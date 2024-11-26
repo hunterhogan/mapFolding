@@ -1,0 +1,6 @@
+__pycache__/
+/Lib/
+/Scripts/
+pyvenv.cfg
+
+# .git\info\exclude
