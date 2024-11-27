@@ -61,5 +61,45 @@ class TestMapFolding(unittest.TestCase):
     def test_A001418(self):
         self.run_sequence_test('A001418')
 
+    def test_concurrent_A001415(self):
+        """Test concurrent computation with different CPU configurations"""
+        config = self.test_cases['A001415']
+        n = 5  # Using a moderate size for concurrent testing
+        folding = MapFolding()
+        expected = self.sequences['A001415'].get(n)
+
+        # Test with default CPU count
+        result = folding.computeSeriesConcurrently(config['series'], n)
+        self.assertEqual(result, expected)
+
+        # Test with specific CPU limits
+        cpu_configs = [1, 2, 0.5, -1, True, False]
+        for cpu_limit in cpu_configs:
+            result = folding.computeSeriesConcurrently(config['series'], n, CPUlimit=cpu_limit)
+            self.assertEqual(
+                result, 
+                expected, 
+                f"Concurrent computation failed with CPU limit {cpu_limit}"
+            )
+
+    def test_concurrent_matches_serial(self):
+        """Test that concurrent results match serial computation"""
+        folding = MapFolding()
+        test_cases = [
+            ('2', 4),
+            ('3', 3),
+            ('2 X 2', 2),
+            ('n', 2)
+        ]
+
+        for series, n in test_cases:
+            serial_result = folding.computeSeries(series, n)
+            concurrent_result = folding.computeSeriesConcurrently(series, n)
+            self.assertEqual(
+                concurrent_result,
+                serial_result,
+                f"Concurrent computation mismatch for series={series}, n={n}"
+            )
+
 if __name__ == "__main__":
     unittest.main()
