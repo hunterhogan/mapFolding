@@ -1,19 +1,18 @@
 from .lovelace import foldings
-from .prepareParameters import getDimensions, countMinimumParsePoints, getCPUlimit
+from .prepareParameters import getDimensions, countMinimumParsePoints
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Optional, Union
+from Z0Z_tools import defineConcurrencyLimit
 import multiprocessing
 import os
 import pathlib
 import random
 
-def computeSeries(series: str, X_n: int) -> int:
-    return computeSeriesConcurrently(series, X_n, True, 1)
+def computeSeries(series: str, X_n: int, normalFoldings: bool = True) -> int:
+    return computeSeriesConcurrently(series, X_n, normalFoldings, 1)
 
 def computeSeriesConcurrently(series: str, X_n: int, normalFoldings: bool = True, CPUlimit: Optional[Union[int, float, bool]] = None) -> int:
-    if CPUlimit is None:
-        CPUlimit = 0
-    max_workers = getCPUlimit(CPUlimit)
+    max_workers = defineConcurrencyLimit(CPUlimit)
     count = 0
     if X_n == 0:
         return 1
@@ -31,9 +30,7 @@ def computeSeriesTask(dimensions: list[int], normalFoldings: bool, computationIn
     return foldings(dimensions, computationDivisions, computationIndex, normalFoldings)
 
 def computeDistributedTask(pathTasks: Union[str, os.PathLike[str]], CPUlimit: Optional[Union[int, float, bool]] = None) -> None:
-    if CPUlimit is None:
-        CPUlimit = 0
-    max_workers = getCPUlimit(CPUlimit)
+    max_workers = defineConcurrencyLimit(CPUlimit)
     series, X_n, normalFoldings, computationDivisions = pathlib.PurePosixPath(pathTasks).parts[-4:]
     dimensions = getDimensions(series, int(X_n))
     listComputationIndices = list(range(int(computationDivisions)))

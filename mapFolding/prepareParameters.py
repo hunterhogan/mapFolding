@@ -1,6 +1,3 @@
-from typing import Union
-import multiprocessing
-
 def countMinimumParsePoints(dimensions: list[int]) -> int:
     leavesTotal = 1
     for dimensionSize in dimensions:
@@ -23,23 +20,3 @@ def getDimensions(series: str, X_n: int) -> list[int]:
         return [X_n + 1, X_n + 1]
     else:
         return [int(series), X_n]
-
-def getCPUlimit(CPUlimit: Union[int, float, bool]) -> int:
-    max_workers = multiprocessing.cpu_count()
-    if CPUlimit is not None:
-        if isinstance(CPUlimit, bool):
-            if CPUlimit == True:
-                max_workers = 1
-        elif isinstance(CPUlimit, int):
-            if CPUlimit > 0:
-                max_workers = CPUlimit
-            elif CPUlimit == 0:
-                pass
-            elif CPUlimit < 0:
-                max_workers = max(multiprocessing.cpu_count() + CPUlimit, 1)
-        elif isinstance(CPUlimit, float):
-            max_workers = max(int(CPUlimit * multiprocessing.cpu_count()), 1)
-    return max_workers
-
-if __name__ == '__main__':
-    multiprocessing.set_start_method('spawn')

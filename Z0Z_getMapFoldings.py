@@ -2,8 +2,8 @@ from mapFolding import computeSeries, computeSeriesConcurrently
 import time
 def main():
     normalFoldings = True
-    series = '3'  # '2', '3', '2 X 2', or 'n'
-    X_n = 3 # A non-negative integer
+    series = 'n'  # '2', '3', '2 X 2', or 'n'
+    X_n = 4 # A non-negative integer
 
     timeStart = time.time()
     foldingsTotal = computeSeriesConcurrently(series, X_n)
@@ -37,4 +37,9 @@ Dimensions: n X 3 = 300608. 0.37 seconds, concurrency.
 Dimensions: n X 4 = 186086600. 32.53 seconds, concurrency.
 Dimensions: n X 4 = 186086600. 141.23 seconds.
 Dimensions: n X 4 = 186086600. 33.04 seconds, concurrency.
+"""
+
+"""Results 2024 November 28
+Dimensions: n X 4 = 186086600. 19.16 seconds, concurrency.
+Dimensions: n X 4 = 186086600. 72.32 seconds.
 """

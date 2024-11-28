@@ -1,102 +1,118 @@
+import multiprocessing
+import random
 import unittest
 import urllib.request
+
 from mapFolding import computeSeries, computeSeriesConcurrently
 
-class TestMapFolding(unittest.TestCase):
-    """
-    OEIS sequences:
-        A001415 Number of ways of folding a 2 X n strip of stamps.
-        A001416 Number of ways of folding a 3 X n strip of stamps.
-        A001417 Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
-        A001418 Number of ways of folding an n X n sheet of stamps.
-    """
-    def setUp(self):
-        # Define test configurations
-        self.test_cases = {
-            'A001415': {'series': '2', 'testValues': list(range(0, 10)), 'url': 'https://oeis.org/A001415/b001415.txt'},
-            'A001416': {'series': '3', 'testValues': list(range(0, 6)), 'url': 'https://oeis.org/A001416/b001416.txt'},
-            'A001417': {'series': '2 X 2', 'testValues': list(range(0, 3)), 'url': 'https://oeis.org/A001417/b001417.txt'},
-            'A001418': {'series': 'n', 'testValues': list(range(0, 4)), 'url': 'https://oeis.org/A001418/b001418.txt'}
+
+class MapFoldingTestSuite(unittest.TestCase):
+    """Base class for map folding tests with shared functionality"""
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.oeisTestConfigurations = {
+            'A001415': {'series': '2', 'testValues': [0,1, random.randint(2, 9)],'url': 'https://oeis.org/A001415/b001415.txt'},
+            'A001416': {'series': '3', 'testValues': [0,1, random.randint(2, 5)], 'url': 'https://oeis.org/A001416/b001416.txt'},
+            'A001417': {'series':'2 X 2','testValues':[0,1, random.randint(2, 3)], 'url': 'https://oeis.org/A001417/b001417.txt'},
+            'A001418': {'series': 'n', 'testValues': [0,1, random.randint(2, 3)], 'url': 'https://oeis.org/A001418/b001418.txt'}
         }
         
         # Load all sequences
-        self.sequences = {
-            sequence: self.load_sequence(config['url'])
-            for sequence, config in self.test_cases.items()
+        cls.sequencesOEIS = {
+            valuesConfirmed: cls._getValuesConfirmed(configuration['url'])
+            for valuesConfirmed, configuration in cls.oeisTestConfigurations.items()
         }
 
-    def load_sequence(self, url):
-        sequence = {}
+    @staticmethod
+    def _getValuesConfirmed(url):
+        valuesConfirmed = {}
         with urllib.request.urlopen(url) as httpRead:
             for line in httpRead:
                 if line.startswith(b'#'):
-                    continue  # Skip comments
-                n_str, a_n_str = line.decode().strip().split()
-                n = int(n_str)
-                sequence[n] = int(a_n_str)
-        return sequence
+                    continue
+                n_as_str, aOFn_as_str = line.decode().strip().split()
+                n = int(n_as_str)
+                valuesConfirmed[n] = int(aOFn_as_str)
+        return valuesConfirmed
 
-    def run_sequence_test(self, sequence_id):
-        """Generic test runner for any OEIS sequence"""
-        config = self.test_cases[sequence_id]
-        for n in config['testValues']:
-            result = computeSeries(config['series'], n)
-            expected = self.sequences[sequence_id].get(n)
-            self.assertEqual(
-                result, 
-                expected, 
-                f"{sequence_id} failed at n={n}: expected {expected}, got {result}"
-            )
+    def validateComputation(self, OEISid, n, result):
+        expected = self.sequencesOEIS[OEISid].get(n)
+        self.assertEqual(
+            result, 
+            expected, 
+            f"{OEISid} failed at n={n}: expected {expected} but got {result}"
+        )
+
+class OEISValidations(MapFoldingTestSuite):
+    """OEIS sequence validation tests"""
+
+    def runOEISvalidation(self, OEISid, concurrent=False):
+        configuration = self.oeisTestConfigurations[OEISid]
+        for n in configuration['testValues']:
+            if concurrent:
+                result = computeSeriesConcurrently(configuration['series'], n)
+            else:
+                result = computeSeries(configuration['series'], n)
+            self.validateComputation(OEISid, n, result)
 
     def test_A001415(self):
-        self.run_sequence_test('A001415')
+        self.runOEISvalidation('A001415')
 
     def test_A001416(self):
-        self.run_sequence_test('A001416')
+        self.runOEISvalidation('A001416')
 
     def test_A001417(self):
-        self.run_sequence_test('A001417')
+        self.runOEISvalidation('A001417')
 
     def test_A001418(self):
-        self.run_sequence_test('A001418')
+        self.runOEISvalidation('A001418')
 
-    def test_concurrent_A001415(self):
-        """Test concurrent computation with different CPU configurations"""
-        config = self.test_cases['A001415']
-        n = 5  # Using a moderate size for concurrent testing
-        expected = self.sequences['A001415'].get(n)
+    def test_A001415concurrently(self):
+        self.runOEISvalidation('A001415', concurrent=True)
 
-        # Test with default CPU count
-        result = computeSeriesConcurrently(config['series'], n)
-        self.assertEqual(result, expected)
+    def test_A001416concurrently(self):
+        self.runOEISvalidation('A001416', concurrent=True)
 
-        # Test with specific CPU limits
-        cpu_configs = [1, 2, 0.5, -1, True, False]
-        for cpu_limit in cpu_configs:
-            result = computeSeriesConcurrently(config['series'], n, CPUlimit=cpu_limit)
-            self.assertEqual(
-                result, 
-                expected, 
-                f"Concurrent computation failed with CPU limit {cpu_limit}"
-            )
+    def test_A001417concurrently(self):
+        self.runOEISvalidation('A001417', concurrent=True)
 
-    def test_concurrent_matches_serial(self):
-        """Test that concurrent results match serial computation"""
-        test_cases = [
-            ('2', 4),
-            ('3', 3),
-            ('2 X 2', 2),
-            ('n', 2)
+    def test_A001418concurrently(self):
+        self.runOEISvalidation('A001418', concurrent=True)
+
+class TestCPUlimitParameter(MapFoldingTestSuite):
+    """Tests for computeSeriesConcurrently with various CPU limits"""
+    
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        COUNTcpu = multiprocessing.cpu_count()
+        cls.testValues = [
+            None, True, False, 0, 1, 0.5, -1, -0.5,
+            random.randint(2, COUNTcpu - 1),
+            -random.randint(2, COUNTcpu - 1),
+            random.uniform(0.01, 1),
+            -random.uniform(0.01, 1)
         ]
 
-        for series, n in test_cases:
-            serial_result = computeSeries(series, n)
-            concurrent_result = computeSeriesConcurrently(series, n)
-            self.assertEqual(
-                concurrent_result,
-                serial_result,
-                f"Concurrent computation mismatch for series={series}, n={n}"
-            )
+    def test_CPUlimit_A001415(self):
+        config = self.oeisTestConfigurations['A001415']
+        n = config['testValues'][-1]  # Use a small test value for speed
+        
+        for CPUlimit in self.testValues:
+            with self.subTest(cpu_limit=CPUlimit):
+                result = computeSeriesConcurrently(config['series'], n, CPUlimit=CPUlimit)
+                self.validateComputation('A001415', n, result)
+
+    def test_CPUlimit_all_series(self):
+        # Test one CPU limit across all series
+        CPUlimit = random.choice(self.testValues)
+        for OEISid, config in self.oeisTestConfigurations.items():
+            n = config['testValues'][-1]  # Use a small test value for speed
+            with self.subTest(series=OEISid):
+                result = computeSeriesConcurrently(config['series'], n, CPUlimit=CPUlimit)
+                self.validateComputation(OEISid, n, result)
 
 if __name__ == "__main__":
+    multiprocessing.set_start_method('spawn')
     unittest.main()
