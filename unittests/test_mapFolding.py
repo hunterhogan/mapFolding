@@ -1,6 +1,6 @@
 import unittest
 import urllib.request
-from mapFolding import MapFolding
+from mapFolding import computeSeries, computeSeriesConcurrently
 
 class TestMapFolding(unittest.TestCase):
     """
@@ -40,8 +40,7 @@ class TestMapFolding(unittest.TestCase):
         """Generic test runner for any OEIS sequence"""
         config = self.test_cases[sequence_id]
         for n in config['testValues']:
-            folding = MapFolding()
-            result = folding.computeSeries(config['series'], n)
+            result = computeSeries(config['series'], n)
             expected = self.sequences[sequence_id].get(n)
             self.assertEqual(
                 result, 
@@ -65,17 +64,16 @@ class TestMapFolding(unittest.TestCase):
         """Test concurrent computation with different CPU configurations"""
         config = self.test_cases['A001415']
         n = 5  # Using a moderate size for concurrent testing
-        folding = MapFolding()
         expected = self.sequences['A001415'].get(n)
 
         # Test with default CPU count
-        result = folding.computeSeriesConcurrently(config['series'], n)
+        result = computeSeriesConcurrently(config['series'], n)
         self.assertEqual(result, expected)
 
         # Test with specific CPU limits
         cpu_configs = [1, 2, 0.5, -1, True, False]
         for cpu_limit in cpu_configs:
-            result = folding.computeSeriesConcurrently(config['series'], n, CPUlimit=cpu_limit)
+            result = computeSeriesConcurrently(config['series'], n, CPUlimit=cpu_limit)
             self.assertEqual(
                 result, 
                 expected, 
@@ -84,7 +82,6 @@ class TestMapFolding(unittest.TestCase):
 
     def test_concurrent_matches_serial(self):
         """Test that concurrent results match serial computation"""
-        folding = MapFolding()
         test_cases = [
             ('2', 4),
             ('3', 3),
@@ -93,8 +90,8 @@ class TestMapFolding(unittest.TestCase):
         ]
 
         for series, n in test_cases:
-            serial_result = folding.computeSeries(series, n)
-            concurrent_result = folding.computeSeriesConcurrently(series, n)
+            serial_result = computeSeries(series, n)
+            concurrent_result = computeSeriesConcurrently(series, n)
             self.assertEqual(
                 concurrent_result,
                 serial_result,
