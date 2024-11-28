@@ -21,8 +21,8 @@ def computeSeriesConcurrently(series: str, X_n: int, normalFoldings: bool = True
     with ProcessPoolExecutor(max_workers=max_workers) as concurrencyManager:
         listConcurrency = [concurrencyManager.submit(computeSeriesTask, dimensions, normalFoldings, computationIndex, computationDivisions)
                            for computationIndex in range(computationDivisions)]
-        listPortionValues = [concurrency.result() for concurrency in listConcurrency]
-    count = sum(listPortionValues)
+        listCountsFolding = [concurrency.result() for concurrency in listConcurrency]
+    count = sum(listCountsFolding)
     return count
 
 def getCPUlimit(CPUlimit: Union[int, float, bool]) -> int:
@@ -66,9 +66,7 @@ def getDimensions(series: str, X_n: int) -> list[int]:
         return [int(series), X_n]
 
 def computeSeriesTask(dimensions: list[int], normalFoldings: bool, computationIndex: int, computationDivisions: int) -> int:
-    count_holder = [0]
-    foldings(dimensions, normalFoldings, computationIndex, computationDivisions, count_holder)
-    return count_holder[0]
+    return foldings(dimensions, normalFoldings, computationIndex, computationDivisions)
 
 def computeDistributedTask(pathTasks: Union[str, os.PathLike[str]], CPUlimit: Optional[Union[int, float, bool]] = None) -> None:
     if CPUlimit is None:
@@ -89,12 +87,8 @@ def computeDistributedTask(pathTasks: Union[str, os.PathLike[str]], CPUlimit: Op
             indexCompleted = dictionaryConcurrency[claimTicket]
             pathlib.Path(pathTasks, str(indexCompleted)).write_text(str(claimTicket.result()))
 
-def process(a, b, n: int, count_holder) -> None:
-    count_holder[0] += n
-
-def foldings(p: list[int], normalFoldings: bool = True, computationIndex: int = 0, computationDivisions: int = 0, count_holder=None) -> None:
-    if count_holder is None:
-        count_holder = [0]
+def foldings(p: list[int], normalFoldings: bool = True, computationIndex: int = 0, computationDivisions: int = 0) -> int:
+    countTotal = 0
     n = 1
     for pp in p:
         n *= pp
@@ -125,7 +119,7 @@ def foldings(p: list[int], normalFoldings: bool = True, computationIndex: int = 
     while l > 0:
         if not normalFoldings or l <= 1 or b[0] == 1:
             if l > n:
-                process(a, b, n, count_holder)
+                countTotal += n
             else:
                 dd = 0
                 gg = gapter[l - 1]
@@ -165,7 +159,7 @@ def foldings(p: list[int], normalFoldings: bool = True, computationIndex: int = 
             a[b[l]] = l
             gapter[l] = g
             l += 1
+    return countTotal
 
 if __name__ == '__main__':
     multiprocessing.set_start_method('spawn')
-    
