@@ -1,17 +1,29 @@
-from mapFolding import computeSeries, computeSeriesConcurrently
+from mapFolding import computeSeries, computeSeriesConcurrently, countMinimumParsePoints, computeDistributedTask
 import time
+import pathlib
 def main():
     normalFoldings = True
     series = 'n'  # '2', '3', '2 X 2', or 'n'
-    X_n = 4 # A non-negative integer
+    X_n = 5 # A non-negative integer
 
-    timeStart = time.time()
-    foldingsTotal = computeSeriesConcurrently(series, X_n)
-    print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds, concurrency.")
+    # timeStart = time.time()
+    # foldingsTotal = computeSeriesConcurrently(series, X_n)
+    # print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds, concurrency.")
 
-    timeStart = time.time()
-    foldingsTotal = computeSeries(series, X_n)
-    print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds.")
+    # timeStart = time.time()
+    # foldingsTotal = computeSeries(series, X_n)
+    # print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds.")
+
+    pathTasks = pathlib.Path("C:/apps/mapFolding/n/5/31/True")
+    print(time.strftime('%H:%M:%S', time.localtime(timeStart := time.time())))
+    tasksRemaining = computeDistributedTask(pathTasks, 2)
+    timeStop = time.time()
+    for pathFilename in pathTasks.iterdir():
+        if pathFilename.stat().st_birthtime > timeStart:
+            print(pathFilename, time.strftime('%H:%M:%S', time.localtime(pathFilename.stat().st_birthtime)))
+    print(time.strftime('%H:%M:%S', time.localtime(timeStop)))
+    print(f"{timeStop - timeStart:.0f} seconds.")
+    print(f"Tasks remaining: {tasksRemaining}.")
 
 if __name__ == "__main__":
     main()
