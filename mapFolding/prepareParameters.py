@@ -1,3 +1,6 @@
+import pathlib
+import os
+from typing import Union
 def countMinimumParsePoints(dimensions: list[int]) -> int:
     # TODO: improve this because the sizes of the divisions have a dramatically wide range.
     leavesTotal = 1
@@ -51,5 +54,22 @@ def getDimensions(series: str, X_n: int) -> list[int]:
         return [X_n + 1, X_n + 1]
     else:
         return [int(series), X_n]
+
+def pathTasksToParameters(pathTasks: Union[str, os.PathLike[str]]) -> tuple[str, int, int, bool]:
+    """
+    Extracts the parameters from the pathTasks string.
+    
+    Parameters:
+        pathTasks: A string containing the path to the task file.
+    
+    Returns:
+        series,X_n,computationDivisions,normalFoldings: 
+        The series type of the map, e.g. '2', '3', '2 X 2', 'n';
+        The number of dimensions, n, for the specified series;
+        The number of divisions to make in the computation;
+        When True, enumerate only normal foldings.
+    """
+    series, X_n, computationDivisions, normalFoldings = pathlib.PurePosixPath(pathTasks).parts[-4:]
+    return series, int(X_n), int(computationDivisions), bool(normalFoldings)
 
 # * Or, I don't know what the hell I'm talking about.

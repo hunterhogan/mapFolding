@@ -4,7 +4,7 @@ import random
 import unittest
 import urllib.request
 
-from mapFolding import computeDistributedTask, computeSeries, computeSeriesConcurrently
+from mapFolding import computeDistributedTask, computeSeries, computeSeriesConcurrently, sumDistributedTasks, pathTasksToParameters
 
 
 class MapFoldingTestSuite(unittest.TestCase):
@@ -35,8 +35,17 @@ class MapFoldingTestSuite(unittest.TestCase):
             for valuesConfirmed, configuration in cls.oeisTestConfigurations.items()
         }
 
+        COUNTcpu = multiprocessing.cpu_count()
+        cls.testValuesCPUlimit = [
+            None, True, False, 0, 1, 0.5, -1, -0.5,
+            random.randint(2, COUNTcpu - 1),
+            -random.randint(2, COUNTcpu - 1),
+            random.uniform(0.01, 1),
+            -random.uniform(0.01, 1)
+        ]
+
     @staticmethod
-    def _getValuesConfirmed(url):
+    def _getValuesConfirmed(url: str) -> dict[int, int]:
         valuesConfirmed = {}
         with urllib.request.urlopen(url) as httpRead:
             for line in httpRead:
@@ -47,18 +56,18 @@ class MapFoldingTestSuite(unittest.TestCase):
                 valuesConfirmed[n] = int(aOFn_as_str)
         return valuesConfirmed
 
-    def validateComputation(self, OEISid, n, result):
+    def validateComputation(self, OEISid: str, n: int, result: int) -> None:
         expected = self.sequencesOEIS[OEISid].get(n)
         self.assertEqual(
             result, 
             expected, 
-            f"{OEISid} failed at n={n}: expected {expected} but got {result}"
+            f"{OEISid}, n={n}: expected {expected} but got {result}"
         )
 
 class OEISValidations(MapFoldingTestSuite):
     """OEIS sequence validation tests"""
 
-    def runOEISvalidation(self, OEISid, concurrent=False):
+    def runOEISvalidation(self, OEISid: str, concurrent: bool = False) -> None:
         configuration = self.oeisTestConfigurations[OEISid]
         for n in configuration['testValues']:
             if concurrent:
@@ -97,34 +106,26 @@ class TestCPUlimitParameter(MapFoldingTestSuite):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        COUNTcpu = multiprocessing.cpu_count()
-        cls.testValues = [
-            None, True, False, 0, 1, 0.5, -1, -0.5,
-            random.randint(2, COUNTcpu - 1),
-            -random.randint(2, COUNTcpu - 1),
-            random.uniform(0.01, 1),
-            -random.uniform(0.01, 1)
-        ]
 
     def test_CPUlimit_A001415(self):
         configuration = self.oeisTestConfigurations['A001415']
         n = configuration['testValues'][-1]  # Use a small test value for speed
         
-        for CPUlimit in self.testValues:
+        for CPUlimit in self.testValuesCPUlimit:
             with self.subTest(cpu_limit=CPUlimit):
                 result = computeSeriesConcurrently(configuration['series'], n, CPUlimit=CPUlimit)
                 self.validateComputation('A001415', n, result)
 
     def test_CPUlimit_allSeries(self):
         # Test one CPU limit across all series
-        CPUlimit = random.choice(self.testValues)
+        CPUlimit = random.choice(self.testValuesCPUlimit)
         for OEISid, configuration in self.oeisTestConfigurations.items():
             n = configuration['testValues'][-1]  # Use a small test value for speed
             with self.subTest(series=OEISid):
                 result = computeSeriesConcurrently(configuration['series'], n, CPUlimit=CPUlimit)
                 self.validateComputation(OEISid, n, result)
 
-class TestComputeDistributedTasks(MapFoldingTestSuite):
+class TestDistributedTasks(MapFoldingTestSuite):
     """Tests for computeDistributedTask function"""
 
     def test_computeDistributedTask(self):
@@ -132,7 +133,7 @@ class TestComputeDistributedTasks(MapFoldingTestSuite):
             pathTasks = pathlib.Path(configuration['pathTest'])
             for pathFilename in pathTasks.glob('*.computationIndex'):
                 pathFilename.unlink()
-            CPUlimit = 1  # Test two random indices per testPath
+            CPUlimit = 2  # Test two random indices per testPath
             computeDistributedTask(pathTasks, CPUlimit=CPUlimit)
             for indexCompleted in pathTasks.glob('*'):
                 with self.subTest(OEISid=OEISid):
@@ -141,6 +142,25 @@ class TestComputeDistributedTasks(MapFoldingTestSuite):
                     expected = configuration['expectedIndexValues'][index]
                     self.assertEqual(result, expected, f"Failed at index {index}: expected {expected} but got {result}")
                     
+    def test_sumDistributedTasks(self):
+        for OEISid, configuration in self.oeisTestConfigurations.items():
+            pathTasks = pathlib.Path(configuration['pathTest'])
+            # Delete any existing computationIndex files
+            for pathFilename in pathTasks.glob('*.computationIndex'):
+                pathFilename.unlink()
+            # Compute all distributed tasks
+            with self.subTest(OEISid=OEISid):
+                while computeDistributedTask(pathTasks, CPUlimit=random.choice(self.testValuesCPUlimit)) > 0:
+                    pass
+                result = sumDistributedTasks(pathTasks)
+                if not result:
+                    result = -1
+                series, X_n, computationDivisions, normalFoldings = pathTasksToParameters(pathTasks)
+                self.validateComputation(OEISid, X_n, result)
+            # Clean up the computationIndex files after test
+            for pathFilename in pathTasks.glob('*.computationIndex'):
+                pathFilename.unlink()
+
 if __name__ == "__main__":
     multiprocessing.set_start_method('spawn')
     unittest.main()

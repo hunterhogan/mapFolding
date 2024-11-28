@@ -8,7 +8,7 @@ from typing import Optional, Union
 from Z0Z_tools import defineConcurrencyLimit
 
 from .lovelace import foldings
-from .prepareParameters import countMinimumParsePoints, getDimensions
+from .prepareParameters import countMinimumParsePoints, getDimensions, pathTasksToParameters
 
 
 def computeSeries(series: str, X_n: int, normalFoldings: bool = True) -> int:
@@ -61,26 +61,25 @@ def computeDistributedTask(pathTasks: Union[str, os.PathLike[str]], CPUlimit: Op
     # TODO add unit tests for this method    
     max_workers = defineConcurrencyLimit(CPUlimit)
 
-    series, X_n, computationDivisions_asStr, normalFoldings = pathlib.PurePosixPath(pathTasks).parts[-4:]
-    computationDivisions = int(computationDivisions_asStr)
+    series, X_n, computationDivisions, normalFoldings = pathTasksToParameters(pathTasks)
+    
+    dimensions = getDimensions(series, X_n)
 
-    dimensions = getDimensions(series, int(X_n))
-
-    listIndicesTasks = getRemainingIndices(pathTasks, computationDivisions)[0:max_workers]
+    listIndicesTasks = getIndicesRemaining(pathTasks, computationDivisions)[0:max_workers]
 
     if listIndicesTasks:
         with ProcessPoolExecutor(max_workers=max_workers) as concurrencyManager:
             dictionaryConcurrency = {concurrencyManager.submit(
-                computeSeriesTask, dimensions, computationDivisions, computationIndex, bool(normalFoldings))
+                computeSeriesTask, dimensions, computationDivisions, computationIndex, normalFoldings)
                                     : computationIndex for computationIndex in listIndicesTasks}
 
             for claimTicket in as_completed(dictionaryConcurrency):
                 indexCompleted = dictionaryConcurrency[claimTicket]
                 pathlib.Path(pathTasks, f"{str(indexCompleted)}.computationIndex").write_text(str(claimTicket.result()))
 
-    return len(getRemainingIndices(pathTasks, computationDivisions))
+    return len(getIndicesRemaining(pathTasks, computationDivisions))
 
-def getRemainingIndices(pathTasks: Union[str, os.PathLike[str]], computationDivisions: int) -> list[int]:
+def getIndicesRemaining(pathTasks: Union[str, os.PathLike[str]], computationDivisions: int) -> list[int]:
     """
     Get the computation indices that have not been written to disk.
 
@@ -97,6 +96,32 @@ def getRemainingIndices(pathTasks: Union[str, os.PathLike[str]], computationDivi
         listComputationIndices.remove(int(indexCompleted.stem))
     random.shuffle(listComputationIndices)
     return listComputationIndices
+
+def sumDistributedTasks(pathTasks: Union[str, os.PathLike[str]]) -> Optional[int]:
+    """
+    Sum the results of distributed tasks.
+
+    Parameters:
+        pathTasks: The path to the directory containing the computation index files.
+
+    Returns:
+        sumFoldingCounts: The total number of foldings.
+    """
+    series, X_n, computationDivisions, normalFoldings = pathTasksToParameters(pathTasks)
+    listIndicesRemaining = getIndicesRemaining(pathTasks, computationDivisions)
+    if listIndicesRemaining:
+        print(f"Warning: {len(listIndicesRemaining)} tasks have not been completed.")
+        return None
+
+    sumFoldingCounts = 0
+    for index in range(computationDivisions):
+        pathFilename = pathlib.Path(pathTasks, f"{str(index)}.computationIndex")
+        allegedInteger = pathFilename.read_text().strip()
+        if not allegedInteger.isdigit():
+            print(f"Warning: {pathFilename} does not contain an integer.")
+            return None
+        sumFoldingCounts += int(allegedInteger)
+    return sumFoldingCounts
 
 def computeSeriesTask(dimensions: list[int], computationDivisions: int, computationIndex: int, normalFoldings: bool) -> int:
     """Ideally, this is the only link between this module and the algorithm, `foldings()`."""
