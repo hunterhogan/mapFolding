@@ -1,6 +1,6 @@
 # Python implementation of "Multi-dimensional map-folding"
 
-`mapFolding.py` explicitly implements [The On-Line Encyclopedia of Integer Sequences](https://oeis.org/):
+`mapFolding` explicitly implements [The On-Line Encyclopedia of Integer Sequences](https://oeis.org/):
 
 - [A001415](https://oeis.org/A001415) Number of ways of folding a 2 X n strip of stamps.
 - [A001416](https://oeis.org/A001416) Number of ways of folding a 3 X n strip of stamps.
@@ -11,15 +11,15 @@
 
 ## Code history
 
-### Original code
+### The original algorithm
 
-You can find a transcription of the code in `foldings.AA`.
+In [`foldings.AA`](foldings.AA), you can find a transcription of the original algorithm as it was printed in 1971. The full paper is preserved as a PDF of images available at the DOI link below.
 
 W. F. Lunnon, Multi-dimensional map-folding, *The Computer Journal*, Volume 14, Issue 1, 1971, Pages 75–80, [https://doi.org/10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75) ([BibTex](citations/Lunnon.bibtex))
 
-### Java implementation by archmageirvine
+### ALGOL68, C, and Java versions
 
-A Java implementation of [sequence A001415 of the On-Line Encyclopedia of Integer Sequences](https://oeis.org/A001415) by [Sean A. Irvine](https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java)
+A Java implementation by [Sean A. Irvine](https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java) ([BibTex](citations/jOEIS.bibtex))
  includes the comments:
 
 ```java
@@ -35,7 +35,8 @@ A Java implementation of [sequence A001415 of the On-Line Encyclopedia of Intege
   // implementation by Fred Lunnon.
 ```
 
-### Related Video
+## Related Video
 
-"How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13
+"How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](citations/Physics_for_the_Birds.bibtex))
+
 [![How Many Ways Can You Fold a Map?](https://img.youtube.com/vi/sfH9uIY3ln4/0.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
