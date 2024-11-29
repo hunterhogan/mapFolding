@@ -32,6 +32,41 @@ def foldings(p: list[int], computationDivisions: int = 0, computationIndex: int 
         - count[m]: counts sections with gaps for new leaf l below leaf m
         - gap[gapter[l-1] + j]: holds j-th possible/actual gap for leaf l
     """
+
+    """
+# Scalars
+n        # Product of dimensions
+dim      # Length of p array (number of dimensions)
+g        # Gap counter
+l        # Current leaf
+
+# 1D Arrays
+p        # Input dimensions (referenced but not shown)
+a        # Leaf above
+b        # Leaf below
+count    # Counter array
+gapter   # Gap array
+gap      # Gap tracking array 
+bigP     # Cumulative products
+
+# 2D Array
+c        # Coordinate mapping array
+
+# 3D Array 
+d        # Connection mapping array
+
+# Loop Variables/Iterators
+pp     # Element in p array when calculating total leaves (n)
+i      # Dimension index (1 to dim)
+m      # Leaf index (1 to n or l)
+j      # Gap array index
+k      # Filtered gap array index
+
+# Calculated Values
+delta  # Difference between coordinates c[i][l] and c[i][m]
+dd     # Counter for unconstrained dimensions
+gg     # Temporary gap counter/index for current leaf
+    """
     countTotal = 0
 
     # Calculate total number of leaves

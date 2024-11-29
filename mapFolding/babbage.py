@@ -58,7 +58,6 @@ def computeDistributedTask(pathTasks: Union[str, os.PathLike[str]], CPUlimit: Op
     Returns:
         COUNTindicesWithoutFile: The number of remaining tasks to be computed.
     """
-    # TODO add unit tests for this method    
     max_workers = defineConcurrencyLimit(CPUlimit)
 
     series, X_n, computationDivisions, normalFoldings = pathTasksToParameters(pathTasks)
