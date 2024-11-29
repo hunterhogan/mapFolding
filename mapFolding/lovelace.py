@@ -1,27 +1,29 @@
 """
 The module enumerates all possible ways to fold a multi-dimensional map with given dimensions.
 
-Implements algorithm from 
-W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, Issue 1, 1971, Pages 75-80, 
-https://doi.org/10.1093/comjnl/14.1.75 (see also "./citations/Lunnon.bibtex") 
+Implements algorithm from
+W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, Issue 1, 1971, Pages 75-80,
+https://doi.org/10.1093/comjnl/14.1.75 (see also "./citations/Lunnon.bibtex")
 but directly based on Sean Irvine's Java port of Fred Lunnon's C version.
 
 See https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java
 """
+from numba import njit
 
-def foldings(p: list[int], computationDivisions: int = 0, computationIndex: int = 0, normalFoldings: bool = True) -> int:
+@njit
+def foldings(mapShape: list[int], computationDivisions: int = 0, computationIndex: int = 0, normalFoldings: bool = True) -> int:
     """
     Enumerate map foldings.
-    
+
     Parameters:
-        p: dimensions of the counting array, which may or may not be identical to 
+        mapShape: dimensions of the counting array, which may or may not be identical to
             the dimensions of the map, see `mapFolding.getDimensions()`
         computationDivisions: attempt* to split computation into this many parts. (*See `mapFolding.countMinimumParsePoints()`)
         computationIndex: an integer in `range(0, computationDivisions)` to select the part to compute
         normalFoldings: when True, enumerate only normal foldings
 
     Returns:
-        countTotal: total number of foldings
+        foldingsTotal: total number of foldings
 
     The algorithm uses the following key data structures:
                 computationDivisions=0 means compute everything in one go
@@ -36,135 +38,129 @@ def foldings(p: list[int], computationDivisions: int = 0, computationIndex: int 
     """
 # Scalars
 n        # Product of dimensions
-dim      # Length of p array (number of dimensions)
+dim      # Length of mapShape array (number of dimensions)
 g        # Gap counter
 l        # Current leaf
 
 # 1D Arrays
-p        # Input dimensions (referenced but not shown)
+mapShape        # Input dimensions (referenced but not shown)
 a        # Leaf above
 b        # Leaf below
 count    # Counter array
 gapter   # Gap array
-gap      # Gap tracking array 
+gap      # Gap tracking array
 bigP     # Cumulative products
 
 # 2D Array
-c        # Coordinate mapping array
+coordinates        # Coordinate mapping array
 
-# 3D Array 
-d        # Connection mapping array
+# 3D Array
+ConnectionMapping        # Connection mapping array
 
 # Loop Variables/Iterators
-pp     # Element in p array when calculating total leaves (n)
+pp     # Element in mapShape array when calculating total leaves (n)
 i      # Dimension index (1 to dim)
 m      # Leaf index (1 to n or l)
 j      # Gap array index
 k      # Filtered gap array index
 
 # Calculated Values
-delta  # Difference between coordinates c[i][l] and c[i][m]
+delta  # Difference between coordinates coordinates[i][l] and coordinates[i][m]
 dd     # Counter for unconstrained dimensions
 gg     # Temporary gap counter/index for current leaf
     """
-    countTotal = 0
+    foldingsTotal = 0
 
-    # Calculate total number of leaves
-    n = 1
-    for pp in p:
-        n *= pp
+    mapCellsQuantity = 1
+    for axis in mapShape:
+        mapCellsQuantity *= axis
 
-    # Initialize arrays
-    a = [0] * (n + 1)  # leaf above
-    b = [0] * (n + 1)  # leaf below
-    count = [0] * (n + 1)
-    gapter = [0] * (n + 1)
-    gap = [0] * (n * n + 1)
+    LeafAboveIndices = [0] * (mapCellsQuantity + 1)
+    LeafBelowIndices = [0] * (mapCellsQuantity + 1)
+    countGapsForLeaf = [0] * (mapCellsQuantity + 1)
+    gapIndexer       = [0] * (mapCellsQuantity + 1)
+    listAllGaps      = [0] * (mapCellsQuantity * mapCellsQuantity + 1)
 
-        # Initialize dimension arrays
-    dim = len(p)
-    bigP = [1] * (dim + 1)
-    c = [[0] * (n + 1) for _ in range(dim + 1)]
-    d = [[[0] * (n + 1) for _ in range(n + 1)] for _ in range(dim + 1)]
+    mapAxesQuantity = len(mapShape)
+    cumulativeProducts = [1] * (mapAxesQuantity + 1)
+    coordinates        = [[0] * (mapCellsQuantity + 1) for _ in range(mapAxesQuantity + 1)]
+    ConnectionMapping  = [[[0] * (mapCellsQuantity + 1) for _ in range(mapCellsQuantity + 1)] for _ in range(mapAxesQuantity + 1)]
 
-        # Initialize bigP array with cumulative products
-    for i in range(1, dim + 1):
-        bigP[i] = bigP[i - 1] * p[i - 1]
+    for i in range(1, mapAxesQuantity + 1):
+        cumulativeProducts[i] = cumulativeProducts[i - 1] * mapShape[i - 1]
 
-        # Initialize c array - coordinate mapping
-    for i in range(1, dim + 1):
-        for m in range(1, n + 1):
-            c[i][m] = (m - 1) // bigP[i - 1] - ((m - 1) // bigP[i]) * p[i - 1] + 1
+    for i in range(1, mapAxesQuantity + 1):
+        for m in range(1, mapCellsQuantity + 1):
+            coordinates[i][m] = (m - 1) // cumulativeProducts[i - 1] - ((m - 1) // cumulativeProducts[i]) * mapShape[i - 1] + 1
 
-        # Initialize d array - connection mapping
-    for i in range(1, dim + 1):
-        for l in range(1, n + 1):
-            for m in range(1, l + 1):
-                delta = c[i][l] - c[i][m]
+    for i in range(1, mapAxesQuantity + 1):
+        for Leaf in range(1, mapCellsQuantity + 1):
+            for m in range(1, Leaf + 1):
+                delta = coordinates[i][Leaf] - coordinates[i][m]
                 if (delta & 1) == 0:
-                    d[i][l][m] = m if c[i][m] == 1 else m - bigP[i - 1]
+                    ConnectionMapping[i][Leaf][m] = m if coordinates[i][m] == 1 else m - cumulativeProducts[i - 1]
                 else:
-                    d[i][l][m] = m if c[i][m] == p[i - 1] or m + bigP[i - 1] > l else m + bigP[i - 1]
+                    ConnectionMapping[i][Leaf][m] = m if coordinates[i][m] == mapShape[i - 1] or m + cumulativeProducts[i - 1] > Leaf else m + cumulativeProducts[i - 1]
 
     g = 0  # Gap counter
-    l = 1  # Current leaf
+    Leaf = 1
 
     # Main backtrack loop - implements Lunnon's state machine:
     # 1. Try to extend current folding by adding new leaf
     # 2. If no extension possible, backtrack
     # 3. Process completed foldings
-    while l > 0:
-        if not normalFoldings or l <= 1 or b[0] == 1:
-            if l > n:
-                countTotal += n # Found valid foldings
+    while Leaf > 0:
+        if not normalFoldings or Leaf <= 1 or LeafBelowIndices[0] == 1:
+            if Leaf > mapCellsQuantity:
+                foldingsTotal += mapCellsQuantity
             else:
                 dd = 0
-                gg = gapter[l - 1]
+                gg = gapIndexer[Leaf - 1]
                 g = gg
 
                     # For each dimension, track gaps
-                for i in range(1, dim + 1):
-                    if d[i][l][l] == l:
+                for i in range(1, mapAxesQuantity + 1):
+                    if ConnectionMapping[i][Leaf][Leaf] == Leaf:
                         dd += 1
                     else:
-                        m = d[i][l][l]
-                        while m != l:
+                        m = ConnectionMapping[i][Leaf][Leaf]
+                        while m != Leaf:
                                 # The parse point
-                            if computationDivisions == 0 or l != computationDivisions or m % computationDivisions == computationIndex:
-                                gap[gg] = m
-                                count[m] += 1  #Increment count here
+                            if computationDivisions == 0 or Leaf != computationDivisions or m % computationDivisions == computationIndex:
+                                listAllGaps[gg] = m
+                                countGapsForLeaf[m] += 1  #Increment count here
                                 gg += 1 #Increment gg only if a new gap is added.
-                            m = d[i][l][b[m]]
+                            m = ConnectionMapping[i][Leaf][LeafBelowIndices[m]]
 
                     # Handle unconstrained case
-                if dd == dim:
-                    for m in range(l):
-                        gap[gg] = m
+                if dd == mapAxesQuantity:
+                    for m in range(Leaf):
+                        listAllGaps[gg] = m
                         gg += 1
 
                     # Gap filtering and update
                 k = g
                 for j in range(g, gg):
-                    if count[gap[j]] == dim - dd:
-                        gap[k] = gap[j]
+                    if countGapsForLeaf[listAllGaps[j]] == mapAxesQuantity - dd:
+                        listAllGaps[k] = listAllGaps[j]
                         k += 1
-                    count[gap[j]] = 0
+                    countGapsForLeaf[listAllGaps[j]] = 0
                 g = k # Update g
 
         # Backtrack when no more gaps
-        while l > 0 and g == gapter[l - 1]:
-            l -= 1
-            if l > 0:
-                b[a[l]] = b[l]
-                a[b[l]] = a[l]
+        while Leaf > 0 and g == gapIndexer[Leaf - 1]:
+            Leaf -= 1
+            if Leaf > 0:
+                LeafBelowIndices[LeafAboveIndices[Leaf]] = LeafBelowIndices[Leaf]
+                LeafAboveIndices[LeafBelowIndices[Leaf]] = LeafAboveIndices[Leaf]
 
             # Make next move if possible
-        if l > 0:
+        if Leaf > 0:
             g -= 1
-            a[l] = gap[g]
-            b[l] = b[a[l]]
-            b[a[l]] = l
-            a[b[l]] = l
-            gapter[l] = g
-            l += 1
-    return countTotal
+            LeafAboveIndices[Leaf] = listAllGaps[g]
+            LeafBelowIndices[Leaf] = LeafBelowIndices[LeafAboveIndices[Leaf]]
+            LeafBelowIndices[LeafAboveIndices[Leaf]] = Leaf
+            LeafAboveIndices[LeafBelowIndices[Leaf]] = Leaf
+            gapIndexer[Leaf] = g
+            Leaf += 1
+    return foldingsTotal

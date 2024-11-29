@@ -1,22 +1,24 @@
-from mapFolding import computeSeries, computeSeriesConcurrently, countMinimumParsePoints, computeDistributedTask
+from mapFolding import computeSeries, computeSeriesConcurrently, countMinimumParsePoints, computeDistributedTask, \
+    getDimensions, sumDistributedTasks
 import time
 import pathlib
 def main():
     normalFoldings = True
     series = 'n'  # '2', '3', '2 X 2', or 'n'
-    X_n = 5 # A non-negative integer
+    X_n = 4 # A non-negative integer
 
-    # timeStart = time.time()
-    # foldingsTotal = computeSeriesConcurrently(series, X_n)
-    # print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds, concurrency.")
+    timeStart = time.time()
+    foldingsTotal = computeSeriesConcurrently(series, X_n)
+    print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds, concurrency.")
 
-    # timeStart = time.time()
-    # foldingsTotal = computeSeries(series, X_n)
-    # print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds.")
+    timeStart = time.time()
+    foldingsTotal = computeSeries(series, X_n)
+    print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds.")
 
+def doTask():
     pathTasks = pathlib.Path("C:/apps/mapFolding/n/5/31/True")
     print(time.strftime('%H:%M:%S', time.localtime(timeStart := time.time())))
-    tasksRemaining = computeDistributedTask(pathTasks, 2)
+    tasksRemaining = computeDistributedTask(pathTasks, 3)
     timeStop = time.time()
     for pathFilename in pathTasks.iterdir():
         if pathFilename.stat().st_birthtime > timeStart:
@@ -25,7 +27,20 @@ def main():
     print(f"{timeStop - timeStart:.0f} seconds.")
     print(f"Tasks remaining: {tasksRemaining}.")
 
-if __name__ == "__main__":
+def countEm():
+    pp = pathlib.Path("G:/My Drive/dataHunter/mapFolding/n/5/31/True")
+    print(sumDistributedTasks(pp))
+
+def dd():
+    series = 'n'
+    X_n = 7
+    dimensions = getDimensions(series, X_n)
+    print(f"Dimensions: {series} X {X_n} = {dimensions}.")
+    computationDivisions = countMinimumParsePoints(dimensions)
+    print(f"Dimensions: {series} X {X_n} = {computationDivisions}.")
+if __name__ == "__main__": 
+    # dd()
+    # countEm()
     main()
 
 """Results when mapFolding used the class MapFolding and the method computeSeriesConcurrently:
@@ -54,4 +69,10 @@ Dimensions: n X 4 = 186086600. 33.04 seconds, concurrency.
 """Results 2024 November 28
 Dimensions: n X 4 = 186086600. 19.16 seconds, concurrency.
 Dimensions: n X 4 = 186086600. 72.32 seconds.
+"""
+
+"""Results 2024 November 29
+from numba import njit
+Dimensions: n X 4 = 186086600. 6.54 seconds, concurrency.
+Dimensions: n X 4 = 186086600. 6.37 seconds.
 """
