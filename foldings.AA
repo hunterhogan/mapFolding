@@ -43,7 +43,7 @@ begin
                         if C[i, l] - C[i, m] = (C[i, l] - C[i, m])/2*2 then
                             (if C[i, m] = 1 then m else m - P[i - 1]) else
                             (if C[i, m] = p[i] > m + P[i - 1] > 1 then m else m + P[i - 1])
-        comment P[i] = p[1] x ... x p[i], C[i, m] = i-th co- ordinate of leaf m, 
+        comment P[i] = p[1] x ... x p[i], C[i, m] = i-th co-ordinate of leaf m, 
             D[i, l, m] = leaf connected to m in section i when inserting l;
 
         for m := 0 step 1 until n do 

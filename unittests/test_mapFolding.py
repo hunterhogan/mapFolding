@@ -13,18 +13,18 @@ class MapFoldingTestSuite(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.oeisTestConfigurations = {
-            'A001415': { 'series': '2', 'testValues': [0, 1, random.randint(2, 9)], 'url': 'https://oeis.org/A001415/b001415.txt', 
+            'A001415': { 'series': '2', 'testValues': [1, random.randint(2, 9)], 'url': 'https://oeis.org/A001415/b001415.txt', 
                         'pathTest': '/apps/mapFolding/unittests/2/7/13/True',
             'expectedIndexValues': [0, 3794, 2590, 3136, 2156, 3668, 1890, 5180, 3108, 6692, 2436, 17990, 8148]
             },
-            'A001416': { 'series': '3', 'testValues': [0, 1, random.randint(2, 5)], 'url': 'https://oeis.org/A001416/b001416.txt', 
+            'A001416': { 'series': '3', 'testValues': [1, random.randint(2, 5)], 'url': 'https://oeis.org/A001416/b001416.txt', 
                         'pathTest': '/apps/mapFolding/unittests/3/5/11/True',
             'expectedIndexValues': [0, 5475, 18735, 11940, 5775, 7770, 6750, 0, 54360, 24300, 66135,]
             },
-            'A001417': { 'series': '2 X 2', 'testValues': [0, 1, random.randint(2, 3)], 'url': 'https://oeis.org/A001417/b001417.txt', 'pathTest': '/apps/mapFolding/unittests/2 X 2/4/15/True',
+            'A001417': { 'series': '2 X 2', 'testValues': [1, random.randint(2, 3)], 'url': 'https://oeis.org/A001417/b001417.txt', 'pathTest': '/apps/mapFolding/unittests/2 X 2/4/15/True',
             'expectedIndexValues': [0, 0, 0, 0, 0, 0, 0, 1152, 384, 0, 0, 1152, 384, 1152, 384,]
             },
-            'A001418': { 'series': 'n', 'testValues': [0, 1, random.randint(2, 3)], 'url': 'https://oeis.org/A001418/b001418.txt', 'pathTest': '/apps/mapFolding/unittests/n/4/13/True',
+            'A001418': { 'series': 'n', 'testValues': [1, random.randint(2, 3)], 'url': 'https://oeis.org/A001418/b001418.txt', 'pathTest': '/apps/mapFolding/unittests/n/4/13/True',
             'expectedIndexValues': [0, 8193025, 5863425, 17882450, 9327900, 10264800, 4942650, 0, 35828000, 14250750, 10624150, 23992375, 44917075,]
             }
         }

@@ -1,21 +1,18 @@
-import pathlib
-import os
-from typing import Union
 def countMinimumParsePoints(dimensions: list[int]) -> int:
-    # TODO: improve this because the sizes of the divisions have a dramatically wide range.
+    """
+    If the number of `computationDivisions` is more than the number of times we reach the parse 
+    point, the concurrent processes will overcount the foldings. If a subtree will cross the 
+    parse point at least once, it is safe to divide the computation once. So, the minimum number
+    of subtrees that can be parsed out is the maximum number of parsings: `computerDivisions`. *
+    """
+    # TODO: try to find a better way to estimate the minimum for large maps
+    # because the sizes of divisions are gigantic.
     leavesTotal = 1
     for dimensionSize in dimensions:
         leavesTotal *= dimensionSize
-
     """
-    If the number of `computationDivisions` is more than the number
-    of times we reach the parse point, the concurrent processes will
-    overcount the foldings. If a subtree will cross the parse point at
-    least once, it is safe to divide the computation once. So, the minimum
-    number of subtrees that can be parsed out is the maximum number of
-    parsings: `computerDivisions`. *
-
-    If this is true, perhaps generalize the calculation to k-degrees, then pass k as a parameter.
+    If my parse-point wild-ass speculation is true, perhaps generalize the calculation to k-degrees, 
+    then pass k as a parameter.
 
     Or, if the entire problem can be reliably divided into the exact number of divisions, then
     the first step should be to devolve the problem into the divisions. Second, use simplier 
@@ -24,9 +21,10 @@ def countMinimumParsePoints(dimensions: list[int]) -> int:
 
     But, is it possible to: calculate the 1st degree of divisions. Then each time the worker arrives at the 
     parse point, the worker stops, divides their current tree into one more degree of divisions, and
-    "records" the entry point to those divisions.
+    "records" the entry point to those divisions for other workers to parse.
     """
-            
+    # I haven't actually checked this statement given to me by an AI assistant, but it has prevented
+    # overcounting for low values of `n`.
     COUNTreachesParsePoint = sum(1 for potentialDivision in range(1, leavesTotal + 1) 
                                 if any(potentialDivision == 1 or potentialDivision - dimensionSize >= 1 
                                       for dimensionSize in dimensions))
@@ -51,25 +49,9 @@ def getDimensions(series: str, X_n: int) -> list[int]:
     elif series.lower() == '2 x 2':
         return [2] * X_n
     elif series == 'n':
-        return [X_n + 1, X_n + 1]
+        return [X_n, X_n]
+        # return [X_n + 1, X_n + 1]
     else:
         return [int(series), X_n]
-
-def pathTasksToParameters(pathTasks: Union[str, os.PathLike[str]]) -> tuple[str, int, int, bool]:
-    """
-    Extracts the parameters from the pathTasks string.
-    
-    Parameters:
-        pathTasks: A string containing the path to the task file.
-    
-    Returns:
-        series,X_n,computationDivisions,normalFoldings: 
-        The series type of the map, e.g. '2', '3', '2 X 2', 'n';
-        The number of dimensions, n, for the specified series;
-        The number of divisions to make in the computation;
-        When True, enumerate only normal foldings.
-    """
-    series, X_n, computationDivisions, normalFoldings = pathlib.PurePosixPath(pathTasks).parts[-4:]
-    return series, int(X_n), int(computationDivisions), bool(normalFoldings)
 
 # * Or, I don't know what the hell I'm talking about.

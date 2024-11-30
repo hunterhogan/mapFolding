@@ -1,14 +1,14 @@
 import multiprocessing
 import os
 import pathlib
-import random
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Optional, Union
 
 from Z0Z_tools import defineConcurrencyLimit
 
+from .distributionCenter import getIndicesRemaining, pathTasksToParameters
 from .lovelace import foldings
-from .prepareParameters import countMinimumParsePoints, getDimensions, pathTasksToParameters
+from .prepareParameters import countMinimumParsePoints, getDimensions
 
 
 def computeSeries(series: str, X_n: int, normalFoldings: bool = True) -> int:
@@ -47,7 +47,8 @@ def computeSeriesConcurrently(series: str, X_n: int, CPUlimit: Optional[Union[in
 
 def computeDistributedTask(pathTasks: Union[str, os.PathLike[str]], CPUlimit: Optional[Union[int, float, bool]] = None) -> int:
     """
-    Computes distributed tasks for map folding calculations. The quantity of counted folds are written directly to a file named by its index in the `pathTasks` directory.
+    Computes distributed tasks for map folding calculations. The quantity of counted folds are written directly to a 
+    file named by its index in the `pathTasks` directory.
 
     Parameters:
         pathTasks:
@@ -58,6 +59,12 @@ def computeDistributedTask(pathTasks: Union[str, os.PathLike[str]], CPUlimit: Op
     Returns:
         COUNTindicesWithoutFile: The number of remaining tasks to be computed.
     """
+    # TODO eliminate the large amount of overlap between computeDistributedTask and computeSeriesConcurrently
+    # computeSeriesConcurrently can't take computationDivisions or computationIndex as parameters, 
+    # so maybe I need another layer between computeSeriesConcurrently and computeSeriesTask
+    # or maybe the layer should be between computeSeries and computeSeriesConcurrently
+    # NOTE I should probably move .write_text() somwhere else: it is not a computation step
+    # claimTicket is as_completed, so I could "eject" the value to some other function
     max_workers = defineConcurrencyLimit(CPUlimit)
 
     series, X_n, computationDivisions, normalFoldings = pathTasksToParameters(pathTasks)
@@ -77,50 +84,6 @@ def computeDistributedTask(pathTasks: Union[str, os.PathLike[str]], CPUlimit: Op
                 pathlib.Path(pathTasks, f"{str(indexCompleted)}.computationIndex").write_text(str(claimTicket.result()))
 
     return len(getIndicesRemaining(pathTasks, computationDivisions))
-
-def getIndicesRemaining(pathTasks: Union[str, os.PathLike[str]], computationDivisions: int) -> list[int]:
-    """
-    Get the computation indices that have not been written to disk.
-
-    Parameters:
-        pathTasks: The path to the directory containing the computation index files.
-        computationDivisions: The total number of computation divisions.
-
-    Returns:
-        listComputationIndices: A shuffled list of remaining computation indices that have
-        not been completed.
-    """
-    listComputationIndices = list(range(int(computationDivisions)))
-    for indexCompleted in pathlib.Path(pathTasks).glob('*.computationIndex'):
-        listComputationIndices.remove(int(indexCompleted.stem))
-    random.shuffle(listComputationIndices)
-    return listComputationIndices
-
-def sumDistributedTasks(pathTasks: Union[str, os.PathLike[str]]) -> Optional[int]:
-    """
-    Sum the results of distributed tasks.
-
-    Parameters:
-        pathTasks: The path to the directory containing the computation index files.
-
-    Returns:
-        sumFoldingCounts: The total number of foldings.
-    """
-    series, X_n, computationDivisions, normalFoldings = pathTasksToParameters(pathTasks)
-    listIndicesRemaining = getIndicesRemaining(pathTasks, computationDivisions)
-    if listIndicesRemaining:
-        print(f"Warning: {len(listIndicesRemaining)} tasks have not been completed.")
-        return None
-
-    sumFoldingCounts = 0
-    for index in range(computationDivisions):
-        pathFilename = pathlib.Path(pathTasks, f"{str(index)}.computationIndex")
-        allegedInteger = pathFilename.read_text().strip()
-        if not allegedInteger.isdigit():
-            print(f"Warning: {pathFilename} does not contain an integer.")
-            return None
-        sumFoldingCounts += int(allegedInteger)
-    return sumFoldingCounts
 
 def computeSeriesTask(dimensions: list[int], computationDivisions: int, computationIndex: int, normalFoldings: bool) -> int:
     """Ideally, this is the only link between this module and the algorithm, `foldings()`."""

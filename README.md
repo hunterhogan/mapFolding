@@ -7,7 +7,7 @@
 - [A001417](https://oeis.org/A001417) Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
 - [A001418](https://oeis.org/A001418) Number of ways of folding an n X n sheet of stamps.
 
-`mapFolding.foldings()` will accept arbitrary values for the array dimensions, however, due to Python's zero-indexing, to count the folds of an *n X m* map, you almost certainly will not use an *n X m* array. Compare with `mapFolding.getDimensions()`.
+`mapFolding.foldings()`, however, will accept arbitrary values for the array dimensions.
 
 ## Code history
 

@@ -16,58 +16,49 @@ def foldings(mapShape: list[int], computationDivisions: int = 0, computationInde
     Enumerate map foldings.
 
     Parameters:
-        mapShape: dimensions of the counting array, which may or may not be identical to
-            the dimensions of the map, see `mapFolding.getDimensions()`
+        mapShape: dimensions of the map
         computationDivisions: attempt* to split computation into this many parts. (*See `mapFolding.countMinimumParsePoints()`)
         computationIndex: an integer in `range(0, computationDivisions)` to select the part to compute
         normalFoldings: when True, enumerate only normal foldings
 
     Returns:
         foldingsTotal: total number of foldings
-
-    The algorithm uses the following key data structures:
-                computationDivisions=0 means compute everything in one go
-                computationDivisions>1 means only compute part 'computationIndex' of 'computationDivisions' parts
-                Example: computationIndex=2, computationDivisions=5 computes the third fifth
-        - b[m]: leaf below leaf m in current folding
-        - a[m]: leaf above leaf m in current folding
-        - count[m]: counts sections with gaps for new leaf l below leaf m
-        - gap[gapter[l-1] + j]: holds j-th possible/actual gap for leaf l
     """
 
     """
-# Scalars
-n        # Product of dimensions
-dim      # Length of mapShape array (number of dimensions)
-g        # Gap counter
-l        # Current leaf
+    # Scalars
+        mapCellsQuantity 
+        mapAxesQuantity      # if mapShape were ndarray, then == `.ndim`
+        g                    # Gap counter
+        Leaf                 # Current leaf
 
-# 1D Arrays
-mapShape        # Input dimensions (referenced but not shown)
-a        # Leaf above
-b        # Leaf below
-count    # Counter array
-gapter   # Gap array
-gap      # Gap tracking array
-bigP     # Cumulative products
+    # 1-axis arrays
+        mapShape         # Input dimensions
+        LeafAboveIndices        
+        LeafBelowIndices        
+        countGapsForLeaf[m]: counts sections with gaps for new leaf l below leaf m
+        gapIndexer   
+        listAllGaps  
+        listAllGaps[gapIndexer[l-1] + j]: holds j-th possible/actual gap for leaf l
+        cumulativeProducts      
 
-# 2D Array
-coordinates        # Coordinate mapping array
+    # 2-axis array
+        coordinates
 
-# 3D Array
-ConnectionMapping        # Connection mapping array
+    # 3-axis array
+        ConnectionMapping
 
-# Loop Variables/Iterators
-pp     # Element in mapShape array when calculating total leaves (n)
-i      # Dimension index (1 to dim)
-m      # Leaf index (1 to n or l)
-j      # Gap array index
-k      # Filtered gap array index
+    # Loop Variables/Iterators
+        pp     # Element in mapShape array when calculating total leaves (n)
+        i      # Dimension index (1 to dim)
+        m      # Leaf index (1 to n or l)
+        j      # Gap array index
+        k      # Filtered gap array index
 
-# Calculated Values
-delta  # Difference between coordinates coordinates[i][l] and coordinates[i][m]
-dd     # Counter for unconstrained dimensions
-gg     # Temporary gap counter/index for current leaf
+    # Calculated Values
+        delta  # Difference between coordinates coordinates[i][l] and coordinates[i][m]
+        dd     # Counter for unconstrained dimensions
+        gg     # Temporary gap counter/index for current leaf
     """
     foldingsTotal = 0
 
@@ -83,8 +74,8 @@ gg     # Temporary gap counter/index for current leaf
 
     mapAxesQuantity = len(mapShape)
     cumulativeProducts = [1] * (mapAxesQuantity + 1)
-    coordinates        = [[0] * (mapCellsQuantity + 1) for _ in range(mapAxesQuantity + 1)]
-    ConnectionMapping  = [[[0] * (mapCellsQuantity + 1) for _ in range(mapCellsQuantity + 1)] for _ in range(mapAxesQuantity + 1)]
+    coordinates        = [[0] * (mapCellsQuantity + 1) for axis in range(mapAxesQuantity + 1)]
+    ConnectionMapping  = [[[0] * (mapCellsQuantity + 1) for cell in range(mapCellsQuantity + 1)] for axis in range(mapAxesQuantity + 1)]
 
     for i in range(1, mapAxesQuantity + 1):
         cumulativeProducts[i] = cumulativeProducts[i - 1] * mapShape[i - 1]
@@ -118,7 +109,7 @@ gg     # Temporary gap counter/index for current leaf
                 gg = gapIndexer[Leaf - 1]
                 g = gg
 
-                    # For each dimension, track gaps
+                # For each dimension, track gaps
                 for i in range(1, mapAxesQuantity + 1):
                     if ConnectionMapping[i][Leaf][Leaf] == Leaf:
                         dd += 1
@@ -128,17 +119,17 @@ gg     # Temporary gap counter/index for current leaf
                                 # The parse point
                             if computationDivisions == 0 or Leaf != computationDivisions or m % computationDivisions == computationIndex:
                                 listAllGaps[gg] = m
-                                countGapsForLeaf[m] += 1  #Increment count here
-                                gg += 1 #Increment gg only if a new gap is added.
+                                countGapsForLeaf[m] += 1  # Increment count here
+                                gg += 1 # Increment gg only if a new gap is added.
                             m = ConnectionMapping[i][Leaf][LeafBelowIndices[m]]
 
-                    # Handle unconstrained case
+                # Handle unconstrained case
                 if dd == mapAxesQuantity:
                     for m in range(Leaf):
                         listAllGaps[gg] = m
                         gg += 1
 
-                    # Gap filtering and update
+                # Gap filtering and update
                 k = g
                 for j in range(g, gg):
                     if countGapsForLeaf[listAllGaps[j]] == mapAxesQuantity - dd:
@@ -154,7 +145,7 @@ gg     # Temporary gap counter/index for current leaf
                 LeafBelowIndices[LeafAboveIndices[Leaf]] = LeafBelowIndices[Leaf]
                 LeafAboveIndices[LeafBelowIndices[Leaf]] = LeafAboveIndices[Leaf]
 
-            # Make next move if possible
+        # Make next move if possible
         if Leaf > 0:
             g -= 1
             LeafAboveIndices[Leaf] = listAllGaps[g]
