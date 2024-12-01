@@ -1,21 +1,21 @@
 from mapFolding import computeSeries, computeSeriesConcurrently, countMinimumParsePoints, computeDistributedTask, \
-    getDimensions, sumDistributedTasks
+    getDimensions, sumDistributedTasks, foldings
 import time
 import pathlib
 # A195646 Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map. 
 
 def main():
     normalFoldings = True
-    series = '2'  # '2', '3', '2 X 2', or 'n'
-    X_n = 2 # A non-negative integer
+    series = '3 X 3'  # '2', '3', '2 X 2', or 'n'
+    X_n = 4 # A non-negative integer
 
     timeStart = time.time()
     foldingsTotal = computeSeriesConcurrently(series, X_n)
     print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds, concurrency.")
 
-    timeStart = time.time()
-    foldingsTotal = computeSeries(series, X_n)
-    print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds.")
+    # timeStart = time.time()
+    # foldingsTotal = computeSeries(series, X_n)
+    # print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds.")
 
 def doTask():
     pathTasks = pathlib.Path("C:/apps/mapFolding/unittests/n/4/13/True")
@@ -40,10 +40,18 @@ def dd():
     print(f"Dimensions: {series} X {X_n} = {dimensions}.")
     computationDivisions = countMinimumParsePoints(dimensions)
     print(f"Dimensions: {series} X {X_n} = {computationDivisions}.")
+
+def direct():
+    timeStart = time.time()
+    mapShape = [7]
+    foldingsTotal = foldings(mapShape)
+    print(f"{mapShape} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds.")
+
 if __name__ == "__main__": 
     # dd()
     # countEm()
-    main()
+    # main()
+    direct()
     # doTask()
 
 """Results when mapFolding used the class MapFolding and the method computeSeriesConcurrently:

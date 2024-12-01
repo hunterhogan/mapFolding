@@ -39,7 +39,7 @@ class MapFoldingTestSuite(unittest.TestCase):
                         'pathTest': '/apps/mapFolding/unittests/n/4/13/True',
             'expectedIndexValues': [0, 22064, 14688, 11136, 11600, 27712, 12496, 9664, 10448, 88432, 44480, 25072, 22816]
             },
-            # 'A007822': { 'series': 'A007822', 'testValues': list(range(4,7)), 'pathTest': '',
+            # 'A007822': { 'series': '2*n+1', 'testValues': list(range(4,7)), 'pathTest': '',
             # 'expectedIndexValues': []
             # },
         }
@@ -88,26 +88,17 @@ class MapFoldingTestSuite(unittest.TestCase):
 class OEISValidations(MapFoldingTestSuite):
     """OEIS sequence validation tests"""
 
-    def runOEISvalidation(self, OEISid: str, concurrent: bool = False) -> None:
+    def runOEISvalidation(self, OEISid: str) -> None:
         configuration = self.oeisTestConfigurations[OEISid]
         for n in configuration['testValues']:
-            if concurrent:
-                result = computeSeriesConcurrently(configuration['series'], n)
-            else:
-                result = computeSeries(configuration['series'], n)
+            result = computeSeries(configuration['series'], n)
             self.validateComputation(OEISid, n, result)
 
-    def test_A001415(self):
-        self.runOEISvalidation('A001415')
 
-    def test_A001416(self):
-        self.runOEISvalidation('A001416')
-
-    def test_A001417(self):
-        self.runOEISvalidation('A001417')
-
-    def test_A001418(self):
-        self.runOEISvalidation('A001418')
+    def test_OEISvalidation(self):
+        for OEISid in self.oeisTestConfigurations:
+            with self.subTest(OEISid=OEISid):
+                self.runOEISvalidation(OEISid)
 
 class TestCPUlimitParameter(MapFoldingTestSuite):
     """Tests for computeSeriesConcurrently with various CPU limits"""

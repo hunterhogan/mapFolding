@@ -35,7 +35,16 @@ def getDimensions(series, X_n: int) -> list[int]:
         A001415: 2 X n strip
         A001416: 3 X n strip
         A001417: 2 X 2 X ... X 2 (n-dimensional)
+        A195646: 3 x 3 x ... x 3 (n-dimensional)
         A001418: n X n sheet
+
+        Not implemented, but have code:
+        A007822: Number of symmetric foldings of 2n+1 stamps. 
+
+        Not implemented, no code:
+        A223096  Number of symmetric meander shapes with 2n+1 crossings. 
+            COMMENTS Number of symmetric foldings of 2n+1 stamps (A007822) in which end leaves are outwards. [Stéphane Legendre, Apr 09 2013]
+
     I made this function because of the error on OEIS that I didn't know was an error
     And I made the parameters series and X_n for the same reason.
     """
