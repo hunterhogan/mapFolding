@@ -2,10 +2,12 @@ from mapFolding import computeSeries, computeSeriesConcurrently, countMinimumPar
     getDimensions, sumDistributedTasks
 import time
 import pathlib
+# A195646 Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map. 
+
 def main():
     normalFoldings = True
-    series = 'n'  # '2', '3', '2 X 2', or 'n'
-    X_n = 4 # A non-negative integer
+    series = '2'  # '2', '3', '2 X 2', or 'n'
+    X_n = 2 # A non-negative integer
 
     timeStart = time.time()
     foldingsTotal = computeSeriesConcurrently(series, X_n)
@@ -16,7 +18,7 @@ def main():
     print(f"Dimensions: {series} X {X_n} = {foldingsTotal}. {time.time() - timeStart:.2f} seconds.")
 
 def doTask():
-    pathTasks = pathlib.Path("C:/apps/mapFolding/n/5/31/True")
+    pathTasks = pathlib.Path("C:/apps/mapFolding/unittests/n/4/13/True")
     print(time.strftime('%H:%M:%S', time.localtime(timeStart := time.time())))
     tasksRemaining = computeDistributedTask(pathTasks, 3)
     timeStop = time.time()
@@ -42,6 +44,7 @@ if __name__ == "__main__":
     # dd()
     # countEm()
     main()
+    # doTask()
 
 """Results when mapFolding used the class MapFolding and the method computeSeriesConcurrently:
 (mapFolding) C:/apps/mapFolding>Z0Z_getMapFoldings.py

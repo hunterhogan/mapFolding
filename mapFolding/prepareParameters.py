@@ -30,28 +30,27 @@ def countMinimumParsePoints(dimensions: list[int]) -> int:
                                       for dimensionSize in dimensions))
     return COUNTreachesParsePoint
 
-def getDimensions(series: str, X_n: int) -> list[int]:  
+def getDimensions(series, X_n: int) -> list[int]:  
     """
-    Return the dimensions of the array used to count the folds of a `series` `X_n` map.
-    
-    Explicitly implements dimensions for the following OEIS sequences
         A001415: 2 X n strip
         A001416: 3 X n strip
         A001417: 2 X 2 X ... X 2 (n-dimensional)
         A001418: n X n sheet
+    I made this function because of the error on OEIS that I didn't know was an error
+    And I made the parameters series and X_n for the same reason.
     """
-    if isinstance(series, int):
-        series = str(series)
-    if series == '2':
-        return [2, X_n]
-    elif series == '3':
-        return [3, X_n]
-    elif series.lower() == '2 x 2':
-        return [2] * X_n
-    elif series == 'n':
-        return [X_n, X_n]
-        # return [X_n + 1, X_n + 1]
-    else:
-        return [int(series), X_n]
+    if isinstance(X_n, str):
+        X_n = int(X_n)
+    if isinstance(series, str):
+        series = series.lower()
+        if series == '2 x 2':
+            return [2] * X_n
+        elif series == '3 x 3':
+            return [3] * X_n
+        elif series == 'n':
+            series = X_n
+        else:
+            series = int(series)
+    return sorted([series, X_n])
 
 # * Or, I don't know what the hell I'm talking about.

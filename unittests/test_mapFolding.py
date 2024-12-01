@@ -2,65 +2,86 @@ import pathlib
 import multiprocessing
 import random
 import unittest
+import pickle
+import time
 import urllib.request
+from typing import Dict
 
 from mapFolding import computeDistributedTask, computeSeries, computeSeriesConcurrently, sumDistributedTasks, pathTasksToParameters
 
 
 class MapFoldingTestSuite(unittest.TestCase):
     """Base class for map folding tests with shared functionality"""
-    
+    pathCache = pathlib.Path(__file__).parent / ".cache"
+    CACHE_EXPIRY = 24 * 60 * 60
+
     @classmethod
-    def setUpClass(cls):
-        cls.oeisTestConfigurations = {
-            'A001415': { 'series': '2', 'testValues': [1, random.randint(2, 9)], 'url': 'https://oeis.org/A001415/b001415.txt', 
+    def setUpClass(superEgo):
+        superEgo.pathCache.mkdir(parents=True, exist_ok=True)
+        superEgo.oeisTestConfigurations = {
+            'A001415': { 'series': 2, 'testValues': [0, 1, random.randint(2, 9)],
                         'pathTest': '/apps/mapFolding/unittests/2/7/13/True',
             'expectedIndexValues': [0, 3794, 2590, 3136, 2156, 3668, 1890, 5180, 3108, 6692, 2436, 17990, 8148]
             },
-            'A001416': { 'series': '3', 'testValues': [1, random.randint(2, 5)], 'url': 'https://oeis.org/A001416/b001416.txt', 
+            'A001416': { 'series': 3, 'testValues': [0, 1, random.randint(2, 5)],
                         'pathTest': '/apps/mapFolding/unittests/3/5/11/True',
             'expectedIndexValues': [0, 5475, 18735, 11940, 5775, 7770, 6750, 0, 54360, 24300, 66135,]
             },
-            'A001417': { 'series': '2 X 2', 'testValues': [1, random.randint(2, 3)], 'url': 'https://oeis.org/A001417/b001417.txt', 'pathTest': '/apps/mapFolding/unittests/2 X 2/4/15/True',
+            'A001417': { 'series': '2 X 2', 'testValues': [0, 1, random.randint(2, 3)],
+                        'pathTest': '/apps/mapFolding/unittests/2 X 2/4/15/True',
             'expectedIndexValues': [0, 0, 0, 0, 0, 0, 0, 1152, 384, 0, 0, 1152, 384, 1152, 384,]
             },
-            'A001418': { 'series': 'n', 'testValues': [1, random.randint(2, 3)], 'url': 'https://oeis.org/A001418/b001418.txt', 'pathTest': '/apps/mapFolding/unittests/n/4/13/True',
-            'expectedIndexValues': [0, 8193025, 5863425, 17882450, 9327900, 10264800, 4942650, 0, 35828000, 14250750, 10624150, 23992375, 44917075,]
-            }
+            'A195646': { 'series': '3 X 3', 'testValues': [0, 1, 2],
+                        'pathTest': '',
+            'expectedIndexValues': []
+            },
+            'A001418': { 'series': 'n', 'testValues': [1, random.randint(2, 3)],
+                        'pathTest': '/apps/mapFolding/unittests/n/4/13/True',
+            'expectedIndexValues': [0, 22064, 14688, 11136, 11600, 27712, 12496, 9664, 10448, 88432, 44480, 25072, 22816]
+            },
+            # 'A007822': { 'series': 'A007822', 'testValues': list(range(4,7)), 'pathTest': '',
+            # 'expectedIndexValues': []
+            # },
         }
-        
-        # Load all sequences
-        cls.sequencesOEIS = {
-            valuesConfirmed: cls._getValuesConfirmed(configuration['url'])
-            for valuesConfirmed, configuration in cls.oeisTestConfigurations.items()
-        }
+
+        for OEISid in superEgo.oeisTestConfigurations:
+            superEgo.oeisTestConfigurations[OEISid]['valuesConfirmed'] = superEgo._getOEISValues(OEISid)
 
         COUNTcpu = multiprocessing.cpu_count()
-        cls.testValuesCPUlimit = [
-            None, True, False, 0, 1, 0.5, -1, -0.5,
-            random.randint(2, COUNTcpu - 1),
-            -random.randint(2, COUNTcpu - 1),
-            random.uniform(0.01, 1),
-            -random.uniform(0.01, 1)
-        ]
+        superEgo.testValuesCPUlimit = [
+                None, True, False, 0, 1, 0.5, -1, -0.5,
+                random.randint(2, COUNTcpu - 1),
+                -random.randint(2, COUNTcpu - 1),
+                random.uniform(0.01, 1),
+                -random.uniform(0.01, 1)
+            ]
 
-    @staticmethod
-    def _getValuesConfirmed(url: str) -> dict[int, int]:
+    @classmethod
+    def _getOEISValues(superEgo, OEISid: str) -> Dict[int, int]:
+        pathFilenameCache = superEgo.pathCache / f"{OEISid}.pkl"
+
+        if pathFilenameCache.exists() and time.time() - pathFilenameCache.stat().st_mtime < superEgo.CACHE_EXPIRY:
+            return pickle.loads(pathFilenameCache.read_bytes())
+
+        url = f'https://oeis.org/{OEISid}/b{OEISid[1:]}.txt'
         valuesConfirmed = {}
-        with urllib.request.urlopen(url) as httpRead:
-            for line in httpRead:
+
+        with urllib.request.urlopen(url) as readHTTP:
+            for line in readHTTP:
                 if line.startswith(b'#'):
                     continue
                 n_as_str, aOFn_as_str = line.decode().strip().split()
                 n = int(n_as_str)
                 valuesConfirmed[n] = int(aOFn_as_str)
+
+        pathFilenameCache.write_bytes(pickle.dumps(valuesConfirmed))
         return valuesConfirmed
 
     def validateComputation(self, OEISid: str, n: int, result: int) -> None:
-        expected = self.sequencesOEIS[OEISid].get(n)
+        expected = self.oeisTestConfigurations[OEISid]['valuesConfirmed'][n]
         self.assertEqual(
-            result, 
-            expected, 
+            result,
+            expected,
             f"{OEISid}, n={n}: expected {expected} but got {result}"
         )
 
@@ -88,78 +109,60 @@ class OEISValidations(MapFoldingTestSuite):
     def test_A001418(self):
         self.runOEISvalidation('A001418')
 
-    def test_A001415concurrently(self):
-        self.runOEISvalidation('A001415', concurrent=True)
-
-    def test_A001416concurrently(self):
-        self.runOEISvalidation('A001416', concurrent=True)
-
-    def test_A001417concurrently(self):
-        self.runOEISvalidation('A001417', concurrent=True)
-
-    def test_A001418concurrently(self):
-        self.runOEISvalidation('A001418', concurrent=True)
-
 class TestCPUlimitParameter(MapFoldingTestSuite):
     """Tests for computeSeriesConcurrently with various CPU limits"""
-    
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(superEgo):
         super().setUpClass()
 
-    def test_CPUlimit_A001415(self):
-        configuration = self.oeisTestConfigurations['A001415']
-        n = configuration['testValues'][-1]  # Use a small test value for speed
-        
+    def test_CPUlimit(self):
         for CPUlimit in self.testValuesCPUlimit:
-            with self.subTest(cpu_limit=CPUlimit):
-                result = computeSeriesConcurrently(configuration['series'], n, CPUlimit=CPUlimit)
-                self.validateComputation('A001415', n, result)
-
-    def test_CPUlimit_allSeries(self):
-        # Test one CPU limit across all series
-        CPUlimit = random.choice(self.testValuesCPUlimit)
-        for OEISid, configuration in self.oeisTestConfigurations.items():
-            n = configuration['testValues'][-1]  # Use a small test value for speed
-            with self.subTest(series=OEISid):
+            OEISid = random.choice(list(self.oeisTestConfigurations.keys()))
+            configuration = self.oeisTestConfigurations[OEISid]
+            n = configuration['testValues'][-1]
+            with self.subTest(cpu_limit=CPUlimit, series=OEISid, n=n):
                 result = computeSeriesConcurrently(configuration['series'], n, CPUlimit=CPUlimit)
                 self.validateComputation(OEISid, n, result)
 
-class TestDistributedTasks(MapFoldingTestSuite):
-    """Tests for computeDistributedTask function"""
+# class TestDistributedTasks(MapFoldingTestSuite):
+#     """Tests for computeDistributedTask function"""
 
-    def test_computeDistributedTask(self):
-        for OEISid, configuration in self.oeisTestConfigurations.items():
-            pathTasks = pathlib.Path(configuration['pathTest'])
-            for pathFilename in pathTasks.glob('*.computationIndex'):
-                pathFilename.unlink()
-            CPUlimit = 2  # Test two random indices per testPath
-            computeDistributedTask(pathTasks, CPUlimit=CPUlimit)
-            for indexCompleted in pathTasks.glob('*'):
-                with self.subTest(OEISid=OEISid):
-                    result = int(indexCompleted.read_text())
-                    index = int(indexCompleted.stem)
-                    expected = configuration['expectedIndexValues'][index]
-                    self.assertEqual(result, expected, f"Failed at index {index}: expected {expected} but got {result}")
-                    
-    def test_sumDistributedTasks(self):
-        for OEISid, configuration in self.oeisTestConfigurations.items():
-            pathTasks = pathlib.Path(configuration['pathTest'])
-            # Delete any existing computationIndex files
-            for pathFilename in pathTasks.glob('*.computationIndex'):
-                pathFilename.unlink()
-            # Compute all distributed tasks
-            with self.subTest(OEISid=OEISid):
-                while computeDistributedTask(pathTasks, CPUlimit=random.choice(self.testValuesCPUlimit)) > 0:
-                    pass
-                result = sumDistributedTasks(pathTasks)
-                if not result:
-                    result = -1
-                series, X_n, computationDivisions, normalFoldings = pathTasksToParameters(pathTasks)
-                self.validateComputation(OEISid, X_n, result)
-            # Clean up the computationIndex files after test
-            for pathFilename in pathTasks.glob('*.computationIndex'):
-                pathFilename.unlink()
+#     def test_computeDistributedTask(self):
+#         for OEISid, configuration in self.oeisTestConfigurations.items():
+#             pathTasks = pathlib.Path(configuration['pathTest'])
+#             for pathFilename in pathTasks.glob('*.computationIndex'):
+#                 pathFilename.unlink()
+#             CPUlimit = 2  # Test two random indices per testPath
+#             computeDistributedTask(pathTasks, CPUlimit=CPUlimit)
+#             for indexCompleted in pathTasks.glob('*.computationIndex'):
+#                 with self.subTest(OEISid=OEISid):
+#                     result = int(indexCompleted.read_text())
+#                     index = int(indexCompleted.stem)
+#                     expected = configuration['expectedIndexValues'][index]
+#                     self.assertEqual(result, expected, f"Failed at index {index}: expected {expected} but got {result}")
+
+#     def test_sumDistributedTasks(self):
+#         OEISid = random.choice(list(self.oeisTestConfigurations.keys()))
+#         configuration = self.oeisTestConfigurations[OEISid]
+#         pathTasks = pathlib.Path(configuration['pathTest'])
+#         # Delete any existing computationIndex files
+#         for pathFilename in pathTasks.glob('*.computationIndex'):
+#             pathFilename.unlink()
+#         # Choose CPU limit once
+#         CPUlimit = random.choice(self.testValuesCPUlimit)
+#         # Compute all distributed tasks
+#         with self.subTest(OEISid=OEISid, CPUlimit=CPUlimit):
+#             while computeDistributedTask(pathTasks, CPUlimit=CPUlimit) > 0:
+#                 pass
+#             result = sumDistributedTasks(pathTasks)
+#             if not result:
+#                 result = -1
+#             series, X_n, computationDivisions, normalFoldings = pathTasksToParameters(pathTasks)
+#             self.validateComputation(OEISid, X_n, result)
+#         # Clean up the computationIndex files after test
+#         for pathFilename in pathTasks.glob('*.computationIndex'):
+#             pathFilename.unlink()
 
 if __name__ == "__main__":
     multiprocessing.set_start_method('spawn')

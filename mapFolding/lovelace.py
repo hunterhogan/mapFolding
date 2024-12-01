@@ -61,6 +61,37 @@ def foldings(mapShape: list[int], computationDivisions: int = 0, computationInde
         gg     # Temporary gap counter/index for current leaf
     """
     foldingsTotal = 0
+    #   protected void process(final int[] a, final int[] b, final int n) {
+    #     mCount += n;
+    #   }
+#   private boolean isSymmetric(final int[] c, final int delta) {
+#     for (int k = 0; k < (c.length - 1) / 2; ++k) {
+#       if (c[(delta + k) % c.length] != c[(delta + c.length - 2 - k) % c.length]) {
+#         return false;
+#       }
+#     }
+#     return true;
+#   }
+
+
+#   @Override
+#   protected void process(final int[] a, final int[] b, final int n) {
+#     final int[] c = new int[a.length];
+#     int j = 0;
+#     for (int k = 0; k < b.length; k++) {
+#       c[k] = b[j] - j;
+#       j = b[j];
+#     }
+#     for (int k = 0; k < a.length; ++k) {
+#       if (isSymmetric(c, k)) {
+#         ++mCount;
+#       }
+#     }
+#   }
+
+    def process(LeafAboveIndices: list[int], LeafBelowIndices: list[int], mapCellsQuantity: int):
+        nonlocal foldingsTotal
+        foldingsTotal += mapCellsQuantity
 
     mapCellsQuantity = 1
     for axis in mapShape:
@@ -103,7 +134,7 @@ def foldings(mapShape: list[int], computationDivisions: int = 0, computationInde
     while Leaf > 0:
         if not normalFoldings or Leaf <= 1 or LeafBelowIndices[0] == 1:
             if Leaf > mapCellsQuantity:
-                foldingsTotal += mapCellsQuantity
+                process(LeafAboveIndices, LeafBelowIndices, mapCellsQuantity)
             else:
                 dd = 0
                 gg = gapIndexer[Leaf - 1]
