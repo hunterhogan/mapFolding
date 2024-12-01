@@ -71,3 +71,4 @@ def pathTasksToParameters(pathTasks: Union[str, os.PathLike[str]]) -> tuple[str,
 # - return the the subpath as a value
 # Maybe - optionally create a file with the path in it, such as how I am using 
 # `pathTasks = pathlib.Path(pathlib.Path("/content/drive/MyDrive/dataHunter/mapFolding/pathTasks.txt").read_text())`
+

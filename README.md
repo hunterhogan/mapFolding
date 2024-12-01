@@ -39,4 +39,4 @@ A Java implementation by [Sean A. Irvine](https://github.com/archmageirvine/joei
 
 "How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](citations/Physics_for_the_Birds.bibtex))
 
-[![How Many Ways Can You Fold a Map?](https://img.youtube.com/vi/sfH9uIY3ln4/0.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
+[![How Many Ways Can You Fold a Map?](https://i.ytimg.com/vi/sfH9uIY3ln4/hq720.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
