@@ -1,20 +1,18 @@
-from typing import List, Callable
 from functools import reduce
 from operator import mul
+from typing import Callable, List
+
 
 def foldings(p: List[int], on_fold: Callable[[List[int], List[int], int], None], 
             normal: bool = True, part: int = 0, parts: int = 0) -> None:
     """Calculate all possible foldings for dimensions specified in p.
     
-    Args:
+    Parameters:
         p: List of dimensions (each > 0)
         on_fold: Callback function receiving (above, below, n) for each valid folding
         normal: If True, only normal foldings are counted
         part/parts: For parallel processing
     """
-    if not p:
-        return
-        
     n = reduce(mul, p, 1)  # Total number of leaves
     dim = len(p)
     
@@ -24,7 +22,7 @@ def foldings(p: List[int], on_fold: Callable[[List[int], List[int], int], None],
     def calc_c(i: int, m: int) -> int:
         """Calculate c[i][m] - i-th coordinate of leaf m"""
         return ((m - 1) // bigP[i-1]) - ((m - 1) // bigP[i]) * p[i-1] + 1
-        
+    
     def calc_d(i: int, l: int, m: int) -> int:
         """Calculate d[i][l][m] - leaf connected to m in section i when inserting l"""
         if m == 0:
@@ -33,12 +31,12 @@ def foldings(p: List[int], on_fold: Callable[[List[int], List[int], int], None],
         if delta % 2 == 0:
             return m if calc_c(i, m) == 1 else m - bigP[i-1]
         return m if calc_c(i, m) == p[i-1] or m + bigP[i-1] > l else m + bigP[i-1]
-
+    
     def process_folding(a: List[int], b: List[int]) -> None:
         """Process a single folding if it meets criteria"""
         if not normal or b[0] == 1:
             on_fold(a, b, n)
-
+    
     def fold_recursive(l: int, a: List[int], b: List[int], gap: List[int], 
                       count: List[int], gapter: List[int], g: int) -> None:
         """Recursive folding implementation"""
@@ -100,6 +98,7 @@ def foldings(p: List[int], on_fold: Callable[[List[int], List[int], int], None],
     # Start folding
     fold_recursive(1, a, b, gap, count, gapter, 0)
 
+
 def count_foldings(p: List[int], normal: bool = True) -> int:
     """Count number of foldings for given dimensions"""
     count = 0
@@ -108,21 +107,3 @@ def count_foldings(p: List[int], normal: bool = True) -> int:
         count += n
     foldings(p, counter, normal)
     return count
-
-def is_symmetric(below: List[int], delta: int) -> bool:
-    """Check if folding is symmetric (for A007822)"""
-    n = len(below) - 1
-    return all(below[(delta + k) % n] - ((delta + k) % n) == 
-              below[(delta + n - 2 - k) % n] - ((delta + n - 2 - k) % n) 
-              for k in range((n-1)//2))
-
-def count_symmetric(n: int) -> int:
-    """Count symmetric foldings (A007822)"""
-    sym_count = 0
-    def check_sym(_, b, __):
-        nonlocal sym_count
-        for k in range(len(b)):
-            if is_symmetric(b, k):
-                sym_count += 1
-    foldings([n-1], check_sym)
-    return (sym_count + 1) // 2
