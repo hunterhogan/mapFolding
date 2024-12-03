@@ -13,7 +13,7 @@ except NameError:
     pathCache = pathlib.Path.home() / ".mapFoldingCache"
 
 class SettingsOEISsequence(TypedDict):
-    dimensions: Callable
+    dimensions: Callable[[int], List[int]]
     testValuesValidation: List[int]
     testValuesSpeed: List[int]
     description: str
@@ -22,13 +22,13 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'dimensions': lambda n: [2, n],
-        'testValuesSpeed': [4, 6],
+        'testValuesSpeed': [4, 6, 9],
         'testValuesValidation': [0, 1, random.randint(2, 9)],
                 },
     'A001416': {
         'description': 'Number of ways of folding a 3 X n strip of stamps.',
         'dimensions': lambda n: [3, n],
-        'testValuesSpeed': [4],
+        'testValuesSpeed': [4, 6],
         'testValuesValidation': [0, 1, random.randint(2, 6)],
     },
     'A001417': {
@@ -46,7 +46,7 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     'A001418': {
         'description': 'Number of ways of folding an n X n sheet of stamps.',
         'dimensions': lambda n: [n, n],
-        'testValuesSpeed': [3, 4],
+        'testValuesSpeed': [3, 4, 5],
         'testValuesValidation': [1, random.randint(2, 4)],
     },
 }
