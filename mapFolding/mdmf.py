@@ -1,111 +1,113 @@
-def foldings(p) -> int:
-    """
-    Compute the total number of foldings for a map with dimensions specified in p.
+from numba import njit
 
+@njit
+def foldings(p, flag=True, res=0, mod=0):
+    """
+    Calculate number of ways to fold a map with given dimensions.
     Parameters:
-        p: List of integers representing the dimensions of the map.
-
+        p: array of dimensions [n, m] for nxm map or [n,n,n...] for n-dimensional
+        flag: when True, only count "normal" foldings
+        res/mod: specify which subset of foldings to compute (for parallel processing)
     Returns:
-        total_count: The total number of foldings (integer).
+        total_count: Total number of valid foldings
     """
-    n = 1  # Total number of leaves
-    d = len(p)  # Number of dimensions
-    for dimension in p:
-        n *= dimension
+    # Calculate total number of leaves
+    n = 1
+    for dim in p:
+        n *= dim
 
-    # Initialize arrays/lists
-    A = [0] * (n + 1)       # Leaf above leaf m
-    B = [0] * (n + 1)       # Leaf below leaf m
-    count = [0] * (n + 1)   # Counts for potential gaps
-    gapter = [0] * (n + 1)  # Indices for gap stack per leaf
-    gap = [0] * (n * n + 1) # Stack of potential gaps
+    # Initialize arrays needed for tracking the folding state
+    a = [0] * (n + 1)  # leaf above m
+    b = [0] * (n + 1)  # leaf below m
+    count = [0] * (n + 1)  # Counts sections with gaps for new leaf
+    gapter = [0] * (n + 1)  # Indices/pointers for each stack/level per leaf
+    gap = [0] * (n * n + 1)  # All possible gaps for each leaf
 
-    # Compute arrays P, C, D as per the algorithm
-    P = [1] * (d + 1)
-    for i in range(1, d + 1):
-        P[i] = P[i - 1] * p[i - 1]
+    dim = len(p)  # number of dimensions
 
-    # C[i][m] holds the i-th coordinate of leaf m
-    C = [[0] * (n + 1) for _ in range(d + 1)]
-    for i in range(1, d + 1):
+    # Calculate dimensional products and coordinates
+    big_p = [1] * (dim + 1)
+    for i in range(1, dim + 1):
+        big_p[i] = big_p[i-1] * p[i-1]
+
+    # Calculate coordinates in each dimension
+    # c[i][m] holds the i-th coordinate of leaf m
+    c = [[0] * (n + 1) for _ in range(dim + 1)]
+    for i in range(1, dim + 1):
         for m in range(1, n + 1):
-            C[i][m] = ((m - 1) // P[i - 1]) - ((m - 1) // P[i]) * p[i - 1] + 1
+            c[i][m] = (m - 1) // big_p[i-1] - ((m - 1) // big_p[i]) * p[i-1] + 1
 
-    # D[i][l][m] computes the leaf connected to m in section i when inserting l
-    D = [[[0] * (n + 1) for _ in range(n + 1)] for _ in range(d + 1)]
-    for i in range(1, d + 1):
+    # Calculate connections in each dimension
+    # d[i][l][m] computes the leaf connected to m in section i when inserting l
+    d = [[[0] * (n + 1) for _ in range(n + 1)] for _ in range(dim + 1)]
+    for i in range(1, dim + 1):
         for l in range(1, n + 1):
             for m in range(1, l + 1):
-                delta = C[i][l] - C[i][m]
+                delta = c[i][l] - c[i][m]
                 if delta % 2 == 0:
                     # If delta is even
-                    if C[i][m] == 1:
-                        D[i][l][m] = m
-                    else:
-                        D[i][l][m] = m - P[i - 1]
+                    d[i][l][m] = m if c[i][m] == 1 else m - big_p[i-1]
                 else:
                     # If delta is odd
-                    if C[i][m] == p[i - 1] or m + P[i - 1] > l:
-                        D[i][l][m] = m
-                    else:
-                        D[i][l][m] = m + P[i - 1]
+                    d[i][l][m] = m if (c[i][m] == p[i-1] or m + big_p[i-1] > l) else m + big_p[i-1]
 
     # Initialize variables for backtracking
     total_count = 0  # Total number of foldings
     g = 0            # Gap index
     l = 1            # Current leaf
 
-    # Start backtracking loop
+    # Main folding loop using a stack-based approach
     while l > 0:
-        # If we have processed all leaves, increment total count
-        if l > n:
-            total_count += 1
-        else:
-            dd = 0     # Number of sections where leaf l is unconstrained
-            gg = g     # Temporary gap index
-            g = gapter[l - 1]  # Reset gap index for current leaf
+        if (not flag) or l <= 1 or b[0] == 1:
+            if l > n:
+                total_count += n
+            else:
+                dd = 0  # Number of sections where leaf l is unconstrained
+                gg = gapter[l-1]  # track possible gaps
+                g = gg
 
-            # Count possible gaps for leaf l in each section
-            for i in range(1, d + 1):
-                if D[i][l][l] == l:
-                    dd += 1
-                else:
-                    m = D[i][l][l]
-                    while m != l:
+                # Find potential gaps for leaf l in each dimension
+                for i in range(1, dim + 1):
+                    if d[i][l][l] == l:
+                        dd += 1
+                    else:
+                        m = d[i][l][l]
+                        while m != l:
+                            if mod == 0 or l != mod or m % mod == res:
+                                gap[gg] = m
+                                if count[m] == 0:
+                                    gg += 1
+                                count[m] += 1
+                            m = d[i][l][b[m]]
+                # If leaf l is unconstrained in all sections, it can be inserted anywhere
+                # Handle unconstrained case and filter common gaps
+                if dd == dim:
+                    for m in range(l):
                         gap[gg] = m
-                        if count[m] == 0:
-                            gg += 1
-                        count[m] += 1
-                        m = D[i][l][B[m]]
+                        gg += 1
 
-            # If leaf l is unconstrained in all sections, it can be inserted anywhere
-            if dd == d:
-                for m in range(l):
-                    gap[gg] = m
-                    gg += 1
+                j = g
+                while j < gg:
+                    gap[g] = gap[j]
+                    if count[gap[j]] == dim - dd:
+                        g += 1
+                    count[gap[j]] = 0
+                    j += 1
 
-            # Filter gaps that are common to all sections
-            for j in range(g, gg):
-                gap[g] = gap[j]
-                if count[gap[j]] == d - dd:
-                    g += 1
-                count[gap[j]] = 0  # Reset count for next iteration
-
-        # Recursive backtracking steps
-        while l > 0 and g == gapter[l - 1]:
-            # No more gaps to try, backtrack to previous leaf
+        # Backtrack if no more gaps
+        while l > 0 and g == gapter[l-1]:
             l -= 1
-            B[A[l]] = B[l]
-            A[B[l]] = A[l]
+            b[a[l]] = b[l]
+            a[b[l]] = a[l]
 
+        # Insert leaf and advance
         if l > 0:
-            # Try next gap for leaf l
             g -= 1
-            A[l] = gap[g]
-            B[l] = B[A[l]]
-            B[A[l]] = l
-            A[B[l]] = l
-            gapter[l] = g  # Save current gap index
-            l += 1         # Move to next leaf
+            a[l] = gap[g]
+            b[l] = b[a[l]]
+            b[a[l]] = l
+            a[b[l]] = l
+            gapter[l] = g
+            l += 1
 
     return total_count

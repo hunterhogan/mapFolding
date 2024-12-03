@@ -40,3 +40,11 @@ A Java implementation by [Sean A. Irvine](https://github.com/archmageirvine/joei
 "How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](mapFolding/citations/Physics_for_the_Birds.bibtex))
 
 [![How Many Ways Can You Fold a Map?](https://i.ytimg.com/vi/sfH9uIY3ln4/hq720.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
+
+## Did *The On-Line Encyclopedia of Integer Sequences* recently update an implemented sequence?
+
+You can clear *The On-Line Encyclopedia of Integer Sequences* data from the `mapFolding` cache:
+
+```sh
+./mapFolding>clearOEIScache
+```

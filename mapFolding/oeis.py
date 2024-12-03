@@ -1,60 +1,77 @@
 import pathlib
 import urllib.request
 from datetime import datetime, timedelta
+from typing import Dict
 
 from mapFolding import foldings
 
-from .oeisSettings import settingsOEISsequences
+try:
+    from .oeisSettings import pathCache, settingsOEISsequences
+except ImportError:
+    from oeisSettings import pathCache, settingsOEISsequences
 
 
-def oeisSequence_aOFn(sequence_id: str, n: int) -> int:
-    """Calculate a(n) of an OEIS sequence."""
+def oeisSequence_aOFn(oeisID: str, n: int) -> int:
+    """
+    Calculate a(n) of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
+
+    Parameters:
+        oeisID: The ID of the OEIS sequence.
+        n: A non-negative integer for which to calculate the sequence value.
+
+    Returns:
+        sequenceValue: a(n) of the OEIS sequence.
+
+    Raises:
+        ValueError: If n is negative.
+        KeyError: If the OEIS sequence ID is not directly implemented.
+    """
     if n < 0:
         raise ValueError("n must be non-negative.")
-    if sequence_id not in settingsOEISsequences:
-        raise KeyError(f"Sequence {sequence_id} is not directly implemented.")
+    if oeisID not in settingsOEISsequences:
+        raise KeyError(f"Sequence {oeisID} is not directly implemented in mapFoldings. Use `mapFolding.foldings()` instead.")
 
-    listDimensions = settingsOEISsequences[sequence_id]['dimensions'](n)
+    listDimensions = settingsOEISsequences[oeisID]['dimensions'](n)
     return foldings(listDimensions) if n > 0 else 1
 
-def getOEISsequence(sequence_number: str) -> dict[int, int]:
+def getOEISsequence(oeisID: str) -> Dict[int, int]:
     """Fetch and parse an OEIS sequence from cache or URL."""
-    cache_path = pathlib.Path(__file__).parent / ".cache" / f"{sequence_number}.txt"
-    cache_valid = False
+    pathFilenameCache = pathCache / f"{oeisID}.txt"
+    cacheDays = 7
 
-    if cache_path.exists():
-        cache_age = datetime.now() - datetime.fromtimestamp(cache_path.stat().st_mtime)
-        cache_valid = cache_age < timedelta(days=7)
+    tryCache = False
+    if pathFilenameCache.exists():
+        fileAge = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
+        tryCache = fileAge < timedelta(days=cacheDays)
     
-    if cache_valid:
+    if tryCache:
         try:
-            content = cache_path.read_text()
-            return _parse_content(content, sequence_number)
+            bFileOEIS = pathFilenameCache.read_text()
+            return _parseContent(bFileOEIS, oeisID)
         except (ValueError, IOError):
-            # Cache invalid or corrupted, fallback to URL
-            pass
+            tryCache = False
     
-    # Construct URL
-    url = f"https://oeis.org/{sequence_number}/b{sequence_number[1:]}.txt"
-    # Fetch content from URL
-    response = urllib.request.urlopen(url)
-    content = response.read().decode('utf-8')
+    url = f"https://oeis.org/{oeisID}/b{oeisID[1:]}.txt"
+    httpResponse = urllib.request.urlopen(url)
+    bFileOEIS = httpResponse.read().decode('utf-8')
     
     # Ensure cache directory exists
-    cache_path.parent.mkdir(parents=True, exist_ok=True)
-    cache_path.write_text(content)
+    if not tryCache:
+        pathFilenameCache.parent.mkdir(parents=True, exist_ok=True)
+        pathFilenameCache.write_text(bFileOEIS)
     
-    return _parse_content(content, sequence_number)
+    return _parseContent(bFileOEIS, oeisID)
 
-def _parse_content(content: str, sequence_number: str) -> dict[int, int]:
-    lines = content.strip().splitlines()
-    if not any(line.startswith(f"# {sequence_number}") for line in lines):
-        raise ValueError(f"Content does not match sequence {sequence_number}")
+def _parseContent(bFileOEIS: str, oeisID: str) -> Dict[int, int]:
+    bFileLines = bFileOEIS.strip().splitlines()
+    # Remove first line with sequence ID
+    if not bFileLines.pop(0).startswith(f"# {oeisID}"):
+        raise ValueError(f"Content does not match sequence {oeisID}")
     
-    result = {}
-    for line in lines:
+    OEISsequence = {}
+    for line in bFileLines:
         if line.startswith('#'):
             continue
-        n, value = map(int, line.split())
-        result[n] = value
-    return result
+        n, aOFn = map(int, line.split())
+        OEISsequence[n] = aOFn
+    return OEISsequence
