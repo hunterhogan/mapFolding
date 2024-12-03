@@ -1,7 +1,11 @@
+from typing import List, Tuple
+
+import numpy as numpy
 from numba import njit
 
+
 @njit
-def foldings(p, flag=True, res=0, mod=0):
+def foldings(p: List[int], flag: bool=True, res:int=0, mod:int=0) -> int:
     """
     Calculate number of ways to fold a map with given dimensions.
     Parameters:
@@ -9,93 +13,58 @@ def foldings(p, flag=True, res=0, mod=0):
         flag: when True, only count "normal" foldings
         res/mod: specify which subset of foldings to compute (for parallel processing)
     Returns:
-        total_count: Total number of valid foldings
+        foldingsTotal: Total number of valid foldings
     """
-    # Calculate total number of leaves
-    n = 1
-    for dim in p:
-        n *= dim
+    leavesTotal, number_of_dimensions, leaf_connection_matrix = setupFoldings(p)
 
-    # Initialize arrays needed for tracking the folding state
-    a = [0] * (n + 1)  # leaf above m
-    b = [0] * (n + 1)  # leaf below m
-    count = [0] * (n + 1)  # Counts sections with gaps for new leaf
-    gapter = [0] * (n + 1)  # Indices/pointers for each stack/level per leaf
-    gap = [0] * (n * n + 1)  # All possible gaps for each leaf
-
-    dim = len(p)  # number of dimensions
-
-    # Calculate dimensional products and coordinates
-    big_p = [1] * (dim + 1)
-    for i in range(1, dim + 1):
-        big_p[i] = big_p[i-1] * p[i-1]
-
-    # Calculate coordinates in each dimension
-    # c[i][m] holds the i-th coordinate of leaf m
-    c = [[0] * (n + 1) for _ in range(dim + 1)]
-    for i in range(1, dim + 1):
-        for m in range(1, n + 1):
-            c[i][m] = (m - 1) // big_p[i-1] - ((m - 1) // big_p[i]) * p[i-1] + 1
-
-    # Calculate connections in each dimension
-    # d[i][l][m] computes the leaf connected to m in section i when inserting l
-    d = [[[0] * (n + 1) for _ in range(n + 1)] for _ in range(dim + 1)]
-    for i in range(1, dim + 1):
-        for l in range(1, n + 1):
-            for m in range(1, l + 1):
-                delta = c[i][l] - c[i][m]
-                if delta % 2 == 0:
-                    # If delta is even
-                    d[i][l][m] = m if c[i][m] == 1 else m - big_p[i-1]
-                else:
-                    # If delta is odd
-                    d[i][l][m] = m if (c[i][m] == p[i-1] or m + big_p[i-1] > l) else m + big_p[i-1]
-
+    a = numpy.zeros(leavesTotal + 1, dtype=numpy.int32)  # leaf above m
+    b = numpy.zeros(leavesTotal + 1, dtype=numpy.int32) # leaf below m
+    count = numpy.zeros(leavesTotal + 1, dtype=numpy.int32)  # Counts sections with gaps for new leaf
+    gapter = numpy.zeros(leavesTotal + 1, dtype=numpy.int32)  # Indices/pointers for each stack/level per leaf
+    gap = numpy.zeros((leavesTotal + 1) * (number_of_dimensions + 1), dtype=numpy.int32)  # All possible gaps for each leaf
     # Initialize variables for backtracking
-    total_count = 0  # Total number of foldings
+    foldingsTotal = 0  # Total number of foldings
     g = 0            # Gap index
     l = 1            # Current leaf
 
     # Main folding loop using a stack-based approach
     while l > 0:
         if (not flag) or l <= 1 or b[0] == 1:
-            if l > n:
-                total_count += n
+            if l > leavesTotal:
+                foldingsTotal += leavesTotal
             else:
                 dd = 0  # Number of sections where leaf l is unconstrained
-                gg = gapter[l-1]  # track possible gaps
+                gg = gapter[l - 1]  # track possible gaps
                 g = gg
 
                 # Find potential gaps for leaf l in each dimension
-                for i in range(1, dim + 1):
-                    if d[i][l][l] == l:
+                for i in range(1, number_of_dimensions + 1):
+                    if leaf_connection_matrix[i][l][l] == l:
                         dd += 1
                     else:
-                        m = d[i][l][l]
+                        m = leaf_connection_matrix[i][l][l]
                         while m != l:
                             if mod == 0 or l != mod or m % mod == res:
                                 gap[gg] = m
                                 if count[m] == 0:
                                     gg += 1
                                 count[m] += 1
-                            m = d[i][l][b[m]]
+                            m = leaf_connection_matrix[i][l][b[m]]
                 # If leaf l is unconstrained in all sections, it can be inserted anywhere
                 # Handle unconstrained case and filter common gaps
-                if dd == dim:
+                if dd == number_of_dimensions:
                     for m in range(l):
                         gap[gg] = m
                         gg += 1
 
-                j = g
-                while j < gg:
+                for j in range(g, gg):
                     gap[g] = gap[j]
-                    if count[gap[j]] == dim - dd:
+                    if count[gap[j]] == number_of_dimensions - dd:
                         g += 1
                     count[gap[j]] = 0
-                    j += 1
 
         # Backtrack if no more gaps
-        while l > 0 and g == gapter[l-1]:
+        while l > 0 and g == gapter[l - 1]:
             l -= 1
             b[a[l]] = b[l]
             a[b[l]] = a[l]
@@ -110,4 +79,42 @@ def foldings(p, flag=True, res=0, mod=0):
             gapter[l] = g
             l += 1
 
-    return total_count
+    return foldingsTotal
+
+@njit
+def setupFoldings(p: List[int]) -> Tuple[int, int, numpy.ndarray[numpy.int32, numpy.dtype[numpy.int32]]]:
+    # Calculate total number of leaves
+    leavesTotal = 1
+    for dimension in p:
+        leavesTotal *= dimension
+    
+    # Initialize arrays needed for tracking the folding state
+    
+    number_of_dimensions = len(p)  # number of dimensions
+    
+    # Calculate dimensional products
+    big_p = numpy.ones(number_of_dimensions + 1, dtype=numpy.int32)
+    for i in range(1, number_of_dimensions + 1):
+        big_p[i] = big_p[i - 1] * p[i - 1]
+        
+    # Calculate coordinates in each dimension
+    # c[i][m] holds the i-th coordinate of leaf m
+    c = numpy.zeros((number_of_dimensions + 1, leavesTotal + 1), dtype=numpy.int32)
+    for i in range(1, number_of_dimensions + 1):
+        for m in range(1, leavesTotal + 1):
+            c[i][m] = ((m - 1) // big_p[i - 1]) % p[i - 1] + 1
+
+    # Calculate connections in each dimension
+    # d[i][l][m] computes the leaf connected to m in section i when inserting l
+    leaf_connection_matrix = numpy.zeros((number_of_dimensions + 1, leavesTotal + 1, leavesTotal + 1), dtype=numpy.int32)
+    for i in range(1, number_of_dimensions + 1):
+        for l in range(1, leavesTotal + 1):
+            for m in range(1, l + 1):
+                delta = c[i][l] - c[i][m]
+                if delta % 2 == 0:
+                    # If delta is even
+                    leaf_connection_matrix[i][l][m] = m if c[i][m] == 1 else m - big_p[i - 1]
+                else:
+                    # If delta is odd
+                    leaf_connection_matrix[i][l][m] = m if (c[i][m] == p[i - 1] or m + big_p[i - 1] > l) else m + big_p[i - 1]
+    return leavesTotal,number_of_dimensions,leaf_connection_matrix

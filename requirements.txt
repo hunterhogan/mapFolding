@@ -1,2 +1,4 @@
+
 numba; python_version < '3.13'
 typing_extensions; python_version < '3.8'
+numpy
