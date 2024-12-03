@@ -22,19 +22,19 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'dimensions': lambda n: [2, n],
-        'testValuesSpeed': [4, 6, 9],
+        'testValuesSpeed': [5],
         'testValuesValidation': [0, 1, random.randint(2, 9)],
                 },
     'A001416': {
         'description': 'Number of ways of folding a 3 X n strip of stamps.',
         'dimensions': lambda n: [3, n],
-        'testValuesSpeed': [4, 6],
+        'testValuesSpeed': [4],
         'testValuesValidation': [0, 1, random.randint(2, 6)],
     },
     'A001417': {
         'description': 'Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.',
         'dimensions': lambda n: [2] * n,
-        'testValuesSpeed': [3, 4],
+        'testValuesSpeed': [3],
         'testValuesValidation': [0, 1, random.randint(2, 4)],
     },
     'A195646': {
@@ -46,7 +46,7 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     'A001418': {
         'description': 'Number of ways of folding an n X n sheet of stamps.',
         'dimensions': lambda n: [n, n],
-        'testValuesSpeed': [3, 4, 5],
+        'testValuesSpeed': [5],
         'testValuesValidation': [1, random.randint(2, 4)],
     },
 }

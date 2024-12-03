@@ -75,3 +75,13 @@ def _parseContent(bFileOEIS: str, oeisID: str) -> Dict[int, int]:
         n, aOFn = map(int, line.split())
         OEISsequence[n] = aOFn
     return OEISsequence
+
+dimensionsFoldingsTotalLookup = {}
+for oeisID, settings in settingsOEISsequences.items():
+    sequence = getOEISsequence(oeisID)
+    
+    # Get all known dimensions and map to their folding counts
+    for n, foldingsTotal in sequence.items():
+        dimensions = settings['dimensions'](n)
+        dimensions.sort()
+        dimensionsFoldingsTotalLookup[tuple(dimensions)] = foldingsTotal
