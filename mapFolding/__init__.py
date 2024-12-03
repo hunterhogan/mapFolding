@@ -1,2 +1,2 @@
-from .mdmf import count_foldings
-from .oeis import OEIS_SEQUENCES, calculate_sequence, get_sequence
+from .mdmf import foldings
+from .oeis import getOEISsequence, oeisSequence_aOFn, settingsOEISsequences

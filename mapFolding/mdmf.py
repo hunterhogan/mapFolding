@@ -1,114 +1,111 @@
-"""5x5 186086600 161.66 seconds."""
-from typing import List
-from numba import njit
+def foldings(p) -> int:
+    """
+    Compute the total number of foldings for a map with dimensions specified in p.
 
-@njit
-def calc_c(i: int, m: int, bigP: List[int], p: List[int]) -> int:
-    """Calculate c[i][m] - i-th coordinate of leaf m"""
-    return ((m - 1) // bigP[i-1]) - ((m - 1) // bigP[i]) * p[i-1] + 1
+    Parameters:
+        p: List of integers representing the dimensions of the map.
 
-@njit
-def calc_d(i: int, l: int, m: int, bigP: List[int], p: List[int]) -> int:
-    """Calculate d[i][l][m] - leaf connected to m in section i when inserting l"""
-    if m == 0:
-        return 0
-    delta = calc_c(i, l, bigP, p) - calc_c(i, m, bigP, p)
-    if delta % 2 == 0:
-        return m if calc_c(i, m, bigP, p) == 1 else m - bigP[i-1]
-    return m if calc_c(i, m, bigP, p) == p[i-1] or m + bigP[i-1] > l else m + bigP[i-1]
+    Returns:
+        total_count: The total number of foldings (integer).
+    """
+    n = 1  # Total number of leaves
+    d = len(p)  # Number of dimensions
+    for dimension in p:
+        n *= dimension
 
-@njit
-def process_folding(a: List[int], b: List[int], n: int, normal: bool, count: List[int]) -> None:
-    """Process a single folding if it meets criteria"""
-    if not normal or b[0] == 1:
-        count[0] += n
+    # Initialize arrays/lists
+    A = [0] * (n + 1)       # Leaf above leaf m
+    B = [0] * (n + 1)       # Leaf below leaf m
+    count = [0] * (n + 1)   # Counts for potential gaps
+    gapter = [0] * (n + 1)  # Indices for gap stack per leaf
+    gap = [0] * (n * n + 1) # Stack of potential gaps
 
-@njit
-def fold_recursive(l: int, a: List[int], b: List[int], gap: List[int], 
-                  count_arr: List[int], gapter: List[int], g: int,
-                  n: int, dim: int, bigP: List[int], p: List[int],
-                  normal: bool, count: List[int], part: int, parts: int) -> None:
-    """Recursive folding implementation"""
-    if l > n:
-        process_folding(a, b, n, normal, count)
-        return
-        
-    dd = 0
-    gg = g = gapter[l-1]
-    
-    # Find gaps for leaf l
-    for i in range(1, dim+1):
-        m = calc_d(i, l, l, bigP, p)
-        if m == l:
-            dd += 1
+    # Compute arrays P, C, D as per the algorithm
+    P = [1] * (d + 1)
+    for i in range(1, d + 1):
+        P[i] = P[i - 1] * p[i - 1]
+
+    # C[i][m] holds the i-th coordinate of leaf m
+    C = [[0] * (n + 1) for _ in range(d + 1)]
+    for i in range(1, d + 1):
+        for m in range(1, n + 1):
+            C[i][m] = ((m - 1) // P[i - 1]) - ((m - 1) // P[i]) * p[i - 1] + 1
+
+    # D[i][l][m] computes the leaf connected to m in section i when inserting l
+    D = [[[0] * (n + 1) for _ in range(n + 1)] for _ in range(d + 1)]
+    for i in range(1, d + 1):
+        for l in range(1, n + 1):
+            for m in range(1, l + 1):
+                delta = C[i][l] - C[i][m]
+                if delta % 2 == 0:
+                    # If delta is even
+                    if C[i][m] == 1:
+                        D[i][l][m] = m
+                    else:
+                        D[i][l][m] = m - P[i - 1]
+                else:
+                    # If delta is odd
+                    if C[i][m] == p[i - 1] or m + P[i - 1] > l:
+                        D[i][l][m] = m
+                    else:
+                        D[i][l][m] = m + P[i - 1]
+
+    # Initialize variables for backtracking
+    total_count = 0  # Total number of foldings
+    g = 0            # Gap index
+    l = 1            # Current leaf
+
+    # Start backtracking loop
+    while l > 0:
+        # If we have processed all leaves, increment total count
+        if l > n:
+            total_count += 1
         else:
-            while m != l:
-                if parts == 0 or l != parts or m % parts == part:
+            dd = 0     # Number of sections where leaf l is unconstrained
+            gg = g     # Temporary gap index
+            g = gapter[l - 1]  # Reset gap index for current leaf
+
+            # Count possible gaps for leaf l in each section
+            for i in range(1, d + 1):
+                if D[i][l][l] == l:
+                    dd += 1
+                else:
+                    m = D[i][l][l]
+                    while m != l:
+                        gap[gg] = m
+                        if count[m] == 0:
+                            gg += 1
+                        count[m] += 1
+                        m = D[i][l][B[m]]
+
+            # If leaf l is unconstrained in all sections, it can be inserted anywhere
+            if dd == d:
+                for m in range(l):
                     gap[gg] = m
-                    if count_arr[m] == 0:
-                        gg += 1
-                    count_arr[m] += 1
-                m = calc_d(i, l, b[m], bigP, p)
-                
-    # Process gaps
-    if dd == dim:
-        for m in range(l):
-            gap[gg] = m
-            gg += 1
-            
-    g = gapter[l-1]
-    for j in range(g, gg):
-        m = gap[j]
-        gap[g] = m
-        if count_arr[m] == dim - dd:
-            g += 1
-        count_arr[m] = 0
-        
-    # Try each gap
-    old_g = g
-    while g > gapter[l-1]:
-        g -= 1
-        a[l] = gap[g]
-        b[l] = b[a[l]]
-        b[a[l]] = l
-        a[b[l]] = l
-        gapter[l] = g
-        fold_recursive(l+1, a, b, gap, count_arr, gapter, old_g,
-                      n, dim, bigP, p, normal, count, part, parts)
-        b[a[l]] = b[l]
-        a[b[l]] = a[l]
+                    gg += 1
 
-@njit
-def foldings(p: List[int], normal: bool = True, part: int = 0, parts: int = 0) -> int:
-    """Calculate all possible foldings for dimensions specified in p."""
-    n = 1
-    for i in p:
-        n *= i  # Total number of leaves
-    dim = len(p)
-    
-    # Calculate bigP array
-    bigP = [1]
-    for i in range(dim):
-        product = 1
-        for j in range(i + 1):
-            product *= p[j]
-        bigP.append(product)
-    
-    # Initialize arrays
-    a = [0] * (n+1)
-    b = [0] * (n+1)
-    count_arr = [0] * (n+1)
-    gapter = [0] * (n+1)
-    gap = [0] * (n*n+1)
-    count = [0]
-    
-    # Start folding
-    fold_recursive(1, a, b, gap, count_arr, gapter, 0,
-                  n, dim, bigP, p, normal, count, part, parts)
-    
-    return count[0]
+            # Filter gaps that are common to all sections
+            for j in range(g, gg):
+                gap[g] = gap[j]
+                if count[gap[j]] == d - dd:
+                    g += 1
+                count[gap[j]] = 0  # Reset count for next iteration
 
-@njit
-def count_foldings(p: List[int], normal: bool = True) -> int:
-    """Count number of foldings for given dimensions"""
-    return foldings(p, normal)
+        # Recursive backtracking steps
+        while l > 0 and g == gapter[l - 1]:
+            # No more gaps to try, backtrack to previous leaf
+            l -= 1
+            B[A[l]] = B[l]
+            A[B[l]] = A[l]
+
+        if l > 0:
+            # Try next gap for leaf l
+            g -= 1
+            A[l] = gap[g]
+            B[l] = B[A[l]]
+            B[A[l]] = l
+            A[B[l]] = l
+            gapter[l] = g  # Save current gap index
+            l += 1         # Move to next leaf
+
+    return total_count

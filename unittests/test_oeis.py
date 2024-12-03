@@ -1,14 +1,14 @@
 import unittest
-from mapFolding import OEIS_SEQUENCES, calculate_sequence, get_sequence
+from mapFolding import settingsOEISsequences, oeisSequence_aOFn, getOEISsequence
 
 class TestCalculateSequence(unittest.TestCase):
     def test_calculate_sequence(self):
-        for seq_id, info in OEIS_SEQUENCES.items():
-            test_values = info.get('test_values', [])
-            expected_sequence = get_sequence(seq_id)
+        for seq_id, info in settingsOEISsequences.items():
+            test_values = info.get('testValuesValidation', [])
+            expected_sequence = getOEISsequence(seq_id)
             for n in test_values:
                 with self.subTest(sequence_id=seq_id, n=n):
-                    result = calculate_sequence(seq_id, n)
+                    result = oeisSequence_aOFn(seq_id, n)
                     self.assertIsInstance(result, int)
                     expected = expected_sequence.get(n)
                     if expected is not None:
