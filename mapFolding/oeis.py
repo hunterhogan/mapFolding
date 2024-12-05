@@ -5,10 +5,11 @@ from typing import Dict
 
 from mapFolding import foldings
 
-try:
-    from .oeisSettings import pathCache, settingsOEISsequences
-except ImportError:
-    from oeisSettings import pathCache, settingsOEISsequences
+from .oeisSettings import pathCache, settingsOEISsequences
+# try:
+#     from .oeisSettings import pathCache, settingsOEISsequences
+# except ImportError:
+#     from oeisSettings import pathCache, settingsOEISsequences
 
 
 def oeisSequence_aOFn(oeisID: str, n: int) -> int:

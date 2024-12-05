@@ -1,6 +1,6 @@
 import shutil
 
-from oeis import pathCache
+from .oeis import pathCache
 
 
 def clearOEIScache() -> None:

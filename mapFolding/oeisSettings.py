@@ -1,22 +1,23 @@
 import random
 import pathlib
 from typing import Callable, Dict, List
+from typing import TYPE_CHECKING
 
-try:
+if TYPE_CHECKING:
     from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
-
-try:
-    pathCache = pathlib.Path(__file__).parent / ".cache"
-except NameError:
-    pathCache = pathlib.Path.home() / ".mapFoldingCache"
+else:
+    TypedDict = dict
 
 class SettingsOEISsequence(TypedDict):
     dimensions: Callable[[int], List[int]]
     testValuesValidation: List[int]
     testValuesSpeed: List[int]
     description: str
+
+try:
+    pathCache = pathlib.Path(__file__).parent / ".cache"
+except NameError:
+    pathCache = pathlib.Path.home() / ".mapFoldingCache"
 
 settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     'A001415': {

@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mapFolding"
+description = "Python implementation of 'Multi-dimensional map-folding'"
+dynamic = [
+    "version", 
+    ]
+readme = "README.md"
+dependencies = [
+    "numpy",
+    "numba",
+]
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-benchmark",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[project.urls]
+"Homepage" = "https://github.com/hunterhogan/mapFolding"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "mapFolding.__version__" }
+
+[tool.coverage.run]
+branch = true
+source = ["mapFolding"]
+data_file = "tests/coverage/.coverage"
+omit = [
+    "mapFolding/__init__.py",
+    "tests/*",
+    "Z0Z_*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+]
+ignore_errors = false
+fail_under = 5
+
+[tool.coverage.xml]
+output = "tests/coverage/coverage.xml"
+
+[tool.coverage.lcov]
+output = "tests/coverage/coverage.lcov"
+
+[tool.pytest.ini_options]
+addopts = "--cov=mapFolding --cov-report=term-missing --cov-report=xml --cov-report=lcov --benchmark-only --benchmark-autosave"
+testpaths = ["tests"]
+
+[tool.pytest_benchmark]
+storage = "tests/.benchmarks"
+histogram = "tests/.benchmarks/histogram.svg"
+save = "last"
+min_time = 0.000100
+max_time = 0.500000
+disable_gc = false
+min_rounds = 2
+warmup = false
+warmup_iterations = 0

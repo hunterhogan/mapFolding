@@ -2,6 +2,8 @@ __pycache__/
 /Lib/
 /Scripts/
 pyvenv.cfg
+*.egg-info/
+
+mapFolding/.cache/
 
 # .git\info\exclude
-mapFolding/.cache/
