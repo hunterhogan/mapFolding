@@ -2,109 +2,109 @@ import numpy as numpy
 from numba import njit, int64, types
 
 @njit(cache=True, boundscheck=True, nogil=True, error_model='numpy')
-def foldings(p: types.List(int64)) -> int64: # type: ignore
+def foldings(dimensionsMap: types.List(int64)) -> int64: # type: ignore
     """
     Calculate number of ways to fold a map with given dimensions.
     Parameters:
-        p: array of dimensions [n, m] for nxm map or [n,n,n...] for n-dimensional
+        dimensionsMap: list of dimensions [n, m] for nXm map or [n,n,n...] for n-dimensional
     Returns:
         foldingsTotal: Total number of valid foldings
     """
     # Calculate total number of leaves
     leavesTotal = 1
-    for dimension in p:
+    for dimension in dimensionsMap:
         leavesTotal *= dimension
         
-    numberOfDimensions = len(p)
+    numberOfDimensions = len(dimensionsMap)
     
-    # Increase array sizes with safety margins
-    arraySize = leavesTotal + 2
-    gapArraySize = arraySize * arraySize  # Significantly larger gap array
-    
-    # Calculate dimensional products
-    big_p = numpy.ones(numberOfDimensions + 1, dtype=numpy.int64)
-    for i in range(1, numberOfDimensions + 1):
-        big_p[i] = big_p[i - 1] * p[i - 1]
-        
-    # Initialize arrays with increased sizes
-    c = numpy.zeros((numberOfDimensions + 1, arraySize), dtype=numpy.int64)
-    leafConnectionGraph = numpy.zeros((numberOfDimensions + 1, arraySize, arraySize), dtype=numpy.int64)
-    a = numpy.zeros(arraySize, dtype=numpy.int64)
-    b = numpy.zeros(arraySize, dtype=numpy.int64)
-    count = numpy.zeros(arraySize, dtype=numpy.int64)
-    gapter = numpy.zeros(arraySize, dtype=numpy.int64)
-    gap = numpy.zeros(gapArraySize, dtype=numpy.int64)  # Much larger gap array
+    # How to build a leafConnectionGraph:
+    # Step 1: find the product of all dimensions
+    productOfDimensions = numpy.ones(numberOfDimensions + 1, dtype=numpy.int64)
+    for indexDimension in range(1, numberOfDimensions + 1):
+        productOfDimensions[indexDimension] = productOfDimensions[indexDimension - 1] * dimensionsMap[indexDimension - 1]
 
-    for i in range(1, numberOfDimensions + 1):
-        for m in range(1, leavesTotal + 1):
-            c[i][m] = ((m - 1) // big_p[i - 1]) % p[i - 1] + 1
+    # Step 2: for each dimension, create a coordinate system
+    coordinateSystem = numpy.zeros((numberOfDimensions + 1, leavesTotal + 1), dtype=numpy.int64)
+    for indexDimension in range(1, numberOfDimensions + 1):
+        for indexOfLeaves in range(1, leavesTotal + 1):
+            coordinateSystem[indexDimension][indexOfLeaves] = ((indexOfLeaves - 1) // productOfDimensions[indexDimension - 1]) % dimensionsMap[indexDimension - 1] + 1
 
-    # Calculate connections in each dimension
-    for i in range(1, numberOfDimensions + 1):
-        for l in range(1, leavesTotal + 1):
-            for m in range(1, l + 1):
-                delta = c[i][l] - c[i][m]
-                if delta % 2 == 0:
-                    # If delta is even
-                    leafConnectionGraph[i][l][m] = m if c[i][m] == 1 else m - big_p[i - 1]
+    # Step 3: create a huge empty leafConnectionGraph
+    leafConnectionGraph = numpy.zeros((numberOfDimensions + 1, leavesTotal + 1, leavesTotal + 1), dtype=numpy.int64)
+
+    # Step for for for: fill the leafConnectionGraph
+    for indexDimension in range(1, numberOfDimensions + 1):
+        for focalLeafIndex in range(1, leavesTotal + 1):
+            for indexOfLeaves in range(1, focalLeafIndex + 1):
+                distance = coordinateSystem[indexDimension][focalLeafIndex] - coordinateSystem[indexDimension][indexOfLeaves]
+                if distance % 2 == 0:
+                    # If distance is even
+                    leafConnectionGraph[indexDimension][focalLeafIndex][indexOfLeaves] = indexOfLeaves if coordinateSystem[indexDimension][indexOfLeaves] == 1 else indexOfLeaves - productOfDimensions[indexDimension - 1]
                 else:
-                    # If delta is odd
-                    leafConnectionGraph[i][l][m] = m if (c[i][m] == p[i - 1] or m + big_p[i - 1] > l) else m + big_p[i - 1]
+                    # If distance is odd
+                    leafConnectionGraph[indexDimension][focalLeafIndex][indexOfLeaves] = indexOfLeaves if (coordinateSystem[indexDimension][indexOfLeaves] == dimensionsMap[indexDimension - 1] or indexOfLeaves + productOfDimensions[indexDimension - 1] > focalLeafIndex) else indexOfLeaves + productOfDimensions[indexDimension - 1]
+
+    # Initialize arrays with increased sizes
+    leafAboveStatusTracker = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
+    leafBelowStatusTracker = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
+    count = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
+    gapPointers = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
+    allGaps = numpy.zeros((leavesTotal + 1) * (leavesTotal + 1), dtype=numpy.int64)
 
     # Initialize variables for backtracking
-    foldingsTotal: int = 0  # Total number of foldings
-    g: int = 0            # Gap index
-    l: int = 1            # Current leaf
+    foldingsTotal: int = 0  # The reason we are doing this
+    g: int = 0              # Gap index
+    focalLeafIndex: int = 1 # Current leaf
 
     # Main folding loop using a stack-based approach
-    while l > 0:
-        if l <= 1 or b[0] == 1:
-            if l > leavesTotal:
+    while focalLeafIndex > 0:
+        if focalLeafIndex <= 1 or leafBelowStatusTracker[0] == 1:
+            if focalLeafIndex > leavesTotal:
                 foldingsTotal += leavesTotal
             else:
                 dd: int = 0  # Number of sections where leaf l is unconstrained
-                gg: int = gapter[l - 1]  # Track possible gaps
+                gg: int = gapPointers[focalLeafIndex - 1]  # Track possible gaps
                 g = gg
 
                 # Find potential gaps for leaf l in each dimension
-                for i in range(1, numberOfDimensions + 1):
-                    if leafConnectionGraph[i][l][l] == l:
+                for indexDimension in range(1, numberOfDimensions + 1): # prange causes error
+                    if leafConnectionGraph[indexDimension][focalLeafIndex][focalLeafIndex] == focalLeafIndex:
                         dd += 1
                     else:
-                        m: int = leafConnectionGraph[i][l][l]
-                        while m != l:
-                            gap[gg] = m
-                            if count[m] == 0:
+                        indexOfLeaves: int = leafConnectionGraph[indexDimension][focalLeafIndex][focalLeafIndex]
+                        while indexOfLeaves != focalLeafIndex:
+                            allGaps[gg] = indexOfLeaves
+                            if count[indexOfLeaves] == 0:
                                 gg += 1
-                            count[m] += 1
-                            m = leafConnectionGraph[i][l][b[m]]
+                            count[indexOfLeaves] += 1
+                            indexOfLeaves = leafConnectionGraph[indexDimension][focalLeafIndex][leafBelowStatusTracker[indexOfLeaves]]
                 # If leaf l is unconstrained in all sections, it can be inserted anywhere
                 if dd == numberOfDimensions:
-                    for m in range(l):
-                        gap[gg] = m
+                    for indexOfLeaves in range(focalLeafIndex): # prange is inconsequential
+                        allGaps[gg] = indexOfLeaves
                         gg += 1
 
-                for j in range(g, gg):
-                    gap[g] = gap[j]
-                    if count[gap[j]] == numberOfDimensions - dd:
+                for j in range(g, gg): # prange causes error
+                    allGaps[g] = allGaps[j]
+                    if count[allGaps[j]] == numberOfDimensions - dd:
                         g += 1
-                    count[gap[j]] = 0
+                    count[allGaps[j]] = 0
 
         # Backtrack if no more gaps
-        while l > 0 and g == gapter[l - 1]:
-            l -= 1
-            b[a[l]] = b[l]
-            a[b[l]] = a[l]
+        while focalLeafIndex > 0 and g == gapPointers[focalLeafIndex - 1]:
+            focalLeafIndex -= 1
+            leafBelowStatusTracker[leafAboveStatusTracker[focalLeafIndex]] = leafBelowStatusTracker[focalLeafIndex]
+            leafAboveStatusTracker[leafBelowStatusTracker[focalLeafIndex]] = leafAboveStatusTracker[focalLeafIndex]
 
         # Insert leaf and advance
-        if l > 0:
+        if focalLeafIndex > 0:
             g -= 1
-            a[l] = gap[g]
-            b[l] = b[a[l]]
-            b[a[l]] = l
-            a[b[l]] = l
-            gapter[l] = g
-            l += 1
+            leafAboveStatusTracker[focalLeafIndex] = allGaps[g]
+            leafBelowStatusTracker[focalLeafIndex] = leafBelowStatusTracker[leafAboveStatusTracker[focalLeafIndex]]
+            leafBelowStatusTracker[leafAboveStatusTracker[focalLeafIndex]] = focalLeafIndex
+            leafAboveStatusTracker[leafBelowStatusTracker[focalLeafIndex]] = focalLeafIndex
+            gapPointers[focalLeafIndex] = g
+            focalLeafIndex += 1
 
     return foldingsTotal
 
