@@ -1,16 +1,14 @@
 import numpy
 from numba import njit, int64, types
 
-@njit(
-    cache=True,
-    fastmath=True,  # Enable fast math operations, slightly less precise but faster
-    error_model='numpy'  # Use NumPy's error model
-)
-def foldings(dimensionsMap: types.List(int64)) -> int64: # type: ignore
+@njit(cache=True, fastmath=True, error_model='numpy', nogil=True )
+def foldings(dimensionsMap: types.List(int64), computationDivisions:int = 0, computationIndex: int = 0) -> int64: # type: ignore
     """
     Calculate number of ways to fold a map with given dimensions.
     Parameters:
         dimensionsMap: list of dimensions [n, m] for nXm map or [n,n,n...] for n-dimensional
+        computationDivisions (0): number of divisions for parallel computation
+        computationIndex (0): index of current computation division (0 to computationDivisions-1)
     Returns:
         foldingsTotal: Total number of valid foldings
     """
@@ -79,10 +77,11 @@ def foldings(dimensionsMap: types.List(int64)) -> int64: # type: ignore
                     else:
                         indexOfLeaves: int64 = leafConnectionGraph[indexDimension][focalLeafIndex][focalLeafIndex] # type: ignore
                         while indexOfLeaves != focalLeafIndex:
-                            allGaps[gg] = indexOfLeaves
-                            if count[indexOfLeaves] == 0:
-                                gg += 1
-                            count[indexOfLeaves] += 1
+                            if computationDivisions == 0 or focalLeafIndex != computationDivisions or indexOfLeaves % computationDivisions == computationIndex:
+                                allGaps[gg] = indexOfLeaves
+                                if count[indexOfLeaves] == 0:
+                                    gg += 1
+                                count[indexOfLeaves] += 1
                             indexOfLeaves = leafConnectionGraph[indexDimension][focalLeafIndex][leafBelowStatusTracker[indexOfLeaves]]
                 # If leaf l is unconstrained in all sections, it can be inserted anywhere
                 if dd == numberOfDimensions:
