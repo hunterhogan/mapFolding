@@ -17,7 +17,6 @@ dependencies = [
 test = [
     "pytest",
     "pytest-cov",
-    "pytest-benchmark",
 ]
 
 [tool.setuptools]
@@ -62,16 +61,5 @@ output = "tests/coverage/coverage.xml"
 output = "tests/coverage/coverage.lcov"
 
 [tool.pytest.ini_options]
-addopts = "--cov=mapFolding --cov-report=term-missing --cov-report=xml --cov-report=lcov --benchmark-only --benchmark-autosave"
+addopts = "--cov=mapFolding --cov-report=term-missing --cov-report=xml --cov-report=lcov"
 testpaths = ["tests"]
-
-[tool.pytest_benchmark]
-storage = "tests/.benchmarks"
-histogram = "tests/.benchmarks/histogram.svg"
-save = "last"
-min_time = 0.000100
-max_time = 0.500000
-disable_gc = false
-min_rounds = 2
-warmup = false
-warmup_iterations = 0

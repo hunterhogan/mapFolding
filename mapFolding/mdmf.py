@@ -1,7 +1,7 @@
 import numpy as numpy
 from numba import njit, int64, types
 
-@njit
+@njit(cache=True, boundscheck=True, nogil=True, error_model='numpy')
 def foldings(p: types.List(int64)) -> int64: # type: ignore
     """
     Calculate number of ways to fold a map with given dimensions.
@@ -14,22 +14,32 @@ def foldings(p: types.List(int64)) -> int64: # type: ignore
     leavesTotal = 1
     for dimension in p:
         leavesTotal *= dimension
+        
+    numberOfDimensions = len(p)
     
-    numberOfDimensions = len(p)  # number of dimensions
+    # Increase array sizes with safety margins
+    arraySize = leavesTotal + 2
+    gapArraySize = arraySize * arraySize  # Significantly larger gap array
     
     # Calculate dimensional products
     big_p = numpy.ones(numberOfDimensions + 1, dtype=numpy.int64)
     for i in range(1, numberOfDimensions + 1):
         big_p[i] = big_p[i - 1] * p[i - 1]
         
-    # Calculate coordinates in each dimension
-    c = numpy.zeros((numberOfDimensions + 1, leavesTotal + 1), dtype=numpy.int64)
+    # Initialize arrays with increased sizes
+    c = numpy.zeros((numberOfDimensions + 1, arraySize), dtype=numpy.int64)
+    leafConnectionGraph = numpy.zeros((numberOfDimensions + 1, arraySize, arraySize), dtype=numpy.int64)
+    a = numpy.zeros(arraySize, dtype=numpy.int64)
+    b = numpy.zeros(arraySize, dtype=numpy.int64)
+    count = numpy.zeros(arraySize, dtype=numpy.int64)
+    gapter = numpy.zeros(arraySize, dtype=numpy.int64)
+    gap = numpy.zeros(gapArraySize, dtype=numpy.int64)  # Much larger gap array
+
     for i in range(1, numberOfDimensions + 1):
         for m in range(1, leavesTotal + 1):
             c[i][m] = ((m - 1) // big_p[i - 1]) % p[i - 1] + 1
 
     # Calculate connections in each dimension
-    leafConnectionGraph = numpy.zeros((numberOfDimensions + 1, leavesTotal + 1, leavesTotal + 1), dtype=numpy.int64)
     for i in range(1, numberOfDimensions + 1):
         for l in range(1, leavesTotal + 1):
             for m in range(1, l + 1):
@@ -41,11 +51,6 @@ def foldings(p: types.List(int64)) -> int64: # type: ignore
                     # If delta is odd
                     leafConnectionGraph[i][l][m] = m if (c[i][m] == p[i - 1] or m + big_p[i - 1] > l) else m + big_p[i - 1]
 
-    a = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)  # leaf above m
-    b = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)  # leaf below m
-    count = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)  # Counts sections with gaps for new leaf
-    gapter = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)  # Indices/pointers for each stack/level per leaf
-    gap = numpy.zeros((leavesTotal + 1) * (numberOfDimensions + 1), dtype=numpy.int64)  # All possible gaps for each leaf
     # Initialize variables for backtracking
     foldingsTotal: int = 0  # Total number of foldings
     g: int = 0            # Gap index
