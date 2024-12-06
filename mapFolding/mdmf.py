@@ -1,8 +1,8 @@
 import numpy
-from numba import njit, int64, types
-
-@njit(cache=True, fastmath=True, error_model='numpy', nogil=True )
-def foldings(dimensionsMap: types.List(int64), computationDivisions:int = 0, computationIndex: int = 0) -> int64: # type: ignore
+from numba import njit
+from typing import List
+@njit(cache=True, fastmath=True, error_model='numpy', nogil=True)
+def foldings(dimensionsMap: List[int], computationDivisions:int = 0, computationIndex: int = 0) -> int: 
     """
     Calculate number of ways to fold a map with given dimensions.
     Parameters:
@@ -46,7 +46,7 @@ def foldings(dimensionsMap: types.List(int64), computationDivisions:int = 0, com
                     # If distance is odd
                     leafConnectionGraph[indexDimension][focalLeafIndex][indexOfLeaves] = indexOfLeaves if (coordinateSystem[indexDimension][indexOfLeaves] == dimensionsMap[indexDimension - 1] or indexOfLeaves + productOfDimensions[indexDimension - 1] > focalLeafIndex) else indexOfLeaves + productOfDimensions[indexDimension - 1]
 
-    # Initialize arrays with increased sizes
+    # Initialize status arrays
     leafAboveStatusTracker = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
     leafBelowStatusTracker = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
     count = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
@@ -54,11 +54,11 @@ def foldings(dimensionsMap: types.List(int64), computationDivisions:int = 0, com
     allGaps = numpy.zeros((leavesTotal + 1) * (leavesTotal + 1), dtype=numpy.int64)
 
     # Initialize variables for backtracking
-    foldingsTotal: int64 = 0  # The reason we are doing this # type: ignore
+    foldingsTotal = 0
 
     # Yet more initializing: variables for backtracking
-    g: int64 = 0              # Gap index # type: ignore
-    focalLeafIndex: int64 = 1 # Current leaf # type: ignore
+    g = 0              # Gap index
+    focalLeafIndex = 1 # Current leaf
 
     # Main folding loop using a stack-based approach
     while focalLeafIndex > 0:
@@ -66,8 +66,8 @@ def foldings(dimensionsMap: types.List(int64), computationDivisions:int = 0, com
             if focalLeafIndex > leavesTotal:
                 foldingsTotal += leavesTotal
             else:
-                dd: int64 = 0  # Number of sections where leaf l is unconstrained  # type: ignore
-                gg: int64 = gapPointers[focalLeafIndex - 1]  # Track possible gaps # type: ignore
+                dd = 0  # Number of sections where leaf l is unconstrained
+                gg = gapPointers[focalLeafIndex - 1]  # Track possible gaps
                 g = gg
 
                 # Find potential gaps for leaf l in each dimension
@@ -75,7 +75,7 @@ def foldings(dimensionsMap: types.List(int64), computationDivisions:int = 0, com
                     if leafConnectionGraph[indexDimension][focalLeafIndex][focalLeafIndex] == focalLeafIndex:
                         dd += 1
                     else:
-                        indexOfLeaves: int64 = leafConnectionGraph[indexDimension][focalLeafIndex][focalLeafIndex] # type: ignore
+                        indexOfLeaves = leafConnectionGraph[indexDimension][focalLeafIndex][focalLeafIndex]
                         while indexOfLeaves != focalLeafIndex:
                             if computationDivisions == 0 or focalLeafIndex != computationDivisions or indexOfLeaves % computationDivisions == computationIndex:
                                 allGaps[gg] = indexOfLeaves

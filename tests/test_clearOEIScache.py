@@ -1,6 +1,6 @@
 from unittest.mock import patch
 import pytest
-from mapFolding.clearOEIScache import clearOEIScache
+from mapFolding import clearOEIScache
 from mapFolding.oeis import pathCache
 
 @patch('shutil.rmtree')

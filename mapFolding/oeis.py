@@ -1,12 +1,70 @@
-import pathlib
-import urllib.request
 from datetime import datetime, timedelta
-from typing import Dict
-
 from mapFolding import foldings
+from typing import Callable, Dict, List, TYPE_CHECKING
+import pathlib
+import random
+import urllib.request
 
-from .oeisSettings import pathCache, settingsOEISsequences
+if TYPE_CHECKING:
+    from typing import TypedDict
+else:
+    TypedDict = dict
 
+class SettingsOEISsequence(TypedDict):
+    description: str
+    dimensions: Callable[[int], List[int]]
+    testValuesSpeed: List[int]
+    testValuesValidation: List[int]
+    valuesKnown: Dict[int, int]
+    valueUnknown: List[int]
+
+try:
+    pathCache = pathlib.Path(__file__).parent / ".cache"
+except NameError:
+    pathCache = pathlib.Path.home() / ".mapFoldingCache"
+
+settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
+    'A001415': {
+        'description': 'Number of ways of folding a 2 X n strip of stamps.',
+        'dimensions': lambda n: [2, n],
+        'testValuesSpeed': [11],
+        'testValuesValidation': [0, 1, random.randint(2, 9)],
+        'valueUnknown': [2, 19],
+        'valuesKnown': {},  # Placeholder
+    },
+    'A001416': {
+        'description': 'Number of ways of folding a 3 X n strip of stamps.',
+        'dimensions': lambda n: [3, n],
+        'testValuesSpeed': [8],
+        'testValuesValidation': [0, 1, random.randint(2, 6)],
+        'valueUnknown': [3, 15],
+        'valuesKnown': {},  # Placeholder
+    },
+    'A001417': {
+        'description': 'Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.',
+        'dimensions': lambda n: [2] * n,
+        'testValuesSpeed': [5],
+        'testValuesValidation': [0, 1, random.randint(2, 4)],
+        'valueUnknown': [2, 2, 2, 2, 2, 2, 2, 2],
+        'valuesKnown': {},  # Placeholder
+    },
+    'A195646': {
+        'description': 'Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.',
+        'dimensions': lambda n: [3] * n,
+        'testValuesSpeed': [3],
+        'testValuesValidation': [0, 1, 2],
+        'valueUnknown': [3, 3, 3, 3],
+        'valuesKnown': {},  # Placeholder
+    },
+    'A001418': {
+        'description': 'Number of ways of folding an n X n sheet of stamps.',
+        'dimensions': lambda n: [n, n],
+        'testValuesSpeed': [5],
+        'testValuesValidation': [*range(1, 4)],
+        'valueUnknown': [8, 8],
+        'valuesKnown': {},  # Placeholder
+    },
+}
 
 def oeisSequence_aOFn(oeisID: str, n: int) -> int:
     """
@@ -31,7 +89,21 @@ def oeisSequence_aOFn(oeisID: str, n: int) -> int:
     listDimensions = settingsOEISsequences[oeisID]['dimensions'](n)
     return foldings(listDimensions) if n > 0 else 1
 
-def getOEISsequence(oeisID: str) -> Dict[int, int]:
+def _parseContent(bFileOEIS: str, oeisID: str) -> Dict[int, int]:
+    bFileLines = bFileOEIS.strip().splitlines()
+    # Remove first line with sequence ID
+    if not bFileLines.pop(0).startswith(f"# {oeisID}"):
+        raise ValueError(f"Content does not match sequence {oeisID}")
+    
+    OEISsequence = {}
+    for line in bFileLines:
+        if line.startswith('#'):
+            continue
+        n, aOFn = map(int, line.split())
+        OEISsequence[n] = aOFn
+    return OEISsequence
+
+def _getOEISsequence(oeisID: str) -> Dict[int, int]:
     """Fetch and parse an OEIS sequence from cache or URL."""
     pathFilenameCache = pathCache / f"{oeisID}.txt"
     cacheDays = 7
@@ -59,23 +131,12 @@ def getOEISsequence(oeisID: str) -> Dict[int, int]:
     
     return _parseContent(bFileOEIS, oeisID)
 
-def _parseContent(bFileOEIS: str, oeisID: str) -> Dict[int, int]:
-    bFileLines = bFileOEIS.strip().splitlines()
-    # Remove first line with sequence ID
-    if not bFileLines.pop(0).startswith(f"# {oeisID}"):
-        raise ValueError(f"Content does not match sequence {oeisID}")
-    
-    OEISsequence = {}
-    for line in bFileLines:
-        if line.startswith('#'):
-            continue
-        n, aOFn = map(int, line.split())
-        OEISsequence[n] = aOFn
-    return OEISsequence
+for oeisID in settingsOEISsequences:
+    settingsOEISsequences[oeisID]['valuesKnown'] = _getOEISsequence(oeisID)
 
-dimensionsFoldingsTotalLookup = {}
+dimensionsFoldingsTotalLookup: Dict[tuple, int] = {}
 for oeisID, settings in settingsOEISsequences.items():
-    sequence = getOEISsequence(oeisID)
+    sequence = settings['valuesKnown']
     
     # Get all known dimensions and map to their folding counts
     for n, foldingsTotal in sequence.items():
