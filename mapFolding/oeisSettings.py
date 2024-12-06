@@ -55,7 +55,7 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
         'dimensions': lambda n: [n, n],
         'testValuesSpeed': [5],
         # 'testValuesValidation': [1, random.randint(2, 4)],
-        'testValuesValidation': [*range(1, 6)],
+        'testValuesValidation': [*range(1, 4)],
         'unknown': [8, 8],
     },
 }

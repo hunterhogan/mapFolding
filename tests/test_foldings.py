@@ -1,5 +1,5 @@
-import pytest
 from mapFolding import foldings, dimensionsFoldingsTotalLookup
+import pytest
 
 def test_foldings():
     listTestsArbitrary =[
