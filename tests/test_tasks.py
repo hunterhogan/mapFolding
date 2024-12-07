@@ -1,6 +1,7 @@
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from mapFolding import foldings, dimensionsFoldingsTotalLookup
 import multiprocessing
+import math
 
 if __name__ == "__main__":
     multiprocessing.set_start_method('spawn')
@@ -8,14 +9,13 @@ if __name__ == "__main__":
 def concurrency_tests(concurrencyExecutor):
     foldingsTotal = 0
     dimensionsMap = [2, 7]
-    computationalDivisions = 5
     expectedFoldingsTotal = dimensionsFoldingsTotalLookup[tuple(dimensionsMap)]
     with concurrencyExecutor() as concurrencyManager:
         listOfConcurrency = [
             concurrencyManager.submit(
-                foldings, dimensionsMap, computationalDivisions, index
+                foldings, dimensionsMap, [leafNumber]
             )
-            for index in range(computationalDivisions)
+            for leafNumber in range(1, math.prod(dimensionsMap) + 1)
         ]
         for index in listOfConcurrency:
             foldingsTotal += index.result()

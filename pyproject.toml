@@ -5,10 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mapFolding"
 description = "Python implementation of 'Multi-dimensional map-folding'"
-dynamic = [
-    "version", 
-    ]
 readme = "README.md"
+authors = [
+    {name = "Hunter Hogan", email = "HunterHogan@pm.me"}
+]
+version = "0.0.1"
 dependencies = [
     "numpy",
     "numba",
@@ -30,9 +31,6 @@ include-package-data = true
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["*"]
-
-[tool.setuptools.dynamic]
-version = { attr = "mapFolding.__version__" }
 
 [tool.coverage.run]
 branch = true

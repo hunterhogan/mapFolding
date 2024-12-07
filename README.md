@@ -8,7 +8,9 @@
 - [A195646](https://oeis.org/A195646) Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.
 - [A001418](https://oeis.org/A001418) Number of ways of folding an n X n sheet of stamps.
 
-`mapFolding.foldings()`, however, will accept arbitrary values for the array dimensions.
+`mapFolding.foldings()`, however, will accept arbitrary values for the list of dimensions.
+
+[![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml)
 
 ## Algorithm history
 
