@@ -13,7 +13,7 @@ else:
 class SettingsOEISsequence(TypedDict):
     description: str
     dimensions: Callable[[int], List[int]]
-    testValuesSpeed: List[int]
+    benchmarkValues: List[int]
     testValuesValidation: List[int]
     valuesKnown: Dict[int, int]
     valueUnknown: List[int]
@@ -27,7 +27,7 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'dimensions': lambda n: [2, n],
-        'testValuesSpeed': [11],
+        'benchmarkValues': [11],
         'testValuesValidation': [0, 1, random.randint(2, 9)],
         'valueUnknown': [2, 19],
         'valuesKnown': {},  # Placeholder
@@ -35,7 +35,7 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     'A001416': {
         'description': 'Number of ways of folding a 3 X n strip of stamps.',
         'dimensions': lambda n: [3, n],
-        'testValuesSpeed': [8],
+        'benchmarkValues': [8],
         'testValuesValidation': [0, 1, random.randint(2, 6)],
         'valueUnknown': [3, 15],
         'valuesKnown': {},  # Placeholder
@@ -43,7 +43,7 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     'A001417': {
         'description': 'Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.',
         'dimensions': lambda n: [2] * n,
-        'testValuesSpeed': [5],
+        'benchmarkValues': [5],
         'testValuesValidation': [0, 1, random.randint(2, 4)],
         'valueUnknown': [2, 2, 2, 2, 2, 2, 2, 2],
         'valuesKnown': {},  # Placeholder
@@ -51,7 +51,7 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     'A195646': {
         'description': 'Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.',
         'dimensions': lambda n: [3] * n,
-        'testValuesSpeed': [3],
+        'benchmarkValues': [3],
         'testValuesValidation': [0, 1, 2],
         'valueUnknown': [3, 3, 3, 3],
         'valuesKnown': {},  # Placeholder
@@ -59,7 +59,7 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     'A001418': {
         'description': 'Number of ways of folding an n X n sheet of stamps.',
         'dimensions': lambda n: [n, n],
-        'testValuesSpeed': [5],
+        'benchmarkValues': [5],
         'testValuesValidation': [*range(1, 4)],
         'valueUnknown': [8, 8],
         'valuesKnown': {},  # Placeholder

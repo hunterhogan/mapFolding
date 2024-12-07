@@ -13,14 +13,16 @@ version = "0.0.1"
 dependencies = [
     "numpy",
     "numba",
+    "Z0Z-tools",
 ]
 [project.optional-dependencies]
 test = [
-    "pytest",
-    "pytest-cov",
-    "pytest-env",
+    "pytest", 
+    "pytest-cov", 
+    "pytest-env", 
     "pytest-xdist",
-]
+    "pytest-benchmark", 
+    "coverage",] 
 
 [tool.setuptools]
 include-package-data = true
@@ -44,10 +46,7 @@ omit = [
 
 [tool.coverage.report]
 exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
     "if TYPE_CHECKING:",
-    "raise NotImplementedError",
     "if __name__ == .__main__.:",
     "pass",
 ]

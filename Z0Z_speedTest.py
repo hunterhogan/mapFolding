@@ -11,8 +11,9 @@ testCallables = [
     mapFolding.lovelace.foldings,
 ]
 
-setTuplesTestDimensions = {tuple(sorted(settings['dimensions'](n))) for settings in settingsOEISsequences.values() for n in settings['testValuesSpeed']}
+setTuplesTestDimensions = {tuple(sorted(settings['dimensions'](n))) for settings in settingsOEISsequences.values() for n in settings['benchmarkValues']}
 listTestDimensions = [list(testDimension) for testDimension in setTuplesTestDimensions]
+listTestDimensions = [[2,13]]
 testRounds = 30
 
 listBenchmarkResults = []

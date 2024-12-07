@@ -1,7 +1,7 @@
 SF:mapFolding\clearOEIScache.py
-DA:1,0
-DA:3,0
-DA:6,0
+DA:1,1
+DA:3,1
+DA:6,1
 DA:9,0
 DA:10,0
 DA:11,0
@@ -9,18 +9,22 @@ DA:13,0
 DA:14,0
 DA:15,0
 LF:9
-LH:0
+LH:3
 FN:6,15,clearOEIScache
 FNDA:0,clearOEIScache
 FNF:1
 FNH:0
+BRDA:9,0,jump to line 10,-
+BRDA:9,0,jump to line 13,-
+BRF:2
+BRH:0
 end_of_record
 SF:mapFolding\lovelace.py
-DA:1,0
-DA:2,0
-DA:3,0
-DA:5,0
-DA:6,0
+DA:1,1
+DA:2,1
+DA:3,1
+DA:5,1
+DA:6,1
 DA:38,0
 DA:39,0
 DA:40,0
@@ -90,61 +94,109 @@ DA:139,0
 DA:140,0
 DA:142,0
 LF:73
-LH:0
+LH:5
 FN:6,142,foldings
 FNDA:0,foldings
 FNF:1
 FNH:0
+BRDA:39,0,jump to line 40,-
+BRDA:39,0,jump to line 42,-
+BRDA:42,0,jump to line 43,-
+BRDA:42,0,jump to line 45,-
+BRDA:50,0,jump to line 51,-
+BRDA:50,0,jump to line 54,-
+BRDA:55,0,jump to line 56,-
+BRDA:55,0,jump to line 60,-
+BRDA:56,0,jump to line 55,-
+BRDA:56,0,jump to line 57,-
+BRDA:63,0,jump to line 64,-
+BRDA:63,0,jump to line 82,-
+BRDA:64,0,jump to line 63,-
+BRDA:64,0,jump to line 65,-
+BRDA:65,0,jump to line 64,-
+BRDA:65,0,jump to line 66,-
+BRDA:67,0,jump to line 69,-
+BRDA:67,0,jump to line 75,-
+BRDA:84,0,jump to line 85,-
+BRDA:84,0,jump to line 142,-
+BRDA:92,0,jump to line 84,-
+BRDA:92,0,jump to line 93,-
+BRDA:93,0,jump to line 94,-
+BRDA:93,0,jump to line 127,-
+BRDA:94,0,jump to line 95,-
+BRDA:94,0,jump to line 97,-
+BRDA:102,0,jump to line 103,-
+BRDA:102,0,jump to line 115,-
+BRDA:103,0,jump to line 104,-
+BRDA:103,0,jump to line 106,-
+BRDA:107,0,jump to line 102,-
+BRDA:107,0,jump to line 108,-
+BRDA:109,0,jump to line 110,-
+BRDA:109,0,jump to line 111,-
+BRDA:115,0,jump to line 116,-
+BRDA:115,0,jump to line 120,-
+BRDA:116,0,jump to line 117,-
+BRDA:116,0,jump to line 120,-
+BRDA:120,0,jump to line 121,-
+BRDA:120,0,jump to line 127,-
+BRDA:122,0,jump to line 123,-
+BRDA:122,0,jump to line 124,-
+BRDA:127,0,jump to line 128,-
+BRDA:127,0,jump to line 133,-
+BRDA:133,0,jump to line 92,-
+BRDA:133,0,jump to line 134,-
+BRF:46
+BRH:0
 end_of_record
 SF:mapFolding\oeis.py
-DA:1,0
-DA:2,0
-DA:3,0
-DA:4,0
-DA:5,0
-DA:6,0
-DA:11,0
-DA:13,0
-DA:14,0
-DA:15,0
-DA:16,0
-DA:17,0
-DA:18,0
-DA:19,0
-DA:21,0
-DA:22,0
+DA:1,1
+DA:2,1
+DA:3,1
+DA:4,1
+DA:5,1
+DA:6,1
+DA:11,1
+DA:13,1
+DA:14,1
+DA:15,1
+DA:16,1
+DA:17,1
+DA:18,1
+DA:19,1
+DA:21,1
+DA:22,1
 DA:23,0
 DA:24,0
-DA:26,0
-DA:69,0
+DA:26,1
+DA:69,1
 DA:84,0
 DA:85,0
 DA:86,0
 DA:87,0
 DA:89,0
 DA:90,0
-DA:92,0
-DA:93,0
-DA:95,0
+DA:92,1
+DA:93,1
+DA:95,1
 DA:96,0
-DA:98,0
-DA:99,0
-DA:100,0
+DA:98,1
+DA:99,1
+DA:100,1
 DA:101,0
-DA:102,0
-DA:103,0
-DA:104,0
-DA:106,0
-DA:108,0
-DA:109,0
-DA:111,0
-DA:112,0
-DA:113,0
-DA:114,0
-DA:116,0
-DA:117,0
-DA:118,0
-DA:119,0
+DA:102,1
+DA:103,1
+DA:104,1
+DA:106,1
+DA:108,1
+DA:109,1
+DA:111,1
+DA:112,1
+DA:113,1
+DA:114,1
+DA:116,1
+DA:117,1
+DA:118,1
+DA:119,1
 DA:120,0
 DA:121,0
 DA:123,0
@@ -154,23 +206,47 @@ DA:128,0
 DA:129,0
 DA:130,0
 DA:132,0
-DA:134,0
-DA:135,0
-DA:137,0
-DA:138,0
-DA:139,0
-DA:142,0
-DA:143,0
-DA:144,0
-DA:145,0
+DA:134,1
+DA:135,1
+DA:137,1
+DA:138,1
+DA:139,1
+DA:142,1
+DA:143,1
+DA:144,1
+DA:145,1
 LF:66
-LH:0
+LH:47
 FN:69,90,oeisSequence_aOFn
 FNDA:0,oeisSequence_aOFn
 FN:92,104,_parseContent
-FNDA:0,_parseContent
+FNDA:1,_parseContent
 FN:106,132,_getOEISsequence
-FNDA:0,_getOEISsequence
+FNDA:1,_getOEISsequence
 FNF:3
-FNH:0
+FNH:2
+BRDA:84,0,jump to line 85,-
+BRDA:84,0,jump to line 86,-
+BRDA:86,0,jump to line 87,-
+BRDA:86,0,jump to line 89,-
+BRDA:95,0,jump to line 96,0
+BRDA:95,0,jump to line 98,1
+BRDA:99,0,jump to line 100,1
+BRDA:99,0,jump to line 104,1
+BRDA:100,0,jump to line 101,0
+BRDA:100,0,jump to line 102,1
+BRDA:112,0,jump to line 113,1
+BRDA:112,0,jump to line 116,0
+BRDA:116,0,jump to line 117,1
+BRDA:116,0,jump to line 123,0
+BRDA:128,0,jump to line 129,-
+BRDA:128,0,jump to line 132,-
+BRDA:134,0,jump to line 135,1
+BRDA:134,0,jump to line 137,1
+BRDA:138,0,jump to line 139,1
+BRDA:138,0,exit the module,1
+BRDA:142,0,jump to line 138,1
+BRDA:142,0,jump to line 143,1
+BRF:22
+BRH:12
 end_of_record
