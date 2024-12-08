@@ -6,7 +6,7 @@ W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, 
 # The order of the imports affects the possibility of an 
 # error due to importing from a partially initialized module
 
-from .lovelace import foldings
+from .babbage import foldings
 from .oeis import oeisSequence_aOFn, settingsOEISsequences, dimensionsFoldingsTotalLookup
 from .clearOEIScache import clearOEIScache
 

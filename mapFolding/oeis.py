@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from mapFolding import foldings
-from typing import Callable, Dict, List, TYPE_CHECKING
+from typing import Callable, Dict, List, TYPE_CHECKING, Literal, get_args
 import pathlib
 import random
 import urllib.request
@@ -23,7 +23,9 @@ try:
 except NameError:
     pathCache = pathlib.Path.home() / ".mapFoldingCache"
 
-settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
+OEISsequenceID = Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418']
+
+settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'dimensions': lambda n: [2, n],
@@ -66,7 +68,8 @@ settingsOEISsequences: Dict[str, SettingsOEISsequence] = {
     },
 }
 
-def oeisSequence_aOFn(oeisID: str, n: int) -> int:
+
+def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
     """
     Calculate a(n) of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
 
@@ -89,7 +92,7 @@ def oeisSequence_aOFn(oeisID: str, n: int) -> int:
     listDimensions = settingsOEISsequences[oeisID]['dimensions'](n)
     return foldings(listDimensions) if n > 0 else 1
 
-def _parseContent(bFileOEIS: str, oeisID: str) -> Dict[int, int]:
+def _parseContent(bFileOEIS: str, oeisID: OEISsequenceID) -> Dict[int, int]:
     bFileLines = bFileOEIS.strip().splitlines()
     # Remove first line with sequence ID
     if not bFileLines.pop(0).startswith(f"# {oeisID}"):
@@ -103,7 +106,7 @@ def _parseContent(bFileOEIS: str, oeisID: str) -> Dict[int, int]:
         OEISsequence[n] = aOFn
     return OEISsequence
 
-def _getOEISsequence(oeisID: str) -> Dict[int, int]:
+def _getOEISsequence(oeisID: OEISsequenceID) -> Dict[int, int]:
     """Fetch and parse an OEIS sequence from cache or URL."""
     pathFilenameCache = pathCache / f"{oeisID}.txt"
     cacheDays = 7

@@ -30,7 +30,7 @@ def test_dimensions_lookup(oeisID):
 
 def test_invalid_sequence():
     with pytest.raises(KeyError):
-        oeisSequence_aOFn('A999999', 1)
+        oeisSequence_aOFn('A999999', 1) # type: ignore
 
 def test_negative_n():
     with pytest.raises(ValueError):

@@ -8,22 +8,23 @@ description = "Python implementation of 'Multi-dimensional map-folding'"
 readme = "README.md"
 authors = [
     {name = "Hunter Hogan", email = "HunterHogan@pm.me"}]
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
     "numpy",
-    "numba",]
+    "numba",
+    "Z0Z-tools",
+    ]
 [project.optional-dependencies]
 test = [
     "pytest",
     "pytest-cov",
     "pytest-env",
     "pytest-xdist",
-    "pytest-benchmark",
     "coverage",]
 offending_rule = [
     "pandas",
     "tqdm",
-    "Z0Z-tools",]
+    ]
 
 [tool.setuptools]
 include-package-data = true

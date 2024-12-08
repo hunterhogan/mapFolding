@@ -22,7 +22,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           PACKAGE_NAME=$(python -c "from configparser import ConfigParser; p = ConfigParser(); p.read('pyproject.toml'); print(p['project']['name'])")
-          pytest --junitxml=junit.xml -o junit_family=legacy
+          pytest --cov=mapFolding --cov-report=term-missing --cov-report=xml --cov-report=lcov --junitxml=junit.xml -o junit_family=legacy
           
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}

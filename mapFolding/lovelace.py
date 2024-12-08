@@ -1,143 +1,127 @@
-from numba import njit
-from typing import List, Optional
+from numba import njit, types
 import numpy
 
-@njit(cache=True, fastmath=True, error_model='numpy', nogil=True)
-def foldings(dimensionsMap: List[int], listLeaves: Optional[List[int]] = None) -> int:
-    """
-    Calculate number of ways to fold a map of the dimensions, `dimensionsMap`.
+ConnectionLeafAbove = 0
+ConnectionLeafBelow = 1
+CountDimensionsGap  = 2
+GapRanges           = 3
 
-    Parameters:
-        dimensionsMap: list of dimensions [n, m ...]
-        listLeaves (all): list of leaves to count foldings for; default is all
+leavesTotal        = 0
+dimensionsTotal    = 1
+leafNumberActive   = 2
+foldingsSubtotal   = 3
+gapNumberActive    = 4
+countUnconstrained = 5
+GG                 = 6
+leafNumber         = 7
 
-    Returns:
-        foldingsTotal: Total number of valid foldings
+@njit(types.int64(types.Array(types.int64, 1, 'C'), types.Array(types.int64, 3, 'C', readonly=True), types.Array(types.int64, 2, 'C'), types.Array(types.int64, 1, 'C')), cache=True, fastmath=True, error_model='numpy', nogil=True, parallel=True)
+def _countLeaf(arrayState: numpy.ndarray, leafConnectionGraph: numpy.ndarray, track: numpy.ndarray, arrayPotentialGaps: numpy.ndarray) -> int:
+    while arrayState[leafNumberActive] > 0:
+        if arrayState[leafNumberActive] <= 1 or track[ConnectionLeafBelow][0] == 1:
+            if arrayState[leafNumberActive] > arrayState[leavesTotal]:
+                arrayState[foldingsSubtotal] += arrayState[leavesTotal]
+            else:
+                arrayState[countUnconstrained] = 0
+                arrayState[GG] = track[GapRanges][arrayState[leafNumberActive] - 1]  # Track possible gaps
+                arrayState[gapNumberActive] = arrayState[GG]
 
-    Key concepts
-        - A "leaf" is a unit square in the map
-        - A "gap" is a potential position where a new leaf can be folded
-        - Connections track how leaves can connect above/below each other
-        - The algorithm builds foldings incrementally by placing one leaf at a time
-        - Backtracking explores all valid combinations
-        - Leaves and dimensions are enumerated starting from 1, not 0; hence, leafNumber not leafIndex
+                # Find potential gaps for leaf l in each dimension
+                for dimensionNumber in range(1, arrayState[dimensionsTotal] + 1):
+                    if leafConnectionGraph[dimensionNumber][arrayState[leafNumberActive]][arrayState[leafNumberActive]] == arrayState[leafNumberActive]:
+                        arrayState[countUnconstrained] += 1
+                    else:
+                        arrayState[leafNumber] = leafConnectionGraph[dimensionNumber][arrayState[leafNumberActive]][arrayState[leafNumberActive]]
+                        while arrayState[leafNumber] != arrayState[leafNumberActive]:
+                            arrayPotentialGaps[arrayState[GG]] = arrayState[leafNumber]
+                            if track[CountDimensionsGap][arrayState[leafNumber]] == 0:
+                                arrayState[GG] += 1
+                            track[CountDimensionsGap][arrayState[leafNumber]] += 1
+                            arrayState[leafNumber] = leafConnectionGraph[dimensionNumber][arrayState[leafNumberActive]][track[ConnectionLeafBelow][arrayState[leafNumber]]]
 
-    Key data structures
-        - mapFoldingConnections[D][L][M]: How leaf L connects to leaf M in dimension D
-        - listCountDimensionsWithGap[L]: Number of dimensions with valid gaps at leaf L
-        - listGapIndicesRange[L]: Index ranges of gaps available for leaf L
-        - listPotentialGapPositions[]: List of all potential gap positions
+                # If leaf l is unconstrained in all dimensions, it can be inserted anywhere
+                if arrayState[countUnconstrained] == arrayState[dimensionsTotal]:
+                    for arrayState[leafNumber] in range(arrayState[leafNumberActive]):
+                        arrayPotentialGaps[arrayState[GG]] = arrayState[leafNumber]
+                        arrayState[GG] += 1
 
-    Algorithm flow
-        1. Initialize coordinate system and connection graph
-        2. For each leaf:
-            - Find valid gaps in each dimension
-            - Place leaf in valid position
-            - Backtrack when no valid positions remain
-        3. Count total valid foldings found
-    """
-    leavesTotal = 1
+                for indexGaps in range(arrayState[gapNumberActive], arrayState[GG]):
+                    arrayPotentialGaps[arrayState[gapNumberActive]] = arrayPotentialGaps[indexGaps]
+                    if track[CountDimensionsGap][arrayPotentialGaps[indexGaps]] == arrayState[dimensionsTotal] - arrayState[countUnconstrained]:
+                        arrayState[gapNumberActive] += 1
+                    track[CountDimensionsGap][arrayPotentialGaps[indexGaps]] = 0
+
+            # Backtrack if no more gaps
+        while arrayState[leafNumberActive] > 0 and arrayState[gapNumberActive] == track[GapRanges][arrayState[leafNumberActive] - 1]:
+            arrayState[leafNumberActive] -= 1
+            track[ConnectionLeafBelow][track[ConnectionLeafAbove][arrayState[leafNumberActive]]] = track[ConnectionLeafBelow][arrayState[leafNumberActive]]
+            track[ConnectionLeafAbove][track[ConnectionLeafBelow][arrayState[leafNumberActive]]] = track[ConnectionLeafAbove][arrayState[leafNumberActive]]
+
+            # Insert leaf and advance
+        if arrayState[leafNumberActive] > 0:
+            arrayState[gapNumberActive] -= 1
+            track[ConnectionLeafAbove][arrayState[leafNumberActive]] = arrayPotentialGaps[arrayState[gapNumberActive]]
+            track[ConnectionLeafBelow][arrayState[leafNumberActive]] = track[ConnectionLeafBelow][track[ConnectionLeafAbove][arrayState[leafNumberActive]]]
+            track[ConnectionLeafBelow][track[ConnectionLeafAbove][arrayState[leafNumberActive]]] = arrayState[leafNumberActive]
+            track[ConnectionLeafAbove][track[ConnectionLeafBelow][arrayState[leafNumberActive]]] = arrayState[leafNumberActive]
+            track[GapRanges][arrayState[leafNumberActive]] = arrayState[gapNumberActive]
+            arrayState[leafNumberActive] += 1
+
+    return int(arrayState[foldingsSubtotal])
+
+@njit(types.int64(types.Array(types.int64, 1, 'C', readonly=True), types.Array(types.int64, 1, 'C', readonly=True)), cache=True, fastmath=True, error_model='numpy', nogil=True, parallel=True)
+def _makeDataStructures(dimensionsMap: numpy.ndarray, listLeaves: numpy.ndarray) -> int:
+    the = numpy.zeros(8, dtype=numpy.int64)
+
+    the[leavesTotal] = 1
     for dimension in dimensionsMap:
-        leavesTotal *= dimension
+        the[leavesTotal] *= dimension
 
-    numberOfDimensions = len(dimensionsMap)
+    the[dimensionsTotal] = len(dimensionsMap)
 
     # How to build a leafConnectionGraph:
     # Step 1: find the product of all dimensions
-    productOfDimensions = numpy.ones(numberOfDimensions + 1, dtype=numpy.int64)
-    for dimensionNumber in range(1, numberOfDimensions + 1):
+    productOfDimensions = numpy.ones(the[dimensionsTotal] + 1, dtype=numpy.int64)
+    for dimensionNumber in range(1, the[dimensionsTotal] + 1):
         productOfDimensions[dimensionNumber] = productOfDimensions[dimensionNumber - 1] * dimensionsMap[dimensionNumber - 1]
 
     # Step 2: for each dimension, create a coordinate system
-    coordinateSystem = numpy.zeros((numberOfDimensions + 1, leavesTotal + 1), dtype=numpy.int64)
-    for dimensionNumber in range(1, numberOfDimensions + 1):
-        for leafNumber in range(1, leavesTotal + 1):
-            coordinateSystem[dimensionNumber][leafNumber] = ((leafNumber - 1) // productOfDimensions[dimensionNumber - 1]) % dimensionsMap[dimensionNumber - 1] + 1
+    coordinateSystem = numpy.zeros((the[dimensionsTotal] + 1, the[leavesTotal] + 1), dtype=numpy.int64)
+    for dimensionNumber in range(1, the[dimensionsTotal] + 1):
+        for leafFriend in range(1, the[leavesTotal] + 1):
+            coordinateSystem[dimensionNumber][leafFriend] = ((leafFriend - 1) // productOfDimensions[dimensionNumber - 1]) % dimensionsMap[dimensionNumber - 1] + 1
 
     # Step 3: create a huge empty leafConnectionGraph
-    leafConnectionGraph = numpy.zeros((numberOfDimensions + 1, leavesTotal + 1, leavesTotal + 1), dtype=numpy.int64)
+    leafConnectionGraph = numpy.zeros((the[dimensionsTotal] + 1, the[leavesTotal] + 1, the[leavesTotal] + 1), dtype=numpy.int64)
 
     # Step for for for: fill the leafConnectionGraph
-    for dimensionNumber in range(1, numberOfDimensions + 1):
-        for leafNumberActive in range(1, leavesTotal + 1):
-            for leafNumber in range(1, leafNumberActive + 1):
-                distance = coordinateSystem[dimensionNumber][leafNumberActive] - coordinateSystem[dimensionNumber][leafNumber]
+    for dimensionNumber in range(1, the[dimensionsTotal] + 1):
+        for leafProxy in range(1, the[leavesTotal] + 1):
+            for leafFriend in range(1, leafProxy + 1):
+                distance = coordinateSystem[dimensionNumber][leafProxy] - coordinateSystem[dimensionNumber][leafFriend]
                 if distance % 2 == 0:
                     # If distance is even
-                    leafConnectionGraph[dimensionNumber][leafNumberActive][leafNumber] = (
-                        leafNumber if coordinateSystem[dimensionNumber][leafNumber] == 1
-                        else leafNumber - productOfDimensions[dimensionNumber - 1]
+                    leafConnectionGraph[dimensionNumber][leafProxy][leafFriend] = (
+                        leafFriend if coordinateSystem[dimensionNumber][leafFriend] == 1
+                        else leafFriend - productOfDimensions[dimensionNumber - 1]
                     )
                 else:
                     # If distance is odd
-                    leafConnectionGraph[dimensionNumber][leafNumberActive][leafNumber] = (
-                        leafNumber if (
-                            coordinateSystem[dimensionNumber][leafNumber] == dimensionsMap[dimensionNumber - 1]
-                            or leafNumber + productOfDimensions[dimensionNumber - 1] > leafNumberActive
-                        ) else leafNumber + productOfDimensions[dimensionNumber - 1]
+                    leafConnectionGraph[dimensionNumber][leafProxy][leafFriend] = (
+                        leafFriend if (
+                            coordinateSystem[dimensionNumber][leafFriend] == dimensionsMap[dimensionNumber - 1]
+                            or leafFriend + productOfDimensions[dimensionNumber - 1] > leafProxy
+                        ) else leafFriend + productOfDimensions[dimensionNumber - 1]
                     )
 
-    if listLeaves is None:
-        listLeaves = list(range(1, leavesTotal + 1))
+    track = numpy.zeros((4, the[leavesTotal] + 1), dtype=numpy.int64)
+    arrayPotentialGaps = numpy.zeros((the[leavesTotal] + 1) * (the[leavesTotal] + 1), dtype=numpy.int64)
 
     foldingsTotal = 0 # The point of the entire module
 
-    for leafNumberActive in listLeaves:
-        gapNumberActive = 0
-        arrayConnectionLeafAbove = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
-        arrayConnectionLeafBelow = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
-        arrayCountDimensionsGap = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
-        arrayGapRanges = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
-        arrayPotentialGaps = numpy.zeros((leavesTotal + 1) * (leavesTotal + 1), dtype=numpy.int64)
-
-        while leafNumberActive > 0:
-            if leafNumberActive <= 1 or arrayConnectionLeafBelow[0] == 1:
-                if leafNumberActive > leavesTotal:
-                    foldingsTotal += leavesTotal
-                else:
-                    countDimensionsUnconstrained = 0
-                    indexGapPointersMaximum = arrayGapRanges[leafNumberActive - 1]  # Track possible gaps
-                    gapNumberActive = indexGapPointersMaximum
-
-                    # Find potential gaps for leaf l in each dimension
-                    for dimensionNumber in range(1, numberOfDimensions + 1):
-                        if leafConnectionGraph[dimensionNumber][leafNumberActive][leafNumberActive] == leafNumberActive:
-                            countDimensionsUnconstrained += 1
-                        else:
-                            leafNumber = leafConnectionGraph[dimensionNumber][leafNumberActive][leafNumberActive]
-                            while leafNumber != leafNumberActive:
-                                arrayPotentialGaps[indexGapPointersMaximum] = leafNumber
-                                if arrayCountDimensionsGap[leafNumber] == 0:
-                                    indexGapPointersMaximum += 1
-                                arrayCountDimensionsGap[leafNumber] += 1
-                                leafNumber = leafConnectionGraph[dimensionNumber][leafNumberActive][arrayConnectionLeafBelow[leafNumber]]
-
-                    # If leaf l is unconstrained in all dimensions, it can be inserted anywhere
-                    if countDimensionsUnconstrained == numberOfDimensions:
-                        for leafNumber in range(leafNumberActive):
-                            arrayPotentialGaps[indexGapPointersMaximum] = leafNumber
-                            indexGapPointersMaximum += 1
-
-                    for indexGaps in range(gapNumberActive, indexGapPointersMaximum):
-                        arrayPotentialGaps[gapNumberActive] = arrayPotentialGaps[indexGaps]
-                        if arrayCountDimensionsGap[arrayPotentialGaps[indexGaps]] == numberOfDimensions - countDimensionsUnconstrained:
-                            gapNumberActive += 1
-                        arrayCountDimensionsGap[arrayPotentialGaps[indexGaps]] = 0
-
-            # Backtrack if no more gaps
-            while leafNumberActive > 0 and gapNumberActive == arrayGapRanges[leafNumberActive - 1]:
-                leafNumberActive -= 1
-                arrayConnectionLeafBelow[arrayConnectionLeafAbove[leafNumberActive]] = arrayConnectionLeafBelow[leafNumberActive]
-                arrayConnectionLeafAbove[arrayConnectionLeafBelow[leafNumberActive]] = arrayConnectionLeafAbove[leafNumberActive]
-
-            # Insert leaf and advance
-            if leafNumberActive > 0:
-                gapNumberActive -= 1
-                arrayConnectionLeafAbove[leafNumberActive] = arrayPotentialGaps[gapNumberActive]
-                arrayConnectionLeafBelow[leafNumberActive] = arrayConnectionLeafBelow[arrayConnectionLeafAbove[leafNumberActive]]
-                arrayConnectionLeafBelow[arrayConnectionLeafAbove[leafNumberActive]] = leafNumberActive
-                arrayConnectionLeafAbove[arrayConnectionLeafBelow[leafNumberActive]] = leafNumberActive
-                arrayGapRanges[leafNumberActive] = gapNumberActive
-                leafNumberActive += 1
+    for leaf in listLeaves:
+        the[leafNumberActive] = leaf
+        foldingsTotal += _countLeaf(the.copy(), leafConnectionGraph, track.copy(), arrayPotentialGaps.copy())
 
     return foldingsTotal
+
