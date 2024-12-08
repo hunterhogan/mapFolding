@@ -22,6 +22,11 @@ test = [
     "pytest-xdist",
     "pytest-benchmark", 
     "coverage",] 
+offending_rule = [
+    "pandas",
+    "tqdm",
+    "Z0Z-tools",
+]
 
 [tool.setuptools]
 include-package-data = true
@@ -46,7 +51,7 @@ omit = [
 [tool.coverage.report]
 exclude_lines = [
     "if TYPE_CHECKING:",
-    "if __name__ == .__main__.:",
+    "if __name__ == \"__main__\":",
     "pass",
 ]
 ignore_errors = false

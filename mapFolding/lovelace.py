@@ -8,7 +8,8 @@ def foldings(dimensionsMap: List[int], listLeaves: Optional[List[int]] = None) -
     Calculate number of ways to fold a map of the dimensions, `dimensionsMap`.
 
     Parameters:
-        dimensionsMap: list of dimensions [n, m] for nXm map or [n,n,n...] for n-dimensional
+        dimensionsMap: list of dimensions [n, m ...]
+        listLeaves (all): list of leaves to count foldings for; default is all
 
     Returns:
         foldingsTotal: Total number of valid foldings
@@ -38,9 +39,6 @@ def foldings(dimensionsMap: List[int], listLeaves: Optional[List[int]] = None) -
     leavesTotal = 1
     for dimension in dimensionsMap:
         leavesTotal *= dimension
-
-    if listLeaves is None:
-        listLeaves = list(range(1, leavesTotal + 1))
 
     numberOfDimensions = len(dimensionsMap)
 
@@ -79,14 +77,17 @@ def foldings(dimensionsMap: List[int], listLeaves: Optional[List[int]] = None) -
                         ) else leafNumber + productOfDimensions[dimensionNumber - 1]
                     )
 
+    if listLeaves is None:
+        listLeaves = list(range(1, leavesTotal + 1))
+
     foldingsTotal = 0 # The point of the entire module
 
     for leafNumberActive in listLeaves:
-        gapIndexActive = 0 # gapNumber?
+        gapNumberActive = 0
         arrayConnectionLeafAbove = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
         arrayConnectionLeafBelow = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
         arrayCountDimensionsGap = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
-        arrayIndicesRangeGap = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
+        arrayGapRanges = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
         arrayPotentialGaps = numpy.zeros((leavesTotal + 1) * (leavesTotal + 1), dtype=numpy.int64)
 
         while leafNumberActive > 0:
@@ -95,8 +96,8 @@ def foldings(dimensionsMap: List[int], listLeaves: Optional[List[int]] = None) -
                     foldingsTotal += leavesTotal
                 else:
                     countDimensionsUnconstrained = 0
-                    indexGapPointersMaximum = arrayIndicesRangeGap[leafNumberActive - 1]  # Track possible gaps
-                    gapIndexActive = indexGapPointersMaximum
+                    indexGapPointersMaximum = arrayGapRanges[leafNumberActive - 1]  # Track possible gaps
+                    gapNumberActive = indexGapPointersMaximum
 
                     # Find potential gaps for leaf l in each dimension
                     for dimensionNumber in range(1, numberOfDimensions + 1):
@@ -117,26 +118,26 @@ def foldings(dimensionsMap: List[int], listLeaves: Optional[List[int]] = None) -
                             arrayPotentialGaps[indexGapPointersMaximum] = leafNumber
                             indexGapPointersMaximum += 1
 
-                    for indexGaps in range(gapIndexActive, indexGapPointersMaximum):
-                        arrayPotentialGaps[gapIndexActive] = arrayPotentialGaps[indexGaps]
+                    for indexGaps in range(gapNumberActive, indexGapPointersMaximum):
+                        arrayPotentialGaps[gapNumberActive] = arrayPotentialGaps[indexGaps]
                         if arrayCountDimensionsGap[arrayPotentialGaps[indexGaps]] == numberOfDimensions - countDimensionsUnconstrained:
-                            gapIndexActive += 1
+                            gapNumberActive += 1
                         arrayCountDimensionsGap[arrayPotentialGaps[indexGaps]] = 0
 
             # Backtrack if no more gaps
-            while leafNumberActive > 0 and gapIndexActive == arrayIndicesRangeGap[leafNumberActive - 1]:
+            while leafNumberActive > 0 and gapNumberActive == arrayGapRanges[leafNumberActive - 1]:
                 leafNumberActive -= 1
                 arrayConnectionLeafBelow[arrayConnectionLeafAbove[leafNumberActive]] = arrayConnectionLeafBelow[leafNumberActive]
                 arrayConnectionLeafAbove[arrayConnectionLeafBelow[leafNumberActive]] = arrayConnectionLeafAbove[leafNumberActive]
 
             # Insert leaf and advance
             if leafNumberActive > 0:
-                gapIndexActive -= 1
-                arrayConnectionLeafAbove[leafNumberActive] = arrayPotentialGaps[gapIndexActive]
+                gapNumberActive -= 1
+                arrayConnectionLeafAbove[leafNumberActive] = arrayPotentialGaps[gapNumberActive]
                 arrayConnectionLeafBelow[leafNumberActive] = arrayConnectionLeafBelow[arrayConnectionLeafAbove[leafNumberActive]]
                 arrayConnectionLeafBelow[arrayConnectionLeafAbove[leafNumberActive]] = leafNumberActive
                 arrayConnectionLeafAbove[arrayConnectionLeafBelow[leafNumberActive]] = leafNumberActive
-                arrayIndicesRangeGap[leafNumberActive] = gapIndexActive
+                arrayGapRanges[leafNumberActive] = gapNumberActive
                 leafNumberActive += 1
 
     return foldingsTotal
