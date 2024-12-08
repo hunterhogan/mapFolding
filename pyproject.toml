@@ -19,7 +19,6 @@ test = [
     "pytest",
     "pytest-cov",
     "pytest-env",
-    "pytest-xdist",
     "coverage",]
 offending_rule = [
     "pandas",
@@ -59,7 +58,7 @@ output = "tests/coverage/coverage.xml"
 output = "tests/coverage/coverage.lcov"
 
 [tool.pytest.ini_options]
-addopts = "--cov=mapFolding --cov-report=term-missing --cov-report=xml --cov-report=lcov -n 8"
+addopts = "--cov=mapFolding --cov-report=term-missing --cov-report=xml --cov-report=lcov"
 testpaths = ["tests"]
 env = [
     "NUMBA_DISABLE_JIT=1"]
