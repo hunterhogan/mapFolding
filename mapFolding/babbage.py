@@ -1,15 +1,12 @@
-from typing import List, Optional
-from Z0Z_tools import defineConcurrencyLimit
-import numba
+from typing import List
 import numpy
 
-def foldings(dimensionsMap: List[int], listLeaves: Optional[List[int]] = None, CPUlimit: Optional[int | float | bool] = None) -> int:
+def foldings(dimensionsMap: List[int]) -> int:
     """
     Calculate number of ways to fold a map of the dimensions, `dimensionsMap`.
 
     Parameters:
         dimensionsMap: list of dimensions [n, m ...]
-        listLeaves (all): list of leaves to count foldings for; default is all
 
     Returns:
         foldingsTotal: Total number of valid foldings
@@ -38,11 +35,8 @@ def foldings(dimensionsMap: List[int], listLeaves: Optional[List[int]] = None, C
     """
     arrayDimensionsMap = numpy.array(dimensionsMap, dtype=numpy.int64)
 
-    if listLeaves is None:
-        listLeaves = list(range(1, numpy.prod(dimensionsMap) + 1))
+    listLeaves = list(range(1, numpy.prod(dimensionsMap) + 1))
     arrayLeaves = numpy.array(listLeaves, dtype=numpy.int64)
-
-    numba.set_num_threads(defineConcurrencyLimit(CPUlimit))
 
     from .lovelace import _makeDataStructures
 

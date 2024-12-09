@@ -12,7 +12,6 @@ version = "0.0.2"
 dependencies = [
     "numpy",
     "numba",
-    "Z0Z-tools",
     ]
 [project.optional-dependencies]
 test = [

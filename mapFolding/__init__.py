@@ -7,7 +7,7 @@ W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, 
 # error due to importing from a partially initialized module
 
 from .babbage import foldings
-from .oeis import oeisSequence_aOFn, settingsOEISsequences, dimensionsFoldingsTotalLookup
+from .oeis import oeisSequence_aOFn, settingsOEISsequences, dimensionsFoldingsTotalLookup, OEISsequenceID
 from .clearOEIScache import clearOEIScache
 
 __all__ = [

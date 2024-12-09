@@ -1,5 +1,6 @@
 from numba import njit, types
 import numpy
+import numba
 
 ConnectionLeafAbove = 0
 ConnectionLeafBelow = 1
@@ -15,7 +16,7 @@ countUnconstrained = 5
 GG                 = 6
 leafNumber         = 7
 
-@njit(types.int64(types.Array(types.int64, 1, 'C'), types.Array(types.int64, 3, 'C', readonly=True), types.Array(types.int64, 2, 'C'), types.Array(types.int64, 1, 'C')), cache=True, fastmath=True, error_model='numpy', nogil=True, parallel=True)
+@njit(types.int64(types.Array(types.int64, 1, 'C'), types.Array(types.int64, 3, 'C', readonly=True), types.Array(types.int64, 2, 'C'), types.Array(types.int64, 1, 'C')), cache=True, fastmath=True, error_model='numpy', nogil=True)
 def _countLeaf(arrayState: numpy.ndarray, leafConnectionGraph: numpy.ndarray, track: numpy.ndarray, arrayPotentialGaps: numpy.ndarray) -> int:
     while arrayState[leafNumberActive] > 0:
         if arrayState[leafNumberActive] <= 1 or track[ConnectionLeafBelow][0] == 1:
@@ -69,7 +70,7 @@ def _countLeaf(arrayState: numpy.ndarray, leafConnectionGraph: numpy.ndarray, tr
 
     return int(arrayState[foldingsSubtotal])
 
-@njit(types.int64(types.Array(types.int64, 1, 'C', readonly=True), types.Array(types.int64, 1, 'C', readonly=True)), cache=True, fastmath=True, error_model='numpy', nogil=True, parallel=True)
+@njit(types.int64(types.Array(types.int64, 1, 'C', readonly=True), types.Array(types.int64, 1, 'C', readonly=True)), cache=True, fastmath=True, error_model='numpy', nogil=True)
 def _makeDataStructures(dimensionsMap: numpy.ndarray, listLeaves: numpy.ndarray) -> int:
     the = numpy.zeros(8, dtype=numpy.int64)
 
@@ -119,9 +120,7 @@ def _makeDataStructures(dimensionsMap: numpy.ndarray, listLeaves: numpy.ndarray)
 
     foldingsTotal = 0 # The point of the entire module
 
-    for leaf in listLeaves:
-        the[leafNumberActive] = leaf
-        foldingsTotal += _countLeaf(the.copy(), leafConnectionGraph, track.copy(), arrayPotentialGaps.copy())
+    the[leafNumberActive] = 1
 
-    return foldingsTotal
+    return _countLeaf(the, leafConnectionGraph, track, arrayPotentialGaps)
 
