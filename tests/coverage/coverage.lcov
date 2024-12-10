@@ -1,176 +1,166 @@
 SF:mapFolding\babbage.py
 DA:1,1
 DA:2,1
+DA:3,1
 DA:4,1
-DA:36,0
-DA:38,0
-DA:39,0
-DA:41,0
-DA:43,0
-LF:8
-LH:3
-FN:4,43,foldings
-FNDA:0,foldings
+DA:6,1
+DA:7,1
+DA:9,1
+DA:10,1
+DA:11,1
+DA:12,1
+DA:14,1
+DA:15,1
+DA:16,1
+DA:17,1
+DA:18,1
+DA:19,1
+DA:20,1
+DA:22,1
+DA:23,1
+DA:24,1
+DA:25,1
+DA:26,1
+DA:27,1
+DA:28,1
+DA:29,1
+DA:30,1
+DA:31,1
+DA:32,1
+DA:33,1
+DA:35,1
+DA:37,1
+DA:39,1
+LF:32
+LH:32
+FN:6,39,foldings
+FNDA:1,foldings
 FNF:1
-FNH:0
+FNH:1
+BRDA:10,0,jump to line 11,1
+BRDA:10,0,jump to line 12,1
+BRDA:23,0,jump to line 24,1
+BRDA:23,0,jump to line 25,1
+BRDA:25,0,jump to line 26,1
+BRDA:25,0,jump to line 28,1
+BRDA:26,0,jump to line 25,1
+BRDA:26,0,jump to line 27,1
+BRDA:28,0,jump to line 29,1
+BRDA:28,0,jump to line 37,1
+BRDA:29,0,jump to line 28,1
+BRDA:29,0,jump to line 30,1
+BRDA:30,0,jump to line 29,1
+BRDA:30,0,jump to line 31,1
+BRDA:32,0,jump to line 33,1
+BRDA:32,0,jump to line 35,1
+BRF:16
+BRH:16
 end_of_record
 SF:mapFolding\clearOEIScache.py
 DA:1,1
 DA:3,1
 DA:6,1
-DA:9,0
-DA:10,0
-DA:11,0
-DA:13,0
-DA:14,0
-DA:15,0
+DA:9,1
+DA:10,1
+DA:11,1
+DA:13,1
+DA:14,1
+DA:15,1
 LF:9
-LH:3
+LH:9
 FN:6,15,clearOEIScache
-FNDA:0,clearOEIScache
+FNDA:1,clearOEIScache
 FNF:1
-FNH:0
-BRDA:9,0,jump to line 10,-
-BRDA:9,0,jump to line 13,-
+FNH:1
+BRDA:9,0,jump to line 10,1
+BRDA:9,0,jump to line 13,1
 BRF:2
-BRH:0
+BRH:2
 end_of_record
 SF:mapFolding\lovelace.py
-DA:1,0
-DA:2,0
-DA:3,0
-DA:5,0
-DA:6,0
-DA:7,0
-DA:8,0
-DA:10,0
-DA:11,0
-DA:12,0
-DA:13,0
-DA:14,0
-DA:15,0
-DA:16,0
-DA:17,0
-DA:19,0
-DA:20,0
-DA:21,0
-DA:22,0
-DA:23,0
-DA:24,0
-DA:26,0
-DA:27,0
-DA:28,0
-DA:31,0
-DA:32,0
-DA:33,0
-DA:35,0
-DA:36,0
-DA:37,0
-DA:38,0
-DA:39,0
-DA:40,0
-DA:41,0
-DA:44,0
-DA:45,0
-DA:46,0
-DA:47,0
-DA:49,0
-DA:50,0
-DA:51,0
-DA:52,0
-DA:53,0
-DA:56,0
-DA:57,0
-DA:58,0
-DA:59,0
-DA:62,0
-DA:63,0
-DA:64,0
-DA:65,0
-DA:66,0
-DA:67,0
-DA:68,0
-DA:69,0
-DA:71,0
-DA:73,0
-DA:74,0
-DA:75,0
-DA:77,0
-DA:78,0
-DA:79,0
-DA:81,0
-DA:85,0
-DA:86,0
-DA:87,0
-DA:90,0
-DA:91,0
-DA:92,0
-DA:93,0
-DA:96,0
-DA:99,0
-DA:100,0
-DA:101,0
-DA:102,0
-DA:103,0
-DA:105,0
-DA:111,0
-DA:118,0
-DA:119,0
-DA:121,0
-DA:123,0
-DA:125,0
-LF:83
-LH:0
-FN:20,71,_countLeaf
-FNDA:0,_countLeaf
-FN:74,125,_makeDataStructures
-FNDA:0,_makeDataStructures
-FNF:2
-FNH:0
-BRDA:21,0,jump to line 22,-
-BRDA:21,0,jump to line 71,-
-BRDA:22,0,jump to line 23,-
-BRDA:22,0,jump to line 56,-
-BRDA:23,0,jump to line 24,-
-BRDA:23,0,jump to line 26,-
-BRDA:31,0,jump to line 32,-
-BRDA:31,0,jump to line 44,-
-BRDA:32,0,jump to line 33,-
-BRDA:32,0,jump to line 35,-
-BRDA:36,0,jump to line 31,-
-BRDA:36,0,jump to line 37,-
-BRDA:38,0,jump to line 39,-
-BRDA:38,0,jump to line 40,-
-BRDA:44,0,jump to line 45,-
-BRDA:44,0,jump to line 49,-
-BRDA:45,0,jump to line 46,-
-BRDA:45,0,jump to line 49,-
-BRDA:49,0,jump to line 50,-
-BRDA:49,0,jump to line 56,-
-BRDA:51,0,jump to line 52,-
-BRDA:51,0,jump to line 53,-
-BRDA:56,0,jump to line 57,-
-BRDA:56,0,jump to line 62,-
-BRDA:62,0,jump to line 21,-
-BRDA:62,0,jump to line 63,-
-BRDA:78,0,jump to line 79,-
-BRDA:78,0,jump to line 81,-
-BRDA:86,0,jump to line 87,-
-BRDA:86,0,jump to line 90,-
-BRDA:91,0,jump to line 92,-
-BRDA:91,0,jump to line 96,-
-BRDA:92,0,jump to line 91,-
-BRDA:92,0,jump to line 93,-
-BRDA:99,0,jump to line 100,-
-BRDA:99,0,jump to line 118,-
-BRDA:100,0,jump to line 99,-
-BRDA:100,0,jump to line 101,-
-BRDA:101,0,jump to line 100,-
-BRDA:101,0,jump to line 102,-
-BRDA:103,0,jump to line 105,-
-BRDA:103,0,jump to line 111,-
-BRF:42
-BRH:0
+DA:1,1
+DA:3,1
+DA:4,1
+DA:5,1
+DA:6,1
+DA:7,1
+DA:8,1
+DA:9,1
+DA:10,1
+DA:12,1
+DA:13,1
+DA:14,1
+DA:15,1
+DA:16,1
+DA:17,1
+DA:19,1
+DA:20,1
+DA:21,1
+DA:22,1
+DA:23,1
+DA:24,1
+DA:25,1
+DA:26,1
+DA:27,1
+DA:28,1
+DA:29,1
+DA:30,1
+DA:31,1
+DA:32,1
+DA:33,1
+DA:34,1
+DA:35,1
+DA:36,1
+DA:37,1
+DA:38,1
+DA:39,1
+DA:40,1
+DA:41,1
+DA:42,1
+DA:43,1
+DA:44,1
+DA:45,1
+DA:46,1
+DA:47,1
+DA:48,1
+DA:49,1
+DA:50,1
+LF:47
+LH:47
+FN:4,50,doWhile
+FNDA:1,doWhile
+FNF:1
+FNH:1
+BRDA:7,0,jump to line 8,1
+BRDA:7,0,jump to line 50,1
+BRDA:8,0,jump to line 9,1
+BRDA:8,0,jump to line 37,1
+BRDA:9,0,jump to line 10,1
+BRDA:9,0,jump to line 12,1
+BRDA:15,0,jump to line 16,1
+BRDA:15,0,jump to line 26,1
+BRDA:16,0,jump to line 17,1
+BRDA:16,0,jump to line 19,1
+BRDA:20,0,jump to line 15,1
+BRDA:20,0,jump to line 21,1
+BRDA:21,0,jump to line 22,1
+BRDA:21,0,jump to line 25,0
+BRDA:26,0,jump to line 27,1
+BRDA:26,0,jump to line 30,1
+BRDA:27,0,jump to line 28,1
+BRDA:27,0,jump to line 30,1
+BRDA:31,0,jump to line 32,1
+BRDA:31,0,jump to line 36,1
+BRDA:32,0,jump to line 33,1
+BRDA:32,0,jump to line 35,1
+BRDA:37,0,jump to line 38,1
+BRDA:37,0,jump to line 42,1
+BRDA:39,0,jump to line 37,1
+BRDA:39,0,jump to line 40,1
+BRDA:42,0,jump to line 7,1
+BRDA:42,0,jump to line 43,1
+BRF:28
+BRH:27
 end_of_record
 SF:mapFolding\oeis.py
 DA:1,1
@@ -198,84 +188,84 @@ DA:28,0
 DA:30,1
 DA:32,1
 DA:76,1
-DA:91,0
-DA:92,0
-DA:93,0
-DA:94,0
-DA:96,0
-DA:97,0
-DA:99,1
+DA:91,1
+DA:92,1
+DA:93,1
+DA:94,1
+DA:96,1
+DA:98,1
 DA:100,1
-DA:102,1
-DA:103,0
-DA:105,1
+DA:101,1
+DA:103,1
+DA:104,1
 DA:106,1
 DA:107,1
-DA:108,0
+DA:108,1
 DA:109,1
 DA:110,1
 DA:111,1
-DA:113,1
-DA:115,1
+DA:112,1
+DA:114,1
 DA:116,1
-DA:118,1
+DA:117,1
 DA:119,1
 DA:120,1
 DA:121,1
-DA:123,1
+DA:122,1
 DA:124,1
 DA:125,1
 DA:126,1
-DA:127,0
-DA:128,0
-DA:130,0
-DA:131,0
-DA:132,0
-DA:135,0
-DA:136,0
-DA:137,0
-DA:139,0
-DA:141,1
+DA:127,1
+DA:128,1
+DA:129,1
+DA:131,1
+DA:132,1
+DA:133,1
+DA:136,1
+DA:137,1
+DA:138,1
+DA:140,1
 DA:142,1
-DA:144,1
+DA:143,1
 DA:145,1
 DA:146,1
-DA:149,1
+DA:147,1
 DA:150,1
 DA:151,1
 DA:152,1
+DA:153,1
 LF:71
-LH:52
-FN:76,97,oeisSequence_aOFn
-FNDA:0,oeisSequence_aOFn
-FN:99,111,_parseContent
+LH:69
+FN:76,98,oeisSequence_aOFn
+FNDA:1,oeisSequence_aOFn
+FN:100,112,_parseContent
 FNDA:1,_parseContent
-FN:113,139,_getOEISsequence
+FN:114,140,_getOEISsequence
 FNDA:1,_getOEISsequence
 FNF:3
-FNH:2
-BRDA:91,0,jump to line 92,-
-BRDA:91,0,jump to line 93,-
-BRDA:93,0,jump to line 94,-
-BRDA:93,0,jump to line 96,-
-BRDA:102,0,jump to line 103,0
-BRDA:102,0,jump to line 105,1
-BRDA:106,0,jump to line 107,1
-BRDA:106,0,jump to line 111,1
-BRDA:107,0,jump to line 108,0
-BRDA:107,0,jump to line 109,1
-BRDA:119,0,jump to line 120,1
-BRDA:119,0,jump to line 123,0
-BRDA:123,0,jump to line 124,1
-BRDA:123,0,jump to line 130,0
-BRDA:135,0,jump to line 136,-
-BRDA:135,0,jump to line 139,-
-BRDA:141,0,jump to line 142,1
-BRDA:141,0,jump to line 144,1
-BRDA:145,0,jump to line 146,1
-BRDA:145,0,exit the module,1
-BRDA:149,0,jump to line 145,1
-BRDA:149,0,jump to line 150,1
+FNH:3
+BRDA:91,0,jump to line 92,1
+BRDA:91,0,jump to line 93,1
+BRDA:93,0,jump to line 94,1
+BRDA:93,0,jump to line 96,1
+BRDA:103,0,jump to line 104,1
+BRDA:103,0,jump to line 106,1
+BRDA:107,0,jump to line 108,1
+BRDA:107,0,jump to line 112,1
+BRDA:108,0,jump to line 109,1
+BRDA:108,0,jump to line 110,1
+BRDA:120,0,jump to line 121,1
+BRDA:120,0,jump to line 124,1
+BRDA:124,0,jump to line 125,1
+BRDA:124,0,jump to line 131,1
+BRDA:136,0,jump to line 137,1
+BRDA:136,0,jump to line 140,0
+BRDA:142,0,jump to line 143,1
+BRDA:142,0,jump to line 145,1
+BRDA:146,0,jump to line 147,1
+BRDA:146,0,exit the module,1
+BRDA:150,0,jump to line 146,1
+BRDA:150,0,jump to line 151,1
 BRF:22
-BRH:12
+BRH:21
 end_of_record

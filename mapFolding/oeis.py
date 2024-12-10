@@ -62,7 +62,7 @@ settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
         'valueUnknown': [3, 3, 3, 3],
         'valuesKnown': {},  # Placeholder
     },
-    'A001418': {
+    'A001418': { # offset 1
         'description': 'Number of ways of folding an n X n sheet of stamps.',
         'dimensions': lambda n: [n, n],
         'benchmarkValues': [5],
@@ -94,6 +94,7 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
         raise KeyError(f"Sequence {oeisID} is not directly implemented in mapFoldings. Use `mapFolding.foldings()` instead.")
 
     listDimensions = settingsOEISsequences[oeisID]['dimensions'](n)
+    # TODO technically, A001418 is not defined at n=0 because that would be 0x0
     return foldings(listDimensions) if n > 0 else 1
 
 def _parseContent(bFileOEIS: str, oeisID: OEISsequenceID) -> Dict[int, int]:
