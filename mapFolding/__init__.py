@@ -14,13 +14,11 @@ W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, 
 from .babbage import foldings
 from .oeis import oeisSequence_aOFn, settingsOEISsequences, dimensionsFoldingsTotalLookup, OEISsequenceID
 from .clearOEIScache import clearOEIScache
-from .timings import listExecutionTimes, clearExecutionTimes
+
 __all__ = [
     'clearOEIScache',
     'dimensionsFoldingsTotalLookup',
     'foldings',
     'oeisSequence_aOFn',
     'settingsOEISsequences',
-    'listExecutionTimes',
-    'clearExecutionTimes',
 ]

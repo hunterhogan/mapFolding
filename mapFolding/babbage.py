@@ -1,24 +1,15 @@
-from numba import njit
 import numpy
-from .lovelace import doWhile
-import time
-from .timings import addExecutionTime
 
 def foldings(dimensionsMap: list[int], computationDivisions: int = 0, computationIndex: int = 0):
-    foldingsTotal = 0
-
     leavesTotal = 1
     for dimension in dimensionsMap:
         leavesTotal *= dimension
     dimensionsTotal = len(dimensionsMap)
 
+    foldingsTotal = 0
     return _makeDataStructures(dimensionsMap, computationDivisions, computationIndex, foldingsTotal, leavesTotal, dimensionsTotal)
 
 def _makeDataStructures(dimensionsMap, computationDivisions, computationIndex, foldingsTotal, leavesTotal, dimensionsTotal):
-    a = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
-    b = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
-    count = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
-    gapter = numpy.zeros(leavesTotal + 1, dtype=numpy.int64)
     track = numpy.zeros((4, leavesTotal + 1), dtype=numpy.int64)
     gap = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=numpy.int64)
 
@@ -39,8 +30,10 @@ def _makeDataStructures(dimensionsMap, computationDivisions, computationIndex, f
                 else:
                     leafConnectionGraph[i][l][m] = m if c[i][m] == dimensionsMap[i - 1] or m + bigP[i - 1] > l else m + bigP[i - 1]
 
-    timeStart = time.perf_counter()
-    foldingsTotal = doWhile(computationDivisions, computationIndex, foldingsTotal, leavesTotal, track, gap, dimensionsTotal, leafConnectionGraph)
-    addExecutionTime(time.perf_counter() - timeStart)
+    from .lovelace import carveInStone
+    carveInStone(leavesTotal, dimensionsTotal, computationDivisions, computationIndex)
+
+    from .lovelace import doWhile
+    foldingsTotal = doWhile(track, gap, foldingsTotal, leafConnectionGraph)
 
     return foldingsTotal
