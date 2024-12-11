@@ -2,7 +2,7 @@ import pathlib
 import random
 import urllib.request
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Callable, Dict, List, Literal
+from typing import TYPE_CHECKING, Callable, Dict, List, Literal, get_args, Tuple
 
 from mapFolding import foldings
 
@@ -69,7 +69,6 @@ settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
     },
 }
 
-
 def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
     """
     Calculate a(n) of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
@@ -85,14 +84,27 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
         ValueError: If n is negative.
         KeyError: If the OEIS sequence ID is not directly implemented.
     """
-    if n < 0:
-        raise ValueError("n must be non-negative.")
+    if oeisID not in get_args(OEISsequenceID):
+        oeisID = oeisID.upper().strip() # type: ignore
     if oeisID not in settingsOEISsequences:
-        raise KeyError(f"Sequence {oeisID} is not directly implemented in mapFoldings. Use `mapFolding.foldings()` instead.")
+        raise KeyError(f"Sequence {oeisID} is not directly implemented in mapFoldings. The directly implemented sequences are {get_args(OEISsequenceID)}. Or, for maps with at least two dimensions, try `mapFolding.foldings()`.")
+    if n < 0 or not isinstance(n, int):
+        raise ValueError("`n` must be non-negative integer.")
+    elif n == 0:
+        foldingsTotal = settingsOEISsequences[oeisID]['valuesKnown'].get(n, None)
+        if foldingsTotal is not None:
+            return foldingsTotal
+        else:
+            raise ArithmeticError(f"Sequence {oeisID} is not defined at {n=}.")
 
     listDimensions = settingsOEISsequences[oeisID]['dimensions'](n)
-    # TODO technically, A001418 is not defined at n=0 because that would be 0x0
-    return foldings(listDimensions) if n > 0 else 1
+    if len(listDimensions) < 2:
+        foldingsTotal = settingsOEISsequences[oeisID]['valuesKnown'].get(n, None)
+        if foldingsTotal is not None:
+            return foldingsTotal
+        else:
+            raise ArithmeticError(f"Sequence {oeisID} is not defined at {n=}.")
+    return foldings(listDimensions)
 
 def _parseContent(bFileOEIS: str, oeisID: OEISsequenceID) -> Dict[int, int]:
     bFileLines = bFileOEIS.strip().splitlines()
@@ -139,7 +151,7 @@ def _getOEISsequence(oeisID: OEISsequenceID) -> Dict[int, int]:
 for oeisID in settingsOEISsequences:
     settingsOEISsequences[oeisID]['valuesKnown'] = _getOEISsequence(oeisID)
 
-dimensionsFoldingsTotalLookup: Dict[tuple, int] = {}
+dimensionsFoldingsTotalLookup: Dict[Tuple, int] = {}
 for oeisID, settings in settingsOEISsequences.items():
     sequence = settings['valuesKnown']
     
