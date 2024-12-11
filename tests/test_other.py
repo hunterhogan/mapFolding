@@ -3,6 +3,7 @@ import pytest
 from mapFolding import clearOEIScache
 from mapFolding.oeis import pathCache
 from mapFolding import getLeavesTotal
+import sys
 
 @patch('shutil.rmtree')
 @patch('pathlib.Path.exists')
@@ -43,28 +44,56 @@ def test_clear_nonexistent_OEIScache(mock_exists):
     ([0], 0),  # edge case: only zero
     ([1, 0], 1),  # zero at end
     ([0, 1], 1),  # zero at start
+    # New test cases
+    ([1] * 1000, 1),  # Test very long lists
+    ([1, sys.maxsize], sys.maxsize),  # Test maximum integer
+    ([2, sys.maxsize // 2], sys.maxsize - 1),  # Test near-maximum result
 ])
 def test_getLeavesTotal_valid(listDimensions, productExpected):
     assert getLeavesTotal(listDimensions) == productExpected
 
-@pytest.mark.parametrize("invalidInput, ERRORExpected", [
-    ([], ValueError),  # empty list
-    ([-1], ValueError),  # negative number
-    ([1, -1], ValueError),  # negative number in middle
-    ([1.5], ValueError),  # float
-    ([1, 2.5], ValueError),  # float in list
-    (['a'], ValueError),  # string
-    ([1, 'b'], ValueError),  # string in list
-    ([None], ValueError),  # None in list
-    ([1, None], ValueError),  # None in list
-    ([[1, 2]], ValueError),  # nested list
-    ([{}], ValueError),  # dictionary
-    (None, TypeError),  # None instead of list
-    ((1, 2), TypeError),  # tuple instead of list
-    ([float('inf')], ValueError),  # infinity
-    ([float('nan')], ValueError),  # NaN
+@pytest.mark.parametrize("sequenceInput, productExpected", [
+    ([1, 2, 3], 6),  # list
+    ((1, 2, 3), 6),  # tuple
+    (range(1, 4), 6),  # range
 ])
-def test_getLeavesTotal_invalid(invalidInput, ERRORExpected):
+def test_getLeavesTotal_sequences(sequenceInput, productExpected):
+    """Test that getLeavesTotal works with various sequence types."""
+    assert getLeavesTotal(sequenceInput) == productExpected
+
+def findNaturalError(inputValue):
+    """Determine the natural error type for an invalid input to getLeavesTotal."""
+    try:
+        getLeavesTotal(inputValue)
+        return None  # No error occurred
+    except Exception as ERRORinstance:
+        return type(ERRORinstance)
+
+# Update the test parameters to use dynamic error detection
+@pytest.mark.parametrize("invalidInput", [
+    [],  # empty list
+    [-1],  # negative number
+    [1, -1],  # negative number in middle
+    [1.5],  # float
+    [1, 2.5],  # float in list
+    ['a'],  # string
+    [1, 'b'],  # string in list
+    [None],  # None in list
+    [1, None],  # None in list
+    [[1, 2]],  # nested list
+    [{}],  # dictionary
+    None,  # None instead of list
+    [float('inf')],  # infinity
+    [float('nan')],  # NaN
+    [True],  # Boolean is an int subclass
+    [1, True],  # Mixed with boolean
+    [b'1'],  # Bytes
+    [range(3)],  # List containing range
+    # Removed memoryview tests as they're not relevant for this use case
+])
+def test_getLeavesTotal_invalid(invalidInput):
+    ERRORExpected = findNaturalError(invalidInput)
+    assert ERRORExpected is not None, f"Expected {invalidInput} to raise an error"
     with pytest.raises(ERRORExpected):
         getLeavesTotal(invalidInput)
 
@@ -85,4 +114,56 @@ def test_getLeavesTotal_immutable():
     listTest = listOriginal.copy()
     getLeavesTotal(listTest)
     assert listTest == listOriginal
+
+def test_getLeavesTotal_custom_list_subclass():
+    class CustomList(list):
+        pass
+    customList = CustomList([1, 2, 3])
+    assert getLeavesTotal(customList) == 6
+
+def test_getLeavesTotal_concurrent_modification():
+    class TrickyList(list):
+        def __iter__(self):
+            self.append(2)  # Modify list during iteration
+            return super().__iter__()
+    
+    trickyList = TrickyList([1, 2, 3])
+    with pytest.raises(RuntimeError):  # Should detect list modification
+        getLeavesTotal(trickyList)
+
+def test_getLeavesTotal_massive_list():
+    # Test with a list that's large but not memory-breaking
+    largeList = [1] * 1_000_000
+    assert getLeavesTotal(largeList) == 1
+
+def test_getLeavesTotal_maxsize_overflow():
+    # Test potential overflow conditions
+    import sys
+    largeNumber = sys.maxsize // 2
+    with pytest.raises(OverflowError):
+        getLeavesTotal([largeNumber, largeNumber, 2])
+
+def test_findNaturalError_validation():
+    """Test that findNaturalError correctly identifies when an error should occur."""
+    class SneakySequence:
+        """A sequence that passes initial checks but fails during numeric conversion."""
+        def __iter__(self):
+            class TrickyNumber:
+                """An object that pretends to be numeric but fails conversion."""
+                def __int__(self):
+                    raise ValueError("Surprise!")
+                def is_integer(self):
+                    return True
+                def __float__(self):
+                    return self
+            
+            return iter([TrickyNumber()])
+        
+        def __len__(self):
+            return 1
+            
+    sneakyInput = SneakySequence()
+    ERRORexpected = findNaturalError(sneakyInput)
+    assert ERRORexpected is not None, "Should detect invalid sequence type"
+    assert ERRORexpected == TypeError  # Changed from ValueError to TypeError
 

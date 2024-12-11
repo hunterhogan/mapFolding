@@ -1,7 +1,11 @@
-import pytest
 import random
-from mapFolding import foldings, getLeavesTotal, settingsOEISsequences, oeis
 from typing import Dict, Tuple
+
+import pytest
+
+from mapFolding import foldings, getLeavesTotal, settingsOEISsequences
+
+
 def buildTestPool():
     poolDimensionsToValue: Dict[Tuple, int] = {}
     for oeisID, settings in settingsOEISsequences.items():
@@ -25,7 +29,11 @@ def poolTestCases():
 def test_foldings_computationDivisions(poolTestCases):
     for listDimensions, foldingsExpected in poolTestCases:
         leavesTotal = getLeavesTotal(listDimensions)
-        computationDivisions = random.randint(2, leavesTotal)
+        leavesTotalMinimum = 2
+        if leavesTotal <= leavesTotalMinimum:
+            computationDivisions = leavesTotal
+        else:
+            computationDivisions = random.randint(leavesTotalMinimum, leavesTotal)
         
         foldingsTotal = sum(
             foldings(listDimensions, computationDivisions, index) 
