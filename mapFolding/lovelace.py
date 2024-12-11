@@ -1,4 +1,5 @@
 from numba import njit
+import numpy
 """
 Hypotheses:
 - The counting loop should only have necessary logic and data structures
@@ -24,15 +25,22 @@ dimensionsTotal = -1
 tasksTotal = -1
 taskActive = -1
 
-def carveInStone(leaves_total, dimensions_total, computationDivisions, computationIndex):
-    global leavesTotal, dimensionsTotal, tasksTotal, taskActive
+leafConnectionGraph = numpy.array(0, dtype=numpy.int64)
+
+def carveInStone(leaves_total, dimensions_total, computationDivisions, computationIndex, theGraph):
+    global leavesTotal, dimensionsTotal, tasksTotal, taskActive, leafConnectionGraph
     leavesTotal = leaves_total
     dimensionsTotal = dimensions_total
     tasksTotal = computationDivisions
     taskActive = computationIndex
+    leafConnectionGraph = theGraph
 
-@njit(cache=False)
-def doWhile(track, gap, foldingsTotal, leafConnectionGraph):
+# I think cache is a bad idea with global constants.
+@njit(cache=False, parallel=False, nogil=True, fastmath=True, boundscheck=False, debug=False)
+def doWhile(track, gap):
+# def doWhile(track, gap, leafConnectionGraph):
+    # print(leavesTotal, dimensionsTotal, tasksTotal, taskActive)
+    foldingsTotal = 0
     g = 0
     l = 1
     while l > 0:

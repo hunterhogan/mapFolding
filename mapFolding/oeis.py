@@ -63,7 +63,7 @@ settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
         'description': 'Number of ways of folding an n X n sheet of stamps.',
         'dimensions': lambda n: [n, n],
         'benchmarkValues': [5],
-        'testValuesValidation': [*range(1, 4)],
+        'testValuesValidation': [*range(1, 5)],
         'valueUnknown': [8, 8],
         'valuesKnown': {},  # Placeholder
     },
