@@ -9,6 +9,7 @@ def foldings(dimensionsMap: list[int], computationDivisions: int = 0, computatio
     return _makeDataStructures(dimensionsMap, computationDivisions, computationIndex, leavesTotal, dimensionsTotal)
 
 def _makeDataStructures(dimensionsMap, computationDivisions, computationIndex, leavesTotal, dimensionsTotal):
+    static = numpy.zeros(4, dtype=numpy.int64)
     track = numpy.zeros((4, leavesTotal + 1), dtype=numpy.int64)
     gap = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=numpy.int64)
 
@@ -29,11 +30,14 @@ def _makeDataStructures(dimensionsMap, computationDivisions, computationIndex, l
                 else:
                     leafConnectionGraph[i][l][m] = m if c[i][m] == dimensionsMap[i - 1] or m + bigP[i - 1] > l else m + bigP[i - 1]
 
+    static[0] = leavesTotal
+    static[1] = dimensionsTotal
+    static[2] = computationDivisions
+    static[3] = computationIndex
     from .lovelace import carveInStone
-    carveInStone(leavesTotal, dimensionsTotal, computationDivisions, computationIndex, leafConnectionGraph)
+    carveInStone(static, leafConnectionGraph)
 
     from .lovelace import doWhile
     babayaga = doWhile(track, gap)
-    # babayaga = doWhile(track, gap, leafConnectionGraph)
 
     return babayaga
