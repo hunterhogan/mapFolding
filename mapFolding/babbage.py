@@ -1,26 +1,35 @@
-from mapFolding import getLeavesTotal
-from typing import List
-import numpy
+from typing import List, Optional
 
-def foldings(dimensionsMap: List[int], computationDivisions: int = 0, computationIndex: int = 0) -> int:
+import numba
+import numpy
+from Z0Z_tools import defineConcurrencyLimit, oopsieKwargsie
+
+from mapFolding import getLeavesTotal
+
+
+def foldings(dimensionsMap: List[int], computationDivisions: int = 0, computationIndex: int = 0, CPUlimit: Optional[int | float | bool] = None) -> int:
     """
     Calculate number of ways to fold a map of the dimensions, `dimensionsMap`.
 
     Parameters:
-        dimensionsMap:
-            list of dimensions [n, m ...]. All dimensions must be non-negative integers. At least two
-            dimensions must be greater than 0.
-        computationDivisions (0):
-            divide the computation into `computationDivisions` parts. The value must
-            be less than or equal to the total number of leaves. (The total number of leaves is the product of
-            all dimensions of the map.)
-        computationIndex (0):
-            the index of the computation part to calculate. The sum of all indices from 0 to `computationDivisions` - 1
-            is equal to the total number of valid foldings. The value of `computationIndex` must be less than `computationDivisions`.
+        dimensionsMap: list of dimensions of the map. All dimensions must be non-negative integers, and at least two dimensions must be greater than 0.
+
+        computationDivisions (0): divide the computation into `computationDivisions` parts. The value must be less than or equal to the total number of leaves, which is the product of all dimensions of the map. If `computationDivisions` is 0, the function will calculate the total number of valid foldings without dividing the computation.
+
+        computationIndex (0): the index of the computation part to calculate. The sum of all indices from 0 to `computationDivisions` - 1 is equal to the total number of valid foldings. The value of `computationIndex` must be less than `computationDivisions`.
+
+        CPUlimit (None): whether and how to limit the CPU usage. See notes for details. 
 
     Returns:
-        foldingsTotal:
-            Total number of valid foldings
+        foldingsTotal: Total number of valid foldings
+
+    Limits on CPU usage `CPUlimit`
+        - `False`, `None`, or `0`: No limits on CPU usage; uses all available CPUs. All other values will potentially limit CPU usage.
+        - `True`: Yes, limit the CPU usage; limits to 1 CPU.
+        - Integer `>= 1`: Limits usage to the specified number of CPUs.
+        - Decimal value (`float`) between 0 and 1: Fraction of total CPUs to use.
+        - Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
+        - Integer `<= -1`: Subtract the absolute value from total CPUs.
 
     Key concepts
         - A "leaf" is a unit square in the map
@@ -31,14 +40,14 @@ def foldings(dimensionsMap: List[int], computationDivisions: int = 0, computatio
         - Leaves and dimensions are enumerated starting from 1, not 0; hence, leafNumber not leafIndex
 
     Key data structures
-        - mapFoldingConnections[D][L][M]: How leaf L connects to leaf M in dimension D
+        - leafConnectionGraph[D][L][M]: How leaf L connects to leaf M in dimension D
         - listCountDimensionsWithGap[L]: Number of dimensions with valid gaps at leaf L
         - listGapIndicesRange[L]: Index ranges of gaps available for leaf L
         - listPotentialGapPositions[]: List of all potential gap positions
 
     Algorithm flow
         1. Initialize coordinate system and connection graph
-        2. For each leaf:
+        2. For each leaf
             - Find valid gaps in each dimension
             - Place leaf in valid position
             - Backtrack when no valid positions remain
@@ -57,8 +66,9 @@ def foldings(dimensionsMap: List[int], computationDivisions: int = 0, computatio
     if any(dimension == 0 for dimension in dimensionsMap) or dimensionsTotal < 2:
         dimensionsNonZero = [dimension for dimension in dimensionsMap if dimension > 0]
         if len(dimensionsNonZero) < 2:
-            from mapFolding import OEISsequenceID
             from typing import get_args
+
+            from mapFolding import OEISsequenceID
             raise NotImplementedError(f"This function requires dimensionsMap, {dimensionsMap}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
         else:
             dimensionsMap = dimensionsNonZero
@@ -72,37 +82,43 @@ def foldings(dimensionsMap: List[int], computationDivisions: int = 0, computatio
     if computationDivisions < 0 or computationIndex < 0 or not isinstance(computationDivisions, int) or not isinstance(computationIndex, int):
         raise ValueError(f"computationDivisions, {computationDivisions}, and computationIndex, {computationIndex}, must be non-negative integers.")
 
+    if isinstance(CPUlimit, str):
+        CPUlimit = oopsieKwargsie(CPUlimit) # type: ignore
+    numba.set_num_threads(defineConcurrencyLimit(CPUlimit))
+
     return _makeDataStructures(dimensionsMap, computationDivisions, computationIndex, leavesTotal, dimensionsTotal)
 
-def _makeDataStructures(
-    dimensionsMap: List[int],
-    computationDivisions: int,
-    computationIndex: int,
-    leavesTotal: int,
-    dimensionsTotal: int
-) -> int:
+def _makeDataStructures( dimensionsMap: List[int], computationDivisions: int, computationIndex: int, leavesTotal: int, dimensionsTotal: int ) -> int:
     static: numpy.ndarray = numpy.zeros(4, dtype=numpy.int64)
     track: numpy.ndarray = numpy.zeros((4, leavesTotal + 1), dtype=numpy.int64)
     gap: numpy.ndarray = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=numpy.int64)
 
-    c: numpy.ndarray = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=numpy.int64)
-    bigP: numpy.ndarray = numpy.ones(dimensionsTotal + 1, dtype=numpy.int64)
-    leafConnectionGraph: numpy.ndarray = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=numpy.int64)
 
+    # How to build a leafConnectionGraph:
+    # Step 1: find the product of all dimensions
+    bigP: numpy.ndarray = numpy.ones(dimensionsTotal + 1, dtype=numpy.int64)
     for i in range(1, dimensionsTotal + 1):
         bigP[i] = bigP[i - 1] * dimensionsMap[i - 1]
 
+    # Step 2: for each dimension, create a coordinate system
+    c: numpy.ndarray = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=numpy.int64)
     for i in range(1, dimensionsTotal + 1):
         for m in range(1, leavesTotal + 1):
             c[i][m] = (m - 1) // bigP[i - 1] - ((m - 1) // bigP[i]) * dimensionsMap[i - 1] + 1
 
+    # Step 3: create a huge empty leafConnectionGraph
+    leafConnectionGraph: numpy.ndarray = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=numpy.int64)
+
+    # Step for... for... for...: fill the leafConnectionGraph
     for i in range(1, dimensionsTotal + 1):
         for l in range(1, leavesTotal + 1):
             for m in range(1, l + 1):
-                delta: int = c[i][l] - c[i][m]
-                if (delta & 1) == 0:
+                distance: int = c[i][l] - c[i][m]
+                if distance % 2 == 0:
+                    # If distance is even
                     leafConnectionGraph[i][l][m] = m if c[i][m] == 1 else m - bigP[i - 1]
                 else:
+                    # If distance is odd
                     leafConnectionGraph[i][l][m] = m if c[i][m] == dimensionsMap[i - 1] or m + bigP[i - 1] > l else m + bigP[i - 1]
 
     static[0] = leavesTotal

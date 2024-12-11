@@ -6,7 +6,7 @@ Hypotheses:
 - The counting loop should only have necessary logic and data structures
 - The rest of the package should prioritize the efficiency of the counting loop
 - Static values should be in static data structures
-- Dynamic values should be in _well-organized_ ndarray: proven true
+- Dynamic values should be in _well-organized_ ndarray: proven at least partially true
 """
 """
 What changed               (2, 2, 2, 2, 2)  (2, 11)  (3, 3, 3)  (3, 8)  (5, 5)
@@ -60,6 +60,7 @@ def doWhile(track, gap):
                 an[unconstrainedLeaf] = 0
                 an[eniggma] = track[gapter][an[activeLeaf1ndex] - 1]
                 an[activeGap1ndex] = an[eniggma]
+                # Find potential gaps for leaf l in each dimension
                 for dimension1ndex in range(1, the[dimensionsTotal] + 1):
                     if leafConnectionGraph[dimension1ndex][an[activeLeaf1ndex]][an[activeLeaf1ndex]] == an[activeLeaf1ndex]:
                         an[unconstrainedLeaf] += 1
@@ -71,6 +72,7 @@ def doWhile(track, gap):
                                 track[count][an[leaf1ndex]] += 1
                                 an[eniggma] += 1
                             an[leaf1ndex] = leafConnectionGraph[dimension1ndex][an[activeLeaf1ndex]][track[below][an[leaf1ndex]]]
+                # If leaf l is unconstrained in all dimensions, it can be inserted anywhere
                 if an[unconstrainedLeaf] == the[dimensionsTotal]:
                     for an[leaf1ndex] in range(an[activeLeaf1ndex]):
                         gap[an[eniggma]] = an[leaf1ndex]
@@ -82,11 +84,13 @@ def doWhile(track, gap):
                         an[effingAIeffedMyCode] += 1
                     track[count][gap[gapRelated]] = 0
                 an[activeGap1ndex] = an[effingAIeffedMyCode]
+        # Backtrack if no more gaps
         while an[activeLeaf1ndex] > 0 and an[activeGap1ndex] == track[gapter][an[activeLeaf1ndex] - 1]:
             an[activeLeaf1ndex] -= 1
             if an[activeLeaf1ndex] > 0:
                 track[below][track[above][an[activeLeaf1ndex]]] = track[below][an[activeLeaf1ndex]]
                 track[above][track[below][an[activeLeaf1ndex]]] = track[above][an[activeLeaf1ndex]]
+        # Backtrack if no more gaps
         if an[activeLeaf1ndex] > 0:
             an[activeGap1ndex] -= 1
             track[above][an[activeLeaf1ndex]] = gap[an[activeGap1ndex]]
