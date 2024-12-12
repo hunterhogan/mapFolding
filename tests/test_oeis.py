@@ -1,16 +1,37 @@
-from datetime import datetime, timedelta
-from mapFolding import oeis, settingsOEISsequences, oeisSequence_aOFn 
+import io
 import os
-import pytest
+import random
+import runpy
 import urllib.error
 import urllib.request
-import random
+from contextlib import redirect_stdout
+from datetime import datetime, timedelta
+from typing import get_args
+import pytest
+
+from mapFolding import dimensionsFoldingsTotalLookup, getOEISids, oeis, oeisSequence_aOFn, settingsOEISsequences, OEISsequenceID
+from mapFolding.oeis import _formatFilenameCache, _getOEISsequence, _parseContent
+
+
+@pytest.fixture
+def temporaryCache(tmp_path):
+    """Temporarily replace the OEIS cache directory with a test directory."""
+    pathCacheOriginal = oeis._pathCache
+    oeis._pathCache = tmp_path
+    yield tmp_path
+    oeis._pathCache = pathCacheOriginal
 
 @pytest.fixture(params=settingsOEISsequences.keys(), autouse=True)
 def oeisID(request):
     return request.param
 
+@pytest.fixture
+def sequenceIDsample() -> OEISsequenceID:
+    """Get a consistent sample sequence ID for cache-related tests."""
+    return next(iter(settingsOEISsequences))  # First sequence ID is fine for these tests
+
 def test_calculate_sequence(oeisID):
+    # Use known values directly from settings
     for n in settingsOEISsequences[oeisID]['testValuesValidation']:
         result = oeisSequence_aOFn(oeisID, n)
         expected = settingsOEISsequences[oeisID]['valuesKnown'][n]
@@ -26,7 +47,7 @@ def test_dimensions_lookup(oeisID):
     dimensions = sorted(settingsOEISsequences[oeisID]['dimensions'](n))
     
     # Test the lookup
-    assert oeis.dimensionsFoldingsTotalLookup[tuple(dimensions)] == expectedValue
+    assert dimensionsFoldingsTotalLookup[tuple(dimensions)] == expectedValue
 
 def test_invalid_sequence():
     with pytest.raises(KeyError):
@@ -39,95 +60,65 @@ def test_negative_n():
 def testInvalidDimensions():
     # Test with invalid dimensions that don't match any known sequence
     dimensions = (999, 999)  # tuple of dimensions not in lookup
-    assert dimensions not in oeis.dimensionsFoldingsTotalLookup
+    assert dimensions not in dimensionsFoldingsTotalLookup
 
-def testCacheMiss(tmp_path):
-    # Simulate cache miss by using a temporary cache directory
-    pathCacheOriginal = oeis.pathCache
-    oeis.pathCache = tmp_path
-    sequenceID = 'A001415'
-    pathFilenameCache = oeis.pathCache / f"{sequenceID}.txt"
+def testCacheMiss(temporaryCache, sequenceIDsample):
+    pathFilenameCache = temporaryCache / _formatFilenameCache.format(oeisID=sequenceIDsample)
+    
     assert not pathFilenameCache.exists()
-    OEISsequence = oeis._getOEISsequence(sequenceID)
+    OEISsequence = _getOEISsequence(sequenceIDsample)
     assert OEISsequence is not None
     assert pathFilenameCache.exists()
-    oeis.pathCache = pathCacheOriginal
 
-def testCacheExpired(tmp_path):
-    # Simulate expired cache by setting an old modification time
-    pathCacheOriginal = oeis.pathCache
-    oeis.pathCache = tmp_path
-    sequenceID = 'A001415'
-    pathFilenameCache = oeis.pathCache / f"{sequenceID}.txt"
+def testCacheExpired(temporaryCache, sequenceIDsample):
+    pathFilenameCache = temporaryCache / _formatFilenameCache.format(oeisID=sequenceIDsample)
     pathFilenameCache.write_text("# Old cache content")
     oldModificationTime = datetime.now() - timedelta(days=30)
     os.utime(pathFilenameCache, times=(oldModificationTime.timestamp(), oldModificationTime.timestamp()))
-    OEISsequence = oeis._getOEISsequence(sequenceID)
+    OEISsequence = _getOEISsequence(sequenceIDsample)
     assert OEISsequence is not None
-    oeis.pathCache = pathCacheOriginal
 
-def testInvalidCache(tmp_path):
-    # Simulate invalid cache content
-    pathCacheOriginal = oeis.pathCache
-    oeis.pathCache = tmp_path
-    sequenceID = 'A001415'
-    pathFilenameCache = oeis.pathCache / f"{sequenceID}.txt"
+def testInvalidCache(temporaryCache, sequenceIDsample):
+    pathFilenameCache = temporaryCache / _formatFilenameCache.format(oeisID=sequenceIDsample)
     pathFilenameCache.write_text("Invalid content")
-    OEISsequence = oeis._getOEISsequence(sequenceID)
+    OEISsequence = _getOEISsequence(sequenceIDsample)
     assert OEISsequence is not None
-    oeis.pathCache = pathCacheOriginal
 
-def testInvalidFileContent(tmp_path):
-    # Test recovery from invalid cache content
-    pathCacheOriginal = oeis.pathCache
-    oeis.pathCache = tmp_path
-    sequenceID = 'A001415'
-    pathFilenameCache = oeis.pathCache / f"{sequenceID}.txt"
+def testInvalidFileContent(temporaryCache, sequenceIDsample):
+    pathFilenameCache = temporaryCache / _formatFilenameCache.format(oeisID=sequenceIDsample)
     
     # Write invalid content to cache
     pathFilenameCache.write_text("# A999999\n1 1\n2 2\n")
     modificationTimeOriginal = pathFilenameCache.stat().st_mtime
     
     # Function should detect invalid content, fetch fresh data, and update cache
-    OEISsequence = oeis._getOEISsequence(sequenceID)
+    OEISsequence = _getOEISsequence(sequenceIDsample)
     
     # Verify the function succeeded
     assert OEISsequence is not None
     # Verify cache was updated (modification time changed)
     assert pathFilenameCache.stat().st_mtime > modificationTimeOriginal
     # Verify cache now contains correct sequence ID
-    assert f"# {sequenceID}" in pathFilenameCache.read_text()
-    
-    oeis.pathCache = pathCacheOriginal
+    assert f"# {sequenceIDsample}" in pathFilenameCache.read_text()
 
-def testNetworkError(monkeypatch, tmp_path):
-    # Test network error when no valid cache exists
-    pathCacheOriginal = oeis.pathCache
-    oeis.pathCache = tmp_path  # Use empty temp directory to ensure no valid cache
-    
+def testNetworkError(monkeypatch, temporaryCache):
     def mockUrlopen(*args, **kwargs):
         raise urllib.error.URLError("Network error")
     
     monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
     with pytest.raises(urllib.error.URLError):
-        oeis._getOEISsequence('A001415')
-    
-    oeis.pathCache = pathCacheOriginal
+        _getOEISsequence(next(iter(settingsOEISsequences)))
 
 def testParseContentErrors():
     # Test invalid content parsing
     with pytest.raises(ValueError):
-        oeis._parseContent("Invalid content\n1 2\n", 'A001415')
+        _parseContent("Invalid content\n1 2\n", 'A001415')
 
-def testExtraComments(tmp_path):
-    # Test that extra comments don't affect sequence parsing
-    pathCacheOriginal = oeis.pathCache
-    oeis.pathCache = tmp_path
-    sequenceID = 'A001415'
-    pathFilenameCache = oeis.pathCache / f"{sequenceID}.txt"
+def testExtraComments(temporaryCache, sequenceIDsample):
+    pathFilenameCache = temporaryCache / _formatFilenameCache.format(oeisID=sequenceIDsample)
     
     # Write content with extra comment lines
-    contentWithExtraComments = f"""# {sequenceID}
+    contentWithExtraComments = f"""# {sequenceIDsample}
 # Extra comment line 1
 # Extra comment line 2
 1 2
@@ -138,10 +129,35 @@ def testExtraComments(tmp_path):
 5 10"""
     pathFilenameCache.write_text(contentWithExtraComments)
     
-    OEISsequence = oeis._getOEISsequence(sequenceID)
+    OEISsequence = _getOEISsequence(sequenceIDsample)
     # Verify sequence values are correct despite extra comments
     assert OEISsequence[1] == 2  # First value
     assert OEISsequence[4] == 8  # Value after mid-sequence comment
     assert OEISsequence[5] == 10  # Last value
+
+def testGetOEISids():
+    """Test that getOEISids prints all sequences with descriptions."""
+    captureOutput = io.StringIO()
+    with redirect_stdout(captureOutput):
+        getOEISids()
     
-    oeis.pathCache = pathCacheOriginal
+    outputText = captureOutput.getvalue()
+    
+    # Check that all sequences are listed
+    for oeisID in get_args(OEISsequenceID):
+        assert oeisID in outputText
+        assert settingsOEISsequences[oeisID]['description'] in outputText
+    
+    # Check that usage example is included
+    assert "Usage example:" in outputText
+    assert "oeisSequence_aOFn" in outputText
+
+def testCommandLineInterface():
+    """Test running as command line script."""
+    captureOutput = io.StringIO()
+    with redirect_stdout(captureOutput):
+        # Use runpy to execute the module as a script
+        runpy.run_module('mapFolding.oeis', run_name='__main__')
+    
+    outputText = captureOutput.getvalue()
+    assert "Available OEIS sequences:" in outputText

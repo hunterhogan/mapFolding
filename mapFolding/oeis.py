@@ -2,7 +2,7 @@ import pathlib
 import random
 import urllib.request
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Callable, Dict, List, Literal, get_args, Tuple
+from typing import TYPE_CHECKING, Callable, Dict, List, Literal, get_args
 
 from mapFolding import foldings
 
@@ -12,20 +12,23 @@ else:
     TypedDict = dict
 
 class SettingsOEISsequence(TypedDict):
-    description: str
+    description: str                        # Should load from OEIS
     dimensions: Callable[[int], List[int]]
     benchmarkValues: List[int]
     testValuesValidation: List[int]
-    valuesKnown: Dict[int, int]
-    valueUnknown: List[int]
+    valuesKnown: Dict[int, int]             # Loaded from OEIS
+    valueUnknown: List[int]                 # Should load from OEIS
 
 try:
-    pathCache = pathlib.Path(__file__).parent / ".cache"
+    _pathCache = pathlib.Path(__file__).parent / ".cache"
 except NameError:
-    pathCache = pathlib.Path.home() / ".mapFoldingCache"
+    _pathCache = pathlib.Path.home() / ".mapFoldingCache"
+
+_formatFilenameCache = "{oeisID}.txt"
 
 OEISsequenceID = Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418']
-
+# perhaps build `settingsOEISsequences` dynamically from `OEISsequenceID` as the keys,
+# values loaded from OEIS, and some values entered by a human somewhere
 settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
@@ -63,7 +66,7 @@ settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
         'description': 'Number of ways of folding an n X n sheet of stamps.',
         'dimensions': lambda n: [n, n],
         'benchmarkValues': [5],
-        'testValuesValidation': [*range(1, 5)],
+        'testValuesValidation': [1, random.randint(2, 4)],
         'valueUnknown': [8, 8],
         'valuesKnown': {},  # Placeholder
     },
@@ -122,7 +125,7 @@ def _parseContent(bFileOEIS: str, oeisID: OEISsequenceID) -> Dict[int, int]:
 
 def _getOEISsequence(oeisID: OEISsequenceID) -> Dict[int, int]:
     """Fetch and parse an OEIS sequence from cache or URL."""
-    pathFilenameCache = pathCache / f"{oeisID}.txt"
+    pathFilenameCache = _pathCache / _formatFilenameCache.format(oeisID=oeisID)
     cacheDays = 7
 
     tryCache = False
@@ -151,12 +154,14 @@ def _getOEISsequence(oeisID: OEISsequenceID) -> Dict[int, int]:
 for oeisID in settingsOEISsequences:
     settingsOEISsequences[oeisID]['valuesKnown'] = _getOEISsequence(oeisID)
 
-dimensionsFoldingsTotalLookup: Dict[Tuple, int] = {}
-for oeisID, settings in settingsOEISsequences.items():
-    sequence = settings['valuesKnown']
-    
-    # Get all known dimensions and map to their folding counts
-    for n, foldingsTotal in sequence.items():
-        dimensions = settings['dimensions'](n)
-        dimensions.sort()
-        dimensionsFoldingsTotalLookup[tuple(dimensions)] = foldingsTotal
+def getOEISids() -> None:
+    """Print all available OEIS sequence IDs that are directly implemented."""
+    print("\nAvailable OEIS sequences:")
+    for oeisID in get_args(OEISsequenceID):
+        print(f"  {oeisID}: {settingsOEISsequences[oeisID]['description']}")
+    print("\nUsage example:")
+    print("  from mapFolding import oeisSequence_aOFn")
+    print("  result = oeisSequence_aOFn('A001415', 5)")
+
+if __name__ == "__main__":
+    getOEISids()

@@ -13,9 +13,11 @@ dependencies = [
     "numpy",
     "numba",
     "Z0Z-tools",
-    # "tbb", # if intel
     ]
 urls = { Homepage = "https://github.com/hunterhogan/mapFolding" }
+
+[project.scripts]
+mapfolding-sequences = "mapFolding.oeis:getOEISids"
 
 [project.optional-dependencies]
 test = [
@@ -23,10 +25,6 @@ test = [
     "pytest-cov",
     "pytest-env",
     "coverage",]
-offending_rule = [
-    "pandas",
-    "tqdm",
-    ]
 
 [tool.setuptools]
 include-package-data = true

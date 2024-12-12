@@ -18,22 +18,19 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
     if not listDimensions:  # Empty list check is semantic, not type
         raise ValueError("listDimensions must not be empty")
     else:
+        # Let Python raise TypeError for non-iterables in the following try/except block
         try:
-            # Let Python raise TypeError for non-iterables
-            iterator = iter(listDimensions)  # Will fail fast for non-iterables
+            # Fail fast if input is not iterable - we don't use the iterator
+            iter(listDimensions)  
             
             # Store initial length to detect modifications
             lengthInitial = len(listDimensions)
             
             for dimension in listDimensions:
-                if len(listDimensions) != lengthInitial:
-                    raise RuntimeError("Input sequence was modified during iteration")
-                    
-                # Explicitly check for integer type, but allow conversion from float if it's a whole number
-                if isinstance(dimension, bool):  # Check for boolean first since it's a subclass of int
+                # Type checking - order matters due to bool being a subclass of int
+                if isinstance(dimension, bool):
                     raise TypeError(f"Boolean values ({dimension}) are not allowed as dimensions")
-                
-                if isinstance(dimension, (int, float)):
+                elif isinstance(dimension, (int, float)):
                     if float(dimension).is_integer():
                         dimension = int(dimension)  # Convert float to int if whole number
                     else:
@@ -43,23 +40,30 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
                     
                 if dimension < 0:
                     raise ValueError(f"Element {dimension} must be non-negative")
+                    
+                # Check for modifications at the end of each iteration
+                if len(listDimensions) != lengthInitial:
+                    raise RuntimeError("Input sequence was modified during iteration")
 
-            # Convert to list to handle all sequence types uniformly
+            # Convert to list[int] to handle all sequence types uniformly
             listDimensionsNonZero = [int(d) for d in listDimensions if d > 0]
+            
             if not listDimensionsNonZero:
                 return 0
-                
-            productDimensions = 1
-            for dimension in listDimensionsNonZero:
-                if dimension > sys.maxsize // productDimensions:
-                    raise OverflowError("Product would exceed maximum integer size")
-                productDimensions *= dimension
-                
-            return productDimensions
+            else:
+                productDimensions = 1
+                for dimension in listDimensionsNonZero:
+                    if dimension > sys.maxsize // productDimensions:
+                        raise OverflowError("Product would exceed maximum integer size")
+                    else:
+                        productDimensions *= dimension
+                    
+                return productDimensions
             
         except TypeError as ERRORtype:
             if not hasattr(listDimensions, '__iter__'):
-                ERRORmessage = f"Input must be iterable, not {type(listDimensions)}"
+                ERRORmessage = f"{listDimensions=} does not have the '__iter__' attribute (it is not iterable), but it must have the '__iter__' attribute. {listDimensions} was passed as data type '{type(listDimensions)}'."
             else:
                 ERRORmessage = f"Invalid element in listDimensions: {ERRORtype.args[0]}"
             raise TypeError(ERRORmessage) from None
+

@@ -1,18 +1,20 @@
-import shutil
+from mapFolding import settingsOEISsequences
 
-from .oeis import pathCache
+from .oeis import _formatFilenameCache, _pathCache
 
 
 def clearOEIScache() -> None:
     """Delete all cached OEIS sequence files."""
     
-    if not pathCache.exists():
-        print(f"Cache directory, {pathCache}, not found - nothing to clear.")
+    if not _pathCache.exists():
+        print(f"Cache directory, {_pathCache}, not found - nothing to clear.")
         return
+    else:
+        for oeisID in settingsOEISsequences:
+            pathFilenameCache = _pathCache / _formatFilenameCache.format(oeisID=oeisID)
+            pathFilenameCache.unlink(missing_ok=True)
         
-    shutil.rmtree(pathCache)
-    pathCache.mkdir(parents=True, exist_ok=True)
-    print(f"Cache cleared from {pathCache}.")
+    print(f"Cache cleared from {_pathCache}.")
 
 if __name__ == "__main__":
     clearOEIScache()

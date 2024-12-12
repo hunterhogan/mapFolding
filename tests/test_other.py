@@ -1,34 +1,36 @@
-from unittest.mock import patch
+from unittest.mock import patch, call
 import pytest
-from mapFolding import clearOEIScache
-from mapFolding.oeis import pathCache
-from mapFolding import getLeavesTotal
+from mapFolding import clearOEIScache, settingsOEISsequences, getLeavesTotal
+from mapFolding.oeis import _pathCache
 import sys
 
-@patch('shutil.rmtree')
 @patch('pathlib.Path.exists')
-@patch('pathlib.Path.mkdir')
-def test_clear_existing_OEIScache(mock_mkdir, mock_exists, mock_rmtree):
+@patch('pathlib.Path.unlink')
+def test_clear_existing_OEIScache(mock_unlink, mock_exists):
     # Setup mocks
     mock_exists.return_value = True
     
     # Run the function
     clearOEIScache()
     
-    # Verify the expected calls were made
-    mock_rmtree.assert_called_once_with(pathCache)
-    mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
+    # Verify each sequence file was unlinked
+    assert mock_unlink.call_count == len(settingsOEISsequences)
+    mock_unlink.assert_has_calls([
+        call(missing_ok=True) for _ in range(len(settingsOEISsequences))
+    ])
 
 @patch('pathlib.Path.exists')
-def test_clear_nonexistent_OEIScache(mock_exists):
+@patch('pathlib.Path.unlink')
+def test_clear_nonexistent_OEIScache(mock_unlink, mock_exists):
     # Setup mock to simulate missing cache directory
     mock_exists.return_value = False
     
     # Run the function
     clearOEIScache()
     
-    # Verify exists was called but rmtree wasn't needed
-    mock_exists.assert_called_once_with()
+    # Verify exists was called but unlink wasn't needed
+    mock_exists.assert_called_once()
+    mock_unlink.assert_not_called()
 
 @pytest.mark.parametrize("listDimensions, productExpected", [
     ([1], 1),
