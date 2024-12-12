@@ -7,14 +7,15 @@ name = "mapFolding"
 description = "Python implementation of 'Multi-dimensional map-folding'"
 readme = "README.md"
 authors = [
-    {name = "Hunter Hogan", email = "HunterHogan@pm.me"}]
+    {name = "Hunter Hogan", email = "HunterHogan@pm.me"}
+    ]
 version = "0.0.2"
 dependencies = [
     "numpy",
     "numba",
     "Z0Z-tools",
     ]
-urls = { Homepage = "https://github.com/hunterhogan/mapFolding" }
+urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
 
 [project.scripts]
 mapfolding-sequences = "mapFolding.oeis:getOEISids"
@@ -24,7 +25,8 @@ test = [
     "pytest",
     "pytest-cov",
     "pytest-env",
-    "coverage",]
+    "coverage",
+    ]
 
 [tool.setuptools]
 include-package-data = true
@@ -39,13 +41,15 @@ data_file = "tests/coverage/.coverage"
 omit = [
     "mapFolding/__init__.py",
     "tests/*",
-    "Z0Z_*"]
+    "Z0Z_*"
+    ]
 
 [tool.coverage.report]
 exclude_lines = [
     "if TYPE_CHECKING:",
     "if __name__ == \"__main__\":",
-    "pass",]
+    "pass"
+    ]
 ignore_errors = false
 
 [tool.coverage.xml]
@@ -58,4 +62,5 @@ output = "tests/coverage/coverage.lcov"
 addopts = "--cov=mapFolding --cov-report=term-missing --cov-report=xml --cov-report=lcov"
 testpaths = ["tests"]
 env = [
-    "NUMBA_DISABLE_JIT=1"]
+    "NUMBA_DISABLE_JIT=1"
+    ]

@@ -17,7 +17,7 @@ class SettingsOEISsequence(TypedDict):
     benchmarkValues: List[int]
     testValuesValidation: List[int]
     valuesKnown: Dict[int, int]             # Loaded from OEIS
-    valueUnknown: List[int]                 # Should load from OEIS
+    valueUnknown: List[int]                 # calculate from valuesKnown
 
 try:
     _pathCache = pathlib.Path(__file__).parent / ".cache"
@@ -27,15 +27,15 @@ except NameError:
 _formatFilenameCache = "{oeisID}.txt"
 
 OEISsequenceID = Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418']
-# perhaps build `settingsOEISsequences` dynamically from `OEISsequenceID` as the keys,
-# values loaded from OEIS, and some values entered by a human somewhere
+# TODO dynamically build `settingsOEISsequences`. DRY ^^^
+# SSoT values loaded from OEIS, and some values entered by a human somewhere
 settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'dimensions': lambda n: [2, n],
         'benchmarkValues': [11],
         'testValuesValidation': [0, 1, random.randint(2, 9)],
-        'valueUnknown': [2, 19],
+        'valueUnknown': [2, 19], # format as `n`; i.e. `19`
         'valuesKnown': {},  # Placeholder
     },
     'A001416': {

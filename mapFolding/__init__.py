@@ -3,8 +3,7 @@ Python implementation of
 W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75 (BibTex)
 """
 # HEY! 
-# The order of the imports affects the possibility of an 
-# error due to importing from a partially initialized module
+# The order of the imports affects the possibility of a partially initialized module error
 # so-called circular imports are not actually a problem,
 # the issue is that a partially initialized module may have
 # a value that could change once the module is fully initialized
@@ -23,7 +22,7 @@ from .clearOEIScache import clearOEIScache
 __all__ = [
     'clearOEIScache',
     'foldings',
+    'getOEISids',
     'oeisSequence_aOFn',
     'settingsOEISsequences',
-    'getOEISids',
 ]
