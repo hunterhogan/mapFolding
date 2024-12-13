@@ -13,10 +13,10 @@ W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, 
 
 # NOTE do not import modules with numba compiled function (e.g., `@numba.njit`) here
 # because, for example, `numba.set_num_threads()` has no effect on compiled functions
-from .beDRY import getLeavesTotal
+from .beDRY import getLeavesTotal, parseListDimensions
 from .mapFolding import foldings
 from .oeis import oeisSequence_aOFn, settingsOEISsequences, OEISsequenceID, getOEISids
-from .noCircularImportsIsAlie import dimensionsFoldingsTotalLookup
+from .noCircularImportsIsAlie import getFoldingsTotalKnown
 from .clearOEIScache import clearOEIScache
 
 __all__ = [

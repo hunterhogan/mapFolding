@@ -1,19 +1,17 @@
 from unittest.mock import patch, call
 import pytest
-from mapFolding import clearOEIScache, settingsOEISsequences, getLeavesTotal
+from mapFolding import clearOEIScache, settingsOEISsequences, getLeavesTotal, parseListDimensions, getFoldingsTotalKnown
 from mapFolding.oeis import _pathCache
 import sys
+from Z0Z_tools import makeTestSuiteIntInnit
 
 @patch('pathlib.Path.exists')
 @patch('pathlib.Path.unlink')
 def test_clear_existing_OEIScache(mock_unlink, mock_exists):
-    # Setup mocks
     mock_exists.return_value = True
     
-    # Run the function
     clearOEIScache()
     
-    # Verify each sequence file was unlinked
     assert mock_unlink.call_count == len(settingsOEISsequences)
     mock_unlink.assert_has_calls([
         call(missing_ok=True) for _ in range(len(settingsOEISsequences))
@@ -22,10 +20,8 @@ def test_clear_existing_OEIScache(mock_unlink, mock_exists):
 @patch('pathlib.Path.exists')
 @patch('pathlib.Path.unlink')
 def test_clear_nonexistent_OEIScache(mock_unlink, mock_exists):
-    # Setup mock to simulate missing cache directory
     mock_exists.return_value = False
     
-    # Run the function
     clearOEIScache()
     
     # Verify exists was called but unlink wasn't needed
@@ -71,7 +67,6 @@ def findNaturalError(inputValue):
     except Exception as ERRORinstance:
         return type(ERRORinstance)
 
-# Update the test parameters to use dynamic error detection
 @pytest.mark.parametrize("invalidInput", [
     [],  # empty list
     [-1],  # negative number
@@ -91,7 +86,6 @@ def findNaturalError(inputValue):
     [1, True],  # Mixed with boolean
     [b'1'],  # Bytes
     [range(3)],  # List containing range
-    # Removed memoryview tests as they're not relevant for this use case
 ])
 def test_getLeavesTotal_invalid(invalidInput):
     ERRORExpected = findNaturalError(invalidInput)
@@ -102,7 +96,7 @@ def test_getLeavesTotal_invalid(invalidInput):
 def test_getLeavesTotal_large_numbers():
     # Test with numbers near sys.maxsize to check for overflow handling
     import sys
-    largeNumber = sys.maxsize // 1000  # Using smaller numbers to avoid overflow
+    largeNumber = sys.maxsize // 2
     assert getLeavesTotal([largeNumber, 2]) == largeNumber * 2
 
 def test_getLeavesTotal_mixed_order():
@@ -167,5 +161,32 @@ def test_findNaturalError_validation():
     sneakyInput = SneakySequence()
     ERRORexpected = findNaturalError(sneakyInput)
     assert ERRORexpected is not None, "Should detect invalid sequence type"
-    assert ERRORexpected == TypeError  # Changed from ValueError to TypeError
+    assert ERRORexpected == TypeError 
 
+def test_parseListInt():
+    """Test the makeTestSuiteIntInnit function with various inputs."""
+    testSuite = makeTestSuiteIntInnit(parseListDimensions)
+    for smurfName, smurfFunction in testSuite.items():
+        smurfFunction()    
+
+def test_getFoldingsTotalKnown_valid_dimensions():
+    # Test known dimensions from OEIS sequences
+    assert getFoldingsTotalKnown([2, 2]) > 0
+    assert getFoldingsTotalKnown([3, 2]) > 0
+    assert getFoldingsTotalKnown([2, 0, 2]) > 0  # Should handle zero dimensions
+
+def test_getFoldingsTotalKnown_invalid_dimensions():
+    with pytest.raises(NotImplementedError):
+        getFoldingsTotalKnown([1])  # Single dimension
+
+    with pytest.raises(NotImplementedError):
+        getFoldingsTotalKnown([0, 0])  # No positive dimensions
+
+    with pytest.raises(ValueError):
+        getFoldingsTotalKnown([])  # Empty list
+
+    with pytest.raises(ValueError):
+        getFoldingsTotalKnown([-1, 2])  # Negative dimension
+
+    with pytest.raises(KeyError):
+        getFoldingsTotalKnown([10, 10])  # Unknown dimensions

@@ -42,8 +42,8 @@ def test_foldings_computationDivisions(poolTestCases):
         assert foldingsTotal == foldingsExpected
 
 def test_foldings_invalid_inputs():
-    with pytest.raises(NotImplementedError):
-        foldings([], 1, 0)  # Empty dimensions
+    with pytest.raises(ValueError):
+        foldings([], 1, 0)  # Empty dimensions (caught by intInnit)
 
     with pytest.raises(NotImplementedError):
         foldings([1], 1, 0)  # Only one dimension
@@ -52,26 +52,76 @@ def test_foldings_invalid_inputs():
         foldings([0, 0], 1, 0)  # No non-zero dimensions
 
     with pytest.raises(ValueError):
-        foldings([1, -1], 1, 0) # Negative dimension
+        foldings([1, -1], 1, 0)  # Negative dimension
 
     with pytest.raises(ValueError):
-        foldings([1,2], -1, 0) #Negative computationDivisions
+        foldings([1, 2], -1, 0)  # Negative computationDivisions
 
     with pytest.raises(ValueError):
-        foldings([1,2], 1, -1) #Negative computationIndex
+        foldings([1, 2], 1, -1)  # Negative computationIndex
 
     with pytest.raises(ValueError):
-        foldings([1,2], 2, 2)  #computationIndex >= computationDivisions
+        foldings([1, 2], 2, 2)  # computationIndex >= computationDivisions
 
     with pytest.raises(ValueError):
-        foldings([1, 2], 10, 0) #computationDivisions > leavesTotal (for a 2x1 map)
+        foldings([1, 2], 10, 0)  # computationDivisions > leavesTotal
 
     with pytest.raises(ValueError):
-        foldings([1.5, 2], 1, 0) #Non-integer dimensions # type: ignore
+        foldings([1.5, 2], 1, 0)  # Non-integer dimensions  # type: ignore
 
     with pytest.raises(TypeError):
-        foldings([1, 2], 'abc', 0) #Invalid type for computationDivisions # type: ignore
+        foldings([1, 2], 'abc', 0)  # Invalid type for computationDivisions  # type: ignore
 
     with pytest.raises(TypeError):
-        foldings([1, 2], 1, 'abc') #Invalid type for computationIndex # type: ignore
+        foldings([1, 2], 1, 'abc')  # Invalid type for computationIndex  # type: ignore
+
+def test_foldings_dimensions_parsing():
+    with pytest.raises(ValueError):
+        foldings([])  # Empty list
+    
+    with pytest.raises(ValueError):
+        foldings([1, 2, 3.5])  # Non-integer dimensions # type: ignore
+
+    with pytest.raises(ValueError):
+        foldings([1, 2, -3])  # Negative dimensions
+
+    # Test filtering of zero dimensions
+    assert foldings([2, 0, 2], 1, 0) == foldings([2, 2], 1, 0)
+
+def test_getLeavesTotal():
+    # Test basic multiplication
+    assert getLeavesTotal([2, 3]) == 6
+    assert getLeavesTotal([2, 3, 4]) == 24
+
+    # Test with zero dimensions
+    assert getLeavesTotal([0, 0]) == 0
+    assert getLeavesTotal([2, 0, 3]) == 6
+
+    # Test error cases
+    with pytest.raises(ValueError):
+        getLeavesTotal([])  # Empty list
+
+    with pytest.raises(ValueError):
+        getLeavesTotal([-1, 2])  # Negative dimensions
+
+    with pytest.raises(TypeError):
+        getLeavesTotal(['1', '2'])  # Non-numeric values # type: ignore
+
+def test_foldings_computation_divisions():
+    with pytest.raises(ValueError):
+        foldings([2, 2], 5, 0)  # computationDivisions > leavesTotal
+
+    # Test computationIndex validation
+    with pytest.raises(ValueError):
+        foldings([2, 2], 2, -1)  # Negative computationIndex
+
+    with pytest.raises(ValueError):
+        foldings([2, 2], 2, 2)  # computationIndex >= computationDivisions
+
+    # Test invalid dimensions
+    with pytest.raises(NotImplementedError):
+        foldings([1], 2, 0)  # Only one dimension
+
+    # Test valid computation divisions
+    assert foldings([2, 2], 2, 0) + foldings([2, 2], 2, 1) == foldings([2, 2])
 

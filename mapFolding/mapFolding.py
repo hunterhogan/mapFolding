@@ -1,5 +1,5 @@
 from typing import List
-from mapFolding import getLeavesTotal
+from mapFolding import getLeavesTotal, parseListDimensions
 from numba import njit
 import numpy
 
@@ -12,24 +12,16 @@ gapter = 3  # Indices for gap stack per leaf
 def foldings(listDimensions: List[int], computationDivisions: int = 0, computationIndex: int = 0) -> int:
     if listDimensions is None:
         raise ValueError(f"listDimensions is a required parameter.")
-    else:
-        listDimensions = sorted(listDimensions)
 
-    if not all(isinstance(dimension, int) and dimension >= 0 for dimension in listDimensions):
-        raise ValueError(f"listDimensions, {listDimensions}, must have non-negative integers as dimensions.")
-    else:
-        dimensionsTotal = len(listDimensions)
+    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
+    listPositive = [dimension for dimension in listNonNegative if dimension > 0]
 
-    if any(dimension == 0 for dimension in listDimensions) or dimensionsTotal < 2:
-        dimensionsNonZero = [dimension for dimension in listDimensions if dimension > 0]
-        if len(dimensionsNonZero) < 2:
-            from typing import get_args
-
-            from mapFolding import OEISsequenceID
-            raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
-        else:
-            listDimensions = dimensionsNonZero
-
+    if len(listPositive) < 2:
+        from typing import get_args
+        from mapFolding import OEISsequenceID
+        raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
+    
+    listDimensions = listPositive
     n = getLeavesTotal(listDimensions)
 
     if computationDivisions > n:

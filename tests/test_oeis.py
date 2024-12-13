@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 from typing import get_args
 import pytest
 
-from mapFolding import dimensionsFoldingsTotalLookup, getOEISids, oeis, oeisSequence_aOFn, settingsOEISsequences, OEISsequenceID
-from mapFolding.oeis import _formatFilenameCache, _getOEISsequence, _parseContent
+from mapFolding import getFoldingsTotalKnown, getOEISids, oeis, oeisSequence_aOFn, settingsOEISsequences, OEISsequenceID
+from mapFolding.oeis import _formatFilenameCache, _getOEISsequence, _parseBFileOEIS
 
 
 @pytest.fixture
@@ -38,16 +38,17 @@ def test_calculate_sequence(oeisID):
         assert result == expected
 
 def test_dimensions_lookup(oeisID):
-    valuesKnown = settingsOEISsequences[oeisID]['valuesKnown']
-    # Get random n and its value
-    n = random.choice(list(valuesKnown.keys()))
-    expectedValue = valuesKnown[n]
+    dictionaryValuesKnown = settingsOEISsequences[oeisID]['valuesKnown']
+    # Get n values where n >= 2
+    listCountTermsValid = [countTerm for countTerm in dictionaryValuesKnown.keys() if countTerm >= 2]
+    countTerm = random.choice(listCountTermsValid)
+    foldingsExpected = dictionaryValuesKnown[countTerm]
     
     # Get dimensions for this n
-    dimensions = sorted(settingsOEISsequences[oeisID]['dimensions'](n))
+    listDimensions = sorted(settingsOEISsequences[oeisID]['dimensions'](countTerm))
     
     # Test the lookup
-    assert dimensionsFoldingsTotalLookup[tuple(dimensions)] == expectedValue
+    assert getFoldingsTotalKnown(listDimensions) == foldingsExpected
 
 def test_invalid_sequence():
     with pytest.raises(KeyError):
@@ -56,11 +57,6 @@ def test_invalid_sequence():
 def test_negative_n():
     with pytest.raises(ValueError):
         oeisSequence_aOFn('A001415', -1)
-
-def testInvalidDimensions():
-    # Test with invalid dimensions that don't match any known sequence
-    dimensions = (999, 999)  # tuple of dimensions not in lookup
-    assert dimensions not in dimensionsFoldingsTotalLookup
 
 def testCacheMiss(temporaryCache, sequenceIDsample):
     pathFilenameCache = temporaryCache / _formatFilenameCache.format(oeisID=sequenceIDsample)
@@ -112,7 +108,7 @@ def testNetworkError(monkeypatch, temporaryCache):
 def testParseContentErrors():
     # Test invalid content parsing
     with pytest.raises(ValueError):
-        _parseContent("Invalid content\n1 2\n", 'A001415')
+        _parseBFileOEIS("Invalid content\n1 2\n", 'A001415')
 
 def testExtraComments(temporaryCache, sequenceIDsample):
     pathFilenameCache = temporaryCache / _formatFilenameCache.format(oeisID=sequenceIDsample)

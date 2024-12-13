@@ -12,12 +12,12 @@ else:
     TypedDict = dict
 
 class SettingsOEISsequence(TypedDict):
-    description: str                        # Should load from OEIS
+    description: str # I would prefer to load this dynamically but it's a pita, right now.
     dimensions: Callable[[int], List[int]]
     benchmarkValues: List[int]
     testValuesValidation: List[int]
-    valuesKnown: Dict[int, int]             # Loaded from OEIS
-    valueUnknown: List[int]                 # calculate from valuesKnown
+    valuesKnown: Dict[int, int]
+    valueUnknown: int
 
 try:
     _pathCache = pathlib.Path(__file__).parent / ".cache"
@@ -26,49 +26,48 @@ except NameError:
 
 _formatFilenameCache = "{oeisID}.txt"
 
-OEISsequenceID = Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418']
-# TODO dynamically build `settingsOEISsequences`. DRY ^^^
-# SSoT values loaded from OEIS, and some values entered by a human somewhere
+OEISsequenceID = Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418'] # I cannot figure out how to not duplicate this information here and in the dictionary.
+
 settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'dimensions': lambda n: [2, n],
         'benchmarkValues': [11],
         'testValuesValidation': [0, 1, random.randint(2, 9)],
-        'valueUnknown': [2, 19], # format as `n`; i.e. `19`
-        'valuesKnown': {},  # Placeholder
+        'valueUnknown': -1,
+        'valuesKnown': {-1:-1},
     },
     'A001416': {
         'description': 'Number of ways of folding a 3 X n strip of stamps.',
         'dimensions': lambda n: [3, n],
         'benchmarkValues': [8],
         'testValuesValidation': [0, 1, random.randint(2, 6)],
-        'valueUnknown': [3, 15],
-        'valuesKnown': {},  # Placeholder
+        'valueUnknown': -1,
+        'valuesKnown': {-1:-1},
     },
     'A001417': {
         'description': 'Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.',
         'dimensions': lambda n: [2] * n,
         'benchmarkValues': [5],
         'testValuesValidation': [0, 1, random.randint(2, 4)],
-        'valueUnknown': [2, 2, 2, 2, 2, 2, 2, 2],
-        'valuesKnown': {},  # Placeholder
+        'valueUnknown': -1,
+        'valuesKnown': {-1:-1},
     },
     'A195646': {
         'description': 'Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.',
         'dimensions': lambda n: [3] * n,
         'benchmarkValues': [3],
         'testValuesValidation': [0, 1, 2],
-        'valueUnknown': [3, 3, 3, 3],
-        'valuesKnown': {},  # Placeholder
+        'valueUnknown': -1,
+        'valuesKnown': {-1:-1},
     },
     'A001418': { # offset 1
         'description': 'Number of ways of folding an n X n sheet of stamps.',
         'dimensions': lambda n: [n, n],
         'benchmarkValues': [5],
         'testValuesValidation': [1, random.randint(2, 4)],
-        'valueUnknown': [8, 8],
-        'valuesKnown': {},  # Placeholder
+        'valueUnknown': -1,
+        'valuesKnown': {-1:-1},
     },
 }
 
@@ -109,7 +108,7 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
             raise ArithmeticError(f"Sequence {oeisID} is not defined at {n=}.")
     return foldings(listDimensions)
 
-def _parseContent(bFileOEIS: str, oeisID: OEISsequenceID) -> Dict[int, int]:
+def _parseBFileOEIS(bFileOEIS: str, oeisID: OEISsequenceID) -> Dict[int, int]:
     bFileLines = bFileOEIS.strip().splitlines()
     # Remove first line with sequence ID
     if not bFileLines.pop(0).startswith(f"# {oeisID}"):
@@ -136,7 +135,7 @@ def _getOEISsequence(oeisID: OEISsequenceID) -> Dict[int, int]:
     if tryCache:
         try:
             bFileOEIS = pathFilenameCache.read_text()
-            return _parseContent(bFileOEIS, oeisID)
+            return _parseBFileOEIS(bFileOEIS, oeisID)
         except (ValueError, IOError):
             tryCache = False
     
@@ -149,10 +148,11 @@ def _getOEISsequence(oeisID: OEISsequenceID) -> Dict[int, int]:
         pathFilenameCache.parent.mkdir(parents=True, exist_ok=True)
         pathFilenameCache.write_text(bFileOEIS)
     
-    return _parseContent(bFileOEIS, oeisID)
+    return _parseBFileOEIS(bFileOEIS, oeisID)
 
 for oeisID in settingsOEISsequences:
     settingsOEISsequences[oeisID]['valuesKnown'] = _getOEISsequence(oeisID)
+    settingsOEISsequences[oeisID]['valueUnknown'] = max(settingsOEISsequences[oeisID]['valuesKnown'].values()) + 1
 
 def getOEISids() -> None:
     """Print all available OEIS sequence IDs that are directly implemented."""
