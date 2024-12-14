@@ -2,22 +2,10 @@ import pathlib
 import random
 import urllib.request
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Callable, Dict, List, Literal, get_args
+from typing import Dict, get_args
 
-from mapFolding import foldings
-
-if TYPE_CHECKING:
-    from typing import TypedDict
-else:
-    TypedDict = dict
-
-class SettingsOEISsequence(TypedDict):
-    description: str # I would prefer to load this dynamically but it's a pita, right now.
-    dimensions: Callable[[int], List[int]]
-    benchmarkValues: List[int]
-    testValuesValidation: List[int]
-    valuesKnown: Dict[int, int]
-    valueUnknown: int
+from mapFolding import OEISsequenceID
+from .types import SettingsOEISsequence
 
 try:
     _pathCache = pathlib.Path(__file__).parent / ".cache"
@@ -25,8 +13,6 @@ except NameError:
     _pathCache = pathlib.Path.home() / ".mapFoldingCache"
 
 _formatFilenameCache = "{oeisID}.txt"
-
-OEISsequenceID = Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418'] # I cannot figure out how to not duplicate this information here and in the dictionary.
 
 settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
@@ -98,7 +84,7 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
             return foldingsTotal
         else:
             raise ArithmeticError(f"Sequence {oeisID} is not defined at {n=}.")
-
+    
     listDimensions = settingsOEISsequences[oeisID]['dimensions'](n)
     if len(listDimensions) < 2:
         foldingsTotal = settingsOEISsequences[oeisID]['valuesKnown'].get(n, None)
@@ -106,6 +92,7 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
             return foldingsTotal
         else:
             raise ArithmeticError(f"Sequence {oeisID} is not defined at {n=}.")
+    from .mapFolding import foldings
     return foldings(listDimensions)
 
 def _parseBFileOEIS(bFileOEIS: str, oeisID: OEISsequenceID) -> Dict[int, int]:

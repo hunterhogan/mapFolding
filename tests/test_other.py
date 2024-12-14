@@ -3,7 +3,7 @@ import pytest
 from mapFolding import clearOEIScache, settingsOEISsequences, getLeavesTotal, parseListDimensions, getFoldingsTotalKnown
 from mapFolding.oeis import _pathCache
 import sys
-from Z0Z_tools import makeTestSuiteIntInnit
+from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
 
 @patch('pathlib.Path.exists')
 @patch('pathlib.Path.unlink')

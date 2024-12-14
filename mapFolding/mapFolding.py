@@ -1,7 +1,8 @@
 from typing import List
-from mapFolding import getLeavesTotal, parseListDimensions
 from numba import njit
 import numpy
+
+from mapFolding import getLeavesTotal, parseListDimensions, OEISsequenceID
 
 A = 0       # Leaf above leaf m
 B = 1       # Leaf below leaf m
@@ -18,7 +19,6 @@ def foldings(listDimensions: List[int], computationDivisions: int = 0, computati
 
     if len(listPositive) < 2:
         from typing import get_args
-        from mapFolding import OEISsequenceID
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
     
     listDimensions = listPositive

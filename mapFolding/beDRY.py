@@ -5,14 +5,12 @@ import sys
 def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed parameter') -> List[int]:
     """
     Parse and validate a list of dimensions.
-    This function takes a list of integers representing dimensions and validates that all dimensions
-    are non-negative values. It first converts all elements to integers if possible, then checks
-    if each dimension is non-negative.
+
     Parameters:
-        listDimensions (List[int]): List of integers representing dimensions
-        parameterName (str, optional): Name of the parameter for error messages. Defaults to 'unnamed parameter'
+        listDimensions: List of integers representing dimensions
+        parameterName ('unnamed parameter'): Name of the parameter for error messages. Defaults to 'unnamed parameter'
     Returns:
-        List[int]: List of validated non-negative integers
+        listNonNegative: List of validated non-negative integers
     Raises:
         ValueError: If any dimension is negative or if the list is empty
         TypeError: If any element cannot be converted to integer (raised by parseListInt)
