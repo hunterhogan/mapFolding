@@ -10,7 +10,8 @@ import pytest
 
 from mapFolding.noCircularImportsIsAlie import getFoldingsTotalKnown
 from mapFolding import getOEISids
-from mapFolding import oeisSequence_aOFn, settingsOEISsequences, OEISsequenceID
+from mapFolding import oeisSequence_aOFn
+from mapFolding.oeis import settingsOEISsequences, OEISsequenceID
 from mapFolding.oeis import _formatFilenameCache, _getOEISsequence, _parseBFileOEIS
 from mapFolding.oeis import _validateOEISid
 

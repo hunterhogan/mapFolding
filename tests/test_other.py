@@ -1,6 +1,7 @@
 from unittest.mock import patch, call
 import pytest
-from mapFolding import clearOEIScache, settingsOEISsequences, getLeavesTotal, parseListDimensions
+from mapFolding import clearOEIScache, getLeavesTotal, parseListDimensions
+from mapFolding.oeis import settingsOEISsequences
 from mapFolding.noCircularImportsIsAlie import getFoldingsTotalKnown
 from mapFolding.oeis import _pathCache
 import sys

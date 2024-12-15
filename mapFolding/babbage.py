@@ -43,11 +43,12 @@ def foldings(listDimensions: List[int], computationDivisions: int = 0, computati
 
     from .lovelace import setGlobalValues
     setGlobalValues(taskDivisions, taskIndex, leavesTotal, d, D)
-    foldingsTotal = _sherpa(track, gap)
+
+    foldingsTotal = _sherpa(track, gap, listDimensions, taskDivisions)
     return foldingsTotal
 
-# @recordBenchmarks
-def _sherpa(track, gap):
+@recordBenchmarks()
+def _sherpa(track, gap, p, tasks):
     from .lovelace import countFoldings
     # start Performance Critical Area
     foldingsTotal = countFoldings(track, gap)
@@ -64,13 +65,14 @@ def _validateTaskDivisions(computationDivisions, computationIndex, n):
     return computationDivisions, computationIndex
 
 def _validateListDimensions(listDimensions):
-    from mapFolding import OEISsequenceID, parseListDimensions
+    from mapFolding import parseListDimensions
     if listDimensions is None:
         raise ValueError(f"listDimensions is a required parameter.")
     listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
     listPositive = [dimension for dimension in listNonNegative if dimension > 0]
     if len(listPositive) < 2:
         from typing import get_args
+        from mapFolding.oeis import OEISsequenceID
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
     listDimensions = listPositive
     return listDimensions

@@ -3,7 +3,8 @@ from typing import Dict, Tuple
 
 import pytest
 
-from mapFolding import foldings, getLeavesTotal, settingsOEISsequences
+from mapFolding import foldings, getLeavesTotal
+from mapFolding.oeis import settingsOEISsequences
 
 
 def buildTestPool():

@@ -1,7 +1,15 @@
-from .core import recordBenchmarks
+from .benchmarking import recordBenchmarks
 
-__all__ = ['recordBenchmarks']
+__all__ = ['recordBenchmarks', 'enableBenchmarks', 'disableBenchmarks']
 
-# first make a function I care about turning on 
-_flagEnableBenchmarksHARDCODED = True
-_flagEnableBenchmarks = _flagEnableBenchmarksHARDCODED
+_measureSpeed = False
+
+def enableBenchmarks():
+    """Enable benchmarking measurements."""
+    global _measureSpeed
+    _measureSpeed = True
+
+def disableBenchmarks():
+    """Disable benchmarking measurements."""
+    global _measureSpeed
+    _measureSpeed = False

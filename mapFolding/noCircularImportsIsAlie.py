@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple, get_args
 
-from mapFolding import OEISsequenceID, parseListDimensions
+from mapFolding import parseListDimensions
+from mapFolding.oeis import OEISsequenceID
 
 def getFoldingsTotalKnown(listDimensions: List[int]) -> int:
     """
