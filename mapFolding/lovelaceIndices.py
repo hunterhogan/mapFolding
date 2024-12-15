@@ -24,7 +24,7 @@ dimensionsTotal = 3
 # """Current leaf index, starts at 1"""
 # dd = unconstrainedLeaf = 3
 # """Number of unconstrained dimensions for the current leaf"""
-# gg = eniggma = 4 
+# gg = gap1ndexLowerBound = 4 
 # """gg in the original code: maximum gap index?"""
-# m = amigoLeaf1ndex = 5 
+# m = leaf1ndex = 5 
 # """Leaf to which current leaf might connect, index starts at 1"""

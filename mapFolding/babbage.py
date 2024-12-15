@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import numpy
 from .benchmarks import recordBenchmarks
 from .lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal 
@@ -66,7 +66,7 @@ def _sherpa(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: nu
     foldingsTotal = countFoldings(track, gap, static, D)
     return foldingsTotal
 
-def _validateTaskDivisions(computationDivisions, computationIndex, n):
+def _validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
     if computationDivisions > n:
         raise ValueError(f"computationDivisions, {computationDivisions}, must be less than or equal to the total number of leaves, {n}.")
     if computationDivisions > 1 and computationIndex >= computationDivisions:
@@ -75,7 +75,7 @@ def _validateTaskDivisions(computationDivisions, computationIndex, n):
         raise ValueError(f"computationDivisions, {computationDivisions}, and computationIndex, {computationIndex}, must be non-negative integers.")
     return computationDivisions, computationIndex
 
-def _validateListDimensions(listDimensions):
+def _validateListDimensions(listDimensions: List[int]) -> List[int]:
     from mapFolding import parseListDimensions
     if listDimensions is None:
         raise ValueError(f"listDimensions is a required parameter.")
