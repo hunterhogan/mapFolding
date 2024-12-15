@@ -77,4 +77,4 @@ def runBenchmarks(benchmarkIterations: int = 30, warmUp: bool = False):
             oeisSequence_aOFn(*parameters)
 
 if __name__ == '__main__':
-    runBenchmarks()
+    runBenchmarks(100)
