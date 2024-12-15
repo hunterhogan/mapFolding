@@ -2,10 +2,20 @@ import pathlib
 import random
 import urllib.request
 from datetime import datetime, timedelta
-from typing import Dict, get_args
+from typing import TYPE_CHECKING, Callable, Dict, List, Literal, get_args
 
-from mapFolding import OEISsequenceID
-from .types import SettingsOEISsequence
+if TYPE_CHECKING:
+    from typing import TypedDict
+else:
+    TypedDict = dict
+
+class SettingsOEISsequence(TypedDict):
+    description: str # I would prefer to load this dynamically but it's a pita right now.
+    dimensions: Callable[[int], List[int]]
+    benchmarkValues: List[int]
+    testValuesValidation: List[int]
+    valuesKnown: Dict[int, int]
+    valueUnknown: int
 
 try:
     _pathCache = pathlib.Path(__file__).parent / ".cache"
@@ -13,6 +23,8 @@ except NameError:
     _pathCache = pathlib.Path.home() / ".mapFoldingCache"
 
 _formatFilenameCache = "{oeisID}.txt"
+
+OEISsequenceID = Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418'] # I cannot figure out how to not duplicate this information here and in the dictionary.
 
 settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
@@ -72,35 +84,38 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
         ValueError: If n is negative.
         KeyError: If the OEIS sequence ID is not directly implemented.
     """
-    if oeisID not in get_args(OEISsequenceID):
-        oeisID = oeisID.upper().strip() # type: ignore
-    if oeisID not in settingsOEISsequences:
-        raise KeyError(f"Sequence {oeisID} is not directly implemented in mapFoldings. The directly implemented sequences are {get_args(OEISsequenceID)}. Or, for maps with at least two dimensions, try `mapFolding.foldings()`.")
+    oeisID = _validateOEISid(oeisID)
+
     if n < 0 or not isinstance(n, int):
         raise ValueError("`n` must be non-negative integer.")
-    elif n == 0:
-        foldingsTotal = settingsOEISsequences[oeisID]['valuesKnown'].get(n, None)
-        if foldingsTotal is not None:
-            return foldingsTotal
-        else:
-            raise ArithmeticError(f"Sequence {oeisID} is not defined at {n=}.")
-    
     listDimensions = settingsOEISsequences[oeisID]['dimensions'](n)
-    if len(listDimensions) < 2:
+
+    if n == 0 or len(listDimensions) < 2:
         foldingsTotal = settingsOEISsequences[oeisID]['valuesKnown'].get(n, None)
         if foldingsTotal is not None:
             return foldingsTotal
         else:
             raise ArithmeticError(f"Sequence {oeisID} is not defined at {n=}.")
+
     from mapFolding import foldings
     return foldings(listDimensions)
+
+def _validateOEISid(oeisID):
+    if oeisID in get_args(OEISsequenceID):
+        return oeisID
+    else:
+        oeisIDcleaned = oeisID.upper().strip() 
+        if oeisIDcleaned in settingsOEISsequences:
+            return oeisIDcleaned
+        else:
+            raise KeyError(f"Sequence {oeisID} is not directly implemented in mapFoldings. The directly implemented sequences are {get_args(OEISsequenceID)}. Or, for maps with at least two dimensions, try `mapFolding.foldings()`.")
 
 def _parseBFileOEIS(bFileOEIS: str, oeisID: OEISsequenceID) -> Dict[int, int]:
     bFileLines = bFileOEIS.strip().splitlines()
     # Remove first line with sequence ID
     if not bFileLines.pop(0).startswith(f"# {oeisID}"):
         raise ValueError(f"Content does not match sequence {oeisID}")
-    
+
     OEISsequence = {}
     for line in bFileLines:
         if line.startswith('#'):
@@ -118,23 +133,23 @@ def _getOEISsequence(oeisID: OEISsequenceID) -> Dict[int, int]:
     if pathFilenameCache.exists():
         fileAge = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
         tryCache = fileAge < timedelta(days=cacheDays)
-    
+
     if tryCache:
         try:
             bFileOEIS = pathFilenameCache.read_text()
             return _parseBFileOEIS(bFileOEIS, oeisID)
         except (ValueError, IOError):
             tryCache = False
-    
+
     url = f"https://oeis.org/{oeisID}/b{oeisID[1:]}.txt"
     httpResponse = urllib.request.urlopen(url)
     bFileOEIS = httpResponse.read().decode('utf-8')
-    
+
     # Ensure cache directory exists
     if not tryCache:
         pathFilenameCache.parent.mkdir(parents=True, exist_ok=True)
         pathFilenameCache.write_text(bFileOEIS)
-    
+
     return _parseBFileOEIS(bFileOEIS, oeisID)
 
 for oeisID in settingsOEISsequences:

@@ -1,5 +1,6 @@
 from typing import List
 import numpy
+from .benchmarks import recordBenchmarks
 
 def foldings(listDimensions: List[int], computationDivisions: int = 0, computationIndex: int = 0) -> int:
     listDimensions = _validateListDimensions(listDimensions)
@@ -42,6 +43,11 @@ def foldings(listDimensions: List[int], computationDivisions: int = 0, computati
 
     from .lovelace import setGlobalValues
     setGlobalValues(taskDivisions, taskIndex, leavesTotal, d, D)
+    foldingsTotal = _sherpa(track, gap)
+    return foldingsTotal
+
+# @recordBenchmarks
+def _sherpa(track, gap):
     from .lovelace import countFoldings
     # start Performance Critical Area
     foldingsTotal = countFoldings(track, gap)

@@ -16,10 +16,9 @@ def setGlobalValues(TASKDIVISIONS, TASKINDEX, LEAVESTOTAL, dims, graph):
     taskDivisions, taskIndex, leavesTotal = TASKDIVISIONS, TASKINDEX, LEAVESTOTAL
     d = dims
     D = graph
-
-@njit(cache=True)
+#cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False 
+@njit(cache=False) #cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False 
 def countFoldings(track, gap):
-
     # variables: as in, the value varies
     foldingsTotal = 0
     g = 0            # Gap index

@@ -1,7 +1,6 @@
 import io
 import os
 import random
-import runpy
 import urllib.error
 import urllib.request
 from contextlib import redirect_stdout
@@ -9,9 +8,13 @@ from datetime import datetime, timedelta
 from typing import get_args
 import pytest
 
-from mapFolding import getFoldingsTotalKnown, getOEISids, oeis, oeisSequence_aOFn, settingsOEISsequences, OEISsequenceID
+from mapFolding.noCircularImportsIsAlie import getFoldingsTotalKnown
+from mapFolding import getOEISids
+from mapFolding import oeisSequence_aOFn, settingsOEISsequences, OEISsequenceID
 from mapFolding.oeis import _formatFilenameCache, _getOEISsequence, _parseBFileOEIS
+from mapFolding.oeis import _validateOEISid
 
+from mapFolding import oeis
 
 @pytest.fixture
 def temporaryCache(tmp_path):
@@ -21,7 +24,7 @@ def temporaryCache(tmp_path):
     yield tmp_path
     oeis._pathCache = pathCacheOriginal
 
-@pytest.fixture(params=settingsOEISsequences.keys(), autouse=True)
+@pytest.fixture(params=settingsOEISsequences.keys())
 def oeisID(request):
     return request.param
 
@@ -152,8 +155,30 @@ def testCommandLineInterface():
     """Test running as command line script."""
     captureOutput = io.StringIO()
     with redirect_stdout(captureOutput):
-        # Use runpy to execute the module as a script
-        runpy.run_module('mapFolding.oeis', run_name='__main__')
-    
+        from mapFolding.oeis import getOEISids
+        getOEISids()
     outputText = captureOutput.getvalue()
     assert "Available OEIS sequences:" in outputText
+
+def test__validateOEISid_valid_id(oeisID):
+    assert _validateOEISid(oeisID) == oeisID
+
+def test__validateOEISid_valid_id_case_insensitive(oeisID):
+    assert _validateOEISid(oeisID.lower()) == oeisID.upper()
+    assert _validateOEISid(oeisID.upper()) == oeisID.upper()
+    assert _validateOEISid(oeisID.swapcase()) == oeisID.upper()
+
+@pytest.mark.parametrize("invalidIDtext", [
+    "A999999",
+    "  A999999  ",
+    "a999999",
+    "A999999 "
+])
+def test__validateOEISid_invalid_id(invalidIDtext):
+    with pytest.raises(KeyError):
+        _validateOEISid(invalidIDtext)
+
+def test__validateOEISid_partially_valid(sequenceIDsample):
+    with pytest.raises(KeyError):
+        _validateOEISid(f"{sequenceIDsample}extra")
+

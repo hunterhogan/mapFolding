@@ -6,3 +6,4 @@ pyvenv.cfg
 
 /mapFolding/.cache/
 /tests/coverage/
+mapFolding/benchmarks/results/
