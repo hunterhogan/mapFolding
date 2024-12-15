@@ -1,18 +1,30 @@
 from mapFolding import oeisSequence_aOFn
 from mapFolding.oeis import settingsOEISsequences
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
-import inspect
+from typing import Callable
 import numpy
 import time
-import pytest
+from tqdm.auto import tqdm
+
+pathRecordedBenchmarks = Path('mapFolding/benchmarks/marks')
+pathRecordedBenchmarks.mkdir(parents=True, exist_ok=True)
+
+_measureSpeed = True # This toggle is not working
+
+def enableBenchmarks():
+    """Enable benchmarking measurements."""
+    global _measureSpeed
+    _measureSpeed = True
+
+def disableBenchmarks():
+    """Disable benchmarking measurements."""
+    global _measureSpeed
+    _measureSpeed = False
 
 def recordBenchmarks():
     """Decorator to benchmark a function."""
     def wrapper(functionTarget: Callable):
         def innerWrapper(*arguments, **keywordArguments):
-            from . import _measureSpeed
-
             if not _measureSpeed:
                 return functionTarget(*arguments, **keywordArguments)
 
@@ -21,8 +33,8 @@ def recordBenchmarks():
             timeElapsed = time.perf_counter() - timeStart
 
             # Extract p and tasks from arguments
-            p = tuple(sorted(arguments[2])) if len(arguments) >= 3 else None
-            tasks = arguments[3] if len(arguments) >= 4 else None
+            p = tuple(sorted(arguments[-2])) if len(arguments) >= 3 else None
+            tasks = arguments[-1] if len(arguments) >= 4 else None
 
             # Store benchmark data in single file
             pathBenchmarkFile = pathRecordedBenchmarks / "benchmarks.npy"
@@ -41,27 +53,28 @@ def recordBenchmarks():
         return innerWrapper
     return wrapper
 
-"""
-In general, benchmarking is passive: it records what happens and it doesn't initiate anything.
-But, I can run this module and it will initiate calls to the algorithm by using the
-defined benchmarkValues in the settingsOEISsequences dictionary. The recording process is still
-the same, the only "active" role is calling the algorithm with the benchmark values.
-`recordBenchmarks` decorates that which we want to measure.
+def runBenchmarks(benchmarkIterations: int = 30, warmUp: bool = False):
+    """Run benchmark iterations with optional warm-up.
+    
+    Parameters
+        benchmarkIterations (30): Number of benchmark iterations to run
+        warmUp (False): Whether to perform one warm-up iteration
+    """
 
-Don't change "protected code", use it. The identifier `recordBenchmarks` is mandatory.
-"""
+    listParameters = []
+    for oeisID, settings in settingsOEISsequences.items():
+        for n in settings['benchmarkValues']:
+            listParameters.append((oeisID, n))
 
-# start protected code
-benchmarkIterations = 32
-pathRecordedBenchmarks = Path('mapFolding/benchmarks/marks')
-pathRecordedBenchmarks.mkdir(parents=True, exist_ok=True)
+    if warmUp:
+        disableBenchmarks()
+        for parameters in tqdm(listParameters):
+                oeisSequence_aOFn(*parameters)
 
-@pytest.fixture(params=settingsOEISsequences.keys())
-def oeisID(request):
-    return request.param
+    enableBenchmarks()
+    for parameters in tqdm(listParameters):
+        for iterationIndex in tqdm(range(benchmarkIterations), leave=False):
+            oeisSequence_aOFn(*parameters)
 
-def test_benchmarks(oeisID):
-    for n in settingsOEISsequences[oeisID]['benchmarkValues']:
-        oeisSequence_aOFn(oeisID, n)
-# end protected code
-
+if __name__ == '__main__':
+    runBenchmarks()

@@ -41,18 +41,22 @@ def foldings(listDimensions: List[int], computationDivisions: int = 0, computati
     track = numpy.zeros((4, leavesTotal + 1), dtype=numpy.int64)
     gap = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=numpy.int64) # Stack of potential gaps
 
-    from .lovelace import setGlobalValues
-    setGlobalValues(taskDivisions, taskIndex, leavesTotal, d, D)
-
-    foldingsTotal = _sherpa(track, gap, listDimensions, taskDivisions)
+    # Pass listDimensions and taskDivisions to _sherpa for benchmarking
+    foldingsTotal = _sherpa(track, gap, taskDivisions, taskIndex, leavesTotal, d, D, listDimensions, taskDivisions)
     return foldingsTotal
 
 @recordBenchmarks()
-def _sherpa(track, gap, p, tasks):
+def _sherpa(track, gap, taskDivisions, taskIndex, leavesTotal, d, D, p, tasks):
+    """Performance critical section that counts foldings.
+    
+    Parameters:
+        track: Array tracking folding state
+        gap: Array for potential gaps
+        p: List of dimensions for benchmarking
+        tasks: Number of computation divisions for benchmarking
+    """
     from .lovelace import countFoldings
-    # start Performance Critical Area
-    foldingsTotal = countFoldings(track, gap)
-    # end Performance Critical Area
+    foldingsTotal = countFoldings(track, gap, taskDivisions, taskIndex, leavesTotal, d, D)
     return foldingsTotal
 
 def _validateTaskDivisions(computationDivisions, computationIndex, n):

@@ -1,24 +1,12 @@
 from numba import njit
-import numpy
 A = 0       # Leaf above leaf m
 B = 1       # Leaf below leaf m
 count = 2  # Counts for potential gaps
 gapter = 3  # Indices for gap stack per leaf
 
-taskDivisions = 0
-taskIndex = 0
-leavesTotal = 0
-d = 0
-D = numpy.zeros((1, 1, 1), dtype=numpy.int64)
-
-def setGlobalValues(TASKDIVISIONS, TASKINDEX, LEAVESTOTAL, dims, graph):
-    global taskDivisions, taskIndex, leavesTotal, d, D
-    taskDivisions, taskIndex, leavesTotal = TASKDIVISIONS, TASKINDEX, LEAVESTOTAL
-    d = dims
-    D = graph
 #cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False 
 @njit(cache=False) #cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False 
-def countFoldings(track, gap):
+def countFoldings(track, gap, taskDivisions, taskIndex, leavesTotal, d, D):
     # variables: as in, the value varies
     foldingsTotal = 0
     g = 0            # Gap index
