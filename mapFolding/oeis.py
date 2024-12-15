@@ -92,7 +92,7 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
             return foldingsTotal
         else:
             raise ArithmeticError(f"Sequence {oeisID} is not defined at {n=}.")
-    from .mapFolding import foldings
+    from mapFolding import foldings
     return foldings(listDimensions)
 
 def _parseBFileOEIS(bFileOEIS: str, oeisID: OEISsequenceID) -> Dict[int, int]:

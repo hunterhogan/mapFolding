@@ -15,7 +15,7 @@ W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, 
 # because, for example, `numba.set_num_threads()` has no effect on compiled functions
 from .beDRY import getLeavesTotal, parseListDimensions
 from .types import OEISsequenceID
-from .mapFolding import foldings
+from .babbage import foldings
 from .oeis import oeisSequence_aOFn, settingsOEISsequences, getOEISids
 from .noCircularImportsIsAlie import getFoldingsTotalKnown
 from .clearOEIScache import clearOEIScache
