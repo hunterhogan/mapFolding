@@ -27,7 +27,7 @@ begin
             A[m] the leaf above. count[m] is the no. of sections in which
             there is a gap for the new leaf l below leaf m,
             gap[gapter[l - 1] + j] is the j-th (possible or actual) gap for leaf l,
-            and later gap [gapter[l]] is the gap where leaf l is currently inserted;
+            and later gap[gapter[l]] is the gap where leaf l is currently inserted;
 
         integer array P [0:d], C [0:d, 0:n], D [0:d, 0:n, 0:n];
         P[0] := 1;

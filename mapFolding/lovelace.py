@@ -4,67 +4,66 @@ import numpy
 # I composed this module to be used with this toggle switch: https://marketplace.visualstudio.com/items?itemName=eliostruyf.vscode-hide-comments
 from .lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal # Indices of array `the`. Static integer values
 from .lovelaceIndices import A, B, count, gapter # Indices of array `track`. Dynamic values; each with length `leavesTotal + 1`
-from .lovelaceIndices import incompleteTotal, activeGap1ndex, activeLeaf1ndex, unconstrainedLeaf, eniggma, amigoLeaf1ndex # Indices of array `an`. Dynamic integer values; `incompleteTotal` could be larger than 10^15 or 2^46, but the other numbers are less than leavesTotal + 1
-from .lovelaceIndices import g, l, dd, gg, m # Alternative indices of array `an` to be more similar to the original code
 
-@njit(cache=False) #cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False 
+@njit(cache=True, parallel=True, fastmath=False)
 def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
-    an = _ = numpy.zeros(6, dtype=numpy.int64)
-    _[l] = 1 # an[activeLeaf1ndex] = 1
+    foldingsTotal: int = 0
+    l: int = 1 # activeLeaf1ndex: int = 1
+    g: int = 0 # activeGap1ndex: int = 0
 
-    while _[l] > 0: # while an[activeLeaf1ndex] > 0:
-        if _[l] <= 1 or track[B][0] == 1: 
-            if _[l] > the[leavesTotal]:
-                an[incompleteTotal] += the[leavesTotal]
+    while l > 0: # while activeLeaf1ndex > 0:
+        if l <= 1 or track[B][0] == 1: # if activeLeaf1ndex <= 1 or track[leafBelow][0] == 1:
+            if l > the[leavesTotal]: # if activeLeaf1ndex > the[leavesTotal]:
+                foldingsTotal += the[leavesTotal]
             else:
-                _[dd] = 0     
+                dd: int = 0 # unconstrainedLeaf: int = 0
                 # Track possible gaps 
-                _[gg] = track[gapter][_[l] - 1]
+                gg: int = track[gapter][l - 1] # gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
                 # Reset gap index
-                _[g] = _[gg]
+                g = gg # activeGap1ndex = gap1ndexLowerBound
 
-                # Count possible gaps for leaf _[l] in each section
-                for i in range(1, the[dimensionsTotal] + 1):
-                    if D[i][_[l]][_[l]] == _[l]:
-                        _[dd] += 1
+                # Count possible gaps for leaf l in each section
+                for dimension1ndex in range(1, the[dimensionsTotal] + 1):
+                    if D[dimension1ndex][l][l] == l: # connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
+                        dd += 1 # unconstrainedLeaf += 1
                     else:
-                        _[m] = D[i][_[l]][_[l]]
-                        while _[m] != _[l]:
-                            if the[taskDivisions] == 0 or _[l] != the[taskDivisions] or _[m] % the[taskDivisions] == the[taskIndex]:
-                                gap[_[gg]] = _[m]
-                                if track[count][_[m]] == 0:
-                                    _[gg] += 1
-                                track[count][_[m]] += 1
-                            _[m] = D[i][_[l]][track[B][_[m]]]
+                        m = D[dimension1ndex][l][l] # leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
+                        while m != l: # while leaf1ndexConnectee != activeLeaf1ndex:
+                            if the[taskDivisions] == 0 or l != the[taskDivisions] or m % the[taskDivisions] == the[taskIndex]: # if the[tasksTotal] == 0 or activeLeaf1ndex != the[tasksTotal] or leaf1ndexConnectee % the[tasksTotal] == the[taskActive]:
+                                gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
+                                if track[count][m] == 0: # track[countDimensionsGapped][leaf1ndexConnectee] == 0:
+                                    gg += 1 # gap1ndexLowerBound += 1
+                                track[count][m] += 1 # track[countDimensionsGapped][leaf1ndexConnectee] += 1
+                            m = D[dimension1ndex][l][track[B][m]] # leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][track[leafBelow][leaf1ndexConnectee]]
 
-                # If leaf _[l] is unconstrained in all sections, it can be inserted anywhere
-                if _[dd] == the[dimensionsTotal]: 
-                    for _[m] in range(_[l]):
-                        gap[_[gg]] = _[m]
-                        _[gg] += 1
+                # If leaf l is unconstrained in all sections, it can be inserted anywhere
+                if dd == the[dimensionsTotal]: # if unconstrainedLeaf == the[dimensionsTotal]:
+                    for m in range(l): # for leaf1ndex in range(activeLeaf1ndex):
+                        gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndex
+                        gg += 1 # gap1ndexLowerBound += 1
 
                 # Filter gaps that are common to all sections
-                for j in range(_[g], _[gg]): 
-                    gap[_[g]] = gap[j]
-                    if track[count][gap[j]] == the[dimensionsTotal] - _[dd]:
-                        _[g] += 1
+                for j in range(g, gg): # for indexMiniGap in range(activeGap1ndex, gap1ndexLowerBound):
+                    gap[g] = gap[j] # potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
+                    if track[count][gap[j]] == the[dimensionsTotal] - dd: # if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == the[dimensionsTotal] - unconstrainedLeaf:
+                        g += 1 # activeGap1ndex += 1
                     # Reset track[count] for next iteration
-                    track[count][gap[j]] = 0  
+                    track[count][gap[j]] = 0  # track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
 
-        # Recursive backtracking steps
-        while _[l] > 0 and _[g] == track[gapter][_[l] - 1]: 
-            _[l] -= 1
-            track[B][track[A][_[l]]] = track[B][_[l]]
-            track[A][track[B][_[l]]] = track[A][_[l]]
+        # Recursive backtracking steps: is recursive backtracking the same as walking forward?
+        while l > 0 and g == track[gapter][l - 1]: # while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart][activeLeaf1ndex - 1]:
+            l -= 1 # activeLeaf1ndex -= 1
+            track[B][track[A][l]] = track[B][l] # track[leafBelow][track[leafAbove][activeLeaf1ndex]] = track[leafBelow][activeLeaf1ndex]
+            track[A][track[B][l]] = track[A][l] # track[leafAbove][track[leafBelow][activeLeaf1ndex]] = track[leafAbove][activeLeaf1ndex]
 
-        if _[l] > 0:
-            _[g] -= 1
-            track[A][_[l]] = gap[_[g]]
-            track[B][_[l]] = track[B][track[A][_[l]]]
-            track[B][track[A][_[l]]] = _[l]
-            track[A][track[B][_[l]]] = _[l]
+        if l > 0: # if activeLeaf1ndex > 0:
+            g -= 1 # activeGap1ndex -= 1
+            track[A][l] = gap[g] # track[leafAbove][activeLeaf1ndex] = potentialGaps[activeGap1ndex]
+            track[B][l] = track[B][track[A][l]] # track[leafBelow][activeLeaf1ndex] = track[leafBelow][track[leafAbove][activeLeaf1ndex]]
+            track[B][track[A][l]] = l # track[leafBelow][track[leafAbove][activeLeaf1ndex]] = activeLeaf1ndex
+            track[A][track[B][l]] = l # track[leafAbove][track[leafBelow][activeLeaf1ndex]] = activeLeaf1ndex
             # Save current gap index
-            track[gapter][_[l]] = _[g]  
+            track[gapter][l] = g # track[gapRangeStart][activeLeaf1ndex] = activeGap1ndex 
             # Move to next leaf
-            _[l] += 1
-    return an[incompleteTotal]
+            l += 1 # activeLeaf1ndex += 1
+    return foldingsTotal
