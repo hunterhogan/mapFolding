@@ -1,62 +1,70 @@
 from numba import njit
-A = 0       # Leaf above leaf m
-B = 1       # Leaf below leaf m
-count = 2  # Counts for potential gaps
-gapter = 3  # Indices for gap stack per leaf
+import numpy
 
-#cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False 
+# I composed this module to be used with this toggle switch: https://marketplace.visualstudio.com/items?itemName=eliostruyf.vscode-hide-comments
+from .lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal # Indices of array `the`. Static integer values
+from .lovelaceIndices import A, B, count, gapter # Indices of array `track`. Dynamic values; each with length `leavesTotal + 1`
+from .lovelaceIndices import incompleteTotal, activeGap1ndex, activeLeaf1ndex, unconstrainedLeaf, eniggma, amigoLeaf1ndex # Indices of array `an`. Dynamic integer values; `incompleteTotal` could be larger than 10^15 or 2^46, but the other numbers are less than leavesTotal + 1
+from .lovelaceIndices import g, l, dd, gg, m # Alternative indices of array `an` to be more similar to the original code
+
 @njit(cache=False) #cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False cache=False 
-def countFoldings(track, gap, taskDivisions, taskIndex, leavesTotal, d, D):
+def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
+    an = _ = numpy.zeros(6, dtype=numpy.int64)
+    _[l] = 1 # an[activeLeaf1ndex] = 1
 
-    # variables: as in, the value varies
-    foldingsTotal = 0
-    g = 0            # Gap index
-    l = 1            # Current leaf
-
-    while l > 0:
-        if l <= 1 or track[B][0] == 1: 
-            if l > leavesTotal:
-                foldingsTotal += leavesTotal
+    while _[l] > 0: # while an[activeLeaf1ndex] > 0:
+        if _[l] <= 1 or track[B][0] == 1: 
+            if _[l] > the[leavesTotal]:
+                an[incompleteTotal] += the[leavesTotal]
             else:
-                dd = 0     # Number of sections where leaf l is unconstrained
-                gg = track[gapter][l - 1]  # Track possible gaps 
-                g = gg      # Reset gap index
+                _[dd] = 0     
+                # Track possible gaps 
+                _[gg] = track[gapter][_[l] - 1]
+                # Reset gap index
+                _[g] = _[gg]
 
-                for i in range(1, d + 1): # Count possible gaps for leaf l in each section
-                    if D[i][l][l] == l:
-                        dd += 1
+                # Count possible gaps for leaf _[l] in each section
+                for i in range(1, the[dimensionsTotal] + 1):
+                    if D[i][_[l]][_[l]] == _[l]:
+                        _[dd] += 1
                     else:
-                        m = D[i][l][l]
-                        while m != l:
-                            if taskDivisions == 0 or l != taskDivisions or m % taskDivisions == taskIndex:
-                                gap[gg] = m
-                                if track[count][m] == 0:
-                                    gg += 1
-                                track[count][m] += 1
-                            m = D[i][l][track[B][m]]
+                        _[m] = D[i][_[l]][_[l]]
+                        while _[m] != _[l]:
+                            if the[taskDivisions] == 0 or _[l] != the[taskDivisions] or _[m] % the[taskDivisions] == the[taskIndex]:
+                                gap[_[gg]] = _[m]
+                                if track[count][_[m]] == 0:
+                                    _[gg] += 1
+                                track[count][_[m]] += 1
+                            _[m] = D[i][_[l]][track[B][_[m]]]
 
-                if dd == d: # If leaf l is unconstrained in all sections, it can be inserted anywhere
-                    for m in range(l):
-                        gap[gg] = m
-                        gg += 1
+                # If leaf _[l] is unconstrained in all sections, it can be inserted anywhere
+                if _[dd] == the[dimensionsTotal]: 
+                    for _[m] in range(_[l]):
+                        gap[_[gg]] = _[m]
+                        _[gg] += 1
 
-                for j in range(g, gg): # Filter gaps that are common to all sections
-                    gap[g] = gap[j]
-                    if track[count][gap[j]] == d - dd:
-                        g += 1
-                    track[count][gap[j]] = 0  # Reset track[count] for next iteration
+                # Filter gaps that are common to all sections
+                for j in range(_[g], _[gg]): 
+                    gap[_[g]] = gap[j]
+                    if track[count][gap[j]] == the[dimensionsTotal] - _[dd]:
+                        _[g] += 1
+                    # Reset track[count] for next iteration
+                    track[count][gap[j]] = 0  
 
-        while l > 0 and g == track[gapter][l - 1]: # Recursive backtracking steps
-            l -= 1
-            track[B][track[A][l]] = track[B][l]
-            track[A][track[B][l]] = track[A][l]
+        # Recursive backtracking steps
+        while _[l] > 0 and _[g] == track[gapter][_[l] - 1]: 
+            _[l] -= 1
+            track[B][track[A][_[l]]] = track[B][_[l]]
+            track[A][track[B][_[l]]] = track[A][_[l]]
 
-        if l > 0:
-            g -= 1
-            track[A][l] = gap[g]
-            track[B][l] = track[B][track[A][l]]
-            track[B][track[A][l]] = l
-            track[A][track[B][l]] = l
-            track[gapter][l] = g  # Save current gap index
-            l += 1         # Move to next leaf
-    return foldingsTotal
+        if _[l] > 0:
+            _[g] -= 1
+            track[A][_[l]] = gap[_[g]]
+            track[B][_[l]] = track[B][track[A][_[l]]]
+            track[B][track[A][_[l]]] = _[l]
+            track[A][track[B][_[l]]] = _[l]
+            # Save current gap index
+            track[gapter][_[l]] = _[g]  
+            # Move to next leaf
+            _[l] += 1
+    return an[incompleteTotal]

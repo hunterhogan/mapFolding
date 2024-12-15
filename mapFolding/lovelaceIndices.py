@@ -1,17 +1,30 @@
-A: int = 0
+A = 0
 """Leaf above leaf m"""
-B: int = 1
+B = 1
 """Leaf below leaf m"""
-count: int = 2
+count = 2
 """Number of gaps available for leaf l"""
-gapter: int = 3
+gapter = 3
 """Index of gap stack for leaf l"""
 
-taskDivisions: int = 0
+taskDivisions = 0
 """Number of computation divisions"""
-taskIndex: int = 1
+taskIndex = 1
 """Index of computation division"""
-leavesTotal: int = 2
+leavesTotal = 2
 """Total number of leaves"""
-dimensionsTotal: int = 3
+dimensionsTotal = 3
 """Number of dimensions"""
+
+incompleteTotal = 0
+"""Ongoing foldings subtotal"""
+g = activeGap1ndex = 1 
+"""Current gap index, starts at 1"""
+l = activeLeaf1ndex = 2 
+"""Current leaf index, starts at 1"""
+dd = unconstrainedLeaf = 3
+"""Number of unconstrained dimensions for the current leaf"""
+gg = eniggma = 4 
+"""gg in the original code: maximum gap index?"""
+m = amigoLeaf1ndex = 5 
+"""Leaf to which current leaf might connect, index starts at 1"""

@@ -30,7 +30,7 @@ settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'dimensions': lambda n: [2, n],
-        'benchmarkValues': [11],
+        'benchmarkValues': [11, 12],
         'testValuesValidation': [0, 1, random.randint(2, 9)],
         'valueUnknown': -1,
         'valuesKnown': {-1:-1},
