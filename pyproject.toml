@@ -9,7 +9,7 @@ readme = "README.md"
 authors = [
     {name = "Hunter Hogan", email = "HunterHogan@pm.me"}
     ]
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
     "numpy",
     "numba",
@@ -26,6 +26,14 @@ test = [
     "pytest-cov",
     "pytest-env",
     "coverage",
+    ]
+benchmark = [
+    "pandas",
+    "matplotlib",
+    "seaborn",
+    "jupyter",
+    "ipywidgets",
+    "tqdm",
     ]
 
 [tool.setuptools]
@@ -55,11 +63,8 @@ ignore_errors = false
 [tool.coverage.xml]
 output = "tests/coverage/coverage.xml"
 
-[tool.coverage.lcov]
-output = "tests/coverage/coverage.lcov"
-
 [tool.pytest.ini_options]
-addopts = "--cov=mapFolding --cov-report=term-missing --cov-report=xml --cov-report=lcov"
+addopts = "--cov=mapFolding --cov-report=term-missing --cov-report=xml"
 testpaths = ["tests"]
 env = [
     "NUMBA_DISABLE_JIT=1"

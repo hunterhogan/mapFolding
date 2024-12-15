@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Callable
 import numpy
 import time
-from tqdm.auto import tqdm
 
 pathRecordedBenchmarks = Path('mapFolding/benchmarks/marks')
 pathRecordedBenchmarks.mkdir(parents=True, exist_ok=True)
@@ -60,6 +59,7 @@ def runBenchmarks(benchmarkIterations: int = 30, warmUp: bool = False):
         benchmarkIterations (30): Number of benchmark iterations to run
         warmUp (False): Whether to perform one warm-up iteration
     """
+    from tqdm.auto import tqdm
 
     listParameters = []
     for oeisID, settings in settingsOEISsequences.items():
