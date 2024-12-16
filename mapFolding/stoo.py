@@ -45,7 +45,7 @@ def foldings(p: list[int], computationDivisions: int = 0, computationIndex: int 
                         D = D.at[i, l, m].set(m + P[i - 1])
     from .pid import spoon
     effingJnpNDArray = spoon(computationDivisions, arrayIndicesComputation, n, d, D)
-    foldingsTotal = int(effingJnpNDArray.sum())
+    foldingsTotal = int(effingJnpNDArray)
     return foldingsTotal
 
 def _validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
