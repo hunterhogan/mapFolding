@@ -74,20 +74,23 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
             A                = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
             B                = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
             count            = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
-            foldingsSubtotal = jax.numpy.zeros(              1,       dtype=jax.numpy.int64),
-            g                = jax.numpy.zeros(              1,       dtype=jax.numpy.int64),
+            foldingsSubtotal = jax.numpy.array(0, dtype=jax.numpy.int64),  
+            g                = jax.numpy.array(0, dtype=jax.numpy.int64),  
             gap              = jax.numpy.zeros((leavesTotal **2) + 1, dtype=jax.numpy.int64),
             gapter           = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
-            l                = jax.numpy.ones(               1,       dtype=jax.numpy.int64),
+            l                = jax.numpy.array(1, dtype=jax.numpy.int64),  
         )
 
         def l_greaterThan_0(a: DynamicHubris):
-            return (a['l'] > 0)[0]  # Extract scalar boolean
+            return a['l'] > 0  
 
         def countFoldings(a: DynamicHubris):
+            # Add debug print at the start of countFoldings
+            jax.debug.print("Start of countFoldings: l={l}, g={g}", l=a['l'], g=a['g'])
+
             def noChange(a: DynamicHubris):
                 return a
-            def findFolds(a: DynamicHubris):
+            def findFolds(a: DynamicHubris):# -> Any | DynamicHubris:
 
                 def increment_foldings(a: DynamicHubris):
                     a['foldingsSubtotal'] += leavesTotal
@@ -98,7 +101,7 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
                         dd: jax.Array
                         gg: jax.Array
 
-                    def countGaps(dimension1ndex: int, aFindGaps: DynamicFindGaps):
+                    def countGaps(dimension1ndex: int, aFindGaps: DynamicFindGaps):# -> Any | DynamicFindGaps:
                         def ddUnconstrained(aFindGaps: DynamicFindGaps):
                             aFindGaps['dd'] += 1
                             return aFindGaps
@@ -108,20 +111,18 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
                                 m: jax.Array
 
                             def m_notEqual_l(aCountGaps: DynamicCountGaps):
-                                return (aCountGaps['m'] != aCountGaps['l'])[0]  # Extract scalar boolean
+                                return aCountGaps['m'] != aCountGaps['l']  
 
-                            def smurfGapSmurf(aCountGaps: DynamicCountGaps):
+                            def smurfGapSmurf(aCountGaps: DynamicCountGaps):# -> Any | DynamicCountGaps:
                                 def noChangeForYou(aCountGaps: DynamicCountGaps):
                                     return aCountGaps
                                 def yourTaskDivision(aCountGaps: DynamicCountGaps):
                                     count, m = aCountGaps['count'], aCountGaps['m']
-                                    aCountGaps['gap'] = aCountGaps['gap'].at[aCountGaps['gg']].set(m[0])
+                                    aCountGaps['gap'] = aCountGaps['gap'].at[aCountGaps['gg']].set(m)
                                     aCountGaps['gg'] += jax.numpy.where((count[m] == 0), 1, 0)
                                     aCountGaps['count'] = aCountGaps['count'].at[m].set(count[m] + 1)
                                     return aCountGaps
-                                if_yourTaskDivision = ((taskDivisions == 0) | 
-                                                     (aCountGaps['l'] != taskDivisions) | 
-                                                     ((aCountGaps['m'] % taskDivisions) == taskIndex))[0]
+                                if_yourTaskDivision = (taskDivisions == 0) | (aCountGaps['l'] != taskDivisions) | ((aCountGaps['m'] % taskDivisions) == taskIndex)
                                 aCountGaps = jax.lax.cond(if_yourTaskDivision, yourTaskDivision, noChangeForYou, aCountGaps)
                                 aCountGaps['m'] = D[dimension1ndex, aCountGaps['l'], aCountGaps['B'][aCountGaps['m']]]
                                 return aCountGaps
@@ -136,13 +137,13 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
                                 aFindGaps[keyName] = aCountGaps[keyName]
                             return aFindGaps
 
-                        connectionGraphPointingAtSelf = (D[dimension1ndex, aFindGaps['l'], aFindGaps['l']] == aFindGaps['l'])[0]  # Extract scalar boolean
+                        connectionGraphPointingAtSelf = D[dimension1ndex, aFindGaps['l'], aFindGaps['l']] == aFindGaps['l']
                         aFindGaps = jax.lax.cond(connectionGraphPointingAtSelf, ddUnconstrained, check_l_to_m, aFindGaps)
                         return aFindGaps
 
                     aFindGaps: DynamicFindGaps = {
                         **a,
-                        'dd': jax.numpy.zeros(1, dtype=jax.numpy.int64),
+                        'dd': jax.numpy.array(0, dtype=jax.numpy.int64),
                         'gg': a['gapter'][a['l'] - 1],
                         'g': a['gapter'][a['l'] - 1],
                     }
@@ -151,16 +152,16 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
                     def allTiedUp(aFindGaps: DynamicFindGaps):
                         return aFindGaps
 
-                    def unconstrainedLeaf(aFindGaps: DynamicFindGaps):
+                    def unconstrainedLeaf(aFindGaps: DynamicFindGaps):# -> Any | DynamicFindGaps:
                         def for_m_in_range_l(m: int, aFindGaps: DynamicFindGaps):
                             aFindGaps['gap'] = aFindGaps['gap'].at[aFindGaps['gg']].set(m)
                             aFindGaps['gg'] += 1
                             return aFindGaps
 
-                        aFindGaps = jax.lax.fori_loop(0, aFindGaps['l'][0], for_m_in_range_l, aFindGaps)
+                        aFindGaps = jax.lax.fori_loop(0, aFindGaps['l'], for_m_in_range_l, aFindGaps)
                         return aFindGaps
 
-                    dd_equals_dimensionsTotal = (aFindGaps['dd'] == dimensionsTotal)[0]  # Extract scalar boolean
+                    dd_equals_dimensionsTotal = aFindGaps['dd'] == dimensionsTotal
                     aFindGaps = jax.lax.cond(dd_equals_dimensionsTotal, unconstrainedLeaf, allTiedUp, aFindGaps)
 
                     def filterCommonGaps(j: int, aFindGaps: DynamicFindGaps):
@@ -170,21 +171,21 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
                         aFindGaps['count'] = aFindGaps['count'].at[aFindGaps['gap'][j]].set(0)
                         return aFindGaps
 
-                    aFindGaps = jax.lax.fori_loop(aFindGaps['g'][0], aFindGaps['gg'][0], filterCommonGaps, aFindGaps)
+                    aFindGaps = jax.lax.fori_loop(aFindGaps['g'], aFindGaps['gg'], filterCommonGaps, aFindGaps)
 
                     for keyName in a.keys():
                         a[keyName] = aFindGaps[keyName]
                     return a
 
-                l_LT_leavesTotal = (a['l'] > leavesTotal)[0]  # Extract scalar boolean
-                a = jax.lax.cond(l_LT_leavesTotal, increment_foldings, findGaps, a)
+                l_greaterThan_leavesTotal = a['l'] > leavesTotal
+                a = jax.lax.cond(l_greaterThan_leavesTotal, increment_foldings, findGaps, a)
                 return a
 
-            l_LTE_1_or_B_index_0_is_1 = ((a['l'] <= 1) | (a['B'] == 1))[0]  # Extract scalar boolean
+            l_LTE_1_or_B_index_0_is_1 = (a['l'] <= 1) | (a['B'][0] == 1)
             a = jax.lax.cond(l_LTE_1_or_B_index_0_is_1, findFolds, noChange, a)
 
             def l_GT_0_and_g_is_gapter_index_lMinus1(a: DynamicHubris):
-                return ((a['l'] > 0) & (a['g'] == a['gapter'][a['l'] - 1]))[0]
+                return (a['l'] > 0) & (a['g'] == a['gapter'][a['l'] - 1])
 
             def backtrack(a: DynamicHubris):
                 A = a['A']
@@ -230,7 +231,11 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
                 a['l'] = l
                 return a
 
-            a = jax.lax.cond(a['l'][0] > 0, move_to_next_leaf, noChange, a)
+            a = jax.lax.cond(a['l'] > 0, move_to_next_leaf, noChange, a)
+
+            # Add debug print before returning 'a'
+            jax.debug.print("End of countFoldings: l={l}, g={g}", l=a['l'], g=a['g'])
+
             return a
 
         dynamicHubris_output_val = jax.lax.while_loop(l_greaterThan_0, countFoldings, dynamicHubris_init_val)
