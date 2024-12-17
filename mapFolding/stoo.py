@@ -43,10 +43,12 @@ def foldings(p: list[int], computationDivisions: int = 0, computationIndex: int 
                         D = D.at[i, l, m].set(m)
                     else:
                         D = D.at[i, l, m].set(m + P[i - 1])
+
+    taskDivisions = jax.numpy.array(computationDivisions, dtype=jax.numpy.int64)
+    n = jax.numpy.array(n, dtype=jax.numpy.int64)
+    d = jax.numpy.array(d, dtype=jax.numpy.int64)
     from .pid import spoon
-    effingJnpNDArray = spoon(computationDivisions, arrayIndicesComputation, n, d, D)
-    foldingsTotal = int(effingJnpNDArray)
-    return foldingsTotal
+    return spoon(taskDivisions, arrayIndicesComputation, n, d, D)
 
 def _validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
     if computationDivisions > n:
