@@ -1,13 +1,11 @@
-from typing import List, Tuple
 import jax
+
 jax.config.update("jax_enable_x64", True)
 
-def foldings(p: list[int], computationDivisions: int = 0, computationIndex: int = 0) -> int:
-    listDimensions = _validateListDimensions(p)
-    del p
-    from mapFolding import  getLeavesTotal
-    n = getLeavesTotal(listDimensions)
-    computationDivisions, computationIndex = _validateTaskDivisions(computationDivisions, computationIndex, n)
+def foldings(listDimensions: list[int], computationDivisions: int = 0, computationIndex: int = 0) -> int:
+    from mapFolding.beDRY import validateParametersFoldings
+    listDimensions, computationDivisions, computationIndex, n = validateParametersFoldings(listDimensions, computationDivisions, computationIndex)
+
     if computationDivisions < 2:
         computationDivisions = n
         del computationIndex
@@ -47,27 +45,5 @@ def foldings(p: list[int], computationDivisions: int = 0, computationIndex: int 
     taskDivisions = jax.numpy.array(computationDivisions, dtype=jax.numpy.int64)
     n = jax.numpy.array(n, dtype=jax.numpy.int64)
     d = jax.numpy.array(d, dtype=jax.numpy.int64)
-    from .pid import spoon
+    from mapFolding.pid import spoon
     return spoon(taskDivisions, arrayIndicesComputation, n, d, D)
-
-def _validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
-    if computationDivisions > n:
-        raise ValueError(f"computationDivisions, {computationDivisions}, must be less than or equal to the total number of leaves, {n}.")
-    if computationDivisions > 1 and computationIndex >= computationDivisions:
-        raise ValueError(f"computationIndex, {computationIndex}, must be less than computationDivisions, {computationDivisions}.")
-    if computationDivisions < 0 or computationIndex < 0 or not isinstance(computationDivisions, int) or not isinstance(computationIndex, int):
-        raise ValueError(f"computationDivisions, {computationDivisions}, and computationIndex, {computationIndex}, must be non-negative integers.")
-    return computationDivisions, computationIndex
-
-def _validateListDimensions(listDimensions: List[int]) -> List[int]:
-    from mapFolding import parseListDimensions
-    if listDimensions is None:
-        raise ValueError(f"listDimensions is a required parameter.")
-    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
-    listPositive = [dimension for dimension in listNonNegative if dimension > 0]
-    if len(listPositive) < 2:
-        from typing import get_args
-        from mapFolding.oeis import OEISsequenceID
-        raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
-    listDimensions = listPositive
-    return listDimensions

@@ -1,12 +1,15 @@
 from numba import njit
 import numpy
 
-# I composed this module to be used with this toggle switch: https://marketplace.visualstudio.com/items?itemName=eliostruyf.vscode-hide-comments
-from .lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal # Indices of array `the`. Static integer values
-from .lovelaceIndices import A, B, count, gapter # Indices of array `track`. Dynamic values; each with length `leavesTotal + 1`
+# I composed this module to be used with this visibility toggle: https://marketplace.visualstudio.com/items?itemName=eliostruyf.vscode-hide-comments
+from mapFolding.lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal # Indices of array `the`. Static integer values
+from mapFolding.lovelaceIndices import A, B, count, gapter # Indices of array `track`. Dynamic values; each with length `leavesTotal + 1`
 
 @njit(cache=True, parallel=True, fastmath=False)
-def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
+def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
+                  gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
+                  the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
+                  D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
     foldingsTotal: int = 0
     l: int = 1 # activeLeaf1ndex: int = 1
     g: int = 0 # activeGap1ndex: int = 0

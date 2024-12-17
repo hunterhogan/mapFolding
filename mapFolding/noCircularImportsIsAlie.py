@@ -20,7 +20,7 @@ def getFoldingsTotalKnown(listDimensions: List[int]) -> int:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
 
     dimensionsFoldingsTotalLookup: Dict[Tuple, int] = {}
-    from .oeis import settingsOEISsequences
+    from mapFolding.oeis import settingsOEISsequences
     for oeisID, settings in settingsOEISsequences.items():
         sequence = settings['valuesKnown']
         

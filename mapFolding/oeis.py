@@ -10,7 +10,8 @@ else:
     TypedDict = dict
 
 class SettingsOEISsequence(TypedDict):
-    description: str # I would prefer to load this dynamically but it's a pita right now.
+    # I would prefer to load description dynamically from OEIS, but it's a pita for me and my skill set right now.
+    description: str 
     dimensions: Callable[[int], List[int]]
     benchmarkValues: List[int]
     testValuesValidation: List[int]
@@ -24,7 +25,8 @@ except NameError:
 
 _formatFilenameCache = "{oeisID}.txt"
 
-OEISsequenceID = Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418'] # I cannot figure out how to not duplicate this information here and in the dictionary.
+# NOTE: not DRY, and I'm annoyed and frustrated. I cannot figure out how to not duplicate this information here and in the dictionary.
+OEISsequenceID = Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418'] 
 
 settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
@@ -59,7 +61,7 @@ settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
         'valueUnknown': -1,
         'valuesKnown': {-1:-1},
     },
-    'A001418': { # offset 1
+    'A001418': { # offset 1: hypothetically, if I were to load the offset from OEIS, I could use it to determine if a sequence is defined at n=0.
         'description': 'Number of ways of folding an n X n sheet of stamps.',
         'dimensions': lambda n: [n, n],
         'benchmarkValues': [5],
@@ -112,7 +114,7 @@ def _validateOEISid(oeisID):
 
 def _parseBFileOEIS(bFileOEIS: str, oeisID: OEISsequenceID) -> Dict[int, int]:
     bFileLines = bFileOEIS.strip().splitlines()
-    # Remove first line with sequence ID
+    # Remove first line with the sequence ID
     if not bFileLines.pop(0).startswith(f"# {oeisID}"):
         raise ValueError(f"Content does not match sequence {oeisID}")
 
@@ -163,7 +165,7 @@ def getOEISids() -> None:
         print(f"  {oeisID}: {settingsOEISsequences[oeisID]['description']}")
     print("\nUsage example:")
     print("  from mapFolding import oeisSequence_aOFn")
-    print("  result = oeisSequence_aOFn('A001415', 5)")
+    print("  foldingsTotal = oeisSequence_aOFn('A001415', 5)")
 
 if __name__ == "__main__":
     getOEISids()

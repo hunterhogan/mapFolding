@@ -1,5 +1,5 @@
 def clearOEIScache() -> None:
-    from .oeis import _formatFilenameCache, _pathCache, settingsOEISsequences
+    from mapFolding.oeis import _formatFilenameCache, _pathCache, settingsOEISsequences
     """Delete all cached OEIS sequence files."""
     
     if not _pathCache.exists():

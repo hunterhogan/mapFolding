@@ -15,16 +15,3 @@ leavesTotal = 2
 """Total number of leaves"""
 dimensionsTotal = 3
 """Number of dimensions"""
-
-# incompleteTotal = 0
-# """Ongoing foldings subtotal"""
-# g = activeGap1ndex = 1 
-# """Current gap index, starts at 1"""
-# l = activeLeaf1ndex = 2 
-# """Current leaf index, starts at 1"""
-# dd = unconstrainedLeaf = 3
-# """Number of unconstrained dimensions for the current leaf"""
-# gg = gap1ndexLowerBound = 4 
-# """gg in the original code: maximum gap index?"""
-# m = leaf1ndex = 5 
-# """Leaf to which current leaf might connect, index starts at 1"""

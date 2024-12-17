@@ -94,6 +94,7 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
 
                 def increment_foldings(a: DynamicHubris):
                     a['foldingsSubtotal'] += leavesTotal
+                    jax.debug.print("increment_foldings: foldingsSubtotal={foldingsSubtotal}", foldingsSubtotal=a['foldingsSubtotal'])
                     return a
 
                 def findGaps(a: DynamicHubris):
