@@ -52,6 +52,7 @@ See jax/_src/lax/control_flow/conditionals.py
 """
 from typing import TypedDict
 import jax
+import inspect
 """ideas:
 - revisit optimizing dtype; except foldingsSubtotal, int8 is (probably) large enough
 - revisit mapFoldingPathDivisions; n.b., only tried with `+= 1` not `+= leavesTotal`
@@ -93,9 +94,9 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
             def findFolds(a: DynamicHubris):
 
                 def increment_foldings(a: DynamicHubris):
-                    a['foldingsSubtotal'] = a['foldingsSubtotal'] + leavesTotal
-                    # jax.debug.print("increment_foldings: foldingsSubtotal={foldingsSubtotal}", foldingsSubtotal=a['foldingsSubtotal'])
-                    return a
+                    wtf = {**a, 'foldingsSubtotal': a['foldingsSubtotal'] + leavesTotal}
+                    jax.debug.print("increment_foldings: foldingsSubtotal={foldingsSubtotal}", foldingsSubtotal=wtf['foldingsSubtotal'])
+                    return wtf
 
                 def findGaps(a: DynamicHubris):
                     class DynamicFindGaps(TypedDict):
@@ -195,7 +196,9 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
                 return a
 
             l_LTE_1_or_B_index_0_is_1 = (a['l'] <= 1) | (a['B'][0] == 1)
-            a = jax.lax.cond(l_LTE_1_or_B_index_0_is_1, findFolds, noChange, a)
+            fu = jax.lax.cond(l_LTE_1_or_B_index_0_is_1, findFolds, noChange, a.copy())
+            jax.debug.print("line no:{line} foldingsSubtotal={foldingsSubtotal}", line=inspect.currentframe().f_lineno, foldingsSubtotal=fu['foldingsSubtotal']) #type: ignore
+            a = fu.copy()
 
             def l_GT_0_and_g_is_gapter_index_lMinus1(a: DynamicHubris):
                 return (a['l'] > 0) & (a['g'] == a['gapter'][a['l'] - 1])
