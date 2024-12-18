@@ -56,126 +56,138 @@ import jax
 - revisit optimizing dtype; except foldingsSubtotal, int8 is (probably) large enough
 - revisit mapFoldingPathDivisions; n.b., only tried with `+= 1` not `+= leavesTotal`
 """
+class DynamicHubris(TypedDict):
+    A: jax.Array
+    B: jax.Array
+    count: jax.Array
+    foldingsSubtotal: jax.Array
+    g: jax.Array
+    gap: jax.Array
+    gapter: jax.Array
+    l: jax.Array
 
 def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: jax.Array, dimensionsTotal: jax.Array, D: jax.Array):
 
-    class DynamicHubris(TypedDict):
-        A: jax.Array
-        B: jax.Array
-        count: jax.Array
-        foldingsSubtotal: jax.Array
-        g: jax.Array
-        gap: jax.Array
-        gapter: jax.Array
-        l: jax.Array
+    dynamicHubris_init_val =  DynamicHubris(
+        A                = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
+        B                = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
+        count            = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
+        foldingsSubtotal = jax.numpy.array(0, dtype=jax.numpy.int64),  
+        g                = jax.numpy.array(0, dtype=jax.numpy.int64),  
+        gap              = jax.numpy.zeros((leavesTotal **2) + 1, dtype=jax.numpy.int64),
+        gapter           = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
+        l                = jax.numpy.array(1, dtype=jax.numpy.int64),  
+    )
 
+    @jax.jit
     def hubris(taskIndex: jax.Array):
-        dynamicHubris_init_val =  DynamicHubris(
-            A                = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
-            B                = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
-            count            = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
-            foldingsSubtotal = jax.numpy.array(0, dtype=jax.numpy.int64),  
-            g                = jax.numpy.array(0, dtype=jax.numpy.int64),  
-            gap              = jax.numpy.zeros((leavesTotal **2) + 1, dtype=jax.numpy.int64),
-            gapter           = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
-            l                = jax.numpy.array(1, dtype=jax.numpy.int64),  
-        )
 
         def l_greaterThan_0(a: DynamicHubris):
             return a['l'] > 0  
 
         def countFoldings(a: DynamicHubris):
-            # Add debug print at the start of countFoldings
-            jax.debug.print("Start of countFoldings: l={l}, g={g}", l=a['l'], g=a['g'])
+            # jax.debug.print("Start of countFoldings: l={l}, g={g}", l=a['l'], g=a['g'])
 
             def noChange(a: DynamicHubris):
                 return a
-            def findFolds(a: DynamicHubris):# -> Any | DynamicHubris:
+            def findFolds(a: DynamicHubris):
 
                 def increment_foldings(a: DynamicHubris):
-                    a['foldingsSubtotal'] += leavesTotal
-                    jax.debug.print("increment_foldings: foldingsSubtotal={foldingsSubtotal}", foldingsSubtotal=a['foldingsSubtotal'])
+                    a['foldingsSubtotal'] = a['foldingsSubtotal'] + leavesTotal
+                    # jax.debug.print("increment_foldings: foldingsSubtotal={foldingsSubtotal}", foldingsSubtotal=a['foldingsSubtotal'])
                     return a
 
                 def findGaps(a: DynamicHubris):
-                    class DynamicFindGaps(DynamicHubris):
+                    class DynamicFindGaps(TypedDict):
+                        a: DynamicHubris
                         dd: jax.Array
                         gg: jax.Array
 
-                    def countGaps(dimension1ndex: int, aFindGaps: DynamicFindGaps):# -> Any | DynamicFindGaps:
+                    def countGaps(dimension1ndex: int, aFindGaps: DynamicFindGaps):
                         def ddUnconstrained(aFindGaps: DynamicFindGaps):
                             aFindGaps['dd'] += 1
                             return aFindGaps
 
                         def check_l_to_m(aFindGaps: DynamicFindGaps):
-                            class DynamicCountGaps(DynamicFindGaps):
+                            class DynamicCountGaps(TypedDict):
+                                aFindGaps: DynamicFindGaps
                                 m: jax.Array
 
                             def m_notEqual_l(aCountGaps: DynamicCountGaps):
-                                return aCountGaps['m'] != aCountGaps['l']  
+                                return aCountGaps['m'] != aCountGaps['aFindGaps']['a']['l']
 
-                            def smurfGapSmurf(aCountGaps: DynamicCountGaps):# -> Any | DynamicCountGaps:
+                            def smurfGapSmurf(aCountGaps: DynamicCountGaps):
                                 def noChangeForYou(aCountGaps: DynamicCountGaps):
                                     return aCountGaps
                                 def yourTaskDivision(aCountGaps: DynamicCountGaps):
-                                    count, m = aCountGaps['count'], aCountGaps['m']
-                                    aCountGaps['gap'] = aCountGaps['gap'].at[aCountGaps['gg']].set(m)
-                                    aCountGaps['gg'] += jax.numpy.where((count[m] == 0), 1, 0)
-                                    aCountGaps['count'] = aCountGaps['count'].at[m].set(count[m] + 1)
+                                    count = aCountGaps['aFindGaps']['a']['count']
+                                    gap = aCountGaps['aFindGaps']['a']['gap']
+                                    gg = aCountGaps['aFindGaps']['gg']
+                                    m = aCountGaps['m']
+
+                                    gap = gap.at[gg].set(m)
+                                    gg += jax.numpy.where((count[m] == 0), 1, 0)
+                                    count = count.at[m].set(count[m] + 1)
+
+                                    aCountGaps['aFindGaps']['a']['count'] = count
+                                    aCountGaps['aFindGaps']['a']['gap'] = gap
+                                    aCountGaps['aFindGaps']['gg'] = gg
+
                                     return aCountGaps
-                                if_yourTaskDivision = (taskDivisions == 0) | (aCountGaps['l'] != taskDivisions) | ((aCountGaps['m'] % taskDivisions) == taskIndex)
+                                if_yourTaskDivision = (taskDivisions == 0) | (aCountGaps['aFindGaps']['a']['l'] != taskDivisions) | ((aCountGaps['m'] % taskDivisions) == taskIndex)
                                 aCountGaps = jax.lax.cond(if_yourTaskDivision, yourTaskDivision, noChangeForYou, aCountGaps)
-                                aCountGaps['m'] = D[dimension1ndex, aCountGaps['l'], aCountGaps['B'][aCountGaps['m']]]
+                                aCountGaps['m'] = D[dimension1ndex, aCountGaps['aFindGaps']['a']['l'], aCountGaps['aFindGaps']['a']['B'][aCountGaps['m']]]
                                 return aCountGaps
 
                             aCountGaps: DynamicCountGaps = {
-                                **aFindGaps,
-                                'm': D[dimension1ndex, aFindGaps['l'], aFindGaps['l']]
+                                'aFindGaps': aFindGaps,
+                                'm': D[dimension1ndex, aFindGaps['a']['l'], aFindGaps['a']['l']]
                             }
                             aCountGaps = jax.lax.while_loop(m_notEqual_l, smurfGapSmurf, aCountGaps)
 
-                            for keyName in aFindGaps.keys():
-                                aFindGaps[keyName] = aCountGaps[keyName]
+                            aFindGaps = aCountGaps['aFindGaps']
+
                             return aFindGaps
 
-                        connectionGraphPointingAtSelf = D[dimension1ndex, aFindGaps['l'], aFindGaps['l']] == aFindGaps['l']
+                        connectionGraphPointingAtSelf = D[dimension1ndex, aFindGaps['a']['l'], aFindGaps['a']['l']] == aFindGaps['a']['l']
                         aFindGaps = jax.lax.cond(connectionGraphPointingAtSelf, ddUnconstrained, check_l_to_m, aFindGaps)
                         return aFindGaps
 
                     aFindGaps: DynamicFindGaps = {
-                        **a,
+                        'a': a,
                         'dd': jax.numpy.array(0, dtype=jax.numpy.int64),
                         'gg': a['gapter'][a['l'] - 1],
-                        'g': a['gapter'][a['l'] - 1],
                     }
+
+                    aFindGaps['a']['g'] = aFindGaps['gg']
                     aFindGaps = jax.lax.fori_loop(1, dimensionsTotal + 1, countGaps, aFindGaps)
 
-                    def allTiedUp(aFindGaps: DynamicFindGaps):
+                    def stitchedUp(aFindGaps: DynamicFindGaps):
                         return aFindGaps
 
-                    def unconstrainedLeaf(aFindGaps: DynamicFindGaps):# -> Any | DynamicFindGaps:
+                    def unconstrainedLeaf(aFindGaps: DynamicFindGaps):
                         def for_m_in_range_l(m: int, aFindGaps: DynamicFindGaps):
-                            aFindGaps['gap'] = aFindGaps['gap'].at[aFindGaps['gg']].set(m)
+                            aFindGaps['a']['gap'] = aFindGaps['a']['gap'].at[aFindGaps['gg']].set(m)
                             aFindGaps['gg'] += 1
                             return aFindGaps
 
-                        aFindGaps = jax.lax.fori_loop(0, aFindGaps['l'], for_m_in_range_l, aFindGaps)
+                        aFindGaps = jax.lax.fori_loop(0, aFindGaps['a']['l'], for_m_in_range_l, aFindGaps)
                         return aFindGaps
 
                     dd_equals_dimensionsTotal = aFindGaps['dd'] == dimensionsTotal
-                    aFindGaps = jax.lax.cond(dd_equals_dimensionsTotal, unconstrainedLeaf, allTiedUp, aFindGaps)
+                    aFindGaps = jax.lax.cond(dd_equals_dimensionsTotal, unconstrainedLeaf, stitchedUp, aFindGaps)
 
                     def filterCommonGaps(j: int, aFindGaps: DynamicFindGaps):
-                        aFindGaps['gap'] = aFindGaps['gap'].at[aFindGaps['g']].set(aFindGaps['gap'][j])
-                        if_count_index_gap_index_j_equal_dimensionsTotal_minus_dd_and_venus_is_in_retrograde = aFindGaps['count'][aFindGaps['gap'][j]] == dimensionsTotal - aFindGaps['dd']
-                        aFindGaps['g'] += jax.numpy.where(if_count_index_gap_index_j_equal_dimensionsTotal_minus_dd_and_venus_is_in_retrograde, 1, 0)
-                        aFindGaps['count'] = aFindGaps['count'].at[aFindGaps['gap'][j]].set(0)
+                        aFindGaps['a']['gap'] = aFindGaps['a']['gap'].at[aFindGaps['a']['g']].set(aFindGaps['a']['gap'][j])
+                        if_count_index_gap_index_j_equal_dimensionsTotal_minus_dd_and_venus_is_in_retrograde = aFindGaps['a']['count'][aFindGaps['a']['gap'][j]] == dimensionsTotal - aFindGaps['dd']
+                        aFindGaps['a']['g'] += jax.numpy.where(if_count_index_gap_index_j_equal_dimensionsTotal_minus_dd_and_venus_is_in_retrograde, 1, 0)
+                        aFindGaps['a']['count'] = aFindGaps['a']['count'].at[aFindGaps['a']['gap'][j]].set(0)
                         return aFindGaps
 
-                    aFindGaps = jax.lax.fori_loop(aFindGaps['g'], aFindGaps['gg'], filterCommonGaps, aFindGaps)
+                    aFindGaps = jax.lax.fori_loop(aFindGaps['a']['g'], aFindGaps['gg'], filterCommonGaps, aFindGaps)
 
-                    for keyName in a.keys():
-                        a[keyName] = aFindGaps[keyName]
+                    a = aFindGaps['a']
+
                     return a
 
                 l_greaterThan_leavesTotal = a['l'] > leavesTotal
@@ -234,8 +246,7 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
 
             a = jax.lax.cond(a['l'] > 0, move_to_next_leaf, noChange, a)
 
-            # Add debug print before returning 'a'
-            jax.debug.print("End of countFoldings: l={l}, g={g}", l=a['l'], g=a['g'])
+            # jax.debug.print("End of countFoldings: l={l}, g={g}, foldingsSubtotal={foldingsSubtotal}", l=a['l'], g=a['g'], foldingsSubtotal=a['foldingsSubtotal'])
 
             return a
 
