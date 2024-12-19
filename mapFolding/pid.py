@@ -8,55 +8,17 @@
     and the predicate in `jax.lax.cond`. The identifier attempts to represent the logic of the conditional
     statement. So `l > 0`, for example, could be `l_greaterThan_0`.
 
-NOTE jax/_src/lax/control_flow/loops.py
-```
-  def while_loop(
-    cond_fun: (T@while_loop) -> BooleanNumeric,
-    body_fun: (T@while_loop) -> T@while_loop,
-    init_val: T@while_loop
-  ) -> T@while_loop
-```
-
- .. code-block:: haskell
-  Args:
-    cond_fun: function of type ``a -> Bool``.
-    body_fun: function of type ``a -> a``.
-    init_val: value of type ``a``, a type that can be a scalar, array, or any
-      pytree (nested Python tuple/list/dict) thereof, representing the initial
-      loop a value.
-
-  Returns:
-    The output from the final iteration of body_fun, of type ``a``.
-
-NOTE jax.lax.cond, effectively:
-```
-  def cond(
-    pred,
-    true_fun: Callable,
-    false_fun: Callable,
-    *operands
-  ):
-```
-
-Which is equivalent to:
-
-```python
-  def cond(pred, true_fun, false_fun, *operands):
-    if pred:
-      return true_fun(*operands)
-    else:
-      return false_fun(*operands)
-```
-
-See jax/_src/lax/control_flow/conditionals.py
+By adding line numbers to identifiers, they should all be unique.
 """
-from typing import TypedDict
-import jax
-import inspect
 """ideas:
 - revisit optimizing dtype; except foldingsSubtotal, int8 is (probably) large enough
 - revisit mapFoldingPathDivisions; n.b., only tried with `+= 1` not `+= leavesTotal`
 """
+from typing import TypedDict
+import jax
+import inspect
+from .pidVariables import integerSize
+
 class Hubris(TypedDict):
     A: jax.Array
     B: jax.Array
@@ -66,8 +28,6 @@ class Hubris(TypedDict):
     gap: jax.Array
     gapter: jax.Array
     l: jax.Array
-
-# reHubris = ['A', 'B', 'count', 'foldingsSubtotal', 'g', 'gap', 'gapter', 'l'] # not DRY: for troubleshooting
 
 class HubHubrisris(TypedDict):
     """a, dd, gg"""
@@ -82,187 +42,186 @@ class HubHubHubrisrisris(TypedDict):
 
 def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: jax.Array, dimensionsTotal: jax.Array, D: jax.Array):
 
-    hubris_init_val =  Hubris(
-        A                = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
-        B                = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
-        count            = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
-        foldingsSubtotal = jax.numpy.array(0, dtype=jax.numpy.int64),  
-        g                = jax.numpy.array(0, dtype=jax.numpy.int64),  
-        gap              = jax.numpy.zeros((leavesTotal **2) + 1, dtype=jax.numpy.int64),
-        gapter           = jax.numpy.zeros(leavesTotal + 1,       dtype=jax.numpy.int64),
-        l                = jax.numpy.array(1, dtype=jax.numpy.int64),  
+    hubris_init_val43 =  Hubris(
+        A                = jax.numpy.zeros(leavesTotal + 1,       dtype=integerSize),
+        B                = jax.numpy.zeros(leavesTotal + 1,       dtype=integerSize),
+        count            = jax.numpy.zeros(leavesTotal + 1,       dtype=integerSize),
+        foldingsSubtotal = jax.numpy.array(0, dtype=integerSize),  
+        g                = jax.numpy.array(0, dtype=integerSize),  
+        gap              = jax.numpy.zeros((leavesTotal **2) + 1, dtype=integerSize),
+        gapter           = jax.numpy.zeros(leavesTotal + 1,       dtype=integerSize),
+        l                = jax.numpy.array(1, dtype=integerSize),  
     )
 
     @jax.jit
-    def hubris(taskIndex: jax.Array):
+    def hubris(taskIndex55: jax.Array):
 
-        def l_greaterThan_0(a99: Hubris):
-            return a99['l'] > 0  
+        def l_greaterThan_0(q57: Hubris):
+            return q57['l'] > 0  
 
-        def countFoldings(a102: Hubris):
-            def noChange(a103: Hubris):
-                return a103
-            def findFolds(a105: Hubris):
-                def increment_foldings(a106: Hubris):
-                    a107: Hubris = {'A': a106['A'], 'B': a106['B'], 'count': a106['count'], 'foldingsSubtotal': a106['foldingsSubtotal'] + leavesTotal, 'g': a106['g'], 'gap': a106['gap'], 'gapter': a106['gapter'], 'l': a106['l']}
-                    jax.debug.print("increment_foldings: foldingsSubtotal={foldingsSubtotal}", foldingsSubtotal=a107['foldingsSubtotal'])
-                    return a107
+        def countFoldings(w60: Hubris):
+            def noChange(e61: Hubris):
+                
+                return e61
+            def findFolds(r63: Hubris):
+                def increment_foldings(t64: Hubris):
+                    y65: Hubris = {'A': t64['A'], 'B': t64['B'], 'count': t64['count'], 'foldingsSubtotal': t64['foldingsSubtotal'] + leavesTotal, 'g': t64['g'], 'gap': t64['gap'], 'gapter': t64['gapter'], 'l': t64['l']}
+                    jax.debug.print("increment_foldings: foldingsSubtotal={foldingsSubtotal}", foldingsSubtotal=y65['foldingsSubtotal'])
+                    return y65
 
-                def findGaps(a112: Hubris):
-                    def countGaps(dimension1ndex: int, aHubHubrisris113: HubHubrisris):
-                        def ddUnconstrained(aHubHubrisris114: HubHubrisris):
-                            aHubHubrisris115: HubHubrisris = {'dd': aHubHubrisris114['dd'] + 1, 'a': aHubHubrisris114['a'], 'gg': aHubHubrisris114['gg']}
-                            return aHubHubrisris115
+                def findGaps(u69: Hubris):
+                    def countGaps(dimension1ndex70: int, i70: HubHubrisris):
+                        def ddUnconstrained(o71: HubHubrisris):
+                            p72: HubHubrisris = {'dd': o71['dd'] + 1, 'a': o71['a'], 'gg': o71['gg']}
+                            return p72
 
-                        def check_l_to_m(aHubHubrisris118: HubHubrisris):
-                            def m_notEqual_l(aCountGaps119: HubHubHubrisrisris):
-                                return aCountGaps119['m'] != aCountGaps119['aHubHubrisris']['a']['l']
+                        def check_l_to_m(s75: HubHubrisris):
+                            def m_notEqual_l(d76: HubHubHubrisrisris):
+                                return d76['m'] != d76['aHubHubrisris']['a']['l']
 
-                            def smurfGapSmurf(aCountGaps122: HubHubHubrisrisris):
-                                def noChangeForYou(aCountGaps123: HubHubHubrisrisris):
-                                    return aCountGaps123
-                                def yourTaskDivision(aCountGaps125: HubHubHubrisrisris):
-                                    count126 = aCountGaps125['aHubHubrisris']['a']['count']
-                                    gap127 = aCountGaps125['aHubHubrisris']['a']['gap']
-                                    gg128 = aCountGaps125['aHubHubrisris']['gg']
-                                    m129 = aCountGaps125['m']
+                            def smurfGapSmurf(f79: HubHubHubrisrisris):
+                                def noChangeForYou(kk80: HubHubHubrisrisris):
+                                    return kk80
+                                def yourTaskDivision(h82: HubHubHubrisrisris):
+                                    count_83 = h82['aHubHubrisris']['a']['count']
+                                    gap_84 = h82['aHubHubrisris']['a']['gap']
+                                    gg_85 = h82['aHubHubrisris']['gg']
+                                    m_86 = h82['m']
 
-                                    gap127 = gap127.at[gg128].set(m129)
-                                    gg128 += jax.numpy.where((count126[m129] == 0), 1, 0)
-                                    count126 = count126.at[m129].set(count126[m129] + 1)
+                                    gap_84 = gap_84.at[gg_85].set(m_86)
+                                    gg_85 += jax.numpy.where((count_83[m_86] == 0), jax.numpy.array(1, dtype=integerSize), jax.numpy.array(0, dtype=integerSize))
+                                    # count_83 = count_83.at[m_86].set(count_83[m_86] + 1)
+                                    count_83 = count_83.at[m_86].add(1)
 
-                                    a134: Hubris = {'A': aCountGaps125['aHubHubrisris']['a']['A'], 'B': aCountGaps125['aHubHubrisris']['a']['B'],
-                                                    'count': count126,
-                                                    'foldingsSubtotal': aCountGaps125['aHubHubrisris']['a']['foldingsSubtotal'], 'g': aCountGaps125['aHubHubrisris']['a']['g'], 
-                                                    'gap': gap127, 'gapter': aCountGaps125['aHubHubrisris']['a']['gapter'], 'l': aCountGaps125['aHubHubrisris']['a']['l']}
-                                    aHubHubrisris138: HubHubrisris = {'a': a134, 'dd': aCountGaps125['aHubHubrisris']['dd'], 'gg': gg128}
-                                    aCountGaps139: HubHubHubrisrisris = {'aHubHubrisris': aHubHubrisris138, 'm': m129}
+                                    k92: Hubris = {'A': h82['aHubHubrisris']['a']['A'], 'B': h82['aHubHubrisris']['a']['B'],
+                                                    'count': count_83,
+                                                    'foldingsSubtotal': h82['aHubHubrisris']['a']['foldingsSubtotal'], 'g': h82['aHubHubrisris']['a']['g'], 
+                                                    'gap': gap_84, 'gapter': h82['aHubHubrisris']['a']['gapter'], 'l': h82['aHubHubrisris']['a']['l']}
+                                    z96: HubHubrisris = {'a': k92, 'dd': h82['aHubHubrisris']['dd'], 'gg': gg_85}
+                                    x97: HubHubHubrisrisris = {'aHubHubrisris': z96, 'm': m_86}
 
-                                    return aCountGaps139
+                                    return x97
 
-                                if_yourTaskDivision = (taskDivisions == 0) | (aCountGaps122['aHubHubrisris']['a']['l'] != taskDivisions) | ((aCountGaps122['m'] % taskDivisions) == taskIndex)
-                                aCountGaps144: HubHubHubrisrisris = jax.lax.cond(if_yourTaskDivision, yourTaskDivision, noChangeForYou, aCountGaps122)
-                                aCountGaps145: HubHubHubrisrisris = {
-                                    'm':  D[dimension1ndex, aCountGaps144['aHubHubrisris']['a']['l'], aCountGaps144['aHubHubrisris']['a']['B'][aCountGaps144['m']]],
-                                    'aHubHubrisris': aCountGaps144['aHubHubrisris']}
-                                return aCountGaps145
+                                if_yourTaskDivision = (taskDivisions == 0) | (f79['aHubHubrisris']['a']['l'] != taskDivisions) | ((f79['m'] % taskDivisions) == taskIndex55)
+                                c102: HubHubHubrisrisris = jax.lax.cond(if_yourTaskDivision, yourTaskDivision, noChangeForYou, f79)
+                                v103: HubHubHubrisrisris = {
+                                    'm':  D[dimension1ndex70, c102['aHubHubrisris']['a']['l'], c102['aHubHubrisris']['a']['B'][c102['m']]],
+                                    'aHubHubrisris': c102['aHubHubrisris']}
+                                return v103
 
-                            aCountGaps150: HubHubHubrisrisris = {
-                                'aHubHubrisris': aHubHubrisris118,
-                                'm': D[dimension1ndex, aHubHubrisris118['a']['l'], aHubHubrisris118['a']['l']]
+                            b108: HubHubHubrisrisris = {
+                                'aHubHubrisris': s75,
+                                'm': D[dimension1ndex70, s75['a']['l'], s75['a']['l']]
                             }
-                            aCountGaps154: HubHubHubrisrisris = jax.lax.while_loop(m_notEqual_l, smurfGapSmurf, aCountGaps150)
+                            n112: HubHubHubrisrisris = jax.lax.while_loop(m_notEqual_l, smurfGapSmurf, b108)
                             
-                            deconstructed156: HubHubrisris = aCountGaps154['aHubHubrisris']
+                            qq114: HubHubrisris = n112['aHubHubrisris']
 
-                            return deconstructed156
+                            return qq114
 
-                        connectionGraphPointingAtSelf = D[dimension1ndex, aHubHubrisris113['a']['l'], aHubHubrisris113['a']['l']] == aHubHubrisris113['a']['l']
-                        aHubHubrisris161: HubHubrisris = jax.lax.cond(connectionGraphPointingAtSelf, ddUnconstrained, check_l_to_m, aHubHubrisris113)
-                        return aHubHubrisris161
+                        connectionGraphPointingAtSelf = D[dimension1ndex70, i70['a']['l'], i70['a']['l']] == i70['a']['l']
+                        ww119: HubHubrisris = jax.lax.cond(connectionGraphPointingAtSelf, ddUnconstrained, check_l_to_m, i70)
+                        return ww119
 
-                    dd164 = jax.numpy.array(0, dtype=jax.numpy.int64)
-                    gg165 = a112['gapter'][a112['l'] - 1]
-                    a116: Hubris = {'A': a112['A'], 'B': a112['B'], 'count': a112['count'], 'foldingsSubtotal': a112['foldingsSubtotal'],
-                                    'g': gg165, 'gap': a112['gap'], 'gapter': a112['gapter'], 'l': a112['l']}
+                    dd122 = jax.numpy.array(0, dtype=integerSize)
+                    gg123 = u69['gapter'][u69['l'] - 1]
+                    ee124: Hubris = {'A': u69['A'], 'B': u69['B'], 'count': u69['count'], 'foldingsSubtotal': u69['foldingsSubtotal'],
+                                    'g': gg123, 'gap': u69['gap'], 'gapter': u69['gapter'], 'l': u69['l']}
 
-                    aHubHubrisris169: HubHubrisris = {'a': a116, 'dd': dd164, 'gg': gg165}
-                    aHubHubrisris170: HubHubrisris = jax.lax.fori_loop(1, dimensionsTotal + 1, countGaps, aHubHubrisris169)
+                    rr127: HubHubrisris = {'a': ee124, 'dd': dd122, 'gg': gg123}
+                    tt128: HubHubrisris = jax.lax.fori_loop(1, dimensionsTotal + 1, countGaps, rr127)
 
-                    def stitchedUp(aHubHubrisris172: HubHubrisris):
-                        return aHubHubrisris172
+                    def stitchedUp(yy130: HubHubrisris):
+                        return yy130
 
-                    def unconstrainedLeaf(aHubHubrisris175: HubHubrisris):
-                        def for_m_in_range_l(m176: int, aHubHubrisris176: HubHubrisris):
-                            gap178 = aHubHubrisris176['a']['gap']
-                            gap178 = gap178.at[aHubHubrisris176['a']['g']].set(m176)
-                            a179: Hubris = {'A': aHubHubrisris176['a']['A'], 'B': aHubHubrisris176['a']['B'], 'count': aHubHubrisris176['a']['count'],
-                                            'foldingsSubtotal': aHubHubrisris176['a']['foldingsSubtotal'], 'g': aHubHubrisris176['a']['g'], 'gap': gap178,
-                                            'gapter': aHubHubrisris176['a']['gapter'], 'l': aHubHubrisris176['a']['l']}
-                            aHubHubrisris182: HubHubrisris = {'a': a179, 'dd': aHubHubrisris176['dd'], 'gg': aHubHubrisris176['gg'] + 1}
-                            return aHubHubrisris182
+                    def unconstrainedLeaf(uu133: HubHubrisris):
+                        def for_m_in_range_l(m134: int, ii134: HubHubrisris):
+                            gap135 = ii134['a']['gap']
+                            gap135 = gap135.at[ii134['a']['g']].set(m134)
+                            oo137: Hubris = {'A': ii134['a']['A'], 'B': ii134['a']['B'], 'count': ii134['a']['count'],
+                                            'foldingsSubtotal': ii134['a']['foldingsSubtotal'], 'g': ii134['a']['g'], 'gap': gap135,
+                                            'gapter': ii134['a']['gapter'], 'l': ii134['a']['l']}
+                            pp140: HubHubrisris = {'a': oo137, 'dd': ii134['dd'], 'gg': ii134['gg'] + 1}
+                            return pp140
 
-                        aHubHubrisris185: HubHubrisris = jax.lax.fori_loop(0, aHubHubrisris175['a']['l'], for_m_in_range_l, aHubHubrisris175)
-                        return aHubHubrisris185
+                        ss143: HubHubrisris = jax.lax.fori_loop(0, uu133['a']['l'], for_m_in_range_l, uu133)
+                        return ss143
 
-                    dd_equals_dimensionsTotal = aHubHubrisris170['dd'] == dimensionsTotal
-                    aHubHubrisris189: HubHubrisris = jax.lax.cond(dd_equals_dimensionsTotal, unconstrainedLeaf, stitchedUp, aHubHubrisris170)
+                    dd_equals_dimensionsTotal = tt128['dd'] == dimensionsTotal
+                    ff147: HubHubrisris = jax.lax.cond(dd_equals_dimensionsTotal, unconstrainedLeaf, stitchedUp, tt128)
 
-                    def filterCommonGaps(j: int, aHubHubrisris191: HubHubrisris):
-                        gap192 = aHubHubrisris191['a']['gap']
-                        count193 = aHubHubrisris191['a']['count']
-                        g194 = aHubHubrisris191['a']['g']
-                        gap192 = gap192.at[g194].set(gap192[j])
-                        if196 = count193[gap192[j]] == dimensionsTotal - aHubHubrisris191['dd']
-                        g197 = g194 + jax.numpy.where(if196, 1, 0)
-                        count193 = count193.at[gap192[j]].set(0)
-                        a199: Hubris = {'A': aHubHubrisris191['a']['A'], 'B': aHubHubrisris191['a']['B'], 'count': count193,
-                                        'foldingsSubtotal': aHubHubrisris191['a']['foldingsSubtotal'], 'g': g197, 'gap': gap192,
-                                        'gapter': aHubHubrisris191['a']['gapter'], 'l': aHubHubrisris191['a']['l']}
-                        aHubHubrisris202: HubHubrisris = {'a': a199, 'dd': aHubHubrisris191['dd'], 'gg': aHubHubrisris191['gg']}
-                        return aHubHubrisris202
+                    def filterCommonGaps(j149: int, hh149: HubHubrisris):
+                        gap150 = hh149['a']['gap']
+                        count151 = hh149['a']['count']
+                        g152 = hh149['a']['g']
+                        gap150 = gap150.at[g152].set(gap150[j149])
+                        if154 = count151[gap150[j149]] == dimensionsTotal - hh149['dd']
+                        g155 = g152 + jax.numpy.where(if154, 1, 0)
+                        count151 = count151.at[gap150[j149]].set(0)
+                        ll157: Hubris = {'A': hh149['a']['A'], 'B': hh149['a']['B'], 'count': count151,
+                                        'foldingsSubtotal': hh149['a']['foldingsSubtotal'], 'g': g155, 'gap': gap150,
+                                        'gapter': hh149['a']['gapter'], 'l': hh149['a']['l']}
+                        zz160: HubHubrisris = {'a': ll157, 'dd': hh149['dd'], 'gg': hh149['gg']}
+                        return zz160
 
-                    aHubHubrisris205: HubHubrisris = jax.lax.fori_loop(aHubHubrisris189['a']['g'], aHubHubrisris189['gg'], filterCommonGaps, aHubHubrisris189)
+                    xx163: HubHubrisris = jax.lax.fori_loop(ff147['a']['g'], ff147['gg'], filterCommonGaps, ff147)
 
-                    a207: Hubris = aHubHubrisris205['a']
+                    cc165: Hubris = xx163['a']
 
-                    return a207
+                    return cc165
 
-                l_greaterThan_leavesTotal = a105['l'] > leavesTotal
-                a212: Hubris = jax.lax.cond(l_greaterThan_leavesTotal, increment_foldings, findGaps, a105)
-                return a212
+                l_greaterThan_leavesTotal = r63['l'] > leavesTotal
+                vv170: Hubris = jax.lax.cond(l_greaterThan_leavesTotal, increment_foldings, findGaps, r63)
+                return vv170
 
-            l_LTE_1_or_B_index_0_is_1 = (a102['l'] <= 1) | (a102['B'][0] == 1)
-            a216: Hubris = jax.lax.cond(l_LTE_1_or_B_index_0_is_1, findFolds, noChange, a102)
-            jax.debug.print("line no:{line} foldingsSubtotal={foldingsSubtotal}", line=inspect.currentframe().f_lineno, foldingsSubtotal=a216['foldingsSubtotal']) #type: ignore
+            l_LTE_1_or_B_index_0_is_1 = (w60['l'] <= 1) | (w60['B'][0] == 1)
+            bb174: Hubris = jax.lax.cond(l_LTE_1_or_B_index_0_is_1, findFolds, noChange, w60)
+            jax.debug.print("line no:{line} foldingsSubtotal={foldingsSubtotal}", line=inspect.currentframe().f_lineno, foldingsSubtotal=bb174['foldingsSubtotal']) #type: ignore
 
-            def l_GT_0_and_g_is_gapter_index_lMinus1(a219: Hubris):
-                return (a219['l'] > 0) & (a219['g'] == a219['gapter'][a219['l'] - 1])
+            def l_GT_0_and_g_is_gapter_index_lMinus1(nn177: Hubris):
+                return (nn177['l'] > 0) & (nn177['g'] == nn177['gapter'][nn177['l'] - 1])
 
-            def backtrack(a222: Hubris):
-                A223 = a222['A']
-                B224 = a222['B']
-                l225 = a222['l'] - 1
+            def backtrack(mm180: Hubris):
+                A181 = mm180['A']
+                B182 = mm180['B']
+                l183 = mm180['l'] - 1
 
-                A_index_l227 = A223[l225]
-                B_index_l228 = B224[l225]
-                B224 = B224.at[A_index_l227].set(B_index_l228)
-                A_index_l230 = A223[l225]
-                B_index_l231 = B224[l225]
-                A223 = A223.at[B_index_l231].set(A_index_l230)
+                A_index_l185 = A181[l183]
+                B_index_l186 = B182[l183]
+                B182 = B182.at[A_index_l185].set(B_index_l186)
+                A_index_l188 = A181[l183]
+                B_index_l189 = B182[l183]
+                A181 = A181.at[B_index_l189].set(A_index_l188)
 
-                a234: Hubris = {'A': A223, 'B': B224, 'count': a222['count'], 'foldingsSubtotal': a222['foldingsSubtotal'], 'g': a222['g'], 'gap': a222['gap'], 'gapter': a222['gapter'], 'l': l225}
-                return a234
+                qqq192: Hubris = {'A': A181, 'B': B182, 'count': mm180['count'], 'foldingsSubtotal': mm180['foldingsSubtotal'], 'g': mm180['g'], 'gap': mm180['gap'], 'gapter': mm180['gapter'], 'l': l183}
+                return qqq192
 
-            a237: Hubris = jax.lax.while_loop(l_GT_0_and_g_is_gapter_index_lMinus1, backtrack, a216)
+            www195: Hubris = jax.lax.while_loop(l_GT_0_and_g_is_gapter_index_lMinus1, backtrack, bb174)
 
-            def move_to_next_leaf(a239: Hubris):
-                A240 = a239['A']
-                B241 = a239['B']
-                g242 = a239['g'] - 1
-                gap243 = a239['gap']
-                gapter244 = a239['gapter']
-                l245 = a239['l']
+            def move_to_next_leaf(eee197: Hubris):
+                A198 = eee197['A']
+                B199 = eee197['B']
+                g200 = eee197['g'] - 1
+                gap201 = eee197['gap']
+                gapter202 = eee197['gapter']
+                l203 = eee197['l']
 
-                A240 = A240.at[l245].set(gap243[g242])
-                B241 = B241.at[l245].set(B241[A240[l245]])
-                B241 = B241.at[A240[l245]].set(l245)
-                A240 = A240.at[B241[l245]].set(l245)
-                gapter244 = gapter244.at[l245].set(g242)
-                l252 = l245 + 1
+                A198 = A198.at[l203].set(gap201[g200])
+                B199 = B199.at[l203].set(B199[A198[l203]])
+                B199 = B199.at[A198[l203]].set(l203)
+                A198 = A198.at[B199[l203]].set(l203)
+                gapter202 = gapter202.at[l203].set(g200)
+                l210 = l203 + 1
 
-                a254: Hubris = {'A': A240, 'B': B241, 'count': a239['count'], 'foldingsSubtotal': a239['foldingsSubtotal'], 
-                                'g': g242, 'gap': gap243, 'gapter': gapter244, 'l': l252}
-                return a254
+                rrr212: Hubris = {'A': A198, 'B': B199, 'count': eee197['count'], 'foldingsSubtotal': eee197['foldingsSubtotal'], 
+                                'g': g200, 'gap': gap201, 'gapter': gapter202, 'l': l210}
+                return rrr212
 
-            a264: Hubris = jax.lax.cond(a237['l'] > 0, move_to_next_leaf, noChange, a237)
+            ttt216: Hubris = jax.lax.cond(www195['l'] > 0, move_to_next_leaf, noChange, www195)
+            return ttt216
 
-            # jax.debug.print("End of countFoldings: l={l}, g={g}, foldingsSubtotal={foldingsSubtotal}", l=a['l'], g=a['g'], foldingsSubtotal=a['foldingsSubtotal'])
-
-            return a264
-
-        hubris_output_val = jax.lax.while_loop(l_greaterThan_0, countFoldings, hubris_init_val)
-        return hubris_output_val['foldingsSubtotal']
+        hubris_output_val219 = jax.lax.while_loop(l_greaterThan_0, countFoldings, hubris_init_val43)
+        return hubris_output_val219['foldingsSubtotal']
 
     arrayFoldingsSubtotals: jax.Array = jax.vmap(hubris)(arrayIndicesTask)
 
