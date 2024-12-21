@@ -2,14 +2,17 @@ from numba import njit
 import numpy
 
 # I composed this module to be used with this visibility toggle: https://marketplace.visualstudio.com/items?itemName=eliostruyf.vscode-hide-comments
-from mapFolding.lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal # Indices of array `the`. Static integer values
-from mapFolding.lovelaceIndices import A, B, count, gapter # Indices of array `track`. Dynamic values; each with length `leavesTotal + 1`
+# to convert the identifiers regex ( *?)(\S.+?)( # )(.+) to $1$4$3$2 and then fix this line
+# Indices of array `the`. Static integer values
+from mapFolding.lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal 
+# Indices of array `track`. Dynamic values; each with length `leavesTotal + 1`
+from mapFolding.lovelaceIndices import A, B, count, gapter # from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 
 @njit(cache=True, parallel=True, fastmath=False)
 def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
-                  gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
-                  the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
-                  D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
+                    gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], # potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
+                    the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
+                    D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]): # connectionGraph: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
     foldingsTotal: int = 0
     l: int = 1 # activeLeaf1ndex: int = 1
     g: int = 0 # activeGap1ndex: int = 0
@@ -27,14 +30,14 @@ def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
 
                 # Count possible gaps for leaf l in each section
                 for dimension1ndex in range(1, the[dimensionsTotal] + 1):
-                    if D[dimension1ndex][l][l] == l: # connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
+                    if D[dimension1ndex][l][l] == l: # if connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
                         dd += 1 # unconstrainedLeaf += 1
                     else:
                         m = D[dimension1ndex][l][l] # leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
                         while m != l: # while leaf1ndexConnectee != activeLeaf1ndex:
-                            if the[taskDivisions] == 0 or l != the[taskDivisions] or m % the[taskDivisions] == the[taskIndex]: # if the[tasksTotal] == 0 or activeLeaf1ndex != the[tasksTotal] or leaf1ndexConnectee % the[tasksTotal] == the[taskActive]:
+                            if the[taskDivisions] == 0 or l != the[taskDivisions] or m % the[taskDivisions] == the[taskIndex]: # if the[taskDivisions] == 0 or activeLeaf1ndex != the[taskDivisions] or leaf1ndexConnectee % the[taskDivisions] == the[taskIndex]:
                                 gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                if track[count][m] == 0: # track[countDimensionsGapped][leaf1ndexConnectee] == 0:
+                                if track[count][m] == 0: # if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
                                     gg += 1 # gap1ndexLowerBound += 1
                                 track[count][m] += 1 # track[countDimensionsGapped][leaf1ndexConnectee] += 1
                             m = D[dimension1ndex][l][track[B][m]] # leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][track[leafBelow][leaf1ndexConnectee]]

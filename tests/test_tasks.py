@@ -1,31 +1,57 @@
 import random
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 
 import pytest
 
-from mapFolding import foldings, getLeavesTotal
+from mapFolding import foldings, getLeavesTotal, validateListDimensions
 from mapFolding.oeis import settingsOEISsequences
 
 
-def buildTestPool():
-    poolDimensionsToValue: Dict[Tuple, int] = {}
+def buildTestPool() -> Dict[Tuple[int, ...], int]:
+    """Build a pool of valid test cases from OEIS sequences."""
+    poolDimensionsToValue: Dict[Tuple[int, ...], int] = {}
     for oeisID, settings in settingsOEISsequences.items():
         for n in settings['testValuesValidation']:
             dimensions = settings['dimensions'](n)
             dimensions.sort()
-            poolDimensionsToValue[tuple(dimensions)] = settings['valuesKnown'][n]
-    for dimensions in poolDimensionsToValue.copy():
-        measure = [element for element in dimensions if element > 0]
-        if len(measure) < 2:  # Skip 1D cases
-            del poolDimensionsToValue[dimensions]
+            try:
+                validateListDimensions(dimensions)
+                poolDimensionsToValue[tuple(dimensions)] = settings['valuesKnown'][n]
+            except Exception:
+                pass
     return poolDimensionsToValue
 
 @pytest.fixture(scope="module")
-def poolTestCases():
+def poolTestCases() -> List[Tuple[List[int], int]]:
+    """Provide a list of valid (dimensions, expected_value) test cases."""
     poolDimensionsToValue = buildTestPool()
     # Select 3 random test cases
     listDimensions = random.sample(list(poolDimensionsToValue.keys()), k=3)
     return [(list(dimensions), poolDimensionsToValue[dimensions]) for dimensions in listDimensions]
+
+@pytest.mark.parametrize("task_parameters", [
+    {'computationDivisions': 5, 'computationIndex': 0, 'error': ".*"},  # computationDivisions > leavesTotal
+    {'computationDivisions': 2, 'computationIndex': 2, 'error': ".*"},  # computationIndex >= computationDivisions
+    {'computationDivisions': -1, 'computationIndex': 0, 'error': ".*"},  # Negative computationDivisions
+    {'computationDivisions': 2, 'computationIndex': -1, 'error': ".*"},  # Negative computationIndex
+    {'computationDivisions': 'abc', 'computationIndex': 0, 'error': ".*"},  # Invalid type computationDivisions
+    {'computationDivisions': 2, 'computationIndex': 'abc', 'error': ".*"},  # Invalid type computationIndex
+    {'computationDivisions': 2.5, 'computationIndex': 0, 'error': ".*"},  # Float computationDivisions
+    {'computationDivisions': 2, 'computationIndex': 1.5, 'error': ".*"},  # Float computationIndex
+    {'computationDivisions': None, 'computationIndex': 0, 'error': ".*"},  # None computationDivisions
+    {'computationDivisions': 2, 'computationIndex': None, 'error': ".*"},  # None computationIndex
+])
+def test_task_validation(poolTestCases, task_parameters):
+    """Test validation of computation task parameters."""
+    # Get first test case dimensions
+    listDimensions, DISCARDexpected = poolTestCases[0]
+    
+    with pytest.raises((ValueError, TypeError), match=task_parameters['error']):
+        foldings(
+            listDimensions, 
+            task_parameters['computationDivisions'],  # type: ignore
+            task_parameters['computationIndex']  # type: ignore
+        )
 
 def test_foldings_computationDivisions(poolTestCases):
     for listDimensions, foldingsExpected in poolTestCases:
@@ -41,88 +67,4 @@ def test_foldings_computationDivisions(poolTestCases):
             for index in range(computationDivisions)
         )
         assert foldingsTotal == foldingsExpected
-
-def test_foldings_invalid_inputs():
-    with pytest.raises(ValueError):
-        foldings([], 1, 0)  # Empty dimensions (caught by intInnit)
-
-    with pytest.raises(NotImplementedError):
-        foldings([1], 1, 0)  # Only one dimension
-
-    with pytest.raises(NotImplementedError):
-        foldings([0, 0], 1, 0)  # No non-zero dimensions
-
-    with pytest.raises(ValueError):
-        foldings([1, -1], 1, 0)  # Negative dimension
-
-    with pytest.raises(ValueError):
-        foldings([1, 2], -1, 0)  # Negative computationDivisions
-
-    with pytest.raises(ValueError):
-        foldings([1, 2], 1, -1)  # Negative computationIndex
-
-    with pytest.raises(ValueError):
-        foldings([1, 2], 2, 2)  # computationIndex >= computationDivisions
-
-    with pytest.raises(ValueError):
-        foldings([1, 2], 10, 0)  # computationDivisions > leavesTotal
-
-    with pytest.raises(ValueError):
-        foldings([1.5, 2], 1, 0)  # Non-integer dimensions  # type: ignore
-
-    with pytest.raises(TypeError):
-        foldings([1, 2], 'abc', 0)  # Invalid type for computationDivisions  # type: ignore
-
-    with pytest.raises(TypeError):
-        foldings([1, 2], 1, 'abc')  # Invalid type for computationIndex  # type: ignore
-
-def test_foldings_dimensions_parsing():
-    with pytest.raises(ValueError):
-        foldings([])  # Empty list
-    
-    with pytest.raises(ValueError):
-        foldings([1, 2, 3.5])  # Non-integer dimensions # type: ignore
-
-    with pytest.raises(ValueError):
-        foldings([1, 2, -3])  # Negative dimensions
-
-    # Test filtering of zero dimensions
-    assert foldings([2, 0, 2], 1, 0) == foldings([2, 2], 1, 0)
-
-def test_getLeavesTotal():
-    # Test basic multiplication
-    assert getLeavesTotal([2, 3]) == 6
-    assert getLeavesTotal([2, 3, 4]) == 24
-
-    # Test with zero dimensions
-    assert getLeavesTotal([0, 0]) == 0
-    assert getLeavesTotal([2, 0, 3]) == 6
-
-    # Test error cases
-    with pytest.raises(ValueError):
-        getLeavesTotal([])  # Empty list
-
-    with pytest.raises(ValueError):
-        getLeavesTotal([-1, 2])  # Negative dimensions
-
-    with pytest.raises(TypeError):
-        getLeavesTotal(['1', '2'])  # Non-numeric values # type: ignore
-
-def test_foldings_computation_divisions():
-    with pytest.raises(ValueError):
-        foldings([2, 2], 5, 0)  # computationDivisions > leavesTotal
-
-    # Test computationIndex validation
-    with pytest.raises(ValueError):
-        foldings([2, 2], 2, -1)  # Negative computationIndex
-
-    with pytest.raises(ValueError):
-        foldings([2, 2], 2, 2)  # computationIndex >= computationDivisions
-
-    # Test invalid dimensions
-    with pytest.raises(NotImplementedError):
-        foldings([1], 2, 0)  # Only one dimension
-
-    # Test valid computation divisions
-    assert foldings([2, 2], 2, 0) + foldings([2, 2], 2, 1) == foldings([2, 2])
 

@@ -1,23 +1,18 @@
 """For troubleshooting, special identifiers:
-
 - Where possible, identifiers match the working non-JAX version: https://github.com/hunterhogan/mapFolding/blob/68a1d7f900caa92916edaba6c2a6dcfd229b3c3a/mapFolding/lovelace.py
-- `dynamicHubris_init_val`: parameter `init_val` in `jax.lax.while_loop`, "of type ``a``"
-- `dynamicHubris_output_val`: return value of `jax.lax.while_loop`, "of type ``a``"
-- `a`: within the while loop, the `dynamicHubris` "of type ``a``", which must be explicitly handled in JAX-style functions
-- Sometimes, some conditional statements must be given an identifier, such as "cond_fun" in `jax.lax.while_loop`
-    and the predicate in `jax.lax.cond`. The identifier attempts to represent the logic of the conditional
+- Conditional statements identifiers attempt to represent the logic of the conditional
     statement. So `l > 0`, for example, could be `l_greaterThan_0`.
-
-By adding line numbers to identifiers, they should all be unique.
+- By adding line numbers to identifiers, they should all be unique.
 """
 """ideas:
+- most best idea: get the crap to work
 - revisit optimizing dtype; except foldingsSubtotal, int8 is (probably) large enough
 - revisit mapFoldingPathDivisions; n.b., only tried with `+= 1` not `+= leavesTotal`
 """
 from typing import TypedDict
 import jax
+import jaxtyping
 import inspect
-from .pidVariables import integerSize
 
 class Hubris(TypedDict):
     A: jax.Array
@@ -41,16 +36,16 @@ class HubHubHubrisrisris(TypedDict):
     m: jax.Array
 
 def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: jax.Array, dimensionsTotal: jax.Array, D: jax.Array):
-
+    leavesTotalPlus1 = jax.numpy.add(leavesTotal, 1)
     hubris_init_val43 =  Hubris(
-        A                = jax.numpy.zeros(leavesTotal + 1,       dtype=integerSize),
-        B                = jax.numpy.zeros(leavesTotal + 1,       dtype=integerSize),
-        count            = jax.numpy.zeros(leavesTotal + 1,       dtype=integerSize),
-        foldingsSubtotal = jax.numpy.array(0, dtype=integerSize),  
-        g                = jax.numpy.array(0, dtype=integerSize),  
-        gap              = jax.numpy.zeros((leavesTotal **2) + 1, dtype=integerSize),
-        gapter           = jax.numpy.zeros(leavesTotal + 1,       dtype=integerSize),
-        l                = jax.numpy.array(1, dtype=integerSize),  
+        A                = jax.numpy.zeros(leavesTotalPlus1,       dtype=jax.numpy.int32),
+        B                = jax.numpy.zeros(leavesTotalPlus1,       dtype=jax.numpy.int32),
+        count            = jax.numpy.zeros(leavesTotalPlus1,       dtype=jax.numpy.int32),
+        foldingsSubtotal = jax.numpy.array(0, dtype=jax.numpy.int32),  
+        g                = jax.numpy.array(0, dtype=jax.numpy.int32),  
+        gap              = jax.numpy.zeros((leavesTotal **2) + 1, dtype=jax.numpy.int32),
+        gapter           = jax.numpy.zeros(leavesTotalPlus1,       dtype=jax.numpy.int32),
+        l                = jax.numpy.array(1, dtype=jax.numpy.int32),  
     )
 
     @jax.jit
@@ -89,7 +84,7 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
                                     m_86 = h82['m']
 
                                     gap_84 = gap_84.at[gg_85].set(m_86)
-                                    gg_85 += jax.numpy.where((count_83[m_86] == 0), jax.numpy.array(1, dtype=integerSize), jax.numpy.array(0, dtype=integerSize))
+                                    gg_85 += jax.numpy.where((count_83[m_86] == 0), jax.numpy.array(1, dtype=jax.numpy.int32), jax.numpy.array(0, dtype=jax.numpy.int32))
                                     # count_83 = count_83.at[m_86].set(count_83[m_86] + 1)
                                     count_83 = count_83.at[m_86].add(1)
 
@@ -123,7 +118,7 @@ def spoon(taskDivisions: jax.Array, arrayIndicesTask: jax.Array, leavesTotal: ja
                         ww119: HubHubrisris = jax.lax.cond(connectionGraphPointingAtSelf, ddUnconstrained, check_l_to_m, i70)
                         return ww119
 
-                    dd122 = jax.numpy.array(0, dtype=integerSize)
+                    dd122 = jax.numpy.array(0, dtype=jax.numpy.int32)
                     gg123 = u69['gapter'][u69['l'] - 1]
                     ee124: Hubris = {'A': u69['A'], 'B': u69['B'], 'count': u69['count'], 'foldingsSubtotal': u69['foldingsSubtotal'],
                                     'g': gg123, 'gap': u69['gap'], 'gapter': u69['gapter'], 'l': u69['l']}

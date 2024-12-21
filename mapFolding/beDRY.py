@@ -1,6 +1,10 @@
-from typing import List, Tuple
-from Z0Z_tools import intInnit
 import sys
+from typing import List, Tuple
+
+import numpy
+import numpy.typing
+from Z0Z_tools import intInnit
+
 
 def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed parameter') -> List[int]:
     """
@@ -77,6 +81,7 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
     listPositive = [dimension for dimension in listNonNegative if dimension > 0]
     if len(listPositive) < 2:
         from typing import get_args
+
         from mapFolding.oeis import OEISsequenceID
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
     listDimensions = listPositive
@@ -87,27 +92,86 @@ def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: i
     Validates the task divisions for a computation process.
 
     Parameters:
-        computationDivisions (int): The number of divisions for the computation.
-        computationIndex (int): The index of the current computation division.
-        n (int): The total number of leaves.
+        computationDivisions: The number of divisions for the computation
+        computationIndex: The index of the current computation division
+        n: The total number of leaves
 
     Returns:
-        Tuple[int, int]: A tuple containing the validated computationDivisions and computationIndex.
+        Tuple containing the validated computationDivisions and computationIndex
 
     Raises:
-        ValueError: If computationDivisions is greater than n.
-        ValueError: If computationIndex is greater than or equal to computationDivisions when computationDivisions is greater than 1.
-        ValueError: If computationDivisions or computationIndex are negative or not integers.
+        ValueError: If parameters are invalid
+        TypeError: If parameters are not integers
     """
+    # First validate types
+    computationDivisions = intInnit([computationDivisions], 'computationDivisions').pop(0)
+    computationIndex = intInnit([computationIndex], 'computationIndex').pop(0)
+
+    # Then validate ranges
+    if computationDivisions < 0 or computationIndex < 0:
+        raise ValueError(f"computationDivisions, {computationDivisions}, and computationIndex, {computationIndex}, must be non-negative integers.")
+
     if computationDivisions > n:
         raise ValueError(f"computationDivisions, {computationDivisions}, must be less than or equal to the total number of leaves, {n}.")
+
     if computationDivisions > 1 and computationIndex >= computationDivisions:
         raise ValueError(f"computationIndex, {computationIndex}, must be less than computationDivisions, {computationDivisions}.")
-    if computationDivisions < 0 or computationIndex < 0 or not isinstance(computationDivisions, int) or not isinstance(computationIndex, int):
-        raise ValueError(f"computationDivisions, {computationDivisions}, and computationIndex, {computationIndex}, must be non-negative integers.")
+
     return computationDivisions, computationIndex
 
-def validateParametersFoldings(listDimensions: List[int], computationDivisions: int, computationIndex: int) -> Tuple[List[int], int, int, int]:
+def makeConnectionGraph(listDimensions: List[int]) -> numpy.typing.NDArray[numpy.int64]:
+    """
+    Constructs a connection graph for a given list of dimensions.
+    This function generates a multi-dimensional connection graph based on the provided list of dimensions.
+    The graph represents the connections between leaves in a Cartesian product decomposition or dimensional product mapping.
+    
+    Parameters:
+        listDimensions: A list of integers representing the dimensions of the map.
+    Returns:
+        D (connectionGraph): A 3D numpy array representing the connection graph. The shape of the array is (d+1, n+1, n+1),
+                                           where d is the number of dimensions and n is the total number of leaves.
+    """
+
+    listDimensions = validateListDimensions(listDimensions)
+    n = getLeavesTotal(listDimensions)
+    d = len(listDimensions)
+
+    # How to build a numpy.ndarray connectionGraph with sentinel values: 
+    # ("Cartesian Product Decomposition" or "Dimensional Product Mapping")
+    # Step 1: find the cumulative product of the map dimensions
+    P = numpy.ones(d + 1, dtype=numpy.int64)
+    for i in range(1, d + 1):
+        P[i] = P[i - 1] * listDimensions[i - 1]
+
+    # Step 2: for each dimension, create a coordinate system
+    # C[i][m] holds the i-th coordinate of leaf m
+    C = numpy.zeros((d + 1, n + 1), dtype=numpy.int64)
+    for i in range(1, d + 1):
+        for m in range(1, n + 1):
+            C[i][m] = ((m - 1) // P[i - 1]) % listDimensions[i - 1] + 1
+
+    # Step 3: create a huge empty leafConnectionGraph
+    D = numpy.zeros((d + 1, n + 1, n + 1), dtype=numpy.int64)
+
+    # Step for... for... for...: fill the leafConnectionGraph
+    for i in range(1, d + 1):
+    # D[i][l][m] computes the leaf connected to m in dimension i when inserting l
+        for l in range(1, n + 1):
+            for m in range(1, l + 1):
+                delta = C[i][l] - C[i][m]
+                if delta % 2 == 0: # If delta is even
+                    if C[i][m] == 1:
+                        D[i][l][m] = m
+                    else:
+                        D[i][l][m] = m - P[i - 1]
+                else: # If delta is odd
+                    if C[i][m] == listDimensions[i - 1] or m + P[i - 1] > l:
+                        D[i][l][m] = m
+                    else:
+                        D[i][l][m] = m + P[i - 1]
+    return D
+
+def validateParametersFoldings(listDimensions: List[int], computationDivisions: int, computationIndex: int) -> Tuple[List[int], int, int, int, numpy.typing.NDArray[numpy.int64]]:
     """
     Validates and processes the parameters for the folding computation.
 
@@ -117,11 +181,14 @@ def validateParametersFoldings(listDimensions: List[int], computationDivisions: 
         computationIndex (int): The index of the current computation task.
 
     Returns:
-        listDimensions,computationDivisions,computationIndex,leavesTotal: A tuple containing the validated list of dimensions,
+        listDimensions,computationDivisions,computationIndex,leavesTotal,connectionGraph: A tuple containing the validated list of dimensions,
                                          the validated number of computation divisions,
                                          the validated computation index, and the total number of leaves.
     """
+    # I don't know if I should put all of these steps in series or if each function should validate its own parameters.
+    # In the future, I might not call the entire series. Also, it feels weird to return listDimensions from makeConnectionGraph.
     listDimensions = validateListDimensions(listDimensions)
     leavesTotal = getLeavesTotal(listDimensions)
+    connectionGraph = makeConnectionGraph(listDimensions)
     computationDivisions, computationIndex = validateTaskDivisions(computationDivisions, computationIndex, leavesTotal)
-    return listDimensions, computationDivisions, computationIndex, leavesTotal
+    return listDimensions, computationDivisions, computationIndex, leavesTotal, connectionGraph

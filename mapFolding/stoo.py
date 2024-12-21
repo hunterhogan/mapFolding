@@ -1,40 +1,51 @@
 import jax
-from .pidVariables import integerSize
-jax.config.update("jax_enable_x64", True)
-jax.config.update("jax_debug_nans", True)
+from typing import List
+import jaxtyping
 
-def foldings(listDimensions: list[int], computationDivisions: int = 0, computationIndex: int = 0) -> int:
+def foldings(listDimensions: List[int], computationDivisions: int = 0, computationIndex: int = 0) -> int:
     from mapFolding.beDRY import validateParametersFoldings
-    listDimensions, computationDivisions, computationIndex, n = validateParametersFoldings(listDimensions, computationDivisions, computationIndex)
-
-    n = jax.numpy.array(n, dtype=integerSize)
-    d = jax.numpy.array(len(listDimensions), dtype=integerSize)
-    taskDivisions = jax.numpy.array(computationDivisions, dtype=integerSize)
+    listDimensions, computationDivisions, computationIndex, n, connectionGraph = validateParametersFoldings(listDimensions, computationDivisions, computationIndex)
+    
+    d = jax.numpy.int32(len(listDimensions))
+    taskDivisions = jax.numpy.int32(computationDivisions)
     del computationDivisions
+
+    p = jax.numpy.array(listDimensions, dtype=jax.numpy.int32)
+    n = jax.numpy.prod(p, where=p > 0)
 
     if taskDivisions < 2:
         taskDivisions = n
         del computationIndex
-        arrayIndicesComputation = jax.numpy.arange(taskDivisions, dtype=integerSize)
+        arrayIndicesComputation = jax.numpy.arange(taskDivisions, dtype=jax.numpy.int32)
     else:
-        arrayIndicesComputation = jax.numpy.array(computationIndex, dtype=integerSize)
+        arrayIndicesComputation = jax.numpy.array(computationIndex, dtype=jax.numpy.int32)
         del computationIndex
 
-    p = jax.numpy.array(listDimensions, dtype=integerSize)
+    dPlus1 = jax.numpy.add(d, 1)
 
-    P = jax.numpy.ones(d + 1, dtype=integerSize)
-    for i in range(1, d + 1):
-        P = P.at[i].set(P[i - 1] * p[i - 1])
+    # How to build a connectionGraph: ("Cartesian Product Decomposition" or "Dimensional Product Mapping", allegedly)
+    # Step 1: find the cumulative product of the map dimensions
+    P = jax.numpy.cumprod(p, dtype=jax.numpy.int32)
 
+    # Step 2: for each dimension, create a coordinate system
     # C[i][m] holds the i-th coordinate of leaf m
-    C = jax.numpy.zeros((d + 1, n + 1), dtype=integerSize)
-    for i in range(1, d + 1):
+    C = jax.numpy.zeros((dPlus1, n + 1), dtype=jax.numpy.int32)
+    for i in range(1, dPlus1):
         for m in range(1, n + 1):
             C = C.at[i, m].set(((m - 1) // P[i - 1]) % p[i - 1] + 1)
+    """
+    Key data structures
+        - leafConnectionGraph[D][L][M]: How leaf L connects to leaf M in dimension D
+        - track[count][L]: Number of dimensions with valid gaps at leaf L
+        - track[gapter][L]: Index ranges of gaps available for leaf L
+        - gap[]: List of all potential gap positions
+    """
 
-    # D[i][l][m] computes the leaf connected to m in section i when inserting l
-    D = jax.numpy.zeros((d + 1, n + 1, n + 1), dtype=integerSize)
-    for i in range(1, d + 1):
+    # Step 3: create a huge empty leafConnectionGraph
+    D = jax.numpy.zeros((dPlus1, n + 1, n + 1), dtype=jax.numpy.int32)
+    # D[i][l][m] computes the leaf connected to m in dimension i when inserting l
+    # Step for... for... for...: fill the leafConnectionGraph
+    for i in range(1, dPlus1):
         for l in range(1, n + 1):
             for m in range(1, l + 1):
                 delta = C[i, l] - C[i, m]
