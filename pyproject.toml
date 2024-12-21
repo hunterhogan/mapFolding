@@ -27,6 +27,7 @@ test = [
     "pytest-env",
     "coverage",
     "jax",
+    "jaxtyping",
     ]
 benchmark = [
     "pandas",

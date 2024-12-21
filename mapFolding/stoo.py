@@ -1,33 +1,33 @@
 import jax
 from typing import List
-import jaxtyping
+import jaxtyping # TODO learn how to use this
+import numpy as NUMERICALPYTHON
+from mapFolding.piderIndices import taskDivisions, leavesTotal, dimensionsTotal
 
-def foldings(listDimensions: List[int], computationDivisions: int = 0, computationIndex: int = 0) -> int:
+def foldings(listDimensions: List[int], computationDivisions: int = 0, computationIndex: int = 0):
     from mapFolding.beDRY import validateParametersFoldings
-    listDimensions, computationDivisions, computationIndex, n, connectionGraph = validateParametersFoldings(listDimensions, computationDivisions, computationIndex)
-    D = jax.numpy.array(connectionGraph, dtype=jax.numpy.int32)
-    d = jax.numpy.int32(len(listDimensions))
-    taskDivisions = jax.numpy.int32(computationDivisions)
+
+    sherpa_the = NUMERICALPYTHON.zeros(3, dtype=NUMERICALPYTHON.int32)
+    listDimensions, sherpa_the[int(taskDivisions)], computationIndex, sherpa_the[int(leavesTotal)], D = validateParametersFoldings(listDimensions, computationDivisions, computationIndex)
+
+    sherpa_the[int(dimensionsTotal)] = len(listDimensions)
+    
+    connectionGraph = jax.numpy.array(D, dtype=jax.numpy.int32)
+
     del computationDivisions
 
-    p = jax.numpy.array(listDimensions, dtype=jax.numpy.int32)
-    n = jax.numpy.prod(p, where=p > 0)
-
-    if taskDivisions < 2:
-        taskDivisions = n
-        del computationIndex
-        arrayIndicesComputation = jax.numpy.arange(taskDivisions, dtype=jax.numpy.int32)
+    if sherpa_the[int(taskDivisions)] < 2:
+        sherpa_the[int(taskDivisions)] = sherpa_the[int(leavesTotal)]
+        arrayIndicesComputation = jax.numpy.arange(sherpa_the[int(taskDivisions)], dtype=jax.numpy.int32)
     else:
         arrayIndicesComputation = jax.numpy.array(computationIndex, dtype=jax.numpy.int32)
-        del computationIndex
+    del computationIndex
 
-    """
-    Key data structures
-        - leafConnectionGraph[D][L][M]: How leaf L connects to leaf M in dimension D
-        - track[count][L]: Number of dimensions with valid gaps at leaf L
-        - track[gapter][L]: Index ranges of gaps available for leaf L
-        - gap[]: List of all potential gap positions
-    """
+    the = jax.numpy.array(sherpa_the, dtype=jax.numpy.int32)
 
-    from mapFolding.pid import spoon
-    return spoon(taskDivisions, arrayIndicesComputation, n, d, D)
+    track = jax.numpy.zeros((4, jax.numpy.add(the[leavesTotal], 1)), dtype=jax.numpy.int32)
+    potentialGapsLength = the[leavesTotal] * the[leavesTotal] + 1
+    potentialGaps = jax.numpy.zeros(potentialGapsLength, dtype=jax.numpy.int32)
+
+    from mapFolding.pider import spoon
+    return spoon(connectionGraph, the, track, potentialGaps, arrayIndicesComputation)
