@@ -7,16 +7,19 @@ import jaxtyping
 from mapFolding.piderIndices import taskDivisions, leavesTotal, dimensionsTotal 
 # Indices of array `track`. Dynamic values; each with length `leavesTotal + 1`
 from mapFolding.piderIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
-
+# `connectionGraph` is a Dimensional Product Mapping of the dimensions of the map; it uses sentinel values
 def spoon(connectionGraph: jax.Array, the: jax.Array, Z0Z_track: jax.Array, Z0Z_potentialGaps: jax.Array, arrayIndicesComputation: jax.Array):
-    the = the.at[taskDivisions].set(0)
-    taskIndex = arrayIndicesComputation[0]
+    the = the.at[taskDivisions].set(0) # Normally, task divisions = total leaves
+    taskIndex = arrayIndicesComputation[0] # This array is arrange(taskDivisions)
     sherpaTrack = NUMERICALPYTHON.asarray(Z0Z_track).copy()
     sherpaPotentialGaps = NUMERICALPYTHON.asarray(Z0Z_potentialGaps).copy()
 
     def countFoldings(track: NDArray[NUMERICALPYTHON.int32], potentialGaps: NDArray[NUMERICALPYTHON.int32]):
         foldingsSubtotal = jax.numpy.int32(0)
-        activeLeaf1ndex: int = 1 # index starts at 0, but 1ndex starts at 1
+        # Concurrency and vectorization cannot be based on the activeLeaf1ndex
+        # All iterations must start at 1 or the worker will not count any foldings
+        # index starts at 0, but 1ndex starts at 1
+        activeLeaf1ndex = jax.numpy.int32(1)
         activeGap1ndex: int = 0 # index starts at 0, but 1ndex starts at 1
 
         while activeLeaf1ndex > 0:
@@ -74,6 +77,7 @@ def spoon(connectionGraph: jax.Array, the: jax.Array, Z0Z_track: jax.Array, Z0Z_
                 track[gapRangeStart][activeLeaf1ndex] = activeGap1ndex 
                 # Move to next leaf
                 activeLeaf1ndex += 1
+
         return int(foldingsSubtotal)
 
     return int(countFoldings(sherpaTrack, sherpaPotentialGaps))
