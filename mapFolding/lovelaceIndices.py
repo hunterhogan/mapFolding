@@ -15,3 +15,13 @@ leavesTotal = 2
 """Total number of leaves"""
 dimensionsTotal = 3
 """Number of dimensions"""
+
+activeLeaf1ndex = 0
+
+activeGap1ndex = 1
+
+unconstrainedLeaf = 2
+
+gap1ndexLowerBound = 3
+
+leaf1ndexConnectee = 4
