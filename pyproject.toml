@@ -37,6 +37,10 @@ benchmark = [
     "ipywidgets",
     "tqdm",
     ]
+colab = [
+    "cupy-cuda12x",  # For CUDA support on Colab
+    "torch",         # PyTorch includes some useful CUDA utilities
+]
 
 [tool.setuptools]
 include-package-data = true
