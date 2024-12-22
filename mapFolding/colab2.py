@@ -1,4 +1,4 @@
-from numba import cuda
+from numba import njit, cuda
 import numpy
 """
 Key concepts
@@ -47,17 +47,18 @@ the variable annotations if the identifiers are imported.
 
 
 # Indices of array `the`, which holds unchanging, small, unsigned, integer values.
-from mapFolding.colab3 import taskDivisions, taskIndex, leavesTotal, dimensionsTotal 
+from mapFolding.lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal 
 # Indices of array `track`, which is a collection of one-dimensional arrays each of length `leavesTotal + 1`. 
 # The values in the array cells are dynamic, small, unsigned integers.
-from mapFolding.colab3 import A, B, count, gapter # from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
+from mapFolding.lovelaceIndices import A, B, count, gapter # from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 
-@cuda.jit
+# numba warnings say there is nothing to parallelize here
+# @njit(cache=True, parallel=True, fastmath=False)
+@cuda.jit(cache=True, fastmath=False, nopython=True)
 def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
                     gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], # potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                     the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
-                    D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], # connectionGraph: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
-                    result: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
+                    D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]): # connectionGraph: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
     foldingsTotal: int = 0
     l: int = 1 # activeLeaf1ndex: int = 1
     g: int = 0 # activeGap1ndex: int = 0
@@ -118,6 +119,4 @@ def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
             track[gapter][l] = g # track[gapRangeStart][activeLeaf1ndex] = activeGap1ndex 
             # Move to next leaf
             l += 1 # activeLeaf1ndex += 1
-    
-    # Store result instead of returning it
-    result[0] = foldingsTotal
+    return foldingsTotal
