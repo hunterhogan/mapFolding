@@ -30,7 +30,7 @@ def poolTestCases() -> List[Tuple[List[int], int]]:
     return [(list(dimensions), poolDimensionsToValue[dimensions]) for dimensions in listDimensions]
 
 @pytest.mark.parametrize("task_parameters", [
-    {'computationDivisions': 5, 'computationIndex': 0, 'error': ".*"},  # computationDivisions > leavesTotal
+    {'computationDivisions': 5000, 'computationIndex': 0, 'error': ".*"},  # computationDivisions > leavesTotal
     {'computationDivisions': 2, 'computationIndex': 2, 'error': ".*"},  # computationIndex >= computationDivisions
     {'computationDivisions': -1, 'computationIndex': 0, 'error': ".*"},  # Negative computationDivisions
     {'computationDivisions': 2, 'computationIndex': -1, 'error': ".*"},  # Negative computationIndex
