@@ -32,6 +32,8 @@ def _sherpa(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: nu
         p: List of dimensions for benchmarking
         tasks: Number of computation divisions for benchmarking
     """
+    # kernel_function[blockspergrid, threadsperblock](arg0, arg1, ..., argn)
     from mapFolding.colab2 import countFoldings
-    foldingsTotal = countFoldings(track, gap, static, D)
+    foldingsTotal = countFoldings[1, 1](track, gap, static, D)
+    # (track, gap, static, D)
     return foldingsTotal
