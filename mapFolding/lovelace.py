@@ -45,10 +45,9 @@ the variable annotations if the identifiers are imported.
     # C) To PERMANENTLY delete the inactive set of identifiers, which are in the comments
     # $1$2
 
-
 # Indices of array `the`, which holds unchanging, small, unsigned, integer values.
-from mapFolding.lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal 
-# Indices of array `track`, which is a collection of one-dimensional arrays each of length `leavesTotal + 1`. 
+from mapFolding.lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal, dimensionsPlus1 
+# Indices of array `track`, which is a collection of one-dimensional arrays each of length `the[leavesTotal] + 1`. 
 # The values in the array cells are dynamic, small, unsigned integers.
 from mapFolding.lovelaceIndices import A, B, count, gapter # from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 
@@ -58,7 +57,7 @@ from mapFolding.lovelaceIndices import A, B, count, gapter # from mapFolding.lov
 def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
                     gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], # potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                     the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
-                    D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]): # connectionGraph: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
+                    D:   numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]) -> int: # connectionGraph: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]) -> int:
     foldingsTotal: int = 0
     l: int = 1 # activeLeaf1ndex: int = 1
     g: int = 0 # activeGap1ndex: int = 0
@@ -75,7 +74,7 @@ def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                 g = gg # activeGap1ndex = gap1ndexLowerBound
 
                 # Count possible gaps for leaf l in each section
-                for dimension1ndex in range(1, the[dimensionsTotal] + 1):
+                for dimension1ndex in range(1, the[dimensionsPlus1]):
                     if D[dimension1ndex][l][l] == l: # if connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
                         dd += 1 # unconstrainedLeaf += 1
                     else:

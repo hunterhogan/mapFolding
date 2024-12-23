@@ -1,20 +1,22 @@
+import pathlib
+import time
+from typing import Callable
+
+import numpy
+
 from mapFolding import oeisSequence_aOFn
 from mapFolding.oeis import settingsOEISsequences
-from pathlib import Path
-from typing import Callable
-import numpy
-import time
 
-pathRecordedBenchmarks = Path('mapFolding/benchmarks/marks')
+pathRecordedBenchmarks = pathlib.Path('mapFolding/benchmarks/marks')
 pathRecordedBenchmarks.mkdir(parents=True, exist_ok=True)
 
 def recordBenchmarks():
     """Decorator to benchmark a function."""
-    def wrapper(functionTarget: Callable):
-        def innerWrapper(*arguments, **keywordArguments):
-            timeStart = time.perf_counter()
+    def AzeemTheRapper(functionTarget: Callable):
+        def djZeph(*arguments, **keywordArguments):
+            timeStart = time.perf_counter_ns()
             result = functionTarget(*arguments, **keywordArguments)
-            timeElapsed = time.perf_counter() - timeStart
+            timeElapsed = (time.perf_counter_ns() - timeStart) / 1e9
 
             # Extract p and tasks from arguments
             p = tuple(sorted(arguments[-2])) if len(arguments) >= 3 else None
@@ -22,8 +24,7 @@ def recordBenchmarks():
 
             # Store benchmark data in single file
             pathFilenameRecordedBenchmarks = pathRecordedBenchmarks / "benchmarks.npy"
-            benchmarkEntry = numpy.array([(timeElapsed, p, tasks if tasks is not None else 0)],
-                                      dtype=[('time', 'f8'), ('dimensions', 'O'), ('tasks', 'i4')])
+            benchmarkEntry = numpy.array([(timeElapsed, p, tasks if tasks is not None else 0)], dtype=[('time', 'f8'), ('dimensions', 'O'), ('tasks', 'i4')])
             
             if pathFilenameRecordedBenchmarks.exists():
                 arrayExisting = numpy.load(str(pathFilenameRecordedBenchmarks), allow_pickle=True)
@@ -34,26 +35,21 @@ def recordBenchmarks():
             numpy.save(str(pathFilenameRecordedBenchmarks), arrayBenchmark)
             return result
 
-        return innerWrapper
-    return wrapper
+        return djZeph
+    return AzeemTheRapper
 
-def runBenchmarks(benchmarkIterations: int = 30):
-    """Run benchmark iterations with optional warm-up.
+def runBenchmarks(benchmarkIterations: int = 30) -> None:
+    """Run benchmark iterations.
     
-    Parameters
+    Parameters:
         benchmarkIterations (30): Number of benchmark iterations to run
-        warmUp (False): Whether to perform one warm-up iteration
     """
+    # TODO warmUp (False): Whether to perform one warm-up iteration
     from tqdm.auto import tqdm
-
-    listParameters = []
-    for oeisID, settings in settingsOEISsequences.items():
-        for n in settings['benchmarkValues']:
-            listParameters.append((oeisID, n))
-
-    for parameters in tqdm(listParameters):
-        for iterationIndex in tqdm(range(benchmarkIterations), leave=False):
-            oeisSequence_aOFn(*parameters)
+    import itertools
+    listParametersOEIS = [(oeisIdentifier, dimensionValue) for oeisIdentifier, settings in settingsOEISsequences.items() for dimensionValue in settings['benchmarkValues']]
+    for (oeisIdentifier, dimensionValue), iterationIndex in tqdm(itertools.product(listParametersOEIS, range(benchmarkIterations)), total=len(listParametersOEIS) * benchmarkIterations):
+        oeisSequence_aOFn(oeisIdentifier, dimensionValue)
 
 if __name__ == '__main__':
-    runBenchmarks(1)
+    runBenchmarks(10)
