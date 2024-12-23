@@ -88,7 +88,7 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
     """
     oeisID = _validateOEISid(oeisID)
 
-    if n < 0 or not isinstance(n, int):
+    if not isinstance(n, int) or n < 0:
         raise ValueError("`n` must be non-negative integer.")
     listDimensions = settingsOEISsequences[oeisID]['dimensions'](n)
 

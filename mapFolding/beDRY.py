@@ -39,8 +39,7 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
         listDimensions: A list of integers representing dimensions.
 
     Returns:
-        productDimensions: The product of all positive integer dimensions.
-        Returns 0 if all dimensions are 0.
+        productDimensions: The product of all positive integer dimensions. Returns 0 if all dimensions are 0.
     """
     listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
     listPositive = [dimension for dimension in listNonNegative if dimension > 0]
@@ -66,26 +65,25 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
     list has fewer than two dimensions, a NotImplementedError is raised.
 
     Parameters:
-        listDimensions (List[int]): A list of integer dimensions to be validated.
+        listDimensions: A list of integer dimensions to be validated.
 
     Returns:
-        List[int]: A list of positive dimensions.
+        listDimensionsPositive: A list of positive dimensions.
 
     Raises:
         ValueError: If the input listDimensions is None.
         NotImplementedError: If the resulting list of positive dimensions has fewer than two elements.
     """
-    if listDimensions is None:
+    if not listDimensions:
         raise ValueError(f"listDimensions is a required parameter.")
     listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
-    listPositive = [dimension for dimension in listNonNegative if dimension > 0]
-    if len(listPositive) < 2:
+    listDimensionsPositive = [dimension for dimension in listNonNegative if dimension > 0]
+    if len(listDimensionsPositive) < 2:
         from typing import get_args
 
         from mapFolding.oeis import OEISsequenceID
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
-    listDimensions = listPositive
-    return listDimensions
+    return listDimensionsPositive
 
 def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
     """
@@ -129,7 +127,7 @@ def makeConnectionGraph(listDimensions: List[int]) -> numpy.typing.NDArray[numpy
         listDimensions: A list of integers representing the dimensions of the map.
     Returns:
         D (connectionGraph): A 3D numpy array representing the connection graph. The shape of the array is (d+1, n+1, n+1),
-                                           where d is the number of dimensions and n is the total number of leaves.
+                                        where d is the number of dimensions and n is the total number of leaves.
     """
 
     listDimensions = validateListDimensions(listDimensions)
@@ -176,14 +174,14 @@ def validateParametersFoldings(listDimensions: List[int], computationDivisions: 
     Validates and processes the parameters for the folding computation.
 
     Parameters:
-        listDimensions (List[int]): A list of dimensions for the folding task.
-        computationDivisions (int): The number of divisions for the computation task.
-        computationIndex (int): The index of the current computation task.
+        listDimensions: A list of dimensions for the folding task.
+        computationDivisions: The number of divisions for the computation task.
+        computationIndex: The index of the current computation task.
 
     Returns:
-        listDimensions,computationDivisions,computationIndex,leavesTotal,connectionGraph: A tuple containing the validated list of dimensions,
-                                         the validated number of computation divisions,
-                                         the validated computation index, and the total number of leaves.
+        listDimensions,computationDivisions,computationIndex,leavesTotal,connectionGraph: 
+            A tuple containing the validated list of dimensions, the validated number of 
+            computation divisions, the validated computation index, and the total number of leaves.
     """
     # I don't know if I should put all of these steps in series or if each function should validate its own parameters.
     # In the future, I might not call the entire series. Also, it feels weird to return listDimensions from makeConnectionGraph.

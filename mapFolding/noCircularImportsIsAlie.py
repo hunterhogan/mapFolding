@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple, get_args
 
-from mapFolding import parseListDimensions
+from mapFolding import validateListDimensions
 from mapFolding.oeis import OEISsequenceID
 
 def getFoldingsTotalKnown(listDimensions: List[int]) -> int:
@@ -13,11 +13,7 @@ def getFoldingsTotalKnown(listDimensions: List[int]) -> int:
     Returns:
         Total number of foldings if known, raises KeyError if not found
     """
-    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
-    listPositive = [dimension for dimension in listNonNegative if dimension > 0]
-
-    if len(listPositive) < 2:
-        raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
+    listPositive = validateListDimensions(listDimensions)
 
     dimensionsFoldingsTotalLookup: Dict[Tuple, int] = {}
     from mapFolding.oeis import settingsOEISsequences

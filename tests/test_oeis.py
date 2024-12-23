@@ -25,16 +25,21 @@ def temporaryCache(tmp_path):
     yield tmp_path
     oeis._pathCache = pathCacheOriginal
 
+@pytest.fixture
+def randomValidOEISid() -> OEISsequenceID:
+    """Return a random valid OEIS ID from settings."""
+    return random.choice(list(settingsOEISsequences.keys()))
+
 @pytest.fixture(params=settingsOEISsequences.keys())
 def oeisID(request):
     return request.param
 
 @pytest.fixture
 def sequenceIDsample() -> OEISsequenceID:
-    """Get a consistent sample sequence ID for cache-related tests."""
-    return next(iter(settingsOEISsequences))  # First sequence ID is fine for these tests
+    """Select a random valid sequence ID as a sample."""
+    return random.choice(list(settingsOEISsequences.keys()))
 
-def test_calculate_sequence(oeisID):
+def test_aOFn_calculate_value(oeisID):
     # Use known values directly from settings
     for n in settingsOEISsequences[oeisID]['testValuesValidation']:
         result = oeisSequence_aOFn(oeisID, n)
@@ -54,14 +59,39 @@ def test_dimensions_lookup(oeisID):
     # Test the lookup
     assert getFoldingsTotalKnown(listDimensions) == foldingsExpected
 
-def test_invalid_sequence():
+@pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
+def test__validateOEISid_invalid_id(badID):
+    """Check that invalid or unknown IDs raise KeyError."""
     with pytest.raises(KeyError):
-        oeisSequence_aOFn('A999999', 1) # type: ignore
+        _validateOEISid(badID)
 
-def test_negative_n():
+def test__validateOEISid_partially_valid(sequenceIDsample):
+    with pytest.raises(KeyError):
+        _validateOEISid(f"{sequenceIDsample}extra")
+
+def test__validateOEISid_valid_id(oeisID):
+    assert _validateOEISid(oeisID) == oeisID
+
+def test__validateOEISid_valid_id_case_insensitive(oeisID):
+    assert _validateOEISid(oeisID.lower()) == oeisID.upper()
+    assert _validateOEISid(oeisID.upper()) == oeisID.upper()
+    assert _validateOEISid(oeisID.swapcase()) == oeisID.upper()
+
+testCasesInvalid = [
+    (-random.randint(1, 100), "randomNegative"),
+    ("foo", "string"),
+    (1.5, "float")
+]
+
+badValues, badValuesIDs = zip(*testCasesInvalid)
+
+@pytest.mark.parametrize("badN", badValues, ids=badValuesIDs)
+def test_aOFn_invalid_n(randomValidOEISid, badN):
+    """Check that negative or non-integer n raises ValueError."""
     with pytest.raises(ValueError):
-        oeisSequence_aOFn('A001415', -1)
+        oeisSequence_aOFn(randomValidOEISid, badN)
 
+# ===== Cache-related Tests =====
 def testCacheMiss(temporaryCache, sequenceIDsample):
     pathFilenameCache = temporaryCache / _formatFilenameCache.format(oeisID=sequenceIDsample)
     
@@ -135,6 +165,7 @@ def testExtraComments(temporaryCache, sequenceIDsample):
     assert OEISsequence[4] == 8  # Value after mid-sequence comment
     assert OEISsequence[5] == 10  # Last value
 
+# ===== Command Line Interface Tests =====
 def testGetOEISids():
     """Test that getOEISids prints all sequences with descriptions."""
     captureOutput = io.StringIO()
@@ -161,25 +192,10 @@ def testCommandLineInterface():
     outputText = captureOutput.getvalue()
     assert "Available OEIS sequences:" in outputText
 
-def test__validateOEISid_valid_id(oeisID):
-    assert _validateOEISid(oeisID) == oeisID
+def test_aOFn_zeroDim_A001418():
+    import pytest
+    from mapFolding.oeis import oeisSequence_aOFn
 
-def test__validateOEISid_valid_id_case_insensitive(oeisID):
-    assert _validateOEISid(oeisID.lower()) == oeisID.upper()
-    assert _validateOEISid(oeisID.upper()) == oeisID.upper()
-    assert _validateOEISid(oeisID.swapcase()) == oeisID.upper()
-
-@pytest.mark.parametrize("invalidIDtext", [
-    "A999999",
-    "  A999999  ",
-    "a999999",
-    "A999999 "
-])
-def test__validateOEISid_invalid_id(invalidIDtext):
-    with pytest.raises(KeyError):
-        _validateOEISid(invalidIDtext)
-
-def test__validateOEISid_partially_valid(sequenceIDsample):
-    with pytest.raises(KeyError):
-        _validateOEISid(f"{sequenceIDsample}extra")
+    with pytest.raises(ArithmeticError):
+        oeisSequence_aOFn('A001418', 0)
 
