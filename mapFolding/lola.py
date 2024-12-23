@@ -6,6 +6,17 @@ ALL of those NDArray are indexed by variables defined in `lovelaceIndices.py`.
 
 `doWhile` has three `for` loops with a strcutre of `for identifier in range(p,q)`.
 At the moment those three identifiers are primitive integers, rather than embedded in an NDArray instance.
+
+The six NDArray:
+    Unchanging values
+        - the
+        - connectionGraph
+    Dynamic values that are "personal" to each worker
+        - my
+        - track
+        - potentialGaps
+    Dynamic values that the workers could share safely
+        - arrayFoldingsSubtotals
 """
 # Indices of array `the`, which holds unchanging, small, unsigned, integer values.
 from mapFolding.lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal 
@@ -15,20 +26,21 @@ from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapp
 # Indices of array `my`, which holds dynamic, small, unsigned, integer values.
 from mapFolding.lovelaceIndices import activeLeaf1ndex, activeGap1ndex, unconstrainedLeaf, gap1ndexLowerBound, leaf1ndexConnectee
 
-# numba warnings say there is nothing to parallelize here
+# numba warnings say there is nothing to parallelize in the module.
 # @njit(cache=True, parallel=True, fastmath=False)
 @njit(cache=True, fastmath=False)
-def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
-                    potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
+def countFoldings(TEMPLATEtrack: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
+                    TEMPLATEpotentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                     the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
-                    connectionGraph: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]):
+                    connectionGraph: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]) -> int:
+
+    TEMPLATEmy = numpy.zeros(5, dtype=numpy.int64)
+    TEMPLATEmy[activeLeaf1ndex] = 1
 
     arrayFoldingsSubtotals = numpy.zeros(the[taskDivisions] + 1, dtype=numpy.int64)
-    my = numpy.zeros(5, dtype=numpy.int64)
-
-    def doWhile():
-        my[activeLeaf1ndex] = 1
-        my[activeGap1ndex] = 0
+    def doWhile(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
+                    potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
+                    my: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]) -> None:
         while my[activeLeaf1ndex] > 0:
             if my[activeLeaf1ndex] <= 1 or track[leafBelow][0] == 1:
                 if my[activeLeaf1ndex] > the[leavesTotal]:
@@ -78,6 +90,6 @@ def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                 track[gapRangeStart][my[activeLeaf1ndex]] = my[activeGap1ndex] 
                 my[activeLeaf1ndex] += 1
 
-    doWhile()
+    doWhile(TEMPLATEtrack, TEMPLATEpotentialGaps, TEMPLATEmy)
 
     return numpy.sum(arrayFoldingsSubtotals).item()
