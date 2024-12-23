@@ -75,8 +75,7 @@ def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                 g = gg # activeGap1ndex = gap1ndexLowerBound
 
                 # Count possible gaps for leaf l in each section
-                for dimension1ndex in range(the[dimensionsTotal], 0, -1):
-                # for dimension1ndex in range(1, the[dimensionsTotal] + 1):
+                for dimension1ndex in range(1, the[dimensionsTotal] + 1):
                     if D[dimension1ndex][l][l] == l: # if connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
                         dd += 1 # unconstrainedLeaf += 1
                     else:
