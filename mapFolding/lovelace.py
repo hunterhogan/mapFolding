@@ -51,7 +51,7 @@ from mapFolding.lovelaceIndices import taskDivisions, taskIndex, leavesTotal, di
 # The values in the array cells are dynamic, small, unsigned integers.
 from mapFolding.lovelaceIndices import A, B, count, gapter # from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 
-# numba warnings say there is nothing to parallelize here
+# numba warnings say there is nothing to parallelize in the module.
 # @njit(cache=True, parallel=True, fastmath=False)
 @njit(cache=True, fastmath=False)
 def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
