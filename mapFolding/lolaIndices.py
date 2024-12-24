@@ -5,6 +5,7 @@ tricky = [
 (gap1ndexLowerBound := 3),
 (leaf1ndexConnectee := 4),
 (taskIndex := 5),
+(dimension1ndex := 6),
 ]
 
 COUNTindicesDynamic = len(tricky)
