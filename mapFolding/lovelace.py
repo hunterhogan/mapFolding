@@ -18,9 +18,9 @@ Algorithm flow
         - Backtrack when no valid positions remain
 
 Identifiers
-This module has two sets of identifiers. One set is active, and the other set is uniformly formatted comments 
-at the end of every line that includes an identifier that has an alternative identifier. First, that might be 
-distracting. In Visual Studio Code, the following extension will hide all comments but not docstrings: 
+This module has two sets of identifiers. One set is active, and the other set is uniformly formatted comments
+at the end of every line that includes an identifier that has an alternative identifier. First, that might be
+distracting. In Visual Studio Code, the following extension will hide all comments but not docstrings:
 https://marketplace.visualstudio.com/items?itemName=eliostruyf.vscode-hide-comments
 
 Second, you can swap the sets of identifiers or delete one set of identifiers permanently. See the regex instructions below.
@@ -30,11 +30,11 @@ For example, that module might include `A = leafAbove = 0`. If those statements 
 in this module, swapping will break in unpredictable ways.
 
 Identifier annotations
-One reason some variable identifers are defined in another module is because VS Code is more likely to display
+One reason some variable identifiers are defined in another module is because VS Code is more likely to display
 the variable annotations if the identifiers are imported.
 """
-# NOTE: To modify the sets of identifiers: 
-# Step 1: regex find 
+# NOTE: To modify the sets of identifiers:
+# Step 1: regex find
     # ^(?!#)( *?)(\S.+?)( # )(.+)
 
 # Step 2: choose a regex replace option
@@ -46,17 +46,17 @@ the variable annotations if the identifiers are imported.
     # $1$2
 
 # Indices of array `the`, which holds unchanging, small, unsigned, integer values.
-from mapFolding.lovelaceIndices import taskDivisions, taskIndex, leavesTotal, dimensionsTotal, dimensionsPlus1 
-# Indices of array `track`, which is a collection of one-dimensional arrays each of length `the[leavesTotal] + 1`. 
+from mapFolding.lovelaceIndices import taskDivisions, leavesTotal, dimensionsTotal, dimensionsPlus1
+# Indices of array `track`, which is a collection of one-dimensional arrays each of length `the[leavesTotal] + 1`.
 # The values in the array cells are dynamic, small, unsigned integers.
 from mapFolding.lovelaceIndices import A, B, count, gapter # from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 
 # numba warnings say there is nothing to parallelize in the module.
 # @njit(cache=True, parallel=True, fastmath=False)
 @njit(cache=True, fastmath=False)
-def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
+def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                     gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], # potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                    the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
+                    the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                     D:   numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]) -> int: # connectionGraph: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]) -> int:
     foldingsTotal: int = 0
     l: int = 1 # activeLeaf1ndex: int = 1
@@ -68,7 +68,7 @@ def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                 foldingsTotal += the[leavesTotal]
             else:
                 dd: int = 0 # unconstrainedLeaf: int = 0
-                # Track possible gaps 
+                # Track possible gaps
                 gg: int = track[gapter][l - 1] # gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
                 # Reset gap index
                 g = gg # activeGap1ndex = gap1ndexLowerBound
@@ -80,11 +80,10 @@ def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                     else:
                         m: int = D[dimension1ndex][l][l] # leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
                         while m != l: # while leaf1ndexConnectee != activeLeaf1ndex:
-                            if the[taskDivisions] == 0 or l != the[taskDivisions] or m % the[taskDivisions] == the[taskIndex]: # if the[taskDivisions] == 0 or activeLeaf1ndex != the[taskDivisions] or leaf1ndexConnectee % the[taskDivisions] == the[taskIndex]:
-                                gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                if track[count][m] == 0: # if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
-                                    gg += 1 # gap1ndexLowerBound += 1
-                                track[count][m] += 1 # track[countDimensionsGapped][leaf1ndexConnectee] += 1
+                            gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
+                            if track[count][m] == 0: # if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
+                                gg += 1 # gap1ndexLowerBound += 1
+                            track[count][m] += 1 # track[countDimensionsGapped][leaf1ndexConnectee] += 1
                             m = D[dimension1ndex][l][track[B][m]] # leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][track[leafBelow][leaf1ndexConnectee]]
 
                 # If leaf l is unconstrained in all sections, it can be inserted anywhere
@@ -115,7 +114,7 @@ def countFoldings(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
             track[B][track[A][l]] = l # track[leafBelow][track[leafAbove][activeLeaf1ndex]] = activeLeaf1ndex
             track[A][track[B][l]] = l # track[leafAbove][track[leafBelow][activeLeaf1ndex]] = activeLeaf1ndex
             # Save current gap index
-            track[gapter][l] = g # track[gapRangeStart][activeLeaf1ndex] = activeGap1ndex 
+            track[gapter][l] = g # track[gapRangeStart][activeLeaf1ndex] = activeGap1ndex
             # Move to next leaf
             l += 1 # activeLeaf1ndex += 1
     return foldingsTotal

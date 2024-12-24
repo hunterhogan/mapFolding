@@ -85,38 +85,6 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
     return listDimensionsPositive
 
-def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
-    """
-    Validates the task divisions for a computation process.
-
-    Parameters:
-        computationDivisions: The number of divisions for the computation
-        computationIndex: The index of the current computation division
-        n: The total number of leaves
-
-    Returns:
-        Tuple containing the validated computationDivisions and computationIndex
-
-    Raises:
-        ValueError: If parameters are invalid
-        TypeError: If parameters are not integers
-    """
-    # First validate types
-    computationDivisions = intInnit([computationDivisions], 'computationDivisions').pop(0)
-    computationIndex = intInnit([computationIndex], 'computationIndex').pop(0)
-
-    # Then validate ranges
-    if computationDivisions < 0 or computationIndex < 0:
-        raise ValueError(f"computationDivisions, {computationDivisions}, and computationIndex, {computationIndex}, must be non-negative integers.")
-
-    if computationDivisions > n:
-        raise ValueError(f"computationDivisions, {computationDivisions}, must be less than or equal to the total number of leaves, {n}.")
-
-    if computationDivisions > 1 and computationIndex >= computationDivisions:
-        raise ValueError(f"computationIndex, {computationIndex}, must be less than computationDivisions, {computationDivisions}.")
-
-    return computationDivisions, computationIndex
-
 def makeConnectionGraph(listDimensions: List[int]) -> numpy.typing.NDArray[numpy.int64]:
     """
     Constructs a connection graph for a given list of dimensions.
@@ -169,17 +137,15 @@ def makeConnectionGraph(listDimensions: List[int]) -> numpy.typing.NDArray[numpy
                         D[i][l][m] = m + P[i - 1]
     return D
 
-def validateParametersFoldings(listDimensions: List[int], computationDivisions: int, computationIndex: int) -> Tuple[List[int], int, int, int, numpy.typing.NDArray[numpy.int64]]:
+def validateParametersFoldings(listDimensions: List[int]):
     """
     Validates and processes the parameters for the folding computation.
 
     Parameters:
         listDimensions: A list of dimensions for the folding task.
-        computationDivisions: The number of divisions for the computation task.
-        computationIndex: The index of the current computation task.
 
     Returns:
-        listDimensions,computationDivisions,computationIndex,leavesTotal,connectionGraph: 
+        listDimensions,leavesTotal,connectionGraph: 
             A tuple containing the validated list of dimensions, the validated number of 
             computation divisions, the validated computation index, and the total number of leaves.
     """
@@ -188,5 +154,4 @@ def validateParametersFoldings(listDimensions: List[int], computationDivisions: 
     listDimensions = validateListDimensions(listDimensions)
     leavesTotal = getLeavesTotal(listDimensions)
     connectionGraph = makeConnectionGraph(listDimensions)
-    computationDivisions, computationIndex = validateTaskDivisions(computationDivisions, computationIndex, leavesTotal)
-    return listDimensions, computationDivisions, computationIndex, leavesTotal, connectionGraph
+    return listDimensions, leavesTotal, connectionGraph

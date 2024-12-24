@@ -9,10 +9,9 @@ gapter = gapRangeStart = 3
 
 tricky = [
 (taskDivisions := 0),
-(taskIndex := 1),
 (leavesTotal := 2),
 (dimensionsTotal := 3),
-(dimensionsPlus1 := 4),
+(dimensionsPlus1 := 1),
 ]
 
 COUNTindicesStatic = len(tricky)
