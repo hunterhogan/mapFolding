@@ -92,7 +92,7 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
         raise ValueError("`n` must be non-negative integer.")
     listDimensions = settingsOEISsequences[oeisID]['dimensions'](n)
 
-    if n == 0 or len(listDimensions) < 2:
+    if n <= 1 or len(listDimensions) < 2:
         foldingsTotal = settingsOEISsequences[oeisID]['valuesKnown'].get(n, None)
         if foldingsTotal is not None:
             return foldingsTotal
