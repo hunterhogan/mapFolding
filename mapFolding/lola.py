@@ -35,7 +35,7 @@ Algorithm flow
         - Backtrack when no valid positions remain
 """
 # Indices of array `the`, which holds unchanging, small, unsigned, integer values.
-from mapFolding.lovelaceIndices import taskDivisions, leavesTotal, dimensionsTotal, dimensionsPlus1
+from mapFolding.lovelaceIndices import leavesTotal, dimensionsTotal, dimensionsPlus1
 # Indices of array `track`, which is a collection of one-dimensional arrays each of length `the[leavesTotal] + 1`.
 # The values in the array cells are dynamic, small, unsigned integers.
 from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
@@ -53,9 +53,9 @@ def countFoldings(TEMPLATEtrack: numpy.ndarray[numpy.int64, numpy.dtype[numpy.in
 
     arrayFoldingsSubtotals = numpy.zeros(the[leavesTotal], dtype=numpy.int64)
 
-    the[taskDivisions] = 0
-    # the[taskDivisions] = the[leavesTotal]
-    TEMPLATEmy[taskIndex] = the[taskDivisions] - 1 # the first modulo is leavesTotal - 1
+    taskDivisions = 0
+    # taskDivisions = the[leavesTotal]
+    TEMPLATEmy[taskIndex] = taskDivisions - 1 # the first modulo is leavesTotal - 1
 
     papasGotABrandNewBag = True
     def doWork(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
@@ -93,18 +93,13 @@ def countFoldings(TEMPLATEtrack: numpy.ndarray[numpy.int64, numpy.dtype[numpy.in
                             while while_leaf1ndexConnectee_notEquals_activeLeaf1ndex == True:
                                 while_leaf1ndexConnectee_notEquals_activeLeaf1ndex = False
                                 thisIsNotTheFirstPass = True
-                                if the[taskDivisions]==0 or my[activeLeaf1ndex] != the[taskDivisions]: 
+                                if taskDivisions==0 or my[activeLeaf1ndex] != taskDivisions: 
                                     myTask = True
                                 else:
                                     modulo = my[leaf1ndexConnectee] % the[leavesTotal]
                                     if modulo == my[taskIndex]: myTask = True
                                     else: 
                                         myTask = False
-                                        STARTmy = my.copy()
-                                        STARTmy[taskIndex] = modulo
-                                        # somehow create a new task IF there is not already a task with that modulo
-                                        # At worst, write each task to a queue on disk and exit the program. Then restart with any of the tasks.
-                                        # doWork(track.copy(), potentialGaps.copy(), STARTmy)
                                 if myTask:
                                     potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
                                     if track[countDimensionsGapped][my[leaf1ndexConnectee]] == 0:

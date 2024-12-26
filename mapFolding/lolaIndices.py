@@ -6,6 +6,7 @@ tricky = [
 (leaf1ndexConnectee := 4),
 (taskIndex := 5),
 (dimension1ndex := 6),
+(foldingsSubtotal := 7),
 ]
 
 COUNTindicesDynamic = len(tricky)
