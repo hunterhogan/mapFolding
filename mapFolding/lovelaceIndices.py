@@ -8,10 +8,9 @@ gapter = gapRangeStart = 3
 """Index of gap stack for leaf l"""
 
 tricky = [
-(taskDivisions := 0),
+(dimensionsPlus1 := 0),
+(dimensionsTotal := 1),
 (leavesTotal := 2),
-(dimensionsTotal := 3),
-(dimensionsPlus1 := 1),
 ]
 
 COUNTindicesStatic = len(tricky)
