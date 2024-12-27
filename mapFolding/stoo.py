@@ -1,8 +1,8 @@
-import jax
+from mapFolding.piderIndices import taskDivisions, leavesTotal, dimensionsTotal
 from typing import List
+import jax
 import jaxtyping # TODO learn how to use this
 import numpy as NUMERICALPYTHON
-from mapFolding.piderIndices import taskDivisions, leavesTotal, dimensionsTotal
 
 def foldings(listDimensions: List[int], computationDivisions: int = 0, computationIndex: int = 0):
     from mapFolding.beDRY import validateParametersFoldings
@@ -29,5 +29,5 @@ def foldings(listDimensions: List[int], computationDivisions: int = 0, computati
     potentialGapsLength = the[leavesTotal] * the[leavesTotal] + 1
     potentialGaps = jax.numpy.zeros(potentialGapsLength, dtype=jax.numpy.int32)
 
-    from mapFolding.pider import spoon
+    from mapFolding.pid import spoon
     return spoon(connectionGraph, the, track, potentialGaps, arrayIndicesComputation)
