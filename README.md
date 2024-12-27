@@ -1,52 +1,22 @@
-# Python implementation of "Multi-dimensional map-folding"
+# Inefficient division of work
 
-`mapFolding` explicitly implements [The On-Line Encyclopedia of Integer Sequences](https://oeis.org/):
+The difference between this version and the base version is the very clever statement
 
-- [A001415](https://oeis.org/A001415) Number of ways of folding a 2 X n strip of stamps.
-- [A001416](https://oeis.org/A001416) Number of ways of folding a 3 X n strip of stamps.
-- [A001417](https://oeis.org/A001417) Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
-- [A195646](https://oeis.org/A195646) Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.
-- [A001418](https://oeis.org/A001418) Number of ways of folding an n X n sheet of stamps.
-
-`mapFolding.foldings()`, however, will accept arbitrary values for the list of dimensions.
-
-[![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml)
-
-## Algorithm history
-
-### The original algorithm
-
-In [`foldings.txt`](mapFolding/reference/foldings.txt) and [`foldings.AA`](mapFolding/reference/foldings.AA), you can find transcriptions of the original algorithm as it was printed in 1971. The full paper is preserved as a PDF of images available at the DOI link below.
-
-W. F. Lunnon, Multi-dimensional map-folding, *The Computer Journal*, Volume 14, Issue 1, 1971, Pages 75–80, [https://doi.org/10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75) ([BibTex](mapFolding/citations/Lunnon.bibtex))
-
-### ALGOL68, C, and Java versions
-
-A Java implementation by [Sean A. Irvine](https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java) ([BibTex](mapFolding/citations/jOEIS.bibtex)) includes the comments:
-
-```java
-/**
- * A001415 Number of ways of folding a 2 X n strip of stamps.
- * @author Fred Lunnon (ALGOL68, C versions)
- * @author Sean A. Irvine (Java port)
- */
-...
-  // Implements algorithm as described in "Multi-dimensional map-folding",
-  // by W. F. Lunnon, The Computer J, 14, 1, pp. 75--80.  Note the original
-  // paper contains a few omissions, so this actual code is based on a C
-  // implementation by Fred Lunnon.
+```python
+if mod == 0 or l != mod or m % mod == res:
 ```
 
-## Related Video
+It is very difficult to divide the counting algorithm into independent tasks, but the modulo
+operation is somewhat successful. Based on my observations and some very rough measurements,
+calculating the total count by summing modulo division requires at least three times as much
+total work (for maps with dimensions 2 x N) and (N-2)-times as much work (for N x N maps).
 
-"How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](mapFolding/citations/Physics_for_the_Birds.bibtex))
+The maximum number of divisions is equal to the number of leaves on the map, but you can divide
+the work into fewer divisions. (The modulo is very clever.)
 
-[![How Many Ways Can You Fold a Map?](https://i.ytimg.com/vi/sfH9uIY3ln4/hq720.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
+To use it, call `foldings` with additional parameters: how many divisions you want, `mod` and which division
+you want to calculate, `res`.
 
-## Did *The On-Line Encyclopedia of Integer Sequences* recently update an implemented sequence?
-
-You can clear *The On-Line Encyclopedia of Integer Sequences* data from the `mapFolding` cache:
-
-```sh
-./mapFolding>clearOEIScache
+```python
+foldingsTotal = foldings([2,9], 18, 4)
 ```

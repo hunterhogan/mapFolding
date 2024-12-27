@@ -137,6 +137,38 @@ def makeConnectionGraph(listDimensions: List[int]) -> numpy.typing.NDArray[numpy
                         D[i][l][m] = m + P[i - 1]
     return D
 
+def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
+    """
+    Validates the task divisions for a computation process.
+
+    Parameters:
+        computationDivisions: The number of divisions for the computation
+        computationIndex: The index of the current computation division
+        n: The total number of leaves
+
+    Returns:
+        computationDivisions,computationIndex: Tuple containing the validated computationDivisions and computationIndex
+
+    Raises:
+        ValueError: If parameters are invalid
+        TypeError: If parameters are not integers
+    """
+    # First validate types
+    computationDivisions = intInnit([computationDivisions], 'computationDivisions').pop(0)
+    computationIndex = intInnit([computationIndex], 'computationIndex').pop(0)
+
+    # Then validate ranges
+    if computationDivisions < 0 or computationIndex < 0:
+        raise ValueError(f"computationDivisions, {computationDivisions}, and computationIndex, {computationIndex}, must be non-negative integers.")
+
+    if computationDivisions > n:
+        raise ValueError(f"computationDivisions, {computationDivisions}, must be less than or equal to the total number of leaves, {n}.")
+
+    if computationDivisions > 1 and computationIndex >= computationDivisions:
+        raise ValueError(f"computationIndex, {computationIndex}, must be less than computationDivisions, {computationDivisions}.")
+
+    return computationDivisions, computationIndex
+
 def validateParametersFoldings(listDimensions: List[int]):
     """
     Validates and processes the parameters for the folding computation.

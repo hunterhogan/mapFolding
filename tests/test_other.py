@@ -108,14 +108,18 @@ def test_dimension_validation(dimensions, expected):
             validateListDimensions(dimensions)
 
 # ===== Parameter Validation Tests =====
-@pytest.mark.parametrize("dimensions,errorType", [
-    ([], ValueError),  # Empty dimensions
-    ([1], NotImplementedError),  # Single dimension
-    ([0, 0], NotImplementedError),  # No positive dimensions
-    ([1, -1], ValueError),  # Negative dimension
+@pytest.mark.parametrize("dimensions,divisions,index,errorType", [
+    ([], 1, 0, ValueError),  # Empty dimensions
+    ([1], 1, 0, NotImplementedError),  # Single dimension
+    ([0, 0], 1, 0, NotImplementedError),  # No positive dimensions
+    ([1, -1], 1, 0, ValueError),  # Negative dimension
+    ([2, 2], -1, 0, ValueError),  # Negative divisions
+    ([2, 2], 1, -1, ValueError),  # Negative index
+    ([2, 2], 1.5, 0, ValueError),  # Float divisions
+    ([2, 2], 1, 1.5, ValueError),  # Float index
 ])
-def test_foldings_parameter_validation(dimensions, errorType):
+def test_foldings_parameter_validation(dimensions, divisions, index, errorType):
     """Test parameter validation in foldings function."""
     with pytest.raises(errorType):
-        foldings(dimensions)
+        foldings(dimensions, divisions, index)
 
