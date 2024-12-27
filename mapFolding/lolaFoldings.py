@@ -34,7 +34,8 @@ Algorithm flow
         - Backtrack when no valid positions remain
 """
 # Indices of array `the`, which holds unchanging, small, unsigned, integer values.
-from mapFolding.lovelaceIndices import leavesTotal, dimensionsTotal, dimensionsPlus1, COUNTindicesStatic, leafBelow
+from mapFolding.lovelaceIndices import leafBelow
+from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1, COUNTindicesStatic
 from mapFolding.lolaIndices import COUNTindicesDynamic, gap1ndexLowerBound
 
 def foldings(listDimensions: List[int]):

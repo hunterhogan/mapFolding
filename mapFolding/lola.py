@@ -35,7 +35,7 @@ Algorithm flow
         - Backtrack when no valid positions remain
 """
 # Indices of array `the`, which holds unchanging, small, unsigned, integer values.
-from mapFolding.lovelaceIndices import leavesTotal, dimensionsTotal, dimensionsPlus1
+from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1
 # Indices of array `track`, which is a collection of one-dimensional arrays each of length `the[leavesTotal] + 1`.
 # The values in the array cells are dynamic, small, unsigned integers.
 from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart

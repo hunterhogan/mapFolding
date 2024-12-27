@@ -10,3 +10,11 @@ tricky = [
 ]
 
 COUNTindicesDynamic = len(tricky)
+
+tricky = [
+(dimensionsPlus1 := 0),
+(dimensionsTotal := 1),
+(leavesTotal := 2),
+]
+
+COUNTindicesStatic = len(tricky)

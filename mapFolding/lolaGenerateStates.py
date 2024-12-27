@@ -3,7 +3,7 @@ import copy
 from typing import TypedDict, Dict
 import numpy
 
-from mapFolding.lovelaceIndices import leavesTotal, dimensionsTotal, dimensionsPlus1
+from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1
 from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 from mapFolding.lolaIndices import (
     activeGap1ndex as activeGap1ndexMyIndex,
