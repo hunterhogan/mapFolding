@@ -34,8 +34,8 @@ Algorithm flow
         - Backtrack when no valid positions remain
 """
 # Indices of array `the`, which holds unchanging, small, unsigned, integer values.
-from mapFolding.lovelaceIndices import leavesTotal, dimensionsTotal, dimensionsPlus1, COUNTindicesStatic
-from mapFolding.lolaIndices import COUNTindicesDynamic
+from mapFolding.lovelaceIndices import leavesTotal, dimensionsTotal, dimensionsPlus1, COUNTindicesStatic, leafBelow
+from mapFolding.lolaIndices import COUNTindicesDynamic, gap1ndexLowerBound
 
 def foldings(listDimensions: List[int]):
     the = numpy.zeros(COUNTindicesStatic, dtype=numpy.int64)
@@ -58,7 +58,8 @@ def foldings(listDimensions: List[int]):
     with ProcessPoolExecutor() as concurrencyManager:
         dictionaryConcurrency = {}
         for taskIndex, taskState in dictionaryStates.items():
-            print(f"{taskIndex=}, {taskState['my']=}")
+            print(f"{taskIndex=}, {taskState['my'][gap1ndexLowerBound]=}")
+            # print(f"{taskIndex=}, {taskState['my']=}, {track[leafBelow][0]=}")
             claimTicket = concurrencyManager.submit(
             countSubtotal, 
             taskState['track'], 

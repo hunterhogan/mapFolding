@@ -35,7 +35,7 @@ the variable annotations if the identifiers are imported.
 """
 # NOTE: To modify the sets of identifiers:
 # Step 1: regex find
-    # ^(?!#)( *?)(\S.+?)( # )(.+)
+# ^(?!#)( *?)(\S.+?)( # )(.+)
 
 # Step 2: choose a regex replace option
     # A) To SWAP the sets of identifiers
