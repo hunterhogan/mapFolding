@@ -1,6 +1,6 @@
 """
 Python implementation of 
-W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75 (BibTex)
+W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
 """
 # HEY! 
 # The order of the imports affects the possibility of a partially initialized module error
@@ -16,7 +16,7 @@ W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, 
 from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions
 from .oeis import oeisSequence_aOFn, getOEISids
 from .clearOEIScache import clearOEIScache
-from .babbage import foldings
+from .lunnon import foldings
 
 __all__ = [
     'clearOEIScache',
