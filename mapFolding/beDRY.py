@@ -137,15 +137,49 @@ def makeConnectionGraph(listDimensions: List[int]) -> numpy.typing.NDArray[numpy
                         D[i][l][m] = m + P[i - 1]
     return D
 
-def validateParametersFoldings(listDimensions: List[int]):
+def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
+    """
+    Validates the task divisions for a computation process.
+
+    Parameters:
+        computationDivisions: The number of divisions for the computation
+        computationIndex: The index of the current computation division
+        n: The total number of leaves
+
+    Returns:
+        Tuple containing the validated computationDivisions and computationIndex
+
+    Raises:
+        ValueError: If parameters are invalid
+        TypeError: If parameters are not integers
+    """
+    # First validate types
+    computationDivisions = intInnit([computationDivisions], 'computationDivisions').pop(0)
+    computationIndex = intInnit([computationIndex], 'computationIndex').pop(0)
+
+    # Then validate ranges
+    if computationDivisions < 0 or computationIndex < 0:
+        raise ValueError(f"computationDivisions, {computationDivisions}, and computationIndex, {computationIndex}, must be non-negative integers.")
+
+    if computationDivisions > n:
+        raise ValueError(f"computationDivisions, {computationDivisions}, must be less than or equal to the total number of leaves, {n}.")
+
+    if computationDivisions > 1 and computationIndex >= computationDivisions:
+        raise ValueError(f"computationIndex, {computationIndex}, must be less than computationDivisions, {computationDivisions}.")
+
+    return computationDivisions, computationIndex
+
+def validateParametersFoldings(listDimensions: List[int], computationDivisions: int, computationIndex: int) -> Tuple[List[int], int, int, int, numpy.typing.NDArray[numpy.int64]]:
     """
     Validates and processes the parameters for the folding computation.
 
     Parameters:
         listDimensions: A list of dimensions for the folding task.
+        computationDivisions: The number of divisions for the computation task.
+        computationIndex: The index of the current computation task.
 
     Returns:
-        listDimensions,leavesTotal,connectionGraph: 
+        listDimensions,computationDivisions,computationIndex,leavesTotal,connectionGraph: 
             A tuple containing the validated list of dimensions, the validated number of 
             computation divisions, the validated computation index, and the total number of leaves.
     """
@@ -154,4 +188,5 @@ def validateParametersFoldings(listDimensions: List[int]):
     listDimensions = validateListDimensions(listDimensions)
     leavesTotal = getLeavesTotal(listDimensions)
     connectionGraph = makeConnectionGraph(listDimensions)
-    return listDimensions, leavesTotal, connectionGraph
+    computationDivisions, computationIndex = validateTaskDivisions(computationDivisions, computationIndex, leavesTotal)
+    return listDimensions, computationDivisions, computationIndex, leavesTotal, connectionGraph
