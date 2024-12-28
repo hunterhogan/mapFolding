@@ -66,6 +66,18 @@ import numpy
 from mapFolding import parseListDimensions, getLeavesTotal
 
 def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> int:
+    """
+    Calculate the number of distinct possible ways to fold a map with given dimensions.
+    This function computes the number of different ways a map can be folded along its grid lines,
+    considering maps with at least two positive dimensions.
+
+    Parameters:
+        p : A list of integers representing the dimensions of the map. Must contain at least two positive dimensions.
+
+    Returns
+        foldingsTotal: The total number of possible distinct foldings for the given map dimensions.
+    """
+
     """I can't figure out how to make numba happy with the calls to other functions,
     so these validators live here."""
     if not p: # if not listDimensions:

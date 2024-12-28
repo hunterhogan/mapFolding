@@ -1,5 +1,27 @@
 # Python implementation of "Multi-dimensional map-folding"
 
+`mapFolding.foldings()` will accept arbitrary values for the list of dimensions.
+
+```python
+from mapFolding import foldings
+foldingsTotal = foldings([4,9])
+```
+
+## Experimenting
+
+In the [git branches](https://github.com/hunterhogan/mapFolding/branches), I experiment with different optimizations of the algorithm.
+
+## Map and stamp folding at The On-Line Encyclopedia of Integer Sequences
+
+```python
+from mapFolding import oeisSequence_aOFn
+foldingsTotal = oeisSequence_aOFn('A001416', 5)
+```
+
+```sh
+mapfolding-getOEISids
+```
+
 `mapFolding` explicitly implements [The On-Line Encyclopedia of Integer Sequences](https://oeis.org/):
 
 - [A001415](https://oeis.org/A001415) Number of ways of folding a 2 X n strip of stamps.
@@ -7,8 +29,6 @@
 - [A001417](https://oeis.org/A001417) Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
 - [A195646](https://oeis.org/A195646) Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.
 - [A001418](https://oeis.org/A001418) Number of ways of folding an n X n sheet of stamps.
-
-`mapFolding.foldings()`, however, will accept arbitrary values for the list of dimensions.
 
 [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml)
 
@@ -50,3 +70,7 @@ You can clear *The On-Line Encyclopedia of Integer Sequences* data from the `map
 ```sh
 ./mapFolding>clearOEIScache
 ```
+
+## List available OEIS sequences
+
+To see all available sequences from The On-Line Encyclopedia of Integer Sequences:
