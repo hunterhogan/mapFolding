@@ -1,5 +1,5 @@
 """
-Python implementation of 
+Python-JAX implementation of 
 W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
 """
 # HEY! 
@@ -11,12 +11,10 @@ W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, 
 # or reverse chronological/flow order?
 # There MUST be an important concept I don't know about or this is a fucking idiotic system.
 
-# NOTE do not import modules with numba compiled function (e.g., `@numba.njit`) here
-# because, for example, `numba.set_num_threads()` has no effect on compiled functions
 from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions
 from .oeis import oeisSequence_aOFn, getOEISids
 from .clearOEIScache import clearOEIScache
-from .stoo import foldings
+from .lunnanJAX import foldings
 
 __all__ = [
     'clearOEIScache',

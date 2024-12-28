@@ -2,7 +2,6 @@ import sys
 from typing import List, Tuple
 
 import numpy
-import numpy.typing
 from Z0Z_tools import intInnit
 
 
@@ -85,7 +84,7 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
     return listDimensionsPositive
 
-def makeConnectionGraph(listDimensions: List[int]) -> numpy.typing.NDArray[numpy.int64]:
+def makeConnectionGraph(listDimensions: List[int]) -> numpy.ndarray[numpy.int32, numpy.dtype[numpy.int32]]:
     """
     Constructs a connection graph for a given list of dimensions.
     This function generates a multi-dimensional connection graph based on the provided list of dimensions.
@@ -105,19 +104,19 @@ def makeConnectionGraph(listDimensions: List[int]) -> numpy.typing.NDArray[numpy
     # How to build a numpy.ndarray connectionGraph with sentinel values: 
     # ("Cartesian Product Decomposition" or "Dimensional Product Mapping")
     # Step 1: find the cumulative product of the map dimensions
-    P = numpy.ones(d + 1, dtype=numpy.int64)
+    P = numpy.ones(d + 1, dtype=numpy.int32)
     for i in range(1, d + 1):
         P[i] = P[i - 1] * listDimensions[i - 1]
 
     # Step 2: for each dimension, create a coordinate system
     # C[i][m] holds the i-th coordinate of leaf m
-    C = numpy.zeros((d + 1, n + 1), dtype=numpy.int64)
+    C = numpy.zeros((d + 1, n + 1), dtype=numpy.int32)
     for i in range(1, d + 1):
         for m in range(1, n + 1):
             C[i][m] = ((m - 1) // P[i - 1]) % listDimensions[i - 1] + 1
 
     # Step 3: create a huge empty leafConnectionGraph
-    D = numpy.zeros((d + 1, n + 1, n + 1), dtype=numpy.int64)
+    D = numpy.zeros((d + 1, n + 1, n + 1), dtype=numpy.int32)
 
     # Step for... for... for...: fill the leafConnectionGraph
     for i in range(1, d + 1):
@@ -169,7 +168,7 @@ def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: i
 
     return computationDivisions, computationIndex
 
-def validateParametersFoldings(listDimensions: List[int], computationDivisions: int, computationIndex: int) -> Tuple[List[int], int, int, int, numpy.typing.NDArray[numpy.int64]]:
+def validateParametersFoldings(listDimensions: List[int], computationDivisions: int, computationIndex: int) -> Tuple[List[int], int, int, int, numpy.ndarray[numpy.int32, numpy.dtype[numpy.int32]]]:
     """
     Validates and processes the parameters for the folding computation.
 

@@ -14,6 +14,9 @@ dependencies = [
     "numpy",
     "numba",
     "Z0Z-tools",
+    "jax",
+    "jaxtyping",
+    "chex",
     ]
 urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
 
@@ -26,8 +29,6 @@ test = [
     "pytest-cov",
     "pytest-env",
     "coverage",
-    "jax",
-    "jaxtyping",
     ]
 benchmark = [
     "pandas",
