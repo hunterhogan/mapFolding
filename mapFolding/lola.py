@@ -41,6 +41,42 @@ from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1
 from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 # Indices of array `my`, which holds dynamic, small, unsigned, integer values.
 from mapFolding.lolaIndices import activeLeaf1ndex, activeGap1ndex, unconstrainedLeaf, gap1ndexLowerBound, leaf1ndexConnectee, taskIndex, dimension1ndex, COUNTindicesDynamic
+from mapFolding.benchmarks import recordBenchmarks
+from typing import List
+import numpy
+
+def foldings(listDimensions: List[int]) -> int:
+    from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1, COUNTindicesStatic
+
+    static = numpy.zeros(COUNTindicesStatic, dtype=numpy.int64)
+
+    from mapFolding.beDRY import validateParametersFoldings
+    listDimensions, static[leavesTotal], D = validateParametersFoldings(listDimensions)
+
+    static[dimensionsTotal] = len(listDimensions)
+    static[dimensionsPlus1] = static[dimensionsTotal] + 1
+
+    track = numpy.zeros((4, static[leavesTotal] + 1), dtype=numpy.int64)
+    potentialGaps = numpy.zeros(static[leavesTotal] * static[leavesTotal] + 1, dtype=numpy.int64)
+
+    # Pass listDimensions and taskDivisions to _sherpa for benchmarking
+    foldingsTotal = _sherpa(track, potentialGaps, static, D, listDimensions)
+    return foldingsTotal
+
+# @recordBenchmarks()
+def _sherpa(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], static: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], p: List[int]) -> int:
+    """Performance critical section that counts foldings.
+    
+    Parameters:
+        track: Array tracking folding state
+        gap: Array for potential gaps
+        static: Array containing static configuration values
+        D: Array of leaf connections
+        p: List of dimensions for benchmarking
+        tasks: Number of computation divisions for benchmarking
+    """
+    foldingsTotal = countFoldings(track, gap, static, D)
+    return foldingsTotal
 
 @njit(cache=True, parallel=True, fastmath=False)
 def countFoldings(TEMPLATEtrack: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
