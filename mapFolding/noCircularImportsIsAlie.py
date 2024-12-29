@@ -1,7 +1,6 @@
-from typing import Dict, List, Tuple, get_args
+from typing import Dict, List, Tuple
 
 from mapFolding import validateListDimensions
-from mapFolding.oeis import OEISsequenceID
 
 def getFoldingsTotalKnown(listDimensions: List[int]) -> int:
     """
@@ -30,4 +29,4 @@ def getFoldingsTotalKnown(listDimensions: List[int]) -> int:
     if dimensionsTuple in dimensionsFoldingsTotalLookup:
         return dimensionsFoldingsTotalLookup[dimensionsTuple]
     else:
-        raise KeyError(f"No known folding count for dimensions {listDimensions}")
+        raise KeyError(f"I don't have a folding count for dimensions {listDimensions}.")

@@ -18,13 +18,12 @@ def recordBenchmarks():
             result = functionTarget(*arguments, **keywordArguments)
             timeElapsed = (time.perf_counter_ns() - timeStart) / 1e9
 
-            # Extract p and tasks from arguments
-            p = tuple(sorted(arguments[-1])) if len(arguments) >= 3 else None
-            # tasks = arguments[-1] if len(arguments) >= 4 else None
+            # Extract listDimensions from arguments
+            listDimensions = tuple(arguments[0])
 
             # Store benchmark data in single file
             pathFilenameRecordedBenchmarks = pathRecordedBenchmarks / "benchmarks.npy"
-            benchmarkEntry = numpy.array([(timeElapsed, p)], dtype=[('time', 'f8'), ('dimensions', 'O')])
+            benchmarkEntry = numpy.array([(timeElapsed, listDimensions)], dtype=[('time', 'f8'), ('dimensions', 'O')])
             
             if pathFilenameRecordedBenchmarks.exists():
                 arrayExisting = numpy.load(str(pathFilenameRecordedBenchmarks), allow_pickle=True)
