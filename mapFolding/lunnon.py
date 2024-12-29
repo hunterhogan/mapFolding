@@ -1,20 +1,4 @@
 """
-Key concepts
-    - A "leaf" is a unit square in the map
-    - A "gap" is a potential position where a new leaf can be folded
-    - Connections track how leaves can connect above/below each other
-    - The algorithm builds foldings incrementally by placing one leaf at a time
-    - Backtracking explores all valid combinations
-    - Leaves and dimensions are enumerated starting from 1, not 0; hence, leaf1ndex not leafIndex
-
-Algorithm flow
-    For each leaf
-        - Find valid gaps in each dimension
-        - Place leaf in valid position
-            - Try to find another lead to put in the adjacent position
-            - Repeat until the map is completely folded
-        - Backtrack when no valid positions remain
-
 Identifiers
     This module has two sets of identifiers. One set is active, and the other set is in uniformly formatted comments
     at the end of every line that includes an identifier that has an alternative identifier. 
@@ -36,27 +20,6 @@ Identifiers
         C) To PERMANENTLY delete the inactive set of identifiers, which are in the comments
         $1$2
 
-    Equivalent identifiers:
-    A = leafAbove
-    B = leafBelow
-    C = coordinateSystem
-    count = countDimensionsGapped
-    D = connectionGraph
-    d = dimensionsTotal
-    dd = unconstrainedLeaf
-    delta = distance
-    g = activeGap1ndex
-    gap = potentialGaps
-    gapter = gapRangeStart
-    gg = gap1ndexLowerBound
-    i = dimension1ndex
-    j = indexMiniGap
-    l = activeLeaf1ndex
-    m = leaf1ndex or leaf1ndexConnectee
-    n = leavesTotal
-    P = cumulativeProduct
-    p = listDimensions
-    s = track
 """
 from typing import List
 import numba
