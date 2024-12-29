@@ -1,8 +1,7 @@
 import random
 import sys
 from unittest.mock import patch, call
-from typing import Any, List
-
+from typing import Any, List, Tuple # Stop fucking deleting Tuple
 import pytest
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
 
@@ -31,7 +30,7 @@ def test_clear_OEIScache(mock_unlink, mock_exists, cacheExists):
 
 # ===== getLeavesTotal Tests =====
 @pytest.fixture
-def validDimensionCases() -> List[tuple[List[int], int]]:
+def validDimensionCases() -> List[Tuple[List[int], int]]:
     """Provide test cases for valid dimension inputs."""
     return [
         ([2, 3], 6),
@@ -43,7 +42,7 @@ def validDimensionCases() -> List[tuple[List[int], int]]:
     ]
 
 @pytest.fixture
-def invalidDimensionCases() -> List[tuple[Any, type]]:
+def invalidDimensionCases() -> List[Tuple[Any, type]]:
     """Provide test cases for invalid dimension inputs."""
     return [
         ([], ValueError),  # empty
@@ -74,7 +73,7 @@ def test_getLeavesTotal_sequence_types(sequenceType):
         sequence = range(1, 4)
     else:
         sequence = sequenceType([1, 2, 3])
-    assert getLeavesTotal(sequence) == 6 # type: ignore
+    assert getLeavesTotal(sequence) == 6  # type: ignore
 
 def test_getLeavesTotal_edge_cases():
     """Test edge cases for getLeavesTotal."""
@@ -128,18 +127,10 @@ def test_foldings_parameter_validation(dimensions, errorType):
 #         testFunction()
 
 # ===== getFoldingsTotalKnown Tests =====
-def test_getFoldingsTotalKnown_valid():
+def test_getFoldingsTotalKnown_valid(valid_dimensions_and_foldings):
     """Test getFoldingsTotalKnown with valid dimensions from OEIS settings."""
-    # Get random sequence and dimensions
-    randomSequence = random.choice(list(settingsOEISsequences.values()))
-    randomN = random.choice(list(randomSequence['valuesKnown'].keys()))
-    dimensions = randomSequence['dimensions'](randomN)
-    
-    # Get expected foldings count
-    expectedFoldings = randomSequence['valuesKnown'][randomN]
-    
-    # Test the lookup
-    assert getFoldingsTotalKnown(dimensions) == expectedFoldings
+    dimensions, expected_foldings = valid_dimensions_and_foldings
+    assert getFoldingsTotalKnown(dimensions) == expected_foldings
 
 def test_getFoldingsTotalKnown_invalid():
     """Test getFoldingsTotalKnown with dimensions that don't exist in any sequence."""

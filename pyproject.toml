@@ -29,6 +29,7 @@ test = [
     "pytest-cov",
     "pytest-env",
     "coverage",
+    "tenacity",
     ]
 benchmark = [
     "pandas",
@@ -69,6 +70,3 @@ output = "tests/coverage/coverage.xml"
 [tool.pytest.ini_options]
 addopts = "--cov=mapFolding --cov-report=term-missing --cov-report=xml"
 testpaths = ["tests"]
-env = [
-    "NUMBA_DISABLE_JIT=1"
-    ]
