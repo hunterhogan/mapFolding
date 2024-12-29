@@ -40,7 +40,7 @@ assume `listDimensions` is at most the next unknown total in the sequence.
 | unsigned int | |  | gg | gap1ndexLowerBound |
 | unsigned int |d | | i | dimension1ndex |
 | unsigned int |gg-1 |  | j | indexMiniGap |
-| unsigned int | |  | l | activeLeaf1ndex |
+| unsigned int |**_n+1_** |  | l | activeLeaf1ndex |
 | unsigned int |n | | m | leaf1ndex or leaf1ndexConnectee |
 | unsigned int |256 |  | n | leavesTotal |
 | unsigned int | | n | P | cumulativeProduct |
