@@ -1,76 +1,49 @@
-# Python implementation of "Multi-dimensional map-folding"
+# JAX version
 
-`mapFolding.foldings()` will accept arbitrary values for the list of dimensions.
+A JAX version would likely be faster than numba and it could automatically use GPU or TPU when available.
+I would like to compare the speed with a functioning version.
 
-```python
-from mapFolding import foldings
-foldingsTotal = foldings([4,9])
-```
+## Notes
 
-## Experimenting
+- int64 does not work in all environments.
+- Removed `track` array to simplify the prototype.
 
-In the [git branches](https://github.com/hunterhogan/mapFolding/branches), I experiment with different optimizations of the algorithm.
+## History
 
-## Map and stamp folding at The On-Line Encyclopedia of Integer Sequences
+1. Building the data structures takes less than a millisecond, so I haven't optimized that step.
+2. I convert the numpy.ndarray to jax.Array.
+3. "pid.py" is supposed to be pure JAX but it didn't work.
+4. I started over with "pider.py" as a hybrid of JAX and non-JAX.
+   1. I make small changes and use the test modules to confirm the counts are correct.
+   2. The hybrid module is painfully slow but the counts are correct.
+5. While working on pider.py, I came up with a way to change improve parallelization, so I switched my focus to the Run Lola Run branch.
+6. After returning to this branch, I decided to start over again with lunnanJAX.py
 
-```python
-from mapFolding import oeisSequence_aOFn
-foldingsTotal = oeisSequence_aOFn('A001416', 5)
-```
+## Potential values for variables
 
-```sh
-mapfolding-getOEISids
-```
+Assume `listDimensions` is for an implemented OEIS sequence, and
+assume `listDimensions` is at most the next unknown total in the sequence.
 
-`mapFolding` explicitly implements [The On-Line Encyclopedia of Integer Sequences](https://oeis.org/):
-
-- [A001415](https://oeis.org/A001415) Number of ways of folding a 2 X n strip of stamps.
-- [A001416](https://oeis.org/A001416) Number of ways of folding a 3 X n strip of stamps.
-- [A001417](https://oeis.org/A001417) Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
-- [A195646](https://oeis.org/A195646) Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.
-- [A001418](https://oeis.org/A001418) Number of ways of folding an n X n sheet of stamps.
-
-[![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml)
-
-## Algorithm history
-
-### The original algorithm
-
-In [`foldings.txt`](mapFolding/reference/foldings.txt) and [`foldings.AA`](mapFolding/reference/foldings.AA), you can find transcriptions of the original algorithm as it was printed in 1971. The full paper is preserved as a PDF of images available at the DOI link below.
-
-W. F. Lunnon, Multi-dimensional map-folding, *The Computer Journal*, Volume 14, Issue 1, 1971, Pages 75–80, [https://doi.org/10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75) ([BibTex](mapFolding/citations/Lunnon.bibtex))
-
-### ALGOL68, C, and Java versions
-
-A Java implementation by [Sean A. Irvine](https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java) ([BibTex](mapFolding/citations/jOEIS.bibtex)) includes the comments:
-
-```java
-/**
- * A001415 Number of ways of folding a 2 X n strip of stamps.
- * @author Fred Lunnon (ALGOL68, C versions)
- * @author Sean A. Irvine (Java port)
- */
-...
-  // Implements algorithm as described in "Multi-dimensional map-folding",
-  // by W. F. Lunnon, The Computer J, 14, 1, pp. 75--80.  Note the original
-  // paper contains a few omissions, so this actual code is based on a C
-  // implementation by Fred Lunnon.
-```
-
-## Related Video
-
-"How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](mapFolding/citations/Physics_for_the_Birds.bibtex))
-
-[![How Many Ways Can You Fold a Map?](https://i.ytimg.com/vi/sfH9uIY3ln4/hq720.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
-
-## Did *The On-Line Encyclopedia of Integer Sequences* recently update an implemented sequence?
-
-You can clear *The On-Line Encyclopedia of Integer Sequences* data from the `mapFolding` cache:
-
-```sh
-./mapFolding>clearOEIScache
-```
-
-## List available OEIS sequences
-
-To see all available sequences from The On-Line Encyclopedia of Integer Sequences:
+| Type | max(x) | max(array) | Identifier | Alternate Identifier |
+|------|----------|-----|-------|---------------------|
+| unsigned int | | n | A | leafAbove |
+| unsigned int | | n | B | leafBelow |
+| unsigned int | | max(p) | C | coordinateSystem |
+| unsigned int |d |  | count | countDimensionsGapped |
+| unsigned int | | n | D | connectionGraph |
+| unsigned int |8 |  | d | dimensionsTotal |
+| unsigned int |d |  | dd | unconstrainedLeaf |
+| unsigned int | |  | delta | distance |
+| unsigned int | |  | g | activeGap1ndex |
+| unsigned int | |  | gap | potentialGaps |
+| unsigned int | |  | gapter | gapRangeStart |
+| unsigned int | |  | gg | gap1ndexLowerBound |
+| unsigned int |d | | i | dimension1ndex |
+| unsigned int |gg-1 |  | j | indexMiniGap |
+| unsigned int |**_n+1_** |  | l | activeLeaf1ndex |
+| unsigned int |n | | m | leaf1ndex or leaf1ndexConnectee |
+| unsigned int |256 |  | n | leavesTotal |
+| unsigned int | | n | P | cumulativeProduct |
+| unsigned int | | 19 | p | listDimensions |
+| unsigned int | | n/a | s | track |
+| unsigned int |10^17 |  | n/a | foldingsTotal |
