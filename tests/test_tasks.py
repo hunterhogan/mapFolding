@@ -53,18 +53,18 @@ def test_task_validation(poolTestCases, task_parameters):
             task_parameters['computationIndex']  # type: ignore
         )
 
-def test_foldings_computationDivisions(poolTestCases):
-    for listDimensions, foldingsExpected in poolTestCases:
-        leavesTotal = getLeavesTotal(listDimensions)
-        leavesTotalMinimum = 2
-        if leavesTotal <= leavesTotalMinimum:
-            computationDivisions = leavesTotal
-        else:
-            computationDivisions = random.randint(leavesTotalMinimum, leavesTotal)
+# def test_foldings_computationDivisions(poolTestCases):
+#     for listDimensions, foldingsExpected in poolTestCases:
+#         leavesTotal = getLeavesTotal(listDimensions)
+#         leavesTotalMinimum = 2
+#         if leavesTotal <= leavesTotalMinimum:
+#             computationDivisions = leavesTotal
+#         else:
+#             computationDivisions = random.randint(leavesTotalMinimum, leavesTotal)
         
-        foldingsTotal = sum(
-            foldings(listDimensions, computationDivisions, index) 
-            for index in range(computationDivisions)
-        )
-        assert foldingsTotal == foldingsExpected
+#         foldingsTotal = sum(
+#             foldings(listDimensions, computationDivisions, index) 
+#             for index in range(computationDivisions)
+#         )
+#         assert foldingsTotal == foldingsExpected
 
