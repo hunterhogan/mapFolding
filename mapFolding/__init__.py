@@ -16,7 +16,7 @@ W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, 
 from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions, validateTaskDivisions, outfitFoldings
 from .oeis import oeisSequence_aOFn, getOEISids
 from .clearOEIScache import clearOEIScache
-from .babbage import foldings
+from .lego import foldings
 
 __all__ = [
     'clearOEIScache',
