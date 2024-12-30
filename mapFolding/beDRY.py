@@ -1,5 +1,5 @@
 import sys
-from typing import List
+from typing import List, Tuple
 
 import numpy
 from Z0Z_tools import intInnit
@@ -138,7 +138,7 @@ def makeConnectionGraph(p: List[int]) -> numpy.ndarray[numpy.int64, numpy.dtype[
 
     return D
 
-def validateParametersFoldings(listDimensions: List[int]):
+def outfitFoldings(listDimensions: List[int]) -> Tuple[List[int], int, numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]]:
     """
     Validates and processes the parameters for the folding computation.
 
@@ -155,8 +155,8 @@ def validateParametersFoldings(listDimensions: List[int]):
     listDimensions = validateListDimensions(listDimensions)
     leavesTotal = getLeavesTotal(listDimensions)
     connectionGraph = makeConnectionGraph(listDimensions)
-    arrayTracking = numpy.zeros((arrayTrackingHeight, leavesTotal + 1))
-    potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1)
+    arrayTracking = numpy.zeros((arrayTrackingHeight, leavesTotal + 1), dtype=numpy.int64)
+    potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=numpy.int64)
     return listDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps
 
 def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
