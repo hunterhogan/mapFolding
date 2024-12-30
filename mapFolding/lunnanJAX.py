@@ -23,11 +23,8 @@ Plan to refactor in JAX
 from mapFolding import validateListDimensions, getLeavesTotal
 from mapFolding.beDRY import makeConnectionGraph
 from typing import List, Tuple
-import chex
 import jax
 import jaxtyping
-
-chex.disable_asserts()
 
 dtypeDefault = jax.numpy.uint32
 dtypeMaximum = jax.numpy.uint32
@@ -49,7 +46,6 @@ def foldings(listDimensions: List[int]) -> int:
     # return foldingsJAX(leavesTotal, dimensionsTotal, connectionGraph)
     return foldingsJAX(n, d, connectionGraph)
 
-# @jax.jit(foldingsJAX, static_argnums=(0, 1, 2))
 def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32, connectionGraph: jaxtyping.Array) -> jaxtyping.UInt32:
 
     def doNothing(argument):
@@ -84,7 +80,6 @@ def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32
 
             def ifLeafIsUnconstrainedDo(unconstrainedValues: Tuple[jaxtyping.Array, jaxtyping.Array, jaxtyping.UInt32, jaxtyping.UInt32]):
                 unconstrained_unconstrainedLeaf = unconstrainedValues[3]
-                chex.assert_rank(unconstrained_unconstrainedLeaf, 0)
                 unconstrained_unconstrainedLeaf = 1 + unconstrained_unconstrainedLeaf
                 return (unconstrainedValues[0], unconstrainedValues[1], unconstrainedValues[2], unconstrained_unconstrainedLeaf)
 
@@ -170,15 +165,6 @@ def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32
         countDimensionsGapped, potentialGaps, activeGap1ndex, indexMiniGap = miniGapValues
         del indexMiniGap
 
-        # Validate array states before processing
-        chex.assert_shape(countDimensionsGapped, (leavesTotal + 1,))
-        chex.assert_shape(potentialGaps, (leavesTotal * leavesTotal + 1,))
-        chex.assert_type([countDimensionsGapped, gapRangeStart], dtypeDefault)
-        chex.assert_type(potentialGaps, dtypeMaximum)
-        chex.assert_scalar_in(activeLeaf1ndex, 0, leavesTotal + 1)
-
-        # Validate state changes
-        chex.assert_tree_all_finite([countDimensionsGapped, potentialGaps])
         return (allValues[0], leafBelow, countDimensionsGapped, gapRangeStart, potentialGaps, allValues[5], activeLeaf1ndex, activeGap1ndex)
 
     def incrementCondition(leafBelowSentinel, activeLeafNumber):
@@ -228,20 +214,7 @@ def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32
         if_activeLeaf1ndex_greaterThan_0_values = jax.lax.cond(if_activeLeaf1ndex_greaterThan_0(activeLeaf1ndex), if_activeLeaf1ndex_greaterThan_0_do, doNothing, if_activeLeaf1ndex_greaterThan_0_values)
         leafAbove, leafBelow, gapRangeStart, activeLeaf1ndex, activeGap1ndex = if_activeLeaf1ndex_greaterThan_0_values
 
-        # Validate array states
-        chex.assert_shape([leafAbove, leafBelow], (leavesTotal + 1,))
-        chex.assert_type([leafAbove, leafBelow, gapRangeStart], dtypeDefault)
-        chex.assert_scalar_in(activeLeaf1ndex, 0, leavesTotal + 1)
-        chex.assert_scalar_in(activeGap1ndex, 0, leavesTotal * leavesTotal + 1)
-
-        # Validate final states
-        chex.assert_tree_all_finite([leafAbove, leafBelow, gapRangeStart])
         return (leafAbove, leafBelow, allValues[2], gapRangeStart, potentialGaps, allValues[5], activeLeaf1ndex, activeGap1ndex)
-
-    # Validate dimensions
-    chex.assert_rank(connectionGraph, 3)
-    chex.assert_shape(connectionGraph, (dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1))
-    chex.assert_type(connectionGraph, dtypeDefault)
 
     # Dynamic values
     A = jax.numpy.zeros(leavesTotal + 1, dtype=dtypeDefault)
@@ -253,16 +226,6 @@ def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32
     foldingsTotal = jax.numpy.uint32(0)
     l = jax.numpy.uint32(1)
     g = jax.numpy.uint32(0)
-
-    # Validate dynamic arrays initialization
-    chex.assert_shape(A, (leavesTotal + 1,))
-    chex.assert_shape(B, (leavesTotal + 1,))
-    chex.assert_shape(count, (leavesTotal + 1,))
-    chex.assert_shape(gapter, (leavesTotal + 1,))
-    chex.assert_shape(gap, (leavesTotal * leavesTotal + 1,))
-
-    chex.assert_type([A, B, count, gapter], dtypeDefault)
-    chex.assert_type(gap, dtypeMaximum)
 
     foldingsValues = (A, B, count, gapter, gap, foldingsTotal, l, g)
     foldingsValues = jax.lax.while_loop(while_activeLeaf1ndex_greaterThan_0, countFoldings, foldingsValues)

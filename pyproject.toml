@@ -9,14 +9,13 @@ readme = "README.md"
 authors = [
     {name = "Hunter Hogan", email = "HunterHogan@pm.me"}
     ]
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
     "numpy",
     "numba",
     "Z0Z-tools",
     "jax",
     "jaxtyping",
-    "chex",
     ]
 urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
 
