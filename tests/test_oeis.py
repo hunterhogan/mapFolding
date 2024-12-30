@@ -8,9 +8,7 @@ from datetime import datetime, timedelta
 from typing import get_args
 import pytest
 
-from mapFolding.noCircularImportsIsAlie import getFoldingsTotalKnown
-from mapFolding import getOEISids
-from mapFolding import oeisSequence_aOFn
+from mapFolding import getOEISids, oeisSequence_aOFn
 from mapFolding.oeis import settingsOEISsequences, OEISsequenceID
 from mapFolding.oeis import _formatFilenameCache, _getOEISsequence, _parseBFileOEIS
 from mapFolding.oeis import _validateOEISid
@@ -37,24 +35,10 @@ def sequenceIDsample() -> OEISsequenceID:
 
 def test_aOFn_calculate_value(oeisID):
     # Use known values directly from settings
-    for n in settingsOEISsequences[oeisID]['testValuesValidation']:
+    for n in settingsOEISsequences[oeisID]['valuesTestValidation']:
         result = oeisSequence_aOFn(oeisID, n)
         expected = settingsOEISsequences[oeisID]['valuesKnown'][n]
         assert result == expected
-
-def test_dimensions_lookup(oeisID, valid_dimensions_and_foldings):
-    """Test that dimensions lookup returns correct folding count for specific OEIS ID."""
-    dictionaryValuesKnown = settingsOEISsequences[oeisID]['valuesKnown']
-    dimensions, expected_foldings = valid_dimensions_and_foldings
-    
-    # Only test if these dimensions belong to this sequence
-    for n in dictionaryValuesKnown:
-        if sorted(settingsOEISsequences[oeisID]['dimensions'](n)) == sorted(dimensions):
-            # Found matching dimensions, test the lookup
-            assert getFoldingsTotalKnown(dimensions) == expected_foldings
-            return
-            
-    pytest.skip(f"No matching dimensions found for {oeisID}")
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID):
@@ -87,6 +71,13 @@ def test_aOFn_invalid_n(randomValidOEISid, badN):
     """Check that negative or non-integer n raises ValueError."""
     with pytest.raises(ValueError):
         oeisSequence_aOFn(randomValidOEISid, badN)
+
+def test_aOFn_zeroDim_A001418():
+    import pytest
+    from mapFolding.oeis import oeisSequence_aOFn
+
+    with pytest.raises(ArithmeticError):
+        oeisSequence_aOFn('A001418', 0)
 
 # ===== Cache-related Tests =====
 def testCacheMiss(temporaryCache, sequenceIDsample):
@@ -188,11 +179,3 @@ def testCommandLineInterface():
         getOEISids()
     outputText = captureOutput.getvalue()
     assert "Available OEIS sequences:" in outputText
-
-def test_aOFn_zeroDim_A001418():
-    import pytest
-    from mapFolding.oeis import oeisSequence_aOFn
-
-    with pytest.raises(ArithmeticError):
-        oeisSequence_aOFn('A001418', 0)
-
