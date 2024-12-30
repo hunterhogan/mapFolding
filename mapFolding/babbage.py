@@ -21,12 +21,11 @@ Identifiers
         $1$2
 """
 from typing import List
-import numpy
 
 from mapFolding import outfitFoldings, validateTaskDivisions
 
 def foldings(p: List[int], mod: int = 0, res: int = 0) -> int: # def foldings(listDimensions: List[int], computationDivisions: int = 0, computationIndex: int = 0) -> int:
-    p, n, D, s, gap = outfitFoldings(p) # listDimensions, leavesTotal, dimensionsTotal, track, potentialGaps = outfitFoldings(listDimensions)
+    p, n, D, s, gap = outfitFoldings(p) # listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions)
     mod, res = validateTaskDivisions(mod, res, n) # computationDivisions, computationIndex = validateTaskDivisions(computationDivisions, computationIndex, leavesTotal)
 
     d: int = len(p) # dimensionsTotal: int = len(listDimensions)
