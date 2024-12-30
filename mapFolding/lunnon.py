@@ -35,7 +35,7 @@ def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> 
     considering maps with at least two positive dimensions.
 
     Parameters:
-        p : A list of integers representing the dimensions of the map. Must contain at least two positive dimensions.
+        p : A list of integers representing the dimensions of the map. Must contain at least two positive dimensions. # listDimensions : A list of integers representing the dimensions of the map. Must contain at least two positive dimensions.
 
     Returns
         foldingsTotal: The total number of possible distinct foldings for the given map dimensions.
