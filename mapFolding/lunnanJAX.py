@@ -1,25 +1,3 @@
-"""
-Plan to refactor in JAX
-- function nesting:
-    - So that functions may use variables with a "higher" scope, nest a function that uses a variable from a higher scope.
-    - So that a function does not unintentionally use a variable from a higher scope, do not nest a function that does not use a variable from a higher scope.
-- comparison functions and identifiers
-    - to avoid using a value from the wrong scope, use generic identifiers for comparison functions
-    - to signal the original Python statement on which the function is based, use the original Python statement as the identifier
-- numpy usage must be conspicuous
-- use `chex`
-    assert when values should have changed
-    assert when values should not have changed
-    assert shapes/ranks
-    assert dtypes
-    create chex statements before change to jax and use chex.disable_asserts() to disable them
-- Typing, tuples, assignments, and `chex`
-    Instead of unpacking and using typing
-    Unpack with one statement and use chex assertions where needed
-        when unpacking , use `_0`, `_1`, `_2`, ... `_N` as placeholders for the unused elements of a tuple: never just `_`
-    Then, `=` is a strong signal that an assignment is happening and that I must conform to JAX rules
-"""
-
 from mapFolding import validateListDimensions, getLeavesTotal
 from mapFolding.beDRY import makeConnectionGraph
 from typing import List, Tuple
@@ -32,18 +10,13 @@ dtypeMaximum = jax.numpy.uint32
 def foldings(listDimensions: List[int]) -> int:
     listDimensionsPositive: List[int] = validateListDimensions(listDimensions)
 
-    # Unchanging values
     n: int = getLeavesTotal(listDimensionsPositive)
     d: int = len(listDimensions)
-    # leavesTotal = jax.numpy.uint32(n)
-    # dimensionsTotal = jax.numpy.uint32(d)
     import numpy
     D: numpy.ndarray[numpy.int32, numpy.dtype[numpy.int32]] = makeConnectionGraph(listDimensionsPositive)
     connectionGraph = jax.numpy.asarray(D, dtype=dtypeDefault)
-    # del n, d, D
     del listDimensionsPositive
 
-    # return foldingsJAX(leavesTotal, dimensionsTotal, connectionGraph)
     return foldingsJAX(n, d, connectionGraph)
 
 def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32, connectionGraph: jaxtyping.Array) -> jaxtyping.UInt32:
@@ -230,4 +203,5 @@ def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32
     foldingsValues = (A, B, count, gapter, gap, foldingsTotal, l, g)
     foldingsValues = jax.lax.while_loop(while_activeLeaf1ndex_greaterThan_0, countFoldings, foldingsValues)
     return foldingsValues[5]
+
 foldingsJAX = jax.jit(foldingsJAX, static_argnums=(0, 1))

@@ -11,11 +11,11 @@ authors = [
     ]
 version = "0.0.5"
 dependencies = [
-    "numpy",
-    "numba",
-    "Z0Z-tools",
     "jax",
+    "jaxlib",
     "jaxtyping",
+    "numpy",
+    "Z0Z-tools",
     ]
 urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
 
