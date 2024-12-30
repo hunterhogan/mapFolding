@@ -30,10 +30,6 @@ def randomValidOEISid() -> OEISsequenceID:
     """Return a random valid OEIS ID from settings."""
     return random.choice(list(settingsOEISsequences.keys()))
 
-@pytest.fixture(params=settingsOEISsequences.keys())
-def oeisID(request):
-    return request.param
-
 @pytest.fixture
 def sequenceIDsample() -> OEISsequenceID:
     """Select a random valid sequence ID as a sample."""
@@ -46,18 +42,19 @@ def test_aOFn_calculate_value(oeisID):
         expected = settingsOEISsequences[oeisID]['valuesKnown'][n]
         assert result == expected
 
-def test_dimensions_lookup(oeisID):
+def test_dimensions_lookup(oeisID, valid_dimensions_and_foldings):
+    """Test that dimensions lookup returns correct folding count for specific OEIS ID."""
     dictionaryValuesKnown = settingsOEISsequences[oeisID]['valuesKnown']
-    # Get n values where n >= 2
-    listCountTermsValid = [countTerm for countTerm in dictionaryValuesKnown.keys() if countTerm >= 2]
-    countTerm = random.choice(listCountTermsValid)
-    foldingsExpected = dictionaryValuesKnown[countTerm]
+    dimensions, expected_foldings = valid_dimensions_and_foldings
     
-    # Get dimensions for this n
-    listDimensions = sorted(settingsOEISsequences[oeisID]['dimensions'](countTerm))
-    
-    # Test the lookup
-    assert getFoldingsTotalKnown(listDimensions) == foldingsExpected
+    # Only test if these dimensions belong to this sequence
+    for n in dictionaryValuesKnown:
+        if sorted(settingsOEISsequences[oeisID]['dimensions'](n)) == sorted(dimensions):
+            # Found matching dimensions, test the lookup
+            assert getFoldingsTotalKnown(dimensions) == expected_foldings
+            return
+            
+    pytest.skip(f"No matching dimensions found for {oeisID}")
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID):

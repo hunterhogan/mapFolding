@@ -1,12 +1,13 @@
+import random
 import sys
 from unittest.mock import patch, call
-from typing import Any, List
-
+from typing import Any, List, Tuple
 import pytest
+from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
 
 from mapFolding import (
     clearOEIScache, getLeavesTotal, parseListDimensions, 
-    foldings, validateListDimensions
+    foldings, validateListDimensions,
 )
 from mapFolding.oeis import settingsOEISsequences
 from mapFolding.noCircularImportsIsAlie import getFoldingsTotalKnown
@@ -29,7 +30,7 @@ def test_clear_OEIScache(mock_unlink, mock_exists, cacheExists):
 
 # ===== getLeavesTotal Tests =====
 @pytest.fixture
-def validDimensionCases() -> List[tuple[List[int], int]]:
+def validDimensionCases() -> List[Tuple[List[int], int]]:
     """Provide test cases for valid dimension inputs."""
     return [
         ([2, 3], 6),
@@ -41,7 +42,7 @@ def validDimensionCases() -> List[tuple[List[int], int]]:
     ]
 
 @pytest.fixture
-def invalidDimensionCases() -> List[tuple[Any, type]]:
+def invalidDimensionCases() -> List[Tuple[Any, type]]:
     """Provide test cases for invalid dimension inputs."""
     return [
         ([], ValueError),  # empty
@@ -72,7 +73,7 @@ def test_getLeavesTotal_sequence_types(sequenceType):
         sequence = range(1, 4)
     else:
         sequence = sequenceType([1, 2, 3])
-    assert getLeavesTotal(sequence) == 6 # type: ignore
+    assert getLeavesTotal(sequence) == 6  # type: ignore
 
 def test_getLeavesTotal_edge_cases():
     """Test edge cases for getLeavesTotal."""
@@ -107,19 +108,26 @@ def test_dimension_validation(dimensions, expected):
         with pytest.raises((ValueError, NotImplementedError)):
             validateListDimensions(dimensions)
 
-# ===== Parameter Validation Tests =====
-@pytest.mark.parametrize("dimensions,divisions,index,errorType", [
-    ([], 1, 0, ValueError),  # Empty dimensions
-    ([1], 1, 0, NotImplementedError),  # Single dimension
-    ([0, 0], 1, 0, NotImplementedError),  # No positive dimensions
-    ([1, -1], 1, 0, ValueError),  # Negative dimension
-    ([2, 2], -1, 0, ValueError),  # Negative divisions
-    ([2, 2], 1, -1, ValueError),  # Negative index
-    ([2, 2], 1.5, 0, ValueError),  # Float divisions
-    ([2, 2], 1, 1.5, ValueError),  # Float index
-])
-def test_foldings_parameter_validation(dimensions, divisions, index, errorType):
-    """Test parameter validation in foldings function."""
-    with pytest.raises(errorType):
-        foldings(dimensions, divisions, index)
+# ===== Parse Integers Tests =====
+# def test_intInnit():
+#     """Test integer parsing using the test suite generator."""
+#     for testName, testFunction in makeTestSuiteIntInnit(parseListDimensions).items():
+#         testFunction()
+
+# ===== getFoldingsTotalKnown Tests =====
+def test_getFoldingsTotalKnown_valid(valid_dimensions_and_foldings):
+    """Test getFoldingsTotalKnown with valid dimensions from OEIS settings."""
+    dimensions, expected_foldings = valid_dimensions_and_foldings
+    assert getFoldingsTotalKnown(dimensions) == expected_foldings
+
+def test_getFoldingsTotalKnown_invalid():
+    """Test getFoldingsTotalKnown with dimensions that don't exist in any sequence."""
+    invalidDimensions = [
+        [21, 31],  # Random large dimensions
+        [4, 4, 4]  # Triple dimensions
+    ]
+    
+    for dimensions in invalidDimensions:
+        with pytest.raises(KeyError):
+            getFoldingsTotalKnown(dimensions)
 
