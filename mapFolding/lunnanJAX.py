@@ -1,7 +1,5 @@
 """
 Plan to refactor in JAX
-- change the control flow to JAX style without using JAX
-- identifiers for variables must signal the scope from which they are drawing their value.
 - function nesting:
     - So that functions may use variables with a "higher" scope, nest a function that uses a variable from a higher scope.
     - So that a function does not unintentionally use a variable from a higher scope, do not nest a function that does not use a variable from a higher scope.
@@ -9,15 +7,28 @@ Plan to refactor in JAX
     - to avoid using a value from the wrong scope, use generic identifiers for comparison functions
     - to signal the original Python statement on which the function is based, use the original Python statement as the identifier
 - numpy usage must be conspicuous
+- use `chex`
+    assert when values should have changed
+    assert when values should not have changed
+    assert shapes/ranks
+    assert dtypes
+    create chex statements before change to jax and use chex.disable_asserts() to disable them
+- Typing, tuples, assignments, and `chex`
+    Instead of unpacking and using typing
+    Unpack with one statement and use chex assertions where needed
+        when unpacking , use `_0`, `_1`, `_2`, ... `_N` as placeholders for the unused elements of a tuple: never just `_`
+    Then, `=` is a strong signal that an assignment is happening and that I must conform to JAX rules
 """
 
 from mapFolding import validateListDimensions, getLeavesTotal
 from mapFolding.beDRY import makeConnectionGraph
 from typing import List
-# import chex
+import chex
 import jax
-# import jaxtyping
+import jaxtyping
 import numpy as NUMERICALPYTHON
+
+chex.disable_asserts()
 
 dtypeMaximumNUMERICALPYTHON = NUMERICALPYTHON.uint32
 dtypeDefaultNUMERICALPYTHON = NUMERICALPYTHON.uint16
@@ -39,20 +50,16 @@ def doNothing(argument):
     return argument
 
 def foldings(listDimensions: List[int]) -> int:
-    def while_activeLeaf1ndex_greaterThan_0(countFoldingsValues):
-        comparand = countFoldingsValues[6]
+    def while_activeLeaf1ndex_greaterThan_0(comparisonValues):
+        comparand = comparisonValues[6]
         return comparand > 0
 
     def countFoldings(allValues):
-        leafBelow: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[1]
-        activeLeaf1ndex: int = allValues[6]
+        _0, leafBelow, _2, _3, _4, _5, activeLeaf1ndex, _7 = allValues
 
         allValues = Z0Z_cond(findGapsCondition(leafBelow[0], activeLeaf1ndex),
                             lambda argumentX: dao(findGapsDo(argumentX)),
-                            lambda argumentY: Z0Z_cond(incrementCondition(leafBelow[0], activeLeaf1ndex),
-                                                        lambda argumentZ: dao(incrementDo(argumentZ)),
-                                                        dao,
-                                                        argumentY),
+                            lambda argumentY: Z0Z_cond(incrementCondition(leafBelow[0], activeLeaf1ndex), lambda argumentZ: dao(incrementDo(argumentZ)), dao, argumentY),
                             allValues)
 
         return allValues
@@ -61,85 +68,57 @@ def foldings(listDimensions: List[int]) -> int:
         return NUMERICALPYTHON.logical_or(NUMERICALPYTHON.logical_and(leafBelowSentinel == 1, activeLeafNumber <= leavesTotal), activeLeafNumber <= 1)
 
     def findGapsDo(allValues):
-        def for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1(for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values):
-            comparand = for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values[4]
-            return comparand <= dimensionsTotal
+        def for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1(comparisonValues):
+            return comparisonValues[-1] <= dimensionsTotal
 
         def for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1_do(for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values):
-            dimensions_countDimensionsGapped: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values[0]
-            dimensions_potentialGaps: NUMERICALPYTHON.ndarray[dtypeMaximumNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeMaximumNUMERICALPYTHON]] = for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values[1]
-            dimensions_gap1ndexLowerBound: int = for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values[2]
-            dimensions_unconstrainedLeaf: int = for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values[3]
-            dimensionNumber: int = for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values[4]
-
             def ifLeafIsUnconstrainedCondition(comparand):
                 return connectionGraph[comparand][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex
 
             def ifLeafIsUnconstrainedDo(unconstrainedValues):
-                unconstrained_countDimensionsGapped: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = unconstrainedValues[0]
-                unconstrained_potentialGaps: NUMERICALPYTHON.ndarray[dtypeMaximumNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeMaximumNUMERICALPYTHON]] = unconstrainedValues[1]
-                unconstrained_gap1ndexLowerBound: int = unconstrainedValues[2]
-                unconstrained_unconstrainedLeaf: int = unconstrainedValues[3]
-
+                unconstrained_unconstrainedLeaf = unconstrainedValues[3]
                 unconstrained_unconstrainedLeaf += 1
-
-                unconstrainedValues = (unconstrained_countDimensionsGapped, unconstrained_potentialGaps, unconstrained_gap1ndexLowerBound, unconstrained_unconstrainedLeaf)
-                return unconstrainedValues
+                return (unconstrainedValues[0], unconstrainedValues[1], unconstrainedValues[2], unconstrained_unconstrainedLeaf)
 
             def ifLeafIsUnconstrainedElse(unconstrainedValues):
-                unconstrained_countDimensionsGapped: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = unconstrainedValues[0]
-                unconstrained_potentialGaps: NUMERICALPYTHON.ndarray[dtypeMaximumNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeMaximumNUMERICALPYTHON]] = unconstrainedValues[1]
-                unconstrained_gap1ndexLowerBound: int = unconstrainedValues[2]
-                unconstrained_unconstrainedLeaf: int = unconstrainedValues[3]
+                def while_leaf1ndexConnectee_notEquals_activeLeaf1ndex(comparisonValues):
+                    return comparisonValues[-1] != activeLeaf1ndex
 
-                leaf1ndexConnectee: int = connectionGraph[dimensionNumber][activeLeaf1ndex][activeLeaf1ndex]
-
-                def while_leaf1ndexConnectee_notEquals_activeLeaf1ndex(countGapsValues):
-                    comparand = countGapsValues[3]
-                    return comparand != activeLeaf1ndex
-
-                def countGaps(countGapsValues):
-                    countGapsCountDimensionsGapped: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = countGapsValues[0]
-                    countGapsPotentialGaps: NUMERICALPYTHON.ndarray[dtypeMaximumNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeMaximumNUMERICALPYTHON]] = countGapsValues[1]
-                    countGapsGap1ndexLowerBound: int = countGapsValues[2]
-                    countGapsLeaf1ndexConnectee: int = countGapsValues[3]
+                def countGaps(countGapsDoValues):
+                    countGapsCountDimensionsGapped, countGapsPotentialGaps, countGapsGap1ndexLowerBound, countGapsLeaf1ndexConnectee = countGapsDoValues
 
                     countGapsPotentialGaps[countGapsGap1ndexLowerBound] = countGapsLeaf1ndexConnectee
-                    if countGapsCountDimensionsGapped[countGapsLeaf1ndexConnectee] == 0:
-                        countGapsGap1ndexLowerBound += 1
+                    countGapsGap1ndexLowerBound = NUMERICALPYTHON.where(countGapsCountDimensionsGapped[countGapsLeaf1ndexConnectee] == 0, countGapsGap1ndexLowerBound + 1, countGapsGap1ndexLowerBound)
                     countGapsCountDimensionsGapped[countGapsLeaf1ndexConnectee] += 1
                     countGapsLeaf1ndexConnectee = connectionGraph[dimensionNumber][activeLeaf1ndex][leafBelow[countGapsLeaf1ndexConnectee]]
 
-                    countGapsValues = (countGapsCountDimensionsGapped, countGapsPotentialGaps, countGapsGap1ndexLowerBound, countGapsLeaf1ndexConnectee)
-                    return countGapsValues
+                    return (countGapsCountDimensionsGapped, countGapsPotentialGaps, countGapsGap1ndexLowerBound, countGapsLeaf1ndexConnectee)
+
+                unconstrained_countDimensionsGapped, unconstrained_potentialGaps, unconstrained_gap1ndexLowerBound, unconstrained_unconstrainedLeaf = unconstrainedValues
+
+                leaf1ndexConnectee = connectionGraph[dimensionNumber][activeLeaf1ndex][activeLeaf1ndex]
 
                 countGapsValues = (unconstrained_countDimensionsGapped, unconstrained_potentialGaps, unconstrained_gap1ndexLowerBound, leaf1ndexConnectee)
-
                 countGapsValues = Z0Z_while_loop(while_leaf1ndexConnectee_notEquals_activeLeaf1ndex, countGaps, countGapsValues)
-
                 unconstrained_countDimensionsGapped, unconstrained_potentialGaps, unconstrained_gap1ndexLowerBound, leaf1ndexConnectee = countGapsValues
 
-                unconstrainedValues = (unconstrained_countDimensionsGapped, unconstrained_potentialGaps, unconstrained_gap1ndexLowerBound, unconstrained_unconstrainedLeaf)
+                return (unconstrained_countDimensionsGapped, unconstrained_potentialGaps, unconstrained_gap1ndexLowerBound, unconstrained_unconstrainedLeaf)
 
-                return unconstrainedValues
+            dimensions_countDimensionsGapped, dimensions_potentialGaps, dimensions_gap1ndexLowerBound, dimensions_unconstrainedLeaf, dimensionNumber = for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values
 
             ifLeafIsUnconstrainedValues = (dimensions_countDimensionsGapped, dimensions_potentialGaps, dimensions_gap1ndexLowerBound, dimensions_unconstrainedLeaf)
-
             ifLeafIsUnconstrainedValues = Z0Z_cond(ifLeafIsUnconstrainedCondition(dimensionNumber), ifLeafIsUnconstrainedDo, ifLeafIsUnconstrainedElse, ifLeafIsUnconstrainedValues)
-
             dimensions_countDimensionsGapped, dimensions_potentialGaps, dimensions_gap1ndexLowerBound, dimensions_unconstrainedLeaf = ifLeafIsUnconstrainedValues
 
             dimensionNumber += 1
-            for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values = (dimensions_countDimensionsGapped, dimensions_potentialGaps, dimensions_gap1ndexLowerBound, dimensions_unconstrainedLeaf, dimensionNumber)
-            return for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values
+            return (dimensions_countDimensionsGapped, dimensions_potentialGaps, dimensions_gap1ndexLowerBound, dimensions_unconstrainedLeaf, dimensionNumber)
 
         def almostUselessCondition(comparand):
             return comparand == dimensionsTotal
 
         def almostUselessConditionDo(for_leaf1ndex_in_range_activeLeaf1ndexValues):
-            def for_leaf1ndex_in_range_activeLeaf1ndex(for_leaf1ndex_in_range_activeLeaf1ndexValues):
-                comparand = for_leaf1ndex_in_range_activeLeaf1ndexValues[2]
-                return comparand < activeLeaf1ndex
+            def for_leaf1ndex_in_range_activeLeaf1ndex(comparisonValues):
+                return comparisonValues[-1] < activeLeaf1ndex
 
             def for_leaf1ndex_in_range_activeLeaf1ndex_do(for_leaf1ndex_in_range_activeLeaf1ndexValues):
                 leafInRangePotentialGaps, gapNumberLowerBound, leafNumber = for_leaf1ndex_in_range_activeLeaf1ndexValues
@@ -151,8 +130,7 @@ def foldings(listDimensions: List[int]) -> int:
             return Z0Z_while_loop(for_leaf1ndex_in_range_activeLeaf1ndex, for_leaf1ndex_in_range_activeLeaf1ndex_do, for_leaf1ndex_in_range_activeLeaf1ndexValues)
 
         def for_range_from_activeGap1ndex_to_gap1ndexLowerBound(comparisonValues):
-            comparand = comparisonValues[-1]
-            return comparand < gap1ndexLowerBound
+            return comparisonValues[-1] < gap1ndexLowerBound
 
         def miniGapDo(gapToGapValues):
             gapToGapCountDimensionsGapped, gapToGapPotentialGaps, activeGapNumber, index = gapToGapValues
@@ -160,22 +138,14 @@ def foldings(listDimensions: List[int]) -> int:
             activeGapNumber = int(NUMERICALPYTHON.where(gapToGapCountDimensionsGapped[gapToGapPotentialGaps[index]] == dimensionsTotal - unconstrainedLeaf, activeGapNumber + 1, activeGapNumber))
             gapToGapCountDimensionsGapped[gapToGapPotentialGaps[index]] = 0
             index += 1
-            gapToGapValues = (gapToGapCountDimensionsGapped, gapToGapPotentialGaps, activeGapNumber, index)
-            return gapToGapValues
+            return (gapToGapCountDimensionsGapped, gapToGapPotentialGaps, activeGapNumber, index)
 
-        leafAbove: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[0]
-        leafBelow: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[1]
-        countDimensionsGapped: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[2]
-        gapRangeStart: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[3]
-        potentialGaps: NUMERICALPYTHON.ndarray[dtypeMaximumNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeMaximumNUMERICALPYTHON]] = allValues[4]
-        foldingsSubTotal: int = allValues[5]
-        activeLeaf1ndex: int = allValues[6]
-        activeGap1ndex: int = allValues[7]
+        _0, leafBelow, countDimensionsGapped, gapRangeStart, potentialGaps, _5, activeLeaf1ndex, activeGap1ndex = allValues
 
         # unconstrainedLeaf = jax.numpy.uint16(0)
         # dimension1ndex = jax.numpy.uint16(1)
         unconstrainedLeaf: int = 0
-        gap1ndexLowerBound: int = int(gapRangeStart[activeLeaf1ndex - 1])
+        gap1ndexLowerBound = gapRangeStart[activeLeaf1ndex - 1]
         activeGap1ndex = gap1ndexLowerBound
         dimension1ndex: int = 1
         for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values = (countDimensionsGapped, potentialGaps, gap1ndexLowerBound, unconstrainedLeaf, dimension1ndex)
@@ -196,54 +166,38 @@ def foldings(listDimensions: List[int]) -> int:
         countDimensionsGapped, potentialGaps, activeGap1ndex, indexMiniGap = miniGapValues
         del indexMiniGap
 
-        allValues = (leafAbove, leafBelow, countDimensionsGapped, gapRangeStart, potentialGaps, foldingsSubTotal, activeLeaf1ndex, activeGap1ndex)
+        # Validate array states before processing
+        chex.assert_shape(countDimensionsGapped, (leavesTotal + 1,))
+        chex.assert_shape(potentialGaps, (leavesTotal * leavesTotal + 1,))
+        chex.assert_type([countDimensionsGapped, gapRangeStart], dtypeDefault)
+        chex.assert_type(potentialGaps, dtypeMaximum)
+        chex.assert_scalar_in(activeLeaf1ndex, 0, leavesTotal + 1)
 
-        return allValues
+        # Validate state changes
+        chex.assert_tree_all_finite([countDimensionsGapped, potentialGaps])
+        return (allValues[0], leafBelow, countDimensionsGapped, gapRangeStart, potentialGaps, allValues[5], activeLeaf1ndex, activeGap1ndex)
 
     def incrementCondition(leafBelowSentinel, activeLeafNumber):
         return NUMERICALPYTHON.logical_and(activeLeafNumber > leavesTotal, leafBelowSentinel == 1)
 
     def incrementDo(allValues):
-        leafAbove: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[0]
-        leafBelow: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[1]
-        countDimensionsGapped: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[2]
-        gapRangeStart: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[3]
-        potentialGaps: NUMERICALPYTHON.ndarray[dtypeMaximumNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeMaximumNUMERICALPYTHON]] = allValues[4]
-        foldingsSubTotal: int = allValues[5]
-        activeLeaf1ndex: int = allValues[6]
-        activeGap1ndex: int = allValues[7]
-
+        foldingsSubTotal = allValues[5]
         foldingsSubTotal += leavesTotal
-
-        allValues = (leafAbove, leafBelow, countDimensionsGapped, gapRangeStart, potentialGaps, foldingsSubTotal, activeLeaf1ndex, activeGap1ndex)
-
-        return allValues
+        return (allValues[0], allValues[1], allValues[2], allValues[3], allValues[4], foldingsSubTotal, allValues[6], allValues[7])
 
     def dao(allValues):
-        leafAbove: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[0]
-        leafBelow: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[1]
-        countDimensionsGapped: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[2]
-        gapRangeStart: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = allValues[3]
-        potentialGaps: NUMERICALPYTHON.ndarray[dtypeMaximumNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeMaximumNUMERICALPYTHON]] = allValues[4]
-        foldingsSubTotal: int = allValues[5]
-        activeLeaf1ndex: int = allValues[6]
-        activeGap1ndex: int = allValues[7]
-
         def whileBacktrackingCondition(backtrackingValues):
             comparand = backtrackingValues[2]
             return NUMERICALPYTHON.logical_and(comparand > 0, activeGap1ndex == gapRangeStart[comparand - 1])
 
         def whileBacktrackingDo(backtrackingValues):
-            backtrackAbove: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = backtrackingValues[0]
-            backtrackBelow: NUMERICALPYTHON.ndarray[dtypeDefaultNUMERICALPYTHON, NUMERICALPYTHON.dtype[dtypeDefaultNUMERICALPYTHON]] = backtrackingValues[1]
-            activeLeafNumber: int = backtrackingValues[2]
+            backtrackAbove, backtrackBelow, activeLeafNumber = backtrackingValues
 
             activeLeafNumber -= 1
             backtrackBelow[backtrackAbove[activeLeafNumber]] = backtrackBelow[activeLeafNumber]
             backtrackAbove[backtrackBelow[activeLeafNumber]] = backtrackAbove[activeLeafNumber]
 
-            backtrackingValues = (backtrackAbove, backtrackBelow, activeLeafNumber)
-            return backtrackingValues
+            return (backtrackAbove, backtrackBelow, activeLeafNumber)
 
         def if_activeLeaf1ndex_greaterThan_0(activeLeafNumber):
             return activeLeafNumber > 0
@@ -259,6 +213,8 @@ def foldings(listDimensions: List[int]) -> int:
             activeLeafNumber += 1
             return (placeLeafAbove, placeLeafBelow, placeGapRangeStart, activeLeafNumber, activeGapNumber)
 
+        leafAbove, leafBelow, _2, gapRangeStart, potentialGaps, _5, activeLeaf1ndex, activeGap1ndex = allValues
+
         whileBacktrackingValues = (leafAbove, leafBelow, activeLeaf1ndex)
         whileBacktrackingValues = Z0Z_while_loop(whileBacktrackingCondition, whileBacktrackingDo, whileBacktrackingValues)
         leafAbove, leafBelow, activeLeaf1ndex = whileBacktrackingValues
@@ -267,9 +223,15 @@ def foldings(listDimensions: List[int]) -> int:
         if_activeLeaf1ndex_greaterThan_0_values = Z0Z_cond(if_activeLeaf1ndex_greaterThan_0(activeLeaf1ndex), if_activeLeaf1ndex_greaterThan_0_do, doNothing, if_activeLeaf1ndex_greaterThan_0_values)
         leafAbove, leafBelow, gapRangeStart, activeLeaf1ndex, activeGap1ndex = if_activeLeaf1ndex_greaterThan_0_values
 
-        allValues = (leafAbove, leafBelow, countDimensionsGapped, gapRangeStart, potentialGaps, foldingsSubTotal, activeLeaf1ndex, activeGap1ndex)
+        # Validate array states
+        chex.assert_shape([leafAbove, leafBelow], (leavesTotal + 1,))
+        chex.assert_type([leafAbove, leafBelow, gapRangeStart], dtypeDefault)
+        chex.assert_scalar_in(activeLeaf1ndex, 0, leavesTotal + 1)
+        chex.assert_scalar_in(activeGap1ndex, 0, leavesTotal * leavesTotal + 1)
 
-        return allValues
+        # Validate final states
+        chex.assert_tree_all_finite([leafAbove, leafBelow, gapRangeStart])
+        return (leafAbove, leafBelow, allValues[2], gapRangeStart, potentialGaps, allValues[5], activeLeaf1ndex, activeGap1ndex)
 
     listDimensionsPositive: List[int] = validateListDimensions(listDimensions)
 
@@ -285,6 +247,11 @@ def foldings(listDimensions: List[int]) -> int:
     # connectionGraph = jax.numpy.asarray(D, dtype=dtypeDefault)
     # del n, d, D
     del listDimensionsPositive
+
+    # Validate dimensions
+    chex.assert_rank(connectionGraph, 3)  # Should be 3D array [dim][leaf][leaf]
+    chex.assert_shape(connectionGraph, (dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1))
+    chex.assert_type(connectionGraph, dtypeDefault)
 
     # Dynamic values
     A = NUMERICALPYTHON.zeros(leavesTotal + 1, dtype=dtypeDefaultNUMERICALPYTHON)
@@ -307,8 +274,16 @@ def foldings(listDimensions: List[int]) -> int:
     # l = jax.numpy.uint16(1)
     # g = jax.numpy.uint16(0)
 
+    # Validate dynamic arrays initialization
+    chex.assert_shape(A, (leavesTotal + 1,))
+    chex.assert_shape(B, (leavesTotal + 1,))
+    chex.assert_shape(count, (leavesTotal + 1,))
+    chex.assert_shape(gapter, (leavesTotal + 1,))
+    chex.assert_shape(gap, (leavesTotal * leavesTotal + 1,))
+    
+    chex.assert_type([A, B, count, gapter], dtypeDefault)
+    chex.assert_type(gap, dtypeMaximum)
+
     foldingsValues = (A, B, count, gapter, gap, foldingsTotal, l, g)
     foldingsValues = Z0Z_while_loop(while_activeLeaf1ndex_greaterThan_0, countFoldings, foldingsValues)
-    foldingsTotal = foldingsValues[5]
-
-    return foldingsTotal
+    return foldingsValues[5]
