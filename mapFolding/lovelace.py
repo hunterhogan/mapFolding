@@ -1,6 +1,6 @@
+from mapFolding.lovelaceIndices import A, B, count, gapter # from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 import numba
 import numpy
-from mapFolding.lovelaceIndices import A, B, count, gapter # from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 
 @numba.njit(cache=True, fastmath=False)
 def countFoldings(

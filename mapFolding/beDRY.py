@@ -91,14 +91,13 @@ def makeConnectionGraph(p: List[int]) -> numpy.ndarray[numpy.int64, numpy.dtype[
     The graph represents the connections between leaves in a Cartesian product decomposition or dimensional product mapping.
     
     Parameters:
-        listDimensions: A _valid_ list of integers representing the dimensions of the map.
+        p: A validated list of integers representing the dimensions of the map. # listDimensions: A validated list of integers representing the dimensions of the map.
     Returns:
-        D (connectionGraph): A 3D numpy array representing the connection graph. The shape of the array is (d+1, n+1, n+1),
-                                        where d is the number of dimensions and n is the total number of leaves.
+        D: A 3D numpy array with shape of (d+1, n+1, n+1). # connectionGraph: A 3D numpy array with shape of (dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1).
     """
 
-    n = getLeavesTotal(p)
-    d = len(p)
+    n = getLeavesTotal(p) # leavesTotal = getLeavesTotal(listDimensions)
+    d = len(p) # dimensionsTotal = len(listDimensions)
 
     """How to build a leaf connection graph, also called a "Cartesian Product Decomposition" 
     or a "Dimensional Product Mapping", with sentinels: 
@@ -136,21 +135,17 @@ def makeConnectionGraph(p: List[int]) -> numpy.ndarray[numpy.int64, numpy.dtype[
                     else:
                         D[i][l][m] = m + P[i - 1] # connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee + cumulativeProduct[dimension1ndex - 1]
 
-    return D
+    return D # return connectionGraph
 
 def outfitFoldings(listDimensions: List[int]) -> Tuple[List[int], int, numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]]:
     """
-    Validates and processes the parameters for the folding computation.
+    Outfits the folding process with the necessary data structures.
 
     Parameters:
-        listDimensions: A list of dimensions for the folding task.
-        computationDivisions: The number of divisions for the computation task.
-        computationIndex: The index of the current computation task.
+        listDimensions: A list of integers representing the dimensions of the map.
 
     Returns:
-        listDimensions,computationDivisions,computationIndex,leavesTotal,connectionGraph: 
-            A tuple containing the validated list of dimensions, the validated number of 
-            computation divisions, the validated computation index, and the total number of leaves.
+        listDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps: Tuple containing the validated list of dimensions, the total number of leaves, the connection graph, an array for tracking, and an array for potential gaps.
     """
     arrayTrackingHeightHARDCODED = 4
     arrayTrackingHeight = arrayTrackingHeightHARDCODED
@@ -168,7 +163,7 @@ def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: i
     Parameters:
         computationDivisions: The number of divisions for the computation
         computationIndex: The index of the current computation division
-        n: The total number of leaves
+        n: The total number of leaves # leavesTotal: The total number of leaves
 
     Returns:
         computationDivisions,computationIndex: Tuple containing the validated computationDivisions and computationIndex
@@ -185,8 +180,8 @@ def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: i
     if computationDivisions < 0 or computationIndex < 0:
         raise ValueError(f"computationDivisions, {computationDivisions}, and computationIndex, {computationIndex}, must be non-negative integers.")
 
-    if computationDivisions > n:
-        raise ValueError(f"computationDivisions, {computationDivisions}, must be less than or equal to the total number of leaves, {n}.")
+    if computationDivisions > n: # if computationDivisions > leavesTotal:
+        raise ValueError(f"computationDivisions, {computationDivisions}, must be less than or equal to the total number of leaves, {n}.") # raise ValueError(f"computationDivisions, {computationDivisions}, must be less than or equal to the total number of leaves, {leavesTotal}.")
 
     if computationDivisions > 1 and computationIndex >= computationDivisions:
         raise ValueError(f"computationIndex, {computationIndex}, must be less than computationDivisions, {computationDivisions}.")

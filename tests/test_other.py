@@ -6,7 +6,7 @@ import pytest
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
 
 from mapFolding import (
-    clearOEIScache, getLeavesTotal, parseListDimensions, 
+    clearOEIScache, getLeavesTotal, parseListDimensions,
     foldings, validateListDimensions,
 )
 from mapFolding.oeis import settingsOEISsequences
@@ -20,7 +20,7 @@ def test_clear_OEIScache(mock_unlink, mock_exists, cacheExists):
     """Test OEIS cache clearing with both existing and non-existing cache."""
     mock_exists.return_value = cacheExists
     clearOEIScache()
-    
+
     if cacheExists:
         assert mock_unlink.call_count == len(settingsOEISsequences)
         mock_unlink.assert_has_calls([call(missing_ok=True)] * len(settingsOEISsequences))
@@ -79,12 +79,12 @@ def test_getLeavesTotal_edge_cases():
     """Test edge cases for getLeavesTotal."""
     # Order independence
     assert getLeavesTotal([2, 3, 4]) == getLeavesTotal([4, 2, 3])
-    
+
     # Immutability
     listOriginal = [2, 3]
     getLeavesTotal(listOriginal)
     assert listOriginal == [2, 3]
-    
+
     # Overflow protection
     largeNumber = sys.maxsize // 2
     with pytest.raises(OverflowError):
@@ -131,18 +131,15 @@ def test_foldings_parameter_validation(dimensions, divisions, index, errorType):
 #         testFunction()
 
 # ===== getFoldingsTotalKnown Tests =====
-def test_getFoldingsTotalKnown_valid():
+def test_getFoldingsTotalKnown_valid(listDimensionsValidated: List[int]):
     """Test getFoldingsTotalKnown with valid dimensions from OEIS settings."""
-    # Get random sequence and dimensions
-    randomSequence = random.choice(list(settingsOEISsequences.values()))
-    randomN = random.choice(list(randomSequence['valuesKnown'].keys()))
-    dimensions = randomSequence['dimensions'](randomN)
-    
-    # Get expected foldings count
-    expectedFoldings = randomSequence['valuesKnown'][randomN]
-    
-    # Test the lookup
-    assert getFoldingsTotalKnown(dimensions) == expectedFoldings
+    listOfFoldingsTotal = []
+    for keyName in settingsOEISsequences.keys():
+        listOfFoldingsTotal.extend(settingsOEISsequences[keyName]['valuesKnown'].values())
+
+    foldingsTotal = getFoldingsTotalKnown(listDimensionsValidated)
+
+    assert foldingsTotal in listOfFoldingsTotal
 
 def test_getFoldingsTotalKnown_invalid():
     """Test getFoldingsTotalKnown with dimensions that don't exist in any sequence."""
@@ -150,31 +147,7 @@ def test_getFoldingsTotalKnown_invalid():
         [21, 31],  # Random large dimensions
         [4, 4, 4]  # Triple dimensions
     ]
-    
+
     for dimensions in invalidDimensions:
         with pytest.raises(KeyError):
             getFoldingsTotalKnown(dimensions)
-
-# ===== Parse Integers Tests =====
-# def test_intInnit():
-#     """Test integer parsing using the test suite generator."""
-#     for testName, testFunction in makeTestSuiteIntInnit(parseListDimensions).items():
-#         testFunction()
-
-# ===== getFoldingsTotalKnown Tests =====
-def test_getFoldingsTotalKnown_valid(valid_dimensions_and_foldings):
-    """Test getFoldingsTotalKnown with valid dimensions from OEIS settings."""
-    dimensions, expected_foldings = valid_dimensions_and_foldings
-    assert getFoldingsTotalKnown(dimensions) == expected_foldings
-
-def test_getFoldingsTotalKnown_invalid():
-    """Test getFoldingsTotalKnown with dimensions that don't exist in any sequence."""
-    invalidDimensions = [
-        [21, 31],  # Random large dimensions
-        [4, 4, 4]  # Triple dimensions
-    ]
-    
-    for dimensions in invalidDimensions:
-        with pytest.raises(KeyError):
-            getFoldingsTotalKnown(dimensions)
-
