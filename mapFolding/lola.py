@@ -17,22 +17,6 @@ The six NDArray:
         - potentialGaps
     Dynamic values that the workers could share safely
         - arrayFoldingsSubtotals
-
-Key concepts
-    - A "leaf" is a unit square in the map
-    - A "gap" is a potential position where a new leaf can be folded
-    - Connections track how leaves can connect above/below each other
-    - The algorithm builds foldings incrementally by placing one leaf at a time
-    - Backtracking explores all valid combinations
-    - Leaves and dimensions are enumerated starting from 1, not 0; hence, leaf1ndex not leafIndex
-
-Algorithm flow
-    For each leaf
-        - Find valid gaps in each dimension
-        - Place leaf in valid position
-            - Try to find another lead to put in the adjacent position
-            - Repeat until the map is completely folded
-        - Backtrack when no valid positions remain
 """
 # Indices of array `the`, which holds unchanging, small, unsigned, integer values.
 from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1
@@ -50,20 +34,17 @@ def foldings(listDimensions: List[int]):
 
     static = numpy.zeros(COUNTindicesStatic, dtype=numpy.int64)
 
-    from mapFolding.beDRY import validateParametersFoldings
-    listDimensions, static[leavesTotal], D = validateParametersFoldings(listDimensions)
+    from mapFolding.beDRY import outfitFoldings
+    listDimensions, static[leavesTotal], D, track,potentialGaps = outfitFoldings(listDimensions)
 
     static[dimensionsTotal] = len(listDimensions)
     static[dimensionsPlus1] = static[dimensionsTotal] + 1
-
-    track = numpy.zeros((4, static[leavesTotal] + 1), dtype=numpy.int64)
-    potentialGaps = numpy.zeros(static[leavesTotal] * static[leavesTotal] + 1, dtype=numpy.int64)
 
     # Pass listDimensions and taskDivisions to _sherpa for benchmarking
     foldingsTotal = _sherpa(track, potentialGaps, static, D, listDimensions)
     return foldingsTotal
 
-# @recordBenchmarks()
+@recordBenchmarks()
 def _sherpa(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], static: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], p: List[int]):
     """Performance critical section that counts foldings.
     
@@ -73,7 +54,6 @@ def _sherpa(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: nu
         static: Array containing static configuration values
         D: Array of leaf connections
         p: List of dimensions for benchmarking
-        tasks: Number of computation divisions for benchmarking
     """
     foldingsTotal = countFoldings(track, gap, static, D)
     return foldingsTotal
@@ -92,66 +72,66 @@ def countFoldings(TEMPLATEtrack: numpy.ndarray[numpy.int64, numpy.dtype[numpy.in
     # taskDivisions = the[leavesTotal]
     TEMPLATEmy[taskIndex] = taskDivisions - 1 # the first modulo is leavesTotal - 1
 
-    def prepareWork(PREPAREtrack: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
-                    PREPAREpotentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                    PREPAREmy: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]) -> tuple[numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]]:
+    def prepareWork(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
+                    potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
+                    my: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]) -> tuple[numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]]:
         foldingsTotal = 0
         while True:
-            if PREPAREmy[activeLeaf1ndex] <= 1 or PREPAREtrack[leafBelow][0] == 1:
-                if PREPAREmy[activeLeaf1ndex] > the[leavesTotal]:
+            if my[activeLeaf1ndex] <= 1 or track[leafBelow][0] == 1:
+                if my[activeLeaf1ndex] > the[leavesTotal]:
                     foldingsTotal += the[leavesTotal]
                 else:
-                    PREPAREmy[unconstrainedLeaf] = 0
-                    PREPAREmy[gap1ndexLowerBound] = PREPAREtrack[gapRangeStart][PREPAREmy[activeLeaf1ndex] - 1]
-                    PREPAREmy[activeGap1ndex] = PREPAREmy[gap1ndexLowerBound]
+                    my[unconstrainedLeaf] = 0
+                    my[gap1ndexLowerBound] = track[gapRangeStart][my[activeLeaf1ndex] - 1]
+                    my[activeGap1ndex] = my[gap1ndexLowerBound]
 
                     for PREPAREdimension1ndex in range(1, the[dimensionsPlus1]):
-                        if connectionGraph[PREPAREdimension1ndex][PREPAREmy[activeLeaf1ndex]][PREPAREmy[activeLeaf1ndex]] == PREPAREmy[activeLeaf1ndex]:
-                            PREPAREmy[unconstrainedLeaf] += 1
+                        if connectionGraph[PREPAREdimension1ndex][my[activeLeaf1ndex]][my[activeLeaf1ndex]] == my[activeLeaf1ndex]:
+                            my[unconstrainedLeaf] += 1
                         else:
-                            PREPAREmy[leaf1ndexConnectee] = connectionGraph[PREPAREdimension1ndex][PREPAREmy[activeLeaf1ndex]][PREPAREmy[activeLeaf1ndex]]
-                            while PREPAREmy[leaf1ndexConnectee] != PREPAREmy[activeLeaf1ndex]:
+                            my[leaf1ndexConnectee] = connectionGraph[PREPAREdimension1ndex][my[activeLeaf1ndex]][my[activeLeaf1ndex]]
+                            while my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
 
-                                if PREPAREmy[leaf1ndexConnectee] != PREPAREmy[activeLeaf1ndex]:
-                                    PREPAREmy[dimension1ndex] = PREPAREdimension1ndex
-                                    return PREPAREtrack, PREPAREpotentialGaps, PREPAREmy
+                                if my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
+                                    my[dimension1ndex] = PREPAREdimension1ndex
+                                    return track, potentialGaps, my
 
-                                if PREPAREmy[activeLeaf1ndex] != the[leavesTotal]:
-                                    PREPAREpotentialGaps[PREPAREmy[gap1ndexLowerBound]] = PREPAREmy[leaf1ndexConnectee]
-                                    if PREPAREtrack[countDimensionsGapped][PREPAREmy[leaf1ndexConnectee]] == 0:
-                                        PREPAREmy[gap1ndexLowerBound] += 1
-                                    PREPAREtrack[countDimensionsGapped][PREPAREmy[leaf1ndexConnectee]] += 1
+                                if my[activeLeaf1ndex] != the[leavesTotal]:
+                                    potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
+                                    if track[countDimensionsGapped][my[leaf1ndexConnectee]] == 0:
+                                        my[gap1ndexLowerBound] += 1
+                                    track[countDimensionsGapped][my[leaf1ndexConnectee]] += 1
                                 else:
                                     print("else")
-                                    PREPAREmy[dimension1ndex] = PREPAREdimension1ndex
-                                    return PREPAREtrack, PREPAREpotentialGaps, PREPAREmy
+                                    my[dimension1ndex] = PREPAREdimension1ndex
+                                    return track, potentialGaps, my
                                     # PREPAREmy[leaf1ndexConnectee] % the[leavesTotal] == PREPAREmy[taskIndex]
-                                PREPAREmy[leaf1ndexConnectee] = connectionGraph[dimension1ndex][PREPAREmy[activeLeaf1ndex]][PREPAREtrack[leafBelow][PREPAREmy[leaf1ndexConnectee]]]
+                                my[leaf1ndexConnectee] = connectionGraph[dimension1ndex][my[activeLeaf1ndex]][track[leafBelow][my[leaf1ndexConnectee]]]
 
-                    if PREPAREmy[unconstrainedLeaf] == the[dimensionsTotal]:
-                        for leaf1ndex in range(PREPAREmy[activeLeaf1ndex]):
-                            PREPAREpotentialGaps[PREPAREmy[gap1ndexLowerBound]] = leaf1ndex
-                            PREPAREmy[gap1ndexLowerBound] += 1
+                    if my[unconstrainedLeaf] == the[dimensionsTotal]:
+                        for leaf1ndex in range(my[activeLeaf1ndex]):
+                            potentialGaps[my[gap1ndexLowerBound]] = leaf1ndex
+                            my[gap1ndexLowerBound] += 1
 
-                    for indexMiniGap in range(PREPAREmy[activeGap1ndex], PREPAREmy[gap1ndexLowerBound]):
-                        PREPAREpotentialGaps[PREPAREmy[activeGap1ndex]] = PREPAREpotentialGaps[indexMiniGap]
-                        if PREPAREtrack[countDimensionsGapped][PREPAREpotentialGaps[indexMiniGap]] == the[dimensionsTotal] - PREPAREmy[unconstrainedLeaf]:
-                            PREPAREmy[activeGap1ndex] += 1
-                        PREPAREtrack[countDimensionsGapped][PREPAREpotentialGaps[indexMiniGap]] = 0
+                    for indexMiniGap in range(my[activeGap1ndex], my[gap1ndexLowerBound]):
+                        potentialGaps[my[activeGap1ndex]] = potentialGaps[indexMiniGap]
+                        if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == the[dimensionsTotal] - my[unconstrainedLeaf]:
+                            my[activeGap1ndex] += 1
+                        track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
 
-            while PREPAREmy[activeLeaf1ndex] > 0 and PREPAREmy[activeGap1ndex] == PREPAREtrack[gapRangeStart][PREPAREmy[activeLeaf1ndex] - 1]:
-                PREPAREmy[activeLeaf1ndex] -= 1
-                PREPAREtrack[leafBelow][PREPAREtrack[leafAbove][PREPAREmy[activeLeaf1ndex]]] = PREPAREtrack[leafBelow][PREPAREmy[activeLeaf1ndex]]
-                PREPAREtrack[leafAbove][PREPAREtrack[leafBelow][PREPAREmy[activeLeaf1ndex]]] = PREPAREtrack[leafAbove][PREPAREmy[activeLeaf1ndex]]
+            while my[activeLeaf1ndex] > 0 and my[activeGap1ndex] == track[gapRangeStart][my[activeLeaf1ndex] - 1]:
+                my[activeLeaf1ndex] -= 1
+                track[leafBelow][track[leafAbove][my[activeLeaf1ndex]]] = track[leafBelow][my[activeLeaf1ndex]]
+                track[leafAbove][track[leafBelow][my[activeLeaf1ndex]]] = track[leafAbove][my[activeLeaf1ndex]]
 
-            if PREPAREmy[activeLeaf1ndex] > 0:
-                PREPAREmy[activeGap1ndex] -= 1
-                PREPAREtrack[leafAbove][PREPAREmy[activeLeaf1ndex]] = PREPAREpotentialGaps[PREPAREmy[activeGap1ndex]]
-                PREPAREtrack[leafBelow][PREPAREmy[activeLeaf1ndex]] = PREPAREtrack[leafBelow][PREPAREtrack[leafAbove][PREPAREmy[activeLeaf1ndex]]]
-                PREPAREtrack[leafBelow][PREPAREtrack[leafAbove][PREPAREmy[activeLeaf1ndex]]] = PREPAREmy[activeLeaf1ndex]
-                PREPAREtrack[leafAbove][PREPAREtrack[leafBelow][PREPAREmy[activeLeaf1ndex]]] = PREPAREmy[activeLeaf1ndex]
-                PREPAREtrack[gapRangeStart][PREPAREmy[activeLeaf1ndex]] = PREPAREmy[activeGap1ndex]
-                PREPAREmy[activeLeaf1ndex] += 1
+            if my[activeLeaf1ndex] > 0:
+                my[activeGap1ndex] -= 1
+                track[leafAbove][my[activeLeaf1ndex]] = potentialGaps[my[activeGap1ndex]]
+                track[leafBelow][my[activeLeaf1ndex]] = track[leafBelow][track[leafAbove][my[activeLeaf1ndex]]]
+                track[leafBelow][track[leafAbove][my[activeLeaf1ndex]]] = my[activeLeaf1ndex]
+                track[leafAbove][track[leafBelow][my[activeLeaf1ndex]]] = my[activeLeaf1ndex]
+                track[gapRangeStart][my[activeLeaf1ndex]] = my[activeGap1ndex]
+                my[activeLeaf1ndex] += 1
 
     RETURNtrack, RETURNpotentialGaps, RETURNmy = prepareWork(TEMPLATEtrack.copy(), TEMPLATEpotentialGaps.copy(), TEMPLATEmy.copy())
 

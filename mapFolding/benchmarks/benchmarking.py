@@ -19,7 +19,7 @@ def recordBenchmarks():
             timeElapsed = (time.perf_counter_ns() - timeStart) / 1e9
 
             # Extract listDimensions from arguments
-            listDimensions = tuple(arguments[0])
+            listDimensions = tuple(arguments[-1])
 
             # Store benchmark data in single file
             pathFilenameRecordedBenchmarks = pathRecordedBenchmarks / "benchmarks.npy"
@@ -51,4 +51,4 @@ def runBenchmarks(benchmarkIterations: int = 30) -> None:
         oeisSequence_aOFn(oeisIdentifier, dimensionValue)
 
 if __name__ == '__main__':
-    runBenchmarks(10)
+    runBenchmarks(100)
