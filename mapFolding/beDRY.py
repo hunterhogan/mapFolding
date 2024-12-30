@@ -2,7 +2,6 @@ import sys
 from typing import List, Tuple
 
 import numpy
-import numpy.typing
 from Z0Z_tools import intInnit
 
 
@@ -30,30 +29,6 @@ def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed
         raise ValueError("At least one dimension must be non-negative")
     
     return listNonNegative
-
-def getLeavesTotal(listDimensions: List[int]) -> int:
-    """
-    Calculate the product of non-zero, non-negative integers in the given list.
-
-    Parameters:
-        listDimensions: A list of integers representing dimensions.
-
-    Returns:
-        productDimensions: The product of all positive integer dimensions. Returns 0 if all dimensions are 0.
-    """
-    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
-    listPositive = [dimension for dimension in listNonNegative if dimension > 0]
-        
-    if not listPositive:
-        return 0
-    else:
-        productDimensions = 1
-        for dimension in listPositive:
-            if dimension > sys.maxsize // productDimensions:
-                raise OverflowError("Product would exceed maximum integer size")
-            productDimensions *= dimension
-                
-        return productDimensions
 
 def validateListDimensions(listDimensions: List[int]) -> List[int]:
     """
@@ -85,20 +60,43 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
     return listDimensionsPositive
 
-def makeConnectionGraph(p: List[int]) -> numpy.typing.NDArray[numpy.int64]:
+def getLeavesTotal(listDimensions: List[int]) -> int:
+    """
+    Calculate the product of non-zero, non-negative integers in the given list.
+
+    Parameters:
+        listDimensions: A list of integers representing dimensions.
+
+    Returns:
+        productDimensions: The product of all positive integer dimensions. Returns 0 if all dimensions are 0.
+    """
+    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
+    listPositive = [dimension for dimension in listNonNegative if dimension > 0]
+        
+    if not listPositive:
+        return 0
+    else:
+        productDimensions = 1
+        for dimension in listPositive:
+            if dimension > sys.maxsize // productDimensions:
+                raise OverflowError("Product would exceed maximum integer size")
+            productDimensions *= dimension
+                
+        return productDimensions
+
+def makeConnectionGraph(p: List[int]) -> numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]:
     """
     Constructs a connection graph for a given list of dimensions.
     This function generates a multi-dimensional connection graph based on the provided list of dimensions.
     The graph represents the connections between leaves in a Cartesian product decomposition or dimensional product mapping.
     
     Parameters:
-        listDimensions: A list of integers representing the dimensions of the map.
+        listDimensions: A _valid_ list of integers representing the dimensions of the map.
     Returns:
         D (connectionGraph): A 3D numpy array representing the connection graph. The shape of the array is (d+1, n+1, n+1),
                                         where d is the number of dimensions and n is the total number of leaves.
     """
 
-    p = validateListDimensions(p)
     n = getLeavesTotal(p)
     d = len(p)
 
@@ -152,12 +150,14 @@ def validateParametersFoldings(listDimensions: List[int]):
             A tuple containing the validated list of dimensions, the validated number of 
             computation divisions, the validated computation index, and the total number of leaves.
     """
-    # I don't know if I should put all of these steps in series or if each function should validate its own parameters.
-    # In the future, I might not call the entire series. Also, it feels weird to return listDimensions from makeConnectionGraph.
+    arrayTrackingHeightHARDCODED = 4
+    arrayTrackingHeight = arrayTrackingHeightHARDCODED
     listDimensions = validateListDimensions(listDimensions)
     leavesTotal = getLeavesTotal(listDimensions)
     connectionGraph = makeConnectionGraph(listDimensions)
-    return listDimensions, leavesTotal, connectionGraph
+    arrayTracking = numpy.zeros((arrayTrackingHeight, leavesTotal + 1))
+    potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1)
+    return listDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps
 
 def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
     """
