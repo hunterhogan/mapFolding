@@ -28,7 +28,6 @@ test = [
     "pytest-cov",
     "pytest-env",
     "coverage",
-    "tenacity",
     ]
 benchmark = [
     "pandas",

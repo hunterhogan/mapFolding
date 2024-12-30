@@ -1,49 +1,21 @@
-# JAX version
+# A modular foundation for improvements
 
-A JAX version would likely be faster than numba and it could automatically use GPU or TPU when available.
-I would like to compare the speed with a functioning version.
+This version is not faster than the original version or the inefficient tasks version. But, because this version has stricter
+separation of concerns, it is easier to use to prototype ideas and compare and contrast different methodologies.
 
-## Notes
+The likely best place to make efficiency gains is the `while` loop of the algorithm. That logic is isolated in
+"lovelace.py" and I aspire for the other modules to support optimization of that module.
 
-- int64 does not work in all environments.
-- Removed `track` array to simplify the prototype.
+## Side note
 
-## History
+Despite [the word "algorithm" ultimately being derived from](https://www.etymonline.com/word/algorithm#etymonline_v_8145)
+the name of the incomparable Muhammad ibn Musa [al-Khwarizmi](https://en.wikipedia.org/wiki/Al-Khwarizmi),
+the concept of the computer algorithm was created by [Ada Lovelace](https://en.wikipedia.org/wiki/Ada_Lovelace) in approximately 1843.
+It is difficult to overstate the magnitude of this accomplishment. Consider, for example, that in 1900,
+[David Hilbert's](https://en.wikipedia.org/wiki/David_Hilbert) 23 Problems included a challenge to create what we call an algorithm, but
+algorithmic analysis didn't exist and they did not have a word for it at the time.
 
-1. Building the data structures takes less than a millisecond, so I haven't optimized that step.
-2. I convert the numpy.ndarray to jax.Array.
-3. "pid.py" is supposed to be pure JAX but it didn't work.
-4. I started over with "pider.py" as a hybrid of JAX and non-JAX.
-   1. I make small changes and use the test modules to confirm the counts are correct.
-   2. The hybrid module is painfully slow but the counts are correct.
-5. While working on pider.py, I came up with a way to change improve parallelization, so I switched my focus to the Run Lola Run branch.
-6. After returning to this branch, I decided to start over again with lunnanJAX.py
+Lovelace's accomplishments could not even be contextualized before the corpus
+of literature produced by Kurt Gödel, Alonzo Church, Alan Turing, and their contemporaries. Before the rest of the world caught up to Lovelace, a few things happened: adoption of the wired telegraph, invention of electric networks and electrical devices, invention of the wireless telegraph (the radio), and the invention of powered flight, to name a few.
 
-## Potential values for variables
-
-Assume `listDimensions` is for an implemented OEIS sequence, and
-assume `listDimensions` is at most the next unknown total in the sequence.
-
-| Type | max(x) | max(array) | Identifier | Alternate Identifier |
-|------|----------|-----|-------|---------------------|
-| unsigned int | | n | A | leafAbove |
-| unsigned int | | n | B | leafBelow |
-| unsigned int | | max(p) | C | coordinateSystem |
-| unsigned int |d |  | count | countDimensionsGapped |
-| unsigned int | | n | D | connectionGraph |
-| unsigned int |8 |  | d | dimensionsTotal |
-| unsigned int |d |  | dd | unconstrainedLeaf |
-| unsigned int | |  | delta | distance |
-| unsigned int | |  | g | activeGap1ndex |
-| unsigned int | |  | gap | potentialGaps |
-| unsigned int | |  | gapter | gapRangeStart |
-| unsigned int | |  | gg | gap1ndexLowerBound |
-| unsigned int |d | | i | dimension1ndex |
-| unsigned int |gg-1 |  | j | indexMiniGap |
-| unsigned int |**_n+1_** |  | l | activeLeaf1ndex |
-| unsigned int |n | | m | leaf1ndex or leaf1ndexConnectee |
-| unsigned int |256 |  | n | leavesTotal |
-| unsigned int | | n | P | cumulativeProduct |
-| unsigned int | | 19 | p | listDimensions |
-| unsigned int | | n/a | s | track |
-| unsigned int |10^17 |  | n/a | foldingsTotal |
+Therefore, the core of the `foldings` algorithm is in the module, "lovelace.py."

@@ -1,5 +1,6 @@
 """
 Python-JAX implementation of 
+Python-JAX implementation of 
 W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
 """
 # HEY! 
@@ -13,7 +14,7 @@ W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, 
 
 # NOTE do not import modules with numba compiled function (e.g., `@numba.njit`) here
 # because, for example, `numba.set_num_threads()` has no effect on compiled functions
-from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions, validateTaskDivisions
+from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions, validateTaskDivisions, outfitFoldings
 from .oeis import oeisSequence_aOFn, getOEISids
 from .clearOEIScache import clearOEIScache
 from .lunnanJAX import foldings
