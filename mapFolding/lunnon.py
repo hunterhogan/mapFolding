@@ -25,8 +25,7 @@ from typing import List
 import numba
 import numpy
 
-# The following functions are used by the test modules
-from mapFolding import parseListDimensions, getLeavesTotal, validateTaskDivisions
+from mapFolding import validateListDimensions, getLeavesTotal
 
 def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> int:
     """
@@ -43,19 +42,13 @@ def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> 
 
     """I can't figure out how to make numba happy with the calls to other functions,
     so these validators live here."""
-    if not p: # if not listDimensions:
-        raise ValueError("`p` is a required parameter.") # raise ValueError("`listDimensions` is a required parameter.")
-    listDimensionsPositive = [dimension for dimension in parseListDimensions(p, 'p') if dimension > 0] # listDimensionsPositive = [dimension for dimension in parseListDimensions(listDimensions, 'listDimensions') if dimension > 0]
-    if len(listDimensionsPositive) < 2:
-        raise NotImplementedError(f"This function requires `p`, {p}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/ or other functions in this package.") # raise NotImplementedError(f"This function requires `listDimensions`, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/ or other functions in this package.")
+    listDimensionsPositive = validateListDimensions(p) # listDimensionsPositive = validateListDimensions(listDimensions)
 
     n: int = getLeavesTotal(listDimensionsPositive) # leavesTotal: int = getLeavesTotal(listDimensionsPositive)
-
-    mod, res = validateTaskDivisions(mod, res, n) # computationDivisions, computationIndex = validateTaskDivisions(computationDivisions, computationIndex, leavesTotal)
-    return countFoldings(listDimensionsPositive, n, mod, res) # return countFoldings(listDimensionsPositive, leavesTotal, computationDivisions, computationIndex)
+    return countFoldings(listDimensionsPositive, n) # return countFoldings(listDimensionsPositive, leavesTotal)
 
 @numba.njit(cache=True, fastmath=False)
-def countFoldings(p: List[int], n: int, mod: int, res: int) -> int: # def countFoldings(listDimensions: List[int], leavesTotal: int, computationDivisions: int, computationIndex: int) -> int:
+def countFoldings(p: List[int], n: int) -> int: # def countFoldings(listDimensions: List[int], leavesTotal: int) -> int:
     d: int = len(p) # dimensionsTotal: int = len(listDimensions)
 
     """How to build a leaf connection graph, also called a "Cartesian Product Decomposition" 
@@ -128,11 +121,10 @@ def countFoldings(p: List[int], n: int, mod: int, res: int) -> int: # def countF
                     else:
                         m: int = D[i][l][l] # leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
                         while m != l: # while leaf1ndexConnectee != activeLeaf1ndex:
-                            if mod == 0 or l != mod or m % mod == res: # if computationDivisions == 0 or activeLeaf1ndex != computationDivisions or leaf1ndexConnectee % computationDivisions == computationIndex:
-                                gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                if s[count][m] == 0: # if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
-                                    gg += 1 # gap1ndexLowerBound += 1
-                                s[count][m] += 1 # track[countDimensionsGapped][leaf1ndexConnectee] += 1
+                            gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
+                            if s[count][m] == 0: # if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
+                                gg += 1 # gap1ndexLowerBound += 1
+                            s[count][m] += 1 # track[countDimensionsGapped][leaf1ndexConnectee] += 1
                             m = D[i][l][s[B][m]] # leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][track[leafBelow][leaf1ndexConnectee]]
 
                 """If leaf l is unconstrained in all sections, it can be inserted anywhere""" # """If activeLeaf1ndex is unconstrained in all sections, it can be inserted anywhere"""

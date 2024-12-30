@@ -1,7 +1,7 @@
 import random
 import sys
 from unittest.mock import patch, call
-from typing import Any, List, Tuple # Stop fucking deleting Tuple
+from typing import Any, List, Tuple
 import pytest
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
 
@@ -107,53 +107,6 @@ def test_dimension_validation(dimensions, expected):
     else:
         with pytest.raises((ValueError, NotImplementedError)):
             validateListDimensions(dimensions)
-
-# ===== Parameter Validation Tests =====
-@pytest.mark.parametrize("dimensions,divisions,index,errorType", [
-    ([], 1, 0, ValueError),  # Empty dimensions
-    ([1], 1, 0, NotImplementedError),  # Single dimension
-    ([0, 0], 1, 0, NotImplementedError),  # No positive dimensions
-    ([1, -1], 1, 0, ValueError),  # Negative dimension
-    ([2, 2], -1, 0, ValueError),  # Negative divisions
-    ([2, 2], 1, -1, ValueError),  # Negative index
-    ([2, 2], 1.5, 0, ValueError),  # Float divisions
-    ([2, 2], 1, 1.5, ValueError),  # Float index
-])
-def test_foldings_parameter_validation(dimensions, divisions, index, errorType):
-    """Test parameter validation in foldings function."""
-    with pytest.raises(errorType):
-        foldings(dimensions, divisions, index)
-
-# ===== Parse Integers Tests =====
-# def test_intInnit():
-#     """Test integer parsing using the test suite generator."""
-#     for testName, testFunction in makeTestSuiteIntInnit(parseListDimensions).items():
-#         testFunction()
-
-# ===== getFoldingsTotalKnown Tests =====
-def test_getFoldingsTotalKnown_valid():
-    """Test getFoldingsTotalKnown with valid dimensions from OEIS settings."""
-    # Get random sequence and dimensions
-    randomSequence = random.choice(list(settingsOEISsequences.values()))
-    randomN = random.choice(list(randomSequence['valuesKnown'].keys()))
-    dimensions = randomSequence['dimensions'](randomN)
-    
-    # Get expected foldings count
-    expectedFoldings = randomSequence['valuesKnown'][randomN]
-    
-    # Test the lookup
-    assert getFoldingsTotalKnown(dimensions) == expectedFoldings
-
-def test_getFoldingsTotalKnown_invalid():
-    """Test getFoldingsTotalKnown with dimensions that don't exist in any sequence."""
-    invalidDimensions = [
-        [21, 31],  # Random large dimensions
-        [4, 4, 4]  # Triple dimensions
-    ]
-    
-    for dimensions in invalidDimensions:
-        with pytest.raises(KeyError):
-            getFoldingsTotalKnown(dimensions)
 
 # ===== Parse Integers Tests =====
 # def test_intInnit():

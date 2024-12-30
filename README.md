@@ -1,21 +1,52 @@
-# A modular foundation for improvements
+# Python implementation of "Multi-dimensional map-folding"
 
-This version is not faster than the original version or the inefficient tasks version. But, because this version has stricter
-separation of concerns, it is easier to use to prototype ideas and compare and contrast different methodologies.
+`mapFolding` explicitly implements [The On-Line Encyclopedia of Integer Sequences](https://oeis.org/):
 
-The likely best place to make efficiency gains is the `while` loop of the algorithm. That logic is isolated in
-"lovelace.py" and I aspire for the other modules to support optimization of that module.
+- [A001415](https://oeis.org/A001415) Number of ways of folding a 2 X n strip of stamps.
+- [A001416](https://oeis.org/A001416) Number of ways of folding a 3 X n strip of stamps.
+- [A001417](https://oeis.org/A001417) Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
+- [A195646](https://oeis.org/A195646) Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.
+- [A001418](https://oeis.org/A001418) Number of ways of folding an n X n sheet of stamps.
 
-## Side note
+`mapFolding.foldings()`, however, will accept arbitrary values for the list of dimensions.
 
-Despite [the word "algorithm" ultimately being derived from](https://www.etymonline.com/word/algorithm#etymonline_v_8145)
-the name of the incomparable Muhammad ibn Musa [al-Khwarizmi](https://en.wikipedia.org/wiki/Al-Khwarizmi),
-the concept of the computer algorithm was created by [Ada Lovelace](https://en.wikipedia.org/wiki/Ada_Lovelace) in approximately 1843.
-It is difficult to overstate the magnitude of this accomplishment. Consider, for example, that in 1900,
-[David Hilbert's](https://en.wikipedia.org/wiki/David_Hilbert) 23 Problems included a challenge to create what we call an algorithm, but
-algorithmic analysis didn't exist and they did not have a word for it at the time.
+[![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml)
 
-Lovelace's accomplishments could not even be contextualized before the corpus
-of literature produced by Kurt Gödel, Alonzo Church, Alan Turing, and their contemporaries. Before the rest of the world caught up to Lovelace, a few things happened: adoption of the wired telegraph, invention of electric networks and electrical devices, invention of the wireless telegraph (the radio), and the invention of powered flight, to name a few.
+## Algorithm history
 
-Therefore, the core of the `foldings` algorithm is in the module, "lovelace.py."
+### The original algorithm
+
+In [`foldings.txt`](mapFolding/reference/foldings.txt) and [`foldings.AA`](mapFolding/reference/foldings.AA), you can find transcriptions of the original algorithm as it was printed in 1971. The full paper is preserved as a PDF of images available at the DOI link below.
+
+W. F. Lunnon, Multi-dimensional map-folding, *The Computer Journal*, Volume 14, Issue 1, 1971, Pages 75–80, [https://doi.org/10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75) ([BibTex](mapFolding/citations/Lunnon.bibtex))
+
+### ALGOL68, C, and Java versions
+
+A Java implementation by [Sean A. Irvine](https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java) ([BibTex](mapFolding/citations/jOEIS.bibtex)) includes the comments:
+
+```java
+/**
+ * A001415 Number of ways of folding a 2 X n strip of stamps.
+ * @author Fred Lunnon (ALGOL68, C versions)
+ * @author Sean A. Irvine (Java port)
+ */
+...
+  // Implements algorithm as described in "Multi-dimensional map-folding",
+  // by W. F. Lunnon, The Computer J, 14, 1, pp. 75--80.  Note the original
+  // paper contains a few omissions, so this actual code is based on a C
+  // implementation by Fred Lunnon.
+```
+
+## Related Video
+
+"How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](mapFolding/citations/Physics_for_the_Birds.bibtex))
+
+[![How Many Ways Can You Fold a Map?](https://i.ytimg.com/vi/sfH9uIY3ln4/hq720.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
+
+## Did *The On-Line Encyclopedia of Integer Sequences* recently update an implemented sequence?
+
+You can clear *The On-Line Encyclopedia of Integer Sequences* data from the `mapFolding` cache:
+
+```sh
+./mapFolding>clearOEIScache
+```
