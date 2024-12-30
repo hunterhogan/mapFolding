@@ -1,12 +1,14 @@
+import random
 import sys
 from unittest.mock import patch, call
 from typing import Any, List
 
 import pytest
+from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
 
 from mapFolding import (
     clearOEIScache, getLeavesTotal, parseListDimensions, 
-    foldings, validateListDimensions
+    foldings, validateListDimensions,
 )
 from mapFolding.oeis import settingsOEISsequences
 from mapFolding.noCircularImportsIsAlie import getFoldingsTotalKnown
@@ -122,4 +124,35 @@ def test_foldings_parameter_validation(dimensions, divisions, index, errorType):
     """Test parameter validation in foldings function."""
     with pytest.raises(errorType):
         foldings(dimensions, divisions, index)
+
+# ===== Parse Integers Tests =====
+# def test_intInnit():
+#     """Test integer parsing using the test suite generator."""
+#     for testName, testFunction in makeTestSuiteIntInnit(parseListDimensions).items():
+#         testFunction()
+
+# ===== getFoldingsTotalKnown Tests =====
+def test_getFoldingsTotalKnown_valid():
+    """Test getFoldingsTotalKnown with valid dimensions from OEIS settings."""
+    # Get random sequence and dimensions
+    randomSequence = random.choice(list(settingsOEISsequences.values()))
+    randomN = random.choice(list(randomSequence['valuesKnown'].keys()))
+    dimensions = randomSequence['dimensions'](randomN)
+    
+    # Get expected foldings count
+    expectedFoldings = randomSequence['valuesKnown'][randomN]
+    
+    # Test the lookup
+    assert getFoldingsTotalKnown(dimensions) == expectedFoldings
+
+def test_getFoldingsTotalKnown_invalid():
+    """Test getFoldingsTotalKnown with dimensions that don't exist in any sequence."""
+    invalidDimensions = [
+        [21, 31],  # Random large dimensions
+        [4, 4, 4]  # Triple dimensions
+    ]
+    
+    for dimensions in invalidDimensions:
+        with pytest.raises(KeyError):
+            getFoldingsTotalKnown(dimensions)
 
