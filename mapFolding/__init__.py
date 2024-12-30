@@ -1,5 +1,5 @@
 """
-Python implementation of 
+Python-JAX implementation of 
 W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
 """
 # HEY! 

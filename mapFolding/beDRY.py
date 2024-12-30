@@ -144,9 +144,11 @@ def outfitFoldings(listDimensions: List[int]) -> Tuple[List[int], int, numpy.nda
 
     Parameters:
         listDimensions: A list of dimensions for the folding task.
+        computationDivisions: The number of divisions for the computation task.
+        computationIndex: The index of the current computation task.
 
     Returns:
-        listDimensions,leavesTotal,connectionGraph: 
+        listDimensions,computationDivisions,computationIndex,leavesTotal,connectionGraph: 
             A tuple containing the validated list of dimensions, the validated number of 
             computation divisions, the validated computation index, and the total number of leaves.
     """
