@@ -27,6 +27,10 @@ import numpy
 
 from mapFolding import validateListDimensions, getLeavesTotal
 from mapFolding.benchmarks import recordBenchmarks
+
+dtypeDefault = numpy.uint8
+dtypeMaximum = numpy.uint16
+
 @recordBenchmarks()
 @numba.njit(cache=True, fastmath=False)
 def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> int:
@@ -44,98 +48,112 @@ def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> 
 
     listDimensionsPositive = validateListDimensions(p) # listDimensionsPositive = validateListDimensions(listDimensions)
 
-    n: int = getLeavesTotal(listDimensionsPositive) # leavesTotal: int = getLeavesTotal(listDimensionsPositive)
-    d: int = len(p) # dimensionsTotal: int = len(listDimensions)
+    n = numba.IntegerLiteral(getLeavesTotal(listDimensionsPositive)) # leavesTotal: int = getLeavesTotal(listDimensionsPositive)
+    d = numba.IntegerLiteral(len(p)) # dimensionsTotal: int = len(listDimensions)
 
     """How to build a leaf connection graph, also called a "Cartesian Product Decomposition" 
     or a "Dimensional Product Mapping", with sentinels: 
     Step 1: find the cumulative product of the map's dimensions"""
-    P = numpy.ones(d + 1, dtype=numpy.int64) # cumulativeProduct = numpy.ones(dimensionsTotal + 1, dtype=numpy.int64)
+    P = numpy.ones(d + 1, dtype=dtypeDefault) # cumulativeProduct = numpy.ones(dimensionsTotal + 1, dtype=dtypeDefault)
     for i in range(1, d + 1): # for dimension1ndex in range(1, dimensionsTotal + 1):
         P[i] = P[i - 1] * p[i - 1] # cumulativeProduct[dimension1ndex] = cumulativeProduct[dimension1ndex - 1] * listDimensions[dimension1ndex - 1]
 
     """Step 2: for each dimension, create a coordinate system """
     """C[i][m] holds the i-th coordinate of leaf m""" # """coordinateSystem[dimension1ndex][leaf1ndex] holds the dimension1ndex-th coordinate of leaf leaf1ndex"""
-    C = numpy.zeros((d + 1, n + 1), dtype=numpy.int64) # coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=numpy.int64)
+    C = numpy.zeros((d + 1, n + 1), dtype=dtypeDefault) # coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=dtypeDefault)
     for i in range(1, d + 1): # for dimension1ndex in range(1, dimensionsTotal + 1):
         for m in range(1, n + 1): # for leaf1ndex in range(1, leavesTotal + 1):
             C[i][m] = ((m - 1) // P[i - 1]) % p[i - 1] + 1 # coordinateSystem[dimension1ndex][leaf1ndex] = ((leaf1ndex - 1) // cumulativeProduct[dimension1ndex - 1]) % listDimensions[dimension1ndex - 1] + 1
 
     """Step 3: create a huge empty connection graph"""
-    D = numpy.zeros((d + 1, n + 1, n + 1), dtype=numpy.int64) # connectionGraph = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=numpy.int64)
+    D = numpy.zeros((d + 1, n + 1, n + 1), dtype=dtypeDefault) # connectionGraph = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=dtypeDefault)
 
     """D[i][l][m] computes the leaf connected to m in dimension i when inserting l""" # """connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndex] computes the leaf1ndex connected to leaf1ndex in dimension1ndex when inserting activeLeaf1ndex"""
     """Step for... for... for...: fill the connection graph"""
     for i in range(1, d + 1): # for dimension1ndex in range(1, dimensionsTotal + 1):
         for l in range(1, n + 1): # for activeLeaf1ndex in range(1, leavesTotal + 1):
             for m in range(1, l + 1): # for leaf1ndexConnectee in range(1, activeLeaf1ndex + 1):
-                delta = C[i][l] - C[i][m] # distance = coordinateSystem[dimension1ndex][activeLeaf1ndex] - coordinateSystem[dimension1ndex][leaf1ndexConnectee]
-                """If delta is even""" # """If distance is even"""
-                if delta % 2 == 0: # if distance % 2 == 0:
+                if (C[i][l] & 1) == (C[i][m] & 1): # if distance % 2 == 0:
                     if C[i][m] == 1: # if coordinateSystem[dimension1ndex][leaf1ndexConnectee] == 1:
                         D[i][l][m] = m # connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee
                     else:
                         D[i][l][m] = m - P[i - 1] # connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee - cumulativeProduct[dimension1ndex - 1]
                 else: 
-                    """If delta is odd""" # """If distance is odd"""
                     if C[i][m] == p[i - 1] or m + P[i - 1] > l: # if coordinateSystem[dimension1ndex][leaf1ndexConnectee] == listDimensions[dimension1ndex - 1] or leaf1ndexConnectee + cumulativeProduct[dimension1ndex - 1] > activeLeaf1ndex:
                         D[i][l][m] = m # connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee
                     else:
                         D[i][l][m] = m + P[i - 1] # connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee + cumulativeProduct[dimension1ndex - 1]
 
     """For numba, a single array is faster than four separate arrays"""
-    s = numpy.zeros((4, n + 1), dtype=numpy.int64) # track = numpy.zeros((4, leavesTotal + 1), dtype=numpy.int64)
+    s = numpy.zeros((4, n + 1), dtype=dtypeDefault) # track = numpy.zeros((4, leavesTotal + 1), dtype=dtypeDefault)
 
     """Indices of array `s` ("s" is for "state"), which is a collection of one-dimensional arrays each of length `n + 1`.""" # """Indices of array `track` (to "track" the state), which is a collection of one-dimensional arrays each of length `leavesTotal + 1`."""
     """The values in the array cells are dynamic, small, unsigned integers."""
-    A = 0 # leafAbove = 0
-    B = 1 # leafBelow = 1
-    count = 2 # countDimensionsGapped = 2
-    gapter = 3 # gapRangeStart = 3
+    # A: int = 0 # leafAbove: int = 0
+    # B: int = 1 # leafBelow: int = 1
+    # count: int = 2 # countDimensionsGapped: int = 2
+    # gapter: int = 3 # gapRangeStart: int = 3
+    A = numba.IntegerLiteral(0) # leafAbove: int = 0
+    B = numba.IntegerLiteral(1) # leafBelow: int = 1
+    count = numba.IntegerLiteral(2) # countDimensionsGapped: int = 2
+    gapter = numba.IntegerLiteral(3) # gapRangeStart: int = 3
 
-    gap = numpy.zeros(n * n + 1, dtype=numpy.int64) # potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=numpy.int64)
+    gap = numpy.zeros(n * n + 1, dtype=dtypeMaximum) # potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
 
-    foldingsTotal: int = 0
-    l: int = 1 # activeLeaf1ndex: int = 1
-    g: int = 0 # activeGap1ndex: int = 0
+    foldingsTotal = numba.uint64(0)
+    l = numba.uint8(1) # activeLeaf1ndex: int = 1
+    g = numba.uint8(0) # activeGap1ndex: int = 0
 
     while l > 0: # while activeLeaf1ndex > 0:
         if l <= 1 or s[B][0] == 1: # if activeLeaf1ndex <= 1 or track[leafBelow][0] == 1:
             if l > n: # if activeLeaf1ndex > leavesTotal:
                 foldingsTotal += n # foldingsTotal += leavesTotal
             else:
-                dd: int = 0 # unconstrainedLeaf: int = 0
+                dd = numba.uint8(0) # dimensionsUnconstrained: int = 0
                 """Track possible gaps for leaf l in each section""" # """Track possible gaps for activeLeaf1ndex in each section"""
-                gg: int = s[gapter][l - 1] # gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
+                gg = numba.uint8(s[gapter][l - 1]) # gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
                 """Reset gap index"""
                 g = gg # activeGap1ndex = gap1ndexLowerBound
 
                 """Count possible gaps for leaf l in each section""" # """Count possible gaps for activeLeaf1ndex in each section"""
-                for i in range(1, d + 1): # for dimension1ndex in range(1, dimensionsTotal + 1):
+                i = numba.uint8(1) # dimension1ndex: int = 1
+                while i <= d: # for dimension1ndex in range(1, dimensionsTotal + 1):
                     if D[i][l][l] == l: # if connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
-                        dd += 1 # unconstrainedLeaf += 1
+                        dd += 1 # dimensionsUnconstrained += 1
                     else:
-                        m: int = D[i][l][l] # leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
+                        m = numba.uint8(D[i][l][l]) # leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
                         while m != l: # while leaf1ndexConnectee != activeLeaf1ndex:
                             gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
                             if s[count][m] == 0: # if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
                                 gg += 1 # gap1ndexLowerBound += 1
                             s[count][m] += 1 # track[countDimensionsGapped][leaf1ndexConnectee] += 1
                             m = D[i][l][s[B][m]] # leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][track[leafBelow][leaf1ndexConnectee]]
+                    i += 1
 
                 """If leaf l is unconstrained in all sections, it can be inserted anywhere""" # """If activeLeaf1ndex is unconstrained in all sections, it can be inserted anywhere"""
-                if dd == d: # if unconstrainedLeaf == dimensionsTotal:
-                    for m in range(l): # for leaf1ndex in range(activeLeaf1ndex):
+                if dd == d: # if dimensionsUnconstrained == dimensionsTotal:
+                    m = numba.uint8(0) # leaf1ndex: int = 0
+                    while m < l: # for leaf1ndex in range(activeLeaf1ndex):
                         gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndex
                         gg += 1 # gap1ndexLowerBound += 1
+                        m += 1
 
                 """Filter gaps that are common to all sections"""
-                for j in range(g, gg): # for indexMiniGap in range(activeGap1ndex, gap1ndexLowerBound):
+                # for j in range(g, gg): # for indexMiniGap in range(activeGap1ndex, gap1ndexLowerBound):
+                #     gap[g] = gap[j] # potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
+                #     if s[count][gap[j]] == d - dd: # if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                #         g += 1 # activeGap1ndex += 1
+                #     """Reset s[count] for next iteration""" # """Reset track[countDimensionsGapped] for next iteration"""
+                #     s[count][gap[j]] = 0  # track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
+
+                j = numba.uint8(g)
+                while j < gg: # for indexMiniGap in range(activeGap1ndex, gap1ndexLowerBound):
                     gap[g] = gap[j] # potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                    if s[count][gap[j]] == d - dd: # if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == dimensionsTotal - unconstrainedLeaf:
+                    if s[count][gap[j]] == d - dd: # if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
                         g += 1 # activeGap1ndex += 1
                     """Reset s[count] for next iteration""" # """Reset track[countDimensionsGapped] for next iteration"""
                     s[count][gap[j]] = 0  # track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
+                    j += 1
 
         """Recursive backtracking steps"""
         while l > 0 and g == s[gapter][l - 1]: # while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart][activeLeaf1ndex - 1]:

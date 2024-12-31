@@ -53,29 +53,29 @@ For each leaf:
 Assume `listDimensions` is for an implemented OEIS sequence, and
 assume `listDimensions` is at most the next unknown total in the sequence.
 
-| Type         | max(x) | max(array) | Identifier | Alternate Identifier  |
-| ------------ | ------ | ---------- | ---------- | --------------------- |
-| 1D array     |        | n+1        | A          | leafAbove             |
-| 1D array     |        | n+1        | B          | leafBelow             |
-| 2D array     |        | max(p)     | C          | coordinateSystem      |
-| unsigned int | d      |            | count      | countDimensionsGapped |
-| 3D array     |        | n          | D          | connectionGraph       |
-| unsigned int | 8*     |            | d          | dimensionsTotal       |
-| unsigned int | d      |            | dd         | unconstrainedLeaf     |
-| unsigned int |        |            | delta      | distance              |
-| unsigned int |        |            | g          | activeGap1ndex        |
-| 1D array     |        |            | gap        | potentialGaps         |
-| 1D array     |        |            | gapter     | gapRangeStart         |
-| unsigned int |        |            | gg         | gap1ndexLowerBound    |
-| unsigned int | d      |            | i          | dimension1ndex        |
-| unsigned int | gg-1   |            | j          | indexMiniGap          |
-| unsigned int | n+1    |            | l          | activeLeaf1ndex       |
-| unsigned int | n      |            | m          | leaf1ndex             |
-| unsigned int | n      |            | m          | leaf1ndexConnectee    |
-| unsigned int | 256*   |            | n          | leavesTotal           |
-| 1D array     |        | n          | P          | cumulativeProduct     |
-| 1D array     |        | 19 (2x19)  | p          | listDimensions        |
-| 2D array     |        | n/a        | s          | track                 |
-| unsigned int | ~10^17 |            | mCount     | foldingsTotal         |
+| Type         | max(x)    | Identifier | Alternate Identifier    |
+| ------------ | --------- | ---------- | ----------------------- |
+| 1D array     | n+1       | A          | leafAbove               |
+| 1D array     | n+1       | B          | leafBelow               |
+| 2D array     | max(p)    | C          | coordinateSystem        |
+| 1D array     | d         | count      | countDimensionsGapped   |
+| 3D array     | n         | D          | connectionGraph         |
+| unsigned int | 8*        | d          | dimensionsTotal         |
+| unsigned int | d         | dd         | dimensionsUnconstrained |
+| unsigned int |           | delta      | distance                |
+| unsigned int |           | g          | activeGap1ndex          |
+| 1D array     | > 2*n     | gap        | potentialGaps           |
+| 1D array     |           | gapter     | gapRangeStart           |
+| unsigned int |           | gg         | gap1ndexLowerBound      |
+| unsigned int | d         | i          | dimension1ndex          |
+| unsigned int | gg-1      | j          | indexMiniGap            |
+| unsigned int | n+1       | l          | activeLeaf1ndex         |
+| unsigned int | n         | m          | leaf1ndex               |
+| unsigned int | n         | m          | leaf1ndexConnectee      |
+| unsigned int | 256*      | n          | leavesTotal             |
+| 1D array     | n         | P          | cumulativeProduct       |
+| 1D array     | 19 (2x19) | p          | listDimensions          |
+| 2D array     | n/a       | s          | track                   |
+| unsigned int | ~10^17    | mCount     | foldingsTotal           |
 
 *2x2x2x2x2x2x2x2 (2x2... 8-dimensional)
