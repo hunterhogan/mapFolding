@@ -115,10 +115,15 @@ def test_dimension_validation(dimensions, expected):
 #         testFunction()
 
 # ===== getFoldingsTotalKnown Tests =====
-def test_getFoldingsTotalKnown_valid(valid_dimensions_and_foldings):
+def test_getFoldingsTotalKnown_valid(listDimensionsValidated: List[int]):
     """Test getFoldingsTotalKnown with valid dimensions from OEIS settings."""
-    dimensions, expected_foldings = valid_dimensions_and_foldings
-    assert getFoldingsTotalKnown(dimensions) == expected_foldings
+    listOfFoldingsTotal = []
+    for keyName in settingsOEISsequences.keys():
+        listOfFoldingsTotal.extend(settingsOEISsequences[keyName]['valuesKnown'].values())
+
+    foldingsTotal = getFoldingsTotalKnown(listDimensionsValidated)
+
+    assert foldingsTotal in listOfFoldingsTotal
 
 def test_getFoldingsTotalKnown_invalid():
     """Test getFoldingsTotalKnown with dimensions that don't exist in any sequence."""

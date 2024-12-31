@@ -5,25 +5,33 @@ from mapFolding import validateListDimensions
 
 @pytest.fixture(params=settingsOEISsequences.keys())
 def oeisID(request):
+    """Returns values from `settingsOEISsequences.keys()` not from `OEISsequenceID`."""
     return request.param
 
-def hasTwoOrMorePositive(listDimensions):
-    """Check if list has at least 2 positive dimensions."""
-    return len([dim for dim in listDimensions if dim > 0]) >= 2
+@pytest.fixture
+def listDimensionsValidated(oeisID):
+    """For each `oeisID` from the `pytest.fixture`, returns `listDimensions` if `validateListDimensions` approves."""
+    while True:
+        listOFn = list(settingsOEISsequences[oeisID]['valuesKnown'].keys())
+        n = random.choice(listOFn)
+        listDimensionsCandidate = settingsOEISsequences[oeisID]['getDimensions'](n)
+
+        try:
+            listDimensionsValidated = validateListDimensions(listDimensionsCandidate)
+            return listDimensionsValidated
+        except (ValueError, NotImplementedError):
+            pass
 
 @pytest.fixture
-def valid_dimensions_and_foldings(oeisID):
-    """Pick a random countTerm with 2+ positive dimensions in the given seq."""
-    dictionaryValuesKnown = settingsOEISsequences[oeisID]['valuesKnown']
-    listCountTerms = [
-        countTerm 
-        for countTerm in dictionaryValuesKnown 
-        if hasTwoOrMorePositive(settingsOEISsequences[oeisID]['dimensions'](countTerm))
-    ]
-    if not listCountTerms:
-        pytest.skip(f"No valid dimensions for {oeisID}")
-    chosenCountTerm = random.choice(listCountTerms)
-    listValidated = validateListDimensions(
-        settingsOEISsequences[oeisID]['dimensions'](chosenCountTerm)
-    )
-    return listValidated, dictionaryValuesKnown[chosenCountTerm]
+def listDimensionsForTests(oeisID):
+    """For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
+    if `validateListDimensions` approves."""
+    while True:
+        n = random.choice(settingsOEISsequences[oeisID]['valuesTestValidation'])
+        listDimensionsCandidate = settingsOEISsequences[oeisID]['getDimensions'](n)
+
+        try:
+            listDimensionsValidated = validateListDimensions(listDimensionsCandidate)
+            return listDimensionsValidated
+        except (ValueError, NotImplementedError):
+            pass

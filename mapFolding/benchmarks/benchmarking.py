@@ -12,7 +12,7 @@ pathRecordedBenchmarks.mkdir(parents=True, exist_ok=True)
 
 def recordBenchmarks():
     """Decorator to benchmark a function."""
-    def AzeemTheRapper(functionTarget: Callable):
+    def AzeemTheWrapper(functionTarget: Callable):
         def djZeph(*arguments, **keywordArguments):
             timeStart = time.perf_counter_ns()
             result = functionTarget(*arguments, **keywordArguments)
@@ -35,7 +35,7 @@ def recordBenchmarks():
             return result
 
         return djZeph
-    return AzeemTheRapper
+    return AzeemTheWrapper
 
 def runBenchmarks(benchmarkIterations: int = 30) -> None:
     """Run benchmark iterations.
@@ -46,7 +46,7 @@ def runBenchmarks(benchmarkIterations: int = 30) -> None:
     # TODO warmUp (False): Whether to perform one warm-up iteration
     from tqdm.auto import tqdm
     import itertools
-    listParametersOEIS = [(oeisIdentifier, dimensionValue) for oeisIdentifier, settings in settingsOEISsequences.items() for dimensionValue in settings['benchmarkValues']]
+    listParametersOEIS = [(oeisIdentifier, dimensionValue) for oeisIdentifier, settings in settingsOEISsequences.items() for dimensionValue in settings['valuesBenchmark']]
     for (oeisIdentifier, dimensionValue), iterationIndex in tqdm(itertools.product(listParametersOEIS, range(benchmarkIterations)), total=len(listParametersOEIS) * benchmarkIterations):
         oeisSequence_aOFn(oeisIdentifier, dimensionValue)
 

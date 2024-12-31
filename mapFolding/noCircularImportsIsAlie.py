@@ -16,12 +16,12 @@ def getFoldingsTotalKnown(listDimensions: List[int]) -> int:
 
     dimensionsFoldingsTotalLookup: Dict[Tuple, int] = {}
     from mapFolding.oeis import settingsOEISsequences
-    for oeisID, settings in settingsOEISsequences.items():
+    for settings in settingsOEISsequences.values():
         sequence = settings['valuesKnown']
         
         # Get all known dimensions and their folding counts
         for n, foldingsTotal in sequence.items():
-            dimensions = settings['dimensions'](n)
+            dimensions = settings['getDimensions'](n)
             dimensions.sort()
             dimensionsFoldingsTotalLookup[tuple(dimensions)] = foldingsTotal
     
