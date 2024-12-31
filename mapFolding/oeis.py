@@ -13,9 +13,9 @@ else:
     TypedDict = dict
 
 class SettingsOEISsequence(TypedDict):
-    # I would prefer to load description dynamically from OEIS, but it's a pita for me 
+    # I would prefer to load description dynamically from OEIS, but it's a pita for me
     # to learn how to efficiently implement right now.
-    description: str 
+    description: str
     getDimensions: typing.Callable[[int], typing.List[int]]
     valuesBenchmark: typing.List[int]
     valuesKnown: typing.Dict[int, int]
@@ -27,10 +27,39 @@ try:
 except NameError:
     _pathCache = pathlib.Path.home() / ".mapFoldingCache"
 
+# Style/grammar/semiotics of "format" identifiers is in the prototype stage because I've never used them before
+# `_formatFilenameCache` is supposed to be the _exact_ name of the file, which is 
+# `b{oeisID[1:]}.txt`, not `{oeisID}.txt`. But 
+
+
+# ImaString = 'A001418'
+# newString = f"{ImaString[1:]}.txt"
+# _formatNewString = "{ImaString[1:]}.txt"
+# _formatNewString = "{ImaString}[1:].txt"
+# _formatNewString = "{{ImaString}[1:]}.txt"
+
+# f"" != format() because Python.
+
+# newerString = _formatNewString.format(ImaString=ImaString)
+# nn = format(ImaString, _formatNewString)
+# urlOEISbFile = f"https://oeis.org/{oeisID}/b{oeisID[1:]}.txt"
+_format_urlOEISbFile  = "https://oeis.org/{oeisID}/b{oeisID[1:]}.txt"
+# urlOEISbFile = _format_urlOEISbFile.format(oeisID=oeisID)
+
 _formatFilenameCache = "{oeisID}.txt"
+# oeisID = 'A001418'
+# bb = _formatFilenameCache.format(oeisID=oeisID)
+# bb = _formatFilenameCache.format('A001418')
+
+
+_formatURLoeisID = "https://oeis.org/{oeisID}"
 
 # NOTE: not DRY, and I'm annoyed and frustrated. I cannot figure out how to not duplicate this information here and in the dictionary.
-OEISsequenceID = typing.Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418'] 
+# I suspect there is a better paradigm to accomplish this.
+# 1. I am acting as if `oeisID` is a member of OEISsequenceID, but that isn't really true.
+# 2. I would like to define `oeisID` as always being upper case, but I don't
+# have an obvious way to do that in this system.
+OEISsequenceID = typing.Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418']
 
 settingsOEISsequences: typing.Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
@@ -65,11 +94,11 @@ settingsOEISsequences: typing.Dict[OEISsequenceID, SettingsOEISsequence] = {
         'valueUnknown': -1,
         'valuesKnown': {-1:-1},
     },
-    'A001418': { 
+    'A001418': {
         'description': 'Number of ways of folding an n X n sheet of stamps.',
         'getDimensions': lambda n: [n, n],
         'valuesBenchmark': [5],
-        # offset 1: hypothetically, if I were to load the offset from OEIS, I could use it to 
+        # offset 1: hypothetically, if I were to load the offset from OEIS, I could use it to
         # determine if a sequence is defined at n=0, which would affect, for example, the valuesTestValidation.
         'valuesTestValidation': [1, random.randint(2, 4)],
         'valueUnknown': -1,
@@ -96,6 +125,7 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
 
     if not isinstance(n, int) or n < 0:
         raise ValueError("`n` must be non-negative integer.")
+
     listDimensions = settingsOEISsequences[oeisID]['getDimensions'](n)
 
     if n <= 1 or len(listDimensions) < 2:
@@ -103,9 +133,8 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
         if foldingsTotal is not None:
             return foldingsTotal
         else:
-            raise ArithmeticError(f"Sequence {oeisID} is not defined at n={n}.")
+            raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
 
-    
     return foldings(listDimensions)
 
 def _validateOEISid(oeisID: typing.Union[str, OEISsequenceID]) -> OEISsequenceID:
@@ -127,10 +156,10 @@ def _validateOEISid(oeisID: typing.Union[str, OEISsequenceID]) -> OEISsequenceID
         KeyError: If the provided sequence ID is not directly implemented.
     """
     if oeisID in typing.get_args(OEISsequenceID):
-        return oeisID # type: ignore # mypy doesn't understand that oeisID is now a valid OEISsequenceID 
+        return oeisID # type: ignore # mypy doesn't understand that oeisID is now a valid OEISsequenceID
                         # and/or I don't know how to tell it that it is
     else:
-        oeisIDcleaned = oeisID.upper().strip() 
+        oeisIDcleaned = oeisID.upper().strip()
         if oeisIDcleaned in settingsOEISsequences:
             return oeisIDcleaned
         else:
@@ -140,7 +169,7 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: OEISsequenceID) -> typing.Dict[int, 
     """
     Parses the content of an OEIS b-file for a given sequence ID.
     This function processes a multiline string representing an OEIS b-file and
-    creates a dictionary mapping integer indices to their corresponding sequence 
+    creates a dictionary mapping integer indices to their corresponding sequence
     values. The first line of the b-file is expected to contain a comment that
     matches the given sequence ID. If it does not match, a ValueError is raised.
 
@@ -167,7 +196,7 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: OEISsequenceID) -> typing.Dict[int, 
         OEISsequence[n] = aOFn
     return OEISsequence
 
-def _getOEISsequence(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
+def _getOEISidValues(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
     """
     Retrieves the specified OEIS sequence as a dictionary mapping integer indices
     to their corresponding values.
@@ -178,7 +207,6 @@ def _getOEISsequence(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
 
     Parameters:
         oeisID: The identifier of the OEIS sequence to retrieve.
-            For example, "A000045" for the Fibonacci sequence.
     Returns:
         OEISsequence: A dictionary where each key is an integer index and each
         value is the corresponding sequence term from the specified OEIS entry.
@@ -197,24 +225,25 @@ def _getOEISsequence(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
 
     if tryCache:
         try:
-            bFileOEIS = pathFilenameCache.read_text()
-            return _parseBFileOEIS(bFileOEIS, oeisID)
+            OEISbFile = pathFilenameCache.read_text()
+            return _parseBFileOEIS(OEISbFile, oeisID)
         except (ValueError, IOError):
             tryCache = False
 
-    url = f"https://oeis.org/{oeisID}/b{oeisID[1:]}.txt"
-    httpResponse: urllib.response.addinfourl = urllib.request.urlopen(url)
-    bFileOEIS = httpResponse.read().decode('utf-8')
+    # urlOEISbFile = _format_urlOEISbFile.format(oeisID=oeisID)
+    urlOEISbFile = f"https://oeis.org/{oeisID}/b{oeisID[1:]}.txt"
+    httpResponse: urllib.response.addinfourl = urllib.request.urlopen(urlOEISbFile)
+    OEISbFile = httpResponse.read().decode('utf-8')
 
     # Ensure cache directory exists
     if not tryCache:
         pathFilenameCache.parent.mkdir(parents=True, exist_ok=True)
-        pathFilenameCache.write_text(bFileOEIS)
+        pathFilenameCache.write_text(OEISbFile)
 
-    return _parseBFileOEIS(bFileOEIS, oeisID)
+    return _parseBFileOEIS(OEISbFile, oeisID)
 
 for oeisID in settingsOEISsequences:
-    settingsOEISsequences[oeisID]['valuesKnown'] = _getOEISsequence(oeisID)
+    settingsOEISsequences[oeisID]['valuesKnown'] = _getOEISidValues(oeisID)
     settingsOEISsequences[oeisID]['valueUnknown'] = max(settingsOEISsequences[oeisID]['valuesKnown'].values()) + 1
 
 def getOEISids() -> None:

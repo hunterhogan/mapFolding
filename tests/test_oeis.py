@@ -10,7 +10,7 @@ import pytest
 
 from mapFolding import getOEISids, oeisSequence_aOFn
 from mapFolding.oeis import settingsOEISsequences, OEISsequenceID
-from mapFolding.oeis import _formatFilenameCache, _getOEISsequence, _parseBFileOEIS
+from mapFolding.oeis import _formatFilenameCache, _getOEISidValues, _parseBFileOEIS
 from mapFolding.oeis import _validateOEISid
 from tests import compareValues, expectError
 from mapFolding import oeis
@@ -58,7 +58,7 @@ def testCacheMiss(pathCacheTesting, oeisIDrandom):
     pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
     
     assert not pathFilenameCache.exists()
-    OEISsequence = _getOEISsequence(oeisIDrandom)
+    OEISsequence = _getOEISidValues(oeisIDrandom)
     assert OEISsequence is not None
     assert pathFilenameCache.exists()
 
@@ -67,13 +67,13 @@ def testCacheExpired(pathCacheTesting, oeisIDrandom):
     pathFilenameCache.write_text("# Old cache content")
     oldModificationTime = datetime.now() - timedelta(days=30)
     os.utime(pathFilenameCache, times=(oldModificationTime.timestamp(), oldModificationTime.timestamp()))
-    OEISsequence = _getOEISsequence(oeisIDrandom)
+    OEISsequence = _getOEISidValues(oeisIDrandom)
     assert OEISsequence is not None
 
 def testInvalidCache(pathCacheTesting, oeisIDrandom):
     pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
     pathFilenameCache.write_text("Invalid content")
-    OEISsequence = _getOEISsequence(oeisIDrandom)
+    OEISsequence = _getOEISidValues(oeisIDrandom)
     assert OEISsequence is not None
 
 def testInvalidFileContent(pathCacheTesting, oeisIDrandom):
@@ -84,7 +84,7 @@ def testInvalidFileContent(pathCacheTesting, oeisIDrandom):
     modificationTimeOriginal = pathFilenameCache.stat().st_mtime
     
     # Function should detect invalid content, fetch fresh data, and update cache
-    OEISsequence = _getOEISsequence(oeisIDrandom)
+    OEISsequence = _getOEISidValues(oeisIDrandom)
     
     # Verify the function succeeded
     assert OEISsequence is not None
@@ -99,7 +99,7 @@ def testNetworkError(monkeypatch, pathCacheTesting):
     
     monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
     with pytest.raises(urllib.error.URLError):
-        _getOEISsequence(next(iter(settingsOEISsequences)))
+        _getOEISidValues(next(iter(settingsOEISsequences)))
 
 def testParseContentErrors():
     """Test invalid content parsing."""
@@ -120,7 +120,7 @@ def testExtraComments(pathCacheTesting, oeisIDrandom):
 5 10"""
     pathFilenameCache.write_text(contentWithExtraComments)
     
-    OEISsequence = _getOEISsequence(oeisIDrandom)
+    OEISsequence = _getOEISidValues(oeisIDrandom)
     # Verify sequence values are correct despite extra comments
     compareValues(2, lambda d: d[1], OEISsequence)  # First value
     compareValues(8, lambda d: d[4], OEISsequence)  # Value after mid-sequence comment

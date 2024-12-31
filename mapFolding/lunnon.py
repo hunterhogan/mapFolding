@@ -31,9 +31,14 @@ from mapFolding.benchmarks import recordBenchmarks
 dtypeDefault = numpy.uint8
 dtypeMaximum = numpy.uint16
 
+A = numba.literally(0) # leafAbove: int = 0
+B = numba.literally(1) # leafBelow: int = 1
+count = numba.literally(2) # countDimensionsGapped: int = 2
+gapter = numba.literally(3) # gapRangeStart: int = 3
+
 @recordBenchmarks()
 @numba.njit(cache=True, fastmath=False)
-def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> int:
+def foldings(p: List[int]): # def foldings(listDimensions: List[int]) -> int:
     """
     Calculate the number of distinct possible ways to fold a map with given dimensions.
     This function computes the number of different ways a map can be folded along its grid lines,
@@ -45,11 +50,21 @@ def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> 
     Returns
         foldingsTotal: The total number of possible distinct foldings for the given map dimensions.
     """
+    def integerSmall(value):
+        return numpy.uint8(value)
+        # return numba.uint8(value)
+
+    def integerLarge(value):
+        return numpy.uint64(value)
+        # return numba.uint64(value)
 
     listDimensionsPositive = validateListDimensions(p) # listDimensionsPositive = validateListDimensions(listDimensions)
 
-    n = numba.IntegerLiteral(getLeavesTotal(listDimensionsPositive)) # leavesTotal: int = getLeavesTotal(listDimensionsPositive)
-    d = numba.IntegerLiteral(len(p)) # dimensionsTotal: int = len(listDimensions)
+    # idk wtf `numba.literal_unroll()` is _supposed_ to do, but it turned `n` into a float which then turned `foldingsTotal` into a float
+    # n = numba.literal_unroll(getLeavesTotal(listDimensionsPositive)) # leavesTotal: int = getLeavesTotal(listDimensionsPositive)
+    # d = numba.literal_unroll(len(p)) # dimensionsTotal: int = len(listDimensions)
+    n = integerSmall(getLeavesTotal(listDimensionsPositive)) # leavesTotal: int = getLeavesTotal(listDimensionsPositive)
+    d = integerSmall(len(p)) # dimensionsTotal: int = len(listDimensions)
 
     """How to build a leaf connection graph, also called a "Cartesian Product Decomposition" 
     or a "Dimensional Product Mapping", with sentinels: 
@@ -89,39 +104,38 @@ def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> 
 
     """Indices of array `s` ("s" is for "state"), which is a collection of one-dimensional arrays each of length `n + 1`.""" # """Indices of array `track` (to "track" the state), which is a collection of one-dimensional arrays each of length `leavesTotal + 1`."""
     """The values in the array cells are dynamic, small, unsigned integers."""
-    # A: int = 0 # leafAbove: int = 0
-    # B: int = 1 # leafBelow: int = 1
-    # count: int = 2 # countDimensionsGapped: int = 2
-    # gapter: int = 3 # gapRangeStart: int = 3
-    A = numba.IntegerLiteral(0) # leafAbove: int = 0
-    B = numba.IntegerLiteral(1) # leafBelow: int = 1
-    count = numba.IntegerLiteral(2) # countDimensionsGapped: int = 2
-    gapter = numba.IntegerLiteral(3) # gapRangeStart: int = 3
-
+    gap = numpy.zeros(integerLarge(n) * integerLarge(n) + 1, dtype=dtypeMaximum) # potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
+    """
+    c:/apps/mapFolding/mapFolding/lunnon.py:107: RuntimeWarning: overflow encountered in scalar multiply
     gap = numpy.zeros(n * n + 1, dtype=dtypeMaximum) # potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
+    """
 
-    foldingsTotal = numba.uint64(0)
-    l = numba.uint8(1) # activeLeaf1ndex: int = 1
-    g = numba.uint8(0) # activeGap1ndex: int = 0
+    foldingsTotal = integerLarge(0)
+    l = integerSmall(1) # activeLeaf1ndex: int = 1
+    g = integerSmall(0) # activeGap1ndex: int = 0
 
     while l > 0: # while activeLeaf1ndex > 0:
         if l <= 1 or s[B][0] == 1: # if activeLeaf1ndex <= 1 or track[leafBelow][0] == 1:
             if l > n: # if activeLeaf1ndex > leavesTotal:
+                
+                # foldingsTotal += integerLarge(n) # foldingsTotal += leavesTotal
                 foldingsTotal += n # foldingsTotal += leavesTotal
             else:
-                dd = numba.uint8(0) # dimensionsUnconstrained: int = 0
+                dd = integerSmall(0) # dimensionsUnconstrained: int = 0
                 """Track possible gaps for leaf l in each section""" # """Track possible gaps for activeLeaf1ndex in each section"""
-                gg = numba.uint8(s[gapter][l - 1]) # gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
+                # gg = integerSmall(s[gapter][l - 1]) # gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
+                gg = s[gapter][l - 1] # gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
                 """Reset gap index"""
                 g = gg # activeGap1ndex = gap1ndexLowerBound
 
                 """Count possible gaps for leaf l in each section""" # """Count possible gaps for activeLeaf1ndex in each section"""
-                i = numba.uint8(1) # dimension1ndex: int = 1
+                i = integerSmall(1) # dimension1ndex: int = 1
                 while i <= d: # for dimension1ndex in range(1, dimensionsTotal + 1):
                     if D[i][l][l] == l: # if connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
                         dd += 1 # dimensionsUnconstrained += 1
                     else:
-                        m = numba.uint8(D[i][l][l]) # leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
+                        # m = integerSmall(D[i][l][l]) # leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
+                        m = D[i][l][l] # leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
                         while m != l: # while leaf1ndexConnectee != activeLeaf1ndex:
                             gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
                             if s[count][m] == 0: # if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
@@ -132,7 +146,7 @@ def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> 
 
                 """If leaf l is unconstrained in all sections, it can be inserted anywhere""" # """If activeLeaf1ndex is unconstrained in all sections, it can be inserted anywhere"""
                 if dd == d: # if dimensionsUnconstrained == dimensionsTotal:
-                    m = numba.uint8(0) # leaf1ndex: int = 0
+                    m = integerSmall(0) # leaf1ndex: int = 0
                     while m < l: # for leaf1ndex in range(activeLeaf1ndex):
                         gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndex
                         gg += 1 # gap1ndexLowerBound += 1
@@ -146,7 +160,7 @@ def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> 
                 #     """Reset s[count] for next iteration""" # """Reset track[countDimensionsGapped] for next iteration"""
                 #     s[count][gap[j]] = 0  # track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
 
-                j = numba.uint8(g)
+                j = g
                 while j < gg: # for indexMiniGap in range(activeGap1ndex, gap1ndexLowerBound):
                     gap[g] = gap[j] # potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
                     if s[count][gap[j]] == d - dd: # if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
