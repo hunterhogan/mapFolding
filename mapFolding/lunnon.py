@@ -26,7 +26,9 @@ import numba
 import numpy
 
 from mapFolding import validateListDimensions, getLeavesTotal
-
+from mapFolding.benchmarks import recordBenchmarks
+@recordBenchmarks()
+@numba.njit(cache=True, fastmath=False)
 def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> int:
     """
     Calculate the number of distinct possible ways to fold a map with given dimensions.
@@ -40,15 +42,9 @@ def foldings(p: List[int]) -> int: # def foldings(listDimensions: List[int]) -> 
         foldingsTotal: The total number of possible distinct foldings for the given map dimensions.
     """
 
-    """I can't figure out how to make numba happy with the calls to other functions,
-    so these validators live here."""
     listDimensionsPositive = validateListDimensions(p) # listDimensionsPositive = validateListDimensions(listDimensions)
 
     n: int = getLeavesTotal(listDimensionsPositive) # leavesTotal: int = getLeavesTotal(listDimensionsPositive)
-    return countFoldings(listDimensionsPositive, n) # return countFoldings(listDimensionsPositive, leavesTotal)
-
-@numba.njit(cache=True, fastmath=False)
-def countFoldings(p: List[int], n: int) -> int: # def countFoldings(listDimensions: List[int], leavesTotal: int) -> int:
     d: int = len(p) # dimensionsTotal: int = len(listDimensions)
 
     """How to build a leaf connection graph, also called a "Cartesian Product Decomposition" 

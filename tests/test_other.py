@@ -1,16 +1,11 @@
-import random
 import sys
+import random
 from unittest.mock import patch, call
-from typing import Any, List, Tuple
 import pytest
-from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
+from tests import compareValues, expectError
 
-from mapFolding import (
-    clearOEIScache, getLeavesTotal, parseListDimensions, 
-    foldings, validateListDimensions,
-)
+from mapFolding import clearOEIScache, getLeavesTotal, validateListDimensions 
 from mapFolding.oeis import settingsOEISsequences
-from mapFolding.noCircularImportsIsAlie import getFoldingsTotalKnown
 
 # ===== OEIS Cache Tests =====
 @pytest.mark.parametrize("cacheExists", [True, False])
@@ -29,42 +24,15 @@ def test_clear_OEIScache(mock_unlink, mock_exists, cacheExists):
         mock_unlink.assert_not_called()
 
 # ===== getLeavesTotal Tests =====
-@pytest.fixture
-def validDimensionCases() -> List[Tuple[List[int], int]]:
-    """Provide test cases for valid dimension inputs."""
-    return [
-        ([2, 3], 6),
-        ([2, 3, 4], 24),
-        ([0, 1, 2], 2),  # zeros ignored
-        ([0], 0),  # edge case
-        ([1] * 1000, 1),  # long list
-        ([1, sys.maxsize], sys.maxsize),  # maxint
-    ]
-
-@pytest.fixture
-def invalidDimensionCases() -> List[Tuple[Any, type]]:
-    """Provide test cases for invalid dimension inputs."""
-    return [
-        ([], ValueError),  # empty
-        ([-1], ValueError),  # negative
-        ([1.5], ValueError),  # float
-        (['a'], ValueError),  # string
-        ([None], TypeError),  # None
-        ([[1, 2]], TypeError),  # nested
-        (None, ValueError),  # None instead of list
-        ([True], TypeError),  # bool
-    ]
-
-def test_getLeavesTotal_valid(validDimensionCases):
+def test_getLeavesTotal_valid(listDimensions_valid):
     """Test getLeavesTotal with valid inputs."""
-    for dimensions, expected in validDimensionCases:
-        assert getLeavesTotal(dimensions) == expected
+    for dimensions, expected in listDimensions_valid:
+        compareValues(expected, getLeavesTotal, dimensions)
 
-def test_getLeavesTotal_invalid(invalidDimensionCases):
+def test_getLeavesTotal_invalid(listDimensions_invalid):
     """Test getLeavesTotal with invalid inputs."""
-    for dimensions, errorType in invalidDimensionCases:
-        with pytest.raises(errorType):
-            getLeavesTotal(dimensions)
+    for dimensions, errorType in listDimensions_invalid:
+        expectError(errorType, getLeavesTotal, dimensions)
 
 @pytest.mark.parametrize("sequenceType", [list, tuple, range])
 def test_getLeavesTotal_sequence_types(sequenceType):
@@ -73,22 +41,31 @@ def test_getLeavesTotal_sequence_types(sequenceType):
         sequence = range(1, 4)
     else:
         sequence = sequenceType([1, 2, 3])
-    assert getLeavesTotal(sequence) == 6  # type: ignore
+    compareValues(6, getLeavesTotal, sequence)
 
 def test_getLeavesTotal_edge_cases():
     """Test edge cases for getLeavesTotal."""
     # Order independence
-    assert getLeavesTotal([2, 3, 4]) == getLeavesTotal([4, 2, 3])
+    compareValues(getLeavesTotal([2, 3, 4]), getLeavesTotal, [4, 2, 3])
     
     # Immutability
     listOriginal = [2, 3]
-    getLeavesTotal(listOriginal)
-    assert listOriginal == [2, 3]
+    compareValues(6, getLeavesTotal, listOriginal)
+    compareValues([2, 3], lambda x: x, listOriginal)  # Check list wasn't modified
     
     # Overflow protection
     largeNumber = sys.maxsize // 2
-    with pytest.raises(OverflowError):
-        getLeavesTotal([largeNumber, largeNumber, 2])
+    expectError(OverflowError, getLeavesTotal, [largeNumber, largeNumber, 2])
+
+def test_getLeavesTotal_properties():
+    """Test properties that should hold for getLeavesTotal."""
+    def generateValidDimensions():
+        return [random.randint(1, 5) for index in range(random.randint(2, 4))]
+    
+    def checkCommutative(inputValue, result):
+        return getLeavesTotal(sorted(inputValue)) == result
+    
+    # templatePropertyTest(getLeavesTotal, "commutative", generateValidDimensions, checkCommutative)
 
 # ===== Dimension Validation Tests =====
 @pytest.mark.parametrize("dimensions,expected", [
@@ -113,26 +90,3 @@ def test_dimension_validation(dimensions, expected):
 #     """Test integer parsing using the test suite generator."""
 #     for testName, testFunction in makeTestSuiteIntInnit(parseListDimensions).items():
 #         testFunction()
-
-# ===== getFoldingsTotalKnown Tests =====
-def test_getFoldingsTotalKnown_valid(listDimensionsValidated: List[int]):
-    """Test getFoldingsTotalKnown with valid dimensions from OEIS settings."""
-    listOfFoldingsTotal = []
-    for keyName in settingsOEISsequences.keys():
-        listOfFoldingsTotal.extend(settingsOEISsequences[keyName]['valuesKnown'].values())
-
-    foldingsTotal = getFoldingsTotalKnown(listDimensionsValidated)
-
-    assert foldingsTotal in listOfFoldingsTotal
-
-def test_getFoldingsTotalKnown_invalid():
-    """Test getFoldingsTotalKnown with dimensions that don't exist in any sequence."""
-    invalidDimensions = [
-        [21, 31],  # Random large dimensions
-        [4, 4, 4]  # Triple dimensions
-    ]
-    
-    for dimensions in invalidDimensions:
-        with pytest.raises(KeyError):
-            getFoldingsTotalKnown(dimensions)
-

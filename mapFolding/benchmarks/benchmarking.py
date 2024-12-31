@@ -4,9 +4,6 @@ from typing import Callable
 
 import numpy
 
-from mapFolding import oeisSequence_aOFn
-from mapFolding.oeis import settingsOEISsequences
-
 pathRecordedBenchmarks = pathlib.Path('mapFolding/benchmarks/marks')
 pathRecordedBenchmarks.mkdir(parents=True, exist_ok=True)
 
@@ -43,9 +40,13 @@ def runBenchmarks(benchmarkIterations: int = 30) -> None:
     Parameters:
         benchmarkIterations (30): Number of benchmark iterations to run
     """
+    import itertools
+
     # TODO warmUp (False): Whether to perform one warm-up iteration
     from tqdm.auto import tqdm
-    import itertools
+
+    from mapFolding import oeisSequence_aOFn
+    from mapFolding.oeis import settingsOEISsequences
     listParametersOEIS = [(oeisIdentifier, dimensionValue) for oeisIdentifier, settings in settingsOEISsequences.items() for dimensionValue in settings['valuesBenchmark']]
     for (oeisIdentifier, dimensionValue), iterationIndex in tqdm(itertools.product(listParametersOEIS, range(benchmarkIterations)), total=len(listParametersOEIS) * benchmarkIterations):
         oeisSequence_aOFn(oeisIdentifier, dimensionValue)

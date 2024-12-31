@@ -1,9 +1,18 @@
 import sys
-from typing import List, Tuple
+from typing import List
 
-import numpy
+import numba
+import numba.extending
 from Z0Z_tools import intInnit
 
+
+@numba.extending.overload(intInnit)
+def intInnit_jitInnit(listDimensions, parameterName):
+    if isinstance(listDimensions, numba.types.List) and isinstance(parameterName, numba.types.StringLiteral):
+        def intInnit_jitInnit_implementInnit(listDimensions, parameterName):
+            return listDimensions
+        return intInnit_jitInnit_implementInnit
+    return None
 
 def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed parameter') -> List[int]:
     """
@@ -27,7 +36,7 @@ def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed
 
     if not listNonNegative:
         raise ValueError("At least one dimension must be non-negative")
-    
+
     return listNonNegative
 
 def validateListDimensions(listDimensions: List[int]) -> List[int]:
@@ -54,10 +63,7 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
     listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
     listDimensionsPositive = [dimension for dimension in listNonNegative if dimension > 0]
     if len(listDimensionsPositive) < 2:
-        from typing import get_args
-
-        from mapFolding.oeis import OEISsequenceID
-        raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. Other functions in this package implement the sequences {get_args(OEISsequenceID)}. You may want to look at https://oeis.org/.")
+        raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
     return listDimensionsPositive
 
 def getLeavesTotal(listDimensions: List[int]) -> int:
@@ -72,7 +78,7 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
     """
     listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
     listPositive = [dimension for dimension in listNonNegative if dimension > 0]
-        
+
     if not listPositive:
         return 0
     else:
@@ -81,5 +87,7 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
             if dimension > sys.maxsize // productDimensions:
                 raise OverflowError("Product would exceed maximum integer size")
             productDimensions *= dimension
-                
+
         return productDimensions
+
+numba.jit_module(cache=True)

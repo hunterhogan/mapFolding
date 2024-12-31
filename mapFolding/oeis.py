@@ -1,11 +1,13 @@
+import numba
+from mapFolding.lunnon import foldings
 import pathlib
 import random
 import urllib.request
 import urllib.response
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Callable, Dict, List, Literal, Union, get_args
+import typing
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
     from typing import TypedDict
 else:
     TypedDict = dict
@@ -14,10 +16,10 @@ class SettingsOEISsequence(TypedDict):
     # I would prefer to load description dynamically from OEIS, but it's a pita for me 
     # to learn how to efficiently implement right now.
     description: str 
-    getDimensions: Callable[[int], List[int]]
-    valuesBenchmark: List[int]
-    valuesKnown: Dict[int, int]
-    valuesTestValidation: List[int]
+    getDimensions: typing.Callable[[int], typing.List[int]]
+    valuesBenchmark: typing.List[int]
+    valuesKnown: typing.Dict[int, int]
+    valuesTestValidation: typing.List[int]
     valueUnknown: int
 
 try:
@@ -28,9 +30,9 @@ except NameError:
 _formatFilenameCache = "{oeisID}.txt"
 
 # NOTE: not DRY, and I'm annoyed and frustrated. I cannot figure out how to not duplicate this information here and in the dictionary.
-OEISsequenceID = Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418'] 
+OEISsequenceID = typing.Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418'] 
 
-settingsOEISsequences: Dict[OEISsequenceID, SettingsOEISsequence] = {
+settingsOEISsequences: typing.Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'getDimensions': lambda n: [2, n],
@@ -101,12 +103,12 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
         if foldingsTotal is not None:
             return foldingsTotal
         else:
-            raise ArithmeticError(f"Sequence {oeisID} is not defined at {n=}.")
+            raise ArithmeticError(f"Sequence {oeisID} is not defined at n={n}.")
 
-    from mapFolding import foldings
+    
     return foldings(listDimensions)
 
-def _validateOEISid(oeisID: Union[str, OEISsequenceID]) -> OEISsequenceID:
+def _validateOEISid(oeisID: typing.Union[str, OEISsequenceID]) -> OEISsequenceID:
     """
     Validates an OEIS sequence ID against implemented sequences.
 
@@ -124,7 +126,7 @@ def _validateOEISid(oeisID: Union[str, OEISsequenceID]) -> OEISsequenceID:
     Raises:
         KeyError: If the provided sequence ID is not directly implemented.
     """
-    if oeisID in get_args(OEISsequenceID):
+    if oeisID in typing.get_args(OEISsequenceID):
         return oeisID # type: ignore # mypy doesn't understand that oeisID is now a valid OEISsequenceID 
                         # and/or I don't know how to tell it that it is
     else:
@@ -132,9 +134,9 @@ def _validateOEISid(oeisID: Union[str, OEISsequenceID]) -> OEISsequenceID:
         if oeisIDcleaned in settingsOEISsequences:
             return oeisIDcleaned
         else:
-            raise KeyError(f"Sequence {oeisID} is not directly implemented in mapFoldings. The directly implemented sequences are {get_args(OEISsequenceID)}.\nFor maps with at least two getDimensions, try `mapFolding.foldings()`.")
+            raise KeyError(f"Sequence {oeisID} is not directly implemented in mapFoldings. The directly implemented sequences are {typing.get_args(OEISsequenceID)}.\nFor maps with at least two getDimensions, try `mapFolding.foldings()`.")
 
-def _parseBFileOEIS(OEISbFile: str, oeisID: OEISsequenceID) -> Dict[int, int]:
+def _parseBFileOEIS(OEISbFile: str, oeisID: OEISsequenceID) -> typing.Dict[int, int]:
     """
     Parses the content of an OEIS b-file for a given sequence ID.
     This function processes a multiline string representing an OEIS b-file and
@@ -165,7 +167,7 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: OEISsequenceID) -> Dict[int, int]:
         OEISsequence[n] = aOFn
     return OEISsequence
 
-def _getOEISsequence(oeisID: OEISsequenceID) -> Dict[int, int]:
+def _getOEISsequence(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
     """
     Retrieves the specified OEIS sequence as a dictionary mapping integer indices
     to their corresponding values.
@@ -218,7 +220,7 @@ for oeisID in settingsOEISsequences:
 def getOEISids() -> None:
     """Print all available OEIS sequence IDs that are directly implemented."""
     print("\nAvailable OEIS sequences:")
-    for oeisID in get_args(OEISsequenceID):
+    for oeisID in typing.get_args(OEISsequenceID):
         print(f"  {oeisID}: {settingsOEISsequences[oeisID]['description']}")
     print("\nUsage example:")
     print("  from mapFolding import oeisSequence_aOFn")
@@ -226,3 +228,5 @@ def getOEISids() -> None:
 
 if __name__ == "__main__":
     getOEISids()
+
+numba.jit_module(forceobj=True, cache=True)
