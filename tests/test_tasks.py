@@ -30,7 +30,10 @@ def test_taskDivisionParameters(listDimensionsValidated, taskDivisionParameters)
 def test_foldings_computationDivisions(listDimensionsForTests):
     leavesTotal = getLeavesTotal(listDimensionsForTests)
     leavesTotalMinimum = 2
-    computationDivisions = random.randint(leavesTotalMinimum, leavesTotal)
+    if leavesTotalMinimum >= leavesTotal:
+        computationDivisions = leavesTotal
+    else:
+        computationDivisions = random.randint(leavesTotalMinimum, leavesTotal)
     
     foldingsTotal = sum(
         foldings(listDimensionsForTests, computationDivisions, index) 
