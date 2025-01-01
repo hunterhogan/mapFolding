@@ -1,5 +1,5 @@
 """
-A largely faithful translation of the original Atlas Autocode code by W. F. Lunnon to Python using NumPy.
+A generally faithful translation of the original Atlas Autocode code by W. F. Lunnon to Python using NumPy.
 W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
 """
 from typing import List
@@ -15,7 +15,7 @@ def foldings(p: List[int]) -> int:
     Returns:
         f: The number of distinct foldings for the given map dimensions.
 
-    NOTE If there are fewer than two dimensions, any dimensions are not positive, or any dimensions are not integers, the output is unreliable.
+    NOTE If there are fewer than two dimensions, any dimensions are not positive, or any dimensions are not integers, the output will be unreliable.
     """
 
     g: int = 0
@@ -47,7 +47,7 @@ def foldings(p: List[int]) -> int:
 
     for i in range(1, d + 1):
         for m in range(1, n + 1):
-            C[i][m] = ((m - 1) // P[i - 1]) % p[i - 1] + 1
+            C[i][m] = ((m - 1) // P[i - 1]) % p[i - 1] + 1 # NOTE Because modulo is available, this statement is simpler.
 
     for i in range(1, d + 1):
         for l in range(1, n + 1):
@@ -105,7 +105,7 @@ def foldings(p: List[int]) -> int:
                         g = g + 1
                     count[gap[j]] = 0
 
-        # for each gap insert leaf l, [the main while shall progress],
+        # for each gap insert leaf l, [the main while loop shall progress],
         # remove leaf l
         while l > 0 and g == gapter[l - 1]:
             l = l - 1
