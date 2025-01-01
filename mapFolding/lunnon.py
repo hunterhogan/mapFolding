@@ -153,13 +153,6 @@ def foldings(p: List[int]): # def foldings(listDimensions: List[int]) -> int:
                         m += 1
 
                 """Filter gaps that are common to all sections"""
-                # for j in range(g, gg): # for indexMiniGap in range(activeGap1ndex, gap1ndexLowerBound):
-                #     gap[g] = gap[j] # potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                #     if s[count][gap[j]] == d - dd: # if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
-                #         g += 1 # activeGap1ndex += 1
-                #     """Reset s[count] for next iteration""" # """Reset track[countDimensionsGapped] for next iteration"""
-                #     s[count][gap[j]] = 0  # track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
-
                 j = g
                 while j < gg: # for indexMiniGap in range(activeGap1ndex, gap1ndexLowerBound):
                     gap[g] = gap[j] # potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
