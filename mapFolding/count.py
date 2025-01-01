@@ -13,7 +13,7 @@ leafBelow = numba.literally(1)
 countDimensionsGapped = numba.literally(2)
 gapRangeStart = numba.literally(3)
 
-@recordBenchmarks()
+# @recordBenchmarks()
 @numba.njit(cache=True, fastmath=False)
 def foldings(listDimensions: List[int]):
     """
@@ -37,9 +37,6 @@ def foldings(listDimensions: List[int]):
 
     listDimensionsPositive = validateListDimensions(listDimensions)
 
-    # idk wtf `numba.literal_unroll()` is _supposed_ to do, but it turned `n` into a float which then turned `foldingsTotal` into a float
-    # n = numba.literal_unroll(getLeavesTotal(listDimensionsPositive)) # leavesTotal: int = getLeavesTotal(listDimensionsPositive)
-    # d = numba.literal_unroll(len(p)) # dimensionsTotal: int = len(listDimensions)
     leavesTotal = integerSmall(getLeavesTotal(listDimensionsPositive))
     dimensionsTotal = integerSmall(len(listDimensionsPositive))
 
@@ -75,16 +72,12 @@ def foldings(listDimensions: List[int]):
                     else:
                         connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee + cumulativeProduct[dimension1ndex - 1]
 
-    """For numba, a single array is faster than four separate arrays"""
     track = numpy.zeros((4, leavesTotal + 1), dtype=dtypeDefault)
 
     """Indices of array `track` (to "track" the state), which is a collection of one-dimensional arrays each of length `leavesTotal + 1`."""
-    """The values in the array cells are dynamic, small, unsigned integers."""
-    potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
-    """
-    c:/apps/mapFolding/mapFolding/lunnon.py:107: RuntimeWarning: overflow encountered in scalar multiply
-    potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
-    """
+    # because this is numba.njit, pay attention to overflow. `leavesTotal * leavesTotal` is placed into a temporary variable of the same 
+    # size as the operands, which is only 8 bits: that's easy to overflow with multiplication.
+    potentialGaps = numpy.zeros(integerLarge(leavesTotal) * integerLarge(leavesTotal) + 1, dtype=dtypeMaximum)
 
     foldingsTotal = integerLarge(0)
     activeLeaf1ndex = integerSmall(1)
@@ -92,14 +85,11 @@ def foldings(listDimensions: List[int]):
 
     while activeLeaf1ndex > 0:
         if activeLeaf1ndex <= 1 or track[leafBelow][0] == 1:
-            if activeLeaf1ndex > leavesTotal:
-                
-                # foldingsTotal += integerLarge(n) # foldingsTotal += leavesTotal
+            if activeLeaf1ndex > leavesTotal:                
                 foldingsTotal += leavesTotal
             else:
                 dimensionsUnconstrained = integerSmall(0)
                 """Track possible gaps for activeLeaf1ndex in each section"""
-                # gg = integerSmall(s[gapter][l - 1]) # gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
                 gap1ndexLowerBound = track[gapRangeStart][activeLeaf1ndex - 1]
                 """Reset gap index"""
                 activeGap1ndex = gap1ndexLowerBound
@@ -110,7 +100,6 @@ def foldings(listDimensions: List[int]):
                     if connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
                         dimensionsUnconstrained += 1
                     else:
-                        # m = integerSmall(D[i][l][l]) # leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
                         leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
                         while leaf1ndexConnectee != activeLeaf1ndex:
                             potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
@@ -155,4 +144,4 @@ def foldings(listDimensions: List[int]):
             track[gapRangeStart][activeLeaf1ndex] = activeGap1ndex
             """Move to next leaf"""
             activeLeaf1ndex += 1
-    return foldingsTotal
+    return int(foldingsTotal)
