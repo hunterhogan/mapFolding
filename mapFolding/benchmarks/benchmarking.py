@@ -4,11 +4,9 @@ from typing import Callable
 
 import numpy
 
-from mapFolding import oeisSequence_aOFn
-from mapFolding.oeis import settingsOEISsequences
-
 pathRecordedBenchmarks = pathlib.Path('mapFolding/benchmarks/marks')
 pathRecordedBenchmarks.mkdir(parents=True, exist_ok=True)
+pathFilenameRecordedBenchmarks = pathRecordedBenchmarks / "benchmarks.npy"
 
 def recordBenchmarks():
     """Decorator to benchmark a function."""
@@ -22,7 +20,6 @@ def recordBenchmarks():
             listDimensions = tuple(arguments[0])
 
             # Store benchmark data in single file
-            pathFilenameRecordedBenchmarks = pathRecordedBenchmarks / "benchmarks.npy"
             benchmarkEntry = numpy.array([(timeElapsed, listDimensions)], dtype=[('time', 'f8'), ('dimensions', 'O')])
             
             if pathFilenameRecordedBenchmarks.exists():
@@ -43,12 +40,17 @@ def runBenchmarks(benchmarkIterations: int = 30) -> None:
     Parameters:
         benchmarkIterations (30): Number of benchmark iterations to run
     """
+    import itertools
+
     # TODO warmUp (False): Whether to perform one warm-up iteration
     from tqdm.auto import tqdm
-    import itertools
+
+    from mapFolding import oeisSequence_aOFn
+    from mapFolding.oeis import settingsOEISsequences
     listParametersOEIS = [(oeisIdentifier, dimensionValue) for oeisIdentifier, settings in settingsOEISsequences.items() for dimensionValue in settings['valuesBenchmark']]
     for (oeisIdentifier, dimensionValue), iterationIndex in tqdm(itertools.product(listParametersOEIS, range(benchmarkIterations)), total=len(listParametersOEIS) * benchmarkIterations):
         oeisSequence_aOFn(oeisIdentifier, dimensionValue)
 
 if __name__ == '__main__':
-    runBenchmarks(10)
+    pathFilenameRecordedBenchmarks.unlink(missing_ok=True)
+    runBenchmarks(30)

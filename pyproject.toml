@@ -68,4 +68,4 @@ addopts = "--cov=mapFolding --cov-report=term-missing --cov-report=xml"
 testpaths = ["tests"]
 env = [
     "NUMBA_DISABLE_JIT=1"
-]
+    ]
