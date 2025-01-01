@@ -1,5 +1,5 @@
 import numba
-from mapFolding.lunnon import foldings
+from mapFolding import foldings
 import pathlib
 import random
 import urllib.request

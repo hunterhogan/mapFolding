@@ -1,39 +1,34 @@
-import io
-import os
-import random
-import urllib.error
-import urllib.request
+from .conftest import expectError, compareValues
+from mapFolding import oeis
 from contextlib import redirect_stdout
 from datetime import datetime, timedelta
 from typing import get_args
+import io
+import os
 import pytest
-
-from mapFolding import getOEISids, oeisSequence_aOFn
-from mapFolding.oeis import settingsOEISsequences, OEISsequenceID
-from mapFolding.oeis import _formatFilenameCache, _getOEISidValues, _parseBFileOEIS
-from mapFolding.oeis import _validateOEISid
-from tests import compareValues, expectError
-from mapFolding import oeis
+import random
+import urllib.error
+import urllib.request
 
 def test_aOFn_calculate_value(oeisID):
-    for n in settingsOEISsequences[oeisID]['valuesTestValidation']:
-        compareValues(settingsOEISsequences[oeisID]['valuesKnown'][n], oeisSequence_aOFn, oeisID, n)
+    for n in oeis.settingsOEISsequences[oeisID]['valuesTestValidation']:
+        compareValues(oeis.settingsOEISsequences[oeisID]['valuesKnown'][n], oeis.oeisSequence_aOFn, oeisID, n)
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID):
     """Check that invalid or unknown IDs raise KeyError."""
-    expectError(KeyError, _validateOEISid, badID)
+    expectError(KeyError, oeis._validateOEISid, badID)
 
 def test__validateOEISid_partially_valid(oeisIDrandom):
-    expectError(KeyError, _validateOEISid, f"{oeisIDrandom}extra")
+    expectError(KeyError, oeis._validateOEISid, f"{oeisIDrandom}extra")
 
 def test__validateOEISid_valid_id(oeisID):
-    compareValues(oeisID, _validateOEISid, oeisID)
+    compareValues(oeisID, oeis._validateOEISid, oeisID)
 
 def test__validateOEISid_valid_id_case_insensitive(oeisID):
-    compareValues(oeisID.upper(), _validateOEISid, oeisID.lower())
-    compareValues(oeisID.upper(), _validateOEISid, oeisID.upper())
-    compareValues(oeisID.upper(), _validateOEISid, oeisID.swapcase())
+    compareValues(oeisID.upper(), oeis._validateOEISid, oeisID.lower())
+    compareValues(oeisID.upper(), oeis._validateOEISid, oeisID.upper())
+    compareValues(oeisID.upper(), oeis._validateOEISid, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [
     # (2, "ok"), # test the test template
@@ -45,46 +40,44 @@ badValues, badValuesIDs = zip(*parameters_test_aOFn_invalid_n)
 @pytest.mark.parametrize("badN", badValues, ids=badValuesIDs)
 def test_aOFn_invalid_n(oeisIDrandom, badN):
     """Check that negative or non-integer n raises ValueError."""
-    expectError(ValueError, oeisSequence_aOFn, oeisIDrandom, badN)
+    expectError(ValueError, oeis.oeisSequence_aOFn, oeisIDrandom, badN)
 
 def test_aOFn_zeroDim_A001418():
-    from mapFolding.oeis import oeisSequence_aOFn
-
     with pytest.raises(ArithmeticError):
-        oeisSequence_aOFn('A001418', 0)
+        oeis.oeisSequence_aOFn('A001418', 0)
 
 # ===== Cache-related Tests =====
 def testCacheMiss(pathCacheTesting, oeisIDrandom):
-    pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
+    pathFilenameCache = pathCacheTesting / oeis._formatFilenameCache.format(oeisID=oeisIDrandom)
     
     assert not pathFilenameCache.exists()
-    OEISsequence = _getOEISidValues(oeisIDrandom)
+    OEISsequence = oeis._getOEISidValues(oeisIDrandom)
     assert OEISsequence is not None
     assert pathFilenameCache.exists()
 
 def testCacheExpired(pathCacheTesting, oeisIDrandom):
-    pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
+    pathFilenameCache = pathCacheTesting / oeis._formatFilenameCache.format(oeisID=oeisIDrandom)
     pathFilenameCache.write_text("# Old cache content")
     oldModificationTime = datetime.now() - timedelta(days=30)
     os.utime(pathFilenameCache, times=(oldModificationTime.timestamp(), oldModificationTime.timestamp()))
-    OEISsequence = _getOEISidValues(oeisIDrandom)
+    OEISsequence = oeis._getOEISidValues(oeisIDrandom)
     assert OEISsequence is not None
 
 def testInvalidCache(pathCacheTesting, oeisIDrandom):
-    pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
+    pathFilenameCache = pathCacheTesting / oeis._formatFilenameCache.format(oeisID=oeisIDrandom)
     pathFilenameCache.write_text("Invalid content")
-    OEISsequence = _getOEISidValues(oeisIDrandom)
+    OEISsequence = oeis._getOEISidValues(oeisIDrandom)
     assert OEISsequence is not None
 
 def testInvalidFileContent(pathCacheTesting, oeisIDrandom):
-    pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
+    pathFilenameCache = pathCacheTesting / oeis._formatFilenameCache.format(oeisID=oeisIDrandom)
     
     # Write invalid content to cache
     pathFilenameCache.write_text("# A999999\n1 1\n2 2\n")
     modificationTimeOriginal = pathFilenameCache.stat().st_mtime
     
     # Function should detect invalid content, fetch fresh data, and update cache
-    OEISsequence = _getOEISidValues(oeisIDrandom)
+    OEISsequence = oeis._getOEISidValues(oeisIDrandom)
     
     # Verify the function succeeded
     assert OEISsequence is not None
@@ -99,14 +92,14 @@ def testNetworkError(monkeypatch, pathCacheTesting):
     
     monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
     with pytest.raises(urllib.error.URLError):
-        _getOEISidValues(next(iter(settingsOEISsequences)))
+        oeis._getOEISidValues(next(iter(oeis.settingsOEISsequences)))
 
 def testParseContentErrors():
     """Test invalid content parsing."""
-    expectError(ValueError, _parseBFileOEIS, "Invalid content\n1 2\n", 'A001415')
+    expectError(ValueError, oeis._parseBFileOEIS, "Invalid content\n1 2\n", 'A001415')
 
 def testExtraComments(pathCacheTesting, oeisIDrandom):
-    pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
+    pathFilenameCache = pathCacheTesting / oeis._formatFilenameCache.format(oeisID=oeisIDrandom)
     
     # Write content with extra comment lines
     contentWithExtraComments = f"""# {oeisIDrandom}
@@ -120,7 +113,7 @@ def testExtraComments(pathCacheTesting, oeisIDrandom):
 5 10"""
     pathFilenameCache.write_text(contentWithExtraComments)
     
-    OEISsequence = _getOEISidValues(oeisIDrandom)
+    OEISsequence = oeis._getOEISidValues(oeisIDrandom)
     # Verify sequence values are correct despite extra comments
     compareValues(2, lambda d: d[1], OEISsequence)  # First value
     compareValues(8, lambda d: d[4], OEISsequence)  # Value after mid-sequence comment
@@ -128,15 +121,15 @@ def testExtraComments(pathCacheTesting, oeisIDrandom):
 
 # ===== Command Line Interface Tests =====
 def testGetOEISids():
-    """Test that getOEISids prints all sequences with descriptions."""
+    """Test that oeis.getOEISids prints all sequences with descriptions."""
     captureOutput = io.StringIO()
     with redirect_stdout(captureOutput):
-        getOEISids()
+        oeis.getOEISids()
     
     outputText = captureOutput.getvalue()
-    
+    from mapFolding.oeis import settingsOEISsequences
     # Check that all sequences are listed
-    for oeisID in get_args(OEISsequenceID):
+    for oeisID in get_args(oeis.OEISsequenceID):
         assert oeisID in outputText
         assert settingsOEISsequences[oeisID]['description'] in outputText
     
@@ -148,7 +141,6 @@ def testCommandLineInterface():
     """Test running as command line script."""
     captureOutput = io.StringIO()
     with redirect_stdout(captureOutput):
-        from mapFolding.oeis import getOEISids
-        getOEISids()
+        oeis.getOEISids()
     outputText = captureOutput.getvalue()
     assert "Available OEIS sequences:" in outputText

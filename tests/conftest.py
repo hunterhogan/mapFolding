@@ -1,20 +1,26 @@
+from mapFolding.beDRY import *
 from mapFolding import oeis
-from mapFolding import validateListDimensions
-from mapFolding.oeis import settingsOEISsequences, OEISsequenceID
-from typing import Any, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Sequence, Tuple, Type, TypeVar, Union, get_args
+from contextlib import redirect_stdout
+from datetime import datetime, timedelta
+import unittest.mock
+import io
+import os
 import pytest
 import random
 import sys
+import urllib.error
+import urllib.request
 
-@pytest.fixture(params=settingsOEISsequences.keys())
+@pytest.fixture(params=oeis.settingsOEISsequences.keys())
 def oeisID(request):
     """Returns values from `settingsOEISsequences.keys()` not from `OEISsequenceID`."""
     return request.param
 
 @pytest.fixture
-def oeisIDrandom() -> OEISsequenceID:
+def oeisIDrandom() -> oeis.OEISsequenceID:
     """Return a random valid OEIS ID from settings."""
-    return random.choice(list(settingsOEISsequences.keys()))
+    return random.choice(list(oeis.settingsOEISsequences.keys()))
 
 @pytest.fixture
 def dictionaryDimensionsFoldingsTotal():
@@ -40,8 +46,8 @@ def listDimensions_testCounts(oeisID):
     """For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
     if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
     while True:
-        n = random.choice(settingsOEISsequences[oeisID]['valuesTestValidation'])
-        listDimensionsCandidate = settingsOEISsequences[oeisID]['getDimensions'](n)
+        n = random.choice(oeis.settingsOEISsequences[oeisID]['valuesTestValidation'])
+        listDimensionsCandidate = oeis.settingsOEISsequences[oeisID]['getDimensions'](n)
 
         try:
             return validateListDimensions(listDimensionsCandidate)
@@ -93,3 +99,46 @@ def pathCacheTesting(tmp_path):
     oeis._pathCache = tmp_path
     yield tmp_path
     oeis._pathCache = pathCacheOriginal
+
+def generateDictionaryDimensionsFoldingsTotal() -> Dict[Tuple[int,...], int]:
+    """Returns a dictionary mapping dimension tuples to their known folding totals."""
+    dimensionsFoldingsTotalLookup = {}
+    
+    for settings in oeis.settingsOEISsequences.values():
+        sequence = settings['valuesKnown']
+        
+        for n, foldingsTotal in sequence.items():
+            dimensions = settings['getDimensions'](n)
+            dimensions.sort()
+            dimensionsFoldingsTotalLookup[tuple(dimensions)] = foldingsTotal
+    
+    return dimensionsFoldingsTotalLookup
+
+# Template Types
+ReturnType = TypeVar('ReturnType')
+ErrorTypes = Union[Type[Exception], Tuple[Type[Exception], ...]]
+
+def formatTestMessage(
+    expected: Any, actual: Any, 
+    functionName: str, 
+    *arguments: Any) -> str:
+    """Format assertion message for any test comparison."""
+    return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"
+            f"Expected: {expected}\n"
+            f"Got: {actual}")
+
+def compareValues(expected: Any, functionTarget: Callable, *arguments: Any) -> None:
+    """Template for tests comparing function output to expected value."""
+    actual = functionTarget(*arguments)
+    assert actual == expected, formatTestMessage(functionTarget.__name__, expected, actual, *arguments)
+
+def expectError(expected: Type[Exception], functionTarget: Callable, *arguments: Any) -> None:
+    """Template for tests expecting an error."""
+    try:
+        actualName = actualObject = functionTarget(*arguments)
+    except Exception as actualError:
+        actualName = type(actualError).__name__
+        actualObject = actualError
+
+    assert isinstance(actualObject, expected), \
+            formatTestMessage(expected.__name__, actualName, functionTarget.__name__, *arguments)

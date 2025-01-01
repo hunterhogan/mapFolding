@@ -1,2 +1,1 @@
-from .utilitiesForTests import (generateDictionaryDimensionsFoldingsTotal, 
-                              compareValues, expectError)
+from .conftest import generateDictionaryDimensionsFoldingsTotal

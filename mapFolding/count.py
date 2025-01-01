@@ -25,20 +25,20 @@ from typing import List
 import numba
 import numpy
 
-from mapFolding import validateListDimensions, getLeavesTotal
+from mapFolding.beDRY import validateListDimensions, getLeavesTotal
 from mapFolding.benchmarks import recordBenchmarks
 
 dtypeDefault = numpy.uint8
 dtypeMaximum = numpy.uint16
 
-A = numba.literally(0) # leafAbove: int = 0
-B = numba.literally(1) # leafBelow: int = 1
-count = numba.literally(2) # countDimensionsGapped: int = 2
-gapter = numba.literally(3) # gapRangeStart: int = 3
+A = numba.literally(0) # leafAbove = numba.literally(0)
+B = numba.literally(1) # leafBelow = numba.literally(1)
+count = numba.literally(2) # countDimensionsGapped = numba.literally(2)
+gapter = numba.literally(3) # gapRangeStart = numba.literally(3)
 
 @recordBenchmarks()
 @numba.njit(cache=True, fastmath=False)
-def foldings(p: List[int]): # def foldings(listDimensions: List[int]) -> int:
+def foldings(p: List[int]): # def foldings(listDimensions: List[int]):
     """
     Calculate the number of distinct possible ways to fold a map with given dimensions.
     This function computes the number of different ways a map can be folded along its grid lines,
@@ -63,8 +63,8 @@ def foldings(p: List[int]): # def foldings(listDimensions: List[int]) -> int:
     # idk wtf `numba.literal_unroll()` is _supposed_ to do, but it turned `n` into a float which then turned `foldingsTotal` into a float
     # n = numba.literal_unroll(getLeavesTotal(listDimensionsPositive)) # leavesTotal: int = getLeavesTotal(listDimensionsPositive)
     # d = numba.literal_unroll(len(p)) # dimensionsTotal: int = len(listDimensions)
-    n = integerSmall(getLeavesTotal(listDimensionsPositive)) # leavesTotal: int = getLeavesTotal(listDimensionsPositive)
-    d = integerSmall(len(p)) # dimensionsTotal: int = len(listDimensions)
+    n = integerSmall(getLeavesTotal(listDimensionsPositive)) # leavesTotal = integerSmall(getLeavesTotal(listDimensionsPositive))
+    d = integerSmall(len(p)) # dimensionsTotal = integerSmall(len(listDimensionsPositive))
 
     """How to build a leaf connection graph, also called a "Cartesian Product Decomposition" 
     or a "Dimensional Product Mapping", with sentinels: 
@@ -88,7 +88,7 @@ def foldings(p: List[int]): # def foldings(listDimensions: List[int]) -> int:
     for i in range(1, d + 1): # for dimension1ndex in range(1, dimensionsTotal + 1):
         for l in range(1, n + 1): # for activeLeaf1ndex in range(1, leavesTotal + 1):
             for m in range(1, l + 1): # for leaf1ndexConnectee in range(1, activeLeaf1ndex + 1):
-                if (C[i][l] & 1) == (C[i][m] & 1): # if distance % 2 == 0:
+                if (C[i][l] & 1) == (C[i][m] & 1): # if (coordinateSystem[dimension1ndex][activeLeaf1ndex] & 1) == (coordinateSystem[dimension1ndex][leaf1ndexConnectee] & 1):
                     if C[i][m] == 1: # if coordinateSystem[dimension1ndex][leaf1ndexConnectee] == 1:
                         D[i][l][m] = m # connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee
                     else:
@@ -111,8 +111,8 @@ def foldings(p: List[int]): # def foldings(listDimensions: List[int]) -> int:
     """
 
     foldingsTotal = integerLarge(0)
-    l = integerSmall(1) # activeLeaf1ndex: int = 1
-    g = integerSmall(0) # activeGap1ndex: int = 0
+    l = integerSmall(1) # activeLeaf1ndex = integerSmall(1)
+    g = integerSmall(0) # activeGap1ndex = integerSmall(0)
 
     while l > 0: # while activeLeaf1ndex > 0:
         if l <= 1 or s[B][0] == 1: # if activeLeaf1ndex <= 1 or track[leafBelow][0] == 1:
@@ -121,46 +121,46 @@ def foldings(p: List[int]): # def foldings(listDimensions: List[int]) -> int:
                 # foldingsTotal += integerLarge(n) # foldingsTotal += leavesTotal
                 foldingsTotal += n # foldingsTotal += leavesTotal
             else:
-                dd = integerSmall(0) # dimensionsUnconstrained: int = 0
+                dd = integerSmall(0) # dimensionsUnconstrained = integerSmall(0)
                 """Track possible gaps for leaf l in each section""" # """Track possible gaps for activeLeaf1ndex in each section"""
                 # gg = integerSmall(s[gapter][l - 1]) # gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
-                gg = s[gapter][l - 1] # gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
+                gg = s[gapter][l - 1] # gap1ndexLowerBound = track[gapRangeStart][activeLeaf1ndex - 1]
                 """Reset gap index"""
                 g = gg # activeGap1ndex = gap1ndexLowerBound
 
                 """Count possible gaps for leaf l in each section""" # """Count possible gaps for activeLeaf1ndex in each section"""
-                i = integerSmall(1) # dimension1ndex: int = 1
-                while i <= d: # for dimension1ndex in range(1, dimensionsTotal + 1):
+                i = integerSmall(1) # dimension1ndex = integerSmall(1)
+                while i <= d: # while dimension1ndex <= dimensionsTotal:
                     if D[i][l][l] == l: # if connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
                         dd += 1 # dimensionsUnconstrained += 1
                     else:
                         # m = integerSmall(D[i][l][l]) # leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
-                        m = D[i][l][l] # leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
+                        m = D[i][l][l] # leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
                         while m != l: # while leaf1ndexConnectee != activeLeaf1ndex:
                             gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
                             if s[count][m] == 0: # if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
                                 gg += 1 # gap1ndexLowerBound += 1
                             s[count][m] += 1 # track[countDimensionsGapped][leaf1ndexConnectee] += 1
                             m = D[i][l][s[B][m]] # leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][track[leafBelow][leaf1ndexConnectee]]
-                    i += 1
+                    i += 1 # dimension1ndex += 1
 
                 """If leaf l is unconstrained in all sections, it can be inserted anywhere""" # """If activeLeaf1ndex is unconstrained in all sections, it can be inserted anywhere"""
                 if dd == d: # if dimensionsUnconstrained == dimensionsTotal:
-                    m = integerSmall(0) # leaf1ndex: int = 0
-                    while m < l: # for leaf1ndex in range(activeLeaf1ndex):
+                    m = integerSmall(0) # leaf1ndex = integerSmall(0)
+                    while m < l: # while leaf1ndex < activeLeaf1ndex:
                         gap[gg] = m # potentialGaps[gap1ndexLowerBound] = leaf1ndex
                         gg += 1 # gap1ndexLowerBound += 1
-                        m += 1
+                        m += 1 # leaf1ndex += 1
 
                 """Filter gaps that are common to all sections"""
-                j = g
-                while j < gg: # for indexMiniGap in range(activeGap1ndex, gap1ndexLowerBound):
+                j = g # indexMiniGap = gap1ndexLowerBound
+                while j < gg: # while indexMiniGap < gap1ndexLowerBound:
                     gap[g] = gap[j] # potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
                     if s[count][gap[j]] == d - dd: # if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
                         g += 1 # activeGap1ndex += 1
                     """Reset s[count] for next iteration""" # """Reset track[countDimensionsGapped] for next iteration"""
                     s[count][gap[j]] = 0  # track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
-                    j += 1
+                    j += 1 # indexMiniGap += 1
 
         """Recursive backtracking steps"""
         while l > 0 and g == s[gapter][l - 1]: # while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart][activeLeaf1ndex - 1]:
