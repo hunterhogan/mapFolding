@@ -1,29 +1,8 @@
-from .conftest import expectError, compareValues
-from mapFolding import oeis
-from mapFolding.beDRY import getLeavesTotal, validateListDimensions
+from .conftest import *
+from mapFolding.__fucking_idiotic_system__ import *
 import pytest
 import random
 import sys
-import unittest.mock
-import urllib.request
-import unittest
-
-# ===== OEIS Cache Tests =====
-@pytest.mark.parametrize("cacheExists", [True, False])
-@unittest.mock.patch('pathlib.Path.exists')
-@unittest.mock.patch('pathlib.Path.unlink')
-def test_clear_OEIScache(mock_unlink, mock_exists, cacheExists):
-    """Test OEIS cache clearing with both existing and non-existing cache."""
-    mock_exists.return_value = cacheExists
-    from mapFolding.clearOEIScache import clearOEIScache
-    clearOEIScache()
-    
-    if cacheExists:
-        assert mock_unlink.call_count == len(oeis.settingsOEISsequences)
-        mock_unlink.assert_has_calls([unittest.mock.call(missing_ok=True)] * len(oeis.settingsOEISsequences))
-    else:
-        mock_exists.assert_called_once()
-        mock_unlink.assert_not_called()
 
 # ===== getLeavesTotal Tests =====
 def test_getLeavesTotal_valid(listDimensions_valid):

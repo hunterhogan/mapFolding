@@ -3,8 +3,6 @@ import random
 import pytest
 
 from mapFolding import foldings, getLeavesTotal
-from mapFolding.noCircularImportsIsAlie import getFoldingsTotalKnown
-
 
 @pytest.mark.parametrize("taskDivisionParameters", [
     {'computationDivisions': 5000, 'computationIndex': 0, 'error': ".*"},  # computationDivisions > leavesTotal
@@ -18,17 +16,17 @@ from mapFolding.noCircularImportsIsAlie import getFoldingsTotalKnown
     {'computationDivisions': None, 'computationIndex': 0, 'error': ".*"},  # None computationDivisions
     {'computationDivisions': 2, 'computationIndex': None, 'error': ".*"},  # None computationIndex
 ])
-def test_taskDivisionParameters(listDimensionsValidated, taskDivisionParameters):
+def test_taskDivisionParameters(listDimensions_validated, taskDivisionParameters):
     """Test validation of computation task parameters."""
     with pytest.raises((ValueError, TypeError), match=taskDivisionParameters['error']):
         foldings(
-            listDimensionsValidated,
+            listDimensions_validated,
             taskDivisionParameters['computationDivisions'],  # type: ignore
             taskDivisionParameters['computationIndex']  # type: ignore
         )
 
-def test_foldings_computationDivisions(listDimensionsForTests):
-    leavesTotal = getLeavesTotal(listDimensionsForTests)
+def test_foldings_computationDivisions(listDimensions_testCounts, dictionaryDimensionsFoldingsTotal):
+    leavesTotal = getLeavesTotal(listDimensions_testCounts)
     leavesTotalMinimum = 2
     if leavesTotalMinimum >= leavesTotal:
         computationDivisions = leavesTotal
@@ -36,8 +34,8 @@ def test_foldings_computationDivisions(listDimensionsForTests):
         computationDivisions = random.randint(leavesTotalMinimum, leavesTotal)
     
     foldingsTotal = sum(
-        foldings(listDimensionsForTests, computationDivisions, index) 
+        foldings(listDimensions_testCounts, computationDivisions, index) 
         for index in range(computationDivisions)
     )
-    assert foldingsTotal == getFoldingsTotalKnown(listDimensionsForTests)
+    assert foldingsTotal == dictionaryDimensionsFoldingsTotal[tuple(listDimensions_testCounts)]
 

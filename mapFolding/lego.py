@@ -1,19 +1,32 @@
 from mapFolding import outfitFoldings, validateTaskDivisions
-from typing import List, Final, Tuple
+from typing import List, Final
 import numba
 import numpy
 
-leafAbove = 0
-leafBelow = 1
-countDimensionsGapped = 2
-gapRangeStart = 3
+dtypeDefault = numpy.uint8
+dtypeMaximum = numpy.uint16
+
+leafAbove = numba.literally(0)
+leafBelow = numba.literally(1)
+countDimensionsGapped = numba.literally(2)
+gapRangeStart = numba.literally(3)
 
 @numba.jit(cache=True, fastmath=False)
-def foldings(listDimensions: List[int], computationDivisions: int = 0, computationIndex: int = 0) -> int:
-    listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions)
+def integerSmall(value):
+    return numpy.uint8(value)
+    # return numba.uint8(value)
+
+@numba.jit(cache=True, fastmath=False)
+def integerLarge(value):
+    return numpy.uint64(value)
+    # return numba.uint64(value)
+
+@numba.jit(cache=True, fastmath=False)
+def foldings(listDimensions: List[int], computationDivisions = 0, computationIndex = 0):
+    listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions, dtypeDefault, dtypeMaximum)
     computationDivisions, computationIndex = validateTaskDivisions(computationDivisions, computationIndex, leavesTotal)
 
-    dimensionsTotal: int = len(listDimensions)
+    dimensionsTotal = len(listDimensions)
 
     foldingsTotal = countFoldings(
         track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
@@ -22,28 +35,19 @@ def foldings(listDimensions: List[int], computationDivisions: int = 0, computati
     return foldingsTotal
 
 @numba.njit(cache=True, fastmath=False)
-def countFoldings(
-    track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-    potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-    D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-    n: int,
-    d: int,
-    computationDivisions: int,
-    computationIndex: int,
-    ) -> int:
+def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
 
     connectionGraph: Final = D
-    leavesTotal: Final = n
-    dimensionsTotal: Final = d
-    taskDivisions: Final = computationDivisions
-    # NOTE don't forget about this new `Final` type thing
-    taskIndex: Final = computationIndex
+    leavesTotal = integerSmall(n)
+    dimensionsTotal = integerSmall(d)
+    taskDivisions = integerSmall(computationDivisions)
+    taskIndex = integerSmall(computationIndex)
     
-    foldingsTotal: int = 0
-    activeLeaf1ndex: int = 1
-    activeGap1ndex: int = 0
+    foldingsTotal = integerLarge(0)
+    activeLeaf1ndex = integerSmall(1)
+    activeGap1ndex = integerSmall(0)
 
-    def countGaps(gap1ndexLowerBound: int, leaf1ndexConnectee: int) -> int:
+    def countGaps(gap1ndexLowerBound, leaf1ndexConnectee):
         if taskDivisions == 0 or activeLeaf1ndex != taskDivisions or leaf1ndexConnectee % taskDivisions == taskIndex:
             potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
             if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
@@ -51,20 +55,20 @@ def countFoldings(
             track[countDimensionsGapped][leaf1ndexConnectee] += 1
         return gap1ndexLowerBound
 
-    def inspectConnectees(gap1ndexLowerBound: int, dimension1ndex: int) -> int:
-        leaf1ndexConnectee: int = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
+    def inspectConnectees(gap1ndexLowerBound, dimension1ndex):
+        leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
         while leaf1ndexConnectee != activeLeaf1ndex:
             gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
             leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][track[leafBelow][leaf1ndexConnectee]]
         return gap1ndexLowerBound
 
-    def findGaps() -> Tuple[int, int]:
+    def findGaps():
         nonlocal activeGap1ndex
 
-        dimensionsUnconstrained: int = 0
-        gap1ndexLowerBound: int = track[gapRangeStart][activeLeaf1ndex - 1]
+        dimensionsUnconstrained = integerSmall(0)
+        gap1ndexLowerBound = track[gapRangeStart][activeLeaf1ndex - 1]
         activeGap1ndex = gap1ndexLowerBound
-        dimension1ndex = 1 
+        dimension1ndex = integerSmall(1) 
 
         while dimension1ndex <= dimensionsTotal:
             if connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
@@ -75,22 +79,26 @@ def countFoldings(
 
         return dimensionsUnconstrained, gap1ndexLowerBound
 
-    def insertUnconstrainedLeaf(unconstrainedCount: int, gapNumberLowerBound: int) -> int:
+    def insertUnconstrainedLeaf(unconstrainedCount, gapNumberLowerBound):
         # NOTE I suspect this is really an initialization function that should not be in the main loop
         """If activeLeaf1ndex is unconstrained in all dimensions, it can be inserted anywhere"""
         if unconstrainedCount == dimensionsTotal:
-            for index in range(activeLeaf1ndex):
+            index = integerSmall(0)
+            while index < activeLeaf1ndex:
                 potentialGaps[gapNumberLowerBound] = index
                 gapNumberLowerBound += 1
+                index += 1
         return gapNumberLowerBound
 
     def filterCommonGaps(unconstrainedCount, gapNumberLowerBound) -> None:
         nonlocal activeGap1ndex
-        for indexMiniGap in range(activeGap1ndex, gapNumberLowerBound):
+        indexMiniGap = activeGap1ndex
+        while indexMiniGap < gapNumberLowerBound:
             potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
             if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == dimensionsTotal - unconstrainedCount:
                 activeGap1ndex += 1
             track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
+            indexMiniGap += 1
 
     def backtrack() -> None:
         nonlocal activeLeaf1ndex, activeGap1ndex
@@ -122,4 +130,7 @@ def countFoldings(
         if activeLeaf1ndex > 0:
             placeLeaf()
 
-    return foldingsTotal
+    return int(foldingsTotal)
+
+# This statement 1.5 seconds. The four statements above take 0.5 seconds.
+# numba.jit(nopython=True, cache=True, fastmath=False)
