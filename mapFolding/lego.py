@@ -48,7 +48,8 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
 # Assume this is Google Colab T4 GPU.
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
 # def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
-def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, leavesTotal, dimensionsTotal, taskDivisions, taskIndex):
+def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, n, d, computationDivisions, computationIndex):
+# def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, leavesTotal, dimensionsTotal, taskDivisions, taskIndex):
     def integerSmall(value):
         # return value
         if useGPU:
@@ -78,6 +79,11 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
     # dimensionsTotal = integerSmall(d)
     # taskDivisions = integerSmall(computationDivisions)
     # taskIndex = integerSmall(computationIndex)
+    
+    leavesTotal = n[()]
+    dimensionsTotal = d[()]
+    taskDivisions = computationDivisions[()]
+    taskIndex = computationIndex[()]
     
     # foldingsTotal = integerLarge(0)
     # activeLeaf1ndex = integerSmall(1)
