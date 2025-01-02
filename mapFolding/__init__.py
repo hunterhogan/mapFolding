@@ -12,9 +12,9 @@ W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, 
 # There MUST be an important concept I don't know about or this is a fucking idiotic system.
 
 from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions
+from .lunnanJAX import foldings
 from .oeis import oeisSequence_aOFn, getOEISids
 from .clearOEIScache import clearOEIScache
-from .lunnanJAX import foldings
 
 __all__ = [
     'clearOEIScache',
