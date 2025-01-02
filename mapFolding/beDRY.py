@@ -91,7 +91,7 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
                 
         return productDimensions
 
-def makeConnectionGraph(listDimensions: List[int], dtype = numpy.int64):
+def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
     """
     Constructs a connection graph for a given list of dimensions.
     This function generates a multi-dimensional connection graph based on the provided list of dimensions.
@@ -159,7 +159,9 @@ def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, 
     listDimensions = validateListDimensions(listDimensions)
     leavesTotal = getLeavesTotal(listDimensions)
 
-    connectionGraph = makeConnectionGraph(listDimensions)
+    # connectionGraph = makeConnectionGraph(listDimensions, dtype=int)
+    connectionGraph = makeConnectionGraph(listDimensions, dtype=dtypeDefault)
+    # connectionGraph = makeConnectionGraph(listDimensions)
     arrayTracking = numpy.zeros((arrayTrackingHeight, leavesTotal + 1), dtype=dtypeDefault)
     potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
 

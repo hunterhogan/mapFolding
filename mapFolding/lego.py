@@ -1,41 +1,78 @@
 from mapFolding import outfitFoldings, validateTaskDivisions
 from typing import List, Final
 import numba
+import numba.cuda
 import numpy
 
-dtypeDefault = numpy.uint8
-dtypeMaximum = numpy.uint16
-
-leafAbove = numba.literally(0)
-leafBelow = numba.literally(1)
-countDimensionsGapped = numba.literally(2)
-gapRangeStart = numba.literally(3)
-
 @numba.jit(cache=True, fastmath=False)
-def integerSmall(value):
-    return numpy.uint8(value)
-    # return numba.uint8(value)
+def foldings(listDimensions: List[int], computationDivisions=0, computationIndex=0):
+    useGPU = False
+    # if numba.cuda.is_available():
+    #     useGPU = True
 
-@numba.jit(cache=True, fastmath=False)
-def integerLarge(value):
-    return numpy.uint64(value)
-    # return numba.uint64(value)
+    dtypeDefault = numpy.uint8
+    dtypeMaximum = numpy.uint16
 
-@numba.jit(cache=True, fastmath=False)
-def foldings(listDimensions: List[int], computationDivisions = 0, computationIndex = 0):
     listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions, dtypeDefault, dtypeMaximum)
     computationDivisions, computationIndex = validateTaskDivisions(computationDivisions, computationIndex, leavesTotal)
 
     dimensionsTotal = len(listDimensions)
 
-    foldingsTotal = countFoldings(
-        track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
-        computationDivisions, computationIndex)
+    if useGPU:
+        track = numba.cuda.to_device(track)
+        potentialGaps = numba.cuda.to_device(potentialGaps)
+        connectionGraph = numba.cuda.to_device(connectionGraph)
+        leavesTotal = numba.cuda.to_device(leavesTotal)
+        dimensionsTotal = numba.cuda.to_device(dimensionsTotal)
+        computationDivisions = numba.cuda.to_device(computationDivisions)
+        computationIndex = numba.cuda.to_device(computationIndex)
 
-    return foldingsTotal
+        # This part smells like bullshit to me
+        # foldingsTotal = integerLarge(0)
+        # foldingsTotal = numba.cuda.to_device(foldingsTotal)
+
+        # # Launch the GPU kernel
+        # countFoldings[1, 1](  # 1 block, 1 thread (for now)
+        #     track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
+        #     computationDivisions, computationIndex)
+
+        # f = foldingsTotal.copy_to_host()[0]
+        # return int(f)
+
+    else:
+        foldingsTotal = countFoldings(
+            track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
+            computationDivisions, computationIndex)
+
+        return foldingsTotal
+
+# @cuda.jit
+# def countFoldings(
+#     track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
+#     taskDivisions, taskIndex, foldingsTotal
+# ):
+#     # Get thread ID for this GPU thread
+#     thread_id = numba.cuda.threadIdx.x + numba.cuda.blockIdx.x * numba.cuda.blockDim.x
+
+#     # Ensure only a single thread executes for now (no unnecessary parallelization)
+#     if thread_id == 0:
+#         # Initialize variables exactly as in your CPU function
+#         foldingsTotal[0] = 0  # Use indexable array to store the result on the GPU
 
 @numba.njit(cache=True, fastmath=False)
 def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
+    def integerSmall(value):
+        return numpy.uint8(value)
+        # return numba.uint8(value)
+
+    def integerLarge(value):
+        return numpy.uint64(value)
+        # return numba.uint64(value)
+
+    leafAbove = numba.literally(0)
+    leafBelow = numba.literally(1)
+    countDimensionsGapped = numba.literally(2)
+    gapRangeStart = numba.literally(3)
 
     connectionGraph: Final = D
     leavesTotal = integerSmall(n)
@@ -131,6 +168,3 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.n
             placeLeaf()
 
     return int(foldingsTotal)
-
-# This statement 1.5 seconds. The four statements above take 0.5 seconds.
-# numba.jit(nopython=True, cache=True, fastmath=False)
