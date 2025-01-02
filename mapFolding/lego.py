@@ -30,22 +30,24 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
         d = numba.cuda.to_device(dimensionsTotal)
         mod = numba.cuda.to_device(computationDivisions)
         res = numba.cuda.to_device(computationIndex)
+        nuckFvidia = numba.cuda.device_array(1, dtype=int)
 
         # Launch the GPU kernel
-        foldingsTotal = countFoldings[1,1](s, gap, D, n, d, mod, res)
+        countFoldings[1,1](s, gap, D, n, d, mod, res, nuckFvidia)
+        foldingsTotal = int(nuckFvidia.copy_to_host()[0])
             # track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
             # computationDivisions, computationIndex)
 
     else:
         foldingsTotal = countFoldings(
             track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
-            computationDivisions, computationIndex)
+            computationDivisions, computationIndex, 0)
 
     return foldingsTotal
 
 # Assume this is Google Colab T4 GPU.
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
-def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
+def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex, nuckFvidia):
     def integerSmall(value):
         # return value
         if useGPU:
@@ -165,4 +167,6 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.n
     # Add explicit return for GPU mode
     if useGPU:
         numba.cuda.threadfence()  # Ensure all writes are visible
-    return int(foldingsTotal)
+        nuckFvidia[0] = foldingsTotal
+    else:
+        return int(foldingsTotal)
