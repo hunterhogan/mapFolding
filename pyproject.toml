@@ -11,7 +11,7 @@ authors = [
     ]
 version = "0.0.5"
 dependencies = [
-    "cupy-cuda12x^12.2.0",
+    "cupy-cuda12x<13.0",
     "numba",
     "numpy",
     "Z0Z-tools",
@@ -22,7 +22,7 @@ urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
 mapFolding-getOEISids = "mapFolding.oeis:getOEISids"
 
 [project.optional-dependencies]
-test = [
+testing = [
     "pytest",
     "pytest-cov",
     "pytest-env",
