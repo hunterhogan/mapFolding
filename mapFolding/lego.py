@@ -34,9 +34,6 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
         # Launch the GPU kernel
         countFoldings[1,1](s, gap, D, n, d, mod, res)
         foldingsTotal = gap.copy_to_host()[0]
-        print(foldingsTotal)
-            # track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
-            # computationDivisions, computationIndex)
 
     else:
         foldingsTotal = countFoldings(
@@ -49,7 +46,6 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
 # def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
 def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, n, d, computationDivisions, computationIndex):
-# def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, leavesTotal, dimensionsTotal, taskDivisions, taskIndex):
     def integerSmall(value):
         # return value
         if useGPU:
@@ -57,16 +53,12 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
         return numpy.int64(value)
         #     return cupy.uint8(value)
         # return numpy.uint8(value)
-        #     return cupy.asarray(value).astype(cupy.uint8)
-        # return numpy.asarray(value).astype(numpy.uint8)
 
     def integerLarge(value):
         # return value
         if useGPU:
             return cupy.int64(value)
         return numpy.int64(value)
-        #     return cupy.asarray(value).astype(cupy.uint64)
-        # return numpy.asarray(value).astype(numpy.uint64)
 
     leafAbove, leafBelow, countDimensionsGapped, gapRangeStart = 0, 1, 2, 3
     # leafAbove = numba.literally(0)
@@ -75,16 +67,17 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
     # gapRangeStart = numba.literally(3)
 
     # connectionGraph = D
-    # leavesTotal = integerSmall(n)
-    # dimensionsTotal = integerSmall(d)
-    # taskDivisions = integerSmall(computationDivisions)
-    # taskIndex = integerSmall(computationIndex)
-    
-    leavesTotal = n[()]
-    dimensionsTotal = d[()]
-    taskDivisions = computationDivisions[()]
-    taskIndex = computationIndex[()]
-    
+
+    if useGPU:
+        leavesTotal = n[()]
+        dimensionsTotal = d[()]
+        taskDivisions = computationDivisions[()]
+        taskIndex = computationIndex[()]
+    else:    
+        leavesTotal = integerSmall(n)
+        dimensionsTotal = integerSmall(d)
+        taskDivisions = integerSmall(computationDivisions)
+        taskIndex = integerSmall(computationIndex)
     # foldingsTotal = integerLarge(0)
     # activeLeaf1ndex = integerSmall(1)
     # activeGap1ndex = integerSmall(0)
