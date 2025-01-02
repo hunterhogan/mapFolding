@@ -12,8 +12,10 @@ if numba.cuda.is_available():
 # @numba.jit(cache=True, fastmath=False)
 def foldings(listDimensions: List[int], computationDivisions=0, computationIndex=0):
 
-    dtypeDefault = numpy.uint8
-    dtypeMaximum = numpy.uint16
+    # dtypeDefault = numpy.uint8
+    # dtypeMaximum = numpy.uint16
+    dtypeDefault = numpy.int64
+    dtypeMaximum = numpy.int64
 
     listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions, dtypeDefault, dtypeMaximum)
     computationDivisions, computationIndex = validateTaskDivisions(computationDivisions, computationIndex, leavesTotal)
@@ -45,18 +47,20 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
 def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
     def integerSmall(value):
-        return value
-        # if useGPU:
+        # return value
+        if useGPU:
+            return cupy.int64(value)
+        return numpy.int64(value)
         #     return cupy.uint8(value)
         # return numpy.uint8(value)
         #     return cupy.asarray(value).astype(cupy.uint8)
         # return numpy.asarray(value).astype(numpy.uint8)
 
     def integerLarge(value):
-        return value
-        # if useGPU:
-        #     return cupy.uint64(value)
-        # return numpy.uint64(value)
+        # return value
+        if useGPU:
+            return cupy.int64(value)
+        return numpy.int64(value)
         #     return cupy.asarray(value).astype(cupy.uint64)
         # return numpy.asarray(value).astype(numpy.uint64)
 
