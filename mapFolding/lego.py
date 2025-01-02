@@ -7,6 +7,7 @@ import numpy
 useGPU = False
 if numba.cuda.is_available():
     useGPU = True
+    # import cupy
 
 # @numba.jit(cache=True, fastmath=False)
 def foldings(listDimensions: List[int], computationDivisions=0, computationIndex=0):
@@ -44,12 +45,12 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
 def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
     def integerSmall(value):
-        return numpy.uint8(value)
-        # return numba.uint8(value)
+        # return numpy.uint8(value)
+        return numba.uint8(value)
 
     def integerLarge(value):
-        return numpy.uint64(value)
-        # return numba.uint64(value)
+        # return numpy.uint64(value)
+        return numba.uint64(value)
 
     leafAbove = numba.literally(0)
     leafBelow = numba.literally(1)
