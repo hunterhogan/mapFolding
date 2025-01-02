@@ -34,7 +34,8 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
 
         # Launch the GPU kernel
         countFoldings[1,1](s, gap, D, n, d, mod, res, nuckFvidia)
-        foldingsTotal = int(nuckFvidia.copy_to_host()[0])
+        foldingsTotal = nuckFvidia.copy_to_host()
+        print(foldingsTotal)
             # track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
             # computationDivisions, computationIndex)
 
