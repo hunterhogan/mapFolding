@@ -3,11 +3,11 @@ from typing import List
 import numba
 import numba.cuda
 import numpy
-import cupy
 
 useGPU = False
 if numba.cuda.is_available():
     useGPU = True
+    import cupy
 
 # @numba.jit(cache=True, fastmath=False)
 def foldings(listDimensions: List[int], computationDivisions=0, computationIndex=0):
@@ -30,11 +30,10 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
         d = numba.cuda.to_device(dimensionsTotal)
         mod = numba.cuda.to_device(computationDivisions)
         res = numba.cuda.to_device(computationIndex)
-        nuckFvidia = numba.cuda.device_array(1, dtype=int)
 
         # Launch the GPU kernel
-        countFoldings[1,1](s, gap, D, n, d, mod, res, nuckFvidia)
-        foldingsTotal = nuckFvidia.copy_to_host()
+        countFoldings[1,1](s, gap, D, n, d, mod, res)
+        foldingsTotal = gap.copy_to_host()[0]
         print(foldingsTotal)
             # track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
             # computationDivisions, computationIndex)
@@ -42,13 +41,14 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
     else:
         foldingsTotal = countFoldings(
             track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
-            computationDivisions, computationIndex, 0)
+            computationDivisions, computationIndex)
 
     return foldingsTotal
 
 # Assume this is Google Colab T4 GPU.
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
-def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex, nuckFvidia):
+# def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
+def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, leavesTotal, dimensionsTotal, taskDivisions, taskIndex):
     def integerSmall(value):
         # return value
         if useGPU:
@@ -73,15 +73,19 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.n
     # countDimensionsGapped = numba.literally(2)
     # gapRangeStart = numba.literally(3)
 
-    connectionGraph = D
-    leavesTotal = integerSmall(n)
-    dimensionsTotal = integerSmall(d)
-    taskDivisions = integerSmall(computationDivisions)
-    taskIndex = integerSmall(computationIndex)
+    # connectionGraph = D
+    # leavesTotal = integerSmall(n)
+    # dimensionsTotal = integerSmall(d)
+    # taskDivisions = integerSmall(computationDivisions)
+    # taskIndex = integerSmall(computationIndex)
     
-    foldingsTotal = integerLarge(0)
-    activeLeaf1ndex = integerSmall(1)
-    activeGap1ndex = integerSmall(0)
+    # foldingsTotal = integerLarge(0)
+    # activeLeaf1ndex = integerSmall(1)
+    # activeGap1ndex = integerSmall(0)
+
+    foldingsTotal = 0
+    activeLeaf1ndex = 1
+    activeGap1ndex = 0
 
     def countGaps(gap1ndexLowerBound, leaf1ndexConnectee):
         if taskDivisions == 0 or activeLeaf1ndex != taskDivisions or leaf1ndexConnectee % taskDivisions == taskIndex:
@@ -169,6 +173,6 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.n
     # Add explicit return for GPU mode
     if useGPU:
         numba.cuda.threadfence()  # Ensure all writes are visible
-        nuckFvidia[0] = foldingsTotal
+        potentialGaps[0] = foldingsTotal
     else:
         return int(foldingsTotal)
