@@ -8,7 +8,7 @@ useGPU = False
 if numba.cuda.is_available():
     useGPU = True
 
-@numba.jit(cache=True, fastmath=False)
+# @numba.jit(cache=True, fastmath=False)
 def foldings(listDimensions: List[int], computationDivisions=0, computationIndex=0):
 
     dtypeDefault = numpy.uint8
@@ -29,7 +29,7 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
         res = numba.cuda.to_device(computationIndex)
 
         # Launch the GPU kernel
-        foldingsTotal = countFoldings(s, gap, D, n, d, mod, res)
+        foldingsTotal = countFoldings[1,1](s, gap, D, n, d, mod, res)
             # track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
             # computationDivisions, computationIndex)
 
@@ -41,7 +41,7 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
     return foldingsTotal
 
 # Assume this is Google Colab T4 GPU.
-@numba.cuda.jit(device=True) if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
+@numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
 def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
     def integerSmall(value):
         return numpy.uint8(value)
@@ -149,4 +149,7 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.n
         if activeLeaf1ndex > 0:
             placeLeaf()
 
+    # Add explicit return for GPU mode
+    if useGPU:
+        numba.cuda.threadfence()  # Ensure all writes are visible
     return int(foldingsTotal)
