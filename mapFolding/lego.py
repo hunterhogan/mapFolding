@@ -3,13 +3,11 @@ from typing import List, Final
 import numba
 import numba.cuda
 import numpy
-import numpy as uintPy
 
 useGPU = False
 if numba.cuda.is_available():
     useGPU = True
     import cupy
-    uintPy = cupy
 
 # @numba.jit(cache=True, fastmath=False)
 def foldings(listDimensions: List[int], computationDivisions=0, computationIndex=0):

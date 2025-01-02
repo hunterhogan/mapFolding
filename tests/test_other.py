@@ -89,6 +89,8 @@ def test_foldings_cuda_disabled(listDimensions_testCounts, dictionaryDimensionsF
         expectedFoldingsTotal = dictionaryDimensionsFoldingsTotal[tuple(sorted(listDimensions_testCounts))]
         compareValues(expectedFoldingsTotal, lambda: foldingsTotalActual)
 
+# import numba, numba.cuda
+# @numba.jit(forceobj=True)
 def test_foldings_results_consistent(mockedCUDA, listDimensions_testCounts, dictionaryDimensionsFoldingsTotal):
     """Test that GPU and CPU paths produce the same results."""
     expectedFoldingsTotal = dictionaryDimensionsFoldingsTotal[tuple(sorted(listDimensions_testCounts))]
