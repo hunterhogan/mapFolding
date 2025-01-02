@@ -1,10 +1,9 @@
 from .conftest import *
-from mapFolding import foldings, getLeavesTotal, validateListDimensions
+from mapFolding import getLeavesTotal, validateListDimensions
 from mapFolding.__idiotic_system__ import *
 import pytest
 import random
 import sys
-import unittest.mock
 
 # ===== getLeavesTotal Tests =====
 def test_getLeavesTotal_valid(listDimensions_valid):
@@ -69,36 +68,9 @@ def test_dimension_validation(dimensions, expected):
             validateListDimensions(dimensions)
 
 # ===== Parse Integers Tests =====
-# def test_intInnit():
-#     """Test integer parsing using the test suite generator."""
-#     for testName, testFunction in makeTestSuiteIntInnit(parseListDimensions).items():
-#         testFunction()
-
-def test_foldings_cuda_enabled(mockedCUDA, listDimensions_testCounts, dictionaryDimensionsFoldingsTotal):
-    """Verify CUDA path produces correct results when GPU is available."""
-    with unittest.mock.patch('mapFolding.lego.useGPU', True):
-        foldingsTotalActual = foldings(listDimensions_testCounts)
-        expectedFoldingsTotal = dictionaryDimensionsFoldingsTotal[tuple(sorted(listDimensions_testCounts))]
-        compareValues(expectedFoldingsTotal, lambda: foldingsTotalActual)
-        mockedCUDA.to_device.assert_called()
-
-def test_foldings_cuda_disabled(listDimensions_testCounts, dictionaryDimensionsFoldingsTotal):
-    """Verify CPU fallback works when GPU is disabled."""
-    with unittest.mock.patch('mapFolding.lego.useGPU', False):
-        foldingsTotalActual = foldings(listDimensions_testCounts)
-        expectedFoldingsTotal = dictionaryDimensionsFoldingsTotal[tuple(sorted(listDimensions_testCounts))]
-        compareValues(expectedFoldingsTotal, lambda: foldingsTotalActual)
-
-# import numba, numba.cuda
-# @numba.jit(forceobj=True)
-def test_foldings_results_consistent(mockedCUDA, listDimensions_testCounts, dictionaryDimensionsFoldingsTotal):
-    """Test that GPU and CPU paths produce the same results."""
-    expectedFoldingsTotal = dictionaryDimensionsFoldingsTotal[tuple(sorted(listDimensions_testCounts))]
-
-    with unittest.mock.patch('mapFolding.lego.useGPU', True):
-        foldingsTotalGPU = foldings(listDimensions_testCounts)
-
-    with unittest.mock.patch('mapFolding.lego.useGPU', False):
-        foldingsTotalCPU = foldings(listDimensions_testCounts)
-
-    assert foldingsTotalGPU == foldingsTotalCPU == expectedFoldingsTotal
+def test_intInnit():
+    """Test integer parsing using the test suite generator."""
+    from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
+    from mapFolding.beDRY import intInnit
+    for testName, testFunction in makeTestSuiteIntInnit(intInnit).items():
+        testFunction()

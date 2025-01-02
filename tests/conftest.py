@@ -4,7 +4,6 @@ from typing import Any, Callable, Dict, List, Tuple, Type, TypeVar, Union
 import pytest
 import random
 import sys
-import unittest.mock
 
 @pytest.fixture(params=settingsOEISsequences.keys())
 def oeisID(request):
@@ -93,38 +92,6 @@ def pathCacheTesting(tmp_path):
     there_must_be_a_better_way._pathCache = tmp_path
     yield tmp_path
     there_must_be_a_better_way._pathCache = pathCacheOriginal
-
-@pytest.fixture(autouse=True)
-def mock_cuda_init():
-    """Ensure CUDA is not initialized during test collection"""
-    with pytest.MonkeyPatch.context() as monkeyPatch:
-        monkeyPatch.setattr('numba.cuda.is_available', lambda: False)
-        yield
-
-def createArraySimulatingCUDA(CUDAarray):
-    """Create a dict that simulates CUDA array behavior."""
-    # For scalar values, just return them directly
-    if isinstance(CUDAarray, (int, float)):
-        return CUDAarray
-    
-    # For array-like objects, wrap them in our mock
-    mockArray = {
-        'array': CUDAarray,
-        'copy_to_host': lambda: CUDAarray,
-        '__int__': lambda: int(CUDAarray),  # Support conversion to int
-        '__float__': lambda: float(CUDAarray),  # Support conversion to float
-        '__index__': lambda: int(CUDAarray)  # Support numpy operations
-    }
-    return type('MockCUDAArray', (), mockArray)()  # Create dynamic object with these attributes
-
-@pytest.fixture
-def mockedCUDA():
-    """Mock CUDA functionality for testing."""
-    with unittest.mock.patch('mapFolding.lego.numba.cuda') as mockCUDAinstance:
-        mockCUDAinstance.is_available.return_value = True
-        mockCUDAinstance.to_device = createArraySimulatingCUDA
-        mockCUDAinstance.jit = lambda device=False: lambda x: x
-        yield mockCUDAinstance
 
 def generateDictionaryDimensionsFoldingsTotal() -> Dict[Tuple[int,...], int]:
     """Returns a dictionary mapping dimension tuples to their known folding totals."""
