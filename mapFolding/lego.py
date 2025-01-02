@@ -20,18 +20,18 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
     dimensionsTotal = len(listDimensions)
 
     if useGPU:
-        track = numba.cuda.to_device(track)
-        potentialGaps = numba.cuda.to_device(potentialGaps)
-        connectionGraph = numba.cuda.to_device(connectionGraph)
-        leavesTotal = numba.cuda.to_device(leavesTotal)
-        dimensionsTotal = numba.cuda.to_device(dimensionsTotal)
-        computationDivisions = numba.cuda.to_device(computationDivisions)
-        computationIndex = numba.cuda.to_device(computationIndex)
+        s = numba.cuda.to_device(track)
+        gap = numba.cuda.to_device(potentialGaps)
+        D = numba.cuda.to_device(connectionGraph)
+        n = numba.cuda.to_device(leavesTotal)
+        d = numba.cuda.to_device(dimensionsTotal)
+        mod = numba.cuda.to_device(computationDivisions)
+        res = numba.cuda.to_device(computationIndex)
 
         # Launch the GPU kernel
-        foldingsTotal = countFoldings(
-            track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
-            computationDivisions, computationIndex)
+        foldingsTotal = countFoldings(s, gap, D, n, d, mod, res)
+            # track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
+            # computationDivisions, computationIndex)
 
     else:
         foldingsTotal = countFoldings(
