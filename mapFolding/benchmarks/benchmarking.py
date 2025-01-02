@@ -1,18 +1,16 @@
+from typing import Callable
+import numba
+import numpy
 import pathlib
 import time
-from typing import Callable
-
-import numpy
-
-from mapFolding import oeisSequence_aOFn
-from mapFolding.oeis import settingsOEISsequences
 
 pathRecordedBenchmarks = pathlib.Path('mapFolding/benchmarks/marks')
 pathRecordedBenchmarks.mkdir(parents=True, exist_ok=True)
+pathFilenameRecordedBenchmarks = pathRecordedBenchmarks / "benchmarks.npy"
 
 def recordBenchmarks():
     """Decorator to benchmark a function."""
-    def AzeemTheRapper(functionTarget: Callable):
+    def AzeemTheWrapper(functionTarget: Callable):
         def djZeph(*arguments, **keywordArguments):
             timeStart = time.perf_counter_ns()
             result = functionTarget(*arguments, **keywordArguments)
@@ -22,7 +20,6 @@ def recordBenchmarks():
             listDimensions = tuple(arguments[0])
 
             # Store benchmark data in single file
-            pathFilenameRecordedBenchmarks = pathRecordedBenchmarks / "benchmarks.npy"
             benchmarkEntry = numpy.array([(timeElapsed, listDimensions)], dtype=[('time', 'f8'), ('dimensions', 'O')])
             
             if pathFilenameRecordedBenchmarks.exists():
@@ -35,8 +32,9 @@ def recordBenchmarks():
             return result
 
         return djZeph
-    return AzeemTheRapper
+    return AzeemTheWrapper
 
+@numba.jit(cache=True, fastmath=False)
 def runBenchmarks(benchmarkIterations: int = 30) -> None:
     """Run benchmark iterations.
     
@@ -44,11 +42,16 @@ def runBenchmarks(benchmarkIterations: int = 30) -> None:
         benchmarkIterations (30): Number of benchmark iterations to run
     """
     # TODO warmUp (False): Whether to perform one warm-up iteration
-    from tqdm.auto import tqdm
+
     import itertools
-    listParametersOEIS = [(oeisIdentifier, dimensionValue) for oeisIdentifier, settings in settingsOEISsequences.items() for dimensionValue in settings['benchmarkValues']]
+    from tqdm.auto import tqdm
+    from mapFolding.oeis import settingsOEISsequences, oeisSequence_aOFn
+
+    listParametersOEIS = [(oeisIdentifier, dimensionValue) for oeisIdentifier, settings in settingsOEISsequences.items() for dimensionValue in settings['valuesBenchmark']]
     for (oeisIdentifier, dimensionValue), iterationIndex in tqdm(itertools.product(listParametersOEIS, range(benchmarkIterations)), total=len(listParametersOEIS) * benchmarkIterations):
         oeisSequence_aOFn(oeisIdentifier, dimensionValue)
 
 if __name__ == '__main__':
-    runBenchmarks(10)
+    pathFilenameRecordedBenchmarks.unlink(missing_ok=True)
+    runBenchmarks(300)
+
