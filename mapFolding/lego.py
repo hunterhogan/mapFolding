@@ -1,13 +1,13 @@
 from mapFolding import outfitFoldings, validateTaskDivisions
-from typing import List, Final
+from typing import List
 import numba
 import numba.cuda
 import numpy
+import cupy
 
 useGPU = False
 if numba.cuda.is_available():
     useGPU = True
-    import cupy
 
 # @numba.jit(cache=True, fastmath=False)
 def foldings(listDimensions: List[int], computationDivisions=0, computationIndex=0):
@@ -67,12 +67,13 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.n
         #     return cupy.asarray(value).astype(cupy.uint64)
         # return numpy.asarray(value).astype(numpy.uint64)
 
-    leafAbove = numba.literally(0)
-    leafBelow = numba.literally(1)
-    countDimensionsGapped = numba.literally(2)
-    gapRangeStart = numba.literally(3)
+    leafAbove, leafBelow, countDimensionsGapped, gapRangeStart = 0, 1, 2, 3
+    # leafAbove = numba.literally(0)
+    # leafBelow = numba.literally(1)
+    # countDimensionsGapped = numba.literally(2)
+    # gapRangeStart = numba.literally(3)
 
-    connectionGraph: Final = D
+    connectionGraph = D
     leavesTotal = integerSmall(n)
     dimensionsTotal = integerSmall(d)
     taskDivisions = integerSmall(computationDivisions)
