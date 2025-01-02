@@ -64,7 +64,7 @@ OEISsequenceID = typing.Literal['A001415', 'A001416', 'A001417', 'A195646', 'A00
 settingsOEISsequences: typing.Dict[OEISsequenceID, SettingsOEISsequence] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
-        'getDimensions': lambda n: [2, n],
+        'getDimensions': lambda n: sorted([2, n]),
         'valuesBenchmark': [12],
         'valuesTestValidation': [0, 1, random.randint(2, 9)],
         'valueUnknown': -1,
@@ -72,7 +72,7 @@ settingsOEISsequences: typing.Dict[OEISsequenceID, SettingsOEISsequence] = {
     },
     'A001416': {
         'description': 'Number of ways of folding a 3 X n strip of stamps.',
-        'getDimensions': lambda n: [3, n],
+        'getDimensions': lambda n: sorted([3, n]),
         'valuesBenchmark': [8],
         'valuesTestValidation': [0, 1, random.randint(2, 6)],
         'valueUnknown': -1,

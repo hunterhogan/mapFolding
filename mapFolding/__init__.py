@@ -11,7 +11,14 @@ Map/stamp folding counter based on W. F. Lunnon, Multi-dimensional map-folding, 
 # There MUST be an important concept I don't know about or this is a fucking idiotic system.
 # I now suspect that both are true.
 
-# from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions
-# from .oeis import oeisSequence_aOFn, getOEISids
-# from .clearOEIScache import clearOEIScache
+from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions
 from .count import foldings
+from .oeis import oeisSequence_aOFn, getOEISids
+from .clearOEIScache import clearOEIScache
+
+__all__ = [
+    'clearOEIScache',
+    'foldings',
+    'getOEISids',
+    'oeisSequence_aOFn',
+]
