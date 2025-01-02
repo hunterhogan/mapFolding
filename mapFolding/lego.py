@@ -29,7 +29,7 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
         computationIndex = numba.cuda.to_device(computationIndex)
 
         # Launch the GPU kernel
-        foldingsTotal = countFoldings[1, 1](  # 1 block, 1 thread (for now) # type: ignore
+        foldingsTotal = countFoldings(
             track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
             computationDivisions, computationIndex)
 
