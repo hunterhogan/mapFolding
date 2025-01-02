@@ -1,4 +1,5 @@
-from mapFolding.__fucking_idiotic_system__ import *
+from mapFolding.__idiotic_system__ import *
+from mapFolding import validateListDimensions
 from typing import Any, Callable, Dict, List, Tuple, Type, TypeVar, Union
 import pytest
 import random

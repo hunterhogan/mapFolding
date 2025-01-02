@@ -1,5 +1,6 @@
 from .conftest import *
-from mapFolding.__fucking_idiotic_system__ import *
+from mapFolding.__idiotic_system__ import *
+from mapFolding import getLeavesTotal, validateListDimensions
 import pytest
 import random
 import sys

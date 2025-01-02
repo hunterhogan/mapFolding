@@ -12,7 +12,7 @@ import unittest.mock
 import urllib.error
 import urllib.request
 
-from mapFolding.__fucking_idiotic_system__ import *
+from mapFolding.__idiotic_system__ import *
 
 def test_aOFn_calculate_value(oeisID):
     for n in settingsOEISsequences[oeisID]['valuesTestValidation']:

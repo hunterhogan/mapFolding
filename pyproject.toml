@@ -18,7 +18,7 @@ dependencies = [
 urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
 
 [project.scripts]
-mapfolding-getOEISids = "mapFolding.oeis:getOEISids"
+mapFolding-getOEISids = "mapFolding.oeis:getOEISids"
 
 [project.optional-dependencies]
 test = [
@@ -48,6 +48,7 @@ source = ["mapFolding"]
 data_file = "tests/coverage/.coverage"
 omit = [
     "mapFolding/__init__.py",
+    "mapFolding/benchmarks/__init__.py",
     "tests/*",
     "Z0Z_*"
     ]

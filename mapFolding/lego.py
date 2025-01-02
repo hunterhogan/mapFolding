@@ -4,11 +4,12 @@ import numba
 import numba.cuda
 import numpy
 
+useGPU = False
+if numba.cuda.is_available():
+    useGPU = True
+
 @numba.jit(cache=True, fastmath=False)
 def foldings(listDimensions: List[int], computationDivisions=0, computationIndex=0):
-    useGPU = False
-    # if numba.cuda.is_available():
-    #     useGPU = True
 
     dtypeDefault = numpy.uint8
     dtypeMaximum = numpy.uint16
@@ -27,39 +28,20 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
         computationDivisions = numba.cuda.to_device(computationDivisions)
         computationIndex = numba.cuda.to_device(computationIndex)
 
-        # This part smells like bullshit to me
-        # foldingsTotal = integerLarge(0)
-        # foldingsTotal = numba.cuda.to_device(foldingsTotal)
-
-        # # Launch the GPU kernel
-        # countFoldings[1, 1](  # 1 block, 1 thread (for now)
-        #     track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
-        #     computationDivisions, computationIndex)
-
-        # f = foldingsTotal.copy_to_host()[0]
-        # return int(f)
+        # Launch the GPU kernel
+        foldingsTotal = countFoldings[1, 1](  # 1 block, 1 thread (for now) # type: ignore
+            track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
+            computationDivisions, computationIndex)
 
     else:
         foldingsTotal = countFoldings(
             track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
             computationDivisions, computationIndex)
 
-        return foldingsTotal
+    return foldingsTotal
 
-# @cuda.jit
-# def countFoldings(
-#     track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
-#     taskDivisions, taskIndex, foldingsTotal
-# ):
-#     # Get thread ID for this GPU thread
-#     thread_id = numba.cuda.threadIdx.x + numba.cuda.blockIdx.x * numba.cuda.blockDim.x
-
-#     # Ensure only a single thread executes for now (no unnecessary parallelization)
-#     if thread_id == 0:
-#         # Initialize variables exactly as in your CPU function
-#         foldingsTotal[0] = 0  # Use indexable array to store the result on the GPU
-
-@numba.njit(cache=True, fastmath=False)
+# Assume this is Google Colab T4 GPU.
+@numba.cuda.jit(device=True) if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
 def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
     def integerSmall(value):
         return numpy.uint8(value)
