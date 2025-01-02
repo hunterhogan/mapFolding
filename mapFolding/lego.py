@@ -45,14 +45,20 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
 def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
     def integerSmall(value):
-        if useGPU:
-            return cupy.uint8(value)
-        return numpy.uint8(value)
+        return value
+        # if useGPU:
+        #     return cupy.uint8(value)
+        # return numpy.uint8(value)
+        #     return cupy.asarray(value).astype(cupy.uint8)
+        # return numpy.asarray(value).astype(numpy.uint8)
 
     def integerLarge(value):
-        if useGPU:
-            return cupy.uint64(value)
-        return numpy.uint64(value)
+        return value
+        # if useGPU:
+        #     return cupy.uint64(value)
+        # return numpy.uint64(value)
+        #     return cupy.asarray(value).astype(cupy.uint64)
+        # return numpy.asarray(value).astype(numpy.uint64)
 
     leafAbove = numba.literally(0)
     leafBelow = numba.literally(1)
