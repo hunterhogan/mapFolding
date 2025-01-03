@@ -3,16 +3,42 @@ from typing import List, Tuple
 import jax
 import jaxtyping
 
-dtypeDefault = jax.numpy.uint32
-dtypeMaximum = jax.numpy.uint32
+dtypeDefault = jax.numpy.int32
+dtypeMaximum = jax.numpy.int32
 
 def foldings(listDimensions: List[int]):
+    """Calculate foldings across multiple devices using pmap"""
     p = validateListDimensions(listDimensions)
     n = getLeavesTotal(p)
-    arrayTaskIndices = jax.numpy.arange(n, dtype=dtypeDefault)
-    arrayDimensions = jax.numpy.array(p, dtype=dtypeDefault)
+    
+    # Get number of devices (GPUs/TPUs)
+    deviceCount = jax.device_count()
+    
+    if deviceCount > 1:
+        # Split work across devices
+        tasksPerDevice = (n + deviceCount - 1) // deviceCount
+        paddedTaskCount = tasksPerDevice * deviceCount
+        
+        # Create padded array of task indices
+        arrayTaskIndices = jax.numpy.arange(paddedTaskCount, dtype=dtypeDefault)
+        arrayTaskIndices = arrayTaskIndices.reshape((deviceCount, tasksPerDevice))
+        
+        # Create pmapped function
+        parallelFoldingsTask = jax.pmap(lambda x: jax.vmap(lambda y: foldingsTask(tuple(p), y))(x))
+        
+        # Run computation across devices
+        arrayResults = parallelFoldingsTask(arrayTaskIndices)
+        
+        # Sum valid results (ignore padding)
+        return jax.numpy.sum(arrayResults[:, :min(tasksPerDevice, n - tasksPerDevice * (deviceCount-1))])
+    else:
+        # Fall back to sequential execution if no multiple devices available
+        arrayTaskIndices = jax.numpy.arange(n, dtype=dtypeDefault)
+        batchedFoldingsTask = jax.vmap(lambda x: foldingsTask(tuple(p), x))
+        return jax.numpy.sum(batchedFoldingsTask(arrayTaskIndices))
 
-def foldingsTask(arrayDimensions: jaxtyping.Array, taskIndex: jaxtyping.Array) -> jaxtyping.UInt32:
+def foldingsTask(p, taskIndex) -> jaxtyping.UInt32:
+    arrayDimensions = jax.numpy.asarray(p, dtype=dtypeDefault)
     leavesTotal = jax.numpy.prod(arrayDimensions)
     dimensionsTotal = jax.numpy.size(arrayDimensions)
 
@@ -99,7 +125,7 @@ def foldingsTask(arrayDimensions: jaxtyping.Array, taskIndex: jaxtyping.Array) -
     def countFoldings(allValues: Tuple[jaxtyping.Array, jaxtyping.Array, jaxtyping.Array, jaxtyping.Array, jaxtyping.Array, jaxtyping.UInt32, jaxtyping.UInt32, jaxtyping.UInt32]):
         _0, leafBelow, _2, _3, _4, _5, activeLeaf1ndex, _7 = allValues
 
-        sentinel = leafBelow.at[0].get().astype(jax.numpy.uint32)
+        sentinel = leafBelow.at[0].get().astype(jax.numpy.int32)
 
         allValues = jax.lax.cond(findGapsCondition(sentinel, activeLeaf1ndex),
                             lambda argumentX: dao(findGapsDo(argumentX)),
@@ -148,13 +174,13 @@ def foldingsTask(arrayDimensions: jaxtyping.Array, taskIndex: jaxtyping.Array) -
                     taskDivisionValues = (countGapsDoValues[0], countGapsDoValues[1], countGapsDoValues[2])
                     taskDivisionValues = jax.lax.cond(taskDivisionComparison(), taskDivisionDo, doNothing, taskDivisionValues)
 
-                    countGapsLeaf1ndexConnectee = connectionGraph.at[dimensionNumber, activeLeaf1ndex, leafBelow.at[countGapsLeaf1ndexConnectee].get()].get().astype(jax.numpy.uint32)
+                    countGapsLeaf1ndexConnectee = connectionGraph.at[dimensionNumber, activeLeaf1ndex, leafBelow.at[countGapsLeaf1ndexConnectee].get()].get().astype(jax.numpy.int32)
 
                     return (taskDivisionValues[0], taskDivisionValues[1], taskDivisionValues[2], countGapsLeaf1ndexConnectee)
 
                 unconstrained_countDimensionsGapped, unconstrained_potentialGaps, unconstrained_gap1ndexLowerBound, unconstrained_unconstrainedLeaf = unconstrainedValues
 
-                leaf1ndexConnectee = connectionGraph.at[dimensionNumber, activeLeaf1ndex, activeLeaf1ndex].get().astype(jax.numpy.uint32)
+                leaf1ndexConnectee = connectionGraph.at[dimensionNumber, activeLeaf1ndex, activeLeaf1ndex].get().astype(jax.numpy.int32)
 
                 countGapsValues = (unconstrained_countDimensionsGapped, unconstrained_potentialGaps, unconstrained_gap1ndexLowerBound, leaf1ndexConnectee)
                 countGapsValues = jax.lax.while_loop(while_leaf1ndexConnectee_notEquals_activeLeaf1ndex, countGaps, countGapsValues)
@@ -192,23 +218,23 @@ def foldingsTask(arrayDimensions: jaxtyping.Array, taskIndex: jaxtyping.Array) -
         def miniGapDo(gapToGapValues: Tuple[jaxtyping.Array, jaxtyping.Array, jaxtyping.UInt32, jaxtyping.UInt32]):
             gapToGapCountDimensionsGapped, gapToGapPotentialGaps, activeGapNumber, index = gapToGapValues
             gapToGapPotentialGaps = gapToGapPotentialGaps.at[activeGapNumber].set(gapToGapPotentialGaps.at[index].get())
-            activeGapNumber = jax.numpy.where(jax.numpy.equal(gapToGapCountDimensionsGapped.at[gapToGapPotentialGaps.at[index].get()].get(), dimensionsTotal - unconstrainedLeaf), activeGapNumber + 1, activeGapNumber).astype(jax.numpy.uint32)
+            activeGapNumber = jax.numpy.where(jax.numpy.equal(gapToGapCountDimensionsGapped.at[gapToGapPotentialGaps.at[index].get()].get(), dimensionsTotal - unconstrainedLeaf), activeGapNumber + 1, activeGapNumber).astype(jax.numpy.int32)
             gapToGapCountDimensionsGapped = gapToGapCountDimensionsGapped.at[gapToGapPotentialGaps.at[index].get()].set(0)
             index = 1 + index
             return (gapToGapCountDimensionsGapped, gapToGapPotentialGaps, activeGapNumber, index)
 
         _0, leafBelow, countDimensionsGapped, gapRangeStart, potentialGaps, _5, activeLeaf1ndex, activeGap1ndex = allValues
 
-        unconstrainedLeaf = jax.numpy.uint32(0)
-        dimension1ndex = jax.numpy.uint32(1)
-        gap1ndexLowerBound = gapRangeStart.at[activeLeaf1ndex - 1].get().astype(jax.numpy.uint32)
+        unconstrainedLeaf = jax.numpy.int32(0)
+        dimension1ndex = jax.numpy.int32(1)
+        gap1ndexLowerBound = gapRangeStart.at[activeLeaf1ndex - 1].get().astype(jax.numpy.int32)
         activeGap1ndex = gap1ndexLowerBound
         for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values = (countDimensionsGapped, potentialGaps, gap1ndexLowerBound, unconstrainedLeaf, dimension1ndex)
         for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values = jax.lax.while_loop(for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1, for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1_do, for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values)
         countDimensionsGapped, potentialGaps, gap1ndexLowerBound, unconstrainedLeaf, dimension1ndex = for_dimension1ndex_in_range_1_to_dimensionsTotalPlus1Values
         del dimension1ndex
 
-        leaf1ndex = jax.numpy.uint32(0)
+        leaf1ndex = jax.numpy.int32(0)
         for_leaf1ndex_in_range_activeLeaf1ndexValues = (potentialGaps, gap1ndexLowerBound, leaf1ndex)
         for_leaf1ndex_in_range_activeLeaf1ndexValues = jax.lax.cond(almostUselessCondition(unconstrainedLeaf), almostUselessConditionDo, doNothing, for_leaf1ndex_in_range_activeLeaf1ndexValues)
         potentialGaps, gap1ndexLowerBound, leaf1ndex = for_leaf1ndex_in_range_activeLeaf1ndexValues
@@ -278,9 +304,9 @@ def foldingsTask(arrayDimensions: jaxtyping.Array, taskIndex: jaxtyping.Array) -
     gapter = jax.numpy.zeros(leavesTotal + 1, dtype=dtypeDefault)
     gap = jax.numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
 
-    foldingsSubTotal = jax.numpy.uint32(0)
-    l = jax.numpy.uint32(1)
-    g = jax.numpy.uint32(0)
+    foldingsSubTotal = jax.numpy.int32(0)
+    l = jax.numpy.int32(1)
+    g = jax.numpy.int32(0)
 
     foldingsValues = (A, B, count, gapter, gap, foldingsSubTotal, l, g)
     foldingsValues = jax.lax.while_loop(while_activeLeaf1ndex_greaterThan_0, countFoldings, foldingsValues)
