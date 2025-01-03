@@ -2,10 +2,22 @@
 phuck Python
 """
 
-from .oeis import settingsOEISsequences, _validateOEISid, oeisSequence_aOFn, _getOEISidValues, _parseBFileOEIS, getOEISids, _formatFilenameCache, OEISsequenceID
+from .oeis import _formatFilenameCache
+from .oeis import _getOEISidValues
+from .oeis import _parseBFileOEIS
+from .oeis import _validateOEISid 
+from .oeis import getOEISids
+from .oeis import oeisSequence_aOFn
+from .oeis import OEISsequenceID
+from .oeis import settingsOEISsequences
 
 __all__ = [
-    'settingsOEISsequences', '_validateOEISid','oeisSequence_aOFn', '_getOEISidValues',
-    '_parseBFileOEIS','getOEISids', '_formatFilenameCache',
-    'OEISsequenceID'
+    '_formatFilenameCache',
+    '_getOEISidValues',
+    '_parseBFileOEIS',
+    '_validateOEISid',
+    'getOEISids', 
+    'oeisSequence_aOFn', 
+    'OEISsequenceID',
+    'settingsOEISsequences',
 ]

@@ -1,8 +1,9 @@
 from mapFolding import outfitFoldings, validateTaskDivisions
-from typing import List
+from typing import List, Optional
 import numba
 import numba.cuda
 import numpy
+import numpy.typing
 
 useGPU = False
 if numba.cuda.is_available():
@@ -10,7 +11,7 @@ if numba.cuda.is_available():
     import cupy
 
 # @numba.jit(cache=True, fastmath=False)
-def foldings(listDimensions: List[int], computationDivisions=0, computationIndex=0):
+def foldings(listDimensions: List[int], computationDivisions: Optional[bool] = False):
 
     # dtypeDefault = numpy.uint8
     # dtypeMaximum = numpy.uint16
@@ -18,9 +19,10 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
     dtypeMaximum = numpy.int64
 
     listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions, dtypeDefault, dtypeMaximum)
-    computationDivisions, computationIndex = validateTaskDivisions(computationDivisions, computationIndex, leavesTotal)
+    computationIndex = 0
 
     dimensionsTotal = len(listDimensions)
+    arraySubTotals = numpy.zeros(leavesTotal, dtype=dtypeMaximum)
 
     if useGPU:
         s = numba.cuda.to_device(track)
@@ -30,22 +32,23 @@ def foldings(listDimensions: List[int], computationDivisions=0, computationIndex
         d = numba.cuda.to_device(dimensionsTotal)
         mod = numba.cuda.to_device(computationDivisions)
         res = numba.cuda.to_device(computationIndex)
+        f = numba.cuda.to_device(arraySubTotals)
 
         # Launch the GPU kernel
-        countFoldings[1,1](s, gap, D, n, d, mod, res)
-        foldingsTotal = gap.copy_to_host()[0]
+        countFoldings[1,1](s, gap, D, n, d, mod, res, f)
+        foldingsSubTotals = f.copy_to_host()
+        foldingsTotal = numpy.sum(foldingsSubTotals).item()
 
     else:
         foldingsTotal = countFoldings(
             track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
-            computationDivisions, computationIndex)
+            computationDivisions, computationIndex, arraySubTotals)
 
     return foldingsTotal
 
 # Assume this is Google Colab T4 GPU.
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
-# def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, D: numpy.ndarray, n, d, computationDivisions, computationIndex):
-def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, n, d, computationDivisions, computationIndex):
+def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, n, d, taskDivisions, computationIndex, arraySubTotals: numpy.typing.NDArray[numpy.int64]) :
     def integerSmall(value):
         # return value
         if useGPU:
@@ -71,23 +74,19 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
     if useGPU:
         leavesTotal = n[()]
         dimensionsTotal = d[()]
-        taskDivisions = computationDivisions[()]
         taskIndex = computationIndex[()]
     else:    
         leavesTotal = integerSmall(n)
         dimensionsTotal = integerSmall(d)
-        taskDivisions = integerSmall(computationDivisions)
         taskIndex = integerSmall(computationIndex)
-    # foldingsTotal = integerLarge(0)
     # activeLeaf1ndex = integerSmall(1)
     # activeGap1ndex = integerSmall(0)
 
-    foldingsTotal = 0
     activeLeaf1ndex = 1
     activeGap1ndex = 0
 
     def countGaps(gap1ndexLowerBound, leaf1ndexConnectee):
-        if taskDivisions == 0 or activeLeaf1ndex != taskDivisions or leaf1ndexConnectee % taskDivisions == taskIndex:
+        if taskDivisions == False or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
             potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
             if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
                 gap1ndexLowerBound += 1
@@ -159,7 +158,7 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
     while activeLeaf1ndex > 0:
         if activeLeaf1ndex <= 1 or track[leafBelow][0] == 1:
             if activeLeaf1ndex > leavesTotal:
-                foldingsTotal += leavesTotal
+                arraySubTotals[taskIndex] += leavesTotal
             else:
                 dimensionsUnconstrained, gap1ndexLowerBound = findGaps()
                 gap1ndexLowerBound = insertUnconstrainedLeaf(dimensionsUnconstrained, gap1ndexLowerBound)
@@ -172,6 +171,6 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
     # Add explicit return for GPU mode
     if useGPU:
         numba.cuda.threadfence()  # Ensure all writes are visible
-        potentialGaps[0] = foldingsTotal
+        return
     else:
-        return int(foldingsTotal)
+        return numpy.sum(arraySubTotals).item()

@@ -8,8 +8,8 @@ from .oeis import oeisSequence_aOFn, getOEISids
 from .clearOEIScache import clearOEIScache
 
 __all__ = [
+    'clearOEIScache',
     'foldings', 
     'getOEISids',
     'oeisSequence_aOFn', 
-    'clearOEIScache',
 ]
