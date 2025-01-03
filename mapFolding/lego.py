@@ -49,7 +49,7 @@ def foldings(listDimensions: List[int], computationDivisions: Optional[bool] = F
 
 # Assume this is Google Colab T4 GPU.
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
-def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, n, d, taskDivisions, computationIndex, arraySubTotals: numpy.typing.NDArray[numpy.int64]) :
+def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, n, d, computationDivisions, computationIndex, arraySubTotals: numpy.typing.NDArray[numpy.int64]) :
     def integerSmall(value):
         # return value
         if useGPU:
@@ -75,10 +75,12 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
     if useGPU:
         leavesTotal = n[()]
         dimensionsTotal = d[()]
+        taskDivisions = computationDivisions[()]
         taskIndex = computationIndex[()]
     else:    
         leavesTotal = integerSmall(n)
         dimensionsTotal = integerSmall(d)
+        taskDivisions = integerSmall(computationDivisions)
         taskIndex = integerSmall(computationIndex)
     # activeLeaf1ndex = integerSmall(1)
     # activeGap1ndex = integerSmall(0)
@@ -87,7 +89,7 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
     activeGap1ndex = 0
 
     def countGaps(gap1ndexLowerBound, leaf1ndexConnectee):
-        if taskDivisions == False or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
+        if taskDivisions == 0 or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
             potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
             if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
                 gap1ndexLowerBound += 1
