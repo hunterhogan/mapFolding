@@ -1,12 +1,94 @@
-from mapFolding import validateListDimensions, getLeavesTotal, makeConnectionGraph
-from typing import List, Tuple, Optional
+from mapFolding import validateListDimensions, getLeavesTotal
+from typing import List, Tuple
 import jax
 import jaxtyping
 
 dtypeDefault = jax.numpy.uint32
 dtypeMaximum = jax.numpy.uint32
 
-def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32, connectionGraph: jaxtyping.Array, taskDivisions: jaxtyping.Bool, taskIndex: jaxtyping.UInt32) -> jaxtyping.UInt32:
+def foldings(listDimensions: List[int]):
+    p = validateListDimensions(listDimensions)
+    n = getLeavesTotal(p)
+    arrayTaskIndices = jax.numpy.arange(n, dtype=dtypeDefault)
+    arrayDimensions = jax.numpy.array(p, dtype=dtypeDefault)
+
+def foldingsTask(arrayDimensions: jaxtyping.Array, taskIndex: jaxtyping.Array) -> jaxtyping.UInt32:
+    leavesTotal = jax.numpy.prod(arrayDimensions)
+    dimensionsTotal = jax.numpy.size(arrayDimensions)
+
+    """How to build a leaf connection graph, also called a "Cartesian Product Decomposition" 
+    or a "Dimensional Product Mapping", with sentinels: 
+    Step 1: find the cumulative product of the map's dimensions"""
+    cumulativeProduct = jax.numpy.ones(dimensionsTotal + 1, dtype=dtypeDefault)
+    cumulativeProduct = cumulativeProduct.at[1:].set(jax.numpy.cumprod(arrayDimensions))
+
+    """Step 2: for each dimension, create a coordinate system """
+    """coordinateSystem[dimension1ndex][leaf1ndex] holds the dimension1ndex-th coordinate of leaf leaf1ndex"""
+    coordinateSystem = jax.numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=dtypeDefault)
+    
+    # Create mesh of indices for vectorized computation
+    dimension1ndices, leaf1ndices = jax.numpy.meshgrid(
+        jax.numpy.arange(1, dimensionsTotal + 1),
+        jax.numpy.arange(1, leavesTotal + 1),
+        indexing='ij'
+    )
+    
+    # Compute all coordinates at once using broadcasting
+    coordinateSystem = coordinateSystem.at[1:, 1:].set(
+        ((leaf1ndices - 1) // cumulativeProduct.at[dimension1ndices - 1].get()) % 
+        arrayDimensions.at[dimension1ndices - 1].get() + 1
+    )
+    del dimension1ndices, leaf1ndices
+
+    """Step 3: create a huge empty connection graph"""
+    connectionGraph = jax.numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=dtypeDefault)
+    
+    # Create 3D mesh of indices for vectorized computation
+    dimension1ndices, activeLeaf1ndices, connectee1ndices = jax.numpy.meshgrid(
+        jax.numpy.arange(1, dimensionsTotal + 1),
+        jax.numpy.arange(1, leavesTotal + 1),
+        jax.numpy.arange(1, leavesTotal + 1),
+        indexing='ij'
+    )
+
+    # Create masks for valid indices
+    maskActiveConnectee = connectee1ndices <= activeLeaf1ndices
+
+    # Calculate coordinate parity comparison
+    coordsParity = (coordinateSystem.at[dimension1ndices, activeLeaf1ndices].get() & 1) == \
+                    (coordinateSystem.at[dimension1ndices, connectee1ndices].get() & 1)
+    
+    # Compute distance conditions
+    isFirstCoord = coordinateSystem.at[dimension1ndices, connectee1ndices].get() == 1
+    isLastCoord = coordinateSystem.at[dimension1ndices, connectee1ndices].get() == \
+                    arrayDimensions.at[dimension1ndices - 1].get()
+    exceedsActive = connectee1ndices + cumulativeProduct.at[dimension1ndices - 1].get() > activeLeaf1ndices
+
+    # Compute connection values for even and odd parities
+    evenParityValues = jax.numpy.where(
+        isFirstCoord,
+        connectee1ndices,
+        connectee1ndices - cumulativeProduct.at[dimension1ndices - 1].get()
+    )
+
+    oddParityValues = jax.numpy.where(
+        jax.numpy.logical_or(isLastCoord, exceedsActive),
+        connectee1ndices,
+        connectee1ndices + cumulativeProduct.at[dimension1ndices - 1].get()
+    )
+
+    # Combine based on parity and valid indices
+    connectionValues = jax.numpy.where(
+        coordsParity,
+        evenParityValues,
+        oddParityValues
+    )
+
+    # Update only valid connections
+    connectionGraph = connectionGraph.at[dimension1ndices, activeLeaf1ndices, connectee1ndices].set(
+        jax.numpy.where(maskActiveConnectee, connectionValues, 0)
+    )
+
     def doNothing(argument):
         return argument
 
@@ -49,11 +131,12 @@ def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32
                 def countGaps(countGapsDoValues: Tuple[jaxtyping.Array, jaxtyping.Array, jaxtyping.UInt32, jaxtyping.UInt32]):
                     # if taskDivisions == False or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
                     def taskDivisionComparison():
-                        return taskDivisions == False or jax.numpy.logical_or(activeLeaf1ndex != leavesTotal, jax.numpy.equal(countGapsLeaf1ndexConnectee % leavesTotal, taskIndex))
+                        return jax.numpy.logical_or(activeLeaf1ndex != leavesTotal, jax.numpy.equal(countGapsLeaf1ndexConnectee % leavesTotal, taskIndex))
+                        # return taskDivisions == False or jax.numpy.logical_or(activeLeaf1ndex != leavesTotal, jax.numpy.equal(countGapsLeaf1ndexConnectee % leavesTotal, taskIndex))
 
                     def taskDivisionDo(taskDivisionDoValues: Tuple[jaxtyping.Array, jaxtyping.Array, jaxtyping.UInt32]):
                         taskDivisionCountDimensionsGapped, taskDivisionPotentialGaps, taskDivisionGap1ndexLowerBound = taskDivisionDoValues
-                        
+
                         taskDivisionPotentialGaps = taskDivisionPotentialGaps.at[taskDivisionGap1ndexLowerBound].set(countGapsLeaf1ndexConnectee)
                         taskDivisionGap1ndexLowerBound = jax.numpy.where(
                             jax.numpy.equal(taskDivisionCountDimensionsGapped.at[countGapsLeaf1ndexConnectee].get(), 0), taskDivisionGap1ndexLowerBound + 1, taskDivisionGap1ndexLowerBound)
@@ -202,27 +285,3 @@ def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32
     foldingsValues = (A, B, count, gapter, gap, foldingsSubTotal, l, g)
     foldingsValues = jax.lax.while_loop(while_activeLeaf1ndex_greaterThan_0, countFoldings, foldingsValues)
     return foldingsValues[5]
-
-def foldings(listDimensions: List[int], taskDivisions: Optional[bool] = False) -> int:
-    listDimensionsPositive: List[int] = validateListDimensions(listDimensions)
-
-    n: int = getLeavesTotal(listDimensionsPositive)
-    d: int = len(listDimensions)
-    import numpy
-    D: numpy.ndarray[numpy.int32, numpy.dtype[numpy.int32]] = makeConnectionGraph(listDimensionsPositive)
-    connectionGraph = jax.numpy.asarray(D, dtype=dtypeDefault)
-    del listDimensionsPositive
-
-    global foldingsJAX
-    if taskDivisions:
-        foldingsJAX = jax.jit(foldingsJAX, static_argnums=(0, 1, 3, 4))
-        listTaskIndices = list(range(n))
-        foldingsTotal = 0
-        for taskIndex in listTaskIndices:
-            foldingsTotal += foldingsJAX(n, d, connectionGraph, taskDivisions, taskIndex)
-        return foldingsTotal
-    else:
-        foldingsJAX = jax.jit(foldingsJAX, static_argnums=(0, 1, 3, 4))
-        taskIndex = 0
-        return foldingsJAX(n, d, connectionGraph, taskDivisions, taskIndex)
-

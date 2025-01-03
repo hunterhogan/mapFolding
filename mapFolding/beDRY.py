@@ -93,6 +93,7 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
         connectionGraph: A 3D numpy array with shape of (dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1).
     """
 
+    arrayDimensions = numpy.array(listDimensions, dtype=dtype)
     leavesTotal = getLeavesTotal(listDimensions)
     dimensionsTotal = len(listDimensions)
 
@@ -100,40 +101,77 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
     or a "Dimensional Product Mapping", with sentinels: 
     Step 1: find the cumulative product of the map's dimensions"""
     cumulativeProduct = numpy.ones(dimensionsTotal + 1, dtype=dtype)
-    for dimension1ndex in range(1, dimensionsTotal + 1):
-        cumulativeProduct[dimension1ndex] = cumulativeProduct[dimension1ndex - 1] * listDimensions[dimension1ndex - 1]
+    cumulativeProduct[1:] = (numpy.cumprod(arrayDimensions))
 
     """Step 2: for each dimension, create a coordinate system """
     """coordinateSystem[dimension1ndex][leaf1ndex] holds the dimension1ndex-th coordinate of leaf leaf1ndex"""
     coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=dtype)
-    for dimension1ndex in range(1, dimensionsTotal + 1):
-        for leaf1ndex in range(1, leavesTotal + 1):
-            coordinateSystem[dimension1ndex][leaf1ndex] = ((leaf1ndex - 1) // cumulativeProduct[dimension1ndex - 1]) % listDimensions[dimension1ndex - 1] + 1
+    
+    # Create mesh of indices for vectorized computation
+    dimension1ndices, leaf1ndices = numpy.meshgrid(
+        numpy.arange(1, dimensionsTotal + 1),
+        numpy.arange(1, leavesTotal + 1),
+        indexing='ij'
+        )
+
+    # Compute all coordinates at once using broadcasting
+    coordinateSystem[1:, 1:] = (
+        ((leaf1ndices - 1) // cumulativeProduct[dimension1ndices - 1]) % 
+        arrayDimensions[dimension1ndices - 1] + 1
+    )
+    del dimension1ndices, leaf1ndices
 
     """Step 3: create a huge empty connection graph"""
     connectionGraph = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=dtype)
+    
+    # Create 3D mesh of indices for vectorized computation
+    dimension1ndices, activeLeaf1ndices, connectee1ndices = numpy.meshgrid(
+        numpy.arange(1, dimensionsTotal + 1),
+        numpy.arange(1, leavesTotal + 1),
+        numpy.arange(1, leavesTotal + 1),
+        indexing='ij'
+    )
 
-    """connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndex] computes the leaf1ndex connected to leaf1ndex in dimension1ndex when inserting activeLeaf1ndex"""
-    """Step for... for... for...: fill the connection graph"""
-    for dimension1ndex in range(1, dimensionsTotal + 1):
-        for activeLeaf1ndex in range(1, leavesTotal + 1):
-            for leaf1ndexConnectee in range(1, activeLeaf1ndex + 1):
-                """If distance is even"""
-                if (coordinateSystem[dimension1ndex][activeLeaf1ndex] & 1) == (coordinateSystem[dimension1ndex][leaf1ndexConnectee] & 1):
-                    if coordinateSystem[dimension1ndex][leaf1ndexConnectee] == 1:
-                        connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee
-                    else:
-                        connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee - cumulativeProduct[dimension1ndex - 1]
-                else: 
-                    """If distance is odd"""
-                    if coordinateSystem[dimension1ndex][leaf1ndexConnectee] == listDimensions[dimension1ndex - 1] or leaf1ndexConnectee + cumulativeProduct[dimension1ndex - 1] > activeLeaf1ndex:
-                        connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee
-                    else:
-                        connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndexConnectee] = leaf1ndexConnectee + cumulativeProduct[dimension1ndex - 1]
+    # Create masks for valid indices
+    maskActiveConnectee = connectee1ndices <= activeLeaf1ndices
+
+    # Calculate coordinate parity comparison
+    coordsParity = (coordinateSystem[dimension1ndices, activeLeaf1ndices] & 1) == \
+                    (coordinateSystem[dimension1ndices, connectee1ndices] & 1)
+    
+    # Compute distance conditions
+    isFirstCoord = coordinateSystem[dimension1ndices, connectee1ndices] == 1
+    isLastCoord = coordinateSystem[dimension1ndices, connectee1ndices] == \
+                    arrayDimensions[dimension1ndices - 1]
+    exceedsActive = connectee1ndices + cumulativeProduct[dimension1ndices - 1] > activeLeaf1ndices
+
+    # Compute connection values for even and odd parities
+    evenParityValues = numpy.where(
+        isFirstCoord,
+        connectee1ndices,
+        connectee1ndices - cumulativeProduct[dimension1ndices - 1]
+    )
+
+    oddParityValues = numpy.where(
+        numpy.logical_or(isLastCoord, exceedsActive),
+        connectee1ndices,
+        connectee1ndices + cumulativeProduct[dimension1ndices - 1]
+    )
+
+    # Combine based on parity and valid indices
+    connectionValues = numpy.where(
+        coordsParity,
+        evenParityValues,
+        oddParityValues
+    )
+
+    # Update only valid connections
+    # """connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndex] computes the leaf1ndex connected to leaf1ndex in dimension1ndex when inserting activeLeaf1ndex"""
+    connectionGraph[dimension1ndices, activeLeaf1ndices, connectee1ndices] = numpy.where(maskActiveConnectee, connectionValues, 0) 
 
     return connectionGraph
 
-def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, dtypeMaximum: type = numpy.int64):
+def outfitFoldings(listDimensions: List[int], dtype: type = numpy.int64, dtypeMaximum: type = numpy.int64):
     """
     Outfits the folding process with the necessary data structures.
 
@@ -150,9 +188,9 @@ def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, 
     leavesTotal = getLeavesTotal(listDimensions)
 
     # connectionGraph = makeConnectionGraph(listDimensions, dtype=int)
-    connectionGraph = makeConnectionGraph(listDimensions, dtype=dtypeDefault)
+    connectionGraph = makeConnectionGraph(listDimensions, dtype=dtype)
     # connectionGraph = makeConnectionGraph(listDimensions)
-    arrayTracking = numpy.zeros((arrayTrackingHeight, leavesTotal + 1), dtype=dtypeDefault)
+    arrayTracking = numpy.zeros((arrayTrackingHeight, leavesTotal + 1), dtype=dtype)
     potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
 
     return listDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps
