@@ -19,6 +19,7 @@ def foldings(listDimensions: List[int], computationDivisions: Optional[bool] = F
     dtypeMaximum = numpy.int64
 
     listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions, dtypeDefault, dtypeMaximum)
+    computationDivisions = int(computationDivisions) # type: ignore
     computationIndex = 0
 
     dimensionsTotal = len(listDimensions)
