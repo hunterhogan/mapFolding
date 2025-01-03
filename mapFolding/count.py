@@ -22,9 +22,9 @@ def foldings(listDimensions: List[int]):
     considering maps with at least two positive dimensions.
 
     Parameters:
-        listDimensions : A list of integers representing the dimensions of the map. Must contain at least two positive dimensions.
+        listDimensions: A list of integers representing the dimensions of the map. Must contain at least two positive dimensions.
 
-    Returns
+    Returns:
         foldingsTotal: The total number of possible distinct foldings for the given map dimensions.
     """
     def integerSmall(value):
@@ -77,7 +77,7 @@ def foldings(listDimensions: List[int]):
     """Indices of array `track` (to "track" the state), which is a collection of one-dimensional arrays each of length `leavesTotal + 1`."""
     # because this is numba.njit, pay attention to overflow. `leavesTotal * leavesTotal` is placed into a temporary variable of the same 
     # size as the operands, which is only 8 bits: that's easy to overflow with multiplication.
-    potentialGaps = numpy.zeros(integerLarge(leavesTotal) * integerLarge(leavesTotal) + 1, dtype=dtypeMaximum)
+    potentialGaps = numpy.zeros(integerLarge(integerLarge(leavesTotal) * integerLarge(leavesTotal) + 1), dtype=dtypeMaximum)
 
     foldingsTotal = integerLarge(0)
     activeLeaf1ndex = integerSmall(1)
