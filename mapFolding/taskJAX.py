@@ -1,5 +1,4 @@
-from mapFolding import validateListDimensions, getLeavesTotal
-from mapFolding.beDRY import makeConnectionGraph
+from mapFolding import validateListDimensions, getLeavesTotal, makeConnectionGraph
 from typing import List, Tuple, Optional
 import jax
 import jaxtyping
@@ -49,9 +48,8 @@ def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32
 
                 def countGaps(countGapsDoValues: Tuple[jaxtyping.Array, jaxtyping.Array, jaxtyping.UInt32, jaxtyping.UInt32]):
                     # if taskDivisions == False or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
-                    def taskDivisionComparison(comparand: jaxtyping.UInt32):
-                        return (taskDivisions == False | activeLeaf1ndex != leavesTotal | jax.numpy.equal(leaf1ndexConnectee % leavesTotal, taskIndex))
-                        # return jax.numpy.logical_or( jax.numpy.logical_not(taskDivisions), jax.numpy.logical_or(jax.numpy.not_equal(activeLeaf1ndex, leavesTotal), jax.numpy.equal(jax.numpy.mod(comparand, leavesTotal), taskIndex)))
+                    def taskDivisionComparison():
+                        return taskDivisions == False or jax.numpy.logical_or(activeLeaf1ndex != leavesTotal, jax.numpy.equal(countGapsLeaf1ndexConnectee % leavesTotal, taskIndex))
 
                     def taskDivisionDo(taskDivisionDoValues: Tuple[jaxtyping.Array, jaxtyping.Array, jaxtyping.UInt32]):
                         taskDivisionCountDimensionsGapped, taskDivisionPotentialGaps, taskDivisionGap1ndexLowerBound = taskDivisionDoValues
@@ -65,7 +63,7 @@ def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32
 
                     countGapsLeaf1ndexConnectee = countGapsDoValues[3]
                     taskDivisionValues = (countGapsDoValues[0], countGapsDoValues[1], countGapsDoValues[2])
-                    taskDivisionValues = jax.lax.cond(taskDivisionComparison(countGapsLeaf1ndexConnectee), taskDivisionDo, doNothing, taskDivisionValues)
+                    taskDivisionValues = jax.lax.cond(taskDivisionComparison(), taskDivisionDo, doNothing, taskDivisionValues)
 
                     countGapsLeaf1ndexConnectee = connectionGraph.at[dimensionNumber, activeLeaf1ndex, leafBelow.at[countGapsLeaf1ndexConnectee].get()].get().astype(jax.numpy.uint32)
 
@@ -217,14 +215,12 @@ def foldings(listDimensions: List[int], taskDivisions: Optional[bool] = False) -
 
     global foldingsJAX
     if taskDivisions:
-        arrayTaskIndices = jax.numpy.arange(n, dtype=dtypeDefault)
-        # foldingsTotal = sum(jax.vmap(foldingsJAX, in_axes=(None, None, None, None, 0), axis_name='taskIndex')(n, d, connectionGraph, taskDivisions, arrayTaskIndices))
-        # return foldingsTotal 
-        foldingsJAX = jax.jit(foldingsJAX, static_argnums=(0, 1, 3))
-        parallelFoldingsJAX = jax.jit(jax.vmap(foldingsJAX, in_axes=(None, None, None, None, 0)), static_argnums=(0, 1, 3))
-        arrayFoldingsSubTotals = parallelFoldingsJAX(n, d, connectionGraph, taskDivisions, arrayTaskIndices)
-        arrayFoldingsSubTotals = jax.vmap(foldingsJAX(n, d, connectionGraph, taskDivisions, 0), in_axes=(0, 0, 0, 0, 0))(arrayTaskIndices)
-        return int(jax.numpy.sum(arrayFoldingsSubTotals))
+        foldingsJAX = jax.jit(foldingsJAX, static_argnums=(0, 1, 3, 4))
+        listTaskIndices = list(range(n))
+        foldingsTotal = 0
+        for taskIndex in listTaskIndices:
+            foldingsTotal += foldingsJAX(n, d, connectionGraph, taskDivisions, taskIndex)
+        return foldingsTotal
     else:
         foldingsJAX = jax.jit(foldingsJAX, static_argnums=(0, 1, 3, 4))
         taskIndex = 0

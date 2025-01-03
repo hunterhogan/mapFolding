@@ -1,5 +1,4 @@
-from mapFolding import validateListDimensions, getLeavesTotal
-from mapFolding.beDRY import makeConnectionGraph
+from mapFolding import validateListDimensions, getLeavesTotal, makeConnectionGraph
 from typing import List, Tuple
 import jax
 import jaxtyping
