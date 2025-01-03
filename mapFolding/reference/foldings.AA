@@ -1,8 +1,8 @@
 comment [hunterhogan]
-W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75–80,
-https://doi.org/10.1093/comjnl/14.1.75
-Language: https://en.wikipedia.org/wiki/Atlas_Autocode
-Similar enough to use: Algol 60 language support in Atom, Pulsar and Visual Studio Code https://github.com/PolariTOON/language-algol60;
+    W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75–80,
+    https://doi.org/10.1093/comjnl/14.1.75
+    Language: https://en.wikipedia.org/wiki/Atlas_Autocode
+    Similar enough to use: Algol 60 language support in Atom, Pulsar and Visual Studio Code https://github.com/PolariTOON/language-algol60;
 
 procedure foldings (p, job);
 integer array p;
@@ -23,7 +23,7 @@ begin
         d := i;
         n := n * p[i]
     end;
-
+    comment [hunterhogan] Added missing semicolon to end of the for loop;
     comment d dimensions and n leaves;
 
     begin
@@ -95,7 +95,7 @@ begin
 
             else for m := D[i,l,l], D[i,l,B[m]]
 
-                    while m != l do
+                    while m ≠ l do
                         begin
                             gap[gg] := m;
 
@@ -116,7 +116,7 @@ begin
         for j := g step 1 until gg - 1 do
 
             begin
-                gap [g] := gap[j];
+                gap[g] := gap[j];
 
                 if count[gap[j]] = d - dd
                     then g := g + 1;
@@ -124,8 +124,7 @@ begin
                 count[gap[j]] := 0
             end;
 
-        comment for each gap insert leaf l, call self recursively,
-            remove leaf l;
+        comment for each gap insert leaf l, call self recursively, remove leaf l;
 
     along:
         if g = gapter[l - 1]
@@ -145,6 +144,7 @@ begin
         if l ≤ n
             then goto down
         else job(A, B);
+        comment [hunterhogan] Corrected `if l ≤ m` to `if l ≤ n`;
 
     up:
         l := l - 1;
@@ -155,4 +155,4 @@ begin
         if l > 0
             then goto along;
     end;
-end;
+end of foldings;
