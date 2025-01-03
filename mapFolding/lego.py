@@ -1,6 +1,7 @@
 from mapFolding import outfitFoldings, validateTaskDivisions
 from typing import List, Optional
 import numba
+from numba import prange
 import numba.cuda
 import numpy
 import numpy.typing
@@ -10,8 +11,8 @@ if numba.cuda.is_available():
     useGPU = True
     import cupy
 
-# @numba.jit(cache=True, fastmath=False)
-def foldings(listDimensions: List[int], computationDivisions: Optional[bool] = False):
+@numba.jit(cache=True, fastmath=False, parallel=True)
+def foldings(listDimensions: List[int], computationDivisions: bool = False):
 
     # dtypeDefault = numpy.uint8
     # dtypeMaximum = numpy.uint16
@@ -19,7 +20,6 @@ def foldings(listDimensions: List[int], computationDivisions: Optional[bool] = F
     dtypeMaximum = numpy.int64
 
     listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions, dtypeDefault, dtypeMaximum)
-    computationDivisions = int(computationDivisions) # type: ignore
     computationIndex = 0
 
     dimensionsTotal = len(listDimensions)
@@ -31,20 +31,22 @@ def foldings(listDimensions: List[int], computationDivisions: Optional[bool] = F
         D = numba.cuda.to_device(connectionGraph)
         n = numba.cuda.to_device(leavesTotal)
         d = numba.cuda.to_device(dimensionsTotal)
-        mod = numba.cuda.to_device(computationDivisions)
+        mod = numba.cuda.to_device(int(computationDivisions))
         res = numba.cuda.to_device(computationIndex)
         f = numba.cuda.to_device(arraySubTotals)
 
         # Launch the GPU kernel
         countFoldings[1,1](s, gap, D, n, d, mod, res, f)
         foldingsSubTotals = f.copy_to_host()
-        foldingsTotal = numpy.sum(foldingsSubTotals).item()
 
     else:
-        foldingsTotal = countFoldings(
-            track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
-            computationDivisions, computationIndex, arraySubTotals)
+        foldingsSubTotals = arraySubTotals.copy()
+        # PRANGE IS NOT DOING SHIT
+        for computationIndex in prange(leavesTotal):
+            foldingsSubTotals[computationIndex] = countFoldings(track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal, 
+                                                            int(computationDivisions), computationIndex, arraySubTotals)
 
+    foldingsTotal = numpy.sum(foldingsSubTotals).item()
     return foldingsTotal
 
 # Assume this is Google Colab T4 GPU.
@@ -176,4 +178,4 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
         numba.cuda.threadfence()  # Ensure all writes are visible
         return
     else:
-        return numpy.sum(arraySubTotals).item()
+        return arraySubTotals[taskIndex]
