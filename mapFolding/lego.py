@@ -32,6 +32,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
         d = numba.cuda.to_device(dimensionsTotal)
         mod = numba.cuda.to_device(int(computationDivisions))
         res = numba.cuda.to_device(computationIndex)
+        f = numba.cuda.to_device(arraySubTotals)
 
         threadsPerBlock = 1
         if computationDivisions:
@@ -48,9 +49,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
             gap = numba.cuda.to_device(potentialGaps)
             blocksPerGrid = 1
 
-        f = numba.cuda.to_device(arraySubTotals)
         countFoldings[blocksPerGrid, threadsPerBlock](s, gap, D, n, d, mod, res, f)
-        # countFoldings[(blocksPerGrid,), (threadsPerBlock,)](s, gap, D, n, d, mod, res, f)
         foldingsSubTotals = f.copy_to_host()
 
     else:
