@@ -27,23 +27,29 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     arraySubTotals = numpy.zeros(leavesTotal, dtype=dtypeMaximum)
 
     if useGPU:
-        s = numba.cuda.to_device(track)
-        gap = numba.cuda.to_device(potentialGaps)
         D = numba.cuda.to_device(connectionGraph)
         n = numba.cuda.to_device(leavesTotal)
         d = numba.cuda.to_device(dimensionsTotal)
         mod = numba.cuda.to_device(int(computationDivisions))
         res = numba.cuda.to_device(computationIndex)
-        f = numba.cuda.to_device(arraySubTotals)
 
+        threadsPerBlock = 1
         if computationDivisions:
-            threadsPerBlock = 128
-            blocksPerGrid = (leavesTotal + threadsPerBlock - 1) // threadsPerBlock
-            # res = numba.cuda.to_device(blocksPerGrid)
+            # Each worker gets their own copy of mutable data
+            trackPerWorker = numpy.tile(track, leavesTotal)
+            gapsPerWorker = numpy.tile(potentialGaps, leavesTotal)
+            
+            s = numba.cuda.to_device(trackPerWorker)
+            gap = numba.cuda.to_device(gapsPerWorker)
+            
+            blocksPerGrid = leavesTotal
         else:
-            blocksPerGrid, threadsPerBlock = 1, 1
+            s = numba.cuda.to_device(track)
+            gap = numba.cuda.to_device(potentialGaps)
+            blocksPerGrid = 1
 
-        countFoldings[blocksPerGrid, threadsPerBlock](s, gap, D, n, d, mod, res, f)
+        f = numba.cuda.to_device(arraySubTotals)
+        countFoldings[(blocksPerGrid,), (threadsPerBlock,)](s, gap, D, n, d, mod, res, f)
         foldingsSubTotals = f.copy_to_host()
 
     else:
@@ -89,11 +95,11 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
         dimensionsTotal = d[()]
         taskDivisions = computationDivisions[()]
         if taskDivisions:
-            # threadsPerBlock = 128 # NOTE hardcoded
-            # blocksPerGrid = computationIndex[()]
             taskIndex = numba.cuda.grid(1)
             if taskIndex >= leavesTotal:
                 return
+            track = track[..., taskIndex]
+            potentialGaps = potentialGaps[..., taskIndex]
         else:
             taskIndex = computationIndex[()]
     else:    
