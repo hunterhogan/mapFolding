@@ -12,21 +12,21 @@ jobs:
       - id: get-python-versions
         run: |
           VERSIONS=$(python -c "
-            import tomli, json
-            import packaging.specifiers
-            import packaging.version
+          import tomli, json
+          import packaging.specifiers
+          import packaging.version
 
-            with open('pyproject.toml', 'rb') as readStreamBinaryMode:
-              specifierPython = packaging.specifiers.SpecifierSet(tomli.load(readStreamBinaryMode)['project']['requires-python'])
-    
-            listCandidateVersionsInSpecifier = []
-            for majorVersion in range(2, 12):
-              for minorVersion in range(0, 40):
-                versionCandidate = packaging.version.Version(f"{majorVersion}.{minorVersion}")
-                if versionCandidate in specifierPython:
-                  listCandidateVersionsInSpecifier.append(f"{majorVersion}.{minorVersion}")
-    
-            print(json.dumps(listCandidateVersionsInSpecifier))
+          with open('pyproject.toml', 'rb') as readStreamBinaryMode:
+            specifierPython = packaging.specifiers.SpecifierSet(tomli.load(readStreamBinaryMode)['project']['requires-python'])
+  
+          listCandidateVersionsInSpecifier = []
+          for majorVersion in range(2, 12):
+            for minorVersion in range(0, 40):
+              versionCandidate = packaging.version.Version(f"{majorVersion}.{minorVersion}")
+              if versionCandidate in specifierPython:
+                listCandidateVersionsInSpecifier.append(f"{majorVersion}.{minorVersion}")
+  
+          print(json.dumps(listCandidateVersionsInSpecifier))
           ")
           echo "versions=$VERSIONS" >> $GITHUB_OUTPUT
 
