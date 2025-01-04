@@ -49,7 +49,8 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
             blocksPerGrid = 1
 
         f = numba.cuda.to_device(arraySubTotals)
-        countFoldings[(blocksPerGrid,), (threadsPerBlock,)](s, gap, D, n, d, mod, res, f)
+        countFoldings[blocksPerGrid, threadsPerBlock](s, gap, D, n, d, mod, res, f)
+        # countFoldings[(blocksPerGrid,), (threadsPerBlock,)](s, gap, D, n, d, mod, res, f)
         foldingsSubTotals = f.copy_to_host()
 
     else:
