@@ -1,5 +1,5 @@
-from mapFolding import outfitFoldings, validateTaskDivisions
-from typing import List, Optional
+from mapFolding import outfitFoldings
+from typing import List
 import numba
 from numba import prange
 import numba.cuda
@@ -12,7 +12,7 @@ if numba.cuda.is_available():
     import cupy
 
 @numba.jit(cache=True, fastmath=False, parallel=True)
-def foldings(listDimensions: List[int], computationDivisions: bool = False):
+def countFolds(listDimensions: List[int], computationDivisions: bool = False):
 
     # dtypeDefault = numpy.uint8
     # dtypeMaximum = numpy.uint16
@@ -42,7 +42,7 @@ def foldings(listDimensions: List[int], computationDivisions: bool = False):
     else:
         foldingsSubTotals = arraySubTotals.copy()
         # PRANGE IS NOT DOING SHIT
-        for computationIndex in prange(leavesTotal):
+        for computationIndex in prange(leavesTotal if computationDivisions else 1):
             foldingsSubTotals[computationIndex] = countFoldings(track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal, 
                                                             int(computationDivisions), computationIndex, arraySubTotals)
 
@@ -53,7 +53,6 @@ def foldings(listDimensions: List[int], computationDivisions: bool = False):
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
 def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, n, d, computationDivisions, computationIndex, arraySubTotals: numpy.typing.NDArray[numpy.int64]) :
     def integerSmall(value):
-        # return value
         if useGPU:
             return cupy.int64(value)
         return numpy.int64(value)
@@ -61,7 +60,6 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
         # return numpy.uint8(value)
 
     def integerLarge(value):
-        # return value
         if useGPU:
             return cupy.int64(value)
         return numpy.int64(value)

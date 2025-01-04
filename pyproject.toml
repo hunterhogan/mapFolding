@@ -4,12 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mapFolding"
-description = "Counter of map foldings"
+description = "Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps)"
 readme = "README.md"
 authors = [
     {name = "Hunter Hogan", email = "HunterHogan@pm.me"}
     ]
-version = "0.0.5"
+version = "0.1.0"
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "cupy-cuda12x<13.0",
     "numba",
@@ -19,7 +20,8 @@ dependencies = [
 urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
 
 [project.scripts]
-mapFolding-getOEISids = "mapFolding.oeis:getOEISids"
+getOEISids = "mapFolding.oeis:getOEISids"
+clearOEIScache = "mapFolding.oeis:clearOEIScache"
 
 [project.optional-dependencies]
 testing = [
