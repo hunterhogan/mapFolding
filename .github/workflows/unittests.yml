@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install toml parser
-        run: pip install tomli
+        run: pip install tomli packaging
       - id: get-python-versions
         run: |
           VERSIONS=$(python -c "
@@ -18,24 +18,23 @@ jobs:
 
           with open('pyproject.toml', 'rb') as readStreamBinaryMode:
             specifierPython = packaging.specifiers.SpecifierSet(tomli.load(readStreamBinaryMode)['project']['requires-python'])
-  
+          
           listCandidateVersionsInSpecifier = []
           for majorVersion in range(2, 12):
             for minorVersion in range(0, 40):
               versionCandidate = packaging.version.Version(f'{majorVersion}.{minorVersion}')
               if versionCandidate in specifierPython:
                 listCandidateVersionsInSpecifier.append(f'{majorVersion}.{minorVersion}')
-  
+          
           print(json.dumps(listCandidateVersionsInSpecifier))
           ")
-          echo "versions=$VERSIONS" >> $GITHUB_OUTPUT
-
+          echo "versions=$(echo $VERSIONS | jq -c .)" >> $GITHUB_OUTPUT
   build:
     needs: get-python-versions
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ${{ fromJson(needs.get-python-versions.outputs.versions) }}
+        python-version: ${{fromJson(needs.get-python-versions.outputs.python-versions)}}
     steps:
       - uses: actions/checkout@v4
       
