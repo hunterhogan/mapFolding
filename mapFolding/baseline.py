@@ -2,20 +2,12 @@ from typing import List
 import numba
 import numpy
 
-from mapFolding.beDRY import validateListDimensions, getLeavesTotal
+from mapFolding import validateListDimensions, getLeavesTotal
 from mapFolding.benchmarks import recordBenchmarks
-
-dtypeDefault = numpy.uint8
-dtypeMaximum = numpy.uint16
-
-leafAbove = numba.literally(0)
-leafBelow = numba.literally(1)
-countDimensionsGapped = numba.literally(2)
-gapRangeStart = numba.literally(3)
 
 # @recordBenchmarks()
 @numba.njit(cache=True, fastmath=False)
-def foldings(listDimensions: List[int]):
+def countFolds(listDimensions: List[int]):
     """
     Calculate the number of distinct possible ways to fold a map with given dimensions.
     This function computes the number of different ways a map can be folded along its grid lines,
@@ -34,6 +26,14 @@ def foldings(listDimensions: List[int]):
     def integerLarge(value):
         return numpy.uint64(value)
         # return numba.uint64(value)
+
+    dtypeDefault = numpy.uint8
+    dtypeMaximum = numpy.uint16
+
+    leafAbove = numba.literally(0)
+    leafBelow = numba.literally(1)
+    countDimensionsGapped = numba.literally(2)
+    gapRangeStart = numba.literally(3)
 
     listDimensionsPositive = validateListDimensions(listDimensions)
 

@@ -1,11 +1,12 @@
+from datetime import datetime, timedelta
+from mapFolding import countFolds
 import numba
-from mapFolding import foldings
+import numba.types
 import pathlib
 import random
+import typing
 import urllib.request
 import urllib.response
-from datetime import datetime, timedelta
-import typing
 
 if typing.TYPE_CHECKING:
     from typing import TypedDict
@@ -27,34 +28,11 @@ try:
 except NameError:
     _pathCache = pathlib.Path.home() / ".mapFoldingCache"
 
-# Style/grammar/semiotics of "format" identifiers is in the prototype stage because I've never used them before
-# `_formatFilenameCache` is supposed to be the _exact_ name of the file, which is 
-# `b{oeisID[1:]}.txt`, not `{oeisID}.txt`. But 
-
-
-# ImaString = 'A001418'
-# newString = f"{ImaString[1:]}.txt"
-# _formatNewString = "{ImaString[1:]}.txt"
-# _formatNewString = "{ImaString}[1:].txt"
-# _formatNewString = "{{ImaString}[1:]}.txt"
-
-# f"" != format() because Python.
-
-# newerString = _formatNewString.format(ImaString=ImaString)
-# nn = format(ImaString, _formatNewString)
-# urlOEISbFile = f"https://oeis.org/{oeisID}/b{oeisID[1:]}.txt"
-_format_urlOEISbFile  = "https://oeis.org/{oeisID}/b{oeisID[1:]}.txt"
-# urlOEISbFile = _format_urlOEISbFile.format(oeisID=oeisID)
-
 _formatFilenameCache = "{oeisID}.txt"
-# oeisID = 'A001418'
-# bb = _formatFilenameCache.format(oeisID=oeisID)
-# bb = _formatFilenameCache.format('A001418')
 
-
-_formatURLoeisID = "https://oeis.org/{oeisID}"
-
-# NOTE: not DRY, and I'm annoyed and frustrated. I cannot figure out how to not duplicate this information here and in the dictionary.
+# NOTE: not DRY, and I'm annoyed and frustrated. I cannot figure out how to not duplicate
+# this information here and in the dictionary.
+# Furthermore, numba is not happy with my syntax and `dict`.
 # I suspect there is a better paradigm to accomplish this.
 # 1. I am acting as if `oeisID` is a member of OEISsequenceID, but that isn't really true.
 # 2. I would like to define `oeisID` as always being upper case, but I don't
@@ -135,7 +113,7 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
         else:
             raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
 
-    return foldings(listDimensions)
+    return countFolds(listDimensions)
 
 def _validateOEISid(oeisID: typing.Union[str, OEISsequenceID]) -> OEISsequenceID:
     """
@@ -246,6 +224,18 @@ for oeisID in settingsOEISsequences:
     settingsOEISsequences[oeisID]['valuesKnown'] = _getOEISidValues(oeisID)
     settingsOEISsequences[oeisID]['valueUnknown'] = max(settingsOEISsequences[oeisID]['valuesKnown'].values()) + 1
 
+def clearOEIScache() -> None:
+    """Delete all cached OEIS sequence files."""
+    if not _pathCache.exists():
+        print(f"Cache directory, {_pathCache}, not found - nothing to clear.")
+        return
+    else:
+        for oeisID in settingsOEISsequences:
+            pathFilenameCache = _pathCache / _formatFilenameCache.format(oeisID=oeisID)
+            pathFilenameCache.unlink(missing_ok=True)
+
+    print(f"Cache cleared from {_pathCache}")
+
 def getOEISids() -> None:
     """Print all available OEIS sequence IDs that are directly implemented."""
     print("\nAvailable OEIS sequences:")
@@ -258,4 +248,4 @@ def getOEISids() -> None:
 if __name__ == "__main__":
     getOEISids()
 
-numba.jit_module(forceobj=True, cache=True)
+numba.jit_module(forceobj=True, cache=True, looplift=False)

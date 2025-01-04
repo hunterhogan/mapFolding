@@ -1,3 +1,5 @@
+W. F. Lunnon, Multi-dimensional map-folding, "The Computer Journal", Volume 14, Issue 1, 1971, Pages 75–80, at page 79, https://doi.org/10.1093/comjnl/14.1.75
+
 procedure foldings (p, job); integer array p; procedure job;
   begin comment perform job (A, B) on each folding of a 
     p[1] x ... x p[d] map, where A and B are the above 
@@ -27,6 +29,9 @@ procedure foldings (p, job); integer array p; procedure job;
       D[i,l,m] := if m = 0 then 0 else
         if C[i,l] - C[i,m] = (C[i,l] - C[i,m])÷2*2 
           then
+
+Page 80
+
             (if C[i,m] = 1 then m else m - P[i - 1]) 
               else
             (if C[i,m] = p[i] > m + P[i - 1] > 1 then 
@@ -51,6 +56,9 @@ down: add := 0; gg := g := gapter[l - 1];
                 to all. All possible if dd = d;
       for i := 1 step 1 until d do if D[i,l,l] = l then 
         dd := dd + 1 else
+
+Page 80 column 2
+
           for m := D[i,l,l], D[i,l,B[m]] while 
             m ≠ l do
               begin gap[gg] := m; if count[m] = 0 

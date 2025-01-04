@@ -12,13 +12,12 @@ Map/stamp folding counter based on W. F. Lunnon, Multi-dimensional map-folding, 
 # I now suspect that both are true.
 
 from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions
-from .count import foldings
-from .oeis import oeisSequence_aOFn, getOEISids
-from .clearOEIScache import clearOEIScache
+from .baseline import countFolds
+from .oeis import oeisSequence_aOFn, getOEISids, clearOEIScache
 
 __all__ = [
     'clearOEIScache',
-    'foldings',
+    'countFolds',
     'getOEISids',
     'oeisSequence_aOFn',
 ]
