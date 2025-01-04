@@ -11,6 +11,7 @@ if numba.cuda.is_available():
     useGPU = True
     import cupy
 
+# On Colab, at least, if this is jitted, it will tell me `numba.cuda.to_device` to_device is not an attribute
 # @numba.jit(cache=True, fastmath=False)
 def countFolds(listDimensions: List[int], computationDivisions: bool = False):
 
@@ -35,8 +36,14 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
         res = numba.cuda.to_device(computationIndex)
         f = numba.cuda.to_device(arraySubTotals)
 
-        # Launch the GPU kernel
-        countFoldings[1,1](s, gap, D, n, d, mod, res, f)
+        if computationDivisions:
+            threadsPerBlock = 128
+            blocksPerGrid = (leavesTotal + threadsPerBlock - 1) // threadsPerBlock
+            # res = numba.cuda.to_device(blocksPerGrid)
+        else:
+            blocksPerGrid, threadsPerBlock = 1, 1
+
+        countFoldings[blocksPerGrid, threadsPerBlock](s, gap, D, n, d, mod, res, f)
         foldingsSubTotals = f.copy_to_host()
 
     else:
@@ -49,6 +56,11 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     foldingsTotal = numpy.sum(foldingsSubTotals).item()
     return foldingsTotal
 
+# @numba.cuda.jit()
+# def countFoldingsDivisionsKernel(track, potentialGaps, connectionGraph, n, d, arraySubTotals):
+#     computationIndex = numba.cuda.grid(1)
+#     if computationIndex >= n[()]:
+#         return
 # Assume this is Google Colab T4 GPU.
 @numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
 def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, n, d, computationDivisions, computationIndex, arraySubTotals: numpy.typing.NDArray[numpy.int64]) :
@@ -76,7 +88,14 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
         leavesTotal = n[()]
         dimensionsTotal = d[()]
         taskDivisions = computationDivisions[()]
-        taskIndex = computationIndex[()]
+        if taskDivisions:
+            # threadsPerBlock = 128 # NOTE hardcoded
+            # blocksPerGrid = computationIndex[()]
+            taskIndex = numba.cuda.grid(1)
+            if taskIndex >= leavesTotal:
+                return
+        else:
+            taskIndex = computationIndex[()]
     else:    
         leavesTotal = integerSmall(n)
         dimensionsTotal = integerSmall(d)
@@ -91,28 +110,28 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
     def countGaps(gap1ndexLowerBound, leaf1ndexConnectee):
         if taskDivisions == 0 or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
             potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-            if track[countDimensionsGapped][leaf1ndexConnectee] == 0:
+            if track[countDimensionsGapped, leaf1ndexConnectee] == 0:
                 gap1ndexLowerBound += 1
-            track[countDimensionsGapped][leaf1ndexConnectee] += 1
+            track[countDimensionsGapped, leaf1ndexConnectee] += 1
         return gap1ndexLowerBound
 
     def inspectConnectees(gap1ndexLowerBound, dimension1ndex):
-        leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex]
+        leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
         while leaf1ndexConnectee != activeLeaf1ndex:
             gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
-            leaf1ndexConnectee = connectionGraph[dimension1ndex][activeLeaf1ndex][track[leafBelow][leaf1ndexConnectee]]
+            leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[leafBelow, leaf1ndexConnectee]]
         return gap1ndexLowerBound
 
     def findGaps():
         nonlocal activeGap1ndex
 
         dimensionsUnconstrained = integerSmall(0)
-        gap1ndexLowerBound = track[gapRangeStart][activeLeaf1ndex - 1]
+        gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
         activeGap1ndex = gap1ndexLowerBound
         dimension1ndex = integerSmall(1) 
 
         while dimension1ndex <= dimensionsTotal:
-            if connectionGraph[dimension1ndex][activeLeaf1ndex][activeLeaf1ndex] == activeLeaf1ndex:
+            if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
                 dimensionsUnconstrained += 1
             else:
                 gap1ndexLowerBound = inspectConnectees(gap1ndexLowerBound, dimension1ndex)
@@ -136,30 +155,30 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
         indexMiniGap = activeGap1ndex
         while indexMiniGap < gapNumberLowerBound:
             potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-            if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == dimensionsTotal - unconstrainedCount:
+            if track[countDimensionsGapped, potentialGaps[indexMiniGap]] == dimensionsTotal - unconstrainedCount:
                 activeGap1ndex += 1
-            track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
+            track[countDimensionsGapped, potentialGaps[indexMiniGap]] = 0
             indexMiniGap += 1
 
     def backtrack() -> None:
         nonlocal activeLeaf1ndex, activeGap1ndex
-        while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart][activeLeaf1ndex - 1]:
+        while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
             activeLeaf1ndex -= 1
-            track[leafBelow][track[leafAbove][activeLeaf1ndex]] = track[leafBelow][activeLeaf1ndex]
-            track[leafAbove][track[leafBelow][activeLeaf1ndex]] = track[leafAbove][activeLeaf1ndex]
+            track[leafBelow, track[leafAbove, activeLeaf1ndex]] = track[leafBelow, activeLeaf1ndex]
+            track[leafAbove, track[leafBelow, activeLeaf1ndex]] = track[leafAbove, activeLeaf1ndex]
 
     def placeLeaf() -> None:
         nonlocal activeLeaf1ndex, activeGap1ndex
         activeGap1ndex -= 1
-        track[leafAbove][activeLeaf1ndex] = potentialGaps[activeGap1ndex]
-        track[leafBelow][activeLeaf1ndex] = track[leafBelow][track[leafAbove][activeLeaf1ndex]]
-        track[leafBelow][track[leafAbove][activeLeaf1ndex]] = activeLeaf1ndex
-        track[leafAbove][track[leafBelow][activeLeaf1ndex]] = activeLeaf1ndex
-        track[gapRangeStart][activeLeaf1ndex] = activeGap1ndex
+        track[leafAbove, activeLeaf1ndex] = potentialGaps[activeGap1ndex]
+        track[leafBelow, activeLeaf1ndex] = track[leafBelow, track[leafAbove, activeLeaf1ndex]]
+        track[leafBelow, track[leafAbove, activeLeaf1ndex]] = activeLeaf1ndex
+        track[leafAbove, track[leafBelow, activeLeaf1ndex]] = activeLeaf1ndex
+        track[gapRangeStart, activeLeaf1ndex] = activeGap1ndex
         activeLeaf1ndex += 1
 
     while activeLeaf1ndex > 0:
-        if activeLeaf1ndex <= 1 or track[leafBelow][0] == 1:
+        if activeLeaf1ndex <= 1 or track[leafBelow, 0] == 1:
             if activeLeaf1ndex > leavesTotal:
                 arraySubTotals[taskIndex] += leavesTotal
             else:
@@ -177,3 +196,4 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
         return
     else:
         return arraySubTotals[taskIndex]
+
