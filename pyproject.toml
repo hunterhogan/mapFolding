@@ -12,7 +12,7 @@ authors = [
 version = "0.1.0"
 requires-python = ">=3.10,<3.13"
 dependencies = [
-    "cupy-cuda12x<13.0",
+    "cupy-cuda12x",
     "numba",
     "numpy>=2.0.0",
     "Z0Z-tools",
