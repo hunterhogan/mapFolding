@@ -4,12 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mapFolding"
-description = "Python implementation of 'Multi-dimensional map-folding'"
+description = "Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps)"
 readme = "README.md"
 authors = [
     {name = "Hunter Hogan", email = "HunterHogan@pm.me"}
     ]
-version = "0.0.5"
+version = "0.1.0"
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "numba",
     "numpy",
@@ -18,10 +19,11 @@ dependencies = [
 urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
 
 [project.scripts]
-mapfolding-getOEISids = "mapFolding.oeis:getOEISids"
+getOEISids = "mapFolding.oeis:getOEISids"
+clearOEIScache = "mapFolding.oeis:clearOEIScache"
 
 [project.optional-dependencies]
-test = [
+testing = [
     "pytest",
     "pytest-cov",
     "pytest-env",
@@ -48,6 +50,7 @@ source = ["mapFolding"]
 data_file = "tests/coverage/.coverage"
 omit = [
     "mapFolding/__init__.py",
+    "mapFolding/benchmarks/__init__.py",
     "tests/*",
     "Z0Z_*"
     ]

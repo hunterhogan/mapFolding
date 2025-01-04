@@ -38,7 +38,7 @@ from mapFolding.lovelaceIndices import leafBelow
 from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1, COUNTindicesStatic
 from mapFolding.lolaIndices import COUNTindicesDynamic, gap1ndexLowerBound
 
-def foldings(listDimensions: List[int]):
+def countFolds(listDimensions: List[int]):
     the = numpy.zeros(COUNTindicesStatic, dtype=numpy.int64)
 
     from mapFolding.beDRY import validateParametersFoldings

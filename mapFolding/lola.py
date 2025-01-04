@@ -29,7 +29,7 @@ from mapFolding.benchmarks import recordBenchmarks
 from typing import List
 import numpy
 
-def foldings(listDimensions: List[int]):
+def countFolds(listDimensions: List[int]):
     from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1, COUNTindicesStatic
 
     static = numpy.zeros(COUNTindicesStatic, dtype=numpy.int64)
