@@ -1,9 +1,17 @@
-def foldings(p, computationDivisions: int = 0, computationIndex: int = 0) -> int:
+"""
+Ported from the Java version by Sean A. Irvine:
+https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java
+
+Citation: mapFolding/citations/jOEIS.bibtex
+"""
+def foldings(p: list[int], res: int = 0, mod: int = 0) -> int:
     """
     Compute the total number of foldings for a map with dimensions specified in p.
 
     Parameters:
         p: List of integers representing the dimensions of the map.
+        res: Residue for modulo operation (integer).
+        mod: Modulus for modulo operation (integer).
 
     Returns:
         total_count: The total number of foldings (integer).
@@ -72,7 +80,7 @@ def foldings(p, computationDivisions: int = 0, computationIndex: int = 0) -> int
                 else:
                     m = D[i][l][l]
                     while m != l:
-                        if computationDivisions == 0 or l != computationDivisions or m % computationDivisions == computationIndex:
+                        if mod == 0 or l != mod or m % mod == res:
                             gap[gg] = m
                             if count[m] == 0:
                                 gg += 1
