@@ -22,9 +22,9 @@ jobs:
           listCandidateVersionsInSpecifier = []
           for majorVersion in range(2, 12):
             for minorVersion in range(0, 40):
-              versionCandidate = packaging.version.Version(f"{majorVersion}.{minorVersion}")
+              versionCandidate = packaging.version.Version(f'{majorVersion}.{minorVersion}')
               if versionCandidate in specifierPython:
-                listCandidateVersionsInSpecifier.append(f"{majorVersion}.{minorVersion}")
+                listCandidateVersionsInSpecifier.append(f'{majorVersion}.{minorVersion}')
   
           print(json.dumps(listCandidateVersionsInSpecifier))
           ")
