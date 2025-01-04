@@ -2,12 +2,12 @@ from mapFolding import outfitFoldings
 from typing import List
 import numba
 from numba import prange
-import numba.cuda
+from numba import cuda
 import numpy
 import numpy.typing
 
 useGPU = False
-if numba.cuda.is_available():
+if cuda.is_available():
     useGPU = True
     import cupy
 
@@ -26,14 +26,14 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     arraySubTotals = numpy.zeros(leavesTotal, dtype=dtypeMaximum)
 
     if useGPU:
-        s = numba.cuda.to_device(track)
-        gap = numba.cuda.to_device(potentialGaps)
-        D = numba.cuda.to_device(connectionGraph)
-        n = numba.cuda.to_device(leavesTotal)
-        d = numba.cuda.to_device(dimensionsTotal)
-        mod = numba.cuda.to_device(int(computationDivisions))
-        res = numba.cuda.to_device(computationIndex)
-        f = numba.cuda.to_device(arraySubTotals)
+        s = cuda.to_device(track)
+        gap = cuda.to_device(potentialGaps)
+        D = cuda.to_device(connectionGraph)
+        n = cuda.to_device(leavesTotal)
+        d = cuda.to_device(dimensionsTotal)
+        mod = cuda.to_device(int(computationDivisions))
+        res = cuda.to_device(computationIndex)
+        f = cuda.to_device(arraySubTotals)
 
         # Launch the GPU kernel
         countFoldings[1,1](s, gap, D, n, d, mod, res, f)
@@ -50,7 +50,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     return foldingsTotal
 
 # Assume this is Google Colab T4 GPU.
-@numba.cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
+@cuda.jit() if useGPU else numba.jit(nopython=True, cache=True, fastmath=False)
 def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connectionGraph: numpy.ndarray, n, d, computationDivisions, computationIndex, arraySubTotals: numpy.typing.NDArray[numpy.int64]) :
     def integerSmall(value):
         if useGPU:
@@ -173,7 +173,7 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
 
     # Add explicit return for GPU mode
     if useGPU:
-        numba.cuda.threadfence()  # Ensure all writes are visible
+        cuda.threadfence()  # Ensure all writes are visible
         return
     else:
         return arraySubTotals[taskIndex]
