@@ -34,15 +34,17 @@ Algorithm flow
         - Backtrack when no valid positions remain
 """
 # Indices of array `the`, which holds unchanging, small, unsigned, integer values.
-from mapFolding.lovelaceIndices import leafBelow
+from mapFolding.lolaIndices import leafBelow
 from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1, COUNTindicesStatic
 from mapFolding.lolaIndices import COUNTindicesDynamic, gap1ndexLowerBound
 
 def countFolds(listDimensions: List[int]):
     the = numpy.zeros(COUNTindicesStatic, dtype=numpy.int64)
 
-    from mapFolding.beDRY import validateParametersFoldings
-    listDimensions, the[leavesTotal], connectionGraph = validateParametersFoldings(listDimensions)
+    from mapFolding import validateListDimensions, getLeavesTotal, makeConnectionGraph
+    listDimensions = validateListDimensions(listDimensions)
+    the[leavesTotal] = getLeavesTotal(listDimensions)
+    connectionGraph = makeConnectionGraph(listDimensions, dtype=numpy.int64)
 
     the[dimensionsTotal] = len(listDimensions)
     the[dimensionsPlus1] = the[dimensionsTotal] + 1
@@ -62,11 +64,11 @@ def countFolds(listDimensions: List[int]):
             print(f"{taskIndex=}, {taskState['my'][gap1ndexLowerBound]=}")
             # print(f"{taskIndex=}, {taskState['my']=}, {track[leafBelow][0]=}")
             claimTicket = concurrencyManager.submit(
-            countSubtotal, 
-            taskState['track'], 
-            taskState['potentialGaps'], 
-            taskState['my'], 
-            the, 
+            countSubtotal,
+            taskState['track'],
+            taskState['potentialGaps'],
+            taskState['my'],
+            the,
             connectionGraph
             )
             dictionaryConcurrency[claimTicket] = taskIndex
@@ -77,4 +79,3 @@ def countFolds(listDimensions: List[int]):
             foldingsTotal += foldingsSubtotal
 
     return foldingsTotal
-

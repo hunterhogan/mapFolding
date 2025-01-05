@@ -22,7 +22,7 @@ The six NDArray:
 from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1
 # Indices of array `track`, which is a collection of one-dimensional arrays each of length `the[leavesTotal] + 1`.
 # The values in the array cells are dynamic, small, unsigned integers.
-from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
+from mapFolding.lolaIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 # Indices of array `my`, which holds dynamic, small, unsigned, integer values.
 from mapFolding.lolaIndices import activeLeaf1ndex, activeGap1ndex, unconstrainedLeaf, gap1ndexLowerBound, leaf1ndexConnectee, taskIndex, dimension1ndex, foldingsSubtotal, COUNTindicesDynamic
 from mapFolding.benchmarks import recordBenchmarks
@@ -44,10 +44,10 @@ def countFolds(listDimensions: List[int]):
     foldingsTotal = _sherpa(track, potentialGaps, static, D, listDimensions)
     return foldingsTotal
 
-@recordBenchmarks()
+# @recordBenchmarks()
 def _sherpa(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], static: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], p: List[int]):
     """Performance critical section that counts foldings.
-    
+
     Parameters:
         track: Array tracking folding state
         gap: Array for potential gaps
@@ -72,7 +72,7 @@ def countFoldings(TEMPLATEtrack: numpy.ndarray[numpy.int64, numpy.dtype[numpy.in
     # taskDivisions = the[leavesTotal]
     TEMPLATEmy[taskIndex] = taskDivisions - 1 # the first modulo is leavesTotal - 1
 
-    def prepareWork(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], 
+    def prepareWork(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                     potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                     my: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]) -> tuple[numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]]:
         foldingsTotal = 0
@@ -180,12 +180,12 @@ def doWork(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
                         while while_leaf1ndexConnectee_notEquals_activeLeaf1ndex == True:
                             while_leaf1ndexConnectee_notEquals_activeLeaf1ndex = False
                             thisIsNotTheFirstPass = True
-                            if taskDivisions==0 or my[activeLeaf1ndex] != taskDivisions: 
+                            if taskDivisions==0 or my[activeLeaf1ndex] != taskDivisions:
                                 myTask = True
                             else:
                                 modulo = my[leaf1ndexConnectee] % the[leavesTotal]
                                 if modulo == my[taskIndex]: myTask = True
-                                else: 
+                                else:
                                     myTask = False
                             if myTask:
                                 potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
@@ -228,4 +228,3 @@ def doWork(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
 
         if my[activeLeaf1ndex] <= 0:
             return my[foldingsSubtotal]
-

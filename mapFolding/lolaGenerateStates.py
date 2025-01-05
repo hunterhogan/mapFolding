@@ -4,10 +4,10 @@ from typing import TypedDict, Dict
 import numpy
 
 from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1
-from mapFolding.lovelaceIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
+from mapFolding.lolaIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 from mapFolding.lolaIndices import (
     activeGap1ndex as activeGap1ndexMyIndex,
-    activeLeaf1ndex as activeLeaf1ndexMyIndex, 
+    activeLeaf1ndex as activeLeaf1ndexMyIndex,
     dimension1ndex as dimension1ndexMyIndex,
     foldingsSubtotal,
     gap1ndexLowerBound as gap1ndexLowerBoundMyIndex,
