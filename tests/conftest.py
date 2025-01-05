@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, List, Tuple, Type, TypeVar, Union
 import pytest
 import random
 import sys
+import os
 
 @pytest.fixture(params=settingsOEISsequences.keys())
 def oeisID(request):
@@ -96,15 +97,15 @@ def pathCacheTesting(tmp_path):
 def generateDictionaryDimensionsFoldingsTotal() -> Dict[Tuple[int,...], int]:
     """Returns a dictionary mapping dimension tuples to their known folding totals."""
     dimensionsFoldingsTotalLookup = {}
-    
+
     for settings in settingsOEISsequences.values():
         sequence = settings['valuesKnown']
-        
+
         for n, foldingsTotal in sequence.items():
             dimensions = settings['getDimensions'](n)
             dimensions.sort()
             dimensionsFoldingsTotalLookup[tuple(dimensions)] = foldingsTotal
-    
+
     return dimensionsFoldingsTotalLookup
 
 # Template Types
@@ -112,8 +113,8 @@ ReturnType = TypeVar('ReturnType')
 ErrorTypes = Union[Type[Exception], Tuple[Type[Exception], ...]]
 
 def formatTestMessage(
-    expected: Any, actual: Any, 
-    functionName: str, 
+    expected: Any, actual: Any,
+    functionName: str,
     *arguments: Any) -> str:
     """Format assertion message for any test comparison."""
     return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"
