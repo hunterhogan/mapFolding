@@ -1,13 +1,16 @@
+from mapFolding import outfitFoldings
+from mapFolding.benchmarks import recordBenchmarks
 from numba import njit
+from typing import List
 import numpy
+
 """
 ALL variables instantiated by `countFoldings` are numpy.NDArray instances.
-ALL of those NDArray are indexed by variables defined in `lovelaceIndices.py`.
 
 `doWork` has two `for` loops with a structure of `for identifier in range(p,q)`.
 At the moment those two identifiers are primitive integers, rather than embedded in an NDArray instance.
 
-The six NDArray:
+The NDArray:
     Unchanging values
         - the
         - connectionGraph
@@ -15,26 +18,45 @@ The six NDArray:
         - my
         - track
         - potentialGaps
-    Dynamic values that the workers could share safely
-        - arrayFoldingsSubtotals
 """
-# Indices of array `the`, which holds unchanging, small, unsigned, integer values.
-from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1
+
 # Indices of array `track`, which is a collection of one-dimensional arrays each of length `the[leavesTotal] + 1`.
 # The values in the array cells are dynamic, small, unsigned integers.
-from mapFolding.lolaIndices import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
+A = leafAbove = 0
+"""Leaf above leaf m"""
+B = leafBelow = 1
+"""Leaf below leaf m"""
+count = countDimensionsGapped = 2
+"""Number of gaps available for leaf l"""
+gapter = gapRangeStart = 3
+"""Index of gap stack for leaf l"""
+
 # Indices of array `my`, which holds dynamic, small, unsigned, integer values.
-from mapFolding.lolaIndices import activeLeaf1ndex, activeGap1ndex, unconstrainedLeaf, gap1ndexLowerBound, leaf1ndexConnectee, taskIndex, dimension1ndex, foldingsSubtotal, COUNTindicesDynamic
-from mapFolding.benchmarks import recordBenchmarks
-from typing import List
-import numpy
+tricky = [
+(activeLeaf1ndex := 0),
+(activeGap1ndex := 1),
+(unconstrainedLeaf := 2),
+(gap1ndexLowerBound := 3),
+(leaf1ndexConnectee := 4),
+(taskIndex := 5),
+(dimension1ndex := 6),
+(foldingsSubtotal := 7),
+]
+
+COUNTindicesDynamic = len(tricky)
+
+# Indices of array `the`, which holds unchanging, small, unsigned, integer values.
+tricky = [
+(dimensionsPlus1 := 0),
+(dimensionsTotal := 1),
+(leavesTotal := 2),
+]
+
+COUNTindicesStatic = len(tricky)
 
 def countFolds(listDimensions: List[int]):
-    from mapFolding.lolaIndices import leavesTotal, dimensionsTotal, dimensionsPlus1, COUNTindicesStatic
-
     static = numpy.zeros(COUNTindicesStatic, dtype=numpy.int64)
 
-    from mapFolding.beDRY import outfitFoldings
     listDimensions, static[leavesTotal], D, track,potentialGaps = outfitFoldings(listDimensions)
 
     static[dimensionsTotal] = len(listDimensions)
