@@ -19,63 +19,68 @@ For each leaf:
   - Repeat until the map is completely folded
 - Backtrack when no valid positions remain
 
-## Equivalent identifiers
+## Identifiers
 
-| Lunnan | Irvine | Hunter Hogan            | diminutive    |
-| ------ | ------ | ----------------------- | ------------- |
-| A      | a      | leafAbove               |               |
-| B      | b      | leafBelow               |               |
-| C      | c      | coordinateSystem        |               |
-| count  |        | countDimensionsGapped   |               |
-| D      | d      | connectionGraph         |               |
-| d      | dim    | dimensionsTotal         |               |
-| dd     |        | dimensionsUnconstrained |               |
-| delta  |        | distance                |               |
-| g      |        | activeGap1ndex          |               |
-| gap    |        | potentialGaps           |               |
-| gapter |        | gapRangeStart           |               |
-| gg     |        | gap1ndexLowerBound      |               |
-| i      |        | dimension1ndex          |               |
-| j      |        | indexMiniGap            |               |
-| l      |        | activeLeaf1ndex         |               |
-| m      |        | leaf1ndex               |               |
-| m      |        | leaf1ndexConnectee      |               |
-| n      |        | leavesTotal             |               |
-| P      | bigP   | cumulativeProduct       |               |
-| p      |        | listDimensions          |               |
-|        |        | track                   | s             |
-|        | mCount | foldingsTotal           |               |
-|        | mod    | computationalDivisions  | taskDivisions |
-|        | res    | computationalIndex      | taskIndex     |
+Assume `listDimensions`:
 
-## Potential values for variables
+1. is in an implemented OEIS sequence, and
+2. is <= the first unknown in the OEIS sequence.
 
-Assume `listDimensions` is for an implemented OEIS sequence, and
-assume `listDimensions` is at most the next unknown total in the sequence.
-
-| Type     | max(x)    | Lunnan | Hunter Hogan            |
-| -------- | --------- | ------ | ----------------------- |
-| 1D array | n+1       | A      | leafAbove               |
-| 1D array | n+1       | B      | leafBelow               |
-| 2D array | max(p)    | C      | coordinateSystem        |
-| 1D array | d         | count  | countDimensionsGapped   |
-| 3D array | n         | D      | connectionGraph         |
-| integer  | 8*        | d      | dimensionsTotal         |
-| integer  | d         | dd     | dimensionsUnconstrained |
-| integer  |           | delta  | distance                |
-| integer  |           | g      | activeGap1ndex          |
-| 1D array | > 2*n     | gap    | potentialGaps           |
-| 1D array |           | gapter | gapRangeStart           |
-| integer  |           | gg     | gap1ndexLowerBound      |
-| integer  | d         | i      | dimension1ndex          |
-| integer  | gg-1      | j      | indexMiniGap            |
-| integer  | n+1       | l      | activeLeaf1ndex         |
-| integer  | n         | m      | leaf1ndex               |
-| integer  | n         | m      | leaf1ndexConnectee      |
-| integer  | 256*      | n      | leavesTotal             |
-| 1D array | n         | P      | cumulativeProduct       |
-| 1D array | 19 (2x19) | p      | listDimensions          |
-| 2D array | n/a       | s      | track                   |
-| integer  | ~10^17    | mCount | foldingsTotal           |
+| Type     | max(x)      | Hunter Hogan            | alternative   | Lunnan | Irvine |
+| -------- | ----------- | ----------------------- | ------------- | ------ | ------ |
+| integer  |             | activeGap1ndex          |               | g      | g      |
+| integer  | n+1         | activeLeaf1ndex         |               | l      | l      |
+| 3D array | n           | connectionGraph         |               | D      | d      |
+| integer  | n           | computationalDivisions  | taskDivisions |        | mod    |
+| integer  | n-1         | computationalIndex      | taskIndex     |        | res    |
+| 2D array | max(p)      | coordinateSystem        |               | C      | c      |
+| 1D array | n           | cumulativeProduct       |               | P      | bigP   |
+| 1D array | d           | countDimensionsGapped   |               | count  | count  |
+| integer  | d           | dimension1ndex          |               | i      | i      |
+| integer  | d           | dimensionsUnconstrained |               | dd     | dd     |
+| integer  | 8*          | dimensionsTotal         |               | d      | dim    |
+| integer  |             | distance                |               | delta  | delta  |
+| integer  | ~10^17      | foldingsTotal           | f             |        | mCount |
+| integer  |             | gap1ndexLowerBound      |               | gg     | gg     |
+| 1D array |             | gapRangeStart           |               | gapter | gapter |
+| integer  | gg-1        | indexMiniGap            |               | j      | j      |
+| integer  | n           | index                   |               | m      | m      |
+| 1D array | n+1         | leafAbove               |               | A      | a      |
+| 1D array | n+1         | leafBelow               |               | B      | b      |
+| integer  | n           | leaf1ndex               |               | m      | m      |
+| integer  | n           | leaf1ndexConnectee      |               | m      | m      |
+| integer  | 256*        | leavesTotal             |               | n      |        |
+| 1D array | 19 (2x19)   | listDimensions          |               | p      | p      |
+| 1D array | (container) | my                      |               |        |        |
+| 1D array | > 2*n  <?   | potentialGaps           |               | gap    | gap    |
+| 1D array | (container) | the                     | static        |        |        |
+| 2D array | (container) | track                   | s             |        |        |
 
 *2x2x2x2x2x2x2x2 (2x2... 8-dimensional)
+
+## "Known options" for `@numba.jit` decorator
+
+- '_dbg_extend_lifetimes',
+- '_dbg_optnone',
+- '_nrt',
+- 'boundscheck', # Check for and report index errors
+- 'debug',
+- 'error_model',
+- 'fastmath', # Disable CPU float precision
+- 'forceinline',
+- 'forceobj',
+- 'inline',
+- 'looplift',
+- 'no_cfunc_wrapper',
+- 'no_cpython_wrapper',
+- 'no_rewrites',
+- 'nogil',
+- 'nopython', # Pure assembly
+- 'parallel' # Enable automatic parallelization
+
+## Miscellany
+
+- All taskIndices can start from the states:
+  - `activeGap1ndex > 0`
+  - `not activeLeaf1ndex != leavesTotal and leaf1ndexConnectee % leavesTotal == leavesTotal - 1`
+- 2 X n strip of stamps: "a(n), called G(n,2), is known to be divisible by 4n for n >= 2. - [Fred Lunnon](https://oeis.org/A001415), Dec 08 2013"
