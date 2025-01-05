@@ -1,5 +1,5 @@
-from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions, validateTaskDivisions
-from .lola import countFolds
+from .beDRY import getLeavesTotal, parseListDimensions, validateListDimensions, validateTaskDivisions, outfitFoldings
+from .legoLola import countFolds
 from .oeis import oeisSequence_aOFn, getOEISids, clearOEIScache
 
 __all__ = [
