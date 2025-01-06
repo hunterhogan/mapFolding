@@ -6,7 +6,7 @@ import jaxtyping
 dtypeDefault = jax.numpy.uint32
 dtypeMaximum = jax.numpy.uint32
 
-def foldings(listDimensions: List[int]) -> int:
+def countFolds(listDimensions: List[int]) -> int:
     listDimensionsPositive: List[int] = validateListDimensions(listDimensions)
 
     n: int = getLeavesTotal(listDimensionsPositive)

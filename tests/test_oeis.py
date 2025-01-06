@@ -1,3 +1,4 @@
+import pathlib
 from .conftest import *
 from contextlib import redirect_stdout
 from datetime import datetime, timedelta
@@ -29,7 +30,7 @@ def test__validateOEISid_partially_valid(oeisIDrandom):
 def test__validateOEISid_valid_id(oeisID):
     compareValues(oeisID, _validateOEISid, oeisID)
 
-def test__validateOEISid_valid_id_case_insensitive(oeisID):
+def test__validateOEISid_valid_id_case_insensitive(oeisID: str):
     compareValues(oeisID.upper(), _validateOEISid, oeisID.lower())
     compareValues(oeisID.upper(), _validateOEISid, oeisID.upper())
     compareValues(oeisID.upper(), _validateOEISid, oeisID.swapcase())
@@ -58,7 +59,7 @@ def test_clearOEIScache(mock_unlink, mock_exists, cacheExists):
     """Test OEIS cache clearing with both existing and non-existing cache."""
     mock_exists.return_value = cacheExists
     clearOEIScache()
-    
+
     if cacheExists:
         assert mock_unlink.call_count == len(settingsOEISsequences)
         mock_unlink.assert_has_calls([unittest.mock.call(missing_ok=True)] * len(settingsOEISsequences))
@@ -67,15 +68,15 @@ def test_clearOEIScache(mock_unlink, mock_exists, cacheExists):
         mock_unlink.assert_not_called()
 
 # ===== Cache-related Tests =====
-def testCacheMiss(pathCacheTesting, oeisIDrandom):
+def testCacheMiss(pathCacheTesting: pathlib.Path, oeisIDrandom):
     pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
-    
+
     assert not pathFilenameCache.exists()
     OEISsequence = _getOEISidValues(oeisIDrandom)
     assert OEISsequence is not None
     assert pathFilenameCache.exists()
 
-def testCacheExpired(pathCacheTesting, oeisIDrandom):
+def testCacheExpired(pathCacheTesting: pathlib.Path, oeisIDrandom):
     pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
     pathFilenameCache.write_text("# Old cache content")
     oldModificationTime = datetime.now() - timedelta(days=30)
@@ -83,22 +84,22 @@ def testCacheExpired(pathCacheTesting, oeisIDrandom):
     OEISsequence = _getOEISidValues(oeisIDrandom)
     assert OEISsequence is not None
 
-def testInvalidCache(pathCacheTesting, oeisIDrandom):
+def testInvalidCache(pathCacheTesting: pathlib.Path, oeisIDrandom):
     pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
     pathFilenameCache.write_text("Invalid content")
     OEISsequence = _getOEISidValues(oeisIDrandom)
     assert OEISsequence is not None
 
-def testInvalidFileContent(pathCacheTesting, oeisIDrandom):
+def testInvalidFileContent(pathCacheTesting: pathlib.Path, oeisIDrandom):
     pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
-    
+
     # Write invalid content to cache
     pathFilenameCache.write_text("# A999999\n1 1\n2 2\n")
     modificationTimeOriginal = pathFilenameCache.stat().st_mtime
-    
+
     # Function should detect invalid content, fetch fresh data, and update cache
     OEISsequence = _getOEISidValues(oeisIDrandom)
-    
+
     # Verify the function succeeded
     assert OEISsequence is not None
     # Verify cache was updated (modification time changed)
@@ -106,10 +107,10 @@ def testInvalidFileContent(pathCacheTesting, oeisIDrandom):
     # Verify cache now contains correct sequence ID
     assert f"# {oeisIDrandom}" in pathFilenameCache.read_text()
 
-def testNetworkError(monkeypatch, pathCacheTesting):
+def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting):
     def mockUrlopen(*args, **kwargs):
         raise urllib.error.URLError("Network error")
-    
+
     monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
     with pytest.raises(urllib.error.URLError):
         _getOEISidValues(next(iter(settingsOEISsequences)))
@@ -118,9 +119,9 @@ def testParseContentErrors():
     """Test invalid content parsing."""
     expectError(ValueError, _parseBFileOEIS, "Invalid content\n1 2\n", 'A001415')
 
-def testExtraComments(pathCacheTesting, oeisIDrandom):
+def testExtraComments(pathCacheTesting: pathlib.Path, oeisIDrandom):
     pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisIDrandom)
-    
+
     # Write content with extra comment lines
     contentWithExtraComments = f"""# {oeisIDrandom}
 # Extra comment line 1
@@ -132,7 +133,7 @@ def testExtraComments(pathCacheTesting, oeisIDrandom):
 4 8
 5 10"""
     pathFilenameCache.write_text(contentWithExtraComments)
-    
+
     OEISsequence = _getOEISidValues(oeisIDrandom)
     # Verify sequence values are correct despite extra comments
     compareValues(2, lambda d: d[1], OEISsequence)  # First value
@@ -145,13 +146,13 @@ def testGetOEISids():
     captureOutput = io.StringIO()
     with redirect_stdout(captureOutput):
         getOEISids()
-    
+
     outputText = captureOutput.getvalue()
     # Check that all sequences are listed
     for oeisID in get_args(OEISsequenceID):
         assert oeisID in outputText
         assert settingsOEISsequences[oeisID]['description'] in outputText
-    
+
     # Check that usage example is included
     assert "Usage example:" in outputText
     assert "oeisSequence_aOFn" in outputText
@@ -163,4 +164,3 @@ def testCommandLineInterface():
         getOEISids()
     outputText = captureOutput.getvalue()
     assert "Available OEIS sequences:" in outputText
-

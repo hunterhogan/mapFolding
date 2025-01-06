@@ -6,29 +6,29 @@ import jaxtyping
 dtypeDefault = jax.numpy.int32
 dtypeMaximum = jax.numpy.int32
 
-def foldings(listDimensions: List[int]):
+def countFolds(listDimensions: List[int]):
     """Calculate foldings across multiple devices using pmap"""
     p = validateListDimensions(listDimensions)
     n = getLeavesTotal(p)
-    
+
     # Get number of devices (GPUs/TPUs)
     deviceCount = jax.device_count()
-    
+
     if deviceCount > 1:
         # Split work across devices
         tasksPerDevice = (n + deviceCount - 1) // deviceCount
         paddedTaskCount = tasksPerDevice * deviceCount
-        
+
         # Create padded array of task indices
         arrayTaskIndices = jax.numpy.arange(paddedTaskCount, dtype=dtypeDefault)
         arrayTaskIndices = arrayTaskIndices.reshape((deviceCount, tasksPerDevice))
-        
+
         # Create pmapped function
         parallelFoldingsTask = jax.pmap(lambda x: jax.vmap(lambda y: foldingsTask(tuple(p), y))(x))
-        
+
         # Run computation across devices
         arrayResults = parallelFoldingsTask(arrayTaskIndices)
-        
+
         # Sum valid results (ignore padding)
         return jax.numpy.sum(arrayResults[:, :min(tasksPerDevice, n - tasksPerDevice * (deviceCount-1))])
     else:
@@ -42,8 +42,8 @@ def foldingsTask(p, taskIndex) -> jaxtyping.UInt32:
     leavesTotal = jax.numpy.prod(arrayDimensions)
     dimensionsTotal = jax.numpy.size(arrayDimensions)
 
-    """How to build a leaf connection graph, also called a "Cartesian Product Decomposition" 
-    or a "Dimensional Product Mapping", with sentinels: 
+    """How to build a leaf connection graph, also called a "Cartesian Product Decomposition"
+    or a "Dimensional Product Mapping", with sentinels:
     Step 1: find the cumulative product of the map's dimensions"""
     cumulativeProduct = jax.numpy.ones(dimensionsTotal + 1, dtype=dtypeDefault)
     cumulativeProduct = cumulativeProduct.at[1:].set(jax.numpy.cumprod(arrayDimensions))
@@ -51,24 +51,24 @@ def foldingsTask(p, taskIndex) -> jaxtyping.UInt32:
     """Step 2: for each dimension, create a coordinate system """
     """coordinateSystem[dimension1ndex][leaf1ndex] holds the dimension1ndex-th coordinate of leaf leaf1ndex"""
     coordinateSystem = jax.numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=dtypeDefault)
-    
+
     # Create mesh of indices for vectorized computation
     dimension1ndices, leaf1ndices = jax.numpy.meshgrid(
         jax.numpy.arange(1, dimensionsTotal + 1),
         jax.numpy.arange(1, leavesTotal + 1),
         indexing='ij'
     )
-    
+
     # Compute all coordinates at once using broadcasting
     coordinateSystem = coordinateSystem.at[1:, 1:].set(
-        ((leaf1ndices - 1) // cumulativeProduct.at[dimension1ndices - 1].get()) % 
+        ((leaf1ndices - 1) // cumulativeProduct.at[dimension1ndices - 1].get()) %
         arrayDimensions.at[dimension1ndices - 1].get() + 1
     )
     del dimension1ndices, leaf1ndices
 
     """Step 3: create a huge empty connection graph"""
     connectionGraph = jax.numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=dtypeDefault)
-    
+
     # Create 3D mesh of indices for vectorized computation
     dimension1ndices, activeLeaf1ndices, connectee1ndices = jax.numpy.meshgrid(
         jax.numpy.arange(1, dimensionsTotal + 1),
@@ -83,7 +83,7 @@ def foldingsTask(p, taskIndex) -> jaxtyping.UInt32:
     # Calculate coordinate parity comparison
     coordsParity = (coordinateSystem.at[dimension1ndices, activeLeaf1ndices].get() & 1) == \
                     (coordinateSystem.at[dimension1ndices, connectee1ndices].get() & 1)
-    
+
     # Compute distance conditions
     isFirstCoord = coordinateSystem.at[dimension1ndices, connectee1ndices].get() == 1
     isLastCoord = coordinateSystem.at[dimension1ndices, connectee1ndices].get() == \

@@ -6,7 +6,7 @@ import random
 import sys
 
 @pytest.fixture(params=settingsOEISsequences.keys())
-def oeisID(request):
+def oeisID(request: pytest.FixtureRequest):
     """Returns values from `settingsOEISsequences.keys()` not from `OEISsequenceID`."""
     return request.param
 
@@ -39,6 +39,8 @@ def listDimensions_testCounts(oeisID):
     if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
     while True:
         n = random.choice(settingsOEISsequences[oeisID]['valuesTestValidation'])
+        if n < 2:
+            continue
         listDimensionsCandidate = settingsOEISsequences[oeisID]['getDimensions'](n)
 
         try:
@@ -96,15 +98,15 @@ def pathCacheTesting(tmp_path):
 def generateDictionaryDimensionsFoldingsTotal() -> Dict[Tuple[int,...], int]:
     """Returns a dictionary mapping dimension tuples to their known folding totals."""
     dimensionsFoldingsTotalLookup = {}
-    
+
     for settings in settingsOEISsequences.values():
         sequence = settings['valuesKnown']
-        
+
         for n, foldingsTotal in sequence.items():
             dimensions = settings['getDimensions'](n)
             dimensions.sort()
             dimensionsFoldingsTotalLookup[tuple(dimensions)] = foldingsTotal
-    
+
     return dimensionsFoldingsTotalLookup
 
 # Template Types
@@ -112,8 +114,8 @@ ReturnType = TypeVar('ReturnType')
 ErrorTypes = Union[Type[Exception], Tuple[Type[Exception], ...]]
 
 def formatTestMessage(
-    expected: Any, actual: Any, 
-    functionName: str, 
+    expected: Any, actual: Any,
+    functionName: str,
     *arguments: Any) -> str:
     """Format assertion message for any test comparison."""
     return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from mapFolding import foldings
+from mapFolding import countFolds
 import pathlib
 import random
 import typing
@@ -14,7 +14,7 @@ else:
 class SettingsOEISsequence(TypedDict):
     # I would prefer to load description dynamically from OEIS, but it's a pita for me
     # to learn how to efficiently implement right now.
-    description: str 
+    description: str
     getDimensions: typing.Callable[[int], typing.List[int]]
     valuesBenchmark: typing.List[int]
     valuesKnown: typing.Dict[int, int]
@@ -109,7 +109,7 @@ def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
         else:
             raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
 
-    return foldings(listDimensions)
+    return countFolds(listDimensions)
 
 def _validateOEISid(oeisID: typing.Union[str, OEISsequenceID]) -> OEISsequenceID:
     """
@@ -204,12 +204,10 @@ def _getOEISidValues(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
         except (ValueError, IOError):
             tryCache = False
 
-    # urlOEISbFile = _format_urlOEISbFile.format(oeisID=oeisID)
     urlOEISbFile = f"https://oeis.org/{oeisID}/b{oeisID[1:]}.txt"
     httpResponse: urllib.response.addinfourl = urllib.request.urlopen(urlOEISbFile)
     OEISbFile = httpResponse.read().decode('utf-8')
 
-    # Ensure cache directory exists
     if not tryCache:
         pathFilenameCache.parent.mkdir(parents=True, exist_ok=True)
         pathFilenameCache.write_text(OEISbFile)
@@ -219,6 +217,18 @@ def _getOEISidValues(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
 for oeisID in settingsOEISsequences:
     settingsOEISsequences[oeisID]['valuesKnown'] = _getOEISidValues(oeisID)
     settingsOEISsequences[oeisID]['valueUnknown'] = max(settingsOEISsequences[oeisID]['valuesKnown'].values()) + 1
+
+def clearOEIScache() -> None:
+    """Delete all cached OEIS sequence files."""
+    if not _pathCache.exists():
+        print(f"Cache directory, {_pathCache}, not found - nothing to clear.")
+        return
+    else:
+        for oeisID in settingsOEISsequences:
+            pathFilenameCache = _pathCache / _formatFilenameCache.format(oeisID=oeisID)
+            pathFilenameCache.unlink(missing_ok=True)
+
+    print(f"Cache cleared from {_pathCache}")
 
 def getOEISids() -> None:
     """Print all available OEIS sequence IDs that are directly implemented."""

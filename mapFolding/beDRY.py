@@ -16,7 +16,7 @@ def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed
         listNonNegative: List of validated non-negative integers
     Raises:
         ValueError: If any dimension is negative or if the list is empty
-        TypeError: If any element cannot be converted to integer (raised by parseListInt)
+        TypeError: If any element cannot be converted to integer (raised by intInnit)
     """
     listValidated = intInnit(listDimensions, parameterName)
     listNonNegative = []
@@ -27,7 +27,7 @@ def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed
 
     if not listNonNegative:
         raise ValueError("At least one dimension must be non-negative")
-    
+
     return listNonNegative
 
 def validateListDimensions(listDimensions: List[int]) -> List[int]:
@@ -69,7 +69,7 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
     """
     listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
     listPositive = [dimension for dimension in listNonNegative if dimension > 0]
-        
+
     if not listPositive:
         return 0
     else:
@@ -78,7 +78,7 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
             if dimension > sys.maxsize // productDimensions:
                 raise OverflowError("Product would exceed maximum integer size")
             productDimensions *= dimension
-                
+
         return productDimensions
 
 def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
@@ -86,7 +86,7 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
     Constructs a connection graph for a given list of dimensions.
     This function generates a multi-dimensional connection graph based on the provided list of dimensions.
     The graph represents the connections between leaves in a Cartesian product decomposition or dimensional product mapping.
-    
+
     Parameters:
         listDimensions: A validated list of integers representing the dimensions of the map.
     Returns:
@@ -97,8 +97,8 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
     leavesTotal = getLeavesTotal(listDimensions)
     dimensionsTotal = len(listDimensions)
 
-    """How to build a leaf connection graph, also called a "Cartesian Product Decomposition" 
-    or a "Dimensional Product Mapping", with sentinels: 
+    """How to build a leaf connection graph, also called a "Cartesian Product Decomposition"
+    or a "Dimensional Product Mapping", with sentinels:
     Step 1: find the cumulative product of the map's dimensions"""
     cumulativeProduct = numpy.ones(dimensionsTotal + 1, dtype=dtype)
     cumulativeProduct[1:] = (numpy.cumprod(arrayDimensions))
@@ -106,7 +106,7 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
     """Step 2: for each dimension, create a coordinate system """
     """coordinateSystem[dimension1ndex][leaf1ndex] holds the dimension1ndex-th coordinate of leaf leaf1ndex"""
     coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=dtype)
-    
+
     # Create mesh of indices for vectorized computation
     dimension1ndices, leaf1ndices = numpy.meshgrid(
         numpy.arange(1, dimensionsTotal + 1),
@@ -116,14 +116,14 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
 
     # Compute all coordinates at once using broadcasting
     coordinateSystem[1:, 1:] = (
-        ((leaf1ndices - 1) // cumulativeProduct[dimension1ndices - 1]) % 
+        ((leaf1ndices - 1) // cumulativeProduct[dimension1ndices - 1]) %
         arrayDimensions[dimension1ndices - 1] + 1
     )
     del dimension1ndices, leaf1ndices
 
     """Step 3: create a huge empty connection graph"""
     connectionGraph = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=dtype)
-    
+
     # Create 3D mesh of indices for vectorized computation
     dimension1ndices, activeLeaf1ndices, connectee1ndices = numpy.meshgrid(
         numpy.arange(1, dimensionsTotal + 1),
@@ -138,7 +138,7 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
     # Calculate coordinate parity comparison
     coordsParity = (coordinateSystem[dimension1ndices, activeLeaf1ndices] & 1) == \
                     (coordinateSystem[dimension1ndices, connectee1ndices] & 1)
-    
+
     # Compute distance conditions
     isFirstCoord = coordinateSystem[dimension1ndices, connectee1ndices] == 1
     isLastCoord = coordinateSystem[dimension1ndices, connectee1ndices] == \
@@ -167,7 +167,7 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
 
     # Update only valid connections
     # """connectionGraph[dimension1ndex][activeLeaf1ndex][leaf1ndex] computes the leaf1ndex connected to leaf1ndex in dimension1ndex when inserting activeLeaf1ndex"""
-    connectionGraph[dimension1ndices, activeLeaf1ndices, connectee1ndices] = numpy.where(maskActiveConnectee, connectionValues, 0) 
+    connectionGraph[dimension1ndices, activeLeaf1ndices, connectee1ndices] = numpy.where(maskActiveConnectee, connectionValues, 0)
 
     return connectionGraph
 
