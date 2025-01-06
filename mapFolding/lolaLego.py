@@ -70,6 +70,36 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
         track[gapRangeStart, activeLeaf1ndex] = activeGap1ndex
         activeLeaf1ndex += 1
 
+    def initializeState():
+        nonlocal foldsTotal
+        while activeLeaf1ndex > 0:
+            if activeLeaf1ndex <= 1 or track[leafBelow, 0] == 1:
+                if activeLeaf1ndex > leavesTotal:
+                    incrementFoldsTotal()
+                else:
+                    dimensionsUnconstrained: int = 0
+                    gap1ndexLowerBound: int = track[gapRangeStart, activeLeaf1ndex - 1]
+                    dimension1ndex: int = 1
+                    while dimension1ndex <= dimensionsTotal:
+                        if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
+                            dimensionsUnconstrained += 1
+                        else:
+                            leaf1ndexConnectee: int = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
+                            while leaf1ndexConnectee != activeLeaf1ndex:
+                                # if computationDivisions == False or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
+                                gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
+                                leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[leafBelow, leaf1ndexConnectee]]
+                        dimension1ndex += 1
+                    if dimensionsUnconstrained == dimensionsTotal:
+                        gap1ndexLowerBound = insertUnconstrainedLeaf(gap1ndexLowerBound)
+                    filterCommonGaps(dimensionsUnconstrained, gap1ndexLowerBound)
+            while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
+                backtrack()
+            if activeLeaf1ndex > 0:
+                placeLeaf()
+            if activeGap1ndex > 0:
+                return
+
     def doWhile():
         nonlocal foldsTotal
         while activeLeaf1ndex > 0:
@@ -77,34 +107,42 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                 if activeLeaf1ndex > leavesTotal:
                     incrementFoldsTotal()
                 else:
-                    # nonlocal activeGap1ndex
-
                     dimensionsUnconstrained: int = 0
                     gap1ndexLowerBound: int = track[gapRangeStart, activeLeaf1ndex - 1]
-                    # activeGap1ndex = gap1ndexLowerBound
                     dimension1ndex: int = 1
-
                     while dimension1ndex <= dimensionsTotal:
                         if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
                             dimensionsUnconstrained += 1
                         else:
                             leaf1ndexConnectee: int = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
                             while leaf1ndexConnectee != activeLeaf1ndex:
-
                                 if computationDivisions == False or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
                                     gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
-
                                 leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[leafBelow, leaf1ndexConnectee]]
                         dimension1ndex += 1
                     if dimensionsUnconstrained == dimensionsTotal:
                         gap1ndexLowerBound = insertUnconstrainedLeaf(gap1ndexLowerBound)
                     filterCommonGaps(dimensionsUnconstrained, gap1ndexLowerBound)
-
             while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
                 backtrack()
             if activeLeaf1ndex > 0:
                 placeLeaf()
 
-    doWhile()
+    initializeState()
+
+    if computationDivisions:
+        state_activeGap1ndex = activeGap1ndex
+        state_activeLeaf1ndex = activeLeaf1ndex
+        state_potentialGaps = potentialGaps.copy()
+        state_track = track.copy()
+        listTaskIndices = list(range(leavesTotal))
+        for taskIndex in listTaskIndices:
+            activeGap1ndex = state_activeGap1ndex
+            activeLeaf1ndex = state_activeLeaf1ndex
+            potentialGaps = state_potentialGaps.copy()
+            track = state_track.copy()
+            doWhile()
+    else:
+        doWhile()
 
     return foldsTotal
