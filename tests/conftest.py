@@ -7,7 +7,7 @@ import sys
 import os
 
 @pytest.fixture(params=settingsOEISsequences.keys())
-def oeisID(request):
+def oeisID(request: pytest.FixtureRequest):
     """Returns values from `settingsOEISsequences.keys()` not from `OEISsequenceID`."""
     return request.param
 

@@ -14,7 +14,6 @@ def intInnit_jitInnit(listDimensions, parameterName):
         return intInnit_jitInnit_implementInnit
     return None
 
-# @numba.jit(cache=True, error_model='python')
 def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed parameter') -> List[int]:
     """
     Parse and validate a list of dimensions.
@@ -40,7 +39,6 @@ def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed
 
     return listNonNegative
 
-# @numba.jit(cache=True, error_model='python')
 def validateListDimensions(listDimensions: List[int]) -> List[int]:
     """
     Validates and processes a list of dimensions.
@@ -68,7 +66,6 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
     return listDimensionsPositive
 
-# @numba.jit(cache=True, error_model='python')
 def getLeavesTotal(listDimensions: List[int]) -> int:
     """
     Calculate the product of non-zero, non-negative integers in the given list.
@@ -92,3 +89,5 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
             productDimensions *= dimension
 
         return productDimensions
+
+numba.jit_module(cache=True, error_model='python')

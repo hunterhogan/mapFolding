@@ -6,18 +6,16 @@ from mapFolding import validateListDimensions, getLeavesTotal
 from mapFolding.benchmarks import recordBenchmarks
 
 # @recordBenchmarks()
-@numba.njit(cache=True, fastmath=False)
+@numba.jit(cache=True, nopython=True, fastmath=False)
 def countFolds(listDimensions: List[int]):
     """
-    Calculate the number of distinct possible ways to fold a map with given dimensions.
-    This function computes the number of different ways a map can be folded along its grid lines,
-    considering maps with at least two positive dimensions.
+    Count the number of distinct ways to fold a map at least two positive dimensions.
 
     Parameters:
         listDimensions: A list of integers representing the dimensions of the map. Must contain at least two positive dimensions.
 
     Returns:
-        foldingsTotal: The total number of possible distinct foldings for the given map dimensions.
+        foldsTotal: The total number of distinct folds for the given map dimensions.
     """
     def integerSmall(value):
         return numpy.uint8(value)
@@ -30,18 +28,13 @@ def countFolds(listDimensions: List[int]):
     dtypeDefault = numpy.uint8
     dtypeMaximum = numpy.uint16
 
-    leafAbove = numba.literally(0)
-    leafBelow = numba.literally(1)
-    countDimensionsGapped = numba.literally(2)
-    gapRangeStart = numba.literally(3)
-
     listDimensionsPositive = validateListDimensions(listDimensions)
 
     leavesTotal = integerSmall(getLeavesTotal(listDimensionsPositive))
     dimensionsTotal = integerSmall(len(listDimensionsPositive))
 
-    """How to build a leaf connection graph, also called a "Cartesian Product Decomposition" 
-    or a "Dimensional Product Mapping", with sentinels: 
+    """How to build a leaf connection graph, also called a "Cartesian Product Decomposition"
+    or a "Dimensional Product Mapping", with sentinels:
     Step 1: find the cumulative product of the map's dimensions"""
     cumulativeProduct = numpy.ones(dimensionsTotal + 1, dtype=dtypeDefault)
     for dimension1ndex in range(1, dimensionsTotal + 1):
@@ -65,26 +58,31 @@ def countFolds(listDimensions: List[int]):
                                 else ((leaf1ndexConnectee if coordinateSystem[dimension1ndex, leaf1ndexConnectee] == 1
                                             else leaf1ndexConnectee - cumulativeProduct[dimension1ndex - 1])
                                     if (coordinateSystem[dimension1ndex, activeLeaf1ndex] & 1) == (coordinateSystem[dimension1ndex, leaf1ndexConnectee] & 1)
-                                    else (leaf1ndexConnectee if coordinateSystem[dimension1ndex, leaf1ndexConnectee] == listDimensions[dimension1ndex-1] 
+                                    else (leaf1ndexConnectee if coordinateSystem[dimension1ndex, leaf1ndexConnectee] == listDimensions[dimension1ndex-1]
                                             or leaf1ndexConnectee + cumulativeProduct[dimension1ndex - 1] > activeLeaf1ndex
                                             else leaf1ndexConnectee + cumulativeProduct[dimension1ndex - 1])))
 
 
+
+    """Indices of array `track` (to "track" the execution state), which is a collection of one-dimensional arrays each of length `leavesTotal + 1`."""
+    leafAbove = numba.literally(0)
+    leafBelow = numba.literally(1)
+    countDimensionsGapped = numba.literally(2)
+    gapRangeStart = numba.literally(3)
     track = numpy.zeros((4, leavesTotal + 1), dtype=dtypeDefault)
 
-    """Indices of array `track` (to "track" the state), which is a collection of one-dimensional arrays each of length `leavesTotal + 1`."""
-    # because this is numba.njit, pay attention to overflow. `leavesTotal * leavesTotal` is placed into a temporary variable of the same 
+    # because this is numba.njit, pay attention to overflow. `leavesTotal * leavesTotal` is placed into a temporary variable of the same
     # size as the operands, which is only 8 bits: that's easy to overflow with multiplication.
     potentialGaps = numpy.zeros(integerLarge(integerLarge(leavesTotal) * integerLarge(leavesTotal) + 1), dtype=dtypeMaximum)
 
-    foldingsTotal = integerLarge(0)
+    foldsTotal = integerLarge(0)
     activeLeaf1ndex = integerSmall(1)
     activeGap1ndex = integerSmall(0)
 
     while activeLeaf1ndex > 0:
         if activeLeaf1ndex <= 1 or track[leafBelow, 0] == 1:
-            if activeLeaf1ndex > leavesTotal:                
-                foldingsTotal += leavesTotal
+            if activeLeaf1ndex > leavesTotal:
+                foldsTotal += leavesTotal
             else:
                 dimensionsUnconstrained = integerSmall(0)
                 """Track possible gaps for activeLeaf1ndex in each section"""
@@ -142,4 +140,4 @@ def countFolds(listDimensions: List[int]):
             track[gapRangeStart, activeLeaf1ndex] = activeGap1ndex
             """Move to next leaf"""
             activeLeaf1ndex += 1
-    return int(foldingsTotal)
+    return int(foldsTotal)

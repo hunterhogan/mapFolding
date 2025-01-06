@@ -245,4 +245,4 @@ def getOEISids() -> None:
 if __name__ == "__main__":
     getOEISids()
 
-# numba.jit_module(forceobj=True, cache=True, looplift=False)
+numba.jit_module(forceobj=True, cache=True, looplift=False)
