@@ -87,6 +87,8 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                             leaf1ndexConnectee: int = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
                             while leaf1ndexConnectee != activeLeaf1ndex:
                                 # if computationDivisions == False or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
+                                if not activeLeaf1ndex != leavesTotal and leaf1ndexConnectee % leavesTotal == leavesTotal - 1:
+                                    return
                                 gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
                                 leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[leafBelow, leaf1ndexConnectee]]
                         dimension1ndex += 1
@@ -97,8 +99,8 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                 backtrack()
             if activeLeaf1ndex > 0:
                 placeLeaf()
-            if activeGap1ndex > 0:
-                return
+            # if activeGap1ndex > 0:
+            #     return
 
     def doWhile():
         nonlocal foldsTotal
