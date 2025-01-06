@@ -62,8 +62,6 @@ def countFolds(listDimensions: List[int]):
                                             or leaf1ndexConnectee + cumulativeProduct[dimension1ndex - 1] > activeLeaf1ndex
                                             else leaf1ndexConnectee + cumulativeProduct[dimension1ndex - 1])))
 
-
-
     """Indices of array `track` (to "track" the execution state), which is a collection of one-dimensional arrays each of length `leavesTotal + 1`."""
     leafAbove = numba.literally(0)
     leafBelow = numba.literally(1)
@@ -87,8 +85,6 @@ def countFolds(listDimensions: List[int]):
                 dimensionsUnconstrained = integerSmall(0)
                 """Track possible gaps for activeLeaf1ndex in each section"""
                 gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
-                """Reset gap index"""
-                activeGap1ndex = gap1ndexLowerBound
 
                 """Count possible gaps for activeLeaf1ndex in each section"""
                 dimension1ndex = integerSmall(1)
