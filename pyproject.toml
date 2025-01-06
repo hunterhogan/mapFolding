@@ -71,3 +71,6 @@ testpaths = ["tests"]
 addopts = [
     "--color=yes",
 ]
+env = [
+    "NUMBA_DISABLE_JIT=1"
+    ]

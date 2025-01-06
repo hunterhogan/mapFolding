@@ -91,6 +91,7 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
 
         return productDimensions
 
+# @numba.jit(cache=True, fastmath=False, forceobj=True, looplift=True)
 def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
     """
     Constructs a connection graph for a given list of dimensions.
@@ -148,6 +149,7 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
 
     return connectionGraph
 
+# @numba.jit(cache=True, fastmath=False, forceobj=True, looplift=True)
 def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, dtypeMaximum: type = numpy.int64):
     """
     Outfits the folding process with the necessary data structures.
@@ -202,4 +204,4 @@ def validateTaskDivisions(computationDivisions: int, computationIndex: int, leav
 
     return computationDivisions, computationIndex
 
-# numba.jit_module(cache=True, fastmath=False)
+numba.jit_module(cache=True, fastmath=False, error_model='numpy')
