@@ -29,12 +29,12 @@ def test_getLeavesTotal_edge_cases():
     """Test edge cases for getLeavesTotal."""
     # Order independence
     compareValues(getLeavesTotal([2, 3, 4]), getLeavesTotal, [4, 2, 3])
-    
+
     # Immutability
     listOriginal = [2, 3]
     compareValues(6, getLeavesTotal, listOriginal)
     compareValues([2, 3], lambda x: x, listOriginal)  # Check list wasn't modified
-    
+
     # Overflow protection
     largeNumber = sys.maxsize // 2
     expectError(OverflowError, getLeavesTotal, [largeNumber, largeNumber, 2])
@@ -43,10 +43,10 @@ def test_getLeavesTotal_properties():
     """Test properties that should hold for getLeavesTotal."""
     def generateValidDimensions():
         return [random.randint(1, 5) for index in range(random.randint(2, 4))]
-    
+
     def checkCommutative(inputValue, result):
         return getLeavesTotal(sorted(inputValue)) == result
-    
+
     # templatePropertyTest(getLeavesTotal, "commutative", generateValidDimensions, checkCommutative)
 
 # ===== Dimension Validation Tests =====
