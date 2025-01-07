@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from mapFolding import countFolds
-import numba
+# import numba
 import pathlib
 import random
 import typing
@@ -245,4 +245,4 @@ def getOEISids() -> None:
 if __name__ == "__main__":
     getOEISids()
 
-numba.jit_module(forceobj=True, cache=True, looplift=False)
+# numba.jit_module(forceobj=True, cache=True, looplift=False)

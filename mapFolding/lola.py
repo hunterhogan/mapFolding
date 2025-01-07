@@ -1,9 +1,9 @@
 from mapFolding import outfitFoldings
 from typing import List, Final, Literal
 import numpy
-import numba
+# import numba
 
-@numba.jit(nopython=True, cache=True, fastmath=False)
+# @numba.jit(nopython=True, cache=True, fastmath=False)
 def countFolds(listDimensions: List[int], computationDivisions: bool = False):
 
     dtypeDefault: Final = numpy.uint8

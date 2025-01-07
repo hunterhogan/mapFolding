@@ -1,11 +1,121 @@
 from typing import List, Tuple
 from Z0Z_tools import intInnit
-import numba
-import numba.extending
+# import numba
+# import numba.extending
 import numpy
 import numpy.typing
-from Z0Z_tools import intInnit
+import sys
 
+
+# @numba.extending.overload(intInnit)
+# def intInnit_jitInnit(listDimensions, parameterName):
+#     if isinstance(listDimensions, numba.types.List) and isinstance(parameterName, numba.types.StringLiteral):
+#         def intInnit_jitInnit_implementInnit(listDimensions, parameterName):
+#             return listDimensions
+#         return intInnit_jitInnit_implementInnit
+#     return None
+
+def getLeavesTotal(listDimensions: List[int]) -> int:
+    """
+    Calculate the product of non-zero, non-negative integers in the given list.
+
+    Parameters:
+        listDimensions: A list of integers representing dimensions.
+
+    Returns:
+        productDimensions: The product of all positive integer dimensions. Returns 0 if all dimensions are 0.
+    """
+    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
+    listPositive = [dimension for dimension in listNonNegative if dimension > 0]
+
+    if not listPositive:
+        return 0
+    else:
+        productDimensions = 1
+        for dimension in listPositive:
+            if dimension > sys.maxsize // productDimensions:
+                raise OverflowError("Product would exceed maximum integer size")
+            productDimensions *= dimension
+
+        return productDimensions
+
+def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
+    """
+    Constructs a connection graph for a given list of dimensions.
+    This function generates a multi-dimensional connection graph based on the provided list of dimensions.
+    The graph represents the connections between leaves in a Cartesian product decomposition or dimensional product mapping.
+
+    Parameters:
+        listDimensions: A validated list of integers representing the dimensions of the map.
+    Returns:
+        connectionGraph: A 3D numpy array with shape of (dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1).
+    """
+    leavesTotal = getLeavesTotal(listDimensions)
+    arrayDimensions = numpy.array(listDimensions, dtype=dtype)
+    dimensionsTotal = len(arrayDimensions)
+
+    # Step 1: find the cumulative product of the map's dimensions
+    cumulativeProduct = numpy.ones(dimensionsTotal + 1, dtype=dtype)
+    for index in range(1, dimensionsTotal + 1):
+        cumulativeProduct[index] = cumulativeProduct[index - 1] * arrayDimensions[index - 1]
+
+    # Step 2: create a coordinate system
+    coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=dtype)
+
+    for dimension1ndex in range(1, dimensionsTotal + 1):
+        for leaf1ndex in range(1, leavesTotal + 1):
+            coordinateSystem[dimension1ndex, leaf1ndex] = (
+                ((leaf1ndex - 1) // cumulativeProduct[dimension1ndex - 1]) %
+                arrayDimensions[dimension1ndex - 1] + 1
+            )
+
+    # Step 3: create and fill the connection graph
+    connectionGraph = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=dtype)
+
+    for dimension1ndex in range(1, dimensionsTotal + 1):
+        for activeLeaf1ndex in range(1, leavesTotal + 1):
+            for connectee1ndex in range(1, activeLeaf1ndex + 1):
+                # Base coordinate conditions
+                isFirstCoord = coordinateSystem[dimension1ndex, connectee1ndex] == 1
+                isLastCoord = coordinateSystem[dimension1ndex, connectee1ndex] == arrayDimensions[dimension1ndex - 1]
+                exceedsActive = connectee1ndex + cumulativeProduct[dimension1ndex - 1] > activeLeaf1ndex
+
+                # Parity check
+                isEvenParity = (coordinateSystem[dimension1ndex, activeLeaf1ndex] & 1) == \
+                                (coordinateSystem[dimension1ndex, connectee1ndex] & 1)
+
+                # Determine connection value
+                if (isEvenParity and isFirstCoord) or (not isEvenParity and (isLastCoord or exceedsActive)):
+                    connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex
+                elif isEvenParity and not isFirstCoord:
+                    connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex - cumulativeProduct[dimension1ndex - 1]
+                elif not isEvenParity and not (isLastCoord or exceedsActive):
+                    connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[dimension1ndex - 1]
+                else:
+                    connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex
+
+    return connectionGraph
+
+def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, dtypeMaximum: type = numpy.int64):
+    """
+    Outfits the folding process with the necessary data structures.
+
+    Parameters:
+        listDimensions: A list of integers representing the dimensions of the map.
+    Returns:
+        listDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps: Tuple containing the validated list of dimensions, the total number of leaves, the connection graph, an array for tracking, and an array for potential gaps.
+    """
+    arrayTrackingHeightHARDCODED = 4
+    arrayTrackingHeight = arrayTrackingHeightHARDCODED
+
+    listDimensions = validateListDimensions(listDimensions)
+    leavesTotal = getLeavesTotal(listDimensions)
+
+    connectionGraph = makeConnectionGraph(listDimensions, dtype=dtypeDefault)
+    arrayTracking = numpy.zeros((arrayTrackingHeight, leavesTotal + 1), dtype=dtypeDefault)
+    potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
+
+    return listDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps
 
 def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed parameter') -> List[int]:
     """
@@ -31,30 +141,6 @@ def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed
         raise ValueError("At least one dimension must be non-negative")
 
     return listNonNegative
-
-def getLeavesTotal(listDimensions: List[int]) -> int:
-    """
-    Calculate the product of non-zero, non-negative integers in the given list.
-
-    Parameters:
-        listDimensions: A list of integers representing dimensions.
-
-    Returns:
-        productDimensions: The product of all positive integer dimensions. Returns 0 if all dimensions are 0.
-    """
-    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
-    listPositive = [dimension for dimension in listNonNegative if dimension > 0]
-
-    if not listPositive:
-        return 0
-    else:
-        productDimensions = 1
-        for dimension in listPositive:
-            if dimension > sys.maxsize // productDimensions:
-                raise OverflowError("Product would exceed maximum integer size")
-            productDimensions *= dimension
-
-        return productDimensions
 
 def validateListDimensions(listDimensions: List[int]) -> List[int]:
     """
@@ -82,106 +168,3 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
     if len(listDimensionsPositive) < 2:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
     return listDimensionsPositive
-
-def makeConnectionGraph(listDimensions: List[int]) -> numpy.typing.NDArray[numpy.int64]:
-    """
-    Constructs a connection graph for a given list of dimensions.
-    This function generates a multi-dimensional connection graph based on the provided list of dimensions.
-    The graph represents the connections between leaves in a Cartesian product decomposition or dimensional product mapping.
-
-    Parameters:
-        listDimensions: A list of integers representing the dimensions of the map.
-    Returns:
-        D (connectionGraph): A 3D numpy array representing the connection graph. The shape of the array is (d+1, n+1, n+1),
-                                        where d is the number of dimensions and n is the total number of leaves.
-    """
-
-    listDimensions = validateListDimensions(listDimensions)
-    n = getLeavesTotal(listDimensions)
-    d = len(listDimensions)
-
-    # How to build a numpy.ndarray connectionGraph with sentinel values:
-    # ("Cartesian Product Decomposition" or "Dimensional Product Mapping")
-    # Step 1: find the cumulative product of the map dimensions
-    P = numpy.ones(d + 1, dtype=numpy.int64)
-    for i in range(1, d + 1):
-        P[i] = P[i - 1] * listDimensions[i - 1]
-
-    # Step 2: for each dimension, create a coordinate system
-    # C[i][m] holds the i-th coordinate of leaf m
-    C = numpy.zeros((d + 1, n + 1), dtype=numpy.int64)
-    for i in range(1, d + 1):
-        for m in range(1, n + 1):
-            C[i][m] = ((m - 1) // P[i - 1]) % listDimensions[i - 1] + 1
-
-    # Step 3: create a huge empty leafConnectionGraph
-    D = numpy.zeros((d + 1, n + 1, n + 1), dtype=numpy.int64)
-
-    # Step for... for... for...: fill the leafConnectionGraph
-    for i in range(1, d + 1):
-    # D[i][l][m] computes the leaf connected to m in dimension i when inserting l
-        for l in range(1, n + 1):
-            for m in range(1, l + 1):
-                delta = C[i][l] - C[i][m]
-                if delta % 2 == 0: # If delta is even
-                    if C[i][m] == 1:
-                        D[i][l][m] = m
-                    else:
-                        D[i][l][m] = m - P[i - 1]
-                else: # If delta is odd
-                    if C[i][m] == listDimensions[i - 1] or m + P[i - 1] > l:
-                        D[i][l][m] = m
-                    else:
-                        D[i][l][m] = m + P[i - 1]
-    return D
-
-def validateTaskDivisions(computationDivisions: int, computationIndex: int, n: int) -> Tuple[int, int]:
-    """
-    Validates the task divisions for a computation process.
-
-    Parameters:
-        computationDivisions: The number of divisions for the computation
-        computationIndex: The index of the current computation division
-        n: The total number of leaves
-
-    Returns:
-        computationDivisions,computationIndex: Tuple containing the validated computationDivisions and computationIndex
-
-    Raises:
-        ValueError: If parameters are invalid
-        TypeError: If parameters are not integers
-    """
-    # First validate types
-    computationDivisions = intInnit([computationDivisions], 'computationDivisions').pop(0)
-    computationIndex = intInnit([computationIndex], 'computationIndex').pop(0)
-
-    # Then validate ranges
-    if computationDivisions < 0 or computationIndex < 0:
-        raise ValueError(f"computationDivisions, {computationDivisions}, and computationIndex, {computationIndex}, must be non-negative integers.")
-
-    if computationDivisions > n:
-        raise ValueError(f"computationDivisions, {computationDivisions}, must be less than or equal to the total number of leaves, {n}.")
-
-    if computationDivisions > 1 and computationIndex >= computationDivisions:
-        raise ValueError(f"computationIndex, {computationIndex}, must be less than computationDivisions, {computationDivisions}.")
-
-    return computationDivisions, computationIndex
-
-def validateParametersFoldings(listDimensions: List[int]):
-    """
-    Validates and processes the parameters for the folding computation.
-
-    Parameters:
-        listDimensions: A list of dimensions for the folding task.
-
-    Returns:
-        listDimensions,leavesTotal,connectionGraph:
-            A tuple containing the validated list of dimensions, the validated number of
-            computation divisions, the validated computation index, and the total number of leaves.
-    """
-    # I don't know if I should put all of these steps in series or if each function should validate its own parameters.
-    # In the future, I might not call the entire series. Also, it feels weird to return listDimensions from makeConnectionGraph.
-    listDimensions = validateListDimensions(listDimensions)
-    leavesTotal = getLeavesTotal(listDimensions)
-    connectionGraph = makeConnectionGraph(listDimensions)
-    return listDimensions, leavesTotal, connectionGraph
