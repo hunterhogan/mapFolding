@@ -40,6 +40,8 @@ def listDimensions_testCounts(oeisID):
     if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
     while True:
         n = random.choice(settingsOEISsequences[oeisID]['valuesTestValidation'])
+        if n < 2:
+            continue
         listDimensionsCandidate = settingsOEISsequences[oeisID]['getDimensions'](n)
 
         try:

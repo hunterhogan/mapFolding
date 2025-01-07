@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from mapFolding import countFolds
+import numba
 import pathlib
 import random
 import typing
@@ -218,7 +219,7 @@ def _getOEISidValues(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
 
 for oeisID in settingsOEISsequences:
     settingsOEISsequences[oeisID]['valuesKnown'] = _getOEISidValues(oeisID)
-    settingsOEISsequences[oeisID]['valueUnknown'] = max(settingsOEISsequences[oeisID]['valuesKnown'].values()) + 1
+    settingsOEISsequences[oeisID]['valueUnknown'] = max(settingsOEISsequences[oeisID]['valuesKnown'].keys()) + 1
 
 def clearOEIScache() -> None:
     """Delete all cached OEIS sequence files."""
@@ -243,3 +244,5 @@ def getOEISids() -> None:
 
 if __name__ == "__main__":
     getOEISids()
+
+numba.jit_module(forceobj=True, cache=True, looplift=False)
