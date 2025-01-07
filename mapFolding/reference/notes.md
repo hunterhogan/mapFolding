@@ -84,3 +84,4 @@ Assume `listDimensions`:
   - `activeGap1ndex > 0`
   - `not activeLeaf1ndex != leavesTotal and leaf1ndexConnectee % leavesTotal == leavesTotal - 1`
 - 2 X n strip of stamps: "a(n), called G(n,2), is known to be divisible by 4n for n >= 2. - [Fred Lunnon](https://oeis.org/A001415), Dec 08 2013"
+- The total number of folds is divisible by the total number of leaves.
