@@ -3,7 +3,7 @@ from typing import List, Final, Literal
 import numpy
 import numba
 
-@numba.jit(nopython=True, cache=True, fastmath=False)
+@numba.jit(nopython=True, cache=True, fastmath=True)
 def countFolds(listDimensions: List[int], computationDivisions: bool = False):
 
     dtypeDefault: Final = numpy.uint8
@@ -17,6 +17,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     leafBelow: Final[Literal[1]] = 1
     countDimensionsGapped: Final[Literal[2]] = 2
     gapRangeStart: Final[Literal[3]] = 3
+    modulus: Final[Literal[4]] = 4
 
     taskIndex: int = 0
 
@@ -89,7 +90,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                 placeLeaf()
 
     def doWhile():
-        nonlocal foldsTotal
+        nonlocal foldsTotal, taskIndex
         while activeLeaf1ndex > 0:
             if activeLeaf1ndex <= 1 or track[leafBelow, 0] == 1:
                 if activeLeaf1ndex > leavesTotal:
@@ -104,8 +105,19 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                         else:
                             leaf1ndexConnectee: int = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
                             while leaf1ndexConnectee != activeLeaf1ndex:
-                                if computationDivisions == False or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
-                                    gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
+                                # if computationDivisions == False or activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
+                                #     gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
+                                if not activeLeaf1ndex != leavesTotal:
+                                    taskPartition: int = leaf1ndexConnectee % leavesTotal
+                                    if taskPartition == taskIndex:
+                                        pass
+                                    else:
+                                        # NOTE Lola condition
+                                        if track[modulus, taskPartition] == 0:
+                                            track[modulus, taskIndex] = 1
+                                            taskIndex = taskPartition
+
+                                gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
                                 leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[leafBelow, leaf1ndexConnectee]]
                         dimension1ndex += 1
                     filterCommonGaps(dimensionsUnconstrained, gap1ndexLowerBound)
@@ -115,22 +127,24 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                 placeLeaf()
 
     initializeState()
+    taskIndex = leavesTotal - 1
+    doWhile()
 
-    state_activeGap1ndex = activeGap1ndex
-    state_activeLeaf1ndex = activeLeaf1ndex
-    state_potentialGaps = potentialGaps.copy()
-    state_track = track.copy()
+    # state_activeGap1ndex = activeGap1ndex
+    # state_activeLeaf1ndex = activeLeaf1ndex
+    # state_potentialGaps = potentialGaps.copy()
+    # state_track = track.copy()
 
-    if computationDivisions:
-        listTaskIndices = list(range(leavesTotal))
-    else:
-        listTaskIndices = [taskIndex]
+    # if computationDivisions:
+    #     listTaskIndices = list(range(leavesTotal))
+    # else:
+    #     listTaskIndices = [taskIndex]
 
-    for taskIndex in listTaskIndices:
-        activeGap1ndex = state_activeGap1ndex
-        activeLeaf1ndex = state_activeLeaf1ndex
-        potentialGaps = state_potentialGaps.copy()
-        track = state_track.copy()
-        doWhile()
+    # for taskIndex in listTaskIndices:
+    #     activeGap1ndex = state_activeGap1ndex
+    #     activeLeaf1ndex = state_activeLeaf1ndex
+    #     potentialGaps = state_potentialGaps.copy()
+    #     track = state_track.copy()
+    #     doWhile()
 
     return foldsTotal

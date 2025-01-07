@@ -3,11 +3,14 @@ from collections import Counter
 from functools import wraps
 from mapFolding import outfitFoldings
 from types import FrameType
-from typing import List, Callable, Any, Final, Literal
+from typing import List, Callable, Any, Final, Literal, Dict
 import pathlib
 import sys
 import time
+import numpy
+import numba
 
+"""
 def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
     def decoratorTrace(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(functionTarget)
@@ -37,6 +40,8 @@ def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
         return wrapperTrace
     return decoratorTrace(functionTarget)
 
+"""
+# @numba.jit(nopython=True, cache=True, fastmath=True)
 def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     def backtrack() -> None:
         nonlocal activeLeaf1ndex
@@ -215,6 +220,61 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
             if activeLeaf1ndex > 0:
                 placeLeaf()
 
+    def changeling():
+        while checkActiveLeafGreaterThan0():
+            if checkActiveLeafIs1orLess() or checkLeafBelowSentinelIs1():
+                if checkActiveLeafGreaterThanLeavesTotal():
+                    incrementFoldsTotal()
+                else:
+                    nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound, dimension1ndex, taskIndex, foldsTotal
+
+                    dimensionsUnconstrained = 0
+                    gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
+
+                    dimension1ndex = 1
+                    while dimension1ndex <= dimensionsTotal:
+                        if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
+                            incrementDimensionsUnconstrained()
+                        else:
+                            initializeLeaf1ndexConnectee()
+                            while leaf1ndexConnectee != activeLeaf1ndex:
+                                if not checkActiveLeafNotEqualToLeavesTotal():
+                                    taskPartition: int = leaf1ndexConnectee % leavesTotal
+                                    if taskPartition == taskIndex:
+                                        pass
+                                    else:
+                                        # NOTE Lola condition
+                                        if track[modulus, taskPartition] == 0:
+                                            track[modulus, taskIndex] = 1
+                                            taskIndex = taskPartition
+                                potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
+                                if track[countDimensionsGapped, leaf1ndexConnectee] == 0:
+                                    incrementGap1ndexLowerBound()
+                                track[countDimensionsGapped, leaf1ndexConnectee] += 1
+                                updateLeaf1ndexConnectee()
+                        dimension1ndex += 1
+
+                    if dimensionsUnconstrained == dimensionsTotal:
+                        insertUnconstrainedLeaf()
+
+                    nonlocal indexMiniGap
+                    indexMiniGap = activeGap1ndex
+                    while indexMiniGap < gap1ndexLowerBound:
+                        potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
+                        if track[countDimensionsGapped, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                            incrementActiveGap()
+                        track[countDimensionsGapped, potentialGaps[indexMiniGap]] = 0
+                        incrementIndexMiniGap()
+
+            while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
+                backtrack()
+
+            if activeLeaf1ndex > 0:
+                placeLeaf()
+
+            if all(track[modulus, index] == 1 for index in range(leavesTotal) if index != taskIndex):
+                return
+
     def doWhile():
         while checkActiveLeafGreaterThan0():
             if checkActiveLeafIs1orLess() or checkLeafBelowSentinelIs1():
@@ -270,12 +330,15 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
 
     listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions)
 
+    connectionGraph: Final[numpy.ndarray]
     countDimensionsGapped: Final[Literal[2]] = 2
     dimensionsTotal: Final[int] = len(listDimensions)
     gapRangeStart: Final[Literal[3]] = 3
     leafAbove: Final[Literal[0]] = 0
     leafBelow: Final[Literal[1]] = 1
     leavesTotal: Final[int]
+    modulus: Final[Literal[4]] = 4
+    subtotal: Final[Literal[4]] = 4
 
     activeGap1ndex: int = 0
     activeLeaf1ndex: int = 1
@@ -291,21 +354,35 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     initializeUnconstrainedLeaf()
     initializeTaskIndex()
 
-    state_activeGap1ndex = activeGap1ndex
-    state_activeLeaf1ndex = activeLeaf1ndex
-    state_potentialGaps = potentialGaps.copy()
-    state_track = track.copy()
+    taskIndex = leavesTotal - 1
+    changeling()
+    """NOTE At the moment, changeling is very interesting, but after limited testing, computationDivisions does not work"""
+    doWhile()
 
-    if computationDivisions:
-        listTaskIndices = list(range(leavesTotal))
-    else:
-        listTaskIndices = [taskIndex]
+    # track[subtotal] = 0
+    # track[subtotal, taskIndex] = foldsTotal
+    # print(foldsTotal)
+    # foldsTotal = 0
 
-    for taskIndex in listTaskIndices:
-        activeGap1ndex = state_activeGap1ndex
-        activeLeaf1ndex = state_activeLeaf1ndex
-        potentialGaps = state_potentialGaps.copy()
-        track = state_track.copy()
-        doWhile()
+    # state_activeGap1ndex = activeGap1ndex
+    # state_activeLeaf1ndex = activeLeaf1ndex
+    # state_potentialGaps = potentialGaps.copy()
+    # state_track = track.copy()
+
+    # if computationDivisions:
+    #     listTaskIndices = list(range(leavesTotal))
+    # else:
+    #     listTaskIndices = [taskIndex]
+
+    # for taskIndex in listTaskIndices:
+    #     print(foldsTotal)
+    #     activeGap1ndex = state_activeGap1ndex
+    #     activeLeaf1ndex = state_activeLeaf1ndex
+    #     potentialGaps = state_potentialGaps.copy()
+    #     track = state_track.copy()
+    #     doWhile()
+
+    # # print(foldsTotal)
+    # foldsTotal = sum(track[subtotal]) + foldsTotal
 
     return foldsTotal

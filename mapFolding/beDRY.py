@@ -105,7 +105,7 @@ def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, 
     Returns:
         listDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps: Tuple containing the validated list of dimensions, the total number of leaves, the connection graph, an array for tracking, and an array for potential gaps.
     """
-    arrayTrackingHeightHARDCODED = 4
+    arrayTrackingHeightHARDCODED = 5
     arrayTrackingHeight = arrayTrackingHeightHARDCODED
 
     listDimensions = validateListDimensions(listDimensions)
