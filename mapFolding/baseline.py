@@ -2,17 +2,13 @@ from typing import List
 import numba
 import numpy
 
-from mapFolding import validateListDimensions, getLeavesTotal
-from mapFolding.benchmarks import recordBenchmarks
-
-# @recordBenchmarks()
 @numba.jit(cache=True, nopython=True, fastmath=False)
 def countFolds(listDimensions: List[int]):
     """
     Count the number of distinct ways to fold a map at least two positive dimensions.
 
     Parameters:
-        listDimensions: A list of integers representing the dimensions of the map. Must contain at least two positive dimensions.
+        listDimensions: A list of integers representing the dimensions of the map. Error checking and DRY code are impermissible in the numba and jax universes. Validate the list yourself before passing here. There might be some tools for that in this package unless I have become a pyL33t coder.
 
     Returns:
         foldsTotal: The total number of distinct folds for the given map dimensions.
@@ -28,10 +24,10 @@ def countFolds(listDimensions: List[int]):
     dtypeDefault = numpy.uint8
     dtypeMaximum = numpy.uint16
 
-    listDimensionsPositive = validateListDimensions(listDimensions)
-
-    leavesTotal = integerSmall(getLeavesTotal(listDimensionsPositive))
-    dimensionsTotal = integerSmall(len(listDimensionsPositive))
+    leavesTotal = integerSmall(1)
+    for 个 in listDimensions:
+        leavesTotal = leavesTotal * integerSmall(个)
+    dimensionsTotal = integerSmall(len(listDimensions))
 
     """How to build a leaf connection graph, also called a "Cartesian Product Decomposition"
     or a "Dimensional Product Mapping", with sentinels:

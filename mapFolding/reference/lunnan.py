@@ -1,7 +1,7 @@
 """
 An unnecessarily literal translation of the original Atlas Autocode code by W. F. Lunnon to Python.
 W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
-"""
+"""# NOTE not functional yet
 def foldings(p, job=None):
     """An unnecessarily literal translation of the original Atlas Autocode code."""
     p = list(p)

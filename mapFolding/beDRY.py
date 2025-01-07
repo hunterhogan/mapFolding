@@ -1,18 +1,35 @@
-import sys
-from typing import List
-
-import numba
-import numba.extending
+import numpy
+import numpy.typing
 from Z0Z_tools import intInnit
+from typing import Any, Callable, List, Sequence, Iterable, Optional, Union
+import sys
 
+def getLeavesTotal(listDimensions: List[int]) -> int:
+    """
+    Calculate the product of non-zero, non-negative integers in the given list.
 
-@numba.extending.overload(intInnit)
-def intInnit_jitInnit(listDimensions, parameterName):
-    if isinstance(listDimensions, numba.types.List) and isinstance(parameterName, numba.types.StringLiteral):
-        def intInnit_jitInnit_implementInnit(listDimensions, parameterName):
-            return listDimensions
-        return intInnit_jitInnit_implementInnit
-    return None
+    Parameters:
+        listDimensions: A list of integers representing dimensions.
+
+    Returns:
+        productDimensions: The product of all positive integer dimensions. Returns 0 if all dimensions are 0.
+    """
+    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
+    listPositive = [dimension for dimension in listNonNegative if dimension > 0]
+
+    if not listPositive:
+        return 0
+    else:
+        productDimensions = 1
+        for dimension in listPositive:
+            if dimension > sys.maxsize // productDimensions:
+                raise OverflowError("Product would exceed maximum integer size")
+            productDimensions *= dimension
+
+        return productDimensions
+
+def Z0Z_getDimensions(listDimensions: List[int], dtype=numpy.int64)-> numpy.ndarray:
+    return numpy.array(validateListDimensions(listDimensions), dtype=dtype)
 
 def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed parameter') -> List[int]:
     """
@@ -65,29 +82,3 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
     if len(listDimensionsPositive) < 2:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
     return listDimensionsPositive
-
-def getLeavesTotal(listDimensions: List[int]) -> int:
-    """
-    Calculate the product of non-zero, non-negative integers in the given list.
-
-    Parameters:
-        listDimensions: A list of integers representing dimensions.
-
-    Returns:
-        productDimensions: The product of all positive integer dimensions. Returns 0 if all dimensions are 0.
-    """
-    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
-    listPositive = [dimension for dimension in listNonNegative if dimension > 0]
-
-    if not listPositive:
-        return 0
-    else:
-        productDimensions = 1
-        for dimension in listPositive:
-            if dimension > sys.maxsize // productDimensions:
-                raise OverflowError("Product would exceed maximum integer size")
-            productDimensions *= dimension
-
-        return productDimensions
-
-numba.jit_module(cache=True, error_model='python')
