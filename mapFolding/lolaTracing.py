@@ -1,15 +1,16 @@
+from Z0Z_tools import dataTabularTOpathFilenameDelimited
 from collections import Counter
 from functools import wraps
 from mapFolding import outfitFoldings
 from numpy.typing import NDArray
 from types import FrameType
 from typing import List, Callable, Any
-from Z0Z_tools import dataTabularTOpathFilenameDelimited
 import pathlib
 import sys
 import time
 
 def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
+    """An incompetently made decorator for collecting basic information about functions calls."""
     def decoratorTrace(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(functionTarget)
         def wrapperTrace(*arguments, **keywordArguments):
@@ -73,11 +74,12 @@ def countFoldings(track: NDArray, potentialGaps: NDArray, connectionGraph: NDArr
             incrementGap1ndexLowerBound()
         track[countDimensionsGapped, leaf1ndexConnectee] += 1
 
+    def incrementIndexMiniGap():
+        nonlocal indexMiniGap
+        indexMiniGap += 1
+
     def filterCommonGaps() -> None:
-        def incrementIndexMiniGap():
-            nonlocal indexMiniGap
-            indexMiniGap += 1
-        nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound
+        nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound, indexMiniGap
         indexMiniGap = activeGap1ndex
         while indexMiniGap < gap1ndexLowerBound:
             potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
@@ -102,13 +104,12 @@ def countFoldings(track: NDArray, potentialGaps: NDArray, connectionGraph: NDArr
         nonlocal gap1ndexLowerBound
         gap1ndexLowerBound += 1
 
-    def insertUnconstrainedLeaf(gapNumberLowerBound: int) -> int:
-        index = 0
-        while index < activeLeaf1ndex:
-            potentialGaps[gapNumberLowerBound] = index
-            gapNumberLowerBound += 1
-            index += 1
-        return gapNumberLowerBound
+    def insertUnconstrainedLeaf():
+        nonlocal gap1ndexLowerBound, indexLeaf
+        while indexLeaf < activeLeaf1ndex:
+            potentialGaps[gap1ndexLowerBound] = indexLeaf
+            gap1ndexLowerBound += 1
+            indexLeaf += 1
 
     def placeLeaf() -> None:
         nonlocal activeLeaf1ndex, activeGap1ndex
@@ -149,7 +150,8 @@ def countFoldings(track: NDArray, potentialGaps: NDArray, connectionGraph: NDArr
                         dimension1ndex += 1
 
                     dimension1ndex = 1 # NOTE this initializes the next loop
-                    if dimensionsUnconstrained == dimensionsTotal: gap1ndexLowerBound = insertUnconstrainedLeaf(gap1ndexLowerBound)
+                    if dimensionsUnconstrained == dimensionsTotal:
+                        insertUnconstrainedLeaf()
 
                     filterCommonGaps()
 
@@ -198,7 +200,8 @@ def countFoldings(track: NDArray, potentialGaps: NDArray, connectionGraph: NDArr
                         dimension1ndex += 1
 
                     dimension1ndex = 1 # NOTE this initializes the next loop
-                    if dimensionsUnconstrained == dimensionsTotal: gap1ndexLowerBound = insertUnconstrainedLeaf(gap1ndexLowerBound)
+                    if dimensionsUnconstrained == dimensionsTotal:
+                        insertUnconstrainedLeaf()
 
                     filterCommonGaps()
 
@@ -210,11 +213,13 @@ def countFoldings(track: NDArray, potentialGaps: NDArray, connectionGraph: NDArr
     leafAbove, leafBelow, countDimensionsGapped, gapRangeStart = 0, 1, 2, 3
 
     activeLeaf1ndex: int = 1
+    indexLeaf: int = 0
     activeGap1ndex: int = 0
     foldsTotal: int = 0
     taskIndexInitialized: bool = False
     dimensionsUnconstrained: int = 0
     gap1ndexLowerBound:int = 0
+    indexMiniGap: int = 0
     dimension1ndex: int = 1 # NOTE This initialization is correct.
     leaf1ndexConnectee: int = 0
 

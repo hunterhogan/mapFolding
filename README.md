@@ -2,9 +2,7 @@
 
 `mapFolding.countFolds()` will accept arbitrary values for the list of dimensions.
 
-In git repository branch "main", you will find a baseline, one-size-fits-all, reasonably fast algorithm. In other branches, you will find variations and experiments.
-
-The directory `mapFolding/citations` has BibTex-formatted citations to other resources, and `mapFolding/benchmarks` has incompetent code for measuring the speed of a function. The directory `mapFolding/reference` has a verbatim transcription of the "procedure" published by _The Computer Journal_, referential versions of the procedure with explanatory comments, and some miscellaneous notes.
+The directory `mapFolding/citations` has BibTex-formatted citations to other resources, and `mapFolding/benchmarks` has incompetent code for measuring the speed of a function. The directory `mapFolding/reference` has a verbatim transcription of the "procedure" published by _The Computer Journal_, referential versions of the procedure with explanatory comments, and some miscellaneous notes. In `mapFolding/reference/hunterNumba.py`, you will find a baseline, one-size-fits-all, self-contained, reasonably fast, contemporary algorithm but afflicted by noobaceae ignorancium.
 
 [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml)
 
