@@ -1,5 +1,4 @@
 from typing import Callable
-import numba
 import numpy
 import pathlib
 import time
@@ -21,23 +20,22 @@ def recordBenchmarks():
 
             # Store benchmark data in single file
             benchmarkEntry = numpy.array([(timeElapsed, listDimensions)], dtype=[('time', 'f8'), ('dimensions', 'O')])
-            
+
             if pathFilenameRecordedBenchmarks.exists():
                 arrayExisting = numpy.load(str(pathFilenameRecordedBenchmarks), allow_pickle=True)
                 arrayBenchmark = numpy.concatenate([arrayExisting, benchmarkEntry])
             else:
                 arrayBenchmark = benchmarkEntry
-            
+
             numpy.save(str(pathFilenameRecordedBenchmarks), arrayBenchmark)
             return result
 
         return djZeph
     return AzeemTheWrapper
 
-@numba.jit(cache=True, fastmath=False)
 def runBenchmarks(benchmarkIterations: int = 30) -> None:
     """Run benchmark iterations.
-    
+
     Parameters:
         benchmarkIterations (30): Number of benchmark iterations to run
     """
@@ -53,5 +51,4 @@ def runBenchmarks(benchmarkIterations: int = 30) -> None:
 
 if __name__ == '__main__':
     pathFilenameRecordedBenchmarks.unlink(missing_ok=True)
-    runBenchmarks(300)
-
+    runBenchmarks(10)
