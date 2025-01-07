@@ -3,9 +3,9 @@ import numba
 import numpy
 
 @numba.jit(cache=True, nopython=True, fastmath=False)
-def countFolds(listDimensions: List[int]):
+def countFolds(listDimensions: List[int]) -> int:
     """
-    Count the number of distinct ways to fold a map at least two positive dimensions.
+    Count the number of distinct ways to fold a map with at least two positive dimensions.
 
     Parameters:
         listDimensions: A list of integers representing the dimensions of the map. Error checking and DRY code are impermissible in the numba and jax universes. Validate the list yourself before passing here. There might be some tools for that in this package unless I have become a pyL33t coder.
@@ -13,13 +13,11 @@ def countFolds(listDimensions: List[int]):
     Returns:
         foldsTotal: The total number of distinct folds for the given map dimensions.
     """
-    def integerSmall(value):
+    def integerSmall(value) -> numpy.uint8:
         return numpy.uint8(value)
-        # return numba.uint8(value)
 
-    def integerLarge(value):
+    def integerLarge(value) -> numpy.uint64:
         return numpy.uint64(value)
-        # return numba.uint64(value)
 
     dtypeDefault = numpy.uint8
     dtypeMaximum = numpy.uint16
@@ -65,8 +63,6 @@ def countFolds(listDimensions: List[int]):
     gapRangeStart = numba.literally(3)
     track = numpy.zeros((4, leavesTotal + 1), dtype=dtypeDefault)
 
-    # because this is numba.njit, pay attention to overflow. `leavesTotal * leavesTotal` is placed into a temporary variable of the same
-    # size as the operands, which is only 8 bits: that's easy to overflow with multiplication.
     potentialGaps = numpy.zeros(integerLarge(integerLarge(leavesTotal) * integerLarge(leavesTotal) + 1), dtype=dtypeMaximum)
 
     foldsTotal = integerLarge(0)
@@ -132,4 +128,5 @@ def countFolds(listDimensions: List[int]):
             track[gapRangeStart, activeLeaf1ndex] = activeGap1ndex
             """Move to next leaf"""
             activeLeaf1ndex += 1
+
     return int(foldsTotal)
