@@ -1,6 +1,6 @@
 from .conftest import *
 from mapFolding import countFolds
-from mapFolding.lola import defineConcurrencyLimit
+from mapFolding.babbage import defineConcurrencyLimit
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteConcurrencyLimit
 
 def test_foldings_computationDivisions(listDimensionsTest_countFolds, foldsTotalKnown):

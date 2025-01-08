@@ -8,9 +8,10 @@ import numpy
 import os
 import pathlib
 import pickle
+import time
 
 def doCountFoldsTask(pathFilenameTask: Union[str, os.PathLike[Any]]):
-
+    print(time.time())
     dictionaryState: countFoldsTask = pickle.loads(pathlib.Path(pathFilenameTask).read_bytes())
     activeGap1ndex = dictionaryState["activeGap1ndex"]
     activeLeaf1ndex = dictionaryState["activeLeaf1ndex"]
@@ -29,16 +30,17 @@ def doCountFoldsTask(pathFilenameTask: Union[str, os.PathLike[Any]]):
 
     connectionGraph: Final[numpy.ndarray]
     countDimensionsGapped: Final[Literal[2]]
-    dimensionsTotal: Final[int]
+    dimensionsTotal: Final[numpy.uint8]
     gapRangeStart: Final[Literal[3]]
     leafAbove: Final[Literal[0]]
     leafBelow: Final[Literal[1]]
     listDimensions: Final[List[int]]
-    taskIndex: Final[int]
+    taskIndex: Final[numpy.uint8]
     foldsSubTotal = _doCountFoldsTask(activeGap1ndex, activeLeaf1ndex, connectionGraph, countDimensionsGapped, dimensionsTotal, foldsSubTotal, gapRangeStart, leafAbove, leafBelow, leavesTotal, listDimensions, potentialGaps, taskIndex, track)
     pathFilenameFoldsSubTotal = pathlib.Path(pathFilenameTask).with_suffix(".foldsSubTotal").write_text(str(foldsSubTotal))
+    print(time.time())
 
-@numba.jit(nopython=True, cache=True, fastmath=False)
+@numba.jit(nopython=True, cache=True, fastmath=True)
 def _doCountFoldsTask(activeGap1ndex, activeLeaf1ndex, connectionGraph, countDimensionsGapped, dimensionsTotal, foldsSubTotal, gapRangeStart, leafAbove, leafBelow, leavesTotal, listDimensions, potentialGaps, taskIndex, track):
 
     def filterCommonGaps(dimensionsUnconstrained, gap1ndexLowerBound) -> None:
@@ -81,16 +83,17 @@ def _doCountFoldsTask(activeGap1ndex, activeLeaf1ndex, connectionGraph, countDim
                 if activeLeaf1ndex > leavesTotal:
                     foldsSubTotal += leavesTotal
                 else:
-                    dimensionsUnconstrained: int = 0
-                    gap1ndexLowerBound: int = track[gapRangeStart, activeLeaf1ndex - 1]
-                    dimension1ndex: int = 1
+                    dimensionsUnconstrained: numpy.uint8 = numpy.uint8(0)
+                    gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
+                    dimension1ndex: numpy.uint8 = numpy.uint8(1)
                     while dimension1ndex <= dimensionsTotal:
                         if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
                             dimensionsUnconstrained += 1
                         else:
-                            leaf1ndexConnectee: int = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
+                            leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
                             while leaf1ndexConnectee != activeLeaf1ndex:
-                                if activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
+                                # if activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
+                                if activeLeaf1ndex != leavesTotal or leaf1ndexConnectee == taskIndex:
                                     gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
                                 leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[leafBelow, leaf1ndexConnectee]]
                         dimension1ndex += 1

@@ -12,7 +12,7 @@ def countFolds(listDimensions: List[int]) -> int:
     n: int = getLeavesTotal(listDimensionsPositive)
     d: int = len(listDimensions)
     import numpy
-    D: numpy.ndarray[numpy.int32, numpy.dtype[numpy.int32]] = makeConnectionGraph(listDimensionsPositive)
+    D: numpy.ndarray = makeConnectionGraph(listDimensionsPositive)
     connectionGraph = jax.numpy.asarray(D, dtype=dtypeDefault)
     del listDimensionsPositive
 

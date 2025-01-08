@@ -7,17 +7,16 @@ from mapFolding import countFolds
 foldsTotal = countFolds( [2,10] )
 ```
 
-The directory `mapFolding/citations` has BibTex-formatted citations to other resources, and `mapFolding/benchmarks` has incompetent code for measuring the speed of a function. The directory `mapFolding/reference` has
+The directory `mapFolding/reference` has
 
 - a verbatim transcription of the "procedure" published in _The Computer Journal_,
-- multiple referential versions of the procedure with explanatory comments, and
+- multiple referential versions of the procedure with explanatory comments including
+- `hunterNumba.py` a one-size-fits-all, self-contained, reasonably fast, contemporary algorithm that is nevertheless infected by _noobaceae ignorancium_, and
 - miscellaneous notes.
-
-In `mapFolding/reference/hunterNumba.py`, you will find a baseline, one-size-fits-all, self-contained, reasonably fast, contemporary algorithm that is nevertheless infected by _noobaceae ignorancium_.
 
 [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml)
 
-## Simple, easy-ish usage based on OEIS IDs
+## Simple, easy usage based on OEIS IDs
 
 `mapFolding` directly implements some IDs from _The On-Line Encyclopedia of Integer Sequences_.
 
@@ -60,20 +59,12 @@ from mapFolding import oeisIDfor_n
 foldsTotal = oeisIDfor_n( 'A001418', 4 )
 ```
 
-(mapFolding) C:\apps\mapFolding>OEIS_for_n A001418 6
-123912532224 distinct folding patterns.
-Time elapsed: 663.955 seconds
+### An "advanced" and likely unnecessary feature: clear `mapFolding`'s cache of OEIS data
 
-With concurrency. So weird.
-(mapFolding) C:\apps\mapFolding>c:/apps/mapFolding/Scripts/python.exe c:/apps/mapFolding/Z0Z_foldings.py
-True 123912532224 2273.939761799993
-
-### "Advanced" and likely unnecessary feature: clear mapFolding's cache of OEIS data
-
-You can clear _The On-Line Encyclopedia of Integer Sequences_ data from the `mapFolding` cache. For example:
+Clear _The On-Line Encyclopedia of Integer Sequences_ data from the `mapFolding` cache:
 
 ```sh
-(mapFolding) C:\apps\mapFolding>clearOEIScache
+(mapFolding) C:\apps\mapFolding> clearOEIScache
 Cache cleared from C:\apps\mapFolding\mapFolding\.cache
 ```
 

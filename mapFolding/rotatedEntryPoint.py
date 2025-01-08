@@ -3,21 +3,10 @@ from mapFolding.benchmarks import recordBenchmarks
 from numba import njit
 from typing import List
 import numpy
+from numpy.typing import NDArray
 
 """
-ALL variables instantiated by `countFoldings` are numpy.NDArray instances.
-
-`doWork` has two `for` loops with a structure of `for identifier in range(p,q)`.
-At the moment those two identifiers are primitive integers, rather than embedded in an NDArray instance.
-
-The NDArray:
-    Unchanging values
-        - the
-        - connectionGraph
-    Dynamic values that are "personal" to each worker
-        - my
-        - track
-        - potentialGaps
+It is possible to enter the main `while` loop from an arbitrary point. This version is "rotated" to effectively enter at the modulo operator.
 """
 
 # Indices of array `track`, which is a collection of one-dimensional arrays each of length `the[leavesTotal] + 1`.
@@ -67,7 +56,7 @@ def countFolds(listDimensions: List[int]):
     return foldingsTotal
 
 # @recordBenchmarks()
-def _sherpa(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], static: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], D: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], p: List[int]):
+def _sherpa(track: NDArray, gap: NDArray, static: NDArray, D: NDArray, p: List[int]):
     """Performance critical section that counts foldings.
 
     Parameters:
@@ -81,10 +70,10 @@ def _sherpa(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], gap: nu
     return foldingsTotal
 
 @njit(cache=True, parallel=False, fastmath=False)
-def countFoldings(TEMPLATEtrack: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                    TEMPLATEpotentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                    the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                    connectionGraph: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]
+def countFoldings(TEMPLATEtrack: NDArray,
+                    TEMPLATEpotentialGaps: NDArray,
+                    the: NDArray,
+                    connectionGraph: NDArray
                     ):
 
     TEMPLATEmy = numpy.zeros(COUNTindicesDynamic, dtype=numpy.int64)
@@ -94,9 +83,9 @@ def countFoldings(TEMPLATEtrack: numpy.ndarray[numpy.int64, numpy.dtype[numpy.in
     # taskDivisions = the[leavesTotal]
     TEMPLATEmy[taskIndex] = taskDivisions - 1 # the first modulo is leavesTotal - 1
 
-    def prepareWork(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                    potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                    my: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]) -> tuple[numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]], numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]]:
+    def prepareWork(track: NDArray,
+                    potentialGaps: NDArray,
+                    my: NDArray) -> tuple[NDArray, NDArray, NDArray]:
         foldingsTotal = 0
         while True:
             if my[activeLeaf1ndex] <= 1 or track[leafBelow][0] == 1:
@@ -162,11 +151,11 @@ def countFoldings(TEMPLATEtrack: numpy.ndarray[numpy.int64, numpy.dtype[numpy.in
     return foldingsTotal
 
 @njit(cache=True, parallel=False, fastmath=False)
-def doWork(track: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                potentialGaps: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                my: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                the: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
-                connectionGraph: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]],
+def doWork(track: NDArray,
+                potentialGaps: NDArray,
+                my: NDArray,
+                the: NDArray,
+                connectionGraph: NDArray,
                 taskDivisions: int = 0
                 ):
 

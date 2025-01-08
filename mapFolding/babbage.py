@@ -37,5 +37,5 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
 
     dimensionsTotal: Final[int] = len(validatedDimensions)
 
-    from .lovelace import _countFolds
+    from .babbageLola import _countFolds
     return _countFolds(leavesTotal, dimensionsTotal, connectionGraph, taskDivisions, track, potentialGaps)
