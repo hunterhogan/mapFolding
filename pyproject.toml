@@ -13,7 +13,6 @@ version = "0.1.0"
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "jax",
-    "jaxlib",
     "jaxtyping",
     "numpy",
     "Z0Z-tools",
@@ -25,6 +24,10 @@ getOEISids = "mapFolding.oeis:getOEISids"
 clearOEIScache = "mapFolding.oeis:clearOEIScache"
 
 [project.optional-dependencies]
+jax = [
+    "jax",
+    "jaxtyping",
+    ]
 testing = [
     "pytest",
     "pytest-cov",
