@@ -127,7 +127,7 @@ def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed
         listNonNegative: List of validated non-negative integers
     Raises:
         ValueError: If any dimension is negative or if the list is empty
-        TypeError: If any element cannot be converted to integer (raised by parseListInt)
+        TypeError: If any element cannot be converted to integer (raised by intInnit)
     """
     listValidated = intInnit(listDimensions, parameterName)
     listNonNegative = []

@@ -25,6 +25,10 @@ OEIS_for_n = "mapFolding.oeis:OEIS_for_n"
 
 [project.optional-dependencies]
 cupy = ["cupy-cuda12x<13.0",]
+jax = [
+    "jax",
+    "jaxtyping",
+    ]
 testing = [
     "pytest",
     "pytest-cov",
