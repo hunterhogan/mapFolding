@@ -6,16 +6,10 @@ build-backend = "setuptools.build_meta"
 name = "mapFolding"
 description = "Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps)"
 readme = "README.md"
-authors = [
-    {name = "Hunter Hogan", email = "HunterHogan@pm.me"}
-    ]
+authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 version = "0.1.1"
 requires-python = ">=3.10,<3.13"
-dependencies = [
-    "numba",
-    "numpy",
-    "Z0Z-tools",
-    ]
+dependencies = ["numba", "numpy", "Z0Z-tools"]
 urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
 
 [project.scripts]
@@ -24,25 +18,16 @@ clearOEIScache = "mapFolding.oeis:clearOEIScache"
 OEIS_for_n = "mapFolding.oeis:OEIS_for_n"
 
 [project.optional-dependencies]
-cupy = ["cupy-cuda12x<13.0",]
-jax = [
-    "jax",
-    "jaxtyping",
-    ]
+cupy = ["cupy-cuda12x<13.0"]
+jax = ["jax", "jaxtyping"]
 testing = [
     "pytest",
     "pytest-cov",
     "pytest-env",
-    "coverage",
-    ]
-benchmark = [
-    "pandas",
-    "matplotlib",
-    "seaborn",
-    "jupyter",
-    "ipywidgets",
-    "tqdm",
-    ]
+    "pytest-xdist",
+    "coverage"
+]
+benchmark = ["pandas", "matplotlib", "seaborn", "jupyter", "ipywidgets", "tqdm"]
 
 [tool.setuptools]
 include-package-data = true
@@ -58,15 +43,11 @@ omit = [
     "mapFolding/__init__.py",
     "mapFolding/benchmarks/__init__.py",
     "tests/*",
-    "Z0Z_*"
-    ]
+    "Z0Z_*",
+]
 
 [tool.coverage.report]
-exclude_lines = [
-    "if TYPE_CHECKING:",
-    "if __name__ == \"__main__\":",
-    "pass"
-    ]
+exclude_lines = ["if TYPE_CHECKING:", "if __name__ == \"__main__\":", "pass"]
 ignore_errors = false
 
 [tool.coverage.xml]
@@ -74,9 +55,5 @@ output = "tests/coverage/coverage.xml"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = [
-    "--color=yes",
-]
-env = [
-    "NUMBA_DISABLE_JIT=1"
-    ]
+addopts = ["--color=yes", "-n 8"]
+env = ["NUMBA_DISABLE_JIT=1"]

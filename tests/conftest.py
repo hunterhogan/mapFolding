@@ -5,7 +5,7 @@ import pathlib
 import pytest
 import random
 import sys
-
+import unittest.mock
 """
 Section: Fixtures"""
 
@@ -17,6 +17,22 @@ def foldsTotalKnown() -> Dict[Tuple[int,...], int]:
     Preference: I _think_ I would prefer a SSOT function available to any module
     similar to `foldsTotalKnown = getFoldsTotalKnown(listDimensions)`."""
     return makeDictionaryFoldsTotalKnown()
+
+@pytest.fixture
+def listDimensionsTestFunctionality(oeisID_1random: str) -> List[int]:
+    """To test functionality, get one `listDimensions` from `valuesTestValidation` if
+    `validateListDimensions` approves. The algorithm can count the folds of the returned
+    `listDimensions` in a short enough time suitable for testing."""
+    while True:
+        n = random.choice(settingsOEIS[oeisID_1random]['valuesTestValidation'])
+        if n < 2:
+            continue
+        listDimensionsCandidate = settingsOEIS[oeisID_1random]['getDimensions'](n)
+
+        try:
+            return validateListDimensions(listDimensionsCandidate)
+        except (ValueError, NotImplementedError):
+            pass
 
 @pytest.fixture
 def listDimensionsTest_countFolds(oeisID: str) -> List[int]:
@@ -71,14 +87,21 @@ def listDimensionsErroneous() -> List[Tuple[Any, type]]:
         ([complex(1,1)], ValueError),  # complex number
     ]
 
+@pytest.fixture
+def mockBenchmarkTimer():
+    """Mock time.perf_counter_ns for consistent benchmark timing."""
+    with unittest.mock.patch('time.perf_counter_ns') as mockTimer:
+        mockTimer.side_effect = [0, 1e9]  # Start and end times for 1 second
+        yield mockTimer
+
 @pytest.fixture(params=oeisIDsImplemented)
 def oeisID(request: pytest.FixtureRequest)-> str:
     return request.param
 
 @pytest.fixture
 def oeisID_1random() -> str:
-    """Return a random valid OEIS ID from settings."""
-    return random.choice(list(settingsOEIS.keys()))
+    """Return one random valid OEIS ID."""
+    return random.choice(oeisIDsImplemented)
 
 @pytest.fixture
 def pathCacheTesting(tmp_path: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
@@ -88,6 +111,16 @@ def pathCacheTesting(tmp_path: pathlib.Path) -> Generator[pathlib.Path, Any, Non
     there_must_be_a_better_way._pathCache = tmp_path
     yield tmp_path
     there_must_be_a_better_way._pathCache = pathCacheOriginal
+
+@pytest.fixture
+def pathBenchmarksTesting(tmp_path: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
+    """Temporarily replace the benchmarks directory with a test directory."""
+    from mapFolding.benchmarks import benchmarking
+    pathOriginal = benchmarking.pathFilenameRecordedBenchmarks
+    pathTest = tmp_path / "benchmarks.npy"
+    benchmarking.pathFilenameRecordedBenchmarks = pathTest
+    yield pathTest
+    benchmarking.pathFilenameRecordedBenchmarks = pathOriginal
 
 def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
     """Returns a dictionary mapping dimension tuples to their known folding totals."""
