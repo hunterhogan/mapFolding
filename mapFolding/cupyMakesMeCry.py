@@ -39,10 +39,10 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
             # Each worker gets their own copy of mutable data
             trackPerWorker = numpy.tile(track, leavesTotal)
             gapsPerWorker = numpy.tile(potentialGaps, leavesTotal)
-            
+
             s = numba.cuda.to_device(trackPerWorker)
             gap = numba.cuda.to_device(gapsPerWorker)
-            
+
             blocksPerGrid = leavesTotal
         else:
             s = numba.cuda.to_device(track)
@@ -54,9 +54,8 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
 
     else:
         foldingsSubTotals = arraySubTotals.copy()
-        # PRANGE IS NOT DOING SHIT
         for computationIndex in prange(leavesTotal if computationDivisions else 1):
-            foldingsSubTotals[computationIndex] = countFoldings(track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal, 
+            foldingsSubTotals[computationIndex] = countFoldings(track, potentialGaps, connectionGraph, leavesTotal, dimensionsTotal,
                                                             int(computationDivisions), computationIndex, arraySubTotals)
 
     foldingsTotal = numpy.sum(foldingsSubTotals).item()
@@ -102,7 +101,7 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
             potentialGaps = potentialGaps[..., taskIndex]
         else:
             taskIndex = computationIndex[()]
-    else:    
+    else:
         leavesTotal = integerSmall(n)
         dimensionsTotal = integerSmall(d)
         taskDivisions = integerSmall(computationDivisions)
@@ -134,7 +133,7 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
         dimensionsUnconstrained = integerSmall(0)
         gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
         activeGap1ndex = gap1ndexLowerBound
-        dimension1ndex = integerSmall(1) 
+        dimension1ndex = integerSmall(1)
 
         while dimension1ndex <= dimensionsTotal:
             if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
@@ -202,4 +201,3 @@ def countFoldings(track: numpy.ndarray, potentialGaps: numpy.ndarray, connection
         return
     else:
         return arraySubTotals[taskIndex]
-
