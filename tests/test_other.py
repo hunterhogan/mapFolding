@@ -1,3 +1,4 @@
+from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit, makeTestSuiteOopsieKwargsie
 from .conftest import *
 from mapFolding import getLeavesTotal, validateListDimensions
 from mapFolding.__idiotic_system__ import *
@@ -59,7 +60,12 @@ def test_dimension_validation(dimensions, expected):
 # ===== Parse Integers Tests =====
 def test_intInnit():
     """Test integer parsing using the test suite generator."""
-    from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
     from mapFolding.beDRY import intInnit
     for testName, testFunction in makeTestSuiteIntInnit(intInnit).items():
+        testFunction()
+
+def test_oopsieKwargsie():
+    """Test handling of unexpected keyword arguments."""
+    from mapFolding.lola import oopsieKwargsie
+    for testName, testFunction in makeTestSuiteOopsieKwargsie(oopsieKwargsie).items():
         testFunction()

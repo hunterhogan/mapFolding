@@ -1,10 +1,81 @@
 # Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps)
 
-`mapFolding.countFolds()` will accept arbitrary values for the list of dimensions.
+`mapFolding.countFolds()` will accept arbitrary values for the map's dimensions.
 
-The directory `mapFolding/citations` has BibTex-formatted citations to other resources, and `mapFolding/benchmarks` has incompetent code for measuring the speed of a function. The directory `mapFolding/reference` has a verbatim transcription of the "procedure" published by _The Computer Journal_, referential versions of the procedure with explanatory comments, and some miscellaneous notes. In `mapFolding/reference/hunterNumba.py`, you will find a baseline, one-size-fits-all, self-contained, reasonably fast, contemporary algorithm but afflicted by noobaceae ignorancium.
+```python
+from mapFolding import countFolds
+foldsTotal = countFolds( [2,10] )
+```
+
+The directory `mapFolding/citations` has BibTex-formatted citations to other resources, and `mapFolding/benchmarks` has incompetent code for measuring the speed of a function. The directory `mapFolding/reference` has
+
+- a verbatim transcription of the "procedure" published in _The Computer Journal_,
+- multiple referential versions of the procedure with explanatory comments, and
+- miscellaneous notes.
+
+In `mapFolding/reference/hunterNumba.py`, you will find a baseline, one-size-fits-all, self-contained, reasonably fast, contemporary algorithm that is nevertheless infected by _noobaceae ignorancium_.
 
 [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml)
+
+## Simple, easy-ish usage based on OEIS IDs
+
+`mapFolding` directly implements some IDs from _The On-Line Encyclopedia of Integer Sequences_.
+
+### Usage: command line
+
+After installing (see below), `OEIS_for_n` will run a computation from the command line.
+
+```cmd
+(mapFolding) C:\apps\mapFolding> OEIS_for_n A001418 5
+186086600 distinct folding patterns.
+Time elapsed: 1.605 seconds
+```
+
+Use `getOEISids` to get the most up-to-date list of available OEIS IDs.
+
+```cmd
+(mapFolding) C:\apps\mapFolding> getOEISids
+
+Available OEIS sequences:
+  A001415: Number of ways of folding a 2 X n strip of stamps.
+  A001416: Number of ways of folding a 3 X n strip of stamps.
+  A001417: Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
+  A001418: Number of ways of folding an n X n sheet of stamps.
+  A195646: Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.
+
+Usage examples:
+  Command line:
+    OEIS_for_n A001415 8
+  Python:
+    from mapFolding import oeisIDfor_n
+    foldsTotal = oeisIDfor_n('A001415', 8)
+```
+
+### Usage: Python module or REPL
+
+Use `mapFolding.oeisIDfor_n()` to compute a(n) for an OEIS ID.
+
+```python
+from mapFolding import oeisIDfor_n
+foldsTotal = oeisIDfor_n( 'A001418', 4 )
+```
+
+(mapFolding) C:\apps\mapFolding>OEIS_for_n A001418 6
+123912532224 distinct folding patterns.
+Time elapsed: 663.955 seconds
+
+With concurrency. So weird.
+(mapFolding) C:\apps\mapFolding>c:/apps/mapFolding/Scripts/python.exe c:/apps/mapFolding/Z0Z_foldings.py
+True 123912532224 2273.939761799993
+
+### "Advanced" and likely unnecessary feature: clear mapFolding's cache of OEIS data
+
+You can clear _The On-Line Encyclopedia of Integer Sequences_ data from the `mapFolding` cache. For example:
+
+```sh
+(mapFolding) C:\apps\mapFolding>clearOEIScache
+Cache cleared from C:\apps\mapFolding\mapFolding\.cache
+```
 
 ## Connections to "Multi-dimensional map-folding" by W. F. Lunnon
 
@@ -31,34 +102,6 @@ In [`foldings.txt`](mapFolding/reference/foldings.txt), you can find a text tran
   // implementation by Fred Lunnon.
 ```
 
-## Connections to _The On-Line Encyclopedia of Integer Sequences_ (OEIS)
-
-For some OEIS sequences, use `mapFolding.oeisIDfor_n()` to calculate a(n). To get the most up-to-date list of OEIS ids to use with `oeisIDfor_n()`, you can use `mapFolding.getOEISids()`. For example, after installing the mapFolding package:
-
-```cmd
-(mapFolding) C:\apps\mapFolding>getOEISids
-
-Available OEIS sequences:
-  A001415: Number of ways of folding a 2 X n strip of stamps.
-  A001416: Number of ways of folding a 3 X n strip of stamps.
-  A001417: Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
-  A195646: Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.
-  A001418: Number of ways of folding an n X n sheet of stamps.
-
-Usage example:
-  from mapFolding import oeisIDfor_n
-  foldingsTotal = oeisIDfor_n('A001415', 5)
-```
-
-### "Advanced" and likely unnecessary feature: clear mapFolding's cache of OEIS data
-
-You can clear _The On-Line Encyclopedia of Integer Sequences_ data from the `mapFolding` cache. For example:
-
-```sh
-(mapFolding) C:\apps\mapFolding>clearOEIScache
-Cache cleared from C:\apps\mapFolding\mapFolding\.cache
-```
-
 ## Map-folding Video
 
 ~~This caused my neurosis:~~ I enjoyed the following video, which is what introduced me to map folding.
@@ -66,3 +109,46 @@ Cache cleared from C:\apps\mapFolding\mapFolding\.cache
 "How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](mapFolding/citations/Physics_for_the_Birds.bibtex) citation)
 
 [![How Many Ways Can You Fold a Map?](https://i.ytimg.com/vi/sfH9uIY3ln4/hq720.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
+
+## Install this package
+
+### From Github
+
+```sh
+pip install mapFolding@git+https://github.com/hunterhogan/mapFolding.git
+```
+
+### From a local directory
+
+#### Windows
+
+```powershell
+git clone https://github.com/hunterhogan/mapFolding.git \path\to\mapFolding
+pip install mapFolding@file:\path\to\mapFolding
+```
+
+#### POSIX
+
+```bash
+git clone https://github.com/hunterhogan/mapFolding.git /path/to/mapFolding
+pip install mapFolding@file:/path/to/mapFolding
+```
+
+## Install updates
+
+```sh
+pip install --upgrade mapFolding@git+https://github.com/hunterhogan/mapFolding.git
+```
+
+## Creating a virtual environment before installation
+
+You can isolate `mapFolding` in a virtual environment. For example, use the following commands to create a directory for the virtual environment, activate the virtual environment, and install the package. In the future, you will likely need to activate the virtual environment before using `mapFolding` again. From the command line, in a directory you want to install in.
+
+```sh
+py -m venv mapFolding
+cd mapFolding
+cd Scripts
+activate
+cd ..
+pip install mapFolding@git+https://github.com/hunterhogan/mapFolding.git
+```

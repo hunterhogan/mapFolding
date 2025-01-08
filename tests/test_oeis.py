@@ -173,7 +173,7 @@ def testHelpText():
         outputStream = io.StringIO()
         with redirect_stdout(outputStream):
             OEIS_for_n()
-        compareValues(expectedValue, lambda: int(outputStream.getvalue().strip()))
+        compareValues(expectedValue, lambda: int(outputStream.getvalue().strip().split()[0]))
 
 def testCLI_InvalidInputs():
     """Test CLI error handling."""

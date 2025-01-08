@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, List, Callable, Dict, Final
 import pathlib
 import random
 import sys
+import time
 import urllib.request
 import urllib.response
 
@@ -265,11 +266,16 @@ def OEIS_for_n() -> None:
 
     argumentsCLI = parserCLI.parse_args()
 
+    timeStart = time.perf_counter()
+
     try:
-        print(oeisIDfor_n(argumentsCLI.oeisID, argumentsCLI.n))
+        print(oeisIDfor_n(argumentsCLI.oeisID, argumentsCLI.n), "distinct folding patterns.")
     except (KeyError, ValueError, ArithmeticError) as ERRORmessage:
         print(f"Error: {ERRORmessage}", file=sys.stderr)
         sys.exit(1)
+
+    timeElapsed = time.perf_counter() - timeStart
+    print(f"Time elapsed: {timeElapsed:.3f} seconds")
 
 def clearOEIScache() -> None:
     """Delete all cached OEIS sequence files."""
