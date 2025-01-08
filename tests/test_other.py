@@ -2,18 +2,17 @@ from .conftest import *
 from mapFolding import getLeavesTotal, validateListDimensions
 from mapFolding.__idiotic_system__ import *
 import pytest
-import random
 import sys
 
 # ===== getLeavesTotal Tests =====
-def test_getLeavesTotal_valid(listDimensions_valid):
+def test_getLeavesTotal_valid(listDimensionsAcceptable):
     """Test getLeavesTotal with valid inputs."""
-    for dimensions, expected in listDimensions_valid:
+    for dimensions, expected in listDimensionsAcceptable:
         compareValues(expected, getLeavesTotal, dimensions)
 
-def test_getLeavesTotal_invalid(listDimensions_invalid):
+def test_getLeavesTotal_invalid(listDimensionsErroneous):
     """Test getLeavesTotal with invalid inputs."""
-    for dimensions, errorType in listDimensions_invalid:
+    for dimensions, errorType in listDimensionsErroneous:
         expectError(errorType, getLeavesTotal, dimensions)
 
 @pytest.mark.parametrize("sequenceType", [list, tuple, range])
@@ -38,16 +37,6 @@ def test_getLeavesTotal_edge_cases():
     # Overflow protection
     largeNumber = sys.maxsize // 2
     expectError(OverflowError, getLeavesTotal, [largeNumber, largeNumber, 2])
-
-def test_getLeavesTotal_properties():
-    """Test properties that should hold for getLeavesTotal."""
-    def generateValidDimensions():
-        return [random.randint(1, 5) for index in range(random.randint(2, 4))]
-
-    def checkCommutative(inputValue, result):
-        return getLeavesTotal(sorted(inputValue)) == result
-
-    # templatePropertyTest(getLeavesTotal, "commutative", generateValidDimensions, checkCommutative)
 
 # ===== Dimension Validation Tests =====
 @pytest.mark.parametrize("dimensions,expected", [

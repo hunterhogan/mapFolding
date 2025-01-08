@@ -9,7 +9,7 @@ readme = "README.md"
 authors = [
     {name = "Hunter Hogan", email = "HunterHogan@pm.me"}
     ]
-version = "0.1.0"
+version = "0.1.1"
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "numba",
@@ -21,6 +21,7 @@ urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
 [project.scripts]
 getOEISids = "mapFolding.oeis:getOEISids"
 clearOEIScache = "mapFolding.oeis:clearOEIScache"
+OEIS_for_n = "mapFolding.oeis:OEIS_for_n"
 
 [project.optional-dependencies]
 testing = [

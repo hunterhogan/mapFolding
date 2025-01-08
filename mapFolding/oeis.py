@@ -1,75 +1,53 @@
 from datetime import datetime, timedelta
 from mapFolding import countFolds
-# import numba
+from typing import TYPE_CHECKING, List, Callable, Dict, Final
 import pathlib
 import random
-import typing
+import sys
 import urllib.request
 import urllib.response
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from typing import TypedDict
 else:
     TypedDict = dict
 
-class SettingsOEISsequence(TypedDict):
+"""
+Section: make `settingsOEIS`"""
+class SettingsOEIS(TypedDict):
     # I would prefer to load description dynamically from OEIS, but it's a pita for me
     # to learn how to efficiently implement right now.
     description: str
-    getDimensions: typing.Callable[[int], typing.List[int]]
-    valuesBenchmark: typing.List[int]
-    valuesKnown: typing.Dict[int, int]
-    valuesTestValidation: typing.List[int]
+    getDimensions: Callable[[int], List[int]]
+    valuesBenchmark: List[int]
+    valuesKnown: Dict[int, int]
+    valuesTestValidation: List[int]
     valueUnknown: int
 
-try:
-    _pathCache = pathlib.Path(__file__).parent / ".cache"
-except NameError:
-    _pathCache = pathlib.Path.home() / ".mapFoldingCache"
-
-_formatFilenameCache = "{oeisID}.txt"
-
-# NOTE: not DRY, and I'm annoyed and frustrated. I cannot figure out how to not duplicate
-# this information here and in the dictionary.
-# Furthermore, numba is not happy with my syntax and `dict`.
-# I suspect there is a better paradigm to accomplish this.
-# 1. I am acting as if `oeisID` is a member of OEISsequenceID, but that isn't really true.
-# 2. I would like to define `oeisID` as always being upper case, but I don't
-# have an obvious way to do that in this system.
-OEISsequenceID = typing.Literal['A001415', 'A001416', 'A001417', 'A195646', 'A001418']
-
-settingsOEISsequences: typing.Dict[OEISsequenceID, SettingsOEISsequence] = {
+settingsOEIShardcodedValues = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'getDimensions': lambda n: sorted([2, n]),
         'valuesBenchmark': [12],
         'valuesTestValidation': [0, 1, random.randint(2, 9)],
-        'valueUnknown': -1,
-        'valuesKnown': {-1:-1},
     },
     'A001416': {
         'description': 'Number of ways of folding a 3 X n strip of stamps.',
         'getDimensions': lambda n: sorted([3, n]),
         'valuesBenchmark': [8],
         'valuesTestValidation': [0, 1, random.randint(2, 6)],
-        'valueUnknown': -1,
-        'valuesKnown': {-1:-1},
     },
     'A001417': {
         'description': 'Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.',
         'getDimensions': lambda n: [2] * n,
         'valuesBenchmark': [5],
         'valuesTestValidation': [0, 1, random.randint(2, 4)],
-        'valueUnknown': -1,
-        'valuesKnown': {-1:-1},
     },
     'A195646': {
         'description': 'Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.',
         'getDimensions': lambda n: [3] * n,
         'valuesBenchmark': [3],
         'valuesTestValidation': [0, 1, 2],
-        'valueUnknown': -1,
-        'valuesKnown': {-1:-1},
     },
     'A001418': {
         'description': 'Number of ways of folding an n X n sheet of stamps.',
@@ -78,71 +56,13 @@ settingsOEISsequences: typing.Dict[OEISsequenceID, SettingsOEISsequence] = {
         # offset 1: hypothetically, if I were to load the offset from OEIS, I could use it to
         # determine if a sequence is defined at n=0, which would affect, for example, the valuesTestValidation.
         'valuesTestValidation': [1, random.randint(2, 4)],
-        'valueUnknown': -1,
-        'valuesKnown': {-1:-1},
     },
 }
 
-def oeisSequence_aOFn(oeisID: OEISsequenceID, n: int) -> int:
-    """
-    Calculate a(n) of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
+oeisIDsImplemented: Final[List[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues.keys()])
+"""Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
-    Parameters:
-        oeisID: The ID of the OEIS sequence.
-        n: A non-negative integer for which to calculate the sequence value.
-
-    Returns:
-        sequenceValue: a(n) of the OEIS sequence.
-
-    Raises:
-        ValueError: If n is negative.
-        KeyError: If the OEIS sequence ID is not directly implemented.
-    """
-    oeisID = _validateOEISid(oeisID)
-
-    if not isinstance(n, int) or n < 0:
-        raise ValueError("`n` must be non-negative integer.")
-
-    listDimensions = settingsOEISsequences[oeisID]['getDimensions'](n)
-
-    if n <= 1 or len(listDimensions) < 2:
-        foldingsTotal = settingsOEISsequences[oeisID]['valuesKnown'].get(n, None)
-        if foldingsTotal is not None:
-            return foldingsTotal
-        else:
-            raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
-
-    return countFolds(listDimensions)
-
-def _validateOEISid(oeisID: typing.Union[str, OEISsequenceID]) -> OEISsequenceID:
-    """
-    Validates an OEIS sequence ID against implemented sequences.
-
-    If the provided ID is recognized within the application's implemented
-    OEIS sequences, the function returns the verified ID in uppercase.
-    Otherwise, a KeyError is raised indicating that the sequence is not
-    directly supported.
-
-    Parameters:
-        oeisID: The OEIS sequence identifier to validate.
-
-    Returns:
-        oeisID: The validated and possibly modified OEIS sequence ID, if recognized.
-
-    Raises:
-        KeyError: If the provided sequence ID is not directly implemented.
-    """
-    if oeisID in typing.get_args(OEISsequenceID):
-        return oeisID # type: ignore # mypy doesn't understand that oeisID is now a valid OEISsequenceID
-                        # and/or I don't know how to tell it that it is
-    else:
-        oeisIDcleaned = oeisID.upper().strip()
-        if oeisIDcleaned in settingsOEISsequences:
-            return oeisIDcleaned
-        else:
-            raise KeyError(f"Sequence {oeisID} is not directly implemented in mapFoldings. The directly implemented sequences are {typing.get_args(OEISsequenceID)}.\nFor maps with at least two getDimensions, try `mapFolding.foldings()`.")
-
-def _parseBFileOEIS(OEISbFile: str, oeisID: OEISsequenceID) -> typing.Dict[int, int]:
+def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> Dict[int, int]:
     """
     Parses the content of an OEIS b-file for a given sequence ID.
     This function processes a multiline string representing an OEIS b-file and
@@ -173,7 +93,14 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: OEISsequenceID) -> typing.Dict[int, 
         OEISsequence[n] = aOFn
     return OEISsequence
 
-def _getOEISidValues(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
+try:
+    _pathCache = pathlib.Path(__file__).parent / ".cache"
+except NameError:
+    _pathCache = pathlib.Path.home() / ".mapFoldingCache"
+
+_formatFilenameCache = "{oeisID}.txt"
+
+def _getOEISidValues(oeisID: str) -> Dict[int, int]:
     """
     Retrieves the specified OEIS sequence as a dictionary mapping integer indices
     to their corresponding values.
@@ -185,8 +112,8 @@ def _getOEISidValues(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
     Parameters:
         oeisID: The identifier of the OEIS sequence to retrieve.
     Returns:
-        OEISsequence: A dictionary where each key is an integer index and each
-        value is the corresponding sequence term from the specified OEIS entry.
+        OEISsequence: A dictionary where each key is an integer index, `n`, and each
+        value is the corresponding "a(n)" from the OEIS entry.
     Raises:
         ValueError: If the cached or downloaded file format is invalid.
         IOError: If there is an error reading from or writing to the local cache.
@@ -217,9 +144,132 @@ def _getOEISidValues(oeisID: OEISsequenceID) -> typing.Dict[int, int]:
 
     return _parseBFileOEIS(OEISbFile, oeisID)
 
-for oeisID in settingsOEISsequences:
-    settingsOEISsequences[oeisID]['valuesKnown'] = _getOEISidValues(oeisID)
-    settingsOEISsequences[oeisID]['valueUnknown'] = max(settingsOEISsequences[oeisID]['valuesKnown'].keys()) + 1
+def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
+    settingsTarget = {}
+    for oeisID in oeisIDsImplemented:
+        valuesKnownSherpa = _getOEISidValues(oeisID)
+        settingsTarget[oeisID] = SettingsOEIS(
+            description = settingsOEIShardcodedValues[oeisID]['description'],
+            getDimensions = settingsOEIShardcodedValues[oeisID]['getDimensions'],
+            valuesBenchmark = settingsOEIShardcodedValues[oeisID]['valuesBenchmark'],
+            valuesKnown = valuesKnownSherpa,
+            valuesTestValidation = settingsOEIShardcodedValues[oeisID]['valuesTestValidation'],
+            valueUnknown = max(valuesKnownSherpa.values(), default=0) + 1
+        )
+    return settingsTarget
+
+settingsOEIS: Dict[str, SettingsOEIS] = makeSettingsOEIS()
+"""All values and settings for `oeisIDsImplemented`."""
+
+"""
+Section: private functions"""
+
+def _formatHelpText() -> str:
+    """Format standardized help text for both CLI and interactive use."""
+    exampleOEISid = oeisIDsImplemented[0]
+    exampleN = settingsOEIS[exampleOEISid]['valuesTestValidation'][-1]
+
+    return (
+        "\nAvailable OEIS sequences:\n"
+        f"{_formatOEISsequenceInfo()}\n"
+        "\nUsage examples:\n"
+        "  Command line:\n"
+        f"    OEIS_for_n {exampleOEISid} {exampleN}\n"
+        "  Python:\n"
+        "    from mapFolding import oeisIDfor_n\n"
+        f"    foldsTotal = oeisIDfor_n('{exampleOEISid}', {exampleN})"
+    )
+
+def _formatOEISsequenceInfo() -> str:
+    """Format information about available OEIS sequences for display or error messages."""
+    return "\n".join(
+        f"  {oeisID}: {settingsOEIS[oeisID]['description']}"
+        for oeisID in oeisIDsImplemented
+    )
+
+def _validateOEISid(oeisIDcandidate: str):
+    """
+    Validates an OEIS sequence ID against implemented sequences.
+
+    If the provided ID is recognized within the application's implemented
+    OEIS sequences, the function returns the verified ID in uppercase.
+    Otherwise, a KeyError is raised indicating that the sequence is not
+    directly supported.
+
+    Parameters:
+        oeisIDcandidate: The OEIS sequence identifier to validate.
+
+    Returns:
+        oeisID: The validated and possibly modified OEIS sequence ID, if recognized.
+
+    Raises:
+        KeyError: If the provided sequence ID is not directly implemented.
+    """
+    if oeisIDcandidate in oeisIDsImplemented:
+        return oeisIDcandidate
+    else:
+        oeisIDcleaned = str(oeisIDcandidate).upper().strip()
+        if oeisIDcleaned in oeisIDsImplemented:
+            return oeisIDcleaned
+        else:
+            raise KeyError(
+                f"OEIS ID {oeisIDcandidate} is not directly implemented.\n"
+                f"Available sequences:\n{_formatOEISsequenceInfo()}"
+            )
+
+"""
+Section: public functions"""
+
+def oeisIDfor_n(oeisID: str, n: int) -> int:
+    """
+    Calculate a(n) of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
+
+    Parameters:
+        oeisID: The ID of the OEIS sequence.
+        n: A non-negative integer for which to calculate the sequence value.
+
+    Returns:
+        sequenceValue: a(n) of the OEIS sequence.
+
+    Raises:
+        ValueError: If n is negative.
+        KeyError: If the OEIS sequence ID is not directly implemented.
+    """
+    oeisID = _validateOEISid(oeisID)
+
+    if not isinstance(n, int) or n < 0:
+        raise ValueError("`n` must be non-negative integer.")
+
+    listDimensions = settingsOEIS[oeisID]['getDimensions'](n)
+
+    if n <= 1 or len(listDimensions) < 2:
+        foldsTotal = settingsOEIS[oeisID]['valuesKnown'].get(n, None)
+        if foldsTotal is not None:
+            return foldsTotal
+        else:
+            raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
+
+    return countFolds(listDimensions)
+
+def OEIS_for_n() -> None:
+    """Command-line interface for oeisIDfor_n."""
+    import argparse
+
+    parserCLI = argparse.ArgumentParser(
+        description="Calculate a(n) for an OEIS sequence.",
+        epilog=_formatHelpText(),
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parserCLI.add_argument('oeisID', help="OEIS sequence identifier")
+    parserCLI.add_argument('n', type=int, help="Calculate a(n) for this n")
+
+    argumentsCLI = parserCLI.parse_args()
+
+    try:
+        print(oeisIDfor_n(argumentsCLI.oeisID, argumentsCLI.n))
+    except (KeyError, ValueError, ArithmeticError) as ERRORmessage:
+        print(f"Error: {ERRORmessage}", file=sys.stderr)
+        sys.exit(1)
 
 def clearOEIScache() -> None:
     """Delete all cached OEIS sequence files."""
@@ -227,7 +277,7 @@ def clearOEIScache() -> None:
         print(f"Cache directory, {_pathCache}, not found - nothing to clear.")
         return
     else:
-        for oeisID in settingsOEISsequences:
+        for oeisID in settingsOEIS:
             pathFilenameCache = _pathCache / _formatFilenameCache.format(oeisID=oeisID)
             pathFilenameCache.unlink(missing_ok=True)
 
@@ -235,14 +285,7 @@ def clearOEIScache() -> None:
 
 def getOEISids() -> None:
     """Print all available OEIS sequence IDs that are directly implemented."""
-    print("\nAvailable OEIS sequences:")
-    for oeisID in typing.get_args(OEISsequenceID):
-        print(f"  {oeisID}: {settingsOEISsequences[oeisID]['description']}")
-    print("\nUsage example:")
-    print("  from mapFolding import oeisSequence_aOFn")
-    print("  foldingsTotal = oeisSequence_aOFn('A001415', 5)")
+    print(_formatHelpText())
 
 if __name__ == "__main__":
     getOEISids()
-
-# numba.jit_module(forceobj=True, cache=True, looplift=False)

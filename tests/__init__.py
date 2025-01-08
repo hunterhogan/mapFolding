@@ -1,1 +1,1 @@
-from .conftest import generateDictionaryDimensionsFoldingsTotal
+from .conftest import makeDictionaryFoldsTotalKnown

@@ -33,7 +33,7 @@ In [`foldings.txt`](mapFolding/reference/foldings.txt), you can find a text tran
 
 ## Connections to _The On-Line Encyclopedia of Integer Sequences_ (OEIS)
 
-For some OEIS sequences, use `mapFolding.oeisSequence_aOFn()` to calculate a(n). To get the most up-to-date list of OEIS ids to use with `oeisSequence_aOFn()`, you can use `mapFolding.getOEISids()`. For example, after installing the mapFolding package:
+For some OEIS sequences, use `mapFolding.oeisIDfor_n()` to calculate a(n). To get the most up-to-date list of OEIS ids to use with `oeisIDfor_n()`, you can use `mapFolding.getOEISids()`. For example, after installing the mapFolding package:
 
 ```cmd
 (mapFolding) C:\apps\mapFolding>getOEISids
@@ -46,8 +46,8 @@ Available OEIS sequences:
   A001418: Number of ways of folding an n X n sheet of stamps.
 
 Usage example:
-  from mapFolding import oeisSequence_aOFn
-  foldingsTotal = oeisSequence_aOFn('A001415', 5)
+  from mapFolding import oeisIDfor_n
+  foldingsTotal = oeisIDfor_n('A001415', 5)
 ```
 
 ### "Advanced" and likely unnecessary feature: clear mapFolding's cache of OEIS data

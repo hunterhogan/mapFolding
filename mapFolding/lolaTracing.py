@@ -62,14 +62,14 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
         return activeLeaf1ndex <= 1
 
     def checkComputationDivisions():
-        if computationDivisions == False:
-            return True
+        return computationDivisions == False
 
     def checkLeafBelowSentinelIs1():
         return track[leafBelow, 0] == 1
 
     def checkTaskIndex():
-        return leaf1ndexConnectee % leavesTotal == taskIndex
+        nonlocal taskPartition
+        return (taskPartition := leaf1ndexConnectee % leavesTotal) == taskIndex
 
     def initializeLeaf1ndexConnectee():
         nonlocal leaf1ndexConnectee
@@ -112,6 +112,23 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
         track[leafAbove, track[leafBelow, activeLeaf1ndex]] = activeLeaf1ndex
         track[gapRangeStart, activeLeaf1ndex] = activeGap1ndex
         activeLeaf1ndex += 1
+
+    def restoreTaskState(taskNumber):
+        nonlocal activeGap1ndex, activeLeaf1ndex
+        activeGap1ndex = dictionaryTaskState[taskIndex]['activeGap1ndex']
+        activeLeaf1ndex = dictionaryTaskState[taskIndex]['activeLeaf1ndex']
+        potentialGaps = dictionaryTaskState[taskIndex]['potentialGaps'].copy()
+        track = dictionaryTaskState[taskIndex]['track'].copy()
+
+
+    def saveTaskState(taskNumber):
+        nonlocal dictionaryTaskState
+        dictionaryTaskState[taskNumber] = dict(
+        activeGap1ndex = activeGap1ndex,
+        activeLeaf1ndex = activeLeaf1ndex,
+        potentialGaps = potentialGaps.copy(),
+        track = track.copy(),
+        )
 
     def updateLeaf1ndexConnectee():
         nonlocal leaf1ndexConnectee
@@ -220,8 +237,9 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
             if activeLeaf1ndex > 0:
                 placeLeaf()
 
-    def changeling():
+    def mitosis():
         while checkActiveLeafGreaterThan0():
+            runLolaRun = False
             if checkActiveLeafIs1orLess() or checkLeafBelowSentinelIs1():
                 if checkActiveLeafGreaterThanLeavesTotal():
                     incrementFoldsTotal()
@@ -238,19 +256,26 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                         else:
                             initializeLeaf1ndexConnectee()
                             while leaf1ndexConnectee != activeLeaf1ndex:
-                                if not checkActiveLeafNotEqualToLeavesTotal():
-                                    taskPartition: int = leaf1ndexConnectee % leavesTotal
-                                    if taskPartition == taskIndex:
-                                        pass
+
+                                doCountGaps = False
+                                if checkActiveLeafNotEqualToLeavesTotal():
+                                    doCountGaps = True
+                                else:
+                                    if checkTaskIndex():
+                                        doCountGaps = True
                                     else:
                                         # NOTE Lola condition
-                                        if track[modulus, taskPartition] == 0:
-                                            track[modulus, taskIndex] = 1
-                                            taskIndex = taskPartition
-                                potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                if track[countDimensionsGapped, leaf1ndexConnectee] == 0:
-                                    incrementGap1ndexLowerBound()
-                                track[countDimensionsGapped, leaf1ndexConnectee] += 1
+                                        if modulus[taskPartition] == 0 and runLolaRun == False:
+                                            saveTaskState(taskIndex)
+                                            runLolaRun = True
+                                            doCountGaps = True
+
+                                if doCountGaps:
+                                    potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
+                                    if track[countDimensionsGapped, leaf1ndexConnectee] == 0:
+                                        incrementGap1ndexLowerBound()
+                                    track[countDimensionsGapped, leaf1ndexConnectee] += 1
+
                                 updateLeaf1ndexConnectee()
                         dimension1ndex += 1
 
@@ -265,14 +290,17 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                             incrementActiveGap()
                         track[countDimensionsGapped, potentialGaps[indexMiniGap]] = 0
                         incrementIndexMiniGap()
-
             while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
                 backtrack()
-
             if activeLeaf1ndex > 0:
                 placeLeaf()
 
-            if all(track[modulus, index] == 1 for index in range(leavesTotal) if index != taskIndex):
+            if runLolaRun:
+                saveTaskState(taskPartition)
+                restoreTaskState(taskIndex)
+
+            if all(modulus[index] == 1 for index in range(leavesTotal) if index != taskIndex):
+                saveTaskState(taskIndex)
                 return
 
     def doWhile():
@@ -337,8 +365,6 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     leafAbove: Final[Literal[0]] = 0
     leafBelow: Final[Literal[1]] = 1
     leavesTotal: Final[int]
-    modulus: Final[Literal[4]] = 4
-    subtotal: Final[Literal[4]] = 4
 
     activeGap1ndex: int = 0
     activeLeaf1ndex: int = 1
@@ -349,20 +375,21 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     indexLeaf: int = 0
     indexMiniGap: int = 0
     leaf1ndexConnectee: int = 0
+    modulus = numpy.zeros(leavesTotal, dtype=numpy.int64)
     taskIndex: int = 0
+    taskPartition: int = 0
+
+    dictionaryTaskState = {}
 
     initializeUnconstrainedLeaf()
     initializeTaskIndex()
 
     taskIndex = leavesTotal - 1
-    changeling()
-    """NOTE At the moment, changeling is very interesting, but after limited testing, computationDivisions does not work"""
-    doWhile()
+    mitosis()
 
-    # track[subtotal] = 0
-    # track[subtotal, taskIndex] = foldsTotal
-    # print(foldsTotal)
-    # foldsTotal = 0
+    for taskIndex in dictionaryTaskState.keys():
+        restoreTaskState(taskIndex)
+        doWhile()
 
     # state_activeGap1ndex = activeGap1ndex
     # state_activeLeaf1ndex = activeLeaf1ndex
@@ -375,14 +402,12 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     #     listTaskIndices = [taskIndex]
 
     # for taskIndex in listTaskIndices:
-    #     print(foldsTotal)
     #     activeGap1ndex = state_activeGap1ndex
     #     activeLeaf1ndex = state_activeLeaf1ndex
     #     potentialGaps = state_potentialGaps.copy()
     #     track = state_track.copy()
     #     doWhile()
 
-    # # print(foldsTotal)
     # foldsTotal = sum(track[subtotal]) + foldsTotal
 
     return foldsTotal

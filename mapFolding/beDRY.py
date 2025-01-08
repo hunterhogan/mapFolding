@@ -1,11 +1,10 @@
-from typing import List, Tuple
 from Z0Z_tools import intInnit
+from typing import Any, List, Tuple
 import numba
 import numba.extending
 import numpy
 import numpy.typing
 import sys
-
 
 @numba.extending.overload(intInnit)
 def intInnit_jitInnit(listDimensions, parameterName):
@@ -39,7 +38,7 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
 
         return productDimensions
 
-def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
+def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64) -> numpy.typing.NDArray[numpy.integer[Any]]:
     """
     Constructs a connection graph for a given list of dimensions.
     This function generates a multi-dimensional connection graph based on the provided list of dimensions.
@@ -96,7 +95,7 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64):
 
     return connectionGraph
 
-def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, dtypeMaximum: type = numpy.int64):
+def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, dtypeMaximum: type = numpy.int64) -> Tuple[List[int], int, numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]]]:
     """
     Outfits the folding process with the necessary data structures.
 
@@ -105,7 +104,7 @@ def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, 
     Returns:
         listDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps: Tuple containing the validated list of dimensions, the total number of leaves, the connection graph, an array for tracking, and an array for potential gaps.
     """
-    arrayTrackingHeightHARDCODED = 5
+    arrayTrackingHeightHARDCODED = 4
     arrayTrackingHeight = arrayTrackingHeightHARDCODED
 
     listDimensions = validateListDimensions(listDimensions)
@@ -169,4 +168,4 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
     return listDimensionsPositive
 
-numba.jit_module(cache=True)
+numba.jit_module(cache=True, fastmath=True)

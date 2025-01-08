@@ -43,11 +43,11 @@ def runBenchmarks(benchmarkIterations: int = 30) -> None:
 
     import itertools
     from tqdm.auto import tqdm
-    from mapFolding.oeis import settingsOEISsequences, oeisSequence_aOFn
+    from mapFolding.oeis import settingsOEIS, oeisIDfor_n
 
-    listParametersOEIS = [(oeisIdentifier, dimensionValue) for oeisIdentifier, settings in settingsOEISsequences.items() for dimensionValue in settings['valuesBenchmark']]
+    listParametersOEIS = [(oeisIdentifier, dimensionValue) for oeisIdentifier, settings in settingsOEIS.items() for dimensionValue in settings['valuesBenchmark']]
     for (oeisIdentifier, dimensionValue), iterationIndex in tqdm(itertools.product(listParametersOEIS, range(benchmarkIterations)), total=len(listParametersOEIS) * benchmarkIterations):
-        oeisSequence_aOFn(oeisIdentifier, dimensionValue)
+        oeisIDfor_n(oeisIdentifier, dimensionValue)
 
 if __name__ == '__main__':
     pathFilenameRecordedBenchmarks.unlink(missing_ok=True)

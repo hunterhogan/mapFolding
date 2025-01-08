@@ -1,48 +1,32 @@
-from mapFolding.__idiotic_system__ import *
 from mapFolding import validateListDimensions
-from typing import Any, Callable, Dict, List, Tuple, Type, TypeVar, Union
+from mapFolding.__idiotic_system__ import *
+from typing import Any, Callable, Dict, Generator, List, Tuple, Type
+import pathlib
 import pytest
 import random
 import sys
-import os
 
-@pytest.fixture(params=settingsOEISsequences.keys())
-def oeisID(request: pytest.FixtureRequest):
-    """Returns values from `settingsOEISsequences.keys()` not from `OEISsequenceID`."""
-    return request.param
+"""
+Section: Fixtures"""
 
 @pytest.fixture
-def oeisIDrandom() -> OEISsequenceID:
-    """Return a random valid OEIS ID from settings."""
-    return random.choice(list(settingsOEISsequences.keys()))
+def foldsTotalKnown() -> Dict[Tuple[int,...], int]:
+    """Returns a dictionary mapping dimension tuples to their known folding totals.
+    NOTE I am not convinced this is the best way to do this.
+    Advantage: I call `makeDictionaryFoldsTotalKnown()` from modules other than test modules.
+    Preference: I _think_ I would prefer a SSOT function available to any module
+    similar to `foldsTotalKnown = getFoldsTotalKnown(listDimensions)`."""
+    return makeDictionaryFoldsTotalKnown()
 
 @pytest.fixture
-def dictionaryDimensionsFoldingsTotal():
-    """Returns a dictionary mapping dimension tuples to their known folding totals."""
-    return generateDictionaryDimensionsFoldingsTotal()
-
-@pytest.fixture
-def listDimensions_validated(dictionaryDimensionsFoldingsTotal: Dict[Tuple[int], int]):
-    """Returns one `listDimensions` approved by `validateListDimensions`. The average time to count foldings
-    for a random `listDimensions` is multiple months, so this fixture is not suitable for testing counts."""
-    while True:
-        listDimensionsCandidate = list(random.choice(list(dictionaryDimensionsFoldingsTotal.keys())))
-
-        try:
-            listDimensionsValidated = validateListDimensions(listDimensionsCandidate)
-            return listDimensionsValidated
-        except (ValueError, NotImplementedError):
-            pass
-
-@pytest.fixture
-def listDimensions_testCounts(oeisID):
+def listDimensionsTest_countFolds(oeisID: str) -> List[int]:
     """For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
     if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
     while True:
-        n = random.choice(settingsOEISsequences[oeisID]['valuesTestValidation'])
+        n = random.choice(settingsOEIS[oeisID]['valuesTestValidation'])
         if n < 2:
             continue
-        listDimensionsCandidate = settingsOEISsequences[oeisID]['getDimensions'](n)
+        listDimensionsCandidate = settingsOEIS[oeisID]['getDimensions'](n)
 
         try:
             return validateListDimensions(listDimensionsCandidate)
@@ -50,7 +34,7 @@ def listDimensions_testCounts(oeisID):
             pass
 
 @pytest.fixture
-def listDimensions_valid() -> List[Tuple[List[int], int]]:
+def listDimensionsAcceptable() -> List[Tuple[List[int], int]]:
     """Provide comprehensive test cases for valid dimension inputs."""
     return [
         # ([2, 3], 45546), # test the test templates
@@ -68,7 +52,7 @@ def listDimensions_valid() -> List[Tuple[List[int], int]]:
     ]
 
 @pytest.fixture
-def listDimensions_invalid() -> List[Tuple[Any, type]]:
+def listDimensionsErroneous() -> List[Tuple[Any, type]]:
     """Provide comprehensive test cases for invalid dimension inputs."""
     return [
         # ([], TypeError),  # test the test templates
@@ -87,8 +71,17 @@ def listDimensions_invalid() -> List[Tuple[Any, type]]:
         ([complex(1,1)], ValueError),  # complex number
     ]
 
+@pytest.fixture(params=oeisIDsImplemented)
+def oeisID(request: pytest.FixtureRequest)-> str:
+    return request.param
+
 @pytest.fixture
-def pathCacheTesting(tmp_path):
+def oeisID_1random() -> str:
+    """Return a random valid OEIS ID from settings."""
+    return random.choice(list(settingsOEIS.keys()))
+
+@pytest.fixture
+def pathCacheTesting(tmp_path: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
     """Temporarily replace the OEIS cache directory with a test directory."""
     from mapFolding import oeis as there_must_be_a_better_way
     pathCacheOriginal = there_must_be_a_better_way._pathCache
@@ -96,11 +89,11 @@ def pathCacheTesting(tmp_path):
     yield tmp_path
     there_must_be_a_better_way._pathCache = pathCacheOriginal
 
-def generateDictionaryDimensionsFoldingsTotal() -> Dict[Tuple[int,...], int]:
+def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
     """Returns a dictionary mapping dimension tuples to their known folding totals."""
     dimensionsFoldingsTotalLookup = {}
 
-    for settings in settingsOEISsequences.values():
+    for settings in settingsOEIS.values():
         sequence = settings['valuesKnown']
 
         for n, foldingsTotal in sequence.items():
@@ -109,10 +102,6 @@ def generateDictionaryDimensionsFoldingsTotal() -> Dict[Tuple[int,...], int]:
             dimensionsFoldingsTotalLookup[tuple(dimensions)] = foldingsTotal
 
     return dimensionsFoldingsTotalLookup
-
-# Template Types
-ReturnType = TypeVar('ReturnType')
-ErrorTypes = Union[Type[Exception], Tuple[Type[Exception], ...]]
 
 def formatTestMessage(
     expected: Any, actual: Any,
