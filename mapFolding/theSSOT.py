@@ -1,5 +1,10 @@
+from typing import Any, Final, Literal, List, TypedDict, Optional, Union
 import numpy
-from typing import List, TypedDict, Final, Literal
+
+leafAbove: Final[Literal[0]] = 0
+leafBelow: Final[Literal[1]] = 1
+countDimensionsGapped: Final[Literal[2]] = 2
+gapRangeStart: Final[Literal[3]] = 3
 
 class countFoldsTask(TypedDict):
     activeGap1ndex: numpy.uint8
@@ -16,8 +21,3 @@ class countFoldsTask(TypedDict):
     potentialGaps: numpy.ndarray
     taskIndex: numpy.uint8
     track: numpy.ndarray
-
-leafAbove: Final[Literal[0]] = 0
-leafBelow: Final[Literal[1]] = 1
-countDimensionsGapped: Final[Literal[2]] = 2
-gapRangeStart: Final[Literal[3]] = 3

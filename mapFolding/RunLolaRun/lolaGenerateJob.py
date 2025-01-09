@@ -1,6 +1,6 @@
 from mapFolding import outfitFoldings
-from .lolaBeDRY import countFoldsTask, leafBelow, leafAbove, countDimensionsGapped, gapRangeStart
-from typing import List, Final, Literal, Any, Union, TypedDict
+from mapFolding import countFoldsTask, leafBelow, leafAbove, countDimensionsGapped, gapRangeStart
+from typing import List, Final, Any, Union
 import numpy
 import pathlib
 import os

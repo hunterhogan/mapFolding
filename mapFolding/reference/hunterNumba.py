@@ -2,7 +2,7 @@ from typing import List
 import numba
 import numpy
 
-@numba.jit(cache=True, nopython=True, fastmath=False)
+@numba.jit(cache=True, nopython=True, fastmath=True)
 def countFolds(listDimensions: List[int]) -> int:
     """
     Count the number of distinct ways to fold a map with at least two positive dimensions.

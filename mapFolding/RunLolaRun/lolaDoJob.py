@@ -10,7 +10,7 @@ import pathlib
 import pickle
 import time
 
-def doCountFoldsTask(pathFilenameTask: Union[str, os.PathLike[Any]]):
+def doCountFoldsJob(pathFilenameTask: Union[str, os.PathLike[Any]]):
     print(time.time())
     dictionaryState: countFoldsTask = pickle.loads(pathlib.Path(pathFilenameTask).read_bytes())
     activeGap1ndex = dictionaryState["activeGap1ndex"]
@@ -18,7 +18,7 @@ def doCountFoldsTask(pathFilenameTask: Union[str, os.PathLike[Any]]):
     connectionGraph = dictionaryState["connectionGraph"]
     countDimensionsGapped = dictionaryState["countDimensionsGapped"]
     dimensionsTotal = dictionaryState["dimensionsTotal"]
-    foldsSubTotal = dictionaryState["foldsTotal"]
+    foldsTotal = dictionaryState["foldsTotal"]
     gapRangeStart = dictionaryState["gapRangeStart"]
     leafAbove = dictionaryState["leafAbove"]
     leafBelow = dictionaryState["leafBelow"]
@@ -36,12 +36,12 @@ def doCountFoldsTask(pathFilenameTask: Union[str, os.PathLike[Any]]):
     leafBelow: Final[Literal[1]]
     listDimensions: Final[List[int]]
     taskIndex: Final[numpy.uint8]
-    foldsSubTotal = _doCountFoldsTask(activeGap1ndex, activeLeaf1ndex, connectionGraph, countDimensionsGapped, dimensionsTotal, foldsSubTotal, gapRangeStart, leafAbove, leafBelow, leavesTotal, listDimensions, potentialGaps, taskIndex, track)
-    pathFilenameFoldsSubTotal = pathlib.Path(pathFilenameTask).with_suffix(".foldsSubTotal").write_text(str(foldsSubTotal))
+    foldsTotal = _doCountFoldsTask(activeGap1ndex, activeLeaf1ndex, connectionGraph, countDimensionsGapped, dimensionsTotal, foldsTotal, gapRangeStart, leafAbove, leafBelow, leavesTotal, potentialGaps, track)
+    pathlib.Path(pathFilenameTask).with_name("foldsTotal.foldsTotal").write_text(str(foldsTotal))
     print(time.time())
 
 @numba.jit(nopython=True, cache=True, fastmath=True)
-def _doCountFoldsTask(activeGap1ndex, activeLeaf1ndex, connectionGraph, countDimensionsGapped, dimensionsTotal, foldsSubTotal, gapRangeStart, leafAbove, leafBelow, leavesTotal, listDimensions, potentialGaps, taskIndex, track):
+def _doCountFoldsTask(activeGap1ndex, activeLeaf1ndex, connectionGraph, countDimensionsGapped, dimensionsTotal, foldsTotal, gapRangeStart, leafAbove, leafBelow, leavesTotal, potentialGaps, track):
 
     def filterCommonGaps(dimensionsUnconstrained, gap1ndexLowerBound) -> None:
         nonlocal activeGap1ndex
@@ -77,11 +77,11 @@ def _doCountFoldsTask(activeGap1ndex, activeLeaf1ndex, connectionGraph, countDim
         activeLeaf1ndex += 1
 
     def doWhile():
-        nonlocal foldsSubTotal
+        nonlocal foldsTotal
         while activeLeaf1ndex > 0:
             if activeLeaf1ndex <= 1 or track[leafBelow, 0] == 1:
                 if activeLeaf1ndex > leavesTotal:
-                    foldsSubTotal += leavesTotal
+                    foldsTotal += leavesTotal
                 else:
                     dimensionsUnconstrained: numpy.uint8 = numpy.uint8(0)
                     gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
@@ -92,9 +92,7 @@ def _doCountFoldsTask(activeGap1ndex, activeLeaf1ndex, connectionGraph, countDim
                         else:
                             leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
                             while leaf1ndexConnectee != activeLeaf1ndex:
-                                # if activeLeaf1ndex != leavesTotal or leaf1ndexConnectee % leavesTotal == taskIndex:
-                                if activeLeaf1ndex != leavesTotal or leaf1ndexConnectee == taskIndex:
-                                    gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
+                                gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
                                 leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[leafBelow, leaf1ndexConnectee]]
                         dimension1ndex += 1
                     filterCommonGaps(dimensionsUnconstrained, gap1ndexLowerBound)
@@ -105,4 +103,4 @@ def _doCountFoldsTask(activeGap1ndex, activeLeaf1ndex, connectionGraph, countDim
 
     doWhile()
 
-    return foldsSubTotal
+    return foldsTotal
