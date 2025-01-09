@@ -1,6 +1,6 @@
 from mapFolding.__idiotic_system__ import *
-from .conftest import *
-from mapFolding.benchmarks import recordBenchmarks, runBenchmarks
+from ...tests.conftest import *
+from .benchmarking import recordBenchmarks, runBenchmarks
 import numpy
 import pathlib
 import pytest

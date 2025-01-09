@@ -1,6 +1,6 @@
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit, makeTestSuiteOopsieKwargsie
 from .conftest import *
-from mapFolding import getLeavesTotal, validateListDimensions
+from mapFolding import getLeavesTotal, validateListDimensions, countFolds, parseListDimensions
 from mapFolding.__idiotic_system__ import *
 import pytest
 import sys
@@ -69,3 +69,11 @@ def test_oopsieKwargsie():
     from mapFolding.babbage import oopsieKwargsie
     for testName, testFunction in makeTestSuiteOopsieKwargsie(oopsieKwargsie).items():
         testFunction()
+
+def test_countFolds_invalid_computationDivisions():
+    # Triggers line 26 in babbage.py
+    expectError(ValueError, countFolds, [2, 2], {"wrong": "value"})
+
+def test_parseListDimensions_noDimensions():
+    # Triggers line 130 in beDRY.py
+    expectError(ValueError, parseListDimensions, [])

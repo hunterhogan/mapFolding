@@ -1,4 +1,4 @@
-from mapFolding.RunLolaRun import countFoldsTask
+from .lolaBeDRY import countFoldsTask
 from typing import List, Final, Literal, Any, Union
 import numba
 import numba.extending

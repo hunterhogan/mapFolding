@@ -1,18 +1,8 @@
 from Z0Z_tools import intInnit
 from typing import Any, List, Tuple
-import numba
-import numba.extending
 import numpy
 import numpy.typing
 import sys
-
-@numba.extending.overload(intInnit)
-def intInnit_jitInnit(listDimensions, parameterName):
-    if isinstance(listDimensions, numba.types.List) and isinstance(parameterName, numba.types.StringLiteral):
-        def intInnit_jitInnit_implementInnit(listDimensions, parameterName):
-            return listDimensions
-        return intInnit_jitInnit_implementInnit
-    return None
 
 def getLeavesTotal(listDimensions: List[int]) -> int:
     """
@@ -167,5 +157,3 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
     if len(listDimensionsPositive) < 2:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
     return listDimensionsPositive
-
-numba.jit_module(cache=True, fastmath=True)
