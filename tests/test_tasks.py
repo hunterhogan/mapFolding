@@ -1,6 +1,6 @@
 from .conftest import *
 from mapFolding import countFolds
-from mapFolding.babbage import defineConcurrencyLimit
+from mapFolding.importPackages import defineConcurrencyLimit
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteConcurrencyLimit
 import pytest
 

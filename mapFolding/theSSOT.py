@@ -1,4 +1,5 @@
-from typing import Any, Final, Literal, List, TypedDict, Optional, Union
+"""Prototype concept; especially as a complement to 'beDRY.py'."""
+from typing import Final, Literal, List, TypedDict
 import numpy
 
 leafAbove: Final[Literal[0]] = 0

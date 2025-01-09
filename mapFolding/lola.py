@@ -1,4 +1,5 @@
-from Z0Z_tools import oopsieKwargsie, defineConcurrencyLimit
+"""A functional but untenable implementation of the Run Lola Run concept. Untenable because of excessive code duplication."""
+from mapFolding.importPackages import oopsieKwargsie, defineConcurrencyLimit
 from mapFolding import outfitFoldings, leafAbove, leafBelow, gapRangeStart, countDimensionsGapped
 from typing import Any, Final, List, Optional, Union
 import numba
@@ -13,7 +14,8 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
     Parameters:
         listDimensions: list of integers, the dimensions of the map.
         computationDivisions: whether to divide the computation into tasks. Dividing into tasks is NEVER* faster and is often many times slower. (*: that I have seen)
-        CPUlimit: whether and how to limit the CPU usage. See notes for details.
+        CPUlimit: This is only relevant if `computationDivisions` is `True`. It sets whether and how to limit the CPU usage. See notes for details.
+        pathJob: This is not used if `computationDivisions` is `True`. If you pass a path, instead of computing the job, the function will save the job to that path. To compute the job, use a different function that can process the saved values. See `mapFolding.lolaOne`.
 
     Limits on CPU usage `CPUlimit`
         - `False`, `None`, or `0`: No limits on CPU usage; uses all available CPUs. All other values will potentially limit CPU usage.
@@ -31,7 +33,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
     if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
         CPUlimit = oopsieKwargsie(CPUlimit)
 
-    # NOTE this must happen before importing any jitted functions
+    # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
     numba.set_num_threads(defineConcurrencyLimit(CPUlimit))
 
     dtypeDefault: Final = numpy.uint8

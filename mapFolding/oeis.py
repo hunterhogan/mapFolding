@@ -1,3 +1,5 @@
+"""Everything implementing the The Online Encyclopedia of Integer Sequences (OEIS);
+_only_ things that implement _only_ the OEIS."""
 from datetime import datetime, timedelta
 from mapFolding import countFolds
 from typing import TYPE_CHECKING, List, Callable, Dict, Final

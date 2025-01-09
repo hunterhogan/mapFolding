@@ -66,7 +66,7 @@ def test_intInnit():
 
 def test_oopsieKwargsie():
     """Test handling of unexpected keyword arguments."""
-    from mapFolding.babbage import oopsieKwargsie
+    from mapFolding.importPackages import oopsieKwargsie
     for testName, testFunction in makeTestSuiteOopsieKwargsie(oopsieKwargsie).items():
         testFunction()
 

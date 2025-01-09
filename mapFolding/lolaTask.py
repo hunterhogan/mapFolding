@@ -1,6 +1,6 @@
+from mapFolding import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 import numba
 import numpy
-from mapFolding import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 
 @numba.jit(nopython=True, cache=True, fastmath=True)
 def doWhileTask(activeGap1ndex: numpy.uint8,
@@ -11,6 +11,8 @@ def doWhileTask(activeGap1ndex: numpy.uint8,
     gaps: numpy.ndarray,
     taskIndex: numpy.uint8,
     s: numpy.ndarray):
+    """Compute one task with values passed to the function.
+    `leavesTotal: numpy.uint8` is a limitation: be cautious, especially [2,2,2,2,2,2,2,2]"""
 
     potentialGaps = gaps.copy()
     track = s.copy()

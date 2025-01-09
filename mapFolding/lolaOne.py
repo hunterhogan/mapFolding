@@ -46,6 +46,8 @@ def doWhileOne(activeGap1ndex: numpy.uint8,
     leavesTotal: numpy.uint8,
     potentialGaps: numpy.ndarray,
     track: numpy.ndarray):
+    """Compute the full job with values passed to the function.
+    `leavesTotal: numpy.uint8` is a limitation: be cautious, especially [2,2,2,2,2,2,2,2]"""
 
     foldsTotal = numpy.uint64(0)
     while activeLeaf1ndex > 0:

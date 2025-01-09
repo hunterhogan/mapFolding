@@ -1,5 +1,8 @@
 """
-phuck Python
+Phyck Python. A module to cope with incomplete imports: primarily used in the pytest modules.
+I hope there is a better way to do this, and I want to learn it. Whatever the case, phyck you, Python:
+phyck your horrible documentation, your dogma, your outdated style conventions, and most especially,
+your PyConceit.
 """
 
 from .oeis import OEIS_for_n
@@ -14,12 +17,12 @@ from .oeis import settingsOEIS
 
 __all__ = [
     'OEIS_for_n',
-    'oeisIDsImplemented',
     '_formatFilenameCache',
     '_getOEISidValues',
     '_parseBFileOEIS',
     '_validateOEISid',
     'getOEISids',
     'oeisIDfor_n',
+    'oeisIDsImplemented',
     'settingsOEIS',
 ]

@@ -1,4 +1,5 @@
-from Z0Z_tools import intInnit
+"""A relatively stable API for oft-needed functionality."""
+from mapFolding.importPackages import intInnit
 from typing import Any, List, Tuple
 import numpy
 import numpy.typing
