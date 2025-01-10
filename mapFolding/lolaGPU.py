@@ -3,7 +3,7 @@ from mapFolding import leafAbove, leafBelow, countDimensionsGapped, gapRangeStar
 import numpy
 import numba
 import numba.cuda
-import numba.types
+from numba.cuda.cudadrv.driver import Stream as cudaStream
 from typing import List, Tuple
 
 def doWhileGPU(activeGap1ndex: numpy.uint8,
@@ -15,35 +15,35 @@ def doWhileGPU(activeGap1ndex: numpy.uint8,
                 track: numpy.ndarray) -> numpy.uint64:
     """Launch GPU computation with one stream per task."""
 
-    listStreams: List = [
-        numba.cuda.stream()
-        for streamIndex in range(leavesTotal)
-    ]
+    listStreams: List[cudaStream] = [numba.cuda.stream() for indexStream in range(leavesTotal)]
 
-    cuda_connectionGraph = numba.cuda.to_device(connectionGraph)
+    cudaConnectionGraph = numba.cuda.to_device(connectionGraph)
 
     arraySubtotals = numpy.zeros(leavesTotal, dtype=numpy.uint64)
-    cuda_arraySubtotals = numba.cuda.to_device(arraySubtotals)
+    cudaArraySubtotals = numba.cuda.to_device(arraySubtotals)
 
     for taskIndex in range(leavesTotal):
         contiguousPotentialGaps = numpy.ascontiguousarray(potentialGaps.copy())
         contiguousTrack = numpy.ascontiguousarray(track.copy())
 
+        gpuPotentialGaps = numba.cuda.to_device(contiguousPotentialGaps, stream=listStreams[taskIndex])
+        gpuTrack = numba.cuda.to_device(contiguousTrack, stream=listStreams[taskIndex])
+
         doWhileKernel[1, 1, listStreams[taskIndex]](
             numpy.uint8(taskIndex),
             activeGap1ndex,
             activeLeaf1ndex,
-            cuda_connectionGraph,
+            cudaConnectionGraph,
             dimensionsTotal,
-            cuda_arraySubtotals,
+            cudaArraySubtotals,
             leavesTotal,
-            numba.cuda.to_device(contiguousPotentialGaps),
-            numba.cuda.to_device(contiguousTrack),
+            gpuPotentialGaps,
+            gpuTrack,
         )
 
-    for taskIndex, cudaStream in enumerate(listStreams):
-        cudaStream.synchronize()
-        arraySubtotals[taskIndex] = cuda_arraySubtotals.copy_to_host()[taskIndex]
+    for taskIndex, gpuStream in enumerate(listStreams):
+        gpuStream.synchronize()
+        arraySubtotals[taskIndex] = cudaArraySubtotals.copy_to_host()[taskIndex]
 
     return numpy.sum(arraySubtotals)
 
