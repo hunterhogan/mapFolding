@@ -31,7 +31,7 @@ settingsOEIShardcodedValues = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'getDimensions': lambda n: sorted([2, n]),
-        'valuesBenchmark': [12],
+        'valuesBenchmark': [13],
         'valuesTestValidation': [0, 1, random.randint(2, 9)],
     },
     'A001416': {
