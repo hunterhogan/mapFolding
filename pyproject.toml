@@ -19,7 +19,7 @@ OEIS_for_n = "mapFolding.oeis:OEIS_for_n"
 
 [project.optional-dependencies]
 benchmark = ["pandas", "matplotlib", "seaborn", "jupyter", "ipywidgets", "tqdm"]
-cupy = ["cupy-cuda12x<13.0"]
+cupy = ["cupy-cuda12x<13.0", "cuda-python"]
 jax = ["jax", "jaxtyping"]
 py310 = [
     "cupy-cuda12x<13.0",
