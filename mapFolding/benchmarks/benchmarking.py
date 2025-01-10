@@ -3,7 +3,7 @@ import numpy
 import pathlib
 import time
 
-pathRecordedBenchmarks = pathlib.Path('mapFolding/benchmarks/marks')
+pathRecordedBenchmarks = pathlib.Path('mapFolding/benchmarks/marks').resolve()
 pathRecordedBenchmarks.mkdir(parents=True, exist_ok=True)
 pathFilenameRecordedBenchmarks = pathRecordedBenchmarks / "benchmarks.npy"
 
@@ -12,14 +12,15 @@ def recordBenchmarks():
     def AzeemTheWrapper(functionTarget: Callable):
         def djZeph(*arguments, **keywordArguments):
             timeStart = time.perf_counter_ns()
-            result = functionTarget(*arguments, **keywordArguments)
+            returnValueTarget = functionTarget(*arguments, **keywordArguments)
             timeElapsed = (time.perf_counter_ns() - timeStart) / 1e9
 
             # Extract listDimensions from arguments
-            listDimensions = tuple(arguments[0])
+            # listDimensions = tuple(arguments[0])
+            leavesTotal = tuple(arguments[3])[4]
 
             # Store benchmark data in single file
-            benchmarkEntry = numpy.array([(timeElapsed, listDimensions)], dtype=[('time', 'f8'), ('dimensions', 'O')])
+            benchmarkEntry = numpy.array([(timeElapsed, leavesTotal)], dtype=[('time', 'f8'), ('leaves', 'O')])
 
             if pathFilenameRecordedBenchmarks.exists():
                 arrayExisting = numpy.load(str(pathFilenameRecordedBenchmarks), allow_pickle=True)
@@ -28,7 +29,7 @@ def recordBenchmarks():
                 arrayBenchmark = benchmarkEntry
 
             numpy.save(str(pathFilenameRecordedBenchmarks), arrayBenchmark)
-            return result
+            return returnValueTarget
 
         return djZeph
     return AzeemTheWrapper
@@ -51,4 +52,4 @@ def runBenchmarks(benchmarkIterations: int = 30) -> None:
 
 if __name__ == '__main__':
     pathFilenameRecordedBenchmarks.unlink(missing_ok=True)
-    runBenchmarks(10)
+    runBenchmarks(30)

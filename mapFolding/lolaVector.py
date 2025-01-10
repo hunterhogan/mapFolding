@@ -34,11 +34,15 @@ def updateLeafConnections(track: numpy.ndarray, activeLeaf1ndex: numpy.uint8, po
     track[leafAbove, belowGap] = activeLeaf1ndex
 
 @numba.jit(nopython=True, cache=True, fastmath=True)
-def doWhileOne(activeGap1ndex: numpy.uint8,
+def doWhileOne(
+    activeGap1ndex: numpy.uint8,
     activeLeaf1ndex: numpy.uint8,
+
     connectionGraph: numpy.ndarray,
+
     dimensionsTotal: numpy.uint8,
     leavesTotal: numpy.uint8,
+
     potentialGaps: numpy.ndarray,
     track: numpy.ndarray):
     """Compute the full job with values passed to the function.
