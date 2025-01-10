@@ -42,7 +42,7 @@ def doWhileGPU(activeGap1ndex: numpy.uint8,
 
     for taskIndex, cudaStream in enumerate(listStreams):
         cudaStream.synchronize()
-        arraySubtotals[taskIndex] = cuda_arraySubtotals[taskIndex].copy_to_host()[0]
+        arraySubtotals[taskIndex] = cuda_arraySubtotals.copy_to_host()[0]
 
     return numpy.sum(arraySubtotals)
 
@@ -62,10 +62,12 @@ def doWhileKernel(
     if taskIndex >= arraySubtotals.shape[0]:
         return
 
+    foldsSubtotal = numpy.uint64(0)
+
     while activeLeaf1ndex > 0:
         if activeLeaf1ndex <= 1 or track[leafBelow, 0] == 1:
             if activeLeaf1ndex > leavesTotal:
-                arraySubtotals[taskIndex] += leavesTotal
+                foldsSubtotal = foldsSubtotal + leavesTotal
             else:
                 dimensionsUnconstrained = 0
                 gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
@@ -104,3 +106,5 @@ def doWhileKernel(
             track[leafAbove, track[leafBelow, activeLeaf1ndex]] = activeLeaf1ndex
             track[gapRangeStart, activeLeaf1ndex] = activeGap1ndex
             activeLeaf1ndex += 1
+
+    arraySubtotals[0] = foldsSubtotal
