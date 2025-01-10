@@ -30,6 +30,7 @@ def doWhileGPU(activeGap1ndex: numpy.uint8,
         contiguousTrack = numpy.ascontiguousarray(track.copy())
 
         doWhileKernel[1, 1, listStreams[taskIndex]](
+            numpy.uint8(taskIndex),
             activeGap1ndex,
             activeLeaf1ndex,
             cuda_connectionGraph,
@@ -42,12 +43,13 @@ def doWhileGPU(activeGap1ndex: numpy.uint8,
 
     for taskIndex, cudaStream in enumerate(listStreams):
         cudaStream.synchronize()
-        arraySubtotals[taskIndex] = cuda_arraySubtotals.copy_to_host()[0]
+        arraySubtotals[taskIndex] = cuda_arraySubtotals.copy_to_host()[taskIndex]
 
     return numpy.sum(arraySubtotals)
 
 @numba.cuda.jit
 def doWhileKernel(
+    taskIndex: numpy.uint8,
     activeGap1ndex: numpy.uint8,
     activeLeaf1ndex: numpy.uint8,
     connectionGraph: numpy.ndarray,
@@ -58,10 +60,6 @@ def doWhileKernel(
     track: numpy.ndarray,
                     ):
     """CUDA kernel that processes a single independent task."""
-    taskIndex = numba.cuda.grid(1)
-    if taskIndex >= arraySubtotals.shape[0]:
-        return
-
     foldsSubtotal = numpy.uint64(0)
 
     while activeLeaf1ndex > 0:
@@ -107,4 +105,4 @@ def doWhileKernel(
             track[gapRangeStart, activeLeaf1ndex] = activeGap1ndex
             activeLeaf1ndex += 1
 
-    arraySubtotals[0] = foldsSubtotal
+    arraySubtotals[taskIndex] = foldsSubtotal
