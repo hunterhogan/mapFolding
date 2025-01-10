@@ -3,6 +3,34 @@ from mapFolding import leafAbove, leafBelow, countDimensionsGapped, gapRangeStar
 import numba
 import numpy
 
+@numba.jit(nopython=True, cache=True, fastmath=True, parallel=True)
+def doWhileConcurrent(activeGap1ndex: numpy.uint8,
+                        activeLeaf1ndex: numpy.uint8,
+                        connectionGraph: numpy.ndarray,
+                        dimensionsTotal: numpy.uint8,
+                        leavesTotal: numpy.uint8,
+                        potentialGaps: numpy.ndarray,
+                        track: numpy.ndarray):
+    foldsRunningTotal = numpy.uint64(0)
+    state_activeGap1ndex = activeGap1ndex
+    state_activeLeaf1ndex = activeLeaf1ndex
+    state_potentialGaps = potentialGaps.copy()
+    state_track = track.copy()
+    for taskIndex in numba.prange(leavesTotal):
+        activeGap1ndex = state_activeGap1ndex
+        activeLeaf1ndex = state_activeLeaf1ndex
+        potentialGaps = state_potentialGaps.copy()
+        track = state_track.copy()
+        foldsRunningTotal += int(doWhileTask(activeGap1ndex,
+                                activeLeaf1ndex,
+                                connectionGraph,
+                                dimensionsTotal,
+                                leavesTotal,
+                                potentialGaps,
+                                numpy.uint8(taskIndex),
+                                track))
+    return foldsRunningTotal
+
 @numba.jit(nopython=True, cache=True, fastmath=True)
 def doWhileTask(activeGap1ndex: numpy.uint8,
     activeLeaf1ndex: numpy.uint8,

@@ -1,21 +1,19 @@
 """A functional but untenable implementation of the Run Lola Run concept. Untenable because of excessive code duplication."""
-from mapFolding.importPackages import oopsieKwargsie, defineConcurrencyLimit
-from mapFolding import outfitFoldings, leafAbove, leafBelow, gapRangeStart, countDimensionsGapped
-from typing import Any, Final, List, Optional, Union
-import numba
+from mapFolding import outfitFoldings, leafAbove, leafBelow, gapRangeStart, countDimensionsGapped, setCPUlimit, getTaskDivisions
+from typing import Any, Final, List, Optional, Tuple, Union
 import numpy
 import numpy.typing
 import pathlib
 import os
 
-def countFolds(listDimensions: List[int], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None, pathJob: Optional[Union[str, os.PathLike[Any]]] = None) -> int:
+def countFolds(listDimensions: List[int], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None, pathJob: Optional[Union[str, os.PathLike[Any]]] = None):
     """
     Count the distinct ways to fold a multi-dimensional map.
     Parameters:
         listDimensions: list of integers, the dimensions of the map.
         computationDivisions: whether to divide the computation into tasks. Dividing into tasks is NEVER* faster and is often many times slower. (*: that I have seen)
         CPUlimit: This is only relevant if `computationDivisions` is `True`. It sets whether and how to limit the CPU usage. See notes for details.
-        pathJob: This is not used if `computationDivisions` is `True`. If you pass a path, instead of computing the job, the function will save the job to that path. To compute the job, use a different function that can process the saved values. See `mapFolding.lolaOne`.
+        pathJob: If you pass a path, instead of computing the job, the function will save the job to that path. To compute the job, use a different function that can process the saved values. See `mapFolding.lolaOne`.
 
     Limits on CPU usage `CPUlimit`
         - `False`, `None`, or `0`: No limits on CPU usage; uses all available CPUs. All other values will potentially limit CPU usage.
@@ -26,15 +24,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
         - Integer `<= -1`: Subtract the absolute value from total CPUs.
     """
 
-    taskDivisions = computationDivisions if isinstance(computationDivisions, bool) else oopsieKwargsie(computationDivisions)
-    if not isinstance(taskDivisions, bool):
-        raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but I need 'True' or 'False'.")
-
-    if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
-        CPUlimit = oopsieKwargsie(CPUlimit)
-
-    # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
-    numba.set_num_threads(defineConcurrencyLimit(CPUlimit))
+    taskDivisions = getTaskDivisions(computationDivisions)
 
     dtypeDefault: Final = numpy.uint8
     dtypeMaximum: Final = numpy.uint16
@@ -113,60 +103,63 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
 
     initializeState()
 
-    if computationDivisions:
-        from mapFolding.lolaTask import doWhileTask
-        @numba.jit(nopython=True, cache=True, fastmath=True, parallel=True)
-        def doWhileConcurrent(activeGap1ndex: numpy.uint8,
-                                activeLeaf1ndex: numpy.uint8,
-                                connectionGraph: numpy.ndarray,
-                                dimensionsTotal: numpy.uint8,
-                                leavesTotal: numpy.uint8,
-                                potentialGaps: numpy.ndarray,
-                                track: numpy.ndarray):
-            foldsRunningTotal = numpy.uint64(0)
-            state_activeGap1ndex = activeGap1ndex
-            state_activeLeaf1ndex = activeLeaf1ndex
-            state_potentialGaps = potentialGaps.copy()
-            state_track = track.copy()
-            for taskIndex in numba.prange(leavesTotal):
-                activeGap1ndex = state_activeGap1ndex
-                activeLeaf1ndex = state_activeLeaf1ndex
-                potentialGaps = state_potentialGaps.copy()
-                track = state_track.copy()
-                foldsRunningTotal += int(doWhileTask(activeGap1ndex,
-                                        activeLeaf1ndex,
-                                        connectionGraph,
-                                        dimensionsTotal,
-                                        leavesTotal,
-                                        potentialGaps,
-                                        numpy.uint8(taskIndex),
-                                        track))
-            return foldsRunningTotal
-        foldsTotal = int(doWhileConcurrent(activeGap1ndex,
-                                            activeLeaf1ndex,
-                                            connectionGraph,
-                                            dimensionsTotal,
-                                            leavesTotal,
-                                            potentialGaps,
-                                            track))
-    else:
-        if pathJob is not None:
-            from mapFolding.lolaOne import saveJob
-            pathJob = pathlib.Path(pathJob, f"[{','.join(map(str, listDimensions))}]")
-            return saveJob(str(pathJob), activeGap1ndex,
-                                activeLeaf1ndex,
-                                connectionGraph,
-                                dimensionsTotal,
-                                leavesTotal,
-                                potentialGaps,
-                                track)
-        from mapFolding.lolaOne import doWhileOne
-        foldsTotal = int(doWhileOne(activeGap1ndex,
-                                activeLeaf1ndex,
-                                connectionGraph,
-                                dimensionsTotal,
-                                leavesTotal,
-                                potentialGaps,
-                                track))
+    tupleLolaState = (activeGap1ndex, activeLeaf1ndex, connectionGraph, dimensionsTotal, leavesTotal, potentialGaps, track)
+    if pathJob is not None:
+        pathJob = pathlib.Path(pathJob, f"[{','.join(map(str, listDimensions))}]")
 
+    return lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState)
+
+def saveState(pathState: Union[str, os.PathLike[Any]],
+    activeGap1ndex: numpy.uint8,
+    activeLeaf1ndex: numpy.uint8,
+    connectionGraph: numpy.ndarray,
+    dimensionsTotal: numpy.uint8,
+    leavesTotal: numpy.uint8,
+    potentialGaps: numpy.ndarray,
+    track: numpy.ndarray):
+    import pathlib
+    pathFilenameState = pathlib.Path(pathState, "stateJob.npz")
+    pathFilenameState.parent.mkdir(parents=True, exist_ok=True)
+    numpy.savez_compressed(pathFilenameState,
+        activeGap1ndex=activeGap1ndex,
+        activeLeaf1ndex=activeLeaf1ndex,
+        connectionGraph=connectionGraph,
+        dimensionsTotal=dimensionsTotal,
+        leavesTotal=leavesTotal,
+        potentialGaps=potentialGaps,
+        track=track
+    )
+    return pathFilenameState
+
+def loadState(pathFilenameState: Union[str, os.PathLike[Any]]) -> Tuple:
+    tupleLolaState = (
+        numpy.uint8(numpy.load(pathFilenameState)['activeGap1ndex']),
+        numpy.uint8(numpy.load(pathFilenameState)['activeLeaf1ndex']),
+        numpy.load(pathFilenameState)['connectionGraph'],
+        numpy.uint8(numpy.load(pathFilenameState)['dimensionsTotal']),
+        numpy.uint8(numpy.load(pathFilenameState)['leavesTotal']),
+        numpy.load(pathFilenameState)['potentialGaps'],
+        numpy.load(pathFilenameState)['track']
+    )
+    return tupleLolaState
+
+def doJob(pathFilenameJob: Union[str, os.PathLike[Any]], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None):
+    taskDivisions = getTaskDivisions(computationDivisions)
+    foldsTotal = lolaDispatcher(taskDivisions, CPUlimit, pathJob=None, tupleLolaState=loadState(pathFilenameJob))
+    print(foldsTotal)
+    pathFilenameFoldsTotal = pathlib.Path(pathFilenameJob).with_name("foldsTotal.txt")
+    pathFilenameFoldsTotal.write_text(str(foldsTotal))
+    return pathFilenameFoldsTotal
+
+def lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState):
+    if pathJob is not None:
+        return saveState(pathJob, *tupleLolaState)
+    elif taskDivisions:
+        # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
+        setCPUlimit(CPUlimit)
+        from mapFolding.lolaTask import doWhileConcurrent
+        foldsTotal = int(doWhileConcurrent(*tupleLolaState))
+    else:
+        from mapFolding.lolaOne import doWhileOne
+        foldsTotal = int(doWhileOne(*tupleLolaState))
     return foldsTotal

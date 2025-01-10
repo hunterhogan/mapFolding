@@ -12,4 +12,4 @@ def test_defineConcurrencyLimit():
 @pytest.mark.parametrize("cpuLimitValue", [{"invalid": True}, ["weird"]])
 def test_countFolds_cpuLimitOopsie(cpuLimitValue):
     # This forces CPUlimit = oopsieKwargsie(cpuLimitValue).
-    standardComparison(ValueError, countFolds, [2, 2], False, cpuLimitValue)
+    standardComparison(ValueError, countFolds, [2, 2], True, cpuLimitValue)

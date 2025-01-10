@@ -1,7 +1,8 @@
 """A relatively stable API for oft-needed functionality."""
-from mapFolding.importPackages import intInnit
-from typing import Any, List, Tuple
+from mapFolding.importPackages import intInnit, defineConcurrencyLimit, oopsieKwargsie
+from typing import Any, List, Tuple, Union
 import numpy
+import numba
 import numpy.typing
 import sys
 
@@ -33,6 +34,12 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
             productDimensions *= dimension
 
         return productDimensions
+
+def getTaskDivisions(computationDivisions: Union[bool, Any]) -> bool:
+    taskDivisions = computationDivisions if isinstance(computationDivisions, bool) else oopsieKwargsie(computationDivisions)
+    if not isinstance(taskDivisions, bool):
+        raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but I need 'True' or 'False'.")
+    return taskDivisions
 
 def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64) -> numpy.typing.NDArray[numpy.integer[Any]]:
     """
@@ -137,6 +144,13 @@ def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed
         raise ValueError("At least one dimension must be non-negative")
 
     return listNonNegative
+
+def setCPUlimit(CPUlimit: Union[int, float, bool, None]):
+    if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
+        CPUlimit = oopsieKwargsie(CPUlimit)
+
+    # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
+    numba.set_num_threads(defineConcurrencyLimit(CPUlimit))
 
 def validateListDimensions(listDimensions: List[int]) -> List[int]:
     """

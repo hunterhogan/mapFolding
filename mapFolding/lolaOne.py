@@ -3,42 +3,6 @@ from mapFolding import leafAbove, leafBelow, countDimensionsGapped, gapRangeStar
 import numba
 import numpy
 
-def saveJob(pathJob: str,
-    activeGap1ndex: numpy.uint8,
-    activeLeaf1ndex: numpy.uint8,
-    connectionGraph: numpy.ndarray,
-    dimensionsTotal: numpy.uint8,
-    leavesTotal: numpy.uint8,
-    potentialGaps: numpy.ndarray,
-    track: numpy.ndarray):
-    import pathlib
-    pathFilenameJob = pathlib.Path(pathJob, "stateJob.npz")
-    pathFilenameJob.parent.mkdir(parents=True, exist_ok=True)
-    numpy.savez_compressed(pathFilenameJob,
-        activeGap1ndex=activeGap1ndex,
-        activeLeaf1ndex=activeLeaf1ndex,
-        connectionGraph=connectionGraph,
-        dimensionsTotal=dimensionsTotal,
-        leavesTotal=leavesTotal,
-        potentialGaps=potentialGaps,
-        track=track
-    )
-    return -1
-
-def doJob(pathFilenameJob):
-    foldsTotal = doWhileOne(
-        activeGap1ndex = numpy.uint8(numpy.load(pathFilenameJob)['activeGap1ndex']),
-        activeLeaf1ndex = numpy.uint8(numpy.load(pathFilenameJob)['activeLeaf1ndex']),
-        connectionGraph = numpy.load(pathFilenameJob)['connectionGraph'],
-        dimensionsTotal = numpy.uint8(numpy.load(pathFilenameJob)['dimensionsTotal']),
-        leavesTotal = numpy.uint8(numpy.load(pathFilenameJob)['leavesTotal']),
-        potentialGaps = numpy.load(pathFilenameJob)['potentialGaps'],
-        track = numpy.load(pathFilenameJob)['track']
-        )
-    print(foldsTotal)
-    import pathlib
-    pathlib.Path(pathFilenameJob).with_name("foldsTotal.txt").write_text(str(foldsTotal))
-
 @numba.jit(nopython=True, cache=True, fastmath=True)
 def doWhileOne(activeGap1ndex: numpy.uint8,
     activeLeaf1ndex: numpy.uint8,
