@@ -27,20 +27,19 @@ def doWhileGPU(activeGap1ndex: numpy.uint8,
     cuda_arraySubtotals = numba.cuda.to_device(arraySubtotals)
 
     for taskIndex in range(leavesTotal):
-        with listStreams[taskIndex]:
-            doWhileKernel[1, 1](
-                activeGap1ndex,
-                activeLeaf1ndex,
-                cuda_connectionGraph,
-                dimensionsTotal,
-                cuda_arraySubtotals,
-                leavesTotal,
-                numba.cuda.to_device(allTasks_potentialGaps[..., taskIndex]),
-                numba.cuda.to_device(allTasks_track[..., taskIndex]),
-            )
+        doWhileKernel[1, 1, listStreams[taskIndex]](
+            activeGap1ndex,
+            activeLeaf1ndex,
+            cuda_connectionGraph,
+            dimensionsTotal,
+            cuda_arraySubtotals,
+            leavesTotal,
+            numba.cuda.to_device(allTasks_potentialGaps[..., taskIndex]),
+            numba.cuda.to_device(allTasks_track[..., taskIndex]),
+        )
 
-    for taskIndex, stream in enumerate(listStreams):
-        stream.synchronize()
+    for taskIndex, cudaStream in enumerate(listStreams):
+        cudaStream.synchronize()
         arraySubtotals[taskIndex] = cuda_arraySubtotals[taskIndex].copy_to_host()[0]
 
     return numpy.sum(arraySubtotals)
