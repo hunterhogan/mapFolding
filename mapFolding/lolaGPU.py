@@ -3,6 +3,7 @@ from mapFolding import leafAbove, leafBelow, countDimensionsGapped, gapRangeStar
 import numpy
 import numba
 import numba.cuda
+import numba.types
 from typing import List, Tuple
 
 def doWhileGPU(activeGap1ndex: numpy.uint8,
@@ -20,13 +21,14 @@ def doWhileGPU(activeGap1ndex: numpy.uint8,
     ]
 
     cuda_connectionGraph = numba.cuda.to_device(connectionGraph)
-    allTasks_potentialGaps = numpy.tile(potentialGaps, int(leavesTotal))
-    allTasks_track = numpy.tile(track, int(leavesTotal))
 
     arraySubtotals = numpy.zeros(leavesTotal, dtype=numpy.uint64)
     cuda_arraySubtotals = numba.cuda.to_device(arraySubtotals)
 
     for taskIndex in range(leavesTotal):
+        contiguousPotentialGaps = numpy.ascontiguousarray(potentialGaps.copy())
+        contiguousTrack = numpy.ascontiguousarray(track.copy())
+
         doWhileKernel[1, 1, listStreams[taskIndex]](
             activeGap1ndex,
             activeLeaf1ndex,
@@ -34,8 +36,8 @@ def doWhileGPU(activeGap1ndex: numpy.uint8,
             dimensionsTotal,
             cuda_arraySubtotals,
             leavesTotal,
-            numba.cuda.to_device(allTasks_potentialGaps[..., taskIndex]),
-            numba.cuda.to_device(allTasks_track[..., taskIndex]),
+            numba.cuda.to_device(contiguousPotentialGaps),
+            numba.cuda.to_device(contiguousTrack),
         )
 
     for taskIndex, cudaStream in enumerate(listStreams):
