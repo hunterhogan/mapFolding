@@ -1,11 +1,47 @@
-from mapFolding import validateListDimensions
-from mapFolding.__idiotic_system__ import *
-from typing import Any, Callable, Dict, Generator, List, Tuple, Type
+"""SSOT for Pytest.
+Other test modules must not import directly from the package being tested."""
+
 import pathlib
-import pytest
 import random
 import sys
 import unittest.mock
+from typing import Any, Callable, Dict, Generator, List, Sequence, Tuple, Type, Union
+
+import pytest
+from Z0Z_tools.pytest_parseParameters import makeTestSuiteConcurrencyLimit
+from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
+from Z0Z_tools.pytest_parseParameters import makeTestSuiteOopsieKwargsie
+
+from mapFolding.importPackages import defineConcurrencyLimit, intInnit, oopsieKwargsie
+from mapFolding import clearOEIScache, countFolds
+from mapFolding import getLeavesTotal, parseListDimensions, validateListDimensions
+from mapFolding.__idiotic_system__ import *
+
+__all__ = [
+    'OEIS_for_n',
+    '_formatFilenameCache',
+    '_getOEISidValues',
+    '_parseBFileOEIS',
+    '_validateOEISid',
+    'clearOEIScache',
+    'countFolds',
+    'defineConcurrencyLimit',
+    'expectSystemExit',
+    'getLeavesTotal',
+    'getOEISids',
+    'intInnit',
+    'makeTestSuiteConcurrencyLimit',
+    'makeTestSuiteIntInnit',
+    'makeTestSuiteOopsieKwargsie',
+    'oeisIDfor_n',
+    'oeisIDsImplemented',
+    'oopsieKwargsie',
+    'parseListDimensions',
+    'settingsOEIS',
+    'standardComparison',
+    'validateListDimensions',
+    ]
+
 """
 Section: Fixtures"""
 
@@ -48,44 +84,6 @@ def listDimensionsTest_countFolds(oeisID: str) -> List[int]:
             return validateListDimensions(listDimensionsCandidate)
         except (ValueError, NotImplementedError):
             pass
-
-@pytest.fixture
-def listDimensionsAcceptable() -> List[Tuple[List[int], int]]:
-    """Provide comprehensive test cases for valid dimension inputs."""
-    return [
-        # ([2, 3], 45546), # test the test templates
-        ([2, 3], 6),
-        ([2, 3, 4], 24),
-        ([0, 1, 2], 2),  # zeros ignored
-        ([0], 0),  # edge case
-        ([1] * 1000, 1),  # long list
-        ([1, sys.maxsize], sys.maxsize),  # maxint
-        ([2] * 10, 1024),  # power of 2
-        ([3] * 3, 27),  # power of 3
-        ([2, 2, 2, 2], 16),  # repeated dimensions
-        ([1, 2, 3, 4, 5], 120),  # sequential
-        ([sys.maxsize - 1, 1], sys.maxsize - 1),  # near maxint
-    ]
-
-@pytest.fixture
-def listDimensionsErroneous() -> List[Tuple[Any, type]]:
-    """Provide comprehensive test cases for invalid dimension inputs."""
-    return [
-        # ([], TypeError),  # test the test templates
-        # ([2, 3], ValueError), # test the test templates
-        ([], ValueError),  # empty
-        ([-1], ValueError),  # negative
-        ([1.5], ValueError),  # float
-        (['a'], ValueError),  # string
-        ([None], TypeError),  # None
-        ([[1, 2]], TypeError),  # nested
-        (None, ValueError),  # None instead of list
-        ([True], TypeError),  # bool
-        ([float('inf')], ValueError),  # infinity
-        ([float('nan')], ValueError),  # NaN
-        ([sys.maxsize, sys.maxsize], OverflowError),  # overflow
-        ([complex(1,1)], ValueError),  # complex number
-    ]
 
 @pytest.fixture
 def mockBenchmarkTimer():
@@ -136,30 +134,56 @@ def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
 
     return dimensionsFoldingsTotalLookup
 
-def formatTestMessage(
-    expected: Any, actual: Any,
-    functionName: str,
-    *arguments: Any) -> str:
+"""
+Section: Standardized test structures"""
+
+def standardComparison(expected: Any, functionTarget: Callable, *arguments: Any) -> None:
+    """Template for tests expecting an error."""
+    if type(expected) == Type[Exception]:
+        messageExpected = expected.__name__
+    else:
+        messageExpected = expected
+
+    try:
+        messageActual = actual = functionTarget(*arguments)
+    except Exception as actualError:
+        messageActual = type(actualError).__name__
+        actual = type(actualError)
+
+    assert actual == expected, formatTestMessage(messageExpected, messageActual, functionTarget.__name__, *arguments)
+
+def expectSystemExit(expected: Union[str, int, Sequence[int]], functionTarget: Callable, *arguments: Any) -> None:
+    """Template for tests expecting SystemExit.
+
+    Parameters
+        expected: Exit code expectation:
+            - "error": any non-zero exit code
+            - "nonError": specifically zero exit code
+            - int: exact exit code match
+            - Sequence[int]: exit code must be one of these values
+        functionTarget: The function to test
+        arguments: Arguments to pass to the function
+    """
+    with pytest.raises(SystemExit) as exitInfo:
+        functionTarget(*arguments)
+
+    exitCode = exitInfo.value.code
+
+    if expected == "error":
+        assert exitCode != 0, \
+            f"Expected error exit (non-zero) but got code {exitCode}"
+    elif expected == "nonError":
+        assert exitCode == 0, \
+            f"Expected non-error exit (0) but got code {exitCode}"
+    elif isinstance(expected, (list, tuple)):
+        assert exitCode in expected, \
+            f"Expected exit code to be one of {expected} but got {exitCode}"
+    else:
+        assert exitCode == expected, \
+            f"Expected exit code {expected} but got {exitCode}"
+
+def formatTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
     """Format assertion message for any test comparison."""
     return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"
             f"Expected: {expected}\n"
             f"Got: {actual}")
-
-def compareValues(expected: Any, functionTarget: Callable, *arguments: Any) -> None:
-    """Template for tests comparing function output to expected value."""
-    actual = functionTarget(*arguments)
-    assert actual == expected, formatTestMessage(functionTarget.__name__, expected, actual, *arguments)
-
-def expectError(expected: Type[Exception], functionTarget: Callable, *arguments: Any) -> None:
-    """Template for tests expecting an error."""
-    try:
-        actualName = actualObject = functionTarget(*arguments)
-    except Exception as actualError:
-        actualName = type(actualError).__name__
-        actualObject = actualError
-
-    assert isinstance(actualObject, expected), \
-            formatTestMessage(expected.__name__, actualName, functionTarget.__name__, *arguments)
-
-__all__ = [
-    'compareValues', 'expectError', ]

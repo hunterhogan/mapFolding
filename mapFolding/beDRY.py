@@ -15,6 +15,11 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
     Returns:
         productDimensions: The product of all positive integer dimensions. Returns 0 if all dimensions are 0.
     """
+    # TODO look more closely to make sure `leavesTotal + 1` is not an overflow.
+    # actually, rethink the role of this function. `potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)`
+    # means that somewhere in the app, I should check for overflow of `leavesTotal * leavesTotal + 1`
+    # furthermore, somewhere in the app, I should check for overflow while taking into account any specified dtype, such as numpy.uint8.
+    # crap.
     listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
     listPositive = [dimension for dimension in listNonNegative if dimension > 0]
 
@@ -93,19 +98,20 @@ def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, 
     Parameters:
         listDimensions: A list of integers representing the dimensions of the map.
     Returns:
-        listDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps: Tuple containing the validated list of dimensions, the total number of leaves, the connection graph, an array for tracking, and an array for potential gaps.
+        sortedValidDimensions,leavesTotal,connectionGraph,arrayTracking,potentialGaps: Tuple containing `sortedValidDimensions`, a sorted list, with at least two elements, of only positive integers;
+            the total number of leaves; the connection graph; an array for state tracking during execution; and an array for tracking potential gaps during execution.
     """
     arrayTrackingHeightHARDCODED = 4
     arrayTrackingHeight = arrayTrackingHeightHARDCODED
 
-    listDimensions = validateListDimensions(listDimensions)
-    leavesTotal = getLeavesTotal(listDimensions)
+    sortedValidDimensions = sorted(validateListDimensions(listDimensions))
+    leavesTotal = getLeavesTotal(sortedValidDimensions)
 
-    connectionGraph = makeConnectionGraph(listDimensions, dtype=dtypeDefault)
+    connectionGraph = makeConnectionGraph(sortedValidDimensions, dtype=dtypeDefault)
     arrayTracking = numpy.zeros((arrayTrackingHeight, leavesTotal + 1), dtype=dtypeDefault)
     potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
 
-    return listDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps
+    return sortedValidDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps
 
 def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed parameter') -> List[int]:
     """
@@ -145,7 +151,7 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
         listDimensions: A list of integer dimensions to be validated.
 
     Returns:
-        listDimensionsPositive: A list of positive dimensions.
+        validDimensions: A list, with at least two elements, of only positive integers.
 
     Raises:
         ValueError: If the input listDimensions is None.
@@ -154,7 +160,7 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
     if not listDimensions:
         raise ValueError(f"listDimensions is a required parameter.")
     listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
-    listDimensionsPositive = [dimension for dimension in listNonNegative if dimension > 0]
-    if len(listDimensionsPositive) < 2:
+    validDimensions = [dimension for dimension in listNonNegative if dimension > 0]
+    if len(validDimensions) < 2:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
-    return listDimensionsPositive
+    return validDimensions

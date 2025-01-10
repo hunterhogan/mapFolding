@@ -1,79 +1,72 @@
-from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit, makeTestSuiteOopsieKwargsie
 from .conftest import *
-from mapFolding import getLeavesTotal, validateListDimensions, countFolds, parseListDimensions
-from mapFolding.__idiotic_system__ import *
 import pytest
 import sys
+# TODO test `outfitFoldings`, especially that `listDimensions` is sorted.
 
-# ===== getLeavesTotal Tests =====
-def test_getLeavesTotal_valid(listDimensionsAcceptable):
-    """Test getLeavesTotal with valid inputs."""
-    for dimensions, expected in listDimensionsAcceptable:
-        compareValues(expected, getLeavesTotal, dimensions)
-
-def test_getLeavesTotal_invalid(listDimensionsErroneous):
-    """Test getLeavesTotal with invalid inputs."""
-    for dimensions, errorType in listDimensionsErroneous:
-        expectError(errorType, getLeavesTotal, dimensions)
-
-@pytest.mark.parametrize("sequenceType", [list, tuple, range])
-def test_getLeavesTotal_sequence_types(sequenceType):
-    """Test getLeavesTotal with different sequence types."""
-    if sequenceType is range:
-        sequence = range(1, 4)
-    else:
-        sequence = sequenceType([1, 2, 3])
-    compareValues(6, getLeavesTotal, sequence)
+# TODO add intInnit and parseListDimensions to this test
+@pytest.mark.parametrize("listDimensions,expected_validateListDimensions,expected_getLeavesTotal", [
+    (None, ValueError, ValueError),  # None instead of list
+    (['a'], ValueError, ValueError),  # string
+    ([-4, 2], ValueError, ValueError),  # negative
+    ([-3], ValueError, ValueError),  # negative
+    ([0, 0], NotImplementedError, 0),  # no positive dimensions
+    ([0, 5, 6], [5, 6], 30),  # zeros ignored
+    ([0], NotImplementedError, 0),  # edge case
+    ([1, 2, 3, 4, 5], [1, 2, 3, 4, 5], 120),  # sequential
+    ([1, sys.maxsize], [1, sys.maxsize], sys.maxsize),  # maxint
+    ([7.5], ValueError, ValueError),  # float
+    ([1] * 1000, [1] * 1000, 1),  # long list
+    ([11], NotImplementedError, 11),  # single dimension
+    ([13, 0, 17], [13, 17], 221),  # zeros handled
+    ([2, 2, 2, 2], [2, 2, 2, 2], 16),  # repeated dimensions
+    ([2, 3, 4], [2, 3, 4], 24),
+    ([2, 3], [2, 3], 6),
+    ([2] * 11, [2] * 11, 2048),  # power of 2
+    ([3, 2], [3, 2], 6),  # return value is the input when valid
+    ([3] * 5, [3, 3, 3, 3, 3], 243),  # power of 3
+    ([None], TypeError, TypeError),  # None
+    ([True], TypeError, TypeError),  # bool
+    ([[17, 39]], TypeError, TypeError),  # nested
+    ([], ValueError, ValueError),  # empty
+    ([complex(1,1)], ValueError, ValueError),  # complex number
+    ([float('inf')], ValueError, ValueError),  # infinity
+    ([float('nan')], ValueError, ValueError),  # NaN
+    ([sys.maxsize - 1, 1], [sys.maxsize - 1, 1], sys.maxsize - 1),  # near maxint
+    ([sys.maxsize // 2, sys.maxsize // 2, 2], [sys.maxsize // 2, sys.maxsize // 2, 2], OverflowError),  # overflow protection
+    ([sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], OverflowError),  # overflow protection
+    (range(3, 7), [3, 4, 5, 6], 360),  # range sequence type
+    (tuple([3, 5, 7]), [3, 5, 7], 105),  # tuple sequence type
+])
+def test_listDimensionsAsParameter(listDimensions, expected_validateListDimensions, expected_getLeavesTotal):
+    """Test both validateListDimensions and getLeavesTotal with the same inputs."""
+    standardComparison(expected_validateListDimensions, validateListDimensions, listDimensions)
+    standardComparison(expected_getLeavesTotal, getLeavesTotal, listDimensions)
 
 def test_getLeavesTotal_edge_cases():
     """Test edge cases for getLeavesTotal."""
     # Order independence
-    compareValues(getLeavesTotal([2, 3, 4]), getLeavesTotal, [4, 2, 3])
+    standardComparison(getLeavesTotal([2, 3, 4]), getLeavesTotal, [4, 2, 3])
 
     # Immutability
     listOriginal = [2, 3]
-    compareValues(6, getLeavesTotal, listOriginal)
-    compareValues([2, 3], lambda x: x, listOriginal)  # Check list wasn't modified
-
-    # Overflow protection
-    largeNumber = sys.maxsize // 2
-    expectError(OverflowError, getLeavesTotal, [largeNumber, largeNumber, 2])
-
-# ===== Dimension Validation Tests =====
-@pytest.mark.parametrize("dimensions,expected", [
-    ([2, 2], True),
-    ([3, 2], True),
-    ([2, 0, 2], True),  # zeros handled
-    ([1], False),  # single dimension
-    ([0, 0], False),  # no positive dimensions
-    ([], False),  # empty
-    ([-1, 2], False),  # negative
-])
-def test_dimension_validation(dimensions, expected):
-    """Test dimension validation logic."""
-    if expected:
-        validateListDimensions(dimensions)
-    else:
-        with pytest.raises((ValueError, NotImplementedError)):
-            validateListDimensions(dimensions)
+    standardComparison(6, getLeavesTotal, listOriginal)
+    standardComparison([2, 3], lambda x: x, listOriginal)  # Check list wasn't modified
 
 # ===== Parse Integers Tests =====
 def test_intInnit():
     """Test integer parsing using the test suite generator."""
-    from mapFolding.beDRY import intInnit
     for testName, testFunction in makeTestSuiteIntInnit(intInnit).items():
         testFunction()
 
 def test_oopsieKwargsie():
     """Test handling of unexpected keyword arguments."""
-    from mapFolding.importPackages import oopsieKwargsie
     for testName, testFunction in makeTestSuiteOopsieKwargsie(oopsieKwargsie).items():
         testFunction()
 
 def test_countFolds_invalid_computationDivisions():
     # Triggers line 26 in babbage.py
-    expectError(ValueError, countFolds, [2, 2], {"wrong": "value"})
+    standardComparison(ValueError, countFolds, [2, 2], {"wrong": "value"})
 
 def test_parseListDimensions_noDimensions():
     # Triggers line 130 in beDRY.py
-    expectError(ValueError, parseListDimensions, [])
+    standardComparison(ValueError, parseListDimensions, [])

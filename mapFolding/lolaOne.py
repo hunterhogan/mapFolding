@@ -1,3 +1,4 @@
+"""A functional but untenable implementation of the Run Lola Run concept. Untenable because of excessive code duplication."""
 from mapFolding import leafAbove, leafBelow, countDimensionsGapped, gapRangeStart
 import numba
 import numpy

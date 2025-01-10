@@ -1,38 +1,36 @@
 from .conftest import *
 from contextlib import redirect_stdout
 from datetime import datetime, timedelta
-from mapFolding import clearOEIScache
 import io
 import os
 import pathlib
 import pytest
 import random
+import re as regex
 import unittest
 import unittest.mock
 import urllib.error
 import urllib.request
 
-from mapFolding.__idiotic_system__ import *
-
 def test_aOFn_calculate_value(oeisID: str):
     for n in settingsOEIS[oeisID]['valuesTestValidation']:
-        compareValues(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
+        standardComparison(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID: str):
     """Check that invalid or unknown IDs raise KeyError."""
-    expectError(KeyError, _validateOEISid, badID)
+    standardComparison(KeyError, _validateOEISid, badID)
 
 def test__validateOEISid_partially_valid(oeisID_1random: str):
-    expectError(KeyError, _validateOEISid, f"{oeisID_1random}extra")
+    standardComparison(KeyError, _validateOEISid, f"{oeisID_1random}extra")
 
 def test__validateOEISid_valid_id(oeisID: str):
-    compareValues(oeisID, _validateOEISid, oeisID)
+    standardComparison(oeisID, _validateOEISid, oeisID)
 
 def test__validateOEISid_valid_id_case_insensitive(oeisID: str):
-    compareValues(oeisID.upper(), _validateOEISid, oeisID.lower())
-    compareValues(oeisID.upper(), _validateOEISid, oeisID.upper())
-    compareValues(oeisID.upper(), _validateOEISid, oeisID.swapcase())
+    standardComparison(oeisID.upper(), _validateOEISid, oeisID.lower())
+    standardComparison(oeisID.upper(), _validateOEISid, oeisID.upper())
+    standardComparison(oeisID.upper(), _validateOEISid, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [
     # (2, "ok"), # test the test template
@@ -44,11 +42,10 @@ badValues, badValuesIDs = zip(*parameters_test_aOFn_invalid_n)
 @pytest.mark.parametrize("badN", badValues, ids=badValuesIDs)
 def test_aOFn_invalid_n(oeisID_1random: str, badN):
     """Check that negative or non-integer n raises ValueError."""
-    expectError(ValueError, oeisIDfor_n, oeisID_1random, badN)
+    standardComparison(ValueError, oeisIDfor_n, oeisID_1random, badN)
 
 def test_aOFn_zeroDim_A001418():
-    with pytest.raises(ArithmeticError):
-        oeisIDfor_n('A001418', 0)
+    standardComparison(ArithmeticError, oeisIDfor_n, 'A001418', 0)
 
 # ===== OEIS Cache Tests =====
 @pytest.mark.parametrize("cacheExists", [True, False])
@@ -116,7 +113,7 @@ def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: pathlib.
 
 def testParseContentErrors():
     """Test invalid content parsing."""
-    expectError(ValueError, _parseBFileOEIS, "Invalid content\n1 2\n", 'A001415')
+    standardComparison(ValueError, _parseBFileOEIS, "Invalid content\n1 2\n", 'A001415')
 
 def testExtraComments(pathCacheTesting: pathlib.Path, oeisID_1random: str):
     pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisID_1random)
@@ -135,9 +132,9 @@ def testExtraComments(pathCacheTesting: pathlib.Path, oeisID_1random: str):
 
     OEISsequence = _getOEISidValues(oeisID_1random)
     # Verify sequence values are correct despite extra comments
-    compareValues(2, lambda d: d[1], OEISsequence)  # First value
-    compareValues(8, lambda d: d[4], OEISsequence)  # Value after mid-sequence comment
-    compareValues(10, lambda d: d[5], OEISsequence)  # Last value
+    standardComparison(2, lambda d: d[1], OEISsequence)  # First value
+    standardComparison(8, lambda d: d[4], OEISsequence)  # Value after mid-sequence comment
+    standardComparison(10, lambda d: d[5], OEISsequence)  # Last value
 
 # ===== Command Line Interface Tests =====
 def testHelpText():
@@ -154,9 +151,9 @@ def testHelpText():
         assert settingsOEIS[oeisID]['description'] in helpText
 
     # Extract and verify examples
-    import re
-    cliMatch = re.search(r'OEIS_for_n (\w+) (\d+)', helpText)
-    pythonMatch = re.search(r"oeisIDfor_n\('(\w+)', (\d+)\)", helpText)
+
+    cliMatch = regex.search(r'OEIS_for_n (\w+) (\d+)', helpText)
+    pythonMatch = regex.search(r"oeisIDfor_n\('(\w+)', (\d+)\)", helpText)
 
     assert cliMatch and pythonMatch, "Help text missing examples"
     oeisID, n = pythonMatch.groups()
@@ -173,7 +170,7 @@ def testHelpText():
         outputStream = io.StringIO()
         with redirect_stdout(outputStream):
             OEIS_for_n()
-        compareValues(expectedValue, lambda: int(outputStream.getvalue().strip().split()[0]))
+        standardComparison(expectedValue, lambda: int(outputStream.getvalue().strip().split()[0]))
 
 def testCLI_InvalidInputs():
     """Test CLI error handling."""
@@ -186,19 +183,14 @@ def testCLI_InvalidInputs():
 
     for arguments, testID in testCases:
         with unittest.mock.patch('sys.argv', arguments):
-            with pytest.raises(SystemExit) as exitInfo:
-                OEIS_for_n()
-            assert exitInfo.value.code != 0
+            expectSystemExit("error", OEIS_for_n)
 
 def testCLI_HelpFlag():
     """Verify --help output contains required information."""
     with unittest.mock.patch('sys.argv', ['OEIS_for_n', '--help']):
         outputStream = io.StringIO()
         with redirect_stdout(outputStream):
-            try:
-                OEIS_for_n()
-            except SystemExit as exitInfo:
-                assert exitInfo.code == 0
+            expectSystemExit("nonError", OEIS_for_n)
 
         helpOutput = outputStream.getvalue()
         assert "Available OEIS sequences:" in helpOutput
