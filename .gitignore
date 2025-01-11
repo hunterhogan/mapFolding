@@ -1,9 +1,10 @@
-__pycache__/
+*.egg-info/
 /Lib/
 /Scripts/
+/build/
+__pycache__/
 pyvenv.cfg
-*.egg-info/
 
 /mapFolding/.cache/
 /tests/coverage/
-mapFolding/benchmarks/results/
+mapFolding/benchmarks/marks/

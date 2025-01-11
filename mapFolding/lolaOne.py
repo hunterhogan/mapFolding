@@ -40,6 +40,12 @@ def doWhileOne(
     """Compute the full job with values passed to the function.
     `leavesTotal: numpy.uint8` is a limitation: be cautious, especially [2,2,2,2,2,2,2,2]"""
 
+    dimensionsUnconstrained = numpy.uint8(0)
+    dimension1ndex = numpy.uint8(1)
+    gap1ndexLowerBound = numpy.uint8(0)
+    leaf1ndexConnectee = numpy.uint8(0)
+    indexMiniGap = numpy.uint8(0)
+
     foldsTotal = numpy.uint64(0)
 
     while activeLeaf1ndex > 0:
@@ -47,34 +53,34 @@ def doWhileOne(
             if activeLeaf1ndex > leavesTotal:
                 foldsTotal = foldsTotal + leavesTotal
             else:
-                dimensionsUnconstrained = numpy.uint8(0)
-                gap1ndexLowerBound: numpy.uint8 = track[gapRangeStart, activeLeaf1ndex - 1]
-                dimension1ndex = numpy.uint8(1)
+                dimensionsUnconstrained = 0
+                gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
+                dimension1ndex = 1
                 while dimension1ndex <= dimensionsTotal:
                     if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
-                        dimensionsUnconstrained += 1
+                        dimensionsUnconstrained = dimensionsUnconstrained + 1
                     else:
-                        leaf1ndexConnectee: numpy.uint8 = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
+                        leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
                         while leaf1ndexConnectee != activeLeaf1ndex:
                             potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
                             if track[countDimensionsGapped, leaf1ndexConnectee] == 0:
-                                gap1ndexLowerBound += 1
-                            track[countDimensionsGapped, leaf1ndexConnectee] += 1
+                                gap1ndexLowerBound = gap1ndexLowerBound + 1
+                            track[countDimensionsGapped, leaf1ndexConnectee] = track[countDimensionsGapped, leaf1ndexConnectee] + 1
                             leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[leafBelow, leaf1ndexConnectee]]
-                    dimension1ndex += 1
-                indexMiniGap: numpy.uint8 = activeGap1ndex
+                    dimension1ndex = dimension1ndex + 1
+                indexMiniGap = activeGap1ndex
                 while indexMiniGap < gap1ndexLowerBound:
                     potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
                     if track[countDimensionsGapped, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
-                        activeGap1ndex += 1
+                        activeGap1ndex = activeGap1ndex + 1
                     track[countDimensionsGapped, potentialGaps[indexMiniGap]] = 0
-                    indexMiniGap += 1
+                    indexMiniGap = indexMiniGap + 1
         while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
-            activeLeaf1ndex -= 1
+            activeLeaf1ndex = activeLeaf1ndex - 1
             updateLinkedTrackParallel(track, activeLeaf1ndex)
         if activeLeaf1ndex > 0:
-            activeGap1ndex -= 1
+            activeGap1ndex = activeGap1ndex - 1
             updateLeafConnections(track, activeLeaf1ndex, potentialGaps, activeGap1ndex)
             track[gapRangeStart, activeLeaf1ndex] = activeGap1ndex
-            activeLeaf1ndex += 1
+            activeLeaf1ndex = activeLeaf1ndex + 1
     return foldsTotal

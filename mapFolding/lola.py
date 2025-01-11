@@ -143,7 +143,7 @@ def loadState(pathFilenameState: Union[str, os.PathLike[Any]]) -> Tuple:
     )
     return tupleLolaState
 
-def doJob(pathFilenameState: Union[str, os.PathLike[Any]], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None, gpu: bool = False):
+def doJob(pathFilenameState: Union[str, os.PathLike[Any]], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None):
     taskDivisions = getTaskDivisions(computationDivisions)
     foldsTotal = lolaDispatcher(taskDivisions, CPUlimit, pathJob=None, tupleLolaState=loadState(pathFilenameState))
     print(foldsTotal)
