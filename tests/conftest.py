@@ -16,6 +16,15 @@ from mapFolding.importPackages import defineConcurrencyLimit, intInnit, oopsieKw
 from mapFolding import clearOEIScache, countFolds
 from mapFolding import getLeavesTotal, parseListDimensions, validateListDimensions
 from mapFolding.__idiotic_system__ import *
+from mapFolding.oeis import OEIS_for_n
+from mapFolding.oeis import _formatFilenameCache
+from mapFolding.oeis import _getOEISidValues
+from mapFolding.oeis import _parseBFileOEIS
+from mapFolding.oeis import _validateOEISid
+from mapFolding.oeis import getOEISids
+from mapFolding.oeis import oeisIDfor_n
+from mapFolding.oeis import oeisIDsImplemented
+from mapFolding.oeis import settingsOEIS
 
 __all__ = [
     'OEIS_for_n',
