@@ -3,7 +3,7 @@ import numpy
 import pathlib
 import time
 
-pathRecordedBenchmarks = pathlib.Path('mapFolding/benchmarks/marks').resolve()
+pathRecordedBenchmarks = pathlib.Path('mapFolding/benchmarks/marks')
 pathRecordedBenchmarks.mkdir(parents=True, exist_ok=True)
 pathFilenameRecordedBenchmarks = pathRecordedBenchmarks / "benchmarks.npy"
 

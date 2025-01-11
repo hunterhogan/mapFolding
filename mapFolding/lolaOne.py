@@ -4,7 +4,33 @@ import numba
 import numpy
 
 @numba.jit(nopython=True, cache=True, fastmath=True)
-def doWhileOne(activeGap1ndex: numpy.uint8,
+def updateLinkedTrackParallel(track: numpy.ndarray, activeLeaf1ndex: numpy.uint8) -> None:
+    # Pre-fetch values to avoid multiple array accesses
+    valueAbove = track[leafAbove, activeLeaf1ndex]
+    valueBelow = track[leafBelow, activeLeaf1ndex]
+    trackLeafBelow = track[leafBelow, activeLeaf1ndex]
+    trackLeafAbove = track[leafAbove, activeLeaf1ndex]
+
+    # Perform updates
+    track[leafBelow, valueAbove] = trackLeafBelow
+    track[leafAbove, valueBelow] = trackLeafAbove
+
+@numba.jit(nopython=True, cache=True, fastmath=True)
+def updateLeafConnections(track: numpy.ndarray, activeLeaf1ndex: numpy.uint8, potentialGaps: numpy.ndarray, activeGap1ndex: numpy.uint8) -> None:
+    # Pre-fetch gap value
+    gapValue = potentialGaps[activeGap1ndex]
+    # Update above connections
+    track[leafAbove, activeLeaf1ndex] = gapValue
+    # Pre-fetch below connection
+    gapBelow = track[leafBelow, gapValue]
+    # Update remaining connections
+    track[leafBelow, activeLeaf1ndex] = gapBelow
+    track[leafBelow, gapValue] = activeLeaf1ndex
+    track[leafAbove, gapBelow] = activeLeaf1ndex
+
+@numba.jit(nopython=True, cache=True, fastmath=True)
+def doWhileOne(
+    activeGap1ndex: numpy.uint8,
     activeLeaf1ndex: numpy.uint8,
     connectionGraph: numpy.ndarray,
     dimensionsTotal: numpy.uint8,
@@ -15,6 +41,7 @@ def doWhileOne(activeGap1ndex: numpy.uint8,
     `leavesTotal: numpy.uint8` is a limitation: be cautious, especially [2,2,2,2,2,2,2,2]"""
 
     foldsTotal = numpy.uint64(0)
+
     while activeLeaf1ndex > 0:
         if activeLeaf1ndex <= 1 or track[leafBelow, 0] == 1:
             if activeLeaf1ndex > leavesTotal:
@@ -44,14 +71,10 @@ def doWhileOne(activeGap1ndex: numpy.uint8,
                     indexMiniGap += 1
         while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
             activeLeaf1ndex -= 1
-            track[leafBelow, track[leafAbove, activeLeaf1ndex]] = track[leafBelow, activeLeaf1ndex]
-            track[leafAbove, track[leafBelow, activeLeaf1ndex]] = track[leafAbove, activeLeaf1ndex]
+            updateLinkedTrackParallel(track, activeLeaf1ndex)
         if activeLeaf1ndex > 0:
             activeGap1ndex -= 1
-            track[leafAbove, activeLeaf1ndex] = potentialGaps[activeGap1ndex]
-            track[leafBelow, activeLeaf1ndex] = track[leafBelow, track[leafAbove, activeLeaf1ndex]]
-            track[leafBelow, track[leafAbove, activeLeaf1ndex]] = activeLeaf1ndex
-            track[leafAbove, track[leafBelow, activeLeaf1ndex]] = activeLeaf1ndex
+            updateLeafConnections(track, activeLeaf1ndex, potentialGaps, activeGap1ndex)
             track[gapRangeStart, activeLeaf1ndex] = activeGap1ndex
             activeLeaf1ndex += 1
     return foldsTotal

@@ -40,7 +40,7 @@ Assume `listDimensions`:
 | integer  | d           | dimensionsUnconstrained |               | dd     | dd     |
 | integer  | 8*          | dimensionsTotal         |               | d      | dim    |
 | integer  |             | distance                |               | delta  | delta  |
-| integer  | ~10^17      | foldingsTotal           | f             |        | mCount |
+| integer  | ~10^17      | foldingsTotal           | f             | G      | mCount |
 | integer  |             | gap1ndexLowerBound      |               | gg     | gg     |
 | 1D array |             | gapRangeStart           |               | gapter | gapter |
 | integer  | gg-1        | indexMiniGap            |               | j      | j      |

@@ -145,28 +145,21 @@ def loadState(pathFilenameState: Union[str, os.PathLike[Any]]) -> Tuple:
 
 def doJob(pathFilenameState: Union[str, os.PathLike[Any]], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None, gpu: bool = False):
     taskDivisions = getTaskDivisions(computationDivisions)
-    foldsTotal = lolaDispatcher(taskDivisions, CPUlimit, pathJob=None, tupleLolaState=loadState(pathFilenameState), gpu=gpu)
+    foldsTotal = lolaDispatcher(taskDivisions, CPUlimit, pathJob=None, tupleLolaState=loadState(pathFilenameState))
     print(foldsTotal)
     pathFilenameFoldsTotal = pathlib.Path(pathFilenameState).with_name("foldsTotalVector.txt")
     pathFilenameFoldsTotal.write_text(str(foldsTotal))
     return pathFilenameFoldsTotal
 
-from mapFolding.benchmarks.benchmarking import recordBenchmarks
-
-@recordBenchmarks()
-def lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState, gpu: Optional[bool] = False):
+def lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState):
     if pathJob is not None:
         return saveState(pathJob, *tupleLolaState)
-    elif gpu:
-        from mapFolding.lolaGPU import doWhileGPU
-        foldsTotal = int(doWhileGPU(*tupleLolaState))
     elif taskDivisions:
         # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
         setCPUlimit(CPUlimit)
         from mapFolding.lolaTask import doWhileConcurrent
         foldsTotal = int(doWhileConcurrent(*tupleLolaState))
     else:
-        from mapFolding.lolaVector import doWhileOne
-        # from mapFolding.lolaOne import doWhileOne
+        from mapFolding.lolaOne import doWhileOne
         foldsTotal = int(doWhileOne(*tupleLolaState))
     return foldsTotal
