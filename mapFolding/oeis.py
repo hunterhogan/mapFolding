@@ -157,7 +157,7 @@ def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
             valuesBenchmark = settingsOEIShardcodedValues[oeisID]['valuesBenchmark'],
             valuesKnown = valuesKnownSherpa,
             valuesTestValidation = settingsOEIShardcodedValues[oeisID]['valuesTestValidation'],
-            valueUnknown = max(valuesKnownSherpa.values(), default=0) + 1
+            valueUnknown = max(valuesKnownSherpa.keys(), default=0) + 1
         )
     return settingsTarget
 
