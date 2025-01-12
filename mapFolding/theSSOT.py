@@ -26,6 +26,24 @@ class t(enum.Enum):
     leafBelow = enum.auto()
     countDimensionsGapped = enum.auto()
     gapRangeStart = enum.auto()
+    my = enum.auto()
+
+@enum.verify(enum.CONTINUOUS)
+@enum.unique
+class indexMy(enum.Enum):
+    """Indices for tracking array operations. Values must start at 0 for numpy array indexing."""
+    @staticmethod
+    def _generate_next_value_(name, start, count, last_values):
+        return count  # Start counting from 0
+
+    activeGap1ndex = enum.auto()
+    activeLeaf1ndex = enum.auto()
+    dimension1ndex = enum.auto()
+    dimensionsUnconstrained = enum.auto()
+    gap1ndexLowerBound = enum.auto()
+    indexMiniGap = enum.auto()
+    leaf1ndexConnectee = enum.auto()
+
 
 # TODO learn how to use TypedDict without numba freaking out
 

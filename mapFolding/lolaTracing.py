@@ -1,3 +1,4 @@
+from mapFolding import activeGap1ndex, activeLeaf1ndex, dimension1ndex, dimensionsUnconstrained, gap1ndexLowerBound, indexMiniGap, leaf1ndexConnectee
 from Z0Z_tools import dataTabularTOpathFilenameDelimited
 from collections import Counter
 from functools import wraps
@@ -44,22 +45,21 @@ def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
 # @numba.jit(nopython=True, cache=True, fastmath=True)
 def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     def backtrack() -> None:
-        nonlocal activeLeaf1ndex
-        activeLeaf1ndex -= 1
-        track[t.leafBelow.value, track[t.leafAbove.value, activeLeaf1ndex]] = track[t.leafBelow.value, activeLeaf1ndex]
-        track[t.leafAbove.value, track[t.leafBelow.value, activeLeaf1ndex]] = track[t.leafAbove.value, activeLeaf1ndex]
+        my[activeLeaf1ndex] -= 1
+        track[t.leafBelow.value, track[t.leafAbove.value, my[activeLeaf1ndex]]] = track[t.leafBelow.value, my[activeLeaf1ndex]]
+        track[t.leafAbove.value, track[t.leafBelow.value, my[activeLeaf1ndex]]] = track[t.leafAbove.value, my[activeLeaf1ndex]]
 
     def checkActiveLeafGreaterThan0():
-        return activeLeaf1ndex > 0
+        return my[activeLeaf1ndex] > 0
 
     def checkActiveLeafGreaterThanLeavesTotal():
-        return activeLeaf1ndex > leavesTotal
+        return my[activeLeaf1ndex] > leavesTotal
 
     def checkActiveLeafNotEqualToLeavesTotal():
-        return activeLeaf1ndex != leavesTotal
+        return my[activeLeaf1ndex] != leavesTotal
 
     def checkActiveLeafIs1orLess():
-        return activeLeaf1ndex <= 1
+        return my[activeLeaf1ndex] <= 1
 
     def checkComputationDivisions():
         return computationDivisions == False
@@ -69,69 +69,56 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
 
     def checkTaskIndex():
         nonlocal taskPartition
-        return (taskPartition := leaf1ndexConnectee % leavesTotal) == taskIndex
+        return (taskPartition := my[leaf1ndexConnectee] % leavesTotal) == taskIndex
 
     def initializeLeaf1ndexConnectee():
-        nonlocal leaf1ndexConnectee
-        leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
+        my[leaf1ndexConnectee] = connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]]
 
     def incrementActiveGap():
-        nonlocal activeGap1ndex
-        activeGap1ndex += 1
+        my[activeGap1ndex] += 1
 
     def incrementDimensionsUnconstrained():
-        nonlocal dimensionsUnconstrained
-        dimensionsUnconstrained += 1
+        my[dimensionsUnconstrained] += 1
 
     def incrementFoldsTotal():
         nonlocal foldsTotal
         foldsTotal += leavesTotal
 
     def incrementGap1ndexLowerBound():
-        nonlocal gap1ndexLowerBound
-        gap1ndexLowerBound += 1
+        my[gap1ndexLowerBound] += 1
 
     def incrementIndexMiniGap():
-        nonlocal indexMiniGap
-        indexMiniGap += 1
+        my[indexMiniGap] += 1
 
     def insertUnconstrainedLeaf():
-        nonlocal gap1ndexLowerBound, indexLeaf
+        nonlocal indexLeaf
         indexLeaf = 0
-        while indexLeaf < activeLeaf1ndex:
-            potentialGaps[gap1ndexLowerBound] = indexLeaf
-            gap1ndexLowerBound += 1
+        while indexLeaf < my[activeLeaf1ndex]:
+            potentialGaps[my[gap1ndexLowerBound]] = indexLeaf
+            my[gap1ndexLowerBound] += 1
             indexLeaf += 1
 
     def placeLeaf() -> None:
-        nonlocal activeLeaf1ndex, activeGap1ndex
-        activeGap1ndex -= 1
-        track[t.leafAbove.value, activeLeaf1ndex] = potentialGaps[activeGap1ndex]
-        track[t.leafBelow.value, activeLeaf1ndex] = track[t.leafBelow.value, track[t.leafAbove.value, activeLeaf1ndex]]
-        track[t.leafBelow.value, track[t.leafAbove.value, activeLeaf1ndex]] = activeLeaf1ndex
-        track[t.leafAbove.value, track[t.leafBelow.value, activeLeaf1ndex]] = activeLeaf1ndex
-        track[t.gapRangeStart.value, activeLeaf1ndex] = activeGap1ndex
-        activeLeaf1ndex += 1
+        my[activeGap1ndex] -= 1
+        track[t.leafAbove.value, my[activeLeaf1ndex]] = potentialGaps[my[activeGap1ndex]]
+        track[t.leafBelow.value, my[activeLeaf1ndex]] = track[t.leafBelow.value, track[t.leafAbove.value, my[activeLeaf1ndex]]]
+        track[t.leafBelow.value, track[t.leafAbove.value, my[activeLeaf1ndex]]] = my[activeLeaf1ndex]
+        track[t.leafAbove.value, track[t.leafBelow.value, my[activeLeaf1ndex]]] = my[activeLeaf1ndex]
+        track[t.gapRangeStart.value, my[activeLeaf1ndex]] = my[activeGap1ndex]
+        my[activeLeaf1ndex] += 1
 
     def restoreTaskState(taskNumber):
-        nonlocal activeGap1ndex, activeLeaf1ndex
-        activeGap1ndex = dictionaryTaskState[taskIndex]['activeGap1ndex']
-        activeLeaf1ndex = dictionaryTaskState[taskIndex]['activeLeaf1ndex']
         potentialGaps = dictionaryTaskState[taskIndex]['potentialGaps'].copy()
         track = dictionaryTaskState[taskIndex]['track'].copy()
 
     def saveTaskState(taskNumber):
-        nonlocal dictionaryTaskState
         dictionaryTaskState[taskNumber] = dict(
-        activeGap1ndex = activeGap1ndex,
-        activeLeaf1ndex = activeLeaf1ndex,
         potentialGaps = potentialGaps.copy(),
         track = track.copy(),
         )
 
     def updateLeaf1ndexConnectee():
-        nonlocal leaf1ndexConnectee
-        leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[t.leafBelow.value, leaf1ndexConnectee]]
+        my[leaf1ndexConnectee] = connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], track[t.leafBelow.value, my[leaf1ndexConnectee]]]
 
     def initializeUnconstrainedLeaf():
         while checkActiveLeafGreaterThan0():
@@ -139,18 +126,16 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                 if checkActiveLeafGreaterThanLeavesTotal():
                     incrementFoldsTotal()
                 else:
-                    nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound, dimension1ndex
+                    my[dimensionsUnconstrained] = 0
+                    my[gap1ndexLowerBound] = track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]
 
-                    dimensionsUnconstrained = 0
-                    gap1ndexLowerBound = track[t.gapRangeStart.value, activeLeaf1ndex - 1]
-
-                    dimension1ndex = 1
-                    while dimension1ndex <= dimensionsTotal:
-                        if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
+                    my[dimension1ndex] = 1
+                    while my[dimension1ndex] <= dimensionsTotal:
+                        if connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]] == my[activeLeaf1ndex]:
                             incrementDimensionsUnconstrained()
                         else:
                             initializeLeaf1ndexConnectee()
-                            while leaf1ndexConnectee != activeLeaf1ndex:
+                            while my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
                                 doCountGaps = False
                                 if checkActiveLeafNotEqualToLeavesTotal():
                                     doCountGaps = True
@@ -161,32 +146,31 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                                         if checkComputationDivisions():
                                             doCountGaps = True
                                 if doCountGaps:
-                                    potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                    if track[t.countDimensionsGapped.value, leaf1ndexConnectee] == 0:
+                                    potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
+                                    if track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] == 0:
                                         incrementGap1ndexLowerBound()
-                                    track[t.countDimensionsGapped.value, leaf1ndexConnectee] += 1
+                                    track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] += 1
                                 updateLeaf1ndexConnectee()
-                        dimension1ndex += 1
+                        my[dimension1ndex] += 1
 
-                    if dimensionsUnconstrained == dimensionsTotal:
+                    if my[dimensionsUnconstrained] == dimensionsTotal:
                         insertUnconstrainedLeaf()
 
-                    nonlocal indexMiniGap
-                    indexMiniGap = activeGap1ndex
-                    while indexMiniGap < gap1ndexLowerBound:
-                        potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                        if track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                    my[indexMiniGap] = my[activeGap1ndex]
+                    while my[indexMiniGap] < my[gap1ndexLowerBound]:
+                        potentialGaps[my[activeGap1ndex]] = potentialGaps[my[indexMiniGap]]
+                        if track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] == dimensionsTotal - my[dimensionsUnconstrained]:
                             incrementActiveGap()
-                        track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] = 0
+                        track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] = 0
                         incrementIndexMiniGap()
 
-            while activeLeaf1ndex > 0 and activeGap1ndex == track[t.gapRangeStart.value, activeLeaf1ndex - 1]:
+            while my[activeLeaf1ndex] > 0 and my[activeGap1ndex] == track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]:
                 backtrack()
 
-            if activeLeaf1ndex > 0:
+            if my[activeLeaf1ndex] > 0:
                 placeLeaf()
 
-            if activeGap1ndex > 0:
+            if my[activeGap1ndex] > 0:
                 return
 
     def initializeTaskIndex():
@@ -195,45 +179,42 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                 if checkActiveLeafGreaterThanLeavesTotal():
                     incrementFoldsTotal()
                 else:
-                    nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound, dimension1ndex
+                    my[dimensionsUnconstrained] = 0
+                    my[gap1ndexLowerBound] = track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]
 
-                    dimensionsUnconstrained = 0
-                    gap1ndexLowerBound = track[t.gapRangeStart.value, activeLeaf1ndex - 1]
-
-                    dimension1ndex = 1
-                    while dimension1ndex <= dimensionsTotal:
-                        if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
+                    my[dimension1ndex] = 1
+                    while my[dimension1ndex] <= dimensionsTotal:
+                        if connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]] == my[activeLeaf1ndex]:
                             incrementDimensionsUnconstrained()
                         else:
                             initializeLeaf1ndexConnectee()
-                            while leaf1ndexConnectee != activeLeaf1ndex:
+                            while my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
                                 if not checkActiveLeafNotEqualToLeavesTotal():
-                                    if leaf1ndexConnectee % leavesTotal == leavesTotal - 1:
+                                    if my[leaf1ndexConnectee] % leavesTotal == leavesTotal - 1:
                                         # NOTE Lola condition
                                         return
-                                potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                if track[t.countDimensionsGapped.value, leaf1ndexConnectee] == 0:
+                                potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
+                                if track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] == 0:
                                     incrementGap1ndexLowerBound()
-                                track[t.countDimensionsGapped.value, leaf1ndexConnectee] += 1
+                                track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] += 1
                                 updateLeaf1ndexConnectee()
-                        dimension1ndex += 1
+                        my[dimension1ndex] += 1
 
-                    if dimensionsUnconstrained == dimensionsTotal:
+                    if my[dimensionsUnconstrained] == dimensionsTotal:
                         insertUnconstrainedLeaf()
 
-                    nonlocal indexMiniGap
-                    indexMiniGap = activeGap1ndex
-                    while indexMiniGap < gap1ndexLowerBound:
-                        potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                        if track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                    my[indexMiniGap] = my[activeGap1ndex]
+                    while my[indexMiniGap] < my[gap1ndexLowerBound]:
+                        potentialGaps[my[activeGap1ndex]] = potentialGaps[my[indexMiniGap]]
+                        if track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] == dimensionsTotal - my[dimensionsUnconstrained]:
                             incrementActiveGap()
-                        track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] = 0
+                        track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] = 0
                         incrementIndexMiniGap()
 
-            while activeLeaf1ndex > 0 and activeGap1ndex == track[t.gapRangeStart.value, activeLeaf1ndex - 1]:
+            while my[activeLeaf1ndex] > 0 and my[activeGap1ndex] == track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]:
                 backtrack()
 
-            if activeLeaf1ndex > 0:
+            if my[activeLeaf1ndex] > 0:
                 placeLeaf()
 
     def mitosis():
@@ -243,18 +224,16 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                 if checkActiveLeafGreaterThanLeavesTotal():
                     incrementFoldsTotal()
                 else:
-                    nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound, dimension1ndex, taskIndex, foldsTotal
+                    my[dimensionsUnconstrained] = 0
+                    my[gap1ndexLowerBound] = track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]
 
-                    dimensionsUnconstrained = 0
-                    gap1ndexLowerBound = track[t.gapRangeStart.value, activeLeaf1ndex - 1]
-
-                    dimension1ndex = 1
-                    while dimension1ndex <= dimensionsTotal:
-                        if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
+                    my[dimension1ndex] = 1
+                    while my[dimension1ndex] <= dimensionsTotal:
+                        if connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]] == my[activeLeaf1ndex]:
                             incrementDimensionsUnconstrained()
                         else:
                             initializeLeaf1ndexConnectee()
-                            while leaf1ndexConnectee != activeLeaf1ndex:
+                            while my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
 
                                 doCountGaps = False
                                 if checkActiveLeafNotEqualToLeavesTotal():
@@ -270,28 +249,27 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                                             doCountGaps = True
 
                                 if doCountGaps:
-                                    potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                    if track[t.countDimensionsGapped.value, leaf1ndexConnectee] == 0:
+                                    potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
+                                    if track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] == 0:
                                         incrementGap1ndexLowerBound()
-                                    track[t.countDimensionsGapped.value, leaf1ndexConnectee] += 1
+                                    track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] += 1
 
                                 updateLeaf1ndexConnectee()
-                        dimension1ndex += 1
+                        my[dimension1ndex] += 1
 
-                    if dimensionsUnconstrained == dimensionsTotal:
+                    if my[dimensionsUnconstrained] == dimensionsTotal:
                         insertUnconstrainedLeaf()
 
-                    nonlocal indexMiniGap
-                    indexMiniGap = activeGap1ndex
-                    while indexMiniGap < gap1ndexLowerBound:
-                        potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                        if track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                    my[indexMiniGap] = my[activeGap1ndex]
+                    while my[indexMiniGap] < my[gap1ndexLowerBound]:
+                        potentialGaps[my[activeGap1ndex]] = potentialGaps[my[indexMiniGap]]
+                        if track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] == dimensionsTotal - my[dimensionsUnconstrained]:
                             incrementActiveGap()
-                        track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] = 0
+                        track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] = 0
                         incrementIndexMiniGap()
-            while activeLeaf1ndex > 0 and activeGap1ndex == track[t.gapRangeStart.value, activeLeaf1ndex - 1]:
+            while my[activeLeaf1ndex] > 0 and my[activeGap1ndex] == track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]:
                 backtrack()
-            if activeLeaf1ndex > 0:
+            if my[activeLeaf1ndex] > 0:
                 placeLeaf()
 
             if runLolaRun:
@@ -308,18 +286,16 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                 if checkActiveLeafGreaterThanLeavesTotal():
                     incrementFoldsTotal()
                 else:
-                    nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound, dimension1ndex
+                    my[dimensionsUnconstrained] = 0
+                    my[gap1ndexLowerBound] = track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]
 
-                    dimensionsUnconstrained = 0
-                    gap1ndexLowerBound = track[t.gapRangeStart.value, activeLeaf1ndex - 1]
-
-                    dimension1ndex = 1
-                    while dimension1ndex <= dimensionsTotal:
-                        if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
+                    my[dimension1ndex] = 1
+                    while my[dimension1ndex] <= dimensionsTotal:
+                        if connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]] == my[activeLeaf1ndex]:
                             incrementDimensionsUnconstrained()
                         else:
                             initializeLeaf1ndexConnectee()
-                            while leaf1ndexConnectee != activeLeaf1ndex:
+                            while my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
                                 doCountGaps = False
                                 if checkActiveLeafNotEqualToLeavesTotal():
                                     doCountGaps = True
@@ -330,46 +306,39 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                                         if checkComputationDivisions():
                                             doCountGaps = True
                                 if doCountGaps:
-                                    potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                    if track[t.countDimensionsGapped.value, leaf1ndexConnectee] == 0:
+                                    potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
+                                    if track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] == 0:
                                         incrementGap1ndexLowerBound()
-                                    track[t.countDimensionsGapped.value, leaf1ndexConnectee] += 1
+                                    track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] += 1
                                 updateLeaf1ndexConnectee()
-                        dimension1ndex += 1
+                        my[dimension1ndex] += 1
 
-                    if dimensionsUnconstrained == dimensionsTotal:
+                    if my[dimensionsUnconstrained] == dimensionsTotal:
                         insertUnconstrainedLeaf()
 
-                    nonlocal indexMiniGap
-                    indexMiniGap = activeGap1ndex
-                    while indexMiniGap < gap1ndexLowerBound:
-                        potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                        if track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                    my[indexMiniGap] = my[activeGap1ndex]
+                    while my[indexMiniGap] < my[gap1ndexLowerBound]:
+                        potentialGaps[my[activeGap1ndex]] = potentialGaps[my[indexMiniGap]]
+                        if track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] == dimensionsTotal - my[dimensionsUnconstrained]:
                             incrementActiveGap()
-                        track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] = 0
+                        track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] = 0
                         incrementIndexMiniGap()
 
-            while activeLeaf1ndex > 0 and activeGap1ndex == track[t.gapRangeStart.value, activeLeaf1ndex - 1]:
+            while my[activeLeaf1ndex] > 0 and my[activeGap1ndex] == track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]:
                 backtrack()
 
-            if activeLeaf1ndex > 0:
+            if my[activeLeaf1ndex] > 0:
                 placeLeaf()
 
     listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions)
-
+    my = track[t.my.value]
     connectionGraph: Final[numpy.ndarray]
     dimensionsTotal: Final[int] = len(listDimensions)
     leavesTotal: Final[int]
 
-    activeGap1ndex: int = 0
-    activeLeaf1ndex: int = 1
-    dimension1ndex: int = 1
-    dimensionsUnconstrained: int = 0
+    my[activeLeaf1ndex] = 1
     foldsTotal: int = 0
-    gap1ndexLowerBound: int = 0
     indexLeaf: int = 0
-    indexMiniGap: int = 0
-    leaf1ndexConnectee: int = 0
     modulus = numpy.zeros(leavesTotal, dtype=numpy.int64)
     taskIndex: int = 0
     taskPartition: int = 0
@@ -379,30 +348,30 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     initializeUnconstrainedLeaf()
     initializeTaskIndex()
 
-    taskIndex = leavesTotal - 1
-    mitosis()
+    # taskIndex = leavesTotal - 1
+    # mitosis()
 
-    for taskIndex in dictionaryTaskState.keys():
-        restoreTaskState(taskIndex)
-        doWhile()
-
-    # state_activeGap1ndex = activeGap1ndex
-    # state_activeLeaf1ndex = activeLeaf1ndex
-    # state_potentialGaps = potentialGaps.copy()
-    # state_track = track.copy()
-
-    # if computationDivisions:
-    #     listTaskIndices = list(range(leavesTotal))
-    # else:
-    #     listTaskIndices = [taskIndex]
-
-    # for taskIndex in listTaskIndices:
-    #     activeGap1ndex = state_activeGap1ndex
-    #     activeLeaf1ndex = state_activeLeaf1ndex
-    #     potentialGaps = state_potentialGaps.copy()
-    #     track = state_track.copy()
+    # for taskIndex in dictionaryTaskState.keys():
+    #     restoreTaskState(taskIndex)
     #     doWhile()
 
-    # foldsTotal = sum(track[subtotal]) + foldsTotal
+    state_activeGap1ndex = my[activeGap1ndex]
+    state_activeLeaf1ndex = my[activeLeaf1ndex]
+    state_potentialGaps = potentialGaps.copy()
+    state_track = track.copy()
+
+    if computationDivisions:
+        listTaskIndices = list(range(leavesTotal))
+    else:
+        listTaskIndices = [taskIndex]
+
+    for taskIndex in listTaskIndices:
+        my[activeGap1ndex] = state_activeGap1ndex
+        my[activeLeaf1ndex] = state_activeLeaf1ndex
+        potentialGaps = state_potentialGaps.copy()
+        track = state_track.copy()
+        doWhile()
+
+    # foldsTotal = sum(my[subtotal]) + foldsTotal
 
     return foldsTotal

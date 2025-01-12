@@ -1,14 +1,13 @@
 """A functional but untenable implementation of the Run Lola Run concept. Untenable because of excessive code duplication."""
 from mapFolding import outfitFoldings, t, setCPUlimit, getTaskDivisions
+from mapFolding import activeGap1ndex, activeLeaf1ndex, dimension1ndex, dimensionsUnconstrained, gap1ndexLowerBound, indexMiniGap, leaf1ndexConnectee
 from typing import Any, Final, List, Optional, Tuple, Union
 import numpy
 import numba
 import numpy.typing
 import pathlib
 import os
-from .profile_tools import measure_cache_misses, get_cpu_cache_info, analyze_array_layout
 
-# @measure_cache_misses
 def countFolds(listDimensions: List[int], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None, pathJob: Optional[Union[str, os.PathLike[Any]]] = None):
     """
     Count the distinct ways to fold a multi-dimensional map.
@@ -39,108 +38,92 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
     dtypeMaximum: Final = numpy.uint16
 
     validatedDimensions, n, D, track, potentialGaps = outfitFoldings(listDimensions, dtypeDefault, dtypeMaximum)
-
+    my=track[t.my.value]
     dimensionsTotal: Final[numpy.uint8] = numpy.uint8(len(validatedDimensions))
 
     connectionGraph: Final[numpy.ndarray] = D
     leavesTotal: Final[numpy.uint8] = numpy.uint8(n)
 
-    activeGap1ndex = numpy.uint8(0)
-    activeLeaf1ndex = numpy.uint8(1)
+    my[activeLeaf1ndex] = numpy.uint8(1)
 
     def backtrack():
-        nonlocal activeLeaf1ndex
-        activeLeaf1ndex -= 1
-        track[t.leafBelow.value, track[t.leafAbove.value, activeLeaf1ndex]] = track[t.leafBelow.value, activeLeaf1ndex]
-        track[t.leafAbove.value, track[t.leafBelow.value, activeLeaf1ndex]] = track[t.leafAbove.value, activeLeaf1ndex]
+        my[activeLeaf1ndex] -= 1
+        track[t.leafBelow.value, track[t.leafAbove.value, my[activeLeaf1ndex]]] = track[t.leafBelow.value, my[activeLeaf1ndex]]
+        track[t.leafAbove.value, track[t.leafBelow.value, my[activeLeaf1ndex]]] = track[t.leafAbove.value, my[activeLeaf1ndex]]
 
-    def countGaps(gap1ndexLowerBound: numpy.uint8, leaf1ndexConnectee: numpy.uint8):
-        potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-        if track[t.countDimensionsGapped.value, leaf1ndexConnectee] == 0:
-            gap1ndexLowerBound += 1
-        track[t.countDimensionsGapped.value, leaf1ndexConnectee] += 1
-        return gap1ndexLowerBound
+    def countGaps():
+        potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
+        if track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] == 0:
+            my[gap1ndexLowerBound] += 1
+        track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] += 1
+        return my[gap1ndexLowerBound]
 
-    def filterCommonGaps(dimensionsUnconstrained: numpy.uint8, gap1ndexLowerBound: numpy.uint8):
-        nonlocal activeGap1ndex
-        indexMiniGap = activeGap1ndex
-        while indexMiniGap < gap1ndexLowerBound:
-            potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-            if track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
-                activeGap1ndex += 1
-            track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] = 0
-            indexMiniGap += 1
+    def filterCommonGaps():
+        my[indexMiniGap] = my[activeGap1ndex]
+        while my[indexMiniGap] < my[gap1ndexLowerBound]:
+            potentialGaps[my[activeGap1ndex]] = potentialGaps[my[indexMiniGap]]
+            if track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] == dimensionsTotal - my[dimensionsUnconstrained]:
+                my[activeGap1ndex] += 1
+            track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] = 0
+            my[indexMiniGap] += 1
 
     def placeLeaf():
-        nonlocal activeLeaf1ndex, activeGap1ndex
-        activeGap1ndex -= 1
-        track[t.leafAbove.value, activeLeaf1ndex] = potentialGaps[activeGap1ndex]
-        track[t.leafBelow.value, activeLeaf1ndex] = track[t.leafBelow.value, track[t.leafAbove.value, activeLeaf1ndex]]
-        track[t.leafBelow.value, track[t.leafAbove.value, activeLeaf1ndex]] = activeLeaf1ndex
-        track[t.leafAbove.value, track[t.leafBelow.value, activeLeaf1ndex]] = activeLeaf1ndex
-        track[t.gapRangeStart.value, activeLeaf1ndex] = activeGap1ndex
-        activeLeaf1ndex += 1
+        my[activeGap1ndex] -= 1
+        track[t.leafAbove.value, my[activeLeaf1ndex]] = potentialGaps[my[activeGap1ndex]]
+        track[t.leafBelow.value, my[activeLeaf1ndex]] = track[t.leafBelow.value, track[t.leafAbove.value, my[activeLeaf1ndex]]]
+        track[t.leafBelow.value, track[t.leafAbove.value, my[activeLeaf1ndex]]] = my[activeLeaf1ndex]
+        track[t.leafAbove.value, track[t.leafBelow.value, my[activeLeaf1ndex]]] = my[activeLeaf1ndex]
+        track[t.gapRangeStart.value, my[activeLeaf1ndex]] = my[activeGap1ndex]
+        my[activeLeaf1ndex] += 1
 
     def initializeState():
-        while activeLeaf1ndex > 0:
-            if activeLeaf1ndex <= 1 or track[t.leafBelow.value, 0] == 1:
-                dimensionsUnconstrained = numpy.uint8(0)
-                gap1ndexLowerBound: numpy.uint8 = track[t.gapRangeStart.value, activeLeaf1ndex - 1]
-                dimension1ndex = numpy.uint8(1)
-                while dimension1ndex <= dimensionsTotal:
-                    if connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex] == activeLeaf1ndex:
-                        dimensionsUnconstrained += 1
+        while my[activeLeaf1ndex] > 0:
+            if my[activeLeaf1ndex] <= 1 or track[t.leafBelow.value, 0] == 1:
+                my[dimensionsUnconstrained] = 0
+                my[gap1ndexLowerBound] = track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]
+                my[dimension1ndex] = 1
+                while my[dimension1ndex] <= dimensionsTotal:
+                    if connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]] == my[activeLeaf1ndex]:
+                        my[dimensionsUnconstrained] += 1
                     else:
-                        leaf1ndexConnectee: numpy.uint8 = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
-                        while leaf1ndexConnectee != activeLeaf1ndex:
-                            if not activeLeaf1ndex != leavesTotal and leaf1ndexConnectee % leavesTotal == leavesTotal - 1:
+                        my[leaf1ndexConnectee] = connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]]
+                        while my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
+                            if not my[activeLeaf1ndex] != leavesTotal and my[leaf1ndexConnectee] % leavesTotal == leavesTotal - 1:
                                 return
-                            gap1ndexLowerBound = countGaps(gap1ndexLowerBound, leaf1ndexConnectee)
-                            leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[t.leafBelow.value, leaf1ndexConnectee]]
-                    dimension1ndex += 1
-                if dimensionsUnconstrained == dimensionsTotal:
+                            my[gap1ndexLowerBound] = countGaps()
+                            my[leaf1ndexConnectee] = connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], track[t.leafBelow.value, my[leaf1ndexConnectee]]]
+                    my[dimension1ndex] += 1
+                if my[dimensionsUnconstrained] == dimensionsTotal:
                     indexLeaf = numpy.uint8(0)
-                    while indexLeaf < activeLeaf1ndex:
-                        potentialGaps[gap1ndexLowerBound] = indexLeaf
-                        gap1ndexLowerBound += 1
+                    while indexLeaf < my[activeLeaf1ndex]:
+                        potentialGaps[my[gap1ndexLowerBound]] = indexLeaf
+                        my[gap1ndexLowerBound] += 1
                         indexLeaf += 1
-                filterCommonGaps(dimensionsUnconstrained, gap1ndexLowerBound)
-            while activeLeaf1ndex > 0 and activeGap1ndex == track[t.gapRangeStart.value, activeLeaf1ndex - 1]:
+                filterCommonGaps()
+            while my[activeLeaf1ndex] > 0 and my[activeGap1ndex] == track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]:
                 backtrack()
-            if activeLeaf1ndex > 0:
+            if my[activeLeaf1ndex] > 0:
                 placeLeaf()
 
     initializeState()
 
-    tupleLolaState = (activeGap1ndex, activeLeaf1ndex, connectionGraph, dimensionsTotal, leavesTotal, potentialGaps, track)
+    tupleLolaState = (connectionGraph, dimensionsTotal, leavesTotal, potentialGaps, track)
     if pathJob is not None:
         # TODO SSOT for where I am putting information!
         pathRelativeJob = str(listDimensions).replace(' ', '')
         pathJob = pathlib.Path(pathJob, pathRelativeJob)
 
-    # Add profiling before returning
-    if os.getenv('MAP_FOLDING_PROFILE'):
-        get_cpu_cache_info()
-        analyze_array_layout(connectionGraph)
-        analyze_array_layout(track)
-        analyze_array_layout(potentialGaps)
-
     return lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState)
 
 def saveState(pathState: Union[str, os.PathLike[Any]],
-    activeGap1ndex: numpy.uint8,
-    activeLeaf1ndex: numpy.uint8,
     connectionGraph: numpy.ndarray,
     dimensionsTotal: numpy.uint8,
     leavesTotal: numpy.uint8,
     potentialGaps: numpy.ndarray,
     track: numpy.ndarray):
-    import pathlib
     pathFilenameState = pathlib.Path(pathState, "stateJob.npz")
     pathFilenameState.parent.mkdir(parents=True, exist_ok=True)
     numpy.savez_compressed(pathFilenameState,
-        activeGap1ndex=activeGap1ndex,
-        activeLeaf1ndex=activeLeaf1ndex,
         connectionGraph=connectionGraph,
         dimensionsTotal=dimensionsTotal,
         leavesTotal=leavesTotal,
@@ -151,8 +134,6 @@ def saveState(pathState: Union[str, os.PathLike[Any]],
 
 def loadState(pathFilenameState: Union[str, os.PathLike[Any]]) -> Tuple:
     tupleLolaState = (
-        numpy.uint8(numpy.load(pathFilenameState)['activeGap1ndex']),
-        numpy.uint8(numpy.load(pathFilenameState)['activeLeaf1ndex']),
         numpy.load(pathFilenameState)['connectionGraph'],
         numpy.uint8(numpy.load(pathFilenameState)['dimensionsTotal']),
         numpy.uint8(numpy.load(pathFilenameState)['leavesTotal']),
@@ -168,7 +149,7 @@ def doJob(pathFilenameState: Union[str, os.PathLike[Any]], computationDivisions:
     foldsTotal = lolaDispatcher(taskDivisions, CPUlimit, pathJob=None, tupleLolaState=tupleLolaState)
     print(foldsTotal)
     # TODO SSOT for where I am putting information, ffs!
-    filenameFoldsTotal = str(tupleLolaState[4]).replace(' ', '') + ".foldsTotal"
+    filenameFoldsTotal = str(tupleLolaState[2]).replace(' ', '') + ".foldsTotal"
     pathFilenameFoldsTotal = pathlib.Path(pathFilenameState).with_name(filenameFoldsTotal)
     pathFilenameFoldsTotal.write_text(str(foldsTotal))
     return pathFilenameFoldsTotal
@@ -179,12 +160,12 @@ def lolaDispatcher(computationDivisions, CPUlimit, pathJob, tupleLolaState):
     elif computationDivisions:
         # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
         setCPUlimit(CPUlimit)
-        # taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[4])) # leavesTotal
-        """TODO something is wrong with `taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[4])) # leavesTotal`
-        but setting `taskDivisions = numpy.uint8(tupleLolaState[4]) # leavesTotal` still works as expected.
+        # taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[2])) # leavesTotal
+        """TODO something is wrong with `taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[2])) # leavesTotal`
+        but setting `taskDivisions = numpy.uint8(tupleLolaState[2]) # leavesTotal` still works as expected.
         Therefore, while restructuring the entire computationDivisions-to-taskDivisions system, look for the reason(s) why
         taskDivisions != leavesTotal if leavesTotal < numba.get_num_threads() calculates incorrectly."""
-        taskDivisions = numpy.uint8(tupleLolaState[4]) # leavesTotal
+        taskDivisions = numpy.uint8(tupleLolaState[2]) # leavesTotal
         from mapFolding.lolaRun import doWhileConcurrent
         foldsTotal = int(doWhileConcurrent(*tupleLolaState, taskDivisions)) # type: ignore
     else:
