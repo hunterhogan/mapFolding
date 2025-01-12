@@ -3,19 +3,19 @@ Other test modules must not import directly from the package being tested."""
 
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
-import pathlib
-import random
-import unittest.mock
-from typing import Any, Callable, Dict, Generator, List, Sequence, Tuple, Type, Union
-
-import pytest
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteConcurrencyLimit
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteOopsieKwargsie
+from typing import Any, Callable, Dict, Generator, List, Sequence, Tuple, Type, Union
+import pathlib
+import pytest
+import random
+import unittest.mock
 
 from mapFolding.importPackages import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from mapFolding import clearOEIScache, countFolds
 from mapFolding import getLeavesTotal, parseListDimensions, validateListDimensions
+from mapFolding import pathJobDEFAULT
 from mapFolding.oeis import OEIS_for_n
 from mapFolding.oeis import _formatFilenameCache
 from mapFolding.oeis import _getOEISidValues
@@ -50,6 +50,46 @@ __all__ = [
     'standardComparison',
     'validateListDimensions',
     ]
+
+def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
+    """Returns a dictionary mapping dimension tuples to their known folding totals."""
+    dictionaryMapDimensionsToFoldsTotalKnown = {}
+
+    for settings in settingsOEIS.values():
+        sequence = settings['valuesKnown']
+
+        for n, foldingsTotal in sequence.items():
+            dimensions = settings['getDimensions'](n)
+            dimensions.sort()
+            dictionaryMapDimensionsToFoldsTotalKnown[tuple(dimensions)] = foldingsTotal
+
+    # Are we in a place that has jobs?
+    if pathJobDEFAULT.exists():
+        # Are there foldsTotal files?
+        for pathFilenameFoldsTotal in pathJobDEFAULT.rglob('*.foldsTotal'):
+            if pathFilenameFoldsTotal.is_file():
+                try:
+                    listDimensions = eval(pathFilenameFoldsTotal.stem)
+                except Exception:
+                    continue
+                # Are the dimensions in the dictionary?
+                if isinstance(listDimensions, list) and all(isinstance(dimension, int) for dimension in listDimensions):
+                    listDimensions.sort()
+                    if tuple(listDimensions) in dictionaryMapDimensionsToFoldsTotalKnown:
+                        continue
+                    # Are the contents a reasonably large integer?
+                    try:
+                        foldsTotal = pathFilenameFoldsTotal.read_text()
+                    except Exception:
+                        continue
+                    # Why did I sincerely believe this would only be three lines of code?
+                    if foldsTotal.isdigit() and int(foldsTotal) > 85109616 * 10**3:
+                        foldsTotal = int(foldsTotal)
+                    # You made it this far, so fuck it: put it in the dictionary
+                    dictionaryMapDimensionsToFoldsTotalKnown[tuple(listDimensions)] = foldsTotal
+                    # The sunk-costs fallacy claims another victim!
+
+    return dictionaryMapDimensionsToFoldsTotalKnown
 
 """
 Section: Fixtures"""
@@ -128,20 +168,6 @@ def pathBenchmarksTesting(tmp_path: pathlib.Path) -> Generator[pathlib.Path, Any
     benchmarking.pathFilenameRecordedBenchmarks = pathTest
     yield pathTest
     benchmarking.pathFilenameRecordedBenchmarks = pathOriginal
-
-def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
-    """Returns a dictionary mapping dimension tuples to their known folding totals."""
-    dimensionsFoldingsTotalLookup = {}
-
-    for settings in settingsOEIS.values():
-        sequence = settings['valuesKnown']
-
-        for n, foldingsTotal in sequence.items():
-            dimensions = settings['getDimensions'](n)
-            dimensions.sort()
-            dimensionsFoldingsTotalLookup[tuple(dimensions)] = foldingsTotal
-
-    return dimensionsFoldingsTotalLookup
 
 """
 Section: Standardized test structures"""

@@ -1,5 +1,16 @@
 """Prototype concept; especially as a complement to 'beDRY.py'."""
 from typing import Final, Literal, TypedDict
+import pathlib
+import sys
+
+try:
+    _pathModule = pathlib.Path(__file__).parent
+except NameError:
+    _pathModule = pathlib.Path.cwd()
+
+pathJobDEFAULT = _pathModule / "jobs"
+if 'google.colab' in sys.modules:
+    pathJobDEFAULT = pathlib.Path("/content/drive/MyDrive") / "jobs"
 
 leafAbove: Final[Literal[0]] = 0
 leafBelow: Final[Literal[1]] = 1

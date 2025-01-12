@@ -112,8 +112,9 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
 
     tupleLolaState = (activeGap1ndex, activeLeaf1ndex, connectionGraph, dimensionsTotal, leavesTotal, potentialGaps, track)
     if pathJob is not None:
-        pathJob = pathlib.Path(pathJob, f"[{','.join(map(str, listDimensions))}]")
-
+        # TODO SSOT for where I am putting information!
+        pathRelativeJob = str(listDimensions).replace(' ', '')
+        pathJob = pathlib.Path(pathJob, pathRelativeJob)
     return lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState)
 
 def saveState(pathState: Union[str, os.PathLike[Any]],
@@ -152,9 +153,13 @@ def loadState(pathFilenameState: Union[str, os.PathLike[Any]]) -> Tuple:
 
 def doJob(pathFilenameState: Union[str, os.PathLike[Any]], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None):
     taskDivisions = getTaskDivisions(computationDivisions)
-    foldsTotal = lolaDispatcher(taskDivisions, CPUlimit, pathJob=None, tupleLolaState=loadState(pathFilenameState))
+    # TODO figure out how to pass state information around. Am I having fun yet?!
+    tupleLolaState=loadState(pathFilenameState)
+    foldsTotal = lolaDispatcher(taskDivisions, CPUlimit, pathJob=None, tupleLolaState=tupleLolaState)
     print(foldsTotal)
-    pathFilenameFoldsTotal = pathlib.Path(pathFilenameState).with_name("foldsTotalVector.txt")
+    # TODO SSOT for where I am putting information, ffs!
+    filenameFoldsTotal = str(tupleLolaState[4]).replace(' ', '') + ".foldsTotal"
+    pathFilenameFoldsTotal = pathlib.Path(pathFilenameState).with_name(filenameFoldsTotal)
     pathFilenameFoldsTotal.write_text(str(foldsTotal))
     return pathFilenameFoldsTotal
 
