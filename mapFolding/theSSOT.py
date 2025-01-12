@@ -2,6 +2,8 @@
 from typing import Final, Literal, TypedDict
 import pathlib
 import sys
+import enum
+import numba
 
 try:
     _pathModule = pathlib.Path(__file__).parent
@@ -12,10 +14,18 @@ pathJobDEFAULT = _pathModule / "jobs"
 if 'google.colab' in sys.modules:
     pathJobDEFAULT = pathlib.Path("/content/drive/MyDrive") / "jobs"
 
-leafAbove: Final[Literal[0]] = 0
-leafBelow: Final[Literal[1]] = 1
-countDimensionsGapped: Final[Literal[2]] = 2
-gapRangeStart: Final[Literal[3]] = 3
+@enum.verify(enum.CONTINUOUS)
+@enum.unique
+class t(enum.Enum):
+    """Indices for tracking array operations. Values must start at 0 for numpy array indexing."""
+    @staticmethod
+    def _generate_next_value_(name, start, count, last_values):
+        return count  # Start counting from 0
+
+    leafAbove = enum.auto()
+    leafBelow = enum.auto()
+    countDimensionsGapped = enum.auto()
+    gapRangeStart = enum.auto()
 
 # TODO learn how to use TypedDict without numba freaking out
 

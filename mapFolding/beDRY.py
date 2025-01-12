@@ -1,5 +1,6 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding.importPackages import intInnit, defineConcurrencyLimit, oopsieKwargsie
+from mapFolding import t as indicesTrack
 from typing import Any, List, Tuple, Union
 import numpy
 import numba
@@ -108,8 +109,7 @@ def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, 
         sortedValidDimensions,leavesTotal,connectionGraph,arrayTracking,potentialGaps: Tuple containing `sortedValidDimensions`, a sorted list, with at least two elements, of only positive integers;
             the total number of leaves; the connection graph; an array for state tracking during execution; and an array for tracking potential gaps during execution.
     """
-    arrayTrackingHeightHARDCODED = 4
-    arrayTrackingHeight = arrayTrackingHeightHARDCODED
+    arrayTrackingHeight = len(indicesTrack)
 
     sortedValidDimensions = sorted(validateListDimensions(listDimensions))
     leavesTotal = getLeavesTotal(sortedValidDimensions)

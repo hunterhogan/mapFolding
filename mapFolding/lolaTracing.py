@@ -1,7 +1,7 @@
 from Z0Z_tools import dataTabularTOpathFilenameDelimited
 from collections import Counter
 from functools import wraps
-from mapFolding import outfitFoldings
+from mapFolding import outfitFoldings, t
 from types import FrameType
 from typing import List, Callable, Any, Final, Literal, Dict
 import pathlib
@@ -10,7 +10,7 @@ import time
 import numpy
 import numba
 
-"""
+# """
 def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
     def decoratorTrace(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(functionTarget)
@@ -40,14 +40,14 @@ def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
         return wrapperTrace
     return decoratorTrace(functionTarget)
 
-"""
+# """
 # @numba.jit(nopython=True, cache=True, fastmath=True)
 def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     def backtrack() -> None:
         nonlocal activeLeaf1ndex
         activeLeaf1ndex -= 1
-        track[leafBelow, track[leafAbove, activeLeaf1ndex]] = track[leafBelow, activeLeaf1ndex]
-        track[leafAbove, track[leafBelow, activeLeaf1ndex]] = track[leafAbove, activeLeaf1ndex]
+        track[t.leafBelow.value, track[t.leafAbove.value, activeLeaf1ndex]] = track[t.leafBelow.value, activeLeaf1ndex]
+        track[t.leafAbove.value, track[t.leafBelow.value, activeLeaf1ndex]] = track[t.leafAbove.value, activeLeaf1ndex]
 
     def checkActiveLeafGreaterThan0():
         return activeLeaf1ndex > 0
@@ -65,7 +65,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
         return computationDivisions == False
 
     def checkLeafBelowSentinelIs1():
-        return track[leafBelow, 0] == 1
+        return track[t.leafBelow.value, 0] == 1
 
     def checkTaskIndex():
         nonlocal taskPartition
@@ -106,11 +106,11 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     def placeLeaf() -> None:
         nonlocal activeLeaf1ndex, activeGap1ndex
         activeGap1ndex -= 1
-        track[leafAbove, activeLeaf1ndex] = potentialGaps[activeGap1ndex]
-        track[leafBelow, activeLeaf1ndex] = track[leafBelow, track[leafAbove, activeLeaf1ndex]]
-        track[leafBelow, track[leafAbove, activeLeaf1ndex]] = activeLeaf1ndex
-        track[leafAbove, track[leafBelow, activeLeaf1ndex]] = activeLeaf1ndex
-        track[gapRangeStart, activeLeaf1ndex] = activeGap1ndex
+        track[t.leafAbove.value, activeLeaf1ndex] = potentialGaps[activeGap1ndex]
+        track[t.leafBelow.value, activeLeaf1ndex] = track[t.leafBelow.value, track[t.leafAbove.value, activeLeaf1ndex]]
+        track[t.leafBelow.value, track[t.leafAbove.value, activeLeaf1ndex]] = activeLeaf1ndex
+        track[t.leafAbove.value, track[t.leafBelow.value, activeLeaf1ndex]] = activeLeaf1ndex
+        track[t.gapRangeStart.value, activeLeaf1ndex] = activeGap1ndex
         activeLeaf1ndex += 1
 
     def restoreTaskState(taskNumber):
@@ -131,7 +131,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
 
     def updateLeaf1ndexConnectee():
         nonlocal leaf1ndexConnectee
-        leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[leafBelow, leaf1ndexConnectee]]
+        leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[t.leafBelow.value, leaf1ndexConnectee]]
 
     def initializeUnconstrainedLeaf():
         while checkActiveLeafGreaterThan0():
@@ -142,7 +142,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                     nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound, dimension1ndex
 
                     dimensionsUnconstrained = 0
-                    gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
+                    gap1ndexLowerBound = track[t.gapRangeStart.value, activeLeaf1ndex - 1]
 
                     dimension1ndex = 1
                     while dimension1ndex <= dimensionsTotal:
@@ -162,9 +162,9 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                                             doCountGaps = True
                                 if doCountGaps:
                                     potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                    if track[countDimensionsGapped, leaf1ndexConnectee] == 0:
+                                    if track[t.countDimensionsGapped.value, leaf1ndexConnectee] == 0:
                                         incrementGap1ndexLowerBound()
-                                    track[countDimensionsGapped, leaf1ndexConnectee] += 1
+                                    track[t.countDimensionsGapped.value, leaf1ndexConnectee] += 1
                                 updateLeaf1ndexConnectee()
                         dimension1ndex += 1
 
@@ -175,12 +175,12 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                     indexMiniGap = activeGap1ndex
                     while indexMiniGap < gap1ndexLowerBound:
                         potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                        if track[countDimensionsGapped, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                        if track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
                             incrementActiveGap()
-                        track[countDimensionsGapped, potentialGaps[indexMiniGap]] = 0
+                        track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] = 0
                         incrementIndexMiniGap()
 
-            while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
+            while activeLeaf1ndex > 0 and activeGap1ndex == track[t.gapRangeStart.value, activeLeaf1ndex - 1]:
                 backtrack()
 
             if activeLeaf1ndex > 0:
@@ -198,7 +198,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                     nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound, dimension1ndex
 
                     dimensionsUnconstrained = 0
-                    gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
+                    gap1ndexLowerBound = track[t.gapRangeStart.value, activeLeaf1ndex - 1]
 
                     dimension1ndex = 1
                     while dimension1ndex <= dimensionsTotal:
@@ -212,9 +212,9 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                                         # NOTE Lola condition
                                         return
                                 potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                if track[countDimensionsGapped, leaf1ndexConnectee] == 0:
+                                if track[t.countDimensionsGapped.value, leaf1ndexConnectee] == 0:
                                     incrementGap1ndexLowerBound()
-                                track[countDimensionsGapped, leaf1ndexConnectee] += 1
+                                track[t.countDimensionsGapped.value, leaf1ndexConnectee] += 1
                                 updateLeaf1ndexConnectee()
                         dimension1ndex += 1
 
@@ -225,12 +225,12 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                     indexMiniGap = activeGap1ndex
                     while indexMiniGap < gap1ndexLowerBound:
                         potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                        if track[countDimensionsGapped, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                        if track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
                             incrementActiveGap()
-                        track[countDimensionsGapped, potentialGaps[indexMiniGap]] = 0
+                        track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] = 0
                         incrementIndexMiniGap()
 
-            while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
+            while activeLeaf1ndex > 0 and activeGap1ndex == track[t.gapRangeStart.value, activeLeaf1ndex - 1]:
                 backtrack()
 
             if activeLeaf1ndex > 0:
@@ -246,7 +246,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                     nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound, dimension1ndex, taskIndex, foldsTotal
 
                     dimensionsUnconstrained = 0
-                    gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
+                    gap1ndexLowerBound = track[t.gapRangeStart.value, activeLeaf1ndex - 1]
 
                     dimension1ndex = 1
                     while dimension1ndex <= dimensionsTotal:
@@ -271,9 +271,9 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
 
                                 if doCountGaps:
                                     potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                    if track[countDimensionsGapped, leaf1ndexConnectee] == 0:
+                                    if track[t.countDimensionsGapped.value, leaf1ndexConnectee] == 0:
                                         incrementGap1ndexLowerBound()
-                                    track[countDimensionsGapped, leaf1ndexConnectee] += 1
+                                    track[t.countDimensionsGapped.value, leaf1ndexConnectee] += 1
 
                                 updateLeaf1ndexConnectee()
                         dimension1ndex += 1
@@ -285,11 +285,11 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                     indexMiniGap = activeGap1ndex
                     while indexMiniGap < gap1ndexLowerBound:
                         potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                        if track[countDimensionsGapped, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                        if track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
                             incrementActiveGap()
-                        track[countDimensionsGapped, potentialGaps[indexMiniGap]] = 0
+                        track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] = 0
                         incrementIndexMiniGap()
-            while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
+            while activeLeaf1ndex > 0 and activeGap1ndex == track[t.gapRangeStart.value, activeLeaf1ndex - 1]:
                 backtrack()
             if activeLeaf1ndex > 0:
                 placeLeaf()
@@ -311,7 +311,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                     nonlocal activeGap1ndex, dimensionsUnconstrained, gap1ndexLowerBound, dimension1ndex
 
                     dimensionsUnconstrained = 0
-                    gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
+                    gap1ndexLowerBound = track[t.gapRangeStart.value, activeLeaf1ndex - 1]
 
                     dimension1ndex = 1
                     while dimension1ndex <= dimensionsTotal:
@@ -331,9 +331,9 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                                             doCountGaps = True
                                 if doCountGaps:
                                     potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
-                                    if track[countDimensionsGapped, leaf1ndexConnectee] == 0:
+                                    if track[t.countDimensionsGapped.value, leaf1ndexConnectee] == 0:
                                         incrementGap1ndexLowerBound()
-                                    track[countDimensionsGapped, leaf1ndexConnectee] += 1
+                                    track[t.countDimensionsGapped.value, leaf1ndexConnectee] += 1
                                 updateLeaf1ndexConnectee()
                         dimension1ndex += 1
 
@@ -344,12 +344,12 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
                     indexMiniGap = activeGap1ndex
                     while indexMiniGap < gap1ndexLowerBound:
                         potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                        if track[countDimensionsGapped, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                        if track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
                             incrementActiveGap()
-                        track[countDimensionsGapped, potentialGaps[indexMiniGap]] = 0
+                        track[t.countDimensionsGapped.value, potentialGaps[indexMiniGap]] = 0
                         incrementIndexMiniGap()
 
-            while activeLeaf1ndex > 0 and activeGap1ndex == track[gapRangeStart, activeLeaf1ndex - 1]:
+            while activeLeaf1ndex > 0 and activeGap1ndex == track[t.gapRangeStart.value, activeLeaf1ndex - 1]:
                 backtrack()
 
             if activeLeaf1ndex > 0:
@@ -358,11 +358,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     listDimensions, leavesTotal, connectionGraph, track, potentialGaps = outfitFoldings(listDimensions)
 
     connectionGraph: Final[numpy.ndarray]
-    countDimensionsGapped: Final[Literal[2]] = 2
     dimensionsTotal: Final[int] = len(listDimensions)
-    gapRangeStart: Final[Literal[3]] = 3
-    leafAbove: Final[Literal[0]] = 0
-    leafBelow: Final[Literal[1]] = 1
     leavesTotal: Final[int]
 
     activeGap1ndex: int = 0

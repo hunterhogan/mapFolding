@@ -252,7 +252,7 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
         else:
             raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
 
-    return countFolds(listDimensions)
+    return countFolds(listDimensions) # type: ignore
 
 def OEIS_for_n() -> None:
     """Command-line interface for oeisIDfor_n."""
