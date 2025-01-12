@@ -6,9 +6,12 @@ Other test modules must not import directly from the package being tested."""
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteConcurrencyLimit
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteOopsieKwargsie
-from typing import Any, Callable, Dict, Generator, List, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, Tuple, Type, Union
 import pathlib
 import pytest
+import numba
+import sys
+import os
 import random
 import unittest.mock
 
@@ -47,6 +50,7 @@ __all__ = [
     'oopsieKwargsie',
     'parseListDimensions',
     'settingsOEIS',
+    'standardCacheTest',
     'standardComparison',
     'validateListDimensions',
     ]
@@ -169,6 +173,50 @@ def pathBenchmarksTesting(tmp_path: pathlib.Path) -> Generator[pathlib.Path, Any
     yield pathTest
     benchmarking.pathFilenameRecordedBenchmarks = pathOriginal
 
+@pytest.fixture(autouse=True)
+def configureNumba(request: pytest.FixtureRequest):
+    """Configure Numba JIT based on test markers and coverage mode."""
+
+    # Save original state
+    jit_state = os.environ.get('NUMBA_DISABLE_JIT', None)
+
+    def isRunningWithCoverage() -> bool:
+        """Detect if we're running under coverage analysis."""
+        # pytest-cov sets this
+        if os.environ.get('COV_CORE_CONFIG'):
+            return True
+        # VS Code and other tools might set these
+        if os.environ.get('COVERAGE_FILE'):
+            return True
+        if os.environ.get('COVERAGE_RUN'):
+            return True
+        # Check if coverage module is loaded
+        if 'coverage' in sys.modules:
+            return True
+        # Check if pytest-cov is active
+        if request.config.pluginmanager.has_plugin('pytest_cov'):
+            return True
+        return False
+
+    # Disable JIT if:
+    # 1. Test is marked with needs_jit_disabled
+    # 2. We're running under any coverage tool
+    if (request.node.get_closest_marker('needs_jit_disabled') or
+        isRunningWithCoverage()):
+        os.environ['NUMBA_DISABLE_JIT'] = '1'
+    elif request.node.get_closest_marker('needs_jit'):
+        # Ensure JIT is enabled for tests that need it
+        if 'NUMBA_DISABLE_JIT' in os.environ:
+            del os.environ['NUMBA_DISABLE_JIT']
+
+    yield
+
+    # Restore original state
+    if jit_state is None:
+        os.environ.pop('NUMBA_DISABLE_JIT', None)
+    else:
+        os.environ['NUMBA_DISABLE_JIT'] = jit_state
+
 """
 Section: Standardized test structures"""
 
@@ -222,3 +270,41 @@ def formatTestMessage(expected: Any, actual: Any, functionName: str, *arguments:
     return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"
             f"Expected: {expected}\n"
             f"Got: {actual}")
+
+def standardCacheTest(
+    expected: Any,
+    setupCacheFile: Optional[Callable[[pathlib.Path, str], None]],
+    oeisID: str,
+    pathCache: pathlib.Path
+) -> None:
+    """Template for tests involving OEIS cache operations.
+
+    Parameters
+        expected: Expected value or exception from _getOEISidValues
+        setupCacheFile: Function to prepare the cache file before test
+        oeisID: OEIS ID to test
+        pathCache: Temporary cache directory path
+    """
+    pathFilenameCache = pathCache / _formatFilenameCache.format(oeisID=oeisID)
+
+    # Setup cache file if provided
+    if setupCacheFile:
+        setupCacheFile(pathFilenameCache, oeisID)
+
+    # Run test
+    try:
+        actual = _getOEISidValues(oeisID)
+        messageActual = actual
+    except Exception as actualError:
+        actual = type(actualError)
+        messageActual = type(actualError).__name__
+
+    # Compare results
+    if isinstance(expected, type) and issubclass(expected, Exception):
+        messageExpected = expected.__name__
+        assert isinstance(actual, expected), formatTestMessage(
+            messageExpected, messageActual, "_getOEISidValues", oeisID)
+    else:
+        messageExpected = expected
+        assert actual == expected, formatTestMessage(
+            messageExpected, messageActual, "_getOEISidValues", oeisID)

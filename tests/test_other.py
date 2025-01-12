@@ -3,42 +3,43 @@ import pytest
 import sys
 # TODO test `outfitFoldings`, especially that `listDimensions` is sorted.
 
-# TODO add intInnit and parseListDimensions to this test
-@pytest.mark.parametrize("listDimensions,expected_validateListDimensions,expected_getLeavesTotal", [
-    (None, ValueError, ValueError),  # None instead of list
-    (['a'], ValueError, ValueError),  # string
-    ([-4, 2], ValueError, ValueError),  # negative
-    ([-3], ValueError, ValueError),  # negative
-    ([0, 0], NotImplementedError, 0),  # no positive dimensions
-    ([0, 5, 6], [5, 6], 30),  # zeros ignored
-    ([0], NotImplementedError, 0),  # edge case
-    ([1, 2, 3, 4, 5], [1, 2, 3, 4, 5], 120),  # sequential
-    ([1, sys.maxsize], [1, sys.maxsize], sys.maxsize),  # maxint
-    ([7.5], ValueError, ValueError),  # float
-    ([1] * 1000, [1] * 1000, 1),  # long list
-    ([11], NotImplementedError, 11),  # single dimension
-    ([13, 0, 17], [13, 17], 221),  # zeros handled
-    ([2, 2, 2, 2], [2, 2, 2, 2], 16),  # repeated dimensions
-    ([2, 3, 4], [2, 3, 4], 24),
-    ([2, 3], [2, 3], 6),
-    ([2] * 11, [2] * 11, 2048),  # power of 2
-    ([3, 2], [3, 2], 6),  # return value is the input when valid
-    ([3] * 5, [3, 3, 3, 3, 3], 243),  # power of 3
-    ([None], TypeError, TypeError),  # None
-    ([True], TypeError, TypeError),  # bool
-    ([[17, 39]], TypeError, TypeError),  # nested
-    ([], ValueError, ValueError),  # empty
-    ([complex(1,1)], ValueError, ValueError),  # complex number
-    ([float('inf')], ValueError, ValueError),  # infinity
-    ([float('nan')], ValueError, ValueError),  # NaN
-    ([sys.maxsize - 1, 1], [sys.maxsize - 1, 1], sys.maxsize - 1),  # near maxint
-    ([sys.maxsize // 2, sys.maxsize // 2, 2], [sys.maxsize // 2, sys.maxsize // 2, 2], OverflowError),  # overflow protection
-    ([sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], OverflowError),  # overflow protection
-    (range(3, 7), [3, 4, 5, 6], 360),  # range sequence type
-    (tuple([3, 5, 7]), [3, 5, 7], 105),  # tuple sequence type
+@pytest.mark.parametrize("listDimensions,expected_intInnit,expected_parseListDimensions,expected_validateListDimensions,expected_getLeavesTotal", [
+    (None, ValueError, ValueError, ValueError, ValueError),  # None instead of list
+    (['a'], ValueError, ValueError, ValueError, ValueError),  # string
+    ([-4, 2], [-4, 2], ValueError, ValueError, ValueError),  # negative
+    ([-3], [-3], ValueError, ValueError, ValueError),  # negative
+    ([0, 0], [0, 0], [0, 0], NotImplementedError, 0),  # no positive dimensions
+    ([0, 5, 6], [0, 5, 6], [0, 5, 6], [5, 6], 30),  # zeros ignored
+    ([0], [0], [0], NotImplementedError, 0),  # edge case
+    ([1, 2, 3, 4, 5], [1, 2, 3, 4, 5], [1, 2, 3, 4, 5], [1, 2, 3, 4, 5], 120),  # sequential
+    ([1, sys.maxsize], [1, sys.maxsize], [1, sys.maxsize], [1, sys.maxsize], sys.maxsize),  # maxint
+    ([7.5], ValueError, ValueError, ValueError, ValueError),  # float
+    ([1] * 1000, [1] * 1000, [1] * 1000, [1] * 1000, 1),  # long list
+    ([11], [11], [11], NotImplementedError, 11),  # single dimension
+    ([13, 0, 17], [13, 0, 17], [13, 0, 17], [13, 17], 221),  # zeros handled
+    ([2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2], 16),  # repeated dimensions
+    ([2, 3, 4], [2, 3, 4], [2, 3, 4], [2, 3, 4], 24),
+    ([2, 3], [2, 3], [2, 3], [2, 3], 6),
+    ([2] * 11, [2] * 11, [2] * 11, [2] * 11, 2048),  # power of 2
+    ([3, 2], [3, 2], [3, 2], [3, 2], 6),  # return value is the input when valid
+    ([3] * 5, [3] * 5, [3] * 5, [3, 3, 3, 3, 3], 243),  # power of 3
+    ([None], TypeError, TypeError, TypeError, TypeError),  # None
+    ([True], TypeError, TypeError, TypeError, TypeError),  # bool
+    ([[17, 39]], TypeError, TypeError, TypeError, TypeError),  # nested
+    ([], ValueError, ValueError, ValueError, ValueError),  # empty
+    ([complex(1,1)], ValueError, ValueError, ValueError, ValueError),  # complex number
+    ([float('inf')], ValueError, ValueError, ValueError, ValueError),  # infinity
+    ([float('nan')], ValueError, ValueError, ValueError, ValueError),  # NaN
+    ([sys.maxsize - 1, 1], [sys.maxsize - 1, 1], [sys.maxsize - 1, 1], [sys.maxsize - 1, 1], sys.maxsize - 1),  # near maxint
+    ([sys.maxsize // 2, sys.maxsize // 2, 2], [sys.maxsize // 2, sys.maxsize // 2, 2], [sys.maxsize // 2, sys.maxsize // 2, 2], [sys.maxsize // 2, sys.maxsize // 2, 2], OverflowError),  # overflow protection
+    ([sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], OverflowError),  # overflow protection
+    (range(3, 7), [3, 4, 5, 6], [3, 4, 5, 6], [3, 4, 5, 6], 360),  # range sequence type
+    (tuple([3, 5, 7]), [3, 5, 7], [3, 5, 7], [3, 5, 7], 105),  # tuple sequence type
 ])
-def test_listDimensionsAsParameter(listDimensions, expected_validateListDimensions, expected_getLeavesTotal):
+def test_listDimensionsAsParameter(listDimensions, expected_intInnit, expected_parseListDimensions, expected_validateListDimensions, expected_getLeavesTotal):
     """Test both validateListDimensions and getLeavesTotal with the same inputs."""
+    standardComparison(expected_intInnit, intInnit, listDimensions)
+    standardComparison(expected_parseListDimensions, parseListDimensions, listDimensions)
     standardComparison(expected_validateListDimensions, validateListDimensions, listDimensions)
     standardComparison(expected_getLeavesTotal, getLeavesTotal, listDimensions)
 
@@ -50,7 +51,7 @@ def test_getLeavesTotal_edge_cases():
     # Immutability
     listOriginal = [2, 3]
     standardComparison(6, getLeavesTotal, listOriginal)
-    standardComparison([2, 3], lambda x: x, listOriginal)  # Check list wasn't modified
+    standardComparison([2, 3], lambda x: x, listOriginal)  # Check that the list wasn't modified
 
 # ===== Parse Integers Tests =====
 def test_intInnit():

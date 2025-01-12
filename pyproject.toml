@@ -7,7 +7,7 @@ name = "mapFolding"
 description = "Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps)"
 readme = "README.md"
 authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
-version = "0.1.3"
+version = "0.1.4"
 requires-python = ">=3.10,<3.13"
 dependencies = ["numba", "numpy", "Z0Z-tools"]
 urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
@@ -44,4 +44,8 @@ output = "tests/coverage/coverage.xml"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--color=yes", "-n 8"]
+markers = [
+    "needs_jit_disabled: marks tests that require Numba JIT to be disabled",
+    "needs_jit: marks tests that specifically test JIT functionality"
+]
 env = ["NUMBA_DISABLE_JIT=1"]

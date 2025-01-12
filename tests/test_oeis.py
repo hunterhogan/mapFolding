@@ -63,26 +63,25 @@ def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unitt
         mock_unlink.assert_not_called()
 
 def testCacheMiss(pathCacheTesting: pathlib.Path, oeisID_1random: str):
-    pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisID_1random)
-
-    assert not pathFilenameCache.exists()
-    OEISsequence = _getOEISidValues(oeisID_1random)
-    assert OEISsequence is not None
-    assert pathFilenameCache.exists()
+    """Test cache miss scenario - cache file doesn't exist."""
+    # No setup function needed - we want to test missing cache
+    standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], None, oeisID_1random, pathCacheTesting)
 
 def testCacheExpired(pathCacheTesting: pathlib.Path, oeisID_1random: str):
-    pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisID_1random)
-    pathFilenameCache.write_text("# Old cache content")
-    oldModificationTime = datetime.now() - timedelta(days=30)
-    os.utime(pathFilenameCache, times=(oldModificationTime.timestamp(), oldModificationTime.timestamp()))
-    OEISsequence = _getOEISidValues(oeisID_1random)
-    assert OEISsequence is not None
+    """Test expired cache scenario."""
+    def setupExpiredCache(pathCache: pathlib.Path, oeisID: str) -> None:
+        pathCache.write_text("# Old cache content")
+        oldModificationTime = datetime.now() - timedelta(days=30)
+        os.utime(pathCache, times=(oldModificationTime.timestamp(), oldModificationTime.timestamp()))
+
+    standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupExpiredCache, oeisID_1random, pathCacheTesting)
 
 def testInvalidCache(pathCacheTesting: pathlib.Path, oeisID_1random: str):
-    pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisID_1random)
-    pathFilenameCache.write_text("Invalid content")
-    OEISsequence = _getOEISidValues(oeisID_1random)
-    assert OEISsequence is not None
+    """Test invalid cache content scenario."""
+    def setupInvalidCache(pathCache: pathlib.Path, oeisID: str) -> None:
+        pathCache.write_text("Invalid content")
+
+    standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupInvalidCache, oeisID_1random, pathCacheTesting)
 
 def testInvalidFileContent(pathCacheTesting: pathlib.Path, oeisID_1random: str):
     pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisID_1random)
