@@ -18,7 +18,6 @@ def test_aOFn_calculate_value(oeisID: str):
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID: str):
-    """Check that invalid or unknown IDs raise KeyError."""
     standardComparison(KeyError, _validateOEISid, badID)
 
 def test__validateOEISid_partially_valid(oeisID_1random: str):
@@ -63,7 +62,6 @@ def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unitt
         mock_exists.assert_called_once()
         mock_unlink.assert_not_called()
 
-# ===== Cache-related Tests =====
 def testCacheMiss(pathCacheTesting: pathlib.Path, oeisID_1random: str):
     pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisID_1random)
 

@@ -120,7 +120,6 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
         potentialGaps = dictionaryTaskState[taskIndex]['potentialGaps'].copy()
         track = dictionaryTaskState[taskIndex]['track'].copy()
 
-
     def saveTaskState(taskNumber):
         nonlocal dictionaryTaskState
         dictionaryTaskState[taskNumber] = dict(

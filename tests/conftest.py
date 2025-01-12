@@ -1,9 +1,10 @@
 """SSOT for Pytest.
 Other test modules must not import directly from the package being tested."""
 
+# TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
+
 import pathlib
 import random
-import sys
 import unittest.mock
 from typing import Any, Callable, Dict, Generator, List, Sequence, Tuple, Type, Union
 
@@ -15,7 +16,6 @@ from Z0Z_tools.pytest_parseParameters import makeTestSuiteOopsieKwargsie
 from mapFolding.importPackages import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from mapFolding import clearOEIScache, countFolds
 from mapFolding import getLeavesTotal, parseListDimensions, validateListDimensions
-from mapFolding.__idiotic_system__ import *
 from mapFolding.oeis import OEIS_for_n
 from mapFolding.oeis import _formatFilenameCache
 from mapFolding.oeis import _getOEISidValues

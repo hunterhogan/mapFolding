@@ -1,18 +1,15 @@
-"""Prototype concept: Import priority levels. Larger priority values should be imported before smaller priority values.
+"""Prototype concept: Import priority levels. Larger priority values should be imported before smaller priority values."""
+"""
+# TODO Across the entire package, restructure computationDivisions.
 
-`import` acts on the entire module, of course, so priority levels are per-module, not per-statement.
+doWhile:
+    taskDivisions: int
+    taskIndex: int
 
-Value system based on ~40 years of varied experiences starting with line basic in 1985, but also used to order/prioritize/enumerate a dynamic set of objects/tasks.
-- Only positive integer values.
-- Do not reuse values.
-- Avoid contiguous values.
-- Prefer values that end with 0 because it makes it easier to skim.
-- "Normal" range: 10-100; linear relationships between values.
-- "Subnormal" range: After you set something at 10 and you discover something else that needs to be lower: 1-9.
-- "I effed up" value: 0.
-- "Supernormal" values: don't use these; The value means, "No, really, this is mega-important;" exponential growth.
+At other places in the package, setCPUlimit and/or computationDivisions can work together to compute the integer values of taskDivisions and taskIndex.
 
-I can already tell this implementation is, at best, untenably inefficient.
+# TODO learn how to profile the size of the compiled code and data. Use it when doing the package restructure, above.
+
 """
 from .theSSOT import * # Priority 10,000
 from .beDRY import getLeavesTotal, getTaskDivisions, makeConnectionGraph, outfitFoldings, setCPUlimit # Priority 1,000

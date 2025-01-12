@@ -64,9 +64,7 @@ def test_oopsieKwargsie():
         testFunction()
 
 def test_countFolds_invalid_computationDivisions():
-    # Triggers line 26 in babbage.py
     standardComparison(ValueError, countFolds, [2, 2], {"wrong": "value"})
 
 def test_parseListDimensions_noDimensions():
-    # Triggers line 130 in beDRY.py
     standardComparison(ValueError, parseListDimensions, [])

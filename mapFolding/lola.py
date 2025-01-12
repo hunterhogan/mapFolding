@@ -2,6 +2,7 @@
 from mapFolding import outfitFoldings, leafAbove, leafBelow, gapRangeStart, countDimensionsGapped, setCPUlimit, getTaskDivisions
 from typing import Any, Final, List, Optional, Tuple, Union
 import numpy
+import numba
 import numpy.typing
 import pathlib
 import os
@@ -9,11 +10,17 @@ import os
 def countFolds(listDimensions: List[int], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None, pathJob: Optional[Union[str, os.PathLike[Any]]] = None):
     """
     Count the distinct ways to fold a multi-dimensional map.
+
     Parameters:
         listDimensions: list of integers, the dimensions of the map.
-        computationDivisions: whether to divide the computation into tasks. Dividing into tasks is NEVER* faster and is often many times slower. (*: that I have seen)
-        CPUlimit: This is only relevant if `computationDivisions` is `True`. It sets whether and how to limit the CPU usage. See notes for details.
-        pathJob: If you pass a path, instead of computing the job, the function will save the job to that path. To compute the job, use a different function that can process the saved values. See `mapFolding.lolaOne`.
+        computationDivisions: whether to divide the computation into tasks.
+        CPUlimit: This is only relevant if `computationDivisions` is `True`: it sets whether and how to limit the CPU usage. See notes for details.
+        pathJob (prototype): If you set a path in this parameter, instead of computing the job, the function will save the job to `pathJob`. To compute the job, use a different function that can process the saved values. See `mapFolding.lolaRun` (or whatever name I have selected for the module).
+
+    Returns:
+        foldsTotal (or pathFilenameState): The total number of distinct ways to fold the map described by `listDimensions`. (Or the path and filename to a datafile that can be used to initiate the computation.)
+
+    If you want to compute a large `foldsTotal`, dividing the computation into tasks is usually a bad idea. Dividing the algorithm into tasks is inherently inefficient: efficient division into tasks means there would be no overlap in the work performed by each task. When dividing this algorithm, the amount of overlap is between 50% and 90% by all tasks: at least 50% of the work done by every task must be done by _all_ tasks. If you improve the computation time, it will only change by -10 to -50% depending on (at the very least) the ratio of the map dimensions and the number of leaves. If an undivided computation would take 10 hours on your computer, for example, the computation will still take at least 5 hours but you might reduce the time to 9 hours. Most of the time, however, you will increase the computation time. If logicalCores >= leavesTotal, it will probably be faster. If logicalCores <= 2 * leavesTotal, it will almost certainly be slower for all map dimensions.
 
     Limits on CPU usage `CPUlimit`
         - `False`, `None`, or `0`: No limits on CPU usage; uses all available CPUs. All other values will potentially limit CPU usage.
@@ -151,15 +158,22 @@ def doJob(pathFilenameState: Union[str, os.PathLike[Any]], computationDivisions:
     pathFilenameFoldsTotal.write_text(str(foldsTotal))
     return pathFilenameFoldsTotal
 
-def lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState):
+def lolaDispatcher(computationDivisions, CPUlimit, pathJob, tupleLolaState):
     if pathJob is not None:
         return saveState(pathJob, *tupleLolaState)
-    elif taskDivisions:
+    elif computationDivisions:
         # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
         setCPUlimit(CPUlimit)
-        from mapFolding.lolaTask import doWhileConcurrent
-        foldsTotal = int(doWhileConcurrent(*tupleLolaState))
+        # taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[4])) # leavesTotal
+        """TODO something is wrong with `taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[4])) # leavesTotal`
+        but setting `taskDivisions = numpy.uint8(tupleLolaState[4]) # leavesTotal` still works as expected.
+        Therefore, while restructuring the entire computationDivisions-to-taskDivisions system, look for the reason(s) why
+        taskDivisions != leavesTotal if leavesTotal < numba.get_num_threads() calculates incorrectly."""
+        taskDivisions = numpy.uint8(tupleLolaState[4]) # leavesTotal
+        from mapFolding.lolaRun import doWhileConcurrent
+        foldsTotal = int(doWhileConcurrent(*tupleLolaState, taskDivisions))
     else:
-        from mapFolding.lolaOne import doWhileOne
-        foldsTotal = int(doWhileOne(*tupleLolaState))
+        # from mapFolding.lolaOne import doWhileOne
+        from mapFolding.lolaRun import doWhile
+        foldsTotal = int(doWhile(*tupleLolaState))
     return foldsTotal
