@@ -1,5 +1,5 @@
 """A functional but untenable implementation of the Run Lola Run concept. Untenable because of excessive code duplication."""
-from mapFolding import outfitFoldings, t, setCPUlimit, getTaskDivisions
+from mapFolding import outfitFoldings, indexTrack as t, setCPUlimit, getTaskDivisions, indexThe, indexMy
 from mapFolding import activeGap1ndex, activeLeaf1ndex, dimension1ndex, dimensionsUnconstrained, gap1ndexLowerBound, indexMiniGap, leaf1ndexConnectee
 from typing import Any, Final, List, Optional, Tuple, Union
 import numpy

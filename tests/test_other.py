@@ -39,7 +39,7 @@ import sys
 def test_listDimensionsAsParameter(listDimensions, expected_intInnit, expected_parseListDimensions, expected_validateListDimensions, expected_getLeavesTotal):
     """Test both validateListDimensions and getLeavesTotal with the same inputs."""
     standardComparison(expected_intInnit, intInnit, listDimensions)
-    standardComparison(expected_parseListDimensions, parseListDimensions, listDimensions)
+    standardComparison(expected_parseListDimensions, parseDimensions, listDimensions)
     standardComparison(expected_validateListDimensions, validateListDimensions, listDimensions)
     standardComparison(expected_getLeavesTotal, getLeavesTotal, listDimensions)
 
@@ -68,4 +68,4 @@ def test_countFolds_invalid_computationDivisions():
     standardComparison(ValueError, countFolds, [2, 2], {"wrong": "value"})
 
 def test_parseListDimensions_noDimensions():
-    standardComparison(ValueError, parseListDimensions, [])
+    standardComparison(ValueError, parseDimensions, [])

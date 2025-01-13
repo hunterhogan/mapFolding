@@ -17,7 +17,7 @@ import unittest.mock
 
 from mapFolding.importPackages import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from mapFolding import clearOEIScache, countFolds
-from mapFolding import getLeavesTotal, parseListDimensions, validateListDimensions
+from mapFolding import getLeavesTotal, parseDimensions, validateListDimensions
 from mapFolding import pathJobDEFAULT
 from mapFolding.oeis import OEIS_for_n
 from mapFolding.oeis import _formatFilenameCache
@@ -48,7 +48,7 @@ __all__ = [
     'oeisIDfor_n',
     'oeisIDsImplemented',
     'oopsieKwargsie',
-    'parseListDimensions',
+    'parseDimensions',
     'settingsOEIS',
     'standardCacheTest',
     'standardComparison',

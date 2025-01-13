@@ -1,7 +1,7 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding.importPackages import intInnit, defineConcurrencyLimit, oopsieKwargsie
-from mapFolding import t as indicesTrack, indexMy
-from typing import Any, List, Tuple, Union
+from mapFolding import indexMy, indexThe, indexTrack, Z0Z_computationState
+from typing import Any, List, Optional, Sequence, Tuple, Union
 import numpy
 import numba
 import numpy.typing
@@ -17,12 +17,7 @@ def getLeavesTotal(listDimensions: List[int]) -> int:
     Returns:
         productDimensions: The product of all positive integer dimensions. Returns 0 if all dimensions are 0.
     """
-    # TODO look more closely to make sure `leavesTotal + 1` is not an overflow.
-    # actually, rethink the role of this function. `potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)`
-    # means that somewhere in the app, I should check for overflow of `leavesTotal * leavesTotal + 1`
-    # furthermore, somewhere in the app, I should check for overflow while taking into account any specified dtype, such as numpy.uint8.
-    # crap.
-    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
+    listNonNegative = parseDimensions(listDimensions, 'listDimensions')
     listPositive = [dimension for dimension in listNonNegative if dimension > 0]
 
     if not listPositive:
@@ -99,6 +94,47 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64) ->
 
     return connectionGraph
 
+def Z0Z_outfitFoldings(listDimensions: Sequence[int], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None,
+                    dtypeDefault: type = numpy.int64,
+                    dtypeMaximum: type = numpy.int64
+                    ) -> Tuple[List[int], int, numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]]]:
+    """
+    computationDivisions
+        int: how many divisions to make; 0 and 1 are effectively none.
+        None: no divisions
+        "maximum": as many divisions as possible = leavesTotal
+        "cpu": as many divisions as CPUs
+
+    1. Validate parameters
+    2. Calculate intermediate values
+    3. setCPUlimit
+    4. Create and populate data structures
+        Z0Z_computationState
+        connectionGraph
+        foldsTotal
+        my
+        potentialGaps
+        the
+        track
+    """
+    the = numpy.zeros(len(indexThe), dtype=dtypeDefault)
+
+    the[indexThe.mapShape] = sorted(validateListDimensions(listDimensions))
+    the[indexThe.leavesTotal] = getLeavesTotal(the[indexThe.mapShape])
+    # Create function to validate that dtypeDefault and dtypeMaximum can hold the values
+    # TODO look more closely to make sure `leavesTotal + 1` is not an overflow.
+    # actually, rethink the role of this function. `potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)`
+    # means that somewhere in the app, I should check for overflow of `leavesTotal * leavesTotal + 1`
+    # furthermore, somewhere in the app, I should check for overflow while taking into account any specified dtype, such as numpy.uint8.
+    # crap.
+    concurrencyLimit = setCPUlimit(CPUlimit)
+    connectionGraph = makeConnectionGraph(the[indexThe.mapShape], dtype=dtypeDefault)
+    my = numpy.zeros(len(indexMy), dtype=dtypeDefault)
+    potentialGaps = numpy.zeros(the[indexThe.leavesTotal] * the[indexThe.leavesTotal] + 1, dtype=dtypeMaximum)
+    track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeDefault)
+
+    return the[indexThe.mapShape], the[indexThe.leavesTotal], connectionGraph, track, potentialGaps
+
 def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, dtypeMaximum: type = numpy.int64) -> Tuple[List[int], int, numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]]]:
     """
     Outfits the folding process with the necessary data structures.
@@ -109,7 +145,7 @@ def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, 
         sortedValidDimensions,leavesTotal,connectionGraph,arrayTracking,potentialGaps: Tuple containing `sortedValidDimensions`, a sorted list, with at least two elements, of only positive integers;
             the total number of leaves; the connection graph; an array for state tracking during execution; and an array for tracking potential gaps during execution.
     """
-    arrayTrackingHeight = len(indicesTrack)
+    arrayTrackingHeight = len(indexTrack)
     arrayTrackingLengthMinimum = len(indexMy)
 
     sortedValidDimensions = sorted(validateListDimensions(listDimensions))
@@ -121,7 +157,7 @@ def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, 
 
     return sortedValidDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps
 
-def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed parameter') -> List[int]:
+def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed parameter') -> List[int]:
     """
     Parse and validate a list of dimensions.
 
@@ -134,7 +170,7 @@ def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed
         ValueError: If any dimension is negative or if the list is empty
         TypeError: If any element cannot be converted to integer (raised by intInnit)
     """
-    listValidated = intInnit(listDimensions, parameterName)
+    listValidated = intInnit(dimensions, parameterName)
     listNonNegative = []
     for dimension in listValidated:
         if dimension < 0:
@@ -147,13 +183,29 @@ def parseListDimensions(listDimensions: List[int], parameterName: str = 'unnamed
     return listNonNegative
 
 def setCPUlimit(CPUlimit: Union[int, float, bool, None]):
+    """Sets CPU limit for concurrent operations using Numba.
+    This function configures the number of CPU threads that Numba can use for parallel execution.
+    Note that this setting only affects Numba-jitted functions that have not yet been imported.
+    Parameters:
+        CPUlimit (Union[int, float, bool, None]): The CPU limit to set.
+            - If int/float: Specifies number of CPU threads to use
+            - If bool: True uses all available CPUs, False uses 1 CPU
+            - If None: Uses system default
+    Returns:
+        concurrencyLimit: The actual concurrency limit that was set
+    Raises:
+        TypeError: If CPUlimit is not of the expected types
+    """
     if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
         CPUlimit = oopsieKwargsie(CPUlimit)
 
+    concurrencyLimit = defineConcurrencyLimit(CPUlimit)
     # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
-    numba.set_num_threads(defineConcurrencyLimit(CPUlimit))
+    numba.set_num_threads(concurrencyLimit)
 
-def validateListDimensions(listDimensions: List[int]) -> List[int]:
+    return concurrencyLimit
+
+def validateListDimensions(listDimensions: Sequence[int]) -> List[int]:
     """
     Validates and processes a list of dimensions.
 
@@ -174,7 +226,7 @@ def validateListDimensions(listDimensions: List[int]) -> List[int]:
     """
     if not listDimensions:
         raise ValueError(f"listDimensions is a required parameter.")
-    listNonNegative = parseListDimensions(listDimensions, 'listDimensions')
+    listNonNegative = parseDimensions(listDimensions, 'listDimensions')
     validDimensions = [dimension for dimension in listNonNegative if dimension > 0]
     if len(validDimensions) < 2:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")

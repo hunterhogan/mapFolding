@@ -1,4 +1,4 @@
-from mapFolding import t
+from mapFolding import indexTrack as t
 from mapFolding import activeGap1ndex, activeLeaf1ndex, dimension1ndex, dimensionsUnconstrained, gap1ndexLowerBound, indexMiniGap, leaf1ndexConnectee
 import numba
 import numba.extending
