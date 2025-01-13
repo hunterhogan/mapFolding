@@ -2,6 +2,7 @@ from mapFolding import activeGap1ndex, activeLeaf1ndex, dimension1ndex, dimensio
 from mapFolding import outfitFoldings, t
 from typing import List, Callable, Any, Final
 import numpy
+import numba
 
 """
 from Z0Z_tools import dataTabularTOpathFilenameDelimited
@@ -44,23 +45,30 @@ def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
 # @numba.jit(nopython=True, cache=True, fastmath=True)
 def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     def backtrack() -> None:
+        nonlocal my
         my[activeLeaf1ndex] -= 1
         track[t.leafBelow.value, track[t.leafAbove.value, my[activeLeaf1ndex]]] = track[t.leafBelow.value, my[activeLeaf1ndex]]
         track[t.leafAbove.value, track[t.leafBelow.value, my[activeLeaf1ndex]]] = track[t.leafAbove.value, my[activeLeaf1ndex]]
 
     def backtrackCondition():
+        nonlocal my
         return my[activeLeaf1ndex] > 0 and my[activeGap1ndex] == track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]
 
     def checkActiveLeafGreaterThan0():
+        nonlocal my
         return my[activeLeaf1ndex] > 0
 
     def checkActiveLeafGreaterThanLeavesTotal():
+        nonlocal my
         return my[activeLeaf1ndex] > leavesTotal
 
+    # TODO taskDivisions
     def checkActiveLeafNotEqualToLeavesTotal():
+        nonlocal my
         return my[activeLeaf1ndex] != leavesTotal
 
     def checkActiveLeafIs1orLess():
+        nonlocal my
         return my[activeLeaf1ndex] <= 1
 
     def checkComputationDivisions():
@@ -69,28 +77,41 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     def checkLeafBelowSentinelIs1():
         return track[t.leafBelow.value, 0] == 1
 
+    # TODO taskDivisions
     def checkTaskIndex():
-        nonlocal taskPartition
+        nonlocal taskPartition, my
         return (taskPartition := my[leaf1ndexConnectee] % leavesTotal) == taskIndex
 
     def countGaps():
+        nonlocal my
         potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
         if track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] == 0:
             incrementGap1ndexLowerBound()
         track[t.countDimensionsGapped.value, my[leaf1ndexConnectee]] += 1
 
+    def filterCommonGaps():
+        nonlocal my
+        potentialGaps[my[activeGap1ndex]] = potentialGaps[my[indexMiniGap]]
+        if track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] == dimensionsTotal - my[dimensionsUnconstrained]:
+            incrementActiveGap()
+        track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] = 0
+
     def findGapsInitialization():
+        nonlocal my
         my[dimensionsUnconstrained] = 0
         my[gap1ndexLowerBound] = track[t.gapRangeStart.value, my[activeLeaf1ndex] - 1]
         my[dimension1ndex] = 1
 
     def initializeLeaf1ndexConnectee():
+        nonlocal my
         my[leaf1ndexConnectee] = connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]]
 
     def incrementActiveGap():
+        nonlocal my
         my[activeGap1ndex] += 1
 
     def incrementDimensionsUnconstrained():
+        nonlocal my
         my[dimensionsUnconstrained] += 1
 
     def incrementFoldsTotal():
@@ -98,13 +119,15 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
         foldsTotal += leavesTotal
 
     def incrementGap1ndexLowerBound():
+        nonlocal my
         my[gap1ndexLowerBound] += 1
 
     def incrementIndexMiniGap():
+        nonlocal my
         my[indexMiniGap] += 1
 
     def insertUnconstrainedLeaf():
-        nonlocal indexLeaf
+        nonlocal indexLeaf, my
         indexLeaf = 0
         while indexLeaf < my[activeLeaf1ndex]:
             potentialGaps[my[gap1ndexLowerBound]] = indexLeaf
@@ -112,6 +135,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
             indexLeaf += 1
 
     def placeLeaf():
+        nonlocal my
         my[activeGap1ndex] -= 1
         track[t.leafAbove.value, my[activeLeaf1ndex]] = potentialGaps[my[activeGap1ndex]]
         track[t.leafBelow.value, my[activeLeaf1ndex]] = track[t.leafBelow.value, track[t.leafAbove.value, my[activeLeaf1ndex]]]
@@ -121,40 +145,30 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
         my[activeLeaf1ndex] += 1
 
     def placeLeafCondition():
+        nonlocal my
         return my[activeLeaf1ndex] > 0
 
     def updateLeaf1ndexConnectee():
+        nonlocal my
         my[leaf1ndexConnectee] = connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], track[t.leafBelow.value, my[leaf1ndexConnectee]]]
 
-    def Z0Z_verbGapAdjective():
-        """mi cerebro es sin funciona ahora"""
-        potentialGaps[my[activeGap1ndex]] = potentialGaps[my[indexMiniGap]]
-        if track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] == dimensionsTotal - my[dimensionsUnconstrained]:
-            incrementActiveGap()
-        track[t.countDimensionsGapped.value, potentialGaps[my[indexMiniGap]]] = 0
-
     def lolaCondition_initializeUnconstrainedLeaf():
-            if my[activeGap1ndex] > 0:
-                return True
-            return False
+        nonlocal my
+        if my[activeGap1ndex] > 0:
+            return True
+        return False
 
+    # TODO taskDivisions
     def lolaCondition_initializeTaskIndex():
         # NOTE this is more than a mere condition check: it always forces countGaps to execute
-        nonlocal doCountGaps
+        nonlocal doCountGaps, my
         doCountGaps = True
         if my[leaf1ndexConnectee] % leavesTotal == leavesTotal - 1:
             return True
         return False
-    """
-    def initializeUnconstrainedLeaf():
-            if lolaCondition_initializeUnconstrainedLeaf():
-                return
 
-    def initializeTaskIndex():
-                                    if lolaCondition_initializeTaskIndex():
-                                        return
-    """
-    def doWhile():
+    def initializeUnconstrainedLeaf():
+        nonlocal my
         while checkActiveLeafGreaterThan0():
             if checkActiveLeafIs1orLess() or checkLeafBelowSentinelIs1():
                 if checkActiveLeafGreaterThanLeavesTotal():
@@ -187,12 +201,93 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
 
                     my[indexMiniGap] = my[activeGap1ndex]
                     while my[indexMiniGap] < my[gap1ndexLowerBound]:
-                        Z0Z_verbGapAdjective()
+                        filterCommonGaps()
                         incrementIndexMiniGap()
-
             while backtrackCondition():
                 backtrack()
+            if placeLeafCondition():
+                placeLeaf()
 
+            if lolaCondition_initializeUnconstrainedLeaf():
+                return
+
+    def initializeTaskIndex():
+        nonlocal my
+        while checkActiveLeafGreaterThan0():
+            if checkActiveLeafIs1orLess() or checkLeafBelowSentinelIs1():
+                if checkActiveLeafGreaterThanLeavesTotal():
+                    incrementFoldsTotal()
+                else:
+                    findGapsInitialization()
+                    while my[dimension1ndex] <= dimensionsTotal:
+                        if connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]] == my[activeLeaf1ndex]:
+                            incrementDimensionsUnconstrained()
+                        else:
+                            initializeLeaf1ndexConnectee()
+                            while my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
+                                nonlocal doCountGaps
+                                doCountGaps = False
+                                if checkActiveLeafNotEqualToLeavesTotal():
+                                    doCountGaps = True
+                                else:
+                                    if lolaCondition_initializeTaskIndex():
+                                        return
+                                    if checkTaskIndex():
+                                        doCountGaps = True
+                                    else:
+                                        if checkComputationDivisions():
+                                            doCountGaps = True
+                                if doCountGaps:
+                                    countGaps()
+                                updateLeaf1ndexConnectee()
+                        my[dimension1ndex] += 1
+                    if my[dimensionsUnconstrained] == dimensionsTotal:
+                        insertUnconstrainedLeaf()
+                    my[indexMiniGap] = my[activeGap1ndex]
+                    while my[indexMiniGap] < my[gap1ndexLowerBound]:
+                        filterCommonGaps()
+                        incrementIndexMiniGap()
+            while backtrackCondition():
+                backtrack()
+            if placeLeafCondition():
+                placeLeaf()
+
+    def doWhile():
+        nonlocal my
+        while checkActiveLeafGreaterThan0():
+            if checkActiveLeafIs1orLess() or checkLeafBelowSentinelIs1():
+                if checkActiveLeafGreaterThanLeavesTotal():
+                    incrementFoldsTotal()
+                else:
+                    findGapsInitialization()
+                    while my[dimension1ndex] <= dimensionsTotal:
+                        if connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]] == my[activeLeaf1ndex]:
+                            incrementDimensionsUnconstrained()
+                        else:
+                            initializeLeaf1ndexConnectee()
+                            while my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
+                                nonlocal doCountGaps
+                                doCountGaps = False
+                                if checkActiveLeafNotEqualToLeavesTotal():
+                                    doCountGaps = True
+                                else:
+                                    if checkTaskIndex():
+                                        doCountGaps = True
+                                    else:
+                                        if checkComputationDivisions():
+                                            doCountGaps = True
+                                if doCountGaps:
+                                    countGaps()
+                                updateLeaf1ndexConnectee()
+                        my[dimension1ndex] += 1
+                    if my[dimensionsUnconstrained] == dimensionsTotal:
+                        insertUnconstrainedLeaf()
+                    my[indexMiniGap] = my[activeGap1ndex]
+                    while my[indexMiniGap] < my[gap1ndexLowerBound]:
+                        filterCommonGaps()
+                        incrementIndexMiniGap()
+            while backtrackCondition():
+                backtrack()
             if placeLeafCondition():
                 placeLeaf()
 
@@ -211,8 +306,8 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False):
     taskIndex: int = 0
     taskPartition: int = 0
 
-    # initializeUnconstrainedLeaf()
-    # initializeTaskIndex()
+    initializeUnconstrainedLeaf()
+    initializeTaskIndex()
 
     # I'm confused. If `my` is a view of `track`, then why do I need to copy it? numba.jit is not activated
     # Nevertheless, is it somehow related to numba.jit rejecting tuple indexing?

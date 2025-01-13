@@ -32,7 +32,7 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
         - Integer `<= -1`: Subtract the absolute value from total CPUs.
     """
 
-    # taskDivisions = getTaskDivisions(computationDivisions)
+    taskDivisions = getTaskDivisions(computationDivisions)
     # TODO if computationDivisions, which means, yet again, that restructuring is very important: saved initial states depend on the value of taskDivisions
     # taskDivisions must be set to properly initialize the state
 
@@ -45,12 +45,12 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
 
     connectionGraph: Final[numpy.ndarray] = D
     leavesTotal: Final[numpy.uint8] = numpy.uint8(n)
-    if getTaskDivisions(computationDivisions):
-        # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
-        setCPUlimit(CPUlimit)
-        taskDivisions = numpy.uint8(min(numba.get_num_threads(), leavesTotal))
-    else:
-        taskDivisions = leavesTotal
+    # if getTaskDivisions(computationDivisions):
+    #     # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
+    #     setCPUlimit(CPUlimit)
+    #     taskDivisions = numpy.uint8(min(numba.get_num_threads(), leavesTotal))
+    # else:
+    #     taskDivisions = leavesTotal
 
     my[activeLeaf1ndex] = numpy.uint8(1)
 
@@ -96,8 +96,8 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
                     else:
                         my[leaf1ndexConnectee] = connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], my[activeLeaf1ndex]]
                         while my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
-                            # if not my[activeLeaf1ndex] != leavesTotal and my[leaf1ndexConnectee] % leavesTotal == leavesTotal - 1:
-                            if not my[activeLeaf1ndex] != taskDivisions and my[leaf1ndexConnectee] % taskDivisions == taskDivisions - 1:
+                            if not my[activeLeaf1ndex] != leavesTotal and my[leaf1ndexConnectee] % leavesTotal == leavesTotal - 1:
+                            # if not my[activeLeaf1ndex] != taskDivisions and my[leaf1ndexConnectee] % taskDivisions == taskDivisions - 1:
                                 return
                             my[gap1ndexLowerBound] = countGaps()
                             my[leaf1ndexConnectee] = connectionGraph[my[dimension1ndex], my[activeLeaf1ndex], track[t.leafBelow.value, my[leaf1ndexConnectee]]]
@@ -122,8 +122,8 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
         pathRelativeJob = str(listDimensions).replace(' ', '')
         pathJob = pathlib.Path(pathJob, pathRelativeJob)
 
-    # return lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState)
-    return lolaDispatcher(getTaskDivisions(computationDivisions), CPUlimit, pathJob, tupleLolaState)
+    return lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState)
+    # return lolaDispatcher(getTaskDivisions(computationDivisions), CPUlimit, pathJob, tupleLolaState)
 
 def saveState(pathState: Union[str, os.PathLike[Any]],
     connectionGraph: numpy.ndarray,
@@ -170,9 +170,9 @@ def lolaDispatcher(computationDivisions, CPUlimit, pathJob, tupleLolaState):
     elif computationDivisions:
         # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
         setCPUlimit(CPUlimit)
-        taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[2])) # leavesTotal
+        # taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[2])) # leavesTotal
         """TODO something is wrong with `taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[2])) # leavesTotal` but setting `taskDivisions = numpy.uint8(tupleLolaState[2]) # leavesTotal` still works as expected. Therefore, while restructuring the entire computationDivisions-to-taskDivisions system, look for the reason(s) why taskDivisions != leavesTotal if leavesTotal < numba.get_num_threads() calculates incorrectly."""
-        # taskDivisions = numpy.uint8(tupleLolaState[2]) # leavesTotal
+        taskDivisions = numpy.uint8(tupleLolaState[2]) # leavesTotal
         from mapFolding.lolaRun import doWhileConcurrent
         foldsTotal = int(doWhileConcurrent(*tupleLolaState, taskDivisions)) # type: ignore
     else:
