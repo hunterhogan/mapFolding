@@ -23,6 +23,7 @@ leaf1ndexConnectee = indexMy.leaf1ndexConnectee.value
 from .beDRY import getLeavesTotal, getTaskDivisions, makeConnectionGraph, outfitFoldings, setCPUlimit # Priority 1,000
 from .beDRY import parseListDimensions, validateListDimensions
 from .lola import countFolds # Priority 70. NOTE `countFolds` is the point of the package. Two things should be very stable: 1) the name of the function and 2) the first parameter will accept a `list` of integers representing the dimensions of a map.
+# from .lolaTracing import countFolds # Priority 70. NOTE `countFolds` is the point of the package. Two things should be very stable: 1) the name of the function and 2) the first parameter will accept a `list` of integers representing the dimensions of a map.
 from .oeis import oeisIDfor_n, getOEISids, clearOEIScache # Priority 30
 
 __all__ = [

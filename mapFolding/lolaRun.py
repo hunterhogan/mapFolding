@@ -7,7 +7,8 @@ from typing import Optional
 
 # TODO learn how to dynamically set the integer sizes instead of hardcoding them into type hints and numba types
 
-@numba.jit(nopython=True, cache=True, fastmath=True)
+# @numba.jit(nopython=True, cache=True, fastmath=True)
+@numba.jit(_nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True, parallel=False)
 def ifComputationDivisions(taskDivisions: numpy.uint8, my: numpy.ndarray, taskIndex: Optional[numpy.uint8]) -> bool:
     """This function (allegedly) allows numba to compile two different versions based on the value of `taskDivisions`. The benefit is one less conditional check in the main loop, which is important. As I write this, I have a CPU process that I estimate is about half way through counting folds: "Total Time: 20:35:45.593; Cycles: 135,149,788,103,967", so removing a statement that might account for only .1% of 135 trillion cycles, would save 135 billion cycles. That's a lot of cycles.
     """
@@ -20,6 +21,7 @@ def ifComputationDivisions(taskDivisions: numpy.uint8, my: numpy.ndarray, taskIn
     return my[activeLeaf1ndex] != taskDivisions or my[leaf1ndexConnectee] % taskDivisions == taskIndex
 
 @numba.jit(nopython=True, cache=True, fastmath=True, parallel=True)
+# @numba.jit(_nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True, parallel=True)
 def doWhileConcurrent(
         connectionGraph: numpy.ndarray,
         dimensionsTotal: numpy.uint8,
@@ -47,6 +49,7 @@ def doWhileConcurrent(
     return foldsRunningTotal
 
 @numba.jit(nopython=True, cache=True, fastmath=True)
+# @numba.jit(_nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True, parallel=False)
 def doWhile(
     connectionGraph: numpy.ndarray,
     dimensionsTotal: numpy.uint8,
