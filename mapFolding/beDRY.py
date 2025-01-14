@@ -39,6 +39,30 @@ def getTaskDivisions(computationDivisions: Union[bool, Any]) -> bool:
         raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but I need 'True' or 'False'.")
     return taskDivisions
 
+def Z0Z_getTaskDivisions( CPUlimit, computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, listDimensions, the: numpy.typing.NDArray[numpy.integer[Any]], ):
+    # TODO remove after restructuring
+    if isinstance(computationDivisions, bool) and computationDivisions:
+        computationDivisions = "maximum"
+
+    if not computationDivisions:
+        # Coding it this way should cover `None`, `False`, and `0`.
+        the[indexThe.taskDivisions] = 0
+    elif isinstance(computationDivisions, int):
+        the[indexThe.taskDivisions] = computationDivisions
+    elif isinstance(computationDivisions, str):
+        computationDivisions = computationDivisions.lower()
+        if computationDivisions == "maximum":
+            the[indexThe.taskDivisions] = the[indexThe.leavesTotal]
+        elif computationDivisions == "cpu":
+            the[indexThe.taskDivisions] = min(concurrencyLimit, the[indexThe.leavesTotal])
+    else:
+        raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but the so-called programmer didn't implement code for that.")
+
+    if the[indexThe.taskDivisions] > the[indexThe.leavesTotal]:
+        raise ValueError(f"Problem: `taskDivisions`, ({the[indexThe.taskDivisions]}), is greater than `leavesTotal`, ({the[indexThe.leavesTotal]}), which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`. They are derived from parameters that may or may not still be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from dubious-quality Python code.\n\nFor those parameters, I received {computationDivisions=}, {CPUlimit=}, and {listDimensions=}.\n\nPotential solutions: get a different hobby or set `computationDivisions` to a different value.")
+
+    return the
+
 def makeConnectionGraph(listDimensions: Sequence[int], dtype: type = numpy.int64) -> numpy.typing.NDArray[numpy.integer[Any]]:
     """
     Constructs a connection graph for a given list of dimensions.
@@ -96,18 +120,18 @@ def makeConnectionGraph(listDimensions: Sequence[int], dtype: type = numpy.int64
 
     return connectionGraph
 
-def Z0Z_outfitFoldings(listDimensions: Sequence[int],
-                        dtypeDefault: type = numpy.int64,
-                        dtypeMaximum: type = numpy.int64,
-                        CPUlimit: Optional[Union[int, float, bool]] = None,
-                        computationDivisions = None,
-                        ):
+def Z0Z_outfitFoldings(
+    listDimensions: Sequence[int],
+    dtypeDefault: type = numpy.int64,
+    dtypeMaximum: type = numpy.int64,
+    CPUlimit: Optional[Union[int, float, bool]] = None,
+    computationDivisions: Optional[Union[int, str]] = None,
+    ) -> Z0Z_computationState:
     """
     TODO Create function(s) to validate more things
         dtype can hold the values; notable statements:
             `leavesTotal + 1`
             `leavesTotal * leavesTotal + 1`
-        taskDivisions <= leavesTotal
     """
     the = numpy.zeros(len(indexThe), dtype=dtypeDefault)
 
@@ -116,33 +140,17 @@ def Z0Z_outfitFoldings(listDimensions: Sequence[int],
     the[indexThe.dimensionsTotal] = len(mapShape)
     concurrencyLimit = setCPUlimit(CPUlimit)
 
-    # TODO remove after restructuring
-    if isinstance(computationDivisions, bool) and computationDivisions:
-        computationDivisions = "maximum"
+    the = Z0Z_getTaskDivisions(CPUlimit, computationDivisions, concurrencyLimit, listDimensions, the)
 
-    if not computationDivisions:
-        # Coding it this way should cover `None`, `False`, and `0`.
-        the[indexThe.taskDivisions] = 0
-    elif isinstance(computationDivisions, int):
-        the[indexThe.taskDivisions] = computationDivisions
-    elif isinstance(computationDivisions, str):
-        computationDivisions = computationDivisions.lower()
-        if computationDivisions == "maximum":
-            the[indexThe.taskDivisions] = the[indexThe.leavesTotal]
-        elif computationDivisions == "cpu":
-            the[indexThe.taskDivisions] = concurrencyLimit
-    else:
-        raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but the so-called programmer didn't implement code for that.")
-
-    connectionGraph = makeConnectionGraph(mapShape, dtype=dtypeDefault)
-    foldsTotal = numpy.zeros(the[indexThe.leavesTotal], dtype=numpy.int64)
-    my = numpy.zeros(len(indexMy), dtype=dtypeDefault)
-    potentialGaps = numpy.zeros(the[indexThe.leavesTotal] * the[indexThe.leavesTotal] + 1, dtype=dtypeMaximum)
-    track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeDefault)
-
-    stateInitialized = Z0Z_computationState(connectionGraph=connectionGraph, foldsTotal=foldsTotal, mapShape=mapShape, my=my, potentialGaps=potentialGaps, the=the, track=track)
-
-    # return connectionGraph, foldsTotal, mapShape, my, potentialGaps, the, track
+    stateInitialized = Z0Z_computationState(
+        connectionGraph = makeConnectionGraph(mapShape, dtype=dtypeDefault),
+        foldsTotal = numpy.zeros(the[indexThe.leavesTotal], dtype=numpy.int64),
+        mapShape = mapShape,
+        my = numpy.zeros(len(indexMy), dtype=dtypeDefault),
+        potentialGaps = numpy.zeros(the[indexThe.leavesTotal] * the[indexThe.leavesTotal] + 1, dtype=dtypeMaximum),
+        the = the,
+        track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeDefault)
+        )
 
     return stateInitialized
 

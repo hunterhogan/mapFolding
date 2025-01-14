@@ -3,44 +3,6 @@ from typing import List, Callable, Any, Final, Optional, Union, Sequence, Tuple
 import numpy
 import numba
 
-"""
-from Z0Z_tools import dataTabularTOpathFilenameDelimited
-from collections import Counter
-from functools import wraps
-from types import FrameType
-import pathlib
-import sys
-import time
-def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
-    def decoratorTrace(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
-        @wraps(functionTarget)
-        def wrapperTrace(*arguments, **keywordArguments):
-            pathLog = pathlib.Path("/apps/mapFolding/Z0Z_notes")
-            pathFilenameLog = pathLog / 'functionCalls.tab'
-            timeStart = time.perf_counter_ns()
-            listTraceCalls = []
-
-            pathFilenameHost = pathlib.Path(__file__).resolve()
-            def logCall(frame: FrameType, event: str, arg: object):
-                if event == 'call':
-                    listTraceCalls.append([time.perf_counter_ns(), frame.f_code.co_name, frame.f_code.co_filename])
-                return logCall
-
-            oldTrace = sys.gettrace()
-            sys.settrace(logCall)
-            try:
-                return functionTarget(*arguments, **keywordArguments)
-            finally:
-                sys.settrace(oldTrace)
-                # listTraceCalls = [[timeRelativeNS - timeStart, functionName] for timeRelativeNS, functionName, DISCARDpathFilename in listTraceCalls]
-                listTraceCalls = [[timeRelativeNS - timeStart, functionName] for timeRelativeNS, functionName, module in listTraceCalls if  pathlib.Path(module).resolve() == pathFilenameHost]
-                print(Counter([functionName for timeRelativeNS, functionName in listTraceCalls]))
-                dataTabularTOpathFilenameDelimited(pathFilenameLog, listTraceCalls, ['timeRelativeNS', 'functionName'])
-
-        return wrapperTrace
-    return decoratorTrace(functionTarget)
-
-"""
 # TODO the current tests expect positional `listDimensions, computationDivisions`, so after restructuring you can arrange the parameters however you want.
 def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUlimit: Optional[Union[int, float, bool]] = None):
     stateUniversal = Z0Z_outfitFoldings(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit)

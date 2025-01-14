@@ -1,15 +1,55 @@
-from mapFolding import indexTrack, indexMy, indexThe
-from typing import Any, Tuple
-import numpy
+from mapFolding import indexMy, indexThe, indexTrack
 from numpy import integer
 from numpy.typing import NDArray
+from typing import Any, Tuple
 import numba
+import numpy
+
+"""
+from Z0Z_tools import dataTabularTOpathFilenameDelimited
+from collections import Counter
+from functools import wraps
+from types import FrameType
+import pathlib
+import sys
+import time
+def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
+    def decoratorTrace(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
+        @wraps(functionTarget)
+        def wrapperTrace(*arguments, **keywordArguments):
+            pathLog = pathlib.Path("/apps/mapFolding/Z0Z_notes")
+            pathFilenameLog = pathLog / 'functionCalls.tab'
+            timeStart = time.perf_counter_ns()
+            listTraceCalls = []
+
+            pathFilenameHost = pathlib.Path(__file__).resolve()
+            def logCall(frame: FrameType, event: str, arg: object):
+                if event == 'call':
+                    listTraceCalls.append([time.perf_counter_ns(), frame.f_code.co_name, frame.f_code.co_filename])
+                return logCall
+
+            oldTrace = sys.gettrace()
+            sys.settrace(logCall)
+            try:
+                return functionTarget(*arguments, **keywordArguments)
+            finally:
+                sys.settrace(oldTrace)
+                # listTraceCalls = [[timeRelativeNS - timeStart, functionName] for timeRelativeNS, functionName, DISCARDpathFilename in listTraceCalls]
+                listTraceCalls = [[timeRelativeNS - timeStart, functionName] for timeRelativeNS, functionName, module in listTraceCalls if  pathlib.Path(module).resolve() == pathFilenameHost]
+                print(Counter([functionName for timeRelativeNS, functionName in listTraceCalls]))
+                dataTabularTOpathFilenameDelimited(pathFilenameLog, listTraceCalls, ['timeRelativeNS', 'functionName'])
+
+        return wrapperTrace
+    return decoratorTrace(functionTarget)
+
+"""
 
 # @numba.jit(nopython=True, cache=True, fastmath=True)
 @numba.jit(parallel=True, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
 def countFoldsCompiled(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], potentialGaps: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]) -> int:
     def backtrack(my, track):
         # Allegedly, `-=` is an optimized, in-place operation in numpy and likely the best choice.
+        # TODO figure out why numba won't work unless I include ".value" in statements such as `my[indexMy.leaf1ndex.value] -= 1`
         my[indexMy.leaf1ndex.value] -= 1
         track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]
         track[indexTrack.leafAbove.value, track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]
