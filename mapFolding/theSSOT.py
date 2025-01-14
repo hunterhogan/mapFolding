@@ -41,7 +41,6 @@ class indexMy(EnumIndices):
     """Indices for dynamic values."""
     dimension1ndex = enum.auto()
     dimensionsUnconstrained = enum.auto()
-    doCountGaps = enum.auto()
     gap1ndex = enum.auto()
     gap1ndexLowerBound = enum.auto()
     indexLeaf = enum.auto()
@@ -67,6 +66,9 @@ class indexTrack(EnumIndices):
 """
 TODO improve semiotics: clarity, brevity
 gapNotGap
+gapsWhere
+gappyMcGapFace
+potentialGaps
 """
 
 class Z0Z_computationState(TypedDict):

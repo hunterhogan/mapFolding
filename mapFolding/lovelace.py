@@ -1,216 +1,93 @@
 from mapFolding import indexMy, indexThe, indexTrack
 from numpy import integer
 from numpy.typing import NDArray
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple
 import numba
 import numpy
+            # Allegedly, `-=` is an optimized, in-place operation in numpy and likely the best choice.
+            # TODO figure out why numba won't work unless I include ".value" in statements such as `my[indexMy.leaf1ndex.value] -= 1`
 
-"""
-from Z0Z_tools import dataTabularTOpathFilenameDelimited
-from collections import Counter
-from functools import wraps
-from types import FrameType
-import pathlib
-import sys
-import time
-def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
-    def decoratorTrace(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
-        @wraps(functionTarget)
-        def wrapperTrace(*arguments, **keywordArguments):
-            pathLog = pathlib.Path("/apps/mapFolding/Z0Z_notes")
-            pathFilenameLog = pathLog / 'functionCalls.tab'
-            timeStart = time.perf_counter_ns()
-            listTraceCalls = []
+@numba.jit(debug=True, _dbg_optnone=True)
+# @numba.jit(parallel=True, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
+def countFoldsCompiled(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], my: NDArray[integer[Any]], potentialGaps: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]) -> int:
+    # TODO conditional compile
+    def ifComputationDivisions(my: NDArray[integer[Any]], the: NDArray[integer[Any]]):
+        """This function (allegedly) allows numba to compile two different versions based on the value of `taskDivisions`. The benefit is one less conditional check in the main loop, which is important. As I write this, I have a CPU process that I estimate is about half way through counting folds: "Total Time: 20:35:45.593; Cycles: 135,149,788,103,967", so removing a statement that might account for only .1% of 135 trillion cycles, would save 135 billion cycles. That's a lot of cycles. """
+        if the[indexThe.taskDivisions.value] == 0:
+            return True
+        return my[indexMy.leaf1ndex.value] != the[indexThe.taskDivisions.value] or numpy.equal(numpy.mod(my[indexMy.leafConnectee.value], the[indexThe.taskDivisions.value]), my[indexMy.taskIndex.value])
 
-            pathFilenameHost = pathlib.Path(__file__).resolve()
-            def logCall(frame: FrameType, event: str, arg: object):
-                if event == 'call':
-                    listTraceCalls.append([time.perf_counter_ns(), frame.f_code.co_name, frame.f_code.co_filename])
-                return logCall
+    # TODO conditional compile
+    def insertUnconstrainedLeaf(my: NDArray[integer[Any]], potentialGaps: NDArray[integer[Any]], the: NDArray[integer[Any]], Z0Z_initializeUnconstrainedLeaf: Optional[bool]):
+        if Z0Z_initializeUnconstrainedLeaf:
+            if my[indexMy.dimensionsUnconstrained.value] == the[indexThe.dimensionsTotal.value]:
+                my[indexMy.indexLeaf.value] = 0
+                while my[indexMy.indexLeaf.value] < my[indexMy.leaf1ndex.value]:
+                    potentialGaps[my[indexMy.gap1ndexLowerBound.value]] = my[indexMy.indexLeaf.value]
+                    my[indexMy.gap1ndexLowerBound.value] += 1
+                    my[indexMy.indexLeaf.value] += 1
 
-            oldTrace = sys.gettrace()
-            sys.settrace(logCall)
-            try:
-                return functionTarget(*arguments, **keywordArguments)
-            finally:
-                sys.settrace(oldTrace)
-                # listTraceCalls = [[timeRelativeNS - timeStart, functionName] for timeRelativeNS, functionName, DISCARDpathFilename in listTraceCalls]
-                listTraceCalls = [[timeRelativeNS - timeStart, functionName] for timeRelativeNS, functionName, module in listTraceCalls if  pathlib.Path(module).resolve() == pathFilenameHost]
-                print(Counter([functionName for timeRelativeNS, functionName in listTraceCalls]))
-                dataTabularTOpathFilenameDelimited(pathFilenameLog, listTraceCalls, ['timeRelativeNS', 'functionName'])
-
-        return wrapperTrace
-    return decoratorTrace(functionTarget)
-
-"""
-
-# @numba.jit(nopython=True, cache=True, fastmath=True)
-@numba.jit(parallel=True, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
-def countFoldsCompiled(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], potentialGaps: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]) -> int:
-    def backtrack(my, track):
-        # Allegedly, `-=` is an optimized, in-place operation in numpy and likely the best choice.
-        # TODO figure out why numba won't work unless I include ".value" in statements such as `my[indexMy.leaf1ndex.value] -= 1`
-        my[indexMy.leaf1ndex.value] -= 1
-        track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]
-        track[indexTrack.leafAbove.value, track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]
-
-    def backtrackCondition(my, track):
-        return my[indexMy.leaf1ndex.value] > 0 and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
-
-    def checkActiveLeafGreaterThan0(my):
-        return my[indexMy.leaf1ndex.value] > 0
-
-    def checkActiveLeafGreaterThanLeavesTotal(my, the):
-        return my[indexMy.leaf1ndex.value] > the[indexThe.leavesTotal.value]
-
-    def checkActiveLeafNotEqualToTaskDivisions(my, the):
-        return my[indexMy.leaf1ndex.value] != the[indexThe.taskDivisions.value]
-
-    def checkActiveLeafIs1orLess(my):
-        return my[indexMy.leaf1ndex.value] <= 1
-
-    def checkComputationDivisions(the):
-        return the[indexThe.taskDivisions.value] == int(False)
-
-    def checkLeafBelowSentinelIs1(track):
-        return track[indexTrack.leafBelow.value, 0] == 1
-
-    def checkTaskIndex(my, the):
-        return numpy.equal(numpy.mod(my[indexMy.leafConnectee.value], the[indexThe.taskDivisions.value]), my[indexMy.taskIndex.value])
-
-    def countGaps(my, potentialGaps, track):
-        potentialGaps[my[indexMy.gap1ndexLowerBound.value]] = my[indexMy.leafConnectee.value]
-        if track[indexTrack.countDimensionsGapped.value, my[indexMy.leafConnectee.value]] == 0:
-            my[indexMy.gap1ndexLowerBound.value] += 1
-        track[indexTrack.countDimensionsGapped.value, my[indexMy.leafConnectee.value]] += 1
-
-    def filterCommonGaps(my, potentialGaps, the, track):
-        potentialGaps[my[indexMy.gap1ndex.value]] = potentialGaps[my[indexMy.indexMiniGap.value]]
-        if track[indexTrack.countDimensionsGapped.value, potentialGaps[my[indexMy.indexMiniGap.value]]] == the[indexThe.dimensionsTotal.value] - my[indexMy.dimensionsUnconstrained.value]:
-            my[indexMy.gap1ndex.value] += 1
-        track[indexTrack.countDimensionsGapped.value, potentialGaps[my[indexMy.indexMiniGap.value]]] = 0
-
-    def findGapsInitialization(my, track):
-        my[indexMy.dimensionsUnconstrained.value] = 0
-        my[indexMy.gap1ndexLowerBound.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
-        my[indexMy.dimension1ndex.value] = 1
-
-    def initializeLeaf1ndexConnectee(connectionGraph, my):
-        my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.dimension1ndex.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]]
-
-    def incrementDimensionsUnconstrained(my):
-        my[indexMy.dimensionsUnconstrained.value] += 1
-
-    def incrementFoldsTotal(foldsTotal, my, the):
-        foldsTotal[my[indexMy.taskIndex.value]] += the[indexThe.leavesTotal.value]
-
-    def incrementIndexMiniGap(my):
-        my[indexMy.indexMiniGap.value] += 1
-
-    def insertUnconstrainedLeaf(my, potentialGaps):
-        my[indexMy.indexLeaf.value] = 0
-        while my[indexMy.indexLeaf.value] < my[indexMy.leaf1ndex.value]:
-            potentialGaps[my[indexMy.gap1ndexLowerBound.value]] = my[indexMy.indexLeaf.value]
-            my[indexMy.gap1ndexLowerBound.value] += 1
-            my[indexMy.indexLeaf.value] += 1
-
-    def placeLeaf(my, potentialGaps, track):
-        my[indexMy.gap1ndex.value] -= 1
-        track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]] = potentialGaps[my[indexMy.gap1ndex.value]]
-        track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]] = track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]]
-        track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]] = my[indexMy.leaf1ndex.value]
-        track[indexTrack.leafAbove.value, track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]] = my[indexMy.leaf1ndex.value]
-        track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value]] = my[indexMy.gap1ndex.value]
-        my[indexMy.leaf1ndex.value] += 1
-
-    def placeLeafCondition(my):
-        return my[indexMy.leaf1ndex.value] > 0
-
-    def updateLeaf1ndexConnectee(connectionGraph, my, track):
-        my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.dimension1ndex.value], my[indexMy.leaf1ndex.value], track[indexTrack.leafBelow.value, my[indexMy.leafConnectee.value]]]
-
-    def lolaCondition_initializeUnconstrainedLeaf(my):
+    # TODO conditional compile
+    def lolaCondition_initializeUnconstrainedLeaf(my: NDArray[integer[Any]]):
         if my[indexMy.gap1ndex.value] > 0:
             return int(True)
         return int(False)
 
-    def initializeUnconstrainedLeaf(connectionGraph, foldsTotal, my, potentialGaps, the, track):
-        while checkActiveLeafGreaterThan0(my):
-            if checkActiveLeafIs1orLess(my) or checkLeafBelowSentinelIs1(track):
-                if checkActiveLeafGreaterThanLeavesTotal(my, the):
-                    incrementFoldsTotal(foldsTotal, my, the)
+    # TODO more semantic function identifier
+    def doWhile(
+        connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]],
+        my: NDArray[integer[Any]], potentialGaps: NDArray[integer[Any]], the: NDArray[integer[Any]],
+        track: NDArray[integer[Any]] , Z0Z_initializeUnconstrainedLeaf: Optional[bool]
+        ):
+        while my[indexMy.leaf1ndex.value] > 0:
+            if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
+                if my[indexMy.leaf1ndex.value] > the[indexThe.leavesTotal.value]:
+                    foldsTotal[my[indexMy.taskIndex.value]] += the[indexThe.leavesTotal.value]
                 else:
-                    findGapsInitialization(my, track)
+                    my[indexMy.dimensionsUnconstrained.value] = 0
+                    my[indexMy.gap1ndexLowerBound.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
+                    my[indexMy.dimension1ndex.value] = 1
                     while my[indexMy.dimension1ndex.value] <= the[indexThe.dimensionsTotal.value]:
                         if connectionGraph[my[indexMy.dimension1ndex.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]] == my[indexMy.leaf1ndex.value]:
-                            incrementDimensionsUnconstrained(my)
+                            my[indexMy.dimensionsUnconstrained.value] += 1
                         else:
-                            initializeLeaf1ndexConnectee(connectionGraph, my)
+                            my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.dimension1ndex.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]]
                             while my[indexMy.leafConnectee.value] != my[indexMy.leaf1ndex.value]:
-                                my[indexMy.doCountGaps.value] = int(False)
-                                if checkActiveLeafNotEqualToTaskDivisions(my, the):
-                                    my[indexMy.doCountGaps.value] = int(True)
-                                else:
-                                    if checkTaskIndex(my, the):
-                                        my[indexMy.doCountGaps.value] = int(True)
-                                    else:
-                                        if checkComputationDivisions(the):
-                                            my[indexMy.doCountGaps.value] = int(True)
-                                if my[indexMy.doCountGaps.value]:
-                                    countGaps(my, potentialGaps, track)
-                                updateLeaf1ndexConnectee(connectionGraph, my, track)
+                                if ifComputationDivisions(my, the):
+                                    potentialGaps[my[indexMy.gap1ndexLowerBound.value]] = my[indexMy.leafConnectee.value]
+                                    if track[indexTrack.countDimensionsGapped.value, my[indexMy.leafConnectee.value]] == 0:
+                                        my[indexMy.gap1ndexLowerBound.value] += 1
+                                    track[indexTrack.countDimensionsGapped.value, my[indexMy.leafConnectee.value]] += 1
+                                my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.dimension1ndex.value], my[indexMy.leaf1ndex.value], track[indexTrack.leafBelow.value, my[indexMy.leafConnectee.value]]]
                         my[indexMy.dimension1ndex.value] += 1
-                    if my[indexMy.dimensionsUnconstrained.value] == the[indexThe.dimensionsTotal.value]:
-                        insertUnconstrainedLeaf(my, potentialGaps)
+                    insertUnconstrainedLeaf(my, potentialGaps, the, Z0Z_initializeUnconstrainedLeaf)
                     my[indexMy.indexMiniGap.value] = my[indexMy.gap1ndex.value]
                     while my[indexMy.indexMiniGap.value] < my[indexMy.gap1ndexLowerBound.value]:
-                        filterCommonGaps(my, potentialGaps, the, track)
-                        incrementIndexMiniGap(my)
-            while backtrackCondition(my, track):
-                backtrack(my, track)
-            if placeLeafCondition(my):
-                placeLeaf(my, potentialGaps, track)
-            if lolaCondition_initializeUnconstrainedLeaf(my):
-                return
+                        potentialGaps[my[indexMy.gap1ndex.value]] = potentialGaps[my[indexMy.indexMiniGap.value]]
+                        if track[indexTrack.countDimensionsGapped.value, potentialGaps[my[indexMy.indexMiniGap.value]]] == the[indexThe.dimensionsTotal.value] - my[indexMy.dimensionsUnconstrained.value]:
+                            my[indexMy.gap1ndex.value] += 1
+                        track[indexTrack.countDimensionsGapped.value, potentialGaps[my[indexMy.indexMiniGap.value]]] = 0
+                        my[indexMy.indexMiniGap.value] += 1
+            while my[indexMy.leaf1ndex.value] > 0 and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]:
+                my[indexMy.leaf1ndex.value] -= 1
+                track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]
+                track[indexTrack.leafAbove.value, track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]
+            if my[indexMy.leaf1ndex.value] > 0:
+                my[indexMy.gap1ndex.value] -= 1
+                track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]] = potentialGaps[my[indexMy.gap1ndex.value]]
+                track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]] = track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]]
+                track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]] = my[indexMy.leaf1ndex.value]
+                track[indexTrack.leafAbove.value, track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]] = my[indexMy.leaf1ndex.value]
+                track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value]] = my[indexMy.gap1ndex.value]
+                my[indexMy.leaf1ndex.value] += 1
+            if Z0Z_initializeUnconstrainedLeaf:
+                if lolaCondition_initializeUnconstrainedLeaf(my):
+                    return
 
-    def doWhile(connectionGraph, foldsTotal, my, potentialGaps, the, track):
-        while checkActiveLeafGreaterThan0(my):
-            if checkActiveLeafIs1orLess(my) or checkLeafBelowSentinelIs1(track):
-                if checkActiveLeafGreaterThanLeavesTotal(my, the):
-                    incrementFoldsTotal(foldsTotal, my, the)
-                else:
-                    findGapsInitialization(my, track)
-                    while my[indexMy.dimension1ndex.value] <= the[indexThe.dimensionsTotal.value]:
-                        if connectionGraph[my[indexMy.dimension1ndex.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]] == my[indexMy.leaf1ndex.value]:
-                            incrementDimensionsUnconstrained(my)
-                        else:
-                            initializeLeaf1ndexConnectee(connectionGraph, my)
-                            while my[indexMy.leafConnectee.value] != my[indexMy.leaf1ndex.value]:
-                                my[indexMy.doCountGaps.value] = int(False)
-                                if checkActiveLeafNotEqualToTaskDivisions(my, the):
-                                    my[indexMy.doCountGaps.value] = int(True)
-                                else:
-                                    if checkTaskIndex(my, the):
-                                        my[indexMy.doCountGaps.value] = int(True)
-                                    else:
-                                        if checkComputationDivisions(the):
-                                            my[indexMy.doCountGaps.value] = int(True)
-                                if my[indexMy.doCountGaps.value]:
-                                    countGaps(my, potentialGaps, track)
-                                updateLeaf1ndexConnectee(connectionGraph, my, track)
-                        my[indexMy.dimension1ndex.value] += 1
-                    if my[indexMy.dimensionsUnconstrained.value] == the[indexThe.dimensionsTotal.value]:
-                        insertUnconstrainedLeaf(my, potentialGaps)
-                    my[indexMy.indexMiniGap.value] = my[indexMy.gap1ndex.value]
-                    while my[indexMy.indexMiniGap.value] < my[indexMy.gap1ndexLowerBound.value]:
-                        filterCommonGaps(my, potentialGaps, the, track)
-                        incrementIndexMiniGap(my)
-            while backtrackCondition(my, track):
-                backtrack(my, track)
-            if placeLeafCondition(my):
-                placeLeaf(my, potentialGaps, track)
-
-    def doTaskIndices(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], my: NDArray[integer[Any]], potentialGaps: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
+    # TODO conditional compile
+    def doTaskIndices(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]],
+                        my: NDArray[integer[Any]], potentialGaps: NDArray[integer[Any]],
+                        the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
         stateMy = my.copy()
         statePotentialGaps = potentialGaps.copy()
         stateTrack = track.copy()
@@ -219,39 +96,15 @@ def countFoldsCompiled(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArr
             my[indexMy.taskIndex.value] = indexSherpa
             potentialGaps = statePotentialGaps.copy()
             track = stateTrack.copy()
-            doWhile(connectionGraph, foldsTotal, my, potentialGaps, the, track)
+            doWhile(connectionGraph, foldsTotal, my, potentialGaps, the, track, Z0Z_initializeUnconstrainedLeaf=False)
 
-    initializeUnconstrainedLeaf(connectionGraph, foldsTotal, my, potentialGaps, the, track)
+    # initializeUnconstrainedLeaf
+    doWhile(connectionGraph, foldsTotal, my, potentialGaps, the, track, Z0Z_initializeUnconstrainedLeaf=True)
 
+    # TODO is this part of the conditional compile?
     if the[indexThe.taskDivisions.value] == int(False):
-        doWhile(connectionGraph, foldsTotal, my, potentialGaps, the, track)
+        doWhile(connectionGraph, foldsTotal, my, potentialGaps, the, track, Z0Z_initializeUnconstrainedLeaf=False)
     else:
         doTaskIndices(connectionGraph, foldsTotal, my, potentialGaps, the, track)
 
     return numpy.sum(foldsTotal).item()
-
-    # def lolaCondition_initializeTaskIndex():
-    #     """
-    #     NOTE hey hey hey !
-    #     You tested this concept with taskDivisions hardcoded to leavesTotal. In that case,
-    #     the Lola Condition was always true at `leavesTotal - 1`. You didn't do the math (because
-    #     you can't), but the vibe is consistent with modulo math and the tests always passed.
-
-    #     But, now you are switching back to taskDivisions as a variable. When
-    #     `taskDivisions == leavesTotal`, all of the previous tests are relevant. But when
-    #     they are not equal, the old tests are not relevant. Furthermore, when they are not
-    #     equal, your tests so far suggest that `leavesTotal - 1` sometimes fails and
-    #     `taskDivisions - 1` sometimes fails, so you don't have a direct substitute for
-    #     `leavesTotal - 1`. Therefore,
-
-    #     TODO prove, adjust, or remove this Lola Condition initialization
-    #     Currently, this condition saves a handful of iterations. By itself, it's not much.
-    #     """
-
-    #     my[indexMy.doCountGaps.value] = int(True)
-    #     # NOTE this is more than a mere condition check: it always forces countGaps to execute
-    #     return my[indexMy.leafConnectee.value] % the[indexThe.leavesTotal.value] == the[indexThe.leavesTotal.value] - 1
-    # def initializeTaskIndex():
-    #                             if lolaCondition_initializeTaskIndex():
-    #                                 return
-    # initializeTaskIndex()

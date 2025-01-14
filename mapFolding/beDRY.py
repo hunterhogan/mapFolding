@@ -122,8 +122,8 @@ def makeConnectionGraph(listDimensions: Sequence[int], dtype: type = numpy.int64
 
 def Z0Z_outfitFoldings(
     listDimensions: Sequence[int],
-    dtypeDefault: type = numpy.int64,
-    dtypeMaximum: type = numpy.int64,
+    dtypeDefault: type = numpy.int64, # TODO consider allowing a type or a "signal", such as "minimum", "safe", "maximum"
+    dtypeMaximum: type = numpy.int64, # Can/should I use numba types?
     CPUlimit: Optional[Union[int, float, bool]] = None,
     computationDivisions: Optional[Union[int, str]] = None,
     ) -> Z0Z_computationState:

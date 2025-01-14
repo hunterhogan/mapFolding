@@ -252,6 +252,8 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
         else:
             raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
 
+    # TODO remove type ignore after restructuring
+    # perhaps add overload
     return countFolds(listDimensions) # type: ignore
 
 def OEIS_for_n() -> None:
