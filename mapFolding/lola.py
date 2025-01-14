@@ -1,9 +1,8 @@
 """A functional but untenable implementation of the Run Lola Run concept. Untenable because of excessive code duplication."""
-from mapFolding import outfitFoldings, indexTrack as t, setCPUlimit, getTaskDivisions, indexThe, indexMy
+from mapFolding import outfitFoldings, indexTrack as t, setCPUlimit, getTaskDivisions
 from mapFolding import activeGap1ndex, activeLeaf1ndex, dimension1ndex, dimensionsUnconstrained, gap1ndexLowerBound, indexMiniGap, leaf1ndexConnectee
 from typing import Any, Final, List, Optional, Tuple, Union
 import numpy
-import numba
 import numpy.typing
 import pathlib
 import os
@@ -33,8 +32,6 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
     """
 
     taskDivisions = getTaskDivisions(computationDivisions)
-    # TODO if computationDivisions, which means, yet again, that restructuring is very important: saved initial states depend on the value of taskDivisions
-    # taskDivisions must be set to properly initialize the state
 
     dtypeDefault: Final = numpy.uint8
     dtypeMaximum: Final = numpy.uint16
@@ -45,12 +42,6 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
 
     connectionGraph: Final[numpy.ndarray] = D
     leavesTotal: Final[numpy.uint8] = numpy.uint8(n)
-    # if getTaskDivisions(computationDivisions):
-    #     # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
-    #     setCPUlimit(CPUlimit)
-    #     taskDivisions = numpy.uint8(min(numba.get_num_threads(), leavesTotal))
-    # else:
-    #     taskDivisions = leavesTotal
 
     my[activeLeaf1ndex] = numpy.uint8(1)
 
@@ -123,7 +114,6 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
         pathJob = pathlib.Path(pathJob, pathRelativeJob)
 
     return lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState)
-    # return lolaDispatcher(getTaskDivisions(computationDivisions), CPUlimit, pathJob, tupleLolaState)
 
 def saveState(pathState: Union[str, os.PathLike[Any]],
     connectionGraph: numpy.ndarray,

@@ -1,13 +1,14 @@
 from mapFolding import indexMy, indexThe, indexTrack
 from numpy import integer
 from numpy.typing import NDArray
-from typing import Any, Optional, Tuple
+from typing import Any, Optional
 import numba
 import numpy
-            # Allegedly, `-=` is an optimized, in-place operation in numpy and likely the best choice.
-            # TODO figure out why numba won't work unless I include ".value" in statements such as `my[indexMy.leaf1ndex.value] -= 1`
 
-@numba.jit(debug=True, _dbg_optnone=True)
+# Allegedly, `-=` is an optimized, in-place operation in numpy and likely the best choice.
+# TODO figure out why numba won't work unless I include ".value" in statements such as `my[indexMy.leaf1ndex.value] -= 1`
+
+# @numba.jit(debug=True, _dbg_optnone=True)
 # @numba.jit(parallel=True, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
 def countFoldsCompiled(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], my: NDArray[integer[Any]], potentialGaps: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]) -> int:
     # TODO conditional compile
