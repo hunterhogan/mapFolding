@@ -5,6 +5,7 @@ Crazy concept: Python doesn't cram at least two import roles into one system, ca
 awesome Python is. Alternatively, I learn about the secret system for mapping physical names to logical names."""
 
 # TODO Across the entire package, restructure computationDivisions.
+# test modules need updating still
 
 from .theSSOT import * # Priority 10,000
 # TODO remove after restructuring

@@ -4,6 +4,7 @@ from mapFolding import indexMy, indexThe, indexTrack, Z0Z_computationState
 from typing import Any, List, Optional, Sequence, Tuple, Union
 import numpy
 import numba
+import numba.extending
 import numpy.typing
 import sys
 
@@ -141,7 +142,7 @@ def Z0Z_outfitFoldings(listDimensions: Sequence[int],
 
     stateInitialized = Z0Z_computationState(connectionGraph=connectionGraph, foldsTotal=foldsTotal, mapShape=mapShape, my=my, potentialGaps=potentialGaps, the=the, track=track)
 
-    # return connectionGraph, foldsTotal, my, potentialGaps, the, track
+    # return connectionGraph, foldsTotal, mapShape, my, potentialGaps, the, track
 
     return stateInitialized
 

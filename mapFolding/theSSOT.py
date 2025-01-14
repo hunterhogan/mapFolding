@@ -3,6 +3,7 @@ import pathlib
 import sys
 import enum
 import numba
+import numba.extending
 import numpy
 import numpy.typing
 
@@ -67,7 +68,7 @@ class indexTrack(EnumIndices):
 TODO improve semiotics: clarity, brevity
 gapNotGap
 """
-# TODO learn how to use TypedDict without numba freaking out
+
 class Z0Z_computationState(TypedDict):
     connectionGraph: numpy.typing.NDArray[numpy.integer[Any]]
     foldsTotal: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]
