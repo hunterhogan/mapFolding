@@ -1,11 +1,13 @@
 from mapFolding import indexTrack, indexMy, indexThe
-from typing import Tuple
+from typing import Any, Tuple
 import numpy
+from numpy import integer
+from numpy.typing import NDArray
 import numba
 
 # @numba.jit(nopython=True, cache=True, fastmath=True)
-@numba.jit(parallel=False, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
-def countFoldsCompiled(connectionGraph: numpy.ndarray, foldsTotal: numpy.ndarray, mapShape: Tuple[int, ...], my: numpy.ndarray, potentialGaps: numpy.ndarray, the: numpy.ndarray, track: numpy.ndarray) -> int:
+@numba.jit(parallel=True, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
+def countFoldsCompiled(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], potentialGaps: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]) -> int:
     def backtrack(my, track):
         # Allegedly, `-=` is an optimized, in-place operation in numpy and likely the best choice.
         my[indexMy.leaf1ndex.value] -= 1
@@ -34,7 +36,7 @@ def countFoldsCompiled(connectionGraph: numpy.ndarray, foldsTotal: numpy.ndarray
         return track[indexTrack.leafBelow.value, 0] == 1
 
     def checkTaskIndex(my, the):
-        return my[indexMy.leafConnectee.value] % the[indexThe.taskDivisions.value] == my[indexMy.taskIndex.value]
+        return numpy.equal(numpy.mod(my[indexMy.leafConnectee.value], the[indexThe.taskDivisions.value]), my[indexMy.taskIndex.value])
 
     def countGaps(my, potentialGaps, track):
         potentialGaps[my[indexMy.gap1ndexLowerBound.value]] = my[indexMy.leafConnectee.value]
@@ -168,11 +170,11 @@ def countFoldsCompiled(connectionGraph: numpy.ndarray, foldsTotal: numpy.ndarray
             if placeLeafCondition(my):
                 placeLeaf(my, potentialGaps, track)
 
-    def doTaskIndices(connectionGraph, foldsTotal, my, potentialGaps, the, track):
+    def doTaskIndices(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], my: NDArray[integer[Any]], potentialGaps: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
         stateMy = my.copy()
         statePotentialGaps = potentialGaps.copy()
         stateTrack = track.copy()
-        for indexSherpa in range(the[indexThe.taskDivisions.value]):
+        for indexSherpa in numba.prange(the[indexThe.taskDivisions.value]):
             my = stateMy.copy()
             my[indexMy.taskIndex.value] = indexSherpa
             potentialGaps = statePotentialGaps.copy()
