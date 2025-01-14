@@ -3,9 +3,6 @@ Other test modules must not import directly from the package being tested."""
 
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
-from Z0Z_tools.pytest_parseParameters import makeTestSuiteConcurrencyLimit
-from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
-from Z0Z_tools.pytest_parseParameters import makeTestSuiteOopsieKwargsie
 from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, Tuple, Type, Union
 import pathlib
 import pytest
@@ -15,10 +12,12 @@ import os
 import random
 import unittest.mock
 
-from mapFolding.importPackages import defineConcurrencyLimit, intInnit, oopsieKwargsie
-from mapFolding import clearOEIScache, countFolds
+from mapFolding import clearOEIScache
+from mapFolding import countFolds, pathJobDEFAULT
 from mapFolding import getLeavesTotal, parseDimensions, validateListDimensions
-from mapFolding import pathJobDEFAULT
+from mapFolding.importPackages import makeTestSuiteConcurrencyLimit, defineConcurrencyLimit
+from mapFolding.importPackages import makeTestSuiteIntInnit, intInnit
+from mapFolding.importPackages import makeTestSuiteOopsieKwargsie, oopsieKwargsie
 from mapFolding.oeis import OEIS_for_n
 from mapFolding.oeis import _formatFilenameCache
 from mapFolding.oeis import _getOEISidValues

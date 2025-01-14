@@ -20,8 +20,8 @@ def ifComputationDivisions(taskDivisions: numpy.uint8, my: numpy.ndarray, taskIn
         return True
     return my[activeLeaf1ndex] != taskDivisions or my[leaf1ndexConnectee] % taskDivisions == taskIndex
 
-@numba.jit(nopython=True, cache=True, fastmath=True, parallel=True)
-# @numba.jit(_nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True, parallel=True)
+# @numba.jit(nopython=True, cache=True, fastmath=True, parallel=True)
+@numba.jit(_nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True, parallel=True)
 def doWhileConcurrent(
         connectionGraph: numpy.ndarray,
         dimensionsTotal: numpy.uint8,
@@ -48,8 +48,8 @@ def doWhileConcurrent(
 
     return foldsRunningTotal
 
-@numba.jit(nopython=True, cache=True, fastmath=True)
-# @numba.jit(_nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True, parallel=False)
+# @numba.jit(nopython=True, cache=True, fastmath=True)
+@numba.jit(_nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True, parallel=False)
 def doWhile(
     connectionGraph: numpy.ndarray,
     dimensionsTotal: numpy.uint8,

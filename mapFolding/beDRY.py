@@ -7,7 +7,7 @@ import numba
 import numpy.typing
 import sys
 
-def getLeavesTotal(listDimensions: List[int]) -> int:
+def getLeavesTotal(listDimensions: Sequence[int]) -> int:
     """
     Calculate the product of non-zero, non-negative integers in the given list.
 
@@ -37,14 +37,14 @@ def getTaskDivisions(computationDivisions: Union[bool, Any]) -> bool:
         raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but I need 'True' or 'False'.")
     return taskDivisions
 
-def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64) -> numpy.typing.NDArray[numpy.integer[Any]]:
+def makeConnectionGraph(listDimensions: Sequence[int], dtype: type = numpy.int64) -> numpy.typing.NDArray[numpy.integer[Any]]:
     """
     Constructs a connection graph for a given list of dimensions.
     This function generates a multi-dimensional connection graph based on the provided list of dimensions.
     The graph represents the connections between leaves in a Cartesian product decomposition or dimensional product mapping.
 
     Parameters:
-        listDimensions: A validated list of integers representing the dimensions of the map.
+        listDimensions: A validated sequence of integers representing the dimensions of the map.
     Returns:
         connectionGraph: A 3D numpy array with shape of (dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1).
     """
@@ -94,46 +94,51 @@ def makeConnectionGraph(listDimensions: List[int], dtype: type = numpy.int64) ->
 
     return connectionGraph
 
-def Z0Z_outfitFoldings(listDimensions: Sequence[int], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None,
-                    dtypeDefault: type = numpy.int64,
-                    dtypeMaximum: type = numpy.int64
-                    ) -> Tuple[List[int], int, numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]]]:
+def Z0Z_outfitFoldings(listDimensions: Sequence[int],
+                        dtypeDefault: type = numpy.int64,
+                        dtypeMaximum: type = numpy.int64,
+                        CPUlimit: Optional[Union[int, float, bool]] = None,
+                        computationDivisions = None,
+                        ):
     """
-    computationDivisions
-        int: how many divisions to make; 0 and 1 are effectively none.
-        None: no divisions
-        "maximum": as many divisions as possible = leavesTotal
-        "cpu": as many divisions as CPUs
-
-    1. Validate parameters
-    2. Calculate intermediate values
-    3. setCPUlimit
-    4. Create and populate data structures
-        Z0Z_computationState
-        connectionGraph
-        foldsTotal
-        my
-        potentialGaps
-        the
-        track
+    TODO Create function(s) to validate more things
+        dtype can hold the values; notable statements:
+            `leavesTotal + 1`
+            `leavesTotal * leavesTotal + 1`
+        taskDivisions <= leavesTotal
     """
     the = numpy.zeros(len(indexThe), dtype=dtypeDefault)
 
-    the[indexThe.mapShape] = sorted(validateListDimensions(listDimensions))
-    the[indexThe.leavesTotal] = getLeavesTotal(the[indexThe.mapShape])
-    # Create function to validate that dtypeDefault and dtypeMaximum can hold the values
-    # TODO look more closely to make sure `leavesTotal + 1` is not an overflow.
-    # actually, rethink the role of this function. `potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)`
-    # means that somewhere in the app, I should check for overflow of `leavesTotal * leavesTotal + 1`
-    # furthermore, somewhere in the app, I should check for overflow while taking into account any specified dtype, such as numpy.uint8.
-    # crap.
+    mapShape = tuple(sorted(validateListDimensions(listDimensions)))
+    the[indexThe.leavesTotal] = getLeavesTotal(mapShape)
+    the[indexThe.dimensionsTotal] = len(mapShape)
     concurrencyLimit = setCPUlimit(CPUlimit)
-    connectionGraph = makeConnectionGraph(the[indexThe.mapShape], dtype=dtypeDefault)
+
+    if not computationDivisions:
+        # Coding it this way should cover `None`, `False`, and `0`.
+        the[indexThe.taskDivisions] = 0
+    elif isinstance(computationDivisions, int):
+        the[indexThe.taskDivisions] = computationDivisions
+    elif isinstance(computationDivisions, str):
+        computationDivisions = computationDivisions.lower()
+        if computationDivisions == "maximum":
+            the[indexThe.taskDivisions] = the[indexThe.leavesTotal]
+        elif computationDivisions == "cpu":
+            the[indexThe.taskDivisions] = concurrencyLimit
+    else:
+        raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but the so-called programmer didn't implement code for that.")
+
+    connectionGraph = makeConnectionGraph(mapShape, dtype=dtypeDefault)
+    foldsTotal = numpy.zeros(the[indexThe.leavesTotal], dtype=numpy.int64)
     my = numpy.zeros(len(indexMy), dtype=dtypeDefault)
     potentialGaps = numpy.zeros(the[indexThe.leavesTotal] * the[indexThe.leavesTotal] + 1, dtype=dtypeMaximum)
     track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeDefault)
 
-    return the[indexThe.mapShape], the[indexThe.leavesTotal], connectionGraph, track, potentialGaps
+    stateInitialized = Z0Z_computationState(connectionGraph=connectionGraph, foldsTotal=foldsTotal, mapShape=mapShape, my=my, potentialGaps=potentialGaps, the=the, track=track)
+
+    # return connectionGraph, foldsTotal, my, potentialGaps, the, track
+
+    return stateInitialized
 
 def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, dtypeMaximum: type = numpy.int64) -> Tuple[List[int], int, numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]]]:
     """

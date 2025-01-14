@@ -1,4 +1,4 @@
-from typing import Any, Final, Literal, TypedDict
+from typing import Any, Final, Literal, TypedDict, Tuple
 import pathlib
 import sys
 import enum
@@ -38,24 +38,22 @@ class EnumIndices(enum.Enum):
 
 class indexMy(EnumIndices):
     """Indices for dynamic values."""
-    activeGap1ndex = enum.auto()
-    gap = enum.auto()
-    leaf = enum.auto()
-    leaf1ndex = enum.auto()
-    activeLeaf1ndex = enum.auto()
     dimension1ndex = enum.auto()
     dimensionsUnconstrained = enum.auto()
+    doCountGaps = enum.auto()
+    gap1ndex = enum.auto()
     gap1ndexLowerBound = enum.auto()
     indexLeaf = enum.auto()
     indexMiniGap = enum.auto()
+    leaf1ndex = enum.auto()
     leafConnectee = enum.auto()
+    lolaCondition = enum.auto()
     taskIndex = enum.auto()
 
 class indexThe(EnumIndices):
     """Indices for static values."""
     dimensionsTotal = enum.auto()
     leavesTotal = enum.auto()
-    mapShape = enum.auto()
     taskDivisions = enum.auto()
 
 class indexTrack(EnumIndices):
@@ -64,6 +62,7 @@ class indexTrack(EnumIndices):
     leafBelow = enum.auto()
     countDimensionsGapped = enum.auto()
     gapRangeStart = enum.auto()
+    # TODO remove
     my = enum.auto()
 """
 TODO improve semiotics: clarity, brevity
@@ -72,7 +71,8 @@ gapNotGap
 # TODO learn how to use TypedDict without numba freaking out
 class Z0Z_computationState(TypedDict):
     connectionGraph: numpy.typing.NDArray[numpy.integer[Any]]
-    foldsTotal: numpy.integer[Any]
+    foldsTotal: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]
+    mapShape: Tuple[int, ...]
     my: numpy.typing.NDArray[numpy.integer[Any]]
     potentialGaps: numpy.typing.NDArray[numpy.integer[Any]]
     the: numpy.typing.NDArray[numpy.integer[Any]]
