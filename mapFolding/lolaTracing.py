@@ -43,8 +43,9 @@ def traceCalls(functionTarget: Callable[..., Any]) -> Callable[..., Any]:
 """
 # @numba.jit(_nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True, parallel=False)
 # @numba.jit(nopython=True, cache=True, fastmath=True, forceinline=True)
-def countFolds(listDimensions: Sequence[int], CPUlimit: Optional[Union[int, float, bool]] = None, computationDivisions = None):
-    def backtrack() -> None:
+# TODO the current tests expect positional `listDimensions, computationDivisions`, so after restructuring you can arrange the parameters however you want.
+def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUlimit: Optional[Union[int, float, bool]] = None):
+    def backtrack():
         # Allegedly, `-=` is an optimized, in-place operation in numpy and likely the best choice.
         my[indexMy.leaf1ndex] -= 1
         track[indexTrack.leafBelow, track[indexTrack.leafAbove, my[indexMy.leaf1ndex]]] = track[indexTrack.leafBelow, my[indexMy.leaf1ndex]]
@@ -59,9 +60,8 @@ def countFolds(listDimensions: Sequence[int], CPUlimit: Optional[Union[int, floa
     def checkActiveLeafGreaterThanLeavesTotal():
         return my[indexMy.leaf1ndex] > the[indexThe.leavesTotal]
 
-    # TODO taskDivisions
-    def checkActiveLeafNotEqualToLeavesTotal():
-        return my[indexMy.leaf1ndex] != the[indexThe.leavesTotal]
+    def checkActiveLeafNotEqualToTaskDivisions():
+        return my[indexMy.leaf1ndex] != the[indexThe.taskDivisions]
 
     def checkActiveLeafIs1orLess():
         return my[indexMy.leaf1ndex] <= 1
@@ -72,9 +72,8 @@ def countFolds(listDimensions: Sequence[int], CPUlimit: Optional[Union[int, floa
     def checkLeafBelowSentinelIs1():
         return track[indexTrack.leafBelow, 0] == 1
 
-    # TODO taskDivisions
     def checkTaskIndex():
-        return my[indexMy.leafConnectee] % the[indexThe.leavesTotal] == my[indexMy.taskIndex]
+        return my[indexMy.leafConnectee] % the[indexThe.taskDivisions] == my[indexMy.taskIndex]
 
     def countGaps():
         potentialGaps[my[indexMy.gap1ndexLowerBound]] = my[indexMy.leafConnectee]
@@ -138,12 +137,6 @@ def countFolds(listDimensions: Sequence[int], CPUlimit: Optional[Union[int, floa
             return int(True)
         return int(False)
 
-    # TODO taskDivisions
-    def lolaCondition_initializeTaskIndex():
-        # NOTE this is more than a mere condition check: it always forces countGaps to execute
-        my[indexMy.doCountGaps] = int(True)
-        my[indexMy.lolaCondition] = int(my[indexMy.leafConnectee] % the[indexThe.leavesTotal] == the[indexThe.leavesTotal] - 1)
-
     def initializeUnconstrainedLeaf():
         while checkActiveLeafGreaterThan0():
             if checkActiveLeafIs1orLess() or checkLeafBelowSentinelIs1():
@@ -158,7 +151,7 @@ def countFolds(listDimensions: Sequence[int], CPUlimit: Optional[Union[int, floa
                             initializeLeaf1ndexConnectee()
                             while my[indexMy.leafConnectee] != my[indexMy.leaf1ndex]:
                                 my[indexMy.doCountGaps] = int(False)
-                                if checkActiveLeafNotEqualToLeavesTotal():
+                                if checkActiveLeafNotEqualToTaskDivisions():
                                     my[indexMy.doCountGaps] = int(True)
                                 else:
                                     if checkTaskIndex():
@@ -186,47 +179,6 @@ def countFolds(listDimensions: Sequence[int], CPUlimit: Optional[Union[int, floa
             if lolaCondition_initializeUnconstrainedLeaf():
                 return
 
-    def initializeTaskIndex():
-        while checkActiveLeafGreaterThan0():
-            if checkActiveLeafIs1orLess() or checkLeafBelowSentinelIs1():
-                if checkActiveLeafGreaterThanLeavesTotal():
-                    incrementFoldsTotal()
-                else:
-                    findGapsInitialization()
-                    while my[indexMy.dimension1ndex] <= the[indexThe.dimensionsTotal]:
-                        if connectionGraph[my[indexMy.dimension1ndex], my[indexMy.leaf1ndex], my[indexMy.leaf1ndex]] == my[indexMy.leaf1ndex]:
-                            incrementDimensionsUnconstrained()
-                        else:
-                            initializeLeaf1ndexConnectee()
-                            while my[indexMy.leafConnectee] != my[indexMy.leaf1ndex]:
-                                my[indexMy.doCountGaps] = int(False)
-                                if checkActiveLeafNotEqualToLeavesTotal():
-                                    my[indexMy.doCountGaps] = int(True)
-                                else:
-                                    lolaCondition_initializeTaskIndex()
-                                    if my[indexMy.lolaCondition]:
-                                        my[indexMy.lolaCondition] = int(False)
-                                        return
-                                    if checkTaskIndex():
-                                        my[indexMy.doCountGaps] = int(True)
-                                    else:
-                                        if checkComputationDivisions():
-                                            my[indexMy.doCountGaps] = int(True)
-                                if my[indexMy.doCountGaps]:
-                                    countGaps()
-                                updateLeaf1ndexConnectee()
-                        my[indexMy.dimension1ndex] += 1
-                    if my[indexMy.dimensionsUnconstrained] == the[indexThe.dimensionsTotal]:
-                        insertUnconstrainedLeaf()
-                    my[indexMy.indexMiniGap] = my[indexMy.gap1ndex]
-                    while my[indexMy.indexMiniGap] < my[indexMy.gap1ndexLowerBound]:
-                        filterCommonGaps()
-                        incrementIndexMiniGap()
-            while backtrackCondition():
-                backtrack()
-            if placeLeafCondition():
-                placeLeaf()
-
     def doWhile():
         while checkActiveLeafGreaterThan0():
             if checkActiveLeafIs1orLess() or checkLeafBelowSentinelIs1():
@@ -241,7 +193,7 @@ def countFolds(listDimensions: Sequence[int], CPUlimit: Optional[Union[int, floa
                             initializeLeaf1ndexConnectee()
                             while my[indexMy.leafConnectee] != my[indexMy.leaf1ndex]:
                                 my[indexMy.doCountGaps] = int(False)
-                                if checkActiveLeafNotEqualToLeavesTotal():
+                                if checkActiveLeafNotEqualToTaskDivisions():
                                     my[indexMy.doCountGaps] = int(True)
                                 else:
                                     if checkTaskIndex():
@@ -264,14 +216,14 @@ def countFolds(listDimensions: Sequence[int], CPUlimit: Optional[Union[int, floa
             if placeLeafCondition():
                 placeLeaf()
 
-    stateStart = Z0Z_outfitFoldings(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit)
-    connectionGraph: Final[numpy.ndarray] = stateStart['connectionGraph']
-    foldsTotal = stateStart['foldsTotal']
-    mapShape: Final[Tuple] = stateStart['mapShape']
-    my = stateStart['my']
-    potentialGaps = stateStart['potentialGaps']
-    the: Final[numpy.ndarray] = stateStart['the']
-    track = stateStart['track']
+    stateUniversal = Z0Z_outfitFoldings(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit)
+    connectionGraph: Final[numpy.ndarray] = stateUniversal['connectionGraph']
+    foldsTotal = stateUniversal['foldsTotal']
+    mapShape: Final[Tuple] = stateUniversal['mapShape']
+    my = stateUniversal['my']
+    potentialGaps = stateUniversal['potentialGaps']
+    the: Final[numpy.ndarray] = stateUniversal['the']
+    track = stateUniversal['track']
 
     # connectionGraph, foldsTotal, my, potentialGaps, the, track = Z0Z_outfitFoldings(listDimensions, computationDivisions)
 
@@ -279,7 +231,43 @@ def countFolds(listDimensions: Sequence[int], CPUlimit: Optional[Union[int, floa
     my[indexMy.leaf1ndex] = 1
 
     initializeUnconstrainedLeaf()
-    initializeTaskIndex()
-    doWhile()
+    if the[indexThe.taskDivisions] == int(False):
+        doWhile()
+    else:
+        stateUniversal['my'] = my.copy()
+        stateUniversal['potentialGaps'] = potentialGaps.copy()
+        stateUniversal['track'] = track.copy()
+        for indexSherpa in range(the[indexThe.taskDivisions]):
+            my = stateUniversal['my'].copy()
+            my[indexMy.taskIndex] = indexSherpa
+            potentialGaps = stateUniversal['potentialGaps'].copy()
+            track = stateUniversal['track'].copy()
+            doWhile()
 
     return numpy.sum(foldsTotal).item()
+
+    # def lolaCondition_initializeTaskIndex():
+    #     """
+    #     NOTE hey hey hey !
+    #     You tested this concept with taskDivisions hardcoded to leavesTotal. In that case,
+    #     the Lola Condition was always true at `leavesTotal - 1`. You didn't do the math (because
+    #     you can't), but the vibe is consistent with modulo math and the tests always passed.
+
+    #     But, now you are switching back to taskDivisions as a variable. When
+    #     `taskDivisions == leavesTotal`, all of the previous tests are relevant. But when
+    #     they are not equal, the old tests are not relevant. Furthermore, when they are not
+    #     equal, your tests so far suggest that `leavesTotal - 1` sometimes fails and
+    #     `taskDivisions - 1` sometimes fails, so you don't have a direct substitute for
+    #     `leavesTotal - 1`. Therefore,
+
+    #     TODO prove, adjust, or remove this Lola Condition initialization
+    #     Currently, this condition saves a handful of iterations. By itself, it's not much.
+    #     """
+
+    #     my[indexMy.doCountGaps] = int(True)
+    #     # NOTE this is more than a mere condition check: it always forces countGaps to execute
+    #     return my[indexMy.leafConnectee] % the[indexThe.leavesTotal] == the[indexThe.leavesTotal] - 1
+    # def initializeTaskIndex():
+    #                             if lolaCondition_initializeTaskIndex():
+    #                                 return
+    # initializeTaskIndex()

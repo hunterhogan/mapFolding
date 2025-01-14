@@ -47,7 +47,6 @@ class indexMy(EnumIndices):
     indexMiniGap = enum.auto()
     leaf1ndex = enum.auto()
     leafConnectee = enum.auto()
-    lolaCondition = enum.auto()
     taskIndex = enum.auto()
 
 class indexThe(EnumIndices):

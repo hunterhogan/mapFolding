@@ -31,6 +31,7 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 
         return productDimensions
 
+# TODO remove after restructuring
 def getTaskDivisions(computationDivisions: Union[bool, Any]) -> bool:
     taskDivisions = computationDivisions if isinstance(computationDivisions, bool) else oopsieKwargsie(computationDivisions)
     if not isinstance(taskDivisions, bool):
@@ -113,6 +114,10 @@ def Z0Z_outfitFoldings(listDimensions: Sequence[int],
     the[indexThe.leavesTotal] = getLeavesTotal(mapShape)
     the[indexThe.dimensionsTotal] = len(mapShape)
     concurrencyLimit = setCPUlimit(CPUlimit)
+
+    # TODO remove after restructuring
+    if isinstance(computationDivisions, bool) and computationDivisions:
+        computationDivisions = "maximum"
 
     if not computationDivisions:
         # Coding it this way should cover `None`, `False`, and `0`.
