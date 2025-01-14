@@ -121,7 +121,61 @@ def countFolds(listDimensions: List[int], computationDivisions: bool = False, CP
         # TODO SSOT for where I am putting information!
         pathRelativeJob = str(listDimensions).replace(' ', '')
         pathJob = pathlib.Path(pathJob, pathRelativeJob)
-    setCPUlimit(CPUlimit)
-    from mapFolding.lolaDispatcher import lolaDispatcher
+
     return lolaDispatcher(taskDivisions, CPUlimit, pathJob, tupleLolaState)
     # return lolaDispatcher(getTaskDivisions(computationDivisions), CPUlimit, pathJob, tupleLolaState)
+
+def saveState(pathState: Union[str, os.PathLike[Any]],
+    connectionGraph: numpy.ndarray,
+    dimensionsTotal: numpy.uint8,
+    leavesTotal: numpy.uint8,
+    potentialGaps: numpy.ndarray,
+    track: numpy.ndarray):
+    pathFilenameState = pathlib.Path(pathState, "stateJob.npz")
+    pathFilenameState.parent.mkdir(parents=True, exist_ok=True)
+    numpy.savez_compressed(pathFilenameState,
+        connectionGraph=connectionGraph,
+        dimensionsTotal=dimensionsTotal,
+        leavesTotal=leavesTotal,
+        potentialGaps=potentialGaps,
+        track=track
+    )
+    return pathFilenameState
+
+def loadState(pathFilenameState: Union[str, os.PathLike[Any]]) -> Tuple:
+    tupleLolaState = (
+        numpy.load(pathFilenameState)['connectionGraph'],
+        numpy.uint8(numpy.load(pathFilenameState)['dimensionsTotal']),
+        numpy.uint8(numpy.load(pathFilenameState)['leavesTotal']),
+        numpy.load(pathFilenameState)['potentialGaps'],
+        numpy.load(pathFilenameState)['track']
+    )
+    return tupleLolaState
+
+def doJob(pathFilenameState: Union[str, os.PathLike[Any]], computationDivisions: bool = False, CPUlimit: Optional[Union[int, float, bool]] = None):
+    taskDivisions = getTaskDivisions(computationDivisions)
+    # TODO figure out how to pass state information around. Am I having fun yet?!
+    tupleLolaState=loadState(pathFilenameState)
+    foldsTotal = lolaDispatcher(taskDivisions, CPUlimit, pathJob=None, tupleLolaState=tupleLolaState)
+    print(foldsTotal)
+    # TODO SSOT for where I am putting information, ffs!
+    filenameFoldsTotal = str(tupleLolaState[2]).replace(' ', '') + ".foldsTotal"
+    pathFilenameFoldsTotal = pathlib.Path(pathFilenameState).with_name(filenameFoldsTotal)
+    pathFilenameFoldsTotal.write_text(str(foldsTotal))
+    return pathFilenameFoldsTotal
+
+def lolaDispatcher(computationDivisions, CPUlimit, pathJob, tupleLolaState):
+    if pathJob is not None:
+        return saveState(pathJob, *tupleLolaState)
+    elif computationDivisions:
+        # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
+        setCPUlimit(CPUlimit)
+        # taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[2])) # leavesTotal
+        """TODO something is wrong with `taskDivisions = numpy.uint8(min(numba.get_num_threads(), tupleLolaState[2])) # leavesTotal` but setting `taskDivisions = numpy.uint8(tupleLolaState[2]) # leavesTotal` still works as expected. Therefore, while restructuring the entire computationDivisions-to-taskDivisions system, look for the reason(s) why taskDivisions != leavesTotal if leavesTotal < numba.get_num_threads() calculates incorrectly."""
+        taskDivisions = numpy.uint8(tupleLolaState[2]) # leavesTotal
+        from mapFolding.lolaDispatcher import doWhileConcurrent
+        foldsTotal = int(doWhileConcurrent(*tupleLolaState, taskDivisions)) # type: ignore
+    else:
+        from mapFolding.lolaDispatcher import doWhile
+        foldsTotal = int(doWhile(*tupleLolaState))
+    return foldsTotal
