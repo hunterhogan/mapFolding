@@ -1,5 +1,4 @@
 from mapFolding import outfitFoldings
-from mapFolding.benchmarks import recordBenchmarks
 from numba import njit
 from typing import List
 import numpy
@@ -25,7 +24,7 @@ tricky = [
 (activeLeaf1ndex := 0),
 (activeGap1ndex := 1),
 (unconstrainedLeaf := 2),
-(gap1ndexLowerBound := 3),
+(gap1ndexCeiling := 3),
 (leaf1ndexConnectee := 4),
 (taskIndex := 5),
 (dimension1ndex := 6),
@@ -46,13 +45,13 @@ COUNTindicesStatic = len(tricky)
 def countFolds(listDimensions: List[int]):
     static = numpy.zeros(COUNTindicesStatic, dtype=numpy.int64)
 
-    listDimensions, static[leavesTotal], D, track,potentialGaps = outfitFoldings(listDimensions)
+    listDimensions, static[leavesTotal], D, track,gapsWhere = outfitFoldings(listDimensions)
 
     static[dimensionsTotal] = len(listDimensions)
     static[dimensionsPlus1] = static[dimensionsTotal] + 1
 
     # Pass listDimensions and taskDivisions to _sherpa for benchmarking
-    foldingsTotal = _sherpa(track, potentialGaps, static, D, listDimensions)
+    foldingsTotal = _sherpa(track, gapsWhere, static, D, listDimensions)
     return foldingsTotal
 
 # @recordBenchmarks()
@@ -71,7 +70,7 @@ def _sherpa(track: NDArray, gap: NDArray, static: NDArray, D: NDArray, p: List[i
 
 @njit(cache=True, parallel=False, fastmath=False)
 def countFoldings(TEMPLATEtrack: NDArray,
-                    TEMPLATEpotentialGaps: NDArray,
+                    TEMPLATEgapsWhere: NDArray,
                     the: NDArray,
                     connectionGraph: NDArray
                     ):
@@ -84,7 +83,7 @@ def countFoldings(TEMPLATEtrack: NDArray,
     TEMPLATEmy[taskIndex] = taskDivisions - 1 # the first modulo is leavesTotal - 1
 
     def prepareWork(track: NDArray,
-                    potentialGaps: NDArray,
+                    gapsWhere: NDArray,
                     my: NDArray) -> tuple[NDArray, NDArray, NDArray]:
         foldingsTotal = 0
         while True:
@@ -93,8 +92,8 @@ def countFoldings(TEMPLATEtrack: NDArray,
                     foldingsTotal += the[leavesTotal]
                 else:
                     my[unconstrainedLeaf] = 0
-                    my[gap1ndexLowerBound] = track[gapRangeStart][my[activeLeaf1ndex] - 1]
-                    my[activeGap1ndex] = my[gap1ndexLowerBound]
+                    my[gap1ndexCeiling] = track[gapRangeStart][my[activeLeaf1ndex] - 1]
+                    my[activeGap1ndex] = my[gap1ndexCeiling]
 
                     for PREPAREdimension1ndex in range(1, the[dimensionsPlus1]):
                         if connectionGraph[PREPAREdimension1ndex][my[activeLeaf1ndex]][my[activeLeaf1ndex]] == my[activeLeaf1ndex]:
@@ -105,30 +104,30 @@ def countFoldings(TEMPLATEtrack: NDArray,
 
                                 if my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
                                     my[dimension1ndex] = PREPAREdimension1ndex
-                                    return track, potentialGaps, my
+                                    return track, gapsWhere, my
 
                                 if my[activeLeaf1ndex] != the[leavesTotal]:
-                                    potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
+                                    gapsWhere[my[gap1ndexCeiling]] = my[leaf1ndexConnectee]
                                     if track[countDimensionsGapped][my[leaf1ndexConnectee]] == 0:
-                                        my[gap1ndexLowerBound] += 1
+                                        my[gap1ndexCeiling] += 1
                                     track[countDimensionsGapped][my[leaf1ndexConnectee]] += 1
                                 else:
                                     print("else")
                                     my[dimension1ndex] = PREPAREdimension1ndex
-                                    return track, potentialGaps, my
+                                    return track, gapsWhere, my
                                     # PREPAREmy[leaf1ndexConnectee] % the[leavesTotal] == PREPAREmy[taskIndex]
                                 my[leaf1ndexConnectee] = connectionGraph[dimension1ndex][my[activeLeaf1ndex]][track[leafBelow][my[leaf1ndexConnectee]]]
 
                     if my[unconstrainedLeaf] == the[dimensionsTotal]:
                         for leaf1ndex in range(my[activeLeaf1ndex]):
-                            potentialGaps[my[gap1ndexLowerBound]] = leaf1ndex
-                            my[gap1ndexLowerBound] += 1
+                            gapsWhere[my[gap1ndexCeiling]] = leaf1ndex
+                            my[gap1ndexCeiling] += 1
 
-                    for indexMiniGap in range(my[activeGap1ndex], my[gap1ndexLowerBound]):
-                        potentialGaps[my[activeGap1ndex]] = potentialGaps[indexMiniGap]
-                        if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == the[dimensionsTotal] - my[unconstrainedLeaf]:
+                    for indexMiniGap in range(my[activeGap1ndex], my[gap1ndexCeiling]):
+                        gapsWhere[my[activeGap1ndex]] = gapsWhere[indexMiniGap]
+                        if track[countDimensionsGapped][gapsWhere[indexMiniGap]] == the[dimensionsTotal] - my[unconstrainedLeaf]:
                             my[activeGap1ndex] += 1
-                        track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
+                        track[countDimensionsGapped][gapsWhere[indexMiniGap]] = 0
 
             while my[activeLeaf1ndex] > 0 and my[activeGap1ndex] == track[gapRangeStart][my[activeLeaf1ndex] - 1]:
                 my[activeLeaf1ndex] -= 1
@@ -137,22 +136,22 @@ def countFoldings(TEMPLATEtrack: NDArray,
 
             if my[activeLeaf1ndex] > 0:
                 my[activeGap1ndex] -= 1
-                track[leafAbove][my[activeLeaf1ndex]] = potentialGaps[my[activeGap1ndex]]
+                track[leafAbove][my[activeLeaf1ndex]] = gapsWhere[my[activeGap1ndex]]
                 track[leafBelow][my[activeLeaf1ndex]] = track[leafBelow][track[leafAbove][my[activeLeaf1ndex]]]
                 track[leafBelow][track[leafAbove][my[activeLeaf1ndex]]] = my[activeLeaf1ndex]
                 track[leafAbove][track[leafBelow][my[activeLeaf1ndex]]] = my[activeLeaf1ndex]
                 track[gapRangeStart][my[activeLeaf1ndex]] = my[activeGap1ndex]
                 my[activeLeaf1ndex] += 1
 
-    RETURNtrack, RETURNpotentialGaps, RETURNmy = prepareWork(TEMPLATEtrack.copy(), TEMPLATEpotentialGaps.copy(), TEMPLATEmy.copy())
+    RETURNtrack, RETURNgapsWhere, RETURNmy = prepareWork(TEMPLATEtrack.copy(), TEMPLATEgapsWhere.copy(), TEMPLATEmy.copy())
 
-    foldingsTotal = doWork(RETURNtrack.copy(), RETURNpotentialGaps.copy(), RETURNmy.copy(), the, connectionGraph, taskDivisions)
+    foldingsTotal = doWork(RETURNtrack.copy(), RETURNgapsWhere.copy(), RETURNmy.copy(), the, connectionGraph, taskDivisions)
 
     return foldingsTotal
 
 @njit(cache=True, parallel=False, fastmath=False)
 def doWork(track: NDArray,
-                potentialGaps: NDArray,
+                gapsWhere: NDArray,
                 my: NDArray,
                 the: NDArray,
                 connectionGraph: NDArray,
@@ -174,8 +173,8 @@ def doWork(track: NDArray,
             else:
                 if thisIsNotTheFirstPass:
                     my[unconstrainedLeaf] = 0
-                    my[gap1ndexLowerBound] = track[gapRangeStart][my[activeLeaf1ndex] - 1]
-                    my[activeGap1ndex] = my[gap1ndexLowerBound]
+                    my[gap1ndexCeiling] = track[gapRangeStart][my[activeLeaf1ndex] - 1]
+                    my[activeGap1ndex] = my[gap1ndexCeiling]
 
                 for_dimension1ndex_in_range_1_to_dimensionsPlus1 = True
                 while for_dimension1ndex_in_range_1_to_dimensionsPlus1 == True:
@@ -199,9 +198,9 @@ def doWork(track: NDArray,
                                 else:
                                     myTask = False
                             if myTask:
-                                potentialGaps[my[gap1ndexLowerBound]] = my[leaf1ndexConnectee]
+                                gapsWhere[my[gap1ndexCeiling]] = my[leaf1ndexConnectee]
                                 if track[countDimensionsGapped][my[leaf1ndexConnectee]] == 0:
-                                    my[gap1ndexLowerBound] += 1
+                                    my[gap1ndexCeiling] += 1
                                 track[countDimensionsGapped][my[leaf1ndexConnectee]] += 1
                             my[leaf1ndexConnectee] = connectionGraph[my[dimension1ndex]][my[activeLeaf1ndex]][track[leafBelow][my[leaf1ndexConnectee]]]
                             if my[leaf1ndexConnectee] != my[activeLeaf1ndex]:
@@ -214,14 +213,14 @@ def doWork(track: NDArray,
 
                 if my[unconstrainedLeaf] == the[dimensionsTotal]:
                     for leaf1ndex in range(my[activeLeaf1ndex]):
-                        potentialGaps[my[gap1ndexLowerBound]] = leaf1ndex
-                        my[gap1ndexLowerBound] += 1
+                        gapsWhere[my[gap1ndexCeiling]] = leaf1ndex
+                        my[gap1ndexCeiling] += 1
 
-                for indexMiniGap in range(my[activeGap1ndex], my[gap1ndexLowerBound]):
-                    potentialGaps[my[activeGap1ndex]] = potentialGaps[indexMiniGap]
-                    if track[countDimensionsGapped][potentialGaps[indexMiniGap]] == the[dimensionsTotal] - my[unconstrainedLeaf]:
+                for indexMiniGap in range(my[activeGap1ndex], my[gap1ndexCeiling]):
+                    gapsWhere[my[activeGap1ndex]] = gapsWhere[indexMiniGap]
+                    if track[countDimensionsGapped][gapsWhere[indexMiniGap]] == the[dimensionsTotal] - my[unconstrainedLeaf]:
                         my[activeGap1ndex] += 1
-                    track[countDimensionsGapped][potentialGaps[indexMiniGap]] = 0
+                    track[countDimensionsGapped][gapsWhere[indexMiniGap]] = 0
 
         while my[activeLeaf1ndex] > 0 and my[activeGap1ndex] == track[gapRangeStart][my[activeLeaf1ndex] - 1]:
             my[activeLeaf1ndex] -= 1
@@ -230,7 +229,7 @@ def doWork(track: NDArray,
 
         if my[activeLeaf1ndex] > 0:
             my[activeGap1ndex] -= 1
-            track[leafAbove][my[activeLeaf1ndex]] = potentialGaps[my[activeGap1ndex]]
+            track[leafAbove][my[activeLeaf1ndex]] = gapsWhere[my[activeGap1ndex]]
             track[leafBelow][my[activeLeaf1ndex]] = track[leafBelow][track[leafAbove][my[activeLeaf1ndex]]]
             track[leafBelow][track[leafAbove][my[activeLeaf1ndex]]] = my[activeLeaf1ndex]
             track[leafAbove][track[leafBelow][my[activeLeaf1ndex]]] = my[activeLeaf1ndex]

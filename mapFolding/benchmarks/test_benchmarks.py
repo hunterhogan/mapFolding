@@ -1,4 +1,3 @@
-from mapFolding.__idiotic_system__ import *
 from ...tests.conftest import *
 from .benchmarking import recordBenchmarks, runBenchmarks
 import numpy

@@ -1,7 +1,7 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding.importPackages import intInnit, defineConcurrencyLimit, oopsieKwargsie
-from mapFolding import indexMy, indexThe, indexTrack, Z0Z_computationState
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from mapFolding import indexMy, indexThe, indexTrack, computationState
+from typing import Any, List, Optional, Sequence, Tuple, Type, Union
 import numpy
 import numba
 import numba.extending
@@ -32,15 +32,8 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 
         return productDimensions
 
-# TODO remove after restructuring
-def getTaskDivisions(computationDivisions: Union[bool, Any]) -> bool:
-    taskDivisions = computationDivisions if isinstance(computationDivisions, bool) else oopsieKwargsie(computationDivisions)
-    if not isinstance(taskDivisions, bool):
-        raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but I need 'True' or 'False'.")
-    return taskDivisions
-
-def Z0Z_getTaskDivisions( CPUlimit, computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, listDimensions, the: numpy.typing.NDArray[numpy.integer[Any]], ):
-    # TODO remove after restructuring
+def getTaskDivisions(CPUlimit, computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, listDimensions, the: numpy.typing.NDArray[numpy.integer[Any]], ):
+    # TODO remove after restructuring the tests
     if isinstance(computationDivisions, bool) and computationDivisions:
         computationDivisions = "maximum"
 
@@ -63,7 +56,7 @@ def Z0Z_getTaskDivisions( CPUlimit, computationDivisions: Optional[Union[int, st
 
     return the
 
-def makeConnectionGraph(listDimensions: Sequence[int], dtype: type = numpy.int64) -> numpy.typing.NDArray[numpy.integer[Any]]:
+def makeConnectionGraph(listDimensions: Sequence[int], dtype: Optional[Type] = numpy.int64) -> numpy.typing.NDArray[numpy.integer[Any]]:
     """
     Constructs a connection graph for a given list of dimensions.
     This function generates a multi-dimensional connection graph based on the provided list of dimensions.
@@ -120,18 +113,17 @@ def makeConnectionGraph(listDimensions: Sequence[int], dtype: type = numpy.int64
 
     return connectionGraph
 
-def Z0Z_outfitFoldings(
+def outfitFoldings(
     listDimensions: Sequence[int],
-    dtypeDefault: type = numpy.int64, # TODO consider allowing a type or a "signal", such as "minimum", "safe", "maximum"
-    dtypeMaximum: type = numpy.int64, # Can/should I use numba types?
-    CPUlimit: Optional[Union[int, float, bool]] = None,
     computationDivisions: Optional[Union[int, str]] = None,
-    ) -> Z0Z_computationState:
+    CPUlimit: Optional[Union[int, float, bool]] = None,
+    dtypeDefault: Optional[Type] = numpy.int64, # TODO consider allowing a type or a "signal", such as "minimum", "safe", "maximum"
+    dtypeLarge: Optional[Type] = numpy.int64, # Can/should I use numba types?
+    ) -> computationState:
     """
-    TODO Create function(s) to validate more things
-        dtype can hold the values; notable statements:
-            `leavesTotal + 1`
-            `leavesTotal * leavesTotal + 1`
+    TODO Create function(s) to validate integer widths
+    gap1ndexCeiling seems to have the largest values
+    track[gapRangeStart] seems to have the second largest values
     """
     the = numpy.zeros(len(indexThe), dtype=dtypeDefault)
 
@@ -140,43 +132,21 @@ def Z0Z_outfitFoldings(
     the[indexThe.dimensionsTotal] = len(mapShape)
     concurrencyLimit = setCPUlimit(CPUlimit)
 
-    the = Z0Z_getTaskDivisions(CPUlimit, computationDivisions, concurrencyLimit, listDimensions, the)
+    the = getTaskDivisions(CPUlimit, computationDivisions, concurrencyLimit, listDimensions, the)
 
-    stateInitialized = Z0Z_computationState(
+    stateInitialized = computationState(
         connectionGraph = makeConnectionGraph(mapShape, dtype=dtypeDefault),
         foldsTotal = numpy.zeros(the[indexThe.leavesTotal], dtype=numpy.int64),
         mapShape = mapShape,
-        my = numpy.zeros(len(indexMy), dtype=dtypeMaximum),
-        potentialGaps = numpy.zeros(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, dtype=dtypeDefault),
+        my = numpy.zeros(len(indexMy), dtype=dtypeLarge),
+        gapsWhere = numpy.zeros(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, dtype=dtypeDefault),
         the = the,
-        track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeMaximum)
+        track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeLarge)
         )
 
     stateInitialized['my'][indexMy.leaf1ndex.value] = 1
 
     return stateInitialized
-
-def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, dtypeMaximum: type = numpy.int64) -> Tuple[List[int], int, numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]]]:
-    """
-    Outfits the folding process with the necessary data structures.
-
-    Parameters:
-        listDimensions: A list of integers representing the dimensions of the map.
-    Returns:
-        sortedValidDimensions,leavesTotal,connectionGraph,arrayTracking,potentialGaps: Tuple containing `sortedValidDimensions`, a sorted list, with at least two elements, of only positive integers;
-            the total number of leaves; the connection graph; an array for state tracking during execution; and an array for tracking potential gaps during execution.
-    """
-    arrayTrackingHeight = len(indexTrack)
-    arrayTrackingLengthMinimum = len(indexMy)
-
-    sortedValidDimensions = sorted(validateListDimensions(listDimensions))
-    leavesTotal = getLeavesTotal(sortedValidDimensions)
-
-    connectionGraph = makeConnectionGraph(sortedValidDimensions, dtype=dtypeDefault)
-    arrayTracking = numpy.zeros((arrayTrackingHeight, max(leavesTotal + 1, arrayTrackingLengthMinimum)), dtype=dtypeDefault)
-    potentialGaps = numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
-
-    return sortedValidDimensions, leavesTotal, connectionGraph, arrayTracking, potentialGaps
 
 def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed parameter') -> List[int]:
     """

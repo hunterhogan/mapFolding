@@ -6,9 +6,6 @@ Other test modules must not import directly from the package being tested."""
 from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, Tuple, Type, Union
 import pathlib
 import pytest
-import numba
-import sys
-import os
 import random
 import unittest.mock
 
@@ -138,7 +135,7 @@ def listDimensionsTest_countFolds(oeisID: str) -> List[int]:
             pass
 
 @pytest.fixture
-def mockBenchmarkTimer():
+def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]:
     """Mock time.perf_counter_ns for consistent benchmark timing."""
     with unittest.mock.patch('time.perf_counter_ns') as mockTimer:
         mockTimer.side_effect = [0, 1e9]  # Start and end times for 1 second
@@ -171,50 +168,6 @@ def pathBenchmarksTesting(tmp_path: pathlib.Path) -> Generator[pathlib.Path, Any
     benchmarking.pathFilenameRecordedBenchmarks = pathTest
     yield pathTest
     benchmarking.pathFilenameRecordedBenchmarks = pathOriginal
-
-@pytest.fixture(autouse=True)
-def configureNumba(request: pytest.FixtureRequest):
-    """Configure Numba JIT based on test markers and coverage mode."""
-
-    # Save original state
-    jit_state = os.environ.get('NUMBA_DISABLE_JIT', None)
-
-    def isRunningWithCoverage() -> bool:
-        """Detect if we're running under coverage analysis."""
-        # pytest-cov sets this
-        if os.environ.get('COV_CORE_CONFIG'):
-            return True
-        # VS Code and other tools might set these
-        if os.environ.get('COVERAGE_FILE'):
-            return True
-        if os.environ.get('COVERAGE_RUN'):
-            return True
-        # Check if coverage module is loaded
-        if 'coverage' in sys.modules:
-            return True
-        # Check if pytest-cov is active
-        if request.config.pluginmanager.has_plugin('pytest_cov'):
-            return True
-        return False
-
-    # Disable JIT if:
-    # 1. Test is marked with needs_jit_disabled
-    # 2. We're running under any coverage tool
-    if (request.node.get_closest_marker('needs_jit_disabled') or
-        isRunningWithCoverage()):
-        os.environ['NUMBA_DISABLE_JIT'] = '1'
-    elif request.node.get_closest_marker('needs_jit'):
-        # Ensure JIT is enabled for tests that need it
-        if 'NUMBA_DISABLE_JIT' in os.environ:
-            del os.environ['NUMBA_DISABLE_JIT']
-
-    yield
-
-    # Restore original state
-    if jit_state is None:
-        os.environ.pop('NUMBA_DISABLE_JIT', None)
-    else:
-        os.environ['NUMBA_DISABLE_JIT'] = jit_state
 
 """
 Section: Standardized test structures"""

@@ -36,14 +36,14 @@ import sys
     (range(3, 7), [3, 4, 5, 6], [3, 4, 5, 6], [3, 4, 5, 6], 360),  # range sequence type
     (tuple([3, 5, 7]), [3, 5, 7], [3, 5, 7], [3, 5, 7], 105),  # tuple sequence type
 ])
-def test_listDimensionsAsParameter(listDimensions, expected_intInnit, expected_parseListDimensions, expected_validateListDimensions, expected_getLeavesTotal):
+def test_listDimensionsAsParameter(listDimensions: None | list[str] | list[int] | list[float] | list[None] | list[bool] | list[list[int]] | list[complex] | range | tuple[int, ...], expected_intInnit: type[ValueError] | list[int] | type[TypeError], expected_parseListDimensions: type[ValueError] | list[int] | type[TypeError], expected_validateListDimensions: type[ValueError] | type[NotImplementedError] | list[int] | type[TypeError], expected_getLeavesTotal: type[ValueError] | int | type[TypeError] | type[OverflowError]) -> None:
     """Test both validateListDimensions and getLeavesTotal with the same inputs."""
     standardComparison(expected_intInnit, intInnit, listDimensions)
     standardComparison(expected_parseListDimensions, parseDimensions, listDimensions)
     standardComparison(expected_validateListDimensions, validateListDimensions, listDimensions)
     standardComparison(expected_getLeavesTotal, getLeavesTotal, listDimensions)
 
-def test_getLeavesTotal_edge_cases():
+def test_getLeavesTotal_edge_cases() -> None:
     """Test edge cases for getLeavesTotal."""
     # Order independence
     standardComparison(getLeavesTotal([2, 3, 4]), getLeavesTotal, [4, 2, 3])
@@ -54,18 +54,18 @@ def test_getLeavesTotal_edge_cases():
     standardComparison([2, 3], lambda x: x, listOriginal)  # Check that the list wasn't modified
 
 # ===== Parse Integers Tests =====
-def test_intInnit():
+def test_intInnit() -> None:
     """Test integer parsing using the test suite generator."""
     for testName, testFunction in makeTestSuiteIntInnit(intInnit).items():
         testFunction()
 
-def test_oopsieKwargsie():
+def test_oopsieKwargsie() -> None:
     """Test handling of unexpected keyword arguments."""
     for testName, testFunction in makeTestSuiteOopsieKwargsie(oopsieKwargsie).items():
         testFunction()
 
-def test_countFolds_invalid_computationDivisions():
+def test_countFolds_invalid_computationDivisions() -> None:
     standardComparison(ValueError, countFolds, [2, 2], {"wrong": "value"})
 
-def test_parseListDimensions_noDimensions():
+def test_parseListDimensions_noDimensions() -> None:
     standardComparison(ValueError, parseDimensions, [])

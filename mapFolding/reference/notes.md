@@ -41,7 +41,7 @@ Assume `listDimensions`:
 | integer  | 8*          | dimensionsTotal         |               | d      | dim    |
 | integer  |             | distance                |               | delta  | delta  |
 | integer  | ~10^17      | foldingsTotal           | f             | G      | mCount |
-| integer  |             | gap1ndexLowerBound      |               | gg     | gg     |
+| integer  |             | gap1ndexCeiling      |               | gg     | gg     |
 | 1D array |             | gapRangeStart           |               | gapter | gapter |
 | integer  | gg-1        | indexMiniGap            |               | j      | j      |
 | integer  | n           | index                   |               | m      | m      |
@@ -52,7 +52,7 @@ Assume `listDimensions`:
 | integer  | 256*        | leavesTotal             |               | n      |        |
 | 1D array | 19 (2x19)   | listDimensions          |               | p      | p      |
 | 1D array | (container) | my                      |               |        |        |
-| 1D array | n-1         | potentialGaps           |               | gap    | gap    |
+| 1D array | n-1         | gapsWhere           |               | gap    | gap    |
 | 1D array | (container) | the                     | static        |        |        |
 | 2D array | (container) | track                   | s             |        |        |
 
@@ -137,3 +137,6 @@ Assume `listDimensions`:
         - or `step = leafBelow[connectee] - leaf`
         - or `step = leafBelow[leaf1ndexConnectee] - leaf1ndexConnectee`
         - or `step = B[m] - l`
+- `countFolds` is the point of the package. Two things should be very stable
+  1. the name of the function and
+  2. the first parameter will accept a `list` of integers representing the dimensions of a map.

@@ -7,7 +7,7 @@ name = "mapFolding"
 description = "Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps)"
 readme = "README.md"
 authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
-version = "0.1.4"
+version = "0.2.0"
 requires-python = ">=3.10,<3.13"
 dependencies = ["numba", "numpy", "Z0Z-tools"]
 urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
@@ -20,7 +20,7 @@ OEIS_for_n = "mapFolding.oeis:OEIS_for_n"
 [project.optional-dependencies]
 benchmark = ["pandas", "jupyter", "ipywidgets", "tqdm"]
 jax = ["jax", "jaxtyping"]
-testing = ["pytest", "pytest-cov", "pytest-env", "pytest-xdist", "coverage"]
+testing = ["pytest", "pytest-cov", "pytest-env", "pytest-xdist"]
 
 [tool.setuptools]
 include-package-data = true
@@ -35,7 +35,6 @@ data_file = "tests/coverage/.coverage"
 omit = ["tests/*", "Z0Z_*"]
 
 [tool.coverage.report]
-exclude_lines = ["if TYPE_CHECKING:", "if __name__ == \"__main__\":", "pass"]
 ignore_errors = false
 
 [tool.coverage.xml]
@@ -44,8 +43,4 @@ output = "tests/coverage/coverage.xml"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--color=yes", "-n 8"]
-markers = [
-    "needs_jit_disabled: marks tests that require Numba JIT to be disabled",
-    "needs_jit: marks tests that specifically test JIT functionality"
-]
 env = ["NUMBA_DISABLE_JIT=1"]

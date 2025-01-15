@@ -63,7 +63,7 @@ def countFolds(listDimensions: List[int]) -> int:
     gapRangeStart = numba.literally(3)
     track = numpy.zeros((4, leavesTotal + 1), dtype=dtypeDefault)
 
-    potentialGaps = numpy.zeros(integerLarge(integerLarge(leavesTotal) * integerLarge(leavesTotal) + 1), dtype=dtypeMaximum)
+    gapsWhere = numpy.zeros(integerLarge(integerLarge(leavesTotal) * integerLarge(leavesTotal) + 1), dtype=dtypeMaximum)
 
     foldsTotal = integerLarge(0)
     activeLeaf1ndex = integerSmall(1)
@@ -76,7 +76,7 @@ def countFolds(listDimensions: List[int]) -> int:
             else:
                 dimensionsUnconstrained = integerSmall(0)
                 """Track possible gaps for activeLeaf1ndex in each section"""
-                gap1ndexLowerBound = track[gapRangeStart, activeLeaf1ndex - 1]
+                gap1ndexCeiling = track[gapRangeStart, activeLeaf1ndex - 1]
 
                 """Count possible gaps for activeLeaf1ndex in each section"""
                 dimension1ndex = integerSmall(1)
@@ -86,9 +86,9 @@ def countFolds(listDimensions: List[int]) -> int:
                     else:
                         leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
                         while leaf1ndexConnectee != activeLeaf1ndex:
-                            potentialGaps[gap1ndexLowerBound] = leaf1ndexConnectee
+                            gapsWhere[gap1ndexCeiling] = leaf1ndexConnectee
                             if track[countDimensionsGapped, leaf1ndexConnectee] == 0:
-                                gap1ndexLowerBound += 1
+                                gap1ndexCeiling += 1
                             track[countDimensionsGapped, leaf1ndexConnectee] += 1
                             leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, track[leafBelow, leaf1ndexConnectee]]
                     dimension1ndex += 1
@@ -97,18 +97,18 @@ def countFolds(listDimensions: List[int]) -> int:
                 if dimensionsUnconstrained == dimensionsTotal:
                     leaf1ndex = integerSmall(0)
                     while leaf1ndex < activeLeaf1ndex:
-                        potentialGaps[gap1ndexLowerBound] = leaf1ndex
-                        gap1ndexLowerBound += 1
+                        gapsWhere[gap1ndexCeiling] = leaf1ndex
+                        gap1ndexCeiling += 1
                         leaf1ndex += 1
 
                 """Filter gaps that are common to all sections"""
                 indexMiniGap = activeGap1ndex
-                while indexMiniGap < gap1ndexLowerBound:
-                    potentialGaps[activeGap1ndex] = potentialGaps[indexMiniGap]
-                    if track[countDimensionsGapped, potentialGaps[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
+                while indexMiniGap < gap1ndexCeiling:
+                    gapsWhere[activeGap1ndex] = gapsWhere[indexMiniGap]
+                    if track[countDimensionsGapped, gapsWhere[indexMiniGap]] == dimensionsTotal - dimensionsUnconstrained:
                         activeGap1ndex += 1
                     """Reset track[countDimensionsGapped] for next iteration"""
-                    track[countDimensionsGapped, potentialGaps[indexMiniGap]] = 0
+                    track[countDimensionsGapped, gapsWhere[indexMiniGap]] = 0
                     indexMiniGap += 1
 
         """Recursive backtracking steps"""
@@ -120,7 +120,7 @@ def countFolds(listDimensions: List[int]) -> int:
         """Place leaf in valid position"""
         if activeLeaf1ndex > 0:
             activeGap1ndex -= 1
-            track[leafAbove, activeLeaf1ndex] = potentialGaps[activeGap1ndex]
+            track[leafAbove, activeLeaf1ndex] = gapsWhere[activeGap1ndex]
             track[leafBelow, activeLeaf1ndex] = track[leafBelow, track[leafAbove, activeLeaf1ndex]]
             track[leafBelow, track[leafAbove, activeLeaf1ndex]] = activeLeaf1ndex
             track[leafAbove, track[leafBelow, activeLeaf1ndex]] = activeLeaf1ndex
