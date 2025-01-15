@@ -1,24 +1,11 @@
-from mapFolding import Z0Z_outfitFoldings, indexMy
-from typing import Final, Optional, Union, Sequence, Tuple
-import numpy
+from mapFolding import Z0Z_outfitFoldings
+from typing import Optional, Union, Sequence
 
 # TODO the current tests expect positional `listDimensions, computationDivisions`, so after restructuring you can arrange the parameters however you want.
-def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUlimit: Optional[Union[int, float, bool]] = None):
+def countFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[int, float, bool]] = None):
 
     # TODO try different dtypes
     stateUniversal = Z0Z_outfitFoldings(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit)
 
-    connectionGraph: Final[numpy.ndarray] = stateUniversal['connectionGraph']
-    foldsTotal = stateUniversal['foldsTotal']
-    mapShape: Final[Tuple] = stateUniversal['mapShape']
-    my = stateUniversal['my']
-    potentialGaps = stateUniversal['potentialGaps']
-    the: Final[numpy.ndarray] = stateUniversal['the']
-    track = stateUniversal['track']
-
-    # TODO remove after restructuring
-    # connectionGraph, foldsTotal, mapShape, my, potentialGaps, the, track = Z0Z_outfitFoldings(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit)
-
-    my[indexMy.leaf1ndex.value] = 1
     from mapFolding.babbage import _countFolds
-    return _countFolds(connectionGraph, foldsTotal, mapShape, my, potentialGaps, the, track)
+    return _countFolds(**stateUniversal)

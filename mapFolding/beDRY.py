@@ -152,6 +152,8 @@ def Z0Z_outfitFoldings(
         track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeDefault)
         )
 
+    stateInitialized['my'][indexMy.leaf1ndex.value] = 1
+
     return stateInitialized
 
 def outfitFoldings(listDimensions: List[int], dtypeDefault: type = numpy.int64, dtypeMaximum: type = numpy.int64) -> Tuple[List[int], int, numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]], numpy.typing.NDArray[numpy.integer[Any]]]:
