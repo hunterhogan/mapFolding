@@ -15,7 +15,7 @@ pathJobDEFAULT = _pathModule / "jobs"
 if 'google.colab' in sys.modules:
     pathJobDEFAULT = pathlib.Path("/content/drive/MyDrive") / "jobs"
 
-@enum.verify(enum.CONTINUOUS, enum.UNIQUE) if sys.version_info >= (3, 11) else None
+@enum.verify(enum.CONTINUOUS, enum.UNIQUE) if sys.version_info >= (3, 11) else lambda x: x
 class EnumIndices(enum.IntEnum):
     """Base class for index enums."""
     @staticmethod
