@@ -1,3 +1,4 @@
+import multiprocessing
 from typing import Callable
 import numpy
 import pathlib
@@ -15,12 +16,14 @@ def recordBenchmarks():
             returnValueTarget = functionTarget(*arguments, **keywordArguments)
             timeElapsed = (time.perf_counter_ns() - timeStart) / 1e9
 
-            # Extract listDimensions from arguments
-            # listDimensions = tuple(arguments[0])
-            leavesTotal = tuple(arguments[3])[4]
+            # Extract mapShape from arguments
+            mapShape = keywordArguments['mapShape']
+            # mapShape = tuple(arguments)[2]
+            # leavesTotal = tuple(arguments[3])[4]
 
             # Store benchmark data in single file
-            benchmarkEntry = numpy.array([(timeElapsed, leavesTotal)], dtype=[('time', 'f8'), ('leaves', 'O')])
+            benchmarkEntry = numpy.array([(timeElapsed, mapShape)], dtype=[('time', 'f8'), ('mapShape', 'O')])
+            # benchmarkEntry = numpy.array([(timeElapsed, leavesTotal)], dtype=[('time', 'f8'), ('leaves', 'O')])
 
             if pathFilenameRecordedBenchmarks.exists():
                 arrayExisting = numpy.load(str(pathFilenameRecordedBenchmarks), allow_pickle=True)
@@ -45,11 +48,19 @@ def runBenchmarks(benchmarkIterations: int = 30) -> None:
     import itertools
     from tqdm.auto import tqdm
     from mapFolding.oeis import settingsOEIS, oeisIDfor_n
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+    max_workers = 6
 
     listParametersOEIS = [(oeisIdentifier, dimensionValue) for oeisIdentifier, settings in settingsOEIS.items() for dimensionValue in settings['valuesBenchmark']]
-    for (oeisIdentifier, dimensionValue), iterationIndex in tqdm(itertools.product(listParametersOEIS, range(benchmarkIterations)), total=len(listParametersOEIS) * benchmarkIterations):
-        oeisIDfor_n(oeisIdentifier, dimensionValue)
+    # for (oeisIdentifier, dimensionValue), iterationIndex in tqdm(itertools.product(listParametersOEIS, range(benchmarkIterations)), total=len(listParametersOEIS) * benchmarkIterations):
+    #     oeisIDfor_n(oeisIdentifier, dimensionValue)
+    listCartesianProduct = list(itertools.product(listParametersOEIS, range(benchmarkIterations)))
+    with ProcessPoolExecutor(max_workers) as concurrencyManager:
+        listConcurrency = [concurrencyManager.submit(oeisIDfor_n, *parameters[0]) for parameters in listCartesianProduct]
+        for complete in tqdm(as_completed(listConcurrency), total=len(listCartesianProduct)):
+            pass
 
 if __name__ == '__main__':
+    multiprocessing.set_start_method('spawn')
     pathFilenameRecordedBenchmarks.unlink(missing_ok=True)
     runBenchmarks(30)

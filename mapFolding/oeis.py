@@ -31,19 +31,22 @@ settingsOEIShardcodedValues = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'getDimensions': lambda n: sorted([2, n]),
-        'valuesBenchmark': [13],
+        # 'valuesBenchmark': [13],
+        'valuesBenchmark': [14],
         'valuesTestValidation': [0, 1, random.randint(2, 9)],
     },
     'A001416': {
         'description': 'Number of ways of folding a 3 X n strip of stamps.',
         'getDimensions': lambda n: sorted([3, n]),
-        'valuesBenchmark': [8],
+        # 'valuesBenchmark': [8],
+        'valuesBenchmark': [9],
         'valuesTestValidation': [0, 1, random.randint(2, 6)],
     },
     'A001417': {
         'description': 'Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.',
         'getDimensions': lambda n: [2] * n,
-        'valuesBenchmark': [5],
+        # 'valuesBenchmark': [5],
+        'valuesBenchmark': [6],
         'valuesTestValidation': [0, 1, random.randint(2, 4)],
     },
     'A195646': {

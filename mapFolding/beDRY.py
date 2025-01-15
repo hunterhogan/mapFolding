@@ -146,10 +146,10 @@ def Z0Z_outfitFoldings(
         connectionGraph = makeConnectionGraph(mapShape, dtype=dtypeDefault),
         foldsTotal = numpy.zeros(the[indexThe.leavesTotal], dtype=numpy.int64),
         mapShape = mapShape,
-        my = numpy.zeros(len(indexMy), dtype=dtypeDefault),
-        potentialGaps = numpy.zeros(the[indexThe.leavesTotal] * the[indexThe.leavesTotal] + 1, dtype=dtypeMaximum),
+        my = numpy.zeros(len(indexMy), dtype=dtypeMaximum),
+        potentialGaps = numpy.zeros(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, dtype=dtypeDefault),
         the = the,
-        track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeDefault)
+        track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeMaximum)
         )
 
     stateInitialized['my'][indexMy.leaf1ndex.value] = 1

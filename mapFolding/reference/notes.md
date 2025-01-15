@@ -52,7 +52,7 @@ Assume `listDimensions`:
 | integer  | 256*        | leavesTotal             |               | n      |        |
 | 1D array | 19 (2x19)   | listDimensions          |               | p      | p      |
 | 1D array | (container) | my                      |               |        |        |
-| 1D array | > 2*n  <?   | potentialGaps           |               | gap    | gap    |
+| 1D array | n-1         | potentialGaps           |               | gap    | gap    |
 | 1D array | (container) | the                     | static        |        |        |
 | 2D array | (container) | track                   | s             |        |        |
 
