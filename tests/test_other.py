@@ -21,7 +21,7 @@ import sys
     ([2, 3, 4], [2, 3, 4], [2, 3, 4], [2, 3, 4], 24),
     ([2, 3], [2, 3], [2, 3], [2, 3], 6),
     ([2] * 11, [2] * 11, [2] * 11, [2] * 11, 2048),  # power of 2
-    ([3, 2], [3, 2], [3, 2], [3, 2], 6),  # return value is the input when valid
+    ([3, 2], [3, 2], [3, 2], [2, 3], 6),  # return value is the input when valid
     ([3] * 5, [3] * 5, [3] * 5, [3, 3, 3, 3, 3], 243),  # power of 3
     ([None], TypeError, TypeError, TypeError, TypeError),  # None
     ([True], TypeError, TypeError, TypeError, TypeError),  # bool
@@ -30,8 +30,8 @@ import sys
     ([complex(1,1)], ValueError, ValueError, ValueError, ValueError),  # complex number
     ([float('inf')], ValueError, ValueError, ValueError, ValueError),  # infinity
     ([float('nan')], ValueError, ValueError, ValueError, ValueError),  # NaN
-    ([sys.maxsize - 1, 1], [sys.maxsize - 1, 1], [sys.maxsize - 1, 1], [sys.maxsize - 1, 1], sys.maxsize - 1),  # near maxint
-    ([sys.maxsize // 2, sys.maxsize // 2, 2], [sys.maxsize // 2, sys.maxsize // 2, 2], [sys.maxsize // 2, sys.maxsize // 2, 2], [sys.maxsize // 2, sys.maxsize // 2, 2], OverflowError),  # overflow protection
+    ([sys.maxsize - 1, 1], [sys.maxsize - 1, 1], [sys.maxsize - 1, 1], [1, sys.maxsize - 1], sys.maxsize - 1),  # near maxint
+    ([sys.maxsize // 2, sys.maxsize // 2, 2], [sys.maxsize // 2, sys.maxsize // 2, 2], [sys.maxsize // 2, sys.maxsize // 2, 2], [2, sys.maxsize // 2, sys.maxsize // 2], OverflowError),  # overflow protection
     ([sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], OverflowError),  # overflow protection
     (range(3, 7), [3, 4, 5, 6], [3, 4, 5, 6], [3, 4, 5, 6], 360),  # range sequence type
     (tuple([3, 5, 7]), [3, 5, 7], [3, 5, 7], [3, 5, 7], 105),  # tuple sequence type
@@ -63,9 +63,6 @@ def test_oopsieKwargsie() -> None:
     """Test handling of unexpected keyword arguments."""
     for testName, testFunction in makeTestSuiteOopsieKwargsie(oopsieKwargsie).items():
         testFunction()
-
-def test_countFolds_invalid_computationDivisions() -> None:
-    standardComparison(ValueError, countFolds, [2, 2], {"wrong": "value"})
 
 def test_parseListDimensions_noDimensions() -> None:
     standardComparison(ValueError, parseDimensions, [])

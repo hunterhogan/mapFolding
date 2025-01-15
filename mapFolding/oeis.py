@@ -148,6 +148,28 @@ def _getOEISidValues(oeisID: str) -> Dict[int, int]:
     return _parseBFileOEIS(OEISbFile, oeisID)
 
 def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
+    """
+    Creates a dictionary mapping OEIS IDs to their corresponding settings.
+
+    This function initializes settings for each implemented OEIS sequence by combining
+    hardcoded values with dynamically retrieved OEIS sequence values.
+
+    Returns:
+        Dict[str, SettingsOEIS]: A dictionary where:
+            - Keys are OEIS sequence IDs (str)
+            - Values are SettingsOEIS objects containing:
+                - description: Text description of the sequence
+                - getDimensions: Function to get dimensions
+                - valuesBenchmark: Benchmark values
+                - valuesKnown: Known values from OEIS
+                - valuesTestValidation: Values for test validation
+                - valueUnknown: First unknown value in sequence
+
+    Note:
+        Relies on global variables:
+        - oeisIDsImplemented: List of implemented OEIS sequence IDs
+        - settingsOEIShardcodedValues: Dictionary of hardcoded settings per sequence
+    """
     settingsTarget = {}
     for oeisID in oeisIDsImplemented:
         valuesKnownSherpa = _getOEISidValues(oeisID)

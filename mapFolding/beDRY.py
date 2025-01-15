@@ -4,19 +4,19 @@ from mapFolding import indexMy, indexThe, indexTrack, computationState
 from typing import Any, List, Optional, Sequence, Type, Union
 import numpy
 import numba
-import numba.extending
-import numpy.typing
+from numpy.typing import NDArray
+from numpy import integer
 import sys
 
 def getLeavesTotal(listDimensions: Sequence[int]) -> int:
     """
-    Calculate the product of non-zero, non-negative integers in the given list.
+    How many leaves are in the map.
 
     Parameters:
         listDimensions: A list of integers representing dimensions.
 
     Returns:
-        productDimensions: The product of all positive integer dimensions. Returns 0 if all dimensions are 0.
+        productDimensions: The product of all positive integer dimensions.
     """
     listNonNegative = parseDimensions(listDimensions, 'listDimensions')
     listPositive = [dimension for dimension in listNonNegative if dimension > 0]
@@ -27,18 +27,46 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
         productDimensions = 1
         for dimension in listPositive:
             if dimension > sys.maxsize // productDimensions:
-                raise OverflowError("Product would exceed maximum integer size")
+                raise OverflowError(f"I received {dimension=} in {listDimensions=}, but the product of the dimensions exceeds the maximum size of an integer on this system.")
             productDimensions *= dimension
 
         return productDimensions
 
-def getTaskDivisions(CPUlimit, computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, listDimensions, the: numpy.typing.NDArray[numpy.integer[Any]], ):
-    # TODO remove after restructuring the tests
-    if isinstance(computationDivisions, bool) and computationDivisions:
-        computationDivisions = "maximum"
+def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, the: NDArray[integer[Any]], CPUlimit: Optional[Union[bool, float, int]], listDimensions: Sequence[int]):
+    """
+    Determines whether or how to divide the computation into tasks.
+
+    Parameters
+    ----------
+    computationDivisions (None):
+        Specifies how to divide computations:
+        - None: no division of the computation into tasks; sets task divisions to 0
+        - int: direct set the number of task divisions; cannot exceed the map's total leaves
+        - "maximum": divides into `leavesTotal`-many `taskDivisions`
+        - "cpu": limits the divisions to the number of available CPUs, i.e. `concurrencyLimit`
+    concurrencyLimit:
+        Maximum number of concurrent tasks allowed
+    the:
+        Array of settings, including `leavesTotal`
+    CPUlimit: for error reporting
+    listDimensions: for error reporting
+
+    Returns
+    -------
+    the
+        Updated settings, including for `taskDivisions`
+
+    Raises
+    ------
+    ValueError
+        If computationDivisions is an unsupported type or if resulting task divisions exceed total leaves
+
+    Notes
+    -----
+    Task divisions cannot exceed total leaves to prevent duplicate counting of folds.
+    """
 
     if not computationDivisions:
-        # Coding it this way should cover `None`, `False`, and `0`.
         the[indexThe.taskDivisions] = 0
     elif isinstance(computationDivisions, int):
         the[indexThe.taskDivisions] = computationDivisions
@@ -56,25 +84,23 @@ def getTaskDivisions(CPUlimit, computationDivisions: Optional[Union[int, str]], 
 
     return the
 
-def makeConnectionGraph(listDimensions: Sequence[int], dtype: Optional[Type] = numpy.int64) -> numpy.typing.NDArray[numpy.integer[Any]]:
+def makeConnectionGraph(listDimensions: Sequence[int], dtype: Optional[Type] = numpy.int64) -> NDArray[integer[Any]]:
     """
-    Constructs a connection graph for a given list of dimensions.
-    This function generates a multi-dimensional connection graph based on the provided list of dimensions.
-    The graph represents the connections between leaves in a Cartesian product decomposition or dimensional product mapping.
+    Constructs a multi-dimensional connection graph representing the connections between the leaves of a map with the given dimensions.
+    Also called a Cartesian product decomposition or dimensional product mapping.
 
     Parameters:
-        listDimensions: A validated sequence of integers representing the dimensions of the map.
+        listDimensions: A sequence of integers representing the dimensions of the map.
     Returns:
         connectionGraph: A 3D numpy array with shape of (dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1).
     """
-    leavesTotal = getLeavesTotal(listDimensions)
-    arrayDimensions = numpy.array(listDimensions, dtype=dtype)
+    mapShape = validateListDimensions(listDimensions)
+    leavesTotal = getLeavesTotal(mapShape)
+    arrayDimensions = numpy.array(mapShape, dtype=dtype)
     dimensionsTotal = len(arrayDimensions)
 
     # Step 1: find the cumulative product of the map's dimensions
-    cumulativeProduct = numpy.ones(dimensionsTotal + 1, dtype=dtype)
-    for index in range(1, dimensionsTotal + 1):
-        cumulativeProduct[index] = cumulativeProduct[index - 1] * arrayDimensions[index - 1]
+    cumulativeProduct = numpy.multiply.accumulate([1] + mapShape, dtype=dtype)
 
     # Step 2: create a coordinate system
     coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=dtype)
@@ -113,13 +139,36 @@ def makeConnectionGraph(listDimensions: Sequence[int], dtype: Optional[Type] = n
 
     return connectionGraph
 
-def outfitFoldings(
-    listDimensions: Sequence[int],
-    computationDivisions: Optional[Union[int, str]] = None,
-    CPUlimit: Optional[Union[int, float, bool]] = None,
-    dtypeDefault: Optional[Type] = numpy.int64, # TODO consider allowing a type or a "signal", such as "minimum", "safe", "maximum"
-    dtypeLarge: Optional[Type] = numpy.int64, # Can/should I use numba types?
-    ) -> computationState:
+def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, dtypeDefault: Optional[Type] = numpy.int64, dtypeLarge: Optional[Type] = numpy.int64, ) -> computationState:
+    """
+    Initializes and configures the computation state for map folding computations.
+
+    Parameters
+    ----------
+    listDimensions:
+        The dimensions of the map to be folded
+    computationDivisions (None):
+        Specifies how to divide the computation tasks
+    CPUlimit (None):
+        Limits the CPU usage for computations
+    dtypeDefault (numpy.int64):
+        The default numpy dtype to use for arrays
+    dtypeLarge (numpy.int64):
+        The numpy dtype to use for larger arrays
+
+    Returns
+    -------
+    computationState
+        An initialized computation state containing:
+        - connectionGraph: Graph representing connections in the map
+        - foldsTotal: Array tracking total folds
+        - mapShape: Validated and sorted dimensions of the map
+        - my: Array for internal state tracking
+        - gapsWhere: Array tracking gap positions
+        - the: Configured task divisions
+        - track: Array for tracking computation progress
+    """
+
     the = numpy.zeros(len(indexThe), dtype=dtypeDefault)
 
     mapShape = tuple(sorted(validateListDimensions(listDimensions)))
@@ -127,15 +176,13 @@ def outfitFoldings(
     the[indexThe.dimensionsTotal] = len(mapShape)
     concurrencyLimit = setCPUlimit(CPUlimit)
 
-    the = getTaskDivisions(CPUlimit, computationDivisions, concurrencyLimit, listDimensions, the)
-
     stateInitialized = computationState(
         connectionGraph = makeConnectionGraph(mapShape, dtype=dtypeDefault),
         foldsTotal = numpy.zeros(the[indexThe.leavesTotal], dtype=numpy.int64),
         mapShape = mapShape,
         my = numpy.zeros(len(indexMy), dtype=dtypeLarge),
         gapsWhere = numpy.zeros(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, dtype=dtypeDefault),
-        the = the,
+        the = getTaskDivisions(computationDivisions, concurrencyLimit, the, CPUlimit, listDimensions),
         track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeLarge)
         )
 
@@ -145,10 +192,10 @@ def outfitFoldings(
 
 def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed parameter') -> List[int]:
     """
-    Parse and validate a list of dimensions.
+    Parse and validate dimensions are non-negative integers.
 
     Parameters:
-        listDimensions: List of integers representing dimensions
+        dimensions: Sequence of integers representing dimensions
         parameterName ('unnamed parameter'): Name of the parameter for error messages. Defaults to 'unnamed parameter'
     Returns:
         listNonNegative: List of validated non-negative integers
@@ -168,43 +215,41 @@ def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed par
 
     return listNonNegative
 
-def setCPUlimit(CPUlimit: Union[int, float, bool, None]):
-    """Sets CPU limit for concurrent operations using Numba.
-    This function configures the number of CPU threads that Numba can use for parallel execution.
-    Note that this setting only affects Numba-jitted functions that have not yet been imported.
+def setCPUlimit(CPUlimit: Union[bool, float, int, None]) -> int:
+    """Sets CPU limit for Numba concurrent operations. Note that it can only affect Numba-jitted functions that have not yet been imported.
+
     Parameters:
-        CPUlimit (Union[int, float, bool, None]): The CPU limit to set.
-            - If int/float: Specifies number of CPU threads to use
-            - If bool: True uses all available CPUs, False uses 1 CPU
-            - If None: Uses system default
+        CPUlimit: whether and how to limit the CPU usage. See notes for details.
     Returns:
         concurrencyLimit: The actual concurrency limit that was set
     Raises:
         TypeError: If CPUlimit is not of the expected types
+
+    Limits on CPU usage `CPUlimit`:
+        - `False`, `None`, or `0`: No limits on CPU usage; uses all available CPUs. All other values will potentially limit CPU usage.
+        - `True`: Yes, limit the CPU usage; limits to 1 CPU.
+        - Integer `>= 1`: Limits usage to the specified number of CPUs.
+        - Decimal value (`float`) between 0 and 1: Fraction of total CPUs to use.
+        - Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
+        - Integer `<= -1`: Subtract the absolute value from total CPUs.
     """
     if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
         CPUlimit = oopsieKwargsie(CPUlimit)
 
     concurrencyLimit = defineConcurrencyLimit(CPUlimit)
-    # NOTE `set_num_threads` only affects "jitted" functions that have _not_ yet been "imported"
     numba.set_num_threads(concurrencyLimit)
 
     return concurrencyLimit
 
 def validateListDimensions(listDimensions: Sequence[int]) -> List[int]:
     """
-    Validates and processes a list of dimensions.
-
-    This function ensures that the input list of dimensions is not None,
-    parses it to ensure all dimensions are non-negative, and then filters
-    out any dimensions that are not greater than zero. If the resulting
-    list has fewer than two dimensions, a NotImplementedError is raised.
+    Validates and sorts a sequence of at least two positive dimensions.
 
     Parameters:
-        listDimensions: A list of integer dimensions to be validated.
+        listDimensions: A sequence of integer dimensions to be validated.
 
     Returns:
-        validDimensions: A list, with at least two elements, of only positive integers.
+        dimensionsValidSorted: A list, with at least two elements, of only positive integers.
 
     Raises:
         ValueError: If the input listDimensions is None.
@@ -213,7 +258,7 @@ def validateListDimensions(listDimensions: Sequence[int]) -> List[int]:
     if not listDimensions:
         raise ValueError(f"listDimensions is a required parameter.")
     listNonNegative = parseDimensions(listDimensions, 'listDimensions')
-    validDimensions = [dimension for dimension in listNonNegative if dimension > 0]
-    if len(validDimensions) < 2:
+    dimensionsValid = [dimension for dimension in listNonNegative if dimension > 0]
+    if len(dimensionsValid) < 2:
         raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
-    return validDimensions
+    return sorted(dimensionsValid)

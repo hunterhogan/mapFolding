@@ -7,11 +7,11 @@ from mapFolding import countFolds
 foldsTotal = countFolds( [2,10] )
 ```
 
-The directory `mapFolding/reference` has
+The directory [mapFolding/reference](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reference) has
 
 - a verbatim transcription of the "procedure" published in _The Computer Journal_,
 - multiple referential versions of the procedure with explanatory comments including
-- `hunterNumba.py` a one-size-fits-all, self-contained, reasonably fast, contemporary algorithm that is nevertheless infected by _noobaceae ignorancium_, and
+- [hunterNumba.py](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reference), a one-size-fits-all, self-contained, reasonably fast, contemporary algorithm that is nevertheless infected by _noobaceae ignorancium_, and
 - miscellaneous notes.
 
 [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml)
@@ -72,13 +72,13 @@ Cache cleared from C:\apps\mapFolding\mapFolding\.cache
 
 ### The typo-laden algorithm published in 1971
 
-The full paper, W. F. Lunnon, Multi-dimensional map-folding, _The Computer Journal_, Volume 14, Issue 1, 1971, Pages 75–80, [https://doi.org/10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75) ([BibTex](mapFolding/citations/Lunnon.bibtex) citation) is available at the DOI link. (As of 3 January 2025, the paper is a PDF of images, not text, and can be accessed without cost or login.)
+The full paper, W. F. Lunnon, Multi-dimensional map-folding, _The Computer Journal_, Volume 14, Issue 1, 1971, Pages 75–80, [https://doi.org/10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75) ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/citations/Lunnon.bibtex) citation) is available at the DOI link. (As of 3 January 2025, the paper is a PDF of images, not text, and can be accessed without cost or login.)
 
-In [`foldings.txt`](mapFolding/reference/foldings.txt), you can find a text transcription of the algorithm as it was printed in 1971. In [`foldings.AA`](mapFolding/reference/foldings.AA), I have corrected obvious transcription errors, documented with comments, and I have reformatted line breaks and indentation. For contemporary readers, the result is likely easier to read than the text transcription or the original paper are easy to read. This is especially true if you view the document with semantic highlighting, such as with [Algol 60 syntax highlighter](https://github.com/PolariTOON/language-algol60).
+In [`foldings.txt`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reference/foldings.txt), you can find a text transcription of the algorithm as it was printed in 1971. In [`foldings.AA`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reference/foldings.AA), I have corrected obvious transcription errors, documented with comments, and I have reformatted line breaks and indentation. For contemporary readers, the result is likely easier to read than the text transcription or the original paper are easy to read. This is especially true if you view the document with semantic highlighting, such as with [Algol 60 syntax highlighter](https://github.com/PolariTOON/language-algol60).
 
 ### Java implementation(s) and improvements
 
-[archmageirvine](https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java) ([BibTex](mapFolding/citations/jOEIS.bibtex) citation) says about the Java code:
+[archmageirvine](https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java) ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/citations/jOEIS.bibtex) citation) says about the Java code:
 
 ```java
 /**
@@ -97,49 +97,12 @@ In [`foldings.txt`](mapFolding/reference/foldings.txt), you can find a text tran
 
 ~~This caused my neurosis:~~ I enjoyed the following video, which is what introduced me to map folding.
 
-"How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](mapFolding/citations/Physics_for_the_Birds.bibtex) citation)
+"How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/citations/Physics_for_the_Birds.bibtex) citation)
 
 [![How Many Ways Can You Fold a Map?](https://i.ytimg.com/vi/sfH9uIY3ln4/hq720.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
 
-## Install this package
-
-### From Github
+## Installation
 
 ```sh
-pip install mapFolding@git+https://github.com/hunterhogan/mapFolding.git
-```
-
-### From a local directory
-
-#### Windows
-
-```powershell
-git clone https://github.com/hunterhogan/mapFolding.git \path\to\mapFolding
-pip install mapFolding@file:\path\to\mapFolding
-```
-
-#### POSIX
-
-```bash
-git clone https://github.com/hunterhogan/mapFolding.git /path/to/mapFolding
-pip install mapFolding@file:/path/to/mapFolding
-```
-
-## Install updates
-
-```sh
-pip install --upgrade mapFolding@git+https://github.com/hunterhogan/mapFolding.git
-```
-
-## Creating a virtual environment before installation
-
-You can isolate `mapFolding` in a virtual environment. For example, use the following commands to create a directory for the virtual environment, activate the virtual environment, and install the package. In the future, you will likely need to activate the virtual environment before using `mapFolding` again. From the command line, in a directory you want to install in.
-
-```sh
-py -m venv mapFolding
-cd mapFolding
-cd Scripts
-activate
-cd ..
-pip install mapFolding@git+https://github.com/hunterhogan/mapFolding.git
+pip install mapFolding
 ```
