@@ -1,7 +1,7 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding.importPackages import intInnit, defineConcurrencyLimit, oopsieKwargsie
 from mapFolding import indexMy, indexThe, indexTrack, computationState
-from typing import Any, List, Optional, Sequence, Tuple, Type, Union
+from typing import Any, List, Optional, Sequence, Type, Union
 import numpy
 import numba
 import numba.extending
@@ -120,11 +120,6 @@ def outfitFoldings(
     dtypeDefault: Optional[Type] = numpy.int64, # TODO consider allowing a type or a "signal", such as "minimum", "safe", "maximum"
     dtypeLarge: Optional[Type] = numpy.int64, # Can/should I use numba types?
     ) -> computationState:
-    """
-    TODO Create function(s) to validate integer widths
-    gap1ndexCeiling seems to have the largest values
-    track[gapRangeStart] seems to have the second largest values
-    """
     the = numpy.zeros(len(indexThe), dtype=dtypeDefault)
 
     mapShape = tuple(sorted(validateListDimensions(listDimensions)))

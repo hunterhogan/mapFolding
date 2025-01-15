@@ -9,7 +9,8 @@ import numpy
 def ifComputationDivisions(my: NDArray[integer[Any]], the: NDArray[integer[Any]]):
     if the[indexThe.taskDivisions.value] == 0:
         return True
-    return my[indexMy.leaf1ndex.value] != the[indexThe.taskDivisions.value] or numpy.equal(numpy.mod(my[indexMy.leafConnectee.value], the[indexThe.taskDivisions.value]), my[indexMy.taskIndex.value])
+    return my[indexMy.leaf1ndex.value] != the[indexThe.taskDivisions.value] or \
+            (my[indexMy.leafConnectee.value] % the[indexThe.taskDivisions.value]) == my[indexMy.taskIndex.value]
 
 @numba.jit(parallel=False, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
 def insertUnconstrainedLeaf(my: NDArray[integer[Any]], the: NDArray[integer[Any]], Z0Z_initializeUnconstrainedLeaf: Optional[bool]):

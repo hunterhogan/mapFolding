@@ -35,6 +35,7 @@ def countFolds(
 
     from mapFolding.babbage import _countFolds
     foldsTotal = _countFolds(**stateUniversal)
+    # foldsTotal = benchmarkSherpa(**stateUniversal)
 
     if pathFilenameFoldsTotal is not None:
         try:
@@ -46,8 +47,6 @@ def countFolds(
             print("\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal")
 
     return foldsTotal
-
-#     return benchmarkSherpa(**stateUniversal)
 
 # @recordBenchmarks()
 # def benchmarkSherpa(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
