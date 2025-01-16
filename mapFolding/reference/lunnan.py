@@ -9,11 +9,11 @@ def foldings(p, job=None):
     p.insert(0, None)  # NOTE mimics Atlas `array` type
 
     if job is None:
-        global f
-        f = 0
+        global G
+        G = 0
         def job(A, B):
-            global f
-            f = f + 1
+            global G
+            G = G + 1
         return foldings(p, job)
     # perform job (A, B) on each folding of a p[1] x ... x p[d] map,
     # where A and B are the above and below vectors. p[d + 1] < 0 terminates p;
@@ -150,4 +150,4 @@ def foldings(p, job=None):
             else:
                 break
 
-    return f #if job.__closure__ else None
+    return G #if job.__closure__ else None

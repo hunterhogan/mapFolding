@@ -13,7 +13,7 @@ def foldings(p: List[int]) -> int:
         p: A list of integers representing the dimensions of the map.
 
     Returns:
-        f: The number of distinct foldings for the given map dimensions.
+        G: The number of distinct foldings for the given map dimensions.
 
     NOTE If there are fewer than two dimensions, any dimensions are not positive, or any dimensions are not integers, the output will be unreliable.
     """
@@ -65,14 +65,14 @@ def foldings(p: List[int]) -> int:
     # P[i] = p[1] x ... x p[i], C[i][m] = i-th co-ordinate of leaf m,
     # D[i][l][m] = leaf connected to m in section i when inserting l;
 
-    f: int = 0
+    G: int = 0
     l: int = 1
 
     # kick off with null folding
     while l > 0:
         if l <= 1 or B[0] == 1: # NOTE This statement is part of a significant divergence from the 1971 paper. As a result, this version is greater than one order of magnitude faster.
             if l > n:
-                f = f + n # NOTE Due to `B[0] == 1`, this implementation increments the counted foldings in batches of `n`-many foldings, rather than immediately incrementing when a folding is found, i.e. `f = f + 1`
+                G = G + n # NOTE Due to `B[0] == 1`, this implementation increments the counted foldings in batches of `n`-many foldings, rather than immediately incrementing when a folding is found, i.e. `G = G + 1`
             else:
                 dd: int = 0
                 gg: int = gapter[l - 1]
@@ -120,4 +120,4 @@ def foldings(p: List[int]) -> int:
             A[B[l]] = l
             gapter[l] = g
             l = l + 1
-    return f
+    return G

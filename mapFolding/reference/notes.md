@@ -28,8 +28,6 @@ Assume `listDimensions`:
 
 | Type     | max(x)      | Hunter Hogan            | alternative   | Lunnan | Irvine |
 | -------- | ----------- | ----------------------- | ------------- | ------ | ------ |
-| integer  |             | activeGap1ndex          |               | g      | g      |
-| integer  | n+1         | activeLeaf1ndex         |               | l      | l      |
 | 3D array | n           | connectionGraph         |               | D      | d      |
 | integer  | n           | computationalDivisions  | taskDivisions |        | mod    |
 | integer  | n-1         | computationalIndex      | taskIndex     |        | res    |
@@ -41,18 +39,20 @@ Assume `listDimensions`:
 | integer  | 8*          | dimensionsTotal         |               | d      | dim    |
 | integer  |             | distance                |               | delta  | delta  |
 | integer  | ~10^17      | foldingsTotal           | f             | G      | mCount |
-| integer  |             | gap1ndexCeiling      |               | gg     | gg     |
+| integer  |             | gap1ndex                |               | g      | g      |
+| integer  |             | gap1ndexCeiling         |               | gg     | gg     |
 | 1D array |             | gapRangeStart           |               | gapter | gapter |
+| 1D array | n-1         | gapsWhere               |               | gap    | gap    |
 | integer  | gg-1        | indexMiniGap            |               | j      | j      |
-| integer  | n           | index                   |               | m      | m      |
+| integer  | n           | indexLeaf               |               | m      | m      |
+| integer  | n+1         | leaf1ndex               |               | l      | l      |
 | 1D array | n+1         | leafAbove               |               | A      | a      |
 | 1D array | n+1         | leafBelow               |               | B      | b      |
-| integer  | n           | leaf1ndex               |               | m      | m      |
-| integer  | n           | leaf1ndexConnectee      |               | m      | m      |
+| integer  | n           | leafConnectee           |               | m      | m      |
+| integer  | n           | leafIndex               |               | m      | m      |
 | integer  | 256*        | leavesTotal             |               | n      |        |
 | 1D array | 19 (2x19)   | listDimensions          |               | p      | p      |
 | 1D array | (container) | my                      |               |        |        |
-| 1D array | n-1         | gapsWhere           |               | gap    | gap    |
 | 1D array | (container) | the                     | static        |        |        |
 | 2D array | (container) | track                   | s             |        |        |
 
@@ -86,8 +86,8 @@ Assume `listDimensions`:
 ## Miscellany
 
 - All taskIndices can start from the states:
-  - `activeGap1ndex > 0`
-  - `not activeLeaf1ndex != leavesTotal and leaf1ndexConnectee % leavesTotal == leavesTotal - 1`
+  - `gap1ndex > 0`
+  - `not leaf1ndex != leavesTotal and leafConnectee % leavesTotal == leavesTotal - 1`
 - 2 X n strip of stamps: "a(n), called G(n,2), is known to be divisible by 4n for n >= 2. - [Fred Lunnon](https://oeis.org/A001415), Dec 08 2013"
 - The total number of folds is divisible by the total number of leaves.
 - `for iteratee in incrementalRange`statements:
@@ -100,7 +100,7 @@ Assume `listDimensions`:
       2. do pytastic pyStuffPy
       3. `iteratee = iteratee + step`
   - Hence, `while` has replaced `for`
-  - Interestingly, the most deeply nested `while` loop, "while the connection-leaf is not equal to the active-leaf" (or `while m != l` or `while leaf1ndexConnectee != activeLeaf1ndex`), is actually a fancy `for` loop.
+  - Interestingly, the most deeply nested `while` loop, "while the connection-leaf is not equal to the active-leaf" (or `while m != l` or `while leafConnectee != leaf1ndex`), is actually a fancy `for` loop.
     - In the [original programming language](foldings.AA), the relationship was explicit:
       - for m := D[i,l,l], D[i,l,B[m]]
         - while m ≠ l do
@@ -117,11 +117,11 @@ Assume `listDimensions`:
     - With my identifiers:
 
     ```python
-    # Initialize iteratee `leaf1ndexConnectee`
-    leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, activeLeaf1ndex]
-    while leaf1ndexConnectee != activeLeaf1ndex:
+    # Initialize iteratee `leafConnectee`
+    leafConnectee = connectionGraph[dimension1ndex, leaf1ndex, leaf1ndex]
+    while leafConnectee != leaf1ndex:
         # do pytastic pyStuffPy
-        leaf1ndexConnectee = connectionGraph[dimension1ndex, activeLeaf1ndex, leafBelow[leaf1ndexConnectee]]
+        leafConnectee = connectionGraph[dimension1ndex, leaf1ndex, leafBelow[leafConnectee]]
     ```
 
     - The `+ step` part, however, is well disguised, but compare the iteratee-initialization statement with the statement that changes the value of the iteratee:
@@ -135,7 +135,7 @@ Assume `listDimensions`:
       - `- value[first, included, included]`
         - so `step = different - included`
         - or `step = leafBelow[connectee] - leaf`
-        - or `step = leafBelow[leaf1ndexConnectee] - leaf1ndexConnectee`
+        - or `step = leafBelow[leafConnectee] - leafConnectee`
         - or `step = B[m] - l`
 - `countFolds` is the point of the package. Two things should be very stable
   1. the name of the function and

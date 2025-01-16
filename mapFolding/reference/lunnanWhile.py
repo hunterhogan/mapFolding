@@ -12,7 +12,7 @@ def foldings(p: Sequence[int]) -> int:
         p: An array of integers representing the dimensions of the map.
 
     Returns:
-        f: The number of distinct foldings for the given map dimensions.
+        G: The number of distinct foldings for the given map dimensions.
 
     NOTE If there are fewer than two dimensions, any dimensions are not positive, or any dimensions are not integers, the output will be unreliable.
     """
@@ -29,7 +29,7 @@ def foldings(p: Sequence[int]) -> int:
     B = [0] * (n + 1)
     count = [0] * (n + 1)
     gapter = [0] * (n + 1)
-    gap = [0] * (n * n + 1)    
+    gap = [0] * (n * n + 1)
 
     # B[m] is the leaf below leaf m in the current folding,
     # A[m] the leaf above. count[m] is the no. of sections in which
@@ -64,13 +64,13 @@ def foldings(p: Sequence[int]) -> int:
     # P[i] = p[1] x ... x p[i], C[i][m] = i-th co-ordinate of leaf m,
     # D[i][l][m] = leaf connected to m in section i when inserting l;
 
-    f: int = 0
+    G: int = 0
     l: int = 1
 
     # kick off with null folding
     while l > 0:
         if l > n:
-            f = f + 1
+            G = G + 1
         else:
             dd: int = 0
             gg: int = gapter[l - 1]
@@ -118,4 +118,4 @@ def foldings(p: Sequence[int]) -> int:
             A[B[l]] = l
             gapter[l] = g
             l = l + 1
-    return f
+    return G
