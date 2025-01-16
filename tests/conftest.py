@@ -3,31 +3,33 @@ Other test modules must not import directly from the package being tested."""
 
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
-from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, Set, Tuple, Type, Union
 import pathlib
 import pytest
 import random
+import shutil
 import unittest.mock
-
-from mapFolding import clearOEIScache
-from mapFolding import countFolds, pathJobDEFAULT
+import uuid
+from Z0Z_tools.pytest_parseParameters import makeTestSuiteConcurrencyLimit
+from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
+from Z0Z_tools.pytest_parseParameters import makeTestSuiteOopsieKwargsie
+from mapFolding import countFolds, pathJobDEFAULT, indexMy, indexThe, indexTrack
+from mapFolding import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from mapFolding import getLeavesTotal, parseDimensions, validateListDimensions
-from mapFolding.importPackages import makeTestSuiteConcurrencyLimit, defineConcurrencyLimit
-from mapFolding.importPackages import makeTestSuiteIntInnit, intInnit
-from mapFolding.importPackages import makeTestSuiteOopsieKwargsie, oopsieKwargsie
+from mapFolding import getTaskDivisions, makeConnectionGraph, outfitFoldings, setCPUlimit
+from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache
+from mapFolding.beDRY import makeDataContainer
 from mapFolding.oeis import OEIS_for_n
-from mapFolding.oeis import _formatFilenameCache
+from mapFolding.oeis import _getFilenameOEISbFile
 from mapFolding.oeis import _getOEISidValues
 from mapFolding.oeis import _parseBFileOEIS
 from mapFolding.oeis import _validateOEISid
-from mapFolding.oeis import getOEISids
-from mapFolding.oeis import oeisIDfor_n
 from mapFolding.oeis import oeisIDsImplemented
 from mapFolding.oeis import settingsOEIS
 
 __all__ = [
     'OEIS_for_n',
-    '_formatFilenameCache',
+    '_getFilenameOEISbFile',
     '_getOEISidValues',
     '_parseBFileOEIS',
     '_validateOEISid',
@@ -37,14 +39,20 @@ __all__ = [
     'expectSystemExit',
     'getLeavesTotal',
     'getOEISids',
+    'indexThe',
+    'getTaskDivisions',
     'intInnit',
+    'makeConnectionGraph',
+    'makeDataContainer',
     'makeTestSuiteConcurrencyLimit',
     'makeTestSuiteIntInnit',
     'makeTestSuiteOopsieKwargsie',
     'oeisIDfor_n',
     'oeisIDsImplemented',
     'oopsieKwargsie',
+    'outfitFoldings',
     'parseDimensions',
+    'setCPUlimit',
     'settingsOEIS',
     'standardCacheTest',
     'standardComparison',
@@ -90,6 +98,75 @@ def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
                     # The sunk-costs fallacy claims another victim!
 
     return dictionaryMapDimensionsToFoldsTotalKnown
+
+"""
+Section: temporary paths and pathFilenames"""
+
+# SSOT for test data paths
+pathDataSamples = pathlib.Path("tests/dataSamples")
+pathTempRoot = pathDataSamples / "tmp"
+
+# The registrar maintains the register of temp files
+registerOfTempFiles: Set[pathlib.Path] = set()
+
+def addTempFileToRegister(path: pathlib.Path) -> None:
+    """The registrar adds a temp file to the register."""
+    registerOfTempFiles.add(path)
+
+def cleanupTempFileRegister() -> None:
+    """The registrar cleans up temp files in the register."""
+    for pathTemp in sorted(registerOfTempFiles, reverse=True):
+        try:
+            if pathTemp.is_file():
+                pathTemp.unlink(missing_ok=True)
+            elif pathTemp.is_dir():
+                shutil.rmtree(pathTemp, ignore_errors=True)
+        except Exception as ERRORmessage:
+            print(f"Warning: Failed to clean up {pathTemp}: {ERRORmessage}")
+    registerOfTempFiles.clear()
+
+@pytest.fixture(scope="session", autouse=True)
+def setupTeardownTestData() -> Generator[None, None, None]:
+    """Auto-fixture to setup test data directories and cleanup after."""
+    pathDataSamples.mkdir(exist_ok=True)
+    pathTempRoot.mkdir(exist_ok=True)
+    yield
+    cleanupTempFileRegister()
+
+@pytest.fixture
+def pathTempTesting(request: pytest.FixtureRequest) -> pathlib.Path:
+    """Create a unique temp directory for each test function."""
+    # Sanitize test name for filesystem compatibility
+    sanitizedName = request.node.name.replace('[', '_').replace(']', '_').replace('/', '_')
+    uniqueDirectory = f"{sanitizedName}_{uuid.uuid4()}"
+    pathTemp = pathTempRoot / uniqueDirectory
+    pathTemp.mkdir(parents=True, exist_ok=True)
+
+    addTempFileToRegister(pathTemp)
+    return pathTemp
+
+@pytest.fixture
+def pathCacheTesting(pathTempTesting: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
+    """Temporarily replace the OEIS cache directory with a test directory."""
+    from mapFolding import oeis as there_must_be_a_better_way
+    pathCacheOriginal = there_must_be_a_better_way._pathCache
+    there_must_be_a_better_way._pathCache = pathTempTesting
+    yield pathTempTesting
+    there_must_be_a_better_way._pathCache = pathCacheOriginal
+
+@pytest.fixture
+def pathFilenameBenchmarksTesting(pathTempTesting: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
+    """Temporarily replace the benchmarks directory with a test directory."""
+    from mapFolding.benchmarks import benchmarking
+    pathFilenameOriginal = benchmarking.pathFilenameRecordedBenchmarks
+    pathFilenameTest = pathTempTesting / "benchmarks.npy"
+    benchmarking.pathFilenameRecordedBenchmarks = pathFilenameTest
+    yield pathFilenameTest
+    benchmarking.pathFilenameRecordedBenchmarks = pathFilenameOriginal
+
+@pytest.fixture
+def pathFilenameFoldsTotalTesting(pathTempTesting: pathlib.Path) -> pathlib.Path:
+    return pathTempTesting.joinpath("foldsTotalTest.txt")
 
 """
 Section: Fixtures"""
@@ -150,27 +227,14 @@ def oeisID_1random() -> str:
     """Return one random valid OEIS ID."""
     return random.choice(oeisIDsImplemented)
 
-@pytest.fixture
-def pathCacheTesting(tmp_path: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
-    """Temporarily replace the OEIS cache directory with a test directory."""
-    from mapFolding import oeis as there_must_be_a_better_way
-    pathCacheOriginal = there_must_be_a_better_way._pathCache
-    there_must_be_a_better_way._pathCache = tmp_path
-    yield tmp_path
-    there_must_be_a_better_way._pathCache = pathCacheOriginal
-
-@pytest.fixture
-def pathBenchmarksTesting(tmp_path: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
-    """Temporarily replace the benchmarks directory with a test directory."""
-    from mapFolding.benchmarks import benchmarking
-    pathOriginal = benchmarking.pathFilenameRecordedBenchmarks
-    pathTest = tmp_path / "benchmarks.npy"
-    benchmarking.pathFilenameRecordedBenchmarks = pathTest
-    yield pathTest
-    benchmarking.pathFilenameRecordedBenchmarks = pathOriginal
-
 """
 Section: Standardized test structures"""
+
+def formatTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
+    """Format assertion message for any test comparison."""
+    return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"
+            f"Expected: {expected}\n"
+            f"Got: {actual}")
 
 def standardComparison(expected: Any, functionTarget: Callable, *arguments: Any) -> None:
     """Template for tests expecting an error."""
@@ -217,12 +281,6 @@ def expectSystemExit(expected: Union[str, int, Sequence[int]], functionTarget: C
         assert exitCode == expected, \
             f"Expected exit code {expected} but got {exitCode}"
 
-def formatTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
-    """Format assertion message for any test comparison."""
-    return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"
-            f"Expected: {expected}\n"
-            f"Got: {actual}")
-
 def standardCacheTest(
     expected: Any,
     setupCacheFile: Optional[Callable[[pathlib.Path, str], None]],
@@ -237,7 +295,7 @@ def standardCacheTest(
         oeisID: OEIS ID to test
         pathCache: Temporary cache directory path
     """
-    pathFilenameCache = pathCache / _formatFilenameCache.format(oeisID=oeisID)
+    pathFilenameCache = pathCache / _getFilenameOEISbFile(oeisID)
 
     # Setup cache file if provided
     if setupCacheFile:

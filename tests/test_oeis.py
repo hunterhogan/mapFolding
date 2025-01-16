@@ -1,6 +1,7 @@
-from .conftest import *
+from tests.conftest import *
 from contextlib import redirect_stdout
 from datetime import datetime, timedelta
+from typing import Optional, Tuple, Union
 import io
 import os
 import pathlib
@@ -62,29 +63,27 @@ def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unitt
         mock_exists.assert_called_once()
         mock_unlink.assert_not_called()
 
-def testCacheMiss(pathCacheTesting: pathlib.Path, oeisID_1random: str):
-    """Test cache miss scenario - cache file doesn't exist."""
-    # No setup function needed - we want to test missing cache
-    standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], None, oeisID_1random, pathCacheTesting)
+@pytest.mark.parametrize("scenarioCache", ["miss", "expired", "invalid"])
+def testCacheScenarios(pathCacheTesting: pathlib.Path, oeisID_1random: str, scenarioCache: str) -> None:
+    """Test cache scenarios: missing file, expired file, and invalid file."""
 
-def testCacheExpired(pathCacheTesting: pathlib.Path, oeisID_1random: str):
-    """Test expired cache scenario."""
-    def setupExpiredCache(pathCache: pathlib.Path, oeisID: str) -> None:
+    def setupCacheExpired(pathCache: pathlib.Path, oeisID: str) -> None:
         pathCache.write_text("# Old cache content")
         oldModificationTime = datetime.now() - timedelta(days=30)
         os.utime(pathCache, times=(oldModificationTime.timestamp(), oldModificationTime.timestamp()))
 
-    standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupExpiredCache, oeisID_1random, pathCacheTesting)
-
-def testInvalidCache(pathCacheTesting: pathlib.Path, oeisID_1random: str):
-    """Test invalid cache content scenario."""
-    def setupInvalidCache(pathCache: pathlib.Path, oeisID: str) -> None:
+    def setupCacheInvalid(pathCache: pathlib.Path, oeisID: str) -> None:
         pathCache.write_text("Invalid content")
 
-    standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupInvalidCache, oeisID_1random, pathCacheTesting)
+    if scenarioCache == "miss":
+        standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], None, oeisID_1random, pathCacheTesting)
+    elif scenarioCache == "expired":
+        standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupCacheExpired, oeisID_1random, pathCacheTesting)
+    else:
+        standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupCacheInvalid, oeisID_1random, pathCacheTesting)
 
 def testInvalidFileContent(pathCacheTesting: pathlib.Path, oeisID_1random: str):
-    pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisID_1random)
+    pathFilenameCache = pathCacheTesting / _getFilenameOEISbFile(oeisID=oeisID_1random)
 
     # Write invalid content to cache
     pathFilenameCache.write_text("# A999999\n1 1\n2 2\n")
@@ -100,25 +99,17 @@ def testInvalidFileContent(pathCacheTesting: pathlib.Path, oeisID_1random: str):
     # Verify cache now contains correct sequence ID
     assert f"# {oeisID_1random}" in pathFilenameCache.read_text()
 
-def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: pathlib.Path):
-    def mockUrlopen(*args, **kwargs):
-        raise urllib.error.URLError("Network error")
-
-    monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
-    with pytest.raises(urllib.error.URLError):
-        _getOEISidValues(next(iter(settingsOEIS)))
-
 def testParseContentErrors():
     """Test invalid content parsing."""
     standardComparison(ValueError, _parseBFileOEIS, "Invalid content\n1 2\n", 'A001415')
 
 def testExtraComments(pathCacheTesting: pathlib.Path, oeisID_1random: str):
-    pathFilenameCache = pathCacheTesting / _formatFilenameCache.format(oeisID=oeisID_1random)
+    pathFilenameCache = pathCacheTesting / _getFilenameOEISbFile(oeisID=oeisID_1random)
 
     # Write content with extra comment lines
     contentWithExtraComments = f"""# {oeisID_1random}
-# Extra comment line 1
-# Extra comment line 2
+# Normal place for comment line 1
+# Abnormal comment line
 1 2
 2 4
 3 6
@@ -132,6 +123,14 @@ def testExtraComments(pathCacheTesting: pathlib.Path, oeisID_1random: str):
     standardComparison(2, lambda d: d[1], OEISsequence)  # First value
     standardComparison(8, lambda d: d[4], OEISsequence)  # Value after mid-sequence comment
     standardComparison(10, lambda d: d[5], OEISsequence)  # Last value
+
+def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: pathlib.Path):
+    """Test network error handling."""
+    def mockUrlopen(*args, **kwargs):
+        raise urllib.error.URLError("Network error")
+
+    monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
+    standardComparison(urllib.error.URLError, _getOEISidValues, next(iter(settingsOEIS)))
 
 # ===== Command Line Interface Tests =====
 def testHelpText():

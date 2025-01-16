@@ -13,7 +13,7 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
         computationDivisions (None):
             Whether and how to divide the computational work. See notes for details.
         CPUlimit (None): This is only relevant if there are `computationDivisions`: whether and how to limit the CPU usage. See notes for details.
-        **keywordArguments: Additional arguments including dtypeDefault and dtypeLarge for data type specifications.
+        **keywordArguments: Additional arguments including `dtypeDefault` and `dtypeLarge` for data type specifications.
     Returns:
         foldsTotal: Total number of distinct ways to fold a map of the given dimensions.
 
@@ -54,9 +54,7 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
             pathFilenameFoldsTotal.write_text(str(foldsTotal))
         except Exception as ERRORmessage:
             print(ERRORmessage)
-            print("\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal")
-            print(f"{foldsTotal=}")
-            print("\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal")
+            print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal")
 
     return foldsTotal
 

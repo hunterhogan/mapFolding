@@ -65,6 +65,40 @@ settingsOEIShardcodedValues = {
 oeisIDsImplemented: Final[List[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues.keys()])
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
+def _validateOEISid(oeisIDcandidate: str):
+    """
+    Validates an OEIS sequence ID against implemented sequences.
+
+    If the provided ID is recognized within the application's implemented
+    OEIS sequences, the function returns the verified ID in uppercase.
+    Otherwise, a KeyError is raised indicating that the sequence is not
+    directly supported.
+
+    Parameters:
+        oeisIDcandidate: The OEIS sequence identifier to validate.
+
+    Returns:
+        oeisID: The validated and possibly modified OEIS sequence ID, if recognized.
+
+    Raises:
+        KeyError: If the provided sequence ID is not directly implemented.
+    """
+    if oeisIDcandidate in oeisIDsImplemented:
+        return oeisIDcandidate
+    else:
+        oeisIDcleaned = str(oeisIDcandidate).upper().strip()
+        if oeisIDcleaned in oeisIDsImplemented:
+            return oeisIDcleaned
+        else:
+            raise KeyError(
+                f"OEIS ID {oeisIDcandidate} is not directly implemented.\n"
+                f"Available sequences:\n{_formatOEISsequenceInfo()}"
+            )
+
+def _getFilenameOEISbFile(oeisID: str) -> str:
+    oeisID = _validateOEISid(oeisID)
+    return f"b{oeisID[1:]}.txt"
+
 def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> Dict[int, int]:
     """
     Parses the content of an OEIS b-file for a given sequence ID.
@@ -101,8 +135,6 @@ try:
 except NameError:
     _pathCache = pathlib.Path.home() / ".mapFoldingCache"
 
-_formatFilenameCache = "{oeisID}.txt"
-
 def _getOEISidValues(oeisID: str) -> Dict[int, int]:
     """
     Retrieves the specified OEIS sequence as a dictionary mapping integer indices
@@ -122,7 +154,7 @@ def _getOEISidValues(oeisID: str) -> Dict[int, int]:
         IOError: If there is an error reading from or writing to the local cache.
     """
 
-    pathFilenameCache = _pathCache / _formatFilenameCache.format(oeisID=oeisID)
+    pathFilenameCache = _pathCache / _getFilenameOEISbFile(oeisID)
     cacheDays = 7
 
     tryCache = False
@@ -137,7 +169,7 @@ def _getOEISidValues(oeisID: str) -> Dict[int, int]:
         except (ValueError, IOError):
             tryCache = False
 
-    urlOEISbFile = f"https://oeis.org/{oeisID}/b{oeisID[1:]}.txt"
+    urlOEISbFile = f"https://oeis.org/{oeisID}/{_getFilenameOEISbFile(oeisID)}"
     httpResponse: urllib.response.addinfourl = urllib.request.urlopen(urlOEISbFile)
     OEISbFile = httpResponse.read().decode('utf-8')
 
@@ -212,36 +244,6 @@ def _formatOEISsequenceInfo() -> str:
         for oeisID in oeisIDsImplemented
     )
 
-def _validateOEISid(oeisIDcandidate: str):
-    """
-    Validates an OEIS sequence ID against implemented sequences.
-
-    If the provided ID is recognized within the application's implemented
-    OEIS sequences, the function returns the verified ID in uppercase.
-    Otherwise, a KeyError is raised indicating that the sequence is not
-    directly supported.
-
-    Parameters:
-        oeisIDcandidate: The OEIS sequence identifier to validate.
-
-    Returns:
-        oeisID: The validated and possibly modified OEIS sequence ID, if recognized.
-
-    Raises:
-        KeyError: If the provided sequence ID is not directly implemented.
-    """
-    if oeisIDcandidate in oeisIDsImplemented:
-        return oeisIDcandidate
-    else:
-        oeisIDcleaned = str(oeisIDcandidate).upper().strip()
-        if oeisIDcleaned in oeisIDsImplemented:
-            return oeisIDcleaned
-        else:
-            raise KeyError(
-                f"OEIS ID {oeisIDcandidate} is not directly implemented.\n"
-                f"Available sequences:\n{_formatOEISsequenceInfo()}"
-            )
-
 """
 Section: public functions"""
 
@@ -308,7 +310,7 @@ def clearOEIScache() -> None:
         return
     else:
         for oeisID in settingsOEIS:
-            pathFilenameCache = _pathCache / _formatFilenameCache.format(oeisID=oeisID)
+            pathFilenameCache = _pathCache / _getFilenameOEISbFile(oeisID)
             pathFilenameCache.unlink(missing_ok=True)
 
     print(f"Cache cleared from {_pathCache}")

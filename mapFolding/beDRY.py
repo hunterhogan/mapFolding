@@ -1,12 +1,14 @@
 """A relatively stable API for oft-needed functionality."""
-from mapFolding.importPackages import intInnit, defineConcurrencyLimit, oopsieKwargsie
+from mapFolding import intInnit, defineConcurrencyLimit, oopsieKwargsie
 from mapFolding import indexMy, indexThe, indexTrack, computationState
+from mapFolding import dtypeDefault, dtypeLarge, dtypeSmall
 from typing import Any, List, Optional, Sequence, Type, Union
 import numpy
 import numba
 from numpy.typing import NDArray
 from numpy import integer
 import sys
+import operator
 
 def getLeavesTotal(listDimensions: Sequence[int]) -> int:
     """
@@ -32,7 +34,7 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 
         return productDimensions
 
-def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, the: NDArray[integer[Any]], CPUlimit: Optional[Union[bool, float, int]], listDimensions: Sequence[int]):
+def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, CPUlimit: Optional[Union[bool, float, int]], listDimensions: Sequence[int]):
     """
     Determines whether or how to divide the computation into tasks.
 
@@ -46,15 +48,12 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
         - "cpu": limits the divisions to the number of available CPUs, i.e. `concurrencyLimit`
     concurrencyLimit:
         Maximum number of concurrent tasks allowed
-    the:
-        Array of settings, including `leavesTotal`
-    CPUlimit: for error reporting
     listDimensions: for error reporting
+    CPUlimit: for error reporting
 
     Returns
     -------
-    the
-        Updated settings, including for `taskDivisions`
+    taskDivisions:
 
     Raises
     ------
@@ -65,26 +64,27 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
     -----
     Task divisions cannot exceed total leaves to prevent duplicate counting of folds.
     """
-
     if not computationDivisions:
-        the[indexThe.taskDivisions] = 0
-    elif isinstance(computationDivisions, int):
-        the[indexThe.taskDivisions] = computationDivisions
+        return 0
+    else:
+        leavesTotal = getLeavesTotal(listDimensions)
+    if isinstance(computationDivisions, int):
+        taskDivisions = computationDivisions
     elif isinstance(computationDivisions, str):
         computationDivisions = computationDivisions.lower()
         if computationDivisions == "maximum":
-            the[indexThe.taskDivisions] = the[indexThe.leavesTotal]
+            taskDivisions = leavesTotal
         elif computationDivisions == "cpu":
-            the[indexThe.taskDivisions] = min(concurrencyLimit, the[indexThe.leavesTotal])
+            taskDivisions = min(concurrencyLimit, leavesTotal)
     else:
         raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but the so-called programmer didn't implement code for that.")
 
-    if the[indexThe.taskDivisions] > the[indexThe.leavesTotal]:
-        raise ValueError(f"Problem: `taskDivisions`, ({the[indexThe.taskDivisions]}), is greater than `leavesTotal`, ({the[indexThe.leavesTotal]}), which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`. They are derived from parameters that may or may not still be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from dubious-quality Python code.\n\nFor those parameters, I received {computationDivisions=}, {CPUlimit=}, and {listDimensions=}.\n\nPotential solutions: get a different hobby or set `computationDivisions` to a different value.")
+    if taskDivisions > leavesTotal:
+        raise ValueError(f"Problem: `taskDivisions`, ({taskDivisions}), is greater than `leavesTotal`, ({leavesTotal}), which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`. They are derived from parameters that may or may not still be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from dubious-quality Python code.\n\nFor those parameters, I received {computationDivisions=}, {CPUlimit=}, and {listDimensions=}.\n\nPotential solutions: get a different hobby or set `computationDivisions` to a different value.")
 
-    return the
+    return taskDivisions
 
-def makeConnectionGraph(listDimensions: Sequence[int], dtype: Optional[Type] = numpy.int64) -> NDArray[integer[Any]]:
+def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> NDArray[integer[Any]]:
     """
     Constructs a multi-dimensional connection graph representing the connections between the leaves of a map with the given dimensions.
     Also called a Cartesian product decomposition or dimensional product mapping.
@@ -94,16 +94,17 @@ def makeConnectionGraph(listDimensions: Sequence[int], dtype: Optional[Type] = n
     Returns:
         connectionGraph: A 3D numpy array with shape of (dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1).
     """
+    datatype = keywordArguments.get('datatype', dtypeDefault)
     mapShape = validateListDimensions(listDimensions)
     leavesTotal = getLeavesTotal(mapShape)
-    arrayDimensions = numpy.array(mapShape, dtype=dtype)
+    arrayDimensions = numpy.array(mapShape, dtype=datatype)
     dimensionsTotal = len(arrayDimensions)
 
     # Step 1: find the cumulative product of the map's dimensions
-    cumulativeProduct = numpy.multiply.accumulate([1] + mapShape, dtype=dtype)
+    cumulativeProduct = numpy.multiply.accumulate([1] + mapShape, dtype=datatype)
 
     # Step 2: create a coordinate system
-    coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=dtype)
+    coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=datatype)
 
     for dimension1ndex in range(1, dimensionsTotal + 1):
         for leaf1ndex in range(1, leavesTotal + 1):
@@ -113,7 +114,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], dtype: Optional[Type] = n
             )
 
     # Step 3: create and fill the connection graph
-    connectionGraph = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=dtype)
+    connectionGraph = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=datatype)
 
     for dimension1ndex in range(1, dimensionsTotal + 1):
         for activeLeaf1ndex in range(1, leavesTotal + 1):
@@ -139,7 +140,13 @@ def makeConnectionGraph(listDimensions: Sequence[int], dtype: Optional[Type] = n
 
     return connectionGraph
 
-def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, dtypeDefault: Optional[Type] = numpy.int64, dtypeLarge: Optional[Type] = numpy.int64, ) -> computationState:
+def makeDataContainer(shape, datatype: Optional[Type] = None):
+    """Create a container, probably numpy.ndarray, with the given shape and datatype."""
+    if datatype is None:
+        datatype = dtypeDefault
+    return numpy.zeros(shape, dtype=datatype)
+
+def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type]) -> computationState:
     """
     Initializes and configures the computation state for map folding computations.
 
@@ -151,10 +158,6 @@ def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional
         Specifies how to divide the computation tasks
     CPUlimit (None):
         Limits the CPU usage for computations
-    dtypeDefault (numpy.int64):
-        The default numpy dtype to use for arrays
-    dtypeLarge (numpy.int64):
-        The numpy dtype to use for larger arrays
 
     Returns
     -------
@@ -165,25 +168,28 @@ def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional
         - mapShape: Validated and sorted dimensions of the map
         - my: Array for internal state tracking
         - gapsWhere: Array tracking gap positions
-        - the: Configured task divisions
+        - the: Static settings and metadata
         - track: Array for tracking computation progress
     """
+    datatypeDefault = keywordArguments.get('datatypeDefault', dtypeDefault)
+    datatypeLarge = keywordArguments.get('datatypeLarge', dtypeLarge)
 
-    the = numpy.zeros(len(indexThe), dtype=dtypeDefault)
+    the = makeDataContainer(len(indexThe), datatypeDefault)
 
     mapShape = tuple(sorted(validateListDimensions(listDimensions)))
     the[indexThe.leavesTotal] = getLeavesTotal(mapShape)
     the[indexThe.dimensionsTotal] = len(mapShape)
     concurrencyLimit = setCPUlimit(CPUlimit)
-
+    the[indexThe.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, listDimensions)
+    
     stateInitialized = computationState(
-        connectionGraph = makeConnectionGraph(mapShape, dtype=dtypeDefault),
-        foldsTotal = numpy.zeros(the[indexThe.leavesTotal], dtype=numpy.int64),
+        connectionGraph = makeConnectionGraph(mapShape, datatype=datatypeDefault),
+        foldsTotal = makeDataContainer(the[indexThe.leavesTotal], datatypeLarge),
         mapShape = mapShape,
-        my = numpy.zeros(len(indexMy), dtype=dtypeLarge),
-        gapsWhere = numpy.zeros(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, dtype=dtypeDefault),
-        the = getTaskDivisions(computationDivisions, concurrencyLimit, the, CPUlimit, listDimensions),
-        track = numpy.zeros((len(indexTrack), the[indexThe.leavesTotal] + 1), dtype=dtypeLarge)
+        my = makeDataContainer(len(indexMy), datatypeLarge),
+        gapsWhere = makeDataContainer(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, datatypeDefault),
+        the = the,
+        track = makeDataContainer((len(indexTrack), the[indexThe.leavesTotal] + 1), datatypeLarge)
         )
 
     stateInitialized['my'][indexMy.leaf1ndex.value] = 1

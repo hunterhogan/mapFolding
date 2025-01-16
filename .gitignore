@@ -7,4 +7,5 @@ pyvenv.cfg
 
 /mapFolding/.cache/
 /tests/coverage/
-mapFolding/benchmarks/marks/
+/tests/dataSamples/tmp/
+/mapFolding/benchmarks/marks/

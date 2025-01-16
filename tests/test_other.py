@@ -1,7 +1,13 @@
+from pathlib import Path
+from typing import List
 from .conftest import *
 import pytest
 import sys
-# TODO test `outfitFoldings`, especially that `listDimensions` is sorted.
+import unittest.mock
+import numpy
+import numba
+
+# TODO test `outfitFoldings`; no negative values in arrays; compare datatypes to the typeddict; commpare the connection graph to making a graPH
 
 @pytest.mark.parametrize("listDimensions,expected_intInnit,expected_parseListDimensions,expected_validateListDimensions,expected_getLeavesTotal", [
     (None, ValueError, ValueError, ValueError, ValueError),  # None instead of list
@@ -53,7 +59,19 @@ def test_getLeavesTotal_edge_cases() -> None:
     standardComparison(6, getLeavesTotal, listOriginal)
     standardComparison([2, 3], lambda x: x, listOriginal)  # Check that the list wasn't modified
 
-# ===== Parse Integers Tests =====
+def test_countFolds_writeFoldsTotal_file(listDimensionsTestFunctionality: List[int], pathFilenameFoldsTotalTesting: Path) -> None:
+    with unittest.mock.patch("mapFolding.babbage._countFolds", return_value=12345):
+        standardComparison(12345, countFolds, listDimensionsTestFunctionality, pathFilenameFoldsTotalTesting)
+    standardComparison("12345", lambda: pathFilenameFoldsTotalTesting.read_text())
+
+def test_countFolds_writeFoldsTotal_directory(listDimensionsTestFunctionality: List[int], pathTempTesting: Path) -> None:
+    with unittest.mock.patch("mapFolding.babbage._countFolds", return_value=67890):
+        returned = countFolds(listDimensionsTestFunctionality, writeFoldsTotal=pathTempTesting)
+    standardComparison(67890, lambda: returned)
+    # Construct expected filename from sorted dimensions
+    expectedName = str(sorted(listDimensionsTestFunctionality)).replace(' ', '') + '.foldsTotal'
+    standardComparison("67890", lambda: (pathTempTesting / expectedName).read_text())
+
 def test_intInnit() -> None:
     """Test integer parsing using the test suite generator."""
     for testName, testFunction in makeTestSuiteIntInnit(intInnit).items():
@@ -64,5 +82,24 @@ def test_oopsieKwargsie() -> None:
     for testName, testFunction in makeTestSuiteOopsieKwargsie(oopsieKwargsie).items():
         testFunction()
 
-def test_parseListDimensions_noDimensions() -> None:
-    standardComparison(ValueError, parseDimensions, [])
+# TODO mock CPU counts?
+# @pytest.mark.parametrize("CPUlimit, expectedLimit", [
+#     (None, numba.config.NUMBA_DEFAULT_NUM_THREADS),
+#     (False, numba.config.NUMBA_DEFAULT_NUM_THREADS),
+#     (True, 1),
+#     (4, 4),
+#     (0.5, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS // 2)),
+#     (-0.5, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS // 2)),
+#     (-2, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS - 2)),
+# ])
+# def test_setCPUlimit(CPUlimit, expectedLimit) -> None:
+#     standardComparison(expectedLimit, setCPUlimit, CPUlimit)
+
+def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: List[int]) -> None:
+    connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality)
+    assert numpy.all(connectionGraph >= 0), "All values in the connection graph should be non-negative."
+
+@pytest.mark.parametrize("datatype", [numpy.int16, numpy.uint64])
+def test_makeConnectionGraph_datatype(listDimensionsTestFunctionality: List[int], datatype) -> None:
+    connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality, datatype=datatype)
+    assert connectionGraph.dtype == datatype, f"Expected datatype {datatype}, but got {connectionGraph.dtype}."

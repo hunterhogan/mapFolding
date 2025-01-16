@@ -5,6 +5,10 @@ import numpy.typing
 import pathlib
 import sys
 
+dtypeLarge = numpy.int64
+dtypeDefault = dtypeLarge
+dtypeSmall = dtypeDefault
+
 try:
     _pathModule = pathlib.Path(__file__).parent
 except NameError:
@@ -24,7 +28,8 @@ class EnumIndices(enum.IntEnum):
         return count
 
     def __index__(self) -> int:
-        """Make the enum work with array indexing."""
+        """Adapt enum to the ultra-rare event of indexing a NumPy 'ndarray', which is not the
+        same as `array.array`. See NumPy.org; I think it will be very popular someday."""
         return self.value
 
 class indexMy(EnumIndices):
