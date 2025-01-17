@@ -17,25 +17,42 @@ The complexity of this module is due to me allegedly applying Numba's features. 
 from mapFolding import indexMy, indexThe, indexTrack
 from numpy import integer
 from numpy.typing import NDArray
-from typing import Any, Tuple, Optional
+from typing import Any, Dict, Tuple, Optional
 import numba
 import numpy
 
-@numba.jit(parallel=False, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
+parametersBoolNumbaJit: Dict[str, bool] = {
+    '_nrt': True,
+    'boundscheck': False,
+    'fastmath': True,
+    'forceinline': True,
+    'looplift': False,
+    'no_cfunc_wrapper': True,
+    'no_cpython_wrapper': True,
+    'nogil': True,
+    'nopython': True,
+    'parallel': False
+}
+
+parametersBoolNumbaJitParallel: Dict[str, bool] = {
+    **parametersBoolNumbaJit,
+    'parallel': True
+}
+
+jitParallel = numba.jit(**parametersBoolNumbaJitParallel, error_model='numpy')
+
 def ifComputationDivisions(my: NDArray[integer[Any]], the: NDArray[integer[Any]]) -> bool:
     if the[indexThe.taskDivisions.value] == 0:
         return True
     return my[indexMy.leaf1ndex.value] != the[indexThe.taskDivisions.value] or \
             (my[indexMy.leafConnectee.value] % the[indexThe.taskDivisions.value]) == my[indexMy.taskIndex.value]
 
-@numba.jit(parallel=False, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
 def insertUnconstrainedLeaf(my: NDArray[integer[Any]], the: NDArray[integer[Any]], initializeUnconstrainedLeaf: Optional[bool]) -> bool:
     if initializeUnconstrainedLeaf:
         return my[indexMy.dimensionsUnconstrained.value] == the[indexThe.dimensionsTotal.value]
     else:
         return False
 
-@numba.jit(parallel=False, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
 def initializationConditionUnconstrainedLeaf(my: NDArray[integer[Any]], initializeUnconstrainedLeaf: Optional[bool]) -> bool:
     if initializeUnconstrainedLeaf is None or initializeUnconstrainedLeaf is False:
         return False
@@ -45,8 +62,7 @@ def initializationConditionUnconstrainedLeaf(my: NDArray[integer[Any]], initiali
         else:
             return False
 
-@numba.jit(parallel=False, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
-def doWhile(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], my: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]], initializeUnconstrainedLeaf: Optional[bool]) -> Tuple[NDArray[integer[Any]], NDArray[integer[Any]], NDArray[integer[Any]], NDArray[integer[Any]]]:
+def doWhile(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], my: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]], initializeUnconstrainedLeaf: Optional[bool]) -> Tuple[NDArray[integer[Any]], NDArray[integer[Any]], NDArray[integer[Any]], NDArray[integer[Any]]]:
     while my[indexMy.leaf1ndex.value] > 0:
         if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
             if my[indexMy.leaf1ndex.value] > the[indexThe.leavesTotal.value]:
@@ -98,48 +114,48 @@ def doWhile(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[
         # NOTE This check and break should be absent from the code that does the counting
         if initializationConditionUnconstrainedLeaf(my, initializeUnconstrainedLeaf):
             break
-    return foldsTotal, my, gapsWhere, track
+    return foldsTotal, gapsWhere, my, track
 
-@numba.jit(parallel=True, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
-def doTaskIndices(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], my: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]) -> NDArray[integer[Any]]:
+@jitParallel
+def doTaskIndices(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], my: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]) -> NDArray[integer[Any]]:
     """This is the only function with the `parallel=True` option.
     Make a copy of the initialized state because all task divisions can start from this baseline.
     Run the counting algorithm but with conditional execution of a few lines of code, so each task has an incomplete count that does not overlap with other tasks."""
     stateFoldsSubTotal = foldsTotal.copy()
+    stateGapsWhere = gapsWhere.copy()
     stateMy = my.copy()
-    statePotentialGaps = gapsWhere.copy()
     stateTrack = track.copy()
 
     for indexSherpa in numba.prange(the[indexThe.taskDivisions.value]):
         my = stateMy.copy()
         my[indexMy.taskIndex.value] = indexSherpa
-        foldsSubTotal, _1, _2, _3 = doWhile(connectionGraph, stateFoldsSubTotal.copy(), my, statePotentialGaps.copy(), the, stateTrack.copy(), initializeUnconstrainedLeaf=False)
+        foldsSubTotal, _1, _2, _3 = doWhile(connectionGraph, stateFoldsSubTotal.copy(), stateGapsWhere.copy(), my, the, stateTrack.copy(), initializeUnconstrainedLeaf=False)
 
         foldsTotal[indexSherpa] = foldsSubTotal[indexSherpa]
 
     return foldsTotal
 
-@numba.jit(parallel=False, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
-def countFoldsCompileBranch(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], my: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]], obviousFlagForNumba: bool) -> NDArray[integer[Any]]:
+def countFoldsCompileBranch(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], my: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]], obviousFlagForNumba: bool) -> NDArray[integer[Any]]:
     """Allegedly, `obviousFlagForNumba` allows Numba to compile two versions: one for parallel execution and one leaner version for sequential execution."""
     if obviousFlagForNumba:
-        foldsTotal, _1, _2, _3 = doWhile(connectionGraph, foldsTotal, my, gapsWhere, the, track, initializeUnconstrainedLeaf=False)
+        foldsTotal, _1, _2, _3 = doWhile(connectionGraph, foldsTotal, gapsWhere, my, the, track, initializeUnconstrainedLeaf=False)
     else:
-        foldsTotal = doTaskIndices(connectionGraph, foldsTotal, my, gapsWhere, the, track)
+        foldsTotal = doTaskIndices(connectionGraph, foldsTotal, gapsWhere, my, the, track)
 
     return foldsTotal
 
-@numba.jit(parallel=False, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
-def countFoldsCompiled(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], my: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]) -> int:
+def countFoldsCompiled(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], my: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]) -> int:
     # ^ Receive the data structures.
 
     # Initialize baseline values primarily to eliminate the need for the logic of `insertUnconstrainedLeaf`
-    _0, my, gapsWhere, track = doWhile(connectionGraph, foldsTotal, my, gapsWhere, the, track, initializeUnconstrainedLeaf=True)
+    _0, gapsWhere, my, track = doWhile(connectionGraph, foldsTotal, gapsWhere, my, the, track, initializeUnconstrainedLeaf=True)
 
     obviousFlagForNumba = the[indexThe.taskDivisions.value] == int(False)
 
     # Call the function that will branch to sequential or parallel counting
-    foldsTotal = countFoldsCompileBranch(connectionGraph, foldsTotal, my, gapsWhere, the, track, obviousFlagForNumba)
+    foldsTotal = countFoldsCompileBranch(connectionGraph, foldsTotal, gapsWhere, my, the, track, obviousFlagForNumba)
 
     # Return an `int` integer
     return numpy.sum(foldsTotal).item()
+
+numba.jit_module(**parametersBoolNumbaJit, error_model='numpy')
