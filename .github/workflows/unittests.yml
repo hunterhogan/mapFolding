@@ -55,4 +55,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-data
-          path: ./tests/coverage/coverage.xml
+          path: tests/coverage/coverage.xml
