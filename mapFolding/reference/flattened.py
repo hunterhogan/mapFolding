@@ -15,7 +15,7 @@ def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUli
             if activeLeafIsTheFirstLeafCondition() or leafBelowSentinelIs1Condition():
 
                 if activeLeafGreaterThanLeavesTotalCondition():
-                    foldsTotalIncrement()
+                    foldsSubTotalsIncrement()
 
                 else:
 
@@ -104,8 +104,8 @@ def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUli
         my[indexMy.gap1ndexCeiling] = track[indexTrack.gapRangeStart, my[indexMy.leaf1ndex] - 1]
         my[indexMy.dimension1ndex] = 1
 
-    def foldsTotalIncrement():
-        foldsTotal[my[indexMy.taskIndex]] += the[indexThe.leavesTotal]
+    def foldsSubTotalsIncrement():
+        foldsSubTotals[my[indexMy.taskIndex]] += the[indexThe.leavesTotal]
 
     def gap1ndexCeilingIncrement():
         my[indexMy.gap1ndexCeiling] += 1
@@ -159,16 +159,15 @@ def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUli
     def thereAreComputationDivisionsYouMightSkip():
         if computationDivisionsCondition():
             return True
-        elif activeLeafNotEqualToTaskDivisionsCondition():
+        if activeLeafNotEqualToTaskDivisionsCondition():
             return True
-        elif taskIndexCondition():
+        if taskIndexCondition():
             return True
-        else:
-            return False
+        return False
 
     stateUniversal = outfitFoldings(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit)
     connectionGraph: Final[numpy.ndarray] = stateUniversal['connectionGraph']
-    foldsTotal = stateUniversal['foldsTotal']
+    foldsSubTotals = stateUniversal['foldsSubTotals']
     gapsWhere = stateUniversal['gapsWhere']
     my = stateUniversal['my']
     the: Final[numpy.ndarray] = stateUniversal['the']
@@ -187,7 +186,7 @@ def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUli
             track = stateUniversal['track'].copy()
             doWhile()
 
-    return numpy.sum(foldsTotal).item()
+    return numpy.sum(foldsSubTotals).item()
 
 @enum.verify(enum.CONTINUOUS, enum.UNIQUE) if sys.version_info >= (3, 11) else lambda x: x
 class EnumIndices(enum.IntEnum):
@@ -229,7 +228,7 @@ class indexTrack(EnumIndices):
 
 class computationState(TypedDict):
     connectionGraph: NDArray[integer[Any]]
-    foldsTotal: NDArray[integer[Any]]
+    foldsSubTotals: NDArray[integer[Any]]
     mapShape: Tuple[int, ...]
     my: NDArray[integer[Any]]
     gapsWhere: NDArray[integer[Any]]
@@ -335,7 +334,7 @@ def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional
 
     stateInitialized = computationState(
         connectionGraph = makeConnectionGraph(mapShape, datatype=datatypeDefault),
-        foldsTotal = makeDataContainer(the[indexThe.leavesTotal], datatypeLarge),
+        foldsSubTotals = makeDataContainer(the[indexThe.leavesTotal], datatypeLarge),
         mapShape = mapShape,
         my = makeDataContainer(len(indexMy), datatypeLarge),
         gapsWhere = makeDataContainer(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, datatypeDefault),
