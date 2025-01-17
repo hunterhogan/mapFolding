@@ -1,6 +1,6 @@
 # Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps)
 
-`mapFolding.countFolds()` will accept arbitrary values for the map's dimensions.
+The function `mapFolding.countFolds()` counts distinct ways to fold maps and strips of stamps. The function accepts two or more dimensions:
 
 ```python
 from mapFolding import countFolds
@@ -9,12 +9,12 @@ foldsTotal = countFolds( [2,10] )
 
 The directory [mapFolding/reference](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reference) has
 
-- a verbatim transcription of the "procedure" published in _The Computer Journal_,
+- a verbatim transcription of Lunnon's "procedure" published in 1971 by _The Computer Journal_,
 - multiple referential versions of the procedure with explanatory comments including
 - [hunterNumba.py](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reference), a one-size-fits-all, self-contained, reasonably fast, contemporary algorithm that is nevertheless infected by _noobaceae ignorancium_, and
 - miscellaneous notes.
 
-[![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml)
+[![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml) [![pip install mapFolding](https://img.shields.io/badge/pip%20install-mapFolding-gray.svg?colorB=3b434b)](https://pypi.org/project/mapFolding/) ![Static Badge](https://img.shields.io/badge/stinkin'%20badges-don't%20need-b98e5e) ![PyPI - Downloads](https://img.shields.io/pypi/dd/mapFolding) ![Static Badge](https://img.shields.io/badge/issues-I%20have%20them-brightgreen) ![GitHub repo size](https://img.shields.io/github/repo-size/hunterhogan/mapFolding)
 
 ## Simple, easy usage based on OEIS IDs
 
