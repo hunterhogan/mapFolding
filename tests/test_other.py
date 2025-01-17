@@ -1,13 +1,12 @@
 from pathlib import Path
-from typing import List
-from .conftest import *
+from typing import List, Optional, Dict, Any, Union
+from tests.conftest import *
+from tests.pythons_idiotic_namespace import *
 import pytest
 import sys
 import unittest.mock
 import numpy
 import numba
-
-# TODO test `outfitFoldings`; no negative values in arrays; compare datatypes to the typeddict; commpare the connection graph to making a graPH
 
 @pytest.mark.parametrize("listDimensions,expected_intInnit,expected_parseListDimensions,expected_validateListDimensions,expected_getLeavesTotal", [
     (None, ValueError, ValueError, ValueError, ValueError),  # None instead of list
@@ -59,18 +58,34 @@ def test_getLeavesTotal_edge_cases() -> None:
     standardComparison(6, getLeavesTotal, listOriginal)
     standardComparison([2, 3], lambda x: x, listOriginal)  # Check that the list wasn't modified
 
-def test_countFolds_writeFoldsTotal_file(listDimensionsTestFunctionality: List[int], pathFilenameFoldsTotalTesting: Path) -> None:
-    with unittest.mock.patch("mapFolding.babbage._countFolds", return_value=12345):
-        standardComparison(12345, countFolds, listDimensionsTestFunctionality, pathFilenameFoldsTotalTesting)
-    standardComparison("12345", lambda: pathFilenameFoldsTotalTesting.read_text())
+@pytest.mark.parametrize("foldsValue,writeFoldsTarget", [
+    (756839, "foldsTotalTest.txt"),  # Direct file
+    (2640919, "foldsTotalTest.txt"), # Direct file
+    (7715177, None),                  # Directory, will use default filename
+])
+def test_countFolds_writeFoldsTotal(
+    listDimensionsTestFunctionality: List[int],
+    pathTempTesting: Path,
+    mockFoldingFunction,
+    foldsValue: int,
+    writeFoldsTarget: Optional[str]
+) -> None:
+    """Test writing folds total to either a file or directory."""
+    # For directory case, use the directory path directly
+    if writeFoldsTarget is None:
+        pathWriteTarget = pathTempTesting
+        filenameFoldsTotalExpected = getFilenameFoldsTotal(listDimensionsTestFunctionality)
+    else:
+        pathWriteTarget = pathTempTesting / writeFoldsTarget
+        filenameFoldsTotalExpected = writeFoldsTarget
 
-def test_countFolds_writeFoldsTotal_directory(listDimensionsTestFunctionality: List[int], pathTempTesting: Path) -> None:
-    with unittest.mock.patch("mapFolding.babbage._countFolds", return_value=67890):
-        returned = countFolds(listDimensionsTestFunctionality, writeFoldsTotal=pathTempTesting)
-    standardComparison(67890, lambda: returned)
-    # Construct expected filename from sorted dimensions
-    expectedName = str(sorted(listDimensionsTestFunctionality)).replace(' ', '') + '.foldsTotal'
-    standardComparison("67890", lambda: (pathTempTesting / expectedName).read_text())
+    mock_countFolds = mockFoldingFunction(foldsValue, listDimensionsTestFunctionality)
+
+    with unittest.mock.patch("mapFolding.babbage._countFolds", side_effect=mock_countFolds):
+        returned = countFolds(listDimensionsTestFunctionality, writeFoldsTotal=pathWriteTarget)
+
+    standardComparison(foldsValue, lambda: returned)  # Check return value
+    standardComparison(str(foldsValue), lambda: (pathTempTesting / filenameFoldsTotalExpected).read_text())  # Check file content
 
 def test_intInnit() -> None:
     """Test integer parsing using the test suite generator."""
@@ -103,3 +118,81 @@ def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: List[i
 def test_makeConnectionGraph_datatype(listDimensionsTestFunctionality: List[int], datatype) -> None:
     connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality, datatype=datatype)
     assert connectionGraph.dtype == datatype, f"Expected datatype {datatype}, but got {connectionGraph.dtype}."
+
+# @pytest.mark.parametrize("computationDivisions,CPUlimit,datatypeOverrides", [
+#     (None, None, {}),  # Basic case
+#     ("maximum", True, {"datatypeDefault": numpy.int32}),  # Max divisions, min CPU, custom dtype
+#     ("cpu", 4, {"datatypeLarge": numpy.int64}),  # CPU-based divisions, fixed CPU limit
+#     (3, 0.5, {}),  # Fixed divisions, fractional CPU
+# ])
+# def test_outfitCountFolds(
+#     listDimensionsTestFunctionality: List[int],
+#     computationDivisions: Optional[Union[int, str]],
+#     CPUlimit: Optional[Union[bool, float, int]],
+#     datatypeOverrides: Dict[str, Any]
+# ) -> None:
+#     """Test outfitCountFolds as a nexus of configuration and initialization.
+
+#     Strategy:
+#     1. Validate structure against computationState TypedDict
+#     2. Compare with direct function calls
+#     3. Verify enum-based indexing
+#     4. Check datatypes and shapes
+#     """
+#     # Get initialized state
+#     stateInitialized = outfitCountFolds(
+#         listDimensionsTestFunctionality,
+#         computationDivisions=computationDivisions,
+#         CPUlimit=CPUlimit,
+#         **datatypeOverrides
+#     )
+
+#     # 1. TypedDict structure validation
+#     for keyRequired in computationState.__annotations__:
+#         assert keyRequired in stateInitialized, f"Missing required key: {keyRequired}"
+#         assert stateInitialized[keyRequired] is not None, f"Key has None value: {keyRequired}"
+
+#         # Type checking
+#         expectedType = computationState.__annotations__[keyRequired]
+#         assert isinstance(stateInitialized[keyRequired], expectedType), \
+#             f"Type mismatch for {keyRequired}: expected {expectedType}, got {type(stateInitialized[keyRequired])}"
+
+#     # 2. Compare with direct function calls
+#     directMapShape = tuple(sorted(validateListDimensions(listDimensionsTestFunctionality)))
+#     assert stateInitialized['mapShape'] == directMapShape
+
+#     directConnectionGraph = makeConnectionGraph(
+#         directMapShape,
+#         datatype=datatypeOverrides.get('datatypeDefault', dtypeDefault)
+#     )
+#     assert numpy.array_equal(stateInitialized['connectionGraph'], directConnectionGraph)
+
+#     # 3. Enum-based indexing validation
+#     for arrayName, indexEnum in [
+#         ('my', indexMy),
+#         ('the', indexThe),
+#         ('track', indexTrack)
+#     ]:
+#         array = stateInitialized[arrayName]
+#         assert array.shape[0] >= len(indexEnum), \
+#             f"Array {arrayName} too small for enum {indexEnum.__name__}"
+
+#         # Test each enum index
+#         for enumMember in indexEnum:
+#             assert array[enumMember.value] >= 0, \
+#                 f"Negative value at {arrayName}[{enumMember.name}]"
+
+#     # 4. Special value checks
+#     assert stateInitialized['my'][indexMy.leaf1ndex.value] == 1, \
+#         "Initial leaf index should be 1"
+
+#     # 5. Shape consistency
+#     leavesTotal = getLeavesTotal(listDimensionsTestFunctionality)
+#     assert stateInitialized['foldsSubTotals'].shape == (leavesTotal,), \
+#         "foldsSubTotals shape mismatch"
+#     assert stateInitialized['gapsWhere'].shape == (leavesTotal * leavesTotal + 1,), \
+#         "gapsWhere shape mismatch"
+#     assert stateInitialized['track'].shape == (len(indexTrack), leavesTotal + 1), \
+#         "track shape mismatch"
+
+# TODO test `outfitCountFolds`; no negative values in arrays; compare datatypes to the typeddict; compare the connection graph to making a graph

@@ -35,7 +35,7 @@ data_file = "tests/coverage/.coverage"
 omit = ["tests/*", "Z0Z_*"]
 
 [tool.coverage.report]
-exclude_lines = ["if TYPE_CHECKING:", "if __name__ == \"__main__\":"]
+exclude_lines = ["if TYPE_CHECKING:", "if __name__ == \"__main__\":", "numba.jit_module"]
 ignore_errors = false
 
 [tool.coverage.xml]

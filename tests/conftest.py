@@ -14,10 +14,10 @@ from Z0Z_tools.pytest_parseParameters import makeTestSuiteConcurrencyLimit
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteOopsieKwargsie
 from mapFolding import countFolds, pathJobDEFAULT, indexMy, indexThe, indexTrack
-from mapFolding import defineConcurrencyLimit, intInnit, oopsieKwargsie
-from mapFolding import getLeavesTotal, parseDimensions, validateListDimensions
-from mapFolding import getTaskDivisions, makeConnectionGraph, outfitFoldings, setCPUlimit
-from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache
+from mapFolding import defineConcurrencyLimit, intInnit, oopsieKwargsie, outfitCountFolds
+from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache, getFilenameFoldsTotal
+from mapFolding.beDRY import getLeavesTotal, parseDimensions, validateListDimensions
+from mapFolding.beDRY import getTaskDivisions, makeConnectionGraph, setCPUlimit
 from mapFolding.beDRY import makeDataContainer
 from mapFolding.oeis import OEIS_for_n
 from mapFolding.oeis import _getFilenameOEISbFile
@@ -26,6 +26,7 @@ from mapFolding.oeis import _parseBFileOEIS
 from mapFolding.oeis import _validateOEISid
 from mapFolding.oeis import oeisIDsImplemented
 from mapFolding.oeis import settingsOEIS
+from mapFolding import *
 
 __all__ = [
     'OEIS_for_n',
@@ -37,10 +38,11 @@ __all__ = [
     'countFolds',
     'defineConcurrencyLimit',
     'expectSystemExit',
+    'getFilenameFoldsTotal',
     'getLeavesTotal',
     'getOEISids',
-    'indexThe',
     'getTaskDivisions',
+    'indexThe',
     'intInnit',
     'makeConnectionGraph',
     'makeDataContainer',
@@ -50,7 +52,7 @@ __all__ = [
     'oeisIDfor_n',
     'oeisIDsImplemented',
     'oopsieKwargsie',
-    'outfitFoldings',
+    'outfitCountFolds',
     'parseDimensions',
     'setCPUlimit',
     'settingsOEIS',
@@ -226,6 +228,22 @@ def oeisID(request: pytest.FixtureRequest)-> str:
 def oeisID_1random() -> str:
     """Return one random valid OEIS ID."""
     return random.choice(oeisIDsImplemented)
+
+@pytest.fixture
+def mockFoldingFunction():
+    """Creates a mock function that simulates _countFolds behavior."""
+    def make_mock(foldsValue: int, listDimensions: List[int]):
+        arraySize = getLeavesTotal(listDimensions)
+        # The array needs to sum to our target value
+        mock_array = makeDataContainer(arraySize)
+        mock_array[arraySize - 1] = foldsValue  # Put entire value in last position
+
+        def mock_countfolds(**keywordArguments):
+            keywordArguments['foldsSubTotals'][:] = mock_array
+            return None
+
+        return mock_countfolds
+    return make_mock
 
 """
 Section: Standardized test structures"""
