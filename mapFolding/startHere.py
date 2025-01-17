@@ -1,4 +1,4 @@
-from mapFolding import outfitFoldings
+from mapFolding import outfitCountFolds, getFilenameFoldsTotal
 from typing import Optional, Sequence, Type, Union
 import os
 import pathlib
@@ -15,7 +15,7 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
         CPUlimit (None): This is only relevant if there are `computationDivisions`: whether and how to limit the CPU usage. See notes for details.
         **keywordArguments: Additional arguments including `dtypeDefault` and `dtypeLarge` for data type specifications.
     Returns:
-        foldsTotal: Total number of distinct ways to fold a map of the given dimensions.
+        foldsSubTotals: Total number of distinct ways to fold a map of the given dimensions.
 
     Computation divisions:
         - None: no division of the computation into tasks; sets task divisions to 0
@@ -34,20 +34,22 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
     N.B.: You probably don't want to divide the computation into tasks.
         If you want to compute a large `foldsTotal`, dividing the computation into tasks is usually a bad idea. Dividing the algorithm into tasks is inherently inefficient: efficient division into tasks means there would be no overlap in the work performed by each task. When dividing this algorithm, the amount of overlap is between 50% and 90% by all tasks: at least 50% of the work done by every task must be done by _all_ tasks. If you improve the computation time, it will only change by -10 to -50% depending on (at the very least) the ratio of the map dimensions and the number of leaves. If an undivided computation would take 10 hours on your computer, for example, the computation will still take at least 5 hours but you might reduce the time to 9 hours. Most of the time, however, you will increase the computation time. If logicalCores >= leavesTotal, it will probably be faster. If logicalCores <= 2 * leavesTotal, it will almost certainly be slower for all map dimensions.
     """
-    stateUniversal = outfitFoldings(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit, **keywordArguments)
+    stateUniversal = outfitCountFolds(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit, **keywordArguments)
 
     pathFilenameFoldsTotal = None
     if writeFoldsTotal is not None:
         pathFilenameFoldsTotal = pathlib.Path(writeFoldsTotal)
         if pathFilenameFoldsTotal.is_dir():
-            filenameFoldsTotalDEFAULT = str(sorted(stateUniversal['mapShape'])).replace(' ', '') + '.foldsTotal'
+            filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(stateUniversal['mapShape'])
             pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT
         pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 
     # NOTE Don't import a module with a numba.jit function until you want the function to compile and to freeze all settings for that function.
     from mapFolding.babbage import _countFolds
-    foldsTotal = _countFolds(**stateUniversal)
-    # foldsTotal = benchmarkSherpa(**stateUniversal)
+    _countFolds(**stateUniversal)
+    # foldsSubTotals = benchmarkSherpa(**stateUniversal)
+
+    foldsTotal = stateUniversal['foldsSubTotals'].sum().item()
 
     if pathFilenameFoldsTotal is not None:
         try:
@@ -63,6 +65,6 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
 # from typing import Any, Tuple
 # from mapFolding.benchmarks.benchmarking import recordBenchmarks
 # @recordBenchmarks()
-# def benchmarkSherpa(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
+# def benchmarkSherpa(connectionGraph: NDArray[integer[Any]], foldsSubTotals: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
 #     from mapFolding.babbage import _countFolds
-#     return _countFolds(connectionGraph, foldsTotal, mapShape, my, gapsWhere, the, track)
+#     return _countFolds(connectionGraph, foldsSubTotals, gapsWhere, mapShape, my, the, track)

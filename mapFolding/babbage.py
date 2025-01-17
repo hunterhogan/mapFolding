@@ -6,7 +6,7 @@ import numba
 import numpy
 
 @numba.jit(cache=True)
-def _countFolds(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]) -> int:
+def _countFolds(connectionGraph: NDArray[integer[Any]], foldsSubTotals: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
     """
     What in tarnation is this stupid module and function?
 
@@ -27,4 +27,4 @@ def _countFolds(connectionGraph: NDArray[integer[Any]], foldsTotal: NDArray[inte
     """
     # TODO learn if I really must change this jitted function to get the super jit to recompile
     # print('babbage')
-    return countFoldsCompiled(connectionGraph, foldsTotal, my, gapsWhere, the, track)
+    countFoldsCompiled(connectionGraph=connectionGraph, foldsSubTotals=foldsSubTotals, gapsWhere=gapsWhere, my=my, the=the, track=track)

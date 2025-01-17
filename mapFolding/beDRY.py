@@ -1,14 +1,16 @@
 """A relatively stable API for oft-needed functionality."""
-from mapFolding import intInnit, defineConcurrencyLimit, oopsieKwargsie
+from mapFolding import dtypeDefault, dtypeLarge
 from mapFolding import indexMy, indexThe, indexTrack, computationState
-from mapFolding import dtypeDefault, dtypeLarge, dtypeSmall
-from typing import Any, List, Optional, Sequence, Type, Union
-import numpy
-import numba
-from numpy.typing import NDArray
+from mapFolding import intInnit, defineConcurrencyLimit, oopsieKwargsie
 from numpy import integer
+from numpy.typing import NDArray
+from typing import Any, List, Optional, Sequence, Type, Union
+import numba
+import numpy
 import sys
-import operator
+
+def getFilenameFoldsTotal(listDimensions: Sequence[int]) -> str:
+    return str(sorted(listDimensions)).replace(' ', '') + '.foldsTotal'
 
 def getLeavesTotal(listDimensions: Sequence[int]) -> int:
     """
@@ -146,7 +148,7 @@ def makeDataContainer(shape, datatype: Optional[Type] = None):
         datatype = dtypeDefault
     return numpy.zeros(shape, dtype=datatype)
 
-def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type]) -> computationState:
+def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type]) -> computationState:
     """
     Initializes and configures the computation state for map folding computations.
 
@@ -155,21 +157,33 @@ def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional
     listDimensions:
         The dimensions of the map to be folded
     computationDivisions (None):
-        Specifies how to divide the computation tasks
+        Specifies how to divide computations:
+        - None: no division of the computation into tasks; sets task divisions to 0
+        - int: direct set the number of task divisions; cannot exceed the map's total leaves
+        - "maximum": divides into `leavesTotal`-many `taskDivisions`
+        - "cpu": limits the divisions to the number of available CPUs, i.e. `concurrencyLimit`
     CPUlimit (None):
-        Limits the CPU usage for computations
+        Whether and how to limit the CPU usage. See notes for details.
 
     Returns
     -------
     computationState
         An initialized computation state containing:
         - connectionGraph: Graph representing connections in the map
-        - foldsTotal: Array tracking total folds
+        - foldsSubTotals: Array tracking total folds
         - mapShape: Validated and sorted dimensions of the map
         - my: Array for internal state tracking
         - gapsWhere: Array tracking gap positions
         - the: Static settings and metadata
         - track: Array for tracking computation progress
+
+    Limits on CPU usage `CPUlimit`:
+        - `False`, `None`, or `0`: No limits on CPU usage; uses all available CPUs. All other values will potentially limit CPU usage.
+        - `True`: Yes, limit the CPU usage; limits to 1 CPU.
+        - Integer `>= 1`: Limits usage to the specified number of CPUs.
+        - Decimal value (`float`) between 0 and 1: Fraction of total CPUs to use.
+        - Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
+        - Integer `<= -1`: Subtract the absolute value from total CPUs.
     """
     datatypeDefault = keywordArguments.get('datatypeDefault', dtypeDefault)
     datatypeLarge = keywordArguments.get('datatypeLarge', dtypeLarge)
@@ -181,10 +195,10 @@ def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional
     the[indexThe.dimensionsTotal] = len(mapShape)
     concurrencyLimit = setCPUlimit(CPUlimit)
     the[indexThe.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, listDimensions)
-    
+
     stateInitialized = computationState(
         connectionGraph = makeConnectionGraph(mapShape, datatype=datatypeDefault),
-        foldsTotal = makeDataContainer(the[indexThe.leavesTotal], datatypeLarge),
+        foldsSubTotals = makeDataContainer(the[indexThe.leavesTotal], datatypeLarge),
         mapShape = mapShape,
         my = makeDataContainer(len(indexMy), datatypeLarge),
         gapsWhere = makeDataContainer(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, datatypeDefault),

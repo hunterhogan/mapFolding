@@ -15,7 +15,7 @@ except NameError:
     _pathModule = pathlib.Path.cwd()
 
 pathJobDEFAULT = _pathModule / "jobs"
-"""filenameFoldsTotal = str(sorted(mapShape)).replace(' ', '') + '.foldsTotal'"""
+
 if 'google.colab' in sys.modules:
     pathJobDEFAULT = pathlib.Path("/content/drive/MyDrive") / "jobs"
 
@@ -59,7 +59,7 @@ class indexTrack(EnumIndices):
 
 class computationState(TypedDict):
     connectionGraph: numpy.typing.NDArray[numpy.integer[Any]]
-    foldsTotal: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]
+    foldsSubTotals: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]
     mapShape: Tuple[int, ...]
     my: numpy.typing.NDArray[numpy.integer[Any]]
     gapsWhere: numpy.typing.NDArray[numpy.integer[Any]]
