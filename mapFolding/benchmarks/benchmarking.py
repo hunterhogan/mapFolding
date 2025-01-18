@@ -1,5 +1,6 @@
-import multiprocessing
+"""An incompetent benchmarking module for mapFolding."""
 from typing import Callable
+import multiprocessing
 import numpy
 import pathlib
 import time
@@ -57,7 +58,7 @@ def runBenchmarks(benchmarkIterations: int = 30) -> None:
     listCartesianProduct = list(itertools.product(listParametersOEIS, range(benchmarkIterations)))
     with ProcessPoolExecutor(max_workers) as concurrencyManager:
         listConcurrency = [concurrencyManager.submit(oeisIDfor_n, *parameters[0]) for parameters in listCartesianProduct]
-        for complete in tqdm(as_completed(listConcurrency), total=len(listCartesianProduct)):
+        for _complete in tqdm(as_completed(listConcurrency), total=len(listCartesianProduct)):
             pass
 
 if __name__ == '__main__':

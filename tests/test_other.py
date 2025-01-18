@@ -1,14 +1,14 @@
-import itertools, more_itertools
-from pathlib import Path
-from typing import List, Optional, Dict, Any, Union
+import pathlib
 from tests.conftest import *
 from tests.pythons_idiotic_namespace import *
-import pytest
-import sys
-import random
-import unittest.mock
-import numpy
+from typing import List, Optional
+import itertools
 import numba
+import numpy
+import pytest
+import random
+import sys
+import unittest.mock
 
 @pytest.mark.parametrize("listDimensions,expected_intInnit,expected_parseListDimensions,expected_validateListDimensions,expected_getLeavesTotal", [
     (None, ValueError, ValueError, ValueError, ValueError),  # None instead of list
@@ -67,7 +67,7 @@ def test_getLeavesTotal_edge_cases() -> None:
 ])
 def test_countFolds_writeFoldsTotal(
     listDimensionsTestFunctionality: List[int],
-    pathTempTesting: Path,
+    pathTempTesting: pathlib.Path,
     mockFoldingFunction,
     foldsValue: int,
     writeFoldsTarget: Optional[str]
@@ -236,7 +236,7 @@ def test_outfitCountFolds_basic(listDimensionsTestFunctionality, parameterIterat
 
     # Basic structure tests
     assert isinstance(stateInitialized, dict)
-    assert len(stateInitialized) == 7  # 6 ndarrays + 1 tuple
+    assert len(stateInitialized) == 7  # 6 ndarray + 1 tuple
 
     # Check for specific keys
     requiredKeys = set(computationState.__annotations__.keys())

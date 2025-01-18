@@ -8,8 +8,10 @@ def runSecondSetAfterAll(request: pytest.FixtureRequest):
     """Run after all other tests complete."""
     def toggleAndRerun():
         import mapFolding.importSelector
+        import mapFolding.babbage
         mapFolding.importSelector.useLovelace = not mapFolding.importSelector.useLovelace
         importlib.reload(mapFolding.importSelector)
+        importlib.reload(mapFolding.babbage)
 
     request.addfinalizer(toggleAndRerun)
 

@@ -1,4 +1,4 @@
-useLovelace = True
+# useLovelace = True
 useLovelace = False
 
 if useLovelace:
