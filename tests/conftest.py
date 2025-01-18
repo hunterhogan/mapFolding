@@ -26,7 +26,6 @@ from mapFolding.oeis import _parseBFileOEIS
 from mapFolding.oeis import _validateOEISid
 from mapFolding.oeis import oeisIDsImplemented
 from mapFolding.oeis import settingsOEIS
-from mapFolding import *
 
 __all__ = [
     'OEIS_for_n',
@@ -134,6 +133,14 @@ def setupTeardownTestData() -> Generator[None, None, None]:
     pathTempRoot.mkdir(exist_ok=True)
     yield
     cleanupTempFileRegister()
+
+@pytest.fixture(autouse=True)
+def setupWarningsAsErrors():
+    """Convert all warnings to errors for all tests."""
+    import warnings
+    warnings.filterwarnings("error")
+    yield
+    warnings.resetwarnings()
 
 @pytest.fixture
 def pathTempTesting(request: pytest.FixtureRequest) -> pathlib.Path:

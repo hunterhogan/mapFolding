@@ -36,26 +36,18 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
     """
     stateUniversal = outfitCountFolds(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit, **keywordArguments)
 
-    connectionGraph = stateUniversal['connectionGraph']
-    foldsSubTotals = stateUniversal['foldsSubTotals']
-    gapsWhere = stateUniversal['gapsWhere']
-    mapShape = stateUniversal['mapShape']
-    my = stateUniversal['my']
-    the = stateUniversal['the']
-    track = stateUniversal['track']
-
     pathFilenameFoldsTotal = None
     if writeFoldsTotal is not None:
         pathFilenameFoldsTotal = pathlib.Path(writeFoldsTotal)
         if pathFilenameFoldsTotal.is_dir():
-            filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(mapShape)
+            filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(stateUniversal['mapShape'])
             pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT
         pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 
     from mapFolding.babbage import _countFolds
     _countFolds(**stateUniversal)
 
-    foldsTotal = foldsSubTotals.sum().item()
+    foldsTotal = stateUniversal['foldsSubTotals'].sum().item()
 
     if pathFilenameFoldsTotal is not None:
         try:

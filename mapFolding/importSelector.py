@@ -1,5 +1,5 @@
 useLovelace = True
-# useLovelace = False
+useLovelace = False
 
 if useLovelace:
     from mapFolding.lovelace import countSequential

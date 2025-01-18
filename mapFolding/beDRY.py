@@ -230,9 +230,6 @@ def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed par
             raise ValueError(f"Dimension {dimension} must be non-negative")
         listNonNegative.append(dimension)
 
-    if not listNonNegative:
-        raise ValueError("At least one dimension must be non-negative")
-
     return listNonNegative
 
 def setCPUlimit(CPUlimit: Union[bool, float, int, None]) -> int:

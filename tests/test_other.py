@@ -1,9 +1,11 @@
+import itertools, more_itertools
 from pathlib import Path
 from typing import List, Optional, Dict, Any, Union
 from tests.conftest import *
 from tests.pythons_idiotic_namespace import *
 import pytest
 import sys
+import random
 import unittest.mock
 import numpy
 import numba
@@ -97,18 +99,19 @@ def test_oopsieKwargsie() -> None:
     for testName, testFunction in makeTestSuiteOopsieKwargsie(oopsieKwargsie).items():
         testFunction()
 
-# TODO mock CPU counts?
-# @pytest.mark.parametrize("CPUlimit, expectedLimit", [
-#     (None, numba.config.NUMBA_DEFAULT_NUM_THREADS),
-#     (False, numba.config.NUMBA_DEFAULT_NUM_THREADS),
-#     (True, 1),
-#     (4, 4),
-#     (0.5, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS // 2)),
-#     (-0.5, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS // 2)),
-#     (-2, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS - 2)),
-# ])
-# def test_setCPUlimit(CPUlimit, expectedLimit) -> None:
-#     standardComparison(expectedLimit, setCPUlimit, CPUlimit)
+@pytest.mark.parametrize("CPUlimit, expectedLimit", [
+    (None, numba.config.NUMBA_DEFAULT_NUM_THREADS), # type: ignore
+    (False, numba.config.NUMBA_DEFAULT_NUM_THREADS), # type: ignore
+    (True, 1),
+    (4, 4),
+    (0.5, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS // 2)), # type: ignore
+    (-0.5, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS // 2)), # type: ignore
+    (-2, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS - 2)), # type: ignore
+    (0, numba.config.NUMBA_DEFAULT_NUM_THREADS), # type: ignore
+    (1, 1),
+])
+def test_setCPUlimit(CPUlimit, expectedLimit) -> None:
+    standardComparison(expectedLimit, setCPUlimit, CPUlimit)
 
 def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: List[int]) -> None:
     connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality)
@@ -119,80 +122,147 @@ def test_makeConnectionGraph_datatype(listDimensionsTestFunctionality: List[int]
     connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality, datatype=datatype)
     assert connectionGraph.dtype == datatype, f"Expected datatype {datatype}, but got {connectionGraph.dtype}."
 
-# @pytest.mark.parametrize("computationDivisions,CPUlimit,datatypeOverrides", [
-#     (None, None, {}),  # Basic case
-#     ("maximum", True, {"datatypeDefault": numpy.int32}),  # Max divisions, min CPU, custom dtype
-#     ("cpu", 4, {"datatypeLarge": numpy.int64}),  # CPU-based divisions, fixed CPU limit
-#     (3, 0.5, {}),  # Fixed divisions, fractional CPU
-# ])
-# def test_outfitCountFolds(
-#     listDimensionsTestFunctionality: List[int],
-#     computationDivisions: Optional[Union[int, str]],
-#     CPUlimit: Optional[Union[bool, float, int]],
-#     datatypeOverrides: Dict[str, Any]
-# ) -> None:
-#     """Test outfitCountFolds as a nexus of configuration and initialization.
 
-#     Strategy:
-#     1. Validate structure against computationState TypedDict
-#     2. Compare with direct function calls
-#     3. Verify enum-based indexing
-#     4. Check datatypes and shapes
-#     """
-#     # Get initialized state
-#     stateInitialized = outfitCountFolds(
-#         listDimensionsTestFunctionality,
-#         computationDivisions=computationDivisions,
-#         CPUlimit=CPUlimit,
-#         **datatypeOverrides
-#     )
+"""5 parameters
+listDimensionsTestFunctionality
 
-#     # 1. TypedDict structure validation
-#     for keyRequired in computationState.__annotations__:
-#         assert keyRequired in stateInitialized, f"Missing required key: {keyRequired}"
-#         assert stateInitialized[keyRequired] is not None, f"Key has None value: {keyRequired}"
+computationDivisions
+    None
+    random: int, first included: 2, first excluded: leavesTotal
+    maximum
+    cpu
 
-#         # Type checking
-#         expectedType = computationState.__annotations__[keyRequired]
-#         assert isinstance(stateInitialized[keyRequired], expectedType), \
-#             f"Type mismatch for {keyRequired}: expected {expectedType}, got {type(stateInitialized[keyRequired])}"
+CPUlimit
+    None
+    True
+    False
+    0
+    1
+    -1
+    random: 0 < float < 1
+    random: -1 < float < 0
+    random: int, first included: 2, first excluded: (min(leavesTotal, 16) - 1)
+    random: int, first included: -1 * (min(leavesTotal, 16) - 1), first excluded: -1
 
-#     # 2. Compare with direct function calls
-#     directMapShape = tuple(sorted(validateListDimensions(listDimensionsTestFunctionality)))
-#     assert stateInitialized['mapShape'] == directMapShape
+datatypeDefault
+    None
+    numpy.int64
+    numpy.intc
+    numpy.uint16
 
-#     directConnectionGraph = makeConnectionGraph(
-#         directMapShape,
-#         datatype=datatypeOverrides.get('datatypeDefault', dtypeDefault)
-#     )
-#     assert numpy.array_equal(stateInitialized['connectionGraph'], directConnectionGraph)
+datatypeLarge
+    None
+    numpy.int64
+    numpy.intp
+    numpy.uint32
 
-#     # 3. Enum-based indexing validation
-#     for arrayName, indexEnum in [
-#         ('my', indexMy),
-#         ('the', indexThe),
-#         ('track', indexTrack)
-#     ]:
-#         array = stateInitialized[arrayName]
-#         assert array.shape[0] >= len(indexEnum), \
-#             f"Array {arrayName} too small for enum {indexEnum.__name__}"
+"""
 
-#         # Test each enum index
-#         for enumMember in indexEnum:
-#             assert array[enumMember.value] >= 0, \
-#                 f"Negative value at {arrayName}[{enumMember.name}]"
+@pytest.fixture
+def parameterIterator():
+    """Generate random combinations of parameters for outfitCountFolds testing."""
+    parameterSets = {
+        'computationDivisions': [
+            None,
+            'maximum',
+            'cpu',
+        ],
+        'CPUlimit': [
+            None, True, False, 0, 1, -1,
+        ],
+        'datatypeDefault': [
+            None,
+            numpy.int64,
+            numpy.intc,
+            numpy.uint16
+        ],
+        'datatypeLarge': [
+            None,
+            numpy.int64,
+            numpy.intp,
+            numpy.uint32
+        ]
+    }
 
-#     # 4. Special value checks
-#     assert stateInitialized['my'][indexMy.leaf1ndex.value] == 1, \
-#         "Initial leaf index should be 1"
+    def makeParametersDynamic(listDimensions):
+        """Add context-dependent parameter values."""
+        parametersDynamic = parameterSets.copy()
+        leavesTotal = getLeavesTotal(listDimensions)
+        concurrencyLimit = min(leavesTotal, 16)
 
-#     # 5. Shape consistency
-#     leavesTotal = getLeavesTotal(listDimensionsTestFunctionality)
-#     assert stateInitialized['foldsSubTotals'].shape == (leavesTotal,), \
-#         "foldsSubTotals shape mismatch"
-#     assert stateInitialized['gapsWhere'].shape == (leavesTotal * leavesTotal + 1,), \
-#         "gapsWhere shape mismatch"
-#     assert stateInitialized['track'].shape == (len(indexTrack), leavesTotal + 1), \
-#         "track shape mismatch"
+        # Add dynamic computationDivisions
+        parametersDynamic['computationDivisions'].extend(
+            [random.randint(2, leavesTotal-1) for iterator in range(3)]
+        )
 
-# TODO test `outfitCountFolds`; no negative values in arrays; compare datatypes to the typeddict; compare the connection graph to making a graph
+        # Add dynamic CPUlimit values
+        parameterDynamicCPU = [
+            random.random(),  # 0 to 1
+            -random.random(), # -1 to 0
+        ]
+        parameterDynamicCPU.extend(
+            [random.randint(2, concurrencyLimit-1) for iterator in range(2)]
+        )
+        parameterDynamicCPU.extend(
+            [random.randint(-concurrencyLimit+1, -2) for iterator in range(2)]
+        )
+        parametersDynamic['CPUlimit'].extend(parameterDynamicCPU)
+
+        return parametersDynamic
+
+    def generateCombinations(listDimensions):
+        parametersDynamic = makeParametersDynamic(listDimensions)
+        parameterKeys = list(parametersDynamic.keys())
+        parameterValues = [parametersDynamic[key] for key in parameterKeys]
+
+        # Shuffle each parameter list
+        for valueList in parameterValues:
+            random.shuffle(valueList)
+
+        # Use zip_longest to iterate, filling with None when shorter lists are exhausted
+        for combination in itertools.zip_longest(*parameterValues, fillvalue=None):
+            yield dict(zip(parameterKeys, combination))
+
+    return generateCombinations
+
+def test_outfitCountFolds_basic(listDimensionsTestFunctionality, parameterIterator):
+    """Basic validation of outfitCountFolds return value structure."""
+    parameters = next(parameterIterator(listDimensionsTestFunctionality))
+
+    stateInitialized = outfitCountFolds(
+        listDimensionsTestFunctionality,
+        **{k: v for k, v in parameters.items() if v is not None}
+    )
+
+    # Basic structure tests
+    assert isinstance(stateInitialized, dict)
+    assert len(stateInitialized) == 7  # 6 ndarrays + 1 tuple
+
+    # Check for specific keys
+    requiredKeys = set(computationState.__annotations__.keys())
+    assert set(stateInitialized.keys()) == requiredKeys
+
+    # Check types more carefully
+    for key, value in stateInitialized.items():
+        if key == 'mapShape':
+            assert isinstance(value, tuple)
+            assert all(isinstance(dim, int) for dim in value)
+        else:
+            assert isinstance(value, numpy.ndarray), f"{key} should be ndarray but is {type(value)}"
+            assert issubclass(value.dtype.type, numpy.integer), \
+                f"{key} should have integer dtype but has {value.dtype}"
+
+def test_pathJobDEFAULT_colab():
+    """Test that pathJobDEFAULT is set correctly when running in Google Colab."""
+    # Mock sys.modules to simulate running in Colab
+    with unittest.mock.patch.dict('sys.modules', {'google.colab': unittest.mock.MagicMock()}):
+        # Force reload of theSSOT to trigger Colab path logic
+        import importlib
+        import mapFolding.theSSOT
+        importlib.reload(mapFolding.theSSOT)
+
+        # Check that path was set to Colab-specific value
+        assert mapFolding.theSSOT.pathJobDEFAULT == pathlib.Path("/content/drive/MyDrive") / "jobs"
+
+    # Reload one more time to restore original state
+    importlib.reload(mapFolding.theSSOT)

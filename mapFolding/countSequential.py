@@ -1,6 +1,6 @@
 import numba
 
-@numba.jit((numba.int64[:, :, ::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:, ::1]), parallel=False, _nrt=True, boundscheck=False, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nogil=True, nopython=True)
+@numba.jit((numba.int64[:, :, ::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:, ::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def countSequential(connectionGraph, foldsSubTotals, gapsWhere, my, the, track):
     while my[6] > 0:
         if my[6] <= 1 or track[1, 0] == 1:

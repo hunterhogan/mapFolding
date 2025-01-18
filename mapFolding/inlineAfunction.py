@@ -1,6 +1,6 @@
 from mapFolding import indexMy, indexThe, indexTrack
-import pathlib
 import ast
+import pathlib
 
 dictionaryEnumValues = {}
 for enumIndex in [indexMy, indexThe, indexTrack]:
@@ -25,7 +25,7 @@ class RecursiveInliner(ast.NodeTransformer):
         return inlineDefinition
 
     def visit_Attribute(self, node):
-        # Handle enum member access (e.g., indexMy.leaf1ndex.value)
+        # Substitute enum identifiers (e.g., indexMy.leaf1ndex.value)
         if isinstance(node.value, ast.Attribute) and isinstance(node.value.value, ast.Name):
             enumPath = f"{node.value.value.id}.{node.value.attr}.{node.attr}"
             if enumPath in self.dictionaryEnumValues:
@@ -60,7 +60,7 @@ def find_required_imports(node):
     class ImportFinder(ast.NodeVisitor):
         def visit_Name(self, node):
             # Common modules we might need
-            if node.id in {'numba', 'numpy', 'indexMy', 'indexThe', 'indexTrack'}:
+            if node.id in {'numba'}:
                 requiredImports.add(node.id)
             self.generic_visit(node)
 
@@ -80,10 +80,6 @@ def generate_imports(requiredImports):
     # Map of module names to their import statements
     importMapping = {
         'numba': 'import numba',
-        'numpy': 'import numpy',
-        'indexMy': 'from mapFolding import indexMy',
-        'indexThe': 'from mapFolding import indexThe',
-        'indexTrack': 'from mapFolding import indexTrack'
     }
 
     for moduleName in sorted(requiredImports):
