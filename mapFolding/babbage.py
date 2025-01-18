@@ -1,4 +1,4 @@
-from mapFolding.templateImportSelector import countSequential, doTaskIndices, initializeJit
+from mapFolding.importSelector import countSequential, countParallel, countInitialize
 from mapFolding import indexThe
 from numpy import integer
 from numpy.typing import NDArray
@@ -27,9 +27,9 @@ def _countFolds(connectionGraph: NDArray[integer[Any]], foldsSubTotals: NDArray[
 
     """
     # print("babbage")
-    initializeJit(connectionGraph=connectionGraph, gapsWhere=gapsWhere, my=my, the=the, track=track)
+    countInitialize(connectionGraph=connectionGraph, gapsWhere=gapsWhere, my=my, the=the, track=track)
 
     if the[indexThe.taskDivisions.value] > 0:
-        doTaskIndices(connectionGraph=connectionGraph, foldsSubTotals=foldsSubTotals, gapsWhere=gapsWhere, my=my, the=the, track=track)
+        countParallel(connectionGraph=connectionGraph, foldsSubTotals=foldsSubTotals, gapsWherePARALLEL=gapsWhere, myPARALLEL=my, the=the, trackPARALLEL=track)
     else:
         countSequential(connectionGraph=connectionGraph, foldsSubTotals=foldsSubTotals, gapsWhere=gapsWhere, my=my, the=the, track=track)

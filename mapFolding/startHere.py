@@ -52,9 +52,6 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
             pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT
         pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 
-    from mapFolding.templateImportSelector import initialize
-    initialize(**stateUniversal)
-
     from mapFolding.babbage import _countFolds
     _countFolds(**stateUniversal)
 

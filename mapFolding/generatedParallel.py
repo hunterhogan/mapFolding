@@ -1,3 +1,0 @@
-import numba
-
-# + lovelace.py
