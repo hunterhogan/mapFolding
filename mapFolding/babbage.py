@@ -1,4 +1,5 @@
-from mapFolding.lovelace import countFoldsCompiled
+from mapFolding.templateImportSelector import countSequential, doTaskIndices, initializeJit
+from mapFolding import indexThe
 from numpy import integer
 from numpy.typing import NDArray
 from typing import Any, Tuple
@@ -25,6 +26,10 @@ def _countFolds(connectionGraph: NDArray[integer[Any]], foldsSubTotals: NDArray[
         - and just a few dozen-jillion other things.
 
     """
-    # TODO learn if I really must change this jitted function to get the super jit to recompile
-    # print('babbage')
-    countFoldsCompiled(connectionGraph=connectionGraph, foldsSubTotals=foldsSubTotals, gapsWhere=gapsWhere, my=my, the=the, track=track)
+    # print("babbage")
+    initializeJit(connectionGraph=connectionGraph, gapsWhere=gapsWhere, my=my, the=the, track=track)
+
+    if the[indexThe.taskDivisions.value] > 0:
+        doTaskIndices(connectionGraph=connectionGraph, foldsSubTotals=foldsSubTotals, gapsWhere=gapsWhere, my=my, the=the, track=track)
+    else:
+        countSequential(connectionGraph=connectionGraph, foldsSubTotals=foldsSubTotals, gapsWhere=gapsWhere, my=my, the=the, track=track)

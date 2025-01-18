@@ -36,20 +36,29 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
     """
     stateUniversal = outfitCountFolds(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit, **keywordArguments)
 
+    connectionGraph = stateUniversal['connectionGraph']
+    foldsSubTotals = stateUniversal['foldsSubTotals']
+    gapsWhere = stateUniversal['gapsWhere']
+    mapShape = stateUniversal['mapShape']
+    my = stateUniversal['my']
+    the = stateUniversal['the']
+    track = stateUniversal['track']
+
     pathFilenameFoldsTotal = None
     if writeFoldsTotal is not None:
         pathFilenameFoldsTotal = pathlib.Path(writeFoldsTotal)
         if pathFilenameFoldsTotal.is_dir():
-            filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(stateUniversal['mapShape'])
+            filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(mapShape)
             pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT
         pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 
-    # NOTE Don't import a module with a numba.jit function until you want the function to compile and to freeze all settings for that function.
+    from mapFolding.templateImportSelector import initialize
+    initialize(**stateUniversal)
+
     from mapFolding.babbage import _countFolds
     _countFolds(**stateUniversal)
-    # foldsSubTotals = benchmarkSherpa(**stateUniversal)
 
-    foldsTotal = stateUniversal['foldsSubTotals'].sum().item()
+    foldsTotal = foldsSubTotals.sum().item()
 
     if pathFilenameFoldsTotal is not None:
         try:
@@ -59,12 +68,3 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
             print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal")
 
     return foldsTotal
-
-# from numpy import integer
-# from numpy.typing import NDArray
-# from typing import Any, Tuple
-# from mapFolding.benchmarks.benchmarking import recordBenchmarks
-# @recordBenchmarks()
-# def benchmarkSherpa(connectionGraph: NDArray[integer[Any]], foldsSubTotals: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
-#     from mapFolding.babbage import _countFolds
-#     return _countFolds(connectionGraph, foldsSubTotals, gapsWhere, mapShape, my, the, track)

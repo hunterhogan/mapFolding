@@ -5,9 +5,17 @@ import numpy.typing
 import pathlib
 import sys
 
-dtypeLarge = numpy.int64
-dtypeDefault = dtypeLarge
-dtypeSmall = dtypeDefault
+datatypeModule = 'numpy'
+
+datatypeLarge = 'int64'
+datatypeDefault = datatypeLarge
+datatypeSmall = datatypeDefault
+
+make_dtype = lambda _datatype: eval(f"{datatypeModule}.{_datatype}")
+
+dtypeLarge = make_dtype(datatypeLarge)
+dtypeDefault = make_dtype(datatypeDefault)
+dtypeSmall = make_dtype(datatypeSmall)
 
 try:
     _pathModule = pathlib.Path(__file__).parent
@@ -59,9 +67,9 @@ class indexTrack(EnumIndices):
 
 class computationState(TypedDict):
     connectionGraph: numpy.typing.NDArray[numpy.integer[Any]]
-    foldsSubTotals: numpy.ndarray[numpy.int64, numpy.dtype[numpy.int64]]
+    foldsSubTotals: numpy.typing.NDArray[numpy.integer[Any]]
+    gapsWhere: numpy.typing.NDArray[numpy.integer[Any]]
     mapShape: Tuple[int, ...]
     my: numpy.typing.NDArray[numpy.integer[Any]]
-    gapsWhere: numpy.typing.NDArray[numpy.integer[Any]]
     the: numpy.typing.NDArray[numpy.integer[Any]]
     track: numpy.typing.NDArray[numpy.integer[Any]]
