@@ -1,3 +1,4 @@
+import copy
 from mapFolding import indexMy, indexThe, indexTrack
 import ast
 import pathlib
@@ -112,13 +113,31 @@ pathFilenameSource = pathlib.Path("/apps/mapFolding/mapFolding/lovelace.py")
 codeSource = pathFilenameSource.read_text()
 
 listCallables = [
-    'countSequential',
-    'countParallel',
     'countInitialize',
+    'countParallel',
+    'countSequential',
 ]
-listPathFilenamesDestination = []
+
+listPathFilenamesDestination: list[pathlib.Path] = []
 for callableTarget in listCallables:
     pathFilenameDestination = pathFilenameSource.with_stem(callableTarget)
     codeInlined = inline_functions(codeSource, callableTarget, dictionaryEnumValues)
     pathFilenameDestination.write_text(codeInlined)
     listPathFilenamesDestination.append(pathFilenameDestination)
+
+listNoNumba = [
+    'countInitialize',
+    'countSequential',
+]
+
+listPathFilenamesNoNumba = []
+for pathFilename in listPathFilenamesDestination:
+    if pathFilename.stem in listNoNumba:
+        pathFilenameNoNumba = pathFilename.with_name(pathFilename.stem + 'NoNumba' + pathFilename.suffix)
+    else:
+        continue
+    codeNoNumba = pathFilename.read_text()
+    for codeLine in copy.copy(codeNoNumba.splitlines()):
+        if 'numba' in codeLine:
+            codeNoNumba = codeNoNumba.replace(codeLine, '')
+    pathFilenameNoNumba.write_text(codeNoNumba)

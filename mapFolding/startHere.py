@@ -1,15 +1,15 @@
-from mapFolding import outfitCountFolds, getFilenameFoldsTotal
-from typing import Optional, Sequence, Type, Union
+from pathlib import Path
+from mapFolding import outfitCountFolds, getPathFilenameFoldsTotal, saveFoldsTotal
+from typing import Any, Optional, Sequence, Type, Union
 import os
-import pathlib
 
-def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None, computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[int, float, bool]] = None, **keywordArguments: Optional[Type]) -> int:
+def countFolds(listDimensions: Sequence[int], pathishWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None, computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[int, float, bool]] = None, **keywordArguments: Optional[Type[Any]]) -> int:
     """Count the total number of possible foldings for a given map dimensions.
 
     Parameters:
         listDimensions: List of integers representing the dimensions of the map to be folded.
-        writeFoldsTotal (None): Path or filename to write the total fold count.
-            If a directory is provided, creates a file with default name based on map dimensions.
+        pathishWriteFoldsTotal (None): Path, filename, or pathFilename to write the total fold count to.
+            If a directory is provided, creates a file with a default name based on map dimensions.
         computationDivisions (None):
             Whether and how to divide the computational work. See notes for details.
         CPUlimit (None): This is only relevant if there are `computationDivisions`: whether and how to limit the CPU usage. See notes for details.
@@ -37,12 +37,8 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
     stateUniversal = outfitCountFolds(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit, **keywordArguments)
 
     pathFilenameFoldsTotal = None
-    if writeFoldsTotal is not None:
-        pathFilenameFoldsTotal = pathlib.Path(writeFoldsTotal)
-        if pathFilenameFoldsTotal.is_dir():
-            filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(stateUniversal['mapShape'])
-            pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT
-        pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
+    if pathishWriteFoldsTotal is not None:
+        pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathishWriteFoldsTotal)
 
     from mapFolding.babbage import _countFolds
     _countFolds(**stateUniversal)
@@ -50,10 +46,59 @@ def countFolds(listDimensions: Sequence[int], writeFoldsTotal: Optional[Union[st
     foldsTotal = stateUniversal['foldsSubTotals'].sum().item()
 
     if pathFilenameFoldsTotal is not None:
-        try:
-            pathFilenameFoldsTotal.write_text(str(foldsTotal))
-        except Exception as ERRORmessage:
-            print(ERRORmessage)
-            print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal")
+        saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
 
     return foldsTotal
+
+def Z0Z_makeJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]) -> Path:
+    from mapFolding import outfitCountFolds
+    stateUniversal = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
+    from mapFolding.countInitialize import countInitialize
+    countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['the'], stateUniversal['track'])
+    from mapFolding import getPathFilenameFoldsTotal
+    pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
+    import pathlib
+    suffix = pathFilenameChopChop.suffix
+    pathJob = pathlib.Path(str(pathFilenameChopChop)[0:-len(suffix)])
+    pathJob.mkdir(parents=True, exist_ok=True)
+    pathFilenameJob = pathJob / 'stateJob.pkl'
+    import pickle
+    pathFilenameJob.write_bytes(pickle.dumps(dict(stateUniversal)))
+    return pathFilenameJob
+
+def runJob(pathFilename: str):
+    from ctypes import c_ulonglong
+    from mapFolding import getPathFilenameFoldsTotal
+    from mapFolding import saveFoldsTotal
+    from mapFolding.countSequentialNoNumba import countSequential
+    from pathlib import Path
+    from pickle import loads
+    from typing import Final
+    from typing import Tuple
+    import numpy
+
+    pathFilenameJob: Final = Path(pathFilename)
+
+    stateJob = loads(pathFilenameJob.read_bytes())
+
+    connectionGraph: Final[numpy.ndarray] = stateJob['connectionGraph']
+    foldsSubTotals: numpy.ndarray = stateJob['foldsSubTotals']
+    gapsWhere: numpy.ndarray = stateJob['gapsWhere']
+    mapShape: Final[Tuple[int, ...]] = stateJob['mapShape']
+    my: numpy.ndarray = stateJob['my']
+    the: Final[numpy.ndarray] = stateJob['the']
+    track: numpy.ndarray = stateJob['track']
+    del stateJob
+
+    pathFilenameFoldsTotal: Final[Path] = getPathFilenameFoldsTotal(mapShape, pathFilenameJob.parent)
+    foldsTotal = c_ulonglong(0)
+
+    def compileThis():
+        nonlocal connectionGraph, foldsTotal, foldsSubTotals, gapsWhere, my, pathFilenameFoldsTotal, the, track
+        countSequential(connectionGraph, foldsSubTotals, gapsWhere, my, the, track)
+        foldsTotal = foldsSubTotals.sum().item()
+        print(foldsTotal)
+        saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
+        print(pathFilenameFoldsTotal)
+
+    compileThis()

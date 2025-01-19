@@ -1,5 +1,5 @@
 """A relatively stable API for oft-needed functionality."""
-from mapFolding import dtypeDefault, dtypeLarge
+from mapFolding import dtypeDefault, dtypeLarge, pathJobDEFAULT
 from mapFolding import indexMy, indexThe, indexTrack, computationState
 from mapFolding import intInnit, defineConcurrencyLimit, oopsieKwargsie
 from numpy import integer
@@ -7,6 +7,8 @@ from numpy.typing import NDArray
 from typing import Any, List, Optional, Sequence, Type, Union
 import numba
 import numpy
+import os
+import pathlib
 import sys
 
 def getFilenameFoldsTotal(listDimensions: Sequence[int]) -> str:
@@ -35,6 +37,14 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
             productDimensions *= dimension
 
         return productDimensions
+
+def getPathFilenameFoldsTotal(listDimensions: Sequence[int], pathishWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
+    pathFilenameFoldsTotal = pathlib.Path(pathishWriteFoldsTotal) if pathishWriteFoldsTotal is not None else pathJobDEFAULT
+    if pathFilenameFoldsTotal.is_dir():
+        filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(listDimensions)
+        pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT
+    pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
+    return pathFilenameFoldsTotal
 
 def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, CPUlimit: Optional[Union[bool, float, int]], listDimensions: Sequence[int]):
     """
@@ -148,7 +158,7 @@ def makeDataContainer(shape, datatype: Optional[Type] = None):
         datatype = dtypeDefault
     return numpy.zeros(shape, dtype=datatype)
 
-def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type]) -> computationState:
+def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type[Any]]) -> computationState:
     """
     Initializes and configures the computation state for map folding computations.
 
@@ -231,6 +241,21 @@ def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed par
         listNonNegative.append(dimension)
 
     return listNonNegative
+
+def saveFoldsTotal(pathFilename: Union[str, os.PathLike[str]], foldsTotal: int) -> None:
+    pathFilenameFoldsTotal = pathlib.Path(pathFilename)
+    try:
+        pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
+        pathFilenameFoldsTotal.write_text(str(foldsTotal))
+    except Exception as ERRORmessage:
+        print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
+        print(ERRORmessage)
+        print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
+        randomnessPlanB = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
+        filenameInfixUnique = ''.join(randomnessPlanB)
+        pathFilenamePlanB = pathlib.Path(pathlib.Path.cwd(), 'foldsTotal' + filenameInfixUnique + '.txt')
+        pathFilenamePlanB.write_text(str(foldsTotal))
+        print(str(pathFilenamePlanB))
 
 def setCPUlimit(CPUlimit: Union[bool, float, int, None]) -> int:
     """Sets CPU limit for Numba concurrent operations. Note that it can only affect Numba-jitted functions that have not yet been imported.

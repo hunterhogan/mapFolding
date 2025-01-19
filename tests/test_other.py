@@ -84,7 +84,7 @@ def test_countFolds_writeFoldsTotal(
     mock_countFolds = mockFoldingFunction(foldsValue, listDimensionsTestFunctionality)
 
     with unittest.mock.patch("mapFolding.babbage._countFolds", side_effect=mock_countFolds):
-        returned = countFolds(listDimensionsTestFunctionality, writeFoldsTotal=pathWriteTarget)
+        returned = countFolds(listDimensionsTestFunctionality, pathishWriteFoldsTotal=pathWriteTarget)
 
     standardComparison(foldsValue, lambda: returned)  # Check return value
     standardComparison(str(foldsValue), lambda: (pathTempTesting / filenameFoldsTotalExpected).read_text())  # Check file content
