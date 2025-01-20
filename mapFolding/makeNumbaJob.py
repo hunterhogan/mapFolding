@@ -4,8 +4,6 @@ import numpy
 import pathlib
 import pickle
 
-# TODO write foldsTotal to a file
-
 """
 Section: configure every time"""
 
@@ -13,13 +11,14 @@ Section: configure every time"""
 Z0Z_inlineMapFolding()
 
 # TODO configure this
-mapShape = [2,2]
+mapShape = [4,4]
 # NOTE ^^^^^^ pay attention
 
 """
 Section: settings"""
 
-parametersNumba = "cache=True, parallel=False, boundscheck=False, error_model='numpy', fastmath=True, nogil=True, nopython=True"
+parametersNumbaJit = "cache=True, parallel=False, boundscheck=False, error_model='numpy', fastmath=True, nogil=True, nopython=True"
+parametersNumbaCfunc = "numba.types.int64(), " + parametersNumbaJit
 
 pathFilenameData = Z0Z_makeJob(mapShape)
 pathJob = pathFilenameData.parent
@@ -33,12 +32,14 @@ ImaIndent = '    '
 """
 Section: did you handle and include this stuff?"""
 
-lineNumba = f"@numba.jit({parametersNumba})"
-linesWriteFoldsTotal = """"""
+# lineNumba = f"@numba.jit({parametersNumbaJit})"
+lineNumba = f"@numba.cfunc({parametersNumbaCfunc})"
+lineReturn = f"{ImaIndent}return foldsSubTotals.sum().item()"
 linesAlgorithm = """"""
 linesDataDynamic = """"""
 linesDataStatic = """"""
 linesLaunch = """"""
+linesWriteFoldsTotal = """"""
 
 """
 Section: do the work"""
@@ -57,7 +58,6 @@ the: numpy.ndarray = stateJob['the']
 track: numpy.ndarray = stateJob['track']
 
 pathFilenameFoldsTotal = stateJob['pathFilenameFoldsTotal']
-lineDataPathFilenameFoldsTotal = "pathFilenameFoldsTotal = r'" + str(pathFilenameFoldsTotal) + "'\n"
 
 def archivistFormatsArrayToCode(arrayTarget: numpy.ndarray, identifierName: str) -> str:
     """Format numpy array into a code string that recreates the array."""
@@ -72,13 +72,13 @@ linesDataDynamic = "\n".join([linesDataDynamic
             ])
 
 linesDataStatic = "\n".join([linesDataStatic
-            # , lineDataPathFilenameFoldsTotal
             , archivistFormatsArrayToCode(the, 'the')
             , archivistFormatsArrayToCode(connectionGraph, 'connectionGraph')
             ])
 
 linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
-                                , f"{ImaIndent}print(foldsSubTotals.sum().item())"
+                                , f"{ImaIndent}print(foldsTotal)"
+                                , f"{ImaIndent}open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
                                 ])
 
 WTFamIdoing = pathFilenameAlgorithm.read_text()
@@ -97,15 +97,16 @@ for lineSource in WTFamIdoing.splitlines():
 
 linesLaunch = linesLaunch + f"""
 if __name__ == '__main__':
-    {identifierCallableLaunch}()
+    foldsTotal = {identifierCallableLaunch}()
 
 """
 linesAll = "\n".join([
             linesImport
             , linesDataStatic
             , linesAlgorithm
-            , linesWriteFoldsTotal
+            , lineReturn
             , linesLaunch
+            , linesWriteFoldsTotal
             ])
 
 # from python_minifier import minify
