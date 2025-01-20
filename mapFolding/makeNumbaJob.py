@@ -1,115 +1,172 @@
-from mapFolding.startHere import Z0Z_makeJob
+"""Create a python module hardcoded to compute a map's foldsTotal.
+NumPy ndarray.
+Numba optimized.
+Absolutely no other imports.
+"""
+from mapFolding import datatypeLarge, dtypeLarge, dtypeDefault
 from mapFolding.inlineAfunction import Z0Z_inlineMapFolding
+from mapFolding.startHere import Z0Z_makeJob
+import ast
+import llvmlite.binding as llvm
+import numba
+import numba.core.compiler
+import numba.core.registry
 import numpy
 import pathlib
 import pickle
 
-"""
-Section: configure every time"""
+listDimensions = [6,6]
 
 # NOTE this overwrites files
 Z0Z_inlineMapFolding()
 
-# TODO configure this
-mapShape = [4,4]
-# NOTE ^^^^^^ pay attention
-
-"""
-Section: settings"""
-
-parametersNumbaJit = "cache=True, parallel=False, boundscheck=False, error_model='numpy', fastmath=True, nogil=True, nopython=True"
-parametersNumbaCfunc = "numba.types.int64(), " + parametersNumbaJit
-
-pathFilenameData = Z0Z_makeJob(mapShape)
-pathJob = pathFilenameData.parent
-pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/countSequentialNoNumba.py')
-pathFilenameDestination = pathFilenameData.with_stem(pathJob.name).with_suffix(".py")
-
 identifierCallableLaunch = "goGoGadgetAbsurdity"
 
-ImaIndent = '    '
+def archivistFormatsArrayToCode(arrayTarget: numpy.ndarray, identifierName: str) -> str:
+    """Format numpy array into a code string that recreates the array."""
+    arrayAsTypeStr = numpy.array2string(arrayTarget, threshold=10000, max_line_width=200, separator=',')
+    return f"{identifierName} = numpy.array({arrayAsTypeStr}, dtype=numpy.{arrayTarget.dtype})"
 
-"""
-Section: did you handle and include this stuff?"""
+def makePythonCode(listDimensions):
+    numpy_dtypeLarge = dtypeLarge
+    numpy_dtypeDefault = dtypeDefault
 
-# lineNumba = f"@numba.jit({parametersNumbaJit})"
-lineNumba = f"@numba.cfunc({parametersNumbaCfunc})"
-lineReturn = f"{ImaIndent}return foldsSubTotals.sum().item()"
-linesAlgorithm = """"""
-linesDataDynamic = """"""
-linesDataStatic = """"""
-linesLaunch = """"""
-linesWriteFoldsTotal = """"""
+    parametersNumba = f"numba.types.{datatypeLarge}(), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, nogil=True, nopython=True"
 
-"""
-Section: do the work"""
+    pathFilenameData = Z0Z_makeJob(listDimensions, datatypeDefault=numpy_dtypeDefault, datatypeLarge=numpy_dtypeLarge)
 
-linesImport = "\n".join([
+    pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/countSequentialNoNumba.py')
+    pathFilenameDestination = pathFilenameData.with_stem(pathFilenameData.parent.name).with_suffix(".py")
+
+    lineNumba = f"@numba.cfunc({parametersNumba})"
+
+    linesImport = "\n".join([
                         "import numpy"
                         , "import numba"
                         ])
 
-stateJob = pickle.loads(pathFilenameData.read_bytes())
-connectionGraph: numpy.ndarray = stateJob['connectionGraph']
-foldsSubTotals: numpy.ndarray = stateJob['foldsSubTotals']
-gapsWhere: numpy.ndarray = stateJob['gapsWhere']
-my: numpy.ndarray = stateJob['my']
-the: numpy.ndarray = stateJob['the']
-track: numpy.ndarray = stateJob['track']
+    stateJob = pickle.loads(pathFilenameData.read_bytes())
 
-pathFilenameFoldsTotal = stateJob['pathFilenameFoldsTotal']
-
-def archivistFormatsArrayToCode(arrayTarget: numpy.ndarray, identifierName: str) -> str:
-    """Format numpy array into a code string that recreates the array."""
-    arrayAsTypeStr = numpy.array2string( arrayTarget, threshold=10000, max_line_width=200, separator=',' )
-    return f"{identifierName} = numpy.array({arrayAsTypeStr}, dtype=numpy.{arrayTarget.dtype})\n"
-
-linesDataDynamic = "\n".join([linesDataDynamic
-            , ImaIndent + archivistFormatsArrayToCode(my, 'my')
-            , ImaIndent + archivistFormatsArrayToCode(foldsSubTotals, 'foldsSubTotals')
-            , ImaIndent + archivistFormatsArrayToCode(gapsWhere, 'gapsWhere')
-            , ImaIndent + archivistFormatsArrayToCode(track, 'track')
+    ImaIndent = '    '
+    linesDataDynamic = """"""
+    linesDataDynamic = "\n".join([linesDataDynamic
+            , ImaIndent + archivistFormatsArrayToCode(stateJob['my'], 'my')
+            , ImaIndent + archivistFormatsArrayToCode(stateJob['foldsSubTotals'], 'foldsSubTotals')
+            , ImaIndent + archivistFormatsArrayToCode(stateJob['gapsWhere'], 'gapsWhere')
+            , ImaIndent + archivistFormatsArrayToCode(stateJob['track'], 'track')
             ])
 
-linesDataStatic = "\n".join([linesDataStatic
-            , archivistFormatsArrayToCode(the, 'the')
-            , archivistFormatsArrayToCode(connectionGraph, 'connectionGraph')
+    linesDataStatic = """"""
+    linesDataStatic = "\n".join([linesDataStatic
+            , ImaIndent + archivistFormatsArrayToCode(stateJob['the'], 'the')
+            , ImaIndent + archivistFormatsArrayToCode(stateJob['connectionGraph'], 'connectionGraph')
             ])
 
-linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
-                                , f"{ImaIndent}print(foldsTotal)"
-                                , f"{ImaIndent}open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
+    pathFilenameFoldsTotal: pathlib.Path = stateJob['pathFilenameFoldsTotal']
+
+    linesAlgorithm = """"""
+    for lineSource in pathFilenameAlgorithm.read_text().splitlines():
+        if lineSource.startswith('#'):
+            continue
+        elif not lineSource:
+            continue
+        elif lineSource.startswith('def '):
+            lineSource = "\n".join([lineNumba
+                                , f"def {identifierCallableLaunch}():"
+                                , linesDataDynamic
+                                , linesDataStatic
                                 ])
-
-WTFamIdoing = pathFilenameAlgorithm.read_text()
-for lineSource in WTFamIdoing.splitlines():
-    if lineSource.startswith('#'):
-        continue
-    elif not lineSource:
-        continue
-    elif lineSource.startswith('def '):
-        lineSource = lineNumba + "\n"
-        lineSource = lineSource + f"def {identifierCallableLaunch}():\n"
-        lineSource = lineSource + linesDataDynamic
-    linesAlgorithm = "\n".join([linesAlgorithm
+        linesAlgorithm = "\n".join([linesAlgorithm
                             , lineSource
                             ])
 
-linesLaunch = linesLaunch + f"""
-if __name__ == '__main__':
-    foldsTotal = {identifierCallableLaunch}()
+    lineReturn = f"{ImaIndent}return foldsSubTotals.sum().item()"
 
-"""
-linesAll = "\n".join([
+    linesPythonCode = "\n".join([
             linesImport
-            , linesDataStatic
             , linesAlgorithm
             , lineReturn
-            , linesLaunch
-            , linesWriteFoldsTotal
             ])
 
-# from python_minifier import minify
-# linesAll = minify(linesAll, hoist_literals=False, rename_globals=True)
+    return pathFilenameDestination,pathFilenameFoldsTotal,linesPythonCode
 
-pathFilenameDestination.write_text(linesAll)
+def numbaTransformation(pythonCode: str) -> str:
+    """Transform Numba-optimized Python code into LLVM IR code"""
+    # Initialize LLVM
+    llvm.initialize()
+    llvm.initialize_native_target()
+    llvm.initialize_native_asmprinter()
+
+    # Parse the Python code to get function object without executing
+    tree = ast.parse(pythonCode)
+    compiled = compile(tree, '<string>', 'exec')
+    namespace = {}
+    eval(compiled, namespace)
+    compiled_function = namespace[identifierCallableLaunch]
+
+    # Get the compilation result
+    contextTyping = numba.core.registry.cpu_target.typing_context
+    contextTarget = numba.core.registry.cpu_target.target_context
+
+    compilationResult = numba.core.compiler.compile_extra(
+        func=compiled_function._pyfunc,
+        args=((),),
+        return_type=eval(f"numba.types.{datatypeLarge}"),
+        flags={},
+        locals={},
+        typingctx=contextTyping,
+        targetctx=contextTarget)
+
+    # Get the LLVM IR
+    llvmModule = str(compilationResult.library.get_llvm_str())
+
+    # Create new code that uses LLVM directly
+    llvmCode = f"""from llvmlite import binding as llvm
+
+# Initialize LLVM
+llvm.initialize()
+llvm.initialize_native_target()
+llvm.initialize_native_asmprinter()
+
+# Create module from IR
+module = llvm.parse_assembly('''
+{llvmModule}
+''')
+
+# Create execution engine
+target = llvm.Target.from_default_triple()
+target_machine = target.create_target_machine()
+execution_engine = llvm.create_execution_engine(target_machine)
+
+# Get function
+function_address = execution_engine.get_function_address("{identifierCallableLaunch}")
+
+# Create callable
+from ctypes import CFUNCTYPE, c_{datatypeLarge}
+compiled_function = CFUNCTYPE(c_{datatypeLarge})(function_address)
+
+if __name__ == '__main__':
+    foldsTotal = compiled_function()
+"""
+    return llvmCode
+
+pathFilenameWritePythonFile, pathFilenameFoldsTotal, linesPythonCode = makePythonCode(listDimensions)
+linesLLVMCode = numbaTransformation(linesPythonCode)
+
+linesLaunch = """"""
+linesLaunch = linesLaunch + f"""
+if __name__ == '__main__':
+    foldsTotal = {identifierCallableLaunch}()"""
+
+linesWriteFoldsTotal = """"""
+linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
+                                , "    print(foldsTotal)"
+                                , f"    open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
+                                ])
+
+linesAll = "\n".join([
+                    linesLLVMCode
+                    , linesWriteFoldsTotal
+                    ])
+
+pathFilenameWritePythonFile.write_text(linesAll)
