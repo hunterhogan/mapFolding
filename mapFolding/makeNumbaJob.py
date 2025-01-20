@@ -12,7 +12,7 @@ import numpy
 import pathlib
 import pickle
 
-listDimensions = [2,9]
+listDimensions = [3,7]
 
 # NOTE this overwrites files
 Z0Z_inlineMapFolding()
@@ -28,7 +28,9 @@ def writeModuleWithNumba(listDimensions):
     numpy_dtypeLarge = dtypeLarge
     numpy_dtypeDefault = dtypeDefault
 
-    parametersNumba = f"numba.types.{datatypeLarge}(), cache=True, parallel=False, boundscheck=False, error_model='numpy', fastmath=True, nogil=True, nopython=True"
+    parametersNumba = f"numba.types.{datatypeLarge}(), cache=True, parallel=False, boundscheck=False, \
+        error_model='numpy', fastmath=True, nogil=True, nopython=True, _nrt=True, forceinline=True, \
+            inline=True, looplift=True, no_cfunc_wrapper=False, no_cpython_wrapper=False"
 
     pathFilenameData = Z0Z_makeJob(listDimensions, datatypeDefault=numpy_dtypeDefault, datatypeLarge=numpy_dtypeLarge)
 
@@ -93,6 +95,7 @@ if __name__ == '__main__':
     linesAll = "\n".join([
                         linesImport
                         , linesAlgorithm
+                        , f"{ImaIndent}print(foldsSubTotals.sum().item())"
                         , lineReturn
                         , linesLaunch
                         , linesWriteFoldsTotal
