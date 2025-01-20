@@ -6,16 +6,13 @@ Absolutely no other imports.
 from mapFolding import datatypeLarge, dtypeLarge, dtypeDefault
 from mapFolding.inlineAfunction import Z0Z_inlineMapFolding
 from mapFolding.startHere import Z0Z_makeJob
-import ast
-import llvmlite.binding as llvm
-import numba
-import numba.core.compiler
-import numba.core.registry
+import importlib
+import llvmlite.binding
 import numpy
 import pathlib
 import pickle
 
-listDimensions = [6,6]
+listDimensions = [2,9]
 
 # NOTE this overwrites files
 Z0Z_inlineMapFolding()
@@ -27,18 +24,18 @@ def archivistFormatsArrayToCode(arrayTarget: numpy.ndarray, identifierName: str)
     arrayAsTypeStr = numpy.array2string(arrayTarget, threshold=10000, max_line_width=200, separator=',')
     return f"{identifierName} = numpy.array({arrayAsTypeStr}, dtype=numpy.{arrayTarget.dtype})"
 
-def makePythonCode(listDimensions):
+def writeModuleWithNumba(listDimensions):
     numpy_dtypeLarge = dtypeLarge
     numpy_dtypeDefault = dtypeDefault
 
-    parametersNumba = f"numba.types.{datatypeLarge}(), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, nogil=True, nopython=True"
+    parametersNumba = f"numba.types.{datatypeLarge}(), cache=True, parallel=False, boundscheck=False, error_model='numpy', fastmath=True, nogil=True, nopython=True"
 
     pathFilenameData = Z0Z_makeJob(listDimensions, datatypeDefault=numpy_dtypeDefault, datatypeLarge=numpy_dtypeLarge)
 
     pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/countSequentialNoNumba.py')
     pathFilenameDestination = pathFilenameData.with_stem(pathFilenameData.parent.name).with_suffix(".py")
 
-    lineNumba = f"@numba.cfunc({parametersNumba})"
+    lineNumba = f"@numba.jit({parametersNumba})"
 
     linesImport = "\n".join([
                         "import numpy"
@@ -82,91 +79,40 @@ def makePythonCode(listDimensions):
 
     lineReturn = f"{ImaIndent}return foldsSubTotals.sum().item()"
 
-    linesPythonCode = "\n".join([
-            linesImport
-            , linesAlgorithm
-            , lineReturn
-            ])
-
-    return pathFilenameDestination,pathFilenameFoldsTotal,linesPythonCode
-
-def numbaTransformation(pythonCode: str) -> str:
-    """Transform Numba-optimized Python code into LLVM IR code"""
-    # Initialize LLVM
-    llvm.initialize()
-    llvm.initialize_native_target()
-    llvm.initialize_native_asmprinter()
-
-    # Parse the Python code to get function object without executing
-    tree = ast.parse(pythonCode)
-    compiled = compile(tree, '<string>', 'exec')
-    namespace = {}
-    eval(compiled, namespace)
-    compiled_function = namespace[identifierCallableLaunch]
-
-    # Get the compilation result
-    contextTyping = numba.core.registry.cpu_target.typing_context
-    contextTarget = numba.core.registry.cpu_target.target_context
-
-    compilationResult = numba.core.compiler.compile_extra(
-        func=compiled_function._pyfunc,
-        args=((),),
-        return_type=eval(f"numba.types.{datatypeLarge}"),
-        flags={},
-        locals={},
-        typingctx=contextTyping,
-        targetctx=contextTarget)
-
-    # Get the LLVM IR
-    llvmModule = str(compilationResult.library.get_llvm_str())
-
-    # Create new code that uses LLVM directly
-    llvmCode = f"""from llvmlite import binding as llvm
-
-# Initialize LLVM
-llvm.initialize()
-llvm.initialize_native_target()
-llvm.initialize_native_asmprinter()
-
-# Create module from IR
-module = llvm.parse_assembly('''
-{llvmModule}
-''')
-
-# Create execution engine
-target = llvm.Target.from_default_triple()
-target_machine = target.create_target_machine()
-execution_engine = llvm.create_execution_engine(target_machine)
-
-# Get function
-function_address = execution_engine.get_function_address("{identifierCallableLaunch}")
-
-# Create callable
-from ctypes import CFUNCTYPE, c_{datatypeLarge}
-compiled_function = CFUNCTYPE(c_{datatypeLarge})(function_address)
-
-if __name__ == '__main__':
-    foldsTotal = compiled_function()
-"""
-    return llvmCode
-
-pathFilenameWritePythonFile, pathFilenameFoldsTotal, linesPythonCode = makePythonCode(listDimensions)
-linesLLVMCode = numbaTransformation(linesPythonCode)
-
-linesLaunch = """"""
-linesLaunch = linesLaunch + f"""
+    linesLaunch = """"""
+    linesLaunch = linesLaunch + f"""
 if __name__ == '__main__':
     foldsTotal = {identifierCallableLaunch}()"""
 
-linesWriteFoldsTotal = """"""
-linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
-                                , "    print(foldsTotal)"
-                                , f"    open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
-                                ])
+    linesWriteFoldsTotal = """"""
+    linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
+                                    , "    print(foldsTotal)"
+                                    , f"    open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
+                                    ])
 
-linesAll = "\n".join([
-                    linesLLVMCode
-                    , linesWriteFoldsTotal
-                    ])
+    linesAll = "\n".join([
+                        linesImport
+                        , linesAlgorithm
+                        , lineReturn
+                        , linesLaunch
+                        , linesWriteFoldsTotal
+                        ])
 
-pathFilenameWritePythonFile.write_text(linesAll)
+    pathFilenameDestination.write_text(linesAll)
+
+    return pathFilenameDestination
+
+def writeModuleLLVM(pathFilenamePythonFile: pathlib.Path) -> pathlib.Path:
+    pathRootPackage = pathlib.Path('c:/apps/mapFolding')
+    relativePathModule = pathFilenamePythonFile.relative_to(pathRootPackage)
+    moduleTarget = '.'.join(relativePathModule.parts)[0:-len(relativePathModule.suffix)]
+    moduleTargetImported = importlib.import_module(moduleTarget)
+    linesLLVM = moduleTargetImported.__dict__[identifierCallableLaunch].inspect_llvm()[()]
+    moduleLLVM = llvmlite.binding.module.parse_assembly(linesLLVM)
+    pathFilenameLLVM = pathFilenamePythonFile.with_suffix(".ll")
+    pathFilenameLLVM.write_text(str(moduleLLVM))
+    return pathFilenameLLVM
+
+if __name__ == '__main__':
+    pathFilenamePythonFile = writeModuleWithNumba(listDimensions)
+    pathFilenameLLVM = writeModuleLLVM(pathFilenamePythonFile)
