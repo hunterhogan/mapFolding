@@ -62,43 +62,36 @@ def Z0Z_makeJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type
     pathJob = pathlib.Path(str(pathFilenameChopChop)[0:-len(suffix)])
     pathJob.mkdir(parents=True, exist_ok=True)
     pathFilenameJob = pathJob / 'stateJob.pkl'
+
+    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathFilenameJob.parent)
+    stateJob = {**stateUniversal, 'pathFilenameFoldsTotal': pathFilenameFoldsTotal}
+
+    del stateJob['mapShape']
+
     import pickle
-    pathFilenameJob.write_bytes(pickle.dumps(dict(stateUniversal)))
+    pathFilenameJob.write_bytes(pickle.dumps(stateJob))
     return pathFilenameJob
 
-def runJob(pathFilename: str):
-    from ctypes import c_ulonglong
-    from mapFolding import getPathFilenameFoldsTotal
-    from mapFolding import saveFoldsTotal
-    from mapFolding.countSequentialNoNumba import countSequential
-    from pathlib import Path
-    from pickle import loads
+def runJob(pathFilename):
     from typing import Final
-    from typing import Tuple
     import numpy
-
-    pathFilenameJob: Final = Path(pathFilename)
-
+    from pathlib import Path
+    pathFilenameJob = Path(pathFilename)
+    from pickle import loads
     stateJob = loads(pathFilenameJob.read_bytes())
 
-    connectionGraph: Final[numpy.ndarray] = stateJob['connectionGraph']
+    connectionGraph: numpy.ndarray = stateJob['connectionGraph']
     foldsSubTotals: numpy.ndarray = stateJob['foldsSubTotals']
     gapsWhere: numpy.ndarray = stateJob['gapsWhere']
-    mapShape: Final[Tuple[int, ...]] = stateJob['mapShape']
     my: numpy.ndarray = stateJob['my']
+    pathFilenameFoldsTotal: Final[Path] = stateJob['pathFilenameFoldsTotal']
     the: Final[numpy.ndarray] = stateJob['the']
     track: numpy.ndarray = stateJob['track']
-    del stateJob
 
-    pathFilenameFoldsTotal: Final[Path] = getPathFilenameFoldsTotal(mapShape, pathFilenameJob.parent)
-    foldsTotal = c_ulonglong(0)
+    from mapFolding.countSequentialNoNumba import countSequential
+    countSequential(connectionGraph, foldsSubTotals, gapsWhere, my, the, track)
 
-    def compileThis():
-        nonlocal connectionGraph, foldsTotal, foldsSubTotals, gapsWhere, my, pathFilenameFoldsTotal, the, track
-        countSequential(connectionGraph, foldsSubTotals, gapsWhere, my, the, track)
-        foldsTotal = foldsSubTotals.sum().item()
-        print(foldsTotal)
-        saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
-        print(pathFilenameFoldsTotal)
-
-    compileThis()
+    print(foldsSubTotals.sum().item())
+    Path(pathFilenameFoldsTotal).parent.mkdir(parents=True, exist_ok=True)
+    Path(pathFilenameFoldsTotal).write_text(str(foldsSubTotals.sum().item()))
+    print(pathFilenameFoldsTotal)
