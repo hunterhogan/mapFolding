@@ -1,24 +1,26 @@
+"""NOTE make a special venv for nuitka, then run nuitka from that venv"""
 from pathlib import Path
 from pickle import loads
 from typing import Final
 import numpy
+from mapFolding.startHere import Z0Z_makeJob
 
 """
 Section: configure every time"""
 
 # TODO configure this
-mapShapeString = '[3x3x3]'
+mapShape = [3]*3
 # NOTE ^^^^^^ pay attention
 
 """
 Section: settings"""
 
-pathJobs = Path('/apps/mapFolding/mapFolding/jobs')
-pathThisJob = pathJobs / mapShapeString
+pathFilenameData = Z0Z_makeJob(mapShape)
+
+pathJob = pathFilenameData.parent
 
 pathFilenameAlgorithm = Path('/apps/mapFolding/mapFolding/countSequentialNoNumba.py')
-pathFilenameData = pathThisJob / 'stateJob.pkl'
-pathFilenameDestination = Path(f"/apps/mapFolding/nn/{mapShapeString}.py")
+pathFilenameDestination = Path(f"/apps/mapFolding/nn/{pathJob.name}.py")
 
 """
 Section: did you handle and include this stuff?"""
@@ -32,8 +34,8 @@ settingsNuitkaProject=f"""
 # nuitka-project: --onefile-no-compression
 # nuitka-project: --lto=yes
 # nuitka-project: --clang
-# nuitka-project: --output-dir={pathThisJob}
-# nuitka-project: --output-filename={mapShapeString}.exe
+# nuitka-project: --output-dir={pathJob}
+# nuitka-project: --output-filename={pathJob.name}.exe
 """
 # nuitka-project:
 """
