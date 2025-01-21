@@ -242,20 +242,39 @@ def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed par
 
     return listNonNegative
 
+import tempfile
+import shutil
+import logging
+import os
 def saveFoldsTotal(pathFilename: Union[str, os.PathLike[str]], foldsTotal: int) -> None:
-    pathFilenameFoldsTotal = pathlib.Path(pathFilename)
+    """
+    Save foldsTotal with multiple fallback mechanisms.
+
+    Parameters:
+        pathFilename: Target save location
+        foldsTotal: Critical computed value to save
+    """
+    """Thoughts
+    Everything in a try block
+    Save it multiple times with multiple packages
+    no need for context managers, especially because they can cause errors"""
     try:
+        pathFilenameFoldsTotal = pathlib.Path(pathFilename)
         pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
         pathFilenameFoldsTotal.write_text(str(foldsTotal))
     except Exception as ERRORmessage:
-        print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
-        print(ERRORmessage)
-        print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
-        randomnessPlanB = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
-        filenameInfixUnique = ''.join(randomnessPlanB)
-        pathFilenamePlanB = pathlib.Path(pathlib.Path.cwd(), 'foldsTotal' + filenameInfixUnique + '.txt')
-        pathFilenamePlanB.write_text(str(foldsTotal))
-        print(str(pathFilenamePlanB))
+        try:
+            print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
+            print(ERRORmessage)
+            print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
+            randomnessPlanB = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
+            filenameInfixUnique = ''.join(randomnessPlanB)
+            import os
+            pathFilenamePlanB = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')
+            open(pathFilenamePlanB, 'w').write(str(foldsTotal))
+            print(str(pathFilenamePlanB))
+        except:
+            print(foldsTotal)
 
 def setCPUlimit(CPUlimit: Union[bool, float, int, None]) -> int:
     """Sets CPU limit for Numba concurrent operations. Note that it can only affect Numba-jitted functions that have not yet been imported.
