@@ -4,8 +4,8 @@ Numba optimized.
 Absolutely no other imports.
 """
 from mapFolding import datatypeLarge, dtypeLarge, dtypeDefault
-from mapFolding.inlineAfunction import Z0Z_inlineMapFolding
-from mapFolding.startHere import Z0Z_makeJob
+from mapFolding.someAssemblyRequired.inlineAfunction import Z0Z_inlineMapFolding
+from mapFolding.someAssemblyRequired.jobsAndTasks import Z0Z_makeJob
 import importlib
 import llvmlite.binding
 import numpy

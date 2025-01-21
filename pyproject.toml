@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mapFolding"
-description = "Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps)"
+description = "Count distinct ways to fold a map (or a strip of stamps)"
 readme = "README.md"
 authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 version = "0.2.4"

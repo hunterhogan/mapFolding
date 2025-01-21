@@ -3,7 +3,7 @@ from pathlib import Path
 from pickle import loads
 from typing import Final
 import numpy
-from mapFolding.startHere import Z0Z_makeJob
+from mapFolding.someAssemblyRequired.jobsAndTasks import Z0Z_makeJob
 
 """
 Section: configure every time"""
