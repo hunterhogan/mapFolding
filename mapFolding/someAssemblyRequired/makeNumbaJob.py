@@ -28,18 +28,18 @@ def writeModuleWithNumba(listDimensions):
     numpy_dtypeLarge = dtypeLarge
     numpy_dtypeDefault = dtypeDefault
 
-    parametersNumba = f"cache=True, \
+    parametersNumba = f"numba.types.{datatypeLarge}(), cache=True, \
 parallel=False, \
+boundscheck=False, \
+error_model='numpy', \
+fastmath=True, \
+nopython=True, \
+forceinline=True, \
+looplift=True, \
+no_cfunc_wrapper=False, \
+no_cpython_wrapper=False, \
+_nrt=True, \
 "
-# boundscheck=False, \
-# error_model='numpy', \
-# fastmath=True, \
-# nopython=True, \
-# forceinline=True, \
-# looplift=True, \
-# no_cfunc_wrapper=False, \
-# no_cpython_wrapper=False, \
-# _nrt=True, \
 
     pathFilenameData = Z0Z_makeJob(listDimensions, datatypeDefault=numpy_dtypeDefault, datatypeLarge=numpy_dtypeLarge)
 
@@ -100,11 +100,11 @@ if __name__ == '__main__':
                                     , "    print(foldsTotal)"
                                     , "    with numba.objmode():"
                                     , f"        open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
+                                    , "    return foldsTotal"
                                     ])
 
     linesAll = "\n".join([
                         linesImport
-                        # , linesCallableWriteToFile
                         , linesAlgorithm
                         , linesWriteFoldsTotal
                         , linesLaunch
@@ -119,10 +119,6 @@ def writeModuleLLVM(pathFilenamePythonFile: pathlib.Path) -> pathlib.Path:
     relativePathModule = pathFilenamePythonFile.relative_to(pathRootPackage)
     moduleTarget = '.'.join(relativePathModule.parts)[0:-len(relativePathModule.suffix)]
     moduleTargetImported = importlib.import_module(moduleTarget)
-    # print(moduleTargetImported.__dict__.keys())
-    # print(moduleTargetImported.__dict__[identifierCallableLaunch].inspect_llvm().keys())
-    print(moduleTargetImported.__dict__[identifierCallableLaunch].inspect_llvm())
-    # linesLLVM = moduleTargetImported.__dict__[identifierCallableLaunch].inspect_llvm()[()]
     linesLLVM = moduleTargetImported.__dict__[identifierCallableLaunch].inspect_llvm()[()]
     moduleLLVM = llvmlite.binding.module.parse_assembly(linesLLVM)
     pathFilenameLLVM = pathFilenamePythonFile.with_suffix(".ll")
