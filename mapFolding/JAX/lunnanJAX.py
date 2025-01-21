@@ -1,3 +1,5 @@
+"""I was able to implement the algorithm with JAX, but I didn't see an advantage and it's a pain in the ass.
+I don't maintain this module."""
 from mapFolding import validateListDimensions, getLeavesTotal, makeConnectionGraph
 from typing import List, Tuple
 import jax
