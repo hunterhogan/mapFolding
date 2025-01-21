@@ -12,7 +12,7 @@ import numpy
 import pathlib
 import pickle
 
-listDimensions = [2,9]
+listDimensions = [2,20]
 
 # NOTE this overwrites files
 Z0Z_inlineMapFolding()

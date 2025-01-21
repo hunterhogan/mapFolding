@@ -12,7 +12,7 @@ import pathlib
 import sys
 
 def getFilenameFoldsTotal(listDimensions: Sequence[int]) -> str:
-    return str(sorted(listDimensions)).replace(', ', 'x') + '.foldsTotal'
+    return str(sorted(listDimensions)).replace(', ', 'x').replace('[', 'p').replace(']', '') + '.foldsTotal'
 
 def getLeavesTotal(listDimensions: Sequence[int]) -> int:
     """
