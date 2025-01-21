@@ -19,7 +19,6 @@ OEIS_for_n = "mapFolding.oeis:OEIS_for_n"
 
 [project.optional-dependencies]
 benchmark = ["pandas", "jupyter", "ipywidgets", "tqdm"]
-jax = ["jax", "jaxtyping"]
 testing = ["pytest", "pytest-cov", "pytest-env", "pytest-xdist", "pytest-order", "pytest-dependency"]
 
 [tool.setuptools]
