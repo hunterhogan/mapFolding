@@ -12,7 +12,7 @@ import numpy
 import pathlib
 import pickle
 
-listDimensions = [3,7]
+listDimensions = [2,9]
 
 # NOTE this overwrites files
 Z0Z_inlineMapFolding()
@@ -28,9 +28,18 @@ def writeModuleWithNumba(listDimensions):
     numpy_dtypeLarge = dtypeLarge
     numpy_dtypeDefault = dtypeDefault
 
-    parametersNumba = f"numba.types.{datatypeLarge}(), cache=True, parallel=False, boundscheck=False, \
-        error_model='numpy', fastmath=True, nogil=True, nopython=True, _nrt=True, forceinline=True, \
-            inline=True, looplift=True, no_cfunc_wrapper=False, no_cpython_wrapper=False"
+    parametersNumba = f"cache=True, \
+parallel=False, \
+"
+# boundscheck=False, \
+# error_model='numpy', \
+# fastmath=True, \
+# nopython=True, \
+# forceinline=True, \
+# looplift=True, \
+# no_cfunc_wrapper=False, \
+# no_cpython_wrapper=False, \
+# _nrt=True, \
 
     pathFilenameData = Z0Z_makeJob(listDimensions, datatypeDefault=numpy_dtypeDefault, datatypeLarge=numpy_dtypeLarge)
 
@@ -49,6 +58,7 @@ def writeModuleWithNumba(listDimensions):
     ImaIndent = '    '
     linesDataDynamic = """"""
     linesDataDynamic = "\n".join([linesDataDynamic
+            , ImaIndent + f"foldsTotal = numba.types.{datatypeLarge}(0)"
             , ImaIndent + archivistFormatsArrayToCode(stateJob['my'], 'my')
             , ImaIndent + archivistFormatsArrayToCode(stateJob['foldsSubTotals'], 'foldsSubTotals')
             , ImaIndent + archivistFormatsArrayToCode(stateJob['gapsWhere'], 'gapsWhere')
@@ -79,26 +89,25 @@ def writeModuleWithNumba(listDimensions):
                             , lineSource
                             ])
 
-    lineReturn = f"{ImaIndent}return foldsSubTotals.sum().item()"
-
     linesLaunch = """"""
     linesLaunch = linesLaunch + f"""
 if __name__ == '__main__':
-    foldsTotal = {identifierCallableLaunch}()"""
+    {identifierCallableLaunch}()"""
 
     linesWriteFoldsTotal = """"""
     linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
+                                    , "    foldsTotal = foldsSubTotals.sum().item()"
                                     , "    print(foldsTotal)"
-                                    , f"    open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
+                                    , "    with numba.objmode():"
+                                    , f"        open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
                                     ])
 
     linesAll = "\n".join([
                         linesImport
+                        # , linesCallableWriteToFile
                         , linesAlgorithm
-                        , f"{ImaIndent}print(foldsSubTotals.sum().item())"
-                        , lineReturn
-                        , linesLaunch
                         , linesWriteFoldsTotal
+                        , linesLaunch
                         ])
 
     pathFilenameDestination.write_text(linesAll)
@@ -110,6 +119,10 @@ def writeModuleLLVM(pathFilenamePythonFile: pathlib.Path) -> pathlib.Path:
     relativePathModule = pathFilenamePythonFile.relative_to(pathRootPackage)
     moduleTarget = '.'.join(relativePathModule.parts)[0:-len(relativePathModule.suffix)]
     moduleTargetImported = importlib.import_module(moduleTarget)
+    # print(moduleTargetImported.__dict__.keys())
+    # print(moduleTargetImported.__dict__[identifierCallableLaunch].inspect_llvm().keys())
+    print(moduleTargetImported.__dict__[identifierCallableLaunch].inspect_llvm())
+    # linesLLVM = moduleTargetImported.__dict__[identifierCallableLaunch].inspect_llvm()[()]
     linesLLVM = moduleTargetImported.__dict__[identifierCallableLaunch].inspect_llvm()[()]
     moduleLLVM = llvmlite.binding.module.parse_assembly(linesLLVM)
     pathFilenameLLVM = pathFilenamePythonFile.with_suffix(".ll")
