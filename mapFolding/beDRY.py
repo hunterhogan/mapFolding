@@ -96,63 +96,6 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
 
     return taskDivisions
 
-def makeConnectionGraphSentinel(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> NDArray[integer[Any]]:
-    """
-    Constructs a multi-dimensional connection graph representing the connections between the leaves of a map with the given dimensions.
-    Also called a Cartesian product decomposition or dimensional product mapping.
-
-    Parameters
-        listDimensions: A sequence of integers representing the dimensions of the map.
-
-    Returns
-        connectionGraph: A 3D numpy array with shape of (dimensionsTotal, leavesTotal + 1, leavesTotal + 1).
-    """
-    datatype = keywordArguments.get('datatype', dtypeDefault)
-    mapShape = validateListDimensions(listDimensions)
-    leavesTotal = getLeavesTotal(mapShape)
-    arrayDimensions = numpy.array(mapShape, dtype=datatype)
-    dimensionsTotal = len(arrayDimensions)
-
-    # Step 1: find the cumulative product of the map's dimensions
-    cumulativeProduct = numpy.multiply.accumulate([1] + mapShape, dtype=datatype)
-
-    # Step 2: create a coordinate system
-    coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=datatype)
-
-    for dimension1ndex in range(1, dimensionsTotal + 1):
-        for leaf1ndex in range(1, leavesTotal + 1):
-            coordinateSystem[dimension1ndex, leaf1ndex] = (
-                ((leaf1ndex - 1) // cumulativeProduct[dimension1ndex - 1]) %
-                arrayDimensions[dimension1ndex - 1] + 1
-            )
-
-    # Step 3: create and fill the connection graph
-    connectionGraph = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=datatype)
-
-    for dimension1ndex in range(1, dimensionsTotal + 1):
-        for activeLeaf1ndex in range(1, leavesTotal + 1):
-            for connectee1ndex in range(1, activeLeaf1ndex + 1):
-                # Base coordinate conditions
-                isFirstCoord = coordinateSystem[dimension1ndex, connectee1ndex] == 1
-                isLastCoord = coordinateSystem[dimension1ndex, connectee1ndex] == arrayDimensions[dimension1ndex - 1]
-                exceedsActive = connectee1ndex + cumulativeProduct[dimension1ndex - 1] > activeLeaf1ndex
-
-                # Parity check
-                isEvenParity = (coordinateSystem[dimension1ndex, activeLeaf1ndex] & 1) == \
-                                (coordinateSystem[dimension1ndex, connectee1ndex] & 1)
-
-                # Determine connection value
-                if (isEvenParity and isFirstCoord) or (not isEvenParity and (isLastCoord or exceedsActive)):
-                    connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex
-                elif isEvenParity and not isFirstCoord:
-                    connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex - cumulativeProduct[dimension1ndex - 1]
-                elif not isEvenParity and not (isLastCoord or exceedsActive):
-                    connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[dimension1ndex - 1]
-                else:
-                    connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex
-
-    return connectionGraph
-
 def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> NDArray[integer[Any]]:
     """
     Constructs a multi-dimensional connection graph representing the connections between the leaves of a map with the given dimensions.
@@ -260,19 +203,21 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
     the = makeDataContainer(len(indexThe), datatypeSmall)
 
     mapShape = tuple(sorted(validateListDimensions(listDimensions)))
-    the[indexThe.leavesTotal] = getLeavesTotal(mapShape)
     the[indexThe.dimensionsTotal] = len(mapShape)
     concurrencyLimit = setCPUlimit(CPUlimit)
-    the[indexThe.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, listDimensions)
+    the[indexThe.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, mapShape)
+
+    foldGroups = makeDataContainer(max(the[indexThe.taskDivisions] + 1, 2), datatypeLarge)
+    foldGroups[-1] = leavesTotal = getLeavesTotal(mapShape)
 
     stateInitialized = computationState(
         connectionGraph = makeConnectionGraph(mapShape, datatype=datatypeSmall),
-        foldsSubTotals = makeDataContainer(the[indexThe.leavesTotal], datatypeLarge),
+        foldGroups = foldGroups,
         mapShape = mapShape,
         my = makeDataContainer(len(indexMy), datatypeDefault),
-        gapsWhere = makeDataContainer(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, datatypeSmall),
+        gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, datatypeSmall),
         the = the,
-        track = makeDataContainer((len(indexTrack), the[indexThe.leavesTotal] + 1), datatypeDefault)
+        track = makeDataContainer((len(indexTrack), leavesTotal + 1), datatypeDefault)
         )
 
     stateInitialized['my'][indexMy.leaf1ndex.value] = 1

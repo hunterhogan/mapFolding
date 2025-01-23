@@ -10,8 +10,8 @@ def activeLeafGreaterThan0Condition(my):
     return my[indexMy.leaf1ndex.value] > 0
 
 @numba.jit((numba.int64[::1],numba.int64[::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
-def activeLeafGreaterThanLeavesTotalCondition(my, the):
-    return my[indexMy.leaf1ndex.value] > the[indexThe.leavesTotal.value]
+def activeLeafGreaterThanLeavesTotalCondition(foldGroups, my):
+    return my[indexMy.leaf1ndex.value] > foldGroups[-1] # leavesTotal
 
 @numba.jit((numba.int64[::1],), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def activeLeafIsTheFirstLeafCondition(my):
@@ -44,11 +44,11 @@ def countGaps(gapsWhere, my, track):
 
 @numba.jit((numba.int64[::1],), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def dimension1ndexIncrement(my):
-    my[indexMy.dimension1ndex.value] += 1
+    my[indexMy.indexDimension.value] += 1
 
 @numba.jit((numba.int64[:,:,::1], numba.int64[::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def dimensionsUnconstrainedCondition(connectionGraph, my):
-    return connectionGraph[my[indexMy.dimension1ndex.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]] == my[indexMy.leaf1ndex.value]
+    return connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]] == my[indexMy.leaf1ndex.value]
 
 @numba.jit((numba.int64[::1],), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def dimensionsUnconstrainedIncrement(my):
@@ -65,11 +65,11 @@ def filterCommonGaps(gapsWhere, my, the, track):
 def findGapsInitializeVariables(my, track):
     my[indexMy.dimensionsUnconstrained.value] = 0
     my[indexMy.gap1ndexCeiling.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
-    my[indexMy.dimension1ndex.value] = 0
+    my[indexMy.indexDimension.value] = 0
 
 @numba.jit((numba.int64[::1],numba.int64[::1],numba.int64[::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
-def foldsSubTotalIncrement(foldsSubTotals, my, the):
-    foldsSubTotals[my[indexMy.taskIndex.value]] += the[indexThe.leavesTotal.value]
+def foldsSubTotalIncrement(foldGroups, my, the):
+    foldGroups[my[indexMy.taskIndex.value]] += 1
 
 @numba.jit((numba.int64[::1],), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def indexMiniGapIncrement(my):
@@ -93,11 +93,11 @@ def leafBelowSentinelIs1Condition(track):
 
 @numba.jit((numba.int64[:,:,::1], numba.int64[::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def leafConnecteeInitialization(connectionGraph, my):
-    my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.dimension1ndex.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]]
+    my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]]
 
 @numba.jit((numba.int64[:,:,::1], numba.int64[::1],numba.int64[:,::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def leafConnecteeUpdate(connectionGraph, my, track):
-    my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.dimension1ndex.value], my[indexMy.leaf1ndex.value], track[indexTrack.leafBelow.value, my[indexMy.leafConnectee.value]]]
+    my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], track[indexTrack.leafBelow.value, my[indexMy.leafConnectee.value]]]
 
 @numba.jit((numba.int64[::1],), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def loopingLeavesConnectedToActiveLeaf(my):
@@ -105,7 +105,7 @@ def loopingLeavesConnectedToActiveLeaf(my):
 
 @numba.jit((numba.int64[::1],numba.int64[::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def loopingTheDimensions(my, the):
-    return my[indexMy.dimension1ndex.value] < the[indexThe.dimensionsTotal.value]
+    return my[indexMy.indexDimension.value] < the[indexThe.dimensionsTotal.value]
 
 @numba.jit((numba.int64[::1],), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def loopingToActiveGapCeiling(my):
@@ -155,11 +155,11 @@ def countInitialize(connectionGraph, gapsWhere, my, the, track):
             return
 
 @numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
-def countSequential(connectionGraph, foldsSubTotals, gapsWhere, my, the, track):
+def countSequential(connectionGraph, foldGroups, gapsWhere, my, the, track):
     while activeLeafGreaterThan0Condition(my=my):
         if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
-            if activeLeafGreaterThanLeavesTotalCondition(my=my, the=the):
-                foldsSubTotalIncrement(foldsSubTotals=foldsSubTotals, my=my, the=the)
+            if activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my):
+                foldsSubTotalIncrement(foldGroups=foldGroups, my=my, the=the)
             else:
                 findGapsInitializeVariables(my=my, track=track)
                 while loopingTheDimensions(my=my, the=the):
@@ -181,7 +181,7 @@ def countSequential(connectionGraph, foldsSubTotals, gapsWhere, my, the, track):
             placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
 
 @numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1],numba.int64[::1],numba.int64[::1],numba.int64[:,::1]), parallel=True, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
-def countParallel(connectionGraph, foldsSubTotals, gapsWherePARALLEL, myPARALLEL, the, trackPARALLEL):
+def countParallel(connectionGraph, foldGroups, gapsWherePARALLEL, myPARALLEL, the, trackPARALLEL):
     for indexSherpa in numba.prange(the[indexThe.taskDivisions.value]):
         gapsWhere = gapsWherePARALLEL.copy()
         my = myPARALLEL.copy()
@@ -189,8 +189,8 @@ def countParallel(connectionGraph, foldsSubTotals, gapsWherePARALLEL, myPARALLEL
         track = trackPARALLEL.copy()
         while activeLeafGreaterThan0Condition(my=my):
             if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
-                if activeLeafGreaterThanLeavesTotalCondition(my=my, the=the):
-                    foldsSubTotalIncrement(foldsSubTotals=foldsSubTotals, my=my, the=the)
+                if activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my):
+                    foldsSubTotalIncrement(foldGroups=foldGroups, my=my, the=the)
                 else:
                     findGapsInitializeVariables(my=my, track=track)
                     while loopingTheDimensions(my=my, the=the):

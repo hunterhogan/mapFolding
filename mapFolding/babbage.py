@@ -7,7 +7,7 @@ import numba
 import numpy
 
 @numba.jit(cache=True)
-def _countFolds(connectionGraph: NDArray[integer[Any]], foldsSubTotals: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
+def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
     """
     What in tarnation is this stupid module and function?
 
@@ -30,6 +30,6 @@ def _countFolds(connectionGraph: NDArray[integer[Any]], foldsSubTotals: NDArray[
     countInitialize(connectionGraph=connectionGraph, gapsWhere=gapsWhere, my=my, the=the, track=track)
 
     if the[indexThe.taskDivisions.value] > 0:
-        countParallel(connectionGraph=connectionGraph, foldsSubTotals=foldsSubTotals, gapsWherePARALLEL=gapsWhere, myPARALLEL=my, the=the, trackPARALLEL=track)
+        countParallel(connectionGraph=connectionGraph, foldGroups=foldGroups, gapsWherePARALLEL=gapsWhere, myPARALLEL=my, the=the, trackPARALLEL=track)
     else:
-        countSequential(connectionGraph=connectionGraph, foldsSubTotals=foldsSubTotals, gapsWhere=gapsWhere, my=my, the=the, track=track)
+        countSequential(connectionGraph=connectionGraph, foldGroups=foldGroups, gapsWhere=gapsWhere, my=my, the=the, track=track)

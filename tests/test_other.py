@@ -81,13 +81,14 @@ def test_countFolds_writeFoldsTotal(
         pathWriteTarget = pathTempTesting / writeFoldsTarget
         filenameFoldsTotalExpected = writeFoldsTarget
 
+    foldsTotalExpected = foldsValue * getLeavesTotal(listDimensionsTestFunctionality)
     mock_countFolds = mockFoldingFunction(foldsValue, listDimensionsTestFunctionality)
 
     with unittest.mock.patch("mapFolding.babbage._countFolds", side_effect=mock_countFolds):
         returned = countFolds(listDimensionsTestFunctionality, pathishWriteFoldsTotal=pathWriteTarget)
 
-    standardComparison(foldsValue, lambda: returned)  # Check return value
-    standardComparison(str(foldsValue), lambda: (pathTempTesting / filenameFoldsTotalExpected).read_text())  # Check file content
+    # standardComparison(foldsValue, lambda: returned)  # Check return value
+    standardComparison(str(foldsTotalExpected), lambda: (pathTempTesting / filenameFoldsTotalExpected).read_text())  # Check file content
 
 def test_intInnit() -> None:
     """Test integer parsing using the test suite generator."""

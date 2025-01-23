@@ -42,7 +42,7 @@ def countFolds(listDimensions: Sequence[int], pathishWriteFoldsTotal: Optional[U
     from mapFolding.babbage import _countFolds
     _countFolds(**stateUniversal)
 
-    foldsTotal = stateUniversal['foldsSubTotals'].sum().item()
+    foldsTotal = stateUniversal['foldGroups'][0:-1].sum() * stateUniversal['foldGroups'][-1]
 
     if pathFilenameFoldsTotal is not None:
         saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)

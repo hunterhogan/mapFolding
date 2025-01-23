@@ -240,13 +240,12 @@ def oeisID_1random() -> str:
 def mockFoldingFunction():
     """Creates a mock function that simulates _countFolds behavior."""
     def make_mock(foldsValue: int, listDimensions: List[int]):
-        arraySize = getLeavesTotal(listDimensions)
-        # The array needs to sum to our target value
-        mock_array = makeDataContainer(arraySize)
-        mock_array[arraySize - 1] = foldsValue  # Put entire value in last position
+        mock_array = makeDataContainer(2)
+        mock_array[0] = foldsValue
+        mock_array[-1] = getLeavesTotal(listDimensions)
 
         def mock_countfolds(**keywordArguments):
-            keywordArguments['foldsSubTotals'][:] = mock_array
+            keywordArguments['foldGroups'][:] = mock_array
             return None
 
         return mock_countfolds
