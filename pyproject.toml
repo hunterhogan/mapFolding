@@ -43,4 +43,4 @@ output = "tests/coverage/coverage.xml"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--color=yes", "-n 4"]
-# env = ["NUMBA_DISABLE_JIT=1"]
+env = ["NUMBA_DISABLE_JIT=1"]
