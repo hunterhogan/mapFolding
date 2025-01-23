@@ -1,6 +1,6 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding import dtypeDefault, dtypeLarge, dtypeSmall, pathJobDEFAULT
-from mapFolding import indexMy, indexThe, indexTrack, computationState
+from mapFolding import indexMy, indexTrack, computationState
 from mapFolding import intInnit, defineConcurrencyLimit, oopsieKwargsie
 from numpy import integer
 from numpy.typing import NDArray
@@ -148,8 +148,6 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
                     connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex - cumulativeProduct[indexDimension]
                 elif not isEvenParity and not (isLastCoord or exceedsActive):
                     connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
-                else:
-                    connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex
 
     return connectionGraph
 
@@ -200,27 +198,26 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
     datatypeLarge = keywordArguments.get('datatypeLarge', dtypeLarge)
     datatypeSmall = keywordArguments.get('datatypeSmall', dtypeSmall)
 
-    the = makeDataContainer(len(indexThe), datatypeSmall)
+    my = makeDataContainer(len(indexMy), datatypeDefault)
 
     mapShape = tuple(sorted(validateListDimensions(listDimensions)))
-    the[indexThe.dimensionsTotal] = len(mapShape)
     concurrencyLimit = setCPUlimit(CPUlimit)
-    the[indexThe.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, mapShape)
+    my[indexMy.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, mapShape)
 
-    foldGroups = makeDataContainer(max(the[indexThe.taskDivisions] + 1, 2), datatypeLarge)
+    foldGroups = makeDataContainer(max(my[indexMy.taskDivisions] + 1, 2), datatypeLarge)
     foldGroups[-1] = leavesTotal = getLeavesTotal(mapShape)
 
+    my[indexMy.dimensionsTotal] = len(mapShape)
+    my[indexMy.leaf1ndex] = 1
     stateInitialized = computationState(
         connectionGraph = makeConnectionGraph(mapShape, datatype=datatypeSmall),
         foldGroups = foldGroups,
         mapShape = mapShape,
-        my = makeDataContainer(len(indexMy), datatypeDefault),
+        my = my,
         gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, datatypeSmall),
-        the = the,
         track = makeDataContainer((len(indexTrack), leavesTotal + 1), datatypeDefault)
         )
 
-    stateInitialized['my'][indexMy.leaf1ndex.value] = 1
 
     return stateInitialized
 
@@ -266,7 +263,9 @@ def saveFoldsTotal(pathFilename: Union[str, os.PathLike[str]], foldsTotal: int) 
             randomnessPlanB = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
             filenameInfixUnique = ''.join(randomnessPlanB)
             pathFilenamePlanB = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')
-            open(pathFilenamePlanB, 'w').write(str(foldsTotal))
+            writeStreamFallback = open(pathFilenamePlanB, 'w')
+            writeStreamFallback.write(str(foldsTotal))
+            writeStreamFallback.close()
             print(str(pathFilenamePlanB))
         except:
             print(foldsTotal)

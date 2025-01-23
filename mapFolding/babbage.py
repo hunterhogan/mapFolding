@@ -1,5 +1,5 @@
 from mapFolding.importSelector import countSequential, countParallel, countInitialize
-from mapFolding import indexThe
+from mapFolding import indexMy
 from numpy import integer
 from numpy.typing import NDArray
 from typing import Any, Tuple
@@ -7,7 +7,7 @@ import numba
 import numpy
 
 @numba.jit(cache=True)
-def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], the: NDArray[integer[Any]], track: NDArray[integer[Any]]):
+def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], track: NDArray[integer[Any]]):
     """
     What in tarnation is this stupid module and function?
 
@@ -27,9 +27,9 @@ def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[inte
 
     """
     # print("babbage")
-    countInitialize(connectionGraph=connectionGraph, gapsWhere=gapsWhere, my=my, the=the, track=track)
+    countInitialize(connectionGraph=connectionGraph, gapsWhere=gapsWhere, my=my, track=track)
 
-    if the[indexThe.taskDivisions.value] > 0:
-        countParallel(connectionGraph=connectionGraph, foldGroups=foldGroups, gapsWherePARALLEL=gapsWhere, myPARALLEL=my, the=the, trackPARALLEL=track)
+    if my[indexMy.taskDivisions.value] > 0:
+        countParallel(connectionGraph=connectionGraph, foldGroups=foldGroups, gapsWherePARALLEL=gapsWhere, myPARALLEL=my, trackPARALLEL=track)
     else:
-        countSequential(connectionGraph=connectionGraph, foldGroups=foldGroups, gapsWhere=gapsWhere, my=my, the=the, track=track)
+        countSequential(connectionGraph=connectionGraph, foldGroups=foldGroups, gapsWhere=gapsWhere, my=my, track=track)

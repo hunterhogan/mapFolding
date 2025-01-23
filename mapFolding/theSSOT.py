@@ -42,6 +42,7 @@ class EnumIndices(enum.IntEnum):
 
 class indexMy(EnumIndices):
     """Indices for dynamic values."""
+    dimensionsTotal = enum.auto() # connectionGraph.shape[0]
     dimensionsUnconstrained = enum.auto()
     gap1ndex = enum.auto()
     gap1ndexCeiling = enum.auto()
@@ -50,12 +51,13 @@ class indexMy(EnumIndices):
     indexMiniGap = enum.auto()
     leaf1ndex = enum.auto()
     leafConnectee = enum.auto()
+    taskDivisions = enum.auto()
     taskIndex = enum.auto()
 
-class indexThe(EnumIndices):
-    """Indices for static values."""
-    dimensionsTotal = enum.auto() # connectionGraph.shape[0]
-    taskDivisions = enum.auto()
+# class indexThe(EnumIndices):
+#     """Indices for static values."""
+#     dimensionsTotal = enum.auto() # connectionGraph.shape[0]
+#     taskDivisions = enum.auto()
 
 class indexTrack(EnumIndices):
     """Indices for state tracking array."""
@@ -70,5 +72,5 @@ class computationState(TypedDict):
     gapsWhere: numpy.typing.NDArray[numpy.integer[Any]]
     mapShape: Tuple[int, ...]
     my: numpy.typing.NDArray[numpy.integer[Any]]
-    the: numpy.typing.NDArray[numpy.integer[Any]]
+    # the: numpy.typing.NDArray[numpy.integer[Any]]
     track: numpy.typing.NDArray[numpy.integer[Any]]

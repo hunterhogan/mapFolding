@@ -1,7 +1,7 @@
 import pathlib
 from tests.conftest import *
 from tests.pythons_idiotic_namespace import *
-from typing import List, Optional
+from typing import List, Optional, Any
 import itertools
 import numba
 import numpy
@@ -9,6 +9,8 @@ import pytest
 import random
 import sys
 import unittest.mock
+import io
+from contextlib import redirect_stdout
 
 @pytest.mark.parametrize("listDimensions,expected_intInnit,expected_parseListDimensions,expected_validateListDimensions,expected_getLeavesTotal", [
     (None, ValueError, ValueError, ValueError, ValueError),  # None instead of list
@@ -267,3 +269,14 @@ def test_pathJobDEFAULT_colab():
 
     # Reload one more time to restore original state
     importlib.reload(mapFolding.theSSOT)
+
+def test_saveFoldsTotal_fallback(pathTempTesting: pathlib.Path) -> None:
+    foldsTotal = 123
+    pathFilename = pathTempTesting / "unwritable" / "foldsTotal.txt"
+    with unittest.mock.patch("pathlib.Path.write_text", side_effect=OSError("Simulated write failure")):
+        with unittest.mock.patch("os.getcwd", return_value=str(pathTempTesting)):
+            capturedOutput = io.StringIO()
+            with redirect_stdout(capturedOutput):
+                saveFoldsTotal(pathFilename, foldsTotal)
+    fallbackFiles = list(pathTempTesting.glob("foldsTotalYO_*.txt"))
+    assert len(fallbackFiles) == 1, "Fallback file was not created upon write failure."

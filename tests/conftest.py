@@ -1,5 +1,4 @@
-"""SSOT for Pytest.
-Other test modules must not import directly from the package being tested."""
+"""SSOT for Pytest"""
 
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
@@ -13,7 +12,7 @@ import uuid
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteConcurrencyLimit
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
 from Z0Z_tools.pytest_parseParameters import makeTestSuiteOopsieKwargsie
-from mapFolding import countFolds, pathJobDEFAULT, indexMy, indexThe, indexTrack
+from mapFolding import countFolds, pathJobDEFAULT, indexMy, indexTrack, saveFoldsTotal
 from mapFolding import defineConcurrencyLimit, intInnit, oopsieKwargsie, outfitCountFolds
 from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache, getFilenameFoldsTotal
 from mapFolding.beDRY import getLeavesTotal, parseDimensions, validateListDimensions
@@ -41,7 +40,6 @@ __all__ = [
     'getLeavesTotal',
     'getOEISids',
     'getTaskDivisions',
-    'indexThe',
     'intInnit',
     'makeConnectionGraph',
     'makeDataContainer',
@@ -53,6 +51,7 @@ __all__ = [
     'oopsieKwargsie',
     'outfitCountFolds',
     'parseDimensions',
+    'saveFoldsTotal',
     'setCPUlimit',
     'settingsOEIS',
     'standardCacheTest',
