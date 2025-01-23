@@ -1,5 +1,5 @@
 """A relatively stable API for oft-needed functionality."""
-from mapFolding import dtypeDefault, dtypeLarge, pathJobDEFAULT
+from mapFolding import dtypeDefault, dtypeLarge, dtypeSmall, pathJobDEFAULT
 from mapFolding import indexMy, indexThe, indexTrack, computationState
 from mapFolding import intInnit, defineConcurrencyLimit, oopsieKwargsie
 from numpy import integer
@@ -96,15 +96,16 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
 
     return taskDivisions
 
-def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> NDArray[integer[Any]]:
+def makeConnectionGraphSentinel(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> NDArray[integer[Any]]:
     """
     Constructs a multi-dimensional connection graph representing the connections between the leaves of a map with the given dimensions.
     Also called a Cartesian product decomposition or dimensional product mapping.
 
-    Parameters:
+    Parameters
         listDimensions: A sequence of integers representing the dimensions of the map.
-    Returns:
-        connectionGraph: A 3D numpy array with shape of (dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1).
+
+    Returns
+        connectionGraph: A 3D numpy array with shape of (dimensionsTotal, leavesTotal + 1, leavesTotal + 1).
     """
     datatype = keywordArguments.get('datatype', dtypeDefault)
     mapShape = validateListDimensions(listDimensions)
@@ -149,6 +150,63 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
                     connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[dimension1ndex - 1]
                 else:
                     connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex
+
+    return connectionGraph
+
+def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> NDArray[integer[Any]]:
+    """
+    Constructs a multi-dimensional connection graph representing the connections between the leaves of a map with the given dimensions.
+    Also called a Cartesian product decomposition or dimensional product mapping.
+
+    Parameters
+        listDimensions: A sequence of integers representing the dimensions of the map.
+
+    Returns
+        connectionGraph: A 3D numpy array with shape of (dimensionsTotal, leavesTotal + 1, leavesTotal + 1).
+    """
+    datatype = keywordArguments.get('datatype', dtypeDefault)
+    mapShape = validateListDimensions(listDimensions)
+    leavesTotal = getLeavesTotal(mapShape)
+    arrayDimensions = numpy.array(mapShape, dtype=datatype)
+    dimensionsTotal = len(arrayDimensions)
+
+    # Step 1: find the cumulative product of the map's dimensions
+    cumulativeProduct = numpy.multiply.accumulate([1] + mapShape, dtype=datatype)
+
+    # Step 2: create a coordinate system
+    coordinateSystem = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=datatype)
+
+    for indexDimension in range(dimensionsTotal):
+        for leaf1ndex in range(1, leavesTotal + 1):
+            coordinateSystem[indexDimension, leaf1ndex] = (
+                ((leaf1ndex - 1) // cumulativeProduct[indexDimension]) %
+                arrayDimensions[indexDimension] + 1
+            )
+
+    # Step 3: create and fill the connection graph
+    connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=datatype)
+
+    for indexDimension in range(dimensionsTotal):
+        for activeLeaf1ndex in range(1, leavesTotal + 1):
+            for connectee1ndex in range(1, activeLeaf1ndex + 1):
+                # Base coordinate conditions
+                isFirstCoord = coordinateSystem[indexDimension, connectee1ndex] == 1
+                isLastCoord = coordinateSystem[indexDimension, connectee1ndex] == arrayDimensions[indexDimension]
+                exceedsActive = connectee1ndex + cumulativeProduct[indexDimension] > activeLeaf1ndex
+
+                # Parity check
+                isEvenParity = (coordinateSystem[indexDimension, activeLeaf1ndex] & 1) == \
+                                (coordinateSystem[indexDimension, connectee1ndex] & 1)
+
+                # Determine connection value
+                if (isEvenParity and isFirstCoord) or (not isEvenParity and (isLastCoord or exceedsActive)):
+                    connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex
+                elif isEvenParity and not isFirstCoord:
+                    connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex - cumulativeProduct[indexDimension]
+                elif not isEvenParity and not (isLastCoord or exceedsActive):
+                    connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
+                else:
+                    connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex
 
     return connectionGraph
 
@@ -197,8 +255,9 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
     """
     datatypeDefault = keywordArguments.get('datatypeDefault', dtypeDefault)
     datatypeLarge = keywordArguments.get('datatypeLarge', dtypeLarge)
+    datatypeSmall = keywordArguments.get('datatypeSmall', dtypeSmall)
 
-    the = makeDataContainer(len(indexThe), datatypeDefault)
+    the = makeDataContainer(len(indexThe), datatypeSmall)
 
     mapShape = tuple(sorted(validateListDimensions(listDimensions)))
     the[indexThe.leavesTotal] = getLeavesTotal(mapShape)
@@ -207,26 +266,26 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
     the[indexThe.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, listDimensions)
 
     stateInitialized = computationState(
-        connectionGraph = makeConnectionGraph(mapShape, datatype=datatypeDefault),
+        connectionGraph = makeConnectionGraph(mapShape, datatype=datatypeSmall),
         foldsSubTotals = makeDataContainer(the[indexThe.leavesTotal], datatypeLarge),
         mapShape = mapShape,
-        my = makeDataContainer(len(indexMy), datatypeLarge),
-        gapsWhere = makeDataContainer(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, datatypeDefault),
+        my = makeDataContainer(len(indexMy), datatypeDefault),
+        gapsWhere = makeDataContainer(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, datatypeSmall),
         the = the,
-        track = makeDataContainer((len(indexTrack), the[indexThe.leavesTotal] + 1), datatypeLarge)
+        track = makeDataContainer((len(indexTrack), the[indexThe.leavesTotal] + 1), datatypeDefault)
         )
 
     stateInitialized['my'][indexMy.leaf1ndex.value] = 1
 
     return stateInitialized
 
-def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed parameter') -> List[int]:
+def parseDimensions(dimensions: Sequence[int], parameterName: str = 'listDimensions') -> List[int]:
     """
     Parse and validate dimensions are non-negative integers.
 
     Parameters:
         dimensions: Sequence of integers representing dimensions
-        parameterName ('unnamed parameter'): Name of the parameter for error messages. Defaults to 'unnamed parameter'
+        parameterName ('listDimensions'): Name of the parameter for error messages. Defaults to 'listDimensions'
     Returns:
         listNonNegative: List of validated non-negative integers
     Raises:
@@ -242,10 +301,6 @@ def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed par
 
     return listNonNegative
 
-import tempfile
-import shutil
-import logging
-import os
 def saveFoldsTotal(pathFilename: Union[str, os.PathLike[str]], foldsTotal: int) -> None:
     """
     Save foldsTotal with multiple fallback mechanisms.
@@ -254,10 +309,6 @@ def saveFoldsTotal(pathFilename: Union[str, os.PathLike[str]], foldsTotal: int) 
         pathFilename: Target save location
         foldsTotal: Critical computed value to save
     """
-    """Thoughts
-    Everything in a try block
-    Save it multiple times with multiple packages
-    no need for context managers, especially because they can cause errors"""
     try:
         pathFilenameFoldsTotal = pathlib.Path(pathFilename)
         pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
@@ -269,7 +320,6 @@ def saveFoldsTotal(pathFilename: Union[str, os.PathLike[str]], foldsTotal: int) 
             print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
             randomnessPlanB = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
             filenameInfixUnique = ''.join(randomnessPlanB)
-            import os
             pathFilenamePlanB = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')
             open(pathFilenamePlanB, 'w').write(str(foldsTotal))
             print(str(pathFilenamePlanB))

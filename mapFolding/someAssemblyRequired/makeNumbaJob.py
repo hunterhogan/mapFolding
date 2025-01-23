@@ -1,9 +1,12 @@
 """Create a python module hardcoded to compute a map's foldsTotal.
-NumPy ndarray.
-Numba optimized.
-Absolutely no other imports.
+- NumPy ndarray.
+- Numba optimized.
+- Absolutely no other imports.
+
+Can create LLVM IR from the module: of unknown utility.
 """
-from mapFolding import datatypeLarge, dtypeLarge, dtypeDefault
+# from mapFolding import dtypeDefault, dtypeSmall
+from mapFolding import make_dtype, datatypeLarge, dtypeLarge
 from mapFolding.someAssemblyRequired.inlineAfunction import Z0Z_inlineMapFolding
 from mapFolding.someAssemblyRequired.jobsAndTasks import Z0Z_makeJob
 import importlib
@@ -11,39 +14,50 @@ import llvmlite.binding
 import numpy
 import pathlib
 import pickle
+import python_minifier
 
-listDimensions = [2,20]
+listDimensions = [6,6]
 
 # NOTE this overwrites files
 Z0Z_inlineMapFolding()
 
 identifierCallableLaunch = "goGoGadgetAbsurdity"
 
-def archivistFormatsArrayToCode(arrayTarget: numpy.ndarray, identifierName: str) -> str:
-    """Format numpy array into a code string that recreates the array."""
-    arrayAsTypeStr = numpy.array2string(arrayTarget, threshold=10000, max_line_width=200, separator=',')
-    return f"{identifierName} = numpy.array({arrayAsTypeStr}, dtype=numpy.{arrayTarget.dtype})"
+def convertNDArrayToStr(arrayTarget: numpy.ndarray, identifierName: str) -> str:
+    arrayAsTypeStr = numpy.array2string(arrayTarget, threshold=100000, max_line_width=200, separator=',')
+    stringMinimized = python_minifier.minify(arrayAsTypeStr)
+    commaZeroMaximum = arrayTarget.shape[-1] - 1
+    stringMinimized = stringMinimized.replace('[0' + ',0'*commaZeroMaximum + ']', '[0]*'+str(commaZeroMaximum+1))
+    for countZeros in range(commaZeroMaximum, 2, -1):
+        stringMinimized = stringMinimized.replace(',0'*countZeros + ']', ']+[0]*'+str(countZeros))
+    return f"{identifierName} = numpy.array({stringMinimized}, dtype=numpy.{arrayTarget.dtype})"
 
 def writeModuleWithNumba(listDimensions):
     numpy_dtypeLarge = dtypeLarge
-    numpy_dtypeDefault = dtypeDefault
+    # numpy_dtypeDefault = dtypeDefault
+    datatypeDefault = 'uint8'
+    numpy_dtypeDefault = make_dtype(datatypeDefault)
+    numpy_dtypeSmall = numpy_dtypeDefault
 
-    parametersNumba = f"numba.types.{datatypeLarge}(), cache=True, \
-parallel=False, \
-boundscheck=False, \
-error_model='numpy', \
-fastmath=True, \
-nopython=True, \
-forceinline=True, \
-looplift=True, \
-no_cfunc_wrapper=False, \
-no_cpython_wrapper=False, \
-_nrt=True, \
+    parametersNumba = f"numba.types.{datatypeLarge}(), \
+cache=True, \
 "
+# no_cfunc_wrapper=True, \
+# no_cpython_wrapper=True, \
+# _nrt=True, \
+# nopython=True, \
+# parallel=False, \
+# boundscheck=False, \
+# error_model='numpy', \
+# fastmath=True, \
+# no_cfunc_wrapper=False, \
+# no_cpython_wrapper=False, \
+# looplift=True, \
+# forceinline=True, \
 
-    pathFilenameData = Z0Z_makeJob(listDimensions, datatypeDefault=numpy_dtypeDefault, datatypeLarge=numpy_dtypeLarge)
+    pathFilenameData = Z0Z_makeJob(listDimensions, datatypeDefault=numpy_dtypeDefault, datatypeLarge=numpy_dtypeLarge, datatypeSmall=numpy_dtypeSmall)
 
-    pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/countSequentialNoNumba.py')
+    pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/someAssemblyRequired/countSequentialNoNumba.py')
     pathFilenameDestination = pathFilenameData.with_stem(pathFilenameData.parent.name).with_suffix(".py")
 
     lineNumba = f"@numba.jit({parametersNumba})"
@@ -59,16 +73,16 @@ _nrt=True, \
     linesDataDynamic = """"""
     linesDataDynamic = "\n".join([linesDataDynamic
             , ImaIndent + f"foldsTotal = numba.types.{datatypeLarge}(0)"
-            , ImaIndent + archivistFormatsArrayToCode(stateJob['my'], 'my')
-            , ImaIndent + archivistFormatsArrayToCode(stateJob['foldsSubTotals'], 'foldsSubTotals')
-            , ImaIndent + archivistFormatsArrayToCode(stateJob['gapsWhere'], 'gapsWhere')
-            , ImaIndent + archivistFormatsArrayToCode(stateJob['track'], 'track')
+            , ImaIndent + convertNDArrayToStr(stateJob['my'], 'my')
+            , ImaIndent + convertNDArrayToStr(stateJob['foldsSubTotals'], 'foldsSubTotals')
+            , ImaIndent + convertNDArrayToStr(stateJob['gapsWhere'], 'gapsWhere')
+            , ImaIndent + convertNDArrayToStr(stateJob['track'], 'track')
             ])
 
     linesDataStatic = """"""
     linesDataStatic = "\n".join([linesDataStatic
-            , ImaIndent + archivistFormatsArrayToCode(stateJob['the'], 'the')
-            , ImaIndent + archivistFormatsArrayToCode(stateJob['connectionGraph'], 'connectionGraph')
+            , ImaIndent + convertNDArrayToStr(stateJob['the'], 'the')
+            , ImaIndent + convertNDArrayToStr(stateJob['connectionGraph'], 'connectionGraph')
             ])
 
     pathFilenameFoldsTotal: pathlib.Path = stateJob['pathFilenameFoldsTotal']

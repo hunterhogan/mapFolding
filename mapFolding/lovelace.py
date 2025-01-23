@@ -65,7 +65,7 @@ def filterCommonGaps(gapsWhere, my, the, track):
 def findGapsInitializeVariables(my, track):
     my[indexMy.dimensionsUnconstrained.value] = 0
     my[indexMy.gap1ndexCeiling.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
-    my[indexMy.dimension1ndex.value] = 1
+    my[indexMy.dimension1ndex.value] = 0
 
 @numba.jit((numba.int64[::1],numba.int64[::1],numba.int64[::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def foldsSubTotalIncrement(foldsSubTotals, my, the):
@@ -105,7 +105,7 @@ def loopingLeavesConnectedToActiveLeaf(my):
 
 @numba.jit((numba.int64[::1],numba.int64[::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def loopingTheDimensions(my, the):
-    return my[indexMy.dimension1ndex.value] <= the[indexThe.dimensionsTotal.value]
+    return my[indexMy.dimension1ndex.value] < the[indexThe.dimensionsTotal.value]
 
 @numba.jit((numba.int64[::1],), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def loopingToActiveGapCeiling(my):

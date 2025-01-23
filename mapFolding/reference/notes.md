@@ -34,7 +34,7 @@ Assume `listDimensions`:
 | 2D array | max(p)      | coordinateSystem        |               | C      | c      |
 | 1D array | n           | cumulativeProduct       |               | P      | bigP   |
 | 1D array | d           | countDimensionsGapped   |               | count  | count  |
-| integer  | d           | dimension1ndex          |               | i      | i      |
+| integer  | d           | indexDimension          |               | i      | i      |
 | integer  | d           | dimensionsUnconstrained |               | dd     | dd     |
 | integer  | 8*          | dimensionsTotal         |               | d      | dim    |
 | integer  |             | distance                |               | delta  | delta  |

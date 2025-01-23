@@ -3,7 +3,7 @@ from typing import Any, Optional, Sequence, Type, Union
 def Z0Z_makeJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]):
     from mapFolding import outfitCountFolds
     stateUniversal = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
-    from mapFolding.countInitialize import countInitialize
+    from mapFolding.someAssemblyRequired.countInitializeNoNumba import countInitialize
     countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['the'], stateUniversal['track'])
     from mapFolding import getPathFilenameFoldsTotal
     pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
@@ -38,7 +38,7 @@ def runJob(pathFilename):
     the: Final[numpy.ndarray] = stateJob['the']
     track: numpy.ndarray = stateJob['track']
 
-    from mapFolding.countSequentialNoNumba import countSequential
+    from mapFolding.someAssemblyRequired.countSequentialNoNumba import countSequential
     countSequential(connectionGraph, foldsSubTotals, gapsWhere, my, the, track)
 
     print(foldsSubTotals.sum().item())

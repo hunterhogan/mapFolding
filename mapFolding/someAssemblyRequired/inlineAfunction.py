@@ -125,7 +125,7 @@ def Z0Z_inlineMapFolding():
 
     listPathFilenamesDestination: list[pathlib.Path] = []
     for callableTarget in listCallables:
-        pathFilenameDestination = pathFilenameSource.with_stem(callableTarget)
+        pathFilenameDestination = pathFilenameSource.parent / "someAssemblyRequired" / pathFilenameSource.with_stem(callableTarget).name
         codeInlined = inlineFunctions(codeSource, callableTarget, dictionaryEnumValues)
         pathFilenameDestination.write_text(codeInlined)
         listPathFilenamesDestination.append(pathFilenameDestination)
