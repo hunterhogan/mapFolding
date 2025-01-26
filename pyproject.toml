@@ -20,22 +20,22 @@ classifiers = [
 dependencies = ["numba", "numpy", "Z0Z_tools"]
 description = "Count distinct ways to fold a map (or a strip of stamps)"
 keywords = [
-    "map folding",
-    "folding",
-    "stamps",
-    "OEIS",
     "A001415",
     "A001416",
     "A001417",
     "A001418",
     "A195646",
+    "folding",
+    "map folding",
+    "OEIS",
+    "stamp folding",
 ]
 license = { text = "CC-BY-NC-4.0" }
 name = "mapFolding"
 optional-dependencies = { benchmark = [
-    "pandas",
-    "jupyter",
     "ipywidgets",
+    "jupyter",
+    "pandas",
     "tqdm",
 ], testing = [
     "pytest",
@@ -70,6 +70,4 @@ testpaths = ["tests"]
 
 [tool.setuptools]
 include-package-data = true
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["*"]
+packages = { find = { where = ["."], include = ["*"] } }
