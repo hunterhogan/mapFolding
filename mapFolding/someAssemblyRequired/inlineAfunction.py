@@ -1,11 +1,11 @@
-from mapFolding import indexMy, indexThe, indexTrack
+from mapFolding import indexMy, indexTrack
 import ast
 import copy
 import pathlib
 
 def getDictionaryEnumValues():
     dictionaryEnumValues = {}
-    for enumIndex in [indexMy, indexThe, indexTrack]:
+    for enumIndex in [indexMy, indexTrack]:
         for memberName, memberValue in enumIndex._member_map_.items():
             dictionaryEnumValues[f"{enumIndex.__name__}.{memberName}.value"] = memberValue.value
     return dictionaryEnumValues

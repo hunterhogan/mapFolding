@@ -1,10 +1,10 @@
-from typing import Any, Optional, Sequence, Type, Union
+from typing import Any, Optional, Sequence, Type
 
 def Z0Z_makeJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]):
     from mapFolding import outfitCountFolds
     stateUniversal = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
     from mapFolding.someAssemblyRequired.countInitializeNoNumba import countInitialize
-    countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['the'], stateUniversal['track'])
+    countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
     from mapFolding import getPathFilenameFoldsTotal
     pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
     import pathlib
@@ -35,11 +35,10 @@ def runJob(pathFilename):
     gapsWhere: numpy.ndarray = stateJob['gapsWhere']
     my: numpy.ndarray = stateJob['my']
     pathFilenameFoldsTotal: Final[Path] = stateJob['pathFilenameFoldsTotal']
-    the: Final[numpy.ndarray] = stateJob['the']
     track: numpy.ndarray = stateJob['track']
 
     from mapFolding.someAssemblyRequired.countSequentialNoNumba import countSequential
-    countSequential(connectionGraph, foldsSubTotals, gapsWhere, my, the, track)
+    countSequential(connectionGraph, foldsSubTotals, gapsWhere, my, track)
 
     print(foldsSubTotals.sum().item())
     Path(pathFilenameFoldsTotal).parent.mkdir(parents=True, exist_ok=True)

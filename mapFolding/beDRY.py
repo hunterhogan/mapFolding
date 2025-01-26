@@ -267,7 +267,7 @@ def saveFoldsTotal(pathFilename: Union[str, os.PathLike[str]], foldsTotal: int) 
             writeStreamFallback.write(str(foldsTotal))
             writeStreamFallback.close()
             print(str(pathFilenamePlanB))
-        except:
+        except Exception:
             print(foldsTotal)
 
 def setCPUlimit(CPUlimit: Union[bool, float, int, None]) -> int:
@@ -311,7 +311,7 @@ def validateListDimensions(listDimensions: Sequence[int]) -> List[int]:
         NotImplementedError: If the resulting list of positive dimensions has fewer than two elements.
     """
     if not listDimensions:
-        raise ValueError(f"listDimensions is a required parameter.")
+        raise ValueError("listDimensions is a required parameter.")
     listNonNegative = parseDimensions(listDimensions, 'listDimensions')
     dimensionsValid = [dimension for dimension in listNonNegative if dimension > 0]
     if len(dimensionsValid) < 2:

@@ -1,4 +1,4 @@
-from typing import Any, Tuple, TypedDict
+from typing import Any, Tuple, Type, TypedDict
 from numpy import integer
 from numpy.typing import NDArray
 import enum
@@ -13,7 +13,8 @@ datatypeLarge = 'int64'
 datatypeDefault = datatypeLarge
 datatypeSmall = datatypeDefault
 
-make_dtype = lambda _datatype: eval(f"{datatypeModule}.{_datatype}")
+def make_dtype(_datatype: str) -> Type:
+    return eval(f"{datatypeModule}.{_datatype}")
 
 dtypeLarge = make_dtype(datatypeLarge)
 dtypeDefault = make_dtype(datatypeDefault)

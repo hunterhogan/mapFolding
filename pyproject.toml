@@ -44,7 +44,7 @@ optional-dependencies = { benchmark = [
     "pytest-xdist",
 ] }
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<3.14"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
 urls = { Homepage = "https://github.com/hunterhogan/mapFolding", Donate = "https://www.patreon.com/integrated" }
 version = "0.2.6"
@@ -65,7 +65,7 @@ xml = { output = "tests/coverage/coverage.xml" }
 
 [tool.pytest.ini_options]
 addopts = ["--color=yes", "-n 4"]
-env = ["NUMBA_DISABLE_JIT=1"]
+env = ["NUMBA_JIT_COVERAGE=1"]
 testpaths = ["tests"]
 
 [tool.setuptools]

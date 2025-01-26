@@ -16,7 +16,7 @@ import pathlib
 import pickle
 import python_minifier
 
-listDimensions = [6,6]
+listDimensions = [5,5]
 
 # NOTE this overwrites files
 Z0Z_inlineMapFolding()
@@ -38,22 +38,23 @@ def writeModuleWithNumba(listDimensions):
     datatypeDefault = 'uint8'
     numpy_dtypeDefault = make_dtype(datatypeDefault)
     numpy_dtypeSmall = numpy_dtypeDefault
-
+    # forceinline=True might actually be useful
     parametersNumba = f"numba.types.{datatypeLarge}(), \
 cache=True, \
+nopython=True, \
+fastmath=True, \
+forceinline=True, \
+inline='always', \
+looplift=False, \
+_nrt=True, \
+error_model='numpy', \
+parallel=False, \
+boundscheck=False, \
+no_cfunc_wrapper=False, \
+no_cpython_wrapper=False, \
 "
 # no_cfunc_wrapper=True, \
 # no_cpython_wrapper=True, \
-# _nrt=True, \
-# nopython=True, \
-# parallel=False, \
-# boundscheck=False, \
-# error_model='numpy', \
-# fastmath=True, \
-# no_cfunc_wrapper=False, \
-# no_cpython_wrapper=False, \
-# looplift=True, \
-# forceinline=True, \
 
     pathFilenameData = Z0Z_makeJob(listDimensions, datatypeDefault=numpy_dtypeDefault, datatypeLarge=numpy_dtypeLarge, datatypeSmall=numpy_dtypeSmall)
 
@@ -74,14 +75,13 @@ cache=True, \
     linesDataDynamic = "\n".join([linesDataDynamic
             , ImaIndent + f"foldsTotal = numba.types.{datatypeLarge}(0)"
             , ImaIndent + convertNDArrayToStr(stateJob['my'], 'my')
-            , ImaIndent + convertNDArrayToStr(stateJob['foldsSubTotals'], 'foldsSubTotals')
+            , ImaIndent + convertNDArrayToStr(stateJob['foldGroups'], 'foldGroups')
             , ImaIndent + convertNDArrayToStr(stateJob['gapsWhere'], 'gapsWhere')
             , ImaIndent + convertNDArrayToStr(stateJob['track'], 'track')
             ])
 
     linesDataStatic = """"""
     linesDataStatic = "\n".join([linesDataStatic
-            , ImaIndent + convertNDArrayToStr(stateJob['the'], 'the')
             , ImaIndent + convertNDArrayToStr(stateJob['connectionGraph'], 'connectionGraph')
             ])
 
@@ -106,11 +106,14 @@ cache=True, \
     linesLaunch = """"""
     linesLaunch = linesLaunch + f"""
 if __name__ == '__main__':
-    {identifierCallableLaunch}()"""
+    import time
+    timeStart = time.perf_counter()
+    {identifierCallableLaunch}()
+    print(time.perf_counter() - timeStart)"""
 
     linesWriteFoldsTotal = """"""
     linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
-                                    , "    foldsTotal = foldsSubTotals.sum().item()"
+                                    , "    foldsTotal = foldGroups[0:-1].sum() * foldGroups[-1]"
                                     , "    print(foldsTotal)"
                                     , "    with numba.objmode():"
                                     , f"        open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
