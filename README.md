@@ -18,7 +18,7 @@ The directory [mapFolding/reference](https://github.com/hunterhogan/mapFolding/b
 
 ## Simple, easy usage based on OEIS IDs
 
-`mapFolding` directly implements some IDs from _The On-Line Encyclopedia of Integer Sequences_.
+`mapFolding` directly implements some IDs from _The On-Line Encyclopedia of Integer Sequences_ ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/citations/oeis.bibtex) citation).
 
 ### Usage: command line
 
