@@ -1,4 +1,6 @@
 from typing import Any, Tuple, TypedDict
+from numpy import integer
+from numpy.typing import NDArray
 import enum
 import numpy
 import numpy.typing
@@ -42,7 +44,7 @@ class EnumIndices(enum.IntEnum):
 
 class indexMy(EnumIndices):
     """Indices for dynamic values."""
-    dimensionsTotal = enum.auto() # connectionGraph.shape[0]
+    dimensionsTotal = enum.auto() # connectionGraph.shape[0] or len(mapShape)
     dimensionsUnconstrained = enum.auto()
     gap1ndex = enum.auto()
     gap1ndexCeiling = enum.auto()
@@ -54,11 +56,6 @@ class indexMy(EnumIndices):
     taskDivisions = enum.auto()
     taskIndex = enum.auto()
 
-# class indexThe(EnumIndices):
-#     """Indices for static values."""
-#     dimensionsTotal = enum.auto() # connectionGraph.shape[0]
-#     taskDivisions = enum.auto()
-
 class indexTrack(EnumIndices):
     """Indices for state tracking array."""
     leafAbove = enum.auto()
@@ -67,10 +64,9 @@ class indexTrack(EnumIndices):
     gapRangeStart = enum.auto()
 
 class computationState(TypedDict):
-    connectionGraph: numpy.typing.NDArray[numpy.integer[Any]]
-    foldGroups: numpy.typing.NDArray[numpy.integer[Any]]
-    gapsWhere: numpy.typing.NDArray[numpy.integer[Any]]
+    connectionGraph: NDArray[integer[Any]]
+    foldGroups: NDArray[integer[Any]]
+    gapsWhere: NDArray[integer[Any]]
     mapShape: Tuple[int, ...]
-    my: numpy.typing.NDArray[numpy.integer[Any]]
-    # the: numpy.typing.NDArray[numpy.integer[Any]]
-    track: numpy.typing.NDArray[numpy.integer[Any]]
+    my: NDArray[integer[Any]]
+    track: NDArray[integer[Any]]

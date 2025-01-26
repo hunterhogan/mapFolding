@@ -1,4 +1,4 @@
-name: Create Release
+name: Make GitHub Release
 
 on:
   workflow_run:
@@ -22,7 +22,7 @@ jobs:
           python-version: '3.x'
       - name: Install toml
         run: python -m pip install toml
-      - name: Get project version
+      - name: Get package version
         id: getVersion
         run: |
           version=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")

@@ -3,14 +3,27 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mapFolding"
-description = "Count distinct ways to fold a map (or a strip of stamps)"
-readme = "README.md"
 authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
-version = "0.2.6"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Other Audience",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Typing :: Typed",
+]
+dependencies = ["numba", "numpy", "Z0Z_tools"]
+description = "Count distinct ways to fold a map (or a strip of stamps)"
+license = { text = "CC-BY-NC-4.0" }
+name = "mapFolding"
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10,<3.13"
-dependencies = ["numba", "numpy", "Z0Z-tools"]
-urls = { homepage = "https://github.com/hunterhogan/mapFolding" }
+version = "0.2.6"
+[project.urls]
+Homepage = "https://github.com/hunterhogan/mapFolding"
+Donate = "https://www.patreon.com/integrated"
 
 [project.scripts]
 getOEISids = "mapFolding.oeis:getOEISids"
@@ -34,7 +47,11 @@ data_file = "tests/coverage/.coverage"
 omit = ["tests/*", "Z0Z_*"]
 
 [tool.coverage.report]
-exclude_lines = ["if TYPE_CHECKING:", "if __name__ == \"__main__\":", "numba.jit_module"]
+exclude_lines = [
+    "if TYPE_CHECKING:",
+    "if __name__ == \"__main__\":",
+    "numba.jit_module",
+]
 ignore_errors = false
 
 [tool.coverage.xml]

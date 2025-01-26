@@ -11,7 +11,7 @@ def activeLeafGreaterThan0Condition(my):
 
 @numba.jit((numba.int64[::1],numba.int64[::1]), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def activeLeafGreaterThanLeavesTotalCondition(foldGroups, my):
-    return my[indexMy.leaf1ndex.value] > foldGroups[-1] # leavesTotal
+    return my[indexMy.leaf1ndex.value] > foldGroups[-1] # NOTE leavesTotal
 
 @numba.jit((numba.int64[::1],), parallel=False, boundscheck=False, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def activeLeafIsTheFirstLeafCondition(my):

@@ -1,4 +1,4 @@
-from mapFolding.importSelector import countSequential, countParallel, countInitialize
+from mapFolding.importSelector import countInitialize, countParallel, countSequential
 from mapFolding import indexMy
 from numpy import integer
 from numpy.typing import NDArray
@@ -26,7 +26,7 @@ def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[inte
         - and just a few dozen-jillion other things.
 
     """
-    # print("babbage")
+    # print("Numba, you need to ignore the cached files and recompile the functions called below.")
     countInitialize(connectionGraph=connectionGraph, gapsWhere=gapsWhere, my=my, track=track)
 
     if my[indexMy.taskDivisions.value] > 0:

@@ -6,6 +6,6 @@ __pycache__/
 pyvenv.cfg
 
 /mapFolding/.cache/
-# /tests/coverage/
+/tests/coverage/
 /tests/dataSamples/tmp/
 /mapFolding/benchmarks/marks/
