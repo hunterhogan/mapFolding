@@ -7,38 +7,47 @@ authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
+    "Intended Audience :: Education",
     "Intended Audience :: End Users/Desktop",
     "Intended Audience :: Other Audience",
+    "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
+    "Topic :: Scientific/Engineering :: Mathematics",
     "Typing :: Typed",
 ]
 dependencies = ["numba", "numpy", "Z0Z_tools"]
 description = "Count distinct ways to fold a map (or a strip of stamps)"
+keywords = [
+    "map folding",
+    "folding",
+    "stamps",
+    "OEIS",
+    "A001415",
+    "A001416",
+    "A001417",
+    "A001418",
+    "A195646",
+]
 license = { text = "CC-BY-NC-4.0" }
 name = "mapFolding"
+optional-dependencies = { benchmark = [
+    "pandas",
+    "jupyter",
+    "ipywidgets",
+    "tqdm",
+], testing = [
+    "pytest",
+    "pytest-cov",
+    "pytest-env",
+    "pytest-xdist",
+] }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10,<3.13"
+scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
+urls = { Homepage = "https://github.com/hunterhogan/mapFolding", Donate = "https://www.patreon.com/integrated" }
 version = "0.2.6"
-[project.urls]
-Homepage = "https://github.com/hunterhogan/mapFolding"
-Donate = "https://www.patreon.com/integrated"
-
-[project.scripts]
-getOEISids = "mapFolding.oeis:getOEISids"
-clearOEIScache = "mapFolding.oeis:clearOEIScache"
-OEIS_for_n = "mapFolding.oeis:OEIS_for_n"
-
-[project.optional-dependencies]
-benchmark = ["pandas", "jupyter", "ipywidgets", "tqdm"]
-testing = ["pytest", "pytest-cov", "pytest-env", "pytest-xdist"]
-
-[tool.setuptools]
-include-package-data = true
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["*"]
 
 [tool.coverage.run]
 branch = true
@@ -61,3 +70,9 @@ output = "tests/coverage/coverage.xml"
 testpaths = ["tests"]
 addopts = ["--color=yes", "-n 4"]
 env = ["NUMBA_DISABLE_JIT=1"]
+
+[tool.setuptools]
+include-package-data = true
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
