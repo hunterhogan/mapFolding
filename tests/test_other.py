@@ -1,4 +1,5 @@
 import pathlib
+from Z0Z_tools import intInnit
 from tests.conftest import *
 from tests.pythons_idiotic_namespace import *
 from typing import List, Optional, Any
@@ -92,15 +93,13 @@ def test_countFolds_writeFoldsTotal(
     # standardComparison(foldsValue, lambda: returned)  # Check return value
     standardComparison(str(foldsTotalExpected), lambda: (pathTempTesting / filenameFoldsTotalExpected).read_text())  # Check file content
 
-def test_intInnit() -> None:
-    """Test integer parsing using the test suite generator."""
-    for testName, testFunction in makeTestSuiteIntInnit(intInnit).items():
-        testFunction()
+@pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_intInnit())
+def testIntInnit(nameOfTest, callablePytest):
+    callablePytest()
 
-def test_oopsieKwargsie() -> None:
-    """Test handling of unexpected keyword arguments."""
-    for testName, testFunction in makeTestSuiteOopsieKwargsie(oopsieKwargsie).items():
-        testFunction()
+@pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_oopsieKwargsie())
+def testOopsieKwargsie(nameOfTest, callablePytest):
+    callablePytest()
 
 @pytest.mark.parametrize("CPUlimit, expectedLimit", [
     (None, numba.config.NUMBA_DEFAULT_NUM_THREADS), # type: ignore

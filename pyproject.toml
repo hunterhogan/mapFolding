@@ -47,7 +47,7 @@ readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10,<3.14"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
 urls = { Homepage = "https://github.com/hunterhogan/mapFolding", Donate = "https://www.patreon.com/integrated" }
-version = "0.2.6"
+version = "0.2.7"
 
 [tool.coverage]
 report = { exclude_lines = [
@@ -55,10 +55,13 @@ report = { exclude_lines = [
     "if __name__ == \"__main__\":",
     "numba.jit_module",
 ], ignore_errors = false }
-run = { branch = true, data_file = "tests/coverage/.coverage", omit = [
+run = { branch = true, concurrency = [
+    "multiprocessing",
+    "thread",
+], data_file = "tests/coverage/.coverage", omit = [
     "tests/*",
     "Z0Z_*",
-], source = [
+], parallel = true, source = [
     "mapFolding",
 ] }
 xml = { output = "tests/coverage/coverage.xml" }

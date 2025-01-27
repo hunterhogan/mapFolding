@@ -9,11 +9,9 @@ import random
 import shutil
 import unittest.mock
 import uuid
-from Z0Z_tools.pytest_parseParameters import makeTestSuiteConcurrencyLimit
-from Z0Z_tools.pytest_parseParameters import makeTestSuiteIntInnit
-from Z0Z_tools.pytest_parseParameters import makeTestSuiteOopsieKwargsie
-from mapFolding import countFolds, pathJobDEFAULT, indexMy, indexTrack, saveFoldsTotal
-from mapFolding import defineConcurrencyLimit, intInnit, oopsieKwargsie, outfitCountFolds
+from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
+from mapFolding import countFolds, pathJobDEFAULT, saveFoldsTotal
+from mapFolding import outfitCountFolds
 from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache, getFilenameFoldsTotal
 from mapFolding.beDRY import getLeavesTotal, parseDimensions, validateListDimensions
 from mapFolding.beDRY import getTaskDivisions, makeConnectionGraph, setCPUlimit
@@ -34,23 +32,20 @@ __all__ = [
     '_validateOEISid',
     'clearOEIScache',
     'countFolds',
-    'defineConcurrencyLimit',
     'expectSystemExit',
     'getFilenameFoldsTotal',
     'getLeavesTotal',
     'getOEISids',
     'getTaskDivisions',
-    'intInnit',
     'makeConnectionGraph',
     'makeDataContainer',
-    'makeTestSuiteConcurrencyLimit',
-    'makeTestSuiteIntInnit',
-    'makeTestSuiteOopsieKwargsie',
     'oeisIDfor_n',
     'oeisIDsImplemented',
-    'oopsieKwargsie',
     'outfitCountFolds',
     'parseDimensions',
+    'PytestFor_defineConcurrencyLimit',
+    'PytestFor_intInnit',
+    'PytestFor_oopsieKwargsie',
     'saveFoldsTotal',
     'setCPUlimit',
     'settingsOEIS',
@@ -243,11 +238,11 @@ def mockFoldingFunction():
         mock_array[0] = foldsValue
         mock_array[-1] = getLeavesTotal(listDimensions)
 
-        def mock_countfolds(**keywordArguments):
+        def mock_countFolds(**keywordArguments):
             keywordArguments['foldGroups'][:] = mock_array
             return None
 
-        return mock_countfolds
+        return mock_countFolds
     return make_mock
 
 """
@@ -261,7 +256,7 @@ def formatTestMessage(expected: Any, actual: Any, functionName: str, *arguments:
 
 def standardComparison(expected: Any, functionTarget: Callable, *arguments: Any) -> None:
     """Template for tests expecting an error."""
-    if type(expected) == Type[Exception]:
+    if type(expected) is Type[Exception]:
         messageExpected = expected.__name__
     else:
         messageExpected = expected

@@ -4,7 +4,6 @@ from numpy import integer
 from numpy.typing import NDArray
 from typing import Any, Tuple
 import numba
-import numpy
 
 @numba.jit(cache=True)
 def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], track: NDArray[integer[Any]]):
