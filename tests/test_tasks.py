@@ -15,7 +15,7 @@ def test_defineConcurrencyLimit() -> None:
 
 @pytest.mark.parametrize("CPUlimitParameter", [{"invalid": True}, ["weird"]])
 def test_countFolds_cpuLimitOopsie(listDimensionsTestFunctionality: List[int], CPUlimitParameter: Dict[str, bool] | List[str]) -> None:
-    standardComparison(ValueError, countFolds, listDimensionsTestFunctionality, None, 'cpu', CPUlimitParameter)
+    standardComparison(AttributeError, countFolds, listDimensionsTestFunctionality, None, 'cpu', CPUlimitParameter)
 
 def test_countFolds_invalid_computationDivisions(listDimensionsTestFunctionality: List[int]) -> None:
     standardComparison(ValueError, countFolds, listDimensionsTestFunctionality, None, {"wrong": "value"})
