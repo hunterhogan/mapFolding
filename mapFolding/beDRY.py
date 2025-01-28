@@ -107,7 +107,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
     Returns
         connectionGraph: A 3D numpy array with shape of (dimensionsTotal, leavesTotal + 1, leavesTotal + 1).
     """
-    datatype = keywordArguments.get('datatype', dtypeDefault)
+    datatype = keywordArguments.get('datatype', dtypeSmall)
     mapShape = validateListDimensions(listDimensions)
     leavesTotal = getLeavesTotal(mapShape)
     arrayDimensions = numpy.array(mapShape, dtype=datatype)
@@ -194,6 +194,8 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
         - Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
         - Integer `<= -1`: Subtract the absolute value from total CPUs.
     """
+    # NOTE Synchronizing all datatypes at all points is currently poorly handled. instead of using these parameters,
+    # you should probably go to "theSSOT.py" and change the datatypes there.
     datatypeDefault = keywordArguments.get('datatypeDefault', dtypeDefault)
     datatypeLarge = keywordArguments.get('datatypeLarge', dtypeLarge)
     datatypeSmall = keywordArguments.get('datatypeSmall', dtypeSmall)

@@ -11,7 +11,7 @@ import unittest.mock
 import uuid
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 from mapFolding import countFolds, pathJobDEFAULT, saveFoldsTotal
-from mapFolding import outfitCountFolds
+from mapFolding import outfitCountFolds, dtypeLarge
 from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache, getFilenameFoldsTotal
 from mapFolding.beDRY import getLeavesTotal, parseDimensions, validateListDimensions
 from mapFolding.beDRY import getTaskDivisions, makeConnectionGraph, setCPUlimit
@@ -234,7 +234,7 @@ def oeisID_1random() -> str:
 def mockFoldingFunction():
     """Creates a mock function that simulates _countFolds behavior."""
     def make_mock(foldsValue: int, listDimensions: List[int]):
-        mock_array = makeDataContainer(2)
+        mock_array = makeDataContainer(2, datatype=dtypeLarge)
         mock_array[0] = foldsValue
         mock_array[-1] = getLeavesTotal(listDimensions)
 

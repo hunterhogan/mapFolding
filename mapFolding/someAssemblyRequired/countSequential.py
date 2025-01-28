@@ -1,43 +1,59 @@
+from mapFolding import indexMy, indexTrack
+import numba
 
-
+@numba.jit((numba.uint8[:,:,::1], numba.int64[::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)
 def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
-    """@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)"""
     doFindGaps = True
-    while my[7] > 0:
-        if (doFindGaps := (my[7] <= 1 or track[1, 0] == 1)) and my[7] > foldGroups[-1]:
-            foldGroups[my[10]] += 1
+    dimensionsTotal = my[indexMy.dimensionsTotal.value]
+    dimensionsUnconstrained = my[indexMy.dimensionsUnconstrained.value]
+    gap1ndex = my[indexMy.gap1ndex.value]
+    gap1ndexCeiling = my[indexMy.gap1ndexCeiling.value]
+    indexDimension = my[indexMy.indexDimension.value]
+    indexMiniGap = my[indexMy.indexMiniGap.value]
+    leaf1ndex = my[indexMy.leaf1ndex.value]
+    leafConnectee = my[indexMy.leafConnectee.value]
+    taskIndex = my[indexMy.taskIndex.value]
+    leafAbove = track[indexTrack.leafAbove.value]
+    leafBelow = track[indexTrack.leafBelow.value]
+    countDimensionsGapped = track[indexTrack.countDimensionsGapped.value]
+    gapRangeStart = track[indexTrack.gapRangeStart.value]
+    groupsOfFolds: int = 0
+    while leaf1ndex > 0:
+        if (doFindGaps := (leaf1ndex <= 1 or leafBelow[0] == 1)) and leaf1ndex > foldGroups[-1]:
+            groupsOfFolds = groupsOfFolds + 1
         elif doFindGaps:
-            my[1] = my[0]
-            my[3] = track[3, my[7] - 1]
-            my[4] = 0
-            while my[4] < my[0]:
-                if connectionGraph[my[4], my[7], my[7]] == my[7]:
-                    my[1] -= 1
+            dimensionsUnconstrained = dimensionsTotal
+            gap1ndexCeiling = gapRangeStart[leaf1ndex - 1]
+            indexDimension = 0
+            while indexDimension < dimensionsTotal:
+                if connectionGraph[indexDimension, leaf1ndex, leaf1ndex] == leaf1ndex:
+                    dimensionsUnconstrained -= 1
                 else:
-                    my[8] = connectionGraph[my[4], my[7], my[7]]
-                    while my[8] != my[7]:
-                        gapsWhere[my[3]] = my[8]
-                        if track[2, my[8]] == 0:
-                            my[3] += 1
-                        track[2, my[8]] += 1
-                        my[8] = connectionGraph[my[4], my[7], track[1, my[8]]]
-                my[4] += 1
-            my[6] = my[2]
-            while my[6] < my[3]:
-                gapsWhere[my[2]] = gapsWhere[my[6]]
-                if track[2, gapsWhere[my[6]]] == my[1]:
-                    my[2] += 1
-                track[2, gapsWhere[my[6]]] = 0
-                my[6] += 1
-        while my[7] > 0 and my[2] == track[3, my[7] - 1]:
-            my[7] -= 1
-            track[1, track[0, my[7]]] = track[1, my[7]]
-            track[0, track[1, my[7]]] = track[0, my[7]]
-        if my[7] > 0:
-            my[2] -= 1
-            track[0, my[7]] = gapsWhere[my[2]]
-            track[1, my[7]] = track[1, track[0, my[7]]]
-            track[1, track[0, my[7]]] = my[7]
-            track[0, track[1, my[7]]] = my[7]
-            track[3, my[7]] = my[2]
-            my[7] += 1
+                    leafConnectee = connectionGraph[indexDimension, leaf1ndex, leaf1ndex]
+                    while leafConnectee != leaf1ndex:
+                        gapsWhere[gap1ndexCeiling] = leafConnectee
+                        if countDimensionsGapped[leafConnectee] == 0:
+                            gap1ndexCeiling += 1
+                        countDimensionsGapped[leafConnectee] += 1
+                        leafConnectee = connectionGraph[indexDimension, leaf1ndex, leafBelow[leafConnectee]]
+                indexDimension += 1
+            indexMiniGap = gap1ndex
+            while indexMiniGap < gap1ndexCeiling:
+                gapsWhere[gap1ndex] = gapsWhere[indexMiniGap]
+                if countDimensionsGapped[gapsWhere[indexMiniGap]] == dimensionsUnconstrained:
+                    gap1ndex += 1
+                countDimensionsGapped[gapsWhere[indexMiniGap]] = 0
+                indexMiniGap += 1
+        while leaf1ndex > 0 and gap1ndex == gapRangeStart[leaf1ndex - 1]:
+            leaf1ndex -= 1
+            leafBelow[leafAbove[leaf1ndex]] = leafBelow[leaf1ndex]
+            leafAbove[leafBelow[leaf1ndex]] = leafAbove[leaf1ndex]
+        if leaf1ndex > 0:
+            gap1ndex -= 1
+            leafAbove[leaf1ndex] = gapsWhere[gap1ndex]
+            leafBelow[leaf1ndex] = leafBelow[leafAbove[leaf1ndex]]
+            leafBelow[leafAbove[leaf1ndex]] = leaf1ndex
+            leafAbove[leafBelow[leaf1ndex]] = leaf1ndex
+            gapRangeStart[leaf1ndex] = gap1ndex
+            leaf1ndex += 1
+    foldGroups[taskIndex] = groupsOfFolds

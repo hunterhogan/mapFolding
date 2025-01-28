@@ -54,8 +54,8 @@ def findGapsInitializeVariables(my, track):
     my[indexMy.gap1ndexCeiling.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
     my[indexMy.indexDimension.value] = 0
 
-def foldsSubTotalIncrement(foldGroups, my):
-    foldGroups[my[indexMy.taskIndex.value]] += 1
+def foldsSubTotalIncrement(groupsOfFolds):
+    return groupsOfFolds + 1
 
 def indexMiniGapIncrement(my):
     my[indexMy.indexMiniGap.value] += 1
@@ -133,10 +133,11 @@ def countParallel(connectionGraph, foldGroups, gapsWherePARALLEL, myPARALLEL, tr
         my = myPARALLEL.copy()
         my[indexMy.taskIndex.value] = indexSherpa
         track = trackPARALLEL.copy()
+        groupsOfFolds: int = 0
         while activeLeafGreaterThan0Condition(my=my):
             if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
                 if activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my):
-                    foldsSubTotalIncrement(foldGroups=foldGroups, my=my)
+                    groupsOfFolds = foldsSubTotalIncrement(groupsOfFolds=groupsOfFolds)
                 else:
                     findGapsInitializeVariables(my=my, track=track)
                     while loopingTheDimensions(my=my):
@@ -157,13 +158,15 @@ def countParallel(connectionGraph, foldGroups, gapsWherePARALLEL, myPARALLEL, tr
                 backtrack(my=my, track=track)
             if placeLeafCondition(my=my):
                 placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
+        foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
 def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
     doFindGaps = True
+    groupsOfFolds: int = 0
     while activeLeafGreaterThan0Condition(my=my):
         if ((doFindGaps := activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track))
                 and activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my)):
-            foldsSubTotalIncrement(foldGroups=foldGroups, my=my)
+            groupsOfFolds = foldsSubTotalIncrement(groupsOfFolds=groupsOfFolds)
         elif doFindGaps:
             findGapsInitializeVariables(my=my, track=track)
             while loopingTheDimensions(my=my):
@@ -183,6 +186,7 @@ def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
             backtrack(my=my, track=track)
         if placeLeafCondition(my=my):
             placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
+    foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
 def hurryUpAndWait(connectionGraph, foldGroups, gapsWhere, mapShape, my, track):
     countInitialize(connectionGraph, gapsWhere, my, track)

@@ -1,6 +1,6 @@
-from typing import Any, Tuple, Type, TypedDict
 from numpy import integer
 from numpy.typing import NDArray
+from typing import Any, Tuple, Type, TypedDict
 import enum
 import numpy
 import numpy.typing
@@ -50,10 +50,16 @@ class indexTrack(EnumIndices):
     countDimensionsGapped = enum.auto()
     gapRangeStart = enum.auto()
 
-datatypeModule = 'numpy'
 
+# Use configparser to manage changes to datatypes.
+# Actually, wait. I switched to numba typing in the signature because I wanted
+# fewer imports because I hoped it would improve speed.
+# Perhaps I should switch back to numpy types with implicit numba types
+datatypeModule = 'numpy'
 datatypeLarge = 'int64'
-datatypeDefault = datatypeLarge
+# datatypeDefault = datatypeLarge
+# datatypeSmall = datatypeDefault
+datatypeDefault = 'uint8'
 datatypeSmall = datatypeDefault
 
 def make_dtype(_datatype: str) -> Type:

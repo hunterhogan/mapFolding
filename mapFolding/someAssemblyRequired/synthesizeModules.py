@@ -1,37 +1,18 @@
-from mapFolding import getPathFilenameFoldsTotal
-from mapFolding import indexMy, indexTrack
-from mapFolding import make_dtype, datatypeLarge, dtypeLarge
-from mapFolding import outfitCountFolds
-from mapFolding import theDao
-from someAssemblyRequired.countInitializeNoNumba import countInitialize
-from typing import Any, Optional, Sequence, Type
+from mapFolding import indexMy, indexTrack, theDao, datatypeDefault, datatypeLarge, datatypeSmall
 import ast
-import copy
-import importlib
-import inspect
-import llvmlite.binding
-import more_itertools
-import numpy
 import pathlib
-import pickle
-import python_minifier
+import inspect
 
-def Z0Z_makeJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]):
-    stateUniversal = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
-    countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
-    pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
-    suffix = pathFilenameChopChop.suffix
-    pathJob = pathlib.Path(str(pathFilenameChopChop)[0:-len(suffix)])
-    pathJob.mkdir(parents=True, exist_ok=True)
-    pathFilenameJob = pathJob / 'stateJob.pkl'
+algorithmSource = theDao
 
-    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathFilenameJob.parent)
-    stateJob = {**stateUniversal, 'pathFilenameFoldsTotal': pathFilenameFoldsTotal}
-
-    del stateJob['mapShape']
-
-    pathFilenameJob.write_bytes(pickle.dumps(stateJob))
-    return pathFilenameJob
+dictionaryDecorators={
+    'countInitialize':
+    f'@numba.jit((numba.{datatypeSmall}[:,:,::1], numba.{datatypeDefault}[::1], numba.{datatypeSmall}[::1], numba.{datatypeDefault}[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)\n',
+    'countParallel':
+    f'@numba.jit((numba.{datatypeSmall}[:,:,::1], numba.{datatypeLarge}[::1], numba.{datatypeDefault}[::1], numba.{datatypeSmall}[::1], numba.{datatypeDefault}[:,::1]), parallel=True, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)\n',
+    'countSequential':
+    f'@numba.jit((numba.{datatypeSmall}[:,:,::1], numba.{datatypeLarge}[::1], numba.{datatypeDefault}[::1], numba.{datatypeSmall}[::1], numba.{datatypeDefault}[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)\n',
+    }
 
 def getDictionaryEnumValues():
     dictionaryEnumValues = {}
@@ -89,18 +70,6 @@ class RecursiveInlinerWithEnum(ast.NodeTransformer):
                     return [self.visit(stmt) for stmt in inlineDefinition.body]
         return self.generic_visit(node)
 
-    def visit_FunctionDef(self, node):
-        # Just insert hardcoded decorators as text nodes
-        if not node.decorator_list:
-            if node.name == 'countInitialize':
-                node.body.insert(0, ast.Expr(value=ast.Constant(value='@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)')))
-            elif node.name == 'countParallel':
-                node.body.insert(0, ast.Expr(value=ast.Constant(value='@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=True, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)')))
-            elif node.name == 'countSequential':
-                node.body.insert(0, ast.Expr(value=ast.Constant(value='@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)')))
-
-        return self.generic_visit(node)
-
 def findRequiredImports(node):
     """Find all modules that need to be imported based on AST analysis.
     NOTE: due to hardcoding, this is a glorified regex. No, wait, this is less versatile than regex."""
@@ -123,20 +92,21 @@ def findRequiredImports(node):
 
 def generateImports(requiredImports):
     """Generate import statements based on required modules."""
-    importStatements = []
+    importStatements = {'import numba', 'from mapFolding import indexMy, indexTrack'}
 
-    # Map of module names to their import statements
     importMapping = {
         'numba': 'import numba',
     }
 
     for moduleName in sorted(requiredImports):
         if moduleName in importMapping:
-            importStatements.append(importMapping[moduleName])
+            importStatements.add(importMapping[moduleName])
 
     return '\n'.join(importStatements)
 
-def inlineFunctions(sourceCode, targetFunctionName, dictionaryEnumValues):
+def inlineFunctions(sourceCode, targetFunctionName, dictionaryEnumValues, skipEnum=False):
+    if skipEnum:
+        dictionaryEnumValues = {}
     dictionaryParsed = ast.parse(sourceCode)
     dictionaryFunctions = {
         element.name: element
@@ -148,198 +118,70 @@ def inlineFunctions(sourceCode, targetFunctionName, dictionaryEnumValues):
     nodeInlined = nodeInliner.visit(nodeTarget)
     ast.fix_missing_locations(nodeInlined)
 
-    # Generate imports
     requiredImports = findRequiredImports(nodeInlined)
     importStatements = generateImports(requiredImports)
 
-    # Combine imports with inlined code
-    inlinedCode = importStatements + '\n\n' + ast.unparse(ast.Module(body=[nodeInlined], type_ignores=[]))
+    lineNumbaDecorator = dictionaryDecorators[targetFunctionName]
+    inlinedCode = importStatements + '\n\n' + lineNumbaDecorator + ast.unparse(ast.Module(body=[nodeInlined], type_ignores=[]))
     return inlinedCode
+
+def unpackArrays(codeInlined: str, callableTarget: str) -> str:
+    dictionaryReplaceScalars = {
+        'my[indexMy.dimensionsTotal.value]': 'dimensionsTotal',
+        'my[indexMy.dimensionsUnconstrained.value]': 'dimensionsUnconstrained',
+        'my[indexMy.gap1ndex.value]': 'gap1ndex',
+        'my[indexMy.gap1ndexCeiling.value]': 'gap1ndexCeiling',
+        'my[indexMy.indexDimension.value]': 'indexDimension',
+        # 'my[indexMy.indexLeaf.value]': 'indexLeaf',
+        'my[indexMy.indexMiniGap.value]': 'indexMiniGap',
+        'my[indexMy.leaf1ndex.value]': 'leaf1ndex',
+        'my[indexMy.leafConnectee.value]': 'leafConnectee',
+        # 'my[indexMy.taskDivisions.value]': 'taskDivisions',
+        'my[indexMy.taskIndex.value]': 'taskIndex',
+        # 'foldGroups[-1]': 'leavesTotal',
+    }
+
+    dictionaryReplaceArrays = {
+        "track[indexTrack.leafAbove.value, ": 'leafAbove[',
+        "track[indexTrack.leafBelow.value, ": 'leafBelow[',
+        'track[indexTrack.countDimensionsGapped.value, ': 'countDimensionsGapped[',
+        'track[indexTrack.gapRangeStart.value, ': 'gapRangeStart[',
+    }
+
+    ImaIndent = "    "
+    linesInitialize = """"""
+
+    for find, replace in dictionaryReplaceScalars.items():
+        linesInitialize += f"{ImaIndent}{replace} = {find}\n"
+        codeInlined = codeInlined.replace(find, replace)
+
+    for find, replace in dictionaryReplaceArrays.items():
+        linesInitialize += f"{ImaIndent}{replace[0:-1]} = {find[0:-2]}]\n"
+        codeInlined = codeInlined.replace(find, replace)
+
+    ourGuyOnTheInside = "    doFindGaps = True\n"
+    linesInitialize = ourGuyOnTheInside + linesInitialize
+
+    codeInlined = codeInlined.replace(ourGuyOnTheInside, linesInitialize)
+
+    return codeInlined
 
 def Z0Z_inlineMapFolding():
     dictionaryEnumValues = getDictionaryEnumValues()
+    codeSource = inspect.getsource(algorithmSource)
+    pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
 
-    pathFilenameSource = pathlib.Path("/apps/mapFolding/mapFolding/theDao.py")
-    codeSource = pathFilenameSource.read_text()
-
-    listCallables = [
-        'countInitialize',
-        'countParallel',
-        'countSequential',
-    ]
+    listCallables = [ 'countInitialize', 'countParallel', 'countSequential', ]
 
     listPathFilenamesDestination: list[pathlib.Path] = []
     for callableTarget in listCallables:
-        pathFilenameDestination = pathFilenameSource.parent / "someAssemblyRequired" / pathFilenameSource.with_stem(callableTarget).name
-        codeInlined = inlineFunctions(codeSource, callableTarget, dictionaryEnumValues)
-        pathFilenameDestination.write_text(codeInlined)
+        skipEnum = (callableTarget == 'countInitialize')
+        skipEnum = (callableTarget == 'countSequential')
+        pathFilenameDestination = pathFilenameAlgorithm.parent / "someAssemblyRequired" / pathFilenameAlgorithm.with_stem(callableTarget).name
+        codeInlined = inlineFunctions(codeSource, callableTarget, dictionaryEnumValues, skipEnum)
+        codeUnpacked = unpackArrays(codeInlined, callableTarget)
+        pathFilenameDestination.write_text(codeUnpacked)
         listPathFilenamesDestination.append(pathFilenameDestination)
 
-    listNoNumba = [
-        'countInitialize',
-        'countSequential',
-    ]
-
-    listPathFilenamesNoNumba = []
-    for pathFilename in listPathFilenamesDestination:
-        if pathFilename.stem in listNoNumba:
-            pathFilenameNoNumba = pathFilename.with_name(pathFilename.stem + 'NoNumba' + pathFilename.suffix)
-        else:
-            continue
-        codeNoNumba = pathFilename.read_text()
-        for codeLine in copy.copy(codeNoNumba.splitlines()):
-            if 'numba' in codeLine:
-                codeNoNumba = codeNoNumba.replace(codeLine, '')
-        pathFilenameNoNumba.write_text(codeNoNumba)
-        listPathFilenamesNoNumba.append(pathFilenameNoNumba)
-
-identifierCallableLaunch = "goGoGadgetAbsurdity"
-
-def convertNDArrayToStr(arrayTarget: numpy.ndarray, identifierName: str) -> str:
-    def process_nested_array(arraySlice):
-        if isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim > 1:
-            return [process_nested_array(arraySlice[index]) for index in range(arraySlice.shape[0])]
-        elif isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim == 1:
-            listWithRanges = []
-            for group in more_itertools.consecutive_groups(arraySlice.tolist()):
-                ImaSerious = list(group)
-                if len(ImaSerious) <= 4:
-                    listWithRanges += ImaSerious
-                else:
-                    ImaRange = [range(ImaSerious[0], ImaSerious[-1] + 1)]
-                    listWithRanges += ImaRange
-            return listWithRanges
-        return arraySlice
-
-    arrayAsNestedLists = process_nested_array(arrayTarget)
-
-    stringMinimized = python_minifier.minify(str(arrayAsNestedLists))
-    commaZeroMaximum = arrayTarget.shape[-1] - 1
-    stringMinimized = stringMinimized.replace('[0' + ',0'*commaZeroMaximum + ']', '[0]*'+str(commaZeroMaximum+1))
-    for countZeros in range(commaZeroMaximum, 2, -1):
-        stringMinimized = stringMinimized.replace(',0'*countZeros + ']', ']+[0]*'+str(countZeros))
-
-    stringMinimized = stringMinimized.replace('range', '*range')
-
-    return f"{identifierName} = numpy.array({stringMinimized}, dtype=numpy.{arrayTarget.dtype})"
-
-def writeModuleWithNumba(listDimensions, datatypeDefault: str = 'uint8'):
-    numpy_dtypeLarge = dtypeLarge
-    #, datatypeDefault: str = 'uint8'
-    # datatypeDefault = 'uint8'
-    numpy_dtypeDefault = make_dtype(datatypeDefault)
-    numpy_dtypeSmall = numpy_dtypeDefault
-    # forceinline=True might actually be useful
-    parametersNumba = f"numba.types.{datatypeLarge}(), \
-cache=True, \
-nopython=True, \
-fastmath=True, \
-forceinline=True, \
-inline='always', \
-looplift=False, \
-_nrt=True, \
-error_model='numpy', \
-parallel=False, \
-boundscheck=False, \
-no_cfunc_wrapper=False, \
-no_cpython_wrapper=False, \
-"
-# no_cfunc_wrapper=True, \
-# no_cpython_wrapper=True, \
-
-    pathFilenameData = Z0Z_makeJob(listDimensions, datatypeDefault=numpy_dtypeDefault, datatypeLarge=numpy_dtypeLarge, datatypeSmall=numpy_dtypeSmall)
-
-    pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/someAssemblyRequired/countSequentialNoNumba.py')  # Switch back to generated module
-    pathFilenameDestination = pathFilenameData.with_stem(pathFilenameData.parent.name).with_suffix(".py")
-
-    lineNumba = f"@numba.jit({parametersNumba})"
-
-    linesImport = "\n".join([
-                        "import numpy"
-                        , "import numba"
-                        ])
-
-    stateJob = pickle.loads(pathFilenameData.read_bytes())
-
-    ImaIndent = '    '
-    linesDataDynamic = """"""
-    linesDataDynamic = "\n".join([linesDataDynamic
-            , ImaIndent + f"foldsTotal = numba.types.{datatypeLarge}(0)"
-            , ImaIndent + convertNDArrayToStr(stateJob['my'], 'my')
-            , ImaIndent + convertNDArrayToStr(stateJob['foldGroups'], 'foldGroups')
-            , ImaIndent + convertNDArrayToStr(stateJob['gapsWhere'], 'gapsWhere')
-            , ImaIndent + convertNDArrayToStr(stateJob['track'], 'track')
-            ])
-
-    linesDataStatic = """"""
-    linesDataStatic = "\n".join([linesDataStatic
-            , ImaIndent + convertNDArrayToStr(stateJob['connectionGraph'], 'connectionGraph')
-            ])
-
-    pathFilenameFoldsTotal: pathlib.Path = stateJob['pathFilenameFoldsTotal']
-
-    linesAlgorithm = """"""
-    for lineSource in pathFilenameAlgorithm.read_text().splitlines():
-        if lineSource.startswith('#'):
-            continue
-        elif not lineSource:
-            continue
-        elif lineSource.startswith('def '):
-            lineSource = "\n".join([lineNumba
-                                , f"def {identifierCallableLaunch}():"
-                                , linesDataDynamic
-                                , linesDataStatic
-                                ])
-        linesAlgorithm = "\n".join([linesAlgorithm
-                            , lineSource
-                            ])
-
-    linesLaunch = """"""
-    linesLaunch = linesLaunch + f"""
 if __name__ == '__main__':
-    import time
-    timeStart = time.perf_counter()
-    {identifierCallableLaunch}()
-    print(time.perf_counter() - timeStart)"""
-
-    linesWriteFoldsTotal = """"""
-    linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
-                                    , "    foldsTotal = foldGroups[0:-1].sum() * foldGroups[-1]"
-                                    , "    print(foldsTotal)"
-                                    , "    with numba.objmode():"
-                                    , f"        open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
-                                    , "    return foldsTotal"
-                                    ])
-
-    linesAll = "\n".join([
-                        linesImport
-                        , linesAlgorithm
-                        , linesWriteFoldsTotal
-                        , linesLaunch
-                        ])
-
-    pathFilenameDestination.write_text(linesAll)
-
-    return pathFilenameDestination
-
-def writeModuleLLVM(pathFilenamePythonFile: pathlib.Path) -> pathlib.Path:
-    pathRootPackage = pathlib.Path('c:/apps/mapFolding')
-    relativePathModule = pathFilenamePythonFile.relative_to(pathRootPackage)
-    moduleTarget = '.'.join(relativePathModule.parts)[0:-len(relativePathModule.suffix)]
-    moduleTargetImported = importlib.import_module(moduleTarget)
-    linesLLVM = moduleTargetImported.__dict__[identifierCallableLaunch].inspect_llvm()[()]
-    moduleLLVM = llvmlite.binding.module.parse_assembly(linesLLVM)
-    pathFilenameLLVM = pathFilenamePythonFile.with_suffix(".ll")
-    pathFilenameLLVM.write_text(str(moduleLLVM))
-    return pathFilenameLLVM
-
-def doIt(listDimensions, datatypeDefault: str = 'uint8'):
-    # NOTE this overwrites files
     Z0Z_inlineMapFolding()
-    pathFilenamePythonFile = writeModuleWithNumba(listDimensions, datatypeDefault=datatypeDefault)
-    pathFilenameLLVM = writeModuleLLVM(pathFilenamePythonFile)  # noqa: F841
-    return pathFilenamePythonFile
-
-if __name__ == '__main__':
-    doIt([2, 6])
-    # doIt([2]*2, datatypeDefault='int64')
