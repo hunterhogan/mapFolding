@@ -1,4 +1,4 @@
-from mapFolding import indexMy, indexTrack
+from mapFolding import indexMy, indexTrack, dtypeDefault, dtypeLarge
 import ast
 import copy
 import pathlib
@@ -9,6 +9,52 @@ def getDictionaryEnumValues():
         for memberName, memberValue in enumIndex._member_map_.items():
             dictionaryEnumValues[f"{enumIndex.__name__}.{memberName}.value"] = memberValue.value
     return dictionaryEnumValues
+
+def getHardcodedShapes():
+    """Temporary function to provide array shapes until proper SSOT is implemented."""
+    return {
+        'my': '(numba.int64[::1])',
+        'track': '(numba.int64[:,::1])',
+        'gapsWhere': '(numba.int64[::1])',
+        'connectionGraph': '(numba.int64[:,:,::1])',
+        'foldGroups': '(numba.int64[::1])',
+    }
+
+def generateDecorator(functionName: str, isParallel: bool = False) -> str:
+    """Generate a Numba decorator string based on function signature."""
+    shapes = getHardcodedShapes()
+    parameters = []
+
+    # Map function parameters to their shapes
+    parameterMapping = {
+        'my': 'numba.int64[::1]',
+        'track': 'numba.int64[:,::1]',
+        'gapsWhere': 'numba.int64[::1]',
+        'connectionGraph': 'numba.int64[:,:,::1]',
+        'foldGroups': 'numba.int64[::1]',
+    }
+
+    # Get function parameters from theDao
+    import inspect
+    from mapFolding import theDao
+    functionObj = getattr(theDao, functionName)
+    signature = inspect.signature(functionObj)
+
+    # Debug info
+    print(f"Creating decorator for function: {functionName}")
+    print(f"Function parameters: {list(signature.parameters.keys())}")
+
+    # Build parameter list in correct order based on function signature
+    for param in signature.parameters:
+        if param in parameterMapping:
+            parameters.append(parameterMapping[param])
+
+    # Format into numba decorator string
+    otherParams = "cache=True, nopython=True, fastmath=True, looplift=False, error_model='numpy', parallel=False, boundscheck=False"
+    decoratorStr = f"@numba.jit(({', '.join(parameters)}), {otherParams})"
+
+    print(f"Generated decorator: {decoratorStr}")
+    return decoratorStr
 
 class RecursiveInlinerWithEnum(ast.NodeTransformer):
     def __init__(self, dictionaryFunctions, dictionaryEnumValues):
@@ -39,7 +85,7 @@ class RecursiveInlinerWithEnum(ast.NodeTransformer):
         callNode = self.generic_visit(node)
         if isinstance(callNode, ast.Call) and isinstance(callNode.func, ast.Name) and callNode.func.id in self.dictionaryFunctions:
             inlineDefinition = self.inlineFunctionBody(callNode.func.id)
-            if inlineDefinition and inlineDefinition.body:
+            if (inlineDefinition and inlineDefinition.body):
                 lastStmt = inlineDefinition.body[-1]
                 if isinstance(lastStmt, ast.Return) and lastStmt.value is not None:
                     return self.visit(lastStmt.value)
@@ -54,6 +100,11 @@ class RecursiveInlinerWithEnum(ast.NodeTransformer):
                 inlineDefinition = self.inlineFunctionBody(node.value.func.id)
                 if inlineDefinition:
                     return [self.visit(stmt) for stmt in inlineDefinition.body]
+        return self.generic_visit(node)
+
+    def visit_FunctionDef(self, node):
+        """Add decorator if function doesn't have one."""
+        # Skip decorator addition since they're already in theDao.py
         return self.generic_visit(node)
 
 def findRequiredImports(node):
@@ -114,7 +165,7 @@ def inlineFunctions(sourceCode, targetFunctionName, dictionaryEnumValues):
 def Z0Z_inlineMapFolding():
     dictionaryEnumValues = getDictionaryEnumValues()
 
-    pathFilenameSource = pathlib.Path("/apps/mapFolding/mapFolding/lovelace.py")
+    pathFilenameSource = pathlib.Path("/apps/mapFolding/mapFolding/theDao.py")
     codeSource = pathFilenameSource.read_text()
 
     listCallables = [

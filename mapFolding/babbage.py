@@ -1,4 +1,4 @@
-from mapFolding.importSelector import countInitialize, countParallel, countSequential
+from someAssemblyRequired import countInitialize, countParallel, countSequential
 from mapFolding import indexMy
 from numpy import integer
 from numpy.typing import NDArray
@@ -15,7 +15,6 @@ def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[inte
     - `countFoldsCompiled` is not merely "jitted", it is super jitted, which makes it too arrogant to talk to plebian Python functions. It will, however, reluctantly talk to basic jitted functions.
     - The function in this module is jitted, so it can talk to `countFoldsCompiled`, and because it isn't so arrogant, it will talk to the low-class `countFolds` with only a few restrictions, such as:
         - No `TypedDict`
-        - No Python v 3.13
         - The plebs must clean up their own memory problems
         - No oversized integers
         - No global variables, only global constants

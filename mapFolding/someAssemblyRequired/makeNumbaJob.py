@@ -8,21 +8,42 @@ Can create LLVM IR from the module: of unknown utility.
 # from mapFolding import dtypeDefault, dtypeSmall
 from mapFolding import make_dtype, datatypeLarge, dtypeLarge
 from mapFolding.someAssemblyRequired.inlineAfunction import Z0Z_inlineMapFolding
-from mapFolding.someAssemblyRequired.jobsAndTasks import Z0Z_makeJob
+from someAssemblyRequired.makeComputationState import Z0Z_makeJob
 import importlib
 import llvmlite.binding
 import numpy
 import pathlib
 import pickle
 import python_minifier
-
-listDimensions = [5,5]
-
-# NOTE this overwrites files
-Z0Z_inlineMapFolding()
+import itertools
+import more_itertools
 
 identifierCallableLaunch = "goGoGadgetAbsurdity"
 
+# def convertNDArrayToStr(arrayTarget: numpy.ndarray, identifierName: str) -> str:
+#     shapeArray = arrayTarget.shape
+#     arrayAsNestedLists = arrayTarget[:,:].copy().tolist()
+#     for axis0, axis1 in itertools.product(range(shapeArray[0]), range(shapeArray[1])):
+#         ImaList = arrayTarget[axis0, axis1].copy().tolist()
+#         listWithRanges = []
+#         for group in more_itertools.consecutive_groups(ImaList):
+#             ImaSerious = list(group)
+#             if len(ImaSerious) <= 4:
+#                 listWithRanges += ImaSerious
+#             else:
+#                 ImaRange = [range(ImaSerious[0],ImaSerious[-1]+1)]
+#                 listWithRanges += ImaRange
+#         arrayAsNestedLists[axis0][axis1] = listWithRanges
+
+#     arrayAsTypeStr = str(arrayAsNestedLists)
+#     stringMinimized = python_minifier.minify(arrayAsTypeStr)
+#     commaZeroMaximum = arrayTarget.shape[-1] - 1
+#     stringMinimized = stringMinimized.replace('[0' + ',0'*commaZeroMaximum + ']', '[0]*'+str(commaZeroMaximum+1))
+#     for countZeros in range(commaZeroMaximum, 2, -1):
+#         stringMinimized = stringMinimized.replace(',0'*countZeros + ']', ']+[0]*'+str(countZeros))
+
+#     stringMinimized = stringMinimized.replace('range', '*range')
+#     return f"{identifierName} = numpy.array({stringMinimized}, dtype=numpy.{arrayTarget.dtype})"
 def convertNDArrayToStr(arrayTarget: numpy.ndarray, identifierName: str) -> str:
     arrayAsTypeStr = numpy.array2string(arrayTarget, threshold=100000, max_line_width=200, separator=',')
     stringMinimized = python_minifier.minify(arrayAsTypeStr)
@@ -32,10 +53,10 @@ def convertNDArrayToStr(arrayTarget: numpy.ndarray, identifierName: str) -> str:
         stringMinimized = stringMinimized.replace(',0'*countZeros + ']', ']+[0]*'+str(countZeros))
     return f"{identifierName} = numpy.array({stringMinimized}, dtype=numpy.{arrayTarget.dtype})"
 
-def writeModuleWithNumba(listDimensions):
+def writeModuleWithNumba(listDimensions, datatypeDefault: str = 'uint8'):
     numpy_dtypeLarge = dtypeLarge
-    # numpy_dtypeDefault = dtypeDefault
-    datatypeDefault = 'uint8'
+    #, datatypeDefault: str = 'uint8'
+    # datatypeDefault = 'uint8'
     numpy_dtypeDefault = make_dtype(datatypeDefault)
     numpy_dtypeSmall = numpy_dtypeDefault
     # forceinline=True might actually be useful
@@ -58,7 +79,7 @@ no_cpython_wrapper=False, \
 
     pathFilenameData = Z0Z_makeJob(listDimensions, datatypeDefault=numpy_dtypeDefault, datatypeLarge=numpy_dtypeLarge, datatypeSmall=numpy_dtypeSmall)
 
-    pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/someAssemblyRequired/countSequentialNoNumba.py')
+    pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/someAssemblyRequired/countSequentialNoNumba.py')  # Switch back to generated module
     pathFilenameDestination = pathFilenameData.with_stem(pathFilenameData.parent.name).with_suffix(".py")
 
     lineNumba = f"@numba.jit({parametersNumba})"
@@ -142,6 +163,13 @@ def writeModuleLLVM(pathFilenamePythonFile: pathlib.Path) -> pathlib.Path:
     pathFilenameLLVM.write_text(str(moduleLLVM))
     return pathFilenameLLVM
 
+def doIt(listDimensions, datatypeDefault: str = 'uint8'):
+    # NOTE this overwrites files
+    Z0Z_inlineMapFolding()
+    pathFilenamePythonFile = writeModuleWithNumba(listDimensions, datatypeDefault=datatypeDefault)
+    pathFilenameLLVM = writeModuleLLVM(pathFilenamePythonFile)  # noqa: F841
+    return pathFilenamePythonFile
+
 if __name__ == '__main__':
-    pathFilenamePythonFile = writeModuleWithNumba(listDimensions)
-    pathFilenameLLVM = writeModuleLLVM(pathFilenamePythonFile)
+    doIt([3, 4])
+    # doIt([2]*2, datatypeDefault='int64')

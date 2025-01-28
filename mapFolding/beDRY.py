@@ -217,7 +217,7 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
         gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, datatypeSmall),
         track = makeDataContainer((len(indexTrack), leavesTotal + 1), datatypeDefault)
         )
-
+    # Try removing some of the scalar values from `my`
 
     return stateInitialized
 
