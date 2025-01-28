@@ -1,7 +1,7 @@
-import numba
 
-@numba.jit((numba.int64[:, :, ::1], numba.int64[::1], numba.int64[::1], numba.int64[:, ::1]), parallel=False, boundscheck=False, cache=True, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
+
 def countInitialize(connectionGraph, gapsWhere, my, track):
+    """@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)"""
     while my[7] > 0:
         if my[7] <= 1 or track[1, 0] == 1:
             my[1] = my[0]

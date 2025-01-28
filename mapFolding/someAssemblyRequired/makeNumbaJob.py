@@ -1,36 +1,25 @@
-"""Create a python module hardcoded to compute a map's foldsTotal.
-- NumPy ndarray.
-- Numba optimized.
-- Absolutely no other imports.
-
-Can create LLVM IR from the module: of unknown utility.
-"""
-# from mapFolding import dtypeDefault, dtypeSmall
+from mapFolding import getPathFilenameFoldsTotal
+from mapFolding import indexMy, indexTrack
 from mapFolding import make_dtype, datatypeLarge, dtypeLarge
-# from mapFolding.someAssemblyRequired.inlineAfunction import Z0Z_inlineMapFolding
-# from someAssemblyRequired.makeComputationState import Z0Z_makeJob
+from mapFolding import outfitCountFolds
+from mapFolding import theDao
+from someAssemblyRequired.countInitializeNoNumba import countInitialize
+from typing import Any, Optional, Sequence, Type
+import ast
+import copy
 import importlib
+import inspect
 import llvmlite.binding
+import more_itertools
 import numpy
 import pathlib
 import pickle
 import python_minifier
-import itertools
-import more_itertools
-from mapFolding import indexMy, indexTrack, dtypeDefault, dtypeLarge
-import ast
-import copy
-import pathlib
-from typing import Any, Optional, Sequence, Type
 
 def Z0Z_makeJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]):
-    from mapFolding import outfitCountFolds
     stateUniversal = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
-    from mapFolding.someAssemblyRequired.countInitializeNoNumba import countInitialize
     countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
-    from mapFolding import getPathFilenameFoldsTotal
     pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
-    import pathlib
     suffix = pathFilenameChopChop.suffix
     pathJob = pathlib.Path(str(pathFilenameChopChop)[0:-len(suffix)])
     pathJob.mkdir(parents=True, exist_ok=True)
@@ -41,7 +30,6 @@ def Z0Z_makeJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type
 
     del stateJob['mapShape']
 
-    import pickle
     pathFilenameJob.write_bytes(pickle.dumps(stateJob))
     return pathFilenameJob
 
@@ -52,57 +40,14 @@ def getDictionaryEnumValues():
             dictionaryEnumValues[f"{enumIndex.__name__}.{memberName}.value"] = memberValue.value
     return dictionaryEnumValues
 
-def getHardcodedShapes():
-    """Temporary function to provide array shapes until proper SSOT is implemented."""
-    return {
-        'my': '(numba.int64[::1])',
-        'track': '(numba.int64[:,::1])',
-        'gapsWhere': '(numba.int64[::1])',
-        'connectionGraph': '(numba.int64[:,:,::1])',
-        'foldGroups': '(numba.int64[::1])',
-    }
-
-def generateDecorator(functionName: str, isParallel: bool = False) -> str:
-    """Generate a Numba decorator string based on function signature."""
-    shapes = getHardcodedShapes()
-    parameters = []
-
-    # Map function parameters to their shapes
-    parameterMapping = {
-        'my': 'numba.int64[::1]',
-        'track': 'numba.int64[:,::1]',
-        'gapsWhere': 'numba.int64[::1]',
-        'connectionGraph': 'numba.int64[:,:,::1]',
-        'foldGroups': 'numba.int64[::1]',
-    }
-
-    # Get function parameters from theDao
-    import inspect
-    from mapFolding import theDao
-    functionObj = getattr(theDao, functionName)
-    signature = inspect.signature(functionObj)
-
-    # Debug info
-    print(f"Creating decorator for function: {functionName}")
-    print(f"Function parameters: {list(signature.parameters.keys())}")
-
-    # Build parameter list in correct order based on function signature
-    for param in signature.parameters:
-        if param in parameterMapping:
-            parameters.append(parameterMapping[param])
-
-    # Format into numba decorator string
-    otherParams = "cache=True, nopython=True, fastmath=True, looplift=False, error_model='numpy', parallel=False, boundscheck=False"
-    decoratorStr = f"@numba.jit(({', '.join(parameters)}), {otherParams})"
-
-    print(f"Generated decorator: {decoratorStr}")
-    return decoratorStr
-
 class RecursiveInlinerWithEnum(ast.NodeTransformer):
+    """Process AST nodes to inline functions and substitute enum values.
+    Also handles function decorators during inlining."""
+
     def __init__(self, dictionaryFunctions, dictionaryEnumValues):
         self.dictionaryFunctions = dictionaryFunctions
         self.dictionaryEnumValues = dictionaryEnumValues
-        self.processed = set()  # Track processed functions to avoid infinite recursion
+        self.processed = set()
 
     def inlineFunctionBody(self, functionName):
         if functionName in self.processed:
@@ -145,8 +90,15 @@ class RecursiveInlinerWithEnum(ast.NodeTransformer):
         return self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
-        """Add decorator if function doesn't have one."""
-        # Skip decorator addition since they're already in theDao.py
+        # Just insert hardcoded decorators as text nodes
+        if not node.decorator_list:
+            if node.name == 'countInitialize':
+                node.body.insert(0, ast.Expr(value=ast.Constant(value='@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)')))
+            elif node.name == 'countParallel':
+                node.body.insert(0, ast.Expr(value=ast.Constant(value='@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=True, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)')))
+            elif node.name == 'countSequential':
+                node.body.insert(0, ast.Expr(value=ast.Constant(value='@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)')))
+
         return self.generic_visit(node)
 
 def findRequiredImports(node):
@@ -389,5 +341,5 @@ def doIt(listDimensions, datatypeDefault: str = 'uint8'):
     return pathFilenamePythonFile
 
 if __name__ == '__main__':
-    doIt([2, 8])
+    doIt([2, 6])
     # doIt([2]*2, datatypeDefault='int64')

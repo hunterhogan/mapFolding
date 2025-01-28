@@ -103,7 +103,6 @@ def placeLeafCondition(my):
 def thereAreComputationDivisionsYouMightSkip(my):
     return my[indexMy.leaf1ndex.value] != my[indexMy.taskDivisions.value] or my[indexMy.leafConnectee.value] % my[indexMy.taskDivisions.value] == my[indexMy.taskIndex.value]
 
-@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=False, boundscheck=False, cache=True, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def countInitialize(connectionGraph, gapsWhere, my, track):
     while activeLeafGreaterThan0Condition(my=my):
         if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
@@ -128,34 +127,6 @@ def countInitialize(connectionGraph, gapsWhere, my, track):
         if my[indexMy.gap1ndex.value] > 0:
             return
 
-@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=False, boundscheck=False, cache=True, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
-def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
-    doFindGaps = True
-    while activeLeafGreaterThan0Condition(my=my):
-        if ((doFindGaps := activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track))
-                and activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my)):
-            foldsSubTotalIncrement(foldGroups=foldGroups, my=my)
-        elif doFindGaps:
-            findGapsInitializeVariables(my=my, track=track)
-            while loopingTheDimensions(my=my):
-                if dimensionsUnconstrainedCondition(connectionGraph=connectionGraph, my=my):
-                    dimensionsUnconstrainedDecrement(my=my)
-                else:
-                    leafConnecteeInitialization(connectionGraph=connectionGraph, my=my)
-                    while loopingLeavesConnectedToActiveLeaf(my=my):
-                        countGaps(gapsWhere=gapsWhere, my=my, track=track)
-                        leafConnecteeUpdate(connectionGraph=connectionGraph, my=my, track=track)
-                dimension1ndexIncrement(my=my)
-            indexMiniGapInitialization(my=my)
-            while loopingToActiveGapCeiling(my=my):
-                filterCommonGaps(gapsWhere=gapsWhere, my=my, track=track)
-                indexMiniGapIncrement(my=my)
-        while backtrackCondition(my=my, track=track):
-            backtrack(my=my, track=track)
-        if placeLeafCondition(my=my):
-            placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
-
-@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def countParallel(connectionGraph, foldGroups, gapsWherePARALLEL, myPARALLEL, trackPARALLEL):
     for indexSherpa in numba.prange(myPARALLEL[indexMy.taskDivisions.value]):
         gapsWhere = gapsWherePARALLEL.copy()
@@ -186,6 +157,32 @@ def countParallel(connectionGraph, foldGroups, gapsWherePARALLEL, myPARALLEL, tr
                 backtrack(my=my, track=track)
             if placeLeafCondition(my=my):
                 placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
+
+def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
+    doFindGaps = True
+    while activeLeafGreaterThan0Condition(my=my):
+        if ((doFindGaps := activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track))
+                and activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my)):
+            foldsSubTotalIncrement(foldGroups=foldGroups, my=my)
+        elif doFindGaps:
+            findGapsInitializeVariables(my=my, track=track)
+            while loopingTheDimensions(my=my):
+                if dimensionsUnconstrainedCondition(connectionGraph=connectionGraph, my=my):
+                    dimensionsUnconstrainedDecrement(my=my)
+                else:
+                    leafConnecteeInitialization(connectionGraph=connectionGraph, my=my)
+                    while loopingLeavesConnectedToActiveLeaf(my=my):
+                        countGaps(gapsWhere=gapsWhere, my=my, track=track)
+                        leafConnecteeUpdate(connectionGraph=connectionGraph, my=my, track=track)
+                dimension1ndexIncrement(my=my)
+            indexMiniGapInitialization(my=my)
+            while loopingToActiveGapCeiling(my=my):
+                filterCommonGaps(gapsWhere=gapsWhere, my=my, track=track)
+                indexMiniGapIncrement(my=my)
+        while backtrackCondition(my=my, track=track):
+            backtrack(my=my, track=track)
+        if placeLeafCondition(my=my):
+            placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
 
 def hurryUpAndWait(connectionGraph, foldGroups, gapsWhere, mapShape, my, track):
     countInitialize(connectionGraph, gapsWhere, my, track)

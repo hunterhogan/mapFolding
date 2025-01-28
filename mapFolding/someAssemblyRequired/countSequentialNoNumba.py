@@ -1,7 +1,7 @@
 
 
-
 def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
+
     doFindGaps = True
     while my[7] > 0:
         if (doFindGaps := (my[7] <= 1 or track[1, 0] == 1)) and my[7] > foldGroups[-1]:

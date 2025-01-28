@@ -1,7 +1,7 @@
-import numba
 
-@numba.jit((numba.int64[:, :, ::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:, ::1]), parallel=False, boundscheck=False, cache=True, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
+
 def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
+    """@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)"""
     doFindGaps = True
     while my[7] > 0:
         if (doFindGaps := (my[7] <= 1 or track[1, 0] == 1)) and my[7] > foldGroups[-1]:

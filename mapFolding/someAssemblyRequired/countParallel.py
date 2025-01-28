@@ -1,7 +1,7 @@
 import numba
 
-@numba.jit((numba.int64[:, :, ::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:, ::1]), parallel=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, looplift=False, nogil=True, nopython=True)
 def countParallel(connectionGraph, foldGroups, gapsWherePARALLEL, myPARALLEL, trackPARALLEL):
+    """@numba.jit((numba.int64[:,:,::1], numba.int64[::1], numba.int64[::1], numba.int64[::1], numba.int64[:,::1]), parallel=True, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)"""
     for indexSherpa in numba.prange(myPARALLEL[9]):
         gapsWhere = gapsWherePARALLEL.copy()
         my = myPARALLEL.copy()

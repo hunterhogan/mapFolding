@@ -1,7 +1,7 @@
 
 
-
 def countInitialize(connectionGraph, gapsWhere, my, track):
+
     while my[7] > 0:
         if my[7] <= 1 or track[1, 0] == 1:
             my[1] = my[0]
