@@ -1,9 +1,10 @@
 from mapFolding import getPathFilenameFoldsTotal, dtypeNumpyDefaults, thisSeemsVeryComplicated
 from mapFolding import make_dtype, datatypeLarge, dtypeLarge, datatypeMedium, dtypeMedium, datatypeSmall, dtypeSmall
-from mapFolding import outfitCountFolds
+from mapFolding import outfitCountFolds, computationState, indexMy, indexTrack
 from someAssemblyRequired import countInitialize, countSequential
 from typing import Any, Optional, Sequence, Type
 import more_itertools
+import inspect
 import numpy
 import pathlib
 import pickle
@@ -14,18 +15,14 @@ identifierCallableLaunch = "goGoGadgetAbsurdity"
 def makeStateJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]):
     stateUniversal = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
     countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
+
     pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
     suffix = pathFilenameChopChop.suffix
     pathJob = pathlib.Path(str(pathFilenameChopChop)[0:-len(suffix)])
     pathJob.mkdir(parents=True, exist_ok=True)
     pathFilenameJob = pathJob / 'stateJob.pkl'
 
-    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathFilenameJob.parent)
-    stateJob = {**stateUniversal, 'pathFilenameFoldsTotal': pathFilenameFoldsTotal}
-
-    del stateJob['mapShape']
-
-    pathFilenameJob.write_bytes(pickle.dumps(stateJob))
+    pathFilenameJob.write_bytes(pickle.dumps(stateUniversal))
     return pathFilenameJob
 
 def convertNDArrayToStr(arrayTarget: numpy.ndarray, identifierName: str) -> str:
@@ -65,7 +62,11 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
     numpy_dtypeMedium = make_dtype(datatypeMediumAsStr) # type: ignore
     numpy_dtypeSmall = make_dtype(datatypeSmallAsStr) # type: ignore
 
-    pathFilenameData = makeStateJob(listDimensions, dtypeLarge = numpy_dtypeLarge, dtypeMedium = numpy_dtypeMedium, dtypeSmall = numpy_dtypeSmall)
+    pathFilenameJob = makeStateJob(listDimensions, dtypeLarge = numpy_dtypeLarge, dtypeMedium = numpy_dtypeMedium, dtypeSmall = numpy_dtypeSmall)
+    stateJob: computationState = pickle.loads(pathFilenameJob.read_bytes())
+    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'], pathFilenameJob.parent)
+
+    codeSource = inspect.getsource(countSequential)
 
     # forceinline=True might actually be useful
     parametersNumba = f"numba.types.{datatypeLargeAsStr}(), \
@@ -85,9 +86,6 @@ no_cpython_wrapper=False, \
 # no_cfunc_wrapper=True, \
 # no_cpython_wrapper=True, \
 
-    pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/someAssemblyRequired/countSequentialNoNumba.py')
-    pathFilenameDestination = pathFilenameData.with_stem(pathFilenameData.parent.name).with_suffix(".py")
-
     lineNumba = f"@numba.jit({parametersNumba})"
 
     linesImport = "\n".join([
@@ -95,16 +93,12 @@ no_cpython_wrapper=False, \
                         , "import numba"
                         ])
 
-    stateJob = pickle.loads(pathFilenameData.read_bytes())
-
     ImaIndent = '    '
     linesDataDynamic = """"""
     linesDataDynamic = "\n".join([linesDataDynamic
             , ImaIndent + f"foldsTotal = numba.types.{datatypeLargeAsStr}(0)"
-            , ImaIndent + convertNDArrayToStr(stateJob['my'], 'my')
             , ImaIndent + convertNDArrayToStr(stateJob['foldGroups'], 'foldGroups')
             , ImaIndent + convertNDArrayToStr(stateJob['gapsWhere'], 'gapsWhere')
-            , ImaIndent + convertNDArrayToStr(stateJob['track'], 'track')
             ])
 
     linesDataStatic = """"""
@@ -112,11 +106,11 @@ no_cpython_wrapper=False, \
             , ImaIndent + convertNDArrayToStr(stateJob['connectionGraph'], 'connectionGraph')
             ])
 
-    pathFilenameFoldsTotal: pathlib.Path = stateJob['pathFilenameFoldsTotal']
-
+    my = stateJob['my']
+    track = stateJob['track']
     linesAlgorithm = """"""
-    for lineSource in pathFilenameAlgorithm.read_text().splitlines():
-        if lineSource.startswith('#'):
+    for lineSource in codeSource.splitlines():
+        if lineSource.startswith(('#', 'import', 'from', '@numba.jit')):
             continue
         elif not lineSource:
             continue
@@ -126,6 +120,15 @@ no_cpython_wrapper=False, \
                                 , linesDataDynamic
                                 , linesDataStatic
                                 ])
+        elif 'my[indexMy.' in lineSource:
+            # leaf1ndex = my[indexMy.leaf1ndex.value]
+            identifier, statement = lineSource.split('=')
+            lineSource = ImaIndent + identifier.strip() + '=' + str(eval(statement.strip()))
+        elif 'track[indexTrack.' in lineSource:
+            # leafAbove = track[indexTrack.leafAbove.value]
+            identifier, statement = lineSource.split('=')
+            lineSource = ImaIndent + convertNDArrayToStr(eval(statement.strip()), identifier.strip())
+
         linesAlgorithm = "\n".join([linesAlgorithm
                             , lineSource
                             ])
@@ -154,12 +157,13 @@ if __name__ == '__main__':
                         , linesLaunch
                         ])
 
+    pathFilenameDestination = pathFilenameJob.with_stem(pathFilenameJob.parent.name).with_suffix(".py")
     pathFilenameDestination.write_text(linesAll)
 
     return pathFilenameDestination
 
 if __name__ == '__main__':
-    listDimensions = [6,6]
+    listDimensions = [3,15]
     datatypeLarge = 'int64'
     datatypeMedium = 'uint8'
     datatypeSmall = datatypeMedium
