@@ -1,5 +1,5 @@
 """A relatively stable API for oft-needed functionality."""
-from mapFolding import dtypeDefault, dtypeLarge, dtypeSmall, pathJobDEFAULT
+from mapFolding import dtypeMedium, dtypeLarge, dtypeSmall, pathJobDEFAULT
 from mapFolding import indexMy, indexTrack, computationState
 from Z0Z_tools import intInnit, defineConcurrencyLimit, oopsieKwargsie
 from numpy import integer
@@ -154,7 +154,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 def makeDataContainer(shape, datatype: Optional[Type] = None):
     """Create a container, probably numpy.ndarray, with the given shape and datatype."""
     if datatype is None:
-        datatype = dtypeDefault
+        datatype = dtypeMedium
     return numpy.zeros(shape, dtype=datatype)
 
 def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type[Any]]) -> computationState:
@@ -196,11 +196,11 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
     """
     # NOTE Synchronizing all datatypes at all points is currently poorly handled. instead of using these parameters,
     # you should probably go to "theSSOT.py" and change the datatypes there.
-    datatypeDefault = keywordArguments.get('datatypeDefault', dtypeDefault)
     datatypeLarge = keywordArguments.get('datatypeLarge', dtypeLarge)
+    datatypeMedium = keywordArguments.get('datatypeMedium', dtypeMedium)
     datatypeSmall = keywordArguments.get('datatypeSmall', dtypeSmall)
 
-    my = makeDataContainer(len(indexMy), datatypeDefault)
+    my = makeDataContainer(len(indexMy), datatypeMedium)
 
     mapShape = tuple(sorted(validateListDimensions(listDimensions)))
     concurrencyLimit = setCPUlimit(CPUlimit)
@@ -217,7 +217,7 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
         mapShape = mapShape,
         my = my,
         gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, datatypeSmall),
-        track = makeDataContainer((len(indexTrack), leavesTotal + 1), datatypeDefault)
+        track = makeDataContainer((len(indexTrack), leavesTotal + 1), datatypeMedium)
         )
     # Try removing some of the scalar values from `my`
 

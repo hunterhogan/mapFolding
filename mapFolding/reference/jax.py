@@ -5,7 +5,7 @@ from typing import List, Tuple
 import jax
 import jaxtyping
 
-dtypeDefault = jax.numpy.uint32
+dtypeMedium = jax.numpy.uint32
 dtypeMaximum = jax.numpy.uint32
 
 def countFolds(listDimensions: List[int]) -> int:
@@ -15,7 +15,7 @@ def countFolds(listDimensions: List[int]) -> int:
     d: int = len(listDimensions)
     import numpy
     D: numpy.ndarray = makeConnectionGraph(listDimensionsPositive)
-    connectionGraph = jax.numpy.asarray(D, dtype=dtypeDefault)
+    connectionGraph = jax.numpy.asarray(D, dtype=dtypeMedium)
     del listDimensionsPositive
 
     return foldingsJAX(n, d, connectionGraph)
@@ -191,10 +191,10 @@ def foldingsJAX(leavesTotal: jaxtyping.UInt32, dimensionsTotal: jaxtyping.UInt32
         return (leafAbove, leafBelow, allValues[2], gapRangeStart, gapsWhere, allValues[5], activeLeaf1ndex, activeGap1ndex)
 
     # Dynamic values
-    A = jax.numpy.zeros(leavesTotal + 1, dtype=dtypeDefault)
-    B = jax.numpy.zeros(leavesTotal + 1, dtype=dtypeDefault)
-    count = jax.numpy.zeros(leavesTotal + 1, dtype=dtypeDefault)
-    gapter = jax.numpy.zeros(leavesTotal + 1, dtype=dtypeDefault)
+    A = jax.numpy.zeros(leavesTotal + 1, dtype=dtypeMedium)
+    B = jax.numpy.zeros(leavesTotal + 1, dtype=dtypeMedium)
+    count = jax.numpy.zeros(leavesTotal + 1, dtype=dtypeMedium)
+    gapter = jax.numpy.zeros(leavesTotal + 1, dtype=dtypeMedium)
     gap = jax.numpy.zeros(leavesTotal * leavesTotal + 1, dtype=dtypeMaximum)
 
     foldingsTotal = jax.numpy.uint32(0)

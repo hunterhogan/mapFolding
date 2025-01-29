@@ -19,7 +19,7 @@ def countFolds(listDimensions: List[int]) -> int:
     def integerLarge(value) -> numpy.uint64:
         return numpy.uint64(value)
 
-    dtypeDefault = numpy.uint8
+    dtypeMedium = numpy.uint8
     dtypeMaximum = numpy.uint16
 
     leavesTotal = integerSmall(1)
@@ -30,19 +30,19 @@ def countFolds(listDimensions: List[int]) -> int:
     """How to build a leaf connection graph, also called a "Cartesian Product Decomposition"
     or a "Dimensional Product Mapping", with sentinels:
     Step 1: find the cumulative product of the map's dimensions"""
-    cumulativeProduct = numpy.ones(dimensionsTotal + 1, dtype=dtypeDefault)
+    cumulativeProduct = numpy.ones(dimensionsTotal + 1, dtype=dtypeMedium)
     for dimension1ndex in range(1, dimensionsTotal + 1):
         cumulativeProduct[dimension1ndex] = cumulativeProduct[dimension1ndex - 1] * listDimensions[dimension1ndex - 1]
 
     """Step 2: for each dimension, create a coordinate system """
     """coordinateSystem[dimension1ndex, leaf1ndex] holds the dimension1ndex-th coordinate of leaf leaf1ndex"""
-    coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=dtypeDefault)
+    coordinateSystem = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1), dtype=dtypeMedium)
     for dimension1ndex in range(1, dimensionsTotal + 1):
         for leaf1ndex in range(1, leavesTotal + 1):
             coordinateSystem[dimension1ndex, leaf1ndex] = ((leaf1ndex - 1) // cumulativeProduct[dimension1ndex - 1]) % listDimensions[dimension1ndex - 1] + 1
 
     """Step 3: create a huge empty connection graph"""
-    connectionGraph = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=dtypeDefault)
+    connectionGraph = numpy.zeros((dimensionsTotal + 1, leavesTotal + 1, leavesTotal + 1), dtype=dtypeMedium)
 
     """Step for... for... for...: fill the connection graph"""
     for dimension1ndex in range(1, dimensionsTotal + 1):
@@ -61,7 +61,7 @@ def countFolds(listDimensions: List[int]) -> int:
     leafBelow = numba.literally(1)
     countDimensionsGapped = numba.literally(2)
     gapRangeStart = numba.literally(3)
-    track = numpy.zeros((4, leavesTotal + 1), dtype=dtypeDefault)
+    track = numpy.zeros((4, leavesTotal + 1), dtype=dtypeMedium)
 
     gapsWhere = numpy.zeros(integerLarge(integerLarge(leavesTotal) * integerLarge(leavesTotal) + 1), dtype=dtypeMaximum)
 

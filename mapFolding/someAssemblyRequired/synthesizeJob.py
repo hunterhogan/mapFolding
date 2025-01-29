@@ -1,7 +1,7 @@
-from mapFolding import getPathFilenameFoldsTotal
-from mapFolding import make_dtype, datatypeLarge, dtypeLarge
+from mapFolding import getPathFilenameFoldsTotal, dtypeNumpyDefaults, thisSeemsVeryComplicated
+from mapFolding import make_dtype, datatypeLarge, dtypeLarge, datatypeMedium, dtypeMedium, datatypeSmall, dtypeSmall
 from mapFolding import outfitCountFolds
-from someAssemblyRequired.countInitialize import countInitialize
+from someAssemblyRequired import countInitialize, countSequential
 from typing import Any, Optional, Sequence, Type
 import more_itertools
 import numpy
@@ -11,7 +11,7 @@ import python_minifier
 
 identifierCallableLaunch = "goGoGadgetAbsurdity"
 
-def Z0Z_makeJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]):
+def makeStateJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]):
     stateUniversal = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
     countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
     pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
@@ -56,14 +56,19 @@ def convertNDArrayToStr(arrayTarget: numpy.ndarray, identifierName: str) -> str:
 
     return f"{identifierName} = numpy.array({stringMinimized}, dtype=numpy.{arrayTarget.dtype})"
 
-def writeModuleWithNumba(listDimensions, datatypeDefault: str = 'uint8'):
-    numpy_dtypeLarge = dtypeLarge
-    #, datatypeDefault: str = 'uint8'
-    # datatypeDefault = 'uint8'
-    numpy_dtypeDefault = make_dtype(datatypeDefault)
-    numpy_dtypeSmall = numpy_dtypeDefault
+def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> pathlib.Path:
+    datatypeLargeAsStr = keywordArguments.get('datatypeLarge', thisSeemsVeryComplicated.datatypeLarge)
+    datatypeMediumAsStr = keywordArguments.get('datatypeMedium', thisSeemsVeryComplicated.datatypeMedium)
+    datatypeSmallAsStr = keywordArguments.get('datatypeSmall', thisSeemsVeryComplicated.datatypeSmall)
+
+    numpy_dtypeLarge = make_dtype(datatypeLargeAsStr) # type: ignore
+    numpy_dtypeMedium = make_dtype(datatypeMediumAsStr) # type: ignore
+    numpy_dtypeSmall = make_dtype(datatypeSmallAsStr) # type: ignore
+
+    pathFilenameData = makeStateJob(listDimensions, dtypeLarge = numpy_dtypeLarge, dtypeMedium = numpy_dtypeMedium, dtypeSmall = numpy_dtypeSmall)
+
     # forceinline=True might actually be useful
-    parametersNumba = f"numba.types.{datatypeLarge}(), \
+    parametersNumba = f"numba.types.{datatypeLargeAsStr}(), \
 cache=True, \
 nopython=True, \
 fastmath=True, \
@@ -80,9 +85,7 @@ no_cpython_wrapper=False, \
 # no_cfunc_wrapper=True, \
 # no_cpython_wrapper=True, \
 
-    pathFilenameData = Z0Z_makeJob(listDimensions)
-
-    pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/someAssemblyRequired/countSequentialNoNumba.py')  # Switch back to generated module
+    pathFilenameAlgorithm = pathlib.Path('/apps/mapFolding/mapFolding/someAssemblyRequired/countSequentialNoNumba.py')
     pathFilenameDestination = pathFilenameData.with_stem(pathFilenameData.parent.name).with_suffix(".py")
 
     lineNumba = f"@numba.jit({parametersNumba})"
@@ -97,7 +100,7 @@ no_cpython_wrapper=False, \
     ImaIndent = '    '
     linesDataDynamic = """"""
     linesDataDynamic = "\n".join([linesDataDynamic
-            , ImaIndent + f"foldsTotal = numba.types.{datatypeLarge}(0)"
+            , ImaIndent + f"foldsTotal = numba.types.{datatypeLargeAsStr}(0)"
             , ImaIndent + convertNDArrayToStr(stateJob['my'], 'my')
             , ImaIndent + convertNDArrayToStr(stateJob['foldGroups'], 'foldGroups')
             , ImaIndent + convertNDArrayToStr(stateJob['gapsWhere'], 'gapsWhere')
@@ -155,10 +158,9 @@ if __name__ == '__main__':
 
     return pathFilenameDestination
 
-def doIt(listDimensions, datatypeDefault: str = 'uint8'):
-    pathFilenamePythonFile = writeModuleWithNumba(listDimensions, datatypeDefault=datatypeDefault)
-    return pathFilenamePythonFile
-
 if __name__ == '__main__':
-    doIt([6, 6])
-    # doIt([2]*2, datatypeDefault='int64')
+    listDimensions = [6,6]
+    datatypeLarge = 'int64'
+    datatypeMedium = 'uint8'
+    datatypeSmall = datatypeMedium
+    writeModuleWithNumba(listDimensions, datatypeLarge=datatypeLarge, datatypeMedium=datatypeMedium, datatypeSmall=datatypeSmall)

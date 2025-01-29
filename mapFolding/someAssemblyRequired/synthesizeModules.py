@@ -1,4 +1,4 @@
-from mapFolding import indexMy, indexTrack, theDao, datatypeDefault, datatypeLarge, datatypeSmall
+from mapFolding import indexMy, indexTrack, theDao, datatypeMedium, datatypeLarge, datatypeSmall
 import ast
 import pathlib
 import inspect
@@ -7,11 +7,11 @@ algorithmSource = theDao
 
 dictionaryDecorators={
     'countInitialize':
-    f'@numba.jit((numba.{datatypeSmall}[:,:,::1], numba.{datatypeDefault}[::1], numba.{datatypeSmall}[::1], numba.{datatypeDefault}[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)\n',
+    f'@numba.jit((numba.{datatypeSmall}[:,:,::1], numba.{datatypeMedium}[::1], numba.{datatypeSmall}[::1], numba.{datatypeMedium}[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)\n',
     'countParallel':
-    f'@numba.jit((numba.{datatypeSmall}[:,:,::1], numba.{datatypeLarge}[::1], numba.{datatypeDefault}[::1], numba.{datatypeSmall}[::1], numba.{datatypeDefault}[:,::1]), parallel=True, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)\n',
+    f'@numba.jit((numba.{datatypeSmall}[:,:,::1], numba.{datatypeLarge}[::1], numba.{datatypeMedium}[::1], numba.{datatypeSmall}[::1], numba.{datatypeMedium}[:,::1]), parallel=True, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)\n',
     'countSequential':
-    f'@numba.jit((numba.{datatypeSmall}[:,:,::1], numba.{datatypeLarge}[::1], numba.{datatypeDefault}[::1], numba.{datatypeSmall}[::1], numba.{datatypeDefault}[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)\n',
+    f'@numba.jit((numba.{datatypeSmall}[:,:,::1], numba.{datatypeLarge}[::1], numba.{datatypeMedium}[::1], numba.{datatypeSmall}[::1], numba.{datatypeMedium}[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)\n',
     }
 
 def getDictionaryEnumValues():

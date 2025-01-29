@@ -146,7 +146,7 @@ CPUlimit
     random: int, first included: 2, first excluded: (min(leavesTotal, 16) - 1)
     random: int, first included: -1 * (min(leavesTotal, 16) - 1), first excluded: -1
 
-datatypeDefault
+datatypeMedium
     None
     numpy.int64
     numpy.intc
@@ -172,7 +172,7 @@ def parameterIterator():
         'CPUlimit': [
             None, True, False, 0, 1, -1,
         ],
-        'datatypeDefault': [
+        'datatypeMedium': [
             None,
             numpy.int64,
             numpy.intc,

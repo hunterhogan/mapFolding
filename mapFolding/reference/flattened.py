@@ -236,7 +236,7 @@ class computationState(TypedDict):
     track: NDArray[integer[Any]]
 
 dtypeLarge = numpy.int64
-dtypeDefault = dtypeLarge
+dtypeMedium = dtypeLarge
 
 def getLeavesTotal(listDimensions: Sequence[int]) -> int:
     """
@@ -284,7 +284,7 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
     return taskDivisions
 
 def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> NDArray[integer[Any]]:
-    datatype = keywordArguments.get('datatype', dtypeDefault)
+    datatype = keywordArguments.get('datatype', dtypeMedium)
     mapShape = validateListDimensions(listDimensions)
     leavesTotal = getLeavesTotal(mapShape)
     arrayDimensions = numpy.array(mapShape, dtype=datatype)
@@ -317,14 +317,14 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 
 def makeDataContainer(shape, datatype: Optional[Type] = None):
     if datatype is None:
-        datatype = dtypeDefault
+        datatype = dtypeMedium
     return numpy.zeros(shape, dtype=datatype)
 
 def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type]) -> computationState:
-    datatypeDefault = keywordArguments.get('datatypeDefault', dtypeDefault)
+    datatypeMedium = keywordArguments.get('datatypeMedium', dtypeMedium)
     datatypeLarge = keywordArguments.get('datatypeLarge', dtypeLarge)
 
-    the = makeDataContainer(len(indexThe), datatypeDefault)
+    the = makeDataContainer(len(indexThe), datatypeMedium)
 
     mapShape = tuple(sorted(validateListDimensions(listDimensions)))
     the[indexThe.leavesTotal] = getLeavesTotal(mapShape)
@@ -333,11 +333,11 @@ def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional
     the[indexThe.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, listDimensions)
 
     stateInitialized = computationState(
-        connectionGraph = makeConnectionGraph(mapShape, datatype=datatypeDefault),
+        connectionGraph = makeConnectionGraph(mapShape, datatype=datatypeMedium),
         foldsSubTotals = makeDataContainer(the[indexThe.leavesTotal], datatypeLarge),
         mapShape = mapShape,
         my = makeDataContainer(len(indexMy), datatypeLarge),
-        gapsWhere = makeDataContainer(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, datatypeDefault),
+        gapsWhere = makeDataContainer(int(the[indexThe.leavesTotal]) * int(the[indexThe.leavesTotal]) + 1, datatypeMedium),
         the = the,
         track = makeDataContainer((len(indexTrack), the[indexThe.leavesTotal] + 1), datatypeLarge)
         )
