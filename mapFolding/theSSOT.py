@@ -50,11 +50,11 @@ class indexTrack(EnumIndices):
     countDimensionsGapped = enum.auto()
     gapRangeStart = enum.auto()
 
-
 # Use configparser to manage changes to datatypes.
 # Actually, wait. I switched to numba typing in the signature because I wanted
 # fewer imports because I hoped it would improve speed.
 # Perhaps I should switch back to numpy types with implicit numba types
+# The integer size should be based on the specific job
 datatypeModule = 'numpy'
 datatypeLarge = 'int64'
 # datatypeDefault = datatypeLarge
