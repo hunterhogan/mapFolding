@@ -113,35 +113,21 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
     arrayDimensions = numpy.array(mapShape, dtype=datatype)
     dimensionsTotal = len(arrayDimensions)
 
-    # Step 1: find the cumulative product of the map's dimensions
     cumulativeProduct = numpy.multiply.accumulate([1] + mapShape, dtype=datatype)
-
-    # Step 2: create a coordinate system
     coordinateSystem = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=datatype)
-
     for indexDimension in range(dimensionsTotal):
         for leaf1ndex in range(1, leavesTotal + 1):
-            coordinateSystem[indexDimension, leaf1ndex] = (
-                ((leaf1ndex - 1) // cumulativeProduct[indexDimension]) %
-                arrayDimensions[indexDimension] + 1
-            )
+            coordinateSystem[indexDimension, leaf1ndex] = ( ((leaf1ndex - 1) // cumulativeProduct[indexDimension]) % arrayDimensions[indexDimension] + 1 )
 
-    # Step 3: create and fill the connection graph
     connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=datatype)
-
     for indexDimension in range(dimensionsTotal):
         for activeLeaf1ndex in range(1, leavesTotal + 1):
             for connectee1ndex in range(1, activeLeaf1ndex + 1):
-                # Base coordinate conditions
                 isFirstCoord = coordinateSystem[indexDimension, connectee1ndex] == 1
                 isLastCoord = coordinateSystem[indexDimension, connectee1ndex] == arrayDimensions[indexDimension]
                 exceedsActive = connectee1ndex + cumulativeProduct[indexDimension] > activeLeaf1ndex
+                isEvenParity = (coordinateSystem[indexDimension, activeLeaf1ndex] & 1) == (coordinateSystem[indexDimension, connectee1ndex] & 1)
 
-                # Parity check
-                isEvenParity = (coordinateSystem[indexDimension, activeLeaf1ndex] & 1) == \
-                                (coordinateSystem[indexDimension, connectee1ndex] & 1)
-
-                # Determine connection value
                 if (isEvenParity and isFirstCoord) or (not isEvenParity and (isLastCoord or exceedsActive)):
                     connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex
                 elif isEvenParity and not isFirstCoord:
@@ -194,8 +180,6 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
         - Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
         - Integer `<= -1`: Subtract the absolute value from total CPUs.
     """
-    # NOTE Synchronizing all datatypes at all points is currently poorly handled. instead of using these parameters,
-    # you should probably go to "theSSOT.py" and change the datatypes there.
     datatypeLarge = keywordArguments.get('datatypeLarge', dtypeLarge)
     datatypeMedium = keywordArguments.get('datatypeMedium', dtypeMedium)
     datatypeSmall = keywordArguments.get('datatypeSmall', dtypeSmall)
@@ -219,7 +203,6 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
         gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, datatypeSmall),
         track = makeDataContainer((len(indexTrack), leavesTotal + 1), datatypeMedium)
         )
-    # Try removing some of the scalar values from `my`
 
     return stateInitialized
 

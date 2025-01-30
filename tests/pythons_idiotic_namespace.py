@@ -1,1 +1,0 @@
-from mapFolding.theSSOT import *

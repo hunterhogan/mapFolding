@@ -1,6 +1,7 @@
-from tests.conftest import *
 from contextlib import redirect_stdout
 from datetime import datetime, timedelta
+from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues, _parseBFileOEIS, _validateOEISid
+from tests.conftest import *
 from typing import Optional, Tuple, Union
 import io
 import os
@@ -10,6 +11,7 @@ import random
 import re as regex
 import unittest
 import unittest.mock
+import urllib
 import urllib.error
 import urllib.request
 

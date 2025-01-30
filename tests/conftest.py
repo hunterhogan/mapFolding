@@ -2,58 +2,20 @@
 
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
+from mapFolding import *
+from mapFolding import basecamp
+from mapFolding import getAlgorithmCallable
+from mapFolding.beDRY import *
+from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues
+from mapFolding.oeis import *
 from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, Set, Tuple, Type, Union
+from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 import pathlib
 import pytest
 import random
-import importlib
 import shutil
 import unittest.mock
 import uuid
-from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
-from mapFolding import countFolds, pathJobDEFAULT, saveFoldsTotal
-from mapFolding import outfitCountFolds, dtypeLarge, getAlgorithmSource
-from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache, getFilenameFoldsTotal
-from mapFolding.beDRY import getLeavesTotal, parseDimensions, validateListDimensions
-from mapFolding.beDRY import getTaskDivisions, makeConnectionGraph, setCPUlimit
-from mapFolding.beDRY import makeDataContainer
-from mapFolding.oeis import OEIS_for_n
-from mapFolding.oeis import _getFilenameOEISbFile
-from mapFolding.oeis import _getOEISidValues
-from mapFolding.oeis import _parseBFileOEIS
-from mapFolding.oeis import _validateOEISid
-from mapFolding.oeis import oeisIDsImplemented
-from mapFolding.oeis import settingsOEIS
-
-__all__ = [
-    '_getFilenameOEISbFile',
-    '_getOEISidValues',
-    '_parseBFileOEIS',
-    '_validateOEISid',
-    'clearOEIScache',
-    'countFolds',
-    'expectSystemExit',
-    'getFilenameFoldsTotal',
-    'getLeavesTotal',
-    'getOEISids',
-    'getTaskDivisions',
-    'makeConnectionGraph',
-    'makeDataContainer',
-    'OEIS_for_n',
-    'oeisIDfor_n',
-    'oeisIDsImplemented',
-    'outfitCountFolds',
-    'parseDimensions',
-    'PytestFor_defineConcurrencyLimit',
-    'PytestFor_intInnit',
-    'PytestFor_oopsieKwargsie',
-    'saveFoldsTotal',
-    'setCPUlimit',
-    'settingsOEIS',
-    'standardCacheTest',
-    'standardComparison',
-    'validateListDimensions',
-    ]
 
 def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
     """Returns a dictionary mapping dimension tuples to their known folding totals."""
@@ -129,17 +91,10 @@ def setupTeardownTestData() -> Generator[None, None, None]:
     yield
     cleanupTempFileRegister()
 
-@pytest.fixture(autouse=True)
-def setupWarningsAsErrors():
-    """Convert all warnings to errors for all tests."""
-    import warnings
-    warnings.filterwarnings("error")
-    yield
-    warnings.resetwarnings()
-
 @pytest.fixture
 def pathTempTesting(request: pytest.FixtureRequest) -> pathlib.Path:
     """Create a unique temp directory for each test function."""
+    # TODO I got rid of this shit. how the fuck is it back?
     # Sanitize test name for filesystem compatibility
     sanitizedName = request.node.name.replace('[', '_').replace(']', '_').replace('/', '_')
     uniqueDirectory = f"{sanitizedName}_{uuid.uuid4()}"
@@ -174,6 +129,14 @@ def pathFilenameFoldsTotalTesting(pathTempTesting: pathlib.Path) -> pathlib.Path
 
 """
 Section: Fixtures"""
+
+@pytest.fixture(autouse=True)
+def setupWarningsAsErrors():
+    """Convert all warnings to errors for all tests."""
+    import warnings
+    warnings.filterwarnings("error")
+    yield
+    warnings.resetwarnings()
 
 @pytest.fixture
 def foldsTotalKnown() -> Dict[Tuple[int,...], int]:
@@ -255,10 +218,6 @@ def oeisID_1random() -> str:
 @pytest.fixture
 def useAlgorithmDirectly():
     """Temporarily patches getDispatcherCallable to return the algorithm source directly."""
-    from mapFolding.theSSOT import getAlgorithmCallable
-    from mapFolding import basecamp
-
-    # Store original function
     original_dispatcher = basecamp.getDispatcherCallable
 
     # Patch the function at module level

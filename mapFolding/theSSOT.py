@@ -45,7 +45,7 @@ class EnumIndices(enum.IntEnum):
 
 class indexMy(EnumIndices):
     """Indices for scalar values."""
-    dimensionsTotal = enum.auto() # connectionGraph.shape[0] or len(mapShape)
+    dimensionsTotal = enum.auto()
     dimensionsUnconstrained = enum.auto()
     gap1ndex = enum.auto()
     gap1ndexCeiling = enum.auto()
@@ -108,14 +108,7 @@ datatypeSmall = thisSeemsVeryComplicated.datatypeSmall
 
 dtypeNumpyDefaults: Final = DatatypeDefaults('numpy', datatypeLarge, datatypeMedium, datatypeSmall)
 
-# Use configparser to manage changes to datatypes.
-# Actually, wait. I switched to numba typing in the signature because I wanted
-# fewer imports because I hoped it would improve speed.
-# Perhaps I should switch back to numpy types with implicit numba types
-# The integer size should be based on the specific job
 datatypeModuleDEFAULT = 'numpy'
-# datatypeMedium = datatypeLarge
-# datatypeSmall = datatypeMedium
 
 def make_dtype(datatype: str, datatypeModule: Optional[str] = None) -> Type[Any]:
     if datatypeModule is None:
