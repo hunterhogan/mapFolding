@@ -2,11 +2,12 @@ from mapFolding import indexMy, indexTrack, getAlgorithmSource
 from mapFolding import datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT
 from someAssemblyRequired import makeInlineFunction
 import pathlib
+from typing import Dict, Optional
 import inspect
 
 algorithmSource = getAlgorithmSource()
 
-def getDictionaryEnumValues():
+def getDictionaryEnumValues() -> Dict[str, int]:
     dictionaryEnumValues = {}
     for enumIndex in [indexMy, indexTrack]:
         for memberName, memberValue in enumIndex._member_map_.items():
@@ -54,7 +55,7 @@ def unpackArrays(codeInlined: str, callableTarget: str) -> str:
 
     return codeInlined
 
-def inlineMapFoldingNumba(**keywordArguments):
+def inlineMapFoldingNumba(**keywordArguments: Optional[str]) -> None:
     datatypeLarge = keywordArguments.get('datatypeLarge', datatypeLargeDEFAULT)
     datatypeMedium = keywordArguments.get('datatypeMedium', datatypeMediumDEFAULT)
     datatypeSmall = keywordArguments.get('datatypeSmall', datatypeSmallDEFAULT)

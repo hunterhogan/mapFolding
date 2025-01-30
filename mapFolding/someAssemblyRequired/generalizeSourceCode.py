@@ -1,16 +1,17 @@
 from mapFolding import datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT
+from typing import Dict, Optional, List, Set, Tuple, Any, Union
 import ast
 
 class RecursiveInlinerWithEnum(ast.NodeTransformer):
     """Process AST nodes to inline functions and substitute enum values.
     Also handles function decorators during inlining."""
 
-    def __init__(self, dictionaryFunctions, dictionaryEnumValues):
+    def __init__(self, dictionaryFunctions: Dict[str, ast.FunctionDef], dictionaryEnumValues: Dict[str, int]) -> None:
         self.dictionaryFunctions = dictionaryFunctions
         self.dictionaryEnumValues = dictionaryEnumValues
         self.processed = set()
 
-    def inlineFunctionBody(self, functionName):
+    def inlineFunctionBody(self, functionName: str) -> Optional[ast.FunctionDef]:
         if functionName in self.processed:
             return None
 
@@ -21,7 +22,7 @@ class RecursiveInlinerWithEnum(ast.NodeTransformer):
             self.visit(node)
         return inlineDefinition
 
-    def visit_Attribute(self, node):
+    def visit_Attribute(self, node: ast.Attribute) -> ast.AST:
         # Substitute enum identifiers (e.g., indexMy.leaf1ndex.value)
         if isinstance(node.value, ast.Attribute) and isinstance(node.value.value, ast.Name):
             enumPath = f"{node.value.value.id}.{node.value.attr}.{node.attr}"
@@ -29,7 +30,7 @@ class RecursiveInlinerWithEnum(ast.NodeTransformer):
                 return ast.Constant(value=self.dictionaryEnumValues[enumPath])
         return self.generic_visit(node)
 
-    def visit_Call(self, node):
+    def visit_Call(self, node: ast.Call) -> ast.AST:
         callNode = self.generic_visit(node)
         if isinstance(callNode, ast.Call) and isinstance(callNode.func, ast.Name) and callNode.func.id in self.dictionaryFunctions:
             inlineDefinition = self.inlineFunctionBody(callNode.func.id)
@@ -39,10 +40,10 @@ class RecursiveInlinerWithEnum(ast.NodeTransformer):
                     return self.visit(lastStmt.value)
                 elif isinstance(lastStmt, ast.Expr) and lastStmt.value is not None:
                     return self.visit(lastStmt.value)
-                return None
+                return ast.Constant(value=None)
         return callNode
 
-    def visit_Expr(self, node):
+    def visit_Expr(self, node: ast.Expr) -> Union[ast.AST, List[ast.AST]]:
         if isinstance(node.value, ast.Call):
             if isinstance(node.value.func, ast.Name) and node.value.func.id in self.dictionaryFunctions:
                 inlineDefinition = self.inlineFunctionBody(node.value.func.id)
@@ -50,18 +51,18 @@ class RecursiveInlinerWithEnum(ast.NodeTransformer):
                     return [self.visit(stmt) for stmt in inlineDefinition.body]
         return self.generic_visit(node)
 
-def findRequiredImports(node):
+def findRequiredImports(node: ast.AST) -> Set[str]:
     """Find all modules that need to be imported based on AST analysis.
     NOTE: due to hardcoding, this is a glorified regex. No, wait, this is less versatile than regex."""
     requiredImports = set()
 
     class ImportFinder(ast.NodeVisitor):
-        def visit_Name(self, node):
+        def visit_Name(self, node: ast.Name) -> None:
             if node.id in {'numba'}:
                 requiredImports.add(node.id)
             self.generic_visit(node)
 
-        def visitDecorator(self, node):
+        def visitDecorator(self, node: ast.AST) -> None:
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
                 if node.func.id == 'jit':
                     requiredImports.add('numba')
@@ -70,7 +71,7 @@ def findRequiredImports(node):
     ImportFinder().visit(node)
     return requiredImports
 
-def generateImports(requiredImports):
+def generateImports(requiredImports: Set[str]) -> str:
     """Generate import statements based on required modules."""
     importStatements = {'import numba', 'from mapFolding import indexMy, indexTrack'}
 
@@ -84,7 +85,7 @@ def generateImports(requiredImports):
 
     return '\n'.join(importStatements)
 
-def makeInlineFunction(sourceCode, targetFunctionName, dictionaryEnumValues, skipEnum=False, **keywordArguments):
+def makeInlineFunction(sourceCode: str, targetFunctionName: str, dictionaryEnumValues: Dict[str, int], skipEnum: bool=False, **keywordArguments: Optional[str]):
     datatypeLarge = keywordArguments.get('datatypeLarge', datatypeLargeDEFAULT)
     datatypeMedium = keywordArguments.get('datatypeMedium', datatypeMediumDEFAULT)
     datatypeSmall = keywordArguments.get('datatypeSmall', datatypeSmallDEFAULT)
