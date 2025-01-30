@@ -12,9 +12,9 @@ def countFolds(listDimensions: Sequence[int], pathLikeWriteFoldsTotal: Optional[
         computationDivisions (None):
             Whether and how to divide the computational work. See notes for details.
         CPUlimit (None): This is only relevant if there are `computationDivisions`: whether and how to limit the CPU usage. See notes for details.
-        **keywordArguments: Additional arguments including `dtypeMedium` and `dtypeLarge` for data type specifications.
+        **keywordArguments: Datatype management.
     Returns:
-        foldsSubTotals: Total number of distinct ways to fold a map of the given dimensions.
+        foldsTotal: Total number of distinct ways to fold a map of the given dimensions.
 
     Computation divisions:
         - None: no division of the computation into tasks; sets task divisions to 0

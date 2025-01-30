@@ -9,8 +9,8 @@ from mapFolding import (
     computationState,
 )
 from numpy import integer
-from numpy.typing import NDArray
-from typing import Any, List, Optional, Sequence, Type, Union
+from numpy.typing import NDArray, DTypeLike
+from typing import Any, List, Optional, Sequence, Tuple, Type, Union
 from Z0Z_tools import intInnit, defineConcurrencyLimit, oopsieKwargsie
 import numba
 import numpy
@@ -18,8 +18,26 @@ import os
 import pathlib
 import sys
 
-def getFilenameFoldsTotal(listDimensions: Sequence[int]) -> str:
-    return str(sorted(listDimensions)).replace(', ', 'x').replace('[', 'p').replace(']', '') + '.foldsTotal'
+def interpretParametersDatatypes(**keywordArguments: Optional[Union[Type, str, DTypeLike]]):
+    # TODO
+    # This _might_ be a good place to use a dataclass instead of returning a 7-tuple.
+    pass
+
+def getFilenameFoldsTotal(mapShape: Sequence[int]) -> str:
+    """Generate a standardized filename string for storing map folding totals.
+
+    The function takes a map shape sequence and converts it into a filename string
+    representing the dimensions of the map, followed by '.foldsTotal' extension.
+    For example, [3, 2] becomes 'p2x3.foldsTotal'.
+
+    Parameters:
+        mapShape (Sequence[int]): A sequence of integers representing the dimensions
+            of the map (e.g., [3, 2] for a 3x2 map)
+
+    Returns:
+        str: A filename string in format 'pNxM.foldsTotal' where N,M are sorted dimensions
+    """
+    return str(sorted(mapShape)).replace(', ', 'x').replace('[', 'p').replace(']', '') + '.foldsTotal'
 
 def getLeavesTotal(listDimensions: Sequence[int]) -> int:
     """
@@ -45,10 +63,25 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 
         return productDimensions
 
-def getPathFilenameFoldsTotal(listDimensions: Sequence[int], pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
+def getPathFilenameFoldsTotal(mapShape: Sequence[int], pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
+    """Get path for folds total file.
+
+    This function determines the file path for storing fold totals. If a path is provided,
+    it will use that path. If the path is a directory, it will append a default filename.
+    The function ensures the parent directory exists by creating it if necessary.
+
+    Parameters:
+        mapShape (Sequence[int]): List of dimensions for the map folding problem.
+        pathLikeWriteFoldsTotal (Union[str, os.PathLike[str]], optional): Path where to save
+            the folds total. Can be a file path or directory path. If None, uses default path.
+            Defaults to None.
+
+    Returns:
+        pathlib.Path: Complete path to the folds total file.
+    """
     pathFilenameFoldsTotal = pathlib.Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else pathJobDEFAULT
     if pathFilenameFoldsTotal.is_dir():
-        filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(listDimensions)
+        filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(mapShape)
         pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT
     pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
     return pathFilenameFoldsTotal
@@ -67,8 +100,8 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
         - "cpu": limits the divisions to the number of available CPUs, i.e. `concurrencyLimit`
     concurrencyLimit:
         Maximum number of concurrent tasks allowed
-    listDimensions: for error reporting
     CPUlimit: for error reporting
+    listDimensions: for error reporting
 
     Returns
     -------
@@ -110,6 +143,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 
     Parameters
         listDimensions: A sequence of integers representing the dimensions of the map.
+        **keywordArguments: Datatype management.
 
     Returns
         connectionGraph: A 3D numpy array with shape of (dimensionsTotal, leavesTotal + 1, leavesTotal + 1).
@@ -144,8 +178,18 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 
     return connectionGraph
 
-def makeDataContainer(shape, datatype: Optional[Type] = None):
-    """Create a container, probably numpy.ndarray, with the given shape and datatype."""
+def makeDataContainer(shape: Union[int, Tuple[int, ...]], datatype: Optional[DTypeLike] = None):
+    """Create a zeroed-out `numpy.ndarray` with the given shape and datatype.
+
+    Parameters:
+        shape (Union[int, Tuple[int, ...]]): The shape of the array. Can be an integer for 1D arrays
+            or a tuple of integers for multi-dimensional arrays.
+        datatype (Optional[DTypeLike], optional): The desired data type for the array.
+            If None, defaults to dtypeLargeDEFAULT. Defaults to None.
+
+    Returns:
+        numpy.ndarray: A new array of given shape and type, filled with zeros.
+    """
     if datatype is None:
         datatype = dtypeLargeDEFAULT
     return numpy.zeros(shape, dtype=datatype)
@@ -166,6 +210,8 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
         - "cpu": limits the divisions to the number of available CPUs, i.e. `concurrencyLimit`
     CPUlimit (None):
         Whether and how to limit the CPU usage. See notes for details.
+    **keywordArguments:
+        Datatype management.
 
     Returns
     -------

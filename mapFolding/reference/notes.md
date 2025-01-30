@@ -51,7 +51,7 @@ Assume `listDimensions`:
 | integer  | n           | leafConnectee           |               | m      | m      |
 | integer  | n           | leafIndex               |               | m      | m      |
 | integer  | 256*        | leavesTotal             |               | n      |        |
-| 1D array | 19 (2x19)   | listDimensions          |               | p      | p      |
+| 1D array | 19 (2x19)   | listDimensions          | mapShape      | p      | p      |
 | 1D array | (container) | my                      |               |        |        |
 | 1D array | (container) | the                     | static        |        |        |
 | 2D array | (container) | track                   | s             |        |        |

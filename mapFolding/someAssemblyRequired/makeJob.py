@@ -5,8 +5,10 @@ import pathlib
 import pickle
 
 def makeStateJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]) -> pathlib.Path:
-    from syntheticModules import countInitialize
+
     stateUniversal = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
+
+    from syntheticModules import countInitialize
     countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
 
     pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
