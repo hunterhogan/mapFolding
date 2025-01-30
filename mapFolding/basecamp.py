@@ -39,8 +39,6 @@ def countFolds(listDimensions: Sequence[int], pathishWriteFoldsTotal: Optional[U
     if pathishWriteFoldsTotal is not None:
         pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathishWriteFoldsTotal)
 
-    # from mapFolding import getAlgorithmCallable
-    # dispatcher = getAlgorithmCallable()
     dispatcher = getDispatcherCallable()
     dispatcher(**stateUniversal)
 

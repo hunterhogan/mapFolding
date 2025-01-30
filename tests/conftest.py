@@ -63,7 +63,7 @@ def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
         sequence = settings['valuesKnown']
 
         for n, foldingsTotal in sequence.items():
-            dimensions = settings['getDimensions'](n)
+            dimensions = settings['getMapShape'](n)
             dimensions.sort()
             dictionaryMapDimensionsToFoldsTotalKnown[tuple(dimensions)] = foldingsTotal
 
@@ -185,6 +185,21 @@ def foldsTotalKnown() -> Dict[Tuple[int,...], int]:
     return makeDictionaryFoldsTotalKnown()
 
 @pytest.fixture
+def listDimensionsTestCountFolds(oeisID: str) -> List[int]:
+    """For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
+    if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
+    while True:
+        n = random.choice(settingsOEIS[oeisID]['valuesTestValidation'])
+        if n < 2:
+            continue
+        listDimensionsCandidate = settingsOEIS[oeisID]['getMapShape'](n)
+
+        try:
+            return validateListDimensions(listDimensionsCandidate)
+        except (ValueError, NotImplementedError):
+            pass
+
+@pytest.fixture
 def listDimensionsTestFunctionality(oeisID_1random: str) -> List[int]:
     """To test functionality, get one `listDimensions` from `valuesTestValidation` if
     `validateListDimensions` approves. The algorithm can count the folds of the returned
@@ -193,7 +208,7 @@ def listDimensionsTestFunctionality(oeisID_1random: str) -> List[int]:
         n = random.choice(settingsOEIS[oeisID_1random]['valuesTestValidation'])
         if n < 2:
             continue
-        listDimensionsCandidate = settingsOEIS[oeisID_1random]['getDimensions'](n)
+        listDimensionsCandidate = settingsOEIS[oeisID_1random]['getMapShape'](n)
 
         try:
             return validateListDimensions(listDimensionsCandidate)
@@ -201,19 +216,10 @@ def listDimensionsTestFunctionality(oeisID_1random: str) -> List[int]:
             pass
 
 @pytest.fixture
-def listDimensionsTest_countFolds(oeisID: str) -> List[int]:
-    """For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
-    if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
-    while True:
-        n = random.choice(settingsOEIS[oeisID]['valuesTestValidation'])
-        if n < 2:
-            continue
-        listDimensionsCandidate = settingsOEIS[oeisID]['getDimensions'](n)
-
-        try:
-            return validateListDimensions(listDimensionsCandidate)
-        except (ValueError, NotImplementedError):
-            pass
+def listDimensionsTestParallelization(oeisID: str) -> List[int]:
+    """For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestParallelization`"""
+    n = random.choice(settingsOEIS[oeisID]['valuesTestParallelization'])
+    return settingsOEIS[oeisID]['getMapShape'](n)
 
 @pytest.fixture
 def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]:
@@ -254,7 +260,7 @@ def useAlgorithmDirectly():
 
     # Store original function
     original_dispatcher = basecamp.getDispatcherCallable
-    
+
     # Patch the function at module level
     basecamp.getDispatcherCallable = getAlgorithmCallable
 

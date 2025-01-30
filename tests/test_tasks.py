@@ -5,14 +5,14 @@ from typing import List, Dict, Tuple
 # TODO add a test. `C` = number of logical cores available. `n = C + 1`. Ensure that `[2,n]` is computed correctly.
 # Or, probably smarter: limit the number of cores, then run a test with C+1.
 
-def test_algorithmSourceParallel(listDimensionsTest_countFolds: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], useAlgorithmDirectly) -> None:
-    standardComparison(foldsTotalKnown[tuple(listDimensionsTest_countFolds)], countFolds, listDimensionsTest_countFolds, None, 'maximum')
+def test_algorithmSourceParallel(listDimensionsTestParallelization: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], useAlgorithmDirectly) -> None:
+    standardComparison(foldsTotalKnown[tuple(listDimensionsTestParallelization)], countFolds, listDimensionsTestParallelization, None, 'maximum')
 
 def test_countFoldsComputationDivisionsInvalid(listDimensionsTestFunctionality: List[int]) -> None:
     standardComparison(ValueError, countFolds, listDimensionsTestFunctionality, None, {"wrong": "value"})
 
-def test_countFoldsComputationDivisionsMaximum(listDimensionsTest_countFolds: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int]) -> None:
-    standardComparison(foldsTotalKnown[tuple(listDimensionsTest_countFolds)], countFolds, listDimensionsTest_countFolds, None, 'maximum')
+def test_countFoldsComputationDivisionsMaximum(listDimensionsTestParallelization: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int]) -> None:
+    standardComparison(foldsTotalKnown[tuple(listDimensionsTestParallelization)], countFolds, listDimensionsTestParallelization, None, 'maximum')
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_defineConcurrencyLimit())
 def test_defineConcurrencyLimit(nameOfTest, callablePytest):

@@ -22,41 +22,47 @@ class SettingsOEIS(TypedDict):
     # I would prefer to load description dynamically from OEIS, but it's a pita for me
     # to learn how to efficiently implement right now.
     description: str
-    getDimensions: Callable[[int], List[int]]
+    getMapShape: Callable[[int], List[int]]
     valuesBenchmark: List[int]
     valuesKnown: Dict[int, int]
+    valuesTestParallelization: List[int]
     valuesTestValidation: List[int]
     valueUnknown: int
 
 settingsOEIShardcodedValues = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
-        'getDimensions': lambda n: sorted([2, n]),
+        'getMapShape': lambda n: sorted([2, n]),
         'valuesBenchmark': [14],
+        'valuesTestParallelization': [*range(3, 7)],
         'valuesTestValidation': [0, 1, random.randint(2, 9)],
     },
     'A001416': {
         'description': 'Number of ways of folding a 3 X n strip of stamps.',
-        'getDimensions': lambda n: sorted([3, n]),
+        'getMapShape': lambda n: sorted([3, n]),
         'valuesBenchmark': [9],
+        'valuesTestParallelization': [*range(3, 5)],
         'valuesTestValidation': [0, 1, random.randint(2, 6)],
     },
     'A001417': {
         'description': 'Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.',
-        'getDimensions': lambda n: [2] * n,
+        'getMapShape': lambda n: [2] * n,
         'valuesBenchmark': [6],
+        'valuesTestParallelization': [*range(2, 4)],
         'valuesTestValidation': [0, 1, random.randint(2, 4)],
     },
     'A195646': {
         'description': 'Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.',
-        'getDimensions': lambda n: [3] * n,
+        'getMapShape': lambda n: [3] * n,
         'valuesBenchmark': [3],
+        'valuesTestParallelization': [*range(2, 3)],
         'valuesTestValidation': [0, 1, 2],
     },
     'A001418': {
         'description': 'Number of ways of folding an n X n sheet of stamps.',
-        'getDimensions': lambda n: [n, n],
+        'getMapShape': lambda n: [n, n],
         'valuesBenchmark': [5],
+        'valuesTestParallelization': [*range(2, 4)],
         # offset 1: hypothetically, if I were to load the offset from OEIS, I could use it to
         # determine if a sequence is defined at n=0, which would affect, for example, the valuesTestValidation.
         'valuesTestValidation': [1, random.randint(2, 4)],
@@ -192,7 +198,7 @@ def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
             - Keys are OEIS sequence IDs (str)
             - Values are SettingsOEIS objects containing:
                 - description: Text description of the sequence
-                - getDimensions: Function to get dimensions
+                - getMapShape: Function to get dimensions
                 - valuesBenchmark: Benchmark values
                 - valuesKnown: Known values from OEIS
                 - valuesTestValidation: Values for test validation
@@ -207,11 +213,8 @@ def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
     for oeisID in oeisIDsImplemented:
         valuesKnownSherpa = _getOEISidValues(oeisID)
         settingsTarget[oeisID] = SettingsOEIS(
-            description = settingsOEIShardcodedValues[oeisID]['description'],
-            getDimensions = settingsOEIShardcodedValues[oeisID]['getDimensions'],
-            valuesBenchmark = settingsOEIShardcodedValues[oeisID]['valuesBenchmark'],
+            **settingsOEIShardcodedValues[oeisID],
             valuesKnown = valuesKnownSherpa,
-            valuesTestValidation = settingsOEIShardcodedValues[oeisID]['valuesTestValidation'],
             valueUnknown = max(valuesKnownSherpa.keys(), default=0) + 1
         )
     return settingsTarget
@@ -268,7 +271,7 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
     if not isinstance(n, int) or n < 0:
         raise ValueError("`n` must be non-negative integer.")
 
-    listDimensions = settingsOEIS[oeisID]['getDimensions'](n)
+    listDimensions = settingsOEIS[oeisID]['getMapShape'](n)
 
     if n <= 1 or len(listDimensions) < 2:
         foldsTotal = settingsOEIS[oeisID]['valuesKnown'].get(n, None)
