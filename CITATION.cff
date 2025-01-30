@@ -11,8 +11,8 @@ authors:
 identifiers:
   - type: url
     value: >-
-      https://github.com/hunterhogan/mapFolding/releases/tag/v0.2.6
-    description: The URL for mapFolding v0.2.6.
+      https://github.com/hunterhogan/mapFolding/releases/tag/0.3.2
+    description: The URL for mapFolding 0.3.2.
 repository-code: 'https://github.com/hunterhogan/mapFolding'
 abstract: >-
   Algorithm(s) for counting distinct ways to fold a map (or
@@ -29,7 +29,9 @@ abstract: >-
   and experimentation.
 keywords:
   - OEIS
+  - map folding
+  - stamp folding
 license: CC-BY-NC-4.0
-commit: 80868b47a784a9cb00b40514f334a6af06e59a62
-version: 0.2.6
-date-released: '2025-01-23'
+commit: aacb0a7950fb3ede656ba3afe45875658f6c4014
+version: 0.3.2
+date-released: '2025-01-30'
