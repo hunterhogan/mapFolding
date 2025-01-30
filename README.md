@@ -14,7 +14,7 @@ The directory [mapFolding/reference](https://github.com/hunterhogan/mapFolding/b
 - [hunterNumba.py](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reference), a one-size-fits-all, self-contained, reasonably fast, contemporary algorithm that is nevertheless infected by _noobaceae ignorancium_, and
 - miscellaneous notes.
 
-[![pip install mapFolding](https://img.shields.io/badge/pip%20install-mapFolding-gray.svg?colorB=3b434b)](https://pypi.org/project/mapFolding/) [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/unittests.yml) [![Static Badge](https://img.shields.io/badge/stinkin'%20badges-don't%20need-b98e5e)](https://youtu.be/g6f_miE91mk&t=4) ![PyPI - Downloads](https://img.shields.io/pypi/dd/mapFolding) ![Static Badge](https://img.shields.io/badge/issues-I%20have%20them-brightgreen) ![GitHub repo size](https://img.shields.io/github/repo-size/hunterhogan/mapFolding)
+[![pip install mapFolding](https://img.shields.io/badge/pip%20install-mapFolding-gray.svg?colorB=3b434b)](https://pypi.org/project/mapFolding/) [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml) [![Static Badge](https://img.shields.io/badge/stinkin'%20badges-don't%20need-b98e5e)](https://youtu.be/g6f_miE91mk&t=4) ![PyPI - Downloads](https://img.shields.io/pypi/dd/mapFolding) ![Static Badge](https://img.shields.io/badge/issues-I%20have%20them-brightgreen) ![GitHub repo size](https://img.shields.io/github/repo-size/hunterhogan/mapFolding)
 
 ## Simple, easy usage based on OEIS IDs
 
