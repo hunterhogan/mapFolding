@@ -1,5 +1,5 @@
-import numba
 from mapFolding import indexMy, indexTrack
+import numba
 @numba.jit((numba.uint8[:,:,::1], numba.int64[::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)
 def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
     doFindGaps = True

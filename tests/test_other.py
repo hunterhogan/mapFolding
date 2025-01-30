@@ -87,7 +87,8 @@ def test_countFolds_writeFoldsTotal(
     foldsTotalExpected = foldsValue * getLeavesTotal(listDimensionsTestFunctionality)
     mock_countFolds = mockFoldingFunction(foldsValue, listDimensionsTestFunctionality)
 
-    with unittest.mock.patch("mapFolding.babbage._countFolds", side_effect=mock_countFolds):
+    # TODO move this to conftest. I shouldn't have such a specific value buried in a test: SSOT
+    with unittest.mock.patch("mapFolding.dispatcher._countFolds", side_effect=mock_countFolds):
         returned = countFolds(listDimensionsTestFunctionality, pathishWriteFoldsTotal=pathWriteTarget)
 
     # standardComparison(foldsValue, lambda: returned)  # Check return value

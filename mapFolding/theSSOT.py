@@ -1,12 +1,25 @@
 from numpy import integer
 from numpy.typing import NDArray
-from typing import Any, Optional, Tuple, Type, TypedDict
+from typing import Any, Callable, Optional, Tuple, Type, TypedDict
+from types import ModuleType
 import enum
 import numba
 import numpy
 import numpy.typing
 import pathlib
 import sys
+
+def getAlgorithmSource() -> ModuleType:
+    from mapFolding import theDao
+    return theDao
+
+def getAlgorithmCallable() -> Callable[..., None]:
+    algorithmSource = getAlgorithmSource()
+    return algorithmSource.doTheNeedful
+
+def getDispatcherCallable() -> Callable[..., None]:
+    from mapFolding import dispatcher
+    return dispatcher._countFolds
 
 # NOTE I want this _concept_ to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
 class computationState(TypedDict):

@@ -1,8 +1,8 @@
-from mapFolding import getPathFilenameFoldsTotal, dtypeNumpyDefaults, thisSeemsVeryComplicated
-from mapFolding import make_dtype, datatypeLarge, dtypeLarge, datatypeMedium, dtypeMedium, datatypeSmall, dtypeSmall
-from mapFolding import outfitCountFolds, computationState, indexMy, indexTrack
+from mapFolding import getPathFilenameFoldsTotal, thisSeemsVeryComplicated
+from mapFolding import make_dtype, datatypeLarge, datatypeMedium, datatypeSmall
+from mapFolding import computationState
 from someAssemblyRequired import makeStateJob
-from typing import Any, Optional, Sequence, Type
+from typing import Optional
 import more_itertools
 import inspect
 import importlib

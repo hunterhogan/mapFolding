@@ -3,6 +3,7 @@ _only_ things that implement _only_ the OEIS."""
 from datetime import datetime, timedelta
 from mapFolding import countFolds
 from typing import TYPE_CHECKING, List, Callable, Dict, Final
+import argparse
 import pathlib
 import random
 import sys
@@ -280,8 +281,6 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 
 def OEIS_for_n() -> None:
     """Command-line interface for oeisIDfor_n."""
-    import argparse
-
     parserCLI = argparse.ArgumentParser(
         description="Calculate a(n) for an OEIS sequence.",
         epilog=_formatHelpText(),

@@ -1,9 +1,9 @@
-from mapFolding import indexMy, indexTrack, theDao, datatypeMedium, datatypeLarge, datatypeSmall
+from mapFolding import indexMy, indexTrack, getAlgorithmSource
 from someAssemblyRequired import makeInlineFunction
 import pathlib
 import inspect
 
-algorithmSource = theDao
+algorithmSource = getAlgorithmSource()
 
 def getDictionaryEnumValues():
     dictionaryEnumValues = {}

@@ -1,4 +1,4 @@
-from mapFolding import outfitCountFolds, getPathFilenameFoldsTotal, saveFoldsTotal
+from mapFolding import getDispatcherCallable, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal
 from typing import Any, Optional, Sequence, Type, Union
 import os
 
@@ -39,8 +39,10 @@ def countFolds(listDimensions: Sequence[int], pathishWriteFoldsTotal: Optional[U
     if pathishWriteFoldsTotal is not None:
         pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathishWriteFoldsTotal)
 
-    from mapFolding.babbage import _countFolds
-    _countFolds(**stateUniversal)
+    # from mapFolding import getAlgorithmCallable
+    # dispatcher = getAlgorithmCallable()
+    dispatcher = getDispatcherCallable()
+    dispatcher(**stateUniversal)
 
     foldsTotal = stateUniversal['foldGroups'][0:-1].sum() * stateUniversal['foldGroups'][-1]
 

@@ -1,10 +1,10 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding import dtypeMedium, dtypeLarge, dtypeSmall, pathJobDEFAULT
 from mapFolding import indexMy, indexTrack, computationState
-from Z0Z_tools import intInnit, defineConcurrencyLimit, oopsieKwargsie
 from numpy import integer
 from numpy.typing import NDArray
 from typing import Any, List, Optional, Sequence, Type, Union
+from Z0Z_tools import intInnit, defineConcurrencyLimit, oopsieKwargsie
 import numba
 import numpy
 import os

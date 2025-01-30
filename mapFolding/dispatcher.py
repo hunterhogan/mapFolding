@@ -1,7 +1,7 @@
-from syntheticModules import countInitialize, countParallel, countSequential
 from mapFolding import indexMy
 from numpy import integer
 from numpy.typing import NDArray
+from syntheticModules import countInitialize, countParallel, countSequential
 from typing import Any, Tuple
 import numba
 

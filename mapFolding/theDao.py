@@ -188,7 +188,7 @@ def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
             placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
     foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
-def hurryUpAndWait(connectionGraph, foldGroups, gapsWhere, mapShape, my, track):
+def doTheNeedful(connectionGraph, foldGroups, gapsWhere, mapShape, my, track):
     countInitialize(connectionGraph, gapsWhere, my, track)
 
     if my[indexMy.taskDivisions.value] > 0:

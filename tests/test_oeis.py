@@ -13,6 +13,10 @@ import unittest.mock
 import urllib.error
 import urllib.request
 
+def test_algorithmSourceSequential(oeisID: str, useAlgorithmDirectly):
+    for n in settingsOEIS[oeisID]['valuesTestValidation']:
+        standardComparison(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
+
 def test_aOFn_calculate_value(oeisID: str):
     for n in settingsOEIS[oeisID]['valuesTestValidation']:
         standardComparison(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)

@@ -1,5 +1,5 @@
-import numba
 from mapFolding import indexMy, indexTrack
+import numba
 @numba.jit((numba.uint8[:,:,::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)
 def countInitialize(connectionGraph, gapsWhere, my, track):
     while my[7] > 0:

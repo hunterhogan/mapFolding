@@ -6,12 +6,13 @@ from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, Set
 import pathlib
 import pytest
 import random
+import importlib
 import shutil
 import unittest.mock
 import uuid
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 from mapFolding import countFolds, pathJobDEFAULT, saveFoldsTotal
-from mapFolding import outfitCountFolds, dtypeLarge
+from mapFolding import outfitCountFolds, dtypeLarge, getAlgorithmSource
 from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache, getFilenameFoldsTotal
 from mapFolding.beDRY import getLeavesTotal, parseDimensions, validateListDimensions
 from mapFolding.beDRY import getTaskDivisions, makeConnectionGraph, setCPUlimit
@@ -25,7 +26,6 @@ from mapFolding.oeis import oeisIDsImplemented
 from mapFolding.oeis import settingsOEIS
 
 __all__ = [
-    'OEIS_for_n',
     '_getFilenameOEISbFile',
     '_getOEISidValues',
     '_parseBFileOEIS',
@@ -39,6 +39,7 @@ __all__ = [
     'getTaskDivisions',
     'makeConnectionGraph',
     'makeDataContainer',
+    'OEIS_for_n',
     'oeisIDfor_n',
     'oeisIDsImplemented',
     'outfitCountFolds',
@@ -221,15 +222,6 @@ def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.As
         mockTimer.side_effect = [0, 1e9]  # Start and end times for 1 second
         yield mockTimer
 
-@pytest.fixture(params=oeisIDsImplemented)
-def oeisID(request: pytest.FixtureRequest)-> str:
-    return request.param
-
-@pytest.fixture
-def oeisID_1random() -> str:
-    """Return one random valid OEIS ID."""
-    return random.choice(oeisIDsImplemented)
-
 @pytest.fixture
 def mockFoldingFunction():
     """Creates a mock function that simulates _countFolds behavior."""
@@ -244,6 +236,32 @@ def mockFoldingFunction():
 
         return mock_countFolds
     return make_mock
+
+@pytest.fixture(params=oeisIDsImplemented)
+def oeisID(request: pytest.FixtureRequest)-> str:
+    return request.param
+
+@pytest.fixture
+def oeisID_1random() -> str:
+    """Return one random valid OEIS ID."""
+    return random.choice(oeisIDsImplemented)
+
+@pytest.fixture
+def useAlgorithmDirectly():
+    """Temporarily patches getDispatcherCallable to return the algorithm source directly."""
+    from mapFolding.theSSOT import getAlgorithmCallable
+    from mapFolding import basecamp
+
+    # Store original function
+    original_dispatcher = basecamp.getDispatcherCallable
+    
+    # Patch the function at module level
+    basecamp.getDispatcherCallable = getAlgorithmCallable
+
+    yield
+
+    # Restore original function
+    basecamp.getDispatcherCallable = original_dispatcher
 
 """
 Section: Standardized test structures"""
