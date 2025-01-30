@@ -1,3 +1,2 @@
-from .countSequential import countSequential
-from .countParallel import countParallel
-from .countInitialize import countInitialize
+from .makeJob import makeStateJob
+from .generalizeSourceCode import makeInlineFunction

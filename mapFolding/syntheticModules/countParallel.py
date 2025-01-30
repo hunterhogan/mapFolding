@@ -1,6 +1,5 @@
-from mapFolding import indexMy, indexTrack
 import numba
-
+from mapFolding import indexMy, indexTrack
 @numba.jit((numba.uint8[:,:,::1], numba.int64[::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:,::1]), parallel=True, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)
 def countParallel(connectionGraph, foldGroups, gapsWherePARALLEL, myPARALLEL, trackPARALLEL):
     for indexSherpa in numba.prange(myPARALLEL[9]):

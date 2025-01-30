@@ -1,10 +1,12 @@
 from mapFolding import getPathFilenameFoldsTotal, dtypeNumpyDefaults, thisSeemsVeryComplicated
 from mapFolding import make_dtype, datatypeLarge, dtypeLarge, datatypeMedium, dtypeMedium, datatypeSmall, dtypeSmall
 from mapFolding import outfitCountFolds, computationState, indexMy, indexTrack
-from someAssemblyRequired import countInitialize, countSequential
+from someAssemblyRequired import makeStateJob
 from typing import Any, Optional, Sequence, Type
 import more_itertools
 import inspect
+import importlib
+import importlib.util
 import numpy
 import pathlib
 import pickle
@@ -12,20 +14,7 @@ import python_minifier
 
 identifierCallableLaunch = "goGoGadgetAbsurdity"
 
-def makeStateJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]):
-    stateUniversal = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
-    countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
-
-    pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
-    suffix = pathFilenameChopChop.suffix
-    pathJob = pathlib.Path(str(pathFilenameChopChop)[0:-len(suffix)])
-    pathJob.mkdir(parents=True, exist_ok=True)
-    pathFilenameJob = pathJob / 'stateJob.pkl'
-
-    pathFilenameJob.write_bytes(pickle.dumps(stateUniversal))
-    return pathFilenameJob
-
-def convertNDArrayToStr(arrayTarget: numpy.ndarray, identifierName: str) -> str:
+def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: str) -> str:
     def process_nested_array(arraySlice):
         if isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim > 1:
             return [process_nested_array(arraySlice[index]) for index in range(arraySlice.shape[0])]
@@ -66,7 +55,9 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
     stateJob: computationState = pickle.loads(pathFilenameJob.read_bytes())
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'], pathFilenameJob.parent)
 
-    codeSource = inspect.getsource(countSequential)
+    from syntheticModules import countSequential
+    algorithmSource = countSequential
+    codeSource = inspect.getsource(algorithmSource)
 
     # forceinline=True might actually be useful
     parametersNumba = f"numba.types.{datatypeLargeAsStr}(), \
@@ -97,13 +88,13 @@ no_cpython_wrapper=False, \
     linesDataDynamic = """"""
     linesDataDynamic = "\n".join([linesDataDynamic
             , ImaIndent + f"foldsTotal = numba.types.{datatypeLargeAsStr}(0)"
-            , ImaIndent + convertNDArrayToStr(stateJob['foldGroups'], 'foldGroups')
-            , ImaIndent + convertNDArrayToStr(stateJob['gapsWhere'], 'gapsWhere')
+            , ImaIndent + makeStrRLEcompacted(stateJob['foldGroups'], 'foldGroups')
+            , ImaIndent + makeStrRLEcompacted(stateJob['gapsWhere'], 'gapsWhere')
             ])
 
     linesDataStatic = """"""
     linesDataStatic = "\n".join([linesDataStatic
-            , ImaIndent + convertNDArrayToStr(stateJob['connectionGraph'], 'connectionGraph')
+            , ImaIndent + makeStrRLEcompacted(stateJob['connectionGraph'], 'connectionGraph')
             ])
 
     my = stateJob['my']
@@ -127,7 +118,7 @@ no_cpython_wrapper=False, \
         elif 'track[indexTrack.' in lineSource:
             # leafAbove = track[indexTrack.leafAbove.value]
             identifier, statement = lineSource.split('=')
-            lineSource = ImaIndent + convertNDArrayToStr(eval(statement.strip()), identifier.strip())
+            lineSource = ImaIndent + makeStrRLEcompacted(eval(statement.strip()), identifier.strip())
 
         linesAlgorithm = "\n".join([linesAlgorithm
                             , lineSource
@@ -163,8 +154,16 @@ if __name__ == '__main__':
     return pathFilenameDestination
 
 if __name__ == '__main__':
-    listDimensions = [3,15]
+    listDimensions = [6,6]
     datatypeLarge = 'int64'
     datatypeMedium = 'uint8'
     datatypeSmall = datatypeMedium
-    writeModuleWithNumba(listDimensions, datatypeLarge=datatypeLarge, datatypeMedium=datatypeMedium, datatypeSmall=datatypeSmall)
+    pathFilenameModule = writeModuleWithNumba(listDimensions, datatypeLarge=datatypeLarge, datatypeMedium=datatypeMedium, datatypeSmall=datatypeSmall)
+    # Induce numba.jit compilation
+    moduleSpec = importlib.util.spec_from_file_location(pathFilenameModule.stem, pathFilenameModule)
+    if moduleSpec is None:
+        raise ImportError(f"Could not load module specification from {pathFilenameModule}")
+    module = importlib.util.module_from_spec(moduleSpec)
+    if moduleSpec.loader is None:
+        raise ImportError(f"Could not load module from {moduleSpec}")
+    moduleSpec.loader.exec_module(module)

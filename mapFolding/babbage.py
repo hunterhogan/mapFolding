@@ -1,4 +1,4 @@
-from someAssemblyRequired import countInitialize, countParallel, countSequential
+from syntheticModules import countInitialize, countParallel, countSequential
 from mapFolding import indexMy
 from numpy import integer
 from numpy.typing import NDArray
