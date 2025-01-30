@@ -12,31 +12,31 @@ import re as regex
 import unittest
 import unittest.mock
 import urllib
-import urllib.error
+from urllib.error import URLError
 import urllib.request
 
 def test_algorithmSourceSequential(oeisID: str, useAlgorithmDirectly):
     for n in settingsOEIS[oeisID]['valuesTestValidation']:
-        standardComparison(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
+        standardizedEqualTo(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
 def test_aOFn_calculate_value(oeisID: str):
     for n in settingsOEIS[oeisID]['valuesTestValidation']:
-        standardComparison(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
+        standardizedEqualTo(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID: str):
-    standardComparison(KeyError, _validateOEISid, badID)
+    standardizedEqualTo(KeyError, _validateOEISid, badID)
 
 def test__validateOEISid_partially_valid(oeisID_1random: str):
-    standardComparison(KeyError, _validateOEISid, f"{oeisID_1random}extra")
+    standardizedEqualTo(KeyError, _validateOEISid, f"{oeisID_1random}extra")
 
 def test__validateOEISid_valid_id(oeisID: str):
-    standardComparison(oeisID, _validateOEISid, oeisID)
+    standardizedEqualTo(oeisID, _validateOEISid, oeisID)
 
 def test__validateOEISid_valid_id_case_insensitive(oeisID: str):
-    standardComparison(oeisID.upper(), _validateOEISid, oeisID.lower())
-    standardComparison(oeisID.upper(), _validateOEISid, oeisID.upper())
-    standardComparison(oeisID.upper(), _validateOEISid, oeisID.swapcase())
+    standardizedEqualTo(oeisID.upper(), _validateOEISid, oeisID.lower())
+    standardizedEqualTo(oeisID.upper(), _validateOEISid, oeisID.upper())
+    standardizedEqualTo(oeisID.upper(), _validateOEISid, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [
     # (2, "ok"), # test the test template
@@ -48,10 +48,10 @@ badValues, badValuesIDs = zip(*parameters_test_aOFn_invalid_n)
 @pytest.mark.parametrize("badN", badValues, ids=badValuesIDs)
 def test_aOFn_invalid_n(oeisID_1random: str, badN):
     """Check that negative or non-integer n raises ValueError."""
-    standardComparison(ValueError, oeisIDfor_n, oeisID_1random, badN)
+    standardizedEqualTo(ValueError, oeisIDfor_n, oeisID_1random, badN)
 
 def test_aOFn_zeroDim_A001418():
-    standardComparison(ArithmeticError, oeisIDfor_n, 'A001418', 0)
+    standardizedEqualTo(ArithmeticError, oeisIDfor_n, 'A001418', 0)
 
 # ===== OEIS Cache Tests =====
 @pytest.mark.parametrize("cacheExists", [True, False])
@@ -82,11 +82,11 @@ def testCacheScenarios(pathCacheTesting: pathlib.Path, oeisID_1random: str, scen
         pathCache.write_text("Invalid content")
 
     if scenarioCache == "miss":
-        standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], None, oeisID_1random, pathCacheTesting)
+        prototypeCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], None, oeisID_1random, pathCacheTesting)
     elif scenarioCache == "expired":
-        standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupCacheExpired, oeisID_1random, pathCacheTesting)
+        prototypeCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupCacheExpired, oeisID_1random, pathCacheTesting)
     else:
-        standardCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupCacheInvalid, oeisID_1random, pathCacheTesting)
+        prototypeCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupCacheInvalid, oeisID_1random, pathCacheTesting)
 
 def testInvalidFileContent(pathCacheTesting: pathlib.Path, oeisID_1random: str):
     pathFilenameCache = pathCacheTesting / _getFilenameOEISbFile(oeisID=oeisID_1random)
@@ -107,7 +107,7 @@ def testInvalidFileContent(pathCacheTesting: pathlib.Path, oeisID_1random: str):
 
 def testParseContentErrors():
     """Test invalid content parsing."""
-    standardComparison(ValueError, _parseBFileOEIS, "Invalid content\n1 2\n", 'A001415')
+    standardizedEqualTo(ValueError, _parseBFileOEIS, "Invalid content\n1 2\n", 'A001415')
 
 def testExtraComments(pathCacheTesting: pathlib.Path, oeisID_1random: str):
     pathFilenameCache = pathCacheTesting / _getFilenameOEISbFile(oeisID=oeisID_1random)
@@ -126,17 +126,17 @@ def testExtraComments(pathCacheTesting: pathlib.Path, oeisID_1random: str):
 
     OEISsequence = _getOEISidValues(oeisID_1random)
     # Verify sequence values are correct despite extra comments
-    standardComparison(2, lambda d: d[1], OEISsequence)  # First value
-    standardComparison(8, lambda d: d[4], OEISsequence)  # Value after mid-sequence comment
-    standardComparison(10, lambda d: d[5], OEISsequence)  # Last value
+    standardizedEqualTo(2, lambda d: d[1], OEISsequence)  # First value
+    standardizedEqualTo(8, lambda d: d[4], OEISsequence)  # Value after mid-sequence comment
+    standardizedEqualTo(10, lambda d: d[5], OEISsequence)  # Last value
 
 def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: pathlib.Path):
     """Test network error handling."""
     def mockUrlopen(*args, **kwargs):
-        raise urllib.error.URLError("Network error")
+        raise URLError("Network error")
 
     monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
-    standardComparison(urllib.error.URLError, _getOEISidValues, next(iter(settingsOEIS)))
+    standardizedEqualTo(URLError, _getOEISidValues, next(iter(settingsOEIS)))
 
 # ===== Command Line Interface Tests =====
 def testHelpText():
@@ -172,7 +172,7 @@ def testHelpText():
         outputStream = io.StringIO()
         with redirect_stdout(outputStream):
             OEIS_for_n()
-        standardComparison(expectedValue, lambda: int(outputStream.getvalue().strip().split()[0]))
+        standardizedEqualTo(expectedValue, lambda: int(outputStream.getvalue().strip().split()[0]))
 
 def testCLI_InvalidInputs():
     """Test CLI error handling."""
@@ -185,14 +185,14 @@ def testCLI_InvalidInputs():
 
     for arguments, testID in testCases:
         with unittest.mock.patch('sys.argv', arguments):
-            expectSystemExit("error", OEIS_for_n)
+            standardizedSystemExit("error", OEIS_for_n)
 
 def testCLI_HelpFlag():
     """Verify --help output contains required information."""
     with unittest.mock.patch('sys.argv', ['OEIS_for_n', '--help']):
         outputStream = io.StringIO()
         with redirect_stdout(outputStream):
-            expectSystemExit("nonError", OEIS_for_n)
+            standardizedSystemExit("nonError", OEIS_for_n)
 
         helpOutput = outputStream.getvalue()
         assert "Available OEIS sequences:" in helpOutput

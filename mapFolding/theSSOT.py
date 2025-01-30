@@ -18,8 +18,8 @@ def getAlgorithmCallable() -> Callable[..., None]:
     return algorithmSource.doTheNeedful
 
 def getDispatcherCallable() -> Callable[..., None]:
-    from mapFolding import dispatcher
-    return dispatcher._countFolds
+    from mapFolding import dispatcherNumba
+    return dispatcherNumba._countFolds
 
 # NOTE I want this _concept_ to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
 class computationState(TypedDict):

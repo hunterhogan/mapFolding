@@ -2,20 +2,31 @@
 
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
+from tests.conftest_tmpRegistry import (
+    pathCacheTesting,
+    pathDataSamples,
+    pathFilenameBenchmarksTesting,
+    pathFilenameFoldsTotalTesting,
+    pathTempTesting,
+    setupTeardownTestData,
+)
+from tests.conftest_uniformTests import (
+    uniformTestMessage,
+    standardizedEqualTo,
+    standardizedSystemExit,
+)
 from mapFolding import *
 from mapFolding import basecamp
-from mapFolding import getAlgorithmCallable
+from mapFolding import getAlgorithmCallable, getDispatcherCallable
 from mapFolding.beDRY import *
 from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues
 from mapFolding.oeis import *
-from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, Set, Tuple, Type, Union
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
+from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, Set, Tuple, Type, Union
 import pathlib
 import pytest
 import random
-import shutil
 import unittest.mock
-import uuid
 
 def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
     """Returns a dictionary mapping dimension tuples to their known folding totals."""
@@ -56,76 +67,6 @@ def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
                     # The sunk-costs fallacy claims another victim!
 
     return dictionaryMapDimensionsToFoldsTotalKnown
-
-"""
-Section: temporary paths and pathFilenames"""
-
-# SSOT for test data paths
-pathDataSamples = pathlib.Path("tests/dataSamples")
-pathTempRoot = pathDataSamples / "tmp"
-
-# The registrar maintains the register of temp files
-registerOfTempFiles: Set[pathlib.Path] = set()
-
-def addTempFileToRegister(path: pathlib.Path) -> None:
-    """The registrar adds a temp file to the register."""
-    registerOfTempFiles.add(path)
-
-def cleanupTempFileRegister() -> None:
-    """The registrar cleans up temp files in the register."""
-    for pathTemp in sorted(registerOfTempFiles, reverse=True):
-        try:
-            if pathTemp.is_file():
-                pathTemp.unlink(missing_ok=True)
-            elif pathTemp.is_dir():
-                shutil.rmtree(pathTemp, ignore_errors=True)
-        except Exception as ERRORmessage:
-            print(f"Warning: Failed to clean up {pathTemp}: {ERRORmessage}")
-    registerOfTempFiles.clear()
-
-@pytest.fixture(scope="session", autouse=True)
-def setupTeardownTestData() -> Generator[None, None, None]:
-    """Auto-fixture to setup test data directories and cleanup after."""
-    pathDataSamples.mkdir(exist_ok=True)
-    pathTempRoot.mkdir(exist_ok=True)
-    yield
-    cleanupTempFileRegister()
-
-@pytest.fixture
-def pathTempTesting(request: pytest.FixtureRequest) -> pathlib.Path:
-    """Create a unique temp directory for each test function."""
-    # TODO I got rid of this shit. how the fuck is it back?
-    # Sanitize test name for filesystem compatibility
-    sanitizedName = request.node.name.replace('[', '_').replace(']', '_').replace('/', '_')
-    uniqueDirectory = f"{sanitizedName}_{uuid.uuid4()}"
-    pathTemp = pathTempRoot / uniqueDirectory
-    pathTemp.mkdir(parents=True, exist_ok=True)
-
-    addTempFileToRegister(pathTemp)
-    return pathTemp
-
-@pytest.fixture
-def pathCacheTesting(pathTempTesting: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
-    """Temporarily replace the OEIS cache directory with a test directory."""
-    from mapFolding import oeis as there_must_be_a_better_way
-    pathCacheOriginal = there_must_be_a_better_way._pathCache
-    there_must_be_a_better_way._pathCache = pathTempTesting
-    yield pathTempTesting
-    there_must_be_a_better_way._pathCache = pathCacheOriginal
-
-@pytest.fixture
-def pathFilenameBenchmarksTesting(pathTempTesting: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
-    """Temporarily replace the benchmarks directory with a test directory."""
-    from mapFolding.benchmarks import benchmarking
-    pathFilenameOriginal = benchmarking.pathFilenameRecordedBenchmarks
-    pathFilenameTest = pathTempTesting / "benchmarks.npy"
-    benchmarking.pathFilenameRecordedBenchmarks = pathFilenameTest
-    yield pathFilenameTest
-    benchmarking.pathFilenameRecordedBenchmarks = pathFilenameOriginal
-
-@pytest.fixture
-def pathFilenameFoldsTotalTesting(pathTempTesting: pathlib.Path) -> pathlib.Path:
-    return pathTempTesting.joinpath("foldsTotalTest.txt")
 
 """
 Section: Fixtures"""
@@ -206,6 +147,14 @@ def mockFoldingFunction():
         return mock_countFolds
     return make_mock
 
+@pytest.fixture
+def mockDispatcher():
+    """Context manager for mocking dispatcher callable."""
+    def wrapper(mockFunction):
+        dispatcherCallable = getDispatcherCallable()
+        return unittest.mock.patch(f"{dispatcherCallable.__module__}.{dispatcherCallable.__name__}", side_effect=mockFunction)
+    return wrapper
+
 @pytest.fixture(params=oeisIDsImplemented)
 def oeisID(request: pytest.FixtureRequest)-> str:
     return request.param
@@ -229,60 +178,9 @@ def useAlgorithmDirectly():
     basecamp.getDispatcherCallable = original_dispatcher
 
 """
-Section: Standardized test structures"""
+Section: Prototype test structures before moving to uniformTests.py"""
 
-def formatTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
-    """Format assertion message for any test comparison."""
-    return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"
-            f"Expected: {expected}\n"
-            f"Got: {actual}")
-
-def standardComparison(expected: Any, functionTarget: Callable, *arguments: Any) -> None:
-    """Template for tests expecting an error."""
-    if type(expected) is Type[Exception]:
-        messageExpected = expected.__name__
-    else:
-        messageExpected = expected
-
-    try:
-        messageActual = actual = functionTarget(*arguments)
-    except Exception as actualError:
-        messageActual = type(actualError).__name__
-        actual = type(actualError)
-
-    assert actual == expected, formatTestMessage(messageExpected, messageActual, functionTarget.__name__, *arguments)
-
-def expectSystemExit(expected: Union[str, int, Sequence[int]], functionTarget: Callable, *arguments: Any) -> None:
-    """Template for tests expecting SystemExit.
-
-    Parameters
-        expected: Exit code expectation:
-            - "error": any non-zero exit code
-            - "nonError": specifically zero exit code
-            - int: exact exit code match
-            - Sequence[int]: exit code must be one of these values
-        functionTarget: The function to test
-        arguments: Arguments to pass to the function
-    """
-    with pytest.raises(SystemExit) as exitInfo:
-        functionTarget(*arguments)
-
-    exitCode = exitInfo.value.code
-
-    if expected == "error":
-        assert exitCode != 0, \
-            f"Expected error exit (non-zero) but got code {exitCode}"
-    elif expected == "nonError":
-        assert exitCode == 0, \
-            f"Expected non-error exit (0) but got code {exitCode}"
-    elif isinstance(expected, (list, tuple)):
-        assert exitCode in expected, \
-            f"Expected exit code to be one of {expected} but got {exitCode}"
-    else:
-        assert exitCode == expected, \
-            f"Expected exit code {expected} but got {exitCode}"
-
-def standardCacheTest(
+def prototypeCacheTest(
     expected: Any,
     setupCacheFile: Optional[Callable[[pathlib.Path, str], None]],
     oeisID: str,
@@ -313,9 +211,9 @@ def standardCacheTest(
     # Compare results
     if isinstance(expected, type) and issubclass(expected, Exception):
         messageExpected = expected.__name__
-        assert isinstance(actual, expected), formatTestMessage(
+        assert isinstance(actual, expected), uniformTestMessage(
             messageExpected, messageActual, "_getOEISidValues", oeisID)
     else:
         messageExpected = expected
-        assert actual == expected, formatTestMessage(
+        assert actual == expected, uniformTestMessage(
             messageExpected, messageActual, "_getOEISidValues", oeisID)

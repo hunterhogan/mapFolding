@@ -10,7 +10,6 @@ import pathlib
 import pytest
 import random
 import sys
-import unittest.mock
 
 @pytest.mark.parametrize("listDimensions,expected_intInnit,expected_parseListDimensions,expected_validateListDimensions,expected_getLeavesTotal", [
     (None, ValueError, ValueError, ValueError, ValueError),  # None instead of list
@@ -47,20 +46,20 @@ import unittest.mock
 ])
 def test_listDimensionsAsParameter(listDimensions: None | list[str] | list[int] | list[float] | list[None] | list[bool] | list[list[int]] | list[complex] | range | tuple[int, ...], expected_intInnit: type[ValueError] | list[int] | type[TypeError], expected_parseListDimensions: type[ValueError] | list[int] | type[TypeError], expected_validateListDimensions: type[ValueError] | type[NotImplementedError] | list[int] | type[TypeError], expected_getLeavesTotal: type[ValueError] | int | type[TypeError] | type[OverflowError]) -> None:
     """Test both validateListDimensions and getLeavesTotal with the same inputs."""
-    standardComparison(expected_intInnit, intInnit, listDimensions)
-    standardComparison(expected_parseListDimensions, parseDimensions, listDimensions)
-    standardComparison(expected_validateListDimensions, validateListDimensions, listDimensions)
-    standardComparison(expected_getLeavesTotal, getLeavesTotal, listDimensions)
+    standardizedEqualTo(expected_intInnit, intInnit, listDimensions)
+    standardizedEqualTo(expected_parseListDimensions, parseDimensions, listDimensions)
+    standardizedEqualTo(expected_validateListDimensions, validateListDimensions, listDimensions)
+    standardizedEqualTo(expected_getLeavesTotal, getLeavesTotal, listDimensions)
 
 def test_getLeavesTotal_edge_cases() -> None:
     """Test edge cases for getLeavesTotal."""
     # Order independence
-    standardComparison(getLeavesTotal([2, 3, 4]), getLeavesTotal, [4, 2, 3])
+    standardizedEqualTo(getLeavesTotal([2, 3, 4]), getLeavesTotal, [4, 2, 3])
 
     # Immutability
     listOriginal = [2, 3]
-    standardComparison(6, getLeavesTotal, listOriginal)
-    standardComparison([2, 3], lambda x: x, listOriginal)  # Check that the list wasn't modified
+    standardizedEqualTo(6, getLeavesTotal, listOriginal)
+    standardizedEqualTo([2, 3], lambda x: x, listOriginal)  # Check that the list wasn't modified
 
 @pytest.mark.parametrize("foldsValue,writeFoldsTarget", [
     (756839, "foldsTotalTest.txt"),  # Direct file
@@ -71,6 +70,7 @@ def test_countFolds_writeFoldsTotal(
     listDimensionsTestFunctionality: List[int],
     pathTempTesting: pathlib.Path,
     mockFoldingFunction,
+    mockDispatcher,
     foldsValue: int,
     writeFoldsTarget: Optional[str]
 ) -> None:
@@ -86,12 +86,10 @@ def test_countFolds_writeFoldsTotal(
     foldsTotalExpected = foldsValue * getLeavesTotal(listDimensionsTestFunctionality)
     mock_countFolds = mockFoldingFunction(foldsValue, listDimensionsTestFunctionality)
 
-    # TODO move this to conftest. I shouldn't have such a specific value buried in a test: SSOT
-    with unittest.mock.patch("mapFolding.dispatcher._countFolds", side_effect=mock_countFolds):
-        returned = countFolds(listDimensionsTestFunctionality, pathishWriteFoldsTotal=pathWriteTarget)
+    with mockDispatcher(mock_countFolds):
+        returned = countFolds(listDimensionsTestFunctionality, pathLikeWriteFoldsTotal=pathWriteTarget)
 
-    # standardComparison(foldsValue, lambda: returned)  # Check return value
-    standardComparison(str(foldsTotalExpected), lambda: (pathTempTesting / filenameFoldsTotalExpected).read_text())  # Check file content
+    standardizedEqualTo(str(foldsTotalExpected), lambda: (pathTempTesting / filenameFoldsTotalExpected).read_text())
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_intInnit())
 def testIntInnit(nameOfTest, callablePytest):
@@ -113,7 +111,7 @@ def testOopsieKwargsie(nameOfTest, callablePytest):
     (1, 1),
 ])
 def test_setCPUlimit(CPUlimit, expectedLimit) -> None:
-    standardComparison(expectedLimit, setCPUlimit, CPUlimit)
+    standardizedEqualTo(expectedLimit, setCPUlimit, CPUlimit)
 
 def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: List[int]) -> None:
     connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality)
@@ -123,7 +121,6 @@ def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: List[i
 def test_makeConnectionGraph_datatype(listDimensionsTestFunctionality: List[int], datatype) -> None:
     connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality, datatype=datatype)
     assert connectionGraph.dtype == datatype, f"Expected datatype {datatype}, but got {connectionGraph.dtype}."
-
 
 """5 parameters
 listDimensionsTestFunctionality
@@ -271,7 +268,7 @@ def test_pathJobDEFAULT_colab():
 
 def test_saveFoldsTotal_fallback(pathTempTesting: pathlib.Path) -> None:
     foldsTotal = 123
-    pathFilename = pathTempTesting / "unwritable" / "foldsTotal.txt"
+    pathFilename = pathTempTesting / "foldsTotal.txt"
     with unittest.mock.patch("pathlib.Path.write_text", side_effect=OSError("Simulated write failure")):
         with unittest.mock.patch("os.getcwd", return_value=str(pathTempTesting)):
             capturedOutput = io.StringIO()
@@ -279,3 +276,10 @@ def test_saveFoldsTotal_fallback(pathTempTesting: pathlib.Path) -> None:
                 saveFoldsTotal(pathFilename, foldsTotal)
     fallbackFiles = list(pathTempTesting.glob("foldsTotalYO_*.txt"))
     assert len(fallbackFiles) == 1, "Fallback file was not created upon write failure."
+
+def test_makeDataContainer_default_datatype():
+    """Test that makeDataContainer uses dtypeLargeDEFAULT when no datatype is specified."""
+    testShape = (3, 4)
+    container = makeDataContainer(testShape)
+    assert container.dtype == dtypeLargeDEFAULT, f"Expected datatype {dtypeLargeDEFAULT}, but got {container.dtype}"
+    assert container.shape == testShape, f"Expected shape {testShape}, but got {container.shape}"

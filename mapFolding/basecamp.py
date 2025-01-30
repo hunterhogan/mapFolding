@@ -2,12 +2,12 @@ from mapFolding import getDispatcherCallable, getPathFilenameFoldsTotal, outfitC
 from typing import Any, Optional, Sequence, Type, Union
 import os
 
-def countFolds(listDimensions: Sequence[int], pathishWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None, computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[int, float, bool]] = None, **keywordArguments: Optional[Type[Any]]) -> int:
+def countFolds(listDimensions: Sequence[int], pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None, computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[int, float, bool]] = None, **keywordArguments: Optional[Type[Any]]) -> int:
     """Count the total number of possible foldings for a given map dimensions.
 
     Parameters:
         listDimensions: List of integers representing the dimensions of the map to be folded.
-        pathishWriteFoldsTotal (None): Path, filename, or pathFilename to write the total fold count to.
+        pathLikeWriteFoldsTotal (None): Path, filename, or pathFilename to write the total fold count to.
             If a directory is provided, creates a file with a default name based on map dimensions.
         computationDivisions (None):
             Whether and how to divide the computational work. See notes for details.
@@ -36,8 +36,8 @@ def countFolds(listDimensions: Sequence[int], pathishWriteFoldsTotal: Optional[U
     stateUniversal = outfitCountFolds(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit, **keywordArguments)
 
     pathFilenameFoldsTotal = None
-    if pathishWriteFoldsTotal is not None:
-        pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathishWriteFoldsTotal)
+    if pathLikeWriteFoldsTotal is not None:
+        pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathLikeWriteFoldsTotal)
 
     dispatcher = getDispatcherCallable()
     dispatcher(**stateUniversal)

@@ -45,8 +45,8 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 
         return productDimensions
 
-def getPathFilenameFoldsTotal(listDimensions: Sequence[int], pathishWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
-    pathFilenameFoldsTotal = pathlib.Path(pathishWriteFoldsTotal) if pathishWriteFoldsTotal is not None else pathJobDEFAULT
+def getPathFilenameFoldsTotal(listDimensions: Sequence[int], pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
+    pathFilenameFoldsTotal = pathlib.Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else pathJobDEFAULT
     if pathFilenameFoldsTotal.is_dir():
         filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(listDimensions)
         pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT
@@ -147,7 +147,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 def makeDataContainer(shape, datatype: Optional[Type] = None):
     """Create a container, probably numpy.ndarray, with the given shape and datatype."""
     if datatype is None:
-        datatype = dtypeMediumDEFAULT
+        datatype = dtypeLargeDEFAULT
     return numpy.zeros(shape, dtype=datatype)
 
 def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type[Any]]) -> computationState:
