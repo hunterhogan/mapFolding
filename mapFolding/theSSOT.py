@@ -1,6 +1,6 @@
 from numpy import integer
 from numpy.typing import NDArray
-from typing import Any, Callable, Optional, Tuple, Type, TypedDict
+from typing import Any, Callable, Final, Optional, Tuple, Type, TypedDict
 from types import ModuleType
 import enum
 import numba
@@ -64,60 +64,21 @@ class indexTrack(EnumIndices):
     countDimensionsGapped = enum.auto()
     gapRangeStart = enum.auto()
 
-from dataclasses import dataclass
-from typing import Final
+datatypeLargeDEFAULT: Final[str] = 'int64'
+datatypeMediumDEFAULT: Final[str] = 'int16'
+datatypeSmallDEFAULT: Final[str] = 'uint8'
 
-@dataclass()
-class DatatypeDefaults():
-    """Configuration for numeric datatypes used in computation."""
-
-    def __init__(self, module: str, large: str, medium: str, small: str) -> None:
-        self.module = module
-        self.large = large
-        self.medium = medium
-        self.small = small
-
-    def make_dtype(self, datatype: str) -> Any:
-        """Convert datatype string to actual type."""
-        return eval(f"{self.module}.{datatype}")
-
-    @property
-    def dtypeLarge(self) -> Any:
-        return self.make_dtype(self.large)
-
-    @property
-    def dtypeMedium(self) -> Any:
-        return self.make_dtype(self.medium)
-
-    @property
-    def dtypeSmall(self) -> Any:
-        return self.make_dtype(self.small)
-
-# Global configuration instance
-@dataclass(frozen=True)
-class Z0Z_strings():
-    datatypeLarge: Final[str] = 'int64'
-    datatypeMedium: Final[str] = 'uint8'
-    datatypeSmall: Final[str] = datatypeMedium
-thisSeemsVeryComplicated: Final = Z0Z_strings()
-
-# If I use the dataclass instance, these are transitory variables
-datatypeLarge = thisSeemsVeryComplicated.datatypeLarge
-datatypeMedium = thisSeemsVeryComplicated.datatypeMedium
-datatypeSmall = thisSeemsVeryComplicated.datatypeSmall
-
-dtypeNumpyDefaults: Final = DatatypeDefaults('numpy', datatypeLarge, datatypeMedium, datatypeSmall)
-
-datatypeModuleDEFAULT = 'numpy'
+# Design for the possibility that I will want to use module jabberPy and their datatypes, wockyPy
+datatypeModuleDEFAULT: Final[str] = 'numpy'
 
 def make_dtype(datatype: str, datatypeModule: Optional[str] = None) -> Type[Any]:
     if datatypeModule is None:
         datatypeModule = datatypeModuleDEFAULT
     return eval(f"{datatypeModule}.{datatype}")
 
-dtypeLarge = make_dtype(datatypeLarge)
-dtypeMedium = make_dtype(datatypeMedium)
-dtypeSmall = make_dtype(datatypeSmall)
+dtypeLargeDEFAULT = make_dtype(datatypeLargeDEFAULT)
+dtypeMediumDEFAULT = make_dtype(datatypeMediumDEFAULT)
+dtypeSmallDEFAULT = make_dtype(datatypeSmallDEFAULT)
 
 try:
     _pathModule = pathlib.Path(__file__).parent

@@ -1,5 +1,5 @@
-from mapFolding import getPathFilenameFoldsTotal, thisSeemsVeryComplicated
-from mapFolding import make_dtype, datatypeLarge, datatypeMedium, datatypeSmall
+from mapFolding import getPathFilenameFoldsTotal
+from mapFolding import make_dtype, datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, datatypeModuleDEFAULT
 from mapFolding import computationState
 from someAssemblyRequired import makeStateJob
 from typing import Optional
@@ -43,15 +43,16 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: str) -> str:
     return f"{identifierName} = numpy.array({stringMinimized}, dtype=numpy.{arrayTarget.dtype})"
 
 def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> pathlib.Path:
-    datatypeLargeAsStr = keywordArguments.get('datatypeLarge', thisSeemsVeryComplicated.datatypeLarge)
-    datatypeMediumAsStr = keywordArguments.get('datatypeMedium', thisSeemsVeryComplicated.datatypeMedium)
-    datatypeSmallAsStr = keywordArguments.get('datatypeSmall', thisSeemsVeryComplicated.datatypeSmall)
+    datatypeLarge = keywordArguments.get('datatypeLarge', datatypeLargeDEFAULT)
+    datatypeMedium = keywordArguments.get('datatypeMedium', datatypeMediumDEFAULT)
+    datatypeSmall = keywordArguments.get('datatypeSmall', datatypeSmallDEFAULT)
+    datatypeModule = keywordArguments.get('datatypeModule', datatypeModuleDEFAULT)
 
-    numpy_dtypeLarge = make_dtype(datatypeLargeAsStr) # type: ignore
-    numpy_dtypeMedium = make_dtype(datatypeMediumAsStr) # type: ignore
-    numpy_dtypeSmall = make_dtype(datatypeSmallAsStr) # type: ignore
+    dtypeLarge = make_dtype(datatypeLarge, datatypeModule) # type: ignore
+    dtypeMedium = make_dtype(datatypeMedium, datatypeModule) # type: ignore
+    dtypeSmall = make_dtype(datatypeSmall, datatypeModule) # type: ignore
 
-    pathFilenameJob = makeStateJob(listDimensions, dtypeLarge = numpy_dtypeLarge, dtypeMedium = numpy_dtypeMedium, dtypeSmall = numpy_dtypeSmall)
+    pathFilenameJob = makeStateJob(listDimensions, dtypeLarge = dtypeLarge, dtypeMedium = dtypeMedium, dtypeSmall = dtypeSmall)
     stateJob: computationState = pickle.loads(pathFilenameJob.read_bytes())
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'], pathFilenameJob.parent)
 
@@ -60,7 +61,7 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
     codeSource = inspect.getsource(algorithmSource)
 
     # forceinline=True might actually be useful
-    parametersNumba = f"numba.types.{datatypeLargeAsStr}(), \
+    parametersNumba = f"numba.types.{datatypeLarge}(), \
 cache=True, \
 nopython=True, \
 fastmath=True, \
@@ -87,7 +88,7 @@ no_cpython_wrapper=False, \
     ImaIndent = '    '
     linesDataDynamic = """"""
     linesDataDynamic = "\n".join([linesDataDynamic
-            , ImaIndent + f"foldsTotal = numba.types.{datatypeLargeAsStr}(0)"
+            , ImaIndent + f"foldsTotal = numba.types.{datatypeLarge}(0)"
             , ImaIndent + makeStrRLEcompacted(stateJob['foldGroups'], 'foldGroups')
             , ImaIndent + makeStrRLEcompacted(stateJob['gapsWhere'], 'gapsWhere')
             ])

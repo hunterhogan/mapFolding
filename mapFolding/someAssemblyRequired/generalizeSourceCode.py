@@ -1,4 +1,4 @@
-from mapFolding import datatypeMedium, datatypeLarge, datatypeSmall
+from mapFolding import datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT
 import ast
 
 class RecursiveInlinerWithEnum(ast.NodeTransformer):
@@ -84,7 +84,10 @@ def generateImports(requiredImports):
 
     return '\n'.join(importStatements)
 
-def makeInlineFunction(sourceCode, targetFunctionName, dictionaryEnumValues, skipEnum=False):
+def makeInlineFunction(sourceCode, targetFunctionName, dictionaryEnumValues, skipEnum=False, **keywordArguments):
+    datatypeLarge = keywordArguments.get('datatypeLarge', datatypeLargeDEFAULT)
+    datatypeMedium = keywordArguments.get('datatypeMedium', datatypeMediumDEFAULT)
+    datatypeSmall = keywordArguments.get('datatypeSmall', datatypeSmallDEFAULT)
     if skipEnum:
         dictionaryEnumValues = {}
     dictionaryParsed = ast.parse(sourceCode)

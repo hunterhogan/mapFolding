@@ -1,6 +1,13 @@
 """A relatively stable API for oft-needed functionality."""
-from mapFolding import dtypeMedium, dtypeLarge, dtypeSmall, pathJobDEFAULT
-from mapFolding import indexMy, indexTrack, computationState
+from mapFolding import (
+    dtypeLargeDEFAULT,
+    dtypeMediumDEFAULT,
+    dtypeSmallDEFAULT,
+    indexMy,
+    indexTrack,
+    pathJobDEFAULT,
+    computationState,
+)
 from numpy import integer
 from numpy.typing import NDArray
 from typing import Any, List, Optional, Sequence, Type, Union
@@ -107,7 +114,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
     Returns
         connectionGraph: A 3D numpy array with shape of (dimensionsTotal, leavesTotal + 1, leavesTotal + 1).
     """
-    datatype = keywordArguments.get('datatype', dtypeSmall)
+    datatype = keywordArguments.get('datatype', dtypeSmallDEFAULT)
     mapShape = validateListDimensions(listDimensions)
     leavesTotal = getLeavesTotal(mapShape)
     arrayDimensions = numpy.array(mapShape, dtype=datatype)
@@ -140,7 +147,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 def makeDataContainer(shape, datatype: Optional[Type] = None):
     """Create a container, probably numpy.ndarray, with the given shape and datatype."""
     if datatype is None:
-        datatype = dtypeMedium
+        datatype = dtypeMediumDEFAULT
     return numpy.zeros(shape, dtype=datatype)
 
 def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type[Any]]) -> computationState:
@@ -180,28 +187,28 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
         - Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
         - Integer `<= -1`: Subtract the absolute value from total CPUs.
     """
-    datatypeLarge = keywordArguments.get('datatypeLarge', dtypeLarge)
-    datatypeMedium = keywordArguments.get('datatypeMedium', dtypeMedium)
-    datatypeSmall = keywordArguments.get('datatypeSmall', dtypeSmall)
+    dtypeLarge = keywordArguments.get('dtypeLarge', dtypeLargeDEFAULT)
+    dtypeMedium = keywordArguments.get('dtypeMedium', dtypeMediumDEFAULT)
+    dtypeSmall = keywordArguments.get('dtypeSmall', dtypeSmallDEFAULT)
 
-    my = makeDataContainer(len(indexMy), datatypeMedium)
+    my = makeDataContainer(len(indexMy), dtypeMedium)
 
     mapShape = tuple(sorted(validateListDimensions(listDimensions)))
     concurrencyLimit = setCPUlimit(CPUlimit)
     my[indexMy.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, mapShape)
 
-    foldGroups = makeDataContainer(max(my[indexMy.taskDivisions] + 1, 2), datatypeLarge)
+    foldGroups = makeDataContainer(max(my[indexMy.taskDivisions] + 1, 2), dtypeLarge)
     foldGroups[-1] = leavesTotal = getLeavesTotal(mapShape)
 
     my[indexMy.dimensionsTotal] = len(mapShape)
     my[indexMy.leaf1ndex] = 1
     stateInitialized = computationState(
-        connectionGraph = makeConnectionGraph(mapShape, datatype=datatypeSmall),
+        connectionGraph = makeConnectionGraph(mapShape, datatype=dtypeSmall),
         foldGroups = foldGroups,
         mapShape = mapShape,
         my = my,
-        gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, datatypeSmall),
-        track = makeDataContainer((len(indexTrack), leavesTotal + 1), datatypeMedium)
+        gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, dtypeSmall),
+        track = makeDataContainer((len(indexTrack), leavesTotal + 1), dtypeMedium)
         )
 
     return stateInitialized

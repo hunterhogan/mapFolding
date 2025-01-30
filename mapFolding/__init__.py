@@ -1,11 +1,12 @@
 from mapFolding.theSSOT import (
     computationState,
-    datatypeLarge,
-    datatypeMedium,
-    datatypeSmall,
-    dtypeLarge,
-    dtypeMedium,
-    dtypeSmall,
+    datatypeLargeDEFAULT,
+    datatypeMediumDEFAULT,
+    datatypeModuleDEFAULT,
+    datatypeSmallDEFAULT,
+    dtypeLargeDEFAULT,
+    dtypeMediumDEFAULT,
+    dtypeSmallDEFAULT,
     getAlgorithmSource,
     getAlgorithmCallable,
     getDispatcherCallable,
@@ -13,7 +14,6 @@ from mapFolding.theSSOT import (
     indexTrack,
     make_dtype,
     pathJobDEFAULT,
-    thisSeemsVeryComplicated,
 )
 from mapFolding.beDRY import getFilenameFoldsTotal, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal
 from mapFolding.basecamp import countFolds

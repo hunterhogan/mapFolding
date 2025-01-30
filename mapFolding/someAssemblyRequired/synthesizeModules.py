@@ -1,4 +1,5 @@
 from mapFolding import indexMy, indexTrack, getAlgorithmSource
+from mapFolding import datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT
 from someAssemblyRequired import makeInlineFunction
 import pathlib
 import inspect
@@ -53,7 +54,10 @@ def unpackArrays(codeInlined: str, callableTarget: str) -> str:
 
     return codeInlined
 
-def inlineMapFoldingNumba():
+def inlineMapFoldingNumba(**keywordArguments):
+    datatypeLarge = keywordArguments.get('datatypeLarge', datatypeLargeDEFAULT)
+    datatypeMedium = keywordArguments.get('datatypeMedium', datatypeMediumDEFAULT)
+    datatypeSmall = keywordArguments.get('datatypeSmall', datatypeSmallDEFAULT)
     dictionaryEnumValues = getDictionaryEnumValues()
     codeSource = inspect.getsource(algorithmSource)
     pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
@@ -65,7 +69,7 @@ def inlineMapFoldingNumba():
         skipEnum = (callableTarget == 'countInitialize')
         skipEnum = (callableTarget == 'countSequential')
         pathFilenameDestination = pathFilenameAlgorithm.parent / "syntheticModules" / pathFilenameAlgorithm.with_stem(callableTarget).name
-        codeInlined, callableInlinedDecorators, importsRequired = makeInlineFunction(codeSource, callableTarget, dictionaryEnumValues, skipEnum)
+        codeInlined, callableInlinedDecorators, importsRequired = makeInlineFunction(codeSource, callableTarget, dictionaryEnumValues, skipEnum, datatypeLarge=datatypeLarge, datatypeMedium=datatypeMedium, datatypeSmall=datatypeSmall)
         codeUnpacked = unpackArrays(codeInlined, callableTarget)
         pathFilenameDestination.write_text(importsRequired + "\n" + codeUnpacked)
         listPathFilenamesDestination.append(pathFilenameDestination)
