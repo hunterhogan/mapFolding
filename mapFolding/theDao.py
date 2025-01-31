@@ -1,12 +1,8 @@
-from mapFolding import indexMy, indexTrack, datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, make_dtype
+from mapFolding import indexMy, indexTrack
 from typing import Any, Tuple
 from numpy import integer
 import numpy
 import numba
-
-datatypeLarge = make_dtype(datatypeLargeDEFAULT, 'numba')
-datatypeMedium = make_dtype(datatypeMediumDEFAULT, 'numba')
-datatypeSmall = make_dtype(datatypeSmallDEFAULT, 'numba')
 
 def activeGapIncrement(my):
     my[indexMy.gap1ndex.value] += 1
@@ -173,7 +169,6 @@ def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dty
                 placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
         foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
-# @numba.jit((datatypeSmall[:,:,::1], datatypeLarge[::1], datatypeMedium[::1], datatypeSmall[::1], datatypeMedium[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)
 def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     doFindGaps = True
     groupsOfFolds: int = 0

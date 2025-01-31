@@ -54,8 +54,9 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
             if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
                 shapeAsListSlices = [ast.Slice() for axis in range(len(annotationShape.slice.elts))]
                 shapeAsListSlices[-1] = ast.Slice(step=ast.Constant(value=1))
+                shapeAST = ast.Tuple(elts=shapeAsListSlices, ctx=ast.Load())
             else:
-                shapeAsListSlices = [ast.Slice(step=ast.Constant(value=1))]
+                shapeAST = ast.Slice(step=ast.Constant(value=1))
 
             annotationDtype = signatureElement.annotation.slice.elts[1]
             if isinstance(annotationDtype, ast.Subscript) and isinstance(annotationDtype.slice, ast.Attribute):
@@ -70,7 +71,7 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
 
             datatypeNumba = ast.Attribute(value=ast.Name(id='numba', ctx=ast.Load()), attr=datatype_attr, ctx=ast.Load())
 
-            return ast.Subscript(value=datatypeNumba, slice=ast.Tuple(elts=shapeAsListSlices, ctx=ast.Load()), ctx=ast.Load())
+            return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
 
     # callableSourceDecorators = [decorator for decorator in callableInlined.decorator_list]
 

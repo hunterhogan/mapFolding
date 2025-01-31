@@ -1,9 +1,9 @@
-import numba
-import numpy
 from numpy import integer
-from mapFolding import indexMy, indexTrack, datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, make_dtype
 from typing import Any, Tuple
-@numba.jit((numba.uint8[:, :, ::1], numba.int64[::1,], numba.uint8[::1,], numba.int16[::1,], numba.int16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
+import numba
+from mapFolding import indexMy, indexTrack
+import numpy
+@numba.jit((numba.uint8[:, :, ::1], numba.int64[::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=False, inline='never', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nopython=True, parallel=False)
 def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     doFindGaps = True
     dimensionsTotal = my[indexMy.dimensionsTotal.value]

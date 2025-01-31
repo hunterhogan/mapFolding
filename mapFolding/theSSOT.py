@@ -85,7 +85,7 @@ class indexTrack(EnumIndices):
 
 
 datatypeLargeDEFAULT: Final[str] = 'int64'
-datatypeMediumDEFAULT: Final[str] = 'int16'
+datatypeMediumDEFAULT: Final[str] = 'uint8'
 datatypeSmallDEFAULT: Final[str] = 'uint8'
 
 # Design for the possibility that I will want to use module jabberPy and their datatypes, wockyPy
@@ -131,11 +131,11 @@ parametersNumbaDEFAULT: Final[ParametersNumba] = {
     'cache': True,
     'error_model': 'numpy',
     'fastmath': True,
-    'forceinline': True,
-    'inline': 'always',
+    'forceinline': False,
+    'inline': 'never',
     'looplift': False,
-    'no_cfunc_wrapper': False,
-    'no_cpython_wrapper': False,
+    'no_cfunc_wrapper': True,
+    'no_cpython_wrapper': True,
     'nopython': True,
     'parallel': False,
 }

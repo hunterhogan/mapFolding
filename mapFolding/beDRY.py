@@ -234,6 +234,7 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
         - Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
         - Integer `<= -1`: Subtract the absolute value from total CPUs.
     """
+    # NOTE to change the dtype, you need to synthesize new modules with the new dtype and recompile the functions
     dtypeLarge = keywordArguments.get('dtypeLarge', dtypeLargeDEFAULT)
     dtypeMedium = keywordArguments.get('dtypeMedium', dtypeMediumDEFAULT)
     dtypeSmall = keywordArguments.get('dtypeSmall', dtypeSmallDEFAULT)

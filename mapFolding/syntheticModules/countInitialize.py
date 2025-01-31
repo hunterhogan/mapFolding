@@ -1,9 +1,9 @@
-import numpy
-import numba
 from numpy import integer
-from mapFolding import indexMy, indexTrack, datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, make_dtype
+import numba
+import numpy
+from mapFolding import indexMy, indexTrack
 from typing import Any, Tuple
-@numba.jit((numba.uint8[:, :, ::1], numba.uint8[::1,], numba.int16[::1,], numba.int16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
+@numba.jit((numba.uint8[:, :, ::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=False, inline='never', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nopython=True, parallel=False)
 def countInitialize(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     while my[indexMy.leaf1ndex.value] > 0:
         if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
