@@ -7,12 +7,15 @@ from mapFolding.theSSOT import (
     dtypeLargeDEFAULT,
     dtypeMediumDEFAULT,
     dtypeSmallDEFAULT,
-    getAlgorithmSource,
     getAlgorithmCallable,
+    getAlgorithmSource,
     getDispatcherCallable,
+    hackSSOTdtype,
     indexMy,
     indexTrack,
     make_dtype,
+    ParametersNumba,
+    parametersNumbaDEFAULT,
     pathJobDEFAULT,
 )
 from mapFolding.beDRY import getFilenameFoldsTotal, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal

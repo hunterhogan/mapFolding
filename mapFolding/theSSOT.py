@@ -1,5 +1,4 @@
 from numpy import integer
-from numpy.typing import NDArray
 from typing import Any, Callable, Final, Optional, Tuple, Type, TypedDict
 from types import ModuleType
 import enum
@@ -23,12 +22,12 @@ def getDispatcherCallable() -> Callable[..., None]:
 
 # NOTE I want this _concept_ to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
 class computationState(TypedDict):
-    connectionGraph: NDArray[integer[Any]]
-    foldGroups: NDArray[integer[Any]]
-    gapsWhere: NDArray[integer[Any]]
+    connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]]
+    foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
+    gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
     mapShape: Tuple[int, ...]
-    my: NDArray[integer[Any]]
-    track: NDArray[integer[Any]]
+    my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
+    track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]
 
 @enum.verify(enum.CONTINUOUS, enum.UNIQUE) if sys.version_info >= (3, 11) else lambda x: x
 class EnumIndices(enum.IntEnum):
@@ -64,6 +63,27 @@ class indexTrack(EnumIndices):
     countDimensionsGapped = enum.auto()
     gapRangeStart = enum.auto()
 
+
+# @enum.verify(enum.CONTINUOUS, enum.UNIQUE) if sys.version_info >= (3, 11) else lambda x: x
+# class indexTrack(enum.Enum):
+#     """Indices for state tracking array."""
+#     @staticmethod
+#     def _generate_next_value_(name, start, count, last_values):
+#         """0-indexed."""
+#         return (..., count)
+
+#     def __index__(self):
+#         """Adapt enum to the ultra-rare event of indexing a NumPy 'ndarray', which is not the
+#         same as `array.array`. See NumPy.org; I think it will be very popular someday."""
+#         return self.value
+
+#     leafAbove = (..., enum.auto())
+#     leafBelow = (..., enum.auto())
+#     countDimensionsGapped = (..., enum.auto())
+#     gapRangeStart = (..., enum.auto())
+
+
+
 datatypeLargeDEFAULT: Final[str] = 'int64'
 datatypeMediumDEFAULT: Final[str] = 'int16'
 datatypeSmallDEFAULT: Final[str] = 'uint8'
@@ -79,6 +99,46 @@ def make_dtype(datatype: str, datatypeModule: Optional[str] = None) -> Type[Any]
 dtypeLargeDEFAULT = make_dtype(datatypeLargeDEFAULT)
 dtypeMediumDEFAULT = make_dtype(datatypeMediumDEFAULT)
 dtypeSmallDEFAULT = make_dtype(datatypeSmallDEFAULT)
+
+hackSSOTdtype={
+    'connectionGraph': 'dtypeSmall',
+    'foldGroups': 'dtypeLarge',
+    'gapsWhere': 'dtypeSmall',
+    'gapsWherePARALLEL': 'dtypeSmall',
+    'my': 'dtypeMedium',
+    'myPARALLEL': 'dtypeMedium',
+    'track': 'dtypeMedium',
+    'trackPARALLEL': 'dtypeMedium',
+    }
+
+class ParametersNumba(TypedDict):
+    _nrt: bool
+    boundscheck: bool
+    cache: bool
+    error_model: str
+    fastmath: bool
+    forceinline: bool
+    inline: str
+    looplift: bool
+    no_cfunc_wrapper: bool
+    no_cpython_wrapper: bool
+    nopython: bool
+    parallel: bool
+
+parametersNumbaDEFAULT: Final[ParametersNumba] = {
+    '_nrt': True,
+    'boundscheck': False,
+    'cache': True,
+    'error_model': 'numpy',
+    'fastmath': True,
+    'forceinline': True,
+    'inline': 'always',
+    'looplift': False,
+    'no_cfunc_wrapper': False,
+    'no_cpython_wrapper': False,
+    'nopython': True,
+    'parallel': False,
+}
 
 try:
     _pathModule = pathlib.Path(__file__).parent

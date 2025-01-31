@@ -1,6 +1,12 @@
-from mapFolding import indexMy, indexTrack
+from mapFolding import indexMy, indexTrack, datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, make_dtype
+from typing import Any, Tuple
+from numpy import integer
 import numpy
 import numba
+
+datatypeLarge = make_dtype(datatypeLargeDEFAULT, 'numba')
+datatypeMedium = make_dtype(datatypeMediumDEFAULT, 'numba')
+datatypeSmall = make_dtype(datatypeSmallDEFAULT, 'numba')
 
 def activeGapIncrement(my):
     my[indexMy.gap1ndex.value] += 1
@@ -103,7 +109,10 @@ def placeLeafCondition(my):
 def thereAreComputationDivisionsYouMightSkip(my):
     return my[indexMy.leaf1ndex.value] != my[indexMy.taskDivisions.value] or my[indexMy.leafConnectee.value] % my[indexMy.taskDivisions.value] == my[indexMy.taskIndex.value]
 
-def countInitialize(connectionGraph, gapsWhere, my, track):
+def countInitialize(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]]
+                    , gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
+                    , my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
+                    , track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     while activeLeafGreaterThan0Condition(my=my):
         if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
             findGapsInitializeVariables(my=my, track=track)
@@ -127,7 +136,11 @@ def countInitialize(connectionGraph, gapsWhere, my, track):
         if my[indexMy.gap1ndex.value] > 0:
             return
 
-def countParallel(connectionGraph, foldGroups, gapsWherePARALLEL, myPARALLEL, trackPARALLEL):
+def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]]
+                    , foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
+                    , gapsWherePARALLEL: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
+                    , myPARALLEL: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
+                    , trackPARALLEL: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     for indexSherpa in numba.prange(myPARALLEL[indexMy.taskDivisions.value]):
         gapsWhere = gapsWherePARALLEL.copy()
         my = myPARALLEL.copy()
@@ -160,7 +173,8 @@ def countParallel(connectionGraph, foldGroups, gapsWherePARALLEL, myPARALLEL, tr
                 placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
         foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
-def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
+# @numba.jit((datatypeSmall[:,:,::1], datatypeLarge[::1], datatypeMedium[::1], datatypeSmall[::1], datatypeMedium[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)
+def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     doFindGaps = True
     groupsOfFolds: int = 0
     while activeLeafGreaterThan0Condition(my=my):
@@ -188,7 +202,7 @@ def countSequential(connectionGraph, foldGroups, gapsWhere, my, track):
             placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
     foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
-def doTheNeedful(connectionGraph, foldGroups, gapsWhere, mapShape, my, track):
+def doTheNeedful(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], mapShape: Tuple[int, ...], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     countInitialize(connectionGraph, gapsWhere, my, track)
 
     if my[indexMy.taskDivisions.value] > 0:

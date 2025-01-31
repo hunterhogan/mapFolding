@@ -1,44 +1,47 @@
-from mapFolding import indexMy, indexTrack
+import numpy
 import numba
-@numba.jit((numba.uint8[:,:,::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:,::1]), parallel=False, boundscheck=False, cache=True, error_model="numpy", fastmath=True, looplift=False, nogil=True, nopython=True)
-def countInitialize(connectionGraph, gapsWhere, my, track):
-    while my[7] > 0:
-        if my[7] <= 1 or track[1, 0] == 1:
-            my[1] = my[0]
-            my[3] = track[3, my[7] - 1]
-            my[4] = 0
-            while my[4] < my[0]:
-                if connectionGraph[my[4], my[7], my[7]] == my[7]:
-                    my[1] -= 1
+from numpy import integer
+from mapFolding import indexMy, indexTrack, datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, make_dtype
+from typing import Any, Tuple
+@numba.jit((numba.uint8[:, :, ::1], numba.uint8[::1,], numba.int16[::1,], numba.int16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
+def countInitialize(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
+    while my[indexMy.leaf1ndex.value] > 0:
+        if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
+            my[indexMy.dimensionsUnconstrained.value] = my[indexMy.dimensionsTotal.value]
+            my[indexMy.gap1ndexCeiling.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
+            my[indexMy.indexDimension.value] = 0
+            while my[indexMy.indexDimension.value] < my[indexMy.dimensionsTotal.value]:
+                if connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]] == my[indexMy.leaf1ndex.value]:
+                    my[indexMy.dimensionsUnconstrained.value] -= 1
                 else:
-                    my[8] = connectionGraph[my[4], my[7], my[7]]
-                    while my[8] != my[7]:
-                        gapsWhere[my[3]] = my[8]
-                        if track[2, my[8]] == 0:
-                            my[3] += 1
-                        track[2, my[8]] += 1
-                        my[8] = connectionGraph[my[4], my[7], track[1, my[8]]]
-                my[4] += 1
-            if not my[1]:
-                my[5] = 0
-                while my[5] < my[7]:
-                    gapsWhere[my[3]] = my[5]
-                    my[3] += 1
-                    my[5] += 1
-            my[6] = my[2]
-            while my[6] < my[3]:
-                gapsWhere[my[2]] = gapsWhere[my[6]]
-                if track[2, gapsWhere[my[6]]] == my[1]:
-                    my[2] += 1
-                track[2, gapsWhere[my[6]]] = 0
-                my[6] += 1
-        if my[7] > 0:
-            my[2] -= 1
-            track[0, my[7]] = gapsWhere[my[2]]
-            track[1, my[7]] = track[1, track[0, my[7]]]
-            track[1, track[0, my[7]]] = my[7]
-            track[0, track[1, my[7]]] = my[7]
-            track[3, my[7]] = my[2]
-            my[7] += 1
-        if my[2] > 0:
+                    my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]]
+                    while my[indexMy.leafConnectee.value] != my[indexMy.leaf1ndex.value]:
+                        gapsWhere[my[indexMy.gap1ndexCeiling.value]] = my[indexMy.leafConnectee.value]
+                        if track[indexTrack.countDimensionsGapped.value, my[indexMy.leafConnectee.value]] == 0:
+                            my[indexMy.gap1ndexCeiling.value] += 1
+                        track[indexTrack.countDimensionsGapped.value, my[indexMy.leafConnectee.value]] += 1
+                        my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], track[indexTrack.leafBelow.value, my[indexMy.leafConnectee.value]]]
+                my[indexMy.indexDimension.value] += 1
+            if not my[indexMy.dimensionsUnconstrained.value]:
+                my[indexMy.indexLeaf.value] = 0
+                while my[indexMy.indexLeaf.value] < my[indexMy.leaf1ndex.value]:
+                    gapsWhere[my[indexMy.gap1ndexCeiling.value]] = my[indexMy.indexLeaf.value]
+                    my[indexMy.gap1ndexCeiling.value] += 1
+                    my[indexMy.indexLeaf.value] += 1
+            my[indexMy.indexMiniGap.value] = my[indexMy.gap1ndex.value]
+            while my[indexMy.indexMiniGap.value] < my[indexMy.gap1ndexCeiling.value]:
+                gapsWhere[my[indexMy.gap1ndex.value]] = gapsWhere[my[indexMy.indexMiniGap.value]]
+                if track[indexTrack.countDimensionsGapped.value, gapsWhere[my[indexMy.indexMiniGap.value]]] == my[indexMy.dimensionsUnconstrained.value]:
+                    my[indexMy.gap1ndex.value] += 1
+                track[indexTrack.countDimensionsGapped.value, gapsWhere[my[indexMy.indexMiniGap.value]]] = 0
+                my[indexMy.indexMiniGap.value] += 1
+        if my[indexMy.leaf1ndex.value] > 0:
+            my[indexMy.gap1ndex.value] -= 1
+            track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]] = gapsWhere[my[indexMy.gap1ndex.value]]
+            track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]] = track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]]
+            track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]] = my[indexMy.leaf1ndex.value]
+            track[indexTrack.leafAbove.value, track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]] = my[indexMy.leaf1ndex.value]
+            track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value]] = my[indexMy.gap1ndex.value]
+            my[indexMy.leaf1ndex.value] += 1
+        if my[indexMy.gap1ndex.value] > 0:
             return

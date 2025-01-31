@@ -3,6 +3,7 @@ from mapFolding import (
     dtypeLargeDEFAULT,
     dtypeMediumDEFAULT,
     dtypeSmallDEFAULT,
+    hackSSOTdtype,
     indexMy,
     indexTrack,
     pathJobDEFAULT,
@@ -136,7 +137,7 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
 
     return taskDivisions
 
-def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> NDArray[integer[Any]]:
+def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]]:
     """
     Constructs a multi-dimensional connection graph representing the connections between the leaves of a map with the given dimensions.
     Also called a Cartesian product decomposition or dimensional product mapping.
@@ -178,7 +179,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 
     return connectionGraph
 
-def makeDataContainer(shape: Union[int, Tuple[int, ...]], datatype: Optional[DTypeLike] = None):
+def makeDataContainer(shape: Union[int, Tuple[int, ...]], datatype: Optional[DTypeLike] = None) -> NDArray[integer[Any]]:
     """Create a zeroed-out `numpy.ndarray` with the given shape and datatype.
 
     Parameters:
@@ -237,24 +238,24 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
     dtypeMedium = keywordArguments.get('dtypeMedium', dtypeMediumDEFAULT)
     dtypeSmall = keywordArguments.get('dtypeSmall', dtypeSmallDEFAULT)
 
-    my = makeDataContainer(len(indexMy), dtypeMedium)
+    my = makeDataContainer(len(indexMy), eval(hackSSOTdtype['my']))
 
     mapShape = tuple(sorted(validateListDimensions(listDimensions)))
     concurrencyLimit = setCPUlimit(CPUlimit)
     my[indexMy.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, mapShape)
 
-    foldGroups = makeDataContainer(max(my[indexMy.taskDivisions] + 1, 2), dtypeLarge)
+    foldGroups = makeDataContainer(max(my[indexMy.taskDivisions] + 1, 2), eval(hackSSOTdtype['foldGroups']))
     foldGroups[-1] = leavesTotal = getLeavesTotal(mapShape)
 
     my[indexMy.dimensionsTotal] = len(mapShape)
     my[indexMy.leaf1ndex] = 1
     stateInitialized = computationState(
-        connectionGraph = makeConnectionGraph(mapShape, datatype=dtypeSmall),
+        connectionGraph = makeConnectionGraph(mapShape, datatype=eval(hackSSOTdtype['connectionGraph'])),
         foldGroups = foldGroups,
         mapShape = mapShape,
         my = my,
-        gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, dtypeSmall),
-        track = makeDataContainer((len(indexTrack), leavesTotal + 1), dtypeMedium)
+        gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, eval(hackSSOTdtype['gapsWhere'])),
+        track = makeDataContainer((len(indexTrack), leavesTotal + 1), eval(hackSSOTdtype['track'])),
         )
 
     return stateInitialized

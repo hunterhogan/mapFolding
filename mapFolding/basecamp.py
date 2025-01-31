@@ -1,4 +1,4 @@
-from mapFolding import getDispatcherCallable, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal
+from mapFolding import getDispatcherCallable, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal, computationState
 from typing import Any, Optional, Sequence, Type, Union
 import os
 
@@ -33,7 +33,7 @@ def countFolds(listDimensions: Sequence[int], pathLikeWriteFoldsTotal: Optional[
     N.B.: You probably don't want to divide the computation into tasks.
         If you want to compute a large `foldsTotal`, dividing the computation into tasks is usually a bad idea. Dividing the algorithm into tasks is inherently inefficient: efficient division into tasks means there would be no overlap in the work performed by each task. When dividing this algorithm, the amount of overlap is between 50% and 90% by all tasks: at least 50% of the work done by every task must be done by _all_ tasks. If you improve the computation time, it will only change by -10 to -50% depending on (at the very least) the ratio of the map dimensions and the number of leaves. If an undivided computation would take 10 hours on your computer, for example, the computation will still take at least 5 hours but you might reduce the time to 9 hours. Most of the time, however, you will increase the computation time. If logicalCores >= leavesTotal, it will probably be faster. If logicalCores <= 2 * leavesTotal, it will almost certainly be slower for all map dimensions.
     """
-    stateUniversal = outfitCountFolds(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit, **keywordArguments)
+    stateUniversal: computationState = outfitCountFolds(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit, **keywordArguments)
 
     pathFilenameFoldsTotal = None
     if pathLikeWriteFoldsTotal is not None:
