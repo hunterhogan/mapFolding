@@ -1,25 +1,25 @@
+from mapFolding import indexMy, indexTrack
+import numpy
 from numpy import integer
 from typing import Any, Tuple
 import numba
-from mapFolding import indexMy, indexTrack
-import numpy
 @numba.jit((numba.uint8[:, :, ::1], numba.int64[::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=False, inline='never', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nopython=True, parallel=False)
 def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
-    doFindGaps = True
-    dimensionsTotal = my[indexMy.dimensionsTotal.value]
+    leafBelow = track[indexTrack.leafBelow.value]
+    gapRangeStart = track[indexTrack.gapRangeStart.value]
+    countDimensionsGapped = track[indexTrack.countDimensionsGapped.value]
+    leafAbove = track[indexTrack.leafAbove.value]
+    leaf1ndex = my[indexMy.leaf1ndex.value]
     dimensionsUnconstrained = my[indexMy.dimensionsUnconstrained.value]
-    gap1ndex = my[indexMy.gap1ndex.value]
+    dimensionsTotal = my[indexMy.dimensionsTotal.value]
     gap1ndexCeiling = my[indexMy.gap1ndexCeiling.value]
     indexDimension = my[indexMy.indexDimension.value]
-    indexMiniGap = my[indexMy.indexMiniGap.value]
-    leaf1ndex = my[indexMy.leaf1ndex.value]
     leafConnectee = my[indexMy.leafConnectee.value]
+    indexMiniGap = my[indexMy.indexMiniGap.value]
+    gap1ndex = my[indexMy.gap1ndex.value]
     taskIndex = my[indexMy.taskIndex.value]
-    leafAbove = track[indexTrack.leafAbove.value]
-    leafBelow = track[indexTrack.leafBelow.value]
-    countDimensionsGapped = track[indexTrack.countDimensionsGapped.value]
-    gapRangeStart = track[indexTrack.gapRangeStart.value]
     groupsOfFolds: int = 0
+    doFindGaps = True
     while leaf1ndex > 0:
         if (doFindGaps := (leaf1ndex <= 1 or leafBelow[0] == 1)) and leaf1ndex > foldGroups[-1]:
             groupsOfFolds = groupsOfFolds + 1

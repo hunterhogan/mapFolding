@@ -7,6 +7,7 @@ from mapFolding.theSSOT import (
     dtypeLargeDEFAULT,
     dtypeMediumDEFAULT,
     dtypeSmallDEFAULT,
+    EnumIndices,
     getAlgorithmCallable,
     getAlgorithmSource,
     getDispatcherCallable,

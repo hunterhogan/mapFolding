@@ -63,27 +63,6 @@ class indexTrack(EnumIndices):
     countDimensionsGapped = enum.auto()
     gapRangeStart = enum.auto()
 
-
-# @enum.verify(enum.CONTINUOUS, enum.UNIQUE) if sys.version_info >= (3, 11) else lambda x: x
-# class indexTrack(enum.Enum):
-#     """Indices for state tracking array."""
-#     @staticmethod
-#     def _generate_next_value_(name, start, count, last_values):
-#         """0-indexed."""
-#         return (..., count)
-
-#     def __index__(self):
-#         """Adapt enum to the ultra-rare event of indexing a NumPy 'ndarray', which is not the
-#         same as `array.array`. See NumPy.org; I think it will be very popular someday."""
-#         return self.value
-
-#     leafAbove = (..., enum.auto())
-#     leafBelow = (..., enum.auto())
-#     countDimensionsGapped = (..., enum.auto())
-#     gapRangeStart = (..., enum.auto())
-
-
-
 datatypeLargeDEFAULT: Final[str] = 'int64'
 datatypeMediumDEFAULT: Final[str] = 'uint8'
 datatypeSmallDEFAULT: Final[str] = 'uint8'

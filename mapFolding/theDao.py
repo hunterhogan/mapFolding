@@ -138,11 +138,11 @@ def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dty
                     , myPARALLEL: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
                     , trackPARALLEL: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     for indexSherpa in numba.prange(myPARALLEL[indexMy.taskDivisions.value]):
+        groupsOfFolds: int = 0
         gapsWhere = gapsWherePARALLEL.copy()
         my = myPARALLEL.copy()
         my[indexMy.taskIndex.value] = indexSherpa
         track = trackPARALLEL.copy()
-        groupsOfFolds: int = 0
         while activeLeafGreaterThan0Condition(my=my):
             if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
                 if activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my):
@@ -170,8 +170,8 @@ def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dty
         foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
 def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
-    doFindGaps = True
     groupsOfFolds: int = 0
+    doFindGaps = True
     while activeLeafGreaterThan0Condition(my=my):
         if ((doFindGaps := activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track))
                 and activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my)):

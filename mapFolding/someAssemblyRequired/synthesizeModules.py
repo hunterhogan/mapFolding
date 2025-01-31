@@ -1,10 +1,10 @@
 from mapFolding import indexMy, indexTrack, getAlgorithmSource, ParametersNumba, parametersNumbaDEFAULT, hackSSOTdtype
-from mapFolding import datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT
+from mapFolding import datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, EnumIndices
 import pathlib
 import inspect
 import numpy
 import numba
-from typing import Dict, Optional, List, Set, Union, Sequence
+from typing import Dict, Optional, List, Union, Sequence, Type, cast
 import ast
 
 algorithmSource = getAlgorithmSource()
@@ -15,7 +15,7 @@ class RecursiveInliner(ast.NodeTransformer):
         self.processed = set()
 
     def inlineFunctionBody(self, functionName: str) -> Optional[ast.FunctionDef]:
-        if functionName in self.processed:
+        if (functionName in self.processed):
             return None
 
         self.processed.add(functionName)
@@ -27,39 +27,38 @@ class RecursiveInliner(ast.NodeTransformer):
 
     def visit_Call(self, node: ast.Call) -> ast.AST:
         callNode = self.generic_visit(node)
-        if isinstance(callNode, ast.Call) and isinstance(callNode.func, ast.Name) and callNode.func.id in self.dictionaryFunctions:
+        if (isinstance(callNode, ast.Call) and isinstance(callNode.func, ast.Name) and callNode.func.id in self.dictionaryFunctions):
             inlineDefinition = self.inlineFunctionBody(callNode.func.id)
             if (inlineDefinition and inlineDefinition.body):
                 lastStmt = inlineDefinition.body[-1]
-                if isinstance(lastStmt, ast.Return) and lastStmt.value is not None:
+                if (isinstance(lastStmt, ast.Return) and lastStmt.value is not None):
                     return self.visit(lastStmt.value)
-                elif isinstance(lastStmt, ast.Expr) and lastStmt.value is not None:
+                elif (isinstance(lastStmt, ast.Expr) and lastStmt.value is not None):
                     return self.visit(lastStmt.value)
                 return ast.Constant(value=None)
         return callNode
 
     def visit_Expr(self, node: ast.Expr) -> Union[ast.AST, List[ast.AST]]:
-        if isinstance(node.value, ast.Call):
-            if isinstance(node.value.func, ast.Name) and node.value.func.id in self.dictionaryFunctions:
+        if (isinstance(node.value, ast.Call)):
+            if (isinstance(node.value.func, ast.Name) and node.value.func.id in self.dictionaryFunctions):
                 inlineDefinition = self.inlineFunctionBody(node.value.func.id)
-                if inlineDefinition:
+                if (inlineDefinition):
                     return [self.visit(stmt) for stmt in inlineDefinition.body]
         return self.generic_visit(node)
 
-def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False, **keywordArguments: Optional[str]):
+def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False, **keywordArguments: Optional[str]) -> ast.FunctionDef:
     def makeNumbaParameterSignatureElement(signatureElement: ast.arg):
         if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
-
             annotationShape = signatureElement.annotation.slice.elts[0]
             if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
-                shapeAsListSlices = [ast.Slice() for axis in range(len(annotationShape.slice.elts))]
+                shapeAsListSlices: Sequence[ast.expr] = [ast.Slice() for axis in range(len(annotationShape.slice.elts))]
                 shapeAsListSlices[-1] = ast.Slice(step=ast.Constant(value=1))
-                shapeAST = ast.Tuple(elts=shapeAsListSlices, ctx=ast.Load())
+                shapeAST = ast.Tuple(elts=list(shapeAsListSlices), ctx=ast.Load())
             else:
                 shapeAST = ast.Slice(step=ast.Constant(value=1))
 
             annotationDtype = signatureElement.annotation.slice.elts[1]
-            if isinstance(annotationDtype, ast.Subscript) and isinstance(annotationDtype.slice, ast.Attribute):
+            if (isinstance(annotationDtype, ast.Subscript) and isinstance(annotationDtype.slice, ast.Attribute)):
                 datatypeAST = annotationDtype.slice.attr
             else:
                 datatypeAST = None
@@ -75,10 +74,10 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
 
     # callableSourceDecorators = [decorator for decorator in callableInlined.decorator_list]
 
-    listNumbaParameterSignature: List[ast.Subscript] = []
+    listNumbaParameterSignature: Sequence[ast.expr] = []
     for parameter in astCallable.args.args:
         signatureElement = makeNumbaParameterSignatureElement(parameter)
-        if signatureElement:
+        if (signatureElement):
             listNumbaParameterSignature.append(signatureElement)
 
     astArgsNumbaSignature = ast.Tuple(elts=listNumbaParameterSignature, ctx=ast.Load())
@@ -91,53 +90,121 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
     astCallable.decorator_list = [astDecoratorNumba]
     return astCallable
 
+class UnpackArrayAccesses(ast.NodeTransformer):
+    """AST transformer that replaces array accesses with simpler variables."""
+
+    def __init__(self, enumIndexClass: Type[EnumIndices], arrayName: str):
+        self.enumIndexClass = enumIndexClass
+        self.arrayName = arrayName
+        self.substitutions = {}
+
+    def extract_member_name(self, node: ast.AST) -> Optional[str]:
+        """Recursively extract enum member name from any node in the AST."""
+        if isinstance(node, ast.Attribute) and node.attr == 'value':
+            innerAttribute = node.value
+            while isinstance(innerAttribute, ast.Attribute):
+                if (isinstance(innerAttribute.value, ast.Name) and innerAttribute.value.id == self.enumIndexClass.__name__):
+                    return innerAttribute.attr
+                innerAttribute = innerAttribute.value
+        return None
+
+    def transform_slice_element(self, node: ast.AST) -> ast.AST:
+        """Transform any enum references within a slice element."""
+        if isinstance(node, ast.Subscript):
+            if isinstance(node.slice, ast.Attribute):
+                member_name = self.extract_member_name(node.slice)
+                if member_name:
+                    return ast.Name(id=member_name, ctx=node.ctx)
+            elif isinstance(node, ast.Tuple):
+                # Handle tuple slices by transforming each element
+                return ast.Tuple(
+                    elts=cast(List[ast.expr], [self.transform_slice_element(elt) for elt in node.elts]),
+                    ctx=node.ctx
+                )
+        elif isinstance(node, ast.Attribute):
+            member_name = self.extract_member_name(node)
+            if member_name:
+                return ast.Name(id=member_name, ctx=ast.Load())
+        return node
+
+    def visit_Subscript(self, node: ast.Subscript) -> ast.AST:
+        # Recursively visit any nested subscripts in value or slice
+        node.value = self.visit(node.value)
+        node.slice = self.visit(node.slice)
+
+        # If node.value is not our arrayName, just return node
+        if not (isinstance(node.value, ast.Name) and node.value.id == self.arrayName):
+            return node
+
+        # Handle scalar array access
+        if isinstance(node.slice, ast.Attribute):
+            memberName = self.extract_member_name(node.slice)
+            if memberName:
+                self.substitutions[memberName] = ('scalar', node)
+                return ast.Name(id=memberName, ctx=ast.Load())
+
+        # Handle array slice access
+        if isinstance(node.slice, ast.Tuple) and node.slice.elts:
+            firstElement = node.slice.elts[0]
+            memberName = self.extract_member_name(firstElement)
+            sliceRemainder = [self.visit(elem) for elem in node.slice.elts[1:]]
+            if memberName:
+                self.substitutions[memberName] = ('array', node)
+                if len(sliceRemainder) == 0:
+                    return ast.Name(id=memberName, ctx=ast.Load())
+                return ast.Subscript(
+                    value=ast.Name(id=memberName, ctx=ast.Load()),
+                    slice=ast.Tuple(elts=sliceRemainder, ctx=ast.Load()) if len(sliceRemainder) > 1 else sliceRemainder[0],
+                    ctx=ast.Load()
+                )
+
+        # If single-element tuple, unwrap
+        if isinstance(node.slice, ast.Tuple) and len(node.slice.elts) == 1:
+            node.slice = node.slice.elts[0]
+
+        return node
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
+        node = cast(ast.FunctionDef, self.generic_visit(node))
+
+        initializations = []
+        for name, (kind, original_node) in self.substitutions.items():
+            if kind == 'scalar':
+                initializations.append(
+                    ast.Assign(
+                        targets=[ast.Name(id=name, ctx=ast.Store())],
+                        value=original_node
+                    )
+                )
+            else:  # array
+                initializations.append(
+                    ast.Assign(
+                        targets=[ast.Name(id=name, ctx=ast.Store())],
+                        value=ast.Subscript(
+                            value=ast.Name(id=self.arrayName, ctx=ast.Load()),
+                            slice=ast.Attribute(
+                                value=ast.Attribute(
+                                    value=ast.Name(id=self.enumIndexClass.__name__, ctx=ast.Load()),
+                                    attr=name,
+                                    ctx=ast.Load()
+                                ),
+                                attr='value',
+                                ctx=ast.Load()
+                            ),
+                            ctx=ast.Load()
+                        )
+                    )
+                )
+
+        node.body = initializations + node.body
+        return node
+
 def getDictionaryEnumValues() -> Dict[str, int]:
     dictionaryEnumValues = {}
     for enumIndex in [indexMy, indexTrack]:
         for memberName, memberValue in enumIndex._member_map_.items():
             dictionaryEnumValues[f"{enumIndex.__name__}.{memberName}.value"] = memberValue.value
     return dictionaryEnumValues
-
-def unpackArrays(codeInlined: str) -> str:
-    dictionaryReplaceScalars = {
-        'my[indexMy.dimensionsTotal.value]': 'dimensionsTotal',
-        'my[indexMy.dimensionsUnconstrained.value]': 'dimensionsUnconstrained',
-        'my[indexMy.gap1ndex.value]': 'gap1ndex',
-        'my[indexMy.gap1ndexCeiling.value]': 'gap1ndexCeiling',
-        'my[indexMy.indexDimension.value]': 'indexDimension',
-        # 'my[indexMy.indexLeaf.value]': 'indexLeaf',
-        'my[indexMy.indexMiniGap.value]': 'indexMiniGap',
-        'my[indexMy.leaf1ndex.value]': 'leaf1ndex',
-        'my[indexMy.leafConnectee.value]': 'leafConnectee',
-        # 'my[indexMy.taskDivisions.value]': 'taskDivisions',
-        'my[indexMy.taskIndex.value]': 'taskIndex',
-        # 'foldGroups[-1]': 'leavesTotal',
-    }
-
-    dictionaryReplaceArrays = {
-        "track[indexTrack.leafAbove.value, ": 'leafAbove[',
-        "track[indexTrack.leafBelow.value, ": 'leafBelow[',
-        'track[indexTrack.countDimensionsGapped.value, ': 'countDimensionsGapped[',
-        'track[indexTrack.gapRangeStart.value, ': 'gapRangeStart[',
-    }
-
-    ImaIndent = "    "
-    linesInitialize = """"""
-
-    for find, replace in dictionaryReplaceScalars.items():
-        linesInitialize += f"{ImaIndent}{replace} = {find}\n"
-        codeInlined = codeInlined.replace(find, replace)
-
-    for find, replace in dictionaryReplaceArrays.items():
-        linesInitialize += f"{ImaIndent}{replace[0:-1]} = {find[0:-2]}]\n"
-        codeInlined = codeInlined.replace(find, replace)
-
-    ourGuyOnTheInside = "    doFindGaps = True\n"
-    linesInitialize = ourGuyOnTheInside + linesInitialize
-
-    codeInlined = codeInlined.replace(ourGuyOnTheInside, linesInitialize)
-
-    return codeInlined
 
 def inlineMapFoldingNumba(**keywordArguments: Optional[str]):
     dictionaryEnumValues = getDictionaryEnumValues()
@@ -157,13 +224,20 @@ def inlineMapFoldingNumba(**keywordArguments: Optional[str]):
             ast.fix_missing_locations(callableInlined)
             callableDecorated = decorateCallableWithNumba(callableInlined, parallel, **keywordArguments)
 
-            importsRequired = "\n".join([ast.unparse(importStatement) for importStatement in codeSourceImportStatements])
+            if callableTarget == 'countSequential':
+                myUnpacker = UnpackArrayAccesses(indexMy, 'my')
+                callableDecorated = cast(ast.FunctionDef, myUnpacker.visit(callableDecorated))
+                ast.fix_missing_locations(callableDecorated)
+
+                trackUnpacker = UnpackArrayAccesses(indexTrack, 'track')
+                callableDecorated = cast(ast.FunctionDef, trackUnpacker.visit(callableDecorated))
+                ast.fix_missing_locations(callableDecorated)
+
             callableInlined = ast.unparse(callableDecorated)
-            codeUnpacked = unpackArrays(callableInlined) if callableTarget == 'countSequential' else callableInlined
-            # inlinedCode = ast.unparse(ast.Module(body=[nodeInlined], type_ignores=[]))
+            importsRequired = "\n".join([ast.unparse(importStatement) for importStatement in codeSourceImportStatements])
 
             pathFilenameDestination = pathFilenameAlgorithm.parent / "syntheticModules" / pathFilenameAlgorithm.with_stem(callableTarget).name
-            pathFilenameDestination.write_text(importsRequired + "\n" + codeUnpacked)
+            pathFilenameDestination.write_text(importsRequired + "\n" + callableInlined)
             listPathFilenamesDestination.append(pathFilenameDestination)
 
 if __name__ == '__main__':
