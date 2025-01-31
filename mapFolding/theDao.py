@@ -56,9 +56,6 @@ def findGapsInitializeVariables(my, track):
     my[indexMy.gap1ndexCeiling.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
     my[indexMy.indexDimension.value] = 0
 
-def foldsSubTotalIncrement(groupsOfFolds):
-    return groupsOfFolds + 1
-
 def indexMiniGapIncrement(my):
     my[indexMy.indexMiniGap.value] += 1
 
@@ -146,7 +143,7 @@ def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dty
         while activeLeafGreaterThan0Condition(my=my):
             if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
                 if activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my):
-                    groupsOfFolds = foldsSubTotalIncrement(groupsOfFolds=groupsOfFolds)
+                    groupsOfFolds += 1
                 else:
                     findGapsInitializeVariables(my=my, track=track)
                     while loopingTheDimensions(my=my):
@@ -175,7 +172,7 @@ def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.d
     while activeLeafGreaterThan0Condition(my=my):
         if ((doFindGaps := activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track))
                 and activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my)):
-            groupsOfFolds = foldsSubTotalIncrement(groupsOfFolds=groupsOfFolds)
+            groupsOfFolds += 1
         elif doFindGaps:
             findGapsInitializeVariables(my=my, track=track)
             while loopingTheDimensions(my=my):

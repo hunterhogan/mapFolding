@@ -14,7 +14,7 @@ def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dty
         while my[indexMy.leaf1ndex.value] > 0:
             if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
                 if my[indexMy.leaf1ndex.value] > foldGroups[-1]:
-                    groupsOfFolds = groupsOfFolds + 1
+                    groupsOfFolds += 1
                 else:
                     my[indexMy.dimensionsUnconstrained.value] = my[indexMy.dimensionsTotal.value]
                     my[indexMy.gap1ndexCeiling.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]

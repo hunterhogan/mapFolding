@@ -1,8 +1,8 @@
-from mapFolding import indexMy, indexTrack
-import numpy
 from numpy import integer
 from typing import Any, Tuple
 import numba
+from mapFolding import indexMy, indexTrack
+import numpy
 @numba.jit((numba.uint8[:, :, ::1], numba.int64[::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=False, inline='never', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nopython=True, parallel=False)
 def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     leafBelow = track[indexTrack.leafBelow.value]
@@ -22,7 +22,7 @@ def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.d
     doFindGaps = True
     while leaf1ndex > 0:
         if (doFindGaps := (leaf1ndex <= 1 or leafBelow[0] == 1)) and leaf1ndex > foldGroups[-1]:
-            groupsOfFolds = groupsOfFolds + 1
+            groupsOfFolds += 1
         elif doFindGaps:
             dimensionsUnconstrained = dimensionsTotal
             gap1ndexCeiling = gapRangeStart[leaf1ndex - 1]
