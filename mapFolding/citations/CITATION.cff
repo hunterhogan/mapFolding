@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+title: mapFolding
+message: >-
+  If you use this software, you can cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Hunter
+    family-names: Hogan
+    email: HunterHogan@protonmail.com
+identifiers:
+  - type: url
+    value: >-
+      https://github.com/hunterhogan/mapFolding/releases/tag/0.3.2
+    description: The URL for mapFolding 0.3.2.
+repository-code: 'https://github.com/hunterhogan/mapFolding'
+abstract: >-
+  Algorithm(s) for counting distinct ways to fold a map (or
+  a strip of stamps). This repository, mapFolding, explores
+  the mathematical and algorithmic challenges of efficiently
+  modeling, simulating, and solving problems related to
+  folding maps. The project implements innovative
+  computational approaches to the geometry and combinatorics
+  of map folding, with applications to both theoretical
+  mathematics and real-world challenges in optimization and
+  design. The repository includes detailed notes on the
+  problem space, comprehensive documentation of the
+  implemented algorithms, and resources for further research
+  and experimentation.
+keywords:
+  - OEIS
+  - map folding
+  - stamp folding
+license: CC-BY-NC-4.0
+commit: aacb0a7950fb3ede656ba3afe45875658f6c4014
+version: 0.3.2
+date-released: '2025-01-30'

@@ -1,5 +1,5 @@
 from mapFolding import datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT
-from typing import Dict, Optional, List, Set, Tuple, Any, Union
+from typing import Dict, Optional, List, Set, Union
 import ast
 
 class RecursiveInlinerWithEnum(ast.NodeTransformer):

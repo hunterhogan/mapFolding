@@ -15,8 +15,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering :: Mathematics",
-    "Typing :: Typed",
-]
+    "Typing :: Typed",]
 dependencies = ["numba", "numpy", "Z0Z_tools"]
 description = "Count distinct ways to fold a map (or a strip of stamps)"
 keywords = [
@@ -28,8 +27,7 @@ keywords = [
     "folding",
     "map folding",
     "OEIS",
-    "stamp folding",
-]
+    "stamp folding",]
 license = { text = "CC-BY-NC-4.0" }
 name = "mapFolding"
 optional-dependencies = { benchmark = [
@@ -38,13 +36,14 @@ optional-dependencies = { benchmark = [
     "pandas",
     "tqdm",
 ], testing = [
+    "cffconvert",
     "more_itertools",
     "pytest",
     "pytest-cov",
     "pytest-env",
     "pytest-xdist",
     "python_minifier",
-] }
+    "tomli",] }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10,<3.14"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
@@ -65,8 +64,7 @@ run = { branch = true, concurrency = [
     "mapFolding/someAssemblyRequired/*",
     "Z0Z_*",
 ], parallel = true, source = [
-    "mapFolding",
-] }
+    "mapFolding",] }
 xml = { output = "tests/coverage/coverage.xml" }
 
 [tool.pytest.ini_options]
