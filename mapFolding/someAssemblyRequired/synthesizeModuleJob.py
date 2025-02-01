@@ -68,8 +68,8 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
     ImaIndent = '    '
     linesDataDynamic = """"""
     linesDataDynamic = "\n".join([linesDataDynamic
-            , ImaIndent + f"foldsTotal = numba.types.{datatypeLarge}(0)"
-            , ImaIndent + makeStrRLEcompacted(stateJob['foldGroups'], 'foldGroups')
+            # , ImaIndent + f"foldsTotal = numba.types.{datatypeLarge}(0)"
+            # , ImaIndent + makeStrRLEcompacted(stateJob['foldGroups'], 'foldGroups')
             , ImaIndent + makeStrRLEcompacted(stateJob['gapsWhere'], 'gapsWhere')
             ])
 
@@ -92,10 +92,14 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
                                 , linesDataDynamic
                                 , linesDataStatic
                                 ])
+        elif 'taskIndex' in lineSource:
+            continue
         elif 'my[indexMy.' in lineSource:
+            if 'dimensionsTotal' in lineSource:
+                continue
             # leaf1ndex = my[indexMy.leaf1ndex.value]
             identifier, statement = lineSource.split('=')
-            lineSource = ImaIndent + identifier.strip() + '=' + str(eval(statement.strip()))
+            lineSource = ImaIndent + identifier.strip() + f"=numba.types.{datatypeSmall}({str(eval(statement.strip()))})"
         elif 'track[indexTrack.' in lineSource:
             # leafAbove = track[indexTrack.leafAbove.value]
             identifier, statement = lineSource.split('=')
@@ -119,11 +123,11 @@ if __name__ == '__main__':
 
     linesWriteFoldsTotal = """"""
     linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
-                                    , "    foldsTotal = foldGroups[0:-1].sum() * foldGroups[-1]"
-                                    , "    print(foldsTotal)"
+                                    , f"    groupsOfFolds *= {str(stateJob['foldGroups'][-1])}"
+                                    , "    print(groupsOfFolds)"
                                     , "    with numba.objmode():"
-                                    , f"        open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(foldsTotal))"
-                                    , "    return foldsTotal"
+                                    , f"        open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(groupsOfFolds))"
+                                    , "    return groupsOfFolds"
                                     ])
 
     linesAll = "\n".join([

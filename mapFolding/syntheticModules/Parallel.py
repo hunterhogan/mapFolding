@@ -7,12 +7,12 @@ import numpy
 @numba.jit((numba.uint8[:, :, ::1], numba.int64[::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=False, inline='never', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nopython=True, parallel=True)
 def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWherePARALLEL: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], myPARALLEL: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], trackPARALLEL: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     for indexSherpa in numba.prange(myPARALLEL[indexMy.taskDivisions.value]):
-        groupsOfFolds: int = 0
+        groupsOfFolds = numba.types.int64(0)
         gapsWhere = gapsWherePARALLEL.copy()
         my = myPARALLEL.copy()
         my[indexMy.taskIndex.value] = indexSherpa
         track = trackPARALLEL.copy()
-        while my[indexMy.leaf1ndex.value] > 0:
+        while my[indexMy.leaf1ndex.value]:
             if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
                 if my[indexMy.leaf1ndex.value] > foldGroups[-1]:
                     groupsOfFolds += 1
@@ -40,11 +40,11 @@ def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dty
                             my[indexMy.gap1ndex.value] += 1
                         track[indexTrack.countDimensionsGapped.value, gapsWhere[my[indexMy.indexMiniGap.value]]] = 0
                         my[indexMy.indexMiniGap.value] += 1
-            while my[indexMy.leaf1ndex.value] > 0 and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]:
+            while my[indexMy.leaf1ndex.value] and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]:
                 my[indexMy.leaf1ndex.value] -= 1
                 track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]
                 track[indexTrack.leafAbove.value, track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]
-            if my[indexMy.leaf1ndex.value] > 0:
+            if my[indexMy.leaf1ndex.value]:
                 my[indexMy.gap1ndex.value] -= 1
                 track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]] = gapsWhere[my[indexMy.gap1ndex.value]]
                 track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]] = track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]]

@@ -8,7 +8,7 @@ def activeGapIncrement(my):
     my[indexMy.gap1ndex.value] += 1
 
 def activeLeafGreaterThan0Condition(my):
-    return my[indexMy.leaf1ndex.value] > 0
+    return my[indexMy.leaf1ndex.value] #> 0
 
 def activeLeafGreaterThanLeavesTotalCondition(foldGroups, my):
     return my[indexMy.leaf1ndex.value] > foldGroups[-1]
@@ -25,7 +25,8 @@ def backtrack(my, track):
     track[indexTrack.leafAbove.value, track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]
 
 def backtrackCondition(my, track):
-    return my[indexMy.leaf1ndex.value] > 0 and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
+    return my[indexMy.leaf1ndex.value] and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
+    # return my[indexMy.leaf1ndex.value] > 0 and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
 
 def gap1ndexCeilingIncrement(my):
     my[indexMy.gap1ndexCeiling.value] += 1
@@ -97,7 +98,7 @@ def placeLeaf(gapsWhere, my, track):
     my[indexMy.leaf1ndex.value] += 1
 
 def placeLeafCondition(my):
-    return my[indexMy.leaf1ndex.value] > 0
+    return my[indexMy.leaf1ndex.value] #> 0
 
 def thereAreComputationDivisionsYouMightSkip(my):
     return my[indexMy.leaf1ndex.value] != my[indexMy.taskDivisions.value] or my[indexMy.leafConnectee.value] % my[indexMy.taskDivisions.value] == my[indexMy.taskIndex.value]
@@ -135,7 +136,7 @@ def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dty
                     , myPARALLEL: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
                     , trackPARALLEL: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
     for indexSherpa in numba.prange(myPARALLEL[indexMy.taskDivisions.value]):
-        groupsOfFolds: int = 0
+        groupsOfFolds = numba.types.int64(0)
         gapsWhere = gapsWherePARALLEL.copy()
         my = myPARALLEL.copy()
         my[indexMy.taskIndex.value] = indexSherpa
@@ -167,7 +168,7 @@ def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dty
         foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
 def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
-    groupsOfFolds: int = 0
+    groupsOfFolds = numba.types.int64(0)
     doFindGaps = True
     while activeLeafGreaterThan0Condition(my=my):
         if ((doFindGaps := activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track))

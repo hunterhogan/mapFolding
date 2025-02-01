@@ -1,6 +1,6 @@
 from numpy import integer
-from typing import Any, Tuple
 import numba
+from typing import Any, Tuple
 from mapFolding import indexMy, indexTrack
 import numpy
 
@@ -19,9 +19,9 @@ def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.d
     indexMiniGap = my[indexMy.indexMiniGap.value]
     gap1ndex = my[indexMy.gap1ndex.value]
     taskIndex = my[indexMy.taskIndex.value]
-    groupsOfFolds: int = 0
+    groupsOfFolds = numba.types.int64(0)
     doFindGaps = True
-    while leaf1ndex > 0:
+    while leaf1ndex:
         if (doFindGaps := (leaf1ndex <= 1 or leafBelow[0] == 1)) and leaf1ndex > foldGroups[-1]:
             groupsOfFolds += 1
         elif doFindGaps:
@@ -47,11 +47,11 @@ def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.d
                     gap1ndex += 1
                 countDimensionsGapped[gapsWhere[indexMiniGap]] = 0
                 indexMiniGap += 1
-        while leaf1ndex > 0 and gap1ndex == gapRangeStart[leaf1ndex - 1]:
+        while leaf1ndex and gap1ndex == gapRangeStart[leaf1ndex - 1]:
             leaf1ndex -= 1
             leafBelow[leafAbove[leaf1ndex]] = leafBelow[leaf1ndex]
             leafAbove[leafBelow[leaf1ndex]] = leafAbove[leaf1ndex]
-        if leaf1ndex > 0:
+        if leaf1ndex:
             gap1ndex -= 1
             leafAbove[leaf1ndex] = gapsWhere[gap1ndex]
             leafBelow[leaf1ndex] = leafBelow[leafAbove[leaf1ndex]]

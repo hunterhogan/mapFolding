@@ -1,12 +1,12 @@
-import numpy
-from typing import Any, Tuple
-from mapFolding import indexMy, indexTrack
 import numba
 from numpy import integer
+from mapFolding import indexMy, indexTrack
+import numpy
+from typing import Any, Tuple
 
 @numba.jit((numba.uint8[:, :, ::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:, ::1]))
 def countInitialize(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
-    while my[indexMy.leaf1ndex.value] > 0:
+    while my[indexMy.leaf1ndex.value]:
         if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
             my[indexMy.dimensionsUnconstrained.value] = my[indexMy.dimensionsTotal.value]
             my[indexMy.gap1ndexCeiling.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
@@ -36,7 +36,7 @@ def countInitialize(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.d
                     my[indexMy.gap1ndex.value] += 1
                 track[indexTrack.countDimensionsGapped.value, gapsWhere[my[indexMy.indexMiniGap.value]]] = 0
                 my[indexMy.indexMiniGap.value] += 1
-        if my[indexMy.leaf1ndex.value] > 0:
+        if my[indexMy.leaf1ndex.value]:
             my[indexMy.gap1ndex.value] -= 1
             track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]] = gapsWhere[my[indexMy.gap1ndex.value]]
             track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]] = track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]]
