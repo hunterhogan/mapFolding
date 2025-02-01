@@ -1,63 +1,16 @@
-from mapFolding import getPathFilenameFoldsTotal
+from mapFolding import getPathFilenameFoldsTotal, indexMy, indexTrack
 from mapFolding import make_dtype, datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, datatypeModuleDEFAULT
-from mapFolding import computationState, indexMy, indexTrack
 from someAssemblyRequired import makeStateJob
-from typing import Any, Dict, Optional
-import more_itertools
-import inspect
+from typing import Optional
 import importlib
 import importlib.util
+import inspect
+import more_itertools
 import numpy
 import pathlib
-import ast
-import pickle
 import python_minifier
 
 identifierCallableLaunch = "goGoGadgetAbsurdity"
-
-class EmbedData(ast.NodeTransformer):
-    def __init__(self, callableParsed: ast.FunctionDef, dataSource: Dict[str, Any] | computationState):
-        self.callableParsed = callableParsed
-        self.dataSource = dataSource
-
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
-        if node != self.callableParsed:
-            return node
-
-        # Create initializations for embedded data
-        initializations: list[ast.Assign] = []
-        parameterNames = []
-        remainingParameters = []
-
-        # Process parameters
-        for parameter in node.args.args:
-            if parameter.arg in self.dataSource:
-                # Create assignment statement
-                initializations.append(
-                    ast.Assign(
-                        targets=[ast.Name(id=parameter.arg, ctx=ast.Store())],
-                        value=ast.Constant(value=self.dataSource[parameter.arg])
-                    )
-                )
-                parameterNames.append(parameter.arg)
-            else:
-                remainingParameters.append(parameter)
-
-        # Update function parameters
-        node.args.args = remainingParameters
-
-        # Insert initializations at the start of function body
-        node.body = initializations + node.body
-
-        return node
-
-def getDictionaryEnumValues() -> Dict[str, int]:
-    dictionaryEnumValues = {}
-    for enumIndex in [indexMy, indexTrack]:
-        for memberName, memberValue in enumIndex._member_map_.items():
-            dictionaryEnumValues[f"{enumIndex.__name__}.{memberName}.value"] = memberValue.value
-    return dictionaryEnumValues
-dictionaryEnumValues = getDictionaryEnumValues()
 
 def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: str) -> str:
     def process_nested_array(arraySlice):
@@ -97,42 +50,15 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
     dtypeMedium = make_dtype(datatypeMedium, datatypeModule) # type: ignore
     dtypeSmall = make_dtype(datatypeSmall, datatypeModule) # type: ignore
 
-    pathFilenameJob = makeStateJob(listDimensions, dtypeLarge = dtypeLarge, dtypeMedium = dtypeMedium, dtypeSmall = dtypeSmall)
-    stateJob: computationState = pickle.loads(pathFilenameJob.read_bytes())
-    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'], pathFilenameJob.parent)
+    stateJob = makeStateJob(listDimensions, writeJob=False, dtypeLarge = dtypeLarge, dtypeMedium = dtypeMedium, dtypeSmall = dtypeSmall)
+    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
 
-    # from syntheticModules import countSequential
-    import mapFolding.syntheticModules.countSequential
-    algorithmSource = mapFolding.syntheticModules.countSequential
+    from syntheticModules import countSequential
+    algorithmSource = countSequential
     codeSource = inspect.getsource(algorithmSource)
-    codeParsed: ast.Module = ast.parse(codeSource, type_comments=True)
-    codeSourceImportStatements = {statement for statement in codeParsed.body if isinstance(statement, (ast.Import, ast.ImportFrom))}
-    callableParsed: ast.FunctionDef = [statement for statement in codeParsed.body if isinstance(statement, ast.FunctionDef) and algorithmSource.__name__ == statement.name][0]
-    callableParsedDecorators = [decorator for decorator in callableParsed.decorator_list]
-    # callableParsed.decorator_list = []
-    # dataEmbedder = EmbedData(callableParsed, stateJob)
-    # callableParsed = dataEmbedder.visit(callableParsed)
-    # codeSource = ast.unparse(callableParsed)
 
-    # forceinline=True might actually be useful
-    parametersNumba = f"numba.types.{datatypeLarge}(), \
-cache=True, \
-nopython=True, \
-fastmath=True, \
-forceinline=True, \
-inline='always', \
-looplift=False, \
-_nrt=True, \
-error_model='numpy', \
-parallel=False, \
-boundscheck=False, \
-no_cfunc_wrapper=False, \
-no_cpython_wrapper=False, \
-"
-# no_cfunc_wrapper=True, \
-# no_cpython_wrapper=True, \
-
-    lineNumba = f"@numba.jit({parametersNumba})"
+    if datatypeLarge:
+        lineNumba = f"@numba.jit(numba.types.{datatypeLarge}(), cache=True, nopython=True, fastmath=True, forceinline=True, inline='always', looplift=False, _nrt=True, error_model='numpy', parallel=False, boundscheck=False, no_cfunc_wrapper=True, no_cpython_wrapper=False)"
 
     linesImport = "\n".join([
                         "import numpy"
@@ -156,8 +82,7 @@ no_cpython_wrapper=False, \
     track = stateJob['track']
     linesAlgorithm = """"""
     for lineSource in codeSource.splitlines():
-        # if lineSource.startswith(('#', 'import', 'from', '@numba.jit')):
-        if lineSource.startswith(('#')):
+        if lineSource.startswith(('#', 'import', 'from', '@numba.jit')):
             continue
         elif not lineSource:
             continue
@@ -175,6 +100,10 @@ no_cpython_wrapper=False, \
             # leafAbove = track[indexTrack.leafAbove.value]
             identifier, statement = lineSource.split('=')
             lineSource = ImaIndent + makeStrRLEcompacted(eval(statement.strip()), identifier.strip())
+        elif 'foldGroups[-1]' in lineSource:
+            lineSource = lineSource.replace('foldGroups[-1]', str(stateJob['foldGroups'][-1]))
+        elif 'dimensionsTotal' in lineSource:
+            lineSource = lineSource.replace('dimensionsTotal', str(stateJob['my'][indexMy.dimensionsTotal]))
 
         linesAlgorithm = "\n".join([linesAlgorithm
                             , lineSource
@@ -204,22 +133,21 @@ if __name__ == '__main__':
                         , linesLaunch
                         ])
 
-    pathFilenameDestination = pathFilenameFoldsTotal.with_stem(pathFilenameFoldsTotal.parent.name).with_suffix(".py")
+    pathFilenameDestination = pathFilenameFoldsTotal.with_suffix(".py")
     pathFilenameDestination.write_text(linesAll)
 
     return pathFilenameDestination
 
 if __name__ == '__main__':
-    listDimensions = [4,4]
+    listDimensions = [6,6]
     datatypeLarge = 'int64'
     datatypeMedium = 'uint8'
     datatypeSmall = datatypeMedium
     pathFilenameModule = writeModuleWithNumba(listDimensions, datatypeLarge=datatypeLarge, datatypeMedium=datatypeMedium, datatypeSmall=datatypeSmall)
+
     # Induce numba.jit compilation
     moduleSpec = importlib.util.spec_from_file_location(pathFilenameModule.stem, pathFilenameModule)
-    if moduleSpec is None:
-        raise ImportError(f"Could not load module specification from {pathFilenameModule}")
+    if moduleSpec is None: raise ImportError(f"Could not load module specification from {pathFilenameModule}")
     module = importlib.util.module_from_spec(moduleSpec)
-    if moduleSpec.loader is None:
-        raise ImportError(f"Could not load module from {moduleSpec}")
+    if moduleSpec.loader is None: raise ImportError(f"Could not load module from {moduleSpec}")
     moduleSpec.loader.exec_module(module)

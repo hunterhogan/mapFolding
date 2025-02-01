@@ -1,15 +1,28 @@
-from mapFolding import getPathFilenameFoldsTotal
+from mapFolding import getPathFilenameFoldsTotal, computationState
 from mapFolding import outfitCountFolds
-from typing import Any, Optional, Sequence, Type
+from typing import Any, Literal, Optional, Sequence, Type, overload
 import pathlib
 import pickle
 
-def makeStateJob(listDimensions: Sequence[int], **keywordArguments: Optional[Type[Any]]) -> pathlib.Path:
+@overload
+def makeStateJob(listDimensions: Sequence[int], writeJob: Literal[True] = True
+                 , **keywordArguments: Optional[Type[Any]]) -> pathlib.Path:
+    ...
 
-    stateUniversal = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
+@overload
+def makeStateJob(listDimensions: Sequence[int], writeJob: Literal[False] = False
+                 , **keywordArguments: Optional[Type[Any]]) -> computationState:
+    ...
 
-    from syntheticModules import countInitialize
+def makeStateJob(listDimensions: Sequence[int], writeJob: bool = True, **keywordArguments: Optional[Type[Any]]) -> computationState | pathlib.Path:
+
+    stateUniversal: computationState = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
+
+    from mapFolding.syntheticModules import countInitialize
     countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
+
+    if not writeJob:
+        return stateUniversal
 
     pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
     suffix = pathFilenameChopChop.suffix

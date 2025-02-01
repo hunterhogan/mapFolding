@@ -1,7 +1,7 @@
 import numpy
-import numba
 from typing import Any, Tuple
 from mapFolding import indexMy, indexTrack
+import numba
 from numpy import integer
 
 @numba.jit((numba.uint8[:, :, ::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:, ::1]))
