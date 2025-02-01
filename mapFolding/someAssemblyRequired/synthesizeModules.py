@@ -82,7 +82,10 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
 
     astArgsNumbaSignature = ast.Tuple(elts=listNumbaParameterSignature, ctx=ast.Load())
 
-    parametersNumba = parametersNumbaDEFAULT if not parallel else ParametersNumba({**parametersNumbaDEFAULT, 'parallel': True})
+    if astCallable.name == 'countInitialize':
+        parametersNumba = {}
+    else:
+        parametersNumba = parametersNumbaDEFAULT if not parallel else ParametersNumba({**parametersNumbaDEFAULT, 'parallel': True})
     listKeywordsNumbaSignature = [ast.keyword(arg=parameterName, value=ast.Constant(value=parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
     astDecoratorNumba = ast.Call(func=ast.Attribute(value=ast.Name(id='numba', ctx=ast.Load()), attr='jit', ctx=ast.Load()), args=[astArgsNumbaSignature], keywords=listKeywordsNumbaSignature)
@@ -205,7 +208,7 @@ def inlineMapFoldingNumba(**keywordArguments: Optional[str]):
             ast.fix_missing_locations(moduleAST)
             moduleSource = ast.unparse(moduleAST)
 
-            pathFilenameDestination = pathFilenameAlgorithm.parent / "syntheticModules" / pathFilenameAlgorithm.with_stem(callableTarget).name
+            pathFilenameDestination = pathFilenameAlgorithm.parent / "syntheticModules" / pathFilenameAlgorithm.with_stem(callableTarget).name[5:None]
             pathFilenameDestination.write_text(moduleSource)
             listPathFilenamesDestination.append(pathFilenameDestination)
 

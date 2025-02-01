@@ -246,7 +246,8 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
     my[indexMy.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, mapShape)
 
     foldGroups = makeDataContainer(max(my[indexMy.taskDivisions] + 1, 2), eval(hackSSOTdtype['foldGroups']))
-    foldGroups[-1] = leavesTotal = getLeavesTotal(mapShape)
+    leavesTotal = getLeavesTotal(mapShape)
+    foldGroups[-1] = leavesTotal
 
     my[indexMy.dimensionsTotal] = len(mapShape)
     my[indexMy.leaf1ndex] = 1
