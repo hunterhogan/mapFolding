@@ -117,10 +117,7 @@ class UnpackArrayAccesses(ast.NodeTransformer):
                     return ast.Name(id=member_name, ctx=node.ctx)
             elif isinstance(node, ast.Tuple):
                 # Handle tuple slices by transforming each element
-                return ast.Tuple(
-                    elts=cast(List[ast.expr], [self.transform_slice_element(elt) for elt in node.elts]),
-                    ctx=node.ctx
-                )
+                return ast.Tuple(elts=cast(List[ast.expr], [self.transform_slice_element(elt) for elt in node.elts]), ctx=node.ctx)
         elif isinstance(node, ast.Attribute):
             member_name = self.extract_member_name(node)
             if member_name:
@@ -131,7 +128,6 @@ class UnpackArrayAccesses(ast.NodeTransformer):
         # Recursively visit any nested subscripts in value or slice
         node.value = self.visit(node.value)
         node.slice = self.visit(node.slice)
-
         # If node.value is not our arrayName, just return node
         if not (isinstance(node.value, ast.Name) and node.value.id == self.arrayName):
             return node
@@ -152,11 +148,7 @@ class UnpackArrayAccesses(ast.NodeTransformer):
                 self.substitutions[memberName] = ('array', node)
                 if len(sliceRemainder) == 0:
                     return ast.Name(id=memberName, ctx=ast.Load())
-                return ast.Subscript(
-                    value=ast.Name(id=memberName, ctx=ast.Load()),
-                    slice=ast.Tuple(elts=sliceRemainder, ctx=ast.Load()) if len(sliceRemainder) > 1 else sliceRemainder[0],
-                    ctx=ast.Load()
-                )
+                return ast.Subscript(value=ast.Name(id=memberName, ctx=ast.Load()), slice=ast.Tuple(elts=sliceRemainder, ctx=ast.Load()) if len(sliceRemainder) > 1 else sliceRemainder[0], ctx=ast.Load())
 
         # If single-element tuple, unwrap
         if isinstance(node.slice, ast.Tuple) and len(node.slice.elts) == 1:
@@ -170,44 +162,20 @@ class UnpackArrayAccesses(ast.NodeTransformer):
         initializations = []
         for name, (kind, original_node) in self.substitutions.items():
             if kind == 'scalar':
-                initializations.append(
-                    ast.Assign(
-                        targets=[ast.Name(id=name, ctx=ast.Store())],
-                        value=original_node
-                    )
-                )
+                initializations.append(ast.Assign(targets=[ast.Name(id=name, ctx=ast.Store())], value=original_node))
             else:  # array
                 initializations.append(
                     ast.Assign(
                         targets=[ast.Name(id=name, ctx=ast.Store())],
-                        value=ast.Subscript(
-                            value=ast.Name(id=self.arrayName, ctx=ast.Load()),
-                            slice=ast.Attribute(
-                                value=ast.Attribute(
+                        value=ast.Subscript(value=ast.Name(id=self.arrayName, ctx=ast.Load()),
+                            slice=ast.Attribute(value=ast.Attribute(
                                     value=ast.Name(id=self.enumIndexClass.__name__, ctx=ast.Load()),
-                                    attr=name,
-                                    ctx=ast.Load()
-                                ),
-                                attr='value',
-                                ctx=ast.Load()
-                            ),
-                            ctx=ast.Load()
-                        )
-                    )
-                )
+                                    attr=name, ctx=ast.Load()), attr='value', ctx=ast.Load()), ctx=ast.Load())))
 
         node.body = initializations + node.body
         return node
 
-def getDictionaryEnumValues() -> Dict[str, int]:
-    dictionaryEnumValues = {}
-    for enumIndex in [indexMy, indexTrack]:
-        for memberName, memberValue in enumIndex._member_map_.items():
-            dictionaryEnumValues[f"{enumIndex.__name__}.{memberName}.value"] = memberValue.value
-    return dictionaryEnumValues
-
 def inlineMapFoldingNumba(**keywordArguments: Optional[str]):
-    dictionaryEnumValues = getDictionaryEnumValues()
     codeSource = inspect.getsource(algorithmSource)
     pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
 
@@ -233,11 +201,12 @@ def inlineMapFoldingNumba(**keywordArguments: Optional[str]):
                 callableDecorated = cast(ast.FunctionDef, trackUnpacker.visit(callableDecorated))
                 ast.fix_missing_locations(callableDecorated)
 
-            callableInlined = ast.unparse(callableDecorated)
-            importsRequired = "\n".join([ast.unparse(importStatement) for importStatement in codeSourceImportStatements])
+            moduleAST = ast.Module(body=cast(List[ast.stmt], list(codeSourceImportStatements) + [callableDecorated]), type_ignores=[])
+            ast.fix_missing_locations(moduleAST)
+            moduleSource = ast.unparse(moduleAST)
 
             pathFilenameDestination = pathFilenameAlgorithm.parent / "syntheticModules" / pathFilenameAlgorithm.with_stem(callableTarget).name
-            pathFilenameDestination.write_text(importsRequired + "\n" + callableInlined)
+            pathFilenameDestination.write_text(moduleSource)
             listPathFilenamesDestination.append(pathFilenameDestination)
 
 if __name__ == '__main__':

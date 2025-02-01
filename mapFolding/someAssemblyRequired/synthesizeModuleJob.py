@@ -1,18 +1,63 @@
 from mapFolding import getPathFilenameFoldsTotal
 from mapFolding import make_dtype, datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, datatypeModuleDEFAULT
-from mapFolding import computationState
+from mapFolding import computationState, indexMy, indexTrack
 from someAssemblyRequired import makeStateJob
-from typing import Optional
+from typing import Any, Dict, Optional
 import more_itertools
 import inspect
 import importlib
 import importlib.util
 import numpy
 import pathlib
+import ast
 import pickle
 import python_minifier
 
 identifierCallableLaunch = "goGoGadgetAbsurdity"
+
+class EmbedData(ast.NodeTransformer):
+    def __init__(self, callableParsed: ast.FunctionDef, dataSource: Dict[str, Any] | computationState):
+        self.callableParsed = callableParsed
+        self.dataSource = dataSource
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
+        if node != self.callableParsed:
+            return node
+
+        # Create initializations for embedded data
+        initializations: list[ast.Assign] = []
+        parameterNames = []
+        remainingParameters = []
+
+        # Process parameters
+        for parameter in node.args.args:
+            if parameter.arg in self.dataSource:
+                # Create assignment statement
+                initializations.append(
+                    ast.Assign(
+                        targets=[ast.Name(id=parameter.arg, ctx=ast.Store())],
+                        value=ast.Constant(value=self.dataSource[parameter.arg])
+                    )
+                )
+                parameterNames.append(parameter.arg)
+            else:
+                remainingParameters.append(parameter)
+
+        # Update function parameters
+        node.args.args = remainingParameters
+
+        # Insert initializations at the start of function body
+        node.body = initializations + node.body
+
+        return node
+
+def getDictionaryEnumValues() -> Dict[str, int]:
+    dictionaryEnumValues = {}
+    for enumIndex in [indexMy, indexTrack]:
+        for memberName, memberValue in enumIndex._member_map_.items():
+            dictionaryEnumValues[f"{enumIndex.__name__}.{memberName}.value"] = memberValue.value
+    return dictionaryEnumValues
+dictionaryEnumValues = getDictionaryEnumValues()
 
 def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: str) -> str:
     def process_nested_array(arraySlice):
@@ -56,9 +101,18 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
     stateJob: computationState = pickle.loads(pathFilenameJob.read_bytes())
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'], pathFilenameJob.parent)
 
-    from syntheticModules import countSequential
-    algorithmSource = countSequential
+    # from syntheticModules import countSequential
+    import mapFolding.syntheticModules.countSequential
+    algorithmSource = mapFolding.syntheticModules.countSequential
     codeSource = inspect.getsource(algorithmSource)
+    codeParsed: ast.Module = ast.parse(codeSource, type_comments=True)
+    codeSourceImportStatements = {statement for statement in codeParsed.body if isinstance(statement, (ast.Import, ast.ImportFrom))}
+    callableParsed: ast.FunctionDef = [statement for statement in codeParsed.body if isinstance(statement, ast.FunctionDef) and algorithmSource.__name__ == statement.name][0]
+    callableParsedDecorators = [decorator for decorator in callableParsed.decorator_list]
+    # callableParsed.decorator_list = []
+    # dataEmbedder = EmbedData(callableParsed, stateJob)
+    # callableParsed = dataEmbedder.visit(callableParsed)
+    # codeSource = ast.unparse(callableParsed)
 
     # forceinline=True might actually be useful
     parametersNumba = f"numba.types.{datatypeLarge}(), \
@@ -102,7 +156,8 @@ no_cpython_wrapper=False, \
     track = stateJob['track']
     linesAlgorithm = """"""
     for lineSource in codeSource.splitlines():
-        if lineSource.startswith(('#', 'import', 'from', '@numba.jit')):
+        # if lineSource.startswith(('#', 'import', 'from', '@numba.jit')):
+        if lineSource.startswith(('#')):
             continue
         elif not lineSource:
             continue
@@ -149,13 +204,13 @@ if __name__ == '__main__':
                         , linesLaunch
                         ])
 
-    pathFilenameDestination = pathFilenameJob.with_stem(pathFilenameJob.parent.name).with_suffix(".py")
+    pathFilenameDestination = pathFilenameFoldsTotal.with_stem(pathFilenameFoldsTotal.parent.name).with_suffix(".py")
     pathFilenameDestination.write_text(linesAll)
 
     return pathFilenameDestination
 
 if __name__ == '__main__':
-    listDimensions = [6,6]
+    listDimensions = [4,4]
     datatypeLarge = 'int64'
     datatypeMedium = 'uint8'
     datatypeSmall = datatypeMedium
