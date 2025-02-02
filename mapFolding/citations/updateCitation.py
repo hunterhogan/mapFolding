@@ -1,13 +1,9 @@
 from cffconvert.cli.create_citation import create_citation
-import copy
-from cffconvert.cli.validate_or_write_output import validate_or_write_output
 from packaging.metadata import Metadata as PyPAMetadata
-from typing import Any, Dict, Final, List, Tuple
+from typing import Any, Dict, List
 import attrs
 import cffconvert
 import tempfile
-import inspect
-import json
 import packaging
 import packaging.metadata
 import packaging.utils
@@ -34,14 +30,6 @@ Tentative plan:
 class CitationNexus:
     """
     - one-to-one correlation with `cffconvert.lib.cff_1_2_x.citation` class Citation_1_2_x.cffobj
-    json schema:
-    cff
-    "required": [
-        "authors",
-        "cff-version",
-        "message",
-        "title"
-    ],
     """
     cffDASHversion: str # pathFilenameCitationSSOT
     message: str # pathFilenameCitationSSOT
@@ -96,7 +84,7 @@ class CitationNexus:
                 # setattr(self.title, 'type', Final[str])
         return self
 
-def getNexusCitation(pathFilenameCitationSSOT):
+def getNexusCitation(pathFilenameCitationSSOT: pathlib.Path) -> CitationNexus:
 
     # `cffconvert.cli.create_citation.create_citation()` is PAINFULLY mundane, but a major problem
     # in the CFF ecosystem is divergence. Therefore, I will use this function so that my code
@@ -124,9 +112,6 @@ def getPypaMetadata(packageData: Dict[str, Any]) -> PyPAMetadata:
     """
     Create a PyPA metadata object (version 2.4) from packageData.
     https://packaging.python.org/en/latest/specifications/core-metadata/
-
-    Mapping for project URLs:
-      - 'homepage' and 'repository' are accepted from packageData['urls'].
     """
     dictionaryProjectURLs: Dict[str, str] = {}
     for urlName, url in packageData.get("urls", {}).items():
@@ -199,8 +184,6 @@ def writeCitation(nexusCitation: CitationNexus, pathFilenameCitationSSOT: pathli
     parameterIndent= 2
     parameterLineWidth = 60
     yamlWorkhorse = ruamel.yaml.YAML()
-    # yamlWorkhorse.indent(sequence=parameterIndent, offset=parameterIndent, mapping=parameterIndent)
-    # yamlWorkhorse.width = parameterLineWidth
 
     def srsly(Z0Z_filed, Z0Z_value):
         if Z0Z_value: # empty lists
@@ -214,10 +197,9 @@ def writeCitation(nexusCitation: CitationNexus, pathFilenameCitationSSOT: pathli
 
     pathFilenameForValidation = pathlib.Path(tempfile.mktemp())
 
-    # pathFilenameForValidation.write_text(yamlWorkhorse.dump(dictionaryCitation))
     def writeStream(pathFilename):
-        with open(pathFilename, 'w') as aStealthContextManagerThatRuamelCannotDetectAndRefusesToWorkWith:
-            yamlWorkhorse.dump(dictionaryCitation, aStealthContextManagerThatRuamelCannotDetectAndRefusesToWorkWith)
+        with open(pathFilename, 'w') as pathlibIsAStealthContextManagerThatRuamelCannotDetectAndRefusesToWorkWith:
+            yamlWorkhorse.dump(dictionaryCitation, pathlibIsAStealthContextManagerThatRuamelCannotDetectAndRefusesToWorkWith)
 
     writeStream(pathFilenameForValidation)
 
@@ -249,7 +231,6 @@ def logistics():
 
     nexusCitation = addPypaMetadata(nexusCitation, pypaMetadata)
     nexusCitation = add_pyprojectDOTtoml(nexusCitation, tomlPackageData)
-    # print(nexusCitation)
 
     writeCitation(nexusCitation, pathFilenameCitationSSOT, pathFilenameCitationDOTcffRepo)
 

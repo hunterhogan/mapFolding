@@ -37,19 +37,20 @@ optional-dependencies = { benchmark = [
     "pandas",
     "tqdm",
 ], testing = [
+    "attrs",
     "cffconvert",
     "more_itertools",
-    "pytest",
     "pytest-cov",
     "pytest-env",
     "pytest-xdist",
+    "pytest",
     "python_minifier",
     "tomli",] }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10,<3.14"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
-urls = { homepage = "https://github.com/hunterhogan/mapFolding", Donate = "https://www.patreon.com/integrated", repository = "https://github.com/hunterhogan/mapFolding.git" }
-version = "0.3.6"
+urls = { Homepage = "https://github.com/hunterhogan/mapFolding", Donate = "https://www.patreon.com/integrated", Repository = "https://github.com/hunterhogan/mapFolding.git" }
+version = "0.3.7"
 
 [tool.coverage]
 report = { exclude_lines = [

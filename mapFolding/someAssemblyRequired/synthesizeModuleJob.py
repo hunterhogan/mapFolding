@@ -116,10 +116,11 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
     linesLaunch = """"""
     linesLaunch = linesLaunch + f"""
 if __name__ == '__main__':
-    import time
-    timeStart = time.perf_counter()
+    # import time
+    # timeStart = time.perf_counter()
     {identifierCallableLaunch}()
-    print(time.perf_counter() - timeStart)"""
+    # print(time.perf_counter() - timeStart)
+"""
 
     linesWriteFoldsTotal = """"""
     linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal

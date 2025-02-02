@@ -1,6 +1,6 @@
 from numpy import integer
-import numba
 from typing import Any, Tuple
+import numba
 from mapFolding import indexMy, indexTrack
 import numpy
 
