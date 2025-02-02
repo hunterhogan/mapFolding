@@ -1,9 +1,11 @@
 from cffconvert.cli.create_citation import create_citation
+import copy
 from cffconvert.cli.validate_or_write_output import validate_or_write_output
 from packaging.metadata import Metadata as PyPAMetadata
 from typing import Any, Dict, Final, List, Tuple
 import attrs
 import cffconvert
+import tempfile
 import inspect
 import json
 import packaging
@@ -17,16 +19,6 @@ import tomli
 listProjectURLsTarget: List[str] = ["homepage", "license", "repository"]
 
 """
-Writing the CFF to disk is the difficult part.
-    - Store in `attrs` class CitationNexus
-        - one-to-one correlation with `cffconvert.lib.cff_1_2_x.citation` class Citation_1_2_x.cffobj
-    - yaml converts to `cffstr`
-        - TODO with the help of NOTE ??? to format the string
-        To find the answer, probably start here:
-            https://github.com/citation-file-format/cff-initializer-javascript
-            src/store/cff.ts ~ `cffobj`
-            src/store/cffstr.ts
-    - write the formatted string with any text writer (which, for me, means pathlib.Path.write_text)
 Tentative plan:
 - Commit and push to GitHub
 - GitHub Action gathers information from the sources of truth
@@ -40,7 +32,10 @@ Tentative plan:
 
 @attrs.define
 class CitationNexus:
-    """cff
+    """
+    - one-to-one correlation with `cffconvert.lib.cff_1_2_x.citation` class Citation_1_2_x.cffobj
+    json schema:
+    cff
     "required": [
         "authors",
         "cff-version",
@@ -52,9 +47,9 @@ class CitationNexus:
     message: str # pathFilenameCitationSSOT
 
     abstract: str | None = None # pathFilenameCitationSSOT
-    authors: list[str] = attrs.field(factory=list) # pathFilenamePackageSSOT; pyproject.toml authors
+    authors: list[dict[str,str]] = attrs.field(factory=list) # pathFilenamePackageSSOT; pyproject.toml authors
     commit: str | None = None # workflows['Make GitHub Release']
-    contact: list[str] = attrs.field(factory=list) # pathFilenamePackageSSOT; pyproject.toml maintainers
+    contact: list[dict[str,str]] = attrs.field(factory=list) # pathFilenamePackageSSOT; pyproject.toml maintainers
     dateDASHreleased: str | None = None # workflows['Make GitHub Release']
     doi: str | None = None # pathFilenameCitationSSOT
     identifiers: list[str] = attrs.field(factory=list) # workflows['Make GitHub Release']
@@ -66,24 +61,39 @@ class CitationNexus:
     repositoryDASHartifact: str | None = None # (https://pypi.org/pypi/{package_name}/json').json()['releases']
     repositoryDASHcode: str | None = None # workflows['Make GitHub Release']
     repository: str | None = None # pathFilenamePackageSSOT; packaging.metadata.Metadata.project_urls: repository
-    title: str | None = None # pathFilenamePackageSSOT; packaging.metadata.Metadata.name
+    title: str | None = None # pathFilenamePackageSSOT; pyproject.toml name (packaging normalizes the names)
     type: str | None = None # pathFilenameCitationSSOT
     url: str | None = None # pathFilenamePackageSSOT; packaging.metadata.Metadata.project_urls: homepage
     version: str | None = None # pathFilenamePackageSSOT; packaging.metadata.Metadata.version
 
     def setInStone(self, prophet: str) -> "CitationNexus":
-        if prophet == "Citation":
-            pass
-            # "freeze" these items
-            # setattr(self.cffDASHversion, 'type', Final[str])
-            # setattr(self.doi, 'type', Final[str])
-            # cffDASHversion: str # pathFilenameCitationSSOT
-            # message: str # pathFilenameCitationSSOT
-            # abstract: str | None = None # pathFilenameCitationSSOT
-            # doi: str | None = None # pathFilenameCitationSSOT
-            # preferredDASHcitation: str | None = None # pathFilenameCitationSSOT
-            # type: str | None = None # pathFilenameCitationSSOT
-        # elif ...
+        match prophet:
+            case "Citation":
+                pass
+                # "freeze" these items
+                # setattr(self.cffDASHversion, 'type', Final[str])
+                # setattr(self.doi, 'type', Final[str])
+                # cffDASHversion: str # pathFilenameCitationSSOT
+                # message: str # pathFilenameCitationSSOT
+                # abstract: str | None = None # pathFilenameCitationSSOT
+                # doi: str | None = None # pathFilenameCitationSSOT
+                # preferredDASHcitation: str | None = None # pathFilenameCitationSSOT
+                # type: str | None = None # pathFilenameCitationSSOT
+            case "PyPA":
+                pass
+                # "freeze" these items
+                # setattr(self.keywords, 'type', Final[list[str]])
+                # setattr(self.license, 'type', Final[str])
+                # setattr(self.licenseDASHurl, 'type', Final[str])
+                # setattr(self.repository, 'type', Final[str])
+                # setattr(self.url, 'type', Final[str])
+                # setattr(self.version, 'type', Final[str])
+            case "pyprojectDOTtoml":
+                pass
+                # "freeze" these items
+                # setattr(self.authors, 'type', Final[list[dict[str,str]]])
+                # setattr(self.contact, 'type', Final[list[dict[str,str]]])
+                # setattr(self.title, 'type', Final[str])
         return self
 
 def getNexusCitation(pathFilenameCitationSSOT):
@@ -128,7 +138,7 @@ def getPypaMetadata(packageData: Dict[str, Any]) -> PyPAMetadata:
         keywords=packageData.get("keywords", []),
         license_expression=packageData.get("license", {}).get("text", ""),
         metadata_version="2.4",
-        name=packaging.utils.canonicalize_name(packageData.get("name", None), validate=True),
+        name=packaging.utils.canonicalize_name(packageData.get("name", None), validate=True), # packaging.metadata.InvalidMetadata: 'name' is a required field
         project_urls=dictionaryProjectURLs,
         version=packageData.get("version", None),
     )
@@ -156,7 +166,65 @@ def addPypaMetadata(nexusCitation: CitationNexus, metadata: PyPAMetadata) -> Cit
             if url:
                 setattr(nexusCitation, Z0Z_lookup[urlTarget], url)
 
+    nexusCitation = nexusCitation.setInStone("PyPA")
     return nexusCitation
+
+def add_pyprojectDOTtoml(nexusCitation: CitationNexus, packageData: Dict[str, Any]) -> CitationNexus:
+    def Z0Z_ImaNotValidatingNoNames(person: Dict[str, str]) -> Dict[str, str]:
+        cffPerson: Dict[str, str] = {}
+        if person.get('name', None):
+            cffPerson['given-names'], cffPerson['family-names'] = person['name'].split(' ', 1)
+        if person.get('email', None):
+            cffPerson['email'] = person['email']
+        return cffPerson
+    listAuthors = packageData.get("authors", None)
+    if not listAuthors:
+        raise ValueError("Authors are required.")
+    else:
+        listPersons = []
+        for person in listAuthors:
+            listPersons.append(Z0Z_ImaNotValidatingNoNames(person))
+            nexusCitation.authors = listPersons
+    if packageData.get("maintainers", None):
+        listPersons = []
+        for person in packageData["maintainers"]:
+            listPersons.append(Z0Z_ImaNotValidatingNoNames(person))
+            nexusCitation.contact = listPersons
+    nexusCitation.title = packageData["name"]
+    nexusCitation = nexusCitation.setInStone("pyprojectDOTtoml")
+    return nexusCitation
+
+def writeCitation(nexusCitation: CitationNexus, pathFilenameCitationSSOT: pathlib.Path, pathFilenameCitationDOTcffRepo: pathlib.Path):
+    # NOTE embarrassingly hacky process to follow
+    parameterIndent= 2
+    parameterLineWidth = 60
+    yamlWorkhorse = ruamel.yaml.YAML()
+    # yamlWorkhorse.indent(sequence=parameterIndent, offset=parameterIndent, mapping=parameterIndent)
+    # yamlWorkhorse.width = parameterLineWidth
+
+    def srsly(Z0Z_filed, Z0Z_value):
+        if Z0Z_value: # empty lists
+            return True
+        else:
+            return False
+
+    dictionaryCitation = attrs.asdict(nexusCitation, filter=srsly)
+    for keyName in list(dictionaryCitation.keys()):
+        dictionaryCitation[keyName.replace("DASH", "-")] = dictionaryCitation.pop(keyName)
+
+    pathFilenameForValidation = pathlib.Path(tempfile.mktemp())
+
+    # pathFilenameForValidation.write_text(yamlWorkhorse.dump(dictionaryCitation))
+    def writeStream(pathFilename):
+        with open(pathFilename, 'w') as aStealthContextManagerThatRuamelCannotDetectAndRefusesToWorkWith:
+            yamlWorkhorse.dump(dictionaryCitation, aStealthContextManagerThatRuamelCannotDetectAndRefusesToWorkWith)
+
+    writeStream(pathFilenameForValidation)
+
+    citationObject: cffconvert.Citation = create_citation(infile=pathFilenameForValidation, url=None)
+    if citationObject.validate(verbose=True) is None:
+        writeStream(pathFilenameCitationSSOT)
+        writeStream(pathFilenameCitationDOTcffRepo)
 
 def logistics():
     # Prefer reliable, dynamic values over hardcoded ones
@@ -180,30 +248,10 @@ def logistics():
     pypaMetadata: PyPAMetadata = getPypaMetadata(tomlPackageData)
 
     nexusCitation = addPypaMetadata(nexusCitation, pypaMetadata)
-    print(nexusCitation)
+    nexusCitation = add_pyprojectDOTtoml(nexusCitation, tomlPackageData)
+    # print(nexusCitation)
 
-    # print(f"{pypaMetadata.name=}, {pypaMetadata.version=}, {pypaMetadata.keywords=}, {pypaMetadata.license_expression=}, {pypaMetadata.metadata_version=}, {pypaMetadata.project_urls=}")
-    # validate_or_write_output(validate_only=True, citation=citationObjectSSOT)
-    # validate_or_write_output(validate_only=True, citation=citationObjectDOTcffRepo)
-
-def chatgpt_write_citation_to_disk(citation: CitationNexus, path: pathlib.Path) -> None:
-    """Convert a CitationNexus to YAML and write it to disk."""
-    citation_dict = attrs.asdict(citation, filter=lambda attr, value: value is not None)
-
-    yaml = ruamel.yaml.YAML()
-    yaml.default_flow_style = False  # Pretty-print YAML with indentation
-    with path.open("w", encoding="utf-8") as file:
-        yaml.dump(citation_dict, file)
+    writeCitation(nexusCitation, pathFilenameCitationSSOT, pathFilenameCitationDOTcffRepo)
 
 if __name__ == '__main__':
     logistics()
-
-# Dissection bench
-# print(f"{pypaMetadata.name=}, {pypaMetadata.version=}, {pypaMetadata.keywords=}, {pypaMetadata.license_expression=}, {pypaMetadata.project_urls=}")
-# path_cffconvert = pathlib.Path(inspect.getfile(cffconvert)).parent
-# pathFilenameSchema = path_cffconvert / "schemas/1.2.0/schema.json"
-# scheme: Dict[str, Any] = json.loads(pathFilenameSchema.read_text())
-# schemaSpecifications: Dict[str, Any] = scheme['properties']
-
-# for property, subProperties in schemaSpecifications.items():
-#     print(property, subProperties.get('items', None))
