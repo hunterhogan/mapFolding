@@ -12,12 +12,11 @@ authors:
 - given-names: Hunter
   family-names: Hogan
   email: HunterHogan@pm.me
-commit: aacb0a7950fb3ede656ba3afe45875658f6c4014
-date-released: '2025-01-30'
+date-released: '2025-02-02'
 identifiers:
 - type: url
-  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.2
-  description: The URL for mapFolding 0.3.2.
+  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.7
+  description: The URL for mapFolding 0.3.7.
 keywords:
 - A001415
 - A001416
@@ -29,8 +28,9 @@ keywords:
 - OEIS
 - stamp folding
 license: CC-BY-NC-4.0
-repository-code: https://github.com/hunterhogan/mapFolding
 repository: https://github.com/hunterhogan/mapFolding.git
+repository-artifact: https://pypi.org/project/mapfolding/0.3.7/
+repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.7
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding

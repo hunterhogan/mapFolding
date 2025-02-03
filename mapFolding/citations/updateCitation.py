@@ -1,13 +1,16 @@
 from cffconvert.cli.create_citation import create_citation
+from mapFolding.citations.constants import GITHUB_API_VERSION_HEADER
 from packaging.metadata import Metadata as PyPAMetadata
 from typing import Any, Dict, List
 import attrs
 import cffconvert
+import os
 import packaging
 import packaging.metadata
 import packaging.utils
 import packaging.version
 import pathlib
+import requests
 import ruamel.yaml
 import tomli
 
@@ -30,28 +33,30 @@ class CitationNexus:
     """
     - one-to-one correlation with `cffconvert.lib.cff_1_2_x.citation` class Citation_1_2_x.cffobj
     """
-    cffDASHversion: str # pathFilenameCitationSSOT
-    message: str # pathFilenameCitationSSOT
+    cffDASHversion: str
+    message: str
 
-    abstract: str | None = None # pathFilenameCitationSSOT
-    authors: list[dict[str,str]] = attrs.field(factory=list) # pathFilenamePackageSSOT; pyproject.toml authors
-    commit: str | None = None # workflows['Make GitHub Release']
-    contact: list[dict[str,str]] = attrs.field(factory=list) # pathFilenamePackageSSOT; pyproject.toml maintainers
-    dateDASHreleased: str | None = None # workflows['Make GitHub Release']
-    doi: str | None = None # pathFilenameCitationSSOT
-    identifiers: list[str] = attrs.field(factory=list) # workflows['Make GitHub Release']
-    keywords: list[str] = attrs.field(factory=list) # pathFilenamePackageSSOT; packaging.metadata.Metadata.keywords
-    license: str | None = None # pathFilenamePackageSSOT; packaging.metadata.Metadata.license_expression
-    licenseDASHurl: str | None = None # pathFilenamePackageSSOT; packaging.metadata.Metadata.project_urls: license or pyproject.toml urls license
-    preferredDASHcitation: str | None = None # pathFilenameCitationSSOT
-    references: list[str] = attrs.field(factory=list) # bibtex files in pathCitationSSOT. Conversion method and timing TBD.
-    repositoryDASHartifact: str | None = None # (https://pypi.org/pypi/{package_name}/json').json()['releases']
-    repositoryDASHcode: str | None = None # workflows['Make GitHub Release']
-    repository: str | None = None # pathFilenamePackageSSOT; packaging.metadata.Metadata.project_urls: repository
-    title: str | None = None # pathFilenamePackageSSOT; pyproject.toml name (packaging normalizes the names)
-    type: str | None = None # pathFilenameCitationSSOT
-    url: str | None = None # pathFilenamePackageSSOT; packaging.metadata.Metadata.project_urls: homepage
-    version: str | None = None # pathFilenamePackageSSOT; packaging.metadata.Metadata.version
+    abstract: str | None = None
+    authors: list[dict[str,str]] = attrs.field(factory=list)
+    # GitHub TODO
+    commit: str | None = None
+    contact: list[dict[str,str]] = attrs.field(factory=list)
+    dateDASHreleased: str | None = None
+    doi: str | None = None
+    identifiers: list[str] = attrs.field(factory=list)
+    keywords: list[str] = attrs.field(factory=list)
+    license: str | None = None
+    licenseDASHurl: str | None = None
+    preferredDASHcitation: str | None = None
+    # TODO bibtex files in pathCitationSSOT. Conversion method and timing TBD.
+    references: list[str] = attrs.field(factory=list)
+    repository: str | None = None
+    repositoryDASHartifact: str | None = None
+    repositoryDASHcode: str | None = None
+    title: str | None = None
+    type: str | None = None
+    url: str | None = None
+    version: str | None = None
 
     def setInStone(self, prophet: str) -> "CitationNexus":
         match prophet:
@@ -60,12 +65,19 @@ class CitationNexus:
                 # "freeze" these items
                 # setattr(self.cffDASHversion, 'type', Final[str])
                 # setattr(self.doi, 'type', Final[str])
-                # cffDASHversion: str # pathFilenameCitationSSOT
-                # message: str # pathFilenameCitationSSOT
-                # abstract: str | None = None # pathFilenameCitationSSOT
-                # doi: str | None = None # pathFilenameCitationSSOT
-                # preferredDASHcitation: str | None = None # pathFilenameCitationSSOT
-                # type: str | None = None # pathFilenameCitationSSOT
+                # cffDASHversion: str
+                # message: str
+                # abstract: str | None = None
+                # doi: str | None = None
+                # preferredDASHcitation: str | None = None
+                # type: str | None = None
+            case "GitHub":
+                pass
+                # "freeze" these items
+                # setattr(self.commit, 'type', Final[str])
+                # setattr(self.dateDASHreleased, 'type', Final[str])
+                # setattr(self.identifiers, 'type', Final[list[str]])
+                # setattr(self.repositoryDASHcode, 'type', Final[str])
             case "PyPA":
                 pass
                 # "freeze" these items
@@ -75,6 +87,10 @@ class CitationNexus:
                 # setattr(self.repository, 'type', Final[str])
                 # setattr(self.url, 'type', Final[str])
                 # setattr(self.version, 'type', Final[str])
+            case "PyPI":
+                pass
+                # "freeze" these items
+                # setattr(self.repositoryDASHartifact, 'type', Final[str])
             case "pyprojectDOTtoml":
                 pass
                 # "freeze" these items
@@ -82,53 +98,6 @@ class CitationNexus:
                 # setattr(self.contact, 'type', Final[list[dict[str,str]]])
                 # setattr(self.title, 'type', Final[str])
         return self
-
-def getNexusCitation(pathFilenameCitationSSOT: pathlib.Path) -> CitationNexus:
-
-    # `cffconvert.cli.create_citation.create_citation()` is PAINFULLY mundane, but a major problem
-    # in the CFF ecosystem is divergence. Therefore, I will use this function so that my code
-    # converges with the CFF ecosystem.
-    citationObject: cffconvert.Citation = create_citation(infile=pathFilenameCitationSSOT, url=None)
-    # `._parse()` is a yaml loader: use it for convergence
-    cffobj: Dict[Any, Any] = citationObject._parse()
-
-    nexusCitation = CitationNexus(
-        cffDASHversion=cffobj["cff-version"],
-        message=cffobj["message"],
-    )
-
-    Z0Z_list: List[attrs.Attribute] = list(attrs.fields(type(nexusCitation)))
-    for Z0Z_field in Z0Z_list:
-        cffobjKeyName: str = Z0Z_field.name.replace("DASH", "-")
-        cffobjValue = cffobj.get(cffobjKeyName)
-        if cffobjValue: # An empty list will be False
-            setattr(nexusCitation, Z0Z_field.name, cffobjValue)
-
-    nexusCitation = nexusCitation.setInStone("Citation")
-    return nexusCitation
-
-def getPypaMetadata(packageData: Dict[str, Any]) -> PyPAMetadata:
-    """
-    Create a PyPA metadata object (version 2.4) from packageData.
-    https://packaging.python.org/en/latest/specifications/core-metadata/
-    """
-    dictionaryProjectURLs: Dict[str, str] = {}
-    for urlName, url in packageData.get("urls", {}).items():
-        urlName = urlName.lower()
-        if urlName in listProjectURLsTarget:
-            dictionaryProjectURLs[urlName] = url
-
-    metadataRaw = packaging.metadata.RawMetadata(
-        keywords=packageData.get("keywords", []),
-        license_expression=packageData.get("license", {}).get("text", ""),
-        metadata_version="2.4",
-        name=packaging.utils.canonicalize_name(packageData.get("name", None), validate=True), # packaging.metadata.InvalidMetadata: 'name' is a required field
-        project_urls=dictionaryProjectURLs,
-        version=packageData.get("version", None),
-    )
-
-    metadata = PyPAMetadata().from_raw(metadataRaw)
-    return metadata
 
 def addPypaMetadata(nexusCitation: CitationNexus, metadata: PyPAMetadata) -> CitationNexus:
     if not metadata.name:
@@ -178,6 +147,177 @@ def add_pyprojectDOTtoml(nexusCitation: CitationNexus, packageData: Dict[str, An
     nexusCitation = nexusCitation.setInStone("pyprojectDOTtoml")
     return nexusCitation
 
+def getGitHubRelease(nexusCitation: CitationNexus) -> Dict[str, Any]:
+    """Return a dictionary with GitHub release data.
+
+    The dictionary contains the following keys:
+        commit: The commit hash (using the API field 'target_commitish').
+        date-released: The published date (in YYYY-MM-DD format).
+        identifiers: A list with one identifier object, whose description is
+            'The URL for {nexusCitation.title} {nexusCitation.version}.'
+        repository-code: A URL for the commit in the repository.
+
+    Raises:
+        ValueError: If the nexusCitation.repository is not set or cannot be parsed.
+        RuntimeError: If the HTTP request to GitHub fails.
+    """
+    if not nexusCitation.repository:
+        raise ValueError("Repository URL is required to get GitHub release info.")
+
+    urlparts = nexusCitation.repository.replace("https://github.com", "", 1).strip("/").split("/") + [None] * 5
+    ownername, reponame, _2, refvalue, *_filename_parts = urlparts
+    reponame = reponame.replace(".git", "") # type: ignore # Remove .git from the repository name, if present.
+    assert ownername is not None, "URL should include the name of the owner/organization."
+    assert reponame is not None, "URL should include the name of the repository."
+    if refvalue is None:
+        repos_api = f"https://api.github.com/repos/{ownername}/{reponame}/releases/latest"
+        headers = GITHUB_API_VERSION_HEADER
+        headers.update({"Accept": "application/vnd.github+json"})
+        token = os.environ.get("GITHUB_TOKEN")
+        headers.update({"Authorization": f"Bearer { token }"})
+        response = requests.get(repos_api, headers=headers)
+        if response.status_code != 200:
+            raise RuntimeError(f"Failed to get GitHub release info: {response.status_code}")
+
+    releaseData = response.json()
+    # commitHash = releaseData.get("target_commitish")
+    publishedAt = releaseData.get("published_at")
+    if publishedAt:
+        # Convert ISO timestamp (e.g., "2020-12-31T12:34:56Z") to "YYYY-MM-DD".
+        publishedAt = publishedAt.split("T")[0]
+
+    releaseHtmlUrl = releaseData.get("html_url")
+    identifierDescription = f"The URL for {nexusCitation.title} {nexusCitation.version}."
+    return {
+        # "commit": commitHash,
+        "dateDASHreleased": publishedAt,
+        "identifiers": [{
+            "type": "url",
+            "value": releaseHtmlUrl,
+            "description": identifierDescription,
+        }],
+        "repositoryDASHcode": releaseHtmlUrl,
+    }
+
+def addGitHubRelease(nexusCitation: CitationNexus) -> CitationNexus:
+    """
+    Update the nexusCitation with GitHub release information.
+
+    This function populates the following fields on the nexusCitation:
+        - commit: using the commit hash from GitHub.
+        - dateDASHreleased: the release date.
+        - identifiers: appends a GitHub-specific identifier.
+        - repositoryDASHcode: the URL to view the commit in the repository.
+
+    Returns:
+        The updated CitationNexus instance.
+
+    Raises:
+        Any exception raised by getGitHubRelease.
+    """
+    gitHubReleaseData = getGitHubRelease(nexusCitation)
+    nexusCitation.commit = gitHubReleaseData.get("commit")
+    nexusCitation.dateDASHreleased = gitHubReleaseData.get("dateDASHreleased")
+    # Overwrite the existing list of identifiers. This could be better
+    nexusCitation.identifiers = gitHubReleaseData.get("identifiers", [])
+    nexusCitation.repositoryDASHcode = gitHubReleaseData.get("repositoryDASHcode")
+    return nexusCitation
+
+def getPyPIrelease(nexusCitation: CitationNexus) -> Dict[str, Any]:
+    """Return a dictionary with PyPI release data.
+
+    The dictionary contains:
+        repository-artifact: The URL for the package on PyPI.
+
+    Raises:
+        ValueError: If the citation title or version is not set.
+        RuntimeError: If the HTTP request to PyPI fails.
+    """
+    if not nexusCitation.title:
+        raise ValueError("Package name (title) is required to get PyPI release info.")
+    if not nexusCitation.version:
+        raise ValueError("Package version is required to get PyPI release info.")
+
+    packageName = packaging.utils.canonicalize_name(nexusCitation.title)
+    pypiURL = f"https://pypi.org/pypi/{packageName}/json"
+
+    response = requests.get(pypiURL)
+    if response.status_code != 200:
+        raise RuntimeError(f"Failed to get PyPI release info: {response.status_code}")
+
+    releaseData = response.json()
+    version = str(nexusCitation.version)
+    if version not in releaseData.get("releases", {}):
+        raise ValueError(f"Version {version} not found on PyPI")
+
+    return {
+        "repositoryDASHartifact": f"https://pypi.org/project/{packageName}/{version}/"
+    }
+
+def addPyPIrelease(nexusCitation: CitationNexus) -> CitationNexus:
+    """
+    Update the nexusCitation with PyPI release information.
+
+    This function populates:
+        - repositoryDASHartifact: the URL to the package version on PyPI.
+
+    Returns:
+        The updated CitationNexus instance.
+
+    Raises:
+        Any exception raised by getPyPIrelease.
+    """
+    pypiReleaseData = getPyPIrelease(nexusCitation)
+    nexusCitation.repositoryDASHartifact = pypiReleaseData.get("repositoryDASHartifact")
+    return nexusCitation
+
+def getNexusCitation(pathFilenameCitationSSOT: pathlib.Path) -> CitationNexus:
+
+    # `cffconvert.cli.create_citation.create_citation()` is PAINFULLY mundane, but a major problem
+    # in the CFF ecosystem is divergence. Therefore, I will use this function so that my code
+    # converges with the CFF ecosystem.
+    citationObject: cffconvert.Citation = create_citation(infile=pathFilenameCitationSSOT, url=None)
+    # `._parse()` is a yaml loader: use it for convergence
+    cffobj: Dict[Any, Any] = citationObject._parse()
+
+    nexusCitation = CitationNexus(
+        cffDASHversion=cffobj["cff-version"],
+        message=cffobj["message"],
+    )
+
+    Z0Z_list: List[attrs.Attribute] = list(attrs.fields(type(nexusCitation)))
+    for Z0Z_field in Z0Z_list:
+        cffobjKeyName: str = Z0Z_field.name.replace("DASH", "-")
+        cffobjValue = cffobj.get(cffobjKeyName)
+        if cffobjValue: # An empty list will be False
+            setattr(nexusCitation, Z0Z_field.name, cffobjValue)
+
+    nexusCitation = nexusCitation.setInStone("Citation")
+    return nexusCitation
+
+def getPypaMetadata(packageData: Dict[str, Any]) -> PyPAMetadata:
+    """
+    Create a PyPA metadata object (version 2.4) from packageData.
+    https://packaging.python.org/en/latest/specifications/core-metadata/
+    """
+    dictionaryProjectURLs: Dict[str, str] = {}
+    for urlName, url in packageData.get("urls", {}).items():
+        urlName = urlName.lower()
+        if urlName in listProjectURLsTarget:
+            dictionaryProjectURLs[urlName] = url
+
+    metadataRaw = packaging.metadata.RawMetadata(
+        keywords=packageData.get("keywords", []),
+        license_expression=packageData.get("license", {}).get("text", ""),
+        metadata_version="2.4",
+        name=packaging.utils.canonicalize_name(packageData.get("name", None), validate=True), # packaging.metadata.InvalidMetadata: 'name' is a required field
+        project_urls=dictionaryProjectURLs,
+        version=packageData.get("version", None),
+    )
+
+    metadata = PyPAMetadata().from_raw(metadataRaw)
+    return metadata
+
 def writeCitation(nexusCitation: CitationNexus, pathFilenameCitationSSOT: pathlib.Path, pathFilenameCitationDOTcffRepo: pathlib.Path):
     # NOTE embarrassingly hacky process to follow
     parameterIndent= 2
@@ -211,13 +351,15 @@ def writeCitation(nexusCitation: CitationNexus, pathFilenameCitationSSOT: pathli
 
 def logistics():
     # Prefer reliable, dynamic values over hardcoded ones
-    packageNameHARDCODED: str = 'mapFolding'
-
-    packageName: str = packageNameHARDCODED
     pathRepoRoot = pathlib.Path(__file__).parent.parent.parent
     pathFilenamePackageSSOT = pathRepoRoot / 'pyproject.toml'
-    filenameGitHubAction = 'updateCitation.yml'
-    pathFilenameGitHubAction = pathRepoRoot / '.github' / 'workflows' / filenameGitHubAction
+
+    tomlPackageData: Dict[str, Any] = tomli.loads(pathFilenamePackageSSOT.read_text())['project']
+    # https://packaging.python.org/en/latest/specifications/pyproject-toml/
+
+    packageName: str = tomlPackageData.get("name", None)
+    if not packageName:
+        raise ValueError("Package name is required.")
 
     filenameCitationDOTcff = 'CITATION.cff'
     pathCitations = pathRepoRoot / packageName / 'citations'
@@ -226,12 +368,16 @@ def logistics():
 
     nexusCitation = getNexusCitation(pathFilenameCitationSSOT)
 
-    tomlPackageData: Dict[str, Any] = tomli.loads(pathFilenamePackageSSOT.read_text())['project']
-    # https://packaging.python.org/en/latest/specifications/pyproject-toml/
     pypaMetadata: PyPAMetadata = getPypaMetadata(tomlPackageData)
 
     nexusCitation = addPypaMetadata(nexusCitation, pypaMetadata)
     nexusCitation = add_pyprojectDOTtoml(nexusCitation, tomlPackageData)
+
+    nexusCitation = addGitHubRelease(nexusCitation)
+    nexusCitation = addPyPIrelease(nexusCitation)
+
+    filenameGitHubAction = 'updateCitation.yml'
+    pathFilenameGitHubAction = pathRepoRoot / '.github' / 'workflows' / filenameGitHubAction
 
     writeCitation(nexusCitation, pathFilenameCitationSSOT, pathFilenameCitationDOTcffRepo)
 
