@@ -1,3 +1,4 @@
+from .theSSOTdatatypes import *
 from numpy import integer
 from typing import Any, Callable, Final, Optional, Tuple, Type, TypedDict
 from types import ModuleType
@@ -7,6 +8,21 @@ import numpy
 import numpy.typing
 import pathlib
 import sys
+
+"""Technical concepts I am likely using and likely want to use more effectively:
+- Configuration Registry
+- Write-Once, Read-Many (WORM) / Immutable Initialization
+- Lazy Initialization
+- Separation of Concerns: in the sense that configuration is separated from business logic
+
+Furthermore, I want to more clearly divorce the concept of a single _source_ of (a) truth from
+the _authority_ of that truth. The analogy to a registry of ownership is still apt: the registry
+is, at most, a single (or centralized) source of truth, but it is merely the place to register/record
+the truth determined by some other authority.
+
+And, I almost certainly want to change the semiotics from "authority" (of truth) to "power" (to create a truth).
+Here, "power" is a direct analogy to https://hunterthinks.com/opinion/a-hohfeldian-primer.
+"""
 
 def getAlgorithmSource() -> ModuleType:
     from mapFolding import theDao
@@ -62,33 +78,6 @@ class indexTrack(EnumIndices):
     leafBelow = enum.auto()
     countDimensionsGapped = enum.auto()
     gapRangeStart = enum.auto()
-
-datatypeLargeDEFAULT: Final[str] = 'int64'
-datatypeMediumDEFAULT: Final[str] = 'uint8'
-datatypeSmallDEFAULT: Final[str] = 'uint8'
-
-# Design for the possibility that I will want to use module jabberPy and their datatypes, wockyPy
-datatypeModuleDEFAULT: Final[str] = 'numpy'
-
-def make_dtype(datatype: str, datatypeModule: Optional[str] = None) -> Type[Any]:
-    if datatypeModule is None:
-        datatypeModule = datatypeModuleDEFAULT
-    return eval(f"{datatypeModule}.{datatype}")
-
-dtypeLargeDEFAULT = make_dtype(datatypeLargeDEFAULT)
-dtypeMediumDEFAULT = make_dtype(datatypeMediumDEFAULT)
-dtypeSmallDEFAULT = make_dtype(datatypeSmallDEFAULT)
-
-hackSSOTdtype={
-    'connectionGraph': 'dtypeSmall',
-    'foldGroups': 'dtypeLarge',
-    'gapsWhere': 'dtypeSmall',
-    'gapsWherePARALLEL': 'dtypeSmall',
-    'my': 'dtypeMedium',
-    'myPARALLEL': 'dtypeMedium',
-    'track': 'dtypeMedium',
-    'trackPARALLEL': 'dtypeMedium',
-    }
 
 class ParametersNumba(TypedDict):
     _nrt: bool

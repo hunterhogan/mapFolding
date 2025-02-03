@@ -46,9 +46,12 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
     datatypeSmall = keywordArguments.get('datatypeSmall', datatypeSmallDEFAULT)
     datatypeModule = keywordArguments.get('datatypeModule', datatypeModuleDEFAULT)
 
-    dtypeLarge = make_dtype(datatypeLarge, datatypeModule) # type: ignore
-    dtypeMedium = make_dtype(datatypeMedium, datatypeModule) # type: ignore
-    dtypeSmall = make_dtype(datatypeSmall, datatypeModule) # type: ignore
+    if not datatypeLarge or not datatypeMedium or not datatypeSmall or not datatypeModule:
+        raise Exception("If I don't include this nonsense, the static type checker will complain. I feel like that means I need a different way to handle 'default'.")
+
+    dtypeLarge = make_dtype(datatypeLarge, datatypeModule)
+    dtypeMedium = make_dtype(datatypeMedium, datatypeModule)
+    dtypeSmall = make_dtype(datatypeSmall, datatypeModule)
 
     stateJob = makeStateJob(listDimensions, writeJob=False, dtypeLarge = dtypeLarge, dtypeMedium = dtypeMedium, dtypeSmall = dtypeSmall)
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
@@ -57,8 +60,7 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
     algorithmSource = countSequential
     codeSource = inspect.getsource(algorithmSource)
 
-    if datatypeLarge:
-        lineNumba = f"@numba.jit(numba.types.{datatypeLarge}(), cache=True, nopython=True, fastmath=True, forceinline=True, inline='always', looplift=False, _nrt=True, error_model='numpy', parallel=False, boundscheck=False, no_cfunc_wrapper=True, no_cpython_wrapper=False)"
+    lineNumba = f"@numba.jit(numba.types.{datatypeLarge}(), cache=True, nopython=True, fastmath=True, forceinline=True, inline='always', looplift=False, _nrt=True, error_model='numpy', parallel=False, boundscheck=False, no_cfunc_wrapper=True, no_cpython_wrapper=False)"
 
     linesImport = "\n".join([
                         "import numpy"
@@ -68,8 +70,6 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
     ImaIndent = '    '
     linesDataDynamic = """"""
     linesDataDynamic = "\n".join([linesDataDynamic
-            # , ImaIndent + f"foldsTotal = numba.types.{datatypeLarge}(0)"
-            # , ImaIndent + makeStrRLEcompacted(stateJob['foldGroups'], 'foldGroups')
             , ImaIndent + makeStrRLEcompacted(stateJob['gapsWhere'], 'gapsWhere')
             ])
 
@@ -97,11 +97,11 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
         elif 'my[indexMy.' in lineSource:
             if 'dimensionsTotal' in lineSource:
                 continue
-            # leaf1ndex = my[indexMy.leaf1ndex.value]
+            # Statements are in the form: leaf1ndex = my[indexMy.leaf1ndex.value]
             identifier, statement = lineSource.split('=')
             lineSource = ImaIndent + identifier.strip() + f"=numba.types.{datatypeSmall}({str(eval(statement.strip()))})"
         elif 'track[indexTrack.' in lineSource:
-            # leafAbove = track[indexTrack.leafAbove.value]
+            # Statements are in the form: leafAbove = track[indexTrack.leafAbove.value]
             identifier, statement = lineSource.split('=')
             lineSource = ImaIndent + makeStrRLEcompacted(eval(statement.strip()), identifier.strip())
         elif 'foldGroups[-1]' in lineSource:

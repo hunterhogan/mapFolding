@@ -136,7 +136,7 @@ def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.As
 def mockFoldingFunction():
     """Creates a mock function that simulates _countFolds behavior."""
     def make_mock(foldsValue: int, listDimensions: List[int]):
-        mock_array = makeDataContainer(2, datatype=dtypeLargeDEFAULT)
+        mock_array = makeDataContainer(2)
         mock_array[0] = foldsValue
         mock_array[-1] = getLeavesTotal(listDimensions)
 

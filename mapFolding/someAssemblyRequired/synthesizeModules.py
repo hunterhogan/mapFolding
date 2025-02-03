@@ -1,13 +1,17 @@
-from mapFolding import indexMy, indexTrack, getAlgorithmSource, ParametersNumba, parametersNumbaDEFAULT, hackSSOTdtype
 from mapFolding import datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, EnumIndices
-import pathlib
-import inspect
-import numpy
-import numba
-from typing import Dict, Optional, List, Union, Sequence, Type, cast
+from mapFolding import indexMy, indexTrack, getAlgorithmSource, ParametersNumba, parametersNumbaDEFAULT, hackSSOTdtype
+from typing import cast, Dict, List, Optional, Sequence, Type, Union
+from types import ModuleType
 import ast
+import inspect
+import numba
+import numpy
+import pathlib
 
-algorithmSource = getAlgorithmSource()
+"""TODO
+Convert types
+    e.g. `groupsOfFolds: int = 0` to `groupsOfFolds = numba.types.{datatypeLarge}(0)`
+    This isn't necessary for Numba, but I may the infrastructure for other compilers or paradigms."""
 
 class RecursiveInliner(ast.NodeTransformer):
     def __init__(self, dictionaryFunctions: Dict[str, ast.FunctionDef]):
@@ -64,14 +68,17 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
                 datatypeAST = None
 
             ndarrayName = signatureElement.arg
-            Z0Z_hackyStr = hackSSOTdtype[ndarrayName]
-            Z0Z_hackyStr = Z0Z_hackyStr[0] + 'ata' + Z0Z_hackyStr[1:]
-            datatype_attr = keywordArguments.get(Z0Z_hackyStr, None) or datatypeAST or eval(Z0Z_hackyStr+'DEFAULT')
+            # datatypePersonalized = get_datatypeFor(dataContainerForWhom)
+            Z0Z_hacky_dtype = hackSSOTdtype(ndarrayName)
+            # Z0Z_hacky_dtype = Z0Z_hacky_dtype[0] + 'ata' + Z0Z_hacky_dtype[1:]
+            # datatype_attr = keywordArguments.get(Z0Z_hacky_dtype, None) or datatypeAST or eval(Z0Z_hacky_dtype+'DEFAULT')
+            datatype_attr = str(Z0Z_hacky_dtype)
 
             datatypeNumba = ast.Attribute(value=ast.Name(id='numba', ctx=ast.Load()), attr=datatype_attr, ctx=ast.Load())
 
             return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
 
+    # TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
     # callableSourceDecorators = [decorator for decorator in callableInlined.decorator_list]
 
     listNumbaParameterSignature: Sequence[ast.expr] = []
@@ -178,39 +185,49 @@ class UnpackArrayAccesses(ast.NodeTransformer):
         node.body = initializations + node.body
         return node
 
-def inlineMapFoldingNumba(**keywordArguments: Optional[str]):
+def inlineOneCallable(codeSource, pathFilenameAlgorithm, listPathFilenamesDestination, callableTarget, **keywordArguments: Optional[str]):
+    codeParsed: ast.Module = ast.parse(codeSource, type_comments=True)
+    codeSourceImportStatements = {statement for statement in codeParsed.body if isinstance(statement, (ast.Import, ast.ImportFrom))}
+    dictionaryFunctions = {statement.name: statement for statement in codeParsed.body if isinstance(statement, ast.FunctionDef)}
+    callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctions)
+    parallel = callableTarget == 'countParallel'
+    callableInlined = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
+    if callableInlined:
+        ast.fix_missing_locations(callableInlined)
+        callableDecorated = decorateCallableWithNumba(callableInlined, parallel, **keywordArguments)
+
+        if callableTarget == 'countSequential':
+            myUnpacker = UnpackArrayAccesses(indexMy, 'my')
+            callableDecorated = cast(ast.FunctionDef, myUnpacker.visit(callableDecorated))
+            ast.fix_missing_locations(callableDecorated)
+
+            trackUnpacker = UnpackArrayAccesses(indexTrack, 'track')
+            callableDecorated = cast(ast.FunctionDef, trackUnpacker.visit(callableDecorated))
+            ast.fix_missing_locations(callableDecorated)
+
+        moduleAST = ast.Module(body=cast(List[ast.stmt], list(codeSourceImportStatements) + [callableDecorated]), type_ignores=[])
+        ast.fix_missing_locations(moduleAST)
+        moduleSource = ast.unparse(moduleAST)
+
+        pathFilenameDestination = pathFilenameAlgorithm.parent / "syntheticModules" / pathFilenameAlgorithm.with_stem(callableTarget).name[5:None]
+        pathFilenameDestination.write_text(moduleSource)
+        listPathFilenamesDestination.append(pathFilenameDestination)
+
+def inlineMapFoldingNumba(listCallablesAsStr: List[str], algorithmSource: Optional[ModuleType] = None, **keywordArguments: Optional[str]):
+    if not algorithmSource:
+        algorithmSource = getAlgorithmSource()
+
     codeSource = inspect.getsource(algorithmSource)
     pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
 
     listPathFilenamesDestination: list[pathlib.Path] = []
-    listCallables = [ 'countInitialize', 'countParallel', 'countSequential', ]
-    for callableTarget in listCallables:
-        codeParsed: ast.Module = ast.parse(codeSource, type_comments=True)
-        codeSourceImportStatements = {statement for statement in codeParsed.body if isinstance(statement, (ast.Import, ast.ImportFrom))}
-        dictionaryFunctions = {statement.name: statement for statement in codeParsed.body if isinstance(statement, ast.FunctionDef)}
-        callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctions)
-        parallel = callableTarget == 'countParallel'
-        callableInlined = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
-        if callableInlined:
-            ast.fix_missing_locations(callableInlined)
-            callableDecorated = decorateCallableWithNumba(callableInlined, parallel, **keywordArguments)
 
-            if callableTarget == 'countSequential':
-                myUnpacker = UnpackArrayAccesses(indexMy, 'my')
-                callableDecorated = cast(ast.FunctionDef, myUnpacker.visit(callableDecorated))
-                ast.fix_missing_locations(callableDecorated)
+    # TODO abstract this process
+    # especially remove the hardcoded paths and filenames
 
-                trackUnpacker = UnpackArrayAccesses(indexTrack, 'track')
-                callableDecorated = cast(ast.FunctionDef, trackUnpacker.visit(callableDecorated))
-                ast.fix_missing_locations(callableDecorated)
-
-            moduleAST = ast.Module(body=cast(List[ast.stmt], list(codeSourceImportStatements) + [callableDecorated]), type_ignores=[])
-            ast.fix_missing_locations(moduleAST)
-            moduleSource = ast.unparse(moduleAST)
-
-            pathFilenameDestination = pathFilenameAlgorithm.parent / "syntheticModules" / pathFilenameAlgorithm.with_stem(callableTarget).name[5:None]
-            pathFilenameDestination.write_text(moduleSource)
-            listPathFilenamesDestination.append(pathFilenameDestination)
+    for callableTarget in listCallablesAsStr:
+        inlineOneCallable(codeSource, pathFilenameAlgorithm, listPathFilenamesDestination, callableTarget, **keywordArguments)
 
 if __name__ == '__main__':
-    inlineMapFoldingNumba()
+    listCallablesAsStr: List[str] = ['countInitialize', 'countParallel', 'countSequential']
+    inlineMapFoldingNumba(listCallablesAsStr)

@@ -1,12 +1,12 @@
 from mapFolding.theSSOT import (
     computationState,
-    datatypeLargeDEFAULT,
-    datatypeMediumDEFAULT,
-    datatypeModuleDEFAULT,
-    datatypeSmallDEFAULT,
-    dtypeLargeDEFAULT,
-    dtypeMediumDEFAULT,
-    dtypeSmallDEFAULT,
+    # datatypeLargeDEFAULT,
+    # datatypeMediumDEFAULT,
+    # datatypeModuleDEFAULT,
+    # datatypeSmallDEFAULT,
+    # dtypeLargeDEFAULT,
+    # dtypeMediumDEFAULT,
+    # dtypeSmallDEFAULT,
     EnumIndices,
     getAlgorithmCallable,
     getAlgorithmSource,
@@ -14,10 +14,14 @@ from mapFolding.theSSOT import (
     hackSSOTdtype,
     indexMy,
     indexTrack,
-    make_dtype,
+    # make_dtype,
     ParametersNumba,
     parametersNumbaDEFAULT,
     pathJobDEFAULT,
+    setDatatypeElephino,
+    setDatatypeFoldsTotal,
+    setDatatypeLeavesTotal,
+    setDatatypeModule,
 )
 from mapFolding.beDRY import getFilenameFoldsTotal, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal
 from mapFolding.basecamp import countFolds
@@ -29,4 +33,3 @@ __all__ = [
     'getOEISids',
     'oeisIDfor_n',
 ]
-
