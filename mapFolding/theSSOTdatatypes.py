@@ -1,7 +1,8 @@
 """module for prototyping/developing a new system for datatype management."""
 from numpy import integer
-from typing import Any, Callable, Final, Optional, Tuple, Type, TypedDict
+from typing import Any, Callable, Dict, Final, Optional, Tuple, Type, TypedDict
 from types import ModuleType
+from collections import defaultdict
 import enum
 import numba
 import numpy
@@ -24,14 +25,24 @@ import sys
     - signedness apathy|non-negative|non-positive|both
     """
 
-_datatypeElephino = ''
-_datatypeFoldsTotal = ''
-_datatypeLeavesTotal = ''
+_datatype = defaultdict(str)
+_datatypeDefault: Final[Dict[str, str]] = {
+    'elephino': 'uint8',
+    'foldsTotal': 'int64',
+    'leavesTotal': 'uint8',
+}
 _datatypeModule = ''
-_datatypeFoldsTotalDEFAULT: Final[str] = 'int64'
-_datatypeElephinoDEFAULT: Final[str] = 'uint8'
-_datatypeLeavesTotalDEFAULT: Final[str] = 'uint8'
 _datatypeModuleDEFAULT: Final[str] = 'numpy'
+
+def reportDatatypeLimit(identifier: str, datatype: str, sourGrapes: Optional[bool] = False) -> str:
+    global _datatype
+    if not _datatype[identifier]:
+        _datatype[identifier] = datatype
+    elif _datatype[identifier] == datatype:
+        pass
+    elif sourGrapes:
+        raise Exception(f"Datatype is '{_datatype[identifier]}' not '{datatype}', so you can take your ball and go home.")
+    return _datatype[identifier]
 
 def setDatatypeModule(datatypeModule: str, sourGrapes: Optional[bool] = False):
     global _datatypeModule
@@ -44,52 +55,22 @@ def setDatatypeModule(datatypeModule: str, sourGrapes: Optional[bool] = False):
     return _datatypeModule
 
 def setDatatypeElephino(datatype: str, sourGrapes: Optional[bool] = False):
-    global _datatypeElephino
-    if not _datatypeElephino:
-        _datatypeElephino = datatype
-    elif _datatypeElephino == datatype:
-        pass
-    elif sourGrapes:
-        raise Exception(f"Datatype is '{_datatypeElephino}' not '{datatype}', so you can take your ball and go home.")
-    return _datatypeElephino
+    identifier = 'elephino'
+    return reportDatatypeLimit(identifier, datatype, sourGrapes)
 
 def setDatatypeFoldsTotal(datatype: str, sourGrapes: Optional[bool] = False):
-    global _datatypeFoldsTotal
-    if not _datatypeFoldsTotal:
-        _datatypeFoldsTotal = datatype
-    elif _datatypeFoldsTotal == datatype:
-        pass
-    elif sourGrapes:
-        raise Exception(f"Datatype is '{_datatypeFoldsTotal}' not '{datatype}', so you can take your ball and go home.")
-    return _datatypeFoldsTotal
+    identifier = 'foldsTotal'
+    return reportDatatypeLimit(identifier, datatype, sourGrapes)
 
 def setDatatypeLeavesTotal(datatype: str, sourGrapes: Optional[bool] = False):
-    global _datatypeLeavesTotal
-    if not _datatypeLeavesTotal:
-        _datatypeLeavesTotal = datatype
-    elif _datatypeLeavesTotal == datatype:
-        pass
-    elif sourGrapes:
-        raise Exception(f"Datatype is '{_datatypeLeavesTotal}' not '{datatype}', so you can take your ball and go home.")
-    return _datatypeLeavesTotal
+    identifier = 'leavesTotal'
+    return reportDatatypeLimit(identifier, datatype, sourGrapes)
 
-def _get_datatypeElephino():
-    global _datatypeElephino
-    if not _datatypeElephino:
-        _datatypeElephino = _datatypeElephinoDEFAULT
-    return _datatypeElephino
-
-def _get_datatypeFoldsTotal():
-    global _datatypeFoldsTotal
-    if not _datatypeFoldsTotal:
-        _datatypeFoldsTotal = _datatypeFoldsTotalDEFAULT
-    return _datatypeFoldsTotal
-
-def _get_datatypeLeavesTotal():
-    global _datatypeLeavesTotal
-    if not _datatypeLeavesTotal:
-        _datatypeLeavesTotal = _datatypeLeavesTotalDEFAULT
-    return _datatypeLeavesTotal
+def _get_datatype(identifier: str) -> str:
+    global _datatype
+    if not _datatype[identifier]:
+        _datatype[identifier] = _datatypeDefault.get(identifier) or _datatypeDefault['foldsTotal']
+    return _datatype[identifier]
 
 def _getDatatypeModule():
     global _datatypeModule
@@ -97,14 +78,21 @@ def _getDatatypeModule():
         _datatypeModule = _datatypeModuleDEFAULT
     return _datatypeModule
 
+def setInStone(identifier: str):
+    # not quite right.
+    # for example, 'myPARALLEL' needs to freeze every identifier in indexMy and probably elephino
+    # But, hackSSOTdatatype and hackSSOTdtype mediate access, so I might be able to configure those to cascade the freeze
+    # Better than that. The freeze will cascade, but there can be sort of two default values for the singleton identifiers
+    return eval(f"{_getDatatypeModule()}.{_get_datatype(identifier)}")
+
 def _make_dtypeElephinoYouLazyBum():
-    return eval(f"{_getDatatypeModule()}.{_get_datatypeElephino()}")
+    return eval(f"{_getDatatypeModule()}.{_get_datatype('elephino')}")
 
 def _make_dtypeFoldsTotalYouLazyBum():
-    return eval(f"{_getDatatypeModule()}.{_get_datatypeFoldsTotal()}")
+    return eval(f"{_getDatatypeModule()}.{_get_datatype('foldsTotal')}")
 
 def _make_dtypeLeavesTotalYouLazyBum():
-    return eval(f"{_getDatatypeModule()}.{_get_datatypeLeavesTotal()}")
+    return eval(f"{_getDatatypeModule()}.{_get_datatype('leavesTotal')}")
 
 def hackSSOTdtype(identifier: str) -> Type[Any]:
     _hackSSOTdtype={
@@ -157,9 +145,9 @@ def hackSSOTdatatype(identifier: str) -> str:
     }
     Rube = _hackSSOTdatatype[identifier]
     if Rube == 'datatypeElephino':
-        GoldBerg = _get_datatypeElephino()
+        GoldBerg = _get_datatype('elephino')
     elif Rube == 'datatypeFoldsTotal':
-        GoldBerg = _get_datatypeFoldsTotal()
+        GoldBerg = _get_datatype('foldsTotal')
     elif Rube == 'datatypeLeavesTotal':
-        GoldBerg = _get_datatypeLeavesTotal()
+        GoldBerg = _get_datatype('leavesTotal')
     return GoldBerg
