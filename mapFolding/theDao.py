@@ -131,10 +131,14 @@ def countInitialize(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.d
 
 def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]]
                     , foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
-                    , gapsWherePARALLEL: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
-                    , myPARALLEL: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
-                    , trackPARALLEL: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
-    for indexSherpa in numba.prange(myPARALLEL[indexMy.taskDivisions.value]):
+                    , gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
+                    , my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
+                    , track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
+    gapsWherePARALLEL = gapsWhere.copy()
+    myPARALLEL = my.copy()
+    trackPARALLEL = track.copy()
+    taskDivisionsPrange = myPARALLEL[indexMy.taskDivisions.value]
+    for indexSherpa in numba.prange(taskDivisionsPrange):
         groupsOfFolds: int = 0
         gapsWhere = gapsWherePARALLEL.copy()
         my = myPARALLEL.copy()

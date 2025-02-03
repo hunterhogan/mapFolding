@@ -198,7 +198,7 @@ if __name__ == '__main__':
     return pathFilenameDestination
 
 if __name__ == '__main__':
-    listDimensions = [6,6]
+    listDimensions = [5,5]
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
     setDatatypeLeavesTotal('int8', sourGrapes=True)

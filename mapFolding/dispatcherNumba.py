@@ -30,6 +30,6 @@ def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[inte
     countInitialize(connectionGraph=connectionGraph, gapsWhere=gapsWhere, my=my, track=track)
 
     if my[indexMy.taskDivisions.value] > 0:
-        countParallel(connectionGraph=connectionGraph, foldGroups=foldGroups, gapsWherePARALLEL=gapsWhere, myPARALLEL=my, trackPARALLEL=track)
+        countParallel(connectionGraph=connectionGraph, foldGroups=foldGroups, gapsWhere=gapsWhere, my=my, track=track)
     else:
         countSequential(connectionGraph=connectionGraph, foldGroups=foldGroups, gapsWhere=gapsWhere, my=my, track=track)

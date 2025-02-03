@@ -1,5 +1,5 @@
-from mapFolding import getPathFilenameFoldsTotal, computationState
-from mapFolding import outfitCountFolds
+import importlib.util
+from mapFolding import getPathFilenameFoldsTotal, computationState, outfitCountFolds, getAlgorithmSource
 from typing import Any, Literal, Optional, Sequence, Type, overload
 import pathlib
 import pickle
@@ -45,8 +45,9 @@ def makeStateJob(listDimensions: Sequence[int], writeJob: bool = True, **keyword
 
     stateUniversal: computationState = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
 
-    from mapFolding.syntheticModules import countInitialize
-    countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
+
+    moduleSource = getAlgorithmSource()
+    moduleSource.countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
 
     if not writeJob:
         return stateUniversal
