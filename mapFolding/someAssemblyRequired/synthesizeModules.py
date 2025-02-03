@@ -326,11 +326,8 @@ def inlineOneCallable(codeSource, callableTarget):
 
     if callableInlined:
         ast.fix_missing_locations(callableInlined)
-        if callableTarget != 'countInitialize':
-            parallel = callableTarget == 'countParallel'
-            callableDecorated = decorateCallableWithNumba(callableInlined, parallel)
-        else:
-            callableDecorated = callableInlined
+        parallel = callableTarget == 'countParallel'
+        callableDecorated = decorateCallableWithNumba(callableInlined, parallel)
 
         if callableTarget == 'countSequential':
             unpackerMy = UnpackArrayAccesses(indexMy, 'my')
@@ -433,11 +430,7 @@ def inlineMapFoldingNumba(listCallablesAsStr: List[str], algorithmSource: Option
         if not moduleSource:
             raise Exception("Pylance, OMG! The sky is falling!")
         pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
-        pathFilenameDestination = (
-            pathFilenameAlgorithm.parent
-            / relativePathSyntheticModules
-            / pathFilenameAlgorithm.with_stem(callableTarget.lower()).name[5:None]
-        )
+        pathFilenameDestination = pathFilenameAlgorithm.parent / relativePathSyntheticModules / pathFilenameAlgorithm.with_stem(callableTarget).name
         pathFilenameDestination.write_text(moduleSource)
         listPathFilenamesDestination.append((pathFilenameDestination, callableTarget))
 
@@ -449,5 +442,5 @@ if __name__ == '__main__':
     setDatatypeModule('numpy', sourGrapes=True)
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
-    setDatatypeLeavesTotal('int8', sourGrapes=True)
+    setDatatypeLeavesTotal('uint8', sourGrapes=True)
     inlineMapFoldingNumba(listCallablesAsStr)

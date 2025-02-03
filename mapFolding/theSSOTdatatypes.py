@@ -29,8 +29,8 @@ _datatypeFoldsTotal = ''
 _datatypeLeavesTotal = ''
 _datatypeModule = ''
 _datatypeFoldsTotalDEFAULT: Final[str] = 'int64'
-_datatypeElephinoDEFAULT: Final[str] = 'int16'
-_datatypeLeavesTotalDEFAULT: Final[str] = 'int16'
+_datatypeElephinoDEFAULT: Final[str] = 'uint8'
+_datatypeLeavesTotalDEFAULT: Final[str] = 'uint8'
 _datatypeModuleDEFAULT: Final[str] = 'numpy'
 
 def setDatatypeModule(datatypeModule: str, sourGrapes: Optional[bool] = False):
