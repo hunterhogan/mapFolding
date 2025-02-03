@@ -1,6 +1,6 @@
-from mapFolding import datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, EnumIndices
-from mapFolding import indexMy, indexTrack, getAlgorithmSource, ParametersNumba, parametersNumbaDEFAULT, hackSSOTdtype
-from typing import cast, Dict, List, Optional, Sequence, Type, Union
+from mapFolding import EnumIndices, relativePathSyntheticModules, setDatatypeElephino, setDatatypeFoldsTotal, setDatatypeLeavesTotal, setDatatypeModule
+from mapFolding import indexMy, indexTrack, getAlgorithmSource, ParametersNumba, parametersNumbaDEFAULT, hackSSOTdatatype, hackSSOTdtype
+from typing import cast, Dict, List, Optional, Sequence, Set, Type, Union
 from types import ModuleType
 import ast
 import inspect
@@ -14,33 +14,57 @@ Convert types
     This isn't necessary for Numba, but I may the infrastructure for other compilers or paradigms."""
 
 class RecursiveInliner(ast.NodeTransformer):
+    """
+    Class RecursiveInliner:
+        A custom AST NodeTransformer designed to recursively inline function calls from a given dictionary
+        of function definitions into the AST. Once a particular function has been inlined, it is marked
+        as completed to avoid repeated inlining. This transformation modifies the AST in-place by substituting
+        eligible function calls with the body of their corresponding function.
+        Attributes:
+            dictionaryFunctions (Dict[str, ast.FunctionDef]):
+                A mapping of function name to its AST definition, used as a source for inlining.
+            callablesCompleted (Set[str]):
+                A set to track function names that have already been inlined to prevent multiple expansions.
+        Methods:
+            inlineFunctionBody(callableTargetName: str) -> Optional[ast.FunctionDef]:
+                Retrieves the AST definition for a given function name from dictionaryFunctions
+                and recursively inlines any function calls within it. Returns the function definition
+                that was inlined or None if the function was already processed.
+            visit_Call(callNode: ast.Call) -> ast.AST:
+                Inspects calls within the AST. If a function call matches one in dictionaryFunctions,
+                it is replaced by the inlined body. If the last statement in the inlined body is a return
+                or an expression, that value or expression is substituted; otherwise, a constant is returned.
+            visit_Expr(node: ast.Expr) -> Union[ast.AST, List[ast.AST]]:
+                Handles expression nodes in the AST. If the expression is a function call from
+                dictionaryFunctions, its statements are expanded in place, effectively inlining
+                the called function's statements into the surrounding context.
+    """
     def __init__(self, dictionaryFunctions: Dict[str, ast.FunctionDef]):
         self.dictionaryFunctions = dictionaryFunctions
-        self.processed = set()
+        self.callablesCompleted: Set[str] = set()
 
-    def inlineFunctionBody(self, functionName: str) -> Optional[ast.FunctionDef]:
-        if (functionName in self.processed):
+    def inlineFunctionBody(self, callableTargetName: str) -> Optional[ast.FunctionDef]:
+        if (callableTargetName in self.callablesCompleted):
             return None
 
-        self.processed.add(functionName)
-        inlineDefinition = self.dictionaryFunctions[functionName]
-        # Recursively process the function body
-        for node in ast.walk(inlineDefinition):
-            self.visit(node)
+        self.callablesCompleted.add(callableTargetName)
+        inlineDefinition = self.dictionaryFunctions[callableTargetName]
+        for astNode in ast.walk(inlineDefinition):
+            self.visit(astNode)
         return inlineDefinition
 
-    def visit_Call(self, node: ast.Call) -> ast.AST:
-        callNode = self.generic_visit(node)
-        if (isinstance(callNode, ast.Call) and isinstance(callNode.func, ast.Name) and callNode.func.id in self.dictionaryFunctions):
-            inlineDefinition = self.inlineFunctionBody(callNode.func.id)
+    def visit_Call(self, callNode: ast.Call) -> ast.AST:
+        callNodeVisited = self.generic_visit(callNode)
+        if (isinstance(callNodeVisited, ast.Call) and isinstance(callNodeVisited.func, ast.Name) and callNodeVisited.func.id in self.dictionaryFunctions):
+            inlineDefinition = self.inlineFunctionBody(callNodeVisited.func.id)
             if (inlineDefinition and inlineDefinition.body):
-                lastStmt = inlineDefinition.body[-1]
-                if (isinstance(lastStmt, ast.Return) and lastStmt.value is not None):
-                    return self.visit(lastStmt.value)
-                elif (isinstance(lastStmt, ast.Expr) and lastStmt.value is not None):
-                    return self.visit(lastStmt.value)
+                statementTerminating = inlineDefinition.body[-1]
+                if (isinstance(statementTerminating, ast.Return) and statementTerminating.value is not None):
+                    return self.visit(statementTerminating.value)
+                elif (isinstance(statementTerminating, ast.Expr) and statementTerminating.value is not None):
+                    return self.visit(statementTerminating.value)
                 return ast.Constant(value=None)
-        return callNode
+        return callNodeVisited
 
     def visit_Expr(self, node: ast.Expr) -> Union[ast.AST, List[ast.AST]]:
         if (isinstance(node.value, ast.Call)):
@@ -50,8 +74,69 @@ class RecursiveInliner(ast.NodeTransformer):
                     return [self.visit(stmt) for stmt in inlineDefinition.body]
         return self.generic_visit(node)
 
-def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False, **keywordArguments: Optional[str]) -> ast.FunctionDef:
+def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False) -> ast.FunctionDef:
+    """
+    Decorates an AST function definition with Numba JIT compilation parameters.
+
+    This function processes an AST FunctionDef node and adds Numba-specific decorators
+    for JIT compilation. It handles array parameter typing and compilation options.
+
+    Parameters
+    ----------
+    astCallable : ast.FunctionDef
+        The AST node representing the function to be decorated with Numba JIT.
+    parallel : bool, optional
+        Whether to enable parallel execution in Numba compilation.
+        Default is False.
+
+    Returns
+    -------
+    ast.FunctionDef
+        The modified AST function definition node with added Numba decorators.
+
+    Notes
+    -----
+    The function performs the following main tasks:
+    1. Processes function parameters to create Numba-compatible type signatures
+    2. Constructs appropriate Numba compilation parameters
+    3. Creates and attaches a @numba.jit decorator to the function
+    Special handling is included for the 'countInitialize' function, which receives
+    empty compilation parameters.
+    The function relies on external parameters:
+    - parametersNumbaDEFAULT: Default Numba compilation parameters
+    - ParametersNumba: Class/type for handling Numba parameters
+    - hackSSOTdatatype: Function for determining default datatypes
+    """
     def makeNumbaParameterSignatureElement(signatureElement: ast.arg):
+        """
+        Converts an AST function parameter signature element into a Numba-compatible type annotation.
+
+        This function processes parameter annotations for array types, handling both shape and datatype
+        specifications. It supports multi-dimensional arrays through tuple-based shape definitions and
+        various numeric datatypes.
+
+        Parameters
+        ----------
+        signatureElement : ast.arg
+            The AST argument node containing the parameter's name and type annotation.
+            Expected annotation format: Type[shape_tuple, dtype]
+            where shape_tuple can be either a single dimension or a tuple of dimensions,
+            and dtype specifies the data type.
+
+        Returns
+        -------
+        ast.Subscript
+            A Numba-compatible type annotation as an AST node, representing an array type
+            with the specified shape and datatype.
+
+        Notes
+        -----
+        The function handles two main cases for shape specifications:
+        1. Multi-dimensional arrays with tuple-based shapes
+        2. Single-dimension arrays with simple slice notation
+        The datatype can be either explicitly specified in the annotation or determined
+        through a fallback mechanism using hackSSOTdatatype().
+        """
         if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
             annotationShape = signatureElement.annotation.slice.elts[0]
             if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
@@ -68,11 +153,8 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
                 datatypeAST = None
 
             ndarrayName = signatureElement.arg
-            # datatypePersonalized = get_datatypeFor(dataContainerForWhom)
-            Z0Z_hacky_dtype = hackSSOTdtype(ndarrayName)
-            # Z0Z_hacky_dtype = Z0Z_hacky_dtype[0] + 'ata' + Z0Z_hacky_dtype[1:]
-            # datatype_attr = keywordArguments.get(Z0Z_hacky_dtype, None) or datatypeAST or eval(Z0Z_hacky_dtype+'DEFAULT')
-            datatype_attr = str(Z0Z_hacky_dtype)
+            Z0Z_hacky_dtype = hackSSOTdatatype(ndarrayName)
+            datatype_attr = datatypeAST or Z0Z_hacky_dtype
 
             datatypeNumba = ast.Attribute(value=ast.Name(id='numba', ctx=ast.Load()), attr=datatype_attr, ctx=ast.Load())
 
@@ -101,7 +183,29 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
     return astCallable
 
 class UnpackArrayAccesses(ast.NodeTransformer):
-    """AST transformer that replaces array accesses with simpler variables."""
+    """
+    A class that transforms array accesses using enum indices into local variables.
+
+    This AST transformer identifies array accesses using enum indices and replaces them
+    with local variables, adding initialization statements at the start of functions.
+
+    Parameters:
+        enumIndexClass (Type[EnumIndices]): The enum class used for array indexing
+        arrayName (str): The name of the array being accessed
+
+    Attributes:
+        enumIndexClass (Type[EnumIndices]): Stored enum class for index lookups
+        arrayName (str): Name of the array being transformed
+        substitutions (dict): Tracks variable substitutions and their original nodes
+
+    The transformer handles two main cases:
+    1. Scalar array access - array[EnumIndices.MEMBER]
+    2. Array slice access - array[EnumIndices.MEMBER, other_indices...]
+    For each identified access pattern, it:
+    1. Creates a local variable named after the enum member
+    2. Adds initialization code at function start
+    3. Replaces original array access with the local variable
+    """
 
     def __init__(self, enumIndexClass: Type[EnumIndices], arrayName: str):
         self.enumIndexClass = enumIndexClass
@@ -185,49 +289,165 @@ class UnpackArrayAccesses(ast.NodeTransformer):
         node.body = initializations + node.body
         return node
 
-def inlineOneCallable(codeSource, pathFilenameAlgorithm, listPathFilenamesDestination, callableTarget, **keywordArguments: Optional[str]):
+def inlineOneCallable(codeSource, callableTarget):
+    """
+    Inlines a target callable function and its dependencies within the provided code source.
+
+    This function performs function inlining, optionally adds Numba decorators, and handles array access unpacking
+    for specific callable targets. It processes the source code through AST manipulation and returns the modified source.
+
+    Parameters:
+        codeSource (str): The source code containing the callable to be inlined.
+        callableTarget (str): The name of the callable function to be inlined. Special handling is provided for
+            'countParallel', 'countInitialize', and 'countSequential'.
+
+    Returns:
+        str: The modified source code with the inlined callable and necessary imports.
+
+    The function performs the following operations:
+    1. Parses the source code into an AST
+    2. Extracts import statements and function definitions
+    3. Inlines the target function using RecursiveInliner
+    4. Applies Numba decoration if needed
+    5. Handles special array access unpacking for 'countSequential'
+    6. Reconstructs and returns the modified source code
+
+    Note:
+        - Special handling is provided for 'countParallel', 'countInitialize', and 'countSequential' targets
+        - For 'countSequential', additional array access unpacking is performed for 'my' and 'track' indices
+        - `UnpackArrayAccesses` would need modification to handle 'countParallel'
+    """
+
     codeParsed: ast.Module = ast.parse(codeSource, type_comments=True)
     codeSourceImportStatements = {statement for statement in codeParsed.body if isinstance(statement, (ast.Import, ast.ImportFrom))}
     dictionaryFunctions = {statement.name: statement for statement in codeParsed.body if isinstance(statement, ast.FunctionDef)}
     callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctions)
-    parallel = callableTarget == 'countParallel'
     callableInlined = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
+
     if callableInlined:
         ast.fix_missing_locations(callableInlined)
-        callableDecorated = decorateCallableWithNumba(callableInlined, parallel, **keywordArguments)
+        if callableTarget != 'countInitialize':
+            parallel = callableTarget == 'countParallel'
+            callableDecorated = decorateCallableWithNumba(callableInlined, parallel)
+        else:
+            callableDecorated = callableInlined
 
         if callableTarget == 'countSequential':
-            myUnpacker = UnpackArrayAccesses(indexMy, 'my')
-            callableDecorated = cast(ast.FunctionDef, myUnpacker.visit(callableDecorated))
+            unpackerMy = UnpackArrayAccesses(indexMy, 'my')
+            callableDecorated = cast(ast.FunctionDef, unpackerMy.visit(callableDecorated))
             ast.fix_missing_locations(callableDecorated)
 
-            trackUnpacker = UnpackArrayAccesses(indexTrack, 'track')
-            callableDecorated = cast(ast.FunctionDef, trackUnpacker.visit(callableDecorated))
+            unpackerTrack = UnpackArrayAccesses(indexTrack, 'track')
+            callableDecorated = cast(ast.FunctionDef, unpackerTrack.visit(callableDecorated))
             ast.fix_missing_locations(callableDecorated)
 
         moduleAST = ast.Module(body=cast(List[ast.stmt], list(codeSourceImportStatements) + [callableDecorated]), type_ignores=[])
         ast.fix_missing_locations(moduleAST)
         moduleSource = ast.unparse(moduleAST)
+        return moduleSource
 
-        pathFilenameDestination = pathFilenameAlgorithm.parent / "syntheticModules" / pathFilenameAlgorithm.with_stem(callableTarget).name[5:None]
-        pathFilenameDestination.write_text(moduleSource)
-        listPathFilenamesDestination.append(pathFilenameDestination)
+class AppendDunderInit(ast.NodeTransformer):
+    """AST transformer that validates and appends imports to __init__.py files."""
 
-def inlineMapFoldingNumba(listCallablesAsStr: List[str], algorithmSource: Optional[ModuleType] = None, **keywordArguments: Optional[str]):
+    def __init__(self, listPathFilenamesDestination: list[tuple[pathlib.Path, str]]):
+        self.listPathFilenamesDestination = listPathFilenamesDestination
+        self.listTuplesDunderInit = []
+
+    def process_init_files(self) -> list[tuple[pathlib.Path, str]]:
+        for pathFilename, callableTarget in self.listPathFilenamesDestination:
+            pathDunderInit = pathFilename.parent / "__init__.py"
+
+            # Create empty init if doesn't exist
+            if not pathDunderInit.exists():
+                pathDunderInit.write_text("")
+
+            # Parse existing init file
+            try:
+                treeInit = ast.parse(pathDunderInit.read_text())
+            except SyntaxError:
+                treeInit = ast.Module(body=[], type_ignores=[])
+
+            # Compute the lowercase module target
+            moduleTarget = "." + pathFilename.stem
+            moduleTargetLower = moduleTarget.lower()
+
+            # Track existing imports as (normalizedModule, name)
+            setImportsExisting = set()
+            for node in treeInit.body:
+                if isinstance(node, ast.ImportFrom) and node.module:
+                    # Compare on a lowercase basis
+                    if node.module.lower() == moduleTargetLower:
+                        for alias in node.names:
+                            setImportsExisting.add((moduleTargetLower, alias.name))
+
+            # Only append if this exact import doesn't exist
+            if (moduleTargetLower, callableTarget) not in setImportsExisting:
+                newImport = ast.ImportFrom(
+                    module=moduleTarget,
+                    names=[ast.alias(name=callableTarget, asname=None)],
+                    level=0
+                )
+                treeInit.body.append(newImport)
+                ast.fix_missing_locations(treeInit)
+                pathDunderInit.write_text(ast.unparse(treeInit))
+
+            self.listTuplesDunderInit.append((pathDunderInit, callableTarget))
+
+        return self.listTuplesDunderInit
+
+def inlineMapFoldingNumba(listCallablesAsStr: List[str], algorithmSource: Optional[ModuleType] = None):
+    """Synthesizes numba-optimized versions of map folding functions.
+    This function creates specialized versions of map folding functions by inlining
+    target callables and generating optimized modules. It handles the code generation
+    and file writing process.
+
+    Parameters:
+        listCallablesAsStr (List[str]): List of callable names to be processed as strings.
+        algorithmSource (Optional[ModuleType], optional): Source module containing the algorithms.
+            If None, will be obtained via getAlgorithmSource(). Defaults to None.
+
+    Returns:
+        List[Tuple[pathlib.Path, str]]: List of tuples containing:
+            - Generated file paths
+            - Associated callable names
+
+    Raises:
+        Exception: If inline operation fails during code generation.
+
+    Note:
+        - Generated files are placed in a synthetic modules subdirectory
+        - Modifies __init__.py files to expose generated modules
+        - Current implementation contains hardcoded paths that should be abstracted
+    """
     if not algorithmSource:
         algorithmSource = getAlgorithmSource()
 
-    codeSource = inspect.getsource(algorithmSource)
-    pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
-
-    listPathFilenamesDestination: list[pathlib.Path] = []
+    listPathFilenamesDestination: list[tuple[pathlib.Path, str]] = []
 
     # TODO abstract this process
     # especially remove the hardcoded paths and filenames
 
     for callableTarget in listCallablesAsStr:
-        inlineOneCallable(codeSource, pathFilenameAlgorithm, listPathFilenamesDestination, callableTarget, **keywordArguments)
+        codeSource = inspect.getsource(algorithmSource)
+        moduleSource = inlineOneCallable(codeSource, callableTarget)
+        if not moduleSource:
+            raise Exception("Pylance, OMG! The sky is falling!")
+        pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
+        pathFilenameDestination = (
+            pathFilenameAlgorithm.parent
+            / relativePathSyntheticModules
+            / pathFilenameAlgorithm.with_stem(callableTarget.lower()).name[5:None]
+        )
+        pathFilenameDestination.write_text(moduleSource)
+        listPathFilenamesDestination.append((pathFilenameDestination, callableTarget))
+
+    # This almost works: it duplicates existing imports, though
+    listTuplesDunderInit = AppendDunderInit(listPathFilenamesDestination).process_init_files()
 
 if __name__ == '__main__':
     listCallablesAsStr: List[str] = ['countInitialize', 'countParallel', 'countSequential']
+    setDatatypeModule('numpy', sourGrapes=True)
+    setDatatypeFoldsTotal('int64', sourGrapes=True)
+    setDatatypeElephino('uint8', sourGrapes=True)
+    setDatatypeLeavesTotal('int8', sourGrapes=True)
     inlineMapFoldingNumba(listCallablesAsStr)

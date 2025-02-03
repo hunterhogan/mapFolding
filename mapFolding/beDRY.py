@@ -1,13 +1,12 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding import (
-    # dtypeLargeDEFAULT,
-    # dtypeMediumDEFAULT,
-    # dtypeSmallDEFAULT,
     computationState,
     hackSSOTdtype,
     indexMy,
     indexTrack,
     pathJobDEFAULT,
+    setDatatypeElephino,
+    setDatatypeFoldsTotal,
     setDatatypeLeavesTotal,
 )
 from numpy import integer
@@ -19,11 +18,6 @@ import numpy
 import os
 import pathlib
 import sys
-
-def interpretParametersDatatypes(**keywordArguments: Optional[Union[Type, str, DTypeLike]]):
-    # TODO
-    # This _might_ be a good place to use a dataclass instead of returning a 7-tuple.
-    pass
 
 def getFilenameFoldsTotal(mapShape: Sequence[int]) -> str:
     """Generate a standardized filename string for storing map folding totals.
@@ -198,7 +192,10 @@ def makeDataContainer(shape: Union[int, Tuple[int, ...]], datatype: Optional[DTy
         datatype = hackSSOTdtype('dtypeFoldsTotal')
     return numpy.zeros(shape, dtype=datatype)
 
-def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type[Any]]) -> computationState:
+def outfitCountFolds(listDimensions: Sequence[int]
+                        , computationDivisions: Optional[Union[int, str]] = None
+                        , CPUlimit: Optional[Union[bool, float, int]] = None
+                        , **keywordArguments: Optional[Union[str, bool]]) -> computationState:
     """
     Initializes and configures the computation state for map folding computations.
 
@@ -237,10 +234,13 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
         - Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
         - Integer `<= -1`: Subtract the absolute value from total CPUs.
     """
-    # NOTE to change the dtype, you need to synthesize new modules with the new dtype and recompile the functions
-    # dtypeLarge = keywordArguments.get('dtypeLarge', dtypeLargeDEFAULT)
-    # dtypeMedium = keywordArguments.get('dtypeMedium', dtypeMediumDEFAULT)
-    # dtypeSmall = keywordArguments.get('dtypeSmall', dtypeSmallDEFAULT)
+    kwourGrapes = keywordArguments.get('sourGrapes', False)
+    kwatatype = keywordArguments.get('datatypeElephino', None)
+    if kwatatype: setDatatypeElephino(kwatatype, sourGrapes=kwourGrapes) # type: ignore
+    kwatatype = keywordArguments.get('datatypeFoldsTotal', None)
+    if kwatatype: setDatatypeFoldsTotal(kwatatype, sourGrapes=kwourGrapes) # type: ignore
+    kwatatype = keywordArguments.get('datatypeLeavesTotal', None)
+    if kwatatype: setDatatypeLeavesTotal(kwatatype, sourGrapes=kwourGrapes) # type: ignore
 
     my = makeDataContainer(len(indexMy), hackSSOTdtype('my'))
 

@@ -117,3 +117,6 @@ pathJobDEFAULT = _pathModule / "jobs"
 
 if 'google.colab' in sys.modules:
     pathJobDEFAULT = pathlib.Path("/content/drive/MyDrive") / "jobs"
+
+# this needs improvement
+relativePathSyntheticModules = "syntheticModules"

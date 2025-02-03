@@ -5,6 +5,8 @@ from syntheticModules import countInitialize, countParallel, countSequential
 from typing import Any, Tuple
 import numba
 
+# TODO synthesize this module
+
 @numba.jit(cache=True)
 def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], track: NDArray[integer[Any]]):
     """

@@ -1,4 +1,3 @@
-from .Initialize import countInitialize
-from .Parallel import countParallel
-from .Sequential import countSequential
-
+from .initialize import countInitialize
+from .parallel import countParallel
+from .sequential import countSequential

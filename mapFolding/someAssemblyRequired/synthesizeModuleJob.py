@@ -1,5 +1,5 @@
 from mapFolding import getPathFilenameFoldsTotal, indexMy, indexTrack
-from mapFolding import make_dtype, datatypeLargeDEFAULT, datatypeMediumDEFAULT, datatypeSmallDEFAULT, datatypeModuleDEFAULT
+from mapFolding import setDatatypeElephino, setDatatypeFoldsTotal, setDatatypeLeavesTotal, setDatatypeModule, hackSSOTdatatype
 from someAssemblyRequired import makeStateJob
 from typing import Optional
 import importlib
@@ -13,9 +13,36 @@ import python_minifier
 identifierCallableLaunch = "goGoGadgetAbsurdity"
 
 def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: str) -> str:
-    def process_nested_array(arraySlice):
+    """Converts a NumPy array into a compressed string representation using run-length encoding (RLE).
+
+    This function takes a NumPy array and converts it into an optimized string representation by:
+    1. Compressing consecutive sequences of numbers into range objects
+    2. Minimizing repeated zeros using array multiplication syntax
+    3. Converting the result into a valid Python array initialization statement
+
+    Parameters:
+        arrayTarget (numpy.ndarray): The input NumPy array to be converted
+        identifierName (str): The variable name to use in the output string
+
+    Returns:
+        str: A string containing Python code that recreates the input array in compressed form.
+            Format: "{identifierName} = numpy.array({compressed_data}, dtype=numpy.{dtype})"
+
+    Example:
+        >>> arr = numpy.array([[0,0,0,1,2,3,4,0,0]])
+        >>> print(makeStrRLEcompacted(arr, "myArray"))
+        "myArray = numpy.array([[0]*3,*range(1,5),[0]*2], dtype=numpy.int64)"
+
+    Notes:
+        - Sequences of 4 or fewer numbers are kept as individual values
+        - Sequences longer than 4 numbers are converted to range objects
+        - Consecutive zeros are compressed using multiplication syntax
+        - The function preserves the original array's dtype
+    """
+
+    def compressRangesNDArrayNoFlatten(arraySlice):
         if isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim > 1:
-            return [process_nested_array(arraySlice[index]) for index in range(arraySlice.shape[0])]
+            return [compressRangesNDArrayNoFlatten(arraySlice[index]) for index in range(arraySlice.shape[0])]
         elif isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim == 1:
             listWithRanges = []
             for group in more_itertools.consecutive_groups(arraySlice.tolist()):
@@ -28,7 +55,7 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: str) -> str:
             return listWithRanges
         return arraySlice
 
-    arrayAsNestedLists = process_nested_array(arrayTarget)
+    arrayAsNestedLists = compressRangesNDArrayNoFlatten(arrayTarget)
 
     stringMinimized = python_minifier.minify(str(arrayAsNestedLists))
     commaZeroMaximum = arrayTarget.shape[-1] - 1
@@ -40,27 +67,47 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: str) -> str:
 
     return f"{identifierName} = numpy.array({stringMinimized}, dtype=numpy.{arrayTarget.dtype})"
 
-def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> pathlib.Path:
-    datatypeLarge = keywordArguments.get('datatypeLarge', datatypeLargeDEFAULT)
-    datatypeMedium = keywordArguments.get('datatypeMedium', datatypeMediumDEFAULT)
-    datatypeSmall = keywordArguments.get('datatypeSmall', datatypeSmallDEFAULT)
-    datatypeModule = keywordArguments.get('datatypeModule', datatypeModuleDEFAULT)
+def writeModuleWithNumba(listDimensions) -> pathlib.Path:
+    """
+    Writes a Numba-optimized Python module for map folding calculations.
 
-    if not datatypeLarge or not datatypeMedium or not datatypeSmall or not datatypeModule:
-        raise Exception("If I don't include this nonsense, the static type checker will complain. I feel like that means I need a different way to handle 'default'.")
+    This function takes map dimensions and generates a specialized Python module with Numba
+    optimizations. It processes a sequential counting algorithm, adds Numba decorators and
+    necessary data structures, and writes the resulting code to a file.
 
-    dtypeLarge = make_dtype(datatypeLarge, datatypeModule)
-    dtypeMedium = make_dtype(datatypeMedium, datatypeModule)
-    dtypeSmall = make_dtype(datatypeSmall, datatypeModule)
+    Parameters:
+        listDimensions: List of integers representing the dimensions of the map to be folded.
 
-    stateJob = makeStateJob(listDimensions, writeJob=False, dtypeLarge = dtypeLarge, dtypeMedium = dtypeMedium, dtypeSmall = dtypeSmall)
+    Returns:
+        pathlib.Path: Path to the generated Python module file.
+
+    The generated module includes:
+    - Numba JIT compilation decorators for performance optimization
+    - Required numpy and numba imports
+    - Dynamic and static data structures needed for folding calculations
+    - Processed algorithm from the original sequential counter
+    - Launch code for standalone execution
+    - Code to write the final fold count to a file
+    The function handles:
+    - Translation of original code to Numba-compatible syntax
+    - Insertion of pre-calculated values from the state job
+    - Management of variable declarations and assignments
+    - Setup of proper data types for Numba optimization
+    - Organization of the output file structure
+
+    Note:
+        The generated module requires Numba and numpy to be installed.
+        The output file will be placed in the same directory as the folds total file,
+        with a .py extension.
+    """
+    stateJob = makeStateJob(listDimensions, writeJob=False)
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
 
     from syntheticModules import countSequential
     algorithmSource = countSequential
     codeSource = inspect.getsource(algorithmSource)
 
-    lineNumba = f"@numba.jit(numba.types.{datatypeLarge}(), cache=True, nopython=True, fastmath=True, forceinline=True, inline='always', looplift=False, _nrt=True, error_model='numpy', parallel=False, boundscheck=False, no_cfunc_wrapper=True, no_cpython_wrapper=False)"
+    lineNumba = f"@numba.jit(numba.types.{hackSSOTdatatype('datatypeFoldsTotal')}(), cache=True, nopython=True, fastmath=True, forceinline=True, inline='always', looplift=False, _nrt=True, error_model='numpy', parallel=False, boundscheck=False, no_cfunc_wrapper=False, no_cpython_wrapper=False)"
 
     linesImport = "\n".join([
                         "import numpy"
@@ -99,7 +146,14 @@ def writeModuleWithNumba(listDimensions, **keywordArguments: Optional[str]) -> p
                 continue
             # Statements are in the form: leaf1ndex = my[indexMy.leaf1ndex.value]
             identifier, statement = lineSource.split('=')
-            lineSource = ImaIndent + identifier.strip() + f"=numba.types.{datatypeSmall}({str(eval(statement.strip()))})"
+            lineSource = ImaIndent + identifier.strip() + f"=numba.types.{hackSSOTdatatype(identifier.strip())}({str(eval(statement.strip()))})"
+        elif ': int =' in lineSource or ':int=' in lineSource:
+            if 'dimensionsTotal' in lineSource:
+                continue
+            # Statements are in the form: groupsOfFolds: int = 0
+            assignment, statement = lineSource.split('=')
+            identifier = assignment.split(':')[0].strip()
+            lineSource = ImaIndent + identifier.strip() + f"=numba.types.{hackSSOTdatatype(identifier.strip())}({str(eval(statement.strip()))})"
         elif 'track[indexTrack.' in lineSource:
             # Statements are in the form: leafAbove = track[indexTrack.leafAbove.value]
             identifier, statement = lineSource.split('=')
@@ -145,10 +199,10 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     listDimensions = [6,6]
-    datatypeLarge = 'int64'
-    datatypeMedium = 'uint8'
-    datatypeSmall = datatypeMedium
-    pathFilenameModule = writeModuleWithNumba(listDimensions, datatypeLarge=datatypeLarge, datatypeMedium=datatypeMedium, datatypeSmall=datatypeSmall)
+    setDatatypeFoldsTotal('int64', sourGrapes=True)
+    setDatatypeElephino('uint8', sourGrapes=True)
+    setDatatypeLeavesTotal('int8', sourGrapes=True)
+    pathFilenameModule = writeModuleWithNumba(listDimensions)
 
     # Induce numba.jit compilation
     moduleSpec = importlib.util.spec_from_file_location(pathFilenameModule.stem, pathFilenameModule)

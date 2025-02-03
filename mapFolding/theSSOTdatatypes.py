@@ -1,6 +1,5 @@
 """module for prototyping/developing a new system for datatype management."""
 from numpy import integer
-# import lazy_object_proxy
 from typing import Any, Callable, Final, Optional, Tuple, Type, TypedDict
 from types import ModuleType
 import enum
@@ -25,27 +24,13 @@ import sys
     - signedness apathy|non-negative|non-positive|both
     """
 
-# datatypeLargeDEFAULT: Final[str] = 'int64'
-# datatypeMediumDEFAULT: Final[str] = 'uint8'
-# datatypeSmallDEFAULT: Final[str] = 'uint8'
-# datatypeModuleDEFAULT: Final[str] = 'numpy'
-
-# def make_dtype(datatype: str, datatypeModule: Optional[str] = None) -> Type[Any]:
-#     if datatypeModule is None:
-#         datatypeModule = datatypeModuleDEFAULT
-#     return eval(f"{datatypeModule}.{datatype}")
-
-# dtypeLargeDEFAULT = make_dtype(datatypeLargeDEFAULT)
-# dtypeMediumDEFAULT = make_dtype(datatypeMediumDEFAULT)
-# dtypeSmallDEFAULT = make_dtype(datatypeSmallDEFAULT)
-
 _datatypeElephino = ''
 _datatypeFoldsTotal = ''
 _datatypeLeavesTotal = ''
 _datatypeModule = ''
 _datatypeFoldsTotalDEFAULT: Final[str] = 'int64'
-_datatypeElephinoDEFAULT: Final[str] = 'uint8'
-_datatypeLeavesTotalDEFAULT: Final[str] = 'uint8'
+_datatypeElephinoDEFAULT: Final[str] = 'int16'
+_datatypeLeavesTotalDEFAULT: Final[str] = 'int16'
 _datatypeModuleDEFAULT: Final[str] = 'numpy'
 
 def setDatatypeModule(datatypeModule: str, sourGrapes: Optional[bool] = False):
@@ -121,10 +106,6 @@ def _make_dtypeFoldsTotalYouLazyBum():
 def _make_dtypeLeavesTotalYouLazyBum():
     return eval(f"{_getDatatypeModule()}.{_get_datatypeLeavesTotal()}")
 
-# dtypeElephino = lazy_object_proxy.Proxy(_make_dtypeElephinoYouLazyBum)
-# dtypeFoldsTotal = lazy_object_proxy.Proxy(_make_dtypeFoldsTotalYouLazyBum)
-# dtypeLeavesTotal = lazy_object_proxy.Proxy(_make_dtypeLeavesTotalYouLazyBum)
-
 def hackSSOTdtype(identifier: str) -> Type[Any]:
     _hackSSOTdtype={
     'connectionGraph': 'dtypeLeavesTotal',
@@ -140,16 +121,45 @@ def hackSSOTdtype(identifier: str) -> Type[Any]:
     'trackPARALLEL': 'dtypeElephino',
     }
     Rube = _hackSSOTdtype[identifier]
-    # if Rube == 'dtypeElephino':
-    #     GoldBerg = dtypeElephino
-    # elif Rube == 'dtypeFoldsTotal':
-    #     GoldBerg = dtypeFoldsTotal
-    # elif Rube == 'dtypeLeavesTotal':
-    #     GoldBerg = dtypeLeavesTotal
     if Rube == 'dtypeElephino':
         GoldBerg = _make_dtypeElephinoYouLazyBum()
     elif Rube == 'dtypeFoldsTotal':
         GoldBerg = _make_dtypeFoldsTotalYouLazyBum()
     elif Rube == 'dtypeLeavesTotal':
         GoldBerg = _make_dtypeLeavesTotalYouLazyBum()
+    return GoldBerg
+
+def hackSSOTdatatype(identifier: str) -> str:
+    _hackSSOTdatatype={
+    'connectionGraph': 'datatypeLeavesTotal',
+    'datatypeElephino': 'datatypeElephino',
+    'datatypeFoldsTotal': 'datatypeFoldsTotal',
+    'datatypeLeavesTotal': 'datatypeLeavesTotal',
+    'dimensionsTotal': 'datatypeLeavesTotal',
+    'dimensionsUnconstrained': 'datatypeLeavesTotal',
+    'foldGroups': 'datatypeFoldsTotal',
+    'gap1ndex': 'datatypeLeavesTotal',
+    'gap1ndexCeiling': 'datatypeElephino',
+    'gapsWhere': 'datatypeLeavesTotal',
+    'gapsWherePARALLEL': 'datatypeLeavesTotal',
+    'groupsOfFolds': 'datatypeFoldsTotal',
+    'indexDimension': 'datatypeLeavesTotal',
+    'indexLeaf': 'datatypeLeavesTotal',
+    'indexMiniGap': 'datatypeElephino',
+    'leaf1ndex': 'datatypeLeavesTotal',
+    'leafConnectee': 'datatypeLeavesTotal',
+    'my': 'datatypeElephino',
+    'myPARALLEL': 'datatypeElephino',
+    'taskDivisions': 'datatypeLeavesTotal',
+    'taskIndex': 'datatypeLeavesTotal',
+    'track': 'datatypeElephino',
+    'trackPARALLEL': 'datatypeElephino',
+    }
+    Rube = _hackSSOTdatatype[identifier]
+    if Rube == 'datatypeElephino':
+        GoldBerg = _get_datatypeElephino()
+    elif Rube == 'datatypeFoldsTotal':
+        GoldBerg = _get_datatypeFoldsTotal()
+    elif Rube == 'datatypeLeavesTotal':
+        GoldBerg = _get_datatypeLeavesTotal()
     return GoldBerg
