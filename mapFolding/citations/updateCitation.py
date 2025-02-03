@@ -3,7 +3,6 @@ from packaging.metadata import Metadata as PyPAMetadata
 from typing import Any, Dict, List
 import attrs
 import cffconvert
-import tempfile
 import packaging
 import packaging.metadata
 import packaging.utils
@@ -195,7 +194,7 @@ def writeCitation(nexusCitation: CitationNexus, pathFilenameCitationSSOT: pathli
     for keyName in list(dictionaryCitation.keys()):
         dictionaryCitation[keyName.replace("DASH", "-")] = dictionaryCitation.pop(keyName)
 
-    pathFilenameForValidation = pathlib.Path(tempfile.mktemp())
+    pathFilenameForValidation = pathFilenameCitationSSOT.with_stem('validation')
 
     def writeStream(pathFilename):
         with open(pathFilename, 'w') as pathlibIsAStealthContextManagerThatRuamelCannotDetectAndRefusesToWorkWith:
@@ -204,9 +203,11 @@ def writeCitation(nexusCitation: CitationNexus, pathFilenameCitationSSOT: pathli
     writeStream(pathFilenameForValidation)
 
     citationObject: cffconvert.Citation = create_citation(infile=pathFilenameForValidation, url=None)
-    if citationObject.validate(verbose=True) is None:
+    if citationObject.validate() is None:
         writeStream(pathFilenameCitationSSOT)
         writeStream(pathFilenameCitationDOTcffRepo)
+
+    pathFilenameForValidation.unlink()
 
 def logistics():
     # Prefer reliable, dynamic values over hardcoded ones
