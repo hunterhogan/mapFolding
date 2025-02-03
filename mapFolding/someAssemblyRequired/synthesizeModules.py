@@ -430,7 +430,7 @@ def inlineMapFoldingNumba(listCallablesAsStr: List[str], algorithmSource: Option
         if not moduleSource:
             raise Exception("Pylance, OMG! The sky is falling!")
         pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
-        pathFilenameDestination = pathFilenameAlgorithm.parent / relativePathSyntheticModules / pathFilenameAlgorithm.with_stem(callableTarget).name
+        pathFilenameDestination = pathFilenameAlgorithm.parent / relativePathSyntheticModules / pathFilenameAlgorithm.with_stem("numba"+callableTarget[5:None]).name
         pathFilenameDestination.write_text(moduleSource)
         listPathFilenamesDestination.append((pathFilenameDestination, callableTarget))
 

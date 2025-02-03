@@ -25,7 +25,7 @@ Tentative plan:
     - pathFilenameCitationDOTcffRepo
 - Commit and push to GitHub
     - this complicates things
-    - I want the updated citation to be in the `commit` field of itself
+    - I want the updated citation to be in the `commit` field of itself: but the commit field isn't even working right now
 """
 
 @attrs.define

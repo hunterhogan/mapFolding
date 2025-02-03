@@ -1,5 +1,5 @@
-import numpy
 from typing import Any, Tuple
+import numpy
 from numpy import integer
 import numba
 from mapFolding import indexMy, indexTrack

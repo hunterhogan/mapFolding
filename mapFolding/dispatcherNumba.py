@@ -7,7 +7,7 @@ import numba
 
 # TODO synthesize this module
 
-@numba.jit(cache=True)
+@numba.jit(cache=False)
 def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], track: NDArray[integer[Any]]):
     """
     What in tarnation is this stupid module and function?
