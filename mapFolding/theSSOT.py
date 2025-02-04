@@ -9,6 +9,10 @@ import numpy.typing
 import pathlib
 import sys
 
+"""I have hobbled together:
+TypedDict, Enum, defaultdict, and lookup dictionaries to make DIY immutability and delayed realization/instantiation.
+Nevertheless, I am both confident that all of these processes will be replaced and completely ignorant of what will replace them."""
+
 """Technical concepts I am likely using and likely want to use more effectively:
 - Configuration Registry
 - Write-Once, Read-Many (WORM) / Immutable Initialization

@@ -224,49 +224,18 @@ def addGitHubRelease(nexusCitation: CitationNexus) -> CitationNexus:
     return nexusCitation
 
 def getPyPIrelease(nexusCitation: CitationNexus) -> Dict[str, Any]:
-    """Return a dictionary with PyPI release data.
-
-    The dictionary contains:
-        repository-artifact: The URL for the package on PyPI.
-
-    Raises:
-        ValueError: If the citation title or version is not set.
-        RuntimeError: If the HTTP request to PyPI fails.
-    """
     if not nexusCitation.title:
         raise ValueError("Package name (title) is required to get PyPI release info.")
     if not nexusCitation.version:
         raise ValueError("Package version is required to get PyPI release info.")
 
     packageName = packaging.utils.canonicalize_name(nexusCitation.title)
-    pypiURL = f"https://pypi.org/pypi/{packageName}/json"
-
-    response = requests.get(pypiURL)
-    if response.status_code != 200:
-        raise RuntimeError(f"Failed to get PyPI release info: {response.status_code}")
-
-    releaseData = response.json()
     version = str(nexusCitation.version)
-    if version not in releaseData.get("releases", {}):
-        raise ValueError(f"Version {version} not found on PyPI")
-
     return {
         "repositoryDASHartifact": f"https://pypi.org/project/{packageName}/{version}/"
     }
 
 def addPyPIrelease(nexusCitation: CitationNexus) -> CitationNexus:
-    """
-    Update the nexusCitation with PyPI release information.
-
-    This function populates:
-        - repositoryDASHartifact: the URL to the package version on PyPI.
-
-    Returns:
-        The updated CitationNexus instance.
-
-    Raises:
-        Any exception raised by getPyPIrelease.
-    """
     pypiReleaseData = getPyPIrelease(nexusCitation)
     nexusCitation.repositoryDASHartifact = pypiReleaseData.get("repositoryDASHartifact")
     return nexusCitation
