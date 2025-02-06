@@ -37,19 +37,20 @@ optional-dependencies = { benchmark = [
     "pandas",
     "tqdm",
 ], testing = [
-    "attrs",
-    "cffconvert",
     "more_itertools",
+    "mypy",
     "pytest-cov",
     "pytest-env",
+    "pytest-mypy",
     "pytest-xdist",
     "pytest",
     "python_minifier",
-    "tomli",] }
+    "tomli",
+    "types-setuptools",] }
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.10"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
-urls = { Homepage = "https://github.com/hunterhogan/mapFolding", Donate = "https://www.patreon.com/integrated", Repository = "https://github.com/hunterhogan/mapFolding.git" }
+urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Repository = "https://github.com/hunterhogan/mapFolding.git" }
 version = "0.3.8"
 
 [tool.coverage]
@@ -66,14 +67,28 @@ run = { branch = true, concurrency = [
     "mapFolding/someAssemblyRequired/*",
     "Z0Z_*",
 ], parallel = true, source = [
-    "mapFolding",] }
+    ".",] }
 xml = { output = "tests/coverage/coverage.xml" }
-
 [tool.pytest.ini_options]
-addopts = ["--color=yes", "-n 4"]
-# env = ["NUMBA_JIT_COVERAGE=1"]
+addopts = ["--color=yes", "-n 4",]# "--mypy", "--mypy-ignore-missing-imports"]
 env = ["NUMBA_DISABLE_JIT=1"]
 testpaths = ["tests"]
 
 [tool.setuptools.packages.find]
-where = ["mapFolding"]
+where = ["."]
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+packages = ["mapFolding"]
+exclude = ["tests/*", "mapFolding/benchmarks/*", "mapFolding/someAssemblyRequired/*", "Z0Z_*"]

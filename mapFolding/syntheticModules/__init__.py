@@ -1,3 +1,3 @@
-from .numbaInitialize import countInitialize
-from .numbaParallel import countParallel
-from .numbaSequential import countSequential
+from .numba_countInitialize import countInitialize
+from .numba_countParallel import countParallel
+from .numba_countSequential import countSequential

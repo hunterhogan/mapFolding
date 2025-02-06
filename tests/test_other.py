@@ -1,6 +1,6 @@
 from contextlib import redirect_stdout
 from tests.conftest import *
-from typing import List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple, Literal, Callable, Generator
 from Z0Z_tools import intInnit
 import io
 import itertools
@@ -44,7 +44,7 @@ import sys
     (range(3, 7), [3, 4, 5, 6], [3, 4, 5, 6], [3, 4, 5, 6], 360),  # range sequence type
     (tuple([3, 5, 7]), [3, 5, 7], [3, 5, 7], [3, 5, 7], 105),  # tuple sequence type
 ])
-def test_listDimensionsAsParameter(listDimensions, expected_intInnit, expected_parseListDimensions, expected_validateListDimensions, expected_getLeavesTotal) -> None:
+def test_listDimensionsAsParameter(listDimensions: None | List[str] | List[int] | List[float] | List[None] | List[bool] | List[List[int]] | List[complex] | range | tuple[int, ...], expected_intInnit: type[ValueError] | List[int] | type[TypeError], expected_parseListDimensions: type[ValueError] | List[int] | type[TypeError], expected_validateListDimensions: type[ValueError] | type[NotImplementedError] | List[int] | type[TypeError], expected_getLeavesTotal: type[ValueError] | int | type[TypeError] | type[OverflowError]) -> None:
     """Test both validateListDimensions and getLeavesTotal with the same inputs."""
     standardizedEqualTo(expected_intInnit, intInnit, listDimensions)
     standardizedEqualTo(expected_parseListDimensions, parseDimensions, listDimensions)
@@ -69,7 +69,7 @@ def test_getLeavesTotal_edge_cases() -> None:
 def test_countFolds_writeFoldsTotal(
     listDimensionsTestFunctionality: List[int],
     pathTempTesting: pathlib.Path,
-    mockFoldingFunction,
+    mockFoldingFunction: Callable[..., Callable[..., None]],
     mockDispatcher,
     foldsValue: int,
     writeFoldsTarget: Optional[str]
@@ -92,25 +92,25 @@ def test_countFolds_writeFoldsTotal(
     standardizedEqualTo(str(foldsTotalExpected), lambda: (pathTempTesting / filenameFoldsTotalExpected).read_text())
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_intInnit())
-def testIntInnit(nameOfTest, callablePytest):
+def testIntInnit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
     callablePytest()
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_oopsieKwargsie())
-def testOopsieKwargsie(nameOfTest, callablePytest):
+def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
     callablePytest()
 
 @pytest.mark.parametrize("CPUlimit, expectedLimit", [
-    (None, numba.config.NUMBA_DEFAULT_NUM_THREADS), # type: ignore
-    (False, numba.config.NUMBA_DEFAULT_NUM_THREADS), # type: ignore
+    (None, numba.get_num_threads()),
+    (False, numba.get_num_threads()),
     (True, 1),
     (4, 4),
-    (0.5, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS // 2)), # type: ignore
-    (-0.5, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS // 2)), # type: ignore
-    (-2, max(1, numba.config.NUMBA_DEFAULT_NUM_THREADS - 2)), # type: ignore
-    (0, numba.config.NUMBA_DEFAULT_NUM_THREADS), # type: ignore
+    (0.5, max(1, numba.get_num_threads() // 2)),
+    (-0.5, max(1, numba.get_num_threads() // 2)),
+    (-2, max(1, numba.get_num_threads() - 2)),
+    (0, numba.get_num_threads()),
     (1, 1),
 ])
-def test_setCPUlimit(CPUlimit, expectedLimit) -> None:
+def test_setCPUlimit(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | Literal[0] | Literal[1], expectedLimit: Any | int) -> None:
     standardizedEqualTo(expectedLimit, setCPUlimit, CPUlimit)
 
 def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: List[int]) -> None:
@@ -159,9 +159,9 @@ datatypeLarge
 """
 
 @pytest.fixture
-def parameterIterator():
+def parameterIterator() -> Callable[[List[int]], Generator[Dict[str, Any], None, None]]:
     """Generate random combinations of parameters for outfitCountFolds testing."""
-    parameterSets = {
+    parameterSets: Dict[str, List[Any]] = {
         'computationDivisions': [
             None,
             'maximum',
@@ -184,16 +184,15 @@ def parameterIterator():
         ]
     }
 
-    def makeParametersDynamic(listDimensions):
+    def makeParametersDynamic(listDimensions: List[int]) -> Dict[str, List[Any]]:
         """Add context-dependent parameter values."""
         parametersDynamic = parameterSets.copy()
         leavesTotal = getLeavesTotal(listDimensions)
         concurrencyLimit = min(leavesTotal, 16)
 
-        # Add dynamic computationDivisions
-        parametersDynamic['computationDivisions'].extend(
-            [random.randint(2, leavesTotal-1) for iterator in range(3)]
-        )
+        # Add dynamic computationDivisions values
+        dynamicDivisions = [random.randint(2, leavesTotal-1) for iterator in range(3)]
+        parametersDynamic['computationDivisions'] = parametersDynamic['computationDivisions'] + dynamicDivisions
 
         # Add dynamic CPUlimit values
         parameterDynamicCPU = [
@@ -206,11 +205,11 @@ def parameterIterator():
         parameterDynamicCPU.extend(
             [random.randint(-concurrencyLimit+1, -2) for iterator in range(2)]
         )
-        parametersDynamic['CPUlimit'].extend(parameterDynamicCPU)
+        parametersDynamic['CPUlimit'] = parametersDynamic['CPUlimit'] + parameterDynamicCPU
 
         return parametersDynamic
 
-    def generateCombinations(listDimensions):
+    def generateCombinations(listDimensions: List[int]) -> Generator[Dict[str, Any], None, None]:
         parametersDynamic = makeParametersDynamic(listDimensions)
         parameterKeys = list(parametersDynamic.keys())
         parameterValues = [parametersDynamic[key] for key in parameterKeys]
@@ -224,35 +223,8 @@ def parameterIterator():
             yield dict(zip(parameterKeys, combination))
 
     return generateCombinations
-# Must mock the set cpu count to avoid errors on GitHub
-# def test_outfitCountFolds_basic(listDimensionsTestFunctionality, parameterIterator):
-#     """Basic validation of outfitCountFolds return value structure."""
-#     parameters = next(parameterIterator(listDimensionsTestFunctionality))
 
-#     stateInitialized = outfitCountFolds(
-#         listDimensionsTestFunctionality,
-#         **{k: v for k, v in parameters.items() if v is not None}
-#     )
-
-#     # Basic structure tests
-#     assert isinstance(stateInitialized, dict)
-#     assert len(stateInitialized) == 7  # 6 ndarray + 1 tuple
-
-#     # Check for specific keys
-#     requiredKeys = set(computationState.__annotations__.keys())
-#     assert set(stateInitialized.keys()) == requiredKeys
-
-#     # Check types more carefully
-#     for key, value in stateInitialized.items():
-#         if key == 'mapShape':
-#             assert isinstance(value, tuple)
-#             assert all(isinstance(dim, int) for dim in value)
-#         else:
-#             assert isinstance(value, numpy.ndarray), f"{key} should be ndarray but is {type(value)}"
-#             assert issubclass(value.dtype.type, numpy.integer), \
-#                 f"{key} should have integer dtype but has {value.dtype}"
-
-def test_pathJobDEFAULT_colab():
+def test_pathJobDEFAULT_colab() -> None:
     """Test that pathJobDEFAULT is set correctly when running in Google Colab."""
     # Mock sys.modules to simulate running in Colab
     with unittest.mock.patch.dict('sys.modules', {'google.colab': unittest.mock.MagicMock()}):
@@ -278,7 +250,7 @@ def test_saveFoldsTotal_fallback(pathTempTesting: pathlib.Path) -> None:
     fallbackFiles = list(pathTempTesting.glob("foldsTotalYO_*.txt"))
     assert len(fallbackFiles) == 1, "Fallback file was not created upon write failure."
 
-def test_makeDataContainer_default_datatype():
+def test_makeDataContainer_default_datatype() -> None:
     """Test that makeDataContainer uses dtypeLargeDEFAULT when no datatype is specified."""
     testShape = (3, 4)
     container = makeDataContainer(testShape)

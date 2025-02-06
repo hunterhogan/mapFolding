@@ -1,6 +1,8 @@
+from operator import call
+from click import Option
 from mapFolding import EnumIndices, relativePathSyntheticModules, setDatatypeElephino, setDatatypeFoldsTotal, setDatatypeLeavesTotal, setDatatypeModule
 from mapFolding import indexMy, indexTrack, getAlgorithmSource, ParametersNumba, parametersNumbaDEFAULT, hackSSOTdatatype, hackSSOTdtype
-from typing import cast, Dict, List, Optional, Sequence, Set, Type, Union
+from typing import cast, Dict, List, Optional, Sequence, Set, Tuple, Type, Union
 from types import ModuleType
 import ast
 import inspect
@@ -392,55 +394,107 @@ class AppendDunderInit(ast.NodeTransformer):
 
         return self.listTuplesDunderInit
 
-def inlineMapFoldingNumba(listCallablesAsStr: List[str], algorithmSource: Optional[ModuleType] = None):
-    """Synthesizes numba-optimized versions of map folding functions.
-    This function creates specialized versions of map folding functions by inlining
-    target callables and generating optimized modules. It handles the code generation
-    and file writing process.
+docstringDispatcher = """
+    What in tarnation is this stupid module and function?
 
-    Parameters:
-        listCallablesAsStr (List[str]): List of callable names to be processed as strings.
-        algorithmSource (Optional[ModuleType], optional): Source module containing the algorithms.
-            If None, will be obtained via getAlgorithmSource(). Defaults to None.
-
-    Returns:
-        List[Tuple[pathlib.Path, str]]: List of tuples containing:
-            - Generated file paths
-            - Associated callable names
-
-    Raises:
-        Exception: If inline operation fails during code generation.
-
-    Note:
-        - Generated files are placed in a synthetic modules subdirectory
-        - Modifies __init__.py files to expose generated modules
-        - Current implementation contains hardcoded paths that should be abstracted
+    - This function is not in the same module as `countFolds` so that we can delay Numba just-in-time (jit) compilation of this function and the finalization of its settings until we are ready.
+    - This function is not in the same module as `countFoldsCompiled`, which is the function that does the hard, so that we can delay `numba.jit` compilation of `countFoldsCompiled`.
+    - `countFoldsCompiled` is not merely "jitted", it is super jitted, which makes it too arrogant to talk to plebian Python functions. It will, however, reluctantly talk to basic jitted functions.
+    - The function in this module is jitted, so it can talk to `countFoldsCompiled`, and because it isn't so arrogant, it will talk to the low-class `countFolds` with only a few restrictions, such as:
+        - No `TypedDict`
+        - The plebs must clean up their own memory problems
+        - No oversized integers
+        - No global variables, only global constants
+        - They don't except pleb nonlocal variables either
+        - Python "class": they are all inferior to a jit
+        - No `**kwargs`
+        - and just a few dozen-jillion other things.
     """
+
+def createDispatcherAST(callableTarget: str, listCallablesInline: List[str], algorithmSource: ModuleType) -> ast.Module:
+    """Creates AST for the dispatcher module that coordinates the optimized functions."""
+
+    # Get source imports and function
+    sourceCode = inspect.getsource(algorithmSource)
+    sourceAST = ast.parse(sourceCode)
+    importsAST = [node for node in sourceAST.body if isinstance(node, (ast.Import, ast.ImportFrom))]
+    sourceFunction = getattr(algorithmSource, callableTarget)
+    sourceFunctionAST = ast.parse(inspect.getsource(sourceFunction))
+    sourceDefNode = next(node for node in ast.walk(sourceFunctionAST) if isinstance(node, ast.FunctionDef))
+
+    # Extract call information from source function
+    sourceCallNodes = []
+    for node in ast.walk(sourceFunctionAST):
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
+            call = node.value
+            if isinstance(call.func, ast.Name) and call.func.id in listCallablesInline:
+                sourceCallNodes.append(node)
+
+    # Create dispatcher function with same signature
+    dispatcherFunction = ast.FunctionDef(
+        name='_countFolds',
+        args=sourceDefNode.args,
+        body=sourceCallNodes,
+        decorator_list=[],
+        returns=None
+    )
+
+    # Decorate with minimal Numba config
+    dispatcherFunction = decorateCallableWithNumba(
+        dispatcherFunction,
+        parallel=False
+    )
+
+    moduleAST = ast.Module(body=importsAST + [dispatcherFunction], type_ignores=[])
+    ast.fix_missing_locations(moduleAST)
+    return moduleAST
+
+def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: Optional[str] = None, algorithmSource: Optional[ModuleType] = None):
+    """Synthesizes numba-optimized versions of map folding functions."""
+
     if not algorithmSource:
         algorithmSource = getAlgorithmSource()
 
-    listPathFilenamesDestination: list[tuple[pathlib.Path, str]] = []
+    def getPathFilenameWrite(callableTarget: str, pathWrite: Optional[pathlib.Path] = None, formatFilenameWrite: Optional[str] = None) -> pathlib.Path:
+        if not pathWrite:
+            pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
+            pathWrite = pathFilenameAlgorithm.parent / relativePathSyntheticModules
+        if not formatFilenameWrite:
+            formatFilenameWrite = "numba_{callableTarget}.py"
+
+        pathFilename = pathWrite  / formatFilenameWrite.format(callableTarget=callableTarget)
+        return pathFilename
+
+    listPathFilenamesDestination: List[Tuple[pathlib.Path, str]] = []
 
     # TODO abstract this process
     # especially remove the hardcoded paths and filenames
 
-    for callableTarget in listCallablesAsStr:
+    for callableTarget in listCallablesInline:
         codeSource = inspect.getsource(algorithmSource)
         moduleSource = inlineOneCallable(codeSource, callableTarget)
         if not moduleSource:
             raise Exception("Pylance, OMG! The sky is falling!")
-        pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
-        pathFilenameDestination = pathFilenameAlgorithm.parent / relativePathSyntheticModules / pathFilenameAlgorithm.with_stem("numba"+callableTarget[5:None]).name
-        pathFilenameDestination.write_text(moduleSource)
-        listPathFilenamesDestination.append((pathFilenameDestination, callableTarget))
+        pathFilenameWrite = getPathFilenameWrite(callableTarget)
+        pathFilenameWrite.write_text(moduleSource)
+        listPathFilenamesDestination.append((pathFilenameWrite, callableTarget))
 
-    # This almost works: it duplicates existing imports, though
-    listTuplesDunderInit = AppendDunderInit(listPathFilenamesDestination).process_init_files()
+    # Generate dispatcher
+    if callableDispatcher:
+        dispatcherAST = createDispatcherAST(callableDispatcher, listCallablesInline, algorithmSource)
+        dispatcherSource = ast.unparse(dispatcherAST)
+        pathFilenameDispatcher = getPathFilenameWrite(
+            'dispatcherNumba',
+            formatFilenameWrite="{callableTarget}.py"
+        )
+        pathFilenameDispatcher.write_text(dispatcherSource)
 
 if __name__ == '__main__':
-    listCallablesAsStr: List[str] = ['countInitialize', 'countParallel', 'countSequential']
     setDatatypeModule('numpy', sourGrapes=True)
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
     setDatatypeLeavesTotal('uint8', sourGrapes=True)
-    inlineMapFoldingNumba(listCallablesAsStr)
+    listCallablesInline: List[str] = ['countInitialize', 'countParallel', 'countSequential']
+    callableDispatcher = 'doTheNeedful'
+    # makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
+    makeNumbaOptimizedFlow(listCallablesInline)

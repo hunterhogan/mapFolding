@@ -1,11 +1,11 @@
 from tests.conftest import *
 import pytest
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict, Literal, Tuple, Any
 
 # TODO add a test. `C` = number of logical cores available. `n = C + 1`. Ensure that `[2,n]` is computed correctly.
 # Or, probably smarter: limit the number of cores, then run a test with C+1.
 
-def test_algorithmSourceParallel(listDimensionsTestParallelization: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], useAlgorithmDirectly) -> None:
+def test_algorithmSourceParallel(listDimensionsTestParallelization: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], useAlgorithmDirectly: None) -> None:
     standardizedEqualTo(foldsTotalKnown[tuple(listDimensionsTestParallelization)], countFolds, listDimensionsTestParallelization, None, 'maximum')
 
 def test_countFoldsComputationDivisionsInvalid(listDimensionsTestFunctionality: List[int]) -> None:
@@ -15,7 +15,7 @@ def test_countFoldsComputationDivisionsMaximum(listDimensionsTestParallelization
     standardizedEqualTo(foldsTotalKnown[tuple(listDimensionsTestParallelization)], countFolds, listDimensionsTestParallelization, None, 'maximum')
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_defineConcurrencyLimit())
-def test_defineConcurrencyLimit(nameOfTest, callablePytest):
+def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
     callablePytest()
 
 # @pytest.mark.parametrize("CPUlimitParameter", [{"invalid": True}, ["weird"]])
@@ -29,7 +29,7 @@ def test_defineConcurrencyLimit(nameOfTest, callablePytest):
     (["invalid"], 4, [19, 23], ValueError),
     (20, 4, [3,5], ValueError)
 ])
-def test_getTaskDivisions(computationDivisions, concurrencyLimit, listDimensions, expectedTaskDivisions) -> None:
+def test_getTaskDivisions(computationDivisions: None | List[str] | Literal['maximum'] | Literal['cpu'] | Literal[20], concurrencyLimit: Literal[4], listDimensions: List[int], expectedTaskDivisions: type[ValueError] | Literal[0] | Literal[77] | Literal[4]) -> None:
     standardizedEqualTo(expectedTaskDivisions, getTaskDivisions, computationDivisions, concurrencyLimit, None, listDimensions)
 
 @pytest.mark.parametrize("expected,parameter", [
@@ -39,6 +39,6 @@ def test_getTaskDivisions(computationDivisions, concurrencyLimit, listDimensions
     (ValueError, {2}),  # set
     (ValueError, {"cores": 2}),  # dict
 ])
-def test_setCPUlimitMalformedParameter(expected, parameter) -> None:
+def test_setCPUlimitMalformedParameter(expected: type[ValueError] | Literal[2], parameter: List[int] | Tuple[int] | set[int] | Dict[str, int] | Literal['2']) -> None:
     """Test that invalid CPUlimit types are properly handled."""
     standardizedEqualTo(expected, setCPUlimit, parameter)

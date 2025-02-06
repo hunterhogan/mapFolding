@@ -30,7 +30,7 @@ import unittest.mock
 
 def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
     """Returns a dictionary mapping dimension tuples to their known folding totals."""
-    dictionaryMapDimensionsToFoldsTotalKnown = {}
+    dictionaryMapDimensionsToFoldsTotalKnown: Dict[Tuple[int, ...], int] = {}
 
     for settings in settingsOEIS.values():
         sequence = settings['valuesKnown']
@@ -60,9 +60,11 @@ def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
                     except Exception:
                         continue
                     # Why did I sincerely believe this would only be three lines of code?
-                    if foldsTotal.isdigit() and int(foldsTotal) > 85109616 * 10**3:
-                        foldsTotal = int(foldsTotal)
-                    # You made it this far, so fuck it: put it in the dictionary
+                    if foldsTotal.isdigit():
+                        foldsTotalInteger = int(foldsTotal)
+                        if foldsTotalInteger > 85109616 * 10**3:
+                            # You made it this far, so fuck it: put it in the dictionary
+                            dictionaryMapDimensionsToFoldsTotalKnown[tuple(listDimensions)] = foldsTotalInteger
                     dictionaryMapDimensionsToFoldsTotalKnown[tuple(listDimensions)] = foldsTotal
                     # The sunk-costs fallacy claims another victim!
 
@@ -72,7 +74,7 @@ def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
 Section: Fixtures"""
 
 @pytest.fixture(autouse=True)
-def setupWarningsAsErrors():
+def setupWarningsAsErrors() -> Generator[None, Any, None]:
     """Convert all warnings to errors for all tests."""
     import warnings
     warnings.filterwarnings("error")
@@ -133,14 +135,14 @@ def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.As
         yield mockTimer
 
 @pytest.fixture
-def mockFoldingFunction():
+def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
     """Creates a mock function that simulates _countFolds behavior."""
-    def make_mock(foldsValue: int, listDimensions: List[int]):
+    def make_mock(foldsValue: int, listDimensions: List[int]) -> Callable[..., None]:
         mock_array = makeDataContainer(2)
         mock_array[0] = foldsValue
         mock_array[-1] = getLeavesTotal(listDimensions)
 
-        def mock_countFolds(**keywordArguments):
+        def mock_countFolds(**keywordArguments: Any) -> None:
             keywordArguments['foldGroups'][:] = mock_array
             return None
 
@@ -148,15 +150,18 @@ def mockFoldingFunction():
     return make_mock
 
 @pytest.fixture
-def mockDispatcher():
+def mockDispatcher() -> Callable[[Any], unittest.mock.patch]:
     """Context manager for mocking dispatcher callable."""
-    def wrapper(mockFunction):
+    def wrapper(mockFunction: Any) -> unittest.mock.patch:
         dispatcherCallable = getDispatcherCallable()
-        return unittest.mock.patch(f"{dispatcherCallable.__module__}.{dispatcherCallable.__name__}", side_effect=mockFunction)
+        return unittest.mock.patch(
+            f"{dispatcherCallable.__module__}.{dispatcherCallable.__name__}",
+            side_effect=mockFunction
+        )
     return wrapper
 
 @pytest.fixture(params=oeisIDsImplemented)
-def oeisID(request: pytest.FixtureRequest)-> str:
+def oeisID(request: pytest.FixtureRequest) -> Any:
     return request.param
 
 @pytest.fixture
@@ -165,7 +170,7 @@ def oeisID_1random() -> str:
     return random.choice(oeisIDsImplemented)
 
 @pytest.fixture
-def useAlgorithmDirectly():
+def useAlgorithmDirectly() -> Generator[None, Any, None]:
     """Temporarily patches getDispatcherCallable to return the algorithm source directly."""
     original_dispatcher = basecamp.getDispatcherCallable
 
@@ -202,7 +207,7 @@ def prototypeCacheTest(
 
     # Run test
     try:
-        actual = _getOEISidValues(oeisID)
+        actual: Any = _getOEISidValues(oeisID)
         messageActual = actual
     except Exception as actualError:
         actual = type(actualError)

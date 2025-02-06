@@ -6,27 +6,22 @@ from typing import Any, Tuple
 import numba
 
 # TODO synthesize this module
+# source: theDao.doTheNeedful
 
+# very simple jit
 @numba.jit(cache=False)
-def _countFolds(connectionGraph: NDArray[integer[Any]], foldGroups: NDArray[integer[Any]], gapsWhere: NDArray[integer[Any]], mapShape: Tuple[int, ...], my: NDArray[integer[Any]], track: NDArray[integer[Any]]):
-    """
-    What in tarnation is this stupid module and function?
+# the call is `dispatcher(**stateUniversal)`, so the signature must accept all keys in `stateUniversal`, which is `StateUniversal`
+def _countFolds(connectionGraph: NDArray[integer[Any]]
+                , foldGroups: NDArray[integer[Any]]
+                , gapsWhere: NDArray[integer[Any]]
+                , mapShape: Tuple[int, ...]
+                , my: NDArray[integer[Any]]
+                , track: NDArray[integer[Any]]
+                ) -> None:
 
-    - This function is not in the same module as `countFolds` so that we can delay Numba just-in-time (jit) compilation of this function and the finalization of its settings until we are ready.
-    - This function is not in the same module as `countFoldsCompiled`, which is the function that does the hard, so that we can delay `numba.jit` compilation of `countFoldsCompiled`.
-    - `countFoldsCompiled` is not merely "jitted", it is super jitted, which makes it too arrogant to talk to plebian Python functions. It will, however, reluctantly talk to basic jitted functions.
-    - The function in this module is jitted, so it can talk to `countFoldsCompiled`, and because it isn't so arrogant, it will talk to the low-class `countFolds` with only a few restrictions, such as:
-        - No `TypedDict`
-        - The plebs must clean up their own memory problems
-        - No oversized integers
-        - No global variables, only global constants
-        - They don't except pleb nonlocal variables either
-        - Python "class": they are all inferior to a jit
-        - No `**kwargs`
-        - and just a few dozen-jillion other things.
-
-    """
     # print("Numba, you need to ignore the cached files and recompile the functions called below.")
+
+    # build three calls to the three functions, and we know exactly what those are because we are making them, too.
     countInitialize(connectionGraph=connectionGraph, gapsWhere=gapsWhere, my=my, track=track)
 
     if my[indexMy.taskDivisions.value] > 0:

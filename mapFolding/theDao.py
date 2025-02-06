@@ -1,93 +1,94 @@
 from mapFolding import indexMy, indexTrack
 from numpy import integer
+from numpy.typing import NDArray
 from typing import Any, Tuple
 import numba
 import numpy
 
-def activeGapIncrement(my):
+def activeGapIncrement(my) -> None:
     my[indexMy.gap1ndex.value] += 1
 
-def activeLeafGreaterThan0Condition(my):
+def activeLeafGreaterThan0Condition(my) -> bool:
     return my[indexMy.leaf1ndex.value]
 
-def activeLeafGreaterThanLeavesTotalCondition(foldGroups, my):
+def activeLeafGreaterThanLeavesTotalCondition(foldGroups, my) -> bool:
     return my[indexMy.leaf1ndex.value] > foldGroups[-1]
 
-def activeLeafIsTheFirstLeafCondition(my):
+def activeLeafIsTheFirstLeafCondition(my) -> bool:
     return my[indexMy.leaf1ndex.value] <= 1
 
-def allDimensionsAreUnconstrained(my):
+def allDimensionsAreUnconstrained(my) -> bool:
     return not my[indexMy.dimensionsUnconstrained.value]
 
-def backtrack(my, track):
+def backtrack(my, track) -> None:
     my[indexMy.leaf1ndex.value] -= 1
     track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]
     track[indexTrack.leafAbove.value, track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]
 
-def backtrackCondition(my, track):
+def backtrackCondition(my, track) -> bool:
     return my[indexMy.leaf1ndex.value] and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
 
-def gap1ndexCeilingIncrement(my):
+def gap1ndexCeilingIncrement(my) -> None:
     my[indexMy.gap1ndexCeiling.value] += 1
 
-def countGaps(gapsWhere, my, track):
+def countGaps(gapsWhere, my, track) -> None:
     gapsWhere[my[indexMy.gap1ndexCeiling.value]] = my[indexMy.leafConnectee.value]
     if track[indexTrack.countDimensionsGapped.value, my[indexMy.leafConnectee.value]] == 0:
         gap1ndexCeilingIncrement(my=my)
     track[indexTrack.countDimensionsGapped.value, my[indexMy.leafConnectee.value]] += 1
 
-def dimension1ndexIncrement(my):
+def dimension1ndexIncrement(my) -> None:
     my[indexMy.indexDimension.value] += 1
 
-def dimensionsUnconstrainedCondition(connectionGraph, my):
+def dimensionsUnconstrainedCondition(connectionGraph, my) -> bool:
     return connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]] == my[indexMy.leaf1ndex.value]
 
-def dimensionsUnconstrainedDecrement(my):
+def dimensionsUnconstrainedDecrement(my) -> None:
     my[indexMy.dimensionsUnconstrained.value] -= 1
 
-def filterCommonGaps(gapsWhere, my, track):
+def filterCommonGaps(gapsWhere, my, track) -> None:
     gapsWhere[my[indexMy.gap1ndex.value]] = gapsWhere[my[indexMy.indexMiniGap.value]]
     if track[indexTrack.countDimensionsGapped.value, gapsWhere[my[indexMy.indexMiniGap.value]]] == my[indexMy.dimensionsUnconstrained.value]:
         activeGapIncrement(my=my)
     track[indexTrack.countDimensionsGapped.value, gapsWhere[my[indexMy.indexMiniGap.value]]] = 0
 
-def findGapsInitializeVariables(my, track):
+def findGapsInitializeVariables(my, track) -> None:
     my[indexMy.dimensionsUnconstrained.value] = my[indexMy.dimensionsTotal.value]
     my[indexMy.gap1ndexCeiling.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
     my[indexMy.indexDimension.value] = 0
 
-def indexMiniGapIncrement(my):
+def indexMiniGapIncrement(my) -> None:
     my[indexMy.indexMiniGap.value] += 1
 
-def indexMiniGapInitialization(my):
+def indexMiniGapInitialization(my) -> None:
     my[indexMy.indexMiniGap.value] = my[indexMy.gap1ndex.value]
 
-def insertUnconstrainedLeaf(gapsWhere, my):
+def insertUnconstrainedLeaf(gapsWhere, my) -> None:
     my[indexMy.indexLeaf.value] = 0
     while my[indexMy.indexLeaf.value] < my[indexMy.leaf1ndex.value]:
         gapsWhere[my[indexMy.gap1ndexCeiling.value]] = my[indexMy.indexLeaf.value]
         my[indexMy.gap1ndexCeiling.value] += 1
         my[indexMy.indexLeaf.value] += 1
 
-def leafBelowSentinelIs1Condition(track):
+def leafBelowSentinelIs1Condition(track) -> bool:
     return track[indexTrack.leafBelow.value, 0] == 1
 
-def leafConnecteeInitialization(connectionGraph, my):
+def leafConnecteeInitialization(connectionGraph, my) -> None:
     my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]]
 
-def leafConnecteeUpdate(connectionGraph, my, track):
+def leafConnecteeUpdate(connectionGraph, my, track) -> None:
     my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], track[indexTrack.leafBelow.value, my[indexMy.leafConnectee.value]]]
 
-def loopingLeavesConnectedToActiveLeaf(my):
+def loopingLeavesConnectedToActiveLeaf(my) -> bool:
     return my[indexMy.leafConnectee.value] != my[indexMy.leaf1ndex.value]
 
-def loopingTheDimensions(my):
+def loopingTheDimensions(my) -> bool:
     return my[indexMy.indexDimension.value] < my[indexMy.dimensionsTotal.value]
 
-def loopingToActiveGapCeiling(my):
+def loopingToActiveGapCeiling(my) -> bool:
     return my[indexMy.indexMiniGap.value] < my[indexMy.gap1ndexCeiling.value]
 
-def placeLeaf(gapsWhere, my, track):
+def placeLeaf(gapsWhere, my, track) -> None:
     my[indexMy.gap1ndex.value] -= 1
     track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]] = gapsWhere[my[indexMy.gap1ndex.value]]
     track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]] = track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]]
@@ -96,16 +97,16 @@ def placeLeaf(gapsWhere, my, track):
     track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value]] = my[indexMy.gap1ndex.value]
     my[indexMy.leaf1ndex.value] += 1
 
-def placeLeafCondition(my):
+def placeLeafCondition(my) -> bool:
     return my[indexMy.leaf1ndex.value]
 
-def thereAreComputationDivisionsYouMightSkip(my):
+def thereAreComputationDivisionsYouMightSkip(my) -> bool:
     return my[indexMy.leaf1ndex.value] != my[indexMy.taskDivisions.value] or my[indexMy.leafConnectee.value] % my[indexMy.taskDivisions.value] == my[indexMy.taskIndex.value]
 
 def countInitialize(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]]
                     , gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
                     , my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
-                    , track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
+                    , track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]) -> None:
     while activeLeafGreaterThan0Condition(my=my):
         if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
             findGapsInitializeVariables(my=my, track=track)
@@ -133,7 +134,7 @@ def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dty
                     , foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
                     , gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
                     , my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
-                    , track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
+                    , track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]) -> None:
     gapsWherePARALLEL = gapsWhere.copy()
     myPARALLEL = my.copy()
     trackPARALLEL = track.copy()
@@ -170,7 +171,7 @@ def countParallel(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dty
                 placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
         foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
-def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
+def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]) -> None:
     groupsOfFolds: int = 0
     doFindGaps = True
     while activeLeafGreaterThan0Condition(my=my):
@@ -198,7 +199,7 @@ def countSequential(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.d
             placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
     foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
-def doTheNeedful(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], mapShape: Tuple[int, ...], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]):
+def doTheNeedful(connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]], foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], mapShape: Tuple[int, ...], my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]], track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]) -> None:
     countInitialize(connectionGraph, gapsWhere, my, track)
 
     if my[indexMy.taskDivisions.value] > 0:

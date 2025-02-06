@@ -2,7 +2,7 @@ from contextlib import redirect_stdout
 from datetime import datetime, timedelta
 from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues, _parseBFileOEIS, _validateOEISid
 from tests.conftest import *
-from typing import Optional, Tuple, Union
+from typing import Optional, NoReturn, Tuple, Union
 import io
 import os
 import pathlib
@@ -15,25 +15,25 @@ import urllib
 from urllib.error import URLError
 import urllib.request
 
-def test_algorithmSourceSequential(oeisID: str, useAlgorithmDirectly):
+def test_algorithmSourceSequential(oeisID: str, useAlgorithmDirectly: None) -> None:
     for n in settingsOEIS[oeisID]['valuesTestValidation']:
         standardizedEqualTo(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
-def test_aOFn_calculate_value(oeisID: str):
+def test_aOFn_calculate_value(oeisID: str) -> None:
     for n in settingsOEIS[oeisID]['valuesTestValidation']:
         standardizedEqualTo(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
-def test__validateOEISid_invalid_id(badID: str):
+def test__validateOEISid_invalid_id(badID: str) -> None:
     standardizedEqualTo(KeyError, _validateOEISid, badID)
 
-def test__validateOEISid_partially_valid(oeisID_1random: str):
+def test__validateOEISid_partially_valid(oeisID_1random: str) -> None:
     standardizedEqualTo(KeyError, _validateOEISid, f"{oeisID_1random}extra")
 
-def test__validateOEISid_valid_id(oeisID: str):
+def test__validateOEISid_valid_id(oeisID: str) -> None:
     standardizedEqualTo(oeisID, _validateOEISid, oeisID)
 
-def test__validateOEISid_valid_id_case_insensitive(oeisID: str):
+def test__validateOEISid_valid_id_case_insensitive(oeisID: str) -> None:
     standardizedEqualTo(oeisID.upper(), _validateOEISid, oeisID.lower())
     standardizedEqualTo(oeisID.upper(), _validateOEISid, oeisID.upper())
     standardizedEqualTo(oeisID.upper(), _validateOEISid, oeisID.swapcase())
@@ -46,18 +46,18 @@ parameters_test_aOFn_invalid_n = [
 ]
 badValues, badValuesIDs = zip(*parameters_test_aOFn_invalid_n)
 @pytest.mark.parametrize("badN", badValues, ids=badValuesIDs)
-def test_aOFn_invalid_n(oeisID_1random: str, badN):
+def test_aOFn_invalid_n(oeisID_1random: str, badN: Any) -> None:
     """Check that negative or non-integer n raises ValueError."""
     standardizedEqualTo(ValueError, oeisIDfor_n, oeisID_1random, badN)
 
-def test_aOFn_zeroDim_A001418():
+def test_aOFn_zeroDim_A001418() -> None:
     standardizedEqualTo(ArithmeticError, oeisIDfor_n, 'A001418', 0)
 
 # ===== OEIS Cache Tests =====
 @pytest.mark.parametrize("cacheExists", [True, False])
 @unittest.mock.patch('pathlib.Path.exists')
 @unittest.mock.patch('pathlib.Path.unlink')
-def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unittest.mock.MagicMock, cacheExists: bool):
+def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unittest.mock.MagicMock, cacheExists: bool) -> None:
     """Test OEIS cache clearing with both existing and non-existing cache."""
     mock_exists.return_value = cacheExists
     clearOEIScache()
@@ -88,7 +88,7 @@ def testCacheScenarios(pathCacheTesting: pathlib.Path, oeisID_1random: str, scen
     else:
         prototypeCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupCacheInvalid, oeisID_1random, pathCacheTesting)
 
-def testInvalidFileContent(pathCacheTesting: pathlib.Path, oeisID_1random: str):
+def testInvalidFileContent(pathCacheTesting: pathlib.Path, oeisID_1random: str) -> None:
     pathFilenameCache = pathCacheTesting / _getFilenameOEISbFile(oeisID=oeisID_1random)
 
     # Write invalid content to cache
@@ -105,11 +105,11 @@ def testInvalidFileContent(pathCacheTesting: pathlib.Path, oeisID_1random: str):
     # Verify cache now contains correct sequence ID
     assert f"# {oeisID_1random}" in pathFilenameCache.read_text()
 
-def testParseContentErrors():
+def testParseContentErrors() -> None:
     """Test invalid content parsing."""
     standardizedEqualTo(ValueError, _parseBFileOEIS, "Invalid content\n1 2\n", 'A001415')
 
-def testExtraComments(pathCacheTesting: pathlib.Path, oeisID_1random: str):
+def testExtraComments(pathCacheTesting: pathlib.Path, oeisID_1random: str) -> None:
     pathFilenameCache = pathCacheTesting / _getFilenameOEISbFile(oeisID=oeisID_1random)
 
     # Write content with extra comment lines
@@ -130,16 +130,16 @@ def testExtraComments(pathCacheTesting: pathlib.Path, oeisID_1random: str):
     standardizedEqualTo(8, lambda d: d[4], OEISsequence)  # Value after mid-sequence comment
     standardizedEqualTo(10, lambda d: d[5], OEISsequence)  # Last value
 
-def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: pathlib.Path):
+def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: pathlib.Path) -> None:
     """Test network error handling."""
-    def mockUrlopen(*args, **kwargs):
+    def mockUrlopen(*args: Any, **kwargs: Any) -> NoReturn:
         raise URLError("Network error")
 
     monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
     standardizedEqualTo(URLError, _getOEISidValues, next(iter(settingsOEIS)))
 
 # ===== Command Line Interface Tests =====
-def testHelpText():
+def testHelpText() -> None:
     """Test that help text is complete and examples are valid."""
     outputStream = io.StringIO()
     with redirect_stdout(outputStream):
@@ -174,7 +174,7 @@ def testHelpText():
             OEIS_for_n()
         standardizedEqualTo(expectedValue, lambda: int(outputStream.getvalue().strip().split()[0]))
 
-def testCLI_InvalidInputs():
+def testCLI_InvalidInputs() -> None:
     """Test CLI error handling."""
     testCases = [
         (['OEIS_for_n'], "missing arguments"),
@@ -187,7 +187,7 @@ def testCLI_InvalidInputs():
         with unittest.mock.patch('sys.argv', arguments):
             standardizedSystemExit("error", OEIS_for_n)
 
-def testCLI_HelpFlag():
+def testCLI_HelpFlag() -> None:
     """Verify --help output contains required information."""
     with unittest.mock.patch('sys.argv', ['OEIS_for_n', '--help']):
         outputStream = io.StringIO()
