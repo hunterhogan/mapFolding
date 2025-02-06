@@ -5,16 +5,16 @@ import pathlib
 import pickle
 
 @overload
-def makeStateJob(listDimensions: Sequence[int], writeJob: Literal[True] = True
+def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[True]
                  , **keywordArguments: Optional[str]) -> pathlib.Path:
     ...
 
 @overload
-def makeStateJob(listDimensions: Sequence[int], writeJob: Literal[False] = False
+def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[False]
                  , **keywordArguments: Optional[str]) -> computationState:
     ...
 
-def makeStateJob(listDimensions: Sequence[int], writeJob: bool = True, **keywordArguments: Optional[str]) -> computationState | pathlib.Path:
+def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Optional[str]) -> computationState | pathlib.Path:
     """
     Creates a computation state job for map folding calculations and optionally saves it to disk.
 

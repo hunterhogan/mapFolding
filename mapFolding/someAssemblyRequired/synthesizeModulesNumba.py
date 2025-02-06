@@ -53,8 +53,8 @@ class RecursiveInliner(ast.NodeTransformer):
             self.visit(astNode)
         return inlineDefinition
 
-    def visit_Call(self, callNode: ast.Call) -> ast.AST:
-        callNodeVisited = self.generic_visit(callNode)
+    def visit_Call(self, node: ast.Call) -> ast.AST:
+        callNodeVisited = self.generic_visit(node)
         if (isinstance(callNodeVisited, ast.Call) and isinstance(callNodeVisited.func, ast.Name) and callNodeVisited.func.id in self.dictionaryFunctions):
             inlineDefinition = self.inlineFunctionBody(callNodeVisited.func.id)
             if (inlineDefinition and inlineDefinition.body):

@@ -112,11 +112,11 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
     -----
     Task divisions cannot exceed total leaves to prevent duplicate counting of folds.
     """
+    taskDivisions = 0
+    leavesTotal = getLeavesTotal(listDimensions)
     if not computationDivisions:
-        return 0
-    else:
-        leavesTotal = getLeavesTotal(listDimensions)
-    if isinstance(computationDivisions, int):
+        pass
+    elif isinstance(computationDivisions, int):
         taskDivisions = computationDivisions
     elif isinstance(computationDivisions, str):
         computationDivisions = computationDivisions.lower()

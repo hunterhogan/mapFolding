@@ -196,14 +196,14 @@ def hackSSOTdtype(identifier: str) -> Type[Any]:
     'my': 'dtypeElephino',
     'track': 'dtypeElephino',
     }
-    Rube = _hackSSOTdtype[identifier]
-    if Rube == 'dtypeElephino':
-        GoldBerg = setInStone('elephino')
-    elif Rube == 'dtypeFoldsTotal':
-        GoldBerg = setInStone('foldsTotal')
-    elif Rube == 'dtypeLeavesTotal':
-        GoldBerg = setInStone('leavesTotal')
-    return GoldBerg
+    RubeGoldBerg = _hackSSOTdtype[identifier]
+    if RubeGoldBerg == 'dtypeElephino':
+        return setInStone('elephino')
+    elif RubeGoldBerg == 'dtypeFoldsTotal':
+        return setInStone('foldsTotal')
+    elif RubeGoldBerg == 'dtypeLeavesTotal':
+        return setInStone('leavesTotal')
+    raise Exception("Dude, you forgot to set a value in `hackSSOTdtype`.")
 
 def hackSSOTdatatype(identifier: str) -> str:
     _hackSSOTdatatype={
@@ -232,14 +232,14 @@ def hackSSOTdatatype(identifier: str) -> str:
     'taskIndex': 'datatypeLeavesTotal',
     'track': 'datatypeElephino',
     }
-    Rube = _hackSSOTdatatype[identifier]
-    if Rube == 'datatypeElephino':
-        GoldBerg = _get_datatype('elephino')
-    elif Rube == 'datatypeFoldsTotal':
-        GoldBerg = _get_datatype('foldsTotal')
-    elif Rube == 'datatypeLeavesTotal':
-        GoldBerg = _get_datatype('leavesTotal')
-    return GoldBerg
+    RubeGoldBerg = _hackSSOTdatatype[identifier]
+    if RubeGoldBerg == 'datatypeElephino':
+        return _get_datatype('elephino')
+    elif RubeGoldBerg == 'datatypeFoldsTotal':
+        return _get_datatype('foldsTotal')
+    elif RubeGoldBerg == 'datatypeLeavesTotal':
+        return _get_datatype('leavesTotal')
+    raise Exception("Dude, you forgot to set a value in `hackSSOTdatatype`.")
 
 try:
     _pathModule = pathlib.Path(__file__).parent
