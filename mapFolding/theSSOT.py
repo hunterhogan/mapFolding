@@ -1,7 +1,7 @@
 from collections import defaultdict
 from numpy import integer
 from types import ModuleType
-from typing import Any, Callable, Dict, Final, Optional, Tuple, Type, TypedDict, cast
+from typing import Any, Callable, Dict, Final, NotRequired, Optional, Tuple, Type, TypedDict, cast
 import enum
 import numba
 import numpy
@@ -105,19 +105,27 @@ class indexTrack(EnumIndices):
     countDimensionsGapped = enum.auto()
     gapRangeStart = enum.auto()
 
+# TODO try to implement all possible parameters, but use `NotRequired` for the more esoteric ones
 class ParametersNumba(TypedDict):
+    _dbg_extend_lifetimes: NotRequired[bool]
+    _dbg_optnone: NotRequired[bool]
     _nrt: bool
     boundscheck: bool
     cache: bool
+    debug: NotRequired[bool]
     error_model: str
     fastmath: bool
     forceinline: bool
+    forceobj: NotRequired[bool]
     inline: str
     looplift: bool
     no_cfunc_wrapper: bool
     no_cpython_wrapper: bool
+    no_rewrites: NotRequired[bool]
+    nogil: NotRequired[bool]
     nopython: bool
     parallel: bool
+    target: NotRequired[str]
 
 parametersNumbaDEFAULT: Final[ParametersNumba] = {
     '_nrt': True,

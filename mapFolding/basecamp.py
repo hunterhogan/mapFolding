@@ -1,4 +1,4 @@
-from mapFolding import getDispatcherCallable, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal, computationState
+from mapFolding import computationState, getDispatcherCallable, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal
 from typing import Optional, Sequence, Union
 import os
 

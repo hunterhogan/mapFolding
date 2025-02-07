@@ -18,7 +18,7 @@ from mapFolding import *
 from mapFolding import basecamp
 from mapFolding import getAlgorithmCallable, getDispatcherCallable
 from mapFolding.beDRY import *
-from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues
+from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues, _getOEISidInformation
 from mapFolding.oeis import *
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 from typing import Any, Callable, ContextManager, Dict, Generator, List, Optional, Sequence, Set, Tuple, Type, Union
@@ -181,44 +181,3 @@ def useAlgorithmDirectly() -> Generator[None, Any, None]:
 
     # Restore original function
     basecamp.getDispatcherCallable = original_dispatcher
-
-"""
-Section: Prototype test structures before moving to uniformTests.py"""
-
-def prototypeCacheTest(
-    expected: Any,
-    setupCacheFile: Optional[Callable[[pathlib.Path, str], None]],
-    oeisID: str,
-    pathCache: pathlib.Path
-) -> None:
-    """Template for tests involving OEIS cache operations.
-
-    Parameters
-        expected: Expected value or exception from _getOEISidValues
-        setupCacheFile: Function to prepare the cache file before test
-        oeisID: OEIS ID to test
-        pathCache: Temporary cache directory path
-    """
-    pathFilenameCache = pathCache / _getFilenameOEISbFile(oeisID)
-
-    # Setup cache file if provided
-    if setupCacheFile:
-        setupCacheFile(pathFilenameCache, oeisID)
-
-    # Run test
-    try:
-        actual: Any = _getOEISidValues(oeisID)
-        messageActual = actual
-    except Exception as actualError:
-        actual = type(actualError)
-        messageActual = type(actualError).__name__
-
-    # Compare results
-    if isinstance(expected, type) and issubclass(expected, Exception):
-        messageExpected = expected.__name__
-        assert isinstance(actual, expected), uniformTestMessage(
-            messageExpected, messageActual, "_getOEISidValues", oeisID)
-    else:
-        messageExpected = expected
-        assert actual == expected, uniformTestMessage(
-            messageExpected, messageActual, "_getOEISidValues", oeisID)

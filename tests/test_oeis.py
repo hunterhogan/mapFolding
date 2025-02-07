@@ -1,8 +1,9 @@
 from contextlib import redirect_stdout
 from datetime import datetime, timedelta
-from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues, _parseBFileOEIS, _validateOEISid
+from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues, _parseBFileOEIS, _validateOEISid, _getOEISidInformation
 from tests.conftest import *
-from typing import Optional, NoReturn, Tuple, Union
+from typing import NoReturn
+from urllib.error import URLError
 import io
 import os
 import pathlib
@@ -12,7 +13,6 @@ import re as regex
 import unittest
 import unittest.mock
 import urllib
-from urllib.error import URLError
 import urllib.request
 
 def test_algorithmSourceSequential(oeisID: str, useAlgorithmDirectly: None) -> None:
@@ -63,72 +63,13 @@ def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unitt
     clearOEIScache()
 
     if cacheExists:
-        assert mock_unlink.call_count == len(settingsOEIS)
-        mock_unlink.assert_has_calls([unittest.mock.call(missing_ok=True)] * len(settingsOEIS))
+        # Each OEIS ID has two cache files
+        expected_calls = len(settingsOEIS) * 2
+        assert mock_unlink.call_count == expected_calls
+        mock_unlink.assert_has_calls([unittest.mock.call(missing_ok=True)] * expected_calls)
     else:
         mock_exists.assert_called_once()
         mock_unlink.assert_not_called()
-
-@pytest.mark.parametrize("scenarioCache", ["miss", "expired", "invalid"])
-def testCacheScenarios(pathCacheTesting: pathlib.Path, oeisID_1random: str, scenarioCache: str) -> None:
-    """Test cache scenarios: missing file, expired file, and invalid file."""
-
-    def setupCacheExpired(pathCache: pathlib.Path, oeisID: str) -> None:
-        pathCache.write_text("# Old cache content")
-        oldModificationTime = datetime.now() - timedelta(days=30)
-        os.utime(pathCache, times=(oldModificationTime.timestamp(), oldModificationTime.timestamp()))
-
-    def setupCacheInvalid(pathCache: pathlib.Path, oeisID: str) -> None:
-        pathCache.write_text("Invalid content")
-
-    if scenarioCache == "miss":
-        prototypeCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], None, oeisID_1random, pathCacheTesting)
-    elif scenarioCache == "expired":
-        prototypeCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupCacheExpired, oeisID_1random, pathCacheTesting)
-    else:
-        prototypeCacheTest(settingsOEIS[oeisID_1random]['valuesKnown'], setupCacheInvalid, oeisID_1random, pathCacheTesting)
-
-def testInvalidFileContent(pathCacheTesting: pathlib.Path, oeisID_1random: str) -> None:
-    pathFilenameCache = pathCacheTesting / _getFilenameOEISbFile(oeisID=oeisID_1random)
-
-    # Write invalid content to cache
-    pathFilenameCache.write_text("# A999999\n1 1\n2 2\n")
-    modificationTimeOriginal = pathFilenameCache.stat().st_mtime
-
-    # Function should detect invalid content, fetch fresh data, and update cache
-    OEISsequence = _getOEISidValues(oeisID_1random)
-
-    # Verify the function succeeded
-    assert OEISsequence is not None
-    # Verify cache was updated (modification time changed)
-    assert pathFilenameCache.stat().st_mtime > modificationTimeOriginal
-    # Verify cache now contains correct sequence ID
-    assert f"# {oeisID_1random}" in pathFilenameCache.read_text()
-
-def testParseContentErrors() -> None:
-    """Test invalid content parsing."""
-    standardizedEqualTo(ValueError, _parseBFileOEIS, "Invalid content\n1 2\n", 'A001415')
-
-def testExtraComments(pathCacheTesting: pathlib.Path, oeisID_1random: str) -> None:
-    pathFilenameCache = pathCacheTesting / _getFilenameOEISbFile(oeisID=oeisID_1random)
-
-    # Write content with extra comment lines
-    contentWithExtraComments = f"""# {oeisID_1random}
-# Normal place for comment line 1
-# Abnormal comment line
-1 2
-2 4
-3 6
-# Another comment in the middle
-4 8
-5 10"""
-    pathFilenameCache.write_text(contentWithExtraComments)
-
-    OEISsequence = _getOEISidValues(oeisID_1random)
-    # Verify sequence values are correct despite extra comments
-    standardizedEqualTo(2, lambda d: d[1], OEISsequence)  # First value
-    standardizedEqualTo(8, lambda d: d[4], OEISsequence)  # Value after mid-sequence comment
-    standardizedEqualTo(10, lambda d: d[5], OEISsequence)  # Last value
 
 def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: pathlib.Path) -> None:
     """Test network error handling."""

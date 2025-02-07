@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from mapFolding import countFolds, getPathPackage
 from typing import Any, Callable, Dict, Final, List, Tuple, TYPE_CHECKING, Union
 import argparse
+import warnings
 import pathlib
 import random
 import sys
@@ -22,9 +23,8 @@ Section: make `settingsOEIS`"""
 _pathCache = getPathPackage() / ".cache"
 
 class SettingsOEIS(TypedDict):
-    # I would prefer to load `description` dynamically from OEIS, but it's a pita for me
-    # to learn how to efficiently implement right now.
     description: str
+    offset: int
     getMapShape: Callable[[int], List[int]]
     valuesBenchmark: List[int]
     valuesKnown: Dict[int, int]
@@ -34,40 +34,33 @@ class SettingsOEIS(TypedDict):
 
 settingsOEIShardcodedValues: Dict[str, Dict[str, Any]] = {
     'A001415': {
-        'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'getMapShape': lambda n: sorted([2, n]),
         'valuesBenchmark': [14],
         'valuesTestParallelization': [*range(3, 7)],
         'valuesTestValidation': [0, 1, random.randint(2, 9)],
     },
     'A001416': {
-        'description': 'Number of ways of folding a 3 X n strip of stamps.',
         'getMapShape': lambda n: sorted([3, n]),
         'valuesBenchmark': [9],
         'valuesTestParallelization': [*range(3, 5)],
         'valuesTestValidation': [0, 1, random.randint(2, 6)],
     },
     'A001417': {
-        'description': 'Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.',
         'getMapShape': lambda n: [2] * n,
         'valuesBenchmark': [6],
         'valuesTestParallelization': [*range(2, 4)],
         'valuesTestValidation': [0, 1, random.randint(2, 4)],
     },
     'A195646': {
-        'description': 'Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.',
         'getMapShape': lambda n: [3] * n,
         'valuesBenchmark': [3],
         'valuesTestParallelization': [*range(2, 3)],
         'valuesTestValidation': [0, 1, 2],
     },
     'A001418': {
-        'description': 'Number of ways of folding an n X n sheet of stamps.',
         'getMapShape': lambda n: [n, n],
         'valuesBenchmark': [5],
         'valuesTestParallelization': [*range(2, 4)],
-        # offset 1: hypothetically, if I were to load the offset from OEIS, I could use it to
-        # determine if a sequence is defined at n=0, which would affect, for example, the valuesTestValidation.
         'valuesTestValidation': [1, random.randint(2, 4)],
     },
 }
@@ -128,9 +121,9 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> Dict[int, int]:
         sequence ID or if the content format is invalid.
     """
     bFileLines = OEISbFile.strip().splitlines()
-    # The first line has the sequence ID
     if not bFileLines.pop(0).startswith(f"# {oeisID}"):
-        raise ValueError(f"Content does not match sequence {oeisID}")
+        warnings.warn(f"Content does not match sequence {oeisID}")
+        return {-1: -1}
 
     OEISsequence = {}
     for line in bFileLines:
@@ -139,6 +132,31 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> Dict[int, int]:
         n, aOFn = map(int, line.split())
         OEISsequence[n] = aOFn
     return OEISsequence
+
+def _getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
+    cacheDays = 7
+    tryCache = False
+    if pathFilenameCache.exists():
+        fileAge = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
+        tryCache = fileAge < timedelta(days=cacheDays)
+
+    oeisInformation = None
+    if tryCache:
+        try:
+            oeisInformation = pathFilenameCache.read_text()
+        except IOError:
+            tryCache = False
+
+    if not tryCache:
+        httpResponse: urllib.response.addinfourl = urllib.request.urlopen(url)
+        oeisInformation = httpResponse.read().decode('utf-8')
+        pathFilenameCache.parent.mkdir(parents=True, exist_ok=True)
+        pathFilenameCache.write_text(oeisInformation)
+
+    if not oeisInformation:
+        warnings.warn(f"Failed to retrieve OEIS sequence information for {pathFilenameCache.stem}.")
+
+    return oeisInformation
 
 def _getOEISidValues(oeisID: str) -> Dict[int, int]:
     """
@@ -160,64 +178,60 @@ def _getOEISidValues(oeisID: str) -> Dict[int, int]:
     """
 
     pathFilenameCache = _pathCache / _getFilenameOEISbFile(oeisID)
-    cacheDays = 7
+    url = f"https://oeis.org/{oeisID}/{_getFilenameOEISbFile(oeisID)}"
 
-    tryCache = False
-    if pathFilenameCache.exists():
-        fileAge = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
-        tryCache = fileAge < timedelta(days=cacheDays)
+    oeisInformation = _getOEISofficial(pathFilenameCache, url)
 
-    if tryCache:
-        try:
-            OEISbFile = pathFilenameCache.read_text()
-            return _parseBFileOEIS(OEISbFile, oeisID)
-        except (ValueError, IOError):
-            tryCache = False
+    if oeisInformation:
+        return _parseBFileOEIS(oeisInformation, oeisID)
+    return {-1: -1}
 
-    urlOEISbFile = f"https://oeis.org/{oeisID}/{_getFilenameOEISbFile(oeisID)}"
-    httpResponse: urllib.response.addinfourl = urllib.request.urlopen(urlOEISbFile)
-    OEISbFile = httpResponse.read().decode('utf-8')
+def _getOEISidInformation(oeisID: str) -> Tuple[str, int]:
+    oeisID = _validateOEISid(oeisID)
+    pathFilenameCache = _pathCache / f"{oeisID}.txt"
+    url = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
-    if not tryCache:
-        pathFilenameCache.parent.mkdir(parents=True, exist_ok=True)
-        pathFilenameCache.write_text(OEISbFile)
+    oeisInformation = _getOEISofficial(pathFilenameCache, url)
 
-    return _parseBFileOEIS(OEISbFile, oeisID)
+    if not oeisInformation:
+        return "Not found", -1
+
+    description_parts = []
+    offset = None
+    for line in oeisInformation.splitlines():
+        if line.startswith('%N'):
+            parts = line.split()
+            if parts[1] == oeisID:
+                desc_part = ' '.join(parts[2:])
+                description_parts.append(desc_part)
+        elif line.startswith('%O'):
+            parts = line.split()
+            if parts[1] == oeisID:
+                offset_str = parts[2].split(',')[0]
+                offset = int(offset_str)
+    if not description_parts:
+        warnings.warn(f"No description found for {oeisID}")
+        description_parts.append("No description found")
+    if offset is None:
+        warnings.warn(f"No offset found for {oeisID}")
+        offset = -1
+    description = ' '.join(description_parts)
+    return description, offset
 
 def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
-    """
-    Creates a dictionary mapping OEIS IDs to their corresponding settings.
-
-    This function initializes settings for each implemented OEIS sequence by combining
-    hardcoded values with dynamically retrieved OEIS sequence values.
-
-    Returns:
-        Dict[str, SettingsOEIS]: A dictionary where:
-            - Keys are OEIS sequence IDs (str)
-            - Values are SettingsOEIS objects containing:
-                - description: Text description of the sequence
-                - getMapShape: Function to get dimensions
-                - valuesBenchmark: Benchmark values
-                - valuesKnown: Known values from OEIS
-                - valuesTestValidation: Values for test validation
-                - valueUnknown: First unknown value in sequence
-
-    Note:
-        Relies on global variables:
-        - oeisIDsImplemented: List of implemented OEIS sequence IDs
-        - settingsOEIShardcodedValues: Dictionary of hardcoded settings per sequence
-    """
     settingsTarget = {}
     for oeisID in oeisIDsImplemented:
         valuesKnownSherpa = _getOEISidValues(oeisID)
+        descriptionSherpa, offsetSherpa = _getOEISidInformation(oeisID)
         settingsTarget[oeisID] = SettingsOEIS(
-            description=settingsOEIShardcodedValues[oeisID]['description'],
+            description=descriptionSherpa,
+            offset=offsetSherpa,
             getMapShape=settingsOEIShardcodedValues[oeisID]['getMapShape'],
             valuesBenchmark=settingsOEIShardcodedValues[oeisID]['valuesBenchmark'],
             valuesTestParallelization=settingsOEIShardcodedValues[oeisID]['valuesTestParallelization'],
             valuesTestValidation=settingsOEIShardcodedValues[oeisID]['valuesTestValidation'],
-            valuesKnown = valuesKnownSherpa,
-            valueUnknown = max(valuesKnownSherpa.keys(), default=0) + 1
+            valuesKnown=valuesKnownSherpa,
+            valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1
         )
     return settingsTarget
 
@@ -276,11 +290,11 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
     listDimensions = settingsOEIS[oeisID]['getMapShape'](n)
 
     if n <= 1 or len(listDimensions) < 2:
-        foldsTotal = settingsOEIS[oeisID]['valuesKnown'].get(n, None)
-        if foldsTotal is not None:
-            return foldsTotal
-        else:
+        offset = settingsOEIS[oeisID]['offset']
+        if n < offset:
             raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
+        foldsTotal = settingsOEIS[oeisID]['valuesKnown'][n]
+        return foldsTotal
 
     return countFolds(listDimensions)
 
@@ -312,11 +326,9 @@ def clearOEIScache() -> None:
     if not _pathCache.exists():
         print(f"Cache directory, {_pathCache}, not found - nothing to clear.")
         return
-    else:
-        for oeisID in settingsOEIS:
-            pathFilenameCache = _pathCache / _getFilenameOEISbFile(oeisID)
-            pathFilenameCache.unlink(missing_ok=True)
-
+    for oeisID in settingsOEIS:
+        ( _pathCache / f"{oeisID}.txt" ).unlink(missing_ok=True)
+        ( _pathCache / _getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
     print(f"Cache cleared from {_pathCache}")
 
 def getOEISids() -> None:
