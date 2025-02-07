@@ -173,7 +173,7 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
 
     astArgsNumbaSignature = ast.Tuple(elts=listNumbaParameterSignature, ctx=ast.Load())
 
-    if astCallable.name == 'countInitialize':
+    if astCallable.name == 'countInitialize' or astCallable.name == 'doTheNeedful':
         parametersNumba = {}
     else:
         parametersNumba = parametersNumbaDEFAULT if not parallel else ParametersNumba({**parametersNumbaDEFAULT, 'parallel': True})
@@ -411,43 +411,53 @@ docstringDispatcher = """
         - and just a few dozen-jillion other things.
     """
 
-def createDispatcherAST(callableTarget: str, listCallablesInline: List[str], algorithmSource: ModuleType) -> ast.Module:
+def makeDispatcherNumba(codeSource: str, callableTarget: str, listPathFilenamesDestination: List[Tuple[pathlib.Path, str]]) -> str:
     """Creates AST for the dispatcher module that coordinates the optimized functions."""
 
-    # Get source imports and function
-    sourceCode = inspect.getsource(algorithmSource)
-    sourceAST = ast.parse(sourceCode)
+    # Parse source code
+    sourceAST = ast.parse(codeSource)
+
+    # Extract imports and target function definition
     importsAST = [node for node in sourceAST.body if isinstance(node, (ast.Import, ast.ImportFrom))]
-    sourceFunction = getattr(algorithmSource, callableTarget)
-    sourceFunctionAST = ast.parse(inspect.getsource(sourceFunction))
-    sourceDefNode = next(node for node in ast.walk(sourceFunctionAST) if isinstance(node, ast.FunctionDef))
+    targetFunction = next((node for node in sourceAST.body
+                         if isinstance(node, ast.FunctionDef)
+                         and node.name == callableTarget), None)
 
-    # Extract call information from source function
-    sourceCallNodes = []
-    for node in ast.walk(sourceFunctionAST):
-        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
-            call = node.value
-            if isinstance(call.func, ast.Name) and call.func.id in listCallablesInline:
-                sourceCallNodes.append(node)
+    if not targetFunction:
+        raise ValueError(f"Could not find function {callableTarget} in source code")
 
-    # Create dispatcher function with same signature
-    dispatcherFunction = ast.FunctionDef(
-        name='_countFolds',
-        args=sourceDefNode.args,
-        body=sourceCallNodes,
+    # Create import statements for synthetic modules
+    syntheticImports = []
+    for pathFilename, funcName in listPathFilenamesDestination:
+        if funcName != callableTarget:  # Don't import self
+            importFrom = ast.ImportFrom(
+                module=f"syntheticModules",
+                names=[ast.alias(name=funcName, asname=None)],
+                level=0
+            )
+            syntheticImports.append(importFrom)
+
+    # Create new function with same signature
+    newFunction = ast.FunctionDef(
+        name=targetFunction.name,
+        args=targetFunction.args,
+        body=targetFunction.body,
         decorator_list=[],
-        returns=None
+        returns=targetFunction.returns,
     )
 
-    # Decorate with minimal Numba config
-    dispatcherFunction = decorateCallableWithNumba(
-        dispatcherFunction,
-        parallel=False
+    # Add Numba decorator
+    newFunction = decorateCallableWithNumba(newFunction, parallel=False)
+
+    # Combine everything into a module
+    moduleAST = ast.Module(
+        body=importsAST + syntheticImports + [newFunction],
+        type_ignores=[]
     )
 
-    moduleAST = ast.Module(body=importsAST + [dispatcherFunction], type_ignores=[])
+    # Fix locations and unparse
     ast.fix_missing_locations(moduleAST)
-    return moduleAST
+    return ast.unparse(moduleAST)
 
 def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: Optional[str] = None, algorithmSource: Optional[ModuleType] = None):
     """Synthesizes numba-optimized versions of map folding functions."""
@@ -481,13 +491,13 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
 
     # Generate dispatcher
     if callableDispatcher:
-        dispatcherAST = createDispatcherAST(callableDispatcher, listCallablesInline, algorithmSource)
-        dispatcherSource = ast.unparse(dispatcherAST)
-        pathFilenameDispatcher = getPathFilenameWrite(
-            'dispatcherNumba',
-            formatFilenameWrite="{callableTarget}.py"
-        )
-        pathFilenameDispatcher.write_text(dispatcherSource)
+        codeSource = inspect.getsource(algorithmSource)
+        moduleSource = makeDispatcherNumba(codeSource, callableDispatcher, listPathFilenamesDestination)
+        if not moduleSource:
+            raise Exception("Pylance, OMG! The sky is falling!")
+        pathFilenameWrite = getPathFilenameWrite(callableDispatcher)
+        pathFilenameWrite.write_text(moduleSource)
+        listPathFilenamesDestination.append((pathFilenameWrite, callableDispatcher))
 
 if __name__ == '__main__':
     setDatatypeModule('numpy', sourGrapes=True)
@@ -496,5 +506,5 @@ if __name__ == '__main__':
     setDatatypeLeavesTotal('uint8', sourGrapes=True)
     listCallablesInline: List[str] = ['countInitialize', 'countParallel', 'countSequential']
     callableDispatcher = 'doTheNeedful'
-    # makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
-    makeNumbaOptimizedFlow(listCallablesInline)
+    makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
+    # makeNumbaOptimizedFlow(listCallablesInline)
