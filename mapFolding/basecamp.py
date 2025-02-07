@@ -2,7 +2,12 @@ from mapFolding import getDispatcherCallable, getPathFilenameFoldsTotal, outfitC
 from typing import Optional, Sequence, Union
 import os
 
-def countFolds(listDimensions: Sequence[int], pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None, computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[int, float, bool]] = None, **keywordArguments: Optional[Union[str, bool]]) -> int:
+def countFolds(listDimensions: Sequence[int]
+                , pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None
+                , computationDivisions: Optional[Union[int, str]] = None
+                , CPUlimit: Optional[Union[int, float, bool]] = None
+                , **keywordArguments: Optional[Union[str, bool]]
+                ) -> int:
     """Count the total number of possible foldings for a given map dimensions.
 
     Parameters:

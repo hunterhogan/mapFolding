@@ -1,14 +1,31 @@
-from operator import call
-from click import Option
-from mapFolding import EnumIndices, relativePathSyntheticModules, setDatatypeElephino, setDatatypeFoldsTotal, setDatatypeLeavesTotal, setDatatypeModule
-from mapFolding import indexMy, indexTrack, getAlgorithmSource, ParametersNumba, parametersNumbaDEFAULT, hackSSOTdatatype, hackSSOTdtype
+from mapFolding import (
+    EnumIndices,
+    getAlgorithmSource,
+    getPathPackage,
+    getPathSyntheticModules,
+    hackSSOTdatatype,
+    hackSSOTdtype,
+    indexMy,
+    indexTrack,
+    moduleOfSyntheticModules,
+    myPackageNameIs,
+    ParametersNumba,
+    parametersNumbaDEFAULT,
+    setDatatypeElephino,
+    setDatatypeFoldsTotal,
+    setDatatypeLeavesTotal,
+    setDatatypeModule,
+)
 from typing import cast, Dict, List, Optional, Sequence, Set, Tuple, Type, Union
 from types import ModuleType
+from collections import namedtuple
 import ast
 import inspect
 import numba
 import numpy
 import pathlib
+
+youOughtaKnow = namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenameForMe', 'astForCompetentProgrammers'])
 
 """TODO
 Convert types
@@ -85,6 +102,7 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
 
     Parameters
     ----------
+
     astCallable : ast.FunctionDef
         The AST node representing the function to be decorated with Numba JIT.
     parallel : bool, optional
@@ -93,6 +111,7 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
 
     Returns
     -------
+
     ast.FunctionDef
         The modified AST function definition node with added Numba decorators.
 
@@ -291,7 +310,7 @@ class UnpackArrayAccesses(ast.NodeTransformer):
         node.body = initializations + node.body
         return node
 
-def inlineOneCallable(codeSource, callableTarget):
+def inlineOneCallable(codeSource: str, callableTarget: str):
     """
     Inlines a target callable function and its dependencies within the provided code source.
 
@@ -345,117 +364,54 @@ def inlineOneCallable(codeSource, callableTarget):
         moduleSource = ast.unparse(moduleAST)
         return moduleSource
 
-class AppendDunderInit(ast.NodeTransformer):
-    """AST transformer that validates and appends imports to __init__.py files."""
-
-    def __init__(self, listPathFilenamesDestination: list[tuple[pathlib.Path, str]]):
-        self.listPathFilenamesDestination = listPathFilenamesDestination
-        self.listTuplesDunderInit = []
-
-    def process_init_files(self) -> list[tuple[pathlib.Path, str]]:
-        for pathFilename, callableTarget in self.listPathFilenamesDestination:
-            pathDunderInit = pathFilename.parent / "__init__.py"
-
-            # Create empty init if doesn't exist
-            if not pathDunderInit.exists():
-                pathDunderInit.write_text("")
-
-            # Parse existing init file
-            try:
-                treeInit = ast.parse(pathDunderInit.read_text())
-            except SyntaxError:
-                treeInit = ast.Module(body=[], type_ignores=[])
-
-            # Compute the lowercase module target
-            moduleTarget = "." + pathFilename.stem
-            moduleTargetLower = moduleTarget.lower()
-
-            # Track existing imports as (normalizedModule, name)
-            setImportsExisting = set()
-            for node in treeInit.body:
-                if isinstance(node, ast.ImportFrom) and node.module:
-                    # Compare on a lowercase basis
-                    if node.module.lower() == moduleTargetLower:
-                        for alias in node.names:
-                            setImportsExisting.add((moduleTargetLower, alias.name))
-
-            # Only append if this exact import doesn't exist
-            if (moduleTargetLower, callableTarget) not in setImportsExisting:
-                newImport = ast.ImportFrom(
-                    module=moduleTarget,
-                    names=[ast.alias(name=callableTarget, asname=None)],
-                    level=0
-                )
-                treeInit.body.append(newImport)
-                ast.fix_missing_locations(treeInit)
-                pathDunderInit.write_text(ast.unparse(treeInit))
-
-            self.listTuplesDunderInit.append((pathDunderInit, callableTarget))
-
-        return self.listTuplesDunderInit
-
-docstringDispatcher = """
-    What in tarnation is this stupid module and function?
-
-    - This function is not in the same module as `countFolds` so that we can delay Numba just-in-time (jit) compilation of this function and the finalization of its settings until we are ready.
-    - This function is not in the same module as `countFoldsCompiled`, which is the function that does the hard, so that we can delay `numba.jit` compilation of `countFoldsCompiled`.
-    - `countFoldsCompiled` is not merely "jitted", it is super jitted, which makes it too arrogant to talk to plebian Python functions. It will, however, reluctantly talk to basic jitted functions.
-    - The function in this module is jitted, so it can talk to `countFoldsCompiled`, and because it isn't so arrogant, it will talk to the low-class `countFolds` with only a few restrictions, such as:
-        - No `TypedDict`
-        - The plebs must clean up their own memory problems
-        - No oversized integers
-        - No global variables, only global constants
-        - They don't except pleb nonlocal variables either
-        - Python "class": they are all inferior to a jit
-        - No `**kwargs`
-        - and just a few dozen-jillion other things.
-    """
-
-def makeDispatcherNumba(codeSource: str, callableTarget: str, listPathFilenamesDestination: List[Tuple[pathlib.Path, str]]) -> str:
+def makeDispatcherNumba(codeSource: str, callableTarget: str, listStuffYouOughtaKnow: List[youOughtaKnow]) -> str:
     """Creates AST for the dispatcher module that coordinates the optimized functions."""
+    docstringDispatcherNumba = """
+        What in tarnation is this stupid module and function?
+
+        - This function is not in the same module as `countFolds` so that we can delay Numba just-in-time (jit) compilation of this function and the finalization of its settings until we are ready.
+        - This function is not in the same module as the next function, which does the hard work, so that we can delay `numba.jit` compilation of the next function.
+        - This function is "jitted" but the next function is super jitted, which makes it too arrogant to talk to plebian Python functions. It will, however, reluctantly talk to basic jitted functions.
+        - So this module can talk to the next function, and because this module isn't as arrogant, it will talk to the low-class `countFolds` that called this function. Well, with a few restrictions, of course:
+            - No `TypedDict`
+            - The plebs must clean up their own memory problems
+            - No oversized integers
+            - No global variables, only global constants
+            - It won't accept pleb nonlocal variables either
+            - Python "class": they are all inferior to the jit class
+            - No `**kwargs`
+            - and just a few dozen-jillion other things.
+        """
 
     # Parse source code
     sourceAST = ast.parse(codeSource)
 
     # Extract imports and target function definition
     importsAST = [node for node in sourceAST.body if isinstance(node, (ast.Import, ast.ImportFrom))]
-    targetFunction = next((node for node in sourceAST.body
-                         if isinstance(node, ast.FunctionDef)
-                         and node.name == callableTarget), None)
+    FunctionDefTarget = next((node for node in sourceAST.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
 
-    if not targetFunction:
+    if not FunctionDefTarget:
         raise ValueError(f"Could not find function {callableTarget} in source code")
 
-    # Create import statements for synthetic modules
-    syntheticImports = []
-    for pathFilename, funcName in listPathFilenamesDestination:
-        if funcName != callableTarget:  # Don't import self
-            importFrom = ast.ImportFrom(
-                module=f"syntheticModules",
-                names=[ast.alias(name=funcName, asname=None)],
-                level=0
-            )
-            syntheticImports.append(importFrom)
-
-    # Create new function with same signature
-    newFunction = ast.FunctionDef(
-        name=targetFunction.name,
-        args=targetFunction.args,
-        body=targetFunction.body,
-        decorator_list=[],
-        returns=targetFunction.returns,
-    )
+    # Zero-out the decorator list
+    FunctionDefTarget.decorator_list=[]
+    # TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
+    # FunctionDefTargetDecorators = [decorator for decorator in FunctionDefTarget.decorator_list]
 
     # Add Numba decorator
-    newFunction = decorateCallableWithNumba(newFunction, parallel=False)
+    FunctionDefTarget = decorateCallableWithNumba(FunctionDefTarget, parallel=False)
+    FunctionDefTarget.body.insert(0, ast.Expr(value=ast.Constant(value=docstringDispatcherNumba)))
 
     # Combine everything into a module
     moduleAST = ast.Module(
-        body=importsAST + syntheticImports + [newFunction],
-        type_ignores=[]
+        body=cast(List[ast.stmt]
+                , importsAST
+                + [Don_Lapre_The_Road_to_Self_Improvement_For_Programmers_by_Using_Short_Identifiers.astForCompetentProgrammers
+                    for Don_Lapre_The_Road_to_Self_Improvement_For_Programmers_by_Using_Short_Identifiers in listStuffYouOughtaKnow]
+                + [FunctionDefTarget])
+        , type_ignores=[]
     )
 
-    # Fix locations and unparse
     ast.fix_missing_locations(moduleAST)
     return ast.unparse(moduleAST)
 
@@ -465,39 +421,79 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
     if not algorithmSource:
         algorithmSource = getAlgorithmSource()
 
-    def getPathFilenameWrite(callableTarget: str, pathWrite: Optional[pathlib.Path] = None, formatFilenameWrite: Optional[str] = None) -> pathlib.Path:
+    formatModuleNameDEFAULT = "numba_{callableTarget}"
+
+    # When I am a more competent programmer, I will make getPathFilenameWrite dependent on makeAstImport or vice versa,
+    # so the name of the physical file doesn't get out of whack with the name of the logical module.
+    def getPathFilenameWrite(callableTarget: str
+                            , pathWrite: Optional[pathlib.Path] = None
+                            , formatFilenameWrite: Optional[str] = None
+                            ) -> pathlib.Path:
         if not pathWrite:
-            pathFilenameAlgorithm = pathlib.Path(inspect.getfile(algorithmSource))
-            pathWrite = pathFilenameAlgorithm.parent / relativePathSyntheticModules
+            pathWrite = getPathSyntheticModules()
         if not formatFilenameWrite:
-            formatFilenameWrite = "numba_{callableTarget}.py"
+            formatFilenameWrite = formatModuleNameDEFAULT + '.py'
 
         pathFilename = pathWrite  / formatFilenameWrite.format(callableTarget=callableTarget)
         return pathFilename
 
-    listPathFilenamesDestination: List[Tuple[pathlib.Path, str]] = []
+    def makeAstImport(callableTarget: str
+                        , packageName: Optional[str] = None
+                        , subPackageName: Optional[str] = None
+                        , moduleName: Optional[str] = None
+                        , astNodeLogicalPathThingy: Optional[ast.AST] = None
+                        ) -> ast.ImportFrom:
+        """Creates import AST node for synthetic modules."""
+        if astNodeLogicalPathThingy is None:
+            if packageName is None:
+                packageName = myPackageNameIs
+            if subPackageName is None:
+                subPackageName = moduleOfSyntheticModules
+            if moduleName is None:
+                moduleName = formatModuleNameDEFAULT.format(callableTarget=callableTarget)
+            module=f'{packageName}.{subPackageName}.{moduleName}'
+        else:
+            module = str(astNodeLogicalPathThingy)
+        return ast.ImportFrom(
+            module=module,
+            names=[ast.alias(name=callableTarget, asname=None)],
+            level=0
+        )
 
-    # TODO abstract this process
-    # especially remove the hardcoded paths and filenames
+    listStuffYouOughtaKnow: List[youOughtaKnow] = []
 
     for callableTarget in listCallablesInline:
         codeSource = inspect.getsource(algorithmSource)
         moduleSource = inlineOneCallable(codeSource, callableTarget)
         if not moduleSource:
             raise Exception("Pylance, OMG! The sky is falling!")
-        pathFilenameWrite = getPathFilenameWrite(callableTarget)
-        pathFilenameWrite.write_text(moduleSource)
-        listPathFilenamesDestination.append((pathFilenameWrite, callableTarget))
 
-    # Generate dispatcher
+        pathFilename = getPathFilenameWrite(callableTarget)
+        astImport = makeAstImport(callableTarget)
+
+        listStuffYouOughtaKnow.append(youOughtaKnow(
+            callableSynthesized=callableTarget,
+            pathFilenameForMe=pathFilename,
+            astForCompetentProgrammers=astImport
+        ))
+        pathFilename.write_text(moduleSource)
+
+    # Generate dispatcher if requested
     if callableDispatcher:
         codeSource = inspect.getsource(algorithmSource)
-        moduleSource = makeDispatcherNumba(codeSource, callableDispatcher, listPathFilenamesDestination)
+        moduleSource = makeDispatcherNumba(codeSource, callableDispatcher, listStuffYouOughtaKnow)
         if not moduleSource:
             raise Exception("Pylance, OMG! The sky is falling!")
-        pathFilenameWrite = getPathFilenameWrite(callableDispatcher)
-        pathFilenameWrite.write_text(moduleSource)
-        listPathFilenamesDestination.append((pathFilenameWrite, callableDispatcher))
+
+        pathFilename = getPathFilenameWrite(callableDispatcher)
+        astImport = makeAstImport(callableDispatcher)
+
+        listStuffYouOughtaKnow.append(youOughtaKnow(
+            callableSynthesized=callableDispatcher,
+            pathFilenameForMe=pathFilename,
+            astForCompetentProgrammers=astImport
+        ))
+        pathFilename.write_text(moduleSource)
 
 if __name__ == '__main__':
     setDatatypeModule('numpy', sourGrapes=True)

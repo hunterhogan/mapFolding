@@ -28,6 +28,28 @@ And, I almost certainly want to change the semiotics from "authority" (of truth)
 Here, "power" is a direct analogy to https://hunterthinks.com/opinion/a-hohfeldian-primer.
 """
 
+myPackageNameIs = "mapFolding"
+
+moduleOfSyntheticModules = "syntheticModules"
+
+def getPathPackage() -> pathlib.Path:
+    import importlib, inspect
+    pathPackage = pathlib.Path(inspect.getfile(importlib.import_module(myPackageNameIs)))
+    if pathPackage.is_file():
+        pathPackage = pathPackage.parent
+    return pathPackage
+
+def getPathJobDEFAULT() -> pathlib.Path:
+    if 'google.colab' in sys.modules:
+        pathJobDEFAULT = pathlib.Path("/content/drive/MyDrive") / "jobs"
+    else:
+        pathJobDEFAULT = getPathPackage() / "jobs"
+    return pathJobDEFAULT
+
+def getPathSyntheticModules() -> pathlib.Path:
+    pathSyntheticModules = getPathPackage() / moduleOfSyntheticModules
+    return pathSyntheticModules
+
 def getAlgorithmSource() -> ModuleType:
     from mapFolding import theDao
     return theDao
@@ -39,10 +61,6 @@ def getAlgorithmCallable() -> Callable[..., None]:
 def getDispatcherCallable() -> Callable[..., None]:
     from mapFolding.syntheticModules import numba_doTheNeedful
     return cast(Callable[..., None], numba_doTheNeedful.doTheNeedful)
-
-# def getDispatcherCallable() -> Callable[..., None]:
-#     from mapFolding import dispatcherNumba
-#     return cast(Callable[..., None], dispatcherNumba.doTheNeedful)
 
 # NOTE I want this _concept_ to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
 class computationState(TypedDict):
@@ -249,16 +267,3 @@ def hackSSOTdatatype(identifier: str) -> str:
     elif RubeGoldBerg == 'datatypeLeavesTotal':
         return _get_datatype('leavesTotal')
     raise Exception("Dude, you forgot to set a value in `hackSSOTdatatype`.")
-
-try:
-    _pathModule = pathlib.Path(__file__).parent
-except NameError:
-    _pathModule = pathlib.Path.cwd()
-
-pathJobDEFAULT = _pathModule / "jobs"
-
-if 'google.colab' in sys.modules:
-    pathJobDEFAULT = pathlib.Path("/content/drive/MyDrive") / "jobs"
-
-# this needs improvement
-relativePathSyntheticModules = "syntheticModules"

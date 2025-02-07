@@ -1,10 +1,11 @@
 """A relatively stable API for oft-needed functionality."""
+from operator import ge
 from mapFolding import (
     computationState,
+    getPathJobDEFAULT,
     hackSSOTdtype,
     indexMy,
     indexTrack,
-    pathJobDEFAULT,
     setDatatypeElephino,
     setDatatypeFoldsTotal,
     setDatatypeLeavesTotal,
@@ -75,7 +76,7 @@ def getPathFilenameFoldsTotal(mapShape: Union[Sequence[int], numpy.ndarray[Tuple
     Returns:
         pathlib.Path: Complete path to the folds total file.
     """
-    pathFilenameFoldsTotal = pathlib.Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else pathJobDEFAULT
+    pathFilenameFoldsTotal = pathlib.Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else getPathJobDEFAULT()
     if pathFilenameFoldsTotal.is_dir():
         filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(mapShape)
         pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT

@@ -4,20 +4,29 @@ from mapFolding.theSSOT import (
     getAlgorithmCallable,
     getAlgorithmSource,
     getDispatcherCallable,
-    hackSSOTdtype,
+    getPathJobDEFAULT,
+    getPathPackage,
+    getPathSyntheticModules,
     hackSSOTdatatype,
+    hackSSOTdtype,
     indexMy,
     indexTrack,
-    relativePathSyntheticModules,
+    moduleOfSyntheticModules,
+    myPackageNameIs,
     ParametersNumba,
     parametersNumbaDEFAULT,
-    pathJobDEFAULT,
     setDatatypeElephino,
     setDatatypeFoldsTotal,
     setDatatypeLeavesTotal,
     setDatatypeModule,
 )
-from mapFolding.beDRY import getFilenameFoldsTotal, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal
+from mapFolding.beDRY import (
+    getFilenameFoldsTotal,
+    getPathFilenameFoldsTotal,
+    outfitCountFolds,
+    saveFoldsTotal,
+)
+
 from mapFolding.basecamp import countFolds
 from mapFolding.oeis import clearOEIScache, getOEISids, oeisIDfor_n
 
