@@ -19,7 +19,7 @@ import os
 import pathlib
 import sys
 
-def getFilenameFoldsTotal(mapShape: Sequence[int]) -> str:
+def getFilenameFoldsTotal(mapShape: Union[Sequence[int], numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]]) -> str:
     """Generate a standardized filename string for storing map folding totals.
 
     The function takes a map shape sequence and converts it into a filename string
@@ -27,13 +27,13 @@ def getFilenameFoldsTotal(mapShape: Sequence[int]) -> str:
     For example, [3, 2] becomes 'p2x3.foldsTotal'.
 
     Parameters:
-        mapShape (Sequence[int]): A sequence of integers representing the dimensions
+        mapShape: A sequence of integers representing the dimensions
             of the map (e.g., [3, 2] for a 3x2 map)
 
     Returns:
-        str: A filename string in format 'pNxM.foldsTotal' where N,M are sorted dimensions
+        A filename string in format 'pNxM.foldsTotal' where N,M are sorted dimensions
     """
-    return str(sorted(mapShape)).replace(', ', 'x').replace('[', 'p').replace(']', '') + '.foldsTotal'
+    return 'p' + 'x'.join(str(dim) for dim in sorted(mapShape)) + '.foldsTotal'
 
 def getLeavesTotal(listDimensions: Sequence[int]) -> int:
     """
@@ -59,7 +59,7 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 
         return productDimensions
 
-def getPathFilenameFoldsTotal(mapShape: Sequence[int], pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
+def getPathFilenameFoldsTotal(mapShape: Union[Sequence[int], numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]], pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
     """Get path for folds total file.
 
     This function determines the file path for storing fold totals. If a path is provided,
@@ -82,7 +82,7 @@ def getPathFilenameFoldsTotal(mapShape: Sequence[int], pathLikeWriteFoldsTotal: 
     pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
     return pathFilenameFoldsTotal
 
-def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, CPUlimit: Optional[Union[bool, float, int]], listDimensions: Sequence[int]):
+def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, CPUlimit: Optional[Union[bool, float, int]], listDimensions: Sequence[int]) -> int:
     """
     Determines whether or how to divide the computation into tasks.
 
@@ -257,7 +257,7 @@ def outfitCountFolds(listDimensions: Sequence[int]
     stateInitialized = computationState(
         connectionGraph = makeConnectionGraph(mapShape, datatype=hackSSOTdtype('connectionGraph')),
         foldGroups = foldGroups,
-        mapShape = mapShape,
+        mapShape = numpy.array(mapShape, dtype=hackSSOTdtype('mapShape')),
         my = my,
         gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, hackSSOTdtype('gapsWhere')),
         track = makeDataContainer((len(indexTrack), leavesTotal + 1), hackSSOTdtype('track')),
@@ -314,7 +314,7 @@ def saveFoldsTotal(pathFilename: Union[str, os.PathLike[str]], foldsTotal: int) 
         except Exception:
             print(foldsTotal)
 
-def setCPUlimit(CPUlimit: Union[bool, float, int, None]) -> int:
+def setCPUlimit(CPUlimit: Optional[Any]) -> int:
     """Sets CPU limit for Numba concurrent operations. Note that it can only affect Numba-jitted functions that have not yet been imported.
 
     Parameters:
@@ -335,7 +335,7 @@ def setCPUlimit(CPUlimit: Union[bool, float, int, None]) -> int:
     if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
         CPUlimit = oopsieKwargsie(CPUlimit)
 
-    concurrencyLimit = defineConcurrencyLimit(CPUlimit)
+    concurrencyLimit = int(defineConcurrencyLimit(CPUlimit))
     numba.set_num_threads(concurrencyLimit)
 
     return concurrencyLimit

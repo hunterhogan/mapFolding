@@ -1,7 +1,7 @@
 from collections import defaultdict
 from numpy import integer
 from types import ModuleType
-from typing import Any, Callable, Dict, Final, Optional, Tuple, Type, TypedDict
+from typing import Any, Callable, Dict, Final, Optional, Tuple, Type, TypedDict, cast
 import enum
 import numba
 import numpy
@@ -34,18 +34,22 @@ def getAlgorithmSource() -> ModuleType:
 
 def getAlgorithmCallable() -> Callable[..., None]:
     algorithmSource = getAlgorithmSource()
-    return algorithmSource.doTheNeedful
+    return cast(Callable[..., None], algorithmSource.doTheNeedful)
 
 def getDispatcherCallable() -> Callable[..., None]:
-    from mapFolding import dispatcherNumba
-    return dispatcherNumba._countFolds
+    from mapFolding.syntheticModules import numba_doTheNeedful
+    return cast(Callable[..., None], numba_doTheNeedful.doTheNeedful)
+
+# def getDispatcherCallable() -> Callable[..., None]:
+#     from mapFolding import dispatcherNumba
+#     return cast(Callable[..., None], dispatcherNumba.doTheNeedful)
 
 # NOTE I want this _concept_ to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
 class computationState(TypedDict):
     connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]]
     foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
     gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
-    mapShape: Tuple[int, ...]
+    mapShape: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
     my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
     track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]
 
@@ -53,7 +57,7 @@ class computationState(TypedDict):
 class EnumIndices(enum.IntEnum):
     """Base class for index enums."""
     @staticmethod
-    def _generate_next_value_(name, start, count, last_values):
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> int:
         """0-indexed."""
         return count
 
@@ -135,7 +139,8 @@ _datatypeDefault: Final[Dict[str, str]] = {
 _datatypeModule = ''
 _datatypeModuleDEFAULT: Final[str] = 'numpy'
 
-_datatype = defaultdict(str)
+_datatype: Dict[str, str] = defaultdict(str)
+
 def reportDatatypeLimit(identifier: str, datatype: str, sourGrapes: Optional[bool] = False) -> str:
     global _datatype
     if not _datatype[identifier]:
@@ -146,7 +151,7 @@ def reportDatatypeLimit(identifier: str, datatype: str, sourGrapes: Optional[boo
         raise Exception(f"Datatype is '{_datatype[identifier]}' not '{datatype}', so you can take your ball and go home.")
     return _datatype[identifier]
 
-def setDatatypeModule(datatypeModule: str, sourGrapes: Optional[bool] = False):
+def setDatatypeModule(datatypeModule: str, sourGrapes: Optional[bool] = False) -> str:
     global _datatypeModule
     if not _datatypeModule:
         _datatypeModule = datatypeModule
@@ -156,13 +161,13 @@ def setDatatypeModule(datatypeModule: str, sourGrapes: Optional[bool] = False):
         raise Exception(f"Datatype module is '{_datatypeModule}' not '{datatypeModule}', so you can take your ball and go home.")
     return _datatypeModule
 
-def setDatatypeElephino(datatype: str, sourGrapes: Optional[bool] = False):
+def setDatatypeElephino(datatype: str, sourGrapes: Optional[bool] = False) -> str:
     return reportDatatypeLimit('elephino', datatype, sourGrapes)
 
-def setDatatypeFoldsTotal(datatype: str, sourGrapes: Optional[bool] = False):
+def setDatatypeFoldsTotal(datatype: str, sourGrapes: Optional[bool] = False) -> str:
     return reportDatatypeLimit('foldsTotal', datatype, sourGrapes)
 
-def setDatatypeLeavesTotal(datatype: str, sourGrapes: Optional[bool] = False):
+def setDatatypeLeavesTotal(datatype: str, sourGrapes: Optional[bool] = False) -> str:
     return reportDatatypeLimit('leavesTotal', datatype, sourGrapes)
 
 def _get_datatype(identifier: str) -> str:
@@ -176,14 +181,16 @@ def _get_datatype(identifier: str) -> str:
             _datatype[identifier] = _datatypeDefault.get(identifier) or _get_datatype('foldsTotal')
     return _datatype[identifier]
 
-def _getDatatypeModule():
+def _getDatatypeModule() -> str:
     global _datatypeModule
     if not _datatypeModule:
         _datatypeModule = _datatypeModuleDEFAULT
     return _datatypeModule
 
-def setInStone(identifier: str):
-    return eval(f"{_getDatatypeModule()}.{_get_datatype(identifier)}")
+def setInStone(identifier: str) -> Type[Any]:
+    datatypeModule = _getDatatypeModule()
+    datatypeStr = _get_datatype(identifier)
+    return cast(Type[Any], getattr(eval(datatypeModule), datatypeStr))
 
 def hackSSOTdtype(identifier: str) -> Type[Any]:
     _hackSSOTdtype={
@@ -193,6 +200,7 @@ def hackSSOTdtype(identifier: str) -> Type[Any]:
     'dtypeLeavesTotal': 'dtypeLeavesTotal',
     'foldGroups': 'dtypeFoldsTotal',
     'gapsWhere': 'dtypeLeavesTotal',
+    'mapShape': 'dtypeLeavesTotal',
     'my': 'dtypeElephino',
     'track': 'dtypeElephino',
     }
@@ -227,6 +235,7 @@ def hackSSOTdatatype(identifier: str) -> str:
     'leafAbove': 'datatypeLeavesTotal',
     'leafBelow': 'datatypeLeavesTotal',
     'leafConnectee': 'datatypeLeavesTotal',
+    'mapShape': 'datatypeLeavesTotal',
     'my': 'datatypeElephino',
     'taskDivisions': 'datatypeLeavesTotal',
     'taskIndex': 'datatypeLeavesTotal',

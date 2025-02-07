@@ -42,7 +42,7 @@ def countFolds(listDimensions: Sequence[int], pathLikeWriteFoldsTotal: Optional[
     dispatcher = getDispatcherCallable()
     dispatcher(**stateUniversal)
 
-    foldsTotal = stateUniversal['foldGroups'][0:-1].sum() * stateUniversal['foldGroups'][-1]
+    foldsTotal = int(stateUniversal['foldGroups'][0:-1].sum() * stateUniversal['foldGroups'][-1])
 
     if pathFilenameFoldsTotal is not None:
         saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)

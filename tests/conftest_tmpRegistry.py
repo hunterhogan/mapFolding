@@ -58,15 +58,5 @@ def pathCacheTesting(pathTempTesting: pathlib.Path) -> Generator[pathlib.Path, A
     there_must_be_a_better_way._pathCache = pathCacheOriginal
 
 @pytest.fixture
-def pathFilenameBenchmarksTesting(pathTempTesting: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
-    """Temporarily replace the benchmarks directory with a test directory."""
-    from mapFolding.benchmarks import benchmarking
-    pathFilenameOriginal = benchmarking.pathFilenameRecordedBenchmarks
-    pathFilenameTest = pathTempTesting / "benchmarks.npy"
-    benchmarking.pathFilenameRecordedBenchmarks = pathFilenameTest
-    yield pathFilenameTest
-    benchmarking.pathFilenameRecordedBenchmarks = pathFilenameOriginal
-
-@pytest.fixture
 def pathFilenameFoldsTotalTesting(pathTempTesting: pathlib.Path) -> pathlib.Path:
     return pathTempTesting.joinpath("foldsTotalTest.txt")

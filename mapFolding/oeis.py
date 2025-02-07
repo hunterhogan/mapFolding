@@ -2,7 +2,7 @@
 _only_ things that implement _only_ the OEIS."""
 from datetime import datetime, timedelta
 from mapFolding import countFolds
-from typing import TYPE_CHECKING, List, Callable, Dict, Final
+from typing import TYPE_CHECKING, List, Callable, Dict, Final, Union, Any
 import argparse
 import pathlib
 import random
@@ -29,7 +29,7 @@ class SettingsOEIS(TypedDict):
     valuesTestValidation: List[int]
     valueUnknown: int
 
-settingsOEIShardcodedValues = {
+settingsOEIShardcodedValues: Dict[str, Dict[str, Any]] = {
     'A001415': {
         'description': 'Number of ways of folding a 2 X n strip of stamps.',
         'getMapShape': lambda n: sorted([2, n]),
@@ -72,7 +72,7 @@ settingsOEIShardcodedValues = {
 oeisIDsImplemented: Final[List[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues.keys()])
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
-def _validateOEISid(oeisIDcandidate: str):
+def _validateOEISid(oeisIDcandidate: str) -> str:
     """
     Validates an OEIS sequence ID against implemented sequences.
 
@@ -213,7 +213,11 @@ def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
     for oeisID in oeisIDsImplemented:
         valuesKnownSherpa = _getOEISidValues(oeisID)
         settingsTarget[oeisID] = SettingsOEIS(
-            **settingsOEIShardcodedValues[oeisID],
+            description=settingsOEIShardcodedValues[oeisID]['description'],
+            getMapShape=settingsOEIShardcodedValues[oeisID]['getMapShape'],
+            valuesBenchmark=settingsOEIShardcodedValues[oeisID]['valuesBenchmark'],
+            valuesTestParallelization=settingsOEIShardcodedValues[oeisID]['valuesTestParallelization'],
+            valuesTestValidation=settingsOEIShardcodedValues[oeisID]['valuesTestValidation'],
             valuesKnown = valuesKnownSherpa,
             valueUnknown = max(valuesKnownSherpa.keys(), default=0) + 1
         )

@@ -5,7 +5,6 @@
 from tests.conftest_tmpRegistry import (
     pathCacheTesting,
     pathDataSamples,
-    pathFilenameBenchmarksTesting,
     pathFilenameFoldsTotalTesting,
     pathTempTesting,
     setupTeardownTestData,
@@ -22,7 +21,7 @@ from mapFolding.beDRY import *
 from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues
 from mapFolding.oeis import *
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
-from typing import Any, Callable, Dict, Generator, List, Optional, Sequence, Set, Tuple, Type, Union
+from typing import Any, Callable, ContextManager, Dict, Generator, List, Optional, Sequence, Set, Tuple, Type, Union
 import pathlib
 import pytest
 import random
@@ -65,7 +64,7 @@ def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
                         if foldsTotalInteger > 85109616 * 10**3:
                             # You made it this far, so fuck it: put it in the dictionary
                             dictionaryMapDimensionsToFoldsTotalKnown[tuple(listDimensions)] = foldsTotalInteger
-                    dictionaryMapDimensionsToFoldsTotalKnown[tuple(listDimensions)] = foldsTotal
+                        dictionaryMapDimensionsToFoldsTotalKnown[tuple(listDimensions)] = foldsTotalInteger
                     # The sunk-costs fallacy claims another victim!
 
     return dictionaryMapDimensionsToFoldsTotalKnown
@@ -150,9 +149,9 @@ def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
     return make_mock
 
 @pytest.fixture
-def mockDispatcher() -> Callable[[Any], unittest.mock.patch]:
+def mockDispatcher() -> Callable[[Any], ContextManager[Any]]:
     """Context manager for mocking dispatcher callable."""
-    def wrapper(mockFunction: Any) -> unittest.mock.patch:
+    def wrapper(mockFunction: Any) -> ContextManager[Any]:
         dispatcherCallable = getDispatcherCallable()
         return unittest.mock.patch(
             f"{dispatcherCallable.__module__}.{dispatcherCallable.__name__}",

@@ -70,7 +70,7 @@ def test_countFolds_writeFoldsTotal(
     listDimensionsTestFunctionality: List[int],
     pathTempTesting: pathlib.Path,
     mockFoldingFunction: Callable[..., Callable[..., None]],
-    mockDispatcher,
+    mockDispatcher: Callable[[Callable[..., None]], Any],
     foldsValue: int,
     writeFoldsTarget: Optional[str]
 ) -> None:
@@ -117,7 +117,6 @@ def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: List[i
     connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality)
     assert numpy.all(connectionGraph >= 0), "All values in the connection graph should be non-negative."
 
-# puck fython
 # @pytest.mark.parametrize("datatype", ['int16', 'uint64'])
 # def test_makeConnectionGraph_datatype(listDimensionsTestFunctionality: List[int], datatype) -> None:
 #     connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality, datatype=datatype)
