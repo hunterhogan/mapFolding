@@ -1,8 +1,8 @@
 """Everything implementing the The Online Encyclopedia of Integer Sequences (OEIS);
 _only_ things that implement _only_ the OEIS."""
 from datetime import datetime, timedelta
-from mapFolding import countFolds
-from typing import TYPE_CHECKING, List, Callable, Dict, Final, Union, Any
+from mapFolding import countFolds, getPathPackage
+from typing import Any, Callable, Dict, Final, List, Tuple, TYPE_CHECKING, Union
 import argparse
 import pathlib
 import random
@@ -18,8 +18,11 @@ else:
 
 """
 Section: make `settingsOEIS`"""
+
+_pathCache = getPathPackage() / ".cache"
+
 class SettingsOEIS(TypedDict):
-    # I would prefer to load description dynamically from OEIS, but it's a pita for me
+    # I would prefer to load `description` dynamically from OEIS, but it's a pita for me
     # to learn how to efficiently implement right now.
     description: str
     getMapShape: Callable[[int], List[int]]
@@ -136,11 +139,6 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> Dict[int, int]:
         n, aOFn = map(int, line.split())
         OEISsequence[n] = aOFn
     return OEISsequence
-
-try:
-    _pathCache = pathlib.Path(__file__).parent / ".cache"
-except NameError:
-    _pathCache = pathlib.Path.home() / ".mapFoldingCache"
 
 def _getOEISidValues(oeisID: str) -> Dict[int, int]:
     """
