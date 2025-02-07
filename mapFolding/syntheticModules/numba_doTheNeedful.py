@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 from typing import Any, Tuple
 import numba
 import numpy
-from syntheticModules import countInitialize
+from mapFolding.syntheticModules import countInitialize
 from syntheticModules import countParallel
 from syntheticModules import countSequential
 
