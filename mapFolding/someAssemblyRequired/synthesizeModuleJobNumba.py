@@ -65,7 +65,8 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: str) -> str:
 
     stringMinimized = stringMinimized.replace('range', '*range')
 
-    return f"{identifierName} = numpy.array({stringMinimized}, dtype=numpy.{arrayTarget.dtype})"
+    return f"{identifierName} = array({stringMinimized}, dtype={arrayTarget.dtype})"
+    # return f"{identifierName} = numpy.array({stringMinimized}, dtype=numpy.{arrayTarget.dtype})"
 
 def writeModuleWithNumba(listDimensions) -> pathlib.Path:
     """
@@ -103,15 +104,23 @@ def writeModuleWithNumba(listDimensions) -> pathlib.Path:
     stateJob = makeStateJob(listDimensions, writeJob=False)
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
 
-    from syntheticModules import countSequential
+    from mapFolding.syntheticModules.numba_countSequential import countSequential
     algorithmSource = countSequential
     codeSource = inspect.getsource(algorithmSource)
 
-    lineNumba = f"@numba.jit(numba.types.{hackSSOTdatatype('datatypeFoldsTotal')}(), cache=True, nopython=True, fastmath=True, forceinline=True, inline='always', looplift=False, _nrt=True, error_model='numpy', parallel=False, boundscheck=False, no_cfunc_wrapper=False, no_cpython_wrapper=False)"
+    lineNumba = f"@jit({hackSSOTdatatype('datatypeFoldsTotal')}Numba(), cache=True, nopython=True, fastmath=True, forceinline=True, inline='always', looplift=False, _nrt=True, error_model='numpy', parallel=False, boundscheck=False, no_cfunc_wrapper=False, no_cpython_wrapper=False)"
+    # lineNumba = f"@numba.jit(numba.types.{hackSSOTdatatype('datatypeFoldsTotal')}(), cache=True, nopython=True, fastmath=True, forceinline=True, inline='always', looplift=False, _nrt=True, error_model='numpy', parallel=False, boundscheck=False, no_cfunc_wrapper=False, no_cpython_wrapper=False)"
 
+    setImportFromNumpy = set(['array', hackSSOTdatatype('datatypeElephino'), hackSSOTdatatype('datatypeLeavesTotal')])
+    setImportFromNumba = set(['jit', 'objmode'])
+    setImportFromNumbaTypes = set([hackSSOTdatatype('datatypeElephino'), hackSSOTdatatype('datatypeLeavesTotal'), hackSSOTdatatype('datatypeFoldsTotal')])
+    setImportFromNumbaTypes = set([f"{numbaType} as {numbaType}Numba" for numbaType in setImportFromNumbaTypes])
     linesImport = "\n".join([
-                        "import numpy"
-                        , "import numba"
+                        # "from numpy array, "
+                        # , "import numba"
+                        f"from numpy import {', '.join(setImportFromNumpy)}"
+                        , f"from numba import {', '.join(setImportFromNumba)}"
+                        , f"from numba.types import {', '.join(setImportFromNumbaTypes)}"
                         ])
 
     ImaIndent = '    '
@@ -146,14 +155,16 @@ def writeModuleWithNumba(listDimensions) -> pathlib.Path:
                 continue
             # Statements are in the form: leaf1ndex = my[indexMy.leaf1ndex.value]
             identifier, statement = lineSource.split('=')
-            lineSource = ImaIndent + identifier.strip() + f"=numba.types.{hackSSOTdatatype(identifier.strip())}({str(eval(statement.strip()))})"
+            lineSource = ImaIndent + identifier.strip() + f"={hackSSOTdatatype(identifier.strip())}Numba({str(eval(statement.strip()))})"
+            # lineSource = ImaIndent + identifier.strip() + f"=numba.types.{hackSSOTdatatype(identifier.strip())}({str(eval(statement.strip()))})"
         elif ': int =' in lineSource or ':int=' in lineSource:
             if 'dimensionsTotal' in lineSource:
                 continue
             # Statements are in the form: groupsOfFolds: int = 0
             assignment, statement = lineSource.split('=')
             identifier = assignment.split(':')[0].strip()
-            lineSource = ImaIndent + identifier.strip() + f"=numba.types.{hackSSOTdatatype(identifier.strip())}({str(eval(statement.strip()))})"
+            lineSource = ImaIndent + identifier.strip() + f"={hackSSOTdatatype(identifier.strip())}Numba({str(eval(statement.strip()))})"
+            # lineSource = ImaIndent + identifier.strip() + f"=numba.types.{hackSSOTdatatype(identifier.strip())}({str(eval(statement.strip()))})"
         elif 'track[indexTrack.' in lineSource:
             # Statements are in the form: leafAbove = track[indexTrack.leafAbove.value]
             identifier, statement = lineSource.split('=')
@@ -180,7 +191,8 @@ if __name__ == '__main__':
     linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
                                     , f"    groupsOfFolds *= {str(stateJob['foldGroups'][-1])}"
                                     , "    print(groupsOfFolds)"
-                                    , "    with numba.objmode():"
+                                    , "    with objmode():"
+                                    # , "    with numba.objmode():"
                                     , f"        open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(groupsOfFolds))"
                                     , "    return groupsOfFolds"
                                     ])
@@ -198,10 +210,10 @@ if __name__ == '__main__':
     return pathFilenameDestination
 
 if __name__ == '__main__':
-    listDimensions = [5,5]
+    listDimensions = [6,6]
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
-    setDatatypeLeavesTotal('int8', sourGrapes=True)
+    setDatatypeLeavesTotal('uint8', sourGrapes=True)
     pathFilenameModule = writeModuleWithNumba(listDimensions)
 
     # Induce numba.jit compilation
@@ -210,3 +222,6 @@ if __name__ == '__main__':
     module = importlib.util.module_from_spec(moduleSpec)
     if moduleSpec.loader is None: raise ImportError(f"Could not load module from {moduleSpec}")
     moduleSpec.loader.exec_module(module)
+
+    # from mapFolding.someAssemblyRequired.getLLVMforNoReason import writeModuleLLVM
+    # pathFilenameLLVM = writeModuleLLVM(pathFilenameModule, identifierCallableLaunch)
