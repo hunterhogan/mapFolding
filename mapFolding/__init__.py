@@ -23,7 +23,7 @@ from mapFolding.theSSOT import (
 from mapFolding.theSSOT import (
     getAlgorithmCallable,
     getAlgorithmSource,
-    getPathJobDEFAULT,
+    getPathJobRootDEFAULT,
     getPathSyntheticModules,
     moduleOfSyntheticModules,
 )

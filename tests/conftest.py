@@ -40,7 +40,7 @@ def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
             dictionaryMapDimensionsToFoldsTotalKnown[tuple(dimensions)] = foldingsTotal
 
     # Are we in a place that has jobs?
-    pathJobDEFAULT = getPathJobDEFAULT()
+    pathJobDEFAULT = getPathJobRootDEFAULT()
     if pathJobDEFAULT.exists():
         # Are there foldsTotal files?
         for pathFilenameFoldsTotal in pathJobDEFAULT.rglob('*.foldsTotal'):

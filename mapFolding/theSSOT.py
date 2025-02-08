@@ -1,4 +1,4 @@
-from .theSSOTnumba import *
+from mapFolding.theSSOTnumba import *
 from collections import defaultdict
 from numpy import integer
 from types import ModuleType
@@ -40,7 +40,7 @@ def getPathPackage() -> pathlib.Path:
         pathPackage = pathPackage.parent
     return pathPackage
 
-def getPathJobDEFAULT() -> pathlib.Path:
+def getPathJobRootDEFAULT() -> pathlib.Path:
     if 'google.colab' in sys.modules:
         pathJobDEFAULT = pathlib.Path("/content/drive/MyDrive") / "jobs"
     else:

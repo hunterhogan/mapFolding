@@ -1,19 +1,21 @@
-from tkinter import N
-from mapFolding import getPathFilenameFoldsTotal, indexMy, indexTrack, ParametersNumba, parametersNumbaDEFAULT
+from mapFolding import indexMy, indexTrack, ParametersNumba, parametersNumbaDEFAULT, getFilenameFoldsTotal, getPathJobRootDEFAULT, getPathFilenameFoldsTotal
 from mapFolding import setDatatypeElephino, setDatatypeFoldsTotal, setDatatypeLeavesTotal, setDatatypeModule, hackSSOTdatatype
 from someAssemblyRequired import makeStateJob, decorateCallableWithNumba, Z0Z_UnhandledDecorators
-from typing import Optional, Callable, List, Sequence, cast, Dict, Set, Any
+from typing import Optional, Callable, List, Sequence, cast, Dict, Set, Any, Union
+import os
 import ast
 import importlib
 import importlib.util
 import inspect
+import collections
 import more_itertools
 import numpy
 import pathlib
 import python_minifier
 from Z0Z_tools import updateExtendPolishDictionaryLists
+from theSSOT import computationState
 
-dictionaryImportFrom_global: Dict[str, List[str]] = {}
+dictionaryImportFrom_global: Dict[str, List[str]] = collections.defaultdict(list)
 
 identifierCallableLaunch = "goGoGadgetAbsurdity"
 
@@ -37,12 +39,6 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
         >>> arr = numpy.array([[0,0,0,1,2,3,4,0,0]])
         >>> print(makeStrRLEcompacted(arr, "myArray"))
         "myArray = numpy.array([[0]*3,*range(1,5),[0]*2], dtype=numpy.int64)"
-
-    Notes:
-        - Sequences of 4 or fewer numbers are kept as individual values
-        - Sequences longer than 4 numbers are converted to range objects
-        - Consecutive zeros are compressed using multiplication syntax
-        - The function preserves the original array's dtype
     """
 
     def compressRangesNDArrayNoFlatten(arraySlice):
@@ -72,13 +68,13 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
 
     if identifierName:
         return f"{identifierName} = array({stringMinimized}, dtype={arrayTarget.dtype})"
-    return f"array({stringMinimized}, dtype={arrayTarget.dtype})"
+    return stringMinimized
 
 def makeImports():
     # TODO replace the hardcoded sets with dynamic signals of the necessary imports
     dictionaryImportFrom_local: Dict[str, List[str]] = {}
-    dictionaryImportFrom_local['numpy'] = [ "array", hackSSOTdatatype("datatypeElephino"), hackSSOTdatatype("datatypeLeavesTotal"), ]
-    dictionaryImportFrom_local['numba'] = [ "jit", "objmode" ]
+    dictionaryImportFrom_local['numpy'] = [hackSSOTdatatype("datatypeElephino")]
+    dictionaryImportFrom_local['numba'] = ["objmode" ]
     setImportFromNumbaTypesRaw = set([ hackSSOTdatatype("datatypeElephino"), hackSSOTdatatype("datatypeLeavesTotal"), hackSSOTdatatype("datatypeFoldsTotal"), ])
     setImportFromNumbaTypes = set([ f"{numbaType} as {numbaType}Numba" for numbaType in setImportFromNumbaTypesRaw ])
 
@@ -102,14 +98,43 @@ def makeImports():
 
     return importStatements
 
-def move_argTo_body(node: ast.FunctionDef, argToMove, argData):
-    # print(ast.unparse(argToMove))
-    linesData = makeStrRLEcompacted(argData)
-    target = ast.Name(id=argToMove.arg, ctx=ast.Store())
-    value = ast.parse(linesData).body[0].value # type: ignore
-    assignment = ast.Assign(targets=[target], value=value)
+def evaluate_argIn_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
+
+    return node
+
+def move_argTo_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
+    arrayType = type(argData)
+    moduleConstructor = arrayType.__module__
+    constructorName = arrayType.__name__
+    # NOTE hack
+    constructorName = constructorName.replace('ndarray', 'array')
+    argData_dtype: numpy.dtype = argData.dtype
+    argData_dtypeName = argData.dtype.name
+
+    onlyDataRLE = makeStrRLEcompacted(argData)
+    astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
+    dataAst = astStatement.value
+
+    # Create constructor call dynamically
+    arrayCall = ast.Call(
+        func=ast.Name(id=constructorName, ctx=ast.Load())
+        , args=[dataAst]
+        , keywords=[ast.keyword(arg='dtype' , value=ast.Name(id=argData_dtypeName , ctx=ast.Load()) ) ] )
+
+    # Add required imports
+    global dictionaryImportFrom_global
+    dictionaryImportFrom_global[moduleConstructor].append(constructorName)
+    dictionaryImportFrom_global[moduleConstructor].append(argData_dtypeName)
+
+    # Create assignment node
+    assignment = ast.Assign(
+        targets=[ast.Name(id=astArg.arg, ctx=ast.Store())],
+        value=arrayCall
+    )
+
     node.body.insert(0, assignment)
-    node.args.args.remove(argToMove)
+    node.args.args.remove(astArg)
+
     return node
 
 def makeDecorator(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None):
@@ -131,7 +156,8 @@ def makeDecorator(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[
                 if getattr(decoratorItem.func.value, "id", None) == "numba" and decoratorItem.func.attr == "jit":
                     FunctionDefTarget.decorator_list.remove(decoratorItem)
     FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
-    dictionaryImportFrom_global['numba'] = ['jit']
+    global dictionaryImportFrom_global
+    dictionaryImportFrom_global['numba'].append('jit')
     FunctionDefTarget = decorateCallableWithNumba(FunctionDefTarget, parametersNumba)
     # make sure the decorator is rendered as `@jit` and not `@numba.jit`
     for decoratorItem in FunctionDefTarget.decorator_list:
@@ -139,58 +165,21 @@ def makeDecorator(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[
             decoratorItem.func = ast.Name(id="jit", ctx=ast.Load())
     return FunctionDefTarget
 
-def writeJobNumba(listDimensions: Sequence[int], callableSource: Callable, parametersNumba: Optional[ParametersNumba]=None) -> pathlib.Path:
-    stateJob = makeStateJob(listDimensions, writeJob=False)
-    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
-
-    codeSource = inspect.getsource(callableSource)
-    astSource = ast.parse(codeSource)
-
-    FunctionDefTarget = next((node for node in astSource.body if isinstance(node, ast.FunctionDef) and node.name == callableSource.__name__), None)
-
-    if not FunctionDefTarget:
-        raise ValueError(f"Could not find function {callableSource.__name__} in source code")
-
-    astImports = makeImports()
-
-    Z0Z_listArgsTarget = ['connectionGraph', 'gapsWhere']
-    Z0Z_listArgsRemove = ['foldGroups', 'my', 'track']
-    for astArgument in FunctionDefTarget.args.args.copy():
-        if astArgument.arg in Z0Z_listArgsTarget:
-            FunctionDefTarget = move_argTo_body(FunctionDefTarget, astArgument, stateJob[astArgument.arg])
-        elif astArgument.arg in Z0Z_listArgsRemove:
-            FunctionDefTarget.args.args.remove(astArgument)
-
-    assert FunctionDefTarget.args.args == [], "FunctionDefTarget.args.args should be empty after moving arguments to body"
-
-    FunctionDefTarget = makeDecorator(FunctionDefTarget, parametersNumba)
-
-    astModule = ast.Module(
-        body=cast(List[ast.stmt]
-                , astImports
-                + [FunctionDefTarget])
-        , type_ignores=[]
-    )
-    ast.fix_missing_locations(astModule)
-
-    codeSource = ast.unparse(astModule)
-
-    # lineNumba = f"@jit({hackSSOTdatatype('datatypeFoldsTotal')}Numba(), cache=True, nopython=True, fastmath=True, forceinline=True, inline='always', looplift=False, _nrt=True, error_model='numpy', parallel=False, boundscheck=False, no_cfunc_wrapper=False, no_cpython_wrapper=False)"
+def Z0Z_stringParsing(stateJob: computationState, codeSource: str) -> str:
     ImaIndent = '    '
+
+    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
 
     my = stateJob['my']
     track = stateJob['track']
     linesAlgorithm = """"""
     for lineSource in codeSource.splitlines():
-        if lineSource.startswith(('#', '@numba')):
+        if lineSource.startswith(('#')):
             continue
         elif not lineSource:
             continue
         elif lineSource.startswith('def '):
-            lineSource = "\n".join([
-                # lineNumba,
-                                f"def {identifierCallableLaunch}():"
-                                ])
+            lineSource = f"def {identifierCallableLaunch}():"
         elif 'taskIndex' in lineSource:
             continue
         elif 'my[indexMy.' in lineSource:
@@ -222,10 +211,10 @@ def writeJobNumba(listDimensions: Sequence[int], callableSource: Callable, param
     linesLaunch = """"""
     linesLaunch = linesLaunch + f"""
 if __name__ == '__main__':
-    # import time
-    # timeStart = time.perf_counter()
+    import time
+    timeStart = time.perf_counter()
     {identifierCallableLaunch}()
-    # print(time.perf_counter() - timeStart)
+    print(time.perf_counter() - timeStart)
 """
 
     linesWriteFoldsTotal = """"""
@@ -238,16 +227,64 @@ if __name__ == '__main__':
                                     ])
 
     linesAll = "\n".join([
-                        # linesImport
                         linesAlgorithm
                         , linesWriteFoldsTotal
                         , linesLaunch
                         ])
 
-    pathFilenameDestination = pathFilenameFoldsTotal.with_suffix(".py")
-    pathFilenameDestination.write_text(linesAll)
+    return linesAll
 
-    return pathFilenameDestination
+def writeJobNumba(listDimensions: Sequence[int], callableSource: Callable, parametersNumba: Optional[ParametersNumba]=None, pathFilenameWriteJob: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
+    stateJob = makeStateJob(listDimensions, writeJob=False)
+    codeSource = inspect.getsource(callableSource)
+    astSource = ast.parse(codeSource)
+
+    FunctionDefTarget = next((node for node in astSource.body if isinstance(node, ast.FunctionDef) and node.name == callableSource.__name__), None)
+
+    if not FunctionDefTarget:
+        raise ValueError(f"Could not find function {callableSource.__name__} in source code")
+
+    Z0Z_listArgsTarget = ['connectionGraph', 'gapsWhere']
+    Z0Z_listArgsEvaluate = []
+    Z0Z_listArgsRemove = ['foldGroups', 'my', 'track']
+    for astArgument in FunctionDefTarget.args.args.copy():
+        if astArgument.arg in Z0Z_listArgsTarget:
+            FunctionDefTarget = move_argTo_body(FunctionDefTarget, astArgument, stateJob[astArgument.arg])
+        elif astArgument.arg in Z0Z_listArgsEvaluate:
+            FunctionDefTarget = evaluate_argIn_body(FunctionDefTarget, astArgument, stateJob[astArgument.arg])
+        elif astArgument.arg in Z0Z_listArgsRemove:
+            FunctionDefTarget.args.args.remove(astArgument)
+
+    global identifierCallableLaunch
+    identifierCallableLaunch = FunctionDefTarget.name
+
+    FunctionDefTarget = makeDecorator(FunctionDefTarget, parametersNumba)
+
+    astImports = makeImports()
+
+    astModule = ast.Module(
+        body=cast(List[ast.stmt]
+                , astImports
+                + [FunctionDefTarget])
+        , type_ignores=[]
+    )
+    ast.fix_missing_locations(astModule)
+
+    codeSource = ast.unparse(astModule)
+
+    linesAll = Z0Z_stringParsing(stateJob, codeSource)
+
+    if pathFilenameWriteJob is None:
+        filename = getFilenameFoldsTotal(stateJob['mapShape'])
+        pathRoot = getPathJobRootDEFAULT()
+        pathFilenameWriteJob = pathlib.Path(pathRoot, pathlib.Path(filename).stem, pathlib.Path(filename).with_suffix('.py'))
+        # pathFilenameWriteJob = getPathFilenameFoldsTotal(stateJob['mapShape'], pathlib.Path(filename).stem).with_suffix('.py')
+    else:
+        pathFilenameWriteJob = pathlib.Path(pathFilenameWriteJob)
+    pathFilenameWriteJob.parent.mkdir(parents=True, exist_ok=True)
+
+    pathFilenameWriteJob.write_text(linesAll)
+    return pathFilenameWriteJob
 
 if __name__ == '__main__':
     listDimensions = [4,4]

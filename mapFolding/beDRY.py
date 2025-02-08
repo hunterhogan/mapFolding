@@ -1,8 +1,9 @@
 """A relatively stable API for oft-needed functionality."""
 from operator import ge
+from httpx import get
 from mapFolding import (
     computationState,
-    getPathJobDEFAULT,
+    getPathJobRootDEFAULT,
     hackSSOTdtype,
     indexMy,
     indexTrack,
@@ -21,18 +22,26 @@ import pathlib
 import sys
 
 def getFilenameFoldsTotal(mapShape: Union[Sequence[int], numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]]) -> str:
-    """Generate a standardized filename string for storing map folding totals.
+    """Make a standardized filename for the computed value `foldsTotal`.
 
-    The function takes a map shape sequence and converts it into a filename string
-    representing the dimensions of the map, followed by '.foldsTotal' extension.
-    For example, [3, 2] becomes 'p2x3.foldsTotal'.
+    The filename takes into account
+        - the dimensions of the map, aka `mapShape`, aka `listDimensions`
+        - no spaces in the filename
+        - safe filesystem characters across platforms
+        - unique extension
+        - avoiding potential problems when Python is manipulating the filename, including
+            - treating the file stem as a valid Python identifier, such as
+                - not starting with a number
+                - not using reserved words
+                - no dashes or other special characters
+            - uh, I can't remember, but I found some frustrating edge limitations
+        - if 'p' is still the first character, I picked that because it was the original identifier for the map shape in Lunnan's code
 
     Parameters:
-        mapShape: A sequence of integers representing the dimensions
-            of the map (e.g., [3, 2] for a 3x2 map)
+        mapShape: A sequence of integers representing the dimensions of the map (e.g., [3, 2] for a 3x2 map)
 
     Returns:
-        A filename string in format 'pNxM.foldsTotal' where N,M are sorted dimensions
+        filenameFoldsTotal: A filename string in format 'pNxM.foldsTotal' where N,M are sorted dimensions
     """
     return 'p' + 'x'.join(str(dim) for dim in sorted(mapShape)) + '.foldsTotal'
 
@@ -76,10 +85,15 @@ def getPathFilenameFoldsTotal(mapShape: Union[Sequence[int], numpy.ndarray[Tuple
     Returns:
         pathlib.Path: Complete path to the folds total file.
     """
-    pathFilenameFoldsTotal = pathlib.Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else getPathJobDEFAULT()
+    pathFilenameFoldsTotal = pathlib.Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else getPathJobRootDEFAULT()
     if pathFilenameFoldsTotal.is_dir():
         filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(mapShape)
         pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT
+    elif pathlib.Path(pathLikeWriteFoldsTotal).is_absolute(): # type: ignore
+        pathFilenameFoldsTotal = pathlib.Path(pathLikeWriteFoldsTotal) # type: ignore
+    else:
+        pathFilenameFoldsTotal = pathlib.Path(getPathJobRootDEFAULT(), pathLikeWriteFoldsTotal) # type: ignore
+
     pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
     return pathFilenameFoldsTotal
 
