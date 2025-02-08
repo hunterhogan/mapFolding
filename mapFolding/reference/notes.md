@@ -58,31 +58,6 @@ Assume `listDimensions`:
 
 *2x2x2x2x2x2x2x2 (2x2... 8-dimensional)
 
-## "Known options" for `@numba.jit` decorator
-
-| **Option**              | **Description**                                     | **Why**               | **Size**        | **But**                  |
-| ----------------------- | --------------------------------------------------- | --------------------- | --------------- | ------------------------ |
-| `_dbg_extend_lifetimes` | Debug option to extend object lifetimes             | Debugging             |                 |                          |
-| `_dbg_optnone`          | Disable optimization for debugging                  | Debugging             |                 |                          |
-| `debug`                 | Enable debug mode with additional checks            | Debugging             |                 |                          |
-| `no_rewrites`           | Disable AST rewrites optimization                   | Debugging             |                 |                          |
-| `boundscheck`           | Enable array bounds checking (slows execution)      | Error checking        | Larger          | Slower                   |
-| `error_model`           | Divide by zero: kill or chill?                      | Error checking        | ?               |                          |
-| `_nrt`                  | Enable No Runtime type checking                     | Startup speed         | Smaller         | No type protection       |
-| `cache`                 | Caches compiled functions to disk                   | Faster reuse          |                 | Rare: need recompile     |
-| `fastmath`              | Reduce float potential precision                    | Float speed           | Smaller         | Discriminatory, untested |
-| `forceinline`           | Force function inlining                             | Reduce function calls | Likely larger   |                          |
-| `forceobj`              | Force object mode compilation                       | Inclusiveness         | Larger          | Slower execution         |
-| `inline`                | Algorithmically choose inlining                     | Speed                 | Slightly larger |                          |
-| `looplift`              | Enable loop lifting optimization                    | Speed (if applicable) | Larger          | Exclusionary             |
-| `no_cfunc_wrapper`      | Disable C function wrapper generation               | Size                  | Smaller         | Exclusionary             |
-| `no_cpython_wrapper`    | Disable Python C-API wrapper generation             | Size                  | Smallest        | Exclusionary             |
-| `nogil`                 | Releases Python GIL: parallel processes and threads | Concurrency           | Smaller         | No thread protection     |
-| `nopython`              | Force pure machine code compilation                 | Speed                 |                 | Exclusionary             |
-| `parallel`              | Enable automatic parallel execution                 | Concurrency           |                 | Rare: errors             |
-
-`target`
-
 ## Miscellany
 
 - All taskIndices can start from the states:
