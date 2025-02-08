@@ -12,11 +12,11 @@ authors:
 - given-names: Hunter
   family-names: Hogan
   email: HunterHogan@pm.me
-date-released: '2025-02-02'
+date-released: '2025-02-07'
 identifiers:
 - type: url
-  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.7
-  description: The URL for mapFolding 0.3.8.
+  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.9
+  description: The URL for mapFolding 0.3.9.
 keywords:
 - A001415
 - A001416
@@ -29,9 +29,9 @@ keywords:
 - stamp folding
 license: CC-BY-NC-4.0
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.3.8/
-repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.7
+repository-artifact: https://pypi.org/project/mapfolding/0.3.9/
+repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.9
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.3.8
+version: 0.3.9

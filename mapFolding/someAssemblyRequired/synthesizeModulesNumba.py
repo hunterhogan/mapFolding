@@ -10,6 +10,9 @@ from mapFolding import (
     moduleOfSyntheticModules,
     myPackageNameIs,
     ParametersNumba,
+    parametersNumbaSuperJit,
+    parametersNumbaFailEarly,
+    parametersNumbaSuperJitParallel,
     parametersNumbaDEFAULT,
     setDatatypeElephino,
     setDatatypeFoldsTotal,
@@ -31,6 +34,14 @@ youOughtaKnow = namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenam
 Convert types
     e.g. `groupsOfFolds: int = 0` to `groupsOfFolds = numba.types.{datatypeLarge}(0)`
     This isn't necessary for Numba, but I may the infrastructure for other compilers or paradigms."""
+
+def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
+    # TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
+    for decoratorItem in astCallable.decorator_list.copy():
+        import warnings
+        astCallable.decorator_list.remove(decoratorItem)
+        warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
+    return astCallable
 
 class RecursiveInliner(ast.NodeTransformer):
     """
@@ -93,7 +104,7 @@ class RecursiveInliner(ast.NodeTransformer):
                     return [self.visit(stmt) for stmt in inlineDefinition.body]
         return self.generic_visit(node)
 
-def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False) -> ast.FunctionDef:
+def decorateCallableWithNumba(astCallable: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> ast.FunctionDef:
     """
     Decorates an AST function definition with Numba JIT compilation parameters.
 
@@ -181,8 +192,7 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
 
             return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
 
-    # TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
-    # callableSourceDecorators = [decorator for decorator in callableInlined.decorator_list]
+    astCallable = Z0Z_UnhandledDecorators(astCallable)
 
     listNumbaParameterSignature: Sequence[ast.expr] = []
     for parameter in astCallable.args.args:
@@ -190,15 +200,31 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parallel: bool=False
         if (signatureElement):
             listNumbaParameterSignature.append(signatureElement)
 
-    astArgsNumbaSignature = ast.Tuple(elts=listNumbaParameterSignature, ctx=ast.Load())
+    astTupleSignatureParameters = ast.Tuple(elts=listNumbaParameterSignature, ctx=ast.Load())
 
-    if astCallable.name == 'countInitialize' or astCallable.name == 'doTheNeedful':
-        parametersNumba = {}
+    # TODO if `astCallable` has a return, the return needs to be added to `astArgsNumbaSignature` in the appropriate place
+    # The return, when placed in the args, is treated as a `Call`. This is logical because numba is converting to machine code.
+    # , args=[Call(func=Name(id='int64', ctx=Load()))]
+    ast_argsSignature = astTupleSignatureParameters
+
+    ImaReturn = next((node for node in astCallable.body if isinstance(node, ast.Return)), None)
+    # Return(value=Name(id='groupsOfFolds', ctx=Load()))]
+    if ImaReturn is not None and isinstance(ImaReturn.value, ast.Name):
+        my_idIf_I_wereA_astCall_func_astName_idParameter = ImaReturn.value.id
+        ast_argsSignature = ast.Call(
+                func=ast.Name(id=my_idIf_I_wereA_astCall_func_astName_idParameter, ctx=ast.Load()),
+                args=[astTupleSignatureParameters],
+                keywords=[]
+            )
     else:
-        parametersNumba = parametersNumbaDEFAULT if not parallel else ParametersNumba({**parametersNumbaDEFAULT, 'parallel': True})
+        ast_argsSignature = astTupleSignatureParameters
+
+    if parametersNumba is None:
+        parametersNumba = parametersNumbaDEFAULT
+
     listKeywordsNumbaSignature = [ast.keyword(arg=parameterName, value=ast.Constant(value=parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
-    astDecoratorNumba = ast.Call(func=ast.Attribute(value=ast.Name(id='numba', ctx=ast.Load()), attr='jit', ctx=ast.Load()), args=[astArgsNumbaSignature], keywords=listKeywordsNumbaSignature)
+    astDecoratorNumba = ast.Call(func=ast.Attribute(value=ast.Name(id='numba', ctx=ast.Load()), attr='jit', ctx=ast.Load()), args=[ast_argsSignature], keywords=listKeywordsNumbaSignature)
 
     astCallable.decorator_list = [astDecoratorNumba]
     return astCallable
@@ -311,6 +337,7 @@ class UnpackArrayAccesses(ast.NodeTransformer):
         return node
 
 def inlineOneCallable(codeSource: str, callableTarget: str):
+
     """
     Inlines a target callable function and its dependencies within the provided code source.
 
@@ -347,8 +374,17 @@ def inlineOneCallable(codeSource: str, callableTarget: str):
 
     if callableInlined:
         ast.fix_missing_locations(callableInlined)
-        parallel = callableTarget == 'countParallel'
-        callableDecorated = decorateCallableWithNumba(callableInlined, parallel)
+        parametersNumba = None
+
+        match callableTarget:
+            case 'countParallel':
+                parametersNumba = parametersNumbaSuperJitParallel
+            case 'countSequential':
+                parametersNumba = parametersNumbaSuperJit
+            case 'countInitialize':
+                parametersNumba = parametersNumbaDEFAULT
+
+        callableDecorated = decorateCallableWithNumba(callableInlined, parametersNumba)
 
         if callableTarget == 'countSequential':
             unpackerMy = UnpackArrayAccesses(indexMy, 'my')
@@ -365,59 +401,50 @@ def inlineOneCallable(codeSource: str, callableTarget: str):
         return moduleSource
 
 def makeDispatcherNumba(codeSource: str, callableTarget: str, listStuffYouOughtaKnow: List[youOughtaKnow]) -> str:
-    """Creates AST for the dispatcher module that coordinates the optimized functions."""
-    docstringDispatcherNumba = """
-        What in tarnation is this stupid module and function?
 
-        - This function is not in the same module as `countFolds` so that we can delay Numba just-in-time (jit) compilation of this function and the finalization of its settings until we are ready.
-        - This function is not in the same module as the next function, which does the hard work, so that we can delay `numba.jit` compilation of the next function.
-        - This function is "jitted" but the next function is super jitted, which makes it too arrogant to talk to plebian Python functions. It will, however, reluctantly talk to basic jitted functions.
-        - So this module can talk to the next function, and because this module isn't as arrogant, it will talk to the low-class `countFolds` that called this function. Well, with a few restrictions, of course:
-            - No `TypedDict`
-            - The plebs must clean up their own memory problems
-            - No oversized integers
-            - No global variables, only global constants
-            - It won't accept pleb nonlocal variables either
-            - Python "class": they are all inferior to the jit class
-            - No `**kwargs`
-            - and just a few dozen-jillion other things.
-        """
+    docstringDispatcherNumba = """What in tarnation is this stupid module and function?
 
-    # Parse source code
-    sourceAST = ast.parse(codeSource)
+    - This function is not in the same module as `countFolds` so that we can delay Numba just-in-time (jit) compilation of this function and the finalization of its settings until we are ready.
+    - This function is not in the same module as the next function, which does the hard work, so that we can delay `numba.jit` compilation of the next function.
+    - This function is "jitted" but the next function is super jitted, which makes it too arrogant to talk to plebian Python functions. It will, however, reluctantly talk to basic jitted functions.
+    - So this module can talk to the next function, and because this module isn't as arrogant, it will talk to the low-class `countFolds` that called this function. Well, with a few restrictions, of course:
+        - No `TypedDict`
+        - The plebs must clean up their own memory problems
+        - No oversized integers
+        - No global variables, only global constants
+        - It won't accept pleb nonlocal variables either
+        - Python "class": they are all inferior to the jit class
+        - No `**kwargs`
+        - and just a few dozen-jillion other things."""
 
-    # Extract imports and target function definition
-    importsAST = [node for node in sourceAST.body if isinstance(node, (ast.Import, ast.ImportFrom))]
-    FunctionDefTarget = next((node for node in sourceAST.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
+    astSource = ast.parse(codeSource)
+
+    astImports = [node for node in astSource.body if isinstance(node, (ast.Import, ast.ImportFrom))]
+    FunctionDefTarget = next((node for node in astSource.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
 
     if not FunctionDefTarget:
         raise ValueError(f"Could not find function {callableTarget} in source code")
 
     # Zero-out the decorator list
-    FunctionDefTarget.decorator_list=[]
-    # TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
-    # FunctionDefTargetDecorators = [decorator for decorator in FunctionDefTarget.decorator_list]
+    FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
 
     # Add Numba decorator
-    FunctionDefTarget = decorateCallableWithNumba(FunctionDefTarget, parallel=False)
+    FunctionDefTarget = decorateCallableWithNumba(FunctionDefTarget, parametersNumbaFailEarly)
     FunctionDefTarget.body.insert(0, ast.Expr(value=ast.Constant(value=docstringDispatcherNumba)))
 
-    # Combine everything into a module
-    moduleAST = ast.Module(
+    astModule = ast.Module(
         body=cast(List[ast.stmt]
-                , importsAST
+                , astImports
                 + [Don_Lapre_The_Road_to_Self_Improvement_For_Programmers_by_Using_Short_Identifiers.astForCompetentProgrammers
                     for Don_Lapre_The_Road_to_Self_Improvement_For_Programmers_by_Using_Short_Identifiers in listStuffYouOughtaKnow]
                 + [FunctionDefTarget])
         , type_ignores=[]
     )
 
-    ast.fix_missing_locations(moduleAST)
-    return ast.unparse(moduleAST)
+    ast.fix_missing_locations(astModule)
+    return ast.unparse(astModule)
 
 def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: Optional[str] = None, algorithmSource: Optional[ModuleType] = None):
-    """Synthesizes numba-optimized versions of map folding functions."""
-
     if not algorithmSource:
         algorithmSource = getAlgorithmSource()
 

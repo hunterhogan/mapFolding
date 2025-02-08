@@ -1,3 +1,4 @@
+from .theSSOTnumba import *
 from collections import defaultdict
 from numpy import integer
 from types import ModuleType
@@ -104,43 +105,6 @@ class indexTrack(EnumIndices):
     leafBelow = enum.auto()
     countDimensionsGapped = enum.auto()
     gapRangeStart = enum.auto()
-
-# TODO try to implement all possible parameters, but use `NotRequired` for the more esoteric ones
-class ParametersNumba(TypedDict):
-    _dbg_extend_lifetimes: NotRequired[bool]
-    _dbg_optnone: NotRequired[bool]
-    _nrt: bool
-    boundscheck: bool
-    cache: bool
-    debug: NotRequired[bool]
-    error_model: str
-    fastmath: bool
-    forceinline: bool
-    forceobj: NotRequired[bool]
-    inline: str
-    looplift: bool
-    no_cfunc_wrapper: bool
-    no_cpython_wrapper: bool
-    no_rewrites: NotRequired[bool]
-    nogil: NotRequired[bool]
-    nopython: bool
-    parallel: bool
-    target: NotRequired[str]
-
-parametersNumbaDEFAULT: Final[ParametersNumba] = {
-    '_nrt': True,
-    'boundscheck': False,
-    'cache': True,
-    'error_model': 'numpy',
-    'fastmath': True,
-    'forceinline': False,
-    'inline': 'never',
-    'looplift': False,
-    'no_cfunc_wrapper': True,
-    'no_cpython_wrapper': True,
-    'nopython': True,
-    'parallel': False,
-}
 
 "delay realization/instantiation until a concrete value is desired"
 "moment of truth: when the value is needed, not when the value is defined"

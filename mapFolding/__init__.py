@@ -1,25 +1,43 @@
+# fundamentals
 from mapFolding.theSSOT import (
     computationState,
     EnumIndices,
-    getAlgorithmCallable,
-    getAlgorithmSource,
     getDispatcherCallable,
-    getPathJobDEFAULT,
     getPathPackage,
-    getPathSyntheticModules,
-    hackSSOTdatatype,
-    hackSSOTdtype,
     indexMy,
     indexTrack,
-    moduleOfSyntheticModules,
     myPackageNameIs,
-    ParametersNumba,
-    parametersNumbaDEFAULT,
+)
+
+# Datatype management
+from mapFolding.theSSOT import (
+    hackSSOTdatatype,
+    hackSSOTdtype,
     setDatatypeElephino,
     setDatatypeFoldsTotal,
     setDatatypeLeavesTotal,
     setDatatypeModule,
 )
+
+# Synthesize modules
+from mapFolding.theSSOT import (
+    getAlgorithmCallable,
+    getAlgorithmSource,
+    getPathJobDEFAULT,
+    getPathSyntheticModules,
+    moduleOfSyntheticModules,
+)
+
+# Parameters for the prima donna
+from mapFolding.theSSOT import (
+    ParametersNumba,
+    parametersNumbaDEFAULT,
+    parametersNumbaFailEarly,
+    parametersNumbaParallelDEFAULT,
+    parametersNumbaSuperJit,
+    parametersNumbaSuperJitParallel,
+)
+
 from mapFolding.beDRY import (
     getFilenameFoldsTotal,
     getPathFilenameFoldsTotal,
