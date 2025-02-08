@@ -1,5 +1,5 @@
-from mapFolding.theSSOTnumba import *
 from collections import defaultdict
+from mapFolding.theSSOTnumba import *
 from numpy import integer
 from types import ModuleType
 from typing import Any, Callable, Dict, Final, NotRequired, Optional, Tuple, Type, TypedDict, cast

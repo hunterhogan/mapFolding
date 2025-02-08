@@ -15,8 +15,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering :: Mathematics",
-    "Typing :: Typed",
-]
+    "Typing :: Typed",]
 dependencies = ["numba", "numpy", "Z0Z_tools"]
 description = "Count distinct ways to fold a map (or a strip of stamps)"
 keywords = [
@@ -28,17 +27,11 @@ keywords = [
     "folding",
     "map folding",
     "OEIS",
-    "stamp folding",
-]
+    "stamp folding",]
 license = { 'text' = "CC-BY-NC-4.0" }
 maintainers = []
 name = "mapFolding"
-optional-dependencies = { benchmark = [
-    "ipywidgets",
-    "jupyter",
-    "pandas",
-    "tqdm",
-], testing = [
+optional-dependencies = { testing = [
     "more_itertools",
     "mypy",
     "pytest-cov",
@@ -47,9 +40,7 @@ optional-dependencies = { benchmark = [
     "pytest-xdist",
     "pytest",
     "python_minifier",
-    "tomli",
-    "types-setuptools",
-] }
+    "types-setuptools",] }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
@@ -70,8 +61,7 @@ run = { branch = true, concurrency = [
     "mapFolding/someAssemblyRequired/*",
     "Z0Z_*",
 ], parallel = true, source = [
-    ".",
-] }
+    ".",] }
 xml = { output = "tests/coverage/coverage.xml" }
 [tool.pytest.ini_options]
 addopts = ["--color=yes", "-n 4", "--mypy", "--mypy-ignore-missing-imports"]
@@ -99,8 +89,6 @@ exclude = [
     "mapFolding/citations/*",
     "mapFolding/jobs/*",
     "mapFolding/reference/*",
-    "mapFolding/scripts/*",
     "mapFolding/someAssemblyRequired/*",
     "tests/*",
-    "Z0Z_*",
-]
+    "Z0Z_*",]

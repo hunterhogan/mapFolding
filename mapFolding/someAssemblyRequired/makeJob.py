@@ -1,6 +1,5 @@
-import importlib.util
 from mapFolding import getPathFilenameFoldsTotal, computationState, outfitCountFolds, getAlgorithmSource
-from typing import Any, Literal, Optional, Sequence, Type, overload
+from typing import Literal, Optional, Sequence, overload
 import pathlib
 import pickle
 

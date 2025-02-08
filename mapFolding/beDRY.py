@@ -1,6 +1,4 @@
 """A relatively stable API for oft-needed functionality."""
-from operator import ge
-from httpx import get
 from mapFolding import (
     computationState,
     getPathJobRootDEFAULT,
@@ -12,9 +10,9 @@ from mapFolding import (
     setDatatypeLeavesTotal,
 )
 from numpy import integer
-from numpy.typing import NDArray, DTypeLike
+from numpy.typing import DTypeLike, NDArray
 from typing import Any, List, Optional, Sequence, Tuple, Type, Union
-from Z0Z_tools import intInnit, defineConcurrencyLimit, oopsieKwargsie
+from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 import numba
 import numpy
 import os
