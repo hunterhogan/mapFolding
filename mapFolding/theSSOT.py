@@ -2,13 +2,18 @@ from collections import defaultdict
 from mapFolding.theSSOTnumba import *
 from numpy import integer
 from types import ModuleType
-from typing import Any, Callable, Dict, Final, NotRequired, Optional, Tuple, Type, TypedDict, cast
+from typing import Any, Callable, Dict, Final, NotRequired, Optional, Tuple, Type, TYPE_CHECKING, cast
 import enum
 import numba
 import numpy
 import numpy.typing
 import pathlib
 import sys
+
+if TYPE_CHECKING:
+    from typing import TypedDict
+else:
+    TypedDict = dict
 
 """I have hobbled together:
 TypedDict, Enum, defaultdict, and lookup dictionaries to make DIY immutability and delayed realization/instantiation.

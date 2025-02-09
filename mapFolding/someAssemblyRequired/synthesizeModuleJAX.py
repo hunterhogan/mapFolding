@@ -1,4 +1,4 @@
-from mapFolding import getAlgorithmSource, relativePathSyntheticModules
+from mapFolding import getAlgorithmSource, getPathSyntheticModules
 from mapFolding import setDatatypeModule, setDatatypeFoldsTotal, setDatatypeElephino, setDatatypeLeavesTotal
 from typing import Optional
 import ast
@@ -18,7 +18,7 @@ def writeJax(*, codeSource: Optional[str] = None, pathFilenameAlgorithm: Optiona
     else:
         raise NotImplementedError("You haven't written this part yet.")
     if pathFilenameDestination is None:
-        pathFilenameDestination = pathFilenameAlgorithm.parent / relativePathSyntheticModules / "countJax.py"
+        pathFilenameDestination = getPathSyntheticModules() / "countJax.py"
     # pathFilenameDestination.write_text(transformedText)
 
 if __name__ == '__main__':

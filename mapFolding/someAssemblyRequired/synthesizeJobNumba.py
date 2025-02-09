@@ -13,7 +13,7 @@ General issues:
 - (almost) Everything prefixed with `Z0Z_` is something I want to substantially improve.
 - convergence with other synthesize modules and functions would be good.
 - while management of datatypes seems to be pretty good, managing pathFilenames could be better.
-- as of this writing, there are zero direct tests for `someAssemblyRequired`. 
+- as of this writing, there are zero direct tests for `someAssemblyRequired`.
 """
 from mapFolding import indexMy, indexTrack, ParametersNumba, parametersNumbaDEFAULT, getFilenameFoldsTotal, getPathJobRootDEFAULT, getPathFilenameFoldsTotal
 from mapFolding import setDatatypeElephino, setDatatypeFoldsTotal, setDatatypeLeavesTotal, setDatatypeModule, hackSSOTdatatype, computationState
@@ -362,7 +362,7 @@ def writeJobNumba(listDimensions: Sequence[int], callableSource: Callable, param
     return pathFilenameWriteJob
 
 if __name__ == '__main__':
-    listDimensions = [5,5]
+    listDimensions = [2,15]
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
     setDatatypeLeavesTotal('uint8', sourGrapes=True)
@@ -371,11 +371,13 @@ if __name__ == '__main__':
     pathFilenameModule = writeJobNumba(listDimensions, callableSource, parametersNumbaDEFAULT)
 
     # Induce numba.jit compilation
-    moduleSpec = importlib.util.spec_from_file_location(pathFilenameModule.stem, pathFilenameModule)
-    if moduleSpec is None: raise ImportError(f"Could not load module specification from {pathFilenameModule}")
-    module = importlib.util.module_from_spec(moduleSpec)
-    if moduleSpec.loader is None: raise ImportError(f"Could not load module from {moduleSpec}")
-    moduleSpec.loader.exec_module(module)
+    # TODO Inducing compilation might be causing the `ModuleNotFoundError: No module named '<dynamic>'` error
+
+    # moduleSpec = importlib.util.spec_from_file_location(pathFilenameModule.stem, pathFilenameModule)
+    # if moduleSpec is None: raise ImportError(f"Could not load module specification from {pathFilenameModule}")
+    # module = importlib.util.module_from_spec(moduleSpec)
+    # if moduleSpec.loader is None: raise ImportError(f"Could not load module from {moduleSpec}")
+    # moduleSpec.loader.exec_module(module)
 
     # from mapFolding.someAssemblyRequired.getLLVMforNoReason import writeModuleLLVM
     # pathFilenameLLVM = writeModuleLLVM(pathFilenameModule, identifierCallableLaunch)

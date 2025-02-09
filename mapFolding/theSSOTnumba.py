@@ -1,7 +1,12 @@
 """TODO learn how to use this efficiently and effectively to solve problems, be DRY, and have SSOT."""
-from typing import Final, NotRequired, TypedDict, Dict, Any, Union, Callable, Tuple, Any
+from typing import Final, TYPE_CHECKING, Dict, Any, Union, Callable, Tuple, Any
 import numba
 import numba.core.compiler
+
+if TYPE_CHECKING:
+    from typing import NotRequired, TypedDict
+else:
+    TypedDict = dict
 
 """
 Old notes that are not entirely accurate.

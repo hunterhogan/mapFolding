@@ -1,5 +1,3 @@
-cff-version: 1.2.0
-message: If you use this software, you can cite it using the metadata from this file.
 abstract: Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps).
   This repository, mapFolding, explores the mathematical and algorithmic challenges
   of efficiently modeling, simulating, and solving problems related to folding maps.
@@ -12,11 +10,12 @@ authors:
 - given-names: Hunter
   family-names: Hogan
   email: HunterHogan@pm.me
+cff-version: 1.2.0
 date-released: '2025-02-07'
 identifiers:
 - type: url
   value: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.9
-  description: The URL for mapFolding 0.3.9.
+  description: The URL for mapFolding 0.3.10.
 keywords:
 - A001415
 - A001416
@@ -28,10 +27,11 @@ keywords:
 - OEIS
 - stamp folding
 license: CC-BY-NC-4.0
+message: If you use this software, you can cite it using the metadata from this file.
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.3.9/
+repository-artifact: https://pypi.org/project/mapfolding/0.3.10/
 repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.9
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.3.9
+version: 0.3.10
