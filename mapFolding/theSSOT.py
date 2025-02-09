@@ -2,13 +2,18 @@ from collections import defaultdict
 from mapFolding.theSSOTnumba import *
 from numpy import integer
 from types import ModuleType
-from typing import Any, Callable, Dict, Final, NotRequired, Optional, Tuple, Type, TYPE_CHECKING, cast
+from typing import Any, Callable, Dict, Final, Optional, Tuple, Type, TYPE_CHECKING, cast
 import enum
 import numba
 import numpy
 import numpy.typing
 import pathlib
 import sys
+
+try:
+    from typing import NotRequired
+except ImportError:
+    from typing_extensions import NotRequired
 
 if TYPE_CHECKING:
     from typing import TypedDict
