@@ -2,9 +2,13 @@
 from typing import Final, TYPE_CHECKING, Dict, Any, Union, Callable, Tuple, Any
 import numba
 import numba.core.compiler
+try:
+    from typing import NotRequired
+except ImportError:
+    from typing_extensions import NotRequired
 
 if TYPE_CHECKING:
-    from typing import NotRequired, TypedDict
+    from typing import TypedDict
 else:
     TypedDict = dict
 
