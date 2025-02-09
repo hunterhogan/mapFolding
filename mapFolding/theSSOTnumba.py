@@ -1,3 +1,4 @@
+"""I have so much truth, I need two files to contain it all!"""
 """TODO learn how to use this efficiently and effectively to solve problems, be DRY, and have SSOT."""
 from typing import Final, TYPE_CHECKING, Dict, Any, Union, Callable, Tuple, Any
 import numba
