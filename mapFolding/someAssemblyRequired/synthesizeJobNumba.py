@@ -1,7 +1,23 @@
+"""
+It's rough, but it works. Actually, the modules it produces are lightening fast.
+
+Specific issues:
+- When trying to run the synthesized file, `ModuleNotFoundError: No module named '<dynamic>'` unless I first re-save the file in the IDE.
+- ast interprets the signature as `def countSequential() -> None:` even though there is a return statement.
+- Similarly, but possibly my fault, `decorateCallableWithNumba` doesn't add the return type to the signature.
+
+General issues:
+- an ironic dearth of abstract functionality in this module based on ast.
+    - I don't have much experience with ast.
+    - ast is one of the few cases that absolutely benefits from an OOP paradigm, and I am comically inept at OOP.
+- (almost) Everything prefixed with `Z0Z_` is something I want to substantially improve.
+- convergence with other synthesize modules and functions would be good.
+- while management of datatypes seems to be pretty good, managing pathFilenames could be better.
+- as of this writing, there are zero direct tests for `someAssemblyRequired`. 
+"""
 from mapFolding import indexMy, indexTrack, ParametersNumba, parametersNumbaDEFAULT, getFilenameFoldsTotal, getPathJobRootDEFAULT, getPathFilenameFoldsTotal
-from mapFolding import setDatatypeElephino, setDatatypeFoldsTotal, setDatatypeLeavesTotal, setDatatypeModule, hackSSOTdatatype
-from someAssemblyRequired import makeStateJob, decorateCallableWithNumba, Z0Z_UnhandledDecorators
-from theSSOT import computationState
+from mapFolding import setDatatypeElephino, setDatatypeFoldsTotal, setDatatypeLeavesTotal, setDatatypeModule, hackSSOTdatatype, computationState
+from mapFolding.someAssemblyRequired import makeStateJob, decorateCallableWithNumba, Z0Z_UnhandledDecorators
 from typing import Optional, Callable, List, Sequence, cast, Dict, Set, Any, Union
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
@@ -15,9 +31,8 @@ import os
 import pathlib
 import python_minifier
 
-dictionaryImportFrom_global: Dict[str, List[str]] = collections.defaultdict(list)
-
-identifierCallableLaunch = "goGoGadgetAbsurdity"
+dictionaryImportFrom: Dict[str, List[str]] = collections.defaultdict(list)
+datatypeModuleScalar = 'numba'
 
 def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str]=None) -> str:
     """Converts a NumPy array into a compressed string representation using run-length encoding (RLE).
@@ -70,18 +85,9 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
         return f"{identifierName} = array({stringMinimized}, dtype={arrayTarget.dtype})"
     return stringMinimized
 
-def makeImports():
-    # TODO replace the hardcoded sets with dynamic signals of the necessary imports
-    dictionaryImportFrom_local: Dict[str, List[str]] = {}
-    dictionaryImportFrom_local['numpy'] = [hackSSOTdatatype("datatypeElephino")]
-    dictionaryImportFrom_local['numba'] = ["objmode" ]
-    setImportFromNumbaTypesRaw = set([ hackSSOTdatatype("datatypeElephino"), hackSSOTdatatype("datatypeLeavesTotal"), hackSSOTdatatype("datatypeFoldsTotal"), ])
-    setImportFromNumbaTypes = set([ f"{numbaType} as {numbaType}Numba" for numbaType in setImportFromNumbaTypesRaw ])
-
-    dictionaryImportFrom = updateExtendPolishDictionaryLists(
-        dictionaryImportFrom_global
-        , dictionaryImportFrom_local
-        , destroyDuplicates=True)
+def makeImports() -> List[List[ast.ImportFrom]]:
+    global dictionaryImportFrom
+    dictionaryImportFrom = updateExtendPolishDictionaryLists(dictionaryImportFrom, destroyDuplicates=True)
 
     def parseAlias(aliasString: str):
         parts = aliasString.split(" as ")
@@ -93,13 +99,81 @@ def makeImports():
         ast.ImportFrom(module=module, names=[ast.alias(name=identifierName, asname=None)
                                             for identifierName in listIdentifiers], level=0)
                                             for module, listIdentifiers in dictionaryImportFrom.items()]
-        + [ast.ImportFrom( module="numba.types", names=[parseAlias(name) for name in setImportFromNumbaTypes], level=0 )]
         ]
 
     return importStatements
 
-def evaluate_argIn_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
+def evaluateArrayIn_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
+    global dictionaryImportFrom
+    arrayType = type(argData)
+    moduleConstructor = arrayType.__module__
+    constructorName = arrayType.__name__
+    # NOTE hack
+    constructorName = constructorName.replace('ndarray', 'array')
+    dictionaryImportFrom[moduleConstructor].append(constructorName)
 
+    for stmt in node.body.copy():
+        if isinstance(stmt, ast.Assign):
+            if isinstance(stmt.targets[0], ast.Name) and isinstance(stmt.value, ast.Subscript):
+                astAssignee: ast.Name = stmt.targets[0]
+                argData_dtypeName = hackSSOTdatatype(astAssignee.id)
+                dictionaryImportFrom[moduleConstructor].append(argData_dtypeName)
+                astSubscript: ast.Subscript = stmt.value
+                if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == astArg.arg and isinstance(astSubscript.slice, ast.Attribute):
+                    indexAs_astAttribute: ast.Attribute = astSubscript.slice
+                    indexAsStr = ast.unparse(indexAs_astAttribute)
+                    argDataSlice = argData[eval(indexAsStr)]
+
+                    onlyDataRLE = makeStrRLEcompacted(argDataSlice)
+                    astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
+                    dataAst = astStatement.value
+
+                    arrayCall = ast.Call(
+                        func=ast.Name(id=constructorName, ctx=ast.Load()) , args=[dataAst]
+                        , keywords=[ast.keyword(arg='dtype', value=ast.Name(id=argData_dtypeName, ctx=ast.Load()) ) ] )
+
+                    assignment = ast.Assign( targets=[astAssignee], value=arrayCall )
+                    node.body.insert(0, assignment)
+                    node.body.remove(stmt)
+
+    node.args.args.remove(astArg)
+    return node
+
+def evaluate_argIn_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, Z0Z_listChaff: List[str]) -> ast.FunctionDef:
+    global dictionaryImportFrom
+    moduleConstructor = datatypeModuleScalar
+    for stmt in node.body.copy():
+        if isinstance(stmt, ast.Assign):
+            if isinstance(stmt.targets[0], ast.Name) and isinstance(stmt.value, ast.Subscript):
+                astAssignee: ast.Name = stmt.targets[0]
+                argData_dtypeName = hackSSOTdatatype(astAssignee.id)
+                dictionaryImportFrom[moduleConstructor].append(argData_dtypeName)
+                astSubscript: ast.Subscript = stmt.value
+                if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == astArg.arg and isinstance(astSubscript.slice, ast.Attribute):
+                    indexAs_astAttribute: ast.Attribute = astSubscript.slice
+                    indexAsStr = ast.unparse(indexAs_astAttribute)
+                    argDataSlice: int = argData[eval(indexAsStr)].item()
+                    astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()) , args=[ast.Constant(value=argDataSlice)], keywords=[])
+                    assignment = ast.Assign(targets=[astAssignee], value=astCall)
+                    if astAssignee.id not in Z0Z_listChaff:
+                        node.body.insert(0, assignment)
+                    node.body.remove(stmt)
+    node.args.args.remove(astArg)
+    return node
+
+def evaluateAnnAssignIn_body(node: ast.FunctionDef) -> ast.FunctionDef:
+    global dictionaryImportFrom
+    moduleConstructor = datatypeModuleScalar
+    for stmt in node.body.copy():
+        if isinstance(stmt, ast.AnnAssign):
+            if isinstance(stmt.target, ast.Name) and isinstance(stmt.value, ast.Constant):
+                astAssignee: ast.Name = stmt.target
+                argData_dtypeName = hackSSOTdatatype(astAssignee.id)
+                dictionaryImportFrom[moduleConstructor].append(argData_dtypeName)
+                astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()) , args=[stmt.value], keywords=[])
+                assignment = ast.Assign(targets=[astAssignee], value=astCall)
+                node.body.insert(0, assignment)
+                node.body.remove(stmt)
     return node
 
 def move_argTo_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
@@ -111,33 +185,26 @@ def move_argTo_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarr
     argData_dtype: numpy.dtype = argData.dtype
     argData_dtypeName = argData.dtype.name
 
+    global dictionaryImportFrom
+    dictionaryImportFrom[moduleConstructor].append(constructorName)
+    dictionaryImportFrom[moduleConstructor].append(argData_dtypeName)
+
     onlyDataRLE = makeStrRLEcompacted(argData)
     astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
     dataAst = astStatement.value
 
-    # Create constructor call dynamically
     arrayCall = ast.Call(
         func=ast.Name(id=constructorName, ctx=ast.Load())
         , args=[dataAst]
         , keywords=[ast.keyword(arg='dtype' , value=ast.Name(id=argData_dtypeName , ctx=ast.Load()) ) ] )
 
-    # Add required imports
-    global dictionaryImportFrom_global
-    dictionaryImportFrom_global[moduleConstructor].append(constructorName)
-    dictionaryImportFrom_global[moduleConstructor].append(argData_dtypeName)
-
-    # Create assignment node
-    assignment = ast.Assign(
-        targets=[ast.Name(id=astArg.arg, ctx=ast.Store())],
-        value=arrayCall
-    )
-
+    assignment = ast.Assign( targets=[ast.Name(id=astArg.arg, ctx=ast.Store())], value=arrayCall )
     node.body.insert(0, assignment)
     node.args.args.remove(astArg)
 
     return node
 
-def makeDecorator(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None):
+def makeDecorator(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> ast.FunctionDef:
     if parametersNumba is None:
         parametersNumbaExtracted: Dict[str, Any] = {}
         for decoratorItem in FunctionDefTarget.decorator_list.copy():
@@ -156,8 +223,8 @@ def makeDecorator(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[
                 if getattr(decoratorItem.func.value, "id", None) == "numba" and decoratorItem.func.attr == "jit":
                     FunctionDefTarget.decorator_list.remove(decoratorItem)
     FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
-    global dictionaryImportFrom_global
-    dictionaryImportFrom_global['numba'].append('jit')
+    global dictionaryImportFrom
+    dictionaryImportFrom['numba'].append('jit')
     FunctionDefTarget = decorateCallableWithNumba(FunctionDefTarget, parametersNumba)
     # make sure the decorator is rendered as `@jit` and not `@numba.jit`
     for decoratorItem in FunctionDefTarget.decorator_list:
@@ -165,79 +232,76 @@ def makeDecorator(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[
             decoratorItem.func = ast.Name(id="jit", ctx=ast.Load())
     return FunctionDefTarget
 
-def Z0Z_stringParsing(stateJob: computationState, codeSource: str) -> str:
-    ImaIndent = '    '
-
-    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
-
-    my = stateJob['my']
-    track = stateJob['track']
-    linesAlgorithm = """"""
-    for lineSource in codeSource.splitlines():
-        if lineSource.startswith(('#')):
-            continue
-        elif not lineSource:
-            continue
-        elif lineSource.startswith('def '):
-            lineSource = f"def {identifierCallableLaunch}():"
-        elif 'taskIndex' in lineSource:
-            continue
-        elif 'my[indexMy.' in lineSource:
-            if 'dimensionsTotal' in lineSource:
-                continue
-            # Statements are in the form: leaf1ndex = my[indexMy.leaf1ndex.value]
-            identifier, statement = lineSource.split('=')
-            lineSource = ImaIndent + identifier.strip() + f"={hackSSOTdatatype(identifier.strip())}Numba({str(eval(statement.strip()))})"
-        elif ': int =' in lineSource or ':int=' in lineSource:
-            if 'dimensionsTotal' in lineSource:
-                continue
-            # Statements are in the form: groupsOfFolds: int = 0
-            assignment, statement = lineSource.split('=')
-            identifier = assignment.split(':')[0].strip()
-            lineSource = ImaIndent + identifier.strip() + f"={hackSSOTdatatype(identifier.strip())}Numba({str(eval(statement.strip()))})"
-        elif 'track[indexTrack.' in lineSource:
-            # Statements are in the form: leafAbove = track[indexTrack.leafAbove.value]
-            identifier, statement = lineSource.split('=')
-            lineSource = ImaIndent + makeStrRLEcompacted(eval(statement.strip()), identifier.strip())
-        elif 'foldGroups[-1]' in lineSource:
-            lineSource = lineSource.replace('foldGroups[-1]', str(stateJob['foldGroups'][-1]))
-        elif 'dimensionsTotal' in lineSource:
-            lineSource = lineSource.replace('dimensionsTotal', str(stateJob['my'][indexMy.dimensionsTotal]))
-
-        linesAlgorithm = "\n".join([linesAlgorithm
-                            , lineSource
-                            ])
-
-    linesLaunch = """"""
-    linesLaunch = linesLaunch + f"""
+def makeLauncher(identifierCallable: str) -> ast.Module:
+    linesLaunch = f"""
 if __name__ == '__main__':
     import time
     timeStart = time.perf_counter()
-    {identifierCallableLaunch}()
+    {identifierCallable}()
     print(time.perf_counter() - timeStart)
 """
+    astLaunch = ast.parse(linesLaunch)
+    return astLaunch
 
-    linesWriteFoldsTotal = """"""
-    linesWriteFoldsTotal = "\n".join([linesWriteFoldsTotal
-                                    , f"    groupsOfFolds *= {str(stateJob['foldGroups'][-1])}"
-                                    , "    print(groupsOfFolds)"
-                                    , "    with objmode():"
-                                    , f"        open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(groupsOfFolds))"
-                                    , "    return groupsOfFolds"
-                                    ])
+def make_writeFoldsTotal(stateJob: computationState, pathFilenameFoldsTotal: pathlib.Path) -> ast.Module:
+    global dictionaryImportFrom
+    dictionaryImportFrom['numba'].append("objmode")
+    linesWriteFoldsTotal = f"""
+groupsOfFolds *= {str(stateJob['foldGroups'][-1])}
+print(groupsOfFolds)
+with objmode():
+    open('{pathFilenameFoldsTotal.as_posix()}', 'w').write(str(groupsOfFolds))
+return groupsOfFolds
+    """
+    return ast.parse(linesWriteFoldsTotal)
 
-    linesAll = "\n".join([
-                        linesAlgorithm
-                        , linesWriteFoldsTotal
-                        , linesLaunch
-                        ])
+def removeIdentifierFrom_body(node: ast.FunctionDef, astArg: ast.arg) -> ast.FunctionDef:
+    for stmt in node.body.copy():
+        if isinstance(stmt, ast.Assign):
+            if isinstance(stmt.targets[0], ast.Subscript) and isinstance(stmt.targets[0].value, ast.Name):
+                if stmt.targets[0].value.id == astArg.arg:
+                    node.body.remove(stmt)
+    node.args.args.remove(astArg)
+    return node
 
-    return linesAll
+def astObjectToAstConstant(astFunction: ast.FunctionDef, object: str, value: int) -> ast.FunctionDef:
+    """
+    Replaces nodes in astFunction matching the AST of the string `object`
+    with a constant node holding the provided value.
+    """
+    targetExpression = ast.parse(object, mode='eval').body
+    targetDump = ast.dump(targetExpression, annotate_fields=False)
+
+    class ReplaceObjectWithConstant(ast.NodeTransformer):
+        def __init__(self, targetDump: str, constantValue: int) -> None:
+            self.targetDump = targetDump
+            self.constantValue = constantValue
+
+        def generic_visit(self, node: ast.AST) -> ast.AST:
+            currentDump = ast.dump(node, annotate_fields=False)
+            if currentDump == self.targetDump:
+                return ast.copy_location(ast.Constant(value=self.constantValue), node)
+            return super().generic_visit(node)
+
+    transformer = ReplaceObjectWithConstant(targetDump, value)
+    newFunction = transformer.visit(astFunction)
+    ast.fix_missing_locations(newFunction)
+    return newFunction
+
+def astNameToAstConstant(astFunction: ast.FunctionDef, name: str, value: int) -> ast.FunctionDef:
+    class ReplaceNameWithConstant(ast.NodeTransformer):
+        def visit_Name(self, node: ast.Name) -> ast.AST:
+            if node.id == name:
+                return ast.copy_location(ast.Constant(value=value), node)
+            return node
+    return ReplaceNameWithConstant().visit(astFunction)
 
 def writeJobNumba(listDimensions: Sequence[int], callableSource: Callable, parametersNumba: Optional[ParametersNumba]=None, pathFilenameWriteJob: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
     stateJob = makeStateJob(listDimensions, writeJob=False)
     codeSource = inspect.getsource(callableSource)
     astSource = ast.parse(codeSource)
+
+    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
 
     FunctionDefTarget = next((node for node in astSource.body if isinstance(node, ast.FunctionDef) and node.name == callableSource.__name__), None)
 
@@ -245,49 +309,60 @@ def writeJobNumba(listDimensions: Sequence[int], callableSource: Callable, param
         raise ValueError(f"Could not find function {callableSource.__name__} in source code")
 
     Z0Z_listArgsTarget = ['connectionGraph', 'gapsWhere']
-    Z0Z_listArgsEvaluate = []
-    Z0Z_listArgsRemove = ['foldGroups', 'my', 'track']
+    Z0Z_listArraysEvaluate = ['track']
+    Z0Z_listArgsEvaluate = ['my']
+    Z0Z_listChaff = ['taskIndex', 'dimensionsTotal']
+    Z0Z_listArgsRemove = ['foldGroups']
     for astArgument in FunctionDefTarget.args.args.copy():
         if astArgument.arg in Z0Z_listArgsTarget:
             FunctionDefTarget = move_argTo_body(FunctionDefTarget, astArgument, stateJob[astArgument.arg])
+        elif astArgument.arg in Z0Z_listArraysEvaluate:
+            FunctionDefTarget = evaluateArrayIn_body(FunctionDefTarget, astArgument, stateJob[astArgument.arg])
         elif astArgument.arg in Z0Z_listArgsEvaluate:
-            FunctionDefTarget = evaluate_argIn_body(FunctionDefTarget, astArgument, stateJob[astArgument.arg])
+            FunctionDefTarget = evaluate_argIn_body(FunctionDefTarget, astArgument, stateJob[astArgument.arg], Z0Z_listChaff)
         elif astArgument.arg in Z0Z_listArgsRemove:
-            FunctionDefTarget.args.args.remove(astArgument)
+            FunctionDefTarget = removeIdentifierFrom_body(FunctionDefTarget, astArgument)
+
+    FunctionDefTarget = evaluateAnnAssignIn_body(FunctionDefTarget)
+    FunctionDefTarget = astNameToAstConstant(FunctionDefTarget, 'dimensionsTotal', int(stateJob['my'][indexMy.dimensionsTotal]))
+    FunctionDefTarget = astObjectToAstConstant(FunctionDefTarget, 'foldGroups[-1]', int(stateJob['foldGroups'][-1]))
 
     global identifierCallableLaunch
     identifierCallableLaunch = FunctionDefTarget.name
 
     FunctionDefTarget = makeDecorator(FunctionDefTarget, parametersNumba)
 
+    astWriteFoldsTotal = make_writeFoldsTotal(stateJob, pathFilenameFoldsTotal)
+    FunctionDefTarget.body += astWriteFoldsTotal.body
+
+    astLauncher = makeLauncher(FunctionDefTarget.name)
+
     astImports = makeImports()
 
     astModule = ast.Module(
         body=cast(List[ast.stmt]
                 , astImports
-                + [FunctionDefTarget])
+                + [FunctionDefTarget]
+                + [astLauncher])
         , type_ignores=[]
     )
     ast.fix_missing_locations(astModule)
 
     codeSource = ast.unparse(astModule)
 
-    linesAll = Z0Z_stringParsing(stateJob, codeSource)
-
     if pathFilenameWriteJob is None:
         filename = getFilenameFoldsTotal(stateJob['mapShape'])
         pathRoot = getPathJobRootDEFAULT()
         pathFilenameWriteJob = pathlib.Path(pathRoot, pathlib.Path(filename).stem, pathlib.Path(filename).with_suffix('.py'))
-        # pathFilenameWriteJob = getPathFilenameFoldsTotal(stateJob['mapShape'], pathlib.Path(filename).stem).with_suffix('.py')
     else:
         pathFilenameWriteJob = pathlib.Path(pathFilenameWriteJob)
     pathFilenameWriteJob.parent.mkdir(parents=True, exist_ok=True)
 
-    pathFilenameWriteJob.write_text(linesAll)
+    pathFilenameWriteJob.write_text(codeSource)
     return pathFilenameWriteJob
 
 if __name__ == '__main__':
-    listDimensions = [4,4]
+    listDimensions = [5,5]
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
     setDatatypeLeavesTotal('uint8', sourGrapes=True)

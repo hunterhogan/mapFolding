@@ -31,7 +31,6 @@ license: CC-BY-NC-4.0
 repository: https://github.com/hunterhogan/mapFolding.git
 repository-artifact: https://pypi.org/project/mapfolding/0.3.9/
 repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.9
-commit: 0d70eb67ffbab9563208ec06294887fb7fa6768a
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
