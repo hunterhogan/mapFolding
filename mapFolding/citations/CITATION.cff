@@ -27,7 +27,7 @@ keywords:
 - OEIS
 - stamp folding
 license: CC-BY-NC-4.0
-message: If you use this software, you can cite it using the metadata from this file.
+message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
 repository-artifact: https://pypi.org/project/mapfolding/0.3.10/
 repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.10
