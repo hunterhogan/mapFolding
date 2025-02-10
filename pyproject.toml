@@ -40,7 +40,8 @@ optional-dependencies = { testing = [
     "pytest-xdist",
     "pytest",
     "python_minifier",
-    "types-setuptools",] }
+    "types-setuptools",
+    "updateCitation",] }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
