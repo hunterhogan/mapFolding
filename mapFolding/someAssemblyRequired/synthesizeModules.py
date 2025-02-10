@@ -3,34 +3,6 @@ from typing import cast, Callable, List, Tuple, Dict, Optional
 
 datatypeModuleScalar = 'numba'
 
-# Example usage: Replace 'dimensionsTotal' with constant
-# dimensions_replacer = NodeReplacer(
-#     lambda n: isinstance(n, ast.Name) and n.id == "dimensionsTotal",
-#     lambda _: ast.Constant(value=5)
-# )
-
-class ArgumentProcessor:
-    """Unified argument processing using transformation rules"""
-    def __init__(self, rules: List[Tuple[Callable[[ast.arg], bool], Callable]]):
-        self.rules = rules  # (predicate, transformation)
-
-    def process(self, func_def: ast.FunctionDef) -> ast.FunctionDef:
-        for arg in func_def.args.args.copy():
-            for predicate, transform in self.rules:
-                if predicate(arg):
-                    func_def = transform(func_def, arg)
-        return func_def
-
-# Example rule configuration
-# array_arg_rule = (
-#     lambda a: a.arg in ["track"],
-#     lambda fn, arg: evaluate_array_access(fn, arg)
-# )
-
-# # Usage in transformers
-# import_context = ImportFromTracker()
-# import_context.addImportFrom("numba", "jit")
-
 class AnnotationConverter(ast.NodeTransformer):
     """Convert type annotations to runtime initializations"""
     def __init__(self, import_tracker: ImportFromTracker):

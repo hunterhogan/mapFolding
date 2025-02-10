@@ -1,10 +1,10 @@
-from numpy import dtype, integer, ndarray
-import numpy
-import numba
 from mapFolding import indexMy, indexTrack
+from numba import jit, uint8
 from typing import Any, Tuple
+from numba import prange
+from numpy import dtype, integer, ndarray
 
-@numba.jit((numba.uint8[:, :, ::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
+@jit((uint8[:, :, ::1], uint8[::1], uint8[::1], uint8[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
 def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
     while my[indexMy.leaf1ndex.value]:
         if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:

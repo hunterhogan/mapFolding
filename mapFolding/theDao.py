@@ -1,8 +1,7 @@
 from mapFolding import indexMy, indexTrack
+from numba import prange
 from numpy import dtype, integer, ndarray
 from typing import Any, Tuple
-import numba
-import numpy
 
 def activeGapIncrement(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> None:
     my[indexMy.gap1ndex.value] += 1
@@ -138,7 +137,7 @@ def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[A
     myPARALLEL = my.copy()
     trackPARALLEL = track.copy()
     taskDivisionsPrange = myPARALLEL[indexMy.taskDivisions.value]
-    for indexSherpa in numba.prange(taskDivisionsPrange):
+    for indexSherpa in prange(taskDivisionsPrange):
         groupsOfFolds: int = 0
         gapsWhere = gapsWherePARALLEL.copy()
         my = myPARALLEL.copy()

@@ -40,24 +40,36 @@ import python_minifier
 youOughtaKnow = namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenameForMe', 'astForCompetentProgrammers'])
 datatypeModuleScalar = 'numba'
 
-class ImportFromTracker:
+class UniversalImportTracker:
     """Centralized import dependency tracking"""
     def __init__(self):
-        self.imports = collections.defaultdict(set)
+        self.dictionaryImportFromAsStr = collections.defaultdict(set)
+        self.setAstImportAndImportFrom = set()
+        self.setImportAsStr = set()
 
-    def addImportFrom(self, module: str, name: str):
-        self.imports[module].add(name)
+    def addAst(self, astImport_: Union[ast.Import, ast.ImportFrom]):
+        self.setAstImportAndImportFrom.add(astImport_)
 
-    def makeListImportFrom(self) -> List[ast.ImportFrom]:
-        # ast.alias is a helper function to create an alias object
-        return [
-            ast.ImportFrom(module=module, names=[ast.alias(name) for name in setOfNames], level=0)
-            for module, setOfNames in self.imports.items()
-        ]
+    def addImportFromStr(self, module: str, name: str):
+        self.dictionaryImportFromAsStr[module].add(name)
+
+    def addImportStr(self, name: str):
+        self.setImportAsStr.add(name)
+
+    def makeListAst(self) -> List[Union[ast.ImportFrom, ast.Import]]:
+        # This doesn't always ensure uniqueness
+        for module in self.setImportAsStr:
+            self.setAstImportAndImportFrom.add(ast.Import(names=[ast.alias(module)]))
+
+        for module, setOfIdentifiers in self.dictionaryImportFromAsStr.items():
+            self.setAstImportAndImportFrom.add(ast.ImportFrom(module=module, names=[ast.alias(identifier)
+                                                    for identifier in setOfIdentifiers], level=0))
+
+        return list(self.setAstImportAndImportFrom)
 
 class NodeReplacer(ast.NodeTransformer):
     """Base class for configurable node replacement"""
-    def __init__(self, findMe: Callable[[ast.AST], bool], nodeReplacementBuilder: Callable[[ast.AST], ast.AST] ):
+    def __init__(self, findMe, nodeReplacementBuilder):
         self.findMe = findMe
         self.nodeReplacementBuilder = nodeReplacementBuilder
 
@@ -65,6 +77,18 @@ class NodeReplacer(ast.NodeTransformer):
         if self.findMe(node):
             return self.nodeReplacementBuilder(node)
         return super().visit(node)
+
+class ArgumentProcessor:
+    """Unified argument processing using transformation rules"""
+    def __init__(self, rules: List[Tuple[Callable[[ast.arg], bool], Callable]]):
+        self.rules = rules  # (predicate, transformation)
+
+    def process(self, FunctionDef: ast.FunctionDef) -> ast.FunctionDef:
+        for arg in FunctionDef.args.args.copy():
+            for predicate, transform in self.rules:
+                if predicate(arg):
+                    FunctionDef = transform(FunctionDef, arg)
+        return FunctionDef
 
 def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
     # TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
@@ -243,6 +267,7 @@ class UnpackArrayAccesses(ast.NodeTransformer):
         return node
 
 def decorateCallableWithNumba(astCallable: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> ast.FunctionDef:
+    datatypeModuleDecorator = 'numba'
     def makeNumbaParameterSignatureElement(signatureElement: ast.arg):
         if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
             annotationShape = signatureElement.annotation.slice.elts[0]
@@ -262,8 +287,8 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parametersNumba: Opt
             ndarrayName = signatureElement.arg
             Z0Z_hacky_dtype = hackSSOTdatatype(ndarrayName)
             datatype_attr = datatypeAST or Z0Z_hacky_dtype
-
-            datatypeNumba = ast.Attribute(value=ast.Name(id='numba', ctx=ast.Load()), attr=datatype_attr, ctx=ast.Load())
+            allImports.addImportFromStr(datatypeModuleDecorator, datatype_attr)
+            datatypeNumba = ast.Name(id=datatype_attr, ctx=ast.Load())
 
             return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
 
@@ -298,15 +323,17 @@ def decorateCallableWithNumba(astCallable: ast.FunctionDef, parametersNumba: Opt
         parametersNumba = parametersNumbaDEFAULT
 
     listKeywordsNumbaSignature = [ast.keyword(arg=parameterName, value=ast.Constant(value=parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
-
-    astDecoratorNumba = ast.Call(func=ast.Attribute(value=ast.Name(id='numba', ctx=ast.Load()), attr='jit', ctx=ast.Load()), args=[ast_argsSignature], keywords=listKeywordsNumbaSignature)
+    allImports.addImportFromStr(datatypeModuleDecorator, 'jit')
+    astDecoratorNumba = ast.Call(func=ast.Name(id='jit', ctx=ast.Load()), args=[ast_argsSignature], keywords=listKeywordsNumbaSignature)
 
     astCallable.decorator_list = [astDecoratorNumba]
     return astCallable
 
 def inlineOneCallable(codeSource: str, callableTarget: str):
     codeParsed: ast.Module = ast.parse(codeSource, type_comments=True)
-    codeSourceImportStatements = {statement for statement in codeParsed.body if isinstance(statement, (ast.Import, ast.ImportFrom))}
+    for statement in codeParsed.body:
+        if isinstance(statement, (ast.Import, ast.ImportFrom)):
+            allImports.addAst(statement)
     dictionaryFunctions = {statement.name: statement for statement in codeParsed.body if isinstance(statement, ast.FunctionDef)}
     callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctions)
     callableInlined = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
@@ -314,7 +341,6 @@ def inlineOneCallable(codeSource: str, callableTarget: str):
     if callableInlined:
         ast.fix_missing_locations(callableInlined)
         parametersNumba = None
-
         match callableTarget:
             case 'countParallel':
                 parametersNumba = parametersNumbaSuperJitParallel
@@ -334,7 +360,7 @@ def inlineOneCallable(codeSource: str, callableTarget: str):
             callableDecorated = cast(ast.FunctionDef, unpackerTrack.visit(callableDecorated))
             ast.fix_missing_locations(callableDecorated)
 
-        moduleAST = ast.Module(body=cast(List[ast.stmt], list(codeSourceImportStatements) + [callableDecorated]), type_ignores=[])
+        moduleAST = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [callableDecorated]), type_ignores=[])
         ast.fix_missing_locations(moduleAST)
         moduleSource = ast.unparse(moduleAST)
         return moduleSource
@@ -342,7 +368,15 @@ def inlineOneCallable(codeSource: str, callableTarget: str):
 def makeDispatcherNumba(codeSource: str, callableTarget: str, listStuffYouOughtaKnow: List[youOughtaKnow]) -> str:
     astSource = ast.parse(codeSource)
 
-    astImports = [node for node in astSource.body if isinstance(node, (ast.Import, ast.ImportFrom))]
+    for statement in astSource.body:
+        if isinstance(statement, (ast.Import, ast.ImportFrom)):
+            allImports.addAst(statement)
+
+    for stuff in listStuffYouOughtaKnow:
+        statement = stuff.astForCompetentProgrammers
+        if isinstance(statement, (ast.Import, ast.ImportFrom)):
+            allImports.addAst(statement)
+
     FunctionDefTarget = next((node for node in astSource.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
 
     if not FunctionDefTarget:
@@ -353,13 +387,8 @@ def makeDispatcherNumba(codeSource: str, callableTarget: str, listStuffYouOughta
 
     FunctionDefTarget = decorateCallableWithNumba(FunctionDefTarget, parametersNumbaFailEarly)
 
-    astModule = ast.Module(
-        body=cast(List[ast.stmt]
-                , astImports
-                + [stuff.astForCompetentProgrammers for stuff in listStuffYouOughtaKnow]
-                + [FunctionDefTarget])
-        , type_ignores=[]
-    )
+    astModule = ast.Module( body=cast(List[ast.stmt], allImports.makeListAst()
+                + [FunctionDefTarget]), type_ignores=[])
 
     ast.fix_missing_locations(astModule)
     return ast.unparse(astModule)
@@ -409,7 +438,9 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
 
     listStuffYouOughtaKnow: List[youOughtaKnow] = []
 
+    global allImports
     for callableTarget in listCallablesInline:
+        allImports = UniversalImportTracker()
         codeSource = inspect.getsource(algorithmSource)
         moduleSource = inlineOneCallable(codeSource, callableTarget)
         if not moduleSource:
@@ -427,6 +458,7 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
 
     # Generate dispatcher if requested
     if callableDispatcher:
+        allImports = UniversalImportTracker()
         codeSource = inspect.getsource(algorithmSource)
         moduleSource = makeDispatcherNumba(codeSource, callableDispatcher, listStuffYouOughtaKnow)
         if not moduleSource:
@@ -488,7 +520,7 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
         return f"{identifierName} = array({stringMinimized}, dtype={arrayTarget.dtype})"
     return stringMinimized
 
-def move_argTo_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
+def moveArrayTo_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
     arrayType = type(argData)
     moduleConstructor = arrayType.__module__
     constructorName = arrayType.__name__
@@ -497,8 +529,8 @@ def move_argTo_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarr
     argData_dtype: numpy.dtype = argData.dtype
     argData_dtypeName = argData.dtype.name
 
-    importFrom.addImportFrom(moduleConstructor, constructorName)
-    importFrom.addImportFrom(moduleConstructor, argData_dtypeName)
+    allImports.addImportFromStr(moduleConstructor, constructorName)
+    allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
 
     onlyDataRLE = makeStrRLEcompacted(argData)
     astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
@@ -521,14 +553,14 @@ def evaluateArrayIn_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.
     constructorName = arrayType.__name__
     # NOTE hack
     constructorName = constructorName.replace('ndarray', 'array')
-    importFrom.addImportFrom(moduleConstructor, constructorName)
+    allImports.addImportFromStr(moduleConstructor, constructorName)
 
     for stmt in node.body.copy():
         if isinstance(stmt, ast.Assign):
             if isinstance(stmt.targets[0], ast.Name) and isinstance(stmt.value, ast.Subscript):
                 astAssignee: ast.Name = stmt.targets[0]
                 argData_dtypeName = hackSSOTdatatype(astAssignee.id)
-                importFrom.addImportFrom(moduleConstructor, argData_dtypeName)
+                allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
                 astSubscript: ast.Subscript = stmt.value
                 if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == astArg.arg and isinstance(astSubscript.slice, ast.Attribute):
                     indexAs_astAttribute: ast.Attribute = astSubscript.slice
@@ -557,7 +589,7 @@ def evaluate_argIn_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.n
             if isinstance(stmt.targets[0], ast.Name) and isinstance(stmt.value, ast.Subscript):
                 astAssignee: ast.Name = stmt.targets[0]
                 argData_dtypeName = hackSSOTdatatype(astAssignee.id)
-                importFrom.addImportFrom(moduleConstructor, argData_dtypeName)
+                allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
                 astSubscript: ast.Subscript = stmt.value
                 if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == astArg.arg and isinstance(astSubscript.slice, ast.Attribute):
                     indexAs_astAttribute: ast.Attribute = astSubscript.slice
@@ -578,7 +610,7 @@ def evaluateAnnAssignIn_body(node: ast.FunctionDef) -> ast.FunctionDef:
             if isinstance(stmt.target, ast.Name) and isinstance(stmt.value, ast.Constant):
                 astAssignee: ast.Name = stmt.target
                 argData_dtypeName = hackSSOTdatatype(astAssignee.id)
-                importFrom.addImportFrom(moduleConstructor, argData_dtypeName)
+                allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
                 astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()) , args=[stmt.value], keywords=[])
                 assignment = ast.Assign(targets=[astAssignee], value=astCall)
                 node.body.insert(0, assignment)
@@ -602,56 +634,63 @@ def astObjectToAstConstant(astFunction: ast.FunctionDef, object: str, value: int
     targetExpression = ast.parse(object, mode='eval').body
     targetDump = ast.dump(targetExpression, annotate_fields=False)
 
-    class ReplaceObjectWithConstant(ast.NodeTransformer):
-        def __init__(self, targetDump: str, constantValue: int) -> None:
-            self.targetDump = targetDump
-            self.constantValue = constantValue
+    def findNode(node: ast.AST) -> bool:
+        return ast.dump(node, annotate_fields=False) == targetDump
 
-        def generic_visit(self, node: ast.AST) -> ast.AST:
-            currentDump = ast.dump(node, annotate_fields=False)
-            if currentDump == self.targetDump:
-                return ast.copy_location(ast.Constant(value=self.constantValue), node)
-            return super().generic_visit(node)
+    def replaceWithConstant(node: ast.AST) -> ast.AST:
+        return ast.copy_location(ast.Constant(value=value), node)
 
-    transformer = ReplaceObjectWithConstant(targetDump, value)
-    newFunction = transformer.visit(astFunction)
+    transformer = NodeReplacer(findNode, replaceWithConstant)
+    newFunction = cast(ast.FunctionDef, transformer.visit(astFunction))
     ast.fix_missing_locations(newFunction)
     return newFunction
 
 def astNameToAstConstant(astFunction: ast.FunctionDef, name: str, value: int) -> ast.FunctionDef:
-    class ReplaceNameWithConstant(ast.NodeTransformer):
-        def visit_Name(self, node: ast.Name) -> ast.AST:
-            if node.id == name:
-                return ast.copy_location(ast.Constant(value=value), node)
-            return node
-    return ReplaceNameWithConstant().visit(astFunction)
+    def findName(node: ast.AST) -> bool:
+        return isinstance(node, ast.Name) and node.id == name
+
+    def replaceWithConstant(node: ast.AST) -> ast.AST:
+        return ast.copy_location(ast.Constant(value=value), node)
+
+    return cast(ast.FunctionDef, NodeReplacer(findName, replaceWithConstant).visit(astFunction))
 
 def makeDecorator(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> ast.FunctionDef:
-    if parametersNumba is None:
-        parametersNumbaExtracted: Dict[str, Any] = {}
-        for decoratorItem in FunctionDefTarget.decorator_list.copy():
-            if isinstance(decoratorItem, ast.Call) and isinstance(decoratorItem.func, ast.Attribute):
-                if getattr(decoratorItem.func.value, "id", None) == "numba" and decoratorItem.func.attr == "jit":
-                    FunctionDefTarget.decorator_list.remove(decoratorItem)
-                    for keywordItem in decoratorItem.keywords:
-                        if isinstance(keywordItem.value, ast.Constant) and keywordItem.arg is not None:
-                            parametersNumbaExtracted[keywordItem.arg] = keywordItem.value.value
-        if parametersNumbaExtracted:
-            parametersNumba = ParametersNumba(parametersNumbaExtracted)  # type: ignore
-    else:
-        # TODO code duplication
-        for decoratorItem in FunctionDefTarget.decorator_list.copy():
-            if isinstance(decoratorItem, ast.Call) and isinstance(decoratorItem.func, ast.Attribute):
-                if getattr(decoratorItem.func.value, "id", None) == "numba" and decoratorItem.func.attr == "jit":
-                    FunctionDefTarget.decorator_list.remove(decoratorItem)
+    # Use NodeReplacer to handle decorator cleanup
+    def isNumbaJitDecorator(node: ast.AST) -> bool:
+        return ((isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                and getattr(node.func.value, "id", None) == "numba" and node.func.attr == "jit")
+                or
+                (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "jit"))
+
+    def extractNumbaParams(node: ast.Call) -> None:
+        nonlocal parametersNumba
+        if parametersNumba is None:
+            parametersNumbaExtracted: Dict[str, Any] = {}
+            for keywordItem in node.keywords:
+                if isinstance(keywordItem.value, ast.Constant) and keywordItem.arg is not None:
+                    parametersNumbaExtracted[keywordItem.arg] = keywordItem.value.value
+            if parametersNumbaExtracted:
+                parametersNumba = ParametersNumba(parametersNumbaExtracted)  # type: ignore
+        return None
+
+    # Remove existing numba decorators
+    decoratorCleaner = NodeReplacer(isNumbaJitDecorator, extractNumbaParams)
+    FunctionDefTarget = cast(ast.FunctionDef, decoratorCleaner.visit(FunctionDefTarget))
+
     FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
-    importFrom.addImportFrom('numba', 'jit')
+    allImports.addImportFromStr('numba', 'jit')
     FunctionDefTarget = decorateCallableWithNumba(FunctionDefTarget, parametersNumba)
-    # make sure the decorator is rendered as `@jit` and not `@numba.jit`
-    for decoratorItem in FunctionDefTarget.decorator_list:
-        if isinstance(decoratorItem, ast.Call) and isinstance(decoratorItem.func, ast.Attribute) and decoratorItem.func.attr == "jit":
-            decoratorItem.func = ast.Name(id="jit", ctx=ast.Load())
-    return FunctionDefTarget
+
+    # Convert @numba.jit to @jit
+    def isNumbaJitCall(node: ast.AST) -> bool:
+        return (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "jit")
+
+    def convertToPlainJit(node: ast.Call) -> ast.Call:
+        node.func = ast.Name(id="jit", ctx=ast.Load())
+        return node
+
+    jitSimplifier = NodeReplacer(isNumbaJitCall, convertToPlainJit)
+    return cast(ast.FunctionDef, jitSimplifier.visit(FunctionDefTarget))
 
 def makeLauncher(identifierCallable: str) -> ast.Module:
     linesLaunch = f"""
@@ -665,7 +704,7 @@ if __name__ == '__main__':
     return astLaunch
 
 def make_writeFoldsTotal(stateJob: computationState, pathFilenameFoldsTotal: pathlib.Path) -> ast.Module:
-    importFrom.addImportFrom('numba', 'objmode')
+    allImports.addImportFromStr('numba', 'objmode')
     linesWriteFoldsTotal = f"""
 groupsOfFolds *= {str(stateJob['foldGroups'][-1])}
 print(groupsOfFolds)
@@ -687,27 +726,28 @@ def writeJobNumba(listDimensions: Sequence[int], callableSource: Callable, param
     if not FunctionDefTarget:
         raise ValueError(f"Could not find function {callableSource.__name__} in source code")
 
-    Z0Z_listArgsTarget = ['connectionGraph', 'gapsWhere']
-    Z0Z_listArraysEvaluate = ['track']
-    Z0Z_listArgsEvaluate = ['my']
-    Z0Z_listChaff = ['taskIndex', 'dimensionsTotal']
-    Z0Z_listArgsRemove = ['foldGroups']
-    for astArgument in FunctionDefTarget.args.args.copy():
-        if astArgument.arg in Z0Z_listArgsTarget:
-            FunctionDefTarget = move_argTo_body(FunctionDefTarget, astArgument, stateJob[astArgument.arg])
-        elif astArgument.arg in Z0Z_listArraysEvaluate:
-            FunctionDefTarget = evaluateArrayIn_body(FunctionDefTarget, astArgument, stateJob[astArgument.arg])
-        elif astArgument.arg in Z0Z_listArgsEvaluate:
-            FunctionDefTarget = evaluate_argIn_body(FunctionDefTarget, astArgument, stateJob[astArgument.arg], Z0Z_listChaff)
-        elif astArgument.arg in Z0Z_listArgsRemove:
-            FunctionDefTarget = removeIdentifierFrom_body(FunctionDefTarget, astArgument)
+    # Define argument processing rules
+    argumentRules = [
+        (lambda arg: arg.arg in ['connectionGraph', 'gapsWhere'],
+        lambda node, arg: moveArrayTo_body(node, arg, stateJob[arg.arg])),
+
+        (lambda arg: arg.arg in ['track'],
+        lambda node, arg: evaluateArrayIn_body(node, arg, stateJob[arg.arg])),
+
+        (lambda arg: arg.arg in ['my'],
+        lambda node, arg: evaluate_argIn_body(node, arg, stateJob[arg.arg], ['taskIndex', 'dimensionsTotal'])),
+
+        (lambda arg: arg.arg in ['foldGroups'],
+        lambda node, arg: removeIdentifierFrom_body(node, arg))
+    ]
+
+    # Process arguments using ArgumentProcessor
+    argumentProcessor = ArgumentProcessor(argumentRules)
+    FunctionDefTarget = argumentProcessor.process(FunctionDefTarget)
 
     FunctionDefTarget = evaluateAnnAssignIn_body(FunctionDefTarget)
     FunctionDefTarget = astNameToAstConstant(FunctionDefTarget, 'dimensionsTotal', int(stateJob['my'][indexMy.dimensionsTotal]))
     FunctionDefTarget = astObjectToAstConstant(FunctionDefTarget, 'foldGroups[-1]', int(stateJob['foldGroups'][-1]))
-
-    global identifierCallableLaunch
-    identifierCallableLaunch = FunctionDefTarget.name
 
     FunctionDefTarget = makeDecorator(FunctionDefTarget, parametersNumba)
 
@@ -716,7 +756,7 @@ def writeJobNumba(listDimensions: Sequence[int], callableSource: Callable, param
 
     astLauncher = makeLauncher(FunctionDefTarget.name)
 
-    astImports = importFrom.makeListImportFrom()
+    astImports = allImports.makeListAst()
 
     astModule = ast.Module(
         body=cast(List[ast.stmt]
@@ -749,11 +789,11 @@ if __name__ == '__main__':
     callableDispatcher = 'doTheNeedful'
     makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
 
-    listDimensions = [2,15]
+    listDimensions = [5,5]
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
     setDatatypeLeavesTotal('uint8', sourGrapes=True)
     from mapFolding.syntheticModules.numba_countSequential import countSequential
     callableSource = countSequential
-    importFrom = ImportFromTracker()
+    allImports = UniversalImportTracker()
     pathFilenameModule = writeJobNumba(listDimensions, callableSource, parametersNumbaDEFAULT)

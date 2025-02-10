@@ -1,13 +1,13 @@
-from mapFolding import indexMy, indexTrack
-from numpy import dtype, integer, ndarray
-from typing import Any, Tuple
-import numba
-import numpy
 from mapFolding.syntheticModules.numba_countInitialize import countInitialize
 from mapFolding.syntheticModules.numba_countParallel import countParallel
+from mapFolding import indexMy, indexTrack
+from numba import int64, jit, uint8
+from numba import prange
+from typing import Any, Tuple
 from mapFolding.syntheticModules.numba_countSequential import countSequential
+from numpy import dtype, integer, ndarray
 
-@numba.jit((numba.uint8[:, :, ::1], numba.int64[::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:, ::1]), _nrt=True, boundscheck=True, cache=True, error_model='python', fastmath=False, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
+@jit((uint8[:, :, ::1], int64[::1], uint8[::1], uint8[::1], uint8[::1], uint8[:, ::1]), _nrt=True, boundscheck=True, cache=True, error_model='python', fastmath=False, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
 def doTheNeedful(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], foldGroups: ndarray[Tuple[int], dtype[integer[Any]]], gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], mapShape: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
     countInitialize(connectionGraph, gapsWhere, my, track)
     if my[indexMy.taskDivisions.value] > 0:
