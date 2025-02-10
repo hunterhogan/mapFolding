@@ -14,66 +14,76 @@ permissions:
   contents: read
 
 jobs:
-  verifyVersion:
+  check-version:
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     outputs:
-      statusPublish: ${{ steps.verifyPyPI.outputs.statusPublish }}
-      versionPackage: ${{ steps.extractVersion.outputs.versionPackage }}
-      namePackage: ${{ steps.verifyPyPI.outputs.namePackage }}
+      should_publish: ${{ steps.check.outputs.should_publish }}
+      version: ${{ steps.version.outputs.version }}
+      package_name: ${{ steps.check.outputs.package_name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - name: Extract package version
-        id: extractVersion
+      - name: Get package version
+        id: version
         run: |
-          python -m pip install toml
-          echo "versionPackage=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")" >> "%GITHUB_OUTPUT%"
-
-      - name: Verify PyPI version
-        id: verifyPyPI
+          pip install toml
+          version=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Check PyPI version
+        id: check
         run: |
-          python -m pip install requests toml
-          SET versionPackage=${{ steps.extractVersion.outputs.versionPackage }}
-          FOR /F "tokens=*" %%i IN ('python -c "import toml; print(toml.load('pyproject.toml')['project']['name'])"') DO SET namePackage=%%i
-          echo "namePackage=%namePackage%" >> "%GITHUB_OUTPUT%"
+          set -e
+          pip install requests
+          version="${{ steps.version.outputs.version }}"
+          package_name=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['name'])")
+          echo "package_name=$package_name" >> "$GITHUB_OUTPUT"
+          echo "Checking version $version for package $package_name"
+          if python -c "import requests, sys; package_name=sys.argv[1]; version=sys.argv[2]; exit(0 if version in requests.get(f'https://pypi.org/pypi/{package_name}/json').json()['releases'] else 1)" "$package_name" "$version"; then
+            echo "Version already on PyPI"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "New version - should publish"
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
 
-          python -c "import requests, sys; print('statusPublish=false' if sys.argv[1] in requests.get(f'https://pypi.org/pypi/{sys.argv[2]}/json').json()['releases'] else 'statusPublish=true')" "%versionPackage%" "%namePackage%" >> "%GITHUB_OUTPUT%"
-
-  buildRelease:
-    needs: verifyVersion
-    if: needs.verifyVersion.outputs.statusPublish == 'true'
+  release-build:
+    needs: check-version
+    if: needs.check-version.outputs.should_publish == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - name: Build package distributions
+      - name: Build release distributions
         run: |
           python -m pip install build
           python -m build
-      - uses: actions/upload-artifact@v4
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
         with:
-          name: distributionsRelease
+          name: release-dists
           path: dist/
 
-  publishPyPI:
-    needs: [verifyVersion, buildRelease]
-    if: needs.verifyVersion.outputs.statusPublish == 'true'
+  pypi-publish:
+    needs: [check-version, release-build]
+    if: needs.check-version.outputs.should_publish == 'true'
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/${{ needs.verifyVersion.outputs.namePackage }}/${{ needs.verifyVersion.outputs.versionPackage }}
+      url: https://pypi.org/project/${{ needs.check-version.outputs.package_name }}/${{ needs.check-version.outputs.version }}
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Retrieve release distributions
+        uses: actions/download-artifact@v4
         with:
-          name: distributionsRelease
+          name: release-dists
           path: dist/
-      - uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.2
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc #v1.12.2
         with:
           packages-dir: dist/

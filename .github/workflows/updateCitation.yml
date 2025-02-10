@@ -1,0 +1,42 @@
+name: Update CITATION.cff
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  processCitation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify citation workflow
+        id: verifyCitation
+        run: |
+          IF EXIST .github\workflows\updateCitation.yml (
+            echo "statusExists=true" >> "%GITHUB_OUTPUT%"
+          ) ELSE (
+            echo "statusExists=false" >> "%GITHUB_OUTPUT%"
+          )
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Process citation update
+        if: steps.verifyCitation.outputs.statusExists == 'true'
+        run: |
+          python -m pip install updateCitation
+          python -c "import updateCitation; updateCitation.here()"
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update citations [skip ci]"
+          git push
+
+      - name: Skip citation update
+        if: steps.verifyCitation.outputs.statusExists != 'true'
+        run: echo "Citation workflow file not found - skipping update process"
