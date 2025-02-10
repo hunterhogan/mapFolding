@@ -59,7 +59,7 @@ run = { branch = true, concurrency = [
     "thread",
 ], data_file = "tests/coverage/.coverage", omit = [
     "tests/*",
-    "mapFolding/someAssemblyRequired/*",
+    # "mapFolding/someAssemblyRequired/*",
     "Z0Z_*",
 ], parallel = true, source = [
     ".",] }

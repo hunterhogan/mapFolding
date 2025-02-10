@@ -1,8 +1,8 @@
-from typing import Any, Tuple
-import numpy
 from numpy import dtype, integer, ndarray
+import numpy
 import numba
 from mapFolding import indexMy, indexTrack
+from typing import Any, Tuple
 
 @numba.jit((numba.uint8[:, :, ::1], numba.uint8[::1], numba.uint8[::1], numba.uint8[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
 def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:

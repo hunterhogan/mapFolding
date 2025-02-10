@@ -49,11 +49,6 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
     Returns:
         str: A string containing Python code that recreates the input array in compressed form.
             Format: "{identifierName} = numpy.array({compressed_data}, dtype=numpy.{dtype})"
-
-    Example:
-        >>> arr = numpy.array([[0,0,0,1,2,3,4,0,0]])
-        >>> print(makeStrRLEcompacted(arr, "myArray"))
-        "myArray = numpy.array([[0]*3,*range(1,5),[0]*2], dtype=numpy.int64)"
     """
 
     def compressRangesNDArrayNoFlatten(arraySlice):
@@ -85,23 +80,33 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
         return f"{identifierName} = array({stringMinimized}, dtype={arrayTarget.dtype})"
     return stringMinimized
 
-def makeImports() -> List[List[ast.ImportFrom]]:
+def move_argTo_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
+    arrayType = type(argData)
+    moduleConstructor = arrayType.__module__
+    constructorName = arrayType.__name__
+    # NOTE hack
+    constructorName = constructorName.replace('ndarray', 'array')
+    argData_dtype: numpy.dtype = argData.dtype
+    argData_dtypeName = argData.dtype.name
+
     global dictionaryImportFrom
-    dictionaryImportFrom = updateExtendPolishDictionaryLists(dictionaryImportFrom, destroyDuplicates=True)
+    dictionaryImportFrom[moduleConstructor].append(constructorName)
+    dictionaryImportFrom[moduleConstructor].append(argData_dtypeName)
 
-    def parseAlias(aliasString: str):
-        parts = aliasString.split(" as ")
-        if len(parts) == 2:
-            return ast.alias(name=parts[0].strip(), asname=parts[1].strip())
-        return ast.alias(name=aliasString.strip(), asname=None)
+    onlyDataRLE = makeStrRLEcompacted(argData)
+    astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
+    dataAst = astStatement.value
 
-    importStatements = [[
-        ast.ImportFrom(module=module, names=[ast.alias(name=identifierName, asname=None)
-                                            for identifierName in listIdentifiers], level=0)
-                                            for module, listIdentifiers in dictionaryImportFrom.items()]
-        ]
+    arrayCall = ast.Call(
+        func=ast.Name(id=constructorName, ctx=ast.Load())
+        , args=[dataAst]
+        , keywords=[ast.keyword(arg='dtype' , value=ast.Name(id=argData_dtypeName , ctx=ast.Load()) ) ] )
 
-    return importStatements
+    assignment = ast.Assign( targets=[ast.Name(id=astArg.arg, ctx=ast.Store())], value=arrayCall )
+    node.body.insert(0, assignment)
+    node.args.args.remove(astArg)
+
+    return node
 
 def evaluateArrayIn_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
     global dictionaryImportFrom
@@ -176,33 +181,46 @@ def evaluateAnnAssignIn_body(node: ast.FunctionDef) -> ast.FunctionDef:
                 node.body.remove(stmt)
     return node
 
-def move_argTo_body(node: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
-    arrayType = type(argData)
-    moduleConstructor = arrayType.__module__
-    constructorName = arrayType.__name__
-    # NOTE hack
-    constructorName = constructorName.replace('ndarray', 'array')
-    argData_dtype: numpy.dtype = argData.dtype
-    argData_dtypeName = argData.dtype.name
-
-    global dictionaryImportFrom
-    dictionaryImportFrom[moduleConstructor].append(constructorName)
-    dictionaryImportFrom[moduleConstructor].append(argData_dtypeName)
-
-    onlyDataRLE = makeStrRLEcompacted(argData)
-    astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
-    dataAst = astStatement.value
-
-    arrayCall = ast.Call(
-        func=ast.Name(id=constructorName, ctx=ast.Load())
-        , args=[dataAst]
-        , keywords=[ast.keyword(arg='dtype' , value=ast.Name(id=argData_dtypeName , ctx=ast.Load()) ) ] )
-
-    assignment = ast.Assign( targets=[ast.Name(id=astArg.arg, ctx=ast.Store())], value=arrayCall )
-    node.body.insert(0, assignment)
+def removeIdentifierFrom_body(node: ast.FunctionDef, astArg: ast.arg) -> ast.FunctionDef:
+    for stmt in node.body.copy():
+        if isinstance(stmt, ast.Assign):
+            if isinstance(stmt.targets[0], ast.Subscript) and isinstance(stmt.targets[0].value, ast.Name):
+                if stmt.targets[0].value.id == astArg.arg:
+                    node.body.remove(stmt)
     node.args.args.remove(astArg)
-
     return node
+
+def astObjectToAstConstant(astFunction: ast.FunctionDef, object: str, value: int) -> ast.FunctionDef:
+    """
+    Replaces nodes in astFunction matching the AST of the string `object`
+    with a constant node holding the provided value.
+    """
+    targetExpression = ast.parse(object, mode='eval').body
+    targetDump = ast.dump(targetExpression, annotate_fields=False)
+
+    class ReplaceObjectWithConstant(ast.NodeTransformer):
+        def __init__(self, targetDump: str, constantValue: int) -> None:
+            self.targetDump = targetDump
+            self.constantValue = constantValue
+
+        def generic_visit(self, node: ast.AST) -> ast.AST:
+            currentDump = ast.dump(node, annotate_fields=False)
+            if currentDump == self.targetDump:
+                return ast.copy_location(ast.Constant(value=self.constantValue), node)
+            return super().generic_visit(node)
+
+    transformer = ReplaceObjectWithConstant(targetDump, value)
+    newFunction = transformer.visit(astFunction)
+    ast.fix_missing_locations(newFunction)
+    return newFunction
+
+def astNameToAstConstant(astFunction: ast.FunctionDef, name: str, value: int) -> ast.FunctionDef:
+    class ReplaceNameWithConstant(ast.NodeTransformer):
+        def visit_Name(self, node: ast.Name) -> ast.AST:
+            if node.id == name:
+                return ast.copy_location(ast.Constant(value=value), node)
+            return node
+    return ReplaceNameWithConstant().visit(astFunction)
 
 def makeDecorator(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> ast.FunctionDef:
     if parametersNumba is None:
@@ -255,46 +273,23 @@ return groupsOfFolds
     """
     return ast.parse(linesWriteFoldsTotal)
 
-def removeIdentifierFrom_body(node: ast.FunctionDef, astArg: ast.arg) -> ast.FunctionDef:
-    for stmt in node.body.copy():
-        if isinstance(stmt, ast.Assign):
-            if isinstance(stmt.targets[0], ast.Subscript) and isinstance(stmt.targets[0].value, ast.Name):
-                if stmt.targets[0].value.id == astArg.arg:
-                    node.body.remove(stmt)
-    node.args.args.remove(astArg)
-    return node
+def makeImports() -> List[List[ast.ImportFrom]]:
+    global dictionaryImportFrom
+    dictionaryImportFrom = updateExtendPolishDictionaryLists(dictionaryImportFrom, destroyDuplicates=True)
 
-def astObjectToAstConstant(astFunction: ast.FunctionDef, object: str, value: int) -> ast.FunctionDef:
-    """
-    Replaces nodes in astFunction matching the AST of the string `object`
-    with a constant node holding the provided value.
-    """
-    targetExpression = ast.parse(object, mode='eval').body
-    targetDump = ast.dump(targetExpression, annotate_fields=False)
+    def parseAlias(aliasString: str):
+        parts = aliasString.split(" as ")
+        if len(parts) == 2:
+            return ast.alias(name=parts[0].strip(), asname=parts[1].strip())
+        return ast.alias(name=aliasString.strip(), asname=None)
 
-    class ReplaceObjectWithConstant(ast.NodeTransformer):
-        def __init__(self, targetDump: str, constantValue: int) -> None:
-            self.targetDump = targetDump
-            self.constantValue = constantValue
+    importStatements = [[
+        ast.ImportFrom(module=module, names=[ast.alias(name=identifierName, asname=None)
+                                            for identifierName in listIdentifiers], level=0)
+                                            for module, listIdentifiers in dictionaryImportFrom.items()]
+        ]
 
-        def generic_visit(self, node: ast.AST) -> ast.AST:
-            currentDump = ast.dump(node, annotate_fields=False)
-            if currentDump == self.targetDump:
-                return ast.copy_location(ast.Constant(value=self.constantValue), node)
-            return super().generic_visit(node)
-
-    transformer = ReplaceObjectWithConstant(targetDump, value)
-    newFunction = transformer.visit(astFunction)
-    ast.fix_missing_locations(newFunction)
-    return newFunction
-
-def astNameToAstConstant(astFunction: ast.FunctionDef, name: str, value: int) -> ast.FunctionDef:
-    class ReplaceNameWithConstant(ast.NodeTransformer):
-        def visit_Name(self, node: ast.Name) -> ast.AST:
-            if node.id == name:
-                return ast.copy_location(ast.Constant(value=value), node)
-            return node
-    return ReplaceNameWithConstant().visit(astFunction)
+    return importStatements
 
 def writeJobNumba(listDimensions: Sequence[int], callableSource: Callable, parametersNumba: Optional[ParametersNumba]=None, pathFilenameWriteJob: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
     stateJob = makeStateJob(listDimensions, writeJob=False)
