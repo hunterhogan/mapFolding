@@ -15,7 +15,7 @@ date-released: '2025-02-09'
 identifiers:
 - type: url
   value: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.10
-  description: The URL for mapFolding 0.3.10.
+  description: The URL for mapFolding 0.3.11.
 keywords:
 - A001415
 - A001416
@@ -29,9 +29,9 @@ keywords:
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.3.10/
+repository-artifact: https://pypi.org/project/mapfolding/0.3.11/
 repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.3.10
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.3.10
+version: 0.3.11
