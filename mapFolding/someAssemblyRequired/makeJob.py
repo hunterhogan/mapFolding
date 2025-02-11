@@ -1,5 +1,6 @@
 from mapFolding import getPathFilenameFoldsTotal, computationState, outfitCountFolds, getAlgorithmSource
-from typing import Literal, Optional, Sequence, overload
+from types import ModuleType
+from typing import Any, Literal, Optional, Sequence, overload
 import pathlib
 import pickle
 
@@ -13,7 +14,7 @@ def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[False]
                  , **keywordArguments: Optional[str]) -> computationState:
     ...
 
-def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Optional[str]) -> computationState | pathlib.Path:
+def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Optional[Any]) -> computationState | pathlib.Path:
     """
     Creates a computation state job for map folding calculations and optionally saves it to disk.
 
@@ -42,10 +43,9 @@ def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keyw
     when writeJob is True. The file is saved in a directory structure based on the map shape.
     """
 
-    stateUniversal: computationState = outfitCountFolds(listDimensions, computationDivisions=None, CPUlimit=None, **keywordArguments)
+    stateUniversal: computationState = outfitCountFolds(listDimensions, **keywordArguments)
 
-
-    moduleSource = getAlgorithmSource()
+    moduleSource: ModuleType = getAlgorithmSource()
     moduleSource.countInitialize(stateUniversal['connectionGraph'], stateUniversal['gapsWhere'], stateUniversal['my'], stateUniversal['track'])
 
     if not writeJob:

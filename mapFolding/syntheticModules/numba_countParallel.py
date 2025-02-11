@@ -1,8 +1,14 @@
-from numpy import dtype, integer, ndarray
-from numba import int64, jit, uint8
+from mapFolding import indexMy
+from mapFolding import indexTrack
+from numba import uint8
 from numba import prange
-from typing import Any, Tuple
-from mapFolding import indexMy, indexTrack
+from numba import jit
+from numba import int64
+from numpy import ndarray
+from numpy import dtype
+from numpy import integer
+from typing import Any
+from typing import Tuple
 
 @jit((uint8[:, :, ::1], int64[::1], uint8[::1], uint8[::1], uint8[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nopython=True, parallel=True)
 def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], foldGroups: ndarray[Tuple[int], dtype[integer[Any]]], gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
@@ -14,8 +20,8 @@ def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[A
         groupsOfFolds: int = 0
         gapsWhere = gapsWherePARALLEL.copy()
         my = myPARALLEL.copy()
-        my[indexMy.taskIndex.value] = indexSherpa
         track = trackPARALLEL.copy()
+        my[indexMy.taskIndex.value] = indexSherpa
         while my[indexMy.leaf1ndex.value]:
             if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
                 if my[indexMy.leaf1ndex.value] > foldGroups[-1]:

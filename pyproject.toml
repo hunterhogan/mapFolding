@@ -32,6 +32,7 @@ license = { 'text' = "CC-BY-NC-4.0" }
 maintainers = []
 name = "mapFolding"
 optional-dependencies = { testing = [
+    "autoflake",
     "more_itertools",
     "mypy",
     "pytest-cov",
@@ -46,7 +47,7 @@ readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Repository = "https://github.com/hunterhogan/mapFolding.git" }
-version = "0.3.10"
+version = "0.3.11"
 
 [tool.coverage]
 report = { exclude_lines = [

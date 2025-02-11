@@ -4,6 +4,7 @@ from numpy import dtype, integer, ndarray
 from typing import Any, Tuple
 
 def activeGapIncrement(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> None:
+    # `.value` is not necessary for this module or most modules. But, this module is transformed into Numba "jitted" functions, and Numba won't use `Enum` for an index without `.value`.
     my[indexMy.gap1ndex.value] += 1
 
 def activeLeafGreaterThan0Condition(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
@@ -102,9 +103,11 @@ def thereAreComputationDivisionsYouMightSkip(my: ndarray[Tuple[int], dtype[integ
     return my[indexMy.leaf1ndex.value] != my[indexMy.taskDivisions.value] or my[indexMy.leafConnectee.value] % my[indexMy.taskDivisions.value] == my[indexMy.taskIndex.value]
 
 def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]]
-                    , gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]]
-                    , my: ndarray[Tuple[int], dtype[integer[Any]]]
-                    , track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
+                        , gapsWhere: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                        ,        my: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                        ,     track: ndarray[Tuple[int, int]     , dtype[integer[Any]]]
+                    ) -> None:
+
     while activeLeafGreaterThan0Condition(my=my):
         if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
             findGapsInitializeVariables(my=my, track=track)
@@ -129,20 +132,27 @@ def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer
             return
 
 def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]]
-                    , foldGroups: ndarray[Tuple[int], dtype[integer[Any]]]
-                    , gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]]
-                    , my: ndarray[Tuple[int], dtype[integer[Any]]]
-                    , track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
+                    ,  foldGroups: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                    ,   gapsWhere: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                    ,          my: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                    ,       track: ndarray[Tuple[int, int]     , dtype[integer[Any]]]
+                ) -> None:
+
     gapsWherePARALLEL = gapsWhere.copy()
     myPARALLEL = my.copy()
     trackPARALLEL = track.copy()
+
     taskDivisionsPrange = myPARALLEL[indexMy.taskDivisions.value]
+
     for indexSherpa in prange(taskDivisionsPrange):
         groupsOfFolds: int = 0
+
         gapsWhere = gapsWherePARALLEL.copy()
         my = myPARALLEL.copy()
-        my[indexMy.taskIndex.value] = indexSherpa
         track = trackPARALLEL.copy()
+
+        my[indexMy.taskIndex.value] = indexSherpa
+
         while activeLeafGreaterThan0Condition(my=my):
             if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
                 if activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my):
@@ -169,9 +179,16 @@ def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[A
                 placeLeaf(gapsWhere=gapsWhere, my=my, track=track)
         foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
-def countSequential(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], foldGroups: ndarray[Tuple[int], dtype[integer[Any]]], gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
+def countSequential( connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]]
+                        , foldGroups: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                        ,  gapsWhere: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                        ,         my: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                        ,      track: ndarray[Tuple[int, int]     , dtype[integer[Any]]]
+                    ) -> None:
+
     groupsOfFolds: int = 0
-    doFindGaps = True
+    doFindGaps = True # Frankly, I can't figure out if `doFindGaps` is or is not faster. Furthermore, I have a strong feeling there is an even better way.
+
     while activeLeafGreaterThan0Condition(my=my):
         if ((doFindGaps := activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track))
                 and activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my)):
@@ -198,12 +215,13 @@ def countSequential(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer
     foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
 def doTheNeedful(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]]
-                , foldGroups: ndarray[Tuple[int], dtype[integer[Any]]]
-                , gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]]
-                , mapShape: ndarray[Tuple[int], dtype[integer[Any]]]
-                , my: ndarray[Tuple[int], dtype[integer[Any]]]
-                , track: ndarray[Tuple[int, int], dtype[integer[Any]]]
-                ) -> None:
+                    , foldGroups: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                    ,  gapsWhere: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                    ,   mapShape: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                    ,         my: ndarray[Tuple[int]          , dtype[integer[Any]]]
+                    ,      track: ndarray[Tuple[int, int]     , dtype[integer[Any]]]
+                    ) -> None:
+
     countInitialize(connectionGraph, gapsWhere, my, track)
 
     if my[indexMy.taskDivisions.value] > 0:

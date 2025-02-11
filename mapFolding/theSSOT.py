@@ -1,6 +1,6 @@
 from collections import defaultdict
 from mapFolding.theSSOTnumba import *
-from numpy import integer
+from numpy import dtype, integer, ndarray
 from types import ModuleType
 from typing import Any, Callable, Dict, Final, Optional, Tuple, Type, TYPE_CHECKING, cast
 import enum
@@ -73,14 +73,14 @@ def getDispatcherCallable() -> Callable[..., None]:
     from mapFolding.syntheticModules import numba_doTheNeedful
     return cast(Callable[..., None], numba_doTheNeedful.doTheNeedful)
 
-# NOTE I want this _concept_ to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
+# NOTE I want this _concept_, not necessarily this method, to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
 class computationState(TypedDict):
-    connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]]
-    foldGroups: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
-    gapsWhere: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
-    mapShape: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
-    my: numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]
-    track: numpy.ndarray[Tuple[int, int], numpy.dtype[integer[Any]]]
+    connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]]
+    foldGroups:      ndarray[Tuple[int]          , dtype[integer[Any]]]
+    gapsWhere:       ndarray[Tuple[int]          , dtype[integer[Any]]]
+    mapShape:        ndarray[Tuple[int]          , dtype[integer[Any]]]
+    my:              ndarray[Tuple[int]          , dtype[integer[Any]]]
+    track:           ndarray[Tuple[int, int]     , dtype[integer[Any]]]
 
 @enum.verify(enum.CONTINUOUS, enum.UNIQUE) if sys.version_info >= (3, 11) else lambda x: x
 class EnumIndices(enum.IntEnum):
