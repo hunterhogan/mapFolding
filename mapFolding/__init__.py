@@ -26,6 +26,10 @@ from mapFolding.theSSOT import (
     getPathJobRootDEFAULT,
     getPathSyntheticModules,
     moduleOfSyntheticModules,
+    Z0Z_getDatatypeModuleScalar,
+    Z0Z_getDecoratorCallable,
+    Z0Z_setDatatypeModuleScalar,
+    Z0Z_setDecoratorCallable,
 )
 
 # Parameters for the prima donna

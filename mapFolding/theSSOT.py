@@ -249,3 +249,21 @@ def hackSSOTdatatype(identifier: str) -> str:
     elif RubeGoldBerg == 'datatypeLeavesTotal':
         return _get_datatype('leavesTotal')
     raise Exception("Dude, you forgot to set a value in `hackSSOTdatatype`.")
+
+_datatypeModuleScalar = 'numba'
+_decoratorCallable = 'jit'
+def Z0Z_getDatatypeModuleScalar() -> str:
+    return _datatypeModuleScalar
+
+def Z0Z_setDatatypeModuleScalar(moduleName: str) -> str:
+    global _datatypeModuleScalar
+    _datatypeModuleScalar = moduleName
+    return _datatypeModuleScalar
+
+def Z0Z_getDecoratorCallable() -> str:
+    return _decoratorCallable
+
+def Z0Z_setDecoratorCallable(decoratorName: str) -> str:
+    global _decoratorCallable
+    _decoratorCallable = decoratorName
+    return _decoratorCallable

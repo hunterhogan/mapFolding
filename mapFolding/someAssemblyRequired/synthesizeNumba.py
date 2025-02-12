@@ -20,6 +20,10 @@ from mapFolding import (
     setDatatypeFoldsTotal,
     setDatatypeLeavesTotal,
     setDatatypeModule,
+    Z0Z_getDatatypeModuleScalar,
+    Z0Z_getDecoratorCallable,
+    Z0Z_setDatatypeModuleScalar,
+    Z0Z_setDecoratorCallable,
 )
 from mapFolding.someAssemblyRequired import makeStateJob
 from types import ModuleType
@@ -70,18 +74,6 @@ class NodeReplacer(ast.NodeTransformer):
         if self.findMe(node):
             return self.nodeReplacementBuilder(node)
         return super().visit(node)
-
-class ArgumentProcessor:
-    """Unified argument processing using transformation rules."""
-    def __init__(self, rules: List[Tuple[Callable[[ast.arg], bool], Callable]]):
-        self.rules = rules  # Each rule is a tuple (predicate, transformation).
-
-    def process(self, FunctionDef: ast.FunctionDef) -> ast.FunctionDef:
-        for arg in FunctionDef.args.args.copy():
-            for predicate, transform in self.rules:
-                if predicate(arg):
-                    FunctionDef = transform(FunctionDef, arg)
-        return FunctionDef
 
 class RecursiveInliner(ast.NodeTransformer):
     """
@@ -259,9 +251,9 @@ def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
         warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
     return astCallable
 def isThisNodeNumbaJitCall(node: ast.AST) -> bool:
-    return (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == decoratorCallable)
+    return (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == Z0Z_getDecoratorCallable())
 def isThisNodeJitCall(node: ast.AST) -> bool:
-    return (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == decoratorCallable)
+    return (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == Z0Z_getDecoratorCallable())
 def isThisNodeNumbaJitDecorator(node: ast.AST) -> bool:
     return isThisNodeNumbaJitCall(node) or isThisNodeJitCall(node)
 def Z0Z_generalizeThis(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, ParametersNumba | None]:
@@ -285,6 +277,7 @@ def Z0Z_generalizeThis(FunctionDefTarget: ast.FunctionDef, parametersNumba: Opti
     return FunctionDefTarget, parametersNumba
 
 def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+    datatypeModuleDecorator = Z0Z_getDatatypeModuleScalar()
     def makeNumbaParameterSignatureElement(signatureElement: ast.arg):
         if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
             annotationShape = signatureElement.annotation.slice.elts[0]
@@ -338,6 +331,8 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
         parametersNumba = parametersNumbaDEFAULT
     listDecoratorKeywords = [ast.keyword(arg=parameterName, value=ast.Constant(value=parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
+    decoratorModule = Z0Z_getDatatypeModuleScalar()
+    decoratorCallable = Z0Z_getDecoratorCallable()
     allImports.addImportFromStr(decoratorModule, decoratorCallable)
     astDecorator = ast.Call(
         func=ast.Name(id=decoratorCallable, ctx=ast.Load())
@@ -348,7 +343,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
     return FunctionDefTarget, allImports
 
 def makeDecoratorJobNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
-
+    decoratorCallable = Z0Z_getDecoratorCallable()
     def convertToPlainJit(node: ast.Call) -> ast.Call:
         node.func = ast.Name(id=decoratorCallable, ctx=ast.Load())
         return node
@@ -550,7 +545,7 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
         return f"{identifierName} = array({stringMinimized}, dtype={arrayTarget.dtype})"
     return stringMinimized
 
-def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
+def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, allImports: UniversalImportTracker):
     arrayType = type(argData)
     moduleConstructor = arrayType.__module__
     constructorName = arrayType.__name__
@@ -575,9 +570,9 @@ def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argDat
     FunctionDefTarget.body.insert(0, assignment)
     FunctionDefTarget.args.args.remove(astArg)
 
-    return FunctionDefTarget
+    return FunctionDefTarget, allImports
 
-def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray) -> ast.FunctionDef:
+def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, allImports: UniversalImportTracker):
     arrayType = type(argData)
     moduleConstructor = arrayType.__module__
     constructorName = arrayType.__name__
@@ -610,10 +605,10 @@ def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, ar
                     FunctionDefTarget.body.remove(stmt)
 
     FunctionDefTarget.args.args.remove(astArg)
-    return FunctionDefTarget
+    return FunctionDefTarget, allImports
 
-def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, Z0Z_listChaff: List[str]) -> ast.FunctionDef:
-    moduleConstructor = datatypeModuleScalar
+def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, Z0Z_listChaff: List[str], allImports: UniversalImportTracker):
+    moduleConstructor = Z0Z_getDatatypeModuleScalar()
     for stmt in FunctionDefTarget.body.copy():
         if isinstance(stmt, ast.Assign):
             if isinstance(stmt.targets[0], ast.Name) and isinstance(stmt.value, ast.Subscript):
@@ -631,10 +626,10 @@ def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arg
                         FunctionDefTarget.body.insert(0, assignment)
                     FunctionDefTarget.body.remove(stmt)
     FunctionDefTarget.args.args.remove(astArg)
-    return FunctionDefTarget
+    return FunctionDefTarget, allImports
 
-def evaluateAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef) -> ast.FunctionDef:
-    moduleConstructor = datatypeModuleScalar
+def evaluateAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker):
+    moduleConstructor = Z0Z_getDatatypeModuleScalar()
     for stmt in FunctionDefTarget.body.copy():
         if isinstance(stmt, ast.AnnAssign):
             if isinstance(stmt.target, ast.Name) and isinstance(stmt.value, ast.Constant):
@@ -645,7 +640,7 @@ def evaluateAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef) -> ast.Function
                 assignment = ast.Assign(targets=[astAssignee], value=astCall)
                 FunctionDefTarget.body.insert(0, assignment)
                 FunctionDefTarget.body.remove(stmt)
-    return FunctionDefTarget
+    return FunctionDefTarget, allImports
 
 def removeIdentifierFrom_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg) -> ast.FunctionDef:
     for stmt in FunctionDefTarget.body.copy():
@@ -696,7 +691,7 @@ if __name__ == '__main__':
 """
     return ast.parse(linesLaunch)
 
-def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationState) -> ast.FunctionDef:
+def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationState, allImports: UniversalImportTracker):
     """Add multiplication and return statement to function, properly constructing AST nodes."""
     # Create AST for multiplication operation
     multiplicand = 'groupsOfFolds'
@@ -712,13 +707,14 @@ def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationS
     ast.copy_location(returnStatement, FunctionDefTarget.body[-1])
 
     # Set function return type annotation if not present
+    datatypeModuleScalar = Z0Z_getDatatypeModuleScalar()
     allImports.addImportFromStr(datatypeModuleScalar, datatype)
     FunctionDefTarget.returns = ast.Name(id=datatype, ctx=ast.Load())
 
     # Add return statement to function body
     FunctionDefTarget.body.append(returnStatement)
 
-    return FunctionDefTarget
+    return FunctionDefTarget, allImports
 
 def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> ast.FunctionDef:
     return FunctionDefTarget
@@ -736,7 +732,7 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
     stateJob = makeStateJob(listDimensions, writeJob=False, **keywordArguments)
     pythonSource = inspect.getsource(algorithmSource)
     astModule = ast.parse(pythonSource)
-    global allImports # TODO remove
+
     allImports = UniversalImportTracker()
 
     for statement in astModule.body:
@@ -746,27 +742,23 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
     FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
     if not FunctionDefTarget: raise ValueError(f"I received `{callableTarget=}` and {algorithmSource.__name__=}, but I could not find that function in that source.")
 
-    # Define argument processing rules
-    argumentRules = [
-        (lambda arg: arg.arg in ['connectionGraph', 'gapsWhere'],
-        lambda node, arg: moveArrayTo_body(node, arg, stateJob[arg.arg])),
-
-        (lambda arg: arg.arg in ['track'],
-        lambda node, arg: evaluateArrayIn_body(node, arg, stateJob[arg.arg])),
-
-        (lambda arg: arg.arg in ['my'],
-        lambda node, arg: evaluate_argIn_body(node, arg, stateJob[arg.arg], ['taskIndex', 'dimensionsTotal'])),
-
-        (lambda arg: arg.arg in ['foldGroups'],
-        lambda node, arg: removeIdentifierFrom_body(node, arg))
-    ]
+    for pirateScowl in FunctionDefTarget.args.args.copy():
+        match pirateScowl.arg:
+            case 'my':
+                FunctionDefTarget, allImports = evaluate_argIn_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], ['taskIndex', 'dimensionsTotal'], allImports)
+            case 'track':
+                FunctionDefTarget, allImports = evaluateArrayIn_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
+            case 'connectionGraph':
+                FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
+            case 'gapsWhere':
+                FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
+            case 'foldGroups':
+                FunctionDefTarget = removeIdentifierFrom_body(FunctionDefTarget, pirateScowl)
 
     # Move function parameters to the function body,
     # initialize identifiers with their state types and values,
     # and replace static-valued identifiers with their values.
-    argumentProcessor = ArgumentProcessor(argumentRules)
-    FunctionDefTarget = argumentProcessor.process(FunctionDefTarget)
-    FunctionDefTarget = evaluateAnnAssignIn_body(FunctionDefTarget)
+    FunctionDefTarget, allImports = evaluateAnnAssignIn_body(FunctionDefTarget, allImports)
     FunctionDefTarget = astNameToAstConstant(FunctionDefTarget, 'dimensionsTotal', int(stateJob['my'][indexMy.dimensionsTotal]))
     FunctionDefTarget = astObjectToAstConstant(FunctionDefTarget, 'foldGroups[-1]', int(stateJob['foldGroups'][-1]))
 
@@ -778,7 +770,7 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
     # After unrolling, we can remove three `indexDimension` statements: 1) the first initialization, which is really a memory allocation, 2) the loop initialization, and 3) the loop increment.
     FunctionDefTarget = unrollWhileLoop(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal])
 
-    FunctionDefTarget = addReturnJobNumba(FunctionDefTarget, stateJob)
+    FunctionDefTarget, allImports = addReturnJobNumba(FunctionDefTarget, stateJob, allImports)
     FunctionDefTarget, allImports = makeDecoratorJobNumba(FunctionDefTarget, allImports, parametersNumba)
 
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
@@ -804,27 +796,29 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
     pathFilenameWriteJob.write_text(pythonSource)
     return pathFilenameWriteJob
 
-if __name__ == '__main__':
+def mainBig():
     setDatatypeModule('numpy', sourGrapes=True)
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
     setDatatypeLeavesTotal('uint8', sourGrapes=True)
     listCallablesInline: List[str] = ['countInitialize', 'countParallel', 'countSequential']
-    datatypeModuleScalar = 'numba'
-    datatypeModuleDecorator = 'numba'
-    decoratorModule = datatypeModuleDecorator
-    decoratorCallable = 'jit'
+    Z0Z_setDatatypeModuleScalar('numba')
+    Z0Z_setDecoratorCallable('jit')
     callableDispatcher = 'doTheNeedful'
     makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
 
+def mainSmall():
     listDimensions = [3,3]
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
     setDatatypeLeavesTotal('uint8', sourGrapes=True)
     from mapFolding.syntheticModules import numba_countSequential
     algorithmSource: ModuleType = numba_countSequential
-    datatypeModuleScalar = 'numba'
-    datatypeModuleDecorator = 'numba'
-    decoratorModule = datatypeModuleDecorator
-    decoratorCallable = 'jit'
-    pathFilenameModule = writeJobNumba(listDimensions, 'countSequential', algorithmSource, parametersNumbaDEFAULT)
+    Z0Z_setDatatypeModuleScalar('numba')
+    Z0Z_setDecoratorCallable('jit')
+    writeJobNumba(listDimensions, 'countSequential', algorithmSource, parametersNumbaDEFAULT)
+
+if __name__ == '__main__':
+    mainBig()
+
+    mainSmall()
