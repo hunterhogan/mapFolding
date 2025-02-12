@@ -13,9 +13,9 @@ import urllib.response
 import warnings
 
 if TYPE_CHECKING:
-    from typing import TypedDict
+	from typing import TypedDict
 else:
-    TypedDict = dict
+	TypedDict = dict
 
 """
 Section: make `settingsOEIS`"""
@@ -23,217 +23,217 @@ Section: make `settingsOEIS`"""
 _pathCache = getPathPackage() / ".cache"
 
 class SettingsOEIS(TypedDict):
-    description: str
-    offset: int
-    getMapShape: Callable[[int], List[int]]
-    valuesBenchmark: List[int]
-    valuesKnown: Dict[int, int]
-    valuesTestParallelization: List[int]
-    valuesTestValidation: List[int]
-    valueUnknown: int
+	description: str
+	offset: int
+	getMapShape: Callable[[int], List[int]]
+	valuesBenchmark: List[int]
+	valuesKnown: Dict[int, int]
+	valuesTestParallelization: List[int]
+	valuesTestValidation: List[int]
+	valueUnknown: int
 
 settingsOEIShardcodedValues: Dict[str, Dict[str, Any]] = {
-    'A001415': {
-        'getMapShape': lambda n: sorted([2, n]),
-        'valuesBenchmark': [14],
-        'valuesTestParallelization': [*range(3, 7)],
-        'valuesTestValidation': [0, 1, random.randint(2, 9)],
-    },
-    'A001416': {
-        'getMapShape': lambda n: sorted([3, n]),
-        'valuesBenchmark': [9],
-        'valuesTestParallelization': [*range(3, 5)],
-        'valuesTestValidation': [0, 1, random.randint(2, 6)],
-    },
-    'A001417': {
-        'getMapShape': lambda n: [2] * n,
-        'valuesBenchmark': [6],
-        'valuesTestParallelization': [*range(2, 4)],
-        'valuesTestValidation': [0, 1, random.randint(2, 4)],
-    },
-    'A195646': {
-        'getMapShape': lambda n: [3] * n,
-        'valuesBenchmark': [3],
-        'valuesTestParallelization': [*range(2, 3)],
-        'valuesTestValidation': [0, 1, 2],
-    },
-    'A001418': {
-        'getMapShape': lambda n: [n, n],
-        'valuesBenchmark': [5],
-        'valuesTestParallelization': [*range(2, 4)],
-        'valuesTestValidation': [1, random.randint(2, 4)],
-    },
+	'A001415': {
+		'getMapShape': lambda n: sorted([2, n]),
+		'valuesBenchmark': [14],
+		'valuesTestParallelization': [*range(3, 7)],
+		'valuesTestValidation': [0, 1, random.randint(2, 9)],
+	},
+	'A001416': {
+		'getMapShape': lambda n: sorted([3, n]),
+		'valuesBenchmark': [9],
+		'valuesTestParallelization': [*range(3, 5)],
+		'valuesTestValidation': [0, 1, random.randint(2, 6)],
+	},
+	'A001417': {
+		'getMapShape': lambda n: [2] * n,
+		'valuesBenchmark': [6],
+		'valuesTestParallelization': [*range(2, 4)],
+		'valuesTestValidation': [0, 1, random.randint(2, 4)],
+	},
+	'A195646': {
+		'getMapShape': lambda n: [3] * n,
+		'valuesBenchmark': [3],
+		'valuesTestParallelization': [*range(2, 3)],
+		'valuesTestValidation': [0, 1, 2],
+	},
+	'A001418': {
+		'getMapShape': lambda n: [n, n],
+		'valuesBenchmark': [5],
+		'valuesTestParallelization': [*range(2, 4)],
+		'valuesTestValidation': [1, random.randint(2, 4)],
+	},
 }
 
 oeisIDsImplemented: Final[List[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues.keys()])
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
 def _validateOEISid(oeisIDcandidate: str) -> str:
-    """
-    Validates an OEIS sequence ID against implemented sequences.
+	"""
+	Validates an OEIS sequence ID against implemented sequences.
 
-    If the provided ID is recognized within the application's implemented
-    OEIS sequences, the function returns the verified ID in uppercase.
-    Otherwise, a KeyError is raised indicating that the sequence is not
-    directly supported.
+	If the provided ID is recognized within the application's implemented
+	OEIS sequences, the function returns the verified ID in uppercase.
+	Otherwise, a KeyError is raised indicating that the sequence is not
+	directly supported.
 
-    Parameters:
-        oeisIDcandidate: The OEIS sequence identifier to validate.
+	Parameters:
+		oeisIDcandidate: The OEIS sequence identifier to validate.
 
-    Returns:
-        oeisID: The validated and possibly modified OEIS sequence ID, if recognized.
+	Returns:
+		oeisID: The validated and possibly modified OEIS sequence ID, if recognized.
 
-    Raises:
-        KeyError: If the provided sequence ID is not directly implemented.
-    """
-    if oeisIDcandidate in oeisIDsImplemented:
-        return oeisIDcandidate
-    else:
-        oeisIDcleaned = str(oeisIDcandidate).upper().strip()
-        if oeisIDcleaned in oeisIDsImplemented:
-            return oeisIDcleaned
-        else:
-            raise KeyError(
-                f"OEIS ID {oeisIDcandidate} is not directly implemented.\n"
-                f"Available sequences:\n{_formatOEISsequenceInfo()}"
-            )
+	Raises:
+		KeyError: If the provided sequence ID is not directly implemented.
+	"""
+	if oeisIDcandidate in oeisIDsImplemented:
+		return oeisIDcandidate
+	else:
+		oeisIDcleaned = str(oeisIDcandidate).upper().strip()
+		if oeisIDcleaned in oeisIDsImplemented:
+			return oeisIDcleaned
+		else:
+			raise KeyError(
+				f"OEIS ID {oeisIDcandidate} is not directly implemented.\n"
+				f"Available sequences:\n{_formatOEISsequenceInfo()}"
+			)
 
 def _getFilenameOEISbFile(oeisID: str) -> str:
-    oeisID = _validateOEISid(oeisID)
-    return f"b{oeisID[1:]}.txt"
+	oeisID = _validateOEISid(oeisID)
+	return f"b{oeisID[1:]}.txt"
 
 def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> Dict[int, int]:
-    """
-    Parses the content of an OEIS b-file for a given sequence ID.
-    This function processes a multiline string representing an OEIS b-file and
-    creates a dictionary mapping integer indices to their corresponding sequence
-    values. The first line of the b-file is expected to contain a comment that
-    matches the given sequence ID. If it does not match, a ValueError is raised.
+	"""
+	Parses the content of an OEIS b-file for a given sequence ID.
+	This function processes a multiline string representing an OEIS b-file and
+	creates a dictionary mapping integer indices to their corresponding sequence
+	values. The first line of the b-file is expected to contain a comment that
+	matches the given sequence ID. If it does not match, a ValueError is raised.
 
-    Parameters:
-        OEISbFile: A multiline string representing an OEIS b-file.
-        oeisID: The expected OEIS sequence identifier.
-    Returns:
-        OEISsequence: A dictionary where each key is an integer index `n` and
-        each value is the sequence value `a(n)` corresponding to that index.
-    Raises:
-        ValueError: If the first line of the file does not indicate the expected
-        sequence ID or if the content format is invalid.
-    """
-    bFileLines = OEISbFile.strip().splitlines()
-    if not bFileLines.pop(0).startswith(f"# {oeisID}"):
-        warnings.warn(f"Content does not match sequence {oeisID}")
-        return {-1: -1}
+	Parameters:
+		OEISbFile: A multiline string representing an OEIS b-file.
+		oeisID: The expected OEIS sequence identifier.
+	Returns:
+		OEISsequence: A dictionary where each key is an integer index `n` and
+		each value is the sequence value `a(n)` corresponding to that index.
+	Raises:
+		ValueError: If the first line of the file does not indicate the expected
+		sequence ID or if the content format is invalid.
+	"""
+	bFileLines = OEISbFile.strip().splitlines()
+	if not bFileLines.pop(0).startswith(f"# {oeisID}"):
+		warnings.warn(f"Content does not match sequence {oeisID}")
+		return {-1: -1}
 
-    OEISsequence = {}
-    for line in bFileLines:
-        if line.startswith('#'):
-            continue
-        n, aOFn = map(int, line.split())
-        OEISsequence[n] = aOFn
-    return OEISsequence
+	OEISsequence = {}
+	for line in bFileLines:
+		if line.startswith('#'):
+			continue
+		n, aOFn = map(int, line.split())
+		OEISsequence[n] = aOFn
+	return OEISsequence
 
 def _getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
-    cacheDays = 7
-    tryCache = False
-    if pathFilenameCache.exists():
-        fileAge = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
-        tryCache = fileAge < timedelta(days=cacheDays)
+	cacheDays = 7
+	tryCache = False
+	if pathFilenameCache.exists():
+		fileAge = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
+		tryCache = fileAge < timedelta(days=cacheDays)
 
-    oeisInformation = None
-    if tryCache:
-        try:
-            oeisInformation = pathFilenameCache.read_text()
-        except IOError:
-            tryCache = False
+	oeisInformation = None
+	if tryCache:
+		try:
+			oeisInformation = pathFilenameCache.read_text()
+		except IOError:
+			tryCache = False
 
-    if not tryCache:
-        httpResponse: urllib.response.addinfourl = urllib.request.urlopen(url)
-        oeisInformation = httpResponse.read().decode('utf-8')
-        pathFilenameCache.parent.mkdir(parents=True, exist_ok=True)
-        pathFilenameCache.write_text(oeisInformation)
+	if not tryCache:
+		httpResponse: urllib.response.addinfourl = urllib.request.urlopen(url)
+		oeisInformation = httpResponse.read().decode('utf-8')
+		pathFilenameCache.parent.mkdir(parents=True, exist_ok=True)
+		pathFilenameCache.write_text(oeisInformation)
 
-    if not oeisInformation:
-        warnings.warn(f"Failed to retrieve OEIS sequence information for {pathFilenameCache.stem}.")
+	if not oeisInformation:
+		warnings.warn(f"Failed to retrieve OEIS sequence information for {pathFilenameCache.stem}.")
 
-    return oeisInformation
+	return oeisInformation
 
 def _getOEISidValues(oeisID: str) -> Dict[int, int]:
-    """
-    Retrieves the specified OEIS sequence as a dictionary mapping integer indices
-    to their corresponding values.
-    This function checks for a cached local copy of the sequence data, using it if
-    it has not expired. Otherwise, it fetches the sequence data from the OEIS
-    website and writes it to the cache. The parsed data is returned as a dictionary
-    mapping each index to its sequence value.
+	"""
+	Retrieves the specified OEIS sequence as a dictionary mapping integer indices
+	to their corresponding values.
+	This function checks for a cached local copy of the sequence data, using it if
+	it has not expired. Otherwise, it fetches the sequence data from the OEIS
+	website and writes it to the cache. The parsed data is returned as a dictionary
+	mapping each index to its sequence value.
 
-    Parameters:
-        oeisID: The identifier of the OEIS sequence to retrieve.
-    Returns:
-        OEISsequence: A dictionary where each key is an integer index, `n`, and each
-        value is the corresponding "a(n)" from the OEIS entry.
-    Raises:
-        ValueError: If the cached or downloaded file format is invalid.
-        IOError: If there is an error reading from or writing to the local cache.
-    """
+	Parameters:
+		oeisID: The identifier of the OEIS sequence to retrieve.
+	Returns:
+		OEISsequence: A dictionary where each key is an integer index, `n`, and each
+		value is the corresponding "a(n)" from the OEIS entry.
+	Raises:
+		ValueError: If the cached or downloaded file format is invalid.
+		IOError: If there is an error reading from or writing to the local cache.
+	"""
 
-    pathFilenameCache = _pathCache / _getFilenameOEISbFile(oeisID)
-    url = f"https://oeis.org/{oeisID}/{_getFilenameOEISbFile(oeisID)}"
+	pathFilenameCache = _pathCache / _getFilenameOEISbFile(oeisID)
+	url = f"https://oeis.org/{oeisID}/{_getFilenameOEISbFile(oeisID)}"
 
-    oeisInformation = _getOEISofficial(pathFilenameCache, url)
+	oeisInformation = _getOEISofficial(pathFilenameCache, url)
 
-    if oeisInformation:
-        return _parseBFileOEIS(oeisInformation, oeisID)
-    return {-1: -1}
+	if oeisInformation:
+		return _parseBFileOEIS(oeisInformation, oeisID)
+	return {-1: -1}
 
 def _getOEISidInformation(oeisID: str) -> Tuple[str, int]:
-    oeisID = _validateOEISid(oeisID)
-    pathFilenameCache = _pathCache / f"{oeisID}.txt"
-    url = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
+	oeisID = _validateOEISid(oeisID)
+	pathFilenameCache = _pathCache / f"{oeisID}.txt"
+	url = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
-    oeisInformation = _getOEISofficial(pathFilenameCache, url)
+	oeisInformation = _getOEISofficial(pathFilenameCache, url)
 
-    if not oeisInformation:
-        return "Not found", -1
+	if not oeisInformation:
+		return "Not found", -1
 
-    description_parts = []
-    offset = None
-    for line in oeisInformation.splitlines():
-        if line.startswith('%N'):
-            parts = line.split()
-            if parts[1] == oeisID:
-                desc_part = ' '.join(parts[2:])
-                description_parts.append(desc_part)
-        elif line.startswith('%O'):
-            parts = line.split()
-            if parts[1] == oeisID:
-                offset_str = parts[2].split(',')[0]
-                offset = int(offset_str)
-    if not description_parts:
-        warnings.warn(f"No description found for {oeisID}")
-        description_parts.append("No description found")
-    if offset is None:
-        warnings.warn(f"No offset found for {oeisID}")
-        offset = -1
-    description = ' '.join(description_parts)
-    return description, offset
+	description_parts = []
+	offset = None
+	for line in oeisInformation.splitlines():
+		if line.startswith('%N'):
+			parts = line.split()
+			if parts[1] == oeisID:
+				desc_part = ' '.join(parts[2:])
+				description_parts.append(desc_part)
+		elif line.startswith('%O'):
+			parts = line.split()
+			if parts[1] == oeisID:
+				offset_str = parts[2].split(',')[0]
+				offset = int(offset_str)
+	if not description_parts:
+		warnings.warn(f"No description found for {oeisID}")
+		description_parts.append("No description found")
+	if offset is None:
+		warnings.warn(f"No offset found for {oeisID}")
+		offset = -1
+	description = ' '.join(description_parts)
+	return description, offset
 
 def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
-    settingsTarget = {}
-    for oeisID in oeisIDsImplemented:
-        valuesKnownSherpa = _getOEISidValues(oeisID)
-        descriptionSherpa, offsetSherpa = _getOEISidInformation(oeisID)
-        settingsTarget[oeisID] = SettingsOEIS(
-            description=descriptionSherpa,
-            offset=offsetSherpa,
-            getMapShape=settingsOEIShardcodedValues[oeisID]['getMapShape'],
-            valuesBenchmark=settingsOEIShardcodedValues[oeisID]['valuesBenchmark'],
-            valuesTestParallelization=settingsOEIShardcodedValues[oeisID]['valuesTestParallelization'],
-            valuesTestValidation=settingsOEIShardcodedValues[oeisID]['valuesTestValidation'],
-            valuesKnown=valuesKnownSherpa,
-            valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1
-        )
-    return settingsTarget
+	settingsTarget = {}
+	for oeisID in oeisIDsImplemented:
+		valuesKnownSherpa = _getOEISidValues(oeisID)
+		descriptionSherpa, offsetSherpa = _getOEISidInformation(oeisID)
+		settingsTarget[oeisID] = SettingsOEIS(
+			description=descriptionSherpa,
+			offset=offsetSherpa,
+			getMapShape=settingsOEIShardcodedValues[oeisID]['getMapShape'],
+			valuesBenchmark=settingsOEIShardcodedValues[oeisID]['valuesBenchmark'],
+			valuesTestParallelization=settingsOEIShardcodedValues[oeisID]['valuesTestParallelization'],
+			valuesTestValidation=settingsOEIShardcodedValues[oeisID]['valuesTestValidation'],
+			valuesKnown=valuesKnownSherpa,
+			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1
+		)
+	return settingsTarget
 
 settingsOEIS: Dict[str, SettingsOEIS] = makeSettingsOEIS()
 """All values and settings for `oeisIDsImplemented`."""
@@ -242,98 +242,98 @@ settingsOEIS: Dict[str, SettingsOEIS] = makeSettingsOEIS()
 Section: private functions"""
 
 def _formatHelpText() -> str:
-    """Format standardized help text for both CLI and interactive use."""
-    exampleOEISid = oeisIDsImplemented[0]
-    exampleN = settingsOEIS[exampleOEISid]['valuesTestValidation'][-1]
+	"""Format standardized help text for both CLI and interactive use."""
+	exampleOEISid = oeisIDsImplemented[0]
+	exampleN = settingsOEIS[exampleOEISid]['valuesTestValidation'][-1]
 
-    return (
-        "\nAvailable OEIS sequences:\n"
-        f"{_formatOEISsequenceInfo()}\n"
-        "\nUsage examples:\n"
-        "  Command line:\n"
-        f"    OEIS_for_n {exampleOEISid} {exampleN}\n"
-        "  Python:\n"
-        "    from mapFolding import oeisIDfor_n\n"
-        f"    foldsTotal = oeisIDfor_n('{exampleOEISid}', {exampleN})"
-    )
+	return (
+		"\nAvailable OEIS sequences:\n"
+		f"{_formatOEISsequenceInfo()}\n"
+		"\nUsage examples:\n"
+		"  Command line:\n"
+		f"	OEIS_for_n {exampleOEISid} {exampleN}\n"
+		"  Python:\n"
+		"	from mapFolding import oeisIDfor_n\n"
+		f"	foldsTotal = oeisIDfor_n('{exampleOEISid}', {exampleN})"
+	)
 
 def _formatOEISsequenceInfo() -> str:
-    """Format information about available OEIS sequences for display or error messages."""
-    return "\n".join(
-        f"  {oeisID}: {settingsOEIS[oeisID]['description']}"
-        for oeisID in oeisIDsImplemented
-    )
+	"""Format information about available OEIS sequences for display or error messages."""
+	return "\n".join(
+		f"  {oeisID}: {settingsOEIS[oeisID]['description']}"
+		for oeisID in oeisIDsImplemented
+	)
 
 """
 Section: public functions"""
 
 def oeisIDfor_n(oeisID: str, n: int) -> int:
-    """
-    Calculate a(n) of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
+	"""
+	Calculate a(n) of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
 
-    Parameters:
-        oeisID: The ID of the OEIS sequence.
-        n: A non-negative integer for which to calculate the sequence value.
+	Parameters:
+		oeisID: The ID of the OEIS sequence.
+		n: A non-negative integer for which to calculate the sequence value.
 
-    Returns:
-        sequenceValue: a(n) of the OEIS sequence.
+	Returns:
+		sequenceValue: a(n) of the OEIS sequence.
 
-    Raises:
-        ValueError: If n is negative.
-        KeyError: If the OEIS sequence ID is not directly implemented.
-    """
-    oeisID = _validateOEISid(oeisID)
+	Raises:
+		ValueError: If n is negative.
+		KeyError: If the OEIS sequence ID is not directly implemented.
+	"""
+	oeisID = _validateOEISid(oeisID)
 
-    if not isinstance(n, int) or n < 0:
-        raise ValueError("`n` must be non-negative integer.")
+	if not isinstance(n, int) or n < 0:
+		raise ValueError("`n` must be non-negative integer.")
 
-    listDimensions = settingsOEIS[oeisID]['getMapShape'](n)
+	listDimensions = settingsOEIS[oeisID]['getMapShape'](n)
 
-    if n <= 1 or len(listDimensions) < 2:
-        offset = settingsOEIS[oeisID]['offset']
-        if n < offset:
-            raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
-        foldsTotal = settingsOEIS[oeisID]['valuesKnown'][n]
-        return foldsTotal
+	if n <= 1 or len(listDimensions) < 2:
+		offset = settingsOEIS[oeisID]['offset']
+		if n < offset:
+			raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
+		foldsTotal = settingsOEIS[oeisID]['valuesKnown'][n]
+		return foldsTotal
 
-    return countFolds(listDimensions)
+	return countFolds(listDimensions)
 
 def OEIS_for_n() -> None:
-    """Command-line interface for oeisIDfor_n."""
-    parserCLI = argparse.ArgumentParser(
-        description="Calculate a(n) for an OEIS sequence.",
-        epilog=_formatHelpText(),
-        formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    parserCLI.add_argument('oeisID', help="OEIS sequence identifier")
-    parserCLI.add_argument('n', type=int, help="Calculate a(n) for this n")
+	"""Command-line interface for oeisIDfor_n."""
+	parserCLI = argparse.ArgumentParser(
+		description="Calculate a(n) for an OEIS sequence.",
+		epilog=_formatHelpText(),
+		formatter_class=argparse.RawDescriptionHelpFormatter
+	)
+	parserCLI.add_argument('oeisID', help="OEIS sequence identifier")
+	parserCLI.add_argument('n', type=int, help="Calculate a(n) for this n")
 
-    argumentsCLI = parserCLI.parse_args()
+	argumentsCLI = parserCLI.parse_args()
 
-    timeStart = time.perf_counter()
+	timeStart = time.perf_counter()
 
-    try:
-        print(oeisIDfor_n(argumentsCLI.oeisID, argumentsCLI.n), "distinct folding patterns.")
-    except (KeyError, ValueError, ArithmeticError) as ERRORmessage:
-        print(f"Error: {ERRORmessage}", file=sys.stderr)
-        sys.exit(1)
+	try:
+		print(oeisIDfor_n(argumentsCLI.oeisID, argumentsCLI.n), "distinct folding patterns.")
+	except (KeyError, ValueError, ArithmeticError) as ERRORmessage:
+		print(f"Error: {ERRORmessage}", file=sys.stderr)
+		sys.exit(1)
 
-    timeElapsed = time.perf_counter() - timeStart
-    print(f"Time elapsed: {timeElapsed:.3f} seconds")
+	timeElapsed = time.perf_counter() - timeStart
+	print(f"Time elapsed: {timeElapsed:.3f} seconds")
 
 def clearOEIScache() -> None:
-    """Delete all cached OEIS sequence files."""
-    if not _pathCache.exists():
-        print(f"Cache directory, {_pathCache}, not found - nothing to clear.")
-        return
-    for oeisID in settingsOEIS:
-        ( _pathCache / f"{oeisID}.txt" ).unlink(missing_ok=True)
-        ( _pathCache / _getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
-    print(f"Cache cleared from {_pathCache}")
+	"""Delete all cached OEIS sequence files."""
+	if not _pathCache.exists():
+		print(f"Cache directory, {_pathCache}, not found - nothing to clear.")
+		return
+	for oeisID in settingsOEIS:
+		( _pathCache / f"{oeisID}.txt" ).unlink(missing_ok=True)
+		( _pathCache / _getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
+	print(f"Cache cleared from {_pathCache}")
 
 def getOEISids() -> None:
-    """Print all available OEIS sequence IDs that are directly implemented."""
-    print(_formatHelpText())
+	"""Print all available OEIS sequence IDs that are directly implemented."""
+	print(_formatHelpText())
 
 if __name__ == "__main__":
-    getOEISids()
+	getOEISids()
