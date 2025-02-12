@@ -18,7 +18,7 @@ The directory [mapFolding/reference](https://github.com/hunterhogan/mapFolding/b
 
 ## Simple, easy usage based on OEIS IDs
 
-`mapFolding` directly implements some IDs from _The On-Line Encyclopedia of Integer Sequences_ ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/citations/oeis.bibtex) citation).
+`mapFolding` directly implements some IDs from _The On-Line Encyclopedia of Integer Sequences_ ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/citations/oeis.bibtex) citation).
 
 ### Usage: command line
 
@@ -72,13 +72,13 @@ Cache cleared from C:\apps\mapFolding\mapFolding\.cache
 
 ### The typo-laden algorithm published in 1971
 
-The full paper, W. F. Lunnon, Multi-dimensional map-folding, _The Computer Journal_, Volume 14, Issue 1, 1971, Pages 75–80, [https://doi.org/10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75) ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/citations/Lunnon.bibtex) citation) is available at the DOI link. (As of 3 January 2025, the paper is a PDF of images, not text, and can be accessed without cost or login.)
+The full paper, W. F. Lunnon, Multi-dimensional map-folding, _The Computer Journal_, Volume 14, Issue 1, 1971, Pages 75–80, [https://doi.org/10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75) ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/citations/Lunnon.bibtex) citation) is available at the DOI link. (As of 3 January 2025, the paper is a PDF of images, not text, and can be accessed without cost or login.)
 
 In [`foldings.txt`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reference/foldings.txt), you can find a text transcription of the algorithm as it was printed in 1971. In [`foldings.AA`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reference/foldings.AA), I have corrected obvious transcription errors, documented with comments, and I have reformatted line breaks and indentation. For contemporary readers, the result is likely easier to read than the text transcription or the original paper are easy to read. This is especially true if you view the document with semantic highlighting, such as with [Algol 60 syntax highlighter](https://github.com/PolariTOON/language-algol60).
 
 ### Java implementation(s) and improvements
 
-[archmageirvine](https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java) ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/citations/jOEIS.bibtex) citation) says about the Java code:
+[archmageirvine](https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java) ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/citations/jOEIS.bibtex) citation) says about the Java code:
 
 ```java
 /**
@@ -97,7 +97,7 @@ In [`foldings.txt`](https://github.com/hunterhogan/mapFolding/blob/main/mapFoldi
 
 ~~This caused my neurosis:~~ I enjoyed the following video, which is what introduced me to map folding.
 
-"How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/citations/Physics_for_the_Birds.bibtex) citation)
+"How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/citations/Physics_for_the_Birds.bibtex) citation)
 
 [![How Many Ways Can You Fold a Map?](https://i.ytimg.com/vi/sfH9uIY3ln4/hq720.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
 

@@ -2,7 +2,7 @@ from collections import defaultdict
 from mapFolding.theSSOTnumba import *
 from numpy import dtype, integer, ndarray
 from types import ModuleType
-from typing import Any, Callable, Dict, Final, Optional, Tuple, Type, TYPE_CHECKING, cast
+from typing import Any, Callable, cast, Dict, Final, Optional, Tuple, Type, TYPE_CHECKING
 import enum
 import numba
 import numpy
