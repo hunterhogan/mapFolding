@@ -187,27 +187,26 @@ def countSequential( connectionGraph: ndarray[Tuple[int, int, int], dtype[intege
                     ) -> None:
 
     groupsOfFolds: int = 0
-    doFindGaps = True # Frankly, I can't figure out if `doFindGaps` is or is not faster. Furthermore, I have a strong feeling there is an even better way.
 
     while activeLeafGreaterThan0Condition(my=my):
-        if ((doFindGaps := activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track))
-                and activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my)):
-            groupsOfFolds += 1
-        elif doFindGaps:
-            findGapsInitializeVariables(my=my, track=track)
-            while loopingTheDimensions(my=my):
-                if dimensionsUnconstrainedCondition(connectionGraph=connectionGraph, my=my):
-                    dimensionsUnconstrainedDecrement(my=my)
-                else:
-                    leafConnecteeInitialization(connectionGraph=connectionGraph, my=my)
-                    while loopingLeavesConnectedToActiveLeaf(my=my):
-                        countGaps(gapsWhere=gapsWhere, my=my, track=track)
-                        leafConnecteeUpdate(connectionGraph=connectionGraph, my=my, track=track)
-                dimension1ndexIncrement(my=my)
-            indexMiniGapInitialization(my=my)
-            while loopingToActiveGapCeiling(my=my):
-                filterCommonGaps(gapsWhere=gapsWhere, my=my, track=track)
-                indexMiniGapIncrement(my=my)
+        if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
+            if activeLeafGreaterThanLeavesTotalCondition(foldGroups=foldGroups, my=my):
+                groupsOfFolds += 1
+            else:
+                findGapsInitializeVariables(my=my, track=track)
+                while loopingTheDimensions(my=my):
+                    if dimensionsUnconstrainedCondition(connectionGraph=connectionGraph, my=my):
+                        dimensionsUnconstrainedDecrement(my=my)
+                    else:
+                        leafConnecteeInitialization(connectionGraph=connectionGraph, my=my)
+                        while loopingLeavesConnectedToActiveLeaf(my=my):
+                            countGaps(gapsWhere=gapsWhere, my=my, track=track)
+                            leafConnecteeUpdate(connectionGraph=connectionGraph, my=my, track=track)
+                    dimension1ndexIncrement(my=my)
+                indexMiniGapInitialization(my=my)
+                while loopingToActiveGapCeiling(my=my):
+                    filterCommonGaps(gapsWhere=gapsWhere, my=my, track=track)
+                    indexMiniGapIncrement(my=my)
         while backtrackCondition(my=my, track=track):
             backtrack(my=my, track=track)
         if placeLeafCondition(my=my):

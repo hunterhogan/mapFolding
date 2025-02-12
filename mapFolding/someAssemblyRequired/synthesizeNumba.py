@@ -813,7 +813,7 @@ if __name__ == '__main__':
     callableDispatcher = 'doTheNeedful'
     makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
 
-    listDimensions = [5,5]
+    listDimensions = [3,4]
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
     setDatatypeLeavesTotal('uint8', sourGrapes=True)
