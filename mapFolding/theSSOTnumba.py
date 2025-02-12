@@ -34,7 +34,7 @@ Old notes that are not entirely accurate.
 | `no_cpython_wrapper`    | Disable Python C-API wrapper generation             | Size                  | Smallest        | Exclusionary             |
 
 """
-
+# NOTE Deepseek removed forceinline=True, inline='always'
 # TODO try to implement all possible parameters, but use `NotRequired` for the more esoteric ones
 class ParametersNumba(TypedDict):
     _dbg_extend_lifetimes: NotRequired[bool]

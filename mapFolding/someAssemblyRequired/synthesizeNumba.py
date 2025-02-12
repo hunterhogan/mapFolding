@@ -61,8 +61,8 @@ class UniversalImportTracker:
         return listAstImportFrom + listAstImport
 
 class NodeReplacer(ast.NodeTransformer):
-    """Base class for configurable node replacement"""
-    def __init__(self, findMe, nodeReplacementBuilder):
+    """Generic node replacement using configurable predicate and builder."""
+    def __init__(self, findMe: Callable[[ast.AST], bool], nodeReplacementBuilder: Callable[[ast.AST], ast.AST]):
         self.findMe = findMe
         self.nodeReplacementBuilder = nodeReplacementBuilder
 
@@ -72,9 +72,9 @@ class NodeReplacer(ast.NodeTransformer):
         return super().visit(node)
 
 class ArgumentProcessor:
-    """Unified argument processing using transformation rules"""
+    """Unified argument processing using transformation rules."""
     def __init__(self, rules: List[Tuple[Callable[[ast.arg], bool], Callable]]):
-        self.rules = rules  # (predicate, transformation)
+        self.rules = rules  # Each rule is a tuple (predicate, transformation).
 
     def process(self, FunctionDef: ast.FunctionDef) -> ast.FunctionDef:
         for arg in FunctionDef.args.args.copy():
@@ -720,6 +720,9 @@ def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationS
 
     return FunctionDefTarget
 
+def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> ast.FunctionDef:
+    return FunctionDefTarget
+
 def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmSource: ModuleType, parametersNumba: Optional[ParametersNumba]=None, pathFilenameWriteJob: Optional[Union[str, os.PathLike[str]]] = None, **keywordArguments: Optional[Any]) -> pathlib.Path:
     """ Parameters: **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`. """
     """Notes about the existing logic:
@@ -741,9 +744,7 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
             allImports.addAst(statement)
 
     FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
-
-    if not FunctionDefTarget:
-        raise ValueError(f"Could not find function {callableTarget} in source code.")
+    if not FunctionDefTarget: raise ValueError(f"I received `{callableTarget=}` and {algorithmSource.__name__=}, but I could not find that function in that source.")
 
     # Define argument processing rules
     argumentRules = [
@@ -760,30 +761,33 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
         lambda node, arg: removeIdentifierFrom_body(node, arg))
     ]
 
-    # Process arguments using ArgumentProcessor
+    # Move function parameters to the function body,
+    # initialize identifiers with their state types and values,
+    # and replace static-valued identifiers with their values.
     argumentProcessor = ArgumentProcessor(argumentRules)
     FunctionDefTarget = argumentProcessor.process(FunctionDefTarget)
-
     FunctionDefTarget = evaluateAnnAssignIn_body(FunctionDefTarget)
     FunctionDefTarget = astNameToAstConstant(FunctionDefTarget, 'dimensionsTotal', int(stateJob['my'][indexMy.dimensionsTotal]))
     FunctionDefTarget = astObjectToAstConstant(FunctionDefTarget, 'foldGroups[-1]', int(stateJob['foldGroups'][-1]))
 
-    FunctionDefTarget = addReturnJobNumba(FunctionDefTarget, stateJob)
+    # Unroll the countGaps loop: in theDao, it is a while loop, of course.
+    # However, it could be written as `for indexDimension in range(dimensionsTotal):`.
+    # It is useful to note that it could also be written as `for indexDimension in range(connectionGraph.shape[0]):`.
+    # We will unroll the loop into a series of stateJob['my'][indexMy.dimensionsTotal]-many code blocks that are similar but not identical.
+    # In each code block, we know the value of the identifier `indexDimension`, so we replace the identifier with its value.
+    # After unrolling, we can remove three `indexDimension` statements: 1) the first initialization, which is really a memory allocation, 2) the loop initialization, and 3) the loop increment.
+    FunctionDefTarget = unrollWhileLoop(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal])
 
+    FunctionDefTarget = addReturnJobNumba(FunctionDefTarget, stateJob)
     FunctionDefTarget, allImports = makeDecoratorJobNumba(FunctionDefTarget, allImports, parametersNumba)
 
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
+    # TODO consider: 1) launcher is a function, 2) if __name__ calls the launcher function, and 3) the launcher is "jitted", even just a light jit, then 4) `FunctionDefTarget` could be superJit.
     astLauncher = makeLauncherJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal)
 
     astImports = allImports.makeListAst()
 
-    astModule = ast.Module(
-        body=cast(List[ast.stmt]
-                , astImports
-                + [FunctionDefTarget]
-                + [astLauncher])
-        , type_ignores=[]
-    )
+    astModule = ast.Module(body=cast(List[ast.stmt], astImports + [FunctionDefTarget] + [astLauncher]), type_ignores=[])
     ast.fix_missing_locations(astModule)
 
     pythonSource = ast.unparse(astModule)
@@ -813,7 +817,7 @@ if __name__ == '__main__':
     callableDispatcher = 'doTheNeedful'
     makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
 
-    listDimensions = [3,4]
+    listDimensions = [3,3]
     setDatatypeFoldsTotal('int64', sourGrapes=True)
     setDatatypeElephino('uint8', sourGrapes=True)
     setDatatypeLeavesTotal('uint8', sourGrapes=True)

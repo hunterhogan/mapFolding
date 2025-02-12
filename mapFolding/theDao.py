@@ -36,9 +36,6 @@ def countGaps(gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[T
         gap1ndexCeilingIncrement(my=my)
     track[indexTrack.countDimensionsGapped.value, my[indexMy.leafConnectee.value]] += 1
 
-def dimension1ndexIncrement(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> None:
-    my[indexMy.indexDimension.value] += 1
-
 def dimensionsUnconstrainedCondition(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
     return connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], my[indexMy.leaf1ndex.value]] == my[indexMy.leaf1ndex.value]
 
@@ -55,6 +52,9 @@ def findGapsInitializeVariables(my: ndarray[Tuple[int], dtype[integer[Any]]], tr
     my[indexMy.dimensionsUnconstrained.value] = my[indexMy.dimensionsTotal.value]
     my[indexMy.gap1ndexCeiling.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
     my[indexMy.indexDimension.value] = 0
+
+def indexDimensionIncrement(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> None:
+    my[indexMy.indexDimension.value] += 1
 
 def indexMiniGapIncrement(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> None:
     my[indexMy.indexMiniGap.value] += 1
@@ -81,7 +81,7 @@ def leafConnecteeUpdate(connectionGraph: ndarray[Tuple[int, int, int], dtype[int
 def loopingLeavesConnectedToActiveLeaf(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
     return my[indexMy.leafConnectee.value] != my[indexMy.leaf1ndex.value]
 
-def loopingTheDimensions(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
+def loopUpToDimensionsTotal(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
     return my[indexMy.indexDimension.value] < my[indexMy.dimensionsTotal.value]
 
 def loopingToActiveGapCeiling(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
@@ -111,7 +111,7 @@ def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer
     while activeLeafGreaterThan0Condition(my=my):
         if activeLeafIsTheFirstLeafCondition(my=my) or leafBelowSentinelIs1Condition(track=track):
             findGapsInitializeVariables(my=my, track=track)
-            while loopingTheDimensions(my=my):
+            while loopUpToDimensionsTotal(my=my):
                 if dimensionsUnconstrainedCondition(connectionGraph=connectionGraph, my=my):
                     dimensionsUnconstrainedDecrement(my=my)
                 else:
@@ -119,7 +119,7 @@ def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer
                     while loopingLeavesConnectedToActiveLeaf(my=my):
                         countGaps(gapsWhere=gapsWhere, my=my, track=track)
                         leafConnecteeUpdate(connectionGraph=connectionGraph, my=my, track=track)
-                dimension1ndexIncrement(my=my)
+                indexDimensionIncrement(my=my)
             if allDimensionsAreUnconstrained(my=my):
                 insertUnconstrainedLeaf(gapsWhere=gapsWhere, my=my)
             indexMiniGapInitialization(my=my)
@@ -159,7 +159,7 @@ def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[A
                     groupsOfFolds += 1
                 else:
                     findGapsInitializeVariables(my=my, track=track)
-                    while loopingTheDimensions(my=my):
+                    while loopUpToDimensionsTotal(my=my):
                         if dimensionsUnconstrainedCondition(connectionGraph=connectionGraph, my=my):
                             dimensionsUnconstrainedDecrement(my=my)
                         else:
@@ -168,7 +168,7 @@ def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[A
                                 if thereAreComputationDivisionsYouMightSkip(my=my):
                                     countGaps(gapsWhere=gapsWhere, my=my, track=track)
                                 leafConnecteeUpdate(connectionGraph=connectionGraph, my=my, track=track)
-                        dimension1ndexIncrement(my=my)
+                        indexDimensionIncrement(my=my)
                     indexMiniGapInitialization(my=my)
                     while loopingToActiveGapCeiling(my=my):
                         filterCommonGaps(gapsWhere=gapsWhere, my=my, track=track)
@@ -194,7 +194,7 @@ def countSequential( connectionGraph: ndarray[Tuple[int, int, int], dtype[intege
                 groupsOfFolds += 1
             else:
                 findGapsInitializeVariables(my=my, track=track)
-                while loopingTheDimensions(my=my):
+                while loopUpToDimensionsTotal(my=my):
                     if dimensionsUnconstrainedCondition(connectionGraph=connectionGraph, my=my):
                         dimensionsUnconstrainedDecrement(my=my)
                     else:
@@ -202,7 +202,7 @@ def countSequential( connectionGraph: ndarray[Tuple[int, int, int], dtype[intege
                         while loopingLeavesConnectedToActiveLeaf(my=my):
                             countGaps(gapsWhere=gapsWhere, my=my, track=track)
                             leafConnecteeUpdate(connectionGraph=connectionGraph, my=my, track=track)
-                    dimension1ndexIncrement(my=my)
+                    indexDimensionIncrement(my=my)
                 indexMiniGapInitialization(my=my)
                 while loopingToActiveGapCeiling(my=my):
                     filterCommonGaps(gapsWhere=gapsWhere, my=my, track=track)
