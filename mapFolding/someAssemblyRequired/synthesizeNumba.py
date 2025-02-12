@@ -1,6 +1,9 @@
+"""I think this module is free of hardcoded values.
+TODO: consolidate the logic in this module."""
 from mapFolding import (
     computationState,
     EnumIndices,
+    FREAKOUT,
     getAlgorithmSource,
     getFilenameFoldsTotal,
     getPathFilenameFoldsTotal,
@@ -22,6 +25,7 @@ from mapFolding import (
     setDatatypeModule,
     Z0Z_getDatatypeModuleScalar,
     Z0Z_getDecoratorCallable,
+    Z0Z_identifierCountFolds,
     Z0Z_setDatatypeModuleScalar,
     Z0Z_setDecoratorCallable,
 )
@@ -136,7 +140,7 @@ class RecursiveInliner(ast.NodeTransformer):
                     return [self.visit(stmt) for stmt in inlineDefinition.body]
         return self.generic_visit(node)
 
-class UnpackArrayAccesses(ast.NodeTransformer):
+class UnpackArrays(ast.NodeTransformer):
     """
     A class that transforms array accesses using enum indices into local variables.
 
@@ -278,7 +282,7 @@ def Z0Z_generalizeThis(FunctionDefTarget: ast.FunctionDef, parametersNumba: Opti
 
 def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
     datatypeModuleDecorator = Z0Z_getDatatypeModuleScalar()
-    def makeNumbaParameterSignatureElement(signatureElement: ast.arg):
+    def make_arg4parameter(signatureElement: ast.arg):
         if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
             annotationShape = signatureElement.annotation.slice.elts[0]
             if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
@@ -302,31 +306,23 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 
             return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
 
-    FunctionDefTarget, parametersNumba = Z0Z_generalizeThis(FunctionDefTarget, parametersNumba)
+    list_argsDecorator: Sequence[ast.expr] = []
 
-    FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
-
-    listDecorator_args: Sequence[ast.expr] = []
-
-    listForNumba_arg_named_signature_or_function: Sequence[ast.expr] = []
+    list_arg4signature_or_function: Sequence[ast.expr] = []
     for parameter in FunctionDefTarget.args.args:
-        signatureElement = makeNumbaParameterSignatureElement(parameter)
+        signatureElement = make_arg4parameter(parameter)
         if signatureElement:
-            listForNumba_arg_named_signature_or_function.append(signatureElement)
+            list_arg4signature_or_function.append(signatureElement)
 
     if FunctionDefTarget.returns and isinstance(FunctionDefTarget.returns, ast.Name):
         theReturn: ast.Name = FunctionDefTarget.returns
-        listDecorator_args = [cast(ast.expr,
-                                ast.Call(
-                                    func=ast.Name(id=theReturn.id, ctx=ast.Load())
-                                    , args=listForNumba_arg_named_signature_or_function if listForNumba_arg_named_signature_or_function else []
-                                    , keywords=[]
-                                )
-                            )]
+        list_argsDecorator = [cast(ast.expr, ast.Call(func=ast.Name(id=theReturn.id, ctx=ast.Load())
+                            , args=list_arg4signature_or_function if list_arg4signature_or_function else [] , keywords=[] ) )]
+    elif list_arg4signature_or_function:
+        list_argsDecorator = [cast(ast.expr, ast.Tuple(elts=list_arg4signature_or_function, ctx=ast.Load()))]
 
-    elif listForNumba_arg_named_signature_or_function:
-        listDecorator_args = [cast(ast.expr, ast.Tuple(elts=listForNumba_arg_named_signature_or_function, ctx=ast.Load()))]
-
+    FunctionDefTarget, parametersNumba = Z0Z_generalizeThis(FunctionDefTarget, parametersNumba)
+    FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
     if parametersNumba is None:
         parametersNumba = parametersNumbaDEFAULT
     listDecoratorKeywords = [ast.keyword(arg=parameterName, value=ast.Constant(value=parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
@@ -336,7 +332,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
     allImports.addImportFromStr(decoratorModule, decoratorCallable)
     astDecorator = ast.Call(
         func=ast.Name(id=decoratorCallable, ctx=ast.Load())
-        , args=listDecorator_args if listDecorator_args else []
+        , args=list_argsDecorator if list_argsDecorator else []
         , keywords=listDecoratorKeywords)
 
     FunctionDefTarget.decorator_list = [astDecorator]
@@ -356,7 +352,7 @@ def makeDecoratorJobNumba(FunctionDefTarget: ast.FunctionDef, allImports: Univer
 
     return FunctionDefTarget, allImports
 
-def inlineOneCallable(pythonSource: str, callableTarget: str) -> str | None:
+def inlineOneCallable(pythonSource: str, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, unpackArrays: Optional[bool]=False) -> str:
     astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
     allImports = UniversalImportTracker()
 
@@ -368,32 +364,23 @@ def inlineOneCallable(pythonSource: str, callableTarget: str) -> str | None:
     callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctionDef)
     FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
 
-    if FunctionDefTarget:
-        ast.fix_missing_locations(FunctionDefTarget)
-        parametersNumba = None
-        match callableTarget:
-            case 'countParallel':
-                parametersNumba = parametersNumbaSuperJitParallel
-            case 'countSequential':
-                parametersNumba = parametersNumbaSuperJit
-            case 'countInitialize':
-                parametersNumba = parametersNumbaDEFAULT
+    if not FunctionDefTarget:
+        raise FREAKOUT
 
-        FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
+    ast.fix_missing_locations(FunctionDefTarget)
 
-        if callableTarget == 'countSequential':
-            unpackerMy = UnpackArrayAccesses(indexMy, 'my')
-            FunctionDefTarget = cast(ast.FunctionDef, unpackerMy.visit(FunctionDefTarget))
+    FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
+
+    if unpackArrays:
+        for tupleUnpack in [(indexMy, 'my'), (indexTrack, 'track')]:
+            unpacker = UnpackArrays(*tupleUnpack)
+            FunctionDefTarget = cast(ast.FunctionDef, unpacker.visit(FunctionDefTarget))
             ast.fix_missing_locations(FunctionDefTarget)
 
-            unpackerTrack = UnpackArrayAccesses(indexTrack, 'track')
-            FunctionDefTarget = cast(ast.FunctionDef, unpackerTrack.visit(FunctionDefTarget))
-            ast.fix_missing_locations(FunctionDefTarget)
-
-        moduleAST = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
-        ast.fix_missing_locations(moduleAST)
-        moduleSource = ast.unparse(moduleAST)
-        return moduleSource
+    moduleAST = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
+    ast.fix_missing_locations(moduleAST)
+    moduleSource = ast.unparse(moduleAST)
+    return moduleSource
 
 def makeDispatcherNumba(pythonSource: str, callableTarget: str, listStuffYouOughtaKnow: List[youOughtaKnow]) -> str:
     astSource = ast.parse(pythonSource)
@@ -415,89 +402,10 @@ def makeDispatcherNumba(pythonSource: str, callableTarget: str, listStuffYouOugh
 
     FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumbaFailEarly)
 
-    astModule = ast.Module( body=cast(List[ast.stmt], allImports.makeListAst()
-                + [FunctionDefTarget]), type_ignores=[])
+    astModule = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
 
     ast.fix_missing_locations(astModule)
     return ast.unparse(astModule)
-
-def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: Optional[str] = None, algorithmSource: Optional[ModuleType] = None) -> None:
-    if not algorithmSource:
-        algorithmSource = getAlgorithmSource()
-
-    formatModuleNameDEFAULT = "numba_{callableTarget}"
-
-    # When I am a more competent programmer, I will make getPathFilenameWrite dependent on makeAstImport or vice versa,
-    # so the name of the physical file doesn't get out of whack with the name of the logical module.
-    def getPathFilenameWrite(callableTarget: str
-                            , pathWrite: Optional[pathlib.Path] = None
-                            , formatFilenameWrite: Optional[str] = None
-                            ) -> pathlib.Path:
-        if not pathWrite:
-            pathWrite = getPathSyntheticModules()
-        if not formatFilenameWrite:
-            formatFilenameWrite = formatModuleNameDEFAULT + '.py'
-
-        pathFilename = pathWrite  / formatFilenameWrite.format(callableTarget=callableTarget)
-        return pathFilename
-
-    def makeAstImport(callableTarget: str
-                        , packageName: Optional[str] = None
-                        , subPackageName: Optional[str] = None
-                        , moduleName: Optional[str] = None
-                        , astNodeLogicalPathThingy: Optional[ast.AST] = None
-                        ) -> ast.ImportFrom:
-        """Creates import AST node for synthetic modules."""
-        if astNodeLogicalPathThingy is None:
-            if packageName is None:
-                packageName = myPackageNameIs
-            if subPackageName is None:
-                subPackageName = moduleOfSyntheticModules
-            if moduleName is None:
-                moduleName = formatModuleNameDEFAULT.format(callableTarget=callableTarget)
-            module=f'{packageName}.{subPackageName}.{moduleName}'
-        else:
-            module = str(astNodeLogicalPathThingy)
-        return ast.ImportFrom(
-            module=module,
-            names=[ast.alias(name=callableTarget, asname=None)],
-            level=0
-        )
-
-    listStuffYouOughtaKnow: List[youOughtaKnow] = []
-
-    for callableTarget in listCallablesInline:
-        pythonSource = inspect.getsource(algorithmSource)
-        pythonSource = inlineOneCallable(pythonSource, callableTarget)
-        if not pythonSource:
-            raise Exception("Pylance, OMG! The sky is falling!")
-
-        pathFilename = getPathFilenameWrite(callableTarget)
-
-        listStuffYouOughtaKnow.append(youOughtaKnow(
-            callableSynthesized=callableTarget,
-            pathFilenameForMe=pathFilename,
-            astForCompetentProgrammers=makeAstImport(callableTarget)
-        ))
-        pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])
-        pathFilename.write_text(pythonSource)
-
-    # Generate dispatcher if requested
-    if callableDispatcher:
-        pythonSource = inspect.getsource(algorithmSource)
-        pythonSource = makeDispatcherNumba(pythonSource, callableDispatcher, listStuffYouOughtaKnow)
-        if not pythonSource:
-            raise Exception("Pylance, OMG! The sky is falling!")
-
-        pathFilename = getPathFilenameWrite(callableDispatcher)
-
-        listStuffYouOughtaKnow.append(youOughtaKnow(
-            callableSynthesized=callableDispatcher,
-            pathFilenameForMe=pathFilename,
-            astForCompetentProgrammers=makeAstImport(callableDispatcher)
-        ))
-        pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])
-        pathFilename.write_text(pythonSource)
 
 def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str]=None) -> str:
     """Converts a NumPy array into a compressed string representation using run-length encoding (RLE).
@@ -545,7 +453,7 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
         return f"{identifierName} = array({stringMinimized}, dtype={arrayTarget.dtype})"
     return stringMinimized
 
-def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, allImports: UniversalImportTracker):
+def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
     arrayType = type(argData)
     moduleConstructor = arrayType.__module__
     constructorName = arrayType.__name__
@@ -572,7 +480,7 @@ def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argDat
 
     return FunctionDefTarget, allImports
 
-def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, allImports: UniversalImportTracker):
+def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
     arrayType = type(argData)
     moduleConstructor = arrayType.__module__
     constructorName = arrayType.__name__
@@ -607,7 +515,7 @@ def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, ar
     FunctionDefTarget.args.args.remove(astArg)
     return FunctionDefTarget, allImports
 
-def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, Z0Z_listChaff: List[str], allImports: UniversalImportTracker):
+def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, Z0Z_listChaff: List[str], allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
     moduleConstructor = Z0Z_getDatatypeModuleScalar()
     for stmt in FunctionDefTarget.body.copy():
         if isinstance(stmt, ast.Assign):
@@ -628,7 +536,7 @@ def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arg
     FunctionDefTarget.args.args.remove(astArg)
     return FunctionDefTarget, allImports
 
-def evaluateAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker):
+def evaluateAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
     moduleConstructor = Z0Z_getDatatypeModuleScalar()
     for stmt in FunctionDefTarget.body.copy():
         if isinstance(stmt, ast.AnnAssign):
@@ -680,21 +588,22 @@ def astNameToAstConstant(FunctionDefTarget: ast.FunctionDef, name: str, value: i
     return cast(ast.FunctionDef, NodeReplacer(findName, replaceWithConstant).visit(FunctionDefTarget))
 
 def makeLauncherJobNumba(callableTarget: str, pathFilenameFoldsTotal: pathlib.Path) -> ast.Module:
-    """Creates AST nodes for executing and recording results."""
     linesLaunch = f"""
 if __name__ == '__main__':
+    import time
+    timeStart = time.perf_counter()
     foldsTotal = {callableTarget}()
-    print(foldsTotal)
+    print(foldsTotal, time.perf_counter() - timeStart)
     writeStream = open('{pathFilenameFoldsTotal.as_posix()}', 'w')
     writeStream.write(str(foldsTotal))
     writeStream.close()
 """
     return ast.parse(linesLaunch)
 
-def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationState, allImports: UniversalImportTracker):
+def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationState, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
     """Add multiplication and return statement to function, properly constructing AST nodes."""
     # Create AST for multiplication operation
-    multiplicand = 'groupsOfFolds'
+    multiplicand = Z0Z_identifierCountFolds
     datatype = hackSSOTdatatype(multiplicand)
     multiplyOperation = ast.BinOp(
         left=ast.Name(id=multiplicand, ctx=ast.Load()),
@@ -702,123 +611,27 @@ def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationS
 
     returnStatement = ast.Return(value=multiplyOperation)
 
-    # This seems unnecessary; AI autocomplete: but it's a good habit to copy location info
-    # Add source location info
-    ast.copy_location(returnStatement, FunctionDefTarget.body[-1])
-
-    # Set function return type annotation if not present
     datatypeModuleScalar = Z0Z_getDatatypeModuleScalar()
     allImports.addImportFromStr(datatypeModuleScalar, datatype)
     FunctionDefTarget.returns = ast.Name(id=datatype, ctx=ast.Load())
 
-    # Add return statement to function body
     FunctionDefTarget.body.append(returnStatement)
 
     return FunctionDefTarget, allImports
 
-def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> ast.FunctionDef:
-    return FunctionDefTarget
-
-def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmSource: ModuleType, parametersNumba: Optional[ParametersNumba]=None, pathFilenameWriteJob: Optional[Union[str, os.PathLike[str]]] = None, **keywordArguments: Optional[Any]) -> pathlib.Path:
-    """ Parameters: **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`. """
-    """Notes about the existing logic:
-    - the synthesized module must run well as a standalone interpreted Python script
-    - `writeJobNumba` synthesizes a parameter-specific module by starting with code synthesized by `makeNumbaOptimizedFlow`, which improves the optimization
-    - similarly, `writeJobNumba` should be a solid foundation for more optimizations, most especially compiling to a standalone executable, but the details of the next optimization step are unknown
-    - the minimum runtime (on my computer) to compute a value unknown to mathematicians is 26 hours, therefore, we ant to ensure the value is seen by the user, but we must have ultra-light overhead.
-    - perf_counter is for testing. When I run a real job, I delete those lines
-    - avoid `with` statement
+def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int, connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[numpy.integer[Any]]]) -> ast.FunctionDef:
     """
-    stateJob = makeStateJob(listDimensions, writeJob=False, **keywordArguments)
-    pythonSource = inspect.getsource(algorithmSource)
-    astModule = ast.parse(pythonSource)
+    Unroll the countGaps loop: in theDao, it is a while loop, of course.
+    However, it could be written as `for indexDimension in range(dimensionsTotal):`.
+    It is useful to note that it could also be written as `for indexDimension in range(connectionGraph.shape[0]):`.
+    We will unroll the loop into a series of stateJob['my'][indexMy.dimensionsTotal]-many code blocks that are similar but not identical.
+    In each code block, we know the value of the identifier `indexDimension`, so we replace the identifier with its value.
+    Furthermore, we will split connectionGraph into arrays along the first axis.
+    `connectionGraph[indexDimension, leaf1ndex, leafBelow[leafConnectee]]`
+    `connectionGraph0[leaf1ndex, leafBelow[leafConnectee]]`
+    `connectionGraph1[leaf1ndex, leafBelow[leafConnectee]]`
+    `connectionGraphN[leaf1ndex, leafBelow[leafConnectee]]`
 
-    allImports = UniversalImportTracker()
-
-    for statement in astModule.body:
-        if isinstance(statement, (ast.Import, ast.ImportFrom)):
-            allImports.addAst(statement)
-
-    FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
-    if not FunctionDefTarget: raise ValueError(f"I received `{callableTarget=}` and {algorithmSource.__name__=}, but I could not find that function in that source.")
-
-    for pirateScowl in FunctionDefTarget.args.args.copy():
-        match pirateScowl.arg:
-            case 'my':
-                FunctionDefTarget, allImports = evaluate_argIn_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], ['taskIndex', 'dimensionsTotal'], allImports)
-            case 'track':
-                FunctionDefTarget, allImports = evaluateArrayIn_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
-            case 'connectionGraph':
-                FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
-            case 'gapsWhere':
-                FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
-            case 'foldGroups':
-                FunctionDefTarget = removeIdentifierFrom_body(FunctionDefTarget, pirateScowl)
-
-    # Move function parameters to the function body,
-    # initialize identifiers with their state types and values,
-    # and replace static-valued identifiers with their values.
-    FunctionDefTarget, allImports = evaluateAnnAssignIn_body(FunctionDefTarget, allImports)
-    FunctionDefTarget = astNameToAstConstant(FunctionDefTarget, 'dimensionsTotal', int(stateJob['my'][indexMy.dimensionsTotal]))
-    FunctionDefTarget = astObjectToAstConstant(FunctionDefTarget, 'foldGroups[-1]', int(stateJob['foldGroups'][-1]))
-
-    # Unroll the countGaps loop: in theDao, it is a while loop, of course.
-    # However, it could be written as `for indexDimension in range(dimensionsTotal):`.
-    # It is useful to note that it could also be written as `for indexDimension in range(connectionGraph.shape[0]):`.
-    # We will unroll the loop into a series of stateJob['my'][indexMy.dimensionsTotal]-many code blocks that are similar but not identical.
-    # In each code block, we know the value of the identifier `indexDimension`, so we replace the identifier with its value.
-    # After unrolling, we can remove three `indexDimension` statements: 1) the first initialization, which is really a memory allocation, 2) the loop initialization, and 3) the loop increment.
-    FunctionDefTarget = unrollWhileLoop(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal])
-
-    FunctionDefTarget, allImports = addReturnJobNumba(FunctionDefTarget, stateJob, allImports)
-    FunctionDefTarget, allImports = makeDecoratorJobNumba(FunctionDefTarget, allImports, parametersNumba)
-
-    pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
-    # TODO consider: 1) launcher is a function, 2) if __name__ calls the launcher function, and 3) the launcher is "jitted", even just a light jit, then 4) `FunctionDefTarget` could be superJit.
-    astLauncher = makeLauncherJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal)
-
-    astImports = allImports.makeListAst()
-
-    astModule = ast.Module(body=cast(List[ast.stmt], astImports + [FunctionDefTarget] + [astLauncher]), type_ignores=[])
-    ast.fix_missing_locations(astModule)
-
-    pythonSource = ast.unparse(astModule)
-    pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])
-
-    if pathFilenameWriteJob is None:
-        filename = getFilenameFoldsTotal(stateJob['mapShape'])
-        pathRoot = getPathJobRootDEFAULT()
-        pathFilenameWriteJob = pathlib.Path(pathRoot, pathlib.Path(filename).stem, pathlib.Path(filename).with_suffix('.py'))
-    else:
-        pathFilenameWriteJob = pathlib.Path(pathFilenameWriteJob)
-    pathFilenameWriteJob.parent.mkdir(parents=True, exist_ok=True)
-
-    pathFilenameWriteJob.write_text(pythonSource)
-    return pathFilenameWriteJob
-
-def mainBig():
-    setDatatypeModule('numpy', sourGrapes=True)
-    setDatatypeFoldsTotal('int64', sourGrapes=True)
-    setDatatypeElephino('uint8', sourGrapes=True)
-    setDatatypeLeavesTotal('uint8', sourGrapes=True)
-    listCallablesInline: List[str] = ['countInitialize', 'countParallel', 'countSequential']
-    Z0Z_setDatatypeModuleScalar('numba')
-    Z0Z_setDecoratorCallable('jit')
-    callableDispatcher = 'doTheNeedful'
-    makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
-
-def mainSmall():
-    listDimensions = [3,3]
-    setDatatypeFoldsTotal('int64', sourGrapes=True)
-    setDatatypeElephino('uint8', sourGrapes=True)
-    setDatatypeLeavesTotal('uint8', sourGrapes=True)
-    from mapFolding.syntheticModules import numba_countSequential
-    algorithmSource: ModuleType = numba_countSequential
-    Z0Z_setDatatypeModuleScalar('numba')
-    Z0Z_setDecoratorCallable('jit')
-    writeJobNumba(listDimensions, 'countSequential', algorithmSource, parametersNumbaDEFAULT)
-
-if __name__ == '__main__':
-    mainBig()
-
-    mainSmall()
+    After unrolling, we can remove three `indexDimension` statements: 1) the first initialization, which is really a memory allocation, 2) the loop initialization, and 3) the loop increment.
+    """
+    return FunctionDefTarget

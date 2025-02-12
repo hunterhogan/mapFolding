@@ -267,3 +267,9 @@ def Z0Z_setDecoratorCallable(decoratorName: str) -> str:
     global _decoratorCallable
     _decoratorCallable = decoratorName
     return _decoratorCallable
+
+class FREAKOUT(Exception):
+    pass
+
+# This identifier is declared in theDao.py. Two sources of truth is better than 900.
+Z0Z_identifierCountFolds = 'groupsOfFolds'

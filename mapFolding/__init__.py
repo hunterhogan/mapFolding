@@ -30,6 +30,7 @@ from mapFolding.theSSOT import (
     Z0Z_getDecoratorCallable,
     Z0Z_setDatatypeModuleScalar,
     Z0Z_setDecoratorCallable,
+    Z0Z_identifierCountFolds,
 )
 
 # Parameters for the prima donna
@@ -40,6 +41,11 @@ from mapFolding.theSSOT import (
     parametersNumbaParallelDEFAULT,
     parametersNumbaSuperJit,
     parametersNumbaSuperJitParallel,
+)
+
+# Coping
+from mapFolding.theSSOT import (
+    FREAKOUT,
 )
 
 from mapFolding.beDRY import (

@@ -1,11 +1,11 @@
-from mapFolding import indexMy
 from mapFolding import indexTrack
-from numba import int64
-from numba import jit
+from mapFolding import indexMy
 from numba import uint8
+from numba import jit
+from numba import int64
 from numpy import ndarray
-from numpy import integer
 from numpy import dtype
+from numpy import integer
 from typing import Any
 from typing import Tuple
 
