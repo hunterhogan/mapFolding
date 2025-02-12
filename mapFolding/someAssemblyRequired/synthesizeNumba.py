@@ -35,14 +35,6 @@ import os
 import pathlib
 import python_minifier
 
-def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
-    # TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
-    for decoratorItem in astCallable.decorator_list.copy():
-        import warnings
-        astCallable.decorator_list.remove(decoratorItem)
-        warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
-    return astCallable
-
 youOughtaKnow = collections.namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenameForMe', 'astForCompetentProgrammers'])
 
 class UniversalImportTracker:
@@ -259,7 +251,40 @@ class UnpackArrayAccesses(ast.NodeTransformer):
         node.body = initializations + node.body
         return node
 
-def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> ast.FunctionDef:
+def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
+    # TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
+    for decoratorItem in astCallable.decorator_list.copy():
+        import warnings
+        astCallable.decorator_list.remove(decoratorItem)
+        warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
+    return astCallable
+def isThisNodeNumbaJitCall(node: ast.AST) -> bool:
+    return (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == decoratorCallable)
+def isThisNodeJitCall(node: ast.AST) -> bool:
+    return (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == decoratorCallable)
+def isThisNodeNumbaJitDecorator(node: ast.AST) -> bool:
+    return isThisNodeNumbaJitCall(node) or isThisNodeJitCall(node)
+def Z0Z_generalizeThis(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, ParametersNumba | None]:
+    def recycleParametersNumba(decorator: ast.Call) -> Dict[str, Any]:
+        parametersNumbaExtracted: Dict[str, Any] = {}
+        for keywordItem in decorator.keywords:
+            if isinstance(keywordItem.value, ast.Constant) and keywordItem.arg is not None:
+                parametersNumbaExtracted[keywordItem.arg] = keywordItem.value.value
+        return parametersNumbaExtracted
+
+    for decorator in FunctionDefTarget.decorator_list.copy():
+        if isThisNodeNumbaJitDecorator(decorator):
+            decorator = cast(ast.Call, decorator)
+            if parametersNumba is None:
+                parametersNumbaSherpa = recycleParametersNumba(decorator)
+                if (HunterIsSureThereAreBetterWaysToDoThis := True):
+                    if parametersNumbaSherpa:
+                        parametersNumba = cast(ParametersNumba, parametersNumbaSherpa)
+        FunctionDefTarget.decorator_list.remove(decorator)
+
+    return FunctionDefTarget, parametersNumba
+
+def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
     def makeNumbaParameterSignatureElement(signatureElement: ast.arg):
         if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
             annotationShape = signatureElement.annotation.slice.elts[0]
@@ -283,6 +308,8 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, parametersNumb
             datatypeNumba = ast.Name(id=datatype_attr, ctx=ast.Load())
 
             return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
+
+    FunctionDefTarget, parametersNumba = Z0Z_generalizeThis(FunctionDefTarget, parametersNumba)
 
     FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
 
@@ -311,8 +338,6 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, parametersNumb
         parametersNumba = parametersNumbaDEFAULT
     listDecoratorKeywords = [ast.keyword(arg=parameterName, value=ast.Constant(value=parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
-    decoratorModule = datatypeModuleDecorator
-    decoratorCallable = 'jit'
     allImports.addImportFromStr(decoratorModule, decoratorCallable)
     astDecorator = ast.Call(
         func=ast.Name(id=decoratorCallable, ctx=ast.Load())
@@ -320,10 +345,25 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, parametersNumb
         , keywords=listDecoratorKeywords)
 
     FunctionDefTarget.decorator_list = [astDecorator]
-    return FunctionDefTarget
+    return FunctionDefTarget, allImports
+
+def makeDecoratorJobNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+
+    def convertToPlainJit(node: ast.Call) -> ast.Call:
+        node.func = ast.Name(id=decoratorCallable, ctx=ast.Load())
+        return node
+
+    FunctionDefTarget, parametersNumba = Z0Z_generalizeThis(FunctionDefTarget, parametersNumba)
+
+    FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
+    if isThisNodeNumbaJitCall(FunctionDefTarget.decorator_list[0]):
+        FunctionDefTarget.decorator_list[0] = convertToPlainJit(cast(ast.Call, FunctionDefTarget.decorator_list[0]))
+
+    return FunctionDefTarget, allImports
 
 def inlineOneCallable(pythonSource: str, callableTarget: str) -> str | None:
     astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
+    allImports = UniversalImportTracker()
 
     for statement in astModule.body:
         if isinstance(statement, (ast.Import, ast.ImportFrom)):
@@ -344,7 +384,7 @@ def inlineOneCallable(pythonSource: str, callableTarget: str) -> str | None:
             case 'countInitialize':
                 parametersNumba = parametersNumbaDEFAULT
 
-        FunctionDefTarget = decorateCallableWithNumba(FunctionDefTarget, parametersNumba)
+        FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
 
         if callableTarget == 'countSequential':
             unpackerMy = UnpackArrayAccesses(indexMy, 'my')
@@ -362,6 +402,7 @@ def inlineOneCallable(pythonSource: str, callableTarget: str) -> str | None:
 
 def makeDispatcherNumba(pythonSource: str, callableTarget: str, listStuffYouOughtaKnow: List[youOughtaKnow]) -> str:
     astSource = ast.parse(pythonSource)
+    allImports = UniversalImportTracker()
 
     for statement in astSource.body:
         if isinstance(statement, (ast.Import, ast.ImportFrom)):
@@ -377,10 +418,7 @@ def makeDispatcherNumba(pythonSource: str, callableTarget: str, listStuffYouOugh
     if not FunctionDefTarget:
         raise ValueError(f"Could not find function {callableTarget} in source code")
 
-    # Zero-out the decorator list
-    FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
-
-    FunctionDefTarget = decorateCallableWithNumba(FunctionDefTarget, parametersNumbaFailEarly)
+    FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumbaFailEarly)
 
     astModule = ast.Module( body=cast(List[ast.stmt], allImports.makeListAst()
                 + [FunctionDefTarget]), type_ignores=[])
@@ -433,9 +471,7 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
 
     listStuffYouOughtaKnow: List[youOughtaKnow] = []
 
-    global allImports
     for callableTarget in listCallablesInline:
-        allImports = UniversalImportTracker()
         pythonSource = inspect.getsource(algorithmSource)
         pythonSource = inlineOneCallable(pythonSource, callableTarget)
         if not pythonSource:
@@ -453,7 +489,6 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
 
     # Generate dispatcher if requested
     if callableDispatcher:
-        allImports = UniversalImportTracker()
         pythonSource = inspect.getsource(algorithmSource)
         pythonSource = makeDispatcherNumba(pythonSource, callableDispatcher, listStuffYouOughtaKnow)
         if not pythonSource:
@@ -649,44 +684,6 @@ def astNameToAstConstant(FunctionDefTarget: ast.FunctionDef, name: str, value: i
 
     return cast(ast.FunctionDef, NodeReplacer(findName, replaceWithConstant).visit(FunctionDefTarget))
 
-def makeDecorator(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> ast.FunctionDef:
-    # Use NodeReplacer to handle decorator cleanup
-    def isNumbaJitDecorator(node: ast.AST) -> bool:
-        return ((isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-                and getattr(node.func.value, "id", None) == "numba" and node.func.attr == "jit")
-                or
-                (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "jit"))
-
-    def extractNumbaParams(node: ast.Call) -> None:
-        nonlocal parametersNumba
-        if parametersNumba is None:
-            parametersNumbaExtracted: Dict[str, Any] = {}
-            for keywordItem in node.keywords:
-                if isinstance(keywordItem.value, ast.Constant) and keywordItem.arg is not None:
-                    parametersNumbaExtracted[keywordItem.arg] = keywordItem.value.value
-            if parametersNumbaExtracted:
-                parametersNumba = ParametersNumba(parametersNumbaExtracted)  # type: ignore
-        return None
-
-    # Remove existing numba decorators
-    decoratorCleaner = NodeReplacer(isNumbaJitDecorator, extractNumbaParams)
-    FunctionDefTarget = cast(ast.FunctionDef, decoratorCleaner.visit(FunctionDefTarget))
-
-    FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
-    allImports.addImportFromStr('numba', 'jit')
-    FunctionDefTarget = decorateCallableWithNumba(FunctionDefTarget, parametersNumba)
-
-    # Convert @numba.jit to @jit
-    def isNumbaJitCall(node: ast.AST) -> bool:
-        return (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "jit")
-
-    def convertToPlainJit(node: ast.Call) -> ast.Call:
-        node.func = ast.Name(id="jit", ctx=ast.Load())
-        return node
-
-    jitSimplifier = NodeReplacer(isNumbaJitCall, convertToPlainJit)
-    return cast(ast.FunctionDef, jitSimplifier.visit(FunctionDefTarget))
-
 def makeLauncherJobNumba(callableTarget: str, pathFilenameFoldsTotal: pathlib.Path) -> ast.Module:
     """Creates AST nodes for executing and recording results."""
     linesLaunch = f"""
@@ -724,13 +721,20 @@ def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationS
     return FunctionDefTarget
 
 def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmSource: ModuleType, parametersNumba: Optional[ParametersNumba]=None, pathFilenameWriteJob: Optional[Union[str, os.PathLike[str]]] = None, **keywordArguments: Optional[Any]) -> pathlib.Path:
-    """
-    Parameters:
-        **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`.
+    """ Parameters: **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`. """
+    """Notes about the existing logic:
+    - the synthesized module must run well as a standalone interpreted Python script
+    - `writeJobNumba` synthesizes a parameter-specific module by starting with code synthesized by `makeNumbaOptimizedFlow`, which improves the optimization
+    - similarly, `writeJobNumba` should be a solid foundation for more optimizations, most especially compiling to a standalone executable, but the details of the next optimization step are unknown
+    - the minimum runtime (on my computer) to compute a value unknown to mathematicians is 26 hours, therefore, we ant to ensure the value is seen by the user, but we must have ultra-light overhead.
+    - perf_counter is for testing. When I run a real job, I delete those lines
+    - avoid `with` statement
     """
     stateJob = makeStateJob(listDimensions, writeJob=False, **keywordArguments)
     pythonSource = inspect.getsource(algorithmSource)
     astModule = ast.parse(pythonSource)
+    global allImports # TODO remove
+    allImports = UniversalImportTracker()
 
     for statement in astModule.body:
         if isinstance(statement, (ast.Import, ast.ImportFrom)):
@@ -764,29 +768,12 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
     FunctionDefTarget = astNameToAstConstant(FunctionDefTarget, 'dimensionsTotal', int(stateJob['my'][indexMy.dimensionsTotal]))
     FunctionDefTarget = astObjectToAstConstant(FunctionDefTarget, 'foldGroups[-1]', int(stateJob['foldGroups'][-1]))
 
-    # NOTE start Refactor area
-    """Specifications for the new logic and notes about the existing logic:
-    - the synthesized module must run well as a standalone interpreted Python script
-    - `writeJobNumba` synthesizes a parameter-specific module by starting with code synthesized by `makeNumbaOptimizedFlow`, which improves the optimization
-    - similarly, `writeJobNumba` should be a solid foundation for more optimizations, most especially compiling to a standalone executable, but the details of the next optimization step are unknown
-    - the minimum runtime (on my computer) to compute a value unknown to mathematicians is 26 hours, therefore, we ant to ensure the value is seen by the user, but we must have ultra-light overhead.
-    - perf_counter is for testing. When I run a real job, I delete those lines
-    - avoid `with` statement
-    - print to screen
-    - write to file
-    """
-    # Final statements in callableTarget
-    # astWriteFoldsTotal = make_return(stateJob)
-    # FunctionDefTarget.body += astWriteFoldsTotal.body
     FunctionDefTarget = addReturnJobNumba(FunctionDefTarget, stateJob)
-    # NOTE end Refactor area
 
-    FunctionDefTarget = makeDecorator(FunctionDefTarget, parametersNumba)
+    FunctionDefTarget, allImports = makeDecoratorJobNumba(FunctionDefTarget, allImports, parametersNumba)
 
-    # These statements are not part of the callableTarget and are not numba "jitted"
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
     astLauncher = makeLauncherJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal)
-    # No more new information in the module other than finalizing the imports
 
     astImports = allImports.makeListAst()
 
@@ -821,6 +808,8 @@ if __name__ == '__main__':
     listCallablesInline: List[str] = ['countInitialize', 'countParallel', 'countSequential']
     datatypeModuleScalar = 'numba'
     datatypeModuleDecorator = 'numba'
+    decoratorModule = datatypeModuleDecorator
+    decoratorCallable = 'jit'
     callableDispatcher = 'doTheNeedful'
     makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
 
@@ -832,5 +821,6 @@ if __name__ == '__main__':
     algorithmSource: ModuleType = numba_countSequential
     datatypeModuleScalar = 'numba'
     datatypeModuleDecorator = 'numba'
-    allImports = UniversalImportTracker()
+    decoratorModule = datatypeModuleDecorator
+    decoratorCallable = 'jit'
     pathFilenameModule = writeJobNumba(listDimensions, 'countSequential', algorithmSource, parametersNumbaDEFAULT)
