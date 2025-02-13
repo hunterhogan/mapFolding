@@ -2,39 +2,6 @@
 TODO: consolidate the logic in this module."""
 from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import *
 
-def Z0Z_OneCallable(pythonSource: str, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, inlineCallables: Optional[bool]=False , unpackArrays: Optional[bool]=False , allImports: Optional[UniversalImportTracker]=None ) -> str:
-	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
-	if allImports is None:
-		allImports = UniversalImportTracker()
-
-	for statement in astModule.body:
-		if isinstance(statement, (ast.Import, ast.ImportFrom)):
-			allImports.addAst(statement)
-
-	if inlineCallables:
-		dictionaryFunctionDef = {statement.name: statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
-		callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctionDef)
-		FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
-	else:
-		FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
-
-	if not FunctionDefTarget:
-		raise ValueError(f"Could not find function {callableTarget} in source code")
-
-	ast.fix_missing_locations(FunctionDefTarget)
-
-	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
-
-	if unpackArrays:
-		for tupleUnpack in [(indexMy, 'my'), (indexTrack, 'track')]:
-			unpacker = UnpackArrays(*tupleUnpack)
-			FunctionDefTarget = cast(ast.FunctionDef, unpacker.visit(FunctionDefTarget))
-			ast.fix_missing_locations(FunctionDefTarget)
-
-	moduleAST = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
-	ast.fix_missing_locations(moduleAST)
-	return ast.unparse(moduleAST)
-
 def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str]=None) -> str:
 	"""Converts a NumPy array into a compressed string representation using run-length encoding (RLE).
 
@@ -81,7 +48,7 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
 		return f"{identifierName} = array({stringMinimized}, dtype={arrayTarget.dtype})"
 	return stringMinimized
 
-def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker, unrollSlices: Optional[int]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
 	constructorName = arrayType.__name__
@@ -93,14 +60,23 @@ def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayT
 	allImports.addImportFromStr(moduleConstructor, constructorName)
 	allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
 
-	onlyDataRLE = makeStrRLEcompacted(arrayTarget)
-	astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
-	dataAst = astStatement.value
+	def insertAssign(assignee: str, arraySlice: numpy.ndarray):
+		nonlocal FunctionDefTarget
+		onlyDataRLE = makeStrRLEcompacted(arraySlice) #NOTE
+		astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
+		dataAst = astStatement.value
 
-	arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], dictionaryKeywords={'dtype': ast.Name(id=argData_dtypeName, ctx=ast.Load())})
+		arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], dictionaryKeywords={'dtype': ast.Name(id=argData_dtypeName, ctx=ast.Load())})
 
-	assignment = ast.Assign(targets=[ast.Name(id=astArg.arg, ctx=ast.Store())], value=arrayCall)
-	FunctionDefTarget.body.insert(0, assignment)
+		assignment = ast.Assign(targets=[ast.Name(id=assignee, ctx=ast.Store())], value=arrayCall)#NOTE
+		FunctionDefTarget.body.insert(0, assignment)
+
+	if not unrollSlices:
+		insertAssign(astArg.arg, arrayTarget)
+	else:
+		for index, arraySlice in enumerate(arrayTarget):
+			insertAssign(f"{astArg.arg}_{index}", arraySlice)
+
 	return FunctionDefTarget, allImports
 
 def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
@@ -154,12 +130,22 @@ def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arr
 					FunctionDefTarget.body.remove(stmt)
 	return FunctionDefTarget, allImports
 
-def removeIdentifierAssignFrom_body(FunctionDefTarget: ast.FunctionDef, identifier) -> ast.FunctionDef:
-	for stmt in FunctionDefTarget.body.copy():
-		if isinstance(stmt, ast.Assign):
-			if isinstance(stmt.targets[0], ast.Subscript) and isinstance(stmt.targets[0].value, ast.Name):
-				if stmt.targets[0].value.id == identifier:
-					FunctionDefTarget.body.remove(stmt)
+def removeIdentifierAssign(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
+	# Remove assignment nodes where the target is either a Subscript referencing `identifier` or satisfies ifThis.nameIs(identifier).
+	def predicate(astNode: ast.AST) -> bool:
+		if not isinstance(astNode, ast.Assign) or not astNode.targets:
+			return False
+		targetNode = astNode.targets[0]
+		return (isinstance(targetNode, ast.Subscript) and isinstance(targetNode.value, ast.Name) and targetNode.value.id == identifier) or ifThis.nameIs(identifier)(targetNode)
+	def replacementBuilder(astNode: ast.AST) -> Optional[ast.stmt]:
+		# Returning None removes the node.
+		return None
+	FunctionDefSherpa = NodeReplacer(predicate, replacementBuilder).visit(FunctionDefTarget)
+	if not FunctionDefSherpa:
+		raise FREAKOUT("Dude, where's my function?")
+	else:
+		FunctionDefTarget = cast(ast.FunctionDef, FunctionDefSherpa)
+	ast.fix_missing_locations(FunctionDefTarget)
 	return FunctionDefTarget
 
 def evaluateAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
@@ -236,22 +222,103 @@ def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationS
 
 	return FunctionDefTarget, allImports
 
-def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int, connectionGraph: numpy.ndarray[Tuple[int, int, int], numpy.dtype[numpy.integer[Any]]]) -> ast.FunctionDef:
+def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> ast.FunctionDef:
 	"""
-	Unroll the countGaps loop: in theDao, it is a while loop, of course.
-	However, it could be written as `for indexDimension in range(dimensionsTotal):`.
-	It is useful to note that it could also be written as `for indexDimension in range(connectionGraph.shape[0]):`.
-	We will unroll the loop into a series of stateJob['my'][indexMy.dimensionsTotal]-many code blocks that are similar but not identical.
-	In each code block, we know the value of the identifier `indexDimension`, so we replace the identifier with its value.
-	Furthermore, we will split connectionGraph into arrays along the first axis.
-	`connectionGraph[indexDimension, leaf1ndex, leafBelow[leafConnectee]]`
-	`connectionGraph0[leaf1ndex, leafBelow[leafConnectee]]`
-	`connectionGraph1[leaf1ndex, leafBelow[leafConnectee]]`
-	`connectionGraphN[leaf1ndex, leafBelow[leafConnectee]]`
+	Unroll all nested while loops matching the condition that their test uses `iteratorName`.
+	"""
+	# Helper transformer to replace iterator occurrences with a constant.
+	class ReplaceIterator(ast.NodeTransformer):
+		def __init__(self, iteratorName: str, constantValue: int) -> None:
+			super().__init__()
+			self.iteratorName = iteratorName
+			self.constantValue = constantValue
 
-	After unrolling, we can remove three `indexDimension` statements: 1) the first initialization, which is really a memory allocation, 2) the loop initialization, and 3) the loop increment.
-	"""
-	return FunctionDefTarget
+		def visit_Name(self, node: ast.Name) -> ast.AST:
+			if node.id == self.iteratorName:
+				return ast.copy_location(ast.Constant(value=self.constantValue), node)
+			return self.generic_visit(node)
+
+	# NodeTransformer that finds while loops (even if deeply nested) and unrolls them.
+	class WhileLoopUnroller(ast.NodeTransformer):
+		def __init__(self, iteratorName: str, iterationsTotal: int) -> None:
+			super().__init__()
+			self.iteratorName = iteratorName
+			self.iterationsTotal = iterationsTotal
+
+		def visit_While(self, node: ast.While) -> List[ast.stmt]:
+				# Check if the while loop's test uses the iterator.
+			if isinstance(node.test, ast.Compare) and ifThis.nameIs(self.iteratorName)(node.test.left):
+				# Recurse the while loop body and remove AugAssign that increments the iterator.
+				cleanBodyStatements: List[ast.stmt] = []
+				for loopStatement in node.body:
+					# Recursively visit nested statements.
+					visitedStatement = self.visit(loopStatement)
+					# Remove direct AugAssign: iterator += 1.
+					if (isinstance(loopStatement, ast.AugAssign) and
+						isinstance(loopStatement.target, ast.Name) and
+						loopStatement.target.id == self.iteratorName and
+						isinstance(loopStatement.op, ast.Add) and
+						isinstance(loopStatement.value, ast.Constant) and
+						loopStatement.value.value == 1):
+						continue
+					cleanBodyStatements.append(visitedStatement)
+
+				newStatements: List[ast.stmt] = []
+				# Unroll using the filtered body.
+				for iterationIndex in range(self.iterationsTotal):
+					for loopStatement in cleanBodyStatements:
+						copiedStatement = copy.deepcopy(loopStatement)
+						replacer = ReplaceIterator(self.iteratorName, iterationIndex)
+						newStatement = replacer.visit(copiedStatement)
+						ast.fix_missing_locations(newStatement)
+						newStatements.append(newStatement)
+				# Optionally, process the orelse block.
+				if node.orelse:
+					for elseStmt in node.orelse:
+						visitedElse = self.visit(elseStmt)
+						if isinstance(visitedElse, list):
+							newStatements.extend(visitedElse)
+						else:
+							newStatements.append(visitedElse)
+				return newStatements
+			return [cast(ast.stmt, self.generic_visit(node))]
+
+	newFunctionDef = WhileLoopUnroller(iteratorName, iterationsTotal).visit(FunctionDefTarget)
+	ast.fix_missing_locations(newFunctionDef)
+	return newFunctionDef
+
+def Z0Z_OneCallable(pythonSource: str, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, inlineCallables: Optional[bool]=False , unpackArrays: Optional[bool]=False , allImports: Optional[UniversalImportTracker]=None ) -> str:
+	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
+	if allImports is None:
+		allImports = UniversalImportTracker()
+
+	for statement in astModule.body:
+		if isinstance(statement, (ast.Import, ast.ImportFrom)):
+			allImports.addAst(statement)
+
+	if inlineCallables:
+		dictionaryFunctionDef = {statement.name: statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
+		callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctionDef)
+		FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
+	else:
+		FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
+
+	if not FunctionDefTarget:
+		raise ValueError(f"Could not find function {callableTarget} in source code")
+
+	ast.fix_missing_locations(FunctionDefTarget)
+
+	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
+
+	if unpackArrays:
+		for tupleUnpack in [(indexMy, 'my'), (indexTrack, 'track')]:
+			unpacker = UnpackArrays(*tupleUnpack)
+			FunctionDefTarget = cast(ast.FunctionDef, unpacker.visit(FunctionDefTarget))
+			ast.fix_missing_locations(FunctionDefTarget)
+
+	moduleAST = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
+	ast.fix_missing_locations(moduleAST)
+	return ast.unparse(moduleAST)
 
 def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
 	# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.

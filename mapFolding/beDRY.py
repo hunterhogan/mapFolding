@@ -41,7 +41,7 @@ def getFilenameFoldsTotal(mapShape: Union[Sequence[int], numpy.ndarray[Tuple[int
 	Returns:
 		filenameFoldsTotal: A filename string in format 'pNxM.foldsTotal' where N,M are sorted dimensions
 	"""
-	return 'p' + 'x'.join(str(dim) for dim in sorted(mapShape)) + '.foldsTotal'
+	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
 
 def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 	"""

@@ -99,11 +99,11 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
 
 def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmSource: ModuleType, parametersNumba: Optional[ParametersNumba]=None, pathFilenameWriteJob: Optional[Union[str, os.PathLike[str]]] = None, **keywordArguments: Optional[Any]) -> pathlib.Path:
 	""" Parameters: **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`. """
-	"""Notes about the existing logic:
-	- the synthesized module must run well as a standalone interpreted Python script
-	- `writeJobNumba` synthesizes a parameter-specific module by starting with code synthesized by `makeNumbaOptimizedFlow`, which improves the optimization
-	- similarly, `writeJobNumba` should be a solid foundation for more optimizations, most especially compiling to a standalone executable, but the details of the next optimization step are unknown
-	- the minimum runtime (on my computer) to compute a value unknown to mathematicians is 26 hours, therefore, we ant to ensure the value is seen by the user, but we must have ultra-light overhead.
+	"""Notes about `writeJobNumba`:
+	- the code starts life in theDao.py, which has many optimizations; `makeNumbaOptimizedFlow` increase optimization especially by using numba; `writeJobNumba` increases optimization especially by limiting its capabilities to just one set of parameters
+	- the synthesized module must run well as a standalone interpreted-Python script
+	- the next major optimization step will (probably) be to use the module synthesized by `writeJobNumba` to compile a standalone executable
+	- Nevertheless, at each major optimization step, the code is constantly being improved and optimized, so everything must be well organized and able to handle upstream and downstream changes
 	- perf_counter is for testing. When I run a real job, I delete those lines
 	- avoid `with` statement
 	"""
@@ -126,13 +126,12 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
 				FunctionDefTarget, allImports = evaluate_argIn_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], ['taskIndex', 'dimensionsTotal'], allImports)
 			case 'track':
 				FunctionDefTarget, allImports = evaluateArrayIn_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
-			# TODO remove this after implementing `unrollWhileLoop`
 			case 'connectionGraph':
-				FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
+				FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports, stateJob['my'][indexMy.dimensionsTotal])
 			case 'gapsWhere':
 				FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
 			case 'foldGroups':
-				FunctionDefTarget = removeIdentifierAssignFrom_body(FunctionDefTarget, pirateScowl.arg)
+				FunctionDefTarget = removeIdentifierAssign(FunctionDefTarget, pirateScowl.arg)
 		FunctionDefTarget.args.args.remove(pirateScowl)
 
 	# Move function parameters to the function body,
@@ -142,16 +141,34 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
 	FunctionDefTarget = astNameToAstConstant(FunctionDefTarget, 'dimensionsTotal', int(stateJob['my'][indexMy.dimensionsTotal]))
 	FunctionDefTarget = astObjectToAstConstant(FunctionDefTarget, 'foldGroups[-1]', int(stateJob['foldGroups'][-1]))
 
-	FunctionDefTarget = unrollWhileLoop(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal], stateJob['connectionGraph'])
+	FunctionDefTarget = unrollWhileLoop(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal])
+	FunctionDefTarget = removeIdentifierAssign(FunctionDefTarget, 'indexDimension')
+	for index in range(stateJob['my'][indexMy.dimensionsTotal]):
+		class ReplaceConnectionGraph(ast.NodeTransformer):
+			def visit_Subscript(self, node: ast.Subscript) -> ast.AST:
+				node = cast(ast.Subscript, self.generic_visit(node))
+				if (isinstance(node.value, ast.Name) and node.value.id == "connectionGraph" and
+					isinstance(node.slice, ast.Tuple) and len(node.slice.elts) >= 1):
+					firstElement = node.slice.elts[0]
+					if isinstance(firstElement, ast.Constant) and firstElement.value == index:
+						newName = ast.Name(id=f"connectionGraph_{index}", ctx=ast.Load())
+						remainingIndices = node.slice.elts[1:]
+						if len(remainingIndices) == 1:
+							newSlice = remainingIndices[0]
+						else:
+							newSlice = ast.Tuple(elts=remainingIndices, ctx=ast.Load())
+						return ast.copy_location(ast.Subscript(value=newName, slice=newSlice, ctx=node.ctx), node)
+				return node
+		transformer = ReplaceConnectionGraph()
+		FunctionDefTarget = transformer.visit(FunctionDefTarget)
 
 	FunctionDefTarget, allImports = addReturnJobNumba(FunctionDefTarget, stateJob, allImports)
-	def convertToPlainJit(astCall: ast.Call) -> ast.Call:
-		astCall.func = ast.Name(id=Z0Z_getDecoratorCallable(), ctx=ast.Load())
-		return astCall
-
 	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
+
 	if thisIsNumbaDotJit(FunctionDefTarget.decorator_list[0]):
-		FunctionDefTarget.decorator_list[0] = convertToPlainJit(cast(ast.Call, FunctionDefTarget.decorator_list[0]))
+		astCall = cast(ast.Call, FunctionDefTarget.decorator_list[0])
+		astCall.func = ast.Name(id=Z0Z_getDecoratorCallable(), ctx=ast.Load())
+		FunctionDefTarget.decorator_list[0] = astCall
 
 	pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
 	# TODO consider: 1) launcher is a function, 2) if __name__ calls the launcher function, and 3) the launcher is "jitted", even just a light jit, then 4) `FunctionDefTarget` could be superJit.
@@ -188,7 +205,7 @@ def mainBig():
 	makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
 
 def mainSmall():
-	listDimensions = [3,4]
+	listDimensions = [6,6]
 	setDatatypeFoldsTotal('int64', sourGrapes=True)
 	setDatatypeElephino('uint8', sourGrapes=True)
 	setDatatypeLeavesTotal('uint8', sourGrapes=True)

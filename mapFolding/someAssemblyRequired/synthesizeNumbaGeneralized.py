@@ -33,6 +33,7 @@ from typing import Any, Callable, cast, Dict, List, Optional, Sequence, Set, Tup
 import ast
 import autoflake
 import collections
+import copy
 import inspect
 import more_itertools
 import numba
@@ -45,6 +46,10 @@ youOughtaKnow = collections.namedtuple('youOughtaKnow', ['callableSynthesized', 
 
 class ifThis:
 	"""Generic AST node predicate builder."""
+	@staticmethod
+	def nameIs(allegedly: str) -> Callable[[ast.AST], bool]:
+		return lambda node: (isinstance(node, ast.Name) and node.id == allegedly)
+
 	@staticmethod
 	def isCallWithAttribute(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
 		return lambda node: (isinstance(node, ast.Call)
@@ -82,12 +87,26 @@ class Then:
 		)
 
 class NodeReplacer(ast.NodeTransformer):
-	"""Generic node replacement using configurable predicate and builder."""
-	def __init__(self, findMe: Callable[[ast.AST], bool], nodeReplacementBuilder: Callable[[ast.AST], ast.AST]):
+	"""
+	A node transformer that replaces or removes AST nodes based on a condition.
+	This transformer traverses an AST and for each node checks a predicate. If the predicate
+	returns True, the transformer uses the replacement builder to obtain a new node. Returning
+	None from the replacement builder indicates that the node should be removed.
+
+	Attributes:
+		findMe (Callable[[ast.AST], bool]): A function that determines whether a node should be replaced.
+		nodeReplacementBuilder (Callable[[ast.AST], Optional[ast.AST]]): A function that returns a new node
+			or None to remove the node.
+
+	Methods:
+		visit(node: ast.AST) -> Optional[ast.AST]:
+			Visits each node in the AST, replacing or removing it based on the predicate.
+	"""
+	def __init__(self, findMe: Callable[[ast.AST], bool], nodeReplacementBuilder: Callable[[ast.AST], Optional[ast.AST]]) -> None:
 		self.findMe = findMe
 		self.nodeReplacementBuilder = nodeReplacementBuilder
 
-	def visit(self, node: ast.AST) -> ast.AST:
+	def visit(self, node: ast.AST) -> Optional[ast.AST]:
 		if self.findMe(node):
 			return self.nodeReplacementBuilder(node)
 		return super().visit(node)
