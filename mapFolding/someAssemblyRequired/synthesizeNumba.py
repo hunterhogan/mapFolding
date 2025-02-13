@@ -1,174 +1,6 @@
 """I think this module is free of hardcoded values.
 TODO: consolidate the logic in this module."""
-from synthesizeNumbaDecorators import *
-
-class RecursiveInliner(ast.NodeTransformer):
-	"""
-	Class RecursiveInliner:
-		A custom AST NodeTransformer designed to recursively inline function calls from a given dictionary
-		of function definitions into the AST. Once a particular function has been inlined, it is marked
-		as completed to avoid repeated inlining. This transformation modifies the AST in-place by substituting
-		eligible function calls with the body of their corresponding function.
-		Attributes:
-			dictionaryFunctions (Dict[str, ast.FunctionDef]):
-				A mapping of function name to its AST definition, used as a source for inlining.
-			callablesCompleted (Set[str]):
-				A set to track function names that have already been inlined to prevent multiple expansions.
-		Methods:
-			inlineFunctionBody(callableTargetName: str) -> Optional[ast.FunctionDef]:
-				Retrieves the AST definition for a given function name from dictionaryFunctions
-				and recursively inlines any function calls within it. Returns the function definition
-				that was inlined or None if the function was already processed.
-			visit_Call(callNode: ast.Call) -> ast.AST:
-				Inspects calls within the AST. If a function call matches one in dictionaryFunctions,
-				it is replaced by the inlined body. If the last statement in the inlined body is a return
-				or an expression, that value or expression is substituted; otherwise, a constant is returned.
-			visit_Expr(node: ast.Expr) -> Union[ast.AST, List[ast.AST]]:
-				Handles expression nodes in the AST. If the expression is a function call from
-				dictionaryFunctions, its statements are expanded in place, effectively inlining
-				the called function's statements into the surrounding context.
-	"""
-	def __init__(self, dictionaryFunctions: Dict[str, ast.FunctionDef]):
-		self.dictionaryFunctions = dictionaryFunctions
-		self.callablesCompleted: Set[str] = set()
-
-	def inlineFunctionBody(self, callableTargetName: str) -> Optional[ast.FunctionDef]:
-		if (callableTargetName in self.callablesCompleted):
-			return None
-
-		self.callablesCompleted.add(callableTargetName)
-		inlineDefinition = self.dictionaryFunctions[callableTargetName]
-		for astNode in ast.walk(inlineDefinition):
-			self.visit(astNode)
-		return inlineDefinition
-
-	def visit_Call(self, node: ast.Call) -> ast.AST:
-		callNodeVisited = self.generic_visit(node)
-		if (isinstance(callNodeVisited, ast.Call) and isinstance(callNodeVisited.func, ast.Name) and callNodeVisited.func.id in self.dictionaryFunctions):
-			inlineDefinition = self.inlineFunctionBody(callNodeVisited.func.id)
-			if (inlineDefinition and inlineDefinition.body):
-				statementTerminating = inlineDefinition.body[-1]
-				if (isinstance(statementTerminating, ast.Return) and statementTerminating.value is not None):
-					return self.visit(statementTerminating.value)
-				elif (isinstance(statementTerminating, ast.Expr) and statementTerminating.value is not None):
-					return self.visit(statementTerminating.value)
-				return ast.Constant(value=None)
-		return callNodeVisited
-
-	def visit_Expr(self, node: ast.Expr) -> Union[ast.AST, List[ast.AST]]:
-		if (isinstance(node.value, ast.Call)):
-			if (isinstance(node.value.func, ast.Name) and node.value.func.id in self.dictionaryFunctions):
-				inlineDefinition = self.inlineFunctionBody(node.value.func.id)
-				if (inlineDefinition):
-					return [self.visit(stmt) for stmt in inlineDefinition.body]
-		return self.generic_visit(node)
-
-class UnpackArrays(ast.NodeTransformer):
-	"""
-	A class that transforms array accesses using enum indices into local variables.
-
-	This AST transformer identifies array accesses using enum indices and replaces them
-	with local variables, adding initialization statements at the start of functions.
-
-	Parameters:
-		enumIndexClass (Type[EnumIndices]): The enum class used for array indexing
-		arrayName (str): The name of the array being accessed
-
-	Attributes:
-		enumIndexClass (Type[EnumIndices]): Stored enum class for index lookups
-		arrayName (str): Name of the array being transformed
-		substitutions (dict): Tracks variable substitutions and their original nodes
-
-	The transformer handles two main cases:
-	1. Scalar array access - array[EnumIndices.MEMBER]
-	2. Array slice access - array[EnumIndices.MEMBER, other_indices...]
-	For each identified access pattern, it:
-	1. Creates a local variable named after the enum member
-	2. Adds initialization code at function start
-	3. Replaces original array access with the local variable
-	"""
-
-	def __init__(self, enumIndexClass: Type[EnumIndices], arrayName: str):
-		self.enumIndexClass = enumIndexClass
-		self.arrayName = arrayName
-		self.substitutions = {}
-
-	def extract_member_name(self, node: ast.AST) -> Optional[str]:
-		"""Recursively extract enum member name from any node in the AST."""
-		if isinstance(node, ast.Attribute) and node.attr == 'value':
-			innerAttribute = node.value
-			while isinstance(innerAttribute, ast.Attribute):
-				if (isinstance(innerAttribute.value, ast.Name) and innerAttribute.value.id == self.enumIndexClass.__name__):
-					return innerAttribute.attr
-				innerAttribute = innerAttribute.value
-		return None
-
-	def transform_slice_element(self, node: ast.AST) -> ast.AST:
-		"""Transform any enum references within a slice element."""
-		if isinstance(node, ast.Subscript):
-			if isinstance(node.slice, ast.Attribute):
-				member_name = self.extract_member_name(node.slice)
-				if member_name:
-					return ast.Name(id=member_name, ctx=node.ctx)
-			elif isinstance(node, ast.Tuple):
-				# Handle tuple slices by transforming each element
-				return ast.Tuple(elts=cast(List[ast.expr], [self.transform_slice_element(elt) for elt in node.elts]), ctx=node.ctx)
-		elif isinstance(node, ast.Attribute):
-			member_name = self.extract_member_name(node)
-			if member_name:
-				return ast.Name(id=member_name, ctx=ast.Load())
-		return node
-
-	def visit_Subscript(self, node: ast.Subscript) -> ast.AST:
-		# Recursively visit any nested subscripts in value or slice
-		node.value = self.visit(node.value)
-		node.slice = self.visit(node.slice)
-		# If node.value is not our arrayName, just return node
-		if not (isinstance(node.value, ast.Name) and node.value.id == self.arrayName):
-			return node
-
-		# Handle scalar array access
-		if isinstance(node.slice, ast.Attribute):
-			memberName = self.extract_member_name(node.slice)
-			if memberName:
-				self.substitutions[memberName] = ('scalar', node)
-				return ast.Name(id=memberName, ctx=ast.Load())
-
-		# Handle array slice access
-		if isinstance(node.slice, ast.Tuple) and node.slice.elts:
-			firstElement = node.slice.elts[0]
-			memberName = self.extract_member_name(firstElement)
-			sliceRemainder = [self.visit(elem) for elem in node.slice.elts[1:]]
-			if memberName:
-				self.substitutions[memberName] = ('array', node)
-				if len(sliceRemainder) == 0:
-					return ast.Name(id=memberName, ctx=ast.Load())
-				return ast.Subscript(value=ast.Name(id=memberName, ctx=ast.Load()), slice=ast.Tuple(elts=sliceRemainder, ctx=ast.Load()) if len(sliceRemainder) > 1 else sliceRemainder[0], ctx=ast.Load())
-
-		# If single-element tuple, unwrap
-		if isinstance(node.slice, ast.Tuple) and len(node.slice.elts) == 1:
-			node.slice = node.slice.elts[0]
-
-		return node
-
-	def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
-		node = cast(ast.FunctionDef, self.generic_visit(node))
-
-		initializations = []
-		for name, (kind, original_node) in self.substitutions.items():
-			if kind == 'scalar':
-				initializations.append(ast.Assign(targets=[ast.Name(id=name, ctx=ast.Store())], value=original_node))
-			else:  # array
-				initializations.append(
-					ast.Assign(
-						targets=[ast.Name(id=name, ctx=ast.Store())],
-						value=ast.Subscript(value=ast.Name(id=self.arrayName, ctx=ast.Load()),
-							slice=ast.Attribute(value=ast.Attribute(
-									value=ast.Name(id=self.enumIndexClass.__name__, ctx=ast.Load()),
-									attr=name, ctx=ast.Load()), attr='value', ctx=ast.Load()), ctx=ast.Load())))
-
-		node.body = initializations + node.body
-		return node
+from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import *
 
 def Z0Z_OneCallable(pythonSource: str, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, inlineCallables: Optional[bool]=False , unpackArrays: Optional[bool]=False , allImports: Optional[UniversalImportTracker]=None ) -> str:
 	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
@@ -249,35 +81,30 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
 		return f"{identifierName} = array({stringMinimized}, dtype={arrayTarget.dtype})"
 	return stringMinimized
 
-def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
-	arrayType = type(argData)
+def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
 	constructorName = arrayType.__name__
 	# NOTE hack
 	constructorName = constructorName.replace('ndarray', 'array')
-	argData_dtype: numpy.dtype = argData.dtype
-	argData_dtypeName = argData.dtype.name
+	argData_dtype: numpy.dtype = arrayTarget.dtype
+	argData_dtypeName = arrayTarget.dtype.name
 
 	allImports.addImportFromStr(moduleConstructor, constructorName)
 	allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
 
-	onlyDataRLE = makeStrRLEcompacted(argData)
+	onlyDataRLE = makeStrRLEcompacted(arrayTarget)
 	astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
 	dataAst = astStatement.value
 
-	arrayCall = ast.Call(
-		func=ast.Name(id=constructorName, ctx=ast.Load())
-		, args=[dataAst]
-		, keywords=[ast.keyword(arg='dtype' , value=ast.Name(id=argData_dtypeName , ctx=ast.Load()) ) ] )
+	arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], dictionaryKeywords={'dtype': ast.Name(id=argData_dtypeName, ctx=ast.Load())})
 
-	assignment = ast.Assign( targets=[ast.Name(id=astArg.arg, ctx=ast.Store())], value=arrayCall )
+	assignment = ast.Assign(targets=[ast.Name(id=astArg.arg, ctx=ast.Store())], value=arrayCall)
 	FunctionDefTarget.body.insert(0, assignment)
-	FunctionDefTarget.args.args.remove(astArg)
-
 	return FunctionDefTarget, allImports
 
-def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
-	arrayType = type(argData)
+def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
 	constructorName = arrayType.__name__
 	# NOTE hack
@@ -294,24 +121,20 @@ def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, ar
 				if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == astArg.arg and isinstance(astSubscript.slice, ast.Attribute):
 					indexAs_astAttribute: ast.Attribute = astSubscript.slice
 					indexAsStr = ast.unparse(indexAs_astAttribute)
-					argDataSlice = argData[eval(indexAsStr)]
+					argDataSlice = arrayTarget[eval(indexAsStr)]
 
 					onlyDataRLE = makeStrRLEcompacted(argDataSlice)
 					astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
 					dataAst = astStatement.value
 
-					arrayCall = ast.Call(
-						func=ast.Name(id=constructorName, ctx=ast.Load()) , args=[dataAst]
-						, keywords=[ast.keyword(arg='dtype', value=ast.Name(id=argData_dtypeName, ctx=ast.Load()) ) ] )
+					arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], dictionaryKeywords={'dtype': ast.Name(id=argData_dtypeName, ctx=ast.Load())})
 
 					assignment = ast.Assign( targets=[astAssignee], value=arrayCall )
 					FunctionDefTarget.body.insert(0, assignment)
 					FunctionDefTarget.body.remove(stmt)
-
-	FunctionDefTarget.args.args.remove(astArg)
 	return FunctionDefTarget, allImports
 
-def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, argData: numpy.ndarray, Z0Z_listChaff: List[str], allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayTarget: numpy.ndarray, Z0Z_listChaff: List[str], allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
 	for stmt in FunctionDefTarget.body.copy():
 		if isinstance(stmt, ast.Assign):
@@ -323,14 +146,21 @@ def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arg
 				if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == astArg.arg and isinstance(astSubscript.slice, ast.Attribute):
 					indexAs_astAttribute: ast.Attribute = astSubscript.slice
 					indexAsStr = ast.unparse(indexAs_astAttribute)
-					argDataSlice: int = argData[eval(indexAsStr)].item()
+					argDataSlice: int = arrayTarget[eval(indexAsStr)].item()
 					astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()) , args=[ast.Constant(value=argDataSlice)], keywords=[])
 					assignment = ast.Assign(targets=[astAssignee], value=astCall)
 					if astAssignee.id not in Z0Z_listChaff:
 						FunctionDefTarget.body.insert(0, assignment)
 					FunctionDefTarget.body.remove(stmt)
-	FunctionDefTarget.args.args.remove(astArg)
 	return FunctionDefTarget, allImports
+
+def removeIdentifierAssignFrom_body(FunctionDefTarget: ast.FunctionDef, identifier) -> ast.FunctionDef:
+	for stmt in FunctionDefTarget.body.copy():
+		if isinstance(stmt, ast.Assign):
+			if isinstance(stmt.targets[0], ast.Subscript) and isinstance(stmt.targets[0].value, ast.Name):
+				if stmt.targets[0].value.id == identifier:
+					FunctionDefTarget.body.remove(stmt)
+	return FunctionDefTarget
 
 def evaluateAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
@@ -345,15 +175,6 @@ def evaluateAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: Uni
 				FunctionDefTarget.body.insert(0, assignment)
 				FunctionDefTarget.body.remove(stmt)
 	return FunctionDefTarget, allImports
-
-def removeIdentifierFrom_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg) -> ast.FunctionDef:
-	for stmt in FunctionDefTarget.body.copy():
-		if isinstance(stmt, ast.Assign):
-			if isinstance(stmt.targets[0], ast.Subscript) and isinstance(stmt.targets[0].value, ast.Name):
-				if stmt.targets[0].value.id == astArg.arg:
-					FunctionDefTarget.body.remove(stmt)
-	FunctionDefTarget.args.args.remove(astArg)
-	return FunctionDefTarget
 
 def astObjectToAstConstant(FunctionDefTarget: ast.FunctionDef, object: str, value: int) -> ast.FunctionDef:
 	"""
@@ -431,3 +252,84 @@ def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, itera
 	After unrolling, we can remove three `indexDimension` statements: 1) the first initialization, which is really a memory allocation, 2) the loop initialization, and 3) the loop increment.
 	"""
 	return FunctionDefTarget
+
+def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
+	# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
+	for decoratorItem in astCallable.decorator_list.copy():
+		import warnings
+		astCallable.decorator_list.remove(decoratorItem)
+		warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
+	return astCallable
+
+def thisIsNumbaDotJit(Ima: ast.AST) -> bool:
+	return ifThis.isCallWithAttribute(Z0Z_getDatatypeModuleScalar(), Z0Z_getDecoratorCallable())(Ima)
+
+def thisIsJit(Ima: ast.AST) -> bool:
+	return ifThis.isCallWithName(Z0Z_getDecoratorCallable())(Ima)
+
+def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
+	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)
+
+def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+	datatypeModuleDecorator = Z0Z_getDatatypeModuleScalar()
+	def make_arg4parameter(signatureElement: ast.arg):
+		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
+			annotationShape = signatureElement.annotation.slice.elts[0]
+			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
+				shapeAsListSlices: Sequence[ast.expr] = [ast.Slice() for axis in range(len(annotationShape.slice.elts))]
+				shapeAsListSlices[-1] = ast.Slice(step=ast.Constant(value=1))
+				shapeAST = ast.Tuple(elts=list(shapeAsListSlices), ctx=ast.Load())
+			else:
+				shapeAST = ast.Slice(step=ast.Constant(value=1))
+
+			annotationDtype = signatureElement.annotation.slice.elts[1]
+			if (isinstance(annotationDtype, ast.Subscript) and isinstance(annotationDtype.slice, ast.Attribute)):
+				datatypeAST = annotationDtype.slice.attr
+			else:
+				datatypeAST = None
+
+			ndarrayName = signatureElement.arg
+			Z0Z_hacky_dtype = hackSSOTdatatype(ndarrayName)
+			datatype_attr = datatypeAST or Z0Z_hacky_dtype
+			allImports.addImportFromStr(datatypeModuleDecorator, datatype_attr)
+			datatypeNumba = ast.Name(id=datatype_attr, ctx=ast.Load())
+
+			return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
+
+	list_argsDecorator: Sequence[ast.expr] = []
+
+	list_arg4signature_or_function: Sequence[ast.expr] = []
+	for parameter in FunctionDefTarget.args.args:
+		signatureElement = make_arg4parameter(parameter)
+		if signatureElement:
+			list_arg4signature_or_function.append(signatureElement)
+
+	if FunctionDefTarget.returns and isinstance(FunctionDefTarget.returns, ast.Name):
+		theReturn: ast.Name = FunctionDefTarget.returns
+		list_argsDecorator = [cast(ast.expr, ast.Call(func=ast.Name(id=theReturn.id, ctx=ast.Load())
+							, args=list_arg4signature_or_function if list_arg4signature_or_function else [] , keywords=[] ) )]
+	elif list_arg4signature_or_function:
+		list_argsDecorator = [cast(ast.expr, ast.Tuple(elts=list_arg4signature_or_function, ctx=ast.Load()))]
+
+	for decorator in FunctionDefTarget.decorator_list.copy():
+		if thisIsAnyNumbaJitDecorator(decorator):
+			decorator = cast(ast.Call, decorator)
+			if parametersNumba is None:
+				parametersNumbaSherpa = Then.copy_astCallKeywords(decorator)
+				if (HunterIsSureThereAreBetterWaysToDoThis := True):
+					if parametersNumbaSherpa:
+						parametersNumba = cast(ParametersNumba, parametersNumbaSherpa)
+		FunctionDefTarget.decorator_list.remove(decorator)
+
+	FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
+	if parametersNumba is None:
+		parametersNumba = parametersNumbaDEFAULT
+	listDecoratorKeywords = [ast.keyword(arg=parameterName, value=ast.Constant(value=parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
+
+	decoratorModule = Z0Z_getDatatypeModuleScalar()
+	decoratorCallable = Z0Z_getDecoratorCallable()
+	allImports.addImportFromStr(decoratorModule, decoratorCallable)
+	astDecorator = Then.make_astCall(decoratorCallable, list_argsDecorator, listDecoratorKeywords, None)
+
+	FunctionDefTarget.decorator_list = [astDecorator]
+	return FunctionDefTarget, allImports

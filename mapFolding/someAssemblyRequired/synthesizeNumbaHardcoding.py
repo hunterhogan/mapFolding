@@ -132,7 +132,8 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
 			case 'gapsWhere':
 				FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
 			case 'foldGroups':
-				FunctionDefTarget = removeIdentifierFrom_body(FunctionDefTarget, pirateScowl)
+				FunctionDefTarget = removeIdentifierAssignFrom_body(FunctionDefTarget, pirateScowl.arg)
+		FunctionDefTarget.args.args.remove(pirateScowl)
 
 	# Move function parameters to the function body,
 	# initialize identifiers with their state types and values,
