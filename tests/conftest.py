@@ -2,30 +2,89 @@
 
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
-from tests.conftest_tmpRegistry import (
-	pathCacheTesting,
-	pathDataSamples,
-	pathFilenameFoldsTotalTesting,
-	pathTempTesting,
-	setupTeardownTestData,
-)
-from tests.conftest_uniformTests import (
-	uniformTestMessage,
-	standardizedEqualTo,
-	standardizedSystemExit,
-)
 from mapFolding import *
-from mapFolding import basecamp
-from mapFolding import getAlgorithmCallable, getDispatcherCallable
+from mapFolding import basecamp, getAlgorithmCallable, getDispatcherCallable
 from mapFolding.beDRY import *
-from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues, _getOEISidInformation
+from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidInformation, _getOEISidValues
 from mapFolding.oeis import *
-from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 from typing import Any, Callable, ContextManager, Dict, Generator, List, Optional, Sequence, Set, Tuple, Type, Union
+from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 import pathlib
 import pytest
 import random
+import shutil
 import unittest.mock
+import uuid
+
+# SSOT for test data paths and filenames
+pathDataSamples = pathlib.Path("tests/dataSamples")
+# NOTE `tmp` is not a diminutive form of temporary: it signals a technical term. And "temp" is strongly disfavored.
+pathTmpRoot = pathDataSamples / "tmp"
+
+# The registrar maintains the register of temp files
+registerOfTemporaryFilesystemObjects: Set[pathlib.Path] = set()
+
+def registrarRecordsTmpObject(path: pathlib.Path) -> None:
+	"""The registrar adds a tmp file to the register."""
+	registerOfTemporaryFilesystemObjects.add(path)
+
+def registrarDeletesTmpObjects() -> None:
+	"""The registrar cleans up tmp files in the register."""
+	for pathTmp in sorted(registerOfTemporaryFilesystemObjects, reverse=True):
+		try:
+			if pathTmp.is_file():
+				pathTmp.unlink(missing_ok=True)
+			elif pathTmp.is_dir():
+				shutil.rmtree(pathTmp, ignore_errors=True)
+		except Exception as ERRORmessage:
+			print(f"Warning: Failed to clean up {pathTmp}: {ERRORmessage}")
+	registerOfTemporaryFilesystemObjects.clear()
+
+@pytest.fixture(scope="session", autouse=True)
+def setupTeardownTmpObjects() -> Generator[None, None, None]:
+	"""Auto-fixture to setup test data directories and cleanup after."""
+	pathDataSamples.mkdir(exist_ok=True)
+	pathTmpRoot.mkdir(exist_ok=True)
+	yield
+	registrarDeletesTmpObjects()
+
+@pytest.fixture
+def pathTmpTesting(request: pytest.FixtureRequest) -> pathlib.Path:
+	pathTmp = pathTmpRoot / str(uuid.uuid4().hex)
+	pathTmp.mkdir(parents=True, exist_ok=False)
+
+	registrarRecordsTmpObject(pathTmp)
+	return pathTmp
+
+@pytest.fixture
+def pathFilenameTmpTesting(request: pytest.FixtureRequest) -> pathlib.Path:
+	try:
+		extension = request.param
+	except AttributeError:
+		extension = ".txt"
+
+	uuidHex = uuid.uuid4().hex
+	subpath = uuidHex[0:-8]
+	filenameStem = uuidHex[-8:None]
+
+	pathFilenameTmp = pathlib.Path(pathTmpRoot, subpath, filenameStem + extension)
+	pathFilenameTmp.parent.mkdir(parents=True, exist_ok=False)
+
+	registrarRecordsTmpObject(pathFilenameTmp)
+	return pathFilenameTmp
+
+@pytest.fixture
+def pathCacheTesting(pathTmpTesting: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
+	"""Temporarily replace the OEIS cache directory with a test directory."""
+	from mapFolding import oeis as there_must_be_a_better_way
+	pathCacheOriginal = there_must_be_a_better_way._pathCache
+	there_must_be_a_better_way._pathCache = pathTmpTesting
+	yield pathTmpTesting
+	there_must_be_a_better_way._pathCache = pathCacheOriginal
+
+@pytest.fixture
+def pathFilenameFoldsTotalTesting(pathTmpTesting: pathlib.Path) -> pathlib.Path:
+	return pathTmpTesting.joinpath("foldsTotalTest.txt")
 
 def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
 	"""Returns a dictionary mapping dimension tuples to their known folding totals."""
@@ -181,3 +240,54 @@ def useAlgorithmDirectly() -> Generator[None, Any, None]:
 
 	# Restore original function
 	basecamp.getDispatcherCallable = original_dispatcher
+
+def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
+	"""Format assertion message for any test comparison."""
+	return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"
+			f"Expected: {expected}\n"
+			f"Got: {actual}")
+
+def standardizedEqualTo(expected: Any, functionTarget: Callable, *arguments: Any) -> None:
+	"""Template for tests expecting an error."""
+	if type(expected) is Type[Exception]:
+		messageExpected = expected.__name__
+	else:
+		messageExpected = expected
+
+	try:
+		messageActual = actual = functionTarget(*arguments)
+	except Exception as actualError:
+		messageActual = type(actualError).__name__
+		actual = type(actualError)
+
+	assert actual == expected, uniformTestMessage(messageExpected, messageActual, functionTarget.__name__, *arguments)
+
+def standardizedSystemExit(expected: Union[str, int, Sequence[int]], functionTarget: Callable, *arguments: Any) -> None:
+	"""Template for tests expecting SystemExit.
+
+	Parameters
+		expected: Exit code expectation:
+			- "error": any non-zero exit code
+			- "nonError": specifically zero exit code
+			- int: exact exit code match
+			- Sequence[int]: exit code must be one of these values
+		functionTarget: The function to test
+		arguments: Arguments to pass to the function
+	"""
+	with pytest.raises(SystemExit) as exitInfo:
+		functionTarget(*arguments)
+
+	exitCode = exitInfo.value.code
+
+	if expected == "error":
+		assert exitCode != 0, \
+			f"Expected error exit (non-zero) but got code {exitCode}"
+	elif expected == "nonError":
+		assert exitCode == 0, \
+			f"Expected non-error exit (0) but got code {exitCode}"
+	elif isinstance(expected, (list, tuple)):
+		assert exitCode in expected, \
+			f"Expected exit code to be one of {expected} but got {exitCode}"
+	else:
+		assert exitCode == expected, \
+			f"Expected exit code {expected} but got {exitCode}"

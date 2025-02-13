@@ -1,6 +1,6 @@
 from contextlib import redirect_stdout
 from tests.conftest import *
-from typing import Dict, List, Optional, Any, Tuple, Literal, Callable, Generator
+from typing import Dict, List, Any, Literal, Callable, Generator
 from Z0Z_tools import intInnit
 import io
 import itertools
@@ -61,37 +61,6 @@ def test_getLeavesTotal_edge_cases() -> None:
 	standardizedEqualTo(6, getLeavesTotal, listOriginal)
 	standardizedEqualTo([2, 3], lambda x: x, listOriginal)  # Check that the list wasn't modified
 
-# TODO fix this mock
-# @pytest.mark.parametrize("foldsValue,writeFoldsTarget", [
-#	 (756839, "foldsTotalTest.txt"),  # Direct file
-#	 (2640919, "foldsTotalTest.txt"), # Direct file
-#	 (7715177, None),				  # Directory, will use default filename
-# ])
-# def test_countFolds_writeFoldsTotal(
-#	 listDimensionsTestFunctionality: List[int],
-#	 pathTempTesting: pathlib.Path,
-#	 mockFoldingFunction: Callable[..., Callable[..., None]],
-#	 mockDispatcher: Callable[[Callable[..., None]], Any],
-#	 foldsValue: int,
-#	 writeFoldsTarget: Optional[str]
-# ) -> None:
-#	 """Test writing folds total to either a file or directory."""
-#	 # For directory case, use the directory path directly
-#	 if writeFoldsTarget is None:
-#		 pathWriteTarget = pathTempTesting
-#		 filenameFoldsTotalExpected = getFilenameFoldsTotal(listDimensionsTestFunctionality)
-#	 else:
-#		 pathWriteTarget = pathTempTesting / writeFoldsTarget
-#		 filenameFoldsTotalExpected = writeFoldsTarget
-
-#	 foldsTotalExpected = foldsValue * getLeavesTotal(listDimensionsTestFunctionality)
-#	 mock_countFolds = mockFoldingFunction(foldsValue, listDimensionsTestFunctionality)
-
-#	 with mockDispatcher(mock_countFolds):
-#		 returned = countFolds(listDimensionsTestFunctionality, pathLikeWriteFoldsTotal=pathWriteTarget)
-
-#	 standardizedEqualTo(str(foldsTotalExpected), lambda: (pathTempTesting / filenameFoldsTotalExpected).read_text())
-
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_intInnit())
 def testIntInnit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
 	callablePytest()
@@ -117,46 +86,6 @@ def test_setCPUlimit(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | 
 def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: List[int]) -> None:
 	connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality)
 	assert numpy.all(connectionGraph >= 0), "All values in the connection graph should be non-negative."
-
-# @pytest.mark.parametrize("datatype", ['int16', 'uint64'])
-# def test_makeConnectionGraph_datatype(listDimensionsTestFunctionality: List[int], datatype) -> None:
-#	 connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality, datatype=datatype)
-#	 assert connectionGraph.dtype == datatype, f"Expected datatype {datatype}, but got {connectionGraph.dtype}."
-
-"""5 parameters
-listDimensionsTestFunctionality
-
-computationDivisions
-	None
-	random: int, first included: 2, first excluded: leavesTotal
-	maximum
-	cpu
-
-CPUlimit
-	None
-	True
-	False
-	0
-	1
-	-1
-	random: 0 < float < 1
-	random: -1 < float < 0
-	random: int, first included: 2, first excluded: (min(leavesTotal, 16) - 1)
-	random: int, first included: -1 * (min(leavesTotal, 16) - 1), first excluded: -1
-
-datatypeMedium
-	None
-	numpy.int64
-	numpy.intc
-	numpy.uint16
-
-datatypeLarge
-	None
-	numpy.int64
-	numpy.intp
-	numpy.uint32
-
-"""
 
 @pytest.fixture
 def parameterIterator() -> Callable[[List[int]], Generator[Dict[str, Any], None, None]]:
@@ -224,31 +153,15 @@ def parameterIterator() -> Callable[[List[int]], Generator[Dict[str, Any], None,
 
 	return generateCombinations
 
-# TODO refactor due to changes
-# def test_pathJobDEFAULT_colab() -> None:
-#	 """Test that pathJobDEFAULT is set correctly when running in Google Colab."""
-#	 # Mock sys.modules to simulate running in Colab
-#	 with unittest.mock.patch.dict('sys.modules', {'google.colab': unittest.mock.MagicMock()}):
-#		 # Force reload of theSSOT to trigger Colab path logic
-#		 import importlib
-#		 import mapFolding.theSSOT
-#		 importlib.reload(mapFolding.theSSOT)
-
-#		 # Check that path was set to Colab-specific value
-#		 assert mapFolding.theSSOT.pathJobDEFAULT == pathlib.Path("/content/drive/MyDrive") / "jobs"
-
-#	 # Reload one more time to restore original state
-#	 importlib.reload(mapFolding.theSSOT)
-
-def test_saveFoldsTotal_fallback(pathTempTesting: pathlib.Path) -> None:
+def test_saveFoldsTotal_fallback(pathTmpTesting: pathlib.Path) -> None:
 	foldsTotal = 123
-	pathFilename = pathTempTesting / "foldsTotal.txt"
+	pathFilename = pathTmpTesting / "foldsTotal.txt"
 	with unittest.mock.patch("pathlib.Path.write_text", side_effect=OSError("Simulated write failure")):
-		with unittest.mock.patch("os.getcwd", return_value=str(pathTempTesting)):
+		with unittest.mock.patch("os.getcwd", return_value=str(pathTmpTesting)):
 			capturedOutput = io.StringIO()
 			with redirect_stdout(capturedOutput):
 				saveFoldsTotal(pathFilename, foldsTotal)
-	fallbackFiles = list(pathTempTesting.glob("foldsTotalYO_*.txt"))
+	fallbackFiles = list(pathTmpTesting.glob("foldsTotalYO_*.txt"))
 	assert len(fallbackFiles) == 1, "Fallback file was not created upon write failure."
 
 def test_makeDataContainer_default_datatype() -> None:

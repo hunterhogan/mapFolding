@@ -120,6 +120,12 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
 	FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
 	if not FunctionDefTarget: raise ValueError(f"I received `{callableTarget=}` and {algorithmSource.__name__=}, but I could not find that function in that source.")
 
+	unrollCountGaps = False
+	if unrollCountGaps:
+		unrollSlices = stateJob['my'][indexMy.dimensionsTotal]
+	else:
+		unrollSlices = None
+
 	for pirateScowl in FunctionDefTarget.args.args.copy():
 		match pirateScowl.arg:
 			case 'my':
@@ -127,7 +133,7 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
 			case 'track':
 				FunctionDefTarget, allImports = evaluateArrayIn_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
 			case 'connectionGraph':
-				FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports, stateJob['my'][indexMy.dimensionsTotal])
+				FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports, unrollSlices)
 			case 'gapsWhere':
 				FunctionDefTarget, allImports = moveArrayTo_body(FunctionDefTarget, pirateScowl, stateJob[pirateScowl.arg], allImports)
 			case 'foldGroups':
@@ -141,26 +147,27 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
 	FunctionDefTarget = astNameToAstConstant(FunctionDefTarget, 'dimensionsTotal', int(stateJob['my'][indexMy.dimensionsTotal]))
 	FunctionDefTarget = astObjectToAstConstant(FunctionDefTarget, 'foldGroups[-1]', int(stateJob['foldGroups'][-1]))
 
-	FunctionDefTarget = unrollWhileLoop(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal])
-	FunctionDefTarget = removeIdentifierAssign(FunctionDefTarget, 'indexDimension')
-	for index in range(stateJob['my'][indexMy.dimensionsTotal]):
-		class ReplaceConnectionGraph(ast.NodeTransformer):
-			def visit_Subscript(self, node: ast.Subscript) -> ast.AST:
-				node = cast(ast.Subscript, self.generic_visit(node))
-				if (isinstance(node.value, ast.Name) and node.value.id == "connectionGraph" and
-					isinstance(node.slice, ast.Tuple) and len(node.slice.elts) >= 1):
-					firstElement = node.slice.elts[0]
-					if isinstance(firstElement, ast.Constant) and firstElement.value == index:
-						newName = ast.Name(id=f"connectionGraph_{index}", ctx=ast.Load())
-						remainingIndices = node.slice.elts[1:]
-						if len(remainingIndices) == 1:
-							newSlice = remainingIndices[0]
-						else:
-							newSlice = ast.Tuple(elts=remainingIndices, ctx=ast.Load())
-						return ast.copy_location(ast.Subscript(value=newName, slice=newSlice, ctx=node.ctx), node)
-				return node
-		transformer = ReplaceConnectionGraph()
-		FunctionDefTarget = transformer.visit(FunctionDefTarget)
+	if unrollCountGaps:
+		FunctionDefTarget = unrollWhileLoop(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal])
+		FunctionDefTarget = removeIdentifierAssign(FunctionDefTarget, 'indexDimension')
+		for index in range(stateJob['my'][indexMy.dimensionsTotal]):
+			class ReplaceConnectionGraph(ast.NodeTransformer):
+				def visit_Subscript(self, node: ast.Subscript) -> ast.AST:
+					node = cast(ast.Subscript, self.generic_visit(node))
+					if (isinstance(node.value, ast.Name) and node.value.id == "connectionGraph" and
+						isinstance(node.slice, ast.Tuple) and len(node.slice.elts) >= 1):
+						firstElement = node.slice.elts[0]
+						if isinstance(firstElement, ast.Constant) and firstElement.value == index:
+							newName = ast.Name(id=f"connectionGraph_{index}", ctx=ast.Load())
+							remainingIndices = node.slice.elts[1:]
+							if len(remainingIndices) == 1:
+								newSlice = remainingIndices[0]
+							else:
+								newSlice = ast.Tuple(elts=remainingIndices, ctx=ast.Load())
+							return ast.copy_location(ast.Subscript(value=newName, slice=newSlice, ctx=node.ctx), node)
+					return node
+			transformer = ReplaceConnectionGraph()
+			FunctionDefTarget = transformer.visit(FunctionDefTarget)
 
 	FunctionDefTarget, allImports = addReturnJobNumba(FunctionDefTarget, stateJob, allImports)
 	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
@@ -205,7 +212,7 @@ def mainBig():
 	makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
 
 def mainSmall():
-	listDimensions = [6,6]
+	listDimensions = [3,4]
 	setDatatypeFoldsTotal('int64', sourGrapes=True)
 	setDatatypeElephino('uint8', sourGrapes=True)
 	setDatatypeLeavesTotal('uint8', sourGrapes=True)

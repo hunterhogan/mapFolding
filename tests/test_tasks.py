@@ -1,6 +1,6 @@
 from tests.conftest import *
+from typing import List, Dict, Literal, Tuple
 import pytest
-from typing import List, Dict, Literal, Tuple, Any
 
 # TODO add a test. `C` = number of logical cores available. `n = C + 1`. Ensure that `[2,n]` is computed correctly.
 # Or, probably smarter: limit the number of cores, then run a test with C+1.
@@ -18,9 +18,9 @@ def test_countFoldsComputationDivisionsMaximum(listDimensionsTestParallelization
 def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
 	callablePytest()
 
-# @pytest.mark.parametrize("CPUlimitParameter", [{"invalid": True}, ["weird"]])
-# def test_countFolds_cpuLimitOopsie(listDimensionsTestFunctionality: List[int], CPUlimitParameter: Dict[str, bool] | List[str]) -> None:
-#	 standardizedEqualTo((AttributeError or ValueError), countFolds, listDimensionsTestFunctionality, None, 'cpu', CPUlimitParameter)
+@pytest.mark.parametrize("CPUlimitParameter", [{"invalid": True}, ["weird"]])
+def test_countFolds_cpuLimitOopsie(listDimensionsTestFunctionality: List[int], CPUlimitParameter: Dict[str, bool] | List[str]) -> None:
+	standardizedEqualTo(ValueError, countFolds, listDimensionsTestFunctionality, None, 'cpu', CPUlimitParameter)
 
 @pytest.mark.parametrize("computationDivisions, concurrencyLimit, listDimensions, expectedTaskDivisions", [
 	(None, 4, [9, 11], 0),
