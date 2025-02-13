@@ -1,4 +1,4 @@
-from synthesizeNumba import *
+from mapFolding.someAssemblyRequired.synthesizeNumba import *
 
 def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: Optional[str] = None, algorithmSource: Optional[ModuleType] = None) -> None:
 	if not algorithmSource:
@@ -200,7 +200,7 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
 	pathFilenameWriteJob.write_text(pythonSource)
 	return pathFilenameWriteJob
 
-def mainBig():
+def mainBig() -> None:
 	setDatatypeModule('numpy', sourGrapes=True)
 	setDatatypeFoldsTotal('int64', sourGrapes=True)
 	setDatatypeElephino('uint8', sourGrapes=True)
@@ -211,7 +211,7 @@ def mainBig():
 	callableDispatcher = 'doTheNeedful'
 	makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
 
-def mainSmall():
+def mainSmall() -> None:
 	listDimensions = [3,4]
 	setDatatypeFoldsTotal('int64', sourGrapes=True)
 	setDatatypeElephino('uint8', sourGrapes=True)

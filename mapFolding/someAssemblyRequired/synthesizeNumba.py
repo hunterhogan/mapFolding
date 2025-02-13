@@ -1,5 +1,6 @@
 """I think this module is free of hardcoded values.
 TODO: consolidate the logic in this module."""
+from ast import Subscript
 from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import *
 
 def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str]=None) -> str:
@@ -19,7 +20,7 @@ def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str
 			Format: "{identifierName} = numpy.array({compressed_data}, dtype=numpy.{dtype})"
 	"""
 
-	def compressRangesNDArrayNoFlatten(arraySlice):
+	def compressRangesNDArrayNoFlatten(arraySlice: numpy.ndarray) -> list[list[Any] | Any | numpy.ndarray[Any, Any]] | list[Any] | Any | numpy.ndarray[Any, Any]:
 		if isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim > 1:
 			return [compressRangesNDArrayNoFlatten(arraySlice[index]) for index in range(arraySlice.shape[0])]
 		elif isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim == 1:
@@ -60,7 +61,7 @@ def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayT
 	allImports.addImportFromStr(moduleConstructor, constructorName)
 	allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
 
-	def insertAssign(assignee: str, arraySlice: numpy.ndarray):
+	def insertAssign(assignee: str, arraySlice: numpy.ndarray) -> None:
 		nonlocal FunctionDefTarget
 		onlyDataRLE = makeStrRLEcompacted(arraySlice) #NOTE
 		astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
@@ -222,7 +223,7 @@ def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationS
 
 	return FunctionDefTarget, allImports
 
-def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> ast.FunctionDef:
+def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> Any:
 	"""
 	Unroll all nested while loops matching the condition that their test uses `iteratorName`.
 	"""
@@ -339,11 +340,11 @@ def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
 
 def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	datatypeModuleDecorator = Z0Z_getDatatypeModuleScalar()
-	def make_arg4parameter(signatureElement: ast.arg):
+	def make_arg4parameter(signatureElement: ast.arg) -> Subscript | None:
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
-				shapeAsListSlices: Sequence[ast.expr] = [ast.Slice() for axis in range(len(annotationShape.slice.elts))]
+				shapeAsListSlices = [ast.Slice() for axis in range(len(annotationShape.slice.elts))]
 				shapeAsListSlices[-1] = ast.Slice(step=ast.Constant(value=1))
 				shapeAST = ast.Tuple(elts=list(shapeAsListSlices), ctx=ast.Load())
 			else:
@@ -362,10 +363,11 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 			datatypeNumba = ast.Name(id=datatype_attr, ctx=ast.Load())
 
 			return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
+		return
 
 	list_argsDecorator: Sequence[ast.expr] = []
 
-	list_arg4signature_or_function: Sequence[ast.expr] = []
+	list_arg4signature_or_function: List[ast.expr] = []
 	for parameter in FunctionDefTarget.args.args:
 		signatureElement = make_arg4parameter(parameter)
 		if signatureElement:

@@ -6,7 +6,7 @@ import inspect
 import pathlib
 import sys
 
-def transformPythonToJAX(codePython: str):
+def transformPythonToJAX(codePython: str) -> None:
 	astPython = ast.parse(codePython)
 
 def writeJax(*, codeSource: Optional[str] = None, pathFilenameAlgorithm: Optional[pathlib.Path] = None, pathFilenameDestination: Optional[pathlib.Path] = None) -> None:

@@ -57,14 +57,15 @@ run = { branch = true, concurrency = [
     "multiprocessing",
 ], data_file = "tests/coverage/.coverage", omit = [
     "tests/*",
-    # "mapFolding/someAssemblyRequired/*",
+    "mapFolding/someAssemblyRequired/*",
     "Z0Z_*",
 ], parallel = true, source = [
     ".",] }
 xml = { output = "tests/coverage/coverage.xml" }
 [tool.pytest.ini_options]
 log_auto_indent = ["On"]
-addopts = ["--color=yes", "-n 4", "--mypy", "--mypy-ignore-missing-imports"]
+addopts = ["--color=yes", "-n 4"]
+# addopts = ["--color=yes", "-n 4", "--mypy", "--mypy-ignore-missing-imports"]
 env = ["NUMBA_DISABLE_JIT=1"]
 testpaths = ["tests"]
 
@@ -86,9 +87,9 @@ warn_no_return = true
 warn_unreachable = true
 packages = ["mapFolding"]
 exclude = [
-    "mapFolding/citations/*",
-    "mapFolding/jobs/*",
-    "mapFolding/reference/*",
-    "mapFolding/someAssemblyRequired/*",
+    "/mapFolding/citations/*",
+    "/mapFolding/jobs/*",
+    "/mapFolding/reference/*",
+    "/mapFolding/someAssemblyRequired/*",
     "tests/*",
     "Z0Z_*",]

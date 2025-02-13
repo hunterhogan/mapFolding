@@ -27,7 +27,7 @@ from mapFolding import (
 	Z0Z_setDatatypeModuleScalar,
 	Z0Z_setDecoratorCallable,
 )
-from mapFolding.someAssemblyRequired import makeStateJob
+from mapFolding.someAssemblyRequired.makeJob import makeStateJob
 from types import ModuleType
 from typing import Any, Callable, cast, Dict, List, Optional, Sequence, Set, Tuple, Type, Union
 import ast
@@ -106,14 +106,14 @@ class NodeReplacer(ast.NodeTransformer):
 		self.findMe = findMe
 		self.nodeReplacementBuilder = nodeReplacementBuilder
 
-	def visit(self, node: ast.AST) -> Optional[ast.AST]:
+	def visit(self, node: ast.AST) -> ast.AST | None | Any:
 		if self.findMe(node):
 			return self.nodeReplacementBuilder(node)
 		return super().visit(node)
 
 class UniversalImportTracker:
-	def __init__(self):
-		self.dictionaryImportFrom = collections.defaultdict(set)
+	def __init__(self) -> None:
+		self.dictionaryImportFrom: Dict[str, Set] = collections.defaultdict(set)
 		self.setImport = set()
 
 	def addAst(self, astImport_: Union[ast.Import, ast.ImportFrom]) -> None:
@@ -121,7 +121,8 @@ class UniversalImportTracker:
 			for alias in astImport_.names:
 				self.setImport.add(alias.name)
 		elif isinstance(astImport_, ast.ImportFrom):
-			self.dictionaryImportFrom[astImport_.module].update(alias.name for alias in astImport_.names)
+			if astImport_.module is not None:
+				self.dictionaryImportFrom[astImport_.module].update(alias.name for alias in astImport_.names)
 
 	def addImportFromStr(self, module: str, name: str) -> None:
 		self.dictionaryImportFrom[module].add(name)
@@ -174,7 +175,7 @@ class RecursiveInliner(ast.NodeTransformer):
 			self.visit(astNode)
 		return inlineDefinition
 
-	def visit_Call(self, node: ast.Call) -> ast.AST:
+	def visit_Call(self, node: ast.Call) -> Any | ast.Constant | ast.Call | ast.AST:
 		callNodeVisited = self.generic_visit(node)
 		if (isinstance(callNodeVisited, ast.Call) and isinstance(callNodeVisited.func, ast.Name) and callNodeVisited.func.id in self.dictionaryFunctions):
 			inlineDefinition = self.inlineFunctionBody(callNodeVisited.func.id)
@@ -220,10 +221,10 @@ class UnpackArrays(ast.NodeTransformer):
 	3. Replaces original array access with the local variable
 	"""
 
-	def __init__(self, enumIndexClass: Type[EnumIndices], arrayName: str):
+	def __init__(self, enumIndexClass: Type[EnumIndices], arrayName: str) -> None:
 		self.enumIndexClass = enumIndexClass
 		self.arrayName = arrayName
-		self.substitutions = {}
+		self.substitutions: Dict[str, Any] = {}
 
 	def extract_member_name(self, node: ast.AST) -> Optional[str]:
 		"""Recursively extract enum member name from any node in the AST."""
