@@ -48,6 +48,7 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
 	for callableTarget in listCallablesInline:
 		pythonSource = inspect.getsource(algorithmSource)
 		parametersNumba = None
+		inlineCallables = True
 		unpackArrays = False
 		match callableTarget:
 			case 'countParallel':
@@ -57,7 +58,7 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
 				unpackArrays = True
 			case 'countInitialize':
 				parametersNumba = parametersNumbaDEFAULT
-		pythonSource = inlineOneCallable(pythonSource, callableTarget, parametersNumba, unpackArrays)
+		pythonSource = Z0Z_OneCallable(pythonSource, callableTarget, parametersNumba, inlineCallables, unpackArrays)
 		if not pythonSource:
 			raise Exception("Pylance, OMG! The sky is falling!")
 
@@ -74,7 +75,15 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
 	# Generate dispatcher if requested
 	if callableDispatcher:
 		pythonSource = inspect.getsource(algorithmSource)
-		pythonSource = makeDispatcherNumba(pythonSource, callableDispatcher, listStuffYouOughtaKnow)
+
+		allImports = UniversalImportTracker()
+		for stuff in listStuffYouOughtaKnow:
+			statement = stuff.astForCompetentProgrammers
+			if isinstance(statement, (ast.Import, ast.ImportFrom)):
+				allImports.addAst(statement)
+
+		pythonSource = Z0Z_OneCallable(pythonSource, callableDispatcher, inlineCallables=False, unpackArrays=False, allImports=allImports)
+
 		if not pythonSource:
 			raise FREAKOUT
 
@@ -135,7 +144,13 @@ def writeJobNumba(listDimensions: Sequence[int], callableTarget: str, algorithmS
 	FunctionDefTarget = unrollWhileLoop(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal], stateJob['connectionGraph'])
 
 	FunctionDefTarget, allImports = addReturnJobNumba(FunctionDefTarget, stateJob, allImports)
-	FunctionDefTarget, allImports = makeDecoratorJobNumba(FunctionDefTarget, allImports, parametersNumba)
+	def convertToPlainJit(astCall: ast.Call) -> ast.Call:
+		astCall.func = ast.Name(id=Z0Z_getDecoratorCallable(), ctx=ast.Load())
+		return astCall
+
+	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
+	if thisIsNumbaDotJit(FunctionDefTarget.decorator_list[0]):
+		FunctionDefTarget.decorator_list[0] = convertToPlainJit(cast(ast.Call, FunctionDefTarget.decorator_list[0]))
 
 	pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
 	# TODO consider: 1) launcher is a function, 2) if __name__ calls the launcher function, and 3) the launcher is "jitted", even just a light jit, then 4) `FunctionDefTarget` could be superJit.
@@ -172,7 +187,7 @@ def mainBig():
 	makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
 
 def mainSmall():
-	listDimensions = [2,20]
+	listDimensions = [3,4]
 	setDatatypeFoldsTotal('int64', sourGrapes=True)
 	setDatatypeElephino('uint8', sourGrapes=True)
 	setDatatypeLeavesTotal('uint8', sourGrapes=True)
@@ -183,6 +198,6 @@ def mainSmall():
 	writeJobNumba(listDimensions, 'countSequential', algorithmSource, parametersNumbaDEFAULT)
 
 if __name__ == '__main__':
-	# mainBig()
+	mainBig()
 
 	mainSmall()

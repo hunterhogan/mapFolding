@@ -43,6 +43,44 @@ import python_minifier
 
 youOughtaKnow = collections.namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenameForMe', 'astForCompetentProgrammers'])
 
+class ifThis:
+	"""Generic AST node predicate builder."""
+	@staticmethod
+	def isCallWithAttribute(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
+		return lambda node: (isinstance(node, ast.Call)
+							and isinstance(node.func, ast.Attribute)
+							and isinstance(node.func.value, ast.Name)
+							and node.func.value.id == moduleName
+							and node.func.attr == callableName)
+
+	@staticmethod
+	def isCallWithName(callableName: str) -> Callable[[ast.AST], bool]:
+		return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callableName)
+
+	@staticmethod
+	def anyOf(*predicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
+		return lambda node: any(pred(node) for pred in predicates)
+
+class Then:
+	"""Generic actions."""
+	@staticmethod
+	def copy_astCallKeywords(astCall: ast.Call) -> Dict[str, Any]:
+		"""Extract keyword parameters from a decorator AST node."""
+		dictionaryKeywords: Dict[str, Any] = {}
+		for keywordItem in astCall.keywords:
+			if isinstance(keywordItem.value, ast.Constant) and keywordItem.arg is not None:
+				dictionaryKeywords[keywordItem.arg] = keywordItem.value.value
+		return dictionaryKeywords
+
+	@staticmethod
+	def make_astCall(name: str, args: Optional[Sequence[ast.expr]], list_astKeywords: Optional[Sequence[ast.keyword]], dictionaryKeywords: Optional[Dict[str, Any]]) -> ast.Call:
+		list_dictionaryKeywords = [ast.keyword(arg=keyName, value=ast.Constant(value=keyValue)) for keyName, keyValue in dictionaryKeywords.items()] if dictionaryKeywords else []
+		return ast.Call(
+			func=ast.Name(id=name, ctx=ast.Load()),
+			args=list(args) if args else [],
+			keywords=list_dictionaryKeywords + list(list_astKeywords) if list_astKeywords else [],
+		)
+
 class NodeReplacer(ast.NodeTransformer):
 	"""Generic node replacement using configurable predicate and builder."""
 	def __init__(self, findMe: Callable[[ast.AST], bool], nodeReplacementBuilder: Callable[[ast.AST], ast.AST]):
@@ -84,25 +122,22 @@ def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
 		astCallable.decorator_list.remove(decoratorItem)
 		warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
 	return astCallable
-def isThisNodeNumbaJitCall(whoAmI: ast.AST) -> bool:
-	return (isinstance(whoAmI, ast.Call) and isinstance(whoAmI.func, ast.Attribute) and whoAmI.func.attr == Z0Z_getDecoratorCallable())
-def isThisNodeJitCall(whoAmI: ast.AST) -> bool:
-	return (isinstance(whoAmI, ast.Call) and isinstance(whoAmI.func, ast.Name) and whoAmI.func.id == Z0Z_getDecoratorCallable())
-def isThisNodeNumbaJitDecorator(whoAmI: ast.AST) -> bool:
-	return isThisNodeNumbaJitCall(whoAmI) or isThisNodeJitCall(whoAmI)
-def Z0Z_generalizeThis(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, ParametersNumba | None]:
-	def recycleParametersNumba(decorator: ast.Call) -> Dict[str, Any]:
-		parametersNumbaExtracted: Dict[str, Any] = {}
-		for keywordItem in decorator.keywords:
-			if isinstance(keywordItem.value, ast.Constant) and keywordItem.arg is not None:
-				parametersNumbaExtracted[keywordItem.arg] = keywordItem.value.value
-		return parametersNumbaExtracted
 
+def thisIsNumbaDotJit(Ima: ast.AST) -> bool:
+	return ifThis.isCallWithAttribute(Z0Z_getDatatypeModuleScalar(), Z0Z_getDecoratorCallable())(Ima)
+
+def thisIsJit(Ima: ast.AST) -> bool:
+	return ifThis.isCallWithName(Z0Z_getDecoratorCallable())(Ima)
+
+def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
+	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)
+
+def Z0Z_recycleParametersNumba(FunctionDefTarget: ast.FunctionDef, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, ParametersNumba | None]:
 	for decorator in FunctionDefTarget.decorator_list.copy():
-		if isThisNodeNumbaJitDecorator(decorator):
+		if thisIsAnyNumbaJitDecorator(decorator):
 			decorator = cast(ast.Call, decorator)
 			if parametersNumba is None:
-				parametersNumbaSherpa = recycleParametersNumba(decorator)
+				parametersNumbaSherpa = Then.copy_astCallKeywords(decorator)
 				if (HunterIsSureThereAreBetterWaysToDoThis := True):
 					if parametersNumbaSherpa:
 						parametersNumba = cast(ParametersNumba, parametersNumbaSherpa)
@@ -151,7 +186,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 	elif list_arg4signature_or_function:
 		list_argsDecorator = [cast(ast.expr, ast.Tuple(elts=list_arg4signature_or_function, ctx=ast.Load()))]
 
-	FunctionDefTarget, parametersNumba = Z0Z_generalizeThis(FunctionDefTarget, parametersNumba)
+	FunctionDefTarget, parametersNumba = Z0Z_recycleParametersNumba(FunctionDefTarget, parametersNumba)
 	FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDEFAULT
@@ -160,24 +195,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 	decoratorModule = Z0Z_getDatatypeModuleScalar()
 	decoratorCallable = Z0Z_getDecoratorCallable()
 	allImports.addImportFromStr(decoratorModule, decoratorCallable)
-	astDecorator = ast.Call(
-		func=ast.Name(id=decoratorCallable, ctx=ast.Load())
-		, args=list_argsDecorator if list_argsDecorator else []
-		, keywords=listDecoratorKeywords)
+	astDecorator = Then.make_astCall(decoratorCallable, list_argsDecorator, listDecoratorKeywords, None)
 
 	FunctionDefTarget.decorator_list = [astDecorator]
-	return FunctionDefTarget, allImports
-
-def makeDecoratorJobNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
-	decoratorCallable = Z0Z_getDecoratorCallable()
-	def convertToPlainJit(node: ast.Call) -> ast.Call:
-		node.func = ast.Name(id=decoratorCallable, ctx=ast.Load())
-		return node
-
-	FunctionDefTarget, parametersNumba = Z0Z_generalizeThis(FunctionDefTarget, parametersNumba)
-
-	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
-	if isThisNodeNumbaJitCall(FunctionDefTarget.decorator_list[0]):
-		FunctionDefTarget.decorator_list[0] = convertToPlainJit(cast(ast.Call, FunctionDefTarget.decorator_list[0]))
-
 	return FunctionDefTarget, allImports

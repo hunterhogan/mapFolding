@@ -170,20 +170,24 @@ class UnpackArrays(ast.NodeTransformer):
 		node.body = initializations + node.body
 		return node
 
-def inlineOneCallable(pythonSource: str, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, unpackArrays: Optional[bool]=False) -> str:
+def Z0Z_OneCallable(pythonSource: str, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, inlineCallables: Optional[bool]=False , unpackArrays: Optional[bool]=False , allImports: Optional[UniversalImportTracker]=None ) -> str:
 	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
-	allImports = UniversalImportTracker()
+	if allImports is None:
+		allImports = UniversalImportTracker()
 
 	for statement in astModule.body:
 		if isinstance(statement, (ast.Import, ast.ImportFrom)):
 			allImports.addAst(statement)
 
-	dictionaryFunctionDef = {statement.name: statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
-	callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctionDef)
-	FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
+	if inlineCallables:
+		dictionaryFunctionDef = {statement.name: statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
+		callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctionDef)
+		FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
+	else:
+		FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
 
 	if not FunctionDefTarget:
-		raise FREAKOUT
+		raise ValueError(f"Could not find function {callableTarget} in source code")
 
 	ast.fix_missing_locations(FunctionDefTarget)
 
@@ -197,33 +201,7 @@ def inlineOneCallable(pythonSource: str, callableTarget: str, parametersNumba: O
 
 	moduleAST = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
 	ast.fix_missing_locations(moduleAST)
-	moduleSource = ast.unparse(moduleAST)
-	return moduleSource
-
-def makeDispatcherNumba(pythonSource: str, callableTarget: str, listStuffYouOughtaKnow: List[youOughtaKnow]) -> str:
-	astSource = ast.parse(pythonSource)
-	allImports = UniversalImportTracker()
-
-	for statement in astSource.body:
-		if isinstance(statement, (ast.Import, ast.ImportFrom)):
-			allImports.addAst(statement)
-
-	for stuff in listStuffYouOughtaKnow:
-		statement = stuff.astForCompetentProgrammers
-		if isinstance(statement, (ast.Import, ast.ImportFrom)):
-			allImports.addAst(statement)
-
-	FunctionDefTarget = next((node for node in astSource.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
-
-	if not FunctionDefTarget:
-		raise ValueError(f"Could not find function {callableTarget} in source code")
-
-	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumbaFailEarly)
-
-	astModule = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
-
-	ast.fix_missing_locations(astModule)
-	return ast.unparse(astModule)
+	return ast.unparse(moduleAST)
 
 def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str]=None) -> str:
 	"""Converts a NumPy array into a compressed string representation using run-length encoding (RLE).
