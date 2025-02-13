@@ -29,19 +29,17 @@ keywords = [
     "OEIS",
     "stamp folding",]
 license = { 'text' = "CC-BY-NC-4.0" }
-maintainers = []
 name = "mapFolding"
-optional-dependencies = { testing = [
+optional-dependencies = { synthesizeModules = [
     "autoflake",
     "more_itertools",
+    "python_minifier",], testing = [
     "mypy",
     "pytest-cov",
     "pytest-env",
     "pytest-mypy",
     "pytest-xdist",
     "pytest",
-    "python_minifier",
-    "types-setuptools",
     "updateCitation",] }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
@@ -57,7 +55,6 @@ report = { exclude_lines = [
 ], ignore_errors = false }
 run = { branch = true, concurrency = [
     "multiprocessing",
-    "thread",
 ], data_file = "tests/coverage/.coverage", omit = [
     "tests/*",
     # "mapFolding/someAssemblyRequired/*",
@@ -66,6 +63,7 @@ run = { branch = true, concurrency = [
     ".",] }
 xml = { output = "tests/coverage/coverage.xml" }
 [tool.pytest.ini_options]
+log_auto_indent = ["On"]
 addopts = ["--color=yes", "-n 4", "--mypy", "--mypy-ignore-missing-imports"]
 env = ["NUMBA_DISABLE_JIT=1"]
 testpaths = ["tests"]

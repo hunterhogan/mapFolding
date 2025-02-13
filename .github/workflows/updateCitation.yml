@@ -8,9 +8,13 @@ permissions:
   contents: write
   actions: write
 
+defaults:
+  run:
+    shell: cmd
+
 jobs:
-  processCitation:
-    runs-on: ubuntu-latest
+  updateCitation:
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -18,7 +22,7 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Process citation update
+      - name: Install and run updateCitation
         run: |
-          python -m pip install updateCitation
+          pip install updateCitation
           python -c "import updateCitation; updateCitation.here()"
