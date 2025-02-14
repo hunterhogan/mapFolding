@@ -2,53 +2,55 @@
 TODO: consolidate the logic in this module."""
 from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import *
 
-def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str]=None) -> str:
+from numpy.typing import NDArray
+from numpy import integer
+def makeStrRLEcompacted(arrayTarget: NDArray[integer[Any]]) -> str:
 	"""Converts a NumPy array into a compressed string representation using run-length encoding (RLE).
 
 	This function takes a NumPy array and converts it into an optimized string representation by:
 	1. Compressing consecutive sequences of numbers into range objects
 	2. Minimizing repeated zeros using array multiplication syntax
-	3. Converting the result into a valid Python array initialization statement
 
 	Parameters:
 		arrayTarget (numpy.ndarray): The input NumPy array to be converted
-		identifierName (str): The variable name to use in the output string
 
 	Returns:
 		str: A string containing Python code that recreates the input array in compressed form.
-			Format: "{identifierName} = numpy.array({compressed_data}, dtype=numpy.{dtype})"
 	"""
 
-	def compressRangesNDArrayNoFlatten(arraySlice: numpy.ndarray) -> list[list[Any] | Any | numpy.ndarray[Any, Any]] | list[Any] | Any | numpy.ndarray[Any, Any]:
+	def compressRangesNDArrayNoFlatten(arraySlice: NDArray[integer[Any]]) -> List[List[Any] | Any | NDArray[integer[Any]]] | List[Any] | Any | NDArray[integer[Any]]:
 		if isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim > 1:
 			return [compressRangesNDArrayNoFlatten(arraySlice[index]) for index in range(arraySlice.shape[0])]
 		elif isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim == 1:
 			listWithRanges = []
 			for group in more_itertools.consecutive_groups(arraySlice.tolist()):
 				ImaSerious = list(group)
-				if len(ImaSerious) <= 4:
-					listWithRanges += ImaSerious
-				else:
-					ImaRange = [range(ImaSerious[0], ImaSerious[-1] + 1)]
+				ImaRange = [range(ImaSerious[0], ImaSerious[-1] + 1)]
+				spaces = True #NOTE
+				lengthAsList = spaces*(len(ImaSerious)-1) + len(python_minifier.minify(str(ImaSerious))) # brackets are proxies for commas
+				lengthAsRange = spaces*1 + len(str('*')) + len(python_minifier.minify(str(ImaRange))) # brackets are proxies for commas
+				if lengthAsRange < lengthAsList:
 					listWithRanges += ImaRange
+				else:
+					listWithRanges += ImaSerious
 			return listWithRanges
 		return arraySlice
 
 	arrayAsNestedLists = compressRangesNDArrayNoFlatten(arrayTarget)
 
-	stringMinimized = python_minifier.minify(str(arrayAsNestedLists))
-	commaZeroMaximum = arrayTarget.shape[-1] - 1
-	stringMinimized = stringMinimized.replace('[0' + ',0'*commaZeroMaximum + ']', '[0]*'+str(commaZeroMaximum+1))
-	for countZeros in range(commaZeroMaximum, 2, -1):
-		stringMinimized = stringMinimized.replace(',0'*countZeros + ']', ']+[0]*'+str(countZeros))
+	arrayAsStr = python_minifier.minify(str(arrayAsNestedLists))
 
-	stringMinimized = stringMinimized.replace('range', '*range')
+	commaIntMaximum = arrayTarget.shape[-1] - 1
+	for X in range(1):
+		arrayAsStr = arrayAsStr.replace(f'[{X}' + f',{X}'*commaIntMaximum + ']', f'[{X}]*'+str(commaIntMaximum+1))
+		for countInt in range(commaIntMaximum, 2, -1):
+			arrayAsStr = arrayAsStr.replace(f',{X}'*countInt + ']', f']+[{X}]*'+str(countInt))
 
-	if identifierName:
-		return f"{identifierName} = array({stringMinimized}, dtype={arrayTarget.dtype})"
-	return stringMinimized
+	arrayAsStr = arrayAsStr.replace('range', '*range')
 
-def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker, unrollSlices: Optional[int]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+	return arrayAsStr
+
+def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker, unrollSlices: Optional[int]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
 	constructorName = arrayType.__name__
@@ -72,14 +74,14 @@ def moveArrayTo_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayT
 		FunctionDefTarget.body.insert(0, assignment)
 
 	if not unrollSlices:
-		insertAssign(astArg.arg, arrayTarget)
+		insertAssign(identifier, arrayTarget)
 	else:
 		for index, arraySlice in enumerate(arrayTarget):
-			insertAssign(f"{astArg.arg}_{index}", arraySlice)
+			insertAssign(f"{identifier}_{index}", arraySlice)
 
 	return FunctionDefTarget, allImports
 
-def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
 	constructorName = arrayType.__name__
@@ -94,7 +96,7 @@ def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, ar
 				argData_dtypeName = hackSSOTdatatype(astAssignee.id)
 				allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
 				astSubscript: ast.Subscript = stmt.value
-				if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == astArg.arg and isinstance(astSubscript.slice, ast.Attribute):
+				if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == identifier and isinstance(astSubscript.slice, ast.Attribute):
 					indexAs_astAttribute: ast.Attribute = astSubscript.slice
 					indexAsStr = ast.unparse(indexAs_astAttribute)
 					argDataSlice = arrayTarget[eval(indexAsStr)]
@@ -110,7 +112,7 @@ def evaluateArrayIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, ar
 					FunctionDefTarget.body.remove(stmt)
 	return FunctionDefTarget, allImports
 
-def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arrayTarget: numpy.ndarray, Z0Z_listChaff: List[str], allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, Z0Z_listChaff: List[str], allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
 	for stmt in FunctionDefTarget.body.copy():
 		if isinstance(stmt, ast.Assign):
@@ -119,7 +121,7 @@ def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arr
 				argData_dtypeName = hackSSOTdatatype(astAssignee.id)
 				allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
 				astSubscript: ast.Subscript = stmt.value
-				if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == astArg.arg and isinstance(astSubscript.slice, ast.Attribute):
+				if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == identifier and isinstance(astSubscript.slice, ast.Attribute):
 					indexAs_astAttribute: ast.Attribute = astSubscript.slice
 					indexAsStr = ast.unparse(indexAs_astAttribute)
 					argDataSlice: int = arrayTarget[eval(indexAsStr)].item()
@@ -130,7 +132,7 @@ def evaluate_argIn_body(FunctionDefTarget: ast.FunctionDef, astArg: ast.arg, arr
 					FunctionDefTarget.body.remove(stmt)
 	return FunctionDefTarget, allImports
 
-def removeIdentifierAssign(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
+def removeAssignTargetFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
 	# Remove assignment nodes where the target is either a Subscript referencing `identifier` or satisfies ifThis.nameIs(identifier).
 	def predicate(astNode: ast.AST) -> bool:
 		if not isinstance(astNode, ast.Assign) or not astNode.targets:
@@ -148,7 +150,7 @@ def removeIdentifierAssign(FunctionDefTarget: ast.FunctionDef, identifier: str) 
 	ast.fix_missing_locations(FunctionDefTarget)
 	return FunctionDefTarget
 
-def evaluateAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
 	for stmt in FunctionDefTarget.body.copy():
 		if isinstance(stmt, ast.AnnAssign):
@@ -162,7 +164,7 @@ def evaluateAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: Uni
 				FunctionDefTarget.body.remove(stmt)
 	return FunctionDefTarget, allImports
 
-def astObjectToAstConstant(FunctionDefTarget: ast.FunctionDef, object: str, value: int) -> ast.FunctionDef:
+def findThingyReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, object: str, value: int) -> ast.FunctionDef:
 	"""
 	Replaces nodes in astFunction matching the AST of the string `object`
 	with a constant node holding the provided value.
@@ -181,7 +183,7 @@ def astObjectToAstConstant(FunctionDefTarget: ast.FunctionDef, object: str, valu
 	ast.fix_missing_locations(newFunction)
 	return newFunction
 
-def astNameToAstConstant(FunctionDefTarget: ast.FunctionDef, name: str, value: int) -> ast.FunctionDef:
+def findAstNameReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, name: str, value: int) -> ast.FunctionDef:
 	def findName(node: ast.AST) -> bool:
 		return isinstance(node, ast.Name) and node.id == name
 
@@ -190,39 +192,25 @@ def astNameToAstConstant(FunctionDefTarget: ast.FunctionDef, name: str, value: i
 
 	return cast(ast.FunctionDef, NodeReplacer(findName, replaceWithConstant).visit(FunctionDefTarget))
 
-def makeLauncherBasicJobNumba(callableTarget: str, pathFilenameFoldsTotal: pathlib.Path) -> ast.Module:
-	linesLaunch = f"""
-if __name__ == '__main__':
-	import time
-	timeStart = time.perf_counter()
-	foldsTotal = {callableTarget}()
-	print(foldsTotal, time.perf_counter() - timeStart)
-	writeStream = open('{pathFilenameFoldsTotal.as_posix()}', 'w')
-	writeStream.write(str(foldsTotal))
-	writeStream.close()
-"""
-	return ast.parse(linesLaunch)
-
-def addReturnJobNumba(FunctionDefTarget: ast.FunctionDef, stateJob: computationState, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	"""Add multiplication and return statement to function, properly constructing AST nodes."""
 	# Create AST for multiplication operation
 	multiplicand = Z0Z_identifierCountFolds
 	datatype = hackSSOTdatatype(multiplicand)
 	multiplyOperation = ast.BinOp(
 		left=ast.Name(id=multiplicand, ctx=ast.Load()),
-		op=ast.Mult(), right=ast.Constant(value=int(stateJob['foldGroups'][-1])))
+		op=ast.Mult(), right=ast.Constant(value=int(arrayTarget[-1])))
 
 	returnStatement = ast.Return(value=multiplyOperation)
 
 	datatypeModuleScalar = Z0Z_getDatatypeModuleScalar()
 	allImports.addImportFromStr(datatypeModuleScalar, datatype)
-	FunctionDefTarget.returns = ast.Name(id=datatype, ctx=ast.Load())
 
 	FunctionDefTarget.body.append(returnStatement)
 
 	return FunctionDefTarget, allImports
 
-def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> Any:
+def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> Any:
 	"""
 	Unroll all nested while loops matching the condition that their test uses `iteratorName`.
 	"""
@@ -287,11 +275,24 @@ def unrollWhileLoop(FunctionDefTarget: ast.FunctionDef, iteratorName: str, itera
 	ast.fix_missing_locations(newFunctionDef)
 	return newFunctionDef
 
-def Z0Z_OneCallable(pythonSource: str, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, inlineCallables: Optional[bool]=False , unpackArrays: Optional[bool]=False , allImports: Optional[UniversalImportTracker]=None ) -> str:
+def makeLauncherBasicJobNumba(callableTarget: str, pathFilenameFoldsTotal: pathlib.Path) -> ast.Module:
+	linesLaunch = f"""
+if __name__ == '__main__':
+	import time
+	timeStart = time.perf_counter()
+	foldsTotal = {callableTarget}()
+	print(foldsTotal, time.perf_counter() - timeStart)
+	writeStream = open('{pathFilenameFoldsTotal.as_posix()}', 'w')
+	writeStream.write(str(foldsTotal))
+	writeStream.close()
+"""
+	return ast.parse(linesLaunch)
+
+def makeAstModuleForOneCallable(pythonSource: str, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, inlineCallables: Optional[bool]=False , unpackArrays: Optional[bool]=False , allImports: Optional[UniversalImportTracker]=None ) -> str:
 	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
+
 	if allImports is None:
 		allImports = UniversalImportTracker()
-
 	for statement in astModule.body:
 		if isinstance(statement, (ast.Import, ast.ImportFrom)):
 			allImports.addAst(statement)
@@ -302,7 +303,6 @@ def Z0Z_OneCallable(pythonSource: str, callableTarget: str, parametersNumba: Opt
 		FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
 	else:
 		FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
-
 	if not FunctionDefTarget:
 		raise ValueError(f"Could not find function {callableTarget} in source code")
 
@@ -310,35 +310,26 @@ def Z0Z_OneCallable(pythonSource: str, callableTarget: str, parametersNumba: Opt
 
 	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
 
+	# NOTE vestigial hardcoding
 	if unpackArrays:
 		for tupleUnpack in [(indexMy, 'my'), (indexTrack, 'track')]:
 			unpacker = UnpackArrays(*tupleUnpack)
 			FunctionDefTarget = cast(ast.FunctionDef, unpacker.visit(FunctionDefTarget))
 			ast.fix_missing_locations(FunctionDefTarget)
 
-	moduleAST = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
-	ast.fix_missing_locations(moduleAST)
-	return ast.unparse(moduleAST)
-
-def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
-	# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
-	for decoratorItem in astCallable.decorator_list.copy():
-		import warnings
-		astCallable.decorator_list.remove(decoratorItem)
-		warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
-	return astCallable
-
-def thisIsNumbaDotJit(Ima: ast.AST) -> bool:
-	return ifThis.isCallWithAttribute(Z0Z_getDatatypeModuleScalar(), Z0Z_getDecoratorCallable())(Ima)
-
-def thisIsJit(Ima: ast.AST) -> bool:
-	return ifThis.isCallWithName(Z0Z_getDecoratorCallable())(Ima)
-
-def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
-	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)
+	astModule = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
+	ast.fix_missing_locations(astModule)
+	return ast.unparse(astModule)
 
 def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
-	datatypeModuleDecorator = Z0Z_getDatatypeModuleScalar()
+	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
+		# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
+		for decoratorItem in astCallable.decorator_list.copy():
+			import warnings
+			astCallable.decorator_list.remove(decoratorItem)
+			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
+		return astCallable
+
 	def make_arg4parameter(signatureElement: ast.arg) -> ast.Subscript | None:
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape = signatureElement.annotation.slice.elts[0]
@@ -364,6 +355,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 			return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
 		return
 
+	datatypeModuleDecorator = Z0Z_getDatatypeModuleScalar()
 	list_argsDecorator: Sequence[ast.expr] = []
 
 	list_arg4signature_or_function: List[ast.expr] = []

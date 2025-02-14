@@ -48,6 +48,7 @@ import python_minifier
 
 youOughtaKnow = collections.namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenameForMe', 'astForCompetentProgrammers'])
 
+# Generic
 class ifThis:
 	"""Generic AST node predicate builder."""
 	@staticmethod
@@ -115,6 +116,17 @@ class NodeReplacer(ast.NodeTransformer):
 			return self.nodeReplacementBuilder(node)
 		return super().visit(node)
 
+# Confusing: suspiciously specific but still reusable
+def thisIsNumbaDotJit(Ima: ast.AST) -> bool:
+	return ifThis.isCallWithAttribute(Z0Z_getDatatypeModuleScalar(), Z0Z_getDecoratorCallable())(Ima)
+
+def thisIsJit(Ima: ast.AST) -> bool:
+	return ifThis.isCallWithName(Z0Z_getDecoratorCallable())(Ima)
+
+def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
+	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)
+
+# Domain-based
 class UniversalImportTracker:
 	def __init__(self) -> None:
 		self.dictionaryImportFrom: Dict[str, Set] = collections.defaultdict(set)
@@ -139,6 +151,7 @@ class UniversalImportTracker:
 		listAstImport = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in self.setImport]
 		return listAstImportFrom + listAstImport
 
+# Intricate and specialized
 class RecursiveInliner(ast.NodeTransformer):
 	"""
 	Class RecursiveInliner:

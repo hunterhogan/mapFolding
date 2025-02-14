@@ -1,13 +1,13 @@
-from mapFolding import indexMy
 from mapFolding import indexTrack
+from mapFolding import indexMy
+from numba import jit
 from numba import uint8
 from numba import int64
-from numba import jit
 from numpy import dtype
-from numpy import integer
 from numpy import ndarray
-from typing import Any
+from numpy import integer
 from typing import Tuple
+from typing import Any
 
 @jit((uint8[:, :, ::1], int64[::1], uint8[::1], uint8[::1], uint8[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nopython=True, parallel=False)
 def countSequential(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], foldGroups: ndarray[Tuple[int], dtype[integer[Any]]], gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:

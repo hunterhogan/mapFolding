@@ -14,7 +14,7 @@ def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: O
 
 	def doThisStuff(callableTarget: str, parametersNumba: Optional[ParametersNumba], inlineCallables: bool, unpackArrays: bool, allImports: Optional[UniversalImportTracker], relativePathWrite: Optional[pathlib.Path], formatFilenameWrite: Optional[str]) -> youOughtaKnow:
 		pythonSource = inspect.getsource(algorithmSource)
-		pythonSource = Z0Z_OneCallable(pythonSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
+		pythonSource = makeAstModuleForOneCallable(pythonSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
 		if not pythonSource: raise FREAKOUT
 		pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])
 
