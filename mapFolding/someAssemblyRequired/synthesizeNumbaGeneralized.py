@@ -31,6 +31,8 @@ from mapFolding import (
 	Z0Z_setDecoratorCallable,
 )
 from mapFolding.someAssemblyRequired.makeJob import makeStateJob
+from numpy import integer
+from numpy.typing import NDArray
 from types import ModuleType
 from typing import Any, Callable, cast, Dict, List, Optional, Sequence, Set, Tuple, Type, Union
 import ast
@@ -47,6 +49,54 @@ import pathlib
 import python_minifier
 
 youOughtaKnow = collections.namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenameForMe', 'astForCompetentProgrammers'])
+
+# TODO move to Z0Z_tools
+def makeStrRLEcompacted(arrayTarget: NDArray[integer[Any]]) -> str:
+	"""Converts a NumPy array into a compressed string representation using run-length encoding (RLE).
+
+	This function takes a NumPy array and converts it into an optimized string representation by:
+	1. Compressing consecutive sequences of numbers into range objects
+	2. Minimizing repeated zeros using array multiplication syntax
+
+	Parameters:
+		arrayTarget (numpy.ndarray): The input NumPy array to be converted
+
+	Returns:
+		str: A string containing Python code that recreates the input array in compressed form.
+	"""
+
+	def compressRangesNDArrayNoFlatten(arraySlice: NDArray[integer[Any]]) -> List[List[Any] | Any | NDArray[integer[Any]]] | List[Any] | Any | NDArray[integer[Any]]:
+		if isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim > 1:
+			return [compressRangesNDArrayNoFlatten(arraySlice[index]) for index in range(arraySlice.shape[0])]
+		elif isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim == 1:
+			listWithRanges = []
+			for group in more_itertools.consecutive_groups(arraySlice.tolist()):
+				ImaSerious = list(group)
+				ImaRange = [range(ImaSerious[0], ImaSerious[-1] + 1)]
+				spaces = True #NOTE
+				lengthAsList = spaces*(len(ImaSerious)-1) + len(python_minifier.minify(str(ImaSerious))) # brackets are proxies for commas
+				lengthAsRange = spaces*1 + len(str('*')) + len(python_minifier.minify(str(ImaRange))) # brackets are proxies for commas
+				if lengthAsRange < lengthAsList:
+					listWithRanges += ImaRange
+				else:
+					listWithRanges += ImaSerious
+			return listWithRanges
+		return arraySlice
+
+	arrayAsNestedLists = compressRangesNDArrayNoFlatten(arrayTarget)
+
+	arrayAsStr = python_minifier.minify(str(arrayAsNestedLists))
+
+	commaIntMaximum = arrayTarget.shape[-1] - 1
+
+	for X in range(1):
+		arrayAsStr = arrayAsStr.replace(f'[{X}' + f',{X}'*commaIntMaximum + ']', f'[{X}]*'+str(commaIntMaximum+1))
+		for countInt in range(commaIntMaximum, 2, -1):
+			arrayAsStr = arrayAsStr.replace(f',{X}'*countInt + ']', f']+[{X}]*'+str(countInt))
+
+	arrayAsStr = arrayAsStr.replace('range', '*range')
+
+	return arrayAsStr
 
 # Generic
 class ifThis:
