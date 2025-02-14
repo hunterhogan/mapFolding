@@ -5,9 +5,9 @@ from mapFolding import indexMy
 from numba import uint8
 from numba import int64
 from numba import jit
-from numpy import ndarray
-from numpy import integer
 from numpy import dtype
+from numpy import integer
+from numpy import ndarray
 from typing import Any
 from typing import Tuple
 

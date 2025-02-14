@@ -1,11 +1,13 @@
 from mapFolding import (
 	computationState,
 	EnumIndices,
+	formatModuleNameDEFAULT,
 	FREAKOUT,
 	getAlgorithmSource,
 	getFilenameFoldsTotal,
 	getPathFilenameFoldsTotal,
 	getPathJobRootDEFAULT,
+	getPathPackage,
 	getPathSyntheticModules,
 	hackSSOTdatatype,
 	indexMy,
@@ -35,6 +37,7 @@ import ast
 import autoflake
 import collections
 import copy
+import importlib.util
 import inspect
 import more_itertools
 import numba

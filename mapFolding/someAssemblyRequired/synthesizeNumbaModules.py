@@ -1,61 +1,45 @@
+"""I suspect this function will be relatively stable for now.
+Managing settings and options, however, ... I've 'invented'
+everything I am doing. I would rather benefit from humanity's
+collective wisdom."""
 from mapFolding.someAssemblyRequired.synthesizeNumba import *
 
-def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: Optional[str] = None, algorithmSource: Optional[ModuleType] = None) -> None:
+def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: Optional[str] = None, algorithmSource: Optional[ModuleType] = None, relativePathWrite: Optional[pathlib.Path] = None, formatFilenameWrite: Optional[str] = None) -> None:
+	if relativePathWrite and relativePathWrite.is_absolute():
+		raise ValueError("The path to write the module must be relative to the root of the package.")
 	if not algorithmSource:
 		algorithmSource = getAlgorithmSource()
 
-	formatModuleNameDEFAULT = "numba_{callableTarget}"
-
-	# When I am a more competent programmer, I will make getPathFilenameWrite dependent on makeAstImport or vice versa,
-	# so the name of the physical file doesn't get out of whack with the name of the logical module.
-	def whatYouOughtaKnow(callableTarget: str , pathWrite: Optional[pathlib.Path] = None , formatFilenameWrite: Optional[str] = None ) -> pathlib.Path:
-		if not pathWrite:
-			pathWrite = getPathSyntheticModules()
-		if not formatFilenameWrite:
-			formatFilenameWrite = formatModuleNameDEFAULT + '.py'
-
-		pathFilename = pathWrite  / formatFilenameWrite.format(callableTarget=callableTarget)
-		return pathFilename
-
-	def makeAstImport(callableTarget: str , packageName: Optional[str] = None , subPackageName: Optional[str] = None , moduleName: Optional[str] = None , astNodeLogicalPathThingy: Optional[ast.AST] = None ) -> ast.ImportFrom:
-		"""Creates import AST node for synthetic modules."""
-		if astNodeLogicalPathThingy is None:
-			if packageName is None:
-				packageName = myPackageNameIs
-			if subPackageName is None:
-				subPackageName = moduleOfSyntheticModules
-			if moduleName is None:
-				moduleName = formatModuleNameDEFAULT.format(callableTarget=callableTarget)
-			module=f'{packageName}.{subPackageName}.{moduleName}'
-		else:
-			module = str(astNodeLogicalPathThingy)
-		return ast.ImportFrom( module=module, names=[ast.alias(name=callableTarget, asname=None)], level=0 )
-
 	listStuffYouOughtaKnow: List[youOughtaKnow] = []
 
-	def doThisStuff():
-		nonlocal listStuffYouOughtaKnow, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports
+	def doThisStuff(callableTarget: str, parametersNumba: Optional[ParametersNumba], inlineCallables: bool, unpackArrays: bool, allImports: Optional[UniversalImportTracker], relativePathWrite: Optional[pathlib.Path], formatFilenameWrite: Optional[str]) -> youOughtaKnow:
 		pythonSource = inspect.getsource(algorithmSource)
 		pythonSource = Z0Z_OneCallable(pythonSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
-
-		if not pythonSource:
-			raise FREAKOUT
-
-		pathFilename = whatYouOughtaKnow(callableTarget)
-
-		listStuffYouOughtaKnow.append(youOughtaKnow(
-			callableSynthesized=callableTarget,
-			pathFilenameForMe=pathFilename,
-			astForCompetentProgrammers=makeAstImport(callableTarget)
-		))
+		if not pythonSource: raise FREAKOUT
 		pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])
+
+		if not relativePathWrite:
+			pathWrite = getPathSyntheticModules()
+		else:
+			pathWrite = getPathPackage() / relativePathWrite
+		if not formatFilenameWrite:
+			formatFilenameWrite = formatModuleNameDEFAULT + '.py'
+		pathFilename = pathWrite  / formatFilenameWrite.format(callableTarget=callableTarget)
+
 		pathFilename.write_text(pythonSource)
+
+		howIsThisStillAThing = getPathPackage().parent
+		dumbassPythonNamespace = pathFilename.relative_to(howIsThisStillAThing).with_suffix('').parts
+		ImaModule = '.'.join(dumbassPythonNamespace)
+		astImportFrom = ast.ImportFrom(module=ImaModule, names=[ast.alias(name=callableTarget, asname=None)], level=0)
+
+		return youOughtaKnow(callableSynthesized=callableTarget, pathFilenameForMe=pathFilename, astForCompetentProgrammers=astImportFrom)
 
 	for callableTarget in listCallablesInline:
 		parametersNumba = None
 		inlineCallables = True
-		unpackArrays = False
-		allImports = None
+		unpackArrays 	= False
+		allImports 		= None
 		match callableTarget:
 			case 'countParallel':
 				parametersNumba = parametersNumbaSuperJitParallel
@@ -64,21 +48,20 @@ def makeNumbaOptimizedFlow(listCallablesInline: List[str], callableDispatcher: O
 				unpackArrays = True
 			case 'countInitialize':
 				parametersNumba = parametersNumbaDEFAULT
-		doThisStuff()
+		listStuffYouOughtaKnow.append(doThisStuff(callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports, relativePathWrite, formatFilenameWrite))
 
 	if callableDispatcher:
-		allImports = UniversalImportTracker()
+		callableTarget 	= callableDispatcher
+		parametersNumba = None
+		inlineCallables	= False
+		unpackArrays	= False
+		allImports 		= UniversalImportTracker()
 		for stuff in listStuffYouOughtaKnow:
 			statement = stuff.astForCompetentProgrammers
 			if isinstance(statement, (ast.Import, ast.ImportFrom)):
 				allImports.addAst(statement)
 
-		callableTarget = callableDispatcher
-		parametersNumba = None
-		inlineCallables=False
-		unpackArrays=False
-
-		doThisStuff()
+		listStuffYouOughtaKnow.append(doThisStuff(callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports, relativePathWrite, formatFilenameWrite))
 
 if __name__ == '__main__':
 	setDatatypeModule('numpy', sourGrapes=True)
@@ -89,4 +72,4 @@ if __name__ == '__main__':
 	Z0Z_setDecoratorCallable('jit')
 	listCallablesInline: List[str] = ['countInitialize', 'countParallel', 'countSequential']
 	callableDispatcher = 'doTheNeedful'
-	makeNumbaOptimizedFlow(listCallablesInline, callableDispatcher)
+	makeFlowNumbaOptimized(listCallablesInline, callableDispatcher)

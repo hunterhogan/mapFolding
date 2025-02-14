@@ -39,9 +39,26 @@ And, I almost certainly want to change the semiotics from "authority" (of truth)
 Here, "power" is a direct analogy to https://hunterthinks.com/opinion/a-hohfeldian-primer.
 """
 
+"delay realization/instantiation until a concrete value is desired"
+
+"moment of truth: when the value is needed, not when the value is defined"
+
+"""What is a (not too complicated, integer) datatype?
+	- ecosystem/module
+		- must apathy|value|list of values
+		- mustn't apathy|value|list of values
+	- bit width
+		- bits maximum apathy|value
+		- bits minimum apathy|value
+		- magnitude maximum apathy|value
+		- ?magnitude minimum apathy|value
+	- signedness apathy|non-negative|non-positive|both
+	"""
+
 myPackageNameIs = "mapFolding"
 
 moduleOfSyntheticModules = "syntheticModules"
+formatModuleNameDEFAULT = "numba_{callableTarget}"
 
 def getPathPackage() -> pathlib.Path:
 	import importlib, inspect
@@ -75,12 +92,12 @@ def getDispatcherCallable() -> Callable[..., None]:
 
 # NOTE I want this _concept_, not necessarily this method, to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
 class computationState(TypedDict):
-	connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]]
-	foldGroups:	  ndarray[Tuple[int]		  , dtype[integer[Any]]]
-	gapsWhere:	   ndarray[Tuple[int]		  , dtype[integer[Any]]]
-	mapShape:		ndarray[Tuple[int]		  , dtype[integer[Any]]]
-	my:			  ndarray[Tuple[int]		  , dtype[integer[Any]]]
-	track:		   ndarray[Tuple[int, int]	 , dtype[integer[Any]]]
+	connectionGraph:	ndarray[Tuple[int, int, int], dtype[integer[Any]]]
+	foldGroups:			ndarray[Tuple[int]			, dtype[integer[Any]]]
+	gapsWhere:			ndarray[Tuple[int]			, dtype[integer[Any]]]
+	mapShape:			ndarray[Tuple[int]			, dtype[integer[Any]]]
+	my:					ndarray[Tuple[int]			, dtype[integer[Any]]]
+	track:				ndarray[Tuple[int, int]		, dtype[integer[Any]]]
 
 @enum.verify(enum.CONTINUOUS, enum.UNIQUE) if sys.version_info >= (3, 11) else lambda x: x
 class EnumIndices(enum.IntEnum):
@@ -97,39 +114,24 @@ class EnumIndices(enum.IntEnum):
 
 class indexMy(EnumIndices):
 	"""Indices for scalar values."""
-	dimensionsTotal = enum.auto()
+	dimensionsTotal 		= enum.auto()
 	dimensionsUnconstrained = enum.auto()
-	gap1ndex = enum.auto()
-	gap1ndexCeiling = enum.auto()
-	indexDimension = enum.auto()
-	indexLeaf = enum.auto()
-	indexMiniGap = enum.auto()
-	leaf1ndex = enum.auto()
-	leafConnectee = enum.auto()
-	taskDivisions = enum.auto()
-	taskIndex = enum.auto()
+	gap1ndex				= enum.auto()
+	gap1ndexCeiling 		= enum.auto()
+	indexDimension 			= enum.auto()
+	indexLeaf 				= enum.auto()
+	indexMiniGap 			= enum.auto()
+	leaf1ndex 				= enum.auto()
+	leafConnectee 			= enum.auto()
+	taskDivisions 			= enum.auto()
+	taskIndex 				= enum.auto()
 
 class indexTrack(EnumIndices):
 	"""Indices for state tracking array."""
-	leafAbove = enum.auto()
-	leafBelow = enum.auto()
-	countDimensionsGapped = enum.auto()
-	gapRangeStart = enum.auto()
-
-"delay realization/instantiation until a concrete value is desired"
-"moment of truth: when the value is needed, not when the value is defined"
-
-"""What is a (not too complicated, integer) datatype?
-	- ecosystem/module
-		- must apathy|value|list of values
-		- mustn't apathy|value|list of values
-	- bit width
-		- bits maximum apathy|value
-		- bits minimum apathy|value
-		- magnitude maximum apathy|value
-		- ?magnitude minimum apathy|value
-	- signedness apathy|non-negative|non-positive|both
-	"""
+	leafAbove				= enum.auto()
+	leafBelow				= enum.auto()
+	countDimensionsGapped	= enum.auto()
+	gapRangeStart			= enum.auto()
 
 _datatypeDefault: Final[Dict[str, str]] = {
 	'elephino': 'uint8',
@@ -194,15 +196,15 @@ def setInStone(identifier: str) -> Type[Any]:
 
 def hackSSOTdtype(identifier: str) -> Type[Any]:
 	_hackSSOTdtype={
-	'connectionGraph': 'dtypeLeavesTotal',
-	'dtypeElephino': 'dtypeElephino',
-	'dtypeFoldsTotal': 'dtypeFoldsTotal',
+	'connectionGraph': 	'dtypeLeavesTotal',
+	'dtypeElephino': 	'dtypeElephino',
+	'dtypeFoldsTotal': 	'dtypeFoldsTotal',
 	'dtypeLeavesTotal': 'dtypeLeavesTotal',
-	'foldGroups': 'dtypeFoldsTotal',
-	'gapsWhere': 'dtypeLeavesTotal',
-	'mapShape': 'dtypeLeavesTotal',
-	'my': 'dtypeElephino',
-	'track': 'dtypeElephino',
+	'foldGroups': 		'dtypeFoldsTotal',
+	'gapsWhere': 		'dtypeLeavesTotal',
+	'mapShape': 		'dtypeLeavesTotal',
+	'my': 				'dtypeElephino',
+	'track': 			'dtypeElephino',
 	}
 	RubeGoldBerg = _hackSSOTdtype[identifier]
 	if RubeGoldBerg == 'dtypeElephino':
@@ -215,31 +217,31 @@ def hackSSOTdtype(identifier: str) -> Type[Any]:
 
 def hackSSOTdatatype(identifier: str) -> str:
 	_hackSSOTdatatype={
-	'connectionGraph': 'datatypeLeavesTotal',
-	'countDimensionsGapped': 'datatypeLeavesTotal',
-	'datatypeElephino': 'datatypeElephino',
-	'datatypeFoldsTotal': 'datatypeFoldsTotal',
-	'datatypeLeavesTotal': 'datatypeLeavesTotal',
-	'dimensionsTotal': 'datatypeLeavesTotal',
-	'dimensionsUnconstrained': 'datatypeLeavesTotal',
-	'foldGroups': 'datatypeFoldsTotal',
-	'gap1ndex': 'datatypeLeavesTotal',
-	'gap1ndexCeiling': 'datatypeElephino',
-	'gapRangeStart': 'datatypeElephino',
-	'gapsWhere': 'datatypeLeavesTotal',
-	'groupsOfFolds': 'datatypeFoldsTotal',
-	'indexDimension': 'datatypeLeavesTotal',
-	'indexLeaf': 'datatypeLeavesTotal',
-	'indexMiniGap': 'datatypeElephino',
-	'leaf1ndex': 'datatypeLeavesTotal',
-	'leafAbove': 'datatypeLeavesTotal',
-	'leafBelow': 'datatypeLeavesTotal',
-	'leafConnectee': 'datatypeLeavesTotal',
-	'mapShape': 'datatypeLeavesTotal',
-	'my': 'datatypeElephino',
-	'taskDivisions': 'datatypeLeavesTotal',
-	'taskIndex': 'datatypeLeavesTotal',
-	'track': 'datatypeElephino',
+	'connectionGraph':	 		'datatypeLeavesTotal',
+	'countDimensionsGapped': 	'datatypeLeavesTotal',
+	'datatypeElephino': 		'datatypeElephino',
+	'datatypeFoldsTotal': 		'datatypeFoldsTotal',
+	'datatypeLeavesTotal': 		'datatypeLeavesTotal',
+	'dimensionsTotal': 			'datatypeLeavesTotal',
+	'dimensionsUnconstrained':	'datatypeLeavesTotal',
+	'foldGroups': 				'datatypeFoldsTotal',
+	'gap1ndex': 				'datatypeLeavesTotal',
+	'gap1ndexCeiling': 			'datatypeElephino',
+	'gapRangeStart': 			'datatypeElephino',
+	'gapsWhere': 				'datatypeLeavesTotal',
+	'groupsOfFolds': 			'datatypeFoldsTotal',
+	'indexDimension': 			'datatypeLeavesTotal',
+	'indexLeaf': 				'datatypeLeavesTotal',
+	'indexMiniGap': 			'datatypeElephino',
+	'leaf1ndex': 				'datatypeLeavesTotal',
+	'leafAbove': 				'datatypeLeavesTotal',
+	'leafBelow': 				'datatypeLeavesTotal',
+	'leafConnectee': 			'datatypeLeavesTotal',
+	'mapShape': 				'datatypeLeavesTotal',
+	'my':	 					'datatypeElephino',
+	'taskDivisions': 			'datatypeLeavesTotal',
+	'taskIndex': 				'datatypeLeavesTotal',
+	'track':	 				'datatypeElephino',
 	}
 	RubeGoldBerg = _hackSSOTdatatype[identifier]
 	if RubeGoldBerg == 'datatypeElephino':
