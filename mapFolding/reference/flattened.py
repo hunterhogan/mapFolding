@@ -267,6 +267,7 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
 		return 0
 	else:
 		leavesTotal = getLeavesTotal(listDimensions)
+		taskDivisions = 0
 	if isinstance(computationDivisions, int):
 		taskDivisions = computationDivisions
 	elif isinstance(computationDivisions, str):
