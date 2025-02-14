@@ -7,7 +7,6 @@ from mapFolding import basecamp, getAlgorithmCallable, getDispatcherCallable
 from mapFolding.beDRY import *
 from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidInformation, _getOEISidValues
 from mapFolding.oeis import *
-from mapFolding.someAssemblyRequired import *
 from typing import Any, Callable, ContextManager, Dict, Generator, List, Optional, Sequence, Set, Tuple, Type, Union
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 import pathlib

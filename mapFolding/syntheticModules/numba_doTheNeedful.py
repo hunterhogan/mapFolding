@@ -2,9 +2,9 @@ from mapFolding.syntheticModules.numba_countInitialize import countInitialize
 from mapFolding.syntheticModules.numba_countParallel import countParallel
 from mapFolding.syntheticModules.numba_countSequential import countSequential
 from mapFolding import indexMy
-from numba import jit
 from numba import uint8
 from numba import int64
+from numba import jit
 from numpy import ndarray
 from numpy import integer
 from numpy import dtype

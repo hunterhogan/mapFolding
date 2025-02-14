@@ -15,6 +15,7 @@ from mapFolding import (
 	ParametersNumba,
 	parametersNumbaDEFAULT,
 	parametersNumbaFailEarly,
+	parametersNumbaMinimum,
 	parametersNumbaSuperJit,
 	parametersNumbaSuperJitParallel,
 	setDatatypeElephino,

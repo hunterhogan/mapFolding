@@ -38,6 +38,7 @@ from mapFolding.theSSOT import (
 	ParametersNumba,
 	parametersNumbaDEFAULT,
 	parametersNumbaFailEarly,
+	parametersNumbaMinimum,
 	parametersNumbaParallelDEFAULT,
 	parametersNumbaSuperJit,
 	parametersNumbaSuperJitParallel,

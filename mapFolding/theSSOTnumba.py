@@ -114,3 +114,19 @@ parametersNumbaSuperJitParallel: Final[ParametersNumba] = {
 """Speed, no helmet, concurrency, no talking to non-jitted functions.
 Claude says, "The NRT is Numba's memory management system that handles memory allocation and deallocation for array operations. Because of array copying, you need to have NRT enabled." IDK which AI assistant autocompleted this, but, "The NRT is a bit slower than the default memory management system, but it's necessary for certain operations."
 """
+
+parametersNumbaMinimum: Final[ParametersNumba] = {
+	'_nrt': True,
+	'boundscheck': True,
+	'cache': True,
+	'error_model': 'numpy',
+	'fastmath': True,
+	'forceinline': False,
+	'inline': 'always',
+	'looplift': False,
+	'no_cfunc_wrapper': False,
+	'no_cpython_wrapper': False,
+	'nopython': False,
+	'forceobj': True,
+	'parallel': False,
+}

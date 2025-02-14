@@ -1,6 +1,5 @@
 """I think this module is free of hardcoded values.
 TODO: consolidate the logic in this module."""
-from ast import Subscript
 from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import *
 
 def makeStrRLEcompacted(arrayTarget: numpy.ndarray, identifierName: Optional[str]=None) -> str:
@@ -191,7 +190,7 @@ def astNameToAstConstant(FunctionDefTarget: ast.FunctionDef, name: str, value: i
 
 	return cast(ast.FunctionDef, NodeReplacer(findName, replaceWithConstant).visit(FunctionDefTarget))
 
-def makeLauncherJobNumba(callableTarget: str, pathFilenameFoldsTotal: pathlib.Path) -> ast.Module:
+def makeLauncherBasicJobNumba(callableTarget: str, pathFilenameFoldsTotal: pathlib.Path) -> ast.Module:
 	linesLaunch = f"""
 if __name__ == '__main__':
 	import time
@@ -340,7 +339,7 @@ def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
 
 def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	datatypeModuleDecorator = Z0Z_getDatatypeModuleScalar()
-	def make_arg4parameter(signatureElement: ast.arg) -> Subscript | None:
+	def make_arg4parameter(signatureElement: ast.arg) -> ast.Subscript | None:
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
