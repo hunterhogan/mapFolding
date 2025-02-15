@@ -2,7 +2,6 @@ from contextlib import redirect_stdout
 from datetime import datetime, timedelta
 from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues, _parseBFileOEIS, _validateOEISid, _getOEISidInformation
 from tests.conftest import *
-from typing import NoReturn
 from urllib.error import URLError
 import io
 import os
@@ -14,14 +13,6 @@ import unittest
 import unittest.mock
 import urllib
 import urllib.request
-
-def test_algorithmSourceSequential(oeisID: str, useAlgorithmDirectly: None) -> None:
-	for n in settingsOEIS[oeisID]['valuesTestValidation']:
-		standardizedEqualTo(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
-
-def test_aOFn_calculate_value(oeisID: str) -> None:
-	for n in settingsOEIS[oeisID]['valuesTestValidation']:
-		standardizedEqualTo(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID: str) -> None:

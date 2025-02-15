@@ -1,2 +1,3 @@
 from mapFolding.someAssemblyRequired.getLLVMforNoReason import writeModuleLLVM
 from mapFolding.someAssemblyRequired.makeJob import makeStateJob
+from mapFolding.someAssemblyRequired.synthesizeNumbaJob import writeJobNumba

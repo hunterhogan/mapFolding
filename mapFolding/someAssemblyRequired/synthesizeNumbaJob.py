@@ -28,9 +28,9 @@ def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob: computationS
 	return FunctionDefTarget, allImports
 
 def writeJobNumba(mapShape: Sequence[int]
-				, callableTarget: str
 				, algorithmSource: ModuleType
-				, parametersNumba: Optional[ParametersNumba]=None
+				, callableTarget: Optional[str] = None
+				, parametersNumba: Optional[ParametersNumba] = None
 				, pathFilenameWriteJob: Optional[Union[str, os.PathLike[str]]] = None
 				, unrollCountGaps: Optional[bool] = False
 				, **keywordArguments: Optional[Any]
@@ -63,7 +63,15 @@ def writeJobNumba(mapShape: Sequence[int]
 	stateJob = makeStateJob(mapShape, writeJob=False, **keywordArguments)
 	pythonSource = inspect.getsource(algorithmSource)
 	astModule = ast.parse(pythonSource)
-	FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
+	setFunctionDef = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
+	if not callableTarget:
+		if len(setFunctionDef) == 1:
+			FunctionDefTarget = setFunctionDef.pop()
+			callableTarget = FunctionDefTarget.name
+		else:
+			raise ValueError(f"I did not receive a `callableTarget` and {algorithmSource.__name__=} has more than one callable: {setFunctionDef}. Please select one.")
+	else:
+		FunctionDefTarget = setFunctionDef.pop() if callableTarget in {statement.name for statement in setFunctionDef} else None
 	if not FunctionDefTarget: raise ValueError(f"I received `{callableTarget=}` and {algorithmSource.__name__=}, but I could not find that function in that source.")
 
 	# NOTE `allImports` is a complementary container to `FunctionDefTarget`; the `FunctionDefTarget` cannot track its own imports very well.
@@ -132,10 +140,10 @@ def writeJobNumba(mapShape: Sequence[int]
 
 if __name__ == '__main__':
 	mapShape = [5,5]
-	callableTarget = 'countSequential'
-
 	from mapFolding.syntheticModules import numba_countSequential
 	algorithmSource: ModuleType = numba_countSequential
+
+	callableTarget = None
 
 	parametersNumba = parametersNumbaDEFAULT
 
@@ -147,4 +155,4 @@ if __name__ == '__main__':
 	Z0Z_setDatatypeModuleScalar('numba')
 	Z0Z_setDecoratorCallable('jit')
 
-	writeJobNumba(mapShape, callableTarget, algorithmSource, parametersNumba, pathFilenameWriteJob)
+	writeJobNumba(mapShape, algorithmSource, callableTarget, parametersNumba, pathFilenameWriteJob)

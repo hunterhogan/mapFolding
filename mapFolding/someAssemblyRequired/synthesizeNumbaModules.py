@@ -4,7 +4,7 @@ everything I am doing. I would rather benefit from humanity's
 collective wisdom."""
 from mapFolding.someAssemblyRequired.synthesizeNumba import *
 
-def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: Optional[str] = None, algorithmSource: Optional[ModuleType] = None, relativePathWrite: Optional[pathlib.Path] = None, formatFilenameWrite: Optional[str] = None) -> None:
+def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: Optional[bool] = False, algorithmSource: Optional[ModuleType] = None, relativePathWrite: Optional[pathlib.Path] = None, formatFilenameWrite: Optional[str] = None) -> None:
 	if relativePathWrite and relativePathWrite.is_absolute():
 		raise ValueError("The path to write the module must be relative to the root of the package.")
 	if not algorithmSource:
@@ -51,7 +51,7 @@ def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: O
 		listStuffYouOughtaKnow.append(doThisStuff(callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports, relativePathWrite, formatFilenameWrite))
 
 	if callableDispatcher:
-		callableTarget 	= callableDispatcher
+		callableTarget 	= getAlgorithmCallable().__name__
 		parametersNumba = None
 		inlineCallables	= False
 		unpackArrays	= False
@@ -71,5 +71,5 @@ if __name__ == '__main__':
 	Z0Z_setDatatypeModuleScalar('numba')
 	Z0Z_setDecoratorCallable('jit')
 	listCallablesInline: List[str] = ['countInitialize', 'countParallel', 'countSequential']
-	callableDispatcher = 'doTheNeedful'
+	callableDispatcher = True
 	makeFlowNumbaOptimized(listCallablesInline, callableDispatcher)

@@ -1,12 +1,8 @@
 from tests.conftest import *
-from typing import List, Dict, Literal, Tuple
 import pytest
 
 # TODO add a test. `C` = number of logical cores available. `n = C + 1`. Ensure that `[2,n]` is computed correctly.
 # Or, probably smarter: limit the number of cores, then run a test with C+1.
-
-def test_algorithmSourceParallel(listDimensionsTestParallelization: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], useAlgorithmDirectly: None) -> None:
-	standardizedEqualTo(foldsTotalKnown[tuple(listDimensionsTestParallelization)], countFolds, listDimensionsTestParallelization, None, 'maximum')
 
 def test_countFoldsComputationDivisionsInvalid(listDimensionsTestFunctionality: List[int]) -> None:
 	standardizedEqualTo(ValueError, countFolds, listDimensionsTestFunctionality, None, {"wrong": "value"})

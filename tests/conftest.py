@@ -5,9 +5,11 @@
 from mapFolding import *
 from mapFolding import basecamp, getAlgorithmCallable, getDispatcherCallable
 from mapFolding.beDRY import *
+from mapFolding.someAssemblyRequired import *
 from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidInformation, _getOEISidValues
 from mapFolding.oeis import *
-from typing import Any, Callable, ContextManager, Dict, Generator, List, Optional, Sequence, Set, Tuple, Type, Union
+from types import ModuleType
+from typing import Any, Callable, ContextManager, Dict, Generator, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, Type, Union
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 import pathlib
 import pytest
@@ -229,7 +231,7 @@ def oeisID_1random() -> str:
 	return random.choice(oeisIDsImplemented)
 
 @pytest.fixture
-def useAlgorithmDirectly() -> Generator[None, Any, None]:
+def useAlgorithmSource() -> Generator[None, Any, None]:
 	"""Temporarily patches getDispatcherCallable to return the algorithm source directly."""
 	original_dispatcher = basecamp.getDispatcherCallable
 

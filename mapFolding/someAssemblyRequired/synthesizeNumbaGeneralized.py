@@ -3,6 +3,7 @@ from mapFolding import (
 	EnumIndices,
 	formatModuleNameDEFAULT,
 	FREAKOUT,
+	getAlgorithmCallable,
 	getAlgorithmSource,
 	getFilenameFoldsTotal,
 	getPathFilenameFoldsTotal,
@@ -35,6 +36,7 @@ from numpy import integer
 from numpy.typing import NDArray
 from types import ModuleType
 from typing import Any, Callable, cast, Dict, List, Optional, Sequence, Set, Tuple, Type, Union
+from Z0Z_tools import autoDecodingRLE
 import ast
 import autoflake
 import collections
@@ -52,19 +54,6 @@ youOughtaKnow = collections.namedtuple('youOughtaKnow', ['callableSynthesized', 
 
 # TODO move to Z0Z_tools
 def makeStrRLEcompacted(arrayTarget: NDArray[integer[Any]]) -> str:
-	"""Converts a NumPy array into a compressed string representation using run-length encoding (RLE).
-
-	This function takes a NumPy array and converts it into an optimized string representation by:
-	1. Compressing consecutive sequences of numbers into range objects
-	2. Minimizing repeated zeros using array multiplication syntax
-
-	Parameters:
-		arrayTarget (numpy.ndarray): The input NumPy array to be converted
-
-	Returns:
-		str: A string containing Python code that recreates the input array in compressed form.
-	"""
-
 	def compressRangesNDArrayNoFlatten(arraySlice: NDArray[integer[Any]]) -> List[List[Any] | Any | NDArray[integer[Any]]] | List[Any] | Any | NDArray[integer[Any]]:
 		if isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim > 1:
 			return [compressRangesNDArrayNoFlatten(arraySlice[index]) for index in range(arraySlice.shape[0])]

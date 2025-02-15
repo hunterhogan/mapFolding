@@ -16,11 +16,12 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 
 	def insertAssign(assignee: str, arraySlice: numpy.ndarray) -> None:
 		nonlocal FunctionDefTarget
-		onlyDataRLE = makeStrRLEcompacted(arraySlice) #NOTE
+		onlyDataRLE = autoDecodingRLE(arraySlice, addSpaces=True)
+		# onlyDataRLE = makeStrRLEcompacted(arraySlice) #NOTE
 		astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
 		dataAst = astStatement.value
 
-		arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], dictionaryKeywords={'dtype': ast.Name(id=argData_dtypeName, ctx=ast.Load())})
+		arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=argData_dtypeName, ctx=ast.Load()))])
 
 		assignment = ast.Assign(targets=[ast.Name(id=assignee, ctx=ast.Store())], value=arrayCall)#NOTE
 		FunctionDefTarget.body.insert(0, assignment)
@@ -51,15 +52,16 @@ def findAndReplaceArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: s
 				if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == identifier and isinstance(astSubscript.slice, ast.Attribute):
 					indexAs_astAttribute: ast.Attribute = astSubscript.slice
 					indexAsStr = ast.unparse(indexAs_astAttribute)
-					argDataSlice = arrayTarget[eval(indexAsStr)]
+					arraySlice = arrayTarget[eval(indexAsStr)]
 
-					onlyDataRLE = makeStrRLEcompacted(argDataSlice)
+					# onlyDataRLE = makeStrRLEcompacted(argDataSlice)
+					onlyDataRLE = autoDecodingRLE(arraySlice, addSpaces=True)
 					astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
 					dataAst = astStatement.value
 
-					arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], dictionaryKeywords={'dtype': ast.Name(id=argData_dtypeName, ctx=ast.Load())})
+					arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=argData_dtypeName, ctx=ast.Load()))])
 
-					assignment = ast.Assign( targets=[astAssignee], value=arrayCall )
+					assignment = ast.Assign(targets=[astAssignee], value=arrayCall)
 					FunctionDefTarget.body.insert(0, assignment)
 					FunctionDefTarget.body.remove(stmt)
 	return FunctionDefTarget, allImports
@@ -77,7 +79,7 @@ def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, iden
 					indexAs_astAttribute: ast.Attribute = astSubscript.slice
 					indexAsStr = ast.unparse(indexAs_astAttribute)
 					argDataSlice: int = arrayTarget[eval(indexAsStr)].item()
-					astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()) , args=[ast.Constant(value=argDataSlice)], keywords=[])
+					astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()), args=[ast.Constant(value=argDataSlice)], keywords=[])
 					assignment = ast.Assign(targets=[astAssignee], value=astCall)
 					if astAssignee.id not in Z0Z_listChaff:
 						FunctionDefTarget.body.insert(0, assignment)

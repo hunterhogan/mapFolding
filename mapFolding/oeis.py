@@ -37,31 +37,31 @@ settingsOEIShardcodedValues: Dict[str, Dict[str, Any]] = {
 		'getMapShape': lambda n: sorted([2, n]),
 		'valuesBenchmark': [14],
 		'valuesTestParallelization': [*range(3, 7)],
-		'valuesTestValidation': [0, 1, random.randint(2, 9)],
+		'valuesTestValidation': [random.randint(2, 9)],
 	},
 	'A001416': {
 		'getMapShape': lambda n: sorted([3, n]),
 		'valuesBenchmark': [9],
 		'valuesTestParallelization': [*range(3, 5)],
-		'valuesTestValidation': [0, 1, random.randint(2, 6)],
+		'valuesTestValidation': [random.randint(2, 6)],
 	},
 	'A001417': {
 		'getMapShape': lambda n: [2] * n,
 		'valuesBenchmark': [6],
 		'valuesTestParallelization': [*range(2, 4)],
-		'valuesTestValidation': [0, 1, random.randint(2, 4)],
+		'valuesTestValidation': [random.randint(2, 4)],
 	},
 	'A195646': {
 		'getMapShape': lambda n: [3] * n,
 		'valuesBenchmark': [3],
 		'valuesTestParallelization': [*range(2, 3)],
-		'valuesTestValidation': [0, 1, 2],
+		'valuesTestValidation': [2],
 	},
 	'A001418': {
 		'getMapShape': lambda n: [n, n],
 		'valuesBenchmark': [5],
 		'valuesTestParallelization': [*range(2, 4)],
-		'valuesTestValidation': [1, random.randint(2, 4)],
+		'valuesTestValidation': [random.randint(2, 4)],
 	},
 }
 
@@ -229,7 +229,7 @@ def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
 			getMapShape=settingsOEIShardcodedValues[oeisID]['getMapShape'],
 			valuesBenchmark=settingsOEIShardcodedValues[oeisID]['valuesBenchmark'],
 			valuesTestParallelization=settingsOEIShardcodedValues[oeisID]['valuesTestParallelization'],
-			valuesTestValidation=settingsOEIShardcodedValues[oeisID]['valuesTestValidation'],
+			valuesTestValidation=settingsOEIShardcodedValues[oeisID]['valuesTestValidation'] + list(range(offsetSherpa, 2)),
 			valuesKnown=valuesKnownSherpa,
 			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1
 		)

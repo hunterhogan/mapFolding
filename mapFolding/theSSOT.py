@@ -84,7 +84,7 @@ def getAlgorithmSource() -> ModuleType:
 
 def getAlgorithmCallable() -> Callable[..., None]:
 	algorithmSource = getAlgorithmSource()
-	return cast(Callable[..., None], algorithmSource.doTheNeedful)
+	return cast(Callable[..., None], algorithmSource.doTheNeedful) # 'doTheNeedful' is duplicated and there is not a SSOT for it
 
 def getDispatcherCallable() -> Callable[..., None]:
 	from mapFolding.syntheticModules import numba_doTheNeedful
