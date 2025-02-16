@@ -78,6 +78,9 @@ def leafConnecteeInitialization(connectionGraph: ndarray[Tuple[int, int, int], d
 def leafConnecteeUpdate(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
 	my[indexMy.leafConnectee.value] = connectionGraph[my[indexMy.indexDimension.value], my[indexMy.leaf1ndex.value], track[indexTrack.leafBelow.value, my[indexMy.leafConnectee.value]]]
 
+def activeLeafConnectedToItself(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
+	return my[indexMy.leafConnectee.value] == my[indexMy.leaf1ndex.value]
+
 def loopingLeavesConnectedToActiveLeaf(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
 	return my[indexMy.leafConnectee.value] != my[indexMy.leaf1ndex.value]
 
@@ -195,10 +198,10 @@ def countSequential( connectionGraph: ndarray[Tuple[int, int, int], dtype[intege
 			else:
 				findGapsInitializeVariables(my=my, track=track)
 				while loopUpToDimensionsTotal(my=my):
-					if dimensionsUnconstrainedCondition(connectionGraph=connectionGraph, my=my):
+					leafConnecteeInitialization(connectionGraph=connectionGraph, my=my)
+					if activeLeafConnectedToItself(my=my):
 						dimensionsUnconstrainedDecrement(my=my)
 					else:
-						leafConnecteeInitialization(connectionGraph=connectionGraph, my=my)
 						while loopingLeavesConnectedToActiveLeaf(my=my):
 							countGaps(gapsWhere=gapsWhere, my=my, track=track)
 							leafConnecteeUpdate(connectionGraph=connectionGraph, my=my, track=track)

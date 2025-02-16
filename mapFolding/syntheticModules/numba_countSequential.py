@@ -1,11 +1,11 @@
 from mapFolding import indexMy
 from mapFolding import indexTrack
+from numba import int64
 from numba import jit
 from numba import uint8
-from numba import int64
+from numpy import dtype
 from numpy import ndarray
 from numpy import integer
-from numpy import dtype
 from typing import Tuple
 from typing import Any
 
@@ -34,10 +34,10 @@ def countSequential(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer
                 gap1ndexCeiling = gapRangeStart[leaf1ndex - 1]
                 indexDimension = 0
                 while indexDimension < dimensionsTotal:
-                    if connectionGraph[indexDimension, leaf1ndex, leaf1ndex] == leaf1ndex:
+                    leafConnectee = connectionGraph[indexDimension, leaf1ndex, leaf1ndex]
+                    if leafConnectee == leaf1ndex:
                         dimensionsUnconstrained -= 1
                     else:
-                        leafConnectee = connectionGraph[indexDimension, leaf1ndex, leaf1ndex]
                         while leafConnectee != leaf1ndex:
                             gapsWhere[gap1ndexCeiling] = leafConnectee
                             if countDimensionsGapped[leafConnectee] == 0:

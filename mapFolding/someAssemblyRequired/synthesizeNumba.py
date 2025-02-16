@@ -252,6 +252,7 @@ def makeAstModuleForOneCallable(pythonSource: str, callableTarget: str, paramete
 	if inlineCallables:
 		dictionaryFunctionDef = {statement.name: statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
 		callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctionDef)
+		# NOTE the inliner assumes each function is not called more than once
 		FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
 	else:
 		FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
