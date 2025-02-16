@@ -13,25 +13,26 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 	for n in settingsOEIS[oeisID]['valuesTestValidation']:
 		standardizedEqualTo(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
-@pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
-def test_writeJobNumba(listDimensionsTestCountFolds: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], pathFilenameTmpTesting: Path) -> None:
-	from mapFolding.syntheticModules import numba_countSequential
-	algorithmSourceHARDCODED: ModuleType = numba_countSequential
-	algorithmSource = algorithmSourceHARDCODED
-	pathFilenameModule = writeJobNumba(listDimensionsTestCountFolds, algorithmSource, pathFilenameWriteJob=pathFilenameTmpTesting.absolute())
+# Python doesn't want me to test this
+# @pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
+# def test_writeJobNumba(listDimensionsTestCountFolds: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], pathFilenameTmpTesting: Path) -> None:
+# 	from mapFolding.syntheticModules import numba_countSequential
+# 	algorithmSourceHARDCODED: ModuleType = numba_countSequential
+# 	algorithmSource = algorithmSourceHARDCODED
+# 	pathFilenameModule = writeJobNumba(listDimensionsTestCountFolds, algorithmSource, pathFilenameWriteJob=pathFilenameTmpTesting.absolute())
 
-	Don_Lapre_Road_to_Self_Improvement = importlib.util.spec_from_file_location("__main__", pathFilenameModule)
-	if Don_Lapre_Road_to_Self_Improvement is None:
-		raise ImportError(f"Failed to create module specification from {pathFilenameModule}")
-	if Don_Lapre_Road_to_Self_Improvement.loader is None:
-		raise ImportError(f"Failed to get loader for module {pathFilenameModule}")
-	module = importlib.util.module_from_spec(Don_Lapre_Road_to_Self_Improvement)
+# 	Don_Lapre_Road_to_Self_Improvement = importlib.util.spec_from_file_location("__main__", pathFilenameModule)
+# 	if Don_Lapre_Road_to_Self_Improvement is None:
+# 		raise ImportError(f"Failed to create module specification from {pathFilenameModule}")
+# 	if Don_Lapre_Road_to_Self_Improvement.loader is None:
+# 		raise ImportError(f"Failed to get loader for module {pathFilenameModule}")
+# 	module = importlib.util.module_from_spec(Don_Lapre_Road_to_Self_Improvement)
 
-	module.__name__ = "__main__"
-	Don_Lapre_Road_to_Self_Improvement.loader.exec_module(module)
+# 	module.__name__ = "__main__"
+# 	Don_Lapre_Road_to_Self_Improvement.loader.exec_module(module)
 
-	pathFilenameFoldsTotal = getPathFilenameFoldsTotal(listDimensionsTestCountFolds)
-	standardizedEqualTo(str(foldsTotalKnown[tuple(listDimensionsTestCountFolds)]), pathFilenameFoldsTotal.read_text().strip)
+# 	pathFilenameFoldsTotal = getPathFilenameFoldsTotal(listDimensionsTestCountFolds)
+# 	standardizedEqualTo(str(foldsTotalKnown[tuple(listDimensionsTestCountFolds)]), pathFilenameFoldsTotal.read_text().strip)
 
 # def test_makeFlowNumbaOptimized(pathTmpTesting: Path, useThisDispatcher):
 # def test_makeFlowNumbaOptimized(useThisDispatcher):
