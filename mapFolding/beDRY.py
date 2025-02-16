@@ -3,13 +3,14 @@ from mapFolding import (
 	computationState,
 	getPathJobRootDEFAULT,
 	hackSSOTdtype,
+	hackSSOTdatatype,
 	indexMy,
 	indexTrack,
 	setDatatypeElephino,
 	setDatatypeFoldsTotal,
 	setDatatypeLeavesTotal,
 )
-from numpy import integer
+from numpy import dtype, integer, ndarray
 from numpy.typing import DTypeLike, NDArray
 from typing import Any, List, Optional, Sequence, Tuple, Type, Union
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
@@ -19,7 +20,7 @@ import os
 import pathlib
 import sys
 
-def getFilenameFoldsTotal(mapShape: Union[Sequence[int], numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]]) -> str:
+def getFilenameFoldsTotal(mapShape: Union[Sequence[int], ndarray[Tuple[int], dtype[integer[Any]]]]) -> str:
 	"""Make a standardized filename for the computed value `foldsTotal`.
 
 	The filename takes into account
@@ -67,30 +68,29 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 
 		return productDimensions
 
-def getPathFilenameFoldsTotal(mapShape: Union[Sequence[int], numpy.ndarray[Tuple[int], numpy.dtype[integer[Any]]]], pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
-	"""Get path for folds total file.
+def getPathFilenameFoldsTotal(mapShape: Union[Sequence[int], ndarray[Tuple[int], dtype[integer[Any]]]], pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
+	"""Get a standardized path and filename for the computed value `foldsTotal`.
 
-	This function determines the file path for storing fold totals. If a path is provided,
-	it will use that path. If the path is a directory, it will append a default filename.
-	The function ensures the parent directory exists by creating it if necessary.
+	If you provide a directory, the function will append a standardized filename. If you provide a filename
+	or a relative path and filename, the function will prepend the default path.
 
 	Parameters:
-		mapShape (Sequence[int]): List of dimensions for the map folding problem.
-		pathLikeWriteFoldsTotal (Union[str, os.PathLike[str]], optional): Path where to save
-			the folds total. Can be a file path or directory path. If None, uses default path.
+		mapShape: List of dimensions for the map folding problem.
+		pathLikeWriteFoldsTotal (pathJobRootDEFAULT): Path, filename, or relative path and filename. If None, uses default path.
 			Defaults to None.
 
 	Returns:
-		pathlib.Path: Complete path to the folds total file.
+		pathFilenameFoldsTotal: Absolute path and filename.
 	"""
-	pathFilenameFoldsTotal = pathlib.Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else getPathJobRootDEFAULT()
-	if pathFilenameFoldsTotal.is_dir():
-		filenameFoldsTotalDEFAULT = getFilenameFoldsTotal(mapShape)
-		pathFilenameFoldsTotal = pathFilenameFoldsTotal / filenameFoldsTotalDEFAULT
-	elif pathlib.Path(pathLikeWriteFoldsTotal).is_absolute(): # type: ignore
-		pathFilenameFoldsTotal = pathlib.Path(pathLikeWriteFoldsTotal) # type: ignore
+	pathLikeSherpa = pathlib.Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else None
+	if not pathLikeSherpa:
+		pathLikeSherpa = getPathJobRootDEFAULT()
+	if pathLikeSherpa.is_dir():
+		pathFilenameFoldsTotal = pathLikeSherpa / getFilenameFoldsTotal(mapShape)
+	elif pathLikeSherpa.is_absolute():
+		pathFilenameFoldsTotal = pathLikeSherpa
 	else:
-		pathFilenameFoldsTotal = pathlib.Path(getPathJobRootDEFAULT(), pathLikeWriteFoldsTotal) # type: ignore
+		pathFilenameFoldsTotal = getPathJobRootDEFAULT() / pathLikeSherpa
 
 	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 	return pathFilenameFoldsTotal
@@ -145,7 +145,7 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
 
 	return taskDivisions
 
-def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> numpy.ndarray[Tuple[int, int, int], numpy.dtype[integer[Any]]]:
+def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[str]) -> ndarray[Tuple[int, int, int], dtype[integer[Any]]]:
 	"""
 	Constructs a multi-dimensional connection graph representing the connections between the leaves of a map with the given dimensions.
 	Also called a Cartesian product decomposition or dimensional product mapping.
@@ -157,21 +157,22 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 	Returns
 		connectionGraph: A 3D numpy array with shape of (dimensionsTotal, leavesTotal + 1, leavesTotal + 1).
 	"""
-	if keywordArguments.get('datatype', None):
-		setDatatypeLeavesTotal(keywordArguments['datatype']) # type: ignore
-	datatype = hackSSOTdtype('connectionGraph')
+	ImaSetTheDatatype = keywordArguments.get('datatype', None)
+	if ImaSetTheDatatype:
+		setDatatypeLeavesTotal(ImaSetTheDatatype)
+	dtype = hackSSOTdtype('connectionGraph')
 	mapShape = validateListDimensions(listDimensions)
 	leavesTotal = getLeavesTotal(mapShape)
-	arrayDimensions = numpy.array(mapShape, dtype=datatype)
+	arrayDimensions = numpy.array(mapShape, dtype=dtype)
 	dimensionsTotal = len(arrayDimensions)
 
-	cumulativeProduct = numpy.multiply.accumulate([1] + mapShape, dtype=datatype)
-	coordinateSystem = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=datatype)
+	cumulativeProduct = numpy.multiply.accumulate([1] + mapShape, dtype=dtype)
+	coordinateSystem = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=dtype)
 	for indexDimension in range(dimensionsTotal):
 		for leaf1ndex in range(1, leavesTotal + 1):
 			coordinateSystem[indexDimension, leaf1ndex] = ( ((leaf1ndex - 1) // cumulativeProduct[indexDimension]) % arrayDimensions[indexDimension] + 1 )
 
-	connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=datatype)
+	connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=dtype)
 	for indexDimension in range(dimensionsTotal):
 		for activeLeaf1ndex in range(1, leavesTotal + 1):
 			for connectee1ndex in range(1, activeLeaf1ndex + 1):
@@ -190,7 +191,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 	return connectionGraph
 
 def makeDataContainer(shape: Union[int, Tuple[int, ...]], datatype: Optional[DTypeLike] = None) -> NDArray[integer[Any]]:
-	"""Create a zeroed-out `numpy.ndarray` with the given shape and datatype.
+	"""Create a zeroed-out `ndarray` with the given shape and datatype.
 
 	Parameters:
 		shape (Union[int, Tuple[int, ...]]): The shape of the array. Can be an integer for 1D arrays
@@ -199,7 +200,7 @@ def makeDataContainer(shape: Union[int, Tuple[int, ...]], datatype: Optional[DTy
 			If None, defaults to dtypeLargeDEFAULT. Defaults to None.
 
 	Returns:
-		numpy.ndarray: A new array of given shape and type, filled with zeros.
+		ndarray: A new array of given shape and type, filled with zeros.
 	"""
 	if datatype is None:
 		datatype = hackSSOTdtype('dtypeFoldsTotal')
@@ -247,13 +248,26 @@ def outfitCountFolds(listDimensions: Sequence[int]
 		- Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
 		- Integer `<= -1`: Subtract the absolute value from total CPUs.
 	"""
-	kwourGrapes = keywordArguments.get('sourGrapes', False)
-	kwatatype = keywordArguments.get('datatypeElephino', None)
-	if kwatatype: setDatatypeElephino(kwatatype, sourGrapes=kwourGrapes) # type: ignore
-	kwatatype = keywordArguments.get('datatypeFoldsTotal', None)
-	if kwatatype: setDatatypeFoldsTotal(kwatatype, sourGrapes=kwourGrapes) # type: ignore
-	kwatatype = keywordArguments.get('datatypeLeavesTotal', None)
-	if kwatatype: setDatatypeLeavesTotal(kwatatype, sourGrapes=kwourGrapes) # type: ignore
+	kwourGrapes = keywordArguments.get('sourGrapes', None)
+	if kwourGrapes:
+		sourGrapes = True
+	else:
+		sourGrapes = False
+
+	ImaSetTheDatatype = keywordArguments.get('datatypeElephino', None)
+	if ImaSetTheDatatype:
+		ImaSetTheDatatype = str(ImaSetTheDatatype)
+		setDatatypeElephino(ImaSetTheDatatype, sourGrapes)
+
+	ImaSetTheDatatype = keywordArguments.get('datatypeFoldsTotal', None)
+	if ImaSetTheDatatype:
+		ImaSetTheDatatype = str(ImaSetTheDatatype)
+		setDatatypeFoldsTotal(ImaSetTheDatatype, sourGrapes)
+
+	ImaSetTheDatatype = keywordArguments.get('datatypeLeavesTotal', None)
+	if ImaSetTheDatatype:
+		ImaSetTheDatatype = str(ImaSetTheDatatype)
+		setDatatypeLeavesTotal(ImaSetTheDatatype, sourGrapes)
 
 	my = makeDataContainer(len(indexMy), hackSSOTdtype('my'))
 
@@ -268,7 +282,7 @@ def outfitCountFolds(listDimensions: Sequence[int]
 	my[indexMy.dimensionsTotal] = len(mapShape)
 	my[indexMy.leaf1ndex] = 1
 	stateInitialized = computationState(
-		connectionGraph = makeConnectionGraph(mapShape, datatype=hackSSOTdtype('connectionGraph')),
+		connectionGraph = makeConnectionGraph(mapShape, datatype=hackSSOTdatatype('connectionGraph')),
 		foldGroups = foldGroups,
 		mapShape = numpy.array(mapShape, dtype=hackSSOTdtype('mapShape')),
 		my = my,

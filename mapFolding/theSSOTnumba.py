@@ -18,23 +18,16 @@ Old notes that are not entirely accurate.
 
 | **Option**			  | **Description**									 | **Why**			   | **Size**		| **But**				  |
 | ----------------------- | --------------------------------------------------- | --------------------- | --------------- | ------------------------ |
-| `_dbg_extend_lifetimes` | Debug option to extend object lifetimes			 | Debugging			 |				 |						  |
-| `_dbg_optnone`		  | Disable optimization for debugging				  | Debugging			 |				 |						  |
-| `debug`				 | Enable debug mode with additional checks			| Debugging			 |				 |						  |
 | `no_rewrites`		   | Disable AST rewrites optimization				   | Debugging			 |				 |						  |
-| `boundscheck`		   | Enable array bounds checking (slows execution)	  | Error checking		| Larger		  | Slower				   |
 | `error_model`		   | Divide by zero: kill or chill?					  | Error checking		| ?			   |						  |
 | `_nrt`				  | Enable No Runtime type checking					 | Startup speed		 | Smaller		 | No type protection	   |
-| `fastmath`			  | Reduce float potential precision					| Float speed		   | Smaller		 | Discriminatory, untested |
 | `forceinline`		   | Force function inlining							 | Reduce function calls | Likely larger   |						  |
-| `forceobj`			  | Force object mode compilation					   | Inclusiveness		 | Larger		  | Slower execution		 |
 | `inline`				| Algorithmically choose inlining					 | Speed				 | Slightly larger |						  |
 | `looplift`			  | Enable loop lifting optimization					| Speed (if applicable) | Larger		  | Exclusionary			 |
 | `no_cfunc_wrapper`	  | Disable C function wrapper generation			   | Size				  | Smaller		 | Exclusionary			 |
 | `no_cpython_wrapper`	| Disable Python C-API wrapper generation			 | Size				  | Smallest		| Exclusionary			 |
 
 """
-# NOTE Deepseek removed forceinline=True, inline='always'
 # TODO try to implement all possible parameters, but use `NotRequired` for the more esoteric ones
 class ParametersNumba(TypedDict):
 	_dbg_extend_lifetimes: NotRequired[bool]
