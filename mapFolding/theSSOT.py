@@ -82,7 +82,7 @@ def getAlgorithmSource() -> ModuleType:
 	from mapFolding import theDao
 	return theDao
 
-def getAlgorithmCallable() -> Callable[..., None]:
+def getAlgorithmDispatcher() -> Callable[..., None]:
 	algorithmSource = getAlgorithmSource()
 	return cast(Callable[..., None], algorithmSource.doTheNeedful) # 'doTheNeedful' is duplicated and there is not a SSOT for it
 

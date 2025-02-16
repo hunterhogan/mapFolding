@@ -64,6 +64,35 @@ Available OEIS sequences:
 - Transform the algorithm using AST
 - Create hyper-optimized modules to compute a specific map.
 
+### 4. **Customizing your algorithm**
+
+- mapFolding\someAssemblyRequired\synthesizeNumbaJob.py (and/or synthesizeNumba____.py, as applicable)
+  - Synthesize a Numba-optimized module for a specific mapShape
+  - Synthesize _from_ a module in mapFolding\syntheticModules or from any source you select
+  - Use the existing transformation options
+  - Or create new ways of transforming the algorithm from its source to a specific job
+- mapFolding\someAssemblyRequired\makeJob.py
+  - Initialize data for a specific mapShape
+- mapFolding\someAssemblyRequired\synthesizeNumbaModules.py (and/or synthesizeNumba____.py, as applicable)
+  - Synthesize one or more Numba-optimized modules for parallel or sequential computation
+  - Overwrite the modules in mapFolding\syntheticModules or save the module(s) to a custom path
+  - Synthesize _from_ the algorithm(s) in mapFolding\theDao.py or from any source you select
+  - Use the existing transformation options
+  - Or create new ways of transforming the algorithm from its source to a new module
+  - Use your new module in synthesizeNumbaJob.py, above, as the source to create a mapShape-specific job module
+- mapFolding\theDao.py
+  - Modify the algorithms for initializing values, parallel computation, and/or sequential computation
+  - Use the modified algorithm(s) in synthesizeNumbaModules.py, above, to create Numba-optimized version(s)
+  - Then use a Numba-optimized version in synthesizeNumbaJob.py, above, to create a hyper-optimized version for a specific mapShape
+- mapFolding\theSSOT.py (and/or theSSOTnumba.py and/ or theSSOT____.py, if they exist)
+  - Modify broad settings or find functions to modify broad settings, such as data structures and their data types
+  - Create new settings or groups of settings
+- mapFolding\beDRY.py
+  - Functions to handle common tasks, such as parsing parameters or creating the `connectionGraph` for a mapShape (a Cartesian product decomposition)
+- mapFolding\someAssemblyRequired
+  - Create new transformations to optimize the algorithm, such as for JAX, CuPy, or CUDA
+  - (mapFolding\reference\jax.py has a once-functional JAX implementation, and synthesizeModuleJAX.py might be a useful starting point)
+
 ## Map-folding Video
 
 ~~This caused my neurosis:~~ I enjoyed the following video, which is what introduced me to map folding.

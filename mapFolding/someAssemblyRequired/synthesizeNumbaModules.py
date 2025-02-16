@@ -4,7 +4,7 @@ everything I am doing. I would rather benefit from humanity's
 collective wisdom."""
 from mapFolding.someAssemblyRequired.synthesizeNumba import *
 
-def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: Optional[bool] = False, algorithmSource: Optional[ModuleType] = None, relativePathWrite: Optional[pathlib.Path] = None, formatFilenameWrite: Optional[str] = None) -> None:
+def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: Optional[bool] = False, algorithmSource: Optional[ModuleType] = None, relativePathWrite: Optional[pathlib.Path] = None, formatFilenameWrite: Optional[str] = None) -> List[youOughtaKnow]:
 	if relativePathWrite and relativePathWrite.is_absolute():
 		raise ValueError("The path to write the module must be relative to the root of the package.")
 	if not algorithmSource:
@@ -51,7 +51,7 @@ def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: O
 		listStuffYouOughtaKnow.append(doThisStuff(callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports, relativePathWrite, formatFilenameWrite))
 
 	if callableDispatcher:
-		callableTarget 	= getAlgorithmCallable().__name__
+		callableTarget 	= getAlgorithmDispatcher().__name__
 		parametersNumba = None
 		inlineCallables	= False
 		unpackArrays	= False
@@ -62,6 +62,8 @@ def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: O
 				allImports.addAst(statement)
 
 		listStuffYouOughtaKnow.append(doThisStuff(callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports, relativePathWrite, formatFilenameWrite))
+
+	return listStuffYouOughtaKnow
 
 if __name__ == '__main__':
 	setDatatypeModule('numpy', sourGrapes=True)

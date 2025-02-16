@@ -2,9 +2,9 @@ from mapFolding import indexMy
 from mapFolding import indexTrack
 from numba import jit
 from numba import uint8
-from numpy import dtype
 from numpy import ndarray
 from numpy import integer
+from numpy import dtype
 from typing import Tuple
 from typing import Any
 

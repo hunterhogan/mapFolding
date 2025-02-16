@@ -3,7 +3,7 @@ from mapFolding import (
 	EnumIndices,
 	formatModuleNameDEFAULT,
 	FREAKOUT,
-	getAlgorithmCallable,
+	getAlgorithmDispatcher,
 	getAlgorithmSource,
 	getFilenameFoldsTotal,
 	getPathFilenameFoldsTotal,
@@ -51,41 +51,6 @@ import pathlib
 import python_minifier
 
 youOughtaKnow = collections.namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenameForMe', 'astForCompetentProgrammers'])
-
-# TODO move to Z0Z_tools
-def makeStrRLEcompacted(arrayTarget: NDArray[integer[Any]]) -> str:
-	def compressRangesNDArrayNoFlatten(arraySlice: NDArray[integer[Any]]) -> List[List[Any] | Any | NDArray[integer[Any]]] | List[Any] | Any | NDArray[integer[Any]]:
-		if isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim > 1:
-			return [compressRangesNDArrayNoFlatten(arraySlice[index]) for index in range(arraySlice.shape[0])]
-		elif isinstance(arraySlice, numpy.ndarray) and arraySlice.ndim == 1:
-			listWithRanges = []
-			for group in more_itertools.consecutive_groups(arraySlice.tolist()):
-				ImaSerious = list(group)
-				ImaRange = [range(ImaSerious[0], ImaSerious[-1] + 1)]
-				spaces = True #NOTE
-				lengthAsList = spaces*(len(ImaSerious)-1) + len(python_minifier.minify(str(ImaSerious))) # brackets are proxies for commas
-				lengthAsRange = spaces*1 + len(str('*')) + len(python_minifier.minify(str(ImaRange))) # brackets are proxies for commas
-				if lengthAsRange < lengthAsList:
-					listWithRanges += ImaRange
-				else:
-					listWithRanges += ImaSerious
-			return listWithRanges
-		return arraySlice
-
-	arrayAsNestedLists = compressRangesNDArrayNoFlatten(arrayTarget)
-
-	arrayAsStr = python_minifier.minify(str(arrayAsNestedLists))
-
-	commaIntMaximum = arrayTarget.shape[-1] - 1
-
-	for X in range(1):
-		arrayAsStr = arrayAsStr.replace(f'[{X}' + f',{X}'*commaIntMaximum + ']', f'[{X}]*'+str(commaIntMaximum+1))
-		for countInt in range(commaIntMaximum, 2, -1):
-			arrayAsStr = arrayAsStr.replace(f',{X}'*countInt + ']', f']+[{X}]*'+str(countInt))
-
-	arrayAsStr = arrayAsStr.replace('range', '*range')
-
-	return arrayAsStr
 
 # Generic
 class ifThis:

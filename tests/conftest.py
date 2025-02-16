@@ -3,7 +3,7 @@
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
 from mapFolding import *
-from mapFolding import basecamp, getAlgorithmCallable, getDispatcherCallable
+from mapFolding import basecamp, getAlgorithmDispatcher, getDispatcherCallable
 from mapFolding.beDRY import *
 from mapFolding.someAssemblyRequired import *
 from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidInformation, _getOEISidValues
@@ -52,7 +52,8 @@ def setupTeardownTmpObjects() -> Generator[None, None, None]:
 
 @pytest.fixture
 def pathTmpTesting(request: pytest.FixtureRequest) -> pathlib.Path:
-	pathTmp = pathTmpRoot / str(uuid.uuid4().hex)
+	# "Z0Z_" ensures the directory name does not start with a number, which would make it an invalid Python identifier
+	pathTmp = pathTmpRoot / ("Z0Z_" + str(uuid.uuid4().hex))
 	pathTmp.mkdir(parents=True, exist_ok=False)
 
 	registrarRecordsTmpObject(pathTmp)
@@ -65,9 +66,10 @@ def pathFilenameTmpTesting(request: pytest.FixtureRequest) -> pathlib.Path:
 	except AttributeError:
 		extension = ".txt"
 
+	# "Z0Z_" ensures the name does not start with a number, which would make it an invalid Python identifier
 	uuidHex = uuid.uuid4().hex
-	subpath = uuidHex[0:-8]
-	filenameStem = uuidHex[-8:None]
+	subpath = "Z0Z_" + uuidHex[0:-8]
+	filenameStem = "Z0Z_" + uuidHex[-8:None]
 
 	pathFilenameTmp = pathlib.Path(pathTmpRoot, subpath, filenameStem + extension)
 	pathFilenameTmp.parent.mkdir(parents=True, exist_ok=False)
@@ -231,17 +233,27 @@ def oeisID_1random() -> str:
 	return random.choice(oeisIDsImplemented)
 
 @pytest.fixture
-def useAlgorithmSource() -> Generator[None, Any, None]:
-	"""Temporarily patches getDispatcherCallable to return the algorithm source directly."""
-	original_dispatcher = basecamp.getDispatcherCallable
+def useThisDispatcher():
+	"""A fixture providing a context manager for temporarily replacing the dispatcher.
 
-	# Patch the function at module level
-	basecamp.getDispatcherCallable = getAlgorithmCallable
+	Returns
+		A context manager for patching the dispatcher
+	"""
+	dispatcherOriginal = basecamp.getDispatcherCallable
 
+	def patchDispatcher(callableTarget: Callable) -> None:
+		def callableParameterized(*arguments: Any, **keywordArguments: Any) -> Callable:
+			return callableTarget
+		basecamp.getDispatcherCallable = callableParameterized
+
+	yield patchDispatcher
+	basecamp.getDispatcherCallable = dispatcherOriginal
+
+@pytest.fixture
+def useAlgorithmSourceDispatcher(useThisDispatcher: Callable) -> Generator[None, None, None]:
+	"""Temporarily patches getDispatcherCallable to return the algorithm dispatcher."""
+	useThisDispatcher(getAlgorithmDispatcher())
 	yield
-
-	# Restore original function
-	basecamp.getDispatcherCallable = original_dispatcher
 
 def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
 	"""Format assertion message for any test comparison."""

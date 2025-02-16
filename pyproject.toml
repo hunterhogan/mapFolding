@@ -5,90 +5,74 @@ build-backend = "setuptools.build_meta"
 [project]
 authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Environment :: Console",
-    "Intended Audience :: Education",
-    "Intended Audience :: End Users/Desktop",
-    "Intended Audience :: Other Audience",
-    "Intended Audience :: Science/Research",
-    "Natural Language :: English",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Typing :: Typed",]
+	"Development Status :: 5 - Production/Stable",
+	"Environment :: Console",
+	"Intended Audience :: Education",
+	"Intended Audience :: End Users/Desktop",
+	"Intended Audience :: Other Audience",
+	"Intended Audience :: Science/Research",
+	"Natural Language :: English",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python",
+	"Topic :: Scientific/Engineering :: Mathematics",
+	"Topic :: Software Development :: Libraries :: Python Modules",
+	"Typing :: Typed",]
 dependencies = ["numba", "numpy", "Z0Z_tools"]
 description = "Count distinct ways to fold a map (or a strip of stamps)"
 keywords = [
-    "A001415",
-    "A001416",
-    "A001417",
-    "A001418",
-    "A195646",
-    "folding",
-    "map folding",
-    "OEIS",
-    "stamp folding",]
+	"A001415",
+	"A001416",
+	"A001417",
+	"A001418",
+	"A195646",
+	"combinatorics",
+	"folding",
+	"map folding",
+	"OEIS",
+	"optimization",
+	"stamp folding",]
 license = { 'text' = "CC-BY-NC-4.0" }
 name = "mapFolding"
 optional-dependencies = { synthesizeModules = [
-    "autoflake",
-    "more_itertools",
-    "python_minifier",], testing = [
-    "mypy",
-    "pytest-cov",
-    "pytest-env",
-    "pytest-mypy",
-    "pytest-xdist",
-    "pytest",
-    "updateCitation",] }
+	"autoflake",
+	"more_itertools",
+	"python_minifier",
+], testing = [
+	"pytest-cov",
+	"pytest-env",
+	"pytest-xdist",
+	"pytest",
+	"updateCitation",] }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Repository = "https://github.com/hunterhogan/mapFolding.git" }
-version = "0.4.0"
+version = "0.4.1"
 
 [tool.coverage]
 report = { exclude_lines = [
-    "if TYPE_CHECKING:",
-    "if __name__ == \"__main__\":",
-    "numba.jit_module",
+	"if TYPE_CHECKING:",
+	"if __name__ == \"__main__\":",
+	"numba.jit_module",
 ], ignore_errors = false }
 run = { branch = true, concurrency = [
-    "multiprocessing",
+	"multiprocessing",
 ], data_file = "tests/coverage/.coverage", omit = [
-    "tests/*",
-    "Z0Z_*",
+	"tests/*",
+	"Z0Z_*",
 ], parallel = true, source = [
-    ".",] }
+	".",] }
 xml = { output = "tests/coverage/coverage.xml" }
 [tool.pytest.ini_options]
 log_auto_indent = ["On"]
 addopts = ["--color=yes", "-n 4"]
-# addopts = ["--color=yes", "-n 4", "--mypy", "--mypy-ignore-missing-imports"]
 env = ["NUMBA_DISABLE_JIT=1"]
 testpaths = ["tests"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-
-[tool.mypy]
-python_version = "3.13"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-disallow_untyped_decorators = false
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
-packages = ["mapFolding"]
-exclude = [
-    "/mapFolding/citations/*",
-    "/mapFolding/jobs/*",
-    "/mapFolding/reference/*",
-    "/mapFolding/someAssemblyRequired/*",
-    "tests/*",
-    "Z0Z_*",]

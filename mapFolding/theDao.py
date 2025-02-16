@@ -103,9 +103,9 @@ def thereAreComputationDivisionsYouMightSkip(my: ndarray[Tuple[int], dtype[integ
 	return my[indexMy.leaf1ndex.value] != my[indexMy.taskDivisions.value] or my[indexMy.leafConnectee.value] % my[indexMy.taskDivisions.value] == my[indexMy.taskIndex.value]
 
 def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]]
-						, gapsWhere: ndarray[Tuple[int]		  , dtype[integer[Any]]]
-						,		my: ndarray[Tuple[int]		  , dtype[integer[Any]]]
-						,	 track: ndarray[Tuple[int, int]	 , dtype[integer[Any]]]
+						, gapsWhere: ndarray[Tuple[int]			 , dtype[integer[Any]]]
+						,		 my: ndarray[Tuple[int]			 , dtype[integer[Any]]]
+						,	  track: ndarray[Tuple[int, int]	 , dtype[integer[Any]]]
 					) -> None:
 
 	while activeLeafGreaterThan0Condition(my=my):
@@ -132,10 +132,10 @@ def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer
 			return
 
 def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]]
-					,  foldGroups: ndarray[Tuple[int]		  , dtype[integer[Any]]]
-					,   gapsWhere: ndarray[Tuple[int]		  , dtype[integer[Any]]]
-					,		  my: ndarray[Tuple[int]		  , dtype[integer[Any]]]
-					,	   track: ndarray[Tuple[int, int]	 , dtype[integer[Any]]]
+					,  foldGroups: ndarray[Tuple[int]		   , dtype[integer[Any]]]
+					,   gapsWhere: ndarray[Tuple[int]		   , dtype[integer[Any]]]
+					,		   my: ndarray[Tuple[int]		   , dtype[integer[Any]]]
+					,		track: ndarray[Tuple[int, int]	   , dtype[integer[Any]]]
 				) -> None:
 
 	gapsWherePARALLEL = gapsWhere.copy()
@@ -182,8 +182,8 @@ def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[A
 def countSequential( connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]]
 						, foldGroups: ndarray[Tuple[int]		  , dtype[integer[Any]]]
 						,  gapsWhere: ndarray[Tuple[int]		  , dtype[integer[Any]]]
-						,		 my: ndarray[Tuple[int]		  , dtype[integer[Any]]]
-						,	  track: ndarray[Tuple[int, int]	 , dtype[integer[Any]]]
+						,		  my: ndarray[Tuple[int]		  , dtype[integer[Any]]]
+						,	   track: ndarray[Tuple[int, int]	  , dtype[integer[Any]]]
 					) -> None:
 
 	groupsOfFolds: int = 0
@@ -217,8 +217,8 @@ def doTheNeedful(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[An
 					, foldGroups: ndarray[Tuple[int]		  , dtype[integer[Any]]]
 					,  gapsWhere: ndarray[Tuple[int]		  , dtype[integer[Any]]]
 					,   mapShape: ndarray[Tuple[int]		  , dtype[integer[Any]]]
-					,		 my: ndarray[Tuple[int]		  , dtype[integer[Any]]]
-					,	  track: ndarray[Tuple[int, int]	 , dtype[integer[Any]]]
+					,		  my: ndarray[Tuple[int]		  , dtype[integer[Any]]]
+					,	   track: ndarray[Tuple[int, int]	  , dtype[integer[Any]]]
 					) -> None:
 
 	countInitialize(connectionGraph, gapsWhere, my, track)

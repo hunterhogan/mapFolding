@@ -17,7 +17,6 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 	def insertAssign(assignee: str, arraySlice: numpy.ndarray) -> None:
 		nonlocal FunctionDefTarget
 		onlyDataRLE = autoDecodingRLE(arraySlice, addSpaces=True)
-		# onlyDataRLE = makeStrRLEcompacted(arraySlice) #NOTE
 		astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
 		dataAst = astStatement.value
 
@@ -54,7 +53,6 @@ def findAndReplaceArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: s
 					indexAsStr = ast.unparse(indexAs_astAttribute)
 					arraySlice = arrayTarget[eval(indexAsStr)]
 
-					# onlyDataRLE = makeStrRLEcompacted(argDataSlice)
 					onlyDataRLE = autoDecodingRLE(arraySlice, addSpaces=True)
 					astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
 					dataAst = astStatement.value

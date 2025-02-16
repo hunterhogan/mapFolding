@@ -124,6 +124,21 @@ def writeJobNumba(mapShape: Sequence[int]
 	ast.fix_missing_locations(astModule)
 	pythonSource = ast.unparse(astModule)
 	pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])
+	pythonSource = python_minifier.minify(pythonSource, remove_annotations = False,
+		remove_pass = False,
+		remove_literal_statements = False,
+		combine_imports = True,
+		hoist_literals = False,
+		rename_locals = False,
+		rename_globals = False,
+		remove_object_base = False,
+		convert_posargs_to_args = False,
+		preserve_shebang = True,
+		remove_asserts = False,
+		remove_debug = False,
+		remove_explicit_return_none = False,
+		remove_builtin_exception_brackets = False,
+		constant_folding = False)
 
 	# NOTE put on disk
 	if pathFilenameWriteJob is None:
