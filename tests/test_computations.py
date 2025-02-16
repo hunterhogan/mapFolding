@@ -14,11 +14,11 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 		standardizedEqualTo(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
 @pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
-def test_writeJobNumba(listDimensionsTestCountFolds: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], pathFilenameTmpTesting):
+def test_writeJobNumba(listDimensionsTestCountFolds: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], pathFilenameTmpTesting: Path) -> None:
 	from mapFolding.syntheticModules import numba_countSequential
 	algorithmSourceHARDCODED: ModuleType = numba_countSequential
 	algorithmSource = algorithmSourceHARDCODED
-	pathFilenameModule = writeJobNumba(listDimensionsTestCountFolds, algorithmSource, pathFilenameWriteJob=pathFilenameTmpTesting)
+	pathFilenameModule = writeJobNumba(listDimensionsTestCountFolds, algorithmSource, pathFilenameWriteJob=pathFilenameTmpTesting.absolute())
 
 	Don_Lapre_Road_to_Self_Improvement = importlib.util.spec_from_file_location("__main__", pathFilenameModule)
 	if Don_Lapre_Road_to_Self_Improvement is None:
