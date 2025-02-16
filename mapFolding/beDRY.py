@@ -2,8 +2,8 @@
 from mapFolding import (
 	computationState,
 	getPathJobRootDEFAULT,
-	hackSSOTdtype,
 	hackSSOTdatatype,
+	hackSSOTdtype,
 	indexMy,
 	indexTrack,
 	setDatatypeElephino,
@@ -12,7 +12,7 @@ from mapFolding import (
 )
 from numpy import dtype, integer, ndarray
 from numpy.typing import DTypeLike, NDArray
-from typing import Any, List, Optional, Sequence, Tuple, Type, Union
+from typing import Any, List, Optional, Sequence, Tuple, Union
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 import numba
 import numpy
@@ -107,23 +107,23 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
 		- int: direct set the number of task divisions; cannot exceed the map's total leaves
 		- "maximum": divides into `leavesTotal`-many `taskDivisions`
 		- "cpu": limits the divisions to the number of available CPUs, i.e. `concurrencyLimit`
-	concurrencyLimit:
-		Maximum number of concurrent tasks allowed
-	CPUlimit: for error reporting
-	listDimensions: for error reporting
+		concurrencyLimit:
+			Maximum number of concurrent tasks allowed
+		CPUlimit: for error reporting
+		listDimensions: for error reporting
 
 	Returns
 	-------
-	taskDivisions:
+		taskDivisions:
 
 	Raises
 	------
-	ValueError
-		If computationDivisions is an unsupported type or if resulting task divisions exceed total leaves
+		ValueError
+			If computationDivisions is an unsupported type or if resulting task divisions exceed total leaves
 
 	Notes
 	-----
-	Task divisions cannot exceed total leaves to prevent duplicate counting of folds.
+	Task divisions should not exceed total leaves to prevent duplicate counting of folds.
 	"""
 	taskDivisions = 0
 	leavesTotal = getLeavesTotal(listDimensions)
@@ -194,59 +194,30 @@ def makeDataContainer(shape: Union[int, Tuple[int, ...]], datatype: Optional[DTy
 	"""Create a zeroed-out `ndarray` with the given shape and datatype.
 
 	Parameters:
-		shape (Union[int, Tuple[int, ...]]): The shape of the array. Can be an integer for 1D arrays
+		shape: The shape of the array. Can be an integer for 1D arrays
 			or a tuple of integers for multi-dimensional arrays.
-		datatype (Optional[DTypeLike], optional): The desired data type for the array.
+		datatype: The desired data type for the array.
 			If None, defaults to dtypeLargeDEFAULT. Defaults to None.
 
 	Returns:
-		ndarray: A new array of given shape and type, filled with zeros.
+		dataContainer: A new array of given shape and type, filled with zeros.
 	"""
 	if datatype is None:
 		datatype = hackSSOTdtype('dtypeFoldsTotal')
 	return numpy.zeros(shape, dtype=datatype)
 
-def outfitCountFolds(listDimensions: Sequence[int]
-						, computationDivisions: Optional[Union[int, str]] = None
-						, CPUlimit: Optional[Union[bool, float, int]] = None
-						, **keywordArguments: Optional[Union[str, bool]]) -> computationState:
+def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Union[str, bool]]) -> computationState:
 	"""
 	Initializes and configures the computation state for map folding computations.
 
-	Parameters
-	----------
-	listDimensions:
-		The dimensions of the map to be folded
-	computationDivisions (None):
-		Specifies how to divide computations:
-		- None: no division of the computation into tasks; sets task divisions to 0
-		- int: direct set the number of task divisions; cannot exceed the map's total leaves
-		- "maximum": divides into `leavesTotal`-many `taskDivisions`
-		- "cpu": limits the divisions to the number of available CPUs, i.e. `concurrencyLimit`
-	CPUlimit (None):
-		Whether and how to limit the CPU usage. See notes for details.
-	**keywordArguments:
-		Datatype management.
+	Parameters:
+		listDimensions: The dimensions of the map to be folded
+		computationDivisions (None): see `getTaskDivisions`
+		CPUlimit (None): see `setCPUlimit`
+		**keywordArguments: Datatype management.
 
-	Returns
-	-------
-	computationState
-		An initialized computation state containing:
-		- connectionGraph: Graph representing connections in the map
-		- foldsSubTotals: Array tracking total folds
-		- mapShape: Validated and sorted dimensions of the map
-		- my: Array for internal state tracking
-		- gapsWhere: Array tracking gap positions
-		- the: Static settings and metadata
-		- track: Array for tracking computation progress
-
-	Limits on CPU usage `CPUlimit`:
-		- `False`, `None`, or `0`: No limits on CPU usage; uses all available CPUs. All other values will potentially limit CPU usage.
-		- `True`: Yes, limit the CPU usage; limits to 1 CPU.
-		- Integer `>= 1`: Limits usage to the specified number of CPUs.
-		- Decimal value (`float`) between 0 and 1: Fraction of total CPUs to use.
-		- Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
-		- Integer `<= -1`: Subtract the absolute value from total CPUs.
+	Returns:
+		stateInitialized: The initialized computation state
 	"""
 	kwourGrapes = keywordArguments.get('sourGrapes', None)
 	if kwourGrapes:
