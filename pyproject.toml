@@ -38,15 +38,14 @@ keywords = [
 	"stamp folding",]
 license = { 'text' = "CC-BY-NC-4.0" }
 name = "mapFolding"
-optional-dependencies = { synthesizeModules = [
+optional-dependencies = { testing = [
 	"autoflake",
 	"more_itertools",
-	"python_minifier",
-], testing = [
 	"pytest-cov",
 	"pytest-env",
 	"pytest-xdist",
 	"pytest",
+	"python_minifier",
 	"updateCitation",] }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
