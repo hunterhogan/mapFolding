@@ -1,6 +1,7 @@
 name: Update CITATION.cff
 
 on:
+  # pre-receive:
   push:
   workflow_dispatch:
 
@@ -17,11 +18,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-
       - name: Install and run updateCitation
         run: |
           pip install updateCitation

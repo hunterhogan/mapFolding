@@ -101,36 +101,6 @@ def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
 			dimensions = settings['getMapShape'](n)
 			dimensions.sort()
 			dictionaryMapDimensionsToFoldsTotalKnown[tuple(dimensions)] = foldingsTotal
-
-	# Are we in a place that has jobs?
-	pathJobDEFAULT = getPathJobRootDEFAULT()
-	if pathJobDEFAULT.exists():
-		# Are there foldsTotal files?
-		for pathFilenameFoldsTotal in pathJobDEFAULT.rglob('*.foldsTotal'):
-			if pathFilenameFoldsTotal.is_file():
-				try:
-					listDimensions = eval(pathFilenameFoldsTotal.stem)
-				except Exception:
-					continue
-				# Are the dimensions in the dictionary?
-				if isinstance(listDimensions, list) and all(isinstance(dimension, int) for dimension in listDimensions):
-					listDimensions.sort()
-					if tuple(listDimensions) in dictionaryMapDimensionsToFoldsTotalKnown:
-						continue
-					# Are the contents a reasonably large integer?
-					try:
-						foldsTotal = pathFilenameFoldsTotal.read_text()
-					except Exception:
-						continue
-					# Why did I sincerely believe this would only be three lines of code?
-					if foldsTotal.isdigit():
-						foldsTotalInteger = int(foldsTotal)
-						if foldsTotalInteger > 85109616 * 10**3:
-							# You made it this far, so fuck it: put it in the dictionary
-							dictionaryMapDimensionsToFoldsTotalKnown[tuple(listDimensions)] = foldsTotalInteger
-						dictionaryMapDimensionsToFoldsTotalKnown[tuple(listDimensions)] = foldsTotalInteger
-					# The sunk-costs fallacy claims another victim!
-
 	return dictionaryMapDimensionsToFoldsTotalKnown
 
 """
