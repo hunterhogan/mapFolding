@@ -1,0 +1,16 @@
+%I M4587 N1956 #36 Nov 29 2024 19:06:25
+%S 1,8,1368,300608,186086600,123912532224,129950723279272
+%N Number of ways of folding an n X n sheet of stamps.
+%D N. J. A. Sloane, A Handbook of Integer Sequences, Academic Press, 1973 (includes this sequence).
+%D N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H W. F. Lunnon, <a href="https://doi.org/10.1093/comjnl/14.1.75">Multi-dimensional map-folding</a>, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
+%H Weisstein, Eric W. <a href="https://mathworld.wolfram.com/MapFolding.html">"Map Folding."</a> From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/MapFolding.html
+%H Robert Dickau (2024), <a href="https://robertdickau.com/mapfolding.html">Map Folding</a>
+%H <a href="/index/Fo#fold">Index entries for sequences obtained by enumerating foldings</a>
+%e For n = 2 the a(2) = 8 foldings of a sheet labeled 1234 in reading order are 1243, 1342, 2134, 2431, 3124, 3421, 4213, 4312.
+%Y Cf. A000136, A000560, A001417, A195646.
+%K nonn,hard,more,changed
+%O 1,2
+%A _N. J. A. Sloane_
+%E a(6)-a(7) from _Sean A. Irvine_, Jan 11 2018
+%E Offset corrected by _Anders Kaseorg_, Nov 29 2024

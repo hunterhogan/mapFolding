@@ -1,0 +1,14 @@
+%I M1901 N0750 #27 Sep 10 2020 03:00:33
+%S 1,2,8,96,4608,798720,361267200,362794844160
+%N Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
+%D N. J. A. Sloane, A Handbook of Integer Sequences, Academic Press, 1973 (includes this sequence).
+%D N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H W. F. Lunnon, <a href="https://doi.org/10.1093/comjnl/14.1.75">Multi-dimensional map-folding</a>, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
+%H Weisstein, Eric W. <a href="https://mathworld.wolfram.com/MapFolding.html">"Map Folding."</a> From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/MapFolding.html
+%H Robert Dickau (2024), <a href="https://robertdickau.com/mapfolding.html">Map Folding</a>
+%H <a href="/index/Fo#fold">Index entries for sequences obtained by enumerating foldings</a>
+%Y Cf. A000136, A000560, A195646, A001418.
+%K hard,nonn,nice,more,changed
+%O 0,2
+%A _N. J. A. Sloane_.
+%E a(7) from _Sean A. Irvine_, Dec 21 2017

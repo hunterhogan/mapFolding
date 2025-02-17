@@ -1,0 +1,11 @@
+%I #14 Dec 04 2024 20:38:14
+%S 1,6,1368,85109616
+%N Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.
+%H W. F. Lunnon, <a href="https://doi.org/10.1093/comjnl/14.1.75">Multi-dimensional map-folding</a>, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
+%H Weisstein, Eric W. <a href="https://mathworld.wolfram.com/MapFolding.html">"Map Folding."</a> From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/MapFolding.html
+%H Robert Dickau (2024), <a href="https://robertdickau.com/mapfolding.html">Map Folding</a>
+%H <a href="/index/Fo#fold">Index entries for sequences obtained by enumerating foldings</a>
+%Y Cf. A000136, A000560, A001417, A001418.
+%K nonn,hard,more,changed
+%O 0,2
+%A _N. J. A. Sloane_, Sep 21 2011
