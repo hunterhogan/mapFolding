@@ -63,6 +63,8 @@ run = { branch = true, concurrency = [
 	"multiprocessing",
 ], data_file = "tests/coverage/.coverage", omit = [
 	"tests/*",
+	"synthesizeModuleJAX.py",
+	"getLLVMforNoReason.py",
 	"Z0Z_*",
 ], parallel = true, source = [
 	".",] }
@@ -71,6 +73,7 @@ xml = { output = "tests/coverage/coverage.xml" }
 log_auto_indent = ["On"]
 addopts = ["--color=yes", "-n 4"]
 env = ["NUMBA_DISABLE_JIT=1"]
+# env = ["NUMBA_JIT_COVERAGE=1"] # it doesn't work
 testpaths = ["tests"]
 
 [tool.setuptools.packages.find]
