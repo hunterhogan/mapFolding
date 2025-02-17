@@ -1,7 +1,7 @@
 from mapFolding import (
 	computationState,
 	EnumIndices,
-	formatModuleNameDEFAULT,
+	formatFilenameModuleDEFAULT,
 	FREAKOUT,
 	getAlgorithmDispatcher,
 	getAlgorithmSource,

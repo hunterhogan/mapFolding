@@ -23,7 +23,7 @@ def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: O
 		else:
 			pathWrite = getPathPackage() / relativePathWrite
 		if not formatFilenameWrite:
-			formatFilenameWrite = formatModuleNameDEFAULT + '.py'
+			formatFilenameWrite = formatFilenameModuleDEFAULT
 		pathFilename = pathWrite / formatFilenameWrite.format(callableTarget=callableTarget)
 
 		pathFilename.write_text(pythonSource)

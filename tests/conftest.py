@@ -11,6 +11,7 @@ from mapFolding.oeis import *
 from types import ModuleType
 from typing import Any, Callable, ContextManager, Dict, Generator, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, Type, Union
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
+import importlib.util
 import pathlib
 import pytest
 import random
@@ -224,6 +225,34 @@ def useAlgorithmSourceDispatcher(useThisDispatcher: Callable) -> Generator[None,
 	"""Temporarily patches getDispatcherCallable to return the algorithm dispatcher."""
 	useThisDispatcher(getAlgorithmDispatcher())
 	yield
+
+@pytest.fixture
+def syntheticDispatcherFixture(useThisDispatcher):
+	listCallablesInlineHARDCODED: List[str] = ['countInitialize', 'countParallel', 'countSequential']
+	listCallablesInline = listCallablesInlineHARDCODED
+	callableDispatcher = True
+	algorithmSource = None
+	relativePathWrite = None
+	formatFilenameWrite = "pytest_{callableTarget}.py"
+	listSynthesizedModules: List[youOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, formatFilenameWrite)
+	dispatcherSynthetic = youOughtaKnow('','','')
+	for stuff in listSynthesizedModules:
+		registrarRecordsTmpObject(stuff.pathFilenameForMe)
+		if stuff.callableSynthesized not in listCallablesInline:
+			dispatcherSynthetic: youOughtaKnow = stuff
+
+	dispatcherSpec = importlib.util.spec_from_file_location( dispatcherSynthetic.callableSynthesized, dispatcherSynthetic.pathFilenameForMe )
+	if dispatcherSpec is None:
+		raise ImportError(f"{dispatcherSynthetic.pathFilenameForMe=}")
+	if dispatcherSpec.loader is None:
+		raise ImportError(f"Failed to get loader for module {dispatcherSynthetic.pathFilenameForMe}")
+
+	dispatcherModule = importlib.util.module_from_spec(dispatcherSpec)
+	dispatcherSpec.loader.exec_module(dispatcherModule)
+	callableDispatcherSynthetic = getattr(dispatcherModule, dispatcherSynthetic.callableSynthesized)
+
+	useThisDispatcher(callableDispatcherSynthetic)
+	return callableDispatcherSynthetic
 
 def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
 	"""Format assertion message for any test comparison."""

@@ -21,7 +21,7 @@ from mapFolding.theSSOT import (
 
 # Synthesize modules
 from mapFolding.theSSOT import (
-	formatModuleNameDEFAULT,
+	formatFilenameModuleDEFAULT,
 	getAlgorithmDispatcher,
 	getAlgorithmSource,
 	getPathJobRootDEFAULT,
