@@ -151,8 +151,15 @@ class UniversalImportTracker:
 		self.setImport.add(name)
 
 	def makeListAst(self) -> List[Union[ast.ImportFrom, ast.Import]]:
-		listAstImportFrom = [ast.ImportFrom(module=module, names=[ast.alias(name=name, asname=None)], level=0) for module, names in self.dictionaryImportFrom.items() for name in names]
-		listAstImport = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in self.setImport]
+		listAstImportFrom = [
+			ast.ImportFrom(
+				module=module,
+				names=[ast.alias(name=name, asname=None) for name in sorted(names)],
+				level=0
+			)
+			for module, names in sorted(self.dictionaryImportFrom.items())
+		]
+		listAstImport = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in sorted(self.setImport)]
 		return listAstImportFrom + listAstImport
 
 # Intricate and specialized

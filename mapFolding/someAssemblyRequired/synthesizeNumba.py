@@ -240,9 +240,7 @@ if __name__ == '__main__':
 """
 	return ast.parse(linesLaunch)
 
-def makeAstModuleForOneCallable(pythonSource: str, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, inlineCallables: Optional[bool]=False , unpackArrays: Optional[bool]=False , allImports: Optional[UniversalImportTracker]=None ) -> str:
-	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
-
+def makeFunctionDef(astModule: ast.Module, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, inlineCallables: Optional[bool]=False, unpackArrays: Optional[bool]=False, allImports: Optional[UniversalImportTracker]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	if allImports is None:
 		allImports = UniversalImportTracker()
 	for statement in astModule.body:
@@ -253,6 +251,7 @@ def makeAstModuleForOneCallable(pythonSource: str, callableTarget: str, paramete
 		dictionaryFunctionDef = {statement.name: statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
 		callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctionDef)
 		# NOTE the inliner assumes each function is not called more than once
+		# TODO change the inliner to handle multiple calls to the same function
 		FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
 	else:
 		FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
@@ -269,6 +268,13 @@ def makeAstModuleForOneCallable(pythonSource: str, callableTarget: str, paramete
 			unpacker = UnpackArrays(*tupleUnpack)
 			FunctionDefTarget = cast(ast.FunctionDef, unpacker.visit(FunctionDefTarget))
 			ast.fix_missing_locations(FunctionDefTarget)
+
+	return FunctionDefTarget, allImports
+
+def makePythonModuleForOneCallable(pythonSource: str, *arguments, **keywordArguments) -> str:
+	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
+
+	FunctionDefTarget, allImports = makeFunctionDef(astModule, *arguments, **keywordArguments)
 
 	astModule = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
 	ast.fix_missing_locations(astModule)
