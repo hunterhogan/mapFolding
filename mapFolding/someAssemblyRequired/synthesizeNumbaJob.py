@@ -64,6 +64,7 @@ def writeJobNumba(mapShape: Sequence[int]
 	pythonSource = inspect.getsource(algorithmSource)
 	astModule = ast.parse(pythonSource)
 	setFunctionDef = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
+
 	if not callableTarget:
 		if len(setFunctionDef) == 1:
 			FunctionDefTarget = setFunctionDef.pop()
@@ -71,7 +72,9 @@ def writeJobNumba(mapShape: Sequence[int]
 		else:
 			raise ValueError(f"I did not receive a `callableTarget` and {algorithmSource.__name__=} has more than one callable: {setFunctionDef}. Please select one.")
 	else:
-		FunctionDefTarget = setFunctionDef.pop() if callableTarget in {statement.name for statement in setFunctionDef} else None
+		# FunctionDefTarget = setFunctionDef.pop() if callableTarget in {statement.name for statement in setFunctionDef} else None
+		listFunctionDefTarget = [statement for statement in setFunctionDef if statement.name == callableTarget]
+		FunctionDefTarget = listFunctionDefTarget[0] if listFunctionDefTarget else None
 	if not FunctionDefTarget: raise ValueError(f"I received `{callableTarget=}` and {algorithmSource.__name__=}, but I could not find that function in that source.")
 
 	# NOTE `allImports` is a complementary container to `FunctionDefTarget`; the `FunctionDefTarget` cannot track its own imports very well.
@@ -79,7 +82,7 @@ def writeJobNumba(mapShape: Sequence[int]
 	for statement in astModule.body:
 		if isinstance(statement, (ast.Import, ast.ImportFrom)):
 			allImports.addAst(statement)
-
+	# print(ast.dump(FunctionDefTarget, indent=2))
 	# NOTE remove the parameters from the function signature
 	for pirateScowl in FunctionDefTarget.args.args.copy():
 		match pirateScowl.arg:
@@ -124,21 +127,7 @@ def writeJobNumba(mapShape: Sequence[int]
 	ast.fix_missing_locations(astModule)
 	pythonSource = ast.unparse(astModule)
 	pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])
-	pythonSource = python_minifier.minify(pythonSource, remove_annotations = False,
-		remove_pass = False,
-		remove_literal_statements = False,
-		combine_imports = True,
-		hoist_literals = False,
-		rename_locals = False,
-		rename_globals = False,
-		remove_object_base = False,
-		convert_posargs_to_args = False,
-		preserve_shebang = True,
-		remove_asserts = False,
-		remove_debug = False,
-		remove_explicit_return_none = False,
-		remove_builtin_exception_brackets = False,
-		constant_folding = False)
+	# pythonSource = python_minifier.minify(pythonSource, remove_annotations = False, remove_pass = False, remove_literal_statements = False, combine_imports = True, hoist_literals = False, rename_locals = False, rename_globals = False, remove_object_base = False, convert_posargs_to_args = False, preserve_shebang = True, remove_asserts = False, remove_debug = False, remove_explicit_return_none = False, remove_builtin_exception_brackets = False, constant_folding = False)
 
 	# NOTE put on disk
 	if pathFilenameWriteJob is None:
@@ -155,10 +144,10 @@ def writeJobNumba(mapShape: Sequence[int]
 
 if __name__ == '__main__':
 	mapShape = [5,5]
-	from mapFolding.syntheticModules import numba_countSequential
-	algorithmSource: ModuleType = numba_countSequential
+	from mapFolding.syntheticModules import numbaCount
+	algorithmSource: ModuleType = numbaCount
 
-	callableTarget = None
+	callableTarget = 'countSequential'
 
 	parametersNumba = parametersNumbaDEFAULT
 

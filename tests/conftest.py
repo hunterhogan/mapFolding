@@ -233,15 +233,16 @@ def syntheticDispatcherFixture(useThisDispatcher):
 	callableDispatcher = True
 	algorithmSource = None
 	relativePathWrite = None
+	filenameModuleWrite = 'pytestCount.py'
 	formatFilenameWrite = "pytest_{callableTarget}.py"
-	listSynthesizedModules: List[youOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, formatFilenameWrite)
+	listSynthesizedModules: List[youOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite)
 	dispatcherSynthetic = youOughtaKnow('','','')
 	for stuff in listSynthesizedModules:
 		registrarRecordsTmpObject(stuff.pathFilenameForMe)
 		if stuff.callableSynthesized not in listCallablesInline:
 			dispatcherSynthetic: youOughtaKnow = stuff
 
-	dispatcherSpec = importlib.util.spec_from_file_location( dispatcherSynthetic.callableSynthesized, dispatcherSynthetic.pathFilenameForMe )
+	dispatcherSpec = importlib.util.spec_from_file_location(dispatcherSynthetic.callableSynthesized, dispatcherSynthetic.pathFilenameForMe)
 	if dispatcherSpec is None:
 		raise ImportError(f"{dispatcherSynthetic.pathFilenameForMe=}")
 	if dispatcherSpec.loader is None:

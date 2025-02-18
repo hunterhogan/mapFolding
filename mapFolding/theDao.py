@@ -2,8 +2,8 @@ from mapFolding import indexMy, indexTrack
 from numba import prange
 from numpy import dtype, integer, ndarray
 from typing import Any, Tuple
-	# `.value` is not necessary for this module or most modules. But, this module is transformed into Numba "jitted" functions, and Numba won't use `Enum` for an ndarray index without `.value`.
 
+# `.value` is not necessary for this module or most modules. But, this module is transformed into Numba "jitted" functions, and Numba won't use `Enum` for an ndarray index without `.value`.
 def activeLeafConnectedToItself(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
 	return my[indexMy.leafConnectee.value] == my[indexMy.leaf1ndex.value]
 
@@ -206,6 +206,8 @@ def countSequential( connectionGraph: ndarray[Tuple[int, int, int], dtype[intege
 							countGaps(gapsWhere=gapsWhere, my=my, track=track)
 							updateLeafConnectee(connectionGraph=connectionGraph, my=my, track=track)
 					incrementIndexDimension(my=my)
+				if allDimensionsAreUnconstrained(my=my):
+					insertUnconstrainedLeaf(gapsWhere=gapsWhere, my=my)
 				initializeIndexMiniGap(my=my)
 				while loopingToActiveGapCeiling(my=my):
 					filterCommonGaps(gapsWhere=gapsWhere, my=my, track=track)

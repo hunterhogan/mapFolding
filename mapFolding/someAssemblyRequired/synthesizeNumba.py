@@ -271,15 +271,6 @@ def makeFunctionDef(astModule: ast.Module, callableTarget: str, parametersNumba:
 
 	return FunctionDefTarget, allImports
 
-def makePythonModuleForOneCallable(pythonSource: str, *arguments, **keywordArguments) -> str:
-	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
-
-	FunctionDefTarget, allImports = makeFunctionDef(astModule, *arguments, **keywordArguments)
-
-	astModule = ast.Module(body=cast(List[ast.stmt], allImports.makeListAst() + [FunctionDefTarget]), type_ignores=[])
-	ast.fix_missing_locations(astModule)
-	return ast.unparse(astModule)
-
 def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
 		# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.

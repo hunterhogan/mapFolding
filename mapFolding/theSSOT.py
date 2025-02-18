@@ -58,7 +58,9 @@ Here, "power" is a direct analogy to https://hunterthinks.com/opinion/a-hohfeldi
 myPackageNameIs = "mapFolding"
 
 moduleOfSyntheticModules = "syntheticModules"
+# TODO I'm not sure if this is the right tool for the job.
 formatFilenameModuleDEFAULT = "numba_{callableTarget}.py"
+dispatcherCallableNameDEFAULT = "doTheNeedful"
 
 def getPathPackage() -> pathlib.Path:
 	import importlib, inspect

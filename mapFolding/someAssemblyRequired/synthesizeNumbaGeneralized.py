@@ -36,7 +36,7 @@ from numpy import integer
 from numpy.typing import NDArray
 from types import ModuleType
 from typing import Any, Callable, cast, Dict, List, Optional, Sequence, Set, Tuple, Type, Union
-from Z0Z_tools import autoDecodingRLE
+from Z0Z_tools import autoDecodingRLE, updateExtendPolishDictionaryLists
 import ast
 import autoflake
 import collections
@@ -49,6 +49,7 @@ import numpy
 import os
 import pathlib
 import python_minifier
+import warnings
 
 youOughtaKnow = collections.namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenameForMe', 'astForCompetentProgrammers'])
 
@@ -151,16 +152,27 @@ class UniversalImportTracker:
 		self.setImport.add(name)
 
 	def makeListAst(self) -> List[Union[ast.ImportFrom, ast.Import]]:
-		listAstImportFrom = [
-			ast.ImportFrom(
-				module=module,
-				names=[ast.alias(name=name, asname=None) for name in sorted(names)],
-				level=0
-			)
-			for module, names in sorted(self.dictionaryImportFrom.items())
-		]
+		listAstImportFrom = [ast.ImportFrom(module=module, names=[ast.alias(name=name, asname=None) for name in sorted(setOfNames)], level=0)
+								for module, setOfNames in sorted(self.dictionaryImportFrom.items())]
 		listAstImport = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in sorted(self.setImport)]
 		return listAstImportFrom + listAstImport
+
+	def update(self, *fromTracker: 'UniversalImportTracker') -> None:
+		"""
+		Update this tracker with imports from one or more other trackers.
+
+		Parameters:
+			*fromTracker: One or more UniversalImportTracker objects to merge from.
+		"""
+		# Merge all import-from dictionaries
+		dictionaryMerged = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(tracker.dictionaryImportFrom for tracker in fromTracker), destroyDuplicates=True, reorderLists=True)
+
+		# Convert lists back to sets for each module's imports
+		self.dictionaryImportFrom = {module: set(listNames) for module, listNames in dictionaryMerged.items()}
+
+		# Update direct imports
+		for tracker in fromTracker:
+			self.setImport.update(tracker.setImport)
 
 # Intricate and specialized
 class RecursiveInliner(ast.NodeTransformer):

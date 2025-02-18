@@ -4,42 +4,82 @@ everything I am doing. I would rather benefit from humanity's
 collective wisdom."""
 from mapFolding.someAssemblyRequired.synthesizeNumba import *
 
-def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: Optional[bool] = False, algorithmSource: Optional[ModuleType] = None, relativePathWrite: Optional[pathlib.Path] = None, formatFilenameWrite: Optional[str] = None) -> List[youOughtaKnow]:
+def getFunctionDef(algorithmSource: ModuleType, *arguments, **keywordArguments) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+	pythonSource = inspect.getsource(algorithmSource)
+	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
+	FunctionDefTarget, allImports = makeFunctionDef(astModule, *arguments, **keywordArguments)
+	return FunctionDefTarget, allImports
+
+def makePythonSource(listFunctionDefs: List[ast.FunctionDef], listAstImports: List[ast.Import|ast.ImportFrom], additional_imports: List[str]) -> str:
+	astModule = ast.Module(body=cast(List[ast.stmt], listAstImports + listFunctionDefs), type_ignores=[])
+	ast.fix_missing_locations(astModule)
+	pythonSource = ast.unparse(astModule)
+	if not pythonSource: raise FREAKOUT
+	pythonSource = autoflake.fix_code(pythonSource, additional_imports)
+	return pythonSource
+
+def writePythonAsModule(pythonSource: str, listCallableSynthesized: List[str], relativePathWrite: Optional[pathlib.Path], filenameWrite: Optional[str], formatFilenameWrite: Optional[str]) -> List[youOughtaKnow]:
+	pathFilename = None
+	if not relativePathWrite:
+		pathWrite = getPathSyntheticModules()
+	else:
+		pathWrite = getPathPackage() / relativePathWrite
+
+	if not formatFilenameWrite:
+		formatFilenameWrite = formatFilenameModuleDEFAULT
+
+	if not filenameWrite:
+		if len(listCallableSynthesized) == 1:
+			callableTarget = listCallableSynthesized[0]
+		else:
+			callableTarget = 'count'
+		filenameWrite = formatFilenameWrite.format(callableTarget=callableTarget)
+	else:
+		if not filenameWrite.endswith('.py'):
+			warnings.warn(f"Filename {filenameWrite=} does not end with '.py'.")
+
+	pathFilename = pathWrite / filenameWrite
+
+	pathFilename.write_text(pythonSource)
+
+	howIsThisStillAThing = getPathPackage().parent
+	dumbassPythonNamespace = pathFilename.relative_to(howIsThisStillAThing).with_suffix('').parts
+	ImaModule = '.'.join(dumbassPythonNamespace)
+
+	listStuffYouOughtaKnow: List[youOughtaKnow] = []
+
+	for callableTarget in listCallableSynthesized:
+		astImportFrom = ast.ImportFrom(module=ImaModule, names=[ast.alias(name=callableTarget, asname=None)], level=0)
+		stuff = youOughtaKnow(callableSynthesized=callableTarget, pathFilenameForMe=pathFilename, astForCompetentProgrammers=astImportFrom)
+		listStuffYouOughtaKnow.append(stuff)
+
+	return listStuffYouOughtaKnow
+
+def makeFlowNumbaOptimized(listCallablesInline: List[str]
+							, callableDispatcher: Optional[bool] = False
+							, algorithmSource: Optional[ModuleType] = None
+							, relativePathWrite: Optional[pathlib.Path] = None
+							, filenameModuleWrite: Optional[str] = None
+							, formatFilenameWrite: Optional[str] = None
+							) -> List[youOughtaKnow]:
 	if relativePathWrite and relativePathWrite.is_absolute():
 		raise ValueError("The path to write the module must be relative to the root of the package.")
 	if not algorithmSource:
 		algorithmSource = getAlgorithmSource()
 
+	Z0Z_filenameModuleWrite = 'numbaCount.py'
+
 	listStuffYouOughtaKnow: List[youOughtaKnow] = []
+	additional_imports = ['mapFolding', 'numba', 'numpy']
 
-	def doThisStuff(callableTarget: str, parametersNumba: Optional[ParametersNumba], inlineCallables: bool, unpackArrays: bool, allImports: Optional[UniversalImportTracker], relativePathWrite: Optional[pathlib.Path], formatFilenameWrite: Optional[str]) -> youOughtaKnow:
-		pythonSource = inspect.getsource(algorithmSource)
-		pythonSource = makePythonModuleForOneCallable(pythonSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
-		if not pythonSource: raise FREAKOUT
-		pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])
-
-		if not relativePathWrite:
-			pathWrite = getPathSyntheticModules()
-		else:
-			pathWrite = getPathPackage() / relativePathWrite
-		if not formatFilenameWrite:
-			formatFilenameWrite = formatFilenameModuleDEFAULT
-		pathFilename = pathWrite / formatFilenameWrite.format(callableTarget=callableTarget)
-
-		pathFilename.write_text(pythonSource)
-
-		howIsThisStillAThing = getPathPackage().parent
-		dumbassPythonNamespace = pathFilename.relative_to(howIsThisStillAThing).with_suffix('').parts
-		ImaModule = '.'.join(dumbassPythonNamespace)
-		astImportFrom = ast.ImportFrom(module=ImaModule, names=[ast.alias(name=callableTarget, asname=None)], level=0)
-
-		return youOughtaKnow(callableSynthesized=callableTarget, pathFilenameForMe=pathFilename, astForCompetentProgrammers=astImportFrom)
-
+	listFunctionDefs: List[ast.FunctionDef] = []
+	allImportsModule = UniversalImportTracker()
 	for callableTarget in listCallablesInline:
 		parametersNumba = None
 		inlineCallables = True
 		unpackArrays 	= False
 		allImports 		= None
+		filenameWrite 	= None
 		match callableTarget:
 			case 'countParallel':
 				parametersNumba = parametersNumbaSuperJitParallel
@@ -48,7 +88,17 @@ def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: O
 				unpackArrays = True
 			case 'countInitialize':
 				parametersNumba = parametersNumbaDEFAULT
-		listStuffYouOughtaKnow.append(doThisStuff(callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports, relativePathWrite, formatFilenameWrite))
+		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
+		listFunctionDefs.append(FunctionDefTarget)
+		allImportsModule.update(allImports)
+
+	listAstImports = allImportsModule.makeListAst()
+	pythonSource = makePythonSource(listFunctionDefs, listAstImports, additional_imports)
+
+	filenameWrite = filenameModuleWrite or Z0Z_filenameModuleWrite
+
+	listStuff = writePythonAsModule(pythonSource, listCallablesInline, relativePathWrite, filenameWrite, formatFilenameWrite)
+	listStuffYouOughtaKnow.extend(listStuff)
 
 	if callableDispatcher:
 		callableTarget 	= getAlgorithmDispatcher().__name__
@@ -56,11 +106,18 @@ def makeFlowNumbaOptimized(listCallablesInline: List[str], callableDispatcher: O
 		inlineCallables	= False
 		unpackArrays	= False
 		allImports 		= UniversalImportTracker()
+		filenameWrite 	= None
 		for stuff in listStuffYouOughtaKnow:
 			statement = stuff.astForCompetentProgrammers
 			if isinstance(statement, (ast.Import, ast.ImportFrom)):
 				allImports.addAst(statement)
-		listStuffYouOughtaKnow.append(doThisStuff(callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports, relativePathWrite, formatFilenameWrite))
+		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
+		listAstImports = allImports.makeListAst()
+
+		pythonSource = makePythonSource([FunctionDefTarget], listAstImports, additional_imports)
+
+		listStuff = writePythonAsModule(pythonSource, [callableTarget], relativePathWrite, filenameWrite, formatFilenameWrite)
+		listStuffYouOughtaKnow.extend(listStuff)
 
 	return listStuffYouOughtaKnow
 
