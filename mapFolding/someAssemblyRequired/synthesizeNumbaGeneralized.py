@@ -53,6 +53,37 @@ import warnings
 
 youOughtaKnow = collections.namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenameForMe', 'astForCompetentProgrammers'])
 
+# idk how to use this
+class ASTBodyTransformer:
+	"""
+	A helper class to apply multiple transformations on an AST FunctionDef's body.
+	This abstraction eliminates the need to write repetitive loops for removals,
+	replacements, or insertions.
+	"""
+	def __init__(self, functionDefinition: ast.FunctionDef) -> None:
+		self.functionDefinition = functionDefinition
+
+	def replaceIn_body(self, predicate: Callable[[ast.stmt], bool], replacementBuilder: Callable[[ast.stmt], Optional[ast.stmt]]) -> None:
+		newBody: List[ast.stmt] = []
+		for statement in self.functionDefinition.body:
+			if predicate(statement):
+				replacementStatement = replacementBuilder(statement)
+				if replacementStatement is not None:
+					newBody.append(replacementStatement)
+			else:
+				newBody.append(statement)
+		self.functionDefinition.body = newBody
+
+	def atIndexInsert(self, index: int, statement: ast.stmt) -> None:
+		self.functionDefinition.body.insert(index, statement)
+
+	def removeAllOf(self, predicate: Callable[[ast.stmt], bool]) -> None:
+		self.replaceIn_body(predicate, lambda stmt: None)
+
+	def Z0Z_apply(self) -> ast.FunctionDef:
+		ast.fix_missing_locations(self.functionDefinition)
+		return self.functionDefinition
+
 # Generic
 class ifThis:
 	"""Generic AST node predicate builder."""
@@ -73,8 +104,25 @@ class ifThis:
 		return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callableName)
 
 	@staticmethod
+	def isAssignTarget(identifier: str):
+		return lambda node: (isinstance(node, ast.Assign)
+								and node.targets
+								and isinstance(node.targets[0], ast.Name)
+								and node.targets[0].id == identifier)
+
+	@staticmethod
 	def anyOf(*predicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		return lambda node: any(pred(node) for pred in predicates)
+
+	@staticmethod
+	def isUnpackingAnArray(identifier:str):
+		return lambda node: (isinstance(node, ast.Assign)
+						and  isinstance(node.targets[0], ast.Name)
+						and  isinstance(node.value, ast.Subscript)
+						and  isinstance(node.value.value, ast.Name)
+						and  node.value.value.id == identifier
+						and  isinstance(node.value.slice, ast.Attribute)
+						)
 
 class Then:
 	"""Generic actions."""
@@ -104,9 +152,8 @@ class NodeReplacer(ast.NodeTransformer):
 	None from the replacement builder indicates that the node should be removed.
 
 	Attributes:
-		findMe (Callable[[ast.AST], bool]): A function that determines whether a node should be replaced.
-		nodeReplacementBuilder (Callable[[ast.AST], Optional[ast.AST]]): A function that returns a new node
-			or None to remove the node.
+		findMe: A function that determines whether a node should be replaced.
+		nodeReplacementBuilder: A function that returns a new node or None to remove the node.
 
 	Methods:
 		visit(node: ast.AST) -> Optional[ast.AST]:

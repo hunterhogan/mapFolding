@@ -89,7 +89,7 @@ def writeJobNumba(mapShape: Sequence[int]
 			case 'my':
 				FunctionDefTarget, allImports = findAndReplaceArraySubscriptIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], ['taskIndex', 'dimensionsTotal'], allImports)
 			case 'track':
-				FunctionDefTarget, allImports = findAndReplaceArrayIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], allImports)
+				FunctionDefTarget, allImports = findAndReplaceTrackArrayIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], allImports)
 			case 'connectionGraph':
 				FunctionDefTarget, allImports = insertArrayIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], allImports)
 			case 'gapsWhere':

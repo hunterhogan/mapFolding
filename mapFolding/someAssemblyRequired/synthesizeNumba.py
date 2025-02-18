@@ -9,7 +9,7 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 	# NOTE hack
 	constructorName = constructorName.replace('ndarray', 'array')
 	argData_dtype: numpy.dtype = arrayTarget.dtype
-	argData_dtypeName = arrayTarget.dtype.name
+	argData_dtypeName = argData_dtype.name
 
 	allImports.addImportFromStr(moduleConstructor, constructorName)
 	allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
@@ -33,7 +33,12 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 
 	return FunctionDefTarget, allImports
 
-def findAndReplaceArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef
+								, identifier: str
+								, arrayTarget: numpy.ndarray
+								, allImports: UniversalImportTracker
+								) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
 	constructorName = arrayType.__name__
@@ -41,47 +46,40 @@ def findAndReplaceArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: s
 	constructorName = constructorName.replace('ndarray', 'array')
 	allImports.addImportFromStr(moduleConstructor, constructorName)
 
-	for stmt in FunctionDefTarget.body.copy():
-		if isinstance(stmt, ast.Assign):
-			if isinstance(stmt.targets[0], ast.Name) and isinstance(stmt.value, ast.Subscript):
-				astAssignee: ast.Name = stmt.targets[0]
-				argData_dtypeName = hackSSOTdatatype(astAssignee.id)
-				allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
-				astSubscript: ast.Subscript = stmt.value
-				if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == identifier and isinstance(astSubscript.slice, ast.Attribute):
-					indexAs_astAttribute: ast.Attribute = astSubscript.slice
-					indexAsStr = ast.unparse(indexAs_astAttribute)
-					arraySlice = arrayTarget[eval(indexAsStr)]
+	for statement in FunctionDefTarget.body.copy():
+		if ifThis.isUnpackingAnArray(identifier)(statement):
+			argData_dtypeName = hackSSOTdatatype(statement.targets[0].id) # type: ignore
+			indexAsStr = ast.unparse(statement.value.slice) # type: ignore
+			arraySlice = arrayTarget[eval(indexAsStr)]
 
-					onlyDataRLE = autoDecodingRLE(arraySlice, addSpaces=True)
-					astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
-					dataAst = astStatement.value
+			onlyDataRLE = autoDecodingRLE(arraySlice, addSpaces=True)
+			astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
+			dataAst = astStatement.value
 
-					arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=argData_dtypeName, ctx=ast.Load()))])
+			arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=argData_dtypeName, ctx=ast.Load()))])
 
-					assignment = ast.Assign(targets=[astAssignee], value=arrayCall)
-					FunctionDefTarget.body.insert(0, assignment)
-					FunctionDefTarget.body.remove(stmt)
+			assignment = ast.Assign(targets=[statement.targets[0]], value=arrayCall) # type: ignore
+			FunctionDefTarget.body.insert(0, assignment)
+			FunctionDefTarget.body.remove(statement)
+			allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
 	return FunctionDefTarget, allImports
 
 def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, Z0Z_listChaff: List[str], allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
-	for stmt in FunctionDefTarget.body.copy():
-		if isinstance(stmt, ast.Assign):
-			if isinstance(stmt.targets[0], ast.Name) and isinstance(stmt.value, ast.Subscript):
-				astAssignee: ast.Name = stmt.targets[0]
-				argData_dtypeName = hackSSOTdatatype(astAssignee.id)
-				allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
-				astSubscript: ast.Subscript = stmt.value
-				if isinstance(astSubscript.value, ast.Name) and astSubscript.value.id == identifier and isinstance(astSubscript.slice, ast.Attribute):
-					indexAs_astAttribute: ast.Attribute = astSubscript.slice
-					indexAsStr = ast.unparse(indexAs_astAttribute)
-					argDataSlice: int = arrayTarget[eval(indexAsStr)].item()
-					astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()), args=[ast.Constant(value=argDataSlice)], keywords=[])
-					assignment = ast.Assign(targets=[astAssignee], value=astCall)
-					if astAssignee.id not in Z0Z_listChaff:
-						FunctionDefTarget.body.insert(0, assignment)
-					FunctionDefTarget.body.remove(stmt)
+	for statement in FunctionDefTarget.body.copy():
+		if ifThis.isUnpackingAnArray(identifier)(statement):
+			astSubscript: ast.Subscript = statement.value # type: ignore
+			astAssignee: ast.Name = statement.targets[0] # type: ignore
+			argData_dtypeName = hackSSOTdatatype(astAssignee.id)
+			allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
+			indexAs_astAttribute: ast.Attribute = astSubscript.slice # type: ignore
+			indexAsStr = ast.unparse(indexAs_astAttribute)
+			argDataSlice: int = arrayTarget[eval(indexAsStr)].item()
+			astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()), args=[ast.Constant(value=argDataSlice)], keywords=[])
+			assignment = ast.Assign(targets=[astAssignee], value=astCall)
+			if astAssignee.id not in Z0Z_listChaff:
+				FunctionDefTarget.body.insert(0, assignment)
+			FunctionDefTarget.body.remove(statement)
 	return FunctionDefTarget, allImports
 
 def removeAssignTargetFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
