@@ -136,13 +136,10 @@ def findThingyReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, obj
 	return newFunction
 
 def findAstNameReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, name: str, value: int) -> ast.FunctionDef:
-	def findName(node: ast.AST) -> bool:
-		return isinstance(node, ast.Name) and node.id == name
-
 	def replaceWithConstant(node: ast.AST) -> ast.AST:
 		return ast.copy_location(ast.Constant(value=value), node)
 
-	return cast(ast.FunctionDef, NodeReplacer(findName, replaceWithConstant).visit(FunctionDefTarget))
+	return cast(ast.FunctionDef, NodeReplacer(ifThis.nameIs(name), replaceWithConstant).visit(FunctionDefTarget))
 
 def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 	"""Add multiplication and return statement to function, properly constructing AST nodes."""
