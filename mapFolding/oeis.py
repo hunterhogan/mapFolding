@@ -2,7 +2,7 @@
 _only_ things that implement _only_ the OEIS."""
 from datetime import datetime, timedelta
 from mapFolding import countFolds, getPathPackage
-from typing import Any, Callable, Dict, Final, List, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, Dict, Final, List, Tuple, TYPE_CHECKING
 import argparse
 import pathlib
 import random
@@ -24,8 +24,8 @@ _pathCache = getPathPackage() / ".cache"
 
 class SettingsOEIS(TypedDict):
 	description: str
-	offset: int
 	getMapShape: Callable[[int], List[int]]
+	offset: int
 	valuesBenchmark: List[int]
 	valuesKnown: Dict[int, int]
 	valuesTestParallelization: List[int]
@@ -68,7 +68,7 @@ settingsOEIShardcodedValues: Dict[str, Dict[str, Any]] = {
 oeisIDsImplemented: Final[List[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues.keys()])
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
-def _validateOEISid(oeisIDcandidate: str) -> str:
+def validateOEISid(oeisIDcandidate: str) -> str:
 	"""
 	Validates an OEIS sequence ID against implemented sequences.
 
@@ -98,13 +98,14 @@ def _validateOEISid(oeisIDcandidate: str) -> str:
 				f"Available sequences:\n{_formatOEISsequenceInfo()}"
 			)
 
-def _getFilenameOEISbFile(oeisID: str) -> str:
-	oeisID = _validateOEISid(oeisID)
+def getFilenameOEISbFile(oeisID: str) -> str:
+	oeisID = validateOEISid(oeisID)
 	return f"b{oeisID[1:]}.txt"
 
 def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> Dict[int, int]:
 	"""
 	Parses the content of an OEIS b-file for a given sequence ID.
+
 	This function processes a multiline string representing an OEIS b-file and
 	creates a dictionary mapping integer indices to their corresponding sequence
 	values. The first line of the b-file is expected to contain a comment that
@@ -133,7 +134,7 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> Dict[int, int]:
 		OEISsequence[n] = aOFn
 	return OEISsequence
 
-def _getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
+def getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
 	cacheDays = 7
 	tryCache = False
 	if pathFilenameCache.exists():
@@ -158,7 +159,7 @@ def _getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
 
 	return oeisInformation
 
-def _getOEISidValues(oeisID: str) -> Dict[int, int]:
+def getOEISidValues(oeisID: str) -> Dict[int, int]:
 	"""
 	Retrieves the specified OEIS sequence as a dictionary mapping integer indices
 	to their corresponding values.
@@ -177,21 +178,21 @@ def _getOEISidValues(oeisID: str) -> Dict[int, int]:
 		IOError: If there is an error reading from or writing to the local cache.
 	"""
 
-	pathFilenameCache = _pathCache / _getFilenameOEISbFile(oeisID)
-	url = f"https://oeis.org/{oeisID}/{_getFilenameOEISbFile(oeisID)}"
+	pathFilenameCache = _pathCache / getFilenameOEISbFile(oeisID)
+	url = f"https://oeis.org/{oeisID}/{getFilenameOEISbFile(oeisID)}"
 
-	oeisInformation = _getOEISofficial(pathFilenameCache, url)
+	oeisInformation = getOEISofficial(pathFilenameCache, url)
 
 	if oeisInformation:
 		return _parseBFileOEIS(oeisInformation, oeisID)
 	return {-1: -1}
 
-def _getOEISidInformation(oeisID: str) -> Tuple[str, int]:
-	oeisID = _validateOEISid(oeisID)
+def getOEISidInformation(oeisID: str) -> Tuple[str, int]:
+	oeisID = validateOEISid(oeisID)
 	pathFilenameCache = _pathCache / f"{oeisID}.txt"
 	url = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
-	oeisInformation = _getOEISofficial(pathFilenameCache, url)
+	oeisInformation = getOEISofficial(pathFilenameCache, url)
 
 	if not oeisInformation:
 		return "Not found", -1
@@ -221,8 +222,8 @@ def _getOEISidInformation(oeisID: str) -> Tuple[str, int]:
 def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
 	settingsTarget = {}
 	for oeisID in oeisIDsImplemented:
-		valuesKnownSherpa = _getOEISidValues(oeisID)
-		descriptionSherpa, offsetSherpa = _getOEISidInformation(oeisID)
+		valuesKnownSherpa = getOEISidValues(oeisID)
+		descriptionSherpa, offsetSherpa = getOEISidInformation(oeisID)
 		settingsTarget[oeisID] = SettingsOEIS(
 			description=descriptionSherpa,
 			offset=offsetSherpa,
@@ -282,7 +283,7 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 		ValueError: If n is negative.
 		KeyError: If the OEIS sequence ID is not directly implemented.
 	"""
-	oeisID = _validateOEISid(oeisID)
+	oeisID = validateOEISid(oeisID)
 
 	if not isinstance(n, int) or n < 0:
 		raise ValueError("`n` must be non-negative integer.")
@@ -328,7 +329,7 @@ def clearOEIScache() -> None:
 		return
 	for oeisID in settingsOEIS:
 		( _pathCache / f"{oeisID}.txt" ).unlink(missing_ok=True)
-		( _pathCache / _getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
+		( _pathCache / getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
 	print(f"Cache cleared from {_pathCache}")
 
 def getOEISids() -> None:

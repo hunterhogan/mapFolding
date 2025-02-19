@@ -78,3 +78,7 @@ testpaths = ["tests"]
 
 [tool.setuptools.packages.find]
 where = ["."]
+
+[tool.updateCitation]
+filenameCitationDOTcff = 'CITATION.cff'
+pathFilenameCitationSSOT = "citations/CITATION.cff"

@@ -6,7 +6,6 @@ from mapFolding import *
 from mapFolding import basecamp, getAlgorithmDispatcher, getDispatcherCallable
 from mapFolding.beDRY import *
 from mapFolding.someAssemblyRequired import *
-from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidInformation, _getOEISidValues
 from mapFolding.oeis import *
 from types import ModuleType
 from typing import Any, Callable, ContextManager, Dict, Generator, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, Type, Union

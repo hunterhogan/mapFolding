@@ -82,7 +82,7 @@ def writeJobNumba(mapShape: Sequence[int]
 	for statement in astModule.body:
 		if isinstance(statement, (ast.Import, ast.ImportFrom)):
 			allImports.addAst(statement)
-	# print(ast.dump(FunctionDefTarget, indent=2))
+
 	# NOTE remove the parameters from the function signature
 	for pirateScowl in FunctionDefTarget.args.args.copy():
 		match pirateScowl.arg:
@@ -127,7 +127,7 @@ def writeJobNumba(mapShape: Sequence[int]
 	ast.fix_missing_locations(astModule)
 	pythonSource = ast.unparse(astModule)
 	pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])
-	# pythonSource = python_minifier.minify(pythonSource, remove_annotations = False, remove_pass = False, remove_literal_statements = False, combine_imports = True, hoist_literals = False, rename_locals = False, rename_globals = False, remove_object_base = False, convert_posargs_to_args = False, preserve_shebang = True, remove_asserts = False, remove_debug = False, remove_explicit_return_none = False, remove_builtin_exception_brackets = False, constant_folding = False)
+	pythonSource = python_minifier.minify(pythonSource, remove_annotations = False, remove_pass = False, remove_literal_statements = False, combine_imports = True, hoist_literals = False, rename_locals = False, rename_globals = False, remove_object_base = False, convert_posargs_to_args = False, preserve_shebang = True, remove_asserts = False, remove_debug = False, remove_explicit_return_none = False, remove_builtin_exception_brackets = False, constant_folding = False)
 
 	# NOTE put on disk
 	if pathFilenameWriteJob is None:
@@ -154,8 +154,8 @@ if __name__ == '__main__':
 	pathFilenameWriteJob = None
 
 	setDatatypeFoldsTotal('int64', sourGrapes=True)
-	setDatatypeElephino('uint8', sourGrapes=True)
-	setDatatypeLeavesTotal('uint8', sourGrapes=True)
+	setDatatypeElephino('int64', sourGrapes=True)
+	setDatatypeLeavesTotal('int64', sourGrapes=True)
 	Z0Z_setDatatypeModuleScalar('numba')
 	Z0Z_setDecoratorCallable('jit')
 

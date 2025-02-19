@@ -1,10 +1,7 @@
 from contextlib import redirect_stdout
-from datetime import datetime, timedelta
-from mapFolding.oeis import _getFilenameOEISbFile, _getOEISidValues, _parseBFileOEIS, _validateOEISid, _getOEISidInformation
 from tests.conftest import *
 from urllib.error import URLError
 import io
-import os
 import pathlib
 import pytest
 import random
@@ -16,18 +13,18 @@ import urllib.request
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID: str) -> None:
-	standardizedEqualTo(KeyError, _validateOEISid, badID)
+	standardizedEqualTo(KeyError, validateOEISid, badID)
 
 def test__validateOEISid_partially_valid(oeisID_1random: str) -> None:
-	standardizedEqualTo(KeyError, _validateOEISid, f"{oeisID_1random}extra")
+	standardizedEqualTo(KeyError, validateOEISid, f"{oeisID_1random}extra")
 
 def test__validateOEISid_valid_id(oeisID: str) -> None:
-	standardizedEqualTo(oeisID, _validateOEISid, oeisID)
+	standardizedEqualTo(oeisID, validateOEISid, oeisID)
 
 def test__validateOEISid_valid_id_case_insensitive(oeisID: str) -> None:
-	standardizedEqualTo(oeisID.upper(), _validateOEISid, oeisID.lower())
-	standardizedEqualTo(oeisID.upper(), _validateOEISid, oeisID.upper())
-	standardizedEqualTo(oeisID.upper(), _validateOEISid, oeisID.swapcase())
+	standardizedEqualTo(oeisID.upper(), validateOEISid, oeisID.lower())
+	standardizedEqualTo(oeisID.upper(), validateOEISid, oeisID.upper())
+	standardizedEqualTo(oeisID.upper(), validateOEISid, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [
 	# (2, "ok"), # test the test template
@@ -68,7 +65,7 @@ def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: pathlib.
 		raise URLError("Network error")
 
 	monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
-	standardizedEqualTo(URLError, _getOEISidValues, next(iter(settingsOEIS)))
+	standardizedEqualTo(URLError, getOEISidValues, next(iter(settingsOEIS)))
 
 # ===== Command Line Interface Tests =====
 def testHelpText() -> None:

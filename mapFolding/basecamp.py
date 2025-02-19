@@ -17,7 +17,7 @@ def countFolds(listDimensions: Sequence[int]
 		computationDivisions (None):
 			Whether and how to divide the computational work. See notes for details.
 		CPUlimit (None): This is only relevant if there are `computationDivisions`: whether and how to limit the CPU usage. See notes for details.
-		**keywordArguments: Datatype management.
+		**keywordArguments: Datatype management. See `outfitCountFolds` for details.
 	Returns:
 		foldsTotal: Total number of distinct ways to fold a map of the given dimensions.
 

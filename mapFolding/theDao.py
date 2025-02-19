@@ -206,8 +206,6 @@ def countSequential( connectionGraph: ndarray[Tuple[int, int, int], dtype[intege
 							countGaps(gapsWhere=gapsWhere, my=my, track=track)
 							updateLeafConnectee(connectionGraph=connectionGraph, my=my, track=track)
 					incrementIndexDimension(my=my)
-				if allDimensionsAreUnconstrained(my=my):
-					insertUnconstrainedLeaf(gapsWhere=gapsWhere, my=my)
 				initializeIndexMiniGap(my=my)
 				while loopingToActiveGapCeiling(my=my):
 					filterCommonGaps(gapsWhere=gapsWhere, my=my, track=track)

@@ -9,6 +9,7 @@ from mapFolding import (
 	setDatatypeElephino,
 	setDatatypeFoldsTotal,
 	setDatatypeLeavesTotal,
+	setDatatypeModule,
 )
 from numpy import dtype, integer, ndarray
 from numpy.typing import DTypeLike, NDArray
@@ -214,11 +215,12 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
 		listDimensions: The dimensions of the map to be folded
 		computationDivisions (None): see `getTaskDivisions`
 		CPUlimit (None): see `setCPUlimit`
-		**keywordArguments: Datatype management.
+		**keywordArguments: Datatype management, it's complicated: see the code below.
 
 	Returns:
 		stateInitialized: The initialized computation state
 	"""
+	# keywordArguments START
 	kwourGrapes = keywordArguments.get('sourGrapes', None)
 	if kwourGrapes:
 		sourGrapes = True
@@ -239,6 +241,13 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
 	if ImaSetTheDatatype:
 		ImaSetTheDatatype = str(ImaSetTheDatatype)
 		setDatatypeLeavesTotal(ImaSetTheDatatype, sourGrapes)
+
+	# NOTE well: this might be only hypothetical because as of this writing, `makeDataContainer` only makes numpy.zeros. But it's here in case things change.
+	ImaSetTheDatatype = keywordArguments.get('datatypeModule', None)
+	if ImaSetTheDatatype:
+		ImaSetTheDatatype = str(ImaSetTheDatatype)
+		setDatatypeModule(ImaSetTheDatatype, sourGrapes)
+	# keywordArguments END
 
 	my = makeDataContainer(len(indexMy), hackSSOTdtype('my'))
 
