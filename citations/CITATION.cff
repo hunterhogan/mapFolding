@@ -11,28 +11,30 @@ authors:
   family-names: Hogan
   email: HunterHogan@pm.me
 cff-version: 1.2.0
-commit: 0a1516ee864d3b8f8d3de9cd8177ba08c95b2b7c
-date-released: '2025-02-14'
+commit: e6f1de72e0ffcf5bb71ef679797cca1d5d65f1bf
+date-released: '2025-02-17'
 identifiers:
 - type: url
-  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.4.0
-  description: The URL for mapFolding 0.4.0.
+  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.4.2
+  description: The URL for mapFolding 0.4.2.
 keywords:
 - A001415
 - A001416
 - A001417
 - A001418
 - A195646
+- combinatorics
 - folding
 - map folding
 - OEIS
+- optimization
 - stamp folding
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.4.0/
-repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.4.0
+repository-artifact: https://pypi.org/project/mapfolding/0.4.2/
+repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.4.2
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.4.0
+version: 0.4.2
