@@ -98,14 +98,14 @@ def _get_datatype(identifier: str) -> str:
 			_datatype[identifier] = _datatypeDefault.get(identifier) or _get_datatype('foldsTotal')
 	return _datatype[identifier]
 
-def _getDatatypeModule() -> str:
+def getDatatypeModule() -> str:
 	global _datatypeModule
 	if not _datatypeModule:
 		_datatypeModule = _datatypeModuleDEFAULT
 	return _datatypeModule
 
 def setInStone(identifier: str) -> Type[Any]:
-	datatypeModule = _getDatatypeModule()
+	datatypeModule = getDatatypeModule()
 	datatypeStr = _get_datatype(identifier)
 	return cast(Type[Any], getattr(eval(datatypeModule), datatypeStr))
 

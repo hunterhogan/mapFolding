@@ -1,6 +1,7 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding import (
 	computationState,
+	getDatatypeModule,
 	getPathJobRootDEFAULT,
 	hackSSOTdatatype,
 	hackSSOTdtype,
@@ -22,23 +23,25 @@ import pathlib
 import sys
 
 def getFilenameFoldsTotal(mapShape: Union[Sequence[int], ndarray[Tuple[int], dtype[integer[Any]]]]) -> str:
-	"""Make a standardized filename for the computed value `foldsTotal`.
+	"""Imagine your computer has been counting folds for 70 hours, and when it tries to save your newly discovered value,
+	the filename is invalid. I bet you think this function is more important after that thought experiment.
+
+	Make a standardized filename for the computed value `foldsTotal`.
 
 	The filename takes into account
 		- the dimensions of the map, aka `mapShape`, aka `listDimensions`
 		- no spaces in the filename
-		- safe filesystem characters across platforms
+		- safe filesystem characters
 		- unique extension
-		- avoiding potential problems when Python is manipulating the filename, including
-			- treating the file stem as a valid Python identifier, such as
-				- not starting with a number
-				- not using reserved words
-				- no dashes or other special characters
-			- uh, I can't remember, but I found some frustrating edge limitations
-		- if 'p' is still the first character, I picked that because it was the original identifier for the map shape in Lunnan's code
+		- Python-safe strings:
+			- no starting with a number
+			- no reserved words
+			- no dashes or other special characters
+			- uh, I can't remember, but I found some other frustrating limitations
+		- if 'p' is still the first character of the filename, I picked that because it was the original identifier for the map shape in Lunnan's code
 
 	Parameters:
-		mapShape: A sequence of integers representing the dimensions of the map (e.g., [3, 2] for a 3x2 map)
+		mapShape: A sequence of integers representing the dimensions of the map.
 
 	Returns:
 		filenameFoldsTotal: A filename string in format 'pNxM.foldsTotal' where N,M are sorted dimensions
@@ -98,33 +101,36 @@ def getPathFilenameFoldsTotal(mapShape: Union[Sequence[int], ndarray[Tuple[int],
 
 def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, CPUlimit: Optional[Union[bool, float, int]], listDimensions: Sequence[int]) -> int:
 	"""
-	Determines whether or how to divide the computation into tasks.
+	Determines whether to divide the computation into tasks and how many divisions.
 
 	Parameters
 	----------
-	computationDivisions (None):
+	computationDivisions (None)
 		Specifies how to divide computations:
-		- None: no division of the computation into tasks; sets task divisions to 0
-		- int: direct set the number of task divisions; cannot exceed the map's total leaves
-		- "maximum": divides into `leavesTotal`-many `taskDivisions`
-		- "cpu": limits the divisions to the number of available CPUs, i.e. `concurrencyLimit`
-		concurrencyLimit:
-			Maximum number of concurrent tasks allowed
-		CPUlimit: for error reporting
-		listDimensions: for error reporting
+		- `None`: no division of the computation into tasks; sets task divisions to 0.
+		- int: direct set the number of task divisions; cannot exceed the map's total leaves.
+		- `'maximum'`: divides into `leavesTotal`-many `taskDivisions`.
+		- `'cpu'`: limits the divisions to the number of available CPUs, i.e. `concurrencyLimit`.
+	concurrencyLimit
+		Maximum number of concurrent tasks allowed.
+	CPUlimit
+		for error reporting.
+	listDimensions
+		for error reporting.
 
 	Returns
 	-------
-		taskDivisions:
+	taskDivisions
+		How many tasks must finish before the job can compute the total number of folds; `0` means no tasks, only job.
 
 	Raises
 	------
-		ValueError
-			If computationDivisions is an unsupported type or if resulting task divisions exceed total leaves
+	ValueError
+		If computationDivisions is an unsupported type or if resulting task divisions exceed total leaves.
 
 	Notes
 	-----
-	Task divisions should not exceed total leaves to prevent duplicate counting of folds.
+	Task divisions should not exceed total leaves or the folds will be over-counted.
 	"""
 	taskDivisions = 0
 	leavesTotal = getLeavesTotal(listDimensions)
@@ -134,9 +140,9 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
 		taskDivisions = computationDivisions
 	elif isinstance(computationDivisions, str):
 		computationDivisions = computationDivisions.lower()
-		if computationDivisions == "maximum":
+		if computationDivisions == 'maximum':
 			taskDivisions = leavesTotal
-		elif computationDivisions == "cpu":
+		elif computationDivisions == 'cpu':
 			taskDivisions = min(concurrencyLimit, leavesTotal)
 	else:
 		raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but the so-called programmer didn't implement code for that.")
@@ -197,15 +203,21 @@ def makeDataContainer(shape: Union[int, Tuple[int, ...]], datatype: Optional[DTy
 	Parameters:
 		shape: The shape of the array. Can be an integer for 1D arrays
 			or a tuple of integers for multi-dimensional arrays.
-		datatype: The desired data type for the array.
-			If None, defaults to dtypeLargeDEFAULT. Defaults to None.
+		datatype ('dtypeFoldsTotal'): The desired data type for the array.
+			If `None`, defaults to 'dtypeFoldsTotal'. Defaults to None.
 
 	Returns:
 		dataContainer: A new array of given shape and type, filled with zeros.
+
+	Notes:
+		If a version of the algorithm were to use something other than numpy, such as JAX or CUDA, because other
+		functions use this function, it would be much easier to change the datatype "ecosystem".
 	"""
-	if datatype is None:
-		datatype = hackSSOTdtype('dtypeFoldsTotal')
-	return numpy.zeros(shape, dtype=datatype)
+	numpyDtype = datatype or hackSSOTdtype('dtypeFoldsTotal')
+	if 'numpy' == getDatatypeModule():
+		return numpy.zeros(shape, dtype=numpyDtype)
+	else:
+		raise NotImplementedError("Somebody done broke it.")
 
 def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Union[str, bool]]) -> computationState:
 	"""
@@ -274,16 +286,16 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
 
 def parseDimensions(dimensions: Sequence[int], parameterName: str = 'listDimensions') -> List[int]:
 	"""
-	Parse and validate dimensions are non-negative integers.
+	Parse and validate the dimensions are non-negative integers.
 
 	Parameters:
-		dimensions: Sequence of integers representing dimensions
-		parameterName ('listDimensions'): Name of the parameter for error messages. Defaults to 'listDimensions'
+		dimensions: Sequence of integers representing dimensions.
+		parameterName ('listDimensions'): Name of the parameter for error messages. Defaults to 'listDimensions'.
 	Returns:
-		listNonNegative: List of validated non-negative integers
+		listNonNegative: List of validated non-negative integers.
 	Raises:
-		ValueError: If any dimension is negative or if the list is empty
-		TypeError: If any element cannot be converted to integer (raised by intInnit)
+		ValueError: If any dimension is negative or if the list is empty.
+		TypeError: If any element cannot be converted to integer (raised by `intInnit`).
 	"""
 	listValidated = intInnit(dimensions, parameterName)
 	listNonNegative = []
@@ -344,6 +356,7 @@ def setCPUlimit(CPUlimit: Optional[Any]) -> int:
 
 	concurrencyLimit = int(defineConcurrencyLimit(CPUlimit))
 	numba.set_num_threads(concurrencyLimit)
+	concurrencyLimit = numba.get_num_threads()
 
 	return concurrencyLimit
 
@@ -358,7 +371,7 @@ def validateListDimensions(listDimensions: Sequence[int]) -> List[int]:
 		dimensionsValidSorted: A list, with at least two elements, of only positive integers.
 
 	Raises:
-		ValueError: If the input listDimensions is None.
+		ValueError: If the input listDimensions is empty.
 		NotImplementedError: If the resulting list of positive dimensions has fewer than two elements.
 	"""
 	if not listDimensions:

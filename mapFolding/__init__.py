@@ -11,6 +11,7 @@ from mapFolding.theSSOT import (
 
 # Datatype management
 from mapFolding.theSSOT import (
+	getDatatypeModule,
 	hackSSOTdatatype,
 	hackSSOTdtype,
 	setDatatypeElephino,
