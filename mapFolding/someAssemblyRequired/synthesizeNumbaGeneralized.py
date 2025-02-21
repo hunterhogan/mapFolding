@@ -190,17 +190,22 @@ class UniversalImportTracker:
 				self.setImport.add(alias.name)
 		elif isinstance(astImport_, ast.ImportFrom):
 			if astImport_.module is not None:
-				self.dictionaryImportFrom[astImport_.module].update(alias.name for alias in astImport_.names)
+				self.dictionaryImportFrom[astImport_.module].update((alias.name, alias.asname) for alias in astImport_.names)
 
-	def addImportFromStr(self, module: str, name: str) -> None:
-		self.dictionaryImportFrom[module].add(name)
+	def addImportStr(self, module: str) -> None:
+		self.setImport.add(module)
 
-	def addImportStr(self, name: str) -> None:
-		self.setImport.add(name)
+	def addImportFromStr(self, module: str, name: str, asname: Optional[str] = None) -> None:
+		self.dictionaryImportFrom[module].add((name, asname))
 
 	def makeListAst(self) -> List[Union[ast.ImportFrom, ast.Import]]:
-		listAstImportFrom = [ast.ImportFrom(module=module, names=[ast.alias(name=name, asname=None) for name in sorted(setOfNames)], level=0)
-								for module, setOfNames in sorted(self.dictionaryImportFrom.items())]
+		listAstImportFrom = []
+		for module, setOfNameTuples in sorted(self.dictionaryImportFrom.items()):
+			listAliases = []
+			for name, asname in setOfNameTuples:
+				listAliases.append(ast.alias(name=name, asname=asname))
+			listAstImportFrom.append(ast.ImportFrom(module=module, names=listAliases, level=0))
+
 		listAstImport = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in sorted(self.setImport)]
 		return listAstImportFrom + listAstImport
 

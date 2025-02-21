@@ -72,7 +72,6 @@ def writeJobNumba(mapShape: Sequence[int]
 		else:
 			raise ValueError(f"I did not receive a `callableTarget` and {algorithmSource.__name__=} has more than one callable: {setFunctionDef}. Please select one.")
 	else:
-		# FunctionDefTarget = setFunctionDef.pop() if callableTarget in {statement.name for statement in setFunctionDef} else None
 		listFunctionDefTarget = [statement for statement in setFunctionDef if statement.name == callableTarget]
 		FunctionDefTarget = listFunctionDefTarget[0] if listFunctionDefTarget else None
 	if not FunctionDefTarget: raise ValueError(f"I received `{callableTarget=}` and {algorithmSource.__name__=}, but I could not find that function in that source.")
@@ -96,6 +95,8 @@ def writeJobNumba(mapShape: Sequence[int]
 				FunctionDefTarget, allImports = insertArrayIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], allImports)
 			case 'foldGroups':
 				FunctionDefTarget = removeAssignTargetFrom_body(FunctionDefTarget, pirateScowl.arg)
+				# FunctionDefTarget, allImports = insertArrayIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], allImports)
+				# continue
 		FunctionDefTarget.args.args.remove(pirateScowl)
 
 	# NOTE replace identifiers with static values with their values
@@ -113,8 +114,6 @@ def writeJobNumba(mapShape: Sequence[int]
 	FunctionDefTarget, allImports = insertReturnStatementIn_body(FunctionDefTarget, stateJob['foldGroups'], allImports)
 
 	# NOTE add the perfect decorator
-	datatype = hackSSOTdatatype(Z0Z_identifierCountFolds)
-	FunctionDefTarget.returns = ast.Name(id=datatype, ctx=ast.Load())
 	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
 	if thisIsNumbaDotJit(FunctionDefTarget.decorator_list[0]):
 		astCall = cast(ast.Call, FunctionDefTarget.decorator_list[0])
@@ -127,7 +126,7 @@ def writeJobNumba(mapShape: Sequence[int]
 	ast.fix_missing_locations(astModule)
 	pythonSource = ast.unparse(astModule)
 	pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])
-	pythonSource = python_minifier.minify(pythonSource, remove_annotations = False, remove_pass = False, remove_literal_statements = False, combine_imports = True, hoist_literals = False, rename_locals = False, rename_globals = False, remove_object_base = False, convert_posargs_to_args = False, preserve_shebang = True, remove_asserts = False, remove_debug = False, remove_explicit_return_none = False, remove_builtin_exception_brackets = False, constant_folding = False)
+	# pythonSource = python_minifier.minify(pythonSource, remove_annotations = False, remove_pass = False, remove_literal_statements = False, combine_imports = True, hoist_literals = False, rename_locals = False, rename_globals = False, remove_object_base = False, convert_posargs_to_args = False, preserve_shebang = True, remove_asserts = False, remove_debug = False, remove_explicit_return_none = False, remove_builtin_exception_brackets = False, constant_folding = False)
 
 	# NOTE put on disk
 	if pathFilenameWriteJob is None:
@@ -154,8 +153,8 @@ if __name__ == '__main__':
 	pathFilenameWriteJob = None
 
 	setDatatypeFoldsTotal('int64', sourGrapes=True)
-	setDatatypeElephino('int64', sourGrapes=True)
-	setDatatypeLeavesTotal('int64', sourGrapes=True)
+	setDatatypeElephino('int16', sourGrapes=True)
+	setDatatypeLeavesTotal('uint8', sourGrapes=True)
 	Z0Z_setDatatypeModuleScalar('numba')
 	Z0Z_setDecoratorCallable('jit')
 

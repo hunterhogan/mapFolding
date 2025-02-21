@@ -9,10 +9,11 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 	# NOTE hack
 	constructorName = constructorName.replace('ndarray', 'array')
 	argData_dtype: numpy.dtype = arrayTarget.dtype
-	argData_dtypeName = argData_dtype.name
+	datatypeName = argData_dtype.name
+	dtypeAsName = f"{moduleConstructor}_{datatypeName}"
 
 	allImports.addImportFromStr(moduleConstructor, constructorName)
-	allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
+	allImports.addImportFromStr(moduleConstructor, datatypeName, dtypeAsName)
 
 	def insertAssign(assignee: str, arraySlice: numpy.ndarray) -> None:
 		nonlocal FunctionDefTarget
@@ -20,7 +21,7 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 		astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
 		dataAst = astStatement.value
 
-		arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=argData_dtypeName, ctx=ast.Load()))])
+		arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))])
 
 		assignment = ast.Assign(targets=[ast.Name(id=assignee, ctx=ast.Store())], value=arrayCall)#NOTE
 		FunctionDefTarget.body.insert(0, assignment)
@@ -33,11 +34,7 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 
 	return FunctionDefTarget, allImports
 
-def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef
-								, identifier: str
-								, arrayTarget: numpy.ndarray
-								, allImports: UniversalImportTracker
-								) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str , arrayTarget: numpy.ndarray , allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
 
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
@@ -48,7 +45,8 @@ def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef
 
 	for statement in FunctionDefTarget.body.copy():
 		if ifThis.isUnpackingAnArray(identifier)(statement):
-			argData_dtypeName = hackSSOTdatatype(statement.targets[0].id) # type: ignore
+			datatypeName = hackSSOTdatatype(statement.targets[0].id) # type: ignore
+			dtypeAsName = f"{moduleConstructor}_{datatypeName}"
 			indexAsStr = ast.unparse(statement.value.slice) # type: ignore
 			arraySlice = arrayTarget[eval(indexAsStr)]
 
@@ -56,12 +54,12 @@ def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef
 			astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
 			dataAst = astStatement.value
 
-			arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=argData_dtypeName, ctx=ast.Load()))])
+			arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))])
 
 			assignment = ast.Assign(targets=[statement.targets[0]], value=arrayCall) # type: ignore
 			FunctionDefTarget.body.insert(0, assignment)
 			FunctionDefTarget.body.remove(statement)
-			allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
+			allImports.addImportFromStr(moduleConstructor, datatypeName, dtypeAsName)
 	return FunctionDefTarget, allImports
 
 def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, Z0Z_listChaff: List[str], allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
@@ -150,6 +148,8 @@ def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget
 
 	returnStatement = ast.Return(value=multiplyOperation)
 
+	datatype = hackSSOTdatatype(Z0Z_identifierCountFolds)
+	FunctionDefTarget.returns = ast.Name(id=datatype, ctx=ast.Load())
 	datatypeModuleScalar = Z0Z_getDatatypeModuleScalar()
 	allImports.addImportFromStr(datatypeModuleScalar, datatype)
 
