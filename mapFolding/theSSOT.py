@@ -22,7 +22,7 @@ from typing import Any, Final, TYPE_CHECKING, cast
 
 try:
 	from typing import NotRequired
-except ImportError:
+except Exception:
 	from typing import NotRequired
 
 if TYPE_CHECKING:
