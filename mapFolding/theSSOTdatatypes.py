@@ -7,7 +7,7 @@ import numpy
 try:
 	from typing import NotRequired
 except Exception:
-	from typing import NotRequired
+	from typing_extensions import NotRequired # type: ignore
 
 if TYPE_CHECKING:
 	from typing import TypedDict
