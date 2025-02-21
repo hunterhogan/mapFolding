@@ -222,7 +222,7 @@ def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorN
 	ast.fix_missing_locations(newFunctionDef)
 	return newFunctionDef
 
-def makeLauncherBasicJobNumba(callableTarget: str, pathFilenameFoldsTotal: pathlib.Path) -> ast.Module:
+def makeLauncherBasicJobNumba(callableTarget: str, pathFilenameFoldsTotal: Path) -> ast.Module:
 	linesLaunch = f"""
 if __name__ == '__main__':
 	import time

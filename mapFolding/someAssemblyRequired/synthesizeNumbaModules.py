@@ -18,7 +18,7 @@ def makePythonSource(listFunctionDefs: list[ast.FunctionDef], listAstImports: li
 	pythonSource = autoflake.fix_code(pythonSource, additional_imports)
 	return pythonSource
 
-def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], relativePathWrite: pathlib.Path | None, filenameWrite: str | None, formatFilenameWrite: str | None) -> list[youOughtaKnow]:
+def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], relativePathWrite: Path | None, filenameWrite: str | None, formatFilenameWrite: str | None) -> list[youOughtaKnow]:
 	pathFilename = None
 	if not relativePathWrite:
 		pathWrite = getPathSyntheticModules()
@@ -58,7 +58,7 @@ def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], r
 def makeFlowNumbaOptimized(listCallablesInline: list[str],
 callableDispatcher: bool | None = False,
 algorithmSource: ModuleType | None = None,
-relativePathWrite: pathlib.Path | None = None,
+relativePathWrite: Path | None = None,
 filenameModuleWrite: str | None = None,
 formatFilenameWrite: str | None = None
 							) -> list[youOughtaKnow]:

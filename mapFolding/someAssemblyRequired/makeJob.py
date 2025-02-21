@@ -1,15 +1,15 @@
-from mapFolding import getPathFilenameFoldsTotal, computationState, outfitCountFolds, getAlgorithmSource
-from types import ModuleType
 from collections.abc import Sequence
+from mapFolding import getPathFilenameFoldsTotal, computationState, outfitCountFolds, getAlgorithmSource
+from pathlib import Path
+from types import ModuleType
 from typing import Any, Literal, overload
-import pathlib
 import pickle
 
 @overload
-def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[True] , **keywordArguments: str | None) -> pathlib.Path: ...
+def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[True] , **keywordArguments: str | None) -> Path: ...
 @overload
 def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[False] , **keywordArguments: str | None) -> computationState: ...
-def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Any | None) -> computationState | pathlib.Path:
+def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Any | None) -> computationState | Path:
 	"""
 	Creates a computation state job for map folding calculations and optionally saves it to disk.
 
@@ -28,7 +28,7 @@ def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keyw
 
 	Returns
 	-------
-	Union[computationState, pathlib.Path]
+	Union[computationState, Path]
 		If writeJob is False, returns the computation state object.
 		If writeJob is True, returns the Path object pointing to the saved state file.
 
@@ -48,7 +48,7 @@ def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keyw
 
 	pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal['mapShape'])
 	suffix = pathFilenameChopChop.suffix
-	pathJob = pathlib.Path(str(pathFilenameChopChop)[0:-len(suffix)])
+	pathJob = Path(str(pathFilenameChopChop)[0:-len(suffix)])
 	pathJob.mkdir(parents=True, exist_ok=True)
 	pathFilenameJob = pathJob / 'stateJob.pkl'
 

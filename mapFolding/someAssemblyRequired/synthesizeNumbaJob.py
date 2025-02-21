@@ -31,10 +31,10 @@ def writeJobNumba(mapShape: Sequence[int],
 				algorithmSource: ModuleType,
 				callableTarget: str | None = None,
 				parametersNumba: ParametersNumba | None = None,
-				pathFilenameWriteJob: str | os.PathLike[str] | None = None,
+				pathFilenameWriteJob: str | PathLike[str] | None = None,
 				unrollCountGaps: bool | None = False,
 				**keywordArguments: Any | None
-				) -> pathlib.Path:
+				) -> Path:
 	""" Parameters: **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`. """
 
 	""" Notes:
@@ -132,9 +132,9 @@ def writeJobNumba(mapShape: Sequence[int],
 	if pathFilenameWriteJob is None:
 		filename = getFilenameFoldsTotal(stateJob['mapShape'])
 		pathRoot = getPathJobRootDEFAULT()
-		pathFilenameWriteJob = pathlib.Path(pathRoot, pathlib.Path(filename).stem, pathlib.Path(filename).with_suffix('.py'))
+		pathFilenameWriteJob = Path(pathRoot, Path(filename).stem, Path(filename).with_suffix('.py'))
 	else:
-		pathFilenameWriteJob = pathlib.Path(pathFilenameWriteJob)
+		pathFilenameWriteJob = Path(pathFilenameWriteJob)
 	pathFilenameWriteJob.parent.mkdir(parents=True, exist_ok=True)
 
 	pathFilenameWriteJob.write_text(pythonSource)

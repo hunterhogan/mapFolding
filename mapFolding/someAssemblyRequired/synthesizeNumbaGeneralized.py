@@ -47,8 +47,8 @@ import inspect
 import more_itertools
 import numba
 import numpy
-import os
-import pathlib
+from os import PathLike
+from pathlib import Path
 import python_minifier
 import warnings
 
