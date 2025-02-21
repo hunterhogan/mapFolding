@@ -55,13 +55,7 @@ def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], r
 
 	return listStuffYouOughtaKnow
 
-def makeFlowNumbaOptimized(listCallablesInline: list[str],
-callableDispatcher: bool | None = False,
-algorithmSource: ModuleType | None = None,
-relativePathWrite: Path | None = None,
-filenameModuleWrite: str | None = None,
-formatFilenameWrite: str | None = None
-							) -> list[youOughtaKnow]:
+def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: bool | None = False, algorithmSource: ModuleType | None = None, relativePathWrite: Path | None = None, filenameModuleWrite: str | None = None, formatFilenameWrite: str | None = None) -> list[youOughtaKnow]:
 	if relativePathWrite and relativePathWrite.is_absolute():
 		raise ValueError("The path to write the module must be relative to the root of the package.")
 	if not algorithmSource:

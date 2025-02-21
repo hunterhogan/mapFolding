@@ -27,14 +27,7 @@ def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob: computationS
 		FunctionDefTarget = transformer.visit(FunctionDefTarget)
 	return FunctionDefTarget, allImports
 
-def writeJobNumba(mapShape: Sequence[int],
-				algorithmSource: ModuleType,
-				callableTarget: str | None = None,
-				parametersNumba: ParametersNumba | None = None,
-				pathFilenameWriteJob: str | PathLike[str] | None = None,
-				unrollCountGaps: bool | None = False,
-				**keywordArguments: Any | None
-				) -> Path:
+def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callableTarget: str | None = None, parametersNumba: ParametersNumba | None = None, pathFilenameWriteJob: str | PathLike[str] | None = None, unrollCountGaps: bool | None = False, **keywordArguments: Any | None) -> Path:
 	""" Parameters: **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`. """
 
 	""" Notes:
@@ -142,7 +135,7 @@ def writeJobNumba(mapShape: Sequence[int],
 	return pathFilenameWriteJob
 
 if __name__ == '__main__':
-	mapShape = [5,5]
+	mapShape: list[int] = [5,5]
 	from mapFolding.syntheticModules import numbaCount
 	algorithmSource: ModuleType = numbaCount
 
