@@ -1,11 +1,11 @@
 from mapFolding import indexMy, indexTrack
-from numba import int64, jit, prange, uint16
-from numpy import dtype, integer, ndarray
-from typing import Any, Tuple
+from numba import jit, int64, prange, uint16
+from numpy import ndarray, dtype, integer
+from typing import Tuple, Any
 
 @jit((uint16[:, :, ::1], uint16[::1], uint16[::1], uint16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
 def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
-    while my[indexMy.leaf1ndex.value]:
+    while my[indexMy.leaf1ndex.value] > 0:
         if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
             my[indexMy.dimensionsUnconstrained.value] = my[indexMy.dimensionsTotal.value]
             my[indexMy.gap1ndexCeiling.value] = track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
@@ -35,7 +35,7 @@ def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer
                     my[indexMy.gap1ndex.value] += 1
                 track[indexTrack.countDimensionsGapped.value, gapsWhere[my[indexMy.indexMiniGap.value]]] = 0
                 my[indexMy.indexMiniGap.value] += 1
-        if my[indexMy.leaf1ndex.value]:
+        if my[indexMy.leaf1ndex.value] > 0:
             my[indexMy.gap1ndex.value] -= 1
             track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]] = gapsWhere[my[indexMy.gap1ndex.value]]
             track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]] = track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]]
@@ -58,7 +58,7 @@ def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[A
         my = myPARALLEL.copy()
         track = trackPARALLEL.copy()
         my[indexMy.taskIndex.value] = indexSherpa
-        while my[indexMy.leaf1ndex.value]:
+        while my[indexMy.leaf1ndex.value] > 0:
             if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
                 if my[indexMy.leaf1ndex.value] > foldGroups[-1]:
                     groupsOfFolds += 1
@@ -86,11 +86,11 @@ def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[A
                             my[indexMy.gap1ndex.value] += 1
                         track[indexTrack.countDimensionsGapped.value, gapsWhere[my[indexMy.indexMiniGap.value]]] = 0
                         my[indexMy.indexMiniGap.value] += 1
-            while my[indexMy.leaf1ndex.value] and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]:
+            while my[indexMy.leaf1ndex.value] > 0 and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]:
                 my[indexMy.leaf1ndex.value] -= 1
                 track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]
                 track[indexTrack.leafAbove.value, track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]]] = track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]
-            if my[indexMy.leaf1ndex.value]:
+            if my[indexMy.leaf1ndex.value] > 0:
                 my[indexMy.gap1ndex.value] -= 1
                 track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]] = gapsWhere[my[indexMy.gap1ndex.value]]
                 track[indexTrack.leafBelow.value, my[indexMy.leaf1ndex.value]] = track[indexTrack.leafBelow.value, track[indexTrack.leafAbove.value, my[indexMy.leaf1ndex.value]]]
@@ -116,7 +116,7 @@ def countSequential(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer
     gap1ndex = my[indexMy.gap1ndex.value]
     taskIndex = my[indexMy.taskIndex.value]
     groupsOfFolds: int = 0
-    while leaf1ndex:
+    while leaf1ndex > 0:
         if leaf1ndex <= 1 or leafBelow[0] == 1:
             if leaf1ndex > foldGroups[-1]:
                 groupsOfFolds += 1
@@ -143,11 +143,11 @@ def countSequential(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer
                         gap1ndex += 1
                     countDimensionsGapped[gapsWhere[indexMiniGap]] = 0
                     indexMiniGap += 1
-        while leaf1ndex and gap1ndex == gapRangeStart[leaf1ndex - 1]:
+        while leaf1ndex > 0 and gap1ndex == gapRangeStart[leaf1ndex - 1]:
             leaf1ndex -= 1
             leafBelow[leafAbove[leaf1ndex]] = leafBelow[leaf1ndex]
             leafAbove[leafBelow[leaf1ndex]] = leafAbove[leaf1ndex]
-        if leaf1ndex:
+        if leaf1ndex > 0:
             gap1ndex -= 1
             leafAbove[leaf1ndex] = gapsWhere[gap1ndex]
             leafBelow[leaf1ndex] = leafBelow[leafAbove[leaf1ndex]]

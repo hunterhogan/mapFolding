@@ -122,12 +122,8 @@ def makeFlowNumbaOptimized(listCallablesInline: List[str]
 	return listStuffYouOughtaKnow
 
 if __name__ == '__main__':
-	# setDatatypeModule('numpy', sourGrapes=True)
-	# setDatatypeFoldsTotal('int64', sourGrapes=True)
-	# setDatatypeElephino('uint8', sourGrapes=True)
-	# setDatatypeLeavesTotal('uint8', sourGrapes=True)
-	Z0Z_setDatatypeModuleScalar('numba')
-	Z0Z_setDecoratorCallable('jit')
+	# Z0Z_setDatatypeModuleScalar('numba')
+	# Z0Z_setDecoratorCallable('jit')
 	listCallablesInline: List[str] = ['countInitialize', 'countParallel', 'countSequential']
 	callableDispatcher = True
 	makeFlowNumbaOptimized(listCallablesInline, callableDispatcher)

@@ -149,6 +149,7 @@ if __name__ == '__main__':
 	callableTarget = 'countSequential'
 
 	parametersNumba = parametersNumbaDEFAULT
+	parametersNumba['boundscheck'] = True
 
 	pathFilenameWriteJob = None
 

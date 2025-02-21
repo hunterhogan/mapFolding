@@ -8,7 +8,7 @@ def activeLeafConnectedToItself(my: ndarray[Tuple[int], dtype[integer[Any]]]) ->
 	return my[indexMy.leafConnectee.value] == my[indexMy.leaf1ndex.value]
 
 def activeLeafGreaterThan0(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
-	return my[indexMy.leaf1ndex.value]
+	return my[indexMy.leaf1ndex.value] > 0
 
 def activeLeafGreaterThanLeavesTotal(foldGroups: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
 	return my[indexMy.leaf1ndex.value] > foldGroups[-1]
@@ -85,7 +85,7 @@ def loopUpToDimensionsTotal(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any
 	return my[indexMy.indexDimension.value] < my[indexMy.dimensionsTotal.value]
 
 def noGapsHere(my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> Any:
-	return my[indexMy.leaf1ndex.value] and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
+	return my[indexMy.leaf1ndex.value] > 0 and my[indexMy.gap1ndex.value] == track[indexTrack.gapRangeStart.value, my[indexMy.leaf1ndex.value] - 1]
 
 def placeLeaf(gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
 	my[indexMy.gap1ndex.value] -= 1
@@ -97,7 +97,7 @@ def placeLeaf(gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[T
 	my[indexMy.leaf1ndex.value] += 1
 
 def thereIsAnActiveLeaf(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
-	return my[indexMy.leaf1ndex.value]
+	return my[indexMy.leaf1ndex.value] > 0
 
 def thisIsMyTaskIndex(my: ndarray[Tuple[int], dtype[integer[Any]]]) -> Any:
 	return my[indexMy.leaf1ndex.value] != my[indexMy.taskDivisions.value] or my[indexMy.leafConnectee.value] % my[indexMy.taskDivisions.value] == my[indexMy.taskIndex.value]
