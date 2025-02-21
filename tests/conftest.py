@@ -8,7 +8,8 @@ from mapFolding.beDRY import *
 from mapFolding.someAssemblyRequired import *
 from mapFolding.oeis import *
 from types import ModuleType
-from typing import Any, Callable, ContextManager, Dict, Generator, List, Literal, NoReturn, Optional, Sequence, Set, Tuple, Type, Union
+from typing import Any, ContextManager, Literal, NoReturn, Final
+from collections.abc import Callable, Generator, Sequence
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 import importlib.util
 import pathlib
@@ -24,7 +25,7 @@ pathDataSamples = pathlib.Path("tests/dataSamples")
 pathTmpRoot = pathDataSamples / "tmp"
 
 # The registrar maintains the register of temp files
-registerOfTemporaryFilesystemObjects: Set[pathlib.Path] = set()
+registerOfTemporaryFilesystemObjects: set[pathlib.Path] = set()
 
 def registrarRecordsTmpObject(path: pathlib.Path) -> None:
 	"""The registrar adds a tmp file to the register."""
@@ -90,9 +91,9 @@ def pathCacheTesting(pathTmpTesting: pathlib.Path) -> Generator[pathlib.Path, An
 def pathFilenameFoldsTotalTesting(pathTmpTesting: pathlib.Path) -> pathlib.Path:
 	return pathTmpTesting.joinpath("foldsTotalTest.txt")
 
-def makeDictionaryFoldsTotalKnown() -> Dict[Tuple[int,...], int]:
+def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 	"""Returns a dictionary mapping dimension tuples to their known folding totals."""
-	dictionaryMapDimensionsToFoldsTotalKnown: Dict[Tuple[int, ...], int] = {}
+	dictionaryMapDimensionsToFoldsTotalKnown: dict[tuple[int, ...], int] = {}
 
 	for settings in settingsOEIS.values():
 		sequence = settings['valuesKnown']
@@ -115,7 +116,7 @@ def setupWarningsAsErrors() -> Generator[None, Any, None]:
 	warnings.resetwarnings()
 
 @pytest.fixture
-def foldsTotalKnown() -> Dict[Tuple[int,...], int]:
+def foldsTotalKnown() -> dict[tuple[int, ...], int]:
 	"""Returns a dictionary mapping dimension tuples to their known folding totals.
 	NOTE I am not convinced this is the best way to do this.
 	Advantage: I call `makeDictionaryFoldsTotalKnown()` from modules other than test modules.
@@ -124,7 +125,7 @@ def foldsTotalKnown() -> Dict[Tuple[int,...], int]:
 	return makeDictionaryFoldsTotalKnown()
 
 @pytest.fixture
-def listDimensionsTestCountFolds(oeisID: str) -> List[int]:
+def listDimensionsTestCountFolds(oeisID: str) -> list[int]:
 	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
 	if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
 	while True:
@@ -139,7 +140,7 @@ def listDimensionsTestCountFolds(oeisID: str) -> List[int]:
 			pass
 
 @pytest.fixture
-def listDimensionsTestFunctionality(oeisID_1random: str) -> List[int]:
+def listDimensionsTestFunctionality(oeisID_1random: str) -> list[int]:
 	"""To test functionality, get one `listDimensions` from `valuesTestValidation` if
 	`validateListDimensions` approves. The algorithm can count the folds of the returned
 	`listDimensions` in a short enough time suitable for testing."""
@@ -155,7 +156,7 @@ def listDimensionsTestFunctionality(oeisID_1random: str) -> List[int]:
 			pass
 
 @pytest.fixture
-def listDimensionsTestParallelization(oeisID: str) -> List[int]:
+def listDimensionsTestParallelization(oeisID: str) -> list[int]:
 	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestParallelization`"""
 	n = random.choice(settingsOEIS[oeisID]['valuesTestParallelization'])
 	return settingsOEIS[oeisID]['getMapShape'](n)
@@ -170,7 +171,7 @@ def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.As
 @pytest.fixture
 def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
 	"""Creates a mock function that simulates _countFolds behavior."""
-	def make_mock(foldsValue: int, listDimensions: List[int]) -> Callable[..., None]:
+	def make_mock(foldsValue: int, listDimensions: list[int]) -> Callable[..., None]:
 		mock_array = makeDataContainer(2)
 		mock_array[0] = foldsValue
 		mock_array[-1] = getLeavesTotal(listDimensions)
@@ -227,14 +228,14 @@ def useAlgorithmSourceDispatcher(useThisDispatcher: Callable) -> Generator[None,
 
 @pytest.fixture
 def syntheticDispatcherFixture(useThisDispatcher):
-	listCallablesInlineHARDCODED: List[str] = ['countInitialize', 'countParallel', 'countSequential']
+	listCallablesInlineHARDCODED: list[str] = ['countInitialize', 'countParallel', 'countSequential']
 	listCallablesInline = listCallablesInlineHARDCODED
 	callableDispatcher = True
 	algorithmSource = None
 	relativePathWrite = None
 	filenameModuleWrite = 'pytestCount.py'
 	formatFilenameWrite = "pytest_{callableTarget}.py"
-	listSynthesizedModules: List[youOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite)
+	listSynthesizedModules: list[youOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite)
 	dispatcherSynthetic = youOughtaKnow('','','')
 	for stuff in listSynthesizedModules:
 		registrarRecordsTmpObject(stuff.pathFilenameForMe)
@@ -262,7 +263,7 @@ def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments
 
 def standardizedEqualTo(expected: Any, functionTarget: Callable, *arguments: Any) -> None:
 	"""Template for tests expecting an error."""
-	if type(expected) is Type[Exception]:
+	if type(expected) is type[Exception]:
 		messageExpected = expected.__name__
 	else:
 		messageExpected = expected
@@ -275,7 +276,7 @@ def standardizedEqualTo(expected: Any, functionTarget: Callable, *arguments: Any
 
 	assert actual == expected, uniformTestMessage(messageExpected, messageActual, functionTarget.__name__, *arguments)
 
-def standardizedSystemExit(expected: Union[str, int, Sequence[int]], functionTarget: Callable, *arguments: Any) -> None:
+def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: Callable, *arguments: Any) -> None:
 	"""Template for tests expecting SystemExit.
 
 	Parameters

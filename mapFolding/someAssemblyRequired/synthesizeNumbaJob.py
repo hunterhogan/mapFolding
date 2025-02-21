@@ -1,7 +1,7 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
 from mapFolding.someAssemblyRequired.synthesizeNumba import *
 
-def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob: computationState, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob: computationState, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	"""The initial results were very bad."""
 	FunctionDefTarget = findAndReplaceWhileLoopIn_body(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal])
 	FunctionDefTarget = removeAssignTargetFrom_body(FunctionDefTarget, 'indexDimension')
@@ -27,13 +27,13 @@ def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob: computationS
 		FunctionDefTarget = transformer.visit(FunctionDefTarget)
 	return FunctionDefTarget, allImports
 
-def writeJobNumba(mapShape: Sequence[int]
-				, algorithmSource: ModuleType
-				, callableTarget: Optional[str] = None
-				, parametersNumba: Optional[ParametersNumba] = None
-				, pathFilenameWriteJob: Optional[Union[str, os.PathLike[str]]] = None
-				, unrollCountGaps: Optional[bool] = False
-				, **keywordArguments: Optional[Any]
+def writeJobNumba(mapShape: Sequence[int],
+				algorithmSource: ModuleType,
+				callableTarget: str | None = None,
+				parametersNumba: ParametersNumba | None = None,
+				pathFilenameWriteJob: str | os.PathLike[str] | None = None,
+				unrollCountGaps: bool | None = False,
+				**keywordArguments: Any | None
 				) -> pathlib.Path:
 	""" Parameters: **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`. """
 
@@ -122,7 +122,7 @@ def writeJobNumba(mapShape: Sequence[int]
 
 	# NOTE add imports, make str, remove unused imports
 	astImports = allImports.makeListAst()
-	astModule = ast.Module(body=cast(List[ast.stmt], astImports + [FunctionDefTarget] + [astLauncher]), type_ignores=[])
+	astModule = ast.Module(body=cast(list[ast.stmt], astImports + [FunctionDefTarget] + [astLauncher]), type_ignores=[])
 	ast.fix_missing_locations(astModule)
 	pythonSource = ast.unparse(astModule)
 	pythonSource = autoflake.fix_code(pythonSource, ['mapFolding', 'numba', 'numpy'])

@@ -35,7 +35,8 @@ from mapFolding.someAssemblyRequired.makeJob import makeStateJob
 from numpy import integer
 from numpy.typing import NDArray
 from types import ModuleType
-from typing import Any, Callable, cast, Dict, List, Optional, Sequence, Set, Tuple, Type, Union
+from collections.abc import Callable, Sequence
+from typing import Any, cast
 from Z0Z_tools import autoDecodingRLE, updateExtendPolishDictionaryLists
 import ast
 import autoflake
@@ -63,8 +64,8 @@ class ASTBodyTransformer:
 	def __init__(self, functionDefinition: ast.FunctionDef) -> None:
 		self.functionDefinition = functionDefinition
 
-	def replaceIn_body(self, predicate: Callable[[ast.stmt], bool], replacementBuilder: Callable[[ast.stmt], Optional[ast.stmt]]) -> None:
-		newBody: List[ast.stmt] = []
+	def replaceIn_body(self, predicate: Callable[[ast.stmt], bool], replacementBuilder: Callable[[ast.stmt], ast.stmt | None]) -> None:
+		newBody: list[ast.stmt] = []
 		for statement in self.functionDefinition.body:
 			if predicate(statement):
 				replacementStatement = replacementBuilder(statement)
@@ -127,16 +128,16 @@ class ifThis:
 class Then:
 	"""Generic actions."""
 	@staticmethod
-	def copy_astCallKeywords(astCall: ast.Call) -> Dict[str, Any]:
+	def copy_astCallKeywords(astCall: ast.Call) -> dict[str, Any]:
 		"""Extract keyword parameters from a decorator AST node."""
-		dictionaryKeywords: Dict[str, Any] = {}
+		dictionaryKeywords: dict[str, Any] = {}
 		for keywordItem in astCall.keywords:
 			if isinstance(keywordItem.value, ast.Constant) and keywordItem.arg is not None:
 				dictionaryKeywords[keywordItem.arg] = keywordItem.value.value
 		return dictionaryKeywords
 
 	@staticmethod
-	def make_astCall(name: str, args: Optional[Sequence[ast.expr]]=None, list_astKeywords: Optional[Sequence[ast.keyword]]=None, dictionaryKeywords: Optional[Dict[str, Any]]=None) -> ast.Call:
+	def make_astCall(name: str, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None, dictionaryKeywords: dict[str, Any] | None = None) -> ast.Call:
 		list_dictionaryKeywords = [ast.keyword(arg=keyName, value=ast.Constant(value=keyValue)) for keyName, keyValue in dictionaryKeywords.items()] if dictionaryKeywords else []
 		return ast.Call(
 			func=ast.Name(id=name, ctx=ast.Load()),
@@ -159,7 +160,7 @@ class NodeReplacer(ast.NodeTransformer):
 		visit(node: ast.AST) -> Optional[ast.AST]:
 			Visits each node in the AST, replacing or removing it based on the predicate.
 	"""
-	def __init__(self, findMe: Callable[[ast.AST], bool], nodeReplacementBuilder: Callable[[ast.AST], Optional[ast.AST]]) -> None:
+	def __init__(self, findMe: Callable[[ast.AST], bool], nodeReplacementBuilder: Callable[[ast.AST], ast.AST | None]) -> None:
 		self.findMe = findMe
 		self.nodeReplacementBuilder = nodeReplacementBuilder
 
@@ -181,10 +182,10 @@ def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
 # Domain-based
 class UniversalImportTracker:
 	def __init__(self) -> None:
-		self.dictionaryImportFrom: Dict[str, Set] = collections.defaultdict(set)
+		self.dictionaryImportFrom: dict[str, set] = collections.defaultdict(set)
 		self.setImport = set()
 
-	def addAst(self, astImport_: Union[ast.Import, ast.ImportFrom]) -> None:
+	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
 		if isinstance(astImport_, ast.Import):
 			for alias in astImport_.names:
 				self.setImport.add(alias.name)
@@ -195,10 +196,10 @@ class UniversalImportTracker:
 	def addImportStr(self, module: str) -> None:
 		self.setImport.add(module)
 
-	def addImportFromStr(self, module: str, name: str, asname: Optional[str] = None) -> None:
+	def addImportFromStr(self, module: str, name: str, asname: str | None = None) -> None:
 		self.dictionaryImportFrom[module].add((name, asname))
 
-	def makeListAst(self) -> List[Union[ast.ImportFrom, ast.Import]]:
+	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
 		listAstImportFrom = []
 		for module, setOfNameTuples in sorted(self.dictionaryImportFrom.items()):
 			listAliases = []
@@ -253,11 +254,11 @@ class RecursiveInliner(ast.NodeTransformer):
 				dictionaryFunctions, its statements are expanded in place, effectively inlining
 				the called function's statements into the surrounding context.
 	"""
-	def __init__(self, dictionaryFunctions: Dict[str, ast.FunctionDef]):
+	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]):
 		self.dictionaryFunctions = dictionaryFunctions
-		self.callablesCompleted: Set[str] = set()
+		self.callablesCompleted: set[str] = set()
 
-	def inlineFunctionBody(self, callableTargetName: str) -> Optional[ast.FunctionDef]:
+	def inlineFunctionBody(self, callableTargetName: str) -> ast.FunctionDef | None:
 		if (callableTargetName in self.callablesCompleted):
 			return None
 
@@ -280,7 +281,7 @@ class RecursiveInliner(ast.NodeTransformer):
 				return ast.Constant(value=None)
 		return callNodeVisited
 
-	def visit_Expr(self, node: ast.Expr) -> Union[ast.AST, List[ast.AST]]:
+	def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.AST]:
 		if (isinstance(node.value, ast.Call)):
 			if (isinstance(node.value.func, ast.Name) and node.value.func.id in self.dictionaryFunctions):
 				inlineDefinition = self.inlineFunctionBody(node.value.func.id)
@@ -313,12 +314,12 @@ class UnpackArrays(ast.NodeTransformer):
 	3. Replaces original array access with the local variable
 	"""
 
-	def __init__(self, enumIndexClass: Type[EnumIndices], arrayName: str) -> None:
+	def __init__(self, enumIndexClass: type[EnumIndices], arrayName: str) -> None:
 		self.enumIndexClass = enumIndexClass
 		self.arrayName = arrayName
-		self.substitutions: Dict[str, Any] = {}
+		self.substitutions: dict[str, Any] = {}
 
-	def extract_member_name(self, node: ast.AST) -> Optional[str]:
+	def extract_member_name(self, node: ast.AST) -> str | None:
 		"""Recursively extract enum member name from any node in the AST."""
 		if isinstance(node, ast.Attribute) and node.attr == 'value':
 			innerAttribute = node.value
@@ -337,7 +338,7 @@ class UnpackArrays(ast.NodeTransformer):
 					return ast.Name(id=member_name, ctx=node.ctx)
 			elif isinstance(node, ast.Tuple):
 				# Handle tuple slices by transforming each element
-				return ast.Tuple(elts=cast(List[ast.expr], [self.transform_slice_element(elt) for elt in node.elts]), ctx=node.ctx)
+				return ast.Tuple(elts=cast(list[ast.expr], [self.transform_slice_element(elt) for elt in node.elts]), ctx=node.ctx)
 		elif isinstance(node, ast.Attribute):
 			member_name = self.extract_member_name(node)
 			if member_name:

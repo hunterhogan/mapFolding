@@ -3,10 +3,10 @@ from tests.conftest import *
 import importlib.util
 import pytest
 
-def test_algorithmSourceParallel(listDimensionsTestParallelization: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], useAlgorithmSourceDispatcher: None) -> None:
+def test_algorithmSourceParallel(listDimensionsTestParallelization: list[int], foldsTotalKnown: dict[tuple[int, ...], int], useAlgorithmSourceDispatcher: None) -> None:
 	standardizedEqualTo(foldsTotalKnown[tuple(listDimensionsTestParallelization)], countFolds, listDimensionsTestParallelization, None, 'maximum')
 
-def test_algorithmSourceSequential(listDimensionsTestCountFolds: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], useAlgorithmSourceDispatcher: None) -> None:
+def test_algorithmSourceSequential(listDimensionsTestCountFolds: list[int], foldsTotalKnown: dict[tuple[int, ...], int], useAlgorithmSourceDispatcher: None) -> None:
 	standardizedEqualTo(foldsTotalKnown[tuple(listDimensionsTestCountFolds)], countFolds, listDimensionsTestCountFolds)
 
 def test_aOFn_calculate_value(oeisID: str) -> None:
@@ -14,7 +14,7 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 		standardizedEqualTo(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
 @pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
-def test_writeJobNumba(listDimensionsTestCountFolds: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int], pathFilenameTmpTesting: Path) -> None:
+def test_writeJobNumba(listDimensionsTestCountFolds: list[int], foldsTotalKnown: dict[tuple[int, ...], int], pathFilenameTmpTesting: Path) -> None:
 	from mapFolding.syntheticModules import numbaCount
 	algorithmSourceHARDCODED: ModuleType = numbaCount
 	algorithmSource = algorithmSourceHARDCODED
@@ -36,8 +36,8 @@ def test_writeJobNumba(listDimensionsTestCountFolds: List[int], foldsTotalKnown:
 	registrarRecordsTmpObject(pathFilenameFoldsTotal)
 	standardizedEqualTo(str(foldsTotalKnown[tuple(listDimensionsTestCountFolds)]), pathFilenameFoldsTotal.read_text().strip)
 
-def test_syntheticParallel(syntheticDispatcherFixture, listDimensionsTestParallelization: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int]):
+def test_syntheticParallel(syntheticDispatcherFixture, listDimensionsTestParallelization: list[int], foldsTotalKnown: dict[tuple[int, ...], int]):
 	standardizedEqualTo(foldsTotalKnown[tuple(listDimensionsTestParallelization)], countFolds, listDimensionsTestParallelization, None, 'maximum')
 
-def test_syntheticSequential(syntheticDispatcherFixture, listDimensionsTestCountFolds: List[int], foldsTotalKnown: Dict[Tuple[int, ...], int]):
+def test_syntheticSequential(syntheticDispatcherFixture, listDimensionsTestCountFolds: list[int], foldsTotalKnown: dict[tuple[int, ...], int]):
 	standardizedEqualTo(foldsTotalKnown[tuple(listDimensionsTestCountFolds)], countFolds, listDimensionsTestCountFolds)

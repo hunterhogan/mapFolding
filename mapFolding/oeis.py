@@ -2,7 +2,8 @@
 _only_ things that implement _only_ the OEIS."""
 from datetime import datetime, timedelta
 from mapFolding import countFolds, getPathPackage
-from typing import Any, Callable, Dict, Final, List, Tuple, TYPE_CHECKING
+from typing import Any, Final, TYPE_CHECKING
+from collections.abc import Callable
 import argparse
 import pathlib
 import random
@@ -24,15 +25,15 @@ _pathCache = getPathPackage() / ".cache"
 
 class SettingsOEIS(TypedDict):
 	description: str
-	getMapShape: Callable[[int], List[int]]
+	getMapShape: Callable[[int], list[int]]
 	offset: int
-	valuesBenchmark: List[int]
-	valuesKnown: Dict[int, int]
-	valuesTestParallelization: List[int]
-	valuesTestValidation: List[int]
+	valuesBenchmark: list[int]
+	valuesKnown: dict[int, int]
+	valuesTestParallelization: list[int]
+	valuesTestValidation: list[int]
 	valueUnknown: int
 
-settingsOEIShardcodedValues: Dict[str, Dict[str, Any]] = {
+settingsOEIShardcodedValues: dict[str, dict[str, Any]] = {
 	'A001415': {
 		'getMapShape': lambda n: sorted([2, n]),
 		'valuesBenchmark': [14],
@@ -65,7 +66,7 @@ settingsOEIShardcodedValues: Dict[str, Dict[str, Any]] = {
 	},
 }
 
-oeisIDsImplemented: Final[List[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues.keys()])
+oeisIDsImplemented: Final[list[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues.keys()])
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
 def validateOEISid(oeisIDcandidate: str) -> str:
@@ -102,7 +103,7 @@ def getFilenameOEISbFile(oeisID: str) -> str:
 	oeisID = validateOEISid(oeisID)
 	return f"b{oeisID[1:]}.txt"
 
-def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> Dict[int, int]:
+def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 	"""
 	Parses the content of an OEIS b-file for a given sequence ID.
 
@@ -159,7 +160,7 @@ def getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
 
 	return oeisInformation
 
-def getOEISidValues(oeisID: str) -> Dict[int, int]:
+def getOEISidValues(oeisID: str) -> dict[int, int]:
 	"""
 	Retrieves the specified OEIS sequence as a dictionary mapping integer indices
 	to their corresponding values.
@@ -187,7 +188,7 @@ def getOEISidValues(oeisID: str) -> Dict[int, int]:
 		return _parseBFileOEIS(oeisInformation, oeisID)
 	return {-1: -1}
 
-def getOEISidInformation(oeisID: str) -> Tuple[str, int]:
+def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	oeisID = validateOEISid(oeisID)
 	pathFilenameCache = _pathCache / f"{oeisID}.txt"
 	url = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
@@ -219,7 +220,7 @@ def getOEISidInformation(oeisID: str) -> Tuple[str, int]:
 	description = ' '.join(description_parts)
 	return description, offset
 
-def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
+def makeSettingsOEIS() -> dict[str, SettingsOEIS]:
 	settingsTarget = {}
 	for oeisID in oeisIDsImplemented:
 		valuesKnownSherpa = getOEISidValues(oeisID)
@@ -236,7 +237,7 @@ def makeSettingsOEIS() -> Dict[str, SettingsOEIS]:
 		)
 	return settingsTarget
 
-settingsOEIS: Dict[str, SettingsOEIS] = makeSettingsOEIS()
+settingsOEIS: dict[str, SettingsOEIS] = makeSettingsOEIS()
 """All values and settings for `oeisIDsImplemented`."""
 
 """

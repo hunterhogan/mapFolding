@@ -2,7 +2,8 @@ from mapFolding.theSSOTdatatypes import *
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from numpy import dtype, integer, ndarray
 from types import ModuleType
-from typing import Any, Callable, Dict, Final, Tuple, TYPE_CHECKING, Union, cast
+from typing import Any, Final, TYPE_CHECKING, cast
+from collections.abc import Callable, Sequence
 import pathlib
 import sys
 
@@ -65,12 +66,12 @@ def getDispatcherCallable() -> Callable[..., None]:
 
 # NOTE I want this _concept_, not necessarily this method, to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
 class computationState(TypedDict):
-	connectionGraph:	ndarray[Tuple[int, int, int], dtype[integer[Any]]]
-	foldGroups:			ndarray[Tuple[int]			, dtype[integer[Any]]]
-	gapsWhere:			ndarray[Tuple[int]			, dtype[integer[Any]]]
-	mapShape:			ndarray[Tuple[int]			, dtype[integer[Any]]]
-	my:					ndarray[Tuple[int]			, dtype[integer[Any]]]
-	track:				ndarray[Tuple[int, int]		, dtype[integer[Any]]]
+	connectionGraph:	ndarray[tuple[int, int, int], dtype[integer[Any]]]
+	foldGroups:			ndarray[tuple[int]			, dtype[integer[Any]]]
+	gapsWhere:			ndarray[tuple[int]			, dtype[integer[Any]]]
+	mapShape:			ndarray[tuple[int]			, dtype[integer[Any]]]
+	my:					ndarray[tuple[int]			, dtype[integer[Any]]]
+	track:				ndarray[tuple[int, int]		, dtype[integer[Any]]]
 
 _datatypeModuleScalar = 'numba'
 _decoratorCallable = 'jit'
@@ -110,7 +111,7 @@ class ParametersNumba(TypedDict):
 	forceinline: bool
 	forceobj: NotRequired[bool]
 	inline: str
-	locals: NotRequired[Dict[str, Any]]
+	locals: NotRequired[dict[str, Any]]
 	looplift: bool
 	no_cfunc_wrapper: bool
 	no_cpython_wrapper: bool
@@ -118,8 +119,8 @@ class ParametersNumba(TypedDict):
 	nogil: NotRequired[bool]
 	nopython: bool
 	parallel: bool
-	pipeline_class: NotRequired[Type[numbaCompilerBase]]
-	signature_or_function: NotRequired[Union[Any, Callable, str, Tuple]]
+	pipeline_class: NotRequired[type[numbaCompilerBase]]
+	signature_or_function: NotRequired[Any | Callable | str | tuple]
 	target: NotRequired[str]
 
 parametersNumbaFailEarly: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'python', 'fastmath': False, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }

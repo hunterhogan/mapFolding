@@ -43,7 +43,11 @@ import sys
 	(range(3, 7), [3, 4, 5, 6], [3, 4, 5, 6], [3, 4, 5, 6], 360),  # range sequence type
 	(tuple([3, 5, 7]), [3, 5, 7], [3, 5, 7], [3, 5, 7], 105),  # tuple sequence type
 ])
-def test_listDimensionsAsParameter(listDimensions: None | List[str] | List[int] | List[float] | List[None] | List[bool] | List[List[int]] | List[complex] | range | tuple[int, ...], expected_intInnit: type[ValueError] | List[int] | type[TypeError], expected_parseListDimensions: type[ValueError] | List[int] | type[TypeError], expected_validateListDimensions: type[ValueError] | type[NotImplementedError] | List[int] | type[TypeError], expected_getLeavesTotal: type[ValueError] | int | type[TypeError] | type[OverflowError]) -> None:
+def test_listDimensionsAsParameter(listDimensions: None | list[str] | list[int] | list[float] | list[None] | list[bool] | list[list[int]] | list[complex] | range | tuple[int, ...],
+								expected_intInnit: type[ValueError] | list[int] | type[TypeError],
+								expected_parseListDimensions: type[ValueError] | list[int] | type[TypeError],
+								expected_validateListDimensions: type[ValueError] | type[NotImplementedError] | list[int] | type[TypeError],
+								expected_getLeavesTotal: type[ValueError] | int | type[TypeError] | type[OverflowError]) -> None:
 	"""Test both validateListDimensions and getLeavesTotal with the same inputs."""
 	standardizedEqualTo(expected_intInnit, intInnit, listDimensions)
 	standardizedEqualTo(expected_parseListDimensions, parseDimensions, listDimensions)
@@ -82,14 +86,14 @@ def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> N
 def test_setCPUlimit(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | Literal[0] | Literal[1], expectedLimit: Any | int) -> None:
 	standardizedEqualTo(expectedLimit, setCPUlimit, CPUlimit)
 
-def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: List[int]) -> None:
+def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: list[int]) -> None:
 	connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality)
 	assert numpy.all(connectionGraph >= 0), "All values in the connection graph should be non-negative."
 
 @pytest.fixture
-def parameterIterator() -> Callable[[List[int]], Generator[Dict[str, Any], None, None]]:
+def parameterIterator() -> Callable[[list[int]], Generator[dict[str, Any], None, None]]:
 	"""Generate random combinations of parameters for outfitCountFolds testing."""
-	parameterSets: Dict[str, List[Any]] = {
+	parameterSets: dict[str, list[Any]] = {
 		'computationDivisions': [
 			None,
 			'maximum',
@@ -112,7 +116,7 @@ def parameterIterator() -> Callable[[List[int]], Generator[Dict[str, Any], None,
 		]
 	}
 
-	def makeParametersDynamic(listDimensions: List[int]) -> Dict[str, List[Any]]:
+	def makeParametersDynamic(listDimensions: list[int]) -> dict[str, list[Any]]:
 		"""Add context-dependent parameter values."""
 		parametersDynamic = parameterSets.copy()
 		leavesTotal = getLeavesTotal(listDimensions)
@@ -137,7 +141,7 @@ def parameterIterator() -> Callable[[List[int]], Generator[Dict[str, Any], None,
 
 		return parametersDynamic
 
-	def generateCombinations(listDimensions: List[int]) -> Generator[Dict[str, Any], None, None]:
+	def generateCombinations(listDimensions: list[int]) -> Generator[dict[str, Any], None, None]:
 		parametersDynamic = makeParametersDynamic(listDimensions)
 		parameterKeys = list(parametersDynamic.keys())
 		parameterValues = [parametersDynamic[key] for key in parameterKeys]

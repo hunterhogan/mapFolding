@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, cast, Dict, Final, Optional, Type, TYPE_CHECKING
+from typing import Any, cast, Final, TYPE_CHECKING
 import enum
 import sys
 import numba
@@ -48,7 +48,7 @@ class indexTrack(EnumIndices):
 	countDimensionsGapped	= enum.auto()
 	gapRangeStart			= enum.auto()
 
-_datatypeDefault: Final[Dict[str, str]] = {
+_datatypeDefault: Final[dict[str, str]] = {
 	'elephino': 'uint16',
 	'foldsTotal': 'int64',
 	'leavesTotal': 'uint16',
@@ -56,9 +56,9 @@ _datatypeDefault: Final[Dict[str, str]] = {
 _datatypeModule = ''
 _datatypeModuleDEFAULT: Final[str] = 'numpy'
 
-_datatype: Dict[str, str] = defaultdict(str)
+_datatype: dict[str, str] = defaultdict(str)
 
-def reportDatatypeLimit(identifier: str, datatype: str, sourGrapes: Optional[bool] = False) -> str:
+def reportDatatypeLimit(identifier: str, datatype: str, sourGrapes: bool | None = False) -> str:
 	global _datatype
 	if not _datatype[identifier]:
 		_datatype[identifier] = datatype
@@ -68,7 +68,7 @@ def reportDatatypeLimit(identifier: str, datatype: str, sourGrapes: Optional[boo
 		raise Exception(f"Datatype is '{_datatype[identifier]}' not '{datatype}', so you can take your ball and go home.")
 	return _datatype[identifier]
 
-def setDatatypeModule(datatypeModule: str, sourGrapes: Optional[bool] = False) -> str:
+def setDatatypeModule(datatypeModule: str, sourGrapes: bool | None = False) -> str:
 	global _datatypeModule
 	if not _datatypeModule:
 		_datatypeModule = datatypeModule
@@ -78,13 +78,13 @@ def setDatatypeModule(datatypeModule: str, sourGrapes: Optional[bool] = False) -
 		raise Exception(f"Datatype module is '{_datatypeModule}' not '{datatypeModule}', so you can take your ball and go home.")
 	return _datatypeModule
 
-def setDatatypeElephino(datatype: str, sourGrapes: Optional[bool] = False) -> str:
+def setDatatypeElephino(datatype: str, sourGrapes: bool | None = False) -> str:
 	return reportDatatypeLimit('elephino', datatype, sourGrapes)
 
-def setDatatypeFoldsTotal(datatype: str, sourGrapes: Optional[bool] = False) -> str:
+def setDatatypeFoldsTotal(datatype: str, sourGrapes: bool | None = False) -> str:
 	return reportDatatypeLimit('foldsTotal', datatype, sourGrapes)
 
-def setDatatypeLeavesTotal(datatype: str, sourGrapes: Optional[bool] = False) -> str:
+def setDatatypeLeavesTotal(datatype: str, sourGrapes: bool | None = False) -> str:
 	return reportDatatypeLimit('leavesTotal', datatype, sourGrapes)
 
 def _get_datatype(identifier: str) -> str:
@@ -104,12 +104,12 @@ def getDatatypeModule() -> str:
 		_datatypeModule = _datatypeModuleDEFAULT
 	return _datatypeModule
 
-def setInStone(identifier: str) -> Type[Any]:
+def setInStone(identifier: str) -> type[Any]:
 	datatypeModule = getDatatypeModule()
 	datatypeStr = _get_datatype(identifier)
-	return cast(Type[Any], getattr(eval(datatypeModule), datatypeStr))
+	return cast(type[Any], getattr(eval(datatypeModule), datatypeStr))
 
-def hackSSOTdtype(identifier: str) -> Type[Any]:
+def hackSSOTdtype(identifier: str) -> type[Any]:
 	_hackSSOTdtype={
 	'connectionGraph': 	'dtypeLeavesTotal',
 	'dtypeElephino': 	'dtypeElephino',

@@ -1,15 +1,13 @@
 from mapFolding import getAlgorithmSource, getPathSyntheticModules
 from mapFolding import setDatatypeModule, setDatatypeFoldsTotal, setDatatypeElephino, setDatatypeLeavesTotal
-from typing import Optional
 import ast
 import inspect
 import pathlib
-import sys
 
 def transformPythonToJAX(codePython: str) -> None:
 	astPython = ast.parse(codePython)
 
-def writeJax(*, codeSource: Optional[str] = None, pathFilenameAlgorithm: Optional[pathlib.Path] = None, pathFilenameDestination: Optional[pathlib.Path] = None) -> None:
+def writeJax(*, codeSource: str | None = None, pathFilenameAlgorithm: pathlib.Path | None = None, pathFilenameDestination: pathlib.Path | None = None) -> None:
 	if codeSource is None and pathFilenameAlgorithm is None:
 		algorithmSource = getAlgorithmSource()
 		codeSource = inspect.getsource(algorithmSource)

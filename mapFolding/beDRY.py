@@ -12,9 +12,10 @@ from mapFolding import (
 	setDatatypeLeavesTotal,
 	setDatatypeModule,
 )
+from collections.abc import Sequence
 from numpy import dtype, integer, ndarray
 from numpy.typing import DTypeLike, NDArray
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import Any
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 import numba
 import numpy
@@ -22,7 +23,7 @@ import os
 import pathlib
 import sys
 
-def getFilenameFoldsTotal(mapShape: Union[Sequence[int], ndarray[Tuple[int], dtype[integer[Any]]]]) -> str:
+def getFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]]) -> str:
 	"""Imagine your computer has been counting folds for 70 hours, and when it tries to save your newly discovered value,
 	the filename is invalid. I bet you think this function is more important after that thought experiment.
 
@@ -72,7 +73,7 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 
 		return productDimensions
 
-def getPathFilenameFoldsTotal(mapShape: Union[Sequence[int], ndarray[Tuple[int], dtype[integer[Any]]]], pathLikeWriteFoldsTotal: Optional[Union[str, os.PathLike[str]]] = None) -> pathlib.Path:
+def getPathFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]], pathLikeWriteFoldsTotal: str | os.PathLike[str] | None = None) -> pathlib.Path:
 	"""Get a standardized path and filename for the computed value `foldsTotal`.
 
 	If you provide a directory, the function will append a standardized filename. If you provide a filename
@@ -99,7 +100,7 @@ def getPathFilenameFoldsTotal(mapShape: Union[Sequence[int], ndarray[Tuple[int],
 	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 	return pathFilenameFoldsTotal
 
-def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, CPUlimit: Optional[Union[bool, float, int]], listDimensions: Sequence[int]) -> int:
+def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, CPUlimit: bool | float | int | None, listDimensions: Sequence[int]) -> int:
 	"""
 	Determines whether to divide the computation into tasks and how many divisions.
 
@@ -152,7 +153,7 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
 
 	return taskDivisions
 
-def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[str]) -> ndarray[Tuple[int, int, int], dtype[integer[Any]]]:
+def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: str | None) -> ndarray[tuple[int, int, int], dtype[integer[Any]]]:
 	"""
 	Constructs a multi-dimensional connection graph representing the connections between the leaves of a map with the given dimensions.
 	Also called a Cartesian product decomposition or dimensional product mapping.
@@ -179,7 +180,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 		for leaf1ndex in range(1, leavesTotal + 1):
 			coordinateSystem[indexDimension, leaf1ndex] = ( ((leaf1ndex - 1) // cumulativeProduct[indexDimension]) % arrayDimensions[indexDimension] + 1 )
 
-	connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=dtype)
+	connectionGraph: ndarray[tuple[int, int, int], numpy.dtype[integer[Any]]] = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=dtype)
 	for indexDimension in range(dimensionsTotal):
 		for activeLeaf1ndex in range(1, leavesTotal + 1):
 			for connectee1ndex in range(1, activeLeaf1ndex + 1):
@@ -197,7 +198,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 
 	return connectionGraph
 
-def makeDataContainer(shape: Union[int, Tuple[int, ...]], datatype: Optional[DTypeLike] = None) -> NDArray[integer[Any]]:
+def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None) -> NDArray[integer[Any]]:
 	"""Create a zeroed-out `ndarray` with the given shape and datatype.
 
 	Parameters:
@@ -219,7 +220,7 @@ def makeDataContainer(shape: Union[int, Tuple[int, ...]], datatype: Optional[DTy
 	else:
 		raise NotImplementedError("Somebody done broke it.")
 
-def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Union[str, bool]]) -> computationState:
+def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: int | str | None = None, CPUlimit: bool | float | int | None = None, **keywordArguments: str | bool | None) -> computationState:
 	"""
 	Initializes and configures the computation state for map folding computations.
 
@@ -284,7 +285,7 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: Option
 
 	return stateInitialized
 
-def parseDimensions(dimensions: Sequence[int], parameterName: str = 'listDimensions') -> List[int]:
+def parseDimensions(dimensions: Sequence[int], parameterName: str = 'listDimensions') -> list[int]:
 	"""
 	Parse and validate the dimensions are non-negative integers.
 
@@ -306,7 +307,7 @@ def parseDimensions(dimensions: Sequence[int], parameterName: str = 'listDimensi
 
 	return listNonNegative
 
-def saveFoldsTotal(pathFilename: Union[str, os.PathLike[str]], foldsTotal: int) -> None:
+def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> None:
 	"""
 	Save foldsTotal with multiple fallback mechanisms.
 
@@ -333,7 +334,7 @@ def saveFoldsTotal(pathFilename: Union[str, os.PathLike[str]], foldsTotal: int) 
 		except Exception:
 			print(foldsTotal)
 
-def setCPUlimit(CPUlimit: Optional[Any]) -> int:
+def setCPUlimit(CPUlimit: Any | None) -> int:
 	"""Sets CPU limit for Numba concurrent operations. Note that it can only affect Numba-jitted functions that have not yet been imported.
 
 	Parameters:
@@ -360,7 +361,7 @@ def setCPUlimit(CPUlimit: Optional[Any]) -> int:
 
 	return concurrencyLimit
 
-def validateListDimensions(listDimensions: Sequence[int]) -> List[int]:
+def validateListDimensions(listDimensions: Sequence[int]) -> list[int]:
 	"""
 	Validates and sorts a sequence of at least two positive dimensions.
 

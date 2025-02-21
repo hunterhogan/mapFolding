@@ -2,7 +2,7 @@
 TODO: consolidate the logic in this module."""
 from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import *
 
-def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker, unrollSlices: Optional[int]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker, unrollSlices: int | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
 	constructorName = arrayType.__name__
@@ -34,7 +34,7 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 
 	return FunctionDefTarget, allImports
 
-def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str , arrayTarget: numpy.ndarray , allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str , arrayTarget: numpy.ndarray , allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
@@ -62,7 +62,7 @@ def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifi
 			allImports.addImportFromStr(moduleConstructor, datatypeName, dtypeAsName)
 	return FunctionDefTarget, allImports
 
-def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, Z0Z_listChaff: List[str], allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, Z0Z_listChaff: list[str], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
 	for statement in FunctionDefTarget.body.copy():
 		if ifThis.isUnpackingAnArray(identifier)(statement):
@@ -87,7 +87,7 @@ def removeAssignTargetFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: 
 			return False
 		targetNode = astNode.targets[0]
 		return (isinstance(targetNode, ast.Subscript) and isinstance(targetNode.value, ast.Name) and targetNode.value.id == identifier) or ifThis.nameIs(identifier)(targetNode)
-	def replacementBuilder(astNode: ast.AST) -> Optional[ast.stmt]:
+	def replacementBuilder(astNode: ast.AST) -> ast.stmt | None:
 		# Returning None removes the node.
 		return None
 	FunctionDefSherpa = NodeReplacer(predicate, replacementBuilder).visit(FunctionDefTarget)
@@ -98,7 +98,7 @@ def removeAssignTargetFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: 
 	ast.fix_missing_locations(FunctionDefTarget)
 	return FunctionDefTarget
 
-def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
 	for stmt in FunctionDefTarget.body.copy():
 		if isinstance(stmt, ast.AnnAssign):
@@ -137,7 +137,7 @@ def findAstNameReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, na
 
 	return cast(ast.FunctionDef, NodeReplacer(ifThis.nameIs(name), replaceWithConstant).visit(FunctionDefTarget))
 
-def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	"""Add multiplication and return statement to function, properly constructing AST nodes."""
 	# Create AST for multiplication operation
 	multiplicand = Z0Z_identifierCountFolds
@@ -157,7 +157,7 @@ def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget
 
 	return FunctionDefTarget, allImports
 
-def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> Any:
+def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> ast.FunctionDef:
 	"""
 	Unroll all nested while loops matching the condition that their test uses `iteratorName`.
 	"""
@@ -180,11 +180,11 @@ def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorN
 			self.iteratorName = iteratorName
 			self.iterationsTotal = iterationsTotal
 
-		def visit_While(self, node: ast.While) -> List[ast.stmt]:
+		def visit_While(self, node: ast.While) -> list[ast.stmt]:
 				# Check if the while loop's test uses the iterator.
 			if isinstance(node.test, ast.Compare) and ifThis.nameIs(self.iteratorName)(node.test.left):
 				# Recurse the while loop body and remove AugAssign that increments the iterator.
-				cleanBodyStatements: List[ast.stmt] = []
+				cleanBodyStatements: list[ast.stmt] = []
 				for loopStatement in node.body:
 					# Recursively visit nested statements.
 					visitedStatement = self.visit(loopStatement)
@@ -198,7 +198,7 @@ def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorN
 						continue
 					cleanBodyStatements.append(visitedStatement)
 
-				newStatements: List[ast.stmt] = []
+				newStatements: list[ast.stmt] = []
 				# Unroll using the filtered body.
 				for iterationIndex in range(self.iterationsTotal):
 					for loopStatement in cleanBodyStatements:
@@ -235,7 +235,12 @@ if __name__ == '__main__':
 """
 	return ast.parse(linesLaunch)
 
-def makeFunctionDef(astModule: ast.Module, callableTarget: str, parametersNumba: Optional[ParametersNumba]=None, inlineCallables: Optional[bool]=False, unpackArrays: Optional[bool]=False, allImports: Optional[UniversalImportTracker]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def makeFunctionDef(astModule: ast.Module,
+					callableTarget: str,
+					parametersNumba: ParametersNumba | None = None,
+					inlineCallables: bool | None = False,
+					unpackArrays: bool | None = False,
+					allImports: UniversalImportTracker | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	if allImports is None:
 		allImports = UniversalImportTracker()
 	for statement in astModule.body:
@@ -266,7 +271,7 @@ def makeFunctionDef(astModule: ast.Module, callableTarget: str, parametersNumba:
 
 	return FunctionDefTarget, allImports
 
-def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: Optional[ParametersNumba]=None) -> Tuple[ast.FunctionDef, UniversalImportTracker]:
+def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: ParametersNumba | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
 		# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
 		for decoratorItem in astCallable.decorator_list.copy():
@@ -303,7 +308,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 	datatypeModuleDecorator = Z0Z_getDatatypeModuleScalar()
 	list_argsDecorator: Sequence[ast.expr] = []
 
-	list_arg4signature_or_function: List[ast.expr] = []
+	list_arg4signature_or_function: list[ast.expr] = []
 	for parameter in FunctionDefTarget.args.args:
 		signatureElement = make_arg4parameter(parameter)
 		if signatureElement:

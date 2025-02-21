@@ -1,10 +1,10 @@
-from mapFolding import indexMy, indexTrack
-from numba import jit, int64, prange, uint16
-from numpy import ndarray, dtype, integer
-from typing import Tuple, Any
+from mapFolding import indexTrack, indexMy
+from numba import int64, uint16, prange, jit
+from numpy import integer, dtype, ndarray
+from typing import Any
 
 @jit((uint16[:, :, ::1], uint16[::1], uint16[::1], uint16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
-def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
+def countInitialize(connectionGraph: ndarray[tuple[int, int, int], dtype[integer[Any]]], gapsWhere: ndarray[tuple[int], dtype[integer[Any]]], my: ndarray[tuple[int], dtype[integer[Any]]], track: ndarray[tuple[int, int], dtype[integer[Any]]]) -> None:
     while my[indexMy.leaf1ndex.value] > 0:
         if my[indexMy.leaf1ndex.value] <= 1 or track[indexTrack.leafBelow.value, 0] == 1:
             my[indexMy.dimensionsUnconstrained.value] = my[indexMy.dimensionsTotal.value]
@@ -47,7 +47,7 @@ def countInitialize(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer
             return
 
 @jit((uint16[:, :, ::1], int64[::1], uint16[::1], uint16[::1], uint16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nopython=True, parallel=True)
-def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], foldGroups: ndarray[Tuple[int], dtype[integer[Any]]], gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
+def countParallel(connectionGraph: ndarray[tuple[int, int, int], dtype[integer[Any]]], foldGroups: ndarray[tuple[int], dtype[integer[Any]]], gapsWhere: ndarray[tuple[int], dtype[integer[Any]]], my: ndarray[tuple[int], dtype[integer[Any]]], track: ndarray[tuple[int, int], dtype[integer[Any]]]) -> None:
     gapsWherePARALLEL = gapsWhere.copy()
     myPARALLEL = my.copy()
     trackPARALLEL = track.copy()
@@ -101,7 +101,7 @@ def countParallel(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[A
         foldGroups[my[indexMy.taskIndex.value]] = groupsOfFolds
 
 @jit((uint16[:, :, ::1], int64[::1], uint16[::1], uint16[::1], uint16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nopython=True, parallel=False)
-def countSequential(connectionGraph: ndarray[Tuple[int, int, int], dtype[integer[Any]]], foldGroups: ndarray[Tuple[int], dtype[integer[Any]]], gapsWhere: ndarray[Tuple[int], dtype[integer[Any]]], my: ndarray[Tuple[int], dtype[integer[Any]]], track: ndarray[Tuple[int, int], dtype[integer[Any]]]) -> None:
+def countSequential(connectionGraph: ndarray[tuple[int, int, int], dtype[integer[Any]]], foldGroups: ndarray[tuple[int], dtype[integer[Any]]], gapsWhere: ndarray[tuple[int], dtype[integer[Any]]], my: ndarray[tuple[int], dtype[integer[Any]]], track: ndarray[tuple[int, int], dtype[integer[Any]]]) -> None:
     leafBelow = track[indexTrack.leafBelow.value]
     gapRangeStart = track[indexTrack.gapRangeStart.value]
     countDimensionsGapped = track[indexTrack.countDimensionsGapped.value]
