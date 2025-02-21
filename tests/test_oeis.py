@@ -58,7 +58,7 @@ def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unitt
 		mock_exists.assert_called_once()
 		mock_unlink.assert_not_called()
 
-def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: pathlib.Path) -> None:
+def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: Path) -> None:
 	"""Test network error handling."""
 	def mockUrlopen(*args: Any, **kwargs: Any) -> NoReturn:
 		raise URLError("Network error")

@@ -2,17 +2,45 @@
 
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
-from mapFolding import *
-from mapFolding import basecamp, getAlgorithmDispatcher, getDispatcherCallable
-from mapFolding.beDRY import *
-from mapFolding.someAssemblyRequired import *
-from mapFolding.oeis import *
+from collections.abc import Callable, Generator, Sequence
+from mapFolding import (
+	getAlgorithmDispatcher,
+	getDispatcherCallable,
+	countFolds,
+	getPathFilenameFoldsTotal,
+	oeisIDfor_n,
+	saveFoldsTotal,
+	hackSSOTdtype,
+	clearOEIScache,
+	getOEISids,
+)
+from mapFolding import basecamp
+from mapFolding.beDRY import (
+	getLeavesTotal,
+	validateListDimensions,
+	makeDataContainer,
+	parseDimensions,
+	setCPUlimit,
+	makeConnectionGraph,
+	getTaskDivisions,
+)
+from mapFolding.oeis import (
+	oeisIDsImplemented,
+	settingsOEIS,
+	validateOEISid,
+	getOEISidValues,
+	OEIS_for_n,
+)
+from mapFolding.someAssemblyRequired import (
+	makeFlowNumbaOptimized,
+	youOughtaKnow,
+	writeJobNumba,
+)
+from pathlib import Path
 from types import ModuleType
 from typing import Any, ContextManager, Literal, NoReturn, Final
-from collections.abc import Callable, Generator, Sequence
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 import importlib.util
-import pathlib
 import pytest
 import random
 import shutil
@@ -20,14 +48,14 @@ import unittest.mock
 import uuid
 
 # SSOT for test data paths and filenames
-pathDataSamples = pathlib.Path("tests/dataSamples")
+pathDataSamples = Path("tests/dataSamples")
 # NOTE `tmp` is not a diminutive form of temporary: it signals a technical term. And "temp" is strongly disfavored.
-pathTmpRoot = pathDataSamples / "tmp"
+pathTmpRoot: Path = pathDataSamples / "tmp"
 
 # The registrar maintains the register of temp files
-registerOfTemporaryFilesystemObjects: set[pathlib.Path] = set()
+registerOfTemporaryFilesystemObjects: set[Path] = set()
 
-def registrarRecordsTmpObject(path: pathlib.Path) -> None:
+def registrarRecordsTmpObject(path: Path) -> None:
 	"""The registrar adds a tmp file to the register."""
 	registerOfTemporaryFilesystemObjects.add(path)
 
@@ -52,7 +80,7 @@ def setupTeardownTmpObjects() -> Generator[None, None, None]:
 	registrarDeletesTmpObjects()
 
 @pytest.fixture
-def pathTmpTesting(request: pytest.FixtureRequest) -> pathlib.Path:
+def pathTmpTesting(request: pytest.FixtureRequest) -> Path:
 	# "Z0Z_" ensures the directory name does not start with a number, which would make it an invalid Python identifier
 	pathTmp = pathTmpRoot / ("Z0Z_" + str(uuid.uuid4().hex))
 	pathTmp.mkdir(parents=True, exist_ok=False)
@@ -61,7 +89,7 @@ def pathTmpTesting(request: pytest.FixtureRequest) -> pathlib.Path:
 	return pathTmp
 
 @pytest.fixture
-def pathFilenameTmpTesting(request: pytest.FixtureRequest) -> pathlib.Path:
+def pathFilenameTmpTesting(request: pytest.FixtureRequest) -> Path:
 	try:
 		extension = request.param
 	except AttributeError:
@@ -72,14 +100,14 @@ def pathFilenameTmpTesting(request: pytest.FixtureRequest) -> pathlib.Path:
 	subpath = "Z0Z_" + uuidHex[0:-8]
 	filenameStem = "Z0Z_" + uuidHex[-8:None]
 
-	pathFilenameTmp = pathlib.Path(pathTmpRoot, subpath, filenameStem + extension)
+	pathFilenameTmp = Path(pathTmpRoot, subpath, filenameStem + extension)
 	pathFilenameTmp.parent.mkdir(parents=True, exist_ok=False)
 
 	registrarRecordsTmpObject(pathFilenameTmp)
 	return pathFilenameTmp
 
 @pytest.fixture
-def pathCacheTesting(pathTmpTesting: pathlib.Path) -> Generator[pathlib.Path, Any, None]:
+def pathCacheTesting(pathTmpTesting: Path) -> Generator[Path, Any, None]:
 	"""Temporarily replace the OEIS cache directory with a test directory."""
 	from mapFolding import oeis as there_must_be_a_better_way
 	pathCacheOriginal = there_must_be_a_better_way._pathCache
@@ -88,7 +116,7 @@ def pathCacheTesting(pathTmpTesting: pathlib.Path) -> Generator[pathlib.Path, An
 	there_must_be_a_better_way._pathCache = pathCacheOriginal
 
 @pytest.fixture
-def pathFilenameFoldsTotalTesting(pathTmpTesting: pathlib.Path) -> pathlib.Path:
+def pathFilenameFoldsTotalTesting(pathTmpTesting: Path) -> Path:
 	return pathTmpTesting.joinpath("foldsTotalTest.txt")
 
 def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:

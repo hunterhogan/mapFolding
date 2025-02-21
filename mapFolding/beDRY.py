@@ -13,15 +13,15 @@ from mapFolding import (
 	setDatatypeModule,
 )
 from collections.abc import Sequence
+from numba import get_num_threads, set_num_threads
 from numpy import dtype, integer, ndarray
 from numpy.typing import DTypeLike, NDArray
-from typing import Any
-from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
-from numba import get_num_threads, set_num_threads
-import numpy
-import os
 from pathlib import Path
 from sys import maxsize as sysMaxsize
+from typing import Any
+from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
+import numpy
+import os
 
 def getFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]]) -> str:
 	"""Imagine your computer has been counting folds for 70 hours, and when it tries to save your newly discovered value,

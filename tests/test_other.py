@@ -156,7 +156,7 @@ def parameterIterator() -> Callable[[list[int]], Generator[dict[str, Any], None,
 
 	return generateCombinations
 
-def test_saveFoldsTotal_fallback(pathTmpTesting: pathlib.Path) -> None:
+def test_saveFoldsTotal_fallback(pathTmpTesting: Path) -> None:
 	foldsTotal = 123
 	pathFilename = pathTmpTesting / "foldsTotal.txt"
 	with unittest.mock.patch("pathlib.Path.write_text", side_effect=OSError("Simulated write failure")):
