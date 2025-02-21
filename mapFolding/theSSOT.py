@@ -1,5 +1,18 @@
 from collections.abc import Callable
-from mapFolding.theSSOTdatatypes import *
+from mapFolding.theSSOTdatatypes import (
+	EnumIndices,
+	indexMy,
+	indexTrack,
+	reportDatatypeLimit,
+	setDatatypeModule,
+	setDatatypeElephino,
+	setDatatypeFoldsTotal,
+	setDatatypeLeavesTotal,
+	getDatatypeModule,
+	setInStone,
+	hackSSOTdtype,
+	hackSSOTdatatype,
+)
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from numpy import dtype, integer, ndarray
 from pathlib import Path
