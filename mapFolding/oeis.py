@@ -146,7 +146,7 @@ def getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
 	if tryCache:
 		try:
 			oeisInformation = pathFilenameCache.read_text()
-		except IOError:
+		except OSError:
 			tryCache = False
 
 	if not tryCache:

@@ -10,7 +10,7 @@ import sys
 try:
 	from typing import NotRequired
 except ImportError:
-	from typing_extensions import NotRequired
+	from typing import NotRequired
 
 if TYPE_CHECKING:
 	from typing import TypedDict

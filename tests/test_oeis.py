@@ -27,7 +27,6 @@ def test__validateOEISid_valid_id_case_insensitive(oeisID: str) -> None:
 	standardizedEqualTo(oeisID.upper(), validateOEISid, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [
-	# (2, "ok"), # test the test template
 	(-random.randint(1, 100), "randomNegative"),
 	("foo", "string"),
 	(1.5, "float")

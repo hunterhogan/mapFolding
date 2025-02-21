@@ -2,12 +2,10 @@ from contextlib import redirect_stdout
 from tests.conftest import *
 from Z0Z_tools import intInnit
 import io
-import itertools
 import numba
 import numpy
 import pathlib
 import pytest
-import random
 import sys
 
 @pytest.mark.parametrize("listDimensions,expected_intInnit,expected_parseListDimensions,expected_validateListDimensions,expected_getLeavesTotal", [
@@ -89,72 +87,6 @@ def test_setCPUlimit(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | 
 def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: list[int]) -> None:
 	connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality)
 	assert numpy.all(connectionGraph >= 0), "All values in the connection graph should be non-negative."
-
-@pytest.fixture
-def parameterIterator() -> Callable[[list[int]], Generator[dict[str, Any], None, None]]:
-	"""Generate random combinations of parameters for outfitCountFolds testing."""
-	parameterSets: dict[str, list[Any]] = {
-		'computationDivisions': [
-			None,
-			'maximum',
-			'cpu',
-		],
-		'CPUlimit': [
-			None, True, False, 0, 1, -1,
-		],
-		'datatypeMedium': [
-			None,
-			numpy.int64,
-			numpy.intc,
-			numpy.uint16
-		],
-		'datatypeLarge': [
-			None,
-			numpy.int64,
-			numpy.intp,
-			numpy.uint32
-		]
-	}
-
-	def makeParametersDynamic(listDimensions: list[int]) -> dict[str, list[Any]]:
-		"""Add context-dependent parameter values."""
-		parametersDynamic = parameterSets.copy()
-		leavesTotal = getLeavesTotal(listDimensions)
-		concurrencyLimit = min(leavesTotal, 16)
-
-		# Add dynamic computationDivisions values
-		dynamicDivisions = [random.randint(2, leavesTotal-1) for iterator in range(3)]
-		parametersDynamic['computationDivisions'] = parametersDynamic['computationDivisions'] + dynamicDivisions
-
-		# Add dynamic CPUlimit values
-		parameterDynamicCPU = [
-			random.random(),  # 0 to 1
-			-random.random(), # -1 to 0
-		]
-		parameterDynamicCPU.extend(
-			[random.randint(2, concurrencyLimit-1) for iterator in range(2)]
-		)
-		parameterDynamicCPU.extend(
-			[random.randint(-concurrencyLimit+1, -2) for iterator in range(2)]
-		)
-		parametersDynamic['CPUlimit'] = parametersDynamic['CPUlimit'] + parameterDynamicCPU
-
-		return parametersDynamic
-
-	def generateCombinations(listDimensions: list[int]) -> Generator[dict[str, Any], None, None]:
-		parametersDynamic = makeParametersDynamic(listDimensions)
-		parameterKeys = list(parametersDynamic.keys())
-		parameterValues = [parametersDynamic[key] for key in parameterKeys]
-
-		# Shuffle each parameter list
-		for valueList in parameterValues:
-			random.shuffle(valueList)
-
-		# Use zip_longest to iterate, filling with None when shorter lists are exhausted
-		for combination in itertools.zip_longest(*parameterValues, fillvalue=None):
-			yield dict(zip(parameterKeys, combination))
-
-	return generateCombinations
 
 def test_saveFoldsTotal_fallback(pathTmpTesting: pathlib.Path) -> None:
 	foldsTotal = 123
