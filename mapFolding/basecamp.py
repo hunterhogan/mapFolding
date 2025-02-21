@@ -1,9 +1,10 @@
 from collections.abc import Sequence
 from mapFolding import computationState, getDispatcherCallable, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal
-import os
+from os import PathLike
+from pathlib import Path
 
 def countFolds(listDimensions: Sequence[int],
-				pathLikeWriteFoldsTotal: str | os.PathLike[str] | None = None,
+				pathLikeWriteFoldsTotal: str | PathLike[str] | None = None,
 				computationDivisions: int | str | None = None,
 				CPUlimit: int | float | bool | None = None,
 				**keywordArguments: str | bool
@@ -40,16 +41,13 @@ def countFolds(listDimensions: Sequence[int],
 	"""
 	stateUniversal: computationState = outfitCountFolds(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit, **keywordArguments)
 
-	pathFilenameFoldsTotal = None
-	if pathLikeWriteFoldsTotal is not None:
-		pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathLikeWriteFoldsTotal)
-
 	dispatcher = getDispatcherCallable()
 	dispatcher(**stateUniversal)
 
 	foldsTotal = int(stateUniversal['foldGroups'][0:-1].sum() * stateUniversal['foldGroups'][-1])
 
-	if pathFilenameFoldsTotal is not None:
+	if pathLikeWriteFoldsTotal is not None:
+		pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathLikeWriteFoldsTotal)
 		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
 
 	return foldsTotal

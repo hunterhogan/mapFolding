@@ -61,7 +61,7 @@ from mapFolding.beDRY import (
 from mapFolding.basecamp import countFolds
 from mapFolding.oeis import clearOEIScache, getOEISids, oeisIDfor_n
 
-__all__ = [
+__all__: list[str] = [
 	'clearOEIScache',
 	'countFolds',
 	'getOEISids',

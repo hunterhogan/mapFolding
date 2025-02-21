@@ -1,9 +1,8 @@
-"""Everything implementing the The Online Encyclopedia of Integer Sequences (OEIS);
-_only_ things that implement _only_ the OEIS."""
+"""Everything implementing the The Online Encyclopedia of Integer Sequences (OEIS); _only_ things that implement _only_ the OEIS."""
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from mapFolding import countFolds, getPathPackage
 from typing import Any, Final, TYPE_CHECKING
-from collections.abc import Callable
 import argparse
 import pathlib
 import random
@@ -17,6 +16,8 @@ if TYPE_CHECKING:
 	from typing import TypedDict
 else:
 	TypedDict = dict
+
+cacheDays = 7
 
 """
 Section: make `settingsOEIS`"""
@@ -136,7 +137,6 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 	return OEISsequence
 
 def getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
-	cacheDays = 7
 	tryCache = False
 	if pathFilenameCache.exists():
 		fileAge = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
@@ -289,7 +289,7 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 	if not isinstance(n, int) or n < 0:
 		raise ValueError("`n` must be non-negative integer.")
 
-	listDimensions = settingsOEIS[oeisID]['getMapShape'](n)
+	listDimensions: list[int] = settingsOEIS[oeisID]['getMapShape'](n)
 
 	if n <= 1 or len(listDimensions) < 2:
 		offset = settingsOEIS[oeisID]['offset']
@@ -310,9 +310,9 @@ def OEIS_for_n() -> None:
 	parserCLI.add_argument('oeisID', help="OEIS sequence identifier")
 	parserCLI.add_argument('n', type=int, help="Calculate a(n) for this n")
 
-	argumentsCLI = parserCLI.parse_args()
+	argumentsCLI: argparse.Namespace = parserCLI.parse_args()
 
-	timeStart = time.perf_counter()
+	timeStart: float = time.perf_counter()
 
 	try:
 		print(oeisIDfor_n(argumentsCLI.oeisID, argumentsCLI.n), "distinct folding patterns.")

@@ -1,11 +1,11 @@
+from collections.abc import Callable
 from mapFolding.theSSOTdatatypes import *
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from numpy import dtype, integer, ndarray
+from pathlib import Path
+from sys import modules as sysModules
 from types import ModuleType
 from typing import Any, Final, TYPE_CHECKING, cast
-from collections.abc import Callable, Sequence
-import pathlib
-import sys
 
 try:
 	from typing import NotRequired
@@ -34,21 +34,21 @@ moduleOfSyntheticModules = "syntheticModules"
 formatFilenameModuleDEFAULT = "numba_{callableTarget}.py"
 dispatcherCallableNameDEFAULT = "doTheNeedful"
 
-def getPathPackage() -> pathlib.Path:
+def getPathPackage() -> Path:
 	import importlib, inspect
-	pathPackage = pathlib.Path(inspect.getfile(importlib.import_module(myPackageNameIs)))
+	pathPackage = Path(inspect.getfile(importlib.import_module(myPackageNameIs)))
 	if pathPackage.is_file():
 		pathPackage = pathPackage.parent
 	return pathPackage
 
-def getPathJobRootDEFAULT() -> pathlib.Path:
-	if 'google.colab' in sys.modules:
-		pathJobDEFAULT = pathlib.Path("/content/drive/MyDrive") / "jobs"
+def getPathJobRootDEFAULT() -> Path:
+	if 'google.colab' in sysModules:
+		pathJobDEFAULT = Path("/content/drive/MyDrive") / "jobs"
 	else:
 		pathJobDEFAULT = getPathPackage() / "jobs"
 	return pathJobDEFAULT
 
-def getPathSyntheticModules() -> pathlib.Path:
+def getPathSyntheticModules() -> Path:
 	pathSyntheticModules = getPathPackage() / moduleOfSyntheticModules
 	return pathSyntheticModules
 

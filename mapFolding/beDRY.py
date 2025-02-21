@@ -17,11 +17,11 @@ from numpy import dtype, integer, ndarray
 from numpy.typing import DTypeLike, NDArray
 from typing import Any
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
-import numba
+from numba import get_num_threads, set_num_threads
 import numpy
 import os
-import pathlib
-import sys
+from pathlib import Path
+from sys import maxsize as sysMaxsize
 
 def getFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]]) -> str:
 	"""Imagine your computer has been counting folds for 70 hours, and when it tries to save your newly discovered value,
@@ -67,13 +67,13 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 	else:
 		productDimensions = 1
 		for dimension in listPositive:
-			if dimension > sys.maxsize // productDimensions:
+			if dimension > sysMaxsize // productDimensions:
 				raise OverflowError(f"I received {dimension=} in {listDimensions=}, but the product of the dimensions exceeds the maximum size of an integer on this system.")
 			productDimensions *= dimension
 
 		return productDimensions
 
-def getPathFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]], pathLikeWriteFoldsTotal: str | os.PathLike[str] | None = None) -> pathlib.Path:
+def getPathFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]], pathLikeWriteFoldsTotal: str | os.PathLike[str] | None = None) -> Path:
 	"""Get a standardized path and filename for the computed value `foldsTotal`.
 
 	If you provide a directory, the function will append a standardized filename. If you provide a filename
@@ -87,7 +87,7 @@ def getPathFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtyp
 	Returns:
 		pathFilenameFoldsTotal: Absolute path and filename.
 	"""
-	pathLikeSherpa = pathlib.Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else None
+	pathLikeSherpa = Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else None
 	if not pathLikeSherpa:
 		pathLikeSherpa = getPathJobRootDEFAULT()
 	if pathLikeSherpa.is_dir():
@@ -316,7 +316,7 @@ def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> Non
 		foldsTotal: Critical computed value to save
 	"""
 	try:
-		pathFilenameFoldsTotal = pathlib.Path(pathFilename)
+		pathFilenameFoldsTotal = Path(pathFilename)
 		pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 		pathFilenameFoldsTotal.write_text(str(foldsTotal))
 	except Exception as ERRORmessage:
@@ -356,8 +356,8 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 		CPUlimit = oopsieKwargsie(CPUlimit)
 
 	concurrencyLimit = int(defineConcurrencyLimit(CPUlimit))
-	numba.set_num_threads(concurrencyLimit)
-	concurrencyLimit = numba.get_num_threads()
+	set_num_threads(concurrencyLimit)
+	concurrencyLimit = get_num_threads()
 
 	return concurrencyLimit
 

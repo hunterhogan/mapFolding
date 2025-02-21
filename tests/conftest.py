@@ -1,19 +1,17 @@
 """SSOT for Pytest"""
 
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
-# TODO crate a new package for the standardized test features: perhaps Z0Z_tools, perhaps a new package
 
-from collections.abc import Callable, Generator, Sequence
 from mapFolding import *
 from mapFolding import basecamp, getAlgorithmDispatcher, getDispatcherCallable
 from mapFolding.beDRY import *
-from mapFolding.oeis import *
 from mapFolding.someAssemblyRequired import *
+from mapFolding.oeis import *
 from types import ModuleType
 from typing import Any, ContextManager, Literal, NoReturn, Final
+from collections.abc import Callable, Generator, Sequence
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 import importlib.util
-import itertools
 import pathlib
 import pytest
 import random
@@ -23,6 +21,7 @@ import uuid
 
 # SSOT for test data paths and filenames
 pathDataSamples = pathlib.Path("tests/dataSamples")
+# NOTE `tmp` is not a diminutive form of temporary: it signals a technical term. And "temp" is strongly disfavored.
 pathTmpRoot = pathDataSamples / "tmp"
 
 # The registrar maintains the register of temp files
@@ -45,7 +44,7 @@ def registrarDeletesTmpObjects() -> None:
 	registerOfTemporaryFilesystemObjects.clear()
 
 @pytest.fixture(scope="session", autouse=True)
-def setupTeardownTmpObjects() -> Generator[None]:
+def setupTeardownTmpObjects() -> Generator[None, None, None]:
 	"""Auto-fixture to setup test data directories and cleanup after."""
 	pathDataSamples.mkdir(exist_ok=True)
 	pathTmpRoot.mkdir(exist_ok=True)
@@ -222,7 +221,7 @@ def useThisDispatcher():
 	basecamp.getDispatcherCallable = dispatcherOriginal
 
 @pytest.fixture
-def useAlgorithmSourceDispatcher(useThisDispatcher: Callable) -> Generator[None]:
+def useAlgorithmSourceDispatcher(useThisDispatcher: Callable) -> Generator[None, None, None]:
 	"""Temporarily patches getDispatcherCallable to return the algorithm dispatcher."""
 	useThisDispatcher(getAlgorithmDispatcher())
 	yield
@@ -306,48 +305,3 @@ def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: 
 	else:
 		assert exitCode == expected, \
 			f"Expected exit code {expected} but got {exitCode}"
-
-# TODO decide the fate of the following
-# It's not currently in use, and some parameters have changed
-@pytest.fixture
-def parameterIterator() -> Callable[[list[int]], Generator[dict[str, Any], None, None]]:
-	"""Generate random combinations of parameters for outfitCountFolds testing."""
-	parameterSets: dict[str, list[Any]] = {
-		'computationDivisions': [ None, 'maximum', 'cpu', ],
-		'CPUlimit': [ None, True, False, 0, 1, -1, ],
-		'datatypeMedium': [ None, numpy.int64, numpy.intc, numpy.uint16 ],
-		'datatypeLarge': [ None, numpy.int64, numpy.intp, numpy.uint32 ]
-	}
-
-	def makeParametersDynamic(listDimensions: list[int]) -> dict[str, list[Any]]:
-		"""Add context-dependent parameter values."""
-		parametersDynamic = parameterSets.copy()
-		leavesTotal = getLeavesTotal(listDimensions)
-		concurrencyLimit = min(leavesTotal, 16)
-
-		# Add dynamic computationDivisions values
-		dynamicDivisions = [random.randint(2, leavesTotal-1) for iterator in range(3)]
-		parametersDynamic['computationDivisions'] = parametersDynamic['computationDivisions'] + dynamicDivisions
-
-		# Add dynamic CPUlimit values
-		parameterDynamicCPU = [ random.random(), -random.random(), ]
-		parameterDynamicCPU.extend( [random.randint(2, concurrencyLimit-1) for iterator in range(2)] )
-		parameterDynamicCPU.extend( [random.randint(-concurrencyLimit+1, -2) for iterator in range(2)] )
-		parametersDynamic['CPUlimit'] = parametersDynamic['CPUlimit'] + parameterDynamicCPU
-
-		return parametersDynamic
-
-	def generateCombinations(listDimensions: list[int]) -> Generator[dict[str, Any], None, None]:
-		parametersDynamic = makeParametersDynamic(listDimensions)
-		parameterKeys = list(parametersDynamic.keys())
-		parameterValues = [parametersDynamic[key] for key in parameterKeys]
-
-		# Shuffle each parameter list
-		for valueList in parameterValues:
-			random.shuffle(valueList)
-
-		# Use zip_longest to iterate, filling with None when shorter lists are exhausted
-		for combination in itertools.zip_longest(*parameterValues, fillvalue=None):
-			yield dict(zip(parameterKeys, combination))
-
-	return generateCombinations

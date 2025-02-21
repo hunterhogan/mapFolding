@@ -1,7 +1,6 @@
 from collections import defaultdict
 from typing import Any, cast, Final, TYPE_CHECKING
 import enum
-import sys
 import numba
 import numpy
 
@@ -15,7 +14,6 @@ if TYPE_CHECKING:
 else:
 	TypedDict = dict
 
-@enum.verify(enum.CONTINUOUS, enum.UNIQUE) if sys.version_info >= (3, 11) else lambda x: x
 class EnumIndices(enum.IntEnum):
 	@staticmethod
 	def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> int:
