@@ -81,8 +81,8 @@ testpaths = ["tests"]
 
 [tool.setuptools]
 package-dir = {'' = '.'}
-packages = ["${project.name}"]
-package-data = {"${project.name}" = ['py.typed', '*.pyi']}
+packages = ["mapFolding"]
+package-data = {"mapFolding" = ['py.typed', '*.pyi']}
 
 [tool.updateCitation]
 filenameCitationDOTcff = 'CITATION.cff'
