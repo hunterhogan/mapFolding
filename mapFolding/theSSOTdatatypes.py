@@ -1,18 +1,8 @@
 from collections import defaultdict
-from typing import Any, cast, Final, TYPE_CHECKING
+from typing import Any, cast, Final
 import enum
-import numba
-import numpy
-
-try:
-	from typing import NotRequired
-except Exception:
-	from typing_extensions import NotRequired # type: ignore
-
-if TYPE_CHECKING:
-	from typing import TypedDict
-else:
-	TypedDict = dict
+import numba # type: ignore
+import numpy # type: ignore
 
 class EnumIndices(enum.IntEnum):
 	@staticmethod
@@ -51,7 +41,7 @@ _datatypeDefault: Final[dict[str, str]] = {
 	'foldsTotal': 'int64',
 	'leavesTotal': 'uint16',
 }
-_datatypeModule = ''
+_datatypeModule: str = ''
 _datatypeModuleDEFAULT: Final[str] = 'numpy'
 
 _datatype: dict[str, str] = defaultdict(str)
@@ -103,12 +93,12 @@ def getDatatypeModule() -> str:
 	return _datatypeModule
 
 def setInStone(identifier: str) -> type[Any]:
-	datatypeModule = getDatatypeModule()
-	datatypeStr = _get_datatype(identifier)
+	datatypeModule: str = getDatatypeModule()
+	datatypeStr: str = _get_datatype(identifier)
 	return cast(type[Any], getattr(eval(datatypeModule), datatypeStr))
 
 def hackSSOTdtype(identifier: str) -> type[Any]:
-	_hackSSOTdtype={
+	_hackSSOTdtype: dict[str, str]={
 	'connectionGraph': 	'dtypeLeavesTotal',
 	'dtypeElephino': 	'dtypeElephino',
 	'dtypeFoldsTotal': 	'dtypeFoldsTotal',
@@ -119,7 +109,7 @@ def hackSSOTdtype(identifier: str) -> type[Any]:
 	'my': 				'dtypeElephino',
 	'track': 			'dtypeElephino',
 	}
-	RubeGoldBerg = _hackSSOTdtype[identifier]
+	RubeGoldBerg: str = _hackSSOTdtype[identifier]
 	if RubeGoldBerg == 'dtypeElephino':
 		return setInStone('elephino')
 	elif RubeGoldBerg == 'dtypeFoldsTotal':
@@ -129,7 +119,7 @@ def hackSSOTdtype(identifier: str) -> type[Any]:
 	raise Exception("Dude, you forgot to set a value in `hackSSOTdtype`.")
 
 def hackSSOTdatatype(identifier: str) -> str:
-	_hackSSOTdatatype={
+	_hackSSOTdatatype: dict[str, str]={
 	'connectionGraph':	 		'datatypeLeavesTotal',
 	'countDimensionsGapped': 	'datatypeLeavesTotal',
 	'datatypeElephino': 		'datatypeElephino',
@@ -156,7 +146,7 @@ def hackSSOTdatatype(identifier: str) -> str:
 	'taskIndex': 				'datatypeLeavesTotal',
 	'track':	 				'datatypeElephino',
 	}
-	RubeGoldBerg = _hackSSOTdatatype[identifier]
+	RubeGoldBerg: str = _hackSSOTdatatype[identifier]
 	if RubeGoldBerg == 'datatypeElephino':
 		return _get_datatype('elephino')
 	elif RubeGoldBerg == 'datatypeFoldsTotal':

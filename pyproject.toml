@@ -40,6 +40,7 @@ license = { 'text' = "CC-BY-NC-4.0" }
 name = "mapFolding"
 optional-dependencies = { testing = [
 	"autoflake",
+	"mypy",
 	"more_itertools",
 	"pytest-cov",
 	"pytest-env",
@@ -52,7 +53,7 @@ readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Repository = "https://github.com/hunterhogan/mapFolding.git" }
-version = "0.5.0"
+version = "0.5.1"
 
 [tool.coverage]
 report = { exclude_lines = [
@@ -78,8 +79,10 @@ env = ["NUMBA_DISABLE_JIT=1"]
 # env = ["NUMBA_JIT_COVERAGE=1"] # it doesn't work
 testpaths = ["tests"]
 
-[tool.setuptools.packages.find]
-where = ["."]
+[tool.setuptools]
+package-dir = {'' = '.'}
+packages = ["${project.name}"]
+package-data = {"${project.name}" = ['py.typed', '*.pyi']}
 
 [tool.updateCitation]
 filenameCitationDOTcff = 'CITATION.cff'

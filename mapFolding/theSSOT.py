@@ -1,18 +1,5 @@
 from collections.abc import Callable
-from mapFolding.theSSOTdatatypes import (
-	EnumIndices,
-	indexMy,
-	indexTrack,
-	reportDatatypeLimit,
-	setDatatypeModule,
-	setDatatypeElephino,
-	setDatatypeFoldsTotal,
-	setDatatypeLeavesTotal,
-	getDatatypeModule,
-	setInStone,
-	hackSSOTdtype,
-	hackSSOTdatatype,
-)
+from mapFolding.theSSOTdatatypes import *
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from numpy import dtype, integer, ndarray
 from pathlib import Path
@@ -45,6 +32,7 @@ myPackageNameIs = "mapFolding"
 moduleOfSyntheticModules = "syntheticModules"
 # TODO I'm not sure if this is the right tool for the job.
 formatFilenameModuleDEFAULT = "numba_{callableTarget}.py"
+# TODO figure out how to implement this
 dispatcherCallableNameDEFAULT = "doTheNeedful"
 
 def getPathPackage() -> Path:
@@ -133,7 +121,7 @@ class ParametersNumba(TypedDict):
 	nopython: bool
 	parallel: bool
 	pipeline_class: NotRequired[type[numbaCompilerBase]]
-	signature_or_function: NotRequired[Any | Callable | str | tuple]
+	signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
 	target: NotRequired[str]
 
 parametersNumbaFailEarly: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'python', 'fastmath': False, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }

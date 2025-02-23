@@ -1,0 +1,15 @@
+add_task: int
+allocate_sched: int
+deallocate_sched: int
+do_scheduling_signed: int
+do_scheduling_unsigned: int
+get_num_threads: int
+get_parallel_chunksize: int
+get_sched_size: int
+get_thread_id: int
+launch_threads: int
+parallel_for: int
+ready: int
+set_num_threads: int
+set_parallel_chunksize: int
+synchronize: int

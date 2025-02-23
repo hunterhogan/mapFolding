@@ -33,7 +33,7 @@ from mapFolding.oeis import (
 )
 from mapFolding.someAssemblyRequired import (
 	makeFlowNumbaOptimized,
-	youOughtaKnow,
+	YouOughtaKnow,
 	writeJobNumba,
 )
 from pathlib import Path
@@ -263,12 +263,12 @@ def syntheticDispatcherFixture(useThisDispatcher):
 	relativePathWrite = None
 	filenameModuleWrite = 'pytestCount.py'
 	formatFilenameWrite = "pytest_{callableTarget}.py"
-	listSynthesizedModules: list[youOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite)
-	dispatcherSynthetic = youOughtaKnow('','','')
+	listSynthesizedModules: list[YouOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite)
+	dispatcherSynthetic = YouOughtaKnow('','','')
 	for stuff in listSynthesizedModules:
 		registrarRecordsTmpObject(stuff.pathFilenameForMe)
 		if stuff.callableSynthesized not in listCallablesInline:
-			dispatcherSynthetic: youOughtaKnow = stuff
+			dispatcherSynthetic: YouOughtaKnow = stuff
 
 	dispatcherSpec = importlib.util.spec_from_file_location(dispatcherSynthetic.callableSynthesized, dispatcherSynthetic.pathFilenameForMe)
 	if dispatcherSpec is None:

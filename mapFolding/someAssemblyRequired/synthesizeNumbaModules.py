@@ -3,6 +3,7 @@ Managing settings and options, however, ... I've 'invented'
 everything I am doing. I would rather benefit from humanity's
 collective wisdom."""
 from mapFolding.someAssemblyRequired.synthesizeNumba import *
+from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import YouOughtaKnow
 
 def getFunctionDef(algorithmSource: ModuleType, *arguments, **keywordArguments) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	pythonSource = inspect.getsource(algorithmSource)
@@ -18,7 +19,7 @@ def makePythonSource(listFunctionDefs: list[ast.FunctionDef], listAstImports: li
 	pythonSource = autoflake.fix_code(pythonSource, additional_imports)
 	return pythonSource
 
-def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], relativePathWrite: Path | None, filenameWrite: str | None, formatFilenameWrite: str | None) -> list[youOughtaKnow]:
+def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], relativePathWrite: Path | None, filenameWrite: str | None, formatFilenameWrite: str | None) -> list[YouOughtaKnow]:
 	pathFilename = None
 	if not relativePathWrite:
 		pathWrite = getPathSyntheticModules()
@@ -46,16 +47,16 @@ def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], r
 	dumbassPythonNamespace = pathFilename.relative_to(howIsThisStillAThing).with_suffix('').parts
 	ImaModule = '.'.join(dumbassPythonNamespace)
 
-	listStuffYouOughtaKnow: list[youOughtaKnow] = []
+	listStuffYouOughtaKnow: list[YouOughtaKnow] = []
 
 	for callableTarget in listCallableSynthesized:
 		astImportFrom = ast.ImportFrom(module=ImaModule, names=[ast.alias(name=callableTarget, asname=None)], level=0)
-		stuff = youOughtaKnow(callableSynthesized=callableTarget, pathFilenameForMe=pathFilename, astForCompetentProgrammers=astImportFrom)
+		stuff = YouOughtaKnow(callableSynthesized=callableTarget, pathFilenameForMe=pathFilename, astForCompetentProgrammers=astImportFrom)
 		listStuffYouOughtaKnow.append(stuff)
 
 	return listStuffYouOughtaKnow
 
-def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: bool | None = False, algorithmSource: ModuleType | None = None, relativePathWrite: Path | None = None, filenameModuleWrite: str | None = None, formatFilenameWrite: str | None = None) -> list[youOughtaKnow]:
+def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: bool | None = False, algorithmSource: ModuleType | None = None, relativePathWrite: Path | None = None, filenameModuleWrite: str | None = None, formatFilenameWrite: str | None = None) -> list[YouOughtaKnow]:
 	if relativePathWrite and relativePathWrite.is_absolute():
 		raise ValueError("The path to write the module must be relative to the root of the package.")
 	if not algorithmSource:
@@ -63,7 +64,7 @@ def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: b
 
 	Z0Z_filenameModuleWrite = 'numbaCount.py'
 
-	listStuffYouOughtaKnow: list[youOughtaKnow] = []
+	listStuffYouOughtaKnow: list[YouOughtaKnow] = []
 	additional_imports = ['mapFolding', 'numba', 'numpy']
 
 	listFunctionDefs: list[ast.FunctionDef] = []
@@ -82,6 +83,8 @@ def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: b
 				unpackArrays = True
 			case 'countInitialize':
 				parametersNumba = parametersNumbaDEFAULT
+			case _:
+				parametersNumba = None
 		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
 		listFunctionDefs.append(FunctionDefTarget)
 		allImportsModule.update(allImports)
@@ -91,7 +94,7 @@ def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: b
 
 	filenameWrite = filenameModuleWrite or Z0Z_filenameModuleWrite
 
-	listStuff = writePythonAsModule(pythonSource, listCallablesInline, relativePathWrite, filenameWrite, formatFilenameWrite)
+	listStuff: list[YouOughtaKnow] = writePythonAsModule(pythonSource, listCallablesInline, relativePathWrite, filenameWrite, formatFilenameWrite)
 	listStuffYouOughtaKnow.extend(listStuff)
 
 	if callableDispatcher:

@@ -5,6 +5,7 @@ from mapFolding import countFolds, getPathPackage
 from typing import Any, Final, TYPE_CHECKING
 import argparse
 import pathlib
+from pathlib import Path
 import random
 import sys
 import time
@@ -22,7 +23,7 @@ cacheDays = 7
 """
 Section: make `settingsOEIS`"""
 
-_pathCache = getPathPackage() / ".cache"
+_pathCache: Path = getPathPackage() / ".cache"
 
 class SettingsOEIS(TypedDict):
 	description: str
@@ -91,7 +92,7 @@ def validateOEISid(oeisIDcandidate: str) -> str:
 	if oeisIDcandidate in oeisIDsImplemented:
 		return oeisIDcandidate
 	else:
-		oeisIDcleaned = str(oeisIDcandidate).upper().strip()
+		oeisIDcleaned: str = str(oeisIDcandidate).upper().strip()
 		if oeisIDcleaned in oeisIDsImplemented:
 			return oeisIDcleaned
 		else:
@@ -123,12 +124,12 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 		ValueError: If the first line of the file does not indicate the expected
 		sequence ID or if the content format is invalid.
 	"""
-	bFileLines = OEISbFile.strip().splitlines()
+	bFileLines: list[str] = OEISbFile.strip().splitlines()
 	if not bFileLines.pop(0).startswith(f"# {oeisID}"):
 		warnings.warn(f"Content does not match sequence {oeisID}")
 		return {-1: -1}
 
-	OEISsequence = {}
+	OEISsequence: dict[int, int] = {}
 	for line in bFileLines:
 		if line.startswith('#'):
 			continue
@@ -139,10 +140,10 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 def getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
 	tryCache = False
 	if pathFilenameCache.exists():
-		fileAge = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
-		tryCache = fileAge < timedelta(days=cacheDays)
+		fileAge: timedelta = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
+		tryCache: bool = fileAge < timedelta(days=cacheDays)
 
-	oeisInformation = None
+	oeisInformation: str | None = None
 	if tryCache:
 		try:
 			oeisInformation = pathFilenameCache.read_text()
@@ -179,10 +180,10 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 		IOError: If there is an error reading from or writing to the local cache.
 	"""
 
-	pathFilenameCache = _pathCache / getFilenameOEISbFile(oeisID)
-	url = f"https://oeis.org/{oeisID}/{getFilenameOEISbFile(oeisID)}"
+	pathFilenameCache: Path = _pathCache / getFilenameOEISbFile(oeisID)
+	url: str = f"https://oeis.org/{oeisID}/{getFilenameOEISbFile(oeisID)}"
 
-	oeisInformation = getOEISofficial(pathFilenameCache, url)
+	oeisInformation: None | str = getOEISofficial(pathFilenameCache, url)
 
 	if oeisInformation:
 		return _parseBFileOEIS(oeisInformation, oeisID)
@@ -190,15 +191,15 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 
 def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	oeisID = validateOEISid(oeisID)
-	pathFilenameCache = _pathCache / f"{oeisID}.txt"
-	url = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
+	pathFilenameCache: Path = _pathCache / f"{oeisID}.txt"
+	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
-	oeisInformation = getOEISofficial(pathFilenameCache, url)
+	oeisInformation: None | str = getOEISofficial(pathFilenameCache, url)
 
 	if not oeisInformation:
 		return "Not found", -1
 
-	description_parts = []
+	description_parts: list[str] = []
 	offset = None
 	for line in oeisInformation.splitlines():
 		if line.startswith('%N'):
@@ -207,9 +208,9 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 				desc_part = ' '.join(parts[2:])
 				description_parts.append(desc_part)
 		elif line.startswith('%O'):
-			parts = line.split()
+			parts: list[str] = line.split()
 			if parts[1] == oeisID:
-				offset_str = parts[2].split(',')[0]
+				offset_str: str = parts[2].split(',')[0]
 				offset = int(offset_str)
 	if not description_parts:
 		warnings.warn(f"No description found for {oeisID}")
@@ -217,13 +218,13 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	if offset is None:
 		warnings.warn(f"No offset found for {oeisID}")
 		offset = -1
-	description = ' '.join(description_parts)
+	description: str = ' '.join(description_parts)
 	return description, offset
 
 def makeSettingsOEIS() -> dict[str, SettingsOEIS]:
-	settingsTarget = {}
+	settingsTarget: dict[str, SettingsOEIS] = {}
 	for oeisID in oeisIDsImplemented:
-		valuesKnownSherpa = getOEISidValues(oeisID)
+		valuesKnownSherpa: dict[int, int] = getOEISidValues(oeisID)
 		descriptionSherpa, offsetSherpa = getOEISidInformation(oeisID)
 		settingsTarget[oeisID] = SettingsOEIS(
 			description=descriptionSherpa,
@@ -245,8 +246,8 @@ Section: private functions"""
 
 def _formatHelpText() -> str:
 	"""Format standardized help text for both CLI and interactive use."""
-	exampleOEISid = oeisIDsImplemented[0]
-	exampleN = settingsOEIS[exampleOEISid]['valuesTestValidation'][-1]
+	exampleOEISid: str = oeisIDsImplemented[0]
+	exampleN: int = settingsOEIS[exampleOEISid]['valuesTestValidation'][-1]
 
 	return (
 		"\nAvailable OEIS sequences:\n"
@@ -269,7 +270,7 @@ def _formatOEISsequenceInfo() -> str:
 """
 Section: public functions"""
 
-def oeisIDfor_n(oeisID: str, n: int) -> int:
+def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 	"""
 	Calculate a(n) of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
 
@@ -292,10 +293,10 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 	listDimensions: list[int] = settingsOEIS[oeisID]['getMapShape'](n)
 
 	if n <= 1 or len(listDimensions) < 2:
-		offset = settingsOEIS[oeisID]['offset']
+		offset: int = settingsOEIS[oeisID]['offset']
 		if n < offset:
 			raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
-		foldsTotal = settingsOEIS[oeisID]['valuesKnown'][n]
+		foldsTotal: int = settingsOEIS[oeisID]['valuesKnown'][n]
 		return foldsTotal
 
 	return countFolds(listDimensions)
@@ -320,7 +321,7 @@ def OEIS_for_n() -> None:
 		print(f"Error: {ERRORmessage}", file=sys.stderr)
 		sys.exit(1)
 
-	timeElapsed = time.perf_counter() - timeStart
+	timeElapsed: float = time.perf_counter() - timeStart
 	print(f"Time elapsed: {timeElapsed:.3f} seconds")
 
 def clearOEIScache() -> None:

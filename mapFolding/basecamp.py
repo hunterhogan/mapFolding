@@ -3,11 +3,11 @@ from mapFolding import computationState, getDispatcherCallable, getPathFilenameF
 from os import PathLike
 from pathlib import Path
 
-def countFolds(listDimensions: Sequence[int],
-				pathLikeWriteFoldsTotal: str | PathLike[str] | None = None,
-				computationDivisions: int | str | None = None,
-				CPUlimit: int | float | bool | None = None,
-				**keywordArguments: str | bool
+def countFolds(listDimensions: Sequence[int]
+				, pathLikeWriteFoldsTotal: str | PathLike[str] | None = None
+				, computationDivisions: int | str | None = None
+				, CPUlimit: int | float | bool | None = None
+				, **keywordArguments: str | bool
 				) -> int:
 	"""Count the total number of possible foldings for a given map dimensions.
 

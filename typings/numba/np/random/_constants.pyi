@@ -1,0 +1,29 @@
+from _typeshed import Incomplete
+
+ki_double: Incomplete
+wi_double: Incomplete
+fi_double: Incomplete
+ki_float: Incomplete
+wi_float: Incomplete
+fi_float: Incomplete
+ke_double: Incomplete
+we_double: Incomplete
+fe_double: Incomplete
+ke_float: Incomplete
+we_float: Incomplete
+fe_float: Incomplete
+ziggurat_nor_r: float
+ziggurat_nor_inv_r: float
+ziggurat_exp_r: float
+ziggurat_nor_r_f: Incomplete
+ziggurat_nor_inv_r_f: Incomplete
+ziggurat_exp_r_f: Incomplete
+M_PI: float
+INT64_MAX: int
+UINT8_MAX: int
+UINT16_MAX: int
+UINT32_MAX: int
+UINT64_MAX: int
+LONG_MAX: Incomplete
+LS2PI: float
+TWELFTH: float

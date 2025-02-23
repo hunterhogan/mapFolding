@@ -1,0 +1,9 @@
+from _typeshed import Incomplete
+
+class FakeRuntime:
+    def get_version(self): ...
+    def is_supported_version(self): ...
+    @property
+    def supported_versions(self): ...
+
+runtime: Incomplete

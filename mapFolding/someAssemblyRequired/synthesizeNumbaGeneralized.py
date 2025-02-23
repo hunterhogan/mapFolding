@@ -51,8 +51,12 @@ from os import PathLike
 from pathlib import Path
 import python_minifier
 import warnings
+from typing import NamedTuple
 
-youOughtaKnow = collections.namedtuple('youOughtaKnow', ['callableSynthesized', 'pathFilenameForMe', 'astForCompetentProgrammers'])
+class YouOughtaKnow(NamedTuple):
+	callableSynthesized: str
+	pathFilenameForMe: Path
+	astForCompetentProgrammers: ast.ImportFrom
 
 # idk how to use this
 class ASTBodyTransformer:
@@ -62,13 +66,13 @@ class ASTBodyTransformer:
 	replacements, or insertions.
 	"""
 	def __init__(self, functionDefinition: ast.FunctionDef) -> None:
-		self.functionDefinition = functionDefinition
+		self.functionDefinition: ast.FunctionDef = functionDefinition
 
 	def replaceIn_body(self, predicate: Callable[[ast.stmt], bool], replacementBuilder: Callable[[ast.stmt], ast.stmt | None]) -> None:
 		newBody: list[ast.stmt] = []
 		for statement in self.functionDefinition.body:
 			if predicate(statement):
-				replacementStatement = replacementBuilder(statement)
+				replacementStatement: ast.stmt | None = replacementBuilder(statement)
 				if replacementStatement is not None:
 					newBody.append(replacementStatement)
 			else:
@@ -105,9 +109,9 @@ class ifThis:
 		return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callableName)
 
 	@staticmethod
-	def isAssignTarget(identifier: str):
+	def isAssignTarget(identifier: str) -> Callable[[ast.AST], bool]:
 		return lambda node: (isinstance(node, ast.Assign)
-								and node.targets
+								and len(node.targets) > 0
 								and isinstance(node.targets[0], ast.Name)
 								and node.targets[0].id == identifier)
 
@@ -116,7 +120,7 @@ class ifThis:
 		return lambda node: any(pred(node) for pred in predicates)
 
 	@staticmethod
-	def isUnpackingAnArray(identifier:str):
+	def isUnpackingAnArray(identifier:str) -> Callable[[ast.AST], bool]:
 		return lambda node: (isinstance(node, ast.Assign)
 						and  isinstance(node.targets[0], ast.Name)
 						and  isinstance(node.value, ast.Subscript)
@@ -138,7 +142,7 @@ class Then:
 
 	@staticmethod
 	def make_astCall(name: str, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None, dictionaryKeywords: dict[str, Any] | None = None) -> ast.Call:
-		list_dictionaryKeywords = [ast.keyword(arg=keyName, value=ast.Constant(value=keyValue)) for keyName, keyValue in dictionaryKeywords.items()] if dictionaryKeywords else []
+		list_dictionaryKeywords: list[ast.keyword] = [ast.keyword(arg=keyName, value=ast.Constant(value=keyValue)) for keyName, keyValue in dictionaryKeywords.items()] if dictionaryKeywords else []
 		return ast.Call(
 			func=ast.Name(id=name, ctx=ast.Load()),
 			args=list(args) if args else [],
@@ -182,8 +186,8 @@ def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
 # Domain-based
 class UniversalImportTracker:
 	def __init__(self) -> None:
-		self.dictionaryImportFrom: dict[str, set] = collections.defaultdict(set)
-		self.setImport = set()
+		self.dictionaryImportFrom: dict[str, set[tuple[str, str|None]]] = collections.defaultdict(set)
+		self.setImport: set[str] = set()
 
 	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
 		if isinstance(astImport_, ast.Import):
@@ -200,14 +204,14 @@ class UniversalImportTracker:
 		self.dictionaryImportFrom[module].add((name, asname))
 
 	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
-		listAstImportFrom = []
+		listAstImportFrom: list[ast.ImportFrom] = []
 		for module, setOfNameTuples in sorted(self.dictionaryImportFrom.items()):
-			listAliases = []
+			listAliases: list[ast.alias] = []
 			for name, asname in setOfNameTuples:
 				listAliases.append(ast.alias(name=name, asname=asname))
 			listAstImportFrom.append(ast.ImportFrom(module=module, names=listAliases, level=0))
 
-		listAstImport = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in sorted(self.setImport)]
+		listAstImport: list[ast.Import] = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in sorted(self.setImport)]
 		return listAstImportFrom + listAstImport
 
 	def update(self, *fromTracker: 'UniversalImportTracker') -> None:
@@ -362,7 +366,7 @@ class UnpackArrays(ast.NodeTransformer):
 
 		# Handle array slice access
 		if isinstance(node.slice, ast.Tuple) and node.slice.elts:
-			firstElement = node.slice.elts[0]
+			firstElement: ast.expr = node.slice.elts[0]
 			memberName = self.extract_member_name(firstElement)
 			sliceRemainder = [self.visit(elem) for elem in node.slice.elts[1:]]
 			if memberName:
@@ -380,7 +384,7 @@ class UnpackArrays(ast.NodeTransformer):
 	def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
 		node = cast(ast.FunctionDef, self.generic_visit(node))
 
-		initializations = []
+		initializations: list[ast.Assign] = []
 		for name, (kind, original_node) in self.substitutions.items():
 			if kind == 'scalar':
 				initializations.append(ast.Assign(targets=[ast.Name(id=name, ctx=ast.Store())], value=original_node))

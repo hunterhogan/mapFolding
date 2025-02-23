@@ -1,0 +1,6 @@
+from _typeshed import Incomplete
+
+__all__ = ['get_sysinfo', 'display_sysinfo']
+
+def get_sysinfo(): ...
+def display_sysinfo(info: Incomplete | None = None, sep_pos: int = 45) -> None: ...

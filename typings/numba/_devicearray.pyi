@@ -1,0 +1,1 @@
+_DEVICEARRAY_API: PyCapsule

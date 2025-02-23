@@ -13,7 +13,7 @@ from mapFolding import (
 	setDatatypeModule,
 )
 from collections.abc import Sequence
-from numba import get_num_threads, set_num_threads
+from numba import get_num_threads, set_num_threads # type: ignore
 from numpy import dtype, integer, ndarray
 from numpy.typing import DTypeLike, NDArray
 from pathlib import Path
@@ -298,8 +298,8 @@ def parseDimensions(dimensions: Sequence[int], parameterName: str = 'listDimensi
 		ValueError: If any dimension is negative or if the list is empty.
 		TypeError: If any element cannot be converted to integer (raised by `intInnit`).
 	"""
-	listValidated = intInnit(dimensions, parameterName)
-	listNonNegative = []
+	listValidated: list[int] = intInnit(dimensions, parameterName)
+	listNonNegative: list[int] = []
 	for dimension in listValidated:
 		if dimension < 0:
 			raise ValueError(f"Dimension {dimension} must be non-negative")
