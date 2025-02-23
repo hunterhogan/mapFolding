@@ -52,6 +52,8 @@ from pathlib import Path
 import python_minifier
 import warnings
 from typing import NamedTuple
+from ast import Call, FunctionDef, Import, ImportFrom, Module
+from mapFolding.theSSOT import ParametersNumba, computationState
 
 class YouOughtaKnow(NamedTuple):
 	callableSynthesized: str

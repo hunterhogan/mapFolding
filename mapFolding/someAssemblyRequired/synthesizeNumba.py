@@ -222,6 +222,18 @@ def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorN
 	ast.fix_missing_locations(newFunctionDef)
 	return newFunctionDef
 
+def makeLauncherTqdmJobNumba(callableTarget: str, pathFilenameFoldsTotal: Path, totalEstimated: int) -> ast.Module:
+	linesLaunch = f"""
+if __name__ == '__main__':
+	with ProgressBar(total={totalEstimated}, update_interval=2) as progress:
+		foldsTotal = {callableTarget}(progress)
+		print(foldsTotal)
+		writeStream = open('{pathFilenameFoldsTotal.as_posix()}', 'w')
+		writeStream.write(str(foldsTotal))
+		writeStream.close()
+"""
+	return ast.parse(linesLaunch)
+
 def makeLauncherBasicJobNumba(callableTarget: str, pathFilenameFoldsTotal: Path) -> ast.Module:
 	linesLaunch = f"""
 if __name__ == '__main__':
@@ -305,7 +317,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 			return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
 		return
 
-	datatypeModuleDecorator = Z0Z_getDatatypeModuleScalar()
+	datatypeModuleDecorator: str = Z0Z_getDatatypeModuleScalar()
 	list_argsDecorator: Sequence[ast.expr] = []
 
 	list_arg4signature_or_function: list[ast.expr] = []

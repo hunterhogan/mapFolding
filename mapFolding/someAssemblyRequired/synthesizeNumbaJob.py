@@ -53,19 +53,19 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	"""
 
 	# NOTE get the raw ingredients: data and the algorithm
-	stateJob = makeStateJob(mapShape, writeJob=False, **keywordArguments)
-	pythonSource = inspect.getsource(algorithmSource)
-	astModule = ast.parse(pythonSource)
-	setFunctionDef = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
+	stateJob: computationState = makeStateJob(mapShape, writeJob=False, **keywordArguments)
+	pythonSource: str = inspect.getsource(algorithmSource)
+	astModule: Module = ast.parse(pythonSource)
+	setFunctionDef: set[FunctionDef] = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
 
 	if not callableTarget:
 		if len(setFunctionDef) == 1:
-			FunctionDefTarget = setFunctionDef.pop()
+			FunctionDefTarget: FunctionDef | None = setFunctionDef.pop()
 			callableTarget = FunctionDefTarget.name
 		else:
 			raise ValueError(f"I did not receive a `callableTarget` and {algorithmSource.__name__=} has more than one callable: {setFunctionDef}. Please select one.")
 	else:
-		listFunctionDefTarget = [statement for statement in setFunctionDef if statement.name == callableTarget]
+		listFunctionDefTarget: list[FunctionDef] = [statement for statement in setFunctionDef if statement.name == callableTarget]
 		FunctionDefTarget = listFunctionDefTarget[0] if listFunctionDefTarget else None
 	if not FunctionDefTarget: raise ValueError(f"I received `{callableTarget=}` and {algorithmSource.__name__=}, but I could not find that function in that source.")
 
@@ -104,19 +104,40 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 		FunctionDefTarget, allImports = doUnrollCountGaps(FunctionDefTarget, stateJob, allImports)
 
 	# NOTE starting the count and printing the total
-	pathFilenameFoldsTotal = getPathFilenameFoldsTotal(stateJob['mapShape'])
-	astLauncher = makeLauncherBasicJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal)
+	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(stateJob['mapShape'])
+	totalEstimated = 100000000000
+	astLauncher: Module = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated)
+
+	# from numba_progress import ProgressBar, ProgressBarType
+	allImports.addImportFromStr('numba_progress', 'ProgressBar')
+	allImports.addImportFromStr('numba_progress', 'ProgressBarType')
+
+	# add ProgressBarType parameter to function args
+	counterArg = ast.arg(arg='Z0Z_counter', annotation=ast.Name(id='ProgressBarType', ctx=ast.Load()))
+	FunctionDefTarget.args.args.append(counterArg)
+	"""
+	steps
+	add `ProgressBarType` to the jit sig
+	add `Z0Z_counter.update(1)` to folds increment
+
+	TODO create function for assigning value to `totalEstimated`
+	totalEstimated = 100000000000
+	reminder: nogil=True
+	"""
+
 	FunctionDefTarget, allImports = insertReturnStatementIn_body(FunctionDefTarget, stateJob['foldGroups'], allImports)
 
+	# TODO have: `if isinstance(signatureElement.annotation, ast.Subscript)`
+	#  need `if isinstance(signatureElement.annotation, ast.Name)`
 	# NOTE add the perfect decorator
 	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
 	if thisIsNumbaDotJit(FunctionDefTarget.decorator_list[0]):
-		astCall = cast(ast.Call, FunctionDefTarget.decorator_list[0])
+		astCall: Call = cast(ast.Call, FunctionDefTarget.decorator_list[0])
 		astCall.func = ast.Name(id=Z0Z_getDecoratorCallable(), ctx=ast.Load())
 		FunctionDefTarget.decorator_list[0] = astCall
 
 	# NOTE add imports, make str, remove unused imports
-	astImports = allImports.makeListAst()
+	astImports: list[ImportFrom | Import] = allImports.makeListAst()
 	astModule = ast.Module(body=cast(list[ast.stmt], astImports + [FunctionDefTarget] + [astLauncher]), type_ignores=[])
 	ast.fix_missing_locations(astModule)
 	pythonSource = ast.unparse(astModule)
@@ -125,8 +146,8 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 
 	# NOTE put on disk
 	if pathFilenameWriteJob is None:
-		filename = getFilenameFoldsTotal(stateJob['mapShape'])
-		pathRoot = getPathJobRootDEFAULT()
+		filename: str = getFilenameFoldsTotal(stateJob['mapShape'])
+		pathRoot: Path = getPathJobRootDEFAULT()
 		pathFilenameWriteJob = Path(pathRoot, Path(filename).stem, Path(filename).with_suffix('.py'))
 	else:
 		pathFilenameWriteJob = Path(pathFilenameWriteJob)
@@ -137,16 +158,17 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	return pathFilenameWriteJob
 
 if __name__ == '__main__':
-	mapShape: list[int] = [5,5]
+	mapShape: list[int] = [3,3,3,3]
 	from mapFolding.syntheticModules import numbaCount
 	algorithmSource: ModuleType = numbaCount
 
 	callableTarget = 'countSequential'
 
-	parametersNumba = parametersNumbaDEFAULT
-	parametersNumba['boundscheck'] = True
+	parametersNumba: ParametersNumba = parametersNumbaDEFAULT
+	parametersNumba['boundscheck'] = False
+	parametersNumba['nogil'] = True
 
-	pathFilenameWriteJob = None
+	pathFilenameWriteJob = 'tqdm'
 
 	setDatatypeFoldsTotal('int64', sourGrapes=True)
 	setDatatypeElephino('int16', sourGrapes=True)

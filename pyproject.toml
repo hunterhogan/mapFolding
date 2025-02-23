@@ -42,6 +42,7 @@ optional-dependencies = { testing = [
 	"autoflake",
 	"mypy",
 	"more_itertools",
+	"numba_progress",
 	"pytest-cov",
 	"pytest-env",
 	"pytest-xdist",
