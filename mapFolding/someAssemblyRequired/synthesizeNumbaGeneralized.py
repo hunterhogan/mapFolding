@@ -58,37 +58,6 @@ class YouOughtaKnow(NamedTuple):
 	pathFilenameForMe: Path
 	astForCompetentProgrammers: ast.ImportFrom
 
-# idk how to use this
-class ASTBodyTransformer:
-	"""
-	A helper class to apply multiple transformations on an AST FunctionDef's body.
-	This abstraction eliminates the need to write repetitive loops for removals,
-	replacements, or insertions.
-	"""
-	def __init__(self, functionDefinition: ast.FunctionDef) -> None:
-		self.functionDefinition: ast.FunctionDef = functionDefinition
-
-	def replaceIn_body(self, predicate: Callable[[ast.stmt], bool], replacementBuilder: Callable[[ast.stmt], ast.stmt | None]) -> None:
-		newBody: list[ast.stmt] = []
-		for statement in self.functionDefinition.body:
-			if predicate(statement):
-				replacementStatement: ast.stmt | None = replacementBuilder(statement)
-				if replacementStatement is not None:
-					newBody.append(replacementStatement)
-			else:
-				newBody.append(statement)
-		self.functionDefinition.body = newBody
-
-	def atIndexInsert(self, index: int, statement: ast.stmt) -> None:
-		self.functionDefinition.body.insert(index, statement)
-
-	def removeAllOf(self, predicate: Callable[[ast.stmt], bool]) -> None:
-		self.replaceIn_body(predicate, lambda stmt: None)
-
-	def Z0Z_apply(self) -> ast.FunctionDef:
-		ast.fix_missing_locations(self.functionDefinition)
-		return self.functionDefinition
-
 # Generic
 class ifThis:
 	"""Generic AST node predicate builder."""
@@ -193,7 +162,7 @@ class UniversalImportTracker:
 		if isinstance(astImport_, ast.Import):
 			for alias in astImport_.names:
 				self.setImport.add(alias.name)
-		elif isinstance(astImport_, ast.ImportFrom):
+		elif isinstance(astImport_, ast.ImportFrom): # type: ignore
 			if astImport_.module is not None:
 				self.dictionaryImportFrom[astImport_.module].update((alias.name, alias.asname) for alias in astImport_.names)
 
@@ -274,15 +243,20 @@ class RecursiveInliner(ast.NodeTransformer):
 
 	def visit_Call(self, node: ast.Call) -> Any | ast.Constant | ast.Call | ast.AST:
 		callNodeVisited = self.generic_visit(node)
-		if (isinstance(callNodeVisited, ast.Call) and isinstance(callNodeVisited.func, ast.Name) and callNodeVisited.func.id in self.dictionaryFunctions):
+		if (isinstance(callNodeVisited, ast.Call)
+		and isinstance(callNodeVisited.func, ast.Name)
+		and callNodeVisited.func.id in self.dictionaryFunctions):
 			inlineDefinition = self.inlineFunctionBody(callNodeVisited.func.id)
 			if (inlineDefinition and inlineDefinition.body):
 				statementTerminating = inlineDefinition.body[-1]
-				if (isinstance(statementTerminating, ast.Return) and statementTerminating.value is not None):
+				if (isinstance(statementTerminating, ast.Return)
+				and statementTerminating.value is not None):
 					return self.visit(statementTerminating.value)
-				elif (isinstance(statementTerminating, ast.Expr) and statementTerminating.value is not None):
+				elif (isinstance(statementTerminating, ast.Expr)
+				and statementTerminating.value is not None):
 					return self.visit(statementTerminating.value)
-				return ast.Constant(value=None)
+				else:
+					return ast.Constant(value=None)
 		return callNodeVisited
 
 	def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.AST]:

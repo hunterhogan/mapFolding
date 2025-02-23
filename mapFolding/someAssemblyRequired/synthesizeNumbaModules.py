@@ -3,9 +3,8 @@ Managing settings and options, however, ... I've 'invented'
 everything I am doing. I would rather benefit from humanity's
 collective wisdom."""
 from mapFolding.someAssemblyRequired.synthesizeNumba import *
-from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import YouOughtaKnow
 
-def getFunctionDef(algorithmSource: ModuleType, *arguments, **keywordArguments) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def getFunctionDef(algorithmSource: ModuleType, *arguments: Any, **keywordArguments: Any) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	pythonSource = inspect.getsource(algorithmSource)
 	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
 	FunctionDefTarget, allImports = makeFunctionDef(astModule, *arguments, **keywordArguments)
@@ -106,7 +105,7 @@ def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: b
 		filenameWrite 	= None
 		for stuff in listStuffYouOughtaKnow:
 			statement = stuff.astForCompetentProgrammers
-			if isinstance(statement, (ast.Import, ast.ImportFrom)):
+			if isinstance(statement, (ast.Import, ast.ImportFrom)): # type: ignore "Unnecessary isinstance call; "ImportFrom" is always an instance of "Import | ImportFrom" Pylance(reportUnnecessaryIsInstance)". Ok, Pylance, bad data never happens. What a dumbass warning/error/problem. 
 				allImports.addAst(statement)
 		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
 		listAstImports = allImports.makeListAst()

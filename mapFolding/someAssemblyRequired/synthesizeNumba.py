@@ -2,20 +2,20 @@
 TODO: consolidate the logic in this module."""
 from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import *
 
-def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker, unrollSlices: int | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[integer[Any]]], allImports: UniversalImportTracker, unrollSlices: int | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
 	constructorName = arrayType.__name__
 	# NOTE hack
 	constructorName = constructorName.replace('ndarray', 'array')
-	argData_dtype: numpy.dtype = arrayTarget.dtype
+	argData_dtype: numpy.dtype[integer[Any]] = arrayTarget.dtype
 	datatypeName = argData_dtype.name
 	dtypeAsName = f"{moduleConstructor}_{datatypeName}"
 
 	allImports.addImportFromStr(moduleConstructor, constructorName)
 	allImports.addImportFromStr(moduleConstructor, datatypeName, dtypeAsName)
 
-	def insertAssign(assignee: str, arraySlice: numpy.ndarray) -> None:
+	def insertAssign(assignee: str, arraySlice: numpy.ndarray[tuple[int, ...], numpy.dtype[integer[Any]]]) -> None:
 		nonlocal FunctionDefTarget
 		onlyDataRLE = autoDecodingRLE(arraySlice, addSpaces=True)
 		astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
@@ -34,7 +34,7 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 
 	return FunctionDefTarget, allImports
 
-def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str , arrayTarget: numpy.ndarray , allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
@@ -45,9 +45,9 @@ def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifi
 
 	for statement in FunctionDefTarget.body.copy():
 		if ifThis.isUnpackingAnArray(identifier)(statement):
-			datatypeName = hackSSOTdatatype(statement.targets[0].id) # type: ignore
+			datatypeName = hackSSOTdatatype(statement.targets[0].id)
 			dtypeAsName = f"{moduleConstructor}_{datatypeName}"
-			indexAsStr = ast.unparse(statement.value.slice) # type: ignore
+			indexAsStr = ast.unparse(statement.value.slice)
 			arraySlice = arrayTarget[eval(indexAsStr)]
 
 			onlyDataRLE = autoDecodingRLE(arraySlice, addSpaces=True)
@@ -56,21 +56,21 @@ def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifi
 
 			arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))])
 
-			assignment = ast.Assign(targets=[statement.targets[0]], value=arrayCall) # type: ignore
+			assignment = ast.Assign(targets=[statement.targets[0]], value=arrayCall)
 			FunctionDefTarget.body.insert(0, assignment)
 			FunctionDefTarget.body.remove(statement)
 			allImports.addImportFromStr(moduleConstructor, datatypeName, dtypeAsName)
 	return FunctionDefTarget, allImports
 
-def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray, Z0Z_listChaff: list[str], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[integer[Any]]], Z0Z_listChaff: list[str], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
 	for statement in FunctionDefTarget.body.copy():
 		if ifThis.isUnpackingAnArray(identifier)(statement):
-			astSubscript: ast.Subscript = statement.value # type: ignore
-			astAssignee: ast.Name = statement.targets[0] # type: ignore
+			astSubscript: ast.Subscript = statement.value
+			astAssignee: ast.Name = statement.targets[0]
 			argData_dtypeName = hackSSOTdatatype(astAssignee.id)
 			allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
-			indexAs_astAttribute: ast.Attribute = astSubscript.slice # type: ignore
+			indexAs_astAttribute: ast.Attribute = astSubscript.slice
 			indexAsStr = ast.unparse(indexAs_astAttribute)
 			argDataSlice: int = arrayTarget[eval(indexAsStr)].item()
 			astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()), args=[ast.Constant(value=argDataSlice)], keywords=[])
@@ -106,7 +106,7 @@ def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImport
 				astAssignee: ast.Name = stmt.target
 				argData_dtypeName = hackSSOTdatatype(astAssignee.id)
 				allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
-				astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()) , args=[stmt.value], keywords=[])
+				astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()), args=[stmt.value], keywords=[])
 				assignment = ast.Assign(targets=[astAssignee], value=astCall)
 				FunctionDefTarget.body.insert(0, assignment)
 				FunctionDefTarget.body.remove(stmt)
@@ -137,7 +137,7 @@ def findAstNameReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, na
 
 	return cast(ast.FunctionDef, NodeReplacer(ifThis.nameIs(name), replaceWithConstant).visit(FunctionDefTarget))
 
-def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	"""Add multiplication and return statement to function, properly constructing AST nodes."""
 	# Create AST for multiplication operation
 	multiplicand = Z0Z_identifierCountFolds
@@ -165,8 +165,8 @@ def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorN
 	class ReplaceIterator(ast.NodeTransformer):
 		def __init__(self, iteratorName: str, constantValue: int) -> None:
 			super().__init__()
-			self.iteratorName = iteratorName
-			self.constantValue = constantValue
+			self.iteratorName: str = iteratorName
+			self.constantValue: int = constantValue
 
 		def visit_Name(self, node: ast.Name) -> ast.AST:
 			if node.id == self.iteratorName:
@@ -177,8 +177,8 @@ def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorN
 	class WhileLoopUnroller(ast.NodeTransformer):
 		def __init__(self, iteratorName: str, iterationsTotal: int) -> None:
 			super().__init__()
-			self.iteratorName = iteratorName
-			self.iterationsTotal = iterationsTotal
+			self.iteratorName: str = iteratorName
+			self.iterationsTotal: int = iterationsTotal
 
 		def visit_While(self, node: ast.While) -> list[ast.stmt]:
 				# Check if the while loop's test uses the iterator.
@@ -212,7 +212,7 @@ def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorN
 					for elseStmt in node.orelse:
 						visitedElse = self.visit(elseStmt)
 						if isinstance(visitedElse, list):
-							newStatements.extend(visitedElse)
+							newStatements.extend(cast(list[ast.stmt], visitedElse))
 						else:
 							newStatements.append(visitedElse)
 				return newStatements
@@ -284,7 +284,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
-				shapeAsListSlices = [ast.Slice() for axis in range(len(annotationShape.slice.elts))]
+				shapeAsListSlices = [ast.Slice() for _axis in range(len(annotationShape.slice.elts))]
 				shapeAsListSlices[-1] = ast.Slice(step=ast.Constant(value=1))
 				shapeAST = ast.Tuple(elts=list(shapeAsListSlices), ctx=ast.Load())
 			else:
@@ -317,7 +317,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 	if FunctionDefTarget.returns and isinstance(FunctionDefTarget.returns, ast.Name):
 		theReturn: ast.Name = FunctionDefTarget.returns
 		list_argsDecorator = [cast(ast.expr, ast.Call(func=ast.Name(id=theReturn.id, ctx=ast.Load())
-							, args=list_arg4signature_or_function if list_arg4signature_or_function else [] , keywords=[] ) )]
+							, args=list_arg4signature_or_function if list_arg4signature_or_function else [], keywords=[] ) )]
 	elif list_arg4signature_or_function:
 		list_argsDecorator = [cast(ast.expr, ast.Tuple(elts=list_arg4signature_or_function, ctx=ast.Load()))]
 
@@ -326,7 +326,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 			decorator = cast(ast.Call, decorator)
 			if parametersNumba is None:
 				parametersNumbaSherpa = Then.copy_astCallKeywords(decorator)
-				if (HunterIsSureThereAreBetterWaysToDoThis := True):
+				if (_HunterIsSureThereAreBetterWaysToDoThis := True):
 					if parametersNumbaSherpa:
 						parametersNumba = cast(ParametersNumba, parametersNumbaSherpa)
 		FunctionDefTarget.decorator_list.remove(decorator)

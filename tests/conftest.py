@@ -9,6 +9,7 @@ from mapFolding import (
 	countFolds,
 	getPathFilenameFoldsTotal,
 	oeisIDfor_n,
+	FREAKOUT,
 	saveFoldsTotal,
 	hackSSOTdtype,
 	clearOEIScache,
@@ -240,8 +241,8 @@ def useThisDispatcher():
 	"""
 	dispatcherOriginal = basecamp.getDispatcherCallable
 
-	def patchDispatcher(callableTarget: Callable) -> None:
-		def callableParameterized(*arguments: Any, **keywordArguments: Any) -> Callable:
+	def patchDispatcher(callableTarget: Callable[..., Any]) -> None:
+		def callableParameterized(*arguments: Any, **keywordArguments: Any) -> Callable[..., Any]:
 			return callableTarget
 		basecamp.getDispatcherCallable = callableParameterized
 
@@ -249,13 +250,13 @@ def useThisDispatcher():
 	basecamp.getDispatcherCallable = dispatcherOriginal
 
 @pytest.fixture
-def useAlgorithmSourceDispatcher(useThisDispatcher: Callable) -> Generator[None, None, None]:
+def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Generator[None, None, None]:
 	"""Temporarily patches getDispatcherCallable to return the algorithm dispatcher."""
 	useThisDispatcher(getAlgorithmDispatcher())
 	yield
 
 @pytest.fixture
-def syntheticDispatcherFixture(useThisDispatcher):
+def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any]) -> Callable[..., Any]:
 	listCallablesInlineHARDCODED: list[str] = ['countInitialize', 'countParallel', 'countSequential']
 	listCallablesInline = listCallablesInlineHARDCODED
 	callableDispatcher = True
@@ -264,11 +265,15 @@ def syntheticDispatcherFixture(useThisDispatcher):
 	filenameModuleWrite = 'pytestCount.py'
 	formatFilenameWrite = "pytest_{callableTarget}.py"
 	listSynthesizedModules: list[YouOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite)
-	dispatcherSynthetic = YouOughtaKnow('','','')
+	dispatcherSynthetic: YouOughtaKnow | None = None
+	# dispatcherSynthetic = YouOughtaKnow('','','')
 	for stuff in listSynthesizedModules:
 		registrarRecordsTmpObject(stuff.pathFilenameForMe)
 		if stuff.callableSynthesized not in listCallablesInline:
-			dispatcherSynthetic: YouOughtaKnow = stuff
+			dispatcherSynthetic = stuff
+
+	if dispatcherSynthetic is None:
+		raise FREAKOUT
 
 	dispatcherSpec = importlib.util.spec_from_file_location(dispatcherSynthetic.callableSynthesized, dispatcherSynthetic.pathFilenameForMe)
 	if dispatcherSpec is None:
@@ -289,7 +294,7 @@ def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments
 			f"Expected: {expected}\n"
 			f"Got: {actual}")
 
-def standardizedEqualTo(expected: Any, functionTarget: Callable, *arguments: Any) -> None:
+def standardizedEqualTo(expected: Any, functionTarget: Callable[..., Any], *arguments: Any) -> None:
 	"""Template for tests expecting an error."""
 	if type(expected) is type[Exception]:
 		messageExpected = expected.__name__
@@ -304,7 +309,7 @@ def standardizedEqualTo(expected: Any, functionTarget: Callable, *arguments: Any
 
 	assert actual == expected, uniformTestMessage(messageExpected, messageActual, functionTarget.__name__, *arguments)
 
-def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: Callable, *arguments: Any) -> None:
+def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: Callable[..., Any], *arguments: Any) -> None:
 	"""Template for tests expecting SystemExit.
 
 	Parameters

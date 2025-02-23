@@ -5,7 +5,6 @@ import io
 import itertools
 import numba
 import numpy
-import pathlib
 import pytest
 import random
 import sys
@@ -123,7 +122,7 @@ def parameterIterator() -> Callable[[list[int]], Generator[dict[str, Any], None,
 		concurrencyLimit = min(leavesTotal, 16)
 
 		# Add dynamic computationDivisions values
-		dynamicDivisions = [random.randint(2, leavesTotal-1) for iterator in range(3)]
+		dynamicDivisions = [random.randint(2, leavesTotal-1) for _iterator in range(3)]
 		parametersDynamic['computationDivisions'] = parametersDynamic['computationDivisions'] + dynamicDivisions
 
 		# Add dynamic CPUlimit values
@@ -132,10 +131,10 @@ def parameterIterator() -> Callable[[list[int]], Generator[dict[str, Any], None,
 			-random.random(), # -1 to 0
 		]
 		parameterDynamicCPU.extend(
-			[random.randint(2, concurrencyLimit-1) for iterator in range(2)]
+			[random.randint(2, concurrencyLimit-1) for _iterator in range(2)]
 		)
 		parameterDynamicCPU.extend(
-			[random.randint(-concurrencyLimit+1, -2) for iterator in range(2)]
+			[random.randint(-concurrencyLimit+1, -2) for _iterator in range(2)]
 		)
 		parametersDynamic['CPUlimit'] = parametersDynamic['CPUlimit'] + parameterDynamicCPU
 

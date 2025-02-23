@@ -15,7 +15,7 @@ def writeModuleLLVM(pathFilename: pathlib.Path, identifierCallable: str) -> path
 
 	# Get LLVM IR and write to file
 	linesLLVM = moduleTarget.__dict__[identifierCallable].inspect_llvm()[()]
-	moduleLLVM = llvmlite.binding.module.parse_assembly(linesLLVM)
+	moduleLLVM: llvmlite.binding.ModuleRef = llvmlite.binding.module.parse_assembly(linesLLVM)
 	pathFilenameLLVM: pathlib.Path = pathFilename.with_suffix(".ll")
 	pathFilenameLLVM.write_text(str(moduleLLVM))
 	return pathFilenameLLVM

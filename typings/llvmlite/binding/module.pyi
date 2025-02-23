@@ -5,7 +5,7 @@ from llvmlite.binding.context import get_global_context as get_global_context
 from llvmlite.binding.linker import link_modules as link_modules
 from llvmlite.binding.value import TypeRef as TypeRef, ValueRef as ValueRef
 
-def parse_assembly(llvmir, context: Incomplete | None = None):
+def parse_assembly(llvmir: str, context: Incomplete | None = None) -> ModuleRef:
     """
     Create Module from a LLVM IR string
     """

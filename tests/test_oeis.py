@@ -1,8 +1,18 @@
 from contextlib import redirect_stdout
-from tests.conftest import *
+from tests.conftest import (
+	getOEISidValues,
+	OEIS_for_n,
+	oeisIDsImplemented,
+	settingsOEIS,
+	standardizedEqualTo,
+	standardizedSystemExit,
+	validateOEISid,
+)
+from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache
 from urllib.error import URLError
 import io
-import pathlib
+from typing import Any, NoReturn
+from pathlib import Path
 import pytest
 import random
 import re as regex
@@ -111,7 +121,7 @@ def testCLI_InvalidInputs() -> None:
 		(['OEIS_for_n', 'A001415', 'abc'], "non-integer n"),
 	]
 
-	for arguments, testID in testCases:
+	for arguments, _testID in testCases:
 		with unittest.mock.patch('sys.argv', arguments):
 			standardizedSystemExit("error", OEIS_for_n)
 

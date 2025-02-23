@@ -90,6 +90,8 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 				FunctionDefTarget = removeAssignTargetFrom_body(FunctionDefTarget, pirateScowl.arg)
 				# FunctionDefTarget, allImports = insertArrayIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], allImports)
 				# continue
+			case _:
+				pass
 		FunctionDefTarget.args.args.remove(pirateScowl)
 
 	# NOTE replace identifiers with static values with their values

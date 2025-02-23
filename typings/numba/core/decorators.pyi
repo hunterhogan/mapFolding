@@ -2,11 +2,13 @@ from _typeshed import Incomplete
 from numba.core import config as config, extending as extending, registry as registry, sigutils as sigutils
 from numba.core.errors import DeprecationError as DeprecationError, NumbaDeprecationWarning as NumbaDeprecationWarning
 from numba.stencils.stencil import stencil as stencil
+from typing import Any as Any
+from collections.abc import Callable as Callable
 
 _logger: Incomplete
 _msg_deprecated_signature_arg: str
 
-def jit(signature_or_function: Incomplete | None = None, locals={}, cache: bool = False, pipeline_class: Incomplete | None = None, boundscheck: Incomplete | None = None, **options):
+def jit(signature_or_function: Incomplete | None = None, locals: dict[str, Any]={}, cache: bool = False, pipeline_class: Incomplete | None = None, boundscheck: Incomplete | None = None, **options: bool | str | Callable[..., Any] | None) -> Callable[..., Any]:
     '''
     This decorator is used to compile a Python function into native code.
 

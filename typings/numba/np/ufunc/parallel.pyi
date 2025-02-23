@@ -140,7 +140,7 @@ def set_num_threads(n) -> None:
 
     """
 def ol_set_num_threads(n): ...
-def get_num_threads():
+def get_num_threads() -> int:
     """
     Get the number of threads used for parallel execution.
 

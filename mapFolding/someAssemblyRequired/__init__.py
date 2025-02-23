@@ -1,5 +1,5 @@
-from mapFolding.someAssemblyRequired.getLLVMforNoReason import writeModuleLLVM
-from mapFolding.someAssemblyRequired.makeJob import makeStateJob
-from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import YouOughtaKnow
-from mapFolding.someAssemblyRequired.synthesizeNumbaJob import writeJobNumba
-from mapFolding.someAssemblyRequired.synthesizeNumbaModules import makeFlowNumbaOptimized
+from mapFolding.someAssemblyRequired.getLLVMforNoReason import writeModuleLLVM as writeModuleLLVM
+from mapFolding.someAssemblyRequired.makeJob import makeStateJob as makeStateJob
+from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import YouOughtaKnow as YouOughtaKnow
+from mapFolding.someAssemblyRequired.synthesizeNumbaJob import writeJobNumba as writeJobNumba
+from mapFolding.someAssemblyRequired.synthesizeNumbaModules import makeFlowNumbaOptimized as makeFlowNumbaOptimized

@@ -139,7 +139,7 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 		pass
 	elif isinstance(computationDivisions, int):
 		taskDivisions = computationDivisions
-	elif isinstance(computationDivisions, str):
+	elif isinstance(computationDivisions, str):  # type: ignore 'Unnecessary isinstance call; "str" is always an instance of "str", so sayeth Pylance'. Yeah, well "User is not always an instance of "correct input" so sayeth the programmer.
 		computationDivisions = computationDivisions.lower()
 		if computationDivisions == 'maximum':
 			taskDivisions = leavesTotal
@@ -357,7 +357,7 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 
 	concurrencyLimit = int(defineConcurrencyLimit(CPUlimit))
 	set_num_threads(concurrencyLimit)
-	concurrencyLimit = get_num_threads()
+	concurrencyLimit: int = get_num_threads()
 
 	return concurrencyLimit
 

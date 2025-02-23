@@ -1,1 +1,1 @@
-from tests.conftest import makeDictionaryFoldsTotalKnown
+from tests.conftest import makeDictionaryFoldsTotalKnown as makeDictionaryFoldsTotalKnown
