@@ -1,5 +1,236 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
-from mapFolding.someAssemblyRequired.synthesizeNumba import *
+from mapFolding import FREAKOUT, Z0Z_identifierCountFolds, Z0Z_setDatatypeModuleScalar, Z0Z_setDecoratorCallable, computationState, getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathJobRootDEFAULT, indexMy, setDatatypeElephino, setDatatypeFoldsTotal, setDatatypeLeavesTotal
+from mapFolding import indexMy, indexTrack as indexTrack
+from mapFolding.someAssemblyRequired import makeStateJob
+from mapFolding.someAssemblyRequired.synthesizeNumbaReusable import *
+from os import PathLike
+from pathlib import Path
+from types import ModuleType
+from Z0Z_tools import autoDecodingRLE
+import ast
+import autoflake
+import copy
+import inspect
+import numpy
+
+def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, statement: ast.Assign | ast.stmt, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+	arrayType = type(arrayTarget)
+	moduleConstructor = arrayType.__module__
+	constructorName = arrayType.__name__.replace('ndarray', 'array') # NOTE hack
+	dataAsStrRLE = autoDecodingRLE(arrayTarget, addSpaces=True)
+	dataAs_astExpr = cast(ast.Expr, ast.parse(dataAsStrRLE).body[0]).value
+	dtypeName = hackSSOTdatatype(identifier)
+	dtypeAsName = f"{moduleConstructor}_{dtypeName}"
+	list_astKeywords: list[ast.keyword] = [ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))]
+	allImports.addImportFromStr(moduleConstructor, dtypeName, dtypeAsName)
+	astCall: ast.Call = Then.make_astCall(name=constructorName, args=[dataAs_astExpr], list_astKeywords=list_astKeywords)
+	assignment = ast.Assign(targets=[astAssignee], value=astCall)
+	FunctionDefTarget.body.insert(0, assignment)
+	FunctionDefTarget.body.remove(statement)
+	allImports.addImportFromStr(moduleConstructor, constructorName)
+	return FunctionDefTarget, allImports
+
+def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker, unrollSlices: int | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+	def insertAssign(FunctionDefTarget: ast.FunctionDef, assignee: str, arraySlice: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+		statement = ast.Assign(targets=[ast.Name(id='beans', ctx=ast.Load())], value=ast.Constant(value='and cornbread'))
+		FunctionDefTarget.body.insert(0, statement)
+		astAssignee = ast.Name(id=assignee, ctx=ast.Store())
+		return Z0Z_gamma(FunctionDefTarget, astAssignee, statement, identifier, arraySlice, allImports)
+
+	if not unrollSlices:
+		FunctionDefTarget, allImports = insertAssign(FunctionDefTarget, identifier, arrayTarget, allImports)
+	else:
+		for index, arraySlice in enumerate(arrayTarget):
+			FunctionDefTarget, allImports = insertAssign(FunctionDefTarget, f"{identifier}_{index}", arraySlice, allImports)
+
+	return FunctionDefTarget, allImports
+
+def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+	for statement in FunctionDefTarget.body.copy():
+		if ifThis.isUnpackingAnArray(identifier)(statement):
+			indexAsStr = ast.unparse(statement.value.slice) # type: ignore
+			arraySlice = arrayTarget[eval(indexAsStr)]
+			astAssignee: ast.Name = statement.targets[0] # type: ignore
+			FunctionDefTarget, allImports = Z0Z_gamma(FunctionDefTarget, astAssignee, statement, identifier, arraySlice, allImports) # type: ignore
+	return FunctionDefTarget, allImports
+
+def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+	# parameter: I define moduleConstructor
+	moduleConstructor = Z0Z_getDatatypeModuleScalar()
+
+	for statement in FunctionDefTarget.body.copy():
+		if ifThis.isUnpackingAnArray(identifier)(statement):
+			indexAsStr = ast.unparse(statement.value.slice) # type: ignore
+			arraySlice = arrayTarget[eval(indexAsStr)]
+			astAssignee: ast.Name = statement.targets[0] # type: ignore
+			arraySliceItem = arraySlice.item() # type: ignore
+			constructorName = hackSSOTdatatype(astAssignee.id) # type: ignore
+			dataAs_astExpr = ast.Constant(value=arraySliceItem)
+			list_astKeywords: list[ast.keyword] = []
+			astCall: ast.Call = Then.make_astCall(name=constructorName, args=[dataAs_astExpr], list_astKeywords=list_astKeywords)
+			assignment = ast.Assign(targets=[astAssignee], value=astCall)
+			FunctionDefTarget.body.insert(0, assignment)
+			FunctionDefTarget.body.remove(statement)
+			allImports.addImportFromStr(moduleConstructor, constructorName)
+	return FunctionDefTarget, allImports
+
+def removeAssignTargetFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
+	FunctionDefSherpa = NodeReplacer(ifThis.AssignTo(identifier), Then.removeNode).visit(FunctionDefTarget)
+	if not FunctionDefSherpa:
+		raise FREAKOUT("Dude, where's my function?")
+	else:
+		FunctionDefTarget = cast(ast.FunctionDef, FunctionDefSherpa)
+	ast.fix_missing_locations(FunctionDefTarget)
+	return FunctionDefTarget
+
+def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+	moduleConstructor = Z0Z_getDatatypeModuleScalar()
+	for stmt in FunctionDefTarget.body.copy():
+		if isinstance(stmt, ast.AnnAssign):
+			if isinstance(stmt.target, ast.Name) and isinstance(stmt.value, ast.Constant):
+				astAssignee: ast.Name = stmt.target
+				argData_dtypeName = hackSSOTdatatype(astAssignee.id)
+				allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
+				astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()), args=[stmt.value], keywords=[])
+				assignment = ast.Assign(targets=[astAssignee], value=astCall)
+				FunctionDefTarget.body.insert(0, assignment)
+				FunctionDefTarget.body.remove(stmt)
+	return FunctionDefTarget, allImports
+
+def findThingyReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, object: str, value: int) -> ast.FunctionDef:
+	"""
+	Replaces nodes in astFunction matching the AST of the string `object`
+	with a constant node holding the provided value.
+	"""
+	targetExpression = ast.parse(object, mode='eval').body
+	targetDump = ast.dump(targetExpression, annotate_fields=False)
+
+	def findNode(node: ast.AST) -> bool:
+		return ast.dump(node, annotate_fields=False) == targetDump
+
+	def replaceWithConstant(node: ast.AST) -> ast.AST:
+		return ast.copy_location(ast.Constant(value=value), node)
+
+	transformer = NodeReplacer(findNode, replaceWithConstant)
+	newFunction = cast(ast.FunctionDef, transformer.visit(FunctionDefTarget))
+	ast.fix_missing_locations(newFunction)
+	return newFunction
+
+def findAstNameReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, name: str, value: int) -> ast.FunctionDef:
+	def replaceWithConstant(node: ast.AST) -> ast.AST:
+		return ast.copy_location(ast.Constant(value=value), node)
+
+	return cast(ast.FunctionDef, NodeReplacer(ifThis.nameIs(name), replaceWithConstant).visit(FunctionDefTarget))
+
+def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+	"""Add multiplication and return statement to function, properly constructing AST nodes."""
+	# Create AST for multiplication operation
+	multiplicand = Z0Z_identifierCountFolds
+	datatype = hackSSOTdatatype(multiplicand)
+	multiplyOperation = ast.BinOp(
+		left=ast.Name(id=multiplicand, ctx=ast.Load()),
+		op=ast.Mult(), right=ast.Constant(value=int(arrayTarget[-1])))
+
+	returnStatement = ast.Return(value=multiplyOperation)
+
+	datatype = hackSSOTdatatype(Z0Z_identifierCountFolds)
+	FunctionDefTarget.returns = ast.Name(id=datatype, ctx=ast.Load())
+	datatypeModuleScalar = Z0Z_getDatatypeModuleScalar()
+	allImports.addImportFromStr(datatypeModuleScalar, datatype)
+
+	FunctionDefTarget.body.append(returnStatement)
+
+	return FunctionDefTarget, allImports
+
+def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorName: str, iterationsTotal: int) -> ast.FunctionDef:
+	"""
+	Unroll all nested while loops matching the condition that their test uses `iteratorName`.
+	"""
+	# Helper transformer to replace iterator occurrences with a constant.
+	class ReplaceIterator(ast.NodeTransformer):
+		def __init__(self, iteratorName: str, constantValue: int) -> None:
+			super().__init__()
+			self.iteratorName: str = iteratorName
+			self.constantValue: int = constantValue
+
+		def visit_Name(self, node: ast.Name) -> ast.AST:
+			if node.id == self.iteratorName:
+				return ast.copy_location(ast.Constant(value=self.constantValue), node)
+			return self.generic_visit(node)
+
+	# NodeTransformer that finds while loops (even if deeply nested) and unrolls them.
+	class WhileLoopUnroller(ast.NodeTransformer):
+		def __init__(self, iteratorName: str, iterationsTotal: int) -> None:
+			super().__init__()
+			self.iteratorName: str = iteratorName
+			self.iterationsTotal: int = iterationsTotal
+
+		def visit_While(self, node: ast.While) -> list[ast.stmt]:
+				# Check if the while loop's test uses the iterator.
+			if isinstance(node.test, ast.Compare) and ifThis.nameIs(self.iteratorName)(node.test.left):
+				# Recurse the while loop body and remove AugAssign that increments the iterator.
+				cleanBodyStatements: list[ast.stmt] = []
+				for loopStatement in node.body:
+					# Recursively visit nested statements.
+					visitedStatement = self.visit(loopStatement)
+					# Remove direct AugAssign: iterator += 1.
+					if (isinstance(loopStatement, ast.AugAssign) and
+						isinstance(loopStatement.target, ast.Name) and
+						loopStatement.target.id == self.iteratorName and
+						isinstance(loopStatement.op, ast.Add) and
+						isinstance(loopStatement.value, ast.Constant) and
+						loopStatement.value.value == 1):
+						continue
+					cleanBodyStatements.append(visitedStatement)
+
+				newStatements: list[ast.stmt] = []
+				# Unroll using the filtered body.
+				for iterationIndex in range(self.iterationsTotal):
+					for loopStatement in cleanBodyStatements:
+						copiedStatement = copy.deepcopy(loopStatement)
+						replacer = ReplaceIterator(self.iteratorName, iterationIndex)
+						newStatement = replacer.visit(copiedStatement)
+						ast.fix_missing_locations(newStatement)
+						newStatements.append(newStatement)
+				# Optionally, process the orelse block.
+				if node.orelse:
+					for elseStmt in node.orelse:
+						visitedElse = self.visit(elseStmt)
+						if isinstance(visitedElse, list):
+							newStatements.extend(cast(list[ast.stmt], visitedElse))
+						else:
+							newStatements.append(visitedElse)
+				return newStatements
+			return [cast(ast.stmt, self.generic_visit(node))]
+
+	newFunctionDef = WhileLoopUnroller(iteratorName, iterationsTotal).visit(FunctionDefTarget)
+	ast.fix_missing_locations(newFunctionDef)
+	return newFunctionDef
+
+def makeLauncherTqdmJobNumba(callableTarget: str, pathFilenameFoldsTotal: Path, totalEstimated: int) -> ast.Module:
+	linesLaunch = f"""
+if __name__ == '__main__':
+	with ProgressBar(total={totalEstimated}, update_interval=2) as progress:
+		foldsTotal = {callableTarget}(progress)
+		print(foldsTotal)
+		writeStream = open('{pathFilenameFoldsTotal.as_posix()}', 'w')
+		writeStream.write(str(foldsTotal))
+		writeStream.close()
+"""
+	return ast.parse(linesLaunch)
+
+def makeLauncherBasicJobNumba(callableTarget: str, pathFilenameFoldsTotal: Path) -> ast.Module:
+	linesLaunch = f"""
+if __name__ == '__main__':
+	import time
+	timeStart = time.perf_counter()
+	foldsTotal = {callableTarget}()
+	print(foldsTotal, time.perf_counter() - timeStart)
+	writeStream = open('{pathFilenameFoldsTotal.as_posix()}', 'w')
+	writeStream.write(str(foldsTotal))
+	writeStream.close()
+"""
+	return ast.parse(linesLaunch)
 
 def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob: computationState, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	"""The initial results were very bad."""
@@ -55,17 +286,17 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	# NOTE get the raw ingredients: data and the algorithm
 	stateJob: computationState = makeStateJob(mapShape, writeJob=False, **keywordArguments)
 	pythonSource: str = inspect.getsource(algorithmSource)
-	astModule: Module = ast.parse(pythonSource)
-	setFunctionDef: set[FunctionDef] = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
+	astModule: ast.Module = ast.parse(pythonSource)
+	setFunctionDef: set[ast.FunctionDef] = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
 
 	if not callableTarget:
 		if len(setFunctionDef) == 1:
-			FunctionDefTarget: FunctionDef | None = setFunctionDef.pop()
+			FunctionDefTarget: ast.FunctionDef | None = setFunctionDef.pop()
 			callableTarget = FunctionDefTarget.name
 		else:
 			raise ValueError(f"I did not receive a `callableTarget` and {algorithmSource.__name__=} has more than one callable: {setFunctionDef}. Please select one.")
 	else:
-		listFunctionDefTarget: list[FunctionDef] = [statement for statement in setFunctionDef if statement.name == callableTarget]
+		listFunctionDefTarget: list[ast.FunctionDef] = [statement for statement in setFunctionDef if statement.name == callableTarget]
 		FunctionDefTarget = listFunctionDefTarget[0] if listFunctionDefTarget else None
 	if not FunctionDefTarget: raise ValueError(f"I received `{callableTarget=}` and {algorithmSource.__name__=}, but I could not find that function in that source.")
 
@@ -108,7 +339,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	# NOTE starting the count and printing the total
 	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(stateJob['mapShape'])
 
-	astLauncher: Module = makeLauncherBasicJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal)
+	astLauncher: ast.Module = makeLauncherBasicJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal)
 
 	# totalEstimated = 100000000000
 	# astLauncher: Module = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated)
@@ -137,12 +368,12 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	# NOTE add the perfect decorator
 	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
 	if thisIsNumbaDotJit(FunctionDefTarget.decorator_list[0]):
-		astCall: Call = cast(ast.Call, FunctionDefTarget.decorator_list[0])
+		astCall: ast.Call = cast(ast.Call, FunctionDefTarget.decorator_list[0])
 		astCall.func = ast.Name(id=Z0Z_getDecoratorCallable(), ctx=ast.Load())
 		FunctionDefTarget.decorator_list[0] = astCall
 
 	# NOTE add imports, make str, remove unused imports
-	astImports: list[ImportFrom | Import] = allImports.makeListAst()
+	astImports: list[ast.ImportFrom | ast.Import] = allImports.makeListAst()
 	astModule = ast.Module(body=cast(list[ast.stmt], astImports + [FunctionDefTarget] + [astLauncher]), type_ignores=[])
 	ast.fix_missing_locations(astModule)
 	pythonSource = ast.unparse(astModule)

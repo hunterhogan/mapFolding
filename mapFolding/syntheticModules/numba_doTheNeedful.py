@@ -1,7 +1,7 @@
 from mapFolding import indexMy
-from mapFolding.syntheticModules.numbaCount import countParallel, countSequential, countInitialize
-from numba import uint16, int64, jit
-from numpy import integer, ndarray, dtype
+from mapFolding.syntheticModules.numbaCount import countSequential, countInitialize, countParallel
+from numba import uint16, jit, int64
+from numpy import ndarray, dtype, integer
 from typing import Any
 
 @jit((uint16[:, :, ::1], int64[::1], uint16[::1], uint16[::1], uint16[::1], uint16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)

@@ -1,94 +1,17 @@
-from mapFolding import (
-	computationState,
-	EnumIndices,
-	formatFilenameModuleDEFAULT,
-	FREAKOUT,
-	getAlgorithmDispatcher,
-	getAlgorithmSource,
-	getFilenameFoldsTotal,
-	getPathFilenameFoldsTotal,
-	getPathJobRootDEFAULT,
-	getPathPackage,
-	getPathSyntheticModules,
-	hackSSOTdatatype,
-	indexMy,
-	indexTrack,
-	moduleOfSyntheticModules,
-	myPackageNameIs,
-	ParametersNumba,
-	parametersNumbaDEFAULT,
-	parametersNumbaFailEarly,
-	parametersNumbaMinimum,
-	parametersNumbaSuperJit,
-	parametersNumbaSuperJitParallel,
-	setDatatypeElephino,
-	setDatatypeFoldsTotal,
-	setDatatypeLeavesTotal,
-	setDatatypeModule,
-	Z0Z_getDatatypeModuleScalar,
-	Z0Z_getDecoratorCallable,
-	Z0Z_identifierCountFolds,
-	Z0Z_setDatatypeModuleScalar,
-	Z0Z_setDecoratorCallable,
-)
-from mapFolding.someAssemblyRequired.makeJob import makeStateJob
-from numpy import integer
-from numpy.typing import NDArray
-from types import ModuleType
 from collections.abc import Callable, Sequence
-from typing import Any, cast
-from Z0Z_tools import autoDecodingRLE, updateExtendPolishDictionaryLists
+from mapFolding import EnumIndices
+from typing import Any, cast, NamedTuple
+from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
-import autoflake
 import collections
-import copy
-import importlib.util
-import inspect
-import more_itertools
-import numba
-import numpy
-from os import PathLike
-from pathlib import Path
-import python_minifier
-import warnings
-from typing import NamedTuple, TypeAlias
-from ast import Call, FunctionDef, Import, ImportFrom, Module
-from mapFolding.theSSOT import ParametersNumba, computationState
-
-astEverything: TypeAlias = (
-	ast.alias
-	| ast.AnnAssign
-	| ast.arguments
-	| ast.arg
-	| ast.Assign
-	| ast.AST
-	| ast.Attribute
-	| ast.Call
-	| ast.Constant
-	| ast.Expr
-	| ast.FunctionDef
-	| ast.ClassDef
-	| ast.Import
-	| ast.ImportFrom
-	| ast.keyword
-	| ast.Module
-	| ast.Name
-	| ast.Return
-	| ast.Slice
-	| ast.stmt
-	| ast.Subscript
-	| ast.Tuple
-	)
-list_astEverything: TypeAlias = astEverything | list[astEverything] | list[astEverything | list[astEverything]]
+import pathlib
 
 class YouOughtaKnow(NamedTuple):
 	callableSynthesized: str
-	pathFilenameForMe: Path
+	pathFilenameForMe: pathlib.Path
 	astForCompetentProgrammers: ast.ImportFrom
 
-# Generic
 class ifThis:
-	"""Generic AST node predicate builder."""
 	@staticmethod
 	def nameIs(allegedly: str) -> Callable[[ast.AST], bool]:
 		return lambda node: (isinstance(node, ast.Name) and node.id == allegedly)
@@ -141,7 +64,6 @@ class ifThis:
 						)
 
 class Then:
-	"""Generic actions."""
 	@staticmethod
 	def copy_astCallKeywords(astCall: ast.Call) -> dict[str, Any]:
 		"""Extract keyword parameters from a decorator AST node."""
@@ -172,39 +94,26 @@ class NodeReplacer(ast.NodeTransformer):
 	None from the replacement builder indicates that the node should be removed.
 
 	Attributes:
-		findMe: A function that determines whether a node should be replaced.
-		nodeReplacementBuilder: A function that returns a new node or None to remove the node.
+		findMe: A function that finds all locations that match a one or more conditions.
+		doThis: A function that does work at each location, such as make a new node, collect information or delete the node.
 
 	Methods:
 		visit(node: ast.AST) -> Optional[ast.AST]:
 			Visits each node in the AST, replacing or removing it based on the predicate.
 	"""
-	def __init__(self
-				, findMe
-				, nodeReplacementBuilder
-				):
-		self.findMe = findMe
-		self.replaceWith = nodeReplacementBuilder
+	def __init__(self, findMe: Callable[[ast.AST], bool], doThis: Callable[[ast.AST], ast.AST | None]) -> None:
+		self.findMe: Callable[[ast.AST], bool] = findMe
+		self.doThis: Callable[[ast.AST], ast.AST | None] = doThis
 
-	def visit(self, node):
+	def visit(self, node: ast.AST) -> ast.AST | None:
 		if self.findMe(node):
-			return self.replaceWith(node)
+			return self.doThis(node)
 		return super().visit(node)
-
-# Confusing: suspiciously specific but still reusable
-def thisIsNumbaDotJit(Ima: ast.AST) -> bool:
-	return ifThis.isCallWithAttribute(Z0Z_getDatatypeModuleScalar(), Z0Z_getDecoratorCallable())(Ima)
-
-def thisIsJit(Ima: ast.AST) -> bool:
-	return ifThis.isCallWithName(Z0Z_getDecoratorCallable())(Ima)
-
-def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
-	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)
 
 # Domain-based
 class UniversalImportTracker:
 	def __init__(self) -> None:
-		self.dictionaryImportFrom: dict[str, set[tuple[str, str|None]]] = collections.defaultdict(set)
+		self.dictionaryImportFrom: dict[str, set[tuple[str, str | None]]] = collections.defaultdict(set)
 		self.setImport: set[str] = set()
 
 	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
@@ -277,7 +186,7 @@ class RecursiveInliner(ast.NodeTransformer):
 				the called function's statements into the surrounding context.
 	"""
 	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
-		self.dictionaryFunctions: dict[str, FunctionDef] = dictionaryFunctions
+		self.dictionaryFunctions: dict[str, ast.FunctionDef] = dictionaryFunctions
 		self.callablesCompleted: set[str] = set()
 
 	def inlineFunctionBody(self, callableTargetName: str) -> ast.FunctionDef | None:
@@ -285,7 +194,7 @@ class RecursiveInliner(ast.NodeTransformer):
 			return None
 
 		self.callablesCompleted.add(callableTargetName)
-		inlineDefinition: FunctionDef = self.dictionaryFunctions[callableTargetName]
+		inlineDefinition: ast.FunctionDef = self.dictionaryFunctions[callableTargetName]
 		for astNode in ast.walk(inlineDefinition):
 			self.visit(astNode)
 		return inlineDefinition
@@ -295,14 +204,13 @@ class RecursiveInliner(ast.NodeTransformer):
 		if (isinstance(callNodeVisited, ast.Call)
 		and isinstance(callNodeVisited.func, ast.Name)
 		and callNodeVisited.func.id in self.dictionaryFunctions):
-			inlineDefinition: FunctionDef | None = self.inlineFunctionBody(callNodeVisited.func.id)
+			inlineDefinition: ast.FunctionDef | None = self.inlineFunctionBody(callNodeVisited.func.id)
 			if (inlineDefinition and inlineDefinition.body):
 				statementTerminating: ast.stmt = inlineDefinition.body[-1]
 				if (isinstance(statementTerminating, ast.Return)
 				and statementTerminating.value is not None):
 					return self.visit(statementTerminating.value)
-				elif (isinstance(statementTerminating, ast.Expr)
-				and statementTerminating.value is not None):
+				elif isinstance(statementTerminating, ast.Expr):
 					return self.visit(statementTerminating.value)
 				else:
 					return ast.Constant(value=None)

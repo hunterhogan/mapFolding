@@ -1,12 +1,50 @@
-"""I suspect this function will be relatively stable for now.
-Managing settings and options, however, ... I've 'invented'
-everything I am doing. I would rather benefit from humanity's
-collective wisdom."""
-from ast import Import, ImportFrom
+from mapFolding import FREAKOUT, formatFilenameModuleDEFAULT, getAlgorithmDispatcher, getPathPackage, getPathSyntheticModules, indexMy, indexTrack, parametersNumbaSuperJit, parametersNumbaSuperJitParallel
+from mapFolding import getAlgorithmSource
+from mapFolding.someAssemblyRequired.synthesizeNumbaReusable import *
 from pathlib import Path
-from mapFolding.someAssemblyRequired.synthesizeNumba import *
+import ast
+import autoflake
+import inspect
+import types
+import warnings
 
-def getFunctionDef(algorithmSource: ModuleType, *arguments: Any, **keywordArguments: Any) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def makeFunctionDef(astModule: ast.Module,
+					callableTarget: str,
+					parametersNumba: ParametersNumba | None = None,
+					inlineCallables: bool | None = False,
+					unpackArrays: bool | None = False,
+					allImports: UniversalImportTracker | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+	if allImports is None:
+		allImports = UniversalImportTracker()
+	for statement in astModule.body:
+		if isinstance(statement, (ast.Import, ast.ImportFrom)):
+			allImports.addAst(statement)
+
+	if inlineCallables:
+		dictionaryFunctionDef = {statement.name: statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
+		callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctionDef)
+		# NOTE the inliner assumes each function is not called more than once
+		# TODO change the inliner to handle multiple calls to the same function
+		FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
+	else:
+		FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
+	if not FunctionDefTarget:
+		raise ValueError(f"Could not find function {callableTarget} in source code")
+
+	ast.fix_missing_locations(FunctionDefTarget)
+
+	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
+
+	# NOTE vestigial hardcoding
+	if unpackArrays:
+		for tupleUnpack in [(indexMy, 'my'), (indexTrack, 'track')]:
+			unpacker = UnpackArrays(*tupleUnpack)
+			FunctionDefTarget = cast(ast.FunctionDef, unpacker.visit(FunctionDefTarget))
+			ast.fix_missing_locations(FunctionDefTarget)
+
+	return FunctionDefTarget, allImports
+
+def getFunctionDef(algorithmSource: types.ModuleType, *arguments: Any, **keywordArguments: Any) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	pythonSource: str = inspect.getsource(algorithmSource)
 	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
 	FunctionDefTarget, allImports = makeFunctionDef(astModule, *arguments, **keywordArguments)
@@ -56,7 +94,7 @@ def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], r
 
 	return listStuffYouOughtaKnow
 
-def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: bool | None = False, algorithmSource: ModuleType | None = None, relativePathWrite: Path | None = None, filenameModuleWrite: str | None = None, formatFilenameWrite: str | None = None) -> list[YouOughtaKnow]:
+def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: bool | None = False, algorithmSource: types.ModuleType | None = None, relativePathWrite: Path | None = None, filenameModuleWrite: str | None = None, formatFilenameWrite: str | None = None) -> list[YouOughtaKnow]:
 	if relativePathWrite and relativePathWrite.is_absolute():
 		raise ValueError("The path to write the module must be relative to the root of the package.")
 	if not algorithmSource:
@@ -88,7 +126,7 @@ def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: b
 		listFunctionDefs.append(FunctionDefTarget)
 		allImportsModule.update(allImports)
 
-	listAstImports: list[ImportFrom | Import] = allImportsModule.makeListAst()
+	listAstImports: list[ast.ImportFrom | ast.Import] = allImportsModule.makeListAst()
 	pythonSource: str = makePythonSource(listFunctionDefs, listAstImports, additional_imports)
 
 	filenameWrite: str | None = filenameModuleWrite or Z0Z_filenameModuleWrite
@@ -104,7 +142,7 @@ def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: b
 		allImports 		= UniversalImportTracker()
 		filenameWrite 	= None
 		for stuff in listStuffYouOughtaKnow:
-			statement: ImportFrom = stuff.astForCompetentProgrammers
+			statement: ast.ImportFrom = stuff.astForCompetentProgrammers
 			if isinstance(statement, (ast.Import, ast.ImportFrom)): # type: ignore "Unnecessary isinstance call; "ImportFrom" is always an instance of "Import | ImportFrom" Pylance(reportUnnecessaryIsInstance)". Ok, Pylance, bad data never happens. What a dumbass warning/error/problem.
 				allImports.addAst(statement)
 		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
