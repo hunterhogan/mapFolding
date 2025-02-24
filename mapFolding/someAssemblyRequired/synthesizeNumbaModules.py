@@ -8,12 +8,12 @@ import inspect
 import types
 import warnings
 
-def makeFunctionDef(astModule: ast.Module,
-					callableTarget: str,
-					parametersNumba: ParametersNumba | None = None,
-					inlineCallables: bool | None = False,
-					unpackArrays: bool | None = False,
-					allImports: UniversalImportTracker | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def makeFunctionDef(astModule: ast.Module
+					, callableTarget: str
+					, parametersNumba: ParametersNumba | None = None
+					, inlineCallables: bool | None = False
+					, unpackArrays: bool | None = False
+					, allImports: UniversalImportTracker | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	if allImports is None:
 		allImports = UniversalImportTracker()
 	for statement in astModule.body:
@@ -21,10 +21,8 @@ def makeFunctionDef(astModule: ast.Module,
 			allImports.addAst(statement)
 
 	if inlineCallables:
-		dictionaryFunctionDef = {statement.name: statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
-		callableInlinerWorkhorse = RecursiveInliner(dictionaryFunctionDef)
-		# NOTE the inliner assumes each function is not called more than once
-		# TODO change the inliner to handle multiple calls to the same function
+		dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = {statement.name: statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
+		callableInlinerWorkhorse = FunctionInliner(dictionaryFunctionDef)
 		FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
 	else:
 		FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
@@ -108,10 +106,10 @@ def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: b
 	listFunctionDefs: list[ast.FunctionDef] = []
 	allImportsModule = UniversalImportTracker()
 	for callableTarget in listCallablesInline:
-		parametersNumba = None
+		parametersNumba: ParametersNumba | None = None
 		inlineCallables = True
 		unpackArrays 	= False
-		allImports 		= None
+		allImports: UniversalImportTracker | None = None
 		match callableTarget:
 			case 'countParallel':
 				parametersNumba = parametersNumbaSuperJitParallel

@@ -147,7 +147,7 @@ def countParallel(connectionGraph: ndarray[tuple[int, int, int], dtype[integer[A
 
 	taskDivisionsPrange = myPARALLEL[indexMy.taskDivisions.value]
 
-	for indexSherpa in prange(taskDivisionsPrange):
+	for indexSherpa in prange(taskDivisionsPrange): # type: ignore
 		groupsOfFolds: int = 0
 
 		gapsWhere = gapsWherePARALLEL.copy()

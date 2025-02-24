@@ -24,7 +24,7 @@ import numpy
 import os
 
 def getFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]]) -> str:
-	"""Imagine your computer has been counting folds for 70 hours, and when it tries to save your newly discovered value,
+	"""Imagine your computer has been counting folds for 9 days, and when it tries to save your newly discovered value,
 	the filename is invalid. I bet you think this function is more important after that thought experiment.
 
 	Make a standardized filename for the computed value `foldsTotal`.

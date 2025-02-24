@@ -1,10 +1,13 @@
 from collections.abc import Callable, Sequence
 from mapFolding import EnumIndices
 from typing import Any, cast, NamedTuple
+from typing import TypeAlias
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import collections
 import pathlib
+
+ast_Identifier: TypeAlias = str
 
 class YouOughtaKnow(NamedTuple):
 	callableSynthesized: str
@@ -27,7 +30,11 @@ class ifThis:
 		return ifThis.anyOf(ifThis.nameIs(allegedly), ifThis.subscriptNameIs(allegedly))
 
 	@staticmethod
-	def isCallWithAttribute(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
+	def CallAsNameIs(callableName: str) -> Callable[[ast.AST], bool]:
+		return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callableName)
+
+	@staticmethod
+	def CallAsModuleAttributeIs(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
 		return lambda node: (isinstance(node, ast.Call)
 							and isinstance(node.func, ast.Attribute)
 							and isinstance(node.func.value, ast.Name)
@@ -35,8 +42,27 @@ class ifThis:
 							and node.func.attr == callableName)
 
 	@staticmethod
-	def isCallWithName(callableName: str) -> Callable[[ast.AST], bool]:
-		return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callableName)
+	def CallReallyIs(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
+		return ifThis.anyOf(ifThis.CallAsNameIs(callableName), ifThis.CallAsModuleAttributeIs(moduleName, callableName))
+
+	@staticmethod
+	def CallDoesNotCallItself(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
+		return lambda node: (ifThis.CallReallyIs(moduleName, callableName)(node)
+							and 1 == sum(1 for descendant in ast.walk(node)
+											if ifThis.CallReallyIs(moduleName, callableName)(descendant)))
+
+	@staticmethod
+	def RecklessCallAsAttributeIs(callableName: str) -> Callable[[ast.AST], bool]:
+		"""Warning: You might match more than you want."""
+		return lambda node: (isinstance(node, ast.Call)
+							and isinstance(node.func, ast.Attribute)
+							and isinstance(node.func.value, ast.Name)
+							and node.func.attr == callableName)
+
+	@staticmethod
+	def RecklessCallReallyIs(callableName: str) -> Callable[[ast.AST], bool]:
+		"""Warning: You might match more than you want."""
+		return ifThis.anyOf(ifThis.CallAsNameIs(callableName), ifThis.RecklessCallAsAttributeIs(callableName))
 
 	@staticmethod
 	def AssignTo(identifier: str) -> Callable[[ast.AST], bool]:
@@ -110,11 +136,15 @@ class NodeReplacer(ast.NodeTransformer):
 			return self.doThis(node)
 		return super().visit(node)
 
-# Domain-based
 class UniversalImportTracker:
-	def __init__(self) -> None:
+	def __init__(self, walkThis: ast.AST | None = None) -> None:
 		self.dictionaryImportFrom: dict[str, set[tuple[str, str | None]]] = collections.defaultdict(set)
 		self.setImport: set[str] = set()
+
+		if walkThis:
+			for smurf in ast.walk(walkThis):
+				if isinstance(smurf, (ast.Import, ast.ImportFrom)):
+					self.addAst(smurf)
 
 	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
 		if isinstance(astImport_, ast.Import):
@@ -158,43 +188,13 @@ class UniversalImportTracker:
 		for tracker in fromTracker:
 			self.setImport.update(tracker.setImport)
 
-# Intricate and specialized
-class RecursiveInliner(ast.NodeTransformer):
-	"""
-	Class RecursiveInliner:
-		A custom AST NodeTransformer designed to recursively inline function calls from a given dictionary
-		of function definitions into the AST. Once a particular function has been inlined, it is marked
-		as completed to avoid repeated inlining. This transformation modifies the AST in-place by substituting
-		eligible function calls with the body of their corresponding function.
-		Attributes:
-			dictionaryFunctions (Dict[str, ast.FunctionDef]):
-				A mapping of function name to its AST definition, used as a source for inlining.
-			callablesCompleted (Set[str]):
-				A set to track function names that have already been inlined to prevent multiple expansions.
-		Methods:
-			inlineFunctionBody(callableTargetName: str) -> Optional[ast.FunctionDef]:
-				Retrieves the AST definition for a given function name from dictionaryFunctions
-				and recursively inlines any function calls within it. Returns the function definition
-				that was inlined or None if the function was already processed.
-			visit_Call(callNode: ast.Call) -> ast.AST:
-				Inspects calls within the AST. If a function call matches one in dictionaryFunctions,
-				it is replaced by the inlined body. If the last statement in the inlined body is a return
-				or an expression, that value or expression is substituted; otherwise, a constant is returned.
-			visit_Expr(node: ast.Expr) -> Union[ast.AST, List[ast.AST]]:
-				Handles expression nodes in the AST. If the expression is a function call from
-				dictionaryFunctions, its statements are expanded in place, effectively inlining
-				the called function's statements into the surrounding context.
-	"""
+class FunctionInliner(ast.NodeTransformer):
 	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
 		self.dictionaryFunctions: dict[str, ast.FunctionDef] = dictionaryFunctions
-		self.callablesCompleted: set[str] = set()
 
-	def inlineFunctionBody(self, callableTargetName: str) -> ast.FunctionDef | None:
-		if (callableTargetName in self.callablesCompleted):
-			return None
-
-		self.callablesCompleted.add(callableTargetName)
+	def inlineFunctionBody(self, callableTargetName: str) -> ast.FunctionDef:
 		inlineDefinition: ast.FunctionDef = self.dictionaryFunctions[callableTargetName]
+		# Process nested calls within the inlined function
 		for astNode in ast.walk(inlineDefinition):
 			self.visit(astNode)
 		return inlineDefinition
@@ -203,10 +203,13 @@ class RecursiveInliner(ast.NodeTransformer):
 		callNodeVisited: ast.AST = self.generic_visit(node)
 		if (isinstance(callNodeVisited, ast.Call)
 		and isinstance(callNodeVisited.func, ast.Name)
-		and callNodeVisited.func.id in self.dictionaryFunctions):
-			inlineDefinition: ast.FunctionDef | None = self.inlineFunctionBody(callNodeVisited.func.id)
+		and callNodeVisited.func.id in self.dictionaryFunctions
+		and ifThis.CallDoesNotCallItself("", callNodeVisited.func.id)(callNodeVisited)):
+			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(callNodeVisited.func.id)
+
 			if (inlineDefinition and inlineDefinition.body):
 				statementTerminating: ast.stmt = inlineDefinition.body[-1]
+
 				if (isinstance(statementTerminating, ast.Return)
 				and statementTerminating.value is not None):
 					return self.visit(statementTerminating.value)
@@ -217,11 +220,12 @@ class RecursiveInliner(ast.NodeTransformer):
 		return callNodeVisited
 
 	def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.AST]:
-		if (isinstance(node.value, ast.Call)):
-			if (isinstance(node.value.func, ast.Name) and node.value.func.id in self.dictionaryFunctions):
-				inlineDefinition = self.inlineFunctionBody(node.value.func.id)
-				if (inlineDefinition):
-					return [self.visit(stmt) for stmt in inlineDefinition.body]
+		if isinstance(node.value, ast.Call):
+			if (isinstance(node.value.func, ast.Name)
+			and node.value.func.id in self.dictionaryFunctions
+			and ifThis.CallDoesNotCallItself("", node.value.func.id)(node.value)):
+				inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(node.value.func.id)
+				return [self.visit(stmt) for stmt in inlineDefinition.body]
 		return self.generic_visit(node)
 
 class UnpackArrays(ast.NodeTransformer):

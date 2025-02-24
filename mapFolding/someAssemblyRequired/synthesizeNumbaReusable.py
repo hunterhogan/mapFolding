@@ -6,10 +6,10 @@ from typing import cast
 import ast
 
 def thisIsNumbaDotJit(Ima: ast.AST) -> bool:
-	return ifThis.isCallWithAttribute(Z0Z_getDatatypeModuleScalar(), Z0Z_getDecoratorCallable())(Ima)
+	return ifThis.CallAsModuleAttributeIs(Z0Z_getDatatypeModuleScalar(), Z0Z_getDecoratorCallable())(Ima)
 
 def thisIsJit(Ima: ast.AST) -> bool:
-	return ifThis.isCallWithName(Z0Z_getDecoratorCallable())(Ima)
+	return ifThis.CallAsNameIs(Z0Z_getDecoratorCallable())(Ima)
 
 def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
 	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)

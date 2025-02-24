@@ -345,7 +345,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	TODO create function for assigning value to `totalEstimated`
 	totalEstimated = 100000000000
 	"""
-	totalEstimated = 100000000000
+	totalEstimated = 1493028892051200
 	astLauncher: ast.Module = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated)
 
 	# from numba_progress import ProgressBar, ProgressBarType
@@ -424,7 +424,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	return pathFilenameWriteJob
 
 if __name__ == '__main__':
-	mapShape: list[int] = [2,14]
+	mapShape: list[int] = [2,21]
 	from mapFolding.syntheticModules import numbaCount
 	algorithmSource: ModuleType = numbaCount
 
@@ -437,7 +437,7 @@ if __name__ == '__main__':
 	pathFilenameWriteJob = None
 
 	setDatatypeFoldsTotal('int64', sourGrapes=True)
-	setDatatypeElephino('int16', sourGrapes=True)
+	setDatatypeElephino('uint8', sourGrapes=True)
 	setDatatypeLeavesTotal('uint8', sourGrapes=True)
 	Z0Z_setDatatypeModuleScalar('numba')
 	Z0Z_setDecoratorCallable('jit')
