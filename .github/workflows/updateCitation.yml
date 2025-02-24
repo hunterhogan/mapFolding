@@ -1,7 +1,6 @@
 name: Update CITATION.cff
 
 on:
-  # pre-receive:
   push:
   workflow_dispatch:
 

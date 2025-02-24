@@ -339,32 +339,62 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	# NOTE starting the count and printing the total
 	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(stateJob['mapShape'])
 
-	astLauncher: ast.Module = makeLauncherBasicJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal)
+	# astLauncher: ast.Module = makeLauncherBasicJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal)
 
-	# totalEstimated = 100000000000
-	# astLauncher: Module = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated)
-
-	# from numba_progress import ProgressBar, ProgressBarType
-	# allImports.addImportFromStr('numba_progress', 'ProgressBar')
-	# allImports.addImportFromStr('numba_progress', 'ProgressBarType')
-
-	# add ProgressBarType parameter to function args
-	# counterArg = ast.arg(arg='Z0Z_counter', annotation=ast.Name(id='ProgressBarType', ctx=ast.Load()))
-	# FunctionDefTarget.args.args.append(counterArg)
 	"""
-	steps
-	add `ProgressBarType` to the jit sig
-	add `Z0Z_counter.update(1)` to folds increment
-
 	TODO create function for assigning value to `totalEstimated`
 	totalEstimated = 100000000000
-	reminder: nogil=True
 	"""
+	totalEstimated = 100000000000
+	astLauncher: ast.Module = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated)
+
+	# from numba_progress import ProgressBar, ProgressBarType
+	allImports.addImportFromStr('numba_progress', 'ProgressBar')
+	allImports.addImportFromStr('numba_progress', 'ProgressBarType')
+
+	# add ProgressBarType parameter to function args
+	counterArg = ast.arg(arg='Z0Z_counter', annotation=ast.Name(id='ProgressBarType', ctx=ast.Load()))
+	FunctionDefTarget.args.args.append(counterArg)
+
+	if parametersNumba is None:
+		parametersNumba = parametersNumbaDEFAULT
+	parametersNumba['nogil'] = True
+
+	# Add counter update after groupsOfFolds increment
+	class AddCounterUpdate(NodeReplacer):
+		def __init__(self):
+			super().__init__(
+				lambda node: (isinstance(node, ast.AugAssign)
+							and isinstance(node.target, ast.Name)
+							and node.target.id == 'groupsOfFolds'
+							and isinstance(node.op, ast.Add)),
+				self.insert_counter_update
+			)
+
+		def insert_counter_update(self, node: ast.AST) -> list[ast.stmt]:
+			counter_update = ast.Expr(
+				value=ast.Call(
+					func=ast.Attribute(
+						value=ast.Name(id='Z0Z_counter', ctx=ast.Load()),
+						attr='update',
+						ctx=ast.Load()
+					),
+					args=[ast.Constant(value=1)],
+					keywords=[]
+				)
+			)
+			return [cast(ast.stmt, node), counter_update]
+
+		def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
+			if self.findMe(node):
+				return self.doThis(node)
+			return cast(ast.AST | None, super().visit(node))
+
+	FunctionDefTarget = cast(ast.FunctionDef, AddCounterUpdate().visit(FunctionDefTarget))
+	ast.fix_missing_locations(FunctionDefTarget)
 
 	FunctionDefTarget, allImports = insertReturnStatementIn_body(FunctionDefTarget, stateJob['foldGroups'], allImports)
 
-	# TODO have: `if isinstance(signatureElement.annotation, ast.Subscript)`
-	#  need `if isinstance(signatureElement.annotation, ast.Name)`
 	# NOTE add the perfect decorator
 	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
 	if thisIsNumbaDotJit(FunctionDefTarget.decorator_list[0]):
@@ -394,15 +424,15 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	return pathFilenameWriteJob
 
 if __name__ == '__main__':
-	mapShape: list[int] = [5,5]
+	mapShape: list[int] = [2,14]
 	from mapFolding.syntheticModules import numbaCount
 	algorithmSource: ModuleType = numbaCount
 
 	callableTarget = 'countSequential'
 
 	parametersNumba: ParametersNumba = parametersNumbaDEFAULT
-	parametersNumba['boundscheck'] = False
 	parametersNumba['nogil'] = True
+	parametersNumba['boundscheck'] = False
 
 	pathFilenameWriteJob = None
 

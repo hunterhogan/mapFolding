@@ -23,7 +23,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
 		return astCallable
 
-	def make_arg4parameter(signatureElement: ast.arg) -> ast.Subscript | None:
+	def make_arg4parameter(signatureElement: ast.arg):
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
@@ -46,6 +46,9 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 			datatypeNumba = ast.Name(id=datatype_attr, ctx=ast.Load())
 
 			return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
+
+		elif isinstance(signatureElement.annotation, ast.Name):
+			return signatureElement.annotation
 		return
 
 	datatypeModuleDecorator: str = Z0Z_getDatatypeModuleScalar()

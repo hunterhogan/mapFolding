@@ -101,11 +101,11 @@ class NodeReplacer(ast.NodeTransformer):
 		visit(node: ast.AST) -> Optional[ast.AST]:
 			Visits each node in the AST, replacing or removing it based on the predicate.
 	"""
-	def __init__(self, findMe: Callable[[ast.AST], bool], doThis: Callable[[ast.AST], ast.AST | None]) -> None:
+	def __init__(self, findMe: Callable[[ast.AST], bool], doThis: Callable[[ast.AST], ast.AST | Sequence[ast.AST] | None]) -> None:
 		self.findMe: Callable[[ast.AST], bool] = findMe
-		self.doThis: Callable[[ast.AST], ast.AST | None] = doThis
+		self.doThis: Callable[[ast.AST], ast.AST | Sequence[ast.AST] | None] = doThis
 
-	def visit(self, node: ast.AST) -> ast.AST | None:
+	def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
 		if self.findMe(node):
 			return self.doThis(node)
 		return super().visit(node)
