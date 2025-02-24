@@ -79,7 +79,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	for pirateScowl in FunctionDefTarget.args.args.copy():
 		match pirateScowl.arg:
 			case 'my':
-				FunctionDefTarget, allImports = findAndReplaceArraySubscriptIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], ['taskIndex', 'dimensionsTotal'], allImports)
+				FunctionDefTarget, allImports = findAndReplaceArraySubscriptIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], allImports)
 			case 'track':
 				FunctionDefTarget, allImports = findAndReplaceTrackArrayIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], allImports)
 			case 'connectionGraph':
@@ -94,6 +94,8 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 				pass
 		FunctionDefTarget.args.args.remove(pirateScowl)
 
+	for assignTarget in ['taskIndex', 'dimensionsTotal']:
+		FunctionDefTarget = removeAssignTargetFrom_body(FunctionDefTarget, assignTarget)
 	# NOTE replace identifiers with static values with their values
 	FunctionDefTarget, allImports = findAndReplaceAnnAssignIn_body(FunctionDefTarget, allImports)
 	FunctionDefTarget = findAstNameReplaceWithConstantIn_body(FunctionDefTarget, 'dimensionsTotal', int(stateJob['my'][indexMy.dimensionsTotal]))
@@ -105,16 +107,19 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 
 	# NOTE starting the count and printing the total
 	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(stateJob['mapShape'])
-	totalEstimated = 100000000000
-	astLauncher: Module = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated)
+
+	astLauncher: Module = makeLauncherBasicJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal)
+
+	# totalEstimated = 100000000000
+	# astLauncher: Module = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated)
 
 	# from numba_progress import ProgressBar, ProgressBarType
-	allImports.addImportFromStr('numba_progress', 'ProgressBar')
-	allImports.addImportFromStr('numba_progress', 'ProgressBarType')
+	# allImports.addImportFromStr('numba_progress', 'ProgressBar')
+	# allImports.addImportFromStr('numba_progress', 'ProgressBarType')
 
 	# add ProgressBarType parameter to function args
-	counterArg = ast.arg(arg='Z0Z_counter', annotation=ast.Name(id='ProgressBarType', ctx=ast.Load()))
-	FunctionDefTarget.args.args.append(counterArg)
+	# counterArg = ast.arg(arg='Z0Z_counter', annotation=ast.Name(id='ProgressBarType', ctx=ast.Load()))
+	# FunctionDefTarget.args.args.append(counterArg)
 	"""
 	steps
 	add `ProgressBarType` to the jit sig
@@ -158,7 +163,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	return pathFilenameWriteJob
 
 if __name__ == '__main__':
-	mapShape: list[int] = [3,3,3,3]
+	mapShape: list[int] = [5,5]
 	from mapFolding.syntheticModules import numbaCount
 	algorithmSource: ModuleType = numbaCount
 
@@ -168,7 +173,7 @@ if __name__ == '__main__':
 	parametersNumba['boundscheck'] = False
 	parametersNumba['nogil'] = True
 
-	pathFilenameWriteJob = 'tqdm'
+	pathFilenameWriteJob = None
 
 	setDatatypeFoldsTotal('int64', sourGrapes=True)
 	setDatatypeElephino('int16', sourGrapes=True)

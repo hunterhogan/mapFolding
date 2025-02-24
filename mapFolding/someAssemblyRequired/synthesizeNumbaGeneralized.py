@@ -51,9 +51,35 @@ from os import PathLike
 from pathlib import Path
 import python_minifier
 import warnings
-from typing import NamedTuple
+from typing import NamedTuple, TypeAlias
 from ast import Call, FunctionDef, Import, ImportFrom, Module
 from mapFolding.theSSOT import ParametersNumba, computationState
+
+astEverything: TypeAlias = (
+	ast.alias
+	| ast.AnnAssign
+	| ast.arguments
+	| ast.arg
+	| ast.Assign
+	| ast.AST
+	| ast.Attribute
+	| ast.Call
+	| ast.Constant
+	| ast.Expr
+	| ast.FunctionDef
+	| ast.ClassDef
+	| ast.Import
+	| ast.ImportFrom
+	| ast.keyword
+	| ast.Module
+	| ast.Name
+	| ast.Return
+	| ast.Slice
+	| ast.stmt
+	| ast.Subscript
+	| ast.Tuple
+	)
+list_astEverything: TypeAlias = astEverything | list[astEverything] | list[astEverything | list[astEverything]]
 
 class YouOughtaKnow(NamedTuple):
 	callableSynthesized: str
@@ -68,6 +94,16 @@ class ifThis:
 		return lambda node: (isinstance(node, ast.Name) and node.id == allegedly)
 
 	@staticmethod
+	def subscriptNameIs(allegedly: str) -> Callable[[ast.AST], bool]:
+		return lambda node: (isinstance(node, ast.Subscript)
+							and isinstance(node.value, ast.Name)
+							and node.value.id == allegedly)
+
+	@staticmethod
+	def NameReallyIs(allegedly: str) -> Callable[[ast.AST], bool]:
+		return ifThis.anyOf(ifThis.nameIs(allegedly), ifThis.subscriptNameIs(allegedly))
+
+	@staticmethod
 	def isCallWithAttribute(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
 		return lambda node: (isinstance(node, ast.Call)
 							and isinstance(node.func, ast.Attribute)
@@ -80,11 +116,15 @@ class ifThis:
 		return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callableName)
 
 	@staticmethod
-	def isAssignTarget(identifier: str) -> Callable[[ast.AST], bool]:
+	def AssignTo(identifier: str) -> Callable[[ast.AST], bool]:
 		return lambda node: (isinstance(node, ast.Assign)
 								and len(node.targets) > 0
-								and isinstance(node.targets[0], ast.Name)
-								and node.targets[0].id == identifier)
+								and ifThis.NameReallyIs(identifier)(node.targets[0]))
+
+	@staticmethod
+	def AnnAssignTo(identifier: str) -> Callable[[ast.AST], bool]:
+		return lambda node: (isinstance(node, ast.AnnAssign)
+								and ifThis.NameReallyIs(identifier)(node.target))
 
 	@staticmethod
 	def anyOf(*predicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
@@ -120,6 +160,10 @@ class Then:
 			keywords=list_dictionaryKeywords + list(list_astKeywords) if list_astKeywords else [],
 		)
 
+	@staticmethod
+	def removeNode(astNode: ast.AST) -> None:
+		return None
+
 class NodeReplacer(ast.NodeTransformer):
 	"""
 	A node transformer that replaces or removes AST nodes based on a condition.
@@ -135,13 +179,16 @@ class NodeReplacer(ast.NodeTransformer):
 		visit(node: ast.AST) -> Optional[ast.AST]:
 			Visits each node in the AST, replacing or removing it based on the predicate.
 	"""
-	def __init__(self, findMe: Callable[[ast.AST], bool], nodeReplacementBuilder: Callable[[ast.AST], ast.AST | None]) -> None:
+	def __init__(self
+				, findMe
+				, nodeReplacementBuilder
+				):
 		self.findMe = findMe
-		self.nodeReplacementBuilder = nodeReplacementBuilder
+		self.replaceWith = nodeReplacementBuilder
 
-	def visit(self, node: ast.AST) -> ast.AST | None | Any:
+	def visit(self, node):
 		if self.findMe(node):
-			return self.nodeReplacementBuilder(node)
+			return self.replaceWith(node)
 		return super().visit(node)
 
 # Confusing: suspiciously specific but still reusable
@@ -229,8 +276,8 @@ class RecursiveInliner(ast.NodeTransformer):
 				dictionaryFunctions, its statements are expanded in place, effectively inlining
 				the called function's statements into the surrounding context.
 	"""
-	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]):
-		self.dictionaryFunctions = dictionaryFunctions
+	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
+		self.dictionaryFunctions: dict[str, FunctionDef] = dictionaryFunctions
 		self.callablesCompleted: set[str] = set()
 
 	def inlineFunctionBody(self, callableTargetName: str) -> ast.FunctionDef | None:
@@ -238,19 +285,19 @@ class RecursiveInliner(ast.NodeTransformer):
 			return None
 
 		self.callablesCompleted.add(callableTargetName)
-		inlineDefinition = self.dictionaryFunctions[callableTargetName]
+		inlineDefinition: FunctionDef = self.dictionaryFunctions[callableTargetName]
 		for astNode in ast.walk(inlineDefinition):
 			self.visit(astNode)
 		return inlineDefinition
 
 	def visit_Call(self, node: ast.Call) -> Any | ast.Constant | ast.Call | ast.AST:
-		callNodeVisited = self.generic_visit(node)
+		callNodeVisited: ast.AST = self.generic_visit(node)
 		if (isinstance(callNodeVisited, ast.Call)
 		and isinstance(callNodeVisited.func, ast.Name)
 		and callNodeVisited.func.id in self.dictionaryFunctions):
-			inlineDefinition = self.inlineFunctionBody(callNodeVisited.func.id)
+			inlineDefinition: FunctionDef | None = self.inlineFunctionBody(callNodeVisited.func.id)
 			if (inlineDefinition and inlineDefinition.body):
-				statementTerminating = inlineDefinition.body[-1]
+				statementTerminating: ast.stmt = inlineDefinition.body[-1]
 				if (isinstance(statementTerminating, ast.Return)
 				and statementTerminating.value is not None):
 					return self.visit(statementTerminating.value)

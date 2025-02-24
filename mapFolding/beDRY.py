@@ -45,7 +45,7 @@ def getFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[in
 		mapShape: A sequence of integers representing the dimensions of the map.
 
 	Returns:
-		filenameFoldsTotal: A filename string in format 'pNxM.foldsTotal' where N,M are sorted dimensions
+		filenameFoldsTotal: A filename string in format 'pMxN.foldsTotal' where M,N are sorted dimensions
 	"""
 	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
 

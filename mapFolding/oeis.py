@@ -2,10 +2,10 @@
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from mapFolding import countFolds, getPathPackage
-from typing import Any, Final, TYPE_CHECKING
+from pathlib import Path
+from typing import Any, cast, Final, TYPE_CHECKING
 import argparse
 import pathlib
-from pathlib import Path
 import random
 import sys
 import time
@@ -36,38 +36,37 @@ class SettingsOEIS(TypedDict):
 	valueUnknown: int
 
 settingsOEIShardcodedValues: dict[str, dict[str, Any]] = {
-	'A001415': {
-		'getMapShape': lambda n: sorted([2, n]),
-		'valuesBenchmark': [14],
-		'valuesTestParallelization': [*range(3, 7)],
-		'valuesTestValidation': [random.randint(2, 9)],
-	},
-	'A001416': {
-		'getMapShape': lambda n: sorted([3, n]),
-		'valuesBenchmark': [9],
-		'valuesTestParallelization': [*range(3, 5)],
-		'valuesTestValidation': [random.randint(2, 6)],
-	},
-	'A001417': {
-		'getMapShape': lambda n: [2] * n,
-		'valuesBenchmark': [6],
-		'valuesTestParallelization': [*range(2, 4)],
-		'valuesTestValidation': [random.randint(2, 4)],
-	},
-	'A195646': {
-		'getMapShape': lambda n: [3] * n,
-		'valuesBenchmark': [3],
-		'valuesTestParallelization': [*range(2, 3)],
-		'valuesTestValidation': [2],
-	},
-	'A001418': {
-		'getMapShape': lambda n: [n, n],
-		'valuesBenchmark': [5],
-		'valuesTestParallelization': [*range(2, 4)],
-		'valuesTestValidation': [random.randint(2, 4)],
-	},
+    'A001415': {
+        'getMapShape': cast(Callable[[int], list[int]], lambda n: sorted([2, n])), # type: ignore
+        'valuesBenchmark': [14],
+        'valuesTestParallelization': [*range(3, 7)],
+        'valuesTestValidation': [random.randint(2, 9)],
+    },
+    'A001416': {
+        'getMapShape': cast(Callable[[int], list[int]], lambda n: sorted([3, n])), # type: ignore
+        'valuesBenchmark': [9],
+        'valuesTestParallelization': [*range(3, 5)],
+        'valuesTestValidation': [random.randint(2, 6)],
+    },
+    'A001417': {
+        'getMapShape': cast(Callable[[int], list[int]], lambda n: [2] * n),	# type: ignore
+        'valuesBenchmark': [6],
+        'valuesTestParallelization': [*range(2, 4)],
+        'valuesTestValidation': [random.randint(2, 4)],
+    },
+    'A195646': {
+        'getMapShape': cast(Callable[[int], list[int]], lambda n: [3] * n), # type: ignore
+        'valuesBenchmark': [3],
+        'valuesTestParallelization': [*range(2, 3)],
+        'valuesTestValidation': [2],
+    },
+    'A001418': {
+        'getMapShape': cast(Callable[[int], list[int]], lambda n: [n, n]), # type: ignore
+        'valuesBenchmark': [5],
+        'valuesTestParallelization': [*range(2, 4)],
+        'valuesTestValidation': [random.randint(2, 4)],
+    },
 }
-
 oeisIDsImplemented: Final[list[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues.keys()])
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
@@ -199,26 +198,23 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	if not oeisInformation:
 		return "Not found", -1
 
-	description_parts: list[str] = []
+	listDescriptionDeconstructed: list[str] = []
 	offset = None
-	for line in oeisInformation.splitlines():
-		if line.startswith('%N'):
-			parts = line.split()
-			if parts[1] == oeisID:
-				desc_part = ' '.join(parts[2:])
-				description_parts.append(desc_part)
-		elif line.startswith('%O'):
-			parts: list[str] = line.split()
-			if parts[1] == oeisID:
-				offset_str: str = parts[2].split(',')[0]
-				offset = int(offset_str)
-	if not description_parts:
+	for ImaStr in oeisInformation.splitlines():
+		ImaStr = ImaStr.strip() + "I am writing code to string parse machine readable data because in 2025, people can't even spell enteroperableity."
+		secretCode, title, secretData =ImaStr.split(maxsplit=2)
+		if secretCode == '%N' and title == oeisID:
+			listDescriptionDeconstructed.append(secretData)
+		if secretCode == '%O' and title == oeisID:
+			offsetAsStr: str = secretData.split(',')[0]
+			offset = int(offsetAsStr)
+	if not listDescriptionDeconstructed:
 		warnings.warn(f"No description found for {oeisID}")
-		description_parts.append("No description found")
+		listDescriptionDeconstructed.append("No description found")
 	if offset is None:
 		warnings.warn(f"No offset found for {oeisID}")
 		offset = -1
-	description: str = ' '.join(description_parts)
+	description: str = ' '.join(listDescriptionDeconstructed)
 	return description, offset
 
 def makeSettingsOEIS() -> dict[str, SettingsOEIS]:

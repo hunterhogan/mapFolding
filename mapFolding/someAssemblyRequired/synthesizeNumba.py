@@ -1,30 +1,37 @@
 """I think this module is free of hardcoded values.
 TODO: consolidate the logic in this module."""
+from ast import Call, keyword
 from mapFolding.someAssemblyRequired.synthesizeNumbaGeneralized import *
 
 def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[integer[Any]]], allImports: UniversalImportTracker, unrollSlices: int | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+	# parameter: I define moduleConstructor
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
-	constructorName = arrayType.__name__
-	# NOTE hack
-	constructorName = constructorName.replace('ndarray', 'array')
-	argData_dtype: numpy.dtype[integer[Any]] = arrayTarget.dtype
-	datatypeName = argData_dtype.name
-	dtypeAsName = f"{moduleConstructor}_{datatypeName}"
-
-	allImports.addImportFromStr(moduleConstructor, constructorName)
-	allImports.addImportFromStr(moduleConstructor, datatypeName, dtypeAsName)
 
 	def insertAssign(assignee: str, arraySlice: numpy.ndarray[tuple[int, ...], numpy.dtype[integer[Any]]]) -> None:
 		nonlocal FunctionDefTarget
-		onlyDataRLE = autoDecodingRLE(arraySlice, addSpaces=True)
-		astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
-		dataAst = astStatement.value
+		# define the "location" for the assignment that will be inserted as a parameter,
+		# which in this case, is the "initialization" area of the function body
 
-		arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))])
+		astAssignee = ast.Name(id=assignee, ctx=ast.Store())
 
-		assignment = ast.Assign(targets=[ast.Name(id=assignee, ctx=ast.Store())], value=arrayCall)#NOTE
-		FunctionDefTarget.body.insert(0, assignment)
+		# Not necessarily abstract, but can be made into a function
+		# new function Gamma
+		constructorName = arrayType.__name__.replace('ndarray', 'array') # NOTE hack
+		dataAsStrRLE = autoDecodingRLE(arraySlice, addSpaces=True)
+		dataAs_astExpr = cast(ast.Expr, ast.parse(dataAsStrRLE).body[0]).value
+		dtypeName = hackSSOTdatatype(identifier)
+		dtypeAsName = f"{moduleConstructor}_{dtypeName}"
+		list_astKeywords: list[keyword] = [ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))]
+		allImports.addImportFromStr(moduleConstructor, dtypeName, dtypeAsName)
+
+		# Abstract This: `Then` Delta: insert new assignment at the location defined by a parameter
+		astCall: Call = Then.make_astCall(name=constructorName, args=[dataAs_astExpr], list_astKeywords=list_astKeywords)
+		assignment = ast.Assign(targets=[astAssignee], value=astCall)
+		FunctionDefTarget.body.insert(0, assignment) # change this to insert at the location defined by a parameter
+
+		# Abstract This: `Then` Echo: add the constructor import
+		allImports.addImportFromStr(moduleConstructor, constructorName)
 
 	if not unrollSlices:
 		insertAssign(identifier, arrayTarget)
@@ -35,62 +42,71 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 	return FunctionDefTarget, allImports
 
 def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
-
+	# parameter: I define moduleConstructor
 	arrayType = type(arrayTarget)
 	moduleConstructor = arrayType.__module__
-	constructorName = arrayType.__name__
-	# NOTE hack
-	constructorName = constructorName.replace('ndarray', 'array')
-	allImports.addImportFromStr(moduleConstructor, constructorName)
 
 	for statement in FunctionDefTarget.body.copy():
 		if ifThis.isUnpackingAnArray(identifier)(statement):
-			datatypeName = hackSSOTdatatype(statement.targets[0].id)
-			dtypeAsName = f"{moduleConstructor}_{datatypeName}"
+			# Abstract This: `Then` Alpha: get the array slice (data)
 			indexAsStr = ast.unparse(statement.value.slice)
 			arraySlice = arrayTarget[eval(indexAsStr)]
+			# Abstract This: `Then` Beta: get the assignee (target)
+			astAssignee: ast.Name = statement.targets[0]
 
-			onlyDataRLE = autoDecodingRLE(arraySlice, addSpaces=True)
-			astStatement = cast(ast.Expr, ast.parse(onlyDataRLE).body[0])
-			dataAst = astStatement.value
+			# Not necessarily abstract, but can be made into a function
+			# new function Gamma
+			constructorName = arrayType.__name__.replace('ndarray', 'array') # NOTE hack
+			dataAsStrRLE = autoDecodingRLE(arraySlice, addSpaces=True)
+			dataAs_astExpr = cast(ast.Expr, ast.parse(dataAsStrRLE).body[0]).value
+			dtypeName = hackSSOTdatatype(identifier)
+			dtypeAsName = f"{moduleConstructor}_{dtypeName}"
+			list_astKeywords: list[keyword] = [ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))]
+			allImports.addImportFromStr(moduleConstructor, dtypeName, dtypeAsName)
 
-			arrayCall = Then.make_astCall(name=constructorName, args=[dataAst], list_astKeywords=[ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))])
-
-			assignment = ast.Assign(targets=[statement.targets[0]], value=arrayCall)
-			FunctionDefTarget.body.insert(0, assignment)
+			# Abstract This: `Then` Charlie: 'define' the "location" for the assignment that will be inserted,
+			# which in this case, is the location of the assignment that is being replaced
 			FunctionDefTarget.body.remove(statement)
-			allImports.addImportFromStr(moduleConstructor, datatypeName, dtypeAsName)
+			# Abstract This: `Then` Delta: insert new assignment at the location defined by a parameter
+			astCall: Call = Then.make_astCall(name=constructorName, args=[dataAs_astExpr], list_astKeywords=list_astKeywords)
+			assignment = ast.Assign(targets=[astAssignee], value=astCall)
+			FunctionDefTarget.body.insert(0, assignment) # change this to insert at the location defined by a parameter
+			# Abstract This: `Then` Echo: add the constructor import
+			allImports.addImportFromStr(moduleConstructor, constructorName)
 	return FunctionDefTarget, allImports
 
-def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[integer[Any]]], Z0Z_listChaff: list[str], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+
+	# parameter: I define moduleConstructor
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
+
 	for statement in FunctionDefTarget.body.copy():
 		if ifThis.isUnpackingAnArray(identifier)(statement):
-			astSubscript: ast.Subscript = statement.value
+			# Abstract This: `Then` Alpha: get the array slice (data)
+			indexAsStr = ast.unparse(statement.value.slice)
+			arraySlice = arrayTarget[eval(indexAsStr)]
+			# Abstract This: `Then` Beta: get the assignee (target)
 			astAssignee: ast.Name = statement.targets[0]
-			argData_dtypeName = hackSSOTdatatype(astAssignee.id)
-			allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
-			indexAs_astAttribute: ast.Attribute = astSubscript.slice
-			indexAsStr = ast.unparse(indexAs_astAttribute)
-			argDataSlice: int = arrayTarget[eval(indexAsStr)].item()
-			astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()), args=[ast.Constant(value=argDataSlice)], keywords=[])
-			assignment = ast.Assign(targets=[astAssignee], value=astCall)
-			if astAssignee.id not in Z0Z_listChaff:
-				FunctionDefTarget.body.insert(0, assignment)
+
+			# I do custom stuff
+			arraySliceItem = arraySlice.item()
+			constructorName = hackSSOTdatatype(astAssignee.id)
+			dataAs_astExpr = ast.Constant(value=arraySliceItem)
+			list_astKeywords: list[keyword] = []
+
+			# Abstract This: `Then` Charlie: 'define' the "location" for the assignment that will be inserted,
+			# which in this case, is the location of the assignment that is being replaced
 			FunctionDefTarget.body.remove(statement)
+			# Abstract This: `Then` Delta: insert new assignment at the location defined by a parameter
+			astCall: Call = Then.make_astCall(name=constructorName, args=[dataAs_astExpr], list_astKeywords=list_astKeywords)
+			assignment = ast.Assign(targets=[astAssignee], value=astCall)
+			FunctionDefTarget.body.insert(0, assignment) # change this to insert at the location defined by a parameter
+			# Abstract This: `Then` Echo: add the constructor import
+			allImports.addImportFromStr(moduleConstructor, constructorName)
 	return FunctionDefTarget, allImports
 
 def removeAssignTargetFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
-	# Remove assignment nodes where the target is either a Subscript referencing `identifier` or satisfies ifThis.nameIs(identifier).
-	def predicate(astNode: ast.AST) -> bool:
-		if not isinstance(astNode, ast.Assign) or not astNode.targets:
-			return False
-		targetNode = astNode.targets[0]
-		return (isinstance(targetNode, ast.Subscript) and isinstance(targetNode.value, ast.Name) and targetNode.value.id == identifier) or ifThis.nameIs(identifier)(targetNode)
-	def replacementBuilder(astNode: ast.AST) -> ast.stmt | None:
-		# Returning None removes the node.
-		return None
-	FunctionDefSherpa = NodeReplacer(predicate, replacementBuilder).visit(FunctionDefTarget)
+	FunctionDefSherpa = NodeReplacer(ifThis.AssignTo(identifier), Then.removeNode).visit(FunctionDefTarget)
 	if not FunctionDefSherpa:
 		raise FREAKOUT("Dude, where's my function?")
 	else:
