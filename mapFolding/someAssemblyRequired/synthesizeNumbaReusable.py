@@ -85,7 +85,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 	decoratorModule = Z0Z_getDatatypeModuleScalar()
 	decoratorCallable = Z0Z_getDecoratorCallable()
 	allImports.addImportFromStr(decoratorModule, decoratorCallable)
-	astDecorator = Then.make_astCall(decoratorCallable, list_argsDecorator, listDecoratorKeywords, None)
+	astDecorator = Then.make_astCall(Then.makeName(decoratorCallable), list_argsDecorator, listDecoratorKeywords, None)
 
 	FunctionDefTarget.decorator_list = [astDecorator]
 	return FunctionDefTarget, allImports

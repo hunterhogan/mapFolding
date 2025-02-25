@@ -23,7 +23,7 @@ def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, stateme
 	dtypeAsName = f"{moduleConstructor}_{dtypeName}"
 	list_astKeywords: list[ast.keyword] = [ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))]
 	allImports.addImportFromStr(moduleConstructor, dtypeName, dtypeAsName)
-	astCall: ast.Call = Then.make_astCall(name=constructorName, args=[dataAs_astExpr], list_astKeywords=list_astKeywords)
+	astCall: ast.Call = Then.make_astCall(caller=Then.makeName(constructorName), args=[dataAs_astExpr], list_astKeywords=list_astKeywords)
 	assignment = ast.Assign(targets=[astAssignee], value=astCall)
 	FunctionDefTarget.body.insert(0, assignment)
 	FunctionDefTarget.body.remove(statement)
@@ -67,15 +67,15 @@ def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, iden
 			constructorName = hackSSOTdatatype(astAssignee.id) # type: ignore
 			dataAs_astExpr = ast.Constant(value=arraySliceItem)
 			list_astKeywords: list[ast.keyword] = []
-			astCall: ast.Call = Then.make_astCall(name=constructorName, args=[dataAs_astExpr], list_astKeywords=list_astKeywords)
+			astCall: ast.Call = Then.make_astCall(caller=Then.makeName(constructorName), args=[dataAs_astExpr], list_astKeywords=list_astKeywords)
 			assignment = ast.Assign(targets=[astAssignee], value=astCall)
 			FunctionDefTarget.body.insert(0, assignment)
 			FunctionDefTarget.body.remove(statement)
 			allImports.addImportFromStr(moduleConstructor, constructorName)
 	return FunctionDefTarget, allImports
 
-def removeAssignTargetFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
-	FunctionDefSherpa = NodeReplacer(ifThis.AssignTo(identifier), Then.removeNode).visit(FunctionDefTarget)
+def removeAssignmentFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
+	FunctionDefSherpa = NodeReplacer(ifThis.anyAssignmentTo(identifier), Then.removeThis).visit(FunctionDefTarget)
 	if not FunctionDefSherpa:
 		raise FREAKOUT("Dude, where's my function?")
 	else:
@@ -84,6 +84,7 @@ def removeAssignTargetFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: 
 	return FunctionDefTarget
 
 def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+	"""Unlike most of the other functions, this is generic: it tries to turn an annotation into a construction call."""
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
 	for stmt in FunctionDefTarget.body.copy():
 		if isinstance(stmt, ast.AnnAssign):
@@ -126,7 +127,6 @@ def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget
 	"""Add multiplication and return statement to function, properly constructing AST nodes."""
 	# Create AST for multiplication operation
 	multiplicand = Z0Z_identifierCountFolds
-	datatype = hackSSOTdatatype(multiplicand)
 	multiplyOperation = ast.BinOp(
 		left=ast.Name(id=multiplicand, ctx=ast.Load()),
 		op=ast.Mult(), right=ast.Constant(value=int(arrayTarget[-1])))
@@ -207,12 +207,13 @@ def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorN
 	ast.fix_missing_locations(newFunctionDef)
 	return newFunctionDef
 
-def makeLauncherTqdmJobNumba(callableTarget: str, pathFilenameFoldsTotal: Path, totalEstimated: int) -> ast.Module:
+def makeLauncherTqdmJobNumba(callableTarget: str, pathFilenameFoldsTotal: Path, totalEstimated: int, leavesTotal:int) -> ast.Module:
 	linesLaunch = f"""
 if __name__ == '__main__':
-	with ProgressBar(total={totalEstimated}, update_interval=2) as progress:
-		foldsTotal = {callableTarget}(progress)
-		print(foldsTotal)
+	with ProgressBar(total={totalEstimated}, update_interval=2) as statusUpdate:
+		{callableTarget}(statusUpdate)
+		foldsTotal = statusUpdate.n * {leavesTotal}
+		print("", foldsTotal)
 		writeStream = open('{pathFilenameFoldsTotal.as_posix()}', 'w')
 		writeStream.write(str(foldsTotal))
 		writeStream.close()
@@ -235,8 +236,8 @@ if __name__ == '__main__':
 def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob: computationState, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	"""The initial results were very bad."""
 	FunctionDefTarget = findAndReplaceWhileLoopIn_body(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal])
-	FunctionDefTarget = removeAssignTargetFrom_body(FunctionDefTarget, 'indexDimension')
-	FunctionDefTarget = removeAssignTargetFrom_body(FunctionDefTarget, 'connectionGraph')
+	FunctionDefTarget = removeAssignmentFrom_body(FunctionDefTarget, 'indexDimension')
+	FunctionDefTarget = removeAssignmentFrom_body(FunctionDefTarget, 'connectionGraph')
 	FunctionDefTarget, allImports = insertArrayIn_body(FunctionDefTarget, 'connectionGraph', stateJob['connectionGraph'], allImports, stateJob['my'][indexMy.dimensionsTotal])
 	for index in range(stateJob['my'][indexMy.dimensionsTotal]):
 		class ReplaceConnectionGraph(ast.NodeTransformer):
@@ -258,10 +259,9 @@ def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob: computationS
 		FunctionDefTarget = transformer.visit(FunctionDefTarget)
 	return FunctionDefTarget, allImports
 
-def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callableTarget: str | None = None, parametersNumba: ParametersNumba | None = None, pathFilenameWriteJob: str | PathLike[str] | None = None, unrollCountGaps: bool | None = False, **keywordArguments: Any | None) -> Path:
-	""" Parameters: **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`. """
-
-	""" Notes:
+def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callableTarget: str | None = None, parametersNumba: ParametersNumba | None = None, pathFilenameWriteJob: str | PathLike[str] | None = None, unrollCountGaps: bool | None = False, Z0Z_totalEstimated: int = 0, **keywordArguments: Any | None) -> Path:
+	""" Parameters: **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`.
+	Notes:
 	Hypothetically, everything can now be configured with parameters and functions. And changing how the job is written is relatively easy.
 
 	Overview
@@ -318,17 +318,19 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 			case 'gapsWhere':
 				FunctionDefTarget, allImports = insertArrayIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], allImports)
 			case 'foldGroups':
-				FunctionDefTarget = removeAssignTargetFrom_body(FunctionDefTarget, pirateScowl.arg)
-				# FunctionDefTarget, allImports = insertArrayIn_body(FunctionDefTarget, pirateScowl.arg, stateJob[pirateScowl.arg], allImports)
-				# continue
+				FunctionDefTarget = removeAssignmentFrom_body(FunctionDefTarget, pirateScowl.arg)
 			case _:
 				pass
 		FunctionDefTarget.args.args.remove(pirateScowl)
 
-	for assignTarget in ['taskIndex', 'dimensionsTotal']:
-		FunctionDefTarget = removeAssignTargetFrom_body(FunctionDefTarget, assignTarget)
+	identifierCounter = Z0Z_identifierCountFolds
+	astExprIncrementCounter = ast.Expr(value = Then.make_astCall(Then.makeNameDOTname(identifierCounter, 'update'), args=[ast.Constant(value=1)], list_astKeywords=[]))
+	FunctionDefTarget= cast(ast.FunctionDef, NodeReplacer(ifThis.AugAssignTo(identifierCounter), Then.replaceWith(astExprIncrementCounter)).visit(FunctionDefTarget))
+	ast.fix_missing_locations(FunctionDefTarget)
+
+	for assignmentTarget in ['taskIndex', 'dimensionsTotal', identifierCounter]:
+		FunctionDefTarget = removeAssignmentFrom_body(FunctionDefTarget, assignmentTarget)
 	# NOTE replace identifiers with static values with their values
-	FunctionDefTarget, allImports = findAndReplaceAnnAssignIn_body(FunctionDefTarget, allImports)
 	FunctionDefTarget = findAstNameReplaceWithConstantIn_body(FunctionDefTarget, 'dimensionsTotal', int(stateJob['my'][indexMy.dimensionsTotal]))
 	FunctionDefTarget = findThingyReplaceWithConstantIn_body(FunctionDefTarget, 'foldGroups[-1]', int(stateJob['foldGroups'][-1]))
 
@@ -341,60 +343,25 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 
 	# astLauncher: ast.Module = makeLauncherBasicJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal)
 
-	"""
-	TODO create function for assigning value to `totalEstimated`
-	totalEstimated = 100000000000
-	"""
-	totalEstimated = 1493028892051200
-	astLauncher: ast.Module = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated)
+	# TODO create function for assigning value to `totalEstimated`
+	totalEstimated = Z0Z_totalEstimated
+	astLauncher: ast.Module = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated, stateJob['foldGroups'][-1])
 
 	# from numba_progress import ProgressBar, ProgressBarType
 	allImports.addImportFromStr('numba_progress', 'ProgressBar')
 	allImports.addImportFromStr('numba_progress', 'ProgressBarType')
 
 	# add ProgressBarType parameter to function args
-	counterArg = ast.arg(arg='Z0Z_counter', annotation=ast.Name(id='ProgressBarType', ctx=ast.Load()))
+	counterArg = ast.arg(arg=identifierCounter, annotation=ast.Name(id='ProgressBarType', ctx=ast.Load()))
 	FunctionDefTarget.args.args.append(counterArg)
 
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDEFAULT
 	parametersNumba['nogil'] = True
 
-	# Add counter update after groupsOfFolds increment
-	class AddCounterUpdate(NodeReplacer):
-		def __init__(self):
-			super().__init__(
-				lambda node: (isinstance(node, ast.AugAssign)
-							and isinstance(node.target, ast.Name)
-							and node.target.id == 'groupsOfFolds'
-							and isinstance(node.op, ast.Add)),
-				self.insert_counter_update
-			)
+	# FunctionDefTarget, allImports = insertReturnStatementIn_body(FunctionDefTarget, stateJob['foldGroups'], allImports)
 
-		def insert_counter_update(self, node: ast.AST) -> list[ast.stmt]:
-			counter_update = ast.Expr(
-				value=ast.Call(
-					func=ast.Attribute(
-						value=ast.Name(id='Z0Z_counter', ctx=ast.Load()),
-						attr='update',
-						ctx=ast.Load()
-					),
-					args=[ast.Constant(value=1)],
-					keywords=[]
-				)
-			)
-			return [cast(ast.stmt, node), counter_update]
-
-		def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
-			if self.findMe(node):
-				return self.doThis(node)
-			return cast(ast.AST | None, super().visit(node))
-
-	FunctionDefTarget = cast(ast.FunctionDef, AddCounterUpdate().visit(FunctionDefTarget))
-	ast.fix_missing_locations(FunctionDefTarget)
-
-	FunctionDefTarget, allImports = insertReturnStatementIn_body(FunctionDefTarget, stateJob['foldGroups'], allImports)
-
+	FunctionDefTarget, allImports = findAndReplaceAnnAssignIn_body(FunctionDefTarget, allImports)
 	# NOTE add the perfect decorator
 	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
 	if thisIsNumbaDotJit(FunctionDefTarget.decorator_list[0]):
@@ -424,7 +391,17 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	return pathFilenameWriteJob
 
 if __name__ == '__main__':
-	mapShape: list[int] = [2,21]
+	mapShape: list[int] = [5,5]
+	dictionaryEstimates: dict[tuple[int, ...], int] = {
+		(2,2,2,2,2,2,2,2): 362794844160000,
+		(2,21): 1493028892051200,
+		(3,15): 9842024675968800,
+		(3,3,3,3,3): 85109616000000,
+		(3,3,3,3): 85109616000,
+		(8,8): 129950723279272000,
+	}
+
+	totalEstimated = dictionaryEstimates.get(tuple(mapShape), 10**8)
 	from mapFolding.syntheticModules import numbaCount
 	algorithmSource: ModuleType = numbaCount
 
@@ -442,4 +419,4 @@ if __name__ == '__main__':
 	Z0Z_setDatatypeModuleScalar('numba')
 	Z0Z_setDecoratorCallable('jit')
 
-	writeJobNumba(mapShape, algorithmSource, callableTarget, parametersNumba, pathFilenameWriteJob)
+	writeJobNumba(mapShape, algorithmSource, callableTarget, parametersNumba, pathFilenameWriteJob, Z0Z_totalEstimated=totalEstimated)

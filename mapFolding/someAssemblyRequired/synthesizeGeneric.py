@@ -76,6 +76,15 @@ class ifThis:
 								and ifThis.NameReallyIs(identifier)(node.target))
 
 	@staticmethod
+	def AugAssignTo(identifier: str) -> Callable[[ast.AST], bool]:
+		return lambda node: (isinstance(node, ast.AugAssign)
+								and ifThis.NameReallyIs(identifier)(node.target))
+
+	@staticmethod
+	def anyAssignmentTo(identifier: str) -> Callable[[ast.AST], bool]:
+		return ifThis.anyOf(ifThis.AssignTo(identifier), ifThis.AnnAssignTo(identifier), ifThis.AugAssignTo(identifier))
+
+	@staticmethod
 	def anyOf(*predicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		return lambda node: any(pred(node) for pred in predicates)
 
@@ -100,16 +109,46 @@ class Then:
 		return dictionaryKeywords
 
 	@staticmethod
-	def make_astCall(name: str, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None, dictionaryKeywords: dict[str, Any] | None = None) -> ast.Call:
+	def make_astCall(caller: ast.Name | ast.Attribute
+				, args: Sequence[ast.expr] | None = None
+				, list_astKeywords: Sequence[ast.keyword] | None = None
+				, dictionaryKeywords: dict[str, Any] | None = None
+				) -> ast.Call:
 		list_dictionaryKeywords: list[ast.keyword] = [ast.keyword(arg=keyName, value=ast.Constant(value=keyValue)) for keyName, keyValue in dictionaryKeywords.items()] if dictionaryKeywords else []
 		return ast.Call(
-			func=ast.Name(id=name, ctx=ast.Load()),
+			func=caller,
 			args=list(args) if args else [],
 			keywords=list_dictionaryKeywords + list(list_astKeywords) if list_astKeywords else [],
 		)
 
 	@staticmethod
-	def removeNode(astNode: ast.AST) -> None:
+	def makeName(identifier: ast_Identifier) -> ast.Name:
+		return ast.Name(id=identifier, ctx=ast.Load())
+
+	@staticmethod
+	def addDOTname(nameChain: ast.Name | ast.Attribute, dotName: str) -> ast.Attribute:
+		return ast.Attribute(value=nameChain, attr=dotName, ctx=ast.Load())
+
+	@staticmethod
+	def makeNameDOTname(identifier: ast_Identifier, *dotName: str) -> ast.Name | ast.Attribute:
+		nameDOTname: ast.Name | ast.Attribute = Then.makeName(identifier)
+		if not dotName:
+			return nameDOTname
+		for suffix in dotName:
+			nameDOTname = Then.addDOTname(nameDOTname, suffix)
+		return nameDOTname
+
+	@staticmethod
+	def appendThis(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]:
+		return lambda belowMe: [cast(ast.stmt, belowMe),
+								cast(ast.stmt, astStatement)]
+
+	@staticmethod
+	def replaceWith(astStatement: ast.AST) -> Callable[[ast.AST], ast.stmt]:
+		return lambda replaceMe: cast(ast.stmt, astStatement)
+
+	@staticmethod
+	def removeThis(astNode: ast.AST) -> None:
 		return None
 
 class NodeReplacer(ast.NodeTransformer):
