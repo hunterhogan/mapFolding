@@ -9,16 +9,14 @@ from tests.conftest import (
 	validateOEISid,
 )
 from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache
+from pathlib import Path
+from typing import Any, NoReturn
 from urllib.error import URLError
 import io
-from typing import Any, NoReturn
-from pathlib import Path
 import pytest
 import random
 import re as regex
-import unittest
 import unittest.mock
-import urllib
 import urllib.request
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])

@@ -1,7 +1,7 @@
 from mapFolding.someAssemblyRequired.synthesizeNumbaReusable import *
 import ast
 import types
-from mapFolding import FREAKOUT as FREAKOUT, formatFilenameModuleDEFAULT as formatFilenameModuleDEFAULT, getAlgorithmDispatcher as getAlgorithmDispatcher, getAlgorithmSource as getAlgorithmSource, getPathPackage as getPathPackage, getPathSyntheticModules as getPathSyntheticModules, indexMy as indexMy, indexTrack as indexTrack, parametersNumbaSuperJit as parametersNumbaSuperJit, parametersNumbaSuperJitParallel as parametersNumbaSuperJitParallel
+from mapFolding import FREAKOUT as FREAKOUT, formatFilenameModule as formatFilenameModule, getAlgorithmDispatcher as getAlgorithmDispatcher, getAlgorithmSource as getAlgorithmSource, getPathPackageINSTALLING as getPathPackageINSTALLING, getPathSyntheticModules as getPathSyntheticModules, indexMy as indexMy, indexTrack as indexTrack, parametersNumbaSuperJit as parametersNumbaSuperJit, parametersNumbaSuperJitParallel as parametersNumbaSuperJitParallel
 from pathlib import Path
 from typing import Any
 

@@ -176,14 +176,12 @@ class NodeReplacer(ast.NodeTransformer):
 		return super().visit(node)
 
 class UniversalImportTracker:
-	def __init__(self, walkThis: ast.AST | None = None) -> None:
+	def __init__(self, startWith: ast.AST | None = None) -> None:
 		self.dictionaryImportFrom: dict[str, set[tuple[str, str | None]]] = collections.defaultdict(set)
 		self.setImport: set[str] = set()
 
-		if walkThis:
-			for smurf in ast.walk(walkThis):
-				if isinstance(smurf, (ast.Import, ast.ImportFrom)):
-					self.addAst(smurf)
+		if startWith:
+			self.walkThis(startWith)
 
 	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
 		if isinstance(astImport_, ast.Import):
@@ -218,7 +216,7 @@ class UniversalImportTracker:
 			*fromTracker: One or more UniversalImportTracker objects to merge from.
 		"""
 		# Merge all import-from dictionaries
-		dictionaryMerged = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(tracker.dictionaryImportFrom for tracker in fromTracker), destroyDuplicates=True, reorderLists=True)
+		dictionaryMerged: dict[str, list[Any]] = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(tracker.dictionaryImportFrom for tracker in fromTracker), destroyDuplicates=True, reorderLists=True)
 
 		# Convert lists back to sets for each module's imports
 		self.dictionaryImportFrom = {module: set(listNames) for module, listNames in dictionaryMerged.items()}
@@ -226,6 +224,11 @@ class UniversalImportTracker:
 		# Update direct imports
 		for tracker in fromTracker:
 			self.setImport.update(tracker.setImport)
+
+	def walkThis(self, walkThis: ast.AST) -> None:
+			for smurf in ast.walk(walkThis):
+				if isinstance(smurf, (ast.Import, ast.ImportFrom)):
+					self.addAst(smurf)
 
 class FunctionInliner(ast.NodeTransformer):
 	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:

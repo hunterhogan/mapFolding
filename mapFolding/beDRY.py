@@ -7,13 +7,10 @@ from mapFolding import (
 	hackSSOTdtype,
 	indexMy,
 	indexTrack,
-	setDatatypeElephino,
-	setDatatypeFoldsTotal,
 	setDatatypeLeavesTotal,
-	setDatatypeModule,
 )
 from collections.abc import Sequence
-from numba import get_num_threads, set_num_threads # type: ignore
+from numba import get_num_threads, set_num_threads 
 from numpy import dtype, integer, ndarray
 from numpy.typing import DTypeLike, NDArray
 from pathlib import Path
@@ -220,7 +217,10 @@ def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None =
 	else:
 		raise NotImplementedError("Somebody done broke it.")
 
-def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: int | str | None = None, CPUlimit: bool | float | int | None = None, **keywordArguments: str | bool | None) -> computationState:
+def outfitCountFolds(listDimensions: Sequence[int]
+					, computationDivisions: int | str | None = None
+					, CPUlimit: bool | float | int | None = None
+					) -> computationState:
 	"""
 	Initializes and configures the computation state for map folding computations.
 
@@ -228,40 +228,10 @@ def outfitCountFolds(listDimensions: Sequence[int], computationDivisions: int | 
 		listDimensions: The dimensions of the map to be folded
 		computationDivisions (None): see `getTaskDivisions`
 		CPUlimit (None): see `setCPUlimit`
-		**keywordArguments: Datatype management, it's complicated: see the code below.
 
 	Returns:
 		stateInitialized: The initialized computation state
 	"""
-	# keywordArguments START
-	kwourGrapes = keywordArguments.get('sourGrapes', None)
-	if kwourGrapes:
-		sourGrapes = True
-	else:
-		sourGrapes = False
-
-	ImaSetTheDatatype = keywordArguments.get('datatypeElephino', None)
-	if ImaSetTheDatatype:
-		ImaSetTheDatatype = str(ImaSetTheDatatype)
-		setDatatypeElephino(ImaSetTheDatatype, sourGrapes)
-
-	ImaSetTheDatatype = keywordArguments.get('datatypeFoldsTotal', None)
-	if ImaSetTheDatatype:
-		ImaSetTheDatatype = str(ImaSetTheDatatype)
-		setDatatypeFoldsTotal(ImaSetTheDatatype, sourGrapes)
-
-	ImaSetTheDatatype = keywordArguments.get('datatypeLeavesTotal', None)
-	if ImaSetTheDatatype:
-		ImaSetTheDatatype = str(ImaSetTheDatatype)
-		setDatatypeLeavesTotal(ImaSetTheDatatype, sourGrapes)
-
-	# NOTE well: this might be only hypothetical because as of this writing, `makeDataContainer` only makes numpy.zeros. But it's here in case things change.
-	ImaSetTheDatatype = keywordArguments.get('datatypeModule', None)
-	if ImaSetTheDatatype:
-		ImaSetTheDatatype = str(ImaSetTheDatatype)
-		setDatatypeModule(ImaSetTheDatatype, sourGrapes)
-	# keywordArguments END
-
 	my = makeDataContainer(len(indexMy), hackSSOTdtype('my'))
 
 	mapShape = tuple(sorted(validateListDimensions(listDimensions)))

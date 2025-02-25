@@ -41,10 +41,10 @@ _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 	'computationState',
 	'EnumIndices',
 	'getDispatcherCallable',
-	'getPathPackage',
 	'indexMy',
 	'indexTrack',
 	'myPackageNameIs',
+	'pathPackage',
 ])
 
 # Datatype management
@@ -60,17 +60,21 @@ _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 
 # Synthesize modules
 _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
-	'formatFilenameModuleDEFAULT',
+	'additional_importsHARDCODED',
+	'formatFilenameModule',
 	'getAlgorithmDispatcher',
 	'getAlgorithmSource',
 	'getPathJobRootDEFAULT',
 	'getPathSyntheticModules',
+	'listCallablesDispatchees',
 	'moduleOfSyntheticModules',
+	'Z0Z_filenameModuleWrite',
+	'Z0Z_filenameWriteElseCallableTarget',
 	'Z0Z_getDatatypeModuleScalar',
 	'Z0Z_getDecoratorCallable',
+	'Z0Z_identifierCountFolds',
 	'Z0Z_setDatatypeModuleScalar',
 	'Z0Z_setDecoratorCallable',
-	'Z0Z_identifierCountFolds',
 ])
 
 # Parameters for the prima donna
@@ -101,4 +105,3 @@ if TYPE_CHECKING:
 	from oeis import *
 	from theDao import *
 	from theSSOT import *
-	from theSSOTdatatypes import *

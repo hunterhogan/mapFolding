@@ -1,3 +1,4 @@
+from mapFolding.theConfiguration import *
 from collections import defaultdict
 from typing import Any, cast, Final
 import enum
@@ -42,19 +43,17 @@ _datatypeDefault: Final[dict[str, str]] = {
 	'leavesTotal': 'uint16',
 }
 _datatypeModule: str = ''
-_datatypeModuleDEFAULT: Final[str] = 'numpy'
-
-_datatype: dict[str, str] = defaultdict(str)
+_registryOfDatatypes: dict[str, str] = defaultdict(str)
 
 def reportDatatypeLimit(identifier: str, datatype: str, sourGrapes: bool | None = False) -> str:
-	global _datatype
-	if not _datatype[identifier]:
-		_datatype[identifier] = datatype
-	elif _datatype[identifier] == datatype:
+	global _registryOfDatatypes
+	if not _registryOfDatatypes[identifier]:
+		_registryOfDatatypes[identifier] = datatype
+	elif _registryOfDatatypes[identifier] == datatype:
 		pass
 	elif sourGrapes:
-		raise Exception(f"Datatype is '{_datatype[identifier]}' not '{datatype}', so you can take your ball and go home.")
-	return _datatype[identifier]
+		raise Exception(f"Datatype is '{_registryOfDatatypes[identifier]}' not '{datatype}', so you can take your ball and go home.")
+	return _registryOfDatatypes[identifier]
 
 def setDatatypeModule(datatypeModule: str, sourGrapes: bool | None = False) -> str:
 	global _datatypeModule
@@ -76,20 +75,20 @@ def setDatatypeLeavesTotal(datatype: str, sourGrapes: bool | None = False) -> st
 	return reportDatatypeLimit('leavesTotal', datatype, sourGrapes)
 
 def _get_datatype(identifier: str) -> str:
-	global _datatype
-	if not _datatype[identifier]:
+	global _registryOfDatatypes
+	if not _registryOfDatatypes[identifier]:
 		if identifier in indexMy._member_names_:
-			_datatype[identifier] = _datatypeDefault.get(identifier) or _get_datatype('elephino')
+			_registryOfDatatypes[identifier] = _datatypeDefault.get(identifier) or _get_datatype('elephino')
 		elif identifier in indexTrack._member_names_:
-			_datatype[identifier] = _datatypeDefault.get(identifier) or _get_datatype('elephino')
+			_registryOfDatatypes[identifier] = _datatypeDefault.get(identifier) or _get_datatype('elephino')
 		else:
-			_datatype[identifier] = _datatypeDefault.get(identifier) or _get_datatype('foldsTotal')
-	return _datatype[identifier]
+			_registryOfDatatypes[identifier] = _datatypeDefault.get(identifier) or _get_datatype('foldsTotal')
+	return _registryOfDatatypes[identifier]
 
 def getDatatypeModule() -> str:
 	global _datatypeModule
 	if not _datatypeModule:
-		_datatypeModule = _datatypeModuleDEFAULT
+		_datatypeModule = datatypeModulePACKAGING
 	return _datatypeModule
 
 def setInStone(identifier: str) -> type[Any]:

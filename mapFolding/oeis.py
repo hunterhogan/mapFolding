@@ -1,7 +1,7 @@
 """Everything implementing the The Online Encyclopedia of Integer Sequences (OEIS); _only_ things that implement _only_ the OEIS."""
 from collections.abc import Callable
 from datetime import datetime, timedelta
-from mapFolding import countFolds, getPathPackage
+from mapFolding import countFolds, pathPackage
 from pathlib import Path
 from typing import Any, cast, Final, TYPE_CHECKING
 import argparse
@@ -23,7 +23,7 @@ cacheDays = 7
 """
 Section: make `settingsOEIS`"""
 
-_pathCache: Path = getPathPackage() / ".cache"
+pathCache: Path = pathPackage / ".cache"
 
 class SettingsOEIS(TypedDict):
 	description: str
@@ -179,7 +179,7 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 		IOError: If there is an error reading from or writing to the local cache.
 	"""
 
-	pathFilenameCache: Path = _pathCache / getFilenameOEISbFile(oeisID)
+	pathFilenameCache: Path = pathCache / getFilenameOEISbFile(oeisID)
 	url: str = f"https://oeis.org/{oeisID}/{getFilenameOEISbFile(oeisID)}"
 
 	oeisInformation: None | str = getOEISofficial(pathFilenameCache, url)
@@ -190,7 +190,7 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 
 def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	oeisID = validateOEISid(oeisID)
-	pathFilenameCache: Path = _pathCache / f"{oeisID}.txt"
+	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
 	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
 	oeisInformation: None | str = getOEISofficial(pathFilenameCache, url)
@@ -322,13 +322,13 @@ def OEIS_for_n() -> None:
 
 def clearOEIScache() -> None:
 	"""Delete all cached OEIS sequence files."""
-	if not _pathCache.exists():
-		print(f"Cache directory, {_pathCache}, not found - nothing to clear.")
+	if not pathCache.exists():
+		print(f"Cache directory, {pathCache}, not found - nothing to clear.")
 		return
 	for oeisID in settingsOEIS:
-		( _pathCache / f"{oeisID}.txt" ).unlink(missing_ok=True)
-		( _pathCache / getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
-	print(f"Cache cleared from {_pathCache}")
+		( pathCache / f"{oeisID}.txt" ).unlink(missing_ok=True)
+		( pathCache / getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
+	print(f"Cache cleared from {pathCache}")
 
 def getOEISids() -> None:
 	"""Print all available OEIS sequence IDs that are directly implemented."""

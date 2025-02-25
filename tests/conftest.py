@@ -3,44 +3,14 @@
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import (
-	getAlgorithmDispatcher,
-	getDispatcherCallable,
-	countFolds,
-	getPathFilenameFoldsTotal,
-	oeisIDfor_n,
-	FREAKOUT,
-	saveFoldsTotal,
-	hackSSOTdtype,
-	clearOEIScache,
-	getOEISids,
-)
+from mapFolding import ( getAlgorithmDispatcher, getAlgorithmSource, getDispatcherCallable, countFolds, getPathFilenameFoldsTotal, listCallablesDispatchees, moduleOfSyntheticModules, oeisIDfor_n, FREAKOUT, saveFoldsTotal, hackSSOTdtype, clearOEIScache, getOEISids, ) # type: ignore
 from mapFolding import basecamp
-from mapFolding.beDRY import (
-	getLeavesTotal,
-	validateListDimensions,
-	makeDataContainer,
-	parseDimensions,
-	setCPUlimit,
-	makeConnectionGraph,
-	getTaskDivisions,
-)
-from mapFolding.oeis import (
-	oeisIDsImplemented,
-	settingsOEIS,
-	validateOEISid,
-	getOEISidValues,
-	OEIS_for_n,
-)
-from mapFolding.someAssemblyRequired import (
-	makeFlowNumbaOptimized,
-	YouOughtaKnow,
-	writeJobNumba,
-)
+from mapFolding.beDRY import ( getLeavesTotal, validateListDimensions, makeDataContainer, parseDimensions, setCPUlimit, makeConnectionGraph, getTaskDivisions, ) # type: ignore
+from mapFolding.oeis import ( oeisIDsImplemented, settingsOEIS, validateOEISid, getOEISidValues, OEIS_for_n, ) # type: ignore
+from mapFolding.someAssemblyRequired import ( makeFlowNumbaOptimized, YouOughtaKnow, writeJobNumba, ) # type: ignore
 from pathlib import Path
-from types import ModuleType
-from typing import Any, ContextManager, Literal, NoReturn, Final
-from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
+from typing import Any, ContextManager
+from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie # type: ignore
 import importlib.util
 import pytest
 import random
@@ -111,10 +81,10 @@ def pathFilenameTmpTesting(request: pytest.FixtureRequest) -> Path:
 def pathCacheTesting(pathTmpTesting: Path) -> Generator[Path, Any, None]:
 	"""Temporarily replace the OEIS cache directory with a test directory."""
 	from mapFolding import oeis as there_must_be_a_better_way
-	pathCacheOriginal = there_must_be_a_better_way._pathCache
-	there_must_be_a_better_way._pathCache = pathTmpTesting
+	pathCacheOriginal = there_must_be_a_better_way.pathCache
+	there_must_be_a_better_way.pathCache = pathTmpTesting
 	yield pathTmpTesting
-	there_must_be_a_better_way._pathCache = pathCacheOriginal
+	there_must_be_a_better_way.pathCache = pathCacheOriginal
 
 @pytest.fixture
 def pathFilenameFoldsTotalTesting(pathTmpTesting: Path) -> Path:
@@ -257,16 +227,14 @@ def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Gener
 
 @pytest.fixture
 def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any]) -> Callable[..., Any]:
-	listCallablesInlineHARDCODED: list[str] = ['countInitialize', 'countParallel', 'countSequential']
-	listCallablesInline = listCallablesInlineHARDCODED
+	listCallablesInline = listCallablesDispatchees
 	callableDispatcher = True
-	algorithmSource = None
-	relativePathWrite = None
+	algorithmSource = getAlgorithmSource()
+	relativePathWrite = moduleOfSyntheticModules
 	filenameModuleWrite = 'pytestCount.py'
 	formatFilenameWrite = "pytest_{callableTarget}.py"
 	listSynthesizedModules: list[YouOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite)
 	dispatcherSynthetic: YouOughtaKnow | None = None
-	# dispatcherSynthetic = YouOughtaKnow('','','')
 	for stuff in listSynthesizedModules:
 		registrarRecordsTmpObject(stuff.pathFilenameForMe)
 		if stuff.callableSynthesized not in listCallablesInline:

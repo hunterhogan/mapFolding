@@ -1,6 +1,6 @@
 from mapFolding import indexMy, indexTrack
-from numba import prange, int64, jit, uint16
-from numpy import integer, ndarray, dtype
+from numba import jit, prange, int64, uint16
+from numpy import dtype, integer, ndarray
 from typing import Any
 
 @jit((uint16[:, :, ::1], uint16[::1], uint16[::1], uint16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)

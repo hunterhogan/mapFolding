@@ -1,6 +1,6 @@
 import pathlib
 from collections.abc import Callable
-from mapFolding import countFolds as countFolds, getPathPackage as getPathPackage
+from mapFolding import countFolds as countFolds, getPathPackageINSTALLING as getPathPackageINSTALLING
 from pathlib import Path
 from typing import Any, Final, TypedDict
 

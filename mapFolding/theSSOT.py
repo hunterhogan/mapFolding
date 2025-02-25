@@ -3,7 +3,6 @@ from mapFolding.theSSOTdatatypes import *
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from numpy import dtype, integer, ndarray
 from pathlib import Path
-from sys import modules as sysModules
 from types import ModuleType
 from typing import Any, Final, TYPE_CHECKING, cast
 
@@ -21,49 +20,28 @@ else:
 - Configuration Registry
 - Write-Once, Read-Many (WORM) / Immutable Initialization
 - Lazy Initialization
-- Separation of configuration from business logic
+- Separate configuration from business logic
+
+theSSOT and yourSSOT
 
 delay realization/instantiation until a concrete value is desired
 moment of truth: when the value is needed, not when the value is defined
 """
 
-myPackageNameIs = "mapFolding"
-
-moduleOfSyntheticModules = "syntheticModules"
-# TODO I'm not sure if this is the right tool for the job.
-formatFilenameModuleDEFAULT = "numba_{callableTarget}.py"
-# TODO figure out how to implement this
-dispatcherCallableNameDEFAULT = "doTheNeedful"
-
-def getPathPackage() -> Path:
-	import importlib, inspect
-	pathPackage = Path(inspect.getfile(importlib.import_module(myPackageNameIs)))
-	if pathPackage.is_file():
-		pathPackage = pathPackage.parent
-	return pathPackage
-
-def getPathJobRootDEFAULT() -> Path:
-	if 'google.colab' in sysModules:
-		pathJobDEFAULT = Path("/content/drive/MyDrive") / "jobs"
-	else:
-		pathJobDEFAULT = getPathPackage() / "jobs"
-	return pathJobDEFAULT
+"""
+listDimensions: list[int]
+mapShape
+tupleDimensions: tuple[int, ...]
+dimensionsTuple
+dimensionTuple
+"""
 
 def getPathSyntheticModules() -> Path:
-	pathSyntheticModules = getPathPackage() / moduleOfSyntheticModules
-	return pathSyntheticModules
-
-def getAlgorithmSource() -> ModuleType:
-	from mapFolding import theDao
-	return theDao
+	return pathPackage / moduleOfSyntheticModules
 
 def getAlgorithmDispatcher() -> Callable[..., None]:
-	algorithmSource = getAlgorithmSource()
+	algorithmSource: ModuleType = getAlgorithmSource()
 	return cast(Callable[..., None], algorithmSource.doTheNeedful) # 'doTheNeedful' is duplicated and there is not a SSOT for it
-
-def getDispatcherCallable() -> Callable[..., None]:
-	from mapFolding.syntheticModules import numba_doTheNeedful
-	return cast(Callable[..., None], numba_doTheNeedful.doTheNeedful)
 
 # NOTE I want this _concept_, not necessarily this method, to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
 class computationState(TypedDict):

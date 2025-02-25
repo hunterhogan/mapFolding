@@ -116,7 +116,7 @@ def gen_snt_check(): ...
 snt_check: Incomplete
 
 def ol_snt_check(n): ...
-def set_num_threads(n) -> None:
+def set_num_threads(n: int) -> None:
     """
     Set the number of threads to use for parallel execution.
 

@@ -1,7 +1,6 @@
 from collections.abc import Sequence
 from mapFolding import hackSSOTdatatype, ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable
 from mapFolding.someAssemblyRequired.synthesizeGeneric import *
-from mapFolding.someAssemblyRequired.synthesizeGeneric import UniversalImportTracker
 from typing import cast
 import ast
 
@@ -23,24 +22,24 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
 		return astCallable
 
-	def make_arg4parameter(signatureElement: ast.arg):
+	def make_arg4parameter(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None:
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
-			annotationShape = signatureElement.annotation.slice.elts[0]
+			annotationShape: ast.expr = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
-				shapeAsListSlices = [ast.Slice() for _axis in range(len(annotationShape.slice.elts))]
+				shapeAsListSlices: list[ast.Slice] = [ast.Slice() for _axis in range(len(annotationShape.slice.elts))]
 				shapeAsListSlices[-1] = ast.Slice(step=ast.Constant(value=1))
 				shapeAST = ast.Tuple(elts=list(shapeAsListSlices), ctx=ast.Load())
 			else:
 				shapeAST = ast.Slice(step=ast.Constant(value=1))
 
-			annotationDtype = signatureElement.annotation.slice.elts[1]
+			annotationDtype: ast.expr = signatureElement.annotation.slice.elts[1]
 			if (isinstance(annotationDtype, ast.Subscript) and isinstance(annotationDtype.slice, ast.Attribute)):
 				datatypeAST = annotationDtype.slice.attr
 			else:
 				datatypeAST = None
 
 			ndarrayName = signatureElement.arg
-			Z0Z_hacky_dtype = hackSSOTdatatype(ndarrayName)
+			Z0Z_hacky_dtype: str = hackSSOTdatatype(ndarrayName)
 			datatype_attr = datatypeAST or Z0Z_hacky_dtype
 			allImports.addImportFromStr(datatypeModuleDecorator, datatype_attr)
 			datatypeNumba = ast.Name(id=datatype_attr, ctx=ast.Load())
@@ -56,7 +55,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 
 	list_arg4signature_or_function: list[ast.expr] = []
 	for parameter in FunctionDefTarget.args.args:
-		signatureElement = make_arg4parameter(parameter)
+		signatureElement: ast.Subscript | ast.Name | None = make_arg4parameter(parameter)
 		if signatureElement:
 			list_arg4signature_or_function.append(signatureElement)
 
@@ -71,7 +70,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 		if thisIsAnyNumbaJitDecorator(decorator):
 			decorator = cast(ast.Call, decorator)
 			if parametersNumba is None:
-				parametersNumbaSherpa = Then.copy_astCallKeywords(decorator)
+				parametersNumbaSherpa: dict[str, Any] = Then.copy_astCallKeywords(decorator)
 				if (_HunterIsSureThereAreBetterWaysToDoThis := True):
 					if parametersNumbaSherpa:
 						parametersNumba = cast(ParametersNumba, parametersNumbaSherpa)
@@ -80,12 +79,12 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 	FunctionDefTarget = Z0Z_UnhandledDecorators(FunctionDefTarget)
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDEFAULT
-	listDecoratorKeywords = [ast.keyword(arg=parameterName, value=ast.Constant(value=parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
+	listDecoratorKeywords: list[ast.keyword] = [ast.keyword(arg=parameterName, value=ast.Constant(value=parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
-	decoratorModule = Z0Z_getDatatypeModuleScalar()
-	decoratorCallable = Z0Z_getDecoratorCallable()
+	decoratorModule: str = Z0Z_getDatatypeModuleScalar()
+	decoratorCallable: str = Z0Z_getDecoratorCallable()
 	allImports.addImportFromStr(decoratorModule, decoratorCallable)
-	astDecorator = Then.make_astCall(Then.makeName(decoratorCallable), list_argsDecorator, listDecoratorKeywords, None)
+	astDecorator: ast.Call = Then.make_astCall(Then.makeName(decoratorCallable), list_argsDecorator, listDecoratorKeywords, None)
 
 	FunctionDefTarget.decorator_list = [astDecorator]
 	return FunctionDefTarget, allImports
