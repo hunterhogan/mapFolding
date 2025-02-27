@@ -28,7 +28,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
 				shapeAsListSlices: list[ast.Slice] = [ast.Slice() for _axis in range(len(annotationShape.slice.elts))]
 				shapeAsListSlices[-1] = ast.Slice(step=ast.Constant(value=1))
-				shapeAST = ast.Tuple(elts=list(shapeAsListSlices), ctx=ast.Load())
+				shapeAST: ast.Slice | ast.Tuple = ast.Tuple(elts=list(shapeAsListSlices), ctx=ast.Load())
 			else:
 				shapeAST = ast.Slice(step=ast.Constant(value=1))
 
@@ -48,7 +48,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 
 		elif isinstance(signatureElement.annotation, ast.Name):
 			return signatureElement.annotation
-		return
+		return None
 
 	datatypeModuleDecorator: str = Z0Z_getDatatypeModuleScalar()
 	list_argsDecorator: Sequence[ast.expr] = []
