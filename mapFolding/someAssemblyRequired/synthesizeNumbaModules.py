@@ -1,9 +1,12 @@
-from mapFolding import FREAKOUT, Z0Z_filenameModuleWrite, Z0Z_filenameWriteElseCallableTarget, additional_importsHARDCODED, formatFilenameModule, getAlgorithmDispatcher, moduleOfSyntheticModules, indexMy, indexTrack, parametersNumbaSuperJit, parametersNumbaSuperJitParallel, pathPackage, listCallablesDispatchees
+from mapFolding import FREAKOUT, Z0Z_filenameModuleWrite, Z0Z_filenameWriteElseCallableTarget, additional_importsHARDCODED
+from mapFolding import formatFilenameModule, getAlgorithmDispatcher, moduleOfSyntheticModules, indexMy, indexTrack
+from mapFolding import parametersNumbaSuperJit, parametersNumbaSuperJitParallel, pathPackage, listCallablesDispatchees
 from mapFolding import getAlgorithmSource, getDatatypeModule
-from mapFolding.someAssemblyRequired.synthesizeNumbaReusable import *
+from mapFolding import ParametersNumba, parametersNumbaDEFAULT
+from mapFolding.someAssemblyRequired import UniversalImportTracker, decorateCallableWithNumba, UnpackArrays, FunctionInliner, YouOughtaKnow, ast_Identifier
 from os import PathLike
 from pathlib import Path
-from typing import overload
+from typing import Any, cast, overload
 import ast
 import autoflake
 import inspect

@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from mapFolding import hackSSOTdatatype, ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable
-from mapFolding.someAssemblyRequired.synthesizeGeneric import *
-from typing import cast
+from mapFolding.someAssemblyRequired import ifThis, UniversalImportTracker, Then
+from typing import Any, cast
 import ast
 
 def thisIsNumbaDotJit(Ima: ast.AST) -> bool:

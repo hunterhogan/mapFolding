@@ -1,17 +1,17 @@
+from Z0Z_tools import updateExtendPolishDictionaryLists
+from collections import defaultdict
 from collections.abc import Callable, Sequence
 from mapFolding import EnumIndices
+from pathlib import Path
 from typing import Any, cast, NamedTuple
 from typing import TypeAlias
-from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
-import collections
-import pathlib
 
 ast_Identifier: TypeAlias = str
 
 class YouOughtaKnow(NamedTuple):
 	callableSynthesized: str
-	pathFilenameForMe: pathlib.Path
+	pathFilenameForMe: Path
 	astForCompetentProgrammers: ast.ImportFrom
 
 class ifThis:
@@ -177,7 +177,7 @@ class NodeReplacer(ast.NodeTransformer):
 
 class UniversalImportTracker:
 	def __init__(self, startWith: ast.AST | None = None) -> None:
-		self.dictionaryImportFrom: dict[str, set[tuple[str, str | None]]] = collections.defaultdict(set)
+		self.dictionaryImportFrom: dict[str, set[tuple[str, str | None]]] = defaultdict(set)
 		self.setImport: set[str] = set()
 
 		if startWith:
