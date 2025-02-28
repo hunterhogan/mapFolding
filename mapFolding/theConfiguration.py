@@ -1,9 +1,9 @@
-from types import ModuleType
-from mapFolding.theWrongWay import *
-from sys import modules as sysModules
-from pathlib import Path
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
+from mapFolding.theWrongWay import *
+from pathlib import Path
+from sys import modules as sysModules
+from types import ModuleType
 from typing import Final
 """
 evaluateWhenPACKAGING
@@ -13,14 +13,14 @@ try:
 	import tomli
 	TRYmyPackageNameIs: str = tomli.load(Path("../pyproject.toml").open('rb'))["project"]["name"]
 except Exception:
-	TRYmyPackageNameIs: str = myPackageNameIsPACKAGING
+	TRYmyPackageNameIs = myPackageNameIsPACKAGING
 
 myPackageNameIs: Final[str] = TRYmyPackageNameIs
 
 def getPathPackageINSTALLING() -> Path:
-	pathPackage = Path(inspect_getfile(importlib_import_module(myPackageNameIs)))
+	pathPackage: Path = Path(inspect_getfile(importlib_import_module(myPackageNameIs)))
 	if pathPackage.is_file():
-		pathPackage: Path = pathPackage.parent
+		pathPackage = pathPackage.parent
 	return pathPackage
 
 pathPackage: Path = getPathPackageINSTALLING()
@@ -42,8 +42,6 @@ def getAlgorithmSource() -> ModuleType:
 	logicalPathModule: str = f"{myPackageNameIs}.{algorithmSourcePACKAGING}"
 	moduleImported: ModuleType = importlib_import_module(logicalPathModule)
 	return moduleImported
-	# from mapFolding import theDao
-	# return theDao
 
 # TODO learn how to see this from the user's perspective
 def getPathJobRootDEFAULT() -> Path:
@@ -56,3 +54,5 @@ def getPathJobRootDEFAULT() -> Path:
 listCallablesDispatchees: list[str] = listCallablesDispatcheesHARDCODED
 
 additional_importsHARDCODED.append(myPackageNameIs)
+
+concurrencyPackage: Final[str] = 'numba'

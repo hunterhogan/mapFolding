@@ -16,6 +16,11 @@ if TYPE_CHECKING:
 else:
 	TypedDict = dict
 
+"""
+refactor theDao, use dataclass or something that makes sense
+refactor the synthesize modules to transform the into data structures that work for numba
+"""
+
 """Technical concepts I am likely using and likely want to use more effectively:
 - Configuration Registry
 - Write-Once, Read-Many (WORM) / Immutable Initialization
@@ -31,9 +36,11 @@ moment of truth: when the value is needed, not when the value is defined
 """
 listDimensions: list[int]
 mapShape
-tupleDimensions: tuple[int, ...]
+
+tupleDimensions: tuple[int]
+tupleMapShape: tuple[int]
+
 dimensionsTuple
-dimensionTuple
 """
 
 def getPathSyntheticModules() -> Path:

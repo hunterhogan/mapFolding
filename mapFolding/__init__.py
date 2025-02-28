@@ -39,6 +39,7 @@ _dictionaryListsImportFrom['mapFolding.oeis'].extend([
 # fundamentals
 _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 	'computationState',
+	'concurrencyPackage',
 	'EnumIndices',
 	'getDispatcherCallable',
 	'indexMy',
@@ -100,8 +101,8 @@ for moduleAsStr, listSymbolsAsStr in _dictionaryListsImportFrom.items():
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-	from basecamp import *
-	from beDRY import *
-	from oeis import *
 	from theDao import *
 	from theSSOT import *
+	from basecamp import *
+	from beDRY import * # type: ignore
+	from oeis import *

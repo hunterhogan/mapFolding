@@ -1,6 +1,7 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding import (
 	computationState,
+	concurrencyPackage,
 	getDatatypeModule,
 	getPathJobRootDEFAULT,
 	hackSSOTdatatype,
@@ -10,7 +11,7 @@ from mapFolding import (
 	setDatatypeLeavesTotal,
 )
 from collections.abc import Sequence
-from numba import get_num_threads, set_num_threads 
+from numba import get_num_threads, set_num_threads
 from numpy import dtype, integer, ndarray
 from numpy.typing import DTypeLike, NDArray
 from pathlib import Path
@@ -86,13 +87,15 @@ def getPathFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtyp
 	"""
 	pathLikeSherpa = Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else None
 	if not pathLikeSherpa:
-		pathLikeSherpa = getPathJobRootDEFAULT()
-	if pathLikeSherpa.is_dir():
-		pathFilenameFoldsTotal = pathLikeSherpa / getFilenameFoldsTotal(mapShape)
-	elif pathLikeSherpa.is_absolute():
-		pathFilenameFoldsTotal = pathLikeSherpa
+		pathLikeSherpaIsNotNone: Path = getPathJobRootDEFAULT()
 	else:
-		pathFilenameFoldsTotal = getPathJobRootDEFAULT() / pathLikeSherpa
+		pathLikeSherpaIsNotNone: Path = pathLikeSherpa
+	if pathLikeSherpaIsNotNone.is_dir():
+		pathFilenameFoldsTotal = pathLikeSherpaIsNotNone / getFilenameFoldsTotal(mapShape)
+	elif pathLikeSherpaIsNotNone.is_absolute():
+		pathFilenameFoldsTotal = pathLikeSherpaIsNotNone
+	else:
+		pathFilenameFoldsTotal = getPathJobRootDEFAULT() / pathLikeSherpaIsNotNone
 
 	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 	return pathFilenameFoldsTotal
@@ -136,7 +139,7 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 		pass
 	elif isinstance(computationDivisions, int):
 		taskDivisions = computationDivisions
-	elif isinstance(computationDivisions, str):  # type: ignore 'Unnecessary isinstance call; "str" is always an instance of "str", so sayeth Pylance'. Yeah, well "User is not always an instance of "correct input" so sayeth the programmer.
+	elif isinstance(computationDivisions, str): # type: ignore 'Unnecessary isinstance call; "str" is always an instance of "str", so sayeth Pylance'. Yeah, well "User is not always an instance of "correct input" so sayeth the programmer.
 		computationDivisions = computationDivisions.lower()
 		if computationDivisions == 'maximum':
 			taskDivisions = leavesTotal
@@ -325,9 +328,13 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 	if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
 		CPUlimit = oopsieKwargsie(CPUlimit)
 
-	concurrencyLimit = int(defineConcurrencyLimit(CPUlimit))
-	set_num_threads(concurrencyLimit)
-	concurrencyLimit: int = get_num_threads()
+	concurrencyLimit: int = int(defineConcurrencyLimit(CPUlimit))
+
+	if concurrencyPackage == 'numba':
+		set_num_threads(concurrencyLimit)
+		concurrencyLimit = get_num_threads()
+	else:
+		raise NotImplementedError("This function only supports the 'numba' concurrency package.")
 
 	return concurrencyLimit
 
