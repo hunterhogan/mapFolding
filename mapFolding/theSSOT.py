@@ -5,7 +5,6 @@ from numpy import dtype, integer, ndarray
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Final, TYPE_CHECKING, cast
-import dataclasses
 
 try:
 	from typing import NotRequired
@@ -16,31 +15,6 @@ if TYPE_CHECKING:
 	from typing import TypedDict
 else:
 	TypedDict = dict
-
-@dataclasses.dataclass
-class ComputationState:
-	connectionGraph: Array3D
-	countDimensionsGapped: Array1DLeavesTotal
-	dimensionsTotal: DatatypeLeavesTotal
-	dimensionsUnconstrained:DatatypeLeavesTotal
-	foldGroups: Array1DFoldsTotal
-	foldsTotal: DatatypeFoldsTotal
-	gap1ndex: DatatypeLeavesTotal
-	gap1ndexCeiling: DatatypeElephino
-	gapRangeStart: Array1DElephino
-	gapsWhere: Array1DLeavesTotal
-	groupsOfFolds: DatatypeFoldsTotal
-	indexDimension: DatatypeLeavesTotal
-	indexLeaf: DatatypeLeavesTotal
-	indexMiniGap: DatatypeElephino
-	leaf1ndex: DatatypeElephino
-	leafAbove: Array1DLeavesTotal
-	leafBelow: Array1DLeavesTotal
-	leafConnectee: DatatypeElephino
-	leavesTotal: DatatypeLeavesTotal
-	mapShape: tuple[DatatypeLeavesTotal, ...]
-	taskDivisions: DatatypeLeavesTotal
-	taskIndex: DatatypeLeavesTotal
 
 class computationState(TypedDict):
 	connectionGraph: ndarray[tuple[int, int, int], dtype[integer[Any]]]
@@ -138,14 +112,4 @@ theSSOT and yourSSOT
 
 delay realization/instantiation until a concrete value is desired
 moment of truth: when the value is needed, not when the value is defined
-"""
-
-"""
-listDimensions: list[int]
-mapShape
-
-tupleDimensions: tuple[int]
-tupleMapShape: tuple[int]
-
-dimensionsTuple
 """

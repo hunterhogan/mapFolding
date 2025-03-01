@@ -1,4 +1,5 @@
 """A relatively stable API for oft-needed functionality."""
+import numpy.typing
 from mapFolding import (
 	computationState,
 	concurrencyPackage,
@@ -10,6 +11,17 @@ from mapFolding import (
 	indexTrack,
 	setDatatypeLeavesTotal,
 )
+from mapFolding.theSSOT import (
+	Array1DLeavesTotal,
+	Array1DFoldsTotal,
+	Array1DElephino,
+	Array3D,
+	DatatypeElephino,
+	DatatypeFoldsTotal,
+	DatatypeLeavesTotal,
+)
+
+import dataclasses
 from collections.abc import Sequence
 from numba import get_num_threads, set_num_threads
 from numpy import dtype, integer, ndarray
@@ -20,6 +32,37 @@ from typing import Any
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 import numpy
 import os
+
+def setCPUlimit(CPUlimit: Any | None) -> int:
+	"""Sets CPU limit for Numba concurrent operations. Note that it can only affect Numba-jitted functions that have not yet been imported.
+
+	Parameters:
+		CPUlimit: whether and how to limit the CPU usage. See notes for details.
+	Returns:
+		concurrencyLimit: The actual concurrency limit that was set
+	Raises:
+		TypeError: If CPUlimit is not of the expected types
+
+	Limits on CPU usage `CPUlimit`:
+		- `False`, `None`, or `0`: No limits on CPU usage; uses all available CPUs. All other values will potentially limit CPU usage.
+		- `True`: Yes, limit the CPU usage; limits to 1 CPU.
+		- Integer `>= 1`: Limits usage to the specified number of CPUs.
+		- Decimal value (`float`) between 0 and 1: Fraction of total CPUs to use.
+		- Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
+		- Integer `<= -1`: Subtract the absolute value from total CPUs.
+	"""
+	if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
+		CPUlimit = oopsieKwargsie(CPUlimit)
+
+	concurrencyLimit: int = int(defineConcurrencyLimit(CPUlimit))
+
+	if concurrencyPackage == 'numba':
+		set_num_threads(concurrencyLimit)
+		concurrencyLimit = get_num_threads()
+	else:
+		raise NotImplementedError("This function only supports the 'numba' concurrency package.")
+
+	return concurrencyLimit
 
 def getFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]]) -> str:
 	"""Imagine your computer has been counting folds for 9 days, and when it tries to save your newly discovered value,
@@ -160,7 +203,6 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: str |
 
 	Parameters
 		listDimensions: A sequence of integers representing the dimensions of the map.
-		**keywordArguments: Datatype management.
 
 	Returns
 		connectionGraph: A 3D numpy array with shape of (dimensionsTotal, leavesTotal + 1, leavesTotal + 1).
@@ -180,7 +222,7 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: str |
 		for leaf1ndex in range(1, leavesTotal + 1):
 			coordinateSystem[indexDimension, leaf1ndex] = ( ((leaf1ndex - 1) // cumulativeProduct[indexDimension]) % arrayDimensions[indexDimension] + 1 )
 
-	connectionGraph: ndarray[tuple[int, int, int], numpy.dtype[integer[Any]]] = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=dtype)
+	connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=dtype)
 	for indexDimension in range(dimensionsTotal):
 		for activeLeaf1ndex in range(1, leavesTotal + 1):
 			for connectee1ndex in range(1, activeLeaf1ndex + 1):
@@ -224,17 +266,8 @@ def outfitCountFolds(listDimensions: Sequence[int]
 					, computationDivisions: int | str | None = None
 					, CPUlimit: bool | float | int | None = None
 					) -> computationState:
-	"""
-	Initializes and configures the computation state for map folding computations.
 
-	Parameters:
-		listDimensions: The dimensions of the map to be folded
-		computationDivisions (None): see `getTaskDivisions`
-		CPUlimit (None): see `setCPUlimit`
 
-	Returns:
-		stateInitialized: The initialized computation state
-	"""
 	my = makeDataContainer(len(indexMy), hackSSOTdtype('my'))
 
 	mapShape = tuple(sorted(validateListDimensions(listDimensions)))
@@ -280,6 +313,90 @@ def parseDimensions(dimensions: Sequence[int], parameterName: str = 'listDimensi
 
 	return listNonNegative
 
+def validateListDimensions(listDimensions: Sequence[int]) -> list[int]:
+	"""
+	Validates and sorts a sequence of at least two positive dimensions.
+
+	Parameters:
+		listDimensions: A sequence of integer dimensions to be validated.
+
+	Returns:
+		dimensionsValidSorted: A list, with at least two elements, of only positive integers.
+
+	Raises:
+		ValueError: If the input listDimensions is empty.
+		NotImplementedError: If the resulting list of positive dimensions has fewer than two elements.
+	"""
+	if not listDimensions:
+		raise ValueError("listDimensions is a required parameter.")
+	listNonNegative = parseDimensions(listDimensions, 'listDimensions')
+	dimensionsValid = [dimension for dimension in listNonNegative if dimension > 0]
+	if len(dimensionsValid) < 2:
+		raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
+	return sorted(dimensionsValid)
+
+# 	computationStateInitialized = ComputationState(listDimensions, computationDivisions, CPUlimit)
+
+@dataclasses.dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False,
+						match_args=True, kw_only=False, slots=False, weakref_slot=False)
+class ComputationState:
+	# I have to define this shit twice? The "pseudo-field" that I don't want in my dataclass is the fucking field I have to define twice?!
+	listDimensions: dataclasses.InitVar[Sequence[int] | Sequence[DatatypeLeavesTotal]]
+	computationDivisions: dataclasses.InitVar[int | str | None] = None
+	CPUlimit: dataclasses.InitVar[bool | float | int | None] = None
+
+	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=False)
+	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	leavesTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+
+	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
+	connectionGraph: Array3D = dataclasses.field(init=False)
+
+	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(init=False)
+	gapRangeStart: Array1DElephino = dataclasses.field(init=False)
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(init=False)
+	leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
+	leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
+
+	foldGroups: Array1DFoldsTotal = dataclasses.field(init=False)
+
+	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
+	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
+	groupsOfFolds: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
+	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
+	leaf1ndex: DatatypeElephino = DatatypeElephino(1)
+	leafConnectee: DatatypeElephino = DatatypeElephino(0)
+	taskDivisions: DatatypeLeavesTotal = dataclasses.field(init=False)
+	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+
+	def __post_init__(self, listDimensions: Sequence[int] | Sequence[DatatypeLeavesTotal], computationDivisions: int | str | None = None, CPUlimit: bool | float | int | None = None):
+		self.mapShape = tuple(map(DatatypeLeavesTotal, sorted(validateListDimensions(listDimensions))))
+		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
+		self.leavesTotal = DatatypeLeavesTotal(getLeavesTotal(self.mapShape))
+		self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
+
+		concurrencyLimit = setCPUlimit(CPUlimit)
+		self.taskDivisions = DatatypeLeavesTotal(getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, self.mapShape))
+
+		# the dtype is defined above. it is the default datatype for this variable for the entire package. the source of truth for this container's datatype is NOT a function call in a post_init method in a dataclass.
+		self.connectionGraph = makeConnectionGraph(self.mapShape)
+
+		# the dtype is defined above
+		self.foldGroups = makeDataContainer(min(2, int(self.taskDivisions)))
+
+		# the dtype is defined above
+		leavesTotalAsInt = int(self.leavesTotal)
+		self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1)
+
+		# the dtype is defined above
+		self.leafAbove = makeDataContainer(leavesTotalAsInt + 1)
+		self.leafBelow = makeDataContainer(leavesTotalAsInt + 1)
+		self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1)
+		self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1)
+
 def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> None:
 	"""
 	Save foldsTotal with multiple fallback mechanisms.
@@ -306,56 +423,4 @@ def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> Non
 			print(str(pathFilenamePlanB))
 		except Exception:
 			print(foldsTotal)
-
-def setCPUlimit(CPUlimit: Any | None) -> int:
-	"""Sets CPU limit for Numba concurrent operations. Note that it can only affect Numba-jitted functions that have not yet been imported.
-
-	Parameters:
-		CPUlimit: whether and how to limit the CPU usage. See notes for details.
-	Returns:
-		concurrencyLimit: The actual concurrency limit that was set
-	Raises:
-		TypeError: If CPUlimit is not of the expected types
-
-	Limits on CPU usage `CPUlimit`:
-		- `False`, `None`, or `0`: No limits on CPU usage; uses all available CPUs. All other values will potentially limit CPU usage.
-		- `True`: Yes, limit the CPU usage; limits to 1 CPU.
-		- Integer `>= 1`: Limits usage to the specified number of CPUs.
-		- Decimal value (`float`) between 0 and 1: Fraction of total CPUs to use.
-		- Decimal value (`float`) between -1 and 0: Fraction of CPUs to *not* use.
-		- Integer `<= -1`: Subtract the absolute value from total CPUs.
-	"""
-	if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
-		CPUlimit = oopsieKwargsie(CPUlimit)
-
-	concurrencyLimit: int = int(defineConcurrencyLimit(CPUlimit))
-
-	if concurrencyPackage == 'numba':
-		set_num_threads(concurrencyLimit)
-		concurrencyLimit = get_num_threads()
-	else:
-		raise NotImplementedError("This function only supports the 'numba' concurrency package.")
-
-	return concurrencyLimit
-
-def validateListDimensions(listDimensions: Sequence[int]) -> list[int]:
-	"""
-	Validates and sorts a sequence of at least two positive dimensions.
-
-	Parameters:
-		listDimensions: A sequence of integer dimensions to be validated.
-
-	Returns:
-		dimensionsValidSorted: A list, with at least two elements, of only positive integers.
-
-	Raises:
-		ValueError: If the input listDimensions is empty.
-		NotImplementedError: If the resulting list of positive dimensions has fewer than two elements.
-	"""
-	if not listDimensions:
-		raise ValueError("listDimensions is a required parameter.")
-	listNonNegative = parseDimensions(listDimensions, 'listDimensions')
-	dimensionsValid = [dimension for dimension in listNonNegative if dimension > 0]
-	if len(dimensionsValid) < 2:
-		raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
-	return sorted(dimensionsValid)
+	return None

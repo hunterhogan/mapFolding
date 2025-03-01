@@ -61,10 +61,14 @@ additional_importsHARDCODED.append(myPackageNameIs)
 concurrencyPackage: Final[str] = 'numba'
 
 # TODO this is stupid: the values will get out of line, but I can't figure out how tyo keep them inline or check they are inline without so much code that the verification code is likely to introduce problems
-DatatypeLeavesTotal: TypeAlias = c_uint8
-numpyLeavesTotal: TypeAlias = numpy_uint8
-DatatypeElephino: TypeAlias = c_int16
-numpyElephino: TypeAlias = numpy_int16
+# DatatypeLeavesTotal: TypeAlias = c_uint8
+# numpyLeavesTotal: TypeAlias = numpy_uint8
+# DatatypeElephino: TypeAlias = c_int16
+# numpyElephino: TypeAlias = numpy_int16
+DatatypeLeavesTotal: TypeAlias = int
+numpyLeavesTotal: TypeAlias = numpy_int64
+DatatypeElephino: TypeAlias = int
+numpyElephino: TypeAlias = numpy_int64
 DatatypeFoldsTotal: TypeAlias = int
 numpyFoldsTotal: TypeAlias = numpy_int64
 
