@@ -3,14 +3,14 @@
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import ( getAlgorithmDispatcher, getAlgorithmSource, getDispatcherCallable, countFolds, getPathFilenameFoldsTotal, listCallablesDispatchees, moduleOfSyntheticModules, oeisIDfor_n, FREAKOUT, saveFoldsTotal, hackSSOTdtype, clearOEIScache, getOEISids, ) # type: ignore
+from mapFolding import ( getAlgorithmDispatcher, getAlgorithmSource, getDispatcherCallable, countFolds, getPathFilenameFoldsTotal, listCallablesDispatchees, moduleOfSyntheticModulesPACKAGING, oeisIDfor_n, FREAKOUT, saveFoldsTotal, hackSSOTdtype, clearOEIScache, getOEISids, )
 from mapFolding import basecamp
-from mapFolding.beDRY import ( getLeavesTotal, validateListDimensions, makeDataContainer, parseDimensions, setCPUlimit, makeConnectionGraph, getTaskDivisions, ) # type: ignore
-from mapFolding.oeis import ( oeisIDsImplemented, settingsOEIS, validateOEISid, getOEISidValues, OEIS_for_n, ) # type: ignore
-from mapFolding.someAssemblyRequired import ( makeFlowNumbaOptimized, YouOughtaKnow, writeJobNumba, ) # type: ignore
+from mapFolding.beDRY import ( getLeavesTotal, validateListDimensions, makeDataContainer, setCPUlimit, makeConnectionGraph, getTaskDivisions, )
+from mapFolding.oeis import ( oeisIDsImplemented, settingsOEIS, validateOEISid, getOEISidValues, OEIS_for_n, )
+from mapFolding.someAssemblyRequired import ( makeFlowNumbaOptimized, YouOughtaKnow, writeJobNumba, )
 from pathlib import Path
 from typing import Any, ContextManager
-from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie # type: ignore
+from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 import importlib.util
 import pytest
 import random
@@ -124,7 +124,7 @@ def foldsTotalKnown() -> dict[tuple[int, ...], int]:
 	return makeDictionaryFoldsTotalKnown()
 
 @pytest.fixture
-def listDimensionsTestCountFolds(oeisID: str) -> list[int]:
+def listDimensionsTestCountFolds(oeisID: str):
 	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
 	if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
 	while True:
@@ -139,7 +139,7 @@ def listDimensionsTestCountFolds(oeisID: str) -> list[int]:
 			pass
 
 @pytest.fixture
-def listDimensionsTestFunctionality(oeisID_1random: str) -> list[int]:
+def listDimensionsTestFunctionality(oeisID_1random: str):
 	"""To test functionality, get one `listDimensions` from `valuesTestValidation` if
 	`validateListDimensions` approves. The algorithm can count the folds of the returned
 	`listDimensions` in a short enough time suitable for testing."""
@@ -173,7 +173,8 @@ def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
 	def make_mock(foldsValue: int, listDimensions: list[int]) -> Callable[..., None]:
 		mock_array = makeDataContainer(2)
 		mock_array[0] = foldsValue
-		mock_array[-1] = getLeavesTotal(listDimensions)
+		mapShape = validateListDimensions(listDimensions)
+		mock_array[-1] = getLeavesTotal(mapShape)
 
 		def mock_countFolds(**keywordArguments: Any) -> None:
 			keywordArguments['foldGroups'][:] = mock_array
@@ -230,7 +231,7 @@ def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any]) -> Callabl
 	listCallablesInline = listCallablesDispatchees
 	callableDispatcher = True
 	algorithmSource = getAlgorithmSource()
-	relativePathWrite = moduleOfSyntheticModules
+	relativePathWrite = moduleOfSyntheticModulesPACKAGING
 	filenameModuleWrite = 'pytestCount.py'
 	formatFilenameWrite = "pytest_{callableTarget}.py"
 	listSynthesizedModules: list[YouOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite)

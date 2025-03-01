@@ -1,9 +1,9 @@
 from ctypes import c_uint8, c_int16
-from numpy import int64 as numpy_int64, int16 as numpy_int16, uint8 as numpy_uint8
-from numpy import dtype, ndarray
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
 from mapFolding.theWrongWay import *
+from numpy import dtype, ndarray
+from numpy import int64 as numpy_int64, int16 as numpy_int16, uint8 as numpy_uint8
 from pathlib import Path
 from sys import modules as sysModules
 from types import ModuleType
@@ -28,23 +28,25 @@ def getPathPackageINSTALLING() -> Path:
 
 pathPackage: Path = getPathPackageINSTALLING()
 
-moduleOfSyntheticModules: Final[str] = "syntheticModules"
-formatNameModule = "numba_{callableTarget}"
-formatFilenameModule = formatNameModule + ".py"
-dispatcherCallableName = "doTheNeedful"
-nameModuleDispatcher: str = formatNameModule.format(callableTarget=dispatcherCallableName)
+Z0Z_formatNameModuleSynthetic = "numba_{callableTarget}"
+Z0Z_formatFilenameModuleSynthetic = Z0Z_formatNameModuleSynthetic + ".py"
+Z0Z_nameModuleDispatcherSynthetic: str = Z0Z_formatNameModuleSynthetic.format(callableTarget=dispatcherCallableNamePACKAGING)
 Z0Z_filenameModuleWrite = 'numbaCount.py'
 Z0Z_filenameWriteElseCallableTarget: str = 'count'
 
-def getDispatcherCallable():
-    logicalPathModule: str = f"{myPackageNameIs}.{moduleOfSyntheticModules}.{nameModuleDispatcher}"
-    moduleImported: ModuleType = importlib_import_module(logicalPathModule)
-    return getattr(moduleImported, dispatcherCallableName)
+# def getDispatcherCallable():
+#     logicalPathModule: str = f"{myPackageNameIs}.{moduleOfSyntheticModulesPACKAGING}.{Z0Z_nameModuleDispatcherSynthetic}"
+#     moduleImported: ModuleType = importlib_import_module(logicalPathModule)
+#     return getattr(moduleImported, dispatcherCallableNamePACKAGING)
 
 def getAlgorithmSource() -> ModuleType:
 	logicalPathModule: str = f"{myPackageNameIs}.{algorithmSourcePACKAGING}"
 	moduleImported: ModuleType = importlib_import_module(logicalPathModule)
 	return moduleImported
+
+def getDispatcherCallable():
+    moduleImported: ModuleType = getAlgorithmSource()
+    return getattr(moduleImported, dispatcherCallableNamePACKAGING)
 
 # TODO learn how to see this from the user's perspective
 def getPathJobRootDEFAULT() -> Path:

@@ -3,20 +3,8 @@ from collections.abc import Callable
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from numpy import dtype, integer, ndarray
 from pathlib import Path
-from types import ModuleType
 from typing import Any, Final, TypedDict
 from typing_extensions import NotRequired
-
-myPackageNameIs: str
-moduleOfSyntheticModules: str
-formatFilenameModuleDEFAULT: str
-dispatcherCallableNameDEFAULT: str
-
-def getPathPackageINSTALLING() -> Path: ...
-def getPathJobRootDEFAULT() -> Path: ...
-def getPathSyntheticModules() -> Path: ...
-def getAlgorithmSource() -> ModuleType: ...
-def getAlgorithmDispatcher() -> Callable[..., None]: ...
 
 class computationState(TypedDict):
     connectionGraph: ndarray[tuple[int, int, int], dtype[integer[Any]]]
@@ -25,6 +13,9 @@ class computationState(TypedDict):
     mapShape: ndarray[tuple[int], dtype[integer[Any]]]
     my: ndarray[tuple[int], dtype[integer[Any]]]
     track: ndarray[tuple[int, int], dtype[integer[Any]]]
+
+def getPathSyntheticModules() -> Path: ...
+def getAlgorithmDispatcher() -> Callable[..., None]: ...
 
 _datatypeModuleScalar: str
 _decoratorCallable: str

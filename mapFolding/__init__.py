@@ -28,6 +28,9 @@ _dictionaryListsImportFrom['mapFolding.beDRY'].extend([
 	'getPathFilenameFoldsTotal',
 	'outfitCountFolds',
 	'saveFoldsTotal',
+	'ComputationState',
+	'setCPUlimit',
+	'validateListDimensions',
 ])
 
 _dictionaryListsImportFrom['mapFolding.oeis'].extend([
@@ -53,6 +56,7 @@ _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 	'getDatatypeModule',
 	'hackSSOTdatatype',
 	'hackSSOTdtype',
+	'numpyFoldsTotal',
 	'setDatatypeElephino',
 	'setDatatypeFoldsTotal',
 	'setDatatypeLeavesTotal',
@@ -62,11 +66,12 @@ _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 # Synthesize modules
 _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 	'additional_importsHARDCODED',
-	'formatFilenameModule',
+	'Z0Z_formatFilenameModuleSynthetic',
 	'getAlgorithmDispatcher',
 	'getAlgorithmSource',
 	'getPathJobRootDEFAULT',
 	'getPathSyntheticModules',
+	'moduleOfSyntheticModulesPACKAGING',
 	'listCallablesDispatchees',
 	'moduleOfSyntheticModules',
 	'Z0Z_filenameModuleWrite',

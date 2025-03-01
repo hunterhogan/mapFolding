@@ -1,5 +1,5 @@
 from mapFolding import FREAKOUT, Z0Z_filenameModuleWrite, Z0Z_filenameWriteElseCallableTarget, additional_importsHARDCODED
-from mapFolding import formatFilenameModule, getAlgorithmDispatcher, moduleOfSyntheticModules, indexMy, indexTrack
+from mapFolding import Z0Z_formatFilenameModuleSynthetic, getAlgorithmDispatcher, moduleOfSyntheticModulesPACKAGING, indexMy, indexTrack
 from mapFolding import parametersNumbaSuperJit, parametersNumbaSuperJitParallel, pathPackage, listCallablesDispatchees
 from mapFolding import getAlgorithmSource, getDatatypeModule
 from mapFolding import ParametersNumba, parametersNumbaDEFAULT
@@ -96,7 +96,7 @@ def makeFlowNumbaOptimized() -> list[YouOughtaKnow]: ...
 def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: bool, algorithmSource: types.ModuleType, relativePathWrite: str | PathLike[str], filenameModuleWrite: str, formatFilenameWrite: str) -> list[YouOughtaKnow]: ...
 def makeFlowNumbaOptimized(listCallablesInline: list[str] | None = None, callableDispatcher: bool | None = None, algorithmSource: types.ModuleType | None = None, relativePathWrite: str | PathLike[str] | None = None, filenameModuleWrite: str | None = None, formatFilenameWrite: str | None = None) -> list[YouOughtaKnow]:
 	if all(parameter is None for parameter in [listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite]):
-		return makeFlowNumbaOptimized(listCallablesDispatchees, True, getAlgorithmSource(), moduleOfSyntheticModules, Z0Z_filenameModuleWrite, formatFilenameModule)
+		return makeFlowNumbaOptimized(listCallablesDispatchees, True, getAlgorithmSource(), moduleOfSyntheticModulesPACKAGING, Z0Z_filenameModuleWrite, Z0Z_formatFilenameModuleSynthetic)
 
 	if (listCallablesInline is None
 	or callableDispatcher is None

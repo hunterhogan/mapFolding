@@ -25,7 +25,7 @@ class computationState(TypedDict):
 	track: ndarray[tuple[int, int], dtype[integer[Any]]]
 
 def getPathSyntheticModules() -> Path:
-	return pathPackage / moduleOfSyntheticModules
+	return pathPackage / moduleOfSyntheticModulesPACKAGING
 
 def getAlgorithmDispatcher() -> Callable[..., None]:
 	algorithmSource: ModuleType = getAlgorithmSource()

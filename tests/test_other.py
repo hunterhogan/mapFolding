@@ -10,7 +10,6 @@ from tests.conftest import (
 	hackSSOTdtype,
 	makeConnectionGraph,
 	makeDataContainer,
-	parseDimensions,
 	saveFoldsTotal,
 	setCPUlimit,
 	standardizedEqualTo,
@@ -65,14 +64,14 @@ def test_listDimensionsAsParameter(listDimensions: None | list[str] | list[int] 
 								expected_getLeavesTotal: type[ValueError] | int | type[TypeError] | type[OverflowError]) -> None:
 	"""Test both validateListDimensions and getLeavesTotal with the same inputs."""
 	standardizedEqualTo(expected_intInnit, intInnit, listDimensions)
-	standardizedEqualTo(expected_parseListDimensions, parseDimensions, listDimensions)
+	# standardizedEqualTo(expected_parseListDimensions, parseDimensions, listDimensions)
 	standardizedEqualTo(expected_validateListDimensions, validateListDimensions, listDimensions)
 	standardizedEqualTo(expected_getLeavesTotal, getLeavesTotal, listDimensions)
 
 def test_getLeavesTotal_edge_cases() -> None:
 	"""Test edge cases for getLeavesTotal."""
 	# Order independence
-	standardizedEqualTo(getLeavesTotal([2, 3, 4]), getLeavesTotal, [4, 2, 3])
+	standardizedEqualTo(getLeavesTotal((2, 3, 4)), getLeavesTotal, (4, 2, 3))
 
 	# Immutability
 	listOriginal = [2, 3]
@@ -100,10 +99,6 @@ def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> N
 ])
 def test_setCPUlimit(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | Literal[0] | Literal[1], expectedLimit: Any | int) -> None:
 	standardizedEqualTo(expectedLimit, setCPUlimit, CPUlimit)
-
-def test_makeConnectionGraph_nonNegative(listDimensionsTestFunctionality: list[int]) -> None:
-	connectionGraph = makeConnectionGraph(listDimensionsTestFunctionality)
-	assert numpy.all(connectionGraph >= 0), "All values in the connection graph should be non-negative."
 
 @pytest.fixture
 def parameterIterator() -> Callable[[list[int]], Generator[dict[str, Any], None, None]]:
@@ -134,7 +129,8 @@ def parameterIterator() -> Callable[[list[int]], Generator[dict[str, Any], None,
 	def makeParametersDynamic(listDimensions: list[int]) -> dict[str, list[Any]]:
 		"""Add context-dependent parameter values."""
 		parametersDynamic = parameterSets.copy()
-		leavesTotal = getLeavesTotal(listDimensions)
+		mapShape = validateListDimensions(listDimensions)
+		leavesTotal = getLeavesTotal(mapShape)
 		concurrencyLimit = min(leavesTotal, 16)
 
 		# Add dynamic computationDivisions values

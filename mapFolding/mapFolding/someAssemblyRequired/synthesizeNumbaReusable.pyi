@@ -1,7 +1,6 @@
-from mapFolding.someAssemblyRequired.synthesizeGeneric import *
 import ast
 from mapFolding import ParametersNumba as ParametersNumba, Z0Z_getDatatypeModuleScalar as Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable as Z0Z_getDecoratorCallable, hackSSOTdatatype as hackSSOTdatatype, parametersNumbaDEFAULT as parametersNumbaDEFAULT
-from mapFolding.someAssemblyRequired.synthesizeGeneric import UniversalImportTracker as UniversalImportTracker
+from mapFolding.someAssemblyRequired import Then as Then, UniversalImportTracker as UniversalImportTracker, ifThis as ifThis
 
 def thisIsNumbaDotJit(Ima: ast.AST) -> bool: ...
 def thisIsJit(Ima: ast.AST) -> bool: ...

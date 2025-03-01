@@ -16,6 +16,9 @@ from mapFolding.theSSOT import (
 	Array1DFoldsTotal,
 	Array1DElephino,
 	Array3D,
+	numpyFoldsTotal,
+	numpyLeavesTotal,
+	numpyElephino,
 	DatatypeElephino,
 	DatatypeFoldsTotal,
 	DatatypeLeavesTotal,
@@ -32,6 +35,65 @@ from typing import Any
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 import numpy
 import os
+
+def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
+	if not listDimensions:
+		raise ValueError("listDimensions is a required parameter.")
+	listValidated: list[int] = intInnit(listDimensions, 'listDimensions')
+	listNonNegative: list[int] = []
+	for dimension in listValidated:
+		if dimension < 0:
+			raise ValueError(f"Dimension {dimension} must be non-negative")
+		listNonNegative.append(dimension)
+	dimensionsValid = [dimension for dimension in listNonNegative if dimension > 0]
+	if len(dimensionsValid) < 2:
+		raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
+	return tuple(sorted(dimensionsValid))
+
+def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
+	productDimensions = 1
+	for dimension in mapShape:
+		if dimension > sysMaxsize // productDimensions:
+			raise OverflowError(f"I received {dimension=} in {mapShape=}, but the product of the dimensions exceeds the maximum size of an integer on this system.")
+		productDimensions *= dimension
+	return productDimensions
+
+def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: DTypeLike | None = None):
+	if 'numpy' == getDatatypeModule():
+		numpyDtype = datatype or numpyFoldsTotal
+	else:
+		raise NotImplementedError("Somebody done broke it.")
+	dimensionsTotal = len(mapShape)
+	cumulativeProduct = numpy.multiply.accumulate([1] + list(mapShape), dtype=numpyDtype)
+	arrayDimensions = numpy.array(mapShape, dtype=numpyDtype)
+	coordinateSystem = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=numpyDtype)
+	for indexDimension in range(dimensionsTotal):
+		for leaf1ndex in range(1, leavesTotal + 1):
+			coordinateSystem[indexDimension, leaf1ndex] = (((leaf1ndex - 1) // cumulativeProduct[indexDimension]) % arrayDimensions[indexDimension] + 1)
+
+	connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=numpyDtype)
+	for indexDimension in range(dimensionsTotal):
+		for activeLeaf1ndex in range(1, leavesTotal + 1):
+			for connectee1ndex in range(1, activeLeaf1ndex + 1):
+				isFirstCoord = coordinateSystem[indexDimension, connectee1ndex] == 1
+				isLastCoord = coordinateSystem[indexDimension, connectee1ndex] == arrayDimensions[indexDimension]
+				exceedsActive = connectee1ndex + cumulativeProduct[indexDimension] > activeLeaf1ndex
+				isEvenParity = (coordinateSystem[indexDimension, activeLeaf1ndex] & 1) == (coordinateSystem[indexDimension, connectee1ndex] & 1)
+
+				if (isEvenParity and isFirstCoord) or (not isEvenParity and (isLastCoord or exceedsActive)):
+					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex
+				elif isEvenParity and not isFirstCoord:
+					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex - cumulativeProduct[indexDimension]
+				elif not isEvenParity and not (isLastCoord or exceedsActive):
+					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
+	return connectionGraph
+
+def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None):
+	if 'numpy' == getDatatypeModule():
+		numpyDtype = datatype or numpyFoldsTotal
+		return numpy.zeros(shape, dtype=numpyDtype)
+	else:
+		raise NotImplementedError("Somebody done broke it.")
 
 def setCPUlimit(CPUlimit: Any | None) -> int:
 	"""Sets CPU limit for Numba concurrent operations. Note that it can only affect Numba-jitted functions that have not yet been imported.
@@ -64,86 +126,7 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 
 	return concurrencyLimit
 
-def getFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]]) -> str:
-	"""Imagine your computer has been counting folds for 9 days, and when it tries to save your newly discovered value,
-	the filename is invalid. I bet you think this function is more important after that thought experiment.
-
-	Make a standardized filename for the computed value `foldsTotal`.
-
-	The filename takes into account
-		- the dimensions of the map, aka `mapShape`, aka `listDimensions`
-		- no spaces in the filename
-		- safe filesystem characters
-		- unique extension
-		- Python-safe strings:
-			- no starting with a number
-			- no reserved words
-			- no dashes or other special characters
-			- uh, I can't remember, but I found some other frustrating limitations
-		- if 'p' is still the first character of the filename, I picked that because it was the original identifier for the map shape in Lunnan's code
-
-	Parameters:
-		mapShape: A sequence of integers representing the dimensions of the map.
-
-	Returns:
-		filenameFoldsTotal: A filename string in format 'pMxN.foldsTotal' where M,N are sorted dimensions
-	"""
-	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
-
-def getLeavesTotal(listDimensions: Sequence[int]) -> int:
-	"""
-	How many leaves are in the map.
-
-	Parameters:
-		listDimensions: A list of integers representing dimensions.
-
-	Returns:
-		productDimensions: The product of all positive integer dimensions.
-	"""
-	listNonNegative = parseDimensions(listDimensions, 'listDimensions')
-	listPositive = [dimension for dimension in listNonNegative if dimension > 0]
-
-	if not listPositive:
-		return 0
-	else:
-		productDimensions = 1
-		for dimension in listPositive:
-			if dimension > sysMaxsize // productDimensions:
-				raise OverflowError(f"I received {dimension=} in {listDimensions=}, but the product of the dimensions exceeds the maximum size of an integer on this system.")
-			productDimensions *= dimension
-
-		return productDimensions
-
-def getPathFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]], pathLikeWriteFoldsTotal: str | os.PathLike[str] | None = None) -> Path:
-	"""Get a standardized path and filename for the computed value `foldsTotal`.
-
-	If you provide a directory, the function will append a standardized filename. If you provide a filename
-	or a relative path and filename, the function will prepend the default path.
-
-	Parameters:
-		mapShape: List of dimensions for the map folding problem.
-		pathLikeWriteFoldsTotal (pathJobRootDEFAULT): Path, filename, or relative path and filename. If None, uses default path.
-			Defaults to None.
-
-	Returns:
-		pathFilenameFoldsTotal: Absolute path and filename.
-	"""
-	pathLikeSherpa = Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else None
-	if not pathLikeSherpa:
-		pathLikeSherpaIsNotNone: Path = getPathJobRootDEFAULT()
-	else:
-		pathLikeSherpaIsNotNone: Path = pathLikeSherpa
-	if pathLikeSherpaIsNotNone.is_dir():
-		pathFilenameFoldsTotal = pathLikeSherpaIsNotNone / getFilenameFoldsTotal(mapShape)
-	elif pathLikeSherpaIsNotNone.is_absolute():
-		pathFilenameFoldsTotal = pathLikeSherpaIsNotNone
-	else:
-		pathFilenameFoldsTotal = getPathJobRootDEFAULT() / pathLikeSherpaIsNotNone
-
-	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
-	return pathFilenameFoldsTotal
-
-def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, CPUlimit: bool | float | int | None, listDimensions: Sequence[int]) -> int:
+def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, leavesTotal: int) -> int:
 	"""
 	Determines whether to divide the computation into tasks and how many divisions.
 
@@ -177,7 +160,6 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 	Task divisions should not exceed total leaves or the folds will be over-counted.
 	"""
 	taskDivisions = 0
-	leavesTotal = getLeavesTotal(listDimensions)
 	if not computationDivisions:
 		pass
 	elif isinstance(computationDivisions, int):
@@ -192,210 +174,60 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 		raise ValueError(f"I received {computationDivisions} for the parameter, `computationDivisions`, but the so-called programmer didn't implement code for that.")
 
 	if taskDivisions > leavesTotal:
-		raise ValueError(f"Problem: `taskDivisions`, ({taskDivisions}), is greater than `leavesTotal`, ({leavesTotal}), which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`. They are derived from parameters that may or may not still be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from dubious-quality Python code.\n\nFor those parameters, I received {computationDivisions=}, {CPUlimit=}, and {listDimensions=}.\n\nPotential solutions: get a different hobby or set `computationDivisions` to a different value.")
-
+		raise ValueError(f"Problem: `taskDivisions`, ({taskDivisions}), is greater than `leavesTotal`, ({leavesTotal}), which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`. They are derived from parameters that may or may not still be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from dubious-quality Python code.")
 	return taskDivisions
-
-def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: str | None) -> ndarray[tuple[int, int, int], dtype[integer[Any]]]:
-	"""
-	Constructs a multi-dimensional connection graph representing the connections between the leaves of a map with the given dimensions.
-	Also called a Cartesian product decomposition or dimensional product mapping.
-
-	Parameters
-		listDimensions: A sequence of integers representing the dimensions of the map.
-
-	Returns
-		connectionGraph: A 3D numpy array with shape of (dimensionsTotal, leavesTotal + 1, leavesTotal + 1).
-	"""
-	ImaSetTheDatatype = keywordArguments.get('datatype', None)
-	if ImaSetTheDatatype:
-		setDatatypeLeavesTotal(ImaSetTheDatatype)
-	dtype = hackSSOTdtype('connectionGraph')
-	mapShape = validateListDimensions(listDimensions)
-	leavesTotal = getLeavesTotal(mapShape)
-	arrayDimensions = numpy.array(mapShape, dtype=dtype)
-	dimensionsTotal = len(arrayDimensions)
-
-	cumulativeProduct = numpy.multiply.accumulate([1] + mapShape, dtype=dtype)
-	coordinateSystem = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=dtype)
-	for indexDimension in range(dimensionsTotal):
-		for leaf1ndex in range(1, leavesTotal + 1):
-			coordinateSystem[indexDimension, leaf1ndex] = ( ((leaf1ndex - 1) // cumulativeProduct[indexDimension]) % arrayDimensions[indexDimension] + 1 )
-
-	connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=dtype)
-	for indexDimension in range(dimensionsTotal):
-		for activeLeaf1ndex in range(1, leavesTotal + 1):
-			for connectee1ndex in range(1, activeLeaf1ndex + 1):
-				isFirstCoord = coordinateSystem[indexDimension, connectee1ndex] == 1
-				isLastCoord = coordinateSystem[indexDimension, connectee1ndex] == arrayDimensions[indexDimension]
-				exceedsActive = connectee1ndex + cumulativeProduct[indexDimension] > activeLeaf1ndex
-				isEvenParity = (coordinateSystem[indexDimension, activeLeaf1ndex] & 1) == (coordinateSystem[indexDimension, connectee1ndex] & 1)
-
-				if (isEvenParity and isFirstCoord) or (not isEvenParity and (isLastCoord or exceedsActive)):
-					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex
-				elif isEvenParity and not isFirstCoord:
-					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex - cumulativeProduct[indexDimension]
-				elif not isEvenParity and not (isLastCoord or exceedsActive):
-					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
-
-	return connectionGraph
-
-def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None) -> NDArray[integer[Any]]:
-	"""Create a zeroed-out `ndarray` with the given shape and datatype.
-
-	Parameters:
-		shape: The shape of the array. Can be an integer for 1D arrays
-			or a tuple of integers for multi-dimensional arrays.
-		datatype ('dtypeFoldsTotal'): The desired data type for the array.
-			If `None`, defaults to 'dtypeFoldsTotal'. Defaults to None.
-
-	Returns:
-		dataContainer: A new array of given shape and type, filled with zeros.
-
-	Notes:
-		If a version of the algorithm were to use something other than numpy, such as JAX or CUDA, because other
-		functions use this function, it would be much easier to change the datatype "ecosystem".
-	"""
-	numpyDtype = datatype or hackSSOTdtype('dtypeFoldsTotal')
-	if 'numpy' == getDatatypeModule():
-		return numpy.zeros(shape, dtype=numpyDtype)
-	else:
-		raise NotImplementedError("Somebody done broke it.")
-
-def outfitCountFolds(listDimensions: Sequence[int]
-					, computationDivisions: int | str | None = None
-					, CPUlimit: bool | float | int | None = None
-					) -> computationState:
-
-
-	my = makeDataContainer(len(indexMy), hackSSOTdtype('my'))
-
-	mapShape = tuple(sorted(validateListDimensions(listDimensions)))
-	concurrencyLimit = setCPUlimit(CPUlimit)
-	my[indexMy.taskDivisions] = getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, mapShape)
-
-	foldGroups = makeDataContainer(max(my[indexMy.taskDivisions] + 1, 2), hackSSOTdtype('foldGroups'))
-	leavesTotal = getLeavesTotal(mapShape)
-	foldGroups[-1] = leavesTotal
-
-	my[indexMy.dimensionsTotal] = len(mapShape)
-	my[indexMy.leaf1ndex] = 1
-	stateInitialized = computationState(
-		connectionGraph = makeConnectionGraph(mapShape, datatype=hackSSOTdatatype('connectionGraph')),
-		foldGroups = foldGroups,
-		mapShape = numpy.array(mapShape, dtype=hackSSOTdtype('mapShape')),
-		my = my,
-		gapsWhere = makeDataContainer(int(leavesTotal) * int(leavesTotal) + 1, hackSSOTdtype('gapsWhere')),
-		track = makeDataContainer((len(indexTrack), leavesTotal + 1), hackSSOTdtype('track')),
-		)
-
-	return stateInitialized
-
-def parseDimensions(dimensions: Sequence[int], parameterName: str = 'listDimensions') -> list[int]:
-	"""
-	Parse and validate the dimensions are non-negative integers.
-
-	Parameters:
-		dimensions: Sequence of integers representing dimensions.
-		parameterName ('listDimensions'): Name of the parameter for error messages. Defaults to 'listDimensions'.
-	Returns:
-		listNonNegative: List of validated non-negative integers.
-	Raises:
-		ValueError: If any dimension is negative or if the list is empty.
-		TypeError: If any element cannot be converted to integer (raised by `intInnit`).
-	"""
-	listValidated: list[int] = intInnit(dimensions, parameterName)
-	listNonNegative: list[int] = []
-	for dimension in listValidated:
-		if dimension < 0:
-			raise ValueError(f"Dimension {dimension} must be non-negative")
-		listNonNegative.append(dimension)
-
-	return listNonNegative
-
-def validateListDimensions(listDimensions: Sequence[int]) -> list[int]:
-	"""
-	Validates and sorts a sequence of at least two positive dimensions.
-
-	Parameters:
-		listDimensions: A sequence of integer dimensions to be validated.
-
-	Returns:
-		dimensionsValidSorted: A list, with at least two elements, of only positive integers.
-
-	Raises:
-		ValueError: If the input listDimensions is empty.
-		NotImplementedError: If the resulting list of positive dimensions has fewer than two elements.
-	"""
-	if not listDimensions:
-		raise ValueError("listDimensions is a required parameter.")
-	listNonNegative = parseDimensions(listDimensions, 'listDimensions')
-	dimensionsValid = [dimension for dimension in listNonNegative if dimension > 0]
-	if len(dimensionsValid) < 2:
-		raise NotImplementedError(f"This function requires listDimensions, {listDimensions}, to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
-	return sorted(dimensionsValid)
-
-# 	computationStateInitialized = ComputationState(listDimensions, computationDivisions, CPUlimit)
 
 @dataclasses.dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False,
 						match_args=True, kw_only=False, slots=False, weakref_slot=False)
 class ComputationState:
-	# I have to define this shit twice? The "pseudo-field" that I don't want in my dataclass is the fucking field I have to define twice?!
-	listDimensions: dataclasses.InitVar[Sequence[int] | Sequence[DatatypeLeavesTotal]]
-	computationDivisions: dataclasses.InitVar[int | str | None] = None
-	CPUlimit: dataclasses.InitVar[bool | float | int | None] = None
+	mapShape: tuple[DatatypeLeavesTotal, ...]
+	leavesTotal: DatatypeLeavesTotal
+	taskDivisions: DatatypeLeavesTotal
 
-	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=False)
-	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
-	leavesTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
-
-	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
 	connectionGraph: Array3D = dataclasses.field(init=False)
-
 	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(init=False)
-	gapRangeStart: Array1DElephino = dataclasses.field(init=False)
-	gapsWhere: Array1DLeavesTotal = dataclasses.field(init=False)
-	leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
-	leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
-
+	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
 	foldGroups: Array1DFoldsTotal = dataclasses.field(init=False)
-
 	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
 	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
+	gapRangeStart: Array1DElephino = dataclasses.field(init=False)
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(init=False)
 	groupsOfFolds: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
 	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
 	leaf1ndex: DatatypeElephino = DatatypeElephino(1)
+	leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
+	leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
 	leafConnectee: DatatypeElephino = DatatypeElephino(0)
-	taskDivisions: DatatypeLeavesTotal = dataclasses.field(init=False)
 	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 
-	def __post_init__(self, listDimensions: Sequence[int] | Sequence[DatatypeLeavesTotal], computationDivisions: int | str | None = None, CPUlimit: bool | float | int | None = None):
-		self.mapShape = tuple(map(DatatypeLeavesTotal, sorted(validateListDimensions(listDimensions))))
+	def __post_init__(self):
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
-		self.leavesTotal = DatatypeLeavesTotal(getLeavesTotal(self.mapShape))
 		self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
-
-		concurrencyLimit = setCPUlimit(CPUlimit)
-		self.taskDivisions = DatatypeLeavesTotal(getTaskDivisions(computationDivisions, concurrencyLimit, CPUlimit, self.mapShape))
-
-		# the dtype is defined above. it is the default datatype for this variable for the entire package. the source of truth for this container's datatype is NOT a function call in a post_init method in a dataclass.
-		self.connectionGraph = makeConnectionGraph(self.mapShape)
+		self.connectionGraph = makeConnectionGraph(self.mapShape, self.leavesTotal, numpyLeavesTotal)
 
 		# the dtype is defined above
-		self.foldGroups = makeDataContainer(min(2, int(self.taskDivisions)))
+		self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions)), numpyFoldsTotal)
+		self.foldGroups[-1] = self.leavesTotal
 
-		# the dtype is defined above
 		leavesTotalAsInt = int(self.leavesTotal)
-		self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1)
+		self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, numpyElephino)
+		self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+		self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, numpyLeavesTotal)
+		self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+		self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
 
-		# the dtype is defined above
-		self.leafAbove = makeDataContainer(leavesTotalAsInt + 1)
-		self.leafBelow = makeDataContainer(leavesTotalAsInt + 1)
-		self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1)
-		self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1)
+	def getFoldsTotal(self):
+		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
+
+def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str | None = None, concurrencyLimit: int = 1) -> ComputationState:
+	leavesTotal = getLeavesTotal(mapShape)
+	taskDivisions = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
+	computationStateInitialized = ComputationState(mapShape, leavesTotal, taskDivisions)
+	return computationStateInitialized
 
 def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> None:
 	"""
@@ -424,3 +256,58 @@ def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> Non
 		except Exception:
 			print(foldsTotal)
 	return None
+
+def getFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]]) -> str:
+	"""Imagine your computer has been counting folds for 9 days, and when it tries to save your newly discovered value,
+	the filename is invalid. I bet you think this function is more important after that thought experiment.
+
+	Make a standardized filename for the computed value `foldsTotal`.
+
+	The filename takes into account
+		- the dimensions of the map, aka `mapShape`, aka `listDimensions`
+		- no spaces in the filename
+		- safe filesystem characters
+		- unique extension
+		- Python-safe strings:
+			- no starting with a number
+			- no reserved words
+			- no dashes or other special characters
+			- uh, I can't remember, but I found some other frustrating limitations
+		- if 'p' is still the first character of the filename, I picked that because it was the original identifier for the map shape in Lunnan's code
+
+	Parameters:
+		mapShape: A sequence of integers representing the dimensions of the map.
+
+	Returns:
+		filenameFoldsTotal: A filename string in format 'pMxN.foldsTotal' where M,N are sorted dimensions
+	"""
+	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
+
+def getPathFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]], pathLikeWriteFoldsTotal: str | os.PathLike[str] | None = None) -> Path:
+	"""Get a standardized path and filename for the computed value `foldsTotal`.
+
+	If you provide a directory, the function will append a standardized filename. If you provide a filename
+	or a relative path and filename, the function will prepend the default path.
+
+	Parameters:
+		mapShape: List of dimensions for the map folding problem.
+		pathLikeWriteFoldsTotal (pathJobRootDEFAULT): Path, filename, or relative path and filename. If None, uses default path.
+			Defaults to None.
+
+	Returns:
+		pathFilenameFoldsTotal: Absolute path and filename.
+	"""
+	pathLikeSherpa = Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else None
+	if not pathLikeSherpa:
+		pathLikeSherpaIsNotNone: Path = getPathJobRootDEFAULT()
+	else:
+		pathLikeSherpaIsNotNone: Path = pathLikeSherpa
+	if pathLikeSherpaIsNotNone.is_dir():
+		pathFilenameFoldsTotal = pathLikeSherpaIsNotNone / getFilenameFoldsTotal(mapShape)
+	elif pathLikeSherpaIsNotNone.is_absolute():
+		pathFilenameFoldsTotal = pathLikeSherpaIsNotNone
+	else:
+		pathFilenameFoldsTotal = getPathJobRootDEFAULT() / pathLikeSherpaIsNotNone
+
+	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
+	return pathFilenameFoldsTotal

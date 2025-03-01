@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from mapFolding import computationState, getDispatcherCallable, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal
+from mapFolding import computationState, ComputationState, getDispatcherCallable, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal, validateListDimensions, setCPUlimit
 from os import PathLike
 from pathlib import Path
 
@@ -37,15 +37,17 @@ def countFolds(listDimensions: Sequence[int]
 	N.B.: You probably don't want to divide the computation into tasks.
 		If you want to compute a large `foldsTotal`, dividing the computation into tasks is usually a bad idea. Dividing the algorithm into tasks is inherently inefficient: efficient division into tasks means there would be no overlap in the work performed by each task. When dividing this algorithm, the amount of overlap is between 50% and 90% by all tasks: at least 50% of the work done by every task must be done by _all_ tasks. If you improve the computation time, it will only change by -10 to -50% depending on (at the very least) the ratio of the map dimensions and the number of leaves. If an undivided computation would take 10 hours on your computer, for example, the computation will still take at least 5 hours but you might reduce the time to 9 hours. Most of the time, however, you will increase the computation time. If logicalCores >= leavesTotal, it will probably be faster. If logicalCores <= 2 * leavesTotal, it will almost certainly be slower for all map dimensions.
 	"""
-	stateUniversal: computationState = outfitCountFolds(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit)
+	mapShape: tuple[int, ...] = validateListDimensions(listDimensions)
+	concurrencyLimit: int = setCPUlimit(CPUlimit)
+	computationStateInitialized: ComputationState = outfitCountFolds(mapShape, computationDivisions, concurrencyLimit)
 
 	dispatcher = getDispatcherCallable()
-	dispatcher(**stateUniversal)
+	computationStateComplete: ComputationState = dispatcher(computationStateInitialized)
 
-	foldsTotal = int(stateUniversal['foldGroups'][0:-1].sum() * stateUniversal['foldGroups'][-1])
+	computationStateComplete.getFoldsTotal()
 
 	if pathLikeWriteFoldsTotal is not None:
-		pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(stateUniversal['mapShape'], pathLikeWriteFoldsTotal)
-		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
+		pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(computationStateComplete.mapShape, pathLikeWriteFoldsTotal)
+		saveFoldsTotal(pathFilenameFoldsTotal, computationStateComplete.foldsTotal)
 
-	return foldsTotal
+	return computationStateComplete.foldsTotal

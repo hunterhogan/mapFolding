@@ -1,16 +1,13 @@
+from mapFolding.theConfiguration import *
 import enum
 from typing import Any, Final
 
 class EnumIndices(enum.IntEnum):
     @staticmethod
-    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> int:
-        """0-indexed."""
-    def __index__(self) -> int:
-        """Adapt enum to the ultra-rare event of indexing a NumPy 'ndarray', which is not the
-\t\tsame as `array.array`. See NumPy.org; I think it will be very popular someday."""
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> int: ...
+    def __index__(self) -> int: ...
 
 class indexMy(EnumIndices):
-    """Indices for scalar values."""
     dimensionsTotal = ...
     dimensionsUnconstrained = ...
     gap1ndex = ...
@@ -24,7 +21,6 @@ class indexMy(EnumIndices):
     taskIndex = ...
 
 class indexTrack(EnumIndices):
-    """Indices for state tracking array."""
     leafAbove = ...
     leafBelow = ...
     countDimensionsGapped = ...
@@ -32,8 +28,7 @@ class indexTrack(EnumIndices):
 
 _datatypeDefault: Final[dict[str, str]]
 _datatypeModule: str
-_datatypeModuleDEFAULT: Final[str]
-_datatype: dict[str, str]
+_registryOfDatatypes: dict[str, str]
 
 def reportDatatypeLimit(identifier: str, datatype: str, sourGrapes: bool | None = False) -> str: ...
 def setDatatypeModule(datatypeModule: str, sourGrapes: bool | None = False) -> str: ...
