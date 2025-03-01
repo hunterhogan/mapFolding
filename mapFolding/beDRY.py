@@ -1,5 +1,4 @@
 """A relatively stable API for oft-needed functionality."""
-import numpy.typing
 from mapFolding import (
 	computationState,
 	concurrencyPackage,
@@ -23,8 +22,7 @@ from mapFolding.theSSOT import (
 	DatatypeFoldsTotal,
 	DatatypeLeavesTotal,
 )
-
-import dataclasses
+from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from collections.abc import Sequence
 from numba import get_num_threads, set_num_threads
 from numpy import dtype, integer, ndarray
@@ -32,8 +30,9 @@ from numpy.typing import DTypeLike, NDArray
 from pathlib import Path
 from sys import maxsize as sysMaxsize
 from typing import Any
-from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
+import dataclasses
 import numpy
+import numpy.typing
 import os
 
 def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
@@ -184,7 +183,7 @@ class ComputationState:
 	leavesTotal: DatatypeLeavesTotal
 	taskDivisions: DatatypeLeavesTotal
 
-	connectionGraph: Array3D = dataclasses.field(init=False)
+	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'description': 'A 3D array representing the connection graph of the map.'})
 	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(init=False)
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
@@ -202,7 +201,8 @@ class ComputationState:
 	leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
 	leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
 	leafConnectee: DatatypeElephino = DatatypeElephino(0)
-	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	taskIndex: DatatypeLeavesTotal = dataclasses.field(default=DatatypeLeavesTotal(0), metadata={'myType': DatatypeLeavesTotal})
+	# taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 
 	def __post_init__(self):
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
@@ -210,7 +210,7 @@ class ComputationState:
 		self.connectionGraph = makeConnectionGraph(self.mapShape, self.leavesTotal, numpyLeavesTotal)
 
 		# the dtype is defined above
-		self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions)), numpyFoldsTotal)
+		self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), numpyFoldsTotal)
 		self.foldGroups[-1] = self.leavesTotal
 
 		leavesTotalAsInt = int(self.leavesTotal)
@@ -222,6 +222,11 @@ class ComputationState:
 
 	def getFoldsTotal(self):
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
+
+	# factory? constructor?
+	# state.taskIndex = state.taskIndex.type(indexSherpa)
+	# self.fieldName = self.fieldName.fieldType(indexSherpa)
+	# state.taskIndex.toMyType(indexSherpa)
 
 def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str | None = None, concurrencyLimit: int = 1) -> ComputationState:
 	leavesTotal = getLeavesTotal(mapShape)

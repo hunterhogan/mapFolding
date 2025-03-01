@@ -27,7 +27,9 @@ def test_countFolds_cpuLimitOopsie(listDimensionsTestFunctionality: list[int], C
 	(20, 4, [3,5], ValueError)
 ])
 def test_getTaskDivisions(computationDivisions: None | list[str] | Literal['maximum'] | Literal['cpu'] | Literal[20], concurrencyLimit: Literal[4], listDimensions: list[int], expectedTaskDivisions: type[ValueError] | Literal[0] | Literal[77] | Literal[4]) -> None:
-	standardizedEqualTo(expectedTaskDivisions, getTaskDivisions, computationDivisions, concurrencyLimit, None, listDimensions)
+	mapShape = validateListDimensions(listDimensions)
+	leavesTotal = getLeavesTotal(mapShape)
+	standardizedEqualTo(expectedTaskDivisions, getTaskDivisions, computationDivisions, concurrencyLimit, leavesTotal)
 
 @pytest.mark.parametrize("expected,parameter", [
 	(2, "2"),  # string
