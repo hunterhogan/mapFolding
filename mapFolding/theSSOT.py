@@ -5,6 +5,7 @@ from numpy import dtype, integer, ndarray
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Final, TYPE_CHECKING, cast
+import dataclasses
 
 try:
 	from typing import NotRequired
@@ -16,32 +17,38 @@ if TYPE_CHECKING:
 else:
 	TypedDict = dict
 
-"""
-refactor theDao, use dataclass or something that makes sense
-refactor the synthesize modules to transform the into data structures that work for numba
-"""
+@dataclasses.dataclass
+class ComputationState:
+	connectionGraph: Array3D
+	countDimensionsGapped: Array1DLeavesTotal
+	dimensionsTotal: DatatypeLeavesTotal
+	dimensionsUnconstrained:DatatypeLeavesTotal
+	foldGroups: Array1DFoldsTotal
+	foldsTotal: DatatypeFoldsTotal
+	gap1ndex: DatatypeLeavesTotal
+	gap1ndexCeiling: DatatypeElephino
+	gapRangeStart: Array1DElephino
+	gapsWhere: Array1DLeavesTotal
+	groupsOfFolds: DatatypeFoldsTotal
+	indexDimension: DatatypeLeavesTotal
+	indexLeaf: DatatypeLeavesTotal
+	indexMiniGap: DatatypeElephino
+	leaf1ndex: DatatypeElephino
+	leafAbove: Array1DLeavesTotal
+	leafBelow: Array1DLeavesTotal
+	leafConnectee: DatatypeElephino
+	leavesTotal: DatatypeLeavesTotal
+	mapShape: tuple[DatatypeLeavesTotal, ...]
+	taskDivisions: DatatypeLeavesTotal
+	taskIndex: DatatypeLeavesTotal
 
-"""Technical concepts I am likely using and likely want to use more effectively:
-- Configuration Registry
-- Write-Once, Read-Many (WORM) / Immutable Initialization
-- Lazy Initialization
-- Separate configuration from business logic
-
-theSSOT and yourSSOT
-
-delay realization/instantiation until a concrete value is desired
-moment of truth: when the value is needed, not when the value is defined
-"""
-
-"""
-listDimensions: list[int]
-mapShape
-
-tupleDimensions: tuple[int]
-tupleMapShape: tuple[int]
-
-dimensionsTuple
-"""
+class computationState(TypedDict):
+	connectionGraph: ndarray[tuple[int, int, int], dtype[integer[Any]]]
+	foldGroups: ndarray[tuple[int], dtype[integer[Any]]]
+	gapsWhere: ndarray[tuple[int], dtype[integer[Any]]]
+	mapShape: ndarray[tuple[int], dtype[integer[Any]]]
+	my: ndarray[tuple[int], dtype[integer[Any]]]
+	track: ndarray[tuple[int, int], dtype[integer[Any]]]
 
 def getPathSyntheticModules() -> Path:
 	return pathPackage / moduleOfSyntheticModules
@@ -49,15 +56,6 @@ def getPathSyntheticModules() -> Path:
 def getAlgorithmDispatcher() -> Callable[..., None]:
 	algorithmSource: ModuleType = getAlgorithmSource()
 	return cast(Callable[..., None], algorithmSource.doTheNeedful) # 'doTheNeedful' is duplicated and there is not a SSOT for it
-
-# NOTE I want this _concept_, not necessarily this method, to be well implemented and usable everywhere: Python, Numba, Jax, CUDA, idc
-class computationState(TypedDict):
-	connectionGraph:	ndarray[tuple[int, int, int], dtype[integer[Any]]]
-	foldGroups:			ndarray[tuple[int]			, dtype[integer[Any]]]
-	gapsWhere:			ndarray[tuple[int]			, dtype[integer[Any]]]
-	mapShape:			ndarray[tuple[int]			, dtype[integer[Any]]]
-	my:					ndarray[tuple[int]			, dtype[integer[Any]]]
-	track:				ndarray[tuple[int, int]		, dtype[integer[Any]]]
 
 _datatypeModuleScalar = 'numba'
 _decoratorCallable = 'jit'
@@ -125,3 +123,29 @@ parametersNumbaSuperJitParallel: Final[ParametersNumba] = { **parametersNumbaSup
 """Speed, no helmet, concurrency, no talking to non-jitted functions."""
 
 parametersNumbaMinimum: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': False, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': False, 'forceobj': True, 'parallel': False, }
+"""
+refactor theDao, use dataclass or something that makes sense
+refactor the synthesize modules to transform the into data structures that work for numba
+"""
+
+"""Technical concepts I am likely using and likely want to use more effectively:
+- Configuration Registry
+- Write-Once, Read-Many (WORM) / Immutable Initialization
+- Lazy Initialization
+- Separate configuration from business logic
+
+theSSOT and yourSSOT
+
+delay realization/instantiation until a concrete value is desired
+moment of truth: when the value is needed, not when the value is defined
+"""
+
+"""
+listDimensions: list[int]
+mapShape
+
+tupleDimensions: tuple[int]
+tupleMapShape: tuple[int]
+
+dimensionsTuple
+"""

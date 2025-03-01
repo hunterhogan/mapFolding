@@ -271,30 +271,6 @@ class FunctionInliner(ast.NodeTransformer):
 		return self.generic_visit(node)
 
 class UnpackArrays(ast.NodeTransformer):
-	"""
-	A class that transforms array accesses using enum indices into local variables.
-
-	This AST transformer identifies array accesses using enum indices and replaces them
-	with local variables, adding initialization statements at the start of functions.
-
-	Parameters:
-		enumIndexClass (Type[EnumIndices]): The enum class used for array indexing
-		arrayName (str): The name of the array being accessed
-
-	Attributes:
-		enumIndexClass (Type[EnumIndices]): Stored enum class for index lookups
-		arrayName (str): Name of the array being transformed
-		substitutions (dict): Tracks variable substitutions and their original nodes
-
-	The transformer handles two main cases:
-	1. Scalar array access - array[EnumIndices.MEMBER]
-	2. Array slice access - array[EnumIndices.MEMBER, other_indices...]
-	For each identified access pattern, it:
-	1. Creates a local variable named after the enum member
-	2. Adds initialization code at function start
-	3. Replaces original array access with the local variable
-	"""
-
 	def __init__(self, enumIndexClass: type[EnumIndices], arrayName: str) -> None:
 		self.enumIndexClass = enumIndexClass
 		self.arrayName = arrayName

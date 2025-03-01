@@ -1,10 +1,13 @@
+from ctypes import c_uint8, c_int16
+from numpy import int64 as numpy_int64, int16 as numpy_int16, uint8 as numpy_uint8
+from numpy import dtype, ndarray
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
 from mapFolding.theWrongWay import *
 from pathlib import Path
 from sys import modules as sysModules
 from types import ModuleType
-from typing import Final
+from typing import Final, TypeAlias
 """
 evaluateWhenPACKAGING
 evaluateWhenINSTALLING
@@ -56,3 +59,16 @@ listCallablesDispatchees: list[str] = listCallablesDispatcheesHARDCODED
 additional_importsHARDCODED.append(myPackageNameIs)
 
 concurrencyPackage: Final[str] = 'numba'
+
+# TODO this is stupid: the values will get out of line, but I can't figure out how tyo keep them inline or check they are inline without so much code that the verification code is likely to introduce problems
+DatatypeLeavesTotal: TypeAlias = c_uint8
+numpyLeavesTotal: TypeAlias = numpy_uint8
+DatatypeElephino: TypeAlias = c_int16
+numpyElephino: TypeAlias = numpy_int16
+DatatypeFoldsTotal: TypeAlias = int
+numpyFoldsTotal: TypeAlias = numpy_int64
+
+Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[numpyLeavesTotal]]
+Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[numpyLeavesTotal]]
+Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[numpy_int16]]
+Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[numpy_int64]]
