@@ -22,7 +22,14 @@ classifiers = [
 	"Topic :: Scientific/Engineering :: Mathematics",
 	"Topic :: Software Development :: Libraries :: Python Modules",
 	"Typing :: Typed",]
-dependencies = ["numba", "numpy", "Z0Z_tools"]
+dependencies = ["numba", "numpy", "Z0Z_tools",
+	"tomli",
+	"autoflake",
+	"mypy",
+	"more_itertools",
+	"numba_progress",
+	"python_minifier",
+]
 description = "Count distinct ways to fold a map (or a strip of stamps)"
 keywords = [
 	"A001415",
@@ -39,15 +46,10 @@ keywords = [
 license = { 'text' = "CC-BY-NC-4.0" }
 name = "mapFolding"
 optional-dependencies = { testing = [
-	"autoflake",
-	"mypy",
-	"more_itertools",
-	"numba_progress",
 	"pytest-cov",
 	"pytest-env",
 	"pytest-xdist",
 	"pytest",
-	"python_minifier",
 	"pyupgrade",
 	"updateCitation",] }
 readme = { file = "README.md", content-type = "text/markdown" }

@@ -1,10 +1,13 @@
 from collections.abc import Callable
-from mapFolding.theSSOTdatatypes import *
+from importlib import import_module as importlib_import_module
+from inspect import getfile as inspect_getfile
 from numba.core.compiler import CompilerBase as numbaCompilerBase
-from numpy import dtype, integer, ndarray
+from numpy import dtype, ndarray, int64 as numpy_int64, int16 as numpy_int16
 from pathlib import Path
+from sys import modules as sysModules
 from types import ModuleType
-from typing import Any, Final, TYPE_CHECKING, cast
+from typing import Any, cast, Final, TYPE_CHECKING, TypeAlias
+import tomli
 
 try:
 	from typing import NotRequired
@@ -16,20 +19,112 @@ if TYPE_CHECKING:
 else:
 	TypedDict = dict
 
-class computationState(TypedDict):
-	connectionGraph: ndarray[tuple[int, int, int], dtype[integer[Any]]]
-	foldGroups: ndarray[tuple[int], dtype[integer[Any]]]
-	gapsWhere: ndarray[tuple[int], dtype[integer[Any]]]
-	mapShape: ndarray[tuple[int], dtype[integer[Any]]]
-	my: ndarray[tuple[int], dtype[integer[Any]]]
-	track: ndarray[tuple[int, int], dtype[integer[Any]]]
+# =============================================================================
+# The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
+# Evaluate When Packaging Evaluate When Packaging Evaluate When Packaging
+
+algorithmSourcePACKAGING: str = 'theDao'
+datatypeModulePACKAGING: Final[str] = 'numpy'
+dispatcherCallableNamePACKAGING = "doTheNeedful"
+moduleOfSyntheticModulesPACKAGING: Final[str] = "syntheticModules"
+
+try:
+	myPackageNameIsPACKAGING: str = tomli.load(Path("../pyproject.toml").open('rb'))["project"]["name"]
+except Exception:
+	myPackageNameIsPACKAGING: str = "mapFolding"
+
+# =============================================================================
+# The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
+# Evaluate When Installing Evaluate When Installing Evaluate When Installing
+
+def getPathPackageINSTALLING() -> Path:
+	pathPackage: Path = Path(inspect_getfile(importlib_import_module(myPackageNameIsPACKAGING)))
+	if pathPackage.is_file():
+		pathPackage = pathPackage.parent
+	return pathPackage
+
+# =============================================================================
+# The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
+# Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding
+
+additional_importsHARDCODED: list[str] = ['numba']
+listCallablesDispatcheesHARDCODED: list[str] = ['countInitialize', 'countParallel', 'countSequential']
+
+# =============================================================================
+# Perhaps, the right way
+
+myPackageNameIs: Final[str] = myPackageNameIsPACKAGING
+pathPackage: Path = getPathPackageINSTALLING()
+
+Z0Z_formatNameModuleSynthetic = "numba_{callableTarget}"
+Z0Z_formatFilenameModuleSynthetic = Z0Z_formatNameModuleSynthetic + ".py"
+Z0Z_nameModuleDispatcherSynthetic: str = Z0Z_formatNameModuleSynthetic.format(callableTarget=dispatcherCallableNamePACKAGING)
+Z0Z_filenameModuleWrite = 'numbaCount.py'
+Z0Z_filenameWriteElseCallableTarget: str = 'count'
+
+concurrencyPackage: str = 'numba'
+
+def getAlgorithmSource() -> ModuleType:
+	logicalPathModule: str = f"{myPackageNameIs}.{algorithmSourcePACKAGING}"
+	moduleImported: ModuleType = importlib_import_module(logicalPathModule)
+	return moduleImported
+
+def getAlgorithmDispatcher():
+	from mapFolding import ComputationState
+	moduleImported: ModuleType = getAlgorithmSource()
+	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
+	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
+
+# I DON'T KNOW!
+def getPackageDispatcher():
+	from mapFolding import ComputationState
+	moduleImported: ModuleType = getAlgorithmSource()
+	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
+	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
+
+# TODO learn how to see this from the user's perspective
+def getPathJobRootDEFAULT() -> Path:
+	if 'google.colab' in sysModules:
+		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / "jobs"
+	else:
+		pathJobDEFAULT = pathPackage / "jobs"
+	return pathJobDEFAULT
+
+listCallablesDispatchees: list[str] = listCallablesDispatcheesHARDCODED
+
+additional_importsHARDCODED.append(myPackageNameIs)
+
+# TODO this is stupid: the values will get out of line, but I can't figure out how tyo keep them inline or check they are inline without so much code that the verification code is likely to introduce problems
+# DatatypeLeavesTotal: TypeAlias = c_uint8
+# numpyLeavesTotal: TypeAlias = numpy_uint8
+# DatatypeElephino: TypeAlias = c_int16
+# numpyElephino: TypeAlias = numpy_int16
+DatatypeLeavesTotal: TypeAlias = int
+numpyLeavesTotal: TypeAlias = numpy_int64
+DatatypeElephino: TypeAlias = int
+numpyElephino: TypeAlias = numpy_int64
+DatatypeFoldsTotal: TypeAlias = int
+numpyFoldsTotal: TypeAlias = numpy_int64
+
+Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[numpyLeavesTotal]]
+Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[numpyLeavesTotal]]
+Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[numpy_int16]]
+Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[numpy_int64]]
+
+_datatypeModule: str = ''
+def getDatatypeModule() -> str:
+	global _datatypeModule
+	if not _datatypeModule:
+		_datatypeModule = datatypeModulePACKAGING
+	return _datatypeModule
+
+def getNumpyDtypeDefault():
+	return numpyFoldsTotal
+# =============================================================================
+# More truth
 
 def getPathSyntheticModules() -> Path:
 	return pathPackage / moduleOfSyntheticModulesPACKAGING
-
-def getAlgorithmDispatcher() -> Callable[..., None]:
-	algorithmSource: ModuleType = getAlgorithmSource()
-	return cast(Callable[..., None], algorithmSource.doTheNeedful) # 'doTheNeedful' is duplicated and there is not a SSOT for it
 
 _datatypeModuleScalar = 'numba'
 _decoratorCallable = 'jit'
@@ -51,11 +146,6 @@ def Z0Z_setDecoratorCallable(decoratorName: str) -> str:
 
 class FREAKOUT(Exception):
 	pass
-
-# The following identifier is declared in theDao.py.
-# TODO Learn how to assign theDao.py the power to set this truth
-# while using theSSOT.py as the SSOT.
-Z0Z_identifierCountFolds = 'groupsOfFolds'
 
 class ParametersNumba(TypedDict):
 	_dbg_extend_lifetimes: NotRequired[bool]

@@ -1,32 +1,22 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding import (
-	computationState,
-	concurrencyPackage,
-	getDatatypeModule,
-	getPathJobRootDEFAULT,
-	hackSSOTdatatype,
-	hackSSOTdtype,
-	indexMy,
-	indexTrack,
-	setDatatypeLeavesTotal,
-)
-from mapFolding.theSSOT import (
-	Array1DLeavesTotal,
-	Array1DFoldsTotal,
 	Array1DElephino,
+	Array1DFoldsTotal,
+	Array1DLeavesTotal,
 	Array3D,
-	numpyFoldsTotal,
-	numpyLeavesTotal,
-	numpyElephino,
 	DatatypeElephino,
 	DatatypeFoldsTotal,
 	DatatypeLeavesTotal,
+	numpyElephino,
+	numpyFoldsTotal,
+	numpyLeavesTotal,
 )
+from mapFolding import getDatatypeModule, getNumpyDtypeDefault
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from collections.abc import Sequence
 from numba import get_num_threads, set_num_threads
 from numpy import dtype, integer, ndarray
-from numpy.typing import DTypeLike, NDArray
+from numpy.typing import DTypeLike
 from pathlib import Path
 from sys import maxsize as sysMaxsize
 from typing import Any
@@ -59,7 +49,7 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 
 def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: DTypeLike | None = None):
 	if 'numpy' == getDatatypeModule():
-		numpyDtype = datatype or numpyFoldsTotal
+		numpyDtype = datatype or getNumpyDtypeDefault()
 	else:
 		raise NotImplementedError("Somebody done broke it.")
 	dimensionsTotal = len(mapShape)
@@ -89,7 +79,7 @@ def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: D
 
 def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None):
 	if 'numpy' == getDatatypeModule():
-		numpyDtype = datatype or numpyFoldsTotal
+		numpyDtype = datatype or getNumpyDtypeDefault()
 		return numpy.zeros(shape, dtype=numpyDtype)
 	else:
 		raise NotImplementedError("Somebody done broke it.")
@@ -116,7 +106,7 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 		CPUlimit = oopsieKwargsie(CPUlimit)
 
 	concurrencyLimit: int = int(defineConcurrencyLimit(CPUlimit))
-
+	from mapFolding import concurrencyPackage
 	if concurrencyPackage == 'numba':
 		set_num_threads(concurrencyLimit)
 		concurrencyLimit = get_num_threads()
@@ -176,8 +166,7 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 		raise ValueError(f"Problem: `taskDivisions`, ({taskDivisions}), is greater than `leavesTotal`, ({leavesTotal}), which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`. They are derived from parameters that may or may not still be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from dubious-quality Python code.")
 	return taskDivisions
 
-@dataclasses.dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False,
-						match_args=True, kw_only=False, slots=False, weakref_slot=False)
+@dataclasses.dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False, match_args=True, kw_only=False, slots=False, weakref_slot=False)
 class ComputationState:
 	mapShape: tuple[DatatypeLeavesTotal, ...]
 	leavesTotal: DatatypeLeavesTotal
@@ -302,6 +291,7 @@ def getPathFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtyp
 	Returns:
 		pathFilenameFoldsTotal: Absolute path and filename.
 	"""
+	from mapFolding import getPathJobRootDEFAULT
 	pathLikeSherpa = Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else None
 	if not pathLikeSherpa:
 		pathLikeSherpaIsNotNone: Path = getPathJobRootDEFAULT()

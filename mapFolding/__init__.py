@@ -19,68 +19,48 @@ def __getattr__(name: str):
 	globals()[name] = blankSymbol
 	return blankSymbol
 
-_dictionaryListsImportFrom['mapFolding.basecamp'].extend([
-	'countFolds',
-])
-
-_dictionaryListsImportFrom['mapFolding.beDRY'].extend([
-	'getFilenameFoldsTotal',
-	'getPathFilenameFoldsTotal',
-	'outfitCountFolds',
-	'saveFoldsTotal',
-	'ComputationState',
-	'setCPUlimit',
-	'validateListDimensions',
-])
-
-_dictionaryListsImportFrom['mapFolding.oeis'].extend([
-	'clearOEIScache',
-	'getOEISids',
-	'oeisIDfor_n',
-])
-
 # fundamentals
 _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 	'computationState',
 	'concurrencyPackage',
-	'EnumIndices',
-	'getDispatcherCallable',
-	'indexMy',
-	'indexTrack',
+	'getPackageDispatcher',
 	'myPackageNameIs',
 	'pathPackage',
 ])
 
 # Datatype management
 _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
+	'Array1DElephino',
+	'Array1DFoldsTotal',
+	'Array1DLeavesTotal',
+	'Array3D',
+	'DatatypeElephino',
+	'DatatypeFoldsTotal',
+	'DatatypeLeavesTotal',
 	'getDatatypeModule',
-	'hackSSOTdatatype',
-	'hackSSOTdtype',
+	'getNumpyDtypeDefault',
+	'numpyElephino',
 	'numpyFoldsTotal',
-	'setDatatypeElephino',
-	'setDatatypeFoldsTotal',
-	'setDatatypeLeavesTotal',
-	'setDatatypeModule',
+	'numpyLeavesTotal',
 ])
 
 # Synthesize modules
 _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
-	'additional_importsHARDCODED',
-	'Z0Z_formatFilenameModuleSynthetic',
-	'getAlgorithmDispatcher',
-	'getAlgorithmSource',
-	'getPathJobRootDEFAULT',
-	'getPathSyntheticModules',
-	'moduleOfSyntheticModulesPACKAGING',
-	'listCallablesDispatchees',
-	'moduleOfSyntheticModules',
 	'Z0Z_filenameModuleWrite',
 	'Z0Z_filenameWriteElseCallableTarget',
+	'Z0Z_formatFilenameModuleSynthetic',
 	'Z0Z_getDatatypeModuleScalar',
 	'Z0Z_getDecoratorCallable',
 	'Z0Z_identifierCountFolds',
 	'Z0Z_setDatatypeModuleScalar',
 	'Z0Z_setDecoratorCallable',
+	'additional_importsHARDCODED',
+	'getAlgorithmDispatcher',
+	'getAlgorithmSource',
+	'getPathJobRootDEFAULT',
+	'getPathSyntheticModules',
+	'listCallablesDispatchees',
+	'moduleOfSyntheticModulesPACKAGING',
 ])
 
 # Parameters for the prima donna
@@ -99,6 +79,35 @@ _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 	'FREAKOUT',
 ])
 
+_dictionaryListsImportFrom['mapFolding.basecamp'].extend([
+	'countFolds',
+])
+
+_dictionaryListsImportFrom['mapFolding.beDRY'].extend([
+	'ComputationState',
+	'getFilenameFoldsTotal',
+	'getPathFilenameFoldsTotal',
+	'outfitCountFolds',
+	'saveFoldsTotal',
+	'makeConnectionGraph',
+	'makeDataContainer',
+	'setCPUlimit',
+	'validateListDimensions',
+	'getLeavesTotal',
+	'getTaskDivisions',
+])
+
+_dictionaryListsImportFrom['mapFolding.oeis'].extend([
+	'clearOEIScache',
+	'getOEISidValues',
+	'settingsOEIS',
+	'getOEISids',
+	'oeisIDsImplemented',
+	'validateOEISid',
+	'OEIS_for_n',
+	'oeisIDfor_n',
+])
+
 _mapSymbolToModule: dict[str, str] = {}
 for moduleAsStr, listSymbolsAsStr in _dictionaryListsImportFrom.items():
 	for symbolAsStr in listSymbolsAsStr:
@@ -108,6 +117,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from theDao import *
 	from theSSOT import *
+	from beDRY import *
 	from basecamp import *
-	from beDRY import * # type: ignore
 	from oeis import *

@@ -1,8 +1,8 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
 from collections.abc import Sequence
 from typing import Any, cast
-from mapFolding import FREAKOUT, Z0Z_identifierCountFolds, Z0Z_setDatatypeModuleScalar, Z0Z_setDecoratorCallable, computationState, getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathJobRootDEFAULT, indexMy, setDatatypeElephino, setDatatypeFoldsTotal, setDatatypeLeavesTotal, Z0Z_getDecoratorCallable
-from mapFolding import indexMy, indexTrack as indexTrack, hackSSOTdatatype, ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar
+from mapFolding import FREAKOUT, Z0Z_setDatatypeModuleScalar, Z0Z_setDecoratorCallable, getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathJobRootDEFAULT, Z0Z_getDecoratorCallable
+from mapFolding import ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar
 from mapFolding.someAssemblyRequired import makeStateJob, NodeReplacer, UniversalImportTracker, Then, ifThis, decorateCallableWithNumba, thisIsNumbaDotJit
 from os import PathLike
 from pathlib import Path
@@ -234,7 +234,7 @@ if __name__ == '__main__':
 """
 	return ast.parse(linesLaunch)
 
-def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob: computationState, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	"""The initial results were very bad."""
 	FunctionDefTarget = findAndReplaceWhileLoopIn_body(FunctionDefTarget, 'indexDimension', stateJob['my'][indexMy.dimensionsTotal])
 	FunctionDefTarget = removeAssignmentFrom_body(FunctionDefTarget, 'indexDimension')
@@ -285,7 +285,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	"""
 
 	# NOTE get the raw ingredients: data and the algorithm
-	stateJob: computationState = makeStateJob(mapShape, writeJob=False, **keywordArguments)
+	stateJob = makeStateJob(mapShape, writeJob=False, **keywordArguments)
 	pythonSource: str = inspect.getsource(algorithmSource)
 	astModule: ast.Module = ast.parse(pythonSource)
 	setFunctionDef: set[ast.FunctionDef] = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
@@ -411,9 +411,6 @@ if __name__ == '__main__':
 
 	pathFilenameWriteJob = None
 
-	setDatatypeFoldsTotal('int64', sourGrapes=True)
-	setDatatypeElephino('int16', sourGrapes=True)
-	setDatatypeLeavesTotal('uint8', sourGrapes=True)
 	Z0Z_setDatatypeModuleScalar('numba')
 	Z0Z_setDecoratorCallable('jit')
 

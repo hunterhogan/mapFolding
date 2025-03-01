@@ -1,7 +1,6 @@
 from Z0Z_tools import updateExtendPolishDictionaryLists
 from collections import defaultdict
 from collections.abc import Callable, Sequence
-from mapFolding import EnumIndices
 from pathlib import Path
 from typing import Any, cast, NamedTuple
 from typing import TypeAlias
@@ -271,7 +270,7 @@ class FunctionInliner(ast.NodeTransformer):
 		return self.generic_visit(node)
 
 class UnpackArrays(ast.NodeTransformer):
-	def __init__(self, enumIndexClass: type[EnumIndices], arrayName: str) -> None:
+	def __init__(self, enumIndexClass, arrayName: str) -> None:
 		self.enumIndexClass = enumIndexClass
 		self.arrayName = arrayName
 		self.substitutions: dict[str, Any] = {}

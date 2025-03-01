@@ -1,15 +1,7 @@
 from contextlib import redirect_stdout
-from tests.conftest import (
-	getOEISidValues,
-	OEIS_for_n,
-	oeisIDsImplemented,
-	settingsOEIS,
-	standardizedEqualTo,
-	standardizedSystemExit,
-	validateOEISid,
-)
-from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache
+from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache, getOEISidValues, OEIS_for_n, oeisIDsImplemented, settingsOEIS, validateOEISid
 from pathlib import Path
+from tests.conftest import standardizedEqualTo, standardizedSystemExit
 from typing import Any, NoReturn
 from urllib.error import URLError
 import io

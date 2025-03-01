@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from mapFolding import computationState, ComputationState, getDispatcherCallable, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal, validateListDimensions, setCPUlimit
+from mapFolding import ComputationState, getPackageDispatcher, getPathFilenameFoldsTotal, outfitCountFolds, saveFoldsTotal, validateListDimensions, setCPUlimit
 from os import PathLike
 from pathlib import Path
 
@@ -41,7 +41,7 @@ def countFolds(listDimensions: Sequence[int]
 	concurrencyLimit: int = setCPUlimit(CPUlimit)
 	computationStateInitialized: ComputationState = outfitCountFolds(mapShape, computationDivisions, concurrencyLimit)
 
-	dispatcher = getDispatcherCallable()
+	dispatcher = getPackageDispatcher()
 	computationStateComplete: ComputationState = dispatcher(computationStateInitialized)
 
 	computationStateComplete.getFoldsTotal()

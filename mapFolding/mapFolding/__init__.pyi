@@ -1,7 +1,7 @@
 from theDao import *
 from theSSOT import *
-from basecamp import *
 from beDRY import *
+from basecamp import *
 from oeis import *
 
 _dictionaryListsImportFrom: dict[str, list[str]]

@@ -1,10 +1,9 @@
 import dataclasses
 import os
 from collections.abc import Sequence
-from mapFolding import computationState as computationState, concurrencyPackage as concurrencyPackage, getDatatypeModule as getDatatypeModule, getPathJobRootDEFAULT as getPathJobRootDEFAULT, hackSSOTdatatype as hackSSOTdatatype, hackSSOTdtype as hackSSOTdtype, indexMy as indexMy, indexTrack as indexTrack, setDatatypeLeavesTotal as setDatatypeLeavesTotal
-from mapFolding.theSSOT import Array1DElephino as Array1DElephino, Array1DFoldsTotal as Array1DFoldsTotal, Array1DLeavesTotal as Array1DLeavesTotal, Array3D as Array3D, DatatypeElephino as DatatypeElephino, DatatypeFoldsTotal as DatatypeFoldsTotal, DatatypeLeavesTotal as DatatypeLeavesTotal, numpyElephino as numpyElephino, numpyFoldsTotal as numpyFoldsTotal, numpyLeavesTotal as numpyLeavesTotal
+from mapFolding import Array1DElephino as Array1DElephino, Array1DFoldsTotal as Array1DFoldsTotal, Array1DLeavesTotal as Array1DLeavesTotal, Array3D as Array3D, DatatypeElephino as DatatypeElephino, DatatypeFoldsTotal as DatatypeFoldsTotal, DatatypeLeavesTotal as DatatypeLeavesTotal, getDatatypeModule as getDatatypeModule, getNumpyDtypeDefault as getNumpyDtypeDefault, numpyElephino as numpyElephino, numpyFoldsTotal as numpyFoldsTotal, numpyLeavesTotal as numpyLeavesTotal
 from numpy import dtype, integer, ndarray
-from numpy.typing import DTypeLike as DTypeLike, NDArray as NDArray
+from numpy.typing import DTypeLike as DTypeLike
 from pathlib import Path
 from typing import Any
 
@@ -20,7 +19,7 @@ class ComputationState:
     mapShape: tuple[DatatypeLeavesTotal, ...]
     leavesTotal: DatatypeLeavesTotal
     taskDivisions: DatatypeLeavesTotal
-    connectionGraph: Array3D = dataclasses.field(init=False)
+    connectionGraph: Array3D = dataclasses.field(init=False, metadata={'description': 'A 3D array representing the connection graph of the map.'})
     countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(init=False)
     dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
     dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
@@ -38,7 +37,7 @@ class ComputationState:
     leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
     leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
     leafConnectee: DatatypeElephino = ...
-    taskIndex: DatatypeLeavesTotal = ...
+    taskIndex: DatatypeLeavesTotal = dataclasses.field(default=DatatypeLeavesTotal(0), metadata={'myType': DatatypeLeavesTotal})
     def __post_init__(self) -> None: ...
     def getFoldsTotal(self) -> None: ...
 

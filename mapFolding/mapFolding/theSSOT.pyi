@@ -1,21 +1,51 @@
-from mapFolding.theSSOTdatatypes import *
+from _typeshed import Incomplete
 from collections.abc import Callable
 from numba.core.compiler import CompilerBase as numbaCompilerBase
-from numpy import dtype, integer, ndarray
 from pathlib import Path
-from typing import Any, Final, TypedDict
+from types import ModuleType
+from typing import Any, Final, TypeAlias, TypedDict
 from typing_extensions import NotRequired
 
-class computationState(TypedDict):
-    connectionGraph: ndarray[tuple[int, int, int], dtype[integer[Any]]]
-    foldGroups: ndarray[tuple[int], dtype[integer[Any]]]
-    gapsWhere: ndarray[tuple[int], dtype[integer[Any]]]
-    mapShape: ndarray[tuple[int], dtype[integer[Any]]]
-    my: ndarray[tuple[int], dtype[integer[Any]]]
-    track: ndarray[tuple[int, int], dtype[integer[Any]]]
+algorithmSourcePACKAGING: str
+datatypeModulePACKAGING: Final[str]
+dispatcherCallableNamePACKAGING: str
+moduleOfSyntheticModulesPACKAGING: Final[str]
+myPackageNameIsPACKAGING: str
 
+def getPathPackageINSTALLING() -> Path: ...
+
+additional_importsHARDCODED: list[str]
+listCallablesDispatcheesHARDCODED: list[str]
+myPackageNameIs: Final[str]
+pathPackage: Path
+Z0Z_formatNameModuleSynthetic: str
+Z0Z_formatFilenameModuleSynthetic: Incomplete
+Z0Z_nameModuleDispatcherSynthetic: str
+Z0Z_filenameModuleWrite: str
+Z0Z_filenameWriteElseCallableTarget: str
+concurrencyPackage: str
+
+def getAlgorithmSource() -> ModuleType: ...
+def getAlgorithmDispatcher(): ...
+def getPackageDispatcher(): ...
+def getPathJobRootDEFAULT() -> Path: ...
+
+listCallablesDispatchees: list[str]
+DatatypeLeavesTotal: TypeAlias
+numpyLeavesTotal: TypeAlias
+DatatypeElephino: TypeAlias
+numpyElephino: TypeAlias
+DatatypeFoldsTotal: TypeAlias
+numpyFoldsTotal: TypeAlias
+Array3D: TypeAlias
+Array1DLeavesTotal: TypeAlias
+Array1DElephino: TypeAlias
+Array1DFoldsTotal: TypeAlias
+_datatypeModule: str
+
+def getDatatypeModule() -> str: ...
+def getNumpyDtypeDefault(): ...
 def getPathSyntheticModules() -> Path: ...
-def getAlgorithmDispatcher() -> Callable[..., None]: ...
 
 _datatypeModuleScalar: str
 _decoratorCallable: str
@@ -26,8 +56,6 @@ def Z0Z_getDecoratorCallable() -> str: ...
 def Z0Z_setDecoratorCallable(decoratorName: str) -> str: ...
 
 class FREAKOUT(Exception): ...
-
-Z0Z_identifierCountFolds: str
 
 class ParametersNumba(TypedDict):
     _dbg_extend_lifetimes: NotRequired[bool]

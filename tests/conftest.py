@@ -1,22 +1,19 @@
 """SSOT for Pytest"""
-
-# TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
-
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import ( getAlgorithmDispatcher, getAlgorithmSource, getDispatcherCallable, countFolds, getPathFilenameFoldsTotal, listCallablesDispatchees, moduleOfSyntheticModulesPACKAGING, oeisIDfor_n, FREAKOUT, saveFoldsTotal, hackSSOTdtype, clearOEIScache, getOEISids, )
+from mapFolding import getAlgorithmDispatcher, getAlgorithmSource, getPackageDispatcher, listCallablesDispatchees, moduleOfSyntheticModulesPACKAGING, FREAKOUT
 from mapFolding import basecamp
-from mapFolding.beDRY import ( getLeavesTotal, validateListDimensions, makeDataContainer, setCPUlimit, makeConnectionGraph, getTaskDivisions, )
-from mapFolding.oeis import ( oeisIDsImplemented, settingsOEIS, validateOEISid, getOEISidValues, OEIS_for_n, )
-from mapFolding.someAssemblyRequired import ( makeFlowNumbaOptimized, YouOughtaKnow, writeJobNumba, )
+from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
+from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
+from mapFolding.someAssemblyRequired import makeFlowNumbaOptimized, YouOughtaKnow
 from pathlib import Path
 from typing import Any, ContextManager
-from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit, PytestFor_intInnit, PytestFor_oopsieKwargsie
 import importlib.util
 import pytest
 import random
 import shutil
 import unittest.mock
 import uuid
+# TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
 # SSOT for test data paths and filenames
 pathDataSamples = Path("tests/dataSamples")
@@ -187,7 +184,7 @@ def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
 def mockDispatcher() -> Callable[[Any], ContextManager[Any]]:
 	"""Context manager for mocking dispatcher callable."""
 	def wrapper(mockFunction: Any) -> ContextManager[Any]:
-		dispatcherCallable = getDispatcherCallable()
+		dispatcherCallable = getPackageDispatcher()
 		return unittest.mock.patch(
 			f"{dispatcherCallable.__module__}.{dispatcherCallable.__name__}",
 			side_effect=mockFunction
@@ -210,15 +207,15 @@ def useThisDispatcher():
 	Returns
 		A context manager for patching the dispatcher
 	"""
-	dispatcherOriginal = basecamp.getDispatcherCallable
+	dispatcherOriginal = basecamp.getPackageDispatcher
 
 	def patchDispatcher(callableTarget: Callable[..., Any]) -> None:
 		def callableParameterized(*arguments: Any, **keywordArguments: Any) -> Callable[..., Any]:
 			return callableTarget
-		basecamp.getDispatcherCallable = callableParameterized
+		basecamp.getPackageDispatcher = callableParameterized
 
 	yield patchDispatcher
-	basecamp.getDispatcherCallable = dispatcherOriginal
+	basecamp.getPackageDispatcher = dispatcherOriginal
 
 @pytest.fixture
 def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Generator[None, None, None]:

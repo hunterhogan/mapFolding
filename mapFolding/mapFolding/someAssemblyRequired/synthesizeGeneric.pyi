@@ -1,7 +1,6 @@
 import ast
 from _typeshed import Incomplete
 from collections.abc import Callable as Callable, Sequence
-from mapFolding import EnumIndices as EnumIndices
 from pathlib import Path
 from typing import Any, NamedTuple, TypeAlias
 
@@ -90,7 +89,7 @@ class UnpackArrays(ast.NodeTransformer):
     enumIndexClass: Incomplete
     arrayName: Incomplete
     substitutions: dict[str, Any]
-    def __init__(self, enumIndexClass: type[EnumIndices], arrayName: str) -> None: ...
+    def __init__(self, enumIndexClass, arrayName: str) -> None: ...
     def extract_member_name(self, node: ast.AST) -> str | None: ...
     def transform_slice_element(self, node: ast.AST) -> ast.AST: ...
     def visit_Subscript(self, node: ast.Subscript) -> ast.AST: ...

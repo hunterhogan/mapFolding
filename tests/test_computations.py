@@ -1,12 +1,6 @@
-from tests.conftest import (
-	countFolds,
-	getPathFilenameFoldsTotal,
-	settingsOEIS,
-	standardizedEqualTo,
-	registrarRecordsTmpObject,
-	writeJobNumba,
-	)
-from mapFolding import oeisIDfor_n
+from mapFolding import countFolds, getPathFilenameFoldsTotal, settingsOEIS, oeisIDfor_n
+from mapFolding.someAssemblyRequired import writeJobNumba
+from tests.conftest import standardizedEqualTo, registrarRecordsTmpObject
 import importlib.util
 import pytest
 from pathlib import Path

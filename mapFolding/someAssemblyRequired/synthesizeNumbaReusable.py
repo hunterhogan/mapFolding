@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from mapFolding import hackSSOTdatatype, ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable
+from mapFolding import ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable
 from mapFolding.someAssemblyRequired import ifThis, UniversalImportTracker, Then
 from typing import Any, cast
 import ast

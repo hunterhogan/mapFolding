@@ -1,15 +1,11 @@
 from collections.abc import Sequence
-from mapFolding import getPathFilenameFoldsTotal, computationState, outfitCountFolds, getAlgorithmSource
+from mapFolding import getPathFilenameFoldsTotal, outfitCountFolds, getAlgorithmSource
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Literal, overload
 import pickle
 
-@overload
-def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[True] , **keywordArguments: str | None) -> Path: ...
-@overload
-def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[False] , **keywordArguments: str | None) -> computationState: ...
-def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Any | None) -> computationState | Path:
+def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Any | None):
 	"""
 	Creates a computation state job for map folding calculations and optionally saves it to disk.
 

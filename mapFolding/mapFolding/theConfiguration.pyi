@@ -1,4 +1,4 @@
-from mapFolding.theWrongWay import *
+from mapFolding.theWrongWayLayerPACKAGING import *
 from _typeshed import Incomplete
 from ctypes import c_int16 as c_int16, c_uint8 as c_uint8
 from pathlib import Path
