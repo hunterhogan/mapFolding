@@ -122,17 +122,12 @@ class Then:
 		return dictionaryKeywords
 
 	@staticmethod
-	def make_astCall(caller: ast.Name | ast.Attribute
-				, args: Sequence[ast.expr] | None = None
-				, list_astKeywords: Sequence[ast.keyword] | None = None
-				, dictionaryKeywords: dict[str, Any] | None = None
-				) -> ast.Call:
-		list_dictionaryKeywords: list[ast.keyword] = [ast.keyword(arg=keyName, value=ast.Constant(value=keyValue)) for keyName, keyValue in dictionaryKeywords.items()] if dictionaryKeywords else []
-		return ast.Call(
-			func=caller,
-			args=list(args) if args else [],
-			keywords=list_dictionaryKeywords + list(list_astKeywords) if list_astKeywords else [],
-		)
+	def make_astCall(caller: ast.Name | ast.Attribute, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
+		return ast.Call(func=caller, args=list(args) if args else [], keywords=list(list_astKeywords) if list_astKeywords else [])
+
+	@staticmethod
+	def make_astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None) -> ast.AnnAssign:
+		return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)))
 
 	@staticmethod
 	def makeName(identifier: ast_Identifier) -> ast.Name:
@@ -173,6 +168,15 @@ class Then:
 	def removeThis(astNode: ast.AST) -> None:
 		return None
 
+	@staticmethod
+	def appendZ0Z_nameDOTnameTo(instance_Identifier: ast_Identifier, primitiveList: list[Any]) -> Callable[[ast.AST], None]:
+		return lambda node: (
+			Then.appendTo(primitiveList)
+			(Then.make_astAnnAssign(node.target # type: ignore
+							, node.annotation # type: ignore
+							, Then.makeNameDOTname(instance_Identifier
+													, node.target.id)))) # type: ignore
+
 class NodeReplacer(ast.NodeTransformer):
 	"""
 	A node transformer that replaces or removes AST nodes based on a condition.
@@ -200,12 +204,15 @@ class NodeReplacer(ast.NodeTransformer):
 			return self.doThis(node)
 		return super().visit(node)
 
-def shatter_dataclassesDOTdataclass(dataclass: ast.AST) -> list[ast.AnnAssign]:
+def shatter_dataclassesDOTdataclass(dataclass: ast.AST, instance_Identifier: ast_Identifier) -> list[ast.AnnAssign]:
 	if not isinstance(dataclass, ast.ClassDef):
 		return []
 
 	listAnnAssign: list[ast.AnnAssign] = []
-	NodeReplacer(ifThis.isAnnAssign(), Then.appendTo(listAnnAssign)).visit(dataclass)
+
+	NodeReplacer(ifThis.isAnnAssign()
+				, Then.appendZ0Z_nameDOTnameTo(instance_Identifier, listAnnAssign)).visit(dataclass)
+
 	return listAnnAssign
 
 class UniversalImportTracker:

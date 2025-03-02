@@ -24,7 +24,7 @@ def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, stateme
 	dtypeAsName: str = f"{moduleConstructor}_{dtypeName}"
 	list_astKeywords: list[ast.keyword] = [ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))]
 	allImports.addImportFromStr(moduleConstructor, dtypeName, dtypeAsName)
-	astCall: ast.Call = Then.make_astCall(caller=Then.makeName(constructorName), args=[dataAs_astExpr], list_astKeywords=list_astKeywords)
+	astCall: ast.Call = Then.make_astCall(Then.makeName(constructorName), [dataAs_astExpr], list_astKeywords)
 	assignment = ast.Assign(targets=[astAssignee], value=astCall)
 	FunctionDefTarget.body.insert(0, assignment)
 	FunctionDefTarget.body.remove(statement)
@@ -68,7 +68,7 @@ def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, iden
 			constructorName: str = astAssignee.id # type: ignore
 			dataAs_astExpr = ast.Constant(value=arraySliceItem)
 			list_astKeywords: list[ast.keyword] = []
-			astCall: ast.Call = Then.make_astCall(caller=Then.makeName(constructorName), args=[dataAs_astExpr], list_astKeywords=list_astKeywords) # type: ignore
+			astCall: ast.Call = Then.make_astCall(Then.makeName(constructorName), [dataAs_astExpr], list_astKeywords) # type: ignore
 			assignment = ast.Assign(targets=[astAssignee], value=astCall)
 			FunctionDefTarget.body.insert(0, assignment)
 			FunctionDefTarget.body.remove(statement)
