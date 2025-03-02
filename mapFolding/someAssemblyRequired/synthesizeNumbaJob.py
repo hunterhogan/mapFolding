@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from typing import Any, cast
 from mapFolding import FREAKOUT, Z0Z_setDatatypeModuleScalar, Z0Z_setDecoratorCallable, getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathJobRootDEFAULT, Z0Z_getDecoratorCallable
 from mapFolding import ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar
-from mapFolding.someAssemblyRequired import makeStateJob, NodeReplacer, UniversalImportTracker, Then, ifThis, decorateCallableWithNumba, thisIsNumbaDotJit
+from mapFolding.someAssemblyRequired import makeStateJob, NodeReplacer, LedgerOfImports, Then, ifThis, decorateCallableWithNumba, thisIsNumbaDotJit
 from os import PathLike
 from pathlib import Path
 from types import ModuleType
@@ -14,7 +14,7 @@ import copy
 import inspect
 import numpy
 
-def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, statement: ast.Assign | ast.stmt, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, statement: ast.Assign | ast.stmt, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	arrayType = type(arrayTarget)
 	moduleConstructor: str = arrayType.__module__
 	constructorName: str = arrayType.__name__.replace('ndarray', 'array') # NOTE hack
@@ -31,8 +31,8 @@ def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, stateme
 	allImports.addImportFromStr(moduleConstructor, constructorName)
 	return FunctionDefTarget, allImports
 
-def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker, unrollSlices: int | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
-	def insertAssign(FunctionDefTarget: ast.FunctionDef, assignee: str, arraySlice: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports, unrollSlices: int | None = None) -> tuple[ast.FunctionDef, LedgerOfImports]:
+	def insertAssign(FunctionDefTarget: ast.FunctionDef, assignee: str, arraySlice: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 		statement = ast.Assign(targets=[ast.Name(id='beans', ctx=ast.Load())], value=ast.Constant(value='and cornbread'))
 		FunctionDefTarget.body.insert(0, statement)
 		astAssignee = ast.Name(id=assignee, ctx=ast.Store())
@@ -46,7 +46,7 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 
 	return FunctionDefTarget, allImports
 
-def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	for statement in FunctionDefTarget.body.copy():
 		if ifThis.isUnpackingAnArray(identifier)(statement):
 			indexAsStr: str = ast.unparse(statement.value.slice) # type: ignore
@@ -55,7 +55,7 @@ def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifi
 			FunctionDefTarget, allImports = Z0Z_gamma(FunctionDefTarget, astAssignee, statement, identifier, arraySlice, allImports) # type: ignore
 	return FunctionDefTarget, allImports
 
-def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	# parameter: I define moduleConstructor
 	moduleConstructor = Z0Z_getDatatypeModuleScalar()
 
@@ -84,7 +84,7 @@ def removeAssignmentFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: st
 	ast.fix_missing_locations(FunctionDefTarget)
 	return FunctionDefTarget
 
-def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	"""Unlike most of the other functions, this is generic: it tries to turn an annotation into a construction call."""
 	moduleConstructor: str = Z0Z_getDatatypeModuleScalar()
 	for stmt in FunctionDefTarget.body.copy():
@@ -124,7 +124,7 @@ def findAstNameReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, na
 
 	return cast(ast.FunctionDef, NodeReplacer(ifThis.nameIs(name), replaceWithConstant).visit(FunctionDefTarget))
 
-def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: UniversalImportTracker) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	"""Add multiplication and return statement to function, properly constructing AST nodes."""
 	# Create AST for multiplication operation
 	multiplicand = 'Z0Z_identifierCountFolds'

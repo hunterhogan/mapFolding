@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from mapFolding import ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable
-from mapFolding.someAssemblyRequired import ifThis, UniversalImportTracker, Then
+from mapFolding.someAssemblyRequired import ifThis, LedgerOfImports, Then
 from typing import Any, cast
 import ast
 
@@ -13,7 +13,7 @@ def thisIsJit(Ima: ast.AST) -> bool:
 def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
 	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)
 
-def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: UniversalImportTracker, parametersNumba: ParametersNumba | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: LedgerOfImports, parametersNumba: ParametersNumba | None = None) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
 		# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
 		for decoratorItem in astCallable.decorator_list.copy():

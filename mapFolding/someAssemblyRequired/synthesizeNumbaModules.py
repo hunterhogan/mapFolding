@@ -3,7 +3,7 @@ from mapFolding import Z0Z_formatFilenameModuleSynthetic, getAlgorithmDispatcher
 from mapFolding import parametersNumbaSuperJit, parametersNumbaSuperJitParallel, pathPackage, listNumbaCallableDispatchees, ParametersSynthesizeNumbaCallable
 from mapFolding import getAlgorithmSource, getDatatypeModule
 from mapFolding import ParametersNumba, parametersNumbaDEFAULT
-from mapFolding.someAssemblyRequired import UniversalImportTracker, decorateCallableWithNumba, FunctionInliner, YouOughtaKnow, ast_Identifier
+from mapFolding.someAssemblyRequired import LedgerOfImports, decorateCallableWithNumba, FunctionInliner, YouOughtaKnow, ast_Identifier
 from os import PathLike
 from pathlib import Path
 from typing import Any, cast, overload
@@ -13,13 +13,9 @@ import inspect
 import types
 import warnings
 
-def makeFunctionDef(astModule: ast.Module
-					, callableTarget: str
-					, parametersNumba: ParametersNumba | None = None
-					, inlineCallables: bool | None = False
-					, allImports: UniversalImportTracker | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def makeFunctionDef(astModule: ast.Module, callableTarget: str, parametersNumba: ParametersNumba | None = None, inlineCallables: bool | None = False, allImports: LedgerOfImports | None = None) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	if allImports is None:
-		allImports = UniversalImportTracker(astModule)
+		allImports = LedgerOfImports(astModule)
 	else:
 		allImports.walkThis(astModule)
 
@@ -38,7 +34,7 @@ def makeFunctionDef(astModule: ast.Module
 
 	return FunctionDefTarget, allImports
 
-def getFunctionDef(algorithmSource: types.ModuleType, *arguments: Any, **keywordArguments: Any) -> tuple[ast.FunctionDef, UniversalImportTracker]:
+def getFunctionDef(algorithmSource: types.ModuleType, *arguments: Any, **keywordArguments: Any) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	pythonSource: str = inspect.getsource(algorithmSource)
 	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
 	FunctionDefTarget, allImports = makeFunctionDef(astModule, *arguments, **keywordArguments)
@@ -106,7 +102,7 @@ def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCa
 	listStuffYouOughtaKnow: list[YouOughtaKnow] = []
 
 	listFunctionDefs: list[ast.FunctionDef] = []
-	allImportsModule = UniversalImportTracker()
+	allImportsModule = LedgerOfImports()
 	for tupleParameters in listCallablesInline:
 		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, *tupleParameters, None)
 		listFunctionDefs.append(FunctionDefTarget)
@@ -122,7 +118,7 @@ def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCa
 
 	if callableDispatcher:
 		callableTarget: str	= getAlgorithmDispatcher().__name__
-		allImports 			= UniversalImportTracker()
+		allImports 			= LedgerOfImports()
 		filenameWrite 		= None
 		for stuff in listStuffYouOughtaKnow:
 			statement: ast.ImportFrom = stuff.astForCompetentProgrammers

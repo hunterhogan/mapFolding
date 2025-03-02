@@ -1,10 +1,10 @@
-from Z0Z_tools import updateExtendPolishDictionaryLists
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
-from typing import Any, cast, NamedTuple
-from typing import TypeAlias
+from typing import Any, cast, NamedTuple, TypeAlias
+from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
+import dataclasses
 
 ast_Identifier: TypeAlias = str
 
@@ -211,10 +211,7 @@ class NodeReplacer(ast.NodeTransformer):
 			return self.doThis(node)
 		return super().visit(node)
 
-def shatter_dataclassesDOTdataclass(dataclass: ast.AST, instance_Identifier: ast_Identifier) -> list[ast.AnnAssign]:
-	if not isinstance(dataclass, ast.ClassDef):
-		return []
-
+def shatter_dataclassesDOTdataclass(dataclass: ast.ClassDef, instance_Identifier: ast_Identifier) -> list[ast.AnnAssign]:
 	listAnnAssign: list[ast.AnnAssign] = []
 
 	NodeReplacer(ifThis.isAnnAssign()
@@ -222,7 +219,7 @@ def shatter_dataclassesDOTdataclass(dataclass: ast.AST, instance_Identifier: ast
 
 	return listAnnAssign
 
-class UniversalImportTracker:
+class LedgerOfImports:
 	def __init__(self, startWith: ast.AST | None = None) -> None:
 		self.dictionaryImportFrom: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
 		self.listImport: list[str] = []
@@ -258,7 +255,7 @@ class UniversalImportTracker:
 		listAstImport: list[ast.Import] = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in sorted(set(self.listImport))]
 		return listAstImportFrom + listAstImport
 
-	def update(self, *fromTracker: 'UniversalImportTracker') -> None:
+	def update(self, *fromTracker: 'LedgerOfImports') -> None:
 		"""
 		Update this tracker with imports from one or more other trackers.
 
@@ -311,3 +308,19 @@ class FunctionInliner(ast.NodeTransformer):
 			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(node.value.func.id) # type: ignore
 			return [self.visit(stmt) for stmt in inlineDefinition.body]
 		return self.generic_visit(node)
+
+@dataclasses.dataclass
+class IngredientsFunction:
+	FunctionDef: ast.FunctionDef 
+	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
+
+@dataclasses.dataclass
+class IngredientsModule:
+	functions: list[ast.FunctionDef]
+	imports: LedgerOfImports
+	name: ast_Identifier
+	Z0Z_logicalPath: str
+	Z0Z_absoluteImport: ast.Import
+	Z0Z_absoluteImportFrom: ast.ImportFrom
+	Z0Z_pathFilename: Path
+	Z0Z_package: str # ast.Name?
