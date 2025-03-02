@@ -39,7 +39,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 				datatypeAST = None
 
 			ndarrayName = signatureElement.arg
-			Z0Z_hacky_dtype: str = hackSSOTdatatype(ndarrayName)
+			Z0Z_hacky_dtype: str = ndarrayName
 			datatype_attr = datatypeAST or Z0Z_hacky_dtype
 			allImports.addImportFromStr(datatypeModuleDecorator, datatype_attr)
 			datatypeNumba = ast.Name(id=datatype_attr, ctx=ast.Load())
@@ -88,3 +88,4 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Un
 
 	FunctionDefTarget.decorator_list = [astDecorator]
 	return FunctionDefTarget, allImports
+

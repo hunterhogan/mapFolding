@@ -59,7 +59,8 @@ _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 	'getAlgorithmSource',
 	'getPathJobRootDEFAULT',
 	'getPathSyntheticModules',
-	'listCallablesDispatchees',
+	'listNumbaCallableDispatchees',
+	'ParametersSynthesizeNumbaCallable',
 	'moduleOfSyntheticModulesPACKAGING',
 ])
 

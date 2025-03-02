@@ -78,6 +78,7 @@ def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: D
 	return connectionGraph
 
 def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None):
+	# ChatGPT (4o reasoning?): "Tip: Create them with functions like np.empty(...) or np.zeros(...) to ensure contiguous memory layout."
 	if 'numpy' == getDatatypeModule():
 		numpyDtype = datatype or getNumpyDtypeDefault()
 		return numpy.zeros(shape, dtype=numpyDtype)

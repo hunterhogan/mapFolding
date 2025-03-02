@@ -1,9 +1,9 @@
 from mapFolding import FREAKOUT, Z0Z_filenameModuleWrite, Z0Z_filenameWriteElseCallableTarget, additional_importsHARDCODED
 from mapFolding import Z0Z_formatFilenameModuleSynthetic, getAlgorithmDispatcher, moduleOfSyntheticModulesPACKAGING
-from mapFolding import parametersNumbaSuperJit, parametersNumbaSuperJitParallel, pathPackage, listCallablesDispatchees
+from mapFolding import parametersNumbaSuperJit, parametersNumbaSuperJitParallel, pathPackage, listNumbaCallableDispatchees, ParametersSynthesizeNumbaCallable
 from mapFolding import getAlgorithmSource, getDatatypeModule
 from mapFolding import ParametersNumba, parametersNumbaDEFAULT
-from mapFolding.someAssemblyRequired import UniversalImportTracker, decorateCallableWithNumba, UnpackArrays, FunctionInliner, YouOughtaKnow, ast_Identifier
+from mapFolding.someAssemblyRequired import UniversalImportTracker, decorateCallableWithNumba, FunctionInliner, YouOughtaKnow, ast_Identifier
 from os import PathLike
 from pathlib import Path
 from typing import Any, cast, overload
@@ -17,7 +17,6 @@ def makeFunctionDef(astModule: ast.Module
 					, callableTarget: str
 					, parametersNumba: ParametersNumba | None = None
 					, inlineCallables: bool | None = False
-					, unpackArrays: bool | None = False
 					, allImports: UniversalImportTracker | None = None) -> tuple[ast.FunctionDef, UniversalImportTracker]:
 	if allImports is None:
 		allImports = UniversalImportTracker(astModule)
@@ -37,13 +36,6 @@ def makeFunctionDef(astModule: ast.Module
 
 	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
 
-	# NOTE vestigial hardcoding
-	if unpackArrays:
-		for tupleUnpack in [(indexMy, 'my'), (indexTrack, 'track')]:
-			unpacker = UnpackArrays(*tupleUnpack)
-			FunctionDefTarget = cast(ast.FunctionDef, unpacker.visit(FunctionDefTarget))
-			ast.fix_missing_locations(FunctionDefTarget)
-
 	return FunctionDefTarget, allImports
 
 def getFunctionDef(algorithmSource: types.ModuleType, *arguments: Any, **keywordArguments: Any) -> tuple[ast.FunctionDef, UniversalImportTracker]:
@@ -60,12 +52,12 @@ def makePythonSource(listFunctionDefs: list[ast.FunctionDef], listAstImports: li
 	pythonSource = autoflake.fix_code(pythonSource, additional_imports)
 	return pythonSource
 
-def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], relativePathWrite: str | PathLike[str], filenameWrite: str | None, formatFilenameWrite: str) -> list[YouOughtaKnow]:
+def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[ParametersSynthesizeNumbaCallable], relativePathWrite: str | PathLike[str], filenameWrite: str | None, formatFilenameWrite: str) -> list[YouOughtaKnow]:
 	pathWrite: Path = pathPackage / relativePathWrite
 
 	if not filenameWrite:
 		if len(listCallableSynthesized) == 1:
-			callableTarget: str = listCallableSynthesized[0]
+			callableTarget: str = listCallableSynthesized[0].callableTarget
 		else:
 			callableTarget = Z0Z_filenameWriteElseCallableTarget
 		filenameWrite = formatFilenameWrite.format(callableTarget=callableTarget)
@@ -83,7 +75,8 @@ def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], r
 
 	listStuffYouOughtaKnow: list[YouOughtaKnow] = []
 
-	for callableTarget in listCallableSynthesized:
+	for item in listCallableSynthesized:
+		callableTarget: str = item.callableTarget
 		astImportFrom = ast.ImportFrom(module=ImaModule, names=[ast.alias(name=callableTarget, asname=None)], level=0)
 		stuff = YouOughtaKnow(callableSynthesized=callableTarget, pathFilenameForMe=pathFilename, astForCompetentProgrammers=astImportFrom)
 		listStuffYouOughtaKnow.append(stuff)
@@ -93,10 +86,10 @@ def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[str], r
 @overload
 def makeFlowNumbaOptimized() -> list[YouOughtaKnow]: ...
 @overload
-def makeFlowNumbaOptimized(listCallablesInline: list[str], callableDispatcher: bool, algorithmSource: types.ModuleType, relativePathWrite: str | PathLike[str], filenameModuleWrite: str, formatFilenameWrite: str) -> list[YouOughtaKnow]: ...
-def makeFlowNumbaOptimized(listCallablesInline: list[str] | None = None, callableDispatcher: bool | None = None, algorithmSource: types.ModuleType | None = None, relativePathWrite: str | PathLike[str] | None = None, filenameModuleWrite: str | None = None, formatFilenameWrite: str | None = None) -> list[YouOughtaKnow]:
+def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCallable], callableDispatcher: bool, algorithmSource: types.ModuleType, relativePathWrite: str | PathLike[str], filenameModuleWrite: str, formatFilenameWrite: str) -> list[YouOughtaKnow]: ...
+def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCallable] | None = None, callableDispatcher: bool | None = None, algorithmSource: types.ModuleType | None = None, relativePathWrite: str | PathLike[str] | None = None, filenameModuleWrite: str | None = None, formatFilenameWrite: str | None = None) -> list[YouOughtaKnow]:
 	if all(parameter is None for parameter in [listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite]):
-		return makeFlowNumbaOptimized(listCallablesDispatchees, True, getAlgorithmSource(), moduleOfSyntheticModulesPACKAGING, Z0Z_filenameModuleWrite, Z0Z_formatFilenameModuleSynthetic)
+		return makeFlowNumbaOptimized(listNumbaCallableDispatchees, True, getAlgorithmSource(), moduleOfSyntheticModulesPACKAGING, Z0Z_filenameModuleWrite, Z0Z_formatFilenameModuleSynthetic)
 
 	if (listCallablesInline is None
 	or callableDispatcher is None
@@ -114,23 +107,8 @@ def makeFlowNumbaOptimized(listCallablesInline: list[str] | None = None, callabl
 
 	listFunctionDefs: list[ast.FunctionDef] = []
 	allImportsModule = UniversalImportTracker()
-	for callableTarget in listCallablesInline:
-		parametersNumba: ParametersNumba | None = None
-		inlineCallables = True
-		unpackArrays 	= False
-		allImports: UniversalImportTracker | None = None
-		# TODO OMG THESE ARE CONFIGURATION OPTIONS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-		match callableTarget:
-			case 'countParallel':
-				parametersNumba = parametersNumbaSuperJitParallel
-			case 'countSequential':
-				parametersNumba = parametersNumbaSuperJit
-				unpackArrays = True
-			case 'countInitialize':
-				parametersNumba = parametersNumbaDEFAULT
-			case _:
-				parametersNumba = None
-		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
+	for tupleParameters in listCallablesInline:
+		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, *tupleParameters, None)
 		listFunctionDefs.append(FunctionDefTarget)
 		allImportsModule.update(allImports)
 
@@ -144,21 +122,19 @@ def makeFlowNumbaOptimized(listCallablesInline: list[str] | None = None, callabl
 
 	if callableDispatcher:
 		callableTarget: str	= getAlgorithmDispatcher().__name__
-		parametersNumba 	= None
-		inlineCallables		= False
-		unpackArrays		= False
 		allImports 			= UniversalImportTracker()
 		filenameWrite 		= None
 		for stuff in listStuffYouOughtaKnow:
 			statement: ast.ImportFrom = stuff.astForCompetentProgrammers
 			if isinstance(statement, (ast.Import, ast.ImportFrom)): # type: ignore "Unnecessary isinstance call; "ImportFrom" is always an instance of "Import | ImportFrom" Pylance(reportUnnecessaryIsInstance)". Ok, Pylance, bad data never happens. What a dumbass warning/error/problem.
 				allImports.addAst(statement)
-		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, callableTarget, parametersNumba, inlineCallables, unpackArrays, allImports)
+		tupleDispatcher = ParametersSynthesizeNumbaCallable(callableTarget, None, False)
+		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, *tupleDispatcher, allImports)
 		listAstImports = allImports.makeListAst()
 
 		pythonSource = makePythonSource([FunctionDefTarget], listAstImports, additional_imports)
 
-		listStuff = writePythonAsModule(pythonSource, [callableTarget], relativePathWrite, filenameWrite, formatFilenameWrite)
+		listStuff = writePythonAsModule(pythonSource, [tupleDispatcher], relativePathWrite, filenameWrite, formatFilenameWrite)
 		listStuffYouOughtaKnow.extend(listStuff)
 
 	return listStuffYouOughtaKnow

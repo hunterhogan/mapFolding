@@ -3,7 +3,7 @@ from collections.abc import Callable
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Final, TypeAlias, TypedDict
+from typing import Any, Final, NamedTuple, TypeAlias, TypedDict
 from typing_extensions import NotRequired
 
 algorithmSourcePACKAGING: str
@@ -15,7 +15,6 @@ myPackageNameIsPACKAGING: str
 def getPathPackageINSTALLING() -> Path: ...
 
 additional_importsHARDCODED: list[str]
-listCallablesDispatcheesHARDCODED: list[str]
 myPackageNameIs: Final[str]
 pathPackage: Path
 Z0Z_formatNameModuleSynthetic: str
@@ -30,7 +29,6 @@ def getAlgorithmDispatcher(): ...
 def getPackageDispatcher(): ...
 def getPathJobRootDEFAULT() -> Path: ...
 
-listCallablesDispatchees: list[str]
 DatatypeLeavesTotal: TypeAlias
 numpyLeavesTotal: TypeAlias
 DatatypeElephino: TypeAlias
@@ -87,3 +85,10 @@ parametersNumbaParallelDEFAULT: Final[ParametersNumba]
 parametersNumbaSuperJit: Final[ParametersNumba]
 parametersNumbaSuperJitParallel: Final[ParametersNumba]
 parametersNumbaMinimum: Final[ParametersNumba]
+
+class ParametersSynthesizeNumbaCallable(NamedTuple):
+    callableTarget: str
+    parametersNumba: ParametersNumba | None = ...
+    inlineCallables: bool = ...
+
+listNumbaCallableDispatchees: list[ParametersSynthesizeNumbaCallable]

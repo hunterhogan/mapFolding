@@ -1,6 +1,6 @@
 from Z0Z_tools import updateExtendPolishDictionaryLists
 from collections import defaultdict
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
 from typing import Any, cast, NamedTuple
 from typing import TypeAlias
@@ -8,6 +8,7 @@ import ast
 
 ast_Identifier: TypeAlias = str
 
+# NOTE: this is weak
 class YouOughtaKnow(NamedTuple):
 	callableSynthesized: str
 	pathFilenameForMe: Path
@@ -31,6 +32,10 @@ class ifThis:
 	@staticmethod
 	def CallAsNameIs(callableName: str) -> Callable[[ast.AST], bool]:
 		return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callableName)
+
+	@staticmethod
+	def CallAsNameIsIn(container: Iterable[Any]) -> Callable[[ast.AST], bool]:
+		return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in container)
 
 	@staticmethod
 	def CallAsModuleAttributeIs(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
@@ -70,9 +75,13 @@ class ifThis:
 								and ifThis.NameReallyIs(identifier)(node.targets[0]))
 
 	@staticmethod
-	def AnnAssignTo(identifier: str) -> Callable[[ast.AST], bool]:
-		return lambda node: (isinstance(node, ast.AnnAssign)
-								and ifThis.NameReallyIs(identifier)(node.target))
+	def isAnnAssign() -> Callable[[ast.AST], bool]:
+		return lambda node: isinstance(node, ast.AnnAssign)
+
+	@staticmethod
+	def isAnnAssignTo(identifier: str) -> Callable[[ast.AST], bool]:
+		return lambda node: (ifThis.isAnnAssign()(node)
+								and ifThis.NameReallyIs(identifier)(node.target)) # type: ignore
 
 	@staticmethod
 	def AugAssignTo(identifier: str) -> Callable[[ast.AST], bool]:
@@ -81,11 +90,16 @@ class ifThis:
 
 	@staticmethod
 	def anyAssignmentTo(identifier: str) -> Callable[[ast.AST], bool]:
-		return ifThis.anyOf(ifThis.AssignTo(identifier), ifThis.AnnAssignTo(identifier), ifThis.AugAssignTo(identifier))
+		return ifThis.anyOf(ifThis.AssignTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.AugAssignTo(identifier))
 
 	@staticmethod
 	def anyOf(*predicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		return lambda node: any(pred(node) for pred in predicates)
+
+	@staticmethod
+	def is_dataclassesDOTField() -> Callable[[ast.AST], bool]: # type: ignore
+		# dataclasses.Field
+		pass
 
 	@staticmethod
 	def isUnpackingAnArray(identifier:str) -> Callable[[ast.AST], bool]:
@@ -138,9 +152,18 @@ class Then:
 		return nameDOTname
 
 	@staticmethod
-	def appendThis(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]:
+	def insertThisAbove(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]:
+		return lambda aboveMe: [cast(ast.stmt, astStatement),
+								cast(ast.stmt, aboveMe)]
+
+	@staticmethod
+	def insertThisBelow(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]:
 		return lambda belowMe: [cast(ast.stmt, belowMe),
 								cast(ast.stmt, astStatement)]
+
+	@staticmethod
+	def appendTo(primitiveList: list[Any]) -> Callable[[ast.AST], None]:
+		return lambda node: primitiveList.append(cast(ast.stmt, node))
 
 	@staticmethod
 	def replaceWith(astStatement: ast.AST) -> Callable[[ast.AST], ast.stmt]:
@@ -165,19 +188,30 @@ class NodeReplacer(ast.NodeTransformer):
 		visit(node: ast.AST) -> Optional[ast.AST]:
 			Visits each node in the AST, replacing or removing it based on the predicate.
 	"""
-	def __init__(self, findMe: Callable[[ast.AST], bool], doThis: Callable[[ast.AST], ast.AST | Sequence[ast.AST] | None]) -> None:
-		self.findMe: Callable[[ast.AST], bool] = findMe
-		self.doThis: Callable[[ast.AST], ast.AST | Sequence[ast.AST] | None] = doThis
+	def __init__(self
+			, findMe: Callable[[ast.AST], bool]
+			, doThis: Callable[[ast.AST], ast.AST | Sequence[ast.AST] | None]
+			) -> None:
+		self.findMe = findMe
+		self.doThis = doThis
 
 	def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
 		if self.findMe(node):
 			return self.doThis(node)
 		return super().visit(node)
 
+def shatter_dataclassesDOTdataclass(dataclass: ast.AST) -> list[ast.AnnAssign]:
+	if not isinstance(dataclass, ast.ClassDef):
+		return []
+
+	listAnnAssign: list[ast.AnnAssign] = []
+	NodeReplacer(ifThis.isAnnAssign(), Then.appendTo(listAnnAssign)).visit(dataclass)
+	return listAnnAssign
+
 class UniversalImportTracker:
 	def __init__(self, startWith: ast.AST | None = None) -> None:
-		self.dictionaryImportFrom: dict[str, set[tuple[str, str | None]]] = defaultdict(set)
-		self.setImport: set[str] = set()
+		self.dictionaryImportFrom: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
+		self.listImport: list[str] = []
 
 		if startWith:
 			self.walkThis(startWith)
@@ -185,26 +219,29 @@ class UniversalImportTracker:
 	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
 		if isinstance(astImport_, ast.Import):
 			for alias in astImport_.names:
-				self.setImport.add(alias.name)
+				self.listImport.append(alias.name)
 		elif isinstance(astImport_, ast.ImportFrom): # type: ignore
 			if astImport_.module is not None:
-				self.dictionaryImportFrom[astImport_.module].update((alias.name, alias.asname) for alias in astImport_.names)
+				for alias in astImport_.names:
+					self.dictionaryImportFrom[astImport_.module].append((alias.name, alias.asname))
 
 	def addImportStr(self, module: str) -> None:
-		self.setImport.add(module)
+		self.listImport.append(module)
 
 	def addImportFromStr(self, module: str, name: str, asname: str | None = None) -> None:
-		self.dictionaryImportFrom[module].add((name, asname))
+		self.dictionaryImportFrom[module].append((name, asname))
 
 	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
 		listAstImportFrom: list[ast.ImportFrom] = []
-		for module, setOfNameTuples in sorted(self.dictionaryImportFrom.items()):
+		for module, listOfNameTuples in sorted(self.dictionaryImportFrom.items()):
 			listAliases: list[ast.alias] = []
-			for name, asname in setOfNameTuples:
+			for name, asname in listOfNameTuples:
 				listAliases.append(ast.alias(name=name, asname=asname))
+			setAliases = set(listAliases)
+			listAliases = sorted(setAliases, key=lambda alias: alias.name)
 			listAstImportFrom.append(ast.ImportFrom(module=module, names=listAliases, level=0))
 
-		listAstImport: list[ast.Import] = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in sorted(self.setImport)]
+		listAstImport: list[ast.Import] = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in sorted(set(self.listImport))]
 		return listAstImportFrom + listAstImport
 
 	def update(self, *fromTracker: 'UniversalImportTracker') -> None:
@@ -215,19 +252,15 @@ class UniversalImportTracker:
 			*fromTracker: One or more UniversalImportTracker objects to merge from.
 		"""
 		# Merge all import-from dictionaries
-		dictionaryMerged: dict[str, list[Any]] = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(tracker.dictionaryImportFrom for tracker in fromTracker), destroyDuplicates=True, reorderLists=True)
+		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(tracker.dictionaryImportFrom for tracker in fromTracker), destroyDuplicates=True, reorderLists=True)
 
-		# Convert lists back to sets for each module's imports
-		self.dictionaryImportFrom = {module: set(listNames) for module, listNames in dictionaryMerged.items()}
-
-		# Update direct imports
 		for tracker in fromTracker:
-			self.setImport.update(tracker.setImport)
+			self.listImport.extend(tracker.listImport)
 
 	def walkThis(self, walkThis: ast.AST) -> None:
-			for smurf in ast.walk(walkThis):
-				if isinstance(smurf, (ast.Import, ast.ImportFrom)):
-					self.addAst(smurf)
+		for smurf in ast.walk(walkThis):
+			if isinstance(smurf, (ast.Import, ast.ImportFrom)):
+				self.addAst(smurf)
 
 class FunctionInliner(ast.NodeTransformer):
 	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
@@ -241,12 +274,10 @@ class FunctionInliner(ast.NodeTransformer):
 		return inlineDefinition
 
 	def visit_Call(self, node: ast.Call) -> Any | ast.Constant | ast.Call | ast.AST:
-		callNodeVisited: ast.AST = self.generic_visit(node)
-		if (isinstance(callNodeVisited, ast.Call)
-		and isinstance(callNodeVisited.func, ast.Name)
-		and callNodeVisited.func.id in self.dictionaryFunctions
-		and ifThis.CallDoesNotCallItself("", callNodeVisited.func.id)(callNodeVisited)):
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(callNodeVisited.func.id)
+		astCall: ast.AST = self.generic_visit(node)
+		if (ifThis.CallAsNameIsIn(self.dictionaryFunctions)(astCall)
+		and ifThis.CallDoesNotCallItself("", astCall.func.id)(astCall)): # type: ignore
+			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(astCall.func.id) # type: ignore
 
 			if (inlineDefinition and inlineDefinition.body):
 				statementTerminating: ast.stmt = inlineDefinition.body[-1]
@@ -258,96 +289,11 @@ class FunctionInliner(ast.NodeTransformer):
 					return self.visit(statementTerminating.value)
 				else:
 					return ast.Constant(value=None)
-		return callNodeVisited
+		return astCall
 
 	def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.AST]:
-		if isinstance(node.value, ast.Call):
-			if (isinstance(node.value.func, ast.Name)
-			and node.value.func.id in self.dictionaryFunctions
-			and ifThis.CallDoesNotCallItself("", node.value.func.id)(node.value)):
-				inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(node.value.func.id)
-				return [self.visit(stmt) for stmt in inlineDefinition.body]
+		if (ifThis.CallAsNameIsIn(self.dictionaryFunctions)(node.value)
+		and ifThis.CallDoesNotCallItself("", node.value.func.id)(node.value)): # type: ignore
+			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(node.value.func.id) # type: ignore
+			return [self.visit(stmt) for stmt in inlineDefinition.body]
 		return self.generic_visit(node)
-
-class UnpackArrays(ast.NodeTransformer):
-	def __init__(self, enumIndexClass, arrayName: str) -> None:
-		self.enumIndexClass = enumIndexClass
-		self.arrayName = arrayName
-		self.substitutions: dict[str, Any] = {}
-
-	def extract_member_name(self, node: ast.AST) -> str | None:
-		"""Recursively extract enum member name from any node in the AST."""
-		if isinstance(node, ast.Attribute) and node.attr == 'value':
-			innerAttribute = node.value
-			while isinstance(innerAttribute, ast.Attribute):
-				if (isinstance(innerAttribute.value, ast.Name) and innerAttribute.value.id == self.enumIndexClass.__name__):
-					return innerAttribute.attr
-				innerAttribute = innerAttribute.value
-		return None
-
-	def transform_slice_element(self, node: ast.AST) -> ast.AST:
-		"""Transform any enum references within a slice element."""
-		if isinstance(node, ast.Subscript):
-			if isinstance(node.slice, ast.Attribute):
-				member_name = self.extract_member_name(node.slice)
-				if member_name:
-					return ast.Name(id=member_name, ctx=node.ctx)
-			elif isinstance(node, ast.Tuple):
-				# Handle tuple slices by transforming each element
-				return ast.Tuple(elts=cast(list[ast.expr], [self.transform_slice_element(elt) for elt in node.elts]), ctx=node.ctx)
-		elif isinstance(node, ast.Attribute):
-			member_name = self.extract_member_name(node)
-			if member_name:
-				return ast.Name(id=member_name, ctx=ast.Load())
-		return node
-
-	def visit_Subscript(self, node: ast.Subscript) -> ast.AST:
-		# Recursively visit any nested subscripts in value or slice
-		node.value = self.visit(node.value)
-		node.slice = self.visit(node.slice)
-		# If node.value is not our arrayName, just return node
-		if not (isinstance(node.value, ast.Name) and node.value.id == self.arrayName):
-			return node
-
-		# Handle scalar array access
-		if isinstance(node.slice, ast.Attribute):
-			memberName = self.extract_member_name(node.slice)
-			if memberName:
-				self.substitutions[memberName] = ('scalar', node)
-				return ast.Name(id=memberName, ctx=ast.Load())
-
-		# Handle array slice access
-		if isinstance(node.slice, ast.Tuple) and node.slice.elts:
-			firstElement: ast.expr = node.slice.elts[0]
-			memberName = self.extract_member_name(firstElement)
-			sliceRemainder = [self.visit(elem) for elem in node.slice.elts[1:]]
-			if memberName:
-				self.substitutions[memberName] = ('array', node)
-				if len(sliceRemainder) == 0:
-					return ast.Name(id=memberName, ctx=ast.Load())
-				return ast.Subscript(value=ast.Name(id=memberName, ctx=ast.Load()), slice=ast.Tuple(elts=sliceRemainder, ctx=ast.Load()) if len(sliceRemainder) > 1 else sliceRemainder[0], ctx=ast.Load())
-
-		# If single-element tuple, unwrap
-		if isinstance(node.slice, ast.Tuple) and len(node.slice.elts) == 1:
-			node.slice = node.slice.elts[0]
-
-		return node
-
-	def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
-		node = cast(ast.FunctionDef, self.generic_visit(node))
-
-		initializations: list[ast.Assign] = []
-		for name, (kind, original_node) in self.substitutions.items():
-			if kind == 'scalar':
-				initializations.append(ast.Assign(targets=[ast.Name(id=name, ctx=ast.Store())], value=original_node))
-			else:  # array
-				initializations.append(
-					ast.Assign(
-						targets=[ast.Name(id=name, ctx=ast.Store())],
-						value=ast.Subscript(value=ast.Name(id=self.arrayName, ctx=ast.Load()),
-							slice=ast.Attribute(value=ast.Attribute(
-									value=ast.Name(id=self.enumIndexClass.__name__, ctx=ast.Load()),
-									attr=name, ctx=ast.Load()), attr='value', ctx=ast.Load()), ctx=ast.Load())))
-
-		node.body = initializations + node.body
-		return node

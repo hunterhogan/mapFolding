@@ -6,7 +6,7 @@ from numpy import dtype, ndarray, int64 as numpy_int64, int16 as numpy_int16
 from pathlib import Path
 from sys import modules as sysModules
 from types import ModuleType
-from typing import Any, cast, Final, TYPE_CHECKING, TypeAlias
+from typing import Any, cast, Final, NamedTuple, TYPE_CHECKING, TypeAlias
 import tomli
 
 try:
@@ -48,7 +48,8 @@ def getPathPackageINSTALLING() -> Path:
 # Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding
 
 additional_importsHARDCODED: list[str] = ['numba']
-listCallablesDispatcheesHARDCODED: list[str] = ['countInitialize', 'countParallel', 'countSequential']
+
+# NOTE see also `ParametersSynthesizeNumbaCallable` below
 
 # =============================================================================
 # Perhaps, the right way
@@ -89,8 +90,6 @@ def getPathJobRootDEFAULT() -> Path:
 	else:
 		pathJobDEFAULT = pathPackage / "jobs"
 	return pathJobDEFAULT
-
-listCallablesDispatchees: list[str] = listCallablesDispatcheesHARDCODED
 
 additional_importsHARDCODED.append(myPackageNameIs)
 
@@ -203,3 +202,14 @@ theSSOT and yourSSOT
 delay realization/instantiation until a concrete value is desired
 moment of truth: when the value is needed, not when the value is defined
 """
+
+class ParametersSynthesizeNumbaCallable(NamedTuple):
+	callableTarget: str
+	parametersNumba: ParametersNumba | None = None
+	inlineCallables: bool = False
+
+listNumbaCallableDispatchees: list[ParametersSynthesizeNumbaCallable] = [
+	ParametersSynthesizeNumbaCallable('countParallel', parametersNumbaSuperJitParallel, True),
+	ParametersSynthesizeNumbaCallable('countSequential', parametersNumbaSuperJit, True),
+	ParametersSynthesizeNumbaCallable('countInitialize', parametersNumbaDEFAULT, True),
+]

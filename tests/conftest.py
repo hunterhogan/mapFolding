@@ -1,6 +1,6 @@
 """SSOT for Pytest"""
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import getAlgorithmDispatcher, getAlgorithmSource, getPackageDispatcher, listCallablesDispatchees, moduleOfSyntheticModulesPACKAGING, FREAKOUT
+from mapFolding import getAlgorithmDispatcher, getAlgorithmSource, getPackageDispatcher, listNumbaCallableDispatchees, moduleOfSyntheticModulesPACKAGING, FREAKOUT
 from mapFolding import basecamp
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
@@ -225,7 +225,7 @@ def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Gener
 
 @pytest.fixture
 def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any]) -> Callable[..., Any]:
-	listCallablesInline = listCallablesDispatchees
+	listCallablesInline = listNumbaCallableDispatchees
 	callableDispatcher = True
 	algorithmSource = getAlgorithmSource()
 	relativePathWrite = moduleOfSyntheticModulesPACKAGING
