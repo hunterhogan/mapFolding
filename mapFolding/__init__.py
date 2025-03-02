@@ -46,6 +46,16 @@ _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 
 # Synthesize modules
 _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
+	'additional_importsHARDCODED',
+	'getAlgorithmDispatcher',
+	'getAlgorithmSource',
+	'getPathJobRootDEFAULT',
+	'getPathSyntheticModules',
+	'listNumbaCallableDispatchees',
+	'moduleOfSyntheticModulesPACKAGING',
+	'ParametersSynthesizeNumbaCallable',
+	'Z0Z_dispatcherOfDataCallable',
+	'Z0Z_dispatcherOfDataFilename',
 	'Z0Z_filenameModuleWrite',
 	'Z0Z_filenameWriteElseCallableTarget',
 	'Z0Z_formatFilenameModuleSynthetic',
@@ -54,14 +64,6 @@ _dictionaryListsImportFrom['mapFolding.theSSOT'].extend([
 	'Z0Z_identifierCountFolds',
 	'Z0Z_setDatatypeModuleScalar',
 	'Z0Z_setDecoratorCallable',
-	'additional_importsHARDCODED',
-	'getAlgorithmDispatcher',
-	'getAlgorithmSource',
-	'getPathJobRootDEFAULT',
-	'getPathSyntheticModules',
-	'listNumbaCallableDispatchees',
-	'ParametersSynthesizeNumbaCallable',
-	'moduleOfSyntheticModulesPACKAGING',
 ])
 
 # Parameters for the prima donna
@@ -87,26 +89,26 @@ _dictionaryListsImportFrom['mapFolding.basecamp'].extend([
 _dictionaryListsImportFrom['mapFolding.beDRY'].extend([
 	'ComputationState',
 	'getFilenameFoldsTotal',
+	'getLeavesTotal',
 	'getPathFilenameFoldsTotal',
-	'outfitCountFolds',
-	'saveFoldsTotal',
+	'getTaskDivisions',
 	'makeConnectionGraph',
 	'makeDataContainer',
+	'outfitCountFolds',
+	'saveFoldsTotal',
 	'setCPUlimit',
 	'validateListDimensions',
-	'getLeavesTotal',
-	'getTaskDivisions',
 ])
 
 _dictionaryListsImportFrom['mapFolding.oeis'].extend([
 	'clearOEIScache',
-	'getOEISidValues',
-	'settingsOEIS',
 	'getOEISids',
-	'oeisIDsImplemented',
-	'validateOEISid',
+	'getOEISidValues',
 	'OEIS_for_n',
 	'oeisIDfor_n',
+	'oeisIDsImplemented',
+	'settingsOEIS',
+	'validateOEISid',
 ])
 
 _mapSymbolToModule: dict[str, str] = {}

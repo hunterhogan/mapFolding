@@ -62,7 +62,8 @@ Z0Z_formatFilenameModuleSynthetic = Z0Z_formatNameModuleSynthetic + ".py"
 Z0Z_nameModuleDispatcherSynthetic: str = Z0Z_formatNameModuleSynthetic.format(callableTarget=dispatcherCallableNamePACKAGING)
 Z0Z_filenameModuleWrite = 'numbaCount.py'
 Z0Z_filenameWriteElseCallableTarget: str = 'count'
-
+Z0Z_dispatcherOfDataFilename = 'dataNamespaceFlattened.py'
+Z0Z_dispatcherOfDataCallable = 'flattenData'
 concurrencyPackage: str = 'numba'
 
 def getAlgorithmSource() -> ModuleType:

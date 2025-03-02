@@ -14,6 +14,13 @@ class YouOughtaKnow(NamedTuple):
 	pathFilenameForMe: Path
 	astForCompetentProgrammers: ast.ImportFrom
 
+"""
+I suspect I'm only using 1-2% of the potential of `ifThis`, `Then`, and `NodeReplacer`.
+- nesting or chaining
+- idk what `@staticmethod` means or what the alternatives are
+- I'm at war with the static type checker, instead of the type checker helping me be more explicit and prevent bugs.
+"""
+
 class ifThis:
 	@staticmethod
 	def nameIs(allegedly: str) -> Callable[[ast.AST], bool]:
