@@ -87,19 +87,6 @@ def pathCacheTesting(pathTmpTesting: Path) -> Generator[Path, Any, None]:
 def pathFilenameFoldsTotalTesting(pathTmpTesting: Path) -> Path:
 	return pathTmpTesting.joinpath("foldsTotalTest.txt")
 
-def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
-	"""Returns a dictionary mapping dimension tuples to their known folding totals."""
-	dictionaryMapDimensionsToFoldsTotalKnown: dict[tuple[int, ...], int] = {}
-
-	for settings in settingsOEIS.values():
-		sequence = settings['valuesKnown']
-
-		for n, foldingsTotal in sequence.items():
-			dimensions = settings['getMapShape'](n)
-			dimensions.sort()
-			dictionaryMapDimensionsToFoldsTotalKnown[tuple(dimensions)] = foldingsTotal
-	return dictionaryMapDimensionsToFoldsTotalKnown
-
 """
 Section: Fixtures"""
 
@@ -112,15 +99,6 @@ def setupWarningsAsErrors() -> Generator[None, Any, None]:
 	warnings.resetwarnings()
 
 @pytest.fixture
-def foldsTotalKnown() -> dict[tuple[int, ...], int]:
-	"""Returns a dictionary mapping dimension tuples to their known folding totals.
-	NOTE I am not convinced this is the best way to do this.
-	Advantage: I call `makeDictionaryFoldsTotalKnown()` from modules other than test modules.
-	Preference: I _think_ I would prefer a SSOT function available to any module
-	similar to `foldsTotalKnown = getFoldsTotalKnown(listDimensions)`."""
-	return makeDictionaryFoldsTotalKnown()
-
-@pytest.fixture
 def listDimensionsTestCountFolds(oeisID: str):
 	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
 	if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
@@ -128,7 +106,7 @@ def listDimensionsTestCountFolds(oeisID: str):
 		n = random.choice(settingsOEIS[oeisID]['valuesTestValidation'])
 		if n < 2:
 			continue
-		listDimensionsCandidate = settingsOEIS[oeisID]['getMapShape'](n)
+		listDimensionsCandidate = list(settingsOEIS[oeisID]['getMapShape'](n))
 
 		try:
 			return validateListDimensions(listDimensionsCandidate)
@@ -136,7 +114,7 @@ def listDimensionsTestCountFolds(oeisID: str):
 			pass
 
 @pytest.fixture
-def listDimensionsTestFunctionality(oeisID_1random: str):
+def mapShapeTestFunctionality(oeisID_1random: str):
 	"""To test functionality, get one `listDimensions` from `valuesTestValidation` if
 	`validateListDimensions` approves. The algorithm can count the folds of the returned
 	`listDimensions` in a short enough time suitable for testing."""
@@ -144,7 +122,7 @@ def listDimensionsTestFunctionality(oeisID_1random: str):
 		n = random.choice(settingsOEIS[oeisID_1random]['valuesTestValidation'])
 		if n < 2:
 			continue
-		listDimensionsCandidate = settingsOEIS[oeisID_1random]['getMapShape'](n)
+		listDimensionsCandidate = list(settingsOEIS[oeisID_1random]['getMapShape'](n))
 
 		try:
 			return validateListDimensions(listDimensionsCandidate)
@@ -155,7 +133,7 @@ def listDimensionsTestFunctionality(oeisID_1random: str):
 def listDimensionsTestParallelization(oeisID: str) -> list[int]:
 	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestParallelization`"""
 	n = random.choice(settingsOEIS[oeisID]['valuesTestParallelization'])
-	return settingsOEIS[oeisID]['getMapShape'](n)
+	return list(settingsOEIS[oeisID]['getMapShape'](n))
 
 @pytest.fixture
 def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]:
@@ -201,7 +179,7 @@ def oeisID_1random() -> str:
 	return random.choice(oeisIDsImplemented)
 
 @pytest.fixture
-def useThisDispatcher():
+def useThisDispatcher()	:
 	"""A fixture providing a context manager for temporarily replacing the dispatcher.
 
 	Returns
@@ -293,14 +271,10 @@ def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: 
 	exitCode = exitInfo.value.code
 
 	if expected == "error":
-		assert exitCode != 0, \
-			f"Expected error exit (non-zero) but got code {exitCode}"
+		assert exitCode != 0, f"Expected error exit (non-zero) but got code {exitCode}"
 	elif expected == "nonError":
-		assert exitCode == 0, \
-			f"Expected non-error exit (0) but got code {exitCode}"
+		assert exitCode == 0, f"Expected non-error exit (0) but got code {exitCode}"
 	elif isinstance(expected, (list, tuple)):
-		assert exitCode in expected, \
-			f"Expected exit code to be one of {expected} but got {exitCode}"
+		assert exitCode in expected, f"Expected exit code to be one of {expected} but got {exitCode}"
 	else:
-		assert exitCode == expected, \
-			f"Expected exit code {expected} but got {exitCode}"
+		assert exitCode == expected, f"Expected exit code {expected} but got {exitCode}"

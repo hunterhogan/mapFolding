@@ -114,6 +114,10 @@ _dictionaryListsImportFrom['mapFolding.oeis'].extend([
 	'validateOEISid',
 ])
 
+_dictionaryListsImportFrom['mapFolding.noHomeYet'].extend([
+	'getFoldsTotalKnown',
+])
+
 _mapSymbolToModule: dict[str, str] = {}
 for moduleAsStr, listSymbolsAsStr in _dictionaryListsImportFrom.items():
 	for symbolAsStr in listSymbolsAsStr:
@@ -127,3 +131,4 @@ if TYPE_CHECKING:
 	from beDRY import *
 	from basecamp import *
 	from oeis import *
+	from noHomeYet import *

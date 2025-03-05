@@ -1,5 +1,5 @@
 from contextlib import redirect_stdout
-from mapFolding import oeisIDfor_n, getOEISids, clearOEIScache, getOEISidValues, OEIS_for_n, oeisIDsImplemented, settingsOEIS, validateOEISid
+from mapFolding.oeis import oeisIDfor_n, getOEISids, clearOEIScache, getOEISidValues, OEIS_for_n, oeisIDsImplemented, settingsOEIS, validateOEISid
 from pathlib import Path
 from tests.conftest import standardizedEqualTo, standardizedSystemExit
 from typing import Any, NoReturn

@@ -3,7 +3,7 @@ from collections.abc import Callable
 from datetime import datetime, timedelta
 from mapFolding import countFolds, pathPackage
 from pathlib import Path
-from typing import Any, cast, Final, TYPE_CHECKING
+from typing import Any, Final, TYPE_CHECKING
 import argparse
 import pathlib
 import random
@@ -27,7 +27,7 @@ pathCache: Path = pathPackage / ".cache"
 
 class SettingsOEIS(TypedDict):
 	description: str
-	getMapShape: Callable[[int], list[int]]
+	getMapShape: Callable[[int], tuple[int, ...]]
 	offset: int
 	valuesBenchmark: list[int]
 	valuesKnown: dict[int, int]
@@ -35,38 +35,45 @@ class SettingsOEIS(TypedDict):
 	valuesTestValidation: list[int]
 	valueUnknown: int
 
-settingsOEIShardcodedValues: dict[str, dict[str, Any]] = {
-    'A001415': {
-        'getMapShape': cast(Callable[[int], list[int]], lambda n: sorted([2, n])), # type: ignore
-        'valuesBenchmark': [14],
-        'valuesTestParallelization': [*range(3, 7)],
-        'valuesTestValidation': [random.randint(2, 9)],
-    },
-    'A001416': {
-        'getMapShape': cast(Callable[[int], list[int]], lambda n: sorted([3, n])), # type: ignore
-        'valuesBenchmark': [9],
-        'valuesTestParallelization': [*range(3, 5)],
-        'valuesTestValidation': [random.randint(2, 6)],
-    },
-    'A001417': {
-        'getMapShape': cast(Callable[[int], list[int]], lambda n: [2] * n),	# type: ignore
-        'valuesBenchmark': [6],
-        'valuesTestParallelization': [*range(2, 4)],
-        'valuesTestValidation': [random.randint(2, 4)],
-    },
-    'A195646': {
-        'getMapShape': cast(Callable[[int], list[int]], lambda n: [3] * n), # type: ignore
-        'valuesBenchmark': [3],
-        'valuesTestParallelization': [*range(2, 3)],
-        'valuesTestValidation': [2],
-    },
-    'A001418': {
-        'getMapShape': cast(Callable[[int], list[int]], lambda n: [n, n]), # type: ignore
-        'valuesBenchmark': [5],
-        'valuesTestParallelization': [*range(2, 4)],
-        'valuesTestValidation': [random.randint(2, 4)],
-    },
+class SettingsOEIShardcodedValues(TypedDict):
+	getMapShape: Callable[[int], tuple[int, ...]]
+	valuesBenchmark: list[int]
+	valuesTestParallelization: list[int]
+	valuesTestValidation: list[int]
+
+settingsOEIShardcodedValues: dict[str, SettingsOEIShardcodedValues] = {
+	'A001415': {
+		'getMapShape': lambda n: (2, n) if n >= 2 else (n, 2),
+		'valuesBenchmark': [14],
+		'valuesTestParallelization': [*range(3, 7)],
+		'valuesTestValidation': [random.randint(2, 9)],
+	},
+	'A001416': {
+		'getMapShape': lambda n: (3, n) if n >= 3 else (n, 3),
+		'valuesBenchmark': [9],
+		'valuesTestParallelization': [*range(3, 5)],
+		'valuesTestValidation': [random.randint(2, 6)],
+	},
+	'A001417': {
+		'getMapShape': lambda n: tuple(2 for _dimension in range(n)),
+		'valuesBenchmark': [6],
+		'valuesTestParallelization': [*range(2, 4)],
+		'valuesTestValidation': [random.randint(2, 4)],
+	},
+	'A195646': {
+		'getMapShape': lambda n: tuple(3 for _dimension in range(n)),
+		'valuesBenchmark': [3],
+		'valuesTestParallelization': [*range(2, 3)],
+		'valuesTestValidation': [2],
+	},
+	'A001418': {
+		'getMapShape': lambda n: (n, n),
+		'valuesBenchmark': [5],
+		'valuesTestParallelization': [*range(2, 4)],
+		'valuesTestValidation': [random.randint(2, 4)],
+	},
 }
+
 oeisIDsImplemented: Final[list[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues.keys()])
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
@@ -286,16 +293,16 @@ def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 	if not isinstance(n, int) or n < 0:
 		raise ValueError("`n` must be non-negative integer.")
 
-	listDimensions: list[int] = settingsOEIS[oeisID]['getMapShape'](n)
+	mapShape: tuple[int, ...] = settingsOEIS[oeisID]['getMapShape'](n)
 
-	if n <= 1 or len(listDimensions) < 2:
+	if n <= 1 or len(mapShape) < 2:
 		offset: int = settingsOEIS[oeisID]['offset']
 		if n < offset:
 			raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
 		foldsTotal: int = settingsOEIS[oeisID]['valuesKnown'][n]
 		return foldsTotal
 
-	return countFolds(listDimensions)
+	return countFolds(mapShape)
 
 def OEIS_for_n() -> None:
 	"""Command-line interface for oeisIDfor_n."""

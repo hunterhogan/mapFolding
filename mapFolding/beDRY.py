@@ -7,23 +7,21 @@ from mapFolding import (
 	DatatypeElephino,
 	DatatypeFoldsTotal,
 	DatatypeLeavesTotal,
+	getDatatypeModule,
+	getNumpyDtypeDefault,
 	numpyElephino,
 	numpyFoldsTotal,
 	numpyLeavesTotal,
 )
-from mapFolding import getDatatypeModule, getNumpyDtypeDefault
-from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from collections.abc import Sequence
 from numba import get_num_threads, set_num_threads
-from numpy import dtype, integer, ndarray
+from numpy import dtype, ndarray
 from numpy.typing import DTypeLike
-from pathlib import Path
 from sys import maxsize as sysMaxsize
 from typing import Any
+from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 import dataclasses
 import numpy
-import numpy.typing
-import os
 
 def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	if not listDimensions:
@@ -47,7 +45,7 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 		productDimensions *= dimension
 	return productDimensions
 
-def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: DTypeLike | None = None):
+def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: DTypeLike | None = None) -> Array3D:
 	if 'numpy' == getDatatypeModule():
 		numpyDtype = datatype or getNumpyDtypeDefault()
 	else:
@@ -77,7 +75,7 @@ def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: D
 					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
 	return connectionGraph
 
-def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None):
+def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None) -> (Array1DLeavesTotal | Array1DElephino | Array1DFoldsTotal | ndarray[Any, dtype[Any]]):
 	# ChatGPT (4o reasoning?): "Tip: Create them with functions like np.empty(...) or np.zeros(...) to ensure contiguous memory layout."
 	if 'numpy' == getDatatypeModule():
 		numpyDtype = datatype or getNumpyDtypeDefault()

@@ -33,7 +33,7 @@ def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> Non
 			print(foldsTotal)
 	return None
 
-def getFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]]) -> str:
+def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""Imagine your computer has been counting folds for 9 days, and when it tries to save your newly discovered value,
 	the filename is invalid. I bet you think this function is more important after that thought experiment.
 
@@ -59,7 +59,7 @@ def getFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[in
 	"""
 	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
 
-def getPathFilenameFoldsTotal(mapShape: Sequence[int] | ndarray[tuple[int], dtype[integer[Any]]], pathLikeWriteFoldsTotal: str | os.PathLike[str] | None = None) -> Path:
+def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal: str | os.PathLike[str] | None = None) -> Path:
 	"""Get a standardized path and filename for the computed value `foldsTotal`.
 
 	If you provide a directory, the function will append a standardized filename. If you provide a filename

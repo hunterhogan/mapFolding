@@ -108,8 +108,8 @@ numpyFoldsTotal: TypeAlias = numpy_int64
 
 Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[numpyLeavesTotal]]
 Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[numpyLeavesTotal]]
-Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[numpy_int16]]
-Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[numpy_int64]]
+Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[numpyElephino]]
+Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[numpyFoldsTotal]]
 
 _datatypeModule: str = ''
 def getDatatypeModule() -> str:
