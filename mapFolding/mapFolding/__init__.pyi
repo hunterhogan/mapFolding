@@ -1,11 +1,4 @@
-from theDao import *
-from theSSOT import *
-from beDRY import *
-from basecamp import *
-from oeis import *
+from mapFolding.basecamp import countFolds as countFolds
+from mapFolding.oeis import OEIS_for_n as OEIS_for_n, clearOEIScache as clearOEIScache, getOEISids as getOEISids
 
-_dictionaryListsImportFrom: dict[str, list[str]]
-
-def __getattr__(name: str): ...
-
-_mapSymbolToModule: dict[str, str]
+__all__ = ['clearOEIScache', 'countFolds', 'getOEISids', 'OEIS_for_n']

@@ -1,4 +1,4 @@
-from mapFolding import indexMy as indexMy, indexTrack as indexTrack
+from mapFolding.theSSOT import indexMy as indexMy, indexTrack as indexTrack
 from numpy import dtype, integer, ndarray
 from typing import Any
 

@@ -22,6 +22,8 @@ Z0Z_formatFilenameModuleSynthetic: Incomplete
 Z0Z_nameModuleDispatcherSynthetic: str
 Z0Z_filenameModuleWrite: str
 Z0Z_filenameWriteElseCallableTarget: str
+Z0Z_dispatcherOfDataFilename: str
+Z0Z_dispatcherOfDataCallable: str
 concurrencyPackage: str
 
 def getAlgorithmSource() -> ModuleType: ...

@@ -1,6 +1,7 @@
 import pathlib
-from collections.abc import Callable
-from mapFolding import countFolds as countFolds, pathPackage as pathPackage
+from collections.abc import Callable as Callable
+from mapFolding import countFolds as countFolds
+from mapFolding.theSSOT import pathPackage as pathPackage
 from pathlib import Path
 from typing import Any, Final, TypedDict
 
@@ -9,7 +10,7 @@ pathCache: Path
 
 class SettingsOEIS(TypedDict):
     description: str
-    getMapShape: Callable[[int], list[int]]
+    getMapShape: Callable[[int], tuple[int, ...]]
     offset: int
     valuesBenchmark: list[int]
     valuesKnown: dict[int, int]
@@ -17,7 +18,13 @@ class SettingsOEIS(TypedDict):
     valuesTestValidation: list[int]
     valueUnknown: int
 
-settingsOEIShardcodedValues: dict[str, dict[str, Any]]
+class SettingsOEIShardcodedValues(TypedDict):
+    getMapShape: Callable[[int], tuple[int, ...]]
+    valuesBenchmark: list[int]
+    valuesTestParallelization: list[int]
+    valuesTestValidation: list[int]
+
+settingsOEIShardcodedValues: dict[str, SettingsOEIShardcodedValues]
 oeisIDsImplemented: Final[list[str]]
 
 def validateOEISid(oeisIDcandidate: str) -> str: ...
