@@ -1,3 +1,0 @@
-from . import cloudpickle as cloudpickle
-
-def __getattr__(name): ...
