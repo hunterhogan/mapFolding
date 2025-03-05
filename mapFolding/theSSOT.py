@@ -72,14 +72,14 @@ def getAlgorithmSource() -> ModuleType:
 	return moduleImported
 
 def getAlgorithmDispatcher():
-	from mapFolding import ComputationState
+	from mapFolding.beDRY import ComputationState
 	moduleImported: ModuleType = getAlgorithmSource()
 	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
 	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
 
 # I DON'T KNOW!
 def getPackageDispatcher():
-	from mapFolding import ComputationState
+	from mapFolding.beDRY import ComputationState
 	moduleImported: ModuleType = getAlgorithmSource()
 	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
 	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)

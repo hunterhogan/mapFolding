@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from mapFolding import ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable
+from mapFolding.theSSOT import ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable
 from mapFolding.someAssemblyRequired import ifThis, LedgerOfImports, Then
 from typing import Any, cast
 import ast

@@ -1,8 +1,7 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
 from collections.abc import Sequence
 from typing import Any, cast
-from mapFolding import FREAKOUT, Z0Z_setDatatypeModuleScalar, Z0Z_setDecoratorCallable, getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathJobRootDEFAULT, Z0Z_getDecoratorCallable
-from mapFolding import ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar
+from mapFolding.theSSOT import FREAKOUT, Z0Z_setDatatypeModuleScalar, Z0Z_setDecoratorCallable, getPathJobRootDEFAULT, Z0Z_getDecoratorCallable, ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar
 from mapFolding.someAssemblyRequired import makeStateJob, NodeReplacer, LedgerOfImports, Then, ifThis, decorateCallableWithNumba, thisIsNumbaDotJit
 from os import PathLike
 from pathlib import Path

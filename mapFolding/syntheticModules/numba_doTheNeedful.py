@@ -1,4 +1,4 @@
-from mapFolding import indexMy
+from mapFolding.theSSOT import indexMy
 from mapFolding.syntheticModules.numbaCount import countInitialize, countSequential, countParallel
 from numba import uint16, int64, jit
 from numpy import ndarray, dtype, integer

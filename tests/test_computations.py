@@ -1,4 +1,6 @@
-from mapFolding import countFolds, getPathFilenameFoldsTotal, getFoldsTotalKnown
+from mapFolding.basecamp import countFolds
+from mapFolding.filesystem import getPathFilenameFoldsTotal
+from mapFolding.noHomeYet import getFoldsTotalKnown
 from mapFolding.oeis import settingsOEIS, oeisIDfor_n
 # from mapFolding.someAssemblyRequired import writeJobNumba
 from tests.conftest import standardizedEqualTo, registrarRecordsTmpObject

@@ -1,5 +1,7 @@
 from typing import Literal
-from mapFolding import countFolds, getTaskDivisions, setCPUlimit, validateListDimensions, getLeavesTotal, getFoldsTotalKnown
+from mapFolding.basecamp import countFolds
+from mapFolding.beDRY import getTaskDivisions, setCPUlimit, validateListDimensions, getLeavesTotal
+from mapFolding.noHomeYet import getFoldsTotalKnown
 from tests.conftest import standardizedEqualTo
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit
 from collections.abc import Callable

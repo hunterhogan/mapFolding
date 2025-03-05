@@ -1,4 +1,4 @@
-from mapFolding import ComputationState
+from mapFolding.beDRY import ComputationState
 import copy
 
 def activeLeafConnectedToItself(state: ComputationState) -> bool:

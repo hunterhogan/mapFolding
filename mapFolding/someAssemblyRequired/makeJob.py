@@ -1,5 +1,7 @@
 from collections.abc import Sequence
-from mapFolding import getPathFilenameFoldsTotal, outfitCountFolds, getAlgorithmSource, validateListDimensions, ComputationState
+from mapFolding.beDRY import outfitCountFolds, validateListDimensions, ComputationState
+from mapFolding.filesystem import getPathFilenameFoldsTotal
+from mapFolding.theSSOT import getAlgorithmSource
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Literal, overload

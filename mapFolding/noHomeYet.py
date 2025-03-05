@@ -1,5 +1,5 @@
 from functools import cache
-from mapFolding import settingsOEIS
+from mapFolding.oeis import settingsOEIS
 
 @cache
 def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:

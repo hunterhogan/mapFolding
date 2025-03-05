@@ -1,6 +1,7 @@
 from contextlib import redirect_stdout
-from mapFolding import getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathJobRootDEFAULT, validateListDimensions
-from mapFolding.filesystem import saveFoldsTotal
+from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal, saveFoldsTotal
+from mapFolding.beDRY import validateListDimensions
+from mapFolding.theSSOT import getPathJobRootDEFAULT
 from pathlib import Path
 from typing import Any
 import io

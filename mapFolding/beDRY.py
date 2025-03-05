@@ -1,5 +1,5 @@
 """A relatively stable API for oft-needed functionality."""
-from mapFolding import (
+from mapFolding.theSSOT import (
 	Array1DElephino,
 	Array1DFoldsTotal,
 	Array1DLeavesTotal,
@@ -105,7 +105,7 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 		CPUlimit = oopsieKwargsie(CPUlimit)
 
 	concurrencyLimit: int = int(defineConcurrencyLimit(CPUlimit))
-	from mapFolding import concurrencyPackage
+	from mapFolding.theSSOT import concurrencyPackage
 	if concurrencyPackage == 'numba':
 		set_num_threads(concurrencyLimit)
 		concurrencyLimit = get_num_threads()

@@ -1,5 +1,6 @@
 from mapFolding.someAssemblyRequired import LedgerOfImports, ast_Identifier, IngredientsFunction, shatter_dataclassesDOTdataclass
-from mapFolding import ComputationState, Z0Z_dispatcherOfDataCallable, Z0Z_dispatcherOfDataFilename, FREAKOUT
+from mapFolding.theSSOT import Z0Z_dispatcherOfDataCallable, Z0Z_dispatcherOfDataFilename, FREAKOUT
+from mapFolding.beDRY import ComputationState
 import inspect
 import ast
 

@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from mapFolding import getLeavesTotal, setCPUlimit, validateListDimensions
+from mapFolding.beDRY import getLeavesTotal, setCPUlimit, validateListDimensions
 from tests.conftest import standardizedEqualTo
 from typing import Any, Literal
 from Z0Z_tools import intInnit

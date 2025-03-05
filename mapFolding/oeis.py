@@ -1,7 +1,8 @@
 """Everything implementing the The Online Encyclopedia of Integer Sequences (OEIS); _only_ things that implement _only_ the OEIS."""
 from collections.abc import Callable
 from datetime import datetime, timedelta
-from mapFolding import countFolds, pathPackage
+from mapFolding import countFolds
+from mapFolding.theSSOT import pathPackage
 from pathlib import Path
 from typing import Any, Final, TYPE_CHECKING
 import argparse

@@ -73,7 +73,7 @@ def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal
 	Returns:
 		pathFilenameFoldsTotal: Absolute path and filename.
 	"""
-	from mapFolding import getPathJobRootDEFAULT
+	from mapFolding.theSSOT import getPathJobRootDEFAULT
 	pathLikeSherpa = Path(pathLikeWriteFoldsTotal) if pathLikeWriteFoldsTotal is not None else None
 	if not pathLikeSherpa:
 		pathLikeSherpaIsNotNone: Path = getPathJobRootDEFAULT()

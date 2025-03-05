@@ -1,4 +1,4 @@
-from mapFolding import indexMy, indexTrack
+from mapFolding.theSSOT import indexMy, indexTrack
 from numba import uint16, prange, int64, jit
 from numpy import ndarray, dtype, integer
 from typing import Any
@@ -99,7 +99,7 @@ def countParallel(connectionGraph: ndarray[tuple[int, int, int], dtype[integer[A
                 track[indexTrack.gapRangeStart, my[indexMy.leaf1ndex]] = my[indexMy.gap1ndex]
                 my[indexMy.leaf1ndex] += 1
         foldGroups[my[indexMy.taskIndex]] = groupsOfFolds
-    
+
 @jit((uint16[:, :, ::1], int64[::1], uint16[::1], uint16[::1], uint16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=True, no_cpython_wrapper=True, nopython=True, parallel=False)
 def countSequential(connectionGraph: ndarray[tuple[int, int, int], dtype[integer[Any]]], foldGroups: ndarray[tuple[int], dtype[integer[Any]]], gapsWhere: ndarray[tuple[int], dtype[integer[Any]]], my: ndarray[tuple[int], dtype[integer[Any]]], track: ndarray[tuple[int, int], dtype[integer[Any]]]) -> None:
     leafBelow = track[indexTrack.leafBelow.value]

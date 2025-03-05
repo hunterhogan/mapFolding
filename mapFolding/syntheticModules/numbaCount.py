@@ -1,4 +1,4 @@
-from mapFolding import indexMy, indexTrack
+from mapFolding.theSSOT import indexMy, indexTrack
 from numba import uint16, prange, int64, jit
 from numpy import ndarray, dtype, integer
 from typing import Any
