@@ -1,18 +1,11 @@
-from collections.abc import Callable, Generator
-from contextlib import redirect_stdout
-from pathlib import Path
-from typing import Any, Literal
-import unittest.mock
-from mapFolding import getLeavesTotal, makeConnectionGraph, makeDataContainer, saveFoldsTotal, setCPUlimit, validateListDimensions
-from Z0Z_tools.pytestForYourUse import PytestFor_intInnit, PytestFor_oopsieKwargsie
+from collections.abc import Callable
+from mapFolding import getLeavesTotal, setCPUlimit, validateListDimensions
 from tests.conftest import standardizedEqualTo
+from typing import Any, Literal
 from Z0Z_tools import intInnit
-import io
-import itertools
+from Z0Z_tools.pytestForYourUse import PytestFor_intInnit, PytestFor_oopsieKwargsie
 import numba
-import numpy
 import pytest
-import random
 import sys
 
 @pytest.mark.parametrize("listDimensions,expected_intInnit,expected_validateListDimensions", [
@@ -86,88 +79,3 @@ def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> N
 ])
 def test_setCPUlimit(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | Literal[0] | Literal[1], expectedLimit: Any | int) -> None:
 	standardizedEqualTo(expectedLimit, setCPUlimit, CPUlimit)
-
-@pytest.fixture
-def parameterIterator() -> Callable[[list[int]], Generator[dict[str, Any], None, None]]:
-	"""Generate random combinations of parameters for outfitCountFolds testing."""
-	parameterSets: dict[str, list[Any]] = {
-		'computationDivisions': [
-			None,
-			'maximum',
-			'cpu',
-		],
-		'CPUlimit': [
-			None, True, False, 0, 1, -1,
-		],
-		'datatypeMedium': [
-			None,
-			numpy.int64,
-			numpy.intc,
-			numpy.uint16
-		],
-		'datatypeLarge': [
-			None,
-			numpy.int64,
-			numpy.intp,
-			numpy.uint32
-		]
-	}
-
-	def makeParametersDynamic(listDimensions: list[int]) -> dict[str, list[Any]]:
-		"""Add context-dependent parameter values."""
-		parametersDynamic = parameterSets.copy()
-		mapShape = validateListDimensions(listDimensions)
-		leavesTotal = getLeavesTotal(mapShape)
-		concurrencyLimit = min(leavesTotal, 16)
-
-		# Add dynamic computationDivisions values
-		dynamicDivisions = [random.randint(2, leavesTotal-1) for _iterator in range(3)]
-		parametersDynamic['computationDivisions'] = parametersDynamic['computationDivisions'] + dynamicDivisions
-
-		# Add dynamic CPUlimit values
-		parameterDynamicCPU = [
-			random.random(),  # 0 to 1
-			-random.random(), # -1 to 0
-		]
-		parameterDynamicCPU.extend(
-			[random.randint(2, concurrencyLimit-1) for _iterator in range(2)]
-		)
-		parameterDynamicCPU.extend(
-			[random.randint(-concurrencyLimit+1, -2) for _iterator in range(2)]
-		)
-		parametersDynamic['CPUlimit'] = parametersDynamic['CPUlimit'] + parameterDynamicCPU
-
-		return parametersDynamic
-
-	def generateCombinations(listDimensions: list[int]) -> Generator[dict[str, Any], None, None]:
-		parametersDynamic = makeParametersDynamic(listDimensions)
-		parameterKeys = list(parametersDynamic.keys())
-		parameterValues = [parametersDynamic[key] for key in parameterKeys]
-
-		# Shuffle each parameter list
-		for valueList in parameterValues:
-			random.shuffle(valueList)
-
-		# Use zip_longest to iterate, filling with None when shorter lists are exhausted
-		for combination in itertools.zip_longest(*parameterValues, fillvalue=None):
-			yield dict(zip(parameterKeys, combination))
-
-	return generateCombinations
-
-def test_saveFoldsTotal_fallback(pathTmpTesting: Path) -> None:
-	foldsTotal = 123
-	pathFilename = pathTmpTesting / "foldsTotal.txt"
-	with unittest.mock.patch("pathlib.Path.write_text", side_effect=OSError("Simulated write failure")):
-		with unittest.mock.patch("os.getcwd", return_value=str(pathTmpTesting)):
-			capturedOutput = io.StringIO()
-			with redirect_stdout(capturedOutput):
-				saveFoldsTotal(pathFilename, foldsTotal)
-	fallbackFiles = list(pathTmpTesting.glob("foldsTotalYO_*.txt"))
-	assert len(fallbackFiles) == 1, "Fallback file was not created upon write failure."
-
-# def test_makeDataContainer_default_datatype() -> None:
-# 	"""Test that makeDataContainer uses dtypeLargeDEFAULT when no datatype is specified."""
-# 	testShape = (3, 4)
-# 	container = makeDataContainer(testShape)
-# 	assert container.dtype == hackSSOTdtype('dtypeFoldsTotal'), f"Expected datatype but got {container.dtype}"
-# 	assert container.shape == testShape, f"Expected shape {testShape}, but got {container.shape}"

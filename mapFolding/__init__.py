@@ -88,16 +88,19 @@ _dictionaryListsImportFrom['mapFolding.basecamp'].extend([
 
 _dictionaryListsImportFrom['mapFolding.beDRY'].extend([
 	'ComputationState',
-	'getFilenameFoldsTotal',
 	'getLeavesTotal',
-	'getPathFilenameFoldsTotal',
 	'getTaskDivisions',
 	'makeConnectionGraph',
 	'makeDataContainer',
 	'outfitCountFolds',
-	'saveFoldsTotal',
 	'setCPUlimit',
 	'validateListDimensions',
+])
+
+_dictionaryListsImportFrom['mapFolding.filesystem'].extend([
+	'getFilenameFoldsTotal',
+	'getPathFilenameFoldsTotal',
+	'saveFoldsTotal',
 ])
 
 _dictionaryListsImportFrom['mapFolding.oeis'].extend([
@@ -119,6 +122,7 @@ for moduleAsStr, listSymbolsAsStr in _dictionaryListsImportFrom.items():
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from theDao import *
+	from filesystem import *
 	from theSSOT import *
 	from beDRY import *
 	from basecamp import *

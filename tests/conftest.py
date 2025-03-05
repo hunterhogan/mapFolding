@@ -1,7 +1,7 @@
 """SSOT for Pytest"""
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import getAlgorithmDispatcher, getAlgorithmSource, getPackageDispatcher, listNumbaCallableDispatchees, moduleOfSyntheticModulesPACKAGING, FREAKOUT
 from mapFolding import basecamp
+from mapFolding import getAlgorithmDispatcher, getAlgorithmSource, getPackageDispatcher, listNumbaCallableDispatchees, moduleOfSyntheticModulesPACKAGING, FREAKOUT
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from mapFolding.someAssemblyRequired import makeFlowNumbaOptimized, YouOughtaKnow
