@@ -34,7 +34,7 @@ def Z0Z_makeDataDispatcher():
 	method in one of those three classes.
 	"""
 	# The source dataclass we want to unpack
-	from mapFolding.beDRY import ComputationState
+	from mapFolding.theSSOT import ComputationState
 	dataclassesDOTdataclass = ComputationState
 	# return dataclassesDOTdataclass
 
@@ -71,25 +71,9 @@ def Z0Z_makeDataDispatcher():
 
 
 	# The following needs to be dynamic based on variables from theSSOT
-	ingredientsDispatcherOfData.imports.addImportFromStr(f"{myPackageNameIs}.syntheticModules.numba_doTheNeedful", "doTheNeedful")
+	# ingredientsDispatcherOfData.imports.addImportFromStr(f"{myPackageNameIs}.syntheticModules.numba_doTheNeedful", "doTheNeedful")
 
 	# Create the module for the dispatcher with all the required elements for module synthesis
-	ingredientsModule = IngredientsModule(
-		functions=[ingredientsDispatcherOfData.FunctionDef],
-		imports=ingredientsDispatcherOfData.imports,
-		name=Z0Z_dispatcherOfDataFilename.replace('.py', ''),
-		Z0Z_logicalPath=f"{myPackageNameIs}.{moduleOfSyntheticModulesPACKAGING}.{Z0Z_dispatcherOfDataFilename.replace('.py', '')}",
-		Z0Z_absoluteImport=ast.Import(names=[ast.alias(
-			name=f"{myPackageNameIs}.{moduleOfSyntheticModulesPACKAGING}.{Z0Z_dispatcherOfDataFilename.replace('.py', '')}",
-			asname=None
-		)]),
-		Z0Z_absoluteImportFrom=ast.ImportFrom(
-			module=f"{myPackageNameIs}.{moduleOfSyntheticModulesPACKAGING}",
-			names=[ast.alias(name=Z0Z_dispatcherOfDataFilename.replace('.py', ''), asname=None)],
-			level=0
-		),
-		Z0Z_pathFilename=pathPackage / moduleOfSyntheticModulesPACKAGING / Z0Z_dispatcherOfDataFilename,
-		Z0Z_package=myPackageNameIs
-	)
+	ingredientsModule = "i hate my life"
 
 	return ingredientsModule

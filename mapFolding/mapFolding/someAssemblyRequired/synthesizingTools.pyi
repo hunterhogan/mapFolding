@@ -2,6 +2,7 @@ import ast
 import dataclasses
 from _typeshed import Incomplete
 from collections.abc import Callable as Callable, Iterable, Sequence
+from mapFolding.theSSOT import fileExtensionINSTALLING as fileExtensionINSTALLING, myPackageNameIs as myPackageNameIs, pathPackage as pathPackage
 from pathlib import Path
 from typing import Any, NamedTuple, TypeAlias
 
@@ -70,6 +71,12 @@ class Make:
     def itDOTname(nameChain: ast.Name | ast.Attribute, dotName: str) -> ast.Attribute: ...
     @staticmethod
     def nameDOTname(identifier: ast_Identifier, *dotName: str) -> ast.Name | ast.Attribute: ...
+    @staticmethod
+    def astAlias(name: ast_Identifier, asname: ast_Identifier | None = None) -> ast.alias: ...
+    @staticmethod
+    def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None) -> ast.Import: ...
+    @staticmethod
+    def astImportFrom(moduleName: ast_Identifier, list_astAlias: list[ast.alias]) -> ast.ImportFrom: ...
 
 class Then:
     @staticmethod
@@ -108,7 +115,7 @@ class NodeReplacer(ast.NodeTransformer):
 def shatter_dataclassesDOTdataclass(dataclass: ast.ClassDef, instance_Identifier: ast_Identifier) -> list[ast.AnnAssign]: ...
 
 class LedgerOfImports:
-    dictionaryImportFrom: dict[str, list[tuple[str, str | None]]]
+    dictionaryImportFrom: dict[str, list[ast.alias]]
     listImport: list[str]
     def __init__(self, startWith: ast.AST | None = None) -> None: ...
     def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None: ...
@@ -143,8 +150,19 @@ class IngredientsModule:
     functions: list[ast.FunctionDef]
     imports: LedgerOfImports
     name: ast_Identifier
-    Z0Z_logicalPath: str
-    Z0Z_absoluteImport: ast.Import
-    Z0Z_absoluteImportFrom: ast.ImportFrom
-    Z0Z_pathFilename: Path
-    Z0Z_package: str
+    Z0Z_logicalPath: ast_Identifier | list[ast_Identifier] | None = ...
+    packageName: ast_Identifier = ...
+    Z0Z_pathPackage: Path = ...
+    fileExtension: str = ...
+    def _getLogicalPathParent(self) -> str: ...
+    def _getLogicalPathAbsolute(self) -> str:
+        """Get the full import path as a string."""
+    @property
+    def pathFilename(self) -> Path:
+        """Dynamically calculate the file path based on current values."""
+    @property
+    def absoluteImport(self) -> ast.Import:
+        """Dynamically create an absolute import statement for this module."""
+    @property
+    def absoluteImportFrom(self) -> ast.ImportFrom:
+        """Dynamically create an absolute import-from statement for this module."""

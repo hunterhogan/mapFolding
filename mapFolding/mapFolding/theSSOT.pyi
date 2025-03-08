@@ -1,3 +1,4 @@
+import dataclasses
 from _typeshed import Incomplete
 from collections.abc import Callable
 from numba.core.compiler import CompilerBase as numbaCompilerBase
@@ -13,26 +14,21 @@ dispatcherCallableNamePACKAGING: str
 moduleOfSyntheticModulesPACKAGING: Final[str]
 dataclassIdentifierPACKAGING: str
 myPackageNameIsPACKAGING: str
+fileExtensionINSTALLING: str
 
 def getPathPackageINSTALLING() -> Path: ...
 
 additional_importsHARDCODED: list[str]
-myPackageNameIs: Final[str]
-pathPackage: Path
 Z0Z_formatNameModuleSynthetic: str
 Z0Z_formatFilenameModuleSynthetic: Incomplete
 Z0Z_nameModuleDispatcherSynthetic: str
-Z0Z_filenameModuleWrite: str
+Z0Z_filenameModuleWrite: Incomplete
 Z0Z_filenameWriteElseCallableTarget: str
-Z0Z_dispatcherOfDataFilename: str
+Z0Z_dispatcherOfDataFilename: Incomplete
 Z0Z_dispatcherOfDataCallable: str
 concurrencyPackage: str
-
-def getAlgorithmSource() -> ModuleType: ...
-def getAlgorithmDispatcher(): ...
-def getPackageDispatcher(): ...
-def getPathJobRootDEFAULT() -> Path: ...
-
+myPackageNameIs: Final[str]
+pathPackage: Path
 DatatypeLeavesTotal: TypeAlias
 numpyLeavesTotal: TypeAlias
 DatatypeElephino: TypeAlias
@@ -43,6 +39,39 @@ Array3D: TypeAlias
 Array1DLeavesTotal: TypeAlias
 Array1DElephino: TypeAlias
 Array1DFoldsTotal: TypeAlias
+
+@dataclasses.dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False, match_args=True, kw_only=False, slots=False, weakref_slot=False)
+class ComputationState:
+    mapShape: tuple[DatatypeLeavesTotal, ...]
+    leavesTotal: DatatypeLeavesTotal
+    taskDivisions: DatatypeLeavesTotal
+    connectionGraph: Array3D = dataclasses.field(init=False, metadata={'description': 'A 3D array representing the connection graph of the map.'})
+    countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(init=False)
+    dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+    dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
+    foldGroups: Array1DFoldsTotal = dataclasses.field(init=False)
+    foldsTotal: DatatypeFoldsTotal = ...
+    gap1ndex: DatatypeLeavesTotal = ...
+    gap1ndexCeiling: DatatypeElephino = ...
+    gapRangeStart: Array1DElephino = dataclasses.field(init=False)
+    gapsWhere: Array1DLeavesTotal = dataclasses.field(init=False)
+    groupsOfFolds: DatatypeFoldsTotal = ...
+    indexDimension: DatatypeLeavesTotal = ...
+    indexLeaf: DatatypeLeavesTotal = ...
+    indexMiniGap: DatatypeElephino = ...
+    leaf1ndex: DatatypeElephino = ...
+    leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
+    leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
+    leafConnectee: DatatypeElephino = ...
+    taskIndex: DatatypeLeavesTotal = dataclasses.field(default=DatatypeLeavesTotal(0), metadata={'myType': DatatypeLeavesTotal})
+    def __post_init__(self) -> None: ...
+    def getFoldsTotal(self) -> None: ...
+
+def getAlgorithmSource() -> ModuleType: ...
+def getAlgorithmDispatcher(): ...
+def getPackageDispatcher(): ...
+def getPathJobRootDEFAULT() -> Path: ...
+
 _datatypeModule: str
 
 def getDatatypeModule() -> str: ...

@@ -1,7 +1,7 @@
 from collections.abc import Sequence
-from mapFolding.beDRY import ComputationState, validateListDimensions, setCPUlimit, outfitCountFolds
-from mapFolding.theSSOT import getPackageDispatcher
+from mapFolding.beDRY import outfitCountFolds, setCPUlimit, validateListDimensions
 from mapFolding.filesystem import getPathFilenameFoldsTotal, saveFoldsTotal
+from mapFolding.theSSOT import ComputationState, getPackageDispatcher
 from os import PathLike
 from pathlib import Path
 

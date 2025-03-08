@@ -8,6 +8,7 @@ from pathlib import Path
 from sys import modules as sysModules
 from types import ModuleType
 from typing import Any, cast, Final, NamedTuple, TYPE_CHECKING, TypeAlias
+import dataclasses
 import tomli
 
 try:
@@ -39,6 +40,8 @@ except Exception:
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
 # Evaluate When Installing Evaluate When Installing Evaluate When Installing
 
+fileExtensionINSTALLING: str = '.py'
+
 def getPathPackageINSTALLING() -> Path:
 	pathPackage: Path = Path(inspect_getfile(importlib_import_module(myPackageNameIsPACKAGING)))
 	if pathPackage.is_file():
@@ -54,46 +57,22 @@ additional_importsHARDCODED: list[str] = ['numba']
 # NOTE see also `ParametersSynthesizeNumbaCallable` below
 
 # =============================================================================
-# Perhaps, the right way
-
-myPackageNameIs: Final[str] = myPackageNameIsPACKAGING
-pathPackage: Path = getPathPackageINSTALLING()
+# Temporary or transient or something; probably still the wrong way
 
 Z0Z_formatNameModuleSynthetic = "numba_{callableTarget}"
-Z0Z_formatFilenameModuleSynthetic = Z0Z_formatNameModuleSynthetic + ".py"
+Z0Z_formatFilenameModuleSynthetic = Z0Z_formatNameModuleSynthetic + fileExtensionINSTALLING
 Z0Z_nameModuleDispatcherSynthetic: str = Z0Z_formatNameModuleSynthetic.format(callableTarget=dispatcherCallableNamePACKAGING)
-Z0Z_filenameModuleWrite = 'numbaCount.py'
+Z0Z_filenameModuleWrite = 'numbaCount' + fileExtensionINSTALLING
 Z0Z_filenameWriteElseCallableTarget: str = 'count'
-Z0Z_dispatcherOfDataFilename = 'dataNamespaceFlattened.py'
+Z0Z_dispatcherOfDataFilename = 'dataNamespaceFlattened' + fileExtensionINSTALLING
 Z0Z_dispatcherOfDataCallable = 'flattenData'
 concurrencyPackage: str = 'numba'
 
-def getAlgorithmSource() -> ModuleType:
-	logicalPathModule: str = f"{myPackageNameIs}.{algorithmSourcePACKAGING}"
-	moduleImported: ModuleType = importlib_import_module(logicalPathModule)
-	return moduleImported
+# =============================================================================
+# The right way, perhaps.
 
-def getAlgorithmDispatcher():
-	# How did you know to import `ComputationState`?
-	from mapFolding.beDRY import ComputationState
-	moduleImported: ModuleType = getAlgorithmSource()
-	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
-	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
-
-# I DON'T KNOW!
-def getPackageDispatcher():
-	from mapFolding.beDRY import ComputationState
-	moduleImported: ModuleType = getAlgorithmSource()
-	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
-	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
-
-# TODO learn how to see this from the user's perspective
-def getPathJobRootDEFAULT() -> Path:
-	if 'google.colab' in sysModules:
-		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / "jobs"
-	else:
-		pathJobDEFAULT = pathPackage / "jobs"
-	return pathJobDEFAULT
+myPackageNameIs: Final[str] = myPackageNameIsPACKAGING
+pathPackage: Path = getPathPackageINSTALLING()
 
 additional_importsHARDCODED.append(myPackageNameIs)
 
@@ -114,6 +93,82 @@ Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[numpyLeavesTotal]]
 Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[numpyElephino]]
 Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[numpyFoldsTotal]]
 
+@dataclasses.dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False, match_args=True, kw_only=False, slots=False, weakref_slot=False)
+class ComputationState:
+	mapShape: tuple[DatatypeLeavesTotal, ...]
+	leavesTotal: DatatypeLeavesTotal
+	taskDivisions: DatatypeLeavesTotal
+
+	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'description': 'A 3D array representing the connection graph of the map.'})
+	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(init=False)
+	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
+	foldGroups: Array1DFoldsTotal = dataclasses.field(init=False)
+	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
+	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
+	gapRangeStart: Array1DElephino = dataclasses.field(init=False)
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(init=False)
+	groupsOfFolds: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
+	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
+	leaf1ndex: DatatypeElephino = DatatypeElephino(1)
+	leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
+	leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
+	leafConnectee: DatatypeElephino = DatatypeElephino(0)
+	taskIndex: DatatypeLeavesTotal = dataclasses.field(default=DatatypeLeavesTotal(0), metadata={'myType': DatatypeLeavesTotal})
+	# taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+
+	def __post_init__(self):
+		from mapFolding.beDRY import makeConnectionGraph, makeDataContainer
+		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
+		self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
+		self.connectionGraph = makeConnectionGraph(self.mapShape, self.leavesTotal, numpyLeavesTotal)
+
+		# the dtype is defined above
+		self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), numpyFoldsTotal)
+		self.foldGroups[-1] = self.leavesTotal
+
+		leavesTotalAsInt = int(self.leavesTotal)
+		self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, numpyElephino)
+		self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+		self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, numpyLeavesTotal)
+		self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+		self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+
+	def getFoldsTotal(self):
+		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
+
+	# factory? constructor?
+	# state.taskIndex = state.taskIndex.type(indexSherpa)
+	# self.fieldName = self.fieldName.fieldType(indexSherpa)
+	# state.taskIndex.toMyType(indexSherpa)
+
+def getAlgorithmSource() -> ModuleType:
+	logicalPathModule: str = f"{myPackageNameIs}.{algorithmSourcePACKAGING}"
+	moduleImported: ModuleType = importlib_import_module(logicalPathModule)
+	return moduleImported
+
+def getAlgorithmDispatcher():
+	moduleImported: ModuleType = getAlgorithmSource()
+	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
+	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
+
+# I DON'T KNOW!
+def getPackageDispatcher():
+	moduleImported: ModuleType = getAlgorithmSource()
+	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
+	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
+
+# TODO learn how to see this from the user's perspective
+def getPathJobRootDEFAULT() -> Path:
+	if 'google.colab' in sysModules:
+		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / "jobs"
+	else:
+		pathJobDEFAULT = pathPackage / "jobs"
+	return pathJobDEFAULT
+
 _datatypeModule: str = ''
 def getDatatypeModule() -> str:
 	global _datatypeModule
@@ -123,6 +178,7 @@ def getDatatypeModule() -> str:
 
 def getNumpyDtypeDefault() -> DTypeLike:
 	return numpyFoldsTotal
+
 # =============================================================================
 # More truth
 

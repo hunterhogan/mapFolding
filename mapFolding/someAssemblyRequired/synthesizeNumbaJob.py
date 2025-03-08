@@ -1,9 +1,9 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
 from collections.abc import Sequence
 from typing import Any, cast
-from mapFolding.beDRY import ComputationState
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal
 from mapFolding.theSSOT import (
+	ComputationState,
 	FREAKOUT,
 	getPathJobRootDEFAULT,
 	ParametersNumba,

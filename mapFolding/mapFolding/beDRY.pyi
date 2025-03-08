@@ -1,6 +1,5 @@
-import dataclasses
 from collections.abc import Sequence
-from mapFolding.theSSOT import Array1DElephino as Array1DElephino, Array1DFoldsTotal as Array1DFoldsTotal, Array1DLeavesTotal as Array1DLeavesTotal, Array3D as Array3D, DatatypeElephino as DatatypeElephino, DatatypeFoldsTotal as DatatypeFoldsTotal, DatatypeLeavesTotal as DatatypeLeavesTotal, getDatatypeModule as getDatatypeModule, getNumpyDtypeDefault as getNumpyDtypeDefault, numpyElephino as numpyElephino, numpyFoldsTotal as numpyFoldsTotal, numpyLeavesTotal as numpyLeavesTotal
+from mapFolding.theSSOT import Array1DElephino as Array1DElephino, Array1DFoldsTotal as Array1DFoldsTotal, Array1DLeavesTotal as Array1DLeavesTotal, Array3D as Array3D, ComputationState as ComputationState, getDatatypeModule as getDatatypeModule, getNumpyDtypeDefault as getNumpyDtypeDefault
 from numpy import dtype, ndarray
 from numpy.typing import DTypeLike as DTypeLike
 from typing import Any
@@ -60,32 +59,4 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 \t-----
 \tTask divisions should not exceed total leaves or the folds will be over-counted.
 \t"""
-
-@dataclasses.dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False, match_args=True, kw_only=False, slots=False, weakref_slot=False)
-class ComputationState:
-    mapShape: tuple[DatatypeLeavesTotal, ...]
-    leavesTotal: DatatypeLeavesTotal
-    taskDivisions: DatatypeLeavesTotal
-    connectionGraph: Array3D = dataclasses.field(init=False, metadata={'description': 'A 3D array representing the connection graph of the map.'})
-    countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(init=False)
-    dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
-    dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
-    foldGroups: Array1DFoldsTotal = dataclasses.field(init=False)
-    foldsTotal: DatatypeFoldsTotal = ...
-    gap1ndex: DatatypeLeavesTotal = ...
-    gap1ndexCeiling: DatatypeElephino = ...
-    gapRangeStart: Array1DElephino = dataclasses.field(init=False)
-    gapsWhere: Array1DLeavesTotal = dataclasses.field(init=False)
-    groupsOfFolds: DatatypeFoldsTotal = ...
-    indexDimension: DatatypeLeavesTotal = ...
-    indexLeaf: DatatypeLeavesTotal = ...
-    indexMiniGap: DatatypeElephino = ...
-    leaf1ndex: DatatypeElephino = ...
-    leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
-    leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
-    leafConnectee: DatatypeElephino = ...
-    taskIndex: DatatypeLeavesTotal = dataclasses.field(default=DatatypeLeavesTotal(0), metadata={'myType': DatatypeLeavesTotal})
-    def __post_init__(self) -> None: ...
-    def getFoldsTotal(self) -> None: ...
-
 def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str | None = None, concurrencyLimit: int = 1) -> ComputationState: ...

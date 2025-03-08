@@ -1,3 +1,4 @@
+from mapFolding.theSSOT import fileExtensionINSTALLING, myPackageNameIs, pathPackage
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from pathlib import Path
@@ -167,6 +168,18 @@ class Make:
 			nameDOTname = Make.itDOTname(nameDOTname, suffix)
 		return nameDOTname
 
+	@staticmethod
+	def astAlias(name: ast_Identifier, asname: ast_Identifier | None = None) -> ast.alias:
+		return ast.alias(name=name, asname=asname)
+
+	@staticmethod
+	def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None) -> ast.Import:
+		return ast.Import(names=[Make.astAlias(moduleName, asname)])
+
+	@staticmethod
+	def astImportFrom(moduleName: ast_Identifier, list_astAlias: list[ast.alias]) -> ast.ImportFrom:
+		return ast.ImportFrom(module=moduleName, names=list_astAlias, level=0)
+
 class Then:
 	@staticmethod
 	def insertThisAbove(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]:
@@ -236,7 +249,8 @@ def shatter_dataclassesDOTdataclass(dataclass: ast.ClassDef, instance_Identifier
 
 class LedgerOfImports:
 	def __init__(self, startWith: ast.AST | None = None) -> None:
-		self.dictionaryImportFrom: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
+		self.dictionaryImportFrom: dict[str, list[ast.alias]] = defaultdict(list)
+		# self.dictionaryImportFrom: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
 		self.listImport: list[str] = []
 
 		if startWith:
@@ -250,26 +264,24 @@ class LedgerOfImports:
 				self.listImport.append(alias.name)
 		else:
 			if astImport_.module is not None:
-				for alias in astImport_.names:
-					self.dictionaryImportFrom[astImport_.module].append((alias.name, alias.asname))
+				self.dictionaryImportFrom[astImport_.module].extend(astImport_.names)
+				# for alias in astImport_.names:
+				# 	self.dictionaryImportFrom[astImport_.module].append((alias.name, alias.asname))
 
 	def addImportStr(self, module: str) -> None:
 		self.listImport.append(module)
 
 	def addImportFromStr(self, module: str, name: str, asname: str | None = None) -> None:
-		self.dictionaryImportFrom[module].append((name, asname))
+		self.dictionaryImportFrom[module].append(Make.astAlias(name, asname))
 
 	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
 		listAstImportFrom: list[ast.ImportFrom] = []
-		for module, listOfNameTuples in sorted(self.dictionaryImportFrom.items()):
-			listAliases: list[ast.alias] = []
-			for name, asname in listOfNameTuples:
-				listAliases.append(ast.alias(name=name, asname=asname))
-			setAliases = set(listAliases)
-			listAliases = sorted(setAliases, key=lambda alias: alias.name)
-			listAstImportFrom.append(ast.ImportFrom(module=module, names=listAliases, level=0))
+		for module, list_astAlias in sorted(self.dictionaryImportFrom.items()):
+			setAliases = set(list_astAlias)
+			sortedAliases = sorted(setAliases, key=lambda alias: alias.name)
+			listAstImportFrom.append(Make.astImportFrom(module, sortedAliases))
 
-		listAstImport: list[ast.Import] = [ast.Import(names=[ast.alias(name=name, asname=None)]) for name in sorted(set(self.listImport))]
+		listAstImport: list[ast.Import] = [Make.astImport(name) for name in sorted(set(self.listImport))]
 		return listAstImportFrom + listAstImport
 
 	def update(self, *fromTracker: 'LedgerOfImports') -> None:
@@ -338,8 +350,35 @@ class IngredientsModule:
 	functions: list[ast.FunctionDef]
 	imports: LedgerOfImports
 	name: ast_Identifier
-	Z0Z_logicalPath: str
-	Z0Z_absoluteImport: ast.Import
-	Z0Z_absoluteImportFrom: ast.ImportFrom
-	Z0Z_pathFilename: Path
-	Z0Z_package: str # ast.Name?
+	Z0Z_logicalPath: ast_Identifier | list[ast_Identifier] | None = None # module names other than the module itself and the package name
+	packageName: ast_Identifier = myPackageNameIs
+	Z0Z_pathPackage: Path = pathPackage
+	fileExtension: str = fileExtensionINSTALLING
+
+	def _getLogicalPathParent(self) -> str:
+		listModules = [self.packageName]
+		if self.Z0Z_logicalPath:
+			listModules.extend(list(self.Z0Z_logicalPath))
+		return '.'.join(listModules)
+
+	def _getLogicalPathAbsolute(self) -> str:
+		"""Get the full import path as a string."""
+		return '.'.join([self._getLogicalPathParent(), self.name])
+
+	@property
+	def pathFilename(self) -> Path:
+		"""Dynamically calculate the file path based on current values."""
+		Z0Z_pathParts: list[Path | str] = [self.Z0Z_pathPackage]
+		if self.Z0Z_logicalPath:
+			Z0Z_pathParts.extend(list(self.Z0Z_logicalPath))
+		return Path(*Z0Z_pathParts, self.name + self.fileExtension)
+
+	@property
+	def absoluteImport(self) -> ast.Import:
+		"""Dynamically create an absolute import statement for this module."""
+		return Make.astImport(self._getLogicalPathAbsolute())
+
+	@property
+	def absoluteImportFrom(self) -> ast.ImportFrom:
+		"""Dynamically create an absolute import-from statement for this module."""
+		return Make.astImportFrom(self._getLogicalPathParent(), [Make.astAlias(self.name)])

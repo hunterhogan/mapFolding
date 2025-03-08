@@ -4,14 +4,9 @@ from mapFolding.theSSOT import (
 	Array1DFoldsTotal,
 	Array1DLeavesTotal,
 	Array3D,
-	DatatypeElephino,
-	DatatypeFoldsTotal,
-	DatatypeLeavesTotal,
+	ComputationState,
 	getDatatypeModule,
 	getNumpyDtypeDefault,
-	numpyElephino,
-	numpyFoldsTotal,
-	numpyLeavesTotal,
 )
 from collections.abc import Sequence
 from numba import get_num_threads, set_num_threads
@@ -20,7 +15,6 @@ from numpy.typing import DTypeLike
 from sys import maxsize as sysMaxsize
 from typing import Any
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
-import dataclasses
 import numpy
 
 def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
@@ -164,57 +158,6 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 	if taskDivisions > leavesTotal:
 		raise ValueError(f"Problem: `taskDivisions`, ({taskDivisions}), is greater than `leavesTotal`, ({leavesTotal}), which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`. They are derived from parameters that may or may not still be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from dubious-quality Python code.")
 	return taskDivisions
-
-@dataclasses.dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False, match_args=True, kw_only=False, slots=False, weakref_slot=False)
-class ComputationState:
-	mapShape: tuple[DatatypeLeavesTotal, ...]
-	leavesTotal: DatatypeLeavesTotal
-	taskDivisions: DatatypeLeavesTotal
-
-	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'description': 'A 3D array representing the connection graph of the map.'})
-	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(init=False)
-	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
-	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
-	foldGroups: Array1DFoldsTotal = dataclasses.field(init=False)
-	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
-	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
-	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
-	gapRangeStart: Array1DElephino = dataclasses.field(init=False)
-	gapsWhere: Array1DLeavesTotal = dataclasses.field(init=False)
-	groupsOfFolds: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
-	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
-	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
-	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
-	leaf1ndex: DatatypeElephino = DatatypeElephino(1)
-	leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
-	leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
-	leafConnectee: DatatypeElephino = DatatypeElephino(0)
-	taskIndex: DatatypeLeavesTotal = dataclasses.field(default=DatatypeLeavesTotal(0), metadata={'myType': DatatypeLeavesTotal})
-	# taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
-
-	def __post_init__(self):
-		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
-		self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
-		self.connectionGraph = makeConnectionGraph(self.mapShape, self.leavesTotal, numpyLeavesTotal)
-
-		# the dtype is defined above
-		self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), numpyFoldsTotal)
-		self.foldGroups[-1] = self.leavesTotal
-
-		leavesTotalAsInt = int(self.leavesTotal)
-		self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, numpyElephino)
-		self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
-		self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, numpyLeavesTotal)
-		self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
-		self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
-
-	def getFoldsTotal(self):
-		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
-
-	# factory? constructor?
-	# state.taskIndex = state.taskIndex.type(indexSherpa)
-	# self.fieldName = self.fieldName.fieldType(indexSherpa)
-	# state.taskIndex.toMyType(indexSherpa)
 
 def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str | None = None, concurrencyLimit: int = 1) -> ComputationState:
 	leavesTotal = getLeavesTotal(mapShape)
