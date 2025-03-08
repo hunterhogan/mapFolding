@@ -82,6 +82,7 @@ theAlgorithmSource: str = algorithmSourcePACKAGING
 theDatatypeModule: Final[str] = datatypeModulePACKAGING
 theDispatcherCallableName: str = dispatcherCallableNamePACKAGING
 theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
+Z0Z_logicalPathDispatcherSynthetic: str = '.'.join([myPackageNameIs, theModuleOfSyntheticModules, Z0Z_nameModuleDispatcherSynthetic])
 theDataclassIdentifier: str = dataclassIdentifierPACKAGING
 theDataclassInstance: str = dataclassInstancePACKAGING
 theFileExtension: str = fileExtensionINSTALLING

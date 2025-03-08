@@ -120,6 +120,22 @@ class ifThis:
 						and isinstance(node.value.slice, ast.Attribute)
 						)
 
+	@staticmethod
+	def isAnnotation_astName() -> Callable[[ast.AST], bool]:
+		return lambda node: (ifThis.isAnnAssign()(node) and isinstance(node.annotation, ast.Name))
+
+	@staticmethod
+	def isAnnotationAttribute() -> Callable[[ast.AST], bool]:
+		return lambda node: (isinstance(node, ast.AnnAssign) and isinstance(node.annotation, ast.Attribute))
+
+	@staticmethod
+	def isAnyAnnotation() -> Callable[[ast.AST], bool]:
+		return ifThis.anyOf(ifThis.isAnnotation(), ifThis.isAnnotationAttribute())
+
+	@staticmethod
+	def findAnnotationNames() -> Callable[[ast.AST], bool]:
+		return lambda node: isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)
+
 class Make:
 	@staticmethod
 	def copy_astCallKeywords(astCall: ast.Call) -> dict[str, Any]:
@@ -180,6 +196,13 @@ class Make:
 		return ast.ImportFrom(module=moduleName, names=list_astAlias, level=0)
 
 	@staticmethod
+	def astKeyword(keywordArgument: ast_Identifier, value: ast.expr
+					, **kwargs: Any
+					#, **kwargs: **ast._Attributes[int | None],
+					) -> ast.keyword:
+		return ast.keyword(arg=keywordArgument, value=value, **kwargs)
+
+	@staticmethod
 	def astModule(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore] = []) -> ast.Module:
 		return ast.Module(body=body, type_ignores=type_ignores)
 
@@ -229,6 +252,10 @@ class Then:
 	@staticmethod
 	def appendTo(primitiveList: list[Any]) -> Callable[[ast.AST], None]:
 		return lambda node: primitiveList.append(cast(ast.stmt, node))
+
+	@staticmethod
+	def Z0Z_appendAnnotationNameTo(primitiveList: list[Any]) -> Callable[[ast.AST], None]:
+		return lambda node: primitiveList.append(node.annotation.id)
 
 	@staticmethod
 	def replaceWith(astStatement: ast.AST) -> Callable[[ast.AST], ast.stmt]:

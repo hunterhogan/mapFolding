@@ -35,6 +35,7 @@ theAlgorithmSource: str
 theDatatypeModule: Final[str]
 theDispatcherCallableName: str
 theModuleOfSyntheticModules: Final[str]
+Z0Z_logicalPathDispatcherSynthetic: str
 theDataclassIdentifier: str
 theDataclassInstance: str
 theFileExtension: str
@@ -55,22 +56,22 @@ class ComputationState:
     leavesTotal: DatatypeLeavesTotal
     taskDivisions: DatatypeLeavesTotal
     connectionGraph: Array3D = dataclasses.field(init=False, metadata={'description': 'A 3D array representing the connection graph of the map.'})
-    countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(init=False)
     dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
-    dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
-    foldGroups: Array1DFoldsTotal = dataclasses.field(init=False)
+    countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None)
+    dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None)
+    gapRangeStart: Array1DElephino = dataclasses.field(default=None)
+    gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None)
+    leafAbove: Array1DLeavesTotal = dataclasses.field(default=None)
+    leafBelow: Array1DLeavesTotal = dataclasses.field(default=None)
+    foldGroups: Array1DFoldsTotal = dataclasses.field(default=None)
     foldsTotal: DatatypeFoldsTotal = ...
     gap1ndex: DatatypeLeavesTotal = ...
     gap1ndexCeiling: DatatypeElephino = ...
-    gapRangeStart: Array1DElephino = dataclasses.field(init=False)
-    gapsWhere: Array1DLeavesTotal = dataclasses.field(init=False)
     groupsOfFolds: DatatypeFoldsTotal = ...
     indexDimension: DatatypeLeavesTotal = ...
     indexLeaf: DatatypeLeavesTotal = ...
     indexMiniGap: DatatypeElephino = ...
     leaf1ndex: DatatypeElephino = ...
-    leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
-    leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
     leafConnectee: DatatypeElephino = ...
     taskIndex: DatatypeLeavesTotal = dataclasses.field(default=DatatypeLeavesTotal(0), metadata={'myType': DatatypeLeavesTotal})
     def __post_init__(self) -> None: ...
