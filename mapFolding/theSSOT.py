@@ -3,6 +3,7 @@ from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from numpy import dtype, ndarray, int64 as numpy_int64, int16 as numpy_int16
+from numpy.typing import DTypeLike
 from pathlib import Path
 from sys import modules as sysModules
 from types import ModuleType
@@ -25,8 +26,9 @@ else:
 
 algorithmSourcePACKAGING: str = 'theDao'
 datatypeModulePACKAGING: Final[str] = 'numpy'
-dispatcherCallableNamePACKAGING = "doTheNeedful"
-moduleOfSyntheticModulesPACKAGING: Final[str] = "syntheticModules"
+dispatcherCallableNamePACKAGING:str = 'doTheNeedful'
+moduleOfSyntheticModulesPACKAGING: Final[str] = 'syntheticModules'
+dataclassIdentifierPACKAGING: str = 'state'
 
 try:
 	myPackageNameIsPACKAGING: str = tomli.load(Path("../pyproject.toml").open('rb'))["project"]["name"]
@@ -72,6 +74,7 @@ def getAlgorithmSource() -> ModuleType:
 	return moduleImported
 
 def getAlgorithmDispatcher():
+	# How did you know to import `ComputationState`?
 	from mapFolding.beDRY import ComputationState
 	moduleImported: ModuleType = getAlgorithmSource()
 	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
@@ -94,7 +97,7 @@ def getPathJobRootDEFAULT() -> Path:
 
 additional_importsHARDCODED.append(myPackageNameIs)
 
-# TODO this is stupid: the values will get out of line, but I can't figure out how tyo keep them inline or check they are inline without so much code that the verification code is likely to introduce problems
+# TODO this is stupid: the values will get out of line, but I can't figure out how to keep them inline or check they are inline without so much code that the verification code is likely to introduce problems
 # DatatypeLeavesTotal: TypeAlias = c_uint8
 # numpyLeavesTotal: TypeAlias = numpy_uint8
 # DatatypeElephino: TypeAlias = c_int16
@@ -118,7 +121,7 @@ def getDatatypeModule() -> str:
 		_datatypeModule = datatypeModulePACKAGING
 	return _datatypeModule
 
-def getNumpyDtypeDefault():
+def getNumpyDtypeDefault() -> DTypeLike:
 	return numpyFoldsTotal
 # =============================================================================
 # More truth
@@ -144,8 +147,7 @@ def Z0Z_setDecoratorCallable(decoratorName: str) -> str:
 	_decoratorCallable = decoratorName
 	return _decoratorCallable
 
-class FREAKOUT(Exception):
-	pass
+class FREAKOUT(Exception): pass
 
 class ParametersNumba(TypedDict):
 	_dbg_extend_lifetimes: NotRequired[bool]

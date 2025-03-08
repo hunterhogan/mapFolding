@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from mapFolding.beDRY import getLeavesTotal, setCPUlimit, validateListDimensions
-from tests.conftest import standardizedEqualTo
+from tests.conftest import standardizedEqualToCallableReturn
 from typing import Any, Literal
 from Z0Z_tools import intInnit
 from Z0Z_tools.pytestForYourUse import PytestFor_intInnit, PytestFor_oopsieKwargsie
@@ -45,17 +45,17 @@ def test_listDimensionsAsParameter(listDimensions: None | list[str] | list[int] 
                                expected_intInnit: type[ValueError] | list[int] | type[TypeError],
                                expected_validateListDimensions: type[ValueError] | type[NotImplementedError] | tuple[int, ...] | type[TypeError]) -> None:
     """Test both validateListDimensions and getLeavesTotal with the same inputs."""
-    standardizedEqualTo(expected_intInnit, intInnit, listDimensions)
-    standardizedEqualTo(expected_validateListDimensions, validateListDimensions, listDimensions)
+    standardizedEqualToCallableReturn(expected_intInnit, intInnit, listDimensions)
+    standardizedEqualToCallableReturn(expected_validateListDimensions, validateListDimensions, listDimensions)
 
 def test_getLeavesTotal_edge_cases() -> None:
     """Test edge cases for getLeavesTotal."""
     # Order independence
-    standardizedEqualTo(getLeavesTotal((2, 3, 4)), getLeavesTotal, (4, 2, 3))
+    standardizedEqualToCallableReturn(getLeavesTotal((2, 3, 4)), getLeavesTotal, (4, 2, 3))
 
     # Input preservation
     mapShape = (2, 3)
-    standardizedEqualTo(6, getLeavesTotal, mapShape)
+    standardizedEqualToCallableReturn(6, getLeavesTotal, mapShape)
     # Remove the lambda entirely for a simpler approach
     assert mapShape == (2, 3), "Input tuple was modified"
 
@@ -79,4 +79,4 @@ def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> N
     (1, 1),
 ])
 def test_setCPUlimit(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | Literal[0] | Literal[1], expectedLimit: Any | int) -> None:
-    standardizedEqualTo(expectedLimit, setCPUlimit, CPUlimit)
+    standardizedEqualToCallableReturn(expectedLimit, setCPUlimit, CPUlimit)

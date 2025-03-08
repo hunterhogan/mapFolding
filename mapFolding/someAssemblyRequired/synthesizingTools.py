@@ -6,6 +6,9 @@ from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import dataclasses
 
+# TODO learn whether libcst can help
+import libcst
+
 ast_Identifier: TypeAlias = str
 
 # NOTE: this is weak
@@ -104,7 +107,7 @@ class ifThis:
 		return lambda node: any(pred(node) for pred in predicates)
 
 	@staticmethod
-	def is_dataclassesDOTField() -> Callable[[ast.AST], bool]: # type: ignore
+	def is_dataclassesDOTField():
 		# dataclasses.Field
 		pass
 
@@ -118,7 +121,7 @@ class ifThis:
 						and  isinstance(node.value.slice, ast.Attribute)
 						)
 
-class Then:
+class Make:
 	@staticmethod
 	def copy_astCallKeywords(astCall: ast.Call) -> dict[str, Any]:
 		"""Extract keyword parameters from a decorator AST node."""
@@ -129,30 +132,42 @@ class Then:
 		return dictionaryKeywords
 
 	@staticmethod
-	def make_astCall(caller: ast.Name | ast.Attribute, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
+	def astCall(caller: ast.Name | ast.Attribute, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
 		return ast.Call(func=caller, args=list(args) if args else [], keywords=list(list_astKeywords) if list_astKeywords else [])
 
 	@staticmethod
-	def make_astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None) -> ast.AnnAssign:
+	def astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None) -> ast.AnnAssign:
 		return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)))
 
 	@staticmethod
-	def makeName(identifier: ast_Identifier) -> ast.Name:
+	def astArgumentsSpecification(posonlyargs: list[ast.arg]=[], args: list[ast.arg]=[], vararg: ast.arg|None=None, kwonlyargs: list[ast.arg]=[], kw_defaults: list[ast.expr|None]=[None], kwarg: ast.arg|None=None, defaults: list[ast.expr]=[]) -> ast.arguments:
+		return ast.arguments(posonlyargs=posonlyargs, args=args, vararg=vararg, kwonlyargs=kwonlyargs, kw_defaults=kw_defaults, kwarg=kwarg, defaults=defaults)
+
+	@staticmethod
+	def astFunctionDef(name: ast_Identifier, args: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, type_comment: str|None=None, type_params: list[ast.type_param]=[]
+		, **kwargs: Any
+		#, **kwargs: **ast._Attributes[int | None]=[],
+		) -> ast.FunctionDef:
+		return ast.FunctionDef(name=name, args=args, body=body, decorator_list=decorator_list, returns=returns, type_comment=type_comment, type_params=type_params, **kwargs)
+
+	@staticmethod
+	def astName(identifier: ast_Identifier) -> ast.Name:
 		return ast.Name(id=identifier, ctx=ast.Load())
 
 	@staticmethod
-	def addDOTname(nameChain: ast.Name | ast.Attribute, dotName: str) -> ast.Attribute:
+	def itDOTname(nameChain: ast.Name | ast.Attribute, dotName: str) -> ast.Attribute:
 		return ast.Attribute(value=nameChain, attr=dotName, ctx=ast.Load())
 
 	@staticmethod
-	def makeNameDOTname(identifier: ast_Identifier, *dotName: str) -> ast.Name | ast.Attribute:
-		nameDOTname: ast.Name | ast.Attribute = Then.makeName(identifier)
+	def nameDOTname(identifier: ast_Identifier, *dotName: str) -> ast.Name | ast.Attribute:
+		nameDOTname: ast.Name | ast.Attribute = Make.astName(identifier)
 		if not dotName:
 			return nameDOTname
 		for suffix in dotName:
-			nameDOTname = Then.addDOTname(nameDOTname, suffix)
+			nameDOTname = Make.itDOTname(nameDOTname, suffix)
 		return nameDOTname
 
+class Then:
 	@staticmethod
 	def insertThisAbove(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]:
 		return lambda aboveMe: [cast(ast.stmt, astStatement),
@@ -176,12 +191,12 @@ class Then:
 		return None
 
 	@staticmethod
-	def appendZ0Z_nameDOTnameTo(instance_Identifier: ast_Identifier, primitiveList: list[Any]) -> Callable[[ast.AST], None]:
+	def appendAnnAssignOfNameDOTnameTo(instance_Identifier: ast_Identifier, primitiveList: list[Any]) -> Callable[[ast.AST], None]:
 		return lambda node: (
 			Then.appendTo(primitiveList)
-			(Then.make_astAnnAssign(node.target # type: ignore
+			(Make.astAnnAssign(node.target # type: ignore
 							, node.annotation # type: ignore
-							, Then.makeNameDOTname(instance_Identifier
+							, Make.nameDOTname(instance_Identifier
 													, node.target.id)))) # type: ignore
 
 class NodeReplacer(ast.NodeTransformer):
@@ -215,7 +230,7 @@ def shatter_dataclassesDOTdataclass(dataclass: ast.ClassDef, instance_Identifier
 	listAnnAssign: list[ast.AnnAssign] = []
 
 	NodeReplacer(ifThis.isAnnAssign()
-				, Then.appendZ0Z_nameDOTnameTo(instance_Identifier, listAnnAssign)).visit(dataclass)
+				, Then.appendAnnAssignOfNameDOTnameTo(instance_Identifier, listAnnAssign)).visit(dataclass)
 
 	return listAnnAssign
 
@@ -228,10 +243,12 @@ class LedgerOfImports:
 			self.walkThis(startWith)
 
 	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
+		if not isinstance(astImport_, (ast.Import, ast.ImportFrom)): # pyright: ignore[reportUnnecessaryIsInstance]
+			raise ValueError(f"Expected ast.Import or ast.ImportFrom, got {type(astImport_)}")
 		if isinstance(astImport_, ast.Import):
 			for alias in astImport_.names:
 				self.listImport.append(alias.name)
-		elif isinstance(astImport_, ast.ImportFrom): # type: ignore
+		else:
 			if astImport_.module is not None:
 				for alias in astImport_.names:
 					self.dictionaryImportFrom[astImport_.module].append((alias.name, alias.asname))
@@ -311,11 +328,13 @@ class FunctionInliner(ast.NodeTransformer):
 
 @dataclasses.dataclass
 class IngredientsFunction:
-	FunctionDef: ast.FunctionDef 
+	"""Everything necessary to integrate a function into a module should be here."""
+	FunctionDef: ast.FunctionDef
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 
 @dataclasses.dataclass
 class IngredientsModule:
+	"""Everything necessary to create a module, including the package context, should be here."""
 	functions: list[ast.FunctionDef]
 	imports: LedgerOfImports
 	name: ast_Identifier

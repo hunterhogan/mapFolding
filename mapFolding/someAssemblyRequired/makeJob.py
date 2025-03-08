@@ -7,7 +7,11 @@ from types import ModuleType
 from typing import Any, Literal, overload
 import pickle
 
-def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Any):
+@overload
+def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...
+@overload
+def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[False], **keywordArguments: Any) -> ComputationState: ...
+def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Any) -> ComputationState | Path:
 	"""
 	Creates a computation state job for map folding calculations and optionally saves it to disk.
 
@@ -27,6 +31,7 @@ def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keyw
 	stateUniversal = outfitCountFolds(mapShape, **keywordArguments)
 
 	moduleSource: ModuleType = getAlgorithmSource()
+	# TODO `countInitialize` is hardcoded
 	stateUniversal: ComputationState = moduleSource.countInitialize(stateUniversal)
 
 	if not writeJob:

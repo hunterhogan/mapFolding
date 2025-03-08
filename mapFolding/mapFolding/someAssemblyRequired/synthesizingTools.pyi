@@ -30,9 +30,11 @@ class ifThis:
     @staticmethod
     def CallDoesNotCallItself(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]: ...
     @staticmethod
-    def RecklessCallAsAttributeIs(callableName: str) -> Callable[[ast.AST], bool]: ...
+    def RecklessCallAsAttributeIs(callableName: str) -> Callable[[ast.AST], bool]:
+        """Warning: You might match more than you want."""
     @staticmethod
-    def RecklessCallReallyIs(callableName: str) -> Callable[[ast.AST], bool]: ...
+    def RecklessCallReallyIs(callableName: str) -> Callable[[ast.AST], bool]:
+        """Warning: You might match more than you want."""
     @staticmethod
     def AssignTo(identifier: str) -> Callable[[ast.AST], bool]: ...
     @staticmethod
@@ -46,23 +48,30 @@ class ifThis:
     @staticmethod
     def anyOf(*predicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]: ...
     @staticmethod
-    def is_dataclassesDOTField() -> Callable[[ast.AST], bool]: ...
+    def is_dataclassesDOTField() -> None: ...
     @staticmethod
     def isUnpackingAnArray(identifier: str) -> Callable[[ast.AST], bool]: ...
 
+class Make:
+    @staticmethod
+    def copy_astCallKeywords(astCall: ast.Call) -> dict[str, Any]:
+        """Extract keyword parameters from a decorator AST node."""
+    @staticmethod
+    def astCall(caller: ast.Name | ast.Attribute, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call: ...
+    @staticmethod
+    def astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None) -> ast.AnnAssign: ...
+    @staticmethod
+    def astArgumentsSpecification(posonlyargs: list[ast.arg] = [], args: list[ast.arg] = [], vararg: ast.arg | None = None, kwonlyargs: list[ast.arg] = [], kw_defaults: list[ast.expr | None] = [None], kwarg: ast.arg | None = None, defaults: list[ast.expr] = []) -> ast.arguments: ...
+    @staticmethod
+    def astFunctionDef(name: ast_Identifier, args: ast.arguments = ..., body: list[ast.stmt] = [], decorator_list: list[ast.expr] = [], returns: ast.expr | None = None, type_comment: str | None = None, type_params: list[ast.type_param] = [], **kwargs: Any) -> ast.FunctionDef: ...
+    @staticmethod
+    def astName(identifier: ast_Identifier) -> ast.Name: ...
+    @staticmethod
+    def itDOTname(nameChain: ast.Name | ast.Attribute, dotName: str) -> ast.Attribute: ...
+    @staticmethod
+    def nameDOTname(identifier: ast_Identifier, *dotName: str) -> ast.Name | ast.Attribute: ...
+
 class Then:
-    @staticmethod
-    def copy_astCallKeywords(astCall: ast.Call) -> dict[str, Any]: ...
-    @staticmethod
-    def make_astCall(caller: ast.Name | ast.Attribute, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call: ...
-    @staticmethod
-    def make_astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None) -> ast.AnnAssign: ...
-    @staticmethod
-    def makeName(identifier: ast_Identifier) -> ast.Name: ...
-    @staticmethod
-    def addDOTname(nameChain: ast.Name | ast.Attribute, dotName: str) -> ast.Attribute: ...
-    @staticmethod
-    def makeNameDOTname(identifier: ast_Identifier, *dotName: str) -> ast.Name | ast.Attribute: ...
     @staticmethod
     def insertThisAbove(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]: ...
     @staticmethod
@@ -74,9 +83,23 @@ class Then:
     @staticmethod
     def removeThis(astNode: ast.AST) -> None: ...
     @staticmethod
-    def appendZ0Z_nameDOTnameTo(instance_Identifier: ast_Identifier, primitiveList: list[Any]) -> Callable[[ast.AST], None]: ...
+    def appendAnnAssignOfNameDOTnameTo(instance_Identifier: ast_Identifier, primitiveList: list[Any]) -> Callable[[ast.AST], None]: ...
 
 class NodeReplacer(ast.NodeTransformer):
+    """
+\tA node transformer that replaces or removes AST nodes based on a condition.
+\tThis transformer traverses an AST and for each node checks a predicate. If the predicate
+\treturns True, the transformer uses the replacement builder to obtain a new node. Returning
+\tNone from the replacement builder indicates that the node should be removed.
+
+\tAttributes:
+\t\tfindMe: A function that finds all locations that match a one or more conditions.
+\t\tdoThis: A function that does work at each location, such as make a new node, collect information or delete the node.
+
+\tMethods:
+\t\tvisit(node: ast.AST) -> Optional[ast.AST]:
+\t\t\tVisits each node in the AST, replacing or removing it based on the predicate.
+\t"""
     findMe: Incomplete
     doThis: Incomplete
     def __init__(self, findMe: Callable[[ast.AST], bool], doThis: Callable[[ast.AST], ast.AST | Sequence[ast.AST] | None]) -> None: ...
@@ -92,7 +115,13 @@ class LedgerOfImports:
     def addImportStr(self, module: str) -> None: ...
     def addImportFromStr(self, module: str, name: str, asname: str | None = None) -> None: ...
     def makeListAst(self) -> list[ast.ImportFrom | ast.Import]: ...
-    def update(self, *fromTracker: LedgerOfImports) -> None: ...
+    def update(self, *fromTracker: LedgerOfImports) -> None:
+        """
+\t\tUpdate this tracker with imports from one or more other trackers.
+
+\t\tParameters:
+\t\t\t*fromTracker: One or more UniversalImportTracker objects to merge from.
+\t\t"""
     def walkThis(self, walkThis: ast.AST) -> None: ...
 
 class FunctionInliner(ast.NodeTransformer):
@@ -104,11 +133,13 @@ class FunctionInliner(ast.NodeTransformer):
 
 @dataclasses.dataclass
 class IngredientsFunction:
+    """Everything necessary to integrate a function into a module should be here."""
     FunctionDef: ast.FunctionDef
     imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 
 @dataclasses.dataclass
 class IngredientsModule:
+    """Everything necessary to create a module, including the package context, should be here."""
     functions: list[ast.FunctionDef]
     imports: LedgerOfImports
     name: ast_Identifier

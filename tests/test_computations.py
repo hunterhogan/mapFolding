@@ -3,21 +3,21 @@ from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.noHomeYet import getFoldsTotalKnown
 from mapFolding.oeis import settingsOEIS, oeisIDfor_n
 # from mapFolding.someAssemblyRequired import writeJobNumba
-from tests.conftest import standardizedEqualTo, registrarRecordsTmpObject
+from tests.conftest import standardizedEqualToCallableReturn, registrarRecordsTmpObject
 import importlib.util
 import pytest
 from pathlib import Path
 from types import ModuleType
 
 def test_algorithmSourceParallel(listDimensionsTestParallelization, useAlgorithmSourceDispatcher: None) -> None:
-    standardizedEqualTo(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
+    standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
 
 def test_algorithmSourceSequential(listDimensionsTestCountFolds, useAlgorithmSourceDispatcher: None) -> None:
-    standardizedEqualTo(getFoldsTotalKnown(tuple(listDimensionsTestCountFolds)), countFolds, listDimensionsTestCountFolds)
+    standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestCountFolds)), countFolds, listDimensionsTestCountFolds)
 
 def test_aOFn_calculate_value(oeisID: str) -> None:
     for n in settingsOEIS[oeisID]['valuesTestValidation']:
-        standardizedEqualTo(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
+        standardizedEqualToCallableReturn(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
 # @pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
 # def test_writeJobNumba(listDimensionsTestCountFolds: list[int], pathFilenameTmpTesting: Path) -> None:

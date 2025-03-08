@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from mapFolding.theSSOT import ParametersNumba, parametersNumbaDEFAULT, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable
-from mapFolding.someAssemblyRequired import ifThis, LedgerOfImports, Then
+from mapFolding.someAssemblyRequired import ifThis, LedgerOfImports, Make, Then
 from typing import Any, cast
 import ast
 
@@ -70,7 +70,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Le
 		if thisIsAnyNumbaJitDecorator(decorator):
 			decorator = cast(ast.Call, decorator)
 			if parametersNumba is None:
-				parametersNumbaSherpa: dict[str, Any] = Then.copy_astCallKeywords(decorator)
+				parametersNumbaSherpa: dict[str, Any] = Make.copy_astCallKeywords(decorator)
 				if (_HunterIsSureThereAreBetterWaysToDoThis := True):
 					if parametersNumbaSherpa:
 						parametersNumba = cast(ParametersNumba, parametersNumbaSherpa)
@@ -84,7 +84,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Le
 	decoratorModule: str = Z0Z_getDatatypeModuleScalar()
 	decoratorCallable: str = Z0Z_getDecoratorCallable()
 	allImports.addImportFromStr(decoratorModule, decoratorCallable)
-	astDecorator: ast.Call = Then.make_astCall(Then.makeName(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
+	astDecorator: ast.Call = Make.astCall(Make.astName(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
 
 	FunctionDefTarget.decorator_list = [astDecorator]
 	return FunctionDefTarget, allImports

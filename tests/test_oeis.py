@@ -1,7 +1,7 @@
 from contextlib import redirect_stdout
 from mapFolding.oeis import oeisIDfor_n, getOEISids, clearOEIScache, getOEISidValues, OEIS_for_n, oeisIDsImplemented, settingsOEIS, validateOEISid
 from pathlib import Path
-from tests.conftest import standardizedEqualTo, standardizedSystemExit
+from tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
 from typing import Any, NoReturn
 from urllib.error import URLError
 import io
@@ -13,18 +13,18 @@ import urllib.request
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID: str) -> None:
-	standardizedEqualTo(KeyError, validateOEISid, badID)
+	standardizedEqualToCallableReturn(KeyError, validateOEISid, badID)
 
 def test__validateOEISid_partially_valid(oeisID_1random: str) -> None:
-	standardizedEqualTo(KeyError, validateOEISid, f"{oeisID_1random}extra")
+	standardizedEqualToCallableReturn(KeyError, validateOEISid, f"{oeisID_1random}extra")
 
 def test__validateOEISid_valid_id(oeisID: str) -> None:
-	standardizedEqualTo(oeisID, validateOEISid, oeisID)
+	standardizedEqualToCallableReturn(oeisID, validateOEISid, oeisID)
 
 def test__validateOEISid_valid_id_case_insensitive(oeisID: str) -> None:
-	standardizedEqualTo(oeisID.upper(), validateOEISid, oeisID.lower())
-	standardizedEqualTo(oeisID.upper(), validateOEISid, oeisID.upper())
-	standardizedEqualTo(oeisID.upper(), validateOEISid, oeisID.swapcase())
+	standardizedEqualToCallableReturn(oeisID.upper(), validateOEISid, oeisID.lower())
+	standardizedEqualToCallableReturn(oeisID.upper(), validateOEISid, oeisID.upper())
+	standardizedEqualToCallableReturn(oeisID.upper(), validateOEISid, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [
 	(-random.randint(1, 100), "randomNegative"),
@@ -35,10 +35,10 @@ badValues, badValuesIDs = zip(*parameters_test_aOFn_invalid_n)
 @pytest.mark.parametrize("badN", badValues, ids=badValuesIDs)
 def test_aOFn_invalid_n(oeisID_1random: str, badN: Any) -> None:
 	"""Check that negative or non-integer n raises ValueError."""
-	standardizedEqualTo(ValueError, oeisIDfor_n, oeisID_1random, badN)
+	standardizedEqualToCallableReturn(ValueError, oeisIDfor_n, oeisID_1random, badN)
 
 def test_aOFn_zeroDim_A001418() -> None:
-	standardizedEqualTo(ArithmeticError, oeisIDfor_n, 'A001418', 0)
+	standardizedEqualToCallableReturn(ArithmeticError, oeisIDfor_n, 'A001418', 0)
 
 # ===== OEIS Cache Tests =====
 @pytest.mark.parametrize("cacheExists", [True, False])
@@ -64,7 +64,7 @@ def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: Path) ->
 		raise URLError("Network error")
 
 	monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
-	standardizedEqualTo(URLError, getOEISidValues, next(iter(settingsOEIS)))
+	standardizedEqualToCallableReturn(URLError, getOEISidValues, next(iter(settingsOEIS)))
 
 # ===== Command Line Interface Tests =====
 def testHelpText() -> None:
@@ -100,7 +100,7 @@ def testHelpText() -> None:
 		outputStream = io.StringIO()
 		with redirect_stdout(outputStream):
 			OEIS_for_n()
-		standardizedEqualTo(expectedValue, lambda: int(outputStream.getvalue().strip().split()[0]))
+		standardizedEqualToCallableReturn(expectedValue, lambda: int(outputStream.getvalue().strip().split()[0]))
 
 def testCLI_InvalidInputs() -> None:
 	"""Test CLI error handling."""

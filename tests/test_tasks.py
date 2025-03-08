@@ -2,7 +2,7 @@ from typing import Literal
 from mapFolding.basecamp import countFolds
 from mapFolding.beDRY import getTaskDivisions, setCPUlimit, validateListDimensions, getLeavesTotal
 from mapFolding.noHomeYet import getFoldsTotalKnown
-from tests.conftest import standardizedEqualTo
+from tests.conftest import standardizedEqualToCallableReturn
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit
 from collections.abc import Callable
 import pytest
@@ -11,10 +11,10 @@ import pytest
 # Or, probably smarter: limit the number of cores, then run a test with C+1.
 
 def test_countFoldsComputationDivisionsInvalid(mapShapeTestFunctionality: tuple[int, ...]) -> None:
-	standardizedEqualTo(ValueError, countFolds, mapShapeTestFunctionality, None, {"wrong": "value"})
+	standardizedEqualToCallableReturn(ValueError, countFolds, mapShapeTestFunctionality, None, {"wrong": "value"})
 
 def test_countFoldsComputationDivisionsMaximum(listDimensionsTestParallelization) -> None:
-	standardizedEqualTo(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_defineConcurrencyLimit())
 def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
@@ -22,7 +22,7 @@ def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], No
 
 @pytest.mark.parametrize("CPUlimitParameter", [{"invalid": True}, ["weird"]])
 def test_countFolds_cpuLimitOopsie(mapShapeTestFunctionality: tuple[int, ...], CPUlimitParameter: dict[str, bool] | list[str]) -> None:
-	standardizedEqualTo(ValueError, countFolds, mapShapeTestFunctionality, None, 'cpu', CPUlimitParameter)
+	standardizedEqualToCallableReturn(ValueError, countFolds, mapShapeTestFunctionality, None, 'cpu', CPUlimitParameter)
 
 @pytest.mark.parametrize("computationDivisions, concurrencyLimit, listDimensions, expectedTaskDivisions", [
 	(None, 4, [9, 11], 0),
@@ -37,7 +37,7 @@ def test_getTaskDivisions(computationDivisions: None | list[str] | Literal['maxi
 							expectedTaskDivisions: type[ValueError] | Literal[0] | Literal[77] | Literal[4]) -> None:
 	mapShape = validateListDimensions(listDimensions)
 	leavesTotal = getLeavesTotal(mapShape)
-	standardizedEqualTo(expectedTaskDivisions, getTaskDivisions, computationDivisions, concurrencyLimit, leavesTotal)
+	standardizedEqualToCallableReturn(expectedTaskDivisions, getTaskDivisions, computationDivisions, concurrencyLimit, leavesTotal)
 
 @pytest.mark.parametrize("expected,parameter", [
 	(2, "2"),  # string
@@ -48,4 +48,4 @@ def test_getTaskDivisions(computationDivisions: None | list[str] | Literal['maxi
 ])
 def test_setCPUlimitMalformedParameter(expected: type[ValueError] | Literal[2], parameter: list[int] | tuple[int] | set[int] | dict[str, int] | Literal['2']) -> None:
 	"""Test that invalid CPUlimit types are properly handled."""
-	standardizedEqualTo(expected, setCPUlimit, parameter)
+	standardizedEqualToCallableReturn(expected, setCPUlimit, parameter)

@@ -1,6 +1,7 @@
 from _typeshed import Incomplete
 from collections.abc import Callable
 from numba.core.compiler import CompilerBase as numbaCompilerBase
+from numpy.typing import DTypeLike as DTypeLike
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Final, NamedTuple, TypeAlias, TypedDict
@@ -10,6 +11,7 @@ algorithmSourcePACKAGING: str
 datatypeModulePACKAGING: Final[str]
 dispatcherCallableNamePACKAGING: str
 moduleOfSyntheticModulesPACKAGING: Final[str]
+dataclassIdentifierPACKAGING: str
 myPackageNameIsPACKAGING: str
 
 def getPathPackageINSTALLING() -> Path: ...
@@ -44,7 +46,7 @@ Array1DFoldsTotal: TypeAlias
 _datatypeModule: str
 
 def getDatatypeModule() -> str: ...
-def getNumpyDtypeDefault(): ...
+def getNumpyDtypeDefault() -> DTypeLike: ...
 def getPathSyntheticModules() -> Path: ...
 
 _datatypeModuleScalar: str

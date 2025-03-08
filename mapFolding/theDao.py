@@ -201,10 +201,6 @@ def countSequential(state: ComputationState) -> ComputationState:
 	return state
 
 def doTheNeedful(computationStateInitialized: ComputationState) -> ComputationState:
-	import dataclasses
-	# print(computationStateInitialized.__dict__.keys())
-	# for zField in dataclasses.fields(computationStateInitialized):
-	# 	print(zField.__repr__())
 	computationStateInitialized = countInitialize(computationStateInitialized)
 	if computationStateInitialized.taskDivisions > 0:
 		return countParallel(computationStateInitialized)

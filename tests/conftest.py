@@ -179,7 +179,7 @@ def oeisID_1random() -> str:
 	return random.choice(oeisIDsImplemented)
 
 @pytest.fixture
-def useThisDispatcher()	:
+def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 	"""A fixture providing a context manager for temporarily replacing the dispatcher.
 
 	Returns
@@ -238,8 +238,8 @@ def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments
 			f"Expected: {expected}\n"
 			f"Got: {actual}")
 
-def standardizedEqualTo(expected: Any, functionTarget: Callable[..., Any], *arguments: Any) -> None:
-	"""Template for tests expecting an error."""
+def standardizedEqualToCallableReturn(expected: Any, functionTarget: Callable[..., Any], *arguments: Any) -> None:
+	"""Use with callables that produce a return or an error."""
 	if type(expected) is type[Exception]:
 		messageExpected = expected.__name__
 	else:
