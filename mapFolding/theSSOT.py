@@ -27,9 +27,11 @@ else:
 
 algorithmSourcePACKAGING: str = 'theDao'
 datatypeModulePACKAGING: Final[str] = 'numpy'
-dispatcherCallableNamePACKAGING:str = 'doTheNeedful'
+dispatcherCallableNamePACKAGING: str = 'doTheNeedful'
 moduleOfSyntheticModulesPACKAGING: Final[str] = 'syntheticModules'
-dataclassIdentifierPACKAGING: str = 'state'
+
+dataclassIdentifierPACKAGING: str = 'ComputationState'
+dataclassInstancePACKAGING: str = 'state'
 
 try:
 	myPackageNameIsPACKAGING: str = tomli.load(Path("../pyproject.toml").open('rb'))["project"]["name"]
@@ -61,11 +63,13 @@ additional_importsHARDCODED: list[str] = ['numba']
 
 Z0Z_formatNameModuleSynthetic = "numba_{callableTarget}"
 Z0Z_formatFilenameModuleSynthetic = Z0Z_formatNameModuleSynthetic + fileExtensionINSTALLING
-Z0Z_nameModuleDispatcherSynthetic: str = Z0Z_formatNameModuleSynthetic.format(callableTarget=dispatcherCallableNamePACKAGING)
+Z0Z_dispatcherCallableName = dispatcherCallableNamePACKAGING
+Z0Z_nameModuleDispatcherSynthetic: str = Z0Z_formatNameModuleSynthetic.format(callableTarget=Z0Z_dispatcherCallableName)
 Z0Z_filenameModuleWrite = 'numbaCount' + fileExtensionINSTALLING
 Z0Z_filenameWriteElseCallableTarget: str = 'count'
-Z0Z_dispatcherOfDataFilename = 'dataNamespaceFlattened' + fileExtensionINSTALLING
-Z0Z_dispatcherOfDataCallable = 'flattenData'
+# the data converter and the dispatcher could be in the same module.
+Z0Z_DataConverterFilename = 'dataNamespaceFlattened' + fileExtensionINSTALLING
+Z0Z_DataConverterCallable = 'flattenData'
 concurrencyPackage: str = 'numba'
 
 # =============================================================================
@@ -73,6 +77,14 @@ concurrencyPackage: str = 'numba'
 
 myPackageNameIs: Final[str] = myPackageNameIsPACKAGING
 pathPackage: Path = getPathPackageINSTALLING()
+
+theAlgorithmSource: str = algorithmSourcePACKAGING
+theDatatypeModule: Final[str] = datatypeModulePACKAGING
+theDispatcherCallableName: str = dispatcherCallableNamePACKAGING
+theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
+theDataclassIdentifier: str = dataclassIdentifierPACKAGING
+theDataclassInstance: str = dataclassInstancePACKAGING
+theFileExtension: str = fileExtensionINSTALLING
 
 additional_importsHARDCODED.append(myPackageNameIs)
 
@@ -146,19 +158,19 @@ class ComputationState:
 	# state.taskIndex.toMyType(indexSherpa)
 
 def getAlgorithmSource() -> ModuleType:
-	logicalPathModule: str = f"{myPackageNameIs}.{algorithmSourcePACKAGING}"
+	logicalPathModule: str = f"{myPackageNameIs}.{theAlgorithmSource}"
 	moduleImported: ModuleType = importlib_import_module(logicalPathModule)
 	return moduleImported
 
 def getAlgorithmDispatcher():
 	moduleImported: ModuleType = getAlgorithmSource()
-	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
+	dispatcherCallable = getattr(moduleImported, theDispatcherCallableName)
 	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
 
 # I DON'T KNOW!
 def getPackageDispatcher():
 	moduleImported: ModuleType = getAlgorithmSource()
-	dispatcherCallable = getattr(moduleImported, dispatcherCallableNamePACKAGING)
+	dispatcherCallable = getattr(moduleImported, theDispatcherCallableName)
 	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
 
 # TODO learn how to see this from the user's perspective
@@ -173,7 +185,7 @@ _datatypeModule: str = ''
 def getDatatypeModule() -> str:
 	global _datatypeModule
 	if not _datatypeModule:
-		_datatypeModule = datatypeModulePACKAGING
+		_datatypeModule = theDatatypeModule
 	return _datatypeModule
 
 def getNumpyDtypeDefault() -> DTypeLike:
@@ -183,7 +195,7 @@ def getNumpyDtypeDefault() -> DTypeLike:
 # More truth
 
 def getPathSyntheticModules() -> Path:
-	return pathPackage / moduleOfSyntheticModulesPACKAGING
+	return pathPackage / theModuleOfSyntheticModules
 
 _datatypeModuleScalar = 'numba'
 _decoratorCallable = 'jit'

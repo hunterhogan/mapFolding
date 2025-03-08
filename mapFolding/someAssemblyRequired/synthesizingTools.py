@@ -1,16 +1,18 @@
-from mapFolding.theSSOT import fileExtensionINSTALLING, myPackageNameIs, pathPackage
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
+from mapFolding.theSSOT import FREAKOUT, additional_importsHARDCODED, getDatatypeModule, theFileExtension, myPackageNameIs, pathPackage
 from pathlib import Path
 from typing import Any, cast, NamedTuple, TypeAlias
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
+import autoflake
 import dataclasses
 
 # TODO learn whether libcst can help
 import libcst
 
 ast_Identifier: TypeAlias = str
+Z0Z_thisCannotBeTheBestWay: TypeAlias = list[ast.Name] | list[ast.Attribute] | list[ast.Subscript] | list[ast.Name | ast.Attribute] | list[ast.Name | ast.Subscript] | list[ast.Attribute | ast.Subscript] | list[ast.Name | ast.Attribute | ast.Subscript]
 
 # NOTE: this is weak
 class YouOughtaKnow(NamedTuple):
@@ -108,18 +110,13 @@ class ifThis:
 		return lambda node: any(pred(node) for pred in predicates)
 
 	@staticmethod
-	def is_dataclassesDOTField():
-		# dataclasses.Field
-		pass
-
-	@staticmethod
 	def isUnpackingAnArray(identifier:str) -> Callable[[ast.AST], bool]:
 		return lambda node: (isinstance(node, ast.Assign)
-						and  isinstance(node.targets[0], ast.Name)
-						and  isinstance(node.value, ast.Subscript)
-						and  isinstance(node.value.value, ast.Name)
-						and  node.value.value.id == identifier
-						and  isinstance(node.value.slice, ast.Attribute)
+						and isinstance(node.targets[0], ast.Name)
+						and isinstance(node.value, ast.Subscript)
+						and isinstance(node.value.value, ast.Name)
+						and node.value.value.id == identifier
+						and isinstance(node.value.slice, ast.Attribute)
 						)
 
 class Make:
@@ -133,23 +130,57 @@ class Make:
 		return dictionaryKeywords
 
 	@staticmethod
-	def astCall(caller: ast.Name | ast.Attribute, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
-		return ast.Call(func=caller, args=list(args) if args else [], keywords=list(list_astKeywords) if list_astKeywords else [])
+	def astAlias(name: ast_Identifier, asname: ast_Identifier | None = None) -> ast.alias:
+		return ast.alias(name=name, asname=asname)
 
 	@staticmethod
-	def astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None) -> ast.AnnAssign:
+	def astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None
+					, **kwargs: Any
+					#, **kwargs: **ast._Attributes[int | None],
+					) -> ast.AnnAssign:
+		""" `simple: int`: uses a clever int-from-boolean to assign the correct value to the `simple` attribute. So, don't add it as a parameter."""
 		return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)))
+
+	@staticmethod
+	def astAssign(listTargets: Z0Z_thisCannotBeTheBestWay, value: ast.expr, type_comment: str | None=None
+				, **kwargs: Any
+				#, **kwargs: **ast._Attributes[int | None],
+				) -> ast.Assign:
+		return ast.Assign(targets=cast(list[ast.expr], listTargets), value=value, type_comment=type_comment, **kwargs)
+
+	@staticmethod
+	def astArg(identifier: ast_Identifier, annotation: ast.expr | None = None, type_comment: str | None = None
+		, **kwargs: Any
+		#, **kwargs: **ast._Attributes[int | None],
+	) -> ast.arg:
+		return ast.arg(identifier, annotation, type_comment, **kwargs)
 
 	@staticmethod
 	def astArgumentsSpecification(posonlyargs: list[ast.arg]=[], args: list[ast.arg]=[], vararg: ast.arg|None=None, kwonlyargs: list[ast.arg]=[], kw_defaults: list[ast.expr|None]=[None], kwarg: ast.arg|None=None, defaults: list[ast.expr]=[]) -> ast.arguments:
 		return ast.arguments(posonlyargs=posonlyargs, args=args, vararg=vararg, kwonlyargs=kwonlyargs, kw_defaults=kw_defaults, kwarg=kwarg, defaults=defaults)
 
 	@staticmethod
+	def astCall(caller: ast.Name | ast.Attribute, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
+		return ast.Call(func=caller, args=list(args) if args else [], keywords=list(list_astKeywords) if list_astKeywords else [])
+
+	@staticmethod
 	def astFunctionDef(name: ast_Identifier, args: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, type_comment: str|None=None, type_params: list[ast.type_param]=[]
 		, **kwargs: Any
-		#, **kwargs: **ast._Attributes[int | None]=[],
+		#, **kwargs: **ast._Attributes[int | None],
 		) -> ast.FunctionDef:
 		return ast.FunctionDef(name=name, args=args, body=body, decorator_list=decorator_list, returns=returns, type_comment=type_comment, type_params=type_params, **kwargs)
+
+	@staticmethod
+	def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None) -> ast.Import:
+		return ast.Import(names=[Make.astAlias(moduleName, asname)])
+
+	@staticmethod
+	def astImportFrom(moduleName: ast_Identifier, list_astAlias: list[ast.alias]) -> ast.ImportFrom:
+		return ast.ImportFrom(module=moduleName, names=list_astAlias, level=0)
+
+	@staticmethod
+	def astModule(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore] = []) -> ast.Module:
+		return ast.Module(body=body, type_ignores=type_ignores)
 
 	@staticmethod
 	def astName(identifier: ast_Identifier) -> ast.Name:
@@ -167,18 +198,6 @@ class Make:
 		for suffix in dotName:
 			nameDOTname = Make.itDOTname(nameDOTname, suffix)
 		return nameDOTname
-
-	@staticmethod
-	def astAlias(name: ast_Identifier, asname: ast_Identifier | None = None) -> ast.alias:
-		return ast.alias(name=name, asname=asname)
-
-	@staticmethod
-	def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None) -> ast.Import:
-		return ast.Import(names=[Make.astAlias(moduleName, asname)])
-
-	@staticmethod
-	def astImportFrom(moduleName: ast_Identifier, list_astAlias: list[ast.alias]) -> ast.ImportFrom:
-		return ast.ImportFrom(module=moduleName, names=list_astAlias, level=0)
 
 class Then:
 	@staticmethod
@@ -250,7 +269,6 @@ def shatter_dataclassesDOTdataclass(dataclass: ast.ClassDef, instance_Identifier
 class LedgerOfImports:
 	def __init__(self, startWith: ast.AST | None = None) -> None:
 		self.dictionaryImportFrom: dict[str, list[ast.alias]] = defaultdict(list)
-		# self.dictionaryImportFrom: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
 		self.listImport: list[str] = []
 
 		if startWith:
@@ -265,8 +283,6 @@ class LedgerOfImports:
 		else:
 			if astImport_.module is not None:
 				self.dictionaryImportFrom[astImport_.module].extend(astImport_.names)
-				# for alias in astImport_.names:
-				# 	self.dictionaryImportFrom[astImport_.module].append((alias.name, alias.asname))
 
 	def addImportStr(self, module: str) -> None:
 		self.listImport.append(module)
@@ -284,18 +300,17 @@ class LedgerOfImports:
 		listAstImport: list[ast.Import] = [Make.astImport(name) for name in sorted(set(self.listImport))]
 		return listAstImportFrom + listAstImport
 
-	def update(self, *fromTracker: 'LedgerOfImports') -> None:
+	def update(self, *fromLedger: 'LedgerOfImports') -> None:
 		"""
-		Update this tracker with imports from one or more other trackers.
+		Update this ledger with imports from one or more other ledgers.
 
 		Parameters:
-			*fromTracker: One or more UniversalImportTracker objects to merge from.
+			*fromTracker: One or more other `LedgerOfImports` objects from which to merge.
 		"""
-		# Merge all import-from dictionaries
-		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(tracker.dictionaryImportFrom for tracker in fromTracker), destroyDuplicates=True, reorderLists=True)
+		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(ledger.dictionaryImportFrom for ledger in fromLedger), destroyDuplicates=True, reorderLists=True)
 
-		for tracker in fromTracker:
-			self.listImport.extend(tracker.listImport)
+		for ledger in fromLedger:
+			self.listImport.extend(ledger.listImport)
 
 	def walkThis(self, walkThis: ast.AST) -> None:
 		for smurf in ast.walk(walkThis):
@@ -350,10 +365,11 @@ class IngredientsModule:
 	functions: list[ast.FunctionDef]
 	imports: LedgerOfImports
 	name: ast_Identifier
-	Z0Z_logicalPath: ast_Identifier | list[ast_Identifier] | None = None # module names other than the module itself and the package name
+
+	fileExtension: str = theFileExtension
 	packageName: ast_Identifier = myPackageNameIs
+	Z0Z_logicalPath: ast_Identifier | list[ast_Identifier] | None = None # module names other than the module itself and the package name
 	Z0Z_pathPackage: Path = pathPackage
-	fileExtension: str = fileExtensionINSTALLING
 
 	def _getLogicalPathParent(self) -> str:
 		listModules = [self.packageName]
@@ -362,23 +378,77 @@ class IngredientsModule:
 		return '.'.join(listModules)
 
 	def _getLogicalPathAbsolute(self) -> str:
-		"""Get the full import path as a string."""
 		return '.'.join([self._getLogicalPathParent(), self.name])
 
 	@property
 	def pathFilename(self) -> Path:
-		"""Dynamically calculate the file path based on current values."""
-		Z0Z_pathParts: list[Path | str] = [self.Z0Z_pathPackage]
+		listPathParts: list[Path | str] = [self.Z0Z_pathPackage]
 		if self.Z0Z_logicalPath:
-			Z0Z_pathParts.extend(list(self.Z0Z_logicalPath))
-		return Path(*Z0Z_pathParts, self.name + self.fileExtension)
+			listPathParts.extend(list(self.Z0Z_logicalPath))
+		return Path(*listPathParts, self.name + self.fileExtension)
 
 	@property
 	def absoluteImport(self) -> ast.Import:
-		"""Dynamically create an absolute import statement for this module."""
 		return Make.astImport(self._getLogicalPathAbsolute())
 
 	@property
 	def absoluteImportFrom(self) -> ast.ImportFrom:
-		"""Dynamically create an absolute import-from statement for this module."""
 		return Make.astImportFrom(self._getLogicalPathParent(), [Make.astAlias(self.name)])
+
+	def addFunction(self, ingredientsFunction: IngredientsFunction) -> None:
+		"""Add a function to the module and incorporate its imports.
+
+		Parameters:
+			ingredientsFunction: Function with its imports to be added to this module.
+		"""
+		self.functions.append(ingredientsFunction.FunctionDef)
+		self.imports.update(ingredientsFunction.imports)
+
+	def addFunctions(self, *ingredientsFunctions: IngredientsFunction) -> None:
+		"""Add multiple functions to the module and incorporate their imports.
+
+		Parameters:
+			*ingredientsFunctions: One or more functions with their imports to be added.
+		"""
+		for ingredientsFunction in ingredientsFunctions:
+			self.addFunction(ingredientsFunction)
+
+	def removeSelfReferencingImports(self) -> None:
+		"""Remove any imports that reference this module itself."""
+		moduleFullPath = self._getLogicalPathAbsolute()
+		parentPath = self._getLogicalPathParent()
+
+		# Remove any direct imports of this module
+		if moduleFullPath in self.imports.listImport:
+			self.imports.listImport.remove(moduleFullPath)
+
+		# Remove any imports from this module's parent that import this module
+		if parentPath in self.imports.dictionaryImportFrom:
+			self.imports.dictionaryImportFrom[parentPath] = [
+				alias for alias in self.imports.dictionaryImportFrom[parentPath]
+				if alias.name != self.name
+			]
+			# Clean up empty entries
+			if not self.imports.dictionaryImportFrom[parentPath]:
+				del self.imports.dictionaryImportFrom[parentPath]
+
+	def writeModule(self) -> None:
+		"""Writes the module to disk with proper imports and functions.
+
+		This method creates a proper AST module with imports and function definitions,
+		fixes missing locations, unpacks the AST to Python code, applies autoflake
+		to clean up imports, and writes the resulting code to the appropriate file.
+		"""
+		self.removeSelfReferencingImports()
+		listAstImports: list[ast.ImportFrom | ast.Import] = self.imports.makeListAst()
+		astModule = Make.astModule(body=cast(list[ast.stmt], listAstImports + self.functions))
+		ast.fix_missing_locations(astModule)
+		pythonSource: str = ast.unparse(astModule)
+		if not pythonSource: raise FREAKOUT
+		additional_imports: list[str] = additional_importsHARDCODED
+		additional_imports.append(getDatatypeModule())
+		pythonSource = autoflake.fix_code(pythonSource, additional_imports)
+		self.pathFilename.write_text(pythonSource)
+
+	# TODO create logic (as init or methods) for aggregating/incorporating `IngredientsFunction` objects
+	# When resolving the ledger of imports, remove self-referential imports

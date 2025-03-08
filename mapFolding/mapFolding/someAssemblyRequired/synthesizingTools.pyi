@@ -2,11 +2,12 @@ import ast
 import dataclasses
 from _typeshed import Incomplete
 from collections.abc import Callable as Callable, Iterable, Sequence
-from mapFolding.theSSOT import fileExtensionINSTALLING as fileExtensionINSTALLING, myPackageNameIs as myPackageNameIs, pathPackage as pathPackage
+from mapFolding.theSSOT import FREAKOUT as FREAKOUT, additional_importsHARDCODED as additional_importsHARDCODED, getDatatypeModule as getDatatypeModule, myPackageNameIs as myPackageNameIs, pathPackage as pathPackage, theFileExtension as theFileExtension
 from pathlib import Path
 from typing import Any, NamedTuple, TypeAlias
 
 ast_Identifier: TypeAlias
+Z0Z_thisCannotBeTheBestWay: TypeAlias
 
 class YouOughtaKnow(NamedTuple):
     callableSynthesized: str
@@ -49,8 +50,6 @@ class ifThis:
     @staticmethod
     def anyOf(*predicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]: ...
     @staticmethod
-    def is_dataclassesDOTField() -> None: ...
-    @staticmethod
     def isUnpackingAnArray(identifier: str) -> Callable[[ast.AST], bool]: ...
 
 class Make:
@@ -58,25 +57,32 @@ class Make:
     def copy_astCallKeywords(astCall: ast.Call) -> dict[str, Any]:
         """Extract keyword parameters from a decorator AST node."""
     @staticmethod
-    def astCall(caller: ast.Name | ast.Attribute, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call: ...
+    def astAlias(name: ast_Identifier, asname: ast_Identifier | None = None) -> ast.alias: ...
     @staticmethod
-    def astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None) -> ast.AnnAssign: ...
+    def astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None, **kwargs: Any) -> ast.AnnAssign:
+        """ `simple: int`: uses a clever int-from-boolean to assign the correct value to the `simple` attribute. So, don't add it as a parameter."""
+    @staticmethod
+    def astAssign(listTargets: Z0Z_thisCannotBeTheBestWay, value: ast.expr, type_comment: str | None = None, **kwargs: Any) -> ast.Assign: ...
+    @staticmethod
+    def astArg(identifier: ast_Identifier, annotation: ast.expr | None = None, type_comment: str | None = None, **kwargs: Any) -> ast.arg: ...
     @staticmethod
     def astArgumentsSpecification(posonlyargs: list[ast.arg] = [], args: list[ast.arg] = [], vararg: ast.arg | None = None, kwonlyargs: list[ast.arg] = [], kw_defaults: list[ast.expr | None] = [None], kwarg: ast.arg | None = None, defaults: list[ast.expr] = []) -> ast.arguments: ...
     @staticmethod
+    def astCall(caller: ast.Name | ast.Attribute, args: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call: ...
+    @staticmethod
     def astFunctionDef(name: ast_Identifier, args: ast.arguments = ..., body: list[ast.stmt] = [], decorator_list: list[ast.expr] = [], returns: ast.expr | None = None, type_comment: str | None = None, type_params: list[ast.type_param] = [], **kwargs: Any) -> ast.FunctionDef: ...
+    @staticmethod
+    def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None) -> ast.Import: ...
+    @staticmethod
+    def astImportFrom(moduleName: ast_Identifier, list_astAlias: list[ast.alias]) -> ast.ImportFrom: ...
+    @staticmethod
+    def astModule(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore] = []) -> ast.Module: ...
     @staticmethod
     def astName(identifier: ast_Identifier) -> ast.Name: ...
     @staticmethod
     def itDOTname(nameChain: ast.Name | ast.Attribute, dotName: str) -> ast.Attribute: ...
     @staticmethod
     def nameDOTname(identifier: ast_Identifier, *dotName: str) -> ast.Name | ast.Attribute: ...
-    @staticmethod
-    def astAlias(name: ast_Identifier, asname: ast_Identifier | None = None) -> ast.alias: ...
-    @staticmethod
-    def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None) -> ast.Import: ...
-    @staticmethod
-    def astImportFrom(moduleName: ast_Identifier, list_astAlias: list[ast.alias]) -> ast.ImportFrom: ...
 
 class Then:
     @staticmethod
@@ -122,12 +128,12 @@ class LedgerOfImports:
     def addImportStr(self, module: str) -> None: ...
     def addImportFromStr(self, module: str, name: str, asname: str | None = None) -> None: ...
     def makeListAst(self) -> list[ast.ImportFrom | ast.Import]: ...
-    def update(self, *fromTracker: LedgerOfImports) -> None:
+    def update(self, *fromLedger: LedgerOfImports) -> None:
         """
-\t\tUpdate this tracker with imports from one or more other trackers.
+\t\tUpdate this ledger with imports from one or more other ledgers.
 
 \t\tParameters:
-\t\t\t*fromTracker: One or more UniversalImportTracker objects to merge from.
+\t\t\t*fromTracker: One or more other `LedgerOfImports` objects from which to merge.
 \t\t"""
     def walkThis(self, walkThis: ast.AST) -> None: ...
 
@@ -150,19 +156,36 @@ class IngredientsModule:
     functions: list[ast.FunctionDef]
     imports: LedgerOfImports
     name: ast_Identifier
-    Z0Z_logicalPath: ast_Identifier | list[ast_Identifier] | None = ...
-    packageName: ast_Identifier = ...
-    Z0Z_pathPackage: Path = ...
     fileExtension: str = ...
+    packageName: ast_Identifier = ...
+    Z0Z_logicalPath: ast_Identifier | list[ast_Identifier] | None = ...
+    Z0Z_pathPackage: Path = ...
     def _getLogicalPathParent(self) -> str: ...
-    def _getLogicalPathAbsolute(self) -> str:
-        """Get the full import path as a string."""
+    def _getLogicalPathAbsolute(self) -> str: ...
     @property
-    def pathFilename(self) -> Path:
-        """Dynamically calculate the file path based on current values."""
+    def pathFilename(self) -> Path: ...
     @property
-    def absoluteImport(self) -> ast.Import:
-        """Dynamically create an absolute import statement for this module."""
+    def absoluteImport(self) -> ast.Import: ...
     @property
-    def absoluteImportFrom(self) -> ast.ImportFrom:
-        """Dynamically create an absolute import-from statement for this module."""
+    def absoluteImportFrom(self) -> ast.ImportFrom: ...
+    def addFunction(self, ingredientsFunction: IngredientsFunction) -> None:
+        """Add a function to the module and incorporate its imports.
+
+\t\tParameters:
+\t\t\tingredientsFunction: Function with its imports to be added to this module.
+\t\t"""
+    def addFunctions(self, *ingredientsFunctions: IngredientsFunction) -> None:
+        """Add multiple functions to the module and incorporate their imports.
+
+\t\tParameters:
+\t\t\t*ingredientsFunctions: One or more functions with their imports to be added.
+\t\t"""
+    def removeSelfReferencingImports(self) -> None:
+        """Remove any imports that reference this module itself."""
+    def writeModule(self) -> None:
+        """Writes the module to disk with proper imports and functions.
+
+\t\tThis method creates a proper AST module with imports and function definitions,
+\t\tfixes missing locations, unpacks the AST to Python code, applies autoflake
+\t\tto clean up imports, and writes the resulting code to the appropriate file.
+\t\t"""

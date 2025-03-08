@@ -1,7 +1,7 @@
 """SSOT for Pytest"""
 from collections.abc import Callable, Generator, Sequence
 from mapFolding import basecamp
-from mapFolding.theSSOT import getAlgorithmDispatcher, getAlgorithmSource, getPackageDispatcher, listNumbaCallableDispatchees, moduleOfSyntheticModulesPACKAGING, FREAKOUT
+from mapFolding.theSSOT import getAlgorithmDispatcher, getAlgorithmSource, getPackageDispatcher, listNumbaCallableDispatchees, theModuleOfSyntheticModules, FREAKOUT
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from mapFolding.someAssemblyRequired import makeFlowNumbaOptimized, YouOughtaKnow
@@ -206,7 +206,7 @@ def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any]) -> Callabl
 	listCallablesInline = listNumbaCallableDispatchees
 	callableDispatcher = True
 	algorithmSource = getAlgorithmSource()
-	relativePathWrite = moduleOfSyntheticModulesPACKAGING
+	relativePathWrite = theModuleOfSyntheticModules
 	filenameModuleWrite = 'pytestCount.py'
 	formatFilenameWrite = "pytest_{callableTarget}.py"
 	listSynthesizedModules: list[YouOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite)

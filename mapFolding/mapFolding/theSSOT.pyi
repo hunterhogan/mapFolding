@@ -13,6 +13,7 @@ datatypeModulePACKAGING: Final[str]
 dispatcherCallableNamePACKAGING: str
 moduleOfSyntheticModulesPACKAGING: Final[str]
 dataclassIdentifierPACKAGING: str
+dataclassInstancePACKAGING: str
 myPackageNameIsPACKAGING: str
 fileExtensionINSTALLING: str
 
@@ -21,14 +22,22 @@ def getPathPackageINSTALLING() -> Path: ...
 additional_importsHARDCODED: list[str]
 Z0Z_formatNameModuleSynthetic: str
 Z0Z_formatFilenameModuleSynthetic: Incomplete
+Z0Z_dispatcherCallableName = dispatcherCallableNamePACKAGING
 Z0Z_nameModuleDispatcherSynthetic: str
 Z0Z_filenameModuleWrite: Incomplete
 Z0Z_filenameWriteElseCallableTarget: str
-Z0Z_dispatcherOfDataFilename: Incomplete
-Z0Z_dispatcherOfDataCallable: str
+Z0Z_DataConverterFilename: Incomplete
+Z0Z_DataConverterCallable: str
 concurrencyPackage: str
 myPackageNameIs: Final[str]
 pathPackage: Path
+theAlgorithmSource: str
+theDatatypeModule: Final[str]
+theDispatcherCallableName: str
+theModuleOfSyntheticModules: Final[str]
+theDataclassIdentifier: str
+theDataclassInstance: str
+theFileExtension: str
 DatatypeLeavesTotal: TypeAlias
 numpyLeavesTotal: TypeAlias
 DatatypeElephino: TypeAlias
