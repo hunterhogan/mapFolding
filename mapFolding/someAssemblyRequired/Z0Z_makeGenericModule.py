@@ -49,8 +49,31 @@ def Z0Z_makeDataConverterCallable() -> IngredientsFunction:
 	if not isinstance(astClassDef, ast.ClassDef): raise FREAKOUT
 
 	# Make annotated assignments unpacking the dataclass to individual identifiers
-	listAnnAssignUnpackDataclass = shatter_dataclassesDOTdataclass(astClassDef, dataclassInstance)
+	listAnnAssignUnpackedDataclass = shatter_dataclassesDOTdataclass(astClassDef, dataclassInstance)
+	"""
+	importing the annotations:
+	Sources:
+		1. built-in
+		2. imported into the source module of the dataclass
+		3. imported into the dataclass
+		4. defined in the module of the dataclass
 
+	1. No need to do anything.
+	2 & 3. somehow get the module of the dataclass:
+		dataClassModule = `dataclassAsObject.__module__`
+		overlyCautiousLedger = LedgerOfImports(ast.parse(inspect.getsource(importlib.import_module(dataClassModule))))
+		initialize IngredientsFunction with overlyCautiousLedger
+	4. Something that has the effect of:
+		dataClassModule_Identifiers: set[str] = do something; probably a method
+		for annAssign in listAnnAssignUnpackedDataclass:
+			if annAssign.annotation in dataClassModule_Identifiers:
+				imports.addImportFromStr(dataClassModule, annAssign.annotation)
+		But, it can/should be done with ifThis, Then, NodeReplace, Make, etc.
+
+	Later in the flow:
+		LedgerOfImports.makeListAst will remove duplicates.
+		autoflake.fix_code(pythonSource, additional_imports) will remove unused imports.
+	"""
 	# Create an AST representation of the function parameter with type annotation
 	dataclassInstanceAsParameter = Make.astArg(dataclassInstance, Make.astName(dataclassIdentifier))
 
@@ -64,17 +87,20 @@ def Z0Z_makeDataConverterCallable() -> IngredientsFunction:
 	ingredientsFunctionDataConverter.imports.addImportFromStr(myPackageNameIs, dataclassIdentifier)
 
 	# Set the function body to contain the unpacked dataclass fields
-	ingredientsFunctionDataConverter.FunctionDef.body = cast(list[ast.stmt], listAnnAssignUnpackDataclass)
+	ingredientsFunctionDataConverter.FunctionDef.body = cast(list[ast.stmt], listAnnAssignUnpackedDataclass)
 
-	list_astNameFormerlyInDataclass = [Make.astName(annAssign.target.id) for annAssign in listAnnAssignUnpackDataclass if isinstance(annAssign.target, ast.Name)]
+	list_astNameFormerlyInDataclass = [Make.astName(annAssign.target.id) for annAssign in listAnnAssignUnpackedDataclass if isinstance(annAssign.target, ast.Name)]
 
-	callDispatcher = Make.astAssign(listTargets=list_astNameFormerlyInDataclass
-									, value=Make.astCall(Make.astName(dispatcherCallableName), args=list_astNameFormerlyInDataclass))
+	callDispatcher = Make.astAssign(listTargets=[Make.astTuple(list_astNameFormerlyInDataclass)]
+										, value=Make.astCall(Make.astName(dispatcherCallableName), args=list_astNameFormerlyInDataclass))
 
 	ingredientsFunctionDataConverter.FunctionDef.body.append(callDispatcher)
 
-	# Import the dispatcher function from the synthetic module
 	ingredientsFunctionDataConverter.imports.addImportFromStr(dispatcherModuleName, dispatcherCallableName)
+
+	# TODO
+	# create a new ComputationState from the returned values
+	# return the new ComputationState
 
 	return ingredientsFunctionDataConverter
 

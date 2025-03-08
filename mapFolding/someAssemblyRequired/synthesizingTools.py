@@ -12,6 +12,7 @@ import dataclasses
 import libcst
 
 ast_Identifier: TypeAlias = str
+strDotStrCuzPyStoopid: TypeAlias = str
 Z0Z_thisCannotBeTheBestWay: TypeAlias = list[ast.Name] | list[ast.Attribute] | list[ast.Subscript] | list[ast.Name | ast.Attribute] | list[ast.Name | ast.Subscript] | list[ast.Attribute | ast.Subscript] | list[ast.Name | ast.Attribute | ast.Subscript]
 
 # NOTE: this is weak
@@ -142,7 +143,7 @@ class Make:
 		return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)))
 
 	@staticmethod
-	def astAssign(listTargets: Z0Z_thisCannotBeTheBestWay, value: ast.expr, type_comment: str | None=None
+	def astAssign(listTargets: Any, value: ast.expr, type_comment: str | None=None
 				, **kwargs: Any
 				#, **kwargs: **ast._Attributes[int | None],
 				) -> ast.Assign:
@@ -198,6 +199,21 @@ class Make:
 		for suffix in dotName:
 			nameDOTname = Make.itDOTname(nameDOTname, suffix)
 		return nameDOTname
+
+	@staticmethod
+	def astTuple(elements: Sequence[ast.expr], ctx: ast.expr_context | None = None
+				, **kwargs: Any
+				#, **kwargs: **ast._Attributes[int | None],
+				) -> ast.Tuple:
+		"""Create an AST Tuple node from a list of expressions.
+
+		Parameters:
+			elements: List of AST expressions to include in the tuple.
+			ctx: Context for the tuple (Load/Store). Defaults to Load context.
+		"""
+		if ctx is None:
+			ctx = ast.Store()
+		return ast.Tuple(elts=list(elements), ctx=ctx, **kwargs)
 
 class Then:
 	@staticmethod
@@ -368,7 +384,7 @@ class IngredientsModule:
 
 	fileExtension: str = theFileExtension
 	packageName: ast_Identifier = myPackageNameIs
-	Z0Z_logicalPath: ast_Identifier | list[ast_Identifier] | None = None # module names other than the module itself and the package name
+	Z0Z_logicalPath: ast_Identifier | strDotStrCuzPyStoopid | None = None # module names other than the module itself and the package name
 	Z0Z_pathPackage: Path = pathPackage
 
 	def _getLogicalPathParent(self) -> str:
@@ -382,10 +398,12 @@ class IngredientsModule:
 
 	@property
 	def pathFilename(self) -> Path:
-		listPathParts: list[Path | str] = [self.Z0Z_pathPackage]
+		pathRoot: Path = self.Z0Z_pathPackage
+
 		if self.Z0Z_logicalPath:
-			listPathParts.extend(list(self.Z0Z_logicalPath))
-		return Path(*listPathParts, self.name + self.fileExtension)
+			pathRoot = pathRoot / self.Z0Z_logicalPath
+
+		return pathRoot / (self.name + self.fileExtension)
 
 	@property
 	def absoluteImport(self) -> ast.Import:
@@ -439,7 +457,7 @@ class IngredientsModule:
 		fixes missing locations, unpacks the AST to Python code, applies autoflake
 		to clean up imports, and writes the resulting code to the appropriate file.
 		"""
-		self.removeSelfReferencingImports()
+		# self.removeSelfReferencingImports()
 		listAstImports: list[ast.ImportFrom | ast.Import] = self.imports.makeListAst()
 		astModule = Make.astModule(body=cast(list[ast.stmt], listAstImports + self.functions))
 		ast.fix_missing_locations(astModule)

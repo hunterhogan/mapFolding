@@ -112,22 +112,24 @@ class ComputationState:
 	taskDivisions: DatatypeLeavesTotal
 
 	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'description': 'A 3D array representing the connection graph of the map.'})
-	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(init=False)
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
-	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(init=False)
-	foldGroups: Array1DFoldsTotal = dataclasses.field(init=False)
+
+	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
+	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
+	gapRangeStart: Array1DElephino = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
+	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
+	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
+	foldGroups: Array1DFoldsTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
+
 	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
 	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
-	gapRangeStart: Array1DElephino = dataclasses.field(init=False)
-	gapsWhere: Array1DLeavesTotal = dataclasses.field(init=False)
 	groupsOfFolds: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
 	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
 	leaf1ndex: DatatypeElephino = DatatypeElephino(1)
-	leafAbove: Array1DLeavesTotal = dataclasses.field(init=False)
-	leafBelow: Array1DLeavesTotal = dataclasses.field(init=False)
 	leafConnectee: DatatypeElephino = DatatypeElephino(0)
 	taskIndex: DatatypeLeavesTotal = dataclasses.field(default=DatatypeLeavesTotal(0), metadata={'myType': DatatypeLeavesTotal})
 	# taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
@@ -135,19 +137,27 @@ class ComputationState:
 	def __post_init__(self):
 		from mapFolding.beDRY import makeConnectionGraph, makeDataContainer
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
-		self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
 		self.connectionGraph = makeConnectionGraph(self.mapShape, self.leavesTotal, numpyLeavesTotal)
 
-		# the dtype is defined above
-		self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), numpyFoldsTotal)
-		self.foldGroups[-1] = self.leavesTotal
+		if self.dimensionsUnconstrained is None: # pyright: ignore[reportUnnecessaryComparison]
+			self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
+
+		if self.foldGroups is None:
+			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), numpyFoldsTotal)
+			self.foldGroups[-1] = self.leavesTotal
 
 		leavesTotalAsInt = int(self.leavesTotal)
-		self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, numpyElephino)
-		self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
-		self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, numpyLeavesTotal)
-		self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
-		self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+
+		if self.countDimensionsGapped is None:
+			self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, numpyElephino)
+		if self.gapRangeStart is None:
+			self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+		if self.gapsWhere is None:
+			self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, numpyLeavesTotal)
+		if self.leafAbove is None:
+			self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+		if self.leafBelow is None:
+			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
 
 	def getFoldsTotal(self):
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
