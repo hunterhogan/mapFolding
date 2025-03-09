@@ -13,7 +13,7 @@ import pytest
 def test_countFoldsComputationDivisionsInvalid(mapShapeTestFunctionality: tuple[int, ...]) -> None:
 	standardizedEqualToCallableReturn(ValueError, countFolds, mapShapeTestFunctionality, None, {"wrong": "value"})
 
-def test_countFoldsComputationDivisionsMaximum(listDimensionsTestParallelization) -> None:
+def test_countFoldsComputationDivisionsMaximum(listDimensionsTestParallelization: list[int]) -> None:
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_defineConcurrencyLimit())
@@ -40,7 +40,6 @@ def test_getTaskDivisions(computationDivisions: None | list[str] | Literal['maxi
 	standardizedEqualToCallableReturn(expectedTaskDivisions, getTaskDivisions, computationDivisions, concurrencyLimit, leavesTotal)
 
 @pytest.mark.parametrize("expected,parameter", [
-	(2, "2"),  # string
 	(ValueError, [4]),  # list
 	(ValueError, (2,)), # tuple
 	(ValueError, {2}),  # set

@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from mapFolding.beDRY import ComputationState as ComputationState, outfitCountFolds as outfitCountFolds, validateListDimensions as validateListDimensions
 from mapFolding.filesystem import getPathFilenameFoldsTotal as getPathFilenameFoldsTotal
-from mapFolding.theSSOT import getAlgorithmSource as getAlgorithmSource
+from mapFolding.theSSOT import getSourceAlgorithm as getSourceAlgorithm
 from pathlib import Path
 from typing import Any, Literal, overload
 

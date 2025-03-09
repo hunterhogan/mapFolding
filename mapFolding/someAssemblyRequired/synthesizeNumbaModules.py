@@ -1,7 +1,7 @@
-from mapFolding.theSSOT import FREAKOUT, Z0Z_filenameModuleWrite, Z0Z_filenameWriteElseCallableTarget, additional_importsHARDCODED
+from mapFolding.theSSOT import FREAKOUT, Z0Z_filenameModuleWrite, Z0Z_filenameWriteElseCallableTarget, autoflake_additional_imports
 from mapFolding.theSSOT import Z0Z_formatFilenameModuleSynthetic, getAlgorithmDispatcher, theModuleOfSyntheticModules
 from mapFolding.theSSOT import pathPackage, listNumbaCallableDispatchees, ParametersSynthesizeNumbaCallable
-from mapFolding.theSSOT import getAlgorithmSource, getDatatypeModule
+from mapFolding.theSSOT import getSourceAlgorithm, getDatatypeModule
 from mapFolding.theSSOT import ParametersNumba
 from mapFolding.someAssemblyRequired import LedgerOfImports, decorateCallableWithNumba, FunctionInliner, YouOughtaKnow, ast_Identifier
 from os import PathLike
@@ -85,7 +85,7 @@ def makeFlowNumbaOptimized() -> list[YouOughtaKnow]: ...
 def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCallable], callableDispatcher: bool, algorithmSource: types.ModuleType, relativePathWrite: str | PathLike[str], filenameModuleWrite: str, formatFilenameWrite: str) -> list[YouOughtaKnow]: ...
 def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCallable] | None = None, callableDispatcher: bool | None = None, algorithmSource: types.ModuleType | None = None, relativePathWrite: str | PathLike[str] | None = None, filenameModuleWrite: str | None = None, formatFilenameWrite: str | None = None) -> list[YouOughtaKnow]:
 	if all(parameter is None for parameter in [listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite]):
-		return makeFlowNumbaOptimized(listNumbaCallableDispatchees, True, getAlgorithmSource(), theModuleOfSyntheticModules, Z0Z_filenameModuleWrite, Z0Z_formatFilenameModuleSynthetic)
+		return makeFlowNumbaOptimized(listNumbaCallableDispatchees, True, getSourceAlgorithm(), theModuleOfSyntheticModules, Z0Z_filenameModuleWrite, Z0Z_formatFilenameModuleSynthetic)
 
 	if (listCallablesInline is None
 	or callableDispatcher is None
@@ -109,7 +109,7 @@ def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCa
 		allImportsModule.update(allImports)
 
 	listAstImports: list[ast.ImportFrom | ast.Import] = allImportsModule.makeListAst()
-	additional_imports: list[str] = additional_importsHARDCODED
+	additional_imports: list[str] = autoflake_additional_imports
 	additional_imports.append(getDatatypeModule())
 	pythonSource: str = makePythonSource(listFunctionDefs, listAstImports, additional_imports)
 

@@ -1,6 +1,6 @@
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
-from mapFolding.theSSOT import FREAKOUT, additional_importsHARDCODED, getDatatypeModule, theFileExtension, myPackageNameIs, pathPackage
+from mapFolding.theSSOT import FREAKOUT, autoflake_additional_imports, getDatatypeModule, theFileExtension, myPackageNameIs, pathPackage
 from pathlib import Path
 from typing import Any, cast, NamedTuple, TypeAlias
 from Z0Z_tools import updateExtendPolishDictionaryLists
@@ -122,19 +122,7 @@ class ifThis:
 
 	@staticmethod
 	def isAnnotation_astName() -> Callable[[ast.AST], bool]:
-		return lambda node: (ifThis.isAnnAssign()(node) and isinstance(node.annotation, ast.Name))
-
-	@staticmethod
-	def isAnnotationAttribute() -> Callable[[ast.AST], bool]:
-		return lambda node: (isinstance(node, ast.AnnAssign) and isinstance(node.annotation, ast.Attribute))
-
-	@staticmethod
-	def isAnyAnnotation() -> Callable[[ast.AST], bool]:
-		return ifThis.anyOf(ifThis.isAnnotation(), ifThis.isAnnotationAttribute())
-
-	@staticmethod
-	def findAnnotationNames() -> Callable[[ast.AST], bool]:
-		return lambda node: isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)
+		return lambda node: (ifThis.isAnnAssign()(node) and isinstance(node.annotation, ast.Name)) # type: ignore
 
 class Make:
 	@staticmethod
@@ -255,7 +243,7 @@ class Then:
 
 	@staticmethod
 	def Z0Z_appendAnnotationNameTo(primitiveList: list[Any]) -> Callable[[ast.AST], None]:
-		return lambda node: primitiveList.append(node.annotation.id)
+		return lambda node: primitiveList.append(node.annotation.id) # type: ignore
 
 	@staticmethod
 	def replaceWith(astStatement: ast.AST) -> Callable[[ast.AST], ast.stmt]:
@@ -458,25 +446,6 @@ class IngredientsModule:
 		for ingredientsFunction in ingredientsFunctions:
 			self.addFunction(ingredientsFunction)
 
-	def removeSelfReferencingImports(self) -> None:
-		"""Remove any imports that reference this module itself."""
-		moduleFullPath = self._getLogicalPathAbsolute()
-		parentPath = self._getLogicalPathParent()
-
-		# Remove any direct imports of this module
-		if moduleFullPath in self.imports.listImport:
-			self.imports.listImport.remove(moduleFullPath)
-
-		# Remove any imports from this module's parent that import this module
-		if parentPath in self.imports.dictionaryImportFrom:
-			self.imports.dictionaryImportFrom[parentPath] = [
-				alias for alias in self.imports.dictionaryImportFrom[parentPath]
-				if alias.name != self.name
-			]
-			# Clean up empty entries
-			if not self.imports.dictionaryImportFrom[parentPath]:
-				del self.imports.dictionaryImportFrom[parentPath]
-
 	def writeModule(self) -> None:
 		"""Writes the module to disk with proper imports and functions.
 
@@ -484,13 +453,12 @@ class IngredientsModule:
 		fixes missing locations, unpacks the AST to Python code, applies autoflake
 		to clean up imports, and writes the resulting code to the appropriate file.
 		"""
-		# self.removeSelfReferencingImports()
 		listAstImports: list[ast.ImportFrom | ast.Import] = self.imports.makeListAst()
 		astModule = Make.astModule(body=cast(list[ast.stmt], listAstImports + self.functions))
 		ast.fix_missing_locations(astModule)
 		pythonSource: str = ast.unparse(astModule)
 		if not pythonSource: raise FREAKOUT
-		additional_imports: list[str] = additional_importsHARDCODED
+		additional_imports: list[str] = autoflake_additional_imports
 		additional_imports.append(getDatatypeModule())
 		pythonSource = autoflake.fix_code(pythonSource, additional_imports)
 		self.pathFilename.write_text(pythonSource)

@@ -69,7 +69,7 @@ def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: D
 					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
 	return connectionGraph
 
-def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None) -> (Array1DLeavesTotal | Array1DElephino | Array1DFoldsTotal | ndarray[Any, dtype[Any]]):
+def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None):# -> (Array1DLeavesTotal | Array1DElephino | Array1DFoldsTotal | ndarray[Any, dtype[Any]]):
 	# ChatGPT (4o reasoning?): "Tip: Create them with functions like np.empty(...) or np.zeros(...) to ensure contiguous memory layout."
 	if 'numpy' == getDatatypeModule():
 		numpyDtype = datatype or getNumpyDtypeDefault()
@@ -103,6 +103,8 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 	if concurrencyPackage == 'numba':
 		set_num_threads(concurrencyLimit)
 		concurrencyLimit = get_num_threads()
+	elif concurrencyPackage == 'not implemented':
+		concurrencyLimit = 1
 	else:
 		raise NotImplementedError("This function only supports the 'numba' concurrency package.")
 
@@ -157,7 +159,7 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 
 	if taskDivisions > leavesTotal:
 		raise ValueError(f"Problem: `taskDivisions`, ({taskDivisions}), is greater than `leavesTotal`, ({leavesTotal}), which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`. They are derived from parameters that may or may not still be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from dubious-quality Python code.")
-	return taskDivisions
+	return int(max(0, taskDivisions))
 
 def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str | None = None, concurrencyLimit: int = 1) -> ComputationState:
 	leavesTotal = getLeavesTotal(mapShape)

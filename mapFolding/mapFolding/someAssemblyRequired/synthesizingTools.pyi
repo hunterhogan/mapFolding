@@ -2,7 +2,7 @@ import ast
 import dataclasses
 from _typeshed import Incomplete
 from collections.abc import Callable as Callable, Iterable, Sequence
-from mapFolding.theSSOT import FREAKOUT as FREAKOUT, additional_importsHARDCODED as additional_importsHARDCODED, getDatatypeModule as getDatatypeModule, myPackageNameIs as myPackageNameIs, pathPackage as pathPackage, theFileExtension as theFileExtension
+from mapFolding.theSSOT import FREAKOUT as FREAKOUT, autoflake_additional_imports as autoflake_additional_imports, getDatatypeModule as getDatatypeModule, myPackageNameIs as myPackageNameIs, pathPackage as pathPackage, theFileExtension as theFileExtension
 from pathlib import Path
 from typing import Any, NamedTuple, TypeAlias
 

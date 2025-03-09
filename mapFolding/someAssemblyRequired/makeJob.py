@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from mapFolding.beDRY import outfitCountFolds, validateListDimensions, ComputationState
 from mapFolding.filesystem import getPathFilenameFoldsTotal
-from mapFolding.theSSOT import getAlgorithmSource
+from mapFolding.theSSOT import getSourceAlgorithm
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Literal, overload
@@ -30,7 +30,7 @@ def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keyw
 	mapShape = validateListDimensions(listDimensions)
 	stateUniversal = outfitCountFolds(mapShape, **keywordArguments)
 
-	moduleSource: ModuleType = getAlgorithmSource()
+	moduleSource: ModuleType = getSourceAlgorithm()
 	# TODO `countInitialize` is hardcoded
 	stateUniversal: ComputationState = moduleSource.countInitialize(stateUniversal)
 

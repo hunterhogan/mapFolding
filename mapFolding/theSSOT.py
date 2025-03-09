@@ -21,17 +21,20 @@ if TYPE_CHECKING:
 else:
 	TypedDict = dict
 
+Z0Z_packageFlow = 'algorithm'
+# Z0Z_packageFlow = 'numba'
+
 # =============================================================================
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
 # Evaluate When Packaging Evaluate When Packaging Evaluate When Packaging
 
-algorithmSourcePACKAGING: str = 'theDao'
+sourceAlgorithmPACKAGING: str = 'theDao'
 datatypeModulePACKAGING: Final[str] = 'numpy'
 dispatcherCallableNamePACKAGING: str = 'doTheNeedful'
 moduleOfSyntheticModulesPACKAGING: Final[str] = 'syntheticModules'
 
-dataclassIdentifierPACKAGING: str = 'ComputationState'
-dataclassInstancePACKAGING: str = 'state'
+dataclassIdentifierAsStrPACKAGING: str = 'ComputationState'
+dataclassInstanceAsStrPACKAGING: str = 'state'
 
 try:
 	myPackageNameIsPACKAGING: str = tomli.load(Path("../pyproject.toml").open('rb'))["project"]["name"]
@@ -54,57 +57,64 @@ def getPathPackageINSTALLING() -> Path:
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
 # Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding
 
-additional_importsHARDCODED: list[str] = ['numba']
-
 # NOTE see also `ParametersSynthesizeNumbaCallable` below
 
 # =============================================================================
 # Temporary or transient or something; probably still the wrong way
 
-Z0Z_formatNameModuleSynthetic = "numba_{callableTarget}"
-Z0Z_formatFilenameModuleSynthetic = Z0Z_formatNameModuleSynthetic + fileExtensionINSTALLING
-Z0Z_dispatcherCallableName = dispatcherCallableNamePACKAGING
-Z0Z_nameModuleDispatcherSynthetic: str = Z0Z_formatNameModuleSynthetic.format(callableTarget=Z0Z_dispatcherCallableName)
-Z0Z_filenameModuleWrite = 'numbaCount' + fileExtensionINSTALLING
-Z0Z_filenameWriteElseCallableTarget: str = 'count'
 # the data converter and the dispatcher could be in the same module.
 Z0Z_DataConverterFilename = 'dataNamespaceFlattened' + fileExtensionINSTALLING
 Z0Z_DataConverterCallable = 'flattenData'
-concurrencyPackage: str = 'numba'
 
 # =============================================================================
 # The right way, perhaps.
 
+# =====================
+# Create enduring identifiers from the hopefully transient identifiers above.
 myPackageNameIs: Final[str] = myPackageNameIsPACKAGING
 pathPackage: Path = getPathPackageINSTALLING()
-
-theAlgorithmSource: str = algorithmSourcePACKAGING
+theSourceAlgorithm: str = sourceAlgorithmPACKAGING
 theDatatypeModule: Final[str] = datatypeModulePACKAGING
 theDispatcherCallableName: str = dispatcherCallableNamePACKAGING
 theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
-Z0Z_logicalPathDispatcherSynthetic: str = '.'.join([myPackageNameIs, theModuleOfSyntheticModules, Z0Z_nameModuleDispatcherSynthetic])
-theDataclassIdentifier: str = dataclassIdentifierPACKAGING
-theDataclassInstance: str = dataclassInstancePACKAGING
+theDataclassIdentifierAsStr: str = dataclassIdentifierAsStrPACKAGING
+theDataclassInstanceAsStr: str = dataclassInstanceAsStrPACKAGING
 theFileExtension: str = fileExtensionINSTALLING
 
-additional_importsHARDCODED.append(myPackageNameIs)
+# =============================================================================
+# The right way.
+autoflake_additional_imports: list[str] = []
+autoflake_additional_imports.append(myPackageNameIs)
+concurrencyPackage: str = 'not implemented'
 
-# TODO this is stupid: the values will get out of line, but I can't figure out how to keep them inline or check they are inline without so much code that the verification code is likely to introduce problems
-# DatatypeLeavesTotal: TypeAlias = c_uint8
-# numpyLeavesTotal: TypeAlias = numpy_uint8
-# DatatypeElephino: TypeAlias = c_int16
-# numpyElephino: TypeAlias = numpy_int16
+# =============================================================================
+# The relatively flexible type system needs a different paradigm, but I don't
+# know what it should be. The system needs to 1) help optimize computation, 2)
+# make it possible to change the basic type of the package (e.g., from numpy
+# to superTypePy), 3) make it possible to synthesize the optimized modules used
+# by the package (numba, at the moment), and 4) make it possible to synthesize
+# arbitrary modules with different type systems.
+
 DatatypeLeavesTotal: TypeAlias = int
-numpyLeavesTotal: TypeAlias = numpy_int64
+# this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers accommodate
+numpyLeavesTotal: TypeAlias = numpy_int16
+
 DatatypeElephino: TypeAlias = int
-numpyElephino: TypeAlias = numpy_int64
+numpyElephino: TypeAlias = numpy_int16
+
 DatatypeFoldsTotal: TypeAlias = int
 numpyFoldsTotal: TypeAlias = numpy_int64
+numpyDtypeDefault = numpyFoldsTotal
 
 Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[numpyLeavesTotal]]
 Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[numpyLeavesTotal]]
 Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[numpyElephino]]
 Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[numpyFoldsTotal]]
+
+# =============================================================================
+# The right way.
+# (The dataclass, not the typing of the dataclass.)
+# (Also, my noobplementation of the dataclass certainly needs improvement.)
 
 @dataclasses.dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False, match_args=True, kw_only=False, slots=False, weakref_slot=False)
 class ComputationState:
@@ -168,21 +178,24 @@ class ComputationState:
 	# self.fieldName = self.fieldName.fieldType(indexSherpa)
 	# state.taskIndex.toMyType(indexSherpa)
 
-def getAlgorithmSource() -> ModuleType:
-	logicalPathModule: str = f"{myPackageNameIs}.{theAlgorithmSource}"
-	moduleImported: ModuleType = importlib_import_module(logicalPathModule)
+# =============================================================================
+# The most right way I know how to implement.
+
+logicalPathModuleSourceAlgorithm: str = f"{myPackageNameIs}.{theSourceAlgorithm}"
+logicalPathModuleDispatcher: str = logicalPathModuleSourceAlgorithm
+
+def getSourceAlgorithm() -> ModuleType:
+	moduleImported: ModuleType = importlib_import_module(logicalPathModuleSourceAlgorithm)
 	return moduleImported
 
 def getAlgorithmDispatcher():
-	moduleImported: ModuleType = getAlgorithmSource()
+	moduleImported: ModuleType = getSourceAlgorithm()
+	# TODO I think I need to use `inspect` to type the return value
 	dispatcherCallable = getattr(moduleImported, theDispatcherCallableName)
-	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
+	return dispatcherCallable
 
-# I DON'T KNOW!
-def getPackageDispatcher():
-	moduleImported: ModuleType = getAlgorithmSource()
-	dispatcherCallable = getattr(moduleImported, theDispatcherCallableName)
-	return cast(Callable[[ComputationState], ComputationState], dispatcherCallable)
+def getPathSyntheticModules() -> Path:
+	return pathPackage / theModuleOfSyntheticModules
 
 # TODO learn how to see this from the user's perspective
 def getPathJobRootDEFAULT() -> Path:
@@ -200,16 +213,41 @@ def getDatatypeModule() -> str:
 	return _datatypeModule
 
 def getNumpyDtypeDefault() -> DTypeLike:
-	return numpyFoldsTotal
+	return numpyDtypeDefault
 
 # =============================================================================
-# More truth
+# The coping way.
 
-def getPathSyntheticModules() -> Path:
-	return pathPackage / theModuleOfSyntheticModules
+class FREAKOUT(Exception): pass
 
-_datatypeModuleScalar = 'numba'
-_decoratorCallable = 'jit'
+# =============================================================================
+# Temporary or transient or something; probably still the wrong way
+
+Z0Z_formatNameModuleSynthetic = "numba_{callableTarget}"
+Z0Z_formatFilenameModuleSynthetic = Z0Z_formatNameModuleSynthetic + fileExtensionINSTALLING
+Z0Z_nameModuleDispatcherSynthetic: str = Z0Z_formatNameModuleSynthetic.format(callableTarget=theDispatcherCallableName)
+Z0Z_filenameModuleWrite = 'numbaCount' + fileExtensionINSTALLING
+Z0Z_logicalPathDispatcherSynthetic: str = '.'.join([myPackageNameIs, theModuleOfSyntheticModules, Z0Z_nameModuleDispatcherSynthetic])
+Z0Z_filenameWriteElseCallableTarget: str = 'count'
+
+_datatypeModuleScalar = ''
+_decoratorCallable = ''
+
+# =============================================================================
+# The most right way I know how to implement.
+
+if Z0Z_packageFlow == 'numba': # pyright: ignore [reportUnnecessaryComparison]
+	autoflake_additional_imports.append('numba')
+	concurrencyPackage: str = 'numba'
+	logicalPathModuleDispatcher = Z0Z_logicalPathDispatcherSynthetic
+	_datatypeModuleScalar = 'numba'
+	_decoratorCallable = 'jit'
+
+def getPackageDispatcher():
+	moduleImported: ModuleType = importlib_import_module(logicalPathModuleDispatcher)
+	dispatcherCallable = getattr(moduleImported, theDispatcherCallableName)
+	return dispatcherCallable
+
 def Z0Z_getDatatypeModuleScalar() -> str:
 	return _datatypeModuleScalar
 
@@ -225,8 +263,6 @@ def Z0Z_setDecoratorCallable(decoratorName: str) -> str:
 	global _decoratorCallable
 	_decoratorCallable = decoratorName
 	return _decoratorCallable
-
-class FREAKOUT(Exception): pass
 
 class ParametersNumba(TypedDict):
 	_dbg_extend_lifetimes: NotRequired[bool]
@@ -268,10 +304,17 @@ parametersNumbaSuperJitParallel: Final[ParametersNumba] = { **parametersNumbaSup
 """Speed, no helmet, concurrency, no talking to non-jitted functions."""
 
 parametersNumbaMinimum: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': False, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': False, 'forceobj': True, 'parallel': False, }
-"""
-refactor theDao, use dataclass or something that makes sense
-refactor the synthesize modules to transform the into data structures that work for numba
-"""
+
+class ParametersSynthesizeNumbaCallable(NamedTuple):
+	callableTarget: str
+	parametersNumba: ParametersNumba | None = None
+	inlineCallables: bool = False
+
+listNumbaCallableDispatchees: list[ParametersSynthesizeNumbaCallable] = [
+	ParametersSynthesizeNumbaCallable('countParallel', parametersNumbaSuperJitParallel, True),
+	ParametersSynthesizeNumbaCallable('countSequential', parametersNumbaSuperJit, True),
+	ParametersSynthesizeNumbaCallable('countInitialize', parametersNumbaDEFAULT, True),
+]
 
 """Technical concepts I am likely using and likely want to use more effectively:
 - Configuration Registry
@@ -284,14 +327,3 @@ theSSOT and yourSSOT
 delay realization/instantiation until a concrete value is desired
 moment of truth: when the value is needed, not when the value is defined
 """
-
-class ParametersSynthesizeNumbaCallable(NamedTuple):
-	callableTarget: str
-	parametersNumba: ParametersNumba | None = None
-	inlineCallables: bool = False
-
-listNumbaCallableDispatchees: list[ParametersSynthesizeNumbaCallable] = [
-	ParametersSynthesizeNumbaCallable('countParallel', parametersNumbaSuperJitParallel, True),
-	ParametersSynthesizeNumbaCallable('countSequential', parametersNumbaSuperJit, True),
-	ParametersSynthesizeNumbaCallable('countInitialize', parametersNumbaDEFAULT, True),
-]
