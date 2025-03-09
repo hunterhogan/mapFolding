@@ -5,7 +5,7 @@ from mapFolding.theSSOT import (
 	Array1DLeavesTotal,
 	Array3D,
 	ComputationState,
-	getDatatypeModule,
+	getDatatypePackage,
 	getNumpyDtypeDefault,
 )
 from collections.abc import Sequence
@@ -40,7 +40,7 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 	return productDimensions
 
 def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: DTypeLike | None = None) -> Array3D:
-	if 'numpy' == getDatatypeModule():
+	if 'numpy' == getDatatypePackage():
 		numpyDtype = datatype or getNumpyDtypeDefault()
 	else:
 		raise NotImplementedError("Somebody done broke it.")
@@ -71,7 +71,7 @@ def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: D
 
 def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None):# -> (Array1DLeavesTotal | Array1DElephino | Array1DFoldsTotal | ndarray[Any, dtype[Any]]):
 	# ChatGPT (4o reasoning?): "Tip: Create them with functions like np.empty(...) or np.zeros(...) to ensure contiguous memory layout."
-	if 'numpy' == getDatatypeModule():
+	if 'numpy' == getDatatypePackage():
 		numpyDtype = datatype or getNumpyDtypeDefault()
 		return numpy.zeros(shape, dtype=numpyDtype)
 	else:

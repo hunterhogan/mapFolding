@@ -1,7 +1,7 @@
-from mapFolding.theSSOT import FREAKOUT, filenameModuleSyntheticWrite, filenameWriteCallableTargetDEFAULT, autoflake_additional_imports
+from mapFolding.theSSOT import FREAKOUT, filenameModuleSyntheticWrite, filenameWriteCallableTargetDEFAULT, Z0Z_autoflake_additional_imports
 from mapFolding.theSSOT import formatStrFilenameForCallableSynthetic, getAlgorithmDispatcher, theModuleOfSyntheticModules
 from mapFolding.theSSOT import thePathPackage, listNumbaCallableDispatchees, ParametersSynthesizeNumbaCallable
-from mapFolding.theSSOT import getSourceAlgorithm, getDatatypeModule
+from mapFolding.theSSOT import getSourceAlgorithm, getDatatypePackage
 from mapFolding.theSSOT import ParametersNumba
 from mapFolding.someAssemblyRequired import LedgerOfImports, decorateCallableWithNumba, FunctionInliner, YouOughtaKnow, ast_Identifier
 from os import PathLike
@@ -110,8 +110,8 @@ def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCa
 		allImportsModule.update(allImports)
 
 	listAstImports: list[ast.ImportFrom | ast.Import] = allImportsModule.makeListAst()
-	additional_imports: list[str] = autoflake_additional_imports
-	additional_imports.append(getDatatypeModule())
+	additional_imports: list[str] = Z0Z_autoflake_additional_imports
+	additional_imports.append(getDatatypePackage())
 	pythonSource: str = makePythonSource(listFunctionDefs, listAstImports, additional_imports)
 
 	listStuff: list[YouOughtaKnow] = writePythonAsModule(pythonSource, listCallablesInline, relativePathWrite, filenameModuleWrite, formatFilenameWrite)

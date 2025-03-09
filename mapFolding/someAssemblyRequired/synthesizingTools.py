@@ -1,6 +1,6 @@
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
-from mapFolding.theSSOT import FREAKOUT, autoflake_additional_imports, getDatatypeModule, theFileExtension, thePackageName, thePathPackage
+from mapFolding.theSSOT import FREAKOUT, Z0Z_autoflake_additional_imports, getDatatypePackage, theFileExtension, thePackageName, thePathPackage
 from pathlib import Path
 from typing import Any, cast, NamedTuple, TypeAlias
 from Z0Z_tools import updateExtendPolishDictionaryLists
@@ -24,7 +24,7 @@ class YouOughtaKnow(NamedTuple):
 	astForCompetentProgrammers: ast.ImportFrom
 
 """
-I suspect I'm only using 1-2% of the potential of `ifThis`, `Then`, and `NodeReplacer`.
+I suspect I'm only using 1-2% of the potential of `ifThis`, `Make`, `Then`, and `NodeReplacer`.
 - nesting or chaining
 - idk what `@staticmethod` means or what the alternatives are
 - I'm at war with the static type checker, instead of the type checker helping me be more explicit and prevent bugs.
@@ -70,19 +70,6 @@ class ifThis:
 		return lambda node: (ifThis.CallReallyIs(moduleName, callableName)(node)
 							and 1 == sum(1 for descendant in ast.walk(node)
 											if ifThis.CallReallyIs(moduleName, callableName)(descendant)))
-
-	@staticmethod
-	def RecklessCallAsAttributeIs(callableName: str) -> Callable[[ast.AST], bool]:
-		"""Warning: You might match more than you want."""
-		return lambda node: (isinstance(node, ast.Call)
-							and isinstance(node.func, ast.Attribute)
-							and isinstance(node.func.value, ast.Name)
-							and node.func.attr == callableName)
-
-	@staticmethod
-	def RecklessCallReallyIs(callableName: str) -> Callable[[ast.AST], bool]:
-		"""Warning: You might match more than you want."""
-		return ifThis.anyOf(ifThis.CallAsNameIs(callableName), ifThis.RecklessCallAsAttributeIs(callableName))
 
 	@staticmethod
 	def AssignTo(identifier: str) -> Callable[[ast.AST], bool]:
@@ -206,16 +193,10 @@ class Make:
 		return ast.Return(value=value, **keywordArguments)
 
 	@staticmethod
-	def astTuple(elements: Sequence[ast.expr], ctx: ast.expr_context | None = None, **keywordArguments: int) -> ast.Tuple:
-		"""Create an AST Tuple node from a list of expressions.
-
-		Parameters:
-			elements: List of AST expressions to include in the tuple.
-			ctx: Context for the tuple (Load/Store). Defaults to Load context.
-		"""
-		if ctx is None:
-			ctx = ast.Store()
-		return ast.Tuple(elts=list(elements), ctx=ctx, **keywordArguments)
+	def astTuple(elements: Sequence[ast.expr], context: ast.expr_context | None = None, **keywordArguments: int) -> ast.Tuple:
+		"""context: Load/Store/Del"""
+		context = context or ast.Load()
+		return ast.Tuple(elts=list(elements), ctx=context, **keywordArguments)
 
 class Then:
 	@staticmethod
@@ -376,32 +357,45 @@ class IngredientsFunction:
 @dataclasses.dataclass
 class IngredientsModule:
 	"""Everything necessary to create a module, including the package context, should be here."""
-	functions: list[ast.FunctionDef]
-	imports: LedgerOfImports
 	name: ast_Identifier
 
-	fileExtension: str = theFileExtension
-	packageName: ast_Identifier = thePackageName
-	Z0Z_logicalPath: ast_Identifier | strDotStrCuzPyStoopid | None = None # module names other than the module itself and the package name
-	Z0Z_pathPackage: Path = thePathPackage
+	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
+	prologue: list[ast.stmt] = dataclasses.field(default_factory=list)
+	functions: list[ast.FunctionDef | ast.stmt] = dataclasses.field(default_factory=list)
+	epilogue: list[ast.stmt] = dataclasses.field(default_factory=list)
+	launcher: list[ast.stmt] = dataclasses.field(default_factory=list)
 
-	def _getLogicalPathParent(self) -> str:
-		listModules = [self.packageName]
-		if self.Z0Z_logicalPath:
-			listModules.extend(list(self.Z0Z_logicalPath))
-		return '.'.join(listModules)
+	packageName: ast_Identifier | None= thePackageName
+	logicalPathINFIX: ast_Identifier | strDotStrCuzPyStoopid | None = None # module names other than the module itself and the package name
+	pathPackage: Path = thePathPackage
+	fileExtension: str = theFileExtension
+	type_ignores: list[ast.TypeIgnore] = dataclasses.field(default_factory=list)
+
+	def _getLogicalPathParent(self) -> str | None:
+		listModules: list[ast_Identifier] = []
+		if self.packageName:
+			listModules.append(self.packageName)
+		if self.logicalPathINFIX:
+			listModules.append(self.logicalPathINFIX)
+		if listModules:
+			return '.'.join(listModules)
 
 	def _getLogicalPathAbsolute(self) -> str:
-		return '.'.join([self._getLogicalPathParent(), self.name])
+		listModules: list[ast_Identifier] = []
+		logicalPathParent: str | None = self._getLogicalPathParent()
+		if logicalPathParent:
+			listModules.append(logicalPathParent)
+		listModules.append(self.name)
+		return '.'.join(listModules)
 
 	@property
 	def pathFilename(self) -> Path:
-		pathRoot: Path = self.Z0Z_pathPackage
-
-		if self.Z0Z_logicalPath:
-			pathRoot = pathRoot / self.Z0Z_logicalPath
-
-		return pathRoot / (self.name + self.fileExtension)
+		pathRoot: Path = self.pathPackage
+		filename = self.name + self.fileExtension
+		if self.logicalPathINFIX:
+			whyIsThisStillAThing = self.logicalPathINFIX.split('.')
+			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
+		return pathRoot.joinpath(filename)
 
 	@property
 	def absoluteImport(self) -> ast.Import:
@@ -409,25 +403,30 @@ class IngredientsModule:
 
 	@property
 	def absoluteImportFrom(self) -> ast.ImportFrom:
-		return Make.astImportFrom(self._getLogicalPathParent(), [Make.astAlias(self.name)])
+		""" `from . import theModule` """
+		logicalPathParent: str | None = self._getLogicalPathParent()
+		if logicalPathParent is None:
+			logicalPathParent = '.'
+		return Make.astImportFrom(logicalPathParent, [Make.astAlias(self.name)])
 
-	def addFunction(self, ingredientsFunction: IngredientsFunction) -> None:
-		"""Add a function to the module and incorporate its imports.
+	def addFunctions(self, *ingredientsFunction: IngredientsFunction) -> None:
+		"""Add one or more `IngredientsFunction`. """
+		listLedgers: list[LedgerOfImports] = []
+		for definition in ingredientsFunction:
+			self.functions.append(definition.FunctionDef)
+			listLedgers.append(definition.imports)
+		self.imports.update(*listLedgers)
 
-		Parameters:
-			ingredientsFunction: Function with its imports to be added to this module.
-		"""
-		self.functions.append(ingredientsFunction.FunctionDef)
-		self.imports.update(ingredientsFunction.imports)
-
-	def addFunctions(self, *ingredientsFunctions: IngredientsFunction) -> None:
-		"""Add multiple functions to the module and incorporate their imports.
-
-		Parameters:
-			*ingredientsFunctions: One or more functions with their imports to be added.
-		"""
-		for ingredientsFunction in ingredientsFunctions:
-			self.addFunction(ingredientsFunction)
+	def _makeModuleBody(self) -> list[ast.stmt]:
+		"""Constructs the body of the module, including prologue, functions, epilogue, and launcher."""
+		body: list[ast.stmt] = []
+		body.extend(self.imports.makeListAst())
+		body.extend(self.prologue)
+		body.extend(self.functions)
+		body.extend(self.epilogue)
+		body.extend(self.launcher)
+		# TODO `launcher` must start with `if __name__ == '__main__':` and be indented
+		return body
 
 	def writeModule(self) -> None:
 		"""Writes the module to disk with proper imports and functions.
@@ -436,18 +435,19 @@ class IngredientsModule:
 		fixes missing locations, unpacks the AST to Python code, applies autoflake
 		to clean up imports, and writes the resulting code to the appropriate file.
 		"""
-		listAstImports: list[ast.ImportFrom | ast.Import] = self.imports.makeListAst()
-		astModule = Make.astModule(body=cast(list[ast.stmt], listAstImports + self.functions))
+		astModule = Make.astModule(body=self._makeModuleBody(), type_ignores=self.type_ignores)
 		ast.fix_missing_locations(astModule)
 		pythonSource: str = ast.unparse(astModule)
 		if not pythonSource: raise FREAKOUT
-		additional_imports: list[str] = autoflake_additional_imports
-		additional_imports.append(getDatatypeModule())
-		pythonSource = autoflake.fix_code(pythonSource, additional_imports)
+		autoflake_additional_imports: list[str] = []
+		if self.packageName:
+			autoflake_additional_imports.append(self.packageName)
+		# TODO LedgerOfImports method: list of package names. autoflake_additional_imports.extend()
+		autoflake_additional_imports.append(getDatatypePackage())
+		pythonSource = autoflake.fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False,)
 		self.pathFilename.write_text(pythonSource)
 
-	# TODO create logic (as init or methods) for aggregating/incorporating `IngredientsFunction` objects
-	# When resolving the ledger of imports, remove self-referential imports
+	# TODO When resolving the ledger of imports, remove self-referential imports
 
 def shatter_dataclassesDOTdataclass(module: ast.Module, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
 									) -> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], list[ast.Name], list[ast.keyword], ast.Tuple]:
@@ -471,6 +471,6 @@ def shatter_dataclassesDOTdataclass(module: ast.Module, dataclass_Identifier: as
 	dataclassDismantler.visit(dataclass)
 
 	list_astNameDataclassFragments: list[ast.Name] = [Make.astName(astAnnAssign.target.id) for astAnnAssign in list_astAnnAssign if isinstance(astAnnAssign.target, ast.Name)]
-	astTuple_astNameDataclassFragments: ast.Tuple = Make.astTuple(list_astNameDataclassFragments)
+	astTupleForAssignTargetsToFragments: ast.Tuple = Make.astTuple(list_astNameDataclassFragments, ast.Store())
 
-	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTuple_astNameDataclassFragments
+	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments

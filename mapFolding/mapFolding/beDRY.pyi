@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from mapFolding.theSSOT import Array1DElephino as Array1DElephino, Array1DFoldsTotal as Array1DFoldsTotal, Array1DLeavesTotal as Array1DLeavesTotal, Array3D as Array3D, ComputationState as ComputationState, getDatatypeModule as getDatatypeModule, getNumpyDtypeDefault as getNumpyDtypeDefault
+from mapFolding.theSSOT import Array1DElephino as Array1DElephino, Array1DFoldsTotal as Array1DFoldsTotal, Array1DLeavesTotal as Array1DLeavesTotal, Array3D as Array3D, ComputationState as ComputationState, getDatatypePackage as getDatatypePackage, getNumpyDtypeDefault as getNumpyDtypeDefault
 from numpy import dtype, ndarray
 from numpy.typing import DTypeLike as DTypeLike
 from typing import Any

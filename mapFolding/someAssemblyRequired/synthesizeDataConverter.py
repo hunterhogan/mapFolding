@@ -1,29 +1,16 @@
-from mapFolding.someAssemblyRequired import (
-	ifThis,
-	IngredientsFunction,
-	IngredientsModule,
-	LedgerOfImports,
-	Make,
-	NodeReplacer,
-	shatter_dataclassesDOTdataclass,
-	Then,
-)
+from mapFolding.someAssemblyRequired import ( IngredientsFunction, IngredientsModule, Make, shatter_dataclassesDOTdataclass, )
 from mapFolding.theSSOT import (
-	FREAKOUT,
 	theDataclassIdentifierAsStr,
 	theDataclassInstanceAsStr,
 	theDispatcherCallableAsStr,
 	theLogicalPathModuleDataclass,
 	theModuleOfSyntheticModules,
-	thePackageName,
 	Z0Z_DataConverterCallable,
 	theLogicalPathModuleDispatcherSynthetic,
 )
-from typing import Any, cast
-import importlib
-import dataclasses
-import copy
-import inspect
+from typing import cast
+from importlib import import_module
+from inspect import getsource as inspect_getsource
 import ast
 
 def makeDataConverterCallable(
@@ -34,9 +21,9 @@ def makeDataConverterCallable(
 	logicalPathModuleDispatcher: str = theLogicalPathModuleDispatcherSynthetic,
 	) -> IngredientsFunction:
 
-	astModuleDataclass: ast.Module = ast.parse(inspect.getsource(importlib.import_module(logicalPathModuleDataclass)))
+	astModuleDataclass: ast.Module = ast.parse(inspect_getsource(import_module(logicalPathModuleDataclass)))
 
-	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTuple_astNameDataclassFragments = shatter_dataclassesDOTdataclass(astModuleDataclass, dataclassIdentifierAsStr, dataclassInstanceAsStr)
+	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments = shatter_dataclassesDOTdataclass(astModuleDataclass, dataclassIdentifierAsStr, dataclassInstanceAsStr)
 
 	ingredientsFunction = IngredientsFunction(
 		FunctionDef = Make.astFunctionDef(name=Z0Z_DataConverterCallable
@@ -47,7 +34,7 @@ def makeDataConverterCallable(
 		, imports = ledgerDataclassAndFragments
 	)
 
-	callToDispatcher = Make.astAssign(listTargets=[astTuple_astNameDataclassFragments]
+	callToDispatcher = Make.astAssign(listTargets=[astTupleForAssignTargetsToFragments]
 										, value=Make.astCall(Make.astName(dispatcherCallableAsStr), args=list_astNameDataclassFragments))
 	ingredientsFunction.FunctionDef.body.append(callToDispatcher)
 	ingredientsFunction.imports.addImportFromStr(logicalPathModuleDispatcher, dispatcherCallableAsStr)
@@ -62,7 +49,7 @@ def makeDataConverterModule() -> IngredientsModule:
 		name=Z0Z_DataConverterCallable,
 		functions=[ingredientsFunctionDataConverter.FunctionDef],
 		imports=ingredientsFunctionDataConverter.imports,
-		Z0Z_logicalPath=theModuleOfSyntheticModules,
+		logicalPathINFIX=theModuleOfSyntheticModules,
 	)
 
 	ingredientsModuleDataConverter.writeModule()

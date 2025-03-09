@@ -103,8 +103,8 @@ theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
 
 # =============================================================================
 # The right way.
-autoflake_additional_imports: list[str] = []
-autoflake_additional_imports.append(thePackageName)
+Z0Z_autoflake_additional_imports: list[str] = []
+Z0Z_autoflake_additional_imports.append(thePackageName)
 concurrencyPackage: str = 'not implemented'
 
 # =============================================================================
@@ -226,12 +226,12 @@ def getPathJobRootDEFAULT() -> Path:
 		pathJobDEFAULT = thePathPackage / "jobs"
 	return pathJobDEFAULT
 
-_datatypeModule: str = ''
-def getDatatypeModule() -> str:
-	global _datatypeModule
-	if not _datatypeModule:
-		_datatypeModule = theDatatypePackage
-	return _datatypeModule
+_datatypePackage: str = ''
+def getDatatypePackage() -> str:
+	global _datatypePackage
+	if not _datatypePackage:
+		_datatypePackage = theDatatypePackage
+	return _datatypePackage
 
 def getNumpyDtypeDefault() -> DTypeLike:
 	return numpyDtypeDefault
@@ -264,7 +264,7 @@ _decoratorCallable = ''
 # The most right way I know how to implement.
 
 if Z0Z_packageFlow == 'numba': # pyright: ignore [reportUnnecessaryComparison]
-	autoflake_additional_imports.append('numba')
+	Z0Z_autoflake_additional_imports.append('numba')
 	concurrencyPackage: str = 'numba'
 	theLogicalPathModuleDispatcher = theLogicalPathModuleDispatcherSynthetic
 	_datatypeModuleScalar = 'numba'
