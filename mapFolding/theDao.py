@@ -142,7 +142,7 @@ def countInitialize(state: ComputationState) -> ComputationState:
 	return state
 
 def countParallel(statePARALLEL: ComputationState) -> ComputationState:
-	stateComplete = copy.deepcopy(statePARALLEL)
+	stateCOMPLETE = copy.deepcopy(statePARALLEL)
 	for indexSherpa in range(statePARALLEL.taskDivisions):
 		state = copy.deepcopy(statePARALLEL)
 		state.taskIndex = indexSherpa
@@ -170,8 +170,8 @@ def countParallel(statePARALLEL: ComputationState) -> ComputationState:
 				state = backtrack(state)
 			if thereIsAnActiveLeaf(state):
 				state = placeLeaf(state)
-		stateComplete.foldGroups[state.taskIndex] = state.groupsOfFolds
-	return stateComplete
+		stateCOMPLETE.foldGroups[state.taskIndex] = state.groupsOfFolds
+	return stateCOMPLETE
 
 def countSequential(state: ComputationState) -> ComputationState:
 	while activeLeafGreaterThan0(state):
@@ -200,9 +200,9 @@ def countSequential(state: ComputationState) -> ComputationState:
 	state.foldGroups[state.taskIndex] = state.groupsOfFolds
 	return state
 
-def doTheNeedful(computationStateInitialized: ComputationState) -> ComputationState:
-	computationStateInitialized = countInitialize(computationStateInitialized)
-	if computationStateInitialized.taskDivisions > 0:
-		return countParallel(computationStateInitialized)
+def doTheNeedful(state: ComputationState) -> ComputationState:
+	state = countInitialize(state)
+	if state.taskDivisions > 0:
+		return countParallel(state)
 	else:
-		return countSequential(computationStateInitialized)
+		return countSequential(state)

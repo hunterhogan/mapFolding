@@ -1,13 +1,12 @@
-from mapFolding.theSSOT import indexMy
-from mapFolding.syntheticModules.numbaCount import countInitialize, countSequential, countParallel
-from numba import uint16, int64, jit
-from numpy import ndarray, dtype, integer
-from typing import Any
+from  import 
+from mapFolding.syntheticModules.numbaCount import countInitialize, countParallel, countSequential
+from mapFolding.theSSOT import ComputationState
+import copy
 
-@jit((uint16[:, :, ::1], int64[::1], uint16[::1], uint16[::1], uint16[::1], uint16[:, ::1]), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
-def doTheNeedful(connectionGraph: ndarray[tuple[int, int, int], dtype[integer[Any]]], foldGroups: ndarray[tuple[int], dtype[integer[Any]]], gapsWhere: ndarray[tuple[int], dtype[integer[Any]]], mapShape: ndarray[tuple[int], dtype[integer[Any]]], my: ndarray[tuple[int], dtype[integer[Any]]], track: ndarray[tuple[int, int], dtype[integer[Any]]]) -> None:
-    countInitialize(connectionGraph, gapsWhere, my, track)
-    if my[indexMy.taskDivisions] > 0:
-        countParallel(connectionGraph, foldGroups, gapsWhere, my, track)
+@(ComputationState(ComputationState), _nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
+def doTheNeedful(computationStateInitialized: ComputationState) -> ComputationState:
+    computationStateInitialized = countInitialize(computationStateInitialized)
+    if computationStateInitialized.taskDivisions > 0:
+        return countParallel(computationStateInitialized)
     else:
-        countSequential(connectionGraph, foldGroups, gapsWhere, my, track)
+        return countSequential(computationStateInitialized)

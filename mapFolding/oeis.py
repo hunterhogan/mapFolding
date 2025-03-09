@@ -2,7 +2,7 @@
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from mapFolding import countFolds
-from mapFolding.theSSOT import pathPackage
+from mapFolding.theSSOT import thePathPackage
 from pathlib import Path
 from typing import Any, Final, TYPE_CHECKING
 import argparse
@@ -24,7 +24,7 @@ cacheDays = 7
 """
 Section: make `settingsOEIS`"""
 
-pathCache: Path = pathPackage / ".cache"
+pathCache: Path = thePathPackage / ".cache"
 
 class SettingsOEIS(TypedDict):
 	description: str

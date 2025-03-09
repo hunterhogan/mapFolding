@@ -1,7 +1,7 @@
 import pathlib
 from collections.abc import Callable as Callable
 from mapFolding import countFolds as countFolds
-from mapFolding.theSSOT import pathPackage as pathPackage
+from mapFolding.theSSOT import thePathPackage as thePathPackage
 from pathlib import Path
 from typing import Any, Final, TypedDict
 

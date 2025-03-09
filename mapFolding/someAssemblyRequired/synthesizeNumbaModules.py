@@ -1,6 +1,6 @@
-from mapFolding.theSSOT import FREAKOUT, Z0Z_filenameModuleWrite, Z0Z_filenameWriteElseCallableTarget, autoflake_additional_imports
-from mapFolding.theSSOT import Z0Z_formatFilenameModuleSynthetic, getAlgorithmDispatcher, theModuleOfSyntheticModules
-from mapFolding.theSSOT import pathPackage, listNumbaCallableDispatchees, ParametersSynthesizeNumbaCallable
+from mapFolding.theSSOT import FREAKOUT, filenameModuleSyntheticWrite, filenameWriteCallableTargetDEFAULT, autoflake_additional_imports
+from mapFolding.theSSOT import formatStrFilenameForCallableSynthetic, getAlgorithmDispatcher, theModuleOfSyntheticModules
+from mapFolding.theSSOT import thePathPackage, listNumbaCallableDispatchees, ParametersSynthesizeNumbaCallable
 from mapFolding.theSSOT import getSourceAlgorithm, getDatatypeModule
 from mapFolding.theSSOT import ParametersNumba
 from mapFolding.someAssemblyRequired import LedgerOfImports, decorateCallableWithNumba, FunctionInliner, YouOughtaKnow, ast_Identifier
@@ -36,7 +36,7 @@ def makeFunctionDef(astModule: ast.Module, callableTarget: str, parametersNumba:
 
 def getFunctionDef(algorithmSource: types.ModuleType, *arguments: Any, **keywordArguments: Any) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	pythonSource: str = inspect.getsource(algorithmSource)
-	astModule: ast.Module = ast.parse(pythonSource, type_comments=True)
+	astModule: ast.Module = ast.parse(pythonSource)
 	FunctionDefTarget, allImports = makeFunctionDef(astModule, *arguments, **keywordArguments)
 	return FunctionDefTarget, allImports
 
@@ -49,13 +49,14 @@ def makePythonSource(listFunctionDefs: list[ast.FunctionDef], listAstImports: li
 	return pythonSource
 
 def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[ParametersSynthesizeNumbaCallable], relativePathWrite: str | PathLike[str], filenameWrite: str | None, formatFilenameWrite: str) -> list[YouOughtaKnow]:
-	pathWrite: Path = pathPackage / relativePathWrite
+	pathWrite: Path = thePathPackage / relativePathWrite
 
 	if not filenameWrite:
 		if len(listCallableSynthesized) == 1:
 			callableTarget: str = listCallableSynthesized[0].callableTarget
 		else:
-			callableTarget = Z0Z_filenameWriteElseCallableTarget
+			callableTarget = filenameWriteCallableTargetDEFAULT
+			# NOTE WARNING I think I broken this format string. See theSSOT.py
 		filenameWrite = formatFilenameWrite.format(callableTarget=callableTarget)
 	else:
 		if not filenameWrite.endswith('.py'):
@@ -65,7 +66,7 @@ def writePythonAsModule(pythonSource: str, listCallableSynthesized: list[Paramet
 
 	pathFilename.write_text(pythonSource)
 
-	howIsThisStillAThing: Path = pathPackage.parent
+	howIsThisStillAThing: Path = thePathPackage.parent
 	dumbassPythonNamespace: tuple[str, ...] = pathFilename.relative_to(howIsThisStillAThing).with_suffix('').parts
 	ImaModule: str = '.'.join(dumbassPythonNamespace)
 
@@ -85,7 +86,7 @@ def makeFlowNumbaOptimized() -> list[YouOughtaKnow]: ...
 def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCallable], callableDispatcher: bool, algorithmSource: types.ModuleType, relativePathWrite: str | PathLike[str], filenameModuleWrite: str, formatFilenameWrite: str) -> list[YouOughtaKnow]: ...
 def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCallable] | None = None, callableDispatcher: bool | None = None, algorithmSource: types.ModuleType | None = None, relativePathWrite: str | PathLike[str] | None = None, filenameModuleWrite: str | None = None, formatFilenameWrite: str | None = None) -> list[YouOughtaKnow]:
 	if all(parameter is None for parameter in [listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite]):
-		return makeFlowNumbaOptimized(listNumbaCallableDispatchees, True, getSourceAlgorithm(), theModuleOfSyntheticModules, Z0Z_filenameModuleWrite, Z0Z_formatFilenameModuleSynthetic)
+		return makeFlowNumbaOptimized(listNumbaCallableDispatchees, True, getSourceAlgorithm(), theModuleOfSyntheticModules, filenameModuleSyntheticWrite, formatStrFilenameForCallableSynthetic)
 
 	if (listCallablesInline is None
 	or callableDispatcher is None

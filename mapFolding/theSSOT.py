@@ -21,25 +21,29 @@ if TYPE_CHECKING:
 else:
 	TypedDict = dict
 
+packageFlowSynthetic = 'numba'
 Z0Z_packageFlow = 'algorithm'
-# Z0Z_packageFlow = 'numba'
+# Z0Z_packageFlow = packageFlowSynthetic
 
 # =============================================================================
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
 # Evaluate When Packaging Evaluate When Packaging Evaluate When Packaging
 
 sourceAlgorithmPACKAGING: str = 'theDao'
-datatypeModulePACKAGING: Final[str] = 'numpy'
-dispatcherCallableNamePACKAGING: str = 'doTheNeedful'
+datatypePackagePACKAGING: Final[str] = 'numpy'
+dispatcherCallableAsStrPACKAGING: str = 'doTheNeedful'
 moduleOfSyntheticModulesPACKAGING: Final[str] = 'syntheticModules'
 
+dataclassModuleAsStrPACKAGING: str = 'theSSOT'
 dataclassIdentifierAsStrPACKAGING: str = 'ComputationState'
 dataclassInstanceAsStrPACKAGING: str = 'state'
+dataclassInstance_Pre_ParallelAsStrPACKAGING = dataclassInstanceAsStrPACKAGING + 'PARALLEL'
+dataclassInstance_Post_ParallelAsStrPACKAGING = dataclassInstanceAsStrPACKAGING + 'COMPLETE'
 
 try:
-	myPackageNameIsPACKAGING: str = tomli.load(Path("../pyproject.toml").open('rb'))["project"]["name"]
+	thePackageNameIsPACKAGING: str = tomli.load(Path("../pyproject.toml").open('rb'))["project"]["name"]
 except Exception:
-	myPackageNameIsPACKAGING: str = "mapFolding"
+	thePackageNameIsPACKAGING: str = "mapFolding"
 
 # =============================================================================
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
@@ -48,7 +52,7 @@ except Exception:
 fileExtensionINSTALLING: str = '.py'
 
 def getPathPackageINSTALLING() -> Path:
-	pathPackage: Path = Path(inspect_getfile(importlib_import_module(myPackageNameIsPACKAGING)))
+	pathPackage: Path = Path(inspect_getfile(importlib_import_module(thePackageNameIsPACKAGING)))
 	if pathPackage.is_file():
 		pathPackage = pathPackage.parent
 	return pathPackage
@@ -71,20 +75,36 @@ Z0Z_DataConverterCallable = 'flattenData'
 
 # =====================
 # Create enduring identifiers from the hopefully transient identifiers above.
-myPackageNameIs: Final[str] = myPackageNameIsPACKAGING
-pathPackage: Path = getPathPackageINSTALLING()
+thePackageName: Final[str] = thePackageNameIsPACKAGING
+thePathPackage: Path = getPathPackageINSTALLING()
+
+"""
+NOTE on semiotics: `theIdentifier` vs `identifier`
+
+- This package has a typical, "hardcoded" algorithm for counting map folds.
+- This package has logic for transforming that algorithm into other forms.
+- The transformation logic can transform other algorithms if 1) they are similar enough to the "hardcoded" algorithm and 2) I have written the transformation logic well enough to handle the differences.
+- To avoid confusion and namespace collisions, I differentiate between, for example, `theSourceAlgorithm` of the package and any other `sourceAlgorithm` being transformed by the package.
+"""
+
 theSourceAlgorithm: str = sourceAlgorithmPACKAGING
-theDatatypeModule: Final[str] = datatypeModulePACKAGING
-theDispatcherCallableName: str = dispatcherCallableNamePACKAGING
-theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
+theDatatypePackage: Final[str] = datatypePackagePACKAGING
+
+theDispatcherCallableAsStr: str = dispatcherCallableAsStrPACKAGING
+
+theDataclassModuleAsStr: str = dataclassModuleAsStrPACKAGING
 theDataclassIdentifierAsStr: str = dataclassIdentifierAsStrPACKAGING
 theDataclassInstanceAsStr: str = dataclassInstanceAsStrPACKAGING
+theDataclassInstance_Pre_ParallelAsStr: str = dataclassInstance_Pre_ParallelAsStrPACKAGING
+theDataclassInstance_Post_ParallelAsStr: str = dataclassInstance_Post_ParallelAsStrPACKAGING
+
 theFileExtension: str = fileExtensionINSTALLING
+theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
 
 # =============================================================================
 # The right way.
 autoflake_additional_imports: list[str] = []
-autoflake_additional_imports.append(myPackageNameIs)
+autoflake_additional_imports.append(thePackageName)
 concurrencyPackage: str = 'not implemented'
 
 # =============================================================================
@@ -181,35 +201,36 @@ class ComputationState:
 # =============================================================================
 # The most right way I know how to implement.
 
-logicalPathModuleSourceAlgorithm: str = f"{myPackageNameIs}.{theSourceAlgorithm}"
-logicalPathModuleDispatcher: str = logicalPathModuleSourceAlgorithm
+theLogicalPathModuleSourceAlgorithm: str = '.'.join([thePackageName, theSourceAlgorithm])
+theLogicalPathModuleDispatcher: str = theLogicalPathModuleSourceAlgorithm
+theLogicalPathModuleDataclass: str = '.'.join([thePackageName, theDataclassModuleAsStr])
 
 def getSourceAlgorithm() -> ModuleType:
-	moduleImported: ModuleType = importlib_import_module(logicalPathModuleSourceAlgorithm)
+	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleSourceAlgorithm)
 	return moduleImported
 
 def getAlgorithmDispatcher():
 	moduleImported: ModuleType = getSourceAlgorithm()
 	# TODO I think I need to use `inspect` to type the return value
-	dispatcherCallable = getattr(moduleImported, theDispatcherCallableName)
+	dispatcherCallable = getattr(moduleImported, theDispatcherCallableAsStr)
 	return dispatcherCallable
 
 def getPathSyntheticModules() -> Path:
-	return pathPackage / theModuleOfSyntheticModules
+	return thePathPackage / theModuleOfSyntheticModules
 
 # TODO learn how to see this from the user's perspective
 def getPathJobRootDEFAULT() -> Path:
 	if 'google.colab' in sysModules:
 		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / "jobs"
 	else:
-		pathJobDEFAULT = pathPackage / "jobs"
+		pathJobDEFAULT = thePathPackage / "jobs"
 	return pathJobDEFAULT
 
 _datatypeModule: str = ''
 def getDatatypeModule() -> str:
 	global _datatypeModule
 	if not _datatypeModule:
-		_datatypeModule = theDatatypeModule
+		_datatypeModule = theDatatypePackage
 	return _datatypeModule
 
 def getNumpyDtypeDefault() -> DTypeLike:
@@ -223,12 +244,18 @@ class FREAKOUT(Exception): pass
 # =============================================================================
 # Temporary or transient or something; probably still the wrong way
 
-Z0Z_formatNameModuleSynthetic = "numba_{callableTarget}"
-Z0Z_formatFilenameModuleSynthetic = Z0Z_formatNameModuleSynthetic + fileExtensionINSTALLING
-Z0Z_nameModuleDispatcherSynthetic: str = Z0Z_formatNameModuleSynthetic.format(callableTarget=theDispatcherCallableName)
-Z0Z_filenameModuleWrite = 'numbaCount' + fileExtensionINSTALLING
-Z0Z_logicalPathDispatcherSynthetic: str = '.'.join([myPackageNameIs, theModuleOfSyntheticModules, Z0Z_nameModuleDispatcherSynthetic])
-Z0Z_filenameWriteElseCallableTarget: str = 'count'
+# THIS IS A STUPID SYSTEM BUT I CAN'T FIGURE OUT AN IMPROVEMENT
+formatStrModuleSynthetic = "{packageFlow}Count"
+formatStrModuleForCallableSynthetic = formatStrModuleSynthetic + "_{callableTarget}"
+
+theModuleDispatcherSynthetic: str = formatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=theDispatcherCallableAsStr)
+theLogicalPathModuleDispatcherSynthetic: str = '.'.join([thePackageName, theModuleOfSyntheticModules, theModuleDispatcherSynthetic])
+
+formatStrFilenameSynthetic = formatStrModuleSynthetic + fileExtensionINSTALLING
+formatStrFilenameForCallableSynthetic = formatStrModuleForCallableSynthetic + fileExtensionINSTALLING
+filenameModuleSyntheticWrite = formatStrFilenameSynthetic.format(packageFlow=packageFlowSynthetic)
+
+filenameWriteCallableTargetDEFAULT: str = 'count'
 
 _datatypeModuleScalar = ''
 _decoratorCallable = ''
@@ -239,13 +266,13 @@ _decoratorCallable = ''
 if Z0Z_packageFlow == 'numba': # pyright: ignore [reportUnnecessaryComparison]
 	autoflake_additional_imports.append('numba')
 	concurrencyPackage: str = 'numba'
-	logicalPathModuleDispatcher = Z0Z_logicalPathDispatcherSynthetic
+	theLogicalPathModuleDispatcher = theLogicalPathModuleDispatcherSynthetic
 	_datatypeModuleScalar = 'numba'
 	_decoratorCallable = 'jit'
 
 def getPackageDispatcher():
-	moduleImported: ModuleType = importlib_import_module(logicalPathModuleDispatcher)
-	dispatcherCallable = getattr(moduleImported, theDispatcherCallableName)
+	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
+	dispatcherCallable = getattr(moduleImported, theDispatcherCallableAsStr)
 	return dispatcherCallable
 
 def Z0Z_getDatatypeModuleScalar() -> str:

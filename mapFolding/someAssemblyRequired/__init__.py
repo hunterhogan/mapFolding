@@ -13,6 +13,7 @@ from mapFolding.someAssemblyRequired.synthesizingTools import (
 	Then as Then,
 	YouOughtaKnow as YouOughtaKnow,
 	)
+from mapFolding.someAssemblyRequired.synthesizeDataConverter import makeDataConverterCallable as makeDataConverterCallable
 from mapFolding.someAssemblyRequired.synthesizeNumbaReusable import (
 	thisIsNumbaDotJit as thisIsNumbaDotJit,
 	decorateCallableWithNumba as decorateCallableWithNumba,

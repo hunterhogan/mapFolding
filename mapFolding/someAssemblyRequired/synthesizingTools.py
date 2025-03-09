@@ -1,6 +1,6 @@
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
-from mapFolding.theSSOT import FREAKOUT, autoflake_additional_imports, getDatatypeModule, theFileExtension, myPackageNameIs, pathPackage
+from mapFolding.theSSOT import FREAKOUT, autoflake_additional_imports, getDatatypeModule, theFileExtension, thePackageName, thePathPackage
 from pathlib import Path
 from typing import Any, cast, NamedTuple, TypeAlias
 from Z0Z_tools import updateExtendPolishDictionaryLists
@@ -13,6 +13,8 @@ import libcst
 
 ast_Identifier: TypeAlias = str
 strDotStrCuzPyStoopid: TypeAlias = str
+strORlist_ast_type_paramORintORNone: TypeAlias = Any
+strORintORNone: TypeAlias = Any
 Z0Z_thisCannotBeTheBestWay: TypeAlias = list[ast.Name] | list[ast.Attribute] | list[ast.Subscript] | list[ast.Name | ast.Attribute] | list[ast.Name | ast.Subscript] | list[ast.Attribute | ast.Subscript] | list[ast.Name | ast.Attribute | ast.Subscript]
 
 # NOTE: this is weak
@@ -139,26 +141,19 @@ class Make:
 		return ast.alias(name=name, asname=asname)
 
 	@staticmethod
-	def astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None
-					, **kwargs: Any
-					#, **kwargs: **ast._Attributes[int | None],
-					) -> ast.AnnAssign:
+	def astAnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None, **keywordArguments: int) -> ast.AnnAssign:
 		""" `simple: int`: uses a clever int-from-boolean to assign the correct value to the `simple` attribute. So, don't add it as a parameter."""
-		return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)))
+		return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)), **keywordArguments)
 
 	@staticmethod
-	def astAssign(listTargets: Any, value: ast.expr, type_comment: str | None=None
-				, **kwargs: Any
-				#, **kwargs: **ast._Attributes[int | None],
-				) -> ast.Assign:
-		return ast.Assign(targets=cast(list[ast.expr], listTargets), value=value, type_comment=type_comment, **kwargs)
+	def astAssign(listTargets: Any, value: ast.expr, **keywordArguments: strORintORNone) -> ast.Assign:
+		"""keywordArguments: type_comment:str|None, lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
+		return ast.Assign(targets=cast(list[ast.expr], listTargets), value=value, **keywordArguments)
 
 	@staticmethod
-	def astArg(identifier: ast_Identifier, annotation: ast.expr | None = None, type_comment: str | None = None
-		, **kwargs: Any
-		#, **kwargs: **ast._Attributes[int | None],
-	) -> ast.arg:
-		return ast.arg(identifier, annotation, type_comment, **kwargs)
+	def astArg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: strORintORNone) -> ast.arg:
+		"""keywordArguments: type_comment:str|None, lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
+		return ast.arg(identifier, annotation, **keywordArguments)
 
 	@staticmethod
 	def astArgumentsSpecification(posonlyargs: list[ast.arg]=[], args: list[ast.arg]=[], vararg: ast.arg|None=None, kwonlyargs: list[ast.arg]=[], kw_defaults: list[ast.expr|None]=[None], kwarg: ast.arg|None=None, defaults: list[ast.expr]=[]) -> ast.arguments:
@@ -169,11 +164,9 @@ class Make:
 		return ast.Call(func=caller, args=list(args) if args else [], keywords=list(list_astKeywords) if list_astKeywords else [])
 
 	@staticmethod
-	def astFunctionDef(name: ast_Identifier, args: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, type_comment: str|None=None, type_params: list[ast.type_param]=[]
-		, **kwargs: Any
-		#, **kwargs: **ast._Attributes[int | None],
-		) -> ast.FunctionDef:
-		return ast.FunctionDef(name=name, args=args, body=body, decorator_list=decorator_list, returns=returns, type_comment=type_comment, type_params=type_params, **kwargs)
+	def astFunctionDef(name: ast_Identifier, args: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, **keywordArguments: strORlist_ast_type_paramORintORNone) -> ast.FunctionDef:
+		"""keywordArguments: type_comment:str|None, type_params:list[ast.type_param], lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
+		return ast.FunctionDef(name=name, args=args, body=body, decorator_list=decorator_list, returns=returns, **keywordArguments)
 
 	@staticmethod
 	def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None) -> ast.Import:
@@ -184,11 +177,8 @@ class Make:
 		return ast.ImportFrom(module=moduleName, names=list_astAlias, level=0)
 
 	@staticmethod
-	def astKeyword(keywordArgument: ast_Identifier, value: ast.expr
-					, **kwargs: Any
-					#, **kwargs: **ast._Attributes[int | None],
-					) -> ast.keyword:
-		return ast.keyword(arg=keywordArgument, value=value, **kwargs)
+	def astKeyword(keywordArgument: ast_Identifier, value: ast.expr, **keywordArguments: int) -> ast.keyword:
+		return ast.keyword(arg=keywordArgument, value=value, **keywordArguments)
 
 	@staticmethod
 	def astModule(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore] = []) -> ast.Module:
@@ -212,10 +202,11 @@ class Make:
 		return nameDOTname
 
 	@staticmethod
-	def astTuple(elements: Sequence[ast.expr], ctx: ast.expr_context | None = None
-				, **kwargs: Any
-				#, **kwargs: **ast._Attributes[int | None],
-				) -> ast.Tuple:
+	def astReturn(value: ast.expr | None = None, **keywordArguments: int) -> ast.Return:
+		return ast.Return(value=value, **keywordArguments)
+
+	@staticmethod
+	def astTuple(elements: Sequence[ast.expr], ctx: ast.expr_context | None = None, **keywordArguments: int) -> ast.Tuple:
 		"""Create an AST Tuple node from a list of expressions.
 
 		Parameters:
@@ -224,7 +215,7 @@ class Make:
 		"""
 		if ctx is None:
 			ctx = ast.Store()
-		return ast.Tuple(elts=list(elements), ctx=ctx, **kwargs)
+		return ast.Tuple(elts=list(elements), ctx=ctx, **keywordArguments)
 
 class Then:
 	@staticmethod
@@ -289,14 +280,6 @@ class NodeReplacer(ast.NodeTransformer):
 			return self.doThis(node)
 		return super().visit(node)
 
-def shatter_dataclassesDOTdataclass(dataclass: ast.ClassDef, instance_Identifier: ast_Identifier) -> list[ast.AnnAssign]:
-	listAnnAssign: list[ast.AnnAssign] = []
-
-	NodeReplacer(ifThis.isAnnAssign()
-				, Then.appendAnnAssignOfNameDOTnameTo(instance_Identifier, listAnnAssign)).visit(dataclass)
-
-	return listAnnAssign
-
 class LedgerOfImports:
 	def __init__(self, startWith: ast.AST | None = None) -> None:
 		self.dictionaryImportFrom: dict[str, list[ast.alias]] = defaultdict(list)
@@ -338,7 +321,7 @@ class LedgerOfImports:
 		Parameters:
 			*fromTracker: One or more other `LedgerOfImports` objects from which to merge.
 		"""
-		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(ledger.dictionaryImportFrom for ledger in fromLedger), destroyDuplicates=True, reorderLists=True)
+		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(ledger.dictionaryImportFrom for ledger in fromLedger), destroyDuplicates=True, reorderLists=False)
 
 		for ledger in fromLedger:
 			self.listImport.extend(ledger.listImport)
@@ -398,9 +381,9 @@ class IngredientsModule:
 	name: ast_Identifier
 
 	fileExtension: str = theFileExtension
-	packageName: ast_Identifier = myPackageNameIs
+	packageName: ast_Identifier = thePackageName
 	Z0Z_logicalPath: ast_Identifier | strDotStrCuzPyStoopid | None = None # module names other than the module itself and the package name
-	Z0Z_pathPackage: Path = pathPackage
+	Z0Z_pathPackage: Path = thePathPackage
 
 	def _getLogicalPathParent(self) -> str:
 		listModules = [self.packageName]
@@ -465,3 +448,29 @@ class IngredientsModule:
 
 	# TODO create logic (as init or methods) for aggregating/incorporating `IngredientsFunction` objects
 	# When resolving the ledger of imports, remove self-referential imports
+
+def shatter_dataclassesDOTdataclass(module: ast.Module, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
+									) -> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], list[ast.Name], list[ast.keyword], ast.Tuple]:
+	"""
+	module: the entire module containing the dataclass, including imports and the dataclass itself.
+	dataclass_Identifier: the identifier of the dataclass to be dismantled.
+	instance_Identifier: in the synthesized module/function/scope, the identifier that will be used. # So many modifiers and qualifiers that the sentence is confusing.
+	"""
+	# The ledger needs to be discriminating
+	ledgerDataclassAndFragments = LedgerOfImports()
+	list_astAnnAssign: list[ast.AnnAssign] = []
+	list_astKeywordDataclassFragments: list[ast.keyword] = []
+	# e.g., [Make.astKeyword(field.name, Make.astName(field.name)) for field in listDataclassFields if field.init]
+
+	astNameDataclass = Make.astName(dataclass_Identifier)
+	dataclass = next((statement for statement in module.body if isinstance(statement, ast.ClassDef) and statement.name == dataclass_Identifier), None)
+	if not isinstance(dataclass, ast.ClassDef): raise FREAKOUT
+
+	dataclassDismantler = NodeReplacer(ifThis.isAnnAssign()
+									, Then.appendAnnAssignOfNameDOTnameTo(instance_Identifier, list_astAnnAssign))
+	dataclassDismantler.visit(dataclass)
+
+	list_astNameDataclassFragments: list[ast.Name] = [Make.astName(astAnnAssign.target.id) for astAnnAssign in list_astAnnAssign if isinstance(astAnnAssign.target, ast.Name)]
+	astTuple_astNameDataclassFragments: ast.Tuple = Make.astTuple(list_astNameDataclassFragments)
+
+	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTuple_astNameDataclassFragments

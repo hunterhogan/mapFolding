@@ -1,9 +1,11 @@
-from mapFolding import ComputationState
-from mapFolding.syntheticModules.numba_doTheNeedful import doTheNeedful
-from mapFolding.theSSOT import Array1DElephino, Array1DFoldsTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array3D, DatatypeElephino, DatatypeElephino, DatatypeElephino, DatatypeElephino, DatatypeFoldsTotal, DatatypeFoldsTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal
-from typing import NotRequired
-from typing_extensions import NotRequired
-import tomli
+from mapFolding.theSSOT import ComputationState
+
+def doTheNeedful(mapShape: tuple[DatatypeLeavesTotal, ...], leavesTotal: DatatypeLeavesTotal, taskDivisions: DatatypeLeavesTotal, connectionGraph: Array3D, dimensionsTotal: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, foldGroups: Array1DFoldsTotal, foldsTotal: DatatypeFoldsTotal, gap1ndex: DatatypeLeavesTotal, gap1ndexCeiling: DatatypeElephino, groupsOfFolds: DatatypeFoldsTotal, indexDimension: DatatypeLeavesTotal, indexLeaf: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeElephino, leafConnectee: DatatypeElephino, taskIndex: DatatypeLeavesTotal) -> ComputationState:
+    computationStateInitialized = countInitialize(computationStateInitialized)
+    if computationStateInitialized.taskDivisions > 0:
+        return countParallel(computationStateInitialized)
+    else:
+        return countSequential(computationStateInitialized)
 
 def flattenData(state: ComputationState) -> ComputationState:
     mapShape: tuple[DatatypeLeavesTotal, ...] = state.mapShape
