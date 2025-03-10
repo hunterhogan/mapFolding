@@ -142,7 +142,7 @@ def findAstNameReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, na
 	def replaceWithConstant(node: ast.AST) -> ast.AST:
 		return ast.copy_location(ast.Constant(value=value), node)
 
-	return cast(ast.FunctionDef, NodeReplacer(ifThis.nameIs(name), replaceWithConstant).visit(FunctionDefTarget))
+	return cast(ast.FunctionDef, NodeReplacer(ifThis.isName_Identifier(name), replaceWithConstant).visit(FunctionDefTarget))
 
 def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	"""Add multiplication and return statement to function, properly constructing AST nodes."""
@@ -188,7 +188,7 @@ def findAndReplaceWhileLoopIn_body(FunctionDefTarget: ast.FunctionDef, iteratorN
 
 		def visit_While(self, node: ast.While) -> list[ast.stmt]:
 				# Check if the while loop's test uses the iterator.
-			if isinstance(node.test, ast.Compare) and ifThis.nameIs(self.iteratorName)(node.test.left):
+			if isinstance(node.test, ast.Compare) and ifThis.isName_Identifier(self.iteratorName)(node.test.left):
 				# Recurse the while loop body and remove AugAssign that increments the iterator.
 				cleanBodyStatements: list[ast.stmt] = []
 				for loopStatement in node.body:
