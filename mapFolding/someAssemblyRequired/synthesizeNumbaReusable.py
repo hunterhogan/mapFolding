@@ -5,10 +5,10 @@ from typing import Any, cast
 import ast
 
 def thisIsNumbaDotJit(Ima: ast.AST) -> bool:
-	return ifThis.CallAsModuleAttributeIs(Z0Z_getDatatypeModuleScalar(), Z0Z_getDecoratorCallable())(Ima)
+	return ifThis.isCall_IdentifierDOTname(Z0Z_getDatatypeModuleScalar(), Z0Z_getDecoratorCallable())(Ima)
 
 def thisIsJit(Ima: ast.AST) -> bool:
-	return ifThis.CallAsNameIs(Z0Z_getDecoratorCallable())(Ima)
+	return ifThis.isCall_Identifier(Z0Z_getDecoratorCallable())(Ima)
 
 def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
 	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)

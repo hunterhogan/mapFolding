@@ -29,31 +29,50 @@ class YouOughtaKnow(NamedTuple):
 
 class ifThis:
 	@staticmethod
-	def anyAssignmentTo(identifier: str) -> Callable[[ast.AST], bool]: return ifThis.anyOf(ifThis.isAssignTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.AugAssignTo(identifier))
+	def anyAssignmentTo(identifier: str) -> Callable[[ast.AST], bool]:
+		return ifThis.anyOf(ifThis.isAssignTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.isAugAssignTo(identifier))
 	@staticmethod
-	def CallReallyIs(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]: return ifThis.anyOf(ifThis.CallAsNameIs(callableName), ifThis.CallAsModuleAttributeIs(moduleName, callableName))
+	def CallReallyIs(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
+		return ifThis.anyOf(ifThis.isCall_Identifier(callableName), ifThis.isCall_IdentifierDOTname(moduleName, callableName))
 	@staticmethod
-	def NameReallyIs(identifier: str) -> Callable[[ast.AST], bool]: return ifThis.anyOf(ifThis.isName_Identifier(identifier), ifThis.subscriptNameIs(identifier))
+	def NameReallyIs(identifier: str) -> Callable[[ast.AST], bool]:
+		return ifThis.anyOf(ifThis.isName_Identifier(identifier), ifThis.isSubscript_Identifier(identifier))
 
-	AnnotationIs_astName = staticmethod(lambda node: ifThis.isAnnAssign(node) and isinstance(node.annotation, ast.Name))
-	anyOf = staticmethod(lambda *predicates: lambda node: any(pred(node) for pred in predicates))
-	AugAssignTo = staticmethod(lambda identifier: lambda node: isinstance(node, ast.AugAssign) and ifThis.NameReallyIs(identifier)(node.target))
-	CallAsModuleAttributeIs = staticmethod(lambda moduleName, callableName: lambda node: isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) and node.func.value.id == moduleName and node.func.attr == callableName)
-	CallAsNameIs = staticmethod(lambda callableName: lambda node: isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callableName)
-	CallAsNameIsIn = staticmethod(lambda container: lambda node: isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in container)
+	@staticmethod
+	def is_keyword_IdentifierEqualsConstantValue(identifier: ast_Identifier, ConstantValue: Any):
+		return lambda node: ifThis.is_keyword_Identifier(identifier)(node) and ifThis.isConstantEquals(ConstantValue)(node.value)
+
+	anyOf = staticmethod(lambda *somePredicates: lambda node: any(predicate(node) for predicate in somePredicates))
 	CallDoesNotCallItself = staticmethod(lambda moduleName, callableName: lambda node: ifThis.CallReallyIs(moduleName, callableName)(node) and 1 == sum(1 for descendant in ast.walk(node) if ifThis.CallReallyIs(moduleName, callableName)(descendant)))
-	ClassDefIs = staticmethod(lambda className: lambda node: isinstance(node, ast.ClassDef) and node.name == className)
-	FunctionDefIs = staticmethod(lambda functionName: lambda node: isinstance(node, ast.FunctionDef) and node.name == functionName)
 	hasDecorator = staticmethod(lambda decoratorName: lambda node: hasattr(node, 'decorator_list') and any(isinstance(dec, ast.Name) and dec.id == decoratorName or isinstance(dec, ast.Call) and isinstance(dec.func, ast.Name) and dec.func.id == decoratorName for dec in node.decorator_list))
+	is_keyword = staticmethod(lambda node: isinstance(node, ast.keyword))
+	is_keyword_Identifier = staticmethod(lambda identifier: lambda node: ifThis.is_keyword(node) and node.arg == identifier)
 	isAnnAssign = staticmethod(lambda node: isinstance(node, ast.AnnAssign))
 	isAnnAssignAndAnnotationIsName = staticmethod(lambda node: ifThis.isAnnAssign(node) and ifThis.isName(node.annotation))
 	isAnnAssignAndTargetIsName = staticmethod(lambda node: ifThis.isAnnAssign(node) and ifThis.isName(node.target))
 	isAnnAssignTo = staticmethod(lambda identifier: lambda node: ifThis.isAnnAssign(node) and ifThis.NameReallyIs(identifier)(node.target))
 	isAssign = staticmethod(lambda node: isinstance(node, ast.Assign))
 	isAssignTo = staticmethod(lambda identifier: lambda node: ifThis.isAssign(node) and len(node.targets) > 0 and ifThis.NameReallyIs(identifier)(node.targets[0]))
+	isAttribute = staticmethod(lambda node: isinstance(node, ast.Attribute))
+	isAugAssign = staticmethod(lambda node: isinstance(node, ast.AugAssign))
+	isAugAssignTo = staticmethod(lambda identifier: lambda node: ifThis.isAugAssign(node) and ifThis.NameReallyIs(identifier)(node.target))
+	isCall = staticmethod(lambda node: isinstance(node, ast.Call))
+	isCall_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isCall(node) and ifThis.isName(node.func) and node.func.id == identifier)
+	isCall_IdentifierDOTname = staticmethod(lambda identifier, dotName: lambda node: ifThis.isCall(node) and ifThis.isNameDOTname_Identifier_Identifier(identifier, dotName)(node.func))
+	isClassDef = staticmethod(lambda node: isinstance(node, ast.ClassDef))
+	isClassDef_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isClassDef(node) and node.name == identifier)
+	isConstant = staticmethod(lambda node: isinstance(node, ast.Constant))
+	isConstantEquals = staticmethod(lambda value: lambda node: ifThis.isConstant(node) and node.value == value)
+	isFunctionDef = staticmethod(lambda node: isinstance(node, ast.FunctionDef))
+	isFunctionDef_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isFunctionDef(node) and node.name == identifier)
+	isImport = staticmethod(lambda node: isinstance(node, ast.Import))
 	isName = staticmethod(lambda node: isinstance(node, ast.Name))
 	isName_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isName(node) and node.id == identifier)
-	subscriptNameIs = staticmethod(lambda identifier: lambda node: isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name) and node.value.id == identifier)
+	isNameDOTname = staticmethod(lambda node: ifThis.isAttribute(node) and ifThis.isName(node.value))
+	isNameDOTname_Identifier_Identifier = staticmethod(lambda identifier, dotName: lambda node: ifThis.isNameDOTname(node) and node.value.id == identifier and node.attr == dotName)
+	isSubscript = staticmethod(lambda node: isinstance(node, ast.Subscript))
+	isSubscript_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isSubscript(node) and ifThis.isName(node.value) and node.value.id == identifier)
+	WTFisThis4isCallAsNameIsIn = staticmethod(lambda container: lambda node: ifThis.isCall(node) and ifThis.isName(node.func) and node.func.id in container)
 
 class Make:
 	@staticmethod
@@ -201,14 +220,14 @@ class Then:
 	@staticmethod
 	def insertThisBelow(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]: return lambda belowMe: [cast(ast.stmt, belowMe), cast(ast.stmt, astStatement)]
 	@staticmethod
-	def Z0Z_appendAnnotationNameTo(primitiveList: list[Any]) -> Callable[[ast.AST], None]: return lambda node: primitiveList.append(node.annotation.id)
+	def Z0Z_appendAnnotationNameTo(list_Identifier: list[Any]) -> Callable[[ast.AST], None]: return lambda node: list_Identifier.append(node.annotation.id)
 	@staticmethod
 	def replaceWith(astStatement: ast.AST) -> Callable[[ast.AST], ast.stmt]: return lambda replaceMe: cast(ast.stmt, astStatement)
 	@staticmethod
 	def removeThis(astNode: ast.AST) -> None: return None
 
-	Z0Z_ledger = staticmethod(lambda logicalPath, ledger: lambda node: ledger.addImportFromStr(logicalPath, node.annotation.id if not isinstance(node.annotation, ast.Subscript) else node.annotation.value.id))
-	appendKeywordMirroredTo = staticmethod(lambda list_stmt: lambda node: list_stmt.append(cast(ast.stmt, Make.astKeyword(node.target.id, node.target))))
+	Z0Z_ledger = staticmethod(lambda logicalPath, ledger: lambda node: ledger.addImportFromStr(logicalPath, node.annotation.id))
+	Z0Z_appendKeywordMirroredTo = staticmethod(lambda list_stmt: lambda node: list_stmt.append(cast(ast.stmt, Make.astKeyword(node.target.id, node.target))))
 	append_targetTo = staticmethod(lambda list_stmt: lambda node: list_stmt.append(cast(ast.stmt, node.target)))
 	appendTo = staticmethod(lambda list_stmt: lambda node: list_stmt.append(cast(ast.stmt, node)))
 	Z0Z_appendAnnAssignOfNameDOTnameTo = staticmethod(lambda identifier, listNameDOTname: lambda node: Then.appendTo(listNameDOTname)(Make.astAnnAssign(node.target, node.annotation, Make.nameDOTname(identifier, node.target.id))))
@@ -265,7 +284,7 @@ class FunctionInliner(ast.NodeTransformer):
 
 	def visit_Call(self, node: ast.Call) -> Any | ast.Constant | ast.Call | ast.AST:
 		astCall: ast.AST = self.generic_visit(node)
-		if (ifThis.CallAsNameIsIn(self.dictionaryFunctions)(astCall)
+		if (ifThis.WTFisThis4isCallAsNameIsIn(self.dictionaryFunctions)(astCall)
 		and ifThis.CallDoesNotCallItself("", astCall.func.id)(astCall)):
 			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(astCall.func.id)
 
@@ -282,7 +301,7 @@ class FunctionInliner(ast.NodeTransformer):
 		return astCall
 
 	def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.AST]:
-		if (ifThis.CallAsNameIsIn(self.dictionaryFunctions)(node.value)
+		if (ifThis.WTFisThis4isCallAsNameIsIn(self.dictionaryFunctions)(node.value)
 		and ifThis.CallDoesNotCallItself("", node.value.func.id)(node.value)):
 			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(node.value.func.id)
 			return [self.visit(stmt) for stmt in inlineDefinition.body]
@@ -389,6 +408,38 @@ class IngredientsModule:
 
 	# TODO When resolving the ledger of imports, remove self-referential imports
 
+def descendantContainsMatchingNode(node: ast.AST, predicateFunction: Callable[[ast.AST], bool]) -> bool:
+	"""
+	Return True if any descendant of the node (or the node itself) matches the predicateFunction.
+	"""
+	matchFound = False
+
+	class DescendantFinder(ast.NodeVisitor):
+		def generic_visit(self, node: ast.AST) -> None:
+			nonlocal matchFound
+			# If the predicate matches the current node, mark it.
+			if predicateFunction(node):
+				matchFound = True
+			else:
+				# Continue walking only if no match was found yet.
+				super().generic_visit(node)
+
+	DescendantFinder().visit(node)
+	return matchFound
+
+def executeActionUnlessDescendantMatches(
+	exclusionPredicate: Callable[[ast.AST], bool],
+	actionFunction: Callable[[ast.AST], None]
+) -> Callable[[ast.AST], None]:
+	"""
+	Return a new action that will execute actionFunction only if no descendant (or the node itself)
+	matches exclusionPredicate.
+	"""
+	def wrappedAction(node: ast.AST) -> None:
+		if not descendantContainsMatchingNode(node, exclusionPredicate):
+			actionFunction(node)
+	return wrappedAction
+
 def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
 									) -> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], list[ast.Name], list[ast.keyword], ast.Tuple]:
 	"""
@@ -399,48 +450,35 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	"""
 	module: ast.Module = ast.parse(inspect_getsource(import_module(logicalPathModule)))
 
-	dataclass = next((statement for statement in module.body if ifThis.ClassDefIs(dataclass_Identifier)(statement)), None)
+	dataclass = next((statement for statement in module.body if ifThis.isClassDef_Identifier(dataclass_Identifier)(statement)), None)
 	if not isinstance(dataclass, ast.ClassDef):
 		raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
 
 	list_astAnnAssign: list[ast.AnnAssign] = []
-	list_astKeywordDataclassFragments: list[ast.keyword] = []
-	# TODO rename this list
+	listKeywordForDataclassInitialization: list[ast.keyword] = []
 	list_astNameDataclassFragments: list[ast.Name] = []
 	ledgerDataclassAndFragments = LedgerOfImports()
+
+	addToLedgerPredicate = ifThis.isAnnAssignAndAnnotationIsName
+	addToLedgerAction = Then.Z0Z_ledger(logicalPathModule, ledgerDataclassAndFragments)
+	addToLedger = NodeCollector(addToLedgerPredicate, [addToLedgerAction])
+
+	exclusionPredicate = ifThis.is_keyword_IdentifierEqualsConstantValue('init', False)
+	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(listKeywordForDataclassInitialization)
+	filteredAppendKeywordAction = executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction)
 
 	collector = NodeCollector(ifThis.isAnnAssignAndTargetIsName,
 		[Then.Z0Z_appendAnnAssignOfNameDOTnameTo(instance_Identifier, list_astAnnAssign)
 		, Then.append_targetTo(list_astNameDataclassFragments)
-		# TODO remove init=False from the keyword
-		, Then.appendKeywordMirroredTo(list_astKeywordDataclassFragments)
-		, Then.Z0Z_ledger(logicalPathModule, ledgerDataclassAndFragments)
-		# , ifThis.isAnnAssignAndAnnotationIsName()(Then.Z0Z_ledger(logicalPathModule, ledgerDataclassAndFragments))
+		, lambda node: addToLedger.visit(node)
+		, filteredAppendKeywordAction
 		]
 	)
 
 	collector.visit(dataclass)
 
-	# Ensure the dataclass itself is imported.
 	ledgerDataclassAndFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
 
 	astNameDataclass = Make.astName(dataclass_Identifier)
 	astTupleForAssignTargetsToFragments: ast.Tuple = Make.astTuple(list_astNameDataclassFragments, ast.Store())
-	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments
-
-	def collectDataclassFragments(instance_Identifier: ast_Identifier, list_astAnnAssign: list[ast.AnnAssign], list_astNameDataclassFragments: list[ast.Name], list_astKeywordDataclassFragments: list[ast.keyword]
-								, ledgerDataclassAndFragments: LedgerOfImports
-								, logicalPathModule: strDotStrCuzPyStoopid
-		) -> Callable[[ast.AST], None]:
-		def action(node: ast.AST) -> None:
-			# With the predicate in use, node.target is guaranteed to be an ast.Name.
-			fieldName = cast(ast_Identifier, node.target.id)
-			newAnnAssign = Make.astAnnAssign(
-				node.target,
-				node.annotation,
-				Make.nameDOTname(instance_Identifier, fieldName)
-			)
-			list_astAnnAssign.append(newAnnAssign)
-			list_astNameDataclassFragments.append(Make.astName(fieldName))
-
-		return action
+	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, listKeywordForDataclassInitialization, astTupleForAssignTargetsToFragments

@@ -339,7 +339,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 
 	identifierCounter = 'Z0Z_identifierCountFolds'
 	astExprIncrementCounter = ast.Expr(value = Make.astCall(Make.nameDOTname(identifierCounter, 'update'), args=[ast.Constant(value=1)], list_astKeywords=[]))
-	FunctionDefTarget= cast(ast.FunctionDef, NodeReplacer(ifThis.AugAssignTo(identifierCounter), Then.replaceWith(astExprIncrementCounter)).visit(FunctionDefTarget))
+	FunctionDefTarget= cast(ast.FunctionDef, NodeReplacer(ifThis.isAugAssignTo(identifierCounter), Then.replaceWith(astExprIncrementCounter)).visit(FunctionDefTarget))
 	ast.fix_missing_locations(FunctionDefTarget)
 
 	for assignmentTarget in ['taskIndex', 'dimensionsTotal', identifierCounter]:
