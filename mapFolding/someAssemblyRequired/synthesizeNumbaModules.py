@@ -24,7 +24,7 @@ def makeFunctionDef(astModule: ast.Module, callableTarget: str, parametersNumba:
 		callableInlinerWorkhorse = FunctionInliner(dictionaryFunctionDef)
 		FunctionDefTarget = callableInlinerWorkhorse.inlineFunctionBody(callableTarget)
 	else:
-		FunctionDefTarget = next((node for node in astModule.body if isinstance(node, ast.FunctionDef) and node.name == callableTarget), None)
+		FunctionDefTarget = next((statement for statement in astModule.body if isinstance(statement, ast.FunctionDef) and statement.name == callableTarget), None)
 	if not FunctionDefTarget:
 		raise ValueError(f"Could not find function {callableTarget} in source code")
 

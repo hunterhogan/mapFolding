@@ -1,6 +1,8 @@
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
-from mapFolding.theSSOT import FREAKOUT, Z0Z_autoflake_additional_imports, getDatatypePackage, theFileExtension, thePackageName, thePathPackage
+from importlib import import_module
+from inspect import getsource as inspect_getsource
+from mapFolding.theSSOT import FREAKOUT, getDatatypePackage, theFileExtension, thePackageName, thePathPackage
 from pathlib import Path
 from typing import Any, cast, NamedTuple, TypeAlias
 from Z0Z_tools import updateExtendPolishDictionaryLists
@@ -9,7 +11,6 @@ import autoflake
 import dataclasses
 
 # TODO learn whether libcst can help
-import libcst
 
 ast_Identifier: TypeAlias = str
 strDotStrCuzPyStoopid: TypeAlias = str
@@ -23,35 +24,23 @@ class YouOughtaKnow(NamedTuple):
 	pathFilenameForMe: Path
 	astForCompetentProgrammers: ast.ImportFrom
 
-"""
-I suspect I'm only using 1-2% of the potential of `ifThis`, `Make`, `Then`, and `NodeReplacer`.
-- nesting or chaining
-- idk what `@staticmethod` means or what the alternatives are
-- I'm at war with the static type checker, instead of the type checker helping me be more explicit and prevent bugs.
-"""
-
 class ifThis:
-	@staticmethod
-	def nameIs(allegedly: str) -> Callable[[ast.AST], bool]:
-		return lambda node: (isinstance(node, ast.Name) and node.id == allegedly)
+	# nameIsZ = staticmethod(lambda allegedly: lambda node: isinstance(node, ast.Name) and node.id == allegedly)
 
 	@staticmethod
-	def subscriptNameIs(allegedly: str) -> Callable[[ast.AST], bool]:
-		return lambda node: (isinstance(node, ast.Subscript)
-							and isinstance(node.value, ast.Name)
-							and node.value.id == allegedly)
+	def nameIs(allegedly: str) -> Callable[[ast.AST], bool]: return lambda node: (isinstance(node, ast.Name) and node.id == allegedly)
 
 	@staticmethod
-	def NameReallyIs(allegedly: str) -> Callable[[ast.AST], bool]:
-		return ifThis.anyOf(ifThis.nameIs(allegedly), ifThis.subscriptNameIs(allegedly))
+	def subscriptNameIs(allegedly: str) -> Callable[[ast.AST], bool]: return lambda node: (isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name) and node.value.id == allegedly)
 
 	@staticmethod
-	def CallAsNameIs(callableName: str) -> Callable[[ast.AST], bool]:
-		return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callableName)
+	def NameReallyIs(allegedly: str) -> Callable[[ast.AST], bool]: return ifThis.anyOf(ifThis.nameIs(allegedly), ifThis.subscriptNameIs(allegedly))
 
 	@staticmethod
-	def CallAsNameIsIn(container: Iterable[Any]) -> Callable[[ast.AST], bool]:
-		return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in container)
+	def CallAsNameIs(callableName: str) -> Callable[[ast.AST], bool]: return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == callableName)
+
+	@staticmethod
+	def CallAsNameIsIn(container: Iterable[Any]) -> Callable[[ast.AST], bool]: return lambda node: (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in container)
 
 	@staticmethod
 	def CallAsModuleAttributeIs(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
@@ -62,56 +51,49 @@ class ifThis:
 							and node.func.attr == callableName)
 
 	@staticmethod
-	def CallReallyIs(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
-		return ifThis.anyOf(ifThis.CallAsNameIs(callableName), ifThis.CallAsModuleAttributeIs(moduleName, callableName))
+	def CallReallyIs(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]: return ifThis.anyOf(ifThis.CallAsNameIs(callableName), ifThis.CallAsModuleAttributeIs(moduleName, callableName))
 
 	@staticmethod
-	def CallDoesNotCallItself(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
-		return lambda node: (ifThis.CallReallyIs(moduleName, callableName)(node)
-							and 1 == sum(1 for descendant in ast.walk(node)
-											if ifThis.CallReallyIs(moduleName, callableName)(descendant)))
+	def CallDoesNotCallItself(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]: return lambda node: (ifThis.CallReallyIs(moduleName, callableName)(node) and 1 == sum(1 for descendant in ast.walk(node) if ifThis.CallReallyIs(moduleName, callableName)(descendant)))
 
 	@staticmethod
-	def AssignTo(identifier: str) -> Callable[[ast.AST], bool]:
-		return lambda node: (isinstance(node, ast.Assign)
-								and len(node.targets) > 0
-								and ifThis.NameReallyIs(identifier)(node.targets[0]))
+	def AssignTo(identifier: str) -> Callable[[ast.AST], bool]: return lambda node: (isinstance(node, ast.Assign) and len(node.targets) > 0 and ifThis.NameReallyIs(identifier)(node.targets[0]))
 
 	@staticmethod
-	def isAnnAssign() -> Callable[[ast.AST], bool]:
-		return lambda node: isinstance(node, ast.AnnAssign)
+	def isAnnAssign() -> Callable[[ast.AST], bool]: return lambda node: isinstance(node, ast.AnnAssign)
 
 	@staticmethod
-	def isAnnAssignTo(identifier: str) -> Callable[[ast.AST], bool]:
-		return lambda node: (ifThis.isAnnAssign()(node)
-								and ifThis.NameReallyIs(identifier)(node.target)) # type: ignore
+	def isAnnAssignTo(identifier: str) -> Callable[[ast.AST], bool]: return lambda node: (ifThis.isAnnAssign()(node) and ifThis.NameReallyIs(identifier)(node.target)) # type: ignore
 
 	@staticmethod
-	def AugAssignTo(identifier: str) -> Callable[[ast.AST], bool]:
-		return lambda node: (isinstance(node, ast.AugAssign)
-								and ifThis.NameReallyIs(identifier)(node.target))
+	def AugAssignTo(identifier: str) -> Callable[[ast.AST], bool]: return lambda node: (isinstance(node, ast.AugAssign) and ifThis.NameReallyIs(identifier)(node.target))
 
 	@staticmethod
-	def anyAssignmentTo(identifier: str) -> Callable[[ast.AST], bool]:
-		return ifThis.anyOf(ifThis.AssignTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.AugAssignTo(identifier))
+	def anyAssignmentTo(identifier: str) -> Callable[[ast.AST], bool]: return ifThis.anyOf(ifThis.AssignTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.AugAssignTo(identifier))
 
 	@staticmethod
 	def anyOf(*predicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		return lambda node: any(pred(node) for pred in predicates)
 
 	@staticmethod
-	def isUnpackingAnArray(identifier:str) -> Callable[[ast.AST], bool]:
-		return lambda node: (isinstance(node, ast.Assign)
-						and isinstance(node.targets[0], ast.Name)
-						and isinstance(node.value, ast.Subscript)
-						and isinstance(node.value.value, ast.Name)
-						and node.value.value.id == identifier
-						and isinstance(node.value.slice, ast.Attribute)
-						)
+	def AnnotationIs_astName() -> Callable[[ast.AST], bool]: return lambda node: (ifThis.isAnnAssign()(node) and isinstance(node.annotation, ast.Name)) # type: ignore
 
 	@staticmethod
-	def isAnnotation_astName() -> Callable[[ast.AST], bool]:
-		return lambda node: (ifThis.isAnnAssign()(node) and isinstance(node.annotation, ast.Name)) # type: ignore
+	def ClassDefIs(className: str) -> Callable[[ast.AST], bool]: return lambda node: (isinstance(node, ast.ClassDef) and node.name == className)
+
+	@staticmethod
+	def FunctionDefIs(functionName: str) -> Callable[[ast.AST], bool]: return lambda node: (isinstance(node, ast.FunctionDef) and node.name == functionName)
+
+	@staticmethod
+	def hasDecorator(decoratorName: str) -> Callable[[ast.AST], bool]:
+		"""Check if a class or function has a specific decorator."""
+		return lambda node: (hasattr(node, 'decorator_list') and
+							any(isinstance(dec, ast.Name) and dec.id == decoratorName
+								or isinstance(dec, ast.Call) and isinstance(dec.func, ast.Name) and dec.func.id == decoratorName
+								for dec in node.decorator_list)) # type: ignore
+
+	@staticmethod
+	def AnnAssignTargetIs_astName() -> Callable[[ast.AST], bool]: return lambda node: (ifThis.isAnnAssign()(node) and isinstance(node.target, ast.Name)) # type: ignore
 
 class Make:
 	@staticmethod
@@ -198,69 +180,6 @@ class Make:
 		context = context or ast.Load()
 		return ast.Tuple(elts=list(elements), ctx=context, **keywordArguments)
 
-class Then:
-	@staticmethod
-	def insertThisAbove(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]:
-		return lambda aboveMe: [cast(ast.stmt, astStatement),
-								cast(ast.stmt, aboveMe)]
-
-	@staticmethod
-	def insertThisBelow(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]:
-		return lambda belowMe: [cast(ast.stmt, belowMe),
-								cast(ast.stmt, astStatement)]
-
-	@staticmethod
-	def appendTo(primitiveList: list[Any]) -> Callable[[ast.AST], None]:
-		return lambda node: primitiveList.append(cast(ast.stmt, node))
-
-	@staticmethod
-	def Z0Z_appendAnnotationNameTo(primitiveList: list[Any]) -> Callable[[ast.AST], None]:
-		return lambda node: primitiveList.append(node.annotation.id) # type: ignore
-
-	@staticmethod
-	def replaceWith(astStatement: ast.AST) -> Callable[[ast.AST], ast.stmt]:
-		return lambda replaceMe: cast(ast.stmt, astStatement)
-
-	@staticmethod
-	def removeThis(astNode: ast.AST) -> None:
-		return None
-
-	@staticmethod
-	def appendAnnAssignOfNameDOTnameTo(instance_Identifier: ast_Identifier, primitiveList: list[Any]) -> Callable[[ast.AST], None]:
-		return lambda node: (
-			Then.appendTo(primitiveList)
-			(Make.astAnnAssign(node.target # type: ignore
-							, node.annotation # type: ignore
-							, Make.nameDOTname(instance_Identifier
-													, node.target.id)))) # type: ignore
-
-class NodeReplacer(ast.NodeTransformer):
-	"""
-	A node transformer that replaces or removes AST nodes based on a condition.
-	This transformer traverses an AST and for each node checks a predicate. If the predicate
-	returns True, the transformer uses the replacement builder to obtain a new node. Returning
-	None from the replacement builder indicates that the node should be removed.
-
-	Attributes:
-		findMe: A function that finds all locations that match a one or more conditions.
-		doThis: A function that does work at each location, such as make a new node, collect information or delete the node.
-
-	Methods:
-		visit(node: ast.AST) -> Optional[ast.AST]:
-			Visits each node in the AST, replacing or removing it based on the predicate.
-	"""
-	def __init__(self
-			, findMe: Callable[[ast.AST], bool]
-			, doThis: Callable[[ast.AST], ast.AST | Sequence[ast.AST] | None]
-			) -> None:
-		self.findMe = findMe
-		self.doThis = doThis
-
-	def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
-		if self.findMe(node):
-			return self.doThis(node)
-		return super().visit(node)
-
 class LedgerOfImports:
 	def __init__(self, startWith: ast.AST | None = None) -> None:
 		self.dictionaryImportFrom: dict[str, list[ast.alias]] = defaultdict(list)
@@ -311,6 +230,81 @@ class LedgerOfImports:
 		for smurf in ast.walk(walkThis):
 			if isinstance(smurf, (ast.Import, ast.ImportFrom)):
 				self.addAst(smurf)
+
+class Then:
+	@staticmethod
+	def insertThisAbove(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]:
+		return lambda aboveMe: [cast(ast.stmt, astStatement),
+								cast(ast.stmt, aboveMe)]
+
+	@staticmethod
+	def insertThisBelow(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]:
+		return lambda belowMe: [cast(ast.stmt, belowMe),
+								cast(ast.stmt, astStatement)]
+
+	@staticmethod
+	def appendTo(primitiveList: list[Any]) -> Callable[[ast.AST], None]:
+		return lambda node: primitiveList.append(cast(ast.stmt, node))
+
+	@staticmethod
+	def Z0Z_appendAnnotationNameTo(primitiveList: list[Any]) -> Callable[[ast.AST], None]:
+		return lambda node: primitiveList.append(node.annotation.id) # type: ignore
+
+	@staticmethod
+	def replaceWith(astStatement: ast.AST) -> Callable[[ast.AST], ast.stmt]:
+		return lambda replaceMe: cast(ast.stmt, astStatement)
+
+	@staticmethod
+	def removeThis(astNode: ast.AST) -> None:
+		return None
+
+	@staticmethod
+	def appendAnnAssignOfNameDOTnameTo(instance_Identifier: ast_Identifier, primitiveList: list[Any]) -> Callable[[ast.AST], None]:
+		return lambda node: (
+			Then.appendTo(primitiveList)
+			(Make.astAnnAssign(node.target # type: ignore
+							, node.annotation # type: ignore
+							, Make.nameDOTname(instance_Identifier
+													, node.target.id)))) # type: ignore
+
+class NodeCollector(ast.NodeVisitor):
+	# A node visitor that collects data via one or more actions when a predicate is met.
+	def __init__(self, findPredicate: Callable[[ast.AST], bool], actions: list[Callable[[ast.AST], None]]) -> None:
+		self.findPredicate = findPredicate
+		self.actions = actions
+
+	def visit(self, node: ast.AST) -> None:
+		if self.findPredicate(node):
+			for action in self.actions:
+				action(node)
+		self.generic_visit(node)
+
+class NodeReplacer(ast.NodeTransformer):
+	"""
+	A node transformer that replaces or removes AST nodes based on a condition.
+	This transformer traverses an AST and for each node checks a predicate. If the predicate
+	returns True, the transformer uses the replacement builder to obtain a new node. Returning
+	None from the replacement builder indicates that the node should be removed.
+
+	Attributes:
+		findMe: A function that finds all locations that match a one or more conditions.
+		doThis: A function that does work at each location, such as make a new node, collect information or delete the node.
+
+	Methods:
+		visit(node: ast.AST) -> Optional[ast.AST]:
+			Visits each node in the AST, replacing or removing it based on the predicate.
+	"""
+	def __init__(self
+			, findMe: Callable[[ast.AST], bool]
+			, doThis: Callable[[ast.AST], ast.AST | Sequence[ast.AST] | None]
+			) -> None:
+		self.findMe = findMe
+		self.doThis = doThis
+
+	def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
+		if self.findMe(node):
+			return self.doThis(node)
+		return super().visit(node)
 
 class FunctionInliner(ast.NodeTransformer):
 	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
@@ -449,28 +443,54 @@ class IngredientsModule:
 
 	# TODO When resolving the ledger of imports, remove self-referential imports
 
-def shatter_dataclassesDOTdataclass(module: ast.Module, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
+def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
 									) -> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], list[ast.Name], list[ast.keyword], ast.Tuple]:
 	"""
-	module: the entire module containing the dataclass, including imports and the dataclass itself.
-	dataclass_Identifier: the identifier of the dataclass to be dismantled.
-	instance_Identifier: in the synthesized module/function/scope, the identifier that will be used. # So many modifiers and qualifiers that the sentence is confusing.
+	Parameters:
+		logicalPathModule: gimme string cuz python is stoopid
+		dataclass_Identifier: The identifier of the dataclass to be dismantled.
+		instance_Identifier: In the synthesized module/function/scope, the identifier that will be used for the instance.
 	"""
-	# The ledger needs to be discriminating
-	ledgerDataclassAndFragments = LedgerOfImports()
+	module: ast.Module = ast.parse(inspect_getsource(import_module(logicalPathModule)))
+
+	dataclass = next((statement for statement in module.body if ifThis.ClassDefIs(dataclass_Identifier)(statement)), None)
+	if not isinstance(dataclass, ast.ClassDef):
+		raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
+
 	list_astAnnAssign: list[ast.AnnAssign] = []
 	list_astKeywordDataclassFragments: list[ast.keyword] = []
-	# e.g., [Make.astKeyword(field.name, Make.astName(field.name)) for field in listDataclassFields if field.init]
+	list_astNameDataclassFragments: list[ast.Name] = []
+	ledgerDataclassAndFragments = LedgerOfImports()
+
+	# Use NodeCollector with a single pass to collect all fragments.
+	collector = NodeCollector(ifThis.AnnAssignTargetIs_astName(),
+		[Then.appendAnnAssignOfNameDOTnameTo(instance_Identifier, list_astAnnAssign)
+		, Then.appendTo(list_astNameDataclassFragments)]
+	)
+
+	collector.visit(dataclass)
+
+	# Ensure the dataclass itself is imported.
+	ledgerDataclassAndFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
 
 	astNameDataclass = Make.astName(dataclass_Identifier)
-	dataclass = next((statement for statement in module.body if isinstance(statement, ast.ClassDef) and statement.name == dataclass_Identifier), None)
-	if not isinstance(dataclass, ast.ClassDef): raise FREAKOUT
-
-	dataclassDismantler = NodeReplacer(ifThis.isAnnAssign()
-									, Then.appendAnnAssignOfNameDOTnameTo(instance_Identifier, list_astAnnAssign))
-	dataclassDismantler.visit(dataclass)
-
-	list_astNameDataclassFragments: list[ast.Name] = [Make.astName(astAnnAssign.target.id) for astAnnAssign in list_astAnnAssign if isinstance(astAnnAssign.target, ast.Name)]
 	astTupleForAssignTargetsToFragments: ast.Tuple = Make.astTuple(list_astNameDataclassFragments, ast.Store())
-
 	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments
+
+	def collectDataclassFragments(instance_Identifier: ast_Identifier, list_astAnnAssign: list[ast.AnnAssign], list_astNameDataclassFragments: list[ast.Name], list_astKeywordDataclassFragments: list[ast.keyword]
+								, ledgerDataclassAndFragments: LedgerOfImports
+								, logicalPathModule: strDotStrCuzPyStoopid
+		) -> Callable[[ast.AST], None]:
+		def action(node: ast.AST) -> None:
+			# With the predicate in use, node.target is guaranteed to be an ast.Name.
+			fieldName = cast(ast_Identifier, node.target.id)  # type: ignore
+			newAnnAssign = Make.astAnnAssign(
+				node.target,  # type: ignore
+				node.annotation,  # type: ignore
+				Make.nameDOTname(instance_Identifier, fieldName)
+			)
+			list_astAnnAssign.append(newAnnAssign)
+			list_astNameDataclassFragments.append(Make.astName(fieldName))
+			list_astKeywordDataclassFragments.append(Make.astKeyword(fieldName, Make.astName(fieldName)))
+			ledgerDataclassAndFragments.addImportFromStr(logicalPathModule, node.annotation.id)
+		return action

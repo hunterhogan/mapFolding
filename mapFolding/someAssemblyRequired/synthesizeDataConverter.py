@@ -9,8 +9,6 @@ from mapFolding.theSSOT import (
 	theLogicalPathModuleDispatcherSynthetic,
 )
 from typing import cast
-from importlib import import_module
-from inspect import getsource as inspect_getsource
 import ast
 
 def makeDataConverterCallable(
@@ -21,9 +19,7 @@ def makeDataConverterCallable(
 	logicalPathModuleDispatcher: str = theLogicalPathModuleDispatcherSynthetic,
 	) -> IngredientsFunction:
 
-	astModuleDataclass: ast.Module = ast.parse(inspect_getsource(import_module(logicalPathModuleDataclass)))
-
-	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments = shatter_dataclassesDOTdataclass(astModuleDataclass, dataclassIdentifierAsStr, dataclassInstanceAsStr)
+	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments = shatter_dataclassesDOTdataclass(logicalPathModuleDataclass, dataclassIdentifierAsStr, dataclassInstanceAsStr)
 
 	ingredientsFunction = IngredientsFunction(
 		FunctionDef = Make.astFunctionDef(name=Z0Z_DataConverterCallable
