@@ -24,6 +24,9 @@ class YouOughtaKnow(NamedTuple):
 	pathFilenameForMe: Path
 	astForCompetentProgrammers: ast.ImportFrom
 
+# \t@(staticmethod)\n\tdef (\w+)\((.+)\)( lambda node: )\((.+)\)$
+# \t$2 = $1(lambda $3:$4$5)
+
 class ifThis:
 	@staticmethod
 	def anyAssignmentTo(identifier: str) -> Callable[[ast.AST], bool]: return ifThis.anyOf(ifThis.isAssignTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.AugAssignTo(identifier))
@@ -95,12 +98,12 @@ class Make:
 		return ast.FunctionDef(name=name, args=args, body=body, decorator_list=decorator_list, returns=returns, **keywordArguments)
 
 	@staticmethod
-	def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None) -> ast.Import:
-		return ast.Import(names=[Make.astAlias(moduleName, asname)])
+	def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None, **keywordArguments: int) -> ast.Import:
+		return ast.Import(names=[Make.astAlias(moduleName, asname)], **keywordArguments)
 
 	@staticmethod
-	def astImportFrom(moduleName: ast_Identifier, list_astAlias: list[ast.alias]) -> ast.ImportFrom:
-		return ast.ImportFrom(module=moduleName, names=list_astAlias, level=0)
+	def astImportFrom(moduleName: ast_Identifier, list_astAlias: list[ast.alias], **keywordArguments: int) -> ast.ImportFrom:
+		return ast.ImportFrom(module=moduleName, names=list_astAlias, level=0, **keywordArguments)
 
 	@staticmethod
 	def astKeyword(keywordArgument: ast_Identifier, value: ast.expr, **keywordArguments: int) -> ast.keyword:
@@ -139,35 +142,38 @@ class Make:
 
 class LedgerOfImports:
 	def __init__(self, startWith: ast.AST | None = None) -> None:
-		self.dictionaryImportFrom: dict[str, list[ast.alias]] = defaultdict(list)
+		self.dictionaryImportFrom: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
 		self.listImport: list[str] = []
 
 		if startWith:
 			self.walkThis(startWith)
 
 	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
-		if not isinstance(astImport_, (ast.Import, ast.ImportFrom)): # pyright: ignore[reportUnnecessaryIsInstance]
+		if not isinstance(astImport_, (ast.Import, ast.ImportFrom)):
 			raise ValueError(f"Expected ast.Import or ast.ImportFrom, got {type(astImport_)}")
 		if isinstance(astImport_, ast.Import):
 			for alias in astImport_.names:
 				self.listImport.append(alias.name)
 		else:
 			if astImport_.module is not None:
-				self.dictionaryImportFrom[astImport_.module].extend(astImport_.names)
+				for alias in astImport_.names:
+					self.dictionaryImportFrom[astImport_.module].append((alias.name, alias.asname))
 
 	def addImportStr(self, module: str) -> None:
 		self.listImport.append(module)
 
 	def addImportFromStr(self, module: str, name: str, asname: str | None = None) -> None:
-		self.dictionaryImportFrom[module].append(Make.astAlias(name, asname))
+		self.dictionaryImportFrom[module].append((name, asname))
 
 	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
 		listAstImportFrom: list[ast.ImportFrom] = []
-		for module, list_astAlias in sorted(self.dictionaryImportFrom.items()):
-			sortedAliases = sorted(list(set(list_astAlias)), key=lambda alias: alias.name)
-			# setAliases = set(list_astAlias)
-			# sortedAliases = sorted(setAliases, key=lambda alias: alias.name)
-			listAstImportFrom.append(Make.astImportFrom(module, sortedAliases))
+
+		for module, listOfNameTuples in sorted(self.dictionaryImportFrom.items()):
+			listOfNameTuples = sorted(list(set(listOfNameTuples)), key=lambda nameTuple: nameTuple[0])
+			listAlias: list[ast.alias] = []
+			for name, asname in listOfNameTuples:
+				listAlias.append(Make.astAlias(name, asname))
+			listAstImportFrom.append(Make.astImportFrom(module, listAlias))
 
 		listAstImport: list[ast.Import] = [Make.astImport(name) for name in sorted(set(self.listImport))]
 		return listAstImportFrom + listAstImport
@@ -179,7 +185,7 @@ class LedgerOfImports:
 		Parameters:
 			*fromTracker: One or more other `LedgerOfImports` objects from which to merge.
 		"""
-		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(ledger.dictionaryImportFrom for ledger in fromLedger), destroyDuplicates=True, reorderLists=False)
+		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(ledger.dictionaryImportFrom for ledger in fromLedger), destroyDuplicates=True, reorderLists=True)
 
 		for ledger in fromLedger:
 			self.listImport.extend(ledger.listImport)
