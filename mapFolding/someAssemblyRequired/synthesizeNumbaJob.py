@@ -2,16 +2,11 @@
 from collections.abc import Sequence
 from typing import Any, cast
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal
+from mapFolding.someAssemblyRequired.whatWillBe import ParametersNumba, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable, Z0Z_setDatatypeModuleScalar, Z0Z_setDecoratorCallable, parametersNumbaDEFAULT
 from mapFolding.theSSOT import (
 	ComputationState,
 	FREAKOUT,
 	getPathJobRootDEFAULT,
-	ParametersNumba,
-	parametersNumbaDEFAULT,
-	Z0Z_getDatatypeModuleScalar,
-	Z0Z_getDecoratorCallable,
-	Z0Z_setDatatypeModuleScalar,
-	Z0Z_setDecoratorCallable,
 )
 from mapFolding.someAssemblyRequired import (
 	decorateCallableWithNumba,
@@ -96,7 +91,7 @@ def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, iden
 	return FunctionDefTarget, allImports
 
 def removeAssignmentFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
-	FunctionDefSherpa: ast.AST | Sequence[ast.AST] | None = NodeReplacer(ifThis.anyAssignmentTo(identifier), Then.removeThis).visit(FunctionDefTarget)
+	FunctionDefSherpa: ast.AST | Sequence[ast.AST] | None = NodeReplacer(ifThis.isAnyAssignmentTo(identifier), Then.removeThis).visit(FunctionDefTarget)
 	if not FunctionDefSherpa:
 		raise FREAKOUT("Dude, where's my function?")
 	else:

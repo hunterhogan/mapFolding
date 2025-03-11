@@ -1,8 +1,9 @@
-from mapFolding.theSSOT import FREAKOUT, filenameModuleSyntheticWrite, filenameWriteCallableTargetDEFAULT, Z0Z_autoflake_additional_imports
-from mapFolding.theSSOT import formatStrFilenameForCallableSynthetic, getAlgorithmDispatcher, theModuleOfSyntheticModules
-from mapFolding.theSSOT import thePathPackage, listNumbaCallableDispatchees, ParametersSynthesizeNumbaCallable
+from mapFolding.someAssemblyRequired.whatWillBe import ParametersSynthesizeNumbaCallable, Z0Z_autoflake_additional_imports, filenameModuleSyntheticWrite, filenameWriteCallableTargetDEFAULT, formatStrFilenameForCallableSynthetic, listNumbaCallableDispatchees
+from mapFolding.theSSOT import FREAKOUT
+from mapFolding.theSSOT import getAlgorithmDispatcher, theModuleOfSyntheticModules
+from mapFolding.theSSOT import thePathPackage
 from mapFolding.theSSOT import getSourceAlgorithm, getDatatypePackage
-from mapFolding.theSSOT import ParametersNumba
+from mapFolding.someAssemblyRequired.whatWillBe import ParametersNumba
 from mapFolding.someAssemblyRequired import LedgerOfImports, decorateCallableWithNumba, FunctionInliner, YouOughtaKnow, ast_Identifier
 from os import PathLike
 from pathlib import Path
@@ -123,7 +124,7 @@ def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCa
 		filenameWrite 		= None
 		for stuff in listStuffYouOughtaKnow:
 			statement: ast.ImportFrom = stuff.astForCompetentProgrammers
-			if isinstance(statement, (ast.Import, ast.ImportFrom)): # type: ignore "Unnecessary isinstance call; "ImportFrom" is always an instance of "Import | ImportFrom" Pylance(reportUnnecessaryIsInstance)". Ok, Pylance, bad data never happens. What a dumbass warning/error/problem.
+			if isinstance(statement, (ast.Import, ast.ImportFrom)):
 				allImports.addAst(statement)
 		tupleDispatcher = ParametersSynthesizeNumbaCallable(callableTarget, None, False)
 		FunctionDefTarget, allImports = getFunctionDef(algorithmSource, *tupleDispatcher, allImports)

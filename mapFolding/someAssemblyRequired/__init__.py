@@ -20,3 +20,4 @@ from mapFolding.someAssemblyRequired.synthesizeNumbaReusable import (
 	)
 from mapFolding.someAssemblyRequired.synthesizeNumbaJob import writeJobNumba as writeJobNumba
 from mapFolding.someAssemblyRequired.synthesizeNumbaModules import makeFlowNumbaOptimized as makeFlowNumbaOptimized
+from mapFolding.someAssemblyRequired.whatWillBe import listNumbaCallableDispatchees as listNumbaCallableDispatchees

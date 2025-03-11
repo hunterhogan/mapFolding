@@ -1,3 +1,4 @@
+from mapFolding.someAssemblyRequired.whatWillBe import ParametersNumba, ParametersSynthesizeNumbaCallable, Z0Z_DataConverterFilename
 from mapFolding.someAssemblyRequired import (
 	ifThis,
 	IngredientsFunction,
@@ -11,14 +12,11 @@ from mapFolding.someAssemblyRequired import (
 )
 from mapFolding.theSSOT import (
 	FREAKOUT,
-	ParametersNumba,
-	ParametersSynthesizeNumbaCallable,
 	getSourceAlgorithm,
 	thePackageName,
 	theDataclassIdentifierAsStr,
 	theDataclassInstanceAsStr,
 	theModuleOfSyntheticModules,
-	Z0Z_DataConverterFilename,
 	theDispatcherCallableAsStr,
 	theLogicalPathModuleDispatcherSynthetic,
 )

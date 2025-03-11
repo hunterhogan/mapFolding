@@ -1,8 +1,5 @@
 """A relatively stable API for oft-needed functionality."""
 from mapFolding.theSSOT import (
-	Array1DElephino,
-	Array1DFoldsTotal,
-	Array1DLeavesTotal,
 	Array3D,
 	ComputationState,
 	getDatatypePackage,
@@ -10,7 +7,6 @@ from mapFolding.theSSOT import (
 )
 from collections.abc import Sequence
 from numba import get_num_threads, set_num_threads
-from numpy import dtype, ndarray
 from numpy.typing import DTypeLike
 from sys import maxsize as sysMaxsize
 from typing import Any
@@ -103,7 +99,7 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 	if concurrencyPackage == 'numba':
 		set_num_threads(concurrencyLimit)
 		concurrencyLimit = get_num_threads()
-	elif concurrencyPackage == 'not implemented':
+	elif concurrencyPackage == 'algorithm':
 		concurrencyLimit = 1
 	else:
 		raise NotImplementedError("This function only supports the 'numba' concurrency package.")

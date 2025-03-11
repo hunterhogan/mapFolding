@@ -1,10 +1,9 @@
 """SSOT for Pytest"""
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import basecamp
-from mapFolding.theSSOT import getAlgorithmDispatcher, getSourceAlgorithm, getPackageDispatcher, listNumbaCallableDispatchees, theModuleOfSyntheticModules, FREAKOUT
+from mapFolding.theSSOT import getAlgorithmDispatcher, getSourceAlgorithm, getPackageDispatcher, theModuleOfSyntheticModules, FREAKOUT
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
-from mapFolding.someAssemblyRequired import makeFlowNumbaOptimized, YouOughtaKnow
+from mapFolding.someAssemblyRequired import makeFlowNumbaOptimized, YouOughtaKnow, listNumbaCallableDispatchees
 from pathlib import Path
 from typing import Any, ContextManager
 import importlib.util
@@ -13,6 +12,7 @@ import random
 import shutil
 import unittest.mock
 import uuid
+from mapFolding import basecamp
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
 # SSOT for test data paths and filenames

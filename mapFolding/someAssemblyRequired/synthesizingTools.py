@@ -27,30 +27,83 @@ class YouOughtaKnow(NamedTuple):
 # \t@(staticmethod)\n\tdef (\w+)\((.+)\)( lambda node: )\((.+)\)$
 # \t$2 = $1(lambda $3:$4$5)
 
+class NodeCollector(ast.NodeVisitor):
+	# A node visitor that collects data via one or more actions when a predicate is met.
+	def __init__(self, findPredicate: Callable[[ast.AST], bool], actions: list[Callable[[ast.AST], None]]) -> None:
+		self.findPredicate = findPredicate
+		self.actions = actions
+
+	def visit(self, node: ast.AST) -> None:
+		if self.findPredicate(node):
+			for action in self.actions:
+				action(node)
+		self.generic_visit(node)
+
+class NodeReplacer(ast.NodeTransformer):
+	"""
+	A node transformer that replaces or removes AST nodes based on a condition.
+	This transformer traverses an AST and for each node checks a predicate. If the predicate
+	returns True, the transformer uses the replacement builder to obtain a new node. Returning
+	None from the replacement builder indicates that the node should be removed.
+
+	Attributes:
+		findMe: A function that finds all locations that match a one or more conditions.
+		doThis: A function that does work at each location, such as make a new node, collect information or delete the node.
+
+	Methods:
+		visit(node: ast.AST) -> Optional[ast.AST]:
+			Visits each node in the AST, replacing or removing it based on the predicate.
+	"""
+	def __init__(self
+			, findMe: Callable[[ast.AST], bool]
+			, doThis: Callable[[ast.AST], ast.AST | Sequence[ast.AST] | None]
+			) -> None:
+		self.findMe = findMe
+		self.doThis = doThis
+
+	def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
+		if self.findMe(node):
+			return self.doThis(node)
+		return super().visit(node)
+
+def descendantContainsMatchingNode(node: ast.AST, predicateFunction: Callable[[ast.AST], bool]) -> bool:
+	""" Return True if any descendant of the node (or the node itself) matches the predicateFunction. """
+	matchFound = False
+
+	class DescendantFinder(ast.NodeVisitor):
+		def generic_visit(self, node: ast.AST) -> None:
+			nonlocal matchFound
+			if predicateFunction(node):
+				matchFound = True
+			else:
+				super().generic_visit(node)
+
+	DescendantFinder().visit(node)
+	return matchFound
+
+def executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.AST], bool], actionFunction: Callable[[ast.AST], None]) -> Callable[[ast.AST], None]:
+	"""
+	Return a new action that will execute actionFunction only if no descendant (or the node itself)
+	matches exclusionPredicate.
+	"""
+	def wrappedAction(node: ast.AST) -> None:
+		if not descendantContainsMatchingNode(node, exclusionPredicate):
+			actionFunction(node)
+	return wrappedAction
+
 class ifThis:
-	@staticmethod
-	def anyAssignmentTo(identifier: str) -> Callable[[ast.AST], bool]:
-		return ifThis.anyOf(ifThis.isAssignTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.isAugAssignTo(identifier))
-	@staticmethod
-	def CallReallyIs(moduleName: str, callableName: str) -> Callable[[ast.AST], bool]:
-		return ifThis.anyOf(ifThis.isCall_Identifier(callableName), ifThis.isCall_IdentifierDOTname(moduleName, callableName))
-	@staticmethod
-	def NameReallyIs(identifier: str) -> Callable[[ast.AST], bool]:
-		return ifThis.anyOf(ifThis.isName_Identifier(identifier), ifThis.isSubscript_Identifier(identifier))
-
-	@staticmethod
-	def is_keyword_IdentifierEqualsConstantValue(identifier: ast_Identifier, ConstantValue: Any):
-		return lambda node: ifThis.is_keyword_Identifier(identifier)(node) and ifThis.isConstantEquals(ConstantValue)(node.value)
-
-	anyOf = staticmethod(lambda *somePredicates: lambda node: any(predicate(node) for predicate in somePredicates))
+	anyOf = staticmethod(lambda *somePredicates: lambda node: any(predicate(node) for predicate in somePredicates)) # type: ignore
 	CallDoesNotCallItself = staticmethod(lambda moduleName, callableName: lambda node: ifThis.CallReallyIs(moduleName, callableName)(node) and 1 == sum(1 for descendant in ast.walk(node) if ifThis.CallReallyIs(moduleName, callableName)(descendant)))
+	CallReallyIs = staticmethod(lambda moduleName, callableName: ifThis.anyOf(ifThis.isCall_Identifier(callableName), ifThis.isCall_IdentifierDOTname(moduleName, callableName)))
 	hasDecorator = staticmethod(lambda decoratorName: lambda node: hasattr(node, 'decorator_list') and any(isinstance(dec, ast.Name) and dec.id == decoratorName or isinstance(dec, ast.Call) and isinstance(dec.func, ast.Name) and dec.func.id == decoratorName for dec in node.decorator_list))
 	is_keyword = staticmethod(lambda node: isinstance(node, ast.keyword))
 	is_keyword_Identifier = staticmethod(lambda identifier: lambda node: ifThis.is_keyword(node) and node.arg == identifier)
+	is_keyword_IdentifierEqualsConstantValue = staticmethod(lambda identifier, ConstantValue: lambda node: ifThis.is_keyword_Identifier(identifier)(node) and ifThis.isConstantEquals(ConstantValue)(node.value))
 	isAnnAssign = staticmethod(lambda node: isinstance(node, ast.AnnAssign))
 	isAnnAssignAndAnnotationIsName = staticmethod(lambda node: ifThis.isAnnAssign(node) and ifThis.isName(node.annotation))
 	isAnnAssignAndTargetIsName = staticmethod(lambda node: ifThis.isAnnAssign(node) and ifThis.isName(node.target))
 	isAnnAssignTo = staticmethod(lambda identifier: lambda node: ifThis.isAnnAssign(node) and ifThis.NameReallyIs(identifier)(node.target))
+	isAnyAssignmentTo = staticmethod(lambda identifier: ifThis.anyOf(ifThis.isAssignTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.isAugAssignTo(identifier)))
 	isAssign = staticmethod(lambda node: isinstance(node, ast.Assign))
 	isAssignTo = staticmethod(lambda identifier: lambda node: ifThis.isAssign(node) and len(node.targets) > 0 and ifThis.NameReallyIs(identifier)(node.targets[0]))
 	isAttribute = staticmethod(lambda node: isinstance(node, ast.Attribute))
@@ -71,7 +124,9 @@ class ifThis:
 	isNameDOTname = staticmethod(lambda node: ifThis.isAttribute(node) and ifThis.isName(node.value))
 	isNameDOTname_Identifier_Identifier = staticmethod(lambda identifier, dotName: lambda node: ifThis.isNameDOTname(node) and node.value.id == identifier and node.attr == dotName)
 	isSubscript = staticmethod(lambda node: isinstance(node, ast.Subscript))
-	isSubscript_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isSubscript(node) and ifThis.isName(node.value) and node.value.id == identifier)
+	isSubscript_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isSubscript(node) and ifThis.isName_Identifier(identifier)(node.value))
+	isSubscript_Identifier_Identifier = staticmethod(lambda identifier, sliceIdentifier: lambda node: ifThis.isSubscript(node) and ifThis.isName_Identifier(identifier)(node.value) and ifThis.isName_Identifier(sliceIdentifier)(node.slice)) # auto-generated
+	NameReallyIs = staticmethod(lambda identifier: ifThis.anyOf(ifThis.isName_Identifier(identifier), ifThis.isSubscript_Identifier(identifier)))
 	WTFisThis4isCallAsNameIsIn = staticmethod(lambda container: lambda node: ifThis.isCall(node) and ifThis.isName(node.func) and node.func.id in container)
 
 class Make:
@@ -220,7 +275,7 @@ class Then:
 	@staticmethod
 	def insertThisBelow(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]: return lambda belowMe: [cast(ast.stmt, belowMe), cast(ast.stmt, astStatement)]
 	@staticmethod
-	def Z0Z_appendAnnotationNameTo(list_Identifier: list[Any]) -> Callable[[ast.AST], None]: return lambda node: list_Identifier.append(node.annotation.id)
+	def Z0Z_appendAnnotationNameTo(list_Identifier: list[Any]) -> Callable[[ast.AST], None]: return lambda node: list_Identifier.append(node.annotation.id) # type: ignore
 	@staticmethod
 	def replaceWith(astStatement: ast.AST) -> Callable[[ast.AST], ast.stmt]: return lambda replaceMe: cast(ast.stmt, astStatement)
 	@staticmethod
@@ -231,45 +286,6 @@ class Then:
 	append_targetTo = staticmethod(lambda list_stmt: lambda node: list_stmt.append(cast(ast.stmt, node.target)))
 	appendTo = staticmethod(lambda list_stmt: lambda node: list_stmt.append(cast(ast.stmt, node)))
 	Z0Z_appendAnnAssignOfNameDOTnameTo = staticmethod(lambda identifier, listNameDOTname: lambda node: Then.appendTo(listNameDOTname)(Make.astAnnAssign(node.target, node.annotation, Make.nameDOTname(identifier, node.target.id))))
-
-class NodeCollector(ast.NodeVisitor):
-	# A node visitor that collects data via one or more actions when a predicate is met.
-	def __init__(self, findPredicate: Callable[[ast.AST], bool], actions: list[Callable[[ast.AST], None]]) -> None:
-		self.findPredicate = findPredicate
-		self.actions = actions
-
-	def visit(self, node: ast.AST) -> None:
-		if self.findPredicate(node):
-			for action in self.actions:
-				action(node)
-		self.generic_visit(node)
-
-class NodeReplacer(ast.NodeTransformer):
-	"""
-	A node transformer that replaces or removes AST nodes based on a condition.
-	This transformer traverses an AST and for each node checks a predicate. If the predicate
-	returns True, the transformer uses the replacement builder to obtain a new node. Returning
-	None from the replacement builder indicates that the node should be removed.
-
-	Attributes:
-		findMe: A function that finds all locations that match a one or more conditions.
-		doThis: A function that does work at each location, such as make a new node, collect information or delete the node.
-
-	Methods:
-		visit(node: ast.AST) -> Optional[ast.AST]:
-			Visits each node in the AST, replacing or removing it based on the predicate.
-	"""
-	def __init__(self
-			, findMe: Callable[[ast.AST], bool]
-			, doThis: Callable[[ast.AST], ast.AST | Sequence[ast.AST] | None]
-			) -> None:
-		self.findMe = findMe
-		self.doThis = doThis
-
-	def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
-		if self.findMe(node):
-			return self.doThis(node)
-		return super().visit(node)
 
 class FunctionInliner(ast.NodeTransformer):
 	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
@@ -285,8 +301,8 @@ class FunctionInliner(ast.NodeTransformer):
 	def visit_Call(self, node: ast.Call) -> Any | ast.Constant | ast.Call | ast.AST:
 		astCall: ast.AST = self.generic_visit(node)
 		if (ifThis.WTFisThis4isCallAsNameIsIn(self.dictionaryFunctions)(astCall)
-		and ifThis.CallDoesNotCallItself("", astCall.func.id)(astCall)):
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(astCall.func.id)
+		and ifThis.CallDoesNotCallItself("", astCall.func.id)(astCall)): # type: ignore
+			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(astCall.func.id) # type: ignore
 
 			if (inlineDefinition and inlineDefinition.body):
 				statementTerminating: ast.stmt = inlineDefinition.body[-1]
@@ -302,8 +318,8 @@ class FunctionInliner(ast.NodeTransformer):
 
 	def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.AST]:
 		if (ifThis.WTFisThis4isCallAsNameIsIn(self.dictionaryFunctions)(node.value)
-		and ifThis.CallDoesNotCallItself("", node.value.func.id)(node.value)):
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(node.value.func.id)
+		and ifThis.CallDoesNotCallItself("", node.value.func.id)(node.value)): # type: ignore
+			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(node.value.func.id) # type: ignore
 			return [self.visit(stmt) for stmt in inlineDefinition.body]
 		return self.generic_visit(node)
 
@@ -407,38 +423,6 @@ class IngredientsModule:
 		self.pathFilename.write_text(pythonSource)
 
 	# TODO When resolving the ledger of imports, remove self-referential imports
-
-def descendantContainsMatchingNode(node: ast.AST, predicateFunction: Callable[[ast.AST], bool]) -> bool:
-	"""
-	Return True if any descendant of the node (or the node itself) matches the predicateFunction.
-	"""
-	matchFound = False
-
-	class DescendantFinder(ast.NodeVisitor):
-		def generic_visit(self, node: ast.AST) -> None:
-			nonlocal matchFound
-			# If the predicate matches the current node, mark it.
-			if predicateFunction(node):
-				matchFound = True
-			else:
-				# Continue walking only if no match was found yet.
-				super().generic_visit(node)
-
-	DescendantFinder().visit(node)
-	return matchFound
-
-def executeActionUnlessDescendantMatches(
-	exclusionPredicate: Callable[[ast.AST], bool],
-	actionFunction: Callable[[ast.AST], None]
-) -> Callable[[ast.AST], None]:
-	"""
-	Return a new action that will execute actionFunction only if no descendant (or the node itself)
-	matches exclusionPredicate.
-	"""
-	def wrappedAction(node: ast.AST) -> None:
-		if not descendantContainsMatchingNode(node, exclusionPredicate):
-			actionFunction(node)
-	return wrappedAction
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
 									) -> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], list[ast.Name], list[ast.keyword], ast.Tuple]:

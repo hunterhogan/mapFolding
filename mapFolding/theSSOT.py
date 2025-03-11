@@ -1,26 +1,15 @@
-from collections.abc import Callable
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
-from numba.core.compiler import CompilerBase as numbaCompilerBase
 from numpy import dtype, ndarray, int64 as numpy_int64, int16 as numpy_int16
 from numpy.typing import DTypeLike
 from pathlib import Path
 from sys import modules as sysModules
+from tomli import load as tomli_load
 from types import ModuleType
-from typing import Any, cast, Final, NamedTuple, TYPE_CHECKING, TypeAlias
+from typing import Final, TypeAlias
 import dataclasses
-import tomli
 
-try:
-	from typing import NotRequired
-except Exception:
-	from typing_extensions import NotRequired # type: ignore
-
-if TYPE_CHECKING:
-	from typing import TypedDict
-else:
-	TypedDict = dict
-
+# I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
 packageFlowSynthetic = 'numba'
 Z0Z_packageFlow = 'algorithm'
 # Z0Z_packageFlow = packageFlowSynthetic
@@ -41,7 +30,7 @@ dataclassInstance_Pre_ParallelAsStrPACKAGING = dataclassInstanceAsStrPACKAGING +
 dataclassInstance_Post_ParallelAsStrPACKAGING = dataclassInstanceAsStrPACKAGING + 'COMPLETE'
 
 try:
-	thePackageNameIsPACKAGING: str = tomli.load(Path("../pyproject.toml").open('rb'))["project"]["name"]
+	thePackageNameIsPACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
 except Exception:
 	thePackageNameIsPACKAGING: str = "mapFolding"
 
@@ -60,15 +49,6 @@ def getPathPackageINSTALLING() -> Path:
 # =============================================================================
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
 # Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding
-
-# NOTE see also `ParametersSynthesizeNumbaCallable` below
-
-# =============================================================================
-# Temporary or transient or something; probably still the wrong way
-
-# the data converter and the dispatcher could be in the same module.
-Z0Z_DataConverterFilename = 'dataNamespaceFlattened' + fileExtensionINSTALLING
-Z0Z_DataConverterCallable = 'flattenData'
 
 # =============================================================================
 # The right way, perhaps.
@@ -99,21 +79,20 @@ theDataclassInstance_Pre_ParallelAsStr: str = dataclassInstance_Pre_ParallelAsSt
 theDataclassInstance_Post_ParallelAsStr: str = dataclassInstance_Post_ParallelAsStrPACKAGING
 
 theFileExtension: str = fileExtensionINSTALLING
+
 theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
 
 # =============================================================================
 # The right way.
-Z0Z_autoflake_additional_imports: list[str] = []
-Z0Z_autoflake_additional_imports.append(thePackageName)
-concurrencyPackage: str = 'not implemented'
+concurrencyPackage: str = Z0Z_packageFlow
 
 # =============================================================================
 # The relatively flexible type system needs a different paradigm, but I don't
 # know what it should be. The system needs to 1) help optimize computation, 2)
 # make it possible to change the basic type of the package (e.g., from numpy
-# to superTypePy), 3) make it possible to synthesize the optimized modules used
-# by the package (numba, at the moment), and 4) make it possible to synthesize
-# arbitrary modules with different type systems.
+# to superTypePy), 3) make it possible to synthesize the optimized flow of used
+# by the package, and 4) make it possible to synthesize arbitrary modules with
+# different type systems.
 
 DatatypeLeavesTotal: TypeAlias = int
 # this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers accommodate
@@ -251,97 +230,16 @@ formatStrModuleForCallableSynthetic = formatStrModuleSynthetic + "_{callableTarg
 theModuleDispatcherSynthetic: str = formatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=theDispatcherCallableAsStr)
 theLogicalPathModuleDispatcherSynthetic: str = '.'.join([thePackageName, theModuleOfSyntheticModules, theModuleDispatcherSynthetic])
 
-formatStrFilenameSynthetic = formatStrModuleSynthetic + fileExtensionINSTALLING
-formatStrFilenameForCallableSynthetic = formatStrModuleForCallableSynthetic + fileExtensionINSTALLING
-filenameModuleSyntheticWrite = formatStrFilenameSynthetic.format(packageFlow=packageFlowSynthetic)
-
-filenameWriteCallableTargetDEFAULT: str = 'count'
-
-_datatypeModuleScalar = ''
-_decoratorCallable = ''
-
 # =============================================================================
 # The most right way I know how to implement.
 
-if Z0Z_packageFlow == 'numba': # pyright: ignore [reportUnnecessaryComparison]
-	Z0Z_autoflake_additional_imports.append('numba')
-	concurrencyPackage: str = 'numba'
+if Z0Z_packageFlow == packageFlowSynthetic: # pyright: ignore [reportUnnecessaryComparison]
 	theLogicalPathModuleDispatcher = theLogicalPathModuleDispatcherSynthetic
-	_datatypeModuleScalar = 'numba'
-	_decoratorCallable = 'jit'
 
 def getPackageDispatcher():
 	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
 	dispatcherCallable = getattr(moduleImported, theDispatcherCallableAsStr)
 	return dispatcherCallable
-
-def Z0Z_getDatatypeModuleScalar() -> str:
-	return _datatypeModuleScalar
-
-def Z0Z_setDatatypeModuleScalar(moduleName: str) -> str:
-	global _datatypeModuleScalar
-	_datatypeModuleScalar = moduleName
-	return _datatypeModuleScalar
-
-def Z0Z_getDecoratorCallable() -> str:
-	return _decoratorCallable
-
-def Z0Z_setDecoratorCallable(decoratorName: str) -> str:
-	global _decoratorCallable
-	_decoratorCallable = decoratorName
-	return _decoratorCallable
-
-class ParametersNumba(TypedDict):
-	_dbg_extend_lifetimes: NotRequired[bool]
-	_dbg_optnone: NotRequired[bool]
-	_nrt: NotRequired[bool]
-	boundscheck: NotRequired[bool]
-	cache: bool
-	debug: NotRequired[bool]
-	error_model: str
-	fastmath: bool
-	forceinline: bool
-	forceobj: NotRequired[bool]
-	inline: str
-	locals: NotRequired[dict[str, Any]]
-	looplift: bool
-	no_cfunc_wrapper: bool
-	no_cpython_wrapper: bool
-	no_rewrites: NotRequired[bool]
-	nogil: NotRequired[bool]
-	nopython: bool
-	parallel: bool
-	pipeline_class: NotRequired[type[numbaCompilerBase]]
-	signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
-	target: NotRequired[str]
-
-parametersNumbaFailEarly: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'python', 'fastmath': False, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }
-"""For a production function: speed is irrelevant, error discovery is paramount, must be compatible with anything downstream."""
-
-parametersNumbaDEFAULT: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }
-"""Middle of the road: fast, lean, but will talk to non-jitted functions."""
-
-parametersNumbaParallelDEFAULT: Final[ParametersNumba] = { **parametersNumbaDEFAULT, '_nrt': True, 'parallel': True, }
-"""Middle of the road: fast, lean, but will talk to non-jitted functions."""
-
-parametersNumbaSuperJit: Final[ParametersNumba] = { **parametersNumbaDEFAULT, 'no_cfunc_wrapper': True, 'no_cpython_wrapper': True, }
-"""Speed, no helmet, no talking to non-jitted functions."""
-
-parametersNumbaSuperJitParallel: Final[ParametersNumba] = { **parametersNumbaSuperJit, '_nrt': True, 'parallel': True, }
-"""Speed, no helmet, concurrency, no talking to non-jitted functions."""
-
-parametersNumbaMinimum: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': False, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': False, 'forceobj': True, 'parallel': False, }
-
-class ParametersSynthesizeNumbaCallable(NamedTuple):
-	callableTarget: str
-	parametersNumba: ParametersNumba | None = None
-	inlineCallables: bool = False
-
-listNumbaCallableDispatchees: list[ParametersSynthesizeNumbaCallable] = [
-	ParametersSynthesizeNumbaCallable('countParallel', parametersNumbaSuperJitParallel, True),
-	ParametersSynthesizeNumbaCallable('countSequential', parametersNumbaSuperJit, True),
-	ParametersSynthesizeNumbaCallable('countInitialize', parametersNumbaDEFAULT, True),
-]
 
 """Technical concepts I am likely using and likely want to use more effectively:
 - Configuration Registry

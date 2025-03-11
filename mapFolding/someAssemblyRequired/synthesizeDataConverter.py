@@ -1,11 +1,11 @@
 from mapFolding.someAssemblyRequired import ( IngredientsFunction, IngredientsModule, Make, shatter_dataclassesDOTdataclass, )
+from mapFolding.someAssemblyRequired.whatWillBe import Z0Z_DataConverterCallable
 from mapFolding.theSSOT import (
 	theDataclassIdentifierAsStr,
 	theDataclassInstanceAsStr,
 	theDispatcherCallableAsStr,
 	theLogicalPathModuleDataclass,
 	theModuleOfSyntheticModules,
-	Z0Z_DataConverterCallable,
 	theLogicalPathModuleDispatcherSynthetic,
 )
 from typing import cast
