@@ -4,7 +4,7 @@ from importlib import import_module
 from inspect import getsource as inspect_getsource
 from mapFolding.theSSOT import FREAKOUT, getDatatypePackage, theFileExtension, thePackageName, thePathPackage
 from pathlib import Path
-from typing import Any, NamedTuple, TypeAlias, TypeGuard, TypeVar
+from typing import Any, cast, NamedTuple, TypeAlias, TypeGuard, TypeVar
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import autoflake
@@ -108,10 +108,18 @@ class ifThis:
 	def anyOf(*somePredicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		return lambda node: any(predicate(node) for predicate in somePredicates)
 
-	# TODO is this only useable if namespace is not `None`?
+	@staticmethod
+	def ast_IdentifierIsIn(container: Container[ast_Identifier]) -> Callable[[ast_Identifier], bool]:
+		return lambda node: node in container
+
+	# TODO is this only useable if namespace is not `None`? Yes, but use "" for namespace if necessary.
 	@staticmethod
 	def CallDoesNotCallItself(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
 		return lambda node: ifThis.CallReallyIs(namespace, identifier)(node) and 1 == sum(1 for descendant in ast.walk(node) if ifThis.CallReallyIs(namespace, identifier)(descendant))
+
+	@staticmethod
+	def CallDoesNotCallItselfAndNameDOTidIsIn(container: Container[ast_Identifier]) -> Callable[[ast.AST], bool]:
+		return lambda node: (ifThis.isCall(node) and ifThis.isName(node.func) and ifThis.ast_IdentifierIsIn(container)(node.func.id) and ifThis.CallDoesNotCallItself("", node.func.id)(node))
 
 	@staticmethod
 	def CallReallyIs(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
@@ -186,6 +194,10 @@ class ifThis:
 		return lambda node: ifThis.isCall(node) and ifThis.isNameDOTnameNamespace_Identifier(namespace, identifier)(node.func)
 
 	@staticmethod
+	def isCallToName(node: ast.AST) -> TypeGuard[ast.Call]:
+		return ifThis.isCall(node) and ifThis.isName(node.func)
+
+	@staticmethod
 	def isClassDef(node: ast.AST) -> TypeGuard[ast.ClassDef]:
 		return isinstance(node, ast.ClassDef)
 
@@ -244,14 +256,6 @@ class ifThis:
 	@staticmethod
 	def NameReallyIs(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
 		return ifThis.anyOf(ifThis.isName_Identifier(identifier), ifThis.isSubscript_Identifier(identifier))
-
-	@staticmethod
-	def ast_IdentifierIsIn(container: Container[ast_Identifier]) -> Callable[[ast_Identifier], bool]:
-		return lambda node: node in container
-
-	@staticmethod
-	def isCall__IsName__NameDOTidIsIn(container: Container[ast_Identifier]) -> Callable[[ast.AST], bool]:
-		return lambda node: ifThis.isCall(node) and ifThis.isName(node.func) and ifThis.ast_IdentifierIsIn(container)(node.func.id)
 
 class Make:
 	@staticmethod
@@ -401,9 +405,6 @@ class Then:
 	def insertThisBelow(astStatement: ast.stmt) -> Callable[[ast.stmt], Sequence[ast.stmt]]:
 		return lambda belowMe: [belowMe, astStatement]
 	@staticmethod
-	def Z0Z_appendAnnotationNameTo(list_Identifier: list[Any]) -> Callable[[ast.AST], None]:
-		return lambda node: list_Identifier.append(node.annotation.id)
-	@staticmethod
 	def replaceWith(astStatement: ast.stmt) -> Callable[[ast.stmt], ast.stmt]:
 		return lambda replaceMe: astStatement
 	@staticmethod
@@ -411,23 +412,23 @@ class Then:
 
 	@staticmethod
 	def Z0Z_ledger(logicalPath: strDotStrCuzPyStoopid, ledger: LedgerOfImports) -> Callable[[ast.AST], None]:
-		return lambda node: ledger.addImportFromStr(logicalPath, node.annotation.id)
+		return lambda node: ledger.addImportFromStr(logicalPath, cast(ast.Name, cast(ast.AnnAssign, node).annotation).id)
 
 	@staticmethod
-	def Z0Z_appendKeywordMirroredTo(list_stmt: list[ast.stmt]) -> Callable[[ast.AST], None]:
-		return lambda node: list_stmt.append(Make.astKeyword(node.target.id, node.target))
+	def Z0Z_appendKeywordMirroredTo(list_keyword: list[ast.keyword]) -> Callable[[ast.AST], None]:
+		return lambda node: list_keyword.append(Make.astKeyword(cast(ast.Name, cast(ast.AnnAssign, node).target).id, cast(ast.Name, cast(ast.AnnAssign, node).target)))
 
 	@staticmethod
-	def append_targetTo(list_stmt: list[ast.stmt]) -> Callable[[ast.AST], None]:
-		return lambda node: list_stmt.append(node.target)
+	def append_targetTo(listName: list[ast.Name]) -> Callable[[ast.AST], None]:
+		return lambda node: listName.append(cast(ast.Name, cast(ast.AnnAssign, node).target))
 
 	@staticmethod
-	def appendTo(list_stmt: list[ast.stmt]) -> Callable[[ast.AST], None]:
-		return lambda node: list_stmt.append(node)
+	def appendTo(list_stmt: Sequence[ast.stmt]) -> Callable[[ast.stmt], None]:
+		return lambda node: list(list_stmt).append(node)
 
 	@staticmethod
-	def Z0Z_appendAnnAssignOfNameDOTnameTo(identifier: ast_Identifier, listNameDOTname: list[ast.stmt]) -> Callable[[ast.AST], None]:
-		return lambda node: Then.appendTo(listNameDOTname)(Make.astAnnAssign(node.target, node.annotation, Make.nameDOTname(identifier, node.target.id)))
+	def Z0Z_appendAnnAssignOfNameDOTnameTo(identifier: ast_Identifier, listNameDOTname: list[ast.AnnAssign]) -> Callable[[ast.AST], None]:
+		return lambda node: Then.appendTo(listNameDOTname)(Make.astAnnAssign(cast(ast.AnnAssign, node).target, cast(ast.AnnAssign, node).annotation, Make.nameDOTname(identifier, cast(ast.Name, cast(ast.AnnAssign, node).target).id)))
 
 class FunctionInliner(ast.NodeTransformer):
 	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
@@ -442,9 +443,8 @@ class FunctionInliner(ast.NodeTransformer):
 
 	def visit_Call(self, node: ast.Call):
 		astCall = self.generic_visit(node)
-		if (ifThis.isCall__IsName__NameDOTidIsIn(self.dictionaryFunctions)(astCall)
-		and ifThis.CallDoesNotCallItself("", astCall.func.id)(astCall)):
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(astCall.func.id)
+		if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryFunctions)(astCall):
+			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(cast(ast.Name, cast(ast.Call, astCall).func).id)
 
 			if (inlineDefinition and inlineDefinition.body):
 				statementTerminating: ast.stmt = inlineDefinition.body[-1]
@@ -459,9 +459,8 @@ class FunctionInliner(ast.NodeTransformer):
 		return astCall
 
 	def visit_Expr(self, node: ast.Expr):
-		if (ifThis.isCall__IsName__NameDOTidIsIn(self.dictionaryFunctions)(node.value)
-		and ifThis.CallDoesNotCallItself("", node.value.func.id)(node.value)):
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(node.value.func.id)
+		if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryFunctions)(node.value):
+			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(cast(ast.Name, cast(ast.Call, node.value).func).id)
 			return [self.visit(stmt) for stmt in inlineDefinition.body]
 		return self.generic_visit(node)
 
@@ -593,13 +592,14 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(listKeywordForDataclassInitialization)
 	filteredAppendKeywordAction = executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction)
 
-	collector = NodeCollector(ifThis.isAnnAssignAndTargetIsName,
-		[Then.Z0Z_appendAnnAssignOfNameDOTnameTo(instance_Identifier, list_astAnnAssign)
-		, Then.append_targetTo(list_astNameDataclassFragments)
-		, lambda node: addToLedger.visit(node)
-		, filteredAppendKeywordAction
-		]
-	)
+	collector = NodeCollector(
+			ifThis.isAnnAssignAndTargetIsName,
+				[Then.Z0Z_appendAnnAssignOfNameDOTnameTo(instance_Identifier, list_astAnnAssign)
+				, Then.append_targetTo(list_astNameDataclassFragments)
+				, lambda node: addToLedger.visit(node)
+				, filteredAppendKeywordAction
+				]
+			)
 
 	collector.visit(dataclass)
 
