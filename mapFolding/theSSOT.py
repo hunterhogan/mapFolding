@@ -233,10 +233,10 @@ class FREAKOUT(Exception): pass
 # Temporary or transient or something; probably still the wrong way
 
 # THIS IS A STUPID SYSTEM BUT I CAN'T FIGURE OUT AN IMPROVEMENT
-formatStrModuleSynthetic = "{packageFlow}Count"
-formatStrModuleForCallableSynthetic = formatStrModuleSynthetic + "_{callableTarget}"
+theFormatStrModuleSynthetic = "{packageFlow}Count"
+theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
 
-theModuleDispatcherSynthetic: str = formatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=theDispatcherCallableAsStr)
+theModuleDispatcherSynthetic: str = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=theDispatcherCallableAsStr)
 theLogicalPathModuleDispatcherSynthetic: str = '.'.join([thePackageName, theModuleOfSyntheticModules, theModuleDispatcherSynthetic])
 
 # =============================================================================

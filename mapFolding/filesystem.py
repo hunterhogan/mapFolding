@@ -1,8 +1,5 @@
 """Filesystem functions for mapFolding package."""
-from collections.abc import Sequence
-from numpy import dtype, integer, ndarray
 from pathlib import Path
-from typing import Any
 import os
 
 def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> None:

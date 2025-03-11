@@ -6,8 +6,8 @@
 """
 from collections.abc import Callable
 from mapFolding.theSSOT import (
-	formatStrModuleForCallableSynthetic,
-	formatStrModuleSynthetic,
+	theFormatStrModuleForCallableSynthetic,
+	theFormatStrModuleSynthetic,
 	getSourceAlgorithm,
 	packageFlowSynthetic,
 	theDataclassIdentifierAsStr,
@@ -37,6 +37,19 @@ else:
 """
 Start with what is: theDao.py
 Create settings that can transform into what I or the user want it to be.
+
+The simplest flow with numba is:
+1. one module
+2. dispatcher
+	- initialize data with makeJob
+	- smash dataclass
+	- call countSequential
+3. countSequential
+	- jitted, not super-jitted
+	- functions inlined (or I'd have to jit them)
+	- return groupsOfFolds
+4. recycle the dataclass with groupsOfFolds
+5. return the dataclass
 """
 
 @dataclasses.dataclass
@@ -45,10 +58,8 @@ class RecipeSynthesizeFlow:
 	sourceAlgorithm: ModuleType = getSourceAlgorithm()
 
 	fileExtension: str = theFileExtension
-	formatStrFilenameSynthetic: str = formatStrModuleSynthetic + fileExtension
-	formatStrFilenameForCallableSynthetic: str = formatStrModuleForCallableSynthetic + fileExtension
-	filenameModuleSyntheticWrite: str = formatStrFilenameSynthetic.format(packageFlow=packageFlowSynthetic)
-	filenameWriteCallableTarget: str = 'count'
+	formatStrModuleSynthetic: str = theFormatStrModuleSynthetic
+	formatStrModuleForCallableSynthetic: str = theFormatStrModuleForCallableSynthetic
 
 	moduleOfSyntheticModules: str = theModuleOfSyntheticModules
 
@@ -58,7 +69,7 @@ class RecipeSynthesizeFlow:
 	dispatcherCallableAsStr: str = theDispatcherCallableAsStr
 	logicalPathModuleDispatcher: str = theLogicalPathModuleDispatcherSynthetic
 	dataConverterCallableAsStr: str = 'flattenData'
-	dataConverterModuleFilename = 'dataNamespaceFlattened' + theFileExtension
+	dataConverterModule: str = 'dataNamespaceFlattened'
 
 recipeNumbaGeneralizedFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 

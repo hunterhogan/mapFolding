@@ -351,7 +351,7 @@ class LedgerOfImports:
 			self.walkThis(startWith)
 
 	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
-		if not isinstance(astImport_, (ast.Import, ast.ImportFrom)):
+		if not isinstance(astImport_, (ast.Import, ast.ImportFrom)): # pyright: ignore[reportUnnecessaryIsInstance]
 			raise ValueError(f"Expected ast.Import or ast.ImportFrom, got {type(astImport_)}")
 		if isinstance(astImport_, ast.Import):
 			for alias in astImport_.names:
@@ -428,7 +428,7 @@ class Then:
 
 	@staticmethod
 	def Z0Z_appendAnnAssignOfNameDOTnameTo(identifier: ast_Identifier, listNameDOTname: list[ast.AnnAssign]) -> Callable[[ast.AST], None]:
-		return lambda node: Then.appendTo(listNameDOTname)(Make.astAnnAssign(cast(ast.AnnAssign, node).target, cast(ast.AnnAssign, node).annotation, Make.nameDOTname(identifier, cast(ast.Name, cast(ast.AnnAssign, node).target).id)))
+		return lambda node: listNameDOTname.append(Make.astAnnAssign(cast(ast.AnnAssign, node).target, cast(ast.AnnAssign, node).annotation, Make.nameDOTname(identifier, cast(ast.Name, cast(ast.AnnAssign, node).target).id)))
 
 class FunctionInliner(ast.NodeTransformer):
 	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
@@ -474,6 +474,7 @@ class IngredientsFunction:
 class IngredientsModule:
 	"""Everything necessary to create a module, including the package context, should be here."""
 	name: ast_Identifier
+	ingredientsFunction: dataclasses.InitVar[Sequence[IngredientsFunction] | IngredientsFunction | None] = None
 
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	prologue: list[ast.stmt] = dataclasses.field(default_factory=list)
@@ -525,7 +526,14 @@ class IngredientsModule:
 			logicalPathParent = '.'
 		return Make.astImportFrom(logicalPathParent, [Make.astAlias(self.name)])
 
-	def addFunctions(self, *ingredientsFunction: IngredientsFunction) -> None:
+	def __post_init__(self, ingredientsFunction: Sequence[IngredientsFunction] | IngredientsFunction | None = None) -> None:
+		if ingredientsFunction is not None:
+			if isinstance(ingredientsFunction, IngredientsFunction):
+				self.addIngredientsFunction(ingredientsFunction)
+			else:
+				self.addIngredientsFunction(*ingredientsFunction)
+
+	def addIngredientsFunction(self, *ingredientsFunction: IngredientsFunction) -> None:
 		"""Add one or more `IngredientsFunction`. """
 		listLedgers: list[LedgerOfImports] = []
 		for definition in ingredientsFunction:

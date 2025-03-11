@@ -1,6 +1,6 @@
 from mapFolding.someAssemblyRequired.getLLVMforNoReason import writeModuleLLVM as writeModuleLLVM
 from mapFolding.someAssemblyRequired.makeJob import makeStateJob as makeStateJob
-from mapFolding.someAssemblyRequired.synthesizingTools import (
+from mapFolding.someAssemblyRequired.transformationTools import (
 	ast_Identifier as ast_Identifier,
 	FunctionInliner as FunctionInliner,
 	ifThis as ifThis,

@@ -1,13 +1,25 @@
-from mapFolding.someAssemblyRequired.synthesizeDataConverter import makeDataConverterModule
+from mapFolding.someAssemblyRequired import IngredientsFunction, IngredientsModule, makeStateJob
+from mapFolding.someAssemblyRequired.synthesizeDataConverters import makeDataclassConverter
 from mapFolding.someAssemblyRequired.whatWillBe import recipeNumbaGeneralizedFlow
-
+import ast
 if __name__ == '__main__':
-	makeDataConverterModule(dataclassIdentifierAsStr=recipeNumbaGeneralizedFlow.dataclassIdentifierAsStr
-, logicalPathModuleDataclass=recipeNumbaGeneralizedFlow.logicalPathModuleDataclass
-, dataclassInstanceAsStr=recipeNumbaGeneralizedFlow.dataclassInstanceAsStr
-, dispatcherCallableAsStr=recipeNumbaGeneralizedFlow.dispatcherCallableAsStr
-, logicalPathModuleDispatcher=recipeNumbaGeneralizedFlow.logicalPathModuleDispatcher
-, dataConverterCallableAsStr=recipeNumbaGeneralizedFlow.dataConverterCallableAsStr
-, logicalPathINFIX=recipeNumbaGeneralizedFlow.moduleOfSyntheticModules
-, moduleFilename=recipeNumbaGeneralizedFlow.dataConverterModuleFilename
-)
+	ingredientsFunctionDataConverter = makeDataclassConverter(
+		dataclassIdentifierAsStr=recipeNumbaGeneralizedFlow.dataclassIdentifierAsStr
+		, logicalPathModuleDataclass=recipeNumbaGeneralizedFlow.logicalPathModuleDataclass
+		, dataclassInstanceAsStr=recipeNumbaGeneralizedFlow.dataclassInstanceAsStr
+		, dispatcherCallableAsStr=recipeNumbaGeneralizedFlow.dispatcherCallableAsStr
+		, logicalPathModuleDispatcher=recipeNumbaGeneralizedFlow.logicalPathModuleDispatcher
+		, dataConverterCallableAsStr=recipeNumbaGeneralizedFlow.dataConverterCallableAsStr
+		)
+
+	dataInitializationHack = "state=makeStateJob(state.mapShape,writeJob=False)"
+	ingredientsFunctionDataConverter.FunctionDef.body.insert(0, ast.parse(dataInitializationHack).body[0])
+	ingredientsFunctionDataConverter.imports.addImportFromStr('mapFolding.someAssemblyRequired', 'makeStateJob')
+
+	ingredientsModuleDataConverter = IngredientsModule(
+		name=recipeNumbaGeneralizedFlow.dataConverterModule,
+		ingredientsFunction=ingredientsFunctionDataConverter,
+		logicalPathINFIX=recipeNumbaGeneralizedFlow.moduleOfSyntheticModules,
+	)
+
+	ingredientsModuleDataConverter.writeModule()

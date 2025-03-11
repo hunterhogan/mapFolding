@@ -1,7 +1,9 @@
+from mapFolding.someAssemblyRequired import makeStateJob
 from mapFolding.syntheticModules.numbaCount_doTheNeedful import doTheNeedful
 from mapFolding.theSSOT import Array1DElephino, Array1DFoldsTotal, Array1DLeavesTotal, Array3D, ComputationState, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
 
 def flattenData(state: ComputationState) -> ComputationState:
+    state = makeStateJob(state.mapShape, writeJob=False)
     mapShape: tuple[DatatypeLeavesTotal, ...] = state.mapShape
     leavesTotal: DatatypeLeavesTotal = state.leavesTotal
     taskDivisions: DatatypeLeavesTotal = state.taskDivisions

@@ -3,7 +3,6 @@ from collections.abc import Callable, Generator, Sequence
 from mapFolding.theSSOT import getAlgorithmDispatcher, getSourceAlgorithm, getPackageDispatcher, theModuleOfSyntheticModules, FREAKOUT
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
-from mapFolding.someAssemblyRequired import makeFlowNumbaOptimized, YouOughtaKnow, listNumbaCallableDispatchees
 from pathlib import Path
 from typing import Any, ContextManager
 import importlib.util
