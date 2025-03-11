@@ -1,31 +1,43 @@
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Container, Iterable, Sequence
 from importlib import import_module
 from inspect import getsource as inspect_getsource
 from mapFolding.theSSOT import FREAKOUT, getDatatypePackage, theFileExtension, thePackageName, thePathPackage
 from pathlib import Path
-from typing import Any, cast, NamedTuple, TypeAlias
+from typing import Any, NamedTuple, TypeAlias, TypeGuard, TypeVar
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import autoflake
 import dataclasses
+"""
+Semiotic notes:
+In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
+
+astName: always means `ast.Name`.
+Name: uppercase, _should_ be interchangeable with astName, even in camelCase.
+name: lowercase, never means `ast.Name`. In camelCase, I _should_ avoid using it in such a way that it could be confused with "Name", uppercase.
+_Identifier: very strongly correlates with the private `ast._Identifier`, which is a TypeAlias for `str`.
+identifier: lowercase, a general term that includes the above and other Python identifiers.
+Identifier: uppercase, without the leading underscore should only appear in camelCase and means "identifier", lowercase.
+namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.abc`, "namespace" is the part before the dot.
+Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
+"""
+# TODO consider semiotic usefulness of "namespace" or variations such as "namespaceName", "namespacePath", and "namespace_Identifier"
 
 # TODO learn whether libcst can help
 
+astParameter = TypeVar('astParameter', bound=Any)
 ast_Identifier: TypeAlias = str
 strDotStrCuzPyStoopid: TypeAlias = str
 strORlist_ast_type_paramORintORNone: TypeAlias = Any
 strORintORNone: TypeAlias = Any
 Z0Z_thisCannotBeTheBestWay: TypeAlias = list[ast.Name] | list[ast.Attribute] | list[ast.Subscript] | list[ast.Name | ast.Attribute] | list[ast.Name | ast.Subscript] | list[ast.Attribute | ast.Subscript] | list[ast.Name | ast.Attribute | ast.Subscript]
 
-# NOTE: this is weak
+# NOTE: the new "Recipe" concept will allow me to remove this
 class YouOughtaKnow(NamedTuple):
 	callableSynthesized: str
 	pathFilenameForMe: Path
 	astForCompetentProgrammers: ast.ImportFrom
-
-# \t@(staticmethod)\n\tdef (\w+)\((.+)\)( lambda node: )\((.+)\)$
-# \t$2 = $1(lambda $3:$4$5)
 
 class NodeCollector(ast.NodeVisitor):
 	# A node visitor that collects data via one or more actions when a predicate is met.
@@ -92,41 +104,154 @@ def executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.AST],
 	return wrappedAction
 
 class ifThis:
-	anyOf = staticmethod(lambda *somePredicates: lambda node: any(predicate(node) for predicate in somePredicates)) # type: ignore
-	CallDoesNotCallItself = staticmethod(lambda moduleName, callableName: lambda node: ifThis.CallReallyIs(moduleName, callableName)(node) and 1 == sum(1 for descendant in ast.walk(node) if ifThis.CallReallyIs(moduleName, callableName)(descendant)))
-	CallReallyIs = staticmethod(lambda moduleName, callableName: ifThis.anyOf(ifThis.isCall_Identifier(callableName), ifThis.isCall_IdentifierDOTname(moduleName, callableName)))
-	is_keyword = staticmethod(lambda node: isinstance(node, ast.keyword))
-	is_keyword_Identifier = staticmethod(lambda identifier: lambda node: ifThis.is_keyword(node) and node.arg == identifier)
-	is_keyword_IdentifierEqualsConstantValue = staticmethod(lambda identifier, ConstantValue: lambda node: ifThis.is_keyword_Identifier(identifier)(node) and ifThis.isConstantEquals(ConstantValue)(node.value))
-	isAnnAssign = staticmethod(lambda node: isinstance(node, ast.AnnAssign))
-	isAnnAssignAndAnnotationIsName = staticmethod(lambda node: ifThis.isAnnAssign(node) and ifThis.isName(node.annotation))
-	isAnnAssignAndTargetIsName = staticmethod(lambda node: ifThis.isAnnAssign(node) and ifThis.isName(node.target))
-	isAnnAssignTo = staticmethod(lambda identifier: lambda node: ifThis.isAnnAssign(node) and ifThis.NameReallyIs(identifier)(node.target))
-	isAnyAssignmentTo = staticmethod(lambda identifier: ifThis.anyOf(ifThis.isAssignOnlyTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.isAugAssignTo(identifier)))
-	isAssign = staticmethod(lambda node: isinstance(node, ast.Assign))
-	isAssignOnlyTo = staticmethod(lambda identifier: lambda node: ifThis.isAssign(node) and ifThis.NameReallyIs(identifier)(node.targets[0]))
-	isAttribute = staticmethod(lambda node: isinstance(node, ast.Attribute))
-	isAugAssign = staticmethod(lambda node: isinstance(node, ast.AugAssign))
-	isAugAssignTo = staticmethod(lambda identifier: lambda node: ifThis.isAugAssign(node) and ifThis.NameReallyIs(identifier)(node.target))
-	isCall = staticmethod(lambda node: isinstance(node, ast.Call))
-	isCall_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isCall(node) and ifThis.isName_Identifier(node.func)(identifier))
-	isCall_IdentifierDOTname = staticmethod(lambda identifier, dotName: lambda node: ifThis.isCall(node) and ifThis.isNameDOTname_Identifier_Identifier(identifier, dotName)(node.func))
-	isClassDef = staticmethod(lambda node: isinstance(node, ast.ClassDef))
-	isClassDef_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isClassDef(node) and node.name == identifier)
-	isConstant = staticmethod(lambda node: isinstance(node, ast.Constant))
-	isConstantEquals = staticmethod(lambda value: lambda node: ifThis.isConstant(node) and node.value == value)
-	isFunctionDef = staticmethod(lambda node: isinstance(node, ast.FunctionDef))
-	isFunctionDef_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isFunctionDef(node) and node.name == identifier)
-	isImport = staticmethod(lambda node: isinstance(node, ast.Import))
-	isName = staticmethod(lambda node: isinstance(node, ast.Name))
-	isName_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isName(node) and node.id == identifier)
-	isNameDOTname = staticmethod(lambda node: ifThis.isAttribute(node) and ifThis.isName(node.value))
-	isNameDOTname_Identifier_Identifier = staticmethod(lambda identifier, dotName: lambda node: ifThis.isNameDOTname(node) and node.value.id == identifier and node.attr == dotName)
-	isSubscript = staticmethod(lambda node: isinstance(node, ast.Subscript))
-	isSubscript_Identifier = staticmethod(lambda identifier: lambda node: ifThis.isSubscript(node) and ifThis.isName_Identifier(identifier)(node.value))
-	isSubscript_Identifier_Identifier = staticmethod(lambda identifier, sliceIdentifier: lambda node: ifThis.isSubscript(node) and ifThis.isName_Identifier(identifier)(node.value) and ifThis.isName_Identifier(sliceIdentifier)(node.slice)) # auto-generated
-	NameReallyIs = staticmethod(lambda identifier: ifThis.anyOf(ifThis.isName_Identifier(identifier), ifThis.isSubscript_Identifier(identifier)))
-	WTFisThis4isCallAsNameIsIn = staticmethod(lambda container: lambda node: ifThis.isCall(node) and ifThis.isName(node.func) and node.func.id in container)
+	@staticmethod
+	def anyOf(*somePredicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
+		return lambda node: any(predicate(node) for predicate in somePredicates)
+
+	# TODO is this only useable if namespace is not `None`?
+	@staticmethod
+	def CallDoesNotCallItself(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.CallReallyIs(namespace, identifier)(node) and 1 == sum(1 for descendant in ast.walk(node) if ifThis.CallReallyIs(namespace, identifier)(descendant))
+
+	@staticmethod
+	def CallReallyIs(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return ifThis.anyOf(ifThis.isCall_Identifier(identifier), ifThis.isCallNamespace_Identifier(namespace, identifier))
+
+	@staticmethod
+	def is_keyword(node: ast.AST) -> TypeGuard[ast.keyword]:
+		return isinstance(node, ast.keyword)
+
+	@staticmethod
+	def is_keywordAndValueIsConstant(node: ast.AST) -> TypeGuard[ast.keyword]:
+		return ifThis.is_keyword(node) and ifThis.isConstant(node.value)
+
+	@staticmethod
+	def is_keyword_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.is_keyword(node) and node.arg == identifier
+	@staticmethod
+	def is_keyword_IdentifierEqualsConstantValue(identifier: ast_Identifier, ConstantValue: Any) -> Callable[[ast.AST], bool]:
+		return lambda node: (ifThis.is_keyword_Identifier(identifier)(node) and ifThis.is_keywordAndValueIsConstant(node) and ifThis.isConstantEquals(ConstantValue)(node.value))
+
+	@staticmethod
+	def isAnnAssign(node: ast.AST) -> TypeGuard[ast.AnnAssign]:
+		return isinstance(node, ast.AnnAssign)
+
+	@staticmethod
+	def isAnnAssignAndAnnotationIsName(node: ast.AST) -> TypeGuard[ast.AnnAssign]:
+		return ifThis.isAnnAssign(node) and ifThis.isName(node.annotation)
+
+	@staticmethod
+	def isAnnAssignAndTargetIsName(node: ast.AST) -> TypeGuard[ast.AnnAssign]:
+		return ifThis.isAnnAssign(node) and ifThis.isName(node.target)
+
+	@staticmethod
+	def isAnnAssignTo(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isAnnAssign(node) and ifThis.NameReallyIs(identifier)(node.target)
+
+	@staticmethod
+	def isAnyAssignmentTo(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return ifThis.anyOf(ifThis.isAssignOnlyTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.isAugAssignTo(identifier))
+
+	@staticmethod
+	def isAssign(node: ast.AST) -> TypeGuard[ast.Assign]:
+		return isinstance(node, ast.Assign)
+
+	@staticmethod
+	def isAssignOnlyTo(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isAssign(node) and ifThis.NameReallyIs(identifier)(node.targets[0])
+
+	@staticmethod
+	def isAttribute(node: ast.AST) -> TypeGuard[ast.Attribute]:
+		return isinstance(node, ast.Attribute)
+
+	@staticmethod
+	def isAugAssign(node: ast.AST) -> TypeGuard[ast.AugAssign]:
+		return isinstance(node, ast.AugAssign)
+
+	@staticmethod
+	def isAugAssignTo(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isAugAssign(node) and ifThis.NameReallyIs(identifier)(node.target)
+
+	@staticmethod
+	def isCall(node: ast.AST) -> TypeGuard[ast.Call]:
+		return isinstance(node, ast.Call)
+
+	@staticmethod
+	def isCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isCall(node) and ifThis.isName_Identifier(identifier)(node.func)
+
+	# TODO what happens if `None` is passed as the namespace?
+	@staticmethod
+	def isCallNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isCall(node) and ifThis.isNameDOTnameNamespace_Identifier(namespace, identifier)(node.func)
+
+	@staticmethod
+	def isClassDef(node: ast.AST) -> TypeGuard[ast.ClassDef]:
+		return isinstance(node, ast.ClassDef)
+
+	@staticmethod
+	def isClassDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isClassDef(node) and node.name == identifier
+
+	@staticmethod
+	def isConstant(node: ast.AST) -> TypeGuard[ast.Constant]:
+		return isinstance(node, ast.Constant)
+
+	@staticmethod
+	def isConstantEquals(value: Any) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isConstant(node) and node.value == value
+
+	@staticmethod
+	def isFunctionDef(node: ast.AST) -> TypeGuard[ast.FunctionDef]:
+		return isinstance(node, ast.FunctionDef)
+
+	@staticmethod
+	def isFunctionDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isFunctionDef(node) and node.name == identifier
+
+	@staticmethod
+	def isImport(node: ast.AST) -> TypeGuard[ast.Import]:
+		return isinstance(node, ast.Import)
+
+	@staticmethod
+	def isName(node: ast.AST) -> TypeGuard[ast.Name]:
+		return isinstance(node, ast.Name)
+
+	@staticmethod
+	def isName_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isName(node) and node.id == identifier
+
+	@staticmethod
+	def isNameDOTname(node: ast.AST) -> TypeGuard[ast.Attribute]:
+		return ifThis.isAttribute(node) and ifThis.isName(node.value)
+
+	@staticmethod
+	def isNameDOTnameNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isNameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value) and node.attr == identifier
+
+	@staticmethod
+	def isSubscript(node: ast.AST) -> TypeGuard[ast.Subscript]:
+		return isinstance(node, ast.Subscript)
+
+	@staticmethod
+	def isSubscript_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isSubscript(node) and ifThis.isName_Identifier(identifier)(node.value)
+
+	@staticmethod
+	def isSubscript_Identifier_Identifier(identifier: ast_Identifier, sliceIdentifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isSubscript(node) and ifThis.isName_Identifier(identifier)(node.value) and ifThis.isName_Identifier(sliceIdentifier)(node.slice) # auto-generated
+
+	@staticmethod
+	def NameReallyIs(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		return ifThis.anyOf(ifThis.isName_Identifier(identifier), ifThis.isSubscript_Identifier(identifier))
+
+	@staticmethod
+	def ast_IdentifierIsIn(container: Container[ast_Identifier]) -> Callable[[ast_Identifier], bool]:
+		return lambda node: node in container
+
+	@staticmethod
+	def isCall__IsName__NameDOTidIsIn(container: Container[ast_Identifier]) -> Callable[[ast.AST], bool]:
+		return lambda node: ifThis.isCall(node) and ifThis.isName(node.func) and ifThis.ast_IdentifierIsIn(container)(node.func.id)
 
 class Make:
 	@staticmethod
@@ -150,7 +275,7 @@ class Make:
 	@staticmethod
 	def astAssign(listTargets: Any, value: ast.expr, **keywordArguments: strORintORNone) -> ast.Assign:
 		"""keywordArguments: type_comment:str|None, lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
-		return ast.Assign(targets=cast(list[ast.expr], listTargets), value=value, **keywordArguments)
+		return ast.Assign(targets=listTargets, value=value, **keywordArguments)
 
 	@staticmethod
 	def astArg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: strORintORNone) -> ast.arg:
@@ -270,21 +395,39 @@ class LedgerOfImports:
 
 class Then:
 	@staticmethod
-	def insertThisAbove(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]: return lambda aboveMe: [cast(ast.stmt, astStatement), cast(ast.stmt, aboveMe)]
+	def insertThisAbove(astStatement: ast.stmt) -> Callable[[ast.stmt], Sequence[ast.stmt]]:
+		return lambda aboveMe: [astStatement, aboveMe]
 	@staticmethod
-	def insertThisBelow(astStatement: ast.AST) -> Callable[[ast.AST], Sequence[ast.stmt]]: return lambda belowMe: [cast(ast.stmt, belowMe), cast(ast.stmt, astStatement)]
+	def insertThisBelow(astStatement: ast.stmt) -> Callable[[ast.stmt], Sequence[ast.stmt]]:
+		return lambda belowMe: [belowMe, astStatement]
 	@staticmethod
-	def Z0Z_appendAnnotationNameTo(list_Identifier: list[Any]) -> Callable[[ast.AST], None]: return lambda node: list_Identifier.append(node.annotation.id) # type: ignore
+	def Z0Z_appendAnnotationNameTo(list_Identifier: list[Any]) -> Callable[[ast.AST], None]:
+		return lambda node: list_Identifier.append(node.annotation.id)
 	@staticmethod
-	def replaceWith(astStatement: ast.AST) -> Callable[[ast.AST], ast.stmt]: return lambda replaceMe: cast(ast.stmt, astStatement)
+	def replaceWith(astStatement: ast.stmt) -> Callable[[ast.stmt], ast.stmt]:
+		return lambda replaceMe: astStatement
 	@staticmethod
 	def removeThis(astNode: ast.AST) -> None: return None
 
-	Z0Z_ledger = staticmethod(lambda logicalPath, ledger: lambda node: ledger.addImportFromStr(logicalPath, node.annotation.id))
-	Z0Z_appendKeywordMirroredTo = staticmethod(lambda list_stmt: lambda node: list_stmt.append(cast(ast.stmt, Make.astKeyword(node.target.id, node.target))))
-	append_targetTo = staticmethod(lambda list_stmt: lambda node: list_stmt.append(cast(ast.stmt, node.target)))
-	appendTo = staticmethod(lambda list_stmt: lambda node: list_stmt.append(cast(ast.stmt, node)))
-	Z0Z_appendAnnAssignOfNameDOTnameTo = staticmethod(lambda identifier, listNameDOTname: lambda node: Then.appendTo(listNameDOTname)(Make.astAnnAssign(node.target, node.annotation, Make.nameDOTname(identifier, node.target.id))))
+	@staticmethod
+	def Z0Z_ledger(logicalPath: strDotStrCuzPyStoopid, ledger: LedgerOfImports) -> Callable[[ast.AST], None]:
+		return lambda node: ledger.addImportFromStr(logicalPath, node.annotation.id)
+
+	@staticmethod
+	def Z0Z_appendKeywordMirroredTo(list_stmt: list[ast.stmt]) -> Callable[[ast.AST], None]:
+		return lambda node: list_stmt.append(Make.astKeyword(node.target.id, node.target))
+
+	@staticmethod
+	def append_targetTo(list_stmt: list[ast.stmt]) -> Callable[[ast.AST], None]:
+		return lambda node: list_stmt.append(node.target)
+
+	@staticmethod
+	def appendTo(list_stmt: list[ast.stmt]) -> Callable[[ast.AST], None]:
+		return lambda node: list_stmt.append(node)
+
+	@staticmethod
+	def Z0Z_appendAnnAssignOfNameDOTnameTo(identifier: ast_Identifier, listNameDOTname: list[ast.stmt]) -> Callable[[ast.AST], None]:
+		return lambda node: Then.appendTo(listNameDOTname)(Make.astAnnAssign(node.target, node.annotation, Make.nameDOTname(identifier, node.target.id)))
 
 class FunctionInliner(ast.NodeTransformer):
 	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
@@ -297,11 +440,11 @@ class FunctionInliner(ast.NodeTransformer):
 			self.visit(astNode)
 		return inlineDefinition
 
-	def visit_Call(self, node: ast.Call) -> Any | ast.Constant | ast.Call | ast.AST:
-		astCall: ast.AST = self.generic_visit(node)
-		if (ifThis.WTFisThis4isCallAsNameIsIn(self.dictionaryFunctions)(astCall)
-		and ifThis.CallDoesNotCallItself("", astCall.func.id)(astCall)): # type: ignore
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(astCall.func.id) # type: ignore
+	def visit_Call(self, node: ast.Call):
+		astCall = self.generic_visit(node)
+		if (ifThis.isCall__IsName__NameDOTidIsIn(self.dictionaryFunctions)(astCall)
+		and ifThis.CallDoesNotCallItself("", astCall.func.id)(astCall)):
+			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(astCall.func.id)
 
 			if (inlineDefinition and inlineDefinition.body):
 				statementTerminating: ast.stmt = inlineDefinition.body[-1]
@@ -315,10 +458,10 @@ class FunctionInliner(ast.NodeTransformer):
 					return ast.Constant(value=None)
 		return astCall
 
-	def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.AST]:
-		if (ifThis.WTFisThis4isCallAsNameIsIn(self.dictionaryFunctions)(node.value)
-		and ifThis.CallDoesNotCallItself("", node.value.func.id)(node.value)): # type: ignore
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(node.value.func.id) # type: ignore
+	def visit_Expr(self, node: ast.Expr):
+		if (ifThis.isCall__IsName__NameDOTidIsIn(self.dictionaryFunctions)(node.value)
+		and ifThis.CallDoesNotCallItself("", node.value.func.id)(node.value)):
+			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(node.value.func.id)
 			return [self.visit(stmt) for stmt in inlineDefinition.body]
 		return self.generic_visit(node)
 

@@ -8,6 +8,16 @@ from types import ModuleType
 from typing import Any, Final, TypeAlias
 import dataclasses
 
+"""
+2025 March 11
+Note to self: fundamental concept in Python:
+Identifiers: scope and resolution, LEGB (Local, Enclosing, Global, Builtin)
+- Local: Inside the function
+- Enclosing: Inside enclosing functions
+- Global: At the uppermost level
+- Builtin: Python's built-in names
+"""
+
 # I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
 packageFlowSynthetic = 'numba'
 Z0Z_packageFlow = 'algorithm'
