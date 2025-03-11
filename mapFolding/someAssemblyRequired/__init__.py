@@ -13,11 +13,9 @@ from mapFolding.someAssemblyRequired.synthesizingTools import (
 	Then as Then,
 	YouOughtaKnow as YouOughtaKnow,
 	)
-from mapFolding.someAssemblyRequired.synthesizeDataConverter import makeDataConverterCallable as makeDataConverterCallable
 from mapFolding.someAssemblyRequired.synthesizeNumbaReusable import (
 	thisIsNumbaDotJit as thisIsNumbaDotJit,
 	decorateCallableWithNumba as decorateCallableWithNumba,
 	)
-from mapFolding.someAssemblyRequired.synthesizeNumbaJob import writeJobNumba as writeJobNumba
-from mapFolding.someAssemblyRequired.synthesizeNumbaModules import makeFlowNumbaOptimized as makeFlowNumbaOptimized
+
 from mapFolding.someAssemblyRequired.whatWillBe import listNumbaCallableDispatchees as listNumbaCallableDispatchees

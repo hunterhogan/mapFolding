@@ -1,12 +1,11 @@
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
-from numpy import dtype, ndarray, int64 as numpy_int64, int16 as numpy_int16
-from numpy.typing import DTypeLike
+from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, ndarray, signedinteger
 from pathlib import Path
 from sys import modules as sysModules
 from tomli import load as tomli_load
 from types import ModuleType
-from typing import Final, TypeAlias
+from typing import Any, Final, TypeAlias
 import dataclasses
 
 # I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
@@ -212,7 +211,7 @@ def getDatatypePackage() -> str:
 		_datatypePackage = theDatatypePackage
 	return _datatypePackage
 
-def getNumpyDtypeDefault() -> DTypeLike:
+def getNumpyDtypeDefault() -> type[signedinteger[Any]]:
 	return numpyDtypeDefault
 
 # =============================================================================

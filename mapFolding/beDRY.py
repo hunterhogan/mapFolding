@@ -6,8 +6,6 @@ from mapFolding.theSSOT import (
 	getNumpyDtypeDefault,
 )
 from collections.abc import Sequence
-from numba import get_num_threads, set_num_threads
-from numpy.typing import DTypeLike
 from sys import maxsize as sysMaxsize
 from typing import Any
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
@@ -35,11 +33,16 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 		productDimensions *= dimension
 	return productDimensions
 
-def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: DTypeLike | None = None) -> Array3D:
+def getNumpyDtype(datatype: type[numpy.signedinteger[Any]] | None = None) -> type[numpy.signedinteger[Any]]:
+	"""An imperfect way to reduce code duplication."""
 	if 'numpy' == getDatatypePackage():
 		numpyDtype = datatype or getNumpyDtypeDefault()
 	else:
 		raise NotImplementedError("Somebody done broke it.")
+	return numpyDtype
+
+def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[numpy.signedinteger[Any]] | None = None) -> Array3D:
+	numpyDtype = getNumpyDtype(datatype)
 	dimensionsTotal = len(mapShape)
 	cumulativeProduct = numpy.multiply.accumulate([1] + list(mapShape), dtype=numpyDtype)
 	arrayDimensions = numpy.array(mapShape, dtype=numpyDtype)
@@ -65,13 +68,9 @@ def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: D
 					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
 	return connectionGraph
 
-def makeDataContainer(shape: int | tuple[int, ...], datatype: DTypeLike | None = None):# -> (Array1DLeavesTotal | Array1DElephino | Array1DFoldsTotal | ndarray[Any, dtype[Any]]):
-	# ChatGPT (4o reasoning?): "Tip: Create them with functions like np.empty(...) or np.zeros(...) to ensure contiguous memory layout."
-	if 'numpy' == getDatatypePackage():
-		numpyDtype = datatype or getNumpyDtypeDefault()
-		return numpy.zeros(shape, dtype=numpyDtype)
-	else:
-		raise NotImplementedError("Somebody done broke it.")
+def makeDataContainer(shape: int | tuple[int, ...], datatype: type[numpy.signedinteger[Any]] | None = None) -> numpy.ndarray[Any, numpy.dtype[numpy.signedinteger[Any]]]:
+	numpyDtype = getNumpyDtype(datatype)
+	return numpy.zeros(shape, dtype=numpyDtype)
 
 def setCPUlimit(CPUlimit: Any | None) -> int:
 	"""Sets CPU limit for Numba concurrent operations. Note that it can only affect Numba-jitted functions that have not yet been imported.
@@ -97,6 +96,7 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 	concurrencyLimit: int = int(defineConcurrencyLimit(CPUlimit))
 	from mapFolding.theSSOT import concurrencyPackage
 	if concurrencyPackage == 'numba':
+		from numba import get_num_threads, set_num_threads
 		set_num_threads(concurrencyLimit)
 		concurrencyLimit = get_num_threads()
 	elif concurrencyPackage == 'algorithm':

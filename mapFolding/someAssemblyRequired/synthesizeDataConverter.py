@@ -1,28 +1,13 @@
-from mapFolding.someAssemblyRequired import ( IngredientsFunction, IngredientsModule, Make, shatter_dataclassesDOTdataclass, )
-from mapFolding.someAssemblyRequired.whatWillBe import Z0Z_DataConverterCallable
-from mapFolding.theSSOT import (
-	theDataclassIdentifierAsStr,
-	theDataclassInstanceAsStr,
-	theDispatcherCallableAsStr,
-	theLogicalPathModuleDataclass,
-	theModuleOfSyntheticModules,
-	theLogicalPathModuleDispatcherSynthetic,
-)
+from mapFolding.someAssemblyRequired import IngredientsFunction, IngredientsModule, Make, shatter_dataclassesDOTdataclass
 from typing import cast
 import ast
 
-def makeDataConverterCallable(
-	dataclassIdentifierAsStr: str = theDataclassIdentifierAsStr,
-	logicalPathModuleDataclass: str = theLogicalPathModuleDataclass,
-	dataclassInstanceAsStr: str = theDataclassInstanceAsStr,
-	dispatcherCallableAsStr: str = theDispatcherCallableAsStr,
-	logicalPathModuleDispatcher: str = theLogicalPathModuleDispatcherSynthetic,
-	) -> IngredientsFunction:
+def makeDataConverterCallable(dataclassIdentifierAsStr: str, logicalPathModuleDataclass: str, dataclassInstanceAsStr: str, dispatcherCallableAsStr: str, logicalPathModuleDispatcher: str, dataConverterCallableAsStr: str, ) -> IngredientsFunction:
 
 	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments = shatter_dataclassesDOTdataclass(logicalPathModuleDataclass, dataclassIdentifierAsStr, dataclassInstanceAsStr)
 
 	ingredientsFunction = IngredientsFunction(
-		FunctionDef = Make.astFunctionDef(name=Z0Z_DataConverterCallable
+		FunctionDef = Make.astFunctionDef(name=dataConverterCallableAsStr
 										, args=Make.astArgumentsSpecification(args=[Make.astArg(dataclassInstanceAsStr, astNameDataclass)])
 										, body = cast(list[ast.stmt], list_astAnnAssign)
 										, returns = astNameDataclass
@@ -39,18 +24,24 @@ def makeDataConverterCallable(
 
 	return ingredientsFunction
 
-def makeDataConverterModule() -> IngredientsModule:
-	ingredientsFunctionDataConverter = makeDataConverterCallable()
+# I suspect this will be replaced with a generic "writeModule" function.
+def makeDataConverterModule(dataclassIdentifierAsStr: str,
+		logicalPathModuleDataclass: str,
+		dataclassInstanceAsStr: str,
+		dispatcherCallableAsStr: str,
+		logicalPathModuleDispatcher: str,
+		dataConverterCallableAsStr: str,
+		logicalPathINFIX: str,
+		moduleFilename: str,
+	) -> IngredientsModule:
+	ingredientsFunctionDataConverter = makeDataConverterCallable(dataclassIdentifierAsStr, logicalPathModuleDataclass, dataclassInstanceAsStr, dispatcherCallableAsStr, logicalPathModuleDispatcher, dataConverterCallableAsStr,)
 	ingredientsModuleDataConverter = IngredientsModule(
-		name=Z0Z_DataConverterCallable,
+		name=moduleFilename,
 		functions=[ingredientsFunctionDataConverter.FunctionDef],
 		imports=ingredientsFunctionDataConverter.imports,
-		logicalPathINFIX=theModuleOfSyntheticModules,
+		logicalPathINFIX=logicalPathINFIX,
 	)
 
 	ingredientsModuleDataConverter.writeModule()
 
 	return ingredientsModuleDataConverter
-
-if __name__ == '__main__':
-	makeDataConverterModule()

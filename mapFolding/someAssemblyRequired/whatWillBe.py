@@ -5,9 +5,24 @@
 - And with only a little more effort, an abstracted system for creating settings to synthesize arbitrary subsets of modules for arbitrary packages
 """
 from collections.abc import Callable
-from mapFolding.theSSOT import formatStrModuleForCallableSynthetic, formatStrModuleSynthetic, packageFlowSynthetic, theFileExtension, thePackageName
+from mapFolding.theSSOT import (
+	formatStrModuleForCallableSynthetic,
+	formatStrModuleSynthetic,
+	getSourceAlgorithm,
+	packageFlowSynthetic,
+	theDataclassIdentifierAsStr,
+	theDataclassInstanceAsStr,
+	theDispatcherCallableAsStr,
+	theFileExtension,
+	theLogicalPathModuleDataclass,
+	theLogicalPathModuleDispatcherSynthetic,
+	theModuleOfSyntheticModules,
+	thePackageName,
+)
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, TYPE_CHECKING, Final, NamedTuple
+from types import ModuleType
+import dataclasses
 
 try:
 	from typing import NotRequired
@@ -19,15 +34,36 @@ if TYPE_CHECKING:
 else:
 	TypedDict = dict
 
-# =============================================================================
-# Temporary or transient or something; probably still the wrong way
+"""
+Start with what is: theDao.py
+Create settings that can transform into what I or the user want it to be.
+"""
+
+@dataclasses.dataclass
+class RecipeSynthesizeFlow:
+	"""Settings for synthesizing flow."""
+	sourceAlgorithm: ModuleType = getSourceAlgorithm()
+
+	fileExtension: str = theFileExtension
+	formatStrFilenameSynthetic: str = formatStrModuleSynthetic + fileExtension
+	formatStrFilenameForCallableSynthetic: str = formatStrModuleForCallableSynthetic + fileExtension
+	filenameModuleSyntheticWrite: str = formatStrFilenameSynthetic.format(packageFlow=packageFlowSynthetic)
+	filenameWriteCallableTarget: str = 'count'
+
+	moduleOfSyntheticModules: str = theModuleOfSyntheticModules
+
+	dataclassIdentifierAsStr: str = theDataclassIdentifierAsStr
+	logicalPathModuleDataclass: str = theLogicalPathModuleDataclass
+	dataclassInstanceAsStr: str = theDataclassInstanceAsStr
+	dispatcherCallableAsStr: str = theDispatcherCallableAsStr
+	logicalPathModuleDispatcher: str = theLogicalPathModuleDispatcherSynthetic
+	dataConverterCallableAsStr: str = 'flattenData'
+	dataConverterModuleFilename = 'dataNamespaceFlattened' + theFileExtension
+
+recipeNumbaGeneralizedFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 
 # the data converter and the dispatcher could be in the same module.
-Z0Z_DataConverterFilename = 'dataNamespaceFlattened' + theFileExtension
-Z0Z_DataConverterCallable = 'flattenData'
 
-# =============================================================================
-# The right way.
 Z0Z_autoflake_additional_imports: list[str] = []
 Z0Z_autoflake_additional_imports.append(thePackageName)
 
@@ -101,10 +137,3 @@ def Z0Z_setDecoratorCallable(decoratorName: str) -> str:
 	global _decoratorCallable
 	_decoratorCallable = decoratorName
 	return _decoratorCallable
-
-
-fileExtension = theFileExtension
-formatStrFilenameSynthetic = formatStrModuleSynthetic + fileExtension
-formatStrFilenameForCallableSynthetic = formatStrModuleForCallableSynthetic + fileExtension
-filenameModuleSyntheticWrite = formatStrFilenameSynthetic.format(packageFlow=packageFlowSynthetic)
-filenameWriteCallableTargetDEFAULT: str = 'count'

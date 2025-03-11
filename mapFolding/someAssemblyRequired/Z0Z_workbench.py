@@ -1,0 +1,13 @@
+from mapFolding.someAssemblyRequired.synthesizeDataConverter import makeDataConverterModule
+from mapFolding.someAssemblyRequired.whatWillBe import recipeNumbaGeneralizedFlow
+
+if __name__ == '__main__':
+	makeDataConverterModule(dataclassIdentifierAsStr=recipeNumbaGeneralizedFlow.dataclassIdentifierAsStr
+, logicalPathModuleDataclass=recipeNumbaGeneralizedFlow.logicalPathModuleDataclass
+, dataclassInstanceAsStr=recipeNumbaGeneralizedFlow.dataclassInstanceAsStr
+, dispatcherCallableAsStr=recipeNumbaGeneralizedFlow.dispatcherCallableAsStr
+, logicalPathModuleDispatcher=recipeNumbaGeneralizedFlow.logicalPathModuleDispatcher
+, dataConverterCallableAsStr=recipeNumbaGeneralizedFlow.dataConverterCallableAsStr
+, logicalPathINFIX=recipeNumbaGeneralizedFlow.moduleOfSyntheticModules
+, moduleFilename=recipeNumbaGeneralizedFlow.dataConverterModuleFilename
+)
