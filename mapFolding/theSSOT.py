@@ -132,7 +132,7 @@ Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[numpyFoldsTotal]]
 # (The dataclass, not the typing of the dataclass.)
 # (Also, my noobplementation of the dataclass certainly needs improvement.)
 
-@dataclasses.dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False, match_args=True, kw_only=False, slots=False, weakref_slot=False)
+@dataclasses.dataclass
 class ComputationState:
 	mapShape: tuple[DatatypeLeavesTotal, ...]
 	leavesTotal: DatatypeLeavesTotal

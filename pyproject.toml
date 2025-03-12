@@ -22,14 +22,15 @@ classifiers = [
 	"Topic :: Scientific/Engineering :: Mathematics",
 	"Topic :: Software Development :: Libraries :: Python Modules",
 	"Typing :: Typed",]
-dependencies = ["numba", "numpy", "Z0Z_tools",
-	"tomli",
+dependencies = [
 	"autoflake",
-	"mypy",
 	"more_itertools",
 	"numba_progress",
+	"numba",
+	"numpy",
 	"python_minifier",
-]
+	"tomli",
+	"Z0Z_tools",]
 description = "Count distinct ways to fold a map (or a strip of stamps)"
 keywords = [
 	"A001415",
@@ -46,6 +47,7 @@ keywords = [
 license = { 'text' = "CC-BY-NC-4.0" }
 name = "mapFolding"
 optional-dependencies = { testing = [
+	"mypy",
 	"pytest-cov",
 	"pytest-env",
 	"pytest-xdist",
@@ -82,10 +84,12 @@ env = ["NUMBA_DISABLE_JIT=1"]
 # env = ["NUMBA_JIT_COVERAGE=1"] # it doesn't work
 testpaths = ["tests"]
 
+# [tool.setuptools.packages.find]
+# where = ["."]
 [tool.setuptools]
 package-dir = {'' = '.'}
-packages = ["mapFolding"]
-package-data = {"mapFolding" = ['py.typed', '*.pyi']}
+# packages = ["mapFolding", "mapFolding-stubs"]
+# package-data = { "mapFolding" = ['py.typed'], "mapFolding-stubs" = ['*.pyi'] }
 
 [tool.updateCitation]
 filenameCitationDOTcff = 'CITATION.cff'

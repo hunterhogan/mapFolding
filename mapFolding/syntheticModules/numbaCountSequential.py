@@ -1,4 +1,4 @@
-from mapFolding.someAssemblyRequired import makeStateJob
+from mapFolding.theDao import countInitialize, countParallel
 from mapFolding.theSSOT import Array1DElephino, Array1DLeavesTotal, Array3D, ComputationState, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
 from numba import jit
 
@@ -14,7 +14,6 @@ def countSequential(
 	gapsWhere: Array1DLeavesTotal,
 	groupsOfFolds: DatatypeFoldsTotal,
 	indexDimension: DatatypeLeavesTotal,
-	indexLeaf: DatatypeLeavesTotal,
 	indexMiniGap: DatatypeElephino,
 	leaf1ndex: DatatypeElephino,
 	leafAbove: Array1DLeavesTotal,
@@ -22,6 +21,7 @@ def countSequential(
 	leafConnectee: DatatypeElephino,
 	leavesTotal: DatatypeLeavesTotal,
 	) -> DatatypeFoldsTotal:
+
 	while leaf1ndex > 0:
 		if leaf1ndex <= 1 or leafBelow[0] == 1:
 			if leaf1ndex > leavesTotal:
@@ -42,12 +42,6 @@ def countSequential(
 							countDimensionsGapped[leafConnectee] += 1
 							leafConnectee = connectionGraph[indexDimension, leaf1ndex, leafBelow[leafConnectee]]
 					indexDimension += 1
-				# if not dimensionsUnconstrained:
-				# 	indexLeaf = 0
-				# 	while indexLeaf < leaf1ndex:
-				# 		gapsWhere[gap1ndexCeiling] = indexLeaf
-				# 		gap1ndexCeiling += 1
-				# 		indexLeaf += 1
 				indexMiniGap = gap1ndex
 				while indexMiniGap < gap1ndexCeiling:
 					gapsWhere[gap1ndex] = gapsWhere[indexMiniGap]
@@ -71,7 +65,9 @@ def countSequential(
 
 def flattenData(state: ComputationState) -> ComputationState:
 
-	state = makeStateJob(state.mapShape, writeJob=False)
+	state = countInitialize(state)
+	if state.taskDivisions > 0:
+		return countParallel(state)
 
 	connectionGraph: Array3D = state.connectionGraph
 	countDimensionsGapped: Array1DLeavesTotal = state.countDimensionsGapped
@@ -83,7 +79,6 @@ def flattenData(state: ComputationState) -> ComputationState:
 	gapsWhere: Array1DLeavesTotal = state.gapsWhere
 	groupsOfFolds: DatatypeFoldsTotal = state.groupsOfFolds
 	indexDimension: DatatypeLeavesTotal = state.indexDimension
-	indexLeaf: DatatypeLeavesTotal = state.indexLeaf
 	indexMiniGap: DatatypeElephino = state.indexMiniGap
 	leaf1ndex: DatatypeElephino = state.leaf1ndex
 	leafAbove: Array1DLeavesTotal = state.leafAbove
@@ -102,7 +97,6 @@ def flattenData(state: ComputationState) -> ComputationState:
 		gapsWhere = gapsWhere,
 		groupsOfFolds = groupsOfFolds,
 		indexDimension = indexDimension,
-		indexLeaf = indexLeaf,
 		indexMiniGap = indexMiniGap,
 		leaf1ndex = leaf1ndex,
 		leafAbove = leafAbove,

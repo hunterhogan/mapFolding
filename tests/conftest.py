@@ -1,4 +1,3 @@
-"""SSOT for Pytest"""
 from collections.abc import Callable, Generator, Sequence
 from mapFolding.theSSOT import getAlgorithmDispatcher, getSourceAlgorithm, getPackageDispatcher, theModuleOfSyntheticModules, FREAKOUT
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
@@ -11,7 +10,6 @@ import random
 import shutil
 import unittest.mock
 import uuid
-from mapFolding import basecamp
 # TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
 # SSOT for test data paths and filenames
@@ -76,11 +74,11 @@ def pathFilenameTmpTesting(request: pytest.FixtureRequest) -> Path:
 @pytest.fixture
 def pathCacheTesting(pathTmpTesting: Path) -> Generator[Path, Any, None]:
 	"""Temporarily replace the OEIS cache directory with a test directory."""
-	from mapFolding import oeis as there_must_be_a_better_way
-	pathCacheOriginal = there_must_be_a_better_way.pathCache
-	there_must_be_a_better_way.pathCache = pathTmpTesting
+	import mapFolding.oeis as oeis
+	pathCacheOriginal = oeis.pathCache
+	oeis.pathCache = pathTmpTesting
 	yield pathTmpTesting
-	there_must_be_a_better_way.pathCache = pathCacheOriginal
+	oeis.pathCache = pathCacheOriginal
 
 @pytest.fixture
 def pathFilenameFoldsTotalTesting(pathTmpTesting: Path) -> Path:
@@ -184,6 +182,7 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 	Returns
 		A context manager for patching the dispatcher
 	"""
+	import mapFolding.basecamp as basecamp
 	dispatcherOriginal = basecamp.getPackageDispatcher
 
 	def patchDispatcher(callableTarget: Callable[..., Any]) -> None:

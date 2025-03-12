@@ -1,7 +1,6 @@
 """Everything implementing the The Online Encyclopedia of Integer Sequences (OEIS); _only_ things that implement _only_ the OEIS."""
 from collections.abc import Callable
 from datetime import datetime, timedelta
-from mapFolding import countFolds
 from mapFolding.theSSOT import thePathPackage
 from pathlib import Path
 from typing import Any, Final, TYPE_CHECKING
@@ -302,7 +301,7 @@ def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 			raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
 		foldsTotal: int = settingsOEIS[oeisID]['valuesKnown'][n]
 		return foldsTotal
-
+	from mapFolding.basecamp import countFolds
 	return countFolds(mapShape)
 
 def OEIS_for_n() -> None:

@@ -1,23 +1,9 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
 from collections.abc import Sequence
-from typing import Any, cast
+from typing import Any, cast, TYPE_CHECKING
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal
-from mapFolding.someAssemblyRequired.whatWillBe import ParametersNumba, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable, Z0Z_setDatatypeModuleScalar, Z0Z_setDecoratorCallable, parametersNumbaDEFAULT
-from mapFolding.theSSOT import (
-	ComputationState,
-	FREAKOUT,
-	getPathJobRootDEFAULT,
-)
-from mapFolding.someAssemblyRequired import (
-	decorateCallableWithNumba,
-	ifThis,
-	LedgerOfImports,
-	Make,
-	makeStateJob,
-	NodeReplacer,
-	Then,
-	thisIsNumbaDotJit,
-)
+from mapFolding.someAssemblyRequired import ( ifThis, Make, NodeReplacer, Then, LedgerOfImports, )
+from mapFolding.theSSOT import ( ComputationState, FREAKOUT, getPathJobRootDEFAULT, )
 from os import PathLike
 from pathlib import Path
 from types import ModuleType
@@ -28,6 +14,10 @@ import autoflake
 import copy
 import inspect
 import numpy
+if TYPE_CHECKING:
+	from mapFolding.someAssemblyRequired.synthesizeDataConverters import makeStateJob
+	from mapFolding.someAssemblyRequired.synthesizeNumba import thisIsNumbaDotJit, decorateCallableWithNumba
+	from mapFolding.someAssemblyRequired.whatWillBe import ParametersNumba, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable, Z0Z_setDatatypeModuleScalar, Z0Z_setDecoratorCallable, parametersNumbaDEFAULT
 
 def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, statement: ast.Assign | ast.stmt, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	arrayType = type(arrayTarget)

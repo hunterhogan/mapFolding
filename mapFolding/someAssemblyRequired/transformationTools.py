@@ -1,14 +1,9 @@
-from collections import defaultdict
-from collections.abc import Callable, Container, Iterable, Sequence
-from importlib import import_module
-from inspect import getsource as inspect_getsource
-from mapFolding.theSSOT import FREAKOUT, getDatatypePackage, theFileExtension, thePackageName, thePathPackage
+from collections.abc import Callable, Container, Sequence
 from pathlib import Path
-from typing import Any, cast, NamedTuple, TypeAlias, TypeGuard, TypeVar
-from Z0Z_tools import updateExtendPolishDictionaryLists
+from typing import Any, cast, NamedTuple, TypeAlias, TYPE_CHECKING, TypeGuard, TypeVar
 import ast
-import autoflake
-import dataclasses
+if TYPE_CHECKING:
+	from mapFolding.someAssemblyRequired.whatWillBe import LedgerOfImports
 """
 Semiotic notes:
 In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
@@ -30,6 +25,7 @@ astParameter = TypeVar('astParameter', bound=Any)
 ast_Identifier: TypeAlias = str
 strDotStrCuzPyStoopid: TypeAlias = str
 strORlist_ast_type_paramORintORNone: TypeAlias = Any
+list_ast_type_paramORintORNone: TypeAlias = Any
 strORintORNone: TypeAlias = Any
 Z0Z_thisCannotBeTheBestWay: TypeAlias = list[ast.Name] | list[ast.Attribute] | list[ast.Subscript] | list[ast.Name | ast.Attribute] | list[ast.Name | ast.Subscript] | list[ast.Attribute | ast.Subscript] | list[ast.Name | ast.Attribute | ast.Subscript]
 
@@ -38,6 +34,8 @@ class YouOughtaKnow(NamedTuple):
 	callableSynthesized: str
 	pathFilenameForMe: Path
 	astForCompetentProgrammers: ast.ImportFrom
+
+# listAsNode
 
 class NodeCollector(ast.NodeVisitor):
 	# A node visitor that collects data via one or more actions when a predicate is met.
@@ -106,7 +104,7 @@ def executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.AST],
 class ifThis:
 	@staticmethod
 	def anyOf(*somePredicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
-		return lambda node: any(predicate(node) for predicate in somePredicates)
+		return lambda nodeTarget: any(predicate(nodeTarget) for predicate in somePredicates)
 
 	@staticmethod
 	def ast_IdentifierIsIn(container: Container[ast_Identifier]) -> Callable[[ast_Identifier], bool]:
@@ -115,11 +113,11 @@ class ifThis:
 	# TODO is this only useable if namespace is not `None`? Yes, but use "" for namespace if necessary.
 	@staticmethod
 	def CallDoesNotCallItself(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
-		return lambda node: ifThis.CallReallyIs(namespace, identifier)(node) and 1 == sum(1 for descendant in ast.walk(node) if ifThis.CallReallyIs(namespace, identifier)(descendant))
+		return lambda nodeFocus: ifThis.CallReallyIs(namespace, identifier)(nodeFocus) and 1 == sum(1 for descendant in ast.walk(nodeFocus) if ifThis.CallReallyIs(namespace, identifier)(descendant))
 
 	@staticmethod
 	def CallDoesNotCallItselfAndNameDOTidIsIn(container: Container[ast_Identifier]) -> Callable[[ast.AST], bool]:
-		return lambda node: (ifThis.isCall(node) and ifThis.isName(node.func) and ifThis.ast_IdentifierIsIn(container)(node.func.id) and ifThis.CallDoesNotCallItself("", node.func.id)(node))
+		return lambda nodeSubject: (ifThis.isCall(nodeSubject) and ifThis.isName(nodeSubject.func) and ifThis.ast_IdentifierIsIn(container)(nodeSubject.func.id) and ifThis.CallDoesNotCallItself("", nodeSubject.func.id)(nodeSubject))
 
 	@staticmethod
 	def CallReallyIs(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
@@ -130,15 +128,15 @@ class ifThis:
 		return isinstance(node, ast.keyword)
 
 	@staticmethod
-	def is_keywordAndValueIsConstant(node: ast.AST) -> TypeGuard[ast.keyword]:
-		return ifThis.is_keyword(node) and ifThis.isConstant(node.value)
+	def is_keywordAndValueIsConstant(nodeCheck: ast.AST) -> TypeGuard[ast.keyword]:
+		return ifThis.is_keyword(nodeCheck) and ifThis.isConstant(nodeCheck.value)
 
 	@staticmethod
 	def is_keyword_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
-		return lambda node: ifThis.is_keyword(node) and node.arg == identifier
+		return lambda nodeInstant: ifThis.is_keyword(nodeInstant) and nodeInstant.arg == identifier
 	@staticmethod
 	def is_keyword_IdentifierEqualsConstantValue(identifier: ast_Identifier, ConstantValue: Any) -> Callable[[ast.AST], bool]:
-		return lambda node: (ifThis.is_keyword_Identifier(identifier)(node) and ifThis.is_keywordAndValueIsConstant(node) and ifThis.isConstantEquals(ConstantValue)(node.value))
+		return lambda astNode: (ifThis.is_keyword_Identifier(identifier)(astNode) and ifThis.is_keywordAndValueIsConstant(astNode) and ifThis.isConstantEquals(ConstantValue)(astNode.value))
 
 	@staticmethod
 	def isAnnAssign(node: ast.AST) -> TypeGuard[ast.AnnAssign]:
@@ -149,12 +147,12 @@ class ifThis:
 		return ifThis.isAnnAssign(node) and ifThis.isName(node.annotation)
 
 	@staticmethod
-	def isAnnAssignAndTargetIsName(node: ast.AST) -> TypeGuard[ast.AnnAssign]:
-		return ifThis.isAnnAssign(node) and ifThis.isName(node.target)
+	def isAnnAssignAndTargetIsName(whatNode: ast.AST) -> TypeGuard[ast.AnnAssign]:
+		return ifThis.isAnnAssign(whatNode) and ifThis.isName(whatNode.target)
 
 	@staticmethod
 	def isAnnAssignTo(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
-		return lambda node: ifThis.isAnnAssign(node) and ifThis.NameReallyIs(identifier)(node.target)
+		return lambda nodeStop: ifThis.isAnnAssign(nodeStop) and ifThis.NameReallyIs(identifier)(nodeStop.target)
 
 	@staticmethod
 	def isAnyAssignmentTo(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
@@ -166,7 +164,7 @@ class ifThis:
 
 	@staticmethod
 	def isAssignOnlyTo(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
-		return lambda node: ifThis.isAssign(node) and ifThis.NameReallyIs(identifier)(node.targets[0])
+		return lambda aNode: ifThis.isAssign(aNode) and ifThis.NameReallyIs(identifier)(aNode.targets[0])
 
 	@staticmethod
 	def isAttribute(node: ast.AST) -> TypeGuard[ast.Attribute]:
@@ -178,7 +176,7 @@ class ifThis:
 
 	@staticmethod
 	def isAugAssignTo(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
-		return lambda node: ifThis.isAugAssign(node) and ifThis.NameReallyIs(identifier)(node.target)
+		return lambda nodeQuestion: ifThis.isAugAssign(nodeQuestion) and ifThis.NameReallyIs(identifier)(nodeQuestion.target)
 
 	@staticmethod
 	def isCall(node: ast.AST) -> TypeGuard[ast.Call]:
@@ -186,7 +184,7 @@ class ifThis:
 
 	@staticmethod
 	def isCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
-		return lambda node: ifThis.isCall(node) and ifThis.isName_Identifier(identifier)(node.func)
+		return lambda ImaNode: ifThis.isCall(ImaNode) and ifThis.isName_Identifier(identifier)(ImaNode.func)
 
 	# TODO what happens if `None` is passed as the namespace?
 	@staticmethod
@@ -295,9 +293,14 @@ class Make:
 		return ast.Call(func=caller, args=list(args) if args else [], keywords=list(list_astKeywords) if list_astKeywords else [])
 
 	@staticmethod
-	def astFunctionDef(name: ast_Identifier, args: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, **keywordArguments: strORlist_ast_type_paramORintORNone) -> ast.FunctionDef:
+	def astClassDef(name: ast_Identifier, listBases: list[ast.expr]=[], list_keyword: list[ast.keyword]=[], body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], **keywordArguments: list_ast_type_paramORintORNone) -> ast.ClassDef:
+		"""keywordArguments: type_params:list[ast.type_param], lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
+		return ast.ClassDef(name=name, bases=listBases, keywords=list_keyword, body=body, decorator_list=decorator_list, **keywordArguments)
+
+	@staticmethod
+	def astFunctionDef(name: ast_Identifier, argSpec: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, **keywordArguments: strORlist_ast_type_paramORintORNone) -> ast.FunctionDef:
 		"""keywordArguments: type_comment:str|None, type_params:list[ast.type_param], lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
-		return ast.FunctionDef(name=name, args=args, body=body, decorator_list=decorator_list, returns=returns, **keywordArguments)
+		return ast.FunctionDef(name=name, args=argSpec, body=body, decorator_list=decorator_list, returns=returns, **keywordArguments)
 
 	@staticmethod
 	def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None, **keywordArguments: int) -> ast.Import:
@@ -342,61 +345,6 @@ class Make:
 		context = context or ast.Load()
 		return ast.Tuple(elts=list(elements), ctx=context, **keywordArguments)
 
-class LedgerOfImports:
-	def __init__(self, startWith: ast.AST | None = None) -> None:
-		self.dictionaryImportFrom: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
-		self.listImport: list[str] = []
-
-		if startWith:
-			self.walkThis(startWith)
-
-	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
-		if not isinstance(astImport_, (ast.Import, ast.ImportFrom)): # pyright: ignore[reportUnnecessaryIsInstance]
-			raise ValueError(f"Expected ast.Import or ast.ImportFrom, got {type(astImport_)}")
-		if isinstance(astImport_, ast.Import):
-			for alias in astImport_.names:
-				self.listImport.append(alias.name)
-		else:
-			if astImport_.module is not None:
-				for alias in astImport_.names:
-					self.dictionaryImportFrom[astImport_.module].append((alias.name, alias.asname))
-
-	def addImportStr(self, module: str) -> None:
-		self.listImport.append(module)
-
-	def addImportFromStr(self, module: str, name: str, asname: str | None = None) -> None:
-		self.dictionaryImportFrom[module].append((name, asname))
-
-	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
-		listAstImportFrom: list[ast.ImportFrom] = []
-
-		for module, listOfNameTuples in sorted(self.dictionaryImportFrom.items()):
-			listOfNameTuples = sorted(list(set(listOfNameTuples)), key=lambda nameTuple: nameTuple[0])
-			listAlias: list[ast.alias] = []
-			for name, asname in listOfNameTuples:
-				listAlias.append(Make.astAlias(name, asname))
-			listAstImportFrom.append(Make.astImportFrom(module, listAlias))
-
-		listAstImport: list[ast.Import] = [Make.astImport(name) for name in sorted(set(self.listImport))]
-		return listAstImportFrom + listAstImport
-
-	def update(self, *fromLedger: 'LedgerOfImports') -> None:
-		"""
-		Update this ledger with imports from one or more other ledgers.
-
-		Parameters:
-			*fromTracker: One or more other `LedgerOfImports` objects from which to merge.
-		"""
-		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(ledger.dictionaryImportFrom for ledger in fromLedger), destroyDuplicates=True, reorderLists=True)
-
-		for ledger in fromLedger:
-			self.listImport.extend(ledger.listImport)
-
-	def walkThis(self, walkThis: ast.AST) -> None:
-		for smurf in ast.walk(walkThis):
-			if isinstance(smurf, (ast.Import, ast.ImportFrom)):
-				self.addAst(smurf)
-
 class Then:
 	@staticmethod
 	def insertThisAbove(astStatement: ast.stmt) -> Callable[[ast.stmt], Sequence[ast.stmt]]:
@@ -408,24 +356,21 @@ class Then:
 	def replaceWith(astStatement: ast.stmt) -> Callable[[ast.stmt], ast.stmt]:
 		return lambda replaceMe: astStatement
 	@staticmethod
-	def removeThis(astNode: ast.AST) -> None: return None
-
+	def removeThis(node: ast.AST) -> None:
+		return None
+	from mapFolding.someAssemblyRequired.whatWillBe import LedgerOfImports
 	@staticmethod
 	def Z0Z_ledger(logicalPath: strDotStrCuzPyStoopid, ledger: LedgerOfImports) -> Callable[[ast.AST], None]:
 		return lambda node: ledger.addImportFromStr(logicalPath, cast(ast.Name, cast(ast.AnnAssign, node).annotation).id)
-
 	@staticmethod
 	def Z0Z_appendKeywordMirroredTo(list_keyword: list[ast.keyword]) -> Callable[[ast.AST], None]:
 		return lambda node: list_keyword.append(Make.astKeyword(cast(ast.Name, cast(ast.AnnAssign, node).target).id, cast(ast.Name, cast(ast.AnnAssign, node).target)))
-
 	@staticmethod
 	def append_targetTo(listName: list[ast.Name]) -> Callable[[ast.AST], None]:
 		return lambda node: listName.append(cast(ast.Name, cast(ast.AnnAssign, node).target))
-
 	@staticmethod
-	def appendTo(list_stmt: Sequence[ast.stmt]) -> Callable[[ast.stmt], None]:
-		return lambda node: list(list_stmt).append(node)
-
+	def appendTo(listAST: Sequence[ast.AST]) -> Callable[[ast.AST], None]:
+		return lambda node: list(listAST).append(node)
 	@staticmethod
 	def Z0Z_appendAnnAssignOfNameDOTnameTo(identifier: ast_Identifier, listNameDOTname: list[ast.AnnAssign]) -> Callable[[ast.AST], None]:
 		return lambda node: listNameDOTname.append(Make.astAnnAssign(cast(ast.AnnAssign, node).target, cast(ast.AnnAssign, node).annotation, Make.nameDOTname(identifier, cast(ast.Name, cast(ast.AnnAssign, node).target).id)))
@@ -463,156 +408,18 @@ class FunctionInliner(ast.NodeTransformer):
 			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(cast(ast.Name, cast(ast.Call, node.value).func).id)
 			return [self.visit(stmt) for stmt in inlineDefinition.body]
 		return self.generic_visit(node)
-
-@dataclasses.dataclass
-class IngredientsFunction:
-	"""Everything necessary to integrate a function into a module should be here."""
-	FunctionDef: ast.FunctionDef
-	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
-
-@dataclasses.dataclass
-class IngredientsModule:
-	"""Everything necessary to create a module, including the package context, should be here."""
-	name: ast_Identifier
-	ingredientsFunction: dataclasses.InitVar[Sequence[IngredientsFunction] | IngredientsFunction | None] = None
-
-	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
-	prologue: list[ast.stmt] = dataclasses.field(default_factory=list)
-	functions: list[ast.FunctionDef | ast.stmt] = dataclasses.field(default_factory=list)
-	epilogue: list[ast.stmt] = dataclasses.field(default_factory=list)
-	launcher: list[ast.stmt] = dataclasses.field(default_factory=list)
-
-	packageName: ast_Identifier | None= thePackageName
-	logicalPathINFIX: ast_Identifier | strDotStrCuzPyStoopid | None = None # module names other than the module itself and the package name
-	pathPackage: Path = thePathPackage
-	fileExtension: str = theFileExtension
-	type_ignores: list[ast.TypeIgnore] = dataclasses.field(default_factory=list)
-
-	def _getLogicalPathParent(self) -> str | None:
-		listModules: list[ast_Identifier] = []
-		if self.packageName:
-			listModules.append(self.packageName)
-		if self.logicalPathINFIX:
-			listModules.append(self.logicalPathINFIX)
-		if listModules:
-			return '.'.join(listModules)
-
-	def _getLogicalPathAbsolute(self) -> str:
-		listModules: list[ast_Identifier] = []
-		logicalPathParent: str | None = self._getLogicalPathParent()
-		if logicalPathParent:
-			listModules.append(logicalPathParent)
-		listModules.append(self.name)
-		return '.'.join(listModules)
-
-	@property
-	def pathFilename(self) -> Path:
-		pathRoot: Path = self.pathPackage
-		filename = self.name + self.fileExtension
-		if self.logicalPathINFIX:
-			whyIsThisStillAThing = self.logicalPathINFIX.split('.')
-			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
-		return pathRoot.joinpath(filename)
-
-	@property
-	def absoluteImport(self) -> ast.Import:
-		return Make.astImport(self._getLogicalPathAbsolute())
-
-	@property
-	def absoluteImportFrom(self) -> ast.ImportFrom:
-		""" `from . import theModule` """
-		logicalPathParent: str | None = self._getLogicalPathParent()
-		if logicalPathParent is None:
-			logicalPathParent = '.'
-		return Make.astImportFrom(logicalPathParent, [Make.astAlias(self.name)])
-
-	def __post_init__(self, ingredientsFunction: Sequence[IngredientsFunction] | IngredientsFunction | None = None) -> None:
-		if ingredientsFunction is not None:
-			if isinstance(ingredientsFunction, IngredientsFunction):
-				self.addIngredientsFunction(ingredientsFunction)
-			else:
-				self.addIngredientsFunction(*ingredientsFunction)
-
-	def addIngredientsFunction(self, *ingredientsFunction: IngredientsFunction) -> None:
-		"""Add one or more `IngredientsFunction`. """
-		listLedgers: list[LedgerOfImports] = []
-		for definition in ingredientsFunction:
-			self.functions.append(definition.FunctionDef)
-			listLedgers.append(definition.imports)
-		self.imports.update(*listLedgers)
-
-	def _makeModuleBody(self) -> list[ast.stmt]:
-		"""Constructs the body of the module, including prologue, functions, epilogue, and launcher."""
-		body: list[ast.stmt] = []
-		body.extend(self.imports.makeListAst())
-		body.extend(self.prologue)
-		body.extend(self.functions)
-		body.extend(self.epilogue)
-		body.extend(self.launcher)
-		# TODO `launcher` must start with `if __name__ == '__main__':` and be indented
-		return body
-
-	def writeModule(self) -> None:
-		"""Writes the module to disk with proper imports and functions.
-
-		This method creates a proper AST module with imports and function definitions,
-		fixes missing locations, unpacks the AST to Python code, applies autoflake
-		to clean up imports, and writes the resulting code to the appropriate file.
-		"""
-		astModule = Make.astModule(body=self._makeModuleBody(), type_ignores=self.type_ignores)
-		ast.fix_missing_locations(astModule)
-		pythonSource: str = ast.unparse(astModule)
-		if not pythonSource: raise FREAKOUT
-		autoflake_additional_imports: list[str] = []
-		if self.packageName:
-			autoflake_additional_imports.append(self.packageName)
-		# TODO LedgerOfImports method: list of package names. autoflake_additional_imports.extend()
-		autoflake_additional_imports.append(getDatatypePackage())
-		pythonSource = autoflake.fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False,)
-		self.pathFilename.write_text(pythonSource)
-
 	# TODO When resolving the ledger of imports, remove self-referential imports
 
-def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
-									) -> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], list[ast.Name], list[ast.keyword], ast.Tuple]:
-	"""
-	Parameters:
-		logicalPathModule: gimme string cuz python is stoopid
-		dataclass_Identifier: The identifier of the dataclass to be dismantled.
-		instance_Identifier: In the synthesized module/function/scope, the identifier that will be used for the instance.
-	"""
-	module: ast.Module = ast.parse(inspect_getsource(import_module(logicalPathModule)))
+def extractClassDef(identifier: ast_Identifier, module: ast.Module) -> ast.ClassDef | None:
+	sherpa: list[ast.ClassDef] = []
+	extractor = NodeCollector(ifThis.isClassDef_Identifier(identifier), [Then.appendTo(sherpa)])
+	extractor.visit(module)
+	astClassDef = sherpa[0] if sherpa else None
+	return astClassDef
 
-	dataclass = next((statement for statement in module.body if ifThis.isClassDef_Identifier(dataclass_Identifier)(statement)), None)
-	if not isinstance(dataclass, ast.ClassDef):
-		raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
-
-	list_astAnnAssign: list[ast.AnnAssign] = []
-	listKeywordForDataclassInitialization: list[ast.keyword] = []
-	list_astNameDataclassFragments: list[ast.Name] = []
-	ledgerDataclassAndFragments = LedgerOfImports()
-
-	addToLedgerPredicate = ifThis.isAnnAssignAndAnnotationIsName
-	addToLedgerAction = Then.Z0Z_ledger(logicalPathModule, ledgerDataclassAndFragments)
-	addToLedger = NodeCollector(addToLedgerPredicate, [addToLedgerAction])
-
-	exclusionPredicate = ifThis.is_keyword_IdentifierEqualsConstantValue('init', False)
-	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(listKeywordForDataclassInitialization)
-	filteredAppendKeywordAction = executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction)
-
-	collector = NodeCollector(
-			ifThis.isAnnAssignAndTargetIsName,
-				[Then.Z0Z_appendAnnAssignOfNameDOTnameTo(instance_Identifier, list_astAnnAssign)
-				, Then.append_targetTo(list_astNameDataclassFragments)
-				, lambda node: addToLedger.visit(node)
-				, filteredAppendKeywordAction
-				]
-			)
-
-	collector.visit(dataclass)
-
-	ledgerDataclassAndFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
-
-	astNameDataclass = Make.astName(dataclass_Identifier)
-	astTupleForAssignTargetsToFragments: ast.Tuple = Make.astTuple(list_astNameDataclassFragments, ast.Store())
-	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, listKeywordForDataclassInitialization, astTupleForAssignTargetsToFragments
+def extractFunctionDef(identifier: ast_Identifier, module: ast.Module) -> ast.FunctionDef | None:
+	sherpa: list[ast.FunctionDef] = []
+	extractor = NodeCollector(ifThis.isFunctionDef_Identifier(identifier), [Then.appendTo(sherpa)])
+	extractor.visit(module)
+	astClassDef = sherpa[0] if sherpa else None
+	return astClassDef

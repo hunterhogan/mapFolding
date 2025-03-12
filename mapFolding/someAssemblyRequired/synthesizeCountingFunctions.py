@@ -1,4 +1,4 @@
-from mapFolding.someAssemblyRequired import IngredientsFunction, Make, shatter_dataclassesDOTdataclass
+from mapFolding.someAssemblyRequired import IngredientsFunction, Make
 from typing import cast
 from types import ModuleType
 import ast
