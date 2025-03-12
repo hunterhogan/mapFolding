@@ -6,7 +6,6 @@ from types import ModuleType
 from typing import Any, cast, overload, Literal
 import ast
 import pickle
-
 from mapFolding.beDRY import ComputationState, outfitCountFolds, validateListDimensions
 from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
@@ -22,28 +21,6 @@ from mapFolding.someAssemblyRequired import (
 	Then,
 )
 from mapFolding.theSSOT import getSourceAlgorithm
-
-def makeDataclassConverter(dataclassIdentifierAsStr: str, logicalPathModuleDataclass: str, dataclassInstanceAsStr: str, dispatcherCallableAsStr: str, logicalPathModuleDispatcher: str, dataConverterCallableAsStr: str, ) -> IngredientsFunction:
-
-	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments = shatter_dataclassesDOTdataclass(logicalPathModuleDataclass, dataclassIdentifierAsStr, dataclassInstanceAsStr)
-
-	ingredientsFunction = IngredientsFunction(
-		FunctionDef = Make.astFunctionDef(name=dataConverterCallableAsStr
-										, argSpec=Make.astArgumentsSpecification(args=[Make.astArg(dataclassInstanceAsStr, astNameDataclass)])
-										, body = cast(list[ast.stmt], list_astAnnAssign)
-										, returns = astNameDataclass
-										)
-		, imports = ledgerDataclassAndFragments
-	)
-
-	callToDispatcher = Make.astAssign(listTargets=[astTupleForAssignTargetsToFragments]
-										, value=Make.astCall(Make.astName(dispatcherCallableAsStr), args=list_astNameDataclassFragments))
-	ingredientsFunction.FunctionDef.body.append(callToDispatcher)
-	ingredientsFunction.imports.addImportFromStr(logicalPathModuleDispatcher, dispatcherCallableAsStr)
-
-	ingredientsFunction.FunctionDef.body.append(Make.astReturn(Make.astCall(astNameDataclass, list_astKeywords=list_astKeywordDataclassFragments)))
-
-	return ingredientsFunction
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
 									) -> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], list[ast.Name], list[ast.keyword], ast.Tuple]:
@@ -89,6 +66,34 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	astNameDataclass = Make.astName(dataclass_Identifier)
 	astTupleForAssignTargetsToFragments: ast.Tuple = Make.astTuple(list_astNameDataclassFragments, ast.Store())
 	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, listKeywordForDataclassInitialization, astTupleForAssignTargetsToFragments
+
+def makeDataclassConverter(dataclassIdentifierAsStr: str,
+		logicalPathModuleDataclass: str,
+		dataclassInstanceAsStr: str,
+		dispatcherCallableAsStr: str,
+		logicalPathModuleDispatcher: str,
+		dataConverterCallableAsStr: str,
+		) -> IngredientsFunction:
+
+	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments = shatter_dataclassesDOTdataclass(logicalPathModuleDataclass, dataclassIdentifierAsStr, dataclassInstanceAsStr)
+
+	ingredientsFunction = IngredientsFunction(
+		FunctionDef = Make.astFunctionDef(name=dataConverterCallableAsStr
+										, argumentsSpecification=Make.astArgumentsSpecification(args=[Make.astArg(dataclassInstanceAsStr, astNameDataclass)])
+										, body = cast(list[ast.stmt], list_astAnnAssign)
+										, returns = astNameDataclass
+										)
+		, imports = ledgerDataclassAndFragments
+	)
+
+	callToDispatcher = Make.astAssign(listTargets=[astTupleForAssignTargetsToFragments]
+										, value=Make.astCall(Make.astName(dispatcherCallableAsStr), args=list_astNameDataclassFragments))
+	ingredientsFunction.FunctionDef.body.append(callToDispatcher)
+	ingredientsFunction.imports.addImportFromStr(logicalPathModuleDispatcher, dispatcherCallableAsStr)
+
+	ingredientsFunction.FunctionDef.body.append(Make.astReturn(Make.astCall(astNameDataclass, list_astKeywords=list_astKeywordDataclassFragments)))
+
+	return ingredientsFunction
 
 @overload
 def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...

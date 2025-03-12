@@ -4,12 +4,7 @@
 - Therefore, an abstracted system for creating settings for the package
 - And with only a little more effort, an abstracted system for creating settings to synthesize arbitrary subsets of modules for arbitrary packages
 """
-from mapFolding.someAssemblyRequired.transformationTools import (
-	Make,
-	ast_Identifier,
-	extractFunctionDef,
-	strDotStrCuzPyStoopid,
-)
+from mapFolding.someAssemblyRequired.transformationTools import *
 from mapFolding.theSSOT import (
 	FREAKOUT,
 	getDatatypePackage,

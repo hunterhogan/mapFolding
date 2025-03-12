@@ -9,11 +9,13 @@ if __name__ == '__main__':
 		dataclassIdentifierAsStr=numbaFlow.dataclassIdentifierAsStr
 		, logicalPathModuleDataclass=numbaFlow.logicalPathModuleDataclass
 		, dataclassInstanceAsStr=numbaFlow.dataclassInstanceAsStr
+
 		, dispatcherCallableAsStr=numbaFlow.dispatcherCallableAsStr
 		, logicalPathModuleDispatcher=numbaFlow.logicalPathModuleDispatcher
 		, dataConverterCallableAsStr=numbaFlow.dataConverterCallableAsStr
 		)
 
+	# initialize with theDao
 	dataInitializationHack = "state=makeStateJob(state.mapShape,writeJob=False)"
 	ingredientsFunctionDataConverter.FunctionDef.body.insert(0, ast.parse(dataInitializationHack).body[0])
 	ingredientsFunctionDataConverter.imports.addImportFromStr('mapFolding.someAssemblyRequired', 'makeStateJob')

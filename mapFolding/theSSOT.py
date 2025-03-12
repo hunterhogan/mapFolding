@@ -254,8 +254,8 @@ if Z0Z_packageFlow == packageFlowSynthetic: # pyright: ignore [reportUnnecessary
 	theLogicalPathModuleDispatcher = theLogicalPathModuleDispatcherSynthetic
 
 def getPackageDispatcher():
-	# moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
-	# dispatcherCallable = getattr(moduleImported, theDispatcherCallableAsStr)
+	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
+	dispatcherCallable = getattr(moduleImported, theDispatcherCallableAsStr)
 	from mapFolding.syntheticModules.numbaCountSequential import flattenData
 	dispatcherCallable = flattenData
 	return dispatcherCallable
