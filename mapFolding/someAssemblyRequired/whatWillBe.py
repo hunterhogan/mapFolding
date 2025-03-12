@@ -6,18 +6,21 @@
 """
 from collections.abc import Callable
 from mapFolding.theSSOT import (
-	theFormatStrModuleForCallableSynthetic,
-	theFormatStrModuleSynthetic,
 	getSourceAlgorithm,
 	packageFlowSynthetic,
 	theDataclassIdentifierAsStr,
 	theDataclassInstanceAsStr,
 	theDispatcherCallableAsStr,
 	theFileExtension,
+	theFormatStrModuleForCallableSynthetic,
+	theFormatStrModuleSynthetic,
 	theLogicalPathModuleDataclass,
 	theLogicalPathModuleDispatcherSynthetic,
 	theModuleOfSyntheticModules,
 	thePackageName,
+	Z0Z_initializeCallableAsStr,
+	Z0Z_parallelCallableAsStr,
+	Z0Z_sequentialCallableAsStr,
 )
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, TYPE_CHECKING, Final, NamedTuple
@@ -70,6 +73,8 @@ class RecipeSynthesizeFlow:
 	logicalPathModuleDispatcher: str = theLogicalPathModuleDispatcherSynthetic
 	dataConverterCallableAsStr: str = 'flattenData'
 	dataConverterModule: str = 'dataNamespaceFlattened'
+
+	sequentialCallableAsStr: str = Z0Z_sequentialCallableAsStr
 
 recipeNumbaGeneralizedFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 

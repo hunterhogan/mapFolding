@@ -38,6 +38,10 @@ dataclassInstanceAsStrPACKAGING: str = 'state'
 dataclassInstance_Pre_ParallelAsStrPACKAGING = dataclassInstanceAsStrPACKAGING + 'PARALLEL'
 dataclassInstance_Post_ParallelAsStrPACKAGING = dataclassInstanceAsStrPACKAGING + 'COMPLETE'
 
+Z0Z_initializeCallableAsStrPACKAGING = 'countInitialize'
+Z0Z_sequentialCallableAsStrPACKAGING = 'countSequential'
+Z0Z_parallelCallableAsStrPACKAGING = 'countParallel'
+
 try:
 	thePackageNameIsPACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
 except Exception:
@@ -90,6 +94,10 @@ theDataclassInstance_Post_ParallelAsStr: str = dataclassInstance_Post_ParallelAs
 theFileExtension: str = fileExtensionINSTALLING
 
 theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
+
+Z0Z_initializeCallableAsStr = Z0Z_initializeCallableAsStrPACKAGING
+Z0Z_sequentialCallableAsStr = Z0Z_sequentialCallableAsStrPACKAGING
+Z0Z_parallelCallableAsStr = Z0Z_parallelCallableAsStrPACKAGING
 
 # =============================================================================
 # The right way.
