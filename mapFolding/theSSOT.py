@@ -21,6 +21,7 @@ Identifiers: scope and resolution, LEGB (Local, Enclosing, Global, Builtin)
 # I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
 packageFlowSynthetic = 'numba'
 Z0Z_packageFlow = 'algorithm'
+# https://github.com/hunterhogan/mapFolding/issues/4
 # Z0Z_packageFlow = packageFlowSynthetic
 
 # =============================================================================
@@ -38,9 +39,9 @@ dataclassInstanceAsStrPACKAGING: str = 'state'
 dataclassInstance_Pre_ParallelAsStrPACKAGING = dataclassInstanceAsStrPACKAGING + 'PARALLEL'
 dataclassInstance_Post_ParallelAsStrPACKAGING = dataclassInstanceAsStrPACKAGING + 'COMPLETE'
 
-Z0Z_initializeCallableAsStrPACKAGING = 'countInitialize'
-Z0Z_sequentialCallableAsStrPACKAGING = 'countSequential'
-Z0Z_parallelCallableAsStrPACKAGING = 'countParallel'
+sourceInitializeCallableAsStrPACKAGING = 'countInitialize'
+sourceSequentialCallableAsStrPACKAGING = 'countSequential'
+sourceParallelCallableAsStrPACKAGING = 'countParallel'
 
 try:
 	thePackageNameIsPACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
@@ -81,6 +82,9 @@ NOTE on semiotics: `theIdentifier` vs `identifier`
 """
 
 theSourceAlgorithm: str = sourceAlgorithmPACKAGING
+theSourceInitializeCallableAsStr = sourceInitializeCallableAsStrPACKAGING
+theSourceSequentialCallableAsStr = sourceSequentialCallableAsStrPACKAGING
+theSourceParallelCallableAsStr = sourceParallelCallableAsStrPACKAGING
 theDatatypePackage: Final[str] = datatypePackagePACKAGING
 
 theDispatcherCallableAsStr: str = dispatcherCallableAsStrPACKAGING
@@ -94,10 +98,6 @@ theDataclassInstance_Post_ParallelAsStr: str = dataclassInstance_Post_ParallelAs
 theFileExtension: str = fileExtensionINSTALLING
 
 theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
-
-Z0Z_initializeCallableAsStr = Z0Z_initializeCallableAsStrPACKAGING
-Z0Z_sequentialCallableAsStr = Z0Z_sequentialCallableAsStrPACKAGING
-Z0Z_parallelCallableAsStr = Z0Z_parallelCallableAsStrPACKAGING
 
 # =============================================================================
 # The right way.
@@ -241,6 +241,8 @@ class FREAKOUT(Exception): pass
 # Temporary or transient or something; probably still the wrong way
 
 # THIS IS A STUPID SYSTEM BUT I CAN'T FIGURE OUT AN IMPROVEMENT
+# NOTE This section for _default_ values probably has value
+# https://github.com/hunterhogan/mapFolding/issues/4
 theFormatStrModuleSynthetic = "{packageFlow}Count"
 theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
 
@@ -250,14 +252,19 @@ theLogicalPathModuleDispatcherSynthetic: str = '.'.join([thePackageName, theModu
 # =============================================================================
 # The most right way I know how to implement.
 
+# https://github.com/hunterhogan/mapFolding/issues/4
 if Z0Z_packageFlow == packageFlowSynthetic: # pyright: ignore [reportUnnecessaryComparison]
+	# NOTE this as a default value _might_ have value
 	theLogicalPathModuleDispatcher = theLogicalPathModuleDispatcherSynthetic
 
+# https://github.com/hunterhogan/mapFolding/issues/4
 def getPackageDispatcher():
+	# NOTE but this part, if the package flow is synthetic, probably needs to be delegated
+	# to the authority for creating _that_ synthetic flow.
 	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
 	dispatcherCallable = getattr(moduleImported, theDispatcherCallableAsStr)
-	from mapFolding.syntheticModules.numbaCountSequential import flattenData
-	dispatcherCallable = flattenData
+	# from mapFolding.syntheticModules.numbaCountSequential import flattenData
+	# dispatcherCallable = flattenData
 	return dispatcherCallable
 
 """Technical concepts I am likely using and likely want to use more effectively:

@@ -4,7 +4,18 @@
 - Therefore, an abstracted system for creating settings for the package
 - And with only a little more effort, an abstracted system for creating settings to synthesize arbitrary subsets of modules for arbitrary packages
 """
-from mapFolding.someAssemblyRequired.transformationTools import *
+from mapFolding.someAssemblyRequired.transformationTools import (
+	ast_Identifier,
+	executeActionUnlessDescendantMatches,
+	extractClassDef,
+	extractFunctionDef,
+	ifThis,
+	Make,
+	NodeCollector,
+	NodeReplacer,
+	strDotStrCuzPyStoopid,
+	Then,
+)
 from mapFolding.theSSOT import (
 	FREAKOUT,
 	getDatatypePackage,
@@ -20,7 +31,7 @@ from mapFolding.theSSOT import (
 	theModuleOfSyntheticModules,
 	thePackageName,
 	thePathPackage,
-	Z0Z_sequentialCallableAsStr,
+	theSourceSequentialCallableAsStr,
 )
 from autoflake import fix_code as autoflake_fix_code
 from collections import defaultdict
@@ -34,32 +45,14 @@ from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import dataclasses
 
-"""
-Start with what is: theDao.py
-Create settings that can transform into what I or the user want it to be.
-
-The simplest flow with numba is:
-1. one module
-2. dispatcher
-	- initialize data with makeJob
-	- smash dataclass
-	- call countSequential
-3. countSequential
-	- jitted, not super-jitted
-	- functions inlined (or I'd have to jit them)
-	- return groupsOfFolds
-4. recycle the dataclass with groupsOfFolds
-5. return the dataclass
-"""
-
 @dataclasses.dataclass
 class RecipeSynthesizeFlow:
 	"""Settings for synthesizing flow."""
 	# TODO consider `IngredientsFlow` or similar
 	sourceAlgorithm: ModuleType = getSourceAlgorithm()
 	sourcePython: str = inspect_getsource(sourceAlgorithm)
-	# sourcePython: str = inspect_getsource(self.sourceAlgorithm)
-	# "self" is not defined
+	# https://github.com/hunterhogan/mapFolding/issues/4
+	dispatcherCallableAsStr: str = theDispatcherCallableAsStr
 	# I still hate the OOP paradigm. But I like this dataclass stuff.
 	source_astModule: ast.Module = ast.parse(sourcePython)
 
@@ -85,9 +78,9 @@ class RecipeSynthesizeFlow:
 
 	# Function
 	dataclassIdentifierAsStr: str = theDataclassIdentifierAsStr
+	dataConverterCallableAsStr: str = 'unpackDataclassPackUp'
 	dispatcherCallableAsStr: str = theDispatcherCallableAsStr
-	dataConverterCallableAsStr: str = 'flattenData'
-	sequentialCallableAsStr: str = Z0Z_sequentialCallableAsStr
+	sequentialCallableAsStr: str = theSourceSequentialCallableAsStr
 
 	# Variable
 	dataclassInstanceAsStr: str = theDataclassInstanceAsStr
@@ -116,6 +109,11 @@ class LedgerOfImports:
 
 	def addImportFromStr(self, module: str, name: str, asname: str | None = None) -> None:
 		self.dictionaryImportFrom[module].append((name, asname))
+
+	def exportListModuleNames(self) -> list[str]:
+		listModuleNames: list[str] = list(self.dictionaryImportFrom.keys())
+		listModuleNames.extend(self.listImport)
+		return sorted(set(listModuleNames))
 
 	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
 		listAstImportFrom: list[ast.ImportFrom] = []
@@ -146,6 +144,12 @@ class LedgerOfImports:
 		for smurf in ast.walk(walkThis):
 			if isinstance(smurf, (ast.Import, ast.ImportFrom)):
 				self.addAst(smurf)
+
+@dataclasses.dataclass
+class Z0Z_IngredientsDataStructure:
+	"""Everything necessary to create a data structure should be here."""
+	dataclassDef: ast.ClassDef
+	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 
 @dataclasses.dataclass
 class IngredientsFunction:
@@ -225,7 +229,6 @@ class IngredientsModule:
 		self.imports.update(*listLedgers)
 
 	def _makeModuleBody(self) -> list[ast.stmt]:
-		"""Constructs the body of the module, including prologue, functions, epilogue, and launcher."""
 		body: list[ast.stmt] = []
 		body.extend(self.imports.makeListAst())
 		body.extend(self.prologue)
@@ -236,12 +239,7 @@ class IngredientsModule:
 		return body
 
 	def writeModule(self) -> None:
-		"""Writes the module to disk with proper imports and functions.
-
-		This method creates a proper AST module with imports and function definitions,
-		fixes missing locations, unpacks the AST to Python code, applies autoflake
-		to clean up imports, and writes the resulting code to the appropriate file.
-		"""
+		"""Writes the module to disk."""
 		astModule = Make.astModule(body=self._makeModuleBody(), type_ignores=self.type_ignores)
 		ast.fix_missing_locations(astModule)
 		pythonSource: str = ast.unparse(astModule)
@@ -249,15 +247,33 @@ class IngredientsModule:
 		autoflake_additional_imports: list[str] = []
 		if self.packageName:
 			autoflake_additional_imports.append(self.packageName)
-		# TODO LedgerOfImports method: list of package names. autoflake_additional_imports.extend()
-		autoflake_additional_imports.append(getDatatypePackage())
+		autoflake_additional_imports.extend(self.imports.exportListModuleNames())
 		pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False,)
 		self.pathFilename.write_text(pythonSource)
 
 @dataclasses.dataclass
-class RecipeSynthesizeCountingFunction:
+class RecipeCountingFunction:
 	"""Settings for synthesizing counting functions."""
 	ingredients: IngredientsFunction
+
+@dataclasses.dataclass
+class RecipeDispatchFunction:
+	# A "dispatcher" must receive a dataclass instance and return a dataclass instance.
+	# computationStateComplete: ComputationState = dispatcher(computationStateInitialized)
+	# The most critical values in the returned dataclass are foldGroups[0:-1] and leavesTotal
+	# self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
+	# the function name is required by IngredientsFunction
+	ingredients: IngredientsFunction
+	logicalPathModuleDataclass: str = theLogicalPathModuleDataclass
+	dataclassIdentifierAsStr: str = theDataclassIdentifierAsStr
+	dataclassInstanceAsStr: str = theDataclassInstanceAsStr
+	Z0Z_unpackDataclass: bool = True
+	countDispatcher: bool = True
+	# is this the countDispatcher or what is the information for calling the countDispatcher: import or no? callable identifier? parameters? return type?
+	# countDispatcher lives in `theLogicalPathModuleDispatcherSynthetic`
+	# countDispatcher is named `theDispatcherCallableAsStr`
+	# post init
+	# addImportFromStr(self, module: str, name: str, asname: str | None = None)
 
 numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 
@@ -265,12 +281,10 @@ numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 sequentialFunctionDef = extractFunctionDef(numbaFlow.sequentialCallableAsStr, numbaFlow.source_astModule)
 if sequentialFunctionDef is None: raise FREAKOUT
 
-numbaCountSequential = RecipeSynthesizeCountingFunction(IngredientsFunction(
+numbaCountSequential = RecipeCountingFunction(IngredientsFunction(
 	FunctionDef=sequentialFunctionDef,
 	imports=LedgerOfImports(numbaFlow.source_astModule)
 ))
-
-# the data converter and the dispatcher could be in the same module.
 
 Z0Z_autoflake_additional_imports: list[str] = []
 Z0Z_autoflake_additional_imports.append(thePackageName)
