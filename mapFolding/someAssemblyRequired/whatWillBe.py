@@ -20,9 +20,9 @@ from mapFolding.theSSOT import (
 	FREAKOUT,
 	getDatatypePackage,
 	getSourceAlgorithm,
-	theDataclassIdentifierAsStr,
-	theDataclassInstanceAsStr,
-	theDispatcherCallableAsStr,
+	theDataclassIdentifier,
+	theDataclassInstance,
+	theDispatcherCallable,
 	theFileExtension,
 	theFormatStrModuleForCallableSynthetic,
 	theFormatStrModuleSynthetic,
@@ -31,7 +31,9 @@ from mapFolding.theSSOT import (
 	theModuleOfSyntheticModules,
 	thePackageName,
 	thePathPackage,
-	theSourceSequentialCallableAsStr,
+	theSourceInitializeCallable,
+	theSourceParallelCallable,
+	theSourceSequentialCallable,
 )
 from autoflake import fix_code as autoflake_fix_code
 from collections import defaultdict
@@ -49,12 +51,16 @@ import dataclasses
 class RecipeSynthesizeFlow:
 	"""Settings for synthesizing flow."""
 	# TODO consider `IngredientsFlow` or similar
+	# ========================================
+	# Source
 	sourceAlgorithm: ModuleType = getSourceAlgorithm()
 	sourcePython: str = inspect_getsource(sourceAlgorithm)
-	# https://github.com/hunterhogan/mapFolding/issues/4
-	dispatcherCallableAsStr: str = theDispatcherCallableAsStr
-	# I still hate the OOP paradigm. But I like this dataclass stuff.
 	source_astModule: ast.Module = ast.parse(sourcePython)
+	# https://github.com/hunterhogan/mapFolding/issues/4
+	sourceDispatcherCallable: str = theDispatcherCallable
+	sourceSequentialCallable: str = theSourceSequentialCallable
+	sourceDataclassIdentifier: str = theDataclassIdentifier
+	# I still hate the OOP paradigm. But I like this dataclass stuff.
 
 	# ========================================
 	# Filesystem
@@ -77,13 +83,13 @@ class RecipeSynthesizeFlow:
 	dataConverterModule: str = 'dataNamespaceFlattened'
 
 	# Function
-	dataclassIdentifierAsStr: str = theDataclassIdentifierAsStr
-	dataConverterCallableAsStr: str = 'unpackDataclassPackUp'
-	dispatcherCallableAsStr: str = theDispatcherCallableAsStr
-	sequentialCallableAsStr: str = theSourceSequentialCallableAsStr
+	sequentialCallable: str = sourceSequentialCallable
+	dataclassIdentifier: str = sourceDataclassIdentifier
+	dataConverterCallable: str = 'unpackDataclassPackUp'
+	dispatcherCallable: str = sourceDispatcherCallable
 
 	# Variable
-	dataclassInstanceAsStr: str = theDataclassInstanceAsStr
+	dataclassInstance: str = theDataclassInstance
 
 class LedgerOfImports:
 	def __init__(self, startWith: ast.AST | None = None) -> None:
@@ -265,24 +271,24 @@ class RecipeDispatchFunction:
 	# the function name is required by IngredientsFunction
 	ingredients: IngredientsFunction
 	logicalPathModuleDataclass: str = theLogicalPathModuleDataclass
-	dataclassIdentifierAsStr: str = theDataclassIdentifierAsStr
-	dataclassInstanceAsStr: str = theDataclassInstanceAsStr
+	dataclassIdentifier: str = theDataclassIdentifier
+	dataclassInstance: str = theDataclassInstance
 	Z0Z_unpackDataclass: bool = True
 	countDispatcher: bool = True
 	# is this the countDispatcher or what is the information for calling the countDispatcher: import or no? callable identifier? parameters? return type?
 	# countDispatcher lives in `theLogicalPathModuleDispatcherSynthetic`
-	# countDispatcher is named `theDispatcherCallableAsStr`
+	# countDispatcher is named `theDispatcherCallable`
 	# post init
 	# addImportFromStr(self, module: str, name: str, asname: str | None = None)
 
 numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 
 # https://github.com/hunterhogan/mapFolding/issues/3
-sequentialFunctionDef = extractFunctionDef(numbaFlow.sequentialCallableAsStr, numbaFlow.source_astModule)
-if sequentialFunctionDef is None: raise FREAKOUT
+sourceSequentialFunctionDef = extractFunctionDef(numbaFlow.sourceSequentialCallable, numbaFlow.source_astModule)
+if sourceSequentialFunctionDef is None: raise FREAKOUT
 
 numbaCountSequential = RecipeCountingFunction(IngredientsFunction(
-	FunctionDef=sequentialFunctionDef,
+	FunctionDef=sourceSequentialFunctionDef,
 	imports=LedgerOfImports(numbaFlow.source_astModule)
 ))
 

@@ -67,19 +67,19 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	astTupleForAssignTargetsToFragments: ast.Tuple = Make.astTuple(list_astNameDataclassFragments, ast.Store())
 	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, listKeywordForDataclassInitialization, astTupleForAssignTargetsToFragments
 
-def makeDataclassConverter(dataclassIdentifierAsStr: str,
+def makeDataclassConverter(dataclassIdentifier: str,
 		logicalPathModuleDataclass: str,
-		dataclassInstanceAsStr: str,
-		dispatcherCallableAsStr: str,
+		dataclassInstance: str,
+		dispatcherCallable: str,
 		logicalPathModuleDispatcher: str,
-		dataConverterCallableAsStr: str,
+		dataConverterCallable: str,
 		) -> IngredientsFunction:
 
-	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments = shatter_dataclassesDOTdataclass(logicalPathModuleDataclass, dataclassIdentifierAsStr, dataclassInstanceAsStr)
+	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments = shatter_dataclassesDOTdataclass(logicalPathModuleDataclass, dataclassIdentifier, dataclassInstance)
 
 	ingredientsFunction = IngredientsFunction(
-		FunctionDef = Make.astFunctionDef(name=dataConverterCallableAsStr
-										, argumentsSpecification=Make.astArgumentsSpecification(args=[Make.astArg(dataclassInstanceAsStr, astNameDataclass)])
+		FunctionDef = Make.astFunctionDef(name=dataConverterCallable
+										, argumentsSpecification=Make.astArgumentsSpecification(args=[Make.astArg(dataclassInstance, astNameDataclass)])
 										, body = cast(list[ast.stmt], list_astAnnAssign)
 										, returns = astNameDataclass
 										)
@@ -87,9 +87,9 @@ def makeDataclassConverter(dataclassIdentifierAsStr: str,
 	)
 
 	callToDispatcher = Make.astAssign(listTargets=[astTupleForAssignTargetsToFragments]
-										, value=Make.astCall(Make.astName(dispatcherCallableAsStr), args=list_astNameDataclassFragments))
+										, value=Make.astCall(Make.astName(dispatcherCallable), args=list_astNameDataclassFragments))
 	ingredientsFunction.FunctionDef.body.append(callToDispatcher)
-	ingredientsFunction.imports.addImportFromStr(logicalPathModuleDispatcher, dispatcherCallableAsStr)
+	ingredientsFunction.imports.addImportFromStr(logicalPathModuleDispatcher, dispatcherCallable)
 
 	ingredientsFunction.FunctionDef.body.append(Make.astReturn(Make.astCall(astNameDataclass, list_astKeywords=list_astKeywordDataclassFragments)))
 

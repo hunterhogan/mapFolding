@@ -43,8 +43,8 @@ def countFolds(listDimensions: Sequence[int]
 	concurrencyLimit: int = setCPUlimit(CPUlimit)
 	computationStateInitialized: ComputationState = outfitCountFolds(mapShape, computationDivisions, concurrencyLimit)
 
-	dispatcher = getPackageDispatcher()
-	computationStateComplete: ComputationState = dispatcher(computationStateInitialized)
+	dispatcherCallableProxy = getPackageDispatcher()
+	computationStateComplete: ComputationState = dispatcherCallableProxy(computationStateInitialized)
 
 	computationStateComplete.getFoldsTotal()
 

@@ -30,23 +30,23 @@ Z0Z_packageFlow = 'algorithm'
 
 sourceAlgorithmPACKAGING: str = 'theDao'
 datatypePackagePACKAGING: Final[str] = 'numpy'
-dispatcherCallableAsStrPACKAGING: str = 'doTheNeedful'
+dispatcherCallablePACKAGING: str = 'doTheNeedful'
 moduleOfSyntheticModulesPACKAGING: Final[str] = 'syntheticModules'
 
-dataclassModuleAsStrPACKAGING: str = 'theSSOT'
-dataclassIdentifierAsStrPACKAGING: str = 'ComputationState'
-dataclassInstanceAsStrPACKAGING: str = 'state'
-dataclassInstance_Pre_ParallelAsStrPACKAGING = dataclassInstanceAsStrPACKAGING + 'PARALLEL'
-dataclassInstance_Post_ParallelAsStrPACKAGING = dataclassInstanceAsStrPACKAGING + 'COMPLETE'
+dataclassModulePACKAGING: str = 'theSSOT'
+dataclassIdentifierPACKAGING: str = 'ComputationState'
+dataclassInstancePACKAGING: str = 'state'
+dataclassInstance_Pre_ParallelPACKAGING = dataclassInstancePACKAGING + 'PARALLEL'
+dataclassInstance_Post_ParallelPACKAGING = dataclassInstancePACKAGING + 'COMPLETE'
 
-sourceInitializeCallableAsStrPACKAGING = 'countInitialize'
-sourceSequentialCallableAsStrPACKAGING = 'countSequential'
-sourceParallelCallableAsStrPACKAGING = 'countParallel'
+sourceInitializeCallablePACKAGING = 'countInitialize'
+sourceSequentialCallablePACKAGING = 'countSequential'
+sourceParallelCallablePACKAGING = 'countParallel'
 
 try:
-	thePackageNameIsPACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
+	thePackageNamePACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
 except Exception:
-	thePackageNameIsPACKAGING: str = "mapFolding"
+	thePackageNamePACKAGING: str = "mapFolding"
 
 # =============================================================================
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
@@ -55,7 +55,7 @@ except Exception:
 fileExtensionINSTALLING: str = '.py'
 
 def getPathPackageINSTALLING() -> Path:
-	pathPackage: Path = Path(inspect_getfile(importlib_import_module(thePackageNameIsPACKAGING)))
+	pathPackage: Path = Path(inspect_getfile(importlib_import_module(thePackageNamePACKAGING)))
 	if pathPackage.is_file():
 		pathPackage = pathPackage.parent
 	return pathPackage
@@ -69,7 +69,7 @@ def getPathPackageINSTALLING() -> Path:
 
 # =====================
 # Create enduring identifiers from the hopefully transient identifiers above.
-thePackageName: Final[str] = thePackageNameIsPACKAGING
+thePackageName: Final[str] = thePackageNamePACKAGING
 thePathPackage: Path = getPathPackageINSTALLING()
 
 """
@@ -82,18 +82,18 @@ NOTE on semiotics: `theIdentifier` vs `identifier`
 """
 
 theSourceAlgorithm: str = sourceAlgorithmPACKAGING
-theSourceInitializeCallableAsStr = sourceInitializeCallableAsStrPACKAGING
-theSourceSequentialCallableAsStr = sourceSequentialCallableAsStrPACKAGING
-theSourceParallelCallableAsStr = sourceParallelCallableAsStrPACKAGING
+theSourceInitializeCallable = sourceInitializeCallablePACKAGING
+theSourceSequentialCallable = sourceSequentialCallablePACKAGING
+theSourceParallelCallable = sourceParallelCallablePACKAGING
 theDatatypePackage: Final[str] = datatypePackagePACKAGING
 
-theDispatcherCallableAsStr: str = dispatcherCallableAsStrPACKAGING
+theDispatcherCallable: str = dispatcherCallablePACKAGING
 
-theDataclassModuleAsStr: str = dataclassModuleAsStrPACKAGING
-theDataclassIdentifierAsStr: str = dataclassIdentifierAsStrPACKAGING
-theDataclassInstanceAsStr: str = dataclassInstanceAsStrPACKAGING
-theDataclassInstance_Pre_ParallelAsStr: str = dataclassInstance_Pre_ParallelAsStrPACKAGING
-theDataclassInstance_Post_ParallelAsStr: str = dataclassInstance_Post_ParallelAsStrPACKAGING
+theDataclassModule: str = dataclassModulePACKAGING
+theDataclassIdentifier: str = dataclassIdentifierPACKAGING
+theDataclassInstance: str = dataclassInstancePACKAGING
+theDataclassInstance_Pre_Parallel: str = dataclassInstance_Pre_ParallelPACKAGING
+theDataclassInstance_Post_Parallel: str = dataclassInstance_Post_ParallelPACKAGING
 
 theFileExtension: str = fileExtensionINSTALLING
 
@@ -199,16 +199,16 @@ class ComputationState:
 
 theLogicalPathModuleSourceAlgorithm: str = '.'.join([thePackageName, theSourceAlgorithm])
 theLogicalPathModuleDispatcher: str = theLogicalPathModuleSourceAlgorithm
-theLogicalPathModuleDataclass: str = '.'.join([thePackageName, theDataclassModuleAsStr])
+theLogicalPathModuleDataclass: str = '.'.join([thePackageName, theDataclassModule])
 
 def getSourceAlgorithm() -> ModuleType:
 	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleSourceAlgorithm)
 	return moduleImported
 
+# dynamically set the return type https://github.com/hunterhogan/mapFolding/issues/5
 def getAlgorithmDispatcher():
 	moduleImported: ModuleType = getSourceAlgorithm()
-	# TODO I think I need to use `inspect` to type the return value
-	dispatcherCallable = getattr(moduleImported, theDispatcherCallableAsStr)
+	dispatcherCallable = getattr(moduleImported, theDispatcherCallable)
 	return dispatcherCallable
 
 def getPathSyntheticModules() -> Path:
@@ -246,7 +246,7 @@ class FREAKOUT(Exception): pass
 theFormatStrModuleSynthetic = "{packageFlow}Count"
 theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
 
-theModuleDispatcherSynthetic: str = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=theDispatcherCallableAsStr)
+theModuleDispatcherSynthetic: str = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=theDispatcherCallable)
 theLogicalPathModuleDispatcherSynthetic: str = '.'.join([thePackageName, theModuleOfSyntheticModules, theModuleDispatcherSynthetic])
 
 # =============================================================================
@@ -258,13 +258,14 @@ if Z0Z_packageFlow == packageFlowSynthetic: # pyright: ignore [reportUnnecessary
 	theLogicalPathModuleDispatcher = theLogicalPathModuleDispatcherSynthetic
 
 # https://github.com/hunterhogan/mapFolding/issues/4
+# dynamically set the return type https://github.com/hunterhogan/mapFolding/issues/5
 def getPackageDispatcher():
 	# NOTE but this part, if the package flow is synthetic, probably needs to be delegated
 	# to the authority for creating _that_ synthetic flow.
-	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
-	dispatcherCallable = getattr(moduleImported, theDispatcherCallableAsStr)
-	# from mapFolding.syntheticModules.numbaCountSequential import flattenData
-	# dispatcherCallable = flattenData
+	# moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
+	# dispatcherCallable = getattr(moduleImported, theDispatcherCallableAsStr)
+	from mapFolding.syntheticModules.numbaCountSequential import flattenData
+	dispatcherCallable = flattenData
 	return dispatcherCallable
 
 """Technical concepts I am likely using and likely want to use more effectively:
