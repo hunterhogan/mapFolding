@@ -11,8 +11,8 @@ def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 
 		for n, foldingsTotal in sequence.items():
 			mapShape = settings['getMapShape'](n)
-			mapShape = sorted(mapShape)
-			dictionaryMapDimensionsToFoldsTotalKnown[tuple(mapShape)] = foldingsTotal
+			mapShape = tuple(sorted(mapShape))
+			dictionaryMapDimensionsToFoldsTotalKnown[mapShape] = foldingsTotal
 	return dictionaryMapDimensionsToFoldsTotalKnown
 
 def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:

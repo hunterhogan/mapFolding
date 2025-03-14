@@ -48,7 +48,7 @@ sourceParallelCallablePACKAGING = 'countParallel'
 try:
 	thePackageNamePACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
 except Exception:
-	thePackageNamePACKAGING: str = "mapFolding"
+	thePackageNamePACKAGING = "mapFolding"
 
 # =============================================================================
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
@@ -141,16 +141,16 @@ class ComputationState:
 	taskDivisions: DatatypeLeavesTotal
 	concurrencyLimit: DatatypeElephino
 
-	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'description': 'A 3D array representing the connection graph of the map.'})
+	connectionGraph: Array3D = dataclasses.field(init=False)
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 
-	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
-	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
-	gapRangeStart: Array1DElephino = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
-	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
-	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
-	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
-	foldGroups: Array1DFoldsTotal = dataclasses.field(default=None) # pyright: ignore[reportAssignmentType]
+	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
+	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
+	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
+	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
+	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
+	foldGroups: Array1DFoldsTotal = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
 
 	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
 	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
@@ -161,10 +161,9 @@ class ComputationState:
 	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
 	leaf1ndex: DatatypeElephino = DatatypeElephino(1)
 	leafConnectee: DatatypeElephino = DatatypeElephino(0)
-	taskIndex: DatatypeLeavesTotal = dataclasses.field(default=DatatypeLeavesTotal(0), metadata={'myType': DatatypeLeavesTotal})
-	# taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 
-	def __post_init__(self):
+	def __post_init__(self) -> None:
 		from mapFolding.beDRY import makeConnectionGraph, makeDataContainer
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
 		self.connectionGraph = makeConnectionGraph(self.mapShape, self.leavesTotal, numpyLeavesTotal)
@@ -189,7 +188,7 @@ class ComputationState:
 		if self.leafBelow is None:
 			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
 
-	def getFoldsTotal(self):
+	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
 
 	# factory? constructor?

@@ -144,10 +144,10 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 	return OEISsequence
 
 def getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
-	tryCache = False
+	tryCache: bool = False
 	if pathFilenameCache.exists():
 		fileAge: timedelta = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
-		tryCache: bool = fileAge < timedelta(days=cacheDays)
+		tryCache = fileAge < timedelta(days=cacheDays)
 
 	oeisInformation: str | None = None
 	if tryCache:
