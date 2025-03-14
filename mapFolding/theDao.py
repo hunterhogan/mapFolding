@@ -4,6 +4,7 @@ import concurrent.futures
 import copy
 import multiprocessing
 
+# When to use multiprocessing.set_start_method https://github.com/hunterhogan/mapFolding/issues/6
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 

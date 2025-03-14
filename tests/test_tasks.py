@@ -1,12 +1,14 @@
-from typing import Literal
+from collections.abc import Callable
 from mapFolding.basecamp import countFolds
 from mapFolding.beDRY import getTaskDivisions, setCPUlimit, validateListDimensions, getLeavesTotal
 from mapFolding.noHomeYet import getFoldsTotalKnown
 from tests.conftest import standardizedEqualToCallableReturn
+from typing import Literal
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit
-from collections.abc import Callable
-import pytest
 import multiprocessing
+import pytest
+
+# When to use multiprocessing.set_start_method https://github.com/hunterhogan/mapFolding/issues/6
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 

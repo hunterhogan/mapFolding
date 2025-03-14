@@ -3,12 +3,13 @@ from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.noHomeYet import getFoldsTotalKnown
 from mapFolding.oeis import settingsOEIS, oeisIDfor_n
 # from mapFolding.someAssemblyRequired import writeJobNumba
-from tests.conftest import standardizedEqualToCallableReturn, registrarRecordsTmpObject
-import importlib.util
-import pytest
 from pathlib import Path
+from tests.conftest import standardizedEqualToCallableReturn, registrarRecordsTmpObject
 from types import ModuleType
+import importlib.util
 import multiprocessing
+import pytest
+
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
