@@ -16,6 +16,7 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 	strDotStrCuzPyStoopid,
 	Then,
 )
+from mapFolding.filesystem import writeStringToHere
 from mapFolding.theSSOT import (
 	FREAKOUT,
 	getDatatypePackage,
@@ -28,6 +29,7 @@ from mapFolding.theSSOT import (
 	theFormatStrModuleSynthetic,
 	theLogicalPathModuleDataclass,
 	theLogicalPathModuleDispatcherSynthetic,
+	theModuleDispatcherSynthetic,
 	theModuleOfSyntheticModules,
 	thePackageName,
 	thePathPackage,
@@ -40,7 +42,7 @@ from collections import defaultdict
 from collections.abc import Sequence
 from inspect import getsource as inspect_getsource
 from mapFolding.someAssemblyRequired.ingredientsNumba import parametersNumbaDEFAULT, parametersNumbaSuperJit, parametersNumbaSuperJitParallel, ParametersNumba
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from types import ModuleType
 from typing import NamedTuple
 from Z0Z_tools import updateExtendPolishDictionaryLists
@@ -64,7 +66,7 @@ class RecipeSynthesizeFlow:
 
 	# ========================================
 	# Filesystem
-	pathPackage: Path = thePathPackage
+	pathPackage: PurePosixPath = PurePosixPath(thePathPackage)
 	fileExtension: str = theFileExtension
 
 	# ========================================
@@ -77,8 +79,12 @@ class RecipeSynthesizeFlow:
 	packageName: ast_Identifier = thePackageName
 
 	# Module
-	moduleOfSyntheticModules: str = theModuleOfSyntheticModules
+	# https://github.com/hunterhogan/mapFolding/issues/4
+	Z0Z_flowLogicalPathRoot: str = theModuleOfSyntheticModules
+	moduleDispatcher: str = theModuleDispatcherSynthetic
 	logicalPathModuleDataclass: str = theLogicalPathModuleDataclass
+	# https://github.com/hunterhogan/mapFolding/issues/4
+	# `theLogicalPathModuleDispatcherSynthetic` is a problem. It is defined in theSSOT, but it can also be calculated.
 	logicalPathModuleDispatcher: str = theLogicalPathModuleDispatcherSynthetic
 	dataConverterModule: str = 'dataNamespaceFlattened'
 
@@ -165,59 +171,24 @@ class IngredientsFunction:
 
 @dataclasses.dataclass
 class IngredientsModule:
-	"""Everything necessary to create a module, including the package context, should be here."""
-	name: ast_Identifier
+	"""Everything necessary to create one _logical_ `ast.Module` should be here.
+	Extrinsic qualities should be handled externally, such as with `RecipeModule`."""
+	# If an `ast.Module` had a logical name that would be reasonable, but Python is firmly opposed
+	# to a reasonable namespace, therefore, Hunter, you were silly to add a `name` field to this
+	# dataclass for building an `ast.Module`.
+	# name: ast_Identifier
+	# Hey, genius, note that this is dataclasses.InitVar
 	ingredientsFunction: dataclasses.InitVar[Sequence[IngredientsFunction] | IngredientsFunction | None] = None
 
+	# `body` attribute of `ast.Module`
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	prologue: list[ast.stmt] = dataclasses.field(default_factory=list)
 	functions: list[ast.FunctionDef | ast.stmt] = dataclasses.field(default_factory=list)
 	epilogue: list[ast.stmt] = dataclasses.field(default_factory=list)
 	launcher: list[ast.stmt] = dataclasses.field(default_factory=list)
 
-	packageName: ast_Identifier | None= thePackageName
-	logicalPathINFIX: ast_Identifier | strDotStrCuzPyStoopid | None = None # module names other than the module itself and the package name
-	pathPackage: Path = thePathPackage
-	fileExtension: str = theFileExtension
+	# parameter for `ast.Module` constructor
 	type_ignores: list[ast.TypeIgnore] = dataclasses.field(default_factory=list)
-
-	def _getLogicalPathParent(self) -> str | None:
-		listModules: list[ast_Identifier] = []
-		if self.packageName:
-			listModules.append(self.packageName)
-		if self.logicalPathINFIX:
-			listModules.append(self.logicalPathINFIX)
-		if listModules:
-			return '.'.join(listModules)
-
-	def _getLogicalPathAbsolute(self) -> str:
-		listModules: list[ast_Identifier] = []
-		logicalPathParent: str | None = self._getLogicalPathParent()
-		if logicalPathParent:
-			listModules.append(logicalPathParent)
-		listModules.append(self.name)
-		return '.'.join(listModules)
-
-	@property
-	def pathFilename(self) -> Path:
-		pathRoot: Path = self.pathPackage
-		filename = self.name + self.fileExtension
-		if self.logicalPathINFIX:
-			whyIsThisStillAThing = self.logicalPathINFIX.split('.')
-			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
-		return pathRoot.joinpath(filename)
-
-	@property
-	def absoluteImport(self) -> ast.Import:
-		return Make.astImport(self._getLogicalPathAbsolute())
-
-	@property
-	def absoluteImportFrom(self) -> ast.ImportFrom:
-		""" `from . import theModule` """
-		logicalPathParent: str | None = self._getLogicalPathParent()
-		if logicalPathParent is None:
-			logicalPathParent = '.'
-		return Make.astImportFrom(logicalPathParent, [Make.astAlias(self.name)])
 
 	def __post_init__(self, ingredientsFunction: Sequence[IngredientsFunction] | IngredientsFunction | None = None) -> None:
 		if ingredientsFunction is not None:
@@ -241,21 +212,12 @@ class IngredientsModule:
 		body.extend(self.functions)
 		body.extend(self.epilogue)
 		body.extend(self.launcher)
-		# TODO `launcher` must start with `if __name__ == '__main__':` and be indented
+		# TODO `launcher`, if it exists, must start with `if __name__ == '__main__':` and be indented
 		return body
 
-	def writeModule(self) -> None:
-		"""Writes the module to disk."""
-		astModule = Make.astModule(body=self._makeModuleBody(), type_ignores=self.type_ignores)
-		ast.fix_missing_locations(astModule)
-		pythonSource: str = ast.unparse(astModule)
-		if not pythonSource: raise FREAKOUT
-		autoflake_additional_imports: list[str] = []
-		if self.packageName:
-			autoflake_additional_imports.append(self.packageName)
-		autoflake_additional_imports.extend(self.imports.exportListModuleNames())
-		pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False,)
-		self.pathFilename.write_text(pythonSource)
+	def export(self) -> ast.Module:
+		"""Create a new `ast.Module` from the ingredients."""
+		return Make.astModule(self._makeModuleBody(), self.type_ignores)
 
 @dataclasses.dataclass
 class RecipeCountingFunction:
@@ -281,6 +243,69 @@ class RecipeDispatchFunction:
 	# post init
 	# addImportFromStr(self, module: str, name: str, asname: str | None = None)
 
+@dataclasses.dataclass
+class RecipeModule:
+	"""How to get one or more logical `ast.Module` on disk as one physical module."""
+	# Physical namespace
+	filenameStem: str
+	fileExtension: str = theFileExtension
+	pathPackage: PurePosixPath = PurePosixPath(thePathPackage)
+
+	# Physical and logical namespace
+	packageName: ast_Identifier | None= thePackageName
+	logicalPathINFIX: ast_Identifier | strDotStrCuzPyStoopid | None = None # module names other than the module itself and the package name
+
+	def _getLogicalPathParent(self) -> str | None:
+		listModules: list[ast_Identifier] = []
+		if self.packageName:
+			listModules.append(self.packageName)
+		if self.logicalPathINFIX:
+			listModules.append(self.logicalPathINFIX)
+		if listModules:
+			return '.'.join(listModules)
+
+	def _getLogicalPathAbsolute(self) -> str:
+		listModules: list[ast_Identifier] = []
+		logicalPathParent: str | None = self._getLogicalPathParent()
+		if logicalPathParent:
+			listModules.append(logicalPathParent)
+		listModules.append(self.filenameStem)
+		return '.'.join(listModules)
+
+	@property
+	def pathFilename(self):
+		""" `PurePosixPath` ensures os-independent formatting of the `dataclass.field` value,
+		but you must convert to `Path` to perform filesystem operations."""
+		pathRoot: PurePosixPath = self.pathPackage
+		filename: str = self.filenameStem + self.fileExtension
+		if self.logicalPathINFIX:
+			whyIsThisStillAThing: list[str] = self.logicalPathINFIX.split('.')
+			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
+		return pathRoot.joinpath(filename)
+
+	ingredients: IngredientsModule = IngredientsModule()
+
+	@property
+	def absoluteImport(self) -> ast.Import:
+		return Make.astImport(self._getLogicalPathAbsolute())
+
+	@property
+	def absoluteImportFrom(self) -> ast.ImportFrom:
+		""" `from . import theModule` """
+		logicalPathParent: str = self._getLogicalPathParent() or '.'
+		return Make.astImportFrom(logicalPathParent, [Make.astAlias(self.filenameStem)])
+
+	def writeModule(self) -> None:
+		astModule = self.ingredients.export()
+		ast.fix_missing_locations(astModule)
+		pythonSource: str = ast.unparse(astModule)
+		if not pythonSource: raise FREAKOUT
+		autoflake_additional_imports: list[str] = self.ingredients.imports.exportListModuleNames()
+		if self.packageName:
+			autoflake_additional_imports.append(self.packageName)
+		pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False,)
+		writeStringToHere(pythonSource, self.pathFilename)
+
 numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 
 # https://github.com/hunterhogan/mapFolding/issues/3
@@ -292,8 +317,8 @@ numbaCountSequential = RecipeCountingFunction(IngredientsFunction(
 	imports=LedgerOfImports(numbaFlow.source_astModule)
 ))
 
-Z0Z_autoflake_additional_imports: list[str] = []
-Z0Z_autoflake_additional_imports.append(thePackageName)
+numbaDispatcher = RecipeModule(filenameStem=numbaFlow.moduleDispatcher, fileExtension=numbaFlow.fileExtension, pathPackage=numbaFlow.pathPackage,
+								packageName=numbaFlow.packageName, logicalPathINFIX=numbaFlow.Z0Z_flowLogicalPathRoot)
 
 class ParametersSynthesizeNumbaCallable(NamedTuple):
 	callableTarget: str
@@ -312,6 +337,7 @@ _decoratorCallable = ''
 # if numba
 _datatypeModuleScalar = 'numba'
 _decoratorCallable = 'jit'
+Z0Z_autoflake_additional_imports: list[str] = []
 Z0Z_autoflake_additional_imports.append('numba')
 
 def Z0Z_getDatatypeModuleScalar() -> str:

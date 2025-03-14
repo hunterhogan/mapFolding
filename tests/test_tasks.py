@@ -6,6 +6,10 @@ from tests.conftest import standardizedEqualToCallableReturn
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit
 from collections.abc import Callable
 import pytest
+import multiprocessing
+if __name__ == '__main__':
+	multiprocessing.set_start_method('spawn')
+
 
 # TODO add a test. `C` = number of logical cores available. `n = C + 1`. Ensure that `[2,n]` is computed correctly.
 # Or, probably smarter: limit the number of cores, then run a test with C+1.
@@ -14,7 +18,7 @@ def test_countFoldsComputationDivisionsInvalid(mapShapeTestFunctionality: tuple[
 	standardizedEqualToCallableReturn(ValueError, countFolds, mapShapeTestFunctionality, None, {"wrong": "value"})
 
 def test_countFoldsComputationDivisionsMaximum(listDimensionsTestParallelization: list[int]) -> None:
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum', None)
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_defineConcurrencyLimit())
 def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:

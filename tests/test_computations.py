@@ -8,11 +8,14 @@ import importlib.util
 import pytest
 from pathlib import Path
 from types import ModuleType
+import multiprocessing
+if __name__ == '__main__':
+	multiprocessing.set_start_method('spawn')
 
-def test_algorithmSourceParallel(listDimensionsTestParallelization, useAlgorithmSourceDispatcher: None) -> None:
-    standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
+def test_algorithmSourceParallel(listDimensionsTestParallelization: list[int], useAlgorithmSourceDispatcher: None) -> None:
+    standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum', None)
 
-def test_algorithmSourceSequential(listDimensionsTestCountFolds, useAlgorithmSourceDispatcher: None) -> None:
+def test_algorithmSourceSequential(listDimensionsTestCountFolds: tuple[int, ...], useAlgorithmSourceDispatcher: None) -> None:
     standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestCountFolds)), countFolds, listDimensionsTestCountFolds)
 
 def test_aOFn_calculate_value(oeisID: str) -> None:

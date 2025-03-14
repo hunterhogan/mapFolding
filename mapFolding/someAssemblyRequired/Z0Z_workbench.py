@@ -27,7 +27,7 @@ if __name__ == '__main__':
 	ingredientsModuleDataConverter = IngredientsModule(
 		name=numbaFlow.dataConverterModule,
 		ingredientsFunction=ingredientsFunctionDataConverter,
-		logicalPathINFIX=numbaFlow.moduleOfSyntheticModules,
+		logicalPathINFIX=numbaFlow.Z0Z_flowLogicalPathRoot,
 	)
 
 	ingredientsModuleDataConverter.writeModule()

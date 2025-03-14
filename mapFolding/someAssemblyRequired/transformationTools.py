@@ -316,7 +316,7 @@ class Make:
 
 	@staticmethod
 	def astModule(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore] = []) -> ast.Module:
-		return ast.Module(body=body, type_ignores=type_ignores)
+		return ast.Module(body, type_ignores)
 
 	@staticmethod
 	def astName(identifier: ast_Identifier) -> ast.Name:

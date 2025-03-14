@@ -78,11 +78,12 @@ run = { branch = true, concurrency = [
 xml = { output = "tests/coverage/coverage.xml" }
 
 [tool.pytest.ini_options]
-log_auto_indent = ["On"]
-addopts = ["--color=yes", "-n 4"]
-env = ["NUMBA_DISABLE_JIT=1"]
-# env = ["NUMBA_JIT_COVERAGE=1"] # it doesn't work
+log_auto_indent = true
+addopts = ["--color=yes", "-n 2"]
 testpaths = ["tests"]
+
+[tool.pytest_env]
+NUMBA_JIT_COVERAGE = "1"
 
 # [tool.setuptools.packages.find]
 # where = ["."]

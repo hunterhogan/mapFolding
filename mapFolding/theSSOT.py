@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
 from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, ndarray, signedinteger
@@ -20,6 +21,7 @@ Identifiers: scope and resolution, LEGB (Local, Enclosing, Global, Builtin)
 
 # I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
 packageFlowSynthetic = 'numba'
+# packageFlowSynthetic = 'multiprocessing'
 Z0Z_packageFlow = 'algorithm'
 # https://github.com/hunterhogan/mapFolding/issues/4
 # Z0Z_packageFlow = packageFlowSynthetic
@@ -259,13 +261,13 @@ if Z0Z_packageFlow == packageFlowSynthetic: # pyright: ignore [reportUnnecessary
 
 # https://github.com/hunterhogan/mapFolding/issues/4
 # dynamically set the return type https://github.com/hunterhogan/mapFolding/issues/5
-def getPackageDispatcher():
+def getPackageDispatcher() -> Callable[[ComputationState], ComputationState]:
 	# NOTE but this part, if the package flow is synthetic, probably needs to be delegated
 	# to the authority for creating _that_ synthetic flow.
-	# moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
-	# dispatcherCallable = getattr(moduleImported, theDispatcherCallableAsStr)
-	from mapFolding.syntheticModules.numbaCountSequential import flattenData
-	dispatcherCallable = flattenData
+	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
+	dispatcherCallable = getattr(moduleImported, theDispatcherCallable)
+	# from mapFolding.syntheticModules.numbaCountSequential import flattenData
+	# dispatcherCallable = flattenData
 	return dispatcherCallable
 
 """Technical concepts I am likely using and likely want to use more effectively:

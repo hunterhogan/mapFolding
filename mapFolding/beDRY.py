@@ -73,7 +73,14 @@ def makeDataContainer(shape: int | tuple[int, ...], datatype: type[numpy.signedi
 	return numpy.zeros(shape, dtype=numpyDtype)
 
 def setCPUlimit(CPUlimit: Any | None) -> int:
-	"""Sets CPU limit for Numba concurrent operations. Note that it can only affect Numba-jitted functions that have not yet been imported.
+	"""Sets CPU limit for concurrent operations.
+
+	If the concurrency is managed by `numba`, the maximum number of CPUs is retrieved from `numba.get_num_threads()` and not by polling the hardware. Therefore, if there are
+	numba environment variables limiting the number of available CPUs, that will effect this function. That _should_ be a good thing: you control the number of CPUs available
+	to numba. But if you're not aware of that, you might be surprised by the results.
+
+	If you are designing custom modules that use numba, note that you must call `numba.set_num_threads()` (i.e., this function) before executing an `import` statement
+	on a Numba-jitted function. Otherwise, the `numba.set_num_threads()` call will have no effect on the imported function.
 
 	Parameters:
 		CPUlimit: whether and how to limit the CPU usage. See notes for details.
@@ -93,17 +100,16 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 	if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
 		CPUlimit = oopsieKwargsie(CPUlimit)
 
-	concurrencyLimit: int = int(defineConcurrencyLimit(CPUlimit))
 	from mapFolding.theSSOT import concurrencyPackage
 	if concurrencyPackage == 'numba':
 		from numba import get_num_threads, set_num_threads
+		concurrencyLimit: int = defineConcurrencyLimit(CPUlimit, get_num_threads())
 		set_num_threads(concurrencyLimit)
 		concurrencyLimit = get_num_threads()
 	elif concurrencyPackage == 'algorithm':
-		concurrencyLimit = 1
+		concurrencyLimit: int = defineConcurrencyLimit(CPUlimit)
 	else:
-		raise NotImplementedError("This function only supports the 'numba' concurrency package.")
-
+		raise NotImplementedError(f"I received {concurrencyPackage=} but I don't know what to do with that.")
 	return concurrencyLimit
 
 def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, leavesTotal: int) -> int:

@@ -1,34 +1,7 @@
 """Filesystem functions for mapFolding package."""
-from pathlib import Path
+from pathlib import Path, PurePath
+from typing import Any
 import os
-
-def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> None:
-	"""
-	Save foldsTotal with multiple fallback mechanisms.
-
-	Parameters:
-		pathFilename: Target save location
-		foldsTotal: Critical computed value to save
-	"""
-	try:
-		pathFilenameFoldsTotal = Path(pathFilename)
-		pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
-		pathFilenameFoldsTotal.write_text(str(foldsTotal))
-	except Exception as ERRORmessage:
-		try:
-			print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
-			print(ERRORmessage)
-			print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
-			randomnessPlanB = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
-			filenameInfixUnique = ''.join(randomnessPlanB)
-			pathFilenamePlanB = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')
-			writeStreamFallback = open(pathFilenamePlanB, 'w')
-			writeStreamFallback.write(str(foldsTotal))
-			writeStreamFallback.close()
-			print(str(pathFilenamePlanB))
-		except Exception:
-			print(foldsTotal)
-	return None
 
 def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""Imagine your computer has been counting folds for 9 days, and when it tries to save your newly discovered value,
@@ -85,3 +58,38 @@ def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal
 
 	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 	return pathFilenameFoldsTotal
+
+def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> None:
+	"""
+	Save foldsTotal with multiple fallback mechanisms.
+
+	Parameters:
+		pathFilename: Target save location
+		foldsTotal: Critical computed value to save
+	"""
+	try:
+		pathFilenameFoldsTotal = Path(pathFilename)
+		pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
+		pathFilenameFoldsTotal.write_text(str(foldsTotal))
+	except Exception as ERRORmessage:
+		try:
+			print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
+			print(ERRORmessage)
+			print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
+			randomnessPlanB = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
+			filenameInfixUnique = ''.join(randomnessPlanB)
+			pathFilenamePlanB = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')
+			writeStreamFallback = open(pathFilenamePlanB, 'w')
+			writeStreamFallback.write(str(foldsTotal))
+			writeStreamFallback.close()
+			print(str(pathFilenamePlanB))
+		except Exception:
+			print(foldsTotal)
+	return None
+
+def writeStringToHere(this: str, pathFilename: str | os.PathLike[Any] | PurePath) -> None:
+	"""Write the string `this` to the file at `pathFilename`."""
+	pathFilename = Path(pathFilename)
+	pathFilename.parent.mkdir(parents=True, exist_ok=True)
+	pathFilename.write_text(str(this))
+	return None

@@ -4,9 +4,6 @@ import concurrent.futures
 import copy
 import multiprocessing
 
-if __name__ == '__main__':
-	multiprocessing.set_start_method('spawn')
-
 def activeLeafConnectedToItself(state: ComputationState) -> bool:
 	return state.leafConnectee == state.leaf1ndex
 
@@ -205,6 +202,7 @@ def countSequential(state: ComputationState) -> ComputationState:
 def doTheNeedful(state: ComputationState) -> ComputationState:
 	state = countInitialize(state)
 	if state.taskDivisions > 0:
+		multiprocessing.set_start_method('spawn')
 		dictionaryConcurrency: dict[int, concurrent.futures.Future[ComputationState]] = {}
 		with ProcessPoolExecutor() as concurrencyManager:
 			for indexSherpa in range(state.taskDivisions):
