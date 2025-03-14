@@ -1,4 +1,4 @@
-from mapFolding.theDao import countInitialize, countParallel
+from mapFolding.theDao import countInitialize, doTheNeedful
 from mapFolding.theSSOT import Array1DElephino, Array1DLeavesTotal, Array3D, ComputationState, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
 from numba import jit
 
@@ -65,9 +65,10 @@ def countSequential(
 
 def flattenData(state: ComputationState) -> ComputationState:
 
-	state = countInitialize(state)
 	if state.taskDivisions > 0:
-		return countParallel(state)
+		return doTheNeedful(state)
+
+	state = countInitialize(state)
 
 	connectionGraph: Array3D = state.connectionGraph
 	countDimensionsGapped: Array1DLeavesTotal = state.countDimensionsGapped

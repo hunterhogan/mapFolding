@@ -207,7 +207,7 @@ def doTheNeedful(state: ComputationState) -> ComputationState:
 	state = countInitialize(state)
 	if state.taskDivisions > 0:
 		dictionaryConcurrency: dict[int, concurrent.futures.Future[ComputationState]] = {}
-		with ProcessPoolExecutor() as concurrencyManager:
+		with ProcessPoolExecutor(state.concurrencyLimit) as concurrencyManager:
 			for indexSherpa in range(state.taskDivisions):
 				stateParallel = copy.deepcopy(state)
 				stateParallel.taskIndex = indexSherpa

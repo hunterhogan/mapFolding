@@ -139,6 +139,7 @@ class ComputationState:
 	mapShape: tuple[DatatypeLeavesTotal, ...]
 	leavesTotal: DatatypeLeavesTotal
 	taskDivisions: DatatypeLeavesTotal
+	concurrencyLimit: DatatypeElephino
 
 	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'description': 'A 3D array representing the connection graph of the map.'})
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
@@ -264,10 +265,14 @@ if Z0Z_packageFlow == packageFlowSynthetic: # pyright: ignore [reportUnnecessary
 def getPackageDispatcher() -> Callable[[ComputationState], ComputationState]:
 	# NOTE but this part, if the package flow is synthetic, probably needs to be delegated
 	# to the authority for creating _that_ synthetic flow.
-	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
-	dispatcherCallable = getattr(moduleImported, theDispatcherCallable)
-	# from mapFolding.syntheticModules.numbaCountSequential import flattenData
-	# dispatcherCallable = flattenData
+
+	# Automated system
+	# moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
+	# dispatcherCallable = getattr(moduleImported, theDispatcherCallable)
+
+	# Hardcoded while I am refactoring "someAssemblyRequired"
+	from mapFolding.syntheticModules.numbaCountSequential import flattenData
+	dispatcherCallable = flattenData
 	return dispatcherCallable
 
 """Technical concepts I am likely using and likely want to use more effectively:

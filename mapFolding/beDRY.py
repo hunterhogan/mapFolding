@@ -167,5 +167,5 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str | None = None, concurrencyLimit: int = 1) -> ComputationState:
 	leavesTotal = getLeavesTotal(mapShape)
 	taskDivisions = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
-	computationStateInitialized = ComputationState(mapShape, leavesTotal, taskDivisions)
+	computationStateInitialized = ComputationState(mapShape, leavesTotal, taskDivisions, concurrencyLimit)
 	return computationStateInitialized
