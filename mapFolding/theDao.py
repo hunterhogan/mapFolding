@@ -1,12 +1,19 @@
+from concurrent.futures import Future as ConcurrentFuture
 from concurrent.futures import ProcessPoolExecutor
+from copy import deepcopy
 from mapFolding.theSSOT import ComputationState
-import concurrent.futures
-import copy
-import multiprocessing
+from multiprocessing import set_start_method as multiprocessing_set_start_method
+
+"""
+- A "leaf" is a unit square in the map
+- A "gap" is a potential position where a new leaf can be folded
+- Connections track how leaves can connect above/below each other
+- Leaves are enumerated starting from 1, not 0; hence, leaf1ndex not leafIndex
+"""
 
 # When to use multiprocessing.set_start_method https://github.com/hunterhogan/mapFolding/issues/6
 if __name__ == '__main__':
-	multiprocessing.set_start_method('spawn')
+	multiprocessing_set_start_method('spawn')
 
 def activeLeafConnectedToItself(state: ComputationState) -> bool:
 	return state.leafConnectee == state.leaf1ndex
@@ -23,7 +30,7 @@ def activeLeafIsTheFirstLeaf(state: ComputationState) -> bool:
 def allDimensionsAreUnconstrained(state: ComputationState) -> bool:
 	return not state.dimensionsUnconstrained
 
-def backtrack(state: ComputationState) -> ComputationState:
+def undoLastLeafPlacement(state: ComputationState) -> ComputationState:
 	state.leaf1ndex -= 1
 	state.leafBelow[state.leafAbove[state.leaf1ndex]] = state.leafBelow[state.leaf1ndex]
 	state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leafAbove[state.leaf1ndex]
@@ -103,7 +110,7 @@ def loopUpToDimensionsTotal(state: ComputationState) -> bool:
 def noGapsHere(state: ComputationState) -> bool:
 	return (state.leaf1ndex > 0) and (state.gap1ndex == state.gapRangeStart[state.leaf1ndex - 1])
 
-def placeLeaf(state: ComputationState) -> ComputationState:
+def insertLeafAtGap(state: ComputationState) -> ComputationState:
 	state.gap1ndex -= 1
 	state.leafAbove[state.leaf1ndex] = state.gapsWhere[state.gap1ndex]
 	state.leafBelow[state.leaf1ndex] = state.leafBelow[state.leafAbove[state.leaf1ndex]]
@@ -143,7 +150,7 @@ def countInitialize(state: ComputationState) -> ComputationState:
 					state = filterCommonGaps(state)
 					state = incrementIndexMiniGap(state)
 		if thereIsAnActiveLeaf(state):
-			state = placeLeaf(state)
+			state = insertLeafAtGap(state)
 		if state.gap1ndex > 0:
 			break
 	return state
@@ -170,9 +177,9 @@ def countParallel(state: ComputationState) -> ComputationState:
 					state = filterCommonGaps(state)
 					state = incrementIndexMiniGap(state)
 		while noGapsHere(state):
-			state = backtrack(state)
+			state = undoLastLeafPlacement(state)
 		if thereIsAnActiveLeaf(state):
-			state = placeLeaf(state)
+			state = insertLeafAtGap(state)
 	state.foldGroups[state.taskIndex] = state.groupsOfFolds
 	return state
 
@@ -197,19 +204,19 @@ def countSequential(state: ComputationState) -> ComputationState:
 					state = filterCommonGaps(state)
 					state = incrementIndexMiniGap(state)
 		while noGapsHere(state):
-			state = backtrack(state)
+			state = undoLastLeafPlacement(state)
 		if thereIsAnActiveLeaf(state):
-			state = placeLeaf(state)
+			state = insertLeafAtGap(state)
 	state.foldGroups[state.taskIndex] = state.groupsOfFolds
 	return state
 
 def doTheNeedful(state: ComputationState) -> ComputationState:
 	state = countInitialize(state)
 	if state.taskDivisions > 0:
-		dictionaryConcurrency: dict[int, concurrent.futures.Future[ComputationState]] = {}
+		dictionaryConcurrency: dict[int, ConcurrentFuture[ComputationState]] = {}
 		with ProcessPoolExecutor(state.concurrencyLimit) as concurrencyManager:
 			for indexSherpa in range(state.taskDivisions):
-				stateParallel = copy.deepcopy(state)
+				stateParallel = deepcopy(state)
 				stateParallel.taskIndex = indexSherpa
 				dictionaryConcurrency[indexSherpa] = concurrencyManager.submit(countParallel, stateParallel)
 			for indexSherpa in range(state.taskDivisions):
