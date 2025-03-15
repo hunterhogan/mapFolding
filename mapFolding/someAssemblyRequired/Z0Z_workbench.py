@@ -1,15 +1,24 @@
 from mapFolding.someAssemblyRequired.synthesizeDataConverters import makeDataclassConverter
-from mapFolding.someAssemblyRequired.whatWillBe import IngredientsFunction, IngredientsModule, numbaFlow
+from mapFolding.someAssemblyRequired.transformationTools import IngredientsFunction, IngredientsModule
+from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import Make, numbaFlow, numbaDispatcher, numbaCountSequential, RecipeDispatchFunction
 from mapFolding.someAssemblyRequired.synthesizeCountingFunctions import Z0Z_makeCountingFunction
 import ast
 
 if __name__ == '__main__':
-	ingredientsFunctionDataConverter = makeDataclassConverter(
-		dataclassIdentifier=numbaFlow.sourceDataclassIdentifier
-		, logicalPathModuleDataclass=numbaFlow.logicalPathModuleDataclass
-		, dataclassInstance=numbaFlow.dataclassInstance
+	numbaDispatchFunction = RecipeDispatchFunction(
+		ingredients=IngredientsFunction(Make.astFunctionDef(numbaFlow.dispatcherCallable))
+							, logicalPathModuleDataclass=numbaFlow.logicalPathModuleDataclass
+							, dataclassIdentifier=numbaFlow.sourceDataclassIdentifier
+							, dataclassInstance=numbaFlow.dataclassInstance
+							, Z0Z_unpackDataclass=True
+							, countDispatcher=False)
 
-		, dispatcherCallable=numbaFlow.dispatcherCallable
+	ingredientsFunctionDataConverter = makeDataclassConverter(
+		dataclassIdentifier=numbaDispatchFunction.dataclassIdentifier
+		, logicalPathModuleDataclass=numbaDispatchFunction.logicalPathModuleDataclass
+		, dataclassInstance=numbaDispatchFunction.dataclassInstance
+
+		, countDispatcherCallable=numbaFlow.dispatcherCallable
 		, logicalPathModuleDispatcher=numbaFlow.logicalPathModuleDispatcher
 		, dataConverterCallable=numbaFlow.dataConverterCallable
 		)

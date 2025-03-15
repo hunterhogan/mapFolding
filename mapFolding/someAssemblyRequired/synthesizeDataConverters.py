@@ -10,16 +10,15 @@ from mapFolding.beDRY import ComputationState, outfitCountFolds, validateListDim
 from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
-	executeActionUnlessDescendantMatches,
+	Z0Z_executeActionUnlessDescendantMatches,
 	extractClassDef,
 	ifThis,
-	IngredientsFunction,
-	LedgerOfImports,
 	Make,
 	NodeCollector,
 	strDotStrCuzPyStoopid,
 	Then,
 )
+from mapFolding.someAssemblyRequired.transformationTools import IngredientsFunction, LedgerOfImports
 from mapFolding.theSSOT import getSourceAlgorithm
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
@@ -48,7 +47,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 
 	exclusionPredicate = ifThis.is_keyword_IdentifierEqualsConstantValue('init', False)
 	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(listKeywordForDataclassInitialization)
-	filteredAppendKeywordAction = executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction)
+	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction)
 
 	collector = NodeCollector(
 			ifThis.isAnnAssignAndTargetIsName,
@@ -67,10 +66,12 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	astTupleForAssignTargetsToFragments: ast.Tuple = Make.astTuple(list_astNameDataclassFragments, ast.Store())
 	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, listKeywordForDataclassInitialization, astTupleForAssignTargetsToFragments
 
-def makeDataclassConverter(dataclassIdentifier: str,
+def makeDataclassConverter(
 		logicalPathModuleDataclass: str,
+		dataclassIdentifier: str,
 		dataclassInstance: str,
-		dispatcherCallable: str,
+
+		countDispatcherCallable: str,
 		logicalPathModuleDispatcher: str,
 		dataConverterCallable: str,
 		) -> IngredientsFunction:
@@ -86,10 +87,10 @@ def makeDataclassConverter(dataclassIdentifier: str,
 		, imports = ledgerDataclassAndFragments
 	)
 
-	callToDispatcher = Make.astAssign(listTargets=[astTupleForAssignTargetsToFragments]
-										, value=Make.astCall(Make.astName(dispatcherCallable), args=list_astNameDataclassFragments))
-	ingredientsFunction.FunctionDef.body.append(callToDispatcher)
-	ingredientsFunction.imports.addImportFromStr(logicalPathModuleDispatcher, dispatcherCallable)
+	whoToCall = Make.astAssign(listTargets=[astTupleForAssignTargetsToFragments]
+										, value=Make.astCall(Make.astName(countDispatcherCallable), args=list_astNameDataclassFragments))
+	ingredientsFunction.FunctionDef.body.append(whoToCall)
+	ingredientsFunction.imports.addImportFromStr(logicalPathModuleDispatcher, countDispatcherCallable)
 
 	ingredientsFunction.FunctionDef.body.append(Make.astReturn(Make.astCall(astNameDataclass, list_astKeywords=list_astKeywordDataclassFragments)))
 

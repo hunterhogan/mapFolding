@@ -1,15 +1,16 @@
 from collections.abc import Sequence
-from mapFolding.someAssemblyRequired.whatWillBe import LedgerOfImports, ParametersNumba, Z0Z_getDatatypeModuleScalar, parametersNumbaDEFAULT
-from mapFolding.someAssemblyRequired.whatWillBe import Z0Z_getDecoratorCallable
+from mapFolding.someAssemblyRequired.transformationTools import LedgerOfImports
+from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import ParametersNumba, getDatatypeModuleScalarVESTIGIAL, parametersNumbaDEFAULT
+from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import getDecoratorCallableVESTIGIAL
 from mapFolding.someAssemblyRequired import Make, ifThis
 from typing import Any, cast
 import ast
 
 def thisIsNumbaDotJit(Ima: ast.AST) -> bool:
-	return ifThis.isCallNamespace_Identifier(Z0Z_getDatatypeModuleScalar(), Z0Z_getDecoratorCallable())(Ima)
+	return ifThis.isCallNamespace_Identifier(getDatatypeModuleScalarVESTIGIAL(), getDecoratorCallableVESTIGIAL())(Ima)
 
 def thisIsJit(Ima: ast.AST) -> bool:
-	return ifThis.isCall_Identifier(Z0Z_getDecoratorCallable())(Ima)
+	return ifThis.isCall_Identifier(getDecoratorCallableVESTIGIAL())(Ima)
 
 def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
 	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)
@@ -51,7 +52,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Le
 			return signatureElement.annotation
 		return None
 
-	datatypeModuleDecorator: str = Z0Z_getDatatypeModuleScalar()
+	datatypeModuleDecorator: str = getDatatypeModuleScalarVESTIGIAL()
 	list_argsDecorator: Sequence[ast.expr] = []
 
 	list_arg4signature_or_function: list[ast.expr] = []
@@ -82,8 +83,8 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Le
 		parametersNumba = parametersNumbaDEFAULT
 	listDecoratorKeywords: list[ast.keyword] = [ast.keyword(arg=parameterName, value=ast.Constant(value=parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
-	decoratorModule: str = Z0Z_getDatatypeModuleScalar()
-	decoratorCallable: str = Z0Z_getDecoratorCallable()
+	decoratorModule: str = getDatatypeModuleScalarVESTIGIAL()
+	decoratorCallable: str = getDecoratorCallableVESTIGIAL()
 	allImports.addImportFromStr(decoratorModule, decoratorCallable)
 	astDecorator: ast.Call = Make.astCall(Make.astName(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
 

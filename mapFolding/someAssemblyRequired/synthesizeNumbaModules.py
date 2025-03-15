@@ -2,17 +2,18 @@
 from os import PathLike
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-	from mapFolding.someAssemblyRequired.whatWillBe import ParametersSynthesizeNumbaCallable, listNumbaCallableDispatchees
+	from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import ParametersSynthesizeNumbaCallableVESTIGIAL, listNumbaCallableDispatcheesVESTIGIAL
+from mapFolding.someAssemblyRequired.transformationTools import LedgerOfImports
 from mapFolding.theSSOT import theModuleOfSyntheticModules
 from mapFolding.theSSOT import getSourceAlgorithm
 import types
 
-def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCallable] = listNumbaCallableDispatchees, callableDispatcher: bool = True, algorithmSource: types.ModuleType = getSourceAlgorithm(), relativePathWrite: str | PathLike[str] = theModuleOfSyntheticModules, filenameModuleWrite: str = 'filenameModuleSyntheticWrite', formatFilenameWrite: str = 'formatStrFilenameForCallableSynthetic'):
-	from mapFolding.someAssemblyRequired.whatWillBe import ParametersSynthesizeNumbaCallable, listNumbaCallableDispatchees
-	from mapFolding.someAssemblyRequired.whatWillBe import LedgerOfImports, Z0Z_autoflake_additional_imports
+def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCallableVESTIGIAL] = listNumbaCallableDispatcheesVESTIGIAL, callableDispatcher: bool = True, algorithmSource: types.ModuleType = getSourceAlgorithm(), relativePathWrite: str | PathLike[str] = theModuleOfSyntheticModules, filenameModuleWrite: str = 'filenameModuleSyntheticWrite', formatFilenameWrite: str = 'formatStrFilenameForCallableSynthetic'):
+	from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import ParametersSynthesizeNumbaCallableVESTIGIAL, listNumbaCallableDispatcheesVESTIGIAL
+	from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import Z0Z_autoflake_additional_imports
 	from mapFolding.theSSOT import FREAKOUT
 	from mapFolding.theSSOT import thePathPackage, getDatatypePackage
-	from mapFolding.someAssemblyRequired.whatWillBe import FunctionInliner, YouOughtaKnow, ast_Identifier
+	from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import FunctionInliner, YouOughtaKnow, ast_Identifier
 	from pathlib import Path
 	from typing import cast
 	import ast

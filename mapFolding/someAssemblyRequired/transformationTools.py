@@ -1,9 +1,32 @@
+""" As of 2025-03-15
+Tools for transforming Python code from one format to another.
+
+Scope of the tools:
+- What is necessary to transform the baseline algorithm into optimized formats used by the official package.
+
+Aspirations:
+- Each tool is abstracted or generic enough to be used beyond the scope of the official package.
+- Each tool is designed to be used in a modular fashion, allowing for the creation of new tools by combining existing tools.
+- If a tool has a default setting, the setting shall be the setting used by the official package.
+- Each tool is designed to be used in a way that is easy to understand and use.
+
+Prior notes I'll integrate and delete:
+- Settings for synthesizing the modules used by the package (i.e., the flow for numba)
+- Settings for synthesizing modules that could be used by the package (e.g., the flow for JAX)
+- Therefore, an abstracted system for creating settings for the package
+- And with only a little more effort, an abstracted system for creating settings to synthesize arbitrary subsets of modules for arbitrary packages
+"""
+from collections import defaultdict
 from collections.abc import Callable, Container, Sequence
-from pathlib import Path
-from typing import Any, cast, NamedTuple, TypeAlias, TYPE_CHECKING, TypeGuard, TypeVar
+from inspect import getsource as inspect_getsource
+from mapFolding.theSSOT import getSourceAlgorithm, theDataclassIdentifier, theDataclassInstance, theDispatcherCallable, theFileExtension, theFormatStrModuleForCallableSynthetic, theFormatStrModuleSynthetic, theLogicalPathModuleDataclass, theLogicalPathModuleDispatcherSynthetic, theModuleDispatcherSynthetic, theModuleOfSyntheticModules, thePackageName, thePathPackage, theSourceSequentialCallable
+from pathlib import PurePosixPath
+from types import ModuleType
+from typing import Any, cast, TypeAlias, TypeGuard, TypeVar
+from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
-if TYPE_CHECKING:
-	from mapFolding.someAssemblyRequired.whatWillBe import LedgerOfImports
+import dataclasses
+
 """
 Semiotic notes:
 In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
@@ -17,8 +40,8 @@ Identifier: uppercase, without the leading underscore should only appear in came
 namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.abc`, "namespace" is the part before the dot.
 Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
 """
-# TODO consider semiotic usefulness of "namespace" or variations such as "namespaceName", "namespacePath", and "namespace_Identifier"
 
+# TODO consider semiotic usefulness of "namespace" or variations such as "namespaceName", "namespacePath", and "namespace_Identifier"
 # TODO learn whether libcst can help
 
 astParameter = TypeVar('astParameter', bound=Any)
@@ -28,12 +51,6 @@ strORlist_ast_type_paramORintORNone: TypeAlias = Any
 list_ast_type_paramORintORNone: TypeAlias = Any
 strORintORNone: TypeAlias = Any
 Z0Z_thisCannotBeTheBestWay: TypeAlias = list[ast.Name] | list[ast.Attribute] | list[ast.Subscript] | list[ast.Name | ast.Attribute] | list[ast.Name | ast.Subscript] | list[ast.Attribute | ast.Subscript] | list[ast.Name | ast.Attribute | ast.Subscript]
-
-# NOTE: the new "Recipe" concept will allow me to remove this
-class YouOughtaKnow(NamedTuple):
-	callableSynthesized: str
-	pathFilenameForMe: Path
-	astForCompetentProgrammers: ast.ImportFrom
 
 # listAsNode
 
@@ -76,7 +93,7 @@ class NodeReplacer(ast.NodeTransformer):
 			return self.doThis(node)
 		return super().visit(node)
 
-def descendantContainsMatchingNode(node: ast.AST, predicateFunction: Callable[[ast.AST], bool]) -> bool:
+def Z0Z_descendantContainsMatchingNode(node: ast.AST, predicateFunction: Callable[[ast.AST], bool]) -> bool:
 	""" Return True if any descendant of the node (or the node itself) matches the predicateFunction. """
 	matchFound = False
 
@@ -91,13 +108,13 @@ def descendantContainsMatchingNode(node: ast.AST, predicateFunction: Callable[[a
 	DescendantFinder().visit(node)
 	return matchFound
 
-def executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.AST], bool], actionFunction: Callable[[ast.AST], None]) -> Callable[[ast.AST], None]:
+def Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.AST], bool], actionFunction: Callable[[ast.AST], None]) -> Callable[[ast.AST], None]:
 	"""
 	Return a new action that will execute actionFunction only if no descendant (or the node itself)
 	matches exclusionPredicate.
 	"""
 	def wrappedAction(node: ast.AST) -> None:
-		if not descendantContainsMatchingNode(node, exclusionPredicate):
+		if not Z0Z_descendantContainsMatchingNode(node, exclusionPredicate):
 			actionFunction(node)
 	return wrappedAction
 
@@ -345,6 +362,66 @@ class Make:
 		context = context or ast.Load()
 		return ast.Tuple(elts=list(elements), ctx=context, **keywordArguments)
 
+class LedgerOfImports:
+	def __init__(self, startWith: ast.AST | None = None) -> None:
+		self.dictionaryImportFrom: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
+		self.listImport: list[str] = []
+
+		if startWith:
+			self.walkThis(startWith)
+
+	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
+		if not isinstance(astImport_, (ast.Import, ast.ImportFrom)): # pyright: ignore[reportUnnecessaryIsInstance]
+			raise ValueError(f"Expected ast.Import or ast.ImportFrom, got {type(astImport_)}")
+		if isinstance(astImport_, ast.Import):
+			for alias in astImport_.names:
+				self.listImport.append(alias.name)
+		else:
+			if astImport_.module is not None:
+				for alias in astImport_.names:
+					self.dictionaryImportFrom[astImport_.module].append((alias.name, alias.asname))
+
+	def addImportStr(self, module: str) -> None:
+		self.listImport.append(module)
+
+	def addImportFromStr(self, module: str, name: str, asname: str | None = None) -> None:
+		self.dictionaryImportFrom[module].append((name, asname))
+
+	def exportListModuleNames(self) -> list[str]:
+		listModuleNames: list[str] = list(self.dictionaryImportFrom.keys())
+		listModuleNames.extend(self.listImport)
+		return sorted(set(listModuleNames))
+
+	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
+		listAstImportFrom: list[ast.ImportFrom] = []
+
+		for module, listOfNameTuples in sorted(self.dictionaryImportFrom.items()):
+			listOfNameTuples = sorted(list(set(listOfNameTuples)), key=lambda nameTuple: nameTuple[0])
+			listAlias: list[ast.alias] = []
+			for name, asname in listOfNameTuples:
+				listAlias.append(Make.astAlias(name, asname))
+			listAstImportFrom.append(Make.astImportFrom(module, listAlias))
+
+		listAstImport: list[ast.Import] = [Make.astImport(name) for name in sorted(set(self.listImport))]
+		return listAstImportFrom + listAstImport
+
+	def update(self, *fromLedger: 'LedgerOfImports') -> None:
+		"""
+		Update this ledger with imports from one or more other ledgers.
+
+		Parameters:
+			*fromTracker: One or more other `LedgerOfImports` objects from which to merge.
+		"""
+		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(ledger.dictionaryImportFrom for ledger in fromLedger), destroyDuplicates=True, reorderLists=True)
+
+		for ledger in fromLedger:
+			self.listImport.extend(ledger.listImport)
+
+	def walkThis(self, walkThis: ast.AST) -> None:
+		for smurf in ast.walk(walkThis):
+			if isinstance(smurf, (ast.Import, ast.ImportFrom)):
+				self.addAst(smurf)
+
 class Then:
 	@staticmethod
 	def insertThisAbove(astStatement: ast.stmt) -> Callable[[ast.stmt], Sequence[ast.stmt]]:
@@ -358,7 +435,6 @@ class Then:
 	@staticmethod
 	def removeThis(node: ast.AST) -> None:
 		return None
-	from mapFolding.someAssemblyRequired.whatWillBe import LedgerOfImports
 	@staticmethod
 	def Z0Z_ledger(logicalPath: strDotStrCuzPyStoopid, ledger: LedgerOfImports) -> Callable[[ast.AST], None]:
 		return lambda node: ledger.addImportFromStr(logicalPath, cast(ast.Name, cast(ast.AnnAssign, node).annotation).id)
@@ -375,40 +451,109 @@ class Then:
 	def Z0Z_appendAnnAssignOfNameDOTnameTo(identifier: ast_Identifier, listNameDOTname: list[ast.AnnAssign]) -> Callable[[ast.AST], None]:
 		return lambda node: listNameDOTname.append(Make.astAnnAssign(cast(ast.AnnAssign, node).target, cast(ast.AnnAssign, node).annotation, Make.nameDOTname(identifier, cast(ast.Name, cast(ast.AnnAssign, node).target).id)))
 
-class FunctionInliner(ast.NodeTransformer):
-	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
-		self.dictionaryFunctions: dict[str, ast.FunctionDef] = dictionaryFunctions
-
-	def inlineFunctionBody(self, callableTargetName: str) -> ast.FunctionDef:
-		inlineDefinition: ast.FunctionDef = self.dictionaryFunctions[callableTargetName]
-		# Process nested calls within the inlined function
-		for astNode in ast.walk(inlineDefinition):
-			self.visit(astNode)
-		return inlineDefinition
-
-	def visit_Call(self, node: ast.Call):
-		astCall = self.generic_visit(node)
-		if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryFunctions)(astCall):
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(cast(ast.Name, cast(ast.Call, astCall).func).id)
-
-			if (inlineDefinition and inlineDefinition.body):
-				statementTerminating: ast.stmt = inlineDefinition.body[-1]
-
-				if (isinstance(statementTerminating, ast.Return)
-				and statementTerminating.value is not None):
-					return self.visit(statementTerminating.value)
-				elif isinstance(statementTerminating, ast.Expr):
-					return self.visit(statementTerminating.value)
-				else:
-					return ast.Constant(value=None)
-		return astCall
-
-	def visit_Expr(self, node: ast.Expr):
-		if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryFunctions)(node.value):
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(cast(ast.Name, cast(ast.Call, node.value).func).id)
-			return [self.visit(stmt) for stmt in inlineDefinition.body]
-		return self.generic_visit(node)
 	# TODO When resolving the ledger of imports, remove self-referential imports
+
+@dataclasses.dataclass
+class IngredientsFunction:
+	"""Everything necessary to integrate a function into a module should be here."""
+	FunctionDef: ast.FunctionDef # hint `Make.astFunctionDef`
+	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
+
+@dataclasses.dataclass
+class IngredientsModule:
+	"""Everything necessary to create one _logical_ `ast.Module` should be here.
+	Extrinsic qualities should be handled externally, such as with `RecipeModule`."""
+	# If an `ast.Module` had a logical name that would be reasonable, but Python is firmly opposed
+	# to a reasonable namespace, therefore, Hunter, you were silly to add a `name` field to this
+	# dataclass for building an `ast.Module`.
+	# name: ast_Identifier
+	# Hey, genius, note that this is dataclasses.InitVar
+	ingredientsFunction: dataclasses.InitVar[Sequence[IngredientsFunction] | IngredientsFunction | None] = None
+
+	# `body` attribute of `ast.Module`
+	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
+	prologue: list[ast.stmt] = dataclasses.field(default_factory=list)
+	functions: list[ast.FunctionDef | ast.stmt] = dataclasses.field(default_factory=list)
+	epilogue: list[ast.stmt] = dataclasses.field(default_factory=list)
+	launcher: list[ast.stmt] = dataclasses.field(default_factory=list)
+
+	# parameter for `ast.Module` constructor
+	type_ignores: list[ast.TypeIgnore] = dataclasses.field(default_factory=list)
+
+	def __post_init__(self, ingredientsFunction: Sequence[IngredientsFunction] | IngredientsFunction | None = None) -> None:
+		if ingredientsFunction is not None:
+			if isinstance(ingredientsFunction, IngredientsFunction):
+				self.addIngredientsFunction(ingredientsFunction)
+			else:
+				self.addIngredientsFunction(*ingredientsFunction)
+
+	def addIngredientsFunction(self, *ingredientsFunction: IngredientsFunction) -> None:
+		"""Add one or more `IngredientsFunction`. """
+		listLedgers: list[LedgerOfImports] = []
+		for definition in ingredientsFunction:
+			self.functions.append(definition.FunctionDef)
+			listLedgers.append(definition.imports)
+		self.imports.update(*listLedgers)
+
+	def _makeModuleBody(self) -> list[ast.stmt]:
+		body: list[ast.stmt] = []
+		body.extend(self.imports.makeListAst())
+		body.extend(self.prologue)
+		body.extend(self.functions)
+		body.extend(self.epilogue)
+		body.extend(self.launcher)
+		# TODO `launcher`, if it exists, must start with `if __name__ == '__main__':` and be indented
+		return body
+
+	def export(self) -> ast.Module:
+		"""Create a new `ast.Module` from the ingredients."""
+		return Make.astModule(self._makeModuleBody(), self.type_ignores)
+
+@dataclasses.dataclass
+class Z0Z_RecipeSynthesizeFlow:
+	"""Settings for synthesizing flow."""
+	# TODO consider `IngredientsFlow` or similar
+	# ========================================
+	# Source
+	sourceAlgorithm: ModuleType = getSourceAlgorithm()
+	sourcePython: str = inspect_getsource(sourceAlgorithm)
+	source_astModule: ast.Module = ast.parse(sourcePython)
+	# https://github.com/hunterhogan/mapFolding/issues/4
+	sourceDispatcherCallable: str = theDispatcherCallable
+	sourceSequentialCallable: str = theSourceSequentialCallable
+	sourceDataclassIdentifier: str = theDataclassIdentifier
+	# I still hate the OOP paradigm. But I like this dataclass stuff.
+
+	# ========================================
+	# Filesystem
+	pathPackage: PurePosixPath = PurePosixPath(thePathPackage)
+	fileExtension: str = theFileExtension
+
+	# ========================================
+	# Logical identifiers
+	# meta
+	formatStrModuleSynthetic: str = theFormatStrModuleSynthetic
+	formatStrModuleForCallableSynthetic: str = theFormatStrModuleForCallableSynthetic
+
+	# Package
+	packageName: ast_Identifier = thePackageName
+
+	# Module
+	# https://github.com/hunterhogan/mapFolding/issues/4
+	Z0Z_flowLogicalPathRoot: str = theModuleOfSyntheticModules
+	moduleDispatcher: str = theModuleDispatcherSynthetic
+	logicalPathModuleDataclass: str = theLogicalPathModuleDataclass
+	# https://github.com/hunterhogan/mapFolding/issues/4
+	# `theLogicalPathModuleDispatcherSynthetic` is a problem. It is defined in theSSOT, but it can also be calculated.
+	logicalPathModuleDispatcher: str = theLogicalPathModuleDispatcherSynthetic
+
+	# Function
+	sequentialCallable: str = sourceSequentialCallable
+	dataclassIdentifier: str = sourceDataclassIdentifier
+	dispatcherCallable: str = sourceDispatcherCallable
+
+	# Variable
+	dataclassInstance: str = theDataclassInstance
 
 def extractClassDef(identifier: ast_Identifier, module: ast.Module) -> ast.ClassDef | None:
 	sherpa: list[ast.ClassDef] = []
@@ -423,3 +568,4 @@ def extractFunctionDef(identifier: ast_Identifier, module: ast.Module) -> ast.Fu
 	extractor.visit(module)
 	astClassDef = sherpa[0] if sherpa else None
 	return astClassDef
+

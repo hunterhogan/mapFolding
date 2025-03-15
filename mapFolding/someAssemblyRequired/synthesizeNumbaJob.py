@@ -2,7 +2,8 @@
 from collections.abc import Sequence
 from typing import Any, cast, TYPE_CHECKING
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal
-from mapFolding.someAssemblyRequired import ( ifThis, Make, NodeReplacer, Then, LedgerOfImports, )
+from mapFolding.someAssemblyRequired import ( ifThis, Make, NodeReplacer, Then, )
+from mapFolding.someAssemblyRequired.transformationTools import LedgerOfImports
 from mapFolding.theSSOT import ( ComputationState, FREAKOUT, getPathJobRootDEFAULT, )
 from os import PathLike
 from pathlib import Path
@@ -17,7 +18,7 @@ import numpy
 if TYPE_CHECKING:
 	from mapFolding.someAssemblyRequired.synthesizeDataConverters import makeStateJob
 	from mapFolding.someAssemblyRequired.synthesizeNumba import thisIsNumbaDotJit, decorateCallableWithNumba
-	from mapFolding.someAssemblyRequired.whatWillBe import ParametersNumba, Z0Z_getDatatypeModuleScalar, Z0Z_getDecoratorCallable, Z0Z_setDatatypeModuleScalar, Z0Z_setDecoratorCallable, parametersNumbaDEFAULT
+	from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import ParametersNumba, getDatatypeModuleScalarVESTIGIAL, getDecoratorCallableVESTIGIAL, setDatatypeModuleScalarVESTIGIAL, setDecoratorCallableVESTIGIAL, parametersNumbaDEFAULT
 
 def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, statement: ast.Assign | ast.stmt, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	arrayType = type(arrayTarget)
@@ -62,7 +63,7 @@ def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifi
 
 def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	# parameter: I define moduleConstructor
-	moduleConstructor = Z0Z_getDatatypeModuleScalar()
+	moduleConstructor = getDatatypeModuleScalarVESTIGIAL()
 
 	for statement in FunctionDefTarget.body.copy():
 		if ifThis.isUnpackingAnArray(identifier)(statement):
@@ -91,7 +92,7 @@ def removeAssignmentFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: st
 
 def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	"""Unlike most of the other functions, this is generic: it tries to turn an annotation into a construction call."""
-	moduleConstructor: str = Z0Z_getDatatypeModuleScalar()
+	moduleConstructor: str = getDatatypeModuleScalarVESTIGIAL()
 	for stmt in FunctionDefTarget.body.copy():
 		if isinstance(stmt, ast.AnnAssign):
 			if isinstance(stmt.target, ast.Name) and isinstance(stmt.value, ast.Constant):
@@ -141,7 +142,7 @@ def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget
 
 	datatype: str = 'Z0Z_identifierCountFolds'
 	FunctionDefTarget.returns = ast.Name(id=datatype, ctx=ast.Load())
-	datatypeModuleScalar: str = Z0Z_getDatatypeModuleScalar()
+	datatypeModuleScalar: str = getDatatypeModuleScalarVESTIGIAL()
 	allImports.addImportFromStr(datatypeModuleScalar, datatype)
 
 	FunctionDefTarget.body.append(returnStatement)
@@ -364,7 +365,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
 	if thisIsNumbaDotJit(FunctionDefTarget.decorator_list[0]):
 		astCall: ast.Call = cast(ast.Call, FunctionDefTarget.decorator_list[0])
-		astCall.func = ast.Name(id=Z0Z_getDecoratorCallable(), ctx=ast.Load())
+		astCall.func = ast.Name(id=getDecoratorCallableVESTIGIAL(), ctx=ast.Load())
 		FunctionDefTarget.decorator_list[0] = astCall
 
 	# NOTE add imports, make str, remove unused imports
@@ -411,7 +412,7 @@ if __name__ == '__main__':
 
 	pathFilenameWriteJob = None
 
-	Z0Z_setDatatypeModuleScalar('numba')
-	Z0Z_setDecoratorCallable('jit')
+	setDatatypeModuleScalarVESTIGIAL('numba')
+	setDecoratorCallableVESTIGIAL('jit')
 
 	writeJobNumba(mapShape, algorithmSource, callableTarget, parametersNumba, pathFilenameWriteJob, Z0Z_totalEstimated=totalEstimated)
