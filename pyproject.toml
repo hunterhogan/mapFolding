@@ -48,12 +48,11 @@ license = { 'text' = "CC-BY-NC-4.0" }
 name = "mapFolding"
 optional-dependencies = { testing = [
 	"mypy",
+	"pytest",
 	"pytest-cov",
 	"pytest-env",
 	"pytest-xdist",
-	"pytest",
-	"pyupgrade",
-	"updateCitation",] }
+	"pyupgrade",] }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
@@ -69,9 +68,10 @@ report = { exclude_lines = [
 run = { branch = true, concurrency = [
 	"multiprocessing",
 ], data_file = "tests/coverage/.coverage", omit = [
-	"tests/*",
-	"synthesizeModuleJAX.py",
 	"getLLVMforNoReason.py",
+	"mapFolding/someAssemblyRequired/*",
+	"synthesizeModuleJAX.py",
+	"tests/*",
 	"Z0Z_*",
 ], parallel = true, source = [
 	".",] }
@@ -85,10 +85,10 @@ testpaths = ["tests"]
 [tool.pytest_env]
 NUMBA_JIT_COVERAGE = "1"
 
-# [tool.setuptools.packages.find]
-# where = ["."]
-[tool.setuptools]
-package-dir = {'' = '.'}
+[tool.setuptools.packages.find]
+where = ["."]
+# [tool.setuptools]
+# package-dir = {'' = '.'}
 # packages = ["mapFolding", "mapFolding-stubs"]
 # package-data = { "mapFolding" = ['py.typed'], "mapFolding-stubs" = ['*.pyi'] }
 

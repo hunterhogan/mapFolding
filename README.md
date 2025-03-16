@@ -66,14 +66,14 @@ Available OEIS sequences:
 
 ### 4. **Customizing your algorithm**
 
-- mapFolding\someAssemblyRequired\synthesizeNumbaJob.py (and/or synthesizeNumba____.py, as applicable)
+- Renovations in progress: ~~mapFolding\someAssemblyRequired\synthesizeNumbaJob.py (and/or synthesizeNumba____.py, as applicable)~~
   - Synthesize a Numba-optimized module for a specific mapShape
   - Synthesize _from_ a module in mapFolding\syntheticModules or from any source you select
   - Use the existing transformation options
   - Or create new ways of transforming the algorithm from its source to a specific job
-- mapFolding\someAssemblyRequired\makeJob.py
+- Renovations in progress: ~~mapFolding\someAssemblyRequired\makeJob.py~~
   - Initialize data for a specific mapShape
-- mapFolding\someAssemblyRequired\synthesizeNumbaModules.py (and/or synthesizeNumba____.py, as applicable)
+- Renovations in progress: ~~mapFolding\someAssemblyRequired\synthesizeNumbaModules.py (and/or synthesizeNumba____.py, as applicable)~~
   - Synthesize one or more Numba-optimized modules for parallel or sequential computation
   - Overwrite the modules in mapFolding\syntheticModules or save the module(s) to a custom path
   - Synthesize _from_ the algorithm(s) in mapFolding\theDao.py or from any source you select
@@ -84,7 +84,7 @@ Available OEIS sequences:
   - Modify the algorithms for initializing values, parallel computation, and/or sequential computation
   - Use the modified algorithm(s) in synthesizeNumbaModules.py, above, to create Numba-optimized version(s)
   - Then use a Numba-optimized version in synthesizeNumbaJob.py, above, to create a hyper-optimized version for a specific mapShape
-- mapFolding\theSSOT.py (and/or theSSOTnumba.py and/ or theSSOT____.py, if they exist)
+- mapFolding\theSSOT.py
   - Modify broad settings or find functions to modify broad settings, such as data structures and their data types
   - Create new settings or groups of settings
 - mapFolding\beDRY.py
