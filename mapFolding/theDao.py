@@ -1,5 +1,4 @@
-from concurrent.futures import Future as ConcurrentFuture
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
 from copy import deepcopy
 from mapFolding.theSSOT import ComputationState
 from multiprocessing import set_start_method as multiprocessing_set_start_method

@@ -100,7 +100,7 @@ class RecipeModule:
 			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
 		return pathRoot.joinpath(filename)
 
-	ingredients: IngredientsModule = IngredientsModule()
+	ingredients: IngredientsModule = dataclasses.field(default_factory=IngredientsModule)
 
 	@property
 	def absoluteImport(self) -> ast.Import:
@@ -123,62 +123,10 @@ class RecipeModule:
 		pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False,)
 		writeStringToHere(pythonSource, self.pathFilename)
 
-numbaFlow: Z0Z_RecipeSynthesizeFlow = Z0Z_RecipeSynthesizeFlow()
-
-# https://github.com/hunterhogan/mapFolding/issues/3
-sourceSequentialFunctionDef = extractFunctionDef(numbaFlow.sourceSequentialCallable, numbaFlow.source_astModule)
-if sourceSequentialFunctionDef is None: raise FREAKOUT
-
-numbaCountSequential = RecipeCountingFunction(IngredientsFunction(
-	FunctionDef=sourceSequentialFunctionDef,
-	imports=LedgerOfImports(numbaFlow.source_astModule)
-))
-
-numbaDispatcher = RecipeModule(filenameStem=numbaFlow.moduleDispatcher, fileExtension=numbaFlow.fileExtension, pathPackage=numbaFlow.pathPackage,
-								packageName=numbaFlow.packageName, logicalPathINFIX=numbaFlow.Z0Z_flowLogicalPathRoot)
-
-class ParametersSynthesizeNumbaCallableVESTIGIAL(NamedTuple):
-	callableTarget: str
-	parametersNumba: ParametersNumba | None = None
-	inlineCallables: bool = False
-
-listNumbaCallableDispatcheesVESTIGIAL: list[ParametersSynthesizeNumbaCallableVESTIGIAL] = [
-	ParametersSynthesizeNumbaCallableVESTIGIAL('countParallel', parametersNumbaSuperJitParallel, True),
-	ParametersSynthesizeNumbaCallableVESTIGIAL('countSequential', parametersNumbaSuperJit, True),
-	ParametersSynthesizeNumbaCallableVESTIGIAL('countInitialize', parametersNumbaDEFAULT, True),
-]
-
-_datatypeModuleScalar = ''
-_decoratorCallable = ''
-
-# if numba
-_datatypeModuleScalar = 'numba'
-_decoratorCallable = 'jit'
-Z0Z_autoflake_additional_imports: list[str] = []
-Z0Z_autoflake_additional_imports.append('numba')
-
-def getDatatypeModuleScalarVESTIGIAL() -> str:
-	return _datatypeModuleScalar
-
-def setDatatypeModuleScalarVESTIGIAL(moduleName: str) -> str:
-	global _datatypeModuleScalar
-	_datatypeModuleScalar = moduleName
-	return _datatypeModuleScalar
-
-def getDecoratorCallableVESTIGIAL() -> str:
-	return _decoratorCallable
-
-def setDecoratorCallableVESTIGIAL(decoratorName: str) -> str:
-	global _decoratorCallable
-	_decoratorCallable = decoratorName
-	return _decoratorCallable
-
-# NOTE: the new "Recipe" concept will allow me to remove this
 class YouOughtaKnowVESTIGIAL(NamedTuple):
 	callableSynthesized: str
 	pathFilenameForMe: Path
 	astForCompetentProgrammers: ast.ImportFrom
-
 
 class FunctionInlinerVESTIGIAL(ast.NodeTransformer):
 	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:

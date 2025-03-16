@@ -1,10 +1,25 @@
 from mapFolding.someAssemblyRequired.synthesizeDataConverters import makeDataclassConverter
-from mapFolding.someAssemblyRequired.transformationTools import IngredientsFunction, IngredientsModule
-from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import Make, numbaFlow, numbaDispatcher, numbaCountSequential, RecipeDispatchFunction
+from mapFolding.someAssemblyRequired.transformationTools import IngredientsFunction, IngredientsModule, LedgerOfImports, Make
+from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import Make, RecipeDispatchFunction, RecipeCountingFunction, Z0Z_RecipeSynthesizeFlow, extractFunctionDef, RecipeModule
+from mapFolding.theSSOT import FREAKOUT
 from mapFolding.someAssemblyRequired.synthesizeCountingFunctions import Z0Z_makeCountingFunction
 import ast
 
 if __name__ == '__main__':
+	numbaFlow: Z0Z_RecipeSynthesizeFlow = Z0Z_RecipeSynthesizeFlow()
+
+	# https://github.com/hunterhogan/mapFolding/issues/3
+	# sourceSequentialFunctionDef = extractFunctionDef(numbaFlow.sourceSequentialCallable, numbaFlow.source_astModule)
+	# if sourceSequentialFunctionDef is None: raise FREAKOUT
+
+	# numbaCountSequential = RecipeCountingFunction(IngredientsFunction(
+	# 	FunctionDef=sourceSequentialFunctionDef,
+	# 	imports=LedgerOfImports(numbaFlow.source_astModule)
+	# ))
+
+	numbaDispatcher = RecipeModule(filenameStem=numbaFlow.moduleDispatcher, fileExtension=numbaFlow.fileExtension, pathPackage=numbaFlow.pathPackage,
+									packageName=numbaFlow.packageName, logicalPathINFIX=numbaFlow.Z0Z_flowLogicalPathRoot)
+
 	numbaDispatchFunction = RecipeDispatchFunction(
 		ingredients=IngredientsFunction(Make.astFunctionDef(numbaFlow.dispatcherCallable))
 							, logicalPathModuleDataclass=numbaFlow.logicalPathModuleDataclass
@@ -20,13 +35,9 @@ if __name__ == '__main__':
 
 		, countDispatcherCallable=numbaFlow.dispatcherCallable
 		, logicalPathModuleDispatcher=numbaFlow.logicalPathModuleDispatcher
-		, dataConverterCallable=numbaFlow.dataConverterCallable
+		, dataConverterCallable='flattenData'
 		)
 
-	# initialize with theDao
-	dataInitializationHack = "state=makeStateJob(state.mapShape,writeJob=False)"
-	ingredientsFunctionDataConverter.FunctionDef.body.insert(0, ast.parse(dataInitializationHack).body[0])
-	ingredientsFunctionDataConverter.imports.addImportFromStr('mapFolding.someAssemblyRequired', 'makeStateJob')
 
 	ingredientsSequential = Z0Z_makeCountingFunction(numbaFlow.sequentialCallable
 													, numbaFlow.sourceAlgorithm
@@ -34,9 +45,8 @@ if __name__ == '__main__':
 													, dataclass=False)
 
 	ingredientsModuleDataConverter = IngredientsModule(
-		name=numbaFlow.dataConverterModule,
 		ingredientsFunction=ingredientsFunctionDataConverter,
-		logicalPathINFIX=numbaFlow.Z0Z_flowLogicalPathRoot,
 	)
 
-	ingredientsModuleDataConverter.writeModule()
+	numbaDispatcher.ingredients = ingredientsModuleDataConverter
+	numbaDispatcher.writeModule()

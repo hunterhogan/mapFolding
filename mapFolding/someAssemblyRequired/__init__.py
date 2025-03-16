@@ -13,6 +13,3 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 	Then as Then,
 	Z0Z_executeActionUnlessDescendantMatches as Z0Z_executeActionUnlessDescendantMatches,
 	)
-from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import (
-	listNumbaCallableDispatcheesVESTIGIAL as listNumbaCallableDispatcheesVESTIGIAL,
-	)

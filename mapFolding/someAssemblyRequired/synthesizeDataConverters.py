@@ -10,15 +10,16 @@ from mapFolding.beDRY import ComputationState, outfitCountFolds, validateListDim
 from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
-	Z0Z_executeActionUnlessDescendantMatches,
 	extractClassDef,
 	ifThis,
+	IngredientsFunction,
+	LedgerOfImports,
 	Make,
 	NodeCollector,
 	strDotStrCuzPyStoopid,
 	Then,
+	Z0Z_executeActionUnlessDescendantMatches,
 )
-from mapFolding.someAssemblyRequired.transformationTools import IngredientsFunction, LedgerOfImports
 from mapFolding.theSSOT import getSourceAlgorithm
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
@@ -30,6 +31,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 		instance_Identifier: In the synthesized module/function/scope, the identifier that will be used for the instance.
 	"""
 	module: ast.Module = ast.parse(inspect_getsource(import_module(logicalPathModule)))
+
+	# dataclass = ((next((node for node in module.body if isinstance(node, ast.ClassDef) and node.name == dataclass_Identifier), None)) or None)
 
 	dataclass = extractClassDef(dataclass_Identifier, module)
 
@@ -117,11 +120,11 @@ def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keyw
 			the path to the saved state file if writeJob is True.
 	"""
 	mapShape = validateListDimensions(listDimensions)
-	stateUniversal = outfitCountFolds(mapShape, **keywordArguments)
+	stateUniversal: ComputationState = outfitCountFolds(mapShape, **keywordArguments)
 
 	moduleSource: ModuleType = getSourceAlgorithm()
 	# TODO `countInitialize` is hardcoded
-	stateUniversal: ComputationState = moduleSource.countInitialize(stateUniversal)
+	stateUniversal = moduleSource.countInitialize(stateUniversal)
 
 	if not writeJob:
 		return stateUniversal

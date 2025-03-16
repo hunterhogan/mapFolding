@@ -72,7 +72,7 @@ def decorateCallableWithNumba(FunctionDefTarget: ast.FunctionDef, allImports: Le
 		if thisIsAnyNumbaJitDecorator(decorator):
 			decorator = cast(ast.Call, decorator)
 			if parametersNumba is None:
-				parametersNumbaSherpa: dict[str, Any] = Make.copy_astCallKeywords(decorator)
+				parametersNumbaSherpa: dict[str, Any] = Make.copy_astCallKeywordsOUTDATED(decorator)
 				if (_HunterIsSureThereAreBetterWaysToDoThis := True):
 					if parametersNumbaSherpa:
 						parametersNumba = cast(ParametersNumba, parametersNumbaSherpa)

@@ -1,5 +1,7 @@
 # Notes and observations
 
+A markdown file is an absurd way to track this information in 2025.
+
 ## Key concepts
 
 - A "leaf" is a unit square in the map
@@ -19,7 +21,7 @@ For each leaf:
   - Repeat until the map is completely folded
 - Backtrack when no valid positions remain
 
-## Identifiers
+## Identifiers and their sizes
 
 Assume `listDimensions`:
 
