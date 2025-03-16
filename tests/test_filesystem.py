@@ -3,9 +3,7 @@ from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTot
 from mapFolding.beDRY import validateListDimensions
 from mapFolding.theSSOT import getPathJobRootDEFAULT
 from pathlib import Path
-from typing import Any
 import io
-import numpy
 import pytest
 import unittest.mock
 

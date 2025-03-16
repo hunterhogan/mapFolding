@@ -12,10 +12,6 @@ import pytest
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
-
-# TODO add a test. `C` = number of logical cores available. `n = C + 1`. Ensure that `[2,n]` is computed correctly.
-# Or, probably smarter: limit the number of cores, then run a test with C+1.
-
 def test_countFoldsComputationDivisionsInvalid(mapShapeTestFunctionality: tuple[int, ...]) -> None:
 	standardizedEqualToCallableReturn(ValueError, countFolds, mapShapeTestFunctionality, None, {"wrong": "value"})
 

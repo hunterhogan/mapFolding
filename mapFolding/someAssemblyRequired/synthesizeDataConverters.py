@@ -82,7 +82,7 @@ def makeDataclassConverter(
 	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments = shatter_dataclassesDOTdataclass(logicalPathModuleDataclass, dataclassIdentifier, dataclassInstance)
 
 	ingredientsFunction = IngredientsFunction(
-		FunctionDef = Make.astFunctionDef(name=dataConverterCallable
+		astFunctionDef = Make.astFunctionDef(name=dataConverterCallable
 										, argumentsSpecification=Make.astArgumentsSpecification(args=[Make.astArg(dataclassInstance, astNameDataclass)])
 										, body = cast(list[ast.stmt], list_astAnnAssign)
 										, returns = astNameDataclass
@@ -92,10 +92,10 @@ def makeDataclassConverter(
 
 	whoToCall = Make.astAssign(listTargets=[astTupleForAssignTargetsToFragments]
 										, value=Make.astCall(Make.astName(countDispatcherCallable), args=list_astNameDataclassFragments))
-	ingredientsFunction.FunctionDef.body.append(whoToCall)
+	ingredientsFunction.astFunctionDef.body.append(whoToCall)
 	ingredientsFunction.imports.addImportFromStr(logicalPathModuleDispatcher, countDispatcherCallable)
 
-	ingredientsFunction.FunctionDef.body.append(Make.astReturn(Make.astCall(astNameDataclass, list_astKeywords=list_astKeywordDataclassFragments)))
+	ingredientsFunction.astFunctionDef.body.append(Make.astReturn(Make.astCall(astNameDataclass, list_astKeywords=list_astKeywordDataclassFragments)))
 
 	return ingredientsFunction
 

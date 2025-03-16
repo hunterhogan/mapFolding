@@ -237,7 +237,7 @@ def getNumpyDtypeDefault() -> type[signedinteger[Any]]:
 # =============================================================================
 # The coping way.
 
-class FREAKOUT(Exception): pass
+class raiseIfNoneGitHubIssueNumber3(Exception): pass
 
 # =============================================================================
 # Temporary or transient or something; probably still the wrong way

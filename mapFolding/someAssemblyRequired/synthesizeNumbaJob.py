@@ -4,7 +4,7 @@ from typing import Any, cast, TYPE_CHECKING
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import ( ifThis, Make, NodeReplacer, Then, )
 from mapFolding.someAssemblyRequired.transformationTools import LedgerOfImports
-from mapFolding.theSSOT import ( ComputationState, FREAKOUT, getPathJobRootDEFAULT, )
+from mapFolding.theSSOT import ( ComputationState, raiseIfNoneGitHubIssueNumber3, getPathJobRootDEFAULT, )
 from os import PathLike
 from pathlib import Path
 from types import ModuleType
@@ -84,7 +84,7 @@ def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, iden
 def removeAssignmentFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
 	FunctionDefSherpa: ast.AST | Sequence[ast.AST] | None = NodeReplacer(ifThis.isAnyAssignmentTo(identifier), Then.removeThis).visit(FunctionDefTarget)
 	if not FunctionDefSherpa:
-		raise FREAKOUT("Dude, where's my function?")
+		raise raiseIfNoneGitHubIssueNumber3("Dude, where's my function?")
 	else:
 		FunctionDefTarget = cast(ast.FunctionDef, FunctionDefSherpa)
 	ast.fix_missing_locations(FunctionDefTarget)

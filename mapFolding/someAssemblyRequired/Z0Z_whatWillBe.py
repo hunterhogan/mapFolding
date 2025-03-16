@@ -7,7 +7,6 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 	Z0Z_executeActionUnlessDescendantMatches,
 	extractClassDef,
 	extractFunctionDef,
-	ifThis,
 	Make,
 	NodeCollector,
 	NodeReplacer,
@@ -16,7 +15,7 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 )
 from mapFolding.filesystem import writeStringToHere
 from mapFolding.theSSOT import (
-	FREAKOUT,
+	raiseIfNoneGitHubIssueNumber3,
 	getDatatypePackage,
 	theDataclassIdentifier,
 	theDataclassInstance,
@@ -30,14 +29,9 @@ from mapFolding.theSSOT import (
 from autoflake import fix_code as autoflake_fix_code
 from mapFolding.someAssemblyRequired.ingredientsNumba import parametersNumbaDEFAULT, parametersNumbaSuperJit, parametersNumbaSuperJitParallel, ParametersNumba
 from pathlib import Path, PurePosixPath
-from typing import NamedTuple, cast
+from typing import NamedTuple
 import ast
 import dataclasses
-
-@dataclasses.dataclass
-class RecipeCountingFunction:
-	"""Settings for synthesizing counting functions."""
-	ingredients: IngredientsFunction
 
 @dataclasses.dataclass
 class RecipeDispatchFunction:
@@ -116,7 +110,7 @@ class RecipeModule:
 		astModule = self.ingredients.export()
 		ast.fix_missing_locations(astModule)
 		pythonSource: str = ast.unparse(astModule)
-		if not pythonSource: raise FREAKOUT
+		if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
 		autoflake_additional_imports: list[str] = self.ingredients.imports.exportListModuleNames()
 		if self.packageName:
 			autoflake_additional_imports.append(self.packageName)
@@ -127,37 +121,3 @@ class YouOughtaKnowVESTIGIAL(NamedTuple):
 	callableSynthesized: str
 	pathFilenameForMe: Path
 	astForCompetentProgrammers: ast.ImportFrom
-
-class FunctionInlinerVESTIGIAL(ast.NodeTransformer):
-	def __init__(self, dictionaryFunctions: dict[str, ast.FunctionDef]) -> None:
-		self.dictionaryFunctions: dict[str, ast.FunctionDef] = dictionaryFunctions
-
-	def inlineFunctionBody(self, callableTargetName: str) -> ast.FunctionDef:
-		inlineDefinition: ast.FunctionDef = self.dictionaryFunctions[callableTargetName]
-		# Process nested calls within the inlined function
-		for astNode in ast.walk(inlineDefinition):
-			self.visit(astNode)
-		return inlineDefinition
-
-	def visit_Call(self, node: ast.Call):
-		astCall = self.generic_visit(node)
-		if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryFunctions)(astCall):
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(cast(ast.Name, cast(ast.Call, astCall).func).id)
-
-			if (inlineDefinition and inlineDefinition.body):
-				statementTerminating: ast.stmt = inlineDefinition.body[-1]
-
-				if (isinstance(statementTerminating, ast.Return)
-				and statementTerminating.value is not None):
-					return self.visit(statementTerminating.value)
-				elif isinstance(statementTerminating, ast.Expr):
-					return self.visit(statementTerminating.value)
-				else:
-					return ast.Constant(value=None)
-		return astCall
-
-	def visit_Expr(self, node: ast.Expr):
-		if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryFunctions)(node.value):
-			inlineDefinition: ast.FunctionDef = self.inlineFunctionBody(cast(ast.Name, cast(ast.Call, node.value).func).id)
-			return [self.visit(stmt) for stmt in inlineDefinition.body]
-		return self.generic_visit(node)

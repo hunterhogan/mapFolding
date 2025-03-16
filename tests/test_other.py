@@ -42,8 +42,8 @@ import sys
 	(tuple([3, 5, 7]), [3, 5, 7], (3, 5, 7)),  # tuple sequence type
 ])
 def test_listDimensionsAsParameter(listDimensions: None | list[str] | list[int] | list[float] | list[None] | list[bool] | list[list[int]] | list[complex] | range | tuple[int, ...],
-							   expected_intInnit: type[ValueError] | list[int] | type[TypeError],
-							   expected_validateListDimensions: type[ValueError] | type[NotImplementedError] | tuple[int, ...] | type[TypeError]) -> None:
+							expected_intInnit: type[ValueError] | list[int] | type[TypeError],
+							expected_validateListDimensions: type[ValueError] | type[NotImplementedError] | tuple[int, ...] | type[TypeError]) -> None:
 	"""Test both validateListDimensions and getLeavesTotal with the same inputs."""
 	standardizedEqualToCallableReturn(expected_intInnit, intInnit, listDimensions)
 	standardizedEqualToCallableReturn(expected_validateListDimensions, validateListDimensions, listDimensions)
@@ -56,7 +56,6 @@ def test_getLeavesTotal_edge_cases() -> None:
 	# Input preservation
 	mapShape = (2, 3)
 	standardizedEqualToCallableReturn(6, getLeavesTotal, mapShape)
-	# Remove the lambda entirely for a simpler approach
 	assert mapShape == (2, 3), "Input tuple was modified"
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_intInnit())

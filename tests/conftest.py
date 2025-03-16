@@ -1,5 +1,5 @@
 from collections.abc import Callable, Generator, Sequence
-from mapFolding.theSSOT import getAlgorithmDispatcher, getSourceAlgorithm, getPackageDispatcher, theModuleOfSyntheticModules, FREAKOUT
+from mapFolding.theSSOT import getAlgorithmDispatcher, getSourceAlgorithm, getPackageDispatcher, theModuleOfSyntheticModules, raiseIfNoneGitHubIssueNumber3
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from pathlib import Path
@@ -10,7 +10,6 @@ import random
 import shutil
 import unittest.mock
 import uuid
-# TODO learn how to run tests and coverage analysis without `env = ["NUMBA_DISABLE_JIT=1"]`
 
 # SSOT for test data paths and filenames
 pathDataSamples = Path("tests/dataSamples")
@@ -215,7 +214,7 @@ def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any]) -> Callabl
 			dispatcherSynthetic = stuff
 
 	if dispatcherSynthetic is None:
-		raise FREAKOUT
+		raise raiseIfNoneGitHubIssueNumber3
 
 	dispatcherSpec = importlib.util.spec_from_file_location(dispatcherSynthetic.callableSynthesized, dispatcherSynthetic.pathFilenameForMe)
 	if dispatcherSpec is None:

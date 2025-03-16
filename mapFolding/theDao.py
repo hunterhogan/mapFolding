@@ -220,6 +220,7 @@ def doTheNeedful(state: ComputationState) -> ComputationState:
 				dictionaryConcurrency[indexSherpa] = concurrencyManager.submit(countParallel, stateParallel)
 			for indexSherpa in range(state.taskDivisions):
 				state.foldGroups[indexSherpa] = dictionaryConcurrency[indexSherpa].result().foldGroups[indexSherpa]
-		return state
 	else:
-		return countSequential(state)
+		state = countSequential(state)
+
+	return state

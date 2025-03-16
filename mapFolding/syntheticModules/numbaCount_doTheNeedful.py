@@ -27,3 +27,30 @@ def flattenData(state: ComputationState) -> ComputationState:
     taskIndex: DatatypeLeavesTotal = state.taskIndex
     mapShape, leavesTotal, taskDivisions, concurrencyLimit, connectionGraph, dimensionsTotal, countDimensionsGapped, dimensionsUnconstrained, gapRangeStart, gapsWhere, leafAbove, leafBelow, foldGroups, foldsTotal, gap1ndex, gap1ndexCeiling, groupsOfFolds, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, taskIndex = doTheNeedful(mapShape, leavesTotal, taskDivisions, concurrencyLimit, connectionGraph, dimensionsTotal, countDimensionsGapped, dimensionsUnconstrained, gapRangeStart, gapsWhere, leafAbove, leafBelow, foldGroups, foldsTotal, gap1ndex, gap1ndexCeiling, groupsOfFolds, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, taskIndex)
     return ComputationState(mapShape=mapShape, leavesTotal=leavesTotal, taskDivisions=taskDivisions, concurrencyLimit=concurrencyLimit, countDimensionsGapped=countDimensionsGapped, dimensionsUnconstrained=dimensionsUnconstrained, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, foldGroups=foldGroups, foldsTotal=foldsTotal, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, groupsOfFolds=groupsOfFolds, indexDimension=indexDimension, indexLeaf=indexLeaf, indexMiniGap=indexMiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, taskIndex=taskIndex)
+
+def countSequential(state: ComputationState) -> ComputationState:
+    while activeLeafGreaterThan0(state):
+        if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
+            if activeLeafGreaterThanLeavesTotal(state):
+                state.groupsOfFolds += 1
+            else:
+                state = initializeVariablesToFindGaps(state)
+                while loopUpToDimensionsTotal(state):
+                    state = initializeLeafConnectee(state)
+                    if activeLeafConnectedToItself(state):
+                        state = decrementDimensionsUnconstrained(state)
+                    else:
+                        while loopingLeavesConnectedToActiveLeaf(state):
+                            state = countGaps(state)
+                            state = updateLeafConnectee(state)
+                    state = incrementIndexDimension(state)
+                state = initializeIndexMiniGap(state)
+                while loopingToActiveGapCeiling(state):
+                    state = filterCommonGaps(state)
+                    state = incrementIndexMiniGap(state)
+        while noGapsHere(state):
+            state = undoLastLeafPlacement(state)
+        if thereIsAnActiveLeaf(state):
+            state = insertLeafAtGap(state)
+    state.foldGroups[state.taskIndex] = state.groupsOfFolds
+    return state

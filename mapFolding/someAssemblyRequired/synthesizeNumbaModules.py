@@ -11,7 +11,7 @@ import types
 def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCallableVESTIGIAL] = listNumbaCallableDispatcheesVESTIGIAL, callableDispatcher: bool = True, algorithmSource: types.ModuleType = getSourceAlgorithm(), relativePathWrite: str | PathLike[str] = theModuleOfSyntheticModules, filenameModuleWrite: str = 'filenameModuleSyntheticWrite', formatFilenameWrite: str = 'formatStrFilenameForCallableSynthetic'):
 	from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import ParametersSynthesizeNumbaCallableVESTIGIAL, listNumbaCallableDispatcheesVESTIGIAL
 	from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import Z0Z_autoflake_additional_imports
-	from mapFolding.theSSOT import FREAKOUT
+	from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
 	from mapFolding.theSSOT import thePathPackage, getDatatypePackage
 	from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import FunctionInliner, YouOughtaKnow, ast_Identifier
 	from pathlib import Path
@@ -55,7 +55,7 @@ def makeFlowNumbaOptimized(listCallablesInline: list[ParametersSynthesizeNumbaCa
 	astModule = ast.Module(body=cast(list[ast.stmt], listAstImports + listFunctionDefs), type_ignores=[])
 	ast.fix_missing_locations(astModule)
 	pythonSource: str = ast.unparse(astModule)
-	if not pythonSource: raise FREAKOUT
+	if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
 	pythonSource = autoflake.fix_code(pythonSource, additional_imports)
 
 	pathWrite: Path = thePathPackage / relativePathWrite
