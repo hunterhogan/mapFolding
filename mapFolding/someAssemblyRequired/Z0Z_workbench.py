@@ -15,6 +15,8 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
 import ast
 
+# Would `libCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
+
 class FunctionInliner(ast.NodeTransformer):
 	def __init__(self, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> None:
 		self.dictionaryReplacementStatements = dictionaryReplacementStatements
@@ -47,10 +49,6 @@ def Z0Z_main() -> None:
 	numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 	dictionaryReplacementStatements = makeDictionaryReplacementStatements(numbaFlow.source_astModule)
 
-	(astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign,
-	list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments) = shatter_dataclassesDOTdataclass(
-		numbaFlow.logicalPathModuleDataclass, numbaFlow.dataclassIdentifier, numbaFlow.dataclassInstance)
-
 	sourceDispatcherFunctionDef = extractFunctionDef(numbaFlow.sourceDispatcherCallable, numbaFlow.source_astModule)
 	if not sourceDispatcherFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	ingredientsDispatcherFunctionDef = IngredientsFunction(sourceDispatcherFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
@@ -58,7 +56,6 @@ def Z0Z_main() -> None:
 	sourceInitializeFunctionDef = extractFunctionDef(numbaFlow.sourceInitializeCallable, numbaFlow.source_astModule)
 	if not sourceInitializeFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	FunctionInliner(dictionaryReplacementStatements).visit(sourceInitializeFunctionDef)
-	# FunctionInliner(dictionaryReplacementStatements).visit(sourceInitializeFunctionDef)
 	ingredientsInitializeFunctionDef = IngredientsFunction(sourceInitializeFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
 
 	sourceParallelFunctionDef = extractFunctionDef(numbaFlow.sourceParallelCallable, numbaFlow.source_astModule)

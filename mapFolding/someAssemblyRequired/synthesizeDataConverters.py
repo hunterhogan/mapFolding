@@ -22,6 +22,8 @@ from mapFolding.someAssemblyRequired import (
 )
 from mapFolding.theSSOT import getSourceAlgorithm
 
+# Would `libCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
+
 def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
 									) -> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], list[ast.Name], list[ast.keyword], ast.Tuple]:
 	"""
@@ -31,8 +33,6 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 		instance_Identifier: In the synthesized module/function/scope, the identifier that will be used for the instance.
 	"""
 	module: ast.Module = ast.parse(inspect_getsource(import_module(logicalPathModule)))
-
-	# dataclass = ((next((node for node in module.body if isinstance(node, ast.ClassDef) and node.name == dataclass_Identifier), None)) or None)
 
 	dataclass = extractClassDef(dataclass_Identifier, module)
 

@@ -11,10 +11,13 @@ Aspirations:
 """
 from collections import defaultdict
 from collections.abc import Callable, Container, Generator, Mapping, Sequence
+from autoflake import fix_code as autoflake_fix_code
 from contextlib import contextmanager
 from inspect import getsource as inspect_getsource
+from mapFolding.filesystem import writeStringToHere
 from mapFolding.theSSOT import (
 	getSourceAlgorithm,
+	raiseIfNoneGitHubIssueNumber3,
 	theDataclassIdentifier,
 	theDataclassInstance,
 	theDispatcherCallable,
@@ -52,7 +55,7 @@ namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.ab
 Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
 """
 
-# TODO learn whether libcst can help
+# Would `libCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
 
 nodeType = TypeVar('nodeType', bound=ast.AST)
 ast_Identifier: TypeAlias = str
@@ -96,7 +99,6 @@ class NodeReplacer(Generic[nodeType], ast.NodeTransformer):
 		return super().visit(node)
 
 class ifThis:
-	# Does this work?
 	@staticmethod
 	def nodeHasNoDescendantWho(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		"""Create a predicate that returns True if no descendant of the node matches the given predicate."""
@@ -113,7 +115,6 @@ class ifThis:
 		"""Create a predicate that returns True if any descendant of the node matches the given predicate."""
 		return lambda node: not ifThis.nodeHasNoDescendantWho(predicate)(node)
 
-	# Does this work?
 	@staticmethod
 	def conditionButNotMyDescendants(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		"""Create a predicate that returns True if the node matches but none of its descendants match the predicate."""
@@ -521,7 +522,7 @@ class IngredientsFunction:
 @dataclasses.dataclass
 class IngredientsModule:
 	"""Everything necessary to create one _logical_ `ast.Module` should be here.
-	Extrinsic qualities should be handled externally, such as with `RecipeModule`."""
+	Extrinsic qualities should _probably_ be handled externally."""
 	# If an `ast.Module` had a logical name that would be reasonable, but Python is firmly opposed
 	# to a reasonable namespace, therefore, Hunter, you were silly to add a `name` field to this
 	# dataclass for building an `ast.Module`.
@@ -672,3 +673,67 @@ def Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.A
 		if not Z0Z_descendantContainsMatchingNode(node, exclusionPredicate):
 			actionFunction(node)
 	return wrappedAction
+
+# This is not a dataclass: this is a function.
+@dataclasses.dataclass
+class RecipeModuleSalvageForParts:
+	# Physical namespace
+	filenameStem: str
+	fileExtension: str = theFileExtension
+	pathPackage: PurePosixPath = PurePosixPath(thePathPackage)
+
+	# Physical and logical namespace
+	packageName: ast_Identifier | None= thePackageName
+	logicalPathINFIX: ast_Identifier | strDotStrCuzPyStoopid | None = None # module names other than the module itself and the package name
+
+	def _getLogicalPathParent(self) -> str | None:
+		listModules: list[ast_Identifier] = []
+		if self.packageName:
+			listModules.append(self.packageName)
+		if self.logicalPathINFIX:
+			listModules.append(self.logicalPathINFIX)
+		if listModules:
+			return '.'.join(listModules)
+		return None
+
+	def _getLogicalPathAbsolute(self) -> str:
+		listModules: list[ast_Identifier] = []
+		logicalPathParent: str | None = self._getLogicalPathParent()
+		if logicalPathParent:
+			listModules.append(logicalPathParent)
+		listModules.append(self.filenameStem)
+		return '.'.join(listModules)
+
+	@property
+	def pathFilename(self):
+		""" `PurePosixPath` ensures os-independent formatting of the `dataclass.field` value,
+		but you must convert to `Path` to perform filesystem operations."""
+		pathRoot: PurePosixPath = self.pathPackage
+		filename: str = self.filenameStem + self.fileExtension
+		if self.logicalPathINFIX:
+			whyIsThisStillAThing: list[str] = self.logicalPathINFIX.split('.')
+			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
+		return pathRoot.joinpath(filename)
+
+	ingredients: IngredientsModule = dataclasses.field(default_factory=IngredientsModule)
+
+	@property
+	def absoluteImport(self) -> ast.Import:
+		return Make.astImport(self._getLogicalPathAbsolute())
+
+	@property
+	def absoluteImportFrom(self) -> ast.ImportFrom:
+		""" `from . import theModule` """
+		logicalPathParent: str = self._getLogicalPathParent() or '.'
+		return Make.astImportFrom(logicalPathParent, [Make.astAlias(self.filenameStem)])
+
+	def writeModule(self) -> None:
+		astModule = self.ingredients.export()
+		ast.fix_missing_locations(astModule)
+		pythonSource: str = ast.unparse(astModule)
+		if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
+		autoflake_additional_imports: list[str] = self.ingredients.imports.exportListModuleNames()
+		if self.packageName:
+			autoflake_additional_imports.append(self.packageName)
+		pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False,)
+		writeStringToHere(pythonSource, self.pathFilename)

@@ -17,7 +17,7 @@ import inspect
 import numpy
 if TYPE_CHECKING:
 	from mapFolding.someAssemblyRequired.synthesizeDataConverters import makeStateJob
-	from mapFolding.someAssemblyRequired.synthesizeNumba import thisIsNumbaDotJit, decorateCallableWithNumba
+	from mapFolding.someAssemblyRequired.synthesizeNumbaVESTIGIAL import thisIsNumbaDotJit, decorateCallableWithNumba
 	from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import ParametersNumba, getDatatypeModuleScalarVESTIGIAL, getDecoratorCallableVESTIGIAL, setDatatypeModuleScalarVESTIGIAL, setDecoratorCallableVESTIGIAL, parametersNumbaDEFAULT
 
 def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, statement: ast.Assign | ast.stmt, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
