@@ -2,7 +2,7 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 	IngredientsFunction,
 	IngredientsModule,
 	LedgerOfImports,
-	Z0Z_RecipeSynthesizeFlow,
+	RecipeSynthesizeFlow,
 	ast_Identifier,
 	Z0Z_executeActionUnlessDescendantMatches,
 	extractClassDef,

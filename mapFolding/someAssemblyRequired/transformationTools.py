@@ -61,6 +61,7 @@ strORlist_ast_type_paramORintORNone: TypeAlias = Any
 list_ast_type_paramORintORNone: TypeAlias = Any
 strORintORNone: TypeAlias = Any
 astHasDOTname: TypeAlias = ast.FunctionDef | ast.ClassDef | ast.AsyncFunctionDef
+astMosDef = TypeVar('astMosDef', bound=astHasDOTname)
 
 @contextmanager
 def listAsNode(ImaList: list[ast.stmt]) -> Generator[ast.Module, None, None]:
@@ -73,7 +74,7 @@ def listAsNode(ImaList: list[ast.stmt]) -> Generator[ast.Module, None, None]:
 
 class NodeCollector(Generic[nodeType], ast.NodeVisitor):
 	"""A node visitor that collects data via one or more actions when a predicate is met."""
-	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: list[Callable[[nodeType], None]]) -> None:
+	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: list[Callable[[nodeType], Any]]) -> None:
 		self.findThis = findThis
 		self.doThat = doThat
 
@@ -84,15 +85,15 @@ class NodeCollector(Generic[nodeType], ast.NodeVisitor):
 		self.generic_visit(node)
 
 class NodeReplacer(Generic[nodeType], ast.NodeTransformer):
-    """A node transformer that replaces or removes AST nodes based on a condition."""
-    def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: Callable[[nodeType], ast.AST | Sequence[ast.AST] | None]) -> None:
-        self.findThis = findThis
-        self.doThat = doThat
+	"""A node transformer that replaces or removes AST nodes based on a condition."""
+	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: Callable[[nodeType], ast.AST | Sequence[ast.AST] | None]) -> None:
+		self.findThis = findThis
+		self.doThat = doThat
 
-    def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
-        if self.findThis(node):
-            return self.doThat(cast(nodeType, node))
-        return super().visit(node)
+	def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
+		if self.findThis(node):
+			return self.doThat(cast(nodeType, node))
+		return super().visit(node)
 
 class ifThis:
 	# Does this work?
@@ -146,7 +147,7 @@ class ifThis:
 
 	@staticmethod
 	def CallDoesNotCallItselfAndNameDOTidIsIn(container: Container[ast_Identifier]) -> Callable[[ast.AST], TypeGuard[ast.Call]]:
-		return lambda node: (ifThis.isCall(node) and ifThis.isName(node.func) and ifThis.ast_IdentifierIsIn(container)(node.func.id) and ifThis.CallDoesNotCallItself("", node.func.id)(node)) # type: ignore[reportReturnType, return-value]
+		return lambda node: ifThis.isCall(node) and ifThis.isName(node.func) and ifThis.ast_IdentifierIsIn(container)(node.func.id) and ifThis.CallDoesNotCallItself("", node.func.id)(node) # type: ignore[reportReturnType, return-value]
 
 	@staticmethod
 	def CallReallyIs(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call]]:
@@ -189,6 +190,10 @@ class ifThis:
 		return ifThis.anyOf(ifThis.isAssignOnlyTo(identifier), ifThis.isAnnAssignTo(identifier), ifThis.isAugAssignTo(identifier))
 
 	@staticmethod
+	def isAnyCompare(node: ast.AST) -> TypeGuard[ast.Compare] | TypeGuard[ast.BoolOp]:
+		return ifThis.isCompare(node) or ifThis.isBoolOp(node)
+
+	@staticmethod
 	def isAssign(node: ast.AST) -> TypeGuard[ast.Assign]:
 		return isinstance(node, ast.Assign)
 
@@ -207,6 +212,10 @@ class ifThis:
 	@staticmethod
 	def isAugAssignTo(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.AugAssign]]:
 		return lambda node: ifThis.isAugAssign(node) and ifThis.NameReallyIs(identifier)(node.target) # type: ignore[reportReturnType, return-value]
+
+	@staticmethod
+	def isBoolOp(node: ast.AST) -> TypeGuard[ast.BoolOp]:
+		return isinstance(node, ast.BoolOp)
 
 	@staticmethod
 	def isCall(node: ast.AST) -> TypeGuard[ast.Call]:
@@ -231,6 +240,10 @@ class ifThis:
 	@staticmethod
 	def isClassDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.ClassDef]]:
 		return lambda node: ifThis.isClassDef(node) and node.name == identifier # type: ignore[reportReturnType, return-value]
+
+	@staticmethod
+	def isCompare(node: ast.AST) -> TypeGuard[ast.Compare]:
+		return isinstance(node, ast.Compare)
 
 	@staticmethod
 	def isConstant(node: ast.AST) -> TypeGuard[ast.Constant]:
@@ -277,8 +290,12 @@ class ifThis:
 		return isinstance(node, ast.Return)
 
 	@staticmethod
-	def isReturnWithValue(node: ast.AST) -> TypeGuard[ast.Return]:
-		return ifThis.isReturn(node) and node.value is not None
+	def isReturnAnyCompare(node: ast.AST) -> TypeGuard[ast.Return]:
+		return ifThis.isReturn(node) and node.value is not None and ifThis.isAnyCompare(node.value)
+
+	@staticmethod
+	def isReturnUnaryOp(node: ast.AST) -> TypeGuard[ast.Return]:
+		return ifThis.isReturn(node) and node.value is not None and ifThis.isUnaryOp(node.value)
 
 	@staticmethod
 	def isSubscript(node: ast.AST) -> TypeGuard[ast.Subscript]:
@@ -293,8 +310,20 @@ class ifThis:
 		return lambda node: ifThis.isSubscript(node) and ifThis.isName_Identifier(identifier)(node.value) and ifThis.isName_Identifier(sliceIdentifier)(node.slice) # type: ignore[reportReturnType, return-value]
 
 	@staticmethod
+	def isUnaryOp(node: ast.AST) -> TypeGuard[ast.UnaryOp]:
+		return isinstance(node, ast.UnaryOp)
+
+	@staticmethod
 	def NameReallyIs(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
 		return ifThis.anyOf(ifThis.isName_Identifier(identifier), ifThis.isSubscript_Identifier(identifier))
+
+	@staticmethod
+	def OnlyReturnAnyCompare(astFunctionDef: ast.AST) -> TypeGuard[ast.FunctionDef]:
+		return ifThis.isFunctionDef(astFunctionDef) and len(astFunctionDef.body) == 1 and ifThis.isReturnAnyCompare(astFunctionDef.body[0])
+
+	@staticmethod
+	def OnlyReturnUnaryOp(astFunctionDef: ast.AST) -> TypeGuard[ast.FunctionDef]:
+		return ifThis.isFunctionDef(astFunctionDef) and len(astFunctionDef.body) == 1 and ifThis.isReturnUnaryOp(astFunctionDef.body[0])
 
 class Make:
 	@staticmethod
@@ -465,8 +494,12 @@ class Then:
 	def replaceWith(astStatement: ast.stmt) -> Callable[[ast.stmt], ast.stmt]:
 		return lambda _replaceMe: astStatement
 	@staticmethod
-	def updateThis(dictionaryOf__Def: Mapping[ast_Identifier, astHasDOTname]) -> Callable[[astHasDOTname], None]:
-		return lambda node: dict(dictionaryOf__Def).update({node.name: node})
+	# def updateThis(dictionaryOf_astMosDef: dict[str, astMosDef]) -> Callable[[astMosDef], None]:
+	def updateThis(dictionaryOf_astMosDef: dict[ast_Identifier, astMosDef]) -> Callable[[astMosDef], astMosDef]:
+	# def updateThis(dictionaryOf_astMosDef: dict[ast_Identifier, ast.FunctionDef] | dict[ast_Identifier, ast.ClassDef] | dict[ast_Identifier, ast.AsyncFunctionDef]) -> Callable[[ast.FunctionDef], None] | Callable[[ast.ClassDef], None] | Callable[[ast.AsyncFunctionDef], None]:
+	# def updateThis(dictionaryOf_astMosDef: dict[ast_Identifier, ast.FunctionDef] | dict[ast_Identifier, ast.ClassDef] | dict[ast_Identifier, ast.AsyncFunctionDef]) -> Callable[[ast.FunctionDef], astHasDOTname] | Callable[[ast.ClassDef], astHasDOTname] | Callable[[ast.AsyncFunctionDef], astHasDOTname]:
+		return lambda node: dictionaryOf_astMosDef.setdefault(node.name, node)
+		# return lambda node: dictionaryOf_astMosDef.update({node.name, node})
 	@staticmethod
 	def Z0Z_ledger(logicalPath: strDotStrCuzPyStoopid, ledger: LedgerOfImports) -> Callable[[ast.AST], None]:
 		return lambda node: ledger.addImportFromStr(logicalPath, cast(ast.Name, cast(ast.AnnAssign, node).annotation).id)
@@ -538,7 +571,7 @@ class IngredientsModule:
 		return Make.astModule(self._makeModuleBody(), self.type_ignores)
 
 @dataclasses.dataclass
-class Z0Z_RecipeSynthesizeFlow:
+class RecipeSynthesizeFlow:
 	"""Settings for synthesizing flow."""
 	# ========================================
 	# Source
@@ -604,6 +637,19 @@ def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.Fu
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
 	NodeCollector(ifThis.isFunctionDef, [Then.updateThis(dictionaryFunctionDef)]).visit(module)
 	return dictionaryFunctionDef
+
+def makeDictionaryReplacementStatements(module: ast.Module) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
+	"""Return a dictionary of function names and their replacement statements."""
+	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
+	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}
+	for name, astFunctionDef in dictionaryFunctionDef.items():
+		if ifThis.OnlyReturnAnyCompare(astFunctionDef):
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
+		elif ifThis.OnlyReturnUnaryOp(astFunctionDef):
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
+		else:
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0:-1]
+	return dictionaryReplacementStatements
 
 def Z0Z_descendantContainsMatchingNode(node: ast.AST, predicateFunction: Callable[[ast.AST], bool]) -> bool:
 	"""Return True if any descendant of the node (or the node itself) matches the predicateFunction."""
