@@ -9,14 +9,18 @@ from mapFolding.someAssemblyRequired import (
 	LedgerOfImports,
 	Make,
 	makeDictionaryReplacementStatements,
+	NodeCollector,
+	NodeReplacer,
 	RecipeSynthesizeFlow,
 	strDotStrCuzPyStoopid,
+	Then,
 )
+from mapFolding.someAssemblyRequired.synthesizeDataConverters import shatter_dataclassesDOTdataclass
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
 from pathlib import Path
 import ast
 
-# Would `libCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
+# Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
 
 def Z0Z_alphaTest_putModuleOnDisk(ingredients: IngredientsModule, recipeFlow: RecipeSynthesizeFlow):
 	# Physical namespace
@@ -76,57 +80,182 @@ def Z0Z_alphaTest_putModuleOnDisk(ingredients: IngredientsModule, recipeFlow: Re
 
 	writeModule()
 
-class FunctionInliner(ast.NodeTransformer):
-	def __init__(self, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> None:
-		self.dictionaryReplacementStatements = dictionaryReplacementStatements
+def inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> ast.FunctionDef:
+	class FunctionInliner(ast.NodeTransformer):
+		def __init__(self, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> None:
+			self.dictionaryReplacementStatements = dictionaryReplacementStatements
 
-	def generic_visit(self, node: ast.AST) -> ast.AST:
-		"""Visit all nodes and replace them if necessary."""
-		return super().generic_visit(node)
+		def generic_visit(self, node: ast.AST) -> ast.AST:
+			"""Visit all nodes and replace them if necessary."""
+			return super().generic_visit(node)
 
-	def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.stmt]:
-		"""Visit Expr nodes and replace value if it's a function call in our dictionary."""
-		if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-			return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore[attr-defined]
-		return node
+		def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.stmt]:
+			"""Visit Expr nodes and replace value if it's a function call in our dictionary."""
+			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
+				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore[attr-defined]
+			return node
 
-	def visit_Assign(self, node: ast.Assign) -> ast.AST | list[ast.stmt]:
-		"""Visit Assign nodes and replace value if it's a function call in our dictionary."""
-		if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-			return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore[attr-defined]
-		return node
+		def visit_Assign(self, node: ast.Assign) -> ast.AST | list[ast.stmt]:
+			"""Visit Assign nodes and replace value if it's a function call in our dictionary."""
+			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
+				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore[attr-defined]
+			return node
 
-	def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
-		"""Replace call nodes with their replacement statements if they're in the dictionary."""
-		if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
-			replacement = self.dictionaryReplacementStatements[node.func.id] # type: ignore[attr-defined]
-			if not isinstance(replacement, list): # If the replacement is a list, we cannot return it directly in an expression context We handle this case in the parent node visitors (Expr, Assign, etc.)
-				return replacement
-		return node
+		def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
+			"""Replace call nodes with their replacement statements if they're in the dictionary."""
+			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
+				replacement = self.dictionaryReplacementStatements[node.func.id] # type: ignore[attr-defined]
+				if not isinstance(replacement, list):
+					return replacement
+			return node
+
+	import copy
+	keepGoing = True
+	ImaInlineFunction = copy.deepcopy(astFunctionDef)
+	while keepGoing:
+		ImaInlineFunction = copy.deepcopy(astFunctionDef)
+		FunctionInliner(copy.deepcopy(dictionaryReplacementStatements)).visit(ImaInlineFunction)
+		if ast.unparse(ImaInlineFunction) == ast.unparse(astFunctionDef):
+			keepGoing = False
+		else:
+			astFunctionDef = copy.deepcopy(ImaInlineFunction)
+	return ImaInlineFunction
+
+def replaceMatchingASTnodes(astTree: ast.AST, replacementMap: list[tuple[ast.AST, ast.AST]]) -> ast.AST:
+	"""Replace matching AST nodes using type-specific visitors.
+
+	Parameters:
+		astTree: The AST to transform
+		replacementMap: List of (find, replace) node pairs
+
+	Returns:
+		The transformed AST
+	"""
+	class TargetedNodeReplacer(ast.NodeTransformer):
+		def __init__(self, replacementMap: list[tuple[ast.AST, ast.AST]]) -> None:
+			# Group replacements by node type for more efficient lookups
+			self.replacementByType: dict[type[ast.AST], list[tuple[ast.AST, ast.AST]]] = {}
+			for findNode, replaceNode in replacementMap:
+				nodeType = type(findNode)
+				if nodeType not in self.replacementByType:
+					self.replacementByType[nodeType] = []
+				self.replacementByType[nodeType].append((findNode, replaceNode))
+
+		def visit(self, node: ast.AST) -> ast.AST:
+			"""Check if this node should be replaced before continuing traversal."""
+			nodeType = type(node)
+			if nodeType in self.replacementByType:
+				for findNode, replaceNode in self.replacementByType[nodeType]:
+					if self.nodesMatchStructurally(node, findNode):
+						return replaceNode
+			return super().visit(node)
+
+		def nodesMatchStructurally(self, node1: ast.AST | list, node2: ast.AST | list) -> bool:
+			"""Compare two AST nodes structurally, ignoring position information."""
+			# Different types can't be equal
+			if type(node1) != type(node2):
+				return False
+
+			if isinstance(node1, ast.AST):
+				# Compare fields that matter for structural equality
+				fields = [f for f in node1._fields
+							if f not in ('lineno', 'col_offset', 'end_lineno', 'end_col_offset', 'ctx')]
+
+				for field in fields:
+					smurf1 = getattr(node1, field, None)
+					smurf2 = getattr(node2, field, None)
+
+					if isinstance(smurf1, (ast.AST, list)) and isinstance(smurf2, (ast.AST, list)):
+						if not self.nodesMatchStructurally(smurf1, smurf2):
+							return False
+					elif smurf1 != smurf2:
+						return False
+				return True
+
+			elif isinstance(node1, list) and isinstance(node2, list):
+				if len(node1) != len(node2):
+					return False
+				return all(self.nodesMatchStructurally(x, y) for x, y in zip(node1, node2))
+
+			else:
+				# Direct comparison for non-AST objects (strings, numbers, etc.)
+				return node1 == node2
+
+	import copy
+	keepGoing = True
+	astResult = copy.deepcopy(astTree)
+
+	while keepGoing:
+		astBeforeChange = copy.deepcopy(astResult)
+		TargetedNodeReplacer(copy.deepcopy(replacementMap)).visit(astResult)
+
+		# Check if we've reached a fixed point (no more changes)
+		if ast.unparse(astResult) == ast.unparse(astBeforeChange):
+			keepGoing = False
+
+	return astResult
 
 def Z0Z_main() -> None:
 	numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 	dictionaryReplacementStatements = makeDictionaryReplacementStatements(numbaFlow.source_astModule)
 
-	sourceDispatcherFunctionDef = extractFunctionDef(numbaFlow.sourceDispatcherCallable, numbaFlow.source_astModule)
-	if not sourceDispatcherFunctionDef: raise raiseIfNoneGitHubIssueNumber3
-	ingredientsDispatcherFunctionDef = IngredientsFunction(sourceDispatcherFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	(astName_dataclassesDOTdataclass, ledgerDataclassANDFragments, listAnnAssign4DataclassUnpack,
+		astTuple4AssignTargetsToFragments, listNameDataclassFragments4Parameters, list_ast_argAnnotated4ArgumentsSpecification,
+		astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns, astAssignDataclassRepack, list_keyword4DataclassInitialization) = shatter_dataclassesDOTdataclass(
+			numbaFlow.logicalPathModuleDataclass, numbaFlow.sourceDataclassIdentifier, numbaFlow.sourceDataclassInstance)
 
-	sourceInitializeFunctionDef = extractFunctionDef(numbaFlow.sourceInitializeCallable, numbaFlow.source_astModule)
-	if not sourceInitializeFunctionDef: raise raiseIfNoneGitHubIssueNumber3
-	FunctionInliner(dictionaryReplacementStatements).visit(sourceInitializeFunctionDef)
-	ingredientsInitializeFunctionDef = IngredientsFunction(sourceInitializeFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	sourcePython = numbaFlow.sourceDispatcherCallable
+	astFunctionDef = extractFunctionDef(sourcePython, numbaFlow.source_astModule)
+	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
+	ingredientsDispatcherFunctionDef = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	ingredientsDispatcherFunctionDef.imports.update(ledgerDataclassANDFragments)
+	NodeReplacer(
+		findThis = ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.sourceInitializeCallable)
+		, doThat = Then.insertThisBelow(listAnnAssign4DataclassUnpack)
+			).visit(ingredientsDispatcherFunctionDef.astFunctionDef)
+	NodeReplacer(
+		findThis = ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.sourceSequentialCallable)
+		, doThat = Then.replaceWith(Make.astAssign(listTargets=[astTuple4AssignTargetsToFragments], value=Make.astCall(Make.astName(numbaFlow.sequentialCallable), listNameDataclassFragments4Parameters)))
+			).visit(ingredientsDispatcherFunctionDef.astFunctionDef)
+	NodeReplacer(
+		findThis = ifThis.isReturn
+		, doThat = Then.insertThisAbove([astAssignDataclassRepack])
+			).visit(ingredientsDispatcherFunctionDef.astFunctionDef)
 
-	sourceParallelFunctionDef = extractFunctionDef(numbaFlow.sourceParallelCallable, numbaFlow.source_astModule)
-	if not sourceParallelFunctionDef: raise raiseIfNoneGitHubIssueNumber3
-	FunctionInliner(dictionaryReplacementStatements).visit(sourceParallelFunctionDef)
-	ingredientsParallelFunctionDef = IngredientsFunction(sourceParallelFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	# TODO remember that `sequentialCallable` and `sourceSequentialCallable` are two different values.
+	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 
-	sourceSequentialFunctionDef = extractFunctionDef(numbaFlow.sourceSequentialCallable, numbaFlow.source_astModule)
-	if not sourceSequentialFunctionDef: raise raiseIfNoneGitHubIssueNumber3
-	FunctionInliner(dictionaryReplacementStatements).visit(sourceSequentialFunctionDef)
-	FunctionInliner(dictionaryReplacementStatements).visit(sourceSequentialFunctionDef)
-	ingredientsSequentialFunctionDef = IngredientsFunction(sourceSequentialFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	sourcePython = numbaFlow.sourceInitializeCallable
+	astFunctionDef = extractFunctionDef(sourcePython, numbaFlow.source_astModule)
+	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
+	astFunctionDef = inlineThisFunctionWithTheseValues(astFunctionDef, dictionaryReplacementStatements)
+	ingredientsInitializeFunctionDef = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+
+	sourcePython = numbaFlow.sourceParallelCallable
+	astFunctionDef = extractFunctionDef(sourcePython, numbaFlow.source_astModule)
+	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
+	astFunctionDef = inlineThisFunctionWithTheseValues(astFunctionDef, dictionaryReplacementStatements)
+	ingredientsParallelFunctionDef = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+
+	sourcePython = numbaFlow.sourceSequentialCallable
+	astFunctionDef = extractFunctionDef(sourcePython, numbaFlow.source_astModule)
+	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
+	astFunctionDef = inlineThisFunctionWithTheseValues(astFunctionDef, dictionaryReplacementStatements)
+	ingredientsSequentialFunctionDef = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	ingredientsSequentialFunctionDef.astFunctionDef.name = numbaFlow.sequentialCallable
+	ingredientsSequentialFunctionDef.astFunctionDef.args = Make.astArgumentsSpecification(args=list_ast_argAnnotated4ArgumentsSpecification)
+	ingredientsSequentialFunctionDef.astFunctionDef.returns = astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns
+	NodeReplacer(
+		findThis = ifThis.isReturn
+		, doThat = Then.replaceWith(Make.astReturn(astTuple4AssignTargetsToFragments))
+			).visit(ingredientsSequentialFunctionDef.astFunctionDef)
+	NodeReplacer(
+		findThis = ifThis.isReturn
+		, doThat = Then.replaceWith(Make.astReturn(astTuple4AssignTargetsToFragments))
+			).visit(ingredientsSequentialFunctionDef.astFunctionDef)
+	replacementMap = [(statement.value, statement.target) for statement in listAnnAssign4DataclassUnpack]
+	ingredientsSequentialFunctionDef.astFunctionDef = replaceMatchingASTnodes(
+		ingredientsSequentialFunctionDef.astFunctionDef, replacementMap) # type: ignore
 
 	ingredientsModuleNumbaUnified = IngredientsModule(
 		ingredientsFunction=[ingredientsInitializeFunctionDef,

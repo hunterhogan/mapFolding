@@ -56,11 +56,12 @@ Namespace: uppercase, should only appear in camelCase and means "namespace", low
 
 nodeType = TypeVar('nodeType', bound=ast.AST)
 ast_Identifier: TypeAlias = str
+ast_expr_Slice: TypeAlias = ast.expr
 strDotStrCuzPyStoopid: TypeAlias = str
 strORlist_ast_type_paramORintORNone: TypeAlias = Any
 list_ast_type_paramORintORNone: TypeAlias = Any
 strORintORNone: TypeAlias = Any
-astHasDOTname: TypeAlias = ast.FunctionDef | ast.ClassDef | ast.AsyncFunctionDef
+astHasDOTname: TypeAlias = ast.FunctionDef | ast.ClassDef | ast.AsyncFunctionDef # Others?
 astMosDef = TypeVar('astMosDef', bound=astHasDOTname)
 
 @contextmanager
@@ -84,13 +85,14 @@ class NodeCollector(Generic[nodeType], ast.NodeVisitor):
 				action(cast(nodeType, node))
 		self.generic_visit(node)
 
+ImaViolationOfTheLiskovSubstitutionPrinciple: TypeAlias = ast.AST
 class NodeReplacer(Generic[nodeType], ast.NodeTransformer):
 	"""A node transformer that replaces or removes AST nodes based on a condition."""
 	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: Callable[[nodeType], ast.AST | Sequence[ast.AST] | None]) -> None:
 		self.findThis = findThis
 		self.doThat = doThat
 
-	def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
+	def visit(self, node: ImaViolationOfTheLiskovSubstitutionPrinciple) -> ast.AST | Sequence[ast.AST] | None:
 		if self.findThis(node):
 			return self.doThat(cast(nodeType, node))
 		return super().visit(node)
@@ -196,6 +198,10 @@ class ifThis:
 		return isinstance(node, ast.Assign)
 
 	@staticmethod
+	def isAssignAndValueIsCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Assign]]:
+		return lambda node: ifThis.isAssign(node) and ifThis.isCall_Identifier(identifier)(node.value) # type: ignore[reportReturnType, return-value]
+
+	@staticmethod
 	def isAssignOnlyTo(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Assign]]:
 		return lambda node: ifThis.isAssign(node) and ifThis.NameReallyIs(identifier)(node.targets[0]) # type: ignore[reportReturnType, return-value]
 
@@ -280,8 +286,13 @@ class ifThis:
 		return ifThis.isAttribute(node) and ifThis.isName(node.value)
 
 	@staticmethod
+	def isNameDOTnameNamespace(namespace: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute]]:
+		return lambda node: ifThis.isNameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value) # type: ignore[reportReturnType, return-value]
+
+	@staticmethod
 	def isNameDOTnameNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute]]:
-		return lambda node: ifThis.isNameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value) and node.attr == identifier # type: ignore[reportReturnType, return-value]
+		return lambda node: ifThis.isNameDOTnameNamespace(namespace)(node.value) and node.attr == identifier # type: ignore[reportReturnType, return-value]
+		# return lambda node: ifThis.isNameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value) and node.attr == identifier # type: ignore[reportReturnType, return-value]
 
 	@staticmethod
 	def isReturn(node: ast.AST) -> TypeGuard[ast.Return]:
@@ -347,7 +358,7 @@ class Make:
 		return ast.Assign(targets=listTargets, value=value, **keywordArguments)
 
 	@staticmethod
-	def astArg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: strORintORNone) -> ast.arg:
+	def ast_arg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: strORintORNone) -> ast.arg:
 		"""keywordArguments: type_comment:str|None, lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
 		return ast.arg(identifier, annotation, **keywordArguments)
 
@@ -378,7 +389,7 @@ class Make:
 		return ast.ImportFrom(module=moduleName, names=list_astAlias, level=0, **keywordArguments)
 
 	@staticmethod
-	def astKeyword(keywordArgument: ast_Identifier, value: ast.expr, **keywordArguments: int) -> ast.keyword:
+	def ast_keyword(keywordArgument: ast_Identifier, value: ast.expr, **keywordArguments: int) -> ast.keyword:
 		return ast.keyword(arg=keywordArgument, value=value, **keywordArguments)
 
 	@staticmethod
@@ -407,9 +418,14 @@ class Make:
 		return ast.Return(value, **keywordArguments)
 
 	@staticmethod
-	def astTuple(elements: Sequence[ast.expr], context: ast.expr_context | None = None, **keywordArguments: int) -> ast.Tuple:
+	def astSubscript(value: ast.expr, slice: ast_expr_Slice, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Subscript:
+		return ast.Subscript(value, slice, ctx=context, **keywordArguments)
+
+	@staticmethod
+	def astTuple(elements: Sequence[ast.expr], context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Tuple:
+	# def astTuple(elements: Sequence[ast.expr], context: ast.expr_context | None = None, **keywordArguments: int) -> ast.Tuple:
 		"""context: Load/Store/Del"""
-		context = context or ast.Load()
+		# context = context or ast.Load()
 		return ast.Tuple(elts=list(elements), ctx=context, **keywordArguments)
 
 class LedgerOfImports:
@@ -474,17 +490,17 @@ class LedgerOfImports:
 
 class Then:
 	@staticmethod
-	def append_targetTo(listName: list[ast.Name]) -> Callable[[ast.AST], None]:
-		return lambda node: listName.append(cast(ast.Name, cast(ast.AnnAssign, node).target))
+	def append_targetTo(listName: list[ast.AST]) -> Callable[[ast.AnnAssign], None]:
+		return lambda node: listName.append(node.target)
 	@staticmethod
 	def appendTo(listOfAny: list[Any]) -> Callable[[ast.AST], None]:
 		return lambda node: listOfAny.append(node)
 	@staticmethod
-	def insertThisAbove(astStatement: ast.stmt) -> Callable[[ast.stmt], Sequence[ast.stmt]]:
-		return lambda aboveMe: [astStatement, aboveMe]
+	def insertThisAbove(list_astAST: Sequence[ast.AST]) -> Callable[[ast.AST], Sequence[ast.AST]]:
+		return lambda aboveMe: [*list_astAST, aboveMe]
 	@staticmethod
-	def insertThisBelow(astStatement: ast.stmt) -> Callable[[ast.stmt], Sequence[ast.stmt]]:
-		return lambda belowMe: [belowMe, astStatement]
+	def insertThisBelow(list_astAST: Sequence[ast.AST]) -> Callable[[ast.AST], Sequence[ast.AST]]:
+		return lambda belowMe: [belowMe, *list_astAST]
 	@staticmethod
 	def removeThis(_node: ast.AST) -> None:
 		return None
@@ -492,21 +508,17 @@ class Then:
 	def replaceWith(astStatement: ast.stmt) -> Callable[[ast.stmt], ast.stmt]:
 		return lambda _replaceMe: astStatement
 	@staticmethod
-	# def updateThis(dictionaryOf_astMosDef: dict[str, astMosDef]) -> Callable[[astMosDef], None]:
 	def updateThis(dictionaryOf_astMosDef: dict[ast_Identifier, astMosDef]) -> Callable[[astMosDef], astMosDef]:
-	# def updateThis(dictionaryOf_astMosDef: dict[ast_Identifier, ast.FunctionDef] | dict[ast_Identifier, ast.ClassDef] | dict[ast_Identifier, ast.AsyncFunctionDef]) -> Callable[[ast.FunctionDef], None] | Callable[[ast.ClassDef], None] | Callable[[ast.AsyncFunctionDef], None]:
-	# def updateThis(dictionaryOf_astMosDef: dict[ast_Identifier, ast.FunctionDef] | dict[ast_Identifier, ast.ClassDef] | dict[ast_Identifier, ast.AsyncFunctionDef]) -> Callable[[ast.FunctionDef], astHasDOTname] | Callable[[ast.ClassDef], astHasDOTname] | Callable[[ast.AsyncFunctionDef], astHasDOTname]:
 		return lambda node: dictionaryOf_astMosDef.setdefault(node.name, node)
-		# return lambda node: dictionaryOf_astMosDef.update({node.name, node})
 	@staticmethod
-	def Z0Z_ledger(logicalPath: strDotStrCuzPyStoopid, ledger: LedgerOfImports) -> Callable[[ast.AST], None]:
-		return lambda node: ledger.addImportFromStr(logicalPath, cast(ast.Name, cast(ast.AnnAssign, node).annotation).id)
+	def Z0Z_ledger(logicalPath: strDotStrCuzPyStoopid, ledger: LedgerOfImports) -> Callable[[ast.AnnAssign], None]:
+		return lambda node: ledger.addImportFromStr(logicalPath, node.annotation.id) # type: ignore[attr-defined]
 	@staticmethod
-	def Z0Z_appendKeywordMirroredTo(list_keyword: list[ast.keyword]) -> Callable[[ast.AST], None]:
-		return lambda node: list_keyword.append(Make.astKeyword(cast(ast.Name, cast(ast.AnnAssign, node).target).id, cast(ast.Name, cast(ast.AnnAssign, node).target)))
+	def Z0Z_appendKeywordMirroredTo(list_keyword: list[ast.keyword]) -> Callable[[ast.AnnAssign], None]:
+		return lambda node: list_keyword.append(Make.ast_keyword(node.target.id, node.target)) # type: ignore[union-attr]
 	@staticmethod
-	def Z0Z_appendAnnAssignOfNameDOTnameTo(identifier: ast_Identifier, listNameDOTname: list[ast.AnnAssign]) -> Callable[[ast.AST], None]:
-		return lambda node: listNameDOTname.append(Make.astAnnAssign(cast(ast.AnnAssign, node).target, cast(ast.AnnAssign, node).annotation, Make.nameDOTname(identifier, cast(ast.Name, cast(ast.AnnAssign, node).target).id)))
+	def Z0Z_appendAnnAssignOfNameDOTnameTo(identifier: ast_Identifier, listNameDOTname: list[ast.AnnAssign]) -> Callable[[ast.AnnAssign], None]:
+		return lambda node: listNameDOTname.append(Make.astAnnAssign(node.target, node.annotation, Make.nameDOTname(identifier, node.target.id))) # type: ignore[union-attr]
 
 	# TODO When resolving the ledger of imports, remove self-referential imports
 
@@ -584,6 +596,7 @@ class RecipeSynthesizeFlow:
 	sourceSequentialCallable: str = theSourceSequentialCallable
 
 	sourceDataclassIdentifier: str = theDataclassIdentifier
+	sourceDataclassInstance: str = theDataclassInstance
 	sourcePathModuleDataclass: str = theLogicalPathModuleDataclass
 
 	# ========================================
@@ -610,12 +623,15 @@ class RecipeSynthesizeFlow:
 	logicalPathModuleDispatcher: str = theLogicalPathModuleDispatcherSynthetic
 
 	# Function
-	sequentialCallable: str = sourceSequentialCallable
-	dataclassIdentifier: str = sourceDataclassIdentifier
 	dispatcherCallable: str = sourceDispatcherCallable
+	initializeCallable: str = sourceInitializeCallable
+	parallelCallable: str = sourceParallelCallable
+	sequentialCallable: str = sourceSequentialCallable
+
+	dataclassIdentifier: str = sourceDataclassIdentifier
 
 	# Variable
-	dataclassInstance: str = theDataclassInstance
+	dataclassInstance: str = sourceDataclassInstance
 
 def extractClassDef(identifier: ast_Identifier, module: ast.Module) -> ast.ClassDef | None:
 	sherpa: list[ast.ClassDef] = []

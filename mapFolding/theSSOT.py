@@ -22,9 +22,9 @@ Identifiers: scope and resolution, LEGB (Local, Enclosing, Global, Builtin)
 # I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
 packageFlowSynthetic = 'numba'
 # packageFlowSynthetic = 'multiprocessing'
-# Z0Z_packageFlow = 'algorithm'
+Z0Z_packageFlow = 'algorithm'
 # https://github.com/hunterhogan/mapFolding/issues/4
-Z0Z_packageFlow = packageFlowSynthetic
+# Z0Z_packageFlow = packageFlowSynthetic
 
 # =============================================================================
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
@@ -38,8 +38,7 @@ moduleOfSyntheticModulesPACKAGING: Final[str] = 'syntheticModules'
 dataclassModulePACKAGING: str = 'theSSOT'
 dataclassIdentifierPACKAGING: str = 'ComputationState'
 dataclassInstancePACKAGING: str = 'state'
-dataclassInstance_Pre_ParallelPACKAGING = dataclassInstancePACKAGING + 'PARALLEL'
-dataclassInstance_Post_ParallelPACKAGING = dataclassInstancePACKAGING + 'COMPLETE'
+dataclassInstanceTaskDistributionPACKAGING = dataclassInstancePACKAGING + 'Parallel'
 
 sourceInitializeCallablePACKAGING = 'countInitialize'
 sourceSequentialCallablePACKAGING = 'countSequential'
@@ -94,8 +93,7 @@ theDispatcherCallable: str = dispatcherCallablePACKAGING
 theDataclassModule: str = dataclassModulePACKAGING
 theDataclassIdentifier: str = dataclassIdentifierPACKAGING
 theDataclassInstance: str = dataclassInstancePACKAGING
-theDataclassInstance_Pre_Parallel: str = dataclassInstance_Pre_ParallelPACKAGING
-theDataclassInstance_Post_Parallel: str = dataclassInstance_Post_ParallelPACKAGING
+theDataclassInstanceTaskDistribution: str = dataclassInstanceTaskDistributionPACKAGING
 
 theFileExtension: str = fileExtensionINSTALLING
 
@@ -207,8 +205,7 @@ def getSourceAlgorithm() -> ModuleType:
 	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleSourceAlgorithm)
 	return moduleImported
 
-# dynamically set the return type https://github.com/hunterhogan/mapFolding/issues/5
-def getAlgorithmDispatcher():
+def getAlgorithmDispatcher() -> Callable[[ComputationState], ComputationState]:
 	moduleImported: ModuleType = getSourceAlgorithm()
 	dispatcherCallable = getattr(moduleImported, theDispatcherCallable)
 	return dispatcherCallable
@@ -268,10 +265,6 @@ def getPackageDispatcher() -> Callable[[ComputationState], ComputationState]:
 	# Automated system
 	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
 	dispatcherCallable = getattr(moduleImported, theDispatcherCallable)
-
-	# Hardcoded while I am refactoring "someAssemblyRequired"
-	# from mapFolding.syntheticModules.numbaCountSequential import flattenData
-	# dispatcherCallable = flattenData
 	return dispatcherCallable
 
 """Technical concepts I am likely using and likely want to use more effectively:

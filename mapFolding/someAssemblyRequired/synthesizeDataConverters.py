@@ -1,18 +1,12 @@
 from collections.abc import Sequence
 from importlib import import_module
 from inspect import getsource as inspect_getsource
-from pathlib import Path
-from types import ModuleType
-from typing import Any, cast, overload, Literal
-import ast
-import pickle
-from mapFolding.beDRY import ComputationState, outfitCountFolds, validateListDimensions
+from mapFolding.beDRY import outfitCountFolds, validateListDimensions
 from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	extractClassDef,
 	ifThis,
-	IngredientsFunction,
 	LedgerOfImports,
 	Make,
 	NodeCollector,
@@ -20,12 +14,17 @@ from mapFolding.someAssemblyRequired import (
 	Then,
 	Z0Z_executeActionUnlessDescendantMatches,
 )
-from mapFolding.theSSOT import getSourceAlgorithm
+from mapFolding.theSSOT import ComputationState, getSourceAlgorithm
+from pathlib import Path
+from types import ModuleType
+from typing import Any, Literal, overload
+import ast
+import pickle
 
-# Would `libCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
+# Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
-									) -> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], list[ast.Name], list[ast.keyword], ast.Tuple]:
+		)-> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], ast.Tuple, list[ast.Name], list[ast.arg], ast.Subscript, ast.Assign, list[ast.keyword]]:
 	"""
 	Parameters:
 		logicalPathModule: gimme string cuz python is stoopid
@@ -39,65 +38,44 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	if not isinstance(dataclass, ast.ClassDef):
 		raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
 
-	list_astAnnAssign: list[ast.AnnAssign] = []
-	listKeywordForDataclassInitialization: list[ast.keyword] = []
-	list_astNameDataclassFragments: list[ast.Name] = []
-	ledgerDataclassAndFragments = LedgerOfImports()
+	ledgerDataclassANDFragments = LedgerOfImports()
+	list_ast_argAnnotated4ArgumentsSpecification: list[ast.arg] = []
+	list_keyword4DataclassInitialization: list[ast.keyword] = []
+	listAnnAssign4DataclassUnpack: list[ast.AnnAssign] = []
+	listAnnotations: list[ast.expr] = []
+	listNameDataclassFragments4Parameters: list[ast.Name] = []
 
 	addToLedgerPredicate = ifThis.isAnnAssignAndAnnotationIsName
-	addToLedgerAction = Then.Z0Z_ledger(logicalPathModule, ledgerDataclassAndFragments)
+	addToLedgerAction = Then.Z0Z_ledger(logicalPathModule, ledgerDataclassANDFragments)
 	addToLedger = NodeCollector(addToLedgerPredicate, [addToLedgerAction])
 
 	exclusionPredicate = ifThis.is_keyword_IdentifierEqualsConstantValue('init', False)
-	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(listKeywordForDataclassInitialization)
-	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction)
+	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(list_keyword4DataclassInitialization)
+	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction) # type: ignore
 
 	collector = NodeCollector(
 			ifThis.isAnnAssignAndTargetIsName,
-				[Then.Z0Z_appendAnnAssignOfNameDOTnameTo(instance_Identifier, list_astAnnAssign)
-				, Then.append_targetTo(list_astNameDataclassFragments)
+				[Then.Z0Z_appendAnnAssignOfNameDOTnameTo(instance_Identifier, listAnnAssign4DataclassUnpack)
+				, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
 				, lambda node: addToLedger.visit(node)
 				, filteredAppendKeywordAction
+				, lambda node: list_ast_argAnnotated4ArgumentsSpecification.append(Make.ast_arg(node.target.id, node.annotation)) # type: ignore
+				, lambda node: listAnnotations.append(node.annotation) # type: ignore
 				]
 			)
 
 	collector.visit(dataclass)
 
-	ledgerDataclassAndFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
+	astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns = Make.astSubscript(Make.astName('tuple'), Make.astTuple(listAnnotations))
 
-	astNameDataclass = Make.astName(dataclass_Identifier)
-	astTupleForAssignTargetsToFragments: ast.Tuple = Make.astTuple(list_astNameDataclassFragments, ast.Store())
-	return astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, listKeywordForDataclassInitialization, astTupleForAssignTargetsToFragments
+	ledgerDataclassANDFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
 
-def makeDataclassConverter(
-		logicalPathModuleDataclass: str,
-		dataclassIdentifier: str,
-		dataclassInstance: str,
-
-		countDispatcherCallable: str,
-		logicalPathModuleDispatcher: str,
-		dataConverterCallable: str,
-		) -> IngredientsFunction:
-
-	astNameDataclass, ledgerDataclassAndFragments, list_astAnnAssign, list_astNameDataclassFragments, list_astKeywordDataclassFragments, astTupleForAssignTargetsToFragments = shatter_dataclassesDOTdataclass(logicalPathModuleDataclass, dataclassIdentifier, dataclassInstance)
-
-	ingredientsFunction = IngredientsFunction(
-		astFunctionDef = Make.astFunctionDef(name=dataConverterCallable
-										, argumentsSpecification=Make.astArgumentsSpecification(args=[Make.astArg(dataclassInstance, astNameDataclass)])
-										, body = cast(list[ast.stmt], list_astAnnAssign)
-										, returns = astNameDataclass
-										)
-		, imports = ledgerDataclassAndFragments
-	)
-
-	whoToCall = Make.astAssign(listTargets=[astTupleForAssignTargetsToFragments]
-										, value=Make.astCall(Make.astName(countDispatcherCallable), args=list_astNameDataclassFragments))
-	ingredientsFunction.astFunctionDef.body.append(whoToCall)
-	ingredientsFunction.imports.addImportFromStr(logicalPathModuleDispatcher, countDispatcherCallable)
-
-	ingredientsFunction.astFunctionDef.body.append(Make.astReturn(Make.astCall(astNameDataclass, list_astKeywords=list_astKeywordDataclassFragments)))
-
-	return ingredientsFunction
+	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
+	astTuple4AssignTargetsToFragments: ast.Tuple = Make.astTuple(listNameDataclassFragments4Parameters, ast.Store())
+	astAssignDataclassRepack = Make.astAssign(listTargets=[Make.astName(instance_Identifier)], value=Make.astCall(astName_dataclassesDOTdataclass, list_astKeywords=list_keyword4DataclassInitialization))
+	return (astName_dataclassesDOTdataclass, ledgerDataclassANDFragments, listAnnAssign4DataclassUnpack,
+			astTuple4AssignTargetsToFragments, listNameDataclassFragments4Parameters, list_ast_argAnnotated4ArgumentsSpecification,
+			astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns, astAssignDataclassRepack, list_keyword4DataclassInitialization)
 
 @overload
 def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...
