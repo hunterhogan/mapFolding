@@ -15,6 +15,7 @@ from mapFolding.someAssemblyRequired import (
 	strDotStrCuzPyStoopid,
 	Then,
 )
+from mapFolding.someAssemblyRequired.ingredientsNumba import decorateCallableWithNumba, parametersNumbaParallelDEFAULT
 from mapFolding.someAssemblyRequired.synthesizeDataConverters import shatter_dataclassesDOTdataclass
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
 from pathlib import Path
@@ -207,20 +208,21 @@ def Z0Z_main() -> None:
 	sourcePython = numbaFlow.sourceDispatcherCallable
 	astFunctionDef = extractFunctionDef(sourcePython, numbaFlow.source_astModule)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
-	ingredientsDispatcherFunctionDef = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
-	ingredientsDispatcherFunctionDef.imports.update(ledgerDataclassANDFragments)
+	ingredientsDispatcher = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	ingredientsDispatcher.imports.update(ledgerDataclassANDFragments)
 	NodeReplacer(
 		findThis = ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.sourceInitializeCallable)
 		, doThat = Then.insertThisBelow(listAnnAssign4DataclassUnpack)
-			).visit(ingredientsDispatcherFunctionDef.astFunctionDef)
+			).visit(ingredientsDispatcher.astFunctionDef)
+	# TODO reconsider: This calls a function, but I don't inspect the function for its parameters or return.
 	NodeReplacer(
 		findThis = ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.sourceSequentialCallable)
 		, doThat = Then.replaceWith(Make.astAssign(listTargets=[astTuple4AssignTargetsToFragments], value=Make.astCall(Make.astName(numbaFlow.sequentialCallable), listNameDataclassFragments4Parameters)))
-			).visit(ingredientsDispatcherFunctionDef.astFunctionDef)
+			).visit(ingredientsDispatcher.astFunctionDef)
 	NodeReplacer(
 		findThis = ifThis.isReturn
 		, doThat = Then.insertThisAbove([astAssignDataclassRepack])
-			).visit(ingredientsDispatcherFunctionDef.astFunctionDef)
+			).visit(ingredientsDispatcher.astFunctionDef)
 
 	# TODO remember that `sequentialCallable` and `sourceSequentialCallable` are two different values.
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
@@ -229,39 +231,59 @@ def Z0Z_main() -> None:
 	astFunctionDef = extractFunctionDef(sourcePython, numbaFlow.source_astModule)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	astFunctionDef = inlineThisFunctionWithTheseValues(astFunctionDef, dictionaryReplacementStatements)
-	ingredientsInitializeFunctionDef = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	ingredientsInitialize = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
 
 	sourcePython = numbaFlow.sourceParallelCallable
 	astFunctionDef = extractFunctionDef(sourcePython, numbaFlow.source_astModule)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	astFunctionDef = inlineThisFunctionWithTheseValues(astFunctionDef, dictionaryReplacementStatements)
-	ingredientsParallelFunctionDef = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	ingredientsParallel = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	ingredientsParallel.astFunctionDef.name = numbaFlow.parallelCallable
+	ingredientsParallel.astFunctionDef.args = Make.astArgumentsSpecification(args=list_ast_argAnnotated4ArgumentsSpecification)
+	ingredientsParallel.astFunctionDef.returns = astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns
+	NodeReplacer(
+		findThis = ifThis.isReturn
+		, doThat = Then.replaceWith(Make.astReturn(astTuple4AssignTargetsToFragments))
+			).visit(ingredientsParallel.astFunctionDef)
+	NodeReplacer(
+		findThis = ifThis.isReturn
+		, doThat = Then.replaceWith(Make.astReturn(astTuple4AssignTargetsToFragments))
+			).visit(ingredientsParallel.astFunctionDef)
+	replacementMap = [(statement.value, statement.target) for statement in listAnnAssign4DataclassUnpack]
+	ingredientsParallel.astFunctionDef = replaceMatchingASTnodes(
+		ingredientsParallel.astFunctionDef, replacementMap) # type: ignore
+	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
+	# But, I would need to update the calling function, too.
+	ingredientsParallel = decorateCallableWithNumba(ingredientsParallel) # parametersNumbaParallelDEFAULT
 
 	sourcePython = numbaFlow.sourceSequentialCallable
 	astFunctionDef = extractFunctionDef(sourcePython, numbaFlow.source_astModule)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	astFunctionDef = inlineThisFunctionWithTheseValues(astFunctionDef, dictionaryReplacementStatements)
-	ingredientsSequentialFunctionDef = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
-	ingredientsSequentialFunctionDef.astFunctionDef.name = numbaFlow.sequentialCallable
-	ingredientsSequentialFunctionDef.astFunctionDef.args = Make.astArgumentsSpecification(args=list_ast_argAnnotated4ArgumentsSpecification)
-	ingredientsSequentialFunctionDef.astFunctionDef.returns = astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns
+	ingredientsSequential = IngredientsFunction(astFunctionDef, LedgerOfImports(numbaFlow.source_astModule))
+	ingredientsSequential.astFunctionDef.name = numbaFlow.sequentialCallable
+	ingredientsSequential.astFunctionDef.args = Make.astArgumentsSpecification(args=list_ast_argAnnotated4ArgumentsSpecification)
+	ingredientsSequential.astFunctionDef.returns = astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns
 	NodeReplacer(
 		findThis = ifThis.isReturn
 		, doThat = Then.replaceWith(Make.astReturn(astTuple4AssignTargetsToFragments))
-			).visit(ingredientsSequentialFunctionDef.astFunctionDef)
+			).visit(ingredientsSequential.astFunctionDef)
 	NodeReplacer(
 		findThis = ifThis.isReturn
 		, doThat = Then.replaceWith(Make.astReturn(astTuple4AssignTargetsToFragments))
-			).visit(ingredientsSequentialFunctionDef.astFunctionDef)
+			).visit(ingredientsSequential.astFunctionDef)
 	replacementMap = [(statement.value, statement.target) for statement in listAnnAssign4DataclassUnpack]
-	ingredientsSequentialFunctionDef.astFunctionDef = replaceMatchingASTnodes(
-		ingredientsSequentialFunctionDef.astFunctionDef, replacementMap) # type: ignore
+	ingredientsSequential.astFunctionDef = replaceMatchingASTnodes(
+		ingredientsSequential.astFunctionDef, replacementMap) # type: ignore
+	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
+	# But, I would need to update the calling function, too.
+	ingredientsSequential = decorateCallableWithNumba(ingredientsSequential)
 
 	ingredientsModuleNumbaUnified = IngredientsModule(
-		ingredientsFunction=[ingredientsInitializeFunctionDef,
-							ingredientsParallelFunctionDef,
-							ingredientsSequentialFunctionDef,
-							ingredientsDispatcherFunctionDef], imports=LedgerOfImports(numbaFlow.source_astModule))
+		ingredientsFunction=[ingredientsInitialize,
+							ingredientsParallel,
+							ingredientsSequential,
+							ingredientsDispatcher], imports=LedgerOfImports(numbaFlow.source_astModule))
 
 	Z0Z_alphaTest_putModuleOnDisk(ingredientsModuleNumbaUnified, numbaFlow)
 

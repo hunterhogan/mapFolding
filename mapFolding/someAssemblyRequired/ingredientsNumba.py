@@ -1,6 +1,8 @@
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
+from mapFolding.someAssemblyRequired import ifThis, IngredientsFunction, LedgerOfImports, Make
 from numba.core.compiler import CompilerBase as numbaCompilerBase
-from typing import Any, TYPE_CHECKING, Final
+from typing import Any, TYPE_CHECKING, Final, cast
+import ast
 
 try:
 	from typing import NotRequired
@@ -98,3 +100,86 @@ parametersNumbaMinimum: Final[ParametersNumba] = {
 		'nopython': False,
 		'forceobj': True,
 		'parallel': False, }
+
+Z0Z_numbaDataTypeModule = 'numba'
+Z0Z_decoratorCallable = 'jit'
+
+def thisIsNumbaDotJit(Ima: ast.AST) -> bool:
+	return ifThis.isCallNamespace_Identifier(Z0Z_numbaDataTypeModule, Z0Z_decoratorCallable)(Ima)
+
+def thisIsJit(Ima: ast.AST) -> bool:
+	return ifThis.isCall_Identifier(Z0Z_decoratorCallable)(Ima)
+
+def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
+	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)
+
+def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:
+	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
+		# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
+		for decoratorItem in astCallable.decorator_list.copy():
+			import warnings
+			astCallable.decorator_list.remove(decoratorItem)
+			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
+		return astCallable
+
+	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None:
+		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
+			annotationShape: ast.expr = signatureElement.annotation.slice.elts[0]
+			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
+				shapeAsListSlices: list[ast.Slice] = [ast.Slice() for _axis in range(len(annotationShape.slice.elts))]
+				shapeAsListSlices[-1] = ast.Slice(step=ast.Constant(value=1))
+				shapeAST: ast.Slice | ast.Tuple = ast.Tuple(elts=list(shapeAsListSlices), ctx=ast.Load())
+			else:
+				shapeAST = ast.Slice(step=ast.Constant(value=1))
+
+			annotationDtype: ast.expr = signatureElement.annotation.slice.elts[1]
+			if (isinstance(annotationDtype, ast.Subscript) and isinstance(annotationDtype.slice, ast.Attribute)):
+				datatypeAST = annotationDtype.slice.attr
+			else:
+				datatypeAST = None
+
+			ndarrayName = signatureElement.arg
+			Z0Z_hacky_dtype: str = ndarrayName
+			datatype_attr = datatypeAST or Z0Z_hacky_dtype
+			ingredientsFunction.imports.addImportFromStr(datatypeModuleDecorator, datatype_attr)
+			datatypeNumba = ast.Name(id=datatype_attr, ctx=ast.Load())
+
+			return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
+
+		elif isinstance(signatureElement.annotation, ast.Name):
+			return signatureElement.annotation
+		return None
+
+	datatypeModuleDecorator: str = Z0Z_numbaDataTypeModule
+	list_argsDecorator: Sequence[ast.expr] = []
+
+	list_arg4signature_or_function: list[ast.expr] = []
+	for parameter in ingredientsFunction.astFunctionDef.args.args:
+		# Efficient translation of Python scalar types to Numba types https://github.com/hunterhogan/mapFolding/issues/8
+		# For now, let Numba infer them.
+		continue
+		signatureElement: ast.Subscript | ast.Name | None = makeSpecialSignatureForNumba(parameter)
+		if signatureElement:
+			list_arg4signature_or_function.append(signatureElement)
+
+	if ingredientsFunction.astFunctionDef.returns and isinstance(ingredientsFunction.astFunctionDef.returns, ast.Name):
+		theReturn: ast.Name = ingredientsFunction.astFunctionDef.returns
+		list_argsDecorator = [cast(ast.expr, ast.Call(func=ast.Name(id=theReturn.id, ctx=ast.Load())
+							, args=list_arg4signature_or_function if list_arg4signature_or_function else [], keywords=[] ) )]
+	elif list_arg4signature_or_function:
+		list_argsDecorator = [cast(ast.expr, ast.Tuple(elts=list_arg4signature_or_function, ctx=ast.Load()))]
+
+	ingredientsFunction.astFunctionDef = Z0Z_UnhandledDecorators(ingredientsFunction.astFunctionDef)
+	if parametersNumba is None:
+		parametersNumba = parametersNumbaDEFAULT
+	listDecoratorKeywords: list[ast.keyword] = [Make.ast_keyword(parameterName, Make.astConstant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
+
+	decoratorModule: str = Z0Z_numbaDataTypeModule
+	decoratorCallable: str = Z0Z_decoratorCallable
+	ingredientsFunction.imports.addImportFromStr(decoratorModule, decoratorCallable)
+	# Leave this line in so that global edits will change it.
+	astDecorator: ast.Call = Make.astCall(Make.astName(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
+	astDecorator: ast.Call = Make.astCall(Make.astName(decoratorCallable), list_astKeywords=listDecoratorKeywords) # type: ignore[no-redef]
+
+	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
+	return ingredientsFunction

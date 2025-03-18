@@ -52,7 +52,7 @@ namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.ab
 Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
 """
 
-# Would `libCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
+# Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
 
 nodeType = TypeVar('nodeType', bound=ast.AST)
 ast_Identifier: TypeAlias = str
@@ -336,12 +336,13 @@ class ifThis:
 
 class Make:
 	@staticmethod
-	def copy_astCallKeywordsOUTDATED(astCall: ast.Call) -> dict[str, Any]:
-		dictionaryKeywords: dict[str, Any] = {}
-		for keywordItem in astCall.keywords:
-			if isinstance(keywordItem.value, ast.Constant) and keywordItem.arg is not None:
-				dictionaryKeywords[keywordItem.arg] = keywordItem.value.value
-		return dictionaryKeywords
+	def ast_arg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: strORintORNone) -> ast.arg:
+		"""keywordArguments: type_comment:str|None, lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
+		return ast.arg(identifier, annotation, **keywordArguments)
+
+	@staticmethod
+	def ast_keyword(keywordArgument: ast_Identifier, value: ast.expr, **keywordArguments: int) -> ast.keyword:
+		return ast.keyword(arg=keywordArgument, value=value, **keywordArguments)
 
 	@staticmethod
 	def astAlias(name: ast_Identifier, asname: ast_Identifier | None = None) -> ast.alias:
@@ -358,11 +359,6 @@ class Make:
 		return ast.Assign(targets=listTargets, value=value, **keywordArguments)
 
 	@staticmethod
-	def ast_arg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: strORintORNone) -> ast.arg:
-		"""keywordArguments: type_comment:str|None, lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
-		return ast.arg(identifier, annotation, **keywordArguments)
-
-	@staticmethod
 	def astArgumentsSpecification(posonlyargs: list[ast.arg]=[], args: list[ast.arg]=[], vararg: ast.arg|None=None, kwonlyargs: list[ast.arg]=[], kw_defaults: list[ast.expr|None]=[None], kwarg: ast.arg|None=None, defaults: list[ast.expr]=[]) -> ast.arguments:
 		return ast.arguments(posonlyargs, args, vararg, kwonlyargs, kw_defaults, kwarg, defaults)
 
@@ -376,6 +372,12 @@ class Make:
 		return ast.ClassDef(name=name, bases=listBases, keywords=list_keyword, body=body, decorator_list=decorator_list, **keywordArguments)
 
 	@staticmethod
+	def astConstant(value: Any, **keywordArguments: strORintORNone) -> ast.Constant:
+		"""value: str|int|float|bool|None|bytes|bytearray|memoryview|complex|list|tuple|dict|set, or any other type that can be represented as a constant in Python.
+		keywordArguments: kind:str, lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
+		return ast.Constant(value, **keywordArguments)
+
+	@staticmethod
 	def astFunctionDef(name: ast_Identifier, argumentsSpecification: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, **keywordArguments: strORlist_ast_type_paramORintORNone) -> ast.FunctionDef:
 		"""keywordArguments: type_comment:str|None, type_params:list[ast.type_param], lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
 		return ast.FunctionDef(name=name, args=argumentsSpecification, body=body, decorator_list=decorator_list, returns=returns, **keywordArguments)
@@ -387,10 +389,6 @@ class Make:
 	@staticmethod
 	def astImportFrom(moduleName: ast_Identifier, list_astAlias: list[ast.alias], **keywordArguments: int) -> ast.ImportFrom:
 		return ast.ImportFrom(module=moduleName, names=list_astAlias, level=0, **keywordArguments)
-
-	@staticmethod
-	def ast_keyword(keywordArgument: ast_Identifier, value: ast.expr, **keywordArguments: int) -> ast.keyword:
-		return ast.keyword(arg=keywordArgument, value=value, **keywordArguments)
 
 	@staticmethod
 	def astModule(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore] = []) -> ast.Module:

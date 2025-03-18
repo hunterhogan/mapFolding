@@ -21,7 +21,6 @@ Identifiers: scope and resolution, LEGB (Local, Enclosing, Global, Builtin)
 
 # I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
 packageFlowSynthetic = 'numba'
-# packageFlowSynthetic = 'multiprocessing'
 Z0Z_packageFlow = 'algorithm'
 # https://github.com/hunterhogan/mapFolding/issues/4
 # Z0Z_packageFlow = packageFlowSynthetic
@@ -62,13 +61,8 @@ def getPathPackageINSTALLING() -> Path:
 	return pathPackage
 
 # =============================================================================
-# The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
-# Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding Hardcoding
-
-# =============================================================================
 # The right way, perhaps.
 
-# =====================
 # Create enduring identifiers from the hopefully transient identifiers above.
 thePackageName: Final[str] = thePackageNamePACKAGING
 thePathPackage: Path = getPathPackageINSTALLING()
@@ -100,7 +94,7 @@ theFileExtension: str = fileExtensionINSTALLING
 theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
 
 # =============================================================================
-# The right way.
+
 concurrencyPackage: str = Z0Z_packageFlow
 
 # =============================================================================
@@ -160,6 +154,7 @@ class ComputationState:
 	leaf1ndex: DatatypeElephino = DatatypeElephino(1)
 	leafConnectee: DatatypeElephino = DatatypeElephino(0)
 	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	# Efficient translation of Python scalar types to Numba types https://github.com/hunterhogan/mapFolding/issues/8
 
 	def __post_init__(self) -> None:
 		from mapFolding.beDRY import makeConnectionGraph, makeDataContainer
@@ -188,11 +183,6 @@ class ComputationState:
 
 	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
-
-	# factory? constructor?
-	# state.taskIndex = state.taskIndex.type(indexSherpa)
-	# self.fieldName = self.fieldName.fieldType(indexSherpa)
-	# state.taskIndex.toMyType(indexSherpa)
 
 # =============================================================================
 # The most right way I know how to implement.
