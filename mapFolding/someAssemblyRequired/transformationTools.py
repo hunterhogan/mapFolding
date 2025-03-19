@@ -9,12 +9,15 @@ Aspirations:
 - Each tool is designed to be used in a modular fashion, allowing for the creation of new tools by combining existing tools.
 - If a tool has a default setting, the setting shall be the setting used by the official package.
 """
+from autoflake import fix_code as autoflake_fix_code
 from collections import defaultdict
 from collections.abc import Callable, Container, Generator, Sequence
 from contextlib import contextmanager
 from inspect import getsource as inspect_getsource
+from mapFolding.filesystem import writeStringToHere
 from mapFolding.theSSOT import (
 	getSourceAlgorithm,
+	raiseIfNoneGitHubIssueNumber3,
 	theDataclassIdentifier,
 	theDataclassInstance,
 	theDataclassInstanceTaskDistribution,
@@ -32,11 +35,13 @@ from mapFolding.theSSOT import (
 	theSourceParallelCallable,
 	theSourceSequentialCallable,
 )
-from pathlib import PurePosixPath
+from os import PathLike
+from pathlib import Path, PurePath, PurePosixPath
 from types import ModuleType
 from typing import Any, Generic, cast, TypeAlias, TypeGuard, TypeVar
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
+import copy
 import dataclasses
 
 """
@@ -653,7 +658,7 @@ class RecipeSynthesizeFlow:
 
 	# ========================================
 	# Filesystem
-	pathPackage: PurePosixPath = PurePosixPath(thePathPackage)
+	pathPackage: PurePosixPath | None = PurePosixPath(thePathPackage)
 	fileExtension: str = theFileExtension
 
 	# ========================================
@@ -663,7 +668,7 @@ class RecipeSynthesizeFlow:
 	formatStrModuleForCallableSynthetic: str = theFormatStrModuleForCallableSynthetic
 
 	# Package
-	packageName: ast_Identifier = thePackageName
+	packageName: ast_Identifier | None = thePackageName
 
 	# Module
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
@@ -684,6 +689,26 @@ class RecipeSynthesizeFlow:
 
 	# Variable
 	dataclassInstance: str = sourceDataclassInstance
+
+	def _makePathFilename(self, filenameStem: str,
+			pathRoot: PurePosixPath | None = None,
+			logicalPathINFIX: strDotStrCuzPyStoopid | None = None,
+			fileExtension: str | None = None,
+			) -> PurePosixPath:
+		"""filenameStem: (hint: the name of the logical module)"""
+		if pathRoot is None:
+			pathRoot = self.pathPackage or PurePosixPath(Path.cwd())
+		if logicalPathINFIX:
+			whyIsThisStillAThing: list[str] = logicalPathINFIX.split('.')
+			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
+		if fileExtension is None:
+			fileExtension = self.fileExtension
+		filename: str = filenameStem + fileExtension
+		return pathRoot.joinpath(filename)
+
+	@property
+	def pathFilenameDispatcher(self) -> PurePosixPath:
+		return self._makePathFilename(filenameStem=self.moduleDispatcher, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
 
 def extractClassDef(identifier: ast_Identifier, module: ast.Module) -> ast.ClassDef | None:
 	sherpa: list[ast.ClassDef] = []
@@ -738,3 +763,98 @@ def Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.A
 		if not Z0Z_descendantContainsMatchingNode(node, exclusionPredicate):
 			actionFunction(node)
 	return wrappedAction
+
+def inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> ast.FunctionDef:
+	class FunctionInliner(ast.NodeTransformer):
+		def __init__(self, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> None:
+			self.dictionaryReplacementStatements = dictionaryReplacementStatements
+
+		def generic_visit(self, node: ast.AST) -> ast.AST:
+			"""Visit all nodes and replace them if necessary."""
+			return super().generic_visit(node)
+
+		def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.stmt]:
+			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
+				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore[attr-defined]
+			return node
+
+		def visit_Assign(self, node: ast.Assign) -> ast.AST | list[ast.stmt]:
+			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
+				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore[attr-defined]
+			return node
+
+		def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
+			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
+				replacement = self.dictionaryReplacementStatements[node.func.id] # type: ignore[attr-defined]
+				if not isinstance(replacement, list):
+					return replacement
+			return node
+
+	keepGoing = True
+	ImaInlineFunction = astFunctionDef
+	while keepGoing:
+		ImaInlineFunction = astFunctionDef
+		FunctionInliner(copy.deepcopy(dictionaryReplacementStatements)).visit(ImaInlineFunction)
+		if ast.unparse(ImaInlineFunction) == ast.unparse(astFunctionDef):
+			keepGoing = False
+		else:
+			astFunctionDef = ImaInlineFunction
+	return ImaInlineFunction
+
+def Z0Z_replaceMatchingASTnodes(astTree: ast.AST, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> ast.AST:
+	class TargetedNodeReplacer(ast.NodeTransformer):
+		def __init__(self, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> None:
+			self.mappingFindReplaceNodes = mappingFindReplaceNodes
+
+		def visit(self, node: ast.AST) -> ast.AST:
+			for nodeFind, nodeReplace in self.mappingFindReplaceNodes.items():
+				if self.nodesMatchStructurally(node, nodeFind):
+					return nodeReplace
+			return self.generic_visit(node)
+
+		def nodesMatchStructurally(self, nodeSubject: ast.AST | list[Any] | Any, nodePattern: ast.AST | list[Any] | Any) -> bool:
+			if nodeSubject is None or nodePattern is None:
+				return nodeSubject is None and nodePattern is None
+
+			if type(nodeSubject) != type(nodePattern):
+				return False
+
+			if isinstance(nodeSubject, ast.AST):
+				for field, fieldValueSubject in ast.iter_fields(nodeSubject):
+					if field in ('lineno', 'col_offset', 'end_lineno', 'end_col_offset', 'ctx'):
+						continue
+					attrPattern = getattr(nodePattern, field, None)
+					if not self.nodesMatchStructurally(fieldValueSubject, attrPattern):
+						return False
+				return True
+
+			if isinstance(nodeSubject, list) and isinstance(nodePattern, list):
+				nodeSubjectList: list[Any] = nodeSubject
+				nodePatternList: list[Any] = nodePattern
+				return len(nodeSubjectList) == len(nodePatternList) and all(
+					self.nodesMatchStructurally(elementSubject, elementPattern)
+					for elementSubject, elementPattern in zip(nodeSubjectList, nodePatternList)
+				)
+
+			return nodeSubject == nodePattern
+
+	astTreeCurrent, astTreePrevious = None, astTree
+	while astTreeCurrent is None or ast.unparse(astTreeCurrent) != ast.unparse(astTreePrevious):
+		astTreePrevious = astTreeCurrent if astTreeCurrent else astTree
+		astTreeCurrent = TargetedNodeReplacer(mappingFindReplaceNodes).visit(astTreePrevious)
+
+	return astTreeCurrent
+
+
+# Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
+
+def write_astModule(ingredients: IngredientsModule, pathFilename: str | PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
+	astModule = ingredients.export()
+	ast.fix_missing_locations(astModule)
+	pythonSource: str = ast.unparse(astModule)
+	if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
+	autoflake_additional_imports: list[str] = ingredients.imports.exportListModuleNames()
+	if packageName:
+		autoflake_additional_imports.append(packageName)
+	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False)
+	writeStringToHere(pythonSource, pathFilename)

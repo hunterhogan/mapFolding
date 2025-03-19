@@ -1,142 +1,23 @@
-from autoflake import fix_code as autoflake_fix_code
-from mapFolding.filesystem import writeStringToHere
 from mapFolding.someAssemblyRequired import (
-	ast_Identifier,
 	extractFunctionDef,
 	ifThis,
 	IngredientsFunction,
 	IngredientsModule,
+	inlineThisFunctionWithTheseValues,
 	LedgerOfImports,
 	Make,
 	makeDictionaryReplacementStatements,
 	NodeCollector,
 	NodeReplacer,
 	RecipeSynthesizeFlow,
-	strDotStrCuzPyStoopid,
 	Then,
+	Z0Z_replaceMatchingASTnodes,
+	write_astModule,
 )
 from mapFolding.someAssemblyRequired.ingredientsNumba import decorateCallableWithNumba
 from mapFolding.someAssemblyRequired.synthesizeDataConverters import shatter_dataclassesDOTdataclass
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
-from pathlib import Path
-from typing import Any
 import ast
-import copy
-
-# Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
-
-def Z0Z_putModuleOnDisk(ingredients: IngredientsModule, recipeFlow: RecipeSynthesizeFlow) -> None:
-	# Physical namespace
-	filenameStem: str = recipeFlow.moduleDispatcher
-	fileExtension: str = recipeFlow.fileExtension
-	pathPackage: Path = Path(recipeFlow.pathPackage)
-
-	# Physical and logical namespace
-	packageName: ast_Identifier | None = recipeFlow.packageName # module name of the package, if any
-	logicalPathINFIX: ast_Identifier | strDotStrCuzPyStoopid | None = recipeFlow.Z0Z_flowLogicalPathRoot
-
-	def getPathFilename() -> Path:
-		pathRoot: Path = pathPackage
-		filename: str = filenameStem + fileExtension
-		if logicalPathINFIX:
-			whyIsThisStillAThing: list[str] = logicalPathINFIX.split('.')
-			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
-		return pathRoot.joinpath(filename)
-
-	def writeModule() -> None:
-		astModule = ingredients.export()
-		ast.fix_missing_locations(astModule)
-		pythonSource: str = ast.unparse(astModule)
-		if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
-		autoflake_additional_imports: list[str] = ingredients.imports.exportListModuleNames()
-		if packageName:
-			autoflake_additional_imports.append(packageName)
-		pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False,)
-		pathFilename = getPathFilename()
-		writeStringToHere(pythonSource, pathFilename)
-
-	writeModule()
-
-def inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> ast.FunctionDef:
-	class FunctionInliner(ast.NodeTransformer):
-		def __init__(self, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> None:
-			self.dictionaryReplacementStatements = dictionaryReplacementStatements
-
-		def generic_visit(self, node: ast.AST) -> ast.AST:
-			"""Visit all nodes and replace them if necessary."""
-			return super().generic_visit(node)
-
-		def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.stmt]:
-			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore[attr-defined]
-			return node
-
-		def visit_Assign(self, node: ast.Assign) -> ast.AST | list[ast.stmt]:
-			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore[attr-defined]
-			return node
-
-		def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
-			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
-				replacement = self.dictionaryReplacementStatements[node.func.id] # type: ignore[attr-defined]
-				if not isinstance(replacement, list):
-					return replacement
-			return node
-
-	keepGoing = True
-	ImaInlineFunction = astFunctionDef
-	while keepGoing:
-		ImaInlineFunction = astFunctionDef
-		FunctionInliner(copy.deepcopy(dictionaryReplacementStatements)).visit(ImaInlineFunction)
-		if ast.unparse(ImaInlineFunction) == ast.unparse(astFunctionDef):
-			keepGoing = False
-		else:
-			astFunctionDef = ImaInlineFunction
-	return ImaInlineFunction
-
-def replaceMatchingASTnodes(astTree: ast.AST, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> ast.AST:
-	class TargetedNodeReplacer(ast.NodeTransformer):
-		def __init__(self, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> None:
-			self.mappingFindReplaceNodes = mappingFindReplaceNodes
-
-		def visit(self, node: ast.AST) -> ast.AST:
-			for nodeFind, nodeReplace in self.mappingFindReplaceNodes.items():
-				if self.nodesMatchStructurally(node, nodeFind):
-					return nodeReplace
-			return self.generic_visit(node)
-
-		def nodesMatchStructurally(self, nodeSubject: ast.AST | list[Any] | Any, nodePattern: ast.AST | list[Any] | Any) -> bool:
-			if nodeSubject is None or nodePattern is None:
-				return nodeSubject is None and nodePattern is None
-
-			if type(nodeSubject) != type(nodePattern):
-				return False
-
-			if isinstance(nodeSubject, ast.AST):
-				for field, fieldValueSubject in ast.iter_fields(nodeSubject):
-					if field in ('lineno', 'col_offset', 'end_lineno', 'end_col_offset', 'ctx'):
-						continue
-					attrPattern = getattr(nodePattern, field, None)
-					if not self.nodesMatchStructurally(fieldValueSubject, attrPattern):
-						return False
-				return True
-
-			if isinstance(nodeSubject, list) and isinstance(nodePattern, list):
-				nodeSubjectList: list[Any] = nodeSubject
-				nodePatternList: list[Any] = nodePattern
-				return len(nodeSubjectList) == len(nodePatternList) and all(
-					self.nodesMatchStructurally(elementSubject, elementPattern)
-					for elementSubject, elementPattern in zip(nodeSubjectList, nodePatternList)
-				)
-
-			return nodeSubject == nodePattern
-
-	astTreeCurrent, astTreePrevious = None, astTree
-	while astTreeCurrent is None or ast.unparse(astTreeCurrent) != ast.unparse(astTreePrevious):
-		astTreePrevious = astTreeCurrent if astTreeCurrent else astTree
-		astTreeCurrent = TargetedNodeReplacer(mappingFindReplaceNodes).visit(astTreePrevious)
-
-	return astTreeCurrent
 
 def Z0Z_main() -> None:
 	numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
@@ -250,7 +131,7 @@ def Z0Z_main() -> None:
 	ingredientsParallel.astFunctionDef.returns = theCountingIdentifierAnnotation
 	# ingredientsParallel.astFunctionDef.returns = astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns
 	replacementMap = {statement.value: statement.target for statement in listAnnAssign4DataclassUnpack}
-	ingredientsParallel.astFunctionDef = replaceMatchingASTnodes(ingredientsParallel.astFunctionDef, replacementMap) # type: ignore
+	ingredientsParallel.astFunctionDef = Z0Z_replaceMatchingASTnodes(ingredientsParallel.astFunctionDef, replacementMap) # type: ignore
 	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
 	# But, I would need to update the calling function, too.
 	ingredientsParallel = decorateCallableWithNumba(ingredientsParallel) # parametersNumbaParallelDEFAULT
@@ -273,7 +154,7 @@ def Z0Z_main() -> None:
 			).visit(ingredientsSequential.astFunctionDef)
 	ingredientsSequential.astFunctionDef.returns = astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns
 	replacementMap = {statement.value: statement.target for statement in listAnnAssign4DataclassUnpack}
-	ingredientsSequential.astFunctionDef = replaceMatchingASTnodes(ingredientsSequential.astFunctionDef, replacementMap) # type: ignore
+	ingredientsSequential.astFunctionDef = Z0Z_replaceMatchingASTnodes(ingredientsSequential.astFunctionDef, replacementMap) # type: ignore
 	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
 	# But, I would need to update the calling function, too.
 	ingredientsSequential = decorateCallableWithNumba(ingredientsSequential)
@@ -284,7 +165,7 @@ def Z0Z_main() -> None:
 							ingredientsSequential,
 							ingredientsDispatcher], imports=LedgerOfImports(numbaFlow.source_astModule))
 
-	Z0Z_putModuleOnDisk(ingredientsModuleNumbaUnified, numbaFlow)
+	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageName)
 
 if __name__ == '__main__':
 	Z0Z_main()

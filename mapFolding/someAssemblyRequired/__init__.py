@@ -5,6 +5,7 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 	ifThis as ifThis,
 	IngredientsFunction as IngredientsFunction,
 	IngredientsModule as IngredientsModule,
+	inlineThisFunctionWithTheseValues as inlineThisFunctionWithTheseValues,
 	LedgerOfImports as LedgerOfImports,
 	Make as Make,
 	makeDictionaryReplacementStatements as makeDictionaryReplacementStatements,
@@ -13,5 +14,7 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 	RecipeSynthesizeFlow as RecipeSynthesizeFlow,
 	strDotStrCuzPyStoopid as strDotStrCuzPyStoopid,
 	Then as Then,
+	write_astModule as write_astModule,
 	Z0Z_executeActionUnlessDescendantMatches as Z0Z_executeActionUnlessDescendantMatches,
+	Z0Z_replaceMatchingASTnodes as Z0Z_replaceMatchingASTnodes,
 	)

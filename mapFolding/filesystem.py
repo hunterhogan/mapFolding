@@ -1,6 +1,7 @@
 """Filesystem functions for mapFolding package."""
 from pathlib import Path, PurePath
 from typing import Any
+from os import PathLike
 import os
 
 def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
@@ -29,7 +30,7 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""
 	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
 
-def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal: str | os.PathLike[str] | None = None) -> Path:
+def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal: str | PathLike[str] | None = None) -> Path:
 	"""Get a standardized path and filename for the computed value `foldsTotal`.
 
 	If you provide a directory, the function will append a standardized filename. If you provide a filename
@@ -59,7 +60,7 @@ def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal
 	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 	return pathFilenameFoldsTotal
 
-def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> None:
+def saveFoldsTotal(pathFilename: str | PathLike[str], foldsTotal: int) -> None:
 	"""
 	Save foldsTotal with multiple fallback mechanisms.
 
@@ -87,7 +88,7 @@ def saveFoldsTotal(pathFilename: str | os.PathLike[str], foldsTotal: int) -> Non
 			print(foldsTotal)
 	return None
 
-def writeStringToHere(this: str, pathFilename: str | os.PathLike[Any] | PurePath) -> None:
+def writeStringToHere(this: str, pathFilename: str | PathLike[Any] | PurePath) -> None:
 	"""Write the string `this` to the file at `pathFilename`."""
 	pathFilename = Path(pathFilename)
 	pathFilename.parent.mkdir(parents=True, exist_ok=True)
