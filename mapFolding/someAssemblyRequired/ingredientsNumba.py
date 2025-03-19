@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import ifThis, IngredientsFunction, LedgerOfImports, Make
+from mapFolding.someAssemblyRequired import ifThis, IngredientsFunction, Make
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, TYPE_CHECKING, Final, cast
 import ast

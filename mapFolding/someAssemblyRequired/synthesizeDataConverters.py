@@ -55,7 +55,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 
 	collector = NodeCollector(
 			ifThis.isAnnAssignAndTargetIsName,
-				[Then.Z0Z_appendAnnAssignOfNameDOTnameTo(instance_Identifier, listAnnAssign4DataclassUnpack)
+				[Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, listAnnAssign4DataclassUnpack)
 				, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
 				, lambda node: addToLedger.visit(node)
 				, filteredAppendKeywordAction

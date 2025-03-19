@@ -20,11 +20,11 @@ Identifiers: scope and resolution, LEGB (Local, Enclosing, Global, Builtin)
 """
 
 # I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
+# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 packageFlowSynthetic = 'numba'
-Z0Z_packageFlow = 'algorithm'
-# https://github.com/hunterhogan/mapFolding/issues/4
-# Z0Z_packageFlow = packageFlowSynthetic
-
+# Z0Z_packageFlow = 'algorithm'
+Z0Z_packageFlow = packageFlowSynthetic
+Z0Z_concurrencyPackage = 'multiprocessing'
 # =============================================================================
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
 # Evaluate When Packaging Evaluate When Packaging Evaluate When Packaging
@@ -95,7 +95,9 @@ theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
 
 # =============================================================================
 
+# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 concurrencyPackage: str = Z0Z_packageFlow
+concurrencyPackage = Z0Z_concurrencyPackage
 
 # =============================================================================
 # The relatively flexible type system needs a different paradigm, but I don't
@@ -252,7 +254,6 @@ def getPackageDispatcher() -> Callable[[ComputationState], ComputationState]:
 	# NOTE but this part, if the package flow is synthetic, probably needs to be delegated
 	# to the authority for creating _that_ synthetic flow.
 
-	# Automated system
 	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
 	dispatcherCallable = getattr(moduleImported, theDispatcherCallable)
 	return dispatcherCallable
@@ -263,8 +264,10 @@ def getPackageDispatcher() -> Callable[[ComputationState], ComputationState]:
 - Lazy Initialization
 - Separate configuration from business logic
 
+----
 theSSOT and yourSSOT
 
+----
 delay realization/instantiation until a concrete value is desired
 moment of truth: when the value is needed, not when the value is defined
 """

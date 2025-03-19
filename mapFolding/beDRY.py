@@ -145,7 +145,7 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 		concurrencyLimit: int = defineConcurrencyLimit(CPUlimit, get_num_threads())
 		set_num_threads(concurrencyLimit)
 		concurrencyLimit = get_num_threads()
-	elif concurrencyPackage == 'algorithm':
+	elif concurrencyPackage == 'multiprocessing':
 		# When to use multiprocessing.set_start_method https://github.com/hunterhogan/mapFolding/issues/6
 		concurrencyLimit = defineConcurrencyLimit(CPUlimit)
 	else:

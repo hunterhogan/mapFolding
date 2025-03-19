@@ -1,4 +1,3 @@
-import importlib
 from importlib.machinery import ModuleSpec
 from types import ModuleType
 import importlib.util

@@ -17,8 +17,8 @@ import inspect
 import numpy
 if TYPE_CHECKING:
 	from mapFolding.someAssemblyRequired.synthesizeDataConverters import makeStateJob
-	from mapFolding.someAssemblyRequired.synthesizeNumbaVESTIGIAL import thisIsNumbaDotJit, decorateCallableWithNumba
-	from mapFolding.someAssemblyRequired.Z0Z_whatWillBe import ParametersNumba, getDatatypeModuleScalarVESTIGIAL, getDecoratorCallableVESTIGIAL, setDatatypeModuleScalarVESTIGIAL, setDecoratorCallableVESTIGIAL, parametersNumbaDEFAULT
+	from mapFolding.someAssemblyRequired.ingredientsNumba import thisIsNumbaDotJit, decorateCallableWithNumba
+	from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDEFAULT
 
 def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, statement: ast.Assign | ast.stmt, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	arrayType = type(arrayTarget)
@@ -54,7 +54,7 @@ def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arra
 
 def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	for statement in FunctionDefTarget.body.copy():
-		if ifThis.isUnpackingAnArray(identifier)(statement):
+		if True:
 			indexAsStr: str = ast.unparse(statement.value.slice) # type: ignore
 			arraySlice: numpy.ndarray[Any, numpy.dtype[numpy.integer[Any]]] = arrayTarget[eval(indexAsStr)]
 			astAssignee: ast.Name = cast(ast.Name, statement.targets[0]) # type: ignore
@@ -63,10 +63,10 @@ def findAndReplaceTrackArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifi
 
 def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	# parameter: I define moduleConstructor
-	moduleConstructor = getDatatypeModuleScalarVESTIGIAL()
+	moduleConstructor = 'numba'
 
 	for statement in FunctionDefTarget.body.copy():
-		if ifThis.isUnpackingAnArray(identifier)(statement):
+		if True:
 			indexAsStr: str = ast.unparse(statement.value.slice) # type: ignore
 			arraySlice: numpy.ndarray[Any, numpy.dtype[numpy.integer[Any]]] = arrayTarget[eval(indexAsStr)]
 			astAssignee: ast.Name = cast(ast.Name, statement.targets[0]) # type: ignore
@@ -92,7 +92,7 @@ def removeAssignmentFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: st
 
 def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	"""Unlike most of the other functions, this is generic: it tries to turn an annotation into a construction call."""
-	moduleConstructor: str = getDatatypeModuleScalarVESTIGIAL()
+	moduleConstructor: str = 'numba'
 	for stmt in FunctionDefTarget.body.copy():
 		if isinstance(stmt, ast.AnnAssign):
 			if isinstance(stmt.target, ast.Name) and isinstance(stmt.value, ast.Constant):
@@ -142,7 +142,7 @@ def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget
 
 	datatype: str = 'Z0Z_identifierCountFolds'
 	FunctionDefTarget.returns = ast.Name(id=datatype, ctx=ast.Load())
-	datatypeModuleScalar: str = getDatatypeModuleScalarVESTIGIAL()
+	datatypeModuleScalar: str = 'numba'
 	allImports.addImportFromStr(datatypeModuleScalar, datatype)
 
 	FunctionDefTarget.body.append(returnStatement)
@@ -298,13 +298,13 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 
 	if not callableTarget:
 		if len(setFunctionDef) == 1:
-			FunctionDefTarget: ast.FunctionDef | None = setFunctionDef.pop()
+			FunctionDefTarget = setFunctionDef.pop()
 			callableTarget = FunctionDefTarget.name
 		else:
 			raise ValueError(f"I did not receive a `callableTarget` and {algorithmSource.__name__=} has more than one callable: {setFunctionDef}. Please select one.")
 	else:
 		listFunctionDefTarget: list[ast.FunctionDef] = [statement for statement in setFunctionDef if statement.name == callableTarget]
-		FunctionDefTarget = listFunctionDefTarget[0] if listFunctionDefTarget else None
+		FunctionDefTarget = listFunctionDefTarget[0] if listFunctionDefTarget else None # type: ignore
 	if not FunctionDefTarget: raise ValueError(f"I received `{callableTarget=}` and {algorithmSource.__name__=}, but I could not find that function in that source.")
 
 	# NOTE `allImports` is a complementary container to `FunctionDefTarget`; the `FunctionDefTarget` cannot track its own imports very well.
@@ -324,7 +324,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 		FunctionDefTarget.args.args.remove(pirateScowl)
 
 	identifierCounter = 'Z0Z_identifierCountFolds'
-	astExprIncrementCounter = ast.Expr(value = Make.astCall(Make.nameDOTname(identifierCounter, 'update'), args=[ast.Constant(value=1)], list_astKeywords=[]))
+	astExprIncrementCounter = ast.Expr(value = Make.astCall(Make.nameDOTname(identifierCounter, 'update'), listArguments=[ast.Constant(value=1)], list_astKeywords=[]))
 	FunctionDefTarget= cast(ast.FunctionDef, NodeReplacer(ifThis.isAugAssignTo(identifierCounter), Then.replaceWith(astExprIncrementCounter)).visit(FunctionDefTarget))
 	ast.fix_missing_locations(FunctionDefTarget)
 
@@ -345,7 +345,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 
 	# TODO create function for assigning value to `totalEstimated`
 	totalEstimated: int = Z0Z_totalEstimated
-	astLauncher: ast.Module = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated, stateJob.foldGroups[-1])
+	astLauncher = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated, stateJob.foldGroups[-1])
 
 	allImports.addImportFromStr('numba_progress', 'ProgressBar')
 	allImports.addImportFromStr('numba_progress', 'ProgressBarType')
@@ -362,10 +362,9 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 
 	FunctionDefTarget, allImports = findAndReplaceAnnAssignIn_body(FunctionDefTarget, allImports)
 	# NOTE add the perfect decorator
-	FunctionDefTarget, allImports = decorateCallableWithNumba(FunctionDefTarget, allImports, parametersNumba)
 	if thisIsNumbaDotJit(FunctionDefTarget.decorator_list[0]):
 		astCall: ast.Call = cast(ast.Call, FunctionDefTarget.decorator_list[0])
-		astCall.func = ast.Name(id=getDecoratorCallableVESTIGIAL(), ctx=ast.Load())
+		astCall.func = ast.Name(id='jit', ctx=ast.Load())
 		FunctionDefTarget.decorator_list[0] = astCall
 
 	# NOTE add imports, make str, remove unused imports
@@ -401,8 +400,8 @@ if __name__ == '__main__':
 	}
 
 	totalEstimated: int = dictionaryEstimates.get(tuple(mapShape), 10**8)
-	from mapFolding.syntheticModules import numbaCount
-	algorithmSource: ModuleType = numbaCount
+	from mapFolding.syntheticModules import numbaCount_doTheNeedful
+	algorithmSource: ModuleType = numbaCount_doTheNeedful
 
 	callableTarget = 'countSequential'
 
@@ -411,8 +410,5 @@ if __name__ == '__main__':
 	parametersNumba['boundscheck'] = False
 
 	pathFilenameWriteJob = None
-
-	setDatatypeModuleScalarVESTIGIAL('numba')
-	setDecoratorCallableVESTIGIAL('jit')
 
 	writeJobNumba(mapShape, algorithmSource, callableTarget, parametersNumba, pathFilenameWriteJob, Z0Z_totalEstimated=totalEstimated)
