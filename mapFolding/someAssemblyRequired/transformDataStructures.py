@@ -35,15 +35,8 @@ class ShatteredDataclass:
 	listAnnAssign4DataclassUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list)
 	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=list)
 	listNameDataclassFragments4Parameters: list[ast.Name] = dataclasses.field(default_factory=list)
-	# ledgerDataclassANDFragments: LedgerOfImports = LedgerOfImports()
-	# list_ast_argAnnotated4ArgumentsSpecification: list[ast.arg] = []
-	# list_keyword4DataclassInitialization: list[ast.keyword] = []
-	# listAnnAssign4DataclassUnpack: list[ast.AnnAssign] = []
-	# listAnnotations: list[ast.expr] = []
-	# listNameDataclassFragments4Parameters: list[ast.Name] = []
 
-def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
-		):
+def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
 	"""
 	Parameters:
 		logicalPathModule: gimme string cuz python is stoopid
@@ -51,9 +44,9 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 		instance_Identifier: In the synthesized module/function/scope, the identifier that will be used for the instance.
 	"""
 	module: ast.Module = ast.parse(inspect_getsource(import_module(logicalPathModule)))
+	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
 
 	dataclass = extractClassDef(dataclass_Identifier, module)
-
 	if not isinstance(dataclass, ast.ClassDef):
 		raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
 
@@ -72,21 +65,16 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(list_keyword4DataclassInitialization)
 	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction) # type: ignore
 
-	collector = NodeCollector(
-			ifThis.isAnnAssignAndTargetIsName,
-				[Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, listAnnAssign4DataclassUnpack)
-				, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
-				, lambda node: addToLedger.visit(node)
-				, filteredAppendKeywordAction
-				, lambda node: list_ast_argAnnotated4ArgumentsSpecification.append(Make.ast_arg(node.target.id, node.annotation)) # type: ignore
-				, lambda node: listAnnotations.append(node.annotation) # type: ignore
-				]
-			)
-
-	collector.visit(dataclass)
-
-	ledgerDataclassANDFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
-	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
+	NodeCollector(
+		ifThis.isAnnAssignAndTargetIsName,
+			[Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, listAnnAssign4DataclassUnpack)
+			, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
+			, lambda node: addToLedger.visit(node)
+			, filteredAppendKeywordAction
+			, lambda node: list_ast_argAnnotated4ArgumentsSpecification.append(Make.ast_arg(node.target.id, node.annotation)) # type: ignore
+			, lambda node: listAnnotations.append(node.annotation) # type: ignore
+			]
+		).visit(dataclass)
 
 	shatteredDataclass = ShatteredDataclass(
 	astAssignDataclassRepack = Make.astAssign(listTargets=[Make.astName(instance_Identifier)], value=Make.astCall(astName_dataclassesDOTdataclass, list_astKeywords=list_keyword4DataclassInitialization))
@@ -99,10 +87,9 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	, listAnnotations = listAnnotations
 	, listNameDataclassFragments4Parameters = listNameDataclassFragments4Parameters
 	)
+
+	shatteredDataclass.ledgerDataclassANDFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
 	return shatteredDataclass
-	# return (astName_dataclassesDOTdataclass, ledgerDataclassANDFragments, listAnnAssign4DataclassUnpack,
-	# 		astTuple4AssignTargetsToFragments, listNameDataclassFragments4Parameters, list_ast_argAnnotated4ArgumentsSpecification,
-	# 		astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns, astAssignDataclassRepack, list_keyword4DataclassInitialization)
 
 @overload
 def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...

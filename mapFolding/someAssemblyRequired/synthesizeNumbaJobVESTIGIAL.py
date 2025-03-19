@@ -16,7 +16,7 @@ import copy
 import inspect
 import numpy
 if TYPE_CHECKING:
-	from mapFolding.someAssemblyRequired.synthesizeDataConverters import makeStateJob
+	from mapFolding.someAssemblyRequired.transformDataStructures import makeStateJob
 	from mapFolding.someAssemblyRequired.ingredientsNumba import thisIsNumbaDotJit, decorateCallableWithNumba
 	from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDEFAULT
 

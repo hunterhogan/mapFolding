@@ -15,7 +15,7 @@ from mapFolding.someAssemblyRequired import (
 	inlineThisFunctionWithTheseValues,
 )
 from mapFolding.someAssemblyRequired.ingredientsNumba import decorateCallableWithNumba
-from mapFolding.someAssemblyRequired.synthesizeDataConverters import shatter_dataclassesDOTdataclass
+from mapFolding.someAssemblyRequired.transformDataStructures import shatter_dataclassesDOTdataclass
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
 import ast
 
