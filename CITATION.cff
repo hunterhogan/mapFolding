@@ -1,40 +1,51 @@
-abstract: Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps).
-  This repository, mapFolding, explores the mathematical and algorithmic challenges
-  of efficiently modeling, simulating, and solving problems related to folding maps.
-  The project implements innovative computational approaches to the geometry and combinatorics
-  of map folding, with applications to both theoretical mathematics and real-world
-  challenges in optimization and design. The repository includes detailed notes on
-  the problem space, comprehensive documentation of the implemented algorithms, and
-  resources for further research and experimentation.
+abstract: A computational framework for enumerating distinct folding patterns of rectangular
+  maps and implementing algorithmic transformations. This repository provides (1)
+  a pure Python implementation of Lunnon's 1971 algorithm, (2) a sophisticated code
+  transformation system that converts human-readable algorithms into highly-optimized
+  implementations, and (3) numerical validation against established sequences in the
+  Online Encyclopedia of Integer Sequences (OEIS). The framework balances theoretical
+  rigor with performance optimization through abstract syntax tree manipulation, dataclass
+  decomposition, and just- in-time compilation techniques. Beyond map folding, the
+  transformation tools offer a general-purpose approach for optimizing numerical algorithms
+  while maintaining readable source implementations.
 authors:
 - given-names: Hunter
   family-names: Hogan
   email: HunterHogan@pm.me
 cff-version: 1.2.0
-commit: ced0d58c8c477e3689e5f53b1f15676cd1cab9be
+commit: d284ea6983fda47881bdfe1b13c626681eea131e
 date-released: '2025-03-19'
 identifiers:
 - type: url
-  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.8.0
-  description: The URL for mapFolding 0.8.0.
+  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.8.1
+  description: The URL for mapFolding 0.8.1.
 keywords:
 - A001415
 - A001416
 - A001417
 - A001418
 - A195646
+- algorithmic optimization
+- AST manipulation
+- code generation
+- code transformation
 - combinatorics
-- folding
+- computational geometry
+- dataclass transformation
+- folding pattern enumeration
+- just-in-time compilation
 - map folding
+- Numba optimization
 - OEIS
-- optimization
+- performance optimization
+- source code analysis
 - stamp folding
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.8.0/
-repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.8.0
+repository-artifact: https://pypi.org/project/mapfolding/0.8.1/
+repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.8.1
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.8.0
+version: 0.8.1
