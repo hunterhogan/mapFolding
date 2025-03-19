@@ -149,7 +149,7 @@ class ComputationState:
 	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
 	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
-	groupsOfFolds: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
+	groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})
 	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	indexMiniGap: DatatypeElephino = DatatypeElephino(0)

@@ -19,12 +19,31 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any, Literal, overload
 import ast
+import dataclasses
 import pickle
 
 # Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
 
+@dataclasses.dataclass
+class ShatteredDataclass:
+	astAssignDataclassRepack: ast.Assign
+	astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns: ast.Subscript
+	astTuple4AssignTargetsToFragments: ast.Tuple
+	ledgerDataclassANDFragments: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
+	list_ast_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list)
+	list_keyword4DataclassInitialization: list[ast.keyword] = dataclasses.field(default_factory=list)
+	listAnnAssign4DataclassUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list)
+	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=list)
+	listNameDataclassFragments4Parameters: list[ast.Name] = dataclasses.field(default_factory=list)
+	# ledgerDataclassANDFragments: LedgerOfImports = LedgerOfImports()
+	# list_ast_argAnnotated4ArgumentsSpecification: list[ast.arg] = []
+	# list_keyword4DataclassInitialization: list[ast.keyword] = []
+	# listAnnAssign4DataclassUnpack: list[ast.AnnAssign] = []
+	# listAnnotations: list[ast.expr] = []
+	# listNameDataclassFragments4Parameters: list[ast.Name] = []
+
 def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier
-		)-> tuple[ast.Name, LedgerOfImports, list[ast.AnnAssign], ast.Tuple, list[ast.Name], list[ast.arg], ast.Subscript, ast.Assign, list[ast.keyword]]:
+		):
 	"""
 	Parameters:
 		logicalPathModule: gimme string cuz python is stoopid
@@ -66,16 +85,24 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 
 	collector.visit(dataclass)
 
-	astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns = Make.astSubscript(Make.astName('tuple'), Make.astTuple(listAnnotations))
-
 	ledgerDataclassANDFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
-
 	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
-	astTuple4AssignTargetsToFragments: ast.Tuple = Make.astTuple(listNameDataclassFragments4Parameters, ast.Store())
+
+	shatteredDataclass = ShatteredDataclass(
 	astAssignDataclassRepack = Make.astAssign(listTargets=[Make.astName(instance_Identifier)], value=Make.astCall(astName_dataclassesDOTdataclass, list_astKeywords=list_keyword4DataclassInitialization))
-	return (astName_dataclassesDOTdataclass, ledgerDataclassANDFragments, listAnnAssign4DataclassUnpack,
-			astTuple4AssignTargetsToFragments, listNameDataclassFragments4Parameters, list_ast_argAnnotated4ArgumentsSpecification,
-			astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns, astAssignDataclassRepack, list_keyword4DataclassInitialization)
+	, astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns = Make.astSubscript(Make.astName('tuple'), Make.astTuple(listAnnotations))
+	, astTuple4AssignTargetsToFragments = Make.astTuple(listNameDataclassFragments4Parameters, ast.Store())
+	, ledgerDataclassANDFragments = ledgerDataclassANDFragments
+	, list_ast_argAnnotated4ArgumentsSpecification = list_ast_argAnnotated4ArgumentsSpecification
+	, list_keyword4DataclassInitialization = list_keyword4DataclassInitialization
+	, listAnnAssign4DataclassUnpack = listAnnAssign4DataclassUnpack
+	, listAnnotations = listAnnotations
+	, listNameDataclassFragments4Parameters = listNameDataclassFragments4Parameters
+	)
+	return shatteredDataclass
+	# return (astName_dataclassesDOTdataclass, ledgerDataclassANDFragments, listAnnAssign4DataclassUnpack,
+	# 		astTuple4AssignTargetsToFragments, listNameDataclassFragments4Parameters, list_ast_argAnnotated4ArgumentsSpecification,
+	# 		astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns, astAssignDataclassRepack, list_keyword4DataclassInitialization)
 
 @overload
 def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...

@@ -791,14 +791,15 @@ def inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionar
 			return node
 
 	keepGoing = True
-	ImaInlineFunction = astFunctionDef
+	ImaInlineFunction = copy.deepcopy(astFunctionDef)
 	while keepGoing:
-		ImaInlineFunction = astFunctionDef
+		ImaInlineFunction = copy.deepcopy(astFunctionDef)
 		FunctionInliner(copy.deepcopy(dictionaryReplacementStatements)).visit(ImaInlineFunction)
 		if ast.unparse(ImaInlineFunction) == ast.unparse(astFunctionDef):
 			keepGoing = False
 		else:
-			astFunctionDef = ImaInlineFunction
+			astFunctionDef = copy.deepcopy(ImaInlineFunction)
+			ast.fix_missing_locations(astFunctionDef)
 	return ImaInlineFunction
 
 def Z0Z_replaceMatchingASTnodes(astTree: ast.AST, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> ast.AST:
