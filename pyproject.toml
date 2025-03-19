@@ -96,7 +96,7 @@ testpaths = ["tests"]
 NUMBA_JIT_COVERAGE = "1"
 
 [tool.setuptools]
-package-data = { "" = ["py.typed"] }
+package-data = { "*" = ["py.typed"] }
 packages = { find = {} }
 
 [tool.updateCitation]
