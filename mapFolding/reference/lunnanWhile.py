@@ -2,9 +2,7 @@
 A largely faithful translation of the original Atlas Autocode code by W. F. Lunnon to Python using `while`.
 W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
 """
-from typing import Sequence
-
-def foldings(p: Sequence[int]) -> int:
+def foldings(p: list[int]) -> int:
 	"""
 	Run loop with (A, B) on each folding of a p[1] x ... x p[d] map, where A and B are the above and below vectors.
 
@@ -38,8 +36,8 @@ def foldings(p: Sequence[int]) -> int:
 	# and later gap[gapter[l]] is the gap where leaf l is currently inserted
 
 	P = [1] * (d + 1)
-	C = [[0] * (n + 1) for dimension1 in range(d + 1)]
-	D = [[[0] * (n + 1) for dimension2 in range(n + 1)] for dimension1 in range(d + 1)]
+	C = [[0] * (n + 1) for _dimension1 in range(d + 1)]
+	D = [[[0] * (n + 1) for _dimension2 in range(n + 1)] for _dimension1 in range(d + 1)]
 
 	for i in range(1, d + 1):
 		P[i] = P[i - 1] * p[i - 1]
@@ -65,7 +63,7 @@ def foldings(p: Sequence[int]) -> int:
 	# D[i][l][m] = leaf connected to m in section i when inserting l;
 
 	G: int = 0
-	l: int = 1
+	l = 1
 
 	# kick off with null folding
 	while l > 0:
@@ -84,7 +82,7 @@ def foldings(p: Sequence[int]) -> int:
 				if D[i][l][l] == l:
 					dd = dd + 1
 				else:
-					m: int = D[i][l][l]
+					m = D[i][l][l]
 					while m != l:
 						gap[gg] = m
 						if count[m] == 0:

@@ -1,9 +1,9 @@
-from typing import List
+from typing import Any
 import numba
 import numpy
 
 @numba.jit(cache=True, nopython=True, fastmath=True)
-def countFolds(listDimensions: List[int]) -> int:
+def countFolds(listDimensions: list[int]) -> int:
 	"""
 	Count the number of distinct ways to fold a map with at least two positive dimensions.
 
@@ -13,10 +13,10 @@ def countFolds(listDimensions: List[int]) -> int:
 	Returns:
 		foldsTotal: The total number of distinct folds for the given map dimensions.
 	"""
-	def integerSmall(value) -> numpy.uint8:
+	def integerSmall(value: numpy.integer[Any] | Any) -> numpy.uint8:
 		return numpy.uint8(value)
 
-	def integerLarge(value) -> numpy.uint64:
+	def integerLarge(value: numpy.integer[Any] | Any) -> numpy.uint64:
 		return numpy.uint64(value)
 
 	dtypeMedium = numpy.uint8

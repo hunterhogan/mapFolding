@@ -1,3 +1,25 @@
+"""
+Utilities for transforming complex data structures in Python code generation.
+
+This module provides specialized tools for working with structured data types during
+the code transformation process, with a particular focus on handling dataclasses. It
+implements functionality that enables:
+
+1. Decomposing dataclasses into individual fields for efficient processing
+2. Creating optimized parameter passing for transformed functions
+3. Converting between different representations of data structures
+4. Serializing and deserializing computation state objects
+
+The core functionality revolves around the "shattering" process that breaks down
+a dataclass into its constituent components, making each field individually accessible
+for code generation and optimization purposes. This dataclass handling is critical for
+transforming algorithms that operate on unified state objects into optimized implementations
+that work with primitive types directly.
+
+While developed for transforming map folding computation state objects, the utilities are
+designed to be applicable to various data structure transformation scenarios.
+"""
+
 from collections.abc import Sequence
 from importlib import import_module
 from inspect import getsource as inspect_getsource
@@ -24,11 +46,15 @@ import pickle
 
 # Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
 
+countingIdentifierHARDCODED = 'groupsOfFolds'
+
 @dataclasses.dataclass
 class ShatteredDataclass:
 	astAssignDataclassRepack: ast.Assign
 	astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns: ast.Subscript
 	astTuple4AssignTargetsToFragments: ast.Tuple
+	countingVariableAnnotation: ast.expr
+	countingVariableName: ast.Name
 	ledgerDataclassANDFragments: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	list_ast_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list)
 	list_keyword4DataclassInitialization: list[ast.keyword] = dataclasses.field(default_factory=list)
@@ -57,6 +83,9 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	listAnnotations: list[ast.expr] = []
 	listNameDataclassFragments4Parameters: list[ast.Name] = []
 
+	# TODO get the value from `groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})`
+	countingVariable = countingIdentifierHARDCODED
+
 	addToLedgerPredicate = ifThis.isAnnAssignAndAnnotationIsName
 	addToLedgerAction = Then.Z0Z_ledger(logicalPathModule, ledgerDataclassANDFragments)
 	addToLedger = NodeCollector(addToLedgerPredicate, [addToLedgerAction])
@@ -80,6 +109,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	astAssignDataclassRepack = Make.astAssign(listTargets=[Make.astName(instance_Identifier)], value=Make.astCall(astName_dataclassesDOTdataclass, list_astKeywords=list_keyword4DataclassInitialization))
 	, astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns = Make.astSubscript(Make.astName('tuple'), Make.astTuple(listAnnotations))
 	, astTuple4AssignTargetsToFragments = Make.astTuple(listNameDataclassFragments4Parameters, ast.Store())
+	, countingVariableAnnotation = next(ast_arg.annotation for ast_arg in list_ast_argAnnotated4ArgumentsSpecification if ast_arg.arg == countingVariable) or Make.astName('Any')
+	, countingVariableName = Make.astName(countingVariable)
 	, ledgerDataclassANDFragments = ledgerDataclassANDFragments
 	, list_ast_argAnnotated4ArgumentsSpecification = list_ast_argAnnotated4ArgumentsSpecification
 	, list_keyword4DataclassInitialization = list_keyword4DataclassInitialization
@@ -92,10 +123,10 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	return shatteredDataclass
 
 @overload
-def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...
+def makeStateJobOUTDATED(listDimensions: Sequence[int], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...
 @overload
-def makeStateJob(listDimensions: Sequence[int], *, writeJob: Literal[False], **keywordArguments: Any) -> ComputationState: ...
-def makeStateJob(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Any) -> ComputationState | Path:
+def makeStateJobOUTDATED(listDimensions: Sequence[int], *, writeJob: Literal[False], **keywordArguments: Any) -> ComputationState: ...
+def makeStateJobOUTDATED(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Any) -> ComputationState | Path:
 	"""
 	Creates a computation state job for map folding calculations and optionally saves it to disk.
 

@@ -1,4 +1,19 @@
-"""Everything implementing the The Online Encyclopedia of Integer Sequences (OEIS); _only_ things that implement _only_ the OEIS."""
+"""
+Interface to The Online Encyclopedia of Integer Sequences (OEIS) for map folding sequences.
+
+This module provides a comprehensive interface for accessing and utilizing integer sequences
+from the OEIS that relate to map folding problems. It implements functionality to:
+
+1. Retrieve sequence data from OEIS with local caching for performance
+2. Map sequence indices to corresponding map shapes based on sequence definitions
+3. Provide a command-line interface for sequence lookups
+4. Execute map folding computations for sequence terms not available in OEIS
+
+The module maintains a registry of implemented OEIS sequences (A001415-A001418, A195646)
+with their metadata, known values, and functions to convert between sequence indices and
+map dimensions. This allows the package to validate results against established mathematical
+literature and extend sequences beyond their currently known terms.
+"""
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from mapFolding.theSSOT import thePathPackage

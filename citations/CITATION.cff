@@ -1,11 +1,14 @@
-abstract: Algorithm(s) for counting distinct ways to fold a map (or a strip of stamps).
-  This repository, mapFolding, explores the mathematical and algorithmic challenges
-  of efficiently modeling, simulating, and solving problems related to folding maps.
-  The project implements innovative computational approaches to the geometry and combinatorics
-  of map folding, with applications to both theoretical mathematics and real-world
-  challenges in optimization and design. The repository includes detailed notes on
-  the problem space, comprehensive documentation of the implemented algorithms, and
-  resources for further research and experimentation.
+abstract: A computational framework for enumerating distinct folding patterns of
+  rectangular maps and implementing algorithmic transformations. This repository
+  provides (1) a pure Python implementation of Lunnon's 1971 algorithm, (2) a
+  sophisticated code transformation system that converts human-readable
+  algorithms into highly-optimized implementations, and (3) numerical validation
+  against established sequences in the Online Encyclopedia of Integer Sequences
+  (OEIS). The framework balances theoretical rigor with performance optimization
+  through abstract syntax tree manipulation, dataclass decomposition, and just-
+  in-time compilation techniques. Beyond map folding, the transformation tools
+  offer a general-purpose approach for optimizing numerical algorithms while
+  maintaining readable source implementations.
 authors:
 - given-names: Hunter
   family-names: Hogan
@@ -23,11 +26,18 @@ keywords:
 - A001417
 - A001418
 - A195646
+- algorithmic optimization
+- AST manipulation
+- code transformation
 - combinatorics
-- folding
+- computational geometry
+- folding pattern enumeration
+- just-in-time compilation
 - map folding
+- Numba
 - OEIS
-- optimization
+- performance optimization
+- source code generation
 - stamp folding
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.

@@ -1,7 +1,28 @@
+"""
+Numba-specific ingredients for optimized code generation.
+
+This module provides specialized tools, constants, and types specifically designed
+for transforming Python code into Numba-accelerated implementations. It implements:
+
+1. A range of Numba jit decorator configurations for different optimization scenarios
+2. Functions to identify and manipulate Numba decorators in abstract syntax trees
+3. Utilities for applying appropriate Numba typing to transformed code
+4. Parameter management for Numba compilation options
+
+The configurations range from conservative options that prioritize compatibility and
+error detection to aggressive optimizations that maximize performance at the cost of
+flexibility. While this module specifically targets Numba, its design follows the pattern
+of generic code transformation tools in the package, allowing similar approaches to be
+applied to other acceleration technologies.
+
+This module works in conjunction with transformation tools to convert the general-purpose
+algorithm implementation into a highly-optimized Numba version.
+"""
+
 from collections.abc import Callable, Sequence
 from mapFolding.someAssemblyRequired import ifThis, IngredientsFunction, Make
 from numba.core.compiler import CompilerBase as numbaCompilerBase
-from typing import Any, TYPE_CHECKING, Final, cast
+from typing import Any, cast, Final, TYPE_CHECKING
 import ast
 
 try:

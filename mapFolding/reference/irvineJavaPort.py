@@ -2,7 +2,7 @@
 Ported from the Java version by Sean A. Irvine:
 https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java
 
-Citation: mapFolding/citations/jOEIS.bibtex
+Citation: https://github.com/hunterhogan/mapFolding/blob/134f2e6ecdf59fb6f6829c775475544a6aaaa800/citations/jOEIS.bibtex
 """
 def foldings(p: list[int], res: int = 0, mod: int = 0) -> int:
 	"""

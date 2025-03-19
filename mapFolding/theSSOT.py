@@ -1,3 +1,21 @@
+"""
+Single Source of Truth module for configuration, types, and computational state management.
+
+This module defines the core data structures, type definitions, and configuration settings
+used throughout the mapFolding package. It implements the Single Source of Truth (SSOT)
+principle to ensure consistency across the package's components.
+
+Key features:
+1. The ComputationState dataclass, which encapsulates the state of the folding computation
+2. Unified type definitions for integers and arrays used in the computation
+3. Configuration settings for synthetic module generation and dispatching
+4. Path resolution and management for package resources and job output
+5. Dynamic dispatch functionality for algorithm implementations
+
+The module differentiates between "the" identifiers (package defaults) and other identifiers
+to avoid namespace collisions when transforming algorithms.
+"""
+
 from collections.abc import Callable
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile

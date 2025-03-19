@@ -1,4 +1,19 @@
-"""A relatively stable API for oft-needed functionality."""
+"""
+Utility functions for maintaining DRY (Don't Repeat Yourself) principles in the mapFolding package.
+
+This module provides a collection of helper functions that abstract common operations needed
+throughout the package, preventing code duplication and ensuring consistency. The functions
+manage core aspects of the computation process, including:
+
+1. Resource allocation and system limits management
+2. Data structure initialization and manipulation
+3. Parameter validation and interpretation
+4. Construction of specialized arrays and matrices for the folding algorithm
+
+The functions in this module serve as a relatively stable API for other modules to use,
+particularly for initializing computation state, validating inputs, and creating data
+structures needed by the folding algorithms.
+"""
 from collections.abc import Sequence
 from mapFolding.theSSOT import Array3D, ComputationState, getDatatypePackage, getNumpyDtypeDefault
 from sys import maxsize as sysMaxsize

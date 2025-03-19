@@ -1,3 +1,17 @@
+"""
+Public API for the map folding algorithm with simplified interface.
+
+This module provides the main entry point for users of the mapFolding package,
+abstracting away the complexities of the computational algorithm. It offers
+a high-level interface to count the total number of possible ways to fold
+a rectangular map of specified dimensions, with options for customizing the
+computation process and saving results.
+
+The primary function is countFolds, which handles parameter validation,
+computation state management, dispatching to the appropriate algorithm
+implementation, and optional persistence of results.
+"""
+
 from collections.abc import Sequence
 from mapFolding.beDRY import outfitCountFolds, setCPUlimit, validateListDimensions
 from mapFolding.filesystem import getPathFilenameFoldsTotal, saveFoldsTotal

@@ -2,8 +2,7 @@
 from collections.abc import Sequence
 from typing import Any, cast, TYPE_CHECKING
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal
-from mapFolding.someAssemblyRequired import ( ifThis, Make, NodeReplacer, Then, )
-from mapFolding.someAssemblyRequired.transformationTools import LedgerOfImports
+from mapFolding.someAssemblyRequired import ( ifThis, LedgerOfImports, Make, NodeReplacer, Then, )
 from mapFolding.theSSOT import ( ComputationState, raiseIfNoneGitHubIssueNumber3, getPathJobRootDEFAULT, )
 from os import PathLike
 from pathlib import Path
@@ -16,7 +15,7 @@ import copy
 import inspect
 import numpy
 if TYPE_CHECKING:
-	from mapFolding.someAssemblyRequired.transformDataStructures import makeStateJob
+	from mapFolding.someAssemblyRequired.transformDataStructures import makeStateJobOUTDATED
 	from mapFolding.someAssemblyRequired.ingredientsNumba import thisIsNumbaDotJit, decorateCallableWithNumba
 	from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDEFAULT
 
@@ -291,7 +290,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	"""
 
 	# NOTE get the raw ingredients: data and the algorithm
-	stateJob = makeStateJob(mapShape, writeJob=False, **keywordArguments)
+	stateJob = makeStateJobOUTDATED(mapShape, writeJob=False, **keywordArguments)
 	pythonSource: str = inspect.getsource(algorithmSource)
 	astModule: ast.Module = ast.parse(pythonSource)
 	setFunctionDef: set[ast.FunctionDef] = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}

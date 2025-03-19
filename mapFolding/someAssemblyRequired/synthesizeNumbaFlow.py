@@ -1,3 +1,26 @@
+"""
+Orchestrator for generating Numba-optimized versions of the map folding algorithm.
+
+This module transforms the pure Python implementation of the map folding algorithm
+into a highly-optimized Numba implementation. It serves as the high-level coordinator
+for the code transformation process, orchestrating the following steps:
+
+1. Extracting the core algorithm functions from the source implementation
+2. Transforming function signatures and state handling for Numba compatibility
+3. Converting state-based operations to direct primitive operations
+4. Applying Numba decorators with appropriate optimization parameters
+5. Managing imports and dependencies for the generated code
+6. Assembling and writing the transformed implementation
+
+The transformation process preserves the algorithm's logic while dramatically improving
+performance by leveraging Numba's just-in-time compilation capabilities. This module
+depends on the abstract transformation tools, dataclass handling utilities, and
+Numba-specific optimization configurations from other modules in the package.
+
+The primary entry point is the makeNumbaFlow function, which can be executed directly
+to generate a fresh optimized implementation.
+"""
+
 from mapFolding.someAssemblyRequired import (
 	extractFunctionDef,
 	ifThis,
@@ -20,6 +43,26 @@ from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
 import ast
 
 def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> None:
+	"""
+	Think about a better organization of this function.
+
+	Currently, transform `Callable` in order:
+		sourceDispatcherCallable
+		sourceInitializeCallable
+		sourceParallelCallable
+		sourceSequentialCallable
+
+	But, it should be organized around each transformation. So, when the parameters of `sourceSequentialCallable`
+	are transformed, for example, the statement in `sourceDispatcherCallable` that calls `sourceSequentialCallable` should be
+	transformed at the same time: literally in the same function-or-NodeReplacer-or-subroutine. That would help
+	avoid bugs.
+
+	Furthermore, if the above example transformation requires unpacking the dataclass, for example, then the unpacking
+	would be automatically triggered. I have no idea how that would happen, but the transformations are highly predictable,
+	so using a programming language to construct if-this-then-that cascades shouldn't be a problem, you know?
+
+	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
+	"""
 	dictionaryReplacementStatements = makeDictionaryReplacementStatements(numbaFlow.source_astModule)
 	# TODO remember that `sequentialCallable` and `sourceSequentialCallable` are two different values.
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
@@ -74,12 +117,6 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 
 	# sourceSequentialCallable
 	shatteredDataclass = shatter_dataclassesDOTdataclass(numbaFlow.logicalPathModuleDataclass, numbaFlow.sourceDataclassIdentifier, numbaFlow.sourceDataclassInstance)
-	# TODO remove hardcoding
-	theCountingIdentifierHARDCODED = 'groupsOfFolds'
-	countingVariable = theCountingIdentifierHARDCODED
-	countingVariableName = Make.astName(countingVariable)
-	countingVariableAnnotation = next(
-		ast_arg.annotation for ast_arg in shatteredDataclass.list_ast_argAnnotated4ArgumentsSpecification if ast_arg.arg == countingVariable)
 
 	ingredientsDispatcher.imports.update(shatteredDataclass.ledgerDataclassANDFragments)
 
@@ -89,10 +126,8 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 			).visit(ingredientsDispatcher.astFunctionDef)
 	NodeReplacer(
 		findThis = ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.sourceSequentialCallable)
-		# findThis = ifThis.isReturn
 		, doThat = Then.insertThisBelow([shatteredDataclass.astAssignDataclassRepack])
 			).visit(ingredientsDispatcher.astFunctionDef)
-	# TODO reconsider: This calls a function, but I don't inspect the function for its parameters or return.
 	NodeReplacer(
 		findThis = ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.sourceSequentialCallable)
 		, doThat = Then.replaceWith(Make.astAssign(listTargets=[shatteredDataclass.astTuple4AssignTargetsToFragments], value=Make.astCall(Make.astName(numbaFlow.sequentialCallable), shatteredDataclass.listNameDataclassFragments4Parameters)))
@@ -120,16 +155,12 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 
 	NodeReplacer(
 		findThis = ifThis.isReturn
-		# , doThat = Then.replaceWith(Make.astReturn(shatteredDataclass.astTuple4AssignTargetsToFragments))
-		, doThat = Then.replaceWith(Make.astReturn(countingVariableName))
+		, doThat = Then.replaceWith(Make.astReturn(shatteredDataclass.countingVariableName))
 			).visit(ingredientsParallel.astFunctionDef)
-	ingredientsParallel.astFunctionDef.returns = countingVariableAnnotation
-	# ingredientsParallel.astFunctionDef.returns = shatteredDataclass.astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns
+	ingredientsParallel.astFunctionDef.returns = shatteredDataclass.countingVariableAnnotation
 	replacementMap = {statement.value: statement.target for statement in shatteredDataclass.listAnnAssign4DataclassUnpack}
 	ingredientsParallel.astFunctionDef = Z0Z_replaceMatchingASTnodes(ingredientsParallel.astFunctionDef, replacementMap) # type: ignore
-	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
-	# But, I would need to update the calling function, too.
-	ingredientsParallel = decorateCallableWithNumba(ingredientsParallel) # parametersNumbaParallelDEFAULT
+	ingredientsParallel = decorateCallableWithNumba(ingredientsParallel)
 
 	# ===========================================================
 	sourcePython = numbaFlow.sourceSequentialCallable
@@ -150,10 +181,9 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 	ingredientsSequential.astFunctionDef.returns = shatteredDataclass.astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns
 	replacementMap = {statement.value: statement.target for statement in shatteredDataclass.listAnnAssign4DataclassUnpack}
 	ingredientsSequential.astFunctionDef = Z0Z_replaceMatchingASTnodes(ingredientsSequential.astFunctionDef, replacementMap) # type: ignore
-	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
-	# But, I would need to update the calling function, too.
 	ingredientsSequential = decorateCallableWithNumba(ingredientsSequential)
 
+	# ===========================================================
 	ingredientsModuleNumbaUnified = IngredientsModule(
 		ingredientsFunction=[ingredientsInitialize,
 							ingredientsParallel,

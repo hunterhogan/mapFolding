@@ -1,6 +1,5 @@
 from mapFolding import outfitFoldings
 from numba import njit
-from typing import List
 import numpy
 from numpy.typing import NDArray
 
@@ -42,7 +41,7 @@ tricky = [
 
 COUNTindicesStatic = len(tricky)
 
-def countFolds(listDimensions: List[int]):
+def countFolds(listDimensions: list[int]):
 	static = numpy.zeros(COUNTindicesStatic, dtype=numpy.int64)
 
 	listDimensions, static[leavesTotal], D, track,gapsWhere = outfitFoldings(listDimensions)
@@ -55,7 +54,7 @@ def countFolds(listDimensions: List[int]):
 	return foldingsTotal
 
 # @recordBenchmarks()
-def _sherpa(track: NDArray, gap: NDArray, static: NDArray, D: NDArray, p: List[int]):
+def _sherpa(track: NDArray, gap: NDArray, static: NDArray, D: NDArray, p: list[int]):
 	"""Performance critical section that counts foldings.
 
 	Parameters:

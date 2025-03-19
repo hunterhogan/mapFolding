@@ -7,9 +7,8 @@ authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 classifiers = [
 	"Development Status :: 4 - Beta",
 	"Environment :: Console",
+	"Intended Audience :: Developers",
 	"Intended Audience :: Education",
-	"Intended Audience :: End Users/Desktop",
-	"Intended Audience :: Other Audience",
 	"Intended Audience :: Science/Research",
 	"Natural Language :: English",
 	"Operating System :: OS Independent",
@@ -20,7 +19,10 @@ classifiers = [
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
 	"Topic :: Scientific/Engineering :: Mathematics",
+	"Topic :: Scientific/Engineering :: Information Analysis",
+	"Topic :: Software Development :: Code Generators",
 	"Topic :: Software Development :: Libraries :: Python Modules",
+	"Topic :: Software Development :: Compilers",
 	"Typing :: Typed",]
 dependencies = [
 	"autoflake",
@@ -31,18 +33,27 @@ dependencies = [
 	"python_minifier",
 	"tomli",
 	"Z0Z_tools",]
-description = "Count distinct ways to fold a map (or a strip of stamps)"
+description = "Map folding algorithm with code transformation framework for optimizing numerical computations"
 keywords = [
 	"A001415",
 	"A001416",
 	"A001417",
 	"A001418",
 	"A195646",
+	"algorithmic optimization",
+	"AST manipulation",
+	"code generation",
+	"code transformation",
 	"combinatorics",
-	"folding",
+	"computational geometry",
+	"dataclass transformation",
+	"folding pattern enumeration",
+	"just-in-time compilation",
 	"map folding",
+	"Numba optimization",
 	"OEIS",
-	"optimization",
+	"performance optimization",
+	"source code analysis",
 	"stamp folding",]
 license = { 'text' = "CC-BY-NC-4.0" }
 name = "mapFolding"
@@ -57,7 +68,7 @@ readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Repository = "https://github.com/hunterhogan/mapFolding.git" }
-version = "0.8.0"
+version = "0.8.1"
 
 [tool.coverage]
 report = { exclude_lines = [
@@ -69,8 +80,7 @@ run = { branch = true, concurrency = [
 	"multiprocessing",
 ], data_file = "tests/coverage/.coverage", omit = [
 	"getLLVMforNoReason.py",
-	"mapFolding/someAssemblyRequired/*",
-	"synthesizeModuleJAX.py",
+	"mapFolding/reference/*",
 	"tests/*",
 	"Z0Z_*",
 ], parallel = true, source = [
@@ -85,12 +95,9 @@ testpaths = ["tests"]
 [tool.pytest_env]
 NUMBA_JIT_COVERAGE = "1"
 
-[tool.setuptools.packages.find]
-where = ["."]
-# [tool.setuptools]
-# package-dir = {'' = '.'}
-# packages = ["mapFolding", "mapFolding-stubs"]
-# package-data = { "mapFolding" = ['py.typed'], "mapFolding-stubs" = ['*.pyi'] }
+[tool.setuptools]
+package-data = { "" = ["py.typed"] }
+packages = { find = {} }
 
 [tool.updateCitation]
 filenameCitationDOTcff = 'CITATION.cff'

@@ -2,10 +2,9 @@
 A generally faithful translation of the original Atlas Autocode code by W. F. Lunnon to Python using NumPy.
 W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
 """
-from typing import List
 import numpy
 
-def foldings(p: List[int]) -> int:
+def foldings(p: list[int]) -> int:
 	"""
 	Run loop with (A, B) on each folding of a p[1] x ... x p[d] map, where A and B are the above and below vectors.
 
@@ -66,7 +65,7 @@ def foldings(p: List[int]) -> int:
 	# D[i][l][m] = leaf connected to m in section i when inserting l;
 
 	G: int = 0
-	l: int = 1
+	l = 1
 
 	# kick off with null folding
 	while l > 0:
@@ -86,7 +85,7 @@ def foldings(p: List[int]) -> int:
 					if D[i][l][l] == l:
 						dd = dd + 1
 					else:
-						m: int = D[i][l][l]
+						m = D[i][l][l]
 						while m != l:
 							gap[gg] = m
 							if count[m] == 0:

@@ -1,14 +1,15 @@
 """The algorithm flattened into semantic sections.
 This version is not maintained, so you may see differences from the current version."""
+from collections.abc import Sequence
 from numpy import integer
 from numpy.typing import NDArray
-from typing import List, Any, Final, Optional, Union, Sequence, Tuple, Type, TypedDict
+from typing import Any, Final, TypedDict
 import enum
 import numpy
 import sys
 
-def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUlimit: Optional[Union[int, float, bool]] = None):
-	def doWhile():
+def countFolds(listDimensions: Sequence[int], computationDivisions: int | str | None = None, CPUlimit: int | float | bool | None = None) -> int:
+	def doWhile() -> None:
 
 		while activeLeafGreaterThan0Condition():
 
@@ -49,99 +50,99 @@ def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUli
 			if placeLeafCondition():
 				placeLeaf()
 
-	def activeGapIncrement():
+	def activeGapIncrement() -> None:
 		my[indexMy.gap1ndex] += 1
 
-	def activeLeafGreaterThan0Condition():
+	def activeLeafGreaterThan0Condition() -> bool:
 		return my[indexMy.leaf1ndex] > 0
 
-	def activeLeafGreaterThanLeavesTotalCondition():
+	def activeLeafGreaterThanLeavesTotalCondition() -> bool:
 		return my[indexMy.leaf1ndex] > the[indexThe.leavesTotal]
 
-	def activeLeafIsTheFirstLeafCondition():
+	def activeLeafIsTheFirstLeafCondition() -> bool:
 		return my[indexMy.leaf1ndex] <= 1
 
-	def activeLeafNotEqualToTaskDivisionsCondition():
+	def activeLeafNotEqualToTaskDivisionsCondition() -> bool:
 		return my[indexMy.leaf1ndex] != the[indexThe.taskDivisions]
 
-	def allDimensionsAreUnconstrained():
+	def allDimensionsAreUnconstrained() -> bool:
 		return my[indexMy.dimensionsUnconstrained] == the[indexThe.dimensionsTotal]
 
-	def backtrack():
+	def backtrack() -> None:
 		my[indexMy.leaf1ndex] -= 1
 		track[indexTrack.leafBelow, track[indexTrack.leafAbove, my[indexMy.leaf1ndex]]] = track[indexTrack.leafBelow, my[indexMy.leaf1ndex]]
 		track[indexTrack.leafAbove, track[indexTrack.leafBelow, my[indexMy.leaf1ndex]]] = track[indexTrack.leafAbove, my[indexMy.leaf1ndex]]
 
-	def backtrackCondition():
+	def backtrackCondition() -> bool:
 		return my[indexMy.leaf1ndex] > 0 and my[indexMy.gap1ndex] == track[indexTrack.gapRangeStart, my[indexMy.leaf1ndex] - 1]
 
-	def computationDivisionsCondition():
+	def computationDivisionsCondition() -> bool:
 		return the[indexThe.taskDivisions] == int(False)
 
-	def countGaps():
+	def countGaps() -> None:
 		gapsWhere[my[indexMy.gap1ndexCeiling]] = my[indexMy.leafConnectee]
 		if track[indexTrack.countDimensionsGapped, my[indexMy.leafConnectee]] == 0:
 			gap1ndexCeilingIncrement()
 		track[indexTrack.countDimensionsGapped, my[indexMy.leafConnectee]] += 1
 
-	def dimension1ndexIncrement():
+	def dimension1ndexIncrement() -> None:
 		my[indexMy.dimension1ndex] += 1
 
-	def dimensionsUnconstrainedCondition():
+	def dimensionsUnconstrainedCondition() -> bool:
 		return connectionGraph[my[indexMy.dimension1ndex], my[indexMy.leaf1ndex], my[indexMy.leaf1ndex]] == my[indexMy.leaf1ndex]
 
-	def dimensionsUnconstrainedIncrement():
+	def dimensionsUnconstrainedIncrement() -> None:
 		my[indexMy.dimensionsUnconstrained] += 1
 
-	def filterCommonGaps():
+	def filterCommonGaps() -> None:
 		gapsWhere[my[indexMy.gap1ndex]] = gapsWhere[my[indexMy.indexMiniGap]]
 		if track[indexTrack.countDimensionsGapped, gapsWhere[my[indexMy.indexMiniGap]]] == the[indexThe.dimensionsTotal] - my[indexMy.dimensionsUnconstrained]:
 			activeGapIncrement()
 		track[indexTrack.countDimensionsGapped, gapsWhere[my[indexMy.indexMiniGap]]] = 0
 
-	def findGapsInitializeVariables():
+	def findGapsInitializeVariables() -> None:
 		my[indexMy.dimensionsUnconstrained] = 0
 		my[indexMy.gap1ndexCeiling] = track[indexTrack.gapRangeStart, my[indexMy.leaf1ndex] - 1]
 		my[indexMy.dimension1ndex] = 1
 
-	def foldsSubTotalsIncrement():
+	def foldsSubTotalsIncrement() -> None:
 		foldsSubTotals[my[indexMy.taskIndex]] += the[indexThe.leavesTotal]
 
-	def gap1ndexCeilingIncrement():
+	def gap1ndexCeilingIncrement() -> None:
 		my[indexMy.gap1ndexCeiling] += 1
 
-	def indexMiniGapIncrement():
+	def indexMiniGapIncrement() -> None:
 		my[indexMy.indexMiniGap] += 1
 
-	def indexMiniGapInitialization():
+	def indexMiniGapInitialization() -> None:
 		my[indexMy.indexMiniGap] = my[indexMy.gap1ndex]
 
-	def insertUnconstrainedLeaf():
+	def insertUnconstrainedLeaf() -> None:
 		my[indexMy.indexLeaf] = 0
 		while my[indexMy.indexLeaf] < my[indexMy.leaf1ndex]:
 			gapsWhere[my[indexMy.gap1ndexCeiling]] = my[indexMy.indexLeaf]
 			my[indexMy.gap1ndexCeiling] += 1
 			my[indexMy.indexLeaf] += 1
 
-	def leafBelowSentinelIs1Condition():
+	def leafBelowSentinelIs1Condition() -> bool:
 		return track[indexTrack.leafBelow, 0] == 1
 
-	def leafConnecteeInitialization():
+	def leafConnecteeInitialization() -> None:
 		my[indexMy.leafConnectee] = connectionGraph[my[indexMy.dimension1ndex], my[indexMy.leaf1ndex], my[indexMy.leaf1ndex]]
 
-	def leafConnecteeUpdate():
+	def leafConnecteeUpdate() -> None:
 		my[indexMy.leafConnectee] = connectionGraph[my[indexMy.dimension1ndex], my[indexMy.leaf1ndex], track[indexTrack.leafBelow, my[indexMy.leafConnectee]]]
 
-	def loopingLeavesConnectedToActiveLeaf():
+	def loopingLeavesConnectedToActiveLeaf() -> bool:
 		return my[indexMy.leafConnectee] != my[indexMy.leaf1ndex]
 
-	def loopingTheDimensions():
+	def loopingTheDimensions() -> bool:
 		return my[indexMy.dimension1ndex] <= the[indexThe.dimensionsTotal]
 
-	def loopingToActiveGapCeiling():
+	def loopingToActiveGapCeiling() -> bool:
 		return my[indexMy.indexMiniGap] < my[indexMy.gap1ndexCeiling]
 
-	def placeLeaf():
+	def placeLeaf() -> None:
 		my[indexMy.gap1ndex] -= 1
 		track[indexTrack.leafAbove, my[indexMy.leaf1ndex]] = gapsWhere[my[indexMy.gap1ndex]]
 		track[indexTrack.leafBelow, my[indexMy.leaf1ndex]] = track[indexTrack.leafBelow, track[indexTrack.leafAbove, my[indexMy.leaf1ndex]]]
@@ -150,13 +151,13 @@ def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUli
 		track[indexTrack.gapRangeStart, my[indexMy.leaf1ndex]] = my[indexMy.gap1ndex]
 		my[indexMy.leaf1ndex] += 1
 
-	def placeLeafCondition():
+	def placeLeafCondition() -> bool:
 		return my[indexMy.leaf1ndex] > 0
 
-	def taskIndexCondition():
+	def taskIndexCondition() -> bool:
 		return my[indexMy.leafConnectee] % the[indexThe.taskDivisions] == my[indexMy.taskIndex]
 
-	def thereAreComputationDivisionsYouMightSkip():
+	def thereAreComputationDivisionsYouMightSkip() -> bool:
 		if computationDivisionsCondition():
 			return True
 		if activeLeafNotEqualToTaskDivisionsCondition():
@@ -166,11 +167,11 @@ def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUli
 		return False
 
 	stateUniversal = outfitFoldings(listDimensions, computationDivisions=computationDivisions, CPUlimit=CPUlimit)
-	connectionGraph: Final[numpy.ndarray] = stateUniversal['connectionGraph']
+	connectionGraph: Final[NDArray[numpy.integer[Any]]] = stateUniversal['connectionGraph']
 	foldsSubTotals = stateUniversal['foldsSubTotals']
 	gapsWhere = stateUniversal['gapsWhere']
 	my = stateUniversal['my']
-	the: Final[numpy.ndarray] = stateUniversal['the']
+	the: Final[NDArray[numpy.integer[Any]]] = stateUniversal['the']
 	track = stateUniversal['track']
 
 	if the[indexThe.taskDivisions] == int(False):
@@ -192,7 +193,7 @@ def countFolds(listDimensions: Sequence[int], computationDivisions = None, CPUli
 class EnumIndices(enum.IntEnum):
 	"""Base class for index enums."""
 	@staticmethod
-	def _generate_next_value_(name, start, count, last_values):
+	def _generate_next_value_(name: str, start: int, count: int, last_values: list[int]) -> int:
 		"""0-indexed."""
 		return count
 
@@ -229,7 +230,7 @@ class indexTrack(EnumIndices):
 class computationState(TypedDict):
 	connectionGraph: NDArray[integer[Any]]
 	foldsSubTotals: NDArray[integer[Any]]
-	mapShape: Tuple[int, ...]
+	mapShape: tuple[int, ...]
 	my: NDArray[integer[Any]]
 	gapsWhere: NDArray[integer[Any]]
 	the: NDArray[integer[Any]]
@@ -262,7 +263,7 @@ def getLeavesTotal(listDimensions: Sequence[int]) -> int:
 
 		return productDimensions
 
-def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrencyLimit: int, CPUlimit: Optional[Union[bool, float, int]], listDimensions: Sequence[int]):
+def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, CPUlimit: bool | float | int | None, listDimensions: Sequence[int]) -> int:
 	if not computationDivisions:
 		return 0
 	else:
@@ -284,7 +285,7 @@ def getTaskDivisions(computationDivisions: Optional[Union[int, str]], concurrenc
 
 	return taskDivisions
 
-def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optional[Type]) -> NDArray[integer[Any]]:
+def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: type | None) -> NDArray[integer[Any]]:
 	datatype = keywordArguments.get('datatype', dtypeMedium)
 	mapShape = validateListDimensions(listDimensions)
 	leavesTotal = getLeavesTotal(mapShape)
@@ -316,12 +317,12 @@ def makeConnectionGraph(listDimensions: Sequence[int], **keywordArguments: Optio
 					connectionGraph[dimension1ndex, activeLeaf1ndex, connectee1ndex] = connectee1ndex
 	return connectionGraph
 
-def makeDataContainer(shape, datatype: Optional[Type] = None):
+def makeDataContainer(shape: int | Sequence[int], datatype: type | None = None) -> NDArray[integer[Any]]:
 	if datatype is None:
 		datatype = dtypeMedium
 	return numpy.zeros(shape, dtype=datatype)
 
-def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional[Union[int, str]] = None, CPUlimit: Optional[Union[bool, float, int]] = None, **keywordArguments: Optional[Type]) -> computationState:
+def outfitFoldings(listDimensions: Sequence[int], computationDivisions: int | str | None = None, CPUlimit: bool | float | int | None = None, **keywordArguments: type | None) -> computationState:
 	datatypeMedium = keywordArguments.get('datatypeMedium', dtypeMedium)
 	datatypeLarge = keywordArguments.get('datatypeLarge', dtypeLarge)
 
@@ -346,10 +347,10 @@ def outfitFoldings(listDimensions: Sequence[int], computationDivisions: Optional
 	stateInitialized['my'][indexMy.leaf1ndex] = 1
 	return stateInitialized
 
-def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed parameter') -> List[int]:
+def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed parameter') -> list[int]:
 	# listValidated = intInnit(dimensions, parameterName)
 	listNOTValidated = dimensions if isinstance(dimensions, (list, tuple)) else list(dimensions)
-	listNonNegative = []
+	listNonNegative: list[int] = []
 	for dimension in listNOTValidated:
 		if dimension < 0:
 			raise ValueError(f"Dimension {dimension} must be non-negative")
@@ -358,7 +359,7 @@ def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed par
 		raise ValueError("At least one dimension must be non-negative")
 	return listNonNegative
 
-def setCPUlimit(CPUlimit: Union[bool, float, int, None]) -> int:
+def setCPUlimit(CPUlimit: bool | float | int | None) -> int:
 	# if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
 	#	 CPUlimit = oopsieKwargsie(CPUlimit)
 	# concurrencyLimit = defineConcurrencyLimit(CPUlimit)
@@ -367,7 +368,7 @@ def setCPUlimit(CPUlimit: Union[bool, float, int, None]) -> int:
 	concurrencyLimit = concurrencyLimitHARDCODED
 	return concurrencyLimit
 
-def validateListDimensions(listDimensions: Sequence[int]) -> List[int]:
+def validateListDimensions(listDimensions: Sequence[int]) -> list[int]:
 	if not listDimensions:
 		raise ValueError(f"listDimensions is a required parameter.")
 	listNonNegative = parseDimensions(listDimensions, 'listDimensions')
