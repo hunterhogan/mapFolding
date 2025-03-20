@@ -2,7 +2,9 @@ from collections.abc import Callable, Generator, Sequence
 from mapFolding.theSSOT import getAlgorithmDispatcher, getSourceAlgorithm, getPackageDispatcher, theModuleOfSyntheticModules, raiseIfNoneGitHubIssueNumber3
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
-from pathlib import Path
+from mapFolding.someAssemblyRequired import RecipeSynthesizeFlow
+from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import makeNumbaFlow
+from pathlib import Path, PurePosixPath
 from typing import Any, ContextManager
 import importlib.util
 import pytest
@@ -199,35 +201,35 @@ def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Gener
 	yield
 
 @pytest.fixture
-def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any]) -> Callable[..., Any]:
-	listCallablesInline = listNumbaCallableDispatchees
-	callableDispatcher = True
-	algorithmSource = getSourceAlgorithm()
-	relativePathWrite = theModuleOfSyntheticModules
-	filenameModuleWrite = 'pytestCount.py'
-	formatFilenameWrite = "pytest_{callableTarget}.py"
-	listSynthesizedModules: list[YouOughtaKnow] = makeFlowNumbaOptimized(listCallablesInline, callableDispatcher, algorithmSource, relativePathWrite, filenameModuleWrite, formatFilenameWrite)
-	dispatcherSynthetic: YouOughtaKnow | None = None
-	for stuff in listSynthesizedModules:
-		registrarRecordsTmpObject(stuff.pathFilenameForMe)
-		if stuff.callableSynthesized not in listCallablesInline:
-			dispatcherSynthetic = stuff
+def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any], pathTmpTesting: Path) -> Callable[..., Any]:
+    """Generate synthetic Numba-optimized dispatcher module and patch the dispatcher"""
+    # Configure synthesis flow to use test directory
+    recipeFlow = RecipeSynthesizeFlow(
+        pathPackage=PurePosixPath(pathTmpTesting.absolute()),
+        Z0Z_flowLogicalPathRoot=None,
+        moduleDispatcher="test_dispatcher",
+# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
+        # dispatcherCallable="dispatcherSynthetic",
+    )
 
-	if dispatcherSynthetic is None:
-		raise raiseIfNoneGitHubIssueNumber3
+    # Generate optimized module in test directory
+    makeNumbaFlow(recipeFlow)
 
-	dispatcherSpec = importlib.util.spec_from_file_location(dispatcherSynthetic.callableSynthesized, dispatcherSynthetic.pathFilenameForMe)
-	if dispatcherSpec is None:
-		raise ImportError(f"{dispatcherSynthetic.pathFilenameForMe=}")
-	if dispatcherSpec.loader is None:
-		raise ImportError(f"Failed to get loader for module {dispatcherSynthetic.pathFilenameForMe}")
+    # Import synthesized dispatcher
+    importlibSpecificationDispatcher = importlib.util.spec_from_file_location(
+        recipeFlow.moduleDispatcher,
+        Path(recipeFlow.pathFilenameDispatcher),
+    )
+    if importlibSpecificationDispatcher is None or importlibSpecificationDispatcher.loader is None:
+        raise ImportError("Failed to load synthetic dispatcher module")
 
-	dispatcherModule = importlib.util.module_from_spec(dispatcherSpec)
-	dispatcherSpec.loader.exec_module(dispatcherModule)
-	callableDispatcherSynthetic = getattr(dispatcherModule, dispatcherSynthetic.callableSynthesized)
+    moduleSpecificationDispatcher = importlib.util.module_from_spec(importlibSpecificationDispatcher)
+    importlibSpecificationDispatcher.loader.exec_module(moduleSpecificationDispatcher)
+    callableDispatcherSynthetic = getattr(moduleSpecificationDispatcher, recipeFlow.dispatcherCallable)
 
-	useThisDispatcher(callableDispatcherSynthetic)
-	return callableDispatcherSynthetic
+    # Patch dispatcher and return callable
+    useThisDispatcher(callableDispatcherSynthetic)
+    return callableDispatcherSynthetic
 
 def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
 	"""Format assertion message for any test comparison."""

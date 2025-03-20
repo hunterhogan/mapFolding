@@ -594,7 +594,7 @@ class RecipeSynthesizeFlow:
 
 	# Module
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-	Z0Z_flowLogicalPathRoot: str = theModuleOfSyntheticModules
+	Z0Z_flowLogicalPathRoot: str | None = theModuleOfSyntheticModules
 	moduleDispatcher: str = theModuleDispatcherSynthetic
 	logicalPathModuleDataclass: str = sourcePathModuleDataclass
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4

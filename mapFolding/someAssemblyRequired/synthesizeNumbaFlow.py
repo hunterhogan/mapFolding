@@ -133,6 +133,8 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 		, doThat = Then.replaceWith(Make.astAssign(listTargets=[shatteredDataclass.astTuple4AssignTargetsToFragments], value=Make.astCall(Make.astName(numbaFlow.sequentialCallable), shatteredDataclass.listNameDataclassFragments4Parameters)))
 			).visit(ingredientsDispatcher.astFunctionDef)
 
+	ingredientsDispatcher.astFunctionDef.name = numbaFlow.dispatcherCallable
+
 	# ===========================================================
 	sourcePython = numbaFlow.sourceInitializeCallable
 	astFunctionDef = extractFunctionDef(sourcePython, numbaFlow.source_astModule)

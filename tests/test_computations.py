@@ -44,10 +44,10 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 
 #     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(listDimensionsTestCountFolds)
 #     registrarRecordsTmpObject(pathFilenameFoldsTotal)
-#     standardizedEqualTo(str(foldsTotalKnown[tuple(listDimensionsTestCountFolds)]), pathFilenameFoldsTotal.read_text().strip)
+#     standardizedEqualToCallableReturn(str(getFoldsTotalKnown(tuple(listDimensionsTestCountFolds))), pathFilenameFoldsTotal.read_text().strip)
 
-# def test_syntheticParallel(syntheticDispatcherFixture: None, listDimensionsTestParallelization: list[int], foldsTotalKnown: dict[tuple[int, ...], int]):
-#     standardizedEqualTo(foldsTotalKnown[tuple(listDimensionsTestParallelization)], countFolds, listDimensionsTestParallelization, None, 'maximum')
+def test_syntheticParallel(syntheticDispatcherFixture: None, listDimensionsTestParallelization: list[int]):
+    standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
 
-# def test_syntheticSequential(syntheticDispatcherFixture: None, listDimensionsTestCountFolds: list[int], foldsTotalKnown: dict[tuple[int, ...], int]):
-#     standardizedEqualTo(foldsTotalKnown[tuple(listDimensionsTestCountFolds)], countFolds, listDimensionsTestCountFolds)
+def test_syntheticSequential(syntheticDispatcherFixture: None, listDimensionsTestCountFolds: list[int]) -> None:
+    standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestCountFolds)), countFolds, listDimensionsTestCountFolds)
