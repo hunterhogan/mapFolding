@@ -26,10 +26,10 @@ from autoflake import fix_code as autoflake_fix_code
 from collections import defaultdict
 from collections.abc import Callable, Container, Sequence
 from copy import deepcopy
+from importlib import import_module as importlib_import_module
 from inspect import getsource as inspect_getsource
 from mapFolding.filesystem import writeStringToHere
 from mapFolding.theSSOT import (
-	getSourceAlgorithm,
 	raiseIfNoneGitHubIssueNumber3,
 	The,
 	theFormatStrModuleForCallableSynthetic,
@@ -552,7 +552,7 @@ class RecipeSynthesizeFlow:
 	"""Settings for synthesizing flow."""
 	# ========================================
 	# Source
-	sourceAlgorithm: ModuleType = getSourceAlgorithm()
+	sourceAlgorithm: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
 	sourcePython: str = inspect_getsource(sourceAlgorithm)
 	source_astModule: ast.Module = ast.parse(sourcePython)
 

@@ -19,59 +19,36 @@ to avoid namespace collisions when transforming algorithms.
 from collections.abc import Callable
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
-from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, ndarray, signedinteger
+from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, ndarray
 from pathlib import Path
 from sys import modules as sysModules
 from tomli import load as tomli_load
 from types import ModuleType
-from typing import Any, Final, TypeAlias
+from typing import TypeAlias
 import dataclasses
 
-"""
-NOTE on semiotics: `theIdentifier` vs `identifier`
-
-- This package has a typical, "hardcoded" algorithm for counting map folds.
-- This package has logic for transforming that algorithm into other forms.
-- The transformation logic can transform other algorithms if 1) they are similar enough to the "hardcoded" algorithm and 2) I have written the transformation logic well enough to handle the differences.
-- To avoid confusion and namespace collisions, I differentiate between, for example, `theSourceAlgorithm` of the package and any other `sourceAlgorithm` being transformed by the package.
-"""
-
-"""
-2025 March 11
-Note to self: fundamental concept in Python:
-Identifiers: scope and resolution, LEGB (Local, Enclosing, Global, Builtin)
-- Local: Inside the function
-- Enclosing: Inside enclosing functions
-- Global: At the uppermost level
-- Builtin: Python's built-in names
-"""
-
-# I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
 # Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
+# I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
 packageFlowSynthetic = 'numba'
 # Z0Z_packageFlow = 'algorithm'
 Z0Z_packageFlow = packageFlowSynthetic
 Z0Z_concurrencyPackage = 'multiprocessing'
+
 # =============================================================================
-# The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
-# Evaluate When Packaging Evaluate When Packaging Evaluate When Packaging
+# The Wrong Way: Evaluate When Packaging
 
 try:
 	packageNamePACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
 except Exception:
 	packageNamePACKAGING = "mapFolding"
 
-# =============================================================================
-# The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
-# Evaluate When Installing Evaluate When Installing Evaluate When Installing
+# The Wrong Way: Evaluate When Installing
 
 def getPathPackageINSTALLING() -> Path:
 	pathPackage: Path = Path(inspect_getfile(importlib_import_module(packageNamePACKAGING)))
 	if pathPackage.is_file():
 		pathPackage = pathPackage.parent
 	return pathPackage
-
-# =============================================================================
 
 # The following is an improvement, but it is not the full solution.
 # I hope that the standardized markers, `metadata={'evaluateWhen': 'packaging'}` will help to automate
@@ -117,15 +94,10 @@ class PackageSettings:
 The = PackageSettings()
 
 # =============================================================================
-# The relatively flexible type system needs a different paradigm, but I don't
-# know what it should be. The system needs to 1) help optimize computation, 2)
-# make it possible to change the basic type of the package (e.g., from numpy
-# to superTypePy), 3) make it possible to synthesize the optimized flow of used
-# by the package, and 4) make it possible to synthesize arbitrary modules with
-# different type systems.
+# Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
 
 DatatypeLeavesTotal: TypeAlias = int
-# this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers accommodate
+# this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
 numpyLeavesTotal: TypeAlias = numpy_int16
 
 DatatypeElephino: TypeAlias = int
@@ -133,17 +105,11 @@ numpyElephino: TypeAlias = numpy_int16
 
 DatatypeFoldsTotal: TypeAlias = int
 numpyFoldsTotal: TypeAlias = numpy_int64
-numpyDtypeDefault = numpyFoldsTotal
 
 Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[numpyLeavesTotal]]
 Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[numpyLeavesTotal]]
 Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[numpyElephino]]
 Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[numpyFoldsTotal]]
-
-# =============================================================================
-# The right way.
-# (The dataclass, not the typing of the dataclass.)
-# (Also, my noobplementation of the dataclass certainly needs improvement.)
 
 @dataclasses.dataclass
 class ComputationState:
@@ -190,9 +156,9 @@ class ComputationState:
 		leavesTotalAsInt = int(self.leavesTotal)
 
 		if self.countDimensionsGapped is None:
-			self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, numpyElephino)
+			self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
 		if self.gapRangeStart is None:
-			self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+			self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, numpyElephino)
 		if self.gapsWhere is None:
 			self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, numpyLeavesTotal)
 		if self.leafAbove is None:
@@ -204,21 +170,6 @@ class ComputationState:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
 
 # =============================================================================
-# The most right way I know how to implement.
-
-theLogicalPathModuleDispatcher: str = The.logicalPathModuleSourceAlgorithm
-
-def getSourceAlgorithm() -> ModuleType:
-	moduleImported: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
-	return moduleImported
-
-def getAlgorithmDispatcher() -> Callable[[ComputationState], ComputationState]:
-	moduleImported: ModuleType = getSourceAlgorithm()
-	dispatcherCallable = getattr(moduleImported, The.dispatcherCallable)
-	return dispatcherCallable
-
-def getPathSyntheticModules() -> Path:
-	return The.pathPackage / The.moduleOfSyntheticModules
 
 # TODO learn how to see this from the user's perspective
 def getPathJobRootDEFAULT() -> Path:
@@ -235,35 +186,27 @@ def getDatatypePackage() -> str:
 		_datatypePackage = The.datatypePackage
 	return _datatypePackage
 
-def getNumpyDtypeDefault() -> type[signedinteger[Any]]:
-	return numpyDtypeDefault
-
 # =============================================================================
 # The coping way.
 
 class raiseIfNoneGitHubIssueNumber3(Exception): pass
 
 # =============================================================================
-# Temporary or transient or something; probably still the wrong way
-
 # THIS IS A STUPID SYSTEM BUT I CAN'T FIGURE OUT AN IMPROVEMENT
 # NOTE This section for _default_ values probably has value
 # https://github.com/hunterhogan/mapFolding/issues/4
 theFormatStrModuleSynthetic = "{packageFlow}Count"
 theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
 
+theLogicalPathModuleDispatcher: str = The.logicalPathModuleSourceAlgorithm
+
 theModuleDispatcherSynthetic: str = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=The.dispatcherCallable)
 theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.moduleOfSyntheticModules, theModuleDispatcherSynthetic])
 
-# =============================================================================
-# The most right way I know how to implement.
-
-# https://github.com/hunterhogan/mapFolding/issues/4
 if Z0Z_packageFlow == packageFlowSynthetic: # pyright: ignore [reportUnnecessaryComparison]
 	# NOTE this as a default value _might_ have value
 	theLogicalPathModuleDispatcher = theLogicalPathModuleDispatcherSynthetic
 
-# https://github.com/hunterhogan/mapFolding/issues/4
 # dynamically set the return type https://github.com/hunterhogan/mapFolding/issues/5
 def getPackageDispatcher() -> Callable[[ComputationState], ComputationState]:
 	# NOTE but this part, if the package flow is synthetic, probably needs to be delegated
@@ -285,4 +228,13 @@ theSSOT and yourSSOT
 ----
 delay realization/instantiation until a concrete value is desired
 moment of truth: when the value is needed, not when the value is defined
+
+----
+2025 March 11
+Note to self: fundamental concept in Python:
+Identifiers: scope and resolution, LEGB (Local, Enclosing, Global, Builtin)
+- Local: Inside the function
+- Enclosing: Inside enclosing functions
+- Global: At the uppermost level
+- Builtin: Python's built-in names
 """

@@ -15,11 +15,14 @@ particularly for initializing computation state, validating inputs, and creating
 structures needed by the folding algorithms.
 """
 from collections.abc import Sequence
-from mapFolding.theSSOT import Array3D, ComputationState, getDatatypePackage, getNumpyDtypeDefault
+from mapFolding.theSSOT import ComputationState
+from numpy import dtype as numpy_dtype, integer, ndarray
 from sys import maxsize as sysMaxsize
-from typing import Any
+from typing import Any, TypeVar
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 import numpy
+
+numpyIntegerType = TypeVar('numpyIntegerType', bound=integer[Any])
 
 def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 	productDimensions = 1
@@ -81,25 +84,16 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 		raise ValueError(f"Problem: `taskDivisions`, ({taskDivisions}), is greater than `leavesTotal`, ({leavesTotal}), which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`. They are derived from parameters that may or may not still be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from dubious-quality Python code.")
 	return int(max(0, taskDivisions))
 
-def interpretParameter_datatype(datatype: type[numpy.signedinteger[Any]] | None = None) -> type[numpy.signedinteger[Any]]:
-	"""An imperfect way to reduce code duplication."""
-	if 'numpy' == getDatatypePackage():
-		numpyDtype = datatype or getNumpyDtypeDefault()
-	else:
-		raise NotImplementedError("Somebody done broke it.")
-	return numpyDtype
-
-def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[numpy.signedinteger[Any]] | None = None) -> Array3D:
-	numpyDtype = interpretParameter_datatype(datatype)
+def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[numpyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[numpyIntegerType]]:
 	dimensionsTotal = len(mapShape)
-	cumulativeProduct = numpy.multiply.accumulate([1] + list(mapShape), dtype=numpyDtype)
-	arrayDimensions = numpy.array(mapShape, dtype=numpyDtype)
-	coordinateSystem = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=numpyDtype)
+	cumulativeProduct = numpy.multiply.accumulate([1] + list(mapShape), dtype=datatype)
+	arrayDimensions = numpy.array(mapShape, dtype=datatype)
+	coordinateSystem = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=datatype)
 	for indexDimension in range(dimensionsTotal):
 		for leaf1ndex in range(1, leavesTotal + 1):
 			coordinateSystem[indexDimension, leaf1ndex] = (((leaf1ndex - 1) // cumulativeProduct[indexDimension]) % arrayDimensions[indexDimension] + 1)
 
-	connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=numpyDtype)
+	connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=datatype)
 	for indexDimension in range(dimensionsTotal):
 		for activeLeaf1ndex in range(1, leavesTotal + 1):
 			for connectee1ndex in range(1, activeLeaf1ndex + 1):
@@ -116,9 +110,8 @@ def makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: t
 					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
 	return connectionGraph
 
-def makeDataContainer(shape: int | tuple[int, ...], datatype: type[numpy.signedinteger[Any]] | None = None) -> numpy.ndarray[Any, numpy.dtype[numpy.signedinteger[Any]]]:
-	numpyDtype = interpretParameter_datatype(datatype)
-	return numpy.zeros(shape, dtype=numpyDtype)
+def makeDataContainer(shape: int | tuple[int, ...], datatype: type[numpyIntegerType]) -> ndarray[Any, numpy_dtype[numpyIntegerType]]:
+	return numpy.zeros(shape, dtype=datatype)
 
 def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str | None = None, concurrencyLimit: int = 1) -> ComputationState:
 	leavesTotal = getLeavesTotal(mapShape)

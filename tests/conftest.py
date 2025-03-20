@@ -1,5 +1,9 @@
+from importlib import import_module as importlib_import_module
 from collections.abc import Callable, Generator, Sequence
-from mapFolding.theSSOT import getAlgorithmDispatcher, getPackageDispatcher
+from types import ModuleType
+
+import numpy
+from mapFolding.theSSOT import ComputationState, The, getPackageDispatcher
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from mapFolding.someAssemblyRequired import RecipeSynthesizeFlow
@@ -143,7 +147,7 @@ def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.As
 def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
 	"""Creates a mock function that simulates _countFolds behavior."""
 	def make_mock(foldsValue: int, listDimensions: list[int]) -> Callable[..., None]:
-		mock_array = makeDataContainer(2)
+		mock_array = makeDataContainer(2, numpy.int32)
 		mock_array[0] = foldsValue
 		mapShape = validateListDimensions(listDimensions)
 		mock_array[-1] = getLeavesTotal(mapShape)
@@ -192,6 +196,11 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 
 	yield patchDispatcher
 	basecamp.getPackageDispatcher = dispatcherOriginal
+
+def getAlgorithmDispatcher() -> Callable[[ComputationState], ComputationState]:
+	moduleImported: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
+	dispatcherCallable = getattr(moduleImported, The.dispatcherCallable)
+	return dispatcherCallable
 
 @pytest.fixture
 def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Generator[None, None, None]:

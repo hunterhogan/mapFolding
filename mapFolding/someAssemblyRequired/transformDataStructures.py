@@ -21,7 +21,7 @@ designed to be applicable to various data structure transformation scenarios.
 """
 
 from collections.abc import Sequence
-from importlib import import_module
+from importlib import import_module as importlib_import_module
 from inspect import getsource as inspect_getsource
 from mapFolding.beDRY import outfitCountFolds, validateListDimensions
 from mapFolding.filesystem import getPathFilenameFoldsTotal
@@ -36,7 +36,7 @@ from mapFolding.someAssemblyRequired import (
 	Then,
 	Z0Z_executeActionUnlessDescendantMatches,
 )
-from mapFolding.theSSOT import ComputationState, getSourceAlgorithm
+from mapFolding.theSSOT import ComputationState, The
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Literal, overload
@@ -71,7 +71,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	"""
 	# TODO learn whether dataclasses.make_dataclass would be useful to transform the target dataclass into the `ShatteredDataclass`
 
-	module: ast.Module = ast.parse(inspect_getsource(import_module(logicalPathModule)))
+	module: ast.Module = ast.parse(inspect_getsource(importlib_import_module(logicalPathModule)))
 	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
 
 	dataclass = extractClassDef(dataclass_Identifier, module)
@@ -124,6 +124,10 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	shatteredDataclass.ledgerDataclassANDFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
 	return shatteredDataclass
 
+def getSourceAlgorithmVESTIGIAL() -> ModuleType:
+	moduleImported: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
+	return moduleImported
+
 @overload
 def makeStateJobOUTDATED(listDimensions: Sequence[int], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...
 @overload
@@ -147,7 +151,7 @@ def makeStateJobOUTDATED(listDimensions: Sequence[int], *, writeJob: bool = True
 	mapShape = validateListDimensions(listDimensions)
 	stateUniversal: ComputationState = outfitCountFolds(mapShape, **keywordArguments)
 
-	moduleSource: ModuleType = getSourceAlgorithm()
+	moduleSource: ModuleType = getSourceAlgorithmVESTIGIAL()
 	# TODO `countInitialize` is hardcoded
 	stateUniversal = moduleSource.countInitialize(stateUniversal)
 
