@@ -77,18 +77,13 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 	shatteredDataclass = shatter_dataclassesDOTdataclass(numbaFlow.logicalPathModuleDataclass, numbaFlow.sourceDataclassIdentifier, numbaFlow.sourceDataclassInstanceTaskDistribution)
 	ingredientsDispatcher.imports.update(shatteredDataclass.ledgerDataclassANDFragments)
 
-	# TODO remove hardcoding
-	namespaceHARDCODED = 'concurrencyManager'
-	identifierHARDCODED = 'submit'
-	sourceNamespace = namespaceHARDCODED
-	sourceIdentifier = identifierHARDCODED
 	NodeReplacer(
-		findThis = ifThis.isAssignAndValueIsCallNamespace_Identifier(sourceNamespace, sourceIdentifier)
+		findThis = ifThis.isAssignAndValueIsCallNamespace_Identifier(numbaFlow.sourceConcurrencyManagerNamespace, numbaFlow.sourceConcurrencyManagerIdentifier)
 		, doThat = Then.insertThisAbove(shatteredDataclass.listAnnAssign4DataclassUnpack)
 			).visit(ingredientsDispatcher.astFunctionDef)
 	NodeReplacer(
-		findThis = ifThis.isCallNamespace_Identifier(sourceNamespace, sourceIdentifier)
-		, doThat = Then.replaceWith(Make.astCall(Make.astAttribute(Make.astName(sourceNamespace), sourceIdentifier)
+		findThis = ifThis.isCallNamespace_Identifier(numbaFlow.sourceConcurrencyManagerNamespace, numbaFlow.sourceConcurrencyManagerIdentifier)
+		, doThat = Then.replaceWith(Make.astCall(Make.astAttribute(Make.astName(numbaFlow.sourceConcurrencyManagerNamespace), numbaFlow.sourceConcurrencyManagerIdentifier)
 									, listArguments=[Make.astName(numbaFlow.parallelCallable)] + shatteredDataclass.listNameDataclassFragments4Parameters))
 			).visit(ingredientsDispatcher.astFunctionDef)
 

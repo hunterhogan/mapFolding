@@ -23,6 +23,12 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
     for n in settingsOEIS[oeisID]['valuesTestValidation']:
         standardizedEqualToCallableReturn(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
+def test_syntheticParallel(syntheticDispatcherFixture: None, listDimensionsTestParallelization: list[int]):
+    standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
+
+def test_syntheticSequential(syntheticDispatcherFixture: None, listDimensionsTestCountFolds: list[int]) -> None:
+    standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestCountFolds)), countFolds, listDimensionsTestCountFolds)
+
 # @pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
 # def test_writeJobNumba(listDimensionsTestCountFolds: list[int], pathFilenameTmpTesting: Path) -> None:
 #     from mapFolding.syntheticModules import numbaCount
@@ -45,9 +51,3 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 #     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(listDimensionsTestCountFolds)
 #     registrarRecordsTmpObject(pathFilenameFoldsTotal)
 #     standardizedEqualToCallableReturn(str(getFoldsTotalKnown(tuple(listDimensionsTestCountFolds))), pathFilenameFoldsTotal.read_text().strip)
-
-def test_syntheticParallel(syntheticDispatcherFixture: None, listDimensionsTestParallelization: list[int]):
-    standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
-
-def test_syntheticSequential(syntheticDispatcherFixture: None, listDimensionsTestCountFolds: list[int]) -> None:
-    standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestCountFolds)), countFolds, listDimensionsTestCountFolds)

@@ -69,6 +69,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 		dataclass_Identifier: The identifier of the dataclass to be dismantled.
 		instance_Identifier: In the synthesized module/function/scope, the identifier that will be used for the instance.
 	"""
+	# TODO learn whether dataclasses.make_dataclass would be useful to transform the target dataclass into the `ShatteredDataclass`
+
 	module: ast.Module = ast.parse(inspect_getsource(import_module(logicalPathModule)))
 	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
 

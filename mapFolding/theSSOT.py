@@ -28,6 +28,15 @@ from typing import Any, Final, TypeAlias
 import dataclasses
 
 """
+NOTE on semiotics: `theIdentifier` vs `identifier`
+
+- This package has a typical, "hardcoded" algorithm for counting map folds.
+- This package has logic for transforming that algorithm into other forms.
+- The transformation logic can transform other algorithms if 1) they are similar enough to the "hardcoded" algorithm and 2) I have written the transformation logic well enough to handle the differences.
+- To avoid confusion and namespace collisions, I differentiate between, for example, `theSourceAlgorithm` of the package and any other `sourceAlgorithm` being transformed by the package.
+"""
+
+"""
 2025 March 11
 Note to self: fundamental concept in Python:
 Identifiers: scope and resolution, LEGB (Local, Enclosing, Global, Builtin)
@@ -47,75 +56,65 @@ Z0Z_concurrencyPackage = 'multiprocessing'
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
 # Evaluate When Packaging Evaluate When Packaging Evaluate When Packaging
 
-sourceAlgorithmPACKAGING: str = 'theDao'
-datatypePackagePACKAGING: Final[str] = 'numpy'
-dispatcherCallablePACKAGING: str = 'doTheNeedful'
-moduleOfSyntheticModulesPACKAGING: Final[str] = 'syntheticModules'
-
-dataclassModulePACKAGING: str = 'theSSOT'
-dataclassIdentifierPACKAGING: str = 'ComputationState'
-dataclassInstancePACKAGING: str = 'state'
-dataclassInstanceTaskDistributionPACKAGING = dataclassInstancePACKAGING + 'Parallel'
-
-sourceInitializeCallablePACKAGING = 'countInitialize'
-sourceSequentialCallablePACKAGING = 'countSequential'
-sourceParallelCallablePACKAGING = 'countParallel'
-
 try:
-	thePackageNamePACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
+	packageNamePACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
 except Exception:
-	thePackageNamePACKAGING = "mapFolding"
+	packageNamePACKAGING = "mapFolding"
 
 # =============================================================================
 # The Wrong Way The Wrong Way The Wrong Way The Wrong Way The Wrong Way
 # Evaluate When Installing Evaluate When Installing Evaluate When Installing
 
-fileExtensionINSTALLING: str = '.py'
-
 def getPathPackageINSTALLING() -> Path:
-	pathPackage: Path = Path(inspect_getfile(importlib_import_module(thePackageNamePACKAGING)))
+	pathPackage: Path = Path(inspect_getfile(importlib_import_module(packageNamePACKAGING)))
 	if pathPackage.is_file():
 		pathPackage = pathPackage.parent
 	return pathPackage
 
 # =============================================================================
-# The right way, perhaps.
 
-# Create enduring identifiers from the hopefully transient identifiers above.
-thePackageName: Final[str] = thePackageNamePACKAGING
-thePathPackage: Path = getPathPackageINSTALLING()
+# The following is an improvement, but it is not the full solution.
+# I hope that the standardized markers, `metadata={'evaluateWhen': 'packaging'}` will help to automate
+# whatever needs to happen so that the following is well implemented.
+@dataclasses.dataclass(frozen=True)
+class PackageSettings:
+	concurrencyPackage = Z0Z_concurrencyPackage
+	dataclassIdentifier: str = dataclasses.field(default='ComputationState', metadata={'evaluateWhen': 'packaging'})
+	dataclassInstance: str = dataclasses.field(default='state', metadata={'evaluateWhen': 'packaging'})
+	dataclassInstanceTaskDistributionSuffix: str = dataclasses.field(default='Parallel', metadata={'evaluateWhen': 'packaging'})
+	dataclassModule: str = dataclasses.field(default='theSSOT', metadata={'evaluateWhen': 'packaging'})
+	datatypePackage: str = dataclasses.field(default='numpy', metadata={'evaluateWhen': 'packaging'})
+	dispatcherCallable: str = dataclasses.field(default='doTheNeedful', metadata={'evaluateWhen': 'packaging'})
+	fileExtension: str = dataclasses.field(default='.py', metadata={'evaluateWhen': 'installing'})
+	moduleOfSyntheticModules: str = dataclasses.field(default='syntheticModules', metadata={'evaluateWhen': 'packaging'})
+	packageName: str = dataclasses.field(default = packageNamePACKAGING, metadata={'evaluateWhen': 'packaging'})
+	pathPackage: Path = dataclasses.field(default_factory=getPathPackageINSTALLING, init=False, metadata={'evaluateWhen': 'installing'})
+	sourceAlgorithm: str = dataclasses.field(default='theDao', metadata={'evaluateWhen': 'packaging'})
+	sourceConcurrencyManagerIdentifier: str = dataclasses.field(default='submit', metadata={'evaluateWhen': 'packaging'})
+	sourceConcurrencyManagerNamespace: str = dataclasses.field(default='concurrencyManager', metadata={'evaluateWhen': 'packaging'})
+	sourceInitializeCallable: str = dataclasses.field(default='countInitialize', metadata={'evaluateWhen': 'packaging'})
+	sourceParallelCallable: str = dataclasses.field(default='countParallel', metadata={'evaluateWhen': 'packaging'})
+	sourceSequentialCallable: str = dataclasses.field(default='countSequential', metadata={'evaluateWhen': 'packaging'})
 
-"""
-NOTE on semiotics: `theIdentifier` vs `identifier`
+	@property # These are not fields, and that annoys me.
+	def dataclassInstanceTaskDistribution(self) -> str:
+		""" Compute the task distribution identifier by concatenating dataclassInstance and dataclassInstanceTaskDistributionSuffix. """
+		# it follows that `metadata={'evaluateWhen': 'packaging'}`
+		return self.dataclassInstance + self.dataclassInstanceTaskDistributionSuffix
 
-- This package has a typical, "hardcoded" algorithm for counting map folds.
-- This package has logic for transforming that algorithm into other forms.
-- The transformation logic can transform other algorithms if 1) they are similar enough to the "hardcoded" algorithm and 2) I have written the transformation logic well enough to handle the differences.
-- To avoid confusion and namespace collisions, I differentiate between, for example, `theSourceAlgorithm` of the package and any other `sourceAlgorithm` being transformed by the package.
-"""
+	@property # These are not fields, and that annoys me.
+	def logicalPathModuleSourceAlgorithm(self) -> str:
+		""" Compute the logical path module for the source algorithm by joining packageName and sourceAlgorithm. """
+		# it follows that `metadata={'evaluateWhen': 'packaging'}`
+		return '.'.join([self.packageName, self.sourceAlgorithm])
 
-theSourceAlgorithm: str = sourceAlgorithmPACKAGING
-theSourceInitializeCallable = sourceInitializeCallablePACKAGING
-theSourceSequentialCallable = sourceSequentialCallablePACKAGING
-theSourceParallelCallable = sourceParallelCallablePACKAGING
-theDatatypePackage: Final[str] = datatypePackagePACKAGING
+	@property # These are not fields, and that annoys me.
+	def logicalPathModuleDataclass(self) -> str:
+		""" Compute the logical path module for the dataclass by joining packageName and dataclassModule. """
+		# it follows that `metadata={'evaluateWhen': 'packaging'}`
+		return '.'.join([self.packageName, self.dataclassModule])
 
-theDispatcherCallable: str = dispatcherCallablePACKAGING
-
-theDataclassModule: str = dataclassModulePACKAGING
-theDataclassIdentifier: str = dataclassIdentifierPACKAGING
-theDataclassInstance: str = dataclassInstancePACKAGING
-theDataclassInstanceTaskDistribution: str = dataclassInstanceTaskDistributionPACKAGING
-
-theFileExtension: str = fileExtensionINSTALLING
-
-theModuleOfSyntheticModules: Final[str] = moduleOfSyntheticModulesPACKAGING
-
-# =============================================================================
-
-# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-concurrencyPackage: str = Z0Z_packageFlow
-concurrencyPackage = Z0Z_concurrencyPackage
+The = PackageSettings()
 
 # =============================================================================
 # The relatively flexible type system needs a different paradigm, but I don't
@@ -207,35 +206,33 @@ class ComputationState:
 # =============================================================================
 # The most right way I know how to implement.
 
-theLogicalPathModuleSourceAlgorithm: str = '.'.join([thePackageName, theSourceAlgorithm])
-theLogicalPathModuleDispatcher: str = theLogicalPathModuleSourceAlgorithm
-theLogicalPathModuleDataclass: str = '.'.join([thePackageName, theDataclassModule])
+theLogicalPathModuleDispatcher: str = The.logicalPathModuleSourceAlgorithm
 
 def getSourceAlgorithm() -> ModuleType:
-	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleSourceAlgorithm)
+	moduleImported: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
 	return moduleImported
 
 def getAlgorithmDispatcher() -> Callable[[ComputationState], ComputationState]:
 	moduleImported: ModuleType = getSourceAlgorithm()
-	dispatcherCallable = getattr(moduleImported, theDispatcherCallable)
+	dispatcherCallable = getattr(moduleImported, The.dispatcherCallable)
 	return dispatcherCallable
 
 def getPathSyntheticModules() -> Path:
-	return thePathPackage / theModuleOfSyntheticModules
+	return The.pathPackage / The.moduleOfSyntheticModules
 
 # TODO learn how to see this from the user's perspective
 def getPathJobRootDEFAULT() -> Path:
 	if 'google.colab' in sysModules:
 		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / "jobs"
 	else:
-		pathJobDEFAULT = thePathPackage / "jobs"
+		pathJobDEFAULT = The.pathPackage / "jobs"
 	return pathJobDEFAULT
 
 _datatypePackage: str = ''
 def getDatatypePackage() -> str:
 	global _datatypePackage
 	if not _datatypePackage:
-		_datatypePackage = theDatatypePackage
+		_datatypePackage = The.datatypePackage
 	return _datatypePackage
 
 def getNumpyDtypeDefault() -> type[signedinteger[Any]]:
@@ -255,8 +252,8 @@ class raiseIfNoneGitHubIssueNumber3(Exception): pass
 theFormatStrModuleSynthetic = "{packageFlow}Count"
 theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
 
-theModuleDispatcherSynthetic: str = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=theDispatcherCallable)
-theLogicalPathModuleDispatcherSynthetic: str = '.'.join([thePackageName, theModuleOfSyntheticModules, theModuleDispatcherSynthetic])
+theModuleDispatcherSynthetic: str = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=The.dispatcherCallable)
+theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.moduleOfSyntheticModules, theModuleDispatcherSynthetic])
 
 # =============================================================================
 # The most right way I know how to implement.
@@ -273,7 +270,7 @@ def getPackageDispatcher() -> Callable[[ComputationState], ComputationState]:
 	# to the authority for creating _that_ synthetic flow.
 
 	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
-	dispatcherCallable = getattr(moduleImported, theDispatcherCallable)
+	dispatcherCallable = getattr(moduleImported, The.dispatcherCallable)
 	return dispatcherCallable
 
 """Technical concepts I am likely using and likely want to use more effectively:

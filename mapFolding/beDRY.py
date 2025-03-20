@@ -126,7 +126,7 @@ def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str 
 	computationStateInitialized = ComputationState(mapShape, leavesTotal, taskDivisions, concurrencyLimit)
 	return computationStateInitialized
 
-def setCPUlimit(CPUlimit: Any | None) -> int:
+def setCPUlimit(CPUlimit: Any | None, concurrencyPackage: str | None = None) -> int:
 	"""Sets CPU limit for concurrent operations.
 
 	If the concurrency is managed by `numba`, the maximum number of CPUs is retrieved from `numba.get_num_threads()` and not by polling the hardware. Therefore, if there are
@@ -154,17 +154,17 @@ def setCPUlimit(CPUlimit: Any | None) -> int:
 	if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
 		CPUlimit = oopsieKwargsie(CPUlimit)
 
-	from mapFolding.theSSOT import concurrencyPackage
-	if concurrencyPackage == 'numba':
-		from numba import get_num_threads, set_num_threads
-		concurrencyLimit: int = defineConcurrencyLimit(CPUlimit, get_num_threads())
-		set_num_threads(concurrencyLimit)
-		concurrencyLimit = get_num_threads()
-	elif concurrencyPackage == 'multiprocessing':
-		# When to use multiprocessing.set_start_method https://github.com/hunterhogan/mapFolding/issues/6
-		concurrencyLimit = defineConcurrencyLimit(CPUlimit)
-	else:
-		raise NotImplementedError(f"I received {concurrencyPackage=} but I don't know what to do with that.")
+	match concurrencyPackage:
+		case 'multiprocessing' | None:
+			# When to use multiprocessing.set_start_method https://github.com/hunterhogan/mapFolding/issues/6
+			concurrencyLimit: int = defineConcurrencyLimit(CPUlimit)
+		case 'numba':
+			from numba import get_num_threads, set_num_threads
+			concurrencyLimit = defineConcurrencyLimit(CPUlimit, get_num_threads())
+			set_num_threads(concurrencyLimit)
+			concurrencyLimit = get_num_threads()
+		case _:
+			raise NotImplementedError(f"I received {concurrencyPackage=} but I don't know what to do with that.")
 	return concurrencyLimit
 
 def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:

@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from mapFolding.beDRY import getLeavesTotal, setCPUlimit, validateListDimensions
+from mapFolding.theSSOT import The
 from tests.conftest import standardizedEqualToCallableReturn
 from typing import Any, Literal
 from Z0Z_tools import intInnit
@@ -78,6 +79,5 @@ def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> N
 	(1, 1),
 ])
 def test_setCPUlimit(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | Literal[0] | Literal[1], expectedLimit: Any | int) -> None:
-	from mapFolding.theSSOT import concurrencyPackage
-	if concurrencyPackage == 'numba':
+	if The.concurrencyPackage == 'numba':
 		standardizedEqualToCallableReturn(expectedLimit, setCPUlimit, CPUlimit)

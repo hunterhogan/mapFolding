@@ -1,5 +1,5 @@
 from collections.abc import Callable, Generator, Sequence
-from mapFolding.theSSOT import getAlgorithmDispatcher, getSourceAlgorithm, getPackageDispatcher, theModuleOfSyntheticModules, raiseIfNoneGitHubIssueNumber3
+from mapFolding.theSSOT import getAlgorithmDispatcher, getPackageDispatcher
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from mapFolding.someAssemblyRequired import RecipeSynthesizeFlow
@@ -15,7 +15,6 @@ import uuid
 
 # SSOT for test data paths and filenames
 pathDataSamples = Path("tests/dataSamples")
-# NOTE `tmp` is not a diminutive form of temporary: it signals a technical term. And "temp" is strongly disfavored.
 pathTmpRoot: Path = pathDataSamples / "tmp"
 
 # The registrar maintains the register of temp files

@@ -31,22 +31,11 @@ from mapFolding.filesystem import writeStringToHere
 from mapFolding.theSSOT import (
 	getSourceAlgorithm,
 	raiseIfNoneGitHubIssueNumber3,
-	theDataclassIdentifier,
-	theDataclassInstance,
-	theDataclassInstanceTaskDistribution,
-	theDispatcherCallable,
-	theFileExtension,
+	The,
 	theFormatStrModuleForCallableSynthetic,
 	theFormatStrModuleSynthetic,
-	theLogicalPathModuleDataclass,
 	theLogicalPathModuleDispatcherSynthetic,
 	theModuleDispatcherSynthetic,
-	theModuleOfSyntheticModules,
-	thePackageName,
-	thePathPackage,
-	theSourceInitializeCallable,
-	theSourceParallelCallable,
-	theSourceSequentialCallable,
 )
 from os import PathLike
 from pathlib import Path, PurePath, PurePosixPath
@@ -568,20 +557,22 @@ class RecipeSynthesizeFlow:
 	source_astModule: ast.Module = ast.parse(sourcePython)
 
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-	sourceDispatcherCallable: str = theDispatcherCallable
-	sourceInitializeCallable: str = theSourceInitializeCallable
-	sourceParallelCallable: str = theSourceParallelCallable
-	sourceSequentialCallable: str = theSourceSequentialCallable
+	sourceDispatcherCallable: str = The.dispatcherCallable
+	sourceInitializeCallable: str = The.sourceInitializeCallable
+	sourceParallelCallable: str = The.sourceParallelCallable
+	sourceSequentialCallable: str = The.sourceSequentialCallable
 
-	sourceDataclassIdentifier: str = theDataclassIdentifier
-	sourceDataclassInstance: str = theDataclassInstance
-	sourceDataclassInstanceTaskDistribution: str = theDataclassInstanceTaskDistribution
-	sourcePathModuleDataclass: str = theLogicalPathModuleDataclass
+	sourceDataclassIdentifier: str = The.dataclassIdentifier
+	sourceDataclassInstance: str = The.dataclassInstance
+	sourceDataclassInstanceTaskDistribution: str = The.dataclassInstanceTaskDistribution
+	sourcePathModuleDataclass: str = The.logicalPathModuleDataclass
 
+	sourceConcurrencyManagerNamespace = The.sourceConcurrencyManagerNamespace
+	sourceConcurrencyManagerIdentifier = The.sourceConcurrencyManagerIdentifier
 	# ========================================
 	# Filesystem
-	pathPackage: PurePosixPath | None = PurePosixPath(thePathPackage)
-	fileExtension: str = theFileExtension
+	pathPackage: PurePosixPath | None = PurePosixPath(The.pathPackage)
+	fileExtension: str = The.fileExtension
 
 	# ========================================
 	# Logical identifiers
@@ -590,11 +581,11 @@ class RecipeSynthesizeFlow:
 	formatStrModuleForCallableSynthetic: str = theFormatStrModuleForCallableSynthetic
 
 	# Package
-	packageName: ast_Identifier | None = thePackageName
+	packageName: ast_Identifier | None = The.packageName
 
 	# Module
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-	Z0Z_flowLogicalPathRoot: str | None = theModuleOfSyntheticModules
+	Z0Z_flowLogicalPathRoot: str | None = The.moduleOfSyntheticModules
 	moduleDispatcher: str = theModuleDispatcherSynthetic
 	logicalPathModuleDataclass: str = sourcePathModuleDataclass
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4

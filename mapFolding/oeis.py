@@ -16,7 +16,7 @@ literature and extend sequences beyond their currently known terms.
 """
 from collections.abc import Callable
 from datetime import datetime, timedelta
-from mapFolding.theSSOT import thePathPackage
+from mapFolding.theSSOT import The
 from pathlib import Path
 from typing import Any, Final, TYPE_CHECKING
 import argparse
@@ -38,7 +38,7 @@ cacheDays = 7
 """
 Section: make `settingsOEIS`"""
 
-pathCache: Path = thePathPackage / ".cache"
+pathCache: Path = The.pathPackage / ".cache"
 
 class SettingsOEIS(TypedDict):
 	description: str
