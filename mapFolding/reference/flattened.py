@@ -1,5 +1,23 @@
-"""The algorithm flattened into semantic sections.
-This version is not maintained, so you may see differences from the current version."""
+"""
+Semantically decomposed implementation of Lunnon's algorithm with operation grouping.
+
+This implementation restructures the map folding algorithm into semantic sections with
+clear function boundaries, making the algorithm more readable and understandable. Each
+operation is isolated into its own named function, providing a clear mapping between
+the mathematical concepts and their implementation.
+
+Key characteristics:
+- Breaks down the algorithm into small, single-purpose functions
+- Uses descriptive function names that explain what each part does
+- Clearly separates logical sections of the algorithm
+- Provides a more maintainable and educational view of the algorithm
+- Uses Python's type hints for better code understanding
+
+This implementation serves as a bridge between the historical implementations and the
+modern functional approach used in the main package. It's particularly valuable for
+understanding the algorithm's operation before diving into the highly optimized versions.
+"""
+
 from collections.abc import Sequence
 from numpy import integer
 from numpy.typing import NDArray

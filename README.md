@@ -50,51 +50,75 @@ Available OEIS sequences:
   A195646: Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.
 ```
 
-### 2. **Algorithm Zoo** 🦒
+### 2. **Algorithm Zoo: A Historical and Performance Journey** 🦒
 
-- **Lunnon's 1971 Algorithm**: A painstakingly debugged version of [the original typo-riddled code](https://github.com/hunterhogan/mapFolding/blob/mapFolding/reference/foldings.txt)
-- The /reference directory.
-- **Numba-JIT Accelerated**: Up to 1000× faster than pure Python ([benchmarks](https://github.com/hunterhogan/mapFolding/blob/mapFolding/notes/Speed%20highlights.md))
+This package offers a comprehensive collection of map folding algorithm implementations that showcase its evolution from historical origins to high-performance computation:
 
-### 3. **For Researchers and Power Users** 🔬
+- **Historical Implementations**:
+  - Carefully restored versions of Lunnon's 1971 original [algorithm](https://github.com/hunterhogan/mapFolding/blob/mapFolding/reference/foldings.txt) with corrections
+  - Atlas Autocode reconstruction in the `reference/foldings.AA` file
 
-This package provides a sophisticated code transformation framework that can turn readable algorithm implementations into highly-optimized computational engines:
+- **Direct Translations**:
+  - Python translations following the original control flow (`lunnanWhile.py`)
+  - NumPy-based vectorized implementations (`lunnanNumpy.py`)
 
-- **Algorithmic Exploration**: Study the core algorithm in `theDao.py`, which uses a functional state-transformation approach with clear, isolated functions
-- **Performance Optimization**: Generate specialized implementations with the `someAssemblyRequired` transformation pipeline:
-  - AST-based code analysis and manipulation
-  - Dataclass "shattering" to decompose complex state objects into primitive components
-  - Just-in-time compilation with Numba and various optimization profiles
-  - LLVM IR extraction for low-level algorithmic analysis
+- **Modern Implementations**:
+  - Java port adaptations (`irvineJavaPort.py`) providing cleaner procedural implementations
+  - Experimental JAX version (`jaxCount.py`) exploring GPU acceleration potential
+  - Semantically decomposed version (`flattened.py`) with clear function boundaries
 
-- **Extensible Design**: The transformation framework is abstract and generic, enabling:
-  - Creation of new optimization targets beyond the included Numba implementation
-  - Customization of compilation parameters and optimization levels
-  - Development of specialized algorithms for specific map dimensions
+- **Performance Optimized**:
+  - Numba-JIT accelerated implementations up to 1000× faster than pure Python (see [benchmarks](https://github.com/hunterhogan/mapFolding/blob/mapFolding/notes/Speed%20highlights.md))
+  - Algorithmic optimizations showcasing subtle yet powerful performance differences (`total_countPlus1vsPlusN.py`)
 
-### 4. **Customization and Extension Guide**
+The `reference` directory serves as both a historical archive and an educational resource for understanding algorithm evolution.
 
-The package architecture supports multiple levels of customization:
+### 3. **Algorithmic Transformation: From Readability to Speed** 🔬
 
-- **Basic Usage**: Work with the high-level API in `basecamp.py` for standard computations
-- **Algorithm Modification**:
+The package provides a sophisticated transformation framework that bridges the gap between human-readable algorithms and high-performance computation:
+
+- **Core Algorithm Understanding**:
+  - Study the functional state-transformation approach in `theDao.py` with clear, isolated functions
+  - Explore the semantic decomposition in `reference/flattened.py` to understand algorithm sections
+
+- **Code Transformation Pipeline**:
+  - **AST Manipulation**: Analyzes and transforms the algorithm's abstract syntax tree
+  - **Dataclass "Shattering"**: Decomposes complex state objects into primitive components
+  - **Optimization Applications**: Applies domain-specific optimizations for numerical computation
+  - **LLVM Integration**: Extracts LLVM IR for low-level algorithmic analysis
+
+- **Performance Breakthroughs**:
+  - Learn why nearly identical algorithms can have dramatically different performance (`total_countPlus1vsPlusN.py`)
+  - See how memory layout and increment strategy impact computation speed
+  - Understand the batching technique that yields order-of-magnitude improvements
+
+### 4. **Multi-Level Architecture: From Simple API to Full Customization**
+
+The package's architecture supports multiple levels of engagement:
+
+- **Basic Usage**:
+  - Work with the high-level API in `basecamp.py` for standard computations
+  - Access OEIS sequence calculations with minimal code
+
+- **Algorithm Exploration**:
+  - Compare different implementations in the `reference` directory to understand trade-offs
   - Modify the core algorithm in `theDao.py` while preserving its functional approach
   - Configure system-wide settings in `theSSOT.py` to adjust data types and performance characteristics
-  - Use utility functions in `beDRY.py` for common operations
 
 - **Advanced Transformation**:
-  - The `someAssemblyRequired` package provides tools to transform code at the AST level:
-    - `transformationTools.py` contains utilities for AST manipulation and code generation
-    - `transformDataStructures.py` handles complex data structure transformations
-    - `ingredientsNumba.py` provides Numba-specific configuration profiles
-    - `synthesizeNumbaFlow.py` orchestrates the transformation process
+  - Use the `someAssemblyRequired` package to transform algorithms at the AST level
+  - Create optimized variants with different compilation settings using:
+    - `transformationTools.py` for AST manipulation
+    - `transformDataStructures.py` for complex data structure transformations
+    - `ingredientsNumba.py` for Numba-specific optimization profiles
+    - `synthesizeNumbaFlow.py` to orchestrate the transformation process
 
 - **Custom Deployment**:
   - Generate specialized implementations for specific dimensions
-  - Create optimized modules that can be executed as standalone scripts
-  - Extract LLVM IR for further analysis or optimization
+  - Create optimized standalone modules for production use
+  - Extract LLVM IR for further analysis and optimization
 
-The package's multi-level design allows you to start with simple API calls and progressively delve deeper into optimization as your computational needs grow.
+The package's multi-level design allows you to start with simple API calls and progressively explore deeper optimization techniques as your computational needs grow.
 
 ## Map-folding Video
 

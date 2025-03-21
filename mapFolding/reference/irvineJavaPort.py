@@ -2,8 +2,20 @@
 Ported from the Java version by Sean A. Irvine:
 https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java
 
+This implementation is a conversion from a well-known Java implementation of Lunnon's algorithm
+by Sean A. Irvine, a contributor to the OEIS project. It provides a clean, procedural implementation
+with straightforward variable naming and control flow that may be more approachable for
+programmers familiar with modern languages.
+
+Key characteristics:
+- Clear variable naming following modern programming conventions
+- Procedural implementation style similar to Java but adapted for Python
+- Follows the same algorithmic structure as Lunnon's original but with cleaner organization
+- Uses primitive Python data structures (lists) without NumPy dependencies
+
 Citation: https://github.com/hunterhogan/mapFolding/blob/134f2e6ecdf59fb6f6829c775475544a6aaaa800/citations/jOEIS.bibtex
 """
+
 def foldings(p: list[int], res: int = 0, mod: int = 0) -> int:
 	"""
 	Compute the total number of foldings for a map with dimensions specified in p.

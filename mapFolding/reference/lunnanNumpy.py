@@ -1,7 +1,22 @@
 """
 A generally faithful translation of the original Atlas Autocode code by W. F. Lunnon to Python using NumPy.
-W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
+
+This implementation transforms Lunnon's 1971 algorithm to leverage NumPy's array operations for improved
+performance while maintaining algorithmic fidelity. It preserves the core logic and variable naming
+conventions of the original algorithm but benefits from NumPy's vectorized operations and efficient
+memory management.
+
+Key characteristics:
+- Uses NumPy arrays instead of Python lists for better memory efficiency
+- Maintains the original algorithm structure and control flow
+- Preserves variable naming for algorithmic clarity
+- Offers significant performance improvements over pure Python implementations
+
+Reference:
+W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14, Issue 1, 1971,
+Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
 """
+
 import numpy
 
 def foldings(p: list[int]) -> int:

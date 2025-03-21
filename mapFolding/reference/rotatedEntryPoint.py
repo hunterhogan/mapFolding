@@ -1,3 +1,21 @@
+"""
+Alternative algorithm entry point implementation for Lunnon's map folding algorithm.
+
+This implementation demonstrates an interesting algorithmic variation where the main processing
+loop is "rotated" to enter at a different point in the execution flow. Specifically, it's
+structured to enter at the modulo operator rather than the traditional starting point.
+
+Key characteristics:
+- Restructures the control flow by reorganizing the entry point of the algorithm
+- Separates preparation work from the main computational loop
+- Uses explicit variable naming with index constants for clarity
+- Demonstrates how the same algorithm can be approached from different entry points
+
+Note: This implementation is intentionally incomplete and requires supporting code from
+other modules to function. It serves primarily as a demonstration of how algorithmic
+structure can be creatively redesigned while maintaining the core computational approach.
+"""
+
 from mapFolding import outfitFoldings
 from numba import njit
 import numpy

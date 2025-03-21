@@ -1,3 +1,27 @@
+"""
+High-performance Numba-accelerated implementation of Lunnon's algorithm.
+
+This implementation focuses on maximum computational performance by leveraging Numba's
+just-in-time (JIT) compilation capabilities to generate native machine code. It represents
+a manually optimized version that served as inspiration for the automated transformation
+framework in the someAssemblyRequired package.
+
+Key characteristics:
+- Optimized data structures using NumPy typed arrays with appropriate data types
+- Function decorators for Numba JIT compilation with performance-oriented settings
+- Memory-efficient implementation with careful type management
+- Reduced Python overhead through native code execution
+- Algorithmic optimizations tailored for numerical computation
+
+Performance considerations:
+- Up to 1000× faster than pure Python implementations
+- Optimized for larger map dimensions where computational demands increase exponentially
+- Incorporates lessons from multiple implementation strategies
+
+Note: This serves as a reference for manually-optimized code before the development of
+the automated transformation pipeline in the main package.
+"""
+
 from typing import Any
 import numba
 import numpy

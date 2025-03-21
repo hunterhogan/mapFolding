@@ -1,7 +1,21 @@
 """
 A largely faithful translation of the original Atlas Autocode code by W. F. Lunnon to Python using `while`.
-W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14, Issue 1, 1971, Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
+
+This implementation closely follows the structure and logic of Lunnon's 1971 paper, preserving the
+variable names and core algorithm design. It uses while loops instead of Atlas Autocode's procedural
+control structures, maintaining the imperative programming style of the original.
+
+Key characteristics:
+- Preserves original algorithm structure for historical accuracy
+- Uses primarily scalar operations and explicit loops
+- Maintains the original variable naming from Lunnon's work
+- Provides a baseline for comparison against optimized implementations
+
+Reference:
+W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14, Issue 1, 1971,
+Pages 75-80, https://doi.org/10.1093/comjnl/14.1.75
 """
+
 def foldings(p: list[int]) -> int:
 	"""
 	Run loop with (A, B) on each folding of a p[1] x ... x p[d] map, where A and B are the above and below vectors.
