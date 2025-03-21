@@ -5,6 +5,7 @@ from tests.conftest import standardizedEqualToCallableReturn
 from typing import Any, Literal
 from Z0Z_tools import intInnit
 from Z0Z_tools.pytestForYourUse import PytestFor_intInnit, PytestFor_oopsieKwargsie
+import multiprocessing
 import numba
 import pytest
 import sys
@@ -78,6 +79,6 @@ def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> N
 	(0, numba.get_num_threads()),
 	(1, 1),
 ])
-def test_setCPUlimit(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | Literal[0] | Literal[1], expectedLimit: Any | int) -> None:
-	if The.concurrencyPackage == 'numba':
-		standardizedEqualToCallableReturn(expectedLimit, setCPUlimit, CPUlimit)
+def test_setCPUlimitNumba(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | Literal[0] | Literal[1], expectedLimit: Any | int) -> None:
+	numba.set_num_threads(multiprocessing.cpu_count())
+	standardizedEqualToCallableReturn(expectedLimit, setCPUlimit, CPUlimit, 'numba')

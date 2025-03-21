@@ -1,2 +1,0 @@
-"An algorithm is described to compute the number of ways of folding a one-dimensional map, and a table of values given."
-%H W. F. Lunnon, <a href="https://doi.org/10.1090/S0025-5718-1968-0221957-8">A map-folding problem</a>, Math. Comp. 22 (1968), 193-199.

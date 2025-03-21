@@ -74,7 +74,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	module: ast.Module = ast.parse(inspect_getsource(importlib_import_module(logicalPathModule)))
 	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
 
-	dataclass = extractClassDef(dataclass_Identifier, module)
+	dataclass = extractClassDef(module, dataclass_Identifier)
 	if not isinstance(dataclass, ast.ClassDef):
 		raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
 

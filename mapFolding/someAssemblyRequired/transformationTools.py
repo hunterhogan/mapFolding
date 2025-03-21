@@ -189,7 +189,8 @@ class ifThis:
 		return isinstance(node, ast.Call)
 	@staticmethod
 	def isCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
-		return lambda node: ifThis.isCall(node) and ifThis.isName_Identifier(identifier)(node.func)
+		def workhorse(node: ast.AST) -> TypeGuard[ast.Call] | bool: return ifThis.isCall(node) and ifThis.isName_Identifier(identifier)(node.func)
+		return workhorse
 	@staticmethod
 	def isCallNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
 		return lambda node: ifThis.isCall(node) and ifThis.is_nameDOTnameNamespace_Identifier(namespace, identifier)(node.func)
@@ -215,8 +216,7 @@ class ifThis:
 	def isExpr(node: ast.AST) -> TypeGuard[ast.Expr]:
 		return isinstance(node, ast.Expr)
 	@staticmethod
-	def isFunctionDef(node: ast.AST) -> TypeGuard[ast.FunctionDef]:
-		return isinstance(node, ast.FunctionDef)
+	def isFunctionDef(node: ast.AST) -> TypeGuard[ast.FunctionDef]: return isinstance(node, ast.FunctionDef)
 	@staticmethod
 	def isFunctionDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.FunctionDef] | bool]:
 		return lambda node: ifThis.isFunctionDef(node) and node.name == identifier
@@ -266,9 +266,9 @@ class ifThis:
 		Parameters:
 			identifier: The identifier to look for in the value chain
 		Returns:
-			predicate: function that checks if a node matches the criteria
+			workhorse: function that checks if a node matches the criteria
 		"""
-		def predicate(node: ast.AST) -> TypeGuard[ast.Subscript]:
+		def workhorse(node: ast.AST) -> TypeGuard[ast.Subscript]:
 			if not ifThis.isSubscript(node):
 				return False
 			def checkNodeDOTvalue(nodeDOTvalue: ast.AST) -> bool:
@@ -279,7 +279,7 @@ class ifThis:
 					return checkNodeDOTvalue(nodeDOTvalue.value) # type: ignore
 				return False
 			return checkNodeDOTvalue(node.value)
-		return predicate
+		return workhorse
 	@staticmethod
 	def isSubscriptIsName_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Subscript] | bool]:
 		return lambda node: ifThis.isSubscript(node) and ifThis.isName_Identifier(identifier)(node.value)
@@ -309,12 +309,12 @@ class ifThis:
 	@staticmethod
 	def matchesNoDescendant(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		"""Create a predicate that returns True if no descendant of the node matches the given predicate."""
-		def checkNoMatchingDescendant(node: ast.AST) -> bool:
+		def workhorse(node: ast.AST) -> bool:
 			for descendant in ast.walk(node):
 				if descendant is not node and predicate(descendant):
 					return False
 			return True
-		return checkNoMatchingDescendant
+		return workhorse
 	@staticmethod
 	def onlyReturnAnyCompare(astFunctionDef: ast.AST) -> TypeGuard[ast.FunctionDef]:
 		return ifThis.isFunctionDef(astFunctionDef) and len(astFunctionDef.body) == 1 and ifThis.isReturnAnyCompare(astFunctionDef.body[0])
@@ -476,11 +476,15 @@ class Then:
 	def insertThisBelow(list_astAST: Sequence[ast.AST]) -> Callable[[ast.AST], Sequence[ast.AST]]:
 		return lambda belowMe: [belowMe, *list_astAST]
 	@staticmethod
-	def removeThis(_node: ast.AST) -> None:
-		return None
+	def removeThis(_node: ast.AST) -> None: return None
 	@staticmethod
-	def replaceWith(astAST: ast.AST) -> Callable[[ast.AST], ast.AST]:
-		return lambda _replaceMe: astAST
+	def replaceWith(astAST: ast.AST) -> Callable[[ast.AST], ast.AST]: return lambda _replaceMe: astAST
+	@staticmethod
+	def replaceDOTfuncWith(ast_expr: ast.expr) -> Callable[[ast.Call], ast.Call]:
+		def workhorse(node: ast.Call) -> ast.Call:
+			node.func = ast_expr
+			return node
+		return workhorse
 	@staticmethod
 	def updateThis(dictionaryOf_astMosDef: dict[ast_Identifier, astMosDef]) -> Callable[[astMosDef], astMosDef]:
 		return lambda node: dictionaryOf_astMosDef.setdefault(node.name, node)
@@ -597,6 +601,9 @@ class RecipeSynthesizeFlow:
 	initializeCallable: str = sourceInitializeCallable
 	parallelCallable: str = sourceParallelCallable
 	sequentialCallable: str = sourceSequentialCallable
+	# initializeCallable: str = 'StartTheCommotion'
+	# parallelCallable: str = sourceParallelCallable
+	# sequentialCallable: str = sourceSequentialCallable
 
 	dataclassIdentifier: str = sourceDataclassIdentifier
 
@@ -623,14 +630,14 @@ class RecipeSynthesizeFlow:
 	def pathFilenameDispatcher(self) -> PurePosixPath:
 		return self._makePathFilename(filenameStem=self.moduleDispatcher, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
 
-def extractClassDef(identifier: ast_Identifier, module: ast.Module) -> ast.ClassDef | None:
+def extractClassDef(module: ast.Module, identifier: ast_Identifier) -> ast.ClassDef | None:
 	sherpa: list[ast.ClassDef] = []
 	extractor = NodeCollector(ifThis.isClassDef_Identifier(identifier), [Then.appendTo(sherpa)])
 	extractor.visit(module)
 	astClassDef = sherpa[0] if sherpa else None
 	return astClassDef
 
-def extractFunctionDef(identifier: ast_Identifier, module: ast.Module) -> ast.FunctionDef | None:
+def extractFunctionDef(module: ast.Module, identifier: ast_Identifier) -> ast.FunctionDef | None:
 	sherpa: list[ast.FunctionDef] = []
 	extractor = NodeCollector(ifThis.isFunctionDef_Identifier(identifier), [Then.appendTo(sherpa)])
 	extractor.visit(module)

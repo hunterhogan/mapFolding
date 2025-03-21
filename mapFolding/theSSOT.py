@@ -179,13 +179,6 @@ def getPathJobRootDEFAULT() -> Path:
 		pathJobDEFAULT = The.pathPackage / "jobs"
 	return pathJobDEFAULT
 
-_datatypePackage: str = ''
-def getDatatypePackage() -> str:
-	global _datatypePackage
-	if not _datatypePackage:
-		_datatypePackage = The.datatypePackage
-	return _datatypePackage
-
 # =============================================================================
 # The coping way.
 
