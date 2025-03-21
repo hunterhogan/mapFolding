@@ -43,7 +43,7 @@ Use `getOEISids` to get the most up-to-date list of available OEIS IDs.
 (mapFolding) C:\apps\mapFolding> getOEISids
 
 Available OEIS sequences:
-  A001415: Number of ways of folding a 2 X n strip of stamps.
+  A001415: Number of ways of folding a 2 X n strip of stamps. (Now extended to n=20!)
   A001416: Number of ways of folding a 3 X n strip of stamps.
   A001417: Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
   A001418: Number of ways of folding an n X n sheet of stamps.
@@ -70,6 +70,7 @@ This package offers a comprehensive collection of map folding algorithm implemen
 - **Performance Optimized**:
   - Numba-JIT accelerated implementations up to 1000× faster than pure Python (see [benchmarks](https://github.com/hunterhogan/mapFolding/blob/mapFolding/notes/Speed%20highlights.md))
   - Algorithmic optimizations showcasing subtle yet powerful performance differences (`total_countPlus1vsPlusN.py`)
+  - **New Computations**: First-ever calculations for 2×19 and 2×20 maps in the `reference/jobsCompleted/` directory
 
 The `reference` directory serves as both a historical archive and an educational resource for understanding algorithm evolution.
 

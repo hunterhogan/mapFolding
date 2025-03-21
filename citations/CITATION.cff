@@ -3,9 +3,10 @@ abstract: A computational framework for enumerating distinct folding patterns of
   a pure Python implementation of Lunnon's 1971 algorithm, (2) a sophisticated code
   transformation system that converts human-readable algorithms into highly-optimized
   implementations, and (3) numerical validation against established sequences in the
-  Online Encyclopedia of Integer Sequences (OEIS). The framework balances theoretical
-  rigor with performance optimization through abstract syntax tree manipulation, dataclass
-  decomposition, and just- in-time compilation techniques. Beyond map folding, the
+  Online Encyclopedia of Integer Sequences (OEIS). Notably, it includes first-ever calculations
+  for 2x19 and 2x20 map foldings, extending OEIS sequence A001415. The framework balances
+  theoretical rigor with performance optimization through abstract syntax tree manipulation,
+  dataclass decomposition, and just-in-time compilation techniques. Beyond map folding, the
   transformation tools offer a general-purpose approach for optimizing numerical algorithms
   while maintaining readable source implementations.
 authors:

@@ -26,11 +26,18 @@ Categories of reference implementations:
    - total_countPlus1vsPlusN.py - Optimized counting with different increment strategies
    - rotatedEntryPoint.py - Alternative entry point implementation (demonstration)
 
+5. Published computations:
+   - jobsCompleted/ - Contains the source code and results of significant new computations:
+     - [2,19] - First-ever computation of the 2x19 map (completed Jan 2025)
+     - [2,20] - First-ever computation of the 2x20 map (completed Jan 2025)
+     - These calculations extend the known values for OEIS sequence A001415
+
 These reference implementations are valuable for:
 - Understanding the algorithm's historical development
 - Comparing performance characteristics across implementation strategies
 - Studying optimization techniques and their effects
 - Verifying the correctness of the core algorithm against known solutions
+- Reproducing published computational results that extend mathematical knowledge
 
 Note: These implementations are for reference only and not used in the production
 code path of the package. The active implementation resides in theDao.py with

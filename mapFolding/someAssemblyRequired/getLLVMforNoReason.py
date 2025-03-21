@@ -12,6 +12,14 @@ The extracted LLVM IR can be valuable for debugging, optimization analysis, or e
 purposes, as it provides a view into how high-level Python code is translated into
 lower-level representations for machine execution.
 
+Example of successful use:
+The LLVM IR for the groundbreaking 2x19 map calculation can be found at:
+mapFolding/reference/jobsCompleted/[2x19]/[2x19].ll
+
+This file demonstrates the low-level optimizations that made this previously
+intractable calculation possible. The IR reveals how the abstract algorithm was
+transformed into efficient machine code through Numba's compilation pipeline.
+
 While originally part of a tighter integration with the code generation pipeline,
 this module now operates as a standalone utility that can be applied to any module
 containing Numba-compiled functions.
@@ -23,7 +31,18 @@ import importlib.util
 import llvmlite.binding
 
 def writeModuleLLVM(pathFilename: Path, identifierCallable: str) -> Path:
-    """Import the generated module directly and get its LLVM IR."""
+    """Import the generated module directly and get its LLVM IR.
+
+    Parameters
+        pathFilename: Path to the Python module file containing the Numba-compiled function
+        identifierCallable: Name of the function within the module to extract LLVM IR from
+
+    Returns
+        Path to the generated .ll file containing the extracted LLVM IR
+
+    For an example of the output, see reference/jobsCompleted/[2x19]/[2x19].ll,
+    which contains the IR for the historically significant 2x19 map calculation.
+    """
     specTarget: ModuleSpec | None = importlib.util.spec_from_file_location("generatedModule", pathFilename)
     if specTarget is None or specTarget.loader is None:
         raise ImportError(f"Could not create module spec or loader for {pathFilename}")

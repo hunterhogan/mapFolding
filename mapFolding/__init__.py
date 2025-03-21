@@ -22,17 +22,21 @@ Special directories:
 - .cache/: Stores cached data from external sources like OEIS to improve performance
 - syntheticModules/: Contains dynamically generated, optimized implementations of the
   core algorithm created by the code transformation framework
+- reference/: Historical implementations and educational resources for algorithm exploration
+  - reference/jobsCompleted/: Contains successful computations for previously unknown values,
+    including first-ever calculations for 2×19 and 2×20 maps (OEIS A001415)
 
 This package strives to balance algorithm readability and understandability with
 high-performance computation capabilities, allowing users to compute map folding
 totals for larger dimensions than previously feasible.
 """
 from mapFolding.basecamp import countFolds as countFolds
-from mapFolding.oeis import clearOEIScache, getOEISids, OEIS_for_n
+from mapFolding.oeis import clearOEIScache, getOEISids, OEIS_for_n, oeisIDfor_n
 
 __all__ = [
     'clearOEIScache',
     'countFolds',
     'getOEISids',
     'OEIS_for_n',
+    'oeisIDfor_n',
 ]
