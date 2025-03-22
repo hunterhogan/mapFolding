@@ -3,23 +3,23 @@ abstract: A computational framework for enumerating distinct folding patterns of
   a pure Python implementation of Lunnon's 1971 algorithm, (2) a sophisticated code
   transformation system that converts human-readable algorithms into highly-optimized
   implementations, and (3) numerical validation against established sequences in the
-  Online Encyclopedia of Integer Sequences (OEIS). Notably, it includes first-ever calculations
-  for 2x19 and 2x20 map foldings, extending OEIS sequence A001415. The framework balances
-  theoretical rigor with performance optimization through abstract syntax tree manipulation,
-  dataclass decomposition, and just-in-time compilation techniques. Beyond map folding, the
-  transformation tools offer a general-purpose approach for optimizing numerical algorithms
-  while maintaining readable source implementations.
+  Online Encyclopedia of Integer Sequences (OEIS). Notably, it includes first-ever
+  calculations for 2x19 and 2x20 map foldings, extending OEIS sequence A001415. The
+  framework balances theoretical rigor with performance optimization through abstract
+  syntax tree manipulation, dataclass decomposition, and just-in-time compilation
+  techniques. Beyond map folding, the transformation tools offer a general-purpose
+  approach for optimizing numerical algorithms while maintaining readable source implementations.
 authors:
 - given-names: Hunter
   family-names: Hogan
   email: HunterHogan@pm.me
 cff-version: 1.2.0
-commit: aaa7c293dd62377276cba6d8511c82e5df07e529
+commit: 09c1f691fa0ff2fb90bf25d85610a067f5c55577
 date-released: '2025-03-21'
 identifiers:
 - type: url
-  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.8.2
-  description: The URL for mapFolding 0.8.2.
+  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.8.3
+  description: The URL for mapFolding 0.8.3.
 keywords:
 - A001415
 - A001416
@@ -44,9 +44,9 @@ keywords:
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.8.2/
-repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.8.2
+repository-artifact: https://pypi.org/project/mapfolding/0.8.3/
+repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.8.3
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.8.2
+version: 0.8.3
