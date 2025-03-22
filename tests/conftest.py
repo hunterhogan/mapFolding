@@ -6,7 +6,7 @@ import numpy
 from mapFolding.theSSOT import ComputationState, The, getPackageDispatcher
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
-from mapFolding.someAssemblyRequired import RecipeSynthesizeFlow
+from mapFolding.someAssemblyRequired.Z0Z_containers import RecipeSynthesizeFlow
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import makeNumbaFlow
 from pathlib import Path, PurePosixPath
 from typing import Any, ContextManager

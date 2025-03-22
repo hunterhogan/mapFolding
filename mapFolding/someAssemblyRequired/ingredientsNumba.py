@@ -20,7 +20,8 @@ algorithm implementation into a highly-optimized Numba version.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import ifThis, IngredientsFunction, Make
+from mapFolding.someAssemblyRequired import ifThis, Make
+from mapFolding.someAssemblyRequired.Z0Z_containers import IngredientsFunction
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, cast, Final, TYPE_CHECKING
 import ast

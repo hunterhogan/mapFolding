@@ -24,23 +24,30 @@ These tools were developed for map folding computation optimization but are desi
 general-purpose utilities applicable to a wide range of code transformation scenarios,
 particularly for numerically-intensive algorithms that benefit from just-in-time compilation.
 """
-from mapFolding.someAssemblyRequired.transformationTools import (
+from mapFolding.someAssemblyRequired.theTypes import (
+	ast_expr_Slice as ast_expr_Slice,
 	ast_Identifier as ast_Identifier,
+	astClassHasAttributeDOTname as astClassHasAttributeDOTname,
+	astMosDef as astMosDef,
+	list_ast_type_paramORintORNone as list_ast_type_paramORintORNone,
+	nodeType as nodeType,
+	strDotStrCuzPyStoopid as strDotStrCuzPyStoopid,
+	strORintORNone as strORintORNone,
+	strORlist_ast_type_paramORintORNone as strORlist_ast_type_paramORintORNone,
+	Z0Z_ast as Z0Z_ast,
+	)
+
+from mapFolding.someAssemblyRequired.tool_ifThis import ifThis as ifThis
+from mapFolding.someAssemblyRequired.tool_Make import Make as Make
+from mapFolding.someAssemblyRequired.tool_Then import Then as Then
+
+from mapFolding.someAssemblyRequired.transformationTools import (
 	extractClassDef as extractClassDef,
 	extractFunctionDef as extractFunctionDef,
-	ifThis as ifThis,
-	IngredientsFunction as IngredientsFunction,
-	IngredientsModule as IngredientsModule,
 	inlineThisFunctionWithTheseValues as inlineThisFunctionWithTheseValues,
-	LedgerOfImports as LedgerOfImports,
-	Make as Make,
 	makeDictionaryReplacementStatements as makeDictionaryReplacementStatements,
 	NodeCollector as NodeCollector,
 	NodeReplacer as NodeReplacer,
-	RecipeSynthesizeFlow as RecipeSynthesizeFlow,
-	strDotStrCuzPyStoopid as strDotStrCuzPyStoopid,
-	Then as Then,
-	write_astModule as write_astModule,
 	Z0Z_executeActionUnlessDescendantMatches as Z0Z_executeActionUnlessDescendantMatches,
 	Z0Z_replaceMatchingASTnodes as Z0Z_replaceMatchingASTnodes,
 	)

@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 else:
 	TypedDict = dict
 
-cacheDays = 7
+cacheDays = 30
 
 """
 Section: make `settingsOEIS`"""
