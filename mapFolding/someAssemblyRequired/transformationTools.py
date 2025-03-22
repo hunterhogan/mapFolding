@@ -40,7 +40,7 @@ from mapFolding.theSSOT import (
 from os import PathLike
 from pathlib import Path, PurePath, PurePosixPath
 from types import ModuleType
-from typing import Any, cast, Generic, TypeAlias, TypeGuard, TypeVar
+from typing import Any, cast, Generic, TypeAlias, TYPE_CHECKING, TypeGuard, TypeVar
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import dataclasses
@@ -62,7 +62,6 @@ Namespace: uppercase, should only appear in camelCase and means "namespace", low
 
 # Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
 
-Z0Z_ast: TypeAlias = ast.AnnAssign | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Return | ast.Starred | ast.Subscript | ast.TypeAlias | ast.Yield | ast.YieldFrom
 ast_expr_Slice: TypeAlias = ast.expr
 ast_Identifier: TypeAlias = str
 astClassHasAttributeDOTname: TypeAlias = ast.FunctionDef | ast.ClassDef | ast.AsyncFunctionDef
@@ -72,6 +71,11 @@ nodeType = TypeVar('nodeType', bound=ast.AST)
 strDotStrCuzPyStoopid: TypeAlias = str
 strORintORNone: TypeAlias = Any
 strORlist_ast_type_paramORintORNone: TypeAlias = Any
+
+if TYPE_CHECKING:
+	Z0Z_ast: TypeAlias = ast.AnnAssign | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Return | ast.Starred | ast.Subscript | ast.TypeAlias | ast.Yield | ast.YieldFrom
+else:
+	Z0Z_ast = str
 
 class NodeCollector(Generic[nodeType], ast.NodeVisitor):
 	"""A node visitor that collects data via one or more actions when a predicate is met."""
@@ -399,10 +403,26 @@ class Make:
 		return ast.Attribute(value=nameChain, attr=dotName, ctx=context, **keywordArguments)
 	@staticmethod
 	def nameDOTname(identifier: ast_Identifier, *dotName: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Attribute:
+
+		# This logic has unnecessary complexity, which invites bugs, and the type checkers still complain.
+		# nameDOTname = None
+		# for suffix in dotName:
+		# 	nameDOTname = Make.itDOTname(
+		# 				nameDOTname if nameDOTname is not None else Make.astName(identifier, context, **keywordArguments)
+		# 				, suffix, context, **keywordArguments)
+
+		# This logic is not DRY and invites bugs.
+		# suffix = dotName[0]
+		# nameDOTname = Make.itDOTname(Make.astName(identifier, context, **keywordArguments), suffix, context, **keywordArguments)
+		# for suffix in dotName[1:None]:
+		# 	nameDOTname = Make.itDOTname(nameDOTname, suffix, context, **keywordArguments)
+
+		# The type checkers get upset about this logic.
 		nameDOTname = Make.astName(identifier, context, **keywordArguments)
 		for suffix in dotName:
 			nameDOTname = Make.itDOTname(nameDOTname, suffix, context, **keywordArguments)
-		return nameDOTname # type: ignore
+
+		return nameDOTname
 	@staticmethod
 	def astReturn(value: ast.expr | None = None, **keywordArguments: int) -> ast.Return:
 		return ast.Return(value, **keywordArguments)
@@ -434,10 +454,10 @@ class LedgerOfImports:
 				for alias in astImport_.names:
 					self.dictionaryImportFrom[astImport_.module].append((alias.name, alias.asname))
 
-	def addImportStr(self, module: str) -> None:
+	def addImportAsStr(self, module: str) -> None:
 		self.listImport.append(module)
 
-	def addImportFromStr(self, module: str, name: str, asname: str | None = None) -> None:
+	def addImportFromAsStr(self, module: str, name: str, asname: str | None = None) -> None:
 		self.dictionaryImportFrom[module].append((name, asname))
 
 	def exportListModuleNames(self) -> list[str]:
@@ -519,7 +539,7 @@ class Then:
 		return lambda node: dictionaryOf_astMosDef.setdefault(node.name, node)
 	@staticmethod
 	def Z0Z_ledger(logicalPath: strDotStrCuzPyStoopid, ledger: LedgerOfImports) -> Callable[[ast.AnnAssign], None]:
-		return lambda node: ledger.addImportFromStr(logicalPath, node.annotation.id) # type: ignore
+		return lambda node: ledger.addImportFromAsStr(logicalPath, node.annotation.id) # type: ignore
 	@staticmethod
 	def Z0Z_appendKeywordMirroredTo(list_keyword: list[ast.keyword]) -> Callable[[ast.AnnAssign], None]:
 		return lambda node: list_keyword.append(Make.ast_keyword(node.target.id, node.target)) # type: ignore
@@ -765,7 +785,7 @@ def Z0Z_replaceMatchingASTnodes(astTree: ast.AST, mappingFindReplaceNodes: dict[
 			if nodeSubject is None or nodePattern is None:
 				return nodeSubject is None and nodePattern is None
 
-			if type(nodeSubject) != type(nodePattern):
+			if type(nodeSubject) is not type(nodePattern):
 				return False
 
 			if isinstance(nodeSubject, ast.AST):

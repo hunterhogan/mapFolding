@@ -122,7 +122,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	, listNameDataclassFragments4Parameters = listNameDataclassFragments4Parameters
 	, dictionaryDataclassField2Primitive = {statement.value: statement.target for statement in listAnnAssign4DataclassUnpack}
 	)
-	shatteredDataclass.ledgerDataclassANDFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
+	shatteredDataclass.ledgerDataclassANDFragments.addImportFromAsStr(logicalPathModule, dataclass_Identifier)
 	return shatteredDataclass
 
 def getSourceAlgorithmVESTIGIAL() -> ModuleType:

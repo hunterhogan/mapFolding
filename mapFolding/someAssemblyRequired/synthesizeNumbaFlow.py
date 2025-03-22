@@ -67,6 +67,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 	ingredientsSequential.astFunctionDef = inlineThisFunctionWithTheseValues(ingredientsSequential.astFunctionDef, dictionaryReplacementStatements)
 
 	# assignRecipeIdentifiersToCallable. =============================
+	# TODO How can I `RecipeSynthesizeFlow` as the SSOT for the pairs of items that may need to be replaced?
 	listFindReplace = [(numbaFlow.sourceDispatcherCallable, numbaFlow.dispatcherCallable),
 						(numbaFlow.sourceInitializeCallable, numbaFlow.initializeCallable),
 						(numbaFlow.sourceParallelCallable, numbaFlow.parallelCallable),
@@ -108,6 +109,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 	ingredientsDispatcher.imports.update(shatteredDataclass.ledgerDataclassANDFragments)
 
 	# Change callable parameters and Call to the callable at the same time ====
+	# TODO How can I use ast and/or other tools to ensure that when I change a callable, I also change the statements that call the callable?
 	# sequentialCallable =========================================================
 	ingredientsSequential.astFunctionDef.args = Make.astArgumentsSpecification(args=shatteredDataclass.list_ast_argAnnotated4ArgumentsSpecification)
 	astCallSequentialCallable = Make.astCall(Make.astName(numbaFlow.sequentialCallable), shatteredDataclass.listNameDataclassFragments4Parameters)

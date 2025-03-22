@@ -28,12 +28,12 @@ def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, stateme
 	dtypeName: str = identifier
 	dtypeAsName: str = f"{moduleConstructor}_{dtypeName}"
 	list_astKeywords: list[ast.keyword] = [ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))]
-	allImports.addImportFromStr(moduleConstructor, dtypeName, dtypeAsName)
+	allImports.addImportFromAsStr(moduleConstructor, dtypeName, dtypeAsName)
 	astCall: ast.Call = Make.astCall(Make.astName(constructorName), [dataAs_astExpr], list_astKeywords)
 	assignment = ast.Assign(targets=[astAssignee], value=astCall)
 	FunctionDefTarget.body.insert(0, assignment)
 	FunctionDefTarget.body.remove(statement)
-	allImports.addImportFromStr(moduleConstructor, constructorName)
+	allImports.addImportFromAsStr(moduleConstructor, constructorName)
 	return FunctionDefTarget, allImports
 
 def insertArrayIn_body(FunctionDefTarget: ast.FunctionDef, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports, unrollSlices: int | None = None) -> tuple[ast.FunctionDef, LedgerOfImports]:
@@ -77,7 +77,7 @@ def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, iden
 			assignment = ast.Assign(targets=[astAssignee], value=astCall)
 			FunctionDefTarget.body.insert(0, assignment)
 			FunctionDefTarget.body.remove(statement)
-			allImports.addImportFromStr(moduleConstructor, constructorName)
+			allImports.addImportFromAsStr(moduleConstructor, constructorName)
 	return FunctionDefTarget, allImports
 
 def removeAssignmentFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
@@ -97,7 +97,7 @@ def findAndReplaceAnnAssignIn_body(FunctionDefTarget: ast.FunctionDef, allImport
 			if isinstance(stmt.target, ast.Name) and isinstance(stmt.value, ast.Constant):
 				astAssignee: ast.Name = stmt.target
 				argData_dtypeName: str = astAssignee.id
-				allImports.addImportFromStr(moduleConstructor, argData_dtypeName)
+				allImports.addImportFromAsStr(moduleConstructor, argData_dtypeName)
 				astCall = ast.Call(func=ast.Name(id=argData_dtypeName, ctx=ast.Load()), args=[stmt.value], keywords=[])
 				assignment = ast.Assign(targets=[astAssignee], value=astCall)
 				FunctionDefTarget.body.insert(0, assignment)
@@ -142,7 +142,7 @@ def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget
 	datatype: str = 'Z0Z_identifierCountFolds'
 	FunctionDefTarget.returns = ast.Name(id=datatype, ctx=ast.Load())
 	datatypeModuleScalar: str = 'numba'
-	allImports.addImportFromStr(datatypeModuleScalar, datatype)
+	allImports.addImportFromAsStr(datatypeModuleScalar, datatype)
 
 	FunctionDefTarget.body.append(returnStatement)
 
@@ -346,8 +346,8 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	totalEstimated: int = Z0Z_totalEstimated
 	astLauncher = makeLauncherTqdmJobNumba(FunctionDefTarget.name, pathFilenameFoldsTotal, totalEstimated, stateJob.foldGroups[-1])
 
-	allImports.addImportFromStr('numba_progress', 'ProgressBar')
-	allImports.addImportFromStr('numba_progress', 'ProgressBarType')
+	allImports.addImportFromAsStr('numba_progress', 'ProgressBar')
+	allImports.addImportFromAsStr('numba_progress', 'ProgressBarType')
 
 	# add ProgressBarType parameter to function args
 	counterArg = ast.arg(arg=identifierCounter, annotation=ast.Name(id='ProgressBarType', ctx=ast.Load()))
