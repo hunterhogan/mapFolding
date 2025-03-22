@@ -61,6 +61,7 @@ class ShatteredDataclass:
 	listAnnAssign4DataclassUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list)
 	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=list)
 	listNameDataclassFragments4Parameters: list[ast.Name] = dataclasses.field(default_factory=list)
+	dictionaryDataclassField2Primitive: dict[ast.expr, ast.Name] = dataclasses.field(default_factory=dict)
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
 	"""
@@ -119,8 +120,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	, listAnnAssign4DataclassUnpack = listAnnAssign4DataclassUnpack
 	, listAnnotations = listAnnotations
 	, listNameDataclassFragments4Parameters = listNameDataclassFragments4Parameters
+	, dictionaryDataclassField2Primitive = {statement.value: statement.target for statement in listAnnAssign4DataclassUnpack}
 	)
-
 	shatteredDataclass.ledgerDataclassANDFragments.addImportFromStr(logicalPathModule, dataclass_Identifier)
 	return shatteredDataclass
 

@@ -227,13 +227,15 @@ def doTheNeedful(state: ComputationState) -> ComputationState:
 	state = countInitialize(state)
 	if state.taskDivisions > 0:
 		dictionaryConcurrency: dict[int, ConcurrentFuture[ComputationState]] = {}
-		with ProcessPoolExecutor(state.concurrencyLimit) as concurrencyManager:
-			for indexSherpa in range(state.taskDivisions):
-				stateParallel = deepcopy(state)
-				stateParallel.taskIndex = indexSherpa
-				dictionaryConcurrency[indexSherpa] = concurrencyManager.submit(countParallel, stateParallel)
-			for indexSherpa in range(state.taskDivisions):
-				state.foldGroups[indexSherpa] = dictionaryConcurrency[indexSherpa].result().foldGroups[indexSherpa]
+		stateParallel = deepcopy(state)
+		with ProcessPoolExecutor(stateParallel.concurrencyLimit) as concurrencyManager:
+			for indexSherpa in range(stateParallel.taskDivisions):
+				state = deepcopy(stateParallel)
+				state.taskIndex = indexSherpa
+				dictionaryConcurrency[indexSherpa] = concurrencyManager.submit(countParallel, state)
+			for indexSherpa in range(stateParallel.taskDivisions):
+				stateParallel.foldGroups[indexSherpa] = dictionaryConcurrency[indexSherpa].result().foldGroups[indexSherpa]
+		state = stateParallel
 	else:
 		state = countSequential(state)
 

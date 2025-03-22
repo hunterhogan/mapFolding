@@ -139,36 +139,38 @@ def doTheNeedful(state: ComputationState) -> ComputationState:
     state = countInitialize(state)
     if state.taskDivisions > 0:
         dictionaryConcurrency: dict[int, ConcurrentFuture[ComputationState]] = {}
-        with ProcessPoolExecutor(state.concurrencyLimit) as concurrencyManager:
-            for indexSherpa in range(state.taskDivisions):
-                stateParallel = deepcopy(state)
-                stateParallel.taskIndex = indexSherpa
-                mapShape: tuple[DatatypeLeavesTotal, ...] = stateParallel.mapShape
-                leavesTotal: DatatypeLeavesTotal = stateParallel.leavesTotal
-                taskDivisions: DatatypeLeavesTotal = stateParallel.taskDivisions
-                concurrencyLimit: DatatypeElephino = stateParallel.concurrencyLimit
-                connectionGraph: Array3D = stateParallel.connectionGraph
-                dimensionsTotal: DatatypeLeavesTotal = stateParallel.dimensionsTotal
-                countDimensionsGapped: Array1DLeavesTotal = stateParallel.countDimensionsGapped
-                dimensionsUnconstrained: DatatypeLeavesTotal = stateParallel.dimensionsUnconstrained
-                gapRangeStart: Array1DElephino = stateParallel.gapRangeStart
-                gapsWhere: Array1DLeavesTotal = stateParallel.gapsWhere
-                leafAbove: Array1DLeavesTotal = stateParallel.leafAbove
-                leafBelow: Array1DLeavesTotal = stateParallel.leafBelow
-                foldGroups: Array1DFoldsTotal = stateParallel.foldGroups
-                foldsTotal: DatatypeFoldsTotal = stateParallel.foldsTotal
-                gap1ndex: DatatypeLeavesTotal = stateParallel.gap1ndex
-                gap1ndexCeiling: DatatypeElephino = stateParallel.gap1ndexCeiling
-                groupsOfFolds: DatatypeFoldsTotal = stateParallel.groupsOfFolds
-                indexDimension: DatatypeLeavesTotal = stateParallel.indexDimension
-                indexLeaf: DatatypeLeavesTotal = stateParallel.indexLeaf
-                indexMiniGap: DatatypeElephino = stateParallel.indexMiniGap
-                leaf1ndex: DatatypeElephino = stateParallel.leaf1ndex
-                leafConnectee: DatatypeElephino = stateParallel.leafConnectee
-                taskIndex: DatatypeLeavesTotal = stateParallel.taskIndex
+        stateParallel = deepcopy(state)
+        with ProcessPoolExecutor(stateParallel.concurrencyLimit) as concurrencyManager:
+            for indexSherpa in range(stateParallel.taskDivisions):
+                state = deepcopy(stateParallel)
+                state.taskIndex = indexSherpa
+                mapShape: tuple[DatatypeLeavesTotal, ...] = state.mapShape
+                leavesTotal: DatatypeLeavesTotal = state.leavesTotal
+                taskDivisions: DatatypeLeavesTotal = state.taskDivisions
+                concurrencyLimit: DatatypeElephino = state.concurrencyLimit
+                connectionGraph: Array3D = state.connectionGraph
+                dimensionsTotal: DatatypeLeavesTotal = state.dimensionsTotal
+                countDimensionsGapped: Array1DLeavesTotal = state.countDimensionsGapped
+                dimensionsUnconstrained: DatatypeLeavesTotal = state.dimensionsUnconstrained
+                gapRangeStart: Array1DElephino = state.gapRangeStart
+                gapsWhere: Array1DLeavesTotal = state.gapsWhere
+                leafAbove: Array1DLeavesTotal = state.leafAbove
+                leafBelow: Array1DLeavesTotal = state.leafBelow
+                foldGroups: Array1DFoldsTotal = state.foldGroups
+                foldsTotal: DatatypeFoldsTotal = state.foldsTotal
+                gap1ndex: DatatypeLeavesTotal = state.gap1ndex
+                gap1ndexCeiling: DatatypeElephino = state.gap1ndexCeiling
+                groupsOfFolds: DatatypeFoldsTotal = state.groupsOfFolds
+                indexDimension: DatatypeLeavesTotal = state.indexDimension
+                indexLeaf: DatatypeLeavesTotal = state.indexLeaf
+                indexMiniGap: DatatypeElephino = state.indexMiniGap
+                leaf1ndex: DatatypeElephino = state.leaf1ndex
+                leafConnectee: DatatypeElephino = state.leafConnectee
+                taskIndex: DatatypeLeavesTotal = state.taskIndex
                 dictionaryConcurrency[indexSherpa] = concurrencyManager.submit(countParallel, mapShape, leavesTotal, taskDivisions, concurrencyLimit, connectionGraph, dimensionsTotal, countDimensionsGapped, dimensionsUnconstrained, gapRangeStart, gapsWhere, leafAbove, leafBelow, foldGroups, foldsTotal, gap1ndex, gap1ndexCeiling, groupsOfFolds, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, taskIndex)
-            for indexSherpa in range(state.taskDivisions):
-                state.foldGroups[indexSherpa] = dictionaryConcurrency[indexSherpa].result()
+            for indexSherpa in range(stateParallel.taskDivisions):
+                stateParallel.foldGroups[indexSherpa] = dictionaryConcurrency[indexSherpa].result()
+        state = stateParallel
     else:
         mapShape: tuple[DatatypeLeavesTotal, ...] = state.mapShape
         leavesTotal: DatatypeLeavesTotal = state.leavesTotal

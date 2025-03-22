@@ -62,6 +62,7 @@ Namespace: uppercase, should only appear in camelCase and means "namespace", low
 
 # Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
 
+Z0Z_ast: TypeAlias = ast.AnnAssign | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Return | ast.Starred | ast.Subscript | ast.TypeAlias | ast.Yield | ast.YieldFrom
 ast_expr_Slice: TypeAlias = ast.expr
 ast_Identifier: TypeAlias = str
 astClassHasAttributeDOTname: TypeAlias = ast.FunctionDef | ast.ClassDef | ast.AsyncFunctionDef
@@ -110,6 +111,13 @@ class ifThis:
 	def CallReallyIs(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
 		return ifThis.isAnyOf(ifThis.isCall_Identifier(identifier), ifThis.isCallNamespace_Identifier(namespace, identifier))
 	@staticmethod
+	def is_arg(node: ast.AST) -> TypeGuard[ast.arg]:
+		return isinstance(node, ast.arg)
+	@staticmethod
+	def is_arg_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.arg] | bool]:
+		def workhorse(node: ast.AST) -> TypeGuard[ast.arg] | bool: return ifThis.is_arg(node) and node.arg == identifier
+		return workhorse
+	@staticmethod
 	def is_keyword(node: ast.AST) -> TypeGuard[ast.keyword]:
 		return isinstance(node, ast.keyword)
 	@staticmethod
@@ -117,8 +125,12 @@ class ifThis:
 		return ifThis.is_keyword(node) and ifThis.isConstant(node.value)
 	@staticmethod
 	def is_keyword_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.keyword] | bool]:
-		def workhorse(node: ast.AST) -> TypeGuard[ast.keyword] | bool:
-			return ifThis.is_keyword(node) and node.arg == identifier
+		def workhorse(node: ast.AST) -> TypeGuard[ast.keyword] | bool: return ifThis.is_keyword(node) and node.arg == identifier
+		return workhorse
+	@staticmethod
+	def isArgument_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.arg] | TypeGuard[ast.keyword] | bool]:
+		def workhorse(node: ast.AST) -> TypeGuard[ast.arg] | TypeGuard[ast.keyword] | bool:
+			return (ifThis.is_arg(node) or ifThis.is_keyword(node)) and node.arg == identifier
 		return workhorse
 	@staticmethod
 	def is_keyword_IdentifierEqualsConstantValue(identifier: ast_Identifier, ConstantValue: Any) -> Callable[[ast.AST], TypeGuard[ast.keyword] | bool]:
@@ -234,13 +246,15 @@ class ifThis:
 		return isinstance(node, ast.Name)
 	@staticmethod
 	def isName_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Name] | bool]:
-		return lambda node: ifThis.isName(node) and node.id == identifier
+		def workhorse(node: ast.AST) -> TypeGuard[ast.Name] | bool: return ifThis.isName(node) and node.id == identifier
+		return workhorse
 	@staticmethod
 	def is_nameDOTname(node: ast.AST) -> TypeGuard[ast.Attribute]:
 		return ifThis.isAttribute(node) and ifThis.isName(node.value)
 	@staticmethod
 	def is_nameDOTnameNamespace(namespace: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute] | bool]:
-		return lambda node: ifThis.is_nameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value)
+		def workhorse(node: ast.AST) -> TypeGuard[ast.Attribute] | bool: return ifThis.is_nameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value)
+		return workhorse
 	@staticmethod
 	def is_nameDOTnameNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute] | bool]:
 		return lambda node: ifThis.is_nameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value) and node.attr == identifier
@@ -381,17 +395,14 @@ class Make:
 	def astName(identifier: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Name:
 		return ast.Name(identifier, context, **keywordArguments)
 	@staticmethod
-	def itDOTname(nameChain: ast.Name | ast.Attribute, dotName: str) -> ast.Attribute:
-		return ast.Attribute(value=nameChain, attr=dotName, ctx=ast.Load())
+	def itDOTname(nameChain: ast.Name | ast.Attribute, dotName: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Attribute:
+		return ast.Attribute(value=nameChain, attr=dotName, ctx=context, **keywordArguments)
 	@staticmethod
-	# TODO rewrite with all parameters
-	def nameDOTname(identifier: ast_Identifier, *dotName: str) -> ast.Name | ast.Attribute:
-		nameDOTname: ast.Name | ast.Attribute = Make.astName(identifier)
-		if not dotName:
-			return nameDOTname
+	def nameDOTname(identifier: ast_Identifier, *dotName: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Attribute:
+		nameDOTname = Make.astName(identifier, context, **keywordArguments)
 		for suffix in dotName:
-			nameDOTname = Make.itDOTname(nameDOTname, suffix)
-		return nameDOTname
+			nameDOTname = Make.itDOTname(nameDOTname, suffix, context, **keywordArguments)
+		return nameDOTname # type: ignore
 	@staticmethod
 	def astReturn(value: ast.expr | None = None, **keywordArguments: int) -> ast.Return:
 		return ast.Return(value, **keywordArguments)
@@ -480,9 +491,27 @@ class Then:
 	@staticmethod
 	def replaceWith(astAST: ast.AST) -> Callable[[ast.AST], ast.AST]: return lambda _replaceMe: astAST
 	@staticmethod
+	def replaceDOTargWith(identifier: ast_Identifier) -> Callable[[ast.arg | ast.keyword], ast.arg | ast.keyword]:
+		def workhorse(node: ast.arg | ast.keyword) -> ast.arg | ast.keyword:
+			node.arg = identifier
+			return node
+		return workhorse
+	@staticmethod
 	def replaceDOTfuncWith(ast_expr: ast.expr) -> Callable[[ast.Call], ast.Call]:
 		def workhorse(node: ast.Call) -> ast.Call:
 			node.func = ast_expr
+			return node
+		return workhorse
+	@staticmethod
+	def replaceDOTidWith(identifier: ast_Identifier) -> Callable[[ast.Name], ast.Name]:
+		def workhorse(node: ast.Name) -> ast.Name:
+			node.id = identifier
+			return node
+		return workhorse
+	@staticmethod
+	def replaceDOTvalueWith(ast_expr: ast.expr) -> Callable[[Z0Z_ast], Z0Z_ast]:
+		def workhorse(node: Z0Z_ast) -> Z0Z_ast:
+			node.value = ast_expr
 			return node
 		return workhorse
 	@staticmethod
@@ -601,14 +630,13 @@ class RecipeSynthesizeFlow:
 	initializeCallable: str = sourceInitializeCallable
 	parallelCallable: str = sourceParallelCallable
 	sequentialCallable: str = sourceSequentialCallable
-	# initializeCallable: str = 'StartTheCommotion'
-	# parallelCallable: str = sourceParallelCallable
-	# sequentialCallable: str = sourceSequentialCallable
-
+	concurrencyManagerNamespace: str = sourceConcurrencyManagerNamespace
+	concurrencyManagerIdentifier: str = sourceConcurrencyManagerIdentifier
 	dataclassIdentifier: str = sourceDataclassIdentifier
 
 	# Variable
 	dataclassInstance: str = sourceDataclassInstance
+	dataclassInstanceTaskDistribution: str = sourceDataclassInstanceTaskDistribution
 
 	def _makePathFilename(self, filenameStem: str,
 			pathRoot: PurePosixPath | None = None,
