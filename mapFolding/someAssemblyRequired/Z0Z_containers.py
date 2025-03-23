@@ -11,7 +11,7 @@ from collections.abc import Sequence
 from importlib import import_module as importlib_import_module
 from inspect import getsource as inspect_getsource
 from mapFolding.filesystem import writeStringToHere
-from mapFolding.someAssemblyRequired import ast_Identifier, Make, strDotStrCuzPyStoopid
+from mapFolding.someAssemblyRequired import ast_Identifier, Make, nameDOTname
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3, The
 from os import PathLike
 from pathlib import Path, PurePath, PurePosixPath
@@ -135,6 +135,7 @@ class RecipeSynthesizeFlow:
 	# ========================================
 	# Source
 	# ========================================
+	# This is probably too restrictive.
 	sourceAlgorithm: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
 	sourcePython: str = inspect_getsource(sourceAlgorithm)
 	source_astModule: ast.Module = ast.parse(sourcePython)
@@ -184,7 +185,6 @@ class RecipeSynthesizeFlow:
 	dataclassInstance: str = sourceDataclassInstance
 	dataclassInstanceTaskDistribution: str = sourceDataclassInstanceTaskDistribution
 
-
 	# ========================================
 	# Computed
 	# ========================================
@@ -204,7 +204,7 @@ theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.mo
 
 	def _makePathFilename(self, filenameStem: str,
 			pathRoot: PurePosixPath | None = None,
-			logicalPathINFIX: strDotStrCuzPyStoopid | None = None,
+			logicalPathINFIX: nameDOTname | None = None,
 			fileExtension: str | None = None,
 			) -> PurePosixPath:
 		"""filenameStem: (hint: the name of the logical module)"""

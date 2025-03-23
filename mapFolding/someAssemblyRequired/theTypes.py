@@ -1,4 +1,4 @@
-from typing import Any, TypeAlias, TYPE_CHECKING, TypeVar
+from typing import Any, TypeAlias as typing_TypeAlias, TYPE_CHECKING, TypeVar as typing_TypeVar
 import ast
 
 """
@@ -8,19 +8,26 @@ This module provides type aliases and variables used in AST manipulation,
 centralizing type definitions to prevent circular imports.
 """
 
-# Type aliases for AST manipulation
-ast_expr_Slice: TypeAlias = ast.expr
-ast_Identifier: TypeAlias = str
-astClassHasAttributeDOTname: TypeAlias = ast.FunctionDef | ast.ClassDef | ast.AsyncFunctionDef
-astMosDef = TypeVar('astMosDef', bound=astClassHasAttributeDOTname)
-list_ast_type_paramORintORNone: TypeAlias = Any
-nodeType = TypeVar('nodeType', bound=ast.AST)
-strDotStrCuzPyStoopid: TypeAlias = str
-strORintORNone: TypeAlias = Any
-strORlist_ast_type_paramORintORNone: TypeAlias = Any
+stuPyd: typing_TypeAlias = str
 
-# Z0Z_ast type definition for conditional typing
 if TYPE_CHECKING:
-    Z0Z_ast: TypeAlias = ast.AnnAssign | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Return | ast.Starred | ast.Subscript | ast.TypeAlias | ast.Yield | ast.YieldFrom
+    astClassHasDOTnameNotName: typing_TypeAlias = ast.alias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple
+    astClassHasDOTnameNotNameOptional: typing_TypeAlias = astClassHasDOTnameNotName | ast.ExceptHandler | ast.MatchAs | ast.MatchStar
+    astClassHasDOTvalue: typing_TypeAlias = ast.AnnAssign | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Return | ast.Starred | ast.Subscript | ast.TypeAlias | ast.Yield | ast.YieldFrom
 else:
-    Z0Z_ast = str
+    astClassHasDOTnameNotName = stuPyd
+    astClassHasDOTnameNotNameOptional = stuPyd
+    astClassHasDOTvalue = stuPyd
+
+ast_expr_Slice: typing_TypeAlias = ast.expr
+ast_Identifier: typing_TypeAlias = str
+
+astMosDef = typing_TypeVar('astMosDef', bound=astClassHasDOTnameNotName)
+
+nodeType = typing_TypeVar('nodeType', bound=ast.AST)
+
+nameDOTname: typing_TypeAlias = stuPyd
+
+intORlist_ast_type_paramORstr_orNone: typing_TypeAlias = Any
+intORstr_orNone: typing_TypeAlias = Any
+list_ast_type_paramORstr_orNone: typing_TypeAlias = Any

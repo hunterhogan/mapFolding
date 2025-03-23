@@ -31,7 +31,7 @@ from mapFolding.someAssemblyRequired import (
 	ifThis,
 	Make,
 	NodeCollector,
-	strDotStrCuzPyStoopid,
+	nameDOTname,
 	Then,
 	Z0Z_executeActionUnlessDescendantMatches,
 )
@@ -63,7 +63,7 @@ class ShatteredDataclass:
 	listNameDataclassFragments4Parameters: list[ast.Name] = dataclasses.field(default_factory=list)
 	dictionaryDataclassField2Primitive: dict[ast.expr, ast.Name] = dataclasses.field(default_factory=dict)
 
-def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
+def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
 	"""
 	Parameters:
 		logicalPathModule: gimme string cuz python is stoopid

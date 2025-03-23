@@ -22,10 +22,15 @@ While these tools were developed to transform the baseline algorithm into optimi
 they are designed as general-purpose utilities applicable to a wide range of code
 transformation scenarios beyond the scope of this package.
 """
+from importlib import import_module as importlib_import_module
+from inspect import getsource as inspect_getsource
+from types import ModuleType
 from collections.abc import Callable, Sequence
 from copy import deepcopy
-from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, nodeType, Then
+from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, nameDOTname, nodeType, Then
 from typing import Any, cast, Generic, TypeGuard
+from os import PathLike
+from pathlib import Path, PurePath
 import ast
 
 """
@@ -204,7 +209,6 @@ def Z0Z_replaceMatchingASTnodes(astTree: ast.AST, mappingFindReplaceNodes: dict[
 
 	return astTreeCurrent
 
-
 dictionaryEstimates: dict[tuple[int, ...], int] = {
 	(2,2,2,2,2,2,2,2): 362794844160000,
 	(2,21): 1493028892051200,
@@ -212,3 +216,12 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 	(3,3,3,3): 85109616000000000000000000000000,
 	(8,8): 129950723279272000,
 }
+
+def parseLogicalPath2astModule(logicalPathModule: nameDOTname, packageIdentifierIfRelative: ast_Identifier | None = None) -> ast.Module:
+	moduleImported: ModuleType = importlib_import_module(logicalPathModule, packageIdentifierIfRelative)
+	sourcePython: str = inspect_getsource(moduleImported)
+	return ast.parse(sourcePython)
+
+def parsePathFilename2astModule(pathFilename: str | PathLike[Any] | PurePath) -> ast.Module:
+	"""Parse a file and return its AST module."""
+	return ast.parse(Path(pathFilename).read_text(encoding='utf-8'))

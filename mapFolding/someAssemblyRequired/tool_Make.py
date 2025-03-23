@@ -2,16 +2,16 @@ from collections.abc import Sequence
 from mapFolding.someAssemblyRequired import (
 	ast_expr_Slice,
 	ast_Identifier,
-	list_ast_type_paramORintORNone,
-	strORintORNone,
-	strORlist_ast_type_paramORintORNone,
+	list_ast_type_paramORstr_orNone,
+	intORstr_orNone,
+	intORlist_ast_type_paramORstr_orNone,
 )
 from typing import Any
 import ast
 
 class Make:
 	@staticmethod
-	def ast_arg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: strORintORNone) -> ast.arg:
+	def ast_arg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: intORstr_orNone) -> ast.arg:
 		"""keywordArguments: type_comment:str|None, lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
 		return ast.arg(identifier, annotation, **keywordArguments)
 	@staticmethod
@@ -25,7 +25,7 @@ class Make:
 		"""`simple: int`: uses a clever int-from-boolean to assign the correct value to the `simple` attribute. So, don't add it as a parameter."""
 		return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)), **keywordArguments)
 	@staticmethod
-	def astAssign(listTargets: Any, value: ast.expr, **keywordArguments: strORintORNone) -> ast.Assign:
+	def astAssign(listTargets: Any, value: ast.expr, **keywordArguments: intORstr_orNone) -> ast.Assign:
 		"""keywordArguments: type_comment:str|None, lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
 		return ast.Assign(targets=listTargets, value=value, **keywordArguments)
 	@staticmethod
@@ -43,16 +43,16 @@ class Make:
 	def astCall(caller: ast.Name | ast.Attribute, listArguments: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
 		return ast.Call(func=caller, args=list(listArguments) if listArguments else [], keywords=list(list_astKeywords) if list_astKeywords else [])
 	@staticmethod
-	def astClassDef(name: ast_Identifier, listBases: list[ast.expr]=[], list_keyword: list[ast.keyword]=[], body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], **keywordArguments: list_ast_type_paramORintORNone) -> ast.ClassDef:
+	def astClassDef(name: ast_Identifier, listBases: list[ast.expr]=[], list_keyword: list[ast.keyword]=[], body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], **keywordArguments: list_ast_type_paramORstr_orNone) -> ast.ClassDef:
 		"""keywordArguments: type_params:list[ast.type_param], lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
 		return ast.ClassDef(name=name, bases=listBases, keywords=list_keyword, body=body, decorator_list=decorator_list, **keywordArguments)
 	@staticmethod
-	def astConstant(value: Any, **keywordArguments: strORintORNone) -> ast.Constant:
+	def astConstant(value: Any, **keywordArguments: intORstr_orNone) -> ast.Constant:
 		"""value: str|int|float|bool|None|bytes|bytearray|memoryview|complex|list|tuple|dict|set, or any other type that can be represented as a constant in Python.
 		keywordArguments: kind:str, lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
 		return ast.Constant(value, **keywordArguments)
 	@staticmethod
-	def astFunctionDef(name: ast_Identifier, argumentsSpecification: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, **keywordArguments: strORlist_ast_type_paramORintORNone) -> ast.FunctionDef:
+	def astFunctionDef(name: ast_Identifier, argumentsSpecification: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, **keywordArguments: intORlist_ast_type_paramORstr_orNone) -> ast.FunctionDef:
 		"""keywordArguments: type_comment:str|None, type_params:list[ast.type_param], lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
 		return ast.FunctionDef(name=name, args=argumentsSpecification, body=body, decorator_list=decorator_list, returns=returns, **keywordArguments)
 	@staticmethod

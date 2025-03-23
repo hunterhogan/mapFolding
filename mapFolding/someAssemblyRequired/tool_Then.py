@@ -3,8 +3,8 @@ from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	astMosDef,
 	Make,
-	strDotStrCuzPyStoopid,
-	Z0Z_ast,
+	nameDOTname,
+	astClassHasDOTvalue,
 )
 from typing import Any
 import ast
@@ -45,17 +45,17 @@ class Then:
 			return node
 		return workhorse
 	@staticmethod
-	def replaceDOTvalueWith(ast_expr: ast.expr) -> Callable[[Z0Z_ast], Z0Z_ast]:
-		def workhorse(node: Z0Z_ast) -> Z0Z_ast:
+	def replaceDOTvalueWith(ast_expr: ast.expr) -> Callable[[astClassHasDOTvalue], astClassHasDOTvalue]:
+		def workhorse(node: astClassHasDOTvalue) -> astClassHasDOTvalue:
 			node.value = ast_expr
 			return node
 		return workhorse
 	@staticmethod
 	def updateThis(dictionaryOf_astMosDef: dict[ast_Identifier, astMosDef]) -> Callable[[astMosDef], astMosDef]:
-		return lambda node: dictionaryOf_astMosDef.setdefault(node.name, node)
+		return lambda node: dictionaryOf_astMosDef.setdefault(node.name, node) 
 	from mapFolding.someAssemblyRequired.Z0Z_containers import LedgerOfImports
 	@staticmethod
-	def Z0Z_ledger(logicalPath: strDotStrCuzPyStoopid, ledger: LedgerOfImports) -> Callable[[ast.AnnAssign], None]:
+	def Z0Z_ledger(logicalPath: nameDOTname, ledger: LedgerOfImports) -> Callable[[ast.AnnAssign], None]:
 		return lambda node: ledger.addImportFromAsStr(logicalPath, node.annotation.id) # type: ignore
 	@staticmethod
 	def Z0Z_appendKeywordMirroredTo(list_keyword: list[ast.keyword]) -> Callable[[ast.AnnAssign], None]:

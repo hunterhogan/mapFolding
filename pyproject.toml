@@ -63,7 +63,8 @@ optional-dependencies = { testing = [
 	"pytest-cov",
 	"pytest-env",
 	"pytest-xdist",
-	"pyupgrade",] }
+	"pyupgrade",
+	"ruff",] }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
