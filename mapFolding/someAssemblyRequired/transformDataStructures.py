@@ -120,7 +120,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: strDotStrCuzPyStoopid, da
 	, listAnnAssign4DataclassUnpack = listAnnAssign4DataclassUnpack
 	, listAnnotations = listAnnotations
 	, listNameDataclassFragments4Parameters = listNameDataclassFragments4Parameters
-	, dictionaryDataclassField2Primitive = {statement.value: statement.target for statement in listAnnAssign4DataclassUnpack}
+	, dictionaryDataclassField2Primitive = {statement.value: statement.target for statement in listAnnAssign4DataclassUnpack} # type: ignore
 	)
 	shatteredDataclass.ledgerDataclassANDFragments.addImportFromAsStr(logicalPathModule, dataclass_Identifier)
 	return shatteredDataclass

@@ -49,15 +49,15 @@ def astModuleToIngredientsFunction(astModule: ast.Module, identifierFunctionDef:
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	return IngredientsFunction(astFunctionDef, LedgerOfImports(astModule))
 
-def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> None:
+def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 
 	listAllIngredientsFunctions = [
-	(ingredientsInitialize := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceInitializeCallable)),
-	(ingredientsParallel := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceParallelCallable)),
-	(ingredientsSequential := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceSequentialCallable)),
-	(ingredientsDispatcher := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceDispatcherCallable)),
+	(ingredientsInitialize := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceCallableInitialize)),
+	(ingredientsParallel := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceCallableParallel)),
+	(ingredientsSequential := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceCallableSequential)),
+	(ingredientsDispatcher := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceCallableDispatcher)),
 	]
 
 	# Inline functions ========================================================
@@ -71,19 +71,19 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 	# TODO How can I `RecipeSynthesizeFlow` as the SSOT for the pairs of items that may need to be replaced?
 	# NOTE reminder: you are updating these `ast.Name` here (and not in a more general search) because this is a
 	# narrow search for `ast.Call` so you won't accidentally replace unrelated `ast.Name`.
-	listFindReplace = [(numbaFlow.sourceDispatcherCallable, numbaFlow.dispatcherCallable),
-						(numbaFlow.sourceInitializeCallable, numbaFlow.initializeCallable),
-						(numbaFlow.sourceParallelCallable, numbaFlow.parallelCallable),
-						(numbaFlow.sourceSequentialCallable, numbaFlow.sequentialCallable),]
+	listFindReplace = [(numbaFlow.sourceCallableDispatcher, numbaFlow.callableDispatcher),
+						(numbaFlow.sourceCallableInitialize, numbaFlow.callableInitialize),
+						(numbaFlow.sourceCallableParallel, numbaFlow.callableParallel),
+						(numbaFlow.sourceCallableSequential, numbaFlow.callableSequential),]
 	for ingredients in listAllIngredientsFunctions:
 		for source_Identifier, recipe_Identifier in listFindReplace:
 			updateCallName = NodeReplacer(ifThis.isCall_Identifier(source_Identifier), Then.replaceDOTfuncWith(Make.astName(recipe_Identifier)))
 			updateCallName.visit(ingredients.astFunctionDef)
 
-	ingredientsDispatcher.astFunctionDef.name = numbaFlow.dispatcherCallable
-	ingredientsInitialize.astFunctionDef.name = numbaFlow.initializeCallable
-	ingredientsParallel.astFunctionDef.name = numbaFlow.parallelCallable
-	ingredientsSequential.astFunctionDef.name = numbaFlow.sequentialCallable
+	ingredientsDispatcher.astFunctionDef.name = numbaFlow.callableDispatcher
+	ingredientsInitialize.astFunctionDef.name = numbaFlow.callableInitialize
+	ingredientsParallel.astFunctionDef.name = numbaFlow.callableParallel
+	ingredientsSequential.astFunctionDef.name = numbaFlow.callableSequential
 
 	# Assign dataclassIdentifier per the recipe. ==============================
 	listFindReplace = [(numbaFlow.sourceDataclassInstance, numbaFlow.dataclassInstance),
@@ -110,13 +110,13 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 	# Asked differently, how do I integrate separate statements into a "subroutine", and that subroutine is "atomic/indivisible"?
 	# sequentialCallable =========================================================
 	ingredientsSequential.astFunctionDef.args = Make.astArgumentsSpecification(args=shatteredDataclass.list_ast_argAnnotated4ArgumentsSpecification)
-	astCallSequentialCallable = Make.astCall(Make.astName(numbaFlow.sequentialCallable), shatteredDataclass.listNameDataclassFragments4Parameters)
+	astCallSequentialCallable = Make.astCall(Make.astName(numbaFlow.callableSequential), shatteredDataclass.listNameDataclassFragments4Parameters)
 	changeReturnSequentialCallable = NodeReplacer(ifThis.isReturn, Then.replaceWith(Make.astReturn(shatteredDataclass.astTuple4AssignTargetsToFragments)))
 	ingredientsSequential.astFunctionDef.returns = shatteredDataclass.astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns
-	replaceAssignSequentialCallable = NodeReplacer(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.sequentialCallable), Then.replaceWith(Make.astAssign(listTargets=[shatteredDataclass.astTuple4AssignTargetsToFragments], value=astCallSequentialCallable)))
+	replaceAssignSequentialCallable = NodeReplacer(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.replaceWith(Make.astAssign(listTargets=[shatteredDataclass.astTuple4AssignTargetsToFragments], value=astCallSequentialCallable)))
 
-	unpack4sequentialCallable = NodeReplacer(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.sequentialCallable), Then.insertThisAbove(shatteredDataclass.listAnnAssign4DataclassUnpack))
-	repack4sequentialCallable = NodeReplacer(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.sequentialCallable), Then.insertThisBelow([shatteredDataclass.astAssignDataclassRepack]))
+	unpack4sequentialCallable = NodeReplacer(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.insertThisAbove(shatteredDataclass.listAnnAssign4DataclassUnpack))
+	repack4sequentialCallable = NodeReplacer(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.insertThisBelow([shatteredDataclass.astAssignDataclassRepack]))
 
 	changeReturnSequentialCallable.visit(ingredientsSequential.astFunctionDef)
 	replaceAssignSequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
@@ -127,7 +127,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 
 	# parallelCallable =========================================================
 	ingredientsParallel.astFunctionDef.args = Make.astArgumentsSpecification(args=shatteredDataclass.list_ast_argAnnotated4ArgumentsSpecification)
-	replaceCall2concurrencyManager = NodeReplacer(ifThis.isCallNamespace_Identifier(numbaFlow.concurrencyManagerNamespace, numbaFlow.concurrencyManagerIdentifier), Then.replaceWith(Make.astCall(Make.astAttribute(Make.astName(numbaFlow.concurrencyManagerNamespace), numbaFlow.concurrencyManagerIdentifier), listArguments=[Make.astName(numbaFlow.parallelCallable)] + shatteredDataclass.listNameDataclassFragments4Parameters)))
+	replaceCall2concurrencyManager = NodeReplacer(ifThis.isCallNamespace_Identifier(numbaFlow.concurrencyManagerNamespace, numbaFlow.concurrencyManagerIdentifier), Then.replaceWith(Make.astCall(Make.astAttribute(Make.astName(numbaFlow.concurrencyManagerNamespace), numbaFlow.concurrencyManagerIdentifier), listArguments=[Make.astName(numbaFlow.callableParallel)] + shatteredDataclass.listNameDataclassFragments4Parameters)))
 
 	# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
 	astCallConcurrencyResult: list[ast.Call] = []
@@ -156,4 +156,5 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()) -> N
 	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageName)
 
 if __name__ == '__main__':
-	makeNumbaFlow()
+	theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
+	makeNumbaFlow(theNumbaFlow)

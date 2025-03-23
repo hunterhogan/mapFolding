@@ -199,7 +199,7 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 
 def getAlgorithmDispatcher() -> Callable[[ComputationState], ComputationState]:
 	moduleImported: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
-	dispatcherCallable = getattr(moduleImported, The.dispatcherCallable)
+	dispatcherCallable = getattr(moduleImported, The.sourceCallableDispatcher)
 	return dispatcherCallable
 
 @pytest.fixture
@@ -233,7 +233,7 @@ def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any], pathTmpTes
 
     moduleSpecificationDispatcher = importlib.util.module_from_spec(importlibSpecificationDispatcher)
     importlibSpecificationDispatcher.loader.exec_module(moduleSpecificationDispatcher)
-    callableDispatcherSynthetic = getattr(moduleSpecificationDispatcher, recipeFlow.dispatcherCallable)
+    callableDispatcherSynthetic = getattr(moduleSpecificationDispatcher, recipeFlow.callableDispatcher)
 
     # Patch dispatcher and return callable
     useThisDispatcher(callableDispatcherSynthetic)

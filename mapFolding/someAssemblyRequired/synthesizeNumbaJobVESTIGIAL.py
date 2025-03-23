@@ -2,7 +2,8 @@
 from collections.abc import Sequence
 from typing import Any, cast, TYPE_CHECKING
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal
-from mapFolding.someAssemblyRequired import ( ifThis, LedgerOfImports, Make, NodeReplacer, Then, )
+from mapFolding.someAssemblyRequired import ( ifThis, Make, NodeReplacer, Then, )
+from mapFolding.someAssemblyRequired.Z0Z_containers import LedgerOfImports
 from mapFolding.theSSOT import ( ComputationState, raiseIfNoneGitHubIssueNumber3, getPathJobRootDEFAULT, )
 from os import PathLike
 from pathlib import Path
@@ -16,7 +17,7 @@ import inspect
 import numpy
 if TYPE_CHECKING:
 	from mapFolding.someAssemblyRequired.transformDataStructures import makeStateJobOUTDATED
-	from mapFolding.someAssemblyRequired.ingredientsNumba import thisIsNumbaDotJit, decorateCallableWithNumba
+	from mapFolding.someAssemblyRequired.ingredientsNumba import thisIsNumbaDotJit
 	from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDEFAULT
 
 def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, statement: ast.Assign | ast.stmt, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:

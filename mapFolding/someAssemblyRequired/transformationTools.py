@@ -203,3 +203,12 @@ def Z0Z_replaceMatchingASTnodes(astTree: ast.AST, mappingFindReplaceNodes: dict[
 		astTreeCurrent = TargetedNodeReplacer(mappingFindReplaceNodes).visit(astTreePrevious)
 
 	return astTreeCurrent
+
+
+dictionaryEstimates: dict[tuple[int, ...], int] = {
+	(2,2,2,2,2,2,2,2): 362794844160000,
+	(2,21): 1493028892051200,
+	(3,15): 9842024675968800,
+	(3,3,3,3): 85109616000000000000000000000000,
+	(8,8): 129950723279272000,
+}

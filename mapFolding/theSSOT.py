@@ -27,13 +27,6 @@ from types import ModuleType
 from typing import TypeAlias
 import dataclasses
 
-# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-# I _think_, in theSSOT, I have abstracted the flow settings to only these couple of lines:
-packageFlowSynthetic = 'numba'
-# Z0Z_packageFlow = 'algorithm'
-Z0Z_packageFlow = packageFlowSynthetic
-Z0Z_concurrencyPackage = 'multiprocessing'
-
 # =============================================================================
 # The Wrong Way: Evaluate When Packaging
 
@@ -50,28 +43,42 @@ def getPathPackageINSTALLING() -> Path:
 		pathPackage = pathPackage.parent
 	return pathPackage
 
+# =============================================================================
+# The Wrong Way: HARDCODED
+# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
+# =============================================================================
+
+# mapFolding.someAssemblyRequired.synthesizeNumbaFlow.theNumbaFlow
+logicalPathModuleDispatcherHARDCODED: str = 'mapFolding.syntheticModules.numbaCount_doTheNeedful'
+callableDispatcherHARDCODED: str = 'doTheNeedful'
+concurrencyPackageHARDCODED = 'multiprocessing'
+
+# =============================================================================
 # The following is an improvement, but it is not the full solution.
 # I hope that the standardized markers, `metadata={'evaluateWhen': 'packaging'}` will help to automate
 # whatever needs to happen so that the following is well implemented.
 @dataclasses.dataclass(frozen=True)
 class PackageSettings:
-	concurrencyPackage = Z0Z_concurrencyPackage
+
+	logicalPathModuleDispatcher: str | None = None
+	callableDispatcher: str | None = None
+	concurrencyPackage: str |None = None
 	dataclassIdentifier: str = dataclasses.field(default='ComputationState', metadata={'evaluateWhen': 'packaging'})
 	dataclassInstance: str = dataclasses.field(default='state', metadata={'evaluateWhen': 'packaging'})
 	dataclassInstanceTaskDistributionSuffix: str = dataclasses.field(default='Parallel', metadata={'evaluateWhen': 'packaging'})
 	dataclassModule: str = dataclasses.field(default='theSSOT', metadata={'evaluateWhen': 'packaging'})
 	datatypePackage: str = dataclasses.field(default='numpy', metadata={'evaluateWhen': 'packaging'})
-	dispatcherCallable: str = dataclasses.field(default='doTheNeedful', metadata={'evaluateWhen': 'packaging'})
 	fileExtension: str = dataclasses.field(default='.py', metadata={'evaluateWhen': 'installing'})
-	moduleOfSyntheticModules: str = dataclasses.field(default='syntheticModules', metadata={'evaluateWhen': 'packaging'})
 	packageName: str = dataclasses.field(default = packageNamePACKAGING, metadata={'evaluateWhen': 'packaging'})
 	pathPackage: Path = dataclasses.field(default_factory=getPathPackageINSTALLING, init=False, metadata={'evaluateWhen': 'installing'})
 	sourceAlgorithm: str = dataclasses.field(default='theDao', metadata={'evaluateWhen': 'packaging'})
+	sourceCallableDispatcher: str = dataclasses.field(default='doTheNeedful', metadata={'evaluateWhen': 'packaging'})
+	sourceCallableInitialize: str = dataclasses.field(default='countInitialize', metadata={'evaluateWhen': 'packaging'})
+	sourceCallableParallel: str = dataclasses.field(default='countParallel', metadata={'evaluateWhen': 'packaging'})
+	sourceCallableSequential: str = dataclasses.field(default='countSequential', metadata={'evaluateWhen': 'packaging'})
 	sourceConcurrencyManagerIdentifier: str = dataclasses.field(default='submit', metadata={'evaluateWhen': 'packaging'})
 	sourceConcurrencyManagerNamespace: str = dataclasses.field(default='concurrencyManager', metadata={'evaluateWhen': 'packaging'})
-	sourceInitializeCallable: str = dataclasses.field(default='countInitialize', metadata={'evaluateWhen': 'packaging'})
-	sourceParallelCallable: str = dataclasses.field(default='countParallel', metadata={'evaluateWhen': 'packaging'})
-	sourceSequentialCallable: str = dataclasses.field(default='countSequential', metadata={'evaluateWhen': 'packaging'})
+	sourceConcurrencyPackage: str = dataclasses.field(default='multiprocessing', metadata={'evaluateWhen': 'packaging'})
 
 	@property # These are not fields, and that annoys me.
 	def dataclassInstanceTaskDistribution(self) -> str:
@@ -91,8 +98,23 @@ class PackageSettings:
 		# it follows that `metadata={'evaluateWhen': 'packaging'}`
 		return '.'.join([self.packageName, self.dataclassModule])
 
-The = PackageSettings()
+	@property # These are not fields, and that annoys me.
+	def dispatcher(self) -> Callable[['ComputationState'], 'ComputationState']:
+		logicalPath: str = self.logicalPathModuleDispatcher or self.logicalPathModuleSourceAlgorithm
+		identifier: str = self.callableDispatcher or self.sourceCallableDispatcher
+		moduleImported: ModuleType = importlib_import_module(logicalPath)
+		dispatcher: Callable[[ComputationState], ComputationState] = getattr(moduleImported, identifier)
+		return dispatcher
 
+The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
+
+def getPackageDispatcher() -> Callable[['ComputationState'], 'ComputationState']:
+	"""Get the dispatcher callable for the package.
+
+	This function retrieves the dispatcher callable for the package based on the
+	logical path module and callable dispatcher defined in the PackageSettings.
+	"""
+	return The.dispatcher
 # =============================================================================
 # Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
 
@@ -183,31 +205,6 @@ def getPathJobRootDEFAULT() -> Path:
 # The coping way.
 
 class raiseIfNoneGitHubIssueNumber3(Exception): pass
-
-# =============================================================================
-# THIS IS A STUPID SYSTEM BUT I CAN'T FIGURE OUT AN IMPROVEMENT
-# NOTE This section for _default_ values probably has value
-# https://github.com/hunterhogan/mapFolding/issues/4
-theFormatStrModuleSynthetic = "{packageFlow}Count"
-theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
-
-theLogicalPathModuleDispatcher: str = The.logicalPathModuleSourceAlgorithm
-
-theModuleDispatcherSynthetic: str = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=The.dispatcherCallable)
-theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.moduleOfSyntheticModules, theModuleDispatcherSynthetic])
-
-if Z0Z_packageFlow == packageFlowSynthetic: # pyright: ignore [reportUnnecessaryComparison]
-	# NOTE this as a default value _might_ have value
-	theLogicalPathModuleDispatcher = theLogicalPathModuleDispatcherSynthetic
-
-# dynamically set the return type https://github.com/hunterhogan/mapFolding/issues/5
-def getPackageDispatcher() -> Callable[[ComputationState], ComputationState]:
-	# NOTE but this part, if the package flow is synthetic, probably needs to be delegated
-	# to the authority for creating _that_ synthetic flow.
-
-	moduleImported: ModuleType = importlib_import_module(theLogicalPathModuleDispatcher)
-	dispatcherCallable = getattr(moduleImported, The.dispatcherCallable)
-	return dispatcherCallable
 
 """Technical concepts I am likely using and likely want to use more effectively:
 - Configuration Registry

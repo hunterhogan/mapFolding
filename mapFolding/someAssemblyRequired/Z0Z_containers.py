@@ -5,31 +5,21 @@ This module provides container classes used in the AST transformation process
 and code synthesis workflows. It acts as a dependency boundary to prevent
 circular imports while providing reusable data structures.
 """
+from autoflake import fix_code as autoflake_fix_code
 from collections import defaultdict
 from collections.abc import Sequence
 from importlib import import_module as importlib_import_module
 from inspect import getsource as inspect_getsource
-
-from autoflake import fix_code as autoflake_fix_code
-from os import PathLike
-from typing import Any
 from mapFolding.filesystem import writeStringToHere
 from mapFolding.someAssemblyRequired import ast_Identifier, Make, strDotStrCuzPyStoopid
-from mapFolding.theSSOT import (
-	The,
-	raiseIfNoneGitHubIssueNumber3,
-	theFormatStrModuleForCallableSynthetic,
-	theFormatStrModuleSynthetic,
-	theLogicalPathModuleDispatcherSynthetic,
-	theModuleDispatcherSynthetic,
-)
+from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3, The
+from os import PathLike
 from pathlib import Path, PurePath, PurePosixPath
 from types import ModuleType
+from typing import Any
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import dataclasses
-
-# Forward-import Make methods needed by LedgerOfImports
 
 class LedgerOfImports:
 	# TODO When resolving the ledger of imports, remove self-referential imports
@@ -144,15 +134,16 @@ class RecipeSynthesizeFlow:
 	"""Settings for synthesizing flow."""
 	# ========================================
 	# Source
+	# ========================================
 	sourceAlgorithm: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
 	sourcePython: str = inspect_getsource(sourceAlgorithm)
 	source_astModule: ast.Module = ast.parse(sourcePython)
 
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-	sourceDispatcherCallable: str = The.dispatcherCallable
-	sourceInitializeCallable: str = The.sourceInitializeCallable
-	sourceParallelCallable: str = The.sourceParallelCallable
-	sourceSequentialCallable: str = The.sourceSequentialCallable
+	sourceCallableDispatcher: str = The.sourceCallableDispatcher
+	sourceCallableInitialize: str = The.sourceCallableInitialize
+	sourceCallableParallel: str = The.sourceCallableParallel
+	sourceCallableSequential: str = The.sourceCallableSequential
 
 	sourceDataclassIdentifier: str = The.dataclassIdentifier
 	sourceDataclassInstance: str = The.dataclassInstance
@@ -161,41 +152,55 @@ class RecipeSynthesizeFlow:
 
 	sourceConcurrencyManagerNamespace = The.sourceConcurrencyManagerNamespace
 	sourceConcurrencyManagerIdentifier = The.sourceConcurrencyManagerIdentifier
-	# ========================================
-	# Filesystem
-	pathPackage: PurePosixPath | None = PurePosixPath(The.pathPackage)
-	fileExtension: str = The.fileExtension
 
 	# ========================================
 	# Logical identifiers
-	# meta
-	formatStrModuleSynthetic: str = theFormatStrModuleSynthetic
-	formatStrModuleForCallableSynthetic: str = theFormatStrModuleForCallableSynthetic
+	# ========================================
+	# meta ===================================
 
-	# Package
+	# Package ================================
 	packageName: ast_Identifier | None = The.packageName
 
-	# Module
-	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-	Z0Z_flowLogicalPathRoot: str | None = The.moduleOfSyntheticModules
-	moduleDispatcher: str = theModuleDispatcherSynthetic
+	# Qualified logical path ================================
 	logicalPathModuleDataclass: str = sourcePathModuleDataclass
-	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-	# `theLogicalPathModuleDispatcherSynthetic` is a problem. It is defined in theSSOT, but it can also be calculated.
-	logicalPathModuleDispatcher: str = theLogicalPathModuleDispatcherSynthetic
+	Z0Z_flowLogicalPathRoot: str | None = 'syntheticModules'
 
-	# Function
-	dispatcherCallable: str = sourceDispatcherCallable
-	initializeCallable: str = sourceInitializeCallable
-	parallelCallable: str = sourceParallelCallable
-	sequentialCallable: str = sourceSequentialCallable
+	# Module ================================
+	moduleDispatcher: str = 'numbaCount_doTheNeedful'
+	moduleInitialize: str = moduleDispatcher
+	moduleParallel: str = moduleDispatcher
+	moduleSequential: str = moduleDispatcher
+
+	# Function ================================
+	callableDispatcher: str = sourceCallableDispatcher
+	callableInitialize: str = sourceCallableInitialize
+	callableParallel: str = sourceCallableParallel
+	callableSequential: str = sourceCallableSequential
 	concurrencyManagerNamespace: str = sourceConcurrencyManagerNamespace
 	concurrencyManagerIdentifier: str = sourceConcurrencyManagerIdentifier
 	dataclassIdentifier: str = sourceDataclassIdentifier
 
-	# Variable
+	# Variable ================================
 	dataclassInstance: str = sourceDataclassInstance
 	dataclassInstanceTaskDistribution: str = sourceDataclassInstanceTaskDistribution
+
+
+	# ========================================
+	# Computed
+	# ========================================
+	"""
+theFormatStrModuleSynthetic = "{packageFlow}Count"
+theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
+theModuleDispatcherSynthetic: str = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=The.sourceCallableDispatcher)
+theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.moduleOfSyntheticModules, theModuleDispatcherSynthetic])
+
+	"""
+	# logicalPathModuleDispatcher: str = '.'.join([Z0Z_flowLogicalPathRoot, moduleDispatcher])
+	# ========================================
+	# Filesystem
+	# ========================================
+	pathPackage: PurePosixPath | None = PurePosixPath(The.pathPackage)
+	fileExtension: str = The.fileExtension
 
 	def _makePathFilename(self, filenameStem: str,
 			pathRoot: PurePosixPath | None = None,
@@ -216,7 +221,15 @@ class RecipeSynthesizeFlow:
 	@property
 	def pathFilenameDispatcher(self) -> PurePosixPath:
 		return self._makePathFilename(filenameStem=self.moduleDispatcher, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
-
+	@property
+	def pathFilenameInitialize(self) -> PurePosixPath:
+		return self._makePathFilename(filenameStem=self.moduleInitialize, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
+	@property
+	def pathFilenameParallel(self) -> PurePosixPath:
+		return self._makePathFilename(filenameStem=self.moduleParallel, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
+	@property
+	def pathFilenameSequential(self) -> PurePosixPath:
+		return self._makePathFilename(filenameStem=self.moduleSequential, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
 
 def write_astModule(ingredients: IngredientsModule, pathFilename: str | PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
 	astModule = ingredients.export()
