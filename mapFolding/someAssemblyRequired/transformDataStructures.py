@@ -91,7 +91,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 
 	addToLedgerPredicate = ifThis.isAnnAssignAndAnnotationIsName
 	addToLedgerAction = Then.Z0Z_ledger(logicalPathModule, ledgerDataclassANDFragments)
-	addToLedger = NodeTourist(addToLedgerPredicate, [addToLedgerAction])
+	addToLedger = NodeTourist(addToLedgerPredicate, addToLedgerAction)
 
 	exclusionPredicate = ifThis.is_keyword_IdentifierEqualsConstantValue('init', False)
 	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(list_keyword4DataclassInitialization)
@@ -99,13 +99,21 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 
 	NodeTourist(
 		ifThis.isAnnAssignAndTargetIsName,
-			[Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, listAnnAssign4DataclassUnpack)
-			, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
-			, lambda node: addToLedger.visit(node)
-			, filteredAppendKeywordAction
-			, lambda node: list_ast_argAnnotated4ArgumentsSpecification.append(Make.ast_arg(node.target.id, node.annotation)) # type: ignore
-			, lambda node: listAnnotations.append(node.annotation) # type: ignore
-			]
+			Then.Z0Z_actions(
+				[
+					Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(
+						instance_Identifier # type: ignore
+						, listAnnAssign4DataclassUnpack)
+					, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
+					, lambda node: addToLedger.visit(node)
+					, filteredAppendKeywordAction
+					, lambda node: list_ast_argAnnotated4ArgumentsSpecification.append(
+						Make.ast_arg(
+							node.target.id # type: ignore
+							, node.annotation)) # type: ignore
+					, lambda node: listAnnotations.append(node.annotation) # type: ignore
+				]
+			)
 		).visit(dataclass)
 
 	shatteredDataclass = ShatteredDataclass(

@@ -53,14 +53,15 @@ Namespace: uppercase, should only appear in camelCase and means "namespace", low
 
 class NodeTourist(Generic[nodeType], ast.NodeVisitor):
 	"""A node visitor that collects data via one or more actions when a predicate is met."""
-	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: list[Callable[[nodeType], Any]]) -> None:
+	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: Callable[[nodeType], Any]) -> None:
 		self.findThis = findThis
 		self.doThat = doThat
 
+	# def visit(self, node: nodeType) -> None:
 	def visit(self, node: ast.AST) -> None:
 		if self.findThis(node):
-			for action in self.doThat:
-				action(cast(nodeType, node))
+			# self.doThat(node)
+			self.doThat(cast(nodeType, node))
 		self.generic_visit(node)
 
 class NodeChanger(Generic[nodeType], ast.NodeTransformer):
@@ -76,17 +77,17 @@ class NodeChanger(Generic[nodeType], ast.NodeTransformer):
 
 def Z0Z_extractClassDef(module: ast.Module, identifier: ast_Identifier) -> ast.ClassDef | None:
 	sherpa: list[ast.ClassDef] = []
-	NodeTourist(ifThis.isClassDef_Identifier(identifier), [Then.appendTo(sherpa)]).visit(module)
+	NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.appendTo(sherpa)).visit(module)
 	return sherpa[0] if sherpa else None
 
 def Z0Z_extractFunctionDef(module: ast.Module, identifier: ast_Identifier) -> ast.FunctionDef | None:
 	sherpa: list[ast.FunctionDef] = []
-	NodeTourist(ifThis.isFunctionDef_Identifier(identifier), [Then.appendTo(sherpa)]).visit(module)
+	NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.appendTo(sherpa)).visit(module)
 	return sherpa[0] if sherpa else None
 
 def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.FunctionDef]:
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
-	NodeTourist(ifThis.isFunctionDef, [Then.updateThis(dictionaryFunctionDef)]).visit(module)
+	NodeTourist(ifThis.isFunctionDef, Then.updateThis(dictionaryFunctionDef)).visit(module)
 	return dictionaryFunctionDef
 
 def Z0Z_makeDictionaryReplacementStatements(module: ast.Module) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
@@ -123,6 +124,13 @@ def Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.A
 		if not Z0Z_descendantContainsMatchingNode(node, exclusionPredicate):
 			actionFunction(node)
 	return wrappedAction
+
+# def Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[nodeType], bool], actionFunction: Callable[[nodeType], None]) -> Callable[[nodeType], None]:
+# 	"""Return a new action that will execute actionFunction only if no descendant (or the node itself) matches exclusionPredicate."""
+# 	def wrappedAction(node: nodeType) -> None:
+# 		if not Z0Z_descendantContainsMatchingNode(node, exclusionPredicate):
+# 			actionFunction(node)
+# 	return wrappedAction
 
 def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> ast.FunctionDef:
 	class FunctionInliner(ast.NodeTransformer):

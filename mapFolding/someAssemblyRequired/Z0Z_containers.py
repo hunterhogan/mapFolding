@@ -247,5 +247,3 @@ def astModuleToIngredientsFunction(astModule: ast.Module, identifierFunctionDef:
 	astFunctionDef = Z0Z_extractFunctionDef(astModule, identifierFunctionDef)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	return IngredientsFunction(astFunctionDef, LedgerOfImports(astModule))
-	# NodeTourist(ifThis.isFunctionDef_Identifier(identifierFunctionDef), [lambda node: astFunctionDef = node]).visit(astModule) # type: ignore
-	# astFunctionDef = NodeTourist(ifThis.isFunctionDef_Identifier(identifierFunctionDef), [Then.returnIt]).visit(astModule) # type: ignore
