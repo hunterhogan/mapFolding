@@ -75,7 +75,7 @@ parametersNumbaFailEarly: Final[ParametersNumba] = {
 		'parallel': False, }
 """For a production function: speed is irrelevant, error discovery is paramount, must be compatible with anything downstream."""
 
-parametersNumbaDEFAULT: Final[ParametersNumba] = {
+parametersNumbaDefault: Final[ParametersNumba] = {
 		'_nrt': True,
 		'boundscheck': False,
 		'cache': True,
@@ -91,13 +91,13 @@ parametersNumbaDEFAULT: Final[ParametersNumba] = {
 """Middle of the road: fast, lean, but will talk to non-jitted functions."""
 
 parametersNumbaParallelDEFAULT: Final[ParametersNumba] = {
-		**parametersNumbaDEFAULT,
+		**parametersNumbaDefault,
 		'_nrt': True,
 		'parallel': True, }
 """Middle of the road: fast, lean, but will talk to non-jitted functions."""
 
 parametersNumbaSuperJit: Final[ParametersNumba] = {
-		**parametersNumbaDEFAULT,
+		**parametersNumbaDefault,
 		'no_cfunc_wrapper': True,
 		'no_cpython_wrapper': True, }
 """Speed, no helmet, no talking to non-jitted functions."""
@@ -193,7 +193,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 
 	ingredientsFunction.astFunctionDef = Z0Z_UnhandledDecorators(ingredientsFunction.astFunctionDef)
 	if parametersNumba is None:
-		parametersNumba = parametersNumbaDEFAULT
+		parametersNumba = parametersNumbaDefault
 	listDecoratorKeywords: list[ast.keyword] = [Make.ast_keyword(parameterName, Make.astConstant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
 	decoratorModule: str = Z0Z_numbaDataTypeModule

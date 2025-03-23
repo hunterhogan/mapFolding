@@ -2,7 +2,7 @@
 from collections.abc import Sequence
 from typing import Any, cast, TYPE_CHECKING
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal
-from mapFolding.someAssemblyRequired import ( ifThis, Make, NodeReplacer, Then, )
+from mapFolding.someAssemblyRequired import ( ifThis, Make, NodeChanger, Then, )
 from mapFolding.someAssemblyRequired.Z0Z_containers import LedgerOfImports
 from mapFolding.theSSOT import ( ComputationState, raiseIfNoneGitHubIssueNumber3, getPathJobRootDEFAULT, )
 from os import PathLike
@@ -16,9 +16,9 @@ import copy
 import inspect
 import numpy
 if TYPE_CHECKING:
-	from mapFolding.someAssemblyRequired.transformDataStructures import makeStateJobOUTDATED
+	from mapFolding.someAssemblyRequired.transformDataStructures import makeComputationStateJob
 	from mapFolding.someAssemblyRequired.ingredientsNumba import thisIsNumbaDotJit
-	from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDEFAULT
+	from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDefault
 
 def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, statement: ast.Assign | ast.stmt, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	arrayType = type(arrayTarget)
@@ -82,7 +82,7 @@ def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, iden
 	return FunctionDefTarget, allImports
 
 def removeAssignmentFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
-	FunctionDefSherpa: ast.AST | Sequence[ast.AST] | None = NodeReplacer(ifThis.isAnyAssignmentTo(identifier), Then.removeThis).visit(FunctionDefTarget)
+	FunctionDefSherpa: ast.AST | Sequence[ast.AST] | None = NodeChanger(ifThis.isAnyAssignmentTo(identifier), Then.removeThis).visit(FunctionDefTarget)
 	if not FunctionDefSherpa:
 		raise raiseIfNoneGitHubIssueNumber3("Dude, where's my function?")
 	else:
@@ -119,7 +119,7 @@ def findThingyReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, obj
 	def replaceWithConstant(node: ast.AST) -> ast.AST:
 		return ast.copy_location(ast.Constant(value=value), node)
 
-	transformer = NodeReplacer(findNode, replaceWithConstant)
+	transformer = NodeChanger(findNode, replaceWithConstant)
 	newFunction: ast.FunctionDef = cast(ast.FunctionDef, transformer.visit(FunctionDefTarget))
 	ast.fix_missing_locations(newFunction)
 	return newFunction
@@ -128,7 +128,7 @@ def findAstNameReplaceWithConstantIn_body(FunctionDefTarget: ast.FunctionDef, na
 	def replaceWithConstant(node: ast.AST) -> ast.AST:
 		return ast.copy_location(ast.Constant(value=value), node)
 
-	return cast(ast.FunctionDef, NodeReplacer(ifThis.isName_Identifier(name), replaceWithConstant).visit(FunctionDefTarget))
+	return cast(ast.FunctionDef, NodeChanger(ifThis.isName_Identifier(name), replaceWithConstant).visit(FunctionDefTarget))
 
 def insertReturnStatementIn_body(FunctionDefTarget: ast.FunctionDef, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
 	"""Add multiplication and return statement to function, properly constructing AST nodes."""
@@ -291,7 +291,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	"""
 
 	# NOTE get the raw ingredients: data and the algorithm
-	stateJob = makeStateJobOUTDATED(mapShape, writeJob=False, **keywordArguments)
+	stateJob = makeComputationStateJob(mapShape, writeJob=False, **keywordArguments)
 	pythonSource: str = inspect.getsource(algorithmSource)
 	astModule: ast.Module = ast.parse(pythonSource)
 	setFunctionDef: set[ast.FunctionDef] = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
@@ -325,7 +325,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 
 	identifierCounter = 'Z0Z_identifierCountFolds'
 	astExprIncrementCounter = ast.Expr(value = Make.astCall(Make.nameDOTname(identifierCounter, 'update'), listArguments=[ast.Constant(value=1)], list_astKeywords=[]))
-	FunctionDefTarget= cast(ast.FunctionDef, NodeReplacer(ifThis.isAugAssignTo(identifierCounter), Then.replaceWith(astExprIncrementCounter)).visit(FunctionDefTarget))
+	FunctionDefTarget= cast(ast.FunctionDef, NodeChanger(ifThis.isAugAssignTo(identifierCounter), Then.replaceWith(astExprIncrementCounter)).visit(FunctionDefTarget))
 	ast.fix_missing_locations(FunctionDefTarget)
 
 	for assignmentTarget in ['taskIndex', 'dimensionsTotal', identifierCounter]:
@@ -355,7 +355,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	FunctionDefTarget.args.args.append(counterArg)
 
 	if parametersNumba is None:
-		parametersNumba = parametersNumbaDEFAULT
+		parametersNumba = parametersNumbaDefault
 	parametersNumba['nogil'] = True
 
 	FunctionDefTarget, allImports = insertReturnStatementIn_body(FunctionDefTarget, stateJob.foldGroups, allImports)
@@ -405,7 +405,7 @@ if __name__ == '__main__':
 
 	callableTarget = 'countSequential'
 
-	parametersNumba: ParametersNumba = parametersNumbaDEFAULT
+	parametersNumba: ParametersNumba = parametersNumbaDefault
 	parametersNumba['nogil'] = True
 	parametersNumba['boundscheck'] = False
 

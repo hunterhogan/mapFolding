@@ -103,11 +103,11 @@ class PackageSettings:
 		logicalPath: str = self.logicalPathModuleDispatcher or self.logicalPathModuleSourceAlgorithm
 		identifier: str = self.callableDispatcher or self.sourceCallableDispatcher
 		moduleImported: ModuleType = importlib_import_module(logicalPath)
-		dispatcher: Callable[[ComputationState], ComputationState] = getattr(moduleImported, identifier)
-		return dispatcher
+		return getattr(moduleImported, identifier)
 
 The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
 
+# To remove this function, I need to learn how to change "conftest.py" to patch this.
 def getPackageDispatcher() -> Callable[['ComputationState'], 'ComputationState']:
 	"""Get the dispatcher callable for the package.
 

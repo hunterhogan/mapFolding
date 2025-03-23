@@ -56,11 +56,11 @@ class Make:
 		"""keywordArguments: type_comment:str|None, type_params:list[ast.type_param], lineno:int, col_offset:int, end_lineno:int|None, end_col_offset:int|None"""
 		return ast.FunctionDef(name=name, args=argumentsSpecification, body=body, decorator_list=decorator_list, returns=returns, **keywordArguments)
 	@staticmethod
-	def astImport(moduleName: ast_Identifier, asname: ast_Identifier | None = None, **keywordArguments: int) -> ast.Import:
-		return ast.Import(names=[Make.astAlias(moduleName, asname)], **keywordArguments)
+	def astImport(moduleIdentifier: ast_Identifier, asname: ast_Identifier | None = None, **keywordArguments: int) -> ast.Import:
+		return ast.Import(names=[Make.astAlias(moduleIdentifier, asname)], **keywordArguments)
 	@staticmethod
-	def astImportFrom(moduleName: ast_Identifier, list_astAlias: list[ast.alias], **keywordArguments: int) -> ast.ImportFrom:
-		return ast.ImportFrom(module=moduleName, names=list_astAlias, level=0, **keywordArguments)
+	def astImportFrom(moduleIdentifier: ast_Identifier, list_astAlias: list[ast.alias], **keywordArguments: int) -> ast.ImportFrom:
+		return ast.ImportFrom(module=moduleIdentifier, names=list_astAlias, level=0, **keywordArguments)
 	@staticmethod
 	def astModule(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore] = []) -> ast.Module:
 		return ast.Module(body, type_ignores)

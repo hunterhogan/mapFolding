@@ -46,10 +46,10 @@ class LedgerOfImports:
 	def addImportFromAsStr(self, module: str, name: str, asname: str | None = None) -> None:
 		self.dictionaryImportFrom[module].append((name, asname))
 
-	def exportListModuleNames(self) -> list[str]:
-		listModuleNames: list[str] = list(self.dictionaryImportFrom.keys())
-		listModuleNames.extend(self.listImport)
-		return sorted(set(listModuleNames))
+	def exportListModuleIdentifiers(self) -> list[str]:
+		listModuleIdentifiers: list[str] = list(self.dictionaryImportFrom.keys())
+		listModuleIdentifiers.extend(self.listImport)
+		return sorted(set(listModuleIdentifiers))
 
 	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
 		listAstImportFrom: list[ast.ImportFrom] = []
@@ -236,8 +236,16 @@ def write_astModule(ingredients: IngredientsModule, pathFilename: str | PathLike
 	ast.fix_missing_locations(astModule)
 	pythonSource: str = ast.unparse(astModule)
 	if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
-	autoflake_additional_imports: list[str] = ingredients.imports.exportListModuleNames()
+	autoflake_additional_imports: list[str] = ingredients.imports.exportListModuleIdentifiers()
 	if packageName:
 		autoflake_additional_imports.append(packageName)
 	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False)
 	writeStringToHere(pythonSource, pathFilename)
+
+def astModuleToIngredientsFunction(astModule: ast.Module, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
+	from mapFolding.someAssemblyRequired import Z0Z_extractFunctionDef
+	astFunctionDef = Z0Z_extractFunctionDef(astModule, identifierFunctionDef)
+	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
+	return IngredientsFunction(astFunctionDef, LedgerOfImports(astModule))
+	# NodeTourist(ifThis.isFunctionDef_Identifier(identifierFunctionDef), [lambda node: astFunctionDef = node]).visit(astModule) # type: ignore
+	# astFunctionDef = NodeTourist(ifThis.isFunctionDef_Identifier(identifierFunctionDef), [Then.returnIt]).visit(astModule) # type: ignore

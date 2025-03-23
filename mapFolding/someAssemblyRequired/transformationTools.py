@@ -22,16 +22,17 @@ While these tools were developed to transform the baseline algorithm into optimi
 they are designed as general-purpose utilities applicable to a wide range of code
 transformation scenarios beyond the scope of this package.
 """
-from importlib import import_module as importlib_import_module
-from inspect import getsource as inspect_getsource
-from types import ModuleType
 from collections.abc import Callable, Sequence
 from copy import deepcopy
+from inspect import getsource as inspect_getsource
 from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, nameDOTname, nodeType, Then
-from typing import Any, cast, Generic, TypeGuard
 from os import PathLike
 from pathlib import Path, PurePath
+from types import ModuleType
+from typing import Any, cast, Generic, TypeGuard
 import ast
+import importlib
+import importlib.util
 
 """
 Semiotic notes:
@@ -50,7 +51,7 @@ Namespace: uppercase, should only appear in camelCase and means "namespace", low
 
 # Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
 
-class NodeCollector(Generic[nodeType], ast.NodeVisitor):
+class NodeTourist(Generic[nodeType], ast.NodeVisitor):
 	"""A node visitor that collects data via one or more actions when a predicate is met."""
 	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: list[Callable[[nodeType], Any]]) -> None:
 		self.findThis = findThis
@@ -62,7 +63,7 @@ class NodeCollector(Generic[nodeType], ast.NodeVisitor):
 				action(cast(nodeType, node))
 		self.generic_visit(node)
 
-class NodeReplacer(Generic[nodeType], ast.NodeTransformer):
+class NodeChanger(Generic[nodeType], ast.NodeTransformer):
 	"""A node transformer that replaces or removes AST nodes based on a condition."""
 	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: Callable[[nodeType], ast.AST | Sequence[ast.AST] | None]) -> None:
 		self.findThis = findThis
@@ -73,26 +74,22 @@ class NodeReplacer(Generic[nodeType], ast.NodeTransformer):
 			return self.doThat(cast(nodeType, node))
 		return super().visit(node)
 
-def extractClassDef(module: ast.Module, identifier: ast_Identifier) -> ast.ClassDef | None:
+def Z0Z_extractClassDef(module: ast.Module, identifier: ast_Identifier) -> ast.ClassDef | None:
 	sherpa: list[ast.ClassDef] = []
-	extractor = NodeCollector(ifThis.isClassDef_Identifier(identifier), [Then.appendTo(sherpa)])
-	extractor.visit(module)
-	astClassDef = sherpa[0] if sherpa else None
-	return astClassDef
+	NodeTourist(ifThis.isClassDef_Identifier(identifier), [Then.appendTo(sherpa)]).visit(module)
+	return sherpa[0] if sherpa else None
 
-def extractFunctionDef(module: ast.Module, identifier: ast_Identifier) -> ast.FunctionDef | None:
+def Z0Z_extractFunctionDef(module: ast.Module, identifier: ast_Identifier) -> ast.FunctionDef | None:
 	sherpa: list[ast.FunctionDef] = []
-	extractor = NodeCollector(ifThis.isFunctionDef_Identifier(identifier), [Then.appendTo(sherpa)])
-	extractor.visit(module)
-	astClassDef = sherpa[0] if sherpa else None
-	return astClassDef
+	NodeTourist(ifThis.isFunctionDef_Identifier(identifier), [Then.appendTo(sherpa)]).visit(module)
+	return sherpa[0] if sherpa else None
 
 def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.FunctionDef]:
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
-	NodeCollector(ifThis.isFunctionDef, [Then.updateThis(dictionaryFunctionDef)]).visit(module)
+	NodeTourist(ifThis.isFunctionDef, [Then.updateThis(dictionaryFunctionDef)]).visit(module)
 	return dictionaryFunctionDef
 
-def makeDictionaryReplacementStatements(module: ast.Module) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
+def Z0Z_makeDictionaryReplacementStatements(module: ast.Module) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
 	"""Return a dictionary of function names and their replacement statements."""
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
 	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}
@@ -127,7 +124,7 @@ def Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.A
 			actionFunction(node)
 	return wrappedAction
 
-def inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> ast.FunctionDef:
+def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> ast.FunctionDef:
 	class FunctionInliner(ast.NodeTransformer):
 		def __init__(self, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> None:
 			self.dictionaryReplacementStatements = dictionaryReplacementStatements
@@ -217,11 +214,24 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 	(8,8): 129950723279272000,
 }
 
+def importLogicalPath2Callable(logicalPathModule: nameDOTname, identifier: ast_Identifier, packageIdentifierIfRelative: ast_Identifier | None = None) -> Callable[..., Any]:
+	moduleImported: ModuleType = importlib.import_module(logicalPathModule, packageIdentifierIfRelative)
+	return getattr(moduleImported, identifier)
+
+def importPathFilename2Callable(pathFilename: str | PathLike[Any] | PurePath, identifier: ast_Identifier, moduleIdentifier: ast_Identifier | None = None) -> Callable[..., Any]:
+	pathFilename = Path(pathFilename)
+
+	importlibSpecification = importlib.util.spec_from_file_location(moduleIdentifier or pathFilename.stem, pathFilename)
+	if importlibSpecification is None or importlibSpecification.loader is None: raise ImportError(f"I received\n\t`{pathFilename = }`,\n\t`{identifier = }`, and\n\t`{moduleIdentifier = }`.\n\tAfter loading, \n\t`importlibSpecification` {'is `None`' if importlibSpecification is None else 'has a value'} and\n\t`importlibSpecification.loader` {'is `None`' if importlibSpecification.loader is None else 'has a value'}.") # type: ignore [union-attr]
+
+	moduleImported_jk_hahaha: ModuleType = importlib.util.module_from_spec(importlibSpecification)
+	importlibSpecification.loader.exec_module(moduleImported_jk_hahaha)
+	return getattr(moduleImported_jk_hahaha, identifier)
+
 def parseLogicalPath2astModule(logicalPathModule: nameDOTname, packageIdentifierIfRelative: ast_Identifier | None = None) -> ast.Module:
-	moduleImported: ModuleType = importlib_import_module(logicalPathModule, packageIdentifierIfRelative)
+	moduleImported: ModuleType = importlib.import_module(logicalPathModule, packageIdentifierIfRelative)
 	sourcePython: str = inspect_getsource(moduleImported)
 	return ast.parse(sourcePython)
 
 def parsePathFilename2astModule(pathFilename: str | PathLike[Any] | PurePath) -> ast.Module:
-	"""Parse a file and return its AST module."""
 	return ast.parse(Path(pathFilename).read_text(encoding='utf-8'))

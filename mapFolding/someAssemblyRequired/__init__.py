@@ -25,33 +25,35 @@ general-purpose utilities applicable to a wide range of code transformation scen
 particularly for numerically-intensive algorithms that benefit from just-in-time compilation.
 """
 from mapFolding.someAssemblyRequired.theTypes import (
-	ast_expr_Slice as ast_expr_Slice,
-	ast_Identifier as ast_Identifier,
-	astClassHasDOTnameNotName as astClassHasDOTnameNotName,
-	astClassHasDOTnameNotNameOptional as astClassHasDOTnameNotNameOptional,
-	astClassHasDOTvalue as astClassHasDOTvalue,
-	astMosDef as astMosDef,
-	intORlist_ast_type_paramORstr_orNone as intORlist_ast_type_paramORstr_orNone,
-	intORstr_orNone as intORstr_orNone,
-	list_ast_type_paramORstr_orNone as list_ast_type_paramORstr_orNone,
-	nameDOTname as nameDOTname,
-	nodeType as nodeType,
+	ast_expr_Slice,
+	ast_Identifier,
+	astClassHasDOTnameNotName,
+	astClassHasDOTnameNotNameOptional,
+	astClassHasDOTvalue,
+	astMosDef,
+	intORlist_ast_type_paramORstr_orNone,
+	intORstr_orNone,
+	list_ast_type_paramORstr_orNone,
+	nameDOTname,
+	nodeType,
 	)
 
-from mapFolding.someAssemblyRequired.tool_ifThis import ifThis as ifThis
-from mapFolding.someAssemblyRequired.tool_Make import Make as Make
-from mapFolding.someAssemblyRequired.tool_Then import Then as Then
+from mapFolding.someAssemblyRequired.tool_ifThis import ifThis
+from mapFolding.someAssemblyRequired.tool_Make import Make
+from mapFolding.someAssemblyRequired.tool_Then import Then
 
 from mapFolding.someAssemblyRequired.transformationTools import (
-	dictionaryEstimates as dictionaryEstimates,
-	extractClassDef as extractClassDef,
-	extractFunctionDef as extractFunctionDef,
-	inlineThisFunctionWithTheseValues as inlineThisFunctionWithTheseValues,
-	makeDictionaryReplacementStatements as makeDictionaryReplacementStatements,
-	NodeCollector as NodeCollector,
-	NodeReplacer as NodeReplacer,
-	parseLogicalPath2astModule as parseLogicalPath2astModule,
-	parsePathFilename2astModule as parsePathFilename2astModule,
-	Z0Z_executeActionUnlessDescendantMatches as Z0Z_executeActionUnlessDescendantMatches,
-	Z0Z_replaceMatchingASTnodes as Z0Z_replaceMatchingASTnodes,
+	dictionaryEstimates,
+	importLogicalPath2Callable,
+	importPathFilename2Callable,
+	NodeChanger,
+	NodeTourist,
+	parseLogicalPath2astModule,
+	parsePathFilename2astModule,
+	Z0Z_executeActionUnlessDescendantMatches,
+	Z0Z_extractClassDef,
+	Z0Z_extractFunctionDef,
+	Z0Z_inlineThisFunctionWithTheseValues,
+	Z0Z_makeDictionaryReplacementStatements,
+	Z0Z_replaceMatchingASTnodes,
 	)

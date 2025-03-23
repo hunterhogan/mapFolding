@@ -27,10 +27,10 @@ from mapFolding.beDRY import outfitCountFolds, validateListDimensions
 from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
-	extractClassDef,
+	Z0Z_extractClassDef,
 	ifThis,
 	Make,
-	NodeCollector,
+	NodeTourist,
 	nameDOTname,
 	Then,
 	Z0Z_executeActionUnlessDescendantMatches,
@@ -75,7 +75,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 	module: ast.Module = ast.parse(inspect_getsource(importlib_import_module(logicalPathModule)))
 	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
 
-	dataclass = extractClassDef(module, dataclass_Identifier)
+	dataclass = Z0Z_extractClassDef(module, dataclass_Identifier)
 	if not isinstance(dataclass, ast.ClassDef):
 		raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
 
@@ -91,13 +91,13 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 
 	addToLedgerPredicate = ifThis.isAnnAssignAndAnnotationIsName
 	addToLedgerAction = Then.Z0Z_ledger(logicalPathModule, ledgerDataclassANDFragments)
-	addToLedger = NodeCollector(addToLedgerPredicate, [addToLedgerAction])
+	addToLedger = NodeTourist(addToLedgerPredicate, [addToLedgerAction])
 
 	exclusionPredicate = ifThis.is_keyword_IdentifierEqualsConstantValue('init', False)
 	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(list_keyword4DataclassInitialization)
 	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction) # type: ignore
 
-	NodeCollector(
+	NodeTourist(
 		ifThis.isAnnAssignAndTargetIsName,
 			[Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, listAnnAssign4DataclassUnpack)
 			, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
@@ -130,10 +130,10 @@ def getSourceAlgorithmVESTIGIAL() -> ModuleType:
 	return moduleImported
 
 @overload
-def makeStateJobOUTDATED(listDimensions: Sequence[int], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...
+def makeComputationStateJob(mapShape: tuple[int, ...], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...
 @overload
-def makeStateJobOUTDATED(listDimensions: Sequence[int], *, writeJob: Literal[False], **keywordArguments: Any) -> ComputationState: ...
-def makeStateJobOUTDATED(listDimensions: Sequence[int], *, writeJob: bool = True, **keywordArguments: Any) -> ComputationState | Path:
+def makeComputationStateJob(mapShape: tuple[int, ...], *, writeJob: Literal[False], **keywordArguments: Any) -> ComputationState: ...
+def makeComputationStateJob(mapShape: tuple[int, ...], *, writeJob: bool = False, **keywordArguments: Any) -> ComputationState | Path:
 	"""
 	Creates a computation state job for map folding calculations and optionally saves it to disk.
 
@@ -141,15 +141,13 @@ def makeStateJobOUTDATED(listDimensions: Sequence[int], *, writeJob: bool = True
 	sets up the initial counting configuration, and can optionally save the state to a pickle file.
 
 	Parameters:
-		listDimensions: List of integers representing the dimensions of the map to be folded.
-		writeJob (True): Whether to save the state to disk.
-		**keywordArguments: Additional keyword arguments to pass to the computation state initialization.
-
+		mapShape: List of integers representing the dimensions of the map to be folded.
+		writeJob (False): Whether to save the state to disk.
+		**keywordArguments: computationDivisions:int|str|None=None,concurrencyLimit:int=1.
 	Returns:
 		stateUniversal|pathFilenameJob: The computation state for the map folding calculations, or
 			the path to the saved state file if writeJob is True.
 	"""
-	mapShape = validateListDimensions(listDimensions)
 	stateUniversal: ComputationState = outfitCountFolds(mapShape, **keywordArguments)
 
 	moduleSource: ModuleType = getSourceAlgorithmVESTIGIAL()

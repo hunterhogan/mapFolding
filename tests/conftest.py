@@ -1,16 +1,17 @@
-from importlib import import_module as importlib_import_module
+import mapFolding
+import mapFolding.someAssemblyRequired
 from collections.abc import Callable, Generator, Sequence
-from types import ModuleType
-
-import numpy
-from mapFolding.theSSOT import ComputationState, The, getPackageDispatcher
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
-from mapFolding.someAssemblyRequired.Z0Z_containers import RecipeSynthesizeFlow
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import makeNumbaFlow
+from mapFolding.someAssemblyRequired.Z0Z_containers import RecipeSynthesizeFlow
+from mapFolding.theSSOT import ComputationState, The, getPackageDispatcher
 from pathlib import Path, PurePosixPath
+from types import ModuleType
 from typing import Any, ContextManager
+import importlib
 import importlib.util
+import numpy
 import pytest
 import random
 import shutil
@@ -198,7 +199,7 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 	basecamp.getPackageDispatcher = dispatcherOriginal
 
 def getAlgorithmDispatcher() -> Callable[[ComputationState], ComputationState]:
-	moduleImported: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
+	moduleImported: ModuleType = importlib.import_module(The.logicalPathModuleSourceAlgorithm)
 	dispatcherCallable = getattr(moduleImported, The.sourceCallableDispatcher)
 	return dispatcherCallable
 
