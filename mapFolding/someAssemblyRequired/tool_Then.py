@@ -11,8 +11,12 @@ import ast
 
 class Then:
 	@staticmethod
-	def Z0Z_actions(listActions: Sequence[Callable[[ast.AST], Any]]) -> Callable[[ast.AST], Sequence[Any]]:
-		return lambda node: [action(node) for action in listActions]
+	def Z0Z_actions(listActions: Sequence[Callable[[ast.AST], Any]]):
+		def workhorse(node: ast.AST):
+			for action in listActions:
+				action(node)
+			return node
+		return workhorse
 	@staticmethod
 	def append_targetTo(listName: list[ast.AST]) -> Callable[[ast.AnnAssign], None]:
 		return lambda node: listName.append(node.target)

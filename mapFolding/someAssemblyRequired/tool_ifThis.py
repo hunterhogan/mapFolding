@@ -18,6 +18,10 @@ class ifThis:
 	def CallReallyIs(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
 		return ifThis.isAnyOf(ifThis.isCall_Identifier(identifier), ifThis.isCallNamespace_Identifier(namespace, identifier))
 	@staticmethod
+	def Z0Z_unparseIs(astAST: ast.AST) -> Callable[[ast.AST], bool]:
+		def workhorse(node: ast.AST) -> bool: return ast.unparse(node) == ast.unparse(astAST)
+		return workhorse
+	@staticmethod
 	def is_arg(node: ast.AST) -> TypeGuard[ast.arg]:
 		return isinstance(node, ast.arg)
 	@staticmethod

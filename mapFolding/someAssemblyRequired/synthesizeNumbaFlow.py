@@ -29,7 +29,7 @@ from mapFolding.someAssemblyRequired import (
 	Then,
 	Z0Z_inlineThisFunctionWithTheseValues,
 	Z0Z_makeDictionaryReplacementStatements,
-	Z0Z_replaceMatchingASTnodes,
+	Z0Z_lameFindReplace,
 )
 from mapFolding.someAssemblyRequired.Z0Z_containers import (
 	astModuleToIngredientsFunction,
@@ -61,7 +61,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	ingredientsSequential.astFunctionDef = Z0Z_inlineThisFunctionWithTheseValues(ingredientsSequential.astFunctionDef, dictionaryReplacementStatements)
 
 	# assignRecipeIdentifiersToCallable. =============================
-	# TODO How can I `RecipeSynthesizeFlow` as the SSOT for the pairs of items that may need to be replaced?
+	# TODO How can I use `RecipeSynthesizeFlow` as the SSOT for the pairs of items that may need to be replaced?
 	# NOTE reminder: you are updating these `ast.Name` here (and not in a more general search) because this is a
 	# narrow search for `ast.Call` so you won't accidentally replace unrelated `ast.Name`.
 	listFindReplace = [(numbaFlow.sourceCallableDispatcher, numbaFlow.callableDispatcher),
@@ -78,7 +78,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	ingredientsParallel.astFunctionDef.name = numbaFlow.callableParallel
 	ingredientsSequential.astFunctionDef.name = numbaFlow.callableSequential
 
-	# Assign dataclassIdentifier per the recipe. ==============================
+	# Assign identifiers per the recipe. ==============================
 	listFindReplace = [(numbaFlow.sourceDataclassInstance, numbaFlow.dataclassInstance),
 		(numbaFlow.sourceDataclassInstanceTaskDistribution, numbaFlow.dataclassInstanceTaskDistribution),
 		(numbaFlow.sourceConcurrencyManagerNamespace, numbaFlow.concurrencyManagerNamespace),]
@@ -116,7 +116,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	unpack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
 	repack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
 
-	ingredientsSequential.astFunctionDef = Z0Z_replaceMatchingASTnodes(ingredientsSequential.astFunctionDef, shatteredDataclass.dictionaryDataclassField2Primitive) # type: ignore
+	ingredientsSequential.astFunctionDef = Z0Z_lameFindReplace(ingredientsSequential.astFunctionDef, shatteredDataclass.dictionaryDataclassField2Primitive) # type: ignore
 
 	# parallelCallable =========================================================
 	ingredientsParallel.astFunctionDef.args = Make.astArgumentsSpecification(args=shatteredDataclass.list_ast_argAnnotated4ArgumentsSpecification)
@@ -137,7 +137,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
 	changeReturnParallelCallable.visit(ingredientsParallel.astFunctionDef)
 
-	ingredientsParallel.astFunctionDef = Z0Z_replaceMatchingASTnodes(ingredientsParallel.astFunctionDef, shatteredDataclass.dictionaryDataclassField2Primitive) # type: ignore
+	ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.dictionaryDataclassField2Primitive) # type: ignore
 
 	# numba decorators =========================================
 	ingredientsParallel = decorateCallableWithNumba(ingredientsParallel)

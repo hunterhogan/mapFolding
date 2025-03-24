@@ -55,5 +55,5 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 	Z0Z_extractFunctionDef,
 	Z0Z_inlineThisFunctionWithTheseValues,
 	Z0Z_makeDictionaryReplacementStatements,
-	Z0Z_replaceMatchingASTnodes,
+	Z0Z_lameFindReplace,
 	)

@@ -170,49 +170,19 @@ def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dicti
 			ast.fix_missing_locations(astFunctionDef)
 	return ImaInlineFunction
 
-def Z0Z_replaceMatchingASTnodes(astTree: ast.AST, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> ast.AST:
-	class TargetedNodeReplacer(ast.NodeTransformer):
-		def __init__(self, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> None:
-			self.mappingFindReplaceNodes = mappingFindReplaceNodes
+def Z0Z_lameFindReplace(astTree: ast.AST, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> ast.AST:
+	keepGoing = True
+	newTree = deepcopy(astTree)
 
-		def visit(self, node: ast.AST) -> ast.AST:
-			for nodeFind, nodeReplace in self.mappingFindReplaceNodes.items():
-				if self.nodesMatchStructurally(node, nodeFind):
-					return nodeReplace
-			return self.generic_visit(node)
+	while keepGoing:
+		for nodeFind, nodeReplace in mappingFindReplaceNodes.items():
+			NodeChanger(ifThis.Z0Z_unparseIs(nodeFind), Then.replaceWith(nodeReplace)).visit(newTree)
 
-		def nodesMatchStructurally(self, nodeSubject: ast.AST | list[Any] | Any, nodePattern: ast.AST | list[Any] | Any) -> bool:
-			if nodeSubject is None or nodePattern is None:
-				return nodeSubject is None and nodePattern is None
-
-			if type(nodeSubject) is not type(nodePattern):
-				return False
-
-			if isinstance(nodeSubject, ast.AST):
-				for field, fieldValueSubject in ast.iter_fields(nodeSubject):
-					if field in ('lineno', 'col_offset', 'end_lineno', 'end_col_offset', 'ctx'):
-						continue
-					attrPattern = getattr(nodePattern, field, None)
-					if not self.nodesMatchStructurally(fieldValueSubject, attrPattern):
-						return False
-				return True
-
-			if isinstance(nodeSubject, list) and isinstance(nodePattern, list):
-				nodeSubjectList: list[Any] = nodeSubject
-				nodePatternList: list[Any] = nodePattern
-				return len(nodeSubjectList) == len(nodePatternList) and all(
-					self.nodesMatchStructurally(elementSubject, elementPattern)
-					for elementSubject, elementPattern in zip(nodeSubjectList, nodePatternList)
-				)
-
-			return nodeSubject == nodePattern
-
-	astTreeCurrent, astTreePrevious = None, astTree
-	while astTreeCurrent is None or ast.unparse(astTreeCurrent) != ast.unparse(astTreePrevious):
-		astTreePrevious = astTreeCurrent if astTreeCurrent else astTree
-		astTreeCurrent = TargetedNodeReplacer(mappingFindReplaceNodes).visit(astTreePrevious)
-
-	return astTreeCurrent
+		if ast.unparse(newTree) == ast.unparse(astTree):
+			keepGoing = False
+		else:
+			astTree = deepcopy(newTree)
+	return newTree
 
 dictionaryEstimates: dict[tuple[int, ...], int] = {
 	(2,2,2,2,2,2,2,2): 362794844160000,
