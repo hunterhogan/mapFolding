@@ -20,25 +20,25 @@ While developed for transforming map folding computation state objects, the util
 designed to be applicable to various data structure transformation scenarios.
 """
 
-from collections.abc import Sequence
 from importlib import import_module as importlib_import_module
 from inspect import getsource as inspect_getsource
-from mapFolding.beDRY import outfitCountFolds, validateListDimensions
+from os import PathLike
+from mapFolding.beDRY import outfitCountFolds
 from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
-	Z0Z_extractClassDef,
 	ifThis,
+	importPathFilename2Callable,
 	Make,
-	NodeTourist,
 	nameDOTname,
+	NodeTourist,
 	Then,
 	Z0Z_executeActionUnlessDescendantMatches,
+	Z0Z_extractClassDef,
 )
 from mapFolding.someAssemblyRequired.Z0Z_containers import LedgerOfImports
 from mapFolding.theSSOT import ComputationState, The
-from pathlib import Path
-from types import ModuleType
+from pathlib import Path, PurePath
 from typing import Any, Literal, overload
 import ast
 import dataclasses
@@ -98,23 +98,14 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction) # type: ignore
 
 	NodeTourist(
-		ifThis.isAnnAssignAndTargetIsName,
-			Then.Z0Z_actions(
-				[
-					Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(
-						instance_Identifier # type: ignore
-						, listAnnAssign4DataclassUnpack)
-					, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
-					, lambda node: addToLedger.visit(node)
-					, filteredAppendKeywordAction
-					, lambda node: list_ast_argAnnotated4ArgumentsSpecification.append(
-						Make.ast_arg(
-							node.target.id # type: ignore
-							, node.annotation)) # type: ignore
-					, lambda node: listAnnotations.append(node.annotation) # type: ignore
-				]
-			)
-		).visit(dataclass)
+		ifThis.isAnnAssignAndTargetIsName, Then.Z0Z_actions([
+			Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, listAnnAssign4DataclassUnpack) # type: ignore
+			, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
+			, lambda node: addToLedger.visit(node)
+			, filteredAppendKeywordAction
+			, lambda node: list_ast_argAnnotated4ArgumentsSpecification.append(Make.ast_arg(node.target.id, node.annotation)) # type: ignore
+			, lambda node: listAnnotations.append(node.annotation) # type: ignore
+		])).visit(dataclass)
 
 	shatteredDataclass = ShatteredDataclass(
 	astAssignDataclassRepack = Make.astAssign(listTargets=[Make.astName(instance_Identifier)], value=Make.astCall(astName_dataclassesDOTdataclass, list_astKeywords=list_keyword4DataclassInitialization))
@@ -133,24 +124,22 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 	shatteredDataclass.ledgerDataclassANDFragments.addImportFromAsStr(logicalPathModule, dataclass_Identifier)
 	return shatteredDataclass
 
-def getSourceAlgorithmVESTIGIAL() -> ModuleType:
-	moduleImported: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
-	return moduleImported
-
 @overload
-def makeComputationStateJob(mapShape: tuple[int, ...], *, writeJob: Literal[True], **keywordArguments: Any) -> Path: ...
+def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[True], *,  pathFilename: str | PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> Path: ...
 @overload
-def makeComputationStateJob(mapShape: tuple[int, ...], *, writeJob: Literal[False], **keywordArguments: Any) -> ComputationState: ...
-def makeComputationStateJob(mapShape: tuple[int, ...], *, writeJob: bool = False, **keywordArguments: Any) -> ComputationState | Path:
+def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[False] = False, **keywordArguments: Any) -> ComputationState: ...
+def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: bool = False, *,  pathFilename: str | PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> ComputationState | Path:
 	"""
-	Creates a computation state job for map folding calculations and optionally saves it to disk.
+	Initializes a computation state and optionally saves it to disk.
 
-	This function initializes a computation state for map folding calculations based on the given dimensions,
-	sets up the initial counting configuration, and can optionally save the state to a pickle file.
+	This function initializes a computation state using the source algorithm.
+
+	Hint: If you want an uninitialized state, call `outfitCountFolds` directly.
 
 	Parameters:
 		mapShape: List of integers representing the dimensions of the map to be folded.
 		writeJob (False): Whether to save the state to disk.
+		pathFilename (getPathFilenameFoldsTotal.pkl): The path and filename to save the state. If None, uses a default path.
 		**keywordArguments: computationDivisions:int|str|None=None,concurrencyLimit:int=1.
 	Returns:
 		stateUniversal|pathFilenameJob: The computation state for the map folding calculations, or
@@ -158,18 +147,17 @@ def makeComputationStateJob(mapShape: tuple[int, ...], *, writeJob: bool = False
 	"""
 	stateUniversal: ComputationState = outfitCountFolds(mapShape, **keywordArguments)
 
-	moduleSource: ModuleType = getSourceAlgorithmVESTIGIAL()
-	# TODO `countInitialize` is hardcoded
-	stateUniversal = moduleSource.countInitialize(stateUniversal)
+	initializeState = importPathFilename2Callable(The.logicalPathModuleSourceAlgorithm, The.sourceCallableInitialize)
+	stateUniversal = initializeState(stateUniversal)
 
 	if not writeJob:
 		return stateUniversal
 
-	pathFilenameChopChop = getPathFilenameFoldsTotal(stateUniversal.mapShape, None)
-	suffix = pathFilenameChopChop.suffix
-	pathJob = Path(str(pathFilenameChopChop)[0:-len(suffix)])
-	pathJob.mkdir(parents=True, exist_ok=True)
-	pathFilenameJob = pathJob / 'stateJob.pkl'
+	if pathFilename:
+		pathFilenameJob = Path(pathFilename)
+		pathFilenameJob.parent.mkdir(parents=True, exist_ok=True)
+	else:
+		pathFilenameJob = getPathFilenameFoldsTotal(stateUniversal.mapShape).with_suffix('.pkl')
 
 	pathFilenameJob.write_bytes(pickle.dumps(stateUniversal))
 	return pathFilenameJob

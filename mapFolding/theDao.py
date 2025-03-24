@@ -101,11 +101,11 @@ def initializeVariablesToFindGaps(state: ComputationState) -> ComputationState:
 	return state
 
 def insertUnconstrainedLeaf(state: ComputationState) -> ComputationState:
-	indexLeaf = 0
-	while indexLeaf < state.leaf1ndex:
-		state.gapsWhere[state.gap1ndexCeiling] = indexLeaf
+	state.indexLeaf = 0
+	while state.indexLeaf < state.leaf1ndex:
+		state.gapsWhere[state.gap1ndexCeiling] = state.indexLeaf
 		state.gap1ndexCeiling += 1
-		indexLeaf += 1
+		state.indexLeaf += 1
 	return state
 
 def leafBelowSentinelIs1(state: ComputationState) -> bool:

@@ -22,11 +22,11 @@ def countInitialize(state: ComputationState) -> ComputationState:
                         state.leafConnectee = state.connectionGraph[state.indexDimension, state.leaf1ndex, state.leafBelow[state.leafConnectee]]
                 state.indexDimension += 1
             if not state.dimensionsUnconstrained:
-                indexLeaf = 0
-                while indexLeaf < state.leaf1ndex:
-                    state.gapsWhere[state.gap1ndexCeiling] = indexLeaf
+                state.indexLeaf = 0
+                while state.indexLeaf < state.leaf1ndex:
+                    state.gapsWhere[state.gap1ndexCeiling] = state.indexLeaf
                     state.gap1ndexCeiling += 1
-                    indexLeaf += 1
+                    state.indexLeaf += 1
             state.indexMiniGap = state.gap1ndex
             while state.indexMiniGap < state.gap1ndexCeiling:
                 state.gapsWhere[state.gap1ndex] = state.gapsWhere[state.indexMiniGap]

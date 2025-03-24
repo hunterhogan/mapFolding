@@ -1,7 +1,7 @@
 from contextlib import redirect_stdout
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal, saveFoldsTotal
 from mapFolding.beDRY import validateListDimensions
-from mapFolding.theSSOT import getPathJobRootDEFAULT
+from mapFolding.filesystem import getPathRootJobDEFAULT
 from pathlib import Path
 import io
 import pytest
@@ -33,14 +33,14 @@ def test_getPathFilenameFoldsTotal_defaultPath(mapShapeTestFunctionality: tuple[
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(mapShapeTestFunctionality)
     assert pathFilenameFoldsTotal.is_absolute(), "Path should be absolute"
     assert pathFilenameFoldsTotal.name == getFilenameFoldsTotal(mapShapeTestFunctionality), "Filename should match getFilenameFoldsTotal output"
-    assert pathFilenameFoldsTotal.parent == getPathJobRootDEFAULT(), "Parent directory should match default job root"
+    assert pathFilenameFoldsTotal.parent == getPathRootJobDEFAULT(), "Parent directory should match default job root"
 
 def test_getPathFilenameFoldsTotal_relativeFilename(mapShapeTestFunctionality: tuple[int, ...]) -> None:
     """Test getPathFilenameFoldsTotal with relative filename."""
     relativeFilename = Path("custom/path/test.foldsTotal")
     pathFilenameFoldsTotal = getPathFilenameFoldsTotal(mapShapeTestFunctionality, relativeFilename)
     assert pathFilenameFoldsTotal.is_absolute(), "Path should be absolute"
-    assert pathFilenameFoldsTotal == getPathJobRootDEFAULT() / relativeFilename, "Relative path should be appended to default job root"
+    assert pathFilenameFoldsTotal == getPathRootJobDEFAULT() / relativeFilename, "Relative path should be appended to default job root"
 
 def test_getPathFilenameFoldsTotal_createsDirs(pathTmpTesting: Path, mapShapeTestFunctionality: tuple[int, ...]) -> None:
     """Test that getPathFilenameFoldsTotal creates necessary directories."""

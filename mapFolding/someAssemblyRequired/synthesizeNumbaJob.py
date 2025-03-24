@@ -2,14 +2,17 @@
 from mapFolding.someAssemblyRequired import ( ast_Identifier, nameDOTname, parsePathFilename2astModule)
 from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDefault
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import theNumbaFlow
+from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState
 from mapFolding.someAssemblyRequired.Z0Z_containers import astModuleToIngredientsFunction, IngredientsFunction
 from pathlib import Path, PurePosixPath
 import ast
 import dataclasses
 
+from mapFolding.theSSOT import ComputationState
+
 @dataclasses.dataclass
 class Z0Z_RecipeJob:
-	mapShape: tuple[int, ...]
+	state: ComputationState
 	# TODO create function for calculating value of `foldsTotalEstimated`
 	foldsTotalEstimated: int = 0
 
@@ -18,9 +21,9 @@ class Z0Z_RecipeJob:
 	sourceCountCallable: str = theNumbaFlow.callableSequential
 
 	countCallable: str = sourceCountCallable
+
 	# from RecipeSynthesizeFlow =================================
 	sourceDispatcherCallable: str = theNumbaFlow.callableDispatcher
-	sourceInitializeCallable: str = theNumbaFlow.callableInitialize
 
 	sourceDataclassIdentifier: str = theNumbaFlow.dataclassIdentifier
 	sourceDataclassInstance: str = theNumbaFlow.dataclassInstance
@@ -43,7 +46,6 @@ class Z0Z_RecipeJob:
 
 	# Function
 	dispatcherCallable: str = sourceDispatcherCallable
-	initializeCallable: str = sourceInitializeCallable
 	concurrencyManagerNamespace: str = sourceConcurrencyManagerNamespace
 	concurrencyManagerIdentifier: str = sourceConcurrencyManagerIdentifier
 	dataclassIdentifier: str = sourceDataclassIdentifier
@@ -69,6 +71,7 @@ class Z0Z_RecipeJob:
 		return pathRoot.joinpath(filename)
 
 def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = parametersNumbaDefault):
+		# get the raw ingredients: data and the algorithm
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(job.source_astModule, job.countCallable)
 	"""
 	Overview
@@ -90,11 +93,9 @@ def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = paramete
 	Minutia
 	- do not use `with` statement inside numba jitted code, except to use numba's obj mode
 	"""
-	pass
 
 	# Steps from `synthesizeNumbaJobVESTIGIAL`:
-		# get the raw ingredients: data and the algorithm
-		# move the parameters from the function signature to the function body
+		# move the parameters from the function signature to the function body and assign their initial values
 		# replace identifiers with static values with their values
 		# print/save the total
 		# launcher
@@ -105,5 +106,5 @@ def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = paramete
 
 if __name__ == '__main__':
 	mapShape = (2,4)
-	aJob = Z0Z_RecipeJob(mapShape)
+	aJob = Z0Z_RecipeJob(makeInitializedComputationState(mapShape))
 	makeJobNumba(aJob)

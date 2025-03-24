@@ -1,10 +1,10 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
 from collections.abc import Sequence
 from typing import Any, cast, TYPE_CHECKING
-from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal
+from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT
 from mapFolding.someAssemblyRequired import ( ifThis, Make, NodeChanger, Then, )
 from mapFolding.someAssemblyRequired.Z0Z_containers import LedgerOfImports
-from mapFolding.theSSOT import ( ComputationState, raiseIfNoneGitHubIssueNumber3, getPathJobRootDEFAULT, )
+from mapFolding.theSSOT import ( ComputationState, raiseIfNoneGitHubIssueNumber3, )
 from os import PathLike
 from pathlib import Path
 from types import ModuleType
@@ -16,7 +16,7 @@ import copy
 import inspect
 import numpy
 if TYPE_CHECKING:
-	from mapFolding.someAssemblyRequired.transformDataStructures import makeComputationStateJob
+	from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState
 	from mapFolding.someAssemblyRequired.ingredientsNumba import thisIsNumbaDotJit
 	from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDefault
 
@@ -291,7 +291,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	"""
 
 	# NOTE get the raw ingredients: data and the algorithm
-	stateJob = makeComputationStateJob(mapShape, writeJob=False, **keywordArguments)
+	stateJob = makeInitializedComputationState(mapShape, writeJob=False, **keywordArguments)
 	pythonSource: str = inspect.getsource(algorithmSource)
 	astModule: ast.Module = ast.parse(pythonSource)
 	setFunctionDef: set[ast.FunctionDef] = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
@@ -378,7 +378,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	# NOTE put on disk
 	if pathFilenameWriteJob is None:
 		filename: str = getFilenameFoldsTotal(stateJob.mapShape)
-		pathRoot: Path = getPathJobRootDEFAULT()
+		pathRoot: Path = getPathRootJobDEFAULT()
 		pathFilenameWriteJob = Path(pathRoot, Path(filename).stem, Path(filename).with_suffix('.py'))
 	else:
 		pathFilenameWriteJob = Path(pathFilenameWriteJob)

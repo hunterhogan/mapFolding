@@ -21,7 +21,6 @@ from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
 from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, ndarray
 from pathlib import Path
-from sys import modules as sysModules
 from tomli import load as tomli_load
 from types import ModuleType
 from typing import TypeAlias
@@ -190,16 +189,6 @@ class ComputationState:
 
 	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
-
-# =============================================================================
-
-# TODO learn how to see this from the user's perspective
-def getPathJobRootDEFAULT() -> Path:
-	if 'google.colab' in sysModules:
-		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / "jobs"
-	else:
-		pathJobDEFAULT = The.pathPackage / "jobs"
-	return pathJobDEFAULT
 
 # =============================================================================
 # The coping way.

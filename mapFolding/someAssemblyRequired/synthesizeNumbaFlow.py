@@ -124,9 +124,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 
 	# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
 	astCallConcurrencyResult: list[ast.Call] = []
-	get_astCallConcurrencyResult: NodeTourist = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn))
-											, doThat = lambda node: NodeTourist(findThis=ifThis.isCall
-												, doThat=Then.appendTo(astCallConcurrencyResult)).visit(node))
+	get_astCallConcurrencyResult: NodeTourist = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), doThat = lambda node: NodeTourist(findThis=ifThis.isCall, doThat=Then.appendTo(astCallConcurrencyResult)).visit(node))
 	get_astCallConcurrencyResult.visit(ingredientsDispatcher.astFunctionDef)
 	replaceAssignParallelCallable = NodeChanger(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), Then.replaceDOTvalueWith(astCallConcurrencyResult[0]))
 	replaceAssignParallelCallable.visit(ingredientsDispatcher.astFunctionDef)
