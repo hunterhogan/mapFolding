@@ -1,22 +1,32 @@
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import (
-	ast_Identifier,
-	astClassHasDOTvalue,
-	astMosDef,
-	Make,
-	nameDOTname,
-)
+from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue, astMosDef, Make, nameDOTname
 from typing import Any
 import ast
+"""
+Semiotic notes:
+In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
+
+astName: always means `ast.Name`.
+Name: uppercase, _should_ be interchangeable with astName, even in camelCase.
+Hunter: ^^ did you do that ^^ ? Are you sure? You just fixed some "Name" identifiers that should have been "_name" because the wrong case confused you.
+name: lowercase, never means `ast.Name`. In camelCase, I _should_ avoid using it in such a way that it could be confused with "Name", uppercase.
+_Identifier: very strongly correlates with the private `ast._Identifier`, which is a `TypeAlias` for `str`.
+identifier: lowercase, a general term that includes the above and other Python identifiers.
+Identifier: uppercase, without the leading underscore should only appear in camelCase and means "identifier", lowercase.
+namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.abc`, "namespace" is the part before the dot.
+Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
+"""
 
 class Then:
 	@staticmethod
-	def Z0Z_actions(listActions: Sequence[Callable[[ast.AST], Any]]):
-		def workhorse(node: ast.AST):
-			for action in listActions:
-				action(node)
+	def allOf(listActions: Sequence[Callable[[ast.AST], Any]]) -> Callable[[ast.AST], ast.AST]:
+		def workhorse(node: ast.AST) -> ast.AST:
+			for action in listActions: action(node)
 			return node
 		return workhorse
+	@staticmethod
+	def append_target_idTo(list_Identifier: list[ast_Identifier]) -> Callable[[ast.AnnAssign], None]:
+		return lambda node: list_Identifier.append(node.target.id) # type: ignore
 	@staticmethod
 	def append_targetTo(listName: list[ast.AST]) -> Callable[[ast.AnnAssign], None]:
 		return lambda node: listName.append(node.target)

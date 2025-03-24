@@ -1,9 +1,27 @@
 from collections.abc import Callable, Container
-from mapFolding.someAssemblyRequired import ast_Identifier
+from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue
 from typing import Any, TypeGuard
 import ast
+"""
+Semiotic notes:
+In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
+
+astName: always means `ast.Name`.
+Name: uppercase, _should_ be interchangeable with astName, even in camelCase.
+Hunter: ^^ did you do that ^^ ? Are you sure? You just fixed some "Name" identifiers that should have been "_name" because the wrong case confused you.
+name: lowercase, never means `ast.Name`. In camelCase, I _should_ avoid using it in such a way that it could be confused with "Name", uppercase.
+_Identifier: very strongly correlates with the private `ast._Identifier`, which is a `TypeAlias` for `str`.
+identifier: lowercase, a general term that includes the above and other Python identifiers.
+Identifier: uppercase, without the leading underscore should only appear in camelCase and means "identifier", lowercase.
+namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.abc`, "namespace" is the part before the dot.
+Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
+"""
 
 class ifThis:
+	@staticmethod
+	def Z0Z_unparseIs(astAST: ast.AST) -> Callable[[ast.AST], bool]:
+		def workhorse(node: ast.AST) -> bool: return ast.unparse(node) == ast.unparse(astAST)
+		return workhorse
 	@staticmethod
 	def ast_IdentifierIsIn(container: Container[ast_Identifier]) -> Callable[[ast_Identifier], TypeGuard[ast_Identifier] | bool]:
 		return lambda node: node in container
@@ -18,14 +36,11 @@ class ifThis:
 	def CallReallyIs(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
 		return ifThis.isAnyOf(ifThis.isCall_Identifier(identifier), ifThis.isCallNamespace_Identifier(namespace, identifier))
 	@staticmethod
-	def Z0Z_unparseIs(astAST: ast.AST) -> Callable[[ast.AST], bool]:
-		def workhorse(node: ast.AST) -> bool: return ast.unparse(node) == ast.unparse(astAST)
-		return workhorse
-	@staticmethod
 	def is_arg(node: ast.AST) -> TypeGuard[ast.arg]:
 		return isinstance(node, ast.arg)
 	@staticmethod
 	def is_arg_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.arg] | bool]:
+		"""see also `isArgument_Identifier`"""
 		def workhorse(node: ast.AST) -> TypeGuard[ast.arg] | bool: return ifThis.is_arg(node) and node.arg == identifier
 		return workhorse
 	@staticmethod
@@ -36,16 +51,22 @@ class ifThis:
 		return ifThis.is_keyword(node) and ifThis.isConstant(node.value)
 	@staticmethod
 	def is_keyword_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.keyword] | bool]:
+		"""see also `isArgument_Identifier`"""
 		def workhorse(node: ast.AST) -> TypeGuard[ast.keyword] | bool: return ifThis.is_keyword(node) and node.arg == identifier
-		return workhorse
-	@staticmethod
-	def isArgument_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.arg] | TypeGuard[ast.keyword] | bool]:
-		def workhorse(node: ast.AST) -> TypeGuard[ast.arg] | TypeGuard[ast.keyword] | bool:
-			return (ifThis.is_arg(node) or ifThis.is_keyword(node)) and node.arg == identifier
 		return workhorse
 	@staticmethod
 	def is_keyword_IdentifierEqualsConstantValue(identifier: ast_Identifier, ConstantValue: Any) -> Callable[[ast.AST], TypeGuard[ast.keyword] | bool]:
 		return lambda node: ifThis.is_keyword_Identifier(identifier)(node) and ifThis.is_keywordAndValueIsConstant(node) and ifThis.isConstantEquals(ConstantValue)(node.value)
+	@staticmethod
+	def is_nameDOTname(node: ast.AST) -> TypeGuard[ast.Attribute]:
+		return ifThis.isAttribute(node) and ifThis.isName(node.value)
+	@staticmethod
+	def is_nameDOTnameNamespace(namespace: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute] | bool]:
+		def workhorse(node: ast.AST) -> TypeGuard[ast.Attribute] | bool: return ifThis.is_nameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value)
+		return workhorse
+	@staticmethod
+	def is_nameDOTnameNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute] | bool]:
+		return lambda node: ifThis.is_nameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value) and node.attr == identifier
 	@staticmethod
 	def isAllOf(*thesePredicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		return lambda node: all(predicate(node) for predicate in thesePredicates)
@@ -70,6 +91,11 @@ class ifThis:
 	@staticmethod
 	def isAnyOf(*thesePredicates: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		return lambda node: any(predicate(node) for predicate in thesePredicates)
+	@staticmethod
+	def isArgument_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.arg] | TypeGuard[ast.keyword] | bool]:
+		def workhorse(node: ast.AST) -> TypeGuard[ast.arg] | TypeGuard[ast.keyword] | bool:
+			return (ifThis.is_arg(node) or ifThis.is_keyword(node)) and node.arg == identifier
+		return workhorse
 	@staticmethod
 	def isAssign(node: ast.AST) -> TypeGuard[ast.Assign]:
 		return isinstance(node, ast.Assign)
@@ -160,20 +186,6 @@ class ifThis:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.Name] | bool: return ifThis.isName(node) and node.id == identifier
 		return workhorse
 	@staticmethod
-	def is_nameDOTname(node: ast.AST) -> TypeGuard[ast.Attribute]:
-		return ifThis.isAttribute(node) and ifThis.isName(node.value)
-	@staticmethod
-	def is_nameDOTnameNamespace(namespace: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute] | bool]:
-		def workhorse(node: ast.AST) -> TypeGuard[ast.Attribute] | bool: return ifThis.is_nameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value)
-		return workhorse
-	@staticmethod
-	def is_nameDOTnameNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute] | bool]:
-		return lambda node: ifThis.is_nameDOTname(node) and ifThis.isName_Identifier(namespace)(node.value) and node.attr == identifier
-	@staticmethod
-	def NameReallyIs_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
-		# The following logic is incomplete.
-		return ifThis.isAnyOf(ifThis.isName_Identifier(identifier), ifThis.isSubscriptIsName_Identifier(identifier))
-	@staticmethod
 	def isReturn(node: ast.AST) -> TypeGuard[ast.Return]:
 		return isinstance(node, ast.Return)
 	@staticmethod
@@ -216,12 +228,12 @@ class ifThis:
 		return isinstance(node, ast.UnaryOp)
 	# TODO Does this work?
 	@staticmethod
-	def matchesAtLeast1Descendant(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
+	def Z0Z_matchesAtLeast1Descendant(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		"""Create a predicate that returns True if any descendant of the node matches the given predicate."""
 		return lambda node: not ifThis.matchesNoDescendant(predicate)(node)
 	# TODO Does this work?
 	@staticmethod
-	def matchesMeAndMyDescendantsExactlyNTimes(predicate: Callable[[ast.AST], bool], nTimes: int) -> Callable[[ast.AST], bool]:
+	def Z0Z_matchesMeAndMyDescendantsExactlyNTimes(predicate: Callable[[ast.AST], bool], nTimes: int) -> Callable[[ast.AST], bool]:
 		"""Create a predicate that returns True if exactly 'count' nodes in the tree match the predicate."""
 		def countMatchingNodes(node: ast.AST) -> bool:
 			matches = sum(1 for descendant in ast.walk(node) if predicate(descendant))
@@ -240,6 +252,10 @@ class ifThis:
 					return False
 			return True
 		return workhorse
+	@staticmethod
+	def NameReallyIs_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], bool]:
+		# The following logic is incomplete.
+		return ifThis.isAnyOf(ifThis.isName_Identifier(identifier), ifThis.isSubscriptIsName_Identifier(identifier))
 	@staticmethod
 	def onlyReturnAnyCompare(astFunctionDef: ast.AST) -> TypeGuard[ast.FunctionDef]:
 		return ifThis.isFunctionDef(astFunctionDef) and len(astFunctionDef.body) == 1 and ifThis.isReturnAnyCompare(astFunctionDef.body[0])

@@ -20,8 +20,6 @@ While developed for transforming map folding computation state objects, the util
 designed to be applicable to various data structure transformation scenarios.
 """
 
-from importlib import import_module as importlib_import_module
-from inspect import getsource as inspect_getsource
 from os import PathLike
 from mapFolding.beDRY import outfitCountFolds
 from mapFolding.filesystem import getPathFilenameFoldsTotal
@@ -32,6 +30,7 @@ from mapFolding.someAssemblyRequired import (
 	Make,
 	nameDOTname,
 	NodeTourist,
+	parseLogicalPath2astModule,
 	Then,
 	Z0Z_executeActionUnlessDescendantMatches,
 	Z0Z_extractClassDef,
@@ -45,8 +44,20 @@ import dataclasses
 import pickle
 
 # Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
+"""
+Semiotic notes:
+In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
 
-countingIdentifierHARDCODED = 'groupsOfFolds'
+astName: always means `ast.Name`.
+Name: uppercase, _should_ be interchangeable with astName, even in camelCase.
+Hunter: ^^ did you do that ^^ ? Are you sure? You just fixed some "Name" identifiers that should have been "_name" because the wrong case confused you.
+name: lowercase, never means `ast.Name`. In camelCase, I _should_ avoid using it in such a way that it could be confused with "Name", uppercase.
+_Identifier: very strongly correlates with the private `ast._Identifier`, which is a `TypeAlias` for `str`.
+identifier: lowercase, a general term that includes the above and other Python identifiers.
+Identifier: uppercase, without the leading underscore should only appear in camelCase and means "identifier", lowercase.
+namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.abc`, "namespace" is the part before the dot.
+Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
+"""
 
 @dataclasses.dataclass
 class ShatteredDataclass:
@@ -72,7 +83,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 	"""
 	# TODO learn whether dataclasses.make_dataclass would be useful to transform the target dataclass into the `ShatteredDataclass`
 
-	module: ast.Module = ast.parse(inspect_getsource(importlib_import_module(logicalPathModule)))
+	module: ast.Module = parseLogicalPath2astModule(logicalPathModule)
 	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
 
 	dataclass = Z0Z_extractClassDef(module, dataclass_Identifier)
@@ -86,19 +97,46 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 	listAnnotations: list[ast.expr] = []
 	listNameDataclassFragments4Parameters: list[ast.Name] = []
 
-	# TODO get the value from `groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})`
-	countingVariable = countingIdentifierHARDCODED
+	"""
+
+	AnnAssign(
+		target=Name(id=CAPTURE_THIS_ast_Identifier, ctx=Store()),
+		annotation=...,
+		value=Call(
+			func=...,
+			keywords=[
+				...,
+				keyword(
+				arg='metadata',
+				value=Dict(
+					keys=[
+					Constant(value='theCountingIdentifier')],
+					values=[
+					Constant(value=True)
+			]))]))
+
+	keywordDOTvalue = 'pseudocode'
+	# Find the counting variable dynamically by looking for special metadata
+	countingVariable: ast_Identifier = 'CAPTURE_THIS_ast_Identifier'
+	keyword_arg = 'metadata'
+	primitiveDictionaryKey = 'theCountingIdentifier'
+	primitiveDictionaryValue = True
+
+	primitiveDictionary = ast.literal_eval(keywordDOTvalue)
+	"""
+
+	countingVariable: ast_Identifier = 'groupsOfFolds'
 
 	addToLedgerPredicate = ifThis.isAnnAssignAndAnnotationIsName
 	addToLedgerAction = Then.Z0Z_ledger(logicalPathModule, ledgerDataclassANDFragments)
-	addToLedger = NodeTourist(addToLedgerPredicate, addToLedgerAction)
+	addToLedger: NodeTourist = NodeTourist(addToLedgerPredicate, addToLedgerAction)
 
 	exclusionPredicate = ifThis.is_keyword_IdentifierEqualsConstantValue('init', False)
 	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(list_keyword4DataclassInitialization)
 	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction) # type: ignore
 
 	NodeTourist(
-		ifThis.isAnnAssignAndTargetIsName, Then.Z0Z_actions([
+		ifThis.isAnnAssignAndTargetIsName, Then.allOf([
 			Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, listAnnAssign4DataclassUnpack) # type: ignore
 			, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
 			, lambda node: addToLedger.visit(node)

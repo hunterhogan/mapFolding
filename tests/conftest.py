@@ -1,10 +1,9 @@
-import mapFolding
-import mapFolding.someAssemblyRequired
 from collections.abc import Callable, Generator, Sequence
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import makeNumbaFlow
 from mapFolding.someAssemblyRequired.Z0Z_containers import RecipeSynthesizeFlow
+from mapFolding.someAssemblyRequired import importLogicalPath2Callable
 from mapFolding.theSSOT import ComputationState, The, getPackageDispatcher
 from pathlib import Path, PurePosixPath
 from types import ModuleType
@@ -160,17 +159,6 @@ def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
 		return mock_countFolds
 	return make_mock
 
-@pytest.fixture
-def mockDispatcher() -> Callable[[Any], ContextManager[Any]]:
-	"""Context manager for mocking dispatcher callable."""
-	def wrapper(mockFunction: Any) -> ContextManager[Any]:
-		dispatcherCallable = getPackageDispatcher()
-		return unittest.mock.patch(
-			f"{dispatcherCallable.__module__}.{dispatcherCallable.__name__}",
-			side_effect=mockFunction
-		)
-	return wrapper
-
 @pytest.fixture(params=oeisIDsImplemented)
 def oeisID(request: pytest.FixtureRequest) -> Any:
 	return request.param
@@ -206,14 +194,14 @@ def getAlgorithmDispatcher() -> Callable[[ComputationState], ComputationState]:
 @pytest.fixture
 def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Generator[None, None, None]:
 	"""Temporarily patches getDispatcherCallable to return the algorithm dispatcher."""
-	useThisDispatcher(getAlgorithmDispatcher())
+	useThisDispatcher(importLogicalPath2Callable(The.logicalPathModuleSourceAlgorithm, The.sourceCallableDispatcher))
 	yield
 
 @pytest.fixture
 def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any], pathTmpTesting: Path) -> Callable[..., Any]:
     """Generate synthetic Numba-optimized dispatcher module and patch the dispatcher"""
     # Configure synthesis flow to use test directory
-    recipeFlow = RecipeSynthesizeFlow(
+    TESTINGrecipeFlow = RecipeSynthesizeFlow(
         pathPackage=PurePosixPath(pathTmpTesting.absolute()),
         Z0Z_flowLogicalPathRoot=None,
         moduleDispatcher="test_dispatcher",
@@ -222,19 +210,19 @@ def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any], pathTmpTes
     )
 
     # Generate optimized module in test directory
-    makeNumbaFlow(recipeFlow)
+    makeNumbaFlow(TESTINGrecipeFlow)
 
     # Import synthesized dispatcher
     importlibSpecificationDispatcher = importlib.util.spec_from_file_location(
-        recipeFlow.moduleDispatcher,
-        Path(recipeFlow.pathFilenameDispatcher),
+        TESTINGrecipeFlow.moduleDispatcher,
+        Path(TESTINGrecipeFlow.pathFilenameDispatcher),
     )
     if importlibSpecificationDispatcher is None or importlibSpecificationDispatcher.loader is None:
         raise ImportError("Failed to load synthetic dispatcher module")
 
     moduleSpecificationDispatcher = importlib.util.module_from_spec(importlibSpecificationDispatcher)
     importlibSpecificationDispatcher.loader.exec_module(moduleSpecificationDispatcher)
-    callableDispatcherSynthetic = getattr(moduleSpecificationDispatcher, recipeFlow.callableDispatcher)
+    callableDispatcherSynthetic = getattr(moduleSpecificationDispatcher, TESTINGrecipeFlow.callableDispatcher)
 
     # Patch dispatcher and return callable
     useThisDispatcher(callableDispatcherSynthetic)

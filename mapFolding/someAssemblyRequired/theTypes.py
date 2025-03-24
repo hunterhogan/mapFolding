@@ -1,11 +1,25 @@
-from typing import Any, TypeAlias as typing_TypeAlias, TYPE_CHECKING, TypeVar as typing_TypeVar
-import ast
-
 """
 Type definitions used across the AST transformation modules.
 
 This module provides type aliases and variables used in AST manipulation,
 centralizing type definitions to prevent circular imports.
+"""
+from typing import Any, TypeAlias as typing_TypeAlias, TYPE_CHECKING, TypeVar as typing_TypeVar
+import ast
+
+"""
+Semiotic notes:
+In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
+
+astName: always means `ast.Name`.
+Name: uppercase, _should_ be interchangeable with astName, even in camelCase.
+Hunter: ^^ did you do that ^^ ? Are you sure? You just fixed some "Name" identifiers that should have been "_name" because the wrong case confused you.
+name: lowercase, never means `ast.Name`. In camelCase, I _should_ avoid using it in such a way that it could be confused with "Name", uppercase.
+_Identifier: very strongly correlates with the private `ast._Identifier`, which is a `TypeAlias` for `str`.
+identifier: lowercase, a general term that includes the above and other Python identifiers.
+Identifier: uppercase, without the leading underscore should only appear in camelCase and means "identifier", lowercase.
+namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.abc`, "namespace" is the part before the dot.
+Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
 """
 
 stuPyd: typing_TypeAlias = str

@@ -45,9 +45,8 @@ def getPathPackageINSTALLING() -> Path:
 # =============================================================================
 # The Wrong Way: HARDCODED
 # Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-# =============================================================================
 
-# mapFolding.someAssemblyRequired.synthesizeNumbaFlow.theNumbaFlow
+# from mapFolding.someAssemblyRequired.synthesizeNumbaFlow.theNumbaFlow
 logicalPathModuleDispatcherHARDCODED: str = 'mapFolding.syntheticModules.numbaCount_doTheNeedful'
 callableDispatcherHARDCODED: str = 'doTheNeedful'
 concurrencyPackageHARDCODED = 'multiprocessing'
@@ -186,6 +185,10 @@ class ComputationState:
 			self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
 		if self.leafBelow is None:
 			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+
+	# def _foldsTotal(self):
+	# 	return DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
+	# foldsTotal: DatatypeFoldsTotal = dataclasses.field(default=_foldsTotal())
 
 	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
