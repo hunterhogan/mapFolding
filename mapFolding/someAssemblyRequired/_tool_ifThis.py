@@ -1,5 +1,5 @@
 from collections.abc import Callable, Container
-from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue
+from mapFolding.someAssemblyRequired import ast_Identifier
 from typing import Any, TypeGuard
 import ast
 """

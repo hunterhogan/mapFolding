@@ -1,23 +1,22 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
-from mapFolding.someAssemblyRequired import ( ast_Identifier, nameDOTname, parsePathFilename2astModule)
+from mapFolding.someAssemblyRequired import ast_Identifier, nameDOTname, parsePathFilename2astModule
 from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDefault
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import theNumbaFlow
 from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState
 from mapFolding.someAssemblyRequired.Z0Z_containers import astModuleToIngredientsFunction, IngredientsFunction
+from mapFolding.theSSOT import ComputationState
 from pathlib import Path, PurePosixPath
 import ast
 import dataclasses
 
-from mapFolding.theSSOT import ComputationState
-
 @dataclasses.dataclass
 class Z0Z_RecipeJob:
 	state: ComputationState
-	# TODO create function for calculating value of `foldsTotalEstimated`
+	# TODO create function to calculate `foldsTotalEstimated`
 	foldsTotalEstimated: int = 0
 
 	# Source
-	source_astModule: ast.Module = parsePathFilename2astModule(theNumbaFlow.pathFilenameSequential)
+	source_astModule = parsePathFilename2astModule(theNumbaFlow.pathFilenameSequential)
 	sourceCountCallable: str = theNumbaFlow.callableSequential
 
 	countCallable: str = sourceCountCallable
@@ -73,6 +72,7 @@ class Z0Z_RecipeJob:
 def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = parametersNumbaDefault):
 		# get the raw ingredients: data and the algorithm
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(job.source_astModule, job.countCallable)
+	ingredientsCount.astFunctionDef.args.args
 	"""
 	Overview
 	- the code starts life in theDao.py, which has many optimizations;

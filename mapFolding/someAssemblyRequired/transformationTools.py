@@ -22,17 +22,17 @@ While these tools were developed to transform the baseline algorithm into optimi
 they are designed as general-purpose utilities applicable to a wide range of code
 transformation scenarios beyond the scope of this package.
 """
-from collections.abc import Callable, Sequence
+from autoflake import fix_code as autoflake_fix_code
+from collections.abc import Callable
 from copy import deepcopy
-from inspect import getsource as inspect_getsource
-from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, nameDOTname, nodeType, Then
+from mapFolding.filesystem import writeStringToHere
+from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, Make, NodeChanger, NodeTourist, Then
+from mapFolding.someAssemblyRequired.Z0Z_containers import IngredientsModule
+from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
 from os import PathLike
-from pathlib import Path, PurePath
-from types import ModuleType
-from typing import Any, cast, Generic, TypeGuard
+from pathlib import PurePath
+from typing import Any
 import ast
-import importlib
-import importlib.util
 
 """
 Semiotic notes:
@@ -49,53 +49,20 @@ namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.ab
 Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
 """
 
-# Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
-
-class NodeTourist(Generic[nodeType], ast.NodeVisitor):
-	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat):
-		self.findThis = findThis
-		self.doThat = doThat
-
-	def visit(self, node):
-		if self.findThis(node):
-			self.doThat(node)
-		self.generic_visit(node)
-
-class NodeChanger(Generic[nodeType], ast.NodeTransformer):
-	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: Callable[[nodeType], ast.AST | Sequence[ast.AST] | None]) -> None:
-		self.findThis = findThis
-		self.doThat = doThat
-
-	def visit(self, node: ast.AST) -> ast.AST | Sequence[ast.AST] | None:
-		if self.findThis(node):
-			return self.doThat(cast(nodeType, node))
-		return super().visit(node)
-
-def importLogicalPath2Callable(logicalPathModule: nameDOTname, identifier: ast_Identifier, packageIdentifierIfRelative: ast_Identifier | None = None) -> Callable[..., Any]:
-	moduleImported: ModuleType = importlib.import_module(logicalPathModule, packageIdentifierIfRelative)
-	return getattr(moduleImported, identifier)
-
-def importPathFilename2Callable(pathFilename: str | PathLike[Any] | PurePath, identifier: ast_Identifier, moduleIdentifier: ast_Identifier | None = None) -> Callable[..., Any]:
-	pathFilename = Path(pathFilename)
-
-	importlibSpecification = importlib.util.spec_from_file_location(moduleIdentifier or pathFilename.stem, pathFilename)
-	if importlibSpecification is None or importlibSpecification.loader is None: raise ImportError(f"I received\n\t`{pathFilename = }`,\n\t`{identifier = }`, and\n\t`{moduleIdentifier = }`.\n\tAfter loading, \n\t`importlibSpecification` {'is `None`' if importlibSpecification is None else 'has a value'} and\n\t`importlibSpecification.loader` {'is `None`' if importlibSpecification.loader is None else 'has a value'}.") # type: ignore [union-attr]
-
-	moduleImported_jk_hahaha: ModuleType = importlib.util.module_from_spec(importlibSpecification)
-	importlibSpecification.loader.exec_module(moduleImported_jk_hahaha)
-	return getattr(moduleImported_jk_hahaha, identifier)
-
-def parseLogicalPath2astModule(logicalPathModule: nameDOTname, packageIdentifierIfRelative: ast_Identifier | None = None) -> ast.Module:
-	moduleImported: ModuleType = importlib.import_module(logicalPathModule, packageIdentifierIfRelative)
-	sourcePython: str = inspect_getsource(moduleImported)
-	return ast.parse(sourcePython)
-
-def parsePathFilename2astModule(pathFilename: str | PathLike[Any] | PurePath) -> ast.Module:
-	return ast.parse(Path(pathFilename).read_text(encoding='utf-8'))
+def write_astModule(ingredients: IngredientsModule, pathFilename: str | PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
+	astModule = Make.astModule(ingredients.body, ingredients.type_ignores)
+	ast.fix_missing_locations(astModule)
+	pythonSource: str = ast.unparse(astModule)
+	if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
+	autoflake_additional_imports: list[str] = ingredients.imports.exportListModuleIdentifiers()
+	if packageName:
+		autoflake_additional_imports.append(packageName)
+	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False)
+	writeStringToHere(pythonSource, pathFilename)
 
 # END of acceptable classes and functions ======================================================
 
-def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.FunctionDef]:
+def makeDictionaryFunctionDef(module: ast.AST) -> dict[ast_Identifier, ast.FunctionDef]:
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
 	NodeTourist(ifThis.isFunctionDef, Then.updateThis(dictionaryFunctionDef)).visit(module)
 	return dictionaryFunctionDef
@@ -112,17 +79,17 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 
 # Start of I HATE PROGRAMMING ==========================================================
 
-def Z0Z_extractClassDef(module: ast.Module, identifier: ast_Identifier) -> ast.ClassDef | None:
+def Z0Z_extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef | None:
 	sherpa: list[ast.ClassDef] = []
 	NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.appendTo(sherpa)).visit(module)
 	return sherpa[0] if sherpa else None
 
-def Z0Z_extractFunctionDef(module: ast.Module, identifier: ast_Identifier) -> ast.FunctionDef | None:
+def Z0Z_extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.FunctionDef | None:
 	sherpa: list[ast.FunctionDef] = []
 	NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.appendTo(sherpa)).visit(module)
 	return sherpa[0] if sherpa else None
 
-def Z0Z_makeDictionaryReplacementStatements(module: ast.Module) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
+def Z0Z_makeDictionaryReplacementStatements(module: ast.AST) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
 	"""Return a dictionary of function names and their replacement statements."""
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
 	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}

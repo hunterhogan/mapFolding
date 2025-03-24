@@ -23,9 +23,9 @@ to generate a fresh optimized implementation.
 
 from mapFolding.someAssemblyRequired import (
 	ifThis,
-	Make,
 	NodeChanger,
 	NodeTourist,
+	Make,
 	Then,
 	Z0Z_inlineThisFunctionWithTheseValues,
 	Z0Z_makeDictionaryReplacementStatements,
@@ -36,11 +36,12 @@ from mapFolding.someAssemblyRequired.Z0Z_containers import (
 	IngredientsModule,
 	LedgerOfImports,
 	RecipeSynthesizeFlow,
-	write_astModule,
 )
 from mapFolding.someAssemblyRequired.ingredientsNumba import decorateCallableWithNumba
 from mapFolding.someAssemblyRequired.transformDataStructures import shatter_dataclassesDOTdataclass
 import ast
+
+from mapFolding.someAssemblyRequired.transformationTools import write_astModule
 
 def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.

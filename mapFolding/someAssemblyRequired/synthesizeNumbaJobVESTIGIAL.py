@@ -2,7 +2,7 @@
 from collections.abc import Sequence
 from typing import Any, cast, TYPE_CHECKING
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT
-from mapFolding.someAssemblyRequired import ( ifThis, Make, NodeChanger, Then, )
+from mapFolding.someAssemblyRequired import ifThis, Make, Then, NodeChanger, NodeTourist
 from mapFolding.someAssemblyRequired.Z0Z_containers import LedgerOfImports
 from mapFolding.theSSOT import ( ComputationState, raiseIfNoneGitHubIssueNumber3, )
 from os import PathLike
@@ -266,7 +266,7 @@ def doUnrollCountGaps(FunctionDefTarget: ast.FunctionDef, stateJob: ComputationS
 		FunctionDefTarget = transformer.visit(FunctionDefTarget)
 	return FunctionDefTarget, allImports
 
-def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callableTarget: str | None = None, parametersNumba: ParametersNumba | None = None, pathFilenameWriteJob: str | PathLike[str] | None = None, unrollCountGaps: bool | None = False, Z0Z_totalEstimated: int = 0, **keywordArguments: Any | None) -> Path:
+def writeJobNumba(mapShape: tuple[int, ...], algorithmSource: ModuleType, callableTarget: str | None = None, parametersNumba: ParametersNumba | None = None, pathFilenameWriteJob: str | PathLike[str] | None = None, unrollCountGaps: bool | None = False, Z0Z_totalEstimated: int = 0, **keywordArguments: Any | None) -> Path:
 	""" Parameters: **keywordArguments: most especially for `computationDivisions` if you want to make a parallel job. Also `CPUlimit`.
 	Notes:
 	Hypothetically, everything can now be configured with parameters and functions. And changing how the job is written is relatively easy.
@@ -291,7 +291,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	"""
 
 	# NOTE get the raw ingredients: data and the algorithm
-	stateJob = makeInitializedComputationState(mapShape, writeJob=False, **keywordArguments)
+	stateJob = makeInitializedComputationState(mapShape)
 	pythonSource: str = inspect.getsource(algorithmSource)
 	astModule: ast.Module = ast.parse(pythonSource)
 	setFunctionDef: set[ast.FunctionDef] = {statement for statement in astModule.body if isinstance(statement, ast.FunctionDef)}
@@ -389,7 +389,7 @@ def writeJobNumba(mapShape: Sequence[int], algorithmSource: ModuleType, callable
 	return pathFilenameWriteJob
 
 if __name__ == '__main__':
-	mapShape: list[int] = [5,5]
+	mapShape = (5,5)
 	dictionaryEstimates: dict[tuple[int, ...], int] = {
 		(2,2,2,2,2,2,2,2): 362794844160000,
 		(2,21): 1493028892051200,
@@ -409,6 +409,4 @@ if __name__ == '__main__':
 	parametersNumba['nogil'] = True
 	parametersNumba['boundscheck'] = False
 
-	pathFilenameWriteJob = None
-
-	writeJobNumba(mapShape, algorithmSource, callableTarget, parametersNumba, pathFilenameWriteJob, Z0Z_totalEstimated=totalEstimated)
+	writeJobNumba(mapShape, algorithmSource, callableTarget, parametersNumba, None, Z0Z_totalEstimated=totalEstimated)

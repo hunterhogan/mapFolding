@@ -83,7 +83,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 	"""
 	# TODO learn whether dataclasses.make_dataclass would be useful to transform the target dataclass into the `ShatteredDataclass`
 
-	module: ast.Module = parseLogicalPath2astModule(logicalPathModule)
+	module = parseLogicalPath2astModule(logicalPathModule)
 	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
 
 	dataclass = Z0Z_extractClassDef(module, dataclass_Identifier)

@@ -5,18 +5,11 @@ This module provides container classes used in the AST transformation process
 and code synthesis workflows. It acts as a dependency boundary to prevent
 circular imports while providing reusable data structures.
 """
-from autoflake import fix_code as autoflake_fix_code
 from collections import defaultdict
 from collections.abc import Sequence
-from importlib import import_module as importlib_import_module
-from inspect import getsource as inspect_getsource
-from mapFolding.filesystem import writeStringToHere
-from mapFolding.someAssemblyRequired import ast_Identifier, Make, nameDOTname
+from mapFolding.someAssemblyRequired import ast_Identifier, nameDOTname, parseLogicalPath2astModule
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3, The
-from os import PathLike
-from pathlib import Path, PurePath, PurePosixPath
-from types import ModuleType
-from typing import Any
+from pathlib import Path, PurePosixPath
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import dataclasses
@@ -66,6 +59,7 @@ class LedgerOfImports:
 		return sorted(set(listModuleIdentifiers))
 
 	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
+		from mapFolding.someAssemblyRequired import Make
 		listAstImportFrom: list[ast.ImportFrom] = []
 		for module, listOfNameTuples in sorted(self.dictionaryImportFrom.items()):
 			listOfNameTuples = sorted(list(set(listOfNameTuples)), key=lambda nameTuple: nameTuple[0])
@@ -129,19 +123,16 @@ class IngredientsModule:
 			listLedgers.append(definition.imports)
 		self.imports.update(*listLedgers)
 
-	def _makeModuleBody(self) -> list[ast.stmt]:
-		body: list[ast.stmt] = []
-		body.extend(self.imports.makeListAst())
-		body.extend(self.prologue)
-		body.extend(self.functions)
-		body.extend(self.epilogue)
-		body.extend(self.launcher)
+	@property
+	def body(self) -> list[ast.stmt]:
+		list_stmt: list[ast.stmt] = []
+		list_stmt.extend(self.imports.makeListAst())
+		list_stmt.extend(self.prologue)
+		list_stmt.extend(self.functions)
+		list_stmt.extend(self.epilogue)
+		list_stmt.extend(self.launcher)
 		# TODO `launcher`, if it exists, must start with `if __name__ == '__main__':` and be indented
-		return body
-
-	def export(self) -> ast.Module:
-		"""Create a new `ast.Module` from the ingredients."""
-		return Make.astModule(self._makeModuleBody(), self.type_ignores)
+		return list_stmt
 
 @dataclasses.dataclass
 class RecipeSynthesizeFlow:
@@ -149,10 +140,7 @@ class RecipeSynthesizeFlow:
 	# ========================================
 	# Source
 	# ========================================
-	# This is probably too restrictive.
-	sourceAlgorithm: ModuleType = importlib_import_module(The.logicalPathModuleSourceAlgorithm)
-	sourcePython: str = inspect_getsource(sourceAlgorithm)
-	source_astModule: ast.Module = ast.parse(sourcePython)
+	source_astModule = parseLogicalPath2astModule(The.logicalPathModuleSourceAlgorithm)
 
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 	sourceCallableDispatcher: str = The.sourceCallableDispatcher
@@ -245,18 +233,7 @@ theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.mo
 	def pathFilenameSequential(self) -> PurePosixPath:
 		return self._makePathFilename(filenameStem=self.moduleSequential, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
 
-def write_astModule(ingredients: IngredientsModule, pathFilename: str | PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
-	astModule = ingredients.export()
-	ast.fix_missing_locations(astModule)
-	pythonSource: str = ast.unparse(astModule)
-	if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
-	autoflake_additional_imports: list[str] = ingredients.imports.exportListModuleIdentifiers()
-	if packageName:
-		autoflake_additional_imports.append(packageName)
-	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False)
-	writeStringToHere(pythonSource, pathFilename)
-
-def astModuleToIngredientsFunction(astModule: ast.Module, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
+def astModuleToIngredientsFunction(astModule: ast.AST, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
 	from mapFolding.someAssemblyRequired import Z0Z_extractFunctionDef
 	astFunctionDef = Z0Z_extractFunctionDef(astModule, identifierFunctionDef)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3

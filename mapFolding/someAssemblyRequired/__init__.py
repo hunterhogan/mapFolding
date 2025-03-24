@@ -24,36 +24,39 @@ These tools were developed for map folding computation optimization but are desi
 general-purpose utilities applicable to a wide range of code transformation scenarios,
 particularly for numerically-intensive algorithms that benefit from just-in-time compilation.
 """
-from mapFolding.someAssemblyRequired.theTypes import (
-	ast_expr_Slice,
-	ast_Identifier,
-	astClassHasDOTnameNotName,
-	astClassHasDOTnameNotNameOptional,
-	astClassHasDOTvalue,
-	astMosDef,
-	intORlist_ast_type_paramORstr_orNone,
-	intORstr_orNone,
-	list_ast_type_paramORstr_orNone,
-	nameDOTname,
-	nodeType,
+from mapFolding.someAssemblyRequired._theTypes import (
+	ast_expr_Slice as ast_expr_Slice,
+	ast_Identifier as ast_Identifier,
+	astClassHasDOTnameNotName as astClassHasDOTnameNotName,
+	astClassHasDOTnameNotNameOptional as astClassHasDOTnameNotNameOptional,
+	astClassHasDOTvalue as astClassHasDOTvalue,
+	astMosDef as astMosDef,
+	intORlist_ast_type_paramORstr_orNone as intORlist_ast_type_paramORstr_orNone,
+	intORstr_orNone as intORstr_orNone,
+	list_ast_type_paramORstr_orNone as list_ast_type_paramORstr_orNone,
+	nameDOTname as nameDOTname,
+	nodeType as nodeType,
 	)
 
-from mapFolding.someAssemblyRequired.tool_ifThis import ifThis
-from mapFolding.someAssemblyRequired.tool_Make import Make
-from mapFolding.someAssemblyRequired.tool_Then import Then
+from mapFolding.someAssemblyRequired._toolboxPython import (
+	importLogicalPath2Callable as importLogicalPath2Callable,
+	importPathFilename2Callable as importPathFilename2Callable,
+	NodeChanger as NodeChanger,
+	NodeTourist as NodeTourist,
+	parseLogicalPath2astModule as parseLogicalPath2astModule,
+	parsePathFilename2astModule as parsePathFilename2astModule,
+	)
+
+from mapFolding.someAssemblyRequired._tool_ifThis import ifThis as ifThis
+from mapFolding.someAssemblyRequired._tool_Make import Make as Make
+from mapFolding.someAssemblyRequired._tool_Then import Then as Then
 
 from mapFolding.someAssemblyRequired.transformationTools import (
-	dictionaryEstimates,
-	importLogicalPath2Callable,
-	importPathFilename2Callable,
-	NodeChanger,
-	NodeTourist,
-	parseLogicalPath2astModule,
-	parsePathFilename2astModule,
-	Z0Z_executeActionUnlessDescendantMatches,
-	Z0Z_extractClassDef,
-	Z0Z_extractFunctionDef,
-	Z0Z_inlineThisFunctionWithTheseValues,
-	Z0Z_makeDictionaryReplacementStatements,
-	Z0Z_lameFindReplace,
+	dictionaryEstimates as dictionaryEstimates,
+	Z0Z_executeActionUnlessDescendantMatches as Z0Z_executeActionUnlessDescendantMatches,
+	Z0Z_extractClassDef as Z0Z_extractClassDef,
+	Z0Z_extractFunctionDef as Z0Z_extractFunctionDef,
+	Z0Z_inlineThisFunctionWithTheseValues as Z0Z_inlineThisFunctionWithTheseValues,
+	Z0Z_makeDictionaryReplacementStatements as Z0Z_makeDictionaryReplacementStatements,
+	Z0Z_lameFindReplace as Z0Z_lameFindReplace,
 	)

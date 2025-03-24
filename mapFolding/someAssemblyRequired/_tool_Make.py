@@ -22,14 +22,14 @@ class Make:
 	Almost all of the parameters described here are only accessible through a method's `**keywordArguments` parameter.
 	Parameters:
 		context (ast.Load()): Are you loading from, storing to, or deleting the identifier? The `context` (also, `ctx`) value is `ast.Load()`, `ast.Store()`, or `ast.Del()`.
-		col_offset (0): int Position information specifying the column where an AST node begins. Pass via `**keywordArguments` when needed for accurate source code location mapping.
-		end_col_offset (None): int|None Position information specifying the column where an AST node ends. Optional position data passed via `**keywordArguments`.
-		end_lineno (None): int|None Position information specifying the line number where an AST node ends. Optional position data passed via `**keywordArguments`.
+		col_offset (0): int Position information specifying the column where an AST node begins.
+		end_col_offset (None): int|None Position information specifying the column where an AST node ends.
+		end_lineno (None): int|None Position information specifying the line number where an AST node ends.
 		level (0): int Module import depth level that controls relative vs absolute imports. Default 0 indicates absolute import.
-		lineno: int Position information specifying the line number where an AST node begins. Used when manually mapping locations and passed via `**keywordArguments`.
-		kind (None): str|None Used for type annotations in limited cases. Pass via `**keywordArguments` when specializing type information.
-		type_comment (None): str|None Captures inline type comments from source code: nearly obsolete. Optional metadata passed via `**keywordArguments`.
-		type_params: list[ast.type_param] Type parameters for generic type definitions. Pass this collection via `**keywordArguments` when defining generic types.
+		lineno: int Position information manually specifying the line number where an AST node begins.
+		kind (None): str|None Used for type annotations in limited cases.
+		type_comment (None): str|None Captures inline type comments from source code, such as `# type: ignore`.
+		type_params: list[ast.type_param] Type parameters for generic type definitions.
 
 	Notes:
 		The `ast._Attributes` are, importantly, not `ast._fields`: lineno, col_offset, end_lineno, and end_col_offset.
