@@ -63,8 +63,8 @@ class Make:
 		"""
 		return ast.Attribute(value, attribute, context, **keywordArguments)
 	@staticmethod
-	def astCall(caller: ast.Name | ast.Attribute, listArguments: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
-		return ast.Call(func=caller, args=list(listArguments) if listArguments else [], keywords=list(list_astKeywords) if list_astKeywords else [])
+	def astCall(callee: ast.Name | ast.Attribute, listArguments: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
+		return ast.Call(func=callee, args=list(listArguments) if listArguments else [], keywords=list(list_astKeywords) if list_astKeywords else [])
 	@staticmethod
 	def astClassDef(name: ast_Identifier, listBases: list[ast.expr]=[], list_keyword: list[ast.keyword]=[], body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], **keywordArguments: list_ast_type_paramORstr_orNone) -> ast.ClassDef:
 		return ast.ClassDef(name, listBases, list_keyword, body, decorator_list, **keywordArguments)

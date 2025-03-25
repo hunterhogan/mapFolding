@@ -116,6 +116,7 @@ def getPackageDispatcher() -> Callable[['ComputationState'], 'ComputationState']
 	return The.dispatcher
 # =============================================================================
 # Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
+# Efficient translation of Python scalar types to Numba types https://github.com/hunterhogan/mapFolding/issues/8
 
 DatatypeLeavesTotal: TypeAlias = int
 # this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
@@ -160,7 +161,6 @@ class ComputationState:
 	leaf1ndex: DatatypeElephino = DatatypeElephino(1)
 	leafConnectee: DatatypeElephino = DatatypeElephino(0)
 	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
-	# Efficient translation of Python scalar types to Numba types https://github.com/hunterhogan/mapFolding/issues/8
 
 	def __post_init__(self) -> None:
 		from mapFolding.beDRY import makeConnectionGraph, makeDataContainer
@@ -187,10 +187,6 @@ class ComputationState:
 		if self.leafBelow is None:
 			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, NumPyLeavesTotal)
 
-	# def _foldsTotal(self):
-	# 	return DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
-	# foldsTotal: DatatypeFoldsTotal = dataclasses.field(default=_foldsTotal())
-
 	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
 
@@ -201,17 +197,9 @@ class raiseIfNoneGitHubIssueNumber3(Exception): pass
 
 """Technical concepts I am likely using and likely want to use more effectively:
 - Configuration Registry
-- Write-Once, Read-Many (WORM) / Immutable Initialization
 - Lazy Initialization
-- Separate configuration from business logic
-
-----
-theSSOT and yourSSOT
-
-----
-delay realization/instantiation until a concrete value is desired
-moment of truth: when the value is needed, not when the value is defined
-
+- delay realization/instantiation until a concrete value is desired
+- moment of truth: when the value is needed, not when the value is defined
 ----
 2025 March 11
 Note to self: fundamental concept in Python:
