@@ -234,7 +234,7 @@ theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.mo
 		return self._makePathFilename(filenameStem=self.moduleSequential, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
 
 def astModuleToIngredientsFunction(astModule: ast.AST, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
-	from mapFolding.someAssemblyRequired import Z0Z_extractFunctionDef
-	astFunctionDef = Z0Z_extractFunctionDef(astModule, identifierFunctionDef)
+	from mapFolding.someAssemblyRequired import extractFunctionDef
+	astFunctionDef = extractFunctionDef(astModule, identifierFunctionDef)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	return IngredientsFunction(astFunctionDef, LedgerOfImports(astModule))

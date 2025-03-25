@@ -49,6 +49,12 @@ namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.ab
 Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
 """
 
+def extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef | None:
+	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.getIt).captureFirstMatch(module)
+
+def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.FunctionDef | None:
+	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.getIt).captureFirstMatch(module)
+
 def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
 	astModule = Make.astModule(ingredients.body, ingredients.type_ignores)
 	ast.fix_missing_locations(astModule)
@@ -78,16 +84,6 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 # END of marginal classes and functions ======================================================
 
 # Start of I HATE PROGRAMMING ==========================================================
-
-def Z0Z_extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef | None:
-	sherpa: list[ast.ClassDef] = []
-	NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.appendTo(sherpa)).visit(module)
-	return sherpa[0] if sherpa else None
-
-def Z0Z_extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.FunctionDef | None:
-	sherpa: list[ast.FunctionDef] = []
-	NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.appendTo(sherpa)).visit(module)
-	return sherpa[0] if sherpa else None
 
 def Z0Z_makeDictionaryReplacementStatements(module: ast.AST) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
 	"""Return a dictionary of function names and their replacement statements."""

@@ -119,18 +119,18 @@ def getPackageDispatcher() -> Callable[['ComputationState'], 'ComputationState']
 
 DatatypeLeavesTotal: TypeAlias = int
 # this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
-numpyLeavesTotal: TypeAlias = numpy_int16
+NumPyLeavesTotal: TypeAlias = numpy_int16
 
 DatatypeElephino: TypeAlias = int
-numpyElephino: TypeAlias = numpy_int16
+NumPyElephino: TypeAlias = numpy_int16
 
 DatatypeFoldsTotal: TypeAlias = int
-numpyFoldsTotal: TypeAlias = numpy_int64
+NumPyFoldsTotal: TypeAlias = numpy_int64
 
-Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[numpyLeavesTotal]]
-Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[numpyLeavesTotal]]
-Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[numpyElephino]]
-Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[numpyFoldsTotal]]
+Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[NumPyLeavesTotal]]
+Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyLeavesTotal]]
+Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[NumPyElephino]]
+Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]
 
 @dataclasses.dataclass
 class ComputationState:
@@ -165,27 +165,27 @@ class ComputationState:
 	def __post_init__(self) -> None:
 		from mapFolding.beDRY import makeConnectionGraph, makeDataContainer
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
-		self.connectionGraph = makeConnectionGraph(self.mapShape, self.leavesTotal, numpyLeavesTotal)
+		self.connectionGraph = makeConnectionGraph(self.mapShape, self.leavesTotal, NumPyLeavesTotal)
 
 		if self.dimensionsUnconstrained is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
 
 		if self.foldGroups is None:
-			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), numpyFoldsTotal)
+			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), NumPyFoldsTotal)
 			self.foldGroups[-1] = self.leavesTotal
 
 		leavesTotalAsInt = int(self.leavesTotal)
 
 		if self.countDimensionsGapped is None:
-			self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+			self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, NumPyLeavesTotal)
 		if self.gapRangeStart is None:
-			self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, numpyElephino)
+			self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, NumPyElephino)
 		if self.gapsWhere is None:
-			self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, numpyLeavesTotal)
+			self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, NumPyLeavesTotal)
 		if self.leafAbove is None:
-			self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+			self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, NumPyLeavesTotal)
 		if self.leafBelow is None:
-			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, numpyLeavesTotal)
+			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, NumPyLeavesTotal)
 
 	# def _foldsTotal(self):
 	# 	return DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)

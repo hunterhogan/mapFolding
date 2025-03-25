@@ -15,11 +15,19 @@ class NodeTourist(Generic[nodeType], ast.NodeVisitor):
 	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat):
 		self.findThis = findThis
 		self.doThat = doThat
+		self.nodeCaptured = None
 
 	def visit(self, node):
 		if self.findThis(node):
-			self.doThat(node)
+			nodeActionOutput = self.doThat(node)
+			if nodeActionOutput is not None:
+				self.nodeCaptured = nodeActionOutput
 		self.generic_visit(node)
+
+	def captureFirstMatch(self, node):
+		self.nodeCaptured = None
+		self.visit(node)
+		return self.nodeCaptured
 
 class NodeChanger(Generic[nodeType], ast.NodeTransformer):
 	def __init__(self, findThis: Callable[[ast.AST], TypeGuard[nodeType] | bool], doThat: Callable[[nodeType], ast.AST | Sequence[ast.AST] | None]) -> None:
@@ -31,7 +39,7 @@ class NodeChanger(Generic[nodeType], ast.NodeTransformer):
 			return self.doThat(cast(nodeType, node))
 		return super().visit(node)
 
-def importLogicalPath2Callable(logicalPathModule: nameDOTname, identifier: ast_Identifier, packageIdentifierIfRelative: ast_Identifier | None = None) -> Callable[..., Any]:
+def importLogicalPath2Callable(logicalPathModule: nameDOTname, identifier: ast_Identifier, packageIdentifierIfRelative: ast_Identifier | None = None):
 	moduleImported: ModuleType = importlib.import_module(logicalPathModule, packageIdentifierIfRelative)
 	return getattr(moduleImported, identifier)
 

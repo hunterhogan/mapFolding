@@ -31,6 +31,7 @@ def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, stateme
 	list_astKeywords: list[ast.keyword] = [ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))]
 	allImports.addImportFromAsStr(moduleConstructor, dtypeName, dtypeAsName)
 	astCall: ast.Call = Make.astCall(Make.astName(constructorName), [dataAs_astExpr], list_astKeywords)
+	astCall.
 	assignment = ast.Assign(targets=[astAssignee], value=astCall)
 	FunctionDefTarget.body.insert(0, assignment)
 	FunctionDefTarget.body.remove(statement)

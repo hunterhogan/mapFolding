@@ -54,8 +54,8 @@ from mapFolding.someAssemblyRequired._tool_Then import Then as Then
 from mapFolding.someAssemblyRequired.transformationTools import (
 	dictionaryEstimates as dictionaryEstimates,
 	Z0Z_executeActionUnlessDescendantMatches as Z0Z_executeActionUnlessDescendantMatches,
-	Z0Z_extractClassDef as Z0Z_extractClassDef,
-	Z0Z_extractFunctionDef as Z0Z_extractFunctionDef,
+	extractClassDef as extractClassDef,
+	extractFunctionDef as extractFunctionDef,
 	Z0Z_inlineThisFunctionWithTheseValues as Z0Z_inlineThisFunctionWithTheseValues,
 	Z0Z_makeDictionaryReplacementStatements as Z0Z_makeDictionaryReplacementStatements,
 	Z0Z_lameFindReplace as Z0Z_lameFindReplace,

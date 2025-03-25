@@ -25,6 +25,7 @@ from mapFolding.beDRY import outfitCountFolds
 from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
+	extractClassDef,
 	ifThis,
 	importLogicalPath2Callable,
 	Make,
@@ -33,7 +34,6 @@ from mapFolding.someAssemblyRequired import (
 	parseLogicalPath2astModule,
 	Then,
 	Z0Z_executeActionUnlessDescendantMatches,
-	Z0Z_extractClassDef,
 )
 from mapFolding.someAssemblyRequired.Z0Z_containers import LedgerOfImports
 from mapFolding.theSSOT import ComputationState, The
@@ -43,36 +43,39 @@ import ast
 import dataclasses
 import pickle
 
-# Would `LibCST` be better than `ast` in some cases? https://github.com/hunterhogan/mapFolding/issues/7
-"""
-Semiotic notes:
-In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
-
-astName: always means `ast.Name`.
-Name: uppercase, _should_ be interchangeable with astName, even in camelCase.
-Hunter: ^^ did you do that ^^ ? Are you sure? You just fixed some "Name" identifiers that should have been "_name" because the wrong case confused you.
-name: lowercase, never means `ast.Name`. In camelCase, I _should_ avoid using it in such a way that it could be confused with "Name", uppercase.
-_Identifier: very strongly correlates with the private `ast._Identifier`, which is a `TypeAlias` for `str`.
-identifier: lowercase, a general term that includes the above and other Python identifiers.
-Identifier: uppercase, without the leading underscore should only appear in camelCase and means "identifier", lowercase.
-namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.abc`, "namespace" is the part before the dot.
-Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
-"""
+# Create dummy AST elements for use as defaults
+dummyAssign = Make.astAssign([Make.astName("dummyTarget")], Make.astConstant(None))
+dummySubscript = Make.astSubscript(Make.astName("dummy"), Make.astName("slice"))
+dummyTuple = Make.astTuple([Make.astName("dummyElement")])
+dummyAnnotation = Make.astName("Any")
+dummyName = Make.astName("dummy")
 
 @dataclasses.dataclass
 class ShatteredDataclass:
-	astAssignDataclassRepack: ast.Assign
-	astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns: ast.Subscript
-	astTuple4AssignTargetsToFragments: ast.Tuple
-	countingVariableAnnotation: ast.expr
-	countingVariableName: ast.Name
+	repack: ast.Assign = dummyAssign
+	"""AST assignment statement that reconstructs the original dataclass instance."""
+	signatureReturnAnnotation: ast.Subscript = dummySubscript
+	"""Tuple-based return type annotation for function definitions."""
+	astTuple4AssignTargetsToFragments: ast.Tuple = dummyTuple
+	"""AST tuple used as target for assignment to capture returned fragments."""
+	countingVariableAnnotation: ast.expr = dummyAnnotation
+	"""Type annotation for the counting variable extracted from the dataclass."""
+	countingVariableName: ast.Name = dummyName
+	"""AST name node representing the counting variable identifier."""
+	dictionary4unpacking: dict[ast.expr, ast.Name] = dataclasses.field(default_factory=dict)
+	"""Maps AST expressions to Name nodes for find-replace operations."""
 	ledgerDataclassANDFragments: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
+	"""Import records for the dataclass and its constituent parts."""
 	list_ast_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list)
-	list_keyword4DataclassInitialization: list[ast.keyword] = dataclasses.field(default_factory=list)
-	listAnnAssign4DataclassUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list)
+	"""Function argument nodes with annotations for parameter specification."""
+	list_keyword_field_equals_field: list[ast.keyword] = dataclasses.field(default_factory=list)
+	"""Keyword arguments for dataclass initialization with field=field format."""
+	listUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list)
+	"""Annotated assignment statements to extract fields from dataclass."""
 	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=list)
-	listNameDataclassFragments4Parameters: list[ast.Name] = dataclasses.field(default_factory=list)
-	dictionaryDataclassField2Primitive: dict[ast.expr, ast.Name] = dataclasses.field(default_factory=dict)
+	"""Type annotations for each dataclass field."""
+	listName4Parameters: list[ast.Name] = dataclasses.field(default_factory=list)
+	"""Name nodes for each dataclass field used as function parameters."""
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
 	"""
@@ -81,84 +84,47 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 		dataclass_Identifier: The identifier of the dataclass to be dismantled.
 		instance_Identifier: In the synthesized module/function/scope, the identifier that will be used for the instance.
 	"""
-	# TODO learn whether dataclasses.make_dataclass would be useful to transform the target dataclass into the `ShatteredDataclass`
+	shatteredDataclass = ShatteredDataclass()
 
 	module = parseLogicalPath2astModule(logicalPathModule)
 	astName_dataclassesDOTdataclass = Make.astName(dataclass_Identifier)
+	dataclassClassDef = extractClassDef(module, dataclass_Identifier)
+	if not isinstance(dataclassClassDef, ast.ClassDef): raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
 
-	dataclass = Z0Z_extractClassDef(module, dataclass_Identifier)
-	if not isinstance(dataclass, ast.ClassDef):
-		raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
-
-	ledgerDataclassANDFragments = LedgerOfImports()
-	list_ast_argAnnotated4ArgumentsSpecification: list[ast.arg] = []
-	list_keyword4DataclassInitialization: list[ast.keyword] = []
-	listAnnAssign4DataclassUnpack: list[ast.AnnAssign] = []
-	listAnnotations: list[ast.expr] = []
-	listNameDataclassFragments4Parameters: list[ast.Name] = []
-
-	"""
-
-	AnnAssign(
-		target=Name(id=CAPTURE_THIS_ast_Identifier, ctx=Store()),
-		annotation=...,
-		value=Call(
-			func=...,
-			keywords=[
-				...,
-				keyword(
-				arg='metadata',
-				value=Dict(
-					keys=[
-					Constant(value='theCountingIdentifier')],
-					values=[
-					Constant(value=True)
-			]))]))
-
-	keywordDOTvalue = 'pseudocode'
-	# Find the counting variable dynamically by looking for special metadata
-	countingVariable: ast_Identifier = 'CAPTURE_THIS_ast_Identifier'
-	keyword_arg = 'metadata'
-	primitiveDictionaryKey = 'theCountingIdentifier'
-	primitiveDictionaryValue = True
-
-	primitiveDictionary = ast.literal_eval(keywordDOTvalue)
-	"""
-
-	countingVariable: ast_Identifier = 'groupsOfFolds'
+	ImaDataclassObject = importLogicalPath2Callable(logicalPathModule, dataclass_Identifier)
+	for aField in dataclasses.fields(ImaDataclassObject):
+		if aField.metadata.get('theCountingIdentifier', False):
+			countingVariable = aField.name
+			break
+	else:
+		raise ValueError(f"I could not find the counting variable in {dataclass_Identifier=} in {logicalPathModule=}.")
 
 	addToLedgerPredicate = ifThis.isAnnAssignAndAnnotationIsName
-	addToLedgerAction = Then.Z0Z_ledger(logicalPathModule, ledgerDataclassANDFragments)
+	addToLedgerAction = Then.Z0Z_ledger(logicalPathModule, shatteredDataclass.ledgerDataclassANDFragments)
 	addToLedger: NodeTourist = NodeTourist(addToLedgerPredicate, addToLedgerAction)
 
 	exclusionPredicate = ifThis.is_keyword_IdentifierEqualsConstantValue('init', False)
-	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(list_keyword4DataclassInitialization)
+	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(shatteredDataclass.list_keyword_field_equals_field)
 	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction) # type: ignore
 
 	NodeTourist(
-		ifThis.isAnnAssignAndTargetIsName, Then.allOf([
-			Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, listAnnAssign4DataclassUnpack) # type: ignore
-			, Then.append_targetTo(listNameDataclassFragments4Parameters) # type: ignore
+		ifThis.isAnnAssignAndTargetIsName
+		, Then.allOf([
+			Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, shatteredDataclass.listUnpack) # type: ignore
+			, lambda node: Then.appendTo(shatteredDataclass.listName4Parameters)(node.target) # type: ignore
 			, lambda node: addToLedger.visit(node)
 			, filteredAppendKeywordAction
-			, lambda node: list_ast_argAnnotated4ArgumentsSpecification.append(Make.ast_arg(node.target.id, node.annotation)) # type: ignore
-			, lambda node: listAnnotations.append(node.annotation) # type: ignore
-		])).visit(dataclass)
+			, lambda node: shatteredDataclass.list_ast_argAnnotated4ArgumentsSpecification.append(Make.ast_arg(node.target.id, node.annotation)) # type: ignore
+			, lambda node: shatteredDataclass.listAnnotations.append(node.annotation) # type: ignore
+		])).visit(dataclassClassDef)
 
-	shatteredDataclass = ShatteredDataclass(
-	astAssignDataclassRepack = Make.astAssign(listTargets=[Make.astName(instance_Identifier)], value=Make.astCall(astName_dataclassesDOTdataclass, list_astKeywords=list_keyword4DataclassInitialization))
-	, astSubscriptPrimitiveTupleAnnotations4FunctionDef_returns = Make.astSubscript(Make.astName('tuple'), Make.astTuple(listAnnotations))
-	, astTuple4AssignTargetsToFragments = Make.astTuple(listNameDataclassFragments4Parameters, ast.Store())
-	, countingVariableAnnotation = next(ast_arg.annotation for ast_arg in list_ast_argAnnotated4ArgumentsSpecification if ast_arg.arg == countingVariable) or Make.astName('Any')
-	, countingVariableName = Make.astName(countingVariable)
-	, ledgerDataclassANDFragments = ledgerDataclassANDFragments
-	, list_ast_argAnnotated4ArgumentsSpecification = list_ast_argAnnotated4ArgumentsSpecification
-	, list_keyword4DataclassInitialization = list_keyword4DataclassInitialization
-	, listAnnAssign4DataclassUnpack = listAnnAssign4DataclassUnpack
-	, listAnnotations = listAnnotations
-	, listNameDataclassFragments4Parameters = listNameDataclassFragments4Parameters
-	, dictionaryDataclassField2Primitive = {statement.value: statement.target for statement in listAnnAssign4DataclassUnpack} # type: ignore
-	)
+	shatteredDataclass.repack = Make.astAssign(listTargets=[Make.astName(instance_Identifier)], value=Make.astCall(astName_dataclassesDOTdataclass, list_astKeywords=shatteredDataclass.list_keyword_field_equals_field))
+	shatteredDataclass.signatureReturnAnnotation = Make.astSubscript(Make.astName('tuple'), Make.astTuple(shatteredDataclass.listAnnotations))
+	shatteredDataclass.astTuple4AssignTargetsToFragments = Make.astTuple(shatteredDataclass.listName4Parameters, ast.Store())
+	shatteredDataclass.countingVariableAnnotation = next(ast_arg.annotation for ast_arg in shatteredDataclass.list_ast_argAnnotated4ArgumentsSpecification if ast_arg.arg == countingVariable) or Make.astName('Any')
+	shatteredDataclass.countingVariableName = Make.astName(countingVariable)
+	shatteredDataclass.dictionary4unpacking = {statement.value: statement.target for statement in shatteredDataclass.listUnpack} # type: ignore
+
 	shatteredDataclass.ledgerDataclassANDFragments.addImportFromAsStr(logicalPathModule, dataclass_Identifier)
 	return shatteredDataclass
 

@@ -1,5 +1,5 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
-from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, nameDOTname, NodeChanger, parsePathFilename2astModule, Then
+from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, Make, nameDOTname, NodeChanger, parsePathFilename2astModule, Then
 from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDefault
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import theNumbaFlow
 from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState, shatter_dataclassesDOTdataclass
@@ -69,10 +69,9 @@ class Z0Z_RecipeJob:
 		filename: str = filenameStem + fileExtension
 		return pathRoot.joinpath(filename)
 
-def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = parametersNumbaDefault):
+def makeJobNumba(job: Z0Z_RecipeJob, zz: dict[ast_Identifier, ast.Call], parametersNumba: ParametersNumba = parametersNumbaDefault):
 		# get the raw ingredients: data and the algorithm
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(job.source_astModule, job.countCallable)
-
 	ImaPirate = ifThis.is_arg
 		# move the parameters from the function signature to the function body and assign their initial values
 	# argTarget: ast_Identifier = arg.arg
@@ -81,6 +80,11 @@ def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = paramete
 	# So we have to add new features to `shatter_dataclassesDOTdataclass`. It will create an ast.Call for each field/property
 	# of the dataclass that can be used to initialize the field/property in the function body using the actual value contained
 	# in job.state.
+
+	argTarget: ast_Identifier = 'dimensionsTotal'
+	# "__getitem__" method not defined on type "ComputationState"
+	zValue = job.state[argTarget]
+	zz[argTarget].args = [Make.astConstant(zValue)]
 
 	"""
 	Overview

@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue, astMosDef, Make, nameDOTname
+from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue, astMosDef, Make, nameDOTname, nodeType
 from typing import Any
 import ast
 """
@@ -34,6 +34,39 @@ class Then:
 	def appendTo(listOfAny: list[Any]) -> Callable[[ast.AST], None]:
 		return lambda node: listOfAny.append(node)
 	@staticmethod
+	def DOTarg(action: Callable[[ast.AST], ast.AST]) -> Callable[[ast.arg | ast.keyword], ast.arg | ast.keyword]:
+		def workhorse(node: ast.arg | ast.keyword) -> ast.arg | ast.keyword:
+			node.arg = action(node.arg) # type: ignore
+			return node
+		return workhorse
+	@staticmethod
+	def DOTfunc(action: Callable[[ast.AST], ast.AST]) -> Callable[[ast.Call], ast.Call]:
+		def workhorse(node: ast.Call) -> ast.Call:
+			node.func = action(node.func) # type: ignore
+			return node
+		return workhorse
+	@staticmethod
+	def DOTid(action: Callable[[ast.AST], ast.AST]) -> Callable[[ast.Name], ast.Name]:
+		def workhorse(node: ast.Name) -> ast.Name:
+			node.id = action(node.id) # type: ignore
+			return node
+		return workhorse
+	@staticmethod
+	def DOTtarget(action: Callable[[ast.AST], ast.AST]) -> Callable[[ast.AnnAssign | ast.AugAssign], ast.AnnAssign | ast.AugAssign]:
+		def workhorse(node: ast.AnnAssign | ast.AugAssign) -> ast.AnnAssign | ast.AugAssign:
+			node.target = action(node.target) # type: ignore
+			return node
+		return workhorse
+	@staticmethod
+	def DOTvalue(action: Callable[[nodeType], nodeType]) -> Callable[[astClassHasDOTvalue], astClassHasDOTvalue]:
+		def workhorse(node: astClassHasDOTvalue) -> astClassHasDOTvalue:
+			node.value = action(node.value) # type: ignore
+			return node
+		return workhorse
+	@staticmethod
+	def getIt(node: ast.AST):
+		return node
+	@staticmethod
 	def insertThisAbove(list_astAST: Sequence[ast.AST]) -> Callable[[ast.AST], Sequence[ast.AST]]:
 		return lambda aboveMe: [*list_astAST, aboveMe]
 	@staticmethod
@@ -43,30 +76,6 @@ class Then:
 	def removeThis(_node: ast.AST) -> None: return None
 	@staticmethod
 	def replaceWith(astAST: ast.AST) -> Callable[[ast.AST], ast.AST]: return lambda _replaceMe: astAST
-	@staticmethod
-	def replaceDOTargWith(identifier: ast_Identifier) -> Callable[[ast.arg | ast.keyword], ast.arg | ast.keyword]:
-		def workhorse(node: ast.arg | ast.keyword) -> ast.arg | ast.keyword:
-			node.arg = identifier
-			return node
-		return workhorse
-	@staticmethod
-	def replaceDOTfuncWith(ast_expr: ast.expr) -> Callable[[ast.Call], ast.Call]:
-		def workhorse(node: ast.Call) -> ast.Call:
-			node.func = ast_expr
-			return node
-		return workhorse
-	@staticmethod
-	def replaceDOTidWith(identifier: ast_Identifier) -> Callable[[ast.Name], ast.Name]:
-		def workhorse(node: ast.Name) -> ast.Name:
-			node.id = identifier
-			return node
-		return workhorse
-	@staticmethod
-	def replaceDOTvalueWith(ast_expr: ast.expr) -> Callable[[astClassHasDOTvalue], astClassHasDOTvalue]:
-		def workhorse(node: astClassHasDOTvalue) -> astClassHasDOTvalue:
-			node.value = ast_expr
-			return node
-		return workhorse
 	@staticmethod
 	def updateThis(dictionaryOf_astMosDef: dict[ast_Identifier, astMosDef]) -> Callable[[astMosDef], astMosDef]:
 		return lambda node: dictionaryOf_astMosDef.setdefault(node.name, node)
