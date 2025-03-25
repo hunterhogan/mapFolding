@@ -149,6 +149,6 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 
 	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageName)
 
+theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 if __name__ == '__main__':
-	theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 	makeNumbaFlow(theNumbaFlow)

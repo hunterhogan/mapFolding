@@ -13,13 +13,12 @@ consistent naming conventions and path resolution strategies to ensure that:
 The module serves as the interface between the computational components of the package
 and the filesystem, abstracting away the details of file operations and path management.
 """
+from mapFolding.theSSOT import The
+from os import PathLike
 from pathlib import Path, PurePath
 from sys import modules as sysModules
 from typing import Any
-from os import PathLike
 import os
-
-from mapFolding.theSSOT import The
 
 def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""
@@ -45,7 +44,7 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""
 	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
 
-def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal: str | PathLike[str] | None = None) -> Path:
+def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None) -> Path:
 	"""
 	Get a standardized path and filename for the computed foldsTotal value.
 
@@ -87,7 +86,12 @@ def getPathRootJobDEFAULT() -> Path:
 	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
 	return pathJobDEFAULT
 
-def saveFoldsTotal(pathFilename: str | PathLike[str], foldsTotal: int) -> None:
+def _saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> None:
+	pathFilenameFoldsTotal = Path(pathFilename)
+	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
+	pathFilenameFoldsTotal.write_text(str(foldsTotal))
+
+def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> None:
 	"""
 	Save `foldsTotal` value to disk with multiple fallback mechanisms.
 
@@ -106,9 +110,7 @@ def saveFoldsTotal(pathFilename: str | PathLike[str], foldsTotal: int) -> None:
 		3. As a last resort, simply print the value
 	"""
 	try:
-		pathFilenameFoldsTotal = Path(pathFilename)
-		pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
-		pathFilenameFoldsTotal.write_text(str(foldsTotal))
+		_saveFoldsTotal(pathFilename, foldsTotal)
 	except Exception as ERRORmessage:
 		try:
 			print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal=}\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
@@ -125,7 +127,20 @@ def saveFoldsTotal(pathFilename: str | PathLike[str], foldsTotal: int) -> None:
 			print(foldsTotal)
 	return None
 
-def writeStringToHere(this: str, pathFilename: str | PathLike[str] | PurePath) -> None:
+def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
+	if Path(pathFilename).exists():
+		raise FileExistsError(f"{pathFilename=} exists: a battle of overwriting might cause tears.")
+	if not Path(pathFilename).parent.exists():
+		raise FileNotFoundError(f"I received {pathFilename=} 0.000139 seconds ago from a function that promised it created the parent directory, but the parent directory does not exist. Fix that now, so your computation doesn't get deleted later. And be compassionate to others.")
+	foldsTotal = 149302889205120
+	_saveFoldsTotal(pathFilename, foldsTotal)
+	if not Path(pathFilename).exists():
+		raise FileNotFoundError(f"I just wrote a test file to {pathFilename=}, but it does not exist. Fix that now, so your computation doesn't get deleted later. And continually improve your empathy skills.")
+	foldsTotalRead = int(Path(pathFilename).read_text())
+	if foldsTotalRead != foldsTotal:
+		raise FileNotFoundError(f"I wrote a test file to {pathFilename=} with contents of {str(foldsTotal)=}, but I read {foldsTotalRead=} from the file. Python says the values are not equal. Fix that now, so your computation doesn't get corrupted later. And be pro-social.")
+
+def writeStringToHere(this: str, pathFilename: PathLike[str] | PurePath) -> None:
 	"""
 	Write a string to a file, creating parent directories if needed.
 

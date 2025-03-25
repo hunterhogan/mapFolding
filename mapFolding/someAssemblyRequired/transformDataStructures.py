@@ -26,7 +26,7 @@ from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	ifThis,
-	importPathFilename2Callable,
+	importLogicalPath2Callable,
 	Make,
 	nameDOTname,
 	NodeTourist,
@@ -163,10 +163,10 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 	return shatteredDataclass
 
 @overload
-def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[True], *,  pathFilename: str | PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> Path: ...
+def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[True], *,  pathFilename: PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> Path: ...
 @overload
 def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[False] = False, **keywordArguments: Any) -> ComputationState: ...
-def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: bool = False, *,  pathFilename: str | PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> ComputationState | Path:
+def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: bool = False, *,  pathFilename: PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> ComputationState | Path:
 	"""
 	Initializes a computation state and optionally saves it to disk.
 
@@ -185,7 +185,7 @@ def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: bool = 
 	"""
 	stateUniversal: ComputationState = outfitCountFolds(mapShape, **keywordArguments)
 
-	initializeState = importPathFilename2Callable(The.logicalPathModuleSourceAlgorithm, The.sourceCallableInitialize)
+	initializeState = importLogicalPath2Callable(The.logicalPathModuleSourceAlgorithm, The.sourceCallableInitialize)
 	stateUniversal = initializeState(stateUniversal)
 
 	if not writeJob:

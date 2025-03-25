@@ -14,13 +14,13 @@ implementation, and optional persistence of results.
 
 from collections.abc import Sequence
 from mapFolding.beDRY import outfitCountFolds, setCPUlimit, validateListDimensions
-from mapFolding.filesystem import getPathFilenameFoldsTotal, saveFoldsTotal
+from mapFolding.filesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from mapFolding.theSSOT import ComputationState, getPackageDispatcher, The
 from os import PathLike
-from pathlib import Path
+from pathlib import PurePath
 
 def countFolds(listDimensions: Sequence[int]
-				, pathLikeWriteFoldsTotal: str | PathLike[str] | None = None
+				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 				, computationDivisions: int | str | None = None
 				, CPUlimit: int | float | bool | None = None
 				) -> int:
@@ -57,14 +57,19 @@ def countFolds(listDimensions: Sequence[int]
 	concurrencyLimit: int = setCPUlimit(CPUlimit, The.concurrencyPackage)
 	computationStateInitialized: ComputationState = outfitCountFolds(mapShape, computationDivisions, concurrencyLimit)
 
+	if pathLikeWriteFoldsTotal is not None:
+		pathFilenameFoldsTotal = getPathFilenameFoldsTotal(computationStateInitialized.mapShape, pathLikeWriteFoldsTotal)
+		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
+	else:
+		pathFilenameFoldsTotal = None
+
 	dispatcherCallableProxy = getPackageDispatcher()
 	computationStateComplete: ComputationState = dispatcherCallableProxy(computationStateInitialized)
 	# computationStateComplete: ComputationState = The.dispatcher(computationStateInitialized)
 
 	computationStateComplete.getFoldsTotal()
 
-	if pathLikeWriteFoldsTotal is not None:
-		pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(computationStateComplete.mapShape, pathLikeWriteFoldsTotal)
+	if pathFilenameFoldsTotal is not None:
 		saveFoldsTotal(pathFilenameFoldsTotal, computationStateComplete.foldsTotal)
 
 	return computationStateComplete.foldsTotal

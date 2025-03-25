@@ -80,24 +80,25 @@ class PackageSettings:
 
 	@property # These are not fields, and that annoys me.
 	def dataclassInstanceTaskDistribution(self) -> str:
-		""" Compute the task distribution identifier by concatenating dataclassInstance and dataclassInstanceTaskDistributionSuffix. """
+		""" During parallel computation, this identifier helps to create deep copies of the dataclass instance. """
 		# it follows that `metadata={'evaluateWhen': 'packaging'}`
 		return self.dataclassInstance + self.dataclassInstanceTaskDistributionSuffix
 
 	@property # These are not fields, and that annoys me.
-	def logicalPathModuleSourceAlgorithm(self) -> str:
-		""" Compute the logical path module for the source algorithm by joining packageName and sourceAlgorithm. """
-		# it follows that `metadata={'evaluateWhen': 'packaging'}`
-		return '.'.join([self.packageName, self.sourceAlgorithm])
-
-	@property # These are not fields, and that annoys me.
 	def logicalPathModuleDataclass(self) -> str:
-		""" Compute the logical path module for the dataclass by joining packageName and dataclassModule. """
+		""" The package.module.name logical path to the dataclass. """
 		# it follows that `metadata={'evaluateWhen': 'packaging'}`
 		return '.'.join([self.packageName, self.dataclassModule])
 
 	@property # These are not fields, and that annoys me.
+	def logicalPathModuleSourceAlgorithm(self) -> str:
+		""" The package.module.name logical path to the source algorithm. """
+		# it follows that `metadata={'evaluateWhen': 'packaging'}`
+		return '.'.join([self.packageName, self.sourceAlgorithm])
+
+	@property # These are not fields, and that annoys me.
 	def dispatcher(self) -> Callable[['ComputationState'], 'ComputationState']:
+		""" _The_ callable that connects `countFolds` to the logic that does the work."""
 		logicalPath: str = self.logicalPathModuleDispatcher or self.logicalPathModuleSourceAlgorithm
 		identifier: str = self.callableDispatcher or self.sourceCallableDispatcher
 		moduleImported: ModuleType = importlib_import_module(logicalPath)

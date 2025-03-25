@@ -49,7 +49,7 @@ namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.ab
 Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
 """
 
-def write_astModule(ingredients: IngredientsModule, pathFilename: str | PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
+def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
 	astModule = Make.astModule(ingredients.body, ingredients.type_ignores)
 	ast.fix_missing_locations(astModule)
 	pythonSource: str = ast.unparse(astModule)

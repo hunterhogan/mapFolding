@@ -1,6 +1,7 @@
 from collections.abc import Callable, Generator, Sequence
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
+from mapFolding.someAssemblyRequired import importLogicalPath2Callable
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import makeNumbaFlow
 from mapFolding.someAssemblyRequired.Z0Z_containers import RecipeSynthesizeFlow
 from mapFolding.theSSOT import ComputationState, The, getPackageDispatcher
@@ -17,8 +18,9 @@ import unittest.mock
 import uuid
 
 # SSOT for test data paths and filenames
-pathDataSamples = Path("tests/dataSamples")
+pathDataSamples = Path("tests/dataSamples").absolute()
 pathTmpRoot: Path = pathDataSamples / "tmp"
+pathTmpRoot.mkdir(parents=True, exist_ok=True)
 
 # The registrar maintains the register of temp files
 registerOfTemporaryFilesystemObjects: set[Path] = set()

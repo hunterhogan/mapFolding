@@ -1,8 +1,8 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
-from mapFolding.someAssemblyRequired import ast_Identifier, nameDOTname, parsePathFilename2astModule
+from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, nameDOTname, NodeChanger, parsePathFilename2astModule, Then
 from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDefault
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import theNumbaFlow
-from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState
+from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState, shatter_dataclassesDOTdataclass
 from mapFolding.someAssemblyRequired.Z0Z_containers import astModuleToIngredientsFunction, IngredientsFunction
 from mapFolding.theSSOT import ComputationState
 from pathlib import Path, PurePosixPath
@@ -72,7 +72,16 @@ class Z0Z_RecipeJob:
 def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = parametersNumbaDefault):
 		# get the raw ingredients: data and the algorithm
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(job.source_astModule, job.countCallable)
-	ingredientsCount.astFunctionDef.args.args
+
+	ImaPirate = ifThis.is_arg
+		# move the parameters from the function signature to the function body and assign their initial values
+	# argTarget: ast_Identifier = arg.arg
+	# Make.Name(arg.arg): annotation if present = job.state.argTarget : the value
+	# Because they are not being passed as parameters anymore, they need to be initialized in the function body
+	# So we have to add new features to `shatter_dataclassesDOTdataclass`. It will create an ast.Call for each field/property
+	# of the dataclass that can be used to initialize the field/property in the function body using the actual value contained
+	# in job.state.
+
 	"""
 	Overview
 	- the code starts life in theDao.py, which has many optimizations;
@@ -95,7 +104,6 @@ def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = paramete
 	"""
 
 	# Steps from `synthesizeNumbaJobVESTIGIAL`:
-		# move the parameters from the function signature to the function body and assign their initial values
 		# replace identifiers with static values with their values
 		# print/save the total
 		# launcher
@@ -106,5 +114,6 @@ def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = paramete
 
 if __name__ == '__main__':
 	mapShape = (2,4)
-	aJob = Z0Z_RecipeJob(makeInitializedComputationState(mapShape))
+	state = makeInitializedComputationState(mapShape)
+	aJob = Z0Z_RecipeJob(state)
 	makeJobNumba(aJob)
