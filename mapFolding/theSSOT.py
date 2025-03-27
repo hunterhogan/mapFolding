@@ -25,6 +25,7 @@ from tomli import load as tomli_load
 from types import ModuleType
 from typing import TypeAlias
 import dataclasses
+import numpy
 
 # =============================================================================
 # The Wrong Way: Evaluate When Packaging
@@ -140,16 +141,16 @@ class ComputationState:
 	taskDivisions: DatatypeLeavesTotal
 	concurrencyLimit: DatatypeElephino
 
-	connectionGraph: Array3D = dataclasses.field(init=False)
+	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'dtype': Array3D.__args__[1].__args__[0]}) # pyright: ignore[reportAttributeAccessIssue]
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 
-	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
+	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
 	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
-	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
-	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
-	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
-	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
-	foldGroups: Array1DFoldsTotal = dataclasses.field(default=None, init=True) # type: ignore[arg-type, reportAssignmentType]
+	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
+	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
+	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
+	foldGroups: Array1DFoldsTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DFoldsTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
 
 	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
 	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
@@ -165,27 +166,22 @@ class ComputationState:
 	def __post_init__(self) -> None:
 		from mapFolding.beDRY import makeConnectionGraph, makeDataContainer
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
-		self.connectionGraph = makeConnectionGraph(self.mapShape, self.leavesTotal, NumPyLeavesTotal)
+		leavesTotalAsInt = int(self.leavesTotal)
+		self.connectionGraph = makeConnectionGraph(self.mapShape, leavesTotalAsInt, Array3D.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
 
 		if self.dimensionsUnconstrained is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
 
 		if self.foldGroups is None:
-			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), NumPyFoldsTotal)
+			actual_dtype = self.__dataclass_fields__['foldGroups'].metadata.get('dtype', None)
+			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), actual_dtype) # pyright: ignore[reportAttributeAccessIssue]
 			self.foldGroups[-1] = self.leavesTotal
 
-		leavesTotalAsInt = int(self.leavesTotal)
-
-		if self.countDimensionsGapped is None:
-			self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, NumPyLeavesTotal)
-		if self.gapRangeStart is None:
-			self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, NumPyElephino)
-		if self.gapsWhere is None:
-			self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, NumPyLeavesTotal)
-		if self.leafAbove is None:
-			self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, NumPyLeavesTotal)
-		if self.leafBelow is None:
-			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, NumPyLeavesTotal)
+		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, Array1DLeavesTotal.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
+		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, Array1DElephino.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
+		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, Array1DLeavesTotal.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
+		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, Array1DLeavesTotal.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
+		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, Array1DLeavesTotal.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
 
 	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)

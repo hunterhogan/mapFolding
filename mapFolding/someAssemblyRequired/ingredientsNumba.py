@@ -72,7 +72,8 @@ parametersNumbaFailEarly: Final[ParametersNumba] = {
 		'no_cfunc_wrapper': False,
 		'no_cpython_wrapper': False,
 		'nopython': True,
-		'parallel': False, }
+		'parallel': False,
+}
 """For a production function: speed is irrelevant, error discovery is paramount, must be compatible with anything downstream."""
 
 parametersNumbaDefault: Final[ParametersNumba] = {
@@ -126,15 +127,6 @@ parametersNumbaMinimum: Final[ParametersNumba] = {
 Z0Z_numbaDataTypeModule = 'numba'
 Z0Z_decoratorCallable = 'jit'
 
-def thisIsNumbaDotJit(Ima: ast.AST) -> bool:
-	return ifThis.isCallNamespace_Identifier(Z0Z_numbaDataTypeModule, Z0Z_decoratorCallable)(Ima)
-
-def thisIsJit(Ima: ast.AST) -> bool:
-	return ifThis.isCall_Identifier(Z0Z_decoratorCallable)(Ima)
-
-def thisIsAnyNumbaJitDecorator(Ima: ast.AST) -> bool:
-	return thisIsNumbaDotJit(Ima) or thisIsJit(Ima)
-
 def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:
 	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
 		# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
@@ -180,9 +172,9 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		# Efficient translation of Python scalar types to Numba types https://github.com/hunterhogan/mapFolding/issues/8
 		# For now, let Numba infer them.
 		continue
-		signatureElement: ast.Subscript | ast.Name | None = makeSpecialSignatureForNumba(parameter)
-		if signatureElement:
-			list_arg4signature_or_function.append(signatureElement)
+		# signatureElement: ast.Subscript | ast.Name | None = makeSpecialSignatureForNumba(parameter)
+		# if signatureElement:
+		# 	list_arg4signature_or_function.append(signatureElement)
 
 	if ingredientsFunction.astFunctionDef.returns and isinstance(ingredientsFunction.astFunctionDef.returns, ast.Name):
 		theReturn: ast.Name = ingredientsFunction.astFunctionDef.returns
@@ -201,7 +193,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.imports.addImportFromAsStr(decoratorModule, decoratorCallable)
 	# Leave this line in so that global edits will change it.
 	astDecorator: ast.Call = Make.astCall(Make.astName(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
-	astDecorator: ast.Call = Make.astCall(Make.astName(decoratorCallable), list_astKeywords=listDecoratorKeywords) # type: ignore[no-redef]
+	astDecorator: ast.Call = Make.astCall(Make.astName(decoratorCallable), list_astKeywords=listDecoratorKeywords)
 
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction

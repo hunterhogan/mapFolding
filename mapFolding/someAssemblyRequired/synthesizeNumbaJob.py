@@ -1,10 +1,10 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
-from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, Make, nameDOTname, NodeChanger, parsePathFilename2astModule, Then
+from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, Make, nameDOTname, NodeChanger, parsePathFilename2astModule, Then, 又
 from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDefault
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import theNumbaFlow
 from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState, shatter_dataclassesDOTdataclass, ShatteredDataclass
 from mapFolding.someAssemblyRequired.Z0Z_containers import astModuleToIngredientsFunction, IngredientsFunction
-from mapFolding.theSSOT import ComputationState, DatatypeLeavesTotal
+from mapFolding.theSSOT import ComputationState, DatatypeLeavesTotal, The
 from pathlib import Path, PurePosixPath
 import ast
 import dataclasses
@@ -69,20 +69,42 @@ class Z0Z_RecipeJob:
 		filename: str = filenameStem + fileExtension
 		return pathRoot.joinpath(filename)
 
+def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount: IngredientsFunction, job: Z0Z_RecipeJob) -> IngredientsFunction:
+	instance_Identifier = theNumbaFlow.dataclassInstance
+	shatteredDataclass = shatter_dataclassesDOTdataclass(theNumbaFlow.logicalPathModuleDataclass, theNumbaFlow.sourceDataclassIdentifier, instance_Identifier)
+	ingredientsCount.imports.update(shatteredDataclass.ledger)
+
+
+	# findThis = (ifThis.is_arg and lambda arg: (argTarget := arg.arg) in shatteredDataclass.field2astCall)
+	findThis = 又.isAllOf(ifThis.is_arg, lambda node: ifThis.ast_IdentifierIn(shatteredDataclass.field2astCall)(node.arg)) # type: ignore
+
+	"""
+	`ast.arg` is a class. While `ast.arg` and `ast.keyword` both have an attribute `arg`.
+		`ast.arg` is always found here:
+			class arguments(
+				posonlyargs: list[arg]
+				args: list[arg]
+				kwonlyargs: list[arg]
+				# Yo, Python devs! This is super fucking annoying that these objects are the same class but function differently.
+				vararg: arg # This is a "pseudo"-arg: the substance will be in `posonlyargs` or `args`
+				kwarg: arg # Also a "pseudo"-arg: the substance will be in `kwonlyargs`
+			)
+			`ast.arguments` is found in `ast.FunctionDef`, `ast.AsyncFunctionDef`, and `ast.Lambda`
+			BUT, the dickheads don't call it "arguments", they fucking call it "args"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	argTarget: ast_Identifier = arg.arg
+	Make.Name(arg.arg): annotation if present = job.state.argTarget : the value
+	dictionary
+	The value of `1` will be added later
+	"""
+
+	return ingredientsCount
+
 def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = parametersNumbaDefault):
 		# get the raw ingredients: data and the algorithm
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(job.source_astModule, job.countCallable)
-	ImaPirate = ifThis.is_arg
-		# move the parameters from the function signature to the function body and assign their initial values
-	# argTarget: ast_Identifier = arg.arg
-	# Make.Name(arg.arg): annotation if present = job.state.argTarget : the value
-	# Because they are not being passed as parameters anymore, they need to be initialized in the function body
-	# So we have to add new features to `shatter_dataclassesDOTdataclass`. It will create an ast.Call for each field/property
-	# of the dataclass that can be used to initialize the field/property in the function body using the actual value contained
-	# in job.state.
 
-
-	# zz[argTarget].args = [Make.astConstant(zValue)]
+	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
 	"""
 	Overview

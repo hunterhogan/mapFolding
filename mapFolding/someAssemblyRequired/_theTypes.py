@@ -27,10 +27,12 @@ stuPyd: typing_TypeAlias = str
 if TYPE_CHECKING:
     astClassHasDOTnameNotName: typing_TypeAlias = ast.alias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple
     astClassHasDOTnameNotNameOptional: typing_TypeAlias = astClassHasDOTnameNotName | ast.ExceptHandler | ast.MatchAs | ast.MatchStar
-    astClassHasDOTvalue: typing_TypeAlias = ast.AnnAssign | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Return | ast.Starred | ast.Subscript | ast.TypeAlias | ast.Yield | ast.YieldFrom
+    astClassHasDOTtarget: typing_TypeAlias = ast.AnnAssign | ast.AsyncFor | ast.AugAssign | ast.comprehension | ast.For | ast.NamedExpr
+    astClassHasDOTvalue: typing_TypeAlias = ast.AnnAssign | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.Constant | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Return | ast.Starred | ast.Subscript | ast.TypeAlias | ast.Yield | ast.YieldFrom
 else:
     astClassHasDOTnameNotName = stuPyd
     astClassHasDOTnameNotNameOptional = stuPyd
+    astClassHasDOTtarget = stuPyd
     astClassHasDOTvalue = stuPyd
 
 ast_expr_Slice: typing_TypeAlias = ast.expr

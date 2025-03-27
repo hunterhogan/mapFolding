@@ -42,6 +42,7 @@ from typing import Any, Literal, overload
 import ast
 import dataclasses
 import pickle
+import numpy
 
 # Create dummy AST elements for use as defaults
 dummyAssign = Make.astAssign([Make.astName("dummyTarget")], Make.astConstant(None))
@@ -58,7 +59,7 @@ class ShatteredDataclass:
 	"""AST name node representing the counting variable identifier."""
 	mapField_name2Identifier: dict[ast.expr, ast.Name] = dataclasses.field(default_factory=dict)
 	"""Maps AST expressions to Name nodes for find-replace operations."""
-	field2astCall: dict[ast_Identifier, ast.Call] = dataclasses.field(default_factory=dict)
+	field2astCall: dict[ast_Identifier, ast.Call | ast.Subscript] = dataclasses.field(default_factory=dict)
 	"""Maps field names to their corresponding AST call expressions."""
 	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
 	"""AST tuple used as target for assignment to capture returned fragments."""
@@ -112,6 +113,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(shatteredDataclass.list_keyword_field__field)
 	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction) # type: ignore
 
+	annotationSherpa: dict[ast_Identifier, ast.Name | ast.Subscript] = {}
+
 	NodeTourist(
 		ifThis.isAnnAssignAndTargetIsName
 		, Then.allOf([
@@ -120,6 +123,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 			, lambda node: addToLedger.visit(node)
 			, filteredAppendKeywordAction
 			, lambda node: shatteredDataclass.list_argAnnotated4ArgumentsSpecification.append(Make.ast_arg(node.target.id, node.annotation)) # type: ignore
+			, lambda node: annotationSherpa.update({node.target.id: node.annotation}) # type: ignore
 			, lambda node: shatteredDataclass.listAnnotations.append(node.annotation) # type: ignore
 		])).visit(dataclassClassDef)
 
@@ -129,24 +133,29 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 	shatteredDataclass.countingVariableAnnotation = next(ast_arg.annotation for ast_arg in shatteredDataclass.list_argAnnotated4ArgumentsSpecification if ast_arg.arg == countingVariable) or Make.astName('Any')
 	shatteredDataclass.mapField_name2Identifier = {statement.value: statement.target for statement in shatteredDataclass.listUnpack} # type: ignore
 
-	"""
-	dictionary
-	'fieldName' : ast.Call   # but no parameters, those will be added later
-	dimensionsUnconstrained=uint8(1)
-	'dimensionsUnconstrained' : Make.astCall(Make.astName('uint8'))  # The value of `1` will be added later
-	gap1ndex=uint8(1)
-	gap1ndexCeiling=uint8(2)
-	groupsOfFolds=int64(0)
-	indexDimension=uint8(2)
-	indexMiniGap=uint8(2)
-	leaf1ndex=uint8(3)
-	leafConnectee=uint8(2)
-	For scalar (non-array) fields, the astName for the astCall is the annotation of the field.
-	# fyi: ComputationState.__dataclass_fields__[ast_Identifier].metadata
-	"""
 	for aField in dataclasses.fields(ImaDataclassObject):
-		if isinstance(aField.type, int):
-			pass
+		dtype = aField.metadata.get('dtype', None)
+		if dtype:
+			constructor = 'array'
+			shatteredDataclass.field2astCall[aField.name] = Make.astCall(Make.astName(constructor), list_astKeywords=[Make.ast_keyword('dtype', Make.astName(dtype.__name__))])
+			shatteredDataclass.ledger.addImportFromAsStr('numpy', constructor)
+			shatteredDataclass.ledger.addImportFromAsStr('numpy', dtype.__name__)
+		elif ifThis.isName(annotationSherpa[aField.name]):
+			shatteredDataclass.field2astCall[aField.name] = Make.astCall(annotationSherpa[aField.name]) # type: ignore
+		elif ifThis.isSubscript(annotationSherpa[aField.name]):
+			shatteredDataclass.field2astCall[aField.name] = annotationSherpa[aField.name] # type: ignore
+			"""
+			constructor = NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.getIt).captureFirstMatch(module)
+			print(ast.dump(annotationSherpa[aField.name], indent=1))
+Subscript(
+ value=Name(id='tuple', ctx=Load()),
+ slice=Tuple(
+  elts=[
+   Name(id='DatatypeLeavesTotal', ctx=Load()),
+   Constant(value=Ellipsis)],
+  ctx=Load()),
+ ctx=Load())
+			"""
 
 	shatteredDataclass.ledger.addImportFromAsStr(logicalPathModule, dataclass_Identifier)
 	return shatteredDataclass

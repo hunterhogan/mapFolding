@@ -29,6 +29,7 @@ from mapFolding.someAssemblyRequired._theTypes import (
 	ast_Identifier as ast_Identifier,
 	astClassHasDOTnameNotName as astClassHasDOTnameNotName,
 	astClassHasDOTnameNotNameOptional as astClassHasDOTnameNotNameOptional,
+	astClassHasDOTtarget as astClassHasDOTtarget,
 	astClassHasDOTvalue as astClassHasDOTvalue,
 	astMosDef as astMosDef,
 	intORlist_ast_type_paramORstr_orNone as intORlist_ast_type_paramORstr_orNone,
@@ -47,7 +48,7 @@ from mapFolding.someAssemblyRequired._toolboxPython import (
 	parsePathFilename2astModule as parsePathFilename2astModule,
 	)
 
-from mapFolding.someAssemblyRequired._tool_ifThis import ifThis as ifThis
+from mapFolding.someAssemblyRequired._tool_ifThis import ifThis as ifThis, 又 as 又
 from mapFolding.someAssemblyRequired._tool_Make import Make as Make
 from mapFolding.someAssemblyRequired._tool_Then import Then as Then
 
