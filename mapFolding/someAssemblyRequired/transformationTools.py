@@ -91,9 +91,9 @@ def Z0Z_makeDictionaryReplacementStatements(module: ast.AST) -> dict[ast_Identif
 	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}
 	for name, astFunctionDef in dictionaryFunctionDef.items():
 		if ifThis.onlyReturnAnyCompare(astFunctionDef):
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value
 		elif ifThis.onlyReturnUnaryOp(astFunctionDef):
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value
 		else:
 			dictionaryReplacementStatements[name] = astFunctionDef.body[0:-1]
 	return dictionaryReplacementStatements
@@ -131,17 +131,17 @@ def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dicti
 
 		def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.stmt]:
 			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore[attr-defined]
+				return self.dictionaryReplacementStatements[node.value.func.id][attr-defined]
 			return node
 
 		def visit_Assign(self, node: ast.Assign) -> ast.AST | list[ast.stmt]:
 			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore[attr-defined]
+				return self.dictionaryReplacementStatements[node.value.func.id][attr-defined]
 			return node
 
 		def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
 			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
-				replacement = self.dictionaryReplacementStatements[node.func.id] # type: ignore[attr-defined]
+				replacement = self.dictionaryReplacementStatements[node.func.id][attr-defined]
 				if not isinstance(replacement, list):
 					return replacement
 			return node

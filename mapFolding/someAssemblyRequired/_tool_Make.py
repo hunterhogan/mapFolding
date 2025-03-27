@@ -109,7 +109,7 @@ class Make:
 		# The type checkers get upset about this logic.
 		nameDOTname = Make.astName(identifier, context, **keywordArguments)
 		for suffix in dotName:
-			nameDOTname = Make._itDOTname(nameDOTname, suffix, context, **keywordArguments) # type: ignore
+			nameDOTname = Make._itDOTname(nameDOTname, suffix, context, **keywordArguments) 
 		# This statement doesn't address all of the type checker complaints and it is absurd.
 		# This statement tells the type checkers, "Hey, fuckers! I am so sure that this fucking identifier is exactly what I said it is, that I am willing to risk an execution halt just to prove it!"
 		# Why the fuck must I engage in brinkmanship with a type checker? Is mypy the tool or am I the tool?

@@ -85,9 +85,9 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 		(numbaFlow.sourceConcurrencyManagerNamespace, numbaFlow.concurrencyManagerNamespace),]
 	for ingredients in listAllIngredientsFunctions:
 		for source_Identifier, recipe_Identifier in listFindReplace:
-			updateName = NodeChanger(ifThis.isName_Identifier(source_Identifier), Then.DOTid(Then.replaceWith(recipe_Identifier))) # type: ignore
+			updateName = NodeChanger(ifThis.isName_Identifier(source_Identifier), Then.DOTid(Then.replaceWith(recipe_Identifier))) 
 			# updateName = NodeChanger(ifThis.isName_Identifier(source_Identifier), Then.replaceDOTidWith(recipe_Identifier))
-			update_arg = NodeChanger(ifThis.isArgument_Identifier(source_Identifier), Then.DOTarg(Then.replaceWith(recipe_Identifier))) # type: ignore
+			update_arg = NodeChanger(ifThis.isArgument_Identifier(source_Identifier), Then.DOTarg(Then.replaceWith(recipe_Identifier))) 
 			updateName.visit(ingredients.astFunctionDef)
 			update_arg.visit(ingredients.astFunctionDef)
 
@@ -119,7 +119,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	unpack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
 	repack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
 
-	ingredientsSequential.astFunctionDef = Z0Z_lameFindReplace(ingredientsSequential.astFunctionDef, shatteredDataclass.mapField_name2Identifier) # type: ignore
+	ingredientsSequential.astFunctionDef = Z0Z_lameFindReplace(ingredientsSequential.astFunctionDef, shatteredDataclass.mapField_name2Identifier) 
 
 	# parallelCallable =========================================================
 	ingredientsParallel.astFunctionDef.args = Make.astArgumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
@@ -140,7 +140,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
 	changeReturnParallelCallable.visit(ingredientsParallel.astFunctionDef)
 
-	ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.mapField_name2Identifier) # type: ignore
+	ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.mapField_name2Identifier) 
 
 	# numba decorators =========================================
 	ingredientsParallel = decorateCallableWithNumba(ingredientsParallel)
