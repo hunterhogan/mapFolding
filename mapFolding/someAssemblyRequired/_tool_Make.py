@@ -2,20 +2,6 @@ from collections.abc import Sequence
 from mapFolding.someAssemblyRequired import ast_expr_Slice, ast_Identifier, intORlist_ast_type_paramORstr_orNone, intORstr_orNone, list_ast_type_paramORstr_orNone
 from typing import Any
 import ast
-"""
-Semiotic notes:
-In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
-
-astName: always means `ast.Name`.
-Name: uppercase, _should_ be interchangeable with astName, even in camelCase.
-Hunter: ^^ did you do that ^^ ? Are you sure? You just fixed some "Name" identifiers that should have been "_name" because the wrong case confused you.
-name: lowercase, never means `ast.Name`. In camelCase, I _should_ avoid using it in such a way that it could be confused with "Name", uppercase.
-_Identifier: very strongly correlates with the private `ast._Identifier`, which is a `TypeAlias` for `str`.
-identifier: lowercase, a general term that includes the above and other Python identifiers.
-Identifier: uppercase, without the leading underscore should only appear in camelCase and means "identifier", lowercase.
-namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.abc`, "namespace" is the part before the dot.
-Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
-"""
 
 class Make:
 	"""
@@ -29,6 +15,7 @@ class Make:
 		lineno: int Position information manually specifying the line number where an AST node begins.
 		kind (None): str|None Used for type annotations in limited cases.
 		type_comment (None): str|None Captures inline type comments from source code, such as `# type: ignore`.
+		"type_comment is an optional string with the type annotation as a comment."
 		type_params: list[ast.type_param] Type parameters for generic type definitions.
 
 	Notes:
@@ -109,7 +96,7 @@ class Make:
 		# The type checkers get upset about this logic.
 		nameDOTname = Make.astName(identifier, context, **keywordArguments)
 		for suffix in dotName:
-			nameDOTname = Make._itDOTname(nameDOTname, suffix, context, **keywordArguments) 
+			nameDOTname = Make._itDOTname(nameDOTname, suffix, context, **keywordArguments)
 		# This statement doesn't address all of the type checker complaints and it is absurd.
 		# This statement tells the type checkers, "Hey, fuckers! I am so sure that this fucking identifier is exactly what I said it is, that I am willing to risk an execution halt just to prove it!"
 		# Why the fuck must I engage in brinkmanship with a type checker? Is mypy the tool or am I the tool?

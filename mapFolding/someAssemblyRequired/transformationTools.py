@@ -26,28 +26,13 @@ from autoflake import fix_code as autoflake_fix_code
 from collections.abc import Callable
 from copy import deepcopy
 from mapFolding.filesystem import writeStringToHere
-from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, Make, NodeChanger, NodeTourist, Then
+from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, NodeChanger, NodeTourist, Then
 from mapFolding.someAssemblyRequired.Z0Z_containers import IngredientsModule
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
 from os import PathLike
 from pathlib import PurePath
 from typing import Any
 import ast
-
-"""
-Semiotic notes:
-In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
-
-astName: always means `ast.Name`.
-Name: uppercase, _should_ be interchangeable with astName, even in camelCase.
-Hunter: ^^ did you do that ^^ ? Are you sure? You just fixed some "Name" identifiers that should have been "_name" because the wrong case confused you.
-name: lowercase, never means `ast.Name`. In camelCase, I _should_ avoid using it in such a way that it could be confused with "Name", uppercase.
-_Identifier: very strongly correlates with the private `ast._Identifier`, which is a `TypeAlias` for `str`.
-identifier: lowercase, a general term that includes the above and other Python identifiers.
-Identifier: uppercase, without the leading underscore should only appear in camelCase and means "identifier", lowercase.
-namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.abc`, "namespace" is the part before the dot.
-Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
-"""
 
 def extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef | None:
 	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.getIt).captureFirstMatch(module)
@@ -70,7 +55,7 @@ def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] 
 
 def makeDictionaryFunctionDef(module: ast.AST) -> dict[ast_Identifier, ast.FunctionDef]:
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
-	NodeTourist(ifThis.isFunctionDef, Then.updateThis(dictionaryFunctionDef)).visit(module)
+	NodeTourist(be.FunctionDef, Then.updateThis(dictionaryFunctionDef)).visit(module)
 	return dictionaryFunctionDef
 
 dictionaryEstimates: dict[tuple[int, ...], int] = {
@@ -82,26 +67,25 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 }
 
 # END of marginal classes and functions ======================================================
+def Z0Z_lameFindReplace(astTree: ast.AST, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> ast.AST:
+	keepGoing = True
+	newTree = deepcopy(astTree)
+
+	while keepGoing:
+		for nodeFind, nodeReplace in mappingFindReplaceNodes.items():
+			NodeChanger(ifThis.Z0Z_unparseIs(nodeFind), Then.replaceWith(nodeReplace)).visit(newTree)
+
+		if ast.unparse(newTree) == ast.unparse(astTree):
+			keepGoing = False
+		else:
+			astTree = deepcopy(newTree)
+	return newTree
 
 # Start of I HATE PROGRAMMING ==========================================================
-
-def Z0Z_makeDictionaryReplacementStatements(module: ast.AST) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
-	"""Return a dictionary of function names and their replacement statements."""
-	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
-	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}
-	for name, astFunctionDef in dictionaryFunctionDef.items():
-		if ifThis.onlyReturnAnyCompare(astFunctionDef):
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value
-		elif ifThis.onlyReturnUnaryOp(astFunctionDef):
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value
-		else:
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0:-1]
-	return dictionaryReplacementStatements
-
+# Similar functionality to call does not call itself, but it is used for something else. I hate this function, too.
 def Z0Z_descendantContainsMatchingNode(node: ast.AST, predicateFunction: Callable[[ast.AST], bool]) -> bool:
 	"""Return True if any descendant of the node (or the node itself) matches the predicateFunction."""
 	matchFound = False
-
 	class DescendantFinder(ast.NodeVisitor):
 		def generic_visit(self, node: ast.AST) -> None:
 			nonlocal matchFound
@@ -109,7 +93,6 @@ def Z0Z_descendantContainsMatchingNode(node: ast.AST, predicateFunction: Callabl
 				matchFound = True
 			else:
 				super().generic_visit(node)
-
 	DescendantFinder().visit(node)
 	return matchFound
 
@@ -119,6 +102,20 @@ def Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.A
 		if not Z0Z_descendantContainsMatchingNode(node, exclusionPredicate):
 			actionFunction(node)
 	return wrappedAction
+
+# Inlining functions ==========================================================
+def Z0Z_makeDictionaryReplacementStatements(module: ast.AST) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
+	"""Return a dictionary of function names and their replacement statements."""
+	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
+	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}
+	for name, astFunctionDef in dictionaryFunctionDef.items():
+		if ifThis.onlyReturnAnyCompare(astFunctionDef):
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
+		elif ifThis.onlyReturnUnaryOp(astFunctionDef):
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
+		else:
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0:-1]
+	return dictionaryReplacementStatements
 
 def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> ast.FunctionDef:
 	class FunctionInliner(ast.NodeTransformer):
@@ -131,17 +128,17 @@ def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dicti
 
 		def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.stmt]:
 			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id][attr-defined]
+				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore
 			return node
 
 		def visit_Assign(self, node: ast.Assign) -> ast.AST | list[ast.stmt]:
 			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id][attr-defined]
+				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore
 			return node
 
 		def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
 			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
-				replacement = self.dictionaryReplacementStatements[node.func.id][attr-defined]
+				replacement = self.dictionaryReplacementStatements[node.func.id]  # type: ignore
 				if not isinstance(replacement, list):
 					return replacement
 			return node
@@ -157,17 +154,3 @@ def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dicti
 			astFunctionDef = deepcopy(ImaInlineFunction)
 			ast.fix_missing_locations(astFunctionDef)
 	return ImaInlineFunction
-
-def Z0Z_lameFindReplace(astTree: ast.AST, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> ast.AST:
-	keepGoing = True
-	newTree = deepcopy(astTree)
-
-	while keepGoing:
-		for nodeFind, nodeReplace in mappingFindReplaceNodes.items():
-			NodeChanger(ifThis.Z0Z_unparseIs(nodeFind), Then.replaceWith(nodeReplace)).visit(newTree)
-
-		if ast.unparse(newTree) == ast.unparse(astTree):
-			keepGoing = False
-		else:
-			astTree = deepcopy(newTree)
-	return newTree

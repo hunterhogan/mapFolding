@@ -9,24 +9,11 @@ from collections import defaultdict
 from collections.abc import Sequence
 from mapFolding.someAssemblyRequired import ast_Identifier, nameDOTname, parseLogicalPath2astModule
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3, The
+from mapFolding.theSSOT import logicalPathModuleDispatcherHARDCODED, callableDispatcherHARDCODED, concurrencyPackageHARDCODED
 from pathlib import Path, PurePosixPath
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import dataclasses
-"""
-Semiotic notes:
-In the `ast` package, some things that look and feel like a "name" are not `ast.Name` type. The following semiotics are a balance between technical precision and practical usage.
-
-astName: always means `ast.Name`.
-Name: uppercase, _should_ be interchangeable with astName, even in camelCase.
-Hunter: ^^ did you do that ^^ ? Are you sure? You just fixed some "Name" identifiers that should have been "_name" because the wrong case confused you.
-name: lowercase, never means `ast.Name`. In camelCase, I _should_ avoid using it in such a way that it could be confused with "Name", uppercase.
-_Identifier: very strongly correlates with the private `ast._Identifier`, which is a `TypeAlias` for `str`.
-identifier: lowercase, a general term that includes the above and other Python identifiers.
-Identifier: uppercase, without the leading underscore should only appear in camelCase and means "identifier", lowercase.
-namespace: lowercase, in dotted-names, such as `pathlib.Path` or `collections.abc`, "namespace" is the part before the dot.
-Namespace: uppercase, should only appear in camelCase and means "namespace", lowercase.
-"""
 
 class LedgerOfImports:
 	# TODO When resolving the ledger of imports, remove self-referential imports
@@ -232,6 +219,16 @@ theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.mo
 	@property
 	def pathFilenameSequential(self) -> PurePosixPath:
 		return self._makePathFilename(filenameStem=self.moduleSequential, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
+
+	def __post_init__(self) -> None:
+		if ((self.concurrencyManagerIdentifier is not None and self.concurrencyManagerIdentifier != self.sourceConcurrencyManagerIdentifier) # `submit` # type: ignore
+			or ((self.concurrencyManagerIdentifier is None) != (self.concurrencyManagerNamespace is None))): # type: ignore
+			import warnings
+			warnings.warn(f"If your synthesized module is weird, check `{self.concurrencyManagerIdentifier=}` and `{self.concurrencyManagerNamespace=}`. (ChildProcessError? 'Yeah! Children shouldn't be processing stuff, man.')", category=ChildProcessError, stacklevel=2) # pyright: ignore[reportCallIssue, reportArgumentType] Y'all Pynatics need to be less shrill and focus on making code that doesn't need 8000 error categories.
+
+		# self.logicalPathModuleDispatcher!=logicalPathModuleDispatcherHARDCODED or
+		if self.callableDispatcher!=callableDispatcherHARDCODED:
+			print(f"fyi: `{self.callableDispatcher=}` but\n\t`{callableDispatcherHARDCODED=}`.")
 
 def astModuleToIngredientsFunction(astModule: ast.AST, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
 	from mapFolding.someAssemblyRequired import extractFunctionDef

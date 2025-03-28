@@ -25,6 +25,7 @@ from mapFolding.beDRY import outfitCountFolds
 from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
+	be,
 	extractClassDef,
 	ifThis,
 	importLogicalPath2Callable,
@@ -111,27 +112,27 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 
 	exclusionPredicate = ifThis.is_keyword_IdentifierEqualsConstantValue('init', False)
 	appendKeywordAction = Then.Z0Z_appendKeywordMirroredTo(shatteredDataclass.list_keyword_field__field)
-	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction) 
+	filteredAppendKeywordAction = Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate, appendKeywordAction)
 
 	annotationSherpa: dict[ast_Identifier, ast.Name | ast.Subscript] = {}
 
 	NodeTourist(
 		ifThis.isAnnAssignAndTargetIsName
 		, Then.allOf([
-			Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, shatteredDataclass.listUnpack) 
-			, lambda node: Then.appendTo(shatteredDataclass.listName4Parameters)(node.target) 
+			Then.Z0Z_appendAnnAssignOf_nameDOTnameTo(instance_Identifier, shatteredDataclass.listUnpack)
+			, lambda node: Then.appendTo(shatteredDataclass.listName4Parameters)(node.target)
 			, lambda node: addToLedger.visit(node)
 			, filteredAppendKeywordAction
-			, lambda node: shatteredDataclass.list_argAnnotated4ArgumentsSpecification.append(Make.ast_arg(node.target.id, node.annotation)) 
-			, lambda node: annotationSherpa.update({node.target.id: node.annotation}) 
-			, lambda node: shatteredDataclass.listAnnotations.append(node.annotation) 
+			, lambda node: shatteredDataclass.list_argAnnotated4ArgumentsSpecification.append(Make.ast_arg(node.target.id, node.annotation))
+			, lambda node: annotationSherpa.update({node.target.id: node.annotation})
+			, lambda node: shatteredDataclass.listAnnotations.append(node.annotation)
 		])).visit(dataclassClassDef)
 
 	shatteredDataclass.repack = Make.astAssign(listTargets=[Make.astName(instance_Identifier)], value=Make.astCall(astName_dataclassesDOTdataclass, list_astKeywords=shatteredDataclass.list_keyword_field__field))
 	shatteredDataclass.signatureReturnAnnotation = Make.astSubscript(Make.astName('tuple'), Make.astTuple(shatteredDataclass.listAnnotations))
 	shatteredDataclass.fragments4AssignmentOrParameters = Make.astTuple(shatteredDataclass.listName4Parameters, ast.Store())
 	shatteredDataclass.countingVariableAnnotation = next(ast_arg.annotation for ast_arg in shatteredDataclass.list_argAnnotated4ArgumentsSpecification if ast_arg.arg == countingVariable) or Make.astName('Any')
-	shatteredDataclass.mapField_name2Identifier = {statement.value: statement.target for statement in shatteredDataclass.listUnpack} 
+	shatteredDataclass.mapField_name2Identifier = {statement.value: statement.target for statement in shatteredDataclass.listUnpack}
 
 	for aField in dataclasses.fields(ImaDataclassObject):
 		dtype = aField.metadata.get('dtype', None)
@@ -140,10 +141,10 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: nameDOTname, dataclass_Id
 			shatteredDataclass.field2astCall[aField.name] = Make.astCall(Make.astName(constructor), list_astKeywords=[Make.ast_keyword('dtype', Make.astName(dtype.__name__))])
 			shatteredDataclass.ledger.addImportFromAsStr('numpy', constructor)
 			shatteredDataclass.ledger.addImportFromAsStr('numpy', dtype.__name__)
-		elif ifThis.isName(annotationSherpa[aField.name]):
-			shatteredDataclass.field2astCall[aField.name] = Make.astCall(annotationSherpa[aField.name]) 
-		elif ifThis.isSubscript(annotationSherpa[aField.name]):
-			shatteredDataclass.field2astCall[aField.name] = annotationSherpa[aField.name] 
+		elif be.Name(annotationSherpa[aField.name]):
+			shatteredDataclass.field2astCall[aField.name] = Make.astCall(annotationSherpa[aField.name])
+		elif be.Subscript(annotationSherpa[aField.name]):
+			shatteredDataclass.field2astCall[aField.name] = annotationSherpa[aField.name]
 			"""
 			constructor = NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.getIt).captureFirstMatch(module)
 			print(ast.dump(annotationSherpa[aField.name], indent=1))

@@ -136,7 +136,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
 		return astCallable
 
-	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None:
+	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None: # type: ignore
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape: ast.expr = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):

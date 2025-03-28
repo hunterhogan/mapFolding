@@ -76,7 +76,6 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount: Ingredie
 
 
 	# findThis = (ifThis.is_arg and lambda arg: (argTarget := arg.arg) in shatteredDataclass.field2astCall)
-	findThis = 又.isAllOf(ifThis.is_arg, lambda node: ifThis.ast_IdentifierIn(shatteredDataclass.field2astCall)(node.arg)) # type: ignore
 
 	"""
 	`ast.arg` is a class. While `ast.arg` and `ast.keyword` both have an attribute `arg`.

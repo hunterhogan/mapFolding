@@ -25,39 +25,40 @@ general-purpose utilities applicable to a wide range of code transformation scen
 particularly for numerically-intensive algorithms that benefit from just-in-time compilation.
 """
 from mapFolding.someAssemblyRequired._theTypes import (
-	ast_expr_Slice as ast_expr_Slice,
-	ast_Identifier as ast_Identifier,
-	astClassHasDOTnameNotName as astClassHasDOTnameNotName,
-	astClassHasDOTnameNotNameOptional as astClassHasDOTnameNotNameOptional,
-	astClassHasDOTtarget as astClassHasDOTtarget,
-	astClassHasDOTvalue as astClassHasDOTvalue,
-	astMosDef as astMosDef,
-	intORlist_ast_type_paramORstr_orNone as intORlist_ast_type_paramORstr_orNone,
-	intORstr_orNone as intORstr_orNone,
-	list_ast_type_paramORstr_orNone as list_ast_type_paramORstr_orNone,
-	nameDOTname as nameDOTname,
-	nodeType as nodeType,
+	ast_expr_Slice,
+	ast_Identifier,
+	ImaAnnotationType,
+	astClassHasDOTnameNotName,
+	astClassHasDOTnameNotNameOptional,
+	astClassHasDOTtarget,
+	astClassHasDOTvalue,
+	astMosDef,
+	intORlist_ast_type_paramORstr_orNone,
+	intORstr_orNone,
+	list_ast_type_paramORstr_orNone,
+	nameDOTname,
+	typeCertified,
 	)
 
 from mapFolding.someAssemblyRequired._toolboxPython import (
-	importLogicalPath2Callable as importLogicalPath2Callable,
-	importPathFilename2Callable as importPathFilename2Callable,
-	NodeChanger as NodeChanger,
-	NodeTourist as NodeTourist,
-	parseLogicalPath2astModule as parseLogicalPath2astModule,
-	parsePathFilename2astModule as parsePathFilename2astModule,
+	importLogicalPath2Callable,
+	importPathFilename2Callable,
+	NodeChanger,
+	NodeTourist,
+	parseLogicalPath2astModule,
+	parsePathFilename2astModule,
 	)
 
-from mapFolding.someAssemblyRequired._tool_ifThis import ifThis as ifThis, 又 as 又
-from mapFolding.someAssemblyRequired._tool_Make import Make as Make
-from mapFolding.someAssemblyRequired._tool_Then import Then as Then
+from mapFolding.someAssemblyRequired._toolboxAntecedents import be, ifThis, 又
+from mapFolding.someAssemblyRequired._tool_Make import Make
+from mapFolding.someAssemblyRequired._tool_Then import Then
 
 from mapFolding.someAssemblyRequired.transformationTools import (
-	dictionaryEstimates as dictionaryEstimates,
-	Z0Z_executeActionUnlessDescendantMatches as Z0Z_executeActionUnlessDescendantMatches,
-	extractClassDef as extractClassDef,
-	extractFunctionDef as extractFunctionDef,
-	Z0Z_inlineThisFunctionWithTheseValues as Z0Z_inlineThisFunctionWithTheseValues,
-	Z0Z_makeDictionaryReplacementStatements as Z0Z_makeDictionaryReplacementStatements,
-	Z0Z_lameFindReplace as Z0Z_lameFindReplace,
+	dictionaryEstimates,
+	Z0Z_executeActionUnlessDescendantMatches,
+	extractClassDef,
+	extractFunctionDef,
+	Z0Z_inlineThisFunctionWithTheseValues,
+	Z0Z_makeDictionaryReplacementStatements,
+	Z0Z_lameFindReplace,
 	)
