@@ -25,7 +25,6 @@ from tomli import load as tomli_load
 from types import ModuleType
 from typing import TypeAlias
 import dataclasses
-import numpy
 
 # =============================================================================
 # The Wrong Way: Evaluate When Packaging
@@ -120,8 +119,7 @@ def getPackageDispatcher() -> Callable[['ComputationState'], 'ComputationState']
 # Efficient translation of Python scalar types to Numba types https://github.com/hunterhogan/mapFolding/issues/8
 
 DatatypeLeavesTotal: TypeAlias = int
-# this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
-NumPyLeavesTotal: TypeAlias = numpy_int16
+NumPyLeavesTotal: TypeAlias = numpy_int16 # this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
 
 DatatypeElephino: TypeAlias = int
 NumPyElephino: TypeAlias = numpy_int16
@@ -167,21 +165,21 @@ class ComputationState:
 		from mapFolding.beDRY import makeConnectionGraph, makeDataContainer
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
 		leavesTotalAsInt = int(self.leavesTotal)
-		self.connectionGraph = makeConnectionGraph(self.mapShape, leavesTotalAsInt, Array3D.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
+		self.connectionGraph = makeConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		if self.dimensionsUnconstrained is None: # pyright: ignore[reportUnnecessaryComparison]
+		if self.dimensionsUnconstrained is None:
 			self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
 
 		if self.foldGroups is None:
-			actual_dtype = self.__dataclass_fields__['foldGroups'].metadata.get('dtype', None)
-			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), actual_dtype) # pyright: ignore[reportAttributeAccessIssue]
+			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), self.__dataclass_fields__['foldGroups'].metadata['dtype'])
 			self.foldGroups[-1] = self.leavesTotal
 
-		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, Array1DLeavesTotal.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
-		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, Array1DElephino.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
-		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, Array1DLeavesTotal.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
-		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, Array1DLeavesTotal.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
-		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, Array1DLeavesTotal.__args__[1].__args__[0]) # pyright: ignore[reportAttributeAccessIssue]
+		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
+
+		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
+		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
+		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
+		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
 
 	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
@@ -190,18 +188,3 @@ class ComputationState:
 # The coping way.
 
 class raiseIfNoneGitHubIssueNumber3(Exception): pass
-
-"""Technical concepts I am likely using and likely want to use more effectively:
-- Configuration Registry
-- Lazy Initialization
-- delay realization/instantiation until a concrete value is desired
-- moment of truth: when the value is needed, not when the value is defined
-----
-2025 March 11
-Note to self: fundamental concept in Python:
-Identifiers: scope and resolution, LEGB (Local, Enclosing, Global, Builtin)
-- Local: Inside the function
-- Enclosing: Inside enclosing functions
-- Global: At the uppermost level
-- Builtin: Python's built-in names
-"""

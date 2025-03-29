@@ -119,7 +119,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	unpack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
 	repack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
 
-	ingredientsSequential.astFunctionDef = Z0Z_lameFindReplace(ingredientsSequential.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name) # type: ignore
+	ingredientsSequential.astFunctionDef = Z0Z_lameFindReplace(ingredientsSequential.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
 
 	# parallelCallable =========================================================
 	ingredientsParallel.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
@@ -140,7 +140,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
 	changeReturnParallelCallable.visit(ingredientsParallel.astFunctionDef)
 
-	ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name) # type: ignore
+	ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
 
 	# numba decorators =========================================
 	ingredientsParallel = decorateCallableWithNumba(ingredientsParallel)
@@ -151,10 +151,6 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 
 	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageName)
 
-theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow(
-	callableInitialize='beta', callableParallel='gamma', callableSequential='delta',
-	dataclassInstance='chicken', dataclassInstanceTaskDistribution='silky',
-	concurrencyManagerNamespace='boom',	)
 theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 if __name__ == '__main__':
 	makeNumbaFlow(theNumbaFlow)

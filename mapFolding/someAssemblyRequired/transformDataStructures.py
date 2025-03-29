@@ -58,7 +58,7 @@ class ShatteredDataclass:
 	"""Type annotation for the counting variable extracted from the dataclass."""
 	countingVariableName: ast.Name
 	"""AST name node representing the counting variable identifier."""
-	field2astCall: dict[ast_Identifier, ast.Call | ast.Subscript] = dataclasses.field(default_factory=dict)
+	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign] = dataclasses.field(default_factory=dict)
 	"""Maps field names to their corresponding AST call expressions."""
 	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
 	"""AST tuple used as target for assignment to capture returned fragments."""
@@ -106,7 +106,8 @@ class DeReConstructField2ast:
 	ast_nameDOTname: ast.Attribute = dataclasses.field(init=False)
 	astAnnotation: ImaAnnotationType = dataclasses.field(init=False)
 	ast_argAnnotated: ast.arg = dataclasses.field(init=False)
-	astCallConstructor: ast.Call = dataclasses.field(init=False)
+	astAnnAssignConstructor: ast.AnnAssign = dataclasses.field(init=False)
+	Z0Z_hack: str = dataclasses.field(init=False)
 
 	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: str_nameDOTname, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstance_Identifier: ast_Identifier, field: dataclasses.Field[Any]) -> None:
 		self.compare = field.compare
@@ -124,7 +125,7 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
 
-		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), 又.annotation(Then.getIt)).captureLastMatch(dataclassClassDef) # type: ignore
+		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), 又.annotation(Then.getIt)).captureLastMatch(dataclassClassDef)
 		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
 		else: self.astAnnotation = sherpa # pyright: ignore [reportAttributeAccessIssue]
 
@@ -133,15 +134,15 @@ class DeReConstructField2ast:
 		dtype = self.metadata.get('dtype', None)
 		if dtype:
 			constructor = 'array'
-			# fill-in `ast.Call.args`
-			self.astCallConstructor = Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtype.__name__))])
+			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtype.__name__))]))
 			self.ledger.addImportFromAsStr('numpy', constructor)
 			self.ledger.addImportFromAsStr('numpy', dtype.__name__)
+			self.Z0Z_hack = 'array'
 		elif be.Name(self.astAnnotation):
 			# fill-in `ast.Call.args[0].value`
-			# astCallConstructor.args[0].value = job.state.field
-			self.astCallConstructor = Make.Call(self.astAnnotation, [Make.Constant(-1)]) # type: ignore
-			self.ledger.addImportFromAsStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id) # pyright: ignore [reportUnknownArgumentType, reportUnknownMemberType, reportIJustCalledATypeGuardMethod_WTF]
+			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
+			self.ledger.addImportFromAsStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
+			self.Z0Z_hack = 'scalar'
 		elif be.Subscript(self.astAnnotation):
 			# TODO figure this out
 			# fill-in `ast.Call.Subscript.slice.elts`
@@ -152,9 +153,10 @@ class DeReConstructField2ast:
 			# for dimension in job.state.mapShape:
 			# 	list_expr.append(Make.Call(Make.Name(elementConstructor), [Make.Constant(dimension)]))
 			# astCallConstructor.Subscript.slice.elts = list_expr
-			emptySubscript: ast.Subscript = deepcopy(self.astAnnotation) # type: ignore
-			emptySubscript.slice.elts = [] # type: ignore
-			self.astCallConstructor = Make.Call(emptySubscript) # type: ignore
+			emptySubscript: ast.Subscript = deepcopy(self.astAnnotation)
+			emptySubscript.slice.elts = []
+			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(emptySubscript))
+			self.Z0Z_hack = 'tuple'
 			"""
 			ast.Subscript(
 				value=ast.Name(id='tuple', ctx=ast.Load())
@@ -165,7 +167,7 @@ class DeReConstructField2ast:
 					, ctx=ast.Load())
 				, ctx=ast.Load())
 			"""
-		if be.Name(self.astAnnotation): # type: ignore
+		if be.Name(self.astAnnotation):
 			self.ledger.addImportFromAsStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id) # pyright: ignore [reportUnknownArgumentType, reportUnknownMemberType, reportIJustCalledATypeGuardMethod_WTF]
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
@@ -194,6 +196,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 	shatteredDataclass = ShatteredDataclass(
 		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation,
 		countingVariableName=dictionaryDeReConstruction[countingVariable].astName,
+		field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder},
 		list_argAnnotated4ArgumentsSpecification=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
 		list_keyword_field__field4init=[dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
 		listAnnotations=[dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],
@@ -202,8 +205,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 		map_stateDOTfield2Name={dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder},
 		)
 	shatteredDataclass.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclass.listName4Parameters, ast.Store())
-	shatteredDataclass.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.listAnnotations))
 	shatteredDataclass.repack = Make.Assign(listTargets=[Make.Name(instance_Identifier)], value=Make.Call(Make.Name(dataclass_Identifier), list_astKeywords=shatteredDataclass.list_keyword_field__field4init))
+	shatteredDataclass.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.listAnnotations))
 
 	shatteredDataclass.ledger.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
 	shatteredDataclass.ledger.addImportFromAsStr(logicalPathModule, dataclass_Identifier)

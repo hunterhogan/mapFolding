@@ -4,7 +4,7 @@ from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, pa
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import theNumbaFlow
 from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState, shatter_dataclassesDOTdataclass, ShatteredDataclass
 from mapFolding.someAssemblyRequired.Z0Z_containers import astModuleToIngredientsFunction, IngredientsFunction
-from mapFolding.theSSOT import ComputationState, DatatypeLeavesTotal, The
+from mapFolding.theSSOT import ComputationState, The
 from pathlib import Path, PurePosixPath
 import ast
 import dataclasses
@@ -74,37 +74,10 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount: Ingredie
 	shatteredDataclass = shatter_dataclassesDOTdataclass(theNumbaFlow.logicalPathModuleDataclass, theNumbaFlow.sourceDataclassIdentifier, instance_Identifier)
 	ingredientsCount.imports.update(shatteredDataclass.ledger)
 
-	findThis = be.arg and 又.arg(ifThis.ast_IdentifierIn(shatteredDataclass.field2astCall))
-	# fill-in `ast.Call.args[0].value`
-	# astCallConstructor.args[0].value = job.state.field
+	findThis = be.arg and 又.arg(ifThis.ast_IdentifierIn(shatteredDataclass.field2AnnAssign))
 
 	remove_arg = NodeChanger(findThis, Then.removeIt)
 
-	NodeTourist(findThis, Then.allOf([
-		lambda node: Make.AnnAssign(又.arg(Make.Name(node, context=ast.Store())), annotation=node.annotation)
-						# AnnAssign(target=Name(id=..., ctx=Store()), annotation=..., value=...) Get it?
-		, lambda node: remove_arg.visit(node) # _must_ be last or irrelevant?
-	])).visit(ingredientsCount.astFunctionDef)
-
-	"""
-	`ast.arg` is a class. While `ast.arg` and `ast.keyword` both have an attribute `arg`.
-		`ast.arg` is always found here:
-			class arguments(
-				posonlyargs: list[arg]
-				args: list[arg]
-				kwonlyargs: list[arg]
-				# Yo, Python devs! This is super fucking annoying that these objects are the same class but function differently.
-				vararg: arg # This is a "pseudo"-arg: the substance will be in `posonlyargs` or `args`
-				kwarg: arg # Also a "pseudo"-arg: the substance will be in `kwonlyargs`
-			)
-			`ast.arguments` is found in `ast.FunctionDef`, `ast.AsyncFunctionDef`, and `ast.Lambda`
-			BUT, the dickheads don't call it "arguments", they fucking call it "args"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	argTarget: ast_Identifier = arg.arg
-	Make.Name(arg.arg): annotation if present = astCall job.state.argTarget : the value
-	dictionary
-	The value of `1` will be added later
-	"""
 
 	return ingredientsCount
 

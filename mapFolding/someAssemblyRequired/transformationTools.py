@@ -35,10 +35,10 @@ from typing import Any
 import ast
 
 def extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef | None:
-	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.getIt).captureLastMatch(module) # type: ignore
+	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.getIt).captureLastMatch(module)
 
 def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.FunctionDef | None:
-	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.getIt).captureLastMatch(module) # type: ignore
+	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.getIt).captureLastMatch(module)
 
 def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
 	astModule = Make.Module(ingredients.body, ingredients.type_ignores)
@@ -110,9 +110,9 @@ def Z0Z_makeDictionaryReplacementStatements(module: ast.AST) -> dict[ast_Identif
 	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}
 	for name, astFunctionDef in dictionaryFunctionDef.items():
 		if ifThis.onlyReturnAnyCompare(astFunctionDef):
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value
 		elif ifThis.onlyReturnUnaryOp(astFunctionDef):
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value
 		else:
 			dictionaryReplacementStatements[name] = astFunctionDef.body[0:-1]
 	return dictionaryReplacementStatements
@@ -128,17 +128,17 @@ def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dicti
 
 		def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.stmt]:
 			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore
+				return self.dictionaryReplacementStatements[node.value.func.id]
 			return node
 
 		def visit_Assign(self, node: ast.Assign) -> ast.AST | list[ast.stmt]:
 			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore
+				return self.dictionaryReplacementStatements[node.value.func.id]
 			return node
 
 		def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
 			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
-				replacement = self.dictionaryReplacementStatements[node.func.id]  # type: ignore
+				replacement = self.dictionaryReplacementStatements[node.func.id]  
 				if not isinstance(replacement, list):
 					return replacement
 			return node

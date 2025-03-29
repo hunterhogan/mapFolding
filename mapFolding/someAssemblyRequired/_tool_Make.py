@@ -77,7 +77,7 @@ class Make:
 		nameDOTname = Make.Name(identifier, context, **keywordArguments)
 		for suffix in dotName:
 			nameDOTname = addDOTname(nameDOTname, suffix, context, **keywordArguments)
-		return nameDOTname # pyright: ignore [reportReturnType]
+		return nameDOTname
 	@staticmethod
 	def Return(value: ast.expr | None = None, **keywordArguments: int) -> ast.Return:
 		return ast.Return(value, **keywordArguments)
