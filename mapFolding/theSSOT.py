@@ -136,7 +136,7 @@ Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]
 
 @dataclasses.dataclass
 class ComputationState:
-	mapShape: tuple[DatatypeLeavesTotal, ...]
+	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'}) # NOTE Python is anti-DRY, again, `DatatypeLeavesTotal` needs to match the type
 	leavesTotal: DatatypeLeavesTotal
 	taskDivisions: DatatypeLeavesTotal
 	concurrencyLimit: DatatypeElephino

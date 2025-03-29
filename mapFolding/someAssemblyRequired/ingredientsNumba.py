@@ -20,7 +20,7 @@ algorithm implementation into a highly-optimized Numba version.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import ifThis, Make
+from mapFolding.someAssemblyRequired import Make
 from mapFolding.someAssemblyRequired.Z0Z_containers import IngredientsFunction
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, cast, Final, TYPE_CHECKING
@@ -186,14 +186,14 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.astFunctionDef = Z0Z_UnhandledDecorators(ingredientsFunction.astFunctionDef)
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
-	listDecoratorKeywords: list[ast.keyword] = [Make.ast_keyword(parameterName, Make.astConstant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
+	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
 	decoratorModule: str = Z0Z_numbaDataTypeModule
 	decoratorCallable: str = Z0Z_decoratorCallable
 	ingredientsFunction.imports.addImportFromAsStr(decoratorModule, decoratorCallable)
 	# Leave this line in so that global edits will change it.
-	astDecorator: ast.Call = Make.astCall(Make.astName(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
-	astDecorator: ast.Call = Make.astCall(Make.astName(decoratorCallable), list_astKeywords=listDecoratorKeywords)
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_astKeywords=listDecoratorKeywords)
 
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction

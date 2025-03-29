@@ -25,7 +25,7 @@ type ast_Identifier = str
 type intORlist_ast_type_paramORstr_orNone = Any
 type intORstr_orNone = Any
 type list_ast_type_paramORstr_orNone = Any
-type nameDOTname = stuPyd
+type str_nameDOTname = stuPyd
 type ImaAnnotationType = ast.Attribute | ast.Constant | ast.Name | ast.Subscript
 
 typeCertified = typing_TypeVar('typeCertified')

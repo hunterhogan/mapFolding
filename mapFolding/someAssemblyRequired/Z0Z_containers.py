@@ -7,9 +7,9 @@ circular imports while providing reusable data structures.
 """
 from collections import defaultdict
 from collections.abc import Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, nameDOTname, parseLogicalPath2astModule
+from mapFolding.someAssemblyRequired import ast_Identifier, str_nameDOTname, parseLogicalPath2astModule
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3, The
-from mapFolding.theSSOT import logicalPathModuleDispatcherHARDCODED, callableDispatcherHARDCODED, concurrencyPackageHARDCODED
+from mapFolding.theSSOT import callableDispatcherHARDCODED
 from pathlib import Path, PurePosixPath
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
@@ -52,9 +52,9 @@ class LedgerOfImports:
 			listOfNameTuples = sorted(list(set(listOfNameTuples)), key=lambda nameTuple: nameTuple[0])
 			listAlias: list[ast.alias] = []
 			for name, asname in listOfNameTuples:
-				listAlias.append(Make.astAlias(name, asname))
-			listAstImportFrom.append(Make.astImportFrom(module, listAlias))
-		listAstImport: list[ast.Import] = [Make.astImport(name) for name in sorted(set(self.listImport))]
+				listAlias.append(Make.Alias(name, asname))
+			listAstImportFrom.append(Make.ImportFrom(module, listAlias))
+		listAstImport: list[ast.Import] = [Make.Import(name) for name in sorted(set(self.listImport))]
 		return listAstImportFrom + listAstImport
 
 	def update(self, *fromLedger: 'LedgerOfImports') -> None:
@@ -193,7 +193,7 @@ theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.mo
 
 	def _makePathFilename(self, filenameStem: str,
 			pathRoot: PurePosixPath | None = None,
-			logicalPathINFIX: nameDOTname | None = None,
+			logicalPathINFIX: str_nameDOTname | None = None,
 			fileExtension: str | None = None,
 			) -> PurePosixPath:
 		"""filenameStem: (hint: the name of the logical module)"""

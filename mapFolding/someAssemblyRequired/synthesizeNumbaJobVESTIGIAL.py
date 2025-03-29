@@ -30,7 +30,7 @@ def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, stateme
 	dtypeAsName: str = f"{moduleConstructor}_{dtypeName}"
 	list_astKeywords: list[ast.keyword] = [ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))]
 	allImports.addImportFromAsStr(moduleConstructor, dtypeName, dtypeAsName)
-	astCall: ast.Call = Make.astCall(Make.astName(constructorName), [dataAs_astExpr], list_astKeywords)
+	astCall: ast.Call = Make.Call(Make.Name(constructorName), [dataAs_astExpr], list_astKeywords)
 	astCall.
 	assignment = ast.Assign(targets=[astAssignee], value=astCall)
 	FunctionDefTarget.body.insert(0, assignment)
@@ -75,7 +75,7 @@ def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, iden
 			constructorName: str = astAssignee.id
 			dataAs_astExpr = ast.Constant(value=arraySliceItem)
 			list_astKeywords: list[ast.keyword] = []
-			astCall: ast.Call = Make.astCall(Make.astName(constructorName), [dataAs_astExpr], list_astKeywords)
+			astCall: ast.Call = Make.Call(Make.Name(constructorName), [dataAs_astExpr], list_astKeywords)
 			assignment = ast.Assign(targets=[astAssignee], value=astCall)
 			FunctionDefTarget.body.insert(0, assignment)
 			FunctionDefTarget.body.remove(statement)
@@ -83,7 +83,7 @@ def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, iden
 	return FunctionDefTarget, allImports
 
 def removeAssignmentFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
-	FunctionDefSherpa: ast.AST | Sequence[ast.AST] | None = NodeChanger(ifThis.isAnyAssignmentTo(identifier), Then.removeThis).visit(FunctionDefTarget)
+	FunctionDefSherpa: ast.AST | Sequence[ast.AST] | None = NodeChanger(ifThis.isAnyAssignmentTo(identifier), Then.removeIt).visit(FunctionDefTarget)
 	if not FunctionDefSherpa:
 		raise raiseIfNoneGitHubIssueNumber3("Dude, where's my function?")
 	else:
@@ -325,7 +325,7 @@ def writeJobNumba(mapShape: tuple[int, ...], algorithmSource: ModuleType, callab
 		FunctionDefTarget.args.args.remove(pirateScowl)
 
 	identifierCounter = 'Z0Z_identifierCountFolds'
-	astExprIncrementCounter = ast.Expr(value = Make.astCall(Make.nameDOTname(identifierCounter, 'update'), listArguments=[ast.Constant(value=1)], list_astKeywords=[]))
+	astExprIncrementCounter = ast.Expr(value = Make.Call(Make.nameDOTname(identifierCounter, 'update'), listArguments=[ast.Constant(value=1)], list_astKeywords=[]))
 	FunctionDefTarget= cast(ast.FunctionDef, NodeChanger(ifThis.isAugAssignTo(identifierCounter), Then.replaceWith(astExprIncrementCounter)).visit(FunctionDefTarget))
 	ast.fix_missing_locations(FunctionDefTarget)
 

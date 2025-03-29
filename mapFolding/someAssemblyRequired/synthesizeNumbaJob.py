@@ -1,5 +1,5 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
-from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, Make, nameDOTname, NodeChanger, parsePathFilename2astModule, Then, 又
+from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, Make, str_nameDOTname, NodeChanger, NodeTourist, parsePathFilename2astModule, Then, 又, be
 from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDefault
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import theNumbaFlow
 from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState, shatter_dataclassesDOTdataclass, ShatteredDataclass
@@ -55,7 +55,7 @@ class Z0Z_RecipeJob:
 
 	def _makePathFilename(self, filenameStem: str,
 			pathRoot: PurePosixPath | None = None,
-			logicalPathINFIX: nameDOTname | None = None,
+			logicalPathINFIX: str_nameDOTname | None = None,
 			fileExtension: str | None = None,
 			) -> PurePosixPath:
 		"""filenameStem: (hint: the name of the logical module)"""
@@ -74,8 +74,17 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount: Ingredie
 	shatteredDataclass = shatter_dataclassesDOTdataclass(theNumbaFlow.logicalPathModuleDataclass, theNumbaFlow.sourceDataclassIdentifier, instance_Identifier)
 	ingredientsCount.imports.update(shatteredDataclass.ledger)
 
+	findThis = be.arg and 又.arg(ifThis.ast_IdentifierIn(shatteredDataclass.field2astCall))
+	# fill-in `ast.Call.args[0].value`
+	# astCallConstructor.args[0].value = job.state.field
 
-	# findThis = (ifThis.is_arg and lambda arg: (argTarget := arg.arg) in shatteredDataclass.field2astCall)
+	remove_arg = NodeChanger(findThis, Then.removeIt)
+
+	NodeTourist(findThis, Then.allOf([
+		lambda node: Make.AnnAssign(又.arg(Make.Name(node, context=ast.Store())), annotation=node.annotation)
+						# AnnAssign(target=Name(id=..., ctx=Store()), annotation=..., value=...) Get it?
+		, lambda node: remove_arg.visit(node) # _must_ be last or irrelevant?
+	])).visit(ingredientsCount.astFunctionDef)
 
 	"""
 	`ast.arg` is a class. While `ast.arg` and `ast.keyword` both have an attribute `arg`.
@@ -92,7 +101,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount: Ingredie
 			BUT, the dickheads don't call it "arguments", they fucking call it "args"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	argTarget: ast_Identifier = arg.arg
-	Make.Name(arg.arg): annotation if present = job.state.argTarget : the value
+	Make.Name(arg.arg): annotation if present = astCall job.state.argTarget : the value
 	dictionary
 	The value of `1` will be added later
 	"""

@@ -35,13 +35,13 @@ from typing import Any
 import ast
 
 def extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef | None:
-	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.getIt).captureFirstMatch(module)
+	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.getIt).captureLastMatch(module) # type: ignore
 
 def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.FunctionDef | None:
-	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.getIt).captureFirstMatch(module)
+	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.getIt).captureLastMatch(module) # type: ignore
 
 def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
-	astModule = Make.astModule(ingredients.body, ingredients.type_ignores)
+	astModule = Make.Module(ingredients.body, ingredients.type_ignores)
 	ast.fix_missing_locations(astModule)
 	pythonSource: str = ast.unparse(astModule)
 	if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
