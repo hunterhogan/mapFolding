@@ -61,6 +61,9 @@ class Make:
 		"""value: str|int|float|bool|None|bytes|bytearray|memoryview|complex|list|tuple|dict|set, or any other type that can be represented as a constant in Python."""
 		return ast.Constant(value, **keywordArguments)
 	@staticmethod
+	def Expr(value: ast.expr, **keywordArguments: int) -> ast.Expr:
+		return ast.Expr(value, **keywordArguments)
+	@staticmethod
 	def FunctionDef(name: ast_Identifier, argumentsSpecification: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, **keywordArguments: intORlist_ast_type_paramORstr_orNone) -> ast.FunctionDef:
 		return ast.FunctionDef(name, argumentsSpecification, body, decorator_list, returns, **keywordArguments)
 	@staticmethod

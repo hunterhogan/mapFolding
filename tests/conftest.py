@@ -101,7 +101,22 @@ def setupWarningsAsErrors() -> Generator[None, Any, None]:
 	warnings.resetwarnings()
 
 @pytest.fixture
-def listDimensionsTestCountFolds(oeisID: str):
+def oneTestCuzTestsOverwritingTests(oeisID_1random: str) -> tuple[int, ...]:
+	"""For each `oeisID_1random` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
+	if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
+	while True:
+		n = random.choice(settingsOEIS[oeisID_1random]['valuesTestValidation'])
+		if n < 2:
+			continue
+		listDimensionsCandidate = list(settingsOEIS[oeisID_1random]['getMapShape'](n))
+
+		try:
+			return validateListDimensions(listDimensionsCandidate)
+		except (ValueError, NotImplementedError):
+			pass
+
+@pytest.fixture
+def listDimensionsTestCountFolds(oeisID: str) -> tuple[int, ...]:
 	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
 	if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
 	while True:
@@ -116,7 +131,7 @@ def listDimensionsTestCountFolds(oeisID: str):
 			pass
 
 @pytest.fixture
-def mapShapeTestFunctionality(oeisID_1random: str):
+def mapShapeTestFunctionality(oeisID_1random: str) -> tuple[int, ...]:
 	"""To test functionality, get one `listDimensions` from `valuesTestValidation` if
 	`validateListDimensions` approves. The algorithm can count the folds of the returned
 	`listDimensions` in a short enough time suitable for testing."""

@@ -16,15 +16,19 @@ list_IdentifiersNotUsedAllHARDCODED = ['concurrencyLimit', 'foldsTotal', 'mapSha
 list_IdentifiersNotUsedParallelSequentialHARDCODED = ['indexLeaf']
 list_IdentifiersNotUsedSequentialHARDCODED = ['foldGroups', 'taskDivisions', 'taskIndex',]
 
+list_IdentifiersReplacedHARDCODED = ['groupsOfFolds',]
+
 list_IdentifiersStaticValuesHARDCODED = ['dimensionsTotal', 'leavesTotal',]
 
-list_IdentifiersNotUsedHARDCODED = list_IdentifiersStaticValuesHARDCODED + list_IdentifiersNotUsedAllHARDCODED + list_IdentifiersNotUsedParallelSequentialHARDCODED + list_IdentifiersNotUsedSequentialHARDCODED
+list_IdentifiersNotUsedHARDCODED = list_IdentifiersStaticValuesHARDCODED + list_IdentifiersReplacedHARDCODED + list_IdentifiersNotUsedAllHARDCODED + list_IdentifiersNotUsedParallelSequentialHARDCODED + list_IdentifiersNotUsedSequentialHARDCODED
 
 @dataclasses.dataclass
 class Z0Z_RecipeJob:
 	state: ComputationState
 	# TODO create function to calculate `foldsTotalEstimated`
 	foldsTotalEstimated: int = 0
+	useNumbaProgressBar: bool = True
+	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
 
 	# ========================================
 	# Source
@@ -54,10 +58,10 @@ class Z0Z_RecipeJob:
 	""" `logicalPathRoot` likely corresponds to a physical filesystem directory."""
 	moduleIdentifier: ast_Identifier = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
 	countCallable: ast_Identifier = sourceCountCallable
-	dataclassIdentifier: ast_Identifier = sourceDataclassIdentifier
-	dataclassInstance: ast_Identifier = sourceDataclassInstance
-	logicalPathModuleDataclass: str_nameDOTname = sourceLogicalPathModuleDataclass
-	countingVariableIdentifier: ast_Identifier = 'groupsOfFolds'
+	dataclassIdentifier: ast_Identifier | None = sourceDataclassIdentifier
+	dataclassInstance: ast_Identifier | None = sourceDataclassInstance
+	logicalPathModuleDataclass: str_nameDOTname | None = sourceLogicalPathModuleDataclass
+	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
 
 	def _makePathFilename(self,
 			pathRoot: PurePosixPath | None = None,
@@ -93,6 +97,9 @@ class Z0Z_RecipeJob:
 		if self.pathFilenameFoldsTotal is None:
 			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
 
+		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.dataclassIdentifier and self.dataclassInstance:
+			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.dataclassIdentifier, self.dataclassInstance)
+
 	# ========================================
 	# Fields you probably don't need =================================
 	# Dispatcher =================================
@@ -113,38 +120,40 @@ if __name__ == '__main__':
 	with ProgressBar(total={job.foldsTotalEstimated}, update_interval=2) as statusUpdate:
 		{job.countCallable}(statusUpdate)
 		foldsTotal = statusUpdate.n * {job.state.leavesTotal}
-		print("", foldsTotal)
+		print('map {job.state.mapShape} =', foldsTotal)
 		writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
 		writeStream.write(str(foldsTotal))
 		writeStream.close()
 """
-	ast.parse(linesLaunch)
-
 	numba_progressPythonClass: ast_Identifier = 'ProgressBar'
 	numba_progressNumbaType: ast_Identifier = 'ProgressBarType'
 	ingredientsModule.imports.addImportFrom_asStr('numba_progress', numba_progressPythonClass)
 	ingredientsModule.imports.addImportFrom_asStr('numba_progress', numba_progressNumbaType)
 
-	ast_argNumbaProgress = ast.arg(arg='countingVariableName', annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
+	ast_argNumbaProgress = ast.arg(arg=job.numbaProgressBarIdentifier, annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
+
+	findThis = ifThis.isAugAssign_targetIs(ifThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id))
+	doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(job.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
+	countWithProgressBar = NodeChanger(findThis, doThat)
+	countWithProgressBar.visit(ingredientsFunction.astFunctionDef)
+
+	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
 
 	return ingredientsModule
 
 def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: IngredientsFunction, job: Z0Z_RecipeJob) -> IngredientsFunction:
-	""" If `ingredientsFunction` has an instance of the dataclass, note `instance_Identifier = job.dataclassInstance`. """
-	instance_Identifier = job.dataclassInstance
-	shatteredDataclass = shatter_dataclassesDOTdataclass(job.logicalPathModuleDataclass, job.dataclassIdentifier, instance_Identifier)
-	ingredientsFunction.imports.update(shatteredDataclass.ledger)
+	ingredientsFunction.imports.update(job.shatteredDataclass.ledger)
 
 	list_IdentifiersNotUsed = list_IdentifiersNotUsedHARDCODED
 
 	list_argCauseMyBrainRefusesToDoThisTheRightWay = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
 	for ast_arg in list_argCauseMyBrainRefusesToDoThisTheRightWay:
-		if ast_arg.arg in shatteredDataclass.field2AnnAssign:
+		if ast_arg.arg in job.shatteredDataclass.field2AnnAssign:
 			if ast_arg.arg in list_IdentifiersNotUsed:
 				pass
 			else:
-				ImaAnnAssign, elementConstructor = shatteredDataclass.Z0Z_field2AnnAssign[ast_arg.arg]
+				ImaAnnAssign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[ast_arg.arg]
 				match elementConstructor:
 					case 'scalar':
 						ImaAnnAssign.value.args[0].value = int(job.state.__dict__[ast_arg.arg])  # type: ignore
@@ -193,12 +202,15 @@ def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = paramete
 		doThat = Then.replaceWith(Make.Constant(int(job.state.__dict__[identifier])))
 		NodeChanger(findThis, doThat).visit(ingredientsCount.astFunctionDef)
 
-	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
-
+	# This launcher eliminates the use of one identifier, so run it now and you can dynamically determine which variables are not used
 	ingredientsModule = IngredientsModule()
 	ingredientsModule = addLauncherNumbaProgress(ingredientsModule, ingredientsCount, job)
+	parametersNumba['nogil'] = True
+
+	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
 	ingredientsCount.astFunctionDef.decorator_list = [] # TODO low-priority, handle this more elegantly
+	# TODO when I add the function signature in numba style back to the decorator, the logic needs to handle `ProgressBarType:`
 	ingredientsCount = decorateCallableWithNumba(ingredientsCount, parametersNumba)
 
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
@@ -228,13 +240,8 @@ def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = paramete
 	- do not use `with` statement inside numba jitted code, except to use numba's obj mode
 	"""
 
-	# Steps from `synthesizeNumbaJobVESTIGIAL`:
-		# print/save the total
-		# launcher
-		# if passing progressBar as parameter, ProgressBarType parameter to function args
-
 if __name__ == '__main__':
-	mapShape = (2,4)
+	mapShape = (6,6)
 	state = makeInitializedComputationState(mapShape)
 	aJob = Z0Z_RecipeJob(state)
 	makeJobNumba(aJob)

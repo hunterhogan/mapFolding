@@ -136,6 +136,7 @@ class IngredientsModule:
 				list_body.append(statement)
 		self_astModule.body.extend(list_body)
 		self_astModule.type_ignores.extend(listTypeIgnore)
+		ast.fix_missing_locations(self_astModule)
 
 	def appendPrologue(self, astModule: ast.Module | None = None, statement: Sequence[ast.stmt] | ast.stmt | None = None, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		"""Append one or more statements to `prologue`."""

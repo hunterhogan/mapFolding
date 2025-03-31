@@ -323,7 +323,7 @@ def writeJobNumba(mapShape: tuple[int, ...], algorithmSource: ModuleType, callab
 		FunctionDefTarget.args.args.remove(pirateScowl)
 
 	identifierCounter = 'Z0Z_identifierCountFolds'
-	# astExprIncrementCounter = ast.Expr(value = Make.Call(Make.nameDOTname(identifierCounter, 'update'), listArguments=[ast.Constant(value=1)], list_astKeywords=[]))
+	astExprIncrementCounter = ast.Expr(value = Make.Call(Make.nameDOTname(identifierCounter, 'update'), listArguments=[ast.Constant(value=1)], list_astKeywords=[]))
 	# FunctionDefTarget= cast(ast.FunctionDef, NodeChanger(ifThis.isAugAssignTo(identifierCounter), Then.replaceWith(astExprIncrementCounter)).visit(FunctionDefTarget))
 	ast.fix_missing_locations(FunctionDefTarget)
 

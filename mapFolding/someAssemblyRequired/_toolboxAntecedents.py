@@ -203,6 +203,11 @@ Argument of type "typeCertified@isAnnAssign_targetIs" cannot be assigned to para
 	@staticmethod
 	def isAnnAssignAndAnnotationIsName(node: ast.AST) -> TypeGuard[object] | bool:
 		return be.AnnAssign(node) and 又.annotation(be.Name)(node)
+	@staticmethod
+	def isAugAssign_targetIs(targetPredicate: Callable[[Ima_targetType], TypeGuard[Ima_targetType] | bool]) -> Callable[[ast.AST], TypeGuard[typeCertified] | bool]:
+		def workhorse(node: ast.AST) -> TypeGuard[typeCertified] | bool:
+			return be.AugAssign(node) and 又.target(targetPredicate)(node)
+		return workhorse
 
 	@staticmethod
 	def isAnyCompare(node: ast.AST) -> TypeGuard[object]:
