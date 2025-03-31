@@ -20,10 +20,10 @@ class Make:
 	The `ast._Attributes`, lineno, col_offset, end_lineno, and end_col_offset, hold position information; however, they are, importantly, _not_ `ast._fields`.
 	"""
 	@staticmethod
-	def Alias(name: ast_Identifier, asname: ast_Identifier | None = None) -> ast.alias:
+	def alias(name: ast_Identifier, asname: ast_Identifier | None = None) -> ast.alias:
 		return ast.alias(name, asname)
 	@staticmethod
-	def AnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ImaAnnotationType, value: ast.expr | None = None, **keywordArguments: int) -> ast.AnnAssign: # `simple: int`: uses a clever int-from-boolean to assign the correct value to the `simple` attribute. So, don't make it a method parameter.
+	def AnnAssign(target: ast.Attribute | ast.Name | ast.Subscript, annotation: ImaAnnotationType, value: ast.expr | None = None, **keywordArguments: int) -> ast.AnnAssign: # `simple: int`: uses a clever int-from-boolean to assign the correct value to the `simple` attribute. So, don't make it a method parameter.
 		return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)), **keywordArguments)
 	@staticmethod
 	def arg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: intORstr_orNone) -> ast.arg:
@@ -35,15 +35,23 @@ class Make:
 	def Assign(listTargets: Any, value: ast.expr, **keywordArguments: intORstr_orNone) -> ast.Assign:
 		return ast.Assign(listTargets, value, **keywordArguments)
 	@staticmethod
-	def Attribute(value: ast.expr, attribute: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Attribute:
-		"""
+	def Attribute(value: ast.expr, *attribute: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Attribute:
+		""" If two `ast_Identifier` are joined by a dot `.`, they are _usually_ an `ast.Attribute`, but see `ast.ImportFrom`.
 		Parameters:
-			value: the part before the dot (hint `ast.Name` for nameDOTname)
-			attribute: the `ast_Identifier` after the dot
+			value: the part before the dot (Often `ast.Name`, but also `ast.Attribute`, `ast.Starred`, and `ast.Subscript`.)
+			attribute: an `ast_Identifier` after a dot `.`; you can pass multiple `attribute` and they will be chained together.
 		"""
-		return ast.Attribute(value, attribute, context, **keywordArguments)
+		# TODO confirm the precision of the docstring.
+		def addDOTattribute(chain, identifier: ast_Identifier, context: ast.expr_context, **keywordArguments: int) -> ast.Attribute:
+			return ast.Attribute(value=chain, attr=identifier, ctx=context, **keywordArguments)
+		buffaloBuffalo = addDOTattribute(value, attribute[0], context, **keywordArguments)
+		for identifier in attribute[1:None]:
+			buffaloBuffalo = addDOTattribute(buffaloBuffalo, identifier, context, **keywordArguments)
+		return buffaloBuffalo
 	@staticmethod
-	def Call(callee: ast.Name | ast.Attribute, listArguments: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
+	# TODO are the types for `callee` comprehensive?
+	# TODO is there an easier way to create precise typings for `ast`? I mean, it's a fucking closed system: there should be a lot of mystery involved.
+	def Call(callee: ast.Attribute | ast.Name | ast.Subscript, listArguments: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
 		return ast.Call(func=callee, args=list(listArguments) if listArguments else [], keywords=list(list_astKeywords) if list_astKeywords else [])
 	@staticmethod
 	def ClassDef(name: ast_Identifier, listBases: list[ast.expr]=[], list_keyword: list[ast.keyword]=[], body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], **keywordArguments: list_ast_type_paramORstr_orNone) -> ast.ClassDef:
@@ -57,7 +65,7 @@ class Make:
 		return ast.FunctionDef(name, argumentsSpecification, body, decorator_list, returns, **keywordArguments)
 	@staticmethod
 	def Import(moduleIdentifier: ast_Identifier, asname: ast_Identifier | None = None, **keywordArguments: int) -> ast.Import:
-		return ast.Import(names=[Make.Alias(moduleIdentifier, asname)], **keywordArguments)
+		return ast.Import(names=[Make.alias(moduleIdentifier, asname)], **keywordArguments)
 	@staticmethod
 	def ImportFrom(moduleIdentifier: ast_Identifier, list_astAlias: list[ast.alias], **keywordArguments: int) -> ast.ImportFrom:
 		return ast.ImportFrom(moduleIdentifier, list_astAlias, **keywordArguments)
@@ -70,14 +78,6 @@ class Make:
 	@staticmethod
 	def Name(identifier: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Name:
 		return ast.Name(identifier, context, **keywordArguments)
-	@staticmethod
-	def nameDOTname(identifier: ast_Identifier, *dotName: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Attribute:
-		def addDOTname(nameChain: ast.Name | ast.Attribute, dotName: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Attribute:
-			return ast.Attribute(value=nameChain, attr=dotName, ctx=context, **keywordArguments)
-		nameDOTname = Make.Name(identifier, context, **keywordArguments)
-		for suffix in dotName:
-			nameDOTname = addDOTname(nameDOTname, suffix, context, **keywordArguments)
-		return nameDOTname
 	@staticmethod
 	def Return(value: ast.expr | None = None, **keywordArguments: int) -> ast.Return:
 		return ast.Return(value, **keywordArguments)

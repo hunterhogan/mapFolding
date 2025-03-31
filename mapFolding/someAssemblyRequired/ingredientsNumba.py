@@ -155,7 +155,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			ndarrayName = signatureElement.arg
 			Z0Z_hacky_dtype: str = ndarrayName
 			datatype_attr = datatypeAST or Z0Z_hacky_dtype
-			ingredientsFunction.imports.addImportFromAsStr(datatypeModuleDecorator, datatype_attr)
+			ingredientsFunction.imports.addImportFrom_asStr(datatypeModuleDecorator, datatype_attr)
 			datatypeNumba = ast.Name(id=datatype_attr, ctx=ast.Load())
 
 			return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
@@ -190,7 +190,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 
 	decoratorModule: str = Z0Z_numbaDataTypeModule
 	decoratorCallable: str = Z0Z_decoratorCallable
-	ingredientsFunction.imports.addImportFromAsStr(decoratorModule, decoratorCallable)
+	ingredientsFunction.imports.addImportFrom_asStr(decoratorModule, decoratorCallable)
 	# Leave this line in so that global edits will change it.
 	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
 	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_astKeywords=listDecoratorKeywords)

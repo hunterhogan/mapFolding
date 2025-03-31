@@ -11,8 +11,6 @@ import importlib.util
 
 # TODO Identify the logic that narrows the type and can help the user during static type checking.
 
-# TODO I am using the moniker `nameDOTname` in two very different ways: differentiate them.
-
 class NodeTourist(ast.NodeVisitor):
     def __init__(self, findThis, doThat): # type: ignore
         self.findThis = findThis

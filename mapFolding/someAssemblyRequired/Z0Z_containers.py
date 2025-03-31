@@ -7,9 +7,8 @@ circular imports while providing reusable data structures.
 """
 from collections import defaultdict
 from collections.abc import Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, str_nameDOTname, parseLogicalPath2astModule
-from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3, The
-from mapFolding.theSSOT import callableDispatcherHARDCODED
+from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, parseLogicalPath2astModule, str_nameDOTname
+from mapFolding.theSSOT import callableDispatcherHARDCODED, raiseIfNoneGitHubIssueNumber3, The
 from pathlib import Path, PurePosixPath
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
@@ -17,45 +16,47 @@ import dataclasses
 
 class LedgerOfImports:
 	# TODO When resolving the ledger of imports, remove self-referential imports
+	# TODO TypeIgnore :/
 
 	def __init__(self, startWith: ast.AST | None = None) -> None:
-		self.dictionaryImportFrom: dict[str, list[tuple[str, str | None]]] = defaultdict(list)
-		self.listImport: list[str] = []
+		self.dictionaryImportFrom: dict[str_nameDOTname, list[tuple[ast_Identifier, ast_Identifier | None]]] = defaultdict(list)
+		self.listImport: list[str_nameDOTname] = []
 		if startWith:
 			self.walkThis(startWith)
 
-	def addAst(self, astImport_: ast.Import | ast.ImportFrom) -> None:
-		assert isinstance(astImport_, (ast.Import, ast.ImportFrom)), f"Expected ast.Import or ast.ImportFrom, got {type(astImport_)}"
-		if isinstance(astImport_, ast.Import):
-			for alias in astImport_.names:
+	def addAst(self, astImport____: ast.Import | ast.ImportFrom) -> None:
+		assert isinstance(astImport____, (ast.Import, ast.ImportFrom)), f"I received {type(astImport____) = }, but I can only accept {ast.Import} and {ast.ImportFrom}."
+		if be.Import(astImport____):
+			for alias in astImport____.names:
 				self.listImport.append(alias.name)
-		else:
-			if astImport_.module is not None:
-				for alias in astImport_.names:
-					self.dictionaryImportFrom[astImport_.module].append((alias.name, alias.asname))
+		elif be.ImportFrom(astImport____):
+			# TODO fix the mess created by `None` means '.'. I need a `str_nameDOTname` to replace '.'
+			if astImport____.module is None:
+				astImport____.module = '.'
+			for alias in astImport____.names:
+				self.dictionaryImportFrom[astImport____.module].append((alias.name, alias.asname))
 
-	def addImportAsStr(self, module: str) -> None:
-		self.listImport.append(module)
+	def addImport_asStr(self, moduleIdentifier: str_nameDOTname) -> None:
+		self.listImport.append(moduleIdentifier)
 
-	def addImportFromAsStr(self, module: str, name: str, asname: str | None = None) -> None:
-		self.dictionaryImportFrom[module].append((name, asname))
+	def addImportFrom_asStr(self, moduleIdentifier: ast_Identifier, name: ast_Identifier, asname: ast_Identifier | None = None) -> None:
+		self.dictionaryImportFrom[moduleIdentifier].append((name, asname))
 
-	def exportListModuleIdentifiers(self) -> list[str]:
-		listModuleIdentifiers: list[str] = list(self.dictionaryImportFrom.keys())
+	def exportListModuleIdentifiers(self) -> list[ast_Identifier]:
+		listModuleIdentifiers: list[ast_Identifier] = list(self.dictionaryImportFrom.keys())
 		listModuleIdentifiers.extend(self.listImport)
 		return sorted(set(listModuleIdentifiers))
 
-	def makeListAst(self) -> list[ast.ImportFrom | ast.Import]:
-		from mapFolding.someAssemblyRequired import Make
-		listAstImportFrom: list[ast.ImportFrom] = []
-		for module, listOfNameTuples in sorted(self.dictionaryImportFrom.items()):
+	def makeList_ast(self) -> list[ast.ImportFrom | ast.Import]:
+		listImportFrom: list[ast.ImportFrom] = []
+		for moduleIdentifier, listOfNameTuples in sorted(self.dictionaryImportFrom.items()):
 			listOfNameTuples = sorted(list(set(listOfNameTuples)), key=lambda nameTuple: nameTuple[0])
-			listAlias: list[ast.alias] = []
+			list_alias: list[ast.alias] = []
 			for name, asname in listOfNameTuples:
-				listAlias.append(Make.Alias(name, asname))
-			listAstImportFrom.append(Make.ImportFrom(module, listAlias))
-		listAstImport: list[ast.Import] = [Make.Import(name) for name in sorted(set(self.listImport))]
-		return listAstImportFrom + listAstImport
+				list_alias.append(Make.alias(name, asname))
+			listImportFrom.append(Make.ImportFrom(moduleIdentifier, list_alias))
+		list_astImport: list[ast.Import] = [Make.Import(moduleIdentifier) for moduleIdentifier in sorted(set(self.listImport))]
+		return listImportFrom + list_astImport
 
 	def update(self, *fromLedger: 'LedgerOfImports') -> None:
 		"""Update this ledger with imports from one or more other ledgers.
@@ -67,15 +68,19 @@ class LedgerOfImports:
 			self.listImport.extend(ledger.listImport)
 
 	def walkThis(self, walkThis: ast.AST) -> None:
-		for smurf in ast.walk(walkThis):
-			if isinstance(smurf, (ast.Import, ast.ImportFrom)):
-				self.addAst(smurf)
+		for nodeBuffalo in ast.walk(walkThis):
+			if isinstance(nodeBuffalo, (ast.Import, ast.ImportFrom)):
+				self.addAst(nodeBuffalo)
 
 @dataclasses.dataclass
 class IngredientsFunction:
-	"""Everything necessary to integrate a function into a module should be here."""
-	astFunctionDef: ast.FunctionDef # hint `Make.astFunctionDef`
+	"""Everything necessary to integrate a function into a module should be here.
+	Parameters:
+		astFunctionDef: hint `Make.astFunctionDef()`
+	"""
+	astFunctionDef: ast.FunctionDef
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
+	type_ignores: list[ast.TypeIgnore] = dataclasses.field(default_factory=list)
 
 @dataclasses.dataclass
 class IngredientsModule:
@@ -83,47 +88,107 @@ class IngredientsModule:
 	Extrinsic qualities should _probably_ be handled externally.
 
 	Parameters:
-		ingredientsFunction (None): One or more `IngredientsFunction` that will be deconstructed and appended to `imports` and `functions`.
+		ingredientsFunction (None): One or more `IngredientsFunction` that will appended to `listIngredientsFunctions`.
 	"""
 	ingredientsFunction: dataclasses.InitVar[Sequence[IngredientsFunction] | IngredientsFunction | None] = None
 
 	# init var with an existing module? method to deconstruct an existing module?
 
 	# `body` attribute of `ast.Module`
+	"""NOTE
+	- Bare statements in `prologue` and `epilogue` are not 'protected' by `if __name__ == '__main__':` so they will be executed merely by loading the module.
+	- The dataclass has methods for modifying `prologue`, `epilogue`, and `launcher`.
+	- However, `prologue`, `epilogue`, and `launcher` are `ast.Module` (as opposed to `list[ast.stmt]`), so that you may use tools such as `ast.walk` and `ast.NodeVisitor` on the fields.
+	"""
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
-	prologue: list[ast.stmt] = dataclasses.field(default_factory=list)
-	functions: list[ast.FunctionDef | ast.stmt] = dataclasses.field(default_factory=list)
-	epilogue: list[ast.stmt] = dataclasses.field(default_factory=list)
-	launcher: list[ast.stmt] = dataclasses.field(default_factory=list)
+	"""Modify this field using the methods in `LedgerOfImports`."""
+	prologue: ast.Module = dataclasses.field(default_factory=ast.Module)
+	"""Statements after the imports and before the functions in listIngredientsFunctions."""
+	listIngredientsFunctions: list[IngredientsFunction] = dataclasses.field(default_factory=list)
+	epilogue: ast.Module = dataclasses.field(default_factory=ast.Module)
+	"""Statements after the functions in listIngredientsFunctions and before `launcher`."""
+	launcher: ast.Module = dataclasses.field(default_factory=ast.Module)
+	"""`if __name__ == '__main__':`"""
 
-	# parameter for `ast.Module` constructor
-	type_ignores: list[ast.TypeIgnore] = dataclasses.field(default_factory=list)
+	# `ast.TypeIgnore` statements to supplement those in other fields; `type_ignores` is a parameter for `ast.Module` constructor
+	supplemental_type_ignores: list[ast.TypeIgnore] = dataclasses.field(default_factory=list)
 
 	def __post_init__(self, ingredientsFunction: Sequence[IngredientsFunction] | IngredientsFunction | None = None) -> None:
 		if ingredientsFunction is not None:
 			if isinstance(ingredientsFunction, IngredientsFunction):
-				self.addIngredientsFunction(ingredientsFunction)
+				self.appendIngredientsFunction(ingredientsFunction)
 			else:
-				self.addIngredientsFunction(*ingredientsFunction)
+				self.appendIngredientsFunction(*ingredientsFunction)
 
-	def addIngredientsFunction(self, *ingredientsFunction: IngredientsFunction) -> None:
-		"""Add one or more `IngredientsFunction`."""
-		listLedgers: list[LedgerOfImports] = []
-		for definition in ingredientsFunction:
-			self.functions.append(definition.astFunctionDef)
-			listLedgers.append(definition.imports)
-		self.imports.update(*listLedgers)
+	def _append_astModule(self, self_astModule: ast.Module, astModule: ast.Module | None, statement: Sequence[ast.stmt] | ast.stmt | None, type_ignores: list[ast.TypeIgnore] | None) -> None:
+		"""Append one or more statements to `prologue`."""
+		list_body: list[ast.stmt] = []
+		listTypeIgnore: list[ast.TypeIgnore] = []
+		if astModule is not None and be.Module(astModule):
+			list_body.extend(astModule.body)
+			listTypeIgnore.extend(astModule.type_ignores)
+		if type_ignores is not None:
+			listTypeIgnore.extend(type_ignores)
+		if statement is not None:
+			if isinstance(statement, Sequence):
+				list_body.extend(statement)
+			else:
+				list_body.append(statement)
+		self_astModule.body.extend(list_body)
+		self_astModule.type_ignores.extend(listTypeIgnore)
+
+	def appendPrologue(self, astModule: ast.Module | None = None, statement: Sequence[ast.stmt] | ast.stmt | None = None, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
+		"""Append one or more statements to `prologue`."""
+		self._append_astModule(self.prologue, astModule, statement, type_ignores)
+
+	def appendEpilogue(self, astModule: ast.Module | None = None, statement: Sequence[ast.stmt] | ast.stmt | None = None, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
+		"""Append one or more statements to `epilogue`."""
+		self._append_astModule(self.epilogue, astModule, statement, type_ignores)
+
+	def appendLauncher(self, astModule: ast.Module | None = None, statement: Sequence[ast.stmt] | ast.stmt | None = None, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
+		"""Append one or more statements to `launcher`."""
+		self._append_astModule(self.launcher, astModule, statement, type_ignores)
+
+	def appendIngredientsFunction(self, *ingredientsFunction: IngredientsFunction) -> None:
+		"""Append one or more `IngredientsFunction`."""
+		for allegedIngredientsFunction in ingredientsFunction:
+			if isinstance(allegedIngredientsFunction, IngredientsFunction):
+				self.listIngredientsFunctions.append(allegedIngredientsFunction)
+			else:
+				raise ValueError(f"I received `{type(allegedIngredientsFunction) = }`, but I can only accept `{IngredientsFunction}`.")
+
+	@property
+	def list_astImportImportFrom(self) -> list[ast.Import | ast.ImportFrom]:
+		"""List of `ast.Import` and `ast.ImportFrom` statements."""
+		sherpaLedger = LedgerOfImports()
+		listLedgers: list[LedgerOfImports] = [self.imports]
+		for ingredientsFunction in self.listIngredientsFunctions:
+			listLedgers.append(ingredientsFunction.imports)
+		sherpaLedger.update(*listLedgers)
+		return sherpaLedger.makeList_ast()
 
 	@property
 	def body(self) -> list[ast.stmt]:
 		list_stmt: list[ast.stmt] = []
-		list_stmt.extend(self.imports.makeListAst())
-		list_stmt.extend(self.prologue)
-		list_stmt.extend(self.functions)
-		list_stmt.extend(self.epilogue)
-		list_stmt.extend(self.launcher)
+		list_stmt.extend(self.list_astImportImportFrom)
+		list_stmt.extend(self.prologue.body)
+		for ingredientsFunction in self.listIngredientsFunctions:
+			list_stmt.append(ingredientsFunction.astFunctionDef)
+		list_stmt.extend(self.epilogue.body)
+		list_stmt.extend(self.launcher.body)
 		# TODO `launcher`, if it exists, must start with `if __name__ == '__main__':` and be indented
 		return list_stmt
+
+	@property
+	def type_ignores(self) -> list[ast.TypeIgnore]:
+		listTypeIgnore: list[ast.TypeIgnore] = self.supplemental_type_ignores
+		# listTypeIgnore.extend(self.imports.makeListAst())
+		listTypeIgnore.extend(self.prologue.type_ignores)
+		for ingredientsFunction in self.listIngredientsFunctions:
+			listTypeIgnore.extend(ingredientsFunction.type_ignores)
+		listTypeIgnore.extend(self.epilogue.type_ignores)
+		listTypeIgnore.extend(self.launcher.type_ignores)
+		return listTypeIgnore
 
 @dataclasses.dataclass
 class RecipeSynthesizeFlow:
@@ -134,14 +199,14 @@ class RecipeSynthesizeFlow:
 	source_astModule = parseLogicalPath2astModule(The.logicalPathModuleSourceAlgorithm)
 
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-	sourceCallableDispatcher: str = The.sourceCallableDispatcher
-	sourceCallableInitialize: str = The.sourceCallableInitialize
-	sourceCallableParallel: str = The.sourceCallableParallel
-	sourceCallableSequential: str = The.sourceCallableSequential
+	sourceCallableDispatcher: ast_Identifier = The.sourceCallableDispatcher
+	sourceCallableInitialize: ast_Identifier = The.sourceCallableInitialize
+	sourceCallableParallel: ast_Identifier = The.sourceCallableParallel
+	sourceCallableSequential: ast_Identifier = The.sourceCallableSequential
 
-	sourceDataclassIdentifier: str = The.dataclassIdentifier
-	sourceDataclassInstance: str = The.dataclassInstance
-	sourceDataclassInstanceTaskDistribution: str = The.dataclassInstanceTaskDistribution
+	sourceDataclassIdentifier: ast_Identifier = The.dataclassIdentifier
+	sourceDataclassInstance: ast_Identifier = The.dataclassInstance
+	sourceDataclassInstanceTaskDistribution: ast_Identifier = The.dataclassInstanceTaskDistribution
 	sourceLogicalPathModuleDataclass: str_nameDOTname = The.logicalPathModuleDataclass
 
 	sourceConcurrencyManagerNamespace = The.sourceConcurrencyManagerNamespace
@@ -154,28 +219,28 @@ class RecipeSynthesizeFlow:
 	packageIdentifier: ast_Identifier | None = The.packageName
 
 	# Qualified logical path ================================
-	logicalPathModuleDataclass: str = sourceLogicalPathModuleDataclass
-	logicalPathFlowRoot: str | None = 'syntheticModules'
+	logicalPathModuleDataclass: str_nameDOTname = sourceLogicalPathModuleDataclass
+	logicalPathFlowRoot: ast_Identifier | None = 'syntheticModules'
 	""" `logicalPathFlowRoot` likely corresponds to a physical filesystem directory."""
 
 	# Module ================================
-	moduleDispatcher: str = 'numbaCount_doTheNeedful'
-	moduleInitialize: str = moduleDispatcher
-	moduleParallel: str = moduleDispatcher
-	moduleSequential: str = moduleDispatcher
+	moduleDispatcher: ast_Identifier = 'numbaCount_doTheNeedful'
+	moduleInitialize: ast_Identifier = moduleDispatcher
+	moduleParallel: ast_Identifier = moduleDispatcher
+	moduleSequential: ast_Identifier = moduleDispatcher
 
 	# Function ================================
-	callableDispatcher: str = sourceCallableDispatcher
-	callableInitialize: str = sourceCallableInitialize
-	callableParallel: str = sourceCallableParallel
-	callableSequential: str = sourceCallableSequential
-	concurrencyManagerNamespace: str = sourceConcurrencyManagerNamespace
-	concurrencyManagerIdentifier: str = sourceConcurrencyManagerIdentifier
-	dataclassIdentifier: str = sourceDataclassIdentifier
+	callableDispatcher: ast_Identifier = sourceCallableDispatcher
+	callableInitialize: ast_Identifier = sourceCallableInitialize
+	callableParallel: ast_Identifier = sourceCallableParallel
+	callableSequential: ast_Identifier = sourceCallableSequential
+	concurrencyManagerNamespace: ast_Identifier = sourceConcurrencyManagerNamespace
+	concurrencyManagerIdentifier: ast_Identifier = sourceConcurrencyManagerIdentifier
+	dataclassIdentifier: ast_Identifier = sourceDataclassIdentifier
 
 	# Variable ================================
-	dataclassInstance: str = sourceDataclassInstance
-	dataclassInstanceTaskDistribution: str = sourceDataclassInstanceTaskDistribution
+	dataclassInstance: ast_Identifier = sourceDataclassInstance
+	dataclassInstanceTaskDistribution: ast_Identifier = sourceDataclassInstanceTaskDistribution
 
 	# ========================================
 	# Computed
@@ -183,7 +248,7 @@ class RecipeSynthesizeFlow:
 	"""
 theFormatStrModuleSynthetic = "{packageFlow}Count"
 theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
-theModuleDispatcherSynthetic: str = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=The.sourceCallableDispatcher)
+theModuleDispatcherSynthetic: ast_Identifier = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=The.sourceCallableDispatcher)
 theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.moduleOfSyntheticModules, theModuleDispatcherSynthetic])
 
 	"""

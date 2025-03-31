@@ -25,9 +25,11 @@ type ast_Identifier = str
 type intORlist_ast_type_paramORstr_orNone = Any
 type intORstr_orNone = Any
 type list_ast_type_paramORstr_orNone = Any
+# TODO I am using the moniker `nameDOTname` in two very different ways: differentiate them.
 type str_nameDOTname = stuPyd
 type ImaAnnotationType = ast.Attribute | ast.Constant | ast.Name | ast.Subscript
 
+# TODO understand whatever the fuck `typing.TypeVar` is _supposed_ to fucking do.
 typeCertified = typing_TypeVar('typeCertified')
 
 astMosDef = typing_TypeVar('astMosDef', bound=astClassHasDOTnameNotName)

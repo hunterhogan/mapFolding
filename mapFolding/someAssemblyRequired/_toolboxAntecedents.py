@@ -121,9 +121,13 @@ class be:
 	@staticmethod
 	def FunctionDef(node: ast.AST) -> TypeGuard[object]: return be._typeCertified(ast.FunctionDef)(node)
 	@staticmethod
-	def Import(node: ast.AST) -> TypeGuard[object]: return be._typeCertified(ast.Import)(node)
+	def Import(node: ast.AST) -> TypeGuard[ast.Import]: return be._typeCertified(ast.Import)(node)
+	@staticmethod
+	def ImportFrom(node: ast.AST) -> TypeGuard[ast.ImportFrom]: return be._typeCertified(ast.ImportFrom)(node)
 	@staticmethod
 	def keyword(node: ast.AST) -> TypeGuard[object]: return be._typeCertified(ast.keyword)(node)
+	@staticmethod
+	def Module(node: ast.AST) -> TypeGuard[typeCertified]: return be._typeCertified(ast.Module)(node)
 	@staticmethod
 	def Name(node: ast.AST) -> TypeGuard[object]: return be._typeCertified(ast.Name)(node)
 	@staticmethod
@@ -173,8 +177,8 @@ class ifThis:
 	def isAssignAndValueIsCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[object] | bool]:
 		return lambda node: be.Assign(node) and 又.value(ifThis.isCall_Identifier(identifier))(node)
 	@staticmethod
-	def isAssignAndValueIsCallNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[object] | bool]:
-		return ifThis.isAssignAndValueIs(ifThis.isCallNamespace_Identifier(namespace, identifier))
+	def isAssignAndValueIsCallAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[object] | bool]:
+		return ifThis.isAssignAndValueIs(ifThis.isCallAttributeNamespace_Identifier(namespace, identifier))
 	@staticmethod
 	def is_keywordAndValueIsConstant(node: ast.AST) -> TypeGuard[object]:
 		return be.keyword(node) and 又.value(be.Constant)(node)
@@ -264,8 +268,8 @@ Argument of type "typeCertified@isAnnAssign_targetIs" cannot be assigned to para
 	# ================================================================
 	# These are used by other functions
 	@staticmethod
-	def isCallNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[object] | bool]:
-		return lambda node: be.Call(node) and 又.func(ifThis.is_nameDOTnameNamespace_Identifier(namespace, identifier))(node)
+	def isCallAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[object] | bool]:
+		return lambda node: be.Call(node) and 又.func(ifThis.isAttributeNamespace_Identifier(namespace, identifier))(node)
 	@staticmethod
 	def isName_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[object] | bool]:
 		return lambda node: be.Name(node) and 又.id(ifThis._Identifier(identifier))(node)
@@ -293,15 +297,16 @@ Argument of type "typeCertified@isAnnAssign_targetIs" cannot be assigned to para
 		return lambda node: ifThis.matchesMeButNotAnyDescendant(ifThis.CallReallyIs(namespace, identifier))(node)
 	@staticmethod
 	def CallReallyIs(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[object] | bool]:
-		return ifThis.isCall_Identifier(identifier) or ifThis.isCallNamespace_Identifier(namespace, identifier)
+		return ifThis.isCall_Identifier(identifier) or ifThis.isCallAttributeNamespace_Identifier(namespace, identifier)
 	@staticmethod
-	def is_nameDOTnameNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[object] | bool]:
-		return lambda node: ifThis.is_nameDOTname(node) and 又.value(ifThis.isName_Identifier(namespace))(node) and 又.attr(ifThis._Identifier(identifier))(node)
+	def isAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[object] | bool]:
+		return lambda node: ifThis.isAttributeName(node) and 又.value(ifThis.isName_Identifier(namespace))(node) and 又.attr(ifThis._Identifier(identifier))(node)
 	@staticmethod
 	def _Identifier(identifier: ast_Identifier) -> Callable[[ast_Identifier | None], TypeGuard[ast_Identifier] | bool]:
 		return lambda node: node == identifier
 	@staticmethod
-	def is_nameDOTname(node: ast.AST) -> TypeGuard[object]:
+	def isAttributeName(node: ast.AST) -> TypeGuard[object]:
+		""" Displayed as Name.attribute."""
 		return be.Attribute(node) and 又.value(be.Name)(node)
 
 	@staticmethod

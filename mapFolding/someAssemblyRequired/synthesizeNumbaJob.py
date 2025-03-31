@@ -54,9 +54,10 @@ class Z0Z_RecipeJob:
 	""" `logicalPathRoot` likely corresponds to a physical filesystem directory."""
 	moduleIdentifier: ast_Identifier = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
 	countCallable: ast_Identifier = sourceCountCallable
-	dataclassIdentifier: str = sourceDataclassIdentifier
-	dataclassInstance: str = sourceDataclassInstance
-	logicalPathModuleDataclass: str = sourceLogicalPathModuleDataclass
+	dataclassIdentifier: ast_Identifier = sourceDataclassIdentifier
+	dataclassInstance: ast_Identifier = sourceDataclassInstance
+	logicalPathModuleDataclass: str_nameDOTname = sourceLogicalPathModuleDataclass
+	countingVariableIdentifier: ast_Identifier = 'groupsOfFolds'
 
 	def _makePathFilename(self,
 			pathRoot: PurePosixPath | None = None,
@@ -95,15 +96,15 @@ class Z0Z_RecipeJob:
 	# ========================================
 	# Fields you probably don't need =================================
 	# Dispatcher =================================
-	sourceDispatcherCallable: str = theNumbaFlow.callableDispatcher
-	dispatcherCallable: str = sourceDispatcherCallable
+	sourceDispatcherCallable: ast_Identifier = theNumbaFlow.callableDispatcher
+	dispatcherCallable: ast_Identifier = sourceDispatcherCallable
 	# Parallel counting =================================
-	sourceDataclassInstanceTaskDistribution: str = theNumbaFlow.dataclassInstanceTaskDistribution
-	sourceConcurrencyManagerNamespace = theNumbaFlow.concurrencyManagerNamespace
-	sourceConcurrencyManagerIdentifier = theNumbaFlow.concurrencyManagerIdentifier
-	dataclassInstanceTaskDistribution: str = sourceDataclassInstanceTaskDistribution
-	concurrencyManagerNamespace: str = sourceConcurrencyManagerNamespace
-	concurrencyManagerIdentifier: str = sourceConcurrencyManagerIdentifier
+	sourceDataclassInstanceTaskDistribution: ast_Identifier = theNumbaFlow.dataclassInstanceTaskDistribution
+	sourceConcurrencyManagerNamespace: ast_Identifier = theNumbaFlow.concurrencyManagerNamespace
+	sourceConcurrencyManagerIdentifier: ast_Identifier = theNumbaFlow.concurrencyManagerIdentifier
+	dataclassInstanceTaskDistribution: ast_Identifier = sourceDataclassInstanceTaskDistribution
+	concurrencyManagerNamespace: ast_Identifier = sourceConcurrencyManagerNamespace
+	concurrencyManagerIdentifier: ast_Identifier = sourceConcurrencyManagerIdentifier
 
 def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: Z0Z_RecipeJob) -> IngredientsModule:
 
@@ -121,8 +122,8 @@ if __name__ == '__main__':
 
 	numba_progressPythonClass: ast_Identifier = 'ProgressBar'
 	numba_progressNumbaType: ast_Identifier = 'ProgressBarType'
-	ingredientsModule.imports.addImportFromAsStr('numba_progress', numba_progressPythonClass)
-	ingredientsModule.imports.addImportFromAsStr('numba_progress', numba_progressNumbaType)
+	ingredientsModule.imports.addImportFrom_asStr('numba_progress', numba_progressPythonClass)
+	ingredientsModule.imports.addImportFrom_asStr('numba_progress', numba_progressNumbaType)
 
 	ast_argNumbaProgress = ast.arg(arg='countingVariableName', annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
@@ -200,7 +201,7 @@ def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = paramete
 	ingredientsCount.astFunctionDef.decorator_list = [] # TODO low-priority, handle this more elegantly
 	ingredientsCount = decorateCallableWithNumba(ingredientsCount, parametersNumba)
 
-	ingredientsModule.addIngredientsFunction(ingredientsCount)
+	ingredientsModule.appendIngredientsFunction(ingredientsCount)
 
 		# add imports, make str, remove unused imports
 		# put on disk

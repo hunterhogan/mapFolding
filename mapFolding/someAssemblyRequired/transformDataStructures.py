@@ -91,7 +91,7 @@ class DeReConstructField2ast:
 
 	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 
-	name: str = dataclasses.field(init=False)
+	name: ast_Identifier = dataclasses.field(init=False)
 	typeBuffalo: type[Any] | str | Any = dataclasses.field(init=False)
 	default: Any | None = dataclasses.field(init=False)
 	default_factory: Callable[..., Any] | None = dataclasses.field(init=False)
@@ -136,21 +136,21 @@ class DeReConstructField2ast:
 		if dtype:
 			constructor = 'array'
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtype.__name__))]))
-			self.ledger.addImportFromAsStr('numpy', constructor)
-			self.ledger.addImportFromAsStr('numpy', dtype.__name__)
+			self.ledger.addImportFrom_asStr('numpy', constructor)
+			self.ledger.addImportFrom_asStr('numpy', dtype.__name__)
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'array')
 		elif be.Name(self.astAnnotation):
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
-			self.ledger.addImportFromAsStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
+			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
 		elif be.Subscript(self.astAnnotation):
 			elementConstructor: ast_Identifier = self.metadata['elementConstructor']
-			self.ledger.addImportFromAsStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
+			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
 			takeTheTuple: ast.Tuple = deepcopy(self.astAnnotation.slice)
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, takeTheTuple)
 			self.Z0Z_hack = (self.astAnnAssignConstructor, elementConstructor)
 		if be.Name(self.astAnnotation):
-			self.ledger.addImportFromAsStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id) # pyright: ignore [reportUnknownArgumentType, reportUnknownMemberType, reportIJustCalledATypeGuardMethod_WTF]
+			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id) # pyright: ignore [reportUnknownArgumentType, reportUnknownMemberType, reportIJustCalledATypeGuardMethod_WTF]
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
 	"""
@@ -160,7 +160,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 		instance_Identifier: In the synthesized module/function/scope, the identifier that will be used for the instance.
 	"""
 	Official_fieldOrder: list[ast_Identifier] = []
-	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
+	dictionaryDeReConstruction: dict[ast_Identifier, DeReConstructField2ast] = {}
 
 	dataclassClassDef = extractClassDef(parseLogicalPath2astModule(logicalPathModule), dataclass_Identifier)
 	if not isinstance(dataclassClassDef, ast.ClassDef): raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
@@ -192,7 +192,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 	shatteredDataclass.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.listAnnotations))
 
 	shatteredDataclass.ledger.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
-	shatteredDataclass.ledger.addImportFromAsStr(logicalPathModule, dataclass_Identifier)
+	shatteredDataclass.ledger.addImportFrom_asStr(logicalPathModule, dataclass_Identifier)
 
 	return shatteredDataclass
 
