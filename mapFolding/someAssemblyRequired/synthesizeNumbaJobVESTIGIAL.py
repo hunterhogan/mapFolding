@@ -17,7 +17,6 @@ import inspect
 import numpy
 if TYPE_CHECKING:
 	from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState
-	from mapFolding.someAssemblyRequired.ingredientsNumba import thisIsNumbaDotJit
 	from mapFolding.someAssemblyRequired.ingredientsNumba import ParametersNumba, parametersNumbaDefault
 
 def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, statement: ast.Assign | ast.stmt, identifier: str, arrayTarget: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]], allImports: LedgerOfImports) -> tuple[ast.FunctionDef, LedgerOfImports]:
@@ -31,7 +30,6 @@ def Z0Z_gamma(FunctionDefTarget: ast.FunctionDef, astAssignee: ast.Name, stateme
 	list_astKeywords: list[ast.keyword] = [ast.keyword(arg='dtype', value=ast.Name(id=dtypeAsName, ctx=ast.Load()))]
 	allImports.addImportFromAsStr(moduleConstructor, dtypeName, dtypeAsName)
 	astCall: ast.Call = Make.Call(Make.Name(constructorName), [dataAs_astExpr], list_astKeywords)
-	astCall.
 	assignment = ast.Assign(targets=[astAssignee], value=astCall)
 	FunctionDefTarget.body.insert(0, assignment)
 	FunctionDefTarget.body.remove(statement)
@@ -83,7 +81,7 @@ def findAndReplaceArraySubscriptIn_body(FunctionDefTarget: ast.FunctionDef, iden
 	return FunctionDefTarget, allImports
 
 def removeAssignmentFrom_body(FunctionDefTarget: ast.FunctionDef, identifier: str) -> ast.FunctionDef:
-	FunctionDefSherpa: ast.AST | Sequence[ast.AST] | None = NodeChanger(ifThis.isAnyAssignmentTo(identifier), Then.removeIt).visit(FunctionDefTarget)
+	FunctionDefSherpa: ast.AST | Sequence[ast.AST] | None = NodeChanger(ifThis.isName_Identifier(identifier), Then.removeIt).visit(FunctionDefTarget)
 	if not FunctionDefSherpa:
 		raise raiseIfNoneGitHubIssueNumber3("Dude, where's my function?")
 	else:
@@ -326,7 +324,7 @@ def writeJobNumba(mapShape: tuple[int, ...], algorithmSource: ModuleType, callab
 
 	identifierCounter = 'Z0Z_identifierCountFolds'
 	astExprIncrementCounter = ast.Expr(value = Make.Call(Make.nameDOTname(identifierCounter, 'update'), listArguments=[ast.Constant(value=1)], list_astKeywords=[]))
-	FunctionDefTarget= cast(ast.FunctionDef, NodeChanger(ifThis.isAugAssignTo(identifierCounter), Then.replaceWith(astExprIncrementCounter)).visit(FunctionDefTarget))
+	# FunctionDefTarget= cast(ast.FunctionDef, NodeChanger(ifThis.isAugAssignTo(identifierCounter), Then.replaceWith(astExprIncrementCounter)).visit(FunctionDefTarget))
 	ast.fix_missing_locations(FunctionDefTarget)
 
 	for assignmentTarget in ['taskIndex', 'dimensionsTotal', identifierCounter]:
@@ -363,10 +361,6 @@ def writeJobNumba(mapShape: tuple[int, ...], algorithmSource: ModuleType, callab
 
 	FunctionDefTarget, allImports = findAndReplaceAnnAssignIn_body(FunctionDefTarget, allImports)
 	# NOTE add the perfect decorator
-	if thisIsNumbaDotJit(FunctionDefTarget.decorator_list[0]):
-		astCall: ast.Call = cast(ast.Call, FunctionDefTarget.decorator_list[0])
-		astCall.func = ast.Name(id='jit', ctx=ast.Load())
-		FunctionDefTarget.decorator_list[0] = astCall
 
 	# NOTE add imports, make str, remove unused imports
 	astImports: list[ast.ImportFrom | ast.Import] = allImports.makeListAst()

@@ -80,7 +80,11 @@ class IngredientsFunction:
 @dataclasses.dataclass
 class IngredientsModule:
 	"""Everything necessary to create one _logical_ `ast.Module` should be here.
-	Extrinsic qualities should _probably_ be handled externally."""
+	Extrinsic qualities should _probably_ be handled externally.
+
+	Parameters:
+		ingredientsFunction (None): One or more `IngredientsFunction` that will be deconstructed and appended to `imports` and `functions`.
+	"""
 	ingredientsFunction: dataclasses.InitVar[Sequence[IngredientsFunction] | IngredientsFunction | None] = None
 
 	# init var with an existing module? method to deconstruct an existing module?
@@ -138,22 +142,21 @@ class RecipeSynthesizeFlow:
 	sourceDataclassIdentifier: str = The.dataclassIdentifier
 	sourceDataclassInstance: str = The.dataclassInstance
 	sourceDataclassInstanceTaskDistribution: str = The.dataclassInstanceTaskDistribution
-	sourcePathModuleDataclass: str = The.logicalPathModuleDataclass
+	sourceLogicalPathModuleDataclass: str_nameDOTname = The.logicalPathModuleDataclass
 
 	sourceConcurrencyManagerNamespace = The.sourceConcurrencyManagerNamespace
 	sourceConcurrencyManagerIdentifier = The.sourceConcurrencyManagerIdentifier
 
 	# ========================================
-	# Logical identifiers
+	# Logical identifiers (as opposed to physical identifiers)
 	# ========================================
-	# meta ===================================
-
 	# Package ================================
-	packageName: ast_Identifier | None = The.packageName
+	packageIdentifier: ast_Identifier | None = The.packageName
 
 	# Qualified logical path ================================
-	logicalPathModuleDataclass: str = sourcePathModuleDataclass
-	Z0Z_flowLogicalPathRoot: str | None = 'syntheticModules'
+	logicalPathModuleDataclass: str = sourceLogicalPathModuleDataclass
+	logicalPathFlowRoot: str | None = 'syntheticModules'
+	""" `logicalPathFlowRoot` likely corresponds to a physical filesystem directory."""
 
 	# Module ================================
 	moduleDispatcher: str = 'numbaCount_doTheNeedful'
@@ -186,7 +189,7 @@ theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.mo
 	"""
 	# logicalPathModuleDispatcher: str = '.'.join([Z0Z_flowLogicalPathRoot, moduleDispatcher])
 	# ========================================
-	# Filesystem
+	# Filesystem (names of physical objects)
 	# ========================================
 	pathPackage: PurePosixPath | None = PurePosixPath(The.pathPackage)
 	fileExtension: str = The.fileExtension
@@ -209,16 +212,16 @@ theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.mo
 
 	@property
 	def pathFilenameDispatcher(self) -> PurePosixPath:
-		return self._makePathFilename(filenameStem=self.moduleDispatcher, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
+		return self._makePathFilename(filenameStem=self.moduleDispatcher, logicalPathINFIX=self.logicalPathFlowRoot)
 	@property
 	def pathFilenameInitialize(self) -> PurePosixPath:
-		return self._makePathFilename(filenameStem=self.moduleInitialize, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
+		return self._makePathFilename(filenameStem=self.moduleInitialize, logicalPathINFIX=self.logicalPathFlowRoot)
 	@property
 	def pathFilenameParallel(self) -> PurePosixPath:
-		return self._makePathFilename(filenameStem=self.moduleParallel, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
+		return self._makePathFilename(filenameStem=self.moduleParallel, logicalPathINFIX=self.logicalPathFlowRoot)
 	@property
 	def pathFilenameSequential(self) -> PurePosixPath:
-		return self._makePathFilename(filenameStem=self.moduleSequential, logicalPathINFIX=self.Z0Z_flowLogicalPathRoot)
+		return self._makePathFilename(filenameStem=self.moduleSequential, logicalPathINFIX=self.logicalPathFlowRoot)
 
 	def __post_init__(self) -> None:
 		if ((self.concurrencyManagerIdentifier is not None and self.concurrencyManagerIdentifier != self.sourceConcurrencyManagerIdentifier) # `submit` # type: ignore

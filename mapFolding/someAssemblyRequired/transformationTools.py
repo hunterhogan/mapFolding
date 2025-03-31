@@ -23,10 +23,10 @@ they are designed as general-purpose utilities applicable to a wide range of cod
 transformation scenarios beyond the scope of this package.
 """
 from autoflake import fix_code as autoflake_fix_code
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from copy import deepcopy
 from mapFolding.filesystem import writeStringToHere
-from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, NodeChanger, NodeTourist, Then
+from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, NodeChanger, NodeTourist, Then, typeCertified
 from mapFolding.someAssemblyRequired.Z0Z_containers import IngredientsModule
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
 from os import PathLike
@@ -67,7 +67,7 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 }
 
 # END of marginal classes and functions ======================================================
-def Z0Z_lameFindReplace(astTree: ast.AST, mappingFindReplaceNodes: dict[ast.AST, ast.AST]) -> ast.AST:
+def Z0Z_lameFindReplace(astTree: typeCertified, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]) -> typeCertified:
 	keepGoing = True
 	newTree = deepcopy(astTree)
 
@@ -138,7 +138,7 @@ def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dicti
 
 		def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
 			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
-				replacement = self.dictionaryReplacementStatements[node.func.id]  
+				replacement = self.dictionaryReplacementStatements[node.func.id]
 				if not isinstance(replacement, list):
 					return replacement
 			return node

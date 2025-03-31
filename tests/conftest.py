@@ -204,7 +204,7 @@ def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any], pathTmpTes
     # Configure synthesis flow to use test directory
     TESTINGrecipeFlow = RecipeSynthesizeFlow(
         pathPackage=PurePosixPath(pathTmpTesting.absolute()),
-        Z0Z_flowLogicalPathRoot=None,
+        logicalPathFlowRoot=None,
         moduleDispatcher="test_dispatcher",
 # Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
         # dispatcherCallable="dispatcherSynthetic",

@@ -55,10 +55,11 @@ from mapFolding.someAssemblyRequired._tool_Then import Then
 
 from mapFolding.someAssemblyRequired.transformationTools import (
 	dictionaryEstimates,
-	Z0Z_executeActionUnlessDescendantMatches,
 	extractClassDef,
 	extractFunctionDef,
+	write_astModule,
+	Z0Z_executeActionUnlessDescendantMatches,
 	Z0Z_inlineThisFunctionWithTheseValues,
-	Z0Z_makeDictionaryReplacementStatements,
 	Z0Z_lameFindReplace,
+	Z0Z_makeDictionaryReplacementStatements,
 	)

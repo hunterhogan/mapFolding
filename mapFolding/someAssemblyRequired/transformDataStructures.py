@@ -60,6 +60,7 @@ class ShatteredDataclass:
 	"""AST name node representing the counting variable identifier."""
 	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign] = dataclasses.field(default_factory=dict)
 	"""Maps field names to their corresponding AST call expressions."""
+	Z0Z_field2AnnAssign: dict[ast_Identifier, tuple[ast.AnnAssign, str]] = dataclasses.field(default_factory=dict)
 	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
 	"""AST tuple used as target for assignment to capture returned fragments."""
 	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
@@ -107,7 +108,7 @@ class DeReConstructField2ast:
 	astAnnotation: ImaAnnotationType = dataclasses.field(init=False)
 	ast_argAnnotated: ast.arg = dataclasses.field(init=False)
 	astAnnAssignConstructor: ast.AnnAssign = dataclasses.field(init=False)
-	Z0Z_hack: str = dataclasses.field(init=False)
+	Z0Z_hack: tuple[ast.AnnAssign, str] = dataclasses.field(init=False)
 
 	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: str_nameDOTname, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstance_Identifier: ast_Identifier, field: dataclasses.Field[Any]) -> None:
 		self.compare = field.compare
@@ -127,7 +128,7 @@ class DeReConstructField2ast:
 
 		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), 又.annotation(Then.getIt)).captureLastMatch(dataclassClassDef)
 		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
-		else: self.astAnnotation = sherpa # pyright: ignore [reportAttributeAccessIssue]
+		else: self.astAnnotation = sherpa
 
 		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
 
@@ -137,36 +138,17 @@ class DeReConstructField2ast:
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtype.__name__))]))
 			self.ledger.addImportFromAsStr('numpy', constructor)
 			self.ledger.addImportFromAsStr('numpy', dtype.__name__)
-			self.Z0Z_hack = 'array'
+			self.Z0Z_hack = (self.astAnnAssignConstructor, 'array')
 		elif be.Name(self.astAnnotation):
-			# fill-in `ast.Call.args[0].value`
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
 			self.ledger.addImportFromAsStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
-			self.Z0Z_hack = 'scalar'
+			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
 		elif be.Subscript(self.astAnnotation):
-			# TODO figure this out
-			# fill-in `ast.Call.Subscript.slice.elts`
-			# list_expr: list[ast.expr] = []
 			elementConstructor: ast_Identifier = self.metadata['elementConstructor']
-			# print(elementConstructor)
 			self.ledger.addImportFromAsStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
-			# for dimension in job.state.mapShape:
-			# 	list_expr.append(Make.Call(Make.Name(elementConstructor), [Make.Constant(dimension)]))
-			# astCallConstructor.Subscript.slice.elts = list_expr
-			emptySubscript: ast.Subscript = deepcopy(self.astAnnotation)
-			emptySubscript.slice.elts = []
-			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(emptySubscript))
-			self.Z0Z_hack = 'tuple'
-			"""
-			ast.Subscript(
-				value=ast.Name(id='tuple', ctx=ast.Load())
-				, slice=ast.Tuple(
-					elts=[
-						ast.Name(id='DatatypeLeavesTotal', ctx=ast.Load()), ast.Constant(value=Ellipsis)
-						]
-					, ctx=ast.Load())
-				, ctx=ast.Load())
-			"""
+			takeTheTuple: ast.Tuple = deepcopy(self.astAnnotation.slice)
+			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, takeTheTuple)
+			self.Z0Z_hack = (self.astAnnAssignConstructor, elementConstructor)
 		if be.Name(self.astAnnotation):
 			self.ledger.addImportFromAsStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id) # pyright: ignore [reportUnknownArgumentType, reportUnknownMemberType, reportIJustCalledATypeGuardMethod_WTF]
 
@@ -197,6 +179,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation,
 		countingVariableName=dictionaryDeReConstruction[countingVariable].astName,
 		field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder},
+		Z0Z_field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].Z0Z_hack for field in Official_fieldOrder},
 		list_argAnnotated4ArgumentsSpecification=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
 		list_keyword_field__field4init=[dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
 		listAnnotations=[dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],

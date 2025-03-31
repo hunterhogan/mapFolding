@@ -47,7 +47,7 @@ class Then:
 		return workhorse
 
 	@staticmethod
-	def getIt(node: ast.AST) -> ast.AST:
+	def getIt(node: ast.AST) -> ast.AST | ast_Identifier:
 		return node
 	@staticmethod
 	def insertThisAbove(list_astAST: Sequence[ast.AST]) -> Callable[[ast.AST], Sequence[ast.AST]]:

@@ -149,7 +149,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	# Module-level transformations ===========================================================
 	ingredientsModuleNumbaUnified = IngredientsModule(ingredientsFunction=listAllIngredientsFunctions, imports=LedgerOfImports(numbaFlow.source_astModule))
 
-	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageName)
+	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageIdentifier)
 
 theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 if __name__ == '__main__':
