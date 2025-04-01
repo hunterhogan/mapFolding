@@ -21,7 +21,7 @@ algorithm implementation into a highly-optimized Numba version.
 
 from collections.abc import Callable, Sequence
 from mapFolding.someAssemblyRequired import Make
-from mapFolding.someAssemblyRequired.Z0Z_containers import IngredientsFunction
+from mapFolding.someAssemblyRequired._toolboxContainers import IngredientsFunction
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, cast, Final, TYPE_CHECKING
 import ast

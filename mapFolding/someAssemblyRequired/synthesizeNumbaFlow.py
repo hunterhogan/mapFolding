@@ -33,7 +33,7 @@ from mapFolding.someAssemblyRequired import (
 	Z0Z_makeDictionaryReplacementStatements,
 	又,
 )
-from mapFolding.someAssemblyRequired.Z0Z_containers import (
+from mapFolding.someAssemblyRequired._toolboxContainers import (
 	astModuleToIngredientsFunction,
 	IngredientsModule,
 	LedgerOfImports,

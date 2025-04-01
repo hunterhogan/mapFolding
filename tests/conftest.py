@@ -3,7 +3,7 @@ from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataCon
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from mapFolding.someAssemblyRequired import importLogicalPath2Callable
 from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import makeNumbaFlow
-from mapFolding.someAssemblyRequired.Z0Z_containers import RecipeSynthesizeFlow
+from mapFolding.someAssemblyRequired._toolboxContainers import RecipeSynthesizeFlow
 from mapFolding.theSSOT import ComputationState, The, getPackageDispatcher
 from pathlib import Path, PurePosixPath
 from types import ModuleType
