@@ -39,7 +39,7 @@ from mapFolding.someAssemblyRequired._toolboxContainers import (
 	LedgerOfImports,
 	RecipeSynthesizeFlow,
 )
-from mapFolding.someAssemblyRequired.ingredientsNumba import decorateCallableWithNumba
+from mapFolding.someAssemblyRequired.toolboxNumba import decorateCallableWithNumba
 from mapFolding.someAssemblyRequired.transformDataStructures import shatter_dataclassesDOTdataclass
 from mapFolding.someAssemblyRequired.transformationTools import write_astModule
 import ast

@@ -1,10 +1,10 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
-from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, str_nameDOTname, Then, write_astModule, 又
-from mapFolding.someAssemblyRequired.ingredientsNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaDefault
-from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import theNumbaFlow
-from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState, shatter_dataclassesDOTdataclass, ShatteredDataclass
-from mapFolding.someAssemblyRequired._toolboxContainers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from mapFolding.filesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT
+from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, str_nameDOTname, Then, write_astModule, 又
+from mapFolding.someAssemblyRequired._toolboxContainers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
+from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import theNumbaFlow
+from mapFolding.someAssemblyRequired.toolboxNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaDefault
+from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState, shatter_dataclassesDOTdataclass, ShatteredDataclass
 from mapFolding.theSSOT import ComputationState, The
 from pathlib import Path, PurePosixPath
 from typing import cast
@@ -23,12 +23,16 @@ list_IdentifiersStaticValuesHARDCODED = ['dimensionsTotal', 'leavesTotal',]
 list_IdentifiersNotUsedHARDCODED = list_IdentifiersStaticValuesHARDCODED + list_IdentifiersReplacedHARDCODED + list_IdentifiersNotUsedAllHARDCODED + list_IdentifiersNotUsedParallelSequentialHARDCODED + list_IdentifiersNotUsedSequentialHARDCODED
 
 @dataclasses.dataclass
-class Z0Z_RecipeJob:
+class SpicesJobNumba:
+	useNumbaProgressBar: bool = True
+	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
+	parametersNumba: ParametersNumba = parametersNumbaDefault
+
+@dataclasses.dataclass
+class RecipeJob:
 	state: ComputationState
 	# TODO create function to calculate `foldsTotalEstimated`
 	foldsTotalEstimated: int = 0
-	useNumbaProgressBar: bool = True
-	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
 	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
 
 	# ========================================
@@ -113,7 +117,7 @@ class Z0Z_RecipeJob:
 	concurrencyManagerNamespace: ast_Identifier = sourceConcurrencyManagerNamespace
 	concurrencyManagerIdentifier: ast_Identifier = sourceConcurrencyManagerIdentifier
 
-def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: Z0Z_RecipeJob) -> IngredientsModule:
+def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJob, spices: SpicesJobNumba) -> tuple[IngredientsModule, IngredientsFunction]:
 
 	linesLaunch: str = f"""
 if __name__ == '__main__':
@@ -130,19 +134,19 @@ if __name__ == '__main__':
 	ingredientsModule.imports.addImportFrom_asStr('numba_progress', numba_progressPythonClass)
 	ingredientsModule.imports.addImportFrom_asStr('numba_progress', numba_progressNumbaType)
 
-	ast_argNumbaProgress = ast.arg(arg=job.numbaProgressBarIdentifier, annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
+	ast_argNumbaProgress = ast.arg(arg=spices.numbaProgressBarIdentifier, annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
 
 	findThis = ifThis.isAugAssign_targetIs(ifThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id))
-	doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(job.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
+	doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
 	countWithProgressBar = NodeChanger(findThis, doThat)
 	countWithProgressBar.visit(ingredientsFunction.astFunctionDef)
 
 	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
 
-	return ingredientsModule
+	return ingredientsModule, ingredientsFunction
 
-def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: IngredientsFunction, job: Z0Z_RecipeJob) -> IngredientsFunction:
+def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: IngredientsFunction, job: RecipeJob) -> IngredientsFunction:
 	ingredientsFunction.imports.update(job.shatteredDataclass.ledger)
 
 	list_IdentifiersNotUsed = list_IdentifiersNotUsedHARDCODED
@@ -180,7 +184,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	ast.fix_missing_locations(ingredientsFunction.astFunctionDef)
 	return ingredientsFunction
 
-def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = parametersNumbaDefault):
+def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba):
 		# get the raw ingredients: data and the algorithm
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(job.source_astModule, job.countCallable)
 
@@ -203,15 +207,16 @@ def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = paramete
 		NodeChanger(findThis, doThat).visit(ingredientsCount.astFunctionDef)
 
 	# This launcher eliminates the use of one identifier, so run it now and you can dynamically determine which variables are not used
-	ingredientsModule = IngredientsModule()
-	ingredientsModule = addLauncherNumbaProgress(ingredientsModule, ingredientsCount, job)
-	parametersNumba['nogil'] = True
+	if spices.useNumbaProgressBar:
+		ingredientsModule = IngredientsModule()
+		ingredientsModule, ingredientsCount = addLauncherNumbaProgress(ingredientsModule, ingredientsCount, job, spices)
+		spices.parametersNumba['nogil'] = True
 
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
 	ingredientsCount.astFunctionDef.decorator_list = [] # TODO low-priority, handle this more elegantly
 	# TODO when I add the function signature in numba style back to the decorator, the logic needs to handle `ProgressBarType:`
-	ingredientsCount = decorateCallableWithNumba(ingredientsCount, parametersNumba)
+	ingredientsCount = decorateCallableWithNumba(ingredientsCount, spices.parametersNumba)
 
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
 
@@ -243,5 +248,6 @@ def makeJobNumba(job: Z0Z_RecipeJob, parametersNumba: ParametersNumba = paramete
 if __name__ == '__main__':
 	mapShape = (6,6)
 	state = makeInitializedComputationState(mapShape)
-	aJob = Z0Z_RecipeJob(state)
-	makeJobNumba(aJob)
+	aJob = RecipeJob(state)
+	spices = SpicesJobNumba()
+	makeJobNumba(aJob, spices)

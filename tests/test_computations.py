@@ -3,7 +3,7 @@ from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.beDRY import validateListDimensions
 from mapFolding.noHomeYet import getFoldsTotalKnown
 from mapFolding.oeis import settingsOEIS, oeisIDfor_n
-from mapFolding.someAssemblyRequired.synthesizeNumbaJob import makeJobNumba, Z0Z_RecipeJob
+from mapFolding.someAssemblyRequired.synthesizeNumbaJob import makeJobNumba, RecipeJob
 from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState
 from pathlib import Path, PurePosixPath
 from tests.conftest import standardizedEqualToCallableReturn, registrarRecordsTmpObject
@@ -42,7 +42,7 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: list[int], pathFilenameT
 	pathFilenameFoldsTotal = pathFilenameModule.with_suffix('.foldsTotalTesting')
 	registrarRecordsTmpObject(pathFilenameFoldsTotal)
 
-	jobTest = Z0Z_RecipeJob(state
+	jobTest = RecipeJob(state
 						, pathModule=PurePosixPath(pathFilenameModule.parent)
 						, moduleIdentifier=pathFilenameModule.stem
 						, pathFilenameFoldsTotal=PurePosixPath(pathFilenameFoldsTotal))
