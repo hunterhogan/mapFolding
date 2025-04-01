@@ -29,7 +29,7 @@ class Make:
 	def arg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: intORstr_orNone) -> ast.arg:
 		return ast.arg(identifier, annotation, **keywordArguments)
 	@staticmethod
-	def argumentsSpecification(posonlyargs: list[ast.arg]=[], args: list[ast.arg]=[], vararg: ast.arg|None=None, kwonlyargs: list[ast.arg]=[], kw_defaults: list[ast.expr|None]=[None], kwarg: ast.arg|None=None, defaults: list[ast.expr]=[]) -> ast.arguments:
+	def argumentsSpecification(posonlyargs:list[ast.arg]=[], args:list[ast.arg]=[], vararg:ast.arg|None=None, kwonlyargs:list[ast.arg]=[], kw_defaults:list[ast.expr|None]=[None], kwarg:ast.arg|None=None, defaults:list[ast.expr]=[]) -> ast.arguments:
 		return ast.arguments(posonlyargs, args, vararg, kwonlyargs, kw_defaults, kwarg, defaults)
 	@staticmethod
 	def Assign(listTargets: Any, value: ast.expr, **keywordArguments: intORstr_orNone) -> ast.Assign:
@@ -64,7 +64,7 @@ class Make:
 	def Expr(value: ast.expr, **keywordArguments: int) -> ast.Expr:
 		return ast.Expr(value, **keywordArguments)
 	@staticmethod
-	def FunctionDef(name: ast_Identifier, argumentsSpecification: ast.arguments=ast.arguments(), body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], returns: ast.expr|None=None, **keywordArguments: intORlist_ast_type_paramORstr_orNone) -> ast.FunctionDef:
+	def FunctionDef(name: ast_Identifier, argumentsSpecification:ast.arguments=ast.arguments(), body:list[ast.stmt]=[], decorator_list:list[ast.expr]=[], returns:ast.expr|None=None, **keywordArguments: intORlist_ast_type_paramORstr_orNone) -> ast.FunctionDef:
 		return ast.FunctionDef(name, argumentsSpecification, body, decorator_list, returns, **keywordArguments)
 	@staticmethod
 	def Import(moduleIdentifier: ast_Identifier, asname: ast_Identifier | None = None, **keywordArguments: int) -> ast.Import:
@@ -76,7 +76,7 @@ class Make:
 	def keyword(keywordArgument: ast_Identifier, value: ast.expr, **keywordArguments: int) -> ast.keyword:
 		return ast.keyword(arg=keywordArgument, value=value, **keywordArguments)
 	@staticmethod
-	def Module(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore] = []) -> ast.Module:
+	def Module(body: list[ast.stmt] = [], type_ignores: list[ast.TypeIgnore] = []) -> ast.Module:
 		return ast.Module(body, type_ignores)
 	@staticmethod
 	def Name(identifier: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Name:
@@ -88,5 +88,5 @@ class Make:
 	def Subscript(value: ast.expr, slice: ast_expr_Slice, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Subscript:
 		return ast.Subscript(value, slice, context, **keywordArguments)
 	@staticmethod
-	def Tuple(elements: Sequence[ast.expr], context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Tuple:
+	def Tuple(elements: Sequence[ast.expr] = [], context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Tuple:
 		return ast.Tuple(list(elements), context, **keywordArguments)

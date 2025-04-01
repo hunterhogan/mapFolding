@@ -28,6 +28,7 @@ class Z0Z_RecipeJob:
 	# TODO create function to calculate `foldsTotalEstimated`
 	foldsTotalEstimated: int = 0
 	useNumbaProgressBar: bool = True
+	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
 	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
 
 	# ========================================
@@ -61,7 +62,6 @@ class Z0Z_RecipeJob:
 	dataclassIdentifier: ast_Identifier | None = sourceDataclassIdentifier
 	dataclassInstance: ast_Identifier | None = sourceDataclassInstance
 	logicalPathModuleDataclass: str_nameDOTname | None = sourceLogicalPathModuleDataclass
-	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
 
 	def _makePathFilename(self,
 			pathRoot: PurePosixPath | None = None,

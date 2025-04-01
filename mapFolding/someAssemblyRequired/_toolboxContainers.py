@@ -102,12 +102,12 @@ class IngredientsModule:
 	"""
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	"""Modify this field using the methods in `LedgerOfImports`."""
-	prologue: ast.Module = dataclasses.field(default_factory=ast.Module)
+	prologue: ast.Module = Make.Module([],[])
 	"""Statements after the imports and before the functions in listIngredientsFunctions."""
 	listIngredientsFunctions: list[IngredientsFunction] = dataclasses.field(default_factory=list)
-	epilogue: ast.Module = dataclasses.field(default_factory=ast.Module)
+	epilogue: ast.Module = Make.Module([],[])
 	"""Statements after the functions in listIngredientsFunctions and before `launcher`."""
-	launcher: ast.Module = dataclasses.field(default_factory=ast.Module)
+	launcher: ast.Module = Make.Module([],[])
 	"""`if __name__ == '__main__':`"""
 
 	# `ast.TypeIgnore` statements to supplement those in other fields; `type_ignores` is a parameter for `ast.Module` constructor
