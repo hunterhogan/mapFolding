@@ -1,5 +1,12 @@
 from collections.abc import Sequence
-from mapFolding.someAssemblyRequired import ast_expr_Slice, ast_Identifier, ImaAnnotationType, intORlist_ast_type_paramORstr_orNone, intORstr_orNone, list_ast_type_paramORstr_orNone
+from mapFolding.someAssemblyRequired import (
+	ast_expr_Slice,
+	ast_Identifier,
+	ImaAnnotationType,
+	intORlist_ast_type_paramORstr_orNone,
+	intORstr_orNone,
+	list_ast_type_paramORstr_orNone,
+)
 from typing import Any
 import ast
 

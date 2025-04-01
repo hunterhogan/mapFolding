@@ -53,13 +53,10 @@ from mapFolding.someAssemblyRequired._toolboxAntecedents import be, ifThis, 又
 from mapFolding.someAssemblyRequired._tool_Make import Make
 from mapFolding.someAssemblyRequired._tool_Then import Then
 
-from mapFolding.someAssemblyRequired.transformationTools import (
-	dictionaryEstimates,
-	extractClassDef,
-	extractFunctionDef,
-	write_astModule,
-	Z0Z_executeActionUnlessDescendantMatches,
-	Z0Z_inlineThisFunctionWithTheseValues,
-	Z0Z_lameFindReplace,
-	Z0Z_makeDictionaryReplacementStatements,
-	)
+from mapFolding.someAssemblyRequired._toolboxContainers import (
+	IngredientsFunction,
+	IngredientsModule,
+	LedgerOfImports,
+	RecipeSynthesizeFlow,
+	ShatteredDataclass,
+)

@@ -3,8 +3,7 @@ from mapFolding.filesystem import getPathFilenameFoldsTotal
 from mapFolding.beDRY import validateListDimensions
 from mapFolding.noHomeYet import getFoldsTotalKnown
 from mapFolding.oeis import settingsOEIS, oeisIDfor_n
-from mapFolding.someAssemblyRequired.synthesizeNumbaJob import makeJobNumba, RecipeJob
-from mapFolding.someAssemblyRequired.transformDataStructures import makeInitializedComputationState
+from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
 from pathlib import Path, PurePosixPath
 from tests.conftest import standardizedEqualToCallableReturn, registrarRecordsTmpObject
 from types import ModuleType
@@ -35,6 +34,8 @@ def test_syntheticSequential(syntheticDispatcherFixture: None, listDimensionsTes
 
 @pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: list[int], pathFilenameTmpTesting: Path) -> None:
+	from mapFolding.someAssemblyRequired.toolboxNumba import RecipeJob, SpicesJobNumba
+	from mapFolding.someAssemblyRequired.synthesizeNumbaJob import makeJobNumba
 	mapShape = validateListDimensions(oneTestCuzTestsOverwritingTests)
 	state = makeInitializedComputationState(mapShape)
 
@@ -46,8 +47,8 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: list[int], pathFilenameT
 						, pathModule=PurePosixPath(pathFilenameModule.parent)
 						, moduleIdentifier=pathFilenameModule.stem
 						, pathFilenameFoldsTotal=PurePosixPath(pathFilenameFoldsTotal))
-
-	makeJobNumba(jobTest)
+	spices = SpicesJobNumba()
+	makeJobNumba(jobTest, spices)
 
 	Don_Lapre_Road_to_Self_Improvement = importlib.util.spec_from_file_location("__main__", pathFilenameModule)
 	if Don_Lapre_Road_to_Self_Improvement is None:

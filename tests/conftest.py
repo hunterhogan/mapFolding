@@ -1,9 +1,7 @@
 from collections.abc import Callable, Generator, Sequence
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
-from mapFolding.someAssemblyRequired import importLogicalPath2Callable
-from mapFolding.someAssemblyRequired.synthesizeNumbaFlow import makeNumbaFlow
-from mapFolding.someAssemblyRequired._toolboxContainers import RecipeSynthesizeFlow
+from mapFolding.someAssemblyRequired import importLogicalPath2Callable, RecipeSynthesizeFlow
 from mapFolding.theSSOT import ComputationState, The, getPackageDispatcher
 from pathlib import Path, PurePosixPath
 from types import ModuleType
@@ -215,34 +213,35 @@ def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Gener
 
 @pytest.fixture
 def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any], pathTmpTesting: Path) -> Callable[..., Any]:
-    """Generate synthetic Numba-optimized dispatcher module and patch the dispatcher"""
-    # Configure synthesis flow to use test directory
-    TESTINGrecipeFlow = RecipeSynthesizeFlow(
-        pathPackage=PurePosixPath(pathTmpTesting.absolute()),
-        logicalPathFlowRoot=None,
-        moduleDispatcher="test_dispatcher",
+	"""Generate synthetic Numba-optimized dispatcher module and patch the dispatcher"""
+	from mapFolding.someAssemblyRequired.toolboxNumba import makeNumbaFlow
+
+	TESTINGrecipeFlow = RecipeSynthesizeFlow(
+		pathPackage=PurePosixPath(pathTmpTesting.absolute()),
+		logicalPathFlowRoot=None,
+		moduleDispatcher="test_dispatcher",
 # Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-        # dispatcherCallable="dispatcherSynthetic",
-    )
+		# dispatcherCallable="dispatcherSynthetic",
+	)
 
-    # Generate optimized module in test directory
-    makeNumbaFlow(TESTINGrecipeFlow)
+	# Generate optimized module in test directory
+	makeNumbaFlow(TESTINGrecipeFlow)
 
-    # Import synthesized dispatcher
-    importlibSpecificationDispatcher = importlib.util.spec_from_file_location(
-        TESTINGrecipeFlow.moduleDispatcher,
-        Path(TESTINGrecipeFlow.pathFilenameDispatcher),
-    )
-    if importlibSpecificationDispatcher is None or importlibSpecificationDispatcher.loader is None:
-        raise ImportError("Failed to load synthetic dispatcher module")
+	# Import synthesized dispatcher
+	importlibSpecificationDispatcher = importlib.util.spec_from_file_location(
+		TESTINGrecipeFlow.moduleDispatcher,
+		Path(TESTINGrecipeFlow.pathFilenameDispatcher),
+	)
+	if importlibSpecificationDispatcher is None or importlibSpecificationDispatcher.loader is None:
+		raise ImportError("Failed to load synthetic dispatcher module")
 
-    moduleSpecificationDispatcher = importlib.util.module_from_spec(importlibSpecificationDispatcher)
-    importlibSpecificationDispatcher.loader.exec_module(moduleSpecificationDispatcher)
-    callableDispatcherSynthetic = getattr(moduleSpecificationDispatcher, TESTINGrecipeFlow.callableDispatcher)
+	moduleSpecificationDispatcher = importlib.util.module_from_spec(importlibSpecificationDispatcher)
+	importlibSpecificationDispatcher.loader.exec_module(moduleSpecificationDispatcher)
+	callableDispatcherSynthetic = getattr(moduleSpecificationDispatcher, TESTINGrecipeFlow.callableDispatcher)
 
-    # Patch dispatcher and return callable
-    useThisDispatcher(callableDispatcherSynthetic)
-    return callableDispatcherSynthetic
+	# Patch dispatcher and return callable
+	useThisDispatcher(callableDispatcherSynthetic)
+	return callableDispatcherSynthetic
 
 def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
 	"""Format assertion message for any test comparison."""

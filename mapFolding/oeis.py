@@ -31,7 +31,7 @@ import warnings
 if TYPE_CHECKING:
 	from typing import TypedDict
 else:
-	TypedDict = dict
+	TypedDict = dict[Any, Any]
 
 cacheDays = 30
 

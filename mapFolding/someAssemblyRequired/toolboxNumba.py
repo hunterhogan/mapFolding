@@ -20,11 +20,15 @@ algorithm implementation into a highly-optimized Numba version.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import Make
-from mapFolding.someAssemblyRequired._toolboxContainers import IngredientsFunction
+from mapFolding.filesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
+from mapFolding.someAssemblyRequired import IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, be, ifThis, parsePathFilename2astModule, str_nameDOTname, IngredientsFunction, ShatteredDataclass
+from mapFolding.someAssemblyRequired.transformationTools import Z0Z_inlineThisFunctionWithTheseValues, Z0Z_lameFindReplace, Z0Z_makeDictionaryReplacementStatements, astModuleToIngredientsFunction, shatter_dataclassesDOTdataclass, write_astModule
+from mapFolding.theSSOT import ComputationState
 from numba.core.compiler import CompilerBase as numbaCompilerBase
+from pathlib import Path, PurePosixPath
 from typing import Any, cast, Final, TYPE_CHECKING
 import ast
+import dataclasses
 
 try:
 	from typing import NotRequired
@@ -34,7 +38,7 @@ except Exception:
 if TYPE_CHECKING:
 	from typing import TypedDict
 else:
-	TypedDict = dict
+	TypedDict = dict[str,Any]
 
 class ParametersNumba(TypedDict):
 	_dbg_extend_lifetimes: NotRequired[bool]
@@ -60,69 +64,17 @@ class ParametersNumba(TypedDict):
 	signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
 	target: NotRequired[str]
 
-parametersNumbaFailEarly: Final[ParametersNumba] = {
-		'_nrt': True,
-		'boundscheck': True,
-		'cache': True,
-		'error_model': 'python',
-		'fastmath': False,
-		'forceinline': True,
-		'inline': 'always',
-		'looplift': False,
-		'no_cfunc_wrapper': False,
-		'no_cpython_wrapper': False,
-		'nopython': True,
-		'parallel': False,
-}
+parametersNumbaFailEarly: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'python', 'fastmath': False, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }
 """For a production function: speed is irrelevant, error discovery is paramount, must be compatible with anything downstream."""
-
-parametersNumbaDefault: Final[ParametersNumba] = {
-		'_nrt': True,
-		'boundscheck': False,
-		'cache': True,
-		'error_model': 'numpy',
-		'fastmath': True,
-		'forceinline': True,
-		'inline': 'always',
-		'looplift': False,
-		'no_cfunc_wrapper': False,
-		'no_cpython_wrapper': False,
-		'nopython': True,
-		'parallel': False, }
+parametersNumbaDefault: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }
 """Middle of the road: fast, lean, but will talk to non-jitted functions."""
-
-parametersNumbaParallelDEFAULT: Final[ParametersNumba] = {
-		**parametersNumbaDefault,
-		'_nrt': True,
-		'parallel': True, }
+parametersNumbaParallelDEFAULT: Final[ParametersNumba] = { **parametersNumbaDefault, '_nrt': True, 'parallel': True, }
 """Middle of the road: fast, lean, but will talk to non-jitted functions."""
-
-parametersNumbaSuperJit: Final[ParametersNumba] = {
-		**parametersNumbaDefault,
-		'no_cfunc_wrapper': True,
-		'no_cpython_wrapper': True, }
+parametersNumbaSuperJit: Final[ParametersNumba] = { **parametersNumbaDefault, 'no_cfunc_wrapper': True, 'no_cpython_wrapper': True, }
 """Speed, no helmet, no talking to non-jitted functions."""
-
-parametersNumbaSuperJitParallel: Final[ParametersNumba] = {
-		**parametersNumbaSuperJit,
-		'_nrt': True,
-		'parallel': True, }
+parametersNumbaSuperJitParallel: Final[ParametersNumba] = { **parametersNumbaSuperJit, '_nrt': True, 'parallel': True, }
 """Speed, no helmet, concurrency, no talking to non-jitted functions."""
-
-parametersNumbaMinimum: Final[ParametersNumba] = {
-		'_nrt': True,
-		'boundscheck': True,
-		'cache': True,
-		'error_model': 'numpy',
-		'fastmath': True,
-		'forceinline': False,
-		'inline': 'always',
-		'looplift': False,
-		'no_cfunc_wrapper': False,
-		'no_cpython_wrapper': False,
-		'nopython': False,
-		'forceobj': True,
-		'parallel': False, }
+parametersNumbaMinimum: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': False, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': False, 'forceobj': True, 'parallel': False, }
 
 Z0Z_numbaDataTypeModule = 'numba'
 Z0Z_decoratorCallable = 'jit'
@@ -197,3 +149,210 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction
+
+@dataclasses.dataclass
+class SpicesJobNumba:
+	useNumbaProgressBar: bool = True
+	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
+	parametersNumba = parametersNumbaDefault
+
+theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
+
+@dataclasses.dataclass
+class RecipeJob:
+	state: ComputationState
+	# TODO create function to calculate `foldsTotalEstimated`
+	foldsTotalEstimated: int = 0
+	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
+
+	# ========================================
+	# Source
+	source_astModule = parsePathFilename2astModule(theNumbaFlow.pathFilenameSequential)
+	sourceCountCallable: ast_Identifier = theNumbaFlow.callableSequential
+
+	sourceLogicalPathModuleDataclass: str_nameDOTname = theNumbaFlow.logicalPathModuleDataclass
+	sourceDataclassIdentifier: ast_Identifier = theNumbaFlow.dataclassIdentifier
+	sourceDataclassInstance: ast_Identifier = theNumbaFlow.dataclassInstance
+
+	sourcePathPackage: PurePosixPath | None = theNumbaFlow.pathPackage
+	sourcePackageIdentifier: ast_Identifier | None = theNumbaFlow.packageIdentifier
+
+	# ========================================
+	# Filesystem (names of physical objects)
+	pathPackage: PurePosixPath | None = None
+	pathModule: PurePosixPath | None = PurePosixPath(getPathRootJobDEFAULT())
+	""" `pathModule` will override `pathPackage` and `logicalPathRoot`."""
+	fileExtension: str = theNumbaFlow.fileExtension
+	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
+
+	# ========================================
+	# Logical identifiers (as opposed to physical identifiers)
+	# ========================================
+	packageIdentifier: ast_Identifier | None = None
+	logicalPathRoot: str_nameDOTname | None = None
+	""" `logicalPathRoot` likely corresponds to a physical filesystem directory."""
+	moduleIdentifier: ast_Identifier = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
+	countCallable: ast_Identifier = sourceCountCallable
+	dataclassIdentifier: ast_Identifier | None = sourceDataclassIdentifier
+	dataclassInstance: ast_Identifier | None = sourceDataclassInstance
+	logicalPathModuleDataclass: str_nameDOTname | None = sourceLogicalPathModuleDataclass
+
+	def _makePathFilename(self,
+			pathRoot: PurePosixPath | None = None,
+			logicalPathINFIX: str_nameDOTname | None = None,
+			filenameStem: str | None = None,
+			fileExtension: str | None = None,
+			) -> PurePosixPath:
+		if pathRoot is None:
+			pathRoot = self.pathPackage or PurePosixPath(Path.cwd())
+		if logicalPathINFIX:
+			whyIsThisStillAThing: list[str] = logicalPathINFIX.split('.')
+			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
+		if filenameStem is None:
+			filenameStem = self.moduleIdentifier
+		if fileExtension is None:
+			fileExtension = self.fileExtension
+		filename: str = filenameStem + fileExtension
+		return pathRoot.joinpath(filename)
+
+	@property
+	def pathFilenameModule(self) -> PurePosixPath:
+		if self.pathModule is None:
+			return self._makePathFilename()
+		else:
+			return self._makePathFilename(pathRoot=self.pathModule, logicalPathINFIX=None)
+
+	def __post_init__(self):
+		pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(self.state.mapShape))
+
+		if self.moduleIdentifier is None:
+			self.moduleIdentifier = pathFilenameFoldsTotal.stem
+
+		if self.pathFilenameFoldsTotal is None:
+			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
+
+		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.dataclassIdentifier and self.dataclassInstance:
+			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.dataclassIdentifier, self.dataclassInstance)
+
+	# ========================================
+	# Fields you probably don't need =================================
+	# Dispatcher =================================
+	sourceDispatcherCallable: ast_Identifier = theNumbaFlow.callableDispatcher
+	dispatcherCallable: ast_Identifier = sourceDispatcherCallable
+	# Parallel counting =================================
+	sourceDataclassInstanceTaskDistribution: ast_Identifier = theNumbaFlow.dataclassInstanceTaskDistribution
+	sourceConcurrencyManagerNamespace: ast_Identifier = theNumbaFlow.concurrencyManagerNamespace
+	sourceConcurrencyManagerIdentifier: ast_Identifier = theNumbaFlow.concurrencyManagerIdentifier
+	dataclassInstanceTaskDistribution: ast_Identifier = sourceDataclassInstanceTaskDistribution
+	concurrencyManagerNamespace: ast_Identifier = sourceConcurrencyManagerNamespace
+	concurrencyManagerIdentifier: ast_Identifier = sourceConcurrencyManagerIdentifier
+
+def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
+	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
+	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
+
+	listAllIngredientsFunctions = [
+	(ingredientsInitialize := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceCallableInitialize)),
+	(ingredientsParallel := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceCallableParallel)),
+	(ingredientsSequential := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceCallableSequential)),
+	(ingredientsDispatcher := astModuleToIngredientsFunction(numbaFlow.source_astModule, numbaFlow.sourceCallableDispatcher)),
+	]
+
+	# Inline functions ========================================================
+	dictionaryReplacementStatements = Z0Z_makeDictionaryReplacementStatements(numbaFlow.source_astModule)
+	# NOTE Replacements statements are based on the identifiers in the _source_, so operate on the source identifiers.
+	ingredientsInitialize.astFunctionDef = Z0Z_inlineThisFunctionWithTheseValues(ingredientsInitialize.astFunctionDef, dictionaryReplacementStatements)
+	ingredientsParallel.astFunctionDef = Z0Z_inlineThisFunctionWithTheseValues(ingredientsParallel.astFunctionDef, dictionaryReplacementStatements)
+	ingredientsSequential.astFunctionDef = Z0Z_inlineThisFunctionWithTheseValues(ingredientsSequential.astFunctionDef, dictionaryReplacementStatements)
+
+	# assignRecipeIdentifiersToCallable. =============================
+	# TODO How can I use `RecipeSynthesizeFlow` as the SSOT for the pairs of items that may need to be replaced?
+	# NOTE reminder: you are updating these `ast.Name` here (and not in a more general search) because this is a
+	# narrow search for `ast.Call` so you won't accidentally replace unrelated `ast.Name`.
+	listFindReplace = [(numbaFlow.sourceCallableDispatcher, numbaFlow.callableDispatcher),
+						(numbaFlow.sourceCallableInitialize, numbaFlow.callableInitialize),
+						(numbaFlow.sourceCallableParallel, numbaFlow.callableParallel),
+						(numbaFlow.sourceCallableSequential, numbaFlow.callableSequential),]
+	for ingredients in listAllIngredientsFunctions:
+		for source_Identifier, recipe_Identifier in listFindReplace:
+			updateCallName = NodeChanger(ifThis.isCall_Identifier(source_Identifier), Then.DOTfunc(Then.replaceWith(Make.Name(recipe_Identifier))))
+			updateCallName.visit(ingredients.astFunctionDef)
+
+	ingredientsDispatcher.astFunctionDef.name = numbaFlow.callableDispatcher
+	ingredientsInitialize.astFunctionDef.name = numbaFlow.callableInitialize
+	ingredientsParallel.astFunctionDef.name = numbaFlow.callableParallel
+	ingredientsSequential.astFunctionDef.name = numbaFlow.callableSequential
+
+	# Assign identifiers per the recipe. ==============================
+	listFindReplace = [(numbaFlow.sourceDataclassInstance, numbaFlow.dataclassInstance),
+		(numbaFlow.sourceDataclassInstanceTaskDistribution, numbaFlow.dataclassInstanceTaskDistribution),
+		(numbaFlow.sourceConcurrencyManagerNamespace, numbaFlow.concurrencyManagerNamespace),]
+	for ingredients in listAllIngredientsFunctions:
+		for source_Identifier, recipe_Identifier in listFindReplace:
+			updateName = NodeChanger(ifThis.isName_Identifier(source_Identifier), Then.DOTid(Then.replaceWith(recipe_Identifier)))
+			update_arg = NodeChanger(ifThis.isArgument_Identifier(source_Identifier), Then.DOTarg(Then.replaceWith(recipe_Identifier)))
+			updateName.visit(ingredients.astFunctionDef)
+			update_arg.visit(ingredients.astFunctionDef)
+
+	updateConcurrencyManager = NodeChanger(ifThis.isCallAttributeNamespace_Identifier(numbaFlow.sourceConcurrencyManagerNamespace, numbaFlow.sourceConcurrencyManagerIdentifier)
+										, Then.DOTfunc(Then.replaceWith(Make.Attribute(Make.Name(numbaFlow.concurrencyManagerNamespace), numbaFlow.concurrencyManagerIdentifier))))
+	updateConcurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
+
+	# shatter Dataclass =======================================================
+	instance_Identifier = numbaFlow.dataclassInstance
+	getTheOtherRecord_damn = numbaFlow.dataclassInstanceTaskDistribution
+	shatteredDataclass = shatter_dataclassesDOTdataclass(numbaFlow.logicalPathModuleDataclass, numbaFlow.sourceDataclassIdentifier, instance_Identifier)
+	ingredientsDispatcher.imports.update(shatteredDataclass.ledger)
+
+	# Change callable parameters and Call to the callable at the same time ====
+	# TODO How can I use ast and/or other tools to ensure that when I change a callable, I also change the statements that call the callable?
+	# Asked differently, how do I integrate separate statements into a "subroutine", and that subroutine is "atomic/indivisible"?
+	# sequentialCallable =========================================================
+	ingredientsSequential.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
+	astCallSequentialCallable = Make.Call(Make.Name(numbaFlow.callableSequential), shatteredDataclass.listName4Parameters)
+	changeReturnSequentialCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
+	ingredientsSequential.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
+	replaceAssignSequentialCallable = NodeChanger(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.replaceWith(Make.Assign(listTargets=[shatteredDataclass.fragments4AssignmentOrParameters], value=astCallSequentialCallable)))
+
+	unpack4sequentialCallable = NodeChanger(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.insertThisAbove(shatteredDataclass.listUnpack))
+	repack4sequentialCallable = NodeChanger(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.insertThisBelow([shatteredDataclass.repack]))
+
+	changeReturnSequentialCallable.visit(ingredientsSequential.astFunctionDef)
+	replaceAssignSequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
+	unpack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
+	repack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
+
+	ingredientsSequential.astFunctionDef = Z0Z_lameFindReplace(ingredientsSequential.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name) # type: ignore
+
+	# parallelCallable =========================================================
+	ingredientsParallel.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
+	replaceCall2concurrencyManager = NodeChanger(ifThis.isCallAttributeNamespace_Identifier(numbaFlow.concurrencyManagerNamespace, numbaFlow.concurrencyManagerIdentifier), Then.replaceWith(Make.Call(Make.Attribute(Make.Name(numbaFlow.concurrencyManagerNamespace), numbaFlow.concurrencyManagerIdentifier), listArguments=[Make.Name(numbaFlow.callableParallel)] + shatteredDataclass.listName4Parameters)))
+
+	# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
+	astCallConcurrencyResult: list[ast.Call] = []
+	get_astCallConcurrencyResult: NodeTourist = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), lambda node: NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)) # pyright: ignore[reportUnknownArgumentType, reportUnknownLambdaType]
+	get_astCallConcurrencyResult.visit(ingredientsDispatcher.astFunctionDef)
+	replaceAssignParallelCallable = NodeChanger(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), Then.DOTvalue(Then.replaceWith(astCallConcurrencyResult[0])))
+	replaceAssignParallelCallable.visit(ingredientsDispatcher.astFunctionDef)
+	changeReturnParallelCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName)))
+	ingredientsParallel.astFunctionDef.returns = shatteredDataclass.countingVariableAnnotation
+
+	unpack4parallelCallable = NodeChanger(ifThis.isAssignAndValueIsCallAttributeNamespace_Identifier(numbaFlow.concurrencyManagerNamespace, numbaFlow.concurrencyManagerIdentifier), Then.insertThisAbove(shatteredDataclass.listUnpack))
+
+	unpack4parallelCallable.visit(ingredientsDispatcher.astFunctionDef)
+	replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
+	changeReturnParallelCallable.visit(ingredientsParallel.astFunctionDef)
+
+	ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name) # type: ignore
+
+	# numba decorators =========================================
+	ingredientsParallel = decorateCallableWithNumba(ingredientsParallel)
+	ingredientsSequential = decorateCallableWithNumba(ingredientsSequential)
+
+	# Module-level transformations ===========================================================
+	ingredientsModuleNumbaUnified = IngredientsModule(ingredientsFunction=listAllIngredientsFunctions, imports=LedgerOfImports(numbaFlow.source_astModule))
+
+	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageIdentifier)
+
+if __name__ == '__main__':
+	makeNumbaFlow(theNumbaFlow)

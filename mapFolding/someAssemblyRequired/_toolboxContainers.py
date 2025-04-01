@@ -7,8 +7,8 @@ circular imports while providing reusable data structures.
 """
 from collections import defaultdict
 from collections.abc import Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, parseLogicalPath2astModule, str_nameDOTname
-from mapFolding.theSSOT import callableDispatcherHARDCODED, raiseIfNoneGitHubIssueNumber3, The
+from mapFolding.someAssemblyRequired import ImaAnnotationType, ast_Identifier, be, Make, parseLogicalPath2astModule, str_nameDOTname
+from mapFolding.theSSOT import callableDispatcherHARDCODED, The
 from pathlib import Path, PurePosixPath
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
@@ -299,8 +299,36 @@ theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.mo
 		if self.callableDispatcher!=callableDispatcherHARDCODED:
 			print(f"fyi: `{self.callableDispatcher=}` but\n\t`{callableDispatcherHARDCODED=}`.")
 
-def astModuleToIngredientsFunction(astModule: ast.AST, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
-	from mapFolding.someAssemblyRequired import extractFunctionDef
-	astFunctionDef = extractFunctionDef(astModule, identifierFunctionDef)
-	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
-	return IngredientsFunction(astFunctionDef, LedgerOfImports(astModule))
+dummyAssign = Make.Assign([Make.Name("dummyTarget")], Make.Constant(None))
+dummySubscript = Make.Subscript(Make.Name("dummy"), Make.Name("slice"))
+dummyTuple = Make.Tuple([Make.Name("dummyElement")])
+
+@dataclasses.dataclass
+class ShatteredDataclass:
+	countingVariableAnnotation: ImaAnnotationType
+	"""Type annotation for the counting variable extracted from the dataclass."""
+	countingVariableName: ast.Name
+	"""AST name node representing the counting variable identifier."""
+	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign] = dataclasses.field(default_factory=dict)
+	"""Maps field names to their corresponding AST call expressions."""
+	Z0Z_field2AnnAssign: dict[ast_Identifier, tuple[ast.AnnAssign, str]] = dataclasses.field(default_factory=dict)
+	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
+	"""AST tuple used as target for assignment to capture returned fragments."""
+	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
+	"""Import records for the dataclass and its constituent parts."""
+	list_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list)
+	"""Function argument nodes with annotations for parameter specification."""
+	list_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list)
+	"""Keyword arguments for dataclass initialization with field=field format."""
+	listAnnotations: list[ImaAnnotationType] = dataclasses.field(default_factory=list)
+	"""Type annotations for each dataclass field."""
+	listName4Parameters: list[ast.Name] = dataclasses.field(default_factory=list)
+	"""Name nodes for each dataclass field used as function parameters."""
+	listUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list)
+	"""Annotated assignment statements to extract fields from dataclass."""
+	map_stateDOTfield2Name: dict[ast.expr, ast.Name] = dataclasses.field(default_factory=dict)
+	"""Maps AST expressions to Name nodes for find-replace operations."""
+	repack: ast.Assign = dummyAssign
+	"""AST assignment statement that reconstructs the original dataclass instance."""
+	signatureReturnAnnotation: ast.Subscript = dummySubscript
+	"""tuple-based return type annotation for function definitions."""
