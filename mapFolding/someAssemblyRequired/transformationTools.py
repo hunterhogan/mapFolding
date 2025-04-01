@@ -27,7 +27,26 @@ from collections.abc import Callable, Mapping
 from copy import deepcopy
 from mapFolding.beDRY import outfitCountFolds
 from mapFolding.filesystem import getPathFilenameFoldsTotal, writeStringToHere
-from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, NodeChanger, ImaAnnotationType, NodeTourist, Then, importLogicalPath2Callable, parseLogicalPath2astModule, str_nameDOTname, typeCertified, IngredientsModule, IngredientsFunction, LedgerOfImports, 又, ShatteredDataclass
+from mapFolding.someAssemblyRequired import (
+	ast_Identifier,
+	be,
+	DOT,
+	ifThis,
+	ImaAnnotationType,
+	importLogicalPath2Callable,
+	IngredientsFunction,
+	IngredientsModule,
+	LedgerOfImports,
+	Make,
+	NodeChanger,
+	NodeTourist,
+	parseLogicalPath2astModule,
+	ShatteredDataclass,
+	str_nameDOTname,
+	Then,
+	typeCertified,
+	又,
+)
 from mapFolding.theSSOT import ComputationState, The, raiseIfNoneGitHubIssueNumber3
 from os import PathLike
 from pathlib import Path, PurePath
@@ -42,6 +61,11 @@ def extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef
 def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.FunctionDef | None:
 	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.getIt).captureLastMatch(module)
 
+def makeDictionaryFunctionDef(module: ast.AST) -> dict[ast_Identifier, ast.FunctionDef]:
+	dictionaryIdentifier2FunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
+	NodeTourist(be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.getIt, dictionaryIdentifier2FunctionDef)).visit(module)
+	return dictionaryIdentifier2FunctionDef
+
 def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
 	astModule = Make.Module(ingredients.body, ingredients.type_ignores)
 	ast.fix_missing_locations(astModule)
@@ -54,12 +78,6 @@ def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] 
 	writeStringToHere(pythonSource, pathFilename)
 
 # END of acceptable classes and functions ======================================================
-
-def makeDictionaryFunctionDef(module: ast.AST) -> dict[ast_Identifier, ast.FunctionDef]:
-	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
-	NodeTourist(be.FunctionDef, Then.updateThis(dictionaryFunctionDef)).visit(module)
-	return dictionaryFunctionDef
-
 dictionaryEstimates: dict[tuple[int, ...], int] = {
 	(2,2,2,2,2,2,2,2): 362794844160000,
 	(2,21): 1493028892051200,
@@ -156,6 +174,8 @@ def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dicti
 			astFunctionDef = deepcopy(ImaInlineFunction)
 			ast.fix_missing_locations(astFunctionDef)
 	return ImaInlineFunction
+
+# Other stuff, good stuff ==========================================================
 
 def astModuleToIngredientsFunction(astModule: ast.AST, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
 	astFunctionDef = extractFunctionDef(astModule, identifierFunctionDef)

@@ -2,16 +2,49 @@ from collections.abc import Callable, Container
 from mapFolding.someAssemblyRequired import (
 	ast_expr_Slice,
 	ast_Identifier,
+	Ima_funcTypeUNEDITED,
 	astClassHasDOTnameNotName,
+	astClassOptionallyHasDOTnameNotName,
 	astClassHasDOTtarget,
 	astClassHasDOTvalue,
 	ImaAnnotationType,
+	Ima_targetType,
 	typeCertified,
 )
 from typing import Any, overload, TypeGuard
 import ast
 
-Ima_targetType = ast.AST
+class NotMyProblem(Exception):
+	pass
+
+class DOT:
+	@staticmethod
+	def func(node: ast.Call) -> Ima_funcTypeUNEDITED | ast.expr:
+		return node.func
+	@staticmethod
+	def id(node: ast.Name) -> ast_Identifier:
+		return node.id
+	@staticmethod
+	def name(node: astClassHasDOTnameNotName | astClassOptionallyHasDOTnameNotName) -> ast_Identifier:
+		if isinstance(node, astClassHasDOTnameNotName):
+			return node.name
+		try:
+			identifier = node.name
+			if identifier is None:
+				raise NotMyProblem
+			return identifier
+		except AttributeError:
+			raise NotMyProblem
+
+	@staticmethod
+	def nameOrNone(node: astClassHasDOTnameNotName | astClassOptionallyHasDOTnameNotName) -> ast_Identifier | None:
+		if isinstance(node, astClassHasDOTnameNotName):
+			return node.name
+		try:
+			return node.name
+		except AttributeError:
+			return None
+
 
 class 又:
 	@staticmethod
@@ -291,6 +324,10 @@ Argument of type "typeCertified@isAnnAssign_targetIs" cannot be assigned to para
 		return lambda node: be.Call(node) and 又.func(ifThis.isName_Identifier(identifier))(node)
 	# ================================================================
 	@staticmethod
+	def CallDoesNotCallItself(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
+		"""If `namespace` is not applicable to your case, then call with `namespace=""`."""
+		return lambda node: ifThis.matchesMeButNotAnyDescendant(ifThis.CallReallyIs(namespace, identifier))(node)
+	@staticmethod
 	def matchesMeButNotAnyDescendant(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		"""Create a predicate that returns True if the node matches but none of its descendants match the predicate."""
 		return lambda node: predicate(node) and ifThis.matchesNoDescendant(predicate)(node)
@@ -304,10 +341,6 @@ Argument of type "typeCertified@isAnnAssign_targetIs" cannot be assigned to para
 			return True
 		return workhorse
 
-	@staticmethod
-	def CallDoesNotCallItself(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
-		"""If `namespace` is not applicable to your case, then call with `namespace=""`."""
-		return lambda node: ifThis.matchesMeButNotAnyDescendant(ifThis.CallReallyIs(namespace, identifier))(node)
 	@staticmethod
 	def CallReallyIs(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
 		return ifThis.isCall_Identifier(identifier) or ifThis.isCallAttributeNamespace_Identifier(namespace, identifier)

@@ -12,8 +12,11 @@ class Then:
 		return workhorse
 
 	@staticmethod
-	def appendTo(listOfAny: list[Any]) -> Callable[[ast.AST], None]:
-		return lambda node: listOfAny.append(node)
+	def appendTo(listOfAny: list[Any]) -> Callable[[ast.AST | ast_Identifier], list[Any]]:
+		def workhorse(node: ast.AST | ast_Identifier) -> list[Any]:
+			listOfAny.append(node)
+			return listOfAny
+		return workhorse
 
 	@staticmethod
 	def DOTarg(action: Callable[[Any], Any]) -> Callable[[ast.arg | ast.keyword], ast.arg | ast.keyword]:
@@ -60,6 +63,10 @@ class Then:
 	@staticmethod
 	def replaceWith(astAST: ast.AST | ast_Identifier) -> Callable[[ast.AST], ast.AST | ast_Identifier]:
 		return lambda _replaceMe: astAST
+
 	@staticmethod
-	def updateThis(dictionaryOf_astMosDef: dict[ast_Identifier, astMosDef]) -> Callable[[astMosDef], astMosDef]:
-		return lambda node: dictionaryOf_astMosDef.setdefault(node.name, node)
+	def updateKeyValueIn(key: Callable, value: Callable, dictionary: dict):
+		def workhorse(node):
+			dictionary.setdefault(key(node), value(node))
+			return dictionary
+		return workhorse

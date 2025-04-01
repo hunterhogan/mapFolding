@@ -40,6 +40,8 @@ if TYPE_CHECKING:
 else:
 	TypedDict = dict[str,Any]
 
+theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
+
 class ParametersNumba(TypedDict):
 	_dbg_extend_lifetimes: NotRequired[bool]
 	_dbg_optnone: NotRequired[bool]
@@ -155,8 +157,6 @@ class SpicesJobNumba:
 	useNumbaProgressBar: bool = True
 	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
 	parametersNumba = parametersNumbaDefault
-
-theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 
 @dataclasses.dataclass
 class RecipeJob:

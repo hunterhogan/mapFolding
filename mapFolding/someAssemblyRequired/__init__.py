@@ -27,12 +27,14 @@ particularly for numerically-intensive algorithms that benefit from just-in-time
 from mapFolding.someAssemblyRequired._theTypes import (
 	ast_expr_Slice,
 	ast_Identifier,
-	ImaAnnotationType,
 	astClassHasDOTnameNotName,
-	astClassHasDOTnameNotNameOptional,
 	astClassHasDOTtarget,
 	astClassHasDOTvalue,
+	astClassOptionallyHasDOTnameNotName,
 	astMosDef,
+	Ima_funcTypeUNEDITED,
+	Ima_targetType,
+	ImaAnnotationType,
 	intORlist_ast_type_paramORstr_orNone,
 	intORstr_orNone,
 	list_ast_type_paramORstr_orNone,
@@ -49,7 +51,7 @@ from mapFolding.someAssemblyRequired._toolboxPython import (
 	parsePathFilename2astModule,
 	)
 
-from mapFolding.someAssemblyRequired._toolboxAntecedents import be, ifThis, 又
+from mapFolding.someAssemblyRequired._toolboxAntecedents import be, DOT, ifThis, 又
 from mapFolding.someAssemblyRequired._tool_Make import Make
 from mapFolding.someAssemblyRequired._tool_Then import Then
 
