@@ -13,9 +13,9 @@ implementation, and optional persistence of results.
 """
 
 from collections.abc import Sequence
+from mapFolding.theSSOT import ComputationState, getPackageDispatcher, The
 from mapFolding.beDRY import outfitCountFolds, setProcessorLimit, validateListDimensions
 from mapFolding.filesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
-from mapFolding.theSSOT import ComputationState, getPackageDispatcher, The
 from os import PathLike
 from pathlib import PurePath
 

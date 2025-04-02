@@ -55,7 +55,8 @@ concurrencyPackageHARDCODED = 'multiprocessing'
 # The following is an improvement, but it is not the full solution.
 # I hope that the standardized markers, `metadata={'evaluateWhen': 'packaging'}` will help to automate
 # whatever needs to happen so that the following is well implemented.
-@dataclasses.dataclass(frozen=True)
+# @dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class PackageSettings:
 
 	logicalPathModuleDispatcher: str | None = None
@@ -78,31 +79,26 @@ class PackageSettings:
 	sourceConcurrencyManagerNamespace: str = dataclasses.field(default='concurrencyManager', metadata={'evaluateWhen': 'packaging'})
 	sourceConcurrencyPackage: str = dataclasses.field(default='multiprocessing', metadata={'evaluateWhen': 'packaging'})
 
-	@property # These are not fields, and that annoys me.
-	def dataclassInstanceTaskDistribution(self) -> str:
-		""" During parallel computation, this identifier helps to create deep copies of the dataclass instance. """
-		# it follows that `metadata={'evaluateWhen': 'packaging'}`
-		return self.dataclassInstance + self.dataclassInstanceTaskDistributionSuffix
+	dataclassInstanceTaskDistribution: str = dataclasses.field(init=False, metadata={'evaluateWhen': 'packaging'})
+	""" During parallel computation, this identifier helps to create deep copies of the dataclass instance. """
+	logicalPathModuleDataclass: str = dataclasses.field(init=False)
+	""" The package.module.name logical path to the dataclass. """
+	logicalPathModuleSourceAlgorithm: str = dataclasses.field(init=False)
+	""" The package.module.name logical path to the source algorithm. """
 
-	@property # These are not fields, and that annoys me.
-	def logicalPathModuleDataclass(self) -> str:
-		""" The package.module.name logical path to the dataclass. """
-		# it follows that `metadata={'evaluateWhen': 'packaging'}`
-		return '.'.join([self.packageName, self.dataclassModule])
-
-	@property # These are not fields, and that annoys me.
-	def logicalPathModuleSourceAlgorithm(self) -> str:
-		""" The package.module.name logical path to the source algorithm. """
-		# it follows that `metadata={'evaluateWhen': 'packaging'}`
-		return '.'.join([self.packageName, self.sourceAlgorithm])
-
-	@property # These are not fields, and that annoys me.
+	@property # This is not a field, and that annoys me.
 	def dispatcher(self) -> Callable[['ComputationState'], 'ComputationState']:
 		""" _The_ callable that connects `countFolds` to the logic that does the work."""
 		logicalPath: str = self.logicalPathModuleDispatcher or self.logicalPathModuleSourceAlgorithm
 		identifier: str = self.callableDispatcher or self.sourceCallableDispatcher
 		moduleImported: ModuleType = importlib_import_module(logicalPath)
 		return getattr(moduleImported, identifier)
+
+	def __post_init__(self) -> None:
+		self.dataclassInstanceTaskDistribution = self.dataclassInstance + self.dataclassInstanceTaskDistributionSuffix
+
+		self.logicalPathModuleDataclass = '.'.join([self.packageName, self.dataclassModule])
+		self.logicalPathModuleSourceAlgorithm = '.'.join([self.packageName, self.sourceAlgorithm])
 
 The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
 
@@ -141,7 +137,7 @@ class ComputationState:
 	taskDivisions: DatatypeLeavesTotal
 	concurrencyLimit: DatatypeElephino
 
-	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'dtype': Array3D.__args__[1].__args__[0]}) # pyright: ignore[reportAttributeAccessIssue]
+	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'dtype': Array3D.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 
 	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
@@ -169,19 +165,19 @@ class ComputationState:
 		leavesTotalAsInt = int(self.leavesTotal)
 		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		if self.dimensionsUnconstrained is None:
+		if self.dimensionsUnconstrained is None: # type: ignore
 			self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
 
-		if self.foldGroups is None:
+		if self.foldGroups is None: # type: ignore
 			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), self.__dataclass_fields__['foldGroups'].metadata['dtype'])
 			self.foldGroups[-1] = self.leavesTotal
 
-		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
+		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype']) # type: ignore
 
-		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
-		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
-		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
-		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
+		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype']) # type: ignore
+		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype']) # type: ignore
+		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype']) # type: ignore
+		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype']) # type: ignore
 
 	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)

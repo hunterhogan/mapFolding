@@ -5,7 +5,7 @@ from mapFolding.someAssemblyRequired import importLogicalPath2Callable, RecipeSy
 from mapFolding.theSSOT import ComputationState, The, getPackageDispatcher
 from pathlib import Path, PurePosixPath
 from types import ModuleType
-from typing import Any, ContextManager
+from typing import Any
 import importlib
 import importlib.util
 import numpy
