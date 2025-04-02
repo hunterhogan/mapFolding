@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue, astMosDef
+from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue
 from typing import Any
 import ast
 
@@ -65,8 +65,8 @@ class Then:
 		return lambda _replaceMe: astAST
 
 	@staticmethod
-	def updateKeyValueIn(key: Callable, value: Callable, dictionary: dict):
-		def workhorse(node):
+	def updateKeyValueIn(key: Callable[..., Any], value: Callable[..., Any], dictionary: dict[Any, Any]) -> Callable[[ast.AST], dict[Any, Any]]:
+		def workhorse(node: ast.AST) -> dict[Any, Any]:
 			dictionary.setdefault(key(node), value(node))
 			return dictionary
 		return workhorse

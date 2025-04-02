@@ -44,7 +44,7 @@ from mapFolding.someAssemblyRequired import (
 	ShatteredDataclass,
 	str_nameDOTname,
 	Then,
-	typeCertified,
+	TypeCertified,
 	又,
 )
 from mapFolding.theSSOT import ComputationState, The, raiseIfNoneGitHubIssueNumber3
@@ -54,6 +54,11 @@ from typing import Any, Literal, overload
 import ast
 import dataclasses
 import pickle
+
+def astModuleToIngredientsFunction(astModule: ast.AST, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
+	astFunctionDef = extractFunctionDef(astModule, identifierFunctionDef)
+	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
+	return IngredientsFunction(astFunctionDef, LedgerOfImports(astModule))
 
 def extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef | None:
 	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.getIt).captureLastMatch(module)
@@ -66,121 +71,101 @@ def makeDictionaryFunctionDef(module: ast.AST) -> dict[ast_Identifier, ast.Funct
 	NodeTourist(be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.getIt, dictionaryIdentifier2FunctionDef)).visit(module)
 	return dictionaryIdentifier2FunctionDef
 
-def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
-	astModule = Make.Module(ingredients.body, ingredients.type_ignores)
-	ast.fix_missing_locations(astModule)
-	pythonSource: str = ast.unparse(astModule)
-	if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
-	autoflake_additional_imports: list[str] = ingredients.imports.exportListModuleIdentifiers()
-	if packageName:
-		autoflake_additional_imports.append(packageName)
-	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False)
-	writeStringToHere(pythonSource, pathFilename)
+def makeDictionary4InliningFunction(identifierToInline: ast_Identifier, dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef], FunctionDefToInline: ast.FunctionDef | None = None) -> dict[str, ast.FunctionDef]:
+	"""
+	Creates a dictionary of function definitions required for inlining a target function.
+	This function analyzes a target function and recursively collects all function definitions
+	that are called within it (and any functions called by those functions), preparing them for inlining.
+	Parameters:
+	----------
+	identifierToInline : ast_Identifier
+		The identifier of the function to be inlined.
+	dictionaryFunctionDef : dict[ast_Identifier, ast.FunctionDef]
+		A dictionary mapping function identifiers to their AST function definitions.
+	FunctionDefToInline : ast.FunctionDef | None, optional
+		The AST function definition to inline. If None, it will be retrieved from dictionaryFunctionDef using identifierToInline.
+	Returns:
+	-------
+	dict[str, ast.FunctionDef]
+		A dictionary mapping function names to their AST function definitions, containing all functions needed for inlining.
+	Raises:
+	------
+	ValueError
+		If the function to inline is not found in the dictionary, or if recursion is detected during analysis.
+	Notes:
+	-----
+	The function performs a recursive analysis to find all dependent functions needed for inlining.
+	It detects and prevents recursive function calls that could cause infinite inlining.
+	"""
+	if FunctionDefToInline is None:
+		try:
+			FunctionDefToInline = dictionaryFunctionDef[identifierToInline]
+		except KeyError as ERRORmessage:
+			raise ValueError(f"FunctionDefToInline not found in dictionaryIdentifier2FunctionDef: {identifierToInline = }") from ERRORmessage
 
-# END of acceptable classes and functions ======================================================
-dictionaryEstimates: dict[tuple[int, ...], int] = {
-	(2,2,2,2,2,2,2,2): 362794844160000,
-	(2,21): 1493028892051200,
-	(3,15): 9842024675968800,
-	(3,3,3,3): 85109616000000000000000000000000,
-	(8,8): 129950723279272000,
-}
+	listIdentifiersCalledFunctions: list[ast_Identifier] = []
+	findIdentifiersToInline = NodeTourist(ifThis.isCallToName, lambda node: Then.appendTo(listIdentifiersCalledFunctions)(DOT.id(DOT.func(node)))) # pyright: ignore[reportArgumentType]
+	findIdentifiersToInline.visit(FunctionDefToInline)
 
-# END of marginal classes and functions ======================================================
-def Z0Z_lameFindReplace(astTree, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]):
-	keepGoing = True
-	newTree = deepcopy(astTree)
-
-	while keepGoing:
-		for nodeFind, nodeReplace in mappingFindReplaceNodes.items():
-			NodeChanger(ifThis.Z0Z_unparseIs(nodeFind), Then.replaceWith(nodeReplace)).visit(newTree)
-
-		if ast.unparse(newTree) == ast.unparse(astTree):
-			keepGoing = False
-		else:
-			astTree = deepcopy(newTree)
-	return newTree
-
-# Start of I HATE PROGRAMMING ==========================================================
-# Similar functionality to call does not call itself, but it is used for something else. I hate this function, too.
-def Z0Z_descendantContainsMatchingNode(node: ast.AST, predicateFunction: Callable[[ast.AST], bool]) -> bool:
-	"""Return True if any descendant of the node (or the node itself) matches the predicateFunction."""
-	matchFound = False
-	class DescendantFinder(ast.NodeVisitor):
-		def generic_visit(self, node: ast.AST) -> None:
-			nonlocal matchFound
-			if predicateFunction(node):
-				matchFound = True
-			else:
-				super().generic_visit(node)
-	DescendantFinder().visit(node)
-	return matchFound
-
-def Z0Z_executeActionUnlessDescendantMatches(exclusionPredicate: Callable[[ast.AST], bool], actionFunction: Callable[[ast.AST], None]) -> Callable[[ast.AST], None]:
-	"""Return a new action that will execute actionFunction only if no descendant (or the node itself) matches exclusionPredicate."""
-	def wrappedAction(node: ast.AST) -> None:
-		if not Z0Z_descendantContainsMatchingNode(node, exclusionPredicate):
-			actionFunction(node)
-	return wrappedAction
-
-# Inlining functions ==========================================================
-def Z0Z_makeDictionaryReplacementStatements(module: ast.AST) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
-	"""Return a dictionary of function names and their replacement statements."""
-	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
-	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}
-	for name, astFunctionDef in dictionaryFunctionDef.items():
-		if ifThis.onlyReturnAnyCompare(astFunctionDef):
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
-		elif ifThis.onlyReturnUnaryOp(astFunctionDef):
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
-		else:
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0:-1]
-	return dictionaryReplacementStatements
-
-def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> ast.FunctionDef:
-	class FunctionInliner(ast.NodeTransformer):
-		def __init__(self, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> None:
-			self.dictionaryReplacementStatements = dictionaryReplacementStatements
-
-		def generic_visit(self, node: ast.AST) -> ast.AST:
-			"""Visit all nodes and replace them if necessary."""
-			return super().generic_visit(node)
-
-		def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.stmt]:
-			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore
-			return node
-
-		def visit_Assign(self, node: ast.Assign) -> ast.AST | list[ast.stmt]:
-			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore
-			return node
-
-		def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
-			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
-				replacement = self.dictionaryReplacementStatements[node.func.id] # type: ignore
-				if not isinstance(replacement, list):
-					return replacement
-			return node
+	dictionary4Inlining: dict[ast_Identifier, ast.FunctionDef] = {}
+	for identifier in sorted(set(listIdentifiersCalledFunctions).intersection(dictionaryFunctionDef.keys())):
+		dictionary4Inlining[identifier] = dictionaryFunctionDef[identifier]
 
 	keepGoing = True
-	ImaInlineFunction = deepcopy(astFunctionDef)
 	while keepGoing:
-		ImaInlineFunction = deepcopy(astFunctionDef)
-		FunctionInliner(deepcopy(dictionaryReplacementStatements)).visit(ImaInlineFunction)
-		if ast.unparse(ImaInlineFunction) == ast.unparse(astFunctionDef):
-			keepGoing = False
-		else:
-			astFunctionDef = deepcopy(ImaInlineFunction)
-			ast.fix_missing_locations(astFunctionDef)
-	return ImaInlineFunction
+		keepGoing = False
+		listIdentifiersCalledFunctions.clear()
+		findIdentifiersToInline.visit(Make.Module(list(dictionary4Inlining.values())))
 
-# Other stuff, good stuff ==========================================================
+		# NOTE: This is simple not comprehensive recursion protection. # TODO think about why I dislike `ifThis.CallDoesNotCallItself`
+		if identifierToInline in listIdentifiersCalledFunctions: raise ValueError(f"Recursion found: {identifierToInline = }.")
 
-def astModuleToIngredientsFunction(astModule: ast.AST, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
-	astFunctionDef = extractFunctionDef(astModule, identifierFunctionDef)
-	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
-	return IngredientsFunction(astFunctionDef, LedgerOfImports(astModule))
+		listIdentifiersCalledFunctions = sorted((set(listIdentifiersCalledFunctions).difference(dictionary4Inlining.keys())).intersection(dictionaryFunctionDef.keys()))
+		if len(listIdentifiersCalledFunctions) > 0:
+			keepGoing = True
+			for identifier in listIdentifiersCalledFunctions:
+				if identifier in dictionaryFunctionDef:
+					dictionary4Inlining[identifier] = dictionaryFunctionDef[identifier]
+
+	return dictionary4Inlining
+
+@overload
+def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[True], *,  pathFilename: PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> Path: ...
+@overload
+def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[False] = False, **keywordArguments: Any) -> ComputationState: ...
+def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: bool = False, *,  pathFilename: PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> ComputationState | Path:
+	"""
+	Initializes a computation state and optionally saves it to disk.
+
+	This function initializes a computation state using the source algorithm.
+
+	Hint: If you want an uninitialized state, call `outfitCountFolds` directly.
+
+	Parameters:
+		mapShape: List of integers representing the dimensions of the map to be folded.
+		writeJob (False): Whether to save the state to disk.
+		pathFilename (getPathFilenameFoldsTotal.pkl): The path and filename to save the state. If None, uses a default path.
+		**keywordArguments: computationDivisions:int|str|None=None,concurrencyLimit:int=1.
+	Returns:
+		stateUniversal|pathFilenameJob: The computation state for the map folding calculations, or
+			the path to the saved state file if writeJob is True.
+	"""
+	stateUniversal: ComputationState = outfitCountFolds(mapShape, **keywordArguments)
+
+	initializeState = importLogicalPath2Callable(The.logicalPathModuleSourceAlgorithm, The.sourceCallableInitialize)
+	stateUniversal = initializeState(stateUniversal)
+
+	if not writeJob:
+		return stateUniversal
+
+	if pathFilename:
+		pathFilenameJob = Path(pathFilename)
+		pathFilenameJob.parent.mkdir(parents=True, exist_ok=True)
+	else:
+		pathFilenameJob = getPathFilenameFoldsTotal(stateUniversal.mapShape).with_suffix('.pkl')
+
+	pathFilenameJob.write_bytes(pickle.dumps(stateUniversal))
+	return pathFilenameJob
 
 @dataclasses.dataclass
 class DeReConstructField2ast:
@@ -296,40 +281,89 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 
 	return shatteredDataclass
 
-@overload
-def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[True], *,  pathFilename: PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> Path: ...
-@overload
-def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[False] = False, **keywordArguments: Any) -> ComputationState: ...
-def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: bool = False, *,  pathFilename: PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> ComputationState | Path:
-	"""
-	Initializes a computation state and optionally saves it to disk.
+def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
+	astModule = Make.Module(ingredients.body, ingredients.type_ignores)
+	ast.fix_missing_locations(astModule)
+	pythonSource: str = ast.unparse(astModule)
+	if not pythonSource: raise raiseIfNoneGitHubIssueNumber3
+	autoflake_additional_imports: list[str] = ingredients.imports.exportListModuleIdentifiers()
+	if packageName:
+		autoflake_additional_imports.append(packageName)
+	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False)
+	writeStringToHere(pythonSource, pathFilename)
 
-	This function initializes a computation state using the source algorithm.
+# END of acceptable classes and functions ======================================================
+dictionaryEstimates: dict[tuple[int, ...], int] = {
+	(2,2,2,2,2,2,2,2): 362794844160000,
+	(2,21): 1493028892051200,
+	(3,15): 9842024675968800,
+	(3,3,3,3): 85109616000000000000000000000000,
+	(8,8): 129950723279272000,
+}
 
-	Hint: If you want an uninitialized state, call `outfitCountFolds` directly.
+# END of marginal classes and functions ======================================================
+def Z0Z_lameFindReplace(astTree, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]):
+	keepGoing = True
+	newTree = deepcopy(astTree)
 
-	Parameters:
-		mapShape: List of integers representing the dimensions of the map to be folded.
-		writeJob (False): Whether to save the state to disk.
-		pathFilename (getPathFilenameFoldsTotal.pkl): The path and filename to save the state. If None, uses a default path.
-		**keywordArguments: computationDivisions:int|str|None=None,concurrencyLimit:int=1.
-	Returns:
-		stateUniversal|pathFilenameJob: The computation state for the map folding calculations, or
-			the path to the saved state file if writeJob is True.
-	"""
-	stateUniversal: ComputationState = outfitCountFolds(mapShape, **keywordArguments)
+	while keepGoing:
+		for nodeFind, nodeReplace in mappingFindReplaceNodes.items():
+			NodeChanger(ifThis.Z0Z_unparseIs(nodeFind), Then.replaceWith(nodeReplace)).visit(newTree)
 
-	initializeState = importLogicalPath2Callable(The.logicalPathModuleSourceAlgorithm, The.sourceCallableInitialize)
-	stateUniversal = initializeState(stateUniversal)
+		if ast.unparse(newTree) == ast.unparse(astTree):
+			keepGoing = False
+		else:
+			astTree = deepcopy(newTree)
+	return newTree
 
-	if not writeJob:
-		return stateUniversal
+# Start of I HATE PROGRAMMING ==========================================================
+def Z0Z_makeDictionaryReplacementStatements(module: ast.AST) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
+	"""Return a dictionary of function names and their replacement statements."""
+	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
+	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}
+	for name, astFunctionDef in dictionaryFunctionDef.items():
+		if ifThis.onlyReturnAnyCompare(astFunctionDef):
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
+		elif ifThis.onlyReturnUnaryOp(astFunctionDef):
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
+		else:
+			dictionaryReplacementStatements[name] = astFunctionDef.body[0:-1]
+	return dictionaryReplacementStatements
 
-	if pathFilename:
-		pathFilenameJob = Path(pathFilename)
-		pathFilenameJob.parent.mkdir(parents=True, exist_ok=True)
-	else:
-		pathFilenameJob = getPathFilenameFoldsTotal(stateUniversal.mapShape).with_suffix('.pkl')
+def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> ast.FunctionDef:
+	class FunctionInliner(ast.NodeTransformer):
+		def __init__(self, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> None:
+			self.dictionaryReplacementStatements = dictionaryReplacementStatements
 
-	pathFilenameJob.write_bytes(pickle.dumps(stateUniversal))
-	return pathFilenameJob
+		def generic_visit(self, node: ast.AST) -> ast.AST:
+			"""Visit all nodes and replace them if necessary."""
+			return super().generic_visit(node)
+
+		def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.stmt]:
+			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
+				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore
+			return node
+
+		def visit_Assign(self, node: ast.Assign) -> ast.AST | list[ast.stmt]:
+			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
+				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore
+			return node
+
+		def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
+			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
+				replacement = self.dictionaryReplacementStatements[node.func.id] # type: ignore
+				if not isinstance(replacement, list):
+					return replacement
+			return node
+
+	keepGoing = True
+	ImaInlineFunction = deepcopy(astFunctionDef)
+	while keepGoing:
+		ImaInlineFunction = deepcopy(astFunctionDef)
+		FunctionInliner(deepcopy(dictionaryReplacementStatements)).visit(ImaInlineFunction)
+		if ast.unparse(ImaInlineFunction) == ast.unparse(astFunctionDef):
+			keepGoing = False
+		else:
+			astFunctionDef = deepcopy(ImaInlineFunction)
+			ast.fix_missing_locations(astFunctionDef)
+	return ImaInlineFunction

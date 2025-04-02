@@ -1,57 +1,43 @@
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from inspect import getsource as inspect_getsource
-from mapFolding.someAssemblyRequired import ast_Identifier, str_nameDOTname
+from mapFolding.someAssemblyRequired import ast_Identifier, str_nameDOTname, 个
 from os import PathLike
 from pathlib import Path, PurePath
 from types import ModuleType
-from typing import Any
+from typing import Any, cast, Generic, TypeGuard
 import ast
 import importlib
 import importlib.util
 
 # TODO Identify the logic that narrows the type and can help the user during static type checking.
 
-class NodeTourist(ast.NodeVisitor):
-    def __init__(self, findThis, doThat): # type: ignore
+class NodeTourist(ast.NodeVisitor, Generic[个]):
+    def __init__(self, findThis: Callable[[个], TypeGuard[个] | bool], doThat: Callable[[个], 个 | None]) -> None:
         self.findThis = findThis
         self.doThat = doThat
-        self.nodeCaptured = None
+        self.nodeCaptured: 个 | None = None
 
-    def visit(self, node): # type: ignore
+    def visit(self, node: 个) -> None: # pyright: ignore [reportGeneralTypeIssues]
         if self.findThis(node):
-            nodeActionReturn = self.doThat(node) # type: ignore
+            nodeActionReturn = self.doThat(node)
             if nodeActionReturn is not None:
-                self.nodeCaptured = nodeActionReturn # type: ignore
-        self.generic_visit(node)
+                self.nodeCaptured = nodeActionReturn
+        self.generic_visit(cast(ast.AST, node))
 
-    def captureLastMatch(self, node): # type: ignore
-        """Capture the last matched node that produces a non-None result.
-
-        This method traverses the entire tree starting at the given node
-        and returns the last non-None value produced by applying doThat
-        to a matching node. It will continue traversing after finding a match,
-        and the value captured can be replaced by later matches.
-
-        Parameters:
-            node: The AST node to start traversal from
-
-        Returns:
-            The result of applying doThat to the last matching node that returned
-            a non-None value, or None if no match found or all matches returned None
-        """
+    def captureLastMatch(self, node: 个) -> 个 | None: # pyright: ignore [reportGeneralTypeIssues]
         self.nodeCaptured = None
-        self.visit(node) # type: ignore
+        self.visit(node)
         return self.nodeCaptured
 
-class NodeChanger(ast.NodeTransformer):
-    def __init__(self, findThis, doThat): # type: ignore
+class NodeChanger(ast.NodeTransformer, Generic[个]):
+    def __init__(self, findThis: Callable[[个], bool], doThat: Callable[[个], Sequence[个] | 个 | None]) -> None:
         self.findThis = findThis
         self.doThat = doThat
 
-    def visit(self, node): # type: ignore
+    def visit(self, node: 个) -> Sequence[个] | 个 | None: # pyright: ignore [reportGeneralTypeIssues]
         if self.findThis(node):
-            return self.doThat(node) # type: ignore
-        return super().visit(node)
+            return self.doThat(node)
+        return super().visit(cast(ast.AST, node))
 
 def importLogicalPath2Callable(logicalPathModule: str_nameDOTname, identifier: ast_Identifier, packageIdentifierIfRelative: ast_Identifier | None = None) -> Callable[..., Any]:
     moduleImported: ModuleType = importlib.import_module(logicalPathModule, packageIdentifierIfRelative)
