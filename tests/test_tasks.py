@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from mapFolding.basecamp import countFolds
-from mapFolding.beDRY import getTaskDivisions, setCPUlimit, validateListDimensions, getLeavesTotal
+from mapFolding.beDRY import getTaskDivisions, setProcessorLimit, validateListDimensions, getLeavesTotal
 from mapFolding.noHomeYet import getFoldsTotalKnown
 from tests.conftest import standardizedEqualToCallableReturn
 from typing import Literal
@@ -49,4 +49,4 @@ def test_getTaskDivisions(computationDivisions: None | list[str] | Literal['maxi
 ])
 def test_setCPUlimitMalformedParameter(expected: type[ValueError] | Literal[2], parameter: list[int] | tuple[int] | set[int] | dict[str, int] | Literal['2']) -> None:
 	"""Test that invalid CPUlimit types are properly handled."""
-	standardizedEqualToCallableReturn(expected, setCPUlimit, parameter)
+	standardizedEqualToCallableReturn(expected, setProcessorLimit, parameter)

@@ -19,7 +19,7 @@ Performance considerations:
 - Incorporates lessons from multiple implementation strategies
 
 Note: This serves as a reference for manually-optimized code before the development of
-the automated transformation pipeline in the main package.
+the automated transformation assembly-line in the main package.
 """
 
 from typing import Any

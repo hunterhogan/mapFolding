@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from mapFolding.beDRY import getLeavesTotal, setCPUlimit, validateListDimensions
+from mapFolding.beDRY import getLeavesTotal, setProcessorLimit, validateListDimensions
 from mapFolding.theSSOT import The
 from tests.conftest import standardizedEqualToCallableReturn
 from typing import Any, Literal
@@ -81,4 +81,4 @@ def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> N
 ])
 def test_setCPUlimitNumba(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | Literal[0] | Literal[1], expectedLimit: Any | int) -> None:
 	numba.set_num_threads(multiprocessing.cpu_count())
-	standardizedEqualToCallableReturn(expectedLimit, setCPUlimit, CPUlimit, 'numba')
+	standardizedEqualToCallableReturn(expectedLimit, setProcessorLimit, CPUlimit, 'numba')

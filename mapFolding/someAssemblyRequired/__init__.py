@@ -14,7 +14,7 @@ Core capabilities:
 4. Performance Optimization - Apply domain-specific optimizations for numerical computation
 5. Code Generation - Generate specialized implementations with appropriate imports and syntax
 
-The transformation pipeline supports multiple optimization targets, from general-purpose
+The transformation assembly-line supports multiple optimization targets, from general-purpose
 acceleration to generating highly-specialized variants optimized for specific input parameters.
 This multi-level transformation approach allows for both development flexibility and
 runtime performance, preserving algorithm readability in the source while enabling

@@ -82,7 +82,7 @@ The package provides a sophisticated transformation framework that bridges the g
   - Study the functional state-transformation approach in `theDao.py` with clear, isolated functions
   - Explore the semantic decomposition in `reference/flattened.py` to understand algorithm sections
 
-- **Code Transformation Pipeline**:
+- **Code Transformation Assembly-line**:
   - **AST Manipulation**: Analyzes and transforms the algorithm's abstract syntax tree
   - **Dataclass "Shattering"**: Decomposes complex state objects into primitive components
   - **Optimization Applications**: Applies domain-specific optimizations for numerical computation

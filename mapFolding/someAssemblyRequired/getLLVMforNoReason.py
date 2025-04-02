@@ -18,9 +18,9 @@ mapFolding/reference/jobsCompleted/[2x19]/[2x19].ll
 
 This file demonstrates the low-level optimizations that made this previously
 intractable calculation possible. The IR reveals how the abstract algorithm was
-transformed into efficient machine code through Numba's compilation pipeline.
+transformed into efficient machine code through Numba's compilation assembly-line.
 
-While originally part of a tighter integration with the code generation pipeline,
+While originally part of a tighter integration with the code generation assembly-line,
 this module now operates as a standalone utility that can be applied to any module
 containing Numba-compiled functions.
 """

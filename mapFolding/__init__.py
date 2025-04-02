@@ -10,7 +10,8 @@ transformation tools.
 Core modules:
 - basecamp: Public API with simplified interfaces for end users
 - theDao: Core computational algorithm using a functional state-transformation approach
-- beDRY: Utility functions for common operations and parameter management
+- beDRY: Core utility functions implementing consistent data handling, validation, and
+  resource management across the package's computational assembly-line
 - theSSOT: Single Source of Truth for configuration, types, and state management
 - oeis: Interface to the Online Encyclopedia of Integer Sequences for known results
 

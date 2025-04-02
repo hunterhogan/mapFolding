@@ -19,11 +19,11 @@ to avoid namespace collisions when transforming algorithms.
 from collections.abc import Callable
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
-from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, ndarray
+from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, integer, ndarray
 from pathlib import Path
 from tomli import load as tomli_load
 from types import ModuleType
-from typing import TypeAlias
+from typing import Any, TypeAlias, TypeVar
 import dataclasses
 
 # =============================================================================
@@ -118,6 +118,8 @@ def getPackageDispatcher() -> Callable[['ComputationState'], 'ComputationState']
 # Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
 # Efficient translation of Python scalar types to Numba types https://github.com/hunterhogan/mapFolding/issues/8
 
+numpyIntegerType = TypeVar('numpyIntegerType', bound=integer[Any], covariant=True)
+
 DatatypeLeavesTotal: TypeAlias = int
 NumPyLeavesTotal: TypeAlias = numpy_int16 # this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
 
@@ -162,10 +164,10 @@ class ComputationState:
 	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 
 	def __post_init__(self) -> None:
-		from mapFolding.beDRY import makeConnectionGraph, makeDataContainer
+		from mapFolding.beDRY import getConnectionGraph, makeDataContainer
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
 		leavesTotalAsInt = int(self.leavesTotal)
-		self.connectionGraph = makeConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
+		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
 		if self.dimensionsUnconstrained is None:
 			self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
