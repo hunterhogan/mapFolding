@@ -23,10 +23,11 @@ from collections.abc import Callable, Sequence
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
 from mapFolding.someAssemblyRequired import IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, be, ifThis, parsePathFilename2astModule, str_nameDOTname, IngredientsFunction, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import Z0Z_inlineThisFunctionWithTheseValues, Z0Z_lameFindReplace, Z0Z_makeDictionaryReplacementStatements, astModuleToIngredientsFunction, shatter_dataclassesDOTdataclass, write_astModule
-from mapFolding.theSSOT import ComputationState
+from mapFolding.theSSOT import ComputationState, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeElephino as TheDatatypeElephino, DatatypeLeavesTotal as TheDatatypeLeavesTotal
+
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from pathlib import Path, PurePosixPath
-from typing import Any, cast, Final, TYPE_CHECKING
+from typing import Any, cast, Final, TYPE_CHECKING, TypeAlias
 import ast
 import dataclasses
 
@@ -78,8 +79,8 @@ parametersNumbaSuperJitParallel: Final[ParametersNumba] = { **parametersNumbaSup
 """Speed, no helmet, concurrency, no talking to non-jitted functions."""
 parametersNumbaMinimum: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': False, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': False, 'forceobj': True, 'parallel': False, }
 
-Z0Z_numbaDataTypeModule = 'numba'
-Z0Z_decoratorCallable = 'jit'
+Z0Z_numbaDataTypeModule: str_nameDOTname = 'numba'
+Z0Z_decoratorCallable: ast_Identifier = 'jit'
 
 def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:
 	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
@@ -123,7 +124,6 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 
 	list_arg4signature_or_function: list[ast.expr] = []
 	for parameter in ingredientsFunction.astFunctionDef.args.args:
-		# Efficient translation of Python scalar types to Numba types https://github.com/hunterhogan/mapFolding/issues/8
 		# For now, let Numba infer them.
 		continue
 		# signatureElement: ast.Subscript | ast.Name | None = makeSpecialSignatureForNumba(parameter)
@@ -142,8 +142,8 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		parametersNumba = parametersNumbaDefault
 	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
-	decoratorModule: str = Z0Z_numbaDataTypeModule
-	decoratorCallable: str = Z0Z_decoratorCallable
+	decoratorModule = Z0Z_numbaDataTypeModule
+	decoratorCallable = Z0Z_decoratorCallable
 	ingredientsFunction.imports.addImportFrom_asStr(decoratorModule, decoratorCallable)
 	# Leave this line in so that global edits will change it.
 	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
@@ -197,6 +197,12 @@ class RecipeJob:
 	dataclassInstance: ast_Identifier | None = sourceDataclassInstance
 	logicalPathModuleDataclass: str_nameDOTname | None = sourceLogicalPathModuleDataclass
 
+	# ========================================
+	# Datatypes
+	DatatypeFoldsTotal: TypeAlias = TheDatatypeFoldsTotal
+	DatatypeElephino: TypeAlias = TheDatatypeElephino
+	DatatypeLeavesTotal: TypeAlias = TheDatatypeLeavesTotal
+
 	def _makePathFilename(self,
 			pathRoot: PurePosixPath | None = None,
 			logicalPathINFIX: str_nameDOTname | None = None,
@@ -225,13 +231,13 @@ class RecipeJob:
 	def __post_init__(self):
 		pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(self.state.mapShape))
 
-		if self.moduleIdentifier is None:
+		if self.moduleIdentifier is None: # type: ignore
 			self.moduleIdentifier = pathFilenameFoldsTotal.stem
 
-		if self.pathFilenameFoldsTotal is None:
+		if self.pathFilenameFoldsTotal is None: # type: ignore
 			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
 
-		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.dataclassIdentifier and self.dataclassInstance:
+		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.dataclassIdentifier and self.dataclassInstance: # type: ignore
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.dataclassIdentifier, self.dataclassInstance)
 
 	# ========================================

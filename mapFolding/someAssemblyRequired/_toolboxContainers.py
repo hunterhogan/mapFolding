@@ -10,6 +10,7 @@ from collections.abc import Sequence
 from mapFolding.someAssemblyRequired import ImaAnnotationType, ast_Identifier, be, Make, parseLogicalPath2astModule, str_nameDOTname
 from mapFolding.theSSOT import callableDispatcherHARDCODED, The
 from pathlib import Path, PurePosixPath
+from typing import Literal
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import dataclasses
@@ -36,11 +37,45 @@ class LedgerOfImports:
 			for alias in astImport____.names:
 				self.dictionaryImportFrom[astImport____.module].append((alias.name, alias.asname))
 
-	def addImport_asStr(self, moduleIdentifier: str_nameDOTname) -> None:
-		self.listImport.append(moduleIdentifier)
+	def addImport_asStr(self, moduleWithLogicalPath: str_nameDOTname) -> None:
+		self.listImport.append(moduleWithLogicalPath)
 
-	def addImportFrom_asStr(self, moduleIdentifier: ast_Identifier, name: ast_Identifier, asname: ast_Identifier | None = None) -> None:
-		self.dictionaryImportFrom[moduleIdentifier].append((name, asname))
+	# def addImportFrom_asStr(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier, asname: ast_Identifier | None = None) -> None:
+	# 	self.dictionaryImportFrom[moduleWithLogicalPath].append((name, asname))
+
+	def addImportFrom_asStr(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier, asname: ast_Identifier | None = None) -> None:
+		if moduleWithLogicalPath not in self.dictionaryImportFrom:
+			self.dictionaryImportFrom[moduleWithLogicalPath] = []
+		self.dictionaryImportFrom[moduleWithLogicalPath].append((name, asname))
+
+	def removeImportFromModule(self, moduleWithLogicalPath: str_nameDOTname) -> None:
+		self.removeImportFrom(moduleWithLogicalPath, None, None)
+		"""Remove all imports from a specific module."""
+
+	def removeImportFrom(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier | None, asname: ast_Identifier | None = None) -> None:
+		if moduleWithLogicalPath is None:
+			raise SyntaxError(f"I received `{moduleWithLogicalPath = }`, but it must be the name of a module.")
+		if moduleWithLogicalPath in self.dictionaryImportFrom:
+			"""
+			name, 			asname				  	Meaning
+			ast_Identifier, ast_Identifier			: remove exact matches
+			ast_Identifier, None					: remove exact matches
+			None, 			ast_Identifier			: remove all matches for asname and if entry_asname is None remove name == ast_Identifier
+			None, 			None					: remove all matches for the module
+			"""
+			if name is None and asname is None:
+				# Remove all entries for the module
+				self.dictionaryImportFrom.pop(moduleWithLogicalPath)
+			else:
+				if name is None:
+					self.dictionaryImportFrom[moduleWithLogicalPath] = [(entry_name, entry_asname) for entry_name, entry_asname in self.dictionaryImportFrom[moduleWithLogicalPath]
+													if not (entry_asname == asname) and not (entry_asname is None and entry_name == asname)]
+				else:
+					# Remove exact matches for the module
+					self.dictionaryImportFrom[moduleWithLogicalPath] = [(entry_name, entry_asname) for entry_name, entry_asname in self.dictionaryImportFrom[moduleWithLogicalPath]
+														if not (entry_name == name and entry_asname == asname)]
+				if not self.dictionaryImportFrom[moduleWithLogicalPath]:
+					self.dictionaryImportFrom.pop(moduleWithLogicalPath)
 
 	def exportListModuleIdentifiers(self) -> list[ast_Identifier]:
 		listModuleIdentifiers: list[ast_Identifier] = list(self.dictionaryImportFrom.keys())
@@ -49,13 +84,14 @@ class LedgerOfImports:
 
 	def makeList_ast(self) -> list[ast.ImportFrom | ast.Import]:
 		listImportFrom: list[ast.ImportFrom] = []
-		for moduleIdentifier, listOfNameTuples in sorted(self.dictionaryImportFrom.items()):
+		for moduleWithLogicalPath, listOfNameTuples in sorted(self.dictionaryImportFrom.items()):
 			listOfNameTuples = sorted(list(set(listOfNameTuples)), key=lambda nameTuple: nameTuple[0])
 			list_alias: list[ast.alias] = []
 			for name, asname in listOfNameTuples:
 				list_alias.append(Make.alias(name, asname))
-			listImportFrom.append(Make.ImportFrom(moduleIdentifier, list_alias))
-		list_astImport: list[ast.Import] = [Make.Import(moduleIdentifier) for moduleIdentifier in sorted(set(self.listImport))]
+			if list_alias:
+				listImportFrom.append(Make.ImportFrom(moduleWithLogicalPath, list_alias))
+		list_astImport: list[ast.Import] = [Make.Import(moduleWithLogicalPath) for moduleWithLogicalPath in sorted(set(self.listImport))]
 		return listImportFrom + list_astImport
 
 	def update(self, *fromLedger: 'LedgerOfImports') -> None:
@@ -157,6 +193,19 @@ class IngredientsModule:
 				self.listIngredientsFunctions.append(allegedIngredientsFunction)
 			else:
 				raise ValueError(f"I received `{type(allegedIngredientsFunction) = }`, but I can only accept `{IngredientsFunction}`.")
+
+	def removeImportFromModule(self, moduleWithLogicalPath: str_nameDOTname) -> None:
+		self.removeImportFrom(moduleWithLogicalPath, None, None)
+		"""Remove all imports from a specific module."""
+
+	def removeImportFrom(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier | None, asname: ast_Identifier | None = None) -> None:
+		"""
+		This method modifies all `LedgerOfImports` in this `IngredientsModule` and all `IngredientsFunction` in `listIngredientsFunctions`.
+		It is not a "blacklist", so the import from could be added after this modification.
+		"""
+		self.imports.removeImportFrom(moduleWithLogicalPath, name, asname)
+		for ingredientsFunction in self.listIngredientsFunctions:
+			ingredientsFunction.imports.removeImportFrom(moduleWithLogicalPath, name, asname)
 
 	@property
 	def list_astImportImportFrom(self) -> list[ast.Import | ast.ImportFrom]:

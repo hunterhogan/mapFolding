@@ -219,14 +219,22 @@ class DeReConstructField2ast:
 
 		dtype = self.metadata.get('dtype', None)
 		if dtype:
+			moduleWithLogicalPath: str_nameDOTname = 'numpy'
+			annotation = 'ndarray'
+			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, annotation)
 			constructor = 'array'
-			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtype.__name__))]))
-			self.ledger.addImportFrom_asStr('numpy', constructor)
-			self.ledger.addImportFrom_asStr('numpy', dtype.__name__)
+			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, constructor)
+			dtypeIdentifier: ast_Identifier = dtype.__name__
+			dtype_asnameName: ast.Name = self.astAnnotation
+			# dtypeIdentifier_asname: ast_Identifier = moduleWithLogicalPath + '_' + dtypeIdentifier
+			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, dtypeIdentifier, dtype_asnameName.id)
+			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, Make.Name(annotation), Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', dtype_asnameName)]))
+			# self.astAnnAssignConstructor = Make.AnnAssign(self.astName, Make.Name(annotation), Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtypeIdentifier_asname))]))
+			# self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtypeIdentifier_asname))]))
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'array')
 		elif be.Name(self.astAnnotation):
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
-			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
+			# self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
 		elif be.Subscript(self.astAnnotation):
 			elementConstructor: ast_Identifier = self.metadata['elementConstructor']
@@ -289,7 +297,7 @@ def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] 
 	autoflake_additional_imports: list[str] = ingredients.imports.exportListModuleIdentifiers()
 	if packageName:
 		autoflake_additional_imports.append(packageName)
-	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=False, remove_duplicate_keys = False, remove_unused_variables = False)
+	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=True, remove_duplicate_keys = False, remove_unused_variables = False)
 	writeStringToHere(pythonSource, pathFilename)
 
 # END of acceptable classes and functions ======================================================

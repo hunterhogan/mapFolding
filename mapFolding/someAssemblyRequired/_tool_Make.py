@@ -6,6 +6,7 @@ from mapFolding.someAssemblyRequired import (
 	intORlist_ast_type_paramORstr_orNone,
 	intORstr_orNone,
 	list_ast_type_paramORstr_orNone,
+	str_nameDOTname,
 )
 from typing import Any
 import ast
@@ -74,11 +75,11 @@ class Make:
 	def FunctionDef(name: ast_Identifier, argumentsSpecification:ast.arguments=ast.arguments(), body:list[ast.stmt]=[], decorator_list:list[ast.expr]=[], returns:ast.expr|None=None, **keywordArguments: intORlist_ast_type_paramORstr_orNone) -> ast.FunctionDef:
 		return ast.FunctionDef(name, argumentsSpecification, body, decorator_list, returns, **keywordArguments)
 	@staticmethod
-	def Import(moduleIdentifier: ast_Identifier, asname: ast_Identifier | None = None, **keywordArguments: int) -> ast.Import:
-		return ast.Import(names=[Make.alias(moduleIdentifier, asname)], **keywordArguments)
+	def Import(moduleWithLogicalPath: str_nameDOTname, asname: ast_Identifier | None = None, **keywordArguments: int) -> ast.Import:
+		return ast.Import(names=[Make.alias(moduleWithLogicalPath, asname)], **keywordArguments)
 	@staticmethod
-	def ImportFrom(moduleIdentifier: ast_Identifier, list_astAlias: list[ast.alias], **keywordArguments: int) -> ast.ImportFrom:
-		return ast.ImportFrom(moduleIdentifier, list_astAlias, **keywordArguments)
+	def ImportFrom(moduleWithLogicalPath: str_nameDOTname, list_astAlias: list[ast.alias], **keywordArguments: int) -> ast.ImportFrom:
+		return ast.ImportFrom(moduleWithLogicalPath, list_astAlias, **keywordArguments)
 	@staticmethod
 	def keyword(keywordArgument: ast_Identifier, value: ast.expr, **keywordArguments: int) -> ast.keyword:
 		return ast.keyword(arg=keywordArgument, value=value, **keywordArguments)

@@ -2,7 +2,6 @@ from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
 from copy import deepcopy
 from mapFolding.theSSOT import Array1DElephino, Array1DFoldsTotal, Array1DLeavesTotal, Array3D, ComputationState, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
 from numba import jit
-from numpy import array, int16, int64
 
 def countInitialize(state: ComputationState) -> ComputationState:
     while state.leaf1ndex > 0:

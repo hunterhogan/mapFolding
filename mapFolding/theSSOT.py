@@ -112,7 +112,6 @@ def getPackageDispatcher() -> Callable[['ComputationState'], 'ComputationState']
 	return The.dispatcher
 # =============================================================================
 # Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
-# Efficient translation of Python scalar types to Numba types https://github.com/hunterhogan/mapFolding/issues/8
 
 numpyIntegerType = TypeVar('numpyIntegerType', bound=integer[Any], covariant=True)
 
