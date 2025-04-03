@@ -13,7 +13,7 @@ implementation, and optional persistence of results.
 """
 
 from collections.abc import Sequence
-from mapFolding.theSSOT import ComputationState, getPackageDispatcher, The
+from mapFolding.theSSOT import ComputationState, The
 from mapFolding.beDRY import outfitCountFolds, setProcessorLimit, validateListDimensions
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from os import PathLike
@@ -63,9 +63,7 @@ def countFolds(listDimensions: Sequence[int]
 	else:
 		pathFilenameFoldsTotal = None
 
-	dispatcherCallableProxy = getPackageDispatcher()
-	computationStateComplete: ComputationState = dispatcherCallableProxy(computationStateInitialized)
-	# computationStateComplete: ComputationState = The.dispatcher(computationStateInitialized)
+	computationStateComplete: ComputationState = The.dispatcher(computationStateInitialized)
 
 	computationStateComplete.getFoldsTotal()
 

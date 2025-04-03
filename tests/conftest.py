@@ -2,7 +2,7 @@ from collections.abc import Callable, Generator, Sequence
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from mapFolding.someAssemblyRequired import importLogicalPath2Callable, RecipeSynthesizeFlow
-from mapFolding.theSSOT import ComputationState, The, getPackageDispatcher
+from mapFolding.theSSOT import ComputationState, The
 from pathlib import Path, PurePosixPath
 from types import ModuleType
 from typing import Any
@@ -189,16 +189,27 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 	Returns
 		A context manager for patching the dispatcher
 	"""
-	import mapFolding.basecamp as basecamp
-	dispatcherOriginal = basecamp.getPackageDispatcher
+	import mapFolding.theSSOT as theSSOT
+	from mapFolding.theSSOT import The
+
+	# Store original property method
+	original_dispatcher_property = theSSOT.PackageSettings.dispatcher
 
 	def patchDispatcher(callableTarget: Callable[..., Any]) -> None:
-		def callableParameterized(*arguments: Any, **keywordArguments: Any) -> Callable[..., Any]:
-			return callableTarget
-		basecamp.getPackageDispatcher = callableParameterized
+		"""Patch the dispatcher property to return the target callable."""
+		# Create a new property that returns the target callable
+		def patched_dispatcher(self) -> Callable[['ComputationState'], 'ComputationState']:
+			def wrapper(state: 'ComputationState') -> 'ComputationState':
+				return callableTarget(state)
+			return wrapper
+
+		# Replace the property with our patched version
+		theSSOT.PackageSettings.dispatcher = property(patched_dispatcher) # type: ignore
 
 	yield patchDispatcher
-	basecamp.getPackageDispatcher = dispatcherOriginal
+
+	# Restore the original property
+	theSSOT.PackageSettings.dispatcher = original_dispatcher_property # type: ignore
 
 def getAlgorithmDispatcher() -> Callable[[ComputationState], ComputationState]:
 	moduleImported: ModuleType = importlib.import_module(The.logicalPathModuleSourceAlgorithm)

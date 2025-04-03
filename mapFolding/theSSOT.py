@@ -102,14 +102,6 @@ class PackageSettings:
 
 The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
 
-# To remove this function, I need to learn how to change "conftest.py" to patch this.
-def getPackageDispatcher() -> Callable[['ComputationState'], 'ComputationState']:
-	"""Get the dispatcher callable for the package.
-
-	This function retrieves the dispatcher callable for the package based on the
-	logical path module and callable dispatcher defined in the PackageSettings.
-	"""
-	return The.dispatcher
 # =============================================================================
 # Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
 
