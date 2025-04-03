@@ -2,26 +2,31 @@
 Interface to The Online Encyclopedia of Integer Sequences (OEIS) for map folding sequences.
 
 This module provides a comprehensive interface for accessing and utilizing integer sequences
-from the OEIS that relate to map folding problems. It implements functionality to:
+from the OEIS that relate to map folding problems. It serves as the bridge between
+mathematical sequence definitions and the computational algorithm, implementing:
 
-1. Retrieve sequence data from OEIS with local caching for performance
-2. Map sequence indices to corresponding map shapes based on sequence definitions
-3. Provide a command-line interface for sequence lookups
-4. Execute map folding computations for sequence terms not available in OEIS
+1. Retrieval of sequence data from OEIS with local caching for performance optimization.
+2. Mapping of sequence indices to corresponding map shapes based on sequence definitions.
+3. Command-line and programmatic interfaces for sequence lookups and validation.
+4. Computation of sequence terms not available in the OEIS database.
 
 The module maintains a registry of implemented OEIS sequences (A001415-A001418, A195646)
-with their metadata, known values, and functions to convert between sequence indices and
+with their metadata, known values, and conversion functions between sequence indices and
 map dimensions. This allows the package to validate results against established mathematical
-literature and extend sequences beyond their currently known terms.
+literature while also extending sequences beyond their currently known terms.
+
+Each sequence is carefully mapped to its corresponding map folding problem, enabling
+seamless integration between the mathematical definition in OEIS and the computational
+implementation in the package.
 """
 from collections.abc import Callable
 from datetime import datetime, timedelta
+from functools import cache
 from mapFolding.theSSOT import The
 from mapFolding.toolboxFilesystem import writeStringToHere
 from pathlib import Path
 from typing import Any, Final, TYPE_CHECKING
 import argparse
-import pathlib
 import random
 import sys
 import time
@@ -35,9 +40,6 @@ else:
 	TypedDict = dict[Any, Any]
 
 cacheDays = 30
-
-"""
-Section: make `settingsOEIS`"""
 
 pathCache: Path = The.pathPackage / ".cache"
 
@@ -159,7 +161,7 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 		OEISsequence[n] = aOFn
 	return OEISsequence
 
-def getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
+def getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 	tryCache: bool = False
 	if pathFilenameCache.exists():
 		fileAge: timedelta = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
@@ -186,6 +188,7 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 	"""
 	Retrieves the specified OEIS sequence as a dictionary mapping integer indices
 	to their corresponding values.
+
 	This function checks for a cached local copy of the sequence data, using it if
 	it has not expired. Otherwise, it fetches the sequence data from the OEIS
 	website and writes it to the cache. The parsed data is returned as a dictionary
@@ -195,7 +198,7 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 		oeisID: The identifier of the OEIS sequence to retrieve.
 	Returns:
 		OEISsequence: A dictionary where each key is an integer index, `n`, and each
-		value is the corresponding "a(n)" from the OEIS entry.
+		value is the corresponding `a(n)` from the OEIS entry.
 	Raises:
 		ValueError: If the cached or downloaded file format is invalid.
 		IOError: If there is an error reading from or writing to the local cache.
@@ -259,8 +262,23 @@ def makeSettingsOEIS() -> dict[str, SettingsOEIS]:
 settingsOEIS: dict[str, SettingsOEIS] = makeSettingsOEIS()
 """All values and settings for `oeisIDsImplemented`."""
 
-"""
-Section: private functions"""
+@cache
+def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
+	"""Returns a dictionary mapping dimension tuples to their known folding totals."""
+	dictionaryMapDimensionsToFoldsTotalKnown: dict[tuple[int, ...], int] = {}
+
+	for settings in settingsOEIS.values():
+		sequence = settings['valuesKnown']
+
+		for n, foldingsTotal in sequence.items():
+			mapShape = settings['getMapShape'](n)
+			mapShape = tuple(sorted(mapShape))
+			dictionaryMapDimensionsToFoldsTotalKnown[mapShape] = foldingsTotal
+	return dictionaryMapDimensionsToFoldsTotalKnown
+
+def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
+	lookupFoldsTotal = makeDictionaryFoldsTotalKnown()
+	return lookupFoldsTotal.get(tuple(mapShape), -1)
 
 def _formatHelpText() -> str:
 	"""Format standardized help text for both CLI and interactive use."""
@@ -285,35 +303,32 @@ def _formatOEISsequenceInfo() -> str:
 		for oeisID in oeisIDsImplemented
 	)
 
-"""
-Section: public functions"""
-
 def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 	"""
-	Calculate a(n) of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
+	Calculate `a(n)` of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
 
 	Parameters:
 		oeisID: The ID of the OEIS sequence.
 		n: A non-negative integer for which to calculate the sequence value.
 
 	Returns:
-		sequenceValue: a(n) of the OEIS sequence.
+		sequenceValue: `a(n)` of the OEIS sequence.
 
 	Raises:
-		ValueError: If n is negative.
+		ValueError: If `n` is negative.
 		KeyError: If the OEIS sequence ID is not directly implemented.
 	"""
 	oeisID = validateOEISid(oeisID)
 
 	if not isinstance(n, int) or n < 0:
-		raise ValueError("`n` must be non-negative integer.")
+		raise ValueError(f"I received `{n = }` in the form of `{type(n) = }`, but it must be non-negative integer in the form of `{int}`.")
 
 	mapShape: tuple[int, ...] = settingsOEIS[oeisID]['getMapShape'](n)
 
 	if n <= 1 or len(mapShape) < 2:
 		offset: int = settingsOEIS[oeisID]['offset']
 		if n < offset:
-			raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at n={n}.")
+			raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at {n = }.")
 		foldsTotal: int = settingsOEIS[oeisID]['valuesKnown'][n]
 		return foldsTotal
 	from mapFolding.basecamp import countFolds

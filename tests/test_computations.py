@@ -1,7 +1,7 @@
 from mapFolding.basecamp import countFolds
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal
 from mapFolding.beDRY import validateListDimensions
-from mapFolding.noHomeYet import getFoldsTotalKnown
+from mapFolding.oeis import getFoldsTotalKnown
 from mapFolding.oeis import settingsOEIS, oeisIDfor_n
 from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
 from pathlib import Path, PurePosixPath

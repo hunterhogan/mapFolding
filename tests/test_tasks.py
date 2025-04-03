@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from mapFolding.basecamp import countFolds
 from mapFolding.beDRY import getTaskDivisions, setProcessorLimit, validateListDimensions, getLeavesTotal
-from mapFolding.noHomeYet import getFoldsTotalKnown
+from mapFolding.oeis import getFoldsTotalKnown
 from tests.conftest import standardizedEqualToCallableReturn
 from typing import Literal
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit

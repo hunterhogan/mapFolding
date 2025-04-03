@@ -1,10 +1,10 @@
 """
-Map folding enumeration and counting algorithms with optimization capabilities.
+Map folding enumeration and counting algorithms with advanced optimization capabilities.
 
-This package implements algorithms to count and enumerate the various ways
+This package implements algorithms to count and enumerate the distinct ways
 a rectangular map can be folded, based on the mathematical problem described
 in Lunnon's 1971 paper. It provides multiple layers of functionality, from
-high-level user interfaces to low-level algorithmic optimizations and code
+high-level user interfaces to sophisticated algorithmic optimizations and code
 transformation tools.
 
 Core modules:
@@ -29,9 +29,10 @@ Special directories:
   - reference/jobsCompleted/: Contains successful computations for previously unknown values,
     including first-ever calculations for 2x19 and 2x20 maps (OEIS A001415)
 
-This package strives to balance algorithm readability and understandability with
+This package balances algorithm readability and understandability with
 high-performance computation capabilities, allowing users to compute map folding
-totals for larger dimensions than previously feasible.
+totals for larger dimensions than previously feasible while also providing
+a foundation for exploring advanced code transformation techniques.
 """
 from mapFolding.basecamp import countFolds
 from mapFolding.oeis import clearOEIScache, getOEISids, OEIS_for_n, oeisIDfor_n
