@@ -22,8 +22,7 @@ implementation in the package.
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from functools import cache
-from mapFolding.theSSOT import The
-from mapFolding.toolboxFilesystem import writeStringToHere
+from mapFolding import writeStringToHere, The
 from pathlib import Path
 from typing import Any, Final, TYPE_CHECKING
 import argparse

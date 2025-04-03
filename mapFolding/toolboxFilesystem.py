@@ -22,7 +22,7 @@ The functions here adhere to a consistent approach to path handling:
 - Progressive fallback strategies for saving critical computation results.
 - Preemptive filesystem validation to detect issues before computation begins.
 """
-from mapFolding.theSSOT import The
+from mapFolding import The
 from os import PathLike
 from pathlib import Path, PurePath
 from sys import modules as sysModules

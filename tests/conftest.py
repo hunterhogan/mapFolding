@@ -198,7 +198,7 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 	def patchDispatcher(callableTarget: Callable[..., Any]) -> None:
 		"""Patch the dispatcher property to return the target callable."""
 		# Create a new property that returns the target callable
-		def patched_dispatcher(self) -> Callable[['ComputationState'], 'ComputationState']:
+		def patched_dispatcher(self: theSSOT.PackageSettings) -> Callable[['ComputationState'], 'ComputationState']:
 			def wrapper(state: 'ComputationState') -> 'ComputationState':
 				return callableTarget(state)
 			return wrapper

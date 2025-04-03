@@ -13,9 +13,16 @@ implementation, and optional persistence of results.
 """
 
 from collections.abc import Sequence
-from mapFolding.theSSOT import ComputationState, The
-from mapFolding.beDRY import outfitCountFolds, setProcessorLimit, validateListDimensions
-from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding import (
+	ComputationState,
+	getPathFilenameFoldsTotal,
+	outfitCountFolds,
+	saveFoldsTotal,
+	saveFoldsTotalFAILearly,
+	setProcessorLimit,
+	The,
+	validateListDimensions,
+)
 from os import PathLike
 from pathlib import PurePath
 

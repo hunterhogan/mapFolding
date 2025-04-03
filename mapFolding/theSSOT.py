@@ -27,6 +27,16 @@ from typing import Any, TypeAlias, TypeVar
 import dataclasses
 
 # =============================================================================
+# The Wrong Way
+# I strongly prefer dynamic values and dynamic handling of values. Nevertheless,
+# some values should be static and universal. In my opinion, all of the values
+# in the section "The Wrong Way" should be 1) static and 2) _easily_ accessible
+# by any part of the package. The two archetypical examples of Python values
+# that are _not_ easy to discover from within a package are the name of the package
+# and the root directory of the package (relative or absolute). I've divided the
+# values into sections. I feel some values should be fixed when I, the developer,
+# "package" the Python code and send it to PyPI. I believe a few more values should
+# (usually) be fixed when the user installs the package.
 # The Wrong Way: Evaluate When Packaging
 
 try:
@@ -42,20 +52,21 @@ def getPathPackageINSTALLING() -> Path:
 		pathPackage = pathPackage.parent
 	return pathPackage
 
-# =============================================================================
-# The Wrong Way: HARDCODED
-# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 
+# The Wrong Way: HARDCODED
+# I believe these values should be dynamically determined, so I have conspicuously marked them "HARDCODED"
+# and created downstream logic that assumes the values were dynamically determined.
+# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 # from mapFolding.someAssemblyRequired.synthesizeNumbaFlow.theNumbaFlow
 logicalPathModuleDispatcherHARDCODED: str = 'mapFolding.syntheticModules.numbaCount_doTheNeedful'
 callableDispatcherHARDCODED: str = 'doTheNeedful'
 concurrencyPackageHARDCODED = 'multiprocessing'
 
-# =============================================================================
-# The following is an improvement, but it is not the full solution.
-# I hope that the standardized markers, `metadata={'evaluateWhen': 'packaging'}` will help to automate
-# whatever needs to happen so that the following is well implemented.
-# @dataclasses.dataclass(frozen=True)
+# The metadata markers `metadata={'evaluateWhen': '...'}` signal values that I believe should be static.
+
+# TODO better use of `dataclasses.dataclass` (and `class`, generally)
+# I feel that these values should be "frozen" during execution, but when I use `frozen=True`, I
+# have problems/complications with `__post_init__` and with Pytest. (i.e., tests.conftest.useThisDispatcher().)
 @dataclasses.dataclass
 class PackageSettings:
 
@@ -105,7 +116,7 @@ The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHAR
 # =============================================================================
 # Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
 
-numpyIntegerType = TypeVar('numpyIntegerType', bound=integer[Any], covariant=True)
+NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)
 
 DatatypeLeavesTotal: TypeAlias = int
 NumPyLeavesTotal: TypeAlias = numpy_int16 # this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
@@ -131,13 +142,14 @@ class ComputationState:
 	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'dtype': Array3D.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 
-	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
-	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
-	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
-	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
-	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
-	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
-	foldGroups: Array1DFoldsTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DFoldsTotal.__args__[1].__args__[0]}) # type: ignore[arg-type, reportAssignmentType]
+	# I am using `dataclasses.field` metadata and `typeAlias.__args__[1].__args__[0]` to make the code more DRY. https://github.com/hunterhogan/mapFolding/issues/9
+	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	foldGroups: Array1DFoldsTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DFoldsTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
 
 	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
 	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
@@ -156,24 +168,27 @@ class ComputationState:
 		leavesTotalAsInt = int(self.leavesTotal)
 		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		if self.dimensionsUnconstrained is None: # type: ignore
-			self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
+		if self.dimensionsUnconstrained is None: self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal)) # pyright: ignore[reportUnnecessaryComparison]
 
-		if self.foldGroups is None: # type: ignore
+		if self.foldGroups is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), self.__dataclass_fields__['foldGroups'].metadata['dtype'])
 			self.foldGroups[-1] = self.leavesTotal
 
-		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype']) # type: ignore
+		# TODO better use of `dataclasses.dataclass` (and `class`, generally)
+		# If I annotate the field with `someType | None`, then every time I try to use the field, the type checker will say "OMG, this _might_ be `None`!"
+		# I can't use `dataclasses.field(default_factory=, init=True)` because "default_factory is a 0-argument function called to initialize a field's value," and I need to pass arguments to the function.
+		# If I write `dataclasses.field(default=makeDataContainer(int(leavesTotal) + 1, numpy_int64), init=True)`, 1) `leavesTotal` is unbound, 2) I haven't figured out how to avoid the so-called circular import if I write `from mapFolding.beDRY import makeDataContainer` outside of the dataclass.
+		# Therefore, I set the annotation to `someType`, `default=None`, and `init=True`, then if the value isn't initialized, I initialize it in `__post_init__`. And add `pyright: ignore[reportUnnecessaryComparison]`
+		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 
-		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype']) # type: ignore
-		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype']) # type: ignore
-		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype']) # type: ignore
-		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype']) # type: ignore
+		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
+		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
+		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
+		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 
+	# TODO better use of `dataclasses.dataclass` (and `class`, generally)
+	# Users must be able to set and change the `foldsTotal` field if the want. However, if they are using the field as I do, which is to automatically calculate the value by multiplying `foldGroups` by `leavesTotal`, it would be convenient if the field were to automatically update instead of having to remember to call this method.
 	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
-
-# =============================================================================
-# The coping way.
 
 class raiseIfNoneGitHubIssueNumber3(Exception): pass

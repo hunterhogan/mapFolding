@@ -19,7 +19,7 @@ These utilities form a stable internal API that other modules depend on, particu
 produce optimized implementations.
 """
 from collections.abc import Sequence
-from mapFolding.theSSOT import ComputationState, numpyIntegerType
+from mapFolding import ComputationState, NumPyIntegerType
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
 from typing import Any
@@ -165,7 +165,7 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray
 					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
 	return connectionGraph
 
-def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[numpyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[numpyIntegerType]]:
+def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]:
 	"""
 	Create a properly typed connection graph for the map folding algorithm.
 
@@ -193,7 +193,7 @@ def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: ty
 	connectionGraph = connectionGraph.astype(datatype)
 	return connectionGraph
 
-def makeDataContainer(shape: int | tuple[int, ...], datatype: type[numpyIntegerType]) -> ndarray[Any, numpy_dtype[numpyIntegerType]]:
+def makeDataContainer(shape: int | tuple[int, ...], datatype: type[NumPyIntegerType]) -> ndarray[Any, numpy_dtype[NumPyIntegerType]]:
 	"""
 	Create a typed NumPy array container with initialized values.
 
