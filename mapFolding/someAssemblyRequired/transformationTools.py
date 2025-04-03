@@ -26,7 +26,7 @@ from autoflake import fix_code as autoflake_fix_code
 from collections.abc import Callable, Mapping
 from copy import deepcopy
 from mapFolding.beDRY import outfitCountFolds
-from mapFolding.filesystem import getPathFilenameFoldsTotal, writeStringToHere
+from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, writeStringToHere
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	be,

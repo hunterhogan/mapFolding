@@ -1,10 +1,13 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
+from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, NodeChanger, Then, IngredientsFunction, IngredientsModule
 from mapFolding.someAssemblyRequired.toolboxNumba import RecipeJob, SpicesJobNumba, decorateCallableWithNumba
 from mapFolding.someAssemblyRequired.transformationTools import astModuleToIngredientsFunction, write_astModule
 from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
+from mapFolding.theSSOT import The
 from typing import cast
 from Z0Z_tools import autoDecodingRLE
+from pathlib import PurePosixPath
 import ast
 
 list_IdentifiersNotUsedAllHARDCODED = ['concurrencyLimit', 'foldsTotal', 'mapShape',]
@@ -146,8 +149,10 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba):
 	"""
 
 if __name__ == '__main__':
-	mapShape = (6,6)
+	mapShape = (3,4)
 	state = makeInitializedComputationState(mapShape)
-	aJob = RecipeJob(state)
+	pathModule = PurePosixPath(The.pathPackage, 'jobs')
+	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
+	aJob = RecipeJob(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	spices = SpicesJobNumba()
 	makeJobNumba(aJob, spices)

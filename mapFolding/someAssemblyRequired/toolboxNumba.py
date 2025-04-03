@@ -20,7 +20,7 @@ algorithm implementation into a highly-optimized Numba version.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding.filesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
+from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
 from mapFolding.someAssemblyRequired import IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, be, ifThis, parsePathFilename2astModule, str_nameDOTname, IngredientsFunction, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import Z0Z_inlineThisFunctionWithTheseValues, Z0Z_lameFindReplace, Z0Z_makeDictionaryReplacementStatements, astModuleToIngredientsFunction, shatter_dataclassesDOTdataclass, write_astModule
 from mapFolding.theSSOT import ComputationState

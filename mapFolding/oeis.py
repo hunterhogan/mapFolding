@@ -17,6 +17,7 @@ literature and extend sequences beyond their currently known terms.
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from mapFolding.theSSOT import The
+from mapFolding.toolboxFilesystem import writeStringToHere
 from pathlib import Path
 from typing import Any, Final, TYPE_CHECKING
 import argparse
@@ -174,8 +175,7 @@ def getOEISofficial(pathFilenameCache: pathlib.Path, url: str) -> None | str:
 	if not tryCache:
 		httpResponse: urllib.response.addinfourl = urllib.request.urlopen(url)
 		oeisInformation = httpResponse.read().decode('utf-8')
-		pathFilenameCache.parent.mkdir(parents=True, exist_ok=True)
-		pathFilenameCache.write_text(oeisInformation)
+		writeStringToHere(oeisInformation, pathFilenameCache)
 
 	if not oeisInformation:
 		warnings.warn(f"Failed to retrieve OEIS sequence information for {pathFilenameCache.stem}.")

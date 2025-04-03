@@ -13,6 +13,8 @@ Core modules:
 - beDRY: Core utility functions implementing consistent data handling, validation, and
   resource management across the package's computational assembly-line
 - theSSOT: Single Source of Truth for configuration, types, and state management
+- toolboxFilesystem: Cross-platform file management services for storing and retrieving
+  computation results with robust error handling and fallback mechanisms
 - oeis: Interface to the Online Encyclopedia of Integer Sequences for known results
 
 Extended functionality:
