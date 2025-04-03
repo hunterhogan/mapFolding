@@ -13,9 +13,9 @@ import ast
 
 list_IdentifiersNotUsedAllHARDCODED = ['concurrencyLimit', 'foldsTotal', 'mapShape',]
 list_IdentifiersNotUsedParallelSequentialHARDCODED = ['indexLeaf']
-list_IdentifiersNotUsedParallelSequentialHARDCODED = []
+# list_IdentifiersNotUsedParallelSequentialHARDCODED = []
 list_IdentifiersNotUsedSequentialHARDCODED = ['foldGroups', 'taskDivisions', 'taskIndex',]
-list_IdentifiersNotUsedSequentialHARDCODED = ['foldGroups']
+# list_IdentifiersNotUsedSequentialHARDCODED = ['foldGroups']
 
 list_IdentifiersReplacedHARDCODED = ['groupsOfFolds',]
 
@@ -90,7 +90,6 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	return ingredientsFunction
 
 def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba):
-	print(job.sourceCountCallable)
 		# get the raw ingredients: data and the algorithm
 	astFunctionDef = extractFunctionDef(job.source_astModule, job.countCallable)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
@@ -189,20 +188,17 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba):
 	"""
 
 if __name__ == '__main__':
-	mapShape = (6,6)
+	mapShape = (2,4)
 	state = makeInitializedComputationState(mapShape)
 	foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
-	from mapFolding.someAssemblyRequired.toolboxNumba import theNumbaFlow
-	sourceCountCallable: ast_Identifier = theNumbaFlow.callableParallel
-	print(sourceCountCallable)
+	# from mapFolding.someAssemblyRequired.toolboxNumba import theNumbaFlow
+	# sourceCountCallable: ast_Identifier = theNumbaFlow.callableParallel
 	pathModule = PurePosixPath(The.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJob(state, foldsTotalEstimated
-				, sourceCountCallable=sourceCountCallable
-				, countCallable=sourceCountCallable
+				# , sourceCountCallable=sourceCountCallable
+				# , countCallable=sourceCountCallable
 				, pathModule=pathModule
 				, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	spices = SpicesJobNumba()
-	print(aJob.sourceCountCallable)
-	print(aJob.countCallable)
 	makeJobNumba(aJob, spices)

@@ -61,14 +61,14 @@ def astModuleToIngredientsFunction(astModule: ast.AST, identifierFunctionDef: as
 	return IngredientsFunction(astFunctionDef, LedgerOfImports(astModule))
 
 def extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef | None:
-	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.getIt).captureLastMatch(module)
+	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.extractIt).captureLastMatch(module)
 
 def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.FunctionDef | None:
-	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.getIt).captureLastMatch(module)
+	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.extractIt).captureLastMatch(module)
 
 def makeDictionaryFunctionDef(module: ast.AST) -> dict[ast_Identifier, ast.FunctionDef]:
 	dictionaryIdentifier2FunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
-	NodeTourist(be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.getIt, dictionaryIdentifier2FunctionDef)).visit(module)
+	NodeTourist(be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module)
 	return dictionaryIdentifier2FunctionDef
 
 def makeDictionary4InliningFunction(identifierToInline: ast_Identifier, dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef], FunctionDefToInline: ast.FunctionDef | None = None) -> dict[str, ast.FunctionDef]:
@@ -211,7 +211,7 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
 
-		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), 又.annotation(Then.getIt)).captureLastMatch(dataclassClassDef)
+		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), Then.extractIt(DOT.annotation)).captureLastMatch(dataclassClassDef)
 		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
 		else: self.astAnnotation = sherpa
 

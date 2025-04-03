@@ -15,10 +15,11 @@ from mapFolding.someAssemblyRequired import (
 from typing import Any, cast, overload, TypeGuard
 import ast
 
-class NotMyProblem(Exception):
-	pass
-
 class DOT:
+	"""
+	class `DOT` : give only the attribute or sub-node to anything, including a `Callable`. Usable anywhere.
+	class `grab`: bring the `Callable` to the node and its attribute or sub-node. Not for antecedents.
+	"""
 	@staticmethod
 	@overload
 	def annotation(node: ast.AnnAssign) -> ImaAnnotationType:...
@@ -28,12 +29,6 @@ class DOT:
 	@staticmethod
 	def annotation(node: ast.AnnAssign | ast.arg) -> ImaAnnotationType | None:
 		return cast(ImaAnnotationType, node.annotation)
-		# fu = node.annotation
-		# if fu is None:
-		# 	return None
-		# else:
-		# 	fu = cast(ImaAnnotationType, node.annotation)
-		# 	return fu
 	@staticmethod
 	def func(node: ast.Call) -> Ima_funcTypeUNEDITED | ast.expr:
 		return node.func
@@ -41,46 +36,21 @@ class DOT:
 	def id(node: ast.Name) -> ast_Identifier:
 		return node.id
 	@staticmethod
-	def name(node: astClassHasDOTnameNotName | astClassOptionallyHasDOTnameNotName) -> ast_Identifier:
-		if isinstance(node, astClassHasDOTnameNotName):
-			return node.name
-		try:
-			identifier = node.name
-			if identifier is None:
-				raise NotMyProblem
-			return identifier
-		except AttributeError:
-			raise NotMyProblem
-
+	@overload
+	def name(node: astClassHasDOTnameNotName) -> ast_Identifier:...
 	@staticmethod
-	def nameOrNone(node: astClassHasDOTnameNotName | astClassOptionallyHasDOTnameNotName) -> ast_Identifier | None:
-		if isinstance(node, astClassHasDOTnameNotName):
-			return node.name
-		try:
-			return node.name
-		except AttributeError:
-			return None
+	@overload
+	def name(node: astClassOptionallyHasDOTnameNotName) -> ast_Identifier | None:...
+	@staticmethod
+	def name(node: astClassHasDOTnameNotName | astClassOptionallyHasDOTnameNotName) -> ast_Identifier | None:
+		return cast(ast_Identifier, node.name)
 
 class 又:
-	@staticmethod
-	@overload
-	def annotation(predicate: Callable[[ImaAnnotationType], ast.AST | ast_Identifier]) -> Callable[[ast.AnnAssign | ast.arg], ast.AST | ast_Identifier]:...
-	@staticmethod
-	@overload
-	def annotation(predicate: Callable[[ImaAnnotationType], TypeGuard[ImaAnnotationType] | bool]) -> Callable[[ast.AnnAssign | ast.arg], TypeGuard[ast.AnnAssign] | TypeGuard[ast.arg] | bool]:...
-	@staticmethod
-	def annotation(predicate: Callable[[ImaAnnotationType], TypeGuard[ImaAnnotationType] | ast.AST | ast_Identifier | bool]) -> Callable[[ast.AnnAssign | ast.arg], TypeGuard[ast.AnnAssign] | TypeGuard[ast.arg] | ast.AST | ast_Identifier | bool]:
-		@overload
-		def workhorse(node: ast.AnnAssign | ast.arg) -> ast.AST | ast_Identifier:...
-		@overload
-		def workhorse(node: ast.AnnAssign | ast.arg) -> TypeGuard[ast.AnnAssign] | TypeGuard[ast.arg] | bool:...
-		def workhorse(node: ast.AnnAssign | ast.arg) -> TypeGuard[ast.AnnAssign] | TypeGuard[ast.arg] | ast.AST | ast_Identifier | bool:
-			ImaAnnotation = node.annotation
-			if ImaAnnotation is None: return False
-			assert be.Attribute(ImaAnnotation) or be.Constant(ImaAnnotation) or be.Name(ImaAnnotation) or be.Subscript(ImaAnnotation)
-			# assert be.Annotation(ImaAnnotation)
-			return predicate(ImaAnnotation)
-		return workhorse
+	"""
+	class `DOT` : give only the attribute or sub-node to anything, including a `Callable`. Usable anywhere.
+	class `grab`: bring the `Callable` to the node and its attribute or sub-node. Not for antecedents.
+	class `又`	: (If this is not an obsolete class) bring the `Callable` to the node and its attribute or sub-node. For use with antecedents.
+	"""
 	@staticmethod
 	@overload
 	def arg(predicate: Callable[[ast_Identifier], ast.AST | ast_Identifier]) -> Callable[[ast.arg | ast.keyword], ast.AST | ast_Identifier]:...
@@ -309,7 +279,8 @@ class ifThis:
 		return lambda node: be.Call(node) and 又.func(ifThis.isAttributeNamespace_Identifier(namespace, identifier))(node)
 	@staticmethod
 	def isName_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Name] | bool]:
-		return lambda node: be.Name(node) and 又.id(ifThis._Identifier(identifier))(node)
+		return lambda node: be.Name(node) and ifThis._Identifier(identifier)(DOT.id(node))
+		# return lambda node: be.Name(node) and 又.id(ifThis._Identifier(identifier))(node)
 	@staticmethod
 	def isCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
 		return lambda node: be.Call(node) and 又.func(ifThis.isName_Identifier(identifier))(node)

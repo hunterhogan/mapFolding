@@ -55,7 +55,7 @@ from mapFolding.someAssemblyRequired._toolboxPython import (
 
 from mapFolding.someAssemblyRequired._toolboxAntecedents import be, DOT, ifThis, 又
 from mapFolding.someAssemblyRequired._tool_Make import Make
-from mapFolding.someAssemblyRequired._tool_Then import Then
+from mapFolding.someAssemblyRequired._tool_Then import grab, Then
 
 from mapFolding.someAssemblyRequired._toolboxContainers import (
 	IngredientsFunction,

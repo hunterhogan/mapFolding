@@ -27,6 +27,7 @@ from typing import Any, TypeAlias, TypeVar
 import dataclasses
 
 # =============================================================================
+# TODO Learn how to handle the issues in "Evaluate When Packaging" and "Evaluate When Installing"
 # The Wrong Way
 # I strongly prefer dynamic values and dynamic handling of values. Nevertheless,
 # some values should be static and universal. In my opinion, all of the values
@@ -37,6 +38,7 @@ import dataclasses
 # values into sections. I feel some values should be fixed when I, the developer,
 # "package" the Python code and send it to PyPI. I believe a few more values should
 # (usually) be fixed when the user installs the package.
+
 # The Wrong Way: Evaluate When Packaging
 
 try:

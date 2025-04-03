@@ -21,7 +21,7 @@ algorithm implementation into a highly-optimized Numba version.
 
 from collections.abc import Callable, Sequence
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
-from mapFolding.someAssemblyRequired import IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, be, ifThis, parsePathFilename2astModule, str_nameDOTname, IngredientsFunction, ShatteredDataclass
+from mapFolding.someAssemblyRequired import DOT, grab, IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, be, ifThis, parsePathFilename2astModule, str_nameDOTname, IngredientsFunction, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import Z0Z_inlineThisFunctionWithTheseValues, Z0Z_lameFindReplace, Z0Z_makeDictionaryReplacementStatements, astModuleToIngredientsFunction, shatter_dataclassesDOTdataclass, write_astModule
 from mapFolding.theSSOT import ComputationState, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeElephino as TheDatatypeElephino, DatatypeLeavesTotal as TheDatatypeLeavesTotal
 
@@ -281,7 +281,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 						(numbaFlow.sourceCallableSequential, numbaFlow.callableSequential),]
 	for ingredients in listAllIngredientsFunctions:
 		for source_Identifier, recipe_Identifier in listFindReplace:
-			updateCallName = NodeChanger(ifThis.isCall_Identifier(source_Identifier), Then.DOTfunc(Then.replaceWith(Make.Name(recipe_Identifier))))
+			updateCallName = NodeChanger(ifThis.isCall_Identifier(source_Identifier), grab.funcAttribute(Then.replaceWith(Make.Name(recipe_Identifier))))
 			updateCallName.visit(ingredients.astFunctionDef)
 
 	ingredientsDispatcher.astFunctionDef.name = numbaFlow.callableDispatcher
@@ -295,13 +295,13 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 		(numbaFlow.sourceConcurrencyManagerNamespace, numbaFlow.concurrencyManagerNamespace),]
 	for ingredients in listAllIngredientsFunctions:
 		for source_Identifier, recipe_Identifier in listFindReplace:
-			updateName = NodeChanger(ifThis.isName_Identifier(source_Identifier), Then.DOTid(Then.replaceWith(recipe_Identifier)))
-			update_arg = NodeChanger(ifThis.isArgument_Identifier(source_Identifier), Then.DOTarg(Then.replaceWith(recipe_Identifier)))
+			updateName = NodeChanger(ifThis.isName_Identifier(source_Identifier) , grab.idAttribute(Then.replaceWith(recipe_Identifier)))
+			update_arg = NodeChanger(ifThis.isArgument_Identifier(source_Identifier), grab.argAttribute(Then.replaceWith(recipe_Identifier)))
 			updateName.visit(ingredients.astFunctionDef)
 			update_arg.visit(ingredients.astFunctionDef)
 
 	updateConcurrencyManager = NodeChanger(ifThis.isCallAttributeNamespace_Identifier(numbaFlow.sourceConcurrencyManagerNamespace, numbaFlow.sourceConcurrencyManagerIdentifier)
-										, Then.DOTfunc(Then.replaceWith(Make.Attribute(Make.Name(numbaFlow.concurrencyManagerNamespace), numbaFlow.concurrencyManagerIdentifier))))
+										, grab.funcAttribute(Then.replaceWith(Make.Attribute(Make.Name(numbaFlow.concurrencyManagerNamespace), numbaFlow.concurrencyManagerIdentifier))))
 	updateConcurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
 
 	# shatter Dataclass =======================================================
@@ -338,7 +338,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	astCallConcurrencyResult: list[ast.Call] = []
 	get_astCallConcurrencyResult: NodeTourist = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), lambda node: NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)) # pyright: ignore[reportUnknownArgumentType, reportUnknownLambdaType]
 	get_astCallConcurrencyResult.visit(ingredientsDispatcher.astFunctionDef)
-	replaceAssignParallelCallable = NodeChanger(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), Then.DOTvalue(Then.replaceWith(astCallConcurrencyResult[0])))
+	replaceAssignParallelCallable = NodeChanger(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), grab.valueAttribute(Then.replaceWith(astCallConcurrencyResult[0])))
 	replaceAssignParallelCallable.visit(ingredientsDispatcher.astFunctionDef)
 	changeReturnParallelCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName)))
 	ingredientsParallel.astFunctionDef.returns = shatteredDataclass.countingVariableAnnotation

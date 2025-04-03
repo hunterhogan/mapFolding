@@ -3,8 +3,8 @@
 [![pip install mapFolding](https://img.shields.io/badge/pip%20install-mapFolding-gray.svg?colorB=3b434b)](https://pypi.org/project/mapFolding/)
 [![Static Badge](https://img.shields.io/badge/stinkin'%20badges-don't%20need-b98e5e)](https://youtu.be/g6f_miE91mk&t=4)
 [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml)
-![Static Badge](https://img.shields.io/badge/issues-I%20have%20them-brightgreen)
 [![License: CC-BY-NC-4.0](https://img.shields.io/badge/License-CC_BY--NC_4.0-3b434b)](https://creativecommons.org/licenses/by-nc/4.0/)
+[![Static Badge](https://img.shields.io/badge/issues-I%20have%20them-brightgreen)](https://github.com/hunterhogan/mapFolding/issues)
 
 ---
 

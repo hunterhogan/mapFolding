@@ -8,13 +8,15 @@ if TYPE_CHECKING:
 	"""	3.12 new: ast.ParamSpec, ast.type_param, ast.TypeAlias, ast.TypeVar, ast.TypeVarTuple
 		3.11 new: ast.TryStar"""
 	astClassHasDOTnameNotName: typing_TypeAlias = ast.alias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple
-	astClassHasDOTvalue: typing_TypeAlias = ast.AnnAssign | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.Constant | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Return | ast.Starred | ast.Subscript | ast.TypeAlias | ast.Yield | ast.YieldFrom
+	astClassHasDOTvalue: typing_TypeAlias = ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.Constant | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchSingleton | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | ast.TypeAlias | ast.YieldFrom
+
 else:
 	astClassHasDOTnameNotName = stuPyd
 	astClassHasDOTvalue = stuPyd
 
-astClassOptionallyHasDOTnameNotName: typing_TypeAlias = ast.ExceptHandler | ast.MatchAs | ast.MatchStar
 astClassHasDOTtarget: typing_TypeAlias = ast.AnnAssign | ast.AsyncFor | ast.AugAssign | ast.comprehension | ast.For | ast.NamedExpr
+astClassOptionallyHasDOTnameNotName: typing_TypeAlias = ast.ExceptHandler | ast.MatchAs | ast.MatchStar
+astClassOptionallyHasDOTvalue: typing_TypeAlias = ast.AnnAssign | ast.Return | ast.Yield
 
 ast_expr_Slice: typing_TypeAlias = ast.expr
 ast_Identifier: typing_TypeAlias = str
