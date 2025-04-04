@@ -46,20 +46,17 @@ class Make:
 	def Attribute(value: ast.expr, *attribute: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Attribute:
 		""" If two `ast_Identifier` are joined by a dot `.`, they are _usually_ an `ast.Attribute`, but see `ast.ImportFrom`.
 		Parameters:
-			value: the part before the dot (Often `ast.Name`, but also `ast.Attribute`, `ast.Starred`, and `ast.Subscript`.)
+			value: the part before the dot (e.g., `ast.Name`.)
 			attribute: an `ast_Identifier` after a dot `.`; you can pass multiple `attribute` and they will be chained together.
 		"""
-		# TODO confirm the precision of the docstring.
-		def addDOTattribute(chain, identifier: ast_Identifier, context: ast.expr_context, **keywordArguments: int) -> ast.Attribute:
+		def addDOTattribute(chain: ast.expr, identifier: ast_Identifier, context: ast.expr_context, **keywordArguments: int) -> ast.Attribute:
 			return ast.Attribute(value=chain, attr=identifier, ctx=context, **keywordArguments)
 		buffaloBuffalo = addDOTattribute(value, attribute[0], context, **keywordArguments)
 		for identifier in attribute[1:None]:
 			buffaloBuffalo = addDOTattribute(buffaloBuffalo, identifier, context, **keywordArguments)
 		return buffaloBuffalo
 	@staticmethod
-	# TODO are the types for `callee` comprehensive?
-	# TODO is there an easier way to create precise typings for `ast`? I mean, it's a fucking closed system: there should be a lot of mystery involved.
-	def Call(callee: ast.Attribute | ast.Name | ast.Subscript, listArguments: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
+	def Call(callee: ast.expr, listArguments: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
 		return ast.Call(func=callee, args=list(listArguments) if listArguments else [], keywords=list(list_astKeywords) if list_astKeywords else [])
 	@staticmethod
 	def ClassDef(name: ast_Identifier, listBases: list[ast.expr]=[], list_keyword: list[ast.keyword]=[], body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], **keywordArguments: list_ast_type_paramORstr_orNone) -> ast.ClassDef:

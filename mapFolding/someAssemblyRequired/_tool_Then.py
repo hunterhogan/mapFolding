@@ -52,7 +52,7 @@ class Then:
 	@staticmethod
 	def removeIt(_node: ast.AST) -> None: return None
 	@staticmethod
-	def replaceWith(astAST: ast.AST | ast_Identifier) -> Callable[[ast.AST], ast.AST | ast_Identifier]:
+	def replaceWith(astAST: Any) -> Callable[[Any], Any]:
 		return lambda _replaceMe: astAST
 	@staticmethod
 	def updateKeyValueIn(key: Callable[..., Any], value: Callable[..., Any], dictionary: dict[Any, Any]) -> Callable[[ast.AST], dict[Any, Any]]:

@@ -31,6 +31,7 @@ from mapFolding.someAssemblyRequired._theTypes import (
 	astClassHasDOTtarget,
 	astClassHasDOTvalue,
 	astClassOptionallyHasDOTnameNotName,
+	astClassOptionallyHasDOTvalue,
 	astMosDef,
 	Ima_funcTypeUNEDITED,
 	Ima_targetTypeUNEDITED,
@@ -53,7 +54,7 @@ from mapFolding.someAssemblyRequired._toolboxPython import (
 	parsePathFilename2astModule,
 	)
 
-from mapFolding.someAssemblyRequired._toolboxAntecedents import be, DOT, ifThis, 又
+from mapFolding.someAssemblyRequired._toolboxAntecedents import be, DOT, ifThis
 from mapFolding.someAssemblyRequired._tool_Make import Make
 from mapFolding.someAssemblyRequired._tool_Then import grab, Then
 

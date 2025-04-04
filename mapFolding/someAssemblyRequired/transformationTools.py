@@ -45,7 +45,6 @@ from mapFolding.someAssemblyRequired import (
 	str_nameDOTname,
 	Then,
 	TypeCertified,
-	又,
 )
 from mapFolding.theSSOT import ComputationState, The, raiseIfNoneGitHubIssueNumber3
 from os import PathLike
@@ -104,7 +103,7 @@ def makeDictionary4InliningFunction(identifierToInline: ast_Identifier, dictiona
 			raise ValueError(f"FunctionDefToInline not found in dictionaryIdentifier2FunctionDef: {identifierToInline = }") from ERRORmessage
 
 	listIdentifiersCalledFunctions: list[ast_Identifier] = []
-	findIdentifiersToInline = NodeTourist(ifThis.isCallToName, lambda node: Then.appendTo(listIdentifiersCalledFunctions)(DOT.id(DOT.func(node)))) # pyright: ignore[reportArgumentType]
+	findIdentifiersToInline = NodeTourist(ifThis.isCallToName, lambda node: Then.appendTo(listIdentifiersCalledFunctions)(DOT.id(DOT.func(node)))) # type: ignore
 	findIdentifiersToInline.visit(FunctionDefToInline)
 
 	dictionary4Inlining: dict[ast_Identifier, ast.FunctionDef] = {}
@@ -211,7 +210,7 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
 
-		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), Then.extractIt(DOT.annotation)).captureLastMatch(dataclassClassDef)
+		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), Then.extractIt(DOT.annotation)).captureLastMatch(dataclassClassDef) # type: ignore
 		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
 		else: self.astAnnotation = sherpa
 
@@ -225,7 +224,7 @@ class DeReConstructField2ast:
 			constructor = 'array'
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, constructor)
 			dtypeIdentifier: ast_Identifier = dtype.__name__
-			dtype_asnameName: ast.Name = self.astAnnotation
+			dtype_asnameName: ast.Name = self.astAnnotation # type: ignore
 			# dtypeIdentifier_asname: ast_Identifier = moduleWithLogicalPath + '_' + dtypeIdentifier
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, dtypeIdentifier, dtype_asnameName.id)
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, Make.Name(annotation), Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', dtype_asnameName)]))
@@ -310,7 +309,7 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 }
 
 # END of marginal classes and functions ======================================================
-def Z0Z_lameFindReplace(astTree, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]):
+def Z0Z_lameFindReplace(astTree: ast.AST, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]) -> ast.AST:
 	keepGoing = True
 	newTree = deepcopy(astTree)
 

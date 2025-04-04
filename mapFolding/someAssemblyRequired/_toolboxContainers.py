@@ -53,8 +53,7 @@ class LedgerOfImports:
 		"""Remove all imports from a specific module."""
 
 	def removeImportFrom(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier | None, asname: ast_Identifier | None = None) -> None:
-		if moduleWithLogicalPath is None:
-			raise SyntaxError(f"I received `{moduleWithLogicalPath = }`, but it must be the name of a module.")
+		assert moduleWithLogicalPath is not None, SyntaxError(f"I received `{moduleWithLogicalPath = }`, but it must be the name of a module.")
 		if moduleWithLogicalPath in self.dictionaryImportFrom:
 			"""
 			name, 			asname				  	Meaning
@@ -189,10 +188,8 @@ class IngredientsModule:
 	def appendIngredientsFunction(self, *ingredientsFunction: IngredientsFunction) -> None:
 		"""Append one or more `IngredientsFunction`."""
 		for allegedIngredientsFunction in ingredientsFunction:
-			if isinstance(allegedIngredientsFunction, IngredientsFunction):
-				self.listIngredientsFunctions.append(allegedIngredientsFunction)
-			else:
-				raise ValueError(f"I received `{type(allegedIngredientsFunction) = }`, but I can only accept `{IngredientsFunction}`.")
+			assert isinstance(allegedIngredientsFunction, IngredientsFunction), ValueError(f"I received `{type(allegedIngredientsFunction) = }`, but I can only accept `{IngredientsFunction}`.")
+			self.listIngredientsFunctions.append(allegedIngredientsFunction)
 
 	def removeImportFromModule(self, moduleWithLogicalPath: str_nameDOTname) -> None:
 		self.removeImportFrom(moduleWithLogicalPath, None, None)
@@ -294,7 +291,6 @@ class RecipeSynthesizeFlow:
 
 	# ========================================
 	# Computed
-	# ========================================
 	"""
 theFormatStrModuleSynthetic = "{packageFlow}Count"
 theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
@@ -337,16 +333,6 @@ theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.mo
 	@property
 	def pathFilenameSequential(self) -> PurePosixPath:
 		return self._makePathFilename(filenameStem=self.moduleSequential, logicalPathINFIX=self.logicalPathFlowRoot)
-
-	def __post_init__(self) -> None:
-		if ((self.concurrencyManagerIdentifier is not None and self.concurrencyManagerIdentifier != self.sourceConcurrencyManagerIdentifier) # `submit` # type: ignore
-			or ((self.concurrencyManagerIdentifier is None) != (self.concurrencyManagerNamespace is None))): # type: ignore
-			import warnings
-			warnings.warn(f"If your synthesized module is weird, check `{self.concurrencyManagerIdentifier=}` and `{self.concurrencyManagerNamespace=}`. (ChildProcessError? 'Yeah! Children shouldn't be processing stuff, man.')", category=ChildProcessError, stacklevel=2) # pyright: ignore[reportCallIssue, reportArgumentType] Y'all Pynatics need to be less shrill and focus on making code that doesn't need 8000 error categories.
-
-		# self.logicalPathModuleDispatcher!=logicalPathModuleDispatcherHARDCODED or
-		if self.callableDispatcher!=callableDispatcherHARDCODED:
-			print(f"fyi: `{self.callableDispatcher=}` but\n\t`{callableDispatcherHARDCODED=}`.")
 
 dummyAssign = Make.Assign([Make.Name("dummyTarget")], Make.Constant(None))
 dummySubscript = Make.Subscript(Make.Name("dummy"), Make.Name("slice"))

@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from copy import deepcopy
-from mapFolding.someAssemblyRequired import ast_Identifier, RecipeSynthesizeFlow, Then, be, ifThis, DOT, 又, NodeChanger
+from mapFolding.someAssemblyRequired import ast_Identifier, RecipeSynthesizeFlow, Then, be, ifThis, DOT, NodeChanger
 from mapFolding.someAssemblyRequired.transformationTools import makeDictionary4InliningFunction, makeDictionaryFunctionDef
 from typing import cast
 import ast

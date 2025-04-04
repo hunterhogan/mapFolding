@@ -163,7 +163,7 @@ class RecipeJob:
 	state: ComputationState
 	# TODO create function to calculate `foldsTotalEstimated`
 	foldsTotalEstimated: int = 0
-	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
+	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # type: ignore
 
 	# ========================================
 	# Source
@@ -183,7 +183,7 @@ class RecipeJob:
 	pathModule: PurePosixPath | None = PurePosixPath(getPathRootJobDEFAULT())
 	""" `pathModule` will override `pathPackage` and `logicalPathRoot`."""
 	fileExtension: str = theNumbaFlow.fileExtension
-	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
+	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # type: ignore
 
 	# ========================================
 	# Logical identifiers (as opposed to physical identifiers)
@@ -191,7 +191,7 @@ class RecipeJob:
 	packageIdentifier: ast_Identifier | None = None
 	logicalPathRoot: str_nameDOTname | None = None
 	""" `logicalPathRoot` likely corresponds to a physical filesystem directory."""
-	moduleIdentifier: ast_Identifier = dataclasses.field(default=None, init=True) # type: ignore[assignment, reportAssignmentType]
+	moduleIdentifier: ast_Identifier = dataclasses.field(default=None, init=True) # type: ignore
 	countCallable: ast_Identifier = sourceCountCallable
 	dataclassIdentifier: ast_Identifier | None = sourceDataclassIdentifier
 	dataclassInstance: ast_Identifier | None = sourceDataclassInstance
@@ -336,7 +336,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 
 	# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
 	astCallConcurrencyResult: list[ast.Call] = []
-	get_astCallConcurrencyResult: NodeTourist = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), lambda node: NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)) # pyright: ignore[reportUnknownArgumentType, reportUnknownLambdaType]
+	get_astCallConcurrencyResult = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), lambda node: NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)) # type: ignore
 	get_astCallConcurrencyResult.visit(ingredientsDispatcher.astFunctionDef)
 	replaceAssignParallelCallable = NodeChanger(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), grab.valueAttribute(Then.replaceWith(astCallConcurrencyResult[0])))
 	replaceAssignParallelCallable.visit(ingredientsDispatcher.astFunctionDef)

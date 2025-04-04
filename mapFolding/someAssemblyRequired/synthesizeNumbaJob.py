@@ -43,9 +43,9 @@ if __name__ == '__main__':
 	ast_argNumbaProgress = ast.arg(arg=spices.numbaProgressBarIdentifier, annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
 
-	findThis = ifThis.isAugAssign_targetIs(ifThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id))
+	findThis = ifThis.isAugAssign_targetIs(ifThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id)) # type: ignore
 	doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
-	countWithProgressBar = NodeChanger(findThis, doThat) # type: ignore
+	countWithProgressBar = NodeChanger(findThis, doThat)
 	countWithProgressBar.visit(ingredientsFunction.astFunctionDef)
 
 	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
@@ -66,11 +66,11 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 				ImaAnnAssign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[ast_arg.arg]
 				match elementConstructor:
 					case 'scalar':
-						ImaAnnAssign.value.args[0].value = int(job.state.__dict__[ast_arg.arg])  # type: ignore
+						ImaAnnAssign.value.args[0].value = int(job.state.__dict__[ast_arg.arg])   # type: ignore
 					case 'array':
 						dataAsStrRLE: str = autoDecodingRLE(job.state.__dict__[ast_arg.arg], addSpaces=True)
 						dataAs_astExpr: ast.expr = cast(ast.Expr, ast.parse(dataAsStrRLE).body[0]).value
-						ImaAnnAssign.value.args = [dataAs_astExpr]  # type: ignore
+						ImaAnnAssign.value.args = [dataAs_astExpr] # type: ignore
 					case _:
 						list_exprDOTannotation: list[ast.expr] = []
 						list_exprDOTvalue: list[ast.expr] = []
@@ -111,7 +111,7 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba):
 	for identifier in list_IdentifiersStaticValues:
 		findThis = ifThis.isName_Identifier(identifier)
 		doThat = Then.replaceWith(Make.Constant(int(job.state.__dict__[identifier])))
-		NodeChanger(findThis, doThat).visit(ingredientsCount.astFunctionDef) # type: ignore
+		NodeChanger(findThis, doThat).visit(ingredientsCount.astFunctionDef)
 
 	# This launcher eliminates the use of one identifier, so run it now and you can dynamically determine which variables are not used
 	ingredientsModule = IngredientsModule()

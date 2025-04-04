@@ -1,43 +1,43 @@
 from collections.abc import Callable, Sequence
 from inspect import getsource as inspect_getsource
-from mapFolding.someAssemblyRequired import ast_Identifier, str_nameDOTname, 个
+from mapFolding.someAssemblyRequired import ast_Identifier, str_nameDOTname
 from os import PathLike
 from pathlib import Path, PurePath
 from types import ModuleType
-from typing import Any, cast, Generic, TypeGuard
+from typing import Any, cast
 import ast
 import importlib
 import importlib.util
 
 # TODO Identify the logic that narrows the type and can help the user during static type checking.
 
-class NodeTourist(ast.NodeVisitor, Generic[个]):
-    def __init__(self, findThis: Callable[[个], TypeGuard[个] | bool], doThat: Callable[[个], 个 | None]) -> None:
+class NodeTourist(ast.NodeVisitor):
+    def __init__(self, findThis: Callable[..., Any], doThat: Callable[..., Any]) -> None:
         self.findThis = findThis
         self.doThat = doThat
-        self.nodeCaptured: 个 | None = None
+        self.nodeCaptured: Any | None = None
 
-    def visit(self, node: 个) -> None: # pyright: ignore [reportGeneralTypeIssues]
+    def visit(self, node: ast.AST) -> None:
         if self.findThis(node):
             nodeActionReturn = self.doThat(node)
             if nodeActionReturn is not None:
                 self.nodeCaptured = nodeActionReturn
-        self.generic_visit(cast(ast.AST, node))
+        self.generic_visit(node)
 
-    def captureLastMatch(self, node: 个) -> 个 | None: # pyright: ignore [reportGeneralTypeIssues]
+    def captureLastMatch(self, node: ast.AST) -> Any | None:
         self.nodeCaptured = None
         self.visit(node)
         return self.nodeCaptured
 
-class NodeChanger(ast.NodeTransformer, Generic[个]):
-    def __init__(self, findThis: Callable[[个], bool], doThat: Callable[[个], Sequence[个] | 个 | None]) -> None:
+class NodeChanger(ast.NodeTransformer):
+    def __init__(self, findThis: Callable[..., Any], doThat: Callable[..., Any]) -> None:
         self.findThis = findThis
         self.doThat = doThat
 
-    def visit(self, node: 个) -> Sequence[个] | 个 | None: # pyright: ignore [reportGeneralTypeIssues]
+    def visit(self, node: ast.AST) -> ast.AST:
         if self.findThis(node):
             return self.doThat(node)
-        return super().visit(cast(ast.AST, node))
+        return super().visit(node)
 
 def importLogicalPath2Callable(logicalPathModule: str_nameDOTname, identifier: ast_Identifier, packageIdentifierIfRelative: ast_Identifier | None = None) -> Callable[..., Any]:
     moduleImported: ModuleType = importlib.import_module(logicalPathModule, packageIdentifierIfRelative)
