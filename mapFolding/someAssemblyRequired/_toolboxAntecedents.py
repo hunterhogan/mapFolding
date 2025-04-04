@@ -221,9 +221,8 @@ class ifThis:
 
 	# ================================================================
 	# NOT used
-	# TODO Does this work?
 	@staticmethod
-	def Z0Z_matchesAtLeast1Descendant(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
+	def matchesAtLeast1Descendant(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		"""Create a predicate that returns True if any descendant of the node matches the given predicate."""
 		return lambda node: not ifThis.matchesNoDescendant(predicate)(node)
 	# ================================================================

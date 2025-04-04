@@ -16,7 +16,7 @@ import dataclasses
 
 class LedgerOfImports:
 	# TODO When resolving the ledger of imports, remove self-referential imports
-	# TODO TypeIgnore :/
+	# TODO add TypeIgnore tracking to the ledger of imports
 
 	def __init__(self, startWith: ast.AST | None = None) -> None:
 		self.dictionaryImportFrom: dict[str_nameDOTname, list[tuple[ast_Identifier, ast_Identifier | None]]] = defaultdict(list)

@@ -32,6 +32,7 @@ from mapFolding.someAssemblyRequired import (
 	be,
 	DOT,
 	ifThis,
+	grab,
 	importLogicalPath2Callable,
 	IngredientsFunction,
 	IngredientsModule,
@@ -63,42 +64,17 @@ def extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef
 def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.FunctionDef | None:
 	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.extractIt).captureLastMatch(module)
 
-def makeDictionaryFunctionDef(module: ast.AST) -> dict[ast_Identifier, ast.FunctionDef]:
+def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.FunctionDef]:
 	dictionaryIdentifier2FunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
 	NodeTourist(be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module)
 	return dictionaryIdentifier2FunctionDef
 
-def makeDictionary4InliningFunction(identifierToInline: ast_Identifier, dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef], FunctionDefToInline: ast.FunctionDef | None = None) -> dict[str, ast.FunctionDef]:
-	"""
-	Creates a dictionary of function definitions required for inlining a target function.
-	This function analyzes a target function and recursively collects all function definitions
-	that are called within it (and any functions called by those functions), preparing them for inlining.
-	Parameters:
-	----------
-	identifierToInline : ast_Identifier
-		The identifier of the function to be inlined.
-	dictionaryFunctionDef : dict[ast_Identifier, ast.FunctionDef]
-		A dictionary mapping function identifiers to their AST function definitions.
-	FunctionDefToInline : ast.FunctionDef | None, optional
-		The AST function definition to inline. If None, it will be retrieved from dictionaryFunctionDef using identifierToInline.
-	Returns:
-	-------
-	dict[str, ast.FunctionDef]
-		A dictionary mapping function names to their AST function definitions, containing all functions needed for inlining.
-	Raises:
-	------
-	ValueError
-		If the function to inline is not found in the dictionary, or if recursion is detected during analysis.
-	Notes:
-	-----
-	The function performs a recursive analysis to find all dependent functions needed for inlining.
-	It detects and prevents recursive function calls that could cause infinite inlining.
-	"""
-	if FunctionDefToInline is None:
-		try:
-			FunctionDefToInline = dictionaryFunctionDef[identifierToInline]
-		except KeyError as ERRORmessage:
-			raise ValueError(f"FunctionDefToInline not found in dictionaryIdentifier2FunctionDef: {identifierToInline = }") from ERRORmessage
+def makeDictionary4InliningFunction(identifierToInline: ast_Identifier, module: ast.Module) -> dict[str, ast.FunctionDef]:
+	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
+	try:
+		FunctionDefToInline = dictionaryFunctionDef[identifierToInline]
+	except KeyError as ERRORmessage:
+		raise ValueError(f"FunctionDefToInline not found in dictionaryIdentifier2FunctionDef: {identifierToInline = }") from ERRORmessage
 
 	listIdentifiersCalledFunctions: list[ast_Identifier] = []
 	findIdentifiersToInline = NodeTourist(ifThis.isCallToName, lambda node: Then.appendTo(listIdentifiersCalledFunctions)(DOT.id(DOT.func(node)))) # type: ignore
@@ -106,7 +82,8 @@ def makeDictionary4InliningFunction(identifierToInline: ast_Identifier, dictiona
 
 	dictionary4Inlining: dict[ast_Identifier, ast.FunctionDef] = {}
 	for identifier in sorted(set(listIdentifiersCalledFunctions).intersection(dictionaryFunctionDef.keys())):
-		dictionary4Inlining[identifier] = dictionaryFunctionDef[identifier]
+		if NodeTourist(ifThis.matchesMeButNotAnyDescendant(ifThis.isCall_Identifier(identifier)), Then.extractIt).captureLastMatch(module) is not None:
+			dictionary4Inlining[identifier] = dictionaryFunctionDef[identifier]
 
 	keepGoing = True
 	while keepGoing:
@@ -114,14 +91,11 @@ def makeDictionary4InliningFunction(identifierToInline: ast_Identifier, dictiona
 		listIdentifiersCalledFunctions.clear()
 		findIdentifiersToInline.visit(Make.Module(list(dictionary4Inlining.values())))
 
-		# NOTE: This is simple not comprehensive recursion protection. # TODO think about why I dislike `ifThis.CallDoesNotCallItself`
-		if identifierToInline in listIdentifiersCalledFunctions: raise ValueError(f"Recursion found: {identifierToInline = }.")
-
 		listIdentifiersCalledFunctions = sorted((set(listIdentifiersCalledFunctions).difference(dictionary4Inlining.keys())).intersection(dictionaryFunctionDef.keys()))
 		if len(listIdentifiersCalledFunctions) > 0:
 			keepGoing = True
 			for identifier in listIdentifiersCalledFunctions:
-				if identifier in dictionaryFunctionDef:
+				if NodeTourist(ifThis.matchesMeButNotAnyDescendant(ifThis.isCall_Identifier(identifier)), Then.extractIt).captureLastMatch(module) is not None:
 					dictionary4Inlining[identifier] = dictionaryFunctionDef[identifier]
 
 	return dictionary4Inlining
@@ -322,7 +296,7 @@ def Z0Z_lameFindReplace(astTree: ast.AST, mappingFindReplaceNodes: Mapping[ast.A
 	return newTree
 
 # Start of I HATE PROGRAMMING ==========================================================
-def Z0Z_makeDictionaryReplacementStatements(module: ast.AST) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
+def Z0Z_makeDictionaryReplacementStatements(module: ast.Module) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
 	"""Return a dictionary of function names and their replacement statements."""
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
 	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}

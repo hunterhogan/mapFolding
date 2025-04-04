@@ -25,7 +25,7 @@ intORstr_orNone: typing_TypeAlias = Any
 list_ast_type_paramORstr_orNone: typing_TypeAlias = Any
 str_nameDOTname: typing_TypeAlias = stuPyd
 
-# TODO understand whatever the fuck `typing.TypeVar` is _supposed_ to fucking do.
+# TODO understand typing.
 TypeCertified = typing_TypeVar('TypeCertified', bound = ast.AST, covariant=True)
 astMosDef = typing_TypeVar('astMosDef', bound=astClassHasDOTnameNotName)
 

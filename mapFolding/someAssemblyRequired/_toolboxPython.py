@@ -53,10 +53,10 @@ def importPathFilename2Callable(pathFilename: PathLike[Any] | PurePath, identifi
     importlibSpecification.loader.exec_module(moduleImported_jk_hahaha)
     return getattr(moduleImported_jk_hahaha, identifier)
 
-def parseLogicalPath2astModule(logicalPathModule: str_nameDOTname, packageIdentifierIfRelative: ast_Identifier|None=None, mode:str='exec') -> ast.AST:
+def parseLogicalPath2astModule(logicalPathModule: str_nameDOTname, packageIdentifierIfRelative: ast_Identifier|None=None, mode:str='exec') -> ast.Module:
     moduleImported: ModuleType = importlib.import_module(logicalPathModule, packageIdentifierIfRelative)
     sourcePython: str = inspect_getsource(moduleImported)
-    return ast.parse(sourcePython, mode=mode)
+    return ast.parse(sourcePython, mode=mode) # type: ignore
 
 def parsePathFilename2astModule(pathFilename: PathLike[Any] | PurePath, mode:str='exec') -> ast.AST:
     return ast.parse(Path(pathFilename).read_text(), mode=mode)
