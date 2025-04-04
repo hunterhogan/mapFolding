@@ -13,9 +13,7 @@ import ast
 
 list_IdentifiersNotUsedAllHARDCODED = ['concurrencyLimit', 'foldsTotal', 'mapShape',]
 list_IdentifiersNotUsedParallelSequentialHARDCODED = ['indexLeaf']
-# list_IdentifiersNotUsedParallelSequentialHARDCODED = []
 list_IdentifiersNotUsedSequentialHARDCODED = ['foldGroups', 'taskDivisions', 'taskIndex',]
-# list_IdentifiersNotUsedSequentialHARDCODED = ['foldGroups']
 
 list_IdentifiersReplacedHARDCODED = ['groupsOfFolds',]
 
@@ -90,7 +88,6 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	return ingredientsFunction
 
 def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba):
-		# get the raw ingredients: data and the algorithm
 	astFunctionDef = extractFunctionDef(job.source_astModule, job.countCallable)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
@@ -154,16 +151,11 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba):
 	Z0Z_type_name = 'uint8'
 	ingredientsCount.imports.addImportFrom_asStr(Z0Z_module, Z0Z_type_name, Z0Z_asname)
 
-	from numpy import int16 as Array1DLeavesTotal, int16 as Array1DElephino, int16 as Array3D
-
 	ingredientsCount.astFunctionDef.decorator_list = [] # TODO low-priority, handle this more elegantly
 	# TODO when I add the function signature in numba style back to the decorator, the logic needs to handle `ProgressBarType:`
 	ingredientsCount = decorateCallableWithNumba(ingredientsCount, spices.parametersNumba)
 
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
-
-		# add imports, make str, remove unused imports
-		# put on disk
 	write_astModule(ingredientsModule, job.pathFilenameModule, job.packageIdentifier)
 
 	"""
@@ -188,7 +180,7 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba):
 	"""
 
 if __name__ == '__main__':
-	mapShape = (6,6)
+	mapShape = (2,4)
 	state = makeInitializedComputationState(mapShape)
 	foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
 	# from mapFolding.someAssemblyRequired.toolboxNumba import theNumbaFlow

@@ -21,7 +21,7 @@ algorithm implementation into a highly-optimized Numba version.
 
 from collections.abc import Callable, Sequence
 from mapFolding.someAssemblyRequired import grab, IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, be, ifThis, parsePathFilename2astModule, str_nameDOTname, IngredientsFunction, ShatteredDataclass
-from mapFolding.someAssemblyRequired.transformationTools import Z0Z_inlineThisFunctionWithTheseValues, Z0Z_lameFindReplace, Z0Z_makeDictionaryReplacementStatements, astModuleToIngredientsFunction, shatter_dataclassesDOTdataclass, write_astModule
+from mapFolding.someAssemblyRequired.transformationTools import inlineFunctionDef, Z0Z_lameFindReplace, astModuleToIngredientsFunction, shatter_dataclassesDOTdataclass, write_astModule
 from mapFolding.theSSOT import ComputationState, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeElephino as TheDatatypeElephino, DatatypeLeavesTotal as TheDatatypeLeavesTotal
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
 from numba.core.compiler import CompilerBase as numbaCompilerBase
@@ -151,12 +151,14 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction
 
+# TODO better use of `dataclasses.dataclass` (and `class`, generally)
 @dataclasses.dataclass
 class SpicesJobNumba:
 	useNumbaProgressBar: bool = True
 	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
 	parametersNumba = parametersNumbaDefault
 
+# TODO better use of `dataclasses.dataclass` (and `class`, generally)
 @dataclasses.dataclass
 class RecipeJob:
 	state: ComputationState
@@ -264,11 +266,10 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	]
 
 	# Inline functions ========================================================
-	dictionaryReplacementStatements = Z0Z_makeDictionaryReplacementStatements(numbaFlow.source_astModule)
 	# NOTE Replacements statements are based on the identifiers in the _source_, so operate on the source identifiers.
-	ingredientsInitialize.astFunctionDef = Z0Z_inlineThisFunctionWithTheseValues(ingredientsInitialize.astFunctionDef, dictionaryReplacementStatements)
-	ingredientsParallel.astFunctionDef = Z0Z_inlineThisFunctionWithTheseValues(ingredientsParallel.astFunctionDef, dictionaryReplacementStatements)
-	ingredientsSequential.astFunctionDef = Z0Z_inlineThisFunctionWithTheseValues(ingredientsSequential.astFunctionDef, dictionaryReplacementStatements)
+	ingredientsInitialize.astFunctionDef = inlineFunctionDef(numbaFlow.sourceCallableInitialize, numbaFlow.source_astModule)
+	ingredientsParallel.astFunctionDef = inlineFunctionDef(numbaFlow.sourceCallableParallel, numbaFlow.source_astModule)
+	ingredientsSequential.astFunctionDef = inlineFunctionDef(numbaFlow.sourceCallableSequential, numbaFlow.source_astModule)
 
 	# assignRecipeIdentifiersToCallable. =============================
 	# TODO How can I use `RecipeSynthesizeFlow` as the SSOT for the pairs of items that may need to be replaced?

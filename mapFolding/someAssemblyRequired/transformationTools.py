@@ -32,7 +32,6 @@ from mapFolding.someAssemblyRequired import (
 	be,
 	DOT,
 	ifThis,
-	grab,
 	importLogicalPath2Callable,
 	IngredientsFunction,
 	IngredientsModule,
@@ -69,7 +68,7 @@ def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.Fu
 	NodeTourist(be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module)
 	return dictionaryIdentifier2FunctionDef
 
-def makeDictionary4InliningFunction(identifierToInline: ast_Identifier, module: ast.Module) -> dict[str, ast.FunctionDef]:
+def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module):
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
 	try:
 		FunctionDefToInline = dictionaryFunctionDef[identifierToInline]
@@ -96,9 +95,25 @@ def makeDictionary4InliningFunction(identifierToInline: ast_Identifier, module: 
 			keepGoing = True
 			for identifier in listIdentifiersCalledFunctions:
 				if NodeTourist(ifThis.matchesMeButNotAnyDescendant(ifThis.isCall_Identifier(identifier)), Then.extractIt).captureLastMatch(module) is not None:
-					dictionary4Inlining[identifier] = dictionaryFunctionDef[identifier]
+					FunctionDefTarget = dictionaryFunctionDef[identifier]
+					if len(FunctionDefTarget.body) == 1:
+						inliner = NodeChanger(ifThis.isCall_Identifier(identifier), Then.replaceWith(FunctionDefTarget.body[0].value)) # type: ignore
+						for astFunctionDef in dictionary4Inlining.values():
+							inliner.visit(astFunctionDef)
+					else:
+						inliner = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(identifier)),Then.replaceWith(FunctionDefTarget.body[0:-1]))
+						for astFunctionDef in dictionary4Inlining.values():
+							inliner.visit(astFunctionDef)
 
-	return dictionary4Inlining
+	for identifier, FunctionDefTarget in dictionary4Inlining.items():
+		if len(FunctionDefTarget.body) == 1:
+			inliner = NodeChanger(ifThis.isCall_Identifier(identifier), Then.replaceWith(FunctionDefTarget.body[0].value)) # type: ignore
+			inliner.visit(FunctionDefToInline)
+		else:
+			inliner = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(identifier)),Then.replaceWith(FunctionDefTarget.body[0:-1]))
+			inliner.visit(FunctionDefToInline)
+	ast.fix_missing_locations(FunctionDefToInline)
+	return FunctionDefToInline
 
 @overload
 def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[True], *,  pathFilename: PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> Path: ...
@@ -294,55 +309,3 @@ def Z0Z_lameFindReplace(astTree: ast.AST, mappingFindReplaceNodes: Mapping[ast.A
 		else:
 			astTree = deepcopy(newTree)
 	return newTree
-
-# Start of I HATE PROGRAMMING ==========================================================
-def Z0Z_makeDictionaryReplacementStatements(module: ast.Module) -> dict[ast_Identifier, ast.stmt | list[ast.stmt]]:
-	"""Return a dictionary of function names and their replacement statements."""
-	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
-	dictionaryReplacementStatements: dict[ast_Identifier, ast.stmt | list[ast.stmt]] = {}
-	for name, astFunctionDef in dictionaryFunctionDef.items():
-		if ifThis.onlyReturnAnyCompare(astFunctionDef):
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
-		elif ifThis.onlyReturnUnaryOp(astFunctionDef):
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0].value # type: ignore
-		else:
-			dictionaryReplacementStatements[name] = astFunctionDef.body[0:-1]
-	return dictionaryReplacementStatements
-
-def Z0Z_inlineThisFunctionWithTheseValues(astFunctionDef: ast.FunctionDef, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> ast.FunctionDef:
-	class FunctionInliner(ast.NodeTransformer):
-		def __init__(self, dictionaryReplacementStatements: dict[str, ast.stmt | list[ast.stmt]]) -> None:
-			self.dictionaryReplacementStatements = dictionaryReplacementStatements
-
-		def generic_visit(self, node: ast.AST) -> ast.AST:
-			"""Visit all nodes and replace them if necessary."""
-			return super().generic_visit(node)
-
-		def visit_Expr(self, node: ast.Expr) -> ast.AST | list[ast.stmt]:
-			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore
-			return node
-
-		def visit_Assign(self, node: ast.Assign) -> ast.AST | list[ast.stmt]:
-			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node.value):
-				return self.dictionaryReplacementStatements[node.value.func.id] # type: ignore
-			return node
-
-		def visit_Call(self, node: ast.Call) -> ast.AST | list[ast.stmt]:
-			if ifThis.CallDoesNotCallItselfAndNameDOTidIsIn(self.dictionaryReplacementStatements)(node):
-				replacement = self.dictionaryReplacementStatements[node.func.id] # type: ignore
-				if not isinstance(replacement, list):
-					return replacement
-			return node
-
-	keepGoing = True
-	ImaInlineFunction = deepcopy(astFunctionDef)
-	while keepGoing:
-		ImaInlineFunction = deepcopy(astFunctionDef)
-		FunctionInliner(deepcopy(dictionaryReplacementStatements)).visit(ImaInlineFunction)
-		if ast.unparse(ImaInlineFunction) == ast.unparse(astFunctionDef):
-			keepGoing = False
-		else:
-			astFunctionDef = deepcopy(ImaInlineFunction)
-			ast.fix_missing_locations(astFunctionDef)
-	return ImaInlineFunction

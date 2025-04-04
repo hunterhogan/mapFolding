@@ -1,6 +1,6 @@
-"""It's still wrong, but typing information is being transmitted between functions, methods, and modules."""
 from typing import Any, TYPE_CHECKING, TypeAlias as typing_TypeAlias, TypeVar as typing_TypeVar
 import ast
+# TODO understand typing.
 
 stuPyd: typing_TypeAlias = str
 
@@ -25,7 +25,6 @@ intORstr_orNone: typing_TypeAlias = Any
 list_ast_type_paramORstr_orNone: typing_TypeAlias = Any
 str_nameDOTname: typing_TypeAlias = stuPyd
 
-# TODO understand typing.
 TypeCertified = typing_TypeVar('TypeCertified', bound = ast.AST, covariant=True)
 astMosDef = typing_TypeVar('astMosDef', bound=astClassHasDOTnameNotName)
 
