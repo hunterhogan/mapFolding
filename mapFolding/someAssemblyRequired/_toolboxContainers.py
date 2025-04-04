@@ -14,7 +14,7 @@ from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import dataclasses
 
-# TODO better use of `dataclasses.dataclass` (and `class`, generally)
+# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 class LedgerOfImports:
 	# TODO When resolving the ledger of imports, remove self-referential imports
 	# TODO add TypeIgnore tracking to the ledger of imports
@@ -107,7 +107,7 @@ class LedgerOfImports:
 			if isinstance(nodeBuffalo, (ast.Import, ast.ImportFrom)):
 				self.addAst(nodeBuffalo)
 
-# TODO better use of `dataclasses.dataclass` (and `class`, generally)
+# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class IngredientsFunction:
 	"""Everything necessary to integrate a function into a module should be here.
@@ -118,7 +118,7 @@ class IngredientsFunction:
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	type_ignores: list[ast.TypeIgnore] = dataclasses.field(default_factory=list)
 
-# TODO better use of `dataclasses.dataclass` (and `class`, generally)
+# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class IngredientsModule:
 	"""Everything necessary to create one _logical_ `ast.Module` should be here.
@@ -239,7 +239,7 @@ class IngredientsModule:
 		listTypeIgnore.extend(self.launcher.type_ignores)
 		return listTypeIgnore
 
-# TODO better use of `dataclasses.dataclass` (and `class`, generally)
+# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class RecipeSynthesizeFlow:
 	"""Settings for synthesizing flow."""
@@ -294,13 +294,11 @@ class RecipeSynthesizeFlow:
 
 	# ========================================
 	# Computed
-	"""
-theFormatStrModuleSynthetic = "{packageFlow}Count"
-theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
-theModuleDispatcherSynthetic: ast_Identifier = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=The.sourceCallableDispatcher)
-theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.moduleOfSyntheticModules, theModuleDispatcherSynthetic])
-
-	"""
+	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
+	# theFormatStrModuleSynthetic = "{packageFlow}Count"
+	# theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
+	# theModuleDispatcherSynthetic: ast_Identifier = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=The.sourceCallableDispatcher)
+	# theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.moduleOfSyntheticModules, theModuleDispatcherSynthetic])
 	# logicalPathModuleDispatcher: str = '.'.join([Z0Z_flowLogicalPathRoot, moduleDispatcher])
 	# ========================================
 	# Filesystem (names of physical objects)
@@ -341,7 +339,7 @@ dummyAssign = Make.Assign([Make.Name("dummyTarget")], Make.Constant(None))
 dummySubscript = Make.Subscript(Make.Name("dummy"), Make.Name("slice"))
 dummyTuple = Make.Tuple([Make.Name("dummyElement")])
 
-# TODO better use of `dataclasses.dataclass` (and `class`, generally)
+# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class ShatteredDataclass:
 	countingVariableAnnotation: ast.expr

@@ -40,6 +40,7 @@ if TYPE_CHECKING:
 else:
 	TypedDict = dict[str,Any]
 
+# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 
 class ParametersNumba(TypedDict):
@@ -151,14 +152,14 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction
 
-# TODO better use of `dataclasses.dataclass` (and `class`, generally)
+# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class SpicesJobNumba:
 	useNumbaProgressBar: bool = True
 	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
 	parametersNumba = parametersNumbaDefault
 
-# TODO better use of `dataclasses.dataclass` (and `class`, generally)
+# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class RecipeJob:
 	state: ComputationState
@@ -272,7 +273,8 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	ingredientsSequential.astFunctionDef = inlineFunctionDef(numbaFlow.sourceCallableSequential, numbaFlow.source_astModule)
 
 	# assignRecipeIdentifiersToCallable. =============================
-	# TODO How can I use `RecipeSynthesizeFlow` as the SSOT for the pairs of items that may need to be replaced?
+	# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
+	# How can I use dataclass settings as the SSOT for specific actions? https://github.com/hunterhogan/mapFolding/issues/16
 	# NOTE reminder: you are updating these `ast.Name` here (and not in a more general search) because this is a
 	# narrow search for `ast.Call` so you won't accidentally replace unrelated `ast.Name`.
 	listFindReplace = [(numbaFlow.sourceCallableDispatcher, numbaFlow.callableDispatcher),
@@ -310,9 +312,8 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	shatteredDataclass = shatter_dataclassesDOTdataclass(numbaFlow.logicalPathModuleDataclass, numbaFlow.sourceDataclassIdentifier, instance_Identifier)
 	ingredientsDispatcher.imports.update(shatteredDataclass.ledger)
 
+	# How can I use dataclass settings as the SSOT for specific actions? https://github.com/hunterhogan/mapFolding/issues/16
 	# Change callable parameters and Call to the callable at the same time ====
-	# TODO How can I use ast and/or other tools to ensure that when I change a callable, I also change the statements that call the callable?
-	# Asked differently, how do I integrate separate statements into a "subroutine", and that subroutine is "atomic/indivisible"?
 	# sequentialCallable =========================================================
 	ingredientsSequential.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 	astCallSequentialCallable = Make.Call(Make.Name(numbaFlow.callableSequential), shatteredDataclass.listName4Parameters)

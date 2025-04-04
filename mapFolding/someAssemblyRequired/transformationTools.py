@@ -44,7 +44,7 @@ from mapFolding.someAssemblyRequired import (
 	str_nameDOTname,
 	Then,
 )
-from mapFolding.theSSOT import ComputationState, The, raiseIfNoneGitHubIssueNumber3
+from mapFolding.theSSOT import ComputationState, raiseIfNoneGitHubIssueNumber3, The
 from os import PathLike
 from pathlib import Path, PurePath
 from typing import Any, Literal, overload
@@ -68,7 +68,7 @@ def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.Fu
 	NodeTourist(be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module)
 	return dictionaryIdentifier2FunctionDef
 
-def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module):
+def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) -> ast.FunctionDef:
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
 	try:
 		FunctionDefToInline = dictionaryFunctionDef[identifierToInline]
@@ -288,11 +288,11 @@ def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] 
 
 # END of acceptable classes and functions ======================================================
 dictionaryEstimates: dict[tuple[int, ...], int] = {
-	(2,2,2,2,2,2,2,2): 362794844160000,
-	(2,21): 1493028892051200,
-	(3,15): 9842024675968800,
+	(2,2,2,2,2,2,2,2): 798148657152000,
+	(2,21): 776374224866624,
+	(3,15): 824761667826225,
 	(3,3,3,3): 85109616000000000000000000000000,
-	(8,8): 129950723279272000,
+	(8,8): 791274195985524900,
 }
 
 # END of marginal classes and functions ======================================================

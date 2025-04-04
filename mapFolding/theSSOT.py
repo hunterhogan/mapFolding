@@ -66,9 +66,7 @@ concurrencyPackageHARDCODED = 'multiprocessing'
 
 # The metadata markers `metadata={'evaluateWhen': '...'}` signal values that I believe should be static.
 
-# TODO better use of `dataclasses.dataclass` (and `class`, generally)
-# I feel that these values should be "frozen" during execution, but when I use `frozen=True`, I
-# have problems/complications with `__post_init__` and with Pytest. (i.e., tests.conftest.useThisDispatcher().)
+# PackageSettings in theSSOT.py and immutability https://github.com/hunterhogan/mapFolding/issues/11
 @dataclasses.dataclass
 class PackageSettings:
 
@@ -176,11 +174,7 @@ class ComputationState:
 			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), self.__dataclass_fields__['foldGroups'].metadata['dtype'])
 			self.foldGroups[-1] = self.leavesTotal
 
-		# TODO better use of `dataclasses.dataclass` (and `class`, generally)
-		# If I annotate the field with `someType | None`, then every time I try to use the field, the type checker will say "OMG, this _might_ be `None`!"
-		# I can't use `dataclasses.field(default_factory=, init=True)` because "default_factory is a 0-argument function called to initialize a field's value," and I need to pass arguments to the function.
-		# If I write `dataclasses.field(default=makeDataContainer(int(leavesTotal) + 1, numpy_int64), init=True)`, 1) `leavesTotal` is unbound, 2) I haven't figured out how to avoid the so-called circular import if I write `from mapFolding.beDRY import makeDataContainer` outside of the dataclass.
-		# Therefore, I set the annotation to `someType`, `default=None`, and `init=True`, then if the value isn't initialized, I initialize it in `__post_init__`. And add `pyright: ignore[reportUnnecessaryComparison]`
+		# Dataclasses, Default factories, and arguments in `ComputationState` https://github.com/hunterhogan/mapFolding/issues/12
 		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 
 		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
@@ -188,8 +182,7 @@ class ComputationState:
 		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 
-	# TODO better use of `dataclasses.dataclass` (and `class`, generally)
-	# Users must be able to set and change the `foldsTotal` field if the want. However, if they are using the field as I do, which is to automatically calculate the value by multiplying `foldGroups` by `leavesTotal`, it would be convenient if the field were to automatically update instead of having to remember to call this method.
+	# Automatic, or not, calculation in dataclass `ComputationState` https://github.com/hunterhogan/mapFolding/issues/14
 	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
 
