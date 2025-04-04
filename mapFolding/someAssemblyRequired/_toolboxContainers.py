@@ -7,10 +7,9 @@ circular imports while providing reusable data structures.
 """
 from collections import defaultdict
 from collections.abc import Sequence
-from mapFolding.someAssemblyRequired import ImaAnnotationType, ast_Identifier, be, Make, parseLogicalPath2astModule, str_nameDOTname
-from mapFolding.theSSOT import callableDispatcherHARDCODED, The
+from mapFolding.someAssemblyRequired import ast_Identifier, be, Make, parseLogicalPath2astModule, str_nameDOTname
+from mapFolding.theSSOT import The
 from pathlib import Path, PurePosixPath
-from typing import Literal
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import dataclasses
@@ -340,7 +339,7 @@ dummyTuple = Make.Tuple([Make.Name("dummyElement")])
 
 @dataclasses.dataclass
 class ShatteredDataclass:
-	countingVariableAnnotation: ImaAnnotationType
+	countingVariableAnnotation: ast.expr
 	"""Type annotation for the counting variable extracted from the dataclass."""
 	countingVariableName: ast.Name
 	"""AST name node representing the counting variable identifier."""
@@ -355,7 +354,7 @@ class ShatteredDataclass:
 	"""Function argument nodes with annotations for parameter specification."""
 	list_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list)
 	"""Keyword arguments for dataclass initialization with field=field format."""
-	listAnnotations: list[ImaAnnotationType] = dataclasses.field(default_factory=list)
+	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=list)
 	"""Type annotations for each dataclass field."""
 	listName4Parameters: list[ast.Name] = dataclasses.field(default_factory=list)
 	"""Name nodes for each dataclass field used as function parameters."""

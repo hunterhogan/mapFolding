@@ -1,19 +1,14 @@
 from collections.abc import Callable, Container
 from mapFolding.someAssemblyRequired import (
-	ast_expr_Slice,
 	ast_Identifier,
 	astClassHasDOTnameNotName,
 	astClassHasDOTtarget,
 	astClassHasDOTvalue,
 	astClassOptionallyHasDOTnameNotName,
 	astClassOptionallyHasDOTvalue,
-	Ima_funcTypeUNEDITED,
-	ImaAnnotationType,
-	ImaAnnotationTypeVar,
-	Ima_targetTypeUNEDITED,
 	TypeCertified,
 )
-from typing import Any, cast, overload, TypeGuard
+from typing import Any, overload, TypeGuard
 import ast
 
 class DOT:
@@ -23,13 +18,13 @@ class DOT:
 	"""
 	@staticmethod
 	@overload
-	def annotation(node: ast.AnnAssign) -> ImaAnnotationType:...
+	def annotation(node: ast.AnnAssign) -> ast.expr:...
 	@staticmethod
 	@overload
-	def annotation(node: ast.arg) -> ImaAnnotationType | None:...
+	def annotation(node: ast.arg) -> ast.expr | None:...
 	@staticmethod
-	def annotation(node: ast.AnnAssign | ast.arg) -> ImaAnnotationType | None:
-		return cast(ImaAnnotationType, node.annotation)
+	def annotation(node: ast.AnnAssign | ast.arg) -> ast.expr | None:
+		return node.annotation
 	@staticmethod
 	@overload
 	def arg(node: ast.arg) -> ast_Identifier:...
@@ -43,7 +38,7 @@ class DOT:
 	def attr(node: ast.Attribute) -> ast_Identifier:
 		return node.attr
 	@staticmethod
-	def func(node: ast.Call) -> Ima_funcTypeUNEDITED | ast.expr:
+	def func(node: ast.Call) -> ast.expr:
 		return node.func
 	@staticmethod
 	def id(node: ast.Name) -> ast_Identifier:
@@ -56,18 +51,18 @@ class DOT:
 	def name(node: astClassOptionallyHasDOTnameNotName) -> ast_Identifier | None:...
 	@staticmethod
 	def name(node: astClassHasDOTnameNotName | astClassOptionallyHasDOTnameNotName) -> ast_Identifier | None:
-		return cast(ast_Identifier, node.name)
+		return node.name
 	@staticmethod
-	def target(node: astClassHasDOTtarget) -> Ima_targetTypeUNEDITED:
+	def target(node: astClassHasDOTtarget) -> ast.Name | ast.Attribute | ast.Subscript | ast.expr:
 		return node.target
 	@staticmethod
 	@overload
-	def value(node: astClassHasDOTvalue) -> Any:...
+	def value(node: astClassHasDOTvalue) -> ast.expr:...
 	@staticmethod
 	@overload
-	def value(node: astClassOptionallyHasDOTvalue) -> Any | None:...
+	def value(node: astClassOptionallyHasDOTvalue) -> ast.expr | Any | None:...
 	@staticmethod
-	def value(node: astClassHasDOTvalue | astClassOptionallyHasDOTvalue) -> Any | None:
+	def value(node: astClassHasDOTvalue | astClassOptionallyHasDOTvalue) -> ast.expr | Any | None | bool:
 		return node.value
 
 class be:
@@ -77,48 +72,47 @@ class be:
 			return isinstance(node, antecedent)
 		return workhorse
 	@staticmethod
-	def AnnAssign(node: TypeCertified) -> TypeGuard[ast.AnnAssign]: return be._typeCertified(ast.AnnAssign)(node) # pyright: ignore [reportInvalidTypeVarUse]
-# 'TypeVar "typeCertified" appears only once in generic function signature. Use "typeCertified" instead Pylance(reportInvalidTypeVarUse)"' HOW THE FUCK IS THAT INVALID WHEN IT IS WORKING PERFECTLY TO PASS THE TYPE INFORMATION--IN YOUR FUCKING STATIC TYPE CHECKER, PYLANCE!!!! Fuck you, and fuck your pretentious language.
+	def AnnAssign(node: ast.AST) -> TypeGuard[ast.AnnAssign]: return be._typeCertified(ast.AnnAssign)(node)
 	@staticmethod
-	def arg(node: TypeCertified) -> TypeGuard[ast.arg]: return be._typeCertified(ast.arg)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def arg(node: ast.AST) -> TypeGuard[ast.arg]: return be._typeCertified(ast.arg)(node)
 	@staticmethod
-	def Assign(node: TypeCertified) -> TypeGuard[ast.Assign]: return be._typeCertified(ast.Assign)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Assign(node: ast.AST) -> TypeGuard[ast.Assign]: return be._typeCertified(ast.Assign)(node)
 	@staticmethod
-	def Attribute(node: TypeCertified) -> TypeGuard[ast.Attribute]: return be._typeCertified(ast.Attribute)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Attribute(node: ast.AST) -> TypeGuard[ast.Attribute]: return be._typeCertified(ast.Attribute)(node)
 	@staticmethod
-	def AugAssign(node: TypeCertified) -> TypeGuard[ast.AugAssign]: return be._typeCertified(ast.AugAssign)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def AugAssign(node: ast.AST) -> TypeGuard[ast.AugAssign]: return be._typeCertified(ast.AugAssign)(node)
 	@staticmethod
-	def BoolOp(node: TypeCertified) -> TypeGuard[ast.BoolOp]: return be._typeCertified(ast.BoolOp)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def BoolOp(node: ast.AST) -> TypeGuard[ast.BoolOp]: return be._typeCertified(ast.BoolOp)(node)
 	@staticmethod
-	def Call(node: TypeCertified) -> TypeGuard[ast.Call]: return be._typeCertified(ast.Call)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Call(node: ast.AST) -> TypeGuard[ast.Call]: return be._typeCertified(ast.Call)(node)
 	@staticmethod
-	def ClassDef(node: TypeCertified) -> TypeGuard[ast.ClassDef]: return be._typeCertified(ast.ClassDef)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def ClassDef(node: ast.AST) -> TypeGuard[ast.ClassDef]: return be._typeCertified(ast.ClassDef)(node)
 	@staticmethod
-	def Compare(node: TypeCertified) -> TypeGuard[ast.Compare]: return be._typeCertified(ast.Compare)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Compare(node: ast.AST) -> TypeGuard[ast.Compare]: return be._typeCertified(ast.Compare)(node)
 	@staticmethod
-	def Constant(node: TypeCertified) -> TypeGuard[ast.Constant]: return be._typeCertified(ast.Constant)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Constant(node: ast.AST) -> TypeGuard[ast.Constant]: return be._typeCertified(ast.Constant)(node)
 	@staticmethod
-	def Expr(node: TypeCertified) -> TypeGuard[ast.Expr]: return be._typeCertified(ast.Expr)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Expr(node: ast.AST) -> TypeGuard[ast.Expr]: return be._typeCertified(ast.Expr)(node)
 	@staticmethod
-	def FunctionDef(node: TypeCertified) -> TypeGuard[ast.FunctionDef]: return be._typeCertified(ast.FunctionDef)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def FunctionDef(node: ast.AST) -> TypeGuard[ast.FunctionDef]: return be._typeCertified(ast.FunctionDef)(node)
 	@staticmethod
-	def Import(node: TypeCertified) -> TypeGuard[ast.Import]: return be._typeCertified(ast.Import)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Import(node: ast.AST) -> TypeGuard[ast.Import]: return be._typeCertified(ast.Import)(node)
 	@staticmethod
-	def ImportFrom(node: TypeCertified) -> TypeGuard[ast.ImportFrom]: return be._typeCertified(ast.ImportFrom)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def ImportFrom(node: ast.AST) -> TypeGuard[ast.ImportFrom]: return be._typeCertified(ast.ImportFrom)(node)
 	@staticmethod
-	def keyword(node: TypeCertified) -> TypeGuard[ast.keyword]: return be._typeCertified(ast.keyword)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def keyword(node: ast.AST) -> TypeGuard[ast.keyword]: return be._typeCertified(ast.keyword)(node)
 	@staticmethod
-	def Module(node: TypeCertified) -> TypeGuard[ast.Module]: return be._typeCertified(ast.Module)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Module(node: ast.AST) -> TypeGuard[ast.Module]: return be._typeCertified(ast.Module)(node)
 	@staticmethod
-	def Name(node: TypeCertified) -> TypeGuard[ast.Name]: return be._typeCertified(ast.Name)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Name(node: ast.AST) -> TypeGuard[ast.Name]: return be._typeCertified(ast.Name)(node)
 	@staticmethod
-	def Return(node: TypeCertified) -> TypeGuard[ast.Return]: return be._typeCertified(ast.Return)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Return(node: ast.AST) -> TypeGuard[ast.Return]: return be._typeCertified(ast.Return)(node)
 	@staticmethod
-	def Starred(node: TypeCertified) -> TypeGuard[ast.Starred]: return be._typeCertified(ast.Starred)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Starred(node: ast.AST) -> TypeGuard[ast.Starred]: return be._typeCertified(ast.Starred)(node)
 	@staticmethod
-	def Subscript(node: TypeCertified) -> TypeGuard[ast.Subscript]: return be._typeCertified(ast.Subscript)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def Subscript(node: ast.AST) -> TypeGuard[ast.Subscript]: return be._typeCertified(ast.Subscript)(node)
 	@staticmethod
-	def UnaryOp(node: TypeCertified) -> TypeGuard[ast.UnaryOp]: return be._typeCertified(ast.UnaryOp)(node) # pyright: ignore [reportInvalidTypeVarUse]
+	def UnaryOp(node: ast.AST) -> TypeGuard[ast.UnaryOp]: return be._typeCertified(ast.UnaryOp)(node)
 
 class ifThis:
 	@staticmethod
@@ -167,7 +161,7 @@ class ifThis:
 	def is_keyword_IdentifierEqualsConstantValue(identifier: ast_Identifier, ConstantValue: Any) -> Callable[[ast.AST], TypeGuard[ast.keyword] | bool]:
 		return lambda node: ifThis.is_keyword_Identifier(identifier)(node) and ifThis.is_keywordAndValueIsConstant(node) and ifThis.isConstantEquals(ConstantValue)(DOT.value(node))
 	@staticmethod
-	def isAnnAssign_targetIs(targetPredicate: Callable[[Ima_targetTypeUNEDITED], TypeGuard[Ima_targetTypeUNEDITED] | bool]) -> Callable[[ast.AST], TypeGuard[ast.AnnAssign] | bool]:
+	def isAnnAssign_targetIs(targetPredicate: Callable[[ast.expr], TypeGuard[ast.expr] | bool]) -> Callable[[ast.AST], TypeGuard[ast.AnnAssign] | bool]:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.AnnAssign] | bool:
 			return be.AnnAssign(node) and targetPredicate(DOT.target(node))
 		return workhorse
@@ -175,7 +169,7 @@ class ifThis:
 	def isAnnAssignAndAnnotationIsName(node: ast.AST) -> TypeGuard[ast.AnnAssign] | bool:
 		return be.AnnAssign(node) and be.Name(DOT.annotation(node))
 	@staticmethod
-	def isAugAssign_targetIs(targetPredicate: Callable[[Ima_targetTypeUNEDITED], TypeGuard[Ima_targetTypeUNEDITED] | bool]) -> Callable[[ast.AST], TypeGuard[ast.AugAssign] | bool]:
+	def isAugAssign_targetIs(targetPredicate: Callable[[ast.expr], TypeGuard[ast.expr] | bool]) -> Callable[[ast.AST], TypeGuard[ast.AugAssign] | bool]:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.AugAssign] | bool:
 			return be.AugAssign(node) and targetPredicate(DOT.target(node))
 		return workhorse

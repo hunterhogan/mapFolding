@@ -20,11 +20,10 @@ algorithm implementation into a highly-optimized Numba version.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
-from mapFolding.someAssemblyRequired import DOT, grab, IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, be, ifThis, parsePathFilename2astModule, str_nameDOTname, IngredientsFunction, ShatteredDataclass
+from mapFolding.someAssemblyRequired import grab, IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, be, ifThis, parsePathFilename2astModule, str_nameDOTname, IngredientsFunction, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import Z0Z_inlineThisFunctionWithTheseValues, Z0Z_lameFindReplace, Z0Z_makeDictionaryReplacementStatements, astModuleToIngredientsFunction, shatter_dataclassesDOTdataclass, write_astModule
 from mapFolding.theSSOT import ComputationState, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeElephino as TheDatatypeElephino, DatatypeLeavesTotal as TheDatatypeLeavesTotal
-
+from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from pathlib import Path, PurePosixPath
 from typing import Any, cast, Final, TYPE_CHECKING, TypeAlias

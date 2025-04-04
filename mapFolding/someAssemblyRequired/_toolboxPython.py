@@ -1,10 +1,10 @@
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from inspect import getsource as inspect_getsource
 from mapFolding.someAssemblyRequired import ast_Identifier, str_nameDOTname
 from os import PathLike
 from pathlib import Path, PurePath
 from types import ModuleType
-from typing import Any, cast
+from typing import Any
 import ast
 import importlib
 import importlib.util

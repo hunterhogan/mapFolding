@@ -25,11 +25,6 @@ intORstr_orNone: typing_TypeAlias = Any
 list_ast_type_paramORstr_orNone: typing_TypeAlias = Any
 str_nameDOTname: typing_TypeAlias = stuPyd
 
-Ima_funcTypeUNEDITED: typing_TypeAlias = ast.Attribute | ast.Await | ast.BinOp | ast.BoolOp | ast.Call | ast.Compare | ast.Constant | ast.Dict | ast.DictComp | ast.FormattedValue | ast.GeneratorExp | ast.IfExp | ast.JoinedStr | ast.Lambda | ast.List | ast.ListComp | ast.Name | ast.NamedExpr | ast.Set | ast.SetComp | ast.Slice | ast.Starred | ast.Subscript | ast.Tuple | ast.UnaryOp | ast.Yield | ast.YieldFrom
-Ima_targetTypeUNEDITED: typing_TypeAlias = ast.AST
-ImaAnnotationType: typing_TypeAlias = ast.Attribute | ast.Constant | ast.Name | ast.Subscript
-ImaAnnotationTypeVar = typing_TypeVar('ImaAnnotationTypeVar', ast.Attribute, ast.Constant, ast.Name, ast.Subscript)
-
 # TODO understand whatever the fuck `typing.TypeVar` is _supposed_ to fucking do.
 TypeCertified = typing_TypeVar('TypeCertified', bound = ast.AST, covariant=True)
 astMosDef = typing_TypeVar('astMosDef', bound=astClassHasDOTnameNotName)

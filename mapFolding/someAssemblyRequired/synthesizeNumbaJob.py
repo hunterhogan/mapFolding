@@ -2,7 +2,7 @@
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, NodeChanger, Then, IngredientsFunction, IngredientsModule, LedgerOfImports
 from mapFolding.someAssemblyRequired.toolboxNumba import RecipeJob, SpicesJobNumba, decorateCallableWithNumba
-from mapFolding.someAssemblyRequired.transformationTools import astModuleToIngredientsFunction, extractFunctionDef, write_astModule
+from mapFolding.someAssemblyRequired.transformationTools import extractFunctionDef, write_astModule
 from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
 from mapFolding.theSSOT import The, raiseIfNoneGitHubIssueNumber3
 from mapFolding.oeis import getFoldsTotalKnown
@@ -188,7 +188,7 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba):
 	"""
 
 if __name__ == '__main__':
-	mapShape = (2,4)
+	mapShape = (6,6)
 	state = makeInitializedComputationState(mapShape)
 	foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
 	# from mapFolding.someAssemblyRequired.toolboxNumba import theNumbaFlow

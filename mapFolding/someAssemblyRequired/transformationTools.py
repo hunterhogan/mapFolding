@@ -32,7 +32,6 @@ from mapFolding.someAssemblyRequired import (
 	be,
 	DOT,
 	ifThis,
-	ImaAnnotationType,
 	importLogicalPath2Callable,
 	IngredientsFunction,
 	IngredientsModule,
@@ -44,7 +43,6 @@ from mapFolding.someAssemblyRequired import (
 	ShatteredDataclass,
 	str_nameDOTname,
 	Then,
-	TypeCertified,
 )
 from mapFolding.theSSOT import ComputationState, The, raiseIfNoneGitHubIssueNumber3
 from os import PathLike
@@ -189,7 +187,7 @@ class DeReConstructField2ast:
 	astName: ast.Name = dataclasses.field(init=False)
 	ast_keyword_field__field: ast.keyword = dataclasses.field(init=False)
 	ast_nameDOTname: ast.Attribute = dataclasses.field(init=False)
-	astAnnotation: ImaAnnotationType = dataclasses.field(init=False)
+	astAnnotation: ast.expr = dataclasses.field(init=False)
 	ast_argAnnotated: ast.arg = dataclasses.field(init=False)
 	astAnnAssignConstructor: ast.AnnAssign = dataclasses.field(init=False)
 	Z0Z_hack: tuple[ast.AnnAssign, str] = dataclasses.field(init=False)

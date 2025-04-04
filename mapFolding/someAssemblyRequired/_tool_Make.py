@@ -2,7 +2,6 @@ from collections.abc import Sequence
 from mapFolding.someAssemblyRequired import (
 	ast_expr_Slice,
 	ast_Identifier,
-	ImaAnnotationType,
 	intORlist_ast_type_paramORstr_orNone,
 	intORstr_orNone,
 	list_ast_type_paramORstr_orNone,
@@ -31,7 +30,7 @@ class Make:
 	def alias(name: ast_Identifier, asname: ast_Identifier | None = None) -> ast.alias:
 		return ast.alias(name, asname)
 	@staticmethod
-	def AnnAssign(target: ast.Attribute | ast.Name | ast.Subscript, annotation: ImaAnnotationType, value: ast.expr | None = None, **keywordArguments: int) -> ast.AnnAssign: # `simple: int`: uses a clever int-from-boolean to assign the correct value to the `simple` attribute. So, don't make it a method parameter.
+	def AnnAssign(target: ast.Attribute | ast.Name | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None, **keywordArguments: int) -> ast.AnnAssign: # `simple: int`: uses a clever int-from-boolean to assign the correct value to the `simple` attribute. So, don't make it a method parameter.
 		return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)), **keywordArguments)
 	@staticmethod
 	def arg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: intORstr_orNone) -> ast.arg:
