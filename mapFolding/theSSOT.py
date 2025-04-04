@@ -26,78 +26,107 @@ from types import ModuleType
 from typing import Any, TypeAlias, TypeVar
 import dataclasses
 
-# =============================================================================
-# TODO Learn how to handle the issues in "Evaluate When Packaging" and "Evaluate When Installing"
-# The Wrong Way
-# I strongly prefer dynamic values and dynamic handling of values. Nevertheless,
-# some values should be static and universal. In my opinion, all of the values
-# in the section "The Wrong Way" should be 1) static and 2) _easily_ accessible
-# by any part of the package. The two archetypical examples of Python values
-# that are _not_ easy to discover from within a package are the name of the package
-# and the root directory of the package (relative or absolute). I've divided the
-# values into sections. I feel some values should be fixed when I, the developer,
-# "package" the Python code and send it to PyPI. I believe a few more values should
-# (usually) be fixed when the user installs the package.
-
-# The Wrong Way: Evaluate When Packaging
-
+# Evaluate When Packaging https://github.com/hunterhogan/mapFolding/issues/18
 try:
 	packageNamePACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
 except Exception:
 	packageNamePACKAGING = "mapFolding"
 
-# The Wrong Way: Evaluate When Installing
-
+# Evaluate When Installing https://github.com/hunterhogan/mapFolding/issues/18
 def getPathPackageINSTALLING() -> Path:
 	pathPackage: Path = Path(inspect_getfile(importlib_import_module(packageNamePACKAGING)))
 	if pathPackage.is_file():
 		pathPackage = pathPackage.parent
 	return pathPackage
 
-
-# The Wrong Way: HARDCODED
 # I believe these values should be dynamically determined, so I have conspicuously marked them "HARDCODED"
 # and created downstream logic that assumes the values were dynamically determined.
 # Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-# from mapFolding.someAssemblyRequired.synthesizeNumbaFlow.theNumbaFlow
 logicalPathModuleDispatcherHARDCODED: str = 'mapFolding.syntheticModules.numbaCount_doTheNeedful'
 callableDispatcherHARDCODED: str = 'doTheNeedful'
 concurrencyPackageHARDCODED = 'multiprocessing'
-
-# The metadata markers `metadata={'evaluateWhen': '...'}` signal values that I believe should be static.
+# from mapFolding.someAssemblyRequired.synthesizeNumbaFlow.theNumbaFlow
 
 # PackageSettings in theSSOT.py and immutability https://github.com/hunterhogan/mapFolding/issues/11
 @dataclasses.dataclass
 class PackageSettings:
+	"""
+	Centralized configuration settings for the mapFolding package.
+
+	This class implements the Single Source of Truth (SSOT) principle for package
+	configuration, providing a consistent interface for accessing package settings,
+	paths, and dispatch functions. The primary instance of this class, named `The`,
+	is imported and used throughout the package to retrieve configuration values.
+	"""
 
 	logicalPathModuleDispatcher: str | None = None
+	"""Logical import path to the module containing the dispatcher function."""
+
 	callableDispatcher: str | None = None
-	concurrencyPackage: str |None = None
+	"""Name of the function within the dispatcher module that will be called."""
+
+	concurrencyPackage: str | None = None
+	"""Package to use for concurrent execution (e.g., 'multiprocessing', 'numba')."""
+
+	# "Evaluate When Packaging" and "Evaluate When Installing" https://github.com/hunterhogan/mapFolding/issues/18
 	dataclassIdentifier: str = dataclasses.field(default='ComputationState', metadata={'evaluateWhen': 'packaging'})
+	"""Name of the dataclass used to track computation state."""
+
 	dataclassInstance: str = dataclasses.field(default='state', metadata={'evaluateWhen': 'packaging'})
+	"""Default variable name for instances of the computation state dataclass."""
+
 	dataclassInstanceTaskDistributionSuffix: str = dataclasses.field(default='Parallel', metadata={'evaluateWhen': 'packaging'})
+	"""Suffix added to dataclassInstance for parallel task distribution."""
+
 	dataclassModule: str = dataclasses.field(default='theSSOT', metadata={'evaluateWhen': 'packaging'})
+	"""Module containing the computation state dataclass definition."""
+
 	datatypePackage: str = dataclasses.field(default='numpy', metadata={'evaluateWhen': 'packaging'})
+	"""Package providing the numeric data types used in computation."""
+
 	fileExtension: str = dataclasses.field(default='.py', metadata={'evaluateWhen': 'installing'})
+	"""Default file extension for generated code files."""
+
 	packageName: str = dataclasses.field(default = packageNamePACKAGING, metadata={'evaluateWhen': 'packaging'})
-	pathPackage: Path = dataclasses.field(default_factory=getPathPackageINSTALLING, init=False, metadata={'evaluateWhen': 'installing'})
+	"""Name of this package, used for import paths and configuration."""
+
+	pathPackage: Path = dataclasses.field(default_factory=getPathPackageINSTALLING, metadata={'evaluateWhen': 'installing'})
+	"""Absolute path to the installed package directory."""
+
 	sourceAlgorithm: str = dataclasses.field(default='theDao', metadata={'evaluateWhen': 'packaging'})
+	"""Module containing the reference implementation of the algorithm."""
+
 	sourceCallableDispatcher: str = dataclasses.field(default='doTheNeedful', metadata={'evaluateWhen': 'packaging'})
+	"""Name of the function that dispatches computation in the source algorithm."""
+
 	sourceCallableInitialize: str = dataclasses.field(default='countInitialize', metadata={'evaluateWhen': 'packaging'})
+	"""Name of the function that initializes computation in the source algorithm."""
+
 	sourceCallableParallel: str = dataclasses.field(default='countParallel', metadata={'evaluateWhen': 'packaging'})
+	"""Name of the function that performs parallel computation in the source algorithm."""
+
 	sourceCallableSequential: str = dataclasses.field(default='countSequential', metadata={'evaluateWhen': 'packaging'})
+	"""Name of the function that performs sequential computation in the source algorithm."""
+
 	sourceConcurrencyManagerIdentifier: str = dataclasses.field(default='submit', metadata={'evaluateWhen': 'packaging'})
+	"""Method name used to submit tasks to the concurrency manager."""
+
 	sourceConcurrencyManagerNamespace: str = dataclasses.field(default='concurrencyManager', metadata={'evaluateWhen': 'packaging'})
+	"""Variable name used for the concurrency manager instance."""
+
 	sourceConcurrencyPackage: str = dataclasses.field(default='multiprocessing', metadata={'evaluateWhen': 'packaging'})
+	"""Default package used for concurrency in the source algorithm."""
 
-	dataclassInstanceTaskDistribution: str = dataclasses.field(init=False, metadata={'evaluateWhen': 'packaging'})
-	""" During parallel computation, this identifier helps to create deep copies of the dataclass instance. """
-	logicalPathModuleDataclass: str = dataclasses.field(init=False)
-	""" The package.module.name logical path to the dataclass. """
-	logicalPathModuleSourceAlgorithm: str = dataclasses.field(init=False)
-	""" The package.module.name logical path to the source algorithm. """
+	dataclassInstanceTaskDistribution: str = dataclasses.field(default=None, metadata={'evaluateWhen': 'packaging'}) # pyright: ignore[reportAssignmentType]
+	"""Variable name for the parallel distribution instance of the computation state."""
 
-	@property # This is not a field, and that annoys me.
+	logicalPathModuleDataclass: str = dataclasses.field(default=None, metadata={'evaluateWhen': 'packaging'}) # pyright: ignore[reportAssignmentType]
+	"""Fully qualified import path to the module containing the computation state dataclass."""
+
+	logicalPathModuleSourceAlgorithm: str = dataclasses.field(default=None, metadata={'evaluateWhen': 'packaging'}) # pyright: ignore[reportAssignmentType]
+	"""Fully qualified import path to the module containing the source algorithm."""
+
+	@property
 	def dispatcher(self) -> Callable[['ComputationState'], 'ComputationState']:
 		""" _The_ callable that connects `countFolds` to the logic that does the work."""
 		logicalPath: str = self.logicalPathModuleDispatcher or self.logicalPathModuleSourceAlgorithm
@@ -106,10 +135,13 @@ class PackageSettings:
 		return getattr(moduleImported, identifier)
 
 	def __post_init__(self) -> None:
-		self.dataclassInstanceTaskDistribution = self.dataclassInstance + self.dataclassInstanceTaskDistributionSuffix
+		if self.dataclassInstanceTaskDistribution is None: # pyright: ignore[reportUnnecessaryComparison]
+			self.dataclassInstanceTaskDistribution = self.dataclassInstance + self.dataclassInstanceTaskDistributionSuffix
 
-		self.logicalPathModuleDataclass = '.'.join([self.packageName, self.dataclassModule])
-		self.logicalPathModuleSourceAlgorithm = '.'.join([self.packageName, self.sourceAlgorithm])
+		if self.logicalPathModuleDataclass is None: # pyright: ignore[reportUnnecessaryComparison]
+			self.logicalPathModuleDataclass = '.'.join([self.packageName, self.dataclassModule])
+		if self.logicalPathModuleSourceAlgorithm is None: # pyright: ignore[reportUnnecessaryComparison]
+			self.logicalPathModuleSourceAlgorithm = '.'.join([self.packageName, self.sourceAlgorithm])
 
 The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
 
@@ -134,33 +166,92 @@ Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]
 
 @dataclasses.dataclass
 class ComputationState:
-	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'}) # NOTE Python is anti-DRY, again, `DatatypeLeavesTotal` needs to match the type
+	"""
+	Represents the complete state of a map folding computation.
+
+	This dataclass encapsulates all the information required to compute the number of
+	possible ways to fold a map, including the map dimensions, leaf connections,
+	computation progress, and fold counting. It serves as the central data structure
+	that flows through the entire computational algorithm.
+
+	Fields are categorized into:
+	1. Input parameters (mapShape, leavesTotal, etc.)
+	2. Core computational structures (connectionGraph, etc.)
+	3. Tracking variables for the folding algorithm state
+	4. Result accumulation fields (foldsTotal, groupsOfFolds)
+
+	The data structures and algorithms are based on Lunnon's 1971 paper on map folding.
+	"""
+	# NOTE Python is anti-DRY, again, `DatatypeLeavesTotal` metadata needs to match the type
+	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
+	"""Dimensions of the map to be folded, as a tuple of integers."""
+
 	leavesTotal: DatatypeLeavesTotal
+	"""Total number of leaves (unit squares) in the map, equal to the product of all dimensions."""
+
 	taskDivisions: DatatypeLeavesTotal
+	"""Number of parallel tasks to divide the computation into. Zero means sequential computation."""
+
 	concurrencyLimit: DatatypeElephino
+	"""Maximum number of concurrent processes to use during computation."""
 
 	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'dtype': Array3D.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+	"""3D array encoding the connections between leaves in all dimensions."""
+
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	"""Total number of dimensions in the map shape."""
 
 	# I am using `dataclasses.field` metadata and `typeAlias.__args__[1].__args__[0]` to make the code more DRY. https://github.com/hunterhogan/mapFolding/issues/9
 	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Tracks how many dimensions are gapped for each leaf."""
+
 	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Number of dimensions that are not constrained in the current folding state."""
+
 	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Starting index for the gap range for each leaf."""
+
 	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Tracks where gaps occur in the folding pattern."""
+
 	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""For each leaf, stores the index of the leaf above it in the folding pattern."""
+
 	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""For each leaf, stores the index of the leaf below it in the folding pattern."""
+
 	foldGroups: Array1DFoldsTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DFoldsTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Accumulator for fold groups across parallel tasks."""
 
 	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
+	"""The final computed total number of distinct folding patterns."""
+
 	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	"""Current index into gaps array during algorithm execution."""
+
 	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
+	"""Upper limit for gap index during the current algorithm phase."""
+
 	groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})
+	"""Accumulator for the number of fold groups found during computation."""
+
 	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	"""Current dimension being processed during algorithm execution."""
+
 	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	"""Current leaf index during iteration."""
+
 	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
+	"""Index used when filtering common gaps."""
+
 	leaf1ndex: DatatypeElephino = DatatypeElephino(1)
+	"""Active leaf being processed in the folding algorithm. Starts at 1, not 0."""
+
 	leafConnectee: DatatypeElephino = DatatypeElephino(0)
+	"""Leaf that is being connected to the active leaf."""
+
 	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	"""Index of the current parallel task when using task divisions."""
 
 	def __post_init__(self) -> None:
 		from mapFolding.beDRY import getConnectionGraph, makeDataContainer

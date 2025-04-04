@@ -161,6 +161,27 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 	return OEISsequence
 
 def getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
+	"""
+	Retrieve OEIS sequence data from cache or online source.
+
+	This function implements a caching strategy for OEIS sequence data, first checking
+	if a local cached copy exists and is not expired. If a valid cache exists, it returns
+	the cached content; otherwise, it fetches the data from the OEIS website and
+	writes it to the cache for future use.
+
+	Parameters:
+		pathFilenameCache: Path to the local cache file.
+		url: URL to retrieve the OEIS sequence data from if cache is invalid or missing.
+
+	Returns:
+		oeisInformation: The retrieved OEIS sequence information as a string, or None if
+		the information could not be retrieved.
+
+	Notes:
+		The cache expiration period is controlled by the global `cacheDays` variable.
+		If the function fails to retrieve data from both cache and online source,
+		it will return None and issue a warning.
+	"""
 	tryCache: bool = False
 	if pathFilenameCache.exists():
 		fileAge: timedelta = datetime.now() - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime)
@@ -214,6 +235,27 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 	return {-1: -1}
 
 def getOEISidInformation(oeisID: str) -> tuple[str, int]:
+	"""
+	Retrieve the description and offset for an OEIS sequence.
+
+	This function fetches the metadata for a given OEIS sequence ID, including
+	its textual description and index offset value. It uses a caching mechanism
+	to avoid redundant network requests while ensuring data freshness.
+
+	Parameters:
+		oeisID: The OEIS sequence identifier to retrieve information for.
+
+	Returns:
+		A tuple containing:
+		- description: A string describing the sequence's mathematical meaning.
+		- offset: An integer representing the starting index of the sequence.
+		  Usually 0 or 1, depending on the mathematical context.
+
+	Notes:
+		Sequence descriptions are parsed from the machine-readable format of OEIS.
+		If information cannot be retrieved, warning messages are issued and
+		fallback values are returned.
+	"""
 	oeisID = validateOEISid(oeisID)
 	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
 	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
@@ -243,6 +285,26 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	return description, offset
 
 def makeSettingsOEIS() -> dict[str, SettingsOEIS]:
+	"""
+	Construct the comprehensive settings dictionary for all implemented OEIS sequences.
+	
+	This function builds a complete configuration dictionary for all supported OEIS 
+	sequences by retrieving and combining:
+	1. Sequence values from OEIS b-files
+	2. Sequence metadata (descriptions and offsets)
+	3. Hardcoded mapping functions and test values
+	
+	The resulting dictionary provides a single authoritative source for all OEIS-related 
+	configurations used throughout the package, including:
+	- Mathematical descriptions of each sequence
+	- Functions to convert between sequence indices and map dimensions
+	- Known sequence values retrieved from OEIS
+	- Testing and benchmarking reference values
+	
+	Returns:
+		A dictionary mapping OEIS sequence IDs to their complete settings objects,
+		containing all metadata and known values needed for computation and validation.
+	"""
 	settingsTarget: dict[str, SettingsOEIS] = {}
 	for oeisID in oeisIDsImplemented:
 		valuesKnownSherpa: dict[int, int] = getOEISidValues(oeisID)
@@ -277,6 +339,25 @@ def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 	return dictionaryMapDimensionsToFoldsTotalKnown
 
 def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
+	"""
+	Retrieve the known total number of foldings for a given map shape.
+	
+	This function looks up precalculated folding totals for specific map dimensions
+	from OEIS sequences. It serves as a rapid reference for known values without
+	requiring computation, and can be used to validate algorithm results.
+	
+	Parameters:
+		mapShape: A tuple of integers representing the dimensions of the map.
+	
+	Returns:
+		foldingsTotal: The known total number of foldings for the given map shape,
+		or -1 if the map shape doesn't match any known values in the OEIS sequences.
+	
+	Notes:
+		The function uses a cached dictionary (via makeDictionaryFoldsTotalKnown) to
+		efficiently retrieve values without repeatedly parsing OEIS data. Map shape
+		tuples are sorted internally to ensure consistent lookup regardless of dimension order.
+	"""
 	lookupFoldsTotal = makeDictionaryFoldsTotalKnown()
 	return lookupFoldsTotal.get(tuple(mapShape), -1)
 
