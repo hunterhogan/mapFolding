@@ -1,8 +1,8 @@
 from collections.abc import Callable, Generator, Sequence
+from mapFolding import ComputationState, The
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from mapFolding.someAssemblyRequired import importLogicalPath2Callable, RecipeSynthesizeFlow
-from mapFolding.theSSOT import ComputationState, The
 from pathlib import Path, PurePosixPath
 from types import ModuleType
 from typing import Any

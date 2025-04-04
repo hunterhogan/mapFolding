@@ -150,6 +150,7 @@ def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: bool = 
 	else:
 		pathFilenameJob = getPathFilenameFoldsTotal(stateUniversal.mapShape).with_suffix('.pkl')
 
+	# Fix code scanning alert - Consider possible security implications associated with pickle module. #17
 	pathFilenameJob.write_bytes(pickle.dumps(stateUniversal))
 	return pathFilenameJob
 

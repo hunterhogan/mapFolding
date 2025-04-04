@@ -1,6 +1,5 @@
 from collections.abc import Callable
 from mapFolding.beDRY import getLeavesTotal, setProcessorLimit, validateListDimensions
-from mapFolding.theSSOT import The
 from tests.conftest import standardizedEqualToCallableReturn
 from typing import Any, Literal
 from Z0Z_tools import intInnit

@@ -87,7 +87,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	ast.fix_missing_locations(ingredientsFunction.astFunctionDef)
 	return ingredientsFunction
 
-def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba):
+def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba) -> None:
 	astFunctionDef = extractFunctionDef(job.source_astModule, job.countCallable)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())

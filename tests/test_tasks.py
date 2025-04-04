@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from mapFolding.basecamp import countFolds
+from mapFolding import countFolds
 from mapFolding.beDRY import getTaskDivisions, setProcessorLimit, validateListDimensions, getLeavesTotal
 from mapFolding.oeis import getFoldsTotalKnown
 from tests.conftest import standardizedEqualToCallableReturn

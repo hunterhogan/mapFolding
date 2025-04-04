@@ -1,16 +1,10 @@
-from mapFolding.basecamp import countFolds
-from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal
-from mapFolding.beDRY import validateListDimensions
-from mapFolding.oeis import getFoldsTotalKnown
-from mapFolding.oeis import settingsOEIS, oeisIDfor_n
+from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n, validateListDimensions
+from mapFolding.oeis import settingsOEIS
 from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
 from pathlib import Path, PurePosixPath
 from tests.conftest import standardizedEqualToCallableReturn, registrarRecordsTmpObject
-from types import ModuleType
 import importlib.util
 import multiprocessing
-import threading
-from copy import deepcopy
 import pytest
 
 if __name__ == '__main__':
@@ -26,7 +20,7 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 	for n in settingsOEIS[oeisID]['valuesTestValidation']:
 		standardizedEqualToCallableReturn(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
-def test_syntheticParallel(syntheticDispatcherFixture: None, listDimensionsTestParallelization: list[int]):
+def test_syntheticParallel(syntheticDispatcherFixture: None, listDimensionsTestParallelization: list[int]) -> None:
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
 
 def test_syntheticSequential(syntheticDispatcherFixture: None, listDimensionsTestCountFolds: list[int]) -> None:

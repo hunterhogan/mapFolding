@@ -78,4 +78,4 @@ from mapFolding.toolboxFilesystem import (
 
 from mapFolding.basecamp import countFolds
 
-from mapFolding.oeis import clearOEIScache, getOEISids, OEIS_for_n, oeisIDfor_n
+from mapFolding.oeis import clearOEIScache, getFoldsTotalKnown, getOEISids, OEIS_for_n, oeisIDfor_n

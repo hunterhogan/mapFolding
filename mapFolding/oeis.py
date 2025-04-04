@@ -174,6 +174,7 @@ def getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 			tryCache = False
 
 	if not tryCache:
+		# Change http handling #13
 		httpResponse: urllib.response.addinfourl = urllib.request.urlopen(url)
 		oeisInformation = httpResponse.read().decode('utf-8')
 		writeStringToHere(oeisInformation, pathFilenameCache)
