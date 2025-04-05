@@ -1,3 +1,60 @@
+"""
+Test Configuration and Shared Fixtures
+
+This module provides the foundation for the mapFolding test suite, offering fixtures and
+utilities that enable consistent, reliable testing across the package. It's particularly
+valuable for users who want to test their own customizations.
+
+## Key Testing Facilities
+
+### File System Management
+
+The module implements a robust temporary file system management approach:
+- Creates a registry of temporary files and directories
+- Ensures proper cleanup after tests
+- Provides fixtures that automatically handle cleanup
+
+### Test-Specific Fixtures
+
+Several fixtures enable specialized testing scenarios:
+
+1. **Dispatcher Fixtures**:
+   - `useThisDispatcher`: Core fixture for patching the algorithm dispatcher
+   - `useAlgorithmSourceDispatcher`: Tests with the source algorithm implementation
+   - `syntheticDispatcherFixture`: Tests with generated Numba-optimized implementation
+
+2. **Test Data Fixtures**:
+   - `oeisID`, `oeisID_1random`: Provide OEIS sequence identifiers for testing
+   - `listDimensionsTestCountFolds`: Provides dimensions suitable for algorithm testing
+   - `listDimensionsTestParallelization`: Provides dimensions suitable for parallel testing
+   - `mapShapeTestFunctionality`: Provides map shapes suitable for functional testing
+
+3. **Path Fixtures**:
+   - `pathTmpTesting`: Creates a temporary directory for test-specific files
+   - `pathFilenameTmpTesting`: Creates a temporary file with appropriate extension
+   - `pathCacheTesting`: Creates a temporary OEIS cache directory
+
+### Standardized Test Utilities
+
+The module provides utilities that create consistent test outputs:
+
+- `standardizedEqualToCallableReturn`: Core utility that handles testing function return values
+  or exceptions with uniform error messages
+- `standardizedSystemExit`: Tests code that should exit the program with specific status codes
+- `uniformTestMessage`: Creates consistent error messages for test failures
+
+## Using These Fixtures for Custom Tests
+
+The most important fixtures for testing custom implementations are:
+
+1. `syntheticDispatcherFixture`: Creates and patches a Numba-optimized module from a recipe
+2. `pathTmpTesting`: Provides a clean temporary directory for test files
+3. `standardizedEqualToCallableReturn`: Simplifies test assertions with clear error messages
+
+These can be adapted by copying and modifying them to test custom recipes and jobs.
+See the examples in `test_computations.py` for guidance on adapting these fixtures.
+"""
+
 from collections.abc import Callable, Generator, Sequence
 from mapFolding import ComputationState, The
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer

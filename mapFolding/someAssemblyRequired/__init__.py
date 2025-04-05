@@ -1,29 +1,52 @@
 """
-Code transformation framework for algorithmic optimization.
+Code Transformation Framework for Algorithm Optimization and Testing
 
 This package implements a comprehensive framework for programmatically analyzing,
-transforming, and generating Python code. It enables sophisticated algorithm optimization
-through abstract syntax tree (AST) manipulation, allowing algorithms to be transformed
-from a readable, functional implementation into highly-optimized variants tailored for
-different execution environments or specific computational tasks.
+transforming, and generating optimized Python code. It serves as the algorithmic
+optimization engine for the mapFolding package, enabling the conversion of readable,
+functional implementations into highly-optimized variants with verified correctness.
 
-Core capabilities:
-1. AST Pattern Recognition - Precisely identify and match code patterns using composable predicates
-2. Algorithm Transformation - Convert functional state-based implementations to primitive operations
-3. Dataclass "Shattering" - Decompose complex state objects into primitive components
-4. Performance Optimization - Apply domain-specific optimizations for numerical computation
-5. Code Generation - Generate specialized implementations with appropriate imports and syntax
+## Core Architecture Components
 
-The transformation assembly-line supports multiple optimization targets, from general-purpose
-acceleration to generating highly-specialized variants optimized for specific input parameters.
-This multi-level transformation approach allows for both development flexibility and
-runtime performance, preserving algorithm readability in the source while enabling
-maximum execution speed in production.
+1. **AST Manipulation Tools**
+   - Pattern recognition with composable predicates (ifThis)
+   - Node access with consistent interfaces (DOT)
+   - AST traversal and transformation (NodeChanger, NodeTourist)
+   - AST construction with sane defaults (Make)
+   - Node transformation operations (grab, Then)
 
-These tools were developed for map folding computation optimization but are designed as
-general-purpose utilities applicable to a wide range of code transformation scenarios,
-particularly for numerically-intensive algorithms that benefit from just-in-time compilation.
+2. **Container and Organization**
+   - Import tracking and management (LedgerOfImports)
+   - Function packaging with dependencies (IngredientsFunction)
+   - Module assembly with structured components (IngredientsModule)
+   - Recipe configuration for generating optimized code (RecipeSynthesizeFlow)
+   - Dataclass decomposition for compatibility (ShatteredDataclass)
+
+3. **Optimization Pipelines**
+   - General-purpose Numba acceleration (makeNumbaFlow)
+   - Job-specific optimization for concrete parameters (makeJobNumba)
+   - Specialized component transformation (decorateCallableWithNumba)
+
+## Integration with Testing Framework
+
+The transformation components are extensively tested through the package's test suite,
+which provides specialized fixtures and utilities for validating both the transformation
+process and the resulting optimized code:
+
+- **syntheticDispatcherFixture**: Creates and tests a complete Numba-optimized module
+  using RecipeSynthesizeFlow configuration
+
+- **test_writeJobNumba**: Tests the job-specific optimization process with RecipeJob
+
+These fixtures enable users to test their own custom recipes and job configurations
+with minimal effort. See the documentation in tests/__init__.py for details on
+extending the test suite for custom implementations.
+
+The framework balances multiple optimization levels - from general algorithmic
+improvements to parameter-specific optimizations - while maintaining the ability
+to verify correctness at each transformation stage through the integrated test suite.
 """
+
 from mapFolding.someAssemblyRequired._theTypes import (
 	ast_expr_Slice,
 	ast_Identifier,

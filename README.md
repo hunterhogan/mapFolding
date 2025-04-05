@@ -1,139 +1,125 @@
-# mapFolding: Algorithms for enumerating distinct map/stamp folding patterns 🗺️
+# mapFolding: High-Performance Algorithm Playground for Computational Enthusiasts 🗺️
 
 [![pip install mapFolding](https://img.shields.io/badge/pip%20install-mapFolding-gray.svg?colorB=3b434b)](https://pypi.org/project/mapFolding/)
-[![Static Badge](https://img.shields.io/badge/stinkin'%20badges-don't%20need-b98e5e)](https://youtu.be/g6f_miE91mk&t=4)
 [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml)
 [![License: CC-BY-NC-4.0](https://img.shields.io/badge/License-CC_BY--NC_4.0-3b434b)](https://creativecommons.org/licenses/by-nc/4.0/)
-[![Static Badge](https://img.shields.io/badge/issues-I%20have%20them-brightgreen)](https://github.com/hunterhogan/mapFolding/issues)
 
----
+**This package is for you if:**
 
-## Quick start
+- You're fascinated by computational algorithms and their optimization
+- You want to explore AST transformation techniques for Python performance tuning
+- You're interested in solving mathematical puzzles through code
+- You're learning about Numba and advanced Python optimization
+
+**This package is NOT for you if:**
+
+- You're looking for a general-purpose folding simulation tool
+- You need commercial-ready mapping software
+- You want simple visualization of folding patterns
+
+## What Does This Package Actually Do?
+
+`mapFolding` solves a specific mathematical problem: counting the number of distinct ways to fold a rectangular map. While this may sound niche, it's a fascinating computational challenge that demonstrates:
+
+1. How to transform readable algorithms into blazingly fast implementations
+2. Advanced techniques for Python optimization using AST manipulation
+3. Numba acceleration with specialized compilation strategies
+4. Algorithms for problems that grow combinatorially
+
+The package has achieved new computational records, including first-ever calculations for large maps that were previously infeasible.
+
+```python
+# Compute the number of ways to fold a 5×5 grid:
+from mapFolding import oeisIDfor_n
+foldsTotal = oeisIDfor_n('A001418', 5)  # Returns 186,086,600
+```
+
+## Key Benefits for Computational Enthusiasts
+
+### 1. Algorithm Transformation Laboratory
+
+See how the same algorithm evolves from readable Python to highly-optimized implementations:
+
+```python
+# The intuitive, readable version:
+def countFolds(mapShape):
+    # ...implement readable algorithm...
+
+# The transformed, optimized version (auto-generated):
+@numba.jit(nopython=True, parallel=True, fastmath=True)
+def countFolds_optimized(shape_param):
+    # ...blazingly fast implementation...
+```
+
+### 2. Code Generation Framework
+
+Study and extend a complete Python code transformation pipeline:
+
+- AST analysis and manipulation
+- Dataclass decomposition ("shattering")
+- Automatic import management
+- Type specialization for numerical computing
+
+### 3. Exhaustive Test Framework
+
+Leverage a sophisticated test suite for validating your own optimizations:
+
+```python
+# Test your own recipe implementation with just a few lines:
+@pytest.fixture
+def myCustomRecipeFixture(useThisDispatcher, pathTmpTesting):
+    myRecipe = RecipeSynthesizeFlow(
+        # Your custom configuration here
+    )
+    # ...transformation code...
+    return customDispatcher
+
+def test_myCustomImplementation(myCustomRecipeFixture):
+    # Automatic validation against known values
+```
+
+## Installation and Getting Started
 
 ```sh
 pip install mapFolding
 ```
 
-`OEIS_for_n` will run a computation from the command line.
-
-```cmd
-(mapFolding) C:\apps\mapFolding> OEIS_for_n A001418 5
-186086600 distinct folding patterns.
-Time elapsed: 1.605 seconds
-```
-
-Use `mapFolding.oeisIDfor_n()` to compute a(n) for an OEIS ID.
+Try a quick calculation:
 
 ```python
 from mapFolding import oeisIDfor_n
-foldsTotal = oeisIDfor_n( 'A001418', 4 )
+
+# Calculate ways to fold a 2×4 map
+result = oeisIDfor_n('A001415', 4)  # Returns 8
+print(f"A 2×4 map can be folded {result} different ways")
 ```
 
----
+## Mathematical Background (For the Curious)
 
-## Features
+The map folding problem was introduced by Lunnon in 1971 and connects to combinatorial geometry, computational complexity, and integer sequence analysis. The calculations provide entries to the Online Encyclopedia of Integer Sequences (OEIS).
 
-### 1. Simple, easy usage based on OEIS IDs
+This package implements several OEIS sequences, including:
 
-`mapFolding` directly implements some IDs from [_The On-Line Encyclopedia of Integer Sequences_](https://oeis.org/) ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/citations/oeis.bibtex) citation).
+- A001415: Number of ways to fold a 2×n strip (now calculated up to n=20!)
+- A001418: Number of ways to fold an n×n square grid
 
-Use `getOEISids` to get the most up-to-date list of available OEIS IDs.
+## Explore the Repository
 
-```cmd
-(mapFolding) C:\apps\mapFolding> getOEISids
+The repository structure reveals the package's educational value:
 
-Available OEIS sequences:
-  A001415: Number of ways of folding a 2 X n strip of stamps. (Now extended to n=20!)
-  A001416: Number of ways of folding a 3 X n strip of stamps.
-  A001417: Number of ways of folding a 2 X 2 X ... X 2 n-dimensional map.
-  A001418: Number of ways of folding an n X n sheet of stamps.
-  A195646: Number of ways of folding a 3 X 3 X ... X 3 n-dimensional map.
-```
+- `reference/`: Historical implementations and algorithm evolution
+- `someAssemblyRequired/`: Code transformation framework
+- `tests/`: Comprehensive test suite with fixtures for your own implementations
 
-### 2. **Algorithm Zoo: A Historical and Performance Journey** 🦒
+## Who Is This For, Really?
 
-This package offers a comprehensive collection of map folding algorithm implementations that showcase its evolution from historical origins to high-performance computation:
+If you've read this far and are intrigued by computational puzzles, algorithm optimization, or Python performance techniques, this package offers a playground for exploration. It's particularly valuable for:
 
-- **Historical Implementations**:
-  - Carefully restored versions of Lunnon's 1971 original [algorithm](https://github.com/hunterhogan/mapFolding/blob/mapFolding/reference/foldings.txt) with corrections
-  - Atlas Autocode reconstruction in the `reference/foldings.AA` file
+- Computer science students studying algorithm optimization
+- Python developers exploring Numba and AST manipulation
+- Computational mathematicians interested in combinatorial problems
+- Anyone fascinated by the intersection of mathematics and computing
 
-- **Direct Translations**:
-  - Python translations following the original control flow (`lunnanWhile.py`)
-  - NumPy-based vectorized implementations (`lunnanNumpy.py`)
-
-- **Modern Implementations**:
-  - Java port adaptations (`irvineJavaPort.py`) providing cleaner procedural implementations
-  - Experimental JAX version (`jaxCount.py`) exploring GPU acceleration potential
-  - Semantically decomposed version (`flattened.py`) with clear function boundaries
-
-- **Performance Optimized**:
-  - Numba-JIT accelerated implementations up to 1000× faster than pure Python (see [benchmarks](https://github.com/hunterhogan/mapFolding/blob/mapFolding/notes/Speed%20highlights.md))
-  - Algorithmic optimizations showcasing subtle yet powerful performance differences (`total_countPlus1vsPlusN.py`)
-  - **New Computations**: First-ever calculations for 2×19 and 2×20 maps in the `reference/jobsCompleted/` directory
-
-The `reference` directory serves as both a historical archive and an educational resource for understanding algorithm evolution.
-
-### 3. **Algorithmic Transformation: From Readability to Speed** 🔬
-
-The package provides a sophisticated transformation framework that bridges the gap between human-readable algorithms and high-performance computation:
-
-- **Core Algorithm Understanding**:
-  - Study the functional state-transformation approach in `theDao.py` with clear, isolated functions
-  - Explore the semantic decomposition in `reference/flattened.py` to understand algorithm sections
-
-- **Code Transformation Assembly-line**:
-  - **AST Manipulation**: Analyzes and transforms the algorithm's abstract syntax tree
-  - **Dataclass "Shattering"**: Decomposes complex state objects into primitive components
-  - **Optimization Applications**: Applies domain-specific optimizations for numerical computation
-  - **LLVM Integration**: Extracts LLVM IR for low-level algorithmic analysis
-
-- **Performance Breakthroughs**:
-  - Learn why nearly identical algorithms can have dramatically different performance (`total_countPlus1vsPlusN.py`)
-  - See how memory layout and increment strategy impact computation speed
-  - Understand the batching technique that yields order-of-magnitude improvements
-
-### 4. **Multi-Level Architecture: From Simple API to Full Customization**
-
-The package's architecture supports multiple levels of engagement:
-
-- **Basic Usage**:
-  - Work with the high-level API in `basecamp.py` for standard computations
-  - Access OEIS sequence calculations with minimal code
-
-- **Algorithm Exploration**:
-  - Compare different implementations in the `reference` directory to understand trade-offs
-  - Modify the core algorithm in `theDao.py` while preserving its functional approach
-  - Configure system-wide settings in `theSSOT.py` to adjust data types and performance characteristics
-
-- **Advanced Transformation**:
-  - Use the `someAssemblyRequired` package to transform algorithms at the AST level
-  - Create optimized variants with different compilation settings using:
-    - `transformationTools.py` for AST manipulation
-    - `transformDataStructures.py` for complex data structure transformations
-    - `ingredientsNumba.py` for Numba-specific optimization profiles
-    - `synthesizeNumbaFlow.py` to orchestrate the transformation process
-
-- **Custom Deployment**:
-  - Generate specialized implementations for specific dimensions
-  - Create optimized standalone modules for production use
-  - Extract LLVM IR for further analysis and optimization
-
-The package's multi-level design allows you to start with simple API calls and progressively explore deeper optimization techniques as your computational needs grow.
-
-## Map-folding Video
-
-~~This caused my neurosis:~~ I enjoyed the following video, which is what introduced me to map folding.
-
-"How Many Ways Can You Fold a Map?" by Physics for the Birds, 2024 November 13 ([BibTex](https://github.com/hunterhogan/mapFolding/blob/main/citations/Physics_for_the_Birds.bibtex) citation)
-
-[![How Many Ways Can You Fold a Map?](https://i.ytimg.com/vi/sfH9uIY3ln4/hq720.jpg)](https://www.youtube.com/watch?v=sfH9uIY3ln4)
-
----
-
-## My recovery
-
-[![Static Badge](https://img.shields.io/badge/2011_August-Homeless_since-blue?style=flat)](https://HunterThinks.com/support)
-[![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UC3Gx7kz61009NbhpRtPP7tw)](https://www.youtube.com/@HunterHogan)
+Whether you use it to solve map folding problems or to study its optimization techniques, `mapFolding` offers a unique window into advanced Python programming approaches.
 
 [![CC-BY-NC-4.0](https://github.com/hunterhogan/mapFolding/blob/main/CC-BY-NC-4.0.svg)](https://creativecommons.org/licenses/by-nc/4.0/)

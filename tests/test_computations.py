@@ -1,3 +1,90 @@
+"""
+Core Algorithm and Module Generation Testing
+
+This module provides tests for validating algorithm correctness and testing
+code generation functionality. It's designed not only to test the package's
+functionality but also to serve as a template for users testing their own
+custom implementations.
+
+## Key Testing Categories
+
+1. Algorithm Validation Tests
+   - `test_algorithmSourceParallel` - Tests the source algorithm in parallel mode
+   - `test_algorithmSourceSequential` - Tests the source algorithm in sequential mode
+   - `test_aOFn_calculate_value` - Tests OEIS sequence value calculations
+
+2. Synthetic Module Tests
+   - `test_syntheticParallel` - Tests generated Numba-optimized code in parallel mode
+   - `test_syntheticSequential` - Tests generated Numba-optimized code in sequential mode
+
+3. Job Testing
+   - `test_writeJobNumba` - Tests job-specific module generation and execution
+
+## How to Test Your Custom Implementations
+
+### Testing Custom Recipes (RecipeSynthesizeFlow):
+
+1. Copy the `syntheticDispatcherFixture` from conftest.py
+2. Modify it to use your custom recipe configuration
+3. Copy and adapt `test_syntheticParallel` and `test_syntheticSequential`
+
+Example:
+
+```python
+@pytest.fixture
+def myCustomRecipeFixture(useThisDispatcher, pathTmpTesting):
+    # Create your custom recipe configuration
+    myRecipe = RecipeSynthesizeFlow(
+        pathPackage=PurePosixPath(pathTmpTesting.absolute()),
+        # Add your custom configuration
+    )
+
+    # Generate the module
+    makeNumbaFlow(myRecipe)
+
+    # Import and patch the dispatcher
+    # ... (similar to syntheticDispatcherFixture)
+
+    return customDispatcher
+
+def test_myCustomRecipeParallel(myCustomRecipeFixture, listDimensionsTestParallelization):
+    # Test with the standardized validation utility
+    standardizedEqualToCallableReturn(
+        getFoldsTotalKnown(tuple(listDimensionsTestParallelization)),
+        countFolds,
+        listDimensionsTestParallelization,
+        None,
+        'maximum'
+    )
+```
+
+### Testing Custom Jobs (RecipeJob):
+
+1. Copy and adapt `test_writeJobNumba`
+2. Modify it to use your custom job configuration
+
+Example:
+
+```python
+def test_myCustomJob(oneTestCuzTestsOverwritingTests, pathFilenameTmpTesting):
+    # Create your custom job configuration
+    myJob = RecipeJob(
+        state=makeInitializedComputationState(validateListDimensions(oneTestCuzTestsOverwritingTests)),
+        # Add your custom configuration
+    )
+
+    spices = SpicesJobNumba()
+    # Customize spices if needed
+
+    # Generate and test the job
+    makeJobNumba(myJob, spices)
+    # Test execution similar to test_writeJobNumba
+```
+
+All tests leverage standardized utilities like `standardizedEqualToCallableReturn`
+that provide consistent, informative error messages and simplify test validation.
+"""
+
 from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n, validateListDimensions
 from mapFolding.oeis import settingsOEIS
 from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState

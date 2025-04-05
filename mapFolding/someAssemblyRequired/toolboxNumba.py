@@ -1,22 +1,18 @@
 """
-Numba-specific ingredients for optimized code generation.
+Numba-specific Tools for Generating Optimized Code
 
-This module provides specialized tools, constants, and types specifically designed
-for transforming Python code into Numba-accelerated implementations. It implements:
+This module provides specialized tools for transforming standard Python code into
+Numba-accelerated implementations. It implements a comprehensive transformation
+assembly-line that:
 
-1. A range of Numba jit decorator configurations for different optimization scenarios
-2. Functions to identify and manipulate Numba decorators in abstract syntax trees
-3. Utilities for applying appropriate Numba typing to transformed code
-4. Parameter management for Numba compilation options
+1. Converts dataclass-based algorithm implementations into Numba-compatible versions.
+2. Applies appropriate Numba decorators with optimized configuration settings.
+3. Restructures code to work within Numba's constraints.
+4. Manages type information for optimized compilation.
 
-The configurations range from conservative options that prioritize compatibility and
-error detection to aggressive optimizations that maximize performance at the cost of
-flexibility. While this module specifically targets Numba, its design follows the pattern
-of generic code transformation tools in the package, allowing similar approaches to be
-applied to other acceleration technologies.
-
-This module works in conjunction with transformation tools to convert the general-purpose
-algorithm implementation into a highly-optimized Numba version.
+The module bridges the gap between readable, maintainable Python code and
+highly-optimized numerical computing implementations, enabling significant
+performance improvements while preserving code semantics and correctness.
 """
 
 from collections.abc import Callable, Sequence
@@ -263,6 +259,30 @@ class be:
 		return isinstance(node, ast.Return)
 
 def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
+	"""
+	Transform standard Python algorithm code into optimized Numba implementations.
+
+	This function implements the complete transformation pipeline that converts
+	a conventional Python implementation into a high-performance Numba-accelerated
+	version. The process includes:
+
+	1. Extracting core algorithm functions from the source module
+	2. Inlining function calls to create self-contained implementations
+	3. Transforming dataclass access patterns for Numba compatibility
+	4. Applying appropriate Numba decorators with optimization settings
+	5. Generating a unified module with sequential and parallel implementations
+	6. Writing the transformed code to the filesystem with properly managed imports
+
+	The transformation preserves the logical structure and semantics of the original
+	implementation while making it compatible with Numba's constraints and
+	optimization capabilities. This creates a bridge between the general-purpose
+	implementation and the highly-optimized version needed for production use.
+
+	Parameters:
+		numbaFlow: Configuration object that specifies all aspects of the
+					transformation process, including source and target locations,
+					function and variable names, and output paths.
+	"""
 	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 

@@ -1,3 +1,20 @@
+"""
+AST Node Predicate and Access Utilities for Pattern Matching and Traversal
+
+This module provides utilities for accessing and matching AST nodes in a consistent way.
+It contains two primary classes:
+
+1. DOT: Provides consistent accessor methods for AST node attributes across different
+   node types, simplifying the access to node properties.
+
+2. ifThis: Contains predicate functions for matching AST nodes based on various criteria,
+   enabling precise targeting of nodes for analysis or transformation.
+
+These utilities form the foundation of the pattern-matching component in the AST
+manipulation framework, working in conjunction with the NodeChanger and NodeTourist
+classes to enable precise and targeted code transformations.
+"""
+
 from collections.abc import Callable
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
@@ -15,8 +32,15 @@ import ast
 
 class DOT:
 	"""
-	class `DOT` : give only the attribute or sub-node to anything, including a `Callable`. Usable anywhere.
-	class `grab`: bring the `Callable` to the node and its attribute or sub-node. Not for antecedents.
+	Access attributes and sub-nodes of AST elements via consistent accessor methods.
+
+	The DOT class provides static methods to access specific attributes of different
+	types of AST nodes in a consistent way. This simplifies attribute access across
+	various node types and improves code readability by abstracting the underlying
+	AST structure details.
+
+	DOT is designed for safe, read-only access to node properties, unlike the grab
+	class which is designed for modifying node attributes.
 	"""
 	@staticmethod
 	@overload
@@ -88,6 +112,17 @@ class DOT:
 		return node.value
 
 class ifThis:
+	"""
+	Provide predicate functions for matching and filtering AST nodes based on various criteria.
+
+	The ifThis class contains static methods that generate predicate functions used to test
+	whether AST nodes match specific criteria. These predicates can be used with NodeChanger
+	and NodeTourist to identify and process specific patterns in the AST.
+
+	The class provides predicates for matching various node types, attributes, identifiers,
+	and structural patterns, enabling precise targeting of AST elements for analysis or
+	transformation.
+	"""
 	@staticmethod
 	def _Identifier(identifier: ast_Identifier) -> Callable[[ast_Identifier | None], TypeGuard[ast_Identifier] | bool]:
 		return lambda node: node == identifier

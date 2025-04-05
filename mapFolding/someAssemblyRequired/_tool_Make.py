@@ -1,3 +1,16 @@
+"""
+AST Node Construction Utilities for Python Code Generation
+
+This module provides the Make class with static methods for creating AST nodes
+with sane defaults. It abstracts away the complexity of constructing AST nodes
+directly, making programmatic code generation more intuitive and less error-prone.
+
+The Make class serves as a factory for creating various types of AST nodes needed
+in code generation, transformation, and analysis workflows. Each method follows
+a consistent pattern that maps cleanly to Python's syntax while handling the
+details of AST node construction.
+"""
+
 from collections.abc import Sequence
 from mapFolding.someAssemblyRequired import (
 	ast_expr_Slice,

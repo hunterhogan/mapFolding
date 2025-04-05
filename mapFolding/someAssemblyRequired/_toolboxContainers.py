@@ -1,10 +1,25 @@
 """
-Container classes for AST transformations and code synthesis.
+AST Container Classes for Python Code Generation and Transformation
 
-This module provides container classes used in the AST transformation process
-and code synthesis workflows. It acts as a dependency boundary to prevent
-circular imports while providing reusable data structures.
+This module provides specialized container classes that organize AST nodes, imports,
+and program structure for code generation and transformation. These classes form
+the organizational backbone of the code generation system, enabling:
+
+1. Tracking and managing imports with LedgerOfImports
+2. Packaging function definitions with their dependencies via IngredientsFunction
+3. Structuring complete modules with IngredientsModule
+4. Configuring code synthesis with RecipeSynthesizeFlow
+5. Organizing decomposed dataclass representations with ShatteredDataclass
+
+Together, these container classes implement a component-based architecture for
+programmatic generation of high-performance code. They maintain a clean separation
+between structure and content, allowing transformations to be applied systematically
+while preserving relationships between code elements.
+
+The containers work in conjunction with transformation tools that manipulate the
+contained AST nodes to implement specific optimizations and transformations.
 """
+
 from collections import defaultdict
 from collections.abc import Sequence
 from mapFolding.someAssemblyRequired import ast_Identifier, Make, parseLogicalPath2astModule, str_nameDOTname
@@ -16,6 +31,23 @@ import dataclasses
 
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 class LedgerOfImports:
+	"""
+	Track and manage import statements for programmatically generated code.
+
+	LedgerOfImports acts as a registry for import statements, maintaining a clean
+	separation between the logical structure of imports and their textual representation.
+	It enables:
+
+	1. Tracking regular imports and import-from statements
+	2. Adding imports programmatically during code transformation
+	3. Merging imports from multiple sources
+	4. Removing unnecessary or conflicting imports
+	5. Generating optimized AST import nodes for the final code
+
+	This class forms the foundation of dependency management in generated code,
+	ensuring that all required libraries are available without duplication or
+	conflict.
+	"""
 	# TODO When resolving the ledger of imports, remove self-referential imports
 	# TODO add TypeIgnore tracking to the ledger of imports
 
@@ -49,8 +81,8 @@ class LedgerOfImports:
 		self.dictionaryImportFrom[moduleWithLogicalPath].append((name, asname))
 
 	def removeImportFromModule(self, moduleWithLogicalPath: str_nameDOTname) -> None:
-		self.removeImportFrom(moduleWithLogicalPath, None, None)
 		"""Remove all imports from a specific module."""
+		self.removeImportFrom(moduleWithLogicalPath, None, None)
 
 	def removeImportFrom(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier | None, asname: ast_Identifier | None = None) -> None:
 		assert moduleWithLogicalPath is not None, SyntaxError(f"I received `{moduleWithLogicalPath = }`, but it must be the name of a module.")
@@ -110,9 +142,25 @@ class LedgerOfImports:
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class IngredientsFunction:
-	"""Everything necessary to integrate a function into a module should be here.
+	"""
+	Package a function definition with its import dependencies for code generation.
+
+	IngredientsFunction encapsulates an AST function definition along with all the
+	imports required for that function to operate correctly. This creates a modular,
+	portable unit that can be:
+
+	1. Transformed independently (e.g., by applying Numba decorators)
+	2. Transplanted between modules while maintaining dependencies
+	3. Combined with other functions to form complete modules
+	4. Analyzed for optimization opportunities
+
+	This class forms the primary unit of function manipulation in the code generation
+	system, enabling targeted transformations while preserving function dependencies.
+
 	Parameters:
-		astFunctionDef: hint `Make.astFunctionDef()`
+		astFunctionDef: The AST representation of the function definition
+		imports: Import statements needed by the function
+		type_ignores: Type ignore comments associated with the function
 	"""
 	astFunctionDef: ast.FunctionDef
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
@@ -121,8 +169,25 @@ class IngredientsFunction:
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class IngredientsModule:
-	"""Everything necessary to create one _logical_ `ast.Module` should be here.
-	Extrinsic qualities should _probably_ be handled externally.
+	"""
+	Assemble a complete Python module from its constituent AST components.
+
+	IngredientsModule provides a structured container for all elements needed to
+	generate a complete Python module, including:
+
+	1. Import statements aggregated from all module components
+	2. Prologue code that runs before function definitions
+	3. Function definitions with their dependencies
+	4. Epilogue code that runs after function definitions
+	5. Entry point code executed when the module runs as a script
+	6. Type ignores and other annotations
+
+	This class enables programmatic assembly of Python modules with a clear
+	separation between different structural elements, while maintaining the
+	proper ordering and relationships between components.
+
+	The modular design allows transformations to be applied to specific parts
+	of a module while preserving the overall structure.
 
 	Parameters:
 		ingredientsFunction (None): One or more `IngredientsFunction` that will appended to `listIngredientsFunctions`.
@@ -200,7 +265,7 @@ class IngredientsModule:
 	def removeImportFrom(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier | None, asname: ast_Identifier | None = None) -> None:
 		"""
 		This method modifies all `LedgerOfImports` in this `IngredientsModule` and all `IngredientsFunction` in `listIngredientsFunctions`.
-		It is not a "blacklist", so the import from could be added after this modification.
+		It is not a "blacklist", so the `import from` could be added after this modification.
 		"""
 		self.imports.removeImportFrom(moduleWithLogicalPath, name, asname)
 		for ingredientsFunction in self.listIngredientsFunctions:
@@ -242,10 +307,30 @@ class IngredientsModule:
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class RecipeSynthesizeFlow:
-	"""Settings for synthesizing flow."""
+	"""
+	Configure the generation of optimized Numba-accelerated code modules.
+
+	RecipeSynthesizeFlow defines the complete blueprint for transforming an original
+	Python algorithm into an optimized, accelerated implementation. It specifies:
+
+	1. Source code locations and identifiers
+	2. Target code locations and identifiers
+	3. Naming conventions for generated modules and functions
+	4. File system paths for output files
+	5. Import relationships between components
+
+	This configuration class serves as a single source of truth for the code generation
+	process, ensuring consistency across all generated artifacts while enabling
+	customization of the transformation pipeline.
+
+	The transformation process uses this configuration to extract functions from the
+	source module, transform them according to optimization rules, and output
+	properly structured optimized modules with all necessary imports.
+	"""
 	# ========================================
 	# Source
 	source_astModule: ast.Module = parseLogicalPath2astModule(The.logicalPathModuleSourceAlgorithm)
+	"""AST of the source algorithm module containing the original implementation."""
 
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 	sourceCallableDispatcher: ast_Identifier = The.sourceCallableDispatcher

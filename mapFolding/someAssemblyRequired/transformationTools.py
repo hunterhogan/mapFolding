@@ -1,27 +1,23 @@
 """
-Tools for transforming Python code through abstract syntax tree (AST) manipulation.
+AST Transformation Tools for Python Code Generation
 
-This module provides a comprehensive set of utilities for programmatically analyzing,
-transforming, and generating Python code through AST manipulation. It implements
-a highly flexible framework that enables:
+This module provides tools for manipulating and transforming Python abstract syntax trees
+to generate optimized code. It implements a system that:
 
-1. Precise identification of code patterns through composable predicates
-2. Targeted modification of code structures while preserving semantics
-3. Code generation with proper syntax and import management
-4. Analysis of code dependencies and relationships
-5. Clean transformation of one algorithmic implementation to another
+1. Extracts functions and classes from existing modules.
+2. Reshapes and transforms them through AST manipulation.
+3. Manages dependencies and imports.
+4. Generates optimized code with specialized implementations.
 
-The utilities are organized into several key components:
-- Predicate factories (ifThis): Create composable functions for matching AST patterns
-- Node transformers: Modify AST structures in targeted ways
-- Code generation helpers (Make): Create well-formed AST nodes programmatically
-- Import tracking: Maintain proper imports during code transformation
-- Analysis tools: Extract and organize code information
+The module is particularly focused on transforming general-purpose Python code into
+high-performance implementations, especially through dataclass decomposition and
+function inlining for Numba compatibility.
 
-While these tools were developed to transform the baseline algorithm into optimized formats,
-they are designed as general-purpose utilities applicable to a wide range of code
-transformation scenarios beyond the scope of this package.
+At its core, the module implements a transformation assembly-line where code flows from
+readable, maintainable implementations to highly optimized versions while preserving
+logical structure and correctness.
 """
+
 from autoflake import fix_code as autoflake_fix_code
 from collections.abc import Callable, Mapping
 from copy import deepcopy
@@ -53,22 +49,94 @@ import dataclasses
 import pickle
 
 def astModuleToIngredientsFunction(astModule: ast.AST, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
+	"""
+	Extract a function definition from an AST module and create an IngredientsFunction.
+
+	This function finds a function definition with the specified identifier in the given
+	AST module and wraps it in an IngredientsFunction object along with its import context.
+
+	Parameters:
+		astModule: The AST module containing the function definition.
+		identifierFunctionDef: The name of the function to extract.
+
+	Returns:
+		An IngredientsFunction object containing the function definition and its imports.
+
+	Raises:
+		raiseIfNoneGitHubIssueNumber3: If the function definition is not found.
+	"""
 	astFunctionDef = extractFunctionDef(astModule, identifierFunctionDef)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	return IngredientsFunction(astFunctionDef, LedgerOfImports(astModule))
 
 def extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef | None:
+	"""
+	Extract a class definition with a specific name from an AST module.
+
+	This function searches through an AST module for a class definition that
+	matches the provided identifier and returns it if found.
+
+	Parameters:
+		module: The AST module to search within.
+		identifier: The name of the class to find.
+
+	Returns:
+		The matching class definition AST node, or None if not found.
+	"""
 	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.extractIt).captureLastMatch(module)
 
 def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.FunctionDef | None:
+	"""
+	Extract a function definition with a specific name from an AST module.
+
+	This function searches through an AST module for a function definition that
+	matches the provided identifier and returns it if found.
+
+	Parameters:
+		module: The AST module to search within.
+		identifier: The name of the function to find.
+
+	Returns:
+		The matching function definition AST node, or None if not found.
+	"""
 	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.extractIt).captureLastMatch(module)
 
 def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.FunctionDef]:
+	"""
+	Create a dictionary mapping function names to their AST definitions.
+
+	This function creates a dictionary that maps function names to their AST function
+	definition nodes for all functions defined in the given module.
+
+	Parameters:
+		module: The AST module to extract function definitions from.
+
+	Returns:
+		A dictionary mapping function identifiers to their AST function definition nodes.
+	"""
 	dictionaryIdentifier2FunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
 	NodeTourist(lambda node: isinstance(node, ast.FunctionDef), Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module) # type: ignore
 	return dictionaryIdentifier2FunctionDef
 
 def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) -> ast.FunctionDef:
+	"""
+	Inline function calls within a function definition to create a self-contained function.
+
+	This function takes a function identifier and a module, finds the function definition,
+	and then recursively inlines all function calls within that function with their
+	implementation bodies. This produces a fully inlined function that doesn't depend
+	on other function definitions from the module.
+
+	Parameters:
+		identifierToInline: The name of the function to inline.
+		module: The AST module containing the function and its dependencies.
+
+	Returns:
+		A modified function definition with all function calls inlined.
+
+	Raises:
+		ValueError: If the function to inline is not found in the module.
+	"""
 	dictionaryFunctionDef: dict[ast_Identifier, ast.FunctionDef] = makeDictionaryFunctionDef(module)
 	try:
 		FunctionDefToInline = dictionaryFunctionDef[identifierToInline]
@@ -156,6 +224,22 @@ def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: bool = 
 
 @dataclasses.dataclass
 class DeReConstructField2ast:
+	"""
+	Transform a dataclass field into AST node representations for code generation.
+
+	This class extracts and transforms a dataclass Field object into various AST node
+	representations needed for code generation. It handles the conversion of field
+	attributes, type annotations, and metadata into AST constructs that can be used
+	to reconstruct the field in generated code.
+
+	The class is particularly important for decomposing dataclass fields (like those in
+	ComputationState) to enable their use in specialized contexts like Numba-optimized
+	functions, where the full dataclass cannot be directly used but its contents need
+	to be accessible.
+
+	Each field is processed according to its type and metadata to create appropriate
+	variable declarations, type annotations, and initialization code as AST nodes.
+	"""
 	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[str_nameDOTname]
 	dataclassClassDef: dataclasses.InitVar[ast.ClassDef]
 	dataclassesDOTdataclassInstance_Identifier: dataclasses.InitVar[ast_Identifier]
@@ -230,16 +314,39 @@ class DeReConstructField2ast:
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
 	"""
+	Decompose a dataclass definition into AST components for manipulation and code generation.
+
+	This function breaks down a complete dataclass (like ComputationState) into its constituent
+	parts as AST nodes, enabling fine-grained manipulation of its fields for code generation.
+	It extracts all field definitions, annotations, and metadata, organizing them into a
+	ShatteredDataclass that provides convenient access to AST representations needed for
+	different code generation contexts.
+
+	The function identifies a special "counting variable" (marked with 'theCountingIdentifier'
+	metadata) which is crucial for map folding algorithms, ensuring it's properly accessible
+	in the generated code.
+
+	This decomposition is particularly important when generating optimized code (e.g., for Numba)
+	where dataclass instances can't be directly used but their fields need to be individually
+	manipulated and passed to computational functions.
+
 	Parameters:
-		logicalPathModule: gimme string cuz python is stoopid
-		dataclass_Identifier: The identifier of the dataclass to be dismantled.
-		instance_Identifier: In the synthesized module/function/scope, the identifier that will be used for the instance.
+		logicalPathModule: The fully qualified module path containing the dataclass definition.
+		dataclass_Identifier: The name of the dataclass to decompose.
+		instance_Identifier: The variable name to use for the dataclass instance in generated code.
+
+	Returns:
+		A ShatteredDataclass containing AST representations of all dataclass components,
+		with imports, field definitions, annotations, and repackaging code.
+
+	Raises:
+		ValueError: If the dataclass cannot be found in the specified module or if no counting variable is identified in the dataclass.
 	"""
 	Official_fieldOrder: list[ast_Identifier] = []
 	dictionaryDeReConstruction: dict[ast_Identifier, DeReConstructField2ast] = {}
 
 	dataclassClassDef = extractClassDef(parseLogicalPath2astModule(logicalPathModule), dataclass_Identifier)
-	if not isinstance(dataclassClassDef, ast.ClassDef): raise ValueError(f"I could not find {dataclass_Identifier=} in {logicalPathModule=}.")
+	if not isinstance(dataclassClassDef, ast.ClassDef): raise ValueError(f"I could not find `{dataclass_Identifier = }` in `{logicalPathModule = }`.")
 
 	countingVariable = None
 	for aField in dataclasses.fields(importLogicalPath2Callable(logicalPathModule, dataclass_Identifier)): # pyright: ignore [reportArgumentType]
@@ -249,7 +356,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 			countingVariable = dictionaryDeReConstruction[aField.name].name
 
 	if countingVariable is None:
-		raise ValueError(f"I could not find the counting variable in {dataclass_Identifier=} in {logicalPathModule=}.")
+		raise ValueError(f"I could not find the counting variable in `{dataclass_Identifier = }` in `{logicalPathModule = }`.")
 
 	shatteredDataclass = ShatteredDataclass(
 		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation,
@@ -273,6 +380,31 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 	return shatteredDataclass
 
 def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] | PurePath, packageName: ast_Identifier | None = None) -> None:
+	"""
+	Convert an IngredientsModule to Python source code and write it to a file.
+
+	This function renders an IngredientsModule into executable Python code,
+	applies code quality improvements like import organization via autoflake,
+	and writes the result to the specified file path.
+
+	The function performs several key steps:
+	1. Converts the AST module structure to a valid Python AST
+	2. Fixes location attributes in the AST for proper formatting
+	3. Converts the AST to Python source code
+	4. Optimizes imports using autoflake
+	5. Writes the final source code to the specified file location
+
+	This is typically the final step in the code generation pipeline,
+	producing optimized Python modules ready for execution.
+
+	Parameters:
+		ingredients: The IngredientsModule containing the module definition.
+		pathFilename: The file path where the module should be written.
+		packageName: Optional package name to preserve in import optimization.
+
+	Raises:
+		raiseIfNoneGitHubIssueNumber3: If the generated source code is empty.
+	"""
 	astModule = Make.Module(ingredients.body, ingredients.type_ignores)
 	ast.fix_missing_locations(astModule)
 	pythonSource: str = ast.unparse(astModule)
@@ -294,6 +426,25 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 
 # END of marginal classes and functions ======================================================
 def Z0Z_lameFindReplace(astTree: 个, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]) -> 个:
+	"""
+	Recursively replace AST nodes based on a mapping of find-replace pairs.
+
+	This function applies brute-force node replacement throughout an AST tree
+	by comparing textual representations of nodes. While not the most efficient
+	approach, it provides a reliable way to replace complex nested structures
+	when more precise targeting methods are difficult to implement.
+
+	The function continues replacing nodes until no more changes are detected
+	in the AST's textual representation, ensuring complete replacement throughout
+	the tree structure.
+
+	Parameters:
+		astTree: The AST structure to modify.
+		mappingFindReplaceNodes: A mapping from source nodes to replacement nodes.
+
+	Returns:
+		The modified AST structure with all matching nodes replaced.
+	"""
 	keepGoing = True
 	newTree = deepcopy(astTree)
 
