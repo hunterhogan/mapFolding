@@ -213,15 +213,11 @@ class DeReConstructField2ast:
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, constructor)
 			dtypeIdentifier: ast_Identifier = dtype.__name__
 			dtype_asnameName: ast.Name = self.astAnnotation # type: ignore
-			# dtypeIdentifier_asname: ast_Identifier = moduleWithLogicalPath + '_' + dtypeIdentifier
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, dtypeIdentifier, dtype_asnameName.id)
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, Make.Name(annotation), Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', dtype_asnameName)]))
-			# self.astAnnAssignConstructor = Make.AnnAssign(self.astName, Make.Name(annotation), Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtypeIdentifier_asname))]))
-			# self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtypeIdentifier_asname))]))
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'array')
 		elif isinstance(self.astAnnotation, ast.Name):
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
-			# self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
 		elif isinstance(self.astAnnotation, ast.Subscript):
 			elementConstructor: ast_Identifier = self.metadata['elementConstructor']

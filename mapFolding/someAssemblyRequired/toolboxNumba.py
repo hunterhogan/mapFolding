@@ -189,7 +189,6 @@ class RecipeJob:
 
 	# ========================================
 	# Logical identifiers (as opposed to physical identifiers)
-	# ========================================
 	packageIdentifier: ast_Identifier | None = None
 	logicalPathRoot: str_nameDOTname | None = None
 	""" `logicalPathRoot` likely corresponds to a physical filesystem directory."""
@@ -327,10 +326,10 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	astCallSequentialCallable = Make.Call(Make.Name(numbaFlow.callableSequential), shatteredDataclass.listName4Parameters)
 	changeReturnSequentialCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
 	ingredientsSequential.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
-	replaceAssignSequentialCallable = NodeChanger(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.replaceWith(Make.Assign(listTargets=[shatteredDataclass.fragments4AssignmentOrParameters], value=astCallSequentialCallable)))
+	replaceAssignSequentialCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(numbaFlow.callableSequential)), Then.replaceWith(Make.Assign(listTargets=[shatteredDataclass.fragments4AssignmentOrParameters], value=astCallSequentialCallable)))
 
-	unpack4sequentialCallable = NodeChanger(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.insertThisAbove(shatteredDataclass.listUnpack))
-	repack4sequentialCallable = NodeChanger(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.insertThisBelow([shatteredDataclass.repack]))
+	unpack4sequentialCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(numbaFlow.callableSequential)), Then.insertThisAbove(shatteredDataclass.listUnpack))
+	repack4sequentialCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(numbaFlow.callableSequential)), Then.insertThisBelow([shatteredDataclass.repack]))
 
 	changeReturnSequentialCallable.visit(ingredientsSequential.astFunctionDef)
 	replaceAssignSequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
@@ -345,16 +344,14 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 
 	# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
 	astCallConcurrencyResult: list[ast.Call] = []
-	get_astCallConcurrencyResult = NodeTourist(
-		ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)),
-		getIt(astCallConcurrencyResult))
+	get_astCallConcurrencyResult = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), getIt(astCallConcurrencyResult))
 	get_astCallConcurrencyResult.visit(ingredientsDispatcher.astFunctionDef)
 	replaceAssignParallelCallable = NodeChanger(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), grab.valueAttribute(Then.replaceWith(astCallConcurrencyResult[0])))
 	replaceAssignParallelCallable.visit(ingredientsDispatcher.astFunctionDef)
 	changeReturnParallelCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName)))
 	ingredientsParallel.astFunctionDef.returns = shatteredDataclass.countingVariableAnnotation
 
-	unpack4parallelCallable = NodeChanger(ifThis.isAssignAndValueIsCallAttributeNamespace_Identifier(numbaFlow.concurrencyManagerNamespace, numbaFlow.concurrencyManagerIdentifier), Then.insertThisAbove(shatteredDataclass.listUnpack))
+	unpack4parallelCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCallAttributeNamespace_Identifier(numbaFlow.concurrencyManagerNamespace, numbaFlow.concurrencyManagerIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
 
 	unpack4parallelCallable.visit(ingredientsDispatcher.astFunctionDef)
 	replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)

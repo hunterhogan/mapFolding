@@ -55,8 +55,8 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 
 	list_IdentifiersNotUsed = list_IdentifiersNotUsedHARDCODED
 
-	list_argCauseMyBrainRefusesToDoThisTheRightWay = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
-	for ast_arg in list_argCauseMyBrainRefusesToDoThisTheRightWay:
+	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
+	for ast_arg in list_argCuzMyBrainRefusesToThink:
 		if ast_arg.arg in job.shatteredDataclass.field2AnnAssign:
 			if ast_arg.arg in list_IdentifiersNotUsed:
 				pass
@@ -183,14 +183,8 @@ if __name__ == '__main__':
 	mapShape = (2,4)
 	state = makeInitializedComputationState(mapShape)
 	foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
-	# from mapFolding.someAssemblyRequired.toolboxNumba import theNumbaFlow
-	# sourceCountCallable: ast_Identifier = theNumbaFlow.callableParallel
 	pathModule = PurePosixPath(The.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
-	aJob = RecipeJob(state, foldsTotalEstimated
-				# , sourceCountCallable=sourceCountCallable
-				# , countCallable=sourceCountCallable
-				, pathModule=pathModule
-				, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
+	aJob = RecipeJob(state, foldsTotalEstimated, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	spices = SpicesJobNumba()
 	makeJobNumba(aJob, spices)

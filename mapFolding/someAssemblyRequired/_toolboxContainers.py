@@ -245,7 +245,6 @@ class RecipeSynthesizeFlow:
 	"""Settings for synthesizing flow."""
 	# ========================================
 	# Source
-	# ========================================
 	source_astModule: ast.Module = parseLogicalPath2astModule(The.logicalPathModuleSourceAlgorithm)
 
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
@@ -300,9 +299,9 @@ class RecipeSynthesizeFlow:
 	# theModuleDispatcherSynthetic: ast_Identifier = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=The.sourceCallableDispatcher)
 	# theLogicalPathModuleDispatcherSynthetic: str = '.'.join([The.packageName, The.moduleOfSyntheticModules, theModuleDispatcherSynthetic])
 	# logicalPathModuleDispatcher: str = '.'.join([Z0Z_flowLogicalPathRoot, moduleDispatcher])
+
 	# ========================================
 	# Filesystem (names of physical objects)
-	# ========================================
 	pathPackage: PurePosixPath | None = PurePosixPath(The.pathPackage)
 	fileExtension: str = The.fileExtension
 
@@ -344,28 +343,41 @@ dummyTuple = Make.Tuple([Make.Name("dummyElement")])
 class ShatteredDataclass:
 	countingVariableAnnotation: ast.expr
 	"""Type annotation for the counting variable extracted from the dataclass."""
+
 	countingVariableName: ast.Name
 	"""AST name node representing the counting variable identifier."""
+
 	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign] = dataclasses.field(default_factory=dict)
 	"""Maps field names to their corresponding AST call expressions."""
+
 	Z0Z_field2AnnAssign: dict[ast_Identifier, tuple[ast.AnnAssign, str]] = dataclasses.field(default_factory=dict)
+
 	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
 	"""AST tuple used as target for assignment to capture returned fragments."""
+
 	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	"""Import records for the dataclass and its constituent parts."""
+
 	list_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list)
 	"""Function argument nodes with annotations for parameter specification."""
+
 	list_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list)
 	"""Keyword arguments for dataclass initialization with field=field format."""
+
 	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=list)
 	"""Type annotations for each dataclass field."""
+
 	listName4Parameters: list[ast.Name] = dataclasses.field(default_factory=list)
 	"""Name nodes for each dataclass field used as function parameters."""
+
 	listUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list)
 	"""Annotated assignment statements to extract fields from dataclass."""
+
 	map_stateDOTfield2Name: dict[ast.AST, ast.Name] = dataclasses.field(default_factory=dict)
 	"""Maps AST expressions to Name nodes for find-replace operations."""
+
 	repack: ast.Assign = dummyAssign
 	"""AST assignment statement that reconstructs the original dataclass instance."""
+
 	signatureReturnAnnotation: ast.Subscript = dummySubscript
 	"""tuple-based return type annotation for function definitions."""

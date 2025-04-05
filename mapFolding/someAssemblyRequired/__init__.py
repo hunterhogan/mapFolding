@@ -35,7 +35,6 @@ from mapFolding.someAssemblyRequired._theTypes import (
 	astClassHasDOTtarget_expr,
 	astClassHasDOTvalue,
 	astClassOptionallyHasDOTnameNotName,
-	astMosDef,
 	intORlist_ast_type_paramORstr_orNone,
 	intORstr_orNone,
 	list_ast_type_paramORstr_orNone,

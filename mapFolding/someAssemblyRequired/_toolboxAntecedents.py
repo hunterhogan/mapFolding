@@ -96,6 +96,7 @@ class ifThis:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.Attribute | ast.Starred | ast.Subscript] | bool:
 			return ifThis.isName_Identifier(identifier)(node) or ifThis.isAttribute_Identifier(identifier)(node) or ifThis.isSubscript_Identifier(identifier)(node) or ifThis.isStarred_Identifier(identifier)(node)
 		return workhorse
+
 	@staticmethod
 	def is_arg_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.arg] | bool]:
 		"""see also `isArgument_Identifier`"""
@@ -104,14 +105,17 @@ class ifThis:
 	def is_keyword_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.keyword] | bool]:
 		"""see also `isArgument_Identifier`"""
 		return lambda node: isinstance(node, ast.keyword) and ifThis._Identifier(identifier)(DOT.arg(node))
+
 	@staticmethod
 	def isAnnAssign_targetIs(targetPredicate: Callable[[ast.expr], TypeGuard[ast.expr] | bool]) -> Callable[[ast.AST], TypeGuard[ast.AnnAssign] | bool]:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.AnnAssign] | bool:
 			return isinstance(node, ast.AnnAssign) and targetPredicate(DOT.target(node))
 		return workhorse
+
 	@staticmethod
 	def isArgument_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.arg | ast.keyword] | bool]:
 		return lambda node: (isinstance(node, ast.arg) or isinstance(node, ast.keyword)) and ifThis._Identifier(identifier)(DOT.arg(node))
+
 	@staticmethod
 	def isAssignAndTargets0Is(targets0Predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], TypeGuard[ast.AnnAssign] | bool]:
 		"""node is Assign and node.targets[0] matches `targets0Predicate`."""
@@ -120,12 +124,7 @@ class ifThis:
 	def isAssignAndValueIs(valuePredicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], TypeGuard[ast.Assign] | bool]:
 		"""node is ast.Assign and node.value matches `valuePredicate`. """
 		return lambda node: isinstance(node, ast.Assign) and valuePredicate(DOT.value(node))
-	@staticmethod
-	def isAssignAndValueIsCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Assign] | bool]:
-		return lambda node: isinstance(node, ast.Assign) and ifThis.isCall_Identifier(identifier)(DOT.value(node))
-	@staticmethod
-	def isAssignAndValueIsCallAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Assign] | bool]:
-		return ifThis.isAssignAndValueIs(ifThis.isCallAttributeNamespace_Identifier(namespace, identifier))
+
 	@staticmethod
 	def isAttribute_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute] | bool]:
 		"""node is `ast.Attribute` and the top-level `ast.Name` is `identifier`"""
@@ -139,11 +138,13 @@ class ifThis:
 	@staticmethod
 	def isAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute] | bool]:
 		return lambda node: ifThis.isAttributeName(node) and ifThis.isName_Identifier(namespace)(DOT.value(node)) and ifThis._Identifier(identifier)(DOT.attr(node))
+
 	@staticmethod
 	def isAugAssign_targetIs(targetPredicate: Callable[[ast.expr], TypeGuard[ast.expr] | bool]) -> Callable[[ast.AST], TypeGuard[ast.AugAssign] | bool]:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.AugAssign] | bool:
 			return isinstance(node, ast.AugAssign) and targetPredicate(DOT.target(node))
 		return workhorse
+
 	@staticmethod
 	def isCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
 		return lambda node: isinstance(node, ast.Call) and ifThis.isName_Identifier(identifier)(DOT.func(node))
@@ -153,15 +154,19 @@ class ifThis:
 	@staticmethod
 	def isCallToName(node: ast.AST) -> TypeGuard[ast.Call]:
 		return isinstance(node, ast.Call) and isinstance(DOT.func(node), ast.Name)
+
 	@staticmethod
 	def isClassDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.ClassDef] | bool]:
 		return lambda node: isinstance(node, ast.ClassDef) and ifThis._Identifier(identifier)(DOT.name(node))
+
 	@staticmethod
 	def isFunctionDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.FunctionDef] | bool]:
 		return lambda node: isinstance(node, ast.FunctionDef) and ifThis._Identifier(identifier)(DOT.name(node))
+
 	@staticmethod
 	def isName_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Name] | bool]:
 		return lambda node: isinstance(node, ast.Name) and ifThis._Identifier(identifier)(DOT.id(node))
+
 	@staticmethod
 	def isStarred_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Starred] | bool]:
 		"""node is `ast.Starred` and the top-level `ast.Name` is `identifier`"""
@@ -174,19 +179,19 @@ class ifThis:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.Subscript]:
 			return isinstance(node, ast.Subscript) and ifThis._nested_Identifier(identifier)(DOT.value(node))
 		return workhorse
+
 	@staticmethod
 	def matchesMeButNotAnyDescendant(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
-		"""Create a predicate that returns True if the node matches but none of its descendants match the predicate."""
 		return lambda node: predicate(node) and ifThis.matchesNoDescendant(predicate)(node)
 	@staticmethod
 	def matchesNoDescendant(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
-		"""Create a predicate that returns True if no descendant of the node matches the given predicate."""
 		def workhorse(node: ast.AST) -> bool:
 			for descendant in ast.walk(node):
 				if descendant is not node and predicate(descendant):
 					return False
 			return True
 		return workhorse
+
 	@staticmethod
 	def Z0Z_unparseIs(astAST: ast.AST) -> Callable[[ast.AST], bool]:
 		def workhorse(node: ast.AST) -> bool: return ast.unparse(node) == ast.unparse(astAST)
