@@ -29,7 +29,6 @@ from mapFolding.beDRY import outfitCountFolds
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, writeStringToHere
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
-	be,
 	DOT,
 	ifThis,
 	importLogicalPath2Callable,
@@ -65,7 +64,7 @@ def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.Funct
 
 def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.FunctionDef]:
 	dictionaryIdentifier2FunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
-	NodeTourist(be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module)
+	NodeTourist(lambda node: isinstance(node, ast.FunctionDef), Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module) # type: ignore
 	return dictionaryIdentifier2FunctionDef
 
 def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) -> ast.FunctionDef:
@@ -219,17 +218,17 @@ class DeReConstructField2ast:
 			# self.astAnnAssignConstructor = Make.AnnAssign(self.astName, Make.Name(annotation), Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtypeIdentifier_asname))]))
 			# self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', Make.Name(dtypeIdentifier_asname))]))
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'array')
-		elif be.Name(self.astAnnotation):
+		elif isinstance(self.astAnnotation, ast.Name):
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
 			# self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
-		elif be.Subscript(self.astAnnotation):
+		elif isinstance(self.astAnnotation, ast.Subscript):
 			elementConstructor: ast_Identifier = self.metadata['elementConstructor']
 			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
 			takeTheTuple: ast.Tuple = deepcopy(self.astAnnotation.slice) # type: ignore
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, takeTheTuple)
 			self.Z0Z_hack = (self.astAnnAssignConstructor, elementConstructor)
-		if be.Name(self.astAnnotation):
+		if isinstance(self.astAnnotation, ast.Name):
 			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id) # pyright: ignore [reportUnknownArgumentType, reportUnknownMemberType, reportIJustCalledATypeGuardMethod_WTF]
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:

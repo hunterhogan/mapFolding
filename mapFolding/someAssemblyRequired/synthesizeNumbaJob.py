@@ -1,6 +1,6 @@
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal
-from mapFolding.someAssemblyRequired import ast_Identifier, be, ifThis, Make, NodeChanger, Then, IngredientsFunction, IngredientsModule, LedgerOfImports
+from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, Make, NodeChanger, Then, IngredientsFunction, IngredientsModule, LedgerOfImports
 from mapFolding.someAssemblyRequired.toolboxNumba import RecipeJob, SpicesJobNumba, decorateCallableWithNumba
 from mapFolding.someAssemblyRequired.transformationTools import extractFunctionDef, write_astModule
 from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
@@ -93,7 +93,7 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba) -> None:
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
 
 	# Change the return so you can dynamically determine which variables are not used
-	removeReturnStatement = NodeChanger(be.Return, Then.removeIt)
+	removeReturnStatement = NodeChanger(lambda node: isinstance(node, ast.Return), Then.removeIt) # type: ignore
 	removeReturnStatement.visit(ingredientsCount.astFunctionDef)
 	ingredientsCount.astFunctionDef.returns = Make.Constant(value=None)
 

@@ -53,7 +53,7 @@ from mapFolding.someAssemblyRequired._toolboxPython import (
 	parsePathFilename2astModule,
 	)
 
-from mapFolding.someAssemblyRequired._toolboxAntecedents import be, DOT, ifThis
+from mapFolding.someAssemblyRequired._toolboxAntecedents import DOT, ifThis
 from mapFolding.someAssemblyRequired._tool_Make import Make
 from mapFolding.someAssemblyRequired._tool_Then import grab, Then
 

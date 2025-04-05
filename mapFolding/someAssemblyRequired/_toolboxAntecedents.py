@@ -88,55 +88,6 @@ class DOT:
 	def value(node: astClassHasDOTvalue) -> Any | ast.expr | bool | None:
 		return node.value
 
-class be:
-	@staticmethod
-	def _typeCertified(antecedent: type[TypeCertified]) -> Callable[[ast.AST | None], TypeGuard[TypeCertified]]:
-		def workhorse(node: ast.AST | None) -> TypeGuard[TypeCertified]:
-			return isinstance(node, antecedent)
-		return workhorse
-	@staticmethod
-	def AnnAssign(node: ast.AST) -> TypeGuard[ast.AnnAssign]: return be._typeCertified(ast.AnnAssign)(node)
-	@staticmethod
-	def arg(node: ast.AST) -> TypeGuard[ast.arg]: return be._typeCertified(ast.arg)(node)
-	@staticmethod
-	def Assign(node: ast.AST) -> TypeGuard[ast.Assign]: return be._typeCertified(ast.Assign)(node)
-	@staticmethod
-	def Attribute(node: ast.AST) -> TypeGuard[ast.Attribute]: return be._typeCertified(ast.Attribute)(node)
-	@staticmethod
-	def AugAssign(node: ast.AST) -> TypeGuard[ast.AugAssign]: return be._typeCertified(ast.AugAssign)(node)
-	@staticmethod
-	def BoolOp(node: ast.AST) -> TypeGuard[ast.BoolOp]: return be._typeCertified(ast.BoolOp)(node)
-	@staticmethod
-	def Call(node: ast.AST) -> TypeGuard[ast.Call]: return be._typeCertified(ast.Call)(node)
-	@staticmethod
-	def ClassDef(node: ast.AST) -> TypeGuard[ast.ClassDef]: return be._typeCertified(ast.ClassDef)(node)
-	@staticmethod
-	def Compare(node: ast.AST) -> TypeGuard[ast.Compare]: return be._typeCertified(ast.Compare)(node)
-	@staticmethod
-	def Constant(node: ast.AST) -> TypeGuard[ast.Constant]: return be._typeCertified(ast.Constant)(node)
-	@staticmethod
-	def Expr(node: ast.AST) -> TypeGuard[ast.Expr]: return be._typeCertified(ast.Expr)(node)
-	@staticmethod
-	def FunctionDef(node: ast.AST) -> TypeGuard[ast.FunctionDef]: return be._typeCertified(ast.FunctionDef)(node)
-	@staticmethod
-	def Import(node: ast.AST) -> TypeGuard[ast.Import]: return be._typeCertified(ast.Import)(node)
-	@staticmethod
-	def ImportFrom(node: ast.AST) -> TypeGuard[ast.ImportFrom]: return be._typeCertified(ast.ImportFrom)(node)
-	@staticmethod
-	def keyword(node: ast.AST) -> TypeGuard[ast.keyword]: return be._typeCertified(ast.keyword)(node)
-	@staticmethod
-	def Module(node: ast.AST) -> TypeGuard[ast.Module]: return be._typeCertified(ast.Module)(node)
-	@staticmethod
-	def Name(node: ast.AST) -> TypeGuard[ast.Name]: return be._typeCertified(ast.Name)(node)
-	@staticmethod
-	def Return(node: ast.AST) -> TypeGuard[ast.Return]: return be._typeCertified(ast.Return)(node)
-	@staticmethod
-	def Starred(node: ast.AST) -> TypeGuard[ast.Starred]: return be._typeCertified(ast.Starred)(node)
-	@staticmethod
-	def Subscript(node: ast.AST) -> TypeGuard[ast.Subscript]: return be._typeCertified(ast.Subscript)(node)
-	@staticmethod
-	def UnaryOp(node: ast.AST) -> TypeGuard[ast.UnaryOp]: return be._typeCertified(ast.UnaryOp)(node)
-
 class ifThis:
 	@staticmethod
 	def _Identifier(identifier: ast_Identifier) -> Callable[[ast_Identifier | None], TypeGuard[ast_Identifier] | bool]:
@@ -149,33 +100,33 @@ class ifThis:
 	@staticmethod
 	def is_arg_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.arg] | bool]:
 		"""see also `isArgument_Identifier`"""
-		return lambda node: be.arg(node) and ifThis._Identifier(identifier)(DOT.arg(node))
+		return lambda node: isinstance(node, ast.arg) and ifThis._Identifier(identifier)(DOT.arg(node))
 	@staticmethod
 	def is_keyword_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.keyword] | bool]:
 		"""see also `isArgument_Identifier`"""
-		return lambda node: be.keyword(node) and ifThis._Identifier(identifier)(DOT.arg(node))
+		return lambda node: isinstance(node, ast.keyword) and ifThis._Identifier(identifier)(DOT.arg(node))
 	@staticmethod
 	def isAnnAssign_targetIs(targetPredicate: Callable[[ast.expr], TypeGuard[ast.expr] | bool]) -> Callable[[ast.AST], TypeGuard[ast.AnnAssign] | bool]:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.AnnAssign] | bool:
-			return be.AnnAssign(node) and targetPredicate(DOT.target(node))
+			return isinstance(node, ast.AnnAssign) and targetPredicate(DOT.target(node))
 		return workhorse
 	@staticmethod
 	def isAnnAssignAndAnnotationIsName(node: ast.AST) -> TypeGuard[ast.AnnAssign] | bool:
-		return be.AnnAssign(node) and be.Name(DOT.annotation(node))
+		return isinstance(node, ast.AnnAssign) and isinstance(DOT.annotation(node), ast.Name)
 	@staticmethod
 	def isArgument_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.arg | ast.keyword] | bool]:
-		return lambda node: (be.arg(node) or be.keyword(node)) and ifThis._Identifier(identifier)(DOT.arg(node))
+		return lambda node: (isinstance(node, ast.arg) or isinstance(node, ast.keyword)) and ifThis._Identifier(identifier)(DOT.arg(node))
 	@staticmethod
 	def isAssignAndTargets0Is(targets0Predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], TypeGuard[ast.AnnAssign] | bool]:
 		"""node is Assign and node.targets[0] matches `targets0Predicate`."""
-		return lambda node: be.Assign(node) and targets0Predicate(node.targets[0])
+		return lambda node: isinstance(node, ast.Assign) and targets0Predicate(node.targets[0])
 	@staticmethod
 	def isAssignAndValueIs(valuePredicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], TypeGuard[ast.Assign] | bool]:
 		"""node is ast.Assign and node.value matches `valuePredicate`. """
-		return lambda node: be.Assign(node) and valuePredicate(DOT.value(node))
+		return lambda node: isinstance(node, ast.Assign) and valuePredicate(DOT.value(node))
 	@staticmethod
 	def isAssignAndValueIsCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Assign] | bool]:
-		return lambda node: be.Assign(node) and ifThis.isCall_Identifier(identifier)(DOT.value(node))
+		return lambda node: isinstance(node, ast.Assign) and ifThis.isCall_Identifier(identifier)(DOT.value(node))
 	@staticmethod
 	def isAssignAndValueIsCallAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Assign] | bool]:
 		return ifThis.isAssignAndValueIs(ifThis.isCallAttributeNamespace_Identifier(namespace, identifier))
@@ -183,52 +134,52 @@ class ifThis:
 	def isAttribute_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute] | bool]:
 		"""node is `ast.Attribute` and the top-level `ast.Name` is `identifier`"""
 		def workhorse(node: ast.AST) -> TypeGuard[ast.Attribute]:
-			return be.Attribute(node) and ifThis._nested_Identifier(identifier)(DOT.value(node))
+			return isinstance(node, ast.Attribute) and ifThis._nested_Identifier(identifier)(DOT.value(node))
 		return workhorse
 	@staticmethod
 	def isAttributeName(node: ast.AST) -> TypeGuard[ast.Attribute]:
 		""" Displayed as Name.attribute."""
-		return be.Attribute(node) and be.Name(DOT.value(node))
+		return isinstance(node, ast.Attribute) and isinstance(DOT.value(node), ast.Name)
 	@staticmethod
 	def isAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Attribute] | bool]:
 		return lambda node: ifThis.isAttributeName(node) and ifThis.isName_Identifier(namespace)(DOT.value(node)) and ifThis._Identifier(identifier)(DOT.attr(node))
 	@staticmethod
 	def isAugAssign_targetIs(targetPredicate: Callable[[ast.expr], TypeGuard[ast.expr] | bool]) -> Callable[[ast.AST], TypeGuard[ast.AugAssign] | bool]:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.AugAssign] | bool:
-			return be.AugAssign(node) and targetPredicate(DOT.target(node))
+			return isinstance(node, ast.AugAssign) and targetPredicate(DOT.target(node))
 		return workhorse
 	@staticmethod
 	def isCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
-		return lambda node: be.Call(node) and ifThis.isName_Identifier(identifier)(DOT.func(node))
+		return lambda node: isinstance(node, ast.Call) and ifThis.isName_Identifier(identifier)(DOT.func(node))
 	@staticmethod
 	def isCallAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
-		return lambda node: be.Call(node) and ifThis.isAttributeNamespace_Identifier(namespace, identifier)(DOT.func(node))
+		return lambda node: isinstance(node, ast.Call) and ifThis.isAttributeNamespace_Identifier(namespace, identifier)(DOT.func(node))
 	@staticmethod
 	def isCallToName(node: ast.AST) -> TypeGuard[ast.Call]:
-		return be.Call(node) and be.Name(DOT.func(node))
+		return isinstance(node, ast.Call) and isinstance(DOT.func(node), ast.Name)
 	@staticmethod
 	def isClassDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.ClassDef] | bool]:
-		return lambda node: be.ClassDef(node) and ifThis._Identifier(identifier)(DOT.name(node))
+		return lambda node: isinstance(node, ast.ClassDef) and ifThis._Identifier(identifier)(DOT.name(node))
 	@staticmethod
 	def isConstantEquals(value: Any) -> Callable[[ast.AST], TypeGuard[ast.Constant] | bool]:
-		return lambda node: be.Constant(node) and DOT.value(node) == value
+		return lambda node: isinstance(node, ast.Constant) and DOT.value(node) == value
 	@staticmethod
 	def isFunctionDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.FunctionDef] | bool]:
-		return lambda node: be.FunctionDef(node) and ifThis._Identifier(identifier)(DOT.name(node))
+		return lambda node: isinstance(node, ast.FunctionDef) and ifThis._Identifier(identifier)(DOT.name(node))
 	@staticmethod
 	def isName_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Name] | bool]:
-		return lambda node: be.Name(node) and ifThis._Identifier(identifier)(DOT.id(node))
+		return lambda node: isinstance(node, ast.Name) and ifThis._Identifier(identifier)(DOT.id(node))
 	@staticmethod
 	def isStarred_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Starred] | bool]:
 		"""node is `ast.Starred` and the top-level `ast.Name` is `identifier`"""
 		def workhorse(node: ast.AST) -> TypeGuard[ast.Starred]:
-			return be.Starred(node) and ifThis._nested_Identifier(identifier)(DOT.value(node))
+			return isinstance(node, ast.Starred) and ifThis._nested_Identifier(identifier)(DOT.value(node))
 		return workhorse
 	@staticmethod
 	def isSubscript_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Subscript] | bool]:
 		"""node is `ast.Subscript` and the top-level `ast.Name` is `identifier`"""
 		def workhorse(node: ast.AST) -> TypeGuard[ast.Subscript]:
-			return be.Subscript(node) and ifThis._nested_Identifier(identifier)(DOT.value(node))
+			return isinstance(node, ast.Subscript) and ifThis._nested_Identifier(identifier)(DOT.value(node))
 		return workhorse
 	@staticmethod
 	def equals(this: Any) -> Callable[[Any], TypeGuard[Any] | bool]:

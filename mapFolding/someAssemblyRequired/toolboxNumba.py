@@ -20,7 +20,7 @@ algorithm implementation into a highly-optimized Numba version.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import grab, IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, be, ifThis, parsePathFilename2astModule, str_nameDOTname, IngredientsFunction, ShatteredDataclass
+from mapFolding.someAssemblyRequired import grab, IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, ifThis, parsePathFilename2astModule, str_nameDOTname, IngredientsFunction, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import inlineFunctionDef, Z0Z_lameFindReplace, astModuleToIngredientsFunction, shatter_dataclassesDOTdataclass, write_astModule
 from mapFolding.theSSOT import ComputationState, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeElephino as TheDatatypeElephino, DatatypeLeavesTotal as TheDatatypeLeavesTotal
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
@@ -317,7 +317,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	# sequentialCallable =========================================================
 	ingredientsSequential.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 	astCallSequentialCallable = Make.Call(Make.Name(numbaFlow.callableSequential), shatteredDataclass.listName4Parameters)
-	changeReturnSequentialCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
+	changeReturnSequentialCallable = NodeChanger(lambda node: isinstance(node, ast.Return), Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters))) # type: ignore
 	ingredientsSequential.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
 	replaceAssignSequentialCallable = NodeChanger(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.replaceWith(Make.Assign(listTargets=[shatteredDataclass.fragments4AssignmentOrParameters], value=astCallSequentialCallable)))
 
@@ -337,11 +337,11 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 
 	# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
 	astCallConcurrencyResult: list[ast.Call] = []
-	get_astCallConcurrencyResult = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), lambda node: NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)) # type: ignore
+	get_astCallConcurrencyResult = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), lambda node: NodeTourist(lambda node: isinstance(node, ast.Call), Then.appendTo(astCallConcurrencyResult)).visit(node)) # type: ignore
 	get_astCallConcurrencyResult.visit(ingredientsDispatcher.astFunctionDef)
 	replaceAssignParallelCallable = NodeChanger(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), grab.valueAttribute(Then.replaceWith(astCallConcurrencyResult[0])))
 	replaceAssignParallelCallable.visit(ingredientsDispatcher.astFunctionDef)
-	changeReturnParallelCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName)))
+	changeReturnParallelCallable = NodeChanger(lambda node: isinstance(node, ast.Return), Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName))) # type: ignore
 	ingredientsParallel.astFunctionDef.returns = shatteredDataclass.countingVariableAnnotation
 
 	unpack4parallelCallable = NodeChanger(ifThis.isAssignAndValueIsCallAttributeNamespace_Identifier(numbaFlow.concurrencyManagerNamespace, numbaFlow.concurrencyManagerIdentifier), Then.insertThisAbove(shatteredDataclass.listUnpack))

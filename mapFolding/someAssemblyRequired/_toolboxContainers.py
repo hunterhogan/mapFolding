@@ -7,7 +7,7 @@ circular imports while providing reusable data structures.
 """
 from collections import defaultdict
 from collections.abc import Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, be, Make, parseLogicalPath2astModule, str_nameDOTname
+from mapFolding.someAssemblyRequired import ast_Identifier, Make, parseLogicalPath2astModule, str_nameDOTname
 from mapFolding.theSSOT import The
 from pathlib import Path, PurePosixPath
 from Z0Z_tools import updateExtendPolishDictionaryLists
@@ -27,10 +27,10 @@ class LedgerOfImports:
 
 	def addAst(self, astImport____: ast.Import | ast.ImportFrom) -> None:
 		assert isinstance(astImport____, (ast.Import, ast.ImportFrom)), f"I received {type(astImport____) = }, but I can only accept {ast.Import} and {ast.ImportFrom}."
-		if be.Import(astImport____):
+		if isinstance(astImport____, ast.Import):
 			for alias in astImport____.names:
 				self.listImport.append(alias.name)
-		elif be.ImportFrom(astImport____):
+		elif isinstance(astImport____, ast.ImportFrom): # type: ignore
 			# TODO fix the mess created by `None` means '.'. I need a `str_nameDOTname` to replace '.'
 			if astImport____.module is None:
 				astImport____.module = '.'
@@ -161,7 +161,7 @@ class IngredientsModule:
 		"""Append one or more statements to `prologue`."""
 		list_body: list[ast.stmt] = []
 		listTypeIgnore: list[ast.TypeIgnore] = []
-		if astModule is not None and be.Module(astModule):
+		if astModule is not None and isinstance(astModule, ast.Module): # type: ignore
 			list_body.extend(astModule.body)
 			listTypeIgnore.extend(astModule.type_ignores)
 		if type_ignores is not None:
