@@ -3,20 +3,22 @@ import ast
 # TODO understand typing.
 
 stuPyd: typing_TypeAlias = str
-
 if TYPE_CHECKING:
 	"""	3.12 new: ast.ParamSpec, ast.type_param, ast.TypeAlias, ast.TypeVar, ast.TypeVarTuple
 		3.11 new: ast.TryStar"""
 	astClassHasDOTnameNotName: typing_TypeAlias = ast.alias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple
-	astClassHasDOTvalue: typing_TypeAlias = ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.Constant | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchSingleton | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | ast.TypeAlias | ast.YieldFrom
+	astClassHasDOTvalue_expr: typing_TypeAlias = ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | ast.TypeAlias | ast.YieldFrom
 
 else:
 	astClassHasDOTnameNotName = stuPyd
-	astClassHasDOTvalue = stuPyd
+	astClassHasDOTvalue_expr = stuPyd
 
-astClassHasDOTtarget: typing_TypeAlias = ast.AnnAssign | ast.AsyncFor | ast.AugAssign | ast.comprehension | ast.For | ast.NamedExpr
+astClassHasDOTtargetAttributeNameSubscript: typing_TypeAlias = ast.AnnAssign | ast.AugAssign
+astClassHasDOTtarget_expr: typing_TypeAlias = ast.AsyncFor | ast.comprehension | ast.For
+astClassHasDOTtarget: typing_TypeAlias = ast.NamedExpr | astClassHasDOTtarget_expr | astClassHasDOTtargetAttributeNameSubscript
 astClassOptionallyHasDOTnameNotName: typing_TypeAlias = ast.ExceptHandler | ast.MatchAs | ast.MatchStar
-astClassOptionallyHasDOTvalue: typing_TypeAlias = ast.AnnAssign | ast.Return | ast.Yield
+astClassHasDOTvalue_exprNone: typing_TypeAlias = ast.AnnAssign | ast.Return | ast.Yield
+astClassHasDOTvalue: typing_TypeAlias = ast.Constant | ast.MatchSingleton | astClassHasDOTvalue_expr | astClassHasDOTvalue_exprNone
 
 ast_expr_Slice: typing_TypeAlias = ast.expr
 ast_Identifier: typing_TypeAlias = str

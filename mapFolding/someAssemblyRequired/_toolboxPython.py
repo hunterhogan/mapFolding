@@ -4,7 +4,7 @@ from mapFolding.someAssemblyRequired import ast_Identifier, str_nameDOTname
 from os import PathLike
 from pathlib import Path, PurePath
 from types import ModuleType
-from typing import Any
+from typing import Any, Literal
 import ast
 import importlib
 import importlib.util
@@ -53,10 +53,10 @@ def importPathFilename2Callable(pathFilename: PathLike[Any] | PurePath, identifi
     importlibSpecification.loader.exec_module(moduleImported_jk_hahaha)
     return getattr(moduleImported_jk_hahaha, identifier)
 
-def parseLogicalPath2astModule(logicalPathModule: str_nameDOTname, packageIdentifierIfRelative: ast_Identifier|None=None, mode:str='exec') -> ast.Module:
+def parseLogicalPath2astModule(logicalPathModule: str_nameDOTname, packageIdentifierIfRelative: ast_Identifier|None=None, mode: Literal['exec'] = 'exec') -> ast.Module:
     moduleImported: ModuleType = importlib.import_module(logicalPathModule, packageIdentifierIfRelative)
     sourcePython: str = inspect_getsource(moduleImported)
-    return ast.parse(sourcePython, mode=mode) # type: ignore
+    return ast.parse(sourcePython, mode=mode)
 
-def parsePathFilename2astModule(pathFilename: PathLike[Any] | PurePath, mode:str='exec') -> ast.AST:
+def parsePathFilename2astModule(pathFilename: PathLike[Any] | PurePath, mode: Literal['exec'] = 'exec') -> ast.Module:
     return ast.parse(Path(pathFilename).read_text(), mode=mode)

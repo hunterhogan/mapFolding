@@ -3,9 +3,12 @@ from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	astClassHasDOTnameNotName,
 	astClassHasDOTtarget,
+	astClassHasDOTtargetAttributeNameSubscript,
+	astClassHasDOTtarget_expr,
 	astClassHasDOTvalue,
+	astClassHasDOTvalue_expr,
 	astClassOptionallyHasDOTnameNotName,
-	astClassOptionallyHasDOTvalue,
+	astClassHasDOTvalue_exprNone,
 	TypeCertified,
 )
 from typing import Any, overload, TypeGuard
@@ -25,6 +28,7 @@ class DOT:
 	@staticmethod
 	def annotation(node: ast.AnnAssign | ast.arg) -> ast.expr | None:
 		return node.annotation
+
 	@staticmethod
 	@overload
 	def arg(node: ast.arg) -> ast_Identifier:...
@@ -34,6 +38,7 @@ class DOT:
 	@staticmethod
 	def arg(node: ast.arg | ast.keyword) -> ast_Identifier | None:
 		return node.arg
+
 	@staticmethod
 	def attr(node: ast.Attribute) -> ast_Identifier:
 		return node.attr
@@ -43,6 +48,7 @@ class DOT:
 	@staticmethod
 	def id(node: ast.Name) -> ast_Identifier:
 		return node.id
+
 	@staticmethod
 	@overload
 	def name(node: astClassHasDOTnameNotName) -> ast_Identifier:...
@@ -52,23 +58,40 @@ class DOT:
 	@staticmethod
 	def name(node: astClassHasDOTnameNotName | astClassOptionallyHasDOTnameNotName) -> ast_Identifier | None:
 		return node.name
+
 	@staticmethod
-	def target(node: astClassHasDOTtarget) -> ast.Name | ast.Attribute | ast.Subscript | ast.expr:
+	@overload
+	def target(node: ast.NamedExpr) -> ast.Name:...
+	@staticmethod
+	@overload
+	def target(node: astClassHasDOTtarget_expr) -> ast.expr:...
+	@staticmethod
+	@overload
+	def target(node: astClassHasDOTtargetAttributeNameSubscript) -> ast.Attribute | ast.Name | ast.Subscript:...
+	@staticmethod
+	def target(node: astClassHasDOTtarget) -> ast.Attribute | ast.expr | ast.Name | ast.Subscript:
 		return node.target
+
 	@staticmethod
 	@overload
-	def value(node: astClassHasDOTvalue) -> ast.expr:...
+	def value(node: ast.Constant) -> Any:...
 	@staticmethod
 	@overload
-	def value(node: astClassOptionallyHasDOTvalue) -> ast.expr | Any | None:...
+	def value(node: ast.MatchSingleton) -> bool | None:...
 	@staticmethod
-	def value(node: astClassHasDOTvalue | astClassOptionallyHasDOTvalue) -> ast.expr | Any | None | bool:
+	@overload
+	def value(node: astClassHasDOTvalue_expr) -> ast.expr:...
+	@staticmethod
+	@overload
+	def value(node: astClassHasDOTvalue_exprNone) -> ast.expr | None:...
+	@staticmethod
+	def value(node: astClassHasDOTvalue) -> Any | ast.expr | bool | None:
 		return node.value
 
 class be:
 	@staticmethod
-	def _typeCertified(antecedent: type[TypeCertified]) -> Callable[[Any | None], TypeGuard[TypeCertified]]:
-		def workhorse(node: Any | None) -> TypeGuard[TypeCertified]:
+	def _typeCertified(antecedent: type[TypeCertified]) -> Callable[[ast.AST | None], TypeGuard[TypeCertified]]:
+		def workhorse(node: ast.AST | None) -> TypeGuard[TypeCertified]:
 			return isinstance(node, antecedent)
 		return workhorse
 	@staticmethod

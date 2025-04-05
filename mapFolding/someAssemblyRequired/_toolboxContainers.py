@@ -246,7 +246,7 @@ class RecipeSynthesizeFlow:
 	# ========================================
 	# Source
 	# ========================================
-	source_astModule = parseLogicalPath2astModule(The.logicalPathModuleSourceAlgorithm)
+	source_astModule: ast.Module = parseLogicalPath2astModule(The.logicalPathModuleSourceAlgorithm)
 
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 	sourceCallableDispatcher: ast_Identifier = The.sourceCallableDispatcher

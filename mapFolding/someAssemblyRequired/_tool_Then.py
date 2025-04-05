@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue
+from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue_expr
 from typing import Any
 import ast
 
@@ -27,8 +27,8 @@ class grab:
 			return node
 		return workhorse
 	@staticmethod
-	def valueAttribute(action: Callable[[Any], Any]) -> Callable[[astClassHasDOTvalue], astClassHasDOTvalue]:
-		def workhorse(node: astClassHasDOTvalue) -> astClassHasDOTvalue:
+	def valueAttribute(action: Callable[[Any], Any]) -> Callable[[astClassHasDOTvalue_expr], astClassHasDOTvalue_expr]:
+		def workhorse(node: astClassHasDOTvalue_expr) -> astClassHasDOTvalue_expr:
 			node.value = action(node.value)
 			return node
 		return workhorse
