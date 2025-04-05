@@ -26,14 +26,14 @@ from mapFolding.theSSOT import ComputationState, DatatypeFoldsTotal as TheDataty
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from pathlib import Path, PurePosixPath
-from typing import Any, cast, Final, TYPE_CHECKING, TypeAlias
+from typing import Any, cast, Final, TYPE_CHECKING, TypeAlias, TypeGuard
 import ast
 import dataclasses
 
 try:
 	from typing import NotRequired
 except Exception:
-	from typing_extensions import NotRequired # type: ignore
+	from typing_extensions import NotRequired # pyright: ignore[reportShadowedImports]
 
 if TYPE_CHECKING:
 	from typing import TypedDict
@@ -91,7 +91,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
 		return astCallable
 
-	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None: # type: ignore
+	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None: # pyright: ignore[reportUnusedFunction]
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape: ast.expr = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
@@ -165,7 +165,7 @@ class RecipeJob:
 	state: ComputationState
 	# TODO create function to calculate `foldsTotalEstimated`
 	foldsTotalEstimated: int = 0
-	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # type: ignore
+	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 
 	# ========================================
 	# Source
@@ -185,7 +185,7 @@ class RecipeJob:
 	pathModule: PurePosixPath | None = PurePosixPath(getPathRootJobDEFAULT())
 	""" `pathModule` will override `pathPackage` and `logicalPathRoot`."""
 	fileExtension: str = theNumbaFlow.fileExtension
-	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # type: ignore
+	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 
 	# ========================================
 	# Logical identifiers (as opposed to physical identifiers)
@@ -193,7 +193,7 @@ class RecipeJob:
 	packageIdentifier: ast_Identifier | None = None
 	logicalPathRoot: str_nameDOTname | None = None
 	""" `logicalPathRoot` likely corresponds to a physical filesystem directory."""
-	moduleIdentifier: ast_Identifier = dataclasses.field(default=None, init=True) # type: ignore
+	moduleIdentifier: ast_Identifier = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 	countCallable: ast_Identifier = sourceCountCallable
 	dataclassIdentifier: ast_Identifier | None = sourceDataclassIdentifier
 	dataclassInstance: ast_Identifier | None = sourceDataclassInstance
@@ -233,13 +233,13 @@ class RecipeJob:
 	def __post_init__(self):
 		pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(self.state.mapShape))
 
-		if self.moduleIdentifier is None: # type: ignore
+		if self.moduleIdentifier is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.moduleIdentifier = pathFilenameFoldsTotal.stem
 
-		if self.pathFilenameFoldsTotal is None: # type: ignore
+		if self.pathFilenameFoldsTotal is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
 
-		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.dataclassIdentifier and self.dataclassInstance: # type: ignore
+		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.dataclassIdentifier and self.dataclassInstance: # pyright: ignore[reportUnnecessaryComparison]
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.dataclassIdentifier, self.dataclassInstance)
 
 	# ========================================
@@ -254,6 +254,14 @@ class RecipeJob:
 	dataclassInstanceTaskDistribution: ast_Identifier = sourceDataclassInstanceTaskDistribution
 	concurrencyManagerNamespace: ast_Identifier = sourceConcurrencyManagerNamespace
 	concurrencyManagerIdentifier: ast_Identifier = sourceConcurrencyManagerIdentifier
+
+class be:
+	@staticmethod
+	def Call(node: ast.AST) -> TypeGuard[ast.Call]:
+		return isinstance(node, ast.Call)
+	@staticmethod
+	def Return(node: ast.AST) -> TypeGuard[ast.Return]:
+		return isinstance(node, ast.Return)
 
 def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
@@ -317,7 +325,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	# sequentialCallable =========================================================
 	ingredientsSequential.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 	astCallSequentialCallable = Make.Call(Make.Name(numbaFlow.callableSequential), shatteredDataclass.listName4Parameters)
-	changeReturnSequentialCallable = NodeChanger(lambda node: isinstance(node, ast.Return), Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters))) # type: ignore
+	changeReturnSequentialCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
 	ingredientsSequential.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
 	replaceAssignSequentialCallable = NodeChanger(ifThis.isAssignAndValueIsCall_Identifier(numbaFlow.callableSequential), Then.replaceWith(Make.Assign(listTargets=[shatteredDataclass.fragments4AssignmentOrParameters], value=astCallSequentialCallable)))
 
@@ -329,7 +337,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	unpack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
 	repack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
 
-	ingredientsSequential.astFunctionDef = Z0Z_lameFindReplace(ingredientsSequential.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name) # type: ignore
+	ingredientsSequential.astFunctionDef = Z0Z_lameFindReplace(ingredientsSequential.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
 
 	# parallelCallable =========================================================
 	ingredientsParallel.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
@@ -337,11 +345,13 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 
 	# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
 	astCallConcurrencyResult: list[ast.Call] = []
-	get_astCallConcurrencyResult = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), lambda node: NodeTourist(lambda node: isinstance(node, ast.Call), Then.appendTo(astCallConcurrencyResult)).visit(node)) # type: ignore
+	get_astCallConcurrencyResult = NodeTourist(
+		ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)),
+		getIt(astCallConcurrencyResult))
 	get_astCallConcurrencyResult.visit(ingredientsDispatcher.astFunctionDef)
 	replaceAssignParallelCallable = NodeChanger(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), grab.valueAttribute(Then.replaceWith(astCallConcurrencyResult[0])))
 	replaceAssignParallelCallable.visit(ingredientsDispatcher.astFunctionDef)
-	changeReturnParallelCallable = NodeChanger(lambda node: isinstance(node, ast.Return), Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName))) # type: ignore
+	changeReturnParallelCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName)))
 	ingredientsParallel.astFunctionDef.returns = shatteredDataclass.countingVariableAnnotation
 
 	unpack4parallelCallable = NodeChanger(ifThis.isAssignAndValueIsCallAttributeNamespace_Identifier(numbaFlow.concurrencyManagerNamespace, numbaFlow.concurrencyManagerIdentifier), Then.insertThisAbove(shatteredDataclass.listUnpack))
@@ -350,7 +360,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
 	changeReturnParallelCallable.visit(ingredientsParallel.astFunctionDef)
 
-	ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name) # type: ignore
+	ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
 
 	# numba decorators =========================================
 	ingredientsParallel = decorateCallableWithNumba(ingredientsParallel)
@@ -361,6 +371,12 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	ingredientsModuleNumbaUnified.removeImportFromModule('numpy')
 
 	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageIdentifier)
+
+def getIt(astCallConcurrencyResult: list[ast.Call]) -> Callable[[ast.AST], ast.AST]:
+	def workhorse(node: ast.AST) -> ast.AST:
+		NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)
+		return node
+	return workhorse
 
 if __name__ == '__main__':
 	makeNumbaFlow(theNumbaFlow)

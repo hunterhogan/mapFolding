@@ -42,6 +42,7 @@ from mapFolding.someAssemblyRequired import (
 	ShatteredDataclass,
 	str_nameDOTname,
 	Then,
+	个,
 )
 from mapFolding.theSSOT import ComputationState, raiseIfNoneGitHubIssueNumber3, The
 from os import PathLike
@@ -296,7 +297,7 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 }
 
 # END of marginal classes and functions ======================================================
-def Z0Z_lameFindReplace(astTree: ast.AST, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]) -> ast.AST:
+def Z0Z_lameFindReplace(astTree: 个, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]) -> 个:
 	keepGoing = True
 	newTree = deepcopy(astTree)
 

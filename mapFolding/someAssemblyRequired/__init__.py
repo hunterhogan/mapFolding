@@ -40,7 +40,6 @@ from mapFolding.someAssemblyRequired._theTypes import (
 	intORstr_orNone,
 	list_ast_type_paramORstr_orNone,
 	str_nameDOTname,
-	TypeCertified,
 	个,
 	)
 

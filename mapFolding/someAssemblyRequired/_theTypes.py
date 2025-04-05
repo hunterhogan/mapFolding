@@ -27,10 +27,9 @@ intORstr_orNone: typing_TypeAlias = Any
 list_ast_type_paramORstr_orNone: typing_TypeAlias = Any
 str_nameDOTname: typing_TypeAlias = stuPyd
 
-TypeCertified = typing_TypeVar('TypeCertified', bound = ast.AST, covariant=True)
 astMosDef = typing_TypeVar('astMosDef', bound=astClassHasDOTnameNotName)
 
-个 = typing_TypeVar('个', bound= ast.AST | ast_Identifier, covariant=True)
+个 = typing_TypeVar('个', bound= ast.AST, covariant=True)
 
 Ima_ast_boolop: typing_TypeAlias = ast.boolop | ast.And | ast.Or
 Ima_ast_cmpop: typing_TypeAlias = ast.cmpop | ast.Eq | ast.NotEq | ast.Lt | ast.LtE | ast.Gt | ast.GtE | ast.Is | ast.IsNot | ast.In | ast.NotIn

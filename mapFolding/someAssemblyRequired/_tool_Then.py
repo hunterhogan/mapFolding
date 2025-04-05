@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue_expr
+from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue
 from typing import Any
 import ast
 
@@ -9,26 +9,26 @@ class grab:
 	class `DOT` : give only the attribute or sub-node to anything, including a `Callable`. Usable anywhere.
 	"""
 	@staticmethod
-	def argAttribute(action: Callable[[Any], Any]) -> Callable[[ast.arg | ast.keyword], ast.arg | ast.keyword]:
+	def argAttribute(action: Callable[[ast_Identifier | None], ast_Identifier]) -> Callable[[ast.arg | ast.keyword], ast.arg | ast.keyword]:
 		def workhorse(node: ast.arg | ast.keyword) -> ast.arg | ast.keyword:
 			node.arg = action(node.arg)
 			return node
 		return workhorse
 	@staticmethod
-	def funcAttribute(action: Callable[[Any], Any]) -> Callable[[ast.Call], ast.Call]:
+	def funcAttribute(action: Callable[[ast.expr], ast.expr]) -> Callable[[ast.Call], ast.Call]:
 		def workhorse(node: ast.Call) -> ast.Call:
 			node.func = action(node.func)
 			return node
 		return workhorse
 	@staticmethod
-	def idAttribute(action: Callable[[Any], Any]) -> Callable[[ast.Name], ast.Name]:
+	def idAttribute(action: Callable[[ast_Identifier], ast_Identifier]) -> Callable[[ast.Name], ast.Name]:
 		def workhorse(node: ast.Name) -> ast.Name:
 			node.id = action(node.id)
 			return node
 		return workhorse
 	@staticmethod
-	def valueAttribute(action: Callable[[Any], Any]) -> Callable[[astClassHasDOTvalue_expr], astClassHasDOTvalue_expr]:
-		def workhorse(node: astClassHasDOTvalue_expr) -> astClassHasDOTvalue_expr:
+	def valueAttribute(action: Callable[[Any | ast.expr | bool | None], Any]) -> Callable[[astClassHasDOTvalue], astClassHasDOTvalue]:
+		def workhorse(node: astClassHasDOTvalue) -> astClassHasDOTvalue:
 			node.value = action(node.value)
 			return node
 		return workhorse

@@ -9,7 +9,6 @@ from mapFolding.someAssemblyRequired import (
 	astClassHasDOTvalue_expr,
 	astClassOptionallyHasDOTnameNotName,
 	astClassHasDOTvalue_exprNone,
-	TypeCertified,
 )
 from typing import Any, overload, TypeGuard
 import ast
@@ -111,9 +110,6 @@ class ifThis:
 			return isinstance(node, ast.AnnAssign) and targetPredicate(DOT.target(node))
 		return workhorse
 	@staticmethod
-	def isAnnAssignAndAnnotationIsName(node: ast.AST) -> TypeGuard[ast.AnnAssign] | bool:
-		return isinstance(node, ast.AnnAssign) and isinstance(DOT.annotation(node), ast.Name)
-	@staticmethod
 	def isArgument_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.arg | ast.keyword] | bool]:
 		return lambda node: (isinstance(node, ast.arg) or isinstance(node, ast.keyword)) and ifThis._Identifier(identifier)(DOT.arg(node))
 	@staticmethod
@@ -161,9 +157,6 @@ class ifThis:
 	def isClassDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.ClassDef] | bool]:
 		return lambda node: isinstance(node, ast.ClassDef) and ifThis._Identifier(identifier)(DOT.name(node))
 	@staticmethod
-	def isConstantEquals(value: Any) -> Callable[[ast.AST], TypeGuard[ast.Constant] | bool]:
-		return lambda node: isinstance(node, ast.Constant) and DOT.value(node) == value
-	@staticmethod
 	def isFunctionDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.FunctionDef] | bool]:
 		return lambda node: isinstance(node, ast.FunctionDef) and ifThis._Identifier(identifier)(DOT.name(node))
 	@staticmethod
@@ -181,13 +174,6 @@ class ifThis:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.Subscript]:
 			return isinstance(node, ast.Subscript) and ifThis._nested_Identifier(identifier)(DOT.value(node))
 		return workhorse
-	@staticmethod
-	def equals(this: Any) -> Callable[[Any], TypeGuard[Any] | bool]:
-		return lambda node: node == this
-	@staticmethod
-	def matchesAtLeast1Descendant(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
-		"""Create a predicate that returns True if any descendant of the node matches the given predicate."""
-		return lambda node: not ifThis.matchesNoDescendant(predicate)(node)
 	@staticmethod
 	def matchesMeButNotAnyDescendant(predicate: Callable[[ast.AST], bool]) -> Callable[[ast.AST], bool]:
 		"""Create a predicate that returns True if the node matches but none of its descendants match the predicate."""

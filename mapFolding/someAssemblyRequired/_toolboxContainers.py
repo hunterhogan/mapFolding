@@ -363,7 +363,7 @@ class ShatteredDataclass:
 	"""Name nodes for each dataclass field used as function parameters."""
 	listUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list)
 	"""Annotated assignment statements to extract fields from dataclass."""
-	map_stateDOTfield2Name: dict[ast.expr, ast.Name] = dataclasses.field(default_factory=dict)
+	map_stateDOTfield2Name: dict[ast.AST, ast.Name] = dataclasses.field(default_factory=dict)
 	"""Maps AST expressions to Name nodes for find-replace operations."""
 	repack: ast.Assign = dummyAssign
 	"""AST assignment statement that reconstructs the original dataclass instance."""
