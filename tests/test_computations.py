@@ -87,6 +87,7 @@ that provide consistent, informative error messages and simplify test validation
 
 from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n, validateListDimensions
 from mapFolding.oeis import settingsOEIS
+from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
 from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
 from pathlib import Path, PurePosixPath
 from tests.conftest import standardizedEqualToCallableReturn, registrarRecordsTmpObject
@@ -115,7 +116,7 @@ def test_syntheticSequential(syntheticDispatcherFixture: None, listDimensionsTes
 
 @pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: list[int], pathFilenameTmpTesting: Path) -> None:
-	from mapFolding.someAssemblyRequired.toolboxNumba import RecipeJob, SpicesJobNumba
+	from mapFolding.someAssemblyRequired.toolboxNumba import SpicesJobNumba
 	from mapFolding.someAssemblyRequired.synthesizeNumbaJob import makeJobNumba
 	mapShape = validateListDimensions(oneTestCuzTestsOverwritingTests)
 	state = makeInitializedComputationState(mapShape)

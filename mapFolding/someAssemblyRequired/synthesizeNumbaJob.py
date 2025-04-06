@@ -18,9 +18,10 @@ This creates extremely fast, specialized implementations that can be run directl
 as Python scripts or further compiled into standalone executables.
 """
 
+from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, Make, NodeChanger, Then, IngredientsFunction, IngredientsModule, LedgerOfImports
-from mapFolding.someAssemblyRequired.toolboxNumba import RecipeJob, SpicesJobNumba, decorateCallableWithNumba
+from mapFolding.someAssemblyRequired.toolboxNumba import SpicesJobNumba, decorateCallableWithNumba
 from mapFolding.someAssemblyRequired.transformationTools import extractFunctionDef, write_astModule
 from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
 from mapFolding.theSSOT import The, raiseIfNoneGitHubIssueNumber3
@@ -269,7 +270,7 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba) -> None:
 	"""
 
 if __name__ == '__main__':
-	mapShape = (2,4)
+	mapShape = (3,4)
 	state = makeInitializedComputationState(mapShape)
 	foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
 	pathModule = PurePosixPath(The.pathPackage, 'jobs')

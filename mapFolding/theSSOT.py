@@ -42,10 +42,10 @@ def getPathPackageINSTALLING() -> Path:
 # I believe these values should be dynamically determined, so I have conspicuously marked them "HARDCODED"
 # and created downstream logic that assumes the values were dynamically determined.
 # Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-logicalPathModuleDispatcherHARDCODED: str = 'mapFolding.syntheticModules.numbaCount_doTheNeedful'
+logicalPathModuleDispatcherHARDCODED: str = 'mapFolding.syntheticModules.numbaCount'
 callableDispatcherHARDCODED: str = 'doTheNeedful'
 concurrencyPackageHARDCODED = 'multiprocessing'
-# from mapFolding.someAssemblyRequired.synthesizeNumbaFlow.theNumbaFlow
+# from mapFolding.someAssemblyRequired.toolboxNumba.theNumbaFlow
 
 # PackageSettings in theSSOT.py and immutability https://github.com/hunterhogan/mapFolding/issues/11
 @dataclasses.dataclass

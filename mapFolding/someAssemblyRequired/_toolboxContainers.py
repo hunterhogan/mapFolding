@@ -308,7 +308,7 @@ class IngredientsModule:
 @dataclasses.dataclass
 class RecipeSynthesizeFlow:
 	"""
-	Configure the generation of optimized Numba-accelerated code modules.
+	Configure the generation of new modules, including Numba-accelerated code modules.
 
 	RecipeSynthesizeFlow defines the complete blueprint for transforming an original
 	Python algorithm into an optimized, accelerated implementation. It specifies:
@@ -358,7 +358,7 @@ class RecipeSynthesizeFlow:
 	""" `logicalPathFlowRoot` likely corresponds to a physical filesystem directory."""
 
 	# Module ================================
-	moduleDispatcher: ast_Identifier = 'numbaCount_doTheNeedful'
+	moduleDispatcher: ast_Identifier = 'numbaCount'
 	moduleInitialize: ast_Identifier = moduleDispatcher
 	moduleParallel: ast_Identifier = moduleDispatcher
 	moduleSequential: ast_Identifier = moduleDispatcher
@@ -376,6 +376,10 @@ class RecipeSynthesizeFlow:
 	dataclassInstance: ast_Identifier = sourceDataclassInstance
 	dataclassInstanceTaskDistribution: ast_Identifier = sourceDataclassInstanceTaskDistribution
 
+	removeDataclassDispatcher: bool = False
+	removeDataclassInitialize: bool = False
+	removeDataclassParallel: bool = True
+	removeDataclassSequential: bool = True
 	# ========================================
 	# Computed
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4

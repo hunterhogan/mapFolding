@@ -26,6 +26,7 @@ from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, writeStringT
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	DOT,
+	grab,
 	ifThis,
 	importLogicalPath2Callable,
 	IngredientsFunction,
@@ -35,6 +36,7 @@ from mapFolding.someAssemblyRequired import (
 	NodeChanger,
 	NodeTourist,
 	parseLogicalPath2astModule,
+	RecipeSynthesizeFlow,
 	ShatteredDataclass,
 	str_nameDOTname,
 	Then,
@@ -43,7 +45,7 @@ from mapFolding.someAssemblyRequired import (
 from mapFolding.theSSOT import ComputationState, raiseIfNoneGitHubIssueNumber3, The
 from os import PathLike
 from pathlib import Path, PurePath
-from typing import Any, Literal, overload
+from typing import Any, Literal, TypeGuard, overload
 import ast
 import dataclasses
 import pickle
@@ -457,3 +459,121 @@ def Z0Z_lameFindReplace(astTree: 个, mappingFindReplaceNodes: Mapping[ast.AST, 
 		else:
 			astTree = deepcopy(newTree)
 	return newTree
+
+class be:
+	@staticmethod
+	def Call(node: ast.AST) -> TypeGuard[ast.Call]:
+		return isinstance(node, ast.Call)
+	@staticmethod
+	def Return(node: ast.AST) -> TypeGuard[ast.Return]:
+		return isinstance(node, ast.Return)
+
+def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
+	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
+	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
+	listAllIngredientsFunctions = [
+	(ingredientsInitialize := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableInitialize)),
+	(ingredientsParallel := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableParallel)),
+	(ingredientsSequential := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableSequential)),
+	(ingredientsDispatcher := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableDispatcher)),
+	]
+
+	# Inline functions ========================================================
+	# NOTE Replacements statements are based on the identifiers in the _source_, so operate on the source identifiers.
+	ingredientsInitialize.astFunctionDef = inlineFunctionDef(recipeFlow.sourceCallableInitialize, recipeFlow.source_astModule)
+	ingredientsParallel.astFunctionDef = inlineFunctionDef(recipeFlow.sourceCallableParallel, recipeFlow.source_astModule)
+	ingredientsSequential.astFunctionDef = inlineFunctionDef(recipeFlow.sourceCallableSequential, recipeFlow.source_astModule)
+
+	# assignRecipeIdentifiersToCallable. =============================
+	# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
+	# How can I use dataclass settings as the SSOT for specific actions? https://github.com/hunterhogan/mapFolding/issues/16
+	# NOTE reminder: you are updating these `ast.Name` here (and not in a more general search) because this is a
+	# narrow search for `ast.Call` so you won't accidentally replace unrelated `ast.Name`.
+	listFindReplace = [(recipeFlow.sourceCallableDispatcher, recipeFlow.callableDispatcher),
+						(recipeFlow.sourceCallableInitialize, recipeFlow.callableInitialize),
+						(recipeFlow.sourceCallableParallel, recipeFlow.callableParallel),
+						(recipeFlow.sourceCallableSequential, recipeFlow.callableSequential),]
+	for ingredients in listAllIngredientsFunctions:
+		for source_Identifier, recipe_Identifier in listFindReplace:
+			updateCallName = NodeChanger(ifThis.isCall_Identifier(source_Identifier), grab.funcAttribute(Then.replaceWith(Make.Name(recipe_Identifier))))
+			updateCallName.visit(ingredients.astFunctionDef)
+
+	ingredientsDispatcher.astFunctionDef.name = recipeFlow.callableDispatcher
+	ingredientsInitialize.astFunctionDef.name = recipeFlow.callableInitialize
+	ingredientsParallel.astFunctionDef.name = recipeFlow.callableParallel
+	ingredientsSequential.astFunctionDef.name = recipeFlow.callableSequential
+
+	# Assign identifiers per the recipe. ==============================
+	listFindReplace = [(recipeFlow.sourceDataclassInstance, recipeFlow.dataclassInstance),
+		(recipeFlow.sourceDataclassInstanceTaskDistribution, recipeFlow.dataclassInstanceTaskDistribution),
+		(recipeFlow.sourceConcurrencyManagerNamespace, recipeFlow.concurrencyManagerNamespace),]
+	for ingredients in listAllIngredientsFunctions:
+		for source_Identifier, recipe_Identifier in listFindReplace:
+			updateName = NodeChanger(ifThis.isName_Identifier(source_Identifier) , grab.idAttribute(Then.replaceWith(recipe_Identifier)))
+			update_arg = NodeChanger(ifThis.isArgument_Identifier(source_Identifier), grab.argAttribute(Then.replaceWith(recipe_Identifier)))
+			updateName.visit(ingredients.astFunctionDef)
+			update_arg.visit(ingredients.astFunctionDef)
+
+	updateConcurrencyManager = NodeChanger(ifThis.isCallAttributeNamespace_Identifier(recipeFlow.sourceConcurrencyManagerNamespace, recipeFlow.sourceConcurrencyManagerIdentifier)
+										, grab.funcAttribute(Then.replaceWith(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier))))
+	updateConcurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
+
+	# shatter Dataclass =======================================================
+	instance_Identifier = recipeFlow.dataclassInstance
+	getTheOtherRecord_damn = recipeFlow.dataclassInstanceTaskDistribution
+	shatteredDataclass = shatter_dataclassesDOTdataclass(recipeFlow.logicalPathModuleDataclass, recipeFlow.sourceDataclassIdentifier, instance_Identifier)
+	ingredientsDispatcher.imports.update(shatteredDataclass.ledger)
+
+	# How can I use dataclass settings as the SSOT for specific actions? https://github.com/hunterhogan/mapFolding/issues/16
+	# Change callable parameters and Call to the callable at the same time ====
+	# sequentialCallable =========================================================
+	if recipeFlow.removeDataclassSequential:
+		ingredientsSequential.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
+		astCallSequentialCallable = Make.Call(Make.Name(recipeFlow.callableSequential), shatteredDataclass.listName4Parameters)
+		changeReturnSequentialCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
+		ingredientsSequential.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
+		replaceAssignSequentialCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(recipeFlow.callableSequential)), Then.replaceWith(Make.Assign(listTargets=[shatteredDataclass.fragments4AssignmentOrParameters], value=astCallSequentialCallable)))
+
+		unpack4sequentialCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(recipeFlow.callableSequential)), Then.insertThisAbove(shatteredDataclass.listUnpack))
+		repack4sequentialCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(recipeFlow.callableSequential)), Then.insertThisBelow([shatteredDataclass.repack]))
+
+		changeReturnSequentialCallable.visit(ingredientsSequential.astFunctionDef)
+		replaceAssignSequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
+		unpack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
+		repack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
+
+		ingredientsSequential.astFunctionDef = Z0Z_lameFindReplace(ingredientsSequential.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
+
+	# parallelCallable =========================================================
+	if recipeFlow.removeDataclassParallel:
+		ingredientsParallel.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
+		replaceCall2concurrencyManager = NodeChanger(ifThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier), Then.replaceWith(Make.Call(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier), listArguments=[Make.Name(recipeFlow.callableParallel)] + shatteredDataclass.listName4Parameters)))
+
+		# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
+		astCallConcurrencyResult: list[ast.Call] = []
+		get_astCallConcurrencyResult = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), getIt(astCallConcurrencyResult))
+		get_astCallConcurrencyResult.visit(ingredientsDispatcher.astFunctionDef)
+		replaceAssignParallelCallable = NodeChanger(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), grab.valueAttribute(Then.replaceWith(astCallConcurrencyResult[0])))
+		replaceAssignParallelCallable.visit(ingredientsDispatcher.astFunctionDef)
+		changeReturnParallelCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName)))
+		ingredientsParallel.astFunctionDef.returns = shatteredDataclass.countingVariableAnnotation
+
+		unpack4parallelCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
+
+		unpack4parallelCallable.visit(ingredientsDispatcher.astFunctionDef)
+		replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
+		changeReturnParallelCallable.visit(ingredientsParallel.astFunctionDef)
+
+		ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
+
+	# Module-level transformations ===========================================================
+	ingredientsModuleNumbaUnified = IngredientsModule(ingredientsFunction=listAllIngredientsFunctions, imports=LedgerOfImports(recipeFlow.source_astModule))
+	ingredientsModuleNumbaUnified.removeImportFromModule('numpy')
+
+	return ingredientsModuleNumbaUnified
+
+def getIt(astCallConcurrencyResult: list[ast.Call]) -> Callable[[ast.AST], ast.AST]:
+	def workhorse(node: ast.AST) -> ast.AST:
+		NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)
+		return node
+	return workhorse
