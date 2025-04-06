@@ -29,7 +29,6 @@ from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
 import dataclasses
 
-# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 class LedgerOfImports:
 	"""
 	Track and manage import statements for programmatically generated code.
@@ -58,22 +57,21 @@ class LedgerOfImports:
 			self.walkThis(startWith)
 
 	def addAst(self, astImport____: ast.Import | ast.ImportFrom) -> None:
-		assert isinstance(astImport____, (ast.Import, ast.ImportFrom)), f"I received {type(astImport____) = }, but I can only accept {ast.Import} and {ast.ImportFrom}."
-		if isinstance(astImport____, ast.Import):
-			for alias in astImport____.names:
-				self.listImport.append(alias.name)
-		elif isinstance(astImport____, ast.ImportFrom): # type: ignore
-			# TODO fix the mess created by `None` means '.'. I need a `str_nameDOTname` to replace '.'
-			if astImport____.module is None:
-				astImport____.module = '.'
-			for alias in astImport____.names:
-				self.dictionaryImportFrom[astImport____.module].append((alias.name, alias.asname))
+		match astImport____:
+			case ast.Import():
+				for alias in astImport____.names:
+					self.listImport.append(alias.name)
+			case ast.ImportFrom():
+				# TODO fix the mess created by `None` means '.'. I need a `str_nameDOTname` to replace '.'
+				if astImport____.module is None:
+					astImport____.module = '.'
+				for alias in astImport____.names:
+					self.dictionaryImportFrom[astImport____.module].append((alias.name, alias.asname))
+			case _:
+				raise ValueError(f"I received {type(astImport____) = }, but I can only accept {ast.Import} and {ast.ImportFrom}.")
 
 	def addImport_asStr(self, moduleWithLogicalPath: str_nameDOTname) -> None:
 		self.listImport.append(moduleWithLogicalPath)
-
-	# def addImportFrom_asStr(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier, asname: ast_Identifier | None = None) -> None:
-	# 	self.dictionaryImportFrom[moduleWithLogicalPath].append((name, asname))
 
 	def addImportFrom_asStr(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier, asname: ast_Identifier | None = None) -> None:
 		if moduleWithLogicalPath not in self.dictionaryImportFrom:
@@ -85,15 +83,14 @@ class LedgerOfImports:
 		self.removeImportFrom(moduleWithLogicalPath, None, None)
 
 	def removeImportFrom(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier | None, asname: ast_Identifier | None = None) -> None:
-		assert moduleWithLogicalPath is not None, SyntaxError(f"I received `{moduleWithLogicalPath = }`, but it must be the name of a module.")
+		"""
+		name, 			asname				  	Action
+		None, 			None					: remove all matches for the module
+		ast_Identifier, ast_Identifier			: remove exact matches
+		ast_Identifier, None					: remove exact matches
+		None, 			ast_Identifier			: remove all matches for asname and if entry_asname is None remove name == ast_Identifier
+		"""
 		if moduleWithLogicalPath in self.dictionaryImportFrom:
-			"""
-			name, 			asname				  	Meaning
-			ast_Identifier, ast_Identifier			: remove exact matches
-			ast_Identifier, None					: remove exact matches
-			None, 			ast_Identifier			: remove all matches for asname and if entry_asname is None remove name == ast_Identifier
-			None, 			None					: remove all matches for the module
-			"""
 			if name is None and asname is None:
 				# Remove all entries for the module
 				self.dictionaryImportFrom.pop(moduleWithLogicalPath)
@@ -102,7 +99,6 @@ class LedgerOfImports:
 					self.dictionaryImportFrom[moduleWithLogicalPath] = [(entry_name, entry_asname) for entry_name, entry_asname in self.dictionaryImportFrom[moduleWithLogicalPath]
 													if not (entry_asname == asname) and not (entry_asname is None and entry_name == asname)]
 				else:
-					# Remove exact matches for the module
 					self.dictionaryImportFrom[moduleWithLogicalPath] = [(entry_name, entry_asname) for entry_name, entry_asname in self.dictionaryImportFrom[moduleWithLogicalPath]
 														if not (entry_name == name and entry_asname == asname)]
 				if not self.dictionaryImportFrom[moduleWithLogicalPath]:
