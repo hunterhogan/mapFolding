@@ -27,3 +27,5 @@
 | 2025 February 12 | 1281   |     |       |        |         |       | 611791   | custom module for job                      |
 | 2025 February 13 |        |     | 31736 |        |         |       | 833272   | unrolled the while loop!                   |
 | 2025 February 13 |        |     | 30866 |        |         |       | 748786   | custom module for job                      |
+| 2025 April 8     |        |     |       |        |         |       | 443530   | break at mirror symmetry                   |
+| 2025 April 8     | 623    |     |       |        |         |       | 312831   | custom module for job                      |
