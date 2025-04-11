@@ -13,10 +13,17 @@ else:
 	astClassHasDOTnameNotName = stuPyd
 	astClassHasDOTvalue_expr = stuPyd
 
+class ImaCallToName(ast.Call):
+	func: ast.Name # pyright: ignore[reportIncompatibleVariableOverride]
+	# assert isinstance(ast.Call.func, ast.Name), "brinksmanship"
+	# func: ast.Name
+
 astClassHasDOTtargetAttributeNameSubscript: typing_TypeAlias = ast.AnnAssign | ast.AugAssign
 astClassHasDOTtarget_expr: typing_TypeAlias = ast.AsyncFor | ast.comprehension | ast.For
 astClassHasDOTtarget: typing_TypeAlias = ast.NamedExpr | astClassHasDOTtarget_expr | astClassHasDOTtargetAttributeNameSubscript
+
 astClassOptionallyHasDOTnameNotName: typing_TypeAlias = ast.ExceptHandler | ast.MatchAs | ast.MatchStar
+
 astClassHasDOTvalue_exprNone: typing_TypeAlias = ast.AnnAssign | ast.Return | ast.Yield
 astClassHasDOTvalue: typing_TypeAlias = ast.Constant | ast.MatchSingleton | astClassHasDOTvalue_expr | astClassHasDOTvalue_exprNone
 
@@ -27,7 +34,8 @@ intORstr_orNone: typing_TypeAlias = Any
 list_ast_type_paramORstr_orNone: typing_TypeAlias = Any
 str_nameDOTname: typing_TypeAlias = stuPyd
 
-个 = typing_TypeVar('个', bound= ast.AST, covariant=True)
+个 = typing_TypeVar('个', bound = ast.AST, covariant = True)
+NodeORattribute = typing_TypeVar('NodeORattribute', bound = ast.AST | ast_expr_Slice | ast_Identifier | str_nameDOTname | bool | Any | None, covariant = True)
 
 # All ast classes by subgroup:
 Ima_ast_boolop: typing_TypeAlias = ast.boolop | ast.And | ast.Or

@@ -148,7 +148,7 @@ def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) ->
 		raise ValueError(f"FunctionDefToInline not found in dictionaryIdentifier2FunctionDef: {identifierToInline = }") from ERRORmessage
 
 	listIdentifiersCalledFunctions: list[ast_Identifier] = []
-	findIdentifiersToInline = NodeTourist(ifThis.isCallToName, lambda node: Then.appendTo(listIdentifiersCalledFunctions)(DOT.id(DOT.func(node)))) # type: ignore
+	findIdentifiersToInline = NodeTourist(findThis = ifThis.isCallToName, doThat = grab.funcDOTidAttribute(Then.appendTo(listIdentifiersCalledFunctions)))
 	findIdentifiersToInline.visit(FunctionDefToInline)
 
 	dictionary4Inlining: dict[ast_Identifier, ast.FunctionDef] = {}
@@ -169,7 +169,8 @@ def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) ->
 				if NodeTourist(ifThis.matchesMeButNotAnyDescendant(ifThis.isCall_Identifier(identifier)), Then.extractIt).captureLastMatch(module) is not None:
 					FunctionDefTarget = dictionaryFunctionDef[identifier]
 					if len(FunctionDefTarget.body) == 1:
-						inliner = NodeChanger(ifThis.isCall_Identifier(identifier), Then.replaceWith(FunctionDefTarget.body[0].value)) # type: ignore
+						replacement = NodeTourist(be.Return, Then.extractIt(DOT.value)).captureLastMatch(FunctionDefTarget)
+						inliner = NodeChanger(ifThis.isCall_Identifier(identifier), Then.replaceWith(replacement))
 						for astFunctionDef in dictionary4Inlining.values():
 							inliner.visit(astFunctionDef)
 					else:
@@ -179,7 +180,8 @@ def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) ->
 
 	for identifier, FunctionDefTarget in dictionary4Inlining.items():
 		if len(FunctionDefTarget.body) == 1:
-			inliner = NodeChanger(ifThis.isCall_Identifier(identifier), Then.replaceWith(FunctionDefTarget.body[0].value)) # type: ignore
+			replacement = NodeTourist(be.Return, Then.extractIt(DOT.value)).captureLastMatch(FunctionDefTarget)
+			inliner = NodeChanger(ifThis.isCall_Identifier(identifier), Then.replaceWith(replacement))
 			inliner.visit(FunctionDefToInline)
 		else:
 			inliner = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(identifier)),Then.replaceWith(FunctionDefTarget.body[0:-1]))
@@ -286,7 +288,7 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
 
-		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), Then.extractIt(DOT.annotation)).captureLastMatch(dataclassClassDef) # type: ignore
+		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), Then.extractIt(DOT.annotation)).captureLastMatch(dataclassClassDef)
 		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
 		else: self.astAnnotation = sherpa
 
@@ -537,7 +539,7 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	for ingredients in listAllIngredientsFunctions:
 		for source_Identifier, recipe_Identifier in listFindReplace:
 			updateName = NodeChanger(ifThis.isName_Identifier(source_Identifier) , grab.idAttribute(Then.replaceWith(recipe_Identifier)))
-			update_arg = NodeChanger(ifThis.isArgument_Identifier(source_Identifier), grab.argAttribute(Then.replaceWith(recipe_Identifier)))
+			update_arg = NodeChanger(ifThis.isArgument_Identifier(source_Identifier), grab.argAttribute(Then.replaceWith(recipe_Identifier))) # type: ignore
 			updateName.visit(ingredients.astFunctionDef)
 			update_arg.visit(ingredients.astFunctionDef)
 

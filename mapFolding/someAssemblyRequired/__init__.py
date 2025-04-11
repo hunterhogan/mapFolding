@@ -58,9 +58,11 @@ from mapFolding.someAssemblyRequired._theTypes import (
 	astClassHasDOTtarget_expr as astClassHasDOTtarget_expr,
 	astClassHasDOTvalue as astClassHasDOTvalue,
 	astClassOptionallyHasDOTnameNotName as astClassOptionallyHasDOTnameNotName,
+	ImaCallToName as ImaCallToName,
 	intORlist_ast_type_paramORstr_orNone as intORlist_ast_type_paramORstr_orNone,
 	intORstr_orNone as intORstr_orNone,
 	list_ast_type_paramORstr_orNone as list_ast_type_paramORstr_orNone,
+	NodeORattribute as NodeORattribute,
 	str_nameDOTname as str_nameDOTname,
 	个 as 个,
 	)

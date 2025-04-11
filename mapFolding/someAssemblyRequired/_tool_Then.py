@@ -15,7 +15,7 @@ once they have been identified using predicate functions from ifThis.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue
+from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue, ImaCallToName, NodeORattribute
 from typing import Any
 import ast
 
@@ -47,6 +47,13 @@ class grab:
 		return workhorse
 
 	@staticmethod
+	def funcDOTidAttribute(action: Callable[[ast_Identifier], Any]) -> Callable[[ImaCallToName], ImaCallToName]:
+		def workhorse(node: ImaCallToName) -> ImaCallToName:
+			node.func = grab.idAttribute(action)(node.func)
+			return node
+		return workhorse
+
+	@staticmethod
 	def idAttribute(action: Callable[[ast_Identifier], ast_Identifier]) -> Callable[[ast.Name], ast.Name]:
 		def workhorse(node: ast.Name) -> ast.Name:
 			node.id = action(node.id)
@@ -54,7 +61,7 @@ class grab:
 		return workhorse
 
 	@staticmethod
-	def valueAttribute(action: Callable[[Any | ast.expr | bool | None], Any]) -> Callable[[astClassHasDOTvalue], astClassHasDOTvalue]:
+	def valueAttribute(action: Callable[[Any], Any]) -> Callable[[astClassHasDOTvalue], astClassHasDOTvalue]:
 		def workhorse(node: astClassHasDOTvalue) -> astClassHasDOTvalue:
 			node.value = action(node.value)
 			return node
@@ -73,14 +80,14 @@ class Then:
 	pattern-matching-and-action workflow for AST manipulation.
 	"""
 	@staticmethod
-	def appendTo(listOfAny: list[Any]) -> Callable[[ast.AST | ast_Identifier], list[Any]]:
-		def workhorse(node: ast.AST | ast_Identifier) -> list[Any]:
+	def appendTo(listOfAny: list[Any]) -> Callable[[ast.AST | ast_Identifier], ast.AST | ast_Identifier]:
+		def workhorse(node: ast.AST | ast_Identifier) -> ast.AST | ast_Identifier:
 			listOfAny.append(node)
-			return listOfAny
+			return node
 		return workhorse
 
 	@staticmethod
-	def extractIt(node: ast.AST) -> ast.AST | ast_Identifier:
+	def extractIt(node: NodeORattribute) -> NodeORattribute:
 		return node
 
 	@staticmethod
@@ -96,7 +103,7 @@ class Then:
 		return None
 
 	@staticmethod
-	def replaceWith(astAST: Any) -> Callable[[Any], Any]:
+	def replaceWith(astAST: NodeORattribute) -> Callable[[NodeORattribute], NodeORattribute]:
 		return lambda _replaceMe: astAST
 
 	@staticmethod

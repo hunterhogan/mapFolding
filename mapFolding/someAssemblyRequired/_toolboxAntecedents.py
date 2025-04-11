@@ -2,17 +2,22 @@
 AST Node Predicate and Access Utilities for Pattern Matching and Traversal
 
 This module provides utilities for accessing and matching AST nodes in a consistent way.
-It contains two primary classes:
+It contains three primary classes:
 
 1. DOT: Provides consistent accessor methods for AST node attributes across different
    node types, simplifying the access to node properties.
 
-2. ifThis: Contains predicate functions for matching AST nodes based on various criteria,
+2. be: Offers type-guard functions that verify AST node types, enabling safe type
+   narrowing for static type checking and improving code safety.
+
+3. ifThis: Contains predicate functions for matching AST nodes based on various criteria,
    enabling precise targeting of nodes for analysis or transformation.
 
 These utilities form the foundation of the pattern-matching component in the AST
 manipulation framework, working in conjunction with the NodeChanger and NodeTourist
-classes to enable precise and targeted code transformations.
+classes to enable precise and targeted code transformations. Together, they implement
+a declarative approach to AST manipulation that separates node identification (ifThis),
+type verification (be), and data access (DOT).
 """
 
 from collections.abc import Callable
@@ -26,6 +31,7 @@ from mapFolding.someAssemblyRequired import (
 	astClassHasDOTvalue_expr,
 	astClassOptionallyHasDOTnameNotName,
 	astClassHasDOTvalue_exprNone,
+	ImaCallToName,
 )
 from typing import Any, overload, TypeGuard
 import ast
@@ -65,9 +71,17 @@ class DOT:
 	@staticmethod
 	def attr(node: ast.Attribute) -> ast_Identifier:
 		return node.attr
+
 	@staticmethod
-	def func(node: ast.Call) -> ast.expr:
+	@overload
+	def func(node: ImaCallToName) -> ast.Name:...
+	@staticmethod
+	@overload
+	def func(node: ast.Call) -> ast.expr:...
+	@staticmethod
+	def func(node: ast.Call | ImaCallToName) -> ast.expr | ast.Name:
 		return node.func
+
 	@staticmethod
 	def id(node: ast.Name) -> ast_Identifier:
 		return node.id
@@ -112,6 +126,22 @@ class DOT:
 		return node.value
 
 class be:
+	"""
+	Provide type-guard functions for safely verifying AST node types during manipulation.
+
+	The be class contains static methods that perform runtime type verification of AST nodes,
+	returning TypeGuard results that enable static type checkers to narrow node types in
+	conditional branches. These type-guards:
+
+	1. Improve code safety by preventing operations on incompatible node types
+	2. Enable IDE tooling to provide better autocompletion and error detection
+	3. Document expected node types in a way that's enforced by the type system
+	4. Support pattern-matching workflows where node types must be verified before access
+
+	When used with conditional statements, these type-guards allow for precise,
+	type-safe manipulation of AST nodes while maintaining full static type checking
+	capabilities, even in complex transformation scenarios.
+	"""
 	@staticmethod
 	def AnnAssign(node: ast.AST) -> TypeGuard[ast.AnnAssign]:
 		return isinstance(node, ast.AnnAssign)
@@ -234,15 +264,18 @@ class ifThis:
 		return workhorse
 
 	@staticmethod
-	def isCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
-		return lambda node: be.Call(node) and ifThis.isName_Identifier(identifier)(DOT.func(node))
+	def isCall_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ImaCallToName] | bool]:
+		def workhorse(node: ast.AST) -> TypeGuard[ImaCallToName] | bool:
+			return ifThis.isCallToName(node) and ifThis._Identifier(identifier)(DOT.id(DOT.func(node)))
+		return workhorse
+
 	@staticmethod
 	def isCallAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Call] | bool]:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.Call] | bool:
 			return be.Call(node) and ifThis.isAttributeNamespace_Identifier(namespace, identifier)(DOT.func(node))
 		return workhorse
 	@staticmethod
-	def isCallToName(node: ast.AST) -> TypeGuard[ast.Call]:
+	def isCallToName(node: ast.AST) -> TypeGuard[ImaCallToName]:
 		return be.Call(node) and be.Name(DOT.func(node))
 
 	@staticmethod
