@@ -119,7 +119,7 @@ def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.Fu
 		A dictionary mapping function identifiers to their AST function definition nodes.
 	"""
 	dictionaryIdentifier2FunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
-	NodeTourist(lambda node: isinstance(node, ast.FunctionDef), Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module) # type: ignore
+	NodeTourist(be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module)
 	return dictionaryIdentifier2FunctionDef
 
 def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) -> ast.FunctionDef:

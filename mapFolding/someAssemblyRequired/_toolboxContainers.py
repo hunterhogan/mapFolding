@@ -251,7 +251,6 @@ class IngredientsModule:
 	def appendIngredientsFunction(self, *ingredientsFunction: IngredientsFunction) -> None:
 		"""Append one or more `IngredientsFunction`."""
 		for allegedIngredientsFunction in ingredientsFunction:
-			assert isinstance(allegedIngredientsFunction, IngredientsFunction), ValueError(f"I received `{type(allegedIngredientsFunction) = }`, but I can only accept `{IngredientsFunction}`.")
 			self.listIngredientsFunctions.append(allegedIngredientsFunction)
 
 	def removeImportFromModule(self, moduleWithLogicalPath: str_nameDOTname) -> None:

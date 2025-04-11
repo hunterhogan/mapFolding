@@ -92,7 +92,8 @@ class Then:
 		return lambda belowMe: [belowMe, *list_astAST]
 
 	@staticmethod
-	def removeIt(_node: ast.AST) -> None: return None
+	def removeIt(_removeMe: ast.AST) -> None:
+		return None
 
 	@staticmethod
 	def replaceWith(astAST: Any) -> Callable[[Any], Any]:

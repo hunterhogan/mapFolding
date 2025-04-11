@@ -83,7 +83,6 @@ class Make:
 
 	@staticmethod
 	def Constant(value: Any, **keywordArguments: intORstr_orNone) -> ast.Constant:
-		"""value: str|int|float|bool|None|bytes|bytearray|memoryview|complex|list|tuple|dict|set, or any other type that can be represented as a constant in Python."""
 		return ast.Constant(value, **keywordArguments)
 
 	@staticmethod

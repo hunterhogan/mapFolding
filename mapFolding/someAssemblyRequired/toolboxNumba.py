@@ -16,8 +16,8 @@ performance improvements while preserving code semantics and correctness.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import Make, NodeTourist, RecipeSynthesizeFlow, Then, ast_Identifier, str_nameDOTname, IngredientsFunction
-from mapFolding.someAssemblyRequired.transformationTools import ( makeNewFlow, write_astModule, )
+from mapFolding.someAssemblyRequired import ast_Identifier, be, IngredientsFunction, Make, NodeTourist, RecipeSynthesizeFlow, str_nameDOTname, Then
+from mapFolding.someAssemblyRequired.transformationTools import makeNewFlow, write_astModule
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, cast, Final, TYPE_CHECKING, TypeGuard
 import ast
@@ -154,14 +154,6 @@ class SpicesJobNumba:
 	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba) # type: ignore
 
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
-class be:
-	@staticmethod
-	def Call(node: ast.AST) -> TypeGuard[ast.Call]:
-		return isinstance(node, ast.Call)
-	@staticmethod
-	def Return(node: ast.AST) -> TypeGuard[ast.Return]:
-		return isinstance(node, ast.Return)
-
 def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	"""
 	Transform standard Python algorithm code into optimized Numba implementations.
