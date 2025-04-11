@@ -56,7 +56,7 @@ class Make:
 		return ast.arguments(posonlyargs, args, vararg, kwonlyargs, kw_defaults, kwarg, defaults)
 
 	@staticmethod
-	def Assign(listTargets: Any, value: ast.expr, **keywordArguments: intORstr_orNone) -> ast.Assign:
+	def Assign(listTargets: list[ast.expr], value: ast.expr, **keywordArguments: intORstr_orNone) -> ast.Assign:
 		return ast.Assign(listTargets, value, **keywordArguments)
 
 	@staticmethod

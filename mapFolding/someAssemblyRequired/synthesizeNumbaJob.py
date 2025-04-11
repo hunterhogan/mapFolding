@@ -18,14 +18,23 @@ This creates extremely fast, specialized implementations that can be run directl
 as Python scripts or further compiled into standalone executables.
 """
 
-from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal
-from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, Make, NodeChanger, Then, IngredientsFunction, IngredientsModule, LedgerOfImports
-from mapFolding.someAssemblyRequired.toolboxNumba import SpicesJobNumba, decorateCallableWithNumba
-from mapFolding.someAssemblyRequired.transformationTools import extractFunctionDef, write_astModule
-from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
-from mapFolding.theSSOT import The, raiseIfNoneGitHubIssueNumber3
-from mapFolding.oeis import getFoldsTotalKnown
+from mapFolding.someAssemblyRequired import (
+	ast_Identifier,
+	be,
+	ifThis,
+	IngredientsFunction,
+	IngredientsModule,
+	LedgerOfImports,
+	Make,
+	NodeChanger,
+	NodeTourist,
+	Then,
+)
+from mapFolding.someAssemblyRequired.toolboxNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
+from mapFolding.someAssemblyRequired.transformationTools import extractFunctionDef, write_astModule, makeInitializedComputationState
+from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
+from mapFolding import The, raiseIfNoneGitHubIssueNumber3, getFoldsTotalKnown
 from typing import cast
 from Z0Z_tools import autoDecodingRLE
 from pathlib import PurePosixPath
@@ -90,6 +99,10 @@ if __name__ == '__main__':
 	countWithProgressBar = NodeChanger(findThis, doThat)
 	countWithProgressBar.visit(ingredientsFunction.astFunctionDef)
 
+	removeReturnStatement = NodeChanger(be.Return, Then.removeIt)
+	removeReturnStatement.visit(ingredientsFunction.astFunctionDef)
+	ingredientsFunction.astFunctionDef.returns = Make.Constant(value=None)
+
 	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
 
 	return ingredientsModule, ingredientsFunction
@@ -120,9 +133,13 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	"""
 	ingredientsFunction.imports.update(job.shatteredDataclass.ledger)
 
-	list_IdentifiersNotUsed = list_IdentifiersNotUsedHARDCODED
-
 	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
+	list_arg_arg: list[ast_Identifier] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
+	listName: list[ast.Name] = []
+	NodeTourist(be.Name, Then.appendTo(listName)).visit(ingredientsFunction.astFunctionDef)
+	list_Identifiers: list[ast_Identifier] = [astName.id for astName in listName]
+	list_IdentifiersNotUsed: list[ast_Identifier] = list(set(list_arg_arg) - set(list_Identifiers))
+
 	for ast_arg in list_argCuzMyBrainRefusesToThink:
 		if ast_arg.arg in job.shatteredDataclass.field2AnnAssign:
 			if ast_arg.arg in list_IdentifiersNotUsed:
@@ -182,11 +199,6 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba) -> None:
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
 
-	# Change the return so you can dynamically determine which variables are not used
-	removeReturnStatement = NodeChanger(lambda node: isinstance(node, ast.Return), Then.removeIt) # type: ignore
-	removeReturnStatement.visit(ingredientsCount.astFunctionDef)
-	ingredientsCount.astFunctionDef.returns = Make.Constant(value=None)
-
 	# Remove `foldGroups` and any other unused statements, so you can dynamically determine which variables are not used
 	findThis = ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier('foldGroups'))
 	doThat = Then.removeIt
@@ -200,30 +212,48 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba) -> None:
 		doThat = Then.replaceWith(Make.Constant(int(job.state.__dict__[identifier])))
 		NodeChanger(findThis, doThat).visit(ingredientsCount.astFunctionDef)
 
-	# This launcher eliminates the use of one identifier, so run it now and you can dynamically determine which variables are not used
 	ingredientsModule = IngredientsModule()
+	# This launcher eliminates the use of one identifier, so run it now and you can dynamically determine which variables are not used
 	if spices.useNumbaProgressBar:
 		ingredientsModule, ingredientsCount = addLauncherNumbaProgress(ingredientsModule, ingredientsCount, job, spices)
 		spices.parametersNumba['nogil'] = True
+	else:
+		linesLaunch: str = f"""
+if __name__ == '__main__':
+	import time
+	timeStart = time.perf_counter()
+	foldsTotal = {job.countCallable}() * {job.state.leavesTotal}
+	print(time.perf_counter() - timeStart)
+	print('\\nmap {job.state.mapShape} =', foldsTotal)
+	writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
+	writeStream.write(str(foldsTotal))
+	writeStream.close()
+	from mapFolding.oeis import getFoldsTotalKnown
+	print(foldsTotal == getFoldsTotalKnown({job.state.mapShape}))
+"""
+		ingredientsModule.appendLauncher(ast.parse(linesLaunch))
+		changeReturnParallelCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName)))
+		changeReturnParallelCallable.visit(ingredientsCount.astFunctionDef)
+		ingredientsCount.astFunctionDef.returns = job.shatteredDataclass.countingVariableAnnotation
 
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
 	Z0Z_Identifier = 'DatatypeLeavesTotal'
 	Z0Z_type = 'uint8'
 	ingredientsModule.imports.addImportFrom_asStr('numba', Z0Z_type)
-	Z0Z_module = 'typing'
-	Z0Z_annotation = 'TypeAlias'
-	ingredientsModule.imports.addImportFrom_asStr(Z0Z_module, Z0Z_annotation)
-	Z0Z_statement = Make.AnnAssign(Make.Name(Z0Z_Identifier, ast.Store()), Make.Name(Z0Z_annotation), Make.Name(Z0Z_type))
+	Z0Z_statement = Make.Assign([Make.Name(Z0Z_Identifier, ast.Store())], Make.Name(Z0Z_type))
 	ingredientsModule.appendPrologue(statement=Z0Z_statement)
 
 	Z0Z_Identifier = 'DatatypeElephino'
-	Z0Z_type = 'int16'
+	Z0Z_type = 'uint8'
 	ingredientsModule.imports.addImportFrom_asStr('numba', Z0Z_type)
-	Z0Z_module = 'typing'
-	Z0Z_annotation = 'TypeAlias'
-	ingredientsModule.imports.addImportFrom_asStr(Z0Z_module, Z0Z_annotation)
-	Z0Z_statement = Make.AnnAssign(Make.Name(Z0Z_Identifier, ast.Store()), Make.Name(Z0Z_annotation), Make.Name(Z0Z_type))
+	Z0Z_statement = Make.Assign([Make.Name(Z0Z_Identifier, ast.Store())], Make.Name(Z0Z_type))
+	ingredientsModule.appendPrologue(statement=Z0Z_statement)
+
+	Z0Z_Identifier = 'DatatypeFoldsTotal'
+	Z0Z_type = 'int64'
+	ingredientsModule.imports.addImportFrom_asStr('numba', Z0Z_type)
+	Z0Z_statement = Make.Assign([Make.Name(Z0Z_Identifier, ast.Store())], Make.Name(Z0Z_type))
 	ingredientsModule.appendPrologue(statement=Z0Z_statement)
 
 	ingredientsCount.imports.removeImportFromModule('mapFolding.theSSOT')
@@ -234,7 +264,7 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba) -> None:
 	ingredientsCount.imports.addImportFrom_asStr(Z0Z_module, Z0Z_type_name, Z0Z_asname)
 	Z0Z_asname = 'Array1DElephino'
 	ingredientsCount.imports.removeImportFrom(Z0Z_module, None, Z0Z_asname)
-	Z0Z_type_name = 'int16'
+	Z0Z_type_name = 'uint8'
 	ingredientsCount.imports.addImportFrom_asStr(Z0Z_module, Z0Z_type_name, Z0Z_asname)
 	Z0Z_asname = 'Array3D'
 	ingredientsCount.imports.removeImportFrom(Z0Z_module, None, Z0Z_asname)
@@ -270,11 +300,12 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba) -> None:
 	"""
 
 if __name__ == '__main__':
-	mapShape = (3,4)
+	mapShape = (1,24)
 	state = makeInitializedComputationState(mapShape)
 	foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
 	pathModule = PurePosixPath(The.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJob(state, foldsTotalEstimated, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
-	spices = SpicesJobNumba()
+	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
+	# spices = SpicesJobNumba()
 	makeJobNumba(aJob, spices)

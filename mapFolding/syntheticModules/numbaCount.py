@@ -47,7 +47,7 @@ def countInitialize(state: ComputationState) -> ComputationState:
     return state
 
 @jit(_nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
-def countParallel(mapShape: tuple[DatatypeLeavesTotal, ...], leavesTotal: DatatypeLeavesTotal, taskDivisions: DatatypeLeavesTotal, concurrencyLimit: DatatypeElephino, connectionGraph: Array3D, dimensionsTotal: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, foldGroups: Array1DFoldsTotal, foldsTotal: DatatypeFoldsTotal, gap1ndex: DatatypeLeavesTotal, gap1ndexCeiling: DatatypeElephino, groupsOfFolds: DatatypeFoldsTotal, indexDimension: DatatypeLeavesTotal, indexLeaf: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeElephino, leafConnectee: DatatypeElephino, taskIndex: DatatypeLeavesTotal) -> DatatypeFoldsTotal:
+def countParallel(mapShape: tuple[DatatypeLeavesTotal, ...], leavesTotal: DatatypeLeavesTotal, taskDivisions: DatatypeLeavesTotal, concurrencyLimit: DatatypeElephino, connectionGraph: Array3D, dimensionsTotal: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, foldGroups: Array1DFoldsTotal, foldsTotal: DatatypeFoldsTotal, gap1ndex: DatatypeLeavesTotal, gap1ndexCeiling: DatatypeElephino, groupsOfFolds: DatatypeFoldsTotal, indexDimension: DatatypeLeavesTotal, indexLeaf: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeLeavesTotal, leafConnectee: DatatypeElephino, taskIndex: DatatypeLeavesTotal) -> DatatypeFoldsTotal:
     while leaf1ndex > 0:
         if leaf1ndex <= 1 or leafBelow[0] == 1:
             if leaf1ndex > leavesTotal:
@@ -92,7 +92,7 @@ def countParallel(mapShape: tuple[DatatypeLeavesTotal, ...], leavesTotal: Dataty
     return groupsOfFolds
 
 @jit(_nrt=True, boundscheck=False, cache=True, error_model='numpy', fastmath=True, forceinline=True, inline='always', looplift=False, no_cfunc_wrapper=False, no_cpython_wrapper=False, nopython=True, parallel=False)
-def countSequential(mapShape: tuple[DatatypeLeavesTotal, ...], leavesTotal: DatatypeLeavesTotal, taskDivisions: DatatypeLeavesTotal, concurrencyLimit: DatatypeElephino, connectionGraph: Array3D, dimensionsTotal: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, foldGroups: Array1DFoldsTotal, foldsTotal: DatatypeFoldsTotal, gap1ndex: DatatypeLeavesTotal, gap1ndexCeiling: DatatypeElephino, groupsOfFolds: DatatypeFoldsTotal, indexDimension: DatatypeLeavesTotal, indexLeaf: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeElephino, leafConnectee: DatatypeElephino, taskIndex: DatatypeLeavesTotal) -> tuple[tuple[DatatypeLeavesTotal, ...], DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeElephino, Array3D, DatatypeLeavesTotal, Array1DLeavesTotal, DatatypeLeavesTotal, Array1DElephino, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array1DFoldsTotal, DatatypeFoldsTotal, DatatypeLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeElephino, DatatypeElephino, DatatypeElephino, DatatypeLeavesTotal]:
+def countSequential(mapShape: tuple[DatatypeLeavesTotal, ...], leavesTotal: DatatypeLeavesTotal, taskDivisions: DatatypeLeavesTotal, concurrencyLimit: DatatypeElephino, connectionGraph: Array3D, dimensionsTotal: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, foldGroups: Array1DFoldsTotal, foldsTotal: DatatypeFoldsTotal, gap1ndex: DatatypeLeavesTotal, gap1ndexCeiling: DatatypeElephino, groupsOfFolds: DatatypeFoldsTotal, indexDimension: DatatypeLeavesTotal, indexLeaf: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeLeavesTotal, leafConnectee: DatatypeElephino, taskIndex: DatatypeLeavesTotal) -> tuple[tuple[DatatypeLeavesTotal, ...], DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeElephino, Array3D, DatatypeLeavesTotal, Array1DLeavesTotal, DatatypeLeavesTotal, Array1DElephino, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array1DFoldsTotal, DatatypeFoldsTotal, DatatypeLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeElephino, DatatypeLeavesTotal, DatatypeElephino, DatatypeLeavesTotal]:
     while leaf1ndex > 0:
         if leaf1ndex <= 1 or leafBelow[0] == 1:
             if leaf1ndex > leavesTotal:
@@ -124,6 +124,9 @@ def countSequential(mapShape: tuple[DatatypeLeavesTotal, ...], leavesTotal: Data
             leaf1ndex -= 1
             leafBelow[leafAbove[leaf1ndex]] = leafBelow[leaf1ndex]
             leafAbove[leafBelow[leaf1ndex]] = leafAbove[leaf1ndex]
+        if groupsOfFolds and leaf1ndex == 3:
+            groupsOfFolds *= 2
+            break
         if leaf1ndex > 0:
             gap1ndex -= 1
             leafAbove[leaf1ndex] = gapsWhere[gap1ndex]
@@ -164,7 +167,7 @@ def doTheNeedful(state: ComputationState) -> ComputationState:
                 indexDimension: DatatypeLeavesTotal = state.indexDimension
                 indexLeaf: DatatypeLeavesTotal = state.indexLeaf
                 indexMiniGap: DatatypeElephino = state.indexMiniGap
-                leaf1ndex: DatatypeElephino = state.leaf1ndex
+                leaf1ndex: DatatypeLeavesTotal = state.leaf1ndex
                 leafConnectee: DatatypeElephino = state.leafConnectee
                 taskIndex: DatatypeLeavesTotal = state.taskIndex
                 dictionaryConcurrency[indexSherpa] = concurrencyManager.submit(countParallel, mapShape, leavesTotal, taskDivisions, concurrencyLimit, connectionGraph, dimensionsTotal, countDimensionsGapped, dimensionsUnconstrained, gapRangeStart, gapsWhere, leafAbove, leafBelow, foldGroups, foldsTotal, gap1ndex, gap1ndexCeiling, groupsOfFolds, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, taskIndex)
@@ -192,7 +195,7 @@ def doTheNeedful(state: ComputationState) -> ComputationState:
         indexDimension: DatatypeLeavesTotal = state.indexDimension
         indexLeaf: DatatypeLeavesTotal = state.indexLeaf
         indexMiniGap: DatatypeElephino = state.indexMiniGap
-        leaf1ndex: DatatypeElephino = state.leaf1ndex
+        leaf1ndex: DatatypeLeavesTotal = state.leaf1ndex
         leafConnectee: DatatypeElephino = state.leafConnectee
         taskIndex: DatatypeLeavesTotal = state.taskIndex
         mapShape, leavesTotal, taskDivisions, concurrencyLimit, connectionGraph, dimensionsTotal, countDimensionsGapped, dimensionsUnconstrained, gapRangeStart, gapsWhere, leafAbove, leafBelow, foldGroups, foldsTotal, gap1ndex, gap1ndexCeiling, groupsOfFolds, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, taskIndex = countSequential(mapShape, leavesTotal, taskDivisions, concurrencyLimit, connectionGraph, dimensionsTotal, countDimensionsGapped, dimensionsUnconstrained, gapRangeStart, gapsWhere, leafAbove, leafBelow, foldGroups, foldsTotal, gap1ndex, gap1ndexCeiling, groupsOfFolds, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, taskIndex)

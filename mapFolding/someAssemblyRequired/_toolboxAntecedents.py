@@ -231,3 +231,15 @@ class ifThis:
 	def Z0Z_unparseIs(astAST: ast.AST) -> Callable[[ast.AST], bool]:
 		def workhorse(node: ast.AST) -> bool: return ast.unparse(node) == ast.unparse(astAST)
 		return workhorse
+
+
+class be:
+	@staticmethod
+	def Call(node: ast.AST) -> TypeGuard[ast.Call]:
+		return isinstance(node, ast.Call)
+	@staticmethod
+	def Name(node: ast.AST) -> TypeGuard[ast.Name]:
+		return isinstance(node, ast.Name)
+	@staticmethod
+	def Return(node: ast.AST) -> TypeGuard[ast.Return]:
+		return isinstance(node, ast.Return)

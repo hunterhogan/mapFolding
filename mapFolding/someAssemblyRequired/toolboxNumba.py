@@ -45,17 +45,17 @@ class ParametersNumba(TypedDict):
 	debug: NotRequired[bool]
 	error_model: str
 	fastmath: bool
-	forceinline: bool
+	forceinline: NotRequired[bool]
 	forceobj: NotRequired[bool]
-	inline: str
+	inline: NotRequired[str]
 	locals: NotRequired[dict[str, Any]]
-	looplift: bool
-	no_cfunc_wrapper: bool
-	no_cpython_wrapper: bool
+	looplift: NotRequired[bool]
+	no_cfunc_wrapper: NotRequired[bool]
+	no_cpython_wrapper: NotRequired[bool]
 	no_rewrites: NotRequired[bool]
 	nogil: NotRequired[bool]
-	nopython: bool
-	parallel: bool
+	nopython: NotRequired[bool]
+	parallel: NotRequired[bool]
 	pipeline_class: NotRequired[type[numbaCompilerBase]]
 	signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
 	target: NotRequired[str]
@@ -71,6 +71,7 @@ parametersNumbaSuperJit: Final[ParametersNumba] = { **parametersNumbaDefault, 'n
 parametersNumbaSuperJitParallel: Final[ParametersNumba] = { **parametersNumbaSuperJit, '_nrt': True, 'parallel': True, }
 """Speed, no helmet, concurrency, no talking to non-jitted functions."""
 parametersNumbaMinimum: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': False, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': False, 'forceobj': True, 'parallel': False, }
+parametersNumbaLight: Final[ParametersNumba] = {'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True}
 
 Z0Z_numbaDataTypeModule: str_nameDOTname = 'numba'
 Z0Z_decoratorCallable: ast_Identifier = 'jit'
@@ -118,10 +119,10 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	list_arg4signature_or_function: list[ast.expr] = []
 	for parameter in ingredientsFunction.astFunctionDef.args.args:
 		# For now, let Numba infer them.
+		signatureElement: ast.Subscript | ast.Name | None = makeSpecialSignatureForNumba(parameter)
+		if signatureElement:
+			list_arg4signature_or_function.append(signatureElement)
 		continue
-		# signatureElement: ast.Subscript | ast.Name | None = makeSpecialSignatureForNumba(parameter)
-		# if signatureElement:
-		# 	list_arg4signature_or_function.append(signatureElement)
 
 	if ingredientsFunction.astFunctionDef.returns and isinstance(ingredientsFunction.astFunctionDef.returns, ast.Name):
 		theReturn: ast.Name = ingredientsFunction.astFunctionDef.returns
@@ -150,7 +151,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 class SpicesJobNumba:
 	useNumbaProgressBar: bool = True
 	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
-	parametersNumba = parametersNumbaDefault
+	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba) # type: ignore
 
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 class be:

@@ -432,10 +432,10 @@ class ShatteredDataclass:
 	countingVariableName: ast.Name
 	"""AST name node representing the counting variable identifier."""
 
-	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign] = dataclasses.field(default_factory=dict)
+	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=dict)
 	"""Maps field names to their corresponding AST call expressions."""
 
-	Z0Z_field2AnnAssign: dict[ast_Identifier, tuple[ast.AnnAssign, str]] = dataclasses.field(default_factory=dict)
+	Z0Z_field2AnnAssign: dict[ast_Identifier, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=dict)
 
 	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
 	"""AST tuple used as target for assignment to capture returned fragments."""

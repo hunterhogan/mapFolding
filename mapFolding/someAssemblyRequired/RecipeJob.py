@@ -4,11 +4,9 @@ from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclas
 from mapFolding.theSSOT import ComputationState, DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
 
-
 import dataclasses
 from pathlib import Path, PurePosixPath
 from typing import TypeAlias
-
 
 @dataclasses.dataclass
 class RecipeJob:

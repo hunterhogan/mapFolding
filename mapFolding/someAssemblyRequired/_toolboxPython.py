@@ -107,6 +107,7 @@ def importPathFilename2Callable(pathFilename: PathLike[Any] | PurePath, identifi
 	Load a callable (function, class, etc.) from a Python file.
 	This function imports a specified Python file as a module, extracts a callable object
 	from it by name, and returns that callable.
+
 	Parameters
 	----------
 	pathFilename : Union[PathLike[Any], PurePath]
@@ -115,10 +116,12 @@ def importPathFilename2Callable(pathFilename: PathLike[Any] | PurePath, identifi
 		Name of the callable to extract from the imported module.
 	moduleIdentifier : Optional[str]
 		Name to use for the imported module. If None, the filename stem is used.
+
 	Returns
 	-------
 	Callable[..., Any]
 		The callable object extracted from the imported module.
+
 	Raises
 	------
 	ImportError

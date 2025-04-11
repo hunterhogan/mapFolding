@@ -48,40 +48,40 @@ to verify correctness at each transformation stage through the integrated test s
 """
 
 from mapFolding.someAssemblyRequired._theTypes import (
-	ast_expr_Slice,
-	ast_Identifier,
-	astClassHasDOTnameNotName,
-	astClassHasDOTtarget,
-	astClassHasDOTvalue_expr,
-	astClassHasDOTvalue_exprNone,
-	astClassHasDOTtargetAttributeNameSubscript,
-	astClassHasDOTtarget_expr,
-	astClassHasDOTvalue,
-	astClassOptionallyHasDOTnameNotName,
-	intORlist_ast_type_paramORstr_orNone,
-	intORstr_orNone,
-	list_ast_type_paramORstr_orNone,
-	str_nameDOTname,
-	个,
+	ast_expr_Slice as ast_expr_Slice,
+	ast_Identifier as ast_Identifier,
+	astClassHasDOTnameNotName as astClassHasDOTnameNotName,
+	astClassHasDOTtarget as astClassHasDOTtarget,
+	astClassHasDOTvalue_expr as astClassHasDOTvalue_expr,
+	astClassHasDOTvalue_exprNone as astClassHasDOTvalue_exprNone,
+	astClassHasDOTtargetAttributeNameSubscript as astClassHasDOTtargetAttributeNameSubscript,
+	astClassHasDOTtarget_expr as astClassHasDOTtarget_expr,
+	astClassHasDOTvalue as astClassHasDOTvalue,
+	astClassOptionallyHasDOTnameNotName as astClassOptionallyHasDOTnameNotName,
+	intORlist_ast_type_paramORstr_orNone as intORlist_ast_type_paramORstr_orNone,
+	intORstr_orNone as intORstr_orNone,
+	list_ast_type_paramORstr_orNone as list_ast_type_paramORstr_orNone,
+	str_nameDOTname as str_nameDOTname,
+	个 as 个,
 	)
 
 from mapFolding.someAssemblyRequired._toolboxPython import (
-	importLogicalPath2Callable,
-	importPathFilename2Callable,
-	NodeChanger,
-	NodeTourist,
-	parseLogicalPath2astModule,
-	parsePathFilename2astModule,
+	importLogicalPath2Callable as importLogicalPath2Callable,
+	importPathFilename2Callable as importPathFilename2Callable,
+	NodeChanger as NodeChanger,
+	NodeTourist as NodeTourist,
+	parseLogicalPath2astModule as parseLogicalPath2astModule,
+	parsePathFilename2astModule as parsePathFilename2astModule,
 	)
 
-from mapFolding.someAssemblyRequired._toolboxAntecedents import DOT, ifThis
-from mapFolding.someAssemblyRequired._tool_Make import Make
-from mapFolding.someAssemblyRequired._tool_Then import grab, Then
+from mapFolding.someAssemblyRequired._toolboxAntecedents import be as be, DOT as DOT, ifThis as ifThis
+from mapFolding.someAssemblyRequired._tool_Make import Make as Make
+from mapFolding.someAssemblyRequired._tool_Then import grab as grab, Then as Then
 
 from mapFolding.someAssemblyRequired._toolboxContainers import (
-	IngredientsFunction,
-	IngredientsModule,
-	LedgerOfImports,
-	RecipeSynthesizeFlow,
-	ShatteredDataclass,
+	IngredientsFunction as IngredientsFunction,
+	IngredientsModule as IngredientsModule,
+	LedgerOfImports as LedgerOfImports,
+	RecipeSynthesizeFlow as RecipeSynthesizeFlow,
+	ShatteredDataclass as ShatteredDataclass,
 )

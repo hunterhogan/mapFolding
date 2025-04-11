@@ -24,4 +24,3 @@ Showing 1-1 of 1
 %E A001415 a(19)-a(20) from _Hunter Hogan_, Mar 21 2025
 
 # Content is available under The OEIS End-User License Agreement: http://oeis.org/LICENSE
-

@@ -25,6 +25,7 @@ from mapFolding.beDRY import outfitCountFolds
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, writeStringToHere
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
+	be,
 	DOT,
 	grab,
 	ifThis,
@@ -45,10 +46,11 @@ from mapFolding.someAssemblyRequired import (
 from mapFolding.theSSOT import ComputationState, raiseIfNoneGitHubIssueNumber3, The
 from os import PathLike
 from pathlib import Path, PurePath
-from typing import Any, Literal, TypeGuard, overload
+from typing import Any, Literal, overload
 import ast
 import dataclasses
 import pickle
+import python_minifier
 
 def astModuleToIngredientsFunction(astModule: ast.AST, identifierFunctionDef: ast_Identifier) -> IngredientsFunction:
 	"""
@@ -99,7 +101,7 @@ def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.Funct
 		identifier: The name of the function to find.
 
 	Returns:
-		The matching function definition AST node, or None if not found.
+		astFunctionDef: The matching function definition AST node, or None if not found.
 	"""
 	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.extractIt).captureLastMatch(module)
 
@@ -265,8 +267,8 @@ class DeReConstructField2ast:
 	ast_nameDOTname: ast.Attribute = dataclasses.field(init=False)
 	astAnnotation: ast.expr = dataclasses.field(init=False)
 	ast_argAnnotated: ast.arg = dataclasses.field(init=False)
-	astAnnAssignConstructor: ast.AnnAssign = dataclasses.field(init=False)
-	Z0Z_hack: tuple[ast.AnnAssign, str] = dataclasses.field(init=False)
+	astAnnAssignConstructor: ast.AnnAssign|ast.Assign = dataclasses.field(init=False)
+	Z0Z_hack: tuple[ast.AnnAssign|ast.Assign, str] = dataclasses.field(init=False)
 
 	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: str_nameDOTname, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstance_Identifier: ast_Identifier, field: dataclasses.Field[Any]) -> None:
 		self.compare = field.compare
@@ -289,18 +291,42 @@ class DeReConstructField2ast:
 		else: self.astAnnotation = sherpa
 
 		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
+		"""
+from ast import Module, Expr, Subscript, Name, Tuple, Load
+Subscript(
+value=Name(id='ndarray', ctx=Load()),
+slice=Tuple(
+	elts=[
+	Subscript(
+		value=Name(id='tuple', ctx=Load()),
+		slice=Name(id='int', ctx=Load()),
+		ctx=Load()),
+	Subscript(
+		value=Name(id='dtype', ctx=Load()),
+		slice=Name(id='NumPyLeavesTotal', ctx=Load()),
+		ctx=Load())],
+	ctx=Load()),
+ctx=Load()
+)
 
+		"""
 		dtype = self.metadata.get('dtype', None)
 		if dtype:
 			moduleWithLogicalPath: str_nameDOTname = 'numpy'
-			annotation = 'ndarray'
-			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, annotation)
+			annotationType = 'ndarray'
+			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, annotationType)
+			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, 'dtype')
+			axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Name('uint8'))
+			dtype_asnameName: ast.Name = self.astAnnotation # type: ignore
+			if dtype_asnameName.id == 'Array3D':
+				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8'), Make.Name('uint8')]))
+			ast_expr = Make.Subscript(Make.Name(annotationType), Make.Tuple([axesSubscript, Make.Subscript(Make.Name('dtype'), dtype_asnameName)]))
 			constructor = 'array'
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, constructor)
 			dtypeIdentifier: ast_Identifier = dtype.__name__
-			dtype_asnameName: ast.Name = self.astAnnotation # type: ignore
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, dtypeIdentifier, dtype_asnameName.id)
-			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, Make.Name(annotation), Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', dtype_asnameName)]))
+			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, ast_expr, Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', dtype_asnameName)]))
+			self.astAnnAssignConstructor = Make.Assign([self.astName], Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', dtype_asnameName)]))
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'array')
 		elif isinstance(self.astAnnotation, ast.Name):
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
@@ -415,9 +441,18 @@ def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] 
 	if packageName:
 		autoflake_additional_imports.append(packageName)
 	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=True, remove_duplicate_keys = False, remove_unused_variables = False)
+	# pythonSource = python_minifier.minify(pythonSource)
 	writeStringToHere(pythonSource, pathFilename)
 
 # END of acceptable classes and functions ======================================================
+def removeUnusedParameters(ingredientsFunction: IngredientsFunction):
+	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
+	list_arg_arg: list[ast_Identifier] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
+	listName: list[ast.Name] = []
+	NodeTourist(be.Name, Then.appendTo(listName)).visit(ingredientsFunction.astFunctionDef)
+	list_Identifiers: list[ast_Identifier] = [astName.id for astName in listName]
+	list_IdentifiersNotUsed: list[ast_Identifier] = list(set(list_arg_arg) - set(list_Identifiers))
+
 dictionaryEstimates: dict[tuple[int, ...], int] = {
 	(2,2,2,2,2,2,2,2): 798148657152000,
 	(2,21): 776374224866624,
@@ -459,14 +494,6 @@ def Z0Z_lameFindReplace(astTree: 个, mappingFindReplaceNodes: Mapping[ast.AST, 
 		else:
 			astTree = deepcopy(newTree)
 	return newTree
-
-class be:
-	@staticmethod
-	def Call(node: ast.AST) -> TypeGuard[ast.Call]:
-		return isinstance(node, ast.Call)
-	@staticmethod
-	def Return(node: ast.AST) -> TypeGuard[ast.Return]:
-		return isinstance(node, ast.Return)
 
 def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
