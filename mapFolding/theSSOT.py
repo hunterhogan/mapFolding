@@ -19,12 +19,13 @@ to avoid namespace collisions when transforming algorithms.
 from collections.abc import Callable
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
-from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, integer, ndarray
+from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, integer, ndarray, uint8 as numpy_uint8
 from pathlib import Path
 from tomli import load as tomli_load
 from types import ModuleType
 from typing import Any, TypeAlias, TypeVar
 import dataclasses
+from numba import int64, uint8
 
 # Evaluate When Packaging https://github.com/hunterhogan/mapFolding/issues/18
 try:
@@ -150,14 +151,20 @@ The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHAR
 
 NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)
 
-DatatypeLeavesTotal: TypeAlias = int
-NumPyLeavesTotal: TypeAlias = numpy_int16 # this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
+# DatatypeLeavesTotal: TypeAlias = int
+NumPyLeavesTotal: TypeAlias = numpy_uint8
+# NumPyLeavesTotal: TypeAlias = numpy_int16 # this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
 
-DatatypeElephino: TypeAlias = int
-NumPyElephino: TypeAlias = numpy_int16
+# DatatypeElephino: TypeAlias = int
+NumPyElephino: TypeAlias = numpy_uint8
+# NumPyElephino: TypeAlias = numpy_int16
 
-DatatypeFoldsTotal: TypeAlias = int
+# DatatypeFoldsTotal: TypeAlias = int
 NumPyFoldsTotal: TypeAlias = numpy_int64
+
+DatatypeLeavesTotal = uint8
+DatatypeElephino = uint8
+DatatypeFoldsTotal = int64
 
 Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[NumPyLeavesTotal]]
 Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyLeavesTotal]]
@@ -244,16 +251,19 @@ class ComputationState:
 	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
 	"""Index used when filtering common gaps."""
 
-	leaf1ndex: DatatypeElephino = DatatypeElephino(1)
+	leaf1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(1)
 	"""Active leaf being processed in the folding algorithm. Starts at 1, not 0."""
 
 	leafConnectee: DatatypeElephino = DatatypeElephino(0)
 	"""Leaf that is being connected to the active leaf."""
 
+	# leafSequence: list[DatatypeLeavesTotal] = dataclasses.field(default_factory=list, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
+
 	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""Index of the current parallel task when using task divisions."""
 
 	def __post_init__(self) -> None:
+		# self.leafSequence = [self.leaf1ndex]
 		from mapFolding.beDRY import getConnectionGraph, makeDataContainer
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
 		leavesTotalAsInt = int(self.leavesTotal)

@@ -59,14 +59,20 @@ class SettingsOEIShardcodedValues(TypedDict):
 	valuesTestValidation: list[int]
 
 settingsOEIShardcodedValues: dict[str, SettingsOEIShardcodedValues] = {
+	'A000136': {
+		'getMapShape': lambda n: tuple(sorted([1, n])),
+		'valuesBenchmark': [14],
+		'valuesTestParallelization': [*range(3, 7)],
+		'valuesTestValidation': [random.randint(2, 9)],
+	},
 	'A001415': {
-		'getMapShape': lambda n: (2, n) if n >= 2 else (n, 2),
+		'getMapShape': lambda n: tuple(sorted([2, n])),
 		'valuesBenchmark': [14],
 		'valuesTestParallelization': [*range(3, 7)],
 		'valuesTestValidation': [random.randint(2, 9)],
 	},
 	'A001416': {
-		'getMapShape': lambda n: (3, n) if n >= 3 else (n, 3),
+		'getMapShape': lambda n: tuple(sorted([3, n])),
 		'valuesBenchmark': [9],
 		'valuesTestParallelization': [*range(3, 5)],
 		'valuesTestValidation': [random.randint(2, 6)],
@@ -148,9 +154,9 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 		sequence ID or if the content format is invalid.
 	"""
 	bFileLines: list[str] = OEISbFile.strip().splitlines()
-	if not bFileLines.pop(0).startswith(f"# {oeisID}"):
-		warnings.warn(f"Content does not match sequence {oeisID}")
-		return {-1: -1}
+	# if not bFileLines.pop(0).startswith(f"# {oeisID}"):
+	# 	warnings.warn(f"Content does not match sequence {oeisID}")
+	# 	return {-1: -1}
 
 	OEISsequence: dict[int, int] = {}
 	for line in bFileLines:
@@ -287,20 +293,20 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 def makeSettingsOEIS() -> dict[str, SettingsOEIS]:
 	"""
 	Construct the comprehensive settings dictionary for all implemented OEIS sequences.
-	
-	This function builds a complete configuration dictionary for all supported OEIS 
+
+	This function builds a complete configuration dictionary for all supported OEIS
 	sequences by retrieving and combining:
 	1. Sequence values from OEIS b-files
 	2. Sequence metadata (descriptions and offsets)
 	3. Hardcoded mapping functions and test values
-	
-	The resulting dictionary provides a single authoritative source for all OEIS-related 
+
+	The resulting dictionary provides a single authoritative source for all OEIS-related
 	configurations used throughout the package, including:
 	- Mathematical descriptions of each sequence
 	- Functions to convert between sequence indices and map dimensions
 	- Known sequence values retrieved from OEIS
 	- Testing and benchmarking reference values
-	
+
 	Returns:
 		A dictionary mapping OEIS sequence IDs to their complete settings objects,
 		containing all metadata and known values needed for computation and validation.
@@ -341,18 +347,18 @@ def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	"""
 	Retrieve the known total number of foldings for a given map shape.
-	
+
 	This function looks up precalculated folding totals for specific map dimensions
 	from OEIS sequences. It serves as a rapid reference for known values without
 	requiring computation, and can be used to validate algorithm results.
-	
+
 	Parameters:
 		mapShape: A tuple of integers representing the dimensions of the map.
-	
+
 	Returns:
 		foldingsTotal: The known total number of foldings for the given map shape,
 		or -1 if the map shape doesn't match any known values in the OEIS sequences.
-	
+
 	Notes:
 		The function uses a cached dictionary (via makeDictionaryFoldsTotalKnown) to
 		efficiently retrieve values without repeatedly parsing OEIS data. Map shape

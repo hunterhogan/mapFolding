@@ -43,12 +43,6 @@ def activeLeafIsTheFirstLeaf(state: ComputationState) -> bool:
 def allDimensionsAreUnconstrained(state: ComputationState) -> bool:
 	return not state.dimensionsUnconstrained
 
-def undoLastLeafPlacement(state: ComputationState) -> ComputationState:
-	state.leaf1ndex -= 1
-	state.leafBelow[state.leafAbove[state.leaf1ndex]] = state.leafBelow[state.leaf1ndex]
-	state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leafAbove[state.leaf1ndex]
-	return state
-
 def countGaps(state: ComputationState) -> ComputationState:
 	state.gapsWhere[state.gap1ndexCeiling] = state.leafConnectee
 	if state.countDimensionsGapped[state.leafConnectee] == 0:
@@ -100,6 +94,16 @@ def initializeVariablesToFindGaps(state: ComputationState) -> ComputationState:
 	state.indexDimension = 0
 	return state
 
+def insertLeafAtGap(state: ComputationState) -> ComputationState:
+	state.gap1ndex -= 1
+	state.leafAbove[state.leaf1ndex] = state.gapsWhere[state.gap1ndex]
+	state.leafBelow[state.leaf1ndex] = state.leafBelow[state.leafAbove[state.leaf1ndex]]
+	state.leafBelow[state.leafAbove[state.leaf1ndex]] = state.leaf1ndex
+	state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leaf1ndex
+	state.gapRangeStart[state.leaf1ndex] = state.gap1ndex
+	state.leaf1ndex += 1
+	return state
+
 def insertUnconstrainedLeaf(state: ComputationState) -> ComputationState:
 	state.indexLeaf = 0
 	while state.indexLeaf < state.leaf1ndex:
@@ -123,21 +127,17 @@ def loopUpToDimensionsTotal(state: ComputationState) -> bool:
 def noGapsHere(state: ComputationState) -> bool:
 	return (state.leaf1ndex > 0) and (state.gap1ndex == state.gapRangeStart[state.leaf1ndex - 1])
 
-def insertLeafAtGap(state: ComputationState) -> ComputationState:
-	state.gap1ndex -= 1
-	state.leafAbove[state.leaf1ndex] = state.gapsWhere[state.gap1ndex]
-	state.leafBelow[state.leaf1ndex] = state.leafBelow[state.leafAbove[state.leaf1ndex]]
-	state.leafBelow[state.leafAbove[state.leaf1ndex]] = state.leaf1ndex
-	state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leaf1ndex
-	state.gapRangeStart[state.leaf1ndex] = state.gap1ndex
-	state.leaf1ndex += 1
-	return state
-
 def thereIsAnActiveLeaf(state: ComputationState) -> bool:
 	return state.leaf1ndex > 0
 
 def thisIsMyTaskIndex(state: ComputationState) -> bool:
 	return (state.leaf1ndex != state.taskDivisions) or (state.leafConnectee % state.taskDivisions == state.taskIndex)
+
+def undoLastLeafPlacement(state: ComputationState) -> ComputationState:
+	state.leaf1ndex -= 1
+	state.leafBelow[state.leafAbove[state.leaf1ndex]] = state.leafBelow[state.leaf1ndex]
+	state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leafAbove[state.leaf1ndex]
+	return state
 
 def updateLeafConnectee(state: ComputationState) -> ComputationState:
 	state.leafConnectee = state.connectionGraph[state.indexDimension, state.leaf1ndex, state.leafBelow[state.leafConnectee]]
@@ -218,6 +218,9 @@ def countSequential(state: ComputationState) -> ComputationState:
 					state = incrementIndexMiniGap(state)
 		while noGapsHere(state):
 			state = undoLastLeafPlacement(state)
+		if state.groupsOfFolds and state.leaf1ndex == 3:
+			state.groupsOfFolds *= 2
+			break
 		if thereIsAnActiveLeaf(state):
 			state = insertLeafAtGap(state)
 	state.foldGroups[state.taskIndex] = state.groupsOfFolds

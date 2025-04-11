@@ -331,8 +331,7 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	ValueError
 		If the input is empty or contains negative values.
 	NotImplementedError
-		If fewer than two positive dimensions are provided, as this would not
-		represent a valid map folding problem.
+		If fewer than two positive dimensions are provided.
 	"""
 	if not listDimensions:
 		raise ValueError("`listDimensions` is a required parameter.")
