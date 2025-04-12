@@ -443,59 +443,23 @@ def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] 
 	if packageName:
 		autoflake_additional_imports.append(packageName)
 	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=True, remove_duplicate_keys = False, remove_unused_variables = False)
-	# pythonSource = python_minifier.minify(pythonSource)
+	# pythonSource = python_minifier.minify(pythonSource, remove_annotations=False, hoist_literals=False)
 	writeStringToHere(pythonSource, pathFilename)
 
 # END of acceptable classes and functions ======================================================
-def removeUnusedParameters(ingredientsFunction: IngredientsFunction):
+def removeUnusedParameters(ingredientsFunction: IngredientsFunction) -> IngredientsFunction:
 	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
 	list_arg_arg: list[ast_Identifier] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
 	listName: list[ast.Name] = []
-	NodeTourist(be.Name, Then.appendTo(listName)).visit(ingredientsFunction.astFunctionDef)
+	fauxFunctionDef = deepcopy(ingredientsFunction.astFunctionDef)
+	NodeChanger(be.Return, Then.removeIt).visit(fauxFunctionDef)
+	NodeTourist(be.Name, Then.appendTo(listName)).visit(fauxFunctionDef)
 	list_Identifiers: list[ast_Identifier] = [astName.id for astName in listName]
 	list_IdentifiersNotUsed: list[ast_Identifier] = list(set(list_arg_arg) - set(list_Identifiers))
-
-dictionaryEstimates: dict[tuple[int, ...], int] = {
-	(2,2,2,2,2,2,2,2): 798148657152000,
-	(2,21): 776374224866624,
-	(3,15): 824761667826225,
-	(3,3,3,3): 85109616000000000000000000000000,
-	(8,8): 791274195985524900,
-}
-
-# END of marginal classes and functions ======================================================
-def Z0Z_lameFindReplace(astTree: 个, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]) -> 个:
-	"""
-	Recursively replace AST nodes based on a mapping of find-replace pairs.
-
-	This function applies brute-force node replacement throughout an AST tree
-	by comparing textual representations of nodes. While not the most efficient
-	approach, it provides a reliable way to replace complex nested structures
-	when more precise targeting methods are difficult to implement.
-
-	The function continues replacing nodes until no more changes are detected
-	in the AST's textual representation, ensuring complete replacement throughout
-	the tree structure.
-
-	Parameters:
-		astTree: The AST structure to modify.
-		mappingFindReplaceNodes: A mapping from source nodes to replacement nodes.
-
-	Returns:
-		The modified AST structure with all matching nodes replaced.
-	"""
-	keepGoing = True
-	newTree = deepcopy(astTree)
-
-	while keepGoing:
-		for nodeFind, nodeReplace in mappingFindReplaceNodes.items():
-			NodeChanger(ifThis.Z0Z_unparseIs(nodeFind), Then.replaceWith(nodeReplace)).visit(newTree)
-
-		if ast.unparse(newTree) == ast.unparse(astTree):
-			keepGoing = False
-		else:
-			astTree = deepcopy(newTree)
-	return newTree
+	for arg_Identifier in list_IdentifiersNotUsed:
+		remove_arg = NodeChanger(ifThis.is_arg_Identifier(arg_Identifier), Then.removeIt)
+		remove_arg.visit(ingredientsFunction.astFunctionDef)
+	return ingredientsFunction
 
 def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
@@ -576,7 +540,17 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	# parallelCallable =========================================================
 	if recipeFlow.removeDataclassParallel:
 		ingredientsParallel.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
-		replaceCall2concurrencyManager = NodeChanger(ifThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier), Then.replaceWith(Make.Call(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier), listArguments=[Make.Name(recipeFlow.callableParallel)] + shatteredDataclass.listName4Parameters)))
+
+		ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
+
+		ingredientsParallel = removeUnusedParameters(ingredientsParallel)
+
+		list_argCuzMyBrainRefusesToThink = ingredientsParallel.astFunctionDef.args.args + ingredientsParallel.astFunctionDef.args.posonlyargs + ingredientsParallel.astFunctionDef.args.kwonlyargs
+		list_arg_arg: list[ast_Identifier] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
+
+		listParameters = [parameter for parameter in shatteredDataclass.listName4Parameters if parameter.id in list_arg_arg]
+
+		replaceCall2concurrencyManager = NodeChanger(ifThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier), Then.replaceWith(Make.Call(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier), listArguments=[Make.Name(recipeFlow.callableParallel)] + listParameters)))
 
 		# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
 		astCallConcurrencyResult: list[ast.Call] = []
@@ -593,8 +567,6 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 		replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
 		changeReturnParallelCallable.visit(ingredientsParallel.astFunctionDef)
 
-		ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
-
 	# Module-level transformations ===========================================================
 	ingredientsModuleNumbaUnified = IngredientsModule(ingredientsFunction=listAllIngredientsFunctions, imports=LedgerOfImports(recipeFlow.source_astModule))
 	ingredientsModuleNumbaUnified.removeImportFromModule('numpy')
@@ -606,3 +578,45 @@ def getIt(astCallConcurrencyResult: list[ast.Call]) -> Callable[[ast.AST], ast.A
 		NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)
 		return node
 	return workhorse
+
+dictionaryEstimates: dict[tuple[int, ...], int] = {
+	(2,2,2,2,2,2,2,2): 798148657152000,
+	(2,21): 776374224866624,
+	(3,15): 824761667826225,
+	(3,3,3,3): 85109616000000000000000000000000,
+	(8,8): 791274195985524900,
+}
+
+# END of marginal classes and functions ======================================================
+def Z0Z_lameFindReplace(astTree: 个, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]) -> 个:
+	"""
+	Recursively replace AST nodes based on a mapping of find-replace pairs.
+
+	This function applies brute-force node replacement throughout an AST tree
+	by comparing textual representations of nodes. While not the most efficient
+	approach, it provides a reliable way to replace complex nested structures
+	when more precise targeting methods are difficult to implement.
+
+	The function continues replacing nodes until no more changes are detected
+	in the AST's textual representation, ensuring complete replacement throughout
+	the tree structure.
+
+	Parameters:
+		astTree: The AST structure to modify.
+		mappingFindReplaceNodes: A mapping from source nodes to replacement nodes.
+
+	Returns:
+		The modified AST structure with all matching nodes replaced.
+	"""
+	keepGoing = True
+	newTree = deepcopy(astTree)
+
+	while keepGoing:
+		for nodeFind, nodeReplace in mappingFindReplaceNodes.items():
+			NodeChanger(ifThis.Z0Z_unparseIs(nodeFind), Then.replaceWith(nodeReplace)).visit(newTree)
+
+		if ast.unparse(newTree) == ast.unparse(astTree):
+			keepGoing = False
+		else:
+			astTree = deepcopy(newTree)
+	return newTree

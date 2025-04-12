@@ -25,7 +25,7 @@ from tomli import load as tomli_load
 from types import ModuleType
 from typing import Any, TypeAlias, TypeVar
 import dataclasses
-from numba import int64, uint8
+from numba import int64, uint8, int16
 
 # Evaluate When Packaging https://github.com/hunterhogan/mapFolding/issues/18
 try:
@@ -164,6 +164,8 @@ NumPyFoldsTotal: TypeAlias = numpy_int64
 
 DatatypeLeavesTotal = uint8
 DatatypeElephino = uint8
+# DatatypeLeavesTotal = int16
+# DatatypeElephino = int16
 DatatypeFoldsTotal = int64
 
 Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[NumPyLeavesTotal]]

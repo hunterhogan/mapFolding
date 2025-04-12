@@ -29,13 +29,14 @@ from mapFolding.someAssemblyRequired import (
 	Make,
 	NodeChanger,
 	NodeTourist,
+	str_nameDOTname,
 	Then,
 )
 from mapFolding.someAssemblyRequired.toolboxNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
-from mapFolding.someAssemblyRequired.transformationTools import extractFunctionDef, write_astModule, makeInitializedComputationState
+from mapFolding.someAssemblyRequired.transformationTools import dictionaryEstimates, extractFunctionDef, write_astModule, makeInitializedComputationState
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
 from mapFolding import The, raiseIfNoneGitHubIssueNumber3, getFoldsTotalKnown
-from typing import cast
+from typing import NamedTuple, cast
 from Z0Z_tools import autoDecodingRLE
 from pathlib import PurePosixPath
 import ast
@@ -238,38 +239,37 @@ if __name__ == '__main__':
 
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
-	Z0Z_Identifier = 'DatatypeLeavesTotal'
-	Z0Z_type = 'uint8'
-	ingredientsModule.imports.addImportFrom_asStr('numba', Z0Z_type)
-	Z0Z_statement = Make.Assign([Make.Name(Z0Z_Identifier, ast.Store())], Make.Name(Z0Z_type))
-	ingredientsModule.appendPrologue(statement=Z0Z_statement)
+	class DatatypeConfig(NamedTuple):
+		Z0Z_module: str_nameDOTname
+		fml: ast_Identifier
+		Z0Z_type_name: ast_Identifier
+		Z0Z_asname: ast_Identifier | None = None
 
-	Z0Z_Identifier = 'DatatypeElephino'
-	Z0Z_type = 'uint8'
-	ingredientsModule.imports.addImportFrom_asStr('numba', Z0Z_type)
-	Z0Z_statement = Make.Assign([Make.Name(Z0Z_Identifier, ast.Store())], Make.Name(Z0Z_type))
-	ingredientsModule.appendPrologue(statement=Z0Z_statement)
+	listDatatypeConfigs = [
+		DatatypeConfig(fml='DatatypeLeavesTotal', Z0Z_module='numba', Z0Z_type_name='int16'),
+		DatatypeConfig(fml='DatatypeElephino', Z0Z_module='numba', Z0Z_type_name='int16'),
+		DatatypeConfig(fml='DatatypeFoldsTotal', Z0Z_module='numba', Z0Z_type_name='int64'),
+	]
 
-	Z0Z_Identifier = 'DatatypeFoldsTotal'
-	Z0Z_type = 'int64'
-	ingredientsModule.imports.addImportFrom_asStr('numba', Z0Z_type)
-	Z0Z_statement = Make.Assign([Make.Name(Z0Z_Identifier, ast.Store())], Make.Name(Z0Z_type))
-	ingredientsModule.appendPrologue(statement=Z0Z_statement)
+	for datatypeConfig in listDatatypeConfigs:
+		ingredientsModule.imports.addImportFrom_asStr(datatypeConfig.Z0Z_module, datatypeConfig.Z0Z_type_name)
+		statement = Make.Assign(
+			[Make.Name(datatypeConfig.fml, ast.Store())],
+			Make.Name(datatypeConfig.Z0Z_type_name)
+		)
+		ingredientsModule.appendPrologue(statement=statement)
 
 	ingredientsCount.imports.removeImportFromModule('mapFolding.theSSOT')
-	Z0Z_module = 'numpy'
-	Z0Z_asname = 'Array1DLeavesTotal'
-	ingredientsCount.imports.removeImportFrom(Z0Z_module, None, Z0Z_asname)
-	Z0Z_type_name = 'uint8'
-	ingredientsCount.imports.addImportFrom_asStr(Z0Z_module, Z0Z_type_name, Z0Z_asname)
-	Z0Z_asname = 'Array1DElephino'
-	ingredientsCount.imports.removeImportFrom(Z0Z_module, None, Z0Z_asname)
-	Z0Z_type_name = 'uint8'
-	ingredientsCount.imports.addImportFrom_asStr(Z0Z_module, Z0Z_type_name, Z0Z_asname)
-	Z0Z_asname = 'Array3D'
-	ingredientsCount.imports.removeImportFrom(Z0Z_module, None, Z0Z_asname)
-	Z0Z_type_name = 'uint8'
-	ingredientsCount.imports.addImportFrom_asStr(Z0Z_module, Z0Z_type_name, Z0Z_asname)
+
+	listNumPyTypeConfigs = [
+		DatatypeConfig(fml='Array1DLeavesTotal', Z0Z_module='numpy', Z0Z_type_name='int16', Z0Z_asname='Array1DLeavesTotal'),
+		DatatypeConfig(fml='Array1DElephino', Z0Z_module='numpy', Z0Z_type_name='int16', Z0Z_asname='Array1DElephino'),
+		DatatypeConfig(fml='Array3D', Z0Z_module='numpy', Z0Z_type_name='int16', Z0Z_asname='Array3D'),
+	]
+
+	for typeConfig in listNumPyTypeConfigs:
+		ingredientsCount.imports.removeImportFrom(typeConfig.Z0Z_module, None, typeConfig.fml)
+		ingredientsCount.imports.addImportFrom_asStr(typeConfig.Z0Z_module, typeConfig.Z0Z_type_name, typeConfig.Z0Z_asname)
 
 	ingredientsCount.astFunctionDef.decorator_list = [] # TODO low-priority, handle this more elegantly
 	# TODO when I add the function signature in numba style back to the decorator, the logic needs to handle `ProgressBarType:`
@@ -303,6 +303,7 @@ if __name__ == '__main__':
 	mapShape = (1,24)
 	state = makeInitializedComputationState(mapShape)
 	foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
+	# foldsTotalEstimated = dictionaryEstimates[state.mapShape] // state.leavesTotal
 	pathModule = PurePosixPath(The.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJob(state, foldsTotalEstimated, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
