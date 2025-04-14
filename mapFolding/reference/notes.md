@@ -28,7 +28,7 @@ Assume `listDimensions`:
 1. is in an implemented OEIS sequence, and
 2. is <= the first unknown in the OEIS sequence.
 
-| Type     | max(x)      | Hunter Hogan            | alternative   | Lunnan | Irvine |
+| Type     | max(x)      | Hunter Hogan            | alternative   | Lunnon | Irvine |
 | -------- | ----------- | ----------------------- | ------------- | ------ | ------ |
 | 3D array | n           | connectionGraph         |               | D      | d      |
 | integer  | n           | computationalDivisions  | taskDivisions |        | mod    |

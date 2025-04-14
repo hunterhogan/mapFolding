@@ -19,13 +19,13 @@ to avoid namespace collisions when transforming algorithms.
 from collections.abc import Callable
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
+from numba import int64, uint8, int16
 from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, integer, ndarray, uint8 as numpy_uint8
 from pathlib import Path
 from tomli import load as tomli_load
 from types import ModuleType
 from typing import Any, TypeAlias, TypeVar
 import dataclasses
-from numba import int64, uint8, int16
 
 # Evaluate When Packaging https://github.com/hunterhogan/mapFolding/issues/18
 try:
@@ -50,7 +50,7 @@ concurrencyPackageHARDCODED = 'multiprocessing'
 
 # PackageSettings in theSSOT.py and immutability https://github.com/hunterhogan/mapFolding/issues/11
 @dataclasses.dataclass
-class PackageSettings:
+class PackageSettings_oldSystem:
 	"""
 	Centralized configuration settings for the mapFolding package.
 
@@ -144,7 +144,7 @@ class PackageSettings:
 		if self.logicalPathModuleSourceAlgorithm is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.logicalPathModuleSourceAlgorithm = '.'.join([self.packageName, self.sourceAlgorithm])
 
-The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
+The = PackageSettings_oldSystem(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
 
 # =============================================================================
 # Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
@@ -152,21 +152,18 @@ The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHAR
 NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)
 
 # DatatypeLeavesTotal: TypeAlias = int
+DatatypeLeavesTotal: TypeAlias = uint8
 NumPyLeavesTotal: TypeAlias = numpy_uint8
 # NumPyLeavesTotal: TypeAlias = numpy_int16 # this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
 
 # DatatypeElephino: TypeAlias = int
+DatatypeElephino: TypeAlias = uint8
 NumPyElephino: TypeAlias = numpy_uint8
 # NumPyElephino: TypeAlias = numpy_int16
 
 # DatatypeFoldsTotal: TypeAlias = int
+DatatypeFoldsTotal: TypeAlias = int64
 NumPyFoldsTotal: TypeAlias = numpy_int64
-
-DatatypeLeavesTotal = uint8
-DatatypeElephino = uint8
-# DatatypeLeavesTotal = int16
-# DatatypeElephino = int16
-DatatypeFoldsTotal = int64
 
 Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[NumPyLeavesTotal]]
 Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyLeavesTotal]]
@@ -259,10 +256,10 @@ class ComputationState:
 	leafConnectee: DatatypeElephino = DatatypeElephino(0)
 	"""Leaf that is being connected to the active leaf."""
 
-	# leafSequence: list[DatatypeLeavesTotal] = dataclasses.field(default_factory=list, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
-
 	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""Index of the current parallel task when using task divisions."""
+
+	# leafSequence: list[DatatypeLeavesTotal] = dataclasses.field(default_factory=list, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
 
 	def __post_init__(self) -> None:
 		# self.leafSequence = [self.leaf1ndex]

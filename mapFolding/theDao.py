@@ -218,8 +218,9 @@ def countSequential(state: ComputationState) -> ComputationState:
 					state = incrementIndexMiniGap(state)
 		while noGapsHere(state):
 			state = undoLastLeafPlacement(state)
-		if state.groupsOfFolds and state.leaf1ndex == 3:
+		if state.leaf1ndex == 3 and state.groupsOfFolds and state.dimensionsTotal > 1 and (any(dimension > 2 for dimension in state.mapShape)):
 			state.groupsOfFolds *= 2
+			# print('break')
 			break
 		if thereIsAnActiveLeaf(state):
 			state = insertLeafAtGap(state)

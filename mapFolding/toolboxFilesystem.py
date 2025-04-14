@@ -49,7 +49,7 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 		- Safe filesystem characters
 		- Unique extension (.foldsTotal)
 		- Python-safe strings (no starting with numbers, no reserved words)
-		- The 'p' prefix comes from Lunnan's original code.
+		- The 'p' prefix comes from Lunnon's original code.
 	"""
 	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
 

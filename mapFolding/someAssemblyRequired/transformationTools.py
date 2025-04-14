@@ -462,7 +462,6 @@ def removeUnusedParameters(ingredientsFunction: IngredientsFunction) -> Ingredie
 	return ingredientsFunction
 
 def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
-	# TODO a tool to automatically remove unused variables from the ArgumentsSpecification (return, and returns) _might_ be nice.
 	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 	listAllIngredientsFunctions = [
 	(ingredientsInitialize := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableInitialize)),
@@ -521,21 +520,12 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	# Change callable parameters and Call to the callable at the same time ====
 	# sequentialCallable =========================================================
 	if recipeFlow.removeDataclassSequential:
-		ingredientsSequential.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
-		astCallSequentialCallable = Make.Call(Make.Name(recipeFlow.callableSequential), shatteredDataclass.listName4Parameters)
-		changeReturnSequentialCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
-		ingredientsSequential.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
-		replaceAssignSequentialCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(recipeFlow.callableSequential)), Then.replaceWith(Make.Assign(listTargets=[shatteredDataclass.fragments4AssignmentOrParameters], value=astCallSequentialCallable)))
+		ingredientsSequential = removeDataclassFromFunction(ingredientsSequential, shatteredDataclass)
+		ingredientsDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsDispatcher, recipeFlow.callableSequential, shatteredDataclass)
 
-		unpack4sequentialCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(recipeFlow.callableSequential)), Then.insertThisAbove(shatteredDataclass.listUnpack))
-		repack4sequentialCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(recipeFlow.callableSequential)), Then.insertThisBelow([shatteredDataclass.repack]))
-
-		changeReturnSequentialCallable.visit(ingredientsSequential.astFunctionDef)
-		replaceAssignSequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
-		unpack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
-		repack4sequentialCallable.visit(ingredientsDispatcher.astFunctionDef)
-
-		ingredientsSequential.astFunctionDef = Z0Z_lameFindReplace(ingredientsSequential.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
+	if recipeFlow.removeDataclassInitialize:
+		ingredientsInitialize = removeDataclassFromFunction(ingredientsInitialize, shatteredDataclass)
+		ingredientsDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsDispatcher, recipeFlow.callableInitialize, shatteredDataclass)
 
 	# parallelCallable =========================================================
 	if recipeFlow.removeDataclassParallel:
@@ -572,6 +562,24 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	ingredientsModuleNumbaUnified.removeImportFromModule('numpy')
 
 	return ingredientsModuleNumbaUnified
+
+def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
+	ingredientsTarget.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
+	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
+	changeReturnCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
+	changeReturnCallable.visit(ingredientsTarget.astFunctionDef)
+	ingredientsTarget.astFunctionDef = Z0Z_lameFindReplace(ingredientsTarget.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
+	return ingredientsTarget
+
+def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, targetCallableIdentifier: ast_Identifier, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
+	astCallTargetCallable = Make.Call(Make.Name(targetCallableIdentifier), shatteredDataclass.listName4Parameters)
+	replaceAssignTargetCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign(listTargets=[shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
+	unpack4targetCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
+	repack4targetCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisBelow([shatteredDataclass.repack]))
+	replaceAssignTargetCallable.visit(ingredientsCaller.astFunctionDef)
+	unpack4targetCallable.visit(ingredientsCaller.astFunctionDef)
+	repack4targetCallable.visit(ingredientsCaller.astFunctionDef)
+	return ingredientsCaller
 
 def getIt(astCallConcurrencyResult: list[ast.Call]) -> Callable[[ast.AST], ast.AST]:
 	def workhorse(node: ast.AST) -> ast.AST:

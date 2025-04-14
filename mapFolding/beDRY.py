@@ -323,8 +323,8 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 
 	Returns
 	-------
-	tuple[int, ...]
-		A sorted tuple of positive integers representing the validated dimensions.
+	mapShape
+		An _unsorted_ tuple of positive integers representing the validated dimensions.
 
 	Raises
 	------
@@ -335,13 +335,26 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	"""
 	if not listDimensions:
 		raise ValueError("`listDimensions` is a required parameter.")
-	listValidated: list[int] = intInnit(listDimensions, 'listDimensions')
-	listNonNegative: list[int] = []
-	for dimension in listValidated:
-		if dimension < 0:
-			raise ValueError(f"`{dimension = }` in `{listDimensions = }`, must be a non-negative integer.")
-		listNonNegative.append(dimension)
-	dimensionsValid = [dimension for dimension in listNonNegative if dimension > 0]
-	if len(dimensionsValid) < 2:
+	listOFint: list[int] = intInnit(listDimensions, 'listDimensions')
+	mapDimensions: list[int] = []
+	for dimension in listOFint:
+		if dimension <= 0:
+			raise ValueError(f"I received `{dimension = }` in `{listDimensions = }`, but all dimensions must be a non-negative integer.")
+		mapDimensions.append(dimension)
+	if len(mapDimensions) < 2:
 		raise NotImplementedError(f"This function requires `{listDimensions = }` to have at least two dimensions greater than 0. You may want to look at https://oeis.org/.")
-	return tuple(sorted(dimensionsValid))
+
+	"""
+	I previously sorted the dimensions for a few reasons that may or may not be valid:
+		1. After emperical testing, I believe that (2,10), for example, computes significantly faster than (10,2).
+		2. Standardization, generally.
+		3. If I recall correctly, after emperical testing, I concluded that sorted dimensions always leads to
+			non-negative values in the connection graph, but if the dimensions are not in ascending order of magnitude,
+			the connection graph might have negative values, which as far as I know, is not an inherent problem, but the
+			negative values propogate into other data structures, which requires the datatypes to hold negative values,
+			which means I cannot optimize the bitwidths of the datatypes as easily. (And optimized bitwidths helps with
+			performance.)
+	Most importantly, now that the package explicitly includes OEIS A000136, 1 x N stamps/maps, sorting could distort results.
+	"""
+	# NOTE Do NOT sort the dimensions.
+	return tuple(mapDimensions)

@@ -124,7 +124,7 @@ def countSequential(mapShape: tuple[DatatypeLeavesTotal, ...], leavesTotal: Data
             leaf1ndex -= 1
             leafBelow[leafAbove[leaf1ndex]] = leafBelow[leaf1ndex]
             leafAbove[leafBelow[leaf1ndex]] = leafAbove[leaf1ndex]
-        if groupsOfFolds and leaf1ndex == 3:
+        if leaf1ndex == 3 and groupsOfFolds and (dimensionsTotal > 1) and any((dimension > 2 for dimension in mapShape)):
             groupsOfFolds *= 2
             break
         if leaf1ndex > 0:

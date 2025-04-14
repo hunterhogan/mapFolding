@@ -13,8 +13,8 @@ Categories of reference implementations:
    - foldings.AA - Reconstructed Atlas Autocode version with corrections
 
 2. Direct translations:
-   - lunnanWhile.py - Python translation using while loops
-   - lunnanNumpy.py - NumPy-based translation with array operations
+   - lunnonWhile.py - Python translation using while loops
+   - lunnonNumpy.py - NumPy-based translation with array operations
 
 3. Alternative implementations:
    - irvineJavaPort.py - Port from Sean A. Irvine's Java implementation
