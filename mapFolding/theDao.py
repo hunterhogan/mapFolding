@@ -1,23 +1,22 @@
 """
 Core computational algorithm for map folding counting and enumeration.
 
-This module implements the core algorithms for enumerating and counting the various ways
-a rectangular map can be folded. It uses a functional state-transformation approach, where
-each function performs a specific state mutation and returns the updated state. The module
-provides three main counting algorithms:
+This module implements the core algorithms for enumerating and counting the various ways a rectangular map can be
+folded. It uses a functional state-transformation approach, where each function performs a specific state mutation and
+returns the updated state. The module provides three main counting algorithms:
 
-1. countInitialize: Sets up the initial state for computation
-2. countSequential: Processes the folding computation sequentially
-3. countParallel: Distributes the computation across multiple processes
+1. `countInitialize`: Sets up the initial state for computation.
+2. `countSequential`: Processes the folding computation sequentially.
+3. `countParallel`: Distributes the computation across multiple processes.
 
-All algorithms operate on a ComputationState object that tracks the folding process, including:
-- A "leaf" is a unit square in the map
-- A "gap" is a potential position where a new leaf can be folded
-- Connections track how leaves can connect above/below each other
-- Leaves are enumerated starting from 1, not 0; hence, leaf1ndex not leafIndex
+All algorithms operate on a `ComputationState` object that tracks the folding process, including:
+- A "leaf" is a unit square in the map.
+- A "gap" is a potential position where a new leaf can be folded.
+- Connections track how leaves can connect above/below each other.
+- Leaves are enumerated starting from 1, not 0; hence, `leaf1ndex` not `leafIndex`.
 
-The doTheNeedful function is the main entry point that orchestrates the computation strategy
-based on task divisions and concurrency parameters.
+The `doTheNeedful` function is the main entry point that orchestrates the computation strategy based on task divisions and
+concurrency parameters.
 """
 from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
 from copy import deepcopy
@@ -144,7 +143,7 @@ def updateLeafConnectee(state: ComputationState) -> ComputationState:
 	return state
 
 def countInitialize(state: ComputationState) -> ComputationState:
-	while activeLeafGreaterThan0(state):
+	while state.gap1ndex == 0:
 		if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
 				state = initializeVariablesToFindGaps(state)
 				while loopUpToDimensionsTotal(state):
@@ -164,8 +163,6 @@ def countInitialize(state: ComputationState) -> ComputationState:
 					state = incrementIndexMiniGap(state)
 		if thereIsAnActiveLeaf(state):
 			state = insertLeafAtGap(state)
-		if state.gap1ndex > 0:
-			break
 	return state
 
 def countParallel(state: ComputationState) -> ComputationState:
@@ -218,7 +215,7 @@ def countSequential(state: ComputationState) -> ComputationState:
 					state = incrementIndexMiniGap(state)
 		while noGapsHere(state):
 			state = undoLastLeafPlacement(state)
-		if state.leaf1ndex == 3 and state.groupsOfFolds and state.dimensionsTotal > 1 and (any(dimension > 2 for dimension in state.mapShape)):
+		if state.leaf1ndex == 3 and state.groupsOfFolds:
 			state.groupsOfFolds *= 2
 			# print('break')
 			break

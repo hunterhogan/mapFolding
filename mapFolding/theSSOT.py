@@ -1,26 +1,25 @@
 """
 Single Source of Truth module for configuration, types, and computational state management.
 
-This module defines the core data structures, type definitions, and configuration settings
-used throughout the mapFolding package. It implements the Single Source of Truth (SSOT)
-principle to ensure consistency across the package's components.
+This module defines the core data structures, type definitions, and configuration settings used throughout the
+mapFolding package. It implements the Single Source of Truth (SSOT) principle to ensure consistency across the package's
+components.
 
 Key features:
-1. The ComputationState dataclass, which encapsulates the state of the folding computation
-2. Unified type definitions for integers and arrays used in the computation
-3. Configuration settings for synthetic module generation and dispatching
-4. Path resolution and management for package resources and job output
-5. Dynamic dispatch functionality for algorithm implementations
+1. The `ComputationState` dataclass, which encapsulates the state of the folding computation.
+2. Unified type definitions for integers and arrays used in the computation.
+3. Configuration settings for synthetic module generation and dispatching.
+4. Path resolution and management for package resources and job output.
+5. Dynamic dispatch functionality for algorithm implementations.
 
-The module differentiates between "the" identifiers (package defaults) and other identifiers
-to avoid namespace collisions when transforming algorithms.
+The module differentiates between "the" identifiers (package defaults) and other identifiers to avoid namespace
+collisions when transforming algorithms.
 """
 
 from collections.abc import Callable
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
-from numba import int64, uint8, int16
-from numpy import dtype, int64 as numpy_int64, int16 as numpy_int16, integer, ndarray, uint8 as numpy_uint8
+from numpy import dtype, int64 as numpy_int64, integer, ndarray
 from pathlib import Path
 from tomli import load as tomli_load
 from types import ModuleType
@@ -50,14 +49,13 @@ concurrencyPackageHARDCODED = 'multiprocessing'
 
 # PackageSettings in theSSOT.py and immutability https://github.com/hunterhogan/mapFolding/issues/11
 @dataclasses.dataclass
-class PackageSettings_oldSystem:
+class PackageSettings:
 	"""
 	Centralized configuration settings for the mapFolding package.
 
-	This class implements the Single Source of Truth (SSOT) principle for package
-	configuration, providing a consistent interface for accessing package settings,
-	paths, and dispatch functions. The primary instance of this class, named `The`,
-	is imported and used throughout the package to retrieve configuration values.
+	This class implements the Single Source of Truth (SSOT) principle for package configuration, providing a consistent
+	interface for accessing package settings, paths, and dispatch functions. The primary instance of this class, named
+	`The`, is imported and used throughout the package to retrieve configuration values.
 	"""
 
 	logicalPathModuleDispatcher: str | None = None
@@ -144,25 +142,20 @@ class PackageSettings_oldSystem:
 		if self.logicalPathModuleSourceAlgorithm is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.logicalPathModuleSourceAlgorithm = '.'.join([self.packageName, self.sourceAlgorithm])
 
-The = PackageSettings_oldSystem(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
+The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
 
 # =============================================================================
 # Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
 
 NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)
 
-# DatatypeLeavesTotal: TypeAlias = int
-DatatypeLeavesTotal: TypeAlias = uint8
-NumPyLeavesTotal: TypeAlias = numpy_uint8
-# NumPyLeavesTotal: TypeAlias = numpy_int16 # this would be uint8, but mapShape (2,2,2,2, 2,2,2,2) has 256 leaves, so generic containers must accommodate at least 256 leaves
+DatatypeLeavesTotal: TypeAlias = int
+NumPyLeavesTotal: TypeAlias = numpy_int64
 
-# DatatypeElephino: TypeAlias = int
-DatatypeElephino: TypeAlias = uint8
-NumPyElephino: TypeAlias = numpy_uint8
-# NumPyElephino: TypeAlias = numpy_int16
+DatatypeElephino: TypeAlias = int
+NumPyElephino: TypeAlias = numpy_int64
 
-# DatatypeFoldsTotal: TypeAlias = int
-DatatypeFoldsTotal: TypeAlias = int64
+DatatypeFoldsTotal: TypeAlias = int
 NumPyFoldsTotal: TypeAlias = numpy_int64
 
 Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[NumPyLeavesTotal]]
@@ -175,18 +168,15 @@ class ComputationState:
 	"""
 	Represents the complete state of a map folding computation.
 
-	This dataclass encapsulates all the information required to compute the number of
-	possible ways to fold a map, including the map dimensions, leaf connections,
-	computation progress, and fold counting. It serves as the central data structure
-	that flows through the entire computational algorithm.
+	This dataclass encapsulates all the information required to compute the number of possible ways to fold a map,
+	including the map dimensions, leaf connections, computation progress, and fold counting. It serves as the central
+	data structure that flows through the entire computational algorithm.
 
 	Fields are categorized into:
-	1. Input parameters (mapShape, leavesTotal, etc.)
-	2. Core computational structures (connectionGraph, etc.)
-	3. Tracking variables for the folding algorithm state
-	4. Result accumulation fields (foldsTotal, groupsOfFolds)
-
-	The data structures and algorithms are based on Lunnon's 1971 paper on map folding.
+	1. Input parameters (`mapShape`, `leavesTotal`, etc.).
+	2. Core computational structures (`connectionGraph`, etc.).
+	3. Tracking variables for the folding algorithm state.
+	4. Result accumulation fields (`foldsTotal`, `groupsOfFolds`).
 	"""
 	# NOTE Python is anti-DRY, again, `DatatypeLeavesTotal` metadata needs to match the type
 	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
@@ -232,7 +222,7 @@ class ComputationState:
 	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
 	"""The final computed total number of distinct folding patterns."""
 
-	gap1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	gap1ndex: DatatypeElephino = DatatypeElephino(0)
 	"""Current index into gaps array during algorithm execution."""
 
 	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
@@ -253,16 +243,13 @@ class ComputationState:
 	leaf1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(1)
 	"""Active leaf being processed in the folding algorithm. Starts at 1, not 0."""
 
-	leafConnectee: DatatypeElephino = DatatypeElephino(0)
+	leafConnectee: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""Leaf that is being connected to the active leaf."""
 
 	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""Index of the current parallel task when using task divisions."""
 
-	# leafSequence: list[DatatypeLeavesTotal] = dataclasses.field(default_factory=list, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
-
 	def __post_init__(self) -> None:
-		# self.leafSequence = [self.leaf1ndex]
 		from mapFolding.beDRY import getConnectionGraph, makeDataContainer
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
 		leavesTotalAsInt = int(self.leavesTotal)

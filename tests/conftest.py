@@ -250,23 +250,23 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 	from mapFolding.theSSOT import The
 
 	# Store original property method
-	original_dispatcher_property = theSSOT.PackageSettings_oldSystem.dispatcher
+	original_dispatcher_property = theSSOT.PackageSettings.dispatcher
 
 	def patchDispatcher(callableTarget: Callable[..., Any]) -> None:
 		"""Patch the dispatcher property to return the target callable."""
 		# Create a new property that returns the target callable
-		def patched_dispatcher(self: theSSOT.PackageSettings_oldSystem) -> Callable[['ComputationState'], 'ComputationState']:
+		def patched_dispatcher(self: theSSOT.PackageSettings) -> Callable[['ComputationState'], 'ComputationState']:
 			def wrapper(state: 'ComputationState') -> 'ComputationState':
 				return callableTarget(state)
 			return wrapper
 
 		# Replace the property with our patched version
-		theSSOT.PackageSettings_oldSystem.dispatcher = property(patched_dispatcher) # type: ignore
+		theSSOT.PackageSettings.dispatcher = property(patched_dispatcher) # type: ignore
 
 	yield patchDispatcher
 
 	# Restore the original property
-	theSSOT.PackageSettings_oldSystem.dispatcher = original_dispatcher_property # type: ignore
+	theSSOT.PackageSettings.dispatcher = original_dispatcher_property # type: ignore
 
 def getAlgorithmDispatcher() -> Callable[[ComputationState], ComputationState]:
 	moduleImported: ModuleType = importlib.import_module(The.logicalPathModuleSourceAlgorithm)

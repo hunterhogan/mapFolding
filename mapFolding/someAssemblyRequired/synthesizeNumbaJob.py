@@ -18,7 +18,7 @@ This creates extremely fast, specialized implementations that can be run directl
 as Python scripts or further compiled into standalone executables.
 """
 
-from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal
+from mapFolding import getPathFilenameFoldsTotal, raiseIfNoneGitHubIssueNumber3, The
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	be,
@@ -32,13 +32,12 @@ from mapFolding.someAssemblyRequired import (
 	str_nameDOTname,
 	Then,
 )
+from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
 from mapFolding.someAssemblyRequired.toolboxNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
 from mapFolding.someAssemblyRequired.transformationTools import dictionaryEstimates, extractFunctionDef, write_astModule, makeInitializedComputationState
-from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
-from mapFolding import The, raiseIfNoneGitHubIssueNumber3, getFoldsTotalKnown
-from typing import NamedTuple, cast
-from Z0Z_tools import autoDecodingRLE
 from pathlib import PurePosixPath
+from typing import cast, NamedTuple
+from Z0Z_tools import autoDecodingRLE
 import ast
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
 
@@ -151,7 +150,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 					case 'scalar':
 						ImaAnnAssign.value.args[0].value = int(job.state.__dict__[ast_arg.arg]) # type: ignore
 					case 'array':
-						dataAsStrRLE: str = autoDecodingRLE(job.state.__dict__[ast_arg.arg], addSpaces=True)
+						dataAsStrRLE: str = autoDecodingRLE(job.state.__dict__[ast_arg.arg], True)
 						dataAs_astExpr: ast.expr = cast(ast.Expr, ast.parse(dataAsStrRLE).body[0]).value
 						ImaAnnAssign.value.args = [dataAs_astExpr] # type: ignore
 					case _:
@@ -229,9 +228,9 @@ if __name__ == '__main__':
 	writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
 	writeStream.write(str(foldsTotal))
 	writeStream.close()
-	from mapFolding.oeis import getFoldsTotalKnown
-	print(foldsTotal == getFoldsTotalKnown({job.state.mapShape}))
 """
+	# from mapFolding.oeis import getFoldsTotalKnown
+	# print(foldsTotal == getFoldsTotalKnown({job.state.mapShape}))
 		ingredientsModule.appendLauncher(ast.parse(linesLaunch))
 		changeReturnParallelCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName)))
 		changeReturnParallelCallable.visit(ingredientsCount.astFunctionDef)
@@ -246,8 +245,8 @@ if __name__ == '__main__':
 		Z0Z_asname: ast_Identifier | None = None
 
 	listDatatypeConfigs = [
-		DatatypeConfig(fml='DatatypeLeavesTotal', Z0Z_module='numba', Z0Z_type_name='int16'),
-		DatatypeConfig(fml='DatatypeElephino', Z0Z_module='numba', Z0Z_type_name='int16'),
+		DatatypeConfig(fml='DatatypeLeavesTotal', Z0Z_module='numba', Z0Z_type_name='uint16'),
+		DatatypeConfig(fml='DatatypeElephino', Z0Z_module='numba', Z0Z_type_name='uint16'),
 		DatatypeConfig(fml='DatatypeFoldsTotal', Z0Z_module='numba', Z0Z_type_name='int64'),
 	]
 
@@ -262,9 +261,9 @@ if __name__ == '__main__':
 	ingredientsCount.imports.removeImportFromModule('mapFolding.theSSOT')
 
 	listNumPyTypeConfigs = [
-		DatatypeConfig(fml='Array1DLeavesTotal', Z0Z_module='numpy', Z0Z_type_name='int16', Z0Z_asname='Array1DLeavesTotal'),
-		DatatypeConfig(fml='Array1DElephino', Z0Z_module='numpy', Z0Z_type_name='int16', Z0Z_asname='Array1DElephino'),
-		DatatypeConfig(fml='Array3D', Z0Z_module='numpy', Z0Z_type_name='int16', Z0Z_asname='Array3D'),
+		DatatypeConfig(fml='Array1DLeavesTotal', Z0Z_module='numpy', Z0Z_type_name='uint16', Z0Z_asname='Array1DLeavesTotal'),
+		DatatypeConfig(fml='Array1DElephino', Z0Z_module='numpy', Z0Z_type_name='uint16', Z0Z_asname='Array1DElephino'),
+		DatatypeConfig(fml='Array3D', Z0Z_module='numpy', Z0Z_type_name='uint16', Z0Z_asname='Array3D'),
 	]
 
 	for typeConfig in listNumPyTypeConfigs:
@@ -300,10 +299,10 @@ if __name__ == '__main__':
 	"""
 
 if __name__ == '__main__':
-	mapShape = (1,24)
+	mapShape = (2,2,2,2,2,2,2,2)
 	state = makeInitializedComputationState(mapShape)
-	foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
-	# foldsTotalEstimated = dictionaryEstimates[state.mapShape] // state.leavesTotal
+	# foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
+	foldsTotalEstimated = dictionaryEstimates[state.mapShape] // state.leavesTotal
 	pathModule = PurePosixPath(The.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJob(state, foldsTotalEstimated, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)

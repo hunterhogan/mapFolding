@@ -32,6 +32,7 @@ dependencies = [
 	"numpy",
 	"platformdirs",
 	"python_minifier",
+	"sympy",
 	"tomli",
 	"Z0Z_tools",]
 description = "Map folding algorithm with code transformation framework for optimizing numerical computations"
@@ -70,7 +71,7 @@ readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Repository = "https://github.com/hunterhogan/mapFolding.git", Issues = "https://github.com/hunterhogan/mapFolding/issues"}
-version = "0.9.1"
+version = "0.9.2"
 
 [tool.coverage]
 report = { exclude_lines = [
@@ -95,7 +96,7 @@ addopts = ["--color=yes", "-n 1"]
 testpaths = ["tests"]
 
 [tool.pytest_env]
-# NUMBA_JIT_COVERAGE = "1"
+# NUMBA_JIT_COVERAGE = "1" # This does not work, whether it is 0 or 1.
 # NUMBA_DISABLE_JIT = "1"
 
 [tool.setuptools]

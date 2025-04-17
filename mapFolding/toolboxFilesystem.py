@@ -1,20 +1,19 @@
 """
 Filesystem utilities for managing map folding computation results.
 
-This module provides functions for standardized handling of files related to the mapFolding
-package, with a focus on saving, retrieving, and naming computation results. It implements
-consistent naming conventions and path resolution strategies to ensure that:
+This module provides functions for standardized handling of files related to the mapFolding package, with a focus on
+saving, retrieving, and naming computation results. It implements consistent naming conventions and path resolution
+strategies to ensure that:
 
 1. Computation results are stored in a predictable location.
 2. Filenames follow a consistent pattern based on map dimensions.
 3. Results can be reliably retrieved for future reference.
 4. The system handles file operations safely with appropriate error handling.
 
-The module serves as the standardized interface between the computational components
-of the package and the filesystem, abstracting away the details of file operations
-and path management. It provides robust fallback mechanisms to preserve computation
-results even in the face of filesystem errors, which is critical for long-running
-computations that may take days to complete.
+The module serves as the standardized interface between the computational components of the package and the filesystem,
+abstracting away the details of file operations and path management. It provides robust fallback mechanisms to preserve
+computation results even in the face of filesystem errors, which is critical for long-running computations that may take
+days to complete.
 
 The functions here adhere to a consistent approach to path handling:
 - Cross-platform compatibility through the use of `pathlib`.
@@ -33,9 +32,9 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""
 	Create a standardized filename for a computed `foldsTotal` value.
 
-	This function generates a consistent, filesystem-safe filename based on map dimensions.
-	Standardizing filenames ensures that results can be reliably stored and retrieved,
-	avoiding potential filesystem incompatibilities or Python naming restrictions.
+	This function generates a consistent, filesystem-safe filename based on map dimensions. Standardizing filenames
+	ensures that results can be reliably stored and retrieved, avoiding potential filesystem incompatibilities or Python
+	naming restrictions.
 
 	Parameters:
 		mapShape: A sequence of integers representing the dimensions of the map.
@@ -57,14 +56,13 @@ def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal
 	"""
 	Get a standardized path and filename for the computed `foldsTotal` value.
 
-	This function resolves paths for storing computation results, handling different
-	input types including directories, absolute paths, or relative paths. It ensures
-	that all parent directories exist in the resulting path.
+	This function resolves paths for storing computation results, handling different input types including directories,
+	absolute paths, or relative paths. It ensures that all parent directories exist in the resulting path.
 
 	Parameters:
 		mapShape: List of dimensions for the map folding problem.
-		pathLikeWriteFoldsTotal (getPathJobRootDEFAULT): Path, filename, or relative path and filename.
-			If None, uses default path. If a directory, appends standardized filename.
+		pathLikeWriteFoldsTotal (getPathJobRootDEFAULT): Path, filename, or relative path and filename. If None, uses
+			default path. If a directory, appends standardized filename.
 
 	Returns:
 		pathFilenameFoldsTotal: Absolute path and filename for storing the `foldsTotal` value.
@@ -91,10 +89,9 @@ def getPathRootJobDEFAULT() -> Path:
 	"""
 	Get the default root directory for map folding computation jobs.
 
-	This function determines the appropriate default directory for storing computation
-	results based on the current runtime environment. It uses platform-specific
-	directories for normal environments and adapts to special environments like
-	Google Colab.
+	This function determines the appropriate default directory for storing computation results based on the current
+	runtime environment. It uses platform-specific directories for normal environments and adapts to special
+	environments like Google Colab.
 
 	Returns:
 		pathJobDEFAULT: Path to the default directory for storing computation results
@@ -112,10 +109,7 @@ def getPathRootJobDEFAULT() -> Path:
 
 def _saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> None:
 	"""
-	Internal helper function to save a `foldsTotal` value to a file.
-
-	This is a low-level function used by the public `saveFoldsTotal` function.
-	It handles the basic file operation without extensive error handling.
+	Standardized function to save a `foldsTotal` value to a file.
 
 	Parameters:
 		pathFilename: Path where the `foldsTotal` value should be saved
@@ -129,9 +123,8 @@ def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> N
 	"""
 	Save `foldsTotal` value to disk with multiple fallback mechanisms.
 
-	This function attempts to save the computed `foldsTotal` value to the specified
-	location, with backup strategies in case the primary save attempt fails.
-	The robustness is critical since these computations may take days to complete.
+	This function attempts to save the computed `foldsTotal` value to the specified location, with backup strategies in
+	case the primary save attempt fails. The robustness is critical since these computations may take days to complete.
 
 	Parameters:
 		pathFilename: Target save location for the `foldsTotal` value
@@ -165,9 +158,8 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
 	"""
 	Preemptively test file write capabilities before beginning computation.
 
-	This function performs validation checks on the target file location before
-	a potentially long-running computation begins. It tests several critical
-	aspects of filesystem functionality to ensure results can be saved:
+	This function performs validation checks on the target file location before a potentially long-running computation
+	begins. It tests several critical aspects of filesystem functionality to ensure results can be saved:
 
 	1. Checks if the file already exists to prevent accidental overwrites.
 	2. Verifies that parent directories exist.
@@ -182,8 +174,8 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
 		FileNotFoundError: If parent directories don't exist or if write tests fail.
 
 	Notes:
-		This function helps prevent a situation where a computation runs for
-		hours or days only to discover at the end that results cannot be saved.
+		This function helps prevent a situation where a computation runs for hours or days only to discover at the end
+		that results cannot be saved.
 	"""
 	if Path(pathFilename).exists():
 		raise FileExistsError(f"`{pathFilename = }` exists: a battle of overwriting might cause tears.")
@@ -201,17 +193,16 @@ def writeStringToHere(this: str, pathFilename: PathLike[str] | PurePath) -> None
 	"""
 	Write a string to a file, creating parent directories if needed.
 
-	This utility function provides a consistent interface for writing string content
-	to files across the package. It handles path creation and ensures proper
-	string conversion.
+	This utility function provides a consistent interface for writing string content to files across the package. It
+	handles path creation and ensures proper string conversion.
 
 	Parameters:
 		this: The string content to write to the file.
 		pathFilename: The target file path where the string should be written.
 
 	Notes:
-		This function creates all parent directories in the path if they don't exist,
-		making it safe to use with newly created directory structures.
+		This function creates all parent directories in the path if they don't exist, making it safe to use with newly
+		created directory structures.
 	"""
 	pathFilename = Path(pathFilename)
 	pathFilename.parent.mkdir(parents=True, exist_ok=True)
