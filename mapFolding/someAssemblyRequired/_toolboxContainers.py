@@ -316,7 +316,7 @@ class RecipeSynthesizeFlow:
 
 	This configuration class serves as a single source of truth for the code generation
 	process, ensuring consistency across all generated artifacts while enabling
-	customization of the transformation pipeline.
+	customization of the transformation assembly line.
 
 	The transformation process uses this configuration to extract functions from the
 	source module, transform them according to optimization rules, and output

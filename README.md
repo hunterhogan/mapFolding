@@ -53,7 +53,7 @@ def countFolds_optimized(shape_param):
 
 ### 2. Code Generation Framework
 
-Study and extend a complete Python code transformation pipeline:
+Study and extend a complete Python code transformation assembly line:
 
 - AST analysis and manipulation
 - Dataclass decomposition ("shattering")

@@ -158,7 +158,7 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	"""
 	Transform standard Python algorithm code into optimized Numba implementations.
 
-	This function implements the complete transformation pipeline that converts
+	This function implements the complete transformation assembly line that converts
 	a conventional Python implementation into a high-performance Numba-accelerated
 	version. The process includes:
 

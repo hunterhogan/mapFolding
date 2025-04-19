@@ -6,7 +6,7 @@ for specific map folding calculation jobs. Unlike the general-purpose transforma
 in toolboxNumba.py, this module creates standalone Python modules optimized for a
 single map shape with statically-encoded parameters.
 
-The code generation pipeline focuses on:
+The code generation assembly line focuses on:
 
 1. Converting function parameters to initialized variables with concrete values.
 2. Replacing dynamic computations with statically-known values.
@@ -175,7 +175,7 @@ def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba) -> None:
 	"""
 	Generate a highly-optimized, single-purpose Numba module for a specific map shape.
 
-	This function implements the complete transformation pipeline for creating a
+	This function implements the complete transformation assembly line for creating a
 	standalone, specialized implementation for calculating map folding solutions for
 	a specific shape. The process includes:
 
@@ -245,9 +245,9 @@ if __name__ == '__main__':
 		Z0Z_asname: ast_Identifier | None = None
 
 	listDatatypeConfigs = [
-		DatatypeConfig(fml='DatatypeLeavesTotal', Z0Z_module='numba', Z0Z_type_name='uint16'),
+		DatatypeConfig(fml='DatatypeLeavesTotal', Z0Z_module='numba', Z0Z_type_name='uint8'),
 		DatatypeConfig(fml='DatatypeElephino', Z0Z_module='numba', Z0Z_type_name='uint16'),
-		DatatypeConfig(fml='DatatypeFoldsTotal', Z0Z_module='numba', Z0Z_type_name='int64'),
+		DatatypeConfig(fml='DatatypeFoldsTotal', Z0Z_module='numba', Z0Z_type_name='uint64'),
 	]
 
 	for datatypeConfig in listDatatypeConfigs:
@@ -261,9 +261,9 @@ if __name__ == '__main__':
 	ingredientsCount.imports.removeImportFromModule('mapFolding.theSSOT')
 
 	listNumPyTypeConfigs = [
-		DatatypeConfig(fml='Array1DLeavesTotal', Z0Z_module='numpy', Z0Z_type_name='uint16', Z0Z_asname='Array1DLeavesTotal'),
+		DatatypeConfig(fml='Array1DLeavesTotal', Z0Z_module='numpy', Z0Z_type_name='uint8', Z0Z_asname='Array1DLeavesTotal'),
 		DatatypeConfig(fml='Array1DElephino', Z0Z_module='numpy', Z0Z_type_name='uint16', Z0Z_asname='Array1DElephino'),
-		DatatypeConfig(fml='Array3D', Z0Z_module='numpy', Z0Z_type_name='uint16', Z0Z_asname='Array3D'),
+		DatatypeConfig(fml='Array3D', Z0Z_module='numpy', Z0Z_type_name='uint8', Z0Z_asname='Array3D'),
 	]
 
 	for typeConfig in listNumPyTypeConfigs:
@@ -299,7 +299,7 @@ if __name__ == '__main__':
 	"""
 
 if __name__ == '__main__':
-	mapShape = (2,2,2,2,2,2,2,2)
+	mapShape = (2,21)
 	state = makeInitializedComputationState(mapShape)
 	# foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
 	foldsTotalEstimated = dictionaryEstimates[state.mapShape] // state.leavesTotal

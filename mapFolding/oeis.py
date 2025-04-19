@@ -20,7 +20,7 @@ mathematical definition in OEIS and the computational implementation in the pack
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from functools import cache
-from mapFolding import writeStringToHere, The
+from mapFolding import countFolds, The, writeStringToHere
 from pathlib import Path
 from typing import Any, Final, TYPE_CHECKING
 import argparse
@@ -401,7 +401,6 @@ def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 			raise ArithmeticError(f"OEIS sequence {oeisID} is not defined at {n = }.")
 		foldsTotal: int = settingsOEIS[oeisID]['valuesKnown'][n]
 		return foldsTotal
-	from mapFolding.basecamp import countFolds
 	return countFolds(mapShape)
 
 def OEIS_for_n() -> None:

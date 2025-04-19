@@ -19,12 +19,23 @@ collisions when transforming algorithms.
 from collections.abc import Callable
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
-from numpy import dtype, int64 as numpy_int64, integer, ndarray
 from pathlib import Path
 from tomli import load as tomli_load
 from types import ModuleType
-from typing import Any, TypeAlias, TypeVar
 import dataclasses
+from mapFolding.datatypes import (
+	Array1DElephino as Array1DElephino,
+	Array1DFoldsTotal as Array1DFoldsTotal,
+	Array1DLeavesTotal as Array1DLeavesTotal,
+	Array3D as Array3D,
+	DatatypeElephino as DatatypeElephino,
+	DatatypeFoldsTotal as DatatypeFoldsTotal,
+	DatatypeLeavesTotal as DatatypeLeavesTotal,
+	NumPyElephino as NumPyElephino,
+	NumPyFoldsTotal as NumPyFoldsTotal,
+	NumPyIntegerType as NumPyIntegerType,
+	NumPyLeavesTotal as NumPyLeavesTotal,
+)
 
 # Evaluate When Packaging https://github.com/hunterhogan/mapFolding/issues/18
 try:
@@ -143,25 +154,6 @@ class PackageSettings:
 			self.logicalPathModuleSourceAlgorithm = '.'.join([self.packageName, self.sourceAlgorithm])
 
 The = PackageSettings(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
-
-# =============================================================================
-# Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
-
-NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)
-
-DatatypeLeavesTotal: TypeAlias = int
-NumPyLeavesTotal: TypeAlias = numpy_int64
-
-DatatypeElephino: TypeAlias = int
-NumPyElephino: TypeAlias = numpy_int64
-
-DatatypeFoldsTotal: TypeAlias = int
-NumPyFoldsTotal: TypeAlias = numpy_int64
-
-Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[NumPyLeavesTotal]]
-Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyLeavesTotal]]
-Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[NumPyElephino]]
-Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]
 
 @dataclasses.dataclass
 class ComputationState:

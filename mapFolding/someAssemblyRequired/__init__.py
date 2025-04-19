@@ -22,7 +22,7 @@ functional implementations into highly-optimized variants with verified correctn
    - Recipe configuration for generating optimized code (RecipeSynthesizeFlow)
    - Dataclass decomposition for compatibility (ShatteredDataclass)
 
-3. **Optimization Pipelines**
+3. **Optimization assembly lines**
    - General-purpose Numba acceleration (makeNumbaFlow)
    - Job-specific optimization for concrete parameters (makeJobNumba)
    - Specialized component transformation (decorateCallableWithNumba)

@@ -14,7 +14,7 @@ own recipe configurations and job implementations.
    - Ensures consistency across different implementation strategies
 
 2. **Code Generation Testing**
-   - Tests the AST transformation pipeline from source to optimized implementations
+   - Tests the AST transformation assembly line from source to optimized implementations
    - Validates that generated Numba-accelerated modules produce correct results
    - Ensures robust code generation across different parameter sets
 
@@ -29,7 +29,7 @@ This suite is designed to make it easy to test your custom recipes and jobs:
 
 ### For Custom Recipes (RecipeSynthesizeFlow):
 Copy and adapt the `syntheticDispatcherFixture` and associated tests from
-`test_computations.py` to validate your customized code transformation pipelines.
+`test_computations.py` to validate your customized code transformation assembly lines.
 
 ### For Custom Jobs (RecipeJob):
 Copy and adapt the `test_writeJobNumba` function to test specialized job modules

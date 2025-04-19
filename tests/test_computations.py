@@ -85,7 +85,7 @@ All tests leverage standardized utilities like `standardizedEqualToCallableRetur
 that provide consistent, informative error messages and simplify test validation.
 """
 
-from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n, validateListDimensions
+from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n
 from mapFolding.oeis import settingsOEIS
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
 from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
@@ -98,28 +98,30 @@ import pytest
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
-def test_algorithmSourceParallel(listDimensionsTestParallelization: list[int], useAlgorithmSourceDispatcher: None) -> None:
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum', None)
+def test_algorithmSourceParallel(mapShapeTestParallelization: tuple[int, ...], useAlgorithmSourceDispatcher: None) -> None:
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestParallelization), countFolds, mapShapeTestParallelization, None, 'maximum', None)
 
-def test_algorithmSourceSequential(listDimensionsTestCountFolds: tuple[int, ...], useAlgorithmSourceDispatcher: None) -> None:
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestCountFolds)), countFolds, listDimensionsTestCountFolds)
+def test_theDaoOfMapFolding(mapShapeTestCountFolds: tuple[int, ...]) -> None:
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, 'theDaoOfMapFolding')
+
+def test_algorithmSourceSequential(mapShapeTestCountFolds: tuple[int, ...], useAlgorithmSourceDispatcher: None) -> None:
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, mapShapeTestCountFolds)
 
 def test_aOFn_calculate_value(oeisID: str) -> None:
 	for n in settingsOEIS[oeisID]['valuesTestValidation']:
 		standardizedEqualToCallableReturn(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
-def test_syntheticParallel(syntheticDispatcherFixture: None, listDimensionsTestParallelization: list[int]) -> None:
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestParallelization)), countFolds, listDimensionsTestParallelization, None, 'maximum')
+def test_syntheticParallel(syntheticDispatcherFixture: None, mapShapeTestParallelization: tuple[int, ...]) -> None:
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestParallelization), countFolds, mapShapeTestParallelization, None, 'maximum')
 
-def test_syntheticSequential(syntheticDispatcherFixture: None, listDimensionsTestCountFolds: list[int]) -> None:
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(listDimensionsTestCountFolds)), countFolds, listDimensionsTestCountFolds)
+def test_syntheticSequential(syntheticDispatcherFixture: None, mapShapeTestCountFolds: tuple[int, ...]) -> None:
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, mapShapeTestCountFolds)
 
 @pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
-def test_writeJobNumba(oneTestCuzTestsOverwritingTests: list[int], pathFilenameTmpTesting: Path) -> None:
+def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilenameTmpTesting: Path) -> None:
 	from mapFolding.someAssemblyRequired.toolboxNumba import SpicesJobNumba
 	from mapFolding.someAssemblyRequired.synthesizeNumbaJob import makeJobNumba
-	mapShape = validateListDimensions(oneTestCuzTestsOverwritingTests)
-	state = makeInitializedComputationState(mapShape)
+	state = makeInitializedComputationState(oneTestCuzTestsOverwritingTests)
 
 	pathFilenameModule = pathFilenameTmpTesting.absolute()
 	pathFilenameFoldsTotal = pathFilenameModule.with_suffix('.foldsTotalTesting')
@@ -142,4 +144,4 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: list[int], pathFilenameT
 	module.__name__ = "__main__"
 	Don_Lapre_Road_to_Self_Improvement.loader.exec_module(module)
 
-	standardizedEqualToCallableReturn(str(getFoldsTotalKnown(mapShape)), pathFilenameFoldsTotal.read_text().strip)
+	standardizedEqualToCallableReturn(str(getFoldsTotalKnown(oneTestCuzTestsOverwritingTests)), pathFilenameFoldsTotal.read_text().strip)

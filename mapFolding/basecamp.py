@@ -63,7 +63,7 @@ def countFolds(listDimensions: Sequence[int]
 
 	Note well
 	---------
-	You probably don't want to divide the computation into tasks.
+	You probably do not want to divide your computation into tasks.
 
 	If you want to compute a large `foldsTotal`, dividing the computation into tasks is usually a bad idea. Dividing the
 	algorithm into tasks is inherently inefficient: efficient division into tasks means there would be no overlap in the

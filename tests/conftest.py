@@ -56,7 +56,7 @@ See the examples in `test_computations.py` for guidance on adapting these fixtur
 """
 
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import ComputationState, The
+from mapFolding import The
 from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from mapFolding.someAssemblyRequired import importLogicalPath2Callable, RecipeSynthesizeFlow
@@ -171,7 +171,7 @@ def oneTestCuzTestsOverwritingTests(oeisID_1random: str) -> tuple[int, ...]:
 			pass
 
 @pytest.fixture
-def listDimensionsTestCountFolds(oeisID: str) -> tuple[int, ...]:
+def mapShapeTestCountFolds(oeisID: str) -> tuple[int, ...]:
 	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
 	if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
 	while True:
@@ -202,10 +202,10 @@ def mapShapeTestFunctionality(oeisID_1random: str) -> tuple[int, ...]:
 			pass
 
 @pytest.fixture
-def listDimensionsTestParallelization(oeisID: str) -> list[int]:
+def mapShapeTestParallelization(oeisID: str) -> tuple[int, ...]:
 	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestParallelization`"""
 	n = random.choice(settingsOEIS[oeisID]['valuesTestParallelization'])
-	return list(settingsOEIS[oeisID]['getMapShape'](n))
+	return settingsOEIS[oeisID]['getMapShape'](n)
 
 @pytest.fixture
 def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]:
@@ -255,8 +255,8 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 	def patchDispatcher(callableTarget: Callable[..., Any]) -> None:
 		"""Patch the dispatcher property to return the target callable."""
 		# Create a new property that returns the target callable
-		def patched_dispatcher(self: theSSOT.PackageSettings) -> Callable[['ComputationState'], 'ComputationState']:
-			def wrapper(state: 'ComputationState') -> 'ComputationState':
+		def patched_dispatcher(self: theSSOT.PackageSettings) -> Callable[..., Any]:
+			def wrapper(state: Any) -> Any:
 				return callableTarget(state)
 			return wrapper
 
@@ -268,7 +268,7 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 	# Restore the original property
 	theSSOT.PackageSettings.dispatcher = original_dispatcher_property # type: ignore
 
-def getAlgorithmDispatcher() -> Callable[[ComputationState], ComputationState]:
+def getAlgorithmDispatcher() -> Callable[..., Any]:
 	moduleImported: ModuleType = importlib.import_module(The.logicalPathModuleSourceAlgorithm)
 	dispatcherCallable = getattr(moduleImported, The.sourceCallableDispatcher)
 	return dispatcherCallable

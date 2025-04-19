@@ -29,8 +29,7 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 	"""
 	Calculate the total number of leaves in a map with the given dimensions.
 
-	The total number of leaves is the product of all dimensions in the map shape. This value is foundational for
-	initializing the computation state and determining task divisions.
+	The total number of leaves is the product of all dimensions in the map shape.
 
 	Parameters
 	----------

@@ -424,7 +424,7 @@ def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] 
 	4. Optimizes imports using autoflake
 	5. Writes the final source code to the specified file location
 
-	This is typically the final step in the code generation pipeline,
+	This is typically the final step in the code generation assembly line,
 	producing optimized Python modules ready for execution.
 
 	Parameters:
