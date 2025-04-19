@@ -1,23 +1,21 @@
 """
 AST Container Classes for Python Code Generation and Transformation
 
-This module provides specialized container classes that organize AST nodes, imports,
-and program structure for code generation and transformation. These classes form
-the organizational backbone of the code generation system, enabling:
+This module provides specialized container classes that organize AST nodes, imports, and program structure for code
+generation and transformation. These classes form the organizational backbone of the code generation system, enabling:
 
-1. Tracking and managing imports with LedgerOfImports
-2. Packaging function definitions with their dependencies via IngredientsFunction
-3. Structuring complete modules with IngredientsModule
-4. Configuring code synthesis with RecipeSynthesizeFlow
-5. Organizing decomposed dataclass representations with ShatteredDataclass
+1. Tracking and managing imports with LedgerOfImports.
+2. Packaging function definitions with their dependencies via IngredientsFunction.
+3. Structuring complete modules with IngredientsModule.
+4. Configuring code synthesis with RecipeSynthesizeFlow.
+5. Organizing decomposed dataclass representations with ShatteredDataclass.
 
-Together, these container classes implement a component-based architecture for
-programmatic generation of high-performance code. They maintain a clean separation
-between structure and content, allowing transformations to be applied systematically
-while preserving relationships between code elements.
+Together, these container classes implement a component-based architecture for programmatic generation of
+high-performance code. They maintain a clean separation between structure and content, allowing transformations to be
+applied systematically while preserving relationships between code elements.
 
-The containers work in conjunction with transformation tools that manipulate the
-contained AST nodes to implement specific optimizations and transformations.
+The containers work in conjunction with transformation tools that manipulate the contained AST nodes to implement
+specific optimizations and transformations.
 """
 
 from collections import defaultdict
@@ -33,30 +31,31 @@ class LedgerOfImports:
 	"""
 	Track and manage import statements for programmatically generated code.
 
-	LedgerOfImports acts as a registry for import statements, maintaining a clean
-	separation between the logical structure of imports and their textual representation.
+	LedgerOfImports acts as a registry for import statements, maintaining a clean separation between the logical
+	structure of imports and their textual representation.
 	It enables:
 
-	1. Tracking regular imports and import-from statements
-	2. Adding imports programmatically during code transformation
-	3. Merging imports from multiple sources
-	4. Removing unnecessary or conflicting imports
-	5. Generating optimized AST import nodes for the final code
+	1. Tracking regular imports and import-from statements.
+	2. Adding imports programmatically during code transformation.
+	3. Merging imports from multiple sources.
+	4. Removing unnecessary or conflicting imports.
+	5. Generating optimized AST import nodes for the final code.
 
-	This class forms the foundation of dependency management in generated code,
-	ensuring that all required libraries are available without duplication or
-	conflict.
+	This class forms the foundation of dependency management in generated code, ensuring that all required libraries are
+	available without duplication or conflict.
 	"""
 	# TODO When resolving the ledger of imports, remove self-referential imports
-	# TODO add TypeIgnore tracking to the ledger of imports
 
-	def __init__(self, startWith: ast.AST | None = None) -> None:
+	type_ignores: list[ast.TypeIgnore]
+
+	def __init__(self, startWith: ast.AST | None = None, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		self.dictionaryImportFrom: dict[str_nameDOTname, list[tuple[ast_Identifier, ast_Identifier | None]]] = defaultdict(list)
 		self.listImport: list[str_nameDOTname] = []
+		self.type_ignores = [] if type_ignores is None else list(type_ignores)
 		if startWith:
 			self.walkThis(startWith)
 
-	def addAst(self, astImport____: ast.Import | ast.ImportFrom) -> None:
+	def addAst(self, astImport____: ast.Import | ast.ImportFrom, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		match astImport____:
 			case ast.Import():
 				for alias in astImport____.names:
@@ -69,14 +68,20 @@ class LedgerOfImports:
 					self.dictionaryImportFrom[astImport____.module].append((alias.name, alias.asname))
 			case _:
 				raise ValueError(f"I received {type(astImport____) = }, but I can only accept {ast.Import} and {ast.ImportFrom}.")
+		if type_ignores:
+			self.type_ignores.extend(type_ignores)
 
-	def addImport_asStr(self, moduleWithLogicalPath: str_nameDOTname) -> None:
+	def addImport_asStr(self, moduleWithLogicalPath: str_nameDOTname, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		self.listImport.append(moduleWithLogicalPath)
+		if type_ignores:
+			self.type_ignores.extend(type_ignores)
 
-	def addImportFrom_asStr(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier, asname: ast_Identifier | None = None) -> None:
+	def addImportFrom_asStr(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier, asname: ast_Identifier | None = None, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		if moduleWithLogicalPath not in self.dictionaryImportFrom:
 			self.dictionaryImportFrom[moduleWithLogicalPath] = []
 		self.dictionaryImportFrom[moduleWithLogicalPath].append((name, asname))
+		if type_ignores:
+			self.type_ignores.extend(type_ignores)
 
 	def removeImportFromModule(self, moduleWithLogicalPath: str_nameDOTname) -> None:
 		"""Remove all imports from a specific module."""
@@ -129,11 +134,14 @@ class LedgerOfImports:
 		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(ledger.dictionaryImportFrom for ledger in fromLedger), destroyDuplicates=True, reorderLists=True)
 		for ledger in fromLedger:
 			self.listImport.extend(ledger.listImport)
+			self.type_ignores.extend(ledger.type_ignores)
 
-	def walkThis(self, walkThis: ast.AST) -> None:
+	def walkThis(self, walkThis: ast.AST, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		for nodeBuffalo in ast.walk(walkThis):
 			if isinstance(nodeBuffalo, (ast.Import, ast.ImportFrom)):
 				self.addAst(nodeBuffalo)
+		if type_ignores:
+			self.type_ignores.extend(type_ignores)
 
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
@@ -141,17 +149,16 @@ class IngredientsFunction:
 	"""
 	Package a function definition with its import dependencies for code generation.
 
-	IngredientsFunction encapsulates an AST function definition along with all the
-	imports required for that function to operate correctly. This creates a modular,
-	portable unit that can be:
+	IngredientsFunction encapsulates an AST function definition along with all the imports required for that function to
+	operate correctly. This creates a modular, portable unit that can be:
 
-	1. Transformed independently (e.g., by applying Numba decorators)
-	2. Transplanted between modules while maintaining dependencies
-	3. Combined with other functions to form complete modules
-	4. Analyzed for optimization opportunities
+	1. Transformed independently (e.g., by applying Numba decorators).
+	2. Transplanted between modules while maintaining dependencies.
+	3. Combined with other functions to form complete modules.
+	4. Analyzed for optimization opportunities.
 
-	This class forms the primary unit of function manipulation in the code generation
-	system, enabling targeted transformations while preserving function dependencies.
+	This class forms the primary unit of function manipulation in the code generation system, enabling targeted
+	transformations while preserving function dependencies.
 
 	Parameters:
 		astFunctionDef: The AST representation of the function definition
@@ -266,15 +273,18 @@ class IngredientsModule:
 		for ingredientsFunction in self.listIngredientsFunctions:
 			ingredientsFunction.imports.removeImportFrom(moduleWithLogicalPath, name, asname)
 
-	@property
-	def list_astImportImportFrom(self) -> list[ast.Import | ast.ImportFrom]:
-		"""List of `ast.Import` and `ast.ImportFrom` statements."""
+	def _consolidatedLedger(self) -> LedgerOfImports:
+		"""Consolidate all ledgers of imports."""
 		sherpaLedger = LedgerOfImports()
 		listLedgers: list[LedgerOfImports] = [self.imports]
 		for ingredientsFunction in self.listIngredientsFunctions:
 			listLedgers.append(ingredientsFunction.imports)
 		sherpaLedger.update(*listLedgers)
-		return sherpaLedger.makeList_ast()
+		return sherpaLedger
+
+	@property
+	def list_astImportImportFrom(self) -> list[ast.Import | ast.ImportFrom]:
+		return self._consolidatedLedger().makeList_ast()
 
 	@property
 	def body(self) -> list[ast.stmt]:
@@ -291,7 +301,7 @@ class IngredientsModule:
 	@property
 	def type_ignores(self) -> list[ast.TypeIgnore]:
 		listTypeIgnore: list[ast.TypeIgnore] = self.supplemental_type_ignores
-		# listTypeIgnore.extend(self.imports.makeListAst())
+		listTypeIgnore.extend(self._consolidatedLedger().type_ignores)
 		listTypeIgnore.extend(self.prologue.type_ignores)
 		for ingredientsFunction in self.listIngredientsFunctions:
 			listTypeIgnore.extend(ingredientsFunction.type_ignores)

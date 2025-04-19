@@ -15,7 +15,7 @@ else:
 
 class ImaCallToName(ast.Call):
 	func: ast.Name # pyright: ignore[reportIncompatibleVariableOverride]
-	# assert isinstance(ast.Call.func, ast.Name), "brinksmanship"
+	# assert isinstance(ast.Call.func, ast.Name), "brinkmanship"
 	# func: ast.Name
 
 astClassHasDOTtargetAttributeNameSubscript: typing_TypeAlias = ast.AnnAssign | ast.AugAssign
