@@ -74,6 +74,10 @@ class Make:
 		return buffaloBuffalo
 
 	@staticmethod
+	def AugAssign(target: ast.Attribute | ast.Name | ast.Subscript, operator: ast.operator, value: ast.expr, **keywordArguments: int) -> ast.AugAssign:
+		return ast.AugAssign(target, operator, value, **keywordArguments)
+
+	@staticmethod
 	def Call(callee: ast.expr, listArguments: Sequence[ast.expr] | None = None, list_astKeywords: Sequence[ast.keyword] | None = None) -> ast.Call:
 		return ast.Call(func=callee, args=list(listArguments) if listArguments else [], keywords=list(list_astKeywords) if list_astKeywords else [])
 
@@ -124,3 +128,7 @@ class Make:
 	@staticmethod
 	def Tuple(elements: Sequence[ast.expr] = [], context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Tuple:
 		return ast.Tuple(list(elements), context, **keywordArguments)
+
+	@staticmethod
+	def While(test: ast.expr, doThis: list[ast.stmt], orElse: list[ast.stmt] = [], **keywordArguments: int) -> ast.While:
+		return ast.While(test, doThis, orElse, **keywordArguments)

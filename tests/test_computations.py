@@ -101,8 +101,11 @@ if __name__ == '__main__':
 def test_algorithmSourceParallel(mapShapeTestParallelization: tuple[int, ...], useAlgorithmSourceDispatcher: None) -> None:
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestParallelization), countFolds, mapShapeTestParallelization, None, 'maximum', None)
 
-def test_theDaoOfMapFolding(mapShapeTestCountFolds: tuple[int, ...]) -> None:
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, 'theDaoOfMapFolding')
+def test_daoOfMapFolding(mapShapeTestCountFolds: tuple[int, ...]) -> None:
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, 'daoOfMapFolding')
+
+def test_theorem2(mapShapeTestCountFolds: tuple[int, ...]) -> None:
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, 'theorem2')
 
 def test_algorithmSourceSequential(mapShapeTestCountFolds: tuple[int, ...], useAlgorithmSourceDispatcher: None) -> None:
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, mapShapeTestCountFolds)

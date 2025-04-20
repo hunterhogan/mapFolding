@@ -73,12 +73,24 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	# Flow control until I can figure out a good way ===============================
 
-	if flow == 'theDaoOfMapFolding':
+	if flow == 'daoOfMapFolding':
 		from mapFolding.dataBaskets import MapFoldingState
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.theDaoOfMapFolding import doTheNeedful
+		from mapFolding.daoOfMapFolding import doTheNeedful
 		mapFoldingState = doTheNeedful(mapFoldingState)
+		foldsTotal = mapFoldingState.foldsTotal
+
+	elif flow == 'theorem2' and any((dimension > 2 for dimension in mapShape)):
+		from mapFolding.dataBaskets import MapFoldingState
+		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
+		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
+		mapFoldingState = initializeGroupsOfFolds(mapFoldingState)
+
+		from mapFolding.syntheticModules.theorem2 import count
+		mapFoldingState = count(mapFoldingState)
+
 		foldsTotal = mapFoldingState.foldsTotal
 
 	# NOTE treat this as a default?

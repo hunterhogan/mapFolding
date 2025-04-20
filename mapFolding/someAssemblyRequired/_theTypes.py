@@ -6,11 +6,13 @@ stuPyd: typing_TypeAlias = str
 if TYPE_CHECKING:
 	"""	3.12 new: ast.ParamSpec, ast.type_param, ast.TypeAlias, ast.TypeVar, ast.TypeVarTuple
 		3.11 new: ast.TryStar"""
-	astClassHasDOTnameNotName: typing_TypeAlias = ast.alias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple
+	astClassHasDOTbodyList_stmt: typing_TypeAlias = ast.AsyncFor | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.match_case | ast.Module | ast.Try | ast.TryStar | ast.While | ast.With
+	astClassHasDOTnameNotNameAlways: typing_TypeAlias = ast.alias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple
 	astClassHasDOTvalue_expr: typing_TypeAlias = ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | ast.TypeAlias | ast.YieldFrom
 
 else:
-	astClassHasDOTnameNotName = stuPyd
+	astClassHasDOTbodyList_stmt = stuPyd
+	astClassHasDOTnameNotNameAlways = stuPyd
 	astClassHasDOTvalue_expr = stuPyd
 
 class ImaCallToName(ast.Call):
@@ -18,11 +20,15 @@ class ImaCallToName(ast.Call):
 	# assert isinstance(ast.Call.func, ast.Name), "brinkmanship"
 	# func: ast.Name
 
+astClassHasDOTbody_expr: typing_TypeAlias = ast.Expression | ast.IfExp | ast.Lambda
+astClassHasDOTbody: typing_TypeAlias = astClassHasDOTbody_expr | astClassHasDOTbodyList_stmt
+
+astClassHasDOTnameNotNameOptionally: typing_TypeAlias = ast.ExceptHandler | ast.MatchAs | ast.MatchStar
+astClassHasDOTnameNotName: typing_TypeAlias = astClassHasDOTnameNotNameAlways | astClassHasDOTnameNotNameOptionally
+
 astClassHasDOTtargetAttributeNameSubscript: typing_TypeAlias = ast.AnnAssign | ast.AugAssign
 astClassHasDOTtarget_expr: typing_TypeAlias = ast.AsyncFor | ast.comprehension | ast.For
 astClassHasDOTtarget: typing_TypeAlias = ast.NamedExpr | astClassHasDOTtarget_expr | astClassHasDOTtargetAttributeNameSubscript
-
-astClassOptionallyHasDOTnameNotName: typing_TypeAlias = ast.ExceptHandler | ast.MatchAs | ast.MatchStar
 
 astClassHasDOTvalue_exprNone: typing_TypeAlias = ast.AnnAssign | ast.Return | ast.Yield
 astClassHasDOTvalue: typing_TypeAlias = ast.Constant | ast.MatchSingleton | astClassHasDOTvalue_expr | astClassHasDOTvalue_exprNone

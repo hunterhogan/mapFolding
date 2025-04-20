@@ -1,18 +1,17 @@
 """
 Core AST Traversal and Transformation Utilities for Python Code Manipulation
 
-This module provides the foundation for traversing and modifying Python Abstract
-Syntax Trees (ASTs). It contains two primary classes:
+This module provides the foundation for traversing and modifying Python Abstract Syntax Trees (ASTs). It contains two
+primary classes:
 
-1. NodeTourist: Implements the visitor pattern to traverse an AST and extract information
-   from nodes that match specific predicates without modifying the AST.
+1. NodeTourist: Implements the visitor pattern to traverse an AST and extract information from nodes that match specific
+	predicates without modifying the AST.
 
-2. NodeChanger: Extends ast.NodeTransformer to selectively transform AST nodes that
-   match specific predicates, enabling targeted code modifications.
+2. NodeChanger: Extends ast.NodeTransformer to selectively transform AST nodes that match specific predicates, enabling
+	targeted code modifications.
 
-The module also provides utilities for importing modules, loading callables from files,
-and parsing Python code into AST structures, creating a complete workflow for code
-analysis and transformation.
+The module also provides utilities for importing modules, loading callables from files, and parsing Python code into AST
+structures, creating a complete workflow for code analysis and transformation.
 """
 
 from collections.abc import Callable
@@ -32,13 +31,12 @@ class NodeTourist(ast.NodeVisitor):
 	"""
 	Visit and extract information from AST nodes that match a predicate.
 
-	NodeTourist implements the visitor pattern to traverse an AST, applying
-	a predicate function to each node and capturing nodes or their attributes
-	when they match. Unlike NodeChanger, it doesn't modify the AST but collects
+	NodeTourist implements the visitor pattern to traverse an AST, applying a predicate function to each node and
+	capturing nodes or their attributes when they match. Unlike NodeChanger, it doesn't modify the AST but collects
 	information during traversal.
 
-	This class is particularly useful for analyzing AST structures, extracting
-	specific nodes or node properties, and gathering information about code patterns.
+	This class is particularly useful for analyzing AST structures, extracting specific nodes or node properties, and
+	gathering information about code patterns.
 	"""
 	def __init__(self, findThis: Callable[..., Any], doThat: Callable[..., Any]) -> None:
 		self.findThis = findThis
@@ -61,12 +59,12 @@ class NodeChanger(ast.NodeTransformer):
 	"""
 	Transform AST nodes that match a predicate by applying a transformation function.
 
-	NodeChanger is an AST node transformer that applies a targeted transformation
-	to nodes matching a specific predicate. It traverses the AST and only modifies
-	nodes that satisfy the predicate condition, leaving other nodes unchanged.
+	NodeChanger is an AST node transformer that applies a targeted transformation to nodes matching a specific
+	predicate. It traverses the AST and only modifies nodes that satisfy the predicate condition, leaving other nodes
+	unchanged.
 
-	This class extends ast.NodeTransformer and implements the visitor pattern
-	to systematically process and transform an AST tree.
+	This class extends ast.NodeTransformer and implements the visitor pattern to systematically process and transform an
+	AST tree.
 	"""
 	def __init__(self, findThis: Callable[..., Any], doThat: Callable[..., Any]) -> None:
 		self.findThis = findThis
@@ -81,8 +79,8 @@ def importLogicalPath2Callable(logicalPathModule: str_nameDOTname, identifier: a
 	"""
 	Import a callable object (function or class) from a module based on its logical path.
 
-	This function imports a module using `importlib.import_module()` and then retrieves
-	a specific attribute (function, class, or other object) from that module.
+	This function imports a module using `importlib.import_module()` and then retrieves a specific attribute (function,
+	class, or other object) from that module.
 
 	Parameters
 	----------
@@ -91,8 +89,8 @@ def importLogicalPath2Callable(logicalPathModule: str_nameDOTname, identifier: a
 	identifier : str
 		The name of the callable object to retrieve from the module.
 	packageIdentifierIfRelative : str, optional
-		The package name to use as the anchor point if `logicalPathModule` is a relative import.
-		If None, absolute import is assumed.
+		The package name to use as the anchor point if `logicalPathModule` is a relative import. If None, absolute
+		import is assumed.
 
 	Returns
 	-------
@@ -105,16 +103,17 @@ def importLogicalPath2Callable(logicalPathModule: str_nameDOTname, identifier: a
 def importPathFilename2Callable(pathFilename: PathLike[Any] | PurePath, identifier: ast_Identifier, moduleIdentifier: ast_Identifier | None = None) -> Callable[..., Any]:
 	"""
 	Load a callable (function, class, etc.) from a Python file.
-	This function imports a specified Python file as a module, extracts a callable object
-	from it by name, and returns that callable.
+
+	This function imports a specified Python file as a module, extracts a callable object from it by name, and returns
+	that callable.
 
 	Parameters
 	----------
-	pathFilename : Union[PathLike[Any], PurePath]
+	pathFilename
 		Path to the Python file to import.
-	identifier : str
+	identifier
 		Name of the callable to extract from the imported module.
-	moduleIdentifier : Optional[str]
+	moduleIdentifier
 		Name to use for the imported module. If None, the filename stem is used.
 
 	Returns

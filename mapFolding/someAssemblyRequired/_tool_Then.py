@@ -16,7 +16,7 @@ once they have been identified using predicate functions from ifThis.
 
 from collections.abc import Callable, Sequence
 from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue, ImaCallToName, NodeORattribute
-from typing import Any
+from typing import Any, overload
 import ast
 
 class grab:
@@ -33,9 +33,31 @@ class grab:
 	control when transforming AST structures.
 	"""
 	@staticmethod
+	def andDoAllOf(listOfActions: list[Callable[[NodeORattribute], NodeORattribute]]) -> Callable[[NodeORattribute], NodeORattribute]:
+		def workhorse(node: NodeORattribute) -> NodeORattribute:
+			for action in listOfActions:
+				node = action(node)
+			return node
+		return workhorse
+
+	@staticmethod
 	def argAttribute(action: Callable[[ast_Identifier | None], ast_Identifier]) -> Callable[[ast.arg | ast.keyword], ast.arg | ast.keyword]:
 		def workhorse(node: ast.arg | ast.keyword) -> ast.arg | ast.keyword:
 			node.arg = action(node.arg)
+			return node
+		return workhorse
+
+	@staticmethod
+	def attrAttribute(action: Callable[[ast_Identifier], ast_Identifier]) -> Callable[[ast.Attribute], ast.Attribute]:
+		def workhorse(node: ast.Attribute) -> ast.Attribute:
+			node.attr = action(node.attr)
+			return node
+		return workhorse
+
+	@staticmethod
+	def comparatorsAttribute(action: Callable[[list[ast.expr]], list[ast.expr]]) -> Callable[[ast.Compare], ast.Compare]:
+		def workhorse(node: ast.Compare) -> ast.Compare:
+			node.comparators = action(node.comparators)
 			return node
 		return workhorse
 
@@ -57,6 +79,27 @@ class grab:
 	def idAttribute(action: Callable[[ast_Identifier], ast_Identifier]) -> Callable[[ast.Name], ast.Name]:
 		def workhorse(node: ast.Name) -> ast.Name:
 			node.id = action(node.id)
+			return node
+		return workhorse
+
+	@staticmethod
+	def leftAttribute(action: Callable[[ast.expr], ast.expr]) -> Callable[[ast.BinOp | ast.Compare], ast.BinOp | ast.Compare]:
+		def workhorse(node: ast.BinOp | ast.Compare) -> ast.BinOp | ast.Compare:
+			node.left = action(node.left)
+			return node
+		return workhorse
+
+	@staticmethod
+	def opsAttribute(action: Callable[[list[ast.cmpop]], list[ast.cmpop]]) -> Callable[[ast.Compare], ast.Compare]:
+		def workhorse(node: ast.Compare) -> ast.Compare:
+			node.ops = action(node.ops)
+			return node
+		return workhorse
+
+	@staticmethod
+	def testAttribute(action: Callable[[ast.expr], ast.expr]) -> Callable[[ast.Assert | ast.If | ast.IfExp | ast.While], ast.Assert | ast.If | ast.IfExp | ast.While]:
+		def workhorse(node: ast.Assert | ast.If | ast.IfExp | ast.While) -> ast.Assert | ast.If | ast.IfExp | ast.While:
+			node.test = action(node.test)
 			return node
 		return workhorse
 

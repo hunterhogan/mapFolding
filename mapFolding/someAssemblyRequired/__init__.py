@@ -50,14 +50,18 @@ to verify correctness at each transformation stage through the integrated test s
 from mapFolding.someAssemblyRequired._theTypes import (
 	ast_expr_Slice as ast_expr_Slice,
 	ast_Identifier as ast_Identifier,
+	astClassHasDOTbody as astClassHasDOTbody,
+	astClassHasDOTbody_expr as astClassHasDOTbody_expr,
+	astClassHasDOTbodyList_stmt as astClassHasDOTbodyList_stmt,
 	astClassHasDOTnameNotName as astClassHasDOTnameNotName,
+	astClassHasDOTnameNotNameAlways as astClassHasDOTnameNotNameAlways,
+	astClassHasDOTnameNotNameOptionally as astClassHasDOTnameNotNameOptionally,
 	astClassHasDOTtarget as astClassHasDOTtarget,
 	astClassHasDOTtarget_expr as astClassHasDOTtarget_expr,
 	astClassHasDOTtargetAttributeNameSubscript as astClassHasDOTtargetAttributeNameSubscript,
 	astClassHasDOTvalue as astClassHasDOTvalue,
 	astClassHasDOTvalue_expr as astClassHasDOTvalue_expr,
 	astClassHasDOTvalue_exprNone as astClassHasDOTvalue_exprNone,
-	astClassOptionallyHasDOTnameNotName as astClassOptionallyHasDOTnameNotName,
 	ImaCallToName as ImaCallToName,
 	intORlist_ast_type_paramORstr_orNone as intORlist_ast_type_paramORstr_orNone,
 	intORstr_orNone as intORstr_orNone,
@@ -87,3 +91,9 @@ from mapFolding.someAssemblyRequired._toolboxContainers import (
 	RecipeSynthesizeFlow as RecipeSynthesizeFlow,
 	ShatteredDataclass as ShatteredDataclass,
 )
+
+from mapFolding.someAssemblyRequired._toolboxAST import (
+	astModuleToIngredientsFunction as astModuleToIngredientsFunction,
+	extractClassDef as extractClassDef,
+	extractFunctionDef as extractFunctionDef,
+	)

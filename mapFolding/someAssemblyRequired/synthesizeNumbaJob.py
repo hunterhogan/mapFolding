@@ -22,6 +22,7 @@ from mapFolding import getPathFilenameFoldsTotal, raiseIfNoneGitHubIssueNumber3,
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	be,
+	extractFunctionDef,
 	ifThis,
 	IngredientsFunction,
 	IngredientsModule,
@@ -34,7 +35,7 @@ from mapFolding.someAssemblyRequired import (
 )
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
 from mapFolding.someAssemblyRequired.toolboxNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
-from mapFolding.someAssemblyRequired.transformationTools import dictionaryEstimates, extractFunctionDef, write_astModule, makeInitializedComputationState
+from mapFolding.someAssemblyRequired.transformationTools import dictionaryEstimates, write_astModule, makeInitializedComputationState
 from pathlib import PurePosixPath
 from typing import cast, NamedTuple
 from Z0Z_tools import autoDecodingRLE

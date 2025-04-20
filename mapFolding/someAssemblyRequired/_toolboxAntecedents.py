@@ -1,36 +1,39 @@
 """
 AST Node Predicate and Access Utilities for Pattern Matching and Traversal
 
-This module provides utilities for accessing and matching AST nodes in a consistent way.
-It contains three primary classes:
+This module provides utilities for accessing and matching AST nodes in a consistent way. It contains three primary
+classes:
 
-1. DOT: Provides consistent accessor methods for AST node attributes across different
-   node types, simplifying the access to node properties.
+1. DOT: Provides consistent accessor methods for AST node attributes across different node types, simplifying the access
+	to node properties.
 
-2. be: Offers type-guard functions that verify AST node types, enabling safe type
-   narrowing for static type checking and improving code safety.
+2. be: Offers type-guard functions that verify AST node types, enabling safe type narrowing for static type checking and
+	improving code safety.
 
-3. ifThis: Contains predicate functions for matching AST nodes based on various criteria,
-   enabling precise targeting of nodes for analysis or transformation.
+3. ifThis: Contains predicate functions for matching AST nodes based on various criteria, enabling precise targeting of
+	nodes for analysis or transformation.
 
-These utilities form the foundation of the pattern-matching component in the AST
-manipulation framework, working in conjunction with the NodeChanger and NodeTourist
-classes to enable precise and targeted code transformations. Together, they implement
-a declarative approach to AST manipulation that separates node identification (ifThis),
-type verification (be), and data access (DOT).
+These utilities form the foundation of the pattern-matching component in the AST manipulation framework, working in
+conjunction with the NodeChanger and NodeTourist classes to enable precise and targeted code transformations. Together,
+they implement a declarative approach to AST manipulation that separates node identification (ifThis), type verification
+(be), and data access (DOT).
 """
 
 from collections.abc import Callable
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
+	astClassHasDOTbody,
+	astClassHasDOTbody_expr,
+	astClassHasDOTbodyList_stmt,
 	astClassHasDOTnameNotName,
+	astClassHasDOTnameNotNameAlways,
+	astClassHasDOTnameNotNameOptionally,
+	astClassHasDOTtarget_expr,
 	astClassHasDOTtarget,
 	astClassHasDOTtargetAttributeNameSubscript,
-	astClassHasDOTtarget_expr,
-	astClassHasDOTvalue,
 	astClassHasDOTvalue_expr,
-	astClassOptionallyHasDOTnameNotName,
 	astClassHasDOTvalue_exprNone,
+	astClassHasDOTvalue,
 	ImaCallToName,
 )
 from typing import Any, overload, TypeGuard
@@ -74,6 +77,16 @@ class DOT:
 
 	@staticmethod
 	@overload
+	def body(node: astClassHasDOTbodyList_stmt) -> list[ast.stmt]:...
+	@staticmethod
+	@overload
+	def body(node: astClassHasDOTbody_expr) -> ast.expr:...
+	@staticmethod
+	def body(node: astClassHasDOTbody) -> ast.expr | list[ast.stmt]:
+		return node.body
+
+	@staticmethod
+	@overload
 	def func(node: ImaCallToName) -> ast.Name:...
 	@staticmethod
 	@overload
@@ -88,12 +101,12 @@ class DOT:
 
 	@staticmethod
 	@overload
-	def name(node: astClassHasDOTnameNotName) -> ast_Identifier:...
+	def name(node: astClassHasDOTnameNotNameAlways) -> ast_Identifier:...
 	@staticmethod
 	@overload
-	def name(node: astClassOptionallyHasDOTnameNotName) -> ast_Identifier | None:...
+	def name(node: astClassHasDOTnameNotNameOptionally) -> ast_Identifier | None:...
 	@staticmethod
-	def name(node: astClassHasDOTnameNotName | astClassOptionallyHasDOTnameNotName) -> ast_Identifier | None:
+	def name(node: astClassHasDOTnameNotName) -> ast_Identifier | None:
 		return node.name
 
 	@staticmethod
@@ -129,18 +142,16 @@ class be:
 	"""
 	Provide type-guard functions for safely verifying AST node types during manipulation.
 
-	The be class contains static methods that perform runtime type verification of AST nodes,
-	returning TypeGuard results that enable static type checkers to narrow node types in
-	conditional branches. These type-guards:
+	The be class contains static methods that perform runtime type verification of AST nodes, returning TypeGuard
+	results that enable static type checkers to narrow node types in conditional branches. These type-guards:
 
-	1. Improve code safety by preventing operations on incompatible node types
-	2. Enable IDE tooling to provide better autocompletion and error detection
-	3. Document expected node types in a way that's enforced by the type system
-	4. Support pattern-matching workflows where node types must be verified before access
+	1. Improve code safety by preventing operations on incompatible node types.
+	2. Enable IDE tooling to provide better autocompletion and error detection.
+	3. Document expected node types in a way that's enforced by the type system.
+	4. Support pattern-matching workflows where node types must be verified before access.
 
-	When used with conditional statements, these type-guards allow for precise,
-	type-safe manipulation of AST nodes while maintaining full static type checking
-	capabilities, even in complex transformation scenarios.
+	When used with conditional statements, these type-guards allow for precise, type-safe manipulation of AST nodes
+	while maintaining full static type checking capabilities, even in complex transformation scenarios.
 	"""
 	@staticmethod
 	def AnnAssign(node: ast.AST) -> TypeGuard[ast.AnnAssign]:
@@ -171,12 +182,32 @@ class be:
 		return isinstance(node, ast.ClassDef)
 
 	@staticmethod
+	def Compare(node: ast.AST) -> TypeGuard[ast.Compare]:
+		return isinstance(node, ast.Compare)
+
+	@staticmethod
+	def Constant(node: ast.AST) -> TypeGuard[ast.Constant]:
+		return isinstance(node, ast.Constant)
+
+	@staticmethod
 	def FunctionDef(node: ast.AST) -> TypeGuard[ast.FunctionDef]:
 		return isinstance(node, ast.FunctionDef)
 
 	@staticmethod
 	def keyword(node: ast.AST) -> TypeGuard[ast.keyword]:
 		return isinstance(node, ast.keyword)
+
+	@staticmethod
+	def If(node: ast.AST) -> TypeGuard[ast.If]:
+		return isinstance(node, ast.If)
+
+	@staticmethod
+	def Gt(node: ast.AST) -> TypeGuard[ast.Gt]:
+		return isinstance(node, ast.Gt)
+
+	@staticmethod
+	def LtE(node: ast.AST) -> TypeGuard[ast.LtE]:
+		return isinstance(node, ast.LtE)
 
 	@staticmethod
 	def Name(node: ast.AST) -> TypeGuard[ast.Name]:
@@ -193,6 +224,10 @@ class be:
 	@staticmethod
 	def Subscript(node: ast.AST) -> TypeGuard[ast.Subscript]:
 		return isinstance(node, ast.Subscript)
+
+	@staticmethod
+	def While(node: ast.AST) -> TypeGuard[ast.While]:
+		return isinstance(node, ast.While)
 
 class ifThis:
 	"""
@@ -258,6 +293,29 @@ class ifThis:
 		return lambda node: ifThis.isAttributeName(node) and ifThis.isName_Identifier(namespace)(DOT.value(node)) and ifThis._Identifier(identifier)(DOT.attr(node))
 
 	@staticmethod
+	def isAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
+		return lambda node: (be.Compare(node)
+					and ifThis.isAttributeNamespace_Identifier(namespace, identifier)(node.left)
+					and be.Gt(node.ops[0])
+					and ifThis.isConstant_value(0)(node.comparators[0]))
+
+	@staticmethod
+	def isIfAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.While] | bool]:
+		return lambda node: (be.If(node)
+					and ifThis.isAttributeNamespace_IdentifierGreaterThan0(namespace, identifier)(node.test))
+
+	@staticmethod
+	def isWhileAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.While] | bool]:
+		return lambda node: (be.While(node)
+					and ifThis.isAttributeNamespace_IdentifierGreaterThan0(namespace, identifier)(node.test))
+
+	@staticmethod
+	def isAttributeNamespace_IdentifierLessThanOrEqual(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
+		return lambda node: (be.Compare(node)
+					and ifThis.isAttributeNamespace_Identifier(namespace, identifier)(node.left)
+					and be.LtE(node.ops[0]))
+
+	@staticmethod
 	def isAugAssign_targetIs(targetPredicate: Callable[[ast.expr], TypeGuard[ast.expr] | bool]) -> Callable[[ast.AST], TypeGuard[ast.AugAssign] | bool]:
 		def workhorse(node: ast.AST) -> TypeGuard[ast.AugAssign] | bool:
 			return be.AugAssign(node) and targetPredicate(DOT.target(node))
@@ -281,6 +339,10 @@ class ifThis:
 	@staticmethod
 	def isClassDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.ClassDef] | bool]:
 		return lambda node: be.ClassDef(node) and ifThis._Identifier(identifier)(DOT.name(node))
+
+	@staticmethod
+	def isConstant_value(value: Any) -> Callable[[ast.AST], TypeGuard[ast.Constant] | bool]:
+		return lambda node: be.Constant(node) and DOT.value(node) == value
 
 	@staticmethod
 	def isFunctionDef_Identifier(identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.FunctionDef] | bool]:
