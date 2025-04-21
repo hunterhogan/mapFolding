@@ -84,11 +84,11 @@ def importLogicalPath2Callable(logicalPathModule: str_nameDOTname, identifier: a
 
 	Parameters
 	----------
-	logicalPathModule : str
+	logicalPathModule
 		The logical path to the module, using dot notation (e.g., 'package.subpackage.module').
-	identifier : str
+	identifier
 		The name of the callable object to retrieve from the module.
-	packageIdentifierIfRelative : str, optional
+	packageIdentifierIfRelative : None
 		The package name to use as the anchor point if `logicalPathModule` is a relative import. If None, absolute
 		import is assumed.
 
@@ -137,49 +137,52 @@ def importPathFilename2Callable(pathFilename: PathLike[Any] | PurePath, identifi
 	importlibSpecification.loader.exec_module(moduleImported_jk_hahaha)
 	return getattr(moduleImported_jk_hahaha, identifier)
 
-def parseLogicalPath2astModule(logicalPathModule: str_nameDOTname, packageIdentifierIfRelative: ast_Identifier|None=None, mode: Literal['exec'] = 'exec') -> ast.Module:
+def parseLogicalPath2astModule(logicalPathModule: str_nameDOTname, packageIdentifierIfRelative: ast_Identifier | None = None, mode: Literal['exec'] = 'exec') -> ast.Module:
 	"""
-	Parse a logical Python module path into an AST Module.
+	Parse a logical Python module path into an `ast.Module`.
 
-	This function imports a module using its logical path (e.g., 'package.subpackage.module')
-	and converts its source code into an Abstract Syntax Tree (AST) Module object.
+	This function imports a module using its logical path (e.g., 'package.subpackage.module') and converts its source
+	code into an Abstract Syntax Tree (AST) Module object.
 
 	Parameters
 	----------
-	logicalPathModule : str
+	logicalPathModule
 		The logical path to the module using dot notation (e.g., 'package.module').
-	packageIdentifierIfRelative : ast.Identifier or None, optional
+	packageIdentifierIfRelative : None
 		The package identifier to use if the module path is relative, defaults to None.
-	mode : Literal['exec'], optional
-		The parsing mode to use, defaults to 'exec'.
+	mode : Literal['exec']
+		The mode parameter for `ast.parse`. Default is `Literal['exec']`. Options are `Literal['exec']`, `"exec"` (which
+		is _not_ the same as `Literal['exec']`), `Literal['eval']`, `Literal['func_type']`, `Literal['single']`. See
+		`ast.parse` documentation for some details and much confusion.
 
 	Returns
 	-------
-	ast.Module
+	astModule
 		An AST Module object representing the parsed source code of the imported module.
 	"""
 	moduleImported: ModuleType = importlib.import_module(logicalPathModule, packageIdentifierIfRelative)
 	sourcePython: str = inspect_getsource(moduleImported)
-	return ast.parse(sourcePython, mode=mode)
+	return ast.parse(sourcePython, mode)
 
 def parsePathFilename2astModule(pathFilename: PathLike[Any] | PurePath, mode: Literal['exec'] = 'exec') -> ast.Module:
 	"""
-	Parse a file from a given path into an ast.Module.
+	Parse a file from a given path into an `ast.Module`.
 
-	This function reads the content of a file specified by `pathFilename` and parses it into an
-	Abstract Syntax Tree (AST) Module using Python's ast module.
+	This function reads the content of a file specified by `pathFilename` and parses it into an Abstract Syntax Tree
+	(AST) Module using Python's ast module.
 
 	Parameters
 	----------
-	pathFilename : PathLike[Any] | PurePath
+	pathFilename
 		The path to the file to be parsed. Can be a string path, PathLike object, or PurePath object.
-	mode : Literal['exec'], optional
-		The mode parameter for ast.parse. Default is 'exec'.
-		Options are 'exec', 'eval', or 'single'. See ast.parse documentation for details.
+	mode : Literal['exec']
+		The mode parameter for `ast.parse`. Default is `Literal['exec']`. Options are `Literal['exec']`, `"exec"` (which
+		is _not_ the same as `Literal['exec']`), `Literal['eval']`, `Literal['func_type']`, `Literal['single']`. See
+		`ast.parse` documentation for some details and much confusion.
 
 	Returns
 	-------
-	ast.Module
+	astModule
 		The parsed abstract syntax tree module.
 	"""
-	return ast.parse(Path(pathFilename).read_text(), mode=mode)
+	return ast.parse(Path(pathFilename).read_text(), mode)

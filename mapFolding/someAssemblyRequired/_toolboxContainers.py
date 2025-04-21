@@ -32,8 +32,7 @@ class LedgerOfImports:
 	Track and manage import statements for programmatically generated code.
 
 	LedgerOfImports acts as a registry for import statements, maintaining a clean separation between the logical
-	structure of imports and their textual representation.
-	It enables:
+	structure of imports and their textual representation. It enables:
 
 	1. Tracking regular imports and import-from statements.
 	2. Adding imports programmatically during code transformation.
@@ -45,8 +44,6 @@ class LedgerOfImports:
 	available without duplication or conflict.
 	"""
 	# TODO When resolving the ledger of imports, remove self-referential imports
-
-	type_ignores: list[ast.TypeIgnore]
 
 	def __init__(self, startWith: ast.AST | None = None, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		self.dictionaryImportFrom: dict[str_nameDOTname, list[tuple[ast_Identifier, ast_Identifier | None]]] = defaultdict(list)
@@ -77,8 +74,6 @@ class LedgerOfImports:
 			self.type_ignores.extend(type_ignores)
 
 	def addImportFrom_asStr(self, moduleWithLogicalPath: str_nameDOTname, name: ast_Identifier, asname: ast_Identifier | None = None, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
-		if moduleWithLogicalPath not in self.dictionaryImportFrom:
-			self.dictionaryImportFrom[moduleWithLogicalPath] = []
 		self.dictionaryImportFrom[moduleWithLogicalPath].append((name, asname))
 		if type_ignores:
 			self.type_ignores.extend(type_ignores)
@@ -131,7 +126,8 @@ class LedgerOfImports:
 		Parameters:
 			*fromLedger: One or more other `LedgerOfImports` objects from which to merge.
 		"""
-		self.dictionaryImportFrom = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(ledger.dictionaryImportFrom for ledger in fromLedger), destroyDuplicates=True, reorderLists=True)
+		updatedDictionary = updateExtendPolishDictionaryLists(self.dictionaryImportFrom, *(ledger.dictionaryImportFrom for ledger in fromLedger), destroyDuplicates=True, reorderLists=True)
+		self.dictionaryImportFrom = defaultdict(list, updatedDictionary)
 		for ledger in fromLedger:
 			self.listImport.extend(ledger.listImport)
 			self.type_ignores.extend(ledger.type_ignores)
@@ -449,7 +445,7 @@ class ShatteredDataclass:
 	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
 	"""AST tuple used as target for assignment to capture returned fragments."""
 
-	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
+	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	"""Import records for the dataclass and its constituent parts."""
 
 	list_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list)

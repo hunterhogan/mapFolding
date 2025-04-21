@@ -132,7 +132,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	Returns:
 		The modified function with parameters converted to initialized variables.
 	"""
-	ingredientsFunction.imports.update(job.shatteredDataclass.ledger)
+	ingredientsFunction.imports.update(job.shatteredDataclass.imports)
 
 	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
 	list_arg_arg: list[ast_Identifier] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]

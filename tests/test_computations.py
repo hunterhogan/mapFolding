@@ -85,6 +85,7 @@ All tests leverage standardized utilities like `standardizedEqualToCallableRetur
 that provide consistent, informative error messages and simplify test validation.
 """
 
+from typing import Literal
 from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n
 from mapFolding.oeis import settingsOEIS
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
@@ -101,11 +102,9 @@ if __name__ == '__main__':
 def test_algorithmSourceParallel(mapShapeTestParallelization: tuple[int, ...], useAlgorithmSourceDispatcher: None) -> None:
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestParallelization), countFolds, mapShapeTestParallelization, None, 'maximum', None)
 
-def test_daoOfMapFolding(mapShapeTestCountFolds: tuple[int, ...]) -> None:
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, 'daoOfMapFolding')
-
-def test_theorem2(mapShapeTestCountFolds: tuple[int, ...]) -> None:
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, 'theorem2')
+@pytest.mark.parametrize('flow', ['daoOfMapFolding', 'theorem2', 'theorem2numba'])
+def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: Literal['daoOfMapFolding'] | Literal['theorem2'] | Literal['theorem2numba']) -> None:
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, flow)
 
 def test_algorithmSourceSequential(mapShapeTestCountFolds: tuple[int, ...], useAlgorithmSourceDispatcher: None) -> None:
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, mapShapeTestCountFolds)

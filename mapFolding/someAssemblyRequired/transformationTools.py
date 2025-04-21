@@ -353,8 +353,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 	shatteredDataclass.repack = Make.Assign(listTargets=[Make.Name(instance_Identifier)], value=Make.Call(Make.Name(dataclass_Identifier), list_astKeywords=shatteredDataclass.list_keyword_field__field4init))
 	shatteredDataclass.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.listAnnotations))
 
-	shatteredDataclass.ledger.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
-	shatteredDataclass.ledger.addImportFrom_asStr(logicalPathModule, dataclass_Identifier)
+	shatteredDataclass.imports.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
+	shatteredDataclass.imports.addImportFrom_asStr(logicalPathModule, dataclass_Identifier)
 
 	return shatteredDataclass
 
@@ -397,6 +397,27 @@ def write_astModule(ingredients: IngredientsModule, pathFilename: PathLike[Any] 
 
 # END of acceptable classes and functions ======================================================
 def removeUnusedParameters(ingredientsFunction: IngredientsFunction) -> IngredientsFunction:
+	"""
+	Removes unused parameters from a function's AST definition, return statement, and annotation.
+
+	This function analyzes the Abstract Syntax Tree (AST) of a given function and removes
+	any parameters that are not referenced within the function body. It updates the
+	function signature, the return statement (if it's a tuple containing unused variables),
+	and the return type annotation accordingly.
+
+	Parameters
+	----------
+	ingredientsFunction : IngredientsFunction
+		An object containing the AST representation of a function to be processed.
+
+	Returns
+	-------
+	IngredientsFunction
+		The modified IngredientsFunction object with unused parameters and corresponding
+		return elements/annotations removed from its AST.
+
+	The modification is done in-place on the original AST nodes within the IngredientsFunction object.
+	"""
 	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
 	list_arg_arg: list[ast_Identifier] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
 	listName: list[ast.Name] = []
@@ -408,6 +429,18 @@ def removeUnusedParameters(ingredientsFunction: IngredientsFunction) -> Ingredie
 	for arg_Identifier in list_IdentifiersNotUsed:
 		remove_arg = NodeChanger(ifThis.is_arg_Identifier(arg_Identifier), Then.removeIt)
 		remove_arg.visit(ingredientsFunction.astFunctionDef)
+
+	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
+
+	listName: list[ast.Name] = [Make.Name(ast_arg.arg) for ast_arg in list_argCuzMyBrainRefusesToThink]
+	replaceReturn = NodeChanger(be.Return, Then.replaceWith(Make.Return(Make.Tuple(listName))))
+	replaceReturn.visit(ingredientsFunction.astFunctionDef)
+
+	list_annotation: list[ast.expr] = [ast_arg.annotation for ast_arg in list_argCuzMyBrainRefusesToThink if ast_arg.annotation is not None]
+	ingredientsFunction.astFunctionDef.returns = Make.Subscript(Make.Name('tuple'), Make.Tuple(list_annotation))
+
+	ast.fix_missing_locations(ingredientsFunction.astFunctionDef)
+
 	return ingredientsFunction
 
 def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
@@ -463,7 +496,7 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	instance_Identifier = recipeFlow.dataclassInstance
 	getTheOtherRecord_damn = recipeFlow.dataclassInstanceTaskDistribution
 	shatteredDataclass = shatter_dataclassesDOTdataclass(recipeFlow.logicalPathModuleDataclass, recipeFlow.sourceDataclassIdentifier, instance_Identifier)
-	ingredientsDispatcher.imports.update(shatteredDataclass.ledger)
+	ingredientsDispatcher.imports.update(shatteredDataclass.imports)
 
 	# How can I use dataclass settings as the SSOT for specific actions? https://github.com/hunterhogan/mapFolding/issues/16
 	# Change callable parameters and Call to the callable at the same time ====

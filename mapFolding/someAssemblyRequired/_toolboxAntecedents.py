@@ -226,6 +226,10 @@ class be:
 		return isinstance(node, ast.Subscript)
 
 	@staticmethod
+	def Tuple(node: ast.AST) -> TypeGuard[ast.Tuple]:
+		return isinstance(node, ast.Tuple)
+
+	@staticmethod
 	def While(node: ast.AST) -> TypeGuard[ast.While]:
 		return isinstance(node, ast.While)
 
