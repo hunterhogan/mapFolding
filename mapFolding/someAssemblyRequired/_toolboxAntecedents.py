@@ -28,12 +28,12 @@ from mapFolding.someAssemblyRequired import (
 	astClassHasDOTnameNotName,
 	astClassHasDOTnameNotNameAlways,
 	astClassHasDOTnameNotNameOptionally,
-	astClassHasDOTtarget_expr,
 	astClassHasDOTtarget,
+	astClassHasDOTtarget_expr,
 	astClassHasDOTtargetAttributeNameSubscript,
+	astClassHasDOTvalue,
 	astClassHasDOTvalue_expr,
 	astClassHasDOTvalue_exprNone,
-	astClassHasDOTvalue,
 	ImaCallToName,
 )
 from typing import Any, overload, TypeGuard
@@ -43,13 +43,12 @@ class DOT:
 	"""
 	Access attributes and sub-nodes of AST elements via consistent accessor methods.
 
-	The DOT class provides static methods to access specific attributes of different
-	types of AST nodes in a consistent way. This simplifies attribute access across
-	various node types and improves code readability by abstracting the underlying
-	AST structure details.
+	The DOT class provides static methods to access specific attributes of different types of AST nodes in a consistent
+	way. This simplifies attribute access across various node types and improves code readability by abstracting the
+	underlying AST structure details.
 
-	DOT is designed for safe, read-only access to node properties, unlike the grab
-	class which is designed for modifying node attributes.
+	DOT is designed for safe, read-only access to node properties, unlike the grab class which is designed for modifying
+	node attributes.
 	"""
 	@staticmethod
 	@overload
@@ -237,13 +236,12 @@ class ifThis:
 	"""
 	Provide predicate functions for matching and filtering AST nodes based on various criteria.
 
-	The ifThis class contains static methods that generate predicate functions used to test
-	whether AST nodes match specific criteria. These predicates can be used with NodeChanger
-	and NodeTourist to identify and process specific patterns in the AST.
+	The ifThis class contains static methods that generate predicate functions used to test whether AST nodes match
+	specific criteria. These predicates can be used with NodeChanger and NodeTourist to identify and process specific
+	patterns in the AST.
 
-	The class provides predicates for matching various node types, attributes, identifiers,
-	and structural patterns, enabling precise targeting of AST elements for analysis or
-	transformation.
+	The class provides predicates for matching various node types, attributes, identifiers, and structural patterns,
+	enabling precise targeting of AST elements for analysis or transformation.
 	"""
 	@staticmethod
 	def _Identifier(identifier: ast_Identifier) -> Callable[[ast_Identifier | None], TypeGuard[ast_Identifier] | bool]:

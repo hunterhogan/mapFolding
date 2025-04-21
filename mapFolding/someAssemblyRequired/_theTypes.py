@@ -1,19 +1,10 @@
-from typing import Any, TYPE_CHECKING, TypeAlias as typing_TypeAlias, TypeVar as typing_TypeVar
+from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTtype_param, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple
+from typing import Any, TypeAlias as typing_TypeAlias, TypeVar as typing_TypeVar
 import ast
+
 # TODO understand typing.
 
 stuPyd: typing_TypeAlias = str
-if TYPE_CHECKING:
-	"""	3.12 new: ast.ParamSpec, ast.type_param, ast.TypeAlias, ast.TypeVar, ast.TypeVarTuple
-		3.11 new: ast.TryStar"""
-	astClassHasDOTbodyList_stmt: typing_TypeAlias = ast.AsyncFor | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.match_case | ast.Module | ast.Try | ast.TryStar | ast.While | ast.With
-	astClassHasDOTnameNotNameAlways: typing_TypeAlias = ast.alias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple
-	astClassHasDOTvalue_expr: typing_TypeAlias = ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | ast.TypeAlias | ast.YieldFrom
-
-else:
-	astClassHasDOTbodyList_stmt = stuPyd
-	astClassHasDOTnameNotNameAlways = stuPyd
-	astClassHasDOTvalue_expr = stuPyd
 
 class ImaCallToName(ast.Call):
 	func: ast.Name # pyright: ignore[reportIncompatibleVariableOverride]
@@ -21,8 +12,10 @@ class ImaCallToName(ast.Call):
 	# func: ast.Name
 
 astClassHasDOTbody_expr: typing_TypeAlias = ast.Expression | ast.IfExp | ast.Lambda
+astClassHasDOTbodyList_stmt: typing_TypeAlias = ast.AsyncFor | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.match_case | ast.Module | ast.Try | astDOTTryStar | ast.While | ast.With
 astClassHasDOTbody: typing_TypeAlias = astClassHasDOTbody_expr | astClassHasDOTbodyList_stmt
 
+astClassHasDOTnameNotNameAlways: typing_TypeAlias = ast.alias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTParamSpec | astDOTTypeVar | astDOTTypeVarTuple
 astClassHasDOTnameNotNameOptionally: typing_TypeAlias = ast.ExceptHandler | ast.MatchAs | ast.MatchStar
 astClassHasDOTnameNotName: typing_TypeAlias = astClassHasDOTnameNotNameAlways | astClassHasDOTnameNotNameOptionally
 
@@ -30,6 +23,7 @@ astClassHasDOTtargetAttributeNameSubscript: typing_TypeAlias = ast.AnnAssign | a
 astClassHasDOTtarget_expr: typing_TypeAlias = ast.AsyncFor | ast.comprehension | ast.For
 astClassHasDOTtarget: typing_TypeAlias = ast.NamedExpr | astClassHasDOTtarget_expr | astClassHasDOTtargetAttributeNameSubscript
 
+astClassHasDOTvalue_expr: typing_TypeAlias = ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | astDOTTypeAlias | ast.YieldFrom
 astClassHasDOTvalue_exprNone: typing_TypeAlias = ast.AnnAssign | ast.Return | ast.Yield
 astClassHasDOTvalue: typing_TypeAlias = ast.Constant | ast.MatchSingleton | astClassHasDOTvalue_expr | astClassHasDOTvalue_exprNone
 
@@ -53,11 +47,7 @@ Ima_ast_mod: typing_TypeAlias = ast.mod | ast.Expression | ast.FunctionType | as
 Ima_ast_operator: typing_TypeAlias = ast.operator | ast.Add | ast.Sub | ast.Mult | ast.MatMult | ast.Div | ast.Mod | ast.Pow | ast.LShift | ast.RShift | ast.BitOr | ast.BitXor | ast.BitAnd | ast.FloorDiv
 Ima_ast_orphan = ast.alias | ast.arg | ast.arguments | ast.comprehension | ast.keyword | ast.match_case | ast.withitem
 iMa_ast_pattern: typing_TypeAlias = ast.pattern | ast.MatchAs | ast.MatchClass | ast.MatchMapping | ast.MatchOr | ast.MatchSequence | ast.MatchSingleton | ast.MatchStar | ast.MatchValue
+Ima_ast_stmt: typing_TypeAlias = ast.stmt | ast.AnnAssign | ast.Assert | ast.Assign | ast.AsyncFor | ast.AsyncFunctionDef | ast.AsyncWith | ast.AugAssign | ast.Break | ast.ClassDef | ast.Continue | ast.Delete | ast.Expr | ast.For | ast.FunctionDef | ast.Global | ast.If | ast.Import | ast.ImportFrom | ast.Match | ast.Nonlocal | ast.Pass | ast.Raise | ast.Return | ast.Try | astDOTTryStar | astDOTTypeAlias | ast.While | ast.With
 Ima_ast_type_ignore: typing_TypeAlias = ast.type_ignore | ast.TypeIgnore
+Ima_ast_type_param: typing_TypeAlias = astDOTtype_param | astDOTParamSpec | astDOTTypeVar | astDOTTypeVarTuple
 Ima_ast_unaryop: typing_TypeAlias = ast.unaryop | ast.Invert | ast.Not | ast.UAdd | ast.USub
-if TYPE_CHECKING:
-	Ima_ast_stmt: typing_TypeAlias = ast.stmt | ast.AnnAssign | ast.Assert | ast.Assign | ast.AsyncFor | ast.AsyncFunctionDef | ast.AsyncWith | ast.AugAssign | ast.Break | ast.ClassDef | ast.Continue | ast.Delete | ast.Expr | ast.For | ast.FunctionDef | ast.Global | ast.If | ast.Import | ast.ImportFrom | ast.Match | ast.Nonlocal | ast.Pass | ast.Raise | ast.Return | ast.Try | ast.TryStar | ast.TypeAlias | ast.While | ast.With
-	Ima_ast_type_param: typing_TypeAlias = ast.type_param | ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple
-else:
-	Ima_ast_stmt = stuPyd
-	Ima_ast_type_param = stuPyd

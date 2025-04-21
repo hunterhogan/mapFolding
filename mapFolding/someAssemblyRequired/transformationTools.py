@@ -44,6 +44,7 @@ from mapFolding.someAssemblyRequired import (
 	Then,
 	个,
 )
+from mapFolding.someAssemblyRequired._toolboxContainers import DeReConstructField2ast
 from mapFolding.theSSOT import ComputationState, raiseIfNoneGitHubIssueNumber3, The
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, writeStringToHere
 from os import PathLike
@@ -176,120 +177,6 @@ def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: bool = 
 	# Fix code scanning alert - Consider possible security implications associated with pickle module. #17
 	pathFilenameJob.write_bytes(pickle.dumps(stateUniversal))
 	return pathFilenameJob
-
-@dataclasses.dataclass
-class DeReConstructField2ast:
-	"""
-	Transform a dataclass field into AST node representations for code generation.
-
-	This class extracts and transforms a dataclass Field object into various AST node
-	representations needed for code generation. It handles the conversion of field
-	attributes, type annotations, and metadata into AST constructs that can be used
-	to reconstruct the field in generated code.
-
-	The class is particularly important for decomposing dataclass fields (like those in
-	ComputationState) to enable their use in specialized contexts like Numba-optimized
-	functions, where the full dataclass cannot be directly used but its contents need
-	to be accessible.
-
-	Each field is processed according to its type and metadata to create appropriate
-	variable declarations, type annotations, and initialization code as AST nodes.
-	"""
-	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[str_nameDOTname]
-	dataclassClassDef: dataclasses.InitVar[ast.ClassDef]
-	dataclassesDOTdataclassInstance_Identifier: dataclasses.InitVar[ast_Identifier]
-	field: dataclasses.InitVar[dataclasses.Field[Any]]
-
-	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
-
-	name: ast_Identifier = dataclasses.field(init=False)
-	typeBuffalo: type[Any] | str | Any = dataclasses.field(init=False)
-	default: Any | None = dataclasses.field(init=False)
-	default_factory: Callable[..., Any] | None = dataclasses.field(init=False)
-	repr: bool = dataclasses.field(init=False)
-	hash: bool | None = dataclasses.field(init=False)
-	init: bool = dataclasses.field(init=False)
-	compare: bool = dataclasses.field(init=False)
-	metadata: dict[Any, Any] = dataclasses.field(init=False)
-	kw_only: bool = dataclasses.field(init=False)
-
-	astName: ast.Name = dataclasses.field(init=False)
-	ast_keyword_field__field: ast.keyword = dataclasses.field(init=False)
-	ast_nameDOTname: ast.Attribute = dataclasses.field(init=False)
-	astAnnotation: ast.expr = dataclasses.field(init=False)
-	ast_argAnnotated: ast.arg = dataclasses.field(init=False)
-	astAnnAssignConstructor: ast.AnnAssign|ast.Assign = dataclasses.field(init=False)
-	Z0Z_hack: tuple[ast.AnnAssign|ast.Assign, str] = dataclasses.field(init=False)
-
-	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: str_nameDOTname, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstance_Identifier: ast_Identifier, field: dataclasses.Field[Any]) -> None:
-		self.compare = field.compare
-		self.default = field.default if field.default is not dataclasses.MISSING else None
-		self.default_factory = field.default_factory if field.default_factory is not dataclasses.MISSING else None
-		self.hash = field.hash
-		self.init = field.init
-		self.kw_only = field.kw_only if field.kw_only is not dataclasses.MISSING else False
-		self.metadata = dict(field.metadata)
-		self.name = field.name
-		self.repr = field.repr
-		self.typeBuffalo = field.type
-
-		self.astName = Make.Name(self.name)
-		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
-		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
-
-		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), Then.extractIt(DOT.annotation)).captureLastMatch(dataclassClassDef)
-		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
-		else: self.astAnnotation = sherpa
-
-		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
-		"""
-from ast import Module, Expr, Subscript, Name, Tuple, Load
-Subscript(
-value=Name(id='ndarray', ctx=Load()),
-slice=Tuple(
-	elts=[
-	Subscript(
-		value=Name(id='tuple', ctx=Load()),
-		slice=Name(id='int', ctx=Load()),
-		ctx=Load()),
-	Subscript(
-		value=Name(id='dtype', ctx=Load()),
-		slice=Name(id='NumPyLeavesTotal', ctx=Load()),
-		ctx=Load())],
-	ctx=Load()),
-ctx=Load()
-)
-
-		"""
-		dtype = self.metadata.get('dtype', None)
-		if dtype:
-			moduleWithLogicalPath: str_nameDOTname = 'numpy'
-			annotationType = 'ndarray'
-			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, annotationType)
-			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, 'dtype')
-			axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Name('uint8'))
-			dtype_asnameName: ast.Name = self.astAnnotation # type: ignore
-			if dtype_asnameName.id == 'Array3D':
-				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8'), Make.Name('uint8')]))
-			ast_expr = Make.Subscript(Make.Name(annotationType), Make.Tuple([axesSubscript, Make.Subscript(Make.Name('dtype'), dtype_asnameName)]))
-			constructor = 'array'
-			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, constructor)
-			dtypeIdentifier: ast_Identifier = dtype.__name__
-			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, dtypeIdentifier, dtype_asnameName.id)
-			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, ast_expr, Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', dtype_asnameName)]))
-			self.astAnnAssignConstructor = Make.Assign([self.astName], Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', dtype_asnameName)]))
-			self.Z0Z_hack = (self.astAnnAssignConstructor, 'array')
-		elif isinstance(self.astAnnotation, ast.Name):
-			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
-			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
-		elif isinstance(self.astAnnotation, ast.Subscript):
-			elementConstructor: ast_Identifier = self.metadata['elementConstructor']
-			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
-			takeTheTuple: ast.Tuple = deepcopy(self.astAnnotation.slice) # type: ignore
-			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, takeTheTuple)
-			self.Z0Z_hack = (self.astAnnAssignConstructor, elementConstructor)
-		if isinstance(self.astAnnotation, ast.Name):
-			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id) # pyright: ignore [reportUnknownArgumentType, reportUnknownMemberType, reportIJustCalledATypeGuardMethod_WTF]
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
 	"""
@@ -524,6 +411,13 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 
 		replaceCall2concurrencyManager = NodeChanger(ifThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier), Then.replaceWith(Make.Call(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier), listArguments=[Make.Name(recipeFlow.callableParallel)] + listParameters)))
 
+		def getIt(astCallConcurrencyResult: list[ast.Call]) -> Callable[[ast.AST], ast.AST]:
+			# TODO I cannot remember why I made this function. It doesn't fit with how I normally do things.
+			def workhorse(node: ast.AST) -> ast.AST:
+				NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)
+				return node
+			return workhorse
+
 		# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
 		astCallConcurrencyResult: list[ast.Call] = []
 		get_astCallConcurrencyResult = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), getIt(astCallConcurrencyResult))
@@ -562,12 +456,6 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 	unpack4targetCallable.visit(ingredientsCaller.astFunctionDef)
 	repack4targetCallable.visit(ingredientsCaller.astFunctionDef)
 	return ingredientsCaller
-
-def getIt(astCallConcurrencyResult: list[ast.Call]) -> Callable[[ast.AST], ast.AST]:
-	def workhorse(node: ast.AST) -> ast.AST:
-		NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)
-		return node
-	return workhorse
 
 dictionaryEstimates: dict[tuple[int, ...], int] = {
 	(2,2,2,2,2,2,2,2): 798148657152000,

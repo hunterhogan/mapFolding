@@ -19,9 +19,11 @@ specific optimizations and transformations.
 """
 
 from collections import defaultdict
-from collections.abc import Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, Make, parseLogicalPath2astModule, str_nameDOTname
-from mapFolding.theSSOT import The
+from collections.abc import Callable, Sequence
+from copy import deepcopy
+from typing import Any
+from mapFolding.someAssemblyRequired import ast_Identifier, DOT, ifThis, Make, NodeTourist, parseLogicalPath2astModule, str_nameDOTname, Then
+from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3, The
 from pathlib import Path, PurePosixPath
 from Z0Z_tools import updateExtendPolishDictionaryLists
 import ast
@@ -171,22 +173,21 @@ class IngredientsModule:
 	"""
 	Assemble a complete Python module from its constituent AST components.
 
-	IngredientsModule provides a structured container for all elements needed to
-	generate a complete Python module, including:
+	IngredientsModule provides a structured container for all elements needed to generate a complete Python module,
+	including:
 
-	1. Import statements aggregated from all module components
-	2. Prologue code that runs before function definitions
-	3. Function definitions with their dependencies
-	4. Epilogue code that runs after function definitions
-	5. Entry point code executed when the module runs as a script
-	6. Type ignores and other annotations
+	1. Import statements aggregated from all module components.
+	2. Prologue code that runs before function definitions.
+	3. Function definitions with their dependencies.
+	4. Epilogue code that runs after function definitions.
+	5. Entry point code executed when the module runs as a script.
+	6. Type ignores and other annotations.
 
-	This class enables programmatic assembly of Python modules with a clear
-	separation between different structural elements, while maintaining the
-	proper ordering and relationships between components.
+	This class enables programmatic assembly of Python modules with a clear separation between different structural
+	elements, while maintaining the proper ordering and relationships between components.
 
-	The modular design allows transformations to be applied to specific parts
-	of a module while preserving the overall structure.
+	The modular design allows transformations to be applied to specific parts of a module while preserving the overall
+	structure.
 
 	Parameters:
 		ingredientsFunction (None): One or more `IngredientsFunction` that will appended to `listIngredientsFunctions`.
@@ -311,22 +312,20 @@ class RecipeSynthesizeFlow:
 	"""
 	Configure the generation of new modules, including Numba-accelerated code modules.
 
-	RecipeSynthesizeFlow defines the complete blueprint for transforming an original
-	Python algorithm into an optimized, accelerated implementation. It specifies:
+	RecipeSynthesizeFlow defines the complete blueprint for transforming an original Python algorithm into an optimized,
+	accelerated implementation. It specifies:
 
-	1. Source code locations and identifiers
-	2. Target code locations and identifiers
-	3. Naming conventions for generated modules and functions
-	4. File system paths for output files
-	5. Import relationships between components
+	1. Source code locations and identifiers.
+	2. Target code locations and identifiers.
+	3. Naming conventions for generated modules and functions.
+	4. File system paths for output files.
+	5. Import relationships between components.
 
-	This configuration class serves as a single source of truth for the code generation
-	process, ensuring consistency across all generated artifacts while enabling
-	customization of the transformation assembly line.
+	This configuration class serves as a single source of truth for the code generation process, ensuring consistency
+	across all generated artifacts while enabling customization of the transformation assembly line.
 
-	The transformation process uses this configuration to extract functions from the
-	source module, transform them according to optimization rules, and output
-	properly structured optimized modules with all necessary imports.
+	The transformation process uses this configuration to extract functions from the source module, transform them
+	according to optimization rules, and output properly structured optimized modules with all necessary imports.
 	"""
 	# ========================================
 	# Source
@@ -471,3 +470,99 @@ class ShatteredDataclass:
 
 	signatureReturnAnnotation: ast.Subscript = dummySubscript
 	"""tuple-based return type annotation for function definitions."""
+
+@dataclasses.dataclass
+class DeReConstructField2ast:
+	"""
+	Transform a dataclass field into AST node representations for code generation.
+
+	This class extracts and transforms a dataclass Field object into various AST node
+	representations needed for code generation. It handles the conversion of field
+	attributes, type annotations, and metadata into AST constructs that can be used
+	to reconstruct the field in generated code.
+
+	The class is particularly important for decomposing dataclass fields (like those in
+	ComputationState) to enable their use in specialized contexts like Numba-optimized
+	functions, where the full dataclass cannot be directly used but its contents need
+	to be accessible.
+
+	Each field is processed according to its type and metadata to create appropriate
+	variable declarations, type annotations, and initialization code as AST nodes.
+	"""
+	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[str_nameDOTname]
+	dataclassClassDef: dataclasses.InitVar[ast.ClassDef]
+	dataclassesDOTdataclassInstance_Identifier: dataclasses.InitVar[ast_Identifier]
+	field: dataclasses.InitVar[dataclasses.Field[Any]]
+
+	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
+
+	name: ast_Identifier = dataclasses.field(init=False)
+	typeBuffalo: type[Any] | str | Any = dataclasses.field(init=False)
+	default: Any | None = dataclasses.field(init=False)
+	default_factory: Callable[..., Any] | None = dataclasses.field(init=False)
+	repr: bool = dataclasses.field(init=False)
+	hash: bool | None = dataclasses.field(init=False)
+	init: bool = dataclasses.field(init=False)
+	compare: bool = dataclasses.field(init=False)
+	metadata: dict[Any, Any] = dataclasses.field(init=False)
+	kw_only: bool = dataclasses.field(init=False)
+
+	astName: ast.Name = dataclasses.field(init=False)
+	ast_keyword_field__field: ast.keyword = dataclasses.field(init=False)
+	ast_nameDOTname: ast.Attribute = dataclasses.field(init=False)
+	astAnnotation: ast.expr = dataclasses.field(init=False)
+	ast_argAnnotated: ast.arg = dataclasses.field(init=False)
+	astAnnAssignConstructor: ast.AnnAssign|ast.Assign = dataclasses.field(init=False)
+	Z0Z_hack: tuple[ast.AnnAssign|ast.Assign, str] = dataclasses.field(init=False)
+
+	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: str_nameDOTname, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstance_Identifier: ast_Identifier, field: dataclasses.Field[Any]) -> None:
+		self.compare = field.compare
+		self.default = field.default if field.default is not dataclasses.MISSING else None
+		self.default_factory = field.default_factory if field.default_factory is not dataclasses.MISSING else None
+		self.hash = field.hash
+		self.init = field.init
+		self.kw_only = field.kw_only if field.kw_only is not dataclasses.MISSING else False
+		self.metadata = dict(field.metadata)
+		self.name = field.name
+		self.repr = field.repr
+		self.typeBuffalo = field.type
+
+		self.astName = Make.Name(self.name)
+		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
+		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
+
+		sherpa = NodeTourist(ifThis.isAnnAssign_targetIs(ifThis.isName_Identifier(self.name)), Then.extractIt(DOT.annotation)).captureLastMatch(dataclassClassDef)
+		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
+		else: self.astAnnotation = sherpa
+
+		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
+
+		dtype = self.metadata.get('dtype', None)
+		if dtype:
+			moduleWithLogicalPath: str_nameDOTname = 'numpy'
+			annotationType = 'ndarray'
+			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, annotationType)
+			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, 'dtype')
+			axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Name('uint8'))
+			dtype_asnameName: ast.Name = self.astAnnotation # type: ignore
+			if dtype_asnameName.id == 'Array3D':
+				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8'), Make.Name('uint8')]))
+			ast_expr = Make.Subscript(Make.Name(annotationType), Make.Tuple([axesSubscript, Make.Subscript(Make.Name('dtype'), dtype_asnameName)]))
+			constructor = 'array'
+			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, constructor)
+			dtypeIdentifier: ast_Identifier = dtype.__name__
+			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, dtypeIdentifier, dtype_asnameName.id)
+			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, ast_expr, Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', dtype_asnameName)]))
+			self.astAnnAssignConstructor = Make.Assign([self.astName], Make.Call(Make.Name(constructor), list_astKeywords=[Make.keyword('dtype', dtype_asnameName)]))
+			self.Z0Z_hack = (self.astAnnAssignConstructor, 'array')
+		elif isinstance(self.astAnnotation, ast.Name):
+			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
+			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
+		elif isinstance(self.astAnnotation, ast.Subscript):
+			elementConstructor: ast_Identifier = self.metadata['elementConstructor']
+			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
+			takeTheTuple: ast.Tuple = deepcopy(self.astAnnotation.slice) # type: ignore
+			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, takeTheTuple)
+			self.Z0Z_hack = (self.astAnnAssignConstructor, elementConstructor)
+		if isinstance(self.astAnnotation, ast.Name):
+			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id) # pyright: ignore [reportUnknownArgumentType, reportUnknownMemberType, reportIJustCalledATypeGuardMethod_WTF]

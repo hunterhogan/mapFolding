@@ -3,10 +3,9 @@ from mapFolding.someAssemblyRequired.toolboxNumba import theNumbaFlow
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from mapFolding.theSSOT import ComputationState, DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
-
-import dataclasses
 from pathlib import Path, PurePosixPath
 from typing import TypeAlias
+import dataclasses
 
 @dataclasses.dataclass
 class RecipeJob:

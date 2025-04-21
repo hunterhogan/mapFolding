@@ -20,9 +20,9 @@ mathematical definition in OEIS and the computational implementation in the pack
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from functools import cache
-from mapFolding import countFolds, The, writeStringToHere
+from mapFolding import countFolds, The, TypedDict, writeStringToHere
 from pathlib import Path
-from typing import Any, Final, TYPE_CHECKING
+from typing import Any, Final
 import argparse
 import random
 import sys
@@ -30,11 +30,6 @@ import time
 import urllib.request
 import urllib.response
 import warnings
-
-if TYPE_CHECKING:
-	from typing import TypedDict
-else:
-	TypedDict = dict[Any, Any]
 
 cacheDays = 30
 

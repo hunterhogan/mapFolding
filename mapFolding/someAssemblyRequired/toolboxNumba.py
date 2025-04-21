@@ -16,22 +16,13 @@ performance improvements while preserving code semantics and correctness.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, be, IngredientsFunction, Make, NodeTourist, RecipeSynthesizeFlow, str_nameDOTname, Then
+from mapFolding import NotRequired, TypedDict
+from mapFolding.someAssemblyRequired import ast_Identifier, IngredientsFunction, Make, RecipeSynthesizeFlow, str_nameDOTname
 from mapFolding.someAssemblyRequired.transformationTools import makeNewFlow, write_astModule
 from numba.core.compiler import CompilerBase as numbaCompilerBase
-from typing import Any, cast, Final, TYPE_CHECKING, TypeGuard
+from typing import Any, cast, Final
 import ast
 import dataclasses
-
-try:
-	from typing import NotRequired
-except Exception:
-	from typing_extensions import NotRequired # pyright: ignore[reportShadowedImports]
-
-if TYPE_CHECKING:
-	from typing import TypedDict
-else:
-	TypedDict = dict[str,Any]
 
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
@@ -60,17 +51,8 @@ class ParametersNumba(TypedDict):
 	signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
 	target: NotRequired[str]
 
-parametersNumbaFailEarly: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'python', 'fastmath': False, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }
-"""For a production function: speed is irrelevant, error discovery is paramount, must be compatible with anything downstream."""
 parametersNumbaDefault: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }
 """Middle of the road: fast, lean, but will talk to non-jitted functions."""
-parametersNumbaParallelDEFAULT: Final[ParametersNumba] = { **parametersNumbaDefault, '_nrt': True, 'parallel': True, }
-"""Middle of the road: fast, lean, but will talk to non-jitted functions."""
-parametersNumbaSuperJit: Final[ParametersNumba] = { **parametersNumbaDefault, 'no_cfunc_wrapper': True, 'no_cpython_wrapper': True, }
-"""Speed, no helmet, no talking to non-jitted functions."""
-parametersNumbaSuperJitParallel: Final[ParametersNumba] = { **parametersNumbaSuperJit, '_nrt': True, 'parallel': True, }
-"""Speed, no helmet, concurrency, no talking to non-jitted functions."""
-parametersNumbaMinimum: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': True, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': False, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': False, 'forceobj': True, 'parallel': False, }
 parametersNumbaLight: Final[ParametersNumba] = {'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True}
 
 Z0Z_numbaDataTypeModule: str_nameDOTname = 'numba'
@@ -187,12 +169,6 @@ def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	ingredientsModuleNumbaUnified.listIngredientsFunctions[2] = decorateCallableWithNumba(ingredientsModuleNumbaUnified.listIngredientsFunctions[2])
 
 	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageIdentifier)
-
-def getIt(astCallConcurrencyResult: list[ast.Call]) -> Callable[[ast.AST], ast.AST]:
-	def workhorse(node: ast.AST) -> ast.AST:
-		NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)
-		return node
-	return workhorse
 
 if __name__ == '__main__':
 	makeNumbaFlow(theNumbaFlow)

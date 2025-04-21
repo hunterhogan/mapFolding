@@ -1,36 +1,32 @@
 """
 AST Node Transformation Actions for Python Code Manipulation
 
-This module provides the Then class with static methods for generating callable
-action functions that specify what to do with AST nodes that match predicates.
-These action functions are used primarily with NodeChanger and NodeTourist to
+This module provides the Then class with static methods for generating callable action functions that specify what to do
+with AST nodes that match predicates. These action functions are used primarily with NodeChanger and NodeTourist to
 transform or extract information from AST nodes.
 
-The module also contains the grab class that provides functions for modifying
-specific attributes of AST nodes while preserving their structure, enabling
-fine-grained control when transforming AST structures.
+The module also contains the grab class that provides functions for modifying specific attributes of AST nodes while
+preserving their structure, enabling fine-grained control when transforming AST structures.
 
-Together, these classes provide a complete system for manipulating AST nodes
-once they have been identified using predicate functions from ifThis.
+Together, these classes provide a complete system for manipulating AST nodes once they have been identified using
+predicate functions from ifThis.
 """
 
 from collections.abc import Callable, Sequence
 from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue, ImaCallToName, NodeORattribute
-from typing import Any, overload
+from typing import Any
 import ast
 
 class grab:
 	"""
 	Modify specific attributes of AST nodes while preserving the node structure.
 
-	The grab class provides static methods that create transformation functions to modify
-	specific attributes of AST nodes. Unlike DOT which provides read-only access,
-	grab allows for targeted modifications of node attributes without replacing the
-	entire node.
+	The grab class provides static methods that create transformation functions to modify specific attributes of AST
+	nodes. Unlike DOT which provides read-only access, grab allows for targeted modifications of node attributes without
+	replacing the entire node.
 
-	Each method returns a function that takes a node, applies a transformation to a
-	specific attribute of that node, and returns the modified node. This enables fine-grained
-	control when transforming AST structures.
+	Each method returns a function that takes a node, applies a transformation to a specific attribute of that node, and
+	returns the modified node. This enables fine-grained control when transforming AST structures.
 	"""
 	@staticmethod
 	def andDoAllOf(listOfActions: list[Callable[[NodeORattribute], NodeORattribute]]) -> Callable[[NodeORattribute], NodeORattribute]:
@@ -114,13 +110,12 @@ class Then:
 	"""
 	Provide action functions that specify what to do with AST nodes that match predicates.
 
-	The Then class contains static methods that generate action functions used with
-	NodeChanger and NodeTourist to transform or extract information from AST nodes
-	that match specific predicates. These actions include node replacement, insertion,
-	extraction, and collection operations.
+	The Then class contains static methods that generate action functions used with NodeChanger and NodeTourist to
+	transform or extract information from AST nodes that match specific predicates. These actions include node
+	replacement, insertion, extraction, and collection operations.
 
-	When paired with predicates from the ifThis class, Then methods complete the
-	pattern-matching-and-action workflow for AST manipulation.
+	When paired with predicates from the ifThis class, Then methods complete the pattern-matching-and-action workflow
+	for AST manipulation.
 	"""
 	@staticmethod
 	def appendTo(listOfAny: list[Any]) -> Callable[[ast.AST | ast_Identifier], ast.AST | ast_Identifier]:

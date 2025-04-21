@@ -44,7 +44,41 @@ allowing users to compute map folding totals for larger dimensions than previous
 foundation for exploring advanced code transformation techniques.
 """
 
-from mapFolding.datatypes import (
+from typing import Any, TypeAlias
+import sys
+
+stuPyd: TypeAlias = Any
+
+if sys.version_info >= (3, 12):
+	from ast import (
+		ParamSpec as astDOTParamSpec,
+		type_param as astDOTtype_param,
+		TypeAlias as astDOTTypeAlias,
+		TypeVar as astDOTTypeVar,
+		TypeVarTuple as astDOTTypeVarTuple,
+	)
+else:
+	astDOTParamSpec: TypeAlias = stuPyd
+	astDOTtype_param: TypeAlias = stuPyd
+	astDOTTypeAlias: TypeAlias = stuPyd
+	astDOTTypeVar: TypeAlias = stuPyd
+	astDOTTypeVarTuple: TypeAlias = stuPyd
+
+if sys.version_info >= (3, 11):
+	from ast import TryStar as astDOTTryStar
+	from typing import TypedDict as TypedDict
+	from typing import NotRequired as NotRequired
+else:
+	astDOTTryStar: TypeAlias = stuPyd
+	try:
+		from typing_extensions import TypedDict as TypedDict
+		from typing_extensions import NotRequired as NotRequired
+	except Exception:
+		TypedDict = dict[stuPyd, stuPyd]
+		from collections.abc import Iterable
+		NotRequired: TypeAlias = Iterable
+
+from mapFolding.datatypes import (  # noqa: E402
 	Array1DElephino as Array1DElephino,
 	Array1DFoldsTotal as Array1DFoldsTotal,
 	Array1DLeavesTotal as Array1DLeavesTotal,
@@ -58,18 +92,18 @@ from mapFolding.datatypes import (
 	NumPyLeavesTotal as NumPyLeavesTotal,
 )
 
-from mapFolding.theSSOT import (
+from mapFolding.theSSOT import (  # noqa: E402
 	ComputationState as ComputationState,
 	raiseIfNoneGitHubIssueNumber3 as raiseIfNoneGitHubIssueNumber3,
 	The as The,
 )
 
-from mapFolding.theDao import (
+from mapFolding.theDao import (  # noqa: E402
 	countInitialize as countInitialize,
 	doTheNeedful as doTheNeedful,
 )
 
-from mapFolding.beDRY import (
+from mapFolding.beDRY import (  # noqa: E402
 	getLeavesTotal as getLeavesTotal,
 	getTaskDivisions as getTaskDivisions,
 	outfitCountFolds as outfitCountFolds,
@@ -77,7 +111,7 @@ from mapFolding.beDRY import (
 	validateListDimensions as validateListDimensions,
 )
 
-from mapFolding.toolboxFilesystem import (
+from mapFolding.toolboxFilesystem import (  # noqa: E402
 	getPathFilenameFoldsTotal as getPathFilenameFoldsTotal,
 	getPathRootJobDEFAULT as getPathRootJobDEFAULT,
 	saveFoldsTotal as saveFoldsTotal,
@@ -85,9 +119,9 @@ from mapFolding.toolboxFilesystem import (
 	writeStringToHere as writeStringToHere,
 )
 
-from mapFolding.Z0Z_flowControl import countFolds
+from mapFolding.Z0Z_flowControl import countFolds as countFolds  # noqa: E402
 
-from mapFolding.oeis import (
+from mapFolding.oeis import (  # noqa: E402
 	clearOEIScache as clearOEIScache,
 	getFoldsTotalKnown as getFoldsTotalKnown,
 	getOEISids as getOEISids,
