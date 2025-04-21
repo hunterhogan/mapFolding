@@ -59,14 +59,12 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 	"""
 	Determines whether to divide the computation into tasks and how many divisions.
 
+
 	Parameters
 	----------
 	computationDivisions: None
-		Specifies how to divide computations:
-		- `None`: no division of the computation into tasks; sets task divisions to 0.
-		- int: directly set the number of task divisions; cannot exceed the map's total leaves.
-		- `'maximum'`: divides into `leavesTotal`-many `taskDivisions`.
-		- `'cpu'`: limits the divisions to the number of available CPUs: i.e., `concurrencyLimit`.
+		Specifies how to divide computations: Please see the documentation in `countFolds` for details. I know it is
+		annoying, but I want to be sure you have the most accurate information.
 	concurrencyLimit
 		Maximum number of concurrent tasks allowed.
 
@@ -224,7 +222,7 @@ def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str 
 		A tuple of integers representing the dimensions of the map.
 	computationDivisions: None
 		Controls how to divide the computation into parallel tasks. I know it is annoying, but please see
-		`getTaskDivisions` for details, so that you and I both know you have the most accurate information.
+		`countFolds` for details, so that you and I both know you have the most accurate information.
 	concurrencyLimit: 1
 		Maximum number of concurrent processes to use during computation.
 
@@ -245,19 +243,13 @@ def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str 
 
 def setProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = None) -> int:
 	"""
-	Sets processor limit for concurrent operations.
+	Whether and how to limit the CPU usage.
 
 	Parameters
 	----------
 	CPUlimit: None
-		Controls processor usage limits:
-		- `False`, `None`, or `0`: No limits on processor usage; uses all available processors. All other values will
-		potentially limit processor usage.
-		- `True`: Yes, limit the processor usage; limits to 1 processor.
-		- Integer `>= 1`: Limits usage to the specified number of processors.
-		- Decimal value (`float`) between 0 and 1: Fraction of total processors to use.
-		- Decimal value (`float`) between -1 and 0: Fraction of processors to _not_ use.
-		- Integer `<= -1`: Subtract the absolute value from total processors.
+		Please see the documentation for in `countFolds` for details. I know it is annoying, but I want to be sure you
+		have the most accurate information.
 	concurrencyPackage: None
 		Specifies which concurrency package to use:
 		- `None` or `'multiprocessing'`: Uses standard `multiprocessing`.

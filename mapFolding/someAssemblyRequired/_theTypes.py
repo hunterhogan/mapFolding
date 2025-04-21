@@ -6,11 +6,13 @@ import ast
 
 stuPyd: typing_TypeAlias = str
 
+# NOTE An idea to subclass antecedents to effectively TypeGuard more than just the top level of the antecedent.
 class ImaCallToName(ast.Call):
 	func: ast.Name # pyright: ignore[reportIncompatibleVariableOverride]
 	# assert isinstance(ast.Call.func, ast.Name), "brinkmanship"
 	# func: ast.Name
 
+# Some common attributes of ast classes.
 astClassHasDOTbody_expr: typing_TypeAlias = ast.Expression | ast.IfExp | ast.Lambda
 astClassHasDOTbodyList_stmt: typing_TypeAlias = ast.AsyncFor | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.match_case | ast.Module | ast.Try | astDOTTryStar | ast.While | ast.With
 astClassHasDOTbody: typing_TypeAlias = astClassHasDOTbody_expr | astClassHasDOTbodyList_stmt
@@ -27,6 +29,7 @@ astClassHasDOTvalue_expr: typing_TypeAlias = ast.Assign | ast.Attribute | ast.Au
 astClassHasDOTvalue_exprNone: typing_TypeAlias = ast.AnnAssign | ast.Return | ast.Yield
 astClassHasDOTvalue: typing_TypeAlias = ast.Constant | ast.MatchSingleton | astClassHasDOTvalue_expr | astClassHasDOTvalue_exprNone
 
+# Type hints through TypeAlias or type "hints" through the identifier name.
 ast_expr_Slice: typing_TypeAlias = ast.expr
 ast_Identifier: typing_TypeAlias = str
 intORlist_ast_type_paramORstr_orNone: typing_TypeAlias = Any
@@ -34,10 +37,11 @@ intORstr_orNone: typing_TypeAlias = Any
 list_ast_type_paramORstr_orNone: typing_TypeAlias = Any
 str_nameDOTname: typing_TypeAlias = stuPyd
 
+# Limited success with TypeVar.
 个 = typing_TypeVar('个', bound = ast.AST, covariant = True)
 NodeORattribute = typing_TypeVar('NodeORattribute', bound = ast.AST | ast_expr_Slice | ast_Identifier | str_nameDOTname | bool | Any | None, covariant = True)
 
-# All ast classes by subgroup:
+# For my reference, all ast classes by subgroup:
 Ima_ast_boolop: typing_TypeAlias = ast.boolop | ast.And | ast.Or
 Ima_ast_cmpop: typing_TypeAlias = ast.cmpop | ast.Eq | ast.NotEq | ast.Lt | ast.LtE | ast.Gt | ast.GtE | ast.Is | ast.IsNot | ast.In | ast.NotIn
 Ima_ast_excepthandler: typing_TypeAlias = ast.excepthandler | ast.ExceptHandler

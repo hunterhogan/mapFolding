@@ -119,7 +119,7 @@ from mapFolding.toolboxFilesystem import (  # noqa: E402
 	writeStringToHere as writeStringToHere,
 )
 
-from mapFolding.Z0Z_flowControl import countFolds as countFolds  # noqa: E402
+from mapFolding.basecamp import countFolds as countFolds  # noqa: E402
 
 from mapFolding.oeis import (  # noqa: E402
 	clearOEIScache as clearOEIScache,
