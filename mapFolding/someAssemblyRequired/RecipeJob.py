@@ -1,4 +1,4 @@
-from mapFolding.someAssemblyRequired import ShatteredDataclass, ast_Identifier, parsePathFilename2astModule, str_nameDOTname
+from mapFolding.someAssemblyRequired import ShatteredDataclass, ast_Identifier, parseLogicalPath2astModule, parsePathFilename2astModule, str_nameDOTname
 from mapFolding.someAssemblyRequired.toolboxNumba import theNumbaFlow
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from mapFolding.theSSOT import ComputationState, DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
@@ -111,7 +111,7 @@ class RecipeJobTheorem2Numba:
 
 	# ========================================
 	# Source
-	source_astModule = parsePathFilename2astModule(PurePosixPath('/apps/mapFolding/mapFolding/syntheticModules/theorem2Numba.py'))
+	source_astModule = parseLogicalPath2astModule('mapFolding.syntheticModules.theorem2Numba')
 	sourceCountCallable: ast_Identifier = 'count'
 
 	sourceLogicalPathModuleDataclass: str_nameDOTname = 'mapFolding.dataBaskets'
