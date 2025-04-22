@@ -82,6 +82,7 @@ from mapFolding.someAssemblyRequired._tool_Make import Make as Make
 from mapFolding.someAssemblyRequired._tool_Then import grab as grab, Then as Then
 
 from mapFolding.someAssemblyRequired._toolboxContainers import (
+	DeReConstructField2ast as DeReConstructField2ast,
 	IngredientsFunction as IngredientsFunction,
 	IngredientsModule as IngredientsModule,
 	LedgerOfImports as LedgerOfImports,

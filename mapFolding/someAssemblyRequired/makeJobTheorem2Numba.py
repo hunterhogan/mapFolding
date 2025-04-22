@@ -1,23 +1,3 @@
-"""
-Job-specific Numba Code Generation for Map Folding Calculations
-
-This module specializes in generating highly-optimized, single-purpose Numba modules
-for specific map folding calculation jobs. Unlike the general-purpose transformation
-in toolboxNumba.py, this module creates standalone Python modules optimized for a
-single map shape with statically-encoded parameters.
-
-The code generation assembly line focuses on:
-
-1. Converting function parameters to initialized variables with concrete values.
-2. Replacing dynamic computations with statically-known values.
-3. Eliminating unused code paths and variables.
-4. Adding progress tracking for long-running calculations.
-5. Applying appropriate Numba optimizations for the specific calculation.
-
-This creates extremely fast, specialized implementations that can be run directly
-as Python scripts or further compiled into standalone executables.
-"""
-
 from mapFolding import getPathFilenameFoldsTotal, raiseIfNoneGitHubIssueNumber3, The
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
@@ -33,9 +13,11 @@ from mapFolding.someAssemblyRequired import (
 	str_nameDOTname,
 	Then,
 )
-from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
+from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
 from mapFolding.someAssemblyRequired.toolboxNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
 from mapFolding.someAssemblyRequired.transformationTools import dictionaryEstimates, write_astModule, makeInitializedComputationState
+from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
+from mapFolding.dataBaskets import MapFoldingState
 from pathlib import PurePosixPath
 from typing import cast, NamedTuple
 from Z0Z_tools import autoDecodingRLE
@@ -52,7 +34,7 @@ list_IdentifiersStaticValuesHARDCODED = ['dimensionsTotal', 'leavesTotal',]
 
 list_IdentifiersNotUsedHARDCODED = list_IdentifiersStaticValuesHARDCODED + list_IdentifiersReplacedHARDCODED + list_IdentifiersNotUsedAllHARDCODED + list_IdentifiersNotUsedParallelSequentialHARDCODED + list_IdentifiersNotUsedSequentialHARDCODED
 
-def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJob, spices: SpicesJobNumba) -> tuple[IngredientsModule, IngredientsFunction]:
+def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> tuple[IngredientsModule, IngredientsFunction]:
 	"""
 	Add progress tracking capabilities to a Numba-optimized function.
 
@@ -108,7 +90,7 @@ if __name__ == '__main__':
 
 	return ingredientsModule, ingredientsFunction
 
-def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: IngredientsFunction, job: RecipeJob) -> IngredientsFunction:
+def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2Numba) -> IngredientsFunction:
 	"""
 	Convert function parameters into initialized variables with concrete values.
 
@@ -172,30 +154,8 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	ast.fix_missing_locations(ingredientsFunction.astFunctionDef)
 	return ingredientsFunction
 
-def makeJobNumba(job: RecipeJob, spices: SpicesJobNumba) -> None:
-	"""
-	Generate a highly-optimized, single-purpose Numba module for a specific map shape.
+def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 
-	This function implements the complete transformation assembly line for creating a
-	standalone, specialized implementation for calculating map folding solutions for
-	a specific shape. The process includes:
-
-	1. Extracting the counting function from the source module
-	2. Removing unused code paths based on static analysis
-	3. Replacing dynamic variables with concrete values
-	4. Converting parameters to initialized variables
-	5. Adding progress tracking if requested
-	6. Applying Numba optimizations and type specifications
-	7. Writing the final module to the filesystem
-
-	The resulting Python module is both human-readable and extraordinarily efficient,
-	with all shape-specific optimizations statically encoded. This creates specialized
-	implementations that can be orders of magnitude faster than general-purpose code.
-
-	Parameters:
-		job: Configuration specifying the target shape, paths, and computation state.
-		spices: Configuration specifying Numba and progress tracking options.
-	"""
 	astFunctionDef = extractFunctionDef(job.source_astModule, job.countCallable)
 	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
@@ -301,13 +261,14 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
 	mapShape = (1,46)
-	state = makeInitializedComputationState(mapShape)
+	state = MapFoldingState(mapShape)
+	state = initializeGroupsOfFolds(state)
 	# foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
 	# foldsTotalEstimated = dictionaryEstimates[state.mapShape] // state.leavesTotal
 	foldsTotalEstimated = 0
 	pathModule = PurePosixPath(The.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
-	aJob = RecipeJob(state, foldsTotalEstimated, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
+	aJob = RecipeJobTheorem2Numba(state, foldsTotalEstimated, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
 	# spices = SpicesJobNumba()
 	makeJobNumba(aJob, spices)

@@ -102,7 +102,7 @@ if __name__ == '__main__':
 def test_algorithmSourceParallel(mapShapeTestParallelization: tuple[int, ...], useAlgorithmSourceDispatcher: None) -> None:
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestParallelization), countFolds, mapShapeTestParallelization, None, 'maximum', None)
 
-@pytest.mark.parametrize('flow', ['daoOfMapFolding', 'theorem2', 'theorem2numba'])
+@pytest.mark.parametrize('flow', ['daoOfMapFolding', 'theorem2', 'theorem2Trimmed', 'theorem2numba'])
 def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: Literal['daoOfMapFolding'] | Literal['theorem2'] | Literal['theorem2numba']) -> None:
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, flow)
 

@@ -26,6 +26,7 @@ from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	astModuleToIngredientsFunction,
 	be,
+	DeReConstructField2ast,
 	DOT,
 	extractClassDef,
 	grab,
@@ -44,7 +45,6 @@ from mapFolding.someAssemblyRequired import (
 	Then,
 	个,
 )
-from mapFolding.someAssemblyRequired._toolboxContainers import DeReConstructField2ast
 from mapFolding.theSSOT import ComputationState, raiseIfNoneGitHubIssueNumber3, The
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal, writeStringToHere
 from os import PathLike

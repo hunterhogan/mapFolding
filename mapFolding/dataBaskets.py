@@ -47,3 +47,15 @@ class MapFoldingState:
 		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
+
+@dataclasses.dataclass
+class LeafSequenceState(MapFoldingState):
+	leafSequence: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+
+	def __post_init__(self) -> None:
+		super().__post_init__()
+		from mapFolding.oeis import getFoldsTotalKnown
+		groupsOfFoldsKnown = getFoldsTotalKnown(self.mapShape) // self.leavesTotal
+		if self.leafSequence is None: # pyright: ignore[reportUnnecessaryComparison]
+			self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
+			self.leafSequence[self.groupsOfFolds] = self.leaf1ndex

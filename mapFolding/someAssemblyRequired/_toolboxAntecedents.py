@@ -213,6 +213,10 @@ class be:
 		return isinstance(node, ast.Name)
 
 	@staticmethod
+	def Not(node: ast.AST) -> TypeGuard[ast.Not]:
+		return isinstance(node, ast.Not)
+
+	@staticmethod
 	def Return(node: ast.AST) -> TypeGuard[ast.Return]:
 		return isinstance(node, ast.Return)
 
@@ -227,6 +231,10 @@ class be:
 	@staticmethod
 	def Tuple(node: ast.AST) -> TypeGuard[ast.Tuple]:
 		return isinstance(node, ast.Tuple)
+
+	@staticmethod
+	def UnaryOp(node: ast.AST) -> TypeGuard[ast.UnaryOp]:
+		return isinstance(node, ast.UnaryOp)
 
 	@staticmethod
 	def While(node: ast.AST) -> TypeGuard[ast.While]:
@@ -302,7 +310,18 @@ class ifThis:
 					and ifThis.isConstant_value(0)(node.comparators[0]))
 
 	@staticmethod
-	def isIfAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.While] | bool]:
+	def isUnaryNotAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.UnaryOp] | bool]:
+		return lambda node: (be.UnaryOp(node)
+					and be.Not(node.op)
+					and ifThis.isAttributeNamespace_Identifier(namespace, identifier)(node.operand))
+
+	@staticmethod
+	def isIfUnaryNotAttributeNamespace_Identifier(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.If] | bool]:
+		return lambda node: (be.If(node)
+					and ifThis.isUnaryNotAttributeNamespace_Identifier(namespace, identifier)(node.test))
+
+	@staticmethod
+	def isIfAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.If] | bool]:
 		return lambda node: (be.If(node)
 					and ifThis.isAttributeNamespace_IdentifierGreaterThan0(namespace, identifier)(node.test))
 

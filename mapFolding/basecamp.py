@@ -144,6 +144,18 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 		foldsTotal = mapFoldingState.foldsTotal
 
+	elif flow == 'theorem2Trimmed' and any((dimension > 2 for dimension in mapShape)):
+		from mapFolding.dataBaskets import MapFoldingState
+		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
+		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
+		mapFoldingState = initializeGroupsOfFolds(mapFoldingState)
+
+		from mapFolding.syntheticModules.theorem2Trimmed import count
+		mapFoldingState = count(mapFoldingState)
+
+		foldsTotal = mapFoldingState.foldsTotal
+
 	elif (flow == 'theorem2Numba' or taskDivisions == 0) and any((dimension > 2 for dimension in mapShape)):
 		from mapFolding.dataBaskets import MapFoldingState
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
