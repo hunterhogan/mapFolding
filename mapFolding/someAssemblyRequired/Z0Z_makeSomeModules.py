@@ -127,7 +127,8 @@ def makeDaoOfMapFolding():
 
 	findThis = ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier))
 	doThat = Then.replaceWith(Make.Assign(listTargets=[astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
-	NodeChanger(findThis, doThat).visit(doTheNeedful.astFunctionDef)
+	changeAssignCallToTarget = NodeChanger(findThis, doThat)
+	changeAssignCallToTarget.visit(doTheNeedful.astFunctionDef)
 
 	ingredientsModule = IngredientsModule([daoOfMapFolding, doTheNeedful])
 	ingredientsModule.removeImportFromModule('numpy')

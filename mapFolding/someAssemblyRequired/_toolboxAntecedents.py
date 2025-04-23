@@ -20,20 +20,21 @@ they implement a declarative approach to AST manipulation that separates node id
 """
 
 from collections.abc import Callable
+from mapFolding.someAssemblyRequired._tool_be import be as be
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
-	astClassHasDOTbody,
-	astClassHasDOTbody_expr,
-	astClassHasDOTbodyList_stmt,
-	astClassHasDOTnameNotName,
-	astClassHasDOTnameNotNameAlways,
-	astClassHasDOTnameNotNameOptionally,
-	astClassHasDOTtarget,
-	astClassHasDOTtarget_expr,
-	astClassHasDOTtargetAttributeNameSubscript,
-	astClassHasDOTvalue,
-	astClassHasDOTvalue_expr,
-	astClassHasDOTvalue_exprNone,
+	hasDOTbody,
+	hasDOTbody_expr,
+	hasDOTbody_list_stmt,
+	hasDOTname,
+	hasDOTname_str,
+	hasDOTname_strORNone,
+	hasDOTtarget,
+	hasDOTtarget_expr,
+	hasDOTtarget_AttributeORNameORSubscript,
+	hasDOTvalue,
+	hasDOTvalue_expr,
+	hasDOTvalue_exprORNone,
 	ImaCallToName,
 )
 from typing import Any, overload, TypeGuard
@@ -76,12 +77,12 @@ class DOT:
 
 	@staticmethod
 	@overload
-	def body(node: astClassHasDOTbodyList_stmt) -> list[ast.stmt]:...
+	def body(node: hasDOTbody_list_stmt) -> list[ast.stmt]:...
 	@staticmethod
 	@overload
-	def body(node: astClassHasDOTbody_expr) -> ast.expr:...
+	def body(node: hasDOTbody_expr) -> ast.expr:...
 	@staticmethod
-	def body(node: astClassHasDOTbody) -> ast.expr | list[ast.stmt]:
+	def body(node: hasDOTbody) -> ast.expr | list[ast.stmt]:
 		return node.body
 
 	@staticmethod
@@ -100,12 +101,12 @@ class DOT:
 
 	@staticmethod
 	@overload
-	def name(node: astClassHasDOTnameNotNameAlways) -> ast_Identifier:...
+	def name(node: hasDOTname_str) -> ast_Identifier:...
 	@staticmethod
 	@overload
-	def name(node: astClassHasDOTnameNotNameOptionally) -> ast_Identifier | None:...
+	def name(node: hasDOTname_strORNone) -> ast_Identifier | None:...
 	@staticmethod
-	def name(node: astClassHasDOTnameNotName) -> ast_Identifier | None:
+	def name(node: hasDOTname) -> ast_Identifier | None:
 		return node.name
 
 	@staticmethod
@@ -113,12 +114,12 @@ class DOT:
 	def target(node: ast.NamedExpr) -> ast.Name:...
 	@staticmethod
 	@overload
-	def target(node: astClassHasDOTtarget_expr) -> ast.expr:...
+	def target(node: hasDOTtarget_expr) -> ast.expr:...
 	@staticmethod
 	@overload
-	def target(node: astClassHasDOTtargetAttributeNameSubscript) -> ast.Attribute | ast.Name | ast.Subscript:...
+	def target(node: hasDOTtarget_AttributeORNameORSubscript) -> ast.Attribute | ast.Name | ast.Subscript:...
 	@staticmethod
-	def target(node: astClassHasDOTtarget) -> ast.Attribute | ast.expr | ast.Name | ast.Subscript:
+	def target(node: hasDOTtarget) -> ast.Attribute | ast.expr | ast.Name | ast.Subscript:
 		return node.target
 
 	@staticmethod
@@ -129,116 +130,13 @@ class DOT:
 	def value(node: ast.MatchSingleton) -> bool | None:...
 	@staticmethod
 	@overload
-	def value(node: astClassHasDOTvalue_expr) -> ast.expr:...
+	def value(node: hasDOTvalue_expr) -> ast.expr:...
 	@staticmethod
 	@overload
-	def value(node: astClassHasDOTvalue_exprNone) -> ast.expr | None:...
+	def value(node: hasDOTvalue_exprORNone) -> ast.expr | None:...
 	@staticmethod
-	def value(node: astClassHasDOTvalue) -> Any | ast.expr | bool | None:
+	def value(node: hasDOTvalue) -> Any | ast.expr | bool | None:
 		return node.value
-
-class be:
-	"""
-	Provide type-guard functions for safely verifying AST node types during manipulation.
-
-	The be class contains static methods that perform runtime type verification of AST nodes, returning TypeGuard
-	results that enable static type checkers to narrow node types in conditional branches. These type-guards:
-
-	1. Improve code safety by preventing operations on incompatible node types.
-	2. Enable IDE tooling to provide better autocompletion and error detection.
-	3. Document expected node types in a way that's enforced by the type system.
-	4. Support pattern-matching workflows where node types must be verified before access.
-
-	When used with conditional statements, these type-guards allow for precise, type-safe manipulation of AST nodes
-	while maintaining full static type checking capabilities, even in complex transformation scenarios.
-	"""
-	@staticmethod
-	def AnnAssign(node: ast.AST) -> TypeGuard[ast.AnnAssign]:
-		return isinstance(node, ast.AnnAssign)
-
-	@staticmethod
-	def arg(node: ast.AST) -> TypeGuard[ast.arg]:
-		return isinstance(node, ast.arg)
-
-	@staticmethod
-	def Assign(node: ast.AST) -> TypeGuard[ast.Assign]:
-		return isinstance(node, ast.Assign)
-
-	@staticmethod
-	def Attribute(node: ast.AST) -> TypeGuard[ast.Attribute]:
-		return isinstance(node, ast.Attribute)
-
-	@staticmethod
-	def AugAssign(node: ast.AST) -> TypeGuard[ast.AugAssign]:
-		return isinstance(node, ast.AugAssign)
-
-	@staticmethod
-	def Call(node: ast.AST) -> TypeGuard[ast.Call]:
-		return isinstance(node, ast.Call)
-
-	@staticmethod
-	def ClassDef(node: ast.AST) -> TypeGuard[ast.ClassDef]:
-		return isinstance(node, ast.ClassDef)
-
-	@staticmethod
-	def Compare(node: ast.AST) -> TypeGuard[ast.Compare]:
-		return isinstance(node, ast.Compare)
-
-	@staticmethod
-	def Constant(node: ast.AST) -> TypeGuard[ast.Constant]:
-		return isinstance(node, ast.Constant)
-
-	@staticmethod
-	def FunctionDef(node: ast.AST) -> TypeGuard[ast.FunctionDef]:
-		return isinstance(node, ast.FunctionDef)
-
-	@staticmethod
-	def keyword(node: ast.AST) -> TypeGuard[ast.keyword]:
-		return isinstance(node, ast.keyword)
-
-	@staticmethod
-	def If(node: ast.AST) -> TypeGuard[ast.If]:
-		return isinstance(node, ast.If)
-
-	@staticmethod
-	def Gt(node: ast.AST) -> TypeGuard[ast.Gt]:
-		return isinstance(node, ast.Gt)
-
-	@staticmethod
-	def LtE(node: ast.AST) -> TypeGuard[ast.LtE]:
-		return isinstance(node, ast.LtE)
-
-	@staticmethod
-	def Name(node: ast.AST) -> TypeGuard[ast.Name]:
-		return isinstance(node, ast.Name)
-
-	@staticmethod
-	def Not(node: ast.AST) -> TypeGuard[ast.Not]:
-		return isinstance(node, ast.Not)
-
-	@staticmethod
-	def Return(node: ast.AST) -> TypeGuard[ast.Return]:
-		return isinstance(node, ast.Return)
-
-	@staticmethod
-	def Starred(node: ast.AST) -> TypeGuard[ast.Starred]:
-		return isinstance(node, ast.Starred)
-
-	@staticmethod
-	def Subscript(node: ast.AST) -> TypeGuard[ast.Subscript]:
-		return isinstance(node, ast.Subscript)
-
-	@staticmethod
-	def Tuple(node: ast.AST) -> TypeGuard[ast.Tuple]:
-		return isinstance(node, ast.Tuple)
-
-	@staticmethod
-	def UnaryOp(node: ast.AST) -> TypeGuard[ast.UnaryOp]:
-		return isinstance(node, ast.UnaryOp)
-
-	@staticmethod
-	def While(node: ast.AST) -> TypeGuard[ast.While]:
-		return isinstance(node, ast.While)
 
 class ifThis:
 	"""

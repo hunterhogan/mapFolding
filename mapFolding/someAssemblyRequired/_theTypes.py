@@ -6,28 +6,15 @@ import ast
 
 stuPyd: typing_TypeAlias = str
 
-# NOTE An idea to subclass antecedents to effectively TypeGuard more than just the top level of the antecedent.
+# NOTE Prototype of an idea to subclass composable methods so that typing information
+# can extend beyond the top level of the ast node.
 class ImaCallToName(ast.Call):
-	func: ast.Name # pyright: ignore[reportIncompatibleVariableOverride]
-	# assert isinstance(ast.Call.func, ast.Name), "brinkmanship"
-	# func: ast.Name
+	func: ast.Name 	# pyright: ignore[reportIncompatibleVariableOverride]
 
 # Some common attributes of ast classes.
-astClassHasDOTbody_expr: typing_TypeAlias = ast.Expression | ast.IfExp | ast.Lambda
-astClassHasDOTbodyList_stmt: typing_TypeAlias = ast.AsyncFor | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.match_case | ast.Module | ast.Try | astDOTTryStar | ast.While | ast.With
-astClassHasDOTbody: typing_TypeAlias = astClassHasDOTbody_expr | astClassHasDOTbodyList_stmt
-
-astClassHasDOTnameNotNameAlways: typing_TypeAlias = ast.alias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTParamSpec | astDOTTypeVar | astDOTTypeVarTuple
-astClassHasDOTnameNotNameOptionally: typing_TypeAlias = ast.ExceptHandler | ast.MatchAs | ast.MatchStar
-astClassHasDOTnameNotName: typing_TypeAlias = astClassHasDOTnameNotNameAlways | astClassHasDOTnameNotNameOptionally
-
-astClassHasDOTtargetAttributeNameSubscript: typing_TypeAlias = ast.AnnAssign | ast.AugAssign
-astClassHasDOTtarget_expr: typing_TypeAlias = ast.AsyncFor | ast.comprehension | ast.For
-astClassHasDOTtarget: typing_TypeAlias = ast.NamedExpr | astClassHasDOTtarget_expr | astClassHasDOTtargetAttributeNameSubscript
-
-astClassHasDOTvalue_expr: typing_TypeAlias = ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.keyword | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | astDOTTypeAlias | ast.YieldFrom
-astClassHasDOTvalue_exprNone: typing_TypeAlias = ast.AnnAssign | ast.Return | ast.Yield
-astClassHasDOTvalue: typing_TypeAlias = ast.Constant | ast.MatchSingleton | astClassHasDOTvalue_expr | astClassHasDOTvalue_exprNone
+hasDOTtarget_AttributeORNameORSubscript: typing_TypeAlias = ast.AnnAssign | ast.AugAssign
+hasDOTtarget_expr: typing_TypeAlias = ast.AsyncFor | ast.comprehension | ast.For
+hasDOTtarget_Name: typing_TypeAlias = ast.NamedExpr
 
 # Type hints through TypeAlias or type "hints" through the identifier name.
 ast_expr_Slice: typing_TypeAlias = ast.expr

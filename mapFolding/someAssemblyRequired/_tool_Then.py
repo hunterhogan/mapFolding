@@ -13,7 +13,7 @@ predicate functions from ifThis.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding.someAssemblyRequired import ast_Identifier, astClassHasDOTvalue, ImaCallToName, NodeORattribute
+from mapFolding.someAssemblyRequired import ast_Identifier, hasDOTvalue, ImaCallToName, NodeORattribute
 from typing import Any
 import ast
 
@@ -100,8 +100,8 @@ class grab:
 		return workhorse
 
 	@staticmethod
-	def valueAttribute(action: Callable[[Any], Any]) -> Callable[[astClassHasDOTvalue], astClassHasDOTvalue]:
-		def workhorse(node: astClassHasDOTvalue) -> astClassHasDOTvalue:
+	def valueAttribute(action: Callable[[Any], Any]) -> Callable[[hasDOTvalue], hasDOTvalue]:
+		def workhorse(node: hasDOTvalue) -> hasDOTvalue:
 			node.value = action(node.value)
 			return node
 		return workhorse

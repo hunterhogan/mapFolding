@@ -120,7 +120,10 @@ def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) ->
 					FunctionDefTarget = dictionaryFunctionDef[identifier]
 					if len(FunctionDefTarget.body) == 1:
 						replacement = NodeTourist(be.Return, Then.extractIt(DOT.value)).captureLastMatch(FunctionDefTarget)
-						inliner = NodeChanger(ifThis.isCall_Identifier(identifier), Then.replaceWith(replacement))
+
+						findThis = ifThis.isCall_Identifier(identifier)
+						doThat = Then.replaceWith(replacement)
+						inliner = NodeChanger(findThis, doThat)
 						for astFunctionDef in dictionary4Inlining.values():
 							inliner.visit(astFunctionDef)
 					else:
