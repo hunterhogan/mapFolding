@@ -1,6 +1,6 @@
 from typing import overload, Any
 from mapFolding.someAssemblyRequired import ast_Identifier
-from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, ast.type_param
+from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
 import ast
 
 class DOT:
@@ -362,7 +362,7 @@ class DOT:
         return node.type_ignores
 
     @staticmethod
-    def type_params(node: ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTTypeAlias) -> list[ast.type_param]:
+    def type_params(node: ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTTypeAlias) -> list[astDOTtype_param]:
         return node.type_params
 
     @staticmethod

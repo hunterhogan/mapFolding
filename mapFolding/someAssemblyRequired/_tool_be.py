@@ -1,7 +1,7 @@
 """This file is generated automatically, so changes to this file will be lost."""
 from typing import TypeGuard
 import ast
-from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, ast.type_param
+from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
 
 class be:
     """
@@ -457,8 +457,8 @@ class be:
         return isinstance(nodeAst, ast.type_ignore)
 
     @staticmethod
-    def type_param(nodeAst: ast.AST) -> TypeGuard[ast.type_param]:
-        return isinstance(nodeAst, ast.type_param)
+    def type_param(nodeAst: ast.AST) -> TypeGuard[astDOTtype_param]:
+        return isinstance(nodeAst, astDOTtype_param)
 
     @staticmethod
     def TypeAlias(nodeAst: ast.AST) -> TypeGuard[astDOTTypeAlias]:
