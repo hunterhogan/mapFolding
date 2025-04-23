@@ -1,7 +1,7 @@
 """This file is generated automatically, so changes to this file will be lost."""
 from typing import TypeGuard
 import ast
-from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple
+from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, ast.type_param
 
 class be:
     """

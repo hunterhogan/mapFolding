@@ -272,7 +272,7 @@ if __name__ == '__main__':
 		'Index', 'ExtSlice', 'Suite', 'AugLoad', 'AugStore', 'Param',
 	}
 
-	list_astDOTStuPydHARDCODED: list[ast_Identifier] = ['astDOTParamSpec', 'astDOTTryStar', 'astDOTTypeAlias', 'astDOTTypeVar', 'astDOTTypeVarTuple']
+	list_astDOTStuPydHARDCODED: list[ast_Identifier] = ['astDOTParamSpec', 'astDOTTryStar', 'astDOTTypeAlias', 'astDOTTypeVar', 'astDOTTypeVarTuple', 'ast.type_param']
 	list_astDOTStuPyd = list_astDOTStuPydHARDCODED.copy()
 
 	logicalPathInfix = logicalPathInfixHARDCODED

@@ -1,4 +1,4 @@
-from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple
+from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, ast.type_param
 from typing import TypeAlias as typing_TypeAlias
 import ast
 

@@ -1,6 +1,6 @@
 from typing import overload, Any
 from mapFolding.someAssemblyRequired import ast_Identifier
-from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple
+from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, ast.type_param
 import ast
 
 class DOT:
