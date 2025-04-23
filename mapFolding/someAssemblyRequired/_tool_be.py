@@ -1,6 +1,7 @@
 """This file is generated automatically, so changes to this file will be lost."""
 from typing import TypeGuard
 import ast
+from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple
 
 class be:
     """
@@ -380,8 +381,8 @@ class be:
         return isinstance(nodeAst, ast.Or)
 
     @staticmethod
-    def ParamSpec(nodeAst: ast.AST) -> TypeGuard[ast.ParamSpec]:
-        return isinstance(nodeAst, ast.ParamSpec)
+    def ParamSpec(nodeAst: ast.AST) -> TypeGuard[astDOTParamSpec]:
+        return isinstance(nodeAst, astDOTParamSpec)
 
     @staticmethod
     def Pass(nodeAst: ast.AST) -> TypeGuard[ast.Pass]:
@@ -444,8 +445,8 @@ class be:
         return isinstance(nodeAst, ast.Try)
 
     @staticmethod
-    def TryStar(nodeAst: ast.AST) -> TypeGuard[ast.TryStar]:
-        return isinstance(nodeAst, ast.TryStar)
+    def TryStar(nodeAst: ast.AST) -> TypeGuard[astDOTTryStar]:
+        return isinstance(nodeAst, astDOTTryStar)
 
     @staticmethod
     def Tuple(nodeAst: ast.AST) -> TypeGuard[ast.Tuple]:
@@ -460,20 +461,20 @@ class be:
         return isinstance(nodeAst, ast.type_param)
 
     @staticmethod
-    def TypeAlias(nodeAst: ast.AST) -> TypeGuard[ast.TypeAlias]:
-        return isinstance(nodeAst, ast.TypeAlias)
+    def TypeAlias(nodeAst: ast.AST) -> TypeGuard[astDOTTypeAlias]:
+        return isinstance(nodeAst, astDOTTypeAlias)
 
     @staticmethod
     def TypeIgnore(nodeAst: ast.AST) -> TypeGuard[ast.TypeIgnore]:
         return isinstance(nodeAst, ast.TypeIgnore)
 
     @staticmethod
-    def TypeVar(nodeAst: ast.AST) -> TypeGuard[ast.TypeVar]:
-        return isinstance(nodeAst, ast.TypeVar)
+    def TypeVar(nodeAst: ast.AST) -> TypeGuard[astDOTTypeVar]:
+        return isinstance(nodeAst, astDOTTypeVar)
 
     @staticmethod
-    def TypeVarTuple(nodeAst: ast.AST) -> TypeGuard[ast.TypeVarTuple]:
-        return isinstance(nodeAst, ast.TypeVarTuple)
+    def TypeVarTuple(nodeAst: ast.AST) -> TypeGuard[astDOTTypeVarTuple]:
+        return isinstance(nodeAst, astDOTTypeVarTuple)
 
     @staticmethod
     def UAdd(nodeAst: ast.AST) -> TypeGuard[ast.UAdd]:

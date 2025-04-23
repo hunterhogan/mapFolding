@@ -142,7 +142,7 @@ class DOT:
     @staticmethod
     def handlers(node: ast.Try | astDOTTryStar) -> list[ast.excepthandler]:
         return node.handlers
-    astDOTTryStar()
+
     @staticmethod
     def id(node: ast.Name) -> str:
         return node.id

@@ -62,13 +62,14 @@ def getStringClassBe(listAstClassIdentifiers: list[ast_Identifier]) -> str:
 		listLine.append('')
 	return '\n'.join(listLine)
 
-def writeModuleBe(
-	pathFilenameTarget: PathLike[str] | PurePath,
-	setAstClassDeprecated: set[ast_Identifier],
-) -> None:
+def writeModuleBe(pathFilenameTarget: PathLike[str] | PurePath, setAstClassDeprecated: set[ast_Identifier], list_astDOTStuPyd: list[ast_Identifier]) -> None:
 	listAstClassIdentifiers = getListAstClassIdentifiers(setAstClassDeprecated)
 	stringHeader: str = '"""This file is generated automatically, so changes to this file will be lost."""\nfrom typing import TypeGuard\nimport ast\n'
+	stringHeader = stringHeader + f"from mapFolding import {', '.join(list_astDOTStuPyd)}\n"
 	stringCode: str = stringHeader + '\n' + getStringClassBe(listAstClassIdentifiers) + '\n'
+	for pyDOTwhy in list_astDOTStuPyd:
+		astClass = pyDOTwhy.replace('DOT', '.')
+		stringCode = stringCode.replace(astClass, pyDOTwhy)
 	writeStringToHere(stringCode, pathFilenameTarget)
 
 def getStringTypeNameForIdentifier(attributeType: object) -> str:
@@ -286,5 +287,5 @@ if __name__ == '__main__':
 
 	setAstClassDeprecated: set[ast_Identifier] = setAstClassDeprecatedHARDCODED | getSetAstClassDeprecatedDynamic()
 
-	writeModuleBe(pathFilename_be, setAstClassDeprecated)
+	writeModuleBe(pathFilename_be, setAstClassDeprecated, list_astDOTStuPyd)
 	writeModules_astTypesAndDOT(pathFilename_astTypes, pathFilename_DOT, list_astDOTStuPyd)
