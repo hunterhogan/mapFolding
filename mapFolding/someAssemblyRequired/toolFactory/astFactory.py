@@ -72,49 +72,49 @@ def writeModuleBe(
 	writeStringToHere(stringCode, pathFilenameTarget)
 
 def getStringTypeNameForIdentifier(attributeType: object) -> str:
-    if attributeType is bool:
-        return 'bool'
-    if attributeType is int:
-        return 'int'
-    if attributeType is str:
-        return 'str'
-    if attributeType is None or attributeType is type(None):
-        return 'None'
-    if attributeType is typing.Any or attributeType is object:
-        return 'Any'
-    if hasattr(attributeType, '__origin__') and getattr(attributeType, '__origin__', None) is list:
-        arg = getattr(attributeType, '__args__', [None])[0]
-        return 'list_' + getStringTypeNameForIdentifier(arg)
-    # Handle typing.Union and | (PEP 604)
-    if (hasattr(attributeType, '__origin__') and getattr(attributeType, '__origin__', None) is typing.Union
-        or hasattr(types, 'UnionType') and isinstance(attributeType, types.UnionType)):
-        args = getattr(attributeType, '__args__', None)
-        if args is not None:
-            names = [getStringTypeNameForIdentifier(arg) for arg in args]
-            return 'OR'.join(names)
-    if isinstance(attributeType, str):
-        return attributeType.replace("'", "")
-    if hasattr(attributeType, '__name__') and getattr(attributeType, '__name__', None):
-        return getattr(attributeType, '__name__')
-    if hasattr(attributeType, '_name') and getattr(attributeType, '_name', None):
-        return getattr(attributeType, '_name')
-    # Fallback: try to parse ast types
-    stringType = str(attributeType)
-    if 'ast.' in stringType:
-        match = re.search(r"ast\.([A-Za-z0-9_]+)", stringType)
-        if match:
-            return 'ast.' + match.group(1)
-    if 'str' in stringType:
-        return 'str'
-    if 'int' in stringType:
-        return 'int'
-    if 'bool' in stringType:
-        return 'bool'
-    if 'NoneType' in stringType:
-        return 'None'
-    if 'Any' in stringType:
-        return 'Any'
-    return stringType.replace('typing.', '').replace('ast.', 'ast.').replace("'", '').replace('[', '').replace(']', '').replace(' ', '')
+	if attributeType is bool:
+		return 'bool'
+	if attributeType is int:
+		return 'int'
+	if attributeType is str:
+		return 'str'
+	if attributeType is None or attributeType is type(None):
+		return 'None'
+	if attributeType is typing.Any or attributeType is object:
+		return 'Any'
+	if hasattr(attributeType, '__origin__') and getattr(attributeType, '__origin__', None) is list:
+		arg = getattr(attributeType, '__args__', [None])[0]
+		return 'list_' + getStringTypeNameForIdentifier(arg)
+	# Handle typing.Union and | (PEP 604)
+	if (hasattr(attributeType, '__origin__') and getattr(attributeType, '__origin__', None) is typing.Union # pyright: ignore[reportDeprecated]
+		or hasattr(types, 'UnionType') and isinstance(attributeType, types.UnionType)):
+		args = getattr(attributeType, '__args__', None)
+		if args is not None:
+			names = [getStringTypeNameForIdentifier(arg) for arg in args]
+			return 'OR'.join(names)
+	if isinstance(attributeType, str):
+		return attributeType.replace("'", "")
+	if hasattr(attributeType, '__name__') and getattr(attributeType, '__name__', None):
+		return getattr(attributeType, '__name__')
+	if hasattr(attributeType, '_name') and getattr(attributeType, '_name', None):
+		return getattr(attributeType, '_name')
+	# Fallback: try to parse ast types
+	stringType = str(attributeType)
+	if 'ast.' in stringType:
+		match = re.search(r"ast\.([A-Za-z0-9_]+)", stringType)
+		if match:
+			return 'ast.' + match.group(1)
+	if 'str' in stringType:
+		return 'str'
+	if 'int' in stringType:
+		return 'int'
+	if 'bool' in stringType:
+		return 'bool'
+	if 'NoneType' in stringType:
+		return 'None'
+	if 'Any' in stringType:
+		return 'Any'
+	return stringType.replace('typing.', '').replace('ast.', 'ast.').replace("'", '').replace('[', '').replace(']', '').replace(' ', '')
 
 def getMappingAttributeToClassSetRich() -> dict[ast_Identifier, dict[str, dict[str, object]]]:
 	mapping: dict[ast_Identifier, dict[str, dict[str, object]]] = {}
@@ -137,111 +137,115 @@ def getMappingAttributeToClassSetRich() -> dict[ast_Identifier, dict[str, dict[s
 	return mapping
 
 def getStringTypeAliasDefinitions(mappingAttributeToTypeToClassSet: dict[ast_Identifier, dict[str, set[ast_Identifier]]]) -> str:
-    def resolve_type(typeName: str) -> str:
-        if typeName == 'ast_Identifier':
-            return 'ast_Identifier'
-        if typeName == 'Any':
-            return 'Any'
-        if typeName == 'bool':
-            return 'bool'
-        if typeName == 'int':
-            return 'int'
-        if typeName == 'str':
-            return 'str'
-        if typeName == 'None':
-            return 'None'
-        if typeName.startswith('list_'):
-            listType = typeName[5:]
-            resolved = resolve_type(listType)
-            return f'list[{resolved}]'
-        if 'OR' in typeName:
-            return ' | '.join(resolve_type(t) for t in typeName.split('OR'))
-        if typeName.startswith('ast.'):
-            return typeName
-        return f'ast.{typeName}'
-    listLine: list[str] = []
-    for attributeName in sorted(mappingAttributeToTypeToClassSet.keys()):
-        typeAliasIdentifier = f'hasDOT{attributeName}'
-        mappingTypeToClassSet = mappingAttributeToTypeToClassSet[attributeName]
-        if len(mappingTypeToClassSet) > 1:
-            listSubtypeAliasIdentifier: list[str] = []
-            for typeName in sorted(mappingTypeToClassSet.keys()):
-                setClassIdentifiers = mappingTypeToClassSet[typeName]
-                subtypeAliasIdentifier = f'{typeAliasIdentifier}_{typeName}'
-                listSubtypeAliasIdentifier.append(subtypeAliasIdentifier)
-                classUnion = ' | '.join(f'ast.{classIdentifier}' for classIdentifier in sorted(setClassIdentifiers))
-                listLine.append(f'{subtypeAliasIdentifier}: typing_TypeAlias = {classUnion}')
-            listLine.append(f'{typeAliasIdentifier}: typing_TypeAlias = {" | ".join(listSubtypeAliasIdentifier)}')
-        else:
-            for typeName in sorted(mappingTypeToClassSet.keys()):
-                setClassIdentifiers = mappingTypeToClassSet[typeName]
-                classUnion = ' | '.join(f'ast.{classIdentifier}' for classIdentifier in sorted(setClassIdentifiers))
-                listLine.append(f'{typeAliasIdentifier}: typing_TypeAlias = {classUnion}')
-    return '\n'.join(listLine)
+	def resolve_type(typeName: str) -> str:
+		if typeName == 'ast_Identifier':
+			return 'ast_Identifier'
+		if typeName == 'Any':
+			return 'Any'
+		if typeName == 'bool':
+			return 'bool'
+		if typeName == 'int':
+			return 'int'
+		if typeName == 'str':
+			return 'str'
+		if typeName == 'None':
+			return 'None'
+		if typeName.startswith('list_'):
+			listType = typeName[5:]
+			resolved = resolve_type(listType)
+			return f'list[{resolved}]'
+		if 'OR' in typeName:
+			return ' | '.join(resolve_type(t) for t in typeName.split('OR'))
+		if typeName.startswith('ast.'):
+			return typeName
+		return f'ast.{typeName}'
+	listLine: list[str] = []
+	for attributeName in sorted(mappingAttributeToTypeToClassSet.keys()):
+		typeAliasIdentifier = f'hasDOT{attributeName}'
+		mappingTypeToClassSet = mappingAttributeToTypeToClassSet[attributeName]
+		if len(mappingTypeToClassSet) > 1:
+			listSubtypeAliasIdentifier: list[str] = []
+			for typeName in sorted(mappingTypeToClassSet.keys()):
+				setClassIdentifiers = mappingTypeToClassSet[typeName]
+				subtypeAliasIdentifier = f'{typeAliasIdentifier}_{typeName}'
+				listSubtypeAliasIdentifier.append(subtypeAliasIdentifier)
+				classUnion = ' | '.join(f'ast.{classIdentifier}' for classIdentifier in sorted(setClassIdentifiers))
+				listLine.append(f'{subtypeAliasIdentifier}: typing_TypeAlias = {classUnion}')
+			listLine.append(f'{typeAliasIdentifier}: typing_TypeAlias = {" | ".join(listSubtypeAliasIdentifier)}')
+		else:
+			for typeName in sorted(mappingTypeToClassSet.keys()):
+				setClassIdentifiers = mappingTypeToClassSet[typeName]
+				classUnion = ' | '.join(f'ast.{classIdentifier}' for classIdentifier in sorted(setClassIdentifiers))
+				listLine.append(f'{typeAliasIdentifier}: typing_TypeAlias = {classUnion}')
+	return '\n'.join(listLine)
 
 def writeModuleDOT(pathFilename_DOT: PathLike[str] | PurePath, mappingAttributeToTypeToClassSetRich: dict[ast_Identifier, dict[str, dict[str, object]]], list_astDOTStuPyd: list[ast_Identifier]) -> None:
-    from typing import Any, cast
-    lines: list[str] = []
-    lines.append('from typing import overload, Any')
-    lines.append('from mapFolding.someAssemblyRequired import ast_Identifier')
-    lines.append('import ast')
-    lines.append('')
-    lines.append('class DOT:')
-    for attributeName in sorted(mappingAttributeToTypeToClassSetRich.keys()):
-        typeMap = mappingAttributeToTypeToClassSetRich[attributeName]
-        inputTypes: list[str] = []
-        returnTypes: list[str] = []
-        overloads: list[tuple[str, str]] = []
-        for typeName in sorted(typeMap.keys()):
-            classSet = cast(set[str], typeMap[typeName]['classes'])
-            inputType = ' | '.join(f'ast.{className}' for className in sorted(classSet))
-            # Return type logic
-            def resolve_type(typeName: str) -> str:
-                if typeName == 'ast_Identifier':
-                    return 'ast_Identifier'
-                if typeName == 'Any':
-                    return 'Any'
-                if typeName == 'bool':
-                    return 'bool'
-                if typeName == 'int':
-                    return 'int'
-                if typeName == 'str':
-                    return 'str'
-                if typeName == 'None':
-                    return 'None'
-                if typeName.startswith('list_'):
-                    listType = typeName[5:]
-                    resolved = resolve_type(listType)
-                    return f'list[{resolved}]'
-                if 'OR' in typeName:
-                    return ' | '.join(resolve_type(t) for t in typeName.split('OR'))
-                if typeName.startswith('ast.'):
-                    return typeName
-                return f'ast.{typeName}'
-            returnType = resolve_type(typeName)
-            overloads.append((inputType, returnType))
-            inputTypes.append(inputType)
-            returnTypes.append(returnType)
-        overloads = list(dict.fromkeys(overloads))
-        inputTypes = list(dict.fromkeys(inputTypes))
-        returnTypes = list(dict.fromkeys(returnTypes))
-        if len(overloads) > 1:
-            for inputType, returnType in overloads:
-                lines.append('    @staticmethod')
-                lines.append('    @overload')
-                lines.append(f'    def {attributeName}(node: {inputType}) -> {returnType}: ...')
-            lines.append('    @staticmethod')
-            lines.append(f'    def {attributeName}(node: {" | ".join(inputTypes)}) -> {" | ".join(returnTypes)}:')
-            lines.append(f'        return node.{attributeName}')
-            lines.append('')
-        else:
-            inputType, returnType = overloads[0]
-            lines.append('    @staticmethod')
-            lines.append(f'    def {attributeName}(node: {inputType}) -> {returnType}:')
-            lines.append(f'        return node.{attributeName}')
-            lines.append('')
-    stringCode = '\n'.join(lines)
-    writeStringToHere(stringCode, pathFilename_DOT)
+	from typing import Any, cast
+	lines: list[str] = []
+	lines.append('from typing import overload, Any')
+	lines.append('from mapFolding.someAssemblyRequired import ast_Identifier')
+	lines.append(f"from mapFolding import {', '.join(list_astDOTStuPyd)}")
+	lines.append('import ast')
+	lines.append('')
+	lines.append('class DOT:')
+	for attributeName in sorted(mappingAttributeToTypeToClassSetRich.keys()):
+		typeMap = mappingAttributeToTypeToClassSetRich[attributeName]
+		inputTypes: list[str] = []
+		returnTypes: list[str] = []
+		overloads: list[tuple[str, str]] = []
+		for typeName in sorted(typeMap.keys()):
+			classSet = cast(set[str], typeMap[typeName]['classes'])
+			inputType = ' | '.join(f'ast.{className}' for className in sorted(classSet))
+			# Return type logic
+			def resolve_type(typeName: str) -> str:
+				if typeName == 'ast_Identifier':
+					return 'ast_Identifier'
+				if typeName == 'Any':
+					return 'Any'
+				if typeName == 'bool':
+					return 'bool'
+				if typeName == 'int':
+					return 'int'
+				if typeName == 'str':
+					return 'str'
+				if typeName == 'None':
+					return 'None'
+				if typeName.startswith('list_'):
+					listType = typeName[5:]
+					resolved = resolve_type(listType)
+					return f'list[{resolved}]'
+				if 'OR' in typeName:
+					return ' | '.join(resolve_type(t) for t in typeName.split('OR'))
+				if typeName.startswith('ast.'):
+					return typeName
+				return f'ast.{typeName}'
+			returnType = resolve_type(typeName)
+			overloads.append((inputType, returnType))
+			inputTypes.append(inputType)
+			returnTypes.append(returnType)
+		overloads = list(dict.fromkeys(overloads))
+		inputTypes = list(dict.fromkeys(inputTypes))
+		returnTypes = list(dict.fromkeys(returnTypes))
+		if len(overloads) > 1:
+			for inputType, returnType in overloads:
+				lines.append('    @staticmethod')
+				lines.append('    @overload')
+				lines.append(f'    def {attributeName}(node: {inputType}) -> {returnType}: ...')
+			lines.append('    @staticmethod')
+			lines.append(f'    def {attributeName}(node: {" | ".join(inputTypes)}) -> {" | ".join(returnTypes)}:')
+			lines.append(f'        return node.{attributeName}')
+			lines.append('')
+		else:
+			inputType, returnType = overloads[0]
+			lines.append('    @staticmethod')
+			lines.append(f'    def {attributeName}(node: {inputType}) -> {returnType}:')
+			lines.append(f'        return node.{attributeName}')
+			lines.append('')
+	stringCode = '\n'.join(lines)
+	for pyDOTwhy in list_astDOTStuPyd:
+		astClass = pyDOTwhy.replace('DOT', '.')
+		stringCode = stringCode.replace(astClass, pyDOTwhy)
+	writeStringToHere(stringCode, pathFilename_DOT)
 
 def writeModules_astTypesAndDOT(pathFilename_astTypes: PathLike[str] | PurePath, pathFilename_DOT: PathLike[str] | PurePath, list_astDOTStuPyd: list[ast_Identifier]) -> None:
 	mappingAttributeToTypeToClassSetRich = getMappingAttributeToClassSetRich()

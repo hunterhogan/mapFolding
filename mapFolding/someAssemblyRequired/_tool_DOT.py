@@ -1,5 +1,6 @@
 from typing import overload, Any
 from mapFolding.someAssemblyRequired import ast_Identifier
+from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple
 import ast
 
 class DOT:
@@ -57,13 +58,13 @@ class DOT:
     def body(node: ast.Expression | ast.IfExp | ast.Lambda) -> ast.expr: ...
     @staticmethod
     @overload
-    def body(node: ast.AsyncFor | ast.AsyncFunctionDef | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.Module | ast.Try | ast.TryStar | ast.While | ast.With | ast.match_case) -> list[ast.stmt]: ...
+    def body(node: ast.AsyncFor | ast.AsyncFunctionDef | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.Module | ast.Try | astDOTTryStar | ast.While | ast.With | ast.match_case) -> list[ast.stmt]: ...
     @staticmethod
-    def body(node: ast.Expression | ast.IfExp | ast.Lambda | ast.AsyncFor | ast.AsyncFunctionDef | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.Module | ast.Try | ast.TryStar | ast.While | ast.With | ast.match_case) -> ast.expr | list[ast.stmt]:
+    def body(node: ast.Expression | ast.IfExp | ast.Lambda | ast.AsyncFor | ast.AsyncFunctionDef | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.Module | ast.Try | astDOTTryStar | ast.While | ast.With | ast.match_case) -> ast.expr | list[ast.stmt]:
         return node.body
 
     @staticmethod
-    def bound(node: ast.TypeVar) -> ast.expr | None:
+    def bound(node: astDOTTypeVar) -> ast.expr | None:
         return node.bound
 
     @staticmethod
@@ -99,7 +100,7 @@ class DOT:
         return node.decorator_list
 
     @staticmethod
-    def default_value(node: ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple) -> ast.expr | None:
+    def default_value(node: astDOTParamSpec | astDOTTypeVar | astDOTTypeVarTuple) -> ast.expr | None:
         return node.default_value
 
     @staticmethod
@@ -119,7 +120,7 @@ class DOT:
         return node.exc
 
     @staticmethod
-    def finalbody(node: ast.Try | ast.TryStar) -> list[ast.stmt]:
+    def finalbody(node: ast.Try | astDOTTryStar) -> list[ast.stmt]:
         return node.finalbody
 
     @staticmethod
@@ -139,9 +140,9 @@ class DOT:
         return node.guard
 
     @staticmethod
-    def handlers(node: ast.Try | ast.TryStar) -> list[ast.excepthandler]:
+    def handlers(node: ast.Try | astDOTTryStar) -> list[ast.excepthandler]:
         return node.handlers
-
+    astDOTTryStar()
     @staticmethod
     def id(node: ast.Name) -> str:
         return node.id
@@ -224,15 +225,15 @@ class DOT:
 
     @staticmethod
     @overload
-    def name(node: ast.TypeAlias) -> ast.expr: ...
+    def name(node: astDOTTypeAlias) -> ast.expr: ...
     @staticmethod
     @overload
-    def name(node: ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple | ast.alias) -> str: ...
+    def name(node: ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTParamSpec | astDOTTypeVar | astDOTTypeVarTuple | ast.alias) -> str: ...
     @staticmethod
     @overload
     def name(node: ast.ExceptHandler | ast.MatchAs | ast.MatchStar) -> str | None: ...
     @staticmethod
-    def name(node: ast.TypeAlias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | ast.ParamSpec | ast.TypeVar | ast.TypeVarTuple | ast.alias | ast.ExceptHandler | ast.MatchAs | ast.MatchStar) -> ast.expr | str | str | None:
+    def name(node: astDOTTypeAlias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTParamSpec | astDOTTypeVar | astDOTTypeVarTuple | ast.alias | ast.ExceptHandler | ast.MatchAs | ast.MatchStar) -> ast.expr | str | str | None:
         return node.name
 
     @staticmethod
@@ -275,9 +276,9 @@ class DOT:
     def orelse(node: ast.IfExp) -> ast.expr: ...
     @staticmethod
     @overload
-    def orelse(node: ast.AsyncFor | ast.For | ast.If | ast.Try | ast.TryStar | ast.While) -> list[ast.stmt]: ...
+    def orelse(node: ast.AsyncFor | ast.For | ast.If | ast.Try | astDOTTryStar | ast.While) -> list[ast.stmt]: ...
     @staticmethod
-    def orelse(node: ast.IfExp | ast.AsyncFor | ast.For | ast.If | ast.Try | ast.TryStar | ast.While) -> ast.expr | list[ast.stmt]:
+    def orelse(node: ast.IfExp | ast.AsyncFor | ast.For | ast.If | ast.Try | astDOTTryStar | ast.While) -> ast.expr | list[ast.stmt]:
         return node.orelse
 
     @staticmethod
@@ -361,7 +362,7 @@ class DOT:
         return node.type_ignores
 
     @staticmethod
-    def type_params(node: ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | ast.TypeAlias) -> list[ast.type_param]:
+    def type_params(node: ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTTypeAlias) -> list[ast.type_param]:
         return node.type_params
 
     @staticmethod
@@ -376,12 +377,12 @@ class DOT:
     def value(node: ast.MatchSingleton) -> bool | None: ...
     @staticmethod
     @overload
-    def value(node: ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | ast.TypeAlias | ast.YieldFrom | ast.keyword) -> ast.expr: ...
+    def value(node: ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | astDOTTypeAlias | ast.YieldFrom | ast.keyword) -> ast.expr: ...
     @staticmethod
     @overload
     def value(node: ast.AnnAssign | ast.Return | ast.Yield) -> ast.expr | None: ...
     @staticmethod
-    def value(node: ast.Constant | ast.MatchSingleton | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | ast.TypeAlias | ast.YieldFrom | ast.keyword | ast.AnnAssign | ast.Return | ast.Yield) -> Any | bool | None | ast.expr | ast.expr | None:
+    def value(node: ast.Constant | ast.MatchSingleton | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | astDOTTypeAlias | ast.YieldFrom | ast.keyword | ast.AnnAssign | ast.Return | ast.Yield) -> Any | bool | None | ast.expr | ast.expr | None:
         return node.value
 
     @staticmethod
