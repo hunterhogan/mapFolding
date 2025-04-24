@@ -1,8 +1,8 @@
 """This file is generated automatically, so changes to this file will be lost."""
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
-import ast
-from typing import Any, Literal
 from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice
+from typing import Any, Literal
+import ast
 
 class Make:
     """
