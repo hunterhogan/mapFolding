@@ -5,6 +5,38 @@ import ast
 
 ast_Identifier: typing_TypeAlias = str
 str_nameDOTname: typing_TypeAlias = str
+ast_expr_Slice: typing_TypeAlias = ast.expr
+
+class substituteTyping_TypeAlias(ast.NodeTransformer):
+	def visit_Name(self, node: ast.Name) -> ast.Name:
+		if node.id == '_Identifier':
+			node.id = 'ast_Identifier'
+		elif node.id == '_Slice':
+			node.id = 'ast_expr_Slice'
+		return node
+
+class Z0Z_Name2Attribute(ast.NodeTransformer):
+	def __init__(self, dictionarySubstitutions: dict[ast_Identifier, ast.Attribute]) -> None:
+		super().__init__()
+		self.dictionarySubstitutions = dictionarySubstitutions
+
+	def visit_Name(self, node: ast.Name) -> ast.Attribute | ast.Name:
+		if node.id in self.dictionarySubstitutions:
+			return self.dictionarySubstitutions[node.id]
+		return node
+
+class Z0Z_dictionary(ast.NodeVisitor):
+    def __init__(self, astAST: ast.AST):
+        super().__init__()
+        self.astAST = astAST
+        self.dictionarySubstitutions: dict[ast_Identifier, ast.Attribute] = {'_Pattern': ast.Attribute(value=ast.Name(id='ast'), attr='pattern', ctx=ast.Load())}
+
+    def visit_ClassDef(self, node: ast.ClassDef):
+        self.dictionarySubstitutions[node.name] = ast.Attribute(value=ast.Name(id='ast'), attr=node.name, ctx=ast.Load())
+
+    def get_dictionarySubstitutions(self):
+        self.visit(self.astAST)
+        return self.dictionarySubstitutions
 
 sys_version_infoTarget: tuple[int, int] = (3, 13)
 
@@ -23,50 +55,8 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname):
 
 	beClassDef = ast.ClassDef(name='be', bases=[], keywords=[], body=[], decorator_list=[])
 	MakeClassDef = ast.ClassDef(name='Make', bases=[], keywords=[], body=[], decorator_list=[])
-	"""
-	Notes for the logic to create the `Make` class:
-		- Once you have the list of attributes, you need to get the type(s) for each attribute.
-		- All types are in `ast.AnnAssign`. The most basic format is:
-		```
-		AnnAssign(
-			target=Name(id='name', ctx=Store()),
-			annotation=Name(id='_Identifier', ctx=Load()),
-			simple=1)
-		```
-		- The target is always `ast.Name` and the id matches the attribute name.
-		- The annotation can get complicated. In a perfect world, we could just use the annotation from the
-		`ast.AnnAssign` as the annotation in the method. But, their annotations say "stmt", for example, not "ast.stmt",
-		so we will need to make some adjustments.
-		- And there is another complication: some `ast.AnnAssign` are inside a system version check, such as:
-		```
-		If(
-			test=Compare(
-				left=Attribute(
-					value=Name(id='sys', ctx=Load()),
-					attr='version_info',
-					ctx=Load()),
-				ops=[
-					GtE()],
-				comparators=[
-					Tuple(
-						elts=[
-							Constant(value=3),
-							Constant(value=12)],
-						ctx=Load())]),
-			body=[
-				AnnAssign(
-					target=Name(id='type_params', ctx=Store()),
-					annotation=Subscript(
-						value=Name(id='list', ctx=Load()),
-						slice=Name(id='type_param', ctx=Load()),
-						ctx=Load()),
-					simple=1)]),
-		```
 
-	You MUST use ast to do the work. Do not use string manipulation. The ast module is your friend.
-
-	"""
-
+	dictionaryAnnotations: dict[ast_Identifier, ast.Attribute] = Z0Z_dictionary(astStubFile).get_dictionarySubstitutions()
 	for node in ast.walk(astStubFile):
 		if not isinstance(node, ast.ClassDef):
 			continue
@@ -124,6 +114,24 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname):
 		else:
 			raise Exception(f"Hunter did not predict this situation.\n\t{ClassDefIdentifier = }\n\t{list__match_args__ = }\n\t{dictAttributes = }")
 
+		substituteTyping_TypeAlias().visit(ImaClassDef)
+		# Z0Z_Name2Attribute(dictionaryAnnotations).visit(ImaClassDef)
+		list_ast_arg: list[ast.arg] = []
+		listName4Call: list[ast.expr] = []
+		for attribute in listAttributes:
+			for subnode in ast.walk(ImaClassDef):
+				if isinstance(subnode, ast.AnnAssign) and isinstance(subnode.target, ast.Name) and subnode.target.id == attribute:
+					annotation = Z0Z_Name2Attribute(dictionaryAnnotations).visit(subnode.annotation)
+					list_ast_arg.append(ast.arg(arg=attribute, annotation=annotation))
+					listName4Call.append(ast.Name(attribute, ctx=ast.Load()))
+
+		MakeClassDef.body.append(ast.FunctionDef(name=ClassDefIdentifier, args=ast.arguments(posonlyargs=[], args=list_ast_arg, vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
+			, body=[ast.Return(value=ast.Call(func=ClassDefName
+										, args=listName4Call
+										, keywords=[]))]
+			, decorator_list=[ast.Name('staticmethod')], type_comment=None
+			, returns=ClassDefName))
+
 	beClassDef.body.sort(key=lambda astFunctionDef: astFunctionDef.name.lower()) # pyright: ignore[reportAttributeAccessIssue, reportUnknownLambdaType, reportUnknownMemberType]
 	MakeClassDef.body.sort(key=lambda astFunctionDef: astFunctionDef.name.lower()) # pyright: ignore[reportAttributeAccessIssue, reportUnknownLambdaType, reportUnknownMemberType]
 
@@ -177,9 +185,11 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname):
 	writeModule(be_astModule, beClassDef.name)
 
 	Make_astModule = ast.Module(
-		body=[ast.Expr(ast.Constant(docstringWarning.strip())), ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0), ast.Import([ast.alias('ast')])
-			, ast.ImportFrom('typing', [ast.alias('Any')], 0)
-			, ast.ImportFrom('mapFolding.someAssemblyRequired', [ast.alias('ast_Identifier')], 0)
+		body=[ast.Expr(ast.Constant(docstringWarning.strip()))
+			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
+			, ast.Import([ast.alias('ast')])
+			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('Literal')], 0)
+			, ast.ImportFrom('mapFolding.someAssemblyRequired', [ast.alias('ast_Identifier'), ast.alias('ast_expr_Slice')], 0)
 			, MakeClassDef
 			],
 		type_ignores=[]
