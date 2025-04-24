@@ -176,7 +176,7 @@ from mapFolding.someAssemblyRequired._toolboxPython import (
 	)
 
 from mapFolding.someAssemblyRequired._toolboxAntecedents import be as be, DOT as DOT, ifThis as ifThis
-from mapFolding.someAssemblyRequired._tool_Make import Make as Make
+from mapFolding.someAssemblyRequired._toolMake import Make as Make
 from mapFolding.someAssemblyRequired._tool_Then import grab as grab, Then as Then
 
 from mapFolding.someAssemblyRequired._toolboxContainers import (

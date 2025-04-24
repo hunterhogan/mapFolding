@@ -1,11 +1,10 @@
 """This file is generated automatically, so changes to this file will be lost."""
-from typing import TypeGuard
-import ast
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
+import ast
+from typing import TypeGuard
 
 class be:
     """
-
 	Provide type-guard functions for safely verifying AST node types during manipulation.
 
 	The be class contains static methods that perform runtime type verification of AST nodes, returning TypeGuard
@@ -18,497 +17,508 @@ class be:
 
 	When used with conditional statements, these type-guards allow for precise, type-safe manipulation of AST nodes
 	while maintaining full static type checking capabilities, even in complex transformation scenarios.
-	
-    """
+	"""
+
+    @staticmethod
+    def Add(node: ast.AST) -> TypeGuard[ast.Add]:
+        return isinstance(node, ast.Add)
+
     @staticmethod
-    def Add(nodeAst: ast.AST) -> TypeGuard[ast.Add]:
-        return isinstance(nodeAst, ast.Add)
+    def alias(node: ast.AST) -> TypeGuard[ast.alias]:
+        return isinstance(node, ast.alias)
 
     @staticmethod
-    def alias(nodeAst: ast.AST) -> TypeGuard[ast.alias]:
-        return isinstance(nodeAst, ast.alias)
+    def And(node: ast.AST) -> TypeGuard[ast.And]:
+        return isinstance(node, ast.And)
 
     @staticmethod
-    def And(nodeAst: ast.AST) -> TypeGuard[ast.And]:
-        return isinstance(nodeAst, ast.And)
+    def AnnAssign(node: ast.AST) -> TypeGuard[ast.AnnAssign]:
+        return isinstance(node, ast.AnnAssign)
 
     @staticmethod
-    def AnnAssign(nodeAst: ast.AST) -> TypeGuard[ast.AnnAssign]:
-        return isinstance(nodeAst, ast.AnnAssign)
+    def arg(node: ast.AST) -> TypeGuard[ast.arg]:
+        return isinstance(node, ast.arg)
 
     @staticmethod
-    def arg(nodeAst: ast.AST) -> TypeGuard[ast.arg]:
-        return isinstance(nodeAst, ast.arg)
+    def arguments(node: ast.AST) -> TypeGuard[ast.arguments]:
+        return isinstance(node, ast.arguments)
 
     @staticmethod
-    def arguments(nodeAst: ast.AST) -> TypeGuard[ast.arguments]:
-        return isinstance(nodeAst, ast.arguments)
+    def Assert(node: ast.AST) -> TypeGuard[ast.Assert]:
+        return isinstance(node, ast.Assert)
 
     @staticmethod
-    def Assert(nodeAst: ast.AST) -> TypeGuard[ast.Assert]:
-        return isinstance(nodeAst, ast.Assert)
+    def Assign(node: ast.AST) -> TypeGuard[ast.Assign]:
+        return isinstance(node, ast.Assign)
 
     @staticmethod
-    def Assign(nodeAst: ast.AST) -> TypeGuard[ast.Assign]:
-        return isinstance(nodeAst, ast.Assign)
+    def AST(node: ast.AST) -> TypeGuard[ast.AST]:
+        return isinstance(node, ast.AST)
 
     @staticmethod
-    def AsyncFor(nodeAst: ast.AST) -> TypeGuard[ast.AsyncFor]:
-        return isinstance(nodeAst, ast.AsyncFor)
+    def AsyncFor(node: ast.AST) -> TypeGuard[ast.AsyncFor]:
+        return isinstance(node, ast.AsyncFor)
 
     @staticmethod
-    def AsyncFunctionDef(nodeAst: ast.AST) -> TypeGuard[ast.AsyncFunctionDef]:
-        return isinstance(nodeAst, ast.AsyncFunctionDef)
+    def AsyncFunctionDef(node: ast.AST) -> TypeGuard[ast.AsyncFunctionDef]:
+        return isinstance(node, ast.AsyncFunctionDef)
 
     @staticmethod
-    def AsyncWith(nodeAst: ast.AST) -> TypeGuard[ast.AsyncWith]:
-        return isinstance(nodeAst, ast.AsyncWith)
+    def AsyncWith(node: ast.AST) -> TypeGuard[ast.AsyncWith]:
+        return isinstance(node, ast.AsyncWith)
 
     @staticmethod
-    def Attribute(nodeAst: ast.AST) -> TypeGuard[ast.Attribute]:
-        return isinstance(nodeAst, ast.Attribute)
+    def Attribute(node: ast.AST) -> TypeGuard[ast.Attribute]:
+        return isinstance(node, ast.Attribute)
 
     @staticmethod
-    def AugAssign(nodeAst: ast.AST) -> TypeGuard[ast.AugAssign]:
-        return isinstance(nodeAst, ast.AugAssign)
+    def AugAssign(node: ast.AST) -> TypeGuard[ast.AugAssign]:
+        return isinstance(node, ast.AugAssign)
 
     @staticmethod
-    def Await(nodeAst: ast.AST) -> TypeGuard[ast.Await]:
-        return isinstance(nodeAst, ast.Await)
+    def Await(node: ast.AST) -> TypeGuard[ast.Await]:
+        return isinstance(node, ast.Await)
 
     @staticmethod
-    def BinOp(nodeAst: ast.AST) -> TypeGuard[ast.BinOp]:
-        return isinstance(nodeAst, ast.BinOp)
+    def BinOp(node: ast.AST) -> TypeGuard[ast.BinOp]:
+        return isinstance(node, ast.BinOp)
 
     @staticmethod
-    def BitAnd(nodeAst: ast.AST) -> TypeGuard[ast.BitAnd]:
-        return isinstance(nodeAst, ast.BitAnd)
+    def BitAnd(node: ast.AST) -> TypeGuard[ast.BitAnd]:
+        return isinstance(node, ast.BitAnd)
 
     @staticmethod
-    def BitOr(nodeAst: ast.AST) -> TypeGuard[ast.BitOr]:
-        return isinstance(nodeAst, ast.BitOr)
+    def BitOr(node: ast.AST) -> TypeGuard[ast.BitOr]:
+        return isinstance(node, ast.BitOr)
 
     @staticmethod
-    def BitXor(nodeAst: ast.AST) -> TypeGuard[ast.BitXor]:
-        return isinstance(nodeAst, ast.BitXor)
+    def BitXor(node: ast.AST) -> TypeGuard[ast.BitXor]:
+        return isinstance(node, ast.BitXor)
 
     @staticmethod
-    def BoolOp(nodeAst: ast.AST) -> TypeGuard[ast.BoolOp]:
-        return isinstance(nodeAst, ast.BoolOp)
+    def BoolOp(node: ast.AST) -> TypeGuard[ast.BoolOp]:
+        return isinstance(node, ast.BoolOp)
 
     @staticmethod
-    def boolop(nodeAst: ast.AST) -> TypeGuard[ast.boolop]:
-        return isinstance(nodeAst, ast.boolop)
+    def boolop(node: ast.AST) -> TypeGuard[ast.boolop]:
+        return isinstance(node, ast.boolop)
 
     @staticmethod
-    def Break(nodeAst: ast.AST) -> TypeGuard[ast.Break]:
-        return isinstance(nodeAst, ast.Break)
+    def Break(node: ast.AST) -> TypeGuard[ast.Break]:
+        return isinstance(node, ast.Break)
 
     @staticmethod
-    def Call(nodeAst: ast.AST) -> TypeGuard[ast.Call]:
-        return isinstance(nodeAst, ast.Call)
+    def Call(node: ast.AST) -> TypeGuard[ast.Call]:
+        return isinstance(node, ast.Call)
 
     @staticmethod
-    def ClassDef(nodeAst: ast.AST) -> TypeGuard[ast.ClassDef]:
-        return isinstance(nodeAst, ast.ClassDef)
+    def ClassDef(node: ast.AST) -> TypeGuard[ast.ClassDef]:
+        return isinstance(node, ast.ClassDef)
 
     @staticmethod
-    def cmpop(nodeAst: ast.AST) -> TypeGuard[ast.cmpop]:
-        return isinstance(nodeAst, ast.cmpop)
+    def cmpop(node: ast.AST) -> TypeGuard[ast.cmpop]:
+        return isinstance(node, ast.cmpop)
 
     @staticmethod
-    def Compare(nodeAst: ast.AST) -> TypeGuard[ast.Compare]:
-        return isinstance(nodeAst, ast.Compare)
+    def Compare(node: ast.AST) -> TypeGuard[ast.Compare]:
+        return isinstance(node, ast.Compare)
 
     @staticmethod
-    def comprehension(nodeAst: ast.AST) -> TypeGuard[ast.comprehension]:
-        return isinstance(nodeAst, ast.comprehension)
+    def comprehension(node: ast.AST) -> TypeGuard[ast.comprehension]:
+        return isinstance(node, ast.comprehension)
 
     @staticmethod
-    def Constant(nodeAst: ast.AST) -> TypeGuard[ast.Constant]:
-        return isinstance(nodeAst, ast.Constant)
+    def Constant(node: ast.AST) -> TypeGuard[ast.Constant]:
+        return isinstance(node, ast.Constant)
 
     @staticmethod
-    def Continue(nodeAst: ast.AST) -> TypeGuard[ast.Continue]:
-        return isinstance(nodeAst, ast.Continue)
+    def Continue(node: ast.AST) -> TypeGuard[ast.Continue]:
+        return isinstance(node, ast.Continue)
 
     @staticmethod
-    def Del(nodeAst: ast.AST) -> TypeGuard[ast.Del]:
-        return isinstance(nodeAst, ast.Del)
+    def Del(node: ast.AST) -> TypeGuard[ast.Del]:
+        return isinstance(node, ast.Del)
 
     @staticmethod
-    def Delete(nodeAst: ast.AST) -> TypeGuard[ast.Delete]:
-        return isinstance(nodeAst, ast.Delete)
+    def Delete(node: ast.AST) -> TypeGuard[ast.Delete]:
+        return isinstance(node, ast.Delete)
 
     @staticmethod
-    def Dict(nodeAst: ast.AST) -> TypeGuard[ast.Dict]:
-        return isinstance(nodeAst, ast.Dict)
+    def Dict(node: ast.AST) -> TypeGuard[ast.Dict]:
+        return isinstance(node, ast.Dict)
 
     @staticmethod
-    def DictComp(nodeAst: ast.AST) -> TypeGuard[ast.DictComp]:
-        return isinstance(nodeAst, ast.DictComp)
+    def DictComp(node: ast.AST) -> TypeGuard[ast.DictComp]:
+        return isinstance(node, ast.DictComp)
 
     @staticmethod
-    def Div(nodeAst: ast.AST) -> TypeGuard[ast.Div]:
-        return isinstance(nodeAst, ast.Div)
+    def Div(node: ast.AST) -> TypeGuard[ast.Div]:
+        return isinstance(node, ast.Div)
 
     @staticmethod
-    def Eq(nodeAst: ast.AST) -> TypeGuard[ast.Eq]:
-        return isinstance(nodeAst, ast.Eq)
+    def Eq(node: ast.AST) -> TypeGuard[ast.Eq]:
+        return isinstance(node, ast.Eq)
 
     @staticmethod
-    def ExceptHandler(nodeAst: ast.AST) -> TypeGuard[ast.ExceptHandler]:
-        return isinstance(nodeAst, ast.ExceptHandler)
+    def excepthandler(node: ast.AST) -> TypeGuard[ast.excepthandler]:
+        return isinstance(node, ast.excepthandler)
 
     @staticmethod
-    def excepthandler(nodeAst: ast.AST) -> TypeGuard[ast.excepthandler]:
-        return isinstance(nodeAst, ast.excepthandler)
+    def ExceptHandler(node: ast.AST) -> TypeGuard[ast.ExceptHandler]:
+        return isinstance(node, ast.ExceptHandler)
 
     @staticmethod
-    def Expr(nodeAst: ast.AST) -> TypeGuard[ast.Expr]:
-        return isinstance(nodeAst, ast.Expr)
+    def Expr(node: ast.AST) -> TypeGuard[ast.Expr]:
+        return isinstance(node, ast.Expr)
 
     @staticmethod
-    def expr(nodeAst: ast.AST) -> TypeGuard[ast.expr]:
-        return isinstance(nodeAst, ast.expr)
+    def expr(node: ast.AST) -> TypeGuard[ast.expr]:
+        return isinstance(node, ast.expr)
 
     @staticmethod
-    def expr_context(nodeAst: ast.AST) -> TypeGuard[ast.expr_context]:
-        return isinstance(nodeAst, ast.expr_context)
+    def expr_context(node: ast.AST) -> TypeGuard[ast.expr_context]:
+        return isinstance(node, ast.expr_context)
 
     @staticmethod
-    def Expression(nodeAst: ast.AST) -> TypeGuard[ast.Expression]:
-        return isinstance(nodeAst, ast.Expression)
+    def Expression(node: ast.AST) -> TypeGuard[ast.Expression]:
+        return isinstance(node, ast.Expression)
 
     @staticmethod
-    def FloorDiv(nodeAst: ast.AST) -> TypeGuard[ast.FloorDiv]:
-        return isinstance(nodeAst, ast.FloorDiv)
+    def FloorDiv(node: ast.AST) -> TypeGuard[ast.FloorDiv]:
+        return isinstance(node, ast.FloorDiv)
 
     @staticmethod
-    def For(nodeAst: ast.AST) -> TypeGuard[ast.For]:
-        return isinstance(nodeAst, ast.For)
+    def For(node: ast.AST) -> TypeGuard[ast.For]:
+        return isinstance(node, ast.For)
 
     @staticmethod
-    def FormattedValue(nodeAst: ast.AST) -> TypeGuard[ast.FormattedValue]:
-        return isinstance(nodeAst, ast.FormattedValue)
+    def FormattedValue(node: ast.AST) -> TypeGuard[ast.FormattedValue]:
+        return isinstance(node, ast.FormattedValue)
 
     @staticmethod
-    def FunctionDef(nodeAst: ast.AST) -> TypeGuard[ast.FunctionDef]:
-        return isinstance(nodeAst, ast.FunctionDef)
+    def FunctionDef(node: ast.AST) -> TypeGuard[ast.FunctionDef]:
+        return isinstance(node, ast.FunctionDef)
 
     @staticmethod
-    def FunctionType(nodeAst: ast.AST) -> TypeGuard[ast.FunctionType]:
-        return isinstance(nodeAst, ast.FunctionType)
+    def FunctionType(node: ast.AST) -> TypeGuard[ast.FunctionType]:
+        return isinstance(node, ast.FunctionType)
 
     @staticmethod
-    def GeneratorExp(nodeAst: ast.AST) -> TypeGuard[ast.GeneratorExp]:
-        return isinstance(nodeAst, ast.GeneratorExp)
+    def GeneratorExp(node: ast.AST) -> TypeGuard[ast.GeneratorExp]:
+        return isinstance(node, ast.GeneratorExp)
 
     @staticmethod
-    def Global(nodeAst: ast.AST) -> TypeGuard[ast.Global]:
-        return isinstance(nodeAst, ast.Global)
+    def Global(node: ast.AST) -> TypeGuard[ast.Global]:
+        return isinstance(node, ast.Global)
 
     @staticmethod
-    def Gt(nodeAst: ast.AST) -> TypeGuard[ast.Gt]:
-        return isinstance(nodeAst, ast.Gt)
+    def Gt(node: ast.AST) -> TypeGuard[ast.Gt]:
+        return isinstance(node, ast.Gt)
 
     @staticmethod
-    def GtE(nodeAst: ast.AST) -> TypeGuard[ast.GtE]:
-        return isinstance(nodeAst, ast.GtE)
+    def GtE(node: ast.AST) -> TypeGuard[ast.GtE]:
+        return isinstance(node, ast.GtE)
 
     @staticmethod
-    def If(nodeAst: ast.AST) -> TypeGuard[ast.If]:
-        return isinstance(nodeAst, ast.If)
+    def If(node: ast.AST) -> TypeGuard[ast.If]:
+        return isinstance(node, ast.If)
 
     @staticmethod
-    def IfExp(nodeAst: ast.AST) -> TypeGuard[ast.IfExp]:
-        return isinstance(nodeAst, ast.IfExp)
+    def IfExp(node: ast.AST) -> TypeGuard[ast.IfExp]:
+        return isinstance(node, ast.IfExp)
 
     @staticmethod
-    def Import(nodeAst: ast.AST) -> TypeGuard[ast.Import]:
-        return isinstance(nodeAst, ast.Import)
+    def Import(node: ast.AST) -> TypeGuard[ast.Import]:
+        return isinstance(node, ast.Import)
 
     @staticmethod
-    def ImportFrom(nodeAst: ast.AST) -> TypeGuard[ast.ImportFrom]:
-        return isinstance(nodeAst, ast.ImportFrom)
+    def ImportFrom(node: ast.AST) -> TypeGuard[ast.ImportFrom]:
+        return isinstance(node, ast.ImportFrom)
 
     @staticmethod
-    def In(nodeAst: ast.AST) -> TypeGuard[ast.In]:
-        return isinstance(nodeAst, ast.In)
+    def In(node: ast.AST) -> TypeGuard[ast.In]:
+        return isinstance(node, ast.In)
 
     @staticmethod
-    def Interactive(nodeAst: ast.AST) -> TypeGuard[ast.Interactive]:
-        return isinstance(nodeAst, ast.Interactive)
+    def Interactive(node: ast.AST) -> TypeGuard[ast.Interactive]:
+        return isinstance(node, ast.Interactive)
 
     @staticmethod
-    def Invert(nodeAst: ast.AST) -> TypeGuard[ast.Invert]:
-        return isinstance(nodeAst, ast.Invert)
+    def Invert(node: ast.AST) -> TypeGuard[ast.Invert]:
+        return isinstance(node, ast.Invert)
 
     @staticmethod
-    def Is(nodeAst: ast.AST) -> TypeGuard[ast.Is]:
-        return isinstance(nodeAst, ast.Is)
+    def Is(node: ast.AST) -> TypeGuard[ast.Is]:
+        return isinstance(node, ast.Is)
 
     @staticmethod
-    def IsNot(nodeAst: ast.AST) -> TypeGuard[ast.IsNot]:
-        return isinstance(nodeAst, ast.IsNot)
+    def IsNot(node: ast.AST) -> TypeGuard[ast.IsNot]:
+        return isinstance(node, ast.IsNot)
 
     @staticmethod
-    def JoinedStr(nodeAst: ast.AST) -> TypeGuard[ast.JoinedStr]:
-        return isinstance(nodeAst, ast.JoinedStr)
+    def JoinedStr(node: ast.AST) -> TypeGuard[ast.JoinedStr]:
+        return isinstance(node, ast.JoinedStr)
 
     @staticmethod
-    def keyword(nodeAst: ast.AST) -> TypeGuard[ast.keyword]:
-        return isinstance(nodeAst, ast.keyword)
+    def keyword(node: ast.AST) -> TypeGuard[ast.keyword]:
+        return isinstance(node, ast.keyword)
 
     @staticmethod
-    def Lambda(nodeAst: ast.AST) -> TypeGuard[ast.Lambda]:
-        return isinstance(nodeAst, ast.Lambda)
+    def Lambda(node: ast.AST) -> TypeGuard[ast.Lambda]:
+        return isinstance(node, ast.Lambda)
 
     @staticmethod
-    def List(nodeAst: ast.AST) -> TypeGuard[ast.List]:
-        return isinstance(nodeAst, ast.List)
+    def List(node: ast.AST) -> TypeGuard[ast.List]:
+        return isinstance(node, ast.List)
 
     @staticmethod
-    def ListComp(nodeAst: ast.AST) -> TypeGuard[ast.ListComp]:
-        return isinstance(nodeAst, ast.ListComp)
+    def ListComp(node: ast.AST) -> TypeGuard[ast.ListComp]:
+        return isinstance(node, ast.ListComp)
 
     @staticmethod
-    def Load(nodeAst: ast.AST) -> TypeGuard[ast.Load]:
-        return isinstance(nodeAst, ast.Load)
+    def Load(node: ast.AST) -> TypeGuard[ast.Load]:
+        return isinstance(node, ast.Load)
 
     @staticmethod
-    def LShift(nodeAst: ast.AST) -> TypeGuard[ast.LShift]:
-        return isinstance(nodeAst, ast.LShift)
+    def LShift(node: ast.AST) -> TypeGuard[ast.LShift]:
+        return isinstance(node, ast.LShift)
 
     @staticmethod
-    def Lt(nodeAst: ast.AST) -> TypeGuard[ast.Lt]:
-        return isinstance(nodeAst, ast.Lt)
+    def Lt(node: ast.AST) -> TypeGuard[ast.Lt]:
+        return isinstance(node, ast.Lt)
 
     @staticmethod
-    def LtE(nodeAst: ast.AST) -> TypeGuard[ast.LtE]:
-        return isinstance(nodeAst, ast.LtE)
+    def LtE(node: ast.AST) -> TypeGuard[ast.LtE]:
+        return isinstance(node, ast.LtE)
 
     @staticmethod
-    def Match(nodeAst: ast.AST) -> TypeGuard[ast.Match]:
-        return isinstance(nodeAst, ast.Match)
+    def Match(node: ast.AST) -> TypeGuard[ast.Match]:
+        return isinstance(node, ast.Match)
 
     @staticmethod
-    def match_case(nodeAst: ast.AST) -> TypeGuard[ast.match_case]:
-        return isinstance(nodeAst, ast.match_case)
+    def match_case(node: ast.AST) -> TypeGuard[ast.match_case]:
+        return isinstance(node, ast.match_case)
 
     @staticmethod
-    def MatchAs(nodeAst: ast.AST) -> TypeGuard[ast.MatchAs]:
-        return isinstance(nodeAst, ast.MatchAs)
+    def MatchAs(node: ast.AST) -> TypeGuard[ast.MatchAs]:
+        return isinstance(node, ast.MatchAs)
 
     @staticmethod
-    def MatchClass(nodeAst: ast.AST) -> TypeGuard[ast.MatchClass]:
-        return isinstance(nodeAst, ast.MatchClass)
+    def MatchClass(node: ast.AST) -> TypeGuard[ast.MatchClass]:
+        return isinstance(node, ast.MatchClass)
 
     @staticmethod
-    def MatchMapping(nodeAst: ast.AST) -> TypeGuard[ast.MatchMapping]:
-        return isinstance(nodeAst, ast.MatchMapping)
+    def MatchMapping(node: ast.AST) -> TypeGuard[ast.MatchMapping]:
+        return isinstance(node, ast.MatchMapping)
 
     @staticmethod
-    def MatchOr(nodeAst: ast.AST) -> TypeGuard[ast.MatchOr]:
-        return isinstance(nodeAst, ast.MatchOr)
+    def MatchOr(node: ast.AST) -> TypeGuard[ast.MatchOr]:
+        return isinstance(node, ast.MatchOr)
 
     @staticmethod
-    def MatchSequence(nodeAst: ast.AST) -> TypeGuard[ast.MatchSequence]:
-        return isinstance(nodeAst, ast.MatchSequence)
+    def MatchSequence(node: ast.AST) -> TypeGuard[ast.MatchSequence]:
+        return isinstance(node, ast.MatchSequence)
 
     @staticmethod
-    def MatchSingleton(nodeAst: ast.AST) -> TypeGuard[ast.MatchSingleton]:
-        return isinstance(nodeAst, ast.MatchSingleton)
+    def MatchSingleton(node: ast.AST) -> TypeGuard[ast.MatchSingleton]:
+        return isinstance(node, ast.MatchSingleton)
 
     @staticmethod
-    def MatchStar(nodeAst: ast.AST) -> TypeGuard[ast.MatchStar]:
-        return isinstance(nodeAst, ast.MatchStar)
+    def MatchStar(node: ast.AST) -> TypeGuard[ast.MatchStar]:
+        return isinstance(node, ast.MatchStar)
 
     @staticmethod
-    def MatchValue(nodeAst: ast.AST) -> TypeGuard[ast.MatchValue]:
-        return isinstance(nodeAst, ast.MatchValue)
+    def MatchValue(node: ast.AST) -> TypeGuard[ast.MatchValue]:
+        return isinstance(node, ast.MatchValue)
 
     @staticmethod
-    def MatMult(nodeAst: ast.AST) -> TypeGuard[ast.MatMult]:
-        return isinstance(nodeAst, ast.MatMult)
+    def MatMult(node: ast.AST) -> TypeGuard[ast.MatMult]:
+        return isinstance(node, ast.MatMult)
 
     @staticmethod
-    def Mod(nodeAst: ast.AST) -> TypeGuard[ast.Mod]:
-        return isinstance(nodeAst, ast.Mod)
+    def mod(node: ast.AST) -> TypeGuard[ast.mod]:
+        return isinstance(node, ast.mod)
 
     @staticmethod
-    def mod(nodeAst: ast.AST) -> TypeGuard[ast.mod]:
-        return isinstance(nodeAst, ast.mod)
+    def Mod(node: ast.AST) -> TypeGuard[ast.Mod]:
+        return isinstance(node, ast.Mod)
 
     @staticmethod
-    def Module(nodeAst: ast.AST) -> TypeGuard[ast.Module]:
-        return isinstance(nodeAst, ast.Module)
+    def Module(node: ast.AST) -> TypeGuard[ast.Module]:
+        return isinstance(node, ast.Module)
 
     @staticmethod
-    def Mult(nodeAst: ast.AST) -> TypeGuard[ast.Mult]:
-        return isinstance(nodeAst, ast.Mult)
+    def Mult(node: ast.AST) -> TypeGuard[ast.Mult]:
+        return isinstance(node, ast.Mult)
 
     @staticmethod
-    def Name(nodeAst: ast.AST) -> TypeGuard[ast.Name]:
-        return isinstance(nodeAst, ast.Name)
+    def Name(node: ast.AST) -> TypeGuard[ast.Name]:
+        return isinstance(node, ast.Name)
 
     @staticmethod
-    def NamedExpr(nodeAst: ast.AST) -> TypeGuard[ast.NamedExpr]:
-        return isinstance(nodeAst, ast.NamedExpr)
+    def NamedExpr(node: ast.AST) -> TypeGuard[ast.NamedExpr]:
+        return isinstance(node, ast.NamedExpr)
 
     @staticmethod
-    def Nonlocal(nodeAst: ast.AST) -> TypeGuard[ast.Nonlocal]:
-        return isinstance(nodeAst, ast.Nonlocal)
+    def NodeTransformer(node: ast.AST) -> TypeGuard[ast.NodeTransformer]:
+        return isinstance(node, ast.NodeTransformer)
 
     @staticmethod
-    def Not(nodeAst: ast.AST) -> TypeGuard[ast.Not]:
-        return isinstance(nodeAst, ast.Not)
+    def NodeVisitor(node: ast.AST) -> TypeGuard[ast.NodeVisitor]:
+        return isinstance(node, ast.NodeVisitor)
 
     @staticmethod
-    def NotEq(nodeAst: ast.AST) -> TypeGuard[ast.NotEq]:
-        return isinstance(nodeAst, ast.NotEq)
+    def Nonlocal(node: ast.AST) -> TypeGuard[ast.Nonlocal]:
+        return isinstance(node, ast.Nonlocal)
 
     @staticmethod
-    def NotIn(nodeAst: ast.AST) -> TypeGuard[ast.NotIn]:
-        return isinstance(nodeAst, ast.NotIn)
+    def Not(node: ast.AST) -> TypeGuard[ast.Not]:
+        return isinstance(node, ast.Not)
 
     @staticmethod
-    def operator(nodeAst: ast.AST) -> TypeGuard[ast.operator]:
-        return isinstance(nodeAst, ast.operator)
+    def NotEq(node: ast.AST) -> TypeGuard[ast.NotEq]:
+        return isinstance(node, ast.NotEq)
 
     @staticmethod
-    def Or(nodeAst: ast.AST) -> TypeGuard[ast.Or]:
-        return isinstance(nodeAst, ast.Or)
+    def NotIn(node: ast.AST) -> TypeGuard[ast.NotIn]:
+        return isinstance(node, ast.NotIn)
 
     @staticmethod
-    def ParamSpec(nodeAst: ast.AST) -> TypeGuard[astDOTParamSpec]:
-        return isinstance(nodeAst, astDOTParamSpec)
+    def operator(node: ast.AST) -> TypeGuard[ast.operator]:
+        return isinstance(node, ast.operator)
 
     @staticmethod
-    def Pass(nodeAst: ast.AST) -> TypeGuard[ast.Pass]:
-        return isinstance(nodeAst, ast.Pass)
+    def Or(node: ast.AST) -> TypeGuard[ast.Or]:
+        return isinstance(node, ast.Or)
 
     @staticmethod
-    def pattern(nodeAst: ast.AST) -> TypeGuard[ast.pattern]:
-        return isinstance(nodeAst, ast.pattern)
+    def ParamSpec(node: ast.AST) -> TypeGuard[astDOTParamSpec]:
+        return isinstance(node, astDOTParamSpec)
 
     @staticmethod
-    def Pow(nodeAst: ast.AST) -> TypeGuard[ast.Pow]:
-        return isinstance(nodeAst, ast.Pow)
+    def Pass(node: ast.AST) -> TypeGuard[ast.Pass]:
+        return isinstance(node, ast.Pass)
 
     @staticmethod
-    def Raise(nodeAst: ast.AST) -> TypeGuard[ast.Raise]:
-        return isinstance(nodeAst, ast.Raise)
+    def pattern(node: ast.AST) -> TypeGuard[ast.pattern]:
+        return isinstance(node, ast.pattern)
 
     @staticmethod
-    def Return(nodeAst: ast.AST) -> TypeGuard[ast.Return]:
-        return isinstance(nodeAst, ast.Return)
+    def Pow(node: ast.AST) -> TypeGuard[ast.Pow]:
+        return isinstance(node, ast.Pow)
 
     @staticmethod
-    def RShift(nodeAst: ast.AST) -> TypeGuard[ast.RShift]:
-        return isinstance(nodeAst, ast.RShift)
+    def Raise(node: ast.AST) -> TypeGuard[ast.Raise]:
+        return isinstance(node, ast.Raise)
 
     @staticmethod
-    def Set(nodeAst: ast.AST) -> TypeGuard[ast.Set]:
-        return isinstance(nodeAst, ast.Set)
+    def Return(node: ast.AST) -> TypeGuard[ast.Return]:
+        return isinstance(node, ast.Return)
 
     @staticmethod
-    def SetComp(nodeAst: ast.AST) -> TypeGuard[ast.SetComp]:
-        return isinstance(nodeAst, ast.SetComp)
+    def RShift(node: ast.AST) -> TypeGuard[ast.RShift]:
+        return isinstance(node, ast.RShift)
 
     @staticmethod
-    def Slice(nodeAst: ast.AST) -> TypeGuard[ast.Slice]:
-        return isinstance(nodeAst, ast.Slice)
+    def Set(node: ast.AST) -> TypeGuard[ast.Set]:
+        return isinstance(node, ast.Set)
 
     @staticmethod
-    def Starred(nodeAst: ast.AST) -> TypeGuard[ast.Starred]:
-        return isinstance(nodeAst, ast.Starred)
+    def SetComp(node: ast.AST) -> TypeGuard[ast.SetComp]:
+        return isinstance(node, ast.SetComp)
 
     @staticmethod
-    def stmt(nodeAst: ast.AST) -> TypeGuard[ast.stmt]:
-        return isinstance(nodeAst, ast.stmt)
+    def Slice(node: ast.AST) -> TypeGuard[ast.Slice]:
+        return isinstance(node, ast.Slice)
 
     @staticmethod
-    def Store(nodeAst: ast.AST) -> TypeGuard[ast.Store]:
-        return isinstance(nodeAst, ast.Store)
+    def Starred(node: ast.AST) -> TypeGuard[ast.Starred]:
+        return isinstance(node, ast.Starred)
 
     @staticmethod
-    def Sub(nodeAst: ast.AST) -> TypeGuard[ast.Sub]:
-        return isinstance(nodeAst, ast.Sub)
+    def stmt(node: ast.AST) -> TypeGuard[ast.stmt]:
+        return isinstance(node, ast.stmt)
 
     @staticmethod
-    def Subscript(nodeAst: ast.AST) -> TypeGuard[ast.Subscript]:
-        return isinstance(nodeAst, ast.Subscript)
+    def Store(node: ast.AST) -> TypeGuard[ast.Store]:
+        return isinstance(node, ast.Store)
 
     @staticmethod
-    def Try(nodeAst: ast.AST) -> TypeGuard[ast.Try]:
-        return isinstance(nodeAst, ast.Try)
+    def Sub(node: ast.AST) -> TypeGuard[ast.Sub]:
+        return isinstance(node, ast.Sub)
 
     @staticmethod
-    def TryStar(nodeAst: ast.AST) -> TypeGuard[astDOTTryStar]:
-        return isinstance(nodeAst, astDOTTryStar)
+    def Subscript(node: ast.AST) -> TypeGuard[ast.Subscript]:
+        return isinstance(node, ast.Subscript)
 
     @staticmethod
-    def Tuple(nodeAst: ast.AST) -> TypeGuard[ast.Tuple]:
-        return isinstance(nodeAst, ast.Tuple)
+    def Try(node: ast.AST) -> TypeGuard[ast.Try]:
+        return isinstance(node, ast.Try)
 
     @staticmethod
-    def type_ignore(nodeAst: ast.AST) -> TypeGuard[ast.type_ignore]:
-        return isinstance(nodeAst, ast.type_ignore)
+    def TryStar(node: ast.AST) -> TypeGuard[astDOTTryStar]:
+        return isinstance(node, astDOTTryStar)
 
     @staticmethod
-    def type_param(nodeAst: ast.AST) -> TypeGuard[astDOTtype_param]:
-        return isinstance(nodeAst, astDOTtype_param)
+    def Tuple(node: ast.AST) -> TypeGuard[ast.Tuple]:
+        return isinstance(node, ast.Tuple)
 
     @staticmethod
-    def TypeAlias(nodeAst: ast.AST) -> TypeGuard[astDOTTypeAlias]:
-        return isinstance(nodeAst, astDOTTypeAlias)
+    def type_ignore(node: ast.AST) -> TypeGuard[ast.type_ignore]:
+        return isinstance(node, ast.type_ignore)
 
     @staticmethod
-    def TypeIgnore(nodeAst: ast.AST) -> TypeGuard[ast.TypeIgnore]:
-        return isinstance(nodeAst, ast.TypeIgnore)
+    def type_param(node: ast.AST) -> TypeGuard[astDOTtype_param]:
+        return isinstance(node, astDOTtype_param)
 
     @staticmethod
-    def TypeVar(nodeAst: ast.AST) -> TypeGuard[astDOTTypeVar]:
-        return isinstance(nodeAst, astDOTTypeVar)
+    def TypeAlias(node: ast.AST) -> TypeGuard[astDOTTypeAlias]:
+        return isinstance(node, astDOTTypeAlias)
 
     @staticmethod
-    def TypeVarTuple(nodeAst: ast.AST) -> TypeGuard[astDOTTypeVarTuple]:
-        return isinstance(nodeAst, astDOTTypeVarTuple)
+    def TypeIgnore(node: ast.AST) -> TypeGuard[ast.TypeIgnore]:
+        return isinstance(node, ast.TypeIgnore)
 
     @staticmethod
-    def UAdd(nodeAst: ast.AST) -> TypeGuard[ast.UAdd]:
-        return isinstance(nodeAst, ast.UAdd)
+    def TypeVar(node: ast.AST) -> TypeGuard[astDOTTypeVar]:
+        return isinstance(node, astDOTTypeVar)
 
     @staticmethod
-    def UnaryOp(nodeAst: ast.AST) -> TypeGuard[ast.UnaryOp]:
-        return isinstance(nodeAst, ast.UnaryOp)
+    def TypeVarTuple(node: ast.AST) -> TypeGuard[astDOTTypeVarTuple]:
+        return isinstance(node, astDOTTypeVarTuple)
 
     @staticmethod
-    def unaryop(nodeAst: ast.AST) -> TypeGuard[ast.unaryop]:
-        return isinstance(nodeAst, ast.unaryop)
+    def UAdd(node: ast.AST) -> TypeGuard[ast.UAdd]:
+        return isinstance(node, ast.UAdd)
 
     @staticmethod
-    def USub(nodeAst: ast.AST) -> TypeGuard[ast.USub]:
-        return isinstance(nodeAst, ast.USub)
+    def UnaryOp(node: ast.AST) -> TypeGuard[ast.UnaryOp]:
+        return isinstance(node, ast.UnaryOp)
 
     @staticmethod
-    def While(nodeAst: ast.AST) -> TypeGuard[ast.While]:
-        return isinstance(nodeAst, ast.While)
+    def unaryop(node: ast.AST) -> TypeGuard[ast.unaryop]:
+        return isinstance(node, ast.unaryop)
 
     @staticmethod
-    def With(nodeAst: ast.AST) -> TypeGuard[ast.With]:
-        return isinstance(nodeAst, ast.With)
+    def USub(node: ast.AST) -> TypeGuard[ast.USub]:
+        return isinstance(node, ast.USub)
 
     @staticmethod
-    def withitem(nodeAst: ast.AST) -> TypeGuard[ast.withitem]:
-        return isinstance(nodeAst, ast.withitem)
+    def While(node: ast.AST) -> TypeGuard[ast.While]:
+        return isinstance(node, ast.While)
 
     @staticmethod
-    def Yield(nodeAst: ast.AST) -> TypeGuard[ast.Yield]:
-        return isinstance(nodeAst, ast.Yield)
+    def With(node: ast.AST) -> TypeGuard[ast.With]:
+        return isinstance(node, ast.With)
 
     @staticmethod
-    def YieldFrom(nodeAst: ast.AST) -> TypeGuard[ast.YieldFrom]:
-        return isinstance(nodeAst, ast.YieldFrom)
+    def withitem(node: ast.AST) -> TypeGuard[ast.withitem]:
+        return isinstance(node, ast.withitem)
 
+    @staticmethod
+    def Yield(node: ast.AST) -> TypeGuard[ast.Yield]:
+        return isinstance(node, ast.Yield)
+
+    @staticmethod
+    def YieldFrom(node: ast.AST) -> TypeGuard[ast.YieldFrom]:
+        return isinstance(node, ast.YieldFrom)

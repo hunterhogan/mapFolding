@@ -35,6 +35,7 @@ dependencies = [
 	"python_minifier",
 	"sympy",
 	"tomli",
+	"typeshed_client",
 	"Z0Z_tools",]
 description = "Map folding algorithm with code transformation framework for optimizing numerical computations"
 keywords = [
