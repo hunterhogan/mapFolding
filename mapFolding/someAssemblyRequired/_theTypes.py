@@ -4,17 +4,10 @@ import ast
 
 # TODO understand typing.
 
-stuPyd: typing_TypeAlias = str
-
 # NOTE Prototype of an idea to subclass composable methods so that typing information
 # can extend beyond the top level of the ast node.
 class ImaCallToName(ast.Call):
 	func: ast.Name 	# pyright: ignore[reportIncompatibleVariableOverride]
-
-# Some common attributes of ast classes.
-hasDOTtarget_AttributeORNameORSubscript: typing_TypeAlias = ast.AnnAssign | ast.AugAssign
-hasDOTtarget_expr: typing_TypeAlias = ast.AsyncFor | ast.comprehension | ast.For
-hasDOTtarget_Name: typing_TypeAlias = ast.NamedExpr
 
 # Type hints through TypeAlias or type "hints" through the identifier name.
 ast_expr_Slice: typing_TypeAlias = ast.expr
@@ -22,7 +15,7 @@ ast_Identifier: typing_TypeAlias = str
 intORlist_ast_type_paramORstr_orNone: typing_TypeAlias = Any
 intORstr_orNone: typing_TypeAlias = Any
 list_ast_type_paramORstr_orNone: typing_TypeAlias = Any
-str_nameDOTname: typing_TypeAlias = stuPyd
+str_nameDOTname: typing_TypeAlias = str
 
 # Limited success with TypeVar.
 个 = typing_TypeVar('个', bound = ast.AST, covariant = True)

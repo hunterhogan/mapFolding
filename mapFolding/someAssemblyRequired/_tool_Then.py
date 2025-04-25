@@ -37,6 +37,13 @@ class grab:
 		return workhorse
 
 	@staticmethod
+	def funcDOTidAttribute(action: Callable[[ast_Identifier], Any]) -> Callable[[ImaCallToName], ImaCallToName]:
+		def workhorse(node: ImaCallToName) -> ImaCallToName:
+			node.func = grab.idAttribute(action)(node.func)
+			return node
+		return workhorse
+
+	@staticmethod
 	def argAttribute(action: Callable[[ast_Identifier | None], ast_Identifier]) -> Callable[[ast.arg | ast.keyword], ast.arg | ast.keyword]:
 		def workhorse(node: ast.arg | ast.keyword) -> ast.arg | ast.keyword:
 			node.arg = action(node.arg)
@@ -61,13 +68,6 @@ class grab:
 	def funcAttribute(action: Callable[[ast.expr], ast.expr]) -> Callable[[ast.Call], ast.Call]:
 		def workhorse(node: ast.Call) -> ast.Call:
 			node.func = action(node.func)
-			return node
-		return workhorse
-
-	@staticmethod
-	def funcDOTidAttribute(action: Callable[[ast_Identifier], Any]) -> Callable[[ImaCallToName], ImaCallToName]:
-		def workhorse(node: ImaCallToName) -> ImaCallToName:
-			node.func = grab.idAttribute(action)(node.func)
 			return node
 		return workhorse
 

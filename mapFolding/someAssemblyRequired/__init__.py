@@ -49,9 +49,6 @@ from mapFolding.someAssemblyRequired._astTypes import *  # noqa: F403
 from mapFolding.someAssemblyRequired._theTypes import (
 	ast_expr_Slice as ast_expr_Slice,
 	ast_Identifier as ast_Identifier,
-	hasDOTtarget_expr as hasDOTtarget_expr,
-	hasDOTtarget_Name as hasDOTtarget_Name,
-	hasDOTtarget_AttributeORNameORSubscript as hasDOTtarget_AttributeORNameORSubscript,
 	ImaCallToName as ImaCallToName,
 	intORlist_ast_type_paramORstr_orNone as intORlist_ast_type_paramORstr_orNone,
 	intORstr_orNone as intORstr_orNone,
@@ -70,7 +67,10 @@ from mapFolding.someAssemblyRequired._toolboxPython import (
 	parsePathFilename2astModule as parsePathFilename2astModule,
 	)
 
-from mapFolding.someAssemblyRequired._toolboxAntecedents import be as be, DOT as DOT, ifThis as ifThis
+from mapFolding.someAssemblyRequired._tool_be import be as be
+from mapFolding.someAssemblyRequired._tool_DOT import DOT as DOT
+
+from mapFolding.someAssemblyRequired._toolboxAntecedents import ifThis as ifThis
 from mapFolding.someAssemblyRequired._toolMake import Make as Make
 from mapFolding.someAssemblyRequired._tool_Then import grab as grab, Then as Then
 

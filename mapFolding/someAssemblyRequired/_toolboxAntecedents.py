@@ -20,125 +20,14 @@ they implement a declarative approach to AST manipulation that separates node id
 """
 
 from collections.abc import Callable
-from mapFolding.someAssemblyRequired._tool_be import be as be
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
-	hasDOTbody,
-	hasDOTbody_expr,
-	hasDOTbody_list_stmt,
-	hasDOTname,
-	hasDOTname_Identifier,
-	hasDOTname_IdentifierOrNone,
-	hasDOTtarget,
-	hasDOTtarget_expr,
-	hasDOTtarget_AttributeORNameORSubscript,
-	hasDOTvalue,
-	hasDOTvalue_LiteralTrueFalseOrNone,
-	hasDOTvalue_Any,
-	hasDOTvalue_expr,
-	hasDOTvalue_exprOrNone,
+	be,
+	DOT,
 	ImaCallToName,
 )
-from typing import Any, overload, TypeGuard
+from typing import Any, TypeGuard
 import ast
-
-class DOT:
-	"""
-	Access attributes and sub-nodes of AST elements via consistent accessor methods.
-
-	The DOT class provides static methods to access specific attributes of different types of AST nodes in a consistent
-	way. This simplifies attribute access across various node types and improves code readability by abstracting the
-	underlying AST structure details.
-
-	DOT is designed for safe, read-only access to node properties, unlike the grab class which is designed for modifying
-	node attributes.
-	"""
-	@staticmethod
-	@overload
-	def annotation(node: ast.AnnAssign) -> ast.expr:...
-	@staticmethod
-	@overload
-	def annotation(node: ast.arg) -> ast.expr | None:...
-	@staticmethod
-	def annotation(node: ast.AnnAssign | ast.arg) -> ast.expr | None:
-		return node.annotation
-
-	@staticmethod
-	@overload
-	def arg(node: ast.arg) -> ast_Identifier:...
-	@staticmethod
-	@overload
-	def arg(node: ast.keyword) -> ast_Identifier | None:...
-	@staticmethod
-	def arg(node: ast.arg | ast.keyword) -> ast_Identifier | None:
-		return node.arg
-
-	@staticmethod
-	def attr(node: ast.Attribute) -> ast_Identifier:
-		return node.attr
-
-	@staticmethod
-	@overload
-	def body(node: hasDOTbody_list_stmt) -> list[ast.stmt]:...
-	@staticmethod
-	@overload
-	def body(node: hasDOTbody_expr) -> ast.expr:...
-	@staticmethod
-	def body(node: hasDOTbody) -> ast.expr | list[ast.stmt]:
-		return node.body
-
-	@staticmethod
-	@overload
-	def func(node: ImaCallToName) -> ast.Name:...
-	@staticmethod
-	@overload
-	def func(node: ast.Call) -> ast.expr:...
-	@staticmethod
-	def func(node: ast.Call | ImaCallToName) -> ast.expr | ast.Name:
-		return node.func
-
-	@staticmethod
-	def id(node: ast.Name) -> ast_Identifier:
-		return node.id
-
-	@staticmethod
-	@overload
-	def name(node: hasDOTname_Identifier) -> ast_Identifier:...
-	@staticmethod
-	@overload
-	def name(node: hasDOTname_IdentifierOrNone) -> ast_Identifier | None:...
-	@staticmethod
-	def name(node: hasDOTname) -> ast_Identifier | None:
-		return node.name
-
-	@staticmethod
-	@overload
-	def target(node: ast.NamedExpr) -> ast.Name:...
-	@staticmethod
-	@overload
-	def target(node: hasDOTtarget_expr) -> ast.expr:...
-	@staticmethod
-	@overload
-	def target(node: hasDOTtarget_AttributeORNameORSubscript) -> ast.Attribute | ast.Name | ast.Subscript:...
-	@staticmethod
-	def target(node: hasDOTtarget) -> ast.Attribute | ast.expr | ast.Name | ast.Subscript:
-		return node.target
-
-	@staticmethod
-	@overload
-	def value(node: hasDOTvalue_Any) -> Any:...
-	@staticmethod
-	@overload
-	def value(node: hasDOTvalue_LiteralTrueFalseOrNone) -> bool | None:...
-	@staticmethod
-	@overload
-	def value(node: hasDOTvalue_expr) -> ast.expr:...
-	@staticmethod
-	@overload
-	def value(node: hasDOTvalue_exprOrNone) -> ast.expr | None:...
-	@staticmethod
-	def value(node: hasDOTvalue) -> Any | ast.expr | bool | None:
-		return node.value
 
 class ifThis:
 	"""
