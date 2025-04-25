@@ -33,6 +33,8 @@ from mapFolding.someAssemblyRequired import (
 	hasDOTtarget_expr,
 	hasDOTtarget_AttributeORNameORSubscript,
 	hasDOTvalue,
+	hasDOTvalue_LiteralTrueFalseOrNone,
+	hasDOTvalue_Any,
 	hasDOTvalue_expr,
 	hasDOTvalue_exprOrNone,
 	ImaCallToName,
@@ -124,10 +126,10 @@ class DOT:
 
 	@staticmethod
 	@overload
-	def value(node: ast.Constant) -> Any:...
+	def value(node: hasDOTvalue_Any) -> Any:...
 	@staticmethod
 	@overload
-	def value(node: ast.MatchSingleton) -> bool | None:...
+	def value(node: hasDOTvalue_LiteralTrueFalseOrNone) -> bool | None:...
 	@staticmethod
 	@overload
 	def value(node: hasDOTvalue_expr) -> ast.expr:...

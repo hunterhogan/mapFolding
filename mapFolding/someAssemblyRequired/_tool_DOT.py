@@ -1,382 +1,486 @@
-from typing import overload, Any
-from mapFolding.someAssemblyRequired import ast_Identifier
+"""This file is generated automatically, so changes to this file will be lost."""
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
+from mapFolding.someAssemblyRequired._astTypes import *  # noqa: F403
+from typing import Any, overload
 import ast
+# ruff: noqa: F405
 
 class DOT:
+    """
+	Access attributes and sub-nodes of AST elements via consistent accessor methods.
+
+	The DOT class provides static methods to access specific attributes of different types of AST nodes in a consistent
+	way. This simplifies attribute access across various node types and improves code readability by abstracting the
+	underlying AST structure details.
+
+	DOT is designed for safe, read-only access to node properties, unlike the grab class which is designed for modifying
+	node attributes.
+	"""
+
     @staticmethod
     @overload
-    def annotation(node: ast.AnnAssign) -> ast.expr: ...
+    def annotation(node: hasDOTannotation_expr):
+        ...
+
     @staticmethod
     @overload
-    def annotation(node: ast.arg) -> ast.expr | None: ...
+    def annotation(node: hasDOTannotation_exprOrNone):
+        ...
+
     @staticmethod
-    def annotation(node: ast.AnnAssign | ast.arg) -> ast.expr | ast.expr | None:
+    def annotation(node: hasDOTannotation):
         return node.annotation
 
     @staticmethod
     @overload
-    def arg(node: ast.arg) -> str: ...
+    def arg(node: hasDOTarg_Identifier):
+        ...
+
     @staticmethod
     @overload
-    def arg(node: ast.keyword) -> str | None: ...
+    def arg(node: hasDOTarg_IdentifierOrNone):
+        ...
+
     @staticmethod
-    def arg(node: ast.arg | ast.keyword) -> str | str | None:
+    def arg(node: hasDOTarg):
         return node.arg
 
     @staticmethod
     @overload
-    def args(node: ast.AsyncFunctionDef | ast.FunctionDef | ast.Lambda) -> ast.arguments: ...
+    def args(node: hasDOTargs_list_arg):
+        ...
+
     @staticmethod
     @overload
-    def args(node: ast.arguments) -> list[ast.arg]: ...
+    def args(node: hasDOTargs_arguments):
+        ...
+
     @staticmethod
     @overload
-    def args(node: ast.Call) -> list[ast.expr]: ...
+    def args(node: hasDOTargs_list_expr):
+        ...
+
     @staticmethod
-    def args(node: ast.AsyncFunctionDef | ast.FunctionDef | ast.Lambda | ast.arguments | ast.Call) -> ast.arguments | list[ast.arg] | list[ast.expr]:
+    def args(node: hasDOTargs):
         return node.args
 
     @staticmethod
-    def argtypes(node: ast.FunctionType) -> list[ast.expr]:
+    def argtypes(node: hasDOTargtypes):
         return node.argtypes
 
     @staticmethod
-    def asname(node: ast.alias) -> str | None:
+    def asname(node: hasDOTasname):
         return node.asname
 
     @staticmethod
-    def attr(node: ast.Attribute) -> str:
+    def attr(node: hasDOTattr):
         return node.attr
 
     @staticmethod
-    def bases(node: ast.ClassDef) -> list[ast.expr]:
+    def bases(node: hasDOTbases):
         return node.bases
 
     @staticmethod
     @overload
-    def body(node: ast.Expression | ast.IfExp | ast.Lambda) -> ast.expr: ...
+    def body(node: hasDOTbody_list_stmt):
+        ...
+
     @staticmethod
     @overload
-    def body(node: ast.AsyncFor | ast.AsyncFunctionDef | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.Module | ast.Try | astDOTTryStar | ast.While | ast.With | ast.match_case) -> list[ast.stmt]: ...
+    def body(node: hasDOTbody_expr):
+        ...
+
     @staticmethod
-    def body(node: ast.Expression | ast.IfExp | ast.Lambda | ast.AsyncFor | ast.AsyncFunctionDef | ast.AsyncWith | ast.ClassDef | ast.ExceptHandler | ast.For | ast.FunctionDef | ast.If | ast.Interactive | ast.Module | ast.Try | astDOTTryStar | ast.While | ast.With | ast.match_case) -> ast.expr | list[ast.stmt]:
+    def body(node: hasDOTbody):
         return node.body
 
     @staticmethod
-    def bound(node: astDOTTypeVar) -> ast.expr | None:
+    def bound(node: hasDOTbound):
         return node.bound
 
     @staticmethod
-    def cases(node: ast.Match) -> list[ast.match_case]:
+    def cases(node: hasDOTcases):
         return node.cases
 
     @staticmethod
-    def cause(node: ast.Raise) -> ast.expr | None:
+    def cause(node: hasDOTcause):
         return node.cause
 
     @staticmethod
-    def cls(node: ast.MatchClass) -> ast.expr:
+    def cls(node: hasDOTcls):
         return node.cls
 
     @staticmethod
-    def comparators(node: ast.Compare) -> list[ast.expr]:
+    def comparators(node: hasDOTcomparators):
         return node.comparators
 
     @staticmethod
-    def context_expr(node: ast.withitem) -> ast.expr:
+    def context_expr(node: hasDOTcontext_expr):
         return node.context_expr
 
     @staticmethod
-    def conversion(node: ast.FormattedValue) -> int:
+    def conversion(node: hasDOTconversion):
         return node.conversion
 
     @staticmethod
-    def ctx(node: ast.Attribute | ast.List | ast.Name | ast.Starred | ast.Subscript | ast.Tuple) -> ast.expr_context:
+    def ctx(node: hasDOTctx):
         return node.ctx
 
     @staticmethod
-    def decorator_list(node: ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef) -> list[ast.expr]:
+    def decorator_list(node: hasDOTdecorator_list):
         return node.decorator_list
 
     @staticmethod
-    def default_value(node: astDOTParamSpec | astDOTTypeVar | astDOTTypeVarTuple) -> ast.expr | None:
+    def default_value(node: hasDOTdefault_value):
         return node.default_value
 
     @staticmethod
-    def defaults(node: ast.arguments) -> list[ast.expr]:
+    def defaults(node: hasDOTdefaults):
         return node.defaults
 
     @staticmethod
-    def elt(node: ast.GeneratorExp | ast.ListComp | ast.SetComp) -> ast.expr:
+    def elt(node: hasDOTelt):
         return node.elt
 
     @staticmethod
-    def elts(node: ast.List | ast.Set | ast.Tuple) -> list[ast.expr]:
+    def elts(node: hasDOTelts):
         return node.elts
 
     @staticmethod
-    def exc(node: ast.Raise) -> ast.expr | None:
+    def exc(node: hasDOTexc):
         return node.exc
 
     @staticmethod
-    def finalbody(node: ast.Try | astDOTTryStar) -> list[ast.stmt]:
+    def finalbody(node: hasDOTfinalbody):
         return node.finalbody
 
     @staticmethod
-    def format_spec(node: ast.FormattedValue) -> ast.expr | None:
+    def format_spec(node: hasDOTformat_spec):
         return node.format_spec
 
     @staticmethod
-    def func(node: ast.Call) -> ast.expr:
+    def func(node: hasDOTfunc):
         return node.func
 
     @staticmethod
-    def generators(node: ast.DictComp | ast.GeneratorExp | ast.ListComp | ast.SetComp) -> list[ast.comprehension]:
+    def generators(node: hasDOTgenerators):
         return node.generators
 
     @staticmethod
-    def guard(node: ast.match_case) -> ast.expr | None:
+    def guard(node: hasDOTguard):
         return node.guard
 
     @staticmethod
-    def handlers(node: ast.Try | astDOTTryStar) -> list[ast.ExceptHandler]:
+    def handlers(node: hasDOThandlers):
         return node.handlers
 
     @staticmethod
-    def id(node: ast.Name) -> str:
+    def id(node: hasDOTid):
         return node.id
 
     @staticmethod
-    def ifs(node: ast.comprehension) -> list[ast.expr]:
+    def ifs(node: hasDOTifs):
         return node.ifs
 
     @staticmethod
-    def is_async(node: ast.comprehension) -> int:
+    def is_async(node: hasDOTis_async):
         return node.is_async
 
     @staticmethod
-    def items(node: ast.AsyncWith | ast.With) -> list[ast.withitem]:
+    def items(node: hasDOTitems):
         return node.items
 
     @staticmethod
-    def iter(node: ast.AsyncFor | ast.For | ast.comprehension) -> ast.expr:
+    def iter(node: hasDOTiter):
         return node.iter
 
     @staticmethod
-    def key(node: ast.DictComp) -> ast.expr:
+    def key(node: hasDOTkey):
         return node.key
 
     @staticmethod
-    def keywords(node: ast.Call | ast.ClassDef) -> list[ast.keyword]:
+    @overload
+    def keys(node: hasDOTkeys_list_exprOrNone):
+        ...
+
+    @staticmethod
+    @overload
+    def keys(node: hasDOTkeys_list_expr):
+        ...
+
+    @staticmethod
+    def keys(node: hasDOTkeys):
+        return node.keys
+
+    @staticmethod
+    def keywords(node: hasDOTkeywords):
         return node.keywords
 
     @staticmethod
-    def kind(node: ast.Constant) -> str | None:
+    def kind(node: hasDOTkind):
         return node.kind
 
     @staticmethod
-    def kwarg(node: ast.arguments) -> ast.arg | None:
+    def kw_defaults(node: hasDOTkw_defaults):
+        return node.kw_defaults
+
+    @staticmethod
+    def kwarg(node: hasDOTkwarg):
         return node.kwarg
 
     @staticmethod
-    def kwd_attrs(node: ast.MatchClass) -> list[str]:
+    def kwd_attrs(node: hasDOTkwd_attrs):
         return node.kwd_attrs
 
     @staticmethod
-    def kwd_patterns(node: ast.MatchClass) -> list[ast.pattern]:
+    def kwd_patterns(node: hasDOTkwd_patterns):
         return node.kwd_patterns
 
     @staticmethod
-    def kwonlyargs(node: ast.arguments) -> list[ast.arg]:
+    def kwonlyargs(node: hasDOTkwonlyargs):
         return node.kwonlyargs
 
     @staticmethod
-    def left(node: ast.BinOp | ast.Compare) -> ast.expr:
+    def left(node: hasDOTleft):
         return node.left
 
     @staticmethod
-    def level(node: ast.ImportFrom) -> int | None:
+    def level(node: hasDOTlevel):
         return node.level
 
     @staticmethod
-    def lineno(node: ast.TypeIgnore) -> int:
+    def lineno(node: hasDOTlineno):
         return node.lineno
 
     @staticmethod
-    def lower(node: ast.Slice) -> ast.expr | None:
+    def lower(node: hasDOTlower):
         return node.lower
 
     @staticmethod
-    def module(node: ast.ImportFrom) -> str | None:
+    def module(node: hasDOTmodule):
         return node.module
 
     @staticmethod
-    def msg(node: ast.Assert) -> ast.expr | None:
+    def msg(node: hasDOTmsg):
         return node.msg
 
     @staticmethod
     @overload
-    def name(node: astDOTTypeAlias) -> ast.expr: ...
+    def name(node: hasDOTname_Identifier):
+        ...
+
     @staticmethod
     @overload
-    def name(node: ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTParamSpec | astDOTTypeVar | astDOTTypeVarTuple | ast.alias) -> str: ...
+    def name(node: hasDOTname_IdentifierOrNone):
+        ...
+
     @staticmethod
     @overload
-    def name(node: ast.ExceptHandler | ast.MatchAs | ast.MatchStar) -> str | None: ...
+    def name(node: hasDOTname_Name):
+        ...
+
     @staticmethod
-    def name(node: astDOTTypeAlias | ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTParamSpec | astDOTTypeVar | astDOTTypeVarTuple | ast.alias | ast.ExceptHandler | ast.MatchAs | ast.MatchStar) -> ast.expr | str | str | None:
+    def name(node: hasDOTname):
         return node.name
 
     @staticmethod
     @overload
-    def names(node: ast.Import | ast.ImportFrom) -> list[ast.alias]: ...
+    def names(node: hasDOTnames_list_Identifier):
+        ...
+
     @staticmethod
     @overload
-    def names(node: ast.Global | ast.Nonlocal) -> list[str]: ...
+    def names(node: hasDOTnames_list_alias):
+        ...
+
     @staticmethod
-    def names(node: ast.Import | ast.ImportFrom | ast.Global | ast.Nonlocal) -> list[ast.alias] | list[str]:
+    def names(node: hasDOTnames):
         return node.names
 
     @staticmethod
     @overload
-    def op(node: ast.BoolOp) -> ast.boolop: ...
+    def op(node: hasDOTop_operator):
+        ...
+
     @staticmethod
     @overload
-    def op(node: ast.AugAssign | ast.BinOp) -> ast.operator: ...
+    def op(node: hasDOTop_boolop):
+        ...
+
     @staticmethod
     @overload
-    def op(node: ast.UnaryOp) -> ast.unaryop: ...
+    def op(node: hasDOTop_unaryop):
+        ...
+
     @staticmethod
-    def op(node: ast.BoolOp | ast.AugAssign | ast.BinOp | ast.UnaryOp) -> ast.boolop | ast.operator | ast.unaryop:
+    def op(node: hasDOTop):
         return node.op
 
     @staticmethod
-    def operand(node: ast.UnaryOp) -> ast.expr:
+    def operand(node: hasDOToperand):
         return node.operand
 
     @staticmethod
-    def ops(node: ast.Compare) -> list[ast.cmpop]:
+    def ops(node: hasDOTops):
         return node.ops
 
     @staticmethod
-    def optional_vars(node: ast.withitem) -> ast.expr | None:
+    def optional_vars(node: hasDOToptional_vars):
         return node.optional_vars
 
     @staticmethod
     @overload
-    def orelse(node: ast.IfExp) -> ast.expr: ...
+    def orelse(node: hasDOTorelse_list_stmt):
+        ...
+
     @staticmethod
     @overload
-    def orelse(node: ast.AsyncFor | ast.For | ast.If | ast.Try | astDOTTryStar | ast.While) -> list[ast.stmt]: ...
+    def orelse(node: hasDOTorelse_expr):
+        ...
+
     @staticmethod
-    def orelse(node: ast.IfExp | ast.AsyncFor | ast.For | ast.If | ast.Try | astDOTTryStar | ast.While) -> ast.expr | list[ast.stmt]:
+    def orelse(node: hasDOTorelse):
         return node.orelse
 
     @staticmethod
     @overload
-    def pattern(node: ast.match_case) -> ast.pattern: ...
+    def pattern(node: hasDOTpattern_pattern):
+        ...
+
     @staticmethod
     @overload
-    def pattern(node: ast.MatchAs) -> ast.pattern | None: ...
+    def pattern(node: hasDOTpattern_patternOrNone):
+        ...
+
     @staticmethod
-    def pattern(node: ast.match_case | ast.MatchAs) -> ast.pattern | ast.pattern | None:
+    def pattern(node: hasDOTpattern):
         return node.pattern
 
     @staticmethod
-    def patterns(node: ast.MatchClass | ast.MatchMapping | ast.MatchOr | ast.MatchSequence) -> list[ast.pattern]:
+    def patterns(node: hasDOTpatterns):
         return node.patterns
 
     @staticmethod
-    def posonlyargs(node: ast.arguments) -> list[ast.arg]:
+    def posonlyargs(node: hasDOTposonlyargs):
         return node.posonlyargs
 
     @staticmethod
-    def rest(node: ast.MatchMapping) -> str | None:
+    def rest(node: hasDOTrest):
         return node.rest
 
     @staticmethod
     @overload
-    def returns(node: ast.FunctionType) -> ast.expr: ...
+    def returns(node: hasDOTreturns_exprOrNone):
+        ...
+
     @staticmethod
     @overload
-    def returns(node: ast.AsyncFunctionDef | ast.FunctionDef) -> ast.expr | None: ...
+    def returns(node: hasDOTreturns_expr):
+        ...
+
     @staticmethod
-    def returns(node: ast.FunctionType | ast.AsyncFunctionDef | ast.FunctionDef) -> ast.expr | ast.expr | None:
+    def returns(node: hasDOTreturns):
         return node.returns
 
     @staticmethod
-    def right(node: ast.BinOp) -> ast.expr:
+    def right(node: hasDOTright):
         return node.right
 
     @staticmethod
-    def simple(node: ast.AnnAssign) -> int:
+    def simple(node: hasDOTsimple):
         return node.simple
 
     @staticmethod
-    def slice(node: ast.Subscript) -> ast.expr:
+    def slice(node: hasDOTslice):
         return node.slice
 
     @staticmethod
-    def step(node: ast.Slice) -> ast.expr | None:
+    def step(node: hasDOTstep):
         return node.step
 
     @staticmethod
-    def subject(node: ast.Match) -> ast.expr:
+    def subject(node: hasDOTsubject):
         return node.subject
 
     @staticmethod
-    def tag(node: ast.TypeIgnore) -> str:
+    def tag(node: hasDOTtag):
         return node.tag
 
     @staticmethod
-    def target(node: ast.AnnAssign | ast.AsyncFor | ast.AugAssign | ast.For | ast.NamedExpr | ast.comprehension) -> ast.expr:
+    @overload
+    def target(node: hasDOTtarget_NameOrAttributeOrSubscript):
+        ...
+
+    @staticmethod
+    @overload
+    def target(node: hasDOTtarget_expr):
+        ...
+
+    @staticmethod
+    @overload
+    def target(node: hasDOTtarget_Name):
+        ...
+
+    @staticmethod
+    def target(node: hasDOTtarget):
         return node.target
 
     @staticmethod
-    def targets(node: ast.Assign | ast.Delete) -> list[ast.expr]:
+    def targets(node: hasDOTtargets):
         return node.targets
 
     @staticmethod
-    def test(node: ast.Assert | ast.If | ast.IfExp | ast.While) -> ast.expr:
+    def test(node: hasDOTtest):
         return node.test
 
     @staticmethod
-    def type(node: ast.ExceptHandler) -> ast.expr | None:
+    def type(node: hasDOTtype):
         return node.type
 
     @staticmethod
-    def type_comment(node: ast.Assign | ast.AsyncFor | ast.AsyncFunctionDef | ast.AsyncWith | ast.For | ast.FunctionDef | ast.With | ast.arg) -> str | None:
+    def type_comment(node: hasDOTtype_comment):
         return node.type_comment
 
     @staticmethod
-    def type_params(node: ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTTypeAlias) -> list[astDOTtype_param]:
+    def type_ignores(node: hasDOTtype_ignores):
+        return node.type_ignores
+
+    @staticmethod
+    def type_params(node: hasDOTtype_params):
         return node.type_params
 
     @staticmethod
-    def upper(node: ast.Slice) -> ast.expr | None:
+    def upper(node: hasDOTupper):
         return node.upper
 
     @staticmethod
     @overload
-    def value(node: ast.Constant) -> Any: ...
+    def value(node: hasDOTvalue_exprOrNone):
+        ...
+
     @staticmethod
     @overload
-    def value(node: ast.MatchSingleton) -> bool | None: ...
+    def value(node: hasDOTvalue_expr):
+        ...
+
     @staticmethod
     @overload
-    def value(node: ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | astDOTTypeAlias | ast.YieldFrom | ast.keyword) -> ast.expr: ...
+    def value(node: hasDOTvalue_Any):
+        ...
+
     @staticmethod
     @overload
-    def value(node: ast.AnnAssign | ast.Return | ast.Yield) -> ast.expr | None: ...
+    def value(node: hasDOTvalue_LiteralTrueFalseOrNone):
+        ...
+
     @staticmethod
-    def value(node: ast.Constant | ast.MatchSingleton | ast.Assign | ast.Attribute | ast.AugAssign | ast.Await | ast.DictComp | ast.Expr | ast.FormattedValue | ast.MatchValue | ast.NamedExpr | ast.Starred | ast.Subscript | astDOTTypeAlias | ast.YieldFrom | ast.keyword | ast.AnnAssign | ast.Return | ast.Yield) -> Any | bool | None | ast.expr | ast.expr | None:
+    def value(node: hasDOTvalue):
         return node.value
 
     @staticmethod
-    def values(node: ast.BoolOp | ast.Dict | ast.JoinedStr) -> list[ast.expr]:
+    def values(node: hasDOTvalues):
         return node.values
 
     @staticmethod
-    def vararg(node: ast.arguments) -> ast.arg | None:
+    def vararg(node: hasDOTvararg):
         return node.vararg

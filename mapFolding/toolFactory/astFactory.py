@@ -12,11 +12,13 @@ clarity, extensibility, and minimal manual intervention. All identifier and code
 maximum semantic clarity and future maintainability.
 """
 from mapFolding import The, writeStringToHere
+from mapFolding.toolFactory.astFactory_docstrings import docstringWarning, beClassDefDocstring, DOTClassDefDocstring, grabClassDefDocstring, MakeClassDefDocstring
 from pathlib import PurePosixPath
+from string import ascii_letters
 from typing import Literal, cast, TypeAlias as typing_TypeAlias
 import ast
-from string import ascii_letters
 
+# TODO this is not DRY, but you can't import from some assembly required
 ast_Identifier: typing_TypeAlias = str
 str_nameDOTname: typing_TypeAlias = str
 ast_expr_Slice: typing_TypeAlias = ast.expr
@@ -144,6 +146,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 
 	moduleIdentifierPrefix: str = '_tool_'
 	staticmethodName = ast.Name('staticmethod', ast.Load())
+	overloadName = ast.Name('overload', ast.Load())
 	typing_TypeAliasName: ast.expr = cast(ast.expr, ast.Name('typing_TypeAlias', ast.Load()))
 
 	beClassDef = ast.ClassDef(name='be', bases=[], keywords=[], body=[], decorator_list=[])
@@ -261,8 +264,10 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 	listAttributeIdentifier: list[ast_Identifier] = list(Z0Z_dictionaryDeconstructedAttributes.keys())
 	listAttributeIdentifier.sort(key=lambda attributeIdentifier: attributeIdentifier.lower())
 	for attributeIdentifier in listAttributeIdentifier:
+		# Integrate DOT class generation here
 		hasDOTIdentifier: ast_Identifier = 'hasDOT' + attributeIdentifier
 		hasDOTName_Store: ast.Name = ast.Name(hasDOTIdentifier, ast.Store())
+		hasDOTName_Load: ast.Name = ast.Name(hasDOTIdentifier, ast.Load())
 		list_hasDOTName_subnode_annotation: list[ast.Name] = []
 		dictionaryAnnotations = Z0Z_dictionaryDeconstructedAttributes[attributeIdentifier]
 		for subnode_annotation, listClassDefIdentifier in dictionaryAnnotations.items():
@@ -283,6 +288,13 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			else:
 				list_hasDOTName_subnode_annotation.append(ast.Name(hasDOTIdentifier + '_' + subnode_annotation.replace('list', 'list_'), ast.Store()))
 				astTypesModule.body.append(ast.AnnAssign(list_hasDOTName_subnode_annotation[-1], typing_TypeAliasName, astAnnAssignValue, 1))
+				DOTClassDef.body.append(ast.FunctionDef(name=attributeIdentifier,
+						args=ast.arguments(posonlyargs=[], args=[ast.arg(arg='node', annotation=ast.Name(list_hasDOTName_subnode_annotation[-1].id, ast.Load()))], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]),
+						body=[ast.Expr(value=ast.Constant(value=Ellipsis))],
+						decorator_list=[staticmethodName, overloadName],
+						# TODO add types to returns
+						returns=None
+					))
 		if list_hasDOTName_subnode_annotation:
 			astAnnAssignValue = ast.BinOp(left=list_hasDOTName_subnode_annotation[0]
 									, op=ast.BitOr()
@@ -292,10 +304,16 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 										, op=ast.BitOr()
 										, right=list_hasDOTName_subnode_annotation[index])
 			astTypesModule.body.append(ast.AnnAssign(hasDOTName_Store, typing_TypeAliasName, astAnnAssignValue, 1))
+		DOTClassDef.body.append(ast.FunctionDef(name=attributeIdentifier
+				, args=ast.arguments(posonlyargs=[], args=[ast.arg(arg='node', annotation=hasDOTName_Load)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
+				, body=[ast.Return(value=ast.Attribute(value=ast.Name('node', ast.Load()), attr=attributeIdentifier, ctx=ast.Load()))]
+				, decorator_list=[staticmethodName]
+				# TODO add types to returns
+				, returns=None
+			))
 
-		# TODO
+		# TODO `pipeJoinedAnnotations`
 		pipeJoinedAnnotations = ast.Name('Any', ast.Load())
-		hasDOTName_Load: ast.Name = ast.Name('hasDOT' + attributeIdentifier, ast.Load())
 		grabClassDef.body.append(ast.FunctionDef(name=attributeIdentifier + 'Attribute'
 			, args=ast.arguments(posonlyargs=[]
 				, args=[ast.arg('action'
@@ -336,8 +354,11 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 	writeModule(ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
 			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
-			, ast.ImportFrom('typing', [ast.alias('TypeGuard')], 0)
+			, ast.ImportFrom('mapFolding.someAssemblyRequired._astTypes', [ast.alias('*')], 0)
+			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('overload')], 0)
 			, ast.Import([ast.alias('ast')])
+			# TODO but idk what
+			, ast.Expr(ast.Constant('# ruff: noqa: F405'))
 			, DOTClassDef
 			],
 		type_ignores=[]
@@ -352,6 +373,8 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			, ast.ImportFrom('mapFolding.someAssemblyRequired._astTypes', [ast.alias('*')], 0)
 			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('Literal')], 0)
 			, ast.Import([ast.alias('ast')])
+			# TODO but idk what
+			, ast.Expr(ast.Constant('# ruff: noqa: F405'))
 			, grabClassDef
 			],
 		type_ignores=[]
@@ -369,67 +392,3 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 		type_ignores=[]
 		)
 		, moduleIdentifierPrefix + MakeClassDef.name)
-
-docstringWarning: str = """This file is generated automatically, so changes to this file will be lost."""
-
-beClassDefDocstring: str = (
-	"""
-	Provide type-guard functions for safely verifying AST node types during manipulation.
-
-	The be class contains static methods that perform runtime type verification of AST nodes, returning TypeGuard
-	results that enable static type checkers to narrow node types in conditional branches. These type-guards:
-
-	1. Improve code safety by preventing operations on incompatible node types.
-	2. Enable IDE tooling to provide better autocompletion and error detection.
-	3. Document expected node types in a way that is enforced by the type system.
-	4. Support pattern-matching workflows where node types must be verified before access.
-
-	When used with conditional statements, these type-guards allow for precise, type-safe manipulation of AST nodes
-	while maintaining full static type checking capabilities, even in complex transformation scenarios.
-	"""
-	)
-
-DOTClassDefDocstring: str = (
-	"""
-	Access attributes and sub-nodes of AST elements via consistent accessor methods.
-
-	The DOT class provides static methods to access specific attributes of different types of AST nodes in a consistent
-	way. This simplifies attribute access across various node types and improves code readability by abstracting the
-	underlying AST structure details.
-
-	DOT is designed for safe, read-only access to node properties, unlike the grab class which is designed for modifying
-	node attributes.
-	"""
-)
-
-grabClassDefDocstring: str = (
-	"""
-	Modify specific attributes of AST nodes while preserving the node structure.
-
-	The grab class provides static methods that create transformation functions to modify specific attributes of AST
-	nodes. Unlike DOT which provides read-only access, grab allows for targeted modifications of node attributes without
-	replacing the entire node.
-
-	Each method returns a function that takes a node, applies a transformation to a specific attribute of that node, and
-	returns the modified node. This enables fine-grained control when transforming AST structures.
-	"""
-)
-
-MakeClassDefDocstring: str = (
-	"""
-	Almost all parameters described here are only accessible through a method's `**keywordArguments` parameter.
-
-	Parameters:
-		context (ast.Load()): Are you loading from, storing to, or deleting the identifier? The `context` (also, `ctx`) value is `ast.Load()`, `ast.Store()`, or `ast.Del()`.
-		col_offset (0): int Position information specifying the column where an AST node begins.
-		end_col_offset (None): int|None Position information specifying the column where an AST node ends.
-		end_lineno (None): int|None Position information specifying the line number where an AST node ends.
-		level (0): int Module import depth level that controls relative vs absolute imports. Default 0 indicates absolute import.
-		lineno: int Position information manually specifying the line number where an AST node begins.
-		kind (None): str|None Used for type annotations in limited cases.
-		type_comment (None): str|None "type_comment is an optional string with the type annotation as a comment." or `# type: ignore`.
-		type_params: list[ast.type_param] Type parameters for generic type definitions.
-
-	The `ast._Attributes`, lineno, col_offset, end_lineno, and end_col_offset, hold position information; however, they are, importantly, _not_ `ast._fields`.
-	"""
-	)
