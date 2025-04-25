@@ -51,8 +51,6 @@ class SubstituteTyping_TypeAlias(ast.NodeTransformer):
 
 class MakeDictionaryOf_astClassAnnotations(ast.NodeVisitor):
 	"""
-	MakeDictionaryOfAnnotations(ast.NodeVisitor)
-
 	A visitor that traverses an AST and builds a dictionary mapping annotation names
 	to their corresponding `ast.Attribute` nodes under the `ast` module.
 	Attributes:
@@ -144,9 +142,10 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 		pathFilenameModule = PurePosixPath(The.pathPackage, logicalPathInfix, moduleIdentifier + The.fileExtension)
 		writeStringToHere(pythonSource, pathFilenameModule)
 
+	astImportFromClassNewInPythonVersion = ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
 	moduleIdentifierPrefix: str = '_tool_'
-	staticmethodName = ast.Name('staticmethod', ast.Load())
 	overloadName = ast.Name('overload', ast.Load())
+	staticmethodName = ast.Name('staticmethod', ast.Load())
 	typing_TypeAliasName: ast.expr = cast(ast.expr, ast.Name('typing_TypeAlias', ast.Load()))
 
 	beClassDef = ast.ClassDef(name='be', bases=[], keywords=[], body=[], decorator_list=[])
@@ -254,7 +253,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 
 	astTypesModule = ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
-			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
+			, astImportFromClassNewInPythonVersion
 			, ast.ImportFrom('typing', [ast.alias('TypeAlias', 'typing_TypeAlias')], 0)
 			, ast.Import([ast.alias('ast')])
 			],
@@ -264,7 +263,6 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 	listAttributeIdentifier: list[ast_Identifier] = list(Z0Z_dictionaryDeconstructedAttributes.keys())
 	listAttributeIdentifier.sort(key=lambda attributeIdentifier: attributeIdentifier.lower())
 	for attributeIdentifier in listAttributeIdentifier:
-		# Integrate DOT class generation here
 		hasDOTIdentifier: ast_Identifier = 'hasDOT' + attributeIdentifier
 		hasDOTName_Store: ast.Name = ast.Name(hasDOTIdentifier, ast.Store())
 		hasDOTName_Load: ast.Name = ast.Name(hasDOTIdentifier, ast.Load())
@@ -275,14 +273,9 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			if len(listClassDefIdentifier) == 1:
 				astAnnAssignValue = dictionary_astClassAnnotations[listClassDefIdentifier[0]]
 			else:
-				astAnnAssignValue = ast.BinOp(left=dictionary_astClassAnnotations[listClassDefIdentifier[0]]
-										, op=ast.BitOr()
-										, right=dictionary_astClassAnnotations[listClassDefIdentifier[1]])
-				for ClassDefIdentifier in listClassDefIdentifier[2:None]:
-					astAnnAssignValue = ast.BinOp(left=astAnnAssignValue
-											, op=ast.BitOr()
-											, right=dictionary_astClassAnnotations[ClassDefIdentifier])
-
+				astAnnAssignValue = dictionary_astClassAnnotations[listClassDefIdentifier[0]]
+				for ClassDefIdentifier in listClassDefIdentifier[1:]:
+					astAnnAssignValue = ast.BinOp(left=astAnnAssignValue, op=ast.BitOr(), right=dictionary_astClassAnnotations[ClassDefIdentifier])
 			if len(dictionaryAnnotations) == 1:
 				astTypesModule.body.append(ast.AnnAssign(hasDOTName_Store, typing_TypeAliasName, astAnnAssignValue, 1))
 			else:
@@ -290,19 +283,15 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 				astTypesModule.body.append(ast.AnnAssign(list_hasDOTName_subnode_annotation[-1], typing_TypeAliasName, astAnnAssignValue, 1))
 				DOTClassDef.body.append(ast.FunctionDef(name=attributeIdentifier,
 						args=ast.arguments(posonlyargs=[], args=[ast.arg(arg='node', annotation=ast.Name(list_hasDOTName_subnode_annotation[-1].id, ast.Load()))], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]),
-						body=[ast.Expr(value=ast.Constant(value=Ellipsis))],
-						decorator_list=[staticmethodName, overloadName],
+					body=[ast.Expr(value=ast.Constant(value=Ellipsis))],
+					decorator_list=[staticmethodName, overloadName],
 						# TODO add types to returns
 						returns=None
-					))
+				))
 		if list_hasDOTName_subnode_annotation:
-			astAnnAssignValue = ast.BinOp(left=list_hasDOTName_subnode_annotation[0]
-									, op=ast.BitOr()
-									, right=list_hasDOTName_subnode_annotation[1])
-			for index in range(2, len(list_hasDOTName_subnode_annotation)):
-				astAnnAssignValue = ast.BinOp(left=astAnnAssignValue
-										, op=ast.BitOr()
-										, right=list_hasDOTName_subnode_annotation[index])
+			astAnnAssignValue = list_hasDOTName_subnode_annotation[0]
+			for index in range(1, len(list_hasDOTName_subnode_annotation)):
+				astAnnAssignValue = ast.BinOp(left=astAnnAssignValue, op=ast.BitOr(), right=list_hasDOTName_subnode_annotation[index])
 			astTypesModule.body.append(ast.AnnAssign(hasDOTName_Store, typing_TypeAliasName, astAnnAssignValue, 1))
 		DOTClassDef.body.append(ast.FunctionDef(name=attributeIdentifier
 				, args=ast.arguments(posonlyargs=[], args=[ast.arg(arg='node', annotation=hasDOTName_Load)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
@@ -325,11 +314,11 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 				, vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
 			, body=[ast.FunctionDef(name='workhorse',
 						args=ast.arguments(args=[ast.arg('node', hasDOTName_Load)]),
-						body=[ast.Assign(targets=[ast.Attribute(ast.Name('node', ast.Load()), attr=attributeIdentifier, ctx=ast.Store())],
-								value=ast.Call(ast.Name('action', ast.Load()), args=[ast.Attribute(ast.Name('node', ast.Load()), attr=attributeIdentifier, ctx=ast.Load())]))
-							, ast.Return(ast.Name('node', ast.Load()))],
+					body=[ast.Assign(targets=[ast.Attribute(ast.Name('node', ast.Load()), attr=attributeIdentifier, ctx=ast.Store())],
+						value=ast.Call(ast.Name('action', ast.Load()), args=[ast.Attribute(ast.Name('node', ast.Load()), attr=attributeIdentifier, ctx=ast.Load())]))
+						, ast.Return(ast.Name('node', ast.Load()))],
 						returns=hasDOTName_Load),
-				ast.Return(ast.Name('workhorse', ctx=ast.Load()))]
+			ast.Return(ast.Name('workhorse', ctx=ast.Load()))]
 			, decorator_list=[staticmethodName], type_comment=None
 			, returns=ast.Subscript(ast.Name('Callable', ast.Load()), ast.Tuple([ast.List([hasDOTName_Load], ast.Load()), hasDOTName_Load], ast.Load()), ast.Load())))
 
@@ -342,7 +331,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 
 	writeModule(ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
-			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
+			, astImportFromClassNewInPythonVersion
 			, ast.ImportFrom('typing', [ast.alias('TypeGuard')], 0)
 			, ast.Import([ast.alias('ast')])
 			, beClassDef
@@ -353,7 +342,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 
 	writeModule(ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
-			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
+			, astImportFromClassNewInPythonVersion
 			, ast.ImportFrom('mapFolding.someAssemblyRequired._astTypes', [ast.alias('*')], 0)
 			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('overload')], 0)
 			, ast.Import([ast.alias('ast')])
@@ -368,7 +357,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 	writeModule(ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
 			, ast.ImportFrom('collections.abc', [ast.alias('Callable')], 0)
-			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
+			, astImportFromClassNewInPythonVersion
 			, ast.ImportFrom('mapFolding.someAssemblyRequired', [ast.alias('ast_Identifier'), ast.alias('ast_expr_Slice')], 0)
 			, ast.ImportFrom('mapFolding.someAssemblyRequired._astTypes', [ast.alias('*')], 0)
 			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('Literal')], 0)
@@ -383,7 +372,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 
 	writeModule(ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
-			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
+			, astImportFromClassNewInPythonVersion
 			, ast.ImportFrom('mapFolding.someAssemblyRequired', [ast.alias('ast_Identifier'), ast.alias('ast_expr_Slice')], 0)
 			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('Literal')], 0)
 			, ast.Import([ast.alias('ast')])
