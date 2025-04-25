@@ -240,16 +240,21 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 
 	beClassDef.body.sort(key=lambda astFunctionDef: astFunctionDef.name.lower()) # pyright: ignore[reportAttributeAccessIssue, reportUnknownLambdaType, reportUnknownMemberType]
 	MakeClassDef.body.sort(key=lambda astFunctionDef: astFunctionDef.name.lower()) # pyright: ignore[reportAttributeAccessIssue, reportUnknownLambdaType, reportUnknownMemberType]
-
 	Z0Z_dictionaryDeconstructedAttributes: dict[ast_Identifier, dict[str, list[ast_Identifier | str_nameDOTname]]] = {}
+	# Track original type annotations for each attribute to be used for return types
+	Z0Z_attributeTypeAnnotations: dict[ast_Identifier, dict[str, ast.expr]] = {}
+
 	for node in ast.walk(MakeClassDef):
 		if isinstance(node, ast.FunctionDef):
 			for subnode in ast.iter_child_nodes(node.args):
 				if isinstance(subnode, ast.arg):
 					if subnode.arg not in Z0Z_dictionaryDeconstructedAttributes:
 						Z0Z_dictionaryDeconstructedAttributes[subnode.arg] = {}
+						Z0Z_attributeTypeAnnotations[subnode.arg] = {}
 					if subnode.annotation is None: raise Exception
-					Z0Z_dictionaryDeconstructedAttributes[subnode.arg].setdefault(''.join([letter for letter in ast.unparse(subnode.annotation).replace('ast','').replace('|','Or') if letter in ascii_letters]), []).append(node.name)
+					subnode_annotation_str = ''.join([letter for letter in ast.unparse(subnode.annotation).replace('ast','').replace('|','Or') if letter in ascii_letters])
+					Z0Z_dictionaryDeconstructedAttributes[subnode.arg].setdefault(subnode_annotation_str, []).append(node.name)
+					Z0Z_attributeTypeAnnotations[subnode.arg][subnode_annotation_str] = subnode.annotation
 
 	astTypesModule = ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
@@ -262,6 +267,21 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 
 	listAttributeIdentifier: list[ast_Identifier] = list(Z0Z_dictionaryDeconstructedAttributes.keys())
 	listAttributeIdentifier.sort(key=lambda attributeIdentifier: attributeIdentifier.lower())
+
+	# Build mappings from attribute to TypeAlias and original types
+	attribute2TypeAlias: dict[str, list[ast.expr]] = {}
+	attribute_to_types: dict[str, list[ast.expr]] = {}
+
+	for attributeIdentifier in listAttributeIdentifier:
+		hasDOTIdentifier: ast_Identifier = 'hasDOT' + attributeIdentifier
+		attribute2TypeAlias[attributeIdentifier] = []
+		attribute_to_types[attributeIdentifier] = []
+		for subnode_annotation, listClassDefIdentifier in Z0Z_dictionaryDeconstructedAttributes[attributeIdentifier].items():
+			hasDOT_subnode_name = ast.Name(hasDOTIdentifier + '_' + subnode_annotation.replace('list', 'list_'), ast.Load()) if len(Z0Z_dictionaryDeconstructedAttributes[attributeIdentifier]) > 1 else ast.Name(hasDOTIdentifier, ast.Load())
+			attribute2TypeAlias[attributeIdentifier].append(hasDOT_subnode_name)
+			type_annotation = Z0Z_attributeTypeAnnotations[attributeIdentifier][subnode_annotation]
+			attribute_to_types[attributeIdentifier].append(type_annotation)
+
 	for attributeIdentifier in listAttributeIdentifier:
 		hasDOTIdentifier: ast_Identifier = 'hasDOT' + attributeIdentifier
 		hasDOTName_Store: ast.Name = ast.Name(hasDOTIdentifier, ast.Store())
@@ -280,36 +300,64 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 				astTypesModule.body.append(ast.AnnAssign(hasDOTName_Store, typing_TypeAliasName, astAnnAssignValue, 1))
 			else:
 				list_hasDOTName_subnode_annotation.append(ast.Name(hasDOTIdentifier + '_' + subnode_annotation.replace('list', 'list_'), ast.Store()))
-				astTypesModule.body.append(ast.AnnAssign(list_hasDOTName_subnode_annotation[-1], typing_TypeAliasName, astAnnAssignValue, 1))
+				astTypesModule.body.append(ast.AnnAssign(list_hasDOTName_subnode_annotation[-1], typing_TypeAliasName, astAnnAssignValue, 1))				# For overloaded methods, use the specific attribute type
 				DOTClassDef.body.append(ast.FunctionDef(name=attributeIdentifier,
 						args=ast.arguments(posonlyargs=[], args=[ast.arg(arg='node', annotation=ast.Name(list_hasDOTName_subnode_annotation[-1].id, ast.Load()))], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]),
 					body=[ast.Expr(value=ast.Constant(value=Ellipsis))],
 					decorator_list=[staticmethodName, overloadName],
-						# TODO add types to returns
-						returns=None
+					# Use the appropriate type annotation for the return value
+					returns=Z0Z_attributeTypeAnnotations[attributeIdentifier][subnode_annotation] if attributeIdentifier in Z0Z_attributeTypeAnnotations and subnode_annotation in Z0Z_attributeTypeAnnotations[attributeIdentifier] else astAnnAssignValue
 				))
 		if list_hasDOTName_subnode_annotation:
 			astAnnAssignValue = list_hasDOTName_subnode_annotation[0]
 			for index in range(1, len(list_hasDOTName_subnode_annotation)):
 				astAnnAssignValue = ast.BinOp(left=astAnnAssignValue, op=ast.BitOr(), right=list_hasDOTName_subnode_annotation[index])
-			astTypesModule.body.append(ast.AnnAssign(hasDOTName_Store, typing_TypeAliasName, astAnnAssignValue, 1))
+			astTypesModule.body.append(ast.AnnAssign(hasDOTName_Store, typing_TypeAliasName, astAnnAssignValue, 1))		# Create a function to get the attribute with the correct return type
+		# Replace None with the appropriate type for each attribute
+		attribute_return_type = None
+		if attributeIdentifier in attribute2TypeAlias:
+			if len(attribute2TypeAlias[attributeIdentifier]) == 1:
+				attribute_return_type = attribute_to_types[attributeIdentifier][0]
+			else:
+				# Create a union of all possible return types
+				attribute_return_type = attribute_to_types[attributeIdentifier][0]
+				for i in range(1, len(attribute_to_types[attributeIdentifier])):
+					attribute_return_type = ast.BinOp(
+						left=attribute_return_type,
+						op=ast.BitOr(),
+						right=attribute_to_types[attributeIdentifier][i]
+					)
+
 		DOTClassDef.body.append(ast.FunctionDef(name=attributeIdentifier
 				, args=ast.arguments(posonlyargs=[], args=[ast.arg(arg='node', annotation=hasDOTName_Load)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
 				, body=[ast.Return(value=ast.Attribute(value=ast.Name('node', ast.Load()), attr=attributeIdentifier, ctx=ast.Load()))]
 				, decorator_list=[staticmethodName]
-				# TODO add types to returns
-				, returns=None
+				, returns=attribute_return_type
 			))
 
-		# TODO `pipeJoinedAnnotations`
-		pipeJoinedAnnotations = ast.Name('Any', ast.Load())
+		# For grab class, use the appropriate attribute type
+		attribute_type = None
+		if attributeIdentifier in attribute_to_types:
+			if len(attribute_to_types[attributeIdentifier]) == 1:
+				attribute_type = attribute_to_types[attributeIdentifier][0]
+			else:
+				attribute_type = attribute_to_types[attributeIdentifier][0]
+				for i in range(1, len(attribute_to_types[attributeIdentifier])):
+					attribute_type = ast.BinOp(
+						left=attribute_type,
+						op=ast.BitOr(),
+						right=attribute_to_types[attributeIdentifier][i]
+					)
+		else:
+			attribute_type = ast.Name('Any', ast.Load())
+
 		grabClassDef.body.append(ast.FunctionDef(name=attributeIdentifier + 'Attribute'
 			, args=ast.arguments(posonlyargs=[]
 				, args=[ast.arg('action'
 					, annotation=ast.Subscript(ast.Name('Callable', ast.Load())
 						, slice=ast.Tuple(elts=[
-							ast.List(elts=[pipeJoinedAnnotations], ctx=ast.Load())
-							,   pipeJoinedAnnotations]
+							ast.List(elts=[attribute_type or ast.Name('Any', ast.Load())], ctx=ast.Load())
+							,   attribute_type or ast.Name('Any', ast.Load())]
 						, ctx=ast.Load()), ctx=ast.Load()))]
 				, vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
 			, body=[ast.FunctionDef(name='workhorse',
@@ -343,6 +391,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 	writeModule(ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
 			, astImportFromClassNewInPythonVersion
+			, ast.ImportFrom('mapFolding.someAssemblyRequired', [ast.alias('ast_Identifier'), ast.alias('ast_expr_Slice')], 0)
 			, ast.ImportFrom('mapFolding.someAssemblyRequired._astTypes', [ast.alias('*')], 0)
 			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('overload')], 0)
 			, ast.Import([ast.alias('ast')])
