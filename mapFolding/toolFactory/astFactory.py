@@ -13,8 +13,9 @@ maximum semantic clarity and future maintainability.
 """
 from mapFolding import The, writeStringToHere
 from pathlib import PurePosixPath
-from typing import cast, TypeAlias as typing_TypeAlias
+from typing import Literal, cast, TypeAlias as typing_TypeAlias
 import ast
+from string import ascii_letters
 
 ast_Identifier: typing_TypeAlias = str
 str_nameDOTname: typing_TypeAlias = str
@@ -40,11 +41,13 @@ class SubstituteTyping_TypeAlias(ast.NodeTransformer):
 	def visit_Name(self, node: ast.Name) -> ast.Name:
 		if node.id == '_Identifier':
 			node.id = 'ast_Identifier'
+		elif node.id == 'str':
+			node.id = 'ast_Identifier'
 		elif node.id == '_Slice':
 			node.id = 'ast_expr_Slice'
 		return node
 
-class MakeDictionaryOfAnnotations(ast.NodeVisitor):
+class MakeDictionaryOf_astClassAnnotations(ast.NodeVisitor):
 	"""
 	MakeDictionaryOfAnnotations(ast.NodeVisitor)
 
@@ -70,12 +73,16 @@ class MakeDictionaryOfAnnotations(ast.NodeVisitor):
 	def __init__(self, astAST: ast.AST) -> None:
 		super().__init__()
 		self.astAST = astAST
-		self.dictionarySubstitutions: dict[ast_Identifier, ast.Attribute] = {'_Pattern': ast.Attribute(value=ast.Name(id='ast'), attr='pattern', ctx=ast.Load())}
+		self.dictionarySubstitutions: dict[ast_Identifier, ast.Name | ast.Attribute] = {'_Pattern': ast.Attribute(value=ast.Name('ast'), attr='pattern', ctx=ast.Load())}
 
 	def visit_ClassDef(self, node: ast.ClassDef) -> None:
-		self.dictionarySubstitutions[node.name] = ast.Attribute(value=ast.Name(id='ast'), attr=node.name, ctx=ast.Load())
+		if 'astDOT' + node.name in list_astDOTStuPyd:
+			NameOrAttribute = ast.Name('astDOT' + node.name, ctx=ast.Load())
+		else:
+			NameOrAttribute = ast.Attribute(value=ast.Name('ast'), attr=node.name, ctx=ast.Load())
+		self.dictionarySubstitutions[node.name] = NameOrAttribute
 
-	def getDictionary(self) -> dict[str, ast.Attribute]:
+	def getDictionary(self) -> dict[ast_Identifier, ast.Name | ast.Attribute]:
 		self.visit(self.astAST)
 		return self.dictionarySubstitutions
 
@@ -97,7 +104,7 @@ class ChangeName2Attribute(ast.NodeTransformer):
 			If node.id is found in dictionarySubstitutions, returns the mapped
 			ast.Attribute. Otherwise, returns the original ast.Name node.
 	"""
-	def __init__(self, dictionarySubstitutions: dict[ast_Identifier, ast.Attribute]) -> None:
+	def __init__(self, dictionarySubstitutions: dict[ast_Identifier, ast.Name | ast.Attribute]) -> None:
 		super().__init__()
 		self.dictionarySubstitutions = dictionarySubstitutions
 
@@ -123,26 +130,28 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			a logical infix path, and the configured package path and file extension.
 		4. Writes the generated source code to the target file using writeStringToHere().
 
-		Args:
+		Parameters:
 			astModule (ast.Module): The abstract syntax tree of the module to be written.
 			moduleIdentifier (ast_Identifier): A unique identifier used to name the output file.
 
 		Returns:
-			 None:
+			None:
 		"""
 		ast.fix_missing_locations(astModule)
 		pythonSource: str = ast.unparse(astModule)
-		moduleIdentifierPrefix: str = '_tool_'
-		pathFilenameModule = PurePosixPath(The.pathPackage, logicalPathInfix, moduleIdentifierPrefix + moduleIdentifier + The.fileExtension)
+		pathFilenameModule = PurePosixPath(The.pathPackage, logicalPathInfix, moduleIdentifier + The.fileExtension)
 		writeStringToHere(pythonSource, pathFilenameModule)
 
-	beClassDef = ast.ClassDef(name='be', bases=[], keywords=[], body=[], decorator_list=[])
-	# This function creates 126 `staticmethod` in the `be` class.
-	MakeClassDef = ast.ClassDef(name='Make', bases=[], keywords=[], body=[], decorator_list=[])
-	# This function creates 76 `staticmethod` in the `Make` class.
-	# How can this module create more than 200 methods in two classes? Filtering.
+	moduleIdentifierPrefix: str = '_tool_'
+	staticmethodName = ast.Name('staticmethod', ast.Load())
+	typing_TypeAliasName: ast.expr = cast(ast.expr, ast.Name('typing_TypeAlias', ast.Load()))
 
-	dictionaryAnnotations: dict[ast_Identifier, ast.Attribute] = MakeDictionaryOfAnnotations(astStubFile).getDictionary()
+	beClassDef = ast.ClassDef(name='be', bases=[], keywords=[], body=[], decorator_list=[])
+	DOTClassDef = ast.ClassDef(name='DOT', bases=[], keywords=[], body=[], decorator_list=[])
+	MakeClassDef = ast.ClassDef(name='Make', bases=[], keywords=[], body=[], decorator_list=[])
+	grabClassDef = ast.ClassDef(name='grab', bases=[], keywords=[], body=[], decorator_list=[])
+
+	dictionary_astClassAnnotations: dict[ast_Identifier, ast.Name | ast.Attribute] = MakeDictionaryOf_astClassAnnotations(astStubFile).getDictionary()
 
 	# Work on one ClassDef at a time.
 	for node in ast.walk(astStubFile):
@@ -159,15 +168,12 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 
 		# Create ast "fragments" before you need them.
 		ClassDefIdentifier: ast_Identifier = ImaClassDef.name
-		class_nameDOTname: str_nameDOTname = 'ast.' + ClassDefIdentifier
-		for pyDOTwhy in list_astDOTStuPyd:
-			# This ties into a system to allow the package to run on Python < 3.13.
-			astClass = pyDOTwhy.replace('DOT', '.')
-			class_nameDOTname = class_nameDOTname.replace(astClass, pyDOTwhy)
-		ClassDefName = ast.Name(class_nameDOTname)
+		ClassDefNameOrAttribute = dictionary_astClassAnnotations[ClassDefIdentifier]
 
 		# Create the ClassDef and add directly to the body of the class.
-		beClassDef.body.append(ast.FunctionDef(name=ClassDefIdentifier, args=ast.arguments(posonlyargs=[], args=[ast.arg(arg='node', annotation=ast.Name('ast.AST'))], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=[ast.Return(value=ast.Call(func=ast.Name('isinstance'), args=[ast.Name('node'), ClassDefName], keywords=[]))], decorator_list=[ast.Name('staticmethod')], type_comment=None, returns=ast.Subscript(value=ast.Name('TypeGuard'), slice=ClassDefName, ctx=ast.Load())))
+		beClassDef.body.append(ast.FunctionDef(name=ClassDefIdentifier
+			, args=ast.arguments(posonlyargs=[]
+			, args=[ast.arg(arg='node', annotation=ast.Name('ast.AST'))], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=[ast.Return(value=ast.Call(func=ast.Name('isinstance'), args=[ast.Name('node'), ClassDefNameOrAttribute], keywords=[]))], decorator_list=[staticmethodName], type_comment=None, returns=ast.Subscript(value=ast.Name('TypeGuard'), slice=ClassDefNameOrAttribute, ctx=ast.Load())))
 
 		# Start: cope with different arguments for Python versions. ==============================================================
 		# NOTE: I would love suggestions to improve this section.
@@ -218,25 +224,105 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			, args=ast.arguments(posonlyargs=[]
 				, args=[]
 				, vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
-			, body=[ast.Return(value=ast.Call(func=ClassDefName
+			, body=[ast.Return(value=ast.Call(func=ClassDefNameOrAttribute
 				, args=[]
-				, keywords=[]))], decorator_list=[ast.Name('staticmethod')], type_comment=None, returns=ClassDefName))
+				, keywords=[]))], decorator_list=[staticmethodName], type_comment=None, returns=ClassDefNameOrAttribute))
 
 		SubstituteTyping_TypeAlias().visit(ImaClassDef)
-		for attribute in listAttributes:
+		for attributeIdentifier in listAttributes:
 			for subnode in ast.walk(ImaClassDef):
-				if isinstance(subnode, ast.AnnAssign) and isinstance(subnode.target, ast.Name) and subnode.target.id == attribute:
-					annotation = ChangeName2Attribute(dictionaryAnnotations).visit(subnode.annotation)
-					cast(ast.FunctionDef, MakeClassDef.body[-1]).args.args.append(ast.arg(arg=attribute, annotation=annotation))
-					cast(ast.Call, cast(ast.Return, cast(ast.FunctionDef, MakeClassDef.body[-1]).body[0]).value).args.append(ast.Name(attribute, ctx=ast.Load()))
+				if isinstance(subnode, ast.AnnAssign) and isinstance(subnode.target, ast.Name) and subnode.target.id == attributeIdentifier:
+					subnode_annotation = ChangeName2Attribute(dictionary_astClassAnnotations).visit(subnode.annotation)
+					cast(ast.FunctionDef, MakeClassDef.body[-1]).args.args.append(ast.arg(arg=attributeIdentifier, annotation=subnode_annotation))
+					cast(ast.Call, cast(ast.Return, cast(ast.FunctionDef, MakeClassDef.body[-1]).body[0]).value).args.append(ast.Name(attributeIdentifier, ctx=ast.Load()))
 
 	beClassDef.body.sort(key=lambda astFunctionDef: astFunctionDef.name.lower()) # pyright: ignore[reportAttributeAccessIssue, reportUnknownLambdaType, reportUnknownMemberType]
 	MakeClassDef.body.sort(key=lambda astFunctionDef: astFunctionDef.name.lower()) # pyright: ignore[reportAttributeAccessIssue, reportUnknownLambdaType, reportUnknownMemberType]
 
-	beClassDef.body.insert(0, ast.Expr(value=ast.Constant(value=beClassDocstring)))
-	MakeClassDef.body.insert(0, ast.Expr(value=ast.Constant(value=MakeClassDocstring)))
+	Z0Z_dictionaryDeconstructedAttributes: dict[ast_Identifier, dict[str, list[ast_Identifier | str_nameDOTname]]] = {}
+	for node in ast.walk(MakeClassDef):
+		if isinstance(node, ast.FunctionDef):
+			for subnode in ast.iter_child_nodes(node.args):
+				if isinstance(subnode, ast.arg):
+					if subnode.arg not in Z0Z_dictionaryDeconstructedAttributes:
+						Z0Z_dictionaryDeconstructedAttributes[subnode.arg] = {}
+					if subnode.annotation is None: raise Exception
+					Z0Z_dictionaryDeconstructedAttributes[subnode.arg].setdefault(''.join([letter for letter in ast.unparse(subnode.annotation).replace('ast','').replace('|','Or') if letter in ascii_letters]), []).append(node.name)
 
-	be_astModule = ast.Module(
+	astTypesModule = ast.Module(
+		body=[ast.Expr(ast.Constant(docstringWarning))
+			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
+			, ast.ImportFrom('typing', [ast.alias('TypeAlias', 'typing_TypeAlias')], 0)
+			, ast.Import([ast.alias('ast')])
+			],
+		type_ignores=[]
+		)
+
+	listAttributeIdentifier: list[ast_Identifier] = list(Z0Z_dictionaryDeconstructedAttributes.keys())
+	listAttributeIdentifier.sort(key=lambda attributeIdentifier: attributeIdentifier.lower())
+	for attributeIdentifier in listAttributeIdentifier:
+		hasDOTIdentifier: ast_Identifier = 'hasDOT' + attributeIdentifier
+		hasDOTName_Store: ast.Name = ast.Name(hasDOTIdentifier, ast.Store())
+		list_hasDOTName_subnode_annotation: list[ast.Name] = []
+		dictionaryAnnotations = Z0Z_dictionaryDeconstructedAttributes[attributeIdentifier]
+		for subnode_annotation, listClassDefIdentifier in dictionaryAnnotations.items():
+			astAnnAssignValue = None
+			if len(listClassDefIdentifier) == 1:
+				astAnnAssignValue = dictionary_astClassAnnotations[listClassDefIdentifier[0]]
+			else:
+				astAnnAssignValue = ast.BinOp(left=dictionary_astClassAnnotations[listClassDefIdentifier[0]]
+										, op=ast.BitOr()
+										, right=dictionary_astClassAnnotations[listClassDefIdentifier[1]])
+				for ClassDefIdentifier in listClassDefIdentifier[2:None]:
+					astAnnAssignValue = ast.BinOp(left=astAnnAssignValue
+											, op=ast.BitOr()
+											, right=dictionary_astClassAnnotations[ClassDefIdentifier])
+
+			if len(dictionaryAnnotations) == 1:
+				astTypesModule.body.append(ast.AnnAssign(hasDOTName_Store, typing_TypeAliasName, astAnnAssignValue, 1))
+			else:
+				list_hasDOTName_subnode_annotation.append(ast.Name(hasDOTIdentifier + '_' + subnode_annotation.replace('list', 'list_'), ast.Store()))
+				astTypesModule.body.append(ast.AnnAssign(list_hasDOTName_subnode_annotation[-1], typing_TypeAliasName, astAnnAssignValue, 1))
+		if list_hasDOTName_subnode_annotation:
+			astAnnAssignValue = ast.BinOp(left=list_hasDOTName_subnode_annotation[0]
+									, op=ast.BitOr()
+									, right=list_hasDOTName_subnode_annotation[1])
+			for index in range(2, len(list_hasDOTName_subnode_annotation)):
+				astAnnAssignValue = ast.BinOp(left=astAnnAssignValue
+										, op=ast.BitOr()
+										, right=list_hasDOTName_subnode_annotation[index])
+			astTypesModule.body.append(ast.AnnAssign(hasDOTName_Store, typing_TypeAliasName, astAnnAssignValue, 1))
+
+		# TODO
+		pipeJoinedAnnotations = ast.Name('Any', ast.Load())
+		hasDOTName_Load: ast.Name = ast.Name('hasDOT' + attributeIdentifier, ast.Load())
+		grabClassDef.body.append(ast.FunctionDef(name=attributeIdentifier + 'Attribute'
+			, args=ast.arguments(posonlyargs=[]
+				, args=[ast.arg('action'
+					, annotation=ast.Subscript(ast.Name('Callable', ast.Load())
+						, slice=ast.Tuple(elts=[
+							ast.List(elts=[pipeJoinedAnnotations], ctx=ast.Load())
+							,   pipeJoinedAnnotations]
+						, ctx=ast.Load()), ctx=ast.Load()))]
+				, vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
+			, body=[ast.FunctionDef(name='workhorse',
+						args=ast.arguments(args=[ast.arg('node', hasDOTName_Load)]),
+						body=[ast.Assign(targets=[ast.Attribute(ast.Name('node', ast.Load()), attr=attributeIdentifier, ctx=ast.Store())],
+								value=ast.Call(ast.Name('action', ast.Load()), args=[ast.Attribute(ast.Name('node', ast.Load()), attr=attributeIdentifier, ctx=ast.Load())]))
+							, ast.Return(ast.Name('node', ast.Load()))],
+						returns=hasDOTName_Load),
+				ast.Return(ast.Name('workhorse', ctx=ast.Load()))]
+			, decorator_list=[staticmethodName], type_comment=None
+			, returns=ast.Subscript(ast.Name('Callable', ast.Load()), ast.Tuple([ast.List([hasDOTName_Load], ast.Load()), hasDOTName_Load], ast.Load()), ast.Load())))
+
+	writeModule(astTypesModule, '_astTypes')
+
+	beClassDef.body.insert(0, ast.Expr(value=ast.Constant(value=beClassDefDocstring)))
+	DOTClassDef.body.insert(0, ast.Expr(value=ast.Constant(value=DOTClassDefDocstring)))
+	grabClassDef.body.insert(0, ast.Expr(value=ast.Constant(value=grabClassDefDocstring)))
+	MakeClassDef.body.insert(0, ast.Expr(value=ast.Constant(value=MakeClassDefDocstring)))
+
+	writeModule(ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
 			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
 			, ast.ImportFrom('typing', [ast.alias('TypeGuard')], 0)
@@ -244,10 +330,35 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			, beClassDef
 			],
 		type_ignores=[]
-	)
-	writeModule(be_astModule, beClassDef.name)
+		)
+		, moduleIdentifierPrefix + beClassDef.name)
 
-	Make_astModule = ast.Module(
+	writeModule(ast.Module(
+		body=[ast.Expr(ast.Constant(docstringWarning))
+			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
+			, ast.ImportFrom('typing', [ast.alias('TypeGuard')], 0)
+			, ast.Import([ast.alias('ast')])
+			, DOTClassDef
+			],
+		type_ignores=[]
+		)
+		, moduleIdentifierPrefix + DOTClassDef.name)
+
+	writeModule(ast.Module(
+		body=[ast.Expr(ast.Constant(docstringWarning))
+			, ast.ImportFrom('collections.abc', [ast.alias('Callable')], 0)
+			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
+			, ast.ImportFrom('mapFolding.someAssemblyRequired', [ast.alias('ast_Identifier'), ast.alias('ast_expr_Slice')], 0)
+			, ast.ImportFrom('mapFolding.someAssemblyRequired._astTypes', [ast.alias('*')], 0)
+			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('Literal')], 0)
+			, ast.Import([ast.alias('ast')])
+			, grabClassDef
+			],
+		type_ignores=[]
+		)
+		, moduleIdentifierPrefix + grabClassDef.name)
+
+	writeModule(ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
 			, ast.ImportFrom('mapFolding', [ast.alias(pleasedonotcrashwhileimportingtypes) for pleasedonotcrashwhileimportingtypes in list_astDOTStuPyd], 0)
 			, ast.ImportFrom('mapFolding.someAssemblyRequired', [ast.alias('ast_Identifier'), ast.alias('ast_expr_Slice')], 0)
@@ -256,12 +367,12 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			, MakeClassDef
 			],
 		type_ignores=[]
-	)
-	writeModule(Make_astModule, MakeClassDef.name)
+		)
+		, moduleIdentifierPrefix + MakeClassDef.name)
 
 docstringWarning: str = """This file is generated automatically, so changes to this file will be lost."""
 
-beClassDocstring: str = (
+beClassDefDocstring: str = (
 	"""
 	Provide type-guard functions for safely verifying AST node types during manipulation.
 
@@ -278,7 +389,33 @@ beClassDocstring: str = (
 	"""
 	)
 
-MakeClassDocstring: str = (
+DOTClassDefDocstring: str = (
+	"""
+	Access attributes and sub-nodes of AST elements via consistent accessor methods.
+
+	The DOT class provides static methods to access specific attributes of different types of AST nodes in a consistent
+	way. This simplifies attribute access across various node types and improves code readability by abstracting the
+	underlying AST structure details.
+
+	DOT is designed for safe, read-only access to node properties, unlike the grab class which is designed for modifying
+	node attributes.
+	"""
+)
+
+grabClassDefDocstring: str = (
+	"""
+	Modify specific attributes of AST nodes while preserving the node structure.
+
+	The grab class provides static methods that create transformation functions to modify specific attributes of AST
+	nodes. Unlike DOT which provides read-only access, grab allows for targeted modifications of node attributes without
+	replacing the entire node.
+
+	Each method returns a function that takes a node, applies a transformation to a specific attribute of that node, and
+	returns the modified node. This enables fine-grained control when transforming AST structures.
+	"""
+)
+
+MakeClassDefDocstring: str = (
 	"""
 	Almost all parameters described here are only accessible through a method's `**keywordArguments` parameter.
 

@@ -23,7 +23,7 @@ class Make:
 	"""
 
     @staticmethod
-    def alias(name: str, asname: ast_Identifier | None) -> ast.alias:
+    def alias(name: ast_Identifier, asname: ast_Identifier | None) -> ast.alias:
         return ast.alias(name, asname)
 
     @staticmethod
@@ -31,7 +31,7 @@ class Make:
         return ast.AnnAssign(target, annotation, value, simple)
 
     @staticmethod
-    def arg(arg: ast_Identifier, annotation: ast.expr | None, type_comment: str | None) -> ast.arg:
+    def arg(arg: ast_Identifier, annotation: ast.expr | None, type_comment: ast_Identifier | None) -> ast.arg:
         return ast.arg(arg, annotation, type_comment)
 
     @staticmethod
@@ -43,19 +43,19 @@ class Make:
         return ast.Assert(test, msg)
 
     @staticmethod
-    def Assign(targets: list[ast.expr], value: ast.expr, type_comment: str | None) -> ast.Assign:
+    def Assign(targets: list[ast.expr], value: ast.expr, type_comment: ast_Identifier | None) -> ast.Assign:
         return ast.Assign(targets, value, type_comment)
 
     @staticmethod
-    def AsyncFor(target: ast.expr, iter: ast.expr, body: list[ast.stmt], orelse: list[ast.stmt], type_comment: str | None) -> ast.AsyncFor:
+    def AsyncFor(target: ast.expr, iter: ast.expr, body: list[ast.stmt], orelse: list[ast.stmt], type_comment: ast_Identifier | None) -> ast.AsyncFor:
         return ast.AsyncFor(target, iter, body, orelse, type_comment)
 
     @staticmethod
-    def AsyncFunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr], returns: ast.expr | None, type_comment: str | None, type_params: list[ast.type_param]) -> ast.AsyncFunctionDef:
+    def AsyncFunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr], returns: ast.expr | None, type_comment: ast_Identifier | None, type_params: list[astDOTtype_param]) -> ast.AsyncFunctionDef:
         return ast.AsyncFunctionDef(name, args, body, decorator_list, returns, type_comment, type_params)
 
     @staticmethod
-    def AsyncWith(items: list[ast.withitem], body: list[ast.stmt], type_comment: str | None) -> ast.AsyncWith:
+    def AsyncWith(items: list[ast.withitem], body: list[ast.stmt], type_comment: ast_Identifier | None) -> ast.AsyncWith:
         return ast.AsyncWith(items, body, type_comment)
 
     @staticmethod
@@ -83,7 +83,7 @@ class Make:
         return ast.Call(func, args, keywords)
 
     @staticmethod
-    def ClassDef(name: ast_Identifier, bases: list[ast.expr], keywords: list[ast.keyword], body: list[ast.stmt], decorator_list: list[ast.expr], type_params: list[ast.type_param]) -> ast.ClassDef:
+    def ClassDef(name: ast_Identifier, bases: list[ast.expr], keywords: list[ast.keyword], body: list[ast.stmt], decorator_list: list[ast.expr], type_params: list[astDOTtype_param]) -> ast.ClassDef:
         return ast.ClassDef(name, bases, keywords, body, decorator_list, type_params)
 
     @staticmethod
@@ -95,7 +95,7 @@ class Make:
         return ast.comprehension(target, iter, ifs, is_async)
 
     @staticmethod
-    def Constant(value: Any, kind: str | None) -> ast.Constant:
+    def Constant(value: Any, kind: ast_Identifier | None) -> ast.Constant:
         return ast.Constant(value, kind)
 
     @staticmethod
@@ -123,7 +123,7 @@ class Make:
         return ast.Expression(body)
 
     @staticmethod
-    def For(target: ast.expr, iter: ast.expr, body: list[ast.stmt], orelse: list[ast.stmt], type_comment: str | None) -> ast.For:
+    def For(target: ast.expr, iter: ast.expr, body: list[ast.stmt], orelse: list[ast.stmt], type_comment: ast_Identifier | None) -> ast.For:
         return ast.For(target, iter, body, orelse, type_comment)
 
     @staticmethod
@@ -131,7 +131,7 @@ class Make:
         return ast.FormattedValue(value, conversion, format_spec)
 
     @staticmethod
-    def FunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr], returns: ast.expr | None, type_comment: str | None, type_params: list[ast.type_param]) -> ast.FunctionDef:
+    def FunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr], returns: ast.expr | None, type_comment: ast_Identifier | None, type_params: list[astDOTtype_param]) -> ast.FunctionDef:
         return ast.FunctionDef(name, args, body, decorator_list, returns, type_comment, type_params)
 
     @staticmethod
@@ -159,7 +159,7 @@ class Make:
         return ast.Import(names)
 
     @staticmethod
-    def ImportFrom(module: str | None, names: list[ast.alias], level: int) -> ast.ImportFrom:
+    def ImportFrom(module: ast_Identifier | None, names: list[ast.alias], level: int) -> ast.ImportFrom:
         return ast.ImportFrom(module, names, level)
 
     @staticmethod
@@ -287,11 +287,11 @@ class Make:
         return ast.Tuple(elts, ctx)
 
     @staticmethod
-    def TypeAlias(name: ast.Name, type_params: list[ast.type_param], value: ast.expr) -> astDOTTypeAlias:
+    def TypeAlias(name: ast.Name, type_params: list[astDOTtype_param], value: ast.expr) -> astDOTTypeAlias:
         return astDOTTypeAlias(name, type_params, value)
 
     @staticmethod
-    def TypeIgnore(lineno: int, tag: str) -> ast.TypeIgnore:
+    def TypeIgnore(lineno: int, tag: ast_Identifier) -> ast.TypeIgnore:
         return ast.TypeIgnore(lineno, tag)
 
     @staticmethod
@@ -311,7 +311,7 @@ class Make:
         return ast.While(test, body, orelse)
 
     @staticmethod
-    def With(items: list[ast.withitem], body: list[ast.stmt], type_comment: str | None) -> ast.With:
+    def With(items: list[ast.withitem], body: list[ast.stmt], type_comment: ast_Identifier | None) -> ast.With:
         return ast.With(items, body, type_comment)
 
     @staticmethod

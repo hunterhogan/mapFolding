@@ -140,7 +140,7 @@ class DOT:
         return node.guard
 
     @staticmethod
-    def handlers(node: ast.Try | astDOTTryStar) -> list[ast.excepthandler]:
+    def handlers(node: ast.Try | astDOTTryStar) -> list[ast.ExceptHandler]:
         return node.handlers
 
     @staticmethod
@@ -168,20 +168,12 @@ class DOT:
         return node.key
 
     @staticmethod
-    def keys(node: ast.Dict | ast.MatchMapping) -> list[ast.expr]:
-        return node.keys
-
-    @staticmethod
     def keywords(node: ast.Call | ast.ClassDef) -> list[ast.keyword]:
         return node.keywords
 
     @staticmethod
     def kind(node: ast.Constant) -> str | None:
         return node.kind
-
-    @staticmethod
-    def kw_defaults(node: ast.arguments) -> list[ast.expr]:
-        return node.kw_defaults
 
     @staticmethod
     def kwarg(node: ast.arguments) -> ast.arg | None:
@@ -356,10 +348,6 @@ class DOT:
     @staticmethod
     def type_comment(node: ast.Assign | ast.AsyncFor | ast.AsyncFunctionDef | ast.AsyncWith | ast.For | ast.FunctionDef | ast.With | ast.arg) -> str | None:
         return node.type_comment
-
-    @staticmethod
-    def type_ignores(node: ast.Module) -> list[ast.type_ignore]:
-        return node.type_ignores
 
     @staticmethod
     def type_params(node: ast.AsyncFunctionDef | ast.ClassDef | ast.FunctionDef | astDOTTypeAlias) -> list[astDOTtype_param]:

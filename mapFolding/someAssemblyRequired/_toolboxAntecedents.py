@@ -27,14 +27,14 @@ from mapFolding.someAssemblyRequired import (
 	hasDOTbody_expr,
 	hasDOTbody_list_stmt,
 	hasDOTname,
-	hasDOTname_str,
-	hasDOTname_strORNone,
+	hasDOTname_Identifier,
+	hasDOTname_IdentifierOrNone,
 	hasDOTtarget,
 	hasDOTtarget_expr,
 	hasDOTtarget_AttributeORNameORSubscript,
 	hasDOTvalue,
 	hasDOTvalue_expr,
-	hasDOTvalue_exprORNone,
+	hasDOTvalue_exprOrNone,
 	ImaCallToName,
 )
 from typing import Any, overload, TypeGuard
@@ -101,10 +101,10 @@ class DOT:
 
 	@staticmethod
 	@overload
-	def name(node: hasDOTname_str) -> ast_Identifier:...
+	def name(node: hasDOTname_Identifier) -> ast_Identifier:...
 	@staticmethod
 	@overload
-	def name(node: hasDOTname_strORNone) -> ast_Identifier | None:...
+	def name(node: hasDOTname_IdentifierOrNone) -> ast_Identifier | None:...
 	@staticmethod
 	def name(node: hasDOTname) -> ast_Identifier | None:
 		return node.name
@@ -133,7 +133,7 @@ class DOT:
 	def value(node: hasDOTvalue_expr) -> ast.expr:...
 	@staticmethod
 	@overload
-	def value(node: hasDOTvalue_exprORNone) -> ast.expr | None:...
+	def value(node: hasDOTvalue_exprOrNone) -> ast.expr | None:...
 	@staticmethod
 	def value(node: hasDOTvalue) -> Any | ast.expr | bool | None:
 		return node.value
