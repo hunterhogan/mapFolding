@@ -1,11 +1,11 @@
 """This file is generated automatically, so changes to this file will be lost."""
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
-from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice
-from mapFolding.someAssemblyRequired._astTypes import *  # noqa: F403
+from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice, NodeORattribute, ImaCallToName
+from mapFolding.someAssemblyRequired._astTypes import *
 from typing import Any, Literal
 import ast
-# ruff: noqa: F405
+'# ruff: noqa: F405'
 
 class grab:
     """
@@ -292,7 +292,7 @@ class grab:
         return workhorse
 
     @staticmethod
-    def keysAttribute(action: Callable[[Sequence[ast.expr | None] | Sequence[ast.expr]], Sequence[ast.expr | None] | Sequence[ast.expr]]) -> Callable[[hasDOTkeys], hasDOTkeys]:
+    def keysAttribute(action: Callable[[list[ast.expr | None] | list[ast.expr]], list[ast.expr | None] | list[ast.expr]]) -> Callable[[hasDOTkeys], hasDOTkeys]:
 
         def workhorse(node: hasDOTkeys) -> hasDOTkeys:
             node.keys = action(node.keys)
@@ -412,7 +412,7 @@ class grab:
         return workhorse
 
     @staticmethod
-    def namesAttribute(action: Callable[[Sequence[ast_Identifier] | Sequence[ast.alias]], Sequence[ast_Identifier] | Sequence[ast.alias]]) -> Callable[[hasDOTnames], hasDOTnames]:
+    def namesAttribute(action: Callable[[list[ast_Identifier] | list[ast.alias]], list[ast_Identifier] | list[ast.alias]]) -> Callable[[hasDOTnames], hasDOTnames]:
 
         def workhorse(node: hasDOTnames) -> hasDOTnames:
             node.names = action(node.names)
@@ -632,5 +632,22 @@ class grab:
 
         def workhorse(node: hasDOTvararg) -> hasDOTvararg:
             node.vararg = action(node.vararg)
+            return node
+        return workhorse
+
+    @staticmethod
+    def andDoAllOf(listOfActions: list[Callable[[NodeORattribute], NodeORattribute]]) -> Callable[[NodeORattribute], NodeORattribute]:
+
+        def workhorse(node: NodeORattribute) -> NodeORattribute:
+            for action in listOfActions:
+                node = action(node)
+            return node
+        return workhorse
+
+    @staticmethod
+    def funcDOTidAttribute(action: Callable[[ast_Identifier], Any]) -> Callable[[ImaCallToName], ImaCallToName]:
+
+        def workhorse(node: ImaCallToName) -> ImaCallToName:
+            node.func = grab.idAttribute(action)(node.func)
             return node
         return workhorse

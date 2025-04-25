@@ -12,6 +12,7 @@ clarity, extensibility, and minimal manual intervention. All identifier and code
 maximum semantic clarity and future maintainability.
 """
 from mapFolding import The, writeStringToHere
+from mapFolding.toolFactory.astFactory_annex import handmadeMethods_grab
 from mapFolding.toolFactory.astFactory_docstrings import docstringWarning, beClassDefDocstring, DOTClassDefDocstring, grabClassDefDocstring, MakeClassDefDocstring
 from pathlib import PurePosixPath
 from string import ascii_letters
@@ -377,6 +378,8 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 	grabClassDef.body.insert(0, ast.Expr(value=ast.Constant(value=grabClassDefDocstring)))
 	MakeClassDef.body.insert(0, ast.Expr(value=ast.Constant(value=MakeClassDefDocstring)))
 
+	grabClassDef.body.extend(handmadeMethods_grab)
+
 	writeModule(ast.Module(
 		body=[ast.Expr(ast.Constant(docstringWarning))
 			, astImportFromClassNewInPythonVersion
@@ -393,7 +396,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			, astImportFromClassNewInPythonVersion
 			, ast.ImportFrom('mapFolding.someAssemblyRequired', [ast.alias('ast_Identifier'), ast.alias('ast_expr_Slice')], 0)
 			, ast.ImportFrom('mapFolding.someAssemblyRequired._astTypes', [ast.alias('*')], 0)
-			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('overload')], 0)
+			, ast.ImportFrom('typing', [ast.alias(identifier) for identifier in ['Any', 'Literal', 'overload']], 0)
 			, ast.Import([ast.alias('ast')])
 			# TODO but idk what
 			, ast.Expr(ast.Constant('# ruff: noqa: F405'))
@@ -407,7 +410,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 		body=[ast.Expr(ast.Constant(docstringWarning))
 			, ast.ImportFrom('collections.abc', [ast.alias('Callable')], 0)
 			, astImportFromClassNewInPythonVersion
-			, ast.ImportFrom('mapFolding.someAssemblyRequired', [ast.alias('ast_Identifier'), ast.alias('ast_expr_Slice')], 0)
+			, ast.ImportFrom('mapFolding.someAssemblyRequired', [ast.alias(identifier) for identifier in ['ast_Identifier', 'ast_expr_Slice', 'NodeORattribute', 'ImaCallToName']], 0)
 			, ast.ImportFrom('mapFolding.someAssemblyRequired._astTypes', [ast.alias('*')], 0)
 			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('Literal')], 0)
 			, ast.Import([ast.alias('ast')])

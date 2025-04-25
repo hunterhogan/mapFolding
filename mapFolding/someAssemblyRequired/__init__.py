@@ -69,10 +69,11 @@ from mapFolding.someAssemblyRequired._toolboxPython import (
 
 from mapFolding.someAssemblyRequired._tool_be import be as be
 from mapFolding.someAssemblyRequired._tool_DOT import DOT as DOT
+from mapFolding.someAssemblyRequired._tool_grab import grab as grab
 
-from mapFolding.someAssemblyRequired._toolboxAntecedents import ifThis as ifThis
+from mapFolding.someAssemblyRequired._tool_ifThis import ifThis as ifThis
 from mapFolding.someAssemblyRequired._toolMake import Make as Make
-from mapFolding.someAssemblyRequired._tool_Then import grab as grab, Then as Then
+from mapFolding.someAssemblyRequired._tool_Then import Then as Then
 
 from mapFolding.someAssemblyRequired._toolboxContainers import (
 	DeReConstructField2ast as DeReConstructField2ast,
