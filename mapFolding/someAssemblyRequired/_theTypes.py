@@ -12,9 +12,6 @@ class ImaCallToName(ast.Call):
 # Type hints through TypeAlias or type "hints" through the identifier name.
 ast_expr_Slice: typing_TypeAlias = ast.expr
 ast_Identifier: typing_TypeAlias = str
-intORlist_ast_type_paramORstr_orNone: typing_TypeAlias = Any
-intORstr_orNone: typing_TypeAlias = Any
-list_ast_type_paramORstr_orNone: typing_TypeAlias = Any
 str_nameDOTname: typing_TypeAlias = str
 
 # Limited success with TypeVar.

@@ -44,19 +44,16 @@ optimizations - while maintaining the ability to verify correctness at each tran
 test suite.
 """
 
-from mapFolding.someAssemblyRequired._astTypes import *  # noqa: F403
-
 from mapFolding.someAssemblyRequired._theTypes import (
 	ast_expr_Slice as ast_expr_Slice,
 	ast_Identifier as ast_Identifier,
 	ImaCallToName as ImaCallToName,
-	intORlist_ast_type_paramORstr_orNone as intORlist_ast_type_paramORstr_orNone,
-	intORstr_orNone as intORstr_orNone,
-	list_ast_type_paramORstr_orNone as list_ast_type_paramORstr_orNone,
 	NodeORattribute as NodeORattribute,
 	str_nameDOTname as str_nameDOTname,
 	个 as 个,
-	)
+)
+
+from mapFolding.someAssemblyRequired._astTypes import *  # noqa: F403
 
 from mapFolding.someAssemblyRequired._toolboxPython import (
 	importLogicalPath2Callable as importLogicalPath2Callable,
@@ -65,7 +62,7 @@ from mapFolding.someAssemblyRequired._toolboxPython import (
 	NodeTourist as NodeTourist,
 	parseLogicalPath2astModule as parseLogicalPath2astModule,
 	parsePathFilename2astModule as parsePathFilename2astModule,
-	)
+)
 
 from mapFolding.someAssemblyRequired._tool_be import be as be
 from mapFolding.someAssemblyRequired._tool_DOT import DOT as DOT
@@ -88,4 +85,4 @@ from mapFolding.someAssemblyRequired._toolboxAST import (
 	astModuleToIngredientsFunction as astModuleToIngredientsFunction,
 	extractClassDef as extractClassDef,
 	extractFunctionDef as extractFunctionDef,
-	)
+)

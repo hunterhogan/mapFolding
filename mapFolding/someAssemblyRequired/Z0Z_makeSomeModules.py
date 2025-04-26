@@ -126,7 +126,7 @@ def makeDaoOfMapFolding():
 	astTuple.ctx = ast.Store()
 
 	findThis = ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier))
-	doThat = Then.replaceWith(Make.Assign(listTargets=[astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
+	doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
 	changeAssignCallToTarget = NodeChanger(findThis, doThat)
 	changeAssignCallToTarget.visit(doTheNeedful.astFunctionDef)
 

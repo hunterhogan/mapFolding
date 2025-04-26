@@ -13,9 +13,7 @@ from collections.abc import Sequence
 from mapFolding.someAssemblyRequired import (
 	ast_expr_Slice,
 	ast_Identifier,
-	intORlist_ast_type_paramORstr_orNone,
-	intORstr_orNone,
-	list_ast_type_paramORstr_orNone,
+	intORstr,
 	str_nameDOTname,
 )
 from typing import Any
@@ -46,15 +44,15 @@ class Make:
 		return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)), **keywordArguments)
 
 	@staticmethod
-	def arg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: intORstr_orNone) -> ast.arg:
+	def arg(identifier: ast_Identifier, annotation: ast.expr | None = None, **keywordArguments: intORstr) -> ast.arg:
 		return ast.arg(identifier, annotation, **keywordArguments)
 
 	@staticmethod
-	def argumentsSpecification(posonlyargs:list[ast.arg]=[], args:list[ast.arg]=[], vararg:ast.arg|None=None, kwonlyargs:list[ast.arg]=[], kw_defaults:list[ast.expr|None]=[None], kwarg:ast.arg|None=None, defaults:list[ast.expr]=[]) -> ast.arguments:
+	def arguments(posonlyargs:list[ast.arg]=[], args:list[ast.arg]=[], vararg:ast.arg|None=None, kwonlyargs:list[ast.arg]=[], kw_defaults:list[ast.expr|None]=[None], kwarg:ast.arg|None=None, defaults:list[ast.expr]=[]) -> ast.arguments:
 		return ast.arguments(posonlyargs, args, vararg, kwonlyargs, kw_defaults, kwarg, defaults)
 
 	@staticmethod
-	def Assign(listTargets: list[ast.expr], value: ast.expr, **keywordArguments: intORstr_orNone) -> ast.Assign:
+	def Assign(listTargets: list[ast.expr], value: ast.expr, **keywordArguments: intORstr) -> ast.Assign:
 		return ast.Assign(listTargets, value, **keywordArguments)
 
 	@staticmethod
@@ -80,11 +78,11 @@ class Make:
 		return ast.Call(func=callee, args=list(listArguments) if listArguments else [], keywords=list(list_astKeywords) if list_astKeywords else [])
 
 	@staticmethod
-	def ClassDef(name: ast_Identifier, listBases: list[ast.expr]=[], list_keyword: list[ast.keyword]=[], body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], **keywordArguments: list_ast_type_paramORstr_orNone) -> ast.ClassDef:
+	def ClassDef(name: ast_Identifier, listBases: list[ast.expr]=[], list_keyword: list[ast.keyword]=[], body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], **keywordArguments: intORstr) -> ast.ClassDef:
 		return ast.ClassDef(name, listBases, list_keyword, body, decorator_list, **keywordArguments)
 
 	@staticmethod
-	def Constant(value: Any, **keywordArguments: intORstr_orNone) -> ast.Constant:
+	def Constant(value: Any, **keywordArguments: intORstr) -> ast.Constant:
 		return ast.Constant(value, **keywordArguments)
 
 	@staticmethod
@@ -92,7 +90,7 @@ class Make:
 		return ast.Expr(value, **keywordArguments)
 
 	@staticmethod
-	def FunctionDef(name: ast_Identifier, argumentsSpecification:ast.arguments=ast.arguments(), body:list[ast.stmt]=[], decorator_list:list[ast.expr]=[], returns:ast.expr|None=None, **keywordArguments: intORlist_ast_type_paramORstr_orNone) -> ast.FunctionDef:
+	def FunctionDef(name: ast_Identifier, argumentsSpecification:ast.arguments=ast.arguments(), body:list[ast.stmt]=[], decorator_list:list[ast.expr]=[], returns:ast.expr|None=None, **keywordArguments: intORstr) -> ast.FunctionDef:
 		return ast.FunctionDef(name, argumentsSpecification, body, decorator_list, returns, **keywordArguments)
 
 	@staticmethod

@@ -1,6 +1,6 @@
 """This file is generated automatically, so changes to this file will be lost."""
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
-from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice
+from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice, intORstr, intORstrORtype_params, intORtype_params
 from typing import Any, Literal
 import ast
 
@@ -23,305 +23,305 @@ class Make:
 	"""
 
     @staticmethod
-    def alias(name: ast_Identifier, asname: ast_Identifier | None) -> ast.alias:
-        return ast.alias(name, asname)
+    def alias(name: ast_Identifier, asName: ast_Identifier | None=None, **keywordArguments: int) -> ast.alias:
+        return ast.alias(name, asName, **keywordArguments)
 
     @staticmethod
-    def AnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None, simple: int) -> ast.AnnAssign:
-        return ast.AnnAssign(target, annotation, value, simple)
+    def AnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None, simple: int, **keywordArguments: int) -> ast.AnnAssign:
+        return ast.AnnAssign(target, annotation, value, simple, **keywordArguments)
 
     @staticmethod
-    def arg(arg: ast_Identifier, annotation: ast.expr | None, type_comment: ast_Identifier | None) -> ast.arg:
-        return ast.arg(arg, annotation, type_comment)
+    def arg(arg: ast_Identifier, annotation: ast.expr | None, **keywordArguments: intORstr) -> ast.arg:
+        return ast.arg(arg, annotation, **keywordArguments)
 
     @staticmethod
-    def arguments(posonlyargs: list[ast.arg], args: list[ast.arg], vararg: ast.arg | None, kwonlyargs: list[ast.arg], kw_defaults: list[ast.expr | None], kwarg: ast.arg | None, defaults: list[ast.expr]) -> ast.arguments:
-        return ast.arguments(posonlyargs, args, vararg, kwonlyargs, kw_defaults, kwarg, defaults)
+    def arguments(posonlyargs: list[ast.arg], args: list[ast.arg], vararg: ast.arg | None, kwonlyargs: list[ast.arg], kw_defaults: list[ast.expr | None], kwarg: ast.arg | None, defaults: list[ast.expr], **keywordArguments: int) -> ast.arguments:
+        return ast.arguments(posonlyargs, args, vararg, kwonlyargs, kw_defaults, kwarg, defaults, **keywordArguments)
 
     @staticmethod
-    def Assert(test: ast.expr, msg: ast.expr | None) -> ast.Assert:
-        return ast.Assert(test, msg)
+    def Assert(test: ast.expr, msg: ast.expr | None, **keywordArguments: int) -> ast.Assert:
+        return ast.Assert(test, msg, **keywordArguments)
 
     @staticmethod
-    def Assign(targets: list[ast.expr], value: ast.expr, type_comment: ast_Identifier | None) -> ast.Assign:
-        return ast.Assign(targets, value, type_comment)
+    def Assign(targets: list[ast.expr], value: ast.expr, **keywordArguments: intORstr) -> ast.Assign:
+        return ast.Assign(targets, value, **keywordArguments)
 
     @staticmethod
-    def AsyncFor(target: ast.expr, iter: ast.expr, body: list[ast.stmt], orelse: list[ast.stmt], type_comment: ast_Identifier | None) -> ast.AsyncFor:
-        return ast.AsyncFor(target, iter, body, orelse, type_comment)
+    def AsyncFor(target: ast.expr, iter: ast.expr, body: list[ast.stmt], orElse: list[ast.stmt]=[], **keywordArguments: intORstr) -> ast.AsyncFor:
+        return ast.AsyncFor(target, iter, body, orElse, **keywordArguments)
 
     @staticmethod
-    def AsyncFunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr], returns: ast.expr | None, type_comment: ast_Identifier | None, type_params: list[astDOTtype_param]) -> ast.AsyncFunctionDef:
-        return ast.AsyncFunctionDef(name, args, body, decorator_list, returns, type_comment, type_params)
+    def AsyncFunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr], returns: ast.expr | None, **keywordArguments: intORstrORtype_params) -> ast.AsyncFunctionDef:
+        return ast.AsyncFunctionDef(name, args, body, decorator_list, returns, **keywordArguments)
 
     @staticmethod
-    def AsyncWith(items: list[ast.withitem], body: list[ast.stmt], type_comment: ast_Identifier | None) -> ast.AsyncWith:
-        return ast.AsyncWith(items, body, type_comment)
+    def AsyncWith(items: list[ast.withitem], body: list[ast.stmt], **keywordArguments: intORstr) -> ast.AsyncWith:
+        return ast.AsyncWith(items, body, **keywordArguments)
 
     @staticmethod
-    def Attribute(value: ast.expr, attr: ast_Identifier, ctx: ast.expr_context) -> ast.Attribute:
-        return ast.Attribute(value, attr, ctx)
+    def Attribute(value: ast.expr, attr: ast_Identifier, context: ast.expr_context=ast.Load(), **keywordArguments: int) -> ast.Attribute:
+        return ast.Attribute(value, attr, context, **keywordArguments)
 
     @staticmethod
-    def AugAssign(target: ast.Name | ast.Attribute | ast.Subscript, op: ast.operator, value: ast.expr) -> ast.AugAssign:
-        return ast.AugAssign(target, op, value)
+    def AugAssign(target: ast.Name | ast.Attribute | ast.Subscript, op: ast.operator, value: ast.expr, **keywordArguments: int) -> ast.AugAssign:
+        return ast.AugAssign(target, op, value, **keywordArguments)
 
     @staticmethod
-    def Await(value: ast.expr) -> ast.Await:
-        return ast.Await(value)
+    def Await(value: ast.expr, **keywordArguments: int) -> ast.Await:
+        return ast.Await(value, **keywordArguments)
 
     @staticmethod
-    def BinOp(left: ast.expr, op: ast.operator, right: ast.expr) -> ast.BinOp:
-        return ast.BinOp(left, op, right)
+    def BinOp(left: ast.expr, op: ast.operator, right: ast.expr, **keywordArguments: int) -> ast.BinOp:
+        return ast.BinOp(left, op, right, **keywordArguments)
 
     @staticmethod
-    def BoolOp(op: ast.boolop, values: list[ast.expr]) -> ast.BoolOp:
-        return ast.BoolOp(op, values)
+    def BoolOp(op: ast.boolop, values: list[ast.expr], **keywordArguments: int) -> ast.BoolOp:
+        return ast.BoolOp(op, values, **keywordArguments)
 
     @staticmethod
-    def Call(func: ast.expr, args: list[ast.expr], keywords: list[ast.keyword]) -> ast.Call:
-        return ast.Call(func, args, keywords)
+    def Call(func: ast.expr, args: list[ast.expr], keywords: list[ast.keyword], **keywordArguments: int) -> ast.Call:
+        return ast.Call(func, args, keywords, **keywordArguments)
 
     @staticmethod
-    def ClassDef(name: ast_Identifier, bases: list[ast.expr], keywords: list[ast.keyword], body: list[ast.stmt], decorator_list: list[ast.expr], type_params: list[astDOTtype_param]) -> ast.ClassDef:
-        return ast.ClassDef(name, bases, keywords, body, decorator_list, type_params)
+    def ClassDef(name: ast_Identifier, bases: list[ast.expr], keywords: list[ast.keyword], body: list[ast.stmt], decorator_list: list[ast.expr], **keywordArguments: intORtype_params) -> ast.ClassDef:
+        return ast.ClassDef(name, bases, keywords, body, decorator_list, **keywordArguments)
 
     @staticmethod
-    def Compare(left: ast.expr, ops: list[ast.cmpop], comparators: list[ast.expr]) -> ast.Compare:
-        return ast.Compare(left, ops, comparators)
+    def Compare(left: ast.expr, ops: list[ast.cmpop], comparators: list[ast.expr], **keywordArguments: int) -> ast.Compare:
+        return ast.Compare(left, ops, comparators, **keywordArguments)
 
     @staticmethod
-    def comprehension(target: ast.expr, iter: ast.expr, ifs: list[ast.expr], is_async: int) -> ast.comprehension:
-        return ast.comprehension(target, iter, ifs, is_async)
+    def comprehension(target: ast.expr, iter: ast.expr, ifs: list[ast.expr], is_async: int, **keywordArguments: int) -> ast.comprehension:
+        return ast.comprehension(target, iter, ifs, is_async, **keywordArguments)
 
     @staticmethod
-    def Constant(value: Any, kind: ast_Identifier | None) -> ast.Constant:
-        return ast.Constant(value, kind)
+    def Constant(value: Any, **keywordArguments: intORstr) -> ast.Constant:
+        return ast.Constant(value, **keywordArguments)
 
     @staticmethod
-    def Delete(targets: list[ast.expr]) -> ast.Delete:
-        return ast.Delete(targets)
+    def Delete(targets: list[ast.expr], **keywordArguments: int) -> ast.Delete:
+        return ast.Delete(targets, **keywordArguments)
 
     @staticmethod
-    def Dict(keys: list[ast.expr | None], values: list[ast.expr]) -> ast.Dict:
-        return ast.Dict(keys, values)
+    def Dict(keys: list[ast.expr | None], values: list[ast.expr], **keywordArguments: int) -> ast.Dict:
+        return ast.Dict(keys, values, **keywordArguments)
 
     @staticmethod
-    def DictComp(key: ast.expr, value: ast.expr, generators: list[ast.comprehension]) -> ast.DictComp:
-        return ast.DictComp(key, value, generators)
+    def DictComp(key: ast.expr, value: ast.expr, generators: list[ast.comprehension], **keywordArguments: int) -> ast.DictComp:
+        return ast.DictComp(key, value, generators, **keywordArguments)
 
     @staticmethod
-    def ExceptHandler(type: ast.expr | None, name: ast_Identifier | None, body: list[ast.stmt]) -> ast.ExceptHandler:
-        return ast.ExceptHandler(type, name, body)
+    def ExceptHandler(type: ast.expr | None, name: ast_Identifier | None, body: list[ast.stmt], **keywordArguments: int) -> ast.ExceptHandler:
+        return ast.ExceptHandler(type, name, body, **keywordArguments)
 
     @staticmethod
-    def Expr(value: ast.expr) -> ast.Expr:
-        return ast.Expr(value)
+    def Expr(value: ast.expr, **keywordArguments: int) -> ast.Expr:
+        return ast.Expr(value, **keywordArguments)
 
     @staticmethod
     def Expression(body: ast.expr) -> ast.Expression:
         return ast.Expression(body)
 
     @staticmethod
-    def For(target: ast.expr, iter: ast.expr, body: list[ast.stmt], orelse: list[ast.stmt], type_comment: ast_Identifier | None) -> ast.For:
-        return ast.For(target, iter, body, orelse, type_comment)
+    def For(target: ast.expr, iter: ast.expr, body: list[ast.stmt], orElse: list[ast.stmt]=[], **keywordArguments: intORstr) -> ast.For:
+        return ast.For(target, iter, body, orElse, **keywordArguments)
 
     @staticmethod
-    def FormattedValue(value: ast.expr, conversion: int, format_spec: ast.expr | None) -> ast.FormattedValue:
-        return ast.FormattedValue(value, conversion, format_spec)
+    def FormattedValue(value: ast.expr, conversion: int, format_spec: ast.expr | None, **keywordArguments: int) -> ast.FormattedValue:
+        return ast.FormattedValue(value, conversion, format_spec, **keywordArguments)
 
     @staticmethod
-    def FunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr], returns: ast.expr | None, type_comment: ast_Identifier | None, type_params: list[astDOTtype_param]) -> ast.FunctionDef:
-        return ast.FunctionDef(name, args, body, decorator_list, returns, type_comment, type_params)
+    def FunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr], returns: ast.expr | None, **keywordArguments: intORstrORtype_params) -> ast.FunctionDef:
+        return ast.FunctionDef(name, args, body, decorator_list, returns, **keywordArguments)
 
     @staticmethod
     def FunctionType(argtypes: list[ast.expr], returns: ast.expr) -> ast.FunctionType:
         return ast.FunctionType(argtypes, returns)
 
     @staticmethod
-    def GeneratorExp(elt: ast.expr, generators: list[ast.comprehension]) -> ast.GeneratorExp:
-        return ast.GeneratorExp(elt, generators)
+    def GeneratorExp(elt: ast.expr, generators: list[ast.comprehension], **keywordArguments: int) -> ast.GeneratorExp:
+        return ast.GeneratorExp(elt, generators, **keywordArguments)
 
     @staticmethod
-    def Global(names: list[ast_Identifier]) -> ast.Global:
-        return ast.Global(names)
+    def Global(names: list[ast_Identifier], **keywordArguments: int) -> ast.Global:
+        return ast.Global(names, **keywordArguments)
 
     @staticmethod
-    def If(test: ast.expr, body: list[ast.stmt], orelse: list[ast.stmt]) -> ast.If:
-        return ast.If(test, body, orelse)
+    def If(test: ast.expr, body: list[ast.stmt], orElse: list[ast.stmt]=[], **keywordArguments: int) -> ast.If:
+        return ast.If(test, body, orElse, **keywordArguments)
 
     @staticmethod
-    def IfExp(test: ast.expr, body: ast.expr, orelse: ast.expr) -> ast.IfExp:
-        return ast.IfExp(test, body, orelse)
+    def IfExp(test: ast.expr, body: ast.expr, orElse: ast.expr, **keywordArguments: int) -> ast.IfExp:
+        return ast.IfExp(test, body, orElse, **keywordArguments)
 
     @staticmethod
-    def Import(names: list[ast.alias]) -> ast.Import:
-        return ast.Import(names)
+    def Import(names: list[ast.alias], **keywordArguments: int) -> ast.Import:
+        return ast.Import(names, **keywordArguments)
 
     @staticmethod
-    def ImportFrom(module: ast_Identifier | None, names: list[ast.alias], level: int) -> ast.ImportFrom:
-        return ast.ImportFrom(module, names, level)
+    def ImportFrom(module: ast_Identifier | None, names: list[ast.alias], **keywordArguments: int) -> ast.ImportFrom:
+        return ast.ImportFrom(module, names, **keywordArguments, level=0)
 
     @staticmethod
     def Interactive(body: list[ast.stmt]) -> ast.Interactive:
         return ast.Interactive(body)
 
     @staticmethod
-    def JoinedStr(values: list[ast.expr]) -> ast.JoinedStr:
-        return ast.JoinedStr(values)
+    def JoinedStr(values: list[ast.expr], **keywordArguments: int) -> ast.JoinedStr:
+        return ast.JoinedStr(values, **keywordArguments)
 
     @staticmethod
-    def keyword(arg: ast_Identifier | None, value: ast.expr) -> ast.keyword:
-        return ast.keyword(arg, value)
+    def keyword(arg: ast_Identifier | None, value: ast.expr, **keywordArguments: int) -> ast.keyword:
+        return ast.keyword(arg, value, **keywordArguments)
 
     @staticmethod
-    def Lambda(args: ast.arguments, body: ast.expr) -> ast.Lambda:
-        return ast.Lambda(args, body)
+    def Lambda(args: ast.arguments, body: ast.expr, **keywordArguments: int) -> ast.Lambda:
+        return ast.Lambda(args, body, **keywordArguments)
 
     @staticmethod
-    def List(elts: list[ast.expr], ctx: ast.expr_context) -> ast.List:
-        return ast.List(elts, ctx)
+    def List(elts: list[ast.expr], context: ast.expr_context=ast.Load(), **keywordArguments: int) -> ast.List:
+        return ast.List(elts, context, **keywordArguments)
 
     @staticmethod
-    def ListComp(elt: ast.expr, generators: list[ast.comprehension]) -> ast.ListComp:
-        return ast.ListComp(elt, generators)
+    def ListComp(elt: ast.expr, generators: list[ast.comprehension], **keywordArguments: int) -> ast.ListComp:
+        return ast.ListComp(elt, generators, **keywordArguments)
 
     @staticmethod
-    def Match(subject: ast.expr, cases: list[ast.match_case]) -> ast.Match:
-        return ast.Match(subject, cases)
+    def Match(subject: ast.expr, cases: list[ast.match_case], **keywordArguments: int) -> ast.Match:
+        return ast.Match(subject, cases, **keywordArguments)
 
     @staticmethod
-    def match_case(pattern: ast.pattern, guard: ast.expr | None, body: list[ast.stmt]) -> ast.match_case:
-        return ast.match_case(pattern, guard, body)
+    def match_case(pattern: ast.pattern, guard: ast.expr | None, body: list[ast.stmt], **keywordArguments: int) -> ast.match_case:
+        return ast.match_case(pattern, guard, body, **keywordArguments)
 
     @staticmethod
-    def MatchAs(pattern: ast.pattern | None, name: ast_Identifier | None) -> ast.MatchAs:
-        return ast.MatchAs(pattern, name)
+    def MatchAs(pattern: ast.pattern | None, name: ast_Identifier | None, **keywordArguments: int) -> ast.MatchAs:
+        return ast.MatchAs(pattern, name, **keywordArguments)
 
     @staticmethod
-    def MatchClass(cls: ast.expr, patterns: list[ast.pattern], kwd_attrs: list[ast_Identifier], kwd_patterns: list[ast.pattern]) -> ast.MatchClass:
-        return ast.MatchClass(cls, patterns, kwd_attrs, kwd_patterns)
+    def MatchClass(cls: ast.expr, patterns: list[ast.pattern], kwd_attrs: list[ast_Identifier], kwd_patterns: list[ast.pattern], **keywordArguments: int) -> ast.MatchClass:
+        return ast.MatchClass(cls, patterns, kwd_attrs, kwd_patterns, **keywordArguments)
 
     @staticmethod
-    def MatchMapping(keys: list[ast.expr], patterns: list[ast.pattern], rest: ast_Identifier | None) -> ast.MatchMapping:
-        return ast.MatchMapping(keys, patterns, rest)
+    def MatchMapping(keys: list[ast.expr], patterns: list[ast.pattern], rest: ast_Identifier | None, **keywordArguments: int) -> ast.MatchMapping:
+        return ast.MatchMapping(keys, patterns, rest, **keywordArguments)
 
     @staticmethod
-    def MatchOr(patterns: list[ast.pattern]) -> ast.MatchOr:
-        return ast.MatchOr(patterns)
+    def MatchOr(patterns: list[ast.pattern], **keywordArguments: int) -> ast.MatchOr:
+        return ast.MatchOr(patterns, **keywordArguments)
 
     @staticmethod
-    def MatchSequence(patterns: list[ast.pattern]) -> ast.MatchSequence:
-        return ast.MatchSequence(patterns)
+    def MatchSequence(patterns: list[ast.pattern], **keywordArguments: int) -> ast.MatchSequence:
+        return ast.MatchSequence(patterns, **keywordArguments)
 
     @staticmethod
-    def MatchSingleton(value: Literal[True, False] | None) -> ast.MatchSingleton:
-        return ast.MatchSingleton(value)
+    def MatchSingleton(value: Literal[True, False] | None, **keywordArguments: int) -> ast.MatchSingleton:
+        return ast.MatchSingleton(value, **keywordArguments)
 
     @staticmethod
-    def MatchStar(name: ast_Identifier | None) -> ast.MatchStar:
-        return ast.MatchStar(name)
+    def MatchStar(name: ast_Identifier | None, **keywordArguments: int) -> ast.MatchStar:
+        return ast.MatchStar(name, **keywordArguments)
 
     @staticmethod
-    def MatchValue(value: ast.expr) -> ast.MatchValue:
-        return ast.MatchValue(value)
+    def MatchValue(value: ast.expr, **keywordArguments: int) -> ast.MatchValue:
+        return ast.MatchValue(value, **keywordArguments)
 
     @staticmethod
     def Module(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore]) -> ast.Module:
         return ast.Module(body, type_ignores)
 
     @staticmethod
-    def Name(id: ast_Identifier, ctx: ast.expr_context) -> ast.Name:
-        return ast.Name(id, ctx)
+    def Name(id: ast_Identifier, context: ast.expr_context=ast.Load(), **keywordArguments: int) -> ast.Name:
+        return ast.Name(id, context, **keywordArguments)
 
     @staticmethod
-    def NamedExpr(target: ast.Name, value: ast.expr) -> ast.NamedExpr:
-        return ast.NamedExpr(target, value)
+    def NamedExpr(target: ast.Name, value: ast.expr, **keywordArguments: int) -> ast.NamedExpr:
+        return ast.NamedExpr(target, value, **keywordArguments)
 
     @staticmethod
-    def Nonlocal(names: list[ast_Identifier]) -> ast.Nonlocal:
-        return ast.Nonlocal(names)
+    def Nonlocal(names: list[ast_Identifier], **keywordArguments: int) -> ast.Nonlocal:
+        return ast.Nonlocal(names, **keywordArguments)
 
     @staticmethod
-    def ParamSpec(name: ast_Identifier, default_value: ast.expr | None) -> astDOTParamSpec:
-        return astDOTParamSpec(name, default_value)
+    def ParamSpec(name: ast_Identifier, default_value: ast.expr | None, **keywordArguments: int) -> astDOTParamSpec:
+        return astDOTParamSpec(name, default_value, **keywordArguments)
 
     @staticmethod
-    def Raise(exc: ast.expr | None, cause: ast.expr | None) -> ast.Raise:
-        return ast.Raise(exc, cause)
+    def Raise(exc: ast.expr | None, cause: ast.expr | None, **keywordArguments: int) -> ast.Raise:
+        return ast.Raise(exc, cause, **keywordArguments)
 
     @staticmethod
-    def Return(value: ast.expr | None) -> ast.Return:
-        return ast.Return(value)
+    def Return(value: ast.expr | None, **keywordArguments: int) -> ast.Return:
+        return ast.Return(value, **keywordArguments)
 
     @staticmethod
-    def Set(elts: list[ast.expr]) -> ast.Set:
-        return ast.Set(elts)
+    def Set(elts: list[ast.expr], **keywordArguments: int) -> ast.Set:
+        return ast.Set(elts, **keywordArguments)
 
     @staticmethod
-    def SetComp(elt: ast.expr, generators: list[ast.comprehension]) -> ast.SetComp:
-        return ast.SetComp(elt, generators)
+    def SetComp(elt: ast.expr, generators: list[ast.comprehension], **keywordArguments: int) -> ast.SetComp:
+        return ast.SetComp(elt, generators, **keywordArguments)
 
     @staticmethod
-    def Slice(lower: ast.expr | None, upper: ast.expr | None, step: ast.expr | None) -> ast.Slice:
-        return ast.Slice(lower, upper, step)
+    def Slice(lower: ast.expr | None, upper: ast.expr | None, step: ast.expr | None, **keywordArguments: int) -> ast.Slice:
+        return ast.Slice(lower, upper, step, **keywordArguments)
 
     @staticmethod
-    def Starred(value: ast.expr, ctx: ast.expr_context) -> ast.Starred:
-        return ast.Starred(value, ctx)
+    def Starred(value: ast.expr, context: ast.expr_context=ast.Load(), **keywordArguments: int) -> ast.Starred:
+        return ast.Starred(value, context, **keywordArguments)
 
     @staticmethod
-    def Subscript(value: ast.expr, slice: ast_expr_Slice, ctx: ast.expr_context) -> ast.Subscript:
-        return ast.Subscript(value, slice, ctx)
+    def Subscript(value: ast.expr, slice: ast_expr_Slice, context: ast.expr_context=ast.Load(), **keywordArguments: int) -> ast.Subscript:
+        return ast.Subscript(value, slice, context, **keywordArguments)
 
     @staticmethod
-    def Try(body: list[ast.stmt], handlers: list[ast.ExceptHandler], orelse: list[ast.stmt], finalbody: list[ast.stmt]) -> ast.Try:
-        return ast.Try(body, handlers, orelse, finalbody)
+    def Try(body: list[ast.stmt], handlers: list[ast.ExceptHandler], orElse: list[ast.stmt], finalbody: list[ast.stmt]=[], **keywordArguments: int) -> ast.Try:
+        return ast.Try(body, handlers, orElse, finalbody, **keywordArguments)
 
     @staticmethod
-    def TryStar(body: list[ast.stmt], handlers: list[ast.ExceptHandler], orelse: list[ast.stmt], finalbody: list[ast.stmt]) -> astDOTTryStar:
-        return astDOTTryStar(body, handlers, orelse, finalbody)
+    def TryStar(body: list[ast.stmt], handlers: list[ast.ExceptHandler], orElse: list[ast.stmt], finalbody: list[ast.stmt]=[], **keywordArguments: int) -> astDOTTryStar:
+        return astDOTTryStar(body, handlers, orElse, finalbody, **keywordArguments)
 
     @staticmethod
-    def Tuple(elts: list[ast.expr], ctx: ast.expr_context) -> ast.Tuple:
-        return ast.Tuple(elts, ctx)
+    def Tuple(elts: list[ast.expr], context: ast.expr_context=ast.Load(), **keywordArguments: int) -> ast.Tuple:
+        return ast.Tuple(elts, context, **keywordArguments)
 
     @staticmethod
-    def TypeAlias(name: ast.Name, type_params: list[astDOTtype_param], value: ast.expr) -> astDOTTypeAlias:
-        return astDOTTypeAlias(name, type_params, value)
+    def TypeAlias(name: ast.Name, type_params: list[astDOTtype_param], value: ast.expr, **keywordArguments: int) -> astDOTTypeAlias:
+        return astDOTTypeAlias(name, type_params, value, **keywordArguments)
 
     @staticmethod
-    def TypeIgnore(lineno: int, tag: ast_Identifier) -> ast.TypeIgnore:
-        return ast.TypeIgnore(lineno, tag)
+    def TypeIgnore(lineno: int, tag: ast_Identifier, **keywordArguments: int) -> ast.TypeIgnore:
+        return ast.TypeIgnore(lineno, tag, **keywordArguments)
 
     @staticmethod
-    def TypeVar(name: ast_Identifier, bound: ast.expr | None, default_value: ast.expr | None) -> astDOTTypeVar:
-        return astDOTTypeVar(name, bound, default_value)
+    def TypeVar(name: ast_Identifier, bound: ast.expr | None, default_value: ast.expr | None, **keywordArguments: int) -> astDOTTypeVar:
+        return astDOTTypeVar(name, bound, default_value, **keywordArguments)
 
     @staticmethod
-    def TypeVarTuple(name: ast_Identifier, default_value: ast.expr | None) -> astDOTTypeVarTuple:
-        return astDOTTypeVarTuple(name, default_value)
+    def TypeVarTuple(name: ast_Identifier, default_value: ast.expr | None, **keywordArguments: int) -> astDOTTypeVarTuple:
+        return astDOTTypeVarTuple(name, default_value, **keywordArguments)
 
     @staticmethod
-    def UnaryOp(op: ast.unaryop, operand: ast.expr) -> ast.UnaryOp:
-        return ast.UnaryOp(op, operand)
+    def UnaryOp(op: ast.unaryop, operand: ast.expr, **keywordArguments: int) -> ast.UnaryOp:
+        return ast.UnaryOp(op, operand, **keywordArguments)
 
     @staticmethod
-    def While(test: ast.expr, body: list[ast.stmt], orelse: list[ast.stmt]) -> ast.While:
-        return ast.While(test, body, orelse)
+    def While(test: ast.expr, body: list[ast.stmt], orElse: list[ast.stmt]=[], **keywordArguments: int) -> ast.While:
+        return ast.While(test, body, orElse, **keywordArguments)
 
     @staticmethod
-    def With(items: list[ast.withitem], body: list[ast.stmt], type_comment: ast_Identifier | None) -> ast.With:
-        return ast.With(items, body, type_comment)
+    def With(items: list[ast.withitem], body: list[ast.stmt], **keywordArguments: intORstr) -> ast.With:
+        return ast.With(items, body, **keywordArguments)
 
     @staticmethod
-    def withitem(context_expr: ast.expr, optional_vars: ast.expr | None) -> ast.withitem:
-        return ast.withitem(context_expr, optional_vars)
+    def withitem(context_expr: ast.expr, optional_vars: ast.expr | None, **keywordArguments: int) -> ast.withitem:
+        return ast.withitem(context_expr, optional_vars, **keywordArguments)
 
     @staticmethod
-    def Yield(value: ast.expr | None) -> ast.Yield:
-        return ast.Yield(value)
+    def Yield(value: ast.expr | None, **keywordArguments: int) -> ast.Yield:
+        return ast.Yield(value, **keywordArguments)
 
     @staticmethod
-    def YieldFrom(value: ast.expr) -> ast.YieldFrom:
-        return ast.YieldFrom(value)
+    def YieldFrom(value: ast.expr, **keywordArguments: int) -> ast.YieldFrom:
+        return ast.YieldFrom(value, **keywordArguments)

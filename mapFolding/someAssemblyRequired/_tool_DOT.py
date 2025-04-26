@@ -1,10 +1,10 @@
 """This file is generated automatically, so changes to this file will be lost."""
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
 from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice
-from mapFolding.someAssemblyRequired._astTypes import *
+from mapFolding.someAssemblyRequired._astTypes import *  # noqa: F403
 from typing import Any, Literal, overload
 import ast
-'# ruff: noqa: F405'
+# ruff: noqa: F405
 
 class DOT:
     """
@@ -48,11 +48,6 @@ class DOT:
 
     @staticmethod
     @overload
-    def args(node: hasDOTargs_list_arg) -> list[ast.arg]:
-        ...
-
-    @staticmethod
-    @overload
     def args(node: hasDOTargs_arguments) -> ast.arguments:
         ...
 
@@ -62,7 +57,12 @@ class DOT:
         ...
 
     @staticmethod
-    def args(node: hasDOTargs) -> list[ast.arg] | ast.arguments | list[ast.expr]:
+    @overload
+    def args(node: hasDOTargs_list_arg) -> list[ast.arg]:
+        ...
+
+    @staticmethod
+    def args(node: hasDOTargs) -> ast.arguments | list[ast.expr] | list[ast.arg]:
         return node.args
 
     @staticmethod
@@ -286,16 +286,16 @@ class DOT:
 
     @staticmethod
     @overload
-    def names(node: hasDOTnames_list_Identifier) -> list[ast_Identifier]:
-        ...
-
-    @staticmethod
-    @overload
     def names(node: hasDOTnames_list_alias) -> list[ast.alias]:
         ...
 
     @staticmethod
-    def names(node: hasDOTnames) -> list[ast_Identifier] | list[ast.alias]:
+    @overload
+    def names(node: hasDOTnames_list_Identifier) -> list[ast_Identifier]:
+        ...
+
+    @staticmethod
+    def names(node: hasDOTnames) -> list[ast.alias] | list[ast_Identifier]:
         return node.names
 
     @staticmethod
@@ -371,16 +371,16 @@ class DOT:
 
     @staticmethod
     @overload
-    def returns(node: hasDOTreturns_exprOrNone) -> ast.expr | None:
-        ...
-
-    @staticmethod
-    @overload
     def returns(node: hasDOTreturns_expr) -> ast.expr:
         ...
 
     @staticmethod
-    def returns(node: hasDOTreturns) -> ast.expr | None | ast.expr:
+    @overload
+    def returns(node: hasDOTreturns_exprOrNone) -> ast.expr | None:
+        ...
+
+    @staticmethod
+    def returns(node: hasDOTreturns) -> ast.expr | (ast.expr | None):
         return node.returns
 
     @staticmethod

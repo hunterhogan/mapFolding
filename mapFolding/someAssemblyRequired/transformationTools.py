@@ -401,7 +401,7 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 
 	# parallelCallable =========================================================
 	if recipeFlow.removeDataclassParallel:
-		ingredientsParallel.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
+		ingredientsParallel.astFunctionDef.args = Make.arguments(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 
 		ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
 
@@ -443,7 +443,7 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	return ingredientsModuleNumbaUnified
 
 def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
-	ingredientsTarget.astFunctionDef.args = Make.argumentsSpecification(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
+	ingredientsTarget.astFunctionDef.args = Make.arguments(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
 	changeReturnCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
 	changeReturnCallable.visit(ingredientsTarget.astFunctionDef)

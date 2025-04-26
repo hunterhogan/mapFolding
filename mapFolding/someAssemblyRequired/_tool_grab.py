@@ -2,10 +2,10 @@
 from collections.abc import Callable
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
 from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice, NodeORattribute, ImaCallToName
-from mapFolding.someAssemblyRequired._astTypes import *
+from mapFolding.someAssemblyRequired._astTypes import *  # noqa: F403
 from typing import Any, Literal
 import ast
-'# ruff: noqa: F405'
+# ruff: noqa: F405
 
 class grab:
     """
@@ -36,7 +36,7 @@ class grab:
         return workhorse
 
     @staticmethod
-    def argsAttribute(action: Callable[[list[ast.arg] | ast.arguments | list[ast.expr]], list[ast.arg] | ast.arguments | list[ast.expr]]) -> Callable[[hasDOTargs], hasDOTargs]:
+    def argsAttribute(action: Callable[[ast.arguments | list[ast.expr] | list[ast.arg]], ast.arguments | list[ast.expr] | list[ast.arg]]) -> Callable[[hasDOTargs], hasDOTargs]:
 
         def workhorse(node: hasDOTargs) -> hasDOTargs:
             node.args = action(node.args)
@@ -412,7 +412,7 @@ class grab:
         return workhorse
 
     @staticmethod
-    def namesAttribute(action: Callable[[list[ast_Identifier] | list[ast.alias]], list[ast_Identifier] | list[ast.alias]]) -> Callable[[hasDOTnames], hasDOTnames]:
+    def namesAttribute(action: Callable[[list[ast.alias] | list[ast_Identifier]], list[ast.alias] | list[ast_Identifier]]) -> Callable[[hasDOTnames], hasDOTnames]:
 
         def workhorse(node: hasDOTnames) -> hasDOTnames:
             node.names = action(node.names)
@@ -492,7 +492,7 @@ class grab:
         return workhorse
 
     @staticmethod
-    def returnsAttribute(action: Callable[[ast.expr | None | ast.expr], ast.expr | None | ast.expr]) -> Callable[[hasDOTreturns], hasDOTreturns]:
+    def returnsAttribute(action: Callable[[ast.expr | (ast.expr | None)], ast.expr | (ast.expr | None)]) -> Callable[[hasDOTreturns], hasDOTreturns]:
 
         def workhorse(node: hasDOTreturns) -> hasDOTreturns:
             node.returns = action(node.returns)
