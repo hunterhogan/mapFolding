@@ -123,7 +123,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.imports.addImportFrom_asStr(decoratorModule, decoratorCallable)
 	# Leave this line in so that global edits will change it.
 	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
-	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_astKeywords=listDecoratorKeywords)
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=listDecoratorKeywords)
 
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction

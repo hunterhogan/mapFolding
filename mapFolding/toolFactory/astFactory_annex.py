@@ -1,6 +1,17 @@
 from typing import Any, cast, TypeAlias as typing_TypeAlias
 import ast
 
+astTypes_intORstr: str ="intORstr: typing_TypeAlias = Any"
+astTypes_intORstrORtype_params: str ="intORstrORtype_params: typing_TypeAlias = Any"
+astTypes_intORtype_params: str ="intORtype_params: typing_TypeAlias = Any"
+
+handmadeTypeAlias_astTypes: list[ast.AnnAssign] = []
+for string in [astTypes_intORstr, astTypes_intORstrORtype_params, astTypes_intORtype_params]:
+	astModule = ast.parse(string)
+	for node in ast.iter_child_nodes(astModule):
+		if isinstance(node, ast.AnnAssign):
+			handmadeTypeAlias_astTypes.append(node)
+
 grab_andDoAllOf: str ="""@staticmethod
 def andDoAllOf(listOfActions: list[Callable[[NodeORattribute], NodeORattribute]]) -> Callable[[NodeORattribute], NodeORattribute]:
 	def workhorse(node: NodeORattribute) -> NodeORattribute:
@@ -25,74 +36,28 @@ for string in [grab_andDoAllOf, grab_funcDOTidAttribute]:
 		if isinstance(node, ast.FunctionDef):
 			handmadeMethods_grab.append(node)
 
-astTypes_intORstr: str ="intORstr: typing_TypeAlias = Any"
-astTypes_intORstrORtype_params: str ="intORstrORtype_params: typing_TypeAlias = Any"
-astTypes_intORtype_params: str ="intORtype_params: typing_TypeAlias = Any"
+MakeAttributeFunctionDef: ast.FunctionDef = ast.FunctionDef(
+	name='Attribute',
+	args=ast.arguments(args=[ast.arg(arg='value', annotation=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='expr', ctx=ast.Load()))], vararg=ast.arg(arg='attribute', annotation=ast.Name(id='ast_Identifier', ctx=ast.Load())), kwonlyargs=[ast.arg(arg='context', annotation=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='expr_context', ctx=ast.Load()))], kw_defaults=[ast.Call(func=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='Load', ctx=ast.Load()))], kwarg=ast.arg(arg='keywordArguments', annotation=ast.Name(id='int', ctx=ast.Load()))),
+	body=[
+		ast.Expr(value=ast.Constant(value=' If two `ast_Identifier` are joined by a dot `.`, they are _usually_ an `ast.Attribute`, but see `ast.ImportFrom`.\n\tParameters:\n\t\tvalue: the part before the dot (e.g., `ast.Name`.)\n\t\tattribute: an `ast_Identifier` after a dot `.`; you can pass multiple `attribute` and they will be chained together.\n\t')),
+		ast.FunctionDef(
+			name='addDOTattribute',
+			args=ast.arguments(args=[ast.arg(arg='chain', annotation=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='expr', ctx=ast.Load())), ast.arg(arg='identifier', annotation=ast.Name(id='ast_Identifier', ctx=ast.Load())), ast.arg(arg='context', annotation=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='expr_context', ctx=ast.Load()))], kwarg=ast.arg(arg='keywordArguments', annotation=ast.Name(id='int', ctx=ast.Load()))),
+			body=[ast.Return(value=ast.Call(func=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='Attribute', ctx=ast.Load()), keywords=[ast.keyword(arg='value', value=ast.Name(id='chain', ctx=ast.Load())), ast.keyword(arg='attr', value=ast.Name(id='identifier', ctx=ast.Load())), ast.keyword(arg='ctx', value=ast.Name(id='context', ctx=ast.Load())), ast.keyword(value=ast.Name(id='keywordArguments', ctx=ast.Load()))]))],
+			returns=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='Attribute', ctx=ast.Load())),
+		ast.Assign(targets=[ast.Name(id='buffaloBuffalo', ctx=ast.Store())], value=ast.Call(func=ast.Name(id='addDOTattribute', ctx=ast.Load()), args=[ast.Name(id='value', ctx=ast.Load()), ast.Subscript(value=ast.Name(id='attribute', ctx=ast.Load()), slice=ast.Constant(value=0), ctx=ast.Load()), ast.Name(id='context', ctx=ast.Load())], keywords=[ast.keyword(value=ast.Name(id='keywordArguments', ctx=ast.Load()))])),
+		ast.For(target=ast.Name(id='identifier', ctx=ast.Store()), iter=ast.Subscript(value=ast.Name(id='attribute', ctx=ast.Load()), slice=ast.Slice(lower=ast.Constant(value=1), upper=ast.Constant(value=None)), ctx=ast.Load()),
+			body=[ast.Assign(targets=[ast.Name(id='buffaloBuffalo', ctx=ast.Store())], value=ast.Call(func=ast.Name(id='addDOTattribute', ctx=ast.Load()), args=[ast.Name(id='buffaloBuffalo', ctx=ast.Load()), ast.Name(id='identifier', ctx=ast.Load()), ast.Name(id='context', ctx=ast.Load())], keywords=[ast.keyword(value=ast.Name(id='keywordArguments', ctx=ast.Load()))]))]),
+		ast.Return(value=ast.Name(id='buffaloBuffalo', ctx=ast.Load()))],
+	decorator_list=[ast.Name(id='staticmethod', ctx=ast.Load())],
+	returns=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='Attribute', ctx=ast.Load()))
 
-handmadeTypeAlias_astTypes: list[ast.AnnAssign] = []
-for string in [astTypes_intORstr, astTypes_intORstrORtype_params, astTypes_intORtype_params]:
-	astModule = ast.parse(string)
-	for node in ast.iter_child_nodes(astModule):
-		if isinstance(node, ast.AnnAssign):
-			handmadeTypeAlias_astTypes.append(node)
+MakeImportFunctionDef: ast.FunctionDef = ast.FunctionDef(name='Import', args=ast.arguments(args=[ast.arg(arg='moduleWithLogicalPath', annotation=ast.Name(id='str_nameDOTname', ctx=ast.Load())), ast.arg(arg='asName', annotation=ast.BinOp(left=ast.Name(id='ast_Identifier', ctx=ast.Load()), op=ast.BitOr(), right=ast.Constant(value=None)))], kwarg=ast.arg(arg='keywordArguments', annotation=ast.Name(id='int', ctx=ast.Load())), defaults=[ast.Constant(value=None)]), body=[ast.Return(value=ast.Call(func=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='Import', ctx=ast.Load()), keywords=[ast.keyword(arg='names', value=ast.List(elts=[ast.Call(func=ast.Attribute(value=ast.Name(id='Make', ctx=ast.Load()), attr='alias', ctx=ast.Load()), args=[ast.Name(id='moduleWithLogicalPath', ctx=ast.Load()), ast.Name(id='asName', ctx=ast.Load())])], ctx=ast.Load())), ast.keyword(value=ast.Name(id='keywordArguments', ctx=ast.Load()))]))], decorator_list=[ast.Name(id='staticmethod', ctx=ast.Load())], returns=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='Import', ctx=ast.Load()))
 
+# ww='''
 
-# print(ast.dump(ast.parse(ww)))
+# '''
+
+# print(ast.dump(ast.parse(ww), indent=4))
 # from ast import *
-
-"""
-@staticmethod
-def Import(moduleWithLogicalPath: str_nameDOTname, asname: ast_Identifier | None = None, **keywordArguments: int) -> ast.Import:
-	return ast.Import(names=[Make.alias(moduleWithLogicalPath, asname)], **keywordArguments)
-
-@staticmethod
-def AnnAssign(target: ast.Attribute | ast.Name | ast.Subscript, annotation: ast.expr, value: ast.expr | None = None, **keywordArguments: int) -> ast.AnnAssign: # `simple: int`: uses a clever int-from-boolean to assign the correct value to the `simple` attribute. So, don't make it a method parameter.
-	return ast.AnnAssign(target, annotation, value, simple=int(isinstance(target, ast.Name)), **keywordArguments)
-
-"""
-# @staticmethod
-# def Attribute(value: ast.expr, *attribute: ast_Identifier, context: ast.expr_context = ast.Load(), **keywordArguments: int) -> ast.Attribute:
-# 	""" If two `ast_Identifier` are joined by a dot `.`, they are _usually_ an `ast.Attribute`, but see `ast.ImportFrom`.
-# 	Parameters:
-# 		value: the part before the dot (e.g., `ast.Name`.)
-# 		attribute: an `ast_Identifier` after a dot `.`; you can pass multiple `attribute` and they will be chained together.
-# 	"""
-# 	def addDOTattribute(chain: ast.expr, identifier: ast_Identifier, context: ast.expr_context, **keywordArguments: int) -> ast.Attribute:
-# 		return ast.Attribute(value=chain, attr=identifier, ctx=context, **keywordArguments)
-# 	buffaloBuffalo = addDOTattribute(value, attribute[0], context, **keywordArguments)
-# 	for identifier in attribute[1:None]:
-# 		buffaloBuffalo = addDOTattribute(buffaloBuffalo, identifier, context, **keywordArguments)
-# 	return buffaloBuffalo
-
-
-"""Notes about the parse function:
-Literal['exec'] = "exec"
-def parse( source: str | ReadableBuffer, filename: str | ReadableBuffer | PathLike[Any] = "<unknown>", mode: Literal['exec'] = "exec", *, type_comments: bool = False, feature_version: int | tuple[int, int] | None = None, optimize: Literal[-1, 0, 1, 2] = -1
-) -> Module: ...
-
-mode: str = "exec",
-def parse( source: str | ReadableBuffer, filename: str | ReadableBuffer | PathLike[Any] = "<unknown>", mode: str = "exec", *, type_comments: bool = False, feature_version: int | tuple[int, int] | None = None, optimize: Literal[-1, 0, 1, 2] = -1
-) -> AST: ...
-
-Creates an ast.expr type
-mode: Literal['eval']
-def parse( source: str | ReadableBuffer,
-    filename: str | ReadableBuffer | PathLike[Any], mode: Literal['eval'], *, type_comments: bool = False, feature_version: int | tuple[int, int] | None = None, optimize: Literal[-1, 0, 1, 2] = -1
-) -> Expression: ...
-
-def parse( source: str | ReadableBuffer, *, mode: Literal['eval'], type_comments: bool = False, feature_version: int | tuple[int, int] | None = None, optimize: Literal[-1, 0, 1, 2] = -1
-) -> Expression: ...
-
-mode: Literal['single']
-def parse( source: str | ReadableBuffer,
-    filename: str | ReadableBuffer | PathLike[Any], mode: Literal['single'], *, type_comments: bool = False, feature_version: int | tuple[int, int] | None = None, optimize: Literal[-1, 0, 1, 2] = -1
-) -> Interactive: ...
-
-def parse( source: str | ReadableBuffer, *, mode: Literal['single'], type_comments: bool = False, feature_version: int | tuple[int, int] | None = None, optimize: Literal[-1, 0, 1, 2] = -1
-) -> Interactive: ...
-
-Python before 3.5
-Literal['func_type']
-def parse( source: str | ReadableBuffer, filename: str | ReadableBuffer | PathLike[Any], mode: Literal['func_type'], *, type_comments: bool = False, feature_version: int | tuple[int, int] | None = None, optimize: Literal[-1, 0, 1, 2] = -1 ) -> FunctionType: ...
-def parse( source: str | ReadableBuffer, *, mode: Literal['func_type'], type_comments: bool = False, feature_version: int | tuple[int, int] | None = None, optimize: Literal[-1, 0, 1, 2] = -1 ) -> FunctionType: ...
-"""

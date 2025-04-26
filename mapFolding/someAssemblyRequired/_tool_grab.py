@@ -2,10 +2,10 @@
 from collections.abc import Callable
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
 from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice, NodeORattribute, ImaCallToName
-from mapFolding.someAssemblyRequired._astTypes import *  # noqa: F403
+from mapFolding.someAssemblyRequired._astTypes import *
 from typing import Any, Literal
 import ast
-# ruff: noqa: F405
+'# ruff: noqa: F405'
 
 class grab:
     """

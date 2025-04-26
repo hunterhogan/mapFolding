@@ -1,6 +1,6 @@
 """This file is generated automatically, so changes to this file will be lost."""
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
-from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice, intORstr, intORstrORtype_params, intORtype_params
+from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice, intORstr, intORstrORtype_params, intORtype_params, str_nameDOTname
 from typing import Any, Literal
 import ast
 
@@ -27,15 +27,15 @@ class Make:
         return ast.alias(name, asName, **keywordArguments)
 
     @staticmethod
-    def AnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None, simple: int, **keywordArguments: int) -> ast.AnnAssign:
-        return ast.AnnAssign(target, annotation, value, simple, **keywordArguments)
+    def AnnAssign(target: ast.Name | ast.Attribute | ast.Subscript, annotation: ast.expr, value: ast.expr | None, **keywordArguments: int) -> ast.AnnAssign:
+        return ast.AnnAssign(target, annotation, value, **keywordArguments, simple=int(isinstance(target, ast.Name)))
 
     @staticmethod
     def arg(arg: ast_Identifier, annotation: ast.expr | None, **keywordArguments: intORstr) -> ast.arg:
         return ast.arg(arg, annotation, **keywordArguments)
 
     @staticmethod
-    def arguments(posonlyargs: list[ast.arg], args: list[ast.arg], vararg: ast.arg | None, kwonlyargs: list[ast.arg], kw_defaults: list[ast.expr | None], kwarg: ast.arg | None, defaults: list[ast.expr], **keywordArguments: int) -> ast.arguments:
+    def arguments(posonlyargs: list[ast.arg]=[], args: list[ast.arg]=[], vararg: ast.arg | None=None, kwonlyargs: list[ast.arg]=[], kw_defaults: list[ast.expr | None]=[None], kwarg: ast.arg | None=None, defaults: list[ast.expr]=[], **keywordArguments: int) -> ast.arguments:
         return ast.arguments(posonlyargs, args, vararg, kwonlyargs, kw_defaults, kwarg, defaults, **keywordArguments)
 
     @staticmethod
@@ -51,7 +51,7 @@ class Make:
         return ast.AsyncFor(target, iter, body, orElse, **keywordArguments)
 
     @staticmethod
-    def AsyncFunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr], returns: ast.expr | None, **keywordArguments: intORstrORtype_params) -> ast.AsyncFunctionDef:
+    def AsyncFunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr]=[], returns: ast.expr | None=None, **keywordArguments: intORstrORtype_params) -> ast.AsyncFunctionDef:
         return ast.AsyncFunctionDef(name, args, body, decorator_list, returns, **keywordArguments)
 
     @staticmethod
@@ -59,8 +59,19 @@ class Make:
         return ast.AsyncWith(items, body, **keywordArguments)
 
     @staticmethod
-    def Attribute(value: ast.expr, attr: ast_Identifier, context: ast.expr_context=ast.Load(), **keywordArguments: int) -> ast.Attribute:
-        return ast.Attribute(value, attr, context, **keywordArguments)
+    def Attribute(value: ast.expr, *attribute: ast_Identifier, context: ast.expr_context=ast.Load(), **keywordArguments: int) -> ast.Attribute:
+        """ If two `ast_Identifier` are joined by a dot `.`, they are _usually_ an `ast.Attribute`, but see `ast.ImportFrom`.
+	Parameters:
+		value: the part before the dot (e.g., `ast.Name`.)
+		attribute: an `ast_Identifier` after a dot `.`; you can pass multiple `attribute` and they will be chained together.
+	"""
+
+        def addDOTattribute(chain: ast.expr, identifier: ast_Identifier, context: ast.expr_context, **keywordArguments: int) -> ast.Attribute:
+            return ast.Attribute(value=chain, attr=identifier, ctx=context, **keywordArguments)
+        buffaloBuffalo = addDOTattribute(value, attribute[0], context, **keywordArguments)
+        for identifier in attribute[1:None]:
+            buffaloBuffalo = addDOTattribute(buffaloBuffalo, identifier, context, **keywordArguments)
+        return buffaloBuffalo
 
     @staticmethod
     def AugAssign(target: ast.Name | ast.Attribute | ast.Subscript, op: ast.operator, value: ast.expr, **keywordArguments: int) -> ast.AugAssign:
@@ -79,12 +90,12 @@ class Make:
         return ast.BoolOp(op, values, **keywordArguments)
 
     @staticmethod
-    def Call(func: ast.expr, args: list[ast.expr], keywords: list[ast.keyword], **keywordArguments: int) -> ast.Call:
-        return ast.Call(func, args, keywords, **keywordArguments)
+    def Call(callee: ast.expr, args: list[ast.expr]=[], list_keyword: list[ast.keyword]=[], **keywordArguments: int) -> ast.Call:
+        return ast.Call(callee, args, list_keyword, **keywordArguments)
 
     @staticmethod
-    def ClassDef(name: ast_Identifier, bases: list[ast.expr], keywords: list[ast.keyword], body: list[ast.stmt], decorator_list: list[ast.expr], **keywordArguments: intORtype_params) -> ast.ClassDef:
-        return ast.ClassDef(name, bases, keywords, body, decorator_list, **keywordArguments)
+    def ClassDef(name: ast_Identifier, bases: list[ast.expr], list_keyword: list[ast.keyword]=[], body: list[ast.stmt]=[], decorator_list: list[ast.expr]=[], **keywordArguments: intORtype_params) -> ast.ClassDef:
+        return ast.ClassDef(name, bases, list_keyword, body, decorator_list, **keywordArguments)
 
     @staticmethod
     def Compare(left: ast.expr, ops: list[ast.cmpop], comparators: list[ast.expr], **keywordArguments: int) -> ast.Compare:
@@ -131,7 +142,7 @@ class Make:
         return ast.FormattedValue(value, conversion, format_spec, **keywordArguments)
 
     @staticmethod
-    def FunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr], returns: ast.expr | None, **keywordArguments: intORstrORtype_params) -> ast.FunctionDef:
+    def FunctionDef(name: ast_Identifier, args: ast.arguments, body: list[ast.stmt], decorator_list: list[ast.expr]=[], returns: ast.expr | None=None, **keywordArguments: intORstrORtype_params) -> ast.FunctionDef:
         return ast.FunctionDef(name, args, body, decorator_list, returns, **keywordArguments)
 
     @staticmethod
@@ -155,12 +166,12 @@ class Make:
         return ast.IfExp(test, body, orElse, **keywordArguments)
 
     @staticmethod
-    def Import(names: list[ast.alias], **keywordArguments: int) -> ast.Import:
-        return ast.Import(names, **keywordArguments)
+    def Import(moduleWithLogicalPath: str_nameDOTname, asName: ast_Identifier | None=None, **keywordArguments: int) -> ast.Import:
+        return ast.Import(names=[Make.alias(moduleWithLogicalPath, asName)], **keywordArguments)
 
     @staticmethod
-    def ImportFrom(module: ast_Identifier | None, names: list[ast.alias], **keywordArguments: int) -> ast.ImportFrom:
-        return ast.ImportFrom(module, names, **keywordArguments, level=0)
+    def ImportFrom(module: ast_Identifier | None, list_alias: list[ast.alias], **keywordArguments: int) -> ast.ImportFrom:
+        return ast.ImportFrom(module, list_alias, **keywordArguments, level=0)
 
     @staticmethod
     def Interactive(body: list[ast.stmt]) -> ast.Interactive:
@@ -227,7 +238,7 @@ class Make:
         return ast.MatchValue(value, **keywordArguments)
 
     @staticmethod
-    def Module(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore]) -> ast.Module:
+    def Module(body: list[ast.stmt], type_ignores: list[ast.TypeIgnore]=[]) -> ast.Module:
         return ast.Module(body, type_ignores)
 
     @staticmethod

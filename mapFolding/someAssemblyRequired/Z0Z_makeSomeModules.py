@@ -35,7 +35,7 @@ sourceCallableIdentifierHARDCODED = 'count'
 logicalPathInfixHARDCODED: ast_Identifier = 'syntheticModules'
 theCountingIdentifierHARDCODED: ast_Identifier = 'groupsOfFolds'
 
-def makeInitializeGroupsOfFolds():
+def makeInitializeGroupsOfFolds() -> None:
 	callableIdentifierHARDCODED = 'initializeGroupsOfFolds'
 	moduleIdentifierHARDCODED: ast_Identifier = 'initializeCount'
 
@@ -70,7 +70,7 @@ def makeInitializeGroupsOfFolds():
 
 	write_astModule(ingredientsModule, pathFilename, The.packageName)
 
-def makeDaoOfMapFolding():
+def makeDaoOfMapFolding() -> PurePath:
 	moduleIdentifierHARDCODED: ast_Identifier = 'daoOfMapFolding'
 
 	algorithmSourceModule = algorithmSourceModuleHARDCODED
@@ -139,7 +139,7 @@ def makeDaoOfMapFolding():
 
 	return pathFilename
 
-def makeTheorem2():
+def makeTheorem2() -> PurePath:
 	moduleIdentifierHARDCODED: ast_Identifier = 'theorem2'
 
 	algorithmSourceModule = algorithmSourceModuleHARDCODED
@@ -189,7 +189,7 @@ def makeTheorem2():
 
 	return pathFilename
 
-def trimTheorem2(pathFilenameSource: PurePath):
+def trimTheorem2(pathFilenameSource: PurePath) -> PurePath:
 	logicalPathInfix = logicalPathInfixHARDCODED
 	sourceCallableIdentifier = sourceCallableIdentifierHARDCODED
 	ingredientsFunction = astModuleToIngredientsFunction(parsePathFilename2astModule(pathFilenameSource), sourceCallableIdentifier)
@@ -216,11 +216,11 @@ def trimTheorem2(pathFilenameSource: PurePath):
 	logicalPath.append(pathFilename.stem)
 	moduleWithLogicalPath: str_nameDOTname = '.'.join(logicalPath)
 
-	astImportFrom: ast.ImportFrom = Make.ImportFrom(moduleWithLogicalPath, list_astAlias=[Make.alias(ingredientsFunction.astFunctionDef.name)])
+	astImportFrom: ast.ImportFrom = Make.ImportFrom(moduleWithLogicalPath, list_alias=[Make.alias(ingredientsFunction.astFunctionDef.name)])
 
 	return pathFilename
 
-def numbaOnTheorem2(pathFilenameSource: PurePath):
+def numbaOnTheorem2(pathFilenameSource: PurePath) -> ast.ImportFrom:
 	logicalPathInfix = logicalPathInfixHARDCODED
 	sourceCallableIdentifier = sourceCallableIdentifierHARDCODED
 	countNumbaTheorem2 = astModuleToIngredientsFunction(parsePathFilename2astModule(pathFilenameSource), sourceCallableIdentifier)
@@ -264,11 +264,11 @@ def numbaOnTheorem2(pathFilenameSource: PurePath):
 	logicalPath.append(pathFilename.stem)
 	moduleWithLogicalPath: str_nameDOTname = '.'.join(logicalPath)
 
-	astImportFrom: ast.ImportFrom = Make.ImportFrom(moduleWithLogicalPath, list_astAlias=[Make.alias(countNumbaTheorem2.astFunctionDef.name)])
+	astImportFrom: ast.ImportFrom = Make.ImportFrom(moduleWithLogicalPath, list_alias=[Make.alias(countNumbaTheorem2.astFunctionDef.name)])
 
 	return astImportFrom
 
-def makeUnRePackDataclass(astImportFrom: ast.ImportFrom):
+def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	moduleIdentifierHARDCODED: ast_Identifier = 'dataPacking'
 
 	algorithmSourceModule = algorithmSourceModuleHARDCODED
@@ -308,7 +308,7 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom):
 	astTuple.ctx = ast.Store()
 
 	findThis = ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier))
-	doThat = Then.replaceWith(Make.Assign(listTargets=[astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
+	doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
 	NodeChanger(findThis, doThat).visit(doTheNeedful.astFunctionDef)
 
 	ingredientsModule = IngredientsModule(doTheNeedful)
