@@ -1,10 +1,10 @@
 """This file is generated automatically, so changes to this file will be lost."""
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
 from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice
-from mapFolding.someAssemblyRequired._astTypes import *  # noqa: F403
+from mapFolding.someAssemblyRequired._astTypes import *
 from typing import Any, Literal, overload
 import ast
-# ruff: noqa: F405
+'# ruff: noqa: F405'
 
 class DOT:
     """
