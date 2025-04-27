@@ -1,6 +1,6 @@
 docstringWarning: str = """This file is generated automatically, so changes to this file will be lost."""
 
-beClassDefDocstring: str = (
+ClassDefDocstringBe: str = (
 	"""
 	Provide type-guard functions for safely verifying AST node types during manipulation.
 
@@ -17,7 +17,7 @@ beClassDefDocstring: str = (
 	"""
 	)
 
-DOTClassDefDocstring: str = (
+ClassDefDocstringDOT: str = (
 	"""
 	Access attributes and sub-nodes of AST elements via consistent accessor methods.
 
@@ -30,7 +30,7 @@ DOTClassDefDocstring: str = (
 	"""
 )
 
-grabClassDefDocstring: str = (
+ClassDefDocstringGrab: str = (
 	"""
 	Modify specific attributes of AST nodes while preserving the node structure.
 
@@ -43,7 +43,7 @@ grabClassDefDocstring: str = (
 	"""
 )
 
-MakeClassDefDocstring: str = (
+ClassDefDocstringMake: str = (
 	"""
 	Almost all parameters described here are only accessible through a method's `**keywordArguments` parameter.
 

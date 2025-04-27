@@ -25,12 +25,12 @@ from mapFolding.beDRY import outfitCountFolds
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	astModuleToIngredientsFunction,
-	be,
+	Be,
 	DeReConstructField2ast,
 	DOT,
 	extractClassDef,
-	grab,
-	ifThis,
+	Grab,
+	IfThis,
 	importLogicalPath2Callable,
 	IngredientsFunction,
 	IngredientsModule,
@@ -69,7 +69,7 @@ def makeDictionaryFunctionDef(module: ast.Module) -> dict[ast_Identifier, ast.Fu
 		A dictionary mapping function identifiers to their AST function definition nodes.
 	"""
 	dictionaryIdentifier2FunctionDef: dict[ast_Identifier, ast.FunctionDef] = {}
-	NodeTourist(be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module)
+	NodeTourist(Be.FunctionDef, Then.updateKeyValueIn(DOT.name, Then.extractIt, dictionaryIdentifier2FunctionDef)).visit(module)
 	return dictionaryIdentifier2FunctionDef
 
 def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) -> ast.FunctionDef:
@@ -98,12 +98,12 @@ def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) ->
 		raise ValueError(f"FunctionDefToInline not found in dictionaryIdentifier2FunctionDef: {identifierToInline = }") from ERRORmessage
 
 	listIdentifiersCalledFunctions: list[ast_Identifier] = []
-	findIdentifiersToInline = NodeTourist(findThis = ifThis.isCallToName, doThat = grab.funcDOTidAttribute(Then.appendTo(listIdentifiersCalledFunctions)))
+	findIdentifiersToInline = NodeTourist(findThis = IfThis.isCallToName, doThat = Grab.funcDOTidAttribute(Then.appendTo(listIdentifiersCalledFunctions)))
 	findIdentifiersToInline.visit(FunctionDefToInline)
 
 	dictionary4Inlining: dict[ast_Identifier, ast.FunctionDef] = {}
 	for identifier in sorted(set(listIdentifiersCalledFunctions).intersection(dictionaryFunctionDef.keys())):
-		if NodeTourist(ifThis.matchesMeButNotAnyDescendant(ifThis.isCall_Identifier(identifier)), Then.extractIt).captureLastMatch(module) is not None:
+		if NodeTourist(IfThis.matchesMeButNotAnyDescendant(IfThis.isCall_Identifier(identifier)), Then.extractIt).captureLastMatch(module) is not None:
 			dictionary4Inlining[identifier] = dictionaryFunctionDef[identifier]
 
 	keepGoing = True
@@ -116,28 +116,28 @@ def inlineFunctionDef(identifierToInline: ast_Identifier, module: ast.Module) ->
 		if len(listIdentifiersCalledFunctions) > 0:
 			keepGoing = True
 			for identifier in listIdentifiersCalledFunctions:
-				if NodeTourist(ifThis.matchesMeButNotAnyDescendant(ifThis.isCall_Identifier(identifier)), Then.extractIt).captureLastMatch(module) is not None:
+				if NodeTourist(IfThis.matchesMeButNotAnyDescendant(IfThis.isCall_Identifier(identifier)), Then.extractIt).captureLastMatch(module) is not None:
 					FunctionDefTarget = dictionaryFunctionDef[identifier]
 					if len(FunctionDefTarget.body) == 1:
-						replacement = NodeTourist(be.Return, Then.extractIt(DOT.value)).captureLastMatch(FunctionDefTarget)
+						replacement = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(FunctionDefTarget)
 
-						findThis = ifThis.isCall_Identifier(identifier)
+						findThis = IfThis.isCall_Identifier(identifier)
 						doThat = Then.replaceWith(replacement)
 						inliner = NodeChanger(findThis, doThat)
 						for astFunctionDef in dictionary4Inlining.values():
 							inliner.visit(astFunctionDef)
 					else:
-						inliner = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(identifier)),Then.replaceWith(FunctionDefTarget.body[0:-1]))
+						inliner = NodeChanger(IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(identifier)),Then.replaceWith(FunctionDefTarget.body[0:-1]))
 						for astFunctionDef in dictionary4Inlining.values():
 							inliner.visit(astFunctionDef)
 
 	for identifier, FunctionDefTarget in dictionary4Inlining.items():
 		if len(FunctionDefTarget.body) == 1:
-			replacement = NodeTourist(be.Return, Then.extractIt(DOT.value)).captureLastMatch(FunctionDefTarget)
-			inliner = NodeChanger(ifThis.isCall_Identifier(identifier), Then.replaceWith(replacement))
+			replacement = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(FunctionDefTarget)
+			inliner = NodeChanger(IfThis.isCall_Identifier(identifier), Then.replaceWith(replacement))
 			inliner.visit(FunctionDefToInline)
 		else:
-			inliner = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(identifier)),Then.replaceWith(FunctionDefTarget.body[0:-1]))
+			inliner = NodeChanger(IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(identifier)),Then.replaceWith(FunctionDefTarget.body[0:-1]))
 			inliner.visit(FunctionDefToInline)
 	ast.fix_missing_locations(FunctionDefToInline)
 	return FunctionDefToInline
@@ -312,18 +312,18 @@ def removeUnusedParameters(ingredientsFunction: IngredientsFunction) -> Ingredie
 	list_arg_arg: list[ast_Identifier] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
 	listName: list[ast.Name] = []
 	fauxFunctionDef = deepcopy(ingredientsFunction.astFunctionDef)
-	NodeChanger(be.Return, Then.removeIt).visit(fauxFunctionDef)
-	NodeTourist(be.Name, Then.appendTo(listName)).visit(fauxFunctionDef)
+	NodeChanger(Be.Return, Then.removeIt).visit(fauxFunctionDef)
+	NodeTourist(Be.Name, Then.appendTo(listName)).visit(fauxFunctionDef)
 	list_Identifiers: list[ast_Identifier] = [astName.id for astName in listName]
 	list_IdentifiersNotUsed: list[ast_Identifier] = list(set(list_arg_arg) - set(list_Identifiers))
 	for arg_Identifier in list_IdentifiersNotUsed:
-		remove_arg = NodeChanger(ifThis.is_arg_Identifier(arg_Identifier), Then.removeIt)
+		remove_arg = NodeChanger(IfThis.is_arg_Identifier(arg_Identifier), Then.removeIt)
 		remove_arg.visit(ingredientsFunction.astFunctionDef)
 
 	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
 
 	listName: list[ast.Name] = [Make.Name(ast_arg.arg) for ast_arg in list_argCuzMyBrainRefusesToThink]
-	replaceReturn = NodeChanger(be.Return, Then.replaceWith(Make.Return(Make.Tuple(listName))))
+	replaceReturn = NodeChanger(Be.Return, Then.replaceWith(Make.Return(Make.Tuple(listName))))
 	replaceReturn.visit(ingredientsFunction.astFunctionDef)
 
 	list_annotation: list[ast.expr] = [ast_arg.annotation for ast_arg in list_argCuzMyBrainRefusesToThink if ast_arg.annotation is not None]
@@ -359,7 +359,7 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 						(recipeFlow.sourceCallableSequential, recipeFlow.callableSequential),]
 	for ingredients in listAllIngredientsFunctions:
 		for source_Identifier, recipe_Identifier in listFindReplace:
-			updateCallName = NodeChanger(ifThis.isCall_Identifier(source_Identifier), grab.funcAttribute(Then.replaceWith(Make.Name(recipe_Identifier))))
+			updateCallName = NodeChanger(IfThis.isCall_Identifier(source_Identifier), Grab.funcAttribute(Then.replaceWith(Make.Name(recipe_Identifier))))
 			updateCallName.visit(ingredients.astFunctionDef)
 
 	ingredientsDispatcher.astFunctionDef.name = recipeFlow.callableDispatcher
@@ -373,13 +373,13 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 		(recipeFlow.sourceConcurrencyManagerNamespace, recipeFlow.concurrencyManagerNamespace),]
 	for ingredients in listAllIngredientsFunctions:
 		for source_Identifier, recipe_Identifier in listFindReplace:
-			updateName = NodeChanger(ifThis.isName_Identifier(source_Identifier) , grab.idAttribute(Then.replaceWith(recipe_Identifier)))
-			update_arg = NodeChanger(ifThis.isArgument_Identifier(source_Identifier), grab.argAttribute(Then.replaceWith(recipe_Identifier))) # type: ignore
+			updateName = NodeChanger(IfThis.isName_Identifier(source_Identifier) , Grab.idAttribute(Then.replaceWith(recipe_Identifier)))
+			update_arg = NodeChanger(IfThis.isArgument_Identifier(source_Identifier), Grab.argAttribute(Then.replaceWith(recipe_Identifier))) # type: ignore
 			updateName.visit(ingredients.astFunctionDef)
 			update_arg.visit(ingredients.astFunctionDef)
 
-	updateConcurrencyManager = NodeChanger(ifThis.isCallAttributeNamespace_Identifier(recipeFlow.sourceConcurrencyManagerNamespace, recipeFlow.sourceConcurrencyManagerIdentifier)
-										, grab.funcAttribute(Then.replaceWith(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier))))
+	updateConcurrencyManager = NodeChanger(IfThis.isCallAttributeNamespace_Identifier(recipeFlow.sourceConcurrencyManagerNamespace, recipeFlow.sourceConcurrencyManagerIdentifier)
+										, Grab.funcAttribute(Then.replaceWith(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier))))
 	updateConcurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
 
 	# shatter Dataclass =======================================================
@@ -412,25 +412,25 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 
 		listParameters = [parameter for parameter in shatteredDataclass.listName4Parameters if parameter.id in list_arg_arg]
 
-		replaceCall2concurrencyManager = NodeChanger(ifThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier), Then.replaceWith(Make.Call(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier), [Make.Name(recipeFlow.callableParallel)] + listParameters)))
+		replaceCall2concurrencyManager = NodeChanger(IfThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier), Then.replaceWith(Make.Call(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier), [Make.Name(recipeFlow.callableParallel)] + listParameters)))
 
 		def getIt(astCallConcurrencyResult: list[ast.Call]) -> Callable[[ast.AST], ast.AST]:
 			# TODO I cannot remember why I made this function. It doesn't fit with how I normally do things.
 			def workhorse(node: ast.AST) -> ast.AST:
-				NodeTourist(be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)
+				NodeTourist(Be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)
 				return node
 			return workhorse
 
 		# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
 		astCallConcurrencyResult: list[ast.Call] = []
-		get_astCallConcurrencyResult = NodeTourist(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), getIt(astCallConcurrencyResult))
+		get_astCallConcurrencyResult = NodeTourist(IfThis.isAssignAndTargets0Is(IfThis.isSubscript_Identifier(getTheOtherRecord_damn)), getIt(astCallConcurrencyResult))
 		get_astCallConcurrencyResult.visit(ingredientsDispatcher.astFunctionDef)
-		replaceAssignParallelCallable = NodeChanger(ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier(getTheOtherRecord_damn)), grab.valueAttribute(Then.replaceWith(astCallConcurrencyResult[0])))
+		replaceAssignParallelCallable = NodeChanger(IfThis.isAssignAndTargets0Is(IfThis.isSubscript_Identifier(getTheOtherRecord_damn)), Grab.valueAttribute(Then.replaceWith(astCallConcurrencyResult[0])))
 		replaceAssignParallelCallable.visit(ingredientsDispatcher.astFunctionDef)
-		changeReturnParallelCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName)))
+		changeReturnParallelCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName)))
 		ingredientsParallel.astFunctionDef.returns = shatteredDataclass.countingVariableAnnotation
 
-		unpack4parallelCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
+		unpack4parallelCallable = NodeChanger(IfThis.isAssignAndValueIs(IfThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
 
 		unpack4parallelCallable.visit(ingredientsDispatcher.astFunctionDef)
 		replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
@@ -445,16 +445,16 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
 	ingredientsTarget.astFunctionDef.args = Make.arguments(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
-	changeReturnCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
+	changeReturnCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
 	changeReturnCallable.visit(ingredientsTarget.astFunctionDef)
 	ingredientsTarget.astFunctionDef = Z0Z_lameFindReplace(ingredientsTarget.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
 	return ingredientsTarget
 
 def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, targetCallableIdentifier: ast_Identifier, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
 	astCallTargetCallable = Make.Call(Make.Name(targetCallableIdentifier), shatteredDataclass.listName4Parameters)
-	replaceAssignTargetCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
-	unpack4targetCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
-	repack4targetCallable = NodeChanger(ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisBelow([shatteredDataclass.repack]))
+	replaceAssignTargetCallable = NodeChanger(IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
+	unpack4targetCallable = NodeChanger(IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
+	repack4targetCallable = NodeChanger(IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisBelow([shatteredDataclass.repack]))
 	replaceAssignTargetCallable.visit(ingredientsCaller.astFunctionDef)
 	unpack4targetCallable.visit(ingredientsCaller.astFunctionDef)
 	repack4targetCallable.visit(ingredientsCaller.astFunctionDef)
@@ -494,7 +494,7 @@ def Z0Z_lameFindReplace(astTree: 个, mappingFindReplaceNodes: Mapping[ast.AST, 
 
 	while keepGoing:
 		for nodeFind, nodeReplace in mappingFindReplaceNodes.items():
-			NodeChanger(ifThis.Z0Z_unparseIs(nodeFind), Then.replaceWith(nodeReplace)).visit(newTree)
+			NodeChanger(IfThis.Z0Z_unparseIs(nodeFind), Then.replaceWith(nodeReplace)).visit(newTree)
 
 		if ast.unparse(newTree) == ast.unparse(astTree):
 			keepGoing = False

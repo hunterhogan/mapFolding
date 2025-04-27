@@ -3,7 +3,7 @@ from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTy
 from typing import TypeGuard
 import ast
 
-class be:
+class Be:
     """
 	Provide type-guard functions for safely verifying AST node types during manipulation.
 

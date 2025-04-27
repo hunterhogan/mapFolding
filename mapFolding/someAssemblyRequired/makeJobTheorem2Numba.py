@@ -1,9 +1,9 @@
 from mapFolding import getPathFilenameFoldsTotal, raiseIfNoneGitHubIssueNumber3, The
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
-	be,
+	Be,
 	extractFunctionDef,
-	ifThis,
+	IfThis,
 	IngredientsFunction,
 	IngredientsModule,
 	LedgerOfImports,
@@ -77,12 +77,12 @@ if __name__ == '__main__':
 	ast_argNumbaProgress = ast.arg(arg=spices.numbaProgressBarIdentifier, annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
 
-	findThis = ifThis.isAugAssign_targetIs(ifThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id))
+	findThis = IfThis.isAugAssign_targetIs(IfThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id))
 	doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
 	countWithProgressBar = NodeChanger(findThis, doThat)
 	countWithProgressBar.visit(ingredientsFunction.astFunctionDef)
 
-	removeReturnStatement = NodeChanger(be.Return, Then.removeIt)
+	removeReturnStatement = NodeChanger(Be.Return, Then.removeIt)
 	removeReturnStatement.visit(ingredientsFunction.astFunctionDef)
 	ingredientsFunction.astFunctionDef.returns = Make.Constant(value=None)
 
@@ -119,7 +119,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
 	list_arg_arg: list[ast_Identifier] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
 	listName: list[ast.Name] = []
-	NodeTourist(be.Name, Then.appendTo(listName)).visit(ingredientsFunction.astFunctionDef)
+	NodeTourist(Be.Name, Then.appendTo(listName)).visit(ingredientsFunction.astFunctionDef)
 	list_Identifiers: list[ast_Identifier] = [astName.id for astName in listName]
 	list_IdentifiersNotUsed: list[ast_Identifier] = list(set(list_arg_arg) - set(list_Identifiers))
 
@@ -147,7 +147,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 
 				ingredientsFunction.astFunctionDef.body.insert(0, ImaAnnAssign)
 
-			findThis = ifThis.is_arg_Identifier(ast_arg.arg)
+			findThis = IfThis.is_arg_Identifier(ast_arg.arg)
 			remove_arg = NodeChanger(findThis, Then.removeIt)
 			remove_arg.visit(ingredientsFunction.astFunctionDef)
 
@@ -161,7 +161,7 @@ def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
 
 	# Remove `foldGroups` and any other unused statements, so you can dynamically determine which variables are not used
-	findThis = ifThis.isAssignAndTargets0Is(ifThis.isSubscript_Identifier('foldGroups'))
+	findThis = IfThis.isAssignAndTargets0Is(IfThis.isSubscript_Identifier('foldGroups'))
 	doThat = Then.removeIt
 	remove_foldGroups = NodeChanger(findThis, doThat)
 	remove_foldGroups.visit(ingredientsCount.astFunctionDef)
@@ -169,7 +169,7 @@ def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 	# replace identifiers with static values with their values, so you can dynamically determine which variables are not used
 	list_IdentifiersStaticValues = list_IdentifiersStaticValuesHARDCODED
 	for identifier in list_IdentifiersStaticValues:
-		findThis = ifThis.isName_Identifier(identifier)
+		findThis = IfThis.isName_Identifier(identifier)
 		doThat = Then.replaceWith(Make.Constant(int(job.state.__dict__[identifier])))
 		NodeChanger(findThis, doThat).visit(ingredientsCount.astFunctionDef)
 
@@ -193,7 +193,7 @@ if __name__ == '__main__':
 	# from mapFolding.oeis import getFoldsTotalKnown
 	# print(foldsTotal == getFoldsTotalKnown({job.state.mapShape}))
 		ingredientsModule.appendLauncher(ast.parse(linesLaunch))
-		changeReturnParallelCallable = NodeChanger(be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName)))
+		changeReturnParallelCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName)))
 		changeReturnParallelCallable.visit(ingredientsCount.astFunctionDef)
 		ingredientsCount.astFunctionDef.returns = job.shatteredDataclass.countingVariableAnnotation
 

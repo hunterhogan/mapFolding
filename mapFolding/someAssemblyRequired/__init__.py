@@ -64,13 +64,13 @@ from mapFolding.someAssemblyRequired._toolboxPython import (
 	parsePathFilename2astModule as parsePathFilename2astModule,
 )
 
-from mapFolding.someAssemblyRequired._tool_be import be as be
-from mapFolding.someAssemblyRequired._tool_DOT import DOT as DOT
-from mapFolding.someAssemblyRequired._tool_grab import grab as grab
+from mapFolding.someAssemblyRequired._toolBe import Be as Be
+from mapFolding.someAssemblyRequired._toolDOT import DOT as DOT
+from mapFolding.someAssemblyRequired._toolGrab import Grab as Grab
+from mapFolding.someAssemblyRequired._toolMake import Make as Make
 
-from mapFolding.someAssemblyRequired._tool_ifThis import ifThis as ifThis
-from mapFolding.someAssemblyRequired._tool_Make import Make as Make
-from mapFolding.someAssemblyRequired._tool_Then import Then as Then
+from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis
+from mapFolding.someAssemblyRequired._toolThen import Then as Then
 
 from mapFolding.someAssemblyRequired._toolboxContainers import (
 	DeReConstructField2ast as DeReConstructField2ast,

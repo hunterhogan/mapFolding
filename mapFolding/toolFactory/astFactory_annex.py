@@ -12,7 +12,7 @@ for string in [astTypes_intORstr, astTypes_intORstrORtype_params, astTypes_intOR
 		if isinstance(node, ast.AnnAssign):
 			handmadeTypeAlias_astTypes.append(node)
 
-grab_andDoAllOf: str ="""@staticmethod
+Grab_andDoAllOf: str ="""@staticmethod
 def andDoAllOf(listOfActions: list[Callable[[NodeORattribute], NodeORattribute]]) -> Callable[[NodeORattribute], NodeORattribute]:
 	def workhorse(node: NodeORattribute) -> NodeORattribute:
 		for action in listOfActions:
@@ -21,20 +21,20 @@ def andDoAllOf(listOfActions: list[Callable[[NodeORattribute], NodeORattribute]]
 	return workhorse
 """
 
-grab_funcDOTidAttribute: str ="""@staticmethod
+Grab_funcDOTidAttribute: str ="""@staticmethod
 def funcDOTidAttribute(action: Callable[[ast_Identifier], Any]) -> Callable[[ImaCallToName], ImaCallToName]:
 	def workhorse(node: ImaCallToName) -> ImaCallToName:
-		node.func = grab.idAttribute(action)(node.func)
+		node.func = Grab.idAttribute(action)(node.func)
 		return node
 	return workhorse
 """
 
-handmadeMethods_grab: list[ast.FunctionDef] = []
-for string in [grab_andDoAllOf, grab_funcDOTidAttribute]:
+handmadeMethodsGrab: list[ast.FunctionDef] = []
+for string in [Grab_andDoAllOf, Grab_funcDOTidAttribute]:
 	astModule = ast.parse(string)
 	for node in ast.iter_child_nodes(astModule):
 		if isinstance(node, ast.FunctionDef):
-			handmadeMethods_grab.append(node)
+			handmadeMethodsGrab.append(node)
 
 MakeAttributeFunctionDef: ast.FunctionDef = ast.FunctionDef(
 	name='Attribute',

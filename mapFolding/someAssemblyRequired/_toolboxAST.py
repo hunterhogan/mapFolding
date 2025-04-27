@@ -1,4 +1,4 @@
-from mapFolding.someAssemblyRequired import ast_Identifier, ifThis, IngredientsFunction, LedgerOfImports, NodeTourist, Then
+from mapFolding.someAssemblyRequired import ast_Identifier, IfThis, IngredientsFunction, LedgerOfImports, NodeTourist, Then
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3
 import ast
 
@@ -38,7 +38,7 @@ def extractClassDef(module: ast.AST, identifier: ast_Identifier) -> ast.ClassDef
 	Returns:
 		astClassDef|None: The matching class definition AST node, or `None` if not found.
 	"""
-	return NodeTourist(ifThis.isClassDef_Identifier(identifier), Then.extractIt).captureLastMatch(module)
+	return NodeTourist(IfThis.isClassDef_Identifier(identifier), Then.extractIt).captureLastMatch(module)
 
 def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.FunctionDef | None:
 	"""
@@ -54,4 +54,4 @@ def extractFunctionDef(module: ast.AST, identifier: ast_Identifier) -> ast.Funct
 	Returns:
 		astFunctionDef|None: The matching function definition AST node, or `None` if not found.
 	"""
-	return NodeTourist(ifThis.isFunctionDef_Identifier(identifier), Then.extractIt).captureLastMatch(module)
+	return NodeTourist(IfThis.isFunctionDef_Identifier(identifier), Then.extractIt).captureLastMatch(module)

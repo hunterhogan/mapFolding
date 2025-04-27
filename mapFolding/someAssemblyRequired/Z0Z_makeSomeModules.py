@@ -2,11 +2,11 @@ from mapFolding import raiseIfNoneGitHubIssueNumber3, The
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	astModuleToIngredientsFunction,
-	be,
+	Be,
 	DOT,
 	extractFunctionDef,
-	grab,
-	ifThis,
+	Grab,
+	IfThis,
 	IngredientsFunction,
 	IngredientsModule,
 	LedgerOfImports,
@@ -53,14 +53,14 @@ def makeInitializeGroupsOfFolds() -> None:
 
 	countInitializeIngredients.astFunctionDef.name = callableIdentifier
 
-	dataclassInstanceIdentifier = NodeTourist(be.arg, Then.extractIt(DOT.arg)).captureLastMatch(countInitializeIngredients.astFunctionDef)
+	dataclassInstanceIdentifier = NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(countInitializeIngredients.astFunctionDef)
 	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
 	theCountingIdentifier = theCountingIdentifierHARDCODED
 
-	findThis = ifThis.isWhileAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-	doThat = grab.testAttribute(grab.andDoAllOf([
-		grab.opsAttribute(Then.replaceWith([ast.Eq()])), # type: ignore
-		grab.leftAttribute(grab.attrAttribute(Then.replaceWith(theCountingIdentifier))) # type: ignore
+	findThis = IfThis.isWhileAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+	doThat = Grab.testAttribute(Grab.andDoAllOf([
+		Grab.opsAttribute(Then.replaceWith([ast.Eq()])), # type: ignore
+		Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(theCountingIdentifier))) # type: ignore
 	]))
 	NodeChanger(findThis, doThat).visit(countInitializeIngredients.astFunctionDef.body[0])
 
@@ -84,9 +84,9 @@ def makeDaoOfMapFolding() -> PurePath:
 	daoOfMapFolding = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule)
 		, LedgerOfImports(astModule))
 
-	dataclassName: ast.expr | None = NodeTourist(be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(daoOfMapFolding.astFunctionDef)
+	dataclassName: ast.expr | None = NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(daoOfMapFolding.astFunctionDef)
 	if dataclassName is None: raise raiseIfNoneGitHubIssueNumber3
-	dataclass_Identifier: ast_Identifier | None = NodeTourist(be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName)
+	dataclass_Identifier: ast_Identifier | None = NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName)
 	if dataclass_Identifier is None: raise raiseIfNoneGitHubIssueNumber3
 
 	dataclassLogicalPathModule = None
@@ -98,7 +98,7 @@ def makeDaoOfMapFolding() -> PurePath:
 		if dataclassLogicalPathModule:
 			break
 	if dataclassLogicalPathModule is None: raise raiseIfNoneGitHubIssueNumber3
-	dataclassInstanceIdentifier = NodeTourist(be.arg, Then.extractIt(DOT.arg)).captureLastMatch(daoOfMapFolding.astFunctionDef)
+	dataclassInstanceIdentifier = NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(daoOfMapFolding.astFunctionDef)
 	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
 	shatteredDataclass = shatter_dataclassesDOTdataclass(dataclassLogicalPathModule, dataclass_Identifier, dataclassInstanceIdentifier)
 
@@ -121,11 +121,11 @@ def makeDaoOfMapFolding() -> PurePath:
 	doTheNeedful.imports.update(shatteredDataclass.imports)
 	targetCallableIdentifier = daoOfMapFolding.astFunctionDef.name
 	doTheNeedful = unpackDataclassCallFunctionRepackDataclass(doTheNeedful, targetCallableIdentifier, shatteredDataclass)
-	astTuple: ast.Tuple | None = NodeTourist(be.Return, Then.extractIt(DOT.value)).captureLastMatch(daoOfMapFolding.astFunctionDef)
+	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(daoOfMapFolding.astFunctionDef)
 	if astTuple is None: raise raiseIfNoneGitHubIssueNumber3
 	astTuple.ctx = ast.Store()
 
-	findThis = ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier))
+	findThis = IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(targetCallableIdentifier))
 	doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
 	changeAssignCallToTarget = NodeChanger(findThis, doThat)
 	changeAssignCallToTarget.visit(doTheNeedful.astFunctionDef)
@@ -153,31 +153,31 @@ def makeTheorem2() -> PurePath:
 	countTheorem2 = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule)
 		, LedgerOfImports(astModule))
 
-	dataclassInstanceIdentifier = NodeTourist(be.arg, Then.extractIt(DOT.arg)).captureLastMatch(countTheorem2.astFunctionDef)
+	dataclassInstanceIdentifier = NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(countTheorem2.astFunctionDef)
 	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
 
-	findThis = ifThis.isWhileAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-	doThat = grab.testAttribute(grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)]))) # type: ignore
+	findThis = IfThis.isWhileAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+	doThat = Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)]))) # type: ignore
 	NodeChanger(findThis, doThat).visit(countTheorem2.astFunctionDef)
 
-	findThis = ifThis.isIfAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+	findThis = IfThis.isIfAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
 	doThat = Then.extractIt(DOT.body)
 	insertLeaf = NodeTourist(findThis, doThat).captureLastMatch(countTheorem2.astFunctionDef)
-	findThis = ifThis.isIfAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+	findThis = IfThis.isIfAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
 	doThat = Then.replaceWith(insertLeaf)
 	NodeChanger(findThis, doThat).visit(countTheorem2.astFunctionDef)
 
-	findThis = ifThis.isAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+	findThis = IfThis.isAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
 	doThat = Then.removeIt
 	NodeChanger(findThis, doThat).visit(countTheorem2.astFunctionDef)
 
-	findThis = ifThis.isAttributeNamespace_IdentifierLessThanOrEqual(dataclassInstanceIdentifier, 'leaf1ndex')
+	findThis = IfThis.isAttributeNamespace_IdentifierLessThanOrEqual(dataclassInstanceIdentifier, 'leaf1ndex')
 	doThat = Then.removeIt
 	NodeChanger(findThis, doThat).visit(countTheorem2.astFunctionDef)
 
 	theCountingIdentifier = theCountingIdentifierHARDCODED
 	doubleTheCount = Make.AugAssign(Make.Attribute(ast.Name(dataclassInstanceIdentifier), theCountingIdentifier), ast.Mult(), Make.Constant(2))
-	findThis = be.Return
+	findThis = Be.Return
 	doThat = Then.insertThisAbove([doubleTheCount])
 	NodeChanger(findThis, doThat).visit(countTheorem2.astFunctionDef)
 
@@ -194,10 +194,10 @@ def trimTheorem2(pathFilenameSource: PurePath) -> PurePath:
 	sourceCallableIdentifier = sourceCallableIdentifierHARDCODED
 	ingredientsFunction = astModuleToIngredientsFunction(parsePathFilename2astModule(pathFilenameSource), sourceCallableIdentifier)
 
-	dataclassInstanceIdentifier = NodeTourist(be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef)
+	dataclassInstanceIdentifier = NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef)
 	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
 
-	findThis = ifThis.isIfUnaryNotAttributeNamespace_Identifier(dataclassInstanceIdentifier, 'dimensionsUnconstrained')
+	findThis = IfThis.isIfUnaryNotAttributeNamespace_Identifier(dataclassInstanceIdentifier, 'dimensionsUnconstrained')
 	doThat = Then.removeIt
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
 
@@ -224,9 +224,9 @@ def numbaOnTheorem2(pathFilenameSource: PurePath) -> ast.ImportFrom:
 	logicalPathInfix = logicalPathInfixHARDCODED
 	sourceCallableIdentifier = sourceCallableIdentifierHARDCODED
 	countNumbaTheorem2 = astModuleToIngredientsFunction(parsePathFilename2astModule(pathFilenameSource), sourceCallableIdentifier)
-	dataclassName: ast.expr | None = NodeTourist(be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(countNumbaTheorem2.astFunctionDef)
+	dataclassName: ast.expr | None = NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(countNumbaTheorem2.astFunctionDef)
 	if dataclassName is None: raise raiseIfNoneGitHubIssueNumber3
-	dataclass_Identifier: ast_Identifier | None = NodeTourist(be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName)
+	dataclass_Identifier: ast_Identifier | None = NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName)
 	if dataclass_Identifier is None: raise raiseIfNoneGitHubIssueNumber3
 
 	dataclassLogicalPathModule = None
@@ -238,7 +238,7 @@ def numbaOnTheorem2(pathFilenameSource: PurePath) -> ast.ImportFrom:
 		if dataclassLogicalPathModule:
 			break
 	if dataclassLogicalPathModule is None: raise raiseIfNoneGitHubIssueNumber3
-	dataclassInstanceIdentifier = NodeTourist(be.arg, Then.extractIt(DOT.arg)).captureLastMatch(countNumbaTheorem2.astFunctionDef)
+	dataclassInstanceIdentifier = NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(countNumbaTheorem2.astFunctionDef)
 	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
 	shatteredDataclass = shatter_dataclassesDOTdataclass(dataclassLogicalPathModule, dataclass_Identifier, dataclassInstanceIdentifier)
 
@@ -279,9 +279,9 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	moduleIdentifier = moduleIdentifierHARDCODED
 
 	doTheNeedful: IngredientsFunction = astModuleToIngredientsFunction(parseLogicalPath2astModule(logicalPathSourceModule), sourceCallableIdentifier)
-	dataclassName: ast.expr | None = NodeTourist(be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(doTheNeedful.astFunctionDef)
+	dataclassName: ast.expr | None = NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(doTheNeedful.astFunctionDef)
 	if dataclassName is None: raise raiseIfNoneGitHubIssueNumber3
-	dataclass_Identifier: ast_Identifier | None = NodeTourist(be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName)
+	dataclass_Identifier: ast_Identifier | None = NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName)
 	if dataclass_Identifier is None: raise raiseIfNoneGitHubIssueNumber3
 
 	dataclassLogicalPathModule = None
@@ -293,7 +293,7 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 		if dataclassLogicalPathModule:
 			break
 	if dataclassLogicalPathModule is None: raise raiseIfNoneGitHubIssueNumber3
-	dataclassInstanceIdentifier = NodeTourist(be.arg, Then.extractIt(DOT.arg)).captureLastMatch(doTheNeedful.astFunctionDef)
+	dataclassInstanceIdentifier = NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(doTheNeedful.astFunctionDef)
 	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
 	shatteredDataclass = shatter_dataclassesDOTdataclass(dataclassLogicalPathModule, dataclass_Identifier, dataclassInstanceIdentifier)
 
@@ -303,11 +303,11 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	doTheNeedful = unpackDataclassCallFunctionRepackDataclass(doTheNeedful, targetCallableIdentifier, shatteredDataclass)
 	targetFunctionDef = extractFunctionDef(parseLogicalPath2astModule(astImportFrom.module), targetCallableIdentifier) # type: ignore
 	if targetFunctionDef is None: raise raiseIfNoneGitHubIssueNumber3
-	astTuple: ast.Tuple | None = NodeTourist(be.Return, Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef)
+	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef)
 	if astTuple is None: raise raiseIfNoneGitHubIssueNumber3
 	astTuple.ctx = ast.Store()
 
-	findThis = ifThis.isAssignAndValueIs(ifThis.isCall_Identifier(targetCallableIdentifier))
+	findThis = IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(targetCallableIdentifier))
 	doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
 	NodeChanger(findThis, doThat).visit(doTheNeedful.astFunctionDef)
 

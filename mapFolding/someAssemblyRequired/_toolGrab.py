@@ -7,7 +7,7 @@ from typing import Any, Literal
 import ast
 '# ruff: noqa: F405'
 
-class grab:
+class Grab:
     """
 	Modify specific attributes of AST nodes while preserving the node structure.
 
@@ -404,7 +404,7 @@ class grab:
         return workhorse
 
     @staticmethod
-    def nameAttribute(action: Callable[[ast_Identifier | (ast_Identifier | None) | ast.Name], ast_Identifier | (ast_Identifier | None) | ast.Name]) -> Callable[[hasDOTname], hasDOTname]:
+    def nameAttribute(action: Callable[[ast_Identifier | (ast_Identifier | None) | ast_Identifier | ast.Name], ast_Identifier | (ast_Identifier | None) | ast_Identifier | ast.Name]) -> Callable[[hasDOTname], hasDOTname]:
 
         def workhorse(node: hasDOTname) -> hasDOTname:
             node.name = action(node.name)
@@ -648,6 +648,6 @@ class grab:
     def funcDOTidAttribute(action: Callable[[ast_Identifier], Any]) -> Callable[[ImaCallToName], ImaCallToName]:
 
         def workhorse(node: ImaCallToName) -> ImaCallToName:
-            node.func = grab.idAttribute(action)(node.func)
+            node.func = Grab.idAttribute(action)(node.func)
             return node
         return workhorse

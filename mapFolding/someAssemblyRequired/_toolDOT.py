@@ -277,11 +277,16 @@ class DOT:
 
     @staticmethod
     @overload
+    def name(node: hasDOTname_str) -> ast_Identifier:
+        ...
+
+    @staticmethod
+    @overload
     def name(node: hasDOTname_Name) -> ast.Name:
         ...
 
     @staticmethod
-    def name(node: hasDOTname) -> ast_Identifier | (ast_Identifier | None) | ast.Name:
+    def name(node: hasDOTname) -> ast_Identifier | (ast_Identifier | None) | ast_Identifier | ast.Name:
         return node.name
 
     @staticmethod
