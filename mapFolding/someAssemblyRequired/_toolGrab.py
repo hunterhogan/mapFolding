@@ -1,5 +1,5 @@
 """This file is generated automatically, so changes to this file will be lost."""
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
 from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice, NodeORattribute, ImaCallToName
 from mapFolding.someAssemblyRequired._astTypes import *
@@ -36,7 +36,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def argsAttribute(action: Callable[[ast.arguments | list[ast.expr] | list[ast.arg]], ast.arguments | list[ast.expr] | list[ast.arg]]) -> Callable[[hasDOTargs], hasDOTargs]:
+    def argsAttribute(action: Callable[[ast.arguments | Sequence[ast.expr] | list[ast.arg]], ast.arguments | Sequence[ast.expr] | list[ast.arg]]) -> Callable[[hasDOTargs], hasDOTargs]:
 
         def workhorse(node: hasDOTargs) -> hasDOTargs:
             node.args = action(node.args)
@@ -44,7 +44,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def argtypesAttribute(action: Callable[[list[ast.expr]], list[ast.expr]]) -> Callable[[hasDOTargtypes], hasDOTargtypes]:
+    def argtypesAttribute(action: Callable[[Sequence[ast.expr]], Sequence[ast.expr]]) -> Callable[[hasDOTargtypes], hasDOTargtypes]:
 
         def workhorse(node: hasDOTargtypes) -> hasDOTargtypes:
             node.argtypes = action(node.argtypes)
@@ -68,7 +68,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def basesAttribute(action: Callable[[list[ast.expr]], list[ast.expr]]) -> Callable[[hasDOTbases], hasDOTbases]:
+    def basesAttribute(action: Callable[[Sequence[ast.expr]], Sequence[ast.expr]]) -> Callable[[hasDOTbases], hasDOTbases]:
 
         def workhorse(node: hasDOTbases) -> hasDOTbases:
             node.bases = action(node.bases)
@@ -76,7 +76,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def bodyAttribute(action: Callable[[list[ast.stmt] | ast.expr], list[ast.stmt] | ast.expr]) -> Callable[[hasDOTbody], hasDOTbody]:
+    def bodyAttribute(action: Callable[[Sequence[ast.stmt] | ast.expr], Sequence[ast.stmt] | ast.expr]) -> Callable[[hasDOTbody], hasDOTbody]:
 
         def workhorse(node: hasDOTbody) -> hasDOTbody:
             node.body = action(node.body)
@@ -116,7 +116,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def comparatorsAttribute(action: Callable[[list[ast.expr]], list[ast.expr]]) -> Callable[[hasDOTcomparators], hasDOTcomparators]:
+    def comparatorsAttribute(action: Callable[[Sequence[ast.expr]], Sequence[ast.expr]]) -> Callable[[hasDOTcomparators], hasDOTcomparators]:
 
         def workhorse(node: hasDOTcomparators) -> hasDOTcomparators:
             node.comparators = action(node.comparators)
@@ -148,7 +148,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def decorator_listAttribute(action: Callable[[list[ast.expr]], list[ast.expr]]) -> Callable[[hasDOTdecorator_list], hasDOTdecorator_list]:
+    def decorator_listAttribute(action: Callable[[Sequence[ast.expr]], Sequence[ast.expr]]) -> Callable[[hasDOTdecorator_list], hasDOTdecorator_list]:
 
         def workhorse(node: hasDOTdecorator_list) -> hasDOTdecorator_list:
             node.decorator_list = action(node.decorator_list)
@@ -164,7 +164,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def defaultsAttribute(action: Callable[[list[ast.expr]], list[ast.expr]]) -> Callable[[hasDOTdefaults], hasDOTdefaults]:
+    def defaultsAttribute(action: Callable[[Sequence[ast.expr]], Sequence[ast.expr]]) -> Callable[[hasDOTdefaults], hasDOTdefaults]:
 
         def workhorse(node: hasDOTdefaults) -> hasDOTdefaults:
             node.defaults = action(node.defaults)
@@ -180,7 +180,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def eltsAttribute(action: Callable[[list[ast.expr]], list[ast.expr]]) -> Callable[[hasDOTelts], hasDOTelts]:
+    def eltsAttribute(action: Callable[[Sequence[ast.expr]], Sequence[ast.expr]]) -> Callable[[hasDOTelts], hasDOTelts]:
 
         def workhorse(node: hasDOTelts) -> hasDOTelts:
             node.elts = action(node.elts)
@@ -196,7 +196,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def finalbodyAttribute(action: Callable[[list[ast.stmt]], list[ast.stmt]]) -> Callable[[hasDOTfinalbody], hasDOTfinalbody]:
+    def finalbodyAttribute(action: Callable[[Sequence[ast.stmt]], Sequence[ast.stmt]]) -> Callable[[hasDOTfinalbody], hasDOTfinalbody]:
 
         def workhorse(node: hasDOTfinalbody) -> hasDOTfinalbody:
             node.finalbody = action(node.finalbody)
@@ -252,7 +252,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def ifsAttribute(action: Callable[[list[ast.expr]], list[ast.expr]]) -> Callable[[hasDOTifs], hasDOTifs]:
+    def ifsAttribute(action: Callable[[Sequence[ast.expr]], Sequence[ast.expr]]) -> Callable[[hasDOTifs], hasDOTifs]:
 
         def workhorse(node: hasDOTifs) -> hasDOTifs:
             node.ifs = action(node.ifs)
@@ -292,7 +292,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def keysAttribute(action: Callable[[list[ast.expr | None] | list[ast.expr]], list[ast.expr | None] | list[ast.expr]]) -> Callable[[hasDOTkeys], hasDOTkeys]:
+    def keysAttribute(action: Callable[[Sequence[ast.expr | None] | Sequence[ast.expr]], Sequence[ast.expr | None] | Sequence[ast.expr]]) -> Callable[[hasDOTkeys], hasDOTkeys]:
 
         def workhorse(node: hasDOTkeys) -> hasDOTkeys:
             node.keys = action(node.keys)
@@ -316,7 +316,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def kw_defaultsAttribute(action: Callable[[list[ast.expr | None]], list[ast.expr | None]]) -> Callable[[hasDOTkw_defaults], hasDOTkw_defaults]:
+    def kw_defaultsAttribute(action: Callable[[Sequence[ast.expr | None]], Sequence[ast.expr | None]]) -> Callable[[hasDOTkw_defaults], hasDOTkw_defaults]:
 
         def workhorse(node: hasDOTkw_defaults) -> hasDOTkw_defaults:
             node.kw_defaults = action(node.kw_defaults)
@@ -340,7 +340,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def kwd_patternsAttribute(action: Callable[[list[ast.pattern]], list[ast.pattern]]) -> Callable[[hasDOTkwd_patterns], hasDOTkwd_patterns]:
+    def kwd_patternsAttribute(action: Callable[[Sequence[ast.pattern]], Sequence[ast.pattern]]) -> Callable[[hasDOTkwd_patterns], hasDOTkwd_patterns]:
 
         def workhorse(node: hasDOTkwd_patterns) -> hasDOTkwd_patterns:
             node.kwd_patterns = action(node.kwd_patterns)
@@ -436,7 +436,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def opsAttribute(action: Callable[[list[ast.cmpop]], list[ast.cmpop]]) -> Callable[[hasDOTops], hasDOTops]:
+    def opsAttribute(action: Callable[[Sequence[ast.cmpop]], Sequence[ast.cmpop]]) -> Callable[[hasDOTops], hasDOTops]:
 
         def workhorse(node: hasDOTops) -> hasDOTops:
             node.ops = action(node.ops)
@@ -452,7 +452,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def orelseAttribute(action: Callable[[list[ast.stmt] | ast.expr], list[ast.stmt] | ast.expr]) -> Callable[[hasDOTorelse], hasDOTorelse]:
+    def orelseAttribute(action: Callable[[Sequence[ast.stmt] | ast.expr], Sequence[ast.stmt] | ast.expr]) -> Callable[[hasDOTorelse], hasDOTorelse]:
 
         def workhorse(node: hasDOTorelse) -> hasDOTorelse:
             node.orelse = action(node.orelse)
@@ -468,7 +468,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def patternsAttribute(action: Callable[[list[ast.pattern]], list[ast.pattern]]) -> Callable[[hasDOTpatterns], hasDOTpatterns]:
+    def patternsAttribute(action: Callable[[Sequence[ast.pattern]], Sequence[ast.pattern]]) -> Callable[[hasDOTpatterns], hasDOTpatterns]:
 
         def workhorse(node: hasDOTpatterns) -> hasDOTpatterns:
             node.patterns = action(node.patterns)
@@ -556,7 +556,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def targetsAttribute(action: Callable[[list[ast.expr]], list[ast.expr]]) -> Callable[[hasDOTtargets], hasDOTtargets]:
+    def targetsAttribute(action: Callable[[Sequence[ast.expr]], Sequence[ast.expr]]) -> Callable[[hasDOTtargets], hasDOTtargets]:
 
         def workhorse(node: hasDOTtargets) -> hasDOTtargets:
             node.targets = action(node.targets)
@@ -596,7 +596,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def type_paramsAttribute(action: Callable[[list[astDOTtype_param]], list[astDOTtype_param]]) -> Callable[[hasDOTtype_params], hasDOTtype_params]:
+    def type_paramsAttribute(action: Callable[[Sequence[astDOTtype_param]], Sequence[astDOTtype_param]]) -> Callable[[hasDOTtype_params], hasDOTtype_params]:
 
         def workhorse(node: hasDOTtype_params) -> hasDOTtype_params:
             node.type_params = action(node.type_params)
@@ -620,7 +620,7 @@ class Grab:
         return workhorse
 
     @staticmethod
-    def valuesAttribute(action: Callable[[list[ast.expr]], list[ast.expr]]) -> Callable[[hasDOTvalues], hasDOTvalues]:
+    def valuesAttribute(action: Callable[[Sequence[ast.expr]], Sequence[ast.expr]]) -> Callable[[hasDOTvalues], hasDOTvalues]:
 
         def workhorse(node: hasDOTvalues) -> hasDOTvalues:
             node.values = action(node.values)

@@ -56,7 +56,7 @@ MakeAttributeFunctionDef: ast.FunctionDef = ast.FunctionDef(
 MakeImportFunctionDef: ast.FunctionDef = ast.FunctionDef(name='Import', args=ast.arguments(args=[ast.arg(arg='moduleWithLogicalPath', annotation=ast.Name(id='str_nameDOTname', ctx=ast.Load())), ast.arg(arg='asName', annotation=ast.BinOp(left=ast.Name(id='ast_Identifier', ctx=ast.Load()), op=ast.BitOr(), right=ast.Constant(value=None)))], kwarg=ast.arg(arg='keywordArguments', annotation=ast.Name(id='int', ctx=ast.Load())), defaults=[ast.Constant(value=None)]), body=[ast.Return(value=ast.Call(func=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='Import', ctx=ast.Load()), keywords=[ast.keyword(arg='names', value=ast.List(elts=[ast.Call(func=ast.Attribute(value=ast.Name(id='Make', ctx=ast.Load()), attr='alias', ctx=ast.Load()), args=[ast.Name(id='moduleWithLogicalPath', ctx=ast.Load()), ast.Name(id='asName', ctx=ast.Load())])], ctx=ast.Load())), ast.keyword(value=ast.Name(id='keywordArguments', ctx=ast.Load()))]))], decorator_list=[ast.Name(id='staticmethod', ctx=ast.Load())], returns=ast.Attribute(value=ast.Name(id='ast', ctx=ast.Load()), attr='Import', ctx=ast.Load()))
 
 # ww='''
-
+# list(targets)
 # '''
 
 # print(ast.dump(ast.parse(ww), indent=4))

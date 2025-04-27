@@ -1,4 +1,5 @@
 """This file is generated automatically, so changes to this file will be lost."""
+from collections.abc import Sequence
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
 from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice
 from mapFolding.someAssemblyRequired._astTypes import *
@@ -53,7 +54,7 @@ class DOT:
 
     @staticmethod
     @overload
-    def args(node: hasDOTargs_list_expr) -> list[ast.expr]:
+    def args(node: hasDOTargs_list_expr) -> Sequence[ast.expr]:
         ...
 
     @staticmethod
@@ -62,11 +63,11 @@ class DOT:
         ...
 
     @staticmethod
-    def args(node: hasDOTargs) -> ast.arguments | list[ast.expr] | list[ast.arg]:
+    def args(node: hasDOTargs) -> ast.arguments | Sequence[ast.expr] | list[ast.arg]:
         return node.args
 
     @staticmethod
-    def argtypes(node: hasDOTargtypes) -> list[ast.expr]:
+    def argtypes(node: hasDOTargtypes) -> Sequence[ast.expr]:
         return node.argtypes
 
     @staticmethod
@@ -78,12 +79,12 @@ class DOT:
         return node.attr
 
     @staticmethod
-    def bases(node: hasDOTbases) -> list[ast.expr]:
+    def bases(node: hasDOTbases) -> Sequence[ast.expr]:
         return node.bases
 
     @staticmethod
     @overload
-    def body(node: hasDOTbody_list_stmt) -> list[ast.stmt]:
+    def body(node: hasDOTbody_list_stmt) -> Sequence[ast.stmt]:
         ...
 
     @staticmethod
@@ -92,7 +93,7 @@ class DOT:
         ...
 
     @staticmethod
-    def body(node: hasDOTbody) -> list[ast.stmt] | ast.expr:
+    def body(node: hasDOTbody) -> Sequence[ast.stmt] | ast.expr:
         return node.body
 
     @staticmethod
@@ -112,7 +113,7 @@ class DOT:
         return node.cls
 
     @staticmethod
-    def comparators(node: hasDOTcomparators) -> list[ast.expr]:
+    def comparators(node: hasDOTcomparators) -> Sequence[ast.expr]:
         return node.comparators
 
     @staticmethod
@@ -128,7 +129,7 @@ class DOT:
         return node.ctx
 
     @staticmethod
-    def decorator_list(node: hasDOTdecorator_list) -> list[ast.expr]:
+    def decorator_list(node: hasDOTdecorator_list) -> Sequence[ast.expr]:
         return node.decorator_list
 
     @staticmethod
@@ -136,7 +137,7 @@ class DOT:
         return node.default_value
 
     @staticmethod
-    def defaults(node: hasDOTdefaults) -> list[ast.expr]:
+    def defaults(node: hasDOTdefaults) -> Sequence[ast.expr]:
         return node.defaults
 
     @staticmethod
@@ -144,7 +145,7 @@ class DOT:
         return node.elt
 
     @staticmethod
-    def elts(node: hasDOTelts) -> list[ast.expr]:
+    def elts(node: hasDOTelts) -> Sequence[ast.expr]:
         return node.elts
 
     @staticmethod
@@ -152,7 +153,7 @@ class DOT:
         return node.exc
 
     @staticmethod
-    def finalbody(node: hasDOTfinalbody) -> list[ast.stmt]:
+    def finalbody(node: hasDOTfinalbody) -> Sequence[ast.stmt]:
         return node.finalbody
 
     @staticmethod
@@ -180,7 +181,7 @@ class DOT:
         return node.id
 
     @staticmethod
-    def ifs(node: hasDOTifs) -> list[ast.expr]:
+    def ifs(node: hasDOTifs) -> Sequence[ast.expr]:
         return node.ifs
 
     @staticmethod
@@ -201,16 +202,16 @@ class DOT:
 
     @staticmethod
     @overload
-    def keys(node: hasDOTkeys_list_exprOrNone) -> list[ast.expr | None]:
+    def keys(node: hasDOTkeys_list_exprOrNone) -> Sequence[ast.expr | None]:
         ...
 
     @staticmethod
     @overload
-    def keys(node: hasDOTkeys_list_expr) -> list[ast.expr]:
+    def keys(node: hasDOTkeys_list_expr) -> Sequence[ast.expr]:
         ...
 
     @staticmethod
-    def keys(node: hasDOTkeys) -> list[ast.expr | None] | list[ast.expr]:
+    def keys(node: hasDOTkeys) -> Sequence[ast.expr | None] | Sequence[ast.expr]:
         return node.keys
 
     @staticmethod
@@ -222,7 +223,7 @@ class DOT:
         return node.kind
 
     @staticmethod
-    def kw_defaults(node: hasDOTkw_defaults) -> list[ast.expr | None]:
+    def kw_defaults(node: hasDOTkw_defaults) -> Sequence[ast.expr | None]:
         return node.kw_defaults
 
     @staticmethod
@@ -234,7 +235,7 @@ class DOT:
         return node.kwd_attrs
 
     @staticmethod
-    def kwd_patterns(node: hasDOTkwd_patterns) -> list[ast.pattern]:
+    def kwd_patterns(node: hasDOTkwd_patterns) -> Sequence[ast.pattern]:
         return node.kwd_patterns
 
     @staticmethod
@@ -327,7 +328,7 @@ class DOT:
         return node.operand
 
     @staticmethod
-    def ops(node: hasDOTops) -> list[ast.cmpop]:
+    def ops(node: hasDOTops) -> Sequence[ast.cmpop]:
         return node.ops
 
     @staticmethod
@@ -336,7 +337,7 @@ class DOT:
 
     @staticmethod
     @overload
-    def orelse(node: hasDOTorelse_list_stmt) -> list[ast.stmt]:
+    def orelse(node: hasDOTorelse_list_stmt) -> Sequence[ast.stmt]:
         ...
 
     @staticmethod
@@ -345,7 +346,7 @@ class DOT:
         ...
 
     @staticmethod
-    def orelse(node: hasDOTorelse) -> list[ast.stmt] | ast.expr:
+    def orelse(node: hasDOTorelse) -> Sequence[ast.stmt] | ast.expr:
         return node.orelse
 
     @staticmethod
@@ -363,7 +364,7 @@ class DOT:
         return node.pattern
 
     @staticmethod
-    def patterns(node: hasDOTpatterns) -> list[ast.pattern]:
+    def patterns(node: hasDOTpatterns) -> Sequence[ast.pattern]:
         return node.patterns
 
     @staticmethod
@@ -432,7 +433,7 @@ class DOT:
         return node.target
 
     @staticmethod
-    def targets(node: hasDOTtargets) -> list[ast.expr]:
+    def targets(node: hasDOTtargets) -> Sequence[ast.expr]:
         return node.targets
 
     @staticmethod
@@ -452,7 +453,7 @@ class DOT:
         return node.type_ignores
 
     @staticmethod
-    def type_params(node: hasDOTtype_params) -> list[astDOTtype_param]:
+    def type_params(node: hasDOTtype_params) -> Sequence[astDOTtype_param]:
         return node.type_params
 
     @staticmethod
@@ -484,7 +485,7 @@ class DOT:
         return node.value
 
     @staticmethod
-    def values(node: hasDOTvalues) -> list[ast.expr]:
+    def values(node: hasDOTvalues) -> Sequence[ast.expr]:
         return node.values
 
     @staticmethod
