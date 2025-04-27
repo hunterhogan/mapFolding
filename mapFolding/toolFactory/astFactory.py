@@ -3,7 +3,7 @@ from mapFolding.toolFactory.astFactory_annex import handmadeMethodsGrab, handmad
 from mapFolding.toolFactory.astFactory_docstrings import docstringWarning, ClassDefDocstringBe, ClassDefDocstringDOT, ClassDefDocstringGrab, ClassDefDocstringMake
 from pathlib import PurePosixPath
 from string import ascii_letters
-from typing import cast, NamedTuple, TypeAlias as typing_TypeAlias
+from typing import cast, NamedTuple, TypeAlias as typing_TypeAlias, TypedDict
 import ast
 
 # TODO this is not DRY, but you can't import from some assembly required
@@ -11,9 +11,9 @@ ast_Identifier: typing_TypeAlias = str
 str_nameDOTname: typing_TypeAlias = str
 ast_expr_Slice: typing_TypeAlias = ast.expr
 
-class AttributeAnnotation(NamedTuple):
-	asStr: str
-	asAST: ast.expr
+class StuPydTypeSystemFromHell(TypedDict):
+	astAnnotation: ast.expr
+	listClassDefIdentifier: list[ast_Identifier | str_nameDOTname]
 
 sys_version_infoTarget: tuple[int, int] = (3, 13)
 
@@ -93,12 +93,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 
 	dictionaryOf_astDOTclass: dict[ast_Identifier, ast.Attribute | ast.Name] = MakeDictionaryOf_astClassAnnotations(astStubFile).getDictionary()
 
-	attributeIdentifier2AttributeAnnotation2ListClassDefIdentifier: dict[ast_Identifier, dict[AttributeAnnotation, list[ast_Identifier | str_nameDOTname]]] = {}
-
-	Z0Z_attributeIdentifierDictionary_subnode_annotation_strListClassDefIdentifier: dict[ast_Identifier, dict[str, list[ast_Identifier | str_nameDOTname]]] = {}
-
-	ClaudesFucking_attributeIdentifierDictionary_subnode_annotation_str2subnode_annotation: dict[ast_Identifier, dict[str, ast.expr]] = {}
-	ClaudesFucking_attributeIdentifierList_subnode_annotation: dict[str, list[ast.expr]] = {}
+	attributeIdentifier2Str4TypeAlias2astAnnotationAndListClassDefIdentifier: dict[ast_Identifier, dict[str, StuPydTypeSystemFromHell]] = {}
 
 	# NOTE Convert each ast.ClassDef into `TypeAlias` and methods in `Be`, `DOT`, `Grab`, and `Make`.
 	for node in ast.walk(astStubFile):
@@ -112,7 +107,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 
 		# Change the identifier solely for the benefit of clarity as you read this code.
 		astDOTClassDef = node
-		del node # NOTE this is necessary because AI assistants don't follow always instructions.
+		del node # NOTE this is necessary because AI assistants don't always follow instructions.
 
 		# Create ast "fragments" before you need them.
 		ClassDefIdentifier: ast_Identifier = astDOTClassDef.name
@@ -193,19 +188,20 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 					# list to Sequence, after creating `subnode_annotation_str`
 					# in Make method, in call to constructor, `list(attributeIdentifier)`
 
-					attributeAnnotation = AttributeAnnotation(
-						asStr = ''.join([letter for letter in ast.unparse(subnode.annotation).replace('ast','').replace('|','Or') if letter in ascii_letters]),
-						asAST = Prepend_ast2astClasses(dictionaryOf_astDOTclass).visit(subnode.annotation)
-					)
 					attributeAnnotation_ast_exprOrBinOp = Prepend_ast2astClasses(dictionaryOf_astDOTclass).visit(subnode.annotation)
 					attributeAnnotationAsStr4TypeAliasIdentifier = ''.join([letter for letter in ast.unparse(subnode.annotation).replace('ast','').replace('|','Or') if letter in ascii_letters])
 					del subnode
 
-					if attributeIdentifier not in Z0Z_attributeIdentifierDictionary_subnode_annotation_strListClassDefIdentifier:
-						Z0Z_attributeIdentifierDictionary_subnode_annotation_strListClassDefIdentifier[attributeIdentifier] = {}
-						ClaudesFucking_attributeIdentifierDictionary_subnode_annotation_str2subnode_annotation[attributeIdentifier] = {}
-					Z0Z_attributeIdentifierDictionary_subnode_annotation_strListClassDefIdentifier[attributeIdentifier].setdefault(attributeAnnotationAsStr4TypeAliasIdentifier, []).append(ClassDefIdentifier)
-					ClaudesFucking_attributeIdentifierDictionary_subnode_annotation_str2subnode_annotation[attributeIdentifier][attributeAnnotationAsStr4TypeAliasIdentifier] = attributeAnnotation_ast_exprOrBinOp
+					if attributeIdentifier not in attributeIdentifier2Str4TypeAlias2astAnnotationAndListClassDefIdentifier:
+						attributeIdentifier2Str4TypeAlias2astAnnotationAndListClassDefIdentifier[attributeIdentifier] = {}
+
+					if attributeAnnotationAsStr4TypeAliasIdentifier not in attributeIdentifier2Str4TypeAlias2astAnnotationAndListClassDefIdentifier[attributeIdentifier]:
+						attributeIdentifier2Str4TypeAlias2astAnnotationAndListClassDefIdentifier[attributeIdentifier][attributeAnnotationAsStr4TypeAliasIdentifier] = StuPydTypeSystemFromHell(
+							astAnnotation = attributeAnnotation_ast_exprOrBinOp,
+							listClassDefIdentifier = [ClassDefIdentifier]
+						)
+					else:
+						attributeIdentifier2Str4TypeAlias2astAnnotationAndListClassDefIdentifier[attributeIdentifier][attributeAnnotationAsStr4TypeAliasIdentifier]['listClassDefIdentifier'].append(ClassDefIdentifier)
 
 					match ClassDefIdentifier:
 						case 'Attribute':
@@ -308,60 +304,50 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 		, type_ignores=[]
 		)
 
-	listAttributeIdentifier: list[ast_Identifier] = list(Z0Z_attributeIdentifierDictionary_subnode_annotation_strListClassDefIdentifier.keys())
+	listAttributeIdentifier: list[ast_Identifier] = list(attributeIdentifier2Str4TypeAlias2astAnnotationAndListClassDefIdentifier.keys())
 	listAttributeIdentifier.sort(key=lambda attributeIdentifier: attributeIdentifier.lower())
-
-	for attributeIdentifier in listAttributeIdentifier:
-		hasDOTIdentifier: ast_Identifier = 'hasDOT' + attributeIdentifier
-		ClaudesFucking_attributeIdentifierList_subnode_annotation[attributeIdentifier] = []
-		for attributeAnnotationAsStr4TypeAliasIdentifier, listClassDefIdentifier in Z0Z_attributeIdentifierDictionary_subnode_annotation_strListClassDefIdentifier[attributeIdentifier].items():
-			attributeAnnotation_ast_exprOrBinOp = ClaudesFucking_attributeIdentifierDictionary_subnode_annotation_str2subnode_annotation[attributeIdentifier][attributeAnnotationAsStr4TypeAliasIdentifier]
-			ClaudesFucking_attributeIdentifierList_subnode_annotation[attributeIdentifier].append(attributeAnnotation_ast_exprOrBinOp)
 
 	for attributeIdentifier in listAttributeIdentifier:
 		hasDOTIdentifier: ast_Identifier = 'hasDOT' + attributeIdentifier
 		hasDOTName_Store: ast.Name = ast.Name(hasDOTIdentifier, ast.Store())
 		hasDOTName_Load: ast.Name = ast.Name(hasDOTIdentifier, ast.Load())
-		list_hasDOTName_subnode_annotation: list[ast.Name] = []
+		list_hasDOTNameTypeAliasAnnotations: list[ast.Name] = []
 
-		for attributeAnnotation_ast_exprOrBinOp, listClassDefIdentifier in Z0Z_attributeIdentifierDictionary_subnode_annotation_strListClassDefIdentifier[attributeIdentifier].items():
-			astAnnAssignValue = None
-			if len(listClassDefIdentifier) == 1:
-				astAnnAssignValue = dictionaryOf_astDOTclass[listClassDefIdentifier[0]]
+		attributeAnnotationUnifiedAsAST = None
+
+		for attributeAnnotationAsStr4TypeAliasIdentifier, puckFython in attributeIdentifier2Str4TypeAlias2astAnnotationAndListClassDefIdentifier[attributeIdentifier].items():
+			listClassDefIdentifier = puckFython['listClassDefIdentifier']
+			attributeAnnotationAsAST = puckFython['astAnnotation']
+			if not attributeAnnotationUnifiedAsAST:
+				attributeAnnotationUnifiedAsAST = attributeAnnotationAsAST
 			else:
-				astAnnAssignValue = dictionaryOf_astDOTclass[listClassDefIdentifier[0]]
+				attributeAnnotationUnifiedAsAST = ast.BinOp(
+					left=attributeAnnotationUnifiedAsAST,
+					op=ast.BitOr(),
+					right=attributeAnnotationAsAST
+				)
+
+			astAnnAssignValue = dictionaryOf_astDOTclass[listClassDefIdentifier[0]]
+			if len(listClassDefIdentifier) > 1:
 				for ClassDefIdentifier in listClassDefIdentifier[1:]:
 					astAnnAssignValue = ast.BinOp(left=astAnnAssignValue, op=ast.BitOr(), right=dictionaryOf_astDOTclass[ClassDefIdentifier])
-			if len(Z0Z_attributeIdentifierDictionary_subnode_annotation_strListClassDefIdentifier[attributeIdentifier]) == 1:
+			if len(attributeIdentifier2Str4TypeAlias2astAnnotationAndListClassDefIdentifier[attributeIdentifier]) == 1:
 				astTypesModule.body.append(ast.AnnAssign(hasDOTName_Store, typing_TypeAliasName, astAnnAssignValue, 1))
 			else:
-				list_hasDOTName_subnode_annotation.append(ast.Name(hasDOTIdentifier + '_' + attributeAnnotation_ast_exprOrBinOp.replace('list', 'list_'), ast.Store()))
-				# For overloaded methods, use the specific attribute type
-				astTypesModule.body.append(ast.AnnAssign(list_hasDOTName_subnode_annotation[-1], typing_TypeAliasName, astAnnAssignValue, 1))
-				ClassDefDOT.body.append(ast.FunctionDef(name=attributeIdentifier,
-						args=ast.arguments(posonlyargs=[], args=[ast.arg(arg='node', annotation=ast.Name(list_hasDOTName_subnode_annotation[-1].id, ast.Load()))], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]),
-					body=[ast.Expr(value=ast.Constant(value=Ellipsis))],
-					decorator_list=[staticmethodName, overloadName],
-					# idk wtf this fucking moronic statement means
-					# Use the appropriate type annotation for the return value
-					returns=ClaudesFucking_attributeIdentifierDictionary_subnode_annotation_str2subnode_annotation[attributeIdentifier][attributeAnnotation_ast_exprOrBinOp] if attributeIdentifier in ClaudesFucking_attributeIdentifierDictionary_subnode_annotation_str2subnode_annotation and attributeAnnotation_ast_exprOrBinOp in ClaudesFucking_attributeIdentifierDictionary_subnode_annotation_str2subnode_annotation[attributeIdentifier] else astAnnAssignValue
+				list_hasDOTNameTypeAliasAnnotations.append(ast.Name(hasDOTIdentifier + '_' + attributeAnnotationAsStr4TypeAliasIdentifier.replace('list', 'list_'), ast.Store()))
+				astTypesModule.body.append(ast.AnnAssign(list_hasDOTNameTypeAliasAnnotations[-1], typing_TypeAliasName, astAnnAssignValue, 1))
+				ClassDefDOT.body.append(ast.FunctionDef(name=attributeIdentifier
+					, args=ast.arguments(posonlyargs=[], args=[ast.arg(arg='node', annotation=ast.Name(list_hasDOTNameTypeAliasAnnotations[-1].id, ast.Load()))], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
+					, body=[ast.Expr(value=ast.Constant(value=Ellipsis))]
+					, decorator_list=[staticmethodName, overloadName]
+					, returns=attributeAnnotationAsAST
 				))
-
-		# acceptable code ===========================================================================
-		attributeAnnotationAsAST = ClaudesFucking_attributeIdentifierList_subnode_annotation[attributeIdentifier][0]
-		if len(ClaudesFucking_attributeIdentifierList_subnode_annotation[attributeIdentifier]) > 1:
-			for Claude_isThisIdentifierSupposedToBeMotherfucking_i_or_index in range(1, len(ClaudesFucking_attributeIdentifierList_subnode_annotation[attributeIdentifier])):
-				attributeAnnotationAsAST = ast.BinOp(
-					left=attributeAnnotationAsAST,
-					op=ast.BitOr(),
-					right=ClaudesFucking_attributeIdentifierList_subnode_annotation[attributeIdentifier][Claude_isThisIdentifierSupposedToBeMotherfucking_i_or_index]
-				)
 
 		ClassDefDOT.body.append(ast.FunctionDef(name=attributeIdentifier
 				, args=ast.arguments(posonlyargs=[], args=[ast.arg(arg='node', annotation=hasDOTName_Load)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
 				, body=[ast.Return(value=ast.Attribute(value=ast.Name('node', ast.Load()), attr=attributeIdentifier, ctx=ast.Load()))]
 				, decorator_list=[staticmethodName]
-				, returns=attributeAnnotationAsAST
+				, returns=attributeAnnotationUnifiedAsAST
 			))
 
 		ClassDefGrab.body.append(ast.FunctionDef(name=attributeIdentifier + 'Attribute'
@@ -369,8 +355,8 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 				, args=[ast.arg('action'
 					, annotation=ast.Subscript(ast.Name('Callable', ast.Load())
 						, slice=ast.Tuple(elts=[
-							ast.List(elts=[attributeAnnotationAsAST or ast.Name('Any', ast.Load())], ctx=ast.Load())
-							,   attributeAnnotationAsAST or ast.Name('Any', ast.Load())]
+							ast.List(elts=[attributeAnnotationUnifiedAsAST or ast.Name('Any', ast.Load())], ctx=ast.Load())
+							,   attributeAnnotationUnifiedAsAST or ast.Name('Any', ast.Load())]
 						, ctx=ast.Load()), ctx=ast.Load()))]
 				, vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[])
 			, body=[ast.FunctionDef(name='workhorse',
@@ -384,10 +370,10 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			, returns=ast.Subscript(ast.Name('Callable', ast.Load()), ast.Tuple([ast.List([hasDOTName_Load], ast.Load()), hasDOTName_Load], ast.Load()), ast.Load())))
 
 		# `astTypesModule`: When one attribute has multiple return types
-		if list_hasDOTName_subnode_annotation:
-			astAnnAssignValue = list_hasDOTName_subnode_annotation[0]
-			for index in range(1, len(list_hasDOTName_subnode_annotation)):
-				astAnnAssignValue = ast.BinOp(left=astAnnAssignValue, op=ast.BitOr(), right=list_hasDOTName_subnode_annotation[index])
+		if list_hasDOTNameTypeAliasAnnotations:
+			astAnnAssignValue = list_hasDOTNameTypeAliasAnnotations[0]
+			for index in range(1, len(list_hasDOTNameTypeAliasAnnotations)):
+				astAnnAssignValue = ast.BinOp(left=astAnnAssignValue, op=ast.BitOr(), right=list_hasDOTNameTypeAliasAnnotations[index])
 			astTypesModule.body.append(ast.AnnAssign(hasDOTName_Store, typing_TypeAliasName, astAnnAssignValue, 1))
 
 	writeModule(astTypesModule, '_astTypes')
