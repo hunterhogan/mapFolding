@@ -20,12 +20,7 @@ they implement a declarative approach to AST manipulation that separates node id
 """
 
 from collections.abc import Callable
-from mapFolding.someAssemblyRequired import (
-	ast_Identifier,
-	Be,
-	DOT,
-	ImaCallToName,
-)
+from mapFolding.someAssemblyRequired import ast_Identifier, Be, DOT, ImaCallToName
 from typing import Any, TypeGuard
 import ast
 

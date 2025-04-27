@@ -59,8 +59,8 @@ def makeInitializeGroupsOfFolds() -> None:
 
 	findThis = IfThis.isWhileAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
 	doThat = Grab.testAttribute(Grab.andDoAllOf([
-		Grab.opsAttribute(Then.replaceWith([ast.Eq()])), # type: ignore
-		Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(theCountingIdentifier))) # type: ignore
+		Grab.opsAttribute(Then.replaceWith([ast.Eq()])),
+		Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(theCountingIdentifier)))
 	]))
 	NodeChanger(findThis, doThat).visit(countInitializeIngredients.astFunctionDef.body[0])
 
@@ -157,7 +157,7 @@ def makeTheorem2() -> PurePath:
 	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
 
 	findThis = IfThis.isWhileAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-	doThat = Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)]))) # type: ignore
+	doThat = Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)])))
 	NodeChanger(findThis, doThat).visit(countTheorem2.astFunctionDef)
 
 	findThis = IfThis.isIfAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
@@ -301,7 +301,8 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	doTheNeedful.imports.addAst(astImportFrom)
 	targetCallableIdentifier = astImportFrom.names[0].name
 	doTheNeedful = unpackDataclassCallFunctionRepackDataclass(doTheNeedful, targetCallableIdentifier, shatteredDataclass)
-	targetFunctionDef = extractFunctionDef(parseLogicalPath2astModule(astImportFrom.module), targetCallableIdentifier) # type: ignore
+	if astImportFrom.module is None: raise raiseIfNoneGitHubIssueNumber3
+	targetFunctionDef = extractFunctionDef(parseLogicalPath2astModule(astImportFrom.module), targetCallableIdentifier)
 	if targetFunctionDef is None: raise raiseIfNoneGitHubIssueNumber3
 	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef)
 	if astTuple is None: raise raiseIfNoneGitHubIssueNumber3

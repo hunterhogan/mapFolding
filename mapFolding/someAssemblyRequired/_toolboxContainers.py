@@ -21,7 +21,7 @@ specific optimizations and transformations.
 from collections import defaultdict
 from collections.abc import Callable, Sequence
 from copy import deepcopy
-from typing import Any
+from typing import Any, cast
 from mapFolding.someAssemblyRequired import ast_Identifier, DOT, IfThis, Make, NodeTourist, parseLogicalPath2astModule, str_nameDOTname, Then
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3, The
 from pathlib import Path, PurePosixPath
@@ -226,7 +226,7 @@ class IngredientsModule:
 		"""Append one or more statements to `prologue`."""
 		list_body: list[ast.stmt] = []
 		listTypeIgnore: list[ast.TypeIgnore] = []
-		if astModule is not None and isinstance(astModule, ast.Module): # type: ignore
+		if astModule is not None and isinstance(astModule, ast.Module):
 			list_body.extend(astModule.body)
 			listTypeIgnore.extend(astModule.type_ignores)
 		if type_ignores is not None:
@@ -544,7 +544,7 @@ class DeReConstructField2ast:
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, annotationType)
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, 'dtype')
 			axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Name('uint8'))
-			dtype_asnameName: ast.Name = self.astAnnotation # type: ignore
+			dtype_asnameName: ast.Name = cast(ast.Name, self.astAnnotation)
 			if dtype_asnameName.id == 'Array3D':
 				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8'), Make.Name('uint8')]))
 			ast_expr = Make.Subscript(Make.Name(annotationType), Make.Tuple([axesSubscript, Make.Subscript(Make.Name('dtype'), dtype_asnameName)]))
@@ -561,7 +561,7 @@ class DeReConstructField2ast:
 		elif isinstance(self.astAnnotation, ast.Subscript):
 			elementConstructor: ast_Identifier = self.metadata['elementConstructor']
 			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
-			takeTheTuple: ast.Tuple = deepcopy(self.astAnnotation.slice) # type: ignore
+			takeTheTuple = deepcopy(self.astAnnotation.slice)
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, takeTheTuple)
 			self.Z0Z_hack = (self.astAnnAssignConstructor, elementConstructor)
 		if isinstance(self.astAnnotation, ast.Name):

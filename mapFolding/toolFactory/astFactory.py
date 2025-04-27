@@ -3,7 +3,7 @@ from mapFolding.toolFactory.astFactory_annex import handmadeMethodsGrab, handmad
 from mapFolding.toolFactory.astFactory_docstrings import docstringWarning, ClassDefDocstringBe, ClassDefDocstringDOT, ClassDefDocstringGrab, ClassDefDocstringMake
 from pathlib import PurePosixPath
 from string import ascii_letters
-from typing import cast, NamedTuple, TypeAlias as typing_TypeAlias, TypedDict
+from typing import cast, TypeAlias as typing_TypeAlias, TypedDict
 import ast
 
 # TODO this is not DRY, but you can't import from some assembly required
@@ -81,6 +81,8 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 	def writeModule(astModule: ast.Module, moduleIdentifier: ast_Identifier) -> None:
 		ast.fix_missing_locations(astModule)
 		pythonSource: str = ast.unparse(astModule)
+		if 'Grab' in moduleIdentifier or 'DOT' in moduleIdentifier:
+			pythonSource = "# ruff: noqa: F403, F405\n" + pythonSource
 		pathFilenameModule = PurePosixPath(The.pathPackage, logicalPathInfix, moduleIdentifier + The.fileExtension)
 		writeStringToHere(pythonSource, pathFilenameModule)
 
@@ -213,56 +215,49 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 						case _:
 							pass
 
+					def list2Sequence():
+						nonlocal append2args, attributeAnnotation_ast_expr
+						cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
+						append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+
 					match attributeIdentifier:
 						case 'args':
 							if 'list' in attributeAnnotationAsStr4TypeAliasIdentifier:
 								cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.List([]))
 								if 'expr' in attributeAnnotationAsStr4TypeAliasIdentifier:
-									cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-									append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
-
+									list2Sequence()
 						case 'argtypes':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'asname':
 							attributeIdentifier = 'asName'
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.Constant(None))
 						case 'bases':
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.List([]))
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'body':
 							if 'list' in attributeAnnotationAsStr4TypeAliasIdentifier:
-								cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-								append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+								list2Sequence()
 						case 'comparators':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'ctx':
 							attributeIdentifier = 'context'
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.Call(ast.Attribute(ast.Name('ast', ctx=ast.Load()), attr='Load', ctx=ast.Load())))
 						case 'decorator_list':
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.List([]))
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'defaults':
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.List([]))
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'elts':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'finalbody':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'func':
 							attributeIdentifier = 'callee'
 						case 'ifs':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'keys':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'kind':
 							cast(ast.arg, cast(ast.FunctionDef, ClassDefMake.body[-1]).args.kwarg).annotation = ast.Name('intORstr', ctx=ast.Load())
 							continue
@@ -271,13 +266,11 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.List([]))
 						case 'kw_defaults':
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.List([ast.Constant(None)]))
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'kwarg':
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.Constant(None))
 						case 'kwd_patterns':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'kwonlyargs':
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.List([]))
 						case 'level':
@@ -287,17 +280,14 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 							if ClassDefIdentifier == 'ImportFrom':
 								attributeIdentifier = 'list_alias'
 						case 'ops':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'orelse':
 							attributeIdentifier = 'orElse'
 							if 'list' in attributeAnnotationAsStr4TypeAliasIdentifier:
 								cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.List([]))
-								cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-								append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+								list2Sequence()
 						case 'patterns':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'posonlyargs':
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.List([]))
 						case 'returns':
@@ -311,16 +301,14 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 									, ast.Call(func=ast.Name('int', ctx=ast.Load()), args=[ast.Call(func=ast.Name('isinstance', ctx=ast.Load()), args=[ast.Name('target', ctx=ast.Load()), ast.Attribute(value=ast.Name('ast', ctx=ast.Load()), attr='Name', ctx=ast.Load())])])))
 							continue
 						case 'targets':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'type_comment':
 							cast(ast.arg, cast(ast.FunctionDef, ClassDefMake.body[-1]).args.kwarg).annotation = ast.Name('intORstr', ctx=ast.Load())
 							continue
 						case 'type_ignores':
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.List([]))
 						case 'type_params':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 							match ClassDefIdentifier:
 								case 'AsyncFunctionDef' | 'FunctionDef':
 									cast(ast.arg, cast(ast.FunctionDef, ClassDefMake.body[-1]).args.kwarg).annotation = ast.Name('intORstrORtype_params', ctx=ast.Load())
@@ -331,8 +319,7 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 								case _:
 									pass
 						case 'values':
-							cast(ast.Name, cast(ast.Subscript, attributeAnnotation_ast_expr).value).id = 'Sequence'
-							append2args = ast.Call(ast.Name('list', ctx=ast.Load()), args=[ast.Name(attributeIdentifier, ctx=ast.Load())])
+							list2Sequence()
 						case 'vararg':
 							cast(ast.FunctionDef, ClassDefMake.body[-1]).args.defaults.append(ast.Constant(None))
 						case _:
@@ -455,8 +442,6 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			, ast.ImportFrom('mapFolding.someAssemblyRequired._astTypes', [ast.alias('*')], 0)
 			, ast.ImportFrom('typing', [ast.alias(identifier) for identifier in ['Any', 'Literal', 'overload']], 0)
 			, ast.Import([ast.alias('ast')])
-			# TODO but idk what
-			, ast.Expr(ast.Constant('# ruff: noqa: F405'))
 			, ClassDefDOT
 			],
 		type_ignores=[]
@@ -471,8 +456,6 @@ def makeTools(astStubFile: ast.AST, logicalPathInfix: str_nameDOTname) -> None:
 			, ast.ImportFrom('mapFolding.someAssemblyRequired._astTypes', [ast.alias('*')], 0)
 			, ast.ImportFrom('typing', [ast.alias('Any'), ast.alias('Literal')], 0)
 			, ast.Import([ast.alias('ast')])
-			# TODO but idk what
-			, ast.Expr(ast.Constant('# ruff: noqa: F405'))
 			, ClassDefGrab
 			],
 		type_ignores=[]

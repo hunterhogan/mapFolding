@@ -15,7 +15,7 @@ from mapFolding.someAssemblyRequired import (
 )
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
 from mapFolding.someAssemblyRequired.toolboxNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
-from mapFolding.someAssemblyRequired.transformationTools import dictionaryEstimates, write_astModule, makeInitializedComputationState
+from mapFolding.someAssemblyRequired.transformationTools import write_astModule
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from mapFolding.dataBaskets import MapFoldingState
 from pathlib import PurePosixPath
@@ -131,19 +131,19 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 				ImaAnnAssign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[ast_arg.arg]
 				match elementConstructor:
 					case 'scalar':
-						ImaAnnAssign.value.args[0].value = int(job.state.__dict__[ast_arg.arg]) # type: ignore
+						cast(ast.Constant, cast(ast.Call, ImaAnnAssign.value).args[0]).value = int(job.state.__dict__[ast_arg.arg])
 					case 'array':
 						dataAsStrRLE: str = autoDecodingRLE(job.state.__dict__[ast_arg.arg], True)
 						dataAs_astExpr: ast.expr = cast(ast.Expr, ast.parse(dataAsStrRLE).body[0]).value
-						ImaAnnAssign.value.args = [dataAs_astExpr] # type: ignore
+						cast(ast.Call, ImaAnnAssign.value).args = [dataAs_astExpr]
 					case _:
 						list_exprDOTannotation: list[ast.expr] = []
 						list_exprDOTvalue: list[ast.expr] = []
 						for dimension in job.state.mapShape:
 							list_exprDOTannotation.append(Make.Name(elementConstructor))
 							list_exprDOTvalue.append(Make.Call(Make.Name(elementConstructor), [Make.Constant(dimension)]))
-						ImaAnnAssign.annotation.slice.elts = list_exprDOTannotation # type: ignore
-						ImaAnnAssign.value.elts = list_exprDOTvalue # type: ignore
+						cast(ast.Tuple, cast(ast.Subscript, cast(ast.AnnAssign, ImaAnnAssign).annotation).slice).elts = list_exprDOTannotation
+						cast(ast.Tuple, ImaAnnAssign.value).elts = list_exprDOTvalue
 
 				ingredientsFunction.astFunctionDef.body.insert(0, ImaAnnAssign)
 

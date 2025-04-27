@@ -374,7 +374,7 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	for ingredients in listAllIngredientsFunctions:
 		for source_Identifier, recipe_Identifier in listFindReplace:
 			updateName = NodeChanger(IfThis.isName_Identifier(source_Identifier) , Grab.idAttribute(Then.replaceWith(recipe_Identifier)))
-			update_arg = NodeChanger(IfThis.isArgument_Identifier(source_Identifier), Grab.argAttribute(Then.replaceWith(recipe_Identifier))) # type: ignore
+			update_arg = NodeChanger(IfThis.isArgument_Identifier(source_Identifier), Grab.argAttribute(Then.replaceWith(recipe_Identifier)))
 			updateName.visit(ingredients.astFunctionDef)
 			update_arg.visit(ingredients.astFunctionDef)
 

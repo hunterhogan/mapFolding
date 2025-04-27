@@ -1,3 +1,4 @@
+# ruff: noqa: F403, F405
 """This file is generated automatically, so changes to this file will be lost."""
 from collections.abc import Callable, Sequence
 from mapFolding import astDOTParamSpec, astDOTTryStar, astDOTTypeAlias, astDOTTypeVar, astDOTTypeVarTuple, astDOTtype_param
@@ -5,7 +6,6 @@ from mapFolding.someAssemblyRequired import ast_Identifier, ast_expr_Slice, Node
 from mapFolding.someAssemblyRequired._astTypes import *
 from typing import Any, Literal
 import ast
-'# ruff: noqa: F405'
 
 class Grab:
     """
