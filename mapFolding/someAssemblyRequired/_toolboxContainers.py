@@ -22,7 +22,7 @@ from collections import defaultdict
 from collections.abc import Callable, Sequence
 from copy import deepcopy
 from typing import Any, cast
-from mapFolding.someAssemblyRequired import ast_Identifier, DOT, IfThis, Make, NodeTourist, parseLogicalPath2astModule, str_nameDOTname, Then
+from mapFolding.someAssemblyRequired import ast_Identifier, Be, DOT, Grab, IfThis, Make, NodeTourist, parseLogicalPath2astModule, str_nameDOTname, Then
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3, The
 from pathlib import Path, PurePosixPath
 from Z0Z_tools import updateExtendPolishDictionaryLists
@@ -531,7 +531,15 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
 
-		sherpa = NodeTourist(IfThis.isAnnAssign_targetIs(IfThis.isName_Identifier(self.name)), Then.extractIt(DOT.annotation)).captureLastMatch(dataclassClassDef)
+
+
+		findThis = IfThis.isAnnAssign_targetIs(IfThis.isName_Identifier(self.name))
+
+		sherpa = NodeTourist(
+			findThis=findThis
+			, doThat=Then.extractIt(DOT.annotation)
+			).captureLastMatch(dataclassClassDef)
+
 		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
 		else: self.astAnnotation = sherpa
 

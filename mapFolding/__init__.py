@@ -47,7 +47,8 @@ foundation for exploring advanced code transformation techniques.
 from typing import Any, TypeAlias
 import sys
 
-stuPyd: TypeAlias = Any
+yourPythonIsOld: TypeAlias = Any
+# ruff: noqa: E402
 
 if sys.version_info >= (3, 12):
 	from ast import (
@@ -58,27 +59,27 @@ if sys.version_info >= (3, 12):
 		TypeVarTuple as astDOTTypeVarTuple,
 	)
 else:
-	astDOTParamSpec: TypeAlias = stuPyd
-	astDOTtype_param: TypeAlias = stuPyd
-	astDOTTypeAlias: TypeAlias = stuPyd
-	astDOTTypeVar: TypeAlias = stuPyd
-	astDOTTypeVarTuple: TypeAlias = stuPyd
+	astDOTParamSpec: TypeAlias = yourPythonIsOld
+	astDOTtype_param: TypeAlias = yourPythonIsOld
+	astDOTTypeAlias: TypeAlias = yourPythonIsOld
+	astDOTTypeVar: TypeAlias = yourPythonIsOld
+	astDOTTypeVarTuple: TypeAlias = yourPythonIsOld
 
 if sys.version_info >= (3, 11):
 	from ast import TryStar as astDOTTryStar
 	from typing import TypedDict as TypedDict
 	from typing import NotRequired as NotRequired
 else:
-	astDOTTryStar: TypeAlias = stuPyd
+	astDOTTryStar: TypeAlias = yourPythonIsOld
 	try:
 		from typing_extensions import TypedDict as TypedDict
 		from typing_extensions import NotRequired as NotRequired
 	except Exception:
-		TypedDict = dict[stuPyd, stuPyd]
+		TypedDict = dict[yourPythonIsOld, yourPythonIsOld]
 		from collections.abc import Iterable
 		NotRequired: TypeAlias = Iterable
 
-from mapFolding.datatypes import (  # noqa: E402
+from mapFolding.datatypes import (
 	Array1DElephino as Array1DElephino,
 	Array1DFoldsTotal as Array1DFoldsTotal,
 	Array1DLeavesTotal as Array1DLeavesTotal,
@@ -92,18 +93,18 @@ from mapFolding.datatypes import (  # noqa: E402
 	NumPyLeavesTotal as NumPyLeavesTotal,
 )
 
-from mapFolding.theSSOT import (  # noqa: E402
+from mapFolding.theSSOT import (
 	ComputationState as ComputationState,
 	raiseIfNoneGitHubIssueNumber3 as raiseIfNoneGitHubIssueNumber3,
 	The as The,
 )
 
-from mapFolding.theDao import (  # noqa: E402
+from mapFolding.theDao import (
 	countInitialize as countInitialize,
 	doTheNeedful as doTheNeedful,
 )
 
-from mapFolding.beDRY import (  # noqa: E402
+from mapFolding.beDRY import (
 	getLeavesTotal as getLeavesTotal,
 	getTaskDivisions as getTaskDivisions,
 	outfitCountFolds as outfitCountFolds,
@@ -111,17 +112,18 @@ from mapFolding.beDRY import (  # noqa: E402
 	validateListDimensions as validateListDimensions,
 )
 
-from mapFolding.toolboxFilesystem import (  # noqa: E402
+from mapFolding.toolboxFilesystem import (
 	getPathFilenameFoldsTotal as getPathFilenameFoldsTotal,
 	getPathRootJobDEFAULT as getPathRootJobDEFAULT,
 	saveFoldsTotal as saveFoldsTotal,
 	saveFoldsTotalFAILearly as saveFoldsTotalFAILearly,
-	writeStringToHere as writeStringToHere,
 )
 
-from mapFolding.basecamp import countFolds as countFolds  # noqa: E402
+from Z0Z_tools import writeStringToHere as writeStringToHere
 
-from mapFolding.oeis import (  # noqa: E402
+from mapFolding.basecamp import countFolds as countFolds
+
+from mapFolding.oeis import (
 	clearOEIScache as clearOEIScache,
 	getFoldsTotalKnown as getFoldsTotalKnown,
 	getOEISids as getOEISids,
