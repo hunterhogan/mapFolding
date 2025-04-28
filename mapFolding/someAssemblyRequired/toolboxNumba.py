@@ -133,7 +133,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 class SpicesJobNumba:
 	useNumbaProgressBar: bool = True
 	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
-	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba)
+	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba) # type: ignore
 
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:

@@ -26,7 +26,7 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 	shatter_dataclassesDOTdataclass,
 	unpackDataclassCallFunctionRepackDataclass,
 	write_astModule,
-	)
+)
 from pathlib import PurePath
 import ast
 
@@ -58,10 +58,7 @@ def makeInitializeGroupsOfFolds() -> None:
 	theCountingIdentifier = theCountingIdentifierHARDCODED
 
 	findThis = IfThis.isWhileAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-	doThat = Grab.testAttribute(Grab.andDoAllOf([
-		Grab.opsAttribute(Then.replaceWith([ast.Eq()])),
-		Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(theCountingIdentifier)))
-	]))
+	doThat = Grab.testAttribute(Grab.andDoAllOf([ Grab.opsAttribute(Then.replaceWith([ast.Eq()])), Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(theCountingIdentifier))) ])) # type: ignore
 	NodeChanger(findThis, doThat).visit(countInitializeIngredients.astFunctionDef.body[0])
 
 	ingredientsModule = IngredientsModule(countInitializeIngredients)
@@ -157,7 +154,7 @@ def makeTheorem2() -> PurePath:
 	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
 
 	findThis = IfThis.isWhileAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-	doThat = Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)])))
+	doThat = Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)]))) # type: ignore
 	NodeChanger(findThis, doThat).visit(countTheorem2.astFunctionDef)
 
 	findThis = IfThis.isIfAttributeNamespace_IdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')

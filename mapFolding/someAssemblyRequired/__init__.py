@@ -44,45 +44,36 @@ optimizations - while maintaining the ability to verify correctness at each tran
 test suite.
 """
 
-from mapFolding.someAssemblyRequired._theTypes import (
+from astToolkit import (
 	ast_expr_Slice as ast_expr_Slice,
 	ast_Identifier as ast_Identifier,
+	astModuleToIngredientsFunction as astModuleToIngredientsFunction,
+	Be as Be,
+	DOT as DOT,
+	extractClassDef as extractClassDef,
+	extractFunctionDef as extractFunctionDef,
+	Grab as Grab,
 	ImaCallToName as ImaCallToName,
-	NodeORattribute as NodeORattribute,
-	str_nameDOTname as str_nameDOTname,
-	个 as 个,
-)
-
-from mapFolding.someAssemblyRequired._astTypes import *  # noqa: F403
-
-from mapFolding.someAssemblyRequired._toolboxPython import (
 	importLogicalPath2Callable as importLogicalPath2Callable,
 	importPathFilename2Callable as importPathFilename2Callable,
-	NodeChanger as NodeChanger,
-	NodeTourist as NodeTourist,
-	parseLogicalPath2astModule as parseLogicalPath2astModule,
-	parsePathFilename2astModule as parsePathFilename2astModule,
-)
-
-from mapFolding.someAssemblyRequired._toolBe import Be as Be
-from mapFolding.someAssemblyRequired._toolDOT import DOT as DOT
-from mapFolding.someAssemblyRequired._toolGrab import Grab as Grab
-from mapFolding.someAssemblyRequired._toolMake import Make as Make
-
-from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis
-from mapFolding.someAssemblyRequired._toolThen import Then as Then
-
-from mapFolding.someAssemblyRequired._toolboxContainers import (
-	DeReConstructField2ast as DeReConstructField2ast,
 	IngredientsFunction as IngredientsFunction,
 	IngredientsModule as IngredientsModule,
 	LedgerOfImports as LedgerOfImports,
-	RecipeSynthesizeFlow as RecipeSynthesizeFlow,
-	ShatteredDataclass as ShatteredDataclass,
+	Make as Make,
+	NodeChanger as NodeChanger,
+	NodeORattribute as NodeORattribute,
+	NodeTourist as NodeTourist,
+	parseLogicalPath2astModule as parseLogicalPath2astModule,
+	parsePathFilename2astModule as parsePathFilename2astModule,
+	str_nameDOTname as str_nameDOTname,
+	Then as Then,
+	个 as 个,
 )
 
-from mapFolding.someAssemblyRequired._toolboxAST import (
-	astModuleToIngredientsFunction as astModuleToIngredientsFunction,
-	extractClassDef as extractClassDef,
-	extractFunctionDef as extractFunctionDef,
+from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis
+
+from mapFolding.someAssemblyRequired._toolboxContainers import (
+	DeReConstructField2ast as DeReConstructField2ast,
+	RecipeSynthesizeFlow as RecipeSynthesizeFlow,
+	ShatteredDataclass as ShatteredDataclass,
 )
