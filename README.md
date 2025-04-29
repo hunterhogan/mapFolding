@@ -11,12 +11,6 @@
 - You're interested in solving mathematical puzzles through code
 - You're learning about Numba and advanced Python optimization
 
-**This package is NOT for you if:**
-
-- You're looking for a general-purpose folding simulation tool
-- You need commercial-ready mapping software
-- You want simple visualization of folding patterns
-
 ## What Does This Package Actually Do?
 
 `mapFolding` solves a specific mathematical problem: counting the number of distinct ways to fold a rectangular map. While this may sound niche, it's a fascinating computational challenge that demonstrates:
@@ -31,7 +25,7 @@ The package has achieved new computational records, including first-ever calcula
 ```python
 # Compute the number of ways to fold a 5×5 grid:
 from mapFolding import oeisIDfor_n
-foldsTotal = oeisIDfor_n('A001418', 5)  # Returns 186,086,600
+foldsTotal = oeisIDfor_n('A001418', 5)
 ```
 
 ## Key Benefits for Computational Enthusiasts
@@ -121,5 +115,10 @@ If you've read this far and are intrigued by computational puzzles, algorithm op
 - Anyone fascinated by the intersection of mathematics and computing
 
 Whether you use it to solve map folding problems or to study its optimization techniques, `mapFolding` offers a unique window into advanced Python programming approaches.
+
+## My recovery
+
+[![Static Badge](https://img.shields.io/badge/2011_August-Homeless_since-blue?style=flat)](https://HunterThinks.com/support)
+[![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UC3Gx7kz61009NbhpRtPP7tw)](https://www.youtube.com/@HunterHogan)
 
 [![CC-BY-NC-4.0](https://github.com/hunterhogan/mapFolding/blob/main/CC-BY-NC-4.0.svg)](https://creativecommons.org/licenses/by-nc/4.0/)

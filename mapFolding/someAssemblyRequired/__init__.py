@@ -53,8 +53,6 @@ from astToolkit import (
 	extractClassDef as extractClassDef,
 	extractFunctionDef as extractFunctionDef,
 	Grab as Grab,
-	importLogicalPath2Callable as importLogicalPath2Callable,
-	importPathFilename2Callable as importPathFilename2Callable,
 	IngredientsFunction as IngredientsFunction,
 	IngredientsModule as IngredientsModule,
 	LedgerOfImports as LedgerOfImports,
@@ -67,6 +65,8 @@ from astToolkit import (
 	str_nameDOTname as str_nameDOTname,
 	Then as Then,
 )
+
+from Z0Z_tools import importLogicalPath2Callable as importLogicalPath2Callable, importPathFilename2Callable as importPathFilename2Callable
 
 from astToolkit.transformationTools import (
 	inlineFunctionDef as inlineFunctionDef,
