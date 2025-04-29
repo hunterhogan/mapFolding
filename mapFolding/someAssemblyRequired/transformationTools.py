@@ -18,9 +18,7 @@ readable, maintainable implementations to highly optimized versions while preser
 logical structure and correctness.
 """
 
-from astToolkit.transformationTools import ( inlineFunctionDef as inlineFunctionDef, removeUnusedParameters as removeUnusedParameters, write_astModule as write_astModule, )
-from collections.abc import Callable, Mapping
-from copy import deepcopy
+from collections.abc import Callable
 from mapFolding.beDRY import outfitCountFolds
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
@@ -33,16 +31,18 @@ from mapFolding.someAssemblyRequired import (
 	importLogicalPath2Callable,
 	IngredientsFunction,
 	IngredientsModule,
+	inlineFunctionDef,
 	LedgerOfImports,
 	Make,
 	NodeChanger,
 	NodeTourist,
 	parseLogicalPath2astModule,
 	RecipeSynthesizeFlow,
+	removeUnusedParameters,
 	ShatteredDataclass,
 	str_nameDOTname,
 	Then,
-	个,
+	unparseFindReplace,
 )
 from mapFolding.theSSOT import ComputationState, The
 from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal
@@ -230,7 +230,7 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	if recipeFlow.removeDataclassParallel:
 		ingredientsParallel.astFunctionDef.args = Make.arguments(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 
-		ingredientsParallel.astFunctionDef = Z0Z_lameFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
+		ingredientsParallel.astFunctionDef = unparseFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
 
 		ingredientsParallel = removeUnusedParameters(ingredientsParallel)
 
@@ -274,7 +274,7 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
 	changeReturnCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
 	changeReturnCallable.visit(ingredientsTarget.astFunctionDef)
-	ingredientsTarget.astFunctionDef = Z0Z_lameFindReplace(ingredientsTarget.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
+	ingredientsTarget.astFunctionDef = unparseFindReplace(ingredientsTarget.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
 	return ingredientsTarget
 
 def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, targetCallableIdentifier: ast_Identifier, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
@@ -294,37 +294,3 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 	(3,3,3,3): 85109616000000000000000000000000,
 	(8,8): 791274195985524900,
 }
-
-# END of marginal classes and functions ======================================================
-def Z0Z_lameFindReplace(astTree: 个, mappingFindReplaceNodes: Mapping[ast.AST, ast.AST]) -> 个:
-	"""
-	Recursively replace AST nodes based on a mapping of find-replace pairs.
-
-	This function applies brute-force node replacement throughout an AST tree
-	by comparing textual representations of nodes. While not the most efficient
-	approach, it provides a reliable way to replace complex nested structures
-	when more precise targeting methods are difficult to implement.
-
-	The function continues replacing nodes until no more changes are detected
-	in the AST's textual representation, ensuring complete replacement throughout
-	the tree structure.
-
-	Parameters:
-		astTree: The AST structure to modify.
-		mappingFindReplaceNodes: A mapping from source nodes to replacement nodes.
-
-	Returns:
-		The modified AST structure with all matching nodes replaced.
-	"""
-	keepGoing = True
-	newTree = deepcopy(astTree)
-
-	while keepGoing:
-		for nodeFind, nodeReplace in mappingFindReplaceNodes.items():
-			NodeChanger(IfThis.unparseIs(nodeFind), Then.replaceWith(nodeReplace)).visit(newTree)
-
-		if ast.unparse(newTree) == ast.unparse(astTree):
-			keepGoing = False
-		else:
-			astTree = deepcopy(newTree)
-	return newTree

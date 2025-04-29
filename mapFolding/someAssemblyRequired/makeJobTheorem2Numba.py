@@ -12,10 +12,10 @@ from mapFolding.someAssemblyRequired import (
 	NodeTourist,
 	str_nameDOTname,
 	Then,
+	write_astModule,
 )
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
 from mapFolding.someAssemblyRequired.toolboxNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
-from mapFolding.someAssemblyRequired.transformationTools import write_astModule
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from mapFolding.dataBaskets import MapFoldingState
 from pathlib import PurePosixPath

@@ -9,23 +9,23 @@ from mapFolding.someAssemblyRequired import (
 	IfThis,
 	IngredientsFunction,
 	IngredientsModule,
+	inlineFunctionDef,
 	LedgerOfImports,
 	Make,
 	NodeChanger,
 	NodeTourist,
 	parseLogicalPath2astModule,
 	parsePathFilename2astModule,
-	Then,
+	removeUnusedParameters,
 	str_nameDOTname,
+	Then,
+	write_astModule,
 )
 from mapFolding.someAssemblyRequired.toolboxNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
-	inlineFunctionDef,
 	removeDataclassFromFunction,
-	removeUnusedParameters,
 	shatter_dataclassesDOTdataclass,
 	unpackDataclassCallFunctionRepackDataclass,
-	write_astModule,
 )
 from pathlib import PurePath
 import ast
@@ -168,7 +168,7 @@ def makeTheorem2() -> PurePath:
 	doThat = Then.removeIt
 	NodeChanger(findThis, doThat).visit(countTheorem2.astFunctionDef)
 
-	findThis = IfThis.isAttributeNamespace_IdentifierLessThanOrEqual(dataclassInstanceIdentifier, 'leaf1ndex')
+	findThis = IfThis.isAttributeNamespace_IdentifierLessThanOrEqual0(dataclassInstanceIdentifier, 'leaf1ndex')
 	doThat = Then.removeIt
 	NodeChanger(findThis, doThat).visit(countTheorem2.astFunctionDef)
 

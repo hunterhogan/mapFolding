@@ -51,3 +51,9 @@ class IfThis(astToolkit_IfThis):
 	def isWhileAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.While] | bool]:
 		return lambda node: (Be.While(node)
 					and IfThis.isAttributeNamespace_IdentifierGreaterThan0(namespace, identifier)(node.test))
+
+	@staticmethod
+	def isAttributeNamespace_IdentifierLessThanOrEqual0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
+		return lambda node: (Be.Compare(node)
+					and IfThis.isAttributeNamespace_Identifier(namespace, identifier)(node.left)
+					and Be.LtE(node.ops[0]))

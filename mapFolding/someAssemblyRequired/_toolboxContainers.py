@@ -18,10 +18,9 @@ The containers work in conjunction with transformation tools that manipulate the
 specific optimizations and transformations.
 """
 
-from astToolkit import IngredientsFunction as IngredientsFunction, IngredientsModule as IngredientsModule, LedgerOfImports as LedgerOfImports
 from collections.abc import Callable
 from copy import deepcopy
-from mapFolding.someAssemblyRequired import ast_Identifier, DOT, IfThis, Make, NodeTourist, parseLogicalPath2astModule, str_nameDOTname, Then
+from mapFolding.someAssemblyRequired import ast_Identifier, DOT, IfThis, Make, NodeTourist, parseLogicalPath2astModule, str_nameDOTname, Then, LedgerOfImports
 from mapFolding.theSSOT import raiseIfNoneGitHubIssueNumber3, The
 from pathlib import Path, PurePosixPath
 from typing import Any, cast
@@ -158,10 +157,10 @@ class ShatteredDataclass:
 	countingVariableName: ast.Name
 	"""AST name node representing the counting variable identifier."""
 
-	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=dict)
+	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=lambda: dict[ast_Identifier, ast.AnnAssign | ast.Assign]())
 	"""Maps field names to their corresponding AST call expressions."""
 
-	Z0Z_field2AnnAssign: dict[ast_Identifier, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=dict)
+	Z0Z_field2AnnAssign: dict[ast_Identifier, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=lambda: dict[ast_Identifier, tuple[ast.AnnAssign | ast.Assign, str]]())
 
 	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
 	"""AST tuple used as target for assignment to capture returned fragments."""
@@ -169,22 +168,22 @@ class ShatteredDataclass:
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	"""Import records for the dataclass and its constituent parts."""
 
-	list_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list)
+	list_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=lambda: list[ast.arg]())
 	"""Function argument nodes with annotations for parameter specification."""
 
-	list_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list)
+	list_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=lambda: list[ast.keyword]())
 	"""Keyword arguments for dataclass initialization with field=field format."""
 
-	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=list)
+	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=lambda: list[ast.expr]())
 	"""Type annotations for each dataclass field."""
 
-	listName4Parameters: list[ast.Name] = dataclasses.field(default_factory=list)
+	listName4Parameters: list[ast.Name] = dataclasses.field(default_factory=lambda: list[ast.Name]())
 	"""Name nodes for each dataclass field used as function parameters."""
 
-	listUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list)
+	listUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=lambda: list[ast.AnnAssign]())
 	"""Annotated assignment statements to extract fields from dataclass."""
 
-	map_stateDOTfield2Name: dict[ast.AST, ast.Name] = dataclasses.field(default_factory=dict)
+	map_stateDOTfield2Name: dict[ast.AST, ast.Name] = dataclasses.field(default_factory=lambda: dict[ast.AST, ast.Name]())
 	"""Maps AST expressions to Name nodes for find-replace operations."""
 
 	repack: ast.Assign = dummyAssign

@@ -53,7 +53,6 @@ from astToolkit import (
 	extractClassDef as extractClassDef,
 	extractFunctionDef as extractFunctionDef,
 	Grab as Grab,
-	ImaCallToName as ImaCallToName,
 	importLogicalPath2Callable as importLogicalPath2Callable,
 	importPathFilename2Callable as importPathFilename2Callable,
 	IngredientsFunction as IngredientsFunction,
@@ -67,7 +66,13 @@ from astToolkit import (
 	parsePathFilename2astModule as parsePathFilename2astModule,
 	str_nameDOTname as str_nameDOTname,
 	Then as Then,
-	个 as 个,
+)
+
+from astToolkit.transformationTools import (
+	inlineFunctionDef as inlineFunctionDef,
+	removeUnusedParameters as removeUnusedParameters,
+	unparseFindReplace as unparseFindReplace,
+	write_astModule as write_astModule,
 )
 
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis

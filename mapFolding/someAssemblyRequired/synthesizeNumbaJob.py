@@ -32,10 +32,11 @@ from mapFolding.someAssemblyRequired import (
 	NodeTourist,
 	str_nameDOTname,
 	Then,
+	write_astModule,
 )
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
 from mapFolding.someAssemblyRequired.toolboxNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
-from mapFolding.someAssemblyRequired.transformationTools import dictionaryEstimates, write_astModule, makeInitializedComputationState
+from mapFolding.someAssemblyRequired.transformationTools import dictionaryEstimates, makeInitializedComputationState
 from pathlib import PurePosixPath
 from typing import cast, NamedTuple
 from Z0Z_tools import autoDecodingRLE
