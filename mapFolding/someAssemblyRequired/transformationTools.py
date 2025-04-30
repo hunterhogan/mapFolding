@@ -19,7 +19,7 @@ logical structure and correctness.
 """
 
 from collections.abc import Callable
-from mapFolding.beDRY import outfitCountFolds
+from mapFolding import outfitCountFolds, ComputationState, The, getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	astModuleToIngredientsFunction,
@@ -44,8 +44,6 @@ from mapFolding.someAssemblyRequired import (
 	Then,
 	unparseFindReplace,
 )
-from mapFolding.theSSOT import ComputationState, The
-from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
 from os import PathLike
 from pathlib import Path, PurePath
 from typing import Any, Literal, overload

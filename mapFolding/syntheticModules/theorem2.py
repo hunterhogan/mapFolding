@@ -1,4 +1,4 @@
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding import MapFoldingState
 
 def count(state: MapFoldingState) -> MapFoldingState:
     while state.leaf1ndex > 4:

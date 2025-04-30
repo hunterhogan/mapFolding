@@ -1,9 +1,8 @@
+from mapFolding import ComputationState, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState
+from mapFolding import DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
 from mapFolding.someAssemblyRequired import ShatteredDataclass, ast_Identifier, parseLogicalPath2astModule, parsePathFilename2astModule, str_nameDOTname
 from mapFolding.someAssemblyRequired.toolkitNumba import theNumbaFlow
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
-from mapFolding.theSSOT import ComputationState, DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
-from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
-from mapFolding.dataBaskets import MapFoldingState
 from pathlib import Path, PurePosixPath
 from typing import TypeAlias
 import dataclasses

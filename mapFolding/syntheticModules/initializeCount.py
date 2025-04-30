@@ -1,4 +1,4 @@
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding import MapFoldingState
 
 def initializeGroupsOfFolds(state: MapFoldingState) -> MapFoldingState:
     while state.groupsOfFolds == 0:

@@ -1,4 +1,4 @@
-from mapFolding import getPathFilenameFoldsTotal, raiseIfNoneGitHubIssueNumber3, The
+from mapFolding import getPathFilenameFoldsTotal, raiseIfNoneGitHubIssueNumber3, The, MapFoldingState
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	Be,
@@ -17,7 +17,6 @@ from mapFolding.someAssemblyRequired import (
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
 from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
-from mapFolding.dataBaskets import MapFoldingState
 from pathlib import PurePosixPath
 from typing import cast, NamedTuple
 from Z0Z_tools import autoDecodingRLE

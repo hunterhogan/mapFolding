@@ -56,8 +56,7 @@ See the examples in `test_computations.py` for guidance on adapting these fixtur
 """
 
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import The
-from mapFolding.beDRY import getLeavesTotal, validateListDimensions, makeDataContainer
+from mapFolding import getLeavesTotal, validateListDimensions, makeDataContainer, The
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from mapFolding.someAssemblyRequired import importLogicalPath2Callable, RecipeSynthesizeFlow
 from pathlib import Path, PurePosixPath
@@ -246,27 +245,27 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 	Returns
 		A context manager for patching the dispatcher
 	"""
-	import mapFolding.theSSOT as theSSOT
-	from mapFolding.theSSOT import The
+	import mapFolding.infoBooth as infoBooth
+	from mapFolding import The
 
 	# Store original property method
-	original_dispatcher_property = theSSOT.PackageSettings.dispatcher
+	original_dispatcher_property = infoBooth.PackageInformation.dispatcher
 
 	def patchDispatcher(callableTarget: Callable[..., Any]) -> None:
 		"""Patch the dispatcher property to return the target callable."""
 		# Create a new property that returns the target callable
-		def patched_dispatcher(self: theSSOT.PackageSettings) -> Callable[..., Any]:
+		def patched_dispatcher(self: infoBooth.PackageInformation) -> Callable[..., Any]:
 			def wrapper(state: Any) -> Any:
 				return callableTarget(state)
 			return wrapper
 
 		# Replace the property with our patched version
-		theSSOT.PackageSettings.dispatcher = property(patched_dispatcher) # type: ignore
+		infoBooth.PackageInformation.dispatcher = property(patched_dispatcher) # type: ignore
 
 	yield patchDispatcher
 
 	# Restore the original property
-	theSSOT.PackageSettings.dispatcher = original_dispatcher_property # type: ignore
+	infoBooth.PackageInformation.dispatcher = original_dispatcher_property # type: ignore
 
 def getAlgorithmDispatcher() -> Callable[..., Any]:
 	moduleImported: ModuleType = importlib.import_module(The.logicalPathModuleSourceAlgorithm)

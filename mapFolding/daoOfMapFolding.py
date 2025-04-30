@@ -1,4 +1,4 @@
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding import MapFoldingState
 
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
 	return state.leaf1ndex > 0

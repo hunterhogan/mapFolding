@@ -18,12 +18,13 @@ These utilities form a stable internal API that other modules depend on, particu
 theDao (core algorithm), and the synthetic module generators that produce optimized implementations.
 """
 from collections.abc import Sequence
-from mapFolding import ComputationState, NumPyIntegerType
+from mapFolding import Array1DElephino, Array1DFoldsTotal, Array1DLeavesTotal, Array3D, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, NumPyIntegerType
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
 from typing import Any
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 import numpy
+import dataclasses
 
 def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 	"""
@@ -58,7 +59,6 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, leavesTotal: int) -> int:
 	"""
 	Determines whether to divide the computation into tasks and how many divisions.
-
 
 	Parameters
 	----------
@@ -207,6 +207,117 @@ def makeDataContainer(shape: int | tuple[int, ...], datatype: type[NumPyIntegerT
 		A NumPy array of zeros with the specified shape and `datatype`.
 	"""
 	return numpy.zeros(shape, dtype=datatype)
+
+
+@dataclasses.dataclass
+class ComputationState:
+	"""
+	Represents the complete state of a map folding computation.
+
+	This dataclass encapsulates all the information required to compute the number of possible ways to fold a map,
+	including the map dimensions, leaf connections, computation progress, and fold counting. It serves as the central
+	data structure that flows through the entire computational algorithm.
+
+	Fields are categorized into:
+	1. Input parameters (`mapShape`, `leavesTotal`, etc.).
+	2. Core computational structures (`connectionGraph`, etc.).
+	3. Tracking variables for the folding algorithm state.
+	4. Result accumulation fields (`foldsTotal`, `groupsOfFolds`).
+	"""
+	# NOTE Python is anti-DRY, again, `DatatypeLeavesTotal` metadata needs to match the type
+	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
+	"""Dimensions of the map to be folded, as a tuple of integers."""
+
+	leavesTotal: DatatypeLeavesTotal
+	"""Total number of leaves (unit squares) in the map, equal to the product of all dimensions."""
+
+	taskDivisions: DatatypeLeavesTotal
+	"""Number of parallel tasks to divide the computation into. Zero means sequential computation."""
+
+	concurrencyLimit: DatatypeElephino
+	"""Maximum number of concurrent processes to use during computation."""
+
+	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'dtype': Array3D.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+	"""3D array encoding the connections between leaves in all dimensions."""
+
+	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	"""Total number of dimensions in the map shape."""
+
+	# I am using `dataclasses.field` metadata and `typeAlias.__args__[1].__args__[0]` to make the code more DRY. https://github.com/hunterhogan/mapFolding/issues/9
+	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Tracks how many dimensions are gapped for each leaf."""
+
+	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Number of dimensions that are not constrained in the current folding state."""
+
+	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Starting index for the gap range for each leaf."""
+
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Tracks where gaps occur in the folding pattern."""
+
+	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""For each leaf, stores the index of the leaf above it in the folding pattern."""
+
+	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""For each leaf, stores the index of the leaf below it in the folding pattern."""
+
+	foldGroups: Array1DFoldsTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DFoldsTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Accumulator for fold groups across parallel tasks."""
+
+	foldsTotal: DatatypeFoldsTotal = DatatypeFoldsTotal(0)
+	"""The final computed total number of distinct folding patterns."""
+
+	gap1ndex: DatatypeElephino = DatatypeElephino(0)
+	"""Current index into gaps array during algorithm execution."""
+
+	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
+	"""Upper limit for gap index during the current algorithm phase."""
+
+	groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})
+	"""Accumulator for the number of fold groups found during computation."""
+
+	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	"""Current dimension being processed during algorithm execution."""
+
+	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	"""Current leaf index during iteration."""
+
+	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
+	"""Index used when filtering common gaps."""
+
+	leaf1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(1)
+	"""Active leaf being processed in the folding algorithm. Starts at 1, not 0."""
+
+	leafConnectee: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	"""Leaf that is being connected to the active leaf."""
+
+	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	"""Index of the current parallel task when using task divisions."""
+
+	def __post_init__(self) -> None:
+		from mapFolding.beDRY import getConnectionGraph, makeDataContainer
+		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
+		leavesTotalAsInt = int(self.leavesTotal)
+		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
+
+		if self.dimensionsUnconstrained is None: self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal)) # pyright: ignore[reportUnnecessaryComparison]
+
+		if self.foldGroups is None: # pyright: ignore[reportUnnecessaryComparison]
+			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), self.__dataclass_fields__['foldGroups'].metadata['dtype'])
+			self.foldGroups[-1] = self.leavesTotal
+
+		# Dataclasses, Default factories, and arguments in `ComputationState` https://github.com/hunterhogan/mapFolding/issues/12
+		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
+
+		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
+		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
+		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
+		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
+
+	# Automatic, or not, calculation in dataclass `ComputationState` https://github.com/hunterhogan/mapFolding/issues/14
+	def getFoldsTotal(self) -> None:
+		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
 
 def outfitCountFolds(mapShape: tuple[int, ...], computationDivisions: int | str | None = None, concurrencyLimit: int = 1) -> ComputationState:
 	"""

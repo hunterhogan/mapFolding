@@ -1,5 +1,14 @@
-from mapFolding.beDRY import getConnectionGraph, getLeavesTotal, makeDataContainer
-from mapFolding.datatypes import Array3D, Array1DElephino, Array1DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
+from mapFolding import (
+	Array1DElephino,
+	Array1DLeavesTotal,
+	Array3D,
+	DatatypeElephino,
+	DatatypeFoldsTotal,
+	DatatypeLeavesTotal,
+	getConnectionGraph,
+	getLeavesTotal,
+	makeDataContainer,
+)
 import dataclasses
 
 @dataclasses.dataclass
