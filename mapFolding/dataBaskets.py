@@ -58,6 +58,19 @@ class MapFoldingState:
 		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 
 @dataclasses.dataclass
+class ParallelMapFoldingState(MapFoldingState):
+	taskDivisions: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	"""Number of tasks into which to divide the computation. If the value is greater than `leavesTotal`, the computation will be wrong. Default is `leavesTotal`."""
+
+	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	"""Index of the current task when using task divisions."""
+
+	def __post_init__(self) -> None:
+		super().__post_init__()
+		if self.taskDivisions == 0:
+			self.taskDivisions = DatatypeLeavesTotal(int(self.leavesTotal))
+
+@dataclasses.dataclass
 class LeafSequenceState(MapFoldingState):
 	leafSequence: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
 

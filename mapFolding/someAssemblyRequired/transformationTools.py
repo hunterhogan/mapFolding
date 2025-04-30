@@ -114,8 +114,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 		instance_Identifier: The variable name to use for the dataclass instance in generated code.
 
 	Returns:
-		A ShatteredDataclass containing AST representations of all dataclass components,
-		with imports, field definitions, annotations, and repackaging code.
+		shatteredDataclass: A ShatteredDataclass containing AST representations of all dataclass components,
+			with imports, field definitions, annotations, and repackaging code.
 
 	Raises:
 		ValueError: If the dataclass cannot be found in the specified module or if no counting variable is identified in the dataclass.
@@ -134,11 +134,12 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 			countingVariable = dictionaryDeReConstruction[aField.name].name
 
 	if countingVariable is None:
-		raise ValueError(f"I could not find the counting variable in `{dataclass_Identifier = }` in `{logicalPathModule = }`.")
+		import warnings
+		warnings.warn(message=f"I could not find the counting variable in `{dataclass_Identifier = }` in `{logicalPathModule = }`.", category=UserWarning)
 
 	shatteredDataclass = ShatteredDataclass(
-		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation,
-		countingVariableName=dictionaryDeReConstruction[countingVariable].astName,
+		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation if countingVariable else None,
+		countingVariableName=dictionaryDeReConstruction[countingVariable].astName if countingVariable else None,
 		field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder},
 		Z0Z_field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].Z0Z_hack for field in Official_fieldOrder},
 		list_argAnnotated4ArgumentsSpecification=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],

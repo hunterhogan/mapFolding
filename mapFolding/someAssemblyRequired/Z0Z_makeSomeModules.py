@@ -1,3 +1,5 @@
+from Z0Z_tools import importLogicalPath2Callable
+from astToolkit import extractClassDef
 from mapFolding import raiseIfNoneGitHubIssueNumber3, The
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
@@ -20,6 +22,8 @@ from mapFolding.someAssemblyRequired import (
 	str_nameDOTname,
 	Then,
 	write_astModule,
+	DeReConstructField2ast,
+	ShatteredDataclass,
 )
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
@@ -29,6 +33,7 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 )
 from pathlib import PurePath
 import ast
+import dataclasses
 
 algorithmSourceModuleHARDCODED = 'daoOfMapFolding'
 sourceCallableIdentifierHARDCODED = 'count'
@@ -128,6 +133,167 @@ def makeDaoOfMapFolding() -> PurePath:
 	changeAssignCallToTarget.visit(doTheNeedful.astFunctionDef)
 
 	ingredientsModule = IngredientsModule([daoOfMapFolding, doTheNeedful])
+	ingredientsModule.removeImportFromModule('numpy')
+
+	pathFilename = PurePath(The.pathPackage, logicalPathInfix, moduleIdentifier + The.fileExtension)
+
+	write_astModule(ingredientsModule, pathFilename, The.packageName)
+
+	return pathFilename
+
+def makeDaoOfMapFoldingParallel() -> PurePath:
+	"""Notes
+	Additional state information: taskDivisions, taskIndex
+	Additional flow information: CPUlimit (already handled in basecamp.py)
+	Additional count logic: `if thisIsMyTaskIndex`
+
+	Make a state container to store the state of one task.
+	Make a state container to store the state of all tasks.
+
+	I know you don't want to do this, but if you segregate the parallel computations now, they will have their own
+	transformation assembly line--that you don't have to care about.
+	"""
+	moduleIdentifierHARDCODED: ast_Identifier = 'countParallel'
+
+	algorithmSourceModule = algorithmSourceModuleHARDCODED
+	sourceCallableIdentifier = sourceCallableIdentifierHARDCODED
+	logicalPathSourceModule = '.'.join([The.packageName, algorithmSourceModule])
+
+	logicalPathInfix = logicalPathInfixHARDCODED
+	moduleIdentifier = moduleIdentifierHARDCODED
+
+	astModule = parseLogicalPath2astModule(logicalPathSourceModule)
+	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule)
+		, LedgerOfImports(astModule))
+
+	dataclassName: ast.expr | None = NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef)
+	if dataclassName is None: raise raiseIfNoneGitHubIssueNumber3
+	dataclass_Identifier: ast_Identifier | None = NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName)
+	if dataclass_Identifier is None: raise raiseIfNoneGitHubIssueNumber3
+
+	dataclassLogicalPathModule = None
+	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports.dictionaryImportFrom.items():
+		for nameTuple in listNameTuples:
+			if nameTuple[0] == dataclass_Identifier:
+				dataclassLogicalPathModule = moduleWithLogicalPath
+				break
+		if dataclassLogicalPathModule:
+			break
+	if dataclassLogicalPathModule is None: raise raiseIfNoneGitHubIssueNumber3
+	dataclassInstanceIdentifier = NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef)
+	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
+	shatteredDataclass = shatter_dataclassesDOTdataclass(dataclassLogicalPathModule, dataclass_Identifier, dataclassInstanceIdentifier)
+
+	ingredientsFunction.imports.update(shatteredDataclass.imports)
+	ingredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclass)
+
+	# Start add the parallel state fields to the count function ================================================
+	dataclassBaseFields = dataclasses.fields(importLogicalPath2Callable(dataclassLogicalPathModule, dataclass_Identifier))  # pyright: ignore [reportArgumentType]
+	dataclass_IdentifierParallel = 'Parallel' + dataclass_Identifier
+	dataclassFieldsParallel = dataclasses.fields(importLogicalPath2Callable(dataclassLogicalPathModule, dataclass_IdentifierParallel))  # pyright: ignore [reportArgumentType]
+	onlyParallelFields = [field for field in dataclassFieldsParallel if field.name not in [fieldBase.name for fieldBase in dataclassBaseFields]]
+
+	Official_fieldOrder: list[ast_Identifier] = []
+	dictionaryDeReConstruction: dict[ast_Identifier, DeReConstructField2ast] = {}
+
+	dataclassClassDef = extractClassDef(parseLogicalPath2astModule(dataclassLogicalPathModule), dataclass_IdentifierParallel)
+	if not isinstance(dataclassClassDef, ast.ClassDef): raise ValueError(f"I could not find `{dataclass_IdentifierParallel = }` in `{dataclassLogicalPathModule = }`.")
+
+	countingVariable = None
+	for aField in onlyParallelFields:
+		Official_fieldOrder.append(aField.name)
+		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(dataclassLogicalPathModule, dataclassClassDef, dataclassInstanceIdentifier, aField)
+
+	shatteredDataclassParallel = ShatteredDataclass(
+		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation if countingVariable else None,
+		countingVariableName=dictionaryDeReConstruction[countingVariable].astName if countingVariable else None,
+		field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder},
+		Z0Z_field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].Z0Z_hack for field in Official_fieldOrder},
+		list_argAnnotated4ArgumentsSpecification=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
+		list_keyword_field__field4init=[dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
+		listAnnotations=[dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],
+		listName4Parameters=[dictionaryDeReConstruction[field].astName for field in Official_fieldOrder],
+		listUnpack=[Make.AnnAssign(dictionaryDeReConstruction[field].astName, dictionaryDeReConstruction[field].astAnnotation, dictionaryDeReConstruction[field].ast_nameDOTname) for field in Official_fieldOrder],
+		map_stateDOTfield2Name={dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder},
+		)
+	shatteredDataclassParallel.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclassParallel.listName4Parameters, ast.Store())
+	fragments4AssignmentOrParametersExtended = Make.Tuple(shatteredDataclass.listName4Parameters + shatteredDataclassParallel.listName4Parameters, ast.Store())
+	shatteredDataclassParallel.repack = Make.Assign([Make.Name(dataclassInstanceIdentifier)], value=Make.Call(Make.Name(dataclass_IdentifierParallel), list_keyword=shatteredDataclassParallel.list_keyword_field__field4init))
+
+	shatteredDataclassParallel.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclassParallel.listAnnotations))
+	signatureReturnAnnotationExtended = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.listAnnotations + shatteredDataclassParallel.listAnnotations))
+	shatteredDataclassParallel.imports.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
+	shatteredDataclassParallel.imports.addImportFrom_asStr(dataclassLogicalPathModule, dataclass_IdentifierParallel)
+
+	ingredientsFunction.astFunctionDef.args.args.extend(shatteredDataclassParallel.list_argAnnotated4ArgumentsSpecification)
+	ingredientsFunction.astFunctionDef.returns = signatureReturnAnnotationExtended
+	changeReturnCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(fragments4AssignmentOrParametersExtended)))
+	changeReturnCallable.visit(ingredientsFunction.astFunctionDef)
+	"""I need to do the equivalent of this:
+	This:
+	state = countGaps(state)
+	Becomes:
+	if thisIsMyTaskIndex(state):
+		state = countGaps(state)
+
+	def thisIsMyTaskIndex(state: ComputationState) -> bool:
+		return (state.leaf1ndex != state.taskDivisions) or (state.leafConnectee % state.taskDivisions == state.taskIndex)
+
+
+	It _might_ be easier to add the conditional check before inlining the functions.
+	But, even if it is easier, I think I want to focus on making a highly reusable function to transform sequential count to parallel count.
+	omg, that sounds hard.
+	I'll come back to this.
+	def countGaps(state: ComputationState) -> ComputationState:
+		state.gapsWhere[state.gap1ndexCeiling] = state.leafConnectee
+		if state.countDimensionsGapped[state.leafConnectee] == 0:
+			state = incrementGap1ndexCeiling(state)
+		state.countDimensionsGapped[state.leafConnectee] += 1
+		return state
+
+	"""
+
+	# End add the parallel state fields to the count function ================================================
+
+	ingredientsFunction = removeUnusedParameters(ingredientsFunction)
+
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
+
+	sourceCallableIdentifier = The.sourceCallableDispatcher
+
+	doTheNeedful: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
+	doTheNeedful.imports.update(shatteredDataclass.imports)
+	targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
+	doTheNeedful = unpackDataclassCallFunctionRepackDataclass(doTheNeedful, targetCallableIdentifier, shatteredDataclass)
+
+	"""
+	In doTheNeedful, I need to
+	- make the master copy of the state
+	- implement concurrency
+	- change the dataclass from MapFoldingState to ParallelMapFoldingState
+		- import
+		- parameter annotation
+		- return annotation
+		- when repacking, call the new identifier
+	- unpack the new fields
+	- have a master groupsOfFolds with the total from all taskIndex
+	- repack the new fields
+	- store each taskIndex state in a yet-to-be-created array (probably a primitive list indexed by taskIndex): this is strictly for the research purposes. Someone may want to examine and compare the states of the task divisions.
+	"""
+
+	# THIS is fanfreakingtastic. This dynamically updates the calling function (doTheNeedful) to have the correct
+	# parameters in the call (to targetCallableIdentifier) and the correct identifiers in the return. NOTE that this
+	# version of the function assumes that 1) the callee returns all of the parameters passed as arguments, 2) that the
+	# callee parameters are in the exact same order as the return, and 3) that the identifiers are all exactly the same.
+	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)
+	if astTuple is None: raise raiseIfNoneGitHubIssueNumber3
+	astTuple.ctx = ast.Store()
+	findThis = IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(targetCallableIdentifier))
+	doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
+	changeAssignCallToTarget = NodeChanger(findThis, doThat)
+	changeAssignCallToTarget.visit(doTheNeedful.astFunctionDef)
+
+	ingredientsModule = IngredientsModule([ingredientsFunction, doTheNeedful])
 	ingredientsModule.removeImportFromModule('numpy')
 
 	pathFilename = PurePath(The.pathPackage, logicalPathInfix, moduleIdentifier + The.fileExtension)
@@ -323,3 +489,4 @@ if __name__ == '__main__':
 	astImportFrom = numbaOnTheorem2(pathFilename)
 	makeUnRePackDataclass(astImportFrom)
 	makeDaoOfMapFolding()
+	makeDaoOfMapFoldingParallel()

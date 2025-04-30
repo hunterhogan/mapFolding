@@ -151,10 +151,10 @@ dummyTuple = Make.Tuple([Make.Name("dummyElement")])
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class ShatteredDataclass:
-	countingVariableAnnotation: ast.expr
+	countingVariableAnnotation: ast.expr | None
 	"""Type annotation for the counting variable extracted from the dataclass."""
 
-	countingVariableName: ast.Name
+	countingVariableName: ast.Name | None
 	"""AST name node representing the counting variable identifier."""
 
 	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=lambda: dict[ast_Identifier, ast.AnnAssign | ast.Assign]())

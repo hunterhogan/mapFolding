@@ -21,7 +21,7 @@ they implement a declarative approach to AST manipulation that separates node id
 
 from astToolkit import IfThis as astToolkit_IfThis
 from collections.abc import Callable
-from mapFolding.someAssemblyRequired import ast_Identifier, Be
+from mapFolding.someAssemblyRequired import ast_Identifier, Be, DOT
 from typing import TypeGuard
 import ast
 
@@ -39,21 +39,21 @@ class IfThis(astToolkit_IfThis):
 	@staticmethod
 	def isAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
 		return lambda node: (Be.Compare(node)
-					and IfThis.isAttributeNamespace_Identifier(namespace, identifier)(node.left)
+					and IfThis.isAttributeNamespace_Identifier(namespace, identifier)(DOT.left(node))
 					and Be.Gt(node.ops[0])
 					and IfThis.isConstant_value(0)(node.comparators[0]))
 	@staticmethod
 	def isIfAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.If] | bool]:
 		return lambda node: (Be.If(node)
-					and IfThis.isAttributeNamespace_IdentifierGreaterThan0(namespace, identifier)(node.test))
+					and IfThis.isAttributeNamespace_IdentifierGreaterThan0(namespace, identifier)(DOT.test(node)))
 
 	@staticmethod
 	def isWhileAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.While] | bool]:
 		return lambda node: (Be.While(node)
-					and IfThis.isAttributeNamespace_IdentifierGreaterThan0(namespace, identifier)(node.test))
+					and IfThis.isAttributeNamespace_IdentifierGreaterThan0(namespace, identifier)(DOT.test(node)))
 
 	@staticmethod
 	def isAttributeNamespace_IdentifierLessThanOrEqual0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
 		return lambda node: (Be.Compare(node)
-					and IfThis.isAttributeNamespace_Identifier(namespace, identifier)(node.left)
+					and IfThis.isAttributeNamespace_Identifier(namespace, identifier)(DOT.left(node))
 					and Be.LtE(node.ops[0]))

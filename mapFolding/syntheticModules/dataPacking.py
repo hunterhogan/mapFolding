@@ -1,4 +1,4 @@
-from mapFolding import Array1DElephino, Array1DLeavesTotal, Array3D, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, MapFoldingState
+from mapFolding.dataBaskets import Array1DElephino, Array1DLeavesTotal, Array3D, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, MapFoldingState
 from mapFolding.syntheticModules.theorem2Numba import count
 
 def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
