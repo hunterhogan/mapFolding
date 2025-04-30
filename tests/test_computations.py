@@ -121,7 +121,7 @@ def test_syntheticSequential(syntheticDispatcherFixture: None, mapShapeTestCount
 
 @pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilenameTmpTesting: Path) -> None:
-	from mapFolding.someAssemblyRequired.toolboxNumba import SpicesJobNumba
+	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba
 	from mapFolding.someAssemblyRequired.synthesizeNumbaJob import makeJobNumba
 	state = makeInitializedComputationState(oneTestCuzTestsOverwritingTests)
 

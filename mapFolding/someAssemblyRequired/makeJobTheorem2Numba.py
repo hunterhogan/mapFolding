@@ -15,7 +15,7 @@ from mapFolding.someAssemblyRequired import (
 	write_astModule,
 )
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
-from mapFolding.someAssemblyRequired.toolboxNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
+from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from mapFolding.dataBaskets import MapFoldingState
 from pathlib import PurePosixPath

@@ -1,6 +1,6 @@
 from contextlib import redirect_stdout
 from mapFolding import validateListDimensions, getPathRootJobDEFAULT, getPathFilenameFoldsTotal, saveFoldsTotal
-from mapFolding.toolboxFilesystem import getFilenameFoldsTotal
+from mapFolding.filesystemToolkit import getFilenameFoldsTotal
 from pathlib import Path
 import io
 import pytest

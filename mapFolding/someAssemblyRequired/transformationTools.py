@@ -45,7 +45,7 @@ from mapFolding.someAssemblyRequired import (
 	unparseFindReplace,
 )
 from mapFolding.theSSOT import ComputationState, The
-from mapFolding.toolboxFilesystem import getPathFilenameFoldsTotal
+from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
 from os import PathLike
 from pathlib import Path, PurePath
 from typing import Any, Literal, overload

@@ -35,7 +35,7 @@ from mapFolding.someAssemblyRequired import (
 	write_astModule,
 )
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
-from mapFolding.someAssemblyRequired.toolboxNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
+from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
 from mapFolding.someAssemblyRequired.transformationTools import dictionaryEstimates, makeInitializedComputationState
 from pathlib import PurePosixPath
 from typing import cast, NamedTuple

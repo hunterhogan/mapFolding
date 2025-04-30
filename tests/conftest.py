@@ -282,7 +282,7 @@ def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Gener
 @pytest.fixture
 def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any], pathTmpTesting: Path) -> Callable[..., Any]:
 	"""Generate synthetic Numba-optimized dispatcher module and patch the dispatcher"""
-	from mapFolding.someAssemblyRequired.toolboxNumba import makeNumbaFlow
+	from mapFolding.someAssemblyRequired.toolkitNumba import makeNumbaFlow
 
 	TESTINGrecipeFlow = RecipeSynthesizeFlow(
 		pathPackage=PurePosixPath(pathTmpTesting.absolute()),

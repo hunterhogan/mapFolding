@@ -95,7 +95,7 @@ from mapFolding.beDRY import (
 	validateListDimensions as validateListDimensions,
 )
 
-from mapFolding.toolboxFilesystem import (
+from mapFolding.filesystemToolkit import (
 	getPathFilenameFoldsTotal as getPathFilenameFoldsTotal,
 	getPathRootJobDEFAULT as getPathRootJobDEFAULT,
 	saveFoldsTotal as saveFoldsTotal,

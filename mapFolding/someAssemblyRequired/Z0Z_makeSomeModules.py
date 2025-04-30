@@ -21,7 +21,7 @@ from mapFolding.someAssemblyRequired import (
 	Then,
 	write_astModule,
 )
-from mapFolding.someAssemblyRequired.toolboxNumba import decorateCallableWithNumba, parametersNumbaLight
+from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction,
 	shatter_dataclassesDOTdataclass,
