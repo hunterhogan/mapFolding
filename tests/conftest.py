@@ -246,7 +246,6 @@ def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
 		A context manager for patching the dispatcher
 	"""
 	import mapFolding.infoBooth as infoBooth
-	from mapFolding import The
 
 	# Store original property method
 	original_dispatcher_property = infoBooth.PackageInformation.dispatcher

@@ -4,12 +4,14 @@ from mapFolding import ComputationState, PackageSettings
 from types import ModuleType
 import dataclasses
 
-# I believe these values should be dynamically determined, so I have conspicuously marked them "HARDCODED"
-# and created downstream logic that assumes the values were dynamically determined.
-# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
-
 @dataclasses.dataclass
 class PackageInformation(PackageSettings):
+	"""
+	In _all_ of the root directory and "syntheticModules", the _only_ `PackageInformation` that are used are:
+		The.concurrencyPackage
+		The.dispatcher
+	"""
+
 	logicalPathModuleDispatcher: str | None = None
 	"""Logical import path to the module containing the dispatcher function."""
 

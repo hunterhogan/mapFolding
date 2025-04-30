@@ -4,11 +4,13 @@ from pathlib import Path
 from tomli import load as tomli_load
 import dataclasses
 
+packageNamePACKAGING_HARDCODED = "mapFolding"
+
 # Evaluate When Packaging https://github.com/hunterhogan/mapFolding/issues/18
 try:
 	packageNamePACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
 except Exception:
-	packageNamePACKAGING = "mapFolding"
+	packageNamePACKAGING = packageNamePACKAGING_HARDCODED
 
 # Evaluate When Installing https://github.com/hunterhogan/mapFolding/issues/18
 def getPathPackageINSTALLING() -> Path:
@@ -20,21 +22,8 @@ def getPathPackageINSTALLING() -> Path:
 # PackageSettings in theSSOT.py and immutability https://github.com/hunterhogan/mapFolding/issues/11
 @dataclasses.dataclass
 class PackageSettings:
-	"""
-	In _all_ of the root directory and "syntheticModules", the _only_ `PackageSettings` that are used are:
-		The.concurrencyPackage
-		The.dispatcher
-		The.packageName
-		The.pathPackage
-
-	From `astToolkit`:
-	class PackageSettings:
-		fileExtension: str = dataclasses.field(default='.py', metadata={'evaluateWhen': 'installing'})
-		packageName: str = dataclasses.field(default = packageNamePACKAGING, metadata={'evaluateWhen': 'packaging'})
-		pathPackage: Path = dataclasses.field(default_factory=getPathPackageINSTALLING, metadata={'evaluateWhen': 'installing'})
-
-	"""
-
 	fileExtension: str = dataclasses.field(default='.py', metadata={'evaluateWhen': 'installing'})
 	packageName: str = dataclasses.field(default = packageNamePACKAGING, metadata={'evaluateWhen': 'packaging'})
 	pathPackage: Path = dataclasses.field(default_factory=getPathPackageINSTALLING, metadata={'evaluateWhen': 'installing'})
+
+packageSettings = PackageSettings()

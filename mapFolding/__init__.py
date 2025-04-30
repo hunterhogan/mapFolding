@@ -30,7 +30,7 @@ from mapFolding.datatypes import (
 	NumPyLeavesTotal as NumPyLeavesTotal,
 )
 
-from mapFolding.theSSOT import PackageSettings as PackageSettings
+from mapFolding.theSSOT import PackageSettings as PackageSettings, packageSettings as packageSettings
 
 from mapFolding.beDRY import (
 	ComputationState as ComputationState,

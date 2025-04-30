@@ -20,7 +20,7 @@ mathematical definition in OEIS and the computational implementation in the pack
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from functools import cache
-from mapFolding import countFolds, TypedDict, The
+from mapFolding import countFolds, packageSettings, TypedDict
 from pathlib import Path
 from typing import Any, Final
 from Z0Z_tools import writeStringToHere
@@ -34,7 +34,7 @@ import warnings
 
 cacheDays = 30
 
-pathCache: Path = The.pathPackage / ".cache"
+pathCache: Path = packageSettings.pathPackage / ".cache"
 
 class SettingsOEIS(TypedDict):
 	description: str

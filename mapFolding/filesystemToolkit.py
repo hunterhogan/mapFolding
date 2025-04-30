@@ -21,7 +21,7 @@ The functions here adhere to a consistent approach to path handling:
 - Progressive fallback strategies for saving critical computation results.
 - Preemptive filesystem validation to detect issues before computation begins.
 """
-from mapFolding import The
+from mapFolding import packageSettings
 from os import PathLike
 from pathlib import Path, PurePath
 from sys import modules as sysModules
@@ -101,9 +101,9 @@ def getPathRootJobDEFAULT() -> Path:
 		- For Google Colab, uses a specific path in Google Drive.
 		- Creates the directory if it doesn't exist.
 	"""
-	pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=The.packageName, appauthor=False, ensure_exists=True))
+	pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=packageSettings.packageName, appauthor=False, ensure_exists=True))
 	if 'google.colab' in sysModules:
-		pathJobDEFAULT = Path("/content/drive/MyDrive") / The.packageName
+		pathJobDEFAULT = Path("/content/drive/MyDrive") / packageSettings.packageName
 	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
 	return pathJobDEFAULT
 
