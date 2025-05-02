@@ -290,6 +290,7 @@ def makeDaoOfMapFoldingParallelV1() -> PurePath:
 
 	while leafConnectee != leaf1ndex:
 	"""
+	# ClassIsAndAttribute ast.While
 	findThis = IfThis.isWhileAttributeNamespace_IdentifierGreaterThan0
 	# End add the parallel logic to the count function ================================================
 

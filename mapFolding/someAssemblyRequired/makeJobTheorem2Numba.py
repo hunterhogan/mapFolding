@@ -161,10 +161,11 @@ def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
 
 	# Remove `foldGroups` and any other unused statements, so you can dynamically determine which variables are not used
-	findThis = IfThis.isAssignAndTargets0Is(IfThis.isSubscript_Identifier('foldGroups'))
+	findThis = ClassIsAndAttribute.targetsIs(ast.Assign, lambda list_expr: any([IfThis.isSubscript_Identifier('foldGroups')(node) for node in list_expr ]))
+	# findThis = IfThis.isAssignAndTargets0Is(IfThis.isSubscript_Identifier('foldGroups'))
 	doThat = Then.removeIt
 	remove_foldGroups = NodeChanger(findThis, doThat)
-	remove_foldGroups.visit(ingredientsCount.astFunctionDef)
+	# remove_foldGroups.visit(ingredientsCount.astFunctionDef)
 
 	# replace identifiers with static values with their values, so you can dynamically determine which variables are not used
 	list_IdentifiersStaticValues = list_IdentifiersStaticValuesHARDCODED
@@ -260,7 +261,7 @@ if __name__ == '__main__':
 	"""
 
 if __name__ == '__main__':
-	mapShape = (1,46)
+	mapShape = (2,4)
 	state = MapFoldingState(mapShape)
 	state = initializeGroupsOfFolds(state)
 	# foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
