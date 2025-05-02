@@ -19,6 +19,7 @@ specific optimizations and transformations.
 """
 
 from collections.abc import Callable
+from astToolkit import ClassIsAndAttribute
 from copy import deepcopy
 from mapFolding.someAssemblyRequired import ast_Identifier, DOT, IfThis, Make, NodeTourist, parseLogicalPath2astModule, str_nameDOTname, Then, LedgerOfImports
 from mapFolding import raiseIfNoneGitHubIssueNumber3, The
@@ -252,10 +253,8 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
 
-		findThis = IfThis.isAnnAssign_targetIs(IfThis.isName_Identifier(self.name))
-
 		sherpa = NodeTourist(
-			findThis=findThis
+			findThis=ClassIsAndAttribute.targetIs(ast.AnnAssign, IfThis.isName_Identifier(self.name))
 			, doThat=Then.extractIt(DOT.annotation)
 			).captureLastMatch(dataclassClassDef)
 

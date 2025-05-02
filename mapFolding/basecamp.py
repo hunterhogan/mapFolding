@@ -163,8 +163,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 		mapFoldingState = initializeGroupsOfFolds(mapFoldingState)
 
-		from mapFolding.syntheticModules.dataPacking import doTheNeedful
-		mapFoldingState = doTheNeedful(mapFoldingState)
+		from mapFolding.syntheticModules.dataPacking import sequential
+		mapFoldingState = sequential(mapFoldingState)
 
 		foldsTotal = mapFoldingState.foldsTotal
 

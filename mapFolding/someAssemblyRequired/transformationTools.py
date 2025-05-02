@@ -19,6 +19,7 @@ logical structure and correctness.
 """
 
 from collections.abc import Callable
+from astToolkit import ClassIsAndAttribute
 from mapFolding import outfitCountFolds, ComputationState, The, getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
@@ -256,7 +257,7 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 		changeReturnParallelCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName)))
 		ingredientsParallel.astFunctionDef.returns = shatteredDataclass.countingVariableAnnotation
 
-		unpack4parallelCallable = NodeChanger(IfThis.isAssignAndValueIs(IfThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
+		unpack4parallelCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
 
 		unpack4parallelCallable.visit(ingredientsDispatcher.astFunctionDef)
 		replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
@@ -278,9 +279,9 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 
 def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, targetCallableIdentifier: ast_Identifier, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
 	astCallTargetCallable = Make.Call(Make.Name(targetCallableIdentifier), shatteredDataclass.listName4Parameters)
-	replaceAssignTargetCallable = NodeChanger(IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
-	unpack4targetCallable = NodeChanger(IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
-	repack4targetCallable = NodeChanger(IfThis.isAssignAndValueIs(IfThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisBelow([shatteredDataclass.repack]))
+	replaceAssignTargetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
+	unpack4targetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
+	repack4targetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisBelow([shatteredDataclass.repack]))
 	replaceAssignTargetCallable.visit(ingredientsCaller.astFunctionDef)
 	unpack4targetCallable.visit(ingredientsCaller.astFunctionDef)
 	repack4targetCallable.visit(ingredientsCaller.astFunctionDef)

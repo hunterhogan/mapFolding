@@ -18,6 +18,7 @@ This creates extremely fast, specialized implementations that can be run directl
 as Python scripts or further compiled into standalone executables.
 """
 
+from astToolkit import ClassIsAndAttribute
 from mapFolding import getPathFilenameFoldsTotal, raiseIfNoneGitHubIssueNumber3, The
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
@@ -96,7 +97,7 @@ if __name__ == '__main__':
 	ast_argNumbaProgress = ast.arg(arg=spices.numbaProgressBarIdentifier, annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
 
-	findThis = IfThis.isAugAssignAndTargetIs(IfThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id))
+	findThis = ClassIsAndAttribute.targetIs(ast.AugAssign, IfThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id)) # type: ignore
 	doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
 	countWithProgressBar = NodeChanger(findThis, doThat)
 	countWithProgressBar.visit(ingredientsFunction.astFunctionDef)
