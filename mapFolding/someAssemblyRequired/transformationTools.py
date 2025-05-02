@@ -137,10 +137,11 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 	if countingVariable is None:
 		import warnings
 		warnings.warn(message=f"I could not find the counting variable in `{dataclass_Identifier = }` in `{logicalPathModule = }`.", category=UserWarning)
+		raise Exception
 
 	shatteredDataclass = ShatteredDataclass(
-		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation if countingVariable else None,
-		countingVariableName=dictionaryDeReConstruction[countingVariable].astName if countingVariable else None,
+		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation,
+		countingVariableName=dictionaryDeReConstruction[countingVariable].astName,
 		field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder},
 		Z0Z_field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].Z0Z_hack for field in Official_fieldOrder},
 		list_argAnnotated4ArgumentsSpecification=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],

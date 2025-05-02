@@ -11,9 +11,7 @@ appropriate algorithm implementation, and optional persistence of results.
 
 from collections.abc import Sequence
 from mapFolding import (
-	ComputationState,
 	getPathFilenameFoldsTotal,
-	outfitCountFolds,
 	saveFoldsTotal,
 	saveFoldsTotalFAILearly,
 	setProcessorLimit,
@@ -168,15 +166,20 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 		foldsTotal = mapFoldingState.foldsTotal
 
-	# NOTE treat this as a default?
-	# flow based on `The` and `ComputationState` ====================================
+	elif taskDivisions > 1:
+		from mapFolding.dataBaskets import ParallelMapFoldingState
+		parallelMapFoldingState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
+
+		from mapFolding.syntheticModules.countParallel import doTheNeedful
+		foldsTotal, listStatesParallel = doTheNeedful(parallelMapFoldingState, concurrencyLimit)
 
 	else:
-		computationStateInitialized: ComputationState = outfitCountFolds(mapShape, computationDivisions, concurrencyLimit)
-		computationStateComplete: ComputationState = The.dispatcher(computationStateInitialized)
+		from mapFolding.dataBaskets import MapFoldingState
+		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		computationStateComplete.getFoldsTotal()
-		foldsTotal = computationStateComplete.foldsTotal
+		from mapFolding.syntheticModules.daoOfMapFolding import doTheNeedful
+		mapFoldingState = doTheNeedful(mapFoldingState)
+		foldsTotal = mapFoldingState.foldsTotal
 
 	# Follow memorialization instructions ===========================================
 

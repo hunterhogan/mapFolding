@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from astToolkit import ClassIsAndAttribute, extractClassDef
 from mapFolding import raiseIfNoneGitHubIssueNumber3, The
 from mapFolding.someAssemblyRequired import (
@@ -39,6 +40,7 @@ algorithmSourceModuleHARDCODED = 'daoOfMapFolding'
 sourceCallableIdentifierHARDCODED = 'count'
 logicalPathInfixHARDCODED: ast_Identifier = 'syntheticModules'
 theCountingIdentifierHARDCODED: ast_Identifier = 'groupsOfFolds'
+dataPackingModuleIdentifierHARDCODED: ast_Identifier = 'dataPacking'
 
 def makeInitializeGroupsOfFolds() -> None:
 	callableIdentifierHARDCODED = 'initializeGroupsOfFolds'
@@ -123,9 +125,10 @@ def makeDaoOfMapFolding() -> PurePath:
 	doTheNeedful.imports.update(shatteredDataclass.imports)
 	targetCallableIdentifier = daoOfMapFolding.astFunctionDef.name
 	doTheNeedful = unpackDataclassCallFunctionRepackDataclass(doTheNeedful, targetCallableIdentifier, shatteredDataclass)
-	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(daoOfMapFolding.astFunctionDef)
+	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(daoOfMapFolding.astFunctionDef) # type: ignore
 	if astTuple is None: raise raiseIfNoneGitHubIssueNumber3
 	astTuple.ctx = ast.Store()
+	ast.Return()
 
 	findThis = ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier))
 	doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
@@ -141,49 +144,7 @@ def makeDaoOfMapFolding() -> PurePath:
 
 	return pathFilename
 
-def makeDaoOfMapFoldingParallel(pathFilenameSource: PurePath) -> PurePath:
-	logicalPathInfix = logicalPathInfixHARDCODED
-	sourceCallableIdentifier = sourceCallableIdentifierHARDCODED
-	ingredientsFunction = astModuleToIngredientsFunction(parsePathFilename2astModule(pathFilenameSource), sourceCallableIdentifier)
-
-	dataclassInstanceIdentifier = NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef)
-	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
-
-	findThis = IfThis.isIfUnaryNotAttributeNamespace_Identifier(dataclassInstanceIdentifier, 'dimensionsUnconstrained')
-	doThat = Then.removeIt
-	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
-
-	ingredientsModule = IngredientsModule(ingredientsFunction)
-	ingredientsModule.removeImportFromModule('numpy')
-
-	pathFilename = pathFilenameSource.with_stem(pathFilenameSource.stem + 'Trimmed')
-
-	write_astModule(ingredientsModule, pathFilename, The.packageName)
-
-	logicalPath: list[str] = []
-	if The.packageName:
-		logicalPath.append(The.packageName)
-	if logicalPathInfix:
-		logicalPath.append(logicalPathInfix)
-	logicalPath.append(pathFilename.stem)
-	moduleWithLogicalPath: str_nameDOTname = '.'.join(logicalPath)
-
-	astImportFrom: ast.ImportFrom = Make.ImportFrom(moduleWithLogicalPath, list_alias=[Make.alias(ingredientsFunction.astFunctionDef.name)])
-
-	return pathFilename
-
-def makeDaoOfMapFoldingParallelV1() -> PurePath:
-	"""Notes
-	Additional state information: taskDivisions, taskIndex
-	Additional flow information: CPUlimit (already handled in basecamp.py)
-	Additional count logic: `if thisIsMyTaskIndex`
-
-	Make a state container to store the state of one task.
-	Make a state container to store the state of all tasks.
-
-	I know you don't want to do this, but if you segregate the parallel computations now, they will have their own
-	transformation assembly line--that you don't have to care about.
-	"""
+def makeDaoOfMapFoldingParallel() -> PurePath:
 	moduleIdentifierHARDCODED: ast_Identifier = 'countParallel'
 
 	algorithmSourceModule = algorithmSourceModuleHARDCODED
@@ -214,13 +175,6 @@ def makeDaoOfMapFoldingParallelV1() -> PurePath:
 	if dataclassInstanceIdentifier is None: raise raiseIfNoneGitHubIssueNumber3
 	shatteredDataclass = shatter_dataclassesDOTdataclass(dataclassLogicalPathModule, dataclass_Identifier, dataclassInstanceIdentifier)
 
-	findThis = IfThis.isIfUnaryNotAttributeNamespace_Identifier(dataclassInstanceIdentifier, 'dimensionsUnconstrained')
-	doThat = Then.removeIt
-	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
-
-	ingredientsFunction.imports.update(shatteredDataclass.imports)
-	ingredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclass)
-
 	# Start add the parallel state fields to the count function ================================================
 	dataclassBaseFields = dataclasses.fields(importLogicalPath2Callable(dataclassLogicalPathModule, dataclass_Identifier))  # pyright: ignore [reportArgumentType]
 	dataclass_IdentifierParallel = 'Parallel' + dataclass_Identifier
@@ -233,112 +187,115 @@ def makeDaoOfMapFoldingParallelV1() -> PurePath:
 	dataclassClassDef = extractClassDef(parseLogicalPath2astModule(dataclassLogicalPathModule), dataclass_IdentifierParallel)
 	if not isinstance(dataclassClassDef, ast.ClassDef): raise ValueError(f"I could not find `{dataclass_IdentifierParallel = }` in `{dataclassLogicalPathModule = }`.")
 
-	countingVariable = None
 	for aField in onlyParallelFields:
 		Official_fieldOrder.append(aField.name)
 		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(dataclassLogicalPathModule, dataclassClassDef, dataclassInstanceIdentifier, aField)
 
 	shatteredDataclassParallel = ShatteredDataclass(
-		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation if countingVariable else None,
-		countingVariableName=dictionaryDeReConstruction[countingVariable].astName if countingVariable else None,
-		field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder},
-		Z0Z_field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].Z0Z_hack for field in Official_fieldOrder},
-		list_argAnnotated4ArgumentsSpecification=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
-		list_keyword_field__field4init=[dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
-		listAnnotations=[dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],
-		listName4Parameters=[dictionaryDeReConstruction[field].astName for field in Official_fieldOrder],
-		listUnpack=[Make.AnnAssign(dictionaryDeReConstruction[field].astName, dictionaryDeReConstruction[field].astAnnotation, dictionaryDeReConstruction[field].ast_nameDOTname) for field in Official_fieldOrder],
-		map_stateDOTfield2Name={dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder},
+		countingVariableAnnotation=shatteredDataclass.countingVariableAnnotation,
+		countingVariableName=shatteredDataclass.countingVariableName,
+		field2AnnAssign={**shatteredDataclass.field2AnnAssign, **{dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder}},
+		Z0Z_field2AnnAssign={**shatteredDataclass.Z0Z_field2AnnAssign, **{dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].Z0Z_hack for field in Official_fieldOrder}},
+		list_argAnnotated4ArgumentsSpecification=shatteredDataclass.list_argAnnotated4ArgumentsSpecification + [dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
+		list_keyword_field__field4init=shatteredDataclass.list_keyword_field__field4init + [dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
+		listAnnotations=shatteredDataclass.listAnnotations + [dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],
+		listName4Parameters=shatteredDataclass.listName4Parameters + [dictionaryDeReConstruction[field].astName for field in Official_fieldOrder],
+		listUnpack=shatteredDataclass.listUnpack + [Make.AnnAssign(dictionaryDeReConstruction[field].astName, dictionaryDeReConstruction[field].astAnnotation, dictionaryDeReConstruction[field].ast_nameDOTname) for field in Official_fieldOrder],
+		map_stateDOTfield2Name={**shatteredDataclass.map_stateDOTfield2Name, **{dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder}},
 		)
 	shatteredDataclassParallel.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclassParallel.listName4Parameters, ast.Store())
-	fragments4AssignmentOrParametersExtended = Make.Tuple(shatteredDataclass.listName4Parameters + shatteredDataclassParallel.listName4Parameters, ast.Store())
 	shatteredDataclassParallel.repack = Make.Assign([Make.Name(dataclassInstanceIdentifier)], value=Make.Call(Make.Name(dataclass_IdentifierParallel), list_keyword=shatteredDataclassParallel.list_keyword_field__field4init))
-
 	shatteredDataclassParallel.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclassParallel.listAnnotations))
-	signatureReturnAnnotationExtended = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.listAnnotations + shatteredDataclassParallel.listAnnotations))
+
 	shatteredDataclassParallel.imports.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
 	shatteredDataclassParallel.imports.addImportFrom_asStr(dataclassLogicalPathModule, dataclass_IdentifierParallel)
+	shatteredDataclassParallel.imports.update(shatteredDataclass.imports)
+	shatteredDataclassParallel.imports.removeImportFrom(dataclassLogicalPathModule, dataclass_Identifier)
 
-	ingredientsFunction.astFunctionDef.args.args.extend(shatteredDataclassParallel.list_argAnnotated4ArgumentsSpecification)
-	ingredientsFunction.astFunctionDef.returns = signatureReturnAnnotationExtended
-	changeReturnCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(fragments4AssignmentOrParametersExtended)))
-	changeReturnCallable.visit(ingredientsFunction.astFunctionDef)
 	# End add the parallel state fields to the count function ================================================
+
+	ingredientsFunction.imports.update(shatteredDataclassParallel.imports)
+	ingredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclassParallel)
+
 	# Start add the parallel logic to the count function ================================================
 
-	"""I need to do the equivalent of this:
-	This:
-	state = countGaps(state)
-	Becomes:
-	if thisIsMyTaskIndex(state):
-		state = countGaps(state)
+	findThis = ClassIsAndAttribute.testIs(ast.While, ClassIsAndAttribute.leftIs(ast.Compare, IfThis.isName_Identifier('leafConnectee')))
+	doThat = Then.extractIt(DOT.body)
+	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat)
+	countGapsCodeBlock = captureCountGapsCodeBlock.captureLastMatch(ingredientsFunction.astFunctionDef)
+	if countGapsCodeBlock is None: raise raiseIfNoneGitHubIssueNumber3
 
-	def thisIsMyTaskIndex(state: ComputationState) -> bool:
-		return (state.leaf1ndex != state.taskDivisions) or (state.leafConnectee % state.taskDivisions == state.taskIndex)
+	thisIsMyTaskIndexCodeBlock = ast.If(ast.BoolOp(ast.Or()
+		, values=[ast.Compare(ast.Name('leaf1ndex'), ops=[ast.NotEq()], comparators=[ast.Name('taskDivisions')])
+				, ast.Compare(ast.BinOp(ast.Name('leafConnectee'), op=ast.Mod(), right=ast.Name('taskDivisions')), ops=[ast.Eq()], comparators=[ast.Name('taskIndex')])])
+	, body=list(countGapsCodeBlock[0:-1]))
 
+	countGapsCodeBlockNew: list[ast.stmt] = [thisIsMyTaskIndexCodeBlock, countGapsCodeBlock[-1]]
 
-	It _might_ be easier to add the conditional check before inlining the functions.
-	But, even if it is easier, I think I want to focus on making a highly reusable function to transform sequential count to parallel count.
-	omg, that sounds hard.
-	I'll come back to this.
-	def countGaps(state: ComputationState) -> ComputationState:
-		state.gapsWhere[state.gap1ndexCeiling] = state.leafConnectee
-		if state.countDimensionsGapped[state.leafConnectee] == 0:
-			state = incrementGap1ndexCeiling(state)
-		state.countDimensionsGapped[state.leafConnectee] += 1
-		return state
+	doThat = Grab.bodyAttribute(Then.replaceWith(countGapsCodeBlockNew))
+	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
 
-	while leafConnectee != leaf1ndex:
-	"""
-	# ClassIsAndAttribute ast.While
-	findThis = IfThis.isWhileAttributeNamespace_IdentifierGreaterThan0
 	# End add the parallel logic to the count function ================================================
 
 	ingredientsFunction = removeUnusedParameters(ingredientsFunction)
 
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
+	# Start unpack/repack the dataclass function ================================================
 	sourceCallableIdentifier = The.sourceCallableDispatcher
 
-	doTheNeedful: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
-	doTheNeedful.imports.update(shatteredDataclass.imports)
+	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
+	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclass_IdentifierParallel
+	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
+	findThis = ClassIsAndAttribute.annotationIs(ast.arg, IfThis.isName_Identifier(dataclass_Identifier)) # type: ignore
+	doThat = Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclass_IdentifierParallel))) # type: ignore
+	NodeChanger(findThis, doThat).visit(unRepackDataclass.astFunctionDef) # type: ignore
+	unRepackDataclass.astFunctionDef.returns = Make.Name(dataclass_IdentifierParallel)
 	targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
-	doTheNeedful = unpackDataclassCallFunctionRepackDataclass(doTheNeedful, targetCallableIdentifier, shatteredDataclass)
+	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
 
-	"""
-	Put pack/unpack and concurrency is separate functions.
-	- make the master copy of the state
-	- implement concurrency
-	- change the dataclass from MapFoldingState to ParallelMapFoldingState
-		- import
-		- parameter annotation
-		- return annotation
-		- when repacking, call the new identifier
-	- unpack the new fields
-	- have a master groupsOfFolds with the total from all taskIndex
-	- repack the new fields
-	- store each taskIndex state in a yet-to-be-created array (probably a primitive list indexed by taskIndex): this is strictly for the research purposes. Someone may want to examine and compare the states of the task divisions.
-	"""
-
-	# THIS is fanfreakingtastic. This dynamically updates the calling function (doTheNeedful) to have the correct
-	# parameters in the call (to targetCallableIdentifier) and the correct identifiers in the return. NOTE that this
-	# version of the function assumes that 1) the callee returns all of the parameters passed as arguments, 2) that the
-	# callee parameters are in the exact same order as the return, and 3) that the identifiers are all exactly the same.
-	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)
+	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef) # type: ignore
 	if astTuple is None: raise raiseIfNoneGitHubIssueNumber3
 	astTuple.ctx = ast.Store()
 	findThis = ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier))
 	doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
 	changeAssignCallToTarget = NodeChanger(findThis, doThat)
-	changeAssignCallToTarget.visit(doTheNeedful.astFunctionDef)
+	changeAssignCallToTarget.visit(unRepackDataclass.astFunctionDef)
 
-	ingredientsModule = IngredientsModule([ingredientsFunction, doTheNeedful])
+	ingredientsDoTheNeedful: IngredientsFunction = IngredientsFunction(
+		astFunctionDef = ast.FunctionDef(name='doTheNeedful'
+			, args=ast.arguments(args=[ast.arg('state', annotation=ast.Name(dataclass_IdentifierParallel)), ast.arg('concurrencyLimit', annotation=ast.Name('int'))])
+			, body=[ast.Assign(targets=[ast.Name('stateParallel', ctx=ast.Store())], value=ast.Call(func=ast.Name('deepcopy'), args=[ast.Name('state')]))
+				, ast.AnnAssign(target=ast.Name('listStatesParallel', ctx=ast.Store()), annotation=ast.Subscript(value=ast.Name('list'), slice=ast.Name(dataclass_IdentifierParallel)), value=ast.BinOp(left=ast.List(elts=[ast.Name('stateParallel')]), op=ast.Mult(), right=ast.Attribute(value=ast.Name('stateParallel'), attr='taskDivisions')), simple=1)
+				, ast.AnnAssign(target=ast.Name('groupsOfFoldsTotal', ctx=ast.Store()), annotation=ast.Name('int'), value=ast.Constant(value=0), simple=1)
+
+				, ast.AnnAssign(target=ast.Name('dictionaryConcurrency', ctx=ast.Store()), annotation=ast.Subscript(value=ast.Name('dict'), slice=ast.Tuple(elts=[ast.Name('int'), ast.Subscript(value=ast.Name('ConcurrentFuture'), slice=ast.Name(dataclass_IdentifierParallel))])), value=ast.Dict(), simple=1)
+				, ast.With(items=[ast.withitem(context_expr=ast.Call(func=ast.Name('ProcessPoolExecutor'), args=[ast.Name('concurrencyLimit')]), optional_vars=ast.Name('concurrencyManager', ctx=ast.Store()))]
+					, body=[ast.For(target=ast.Name('indexSherpa', ctx=ast.Store()), iter=ast.Call(func=ast.Name('range'), args=[ast.Attribute(value=ast.Name('stateParallel'), attr='taskDivisions')])
+							, body=[ast.Assign(targets=[ast.Name('state', ctx=ast.Store())], value=ast.Call(func=ast.Name('deepcopy'), args=[ast.Name('stateParallel')]))
+								, ast.Assign(targets=[ast.Attribute(value=ast.Name('state'), attr='taskIndex', ctx=ast.Store())], value=ast.Name('indexSherpa'))
+								, ast.Assign(targets=[ast.Subscript(value=ast.Name('dictionaryConcurrency'), slice=ast.Name('indexSherpa'), ctx=ast.Store())], value=ast.Call(func=ast.Attribute(value=ast.Name('concurrencyManager'), attr='submit'), args=[ast.Name(unRepackDataclass.astFunctionDef.name), ast.Name('state')]))])
+						, ast.For(target=ast.Name('indexSherpa', ctx=ast.Store()), iter=ast.Call(func=ast.Name('range'), args=[ast.Attribute(value=ast.Name('stateParallel'), attr='taskDivisions')])
+							, body=[ast.Assign(targets=[ast.Subscript(value=ast.Name('listStatesParallel'), slice=ast.Name('indexSherpa'), ctx=ast.Store())], value=ast.Call(func=ast.Attribute(value=ast.Subscript(value=ast.Name('dictionaryConcurrency'), slice=ast.Name('indexSherpa')), attr='result')))
+								, ast.AugAssign(target=ast.Name('groupsOfFoldsTotal', ctx=ast.Store()), op=ast.Add(), value=ast.Attribute(value=ast.Subscript(value=ast.Name('listStatesParallel'), slice=ast.Name('indexSherpa')), attr='groupsOfFolds'))])])
+
+				, ast.AnnAssign(target=ast.Name('foldsTotal', ctx=ast.Store()), annotation=ast.Name('int'), value=ast.BinOp(left=ast.Name('groupsOfFoldsTotal'), op=ast.Mult(), right=ast.Attribute(value=ast.Name('stateParallel'), attr='leavesTotal')), simple=1)
+				, ast.Return(value=ast.Tuple(elts=[ast.Name('foldsTotal'), ast.Name('listStatesParallel')]))]
+			, returns=ast.Subscript(value=ast.Name('tuple'), slice=ast.Tuple(elts=[ast.Name('int'), ast.Subscript(value=ast.Name('list'), slice=ast.Name(dataclass_IdentifierParallel))])))
+		, imports = LedgerOfImports(Make.Module([ast.ImportFrom(module='concurrent.futures', names=[ast.alias(name='Future', asname='ConcurrentFuture'), ast.alias(name='ProcessPoolExecutor')], level=0),
+			ast.ImportFrom(module='copy', names=[ast.alias(name='deepcopy')], level=0),
+			ast.ImportFrom(module='multiprocessing', names=[ast.alias(name='set_start_method', asname='multiprocessing_set_start_method')], level=0),])
+		)
+	)
+
+	ingredientsModule = IngredientsModule([ingredientsFunction, unRepackDataclass, ingredientsDoTheNeedful]
+						, prologue = Make.Module([ast.If(test=ast.Compare(left=ast.Name('__name__'), ops=[ast.Eq()], comparators=[ast.Constant(value='__main__')]), body=[ast.Expr(value=ast.Call(func=ast.Name('multiprocessing_set_start_method'), args=[ast.Constant(value='spawn')]))])])
+	)
 	ingredientsModule.removeImportFromModule('numpy')
 
 	pathFilename = PurePath(The.pathPackage, logicalPathInfix, moduleIdentifier + The.fileExtension)
 
 	write_astModule(ingredientsModule, pathFilename, The.packageName)
-
 	return pathFilename
 
 def makeTheorem2() -> PurePath:
@@ -471,7 +428,6 @@ def numbaOnTheorem2(pathFilenameSource: PurePath) -> ast.ImportFrom:
 	return astImportFrom
 
 def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
-	moduleIdentifierHARDCODED: ast_Identifier = 'dataPacking'
 	callableIdentifierHARDCODED: ast_Identifier = 'sequential'
 
 	algorithmSourceModule = algorithmSourceModuleHARDCODED
@@ -479,7 +435,7 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	logicalPathSourceModule = '.'.join([The.packageName, algorithmSourceModule])
 
 	logicalPathInfix = logicalPathInfixHARDCODED
-	moduleIdentifier = moduleIdentifierHARDCODED
+	moduleIdentifier = dataPackingModuleIdentifierHARDCODED
 	callableIdentifier = callableIdentifierHARDCODED
 
 	ingredientsFunction: IngredientsFunction = astModuleToIngredientsFunction(parseLogicalPath2astModule(logicalPathSourceModule), sourceCallableIdentifier)
@@ -509,7 +465,7 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	if astImportFrom.module is None: raise raiseIfNoneGitHubIssueNumber3
 	targetFunctionDef = extractFunctionDef(parseLogicalPath2astModule(astImportFrom.module), targetCallableIdentifier)
 	if targetFunctionDef is None: raise raiseIfNoneGitHubIssueNumber3
-	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef)
+	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef) # type: ignore
 	if astTuple is None: raise raiseIfNoneGitHubIssueNumber3
 	astTuple.ctx = ast.Store()
 
@@ -531,4 +487,4 @@ if __name__ == '__main__':
 	astImportFrom = numbaOnTheorem2(pathFilename)
 	makeUnRePackDataclass(astImportFrom)
 	pathFilename = makeDaoOfMapFolding()
-	makeDaoOfMapFoldingParallelV1()
+	makeDaoOfMapFoldingParallel()

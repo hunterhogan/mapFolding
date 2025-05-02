@@ -152,10 +152,10 @@ dummyTuple = Make.Tuple([Make.Name("dummyElement")])
 # Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class ShatteredDataclass:
-	countingVariableAnnotation: ast.expr | None
+	countingVariableAnnotation: ast.expr
 	"""Type annotation for the counting variable extracted from the dataclass."""
 
-	countingVariableName: ast.Name | None
+	countingVariableName: ast.Name
 	"""AST name node representing the counting variable identifier."""
 
 	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=lambda: dict[ast_Identifier, ast.AnnAssign | ast.Assign]())
@@ -253,12 +253,12 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
 
-		sherpa = NodeTourist(
+		sherpa: ast.expr = NodeTourist( # type: ignore
 			findThis=ClassIsAndAttribute.targetIs(ast.AnnAssign, IfThis.isName_Identifier(self.name))
-			, doThat=Then.extractIt(DOT.annotation)
+			, doThat=Then.extractIt(DOT.annotation) # type: ignore
 			).captureLastMatch(dataclassClassDef)
 
-		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
+		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3 # type: ignore
 		else: self.astAnnotation = sherpa
 
 		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
