@@ -286,7 +286,6 @@ def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any], pathTmpTes
 		pathPackage=PurePosixPath(pathTmpTesting.absolute()),
 		logicalPathFlowRoot=None,
 		moduleDispatcher="test_dispatcher",
-# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 		# dispatcherCallable="dispatcherSynthetic",
 	)
 

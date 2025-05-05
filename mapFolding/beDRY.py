@@ -243,7 +243,7 @@ class ComputationState:
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Total number of dimensions in the map shape."""
 
-	# I am using `dataclasses.field` metadata and `typeAlias.__args__[1].__args__[0]` to make the code more DRY. https://github.com/hunterhogan/mapFolding/issues/9
+	# I am using `dataclasses.field` metadata and `typeAlias.__args__[1].__args__[0]` to make the code more DRY.
 	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
 	"""Tracks how many dimensions are gapped for each leaf."""
 
@@ -307,7 +307,6 @@ class ComputationState:
 			self.foldGroups = makeDataContainer(max(2, int(self.taskDivisions) + 1), self.__dataclass_fields__['foldGroups'].metadata['dtype'])
 			self.foldGroups[-1] = self.leavesTotal
 
-		# Dataclasses, Default factories, and arguments in `ComputationState` https://github.com/hunterhogan/mapFolding/issues/12
 		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 
 		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
@@ -315,7 +314,6 @@ class ComputationState:
 		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]
 
-	# Automatic, or not, calculation in dataclass `ComputationState` https://github.com/hunterhogan/mapFolding/issues/14
 	def getFoldsTotal(self) -> None:
 		self.foldsTotal = DatatypeFoldsTotal(self.foldGroups[0:-1].sum() * self.leavesTotal)
 
@@ -392,7 +390,8 @@ def setProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = Non
 
 	match concurrencyPackage:
 		case 'multiprocessing' | None:
-			# When to use multiprocessing.set_start_method https://github.com/hunterhogan/mapFolding/issues/6
+			# When to use multiprocessing.set_start_method
+			# https://github.com/hunterhogan/mapFolding/issues/6
 			concurrencyLimit: int = defineConcurrencyLimit(CPUlimit)
 		case 'numba':
 			from numba import get_num_threads, set_num_threads

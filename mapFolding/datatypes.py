@@ -1,9 +1,6 @@
 from numpy import dtype, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64, integer, ndarray
 from typing import Any, TypeAlias, TypeVar
 
-# =============================================================================
-# Flexible Data Structure System Needs Enhanced Paradigm https://github.com/hunterhogan/mapFolding/issues/9
-
 NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)
 
 DatatypeLeavesTotal: TypeAlias = int

@@ -162,7 +162,6 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 
 # END of acceptable classes and functions ======================================================
 def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
-	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 	listAllIngredientsFunctions = [
 	(ingredientsInitialize := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableInitialize)),
 	(ingredientsParallel := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableParallel)),
@@ -177,8 +176,6 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	ingredientsSequential.astFunctionDef = inlineFunctionDef(recipeFlow.sourceCallableSequential, recipeFlow.source_astModule)
 
 	# assignRecipeIdentifiersToCallable. =============================
-	# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
-	# How can I use dataclass settings as the SSOT for specific actions? https://github.com/hunterhogan/mapFolding/issues/16
 	# NOTE reminder: you are updating these `ast.Name` here (and not in a more general search) because this is a
 	# narrow search for `ast.Call` so you won't accidentally replace unrelated `ast.Name`.
 	listFindReplace = [(recipeFlow.sourceCallableDispatcher, recipeFlow.callableDispatcher),
@@ -216,7 +213,6 @@ def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
 	shatteredDataclass = shatter_dataclassesDOTdataclass(recipeFlow.logicalPathModuleDataclass, recipeFlow.sourceDataclassIdentifier, instance_Identifier)
 	ingredientsDispatcher.imports.update(shatteredDataclass.imports)
 
-	# How can I use dataclass settings as the SSOT for specific actions? https://github.com/hunterhogan/mapFolding/issues/16
 	# Change callable parameters and Call to the callable at the same time ====
 	# sequentialCallable =========================================================
 	if recipeFlow.removeDataclassSequential:

@@ -24,7 +24,6 @@ from typing import Any, cast, Final
 import ast
 import dataclasses
 
-# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 
 class ParametersNumba(TypedDict):
@@ -128,14 +127,12 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction
 
-# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class SpicesJobNumba:
 	useNumbaProgressBar: bool = True
 	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
 	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba) # type: ignore
 
-# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
 	"""
 	Transform standard Python algorithm code into optimized Numba implementations.

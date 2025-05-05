@@ -21,7 +21,8 @@ class PackageInformation(PackageSettings):
 	concurrencyPackage: str | None = None
 	"""Package to use for concurrent execution (e.g., 'multiprocessing', 'numba')."""
 
-	# "Evaluate When Packaging" and "Evaluate When Installing" https://github.com/hunterhogan/mapFolding/issues/18
+	# "Evaluate When Packaging" and "Evaluate When Installing"
+	# https://github.com/hunterhogan/mapFolding/issues/18
 	dataclassIdentifier: str = dataclasses.field(default='ComputationState', metadata={'evaluateWhen': 'packaging'})
 	"""Name of the dataclass used to track computation state."""
 

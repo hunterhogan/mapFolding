@@ -23,7 +23,8 @@ from copy import deepcopy
 from mapFolding.beDRY import ComputationState
 from multiprocessing import set_start_method as multiprocessing_set_start_method
 
-# When to use multiprocessing.set_start_method https://github.com/hunterhogan/mapFolding/issues/6
+# When to use multiprocessing.set_start_method
+# https://github.com/hunterhogan/mapFolding/issues/6
 if __name__ == '__main__':
 	multiprocessing_set_start_method('spawn')
 

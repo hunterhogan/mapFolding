@@ -97,7 +97,7 @@ if __name__ == '__main__':
 	ast_argNumbaProgress = ast.arg(arg=spices.numbaProgressBarIdentifier, annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
 
-	findThis = ClassIsAndAttribute.targetIs(ast.AugAssign, IfThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id)) # type: ignore
+	findThis = ClassIsAndAttribute.targetIs(ast.AugAssign, IfThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id))
 	doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
 	countWithProgressBar = NodeChanger(findThis, doThat)
 	countWithProgressBar.visit(ingredientsFunction.astFunctionDef)

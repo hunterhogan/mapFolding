@@ -28,7 +28,6 @@ from typing import Any, cast
 import ast
 import dataclasses
 
-# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class RecipeSynthesizeFlow:
 	"""
@@ -54,7 +53,6 @@ class RecipeSynthesizeFlow:
 	source_astModule: ast.Module = parseLogicalPath2astModule(The.logicalPathModuleSourceAlgorithm)
 	"""AST of the source algorithm module containing the original implementation."""
 
-	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 	sourceCallableDispatcher: ast_Identifier = The.sourceCallableDispatcher
 	sourceCallableInitialize: ast_Identifier = The.sourceCallableInitialize
 	sourceCallableParallel: ast_Identifier = The.sourceCallableParallel
@@ -104,7 +102,6 @@ class RecipeSynthesizeFlow:
 	removeDataclassSequential: bool = True
 	# ========================================
 	# Computed
-	# Figure out dynamic flow control to synthesized modules https://github.com/hunterhogan/mapFolding/issues/4
 	# theFormatStrModuleSynthetic = "{packageFlow}Count"
 	# theFormatStrModuleForCallableSynthetic = theFormatStrModuleSynthetic + "_{callableTarget}"
 	# theModuleDispatcherSynthetic: ast_Identifier = theFormatStrModuleForCallableSynthetic.format(packageFlow=packageFlowSynthetic, callableTarget=The.sourceCallableDispatcher)
@@ -149,7 +146,6 @@ dummyAssign = Make.Assign([Make.Name("dummyTarget")], Make.Constant(None))
 dummySubscript = Make.Subscript(Make.Name("dummy"), Make.Name("slice"))
 dummyTuple = Make.Tuple([Make.Name("dummyElement")])
 
-# Consolidate settings classes through inheritance https://github.com/hunterhogan/mapFolding/issues/15
 @dataclasses.dataclass
 class ShatteredDataclass:
 	countingVariableAnnotation: ast.expr
