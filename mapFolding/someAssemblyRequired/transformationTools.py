@@ -20,7 +20,6 @@ logical structure and correctness.
 
 from collections.abc import Callable
 from astToolkit import ClassIsAndAttribute
-from mapFolding import outfitCountFolds, ComputationState, The, getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
 	astModuleToIngredientsFunction,
@@ -45,51 +44,8 @@ from mapFolding.someAssemblyRequired import (
 	Then,
 	unparseFindReplace,
 )
-from os import PathLike
-from pathlib import Path, PurePath
-from typing import Any, Literal, overload
 import ast
 import dataclasses
-import pickle
-
-@overload
-def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[True], *,  pathFilename: PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> Path: ...
-@overload
-def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: Literal[False] = False, **keywordArguments: Any) -> ComputationState: ...
-def makeInitializedComputationState(mapShape: tuple[int, ...], writeJob: bool = False, *,  pathFilename: PathLike[str] | PurePath | None = None, **keywordArguments: Any) -> ComputationState | Path:
-	"""
-	Initializes a computation state and optionally saves it to disk.
-
-	This function initializes a computation state using the source algorithm.
-
-	Hint: If you want an uninitialized state, call `outfitCountFolds` directly.
-
-	Parameters:
-		mapShape: List of integers representing the dimensions of the map to be folded.
-		writeJob (False): Whether to save the state to disk.
-		pathFilename (getPathFilenameFoldsTotal.pkl): The path and filename to save the state. If None, uses a default path.
-		**keywordArguments: computationDivisions:int|str|None=None,concurrencyLimit:int=1.
-	Returns:
-		stateUniversal|pathFilenameJob: The computation state for the map folding calculations, or
-			the path to the saved state file if writeJob is True.
-	"""
-	stateUniversal: ComputationState = outfitCountFolds(mapShape, **keywordArguments)
-
-	initializeState = importLogicalPath2Callable(The.logicalPathModuleSourceAlgorithm, The.sourceCallableInitialize)
-	stateUniversal = initializeState(stateUniversal)
-
-	if not writeJob:
-		return stateUniversal
-
-	if pathFilename:
-		pathFilenameJob = Path(pathFilename)
-		pathFilenameJob.parent.mkdir(parents=True, exist_ok=True)
-	else:
-		pathFilenameJob = getPathFilenameFoldsTotal(stateUniversal.mapShape).with_suffix('.pkl')
-
-	# Fix code scanning alert - Consider possible security implications associated with pickle module. #17
-	pathFilenameJob.write_bytes(pickle.dumps(stateUniversal))
-	return pathFilenameJob
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
 	"""

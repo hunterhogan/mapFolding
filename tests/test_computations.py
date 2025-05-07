@@ -85,13 +85,14 @@ All tests leverage standardized utilities like `standardizedEqualToCallableRetur
 that provide consistent, informative error messages and simplify test validation.
 """
 
-from typing import Literal
 from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n
+from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import settingsOEIS
-from mapFolding.someAssemblyRequired.RecipeJob import RecipeJob
-from mapFolding.someAssemblyRequired.transformationTools import makeInitializedComputationState
+from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
+from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from tests.conftest import standardizedEqualToCallableReturn, registrarRecordsTmpObject
+from typing import Literal
 import importlib.util
 import multiprocessing
 import pytest
@@ -122,18 +123,20 @@ def test_syntheticSequential(syntheticDispatcherFixture: None, mapShapeTestCount
 @pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilenameTmpTesting: Path) -> None:
 	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba
-	from mapFolding.someAssemblyRequired.synthesizeNumbaJob import makeJobNumba
-	state = makeInitializedComputationState(oneTestCuzTestsOverwritingTests)
+	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba
+	mapShape = oneTestCuzTestsOverwritingTests
+	state = MapFoldingState(mapShape)
+	state = initializeGroupsOfFolds(state)
 
 	pathFilenameModule = pathFilenameTmpTesting.absolute()
 	pathFilenameFoldsTotal = pathFilenameModule.with_suffix('.foldsTotalTesting')
 	registrarRecordsTmpObject(pathFilenameFoldsTotal)
 
-	jobTest = RecipeJob(state
+	jobTest = RecipeJobTheorem2Numba(state
 						, pathModule=PurePosixPath(pathFilenameModule.parent)
 						, moduleIdentifier=pathFilenameModule.stem
 						, pathFilenameFoldsTotal=PurePosixPath(pathFilenameFoldsTotal))
-	spices = SpicesJobNumba()
+	spices = SpicesJobNumba(useNumbaProgressBar=False)
 	makeJobNumba(jobTest, spices)
 
 	Don_Lapre_Road_to_Self_Improvement = importlib.util.spec_from_file_location("__main__", pathFilenameModule)

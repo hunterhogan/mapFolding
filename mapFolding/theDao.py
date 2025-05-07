@@ -1,22 +1,7 @@
 """
-Core computational algorithm for map folding counting and enumeration.
+This is no longer in the normal flow. (i.e., basecamp.py)
+But, it is part of some of the transformations. IDK if all of those transformations are obsolete or not.
 
-This module implements the core algorithms for enumerating and counting the various ways a rectangular map can be
-folded. It uses a functional state-transformation approach, where each function performs a specific state mutation and
-returns the updated state. The module provides three main counting algorithms:
-
-1. `countInitialize`: Sets up the initial state for computation.
-2. `countSequential`: Processes the folding computation sequentially.
-3. `countParallel`: Distributes the computation across multiple processes.
-
-All algorithms operate on a `ComputationState` object that tracks the folding process, including:
-- A "leaf" is a unit square in the map.
-- A "gap" is a potential position where a new leaf can be folded.
-- Connections track how leaves can connect above/below each other.
-- Leaves are enumerated starting from 1, not 0; hence, `leaf1ndex` not `leafIndex`.
-
-The `doTheNeedful` function is the main entry point that orchestrates the computation strategy based on task divisions and
-concurrency parameters.
 """
 from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
 from copy import deepcopy

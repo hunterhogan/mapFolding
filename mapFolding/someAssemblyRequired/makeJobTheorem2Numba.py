@@ -184,7 +184,7 @@ def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 if __name__ == '__main__':
 	import time
 	timeStart = time.perf_counter()
-	foldsTotal = {job.countCallable}() * {job.state.leavesTotal}
+	foldsTotal = int({job.countCallable}() * {job.state.leavesTotal})
 	print(time.perf_counter() - timeStart)
 	print('\\nmap {job.state.mapShape} =', foldsTotal)
 	writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
