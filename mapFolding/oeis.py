@@ -144,9 +144,6 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 		invalid.
 	"""
 	bFileLines: list[str] = OEISbFile.strip().splitlines()
-	# if not bFileLines.pop(0).startswith(f"# {oeisID}"):
-	# 	warnings.warn(f"Content does not match sequence {oeisID}")
-	# 	return {-1: -1}
 
 	OEISsequence: dict[int, int] = {}
 	for line in bFileLines:

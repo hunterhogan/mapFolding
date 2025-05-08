@@ -18,27 +18,18 @@ readable, maintainable implementations to highly optimized versions while preser
 logical structure and correctness.
 """
 
-from collections.abc import Callable
 from astToolkit import ClassIsAndAttribute
 from mapFolding.someAssemblyRequired import (
 	ast_Identifier,
-	astModuleToIngredientsFunction,
 	Be,
 	DeReConstructField2ast,
 	extractClassDef,
-	Grab,
 	IfThis,
 	importLogicalPath2Callable,
 	IngredientsFunction,
-	IngredientsModule,
-	inlineFunctionDef,
-	LedgerOfImports,
 	Make,
 	NodeChanger,
-	NodeTourist,
 	parseLogicalPath2astModule,
-	# RecipeSynthesizeFlow,
-	removeUnusedParameters,
 	ShatteredDataclass,
 	str_nameDOTname,
 	Then,
@@ -117,110 +108,6 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 	return shatteredDataclass
 
 # END of acceptable classes and functions ======================================================
-# def makeNewFlow(recipeFlow: RecipeSynthesizeFlow) -> IngredientsModule:
-# 	listAllIngredientsFunctions = [
-# 	(ingredientsInitialize := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableInitialize)),
-# 	(ingredientsParallel := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableParallel)),
-# 	(ingredientsSequential := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableSequential)),
-# 	(ingredientsDispatcher := astModuleToIngredientsFunction(recipeFlow.source_astModule, recipeFlow.sourceCallableDispatcher)),
-# 	]
-
-# 	# Inline functions ========================================================
-# 	# NOTE Replacements statements are based on the identifiers in the _source_, so operate on the source identifiers.
-# 	ingredientsInitialize.astFunctionDef = inlineFunctionDef(recipeFlow.sourceCallableInitialize, recipeFlow.source_astModule)
-# 	ingredientsParallel.astFunctionDef = inlineFunctionDef(recipeFlow.sourceCallableParallel, recipeFlow.source_astModule)
-# 	ingredientsSequential.astFunctionDef = inlineFunctionDef(recipeFlow.sourceCallableSequential, recipeFlow.source_astModule)
-
-# 	# assignRecipeIdentifiersToCallable. =============================
-# 	# NOTE reminder: you are updating these `ast.Name` here (and not in a more general search) because this is a
-# 	# narrow search for `ast.Call` so you won't accidentally replace unrelated `ast.Name`.
-# 	listFindReplace = [(recipeFlow.sourceCallableDispatcher, recipeFlow.callableDispatcher),
-# 						(recipeFlow.sourceCallableInitialize, recipeFlow.callableInitialize),
-# 						(recipeFlow.sourceCallableParallel, recipeFlow.callableParallel),
-# 						(recipeFlow.sourceCallableSequential, recipeFlow.callableSequential),]
-# 	for ingredients in listAllIngredientsFunctions:
-# 		for source_Identifier, recipe_Identifier in listFindReplace:
-# 			updateCallName = NodeChanger(IfThis.isCall_Identifier(source_Identifier), Grab.funcAttribute(Then.replaceWith(Make.Name(recipe_Identifier))))
-# 			updateCallName.visit(ingredients.astFunctionDef)
-
-# 	ingredientsDispatcher.astFunctionDef.name = recipeFlow.callableDispatcher
-# 	ingredientsInitialize.astFunctionDef.name = recipeFlow.callableInitialize
-# 	ingredientsParallel.astFunctionDef.name = recipeFlow.callableParallel
-# 	ingredientsSequential.astFunctionDef.name = recipeFlow.callableSequential
-
-# 	# Assign identifiers per the recipe. ==============================
-# 	listFindReplace = [(recipeFlow.sourceDataclassInstance, recipeFlow.dataclassInstance),
-# 		(recipeFlow.sourceDataclassInstanceTaskDistribution, recipeFlow.dataclassInstanceTaskDistribution),
-# 		(recipeFlow.sourceConcurrencyManagerNamespace, recipeFlow.concurrencyManagerNamespace),]
-# 	for ingredients in listAllIngredientsFunctions:
-# 		for source_Identifier, recipe_Identifier in listFindReplace:
-# 			updateName = NodeChanger(IfThis.isName_Identifier(source_Identifier) , Grab.idAttribute(Then.replaceWith(recipe_Identifier)))
-# 			update_arg = NodeChanger(IfThis.isArgument_Identifier(source_Identifier), Grab.argAttribute(Then.replaceWith(recipe_Identifier)))
-# 			updateName.visit(ingredients.astFunctionDef)
-# 			update_arg.visit(ingredients.astFunctionDef)
-
-# 	updateConcurrencyManager = NodeChanger(IfThis.isCallAttributeNamespace_Identifier(recipeFlow.sourceConcurrencyManagerNamespace, recipeFlow.sourceConcurrencyManagerIdentifier)
-# 										, Grab.funcAttribute(Then.replaceWith(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier))))
-# 	updateConcurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
-
-# 	# shatter Dataclass =======================================================
-# 	instance_Identifier = recipeFlow.dataclassInstance
-# 	getTheOtherRecord_damn = recipeFlow.dataclassInstanceTaskDistribution
-# 	shatteredDataclass = shatter_dataclassesDOTdataclass(recipeFlow.logicalPathModuleDataclass, recipeFlow.sourceDataclassIdentifier, instance_Identifier)
-# 	ingredientsDispatcher.imports.update(shatteredDataclass.imports)
-
-# 	# Change callable parameters and Call to the callable at the same time ====
-# 	# sequentialCallable =========================================================
-# 	if recipeFlow.removeDataclassSequential:
-# 		ingredientsSequential = removeDataclassFromFunction(ingredientsSequential, shatteredDataclass)
-# 		ingredientsDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsDispatcher, recipeFlow.callableSequential, shatteredDataclass)
-
-# 	if recipeFlow.removeDataclassInitialize:
-# 		ingredientsInitialize = removeDataclassFromFunction(ingredientsInitialize, shatteredDataclass)
-# 		ingredientsDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsDispatcher, recipeFlow.callableInitialize, shatteredDataclass)
-
-# 	# parallelCallable =========================================================
-# 	if recipeFlow.removeDataclassParallel:
-# 		ingredientsParallel.astFunctionDef.args = Make.arguments(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
-
-# 		ingredientsParallel.astFunctionDef = unparseFindReplace(ingredientsParallel.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
-
-# 		ingredientsParallel = removeUnusedParameters(ingredientsParallel)
-
-# 		list_argCuzMyBrainRefusesToThink = ingredientsParallel.astFunctionDef.args.args + ingredientsParallel.astFunctionDef.args.posonlyargs + ingredientsParallel.astFunctionDef.args.kwonlyargs
-# 		list_arg_arg: list[ast_Identifier] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
-
-# 		listParameters = [parameter for parameter in shatteredDataclass.listName4Parameters if parameter.id in list_arg_arg]
-
-# 		replaceCall2concurrencyManager = NodeChanger(IfThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier), Then.replaceWith(Make.Call(Make.Attribute(Make.Name(recipeFlow.concurrencyManagerNamespace), recipeFlow.concurrencyManagerIdentifier), [Make.Name(recipeFlow.callableParallel)] + listParameters)))
-
-# 		def getIt(astCallConcurrencyResult: list[ast.Call]) -> Callable[[ast.AST], ast.AST]:
-# 			# TODO I cannot remember why I made this function. It doesn't fit with how I normally do things.
-# 			def workhorse(node: ast.AST) -> ast.AST:
-# 				NodeTourist(Be.Call, Then.appendTo(astCallConcurrencyResult)).visit(node)
-# 				return node
-# 			return workhorse
-
-# 		# NOTE I am dissatisfied with this logic for many reasons, including that it requires separate NodeCollector and NodeReplacer instances.
-# 		astCallConcurrencyResult: list[ast.Call] = []
-# 		get_astCallConcurrencyResult = NodeTourist(IfThis.isAssignAndTargets0Is(IfThis.isSubscript_Identifier(getTheOtherRecord_damn)), getIt(astCallConcurrencyResult))
-# 		get_astCallConcurrencyResult.visit(ingredientsDispatcher.astFunctionDef)
-# 		replaceAssignParallelCallable = NodeChanger(IfThis.isAssignAndTargets0Is(IfThis.isSubscript_Identifier(getTheOtherRecord_damn)), Grab.valueAttribute(Then.replaceWith(astCallConcurrencyResult[0])))
-# 		replaceAssignParallelCallable.visit(ingredientsDispatcher.astFunctionDef)
-# 		changeReturnParallelCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.countingVariableName)))
-# 		ingredientsParallel.astFunctionDef.returns = shatteredDataclass.countingVariableAnnotation
-
-# 		unpack4parallelCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCallAttributeNamespace_Identifier(recipeFlow.concurrencyManagerNamespace, recipeFlow.concurrencyManagerIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
-
-# 		unpack4parallelCallable.visit(ingredientsDispatcher.astFunctionDef)
-# 		replaceCall2concurrencyManager.visit(ingredientsDispatcher.astFunctionDef)
-# 		changeReturnParallelCallable.visit(ingredientsParallel.astFunctionDef)
-
-# 	# Module-level transformations ===========================================================
-# 	ingredientsModuleNumbaUnified = IngredientsModule(ingredientsFunction=listAllIngredientsFunctions, imports=LedgerOfImports(recipeFlow.source_astModule))
-# 	ingredientsModuleNumbaUnified.removeImportFromModule('numpy')
-
-# 	return ingredientsModuleNumbaUnified
 
 def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
 	ingredientsTarget.astFunctionDef.args = Make.arguments(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)

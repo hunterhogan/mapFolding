@@ -1,7 +1,6 @@
 from mapFolding import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState, The
 from mapFolding import DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
 from mapFolding.someAssemblyRequired import ShatteredDataclass, ast_Identifier, parseLogicalPath2astModule, str_nameDOTname
-# from mapFolding.someAssemblyRequired.toolkitNumba import The
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 from typing import TypeAlias
@@ -88,15 +87,3 @@ class RecipeJobTheorem2Numba:
 		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.dataclassIdentifier and self.dataclassInstance: # pyright: ignore[reportUnnecessaryComparison]
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.dataclassIdentifier, self.dataclassInstance)
 
-	# ========================================
-	# Fields you probably don't need =================================
-	# Dispatcher =================================
-	# sourceDispatcherCallable: ast_Identifier = The.callableDispatcher
-	# dispatcherCallable: ast_Identifier = sourceDispatcherCallable
-	# # Parallel counting =================================
-	# sourceDataclassInstanceTaskDistribution: ast_Identifier = The.dataclassInstanceTaskDistribution
-	# sourceConcurrencyManagerNamespace: ast_Identifier = The.concurrencyManagerNamespace
-	# sourceConcurrencyManagerIdentifier: ast_Identifier = The.concurrencyManagerIdentifier
-	# dataclassInstanceTaskDistribution: ast_Identifier = sourceDataclassInstanceTaskDistribution
-	# concurrencyManagerNamespace: ast_Identifier = sourceConcurrencyManagerNamespace
-	# concurrencyManagerIdentifier: ast_Identifier = sourceConcurrencyManagerIdentifier
