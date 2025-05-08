@@ -33,23 +33,15 @@ from mapFolding.datatypes import (
 from mapFolding.theSSOT import PackageSettings as PackageSettings, packageSettings as packageSettings
 
 from mapFolding.beDRY import (
-	ComputationState as ComputationState,
 	getConnectionGraph as getConnectionGraph,
 	getLeavesTotal as getLeavesTotal,
 	getTaskDivisions as getTaskDivisions,
 	makeDataContainer as makeDataContainer,
-	outfitCountFolds as outfitCountFolds,
 	setProcessorLimit as setProcessorLimit,
 	validateListDimensions as validateListDimensions,
 )
 
 from mapFolding.dataBaskets import MapFoldingState as MapFoldingState
-
-from mapFolding.infoBooth import (
-	PackageInformation as PackageInformation,
-	raiseIfNoneGitHubIssueNumber3 as raiseIfNoneGitHubIssueNumber3,
-	The as The,
-)
 
 from mapFolding.filesystemToolkit import (
 	getFilenameFoldsTotal as getFilenameFoldsTotal,

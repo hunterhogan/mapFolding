@@ -5,6 +5,7 @@ from tomli import load as tomli_load
 import dataclasses
 
 packageNamePACKAGING_HARDCODED = "mapFolding"
+concurrencyPackageHARDCODED = 'multiprocessing'
 
 # Evaluate When Packaging
 # https://github.com/hunterhogan/mapFolding/issues/18
@@ -26,5 +27,8 @@ class PackageSettings:
 	fileExtension: str = dataclasses.field(default='.py', metadata={'evaluateWhen': 'installing'})
 	packageName: str = dataclasses.field(default = packageNamePACKAGING, metadata={'evaluateWhen': 'packaging'})
 	pathPackage: Path = dataclasses.field(default_factory=getPathPackageINSTALLING, metadata={'evaluateWhen': 'installing'})
+	concurrencyPackage: str | None = None
+	"""Package to use for concurrent execution (e.g., 'multiprocessing', 'numba')."""
 
-packageSettings = PackageSettings()
+concurrencyPackage = concurrencyPackageHARDCODED
+packageSettings = PackageSettings(concurrencyPackage=concurrencyPackage)

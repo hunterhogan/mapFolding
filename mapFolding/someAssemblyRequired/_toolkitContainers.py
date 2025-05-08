@@ -21,8 +21,7 @@ specific optimizations and transformations.
 from collections.abc import Callable
 from astToolkit import ClassIsAndAttribute
 from copy import deepcopy
-from mapFolding.someAssemblyRequired import ast_Identifier, DOT, IfThis, Make, NodeTourist, parseLogicalPath2astModule, str_nameDOTname, Then, LedgerOfImports
-from mapFolding import raiseIfNoneGitHubIssueNumber3, The
+from mapFolding.someAssemblyRequired import ast_Identifier, DOT, IfThis, Make, NodeTourist, parseLogicalPath2astModule, str_nameDOTname, Then, LedgerOfImports, raiseIfNoneGitHubIssueNumber3, The
 from pathlib import Path, PurePosixPath
 from typing import Any, cast
 import ast

@@ -1,25 +1,10 @@
-from collections.abc import Callable
-from importlib import import_module as importlib_import_module
-from mapFolding import ComputationState, PackageSettings
-from types import ModuleType
+from mapFolding import PackageSettings
 import dataclasses
 
 @dataclasses.dataclass
 class PackageInformation(PackageSettings):
-	"""
-	In _all_ of the root directory and "syntheticModules", the _only_ `PackageInformation` that are used are:
-		The.concurrencyPackage
-		The.dispatcher
-	"""
-
-	logicalPathModuleDispatcher: str | None = None
-	"""Logical import path to the module containing the dispatcher function."""
-
 	callableDispatcher: str | None = None
 	"""Name of the function within the dispatcher module that will be called."""
-
-	concurrencyPackage: str | None = None
-	"""Package to use for concurrent execution (e.g., 'multiprocessing', 'numba')."""
 
 	# "Evaluate When Packaging" and "Evaluate When Installing"
 	# https://github.com/hunterhogan/mapFolding/issues/18
@@ -71,14 +56,6 @@ class PackageInformation(PackageSettings):
 	logicalPathModuleSourceAlgorithm: str = dataclasses.field(default=None, metadata={'evaluateWhen': 'packaging'}) # pyright: ignore[reportAssignmentType]
 	"""Fully qualified import path to the module containing the source algorithm."""
 
-	@property
-	def dispatcher(self) -> Callable[['ComputationState'], 'ComputationState']:
-		""" _The_ callable that connects `countFolds` to the logic that does the work."""
-		logicalPath: str = self.logicalPathModuleDispatcher or self.logicalPathModuleSourceAlgorithm
-		identifier: str = self.callableDispatcher or self.sourceCallableDispatcher
-		moduleImported: ModuleType = importlib_import_module(logicalPath)
-		return getattr(moduleImported, identifier)
-
 	def __post_init__(self) -> None:
 		if self.dataclassInstanceTaskDistribution is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.dataclassInstanceTaskDistribution = self.dataclassInstance + self.dataclassInstanceTaskDistributionSuffix
@@ -90,8 +67,6 @@ class PackageInformation(PackageSettings):
 
 class raiseIfNoneGitHubIssueNumber3(Exception): pass
 
-logicalPathModuleDispatcherHARDCODED: str = 'mapFolding.syntheticModules.numbaCount'
 callableDispatcherHARDCODED: str = 'doTheNeedful'
-concurrencyPackageHARDCODED = 'multiprocessing'
 
-The = PackageInformation(logicalPathModuleDispatcher=logicalPathModuleDispatcherHARDCODED, callableDispatcher=callableDispatcherHARDCODED, concurrencyPackage=concurrencyPackageHARDCODED)
+The = PackageInformation(callableDispatcher=callableDispatcherHARDCODED)

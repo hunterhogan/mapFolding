@@ -12,10 +12,10 @@ appropriate algorithm implementation, and optional persistence of results.
 from collections.abc import Sequence
 from mapFolding import (
 	getPathFilenameFoldsTotal,
+	packageSettings,
 	saveFoldsTotal,
 	saveFoldsTotalFAILearly,
 	setProcessorLimit,
-	The,
 	validateListDimensions,
 )
 from os import PathLike
@@ -102,8 +102,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	# task division instructions ===============================================
 
 	if computationDivisions:
-		# NOTE `The.concurrencyPackage`
-		concurrencyLimit: int = setProcessorLimit(CPUlimit, The.concurrencyPackage)
+		concurrencyLimit: int = setProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
 		from mapFolding.beDRY import getLeavesTotal, getTaskDivisions
 		leavesTotal: int = getLeavesTotal(mapShape)
 		taskDivisions = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)

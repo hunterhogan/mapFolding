@@ -75,6 +75,12 @@ from astToolkit.transformationTools import (
 	write_astModule as write_astModule,
 )
 
+from mapFolding.someAssemblyRequired.infoBooth import (
+	PackageInformation as PackageInformation,
+	raiseIfNoneGitHubIssueNumber3 as raiseIfNoneGitHubIssueNumber3,
+	The as The,
+)
+
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis
 
 from mapFolding.someAssemblyRequired._toolkitContainers import (

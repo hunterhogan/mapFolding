@@ -1,6 +1,6 @@
-from mapFolding import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState, The
+from mapFolding import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState
 from mapFolding import DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
-from mapFolding.someAssemblyRequired import ShatteredDataclass, ast_Identifier, parseLogicalPath2astModule, str_nameDOTname
+from mapFolding.someAssemblyRequired import ShatteredDataclass, ast_Identifier, parseLogicalPath2astModule, str_nameDOTname, The
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 from typing import TypeAlias
@@ -86,4 +86,3 @@ class RecipeJobTheorem2Numba:
 
 		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.dataclassIdentifier and self.dataclassInstance: # pyright: ignore[reportUnnecessaryComparison]
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.dataclassIdentifier, self.dataclassInstance)
-

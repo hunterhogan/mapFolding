@@ -1,7 +1,8 @@
 from collections.abc import Sequence
 from astToolkit import ClassIsAndAttribute, extractClassDef
-from mapFolding import raiseIfNoneGitHubIssueNumber3, The
 from mapFolding.someAssemblyRequired import (
+	raiseIfNoneGitHubIssueNumber3,
+	The,
 	ast_Identifier,
 	astModuleToIngredientsFunction,
 	Be,

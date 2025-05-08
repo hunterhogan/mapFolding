@@ -1,6 +1,8 @@
 from astToolkit import ClassIsAndAttribute
-from mapFolding import getPathFilenameFoldsTotal, raiseIfNoneGitHubIssueNumber3, The, MapFoldingState
+from mapFolding import getPathFilenameFoldsTotal, MapFoldingState
 from mapFolding.someAssemblyRequired import (
+	raiseIfNoneGitHubIssueNumber3,
+	The,
 	ast_Identifier,
 	Be,
 	extractFunctionDef,
