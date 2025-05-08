@@ -1,12 +1,10 @@
-from astToolkit import ClassIsAndAttribute
 from mapFolding import getPathFilenameFoldsTotal, MapFoldingState
-from mapFolding.someAssemblyRequired import (
-	raiseIfNoneGitHubIssueNumber3,
-	The,
+from mapFolding.someAssemblyRequired import IfThis, packageInformation, raiseIfNoneGitHubIssueNumber3
+from astToolkit import (
 	ast_Identifier,
 	Be,
+	ClassIsAndAttribute,
 	extractFunctionDef,
-	IfThis,
 	IngredientsFunction,
 	IngredientsModule,
 	LedgerOfImports,
@@ -15,10 +13,10 @@ from mapFolding.someAssemblyRequired import (
 	NodeTourist,
 	str_nameDOTname,
 	Then,
-	write_astModule,
 )
+from astToolkit.transformationTools import write_astModule
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
-from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight, SpicesJobNumba, decorateCallableWithNumba
+from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from pathlib import PurePosixPath
 from typing import cast, NamedTuple
@@ -269,7 +267,7 @@ if __name__ == '__main__':
 	# foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
 	# foldsTotalEstimated = dictionaryEstimates[state.mapShape] // state.leavesTotal
 	foldsTotalEstimated = 0
-	pathModule = PurePosixPath(The.pathPackage, 'jobs')
+	pathModule = PurePosixPath(packageInformation.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2Numba(state, foldsTotalEstimated, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)

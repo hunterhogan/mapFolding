@@ -44,41 +44,10 @@ optimizations - while maintaining the ability to verify correctness at each tran
 test suite.
 """
 
-from astToolkit import (
-	ast_expr_Slice as ast_expr_Slice,
-	ast_Identifier as ast_Identifier,
-	astModuleToIngredientsFunction as astModuleToIngredientsFunction,
-	Be as Be,
-	DOT as DOT,
-	extractClassDef as extractClassDef,
-	extractFunctionDef as extractFunctionDef,
-	Grab as Grab,
-	IngredientsFunction as IngredientsFunction,
-	IngredientsModule as IngredientsModule,
-	LedgerOfImports as LedgerOfImports,
-	Make as Make,
-	NodeChanger as NodeChanger,
-	NodeORattribute as NodeORattribute,
-	NodeTourist as NodeTourist,
-	parseLogicalPath2astModule as parseLogicalPath2astModule,
-	parsePathFilename2astModule as parsePathFilename2astModule,
-	str_nameDOTname as str_nameDOTname,
-	Then as Then,
-)
-
-from Z0Z_tools import importLogicalPath2Callable as importLogicalPath2Callable, importPathFilename2Callable as importPathFilename2Callable
-
-from astToolkit.transformationTools import (
-	inlineFunctionDef as inlineFunctionDef,
-	removeUnusedParameters as removeUnusedParameters,
-	unparseFindReplace as unparseFindReplace,
-	write_astModule as write_astModule,
-)
-
 from mapFolding.someAssemblyRequired.infoBooth import (
 	PackageInformation as PackageInformation,
 	raiseIfNoneGitHubIssueNumber3 as raiseIfNoneGitHubIssueNumber3,
-	The as The,
+	packageInformation as packageInformation,
 )
 
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis

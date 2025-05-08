@@ -3,7 +3,7 @@ import dataclasses
 
 @dataclasses.dataclass
 class PackageInformation(PackageSettings):
-	callableDispatcher: str | None = None
+	callableDispatcher: str = 'doTheNeedful'
 	"""Name of the function within the dispatcher module that will be called."""
 
 	# "Evaluate When Packaging" and "Evaluate When Installing"
@@ -67,6 +67,4 @@ class PackageInformation(PackageSettings):
 
 class raiseIfNoneGitHubIssueNumber3(Exception): pass
 
-callableDispatcherHARDCODED: str = 'doTheNeedful'
-
-The = PackageInformation(callableDispatcher=callableDispatcherHARDCODED)
+packageInformation = PackageInformation()

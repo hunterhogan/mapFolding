@@ -17,7 +17,8 @@ performance improvements while preserving code semantics and correctness.
 
 from collections.abc import Callable, Sequence
 from mapFolding import NotRequired, TypedDict
-from mapFolding.someAssemblyRequired import ast_Identifier, IngredientsFunction, Make, str_nameDOTname, write_astModule
+from astToolkit import ast_Identifier, IngredientsFunction, Make, str_nameDOTname
+from astToolkit.transformationTools import write_astModule
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, cast, Final
 import ast

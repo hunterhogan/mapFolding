@@ -18,11 +18,10 @@ The containers work in conjunction with transformation tools that manipulate the
 specific optimizations and transformations.
 """
 
+from astToolkit import ast_Identifier, ClassIsAndAttribute, DOT, LedgerOfImports, Make, NodeTourist, str_nameDOTname, Then
 from collections.abc import Callable
-from astToolkit import ClassIsAndAttribute
 from copy import deepcopy
-from mapFolding.someAssemblyRequired import ast_Identifier, DOT, IfThis, Make, NodeTourist, parseLogicalPath2astModule, str_nameDOTname, Then, LedgerOfImports, raiseIfNoneGitHubIssueNumber3, The
-from pathlib import Path, PurePosixPath
+from mapFolding.someAssemblyRequired import IfThis, raiseIfNoneGitHubIssueNumber3
 from typing import Any, cast
 import ast
 import dataclasses

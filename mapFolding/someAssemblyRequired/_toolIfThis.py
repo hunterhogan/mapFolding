@@ -19,9 +19,8 @@ they implement a declarative approach to AST manipulation that separates node id
 (be), and data access (DOT).
 """
 
-from astToolkit import IfThis as astToolkit_IfThis
+from astToolkit import ast_Identifier, Be, DOT, IfThis as astToolkit_IfThis
 from collections.abc import Callable
-from mapFolding.someAssemblyRequired import ast_Identifier, Be, DOT
 from typing import TypeGuard
 import ast
 

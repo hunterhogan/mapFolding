@@ -20,21 +20,23 @@ logical structure and correctness.
 
 from astToolkit import ClassIsAndAttribute
 from mapFolding.someAssemblyRequired import (
+	DeReConstructField2ast,
+	IfThis,
+	ShatteredDataclass,
+)
+from astToolkit import(
 	ast_Identifier,
 	Be,
-	DeReConstructField2ast,
 	extractClassDef,
-	IfThis,
-	importLogicalPath2Callable,
 	IngredientsFunction,
 	Make,
 	NodeChanger,
 	parseLogicalPath2astModule,
-	ShatteredDataclass,
 	str_nameDOTname,
 	Then,
-	unparseFindReplace,
 )
+from astToolkit.transformationTools import unparseFindReplace
+from Z0Z_tools import importLogicalPath2Callable
 import ast
 import dataclasses
 
