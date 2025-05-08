@@ -51,11 +51,6 @@ from mapFolding.infoBooth import (
 	The as The,
 )
 
-from mapFolding.theDao import (
-	countInitialize as countInitialize,
-	doTheNeedful as doTheNeedful,
-)
-
 from mapFolding.filesystemToolkit import (
 	getFilenameFoldsTotal as getFilenameFoldsTotal,
 	getPathFilenameFoldsTotal as getPathFilenameFoldsTotal,

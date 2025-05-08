@@ -56,14 +56,10 @@ See the examples in `test_computations.py` for guidance on adapting these fixtur
 """
 
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import getLeavesTotal, validateListDimensions, makeDataContainer, The
+from mapFolding import getLeavesTotal, validateListDimensions, makeDataContainer
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
-from mapFolding.someAssemblyRequired import importLogicalPath2Callable, RecipeSynthesizeFlow
-from pathlib import Path, PurePosixPath
-from types import ModuleType
+from pathlib import Path
 from typing import Any
-import importlib
-import importlib.util
 import numpy
 import pytest
 import random
@@ -238,75 +234,75 @@ def oeisID_1random() -> str:
 	"""Return one random valid OEIS ID."""
 	return random.choice(oeisIDsImplemented)
 
-@pytest.fixture
-def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
-	"""A fixture providing a context manager for temporarily replacing the dispatcher.
+# @pytest.fixture
+# def useThisDispatcher() -> Generator[Callable[..., None], Any, None]:
+# 	"""A fixture providing a context manager for temporarily replacing the dispatcher.
 
-	Returns
-		A context manager for patching the dispatcher
-	"""
-	import mapFolding.infoBooth as infoBooth
+# 	Returns
+# 		A context manager for patching the dispatcher
+# 	"""
+# 	import mapFolding.infoBooth as infoBooth
 
-	# Store original property method
-	original_dispatcher_property = infoBooth.PackageInformation.dispatcher
+# 	# Store original property method
+# 	original_dispatcher_property = infoBooth.PackageInformation.dispatcher
 
-	def patchDispatcher(callableTarget: Callable[..., Any]) -> None:
-		"""Patch the dispatcher property to return the target callable."""
-		# Create a new property that returns the target callable
-		def patched_dispatcher(self: infoBooth.PackageInformation) -> Callable[..., Any]:
-			def wrapper(state: Any) -> Any:
-				return callableTarget(state)
-			return wrapper
+# 	def patchDispatcher(callableTarget: Callable[..., Any]) -> None:
+# 		"""Patch the dispatcher property to return the target callable."""
+# 		# Create a new property that returns the target callable
+# 		def patched_dispatcher(self: infoBooth.PackageInformation) -> Callable[..., Any]:
+# 			def wrapper(state: Any) -> Any:
+# 				return callableTarget(state)
+# 			return wrapper
 
-		# Replace the property with our patched version
-		infoBooth.PackageInformation.dispatcher = property(patched_dispatcher) # type: ignore
+# 		# Replace the property with our patched version
+# 		infoBooth.PackageInformation.dispatcher = property(patched_dispatcher) # type: ignore
 
-	yield patchDispatcher
+# 	yield patchDispatcher
 
-	# Restore the original property
-	infoBooth.PackageInformation.dispatcher = original_dispatcher_property # type: ignore
+# 	# Restore the original property
+# 	infoBooth.PackageInformation.dispatcher = original_dispatcher_property # type: ignore
 
-def getAlgorithmDispatcher() -> Callable[..., Any]:
-	moduleImported: ModuleType = importlib.import_module(The.logicalPathModuleSourceAlgorithm)
-	dispatcherCallable = getattr(moduleImported, The.sourceCallableDispatcher)
-	return dispatcherCallable
+# def getAlgorithmDispatcher() -> Callable[..., Any]:
+# 	moduleImported: ModuleType = importlib.import_module(The.logicalPathModuleSourceAlgorithm)
+# 	dispatcherCallable = getattr(moduleImported, The.sourceCallableDispatcher)
+# 	return dispatcherCallable
 
-@pytest.fixture
-def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Generator[None, None, None]:
-	"""Temporarily patches getDispatcherCallable to return the algorithm dispatcher."""
-	useThisDispatcher(importLogicalPath2Callable(The.logicalPathModuleSourceAlgorithm, The.sourceCallableDispatcher))
-	yield
+# @pytest.fixture
+# def useAlgorithmSourceDispatcher(useThisDispatcher: Callable[..., Any]) -> Generator[None, None, None]:
+# 	"""Temporarily patches getDispatcherCallable to return the algorithm dispatcher."""
+# 	useThisDispatcher(importLogicalPath2Callable(The.logicalPathModuleSourceAlgorithm, The.sourceCallableDispatcher))
+# 	yield
 
-@pytest.fixture
-def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any], pathTmpTesting: Path) -> Callable[..., Any]:
-	"""Generate synthetic Numba-optimized dispatcher module and patch the dispatcher"""
-	from mapFolding.someAssemblyRequired.toolkitNumba import makeNumbaFlow
+# @pytest.fixture
+# def syntheticDispatcherFixture(useThisDispatcher: Callable[..., Any], pathTmpTesting: Path) -> Callable[..., Any]:
+# 	"""Generate synthetic Numba-optimized dispatcher module and patch the dispatcher"""
+# 	from mapFolding.someAssemblyRequired.toolkitNumba import makeNumbaFlow
 
-	TESTINGrecipeFlow = RecipeSynthesizeFlow(
-		pathPackage=PurePosixPath(pathTmpTesting.absolute()),
-		logicalPathFlowRoot=None,
-		moduleDispatcher="test_dispatcher",
-		# dispatcherCallable="dispatcherSynthetic",
-	)
+# 	TESTINGrecipeFlow = RecipeSynthesizeFlow(
+# 		pathPackage=PurePosixPath(pathTmpTesting.absolute()),
+# 		logicalPathFlowRoot=None,
+# 		moduleDispatcher="test_dispatcher",
+# 		# dispatcherCallable="dispatcherSynthetic",
+# 	)
 
-	# Generate optimized module in test directory
-	makeNumbaFlow(TESTINGrecipeFlow)
+# 	# Generate optimized module in test directory
+# 	makeNumbaFlow(TESTINGrecipeFlow)
 
-	# Import synthesized dispatcher
-	importlibSpecificationDispatcher = importlib.util.spec_from_file_location(
-		TESTINGrecipeFlow.moduleDispatcher,
-		Path(TESTINGrecipeFlow.pathFilenameDispatcher),
-	)
-	if importlibSpecificationDispatcher is None or importlibSpecificationDispatcher.loader is None:
-		raise ImportError("Failed to load synthetic dispatcher module")
+# 	# Import synthesized dispatcher
+# 	importlibSpecificationDispatcher = importlib.util.spec_from_file_location(
+# 		TESTINGrecipeFlow.moduleDispatcher,
+# 		Path(TESTINGrecipeFlow.pathFilenameDispatcher),
+# 	)
+# 	if importlibSpecificationDispatcher is None or importlibSpecificationDispatcher.loader is None:
+# 		raise ImportError("Failed to load synthetic dispatcher module")
 
-	moduleSpecificationDispatcher = importlib.util.module_from_spec(importlibSpecificationDispatcher)
-	importlibSpecificationDispatcher.loader.exec_module(moduleSpecificationDispatcher)
-	callableDispatcherSynthetic = getattr(moduleSpecificationDispatcher, TESTINGrecipeFlow.callableDispatcher)
+# 	moduleSpecificationDispatcher = importlib.util.module_from_spec(importlibSpecificationDispatcher)
+# 	importlibSpecificationDispatcher.loader.exec_module(moduleSpecificationDispatcher)
+# 	callableDispatcherSynthetic = getattr(moduleSpecificationDispatcher, TESTINGrecipeFlow.callableDispatcher)
 
-	# Patch dispatcher and return callable
-	useThisDispatcher(callableDispatcherSynthetic)
-	return callableDispatcherSynthetic
+# 	# Patch dispatcher and return callable
+# 	useThisDispatcher(callableDispatcherSynthetic)
+# 	return callableDispatcherSynthetic
 
 def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
 	"""Format assertion message for any test comparison."""

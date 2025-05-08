@@ -1,7 +1,7 @@
-from mapFolding import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState
+from mapFolding import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState, The
 from mapFolding import DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
 from mapFolding.someAssemblyRequired import ShatteredDataclass, ast_Identifier, parseLogicalPath2astModule, str_nameDOTname
-from mapFolding.someAssemblyRequired.toolkitNumba import theNumbaFlow
+# from mapFolding.someAssemblyRequired.toolkitNumba import The
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 from typing import TypeAlias
@@ -21,17 +21,17 @@ class RecipeJobTheorem2Numba:
 
 	sourceLogicalPathModuleDataclass: str_nameDOTname = 'mapFolding.dataBaskets'
 	sourceDataclassIdentifier: ast_Identifier = 'MapFoldingState'
-	sourceDataclassInstance: ast_Identifier = theNumbaFlow.dataclassInstance
+	sourceDataclassInstance: ast_Identifier = The.dataclassInstance
 
-	sourcePathPackage: PurePosixPath | None = theNumbaFlow.pathPackage
-	sourcePackageIdentifier: ast_Identifier | None = theNumbaFlow.packageIdentifier
+	sourcePathPackage: PurePosixPath | None = PurePosixPath(The.pathPackage)
+	sourcePackageIdentifier: ast_Identifier | None = The.packageName
 
 	# ========================================
 	# Filesystem (names of physical objects)
 	pathPackage: PurePosixPath | None = None
 	pathModule: PurePosixPath | None = PurePosixPath(getPathRootJobDEFAULT())
 	""" `pathModule` will override `pathPackage` and `logicalPathRoot`."""
-	fileExtension: str = theNumbaFlow.fileExtension
+	fileExtension: str = The.fileExtension
 	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 
 	# ========================================
@@ -91,12 +91,12 @@ class RecipeJobTheorem2Numba:
 	# ========================================
 	# Fields you probably don't need =================================
 	# Dispatcher =================================
-	sourceDispatcherCallable: ast_Identifier = theNumbaFlow.callableDispatcher
-	dispatcherCallable: ast_Identifier = sourceDispatcherCallable
-	# Parallel counting =================================
-	sourceDataclassInstanceTaskDistribution: ast_Identifier = theNumbaFlow.dataclassInstanceTaskDistribution
-	sourceConcurrencyManagerNamespace: ast_Identifier = theNumbaFlow.concurrencyManagerNamespace
-	sourceConcurrencyManagerIdentifier: ast_Identifier = theNumbaFlow.concurrencyManagerIdentifier
-	dataclassInstanceTaskDistribution: ast_Identifier = sourceDataclassInstanceTaskDistribution
-	concurrencyManagerNamespace: ast_Identifier = sourceConcurrencyManagerNamespace
-	concurrencyManagerIdentifier: ast_Identifier = sourceConcurrencyManagerIdentifier
+	# sourceDispatcherCallable: ast_Identifier = The.callableDispatcher
+	# dispatcherCallable: ast_Identifier = sourceDispatcherCallable
+	# # Parallel counting =================================
+	# sourceDataclassInstanceTaskDistribution: ast_Identifier = The.dataclassInstanceTaskDistribution
+	# sourceConcurrencyManagerNamespace: ast_Identifier = The.concurrencyManagerNamespace
+	# sourceConcurrencyManagerIdentifier: ast_Identifier = The.concurrencyManagerIdentifier
+	# dataclassInstanceTaskDistribution: ast_Identifier = sourceDataclassInstanceTaskDistribution
+	# concurrencyManagerNamespace: ast_Identifier = sourceConcurrencyManagerNamespace
+	# concurrencyManagerIdentifier: ast_Identifier = sourceConcurrencyManagerIdentifier

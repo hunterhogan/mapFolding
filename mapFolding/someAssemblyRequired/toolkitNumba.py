@@ -17,14 +17,12 @@ performance improvements while preserving code semantics and correctness.
 
 from collections.abc import Callable, Sequence
 from mapFolding import NotRequired, TypedDict
-from mapFolding.someAssemblyRequired import ast_Identifier, IngredientsFunction, Make, RecipeSynthesizeFlow, str_nameDOTname, write_astModule
-from mapFolding.someAssemblyRequired.transformationTools import makeNewFlow
+from mapFolding.someAssemblyRequired import ast_Identifier, IngredientsFunction, Make, str_nameDOTname, write_astModule
+# from mapFolding.someAssemblyRequired.transformationTools import makeNewFlow
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, cast, Final
 import ast
 import dataclasses
-
-theNumbaFlow: RecipeSynthesizeFlow = RecipeSynthesizeFlow()
 
 class ParametersNumba(TypedDict):
 	_dbg_extend_lifetimes: NotRequired[bool]
@@ -133,39 +131,39 @@ class SpicesJobNumba:
 	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
 	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba) # type: ignore
 
-def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
-	"""
-	Transform standard Python algorithm code into optimized Numba implementations.
+# def makeNumbaFlow(numbaFlow: RecipeSynthesizeFlow) -> None:
+# 	"""
+# 	Transform standard Python algorithm code into optimized Numba implementations.
 
-	This function implements the complete transformation assembly line that converts
-	a conventional Python implementation into a high-performance Numba-accelerated
-	version. The process includes:
+# 	This function implements the complete transformation assembly line that converts
+# 	a conventional Python implementation into a high-performance Numba-accelerated
+# 	version. The process includes:
 
-	1. Extracting core algorithm functions from the source module
-	2. Inlining function calls to create self-contained implementations
-	3. Transforming dataclass access patterns for Numba compatibility
-	4. Applying appropriate Numba decorators with optimization settings
-	5. Generating a unified module with sequential and parallel implementations
-	6. Writing the transformed code to the filesystem with properly managed imports
+# 	1. Extracting core algorithm functions from the source module
+# 	2. Inlining function calls to create self-contained implementations
+# 	3. Transforming dataclass access patterns for Numba compatibility
+# 	4. Applying appropriate Numba decorators with optimization settings
+# 	5. Generating a unified module with sequential and parallel implementations
+# 	6. Writing the transformed code to the filesystem with properly managed imports
 
-	The transformation preserves the logical structure and semantics of the original
-	implementation while making it compatible with Numba's constraints and
-	optimization capabilities. This creates a bridge between the general-purpose
-	implementation and the highly-optimized version needed for production use.
+# 	The transformation preserves the logical structure and semantics of the original
+# 	implementation while making it compatible with Numba's constraints and
+# 	optimization capabilities. This creates a bridge between the general-purpose
+# 	implementation and the highly-optimized version needed for production use.
 
-	Parameters:
-		numbaFlow: Configuration object that specifies all aspects of the
-					transformation process, including source and target locations,
-					function and variable names, and output paths.
-	"""
+# 	Parameters:
+# 		numbaFlow: Configuration object that specifies all aspects of the
+# 					transformation process, including source and target locations,
+# 					function and variable names, and output paths.
+# 	"""
 
-	ingredientsModuleNumbaUnified = makeNewFlow(numbaFlow)
+# 	ingredientsModuleNumbaUnified = makeNewFlow(numbaFlow)
 
-	# numba decorators =========================================
-	ingredientsModuleNumbaUnified.listIngredientsFunctions[1] = decorateCallableWithNumba(ingredientsModuleNumbaUnified.listIngredientsFunctions[1])
-	ingredientsModuleNumbaUnified.listIngredientsFunctions[2] = decorateCallableWithNumba(ingredientsModuleNumbaUnified.listIngredientsFunctions[2])
+# 	# numba decorators =========================================
+# 	ingredientsModuleNumbaUnified.listIngredientsFunctions[1] = decorateCallableWithNumba(ingredientsModuleNumbaUnified.listIngredientsFunctions[1])
+# 	ingredientsModuleNumbaUnified.listIngredientsFunctions[2] = decorateCallableWithNumba(ingredientsModuleNumbaUnified.listIngredientsFunctions[2])
 
-	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageIdentifier)
+# 	write_astModule(ingredientsModuleNumbaUnified, numbaFlow.pathFilenameDispatcher, numbaFlow.packageIdentifier)
 
-if __name__ == '__main__':
-	makeNumbaFlow(theNumbaFlow)
+# if __name__ == '__main__':
+# 	makeNumbaFlow(theNumbaFlow)
