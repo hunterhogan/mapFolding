@@ -1,7 +1,6 @@
 from mapFolding import getPathFilenameFoldsTotal, MapFoldingState
 from mapFolding.someAssemblyRequired import IfThis, packageInformation, raiseIfNoneGitHubIssueNumber3
 from astToolkit import (
-	ast_Identifier,
 	Be,
 	ClassIsAndAttribute,
 	extractFunctionDef,
@@ -69,8 +68,8 @@ if __name__ == '__main__':
 		writeStream.write(str(foldsTotal))
 		writeStream.close()
 """
-	numba_progressPythonClass: ast_Identifier = 'ProgressBar'
-	numba_progressNumbaType: ast_Identifier = 'ProgressBarType'
+	numba_progressPythonClass: str = 'ProgressBar'
+	numba_progressNumbaType: str = 'ProgressBarType'
 	ingredientsModule.imports.addImportFrom_asStr('numba_progress', numba_progressPythonClass)
 	ingredientsModule.imports.addImportFrom_asStr('numba_progress', numba_progressNumbaType)
 
@@ -117,11 +116,11 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	ingredientsFunction.imports.update(job.shatteredDataclass.imports)
 
 	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
-	list_arg_arg: list[ast_Identifier] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
+	list_arg_arg: list[str] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
 	listName: list[ast.Name] = []
 	NodeTourist(Be.Name, Then.appendTo(listName)).visit(ingredientsFunction.astFunctionDef)
-	list_Identifiers: list[ast_Identifier] = [astName.id for astName in listName]
-	list_IdentifiersNotUsed: list[ast_Identifier] = list(set(list_arg_arg) - set(list_Identifiers))
+	list_Identifiers: list[str] = [astName.id for astName in listName]
+	list_IdentifiersNotUsed: list[str] = list(set(list_arg_arg) - set(list_Identifiers))
 
 	for ast_arg in list_argCuzMyBrainRefusesToThink:
 		if ast_arg.arg in job.shatteredDataclass.field2AnnAssign:
@@ -202,9 +201,9 @@ if __name__ == '__main__':
 
 	class DatatypeConfig(NamedTuple):
 		Z0Z_module: str_nameDOTname
-		fml: ast_Identifier
-		Z0Z_type_name: ast_Identifier
-		Z0Z_asname: ast_Identifier | None = None
+		fml: str
+		Z0Z_type_name: str
+		Z0Z_asname: str | None = None
 
 	listDatatypeConfigs = [
 		DatatypeConfig(fml='DatatypeLeavesTotal', Z0Z_module='numba', Z0Z_type_name='uint8'),

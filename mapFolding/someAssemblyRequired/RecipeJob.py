@@ -1,4 +1,4 @@
-from astToolkit import ast_Identifier, parseLogicalPath2astModule, str_nameDOTname
+from astToolkit import parseLogicalPath2astModule, str_nameDOTname
 from mapFolding import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState
 from mapFolding import DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
 from mapFolding.someAssemblyRequired import ShatteredDataclass, packageInformation
@@ -17,14 +17,14 @@ class RecipeJobTheorem2Numba:
 	# ========================================
 	# Source
 	source_astModule = parseLogicalPath2astModule('mapFolding.syntheticModules.theorem2Numba')
-	sourceCountCallable: ast_Identifier = 'count'
+	sourceCountCallable: str = 'count'
 
 	sourceLogicalPathModuleDataclass: str_nameDOTname = 'mapFolding.dataBaskets'
-	sourceDataclassIdentifier: ast_Identifier = 'MapFoldingState'
-	sourceDataclassInstance: ast_Identifier = packageInformation.dataclassInstance
+	sourceDataclassIdentifier: str = 'MapFoldingState'
+	sourceDataclassInstance: str = packageInformation.dataclassInstance
 
 	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageInformation.pathPackage)
-	sourcePackageIdentifier: ast_Identifier | None = packageInformation.packageName
+	sourcePackageIdentifier: str | None = packageInformation.packageName
 
 	# ========================================
 	# Filesystem (names of physical objects)
@@ -36,13 +36,13 @@ class RecipeJobTheorem2Numba:
 
 	# ========================================
 	# Logical identifiers (as opposed to physical identifiers)
-	packageIdentifier: ast_Identifier | None = None
+	packageIdentifier: str | None = None
 	logicalPathRoot: str_nameDOTname | None = None
 	""" `logicalPathRoot` likely corresponds to a physical filesystem directory."""
-	moduleIdentifier: ast_Identifier = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
-	countCallable: ast_Identifier = sourceCountCallable
-	dataclassIdentifier: ast_Identifier | None = sourceDataclassIdentifier
-	dataclassInstance: ast_Identifier | None = sourceDataclassInstance
+	moduleIdentifier: str = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
+	countCallable: str = sourceCountCallable
+	dataclassIdentifier: str | None = sourceDataclassIdentifier
+	dataclassInstance: str | None = sourceDataclassInstance
 	logicalPathModuleDataclass: str_nameDOTname | None = sourceLogicalPathModuleDataclass
 
 	# ========================================

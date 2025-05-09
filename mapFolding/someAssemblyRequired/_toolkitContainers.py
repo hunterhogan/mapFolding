@@ -18,7 +18,7 @@ The containers work in conjunction with transformation tools that manipulate the
 specific optimizations and transformations.
 """
 
-from astToolkit import ast_Identifier, ClassIsAndAttribute, DOT, LedgerOfImports, Make, NodeTourist, str_nameDOTname, Then
+from astToolkit import ClassIsAndAttribute, DOT, LedgerOfImports, Make, NodeTourist, str_nameDOTname, Then
 from collections.abc import Callable
 from copy import deepcopy
 from mapFolding.someAssemblyRequired import IfThis, raiseIfNoneGitHubIssueNumber3
@@ -38,10 +38,10 @@ class ShatteredDataclass:
 	countingVariableName: ast.Name
 	"""AST name node representing the counting variable identifier."""
 
-	field2AnnAssign: dict[ast_Identifier, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=lambda: dict[ast_Identifier, ast.AnnAssign | ast.Assign]())
+	field2AnnAssign: dict[str, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=lambda: dict[str, ast.AnnAssign | ast.Assign]())
 	"""Maps field names to their corresponding AST call expressions."""
 
-	Z0Z_field2AnnAssign: dict[ast_Identifier, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=lambda: dict[ast_Identifier, tuple[ast.AnnAssign | ast.Assign, str]]())
+	Z0Z_field2AnnAssign: dict[str, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=lambda: dict[str, tuple[ast.AnnAssign | ast.Assign, str]]())
 
 	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
 	"""AST tuple used as target for assignment to capture returned fragments."""
@@ -93,12 +93,12 @@ class DeReConstructField2ast:
 	"""
 	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[str_nameDOTname]
 	dataclassClassDef: dataclasses.InitVar[ast.ClassDef]
-	dataclassesDOTdataclassInstance_Identifier: dataclasses.InitVar[ast_Identifier]
+	dataclassesDOTdataclassInstance_Identifier: dataclasses.InitVar[str]
 	field: dataclasses.InitVar[dataclasses.Field[Any]]
 
 	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 
-	name: ast_Identifier = dataclasses.field(init=False)
+	name: str = dataclasses.field(init=False)
 	typeBuffalo: type[Any] | str | Any = dataclasses.field(init=False)
 	default: Any | None = dataclasses.field(init=False)
 	default_factory: Callable[..., Any] | None = dataclasses.field(init=False)
@@ -117,7 +117,7 @@ class DeReConstructField2ast:
 	astAnnAssignConstructor: ast.AnnAssign|ast.Assign = dataclasses.field(init=False)
 	Z0Z_hack: tuple[ast.AnnAssign|ast.Assign, str] = dataclasses.field(init=False)
 
-	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: str_nameDOTname, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstance_Identifier: ast_Identifier, field: dataclasses.Field[Any]) -> None:
+	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: str_nameDOTname, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstance_Identifier: str, field: dataclasses.Field[Any]) -> None:
 		self.compare = field.compare
 		self.default = field.default if field.default is not dataclasses.MISSING else None
 		self.default_factory = field.default_factory if field.default_factory is not dataclasses.MISSING else None
@@ -156,7 +156,7 @@ class DeReConstructField2ast:
 			ast_expr = Make.Subscript(Make.Name(annotationType), Make.Tuple([axesSubscript, Make.Subscript(Make.Name('dtype'), dtype_asnameName)]))
 			constructor = 'array'
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, constructor)
-			dtypeIdentifier: ast_Identifier = dtype.__name__
+			dtypeIdentifier: str = dtype.__name__
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, dtypeIdentifier, dtype_asnameName.id)
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, ast_expr, Make.Call(Make.Name(constructor), list_keyword=[Make.keyword('dtype', dtype_asnameName)]))
 			self.astAnnAssignConstructor = Make.Assign([self.astName], Make.Call(Make.Name(constructor), list_keyword=[Make.keyword('dtype', dtype_asnameName)]))
@@ -165,7 +165,7 @@ class DeReConstructField2ast:
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
 		elif isinstance(self.astAnnotation, ast.Subscript):
-			elementConstructor: ast_Identifier = self.metadata['elementConstructor']
+			elementConstructor: str = self.metadata['elementConstructor']
 			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
 			takeTheTuple = deepcopy(self.astAnnotation.slice)
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, takeTheTuple)

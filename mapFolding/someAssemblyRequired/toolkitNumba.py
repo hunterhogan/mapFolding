@@ -17,7 +17,7 @@ performance improvements while preserving code semantics and correctness.
 
 from collections.abc import Callable, Sequence
 from mapFolding import NotRequired, TypedDict
-from astToolkit import ast_Identifier, IngredientsFunction, Make, str_nameDOTname
+from astToolkit import  IngredientsFunction, Make, str_nameDOTname
 from astToolkit.transformationTools import write_astModule
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, cast, Final
@@ -53,7 +53,7 @@ parametersNumbaDefault: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': 
 parametersNumbaLight: Final[ParametersNumba] = {'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True}
 
 Z0Z_numbaDataTypeModule: str_nameDOTname = 'numba'
-Z0Z_decoratorCallable: ast_Identifier = 'jit'
+Z0Z_decoratorCallable: str = 'jit'
 
 def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:
 	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
@@ -128,5 +128,5 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 @dataclasses.dataclass
 class SpicesJobNumba:
 	useNumbaProgressBar: bool = True
-	numbaProgressBarIdentifier: ast_Identifier = 'ProgressBarGroupsOfFolds'
+	numbaProgressBarIdentifier: str = 'ProgressBarGroupsOfFolds'
 	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba) # type: ignore

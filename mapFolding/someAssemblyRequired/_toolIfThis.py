@@ -19,7 +19,7 @@ they implement a declarative approach to AST manipulation that separates node id
 (be), and data access (DOT).
 """
 
-from astToolkit import ast_Identifier, Be, DOT, IfThis as astToolkit_IfThis
+from astToolkit import Be, DOT, IfThis as astToolkit_IfThis
 from collections.abc import Callable
 from typing import TypeGuard
 import ast
@@ -36,23 +36,23 @@ class IfThis(astToolkit_IfThis):
 	enabling precise targeting of AST elements for analysis or transformation.
 	"""
 	@staticmethod
-	def isAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
+	def isAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
 		return lambda node: (Be.Compare(node)
 					and IfThis.isAttributeNamespace_Identifier(namespace, identifier)(DOT.left(node))
 					and Be.Gt(node.ops[0])
 					and IfThis.isConstant_value(0)(node.comparators[0]))
 	@staticmethod
-	def isIfAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.If] | bool]:
+	def isIfAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeGuard[ast.If] | bool]:
 		return lambda node: (Be.If(node)
-					and IfThis.isAttributeNamespace_IdentifierGreaterThan0(namespace, identifier)(DOT.test(node)))
+					and IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier)(DOT.test(node)))
 
 	@staticmethod
-	def isWhileAttributeNamespace_IdentifierGreaterThan0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.While] | bool]:
+	def isWhileAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeGuard[ast.While] | bool]:
 		return lambda node: (Be.While(node)
-					and IfThis.isAttributeNamespace_IdentifierGreaterThan0(namespace, identifier)(DOT.test(node)))
+					and IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier)(DOT.test(node)))
 
 	@staticmethod
-	def isAttributeNamespace_IdentifierLessThanOrEqual0(namespace: ast_Identifier, identifier: ast_Identifier) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
+	def isAttributeNamespaceIdentifierLessThanOrEqual0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
 		return lambda node: (Be.Compare(node)
 					and IfThis.isAttributeNamespace_Identifier(namespace, identifier)(DOT.left(node))
 					and Be.LtE(node.ops[0]))

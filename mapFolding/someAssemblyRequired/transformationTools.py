@@ -25,7 +25,6 @@ from mapFolding.someAssemblyRequired import (
 	ShatteredDataclass,
 )
 from astToolkit import(
-	ast_Identifier,
 	Be,
 	extractClassDef,
 	IngredientsFunction,
@@ -40,7 +39,7 @@ from Z0Z_tools import importLogicalPath2Callable
 import ast
 import dataclasses
 
-def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclass_Identifier: ast_Identifier, instance_Identifier: ast_Identifier) -> ShatteredDataclass:
+def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclass_Identifier: str, instance_Identifier: str) -> ShatteredDataclass:
 	"""
 	Decompose a dataclass definition into AST components for manipulation and code generation.
 
@@ -70,8 +69,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 	Raises:
 		ValueError: If the dataclass cannot be found in the specified module or if no counting variable is identified in the dataclass.
 	"""
-	Official_fieldOrder: list[ast_Identifier] = []
-	dictionaryDeReConstruction: dict[ast_Identifier, DeReConstructField2ast] = {}
+	Official_fieldOrder: list[str] = []
+	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
 	dataclassClassDef = extractClassDef(parseLogicalPath2astModule(logicalPathModule), dataclass_Identifier)
 	if not isinstance(dataclassClassDef, ast.ClassDef): raise ValueError(f"I could not find `{dataclass_Identifier = }` in `{logicalPathModule = }`.")
@@ -109,8 +108,6 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 
 	return shatteredDataclass
 
-# END of acceptable classes and functions ======================================================
-
 def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
 	ingredientsTarget.astFunctionDef.args = Make.arguments(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
@@ -119,7 +116,7 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 	ingredientsTarget.astFunctionDef = unparseFindReplace(ingredientsTarget.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
 	return ingredientsTarget
 
-def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, targetCallableIdentifier: ast_Identifier, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
+def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, targetCallableIdentifier: str, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
 	astCallTargetCallable = Make.Call(Make.Name(targetCallableIdentifier), shatteredDataclass.listName4Parameters)
 	replaceAssignTargetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
 	unpack4targetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
@@ -128,11 +125,3 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 	unpack4targetCallable.visit(ingredientsCaller.astFunctionDef)
 	repack4targetCallable.visit(ingredientsCaller.astFunctionDef)
 	return ingredientsCaller
-
-dictionaryEstimates: dict[tuple[int, ...], int] = {
-	(2,2,2,2,2,2,2,2): 798148657152000,
-	(2,21): 776374224866624,
-	(3,15): 824761667826225,
-	(3,3,3,3): 85109616000000000000000000000000,
-	(8,8): 791274195985524900,
-}
