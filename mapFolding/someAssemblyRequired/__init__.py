@@ -45,9 +45,9 @@ test suite.
 """
 
 from mapFolding.someAssemblyRequired.infoBooth import (
-	PackageInformation as PackageInformation,
+	dataclassInstanceIdentifierHardcoded as dataclassInstanceIdentifierHardcoded,
 	raiseIfNoneGitHubIssueNumber3 as raiseIfNoneGitHubIssueNumber3,
-	packageInformation as packageInformation,
+	sourceCallableDispatcherHARDCODED as sourceCallableDispatcherHARDCODED,
 )
 
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis

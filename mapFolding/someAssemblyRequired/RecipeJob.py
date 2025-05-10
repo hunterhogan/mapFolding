@@ -1,7 +1,7 @@
 from astToolkit import parseLogicalPath2astModule, str_nameDOTname
-from mapFolding import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState
+from mapFolding import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState, packageSettings
 from mapFolding import DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
-from mapFolding.someAssemblyRequired import ShatteredDataclass, packageInformation
+from mapFolding.someAssemblyRequired import dataclassInstanceIdentifierHardcoded, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 from typing import TypeAlias
@@ -21,17 +21,17 @@ class RecipeJobTheorem2Numba:
 
 	sourceLogicalPathModuleDataclass: str_nameDOTname = 'mapFolding.dataBaskets'
 	sourceDataclassIdentifier: str = 'MapFoldingState'
-	sourceDataclassInstance: str = packageInformation.dataclassInstance
+	sourceDataclassInstance: str = dataclassInstanceIdentifierHardcoded
 
-	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageInformation.pathPackage)
-	sourcePackageIdentifier: str | None = packageInformation.packageName
+	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageSettings.pathPackage)
+	sourcePackageIdentifier: str | None = packageSettings.packageName
 
 	# ========================================
 	# Filesystem (names of physical objects)
 	pathPackage: PurePosixPath | None = None
 	pathModule: PurePosixPath | None = PurePosixPath(getPathRootJobDEFAULT())
 	""" `pathModule` will override `pathPackage` and `logicalPathRoot`."""
-	fileExtension: str = packageInformation.fileExtension
+	fileExtension: str = packageSettings.fileExtension
 	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 
 	# ========================================

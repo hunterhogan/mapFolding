@@ -19,13 +19,15 @@ from astToolkit import (
 )
 from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
 from collections.abc import Sequence
+from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
 	DeReConstructField2ast,
 	IfThis,
-	packageInformation,
 	raiseIfNoneGitHubIssueNumber3,
 	ShatteredDataclass,
+	sourceCallableDispatcherHARDCODED,
 )
+from mapFolding.someAssemblyRequired.infoBooth import algorithmSourceModuleHARDCODED, dataPackingModuleIdentifierHARDCODED, logicalPathInfixHARDCODED, sourceCallableIdentifierHARDCODED, theCountingIdentifierHARDCODED
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction,
@@ -36,24 +38,22 @@ from pathlib import PurePath
 from Z0Z_tools import importLogicalPath2Callable
 import ast
 import dataclasses
+from os import PathLike
 
-algorithmSourceModuleHARDCODED = 'daoOfMapFolding'
-sourceCallableIdentifierHARDCODED = 'count'
-logicalPathInfixHARDCODED: str = 'syntheticModules'
-theCountingIdentifierHARDCODED: str = 'groupsOfFolds'
-dataPackingModuleIdentifierHARDCODED: str = 'dataPacking'
+def _getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.pathPackage
+					, logicalPathInfix: PathLike[str] | PurePath | str | None = None
+					, moduleIdentifier: str = '', fileExtension: str = packageSettings.fileExtension) -> PurePath:
+	pathFilename = PurePath(moduleIdentifier + fileExtension)
+	if logicalPathInfix:
+		pathFilename = PurePath(logicalPathInfix, pathFilename)
+	if pathRoot:
+		pathFilename = PurePath(pathRoot, pathFilename)
+	return pathFilename
 
-def makeInitializeGroupsOfFolds() -> None:
-	callableIdentifierHARDCODED = 'initializeGroupsOfFolds'
-	moduleIdentifierHARDCODED: str = 'initializeCount'
-
+def makeInitializeGroupsOfFolds(moduleIdentifier: str, callableIdentifier: str, logicalPathInfix: PathLike[str] | PurePath | str | None = None) -> None:
 	algorithmSourceModule = algorithmSourceModuleHARDCODED
 	sourceCallableIdentifier = sourceCallableIdentifierHARDCODED
-	logicalPathSourceModule = '.'.join([packageInformation.packageName, algorithmSourceModule])
-
-	callableIdentifier = callableIdentifierHARDCODED
-	logicalPathInfix = logicalPathInfixHARDCODED
-	moduleIdentifier = moduleIdentifierHARDCODED
+	logicalPathSourceModule = '.'.join([packageSettings.packageName, algorithmSourceModule])
 
 	astModule = parseLogicalPath2astModule(logicalPathSourceModule)
 	countInitializeIngredients = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
@@ -70,19 +70,18 @@ def makeInitializeGroupsOfFolds() -> None:
 
 	ingredientsModule = IngredientsModule(countInitializeIngredients)
 
-	pathFilename = PurePath(packageInformation.pathPackage, logicalPathInfix, moduleIdentifier + packageInformation.fileExtension)
+	pathFilename = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier + packageSettings.fileExtension)
 
-	write_astModule(ingredientsModule, pathFilename, packageInformation.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
 
-def makeDaoOfMapFolding() -> PurePath:
-	moduleIdentifierHARDCODED: str = 'daoOfMapFolding'
-
+def makeDaoOfMapFolding(moduleIdentifier: str, callableIdentifier: str | None = None
+						, logicalPathInfix: PathLike[str] | PurePath | str | None = None
+						, sourceCallableDispatcher: str | None = None) -> PurePath:
 	algorithmSourceModule = algorithmSourceModuleHARDCODED
 	sourceCallableIdentifier = sourceCallableIdentifierHARDCODED
-	logicalPathSourceModule = '.'.join([packageInformation.packageName, algorithmSourceModule])
-
-	logicalPathInfix = logicalPathInfixHARDCODED
-	moduleIdentifier = moduleIdentifierHARDCODED
+	if callableIdentifier is None:
+		callableIdentifier = sourceCallableIdentifier
+	logicalPathSourceModule = '.'.join([packageSettings.packageName, algorithmSourceModule])
 
 	astModule = parseLogicalPath2astModule(logicalPathSourceModule)
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
@@ -112,27 +111,30 @@ def makeDaoOfMapFolding() -> PurePath:
 
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
-	sourceCallableIdentifier = packageInformation.sourceCallableDispatcher
+	ingredientsModule = IngredientsModule(ingredientsFunction)
 
-	doTheNeedful: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
-	doTheNeedful.imports.update(shatteredDataclass.imports)
-	targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
-	doTheNeedful = unpackDataclassCallFunctionRepackDataclass(doTheNeedful, targetCallableIdentifier, shatteredDataclass)
-	astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef) # type: ignore
-	if astTuple is None: raise raiseIfNoneGitHubIssueNumber3
-	astTuple.ctx = ast.Store()
+	if sourceCallableDispatcher is not None:
 
-	findThis = ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier))
-	doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
-	changeAssignCallToTarget = NodeChanger(findThis, doThat)
-	changeAssignCallToTarget.visit(doTheNeedful.astFunctionDef)
+		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
+		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
+		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
+		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
+		astTuple: ast.Tuple | None = NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef) # type: ignore
+		if astTuple is None: raise raiseIfNoneGitHubIssueNumber3
+		astTuple.ctx = ast.Store()
 
-	ingredientsModule = IngredientsModule([ingredientsFunction, doTheNeedful])
+		findThis = ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier))
+		doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
+		changeAssignCallToTarget = NodeChanger(findThis, doThat)
+		changeAssignCallToTarget.visit(ingredientsFunctionDispatcher.astFunctionDef)
+
+		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
+
 	ingredientsModule.removeImportFromModule('numpy')
 
-	pathFilename = PurePath(packageInformation.pathPackage, logicalPathInfix, moduleIdentifier + packageInformation.fileExtension)
+	pathFilename = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier + packageSettings.fileExtension)
 
-	write_astModule(ingredientsModule, pathFilename, packageInformation.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
 
 	return pathFilename
 
@@ -141,7 +143,7 @@ def makeDaoOfMapFoldingParallel() -> PurePath:
 
 	algorithmSourceModule = algorithmSourceModuleHARDCODED
 	sourceCallableIdentifier = sourceCallableIdentifierHARDCODED
-	logicalPathSourceModule = '.'.join([packageInformation.packageName, algorithmSourceModule])
+	logicalPathSourceModule = '.'.join([packageSettings.packageName, algorithmSourceModule])
 
 	logicalPathInfix = logicalPathInfixHARDCODED
 	moduleIdentifier = moduleIdentifierHARDCODED
@@ -234,7 +236,7 @@ def makeDaoOfMapFoldingParallel() -> PurePath:
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
 	# Start unpack/repack the dataclass function ================================================
-	sourceCallableIdentifier = packageInformation.sourceCallableDispatcher
+	sourceCallableIdentifier = sourceCallableDispatcherHARDCODED
 
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclass_IdentifierParallel
@@ -285,20 +287,19 @@ def makeDaoOfMapFoldingParallel() -> PurePath:
 	)
 	ingredientsModule.removeImportFromModule('numpy')
 
-	pathFilename = PurePath(packageInformation.pathPackage, logicalPathInfix, moduleIdentifier + packageInformation.fileExtension)
+	pathFilename = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier + packageSettings.fileExtension)
 
-	write_astModule(ingredientsModule, pathFilename, packageInformation.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
 	return pathFilename
 
-def makeTheorem2() -> PurePath:
-	moduleIdentifierHARDCODED: str = 'theorem2'
-
+def makeTheorem2(moduleIdentifier: str, callableIdentifier: str | None = None
+						, logicalPathInfix: PathLike[str] | PurePath | str | None = None
+						, sourceCallableDispatcher: str | None = None) -> PurePath:
 	algorithmSourceModule = algorithmSourceModuleHARDCODED
 	sourceCallableIdentifier = sourceCallableIdentifierHARDCODED
-	logicalPathSourceModule = '.'.join([packageInformation.packageName, algorithmSourceModule])
-
-	logicalPathInfix = logicalPathInfixHARDCODED
-	moduleIdentifier = moduleIdentifierHARDCODED
+	if callableIdentifier is None:
+		callableIdentifier = sourceCallableIdentifier
+	logicalPathSourceModule = '.'.join([packageSettings.packageName, algorithmSourceModule])
 
 	astModule = parseLogicalPath2astModule(logicalPathSourceModule)
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
@@ -333,9 +334,12 @@ def makeTheorem2() -> PurePath:
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 
-	pathFilename = PurePath(packageInformation.pathPackage, logicalPathInfix, moduleIdentifier + packageInformation.fileExtension)
+	if sourceCallableDispatcher is not None:
+		raise NotImplementedError('sourceCallableDispatcher is not implemented yet')
 
-	write_astModule(ingredientsModule, pathFilename, packageInformation.packageName)
+	pathFilename = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier + packageSettings.fileExtension)
+
+	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
 
 	return pathFilename
 
@@ -356,11 +360,11 @@ def trimTheorem2(pathFilenameSource: PurePath) -> PurePath:
 
 	pathFilename = pathFilenameSource.with_stem(pathFilenameSource.stem + 'Trimmed')
 
-	write_astModule(ingredientsModule, pathFilename, packageInformation.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
 
 	logicalPath: list[str] = []
-	if packageInformation.packageName:
-		logicalPath.append(packageInformation.packageName)
+	if packageSettings.packageName:
+		logicalPath.append(packageSettings.packageName)
 	if logicalPathInfix:
 		logicalPath.append(logicalPathInfix)
 	logicalPath.append(pathFilename.stem)
@@ -404,11 +408,11 @@ def numbaOnTheorem2(pathFilenameSource: PurePath) -> ast.ImportFrom:
 
 	pathFilename = pathFilenameSource.with_stem(pathFilenameSource.stem.replace('Trimmed', '') + 'Numba')
 
-	write_astModule(ingredientsModule, pathFilename, packageInformation.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
 
 	logicalPath: list[str] = []
-	if packageInformation.packageName:
-		logicalPath.append(packageInformation.packageName)
+	if packageSettings.packageName:
+		logicalPath.append(packageSettings.packageName)
 	if logicalPathInfix:
 		logicalPath.append(logicalPathInfix)
 	logicalPath.append(pathFilename.stem)
@@ -422,8 +426,8 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	callableIdentifierHARDCODED: str = 'sequential'
 
 	algorithmSourceModule = algorithmSourceModuleHARDCODED
-	sourceCallableIdentifier = packageInformation.sourceCallableDispatcher
-	logicalPathSourceModule = '.'.join([packageInformation.packageName, algorithmSourceModule])
+	sourceCallableIdentifier = sourceCallableDispatcherHARDCODED
+	logicalPathSourceModule = '.'.join([packageSettings.packageName, algorithmSourceModule])
 
 	logicalPathInfix = logicalPathInfixHARDCODED
 	moduleIdentifier = dataPackingModuleIdentifierHARDCODED
@@ -467,15 +471,15 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 	ingredientsModule.removeImportFromModule('numpy')
 
-	pathFilename = PurePath(packageInformation.pathPackage, logicalPathInfix, moduleIdentifier + packageInformation.fileExtension)
+	pathFilename = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier + packageSettings.fileExtension)
 
-	write_astModule(ingredientsModule, pathFilename, packageInformation.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
 
 if __name__ == '__main__':
-	makeInitializeGroupsOfFolds()
-	pathFilename = makeTheorem2()
+	makeInitializeGroupsOfFolds('initializeCount', 'initializeGroupsOfFolds', logicalPathInfixHARDCODED)
+	pathFilename = makeTheorem2('theorem2', None, logicalPathInfixHARDCODED)
 	pathFilename = trimTheorem2(pathFilename)
 	astImportFrom = numbaOnTheorem2(pathFilename)
 	makeUnRePackDataclass(astImportFrom)
-	pathFilename = makeDaoOfMapFolding()
+	pathFilename = makeDaoOfMapFolding('daoOfMapFolding', None, logicalPathInfixHARDCODED, sourceCallableDispatcherHARDCODED)
 	makeDaoOfMapFoldingParallel()

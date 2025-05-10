@@ -1,5 +1,5 @@
-from mapFolding import getPathFilenameFoldsTotal, MapFoldingState
-from mapFolding.someAssemblyRequired import IfThis, packageInformation, raiseIfNoneGitHubIssueNumber3
+from mapFolding import getPathFilenameFoldsTotal, MapFoldingState, packageSettings
+from mapFolding.someAssemblyRequired import IfThis, raiseIfNoneGitHubIssueNumber3
 from astToolkit import (
 	Be,
 	ClassIsAndAttribute,
@@ -266,7 +266,7 @@ if __name__ == '__main__':
 	# foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal
 	# foldsTotalEstimated = dictionaryEstimates[state.mapShape] // state.leavesTotal
 	foldsTotalEstimated = 0
-	pathModule = PurePosixPath(packageInformation.pathPackage, 'jobs')
+	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2Numba(state, foldsTotalEstimated, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
