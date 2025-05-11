@@ -23,13 +23,13 @@ from functools import cache
 from mapFolding import countFolds, packageSettings, TypedDict
 from pathlib import Path
 from typing import Any, Final
+from urllib.parse import urlparse
 from Z0Z_tools import writeStringToHere
 import argparse
 import random
 import sys
 import time
 import urllib.request
-import urllib.response
 import warnings
 
 cacheDays = 30
@@ -186,10 +186,14 @@ def getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 			tryCache = False
 
 	if not tryCache:
-		# Change http handling #13
-		httpResponse: urllib.response.addinfourl = urllib.request.urlopen(url)
-		oeisInformation = httpResponse.read().decode('utf-8')
-		writeStringToHere(oeisInformation, pathFilenameCache)
+		parsedUrl = urlparse(url)
+		if parsedUrl.scheme not in ("http", "https"):
+			warnings.warn(f"I received the URL '{url}', but only 'http' and 'https' schemes are permitted.")
+		else:
+			httpResponse = urllib.request.urlopen(url)
+			oeisInformationRaw = httpResponse.read().decode('utf-8')
+			oeisInformation = str(oeisInformationRaw)
+			writeStringToHere(oeisInformation, pathFilenameCache)
 
 	if not oeisInformation:
 		warnings.warn(f"Failed to retrieve OEIS sequence information for {pathFilenameCache.stem}.")
