@@ -129,4 +129,4 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 class SpicesJobNumba:
 	useNumbaProgressBar: bool = True
 	numbaProgressBarIdentifier: str = 'ProgressBarGroupsOfFolds'
-	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba) # type: ignore
+	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba)  # pyright: ignore[reportArgumentType, reportCallIssue, reportUnknownVariableType]

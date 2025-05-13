@@ -1,7 +1,7 @@
 from astToolkit import parseLogicalPath2astModule, str_nameDOTname
 from mapFolding import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState, packageSettings
 from mapFolding import DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
-from mapFolding.someAssemblyRequired import dataclassInstanceIdentifierHardcoded, ShatteredDataclass
+from mapFolding.someAssemblyRequired import dataclassInstanceIdentifierDEFAULT, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 from typing import TypeAlias
@@ -21,7 +21,7 @@ class RecipeJobTheorem2Numba:
 
 	sourceLogicalPathModuleDataclass: str_nameDOTname = 'mapFolding.dataBaskets'
 	sourceDataclassIdentifier: str = 'MapFoldingState'
-	sourceDataclassInstance: str = dataclassInstanceIdentifierHardcoded
+	sourceDataclassInstance: str = dataclassInstanceIdentifierDEFAULT
 
 	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageSettings.pathPackage)
 	sourcePackageIdentifier: str | None = packageSettings.packageName

@@ -133,15 +133,15 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
 
-		sherpa: ast.expr = NodeTourist( # type: ignore
+		sherpa = NodeTourist( # pyright: ignore[reportUnknownVariableType]
 			findThis=ClassIsAndAttribute.targetIs(ast.AnnAssign, IfThis.isName_Identifier(self.name))
-			, doThat=Then.extractIt(DOT.annotation) # type: ignore
+			, doThat=Then.extractIt(DOT.annotation) # pyright: ignore[reportArgumentType]
 			).captureLastMatch(dataclassClassDef)
 
-		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3 # type: ignore
+		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
 		else: self.astAnnotation = sherpa
 
-		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
+		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
 
 		dtype = self.metadata.get('dtype', None)
 		if dtype:

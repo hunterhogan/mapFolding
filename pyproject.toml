@@ -14,8 +14,6 @@ classifiers = [
 	"Operating System :: OS Independent",
 	"Programming Language :: Python",
 	"Programming Language :: Python :: 3",
-	"Programming Language :: Python :: 3.10",
-	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
 	"Topic :: Scientific/Engineering :: Mathematics",
@@ -69,10 +67,10 @@ optional-dependencies = { testing = [
 	"pyupgrade",
 	"ruff",] }
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Repository = "https://github.com/hunterhogan/mapFolding.git", Issues = "https://github.com/hunterhogan/mapFolding/issues"}
-version = "0.11.4"
+version = "0.12.0"
 
 [tool.coverage]
 report = { exclude_lines = [

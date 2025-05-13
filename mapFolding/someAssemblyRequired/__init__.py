@@ -45,9 +45,9 @@ test suite.
 """
 
 from mapFolding.someAssemblyRequired.infoBooth import (
-	dataclassInstanceIdentifierHardcoded as dataclassInstanceIdentifierHardcoded,
+	dataclassInstanceIdentifierDEFAULT as dataclassInstanceIdentifierDEFAULT,
 	raiseIfNoneGitHubIssueNumber3 as raiseIfNoneGitHubIssueNumber3,
-	sourceCallableDispatcherHARDCODED as sourceCallableDispatcherHARDCODED,
+	sourceCallableDispatcherDEFAULT as sourceCallableDispatcherDEFAULT,
 )
 
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis
@@ -56,3 +56,8 @@ from mapFolding.someAssemblyRequired._toolkitContainers import (
 	DeReConstructField2ast as DeReConstructField2ast,
 	ShatteredDataclass as ShatteredDataclass,
 )
+
+def raiseIfNone[TypeSansNone](returnTarget: TypeSansNone | None) -> TypeSansNone:
+	if returnTarget is None:
+		raise ValueError('Return is None.')
+	return returnTarget

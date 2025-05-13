@@ -1,8 +1,10 @@
-from mapFolding import PackageSettings
-import dataclasses
-
-dataclassInstanceIdentifierHardcoded: str = 'state'
-sourceCallableDispatcherHARDCODED: str = 'doTheNeedful'
+algorithmSourceModuleDEFAULT: str = 'daoOfMapFolding'
+dataclassInstanceIdentifierDEFAULT: str = 'state'
+dataPackingModuleIdentifierDEFAULT: str = 'dataPacking'
+logicalPathInfixDEFAULT: str = 'syntheticModules'
+sourceCallableDispatcherDEFAULT: str = 'doTheNeedful'
+sourceCallableIdentifierDEFAULT: str = 'count'
+theCountingIdentifierDEFAULT: str = 'groupsOfFolds'
 
 class raiseIfNoneGitHubIssueNumber3(Exception): pass
 
@@ -13,8 +15,3 @@ dictionaryEstimates: dict[tuple[int, ...], int] = {
 	(3,3,3,3): 85109616000000000000000000000000,
 	(8,8): 791274195985524900,
 }
-algorithmSourceModuleHARDCODED: str = 'daoOfMapFolding'
-sourceCallableIdentifierHARDCODED: str = 'count'
-logicalPathInfixHARDCODED: str = 'syntheticModules'
-theCountingIdentifierHARDCODED: str = 'groupsOfFolds'
-dataPackingModuleIdentifierHARDCODED: str = 'dataPacking'
