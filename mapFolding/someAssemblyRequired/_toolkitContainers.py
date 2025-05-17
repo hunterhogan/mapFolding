@@ -93,7 +93,7 @@ class DeReConstructField2ast:
 	"""
 	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[str_nameDOTname]
 	dataclassClassDef: dataclasses.InitVar[ast.ClassDef]
-	dataclassesDOTdataclassInstance_Identifier: dataclasses.InitVar[str]
+	dataclassesDOTdataclassInstanceIdentifier: dataclasses.InitVar[str]
 	field: dataclasses.InitVar[dataclasses.Field[Any]]
 
 	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
@@ -117,7 +117,7 @@ class DeReConstructField2ast:
 	astAnnAssignConstructor: ast.AnnAssign|ast.Assign = dataclasses.field(init=False)
 	Z0Z_hack: tuple[ast.AnnAssign|ast.Assign, str] = dataclasses.field(init=False)
 
-	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: str_nameDOTname, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstance_Identifier: str, field: dataclasses.Field[Any]) -> None:
+	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: str_nameDOTname, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstanceIdentifier: str, field: dataclasses.Field[Any]) -> None:
 		self.compare = field.compare
 		self.default = field.default if field.default is not dataclasses.MISSING else None
 		self.default_factory = field.default_factory if field.default_factory is not dataclasses.MISSING else None
@@ -131,10 +131,10 @@ class DeReConstructField2ast:
 
 		self.astName = Make.Name(self.name)
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
-		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstance_Identifier), self.name)
+		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstanceIdentifier), self.name)
 
 		sherpa = NodeTourist( # pyright: ignore[reportUnknownVariableType]
-			findThis=ClassIsAndAttribute.targetIs(ast.AnnAssign, IfThis.isName_Identifier(self.name))
+			findThis=ClassIsAndAttribute.targetIs(ast.AnnAssign, IfThis.isNameIdentifier(self.name))
 			, doThat=Then.extractIt(DOT.annotation) # pyright: ignore[reportArgumentType]
 			).captureLastMatch(dataclassClassDef)
 

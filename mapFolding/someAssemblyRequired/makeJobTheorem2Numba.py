@@ -23,15 +23,15 @@ from Z0Z_tools import autoDecodingRLE
 import ast
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
 
-list_IdentifiersNotUsedAllHARDCODED = ['concurrencyLimit', 'foldsTotal', 'mapShape',]
-list_IdentifiersNotUsedParallelSequentialHARDCODED = ['indexLeaf']
-list_IdentifiersNotUsedSequentialHARDCODED = ['foldGroups', 'taskDivisions', 'taskIndex',]
+listIdentifiersNotUsedAllHARDCODED = ['concurrencyLimit', 'foldsTotal', 'mapShape',]
+listIdentifiersNotUsedParallelSequentialHARDCODED = ['indexLeaf']
+listIdentifiersNotUsedSequentialHARDCODED = ['foldGroups', 'taskDivisions', 'taskIndex',]
 
-list_IdentifiersReplacedHARDCODED = ['groupsOfFolds',]
+listIdentifiersReplacedHARDCODED = ['groupsOfFolds',]
 
-list_IdentifiersStaticValuesHARDCODED = ['dimensionsTotal', 'leavesTotal',]
+listIdentifiersStaticValuesHARDCODED = ['dimensionsTotal', 'leavesTotal',]
 
-list_IdentifiersNotUsedHARDCODED = list_IdentifiersStaticValuesHARDCODED + list_IdentifiersReplacedHARDCODED + list_IdentifiersNotUsedAllHARDCODED + list_IdentifiersNotUsedParallelSequentialHARDCODED + list_IdentifiersNotUsedSequentialHARDCODED
+listIdentifiersNotUsedHARDCODED = listIdentifiersStaticValuesHARDCODED + listIdentifiersReplacedHARDCODED + listIdentifiersNotUsedAllHARDCODED + listIdentifiersNotUsedParallelSequentialHARDCODED + listIdentifiersNotUsedSequentialHARDCODED
 
 def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> tuple[IngredientsModule, IngredientsFunction]:
 	"""
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 	ast_argNumbaProgress = ast.arg(arg=spices.numbaProgressBarIdentifier, annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
 
-	findThis = ClassIsAndAttribute.targetIs(ast.AugAssign, IfThis.isName_Identifier(job.shatteredDataclass.countingVariableName.id))
+	findThis = ClassIsAndAttribute.targetIs(ast.AugAssign, IfThis.isNameIdentifier(job.shatteredDataclass.countingVariableName.id))
 	doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
 	countWithProgressBar = NodeChanger(findThis, doThat)
 	countWithProgressBar.visit(ingredientsFunction.astFunctionDef)
@@ -119,12 +119,12 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	list_arg_arg: list[str] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
 	listName: list[ast.Name] = []
 	NodeTourist(Be.Name, Then.appendTo(listName)).visit(ingredientsFunction.astFunctionDef)
-	list_Identifiers: list[str] = [astName.id for astName in listName]
-	list_IdentifiersNotUsed: list[str] = list(set(list_arg_arg) - set(list_Identifiers))
+	listIdentifiers: list[str] = [astName.id for astName in listName]
+	listIdentifiersNotUsed: list[str] = list(set(list_arg_arg) - set(listIdentifiers))
 
 	for ast_arg in list_argCuzMyBrainRefusesToThink:
 		if ast_arg.arg in job.shatteredDataclass.field2AnnAssign:
-			if ast_arg.arg in list_IdentifiersNotUsed:
+			if ast_arg.arg in listIdentifiersNotUsed:
 				pass
 			else:
 				ImaAnnAssign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[ast_arg.arg]
@@ -146,7 +146,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 
 				ingredientsFunction.astFunctionDef.body.insert(0, ImaAnnAssign)
 
-			findThis = IfThis.is_arg_Identifier(ast_arg.arg)
+			findThis = IfThis.is_argIdentifier(ast_arg.arg)
 			remove_arg = NodeChanger(findThis, Then.removeIt)
 			remove_arg.visit(ingredientsFunction.astFunctionDef)
 
@@ -160,16 +160,16 @@ def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
 
 	# Remove `foldGroups` and any other unused statements, so you can dynamically determine which variables are not used
-	findThis = ClassIsAndAttribute.targetsIs(ast.Assign, lambda list_expr: any([IfThis.isSubscript_Identifier('foldGroups')(node) for node in list_expr ]))
-	# findThis = IfThis.isAssignAndTargets0Is(IfThis.isSubscript_Identifier('foldGroups'))
+	findThis = ClassIsAndAttribute.targetsIs(ast.Assign, lambda list_expr: any([IfThis.isSubscriptIdentifier('foldGroups')(node) for node in list_expr ]))
+	# findThis = IfThis.isAssignAndTargets0Is(IfThis.isSubscriptIdentifier('foldGroups'))
 	doThat = Then.removeIt
 	remove_foldGroups = NodeChanger(findThis, doThat)
 	# remove_foldGroups.visit(ingredientsCount.astFunctionDef)
 
 	# replace identifiers with static values with their values, so you can dynamically determine which variables are not used
-	list_IdentifiersStaticValues = list_IdentifiersStaticValuesHARDCODED
-	for identifier in list_IdentifiersStaticValues:
-		findThis = IfThis.isName_Identifier(identifier)
+	listIdentifiersStaticValues = listIdentifiersStaticValuesHARDCODED
+	for identifier in listIdentifiersStaticValues:
+		findThis = IfThis.isNameIdentifier(identifier)
 		doThat = Then.replaceWith(Make.Constant(int(job.state.__dict__[identifier])))
 		NodeChanger(findThis, doThat).visit(ingredientsCount.astFunctionDef)
 

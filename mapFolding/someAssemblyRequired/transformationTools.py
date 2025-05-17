@@ -39,7 +39,7 @@ from Z0Z_tools import importLogicalPath2Callable
 import ast
 import dataclasses
 
-def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclass_Identifier: str, instance_Identifier: str) -> ShatteredDataclass:
+def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclassIdentifier: str, instanceIdentifier: str) -> ShatteredDataclass:
 	"""
 	Decompose a dataclass definition into AST components for manipulation and code generation.
 
@@ -59,8 +59,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 
 	Parameters:
 		logicalPathModule: The fully qualified module path containing the dataclass definition.
-		dataclass_Identifier: The name of the dataclass to decompose.
-		instance_Identifier: The variable name to use for the dataclass instance in generated code.
+		dataclassIdentifier: The name of the dataclass to decompose.
+		instanceIdentifier: The variable name to use for the dataclass instance in generated code.
 
 	Returns:
 		shatteredDataclass: A ShatteredDataclass containing AST representations of all dataclass components,
@@ -72,19 +72,19 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 	Official_fieldOrder: list[str] = []
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
-	dataclassClassDef = extractClassDef(parseLogicalPath2astModule(logicalPathModule), dataclass_Identifier)
-	if not isinstance(dataclassClassDef, ast.ClassDef): raise ValueError(f"I could not find `{dataclass_Identifier = }` in `{logicalPathModule = }`.")
+	dataclassClassDef = extractClassDef(parseLogicalPath2astModule(logicalPathModule), dataclassIdentifier)
+	if not isinstance(dataclassClassDef, ast.ClassDef): raise ValueError(f"I could not find `{dataclassIdentifier = }` in `{logicalPathModule = }`.")
 
 	countingVariable = None
-	for aField in dataclasses.fields(importLogicalPath2Callable(logicalPathModule, dataclass_Identifier)): # pyright: ignore [reportArgumentType]
+	for aField in dataclasses.fields(importLogicalPath2Callable(logicalPathModule, dataclassIdentifier)): # pyright: ignore [reportArgumentType]
 		Official_fieldOrder.append(aField.name)
-		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathModule, dataclassClassDef, instance_Identifier, aField)
+		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathModule, dataclassClassDef, instanceIdentifier, aField)
 		if aField.metadata.get('theCountingIdentifier', False):
 			countingVariable = dictionaryDeReConstruction[aField.name].name
 
 	if countingVariable is None:
 		import warnings
-		warnings.warn(message=f"I could not find the counting variable in `{dataclass_Identifier = }` in `{logicalPathModule = }`.", category=UserWarning)
+		warnings.warn(message=f"I could not find the counting variable in `{dataclassIdentifier = }` in `{logicalPathModule = }`.", category=UserWarning)
 		raise Exception
 
 	shatteredDataclass = ShatteredDataclass(
@@ -100,11 +100,11 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 		map_stateDOTfield2Name={dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder},
 		)
 	shatteredDataclass.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclass.listName4Parameters, ast.Store())
-	shatteredDataclass.repack = Make.Assign([Make.Name(instance_Identifier)], value=Make.Call(Make.Name(dataclass_Identifier), list_keyword=shatteredDataclass.list_keyword_field__field4init))
+	shatteredDataclass.repack = Make.Assign([Make.Name(instanceIdentifier)], value=Make.Call(Make.Name(dataclassIdentifier), list_keyword=shatteredDataclass.list_keyword_field__field4init))
 	shatteredDataclass.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.listAnnotations))
 
 	shatteredDataclass.imports.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
-	shatteredDataclass.imports.addImportFrom_asStr(logicalPathModule, dataclass_Identifier)
+	shatteredDataclass.imports.addImportFrom_asStr(logicalPathModule, dataclassIdentifier)
 
 	return shatteredDataclass
 
@@ -118,9 +118,9 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 
 def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, targetCallableIdentifier: str, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
 	astCallTargetCallable = Make.Call(Make.Name(targetCallableIdentifier), shatteredDataclass.listName4Parameters)
-	replaceAssignTargetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
-	unpack4targetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
-	repack4targetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCall_Identifier(targetCallableIdentifier)), Then.insertThisBelow([shatteredDataclass.repack]))
+	replaceAssignTargetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCallIdentifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
+	unpack4targetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCallIdentifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
+	repack4targetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCallIdentifier(targetCallableIdentifier)), Then.insertThisBelow([shatteredDataclass.repack]))
 	replaceAssignTargetCallable.visit(ingredientsCaller.astFunctionDef)
 	unpack4targetCallable.visit(ingredientsCaller.astFunctionDef)
 	repack4targetCallable.visit(ingredientsCaller.astFunctionDef)
