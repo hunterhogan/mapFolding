@@ -18,11 +18,12 @@ The containers work in conjunction with transformation tools that manipulate the
 specific optimizations and transformations.
 """
 
-from astToolkit import ClassIsAndAttribute, DOT, LedgerOfImports, Make, NodeTourist, str_nameDOTname, Then
+from astToolkit import ClassIsAndAttribute, hasDOTtarget_NameOrAttributeOrSubscript, DOT, LedgerOfImports, Make, NodeTourist, str_nameDOTname, Then
 from collections.abc import Callable
 from copy import deepcopy
-from mapFolding.someAssemblyRequired import IfThis, raiseIfNoneGitHubIssueNumber3
+from mapFolding.someAssemblyRequired import IfThis
 from typing import Any, cast
+from Z0Z_tools import raiseIfNone
 import ast
 import dataclasses
 
@@ -133,15 +134,11 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstanceIdentifier), self.name)
 
-		sherpa = NodeTourist( # pyright: ignore[reportUnknownVariableType]
-			findThis=ClassIsAndAttribute.targetIs(ast.AnnAssign, IfThis.isNameIdentifier(self.name))
-			, doThat=Then.extractIt(DOT.annotation) # pyright: ignore[reportArgumentType]
-			).captureLastMatch(dataclassClassDef)
+		findThis=ClassIsAndAttribute.targetIs(ast.AnnAssign, IfThis.isNameIdentifier(self.name))
+		doThat=cast(Callable[[hasDOTtarget_NameOrAttributeOrSubscript], ast.expr], Then.extractIt(DOT.annotation))
+		self.astAnnotation = raiseIfNone(NodeTourist(findThis, doThat).captureLastMatch(dataclassClassDef))
 
-		if sherpa is None: raise raiseIfNoneGitHubIssueNumber3
-		else: self.astAnnotation = sherpa
-
-		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
 
 		dtype = self.metadata.get('dtype', None)
 		if dtype:
@@ -171,4 +168,4 @@ class DeReConstructField2ast:
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, takeTheTuple)
 			self.Z0Z_hack = (self.astAnnAssignConstructor, elementConstructor)
 		if isinstance(self.astAnnotation, ast.Name):
-			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id) # pyright: ignore [reportUnknownArgumentType, reportUnknownMemberType, reportIJustCalledATypeGuardMethod_WTF]
+			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)

@@ -16,11 +16,10 @@ performance improvements while preserving code semantics and correctness.
 """
 
 from collections.abc import Callable, Sequence
-from mapFolding import NotRequired, TypedDict
 from astToolkit import  IngredientsFunction, Make, str_nameDOTname
 from astToolkit.transformationTools import write_astModule
 from numba.core.compiler import CompilerBase as numbaCompilerBase
-from typing import Any, cast, Final
+from typing import Any, NotRequired, TypedDict, cast, Final
 import ast
 import dataclasses
 

@@ -23,7 +23,6 @@ from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
 	DeReConstructField2ast,
 	IfThis,
-	raiseIfNone,
 	ShatteredDataclass,
 	sourceCallableDispatcherDEFAULT,
 )
@@ -37,7 +36,7 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 from os import PathLike
 from pathlib import PurePath
 from typing import cast
-from Z0Z_tools import importLogicalPath2Callable
+from Z0Z_tools import importLogicalPath2Callable, raiseIfNone
 import ast
 import dataclasses
 
@@ -235,9 +234,9 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclassIdentifierParallel
 	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
-	findThis = ClassIsAndAttribute.annotationIs(ast.arg, IfThis.isNameIdentifier(dataclassIdentifier)) # pyright: ignore[reportArgumentType, reportUnknownVariableType, reportCallIssue]
-	doThat = Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel))) # pyright: ignore[reportArgumentType]
-	NodeChanger(findThis, doThat).visit(unRepackDataclass.astFunctionDef) # pyright: ignore[reportUnknownArgumentType]
+	findThis = ClassIsAndAttribute.annotationIs(ast.arg, IfThis.isNameIdentifier(dataclassIdentifier))
+	doThat = Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel)))
+	NodeChanger(findThis, doThat).visit(unRepackDataclass.astFunctionDef)
 	unRepackDataclass.astFunctionDef.returns = Make.Name(dataclassIdentifierParallel)
 	targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)

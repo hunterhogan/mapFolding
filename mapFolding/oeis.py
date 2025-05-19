@@ -20,9 +20,9 @@ mathematical definition in OEIS and the computational implementation in the pack
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from functools import cache
-from mapFolding import countFolds, packageSettings, TypedDict
+from mapFolding import countFolds, packageSettings
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Final, TypedDict
 from urllib.parse import urlparse
 from Z0Z_tools import writeStringToHere
 import argparse

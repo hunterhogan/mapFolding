@@ -56,8 +56,3 @@ from mapFolding.someAssemblyRequired._toolkitContainers import (
 	DeReConstructField2ast as DeReConstructField2ast,
 	ShatteredDataclass as ShatteredDataclass,
 )
-
-def raiseIfNone[TypeSansNone](returnTarget: TypeSansNone | None) -> TypeSansNone:
-	if returnTarget is None:
-		raise ValueError('Return is None.')
-	return returnTarget
