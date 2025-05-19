@@ -235,7 +235,7 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclassIdentifierParallel
 	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
 	findThis = ClassIsAndAttribute.annotationIs(ast.arg, IfThis.isNameIdentifier(dataclassIdentifier))
-	doThat = Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel)))
+	doThat = Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel))) # pyright: ignore[reportArgumentType]
 	NodeChanger(findThis, doThat).visit(unRepackDataclass.astFunctionDef)
 	unRepackDataclass.astFunctionDef.returns = Make.Name(dataclassIdentifierParallel)
 	targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
