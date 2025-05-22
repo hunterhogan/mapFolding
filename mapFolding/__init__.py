@@ -12,7 +12,7 @@ from mapFolding.datatypes import (
 	NumPyLeavesTotal as NumPyLeavesTotal,
 )
 
-from mapFolding.theSSOT import PackageSettings as PackageSettings, packageSettings as packageSettings
+from mapFolding._theSSOT import PackageSettings as PackageSettings, packageSettings as packageSettings
 
 from mapFolding.beDRY import (
 	getConnectionGraph as getConnectionGraph,
