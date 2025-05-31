@@ -1,3 +1,33 @@
+"""
+Map folding AST transformation system: Specialized job generation and optimization implementation.
+
+This module implements the specialized job generation layer of the map folding AST transformation
+system, executing the complete transformation process to convert generic map folding algorithms
+into highly optimized, standalone computation modules. Building upon the configuration orchestration
+established in the recipe system, this module applies the full sequence of transformations from
+pattern recognition through Numba compilation to produce self-contained computational solutions
+optimized for specific map dimensions and calculation contexts.
+
+The transformation implementation addresses the computational demands of map folding research where
+calculations can require hours or days to complete. The specialization process converts abstract
+algorithms with flexible parameters into concrete, statically-optimized code that leverages
+just-in-time compilation for maximum performance. Each generated module targets specific map
+shapes and calculation modes, enabling aggressive compiler optimizations based on known constraints
+and embedded constants.
+
+The optimization process executes systematic transformations including static value embedding to
+replace parameterized values with compile-time constants, dead code elimination to remove unused
+variables and code paths, parameter internalization to convert function parameters into embedded
+variables, import optimization to replace generic imports with specific implementations, Numba
+decoration with appropriate compilation directives, progress integration for long-running calculations,
+and launcher generation for standalone execution entry points.
+
+The resulting modules represent the culmination of the entire AST transformation system, producing
+self-contained Python scripts that execute independently with dramatically improved performance
+compared to original generic algorithms while maintaining mathematical correctness and providing
+essential progress feedback capabilities for large-scale computational research.
+"""
+
 from astToolkit import (
 	Be, ClassIsAndAttribute, extractFunctionDef, identifierDotAttribute, IngredientsFunction,
 	IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, Then,
@@ -15,21 +45,27 @@ from typing import cast, NamedTuple
 from Z0Z_tools import autoDecodingRLE, raiseIfNone
 import ast
 
-"""Synthesize one file to compute `foldsTotal` of `mapShape`."""
+# Configuration lists for code optimization and dead code elimination
+listIdentifiersNotUsedAllHARDCODED: list[str] = ['concurrencyLimit', 'foldsTotal', 'mapShape',]
+"""Identifiers that are universally unused across all optimization contexts."""
 
-listIdentifiersNotUsedAllHARDCODED = ['concurrencyLimit', 'foldsTotal', 'mapShape',]
-listIdentifiersNotUsedParallelSequentialHARDCODED = ['indexLeaf']
-listIdentifiersNotUsedSequentialHARDCODED = ['foldGroups', 'taskDivisions', 'taskIndex',]
+listIdentifiersNotUsedParallelSequentialHARDCODED: list[str] = ['indexLeaf']
+"""Identifiers unused in both parallel and sequential execution modes."""
 
-listIdentifiersReplacedHARDCODED = ['groupsOfFolds',]
+listIdentifiersNotUsedSequentialHARDCODED: list[str] = ['foldGroups', 'taskDivisions', 'taskIndex',]
+"""Identifiers unused specifically in sequential execution mode."""
 
-listIdentifiersStaticValuesHARDCODED = ['dimensionsTotal', 'leavesTotal',]
+listIdentifiersReplacedHARDCODED: list[str] = ['groupsOfFolds',]
+"""Identifiers that get replaced with optimized equivalents during transformation."""
 
-listIdentifiersNotUsedHARDCODED = listIdentifiersStaticValuesHARDCODED + listIdentifiersReplacedHARDCODED + listIdentifiersNotUsedAllHARDCODED + listIdentifiersNotUsedParallelSequentialHARDCODED + listIdentifiersNotUsedSequentialHARDCODED
+listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal',]
+"""Identifiers with compile-time constant values that can be embedded directly."""
+
+listIdentifiersNotUsedHARDCODED: list[str] = listIdentifiersStaticValuesHARDCODED + listIdentifiersReplacedHARDCODED + listIdentifiersNotUsedAllHARDCODED + listIdentifiersNotUsedParallelSequentialHARDCODED + listIdentifiersNotUsedSequentialHARDCODED
+"""Complete list of all identifiers that can be eliminated during optimization."""
 
 def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> tuple[IngredientsModule, IngredientsFunction]:
-	"""
-	Add progress tracking capabilities to a Numba-optimized function.
+	"""Add progress tracking capabilities to a Numba-optimized function.
 
 	This function modifies both the module and the function to integrate Numba-compatible
 	progress tracking for long-running calculations. It performs several key transformations:
@@ -50,8 +86,9 @@ def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFu
 		spices: Configuration specifying progress bar details.
 
 	Returns:
-		A tuple containing the modified module and function with progress tracking.
+		Modified module and function with integrated progress tracking capabilities.
 	"""
+
 	linesLaunch: str = f"""
 if __name__ == '__main__':
 	with ProgressBar(total={job.foldsTotalEstimated}, update_interval=2) as statusUpdate:
@@ -84,17 +121,16 @@ if __name__ == '__main__':
 	return ingredientsModule, ingredientsFunction
 
 def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2Numba) -> IngredientsFunction:
-	"""
-	Convert function parameters into initialized variables with concrete values.
+	"""Convert function parameters into initialized variables with concrete values.
 
 	This function implements a critical transformation that converts function parameters
 	into statically initialized variables in the function body. This enables several
 	optimizations:
 
-	1. Eliminating parameter passing overhead.
-	2. Embedding concrete values directly in the code.
-	3. Allowing Numba to optimize based on known value characteristics.
-	4. Simplifying function signatures for specialized use cases.
+	1. Eliminating parameter passing overhead
+	2. Embedding concrete values directly in the code
+	3. Allowing Numba to optimize based on known value characteristics
+	4. Simplifying function signatures for specialized use cases
 
 	The function handles different data types (scalars, arrays, custom types) appropriately,
 	replacing abstract parameter references with concrete values from the computation state.
@@ -109,7 +145,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	"""
 	ingredientsFunction.imports.update(job.shatteredDataclass.imports)
 
-	list_argCuzMyBrainRefusesToThink = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
+	list_argCuzMyBrainRefusesToThink: list[ast.arg] = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
 	list_arg_arg: list[str] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
 	listName: list[ast.Name] = []
 	NodeTourist(Be.Name, Then.appendTo(listName)).visit(ingredientsFunction.astFunctionDef)
@@ -148,8 +184,31 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	return ingredientsFunction
 
 def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
+	"""Generate an optimized Numba-compiled computation module for map folding calculations.
 
-	astFunctionDef = raiseIfNone(extractFunctionDef(job.source_astModule, job.countCallable))
+	This function orchestrates the complete code transformation pipeline to convert
+	a generic map folding algorithm into a highly optimized, specialized computation
+	module. The transformation process includes:
+
+	1. Extract and modify the source function from the generic algorithm
+	2. Replace static-valued identifiers with their concrete values
+	3. Convert function parameters to embedded initialized variables
+	4. Remove unused code paths and variables for optimization
+	5. Configure appropriate Numba decorators for JIT compilation
+	6. Add progress tracking capabilities for long-running computations
+	7. Generate standalone launcher code for direct execution
+	8. Write the complete optimized module to the filesystem
+
+	The resulting module is a self-contained Python script that can execute
+	map folding calculations for the specific map dimensions with maximum
+	performance through just-in-time compilation.
+
+	Parameters:
+		job: Configuration recipe containing source locations, target paths, and state.
+		spices: Optimization settings including Numba parameters and progress options.
+	"""
+
+	astFunctionDef: ast.FunctionDef = raiseIfNone(extractFunctionDef(job.source_astModule, job.countCallable))
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
 
 	# Remove `foldGroups` and any other unused statements, so you can dynamically determine which variables are not used
@@ -160,7 +219,7 @@ def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 	# remove_foldGroups.visit(ingredientsCount.astFunctionDef)
 
 	# replace identifiers with static values with their values, so you can dynamically determine which variables are not used
-	listIdentifiersStaticValues = listIdentifiersStaticValuesHARDCODED
+	listIdentifiersStaticValues: list[str] = listIdentifiersStaticValuesHARDCODED
 	for identifier in listIdentifiersStaticValues:
 		findThis = IfThis.isNameIdentifier(identifier)
 		doThat = Then.replaceWith(Make.Constant(int(job.state.__dict__[identifier])))
@@ -191,14 +250,26 @@ if __name__ == '__main__':
 		ingredientsCount.astFunctionDef.returns = job.shatteredDataclass.countingVariableAnnotation
 
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
-
 	class DatatypeConfig(NamedTuple):
-		Z0Z_module: identifierDotAttribute
+		"""Configuration for mapping framework datatypes to Numba-compatible types.
+
+		This configuration class defines how abstract datatypes used in the map folding
+		framework should be replaced with concrete Numba-compatible types during code
+		generation. Each configuration specifies the source module, target type name,
+		and optional import alias for the transformation.
+
+		Attributes:
+			fml: Framework datatype identifier to be replaced.
+			Z0Z_module: Module containing the target datatype (e.g., 'numba', 'numpy').
+			Z0Z_type_name: Concrete type name in the target module.
+			Z0Z_asname: Optional import alias for the type.
+		"""
 		fml: str
+		Z0Z_module: identifierDotAttribute
 		Z0Z_type_name: str
 		Z0Z_asname: str | None = None
 
-	listDatatypeConfigs = [
+	listDatatypeConfigs: list[DatatypeConfig] = [
 		DatatypeConfig(fml='DatatypeLeavesTotal', Z0Z_module='numba', Z0Z_type_name='uint8'),
 		DatatypeConfig(fml='DatatypeElephino', Z0Z_module='numba', Z0Z_type_name='uint16'),
 		DatatypeConfig(fml='DatatypeFoldsTotal', Z0Z_module='numba', Z0Z_type_name='uint64'),
@@ -227,7 +298,6 @@ if __name__ == '__main__':
 	ingredientsCount.astFunctionDef.decorator_list = [] # TODO low-priority, handle this more elegantly
 	# TODO when I add the function signature in numba style back to the decorator, the logic needs to handle `ProgressBarType:`
 	ingredientsCount = decorateCallableWithNumba(ingredientsCount, spices.parametersNumba)
-
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
 	write_astModule(ingredientsModule, job.pathFilenameModule, job.packageIdentifier)
 

@@ -1,44 +1,28 @@
-"""
-Map Folding Test Suite and Validation Framework
+"""Test suite for the mapFolding package.
 
-This test suite provides comprehensive testing capabilities for the mapFolding package
-and its optimization framework. It is specifically designed to enable both package
-maintenance and custom extension testing, making it easy for users to validate their
-own recipe configurations and job implementations.
+This test suite provides comprehensive validation of map folding computations,
+file system operations, OEIS integration, task division, and foundational
+utilities. The tests are designed to support multiple audiences and use cases.
 
-## Key Testing Capabilities
+Test Module Organization:
+- conftest.py: Testing infrastructure and shared fixtures
+- test_computations.py: Core mathematical validation and algorithm testing
+- test_filesystem.py: File operations and path management
+- test_oeis.py: OEIS sequence integration and caching
+- test_other.py: Foundational utilities and data validation
+- test_tasks.py: Task division and work distribution
 
-1. **Algorithm Validation**
-   - Tests core algorithm correctness against known OEIS sequence values
-   - Validates both sequential and parallel execution paths
-   - Ensures consistency across different implementation strategies
+For Contributors:
+The test suite follows Domain-Driven Design principles, organizing tests around
+mathematical concepts rather than implementation details. Use the existing
+patterns as templates when adding new functionality.
 
-2. **Code Generation Testing**
-   - Tests the AST transformation assembly line from source to optimized implementations
-   - Validates that generated Numba-accelerated modules produce correct results
-   - Ensures robust code generation across different parameter sets
+For Users Adding Custom Modules:
+The test_computations.py module provides the most relevant examples for testing
+custom computational approaches. The standardized testing functions in conftest.py
+ensure consistent error reporting across all tests.
 
-3. **Job-Specific Testing**
-   - Tests specialized job module generation for specific map shapes
-   - Validates execution of the generated modules
-   - Verifies correct output file creation and value storage
-
-## Testing Your Own Implementations
-
-This suite is designed to make it easy to test your custom recipes and jobs:
-
-### For Custom Recipes (RecipeSynthesizeFlow):
-Copy and adapt the `syntheticDispatcherFixture` and associated tests from
-`test_computations.py` to validate your customized code transformation assembly lines.
-
-### For Custom Jobs (RecipeJob):
-Copy and adapt the `test_writeJobNumba` function to test specialized job modules
-for specific map shapes with your custom configurations.
-
-The entire test infrastructure is built on fixtures and utilities that handle
-complex setup and validation, allowing you to focus on your implementation details
-while leveraging the existing validation framework.
-
-See the module docstrings in `test_computations.py` and `conftest.py` for detailed
-guidance on adapting these tests for your own purposes.
+For AI Assistants:
+The testing framework emphasizes readable, predictable patterns that maintain
+mathematical correctness while supporting code evolution and optimization.
 """

@@ -1,5 +1,35 @@
+"""Parallel processing and task distribution validation.
+
+This module tests the package's parallel processing capabilities, ensuring that
+computations can be effectively distributed across multiple processors while
+maintaining mathematical accuracy. These tests are crucial for performance
+optimization and scalability.
+
+The task distribution system allows large computational problems to be broken
+down into smaller chunks that can be processed concurrently. These tests verify
+that the distribution logic works correctly and that results remain consistent
+regardless of how the work is divided.
+
+Key Testing Areas:
+- Task division strategies for different computational approaches
+- Processor limit configuration and enforcement
+- Parallel execution consistency and correctness
+- Resource management and concurrency control
+- Error handling in multi-process environments
+
+For users working with large-scale computations: these tests demonstrate how to
+configure and validate parallel processing setups. The concurrency limit tests
+show how to balance performance with system resource constraints.
+
+The multiprocessing configuration (spawn method) is essential for cross-platform
+compatibility and proper resource isolation between test processes.
+"""
+
 from collections.abc import Callable
-from mapFolding import countFolds, getTaskDivisions, setProcessorLimit, validateListDimensions, getLeavesTotal, getFoldsTotalKnown
+from mapFolding import (
+	countFolds, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions, setProcessorLimit,
+	validateListDimensions,
+)
 from tests.conftest import standardizedEqualToCallableReturn
 from typing import Literal
 from Z0Z_tools.pytestForYourUse import PytestFor_defineConcurrencyLimit

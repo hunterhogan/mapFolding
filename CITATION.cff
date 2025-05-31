@@ -1,4 +1,4 @@
-abstract: A computational framework for enumerating distinct folding patterns of rectangular
+abstract: A computational framework for enumerating distinct folding patterns of 
   maps and implementing algorithmic transformations. This repository provides (1)
   a pure Python implementation of Lunnon's 1971 algorithm, (2) a sophisticated code
   transformation system that converts human-readable algorithms into highly-optimized

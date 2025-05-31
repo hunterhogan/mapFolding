@@ -1,12 +1,24 @@
 """
-Public API for the map folding algorithm with simplified interface.
+Unified interface for map folding computation orchestration.
 
-This module provides the main entry point for users of the mapFolding package, abstracting away the complexities of the
-computational algorithm. It offers a high-level interface to count the total number of possible ways to fold a
-rectangular map of specified dimensions, with options for customizing the computation process and saving results.
+This module represents the culmination of the computational ecosystem, providing
+the primary entry point where users interact with the complete map folding analysis
+system. It orchestrates all preceding layers: the configuration foundation,
+type system, core utilities, state management, and persistent storage to deliver
+a seamless computational experience.
 
-The primary function is countFolds, which handles parameter validation, computation state management, dispatching to the
-appropriate algorithm implementation, and optional persistence of results.
+The interface handles multiple computation flows including sequential algorithms,
+experimental task division strategies, and various mathematical theorem implementations.
+It provides flexible parameter validation, computation method selection, task
+division management, processor utilization control, and automatic result persistence.
+Integration with OEIS sequences enables research validation and mathematical
+verification of computed results.
+
+Through this unified interface, researchers and practitioners can access the full
+power of Lunnon's algorithm implementation while the underlying computational
+complexity remains elegantly abstracted. The interface ensures that whether
+solving simple 2D problems or complex multi-dimensional challenges, users receive
+consistent, reliable, and efficiently computed folding pattern counts.
 """
 
 from collections.abc import Sequence
@@ -166,6 +178,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		parallelMapFoldingState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
 		from mapFolding.syntheticModules.countParallel import doTheNeedful
+
 		# `listStatesParallel` exists in case you want to research the parallel computation.
 		foldsTotal, listStatesParallel = doTheNeedful(parallelMapFoldingState, concurrencyLimit) # pyright: ignore[reportUnusedVariable]
 

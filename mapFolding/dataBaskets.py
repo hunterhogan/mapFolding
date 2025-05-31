@@ -1,23 +1,22 @@
 """
-Data container classes for map folding computational state management.
+Computational state orchestration for map folding analysis.
 
-This module provides the core data structures that encapsulate all state needed
-for map folding computations. The classes form a hierarchy that supports different
-computational patterns:
+Building upon the core utilities and their generated data structures, this module
+orchestrates the complex computational state required for Lunnon's recursive
+algorithm execution. The state classes serve as both data containers and computational
+interfaces, managing the intricate arrays, indices, and control structures that
+guide the folding pattern discovery process.
 
-1. **MapFoldingState**: Base state for sequential computations
-2. **ParallelMapFoldingState**: Enhanced state for parallel processing
-3. **LeafSequenceState**: Specialized state for sequence tracking
+Each state class encapsulates a specific computational scenario: sequential processing
+for standard analysis, experimental task division for research applications, and specialized
+leaf sequence tracking for mathematical exploration. The automatic initialization
+integrates seamlessly with the type system and core utilities, ensuring proper
+array allocation and connection graph integration.
 
-Each class manages both the computational data and the metadata needed for
-efficient NumPy operations, automatic array initialization, and type-safe
-data access. The design follows the dataclass pattern while integrating
-deeply with the package's type system and computational requirements.
-
-The state classes serve as the primary interface between the computational
-algorithms and the underlying data storage, abstracting away the complexity
-of array management while providing the performance characteristics needed
-for large-scale map folding computations.
+These state management classes bridge the gap between the foundational computational
+building blocks and the persistent storage system. They maintain computational
+integrity throughout the recursive analysis while providing the structured data
+access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
 	Array1DElephino, Array1DLeavesTotal, Array3D, DatatypeElephino, DatatypeFoldsTotal,
@@ -139,21 +138,22 @@ class MapFoldingState:
 @dataclasses.dataclass
 class ParallelMapFoldingState(MapFoldingState):
 	"""
-	Enhanced computational state for parallel map folding operations.
+	Experimental computational state for task division operations.
 
 	This class extends the base MapFoldingState with additional attributes
-	needed for parallel processing of map folding computations. It manages
-	task division and synchronization state while inheriting all the core
-	computational arrays and properties from the base class.
+	needed for experimental task division of map folding computations. It manages
+	task division state while inheriting all the core computational arrays and
+	properties from the base class.
 
-	The parallel processing model divides the total computation space into
+	The task division model attempts to divide the total computation space into
 	discrete tasks that can be processed independently, then combined to
-	produce the final result. This class tracks the division parameters
-	and current processing state.
+	produce the final result. However, the map folding problem is inherently
+	sequential and task division typically results in significant computational
+	overhead due to work overlap between tasks.
 
 	Attributes:
-		taskDivisions: Number of parallel tasks into which the computation is divided.
-		taskIndex: Current task identifier when processing in parallel mode.
+		taskDivisions: Number of tasks into which the computation is divided.
+		taskIndex: Current task identifier when processing in task division mode.
 	"""
 	taskDivisions: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""
@@ -177,9 +177,8 @@ class ParallelMapFoldingState(MapFoldingState):
 	def __post_init__(self) -> None:
 		"""
 		Initialize parallel-specific state after base initialization.
-
 		This method calls the parent initialization to set up all base
-		computational arrays, then configures the parallel processing
+		computational arrays, then configures the task division
 		parameters. If `taskDivisions` is 0, it automatically sets the
 		value to `leavesTotal` for optimal parallelization.
 		"""

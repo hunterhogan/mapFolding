@@ -1,5 +1,29 @@
+"""File system operations and path management validation.
+
+This module tests the package's interaction with the file system, ensuring that
+results are correctly saved, paths are properly constructed, and fallback mechanisms
+work when file operations fail. These tests are essential for maintaining data
+integrity during long-running computations.
+
+The file system abstraction allows the package to work consistently across different
+operating systems and storage configurations. These tests verify that abstraction
+works correctly and handles edge cases gracefully.
+
+Key Testing Areas:
+- Filename generation following consistent naming conventions
+- Path construction and directory creation
+- Fallback file creation when primary save operations fail
+- Cross-platform path handling
+
+Most users won't need to modify these tests unless they're changing how the package
+stores computational results or adding new file formats.
+"""
+
 from contextlib import redirect_stdout
-from mapFolding import validateListDimensions, getPathRootJobDEFAULT, getPathFilenameFoldsTotal, saveFoldsTotal, getFilenameFoldsTotal
+from mapFolding import (
+	getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal,
+	validateListDimensions,
+)
 from pathlib import Path
 import io
 import pytest

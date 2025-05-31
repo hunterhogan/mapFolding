@@ -1,26 +1,24 @@
 """
-Filesystem utilities for managing map folding computation results.
+Persistent storage infrastructure for map folding computation results.
 
-This module provides functions for standardized handling of files related to the mapFolding package, with a focus on
-saving, retrieving, and naming computation results. It implements consistent naming conventions and path resolution
-strategies to ensure that:
+As computational state management orchestrates the complex recursive analysis,
+this module ensures that the valuable results of potentially multi-day computations
+are safely preserved and reliably retrievable. Map folding problems can require
+extensive computational time, making robust result persistence critical for
+practical research and application.
 
-1. Computation results are stored in a predictable location.
-2. Filenames follow a consistent pattern based on map dimensions.
-3. Results can be reliably retrieved for future reference.
-4. The system handles file operations safely with appropriate error handling.
+The storage system provides standardized filename generation, platform-independent
+path resolution, and multiple fallback strategies to prevent data loss. Special
+attention is given to environments like Google Colab and cross-platform deployment
+scenarios. The storage patterns integrate with the configuration foundation to
+provide consistent behavior across different installation contexts.
 
-The module serves as the standardized interface between the computational components of the package and the filesystem,
-abstracting away the details of file operations and path management. It provides robust fallback mechanisms to preserve
-computation results even in the face of filesystem errors, which is critical for long-running computations that may take
-days to complete.
-
-The functions here adhere to a consistent approach to path handling:
-- Cross-platform compatibility through the use of `pathlib`.
-- Default locations determined intelligently based on the runtime environment.
-- Progressive fallback strategies for saving critical computation results.
-- Preemptive filesystem validation to detect issues before computation begins.
+This persistence layer serves as the crucial bridge between the computational
+framework and the user interface, ensuring that computation results are available
+for the main interface to retrieve, validate, and present to users seeking
+solutions to their map folding challenges.
 """
+
 from mapFolding import packageSettings
 from os import PathLike
 from pathlib import Path, PurePath

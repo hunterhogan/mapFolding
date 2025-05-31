@@ -1,21 +1,25 @@
 """
-Single Source of Truth (SSOT) for package configuration and metadata.
+Foundation layer for the map folding computational ecosystem.
 
-This module establishes the canonical sources for package-wide configuration values,
-implementing a dual-phase resolution strategy that handles both packaging-time and
-installation-time requirements. It ensures consistent package metadata access across
-all environments, from development through packaging to runtime.
+This module establishes the fundamental configuration infrastructure that underpins
+all map folding operations. Map folding, as defined by Lunnon's 1971 algorithm,
+requires precise coordination of computational resources, type systems, and data
+flow management to solve the complex combinatorial problem of counting distinct
+folding patterns across multi-dimensional maps.
 
-The module follows the "evaluate when needed" principle, deferring expensive operations
-like filesystem access until the information is actually required, while providing
-immediate access to lightweight string constants.
+The Single Source Of Truth (SSOT) principle governs this foundation, ensuring that
+package identity, filesystem locations, and concurrency configuration remain
+consistent across all computational phases. During packaging, static metadata is
+resolved from pyproject.toml. During installation, filesystem-dependent paths are
+dynamically discovered. During runtime, the `packageSettings` instance provides
+unified access to all configuration values, enabling the sophisticated computational
+framework that follows.
 
-Key Design Principles:
-1. Single source of truth for all package configuration
-2. Graceful fallback from dynamic to hardcoded values
-3. Lazy evaluation of filesystem-dependent properties
-4. Environment-aware path resolution (development vs. installed package)
+This configuration foundation supports the type system definition, core utility
+functions, computational state management, result persistence, and ultimately the
+main computational interface that users interact with to solve map folding problems.
 """
+
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
 from pathlib import Path

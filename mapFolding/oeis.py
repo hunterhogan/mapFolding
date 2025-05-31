@@ -1,22 +1,27 @@
 """
-Interface to The Online Encyclopedia of Integer Sequences (OEIS) for map folding sequences.
+Mathematical validation and discovery through OEIS integration.
 
-This module provides a comprehensive interface for accessing and utilizing integer sequences from the OEIS that relate
-to map folding problems. It serves as the bridge between mathematical sequence definitions and the computational
-algorithm, implementing:
+Complementing the unified computational interface, this module extends the map
+folding ecosystem into the broader mathematical community through comprehensive
+integration with the Online Encyclopedia of Integer Sequences (OEIS). This bridge
+enables validation of computational results against established mathematical
+knowledge while supporting the discovery of new sequence values through the
+sophisticated computational pipeline.
 
-1. Retrieval of sequence data from OEIS with local caching for performance optimization.
-2. Mapping of sequence indices to corresponding map shapes based on sequence definitions.
-3. Command-line and programmatic interfaces for sequence lookups and validation.
-4. Computation of sequence terms not available in the OEIS database.
+The integration provides multiple pathways for mathematical verification: direct
+computation of OEIS sequences using the complete algorithmic implementation,
+cached access to published sequence data for rapid validation, and research
+support for extending known sequences through new computational discoveries.
+The module handles sequence families ranging from simple strip folding to
+complex multi-dimensional hypercube problems.
 
-The module maintains a registry of implemented OEIS sequences (A001415-A001418, A195646) with their metadata, known
-values, and conversion functions between sequence indices and map dimensions. This allows the package to validate
-results against established mathematical literature while also extending sequences beyond their currently known terms.
-
-Each sequence is carefully mapped to its corresponding map folding problem, enabling seamless integration between the
-mathematical definition in OEIS and the computational implementation in the package.
+Through intelligent caching and optimized lookup mechanisms, this module ensures
+that the computational power developed through the foundational layers can contribute
+meaningfully to mathematical research. Whether validating results, avoiding
+redundant computation, or extending mathematical knowledge, this integration
+completes the journey from configuration foundation to mathematical discovery.
 """
+
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from functools import cache

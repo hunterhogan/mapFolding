@@ -1,5 +1,34 @@
+"""OEIS (Online Encyclopedia of Integer Sequences) integration testing.
+
+This module validates the package's integration with OEIS, ensuring that sequence
+identification, value retrieval, and caching mechanisms work correctly. The OEIS
+connection provides the mathematical foundation that validates computational results
+against established mathematical knowledge.
+
+These tests verify both the technical aspects of OEIS integration (network requests,
+caching, error handling) and the mathematical correctness of sequence identification
+and value mapping.
+
+Key Testing Areas:
+- OEIS sequence ID validation and normalization
+- Network request handling and error recovery
+- Local caching of sequence data for offline operation
+- Command-line interface for OEIS sequence queries
+- Mathematical consistency between local computations and OEIS values
+
+The caching tests are particularly important for users working in environments with
+limited network access, as they ensure the package can operate effectively offline
+once sequence data has been retrieved.
+
+Network error handling tests verify graceful degradation when OEIS is unavailable,
+which is crucial for maintaining package reliability in production environments.
+"""
+
 from contextlib import redirect_stdout
-from mapFolding.oeis import oeisIDfor_n, getOEISids, clearOEIScache, getOEISidValues, OEIS_for_n, oeisIDsImplemented, settingsOEIS, validateOEISid
+from mapFolding.oeis import (
+	clearOEIScache, getOEISids, getOEISidValues, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented,
+	settingsOEIS, validateOEISid,
+)
 from pathlib import Path
 from tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
 from typing import Any, NoReturn

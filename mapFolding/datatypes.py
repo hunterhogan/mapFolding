@@ -1,23 +1,24 @@
 """
-Type definitions and aliases for map folding computational domains.
+Type system architecture for map folding computational domains.
 
-This module establishes the type system for map folding computations, defining
-semantic relationships between Python types and their NumPy counterparts. The
-type aliases create a consistent vocabulary for different computational domains
-while enabling efficient NumPy operations through appropriate data type selection.
+Building upon the configuration foundation, this module defines the complete type
+hierarchy that ensures type safety and semantic clarity throughout the map folding
+computational framework. The type system recognizes three distinct computational
+domains, each with specific data characteristics and performance requirements
+that emerge from Lunnon's algorithm implementation.
 
-The type system supports three primary computational domains:
+The Leaves domain handles map sections, their indices, and dimensional parameters.
+The Elephino domain manages internal computational state, gap calculations, and
+temporary indices used during the recursive folding analysis. The Folds domain
+represents final pattern counts and computation results. Each domain employs both
+Python types for general computation and NumPy types for performance-critical
+array operations.
 
-1. **Leaves Domain**: Counts and indices related to individual map sections (leaves)
-2. **Elephino Domain**: Internal computational indices and temporary values
-3. **Folds Domain**: Final folding pattern counts and totals
-
-Each domain uses semantically appropriate integer sizes - smaller types for
-leaf-related computations that typically involve small numbers, and larger
-types for fold totals that can grow to very large values.
-
-The module enables seamless integration between pure Python computations and
-NumPy-accelerated operations while maintaining type safety and semantic clarity.
+This dual-type strategy enables the core utility functions to operate with type
+safety while maintaining the computational efficiency required for analyzing
+complex multi-dimensional folding patterns. The array types built from these
+base types provide the structured data containers that computational state
+management depends upon.
 """
 from numpy import (
 	dtype, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64,

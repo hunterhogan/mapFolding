@@ -1,21 +1,29 @@
 """
-AST Transformation Tools for Python Code Generation
+Map folding AST transformation system: Core dataclass decomposition and function optimization tools.
 
-This module provides tools for manipulating and transforming Python abstract syntax trees
-to generate optimized code. It implements a system that:
+This module implements the essential transformation capabilities that form the operational core of
+the map folding AST transformation system. Working with the pattern recognition foundation and
+decomposition containers established in the foundational layers, these tools execute the critical
+transformations that convert dataclass-based functions into optimized implementations suitable
+for Numba just-in-time compilation.
 
-1. Extracts functions and classes from existing modules.
-2. Reshapes and transforms them through AST manipulation.
-3. Manages dependencies and imports.
-4. Generates optimized code with specialized implementations.
+The transformation process addresses the fundamental incompatibility between dataclass-dependent
+map folding algorithms and Numba's compilation requirements. While dataclass instances provide
+clean, maintainable interfaces for complex mathematical state, Numba cannot directly process
+these objects but excels at optimizing operations on primitive values and tuples. The tools
+bridge this architectural gap through systematic function signature transformation and calling
+convention adaptation.
 
-The module is particularly focused on transforming general-purpose Python code into
-high-performance implementations, especially through dataclass decomposition and
-function inlining for Numba compatibility.
+The three-stage transformation pattern implemented here follows a precise sequence: dataclass
+decomposition breaks down dataclass definitions into constituent AST components while extracting
+field definitions and type annotations; function transformation converts functions accepting
+dataclass parameters to functions accepting individual field parameters with updated signatures
+and return types; caller adaptation modifies calling code to unpack dataclass instances, invoke
+transformed functions, and repack results back into dataclass instances.
 
-At its core, the module implements a transformation assembly-line where code flows from
-readable, maintainable implementations to highly optimized versions while preserving
-logical structure and correctness.
+This approach enables seamless integration between high-level dataclass-based interfaces and
+low-level optimized implementations, maintaining code clarity while achieving performance gains
+through specialized compilation paths essential for computationally intensive map folding research.
 """
 
 from astToolkit import (
@@ -61,7 +69,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, d
 	Official_fieldOrder: list[str] = []
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
-	dataclassClassDef = extractClassDef(parseLogicalPath2astModule(logicalPathModule), dataclassIdentifier)
+	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(logicalPathModule), dataclassIdentifier)
 	if not isinstance(dataclassClassDef, ast.ClassDef):
 		raise ValueError(f"I could not find `{dataclassIdentifier = }` in `{logicalPathModule = }`.")
 
@@ -71,11 +79,10 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, d
 		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathModule, dataclassClassDef, instanceIdentifier, aField)
 		if aField.metadata.get('theCountingIdentifier', False):
 			countingVariable = dictionaryDeReConstruction[aField.name].name
-
 	if countingVariable is None:
-		import warnings
-		warnings.warn(message=f"I could not find the counting variable in `{dataclassIdentifier = }` in `{logicalPathModule = }`.", category=UserWarning)
-		raise Exception
+		# import warnings
+		# warnings.warn(message=f"I could not find the counting variable in `{dataclassIdentifier = }` in `{logicalPathModule = }`.", category=UserWarning)
+		raise ValueError(f"I could not find the counting variable in `{dataclassIdentifier = }` in `{logicalPathModule = }`.")
 
 	shatteredDataclass = ShatteredDataclass(
 		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation,
@@ -99,6 +106,28 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, d
 	return shatteredDataclass
 
 def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
+	"""
+	Transform a function that operates on dataclass instances to work with individual field parameters.
+
+	This function performs the core transformation required for Numba compatibility by removing dataclass
+	dependencies from function signatures and implementations. It modifies the target function to:
+
+	1. Replace the single dataclass parameter with individual field parameters.
+	2. Update the return type annotation to return a tuple of field values.
+	3. Transform return statements to return the tuple of fields.
+	4. Replace all dataclass attribute access with direct field variable access.
+
+	This transformation is essential for creating Numba-compatible functions from dataclass-based
+	implementations, as Numba cannot handle dataclass instances directly but can efficiently
+	process individual primitive values and tuples.
+
+	Parameters:
+		ingredientsTarget: The function definition and its dependencies to be transformed.
+		shatteredDataclass: The decomposed dataclass components providing AST mappings and transformations.
+
+	Returns:
+		ingredientsTarget: The modified function ingredients with dataclass dependencies removed.
+	"""
 	ingredientsTarget.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
 	changeReturnCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
@@ -107,6 +136,31 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 	return ingredientsTarget
 
 def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, targetCallableIdentifier: str, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
+	"""
+	Transform a caller function to interface with a dataclass-free target function.
+
+	This function complements `removeDataclassFromFunction` by modifying calling code to work with
+	the transformed target function. It implements the unpacking and repacking pattern required
+	when a dataclass-based caller needs to invoke a function that has been converted to accept
+	individual field parameters instead of dataclass instances.
+
+	The transformation creates a three-step pattern around the target function call:
+	1. Unpack the dataclass instance into individual field variables.
+	2. Call the target function with the unpacked field values.
+	3. Repack the returned field values back into a dataclass instance.
+
+	This enables seamless integration between dataclass-based high-level code and optimized
+	field-based implementations, maintaining the original interface while enabling performance
+	optimizations in the target function.
+
+	Parameters:
+		ingredientsCaller: The calling function definition and its dependencies to be transformed.
+		targetCallableIdentifier: The name of the target function being called.
+		shatteredDataclass: The decomposed dataclass components providing unpacking and repacking logic.
+
+	Returns:
+		ingredientsCaller: The modified caller function with appropriate unpacking and repacking around the target call.
+	"""
 	astCallTargetCallable = Make.Call(Make.Name(targetCallableIdentifier), shatteredDataclass.listName4Parameters)
 	replaceAssignTargetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCallIdentifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
 	unpack4targetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCallIdentifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))

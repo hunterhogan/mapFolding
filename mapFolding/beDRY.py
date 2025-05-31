@@ -1,22 +1,25 @@
 """
-Core utility functions implementing DRY (Don't Repeat Yourself) principles for the mapFolding package.
+Core computational utilities implementing Lunnon's map folding algorithm.
 
-This module serves as the foundation for consistent data management and parameter validation across the entire
-mapFolding computation assembly-line. It provides critical utility functions that:
+With the configuration foundation established and the type system defined, this
+module provides the essential building blocks that transform mathematical theory
+into executable computation. These utilities implement the fundamental operations
+required by Lunnon's 1971 algorithm, handling dimension validation, connection
+graph generation, and computational resource management.
 
-1. Calculate and validate fundamental computational parameters such as leaves total and task divisions.
-2. Generate specialized connection graphs that define the folding algorithm's constraints.
-3. Provide centralized resource allocation and system limits management.
-4. Construct and manage uniform data structures for the computation state.
-5. Ensure parameter validation and safe type conversion.
+The connection graph generation represents the mathematical heart of the algorithm,
+calculating how leaves connect across dimensions using coordinate systems, parity
+rules, and boundary conditions. This graph becomes the foundation upon which the
+recursive folding analysis operates. Validation functions ensure computational
+of large-scale problems. Validation functions ensure computational
+integrity, while task division management enables experimental task division strategies.
 
-The functions in this module maintain a clear separation between data initialization and algorithm implementation,
-enabling the package to support multiple computational strategies (sequential, parallel, and JIT-compiled) while
-ensuring consistent input handling and state management.
-
-These utilities form a stable internal API that other modules depend on, particularly theSSOT (Single Source of Truth),
-theDao (core algorithm), and the synthetic module generators that produce optimized implementations.
+These utilities follow DRY and SSOT principles, providing reusable functions that
+serve as the computational assembly-line components. They prepare the essential
+data structures and computational parameters that the state management system
+requires to orchestrate the complex recursive algorithms.
 """
+
 from collections.abc import Sequence
 from mapFolding import NumPyIntegerType
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray

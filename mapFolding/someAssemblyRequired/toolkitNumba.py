@@ -1,29 +1,61 @@
 """
-Numba-specific Tools for Generating Optimized Code
+Map folding AST transformation system: Numba integration and just-in-time compilation optimization.
 
-This module provides specialized tools for transforming standard Python code into
-Numba-accelerated implementations. It implements a comprehensive transformation
-assembly-line that:
+This module provides the compilation optimization layer of the map folding AST transformation system,
+implementing comprehensive tools for applying Numba's just-in-time compilation to functions generated
+by the core transformation tools. Building upon the dataclass decomposition and function optimization
+capabilities established in the operational core, this module completes the transformation process
+by applying aggressive performance optimizations through strategic compiler configuration.
 
-1. Converts dataclass-based algorithm implementations into Numba-compatible versions.
-2. Applies appropriate Numba decorators with optimized configuration settings.
-3. Restructures code to work within Numba's constraints.
-4. Manages type information for optimized compilation.
+The integration addresses the final stage of the transformation process where decomposed, optimized
+functions receive Numba decorators with carefully configured optimization parameters. The module
+handles the complexities of type signature generation, import management, and decorator conflict
+resolution that arise when converting high-level map folding algorithms into machine-optimized code.
 
-The module bridges the gap between readable, maintainable Python code and
-highly-optimized numerical computing implementations, enabling significant
-performance improvements while preserving code semantics and correctness.
+Two primary compilation strategies accommodate different performance and compatibility requirements:
+aggressive optimization for production numerical computing provides maximum performance through
+comprehensive compiler directives including nopython mode, bounds checking elimination, forced
+function inlining, and fastmath optimizations; lightweight optimization maintains broader compatibility
+while achieving significant performance gains through selective compiler optimizations suitable for
+development and testing environments.
+
+The strategic application of these optimization configurations enables map folding calculations that
+require hours or days to complete, transforming abstract mathematical algorithms into highly efficient
+computational modules. The compilation layer integrates seamlessly with the broader transformation
+system to produce standalone modules optimized for specific map dimensions and computational contexts.
 """
 
 from astToolkit import identifierDotAttribute, IngredientsFunction, Make
-from astToolkit.transformationTools import write_astModule
 from collections.abc import Callable, Sequence
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, cast, Final, NotRequired, TypedDict
 import ast
 import dataclasses
+import warnings
 
 class ParametersNumba(TypedDict):
+	"""
+	Configuration parameters for Numba compilation decorators.
+
+	This TypedDict defines all possible configuration options that can be passed to Numba's
+	`@jit` decorator to control compilation behavior. The parameters enable fine-tuned control
+	over optimization strategies, debugging features, and runtime behavior.
+
+	Key compilation modes:
+		nopython: Forces compilation without Python fallback for maximum performance
+		cache: Enables compilation result caching to disk for faster subsequent runs
+		fastmath: Allows aggressive mathematical optimizations at cost of IEEE compliance
+		parallel: Enables automatic parallelization of supported operations
+
+	Debug and development options:
+		debug: Enables debug information generation
+		boundscheck: Controls array bounds checking (disabled for performance in production)
+		error_model: Defines how numerical errors are handled ('numpy' vs 'python')
+
+	Only `cache`, `error_model`, and `fastmath` are required fields. All other fields are
+	optional via `NotRequired`, allowing flexible configuration while requiring explicit
+	decisions on critical performance and correctness parameters.
+	"""
 	_dbg_extend_lifetimes: NotRequired[bool]
 	_dbg_optnone: NotRequired[bool]
 	_nrt: NotRequired[bool]
@@ -48,22 +80,121 @@ class ParametersNumba(TypedDict):
 	target: NotRequired[str]
 
 parametersNumbaDefault: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }
-"""Middle of the road: fast, lean, but will talk to non-jitted functions."""
+"""
+Comprehensive Numba configuration for maximum performance optimization.
+
+This configuration provides aggressive optimization settings suitable for production
+numerical computing code. Key characteristics:
+	Enables nopython mode for full compilation without Python fallback
+	Disables bounds checking for maximum array access performance
+	Forces function inlining with 'always' policy for reduced call overhead
+	Uses numpy error model for consistent numerical behavior
+	Enables fastmath for aggressive floating-point optimizations
+	Disables loop lifting to prevent unexpected performance penalties
+
+The configuration prioritizes execution speed over compatibility, producing highly
+optimized machine code at the cost of reduced interoperability with uncompiled
+Python functions.
+"""
+
 parametersNumbaLight: Final[ParametersNumba] = {'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True}
+"""
+Minimal Numba configuration for basic optimization with maximum compatibility.
+
+This lightweight configuration provides essential optimizations while maintaining
+broad compatibility with existing Python code. Suitable for:
+	Development and debugging phases
+	Code that needs to interoperate with non-Numba functions
+	Situations where full nopython mode causes compilation issues
+
+Key features:
+	Enables compilation caching for faster subsequent runs
+	Uses numpy error model for consistent mathematical behavior
+	Enables fastmath and function inlining for performance gains
+	Allows Python object mode fallback when needed
+"""
 
 Z0Z_numbaDataTypeModule: identifierDotAttribute = 'numba'
+"""
+Module identifier for Numba imports and type annotations.
+
+This constant specifies the module path used when importing Numba-specific types and decorators
+in generated code. It serves as the single source of truth for the Numba module reference,
+enabling consistent import statements across all generated functions.
+"""
+
 Z0Z_decoratorCallable: str = 'jit'
+"""
+The Numba decorator function name used for just-in-time compilation.
+
+This constant identifies the specific Numba decorator applied to functions for compilation.
+While Numba offers multiple decorators (`@jit`, `@njit`, `@vectorize`), this toolkit focuses
+on the general-purpose `@jit` decorator with configurable parameters for flexibility.
+"""
 
 def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:
+	"""
+	Transform a Python function into a Numba-accelerated version with appropriate decorators.
+
+	This function applies Numba's @jit decorator to an existing function definition within
+	an IngredientsFunction container. It handles the complete transformation pipeline:
+
+	1. Removes any existing decorators that might conflict with Numba
+	2. Constructs type signatures for Numba compilation when possible
+	3. Applies the @jit decorator with specified or default parameters
+	4. Updates import requirements to include necessary Numba modules
+
+	The transformation preserves function semantics while enabling significant performance
+	improvements through just-in-time compilation. Type inference is attempted for
+	function parameters and return values to enable optimized compilation paths.
+	Parameters:
+		ingredientsFunction: Container holding the function definition and associated metadata
+		parametersNumba: Optional Numba configuration; uses parametersNumbaDefault if None
+	Returns:
+		Modified IngredientsFunction with Numba decorator applied and imports updated
+	"""
 	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
+		"""
+		Remove existing decorators from function definition to prevent conflicts with Numba.
+
+		Numba compilation can be incompatible with certain Python decorators, so this
+		function strips all existing decorators from a function definition before
+		applying the Numba @jit decorator. Removed decorators are logged as warnings
+		for debugging purposes.
+
+		TODO: Implement more sophisticated decorator handling that can preserve
+		compatible decorators and intelligently handle decorator composition.
+
+		Parameters:
+			astCallable: Function definition AST node to process
+
+		Returns:
+			astCallable: Function definition with decorator list cleared
+		"""
 		# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
 		for decoratorItem in astCallable.decorator_list.copy():
-			import warnings
 			astCallable.decorator_list.remove(decoratorItem)
 			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
 		return astCallable
 
 	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None: # pyright: ignore[reportUnusedFunction]
+		"""
+		Generate Numba-compatible type signatures for function parameters.
+
+		This function analyzes function parameter type annotations and converts them into
+		Numba-compatible type signature expressions. It handles various annotation patterns
+		including array types with shape and dtype information, scalar types with simple
+		name annotations, and complex subscripted types requiring special handling.
+
+		The generated signatures enable Numba to perform more efficient compilation by
+		providing explicit type information rather than relying solely on type inference.
+
+		Parameters:
+			signatureElement: Function parameter with type annotation to convert
+
+		Returns:
+			Numba-compatible type signature AST node, or None if conversion not possible
+		"""
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape: ast.expr = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
@@ -126,6 +257,28 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 
 @dataclasses.dataclass
 class SpicesJobNumba:
+	"""
+	Configuration container for Numba-specific job processing options.
+
+	This dataclass encapsulates configuration settings that control how Numba
+	compilation and execution is applied to job processing functions. It provides
+	a centralized way to manage Numba-specific settings that affect both
+	compilation behavior and runtime features like progress reporting.
+
+	The class serves as a bridge between the generic job processing system and
+	Numba's specialized requirements, enabling consistent application of
+	optimization settings across different computational contexts.
+
+	Attributes:
+		useNumbaProgressBar: Enable progress bar display for long-running computations
+		numbaProgressBarIdentifier: Progress bar implementation identifier
+		parametersNumba: Numba compilation parameters with sensible defaults
+	"""
 	useNumbaProgressBar: bool = True
+	"""Enable progress bar display for Numba-compiled functions with long execution times."""
+
 	numbaProgressBarIdentifier: str = 'ProgressBarGroupsOfFolds'
+	"""Identifier for the progress bar implementation used in Numba-compiled code."""
+
 	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba)  # pyright: ignore[reportArgumentType, reportCallIssue, reportUnknownVariableType]
+	"""Numba compilation parameters; defaults to empty dict allowing decorator defaults."""
