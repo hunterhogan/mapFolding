@@ -1,4 +1,6 @@
-from numpy import dtype, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64, integer, ndarray
+from numpy import (
+	dtype, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64,
+)
 from typing import Any, TypeAlias, TypeVar
 
 NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)

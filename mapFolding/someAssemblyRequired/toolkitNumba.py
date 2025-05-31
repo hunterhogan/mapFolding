@@ -15,11 +15,11 @@ highly-optimized numerical computing implementations, enabling significant
 performance improvements while preserving code semantics and correctness.
 """
 
-from collections.abc import Callable, Sequence
-from astToolkit import  IngredientsFunction, Make, str_nameDOTname
+from astToolkit import identifierDotAttribute, IngredientsFunction, Make
 from astToolkit.transformationTools import write_astModule
+from collections.abc import Callable, Sequence
 from numba.core.compiler import CompilerBase as numbaCompilerBase
-from typing import Any, NotRequired, TypedDict, cast, Final
+from typing import Any, cast, Final, NotRequired, TypedDict
 import ast
 import dataclasses
 
@@ -51,7 +51,7 @@ parametersNumbaDefault: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': 
 """Middle of the road: fast, lean, but will talk to non-jitted functions."""
 parametersNumbaLight: Final[ParametersNumba] = {'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True}
 
-Z0Z_numbaDataTypeModule: str_nameDOTname = 'numba'
+Z0Z_numbaDataTypeModule: identifierDotAttribute = 'numba'
 Z0Z_decoratorCallable: str = 'jit'
 
 def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:
@@ -112,7 +112,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.astFunctionDef = Z0Z_UnhandledDecorators(ingredientsFunction.astFunctionDef)
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
-	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
+	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()] # pyright: ignore[reportArgumentType]
 
 	decoratorModule = Z0Z_numbaDataTypeModule
 	decoratorCallable = Z0Z_decoratorCallable

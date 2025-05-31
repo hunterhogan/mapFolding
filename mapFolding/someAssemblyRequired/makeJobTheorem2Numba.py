@@ -1,26 +1,20 @@
-from mapFolding import getPathFilenameFoldsTotal, MapFoldingState, packageSettings
-from mapFolding.someAssemblyRequired import IfThis, raiseIfNoneGitHubIssueNumber3
 from astToolkit import (
-	Be,
-	ClassIsAndAttribute,
-	extractFunctionDef,
-	IngredientsFunction,
-	IngredientsModule,
-	LedgerOfImports,
-	Make,
-	NodeChanger,
-	NodeTourist,
-	str_nameDOTname,
-	Then,
+	Be, ClassIsAndAttribute, extractFunctionDef, identifierDotAttribute, IngredientsFunction,
+	IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, Then,
 )
 from astToolkit.transformationTools import write_astModule
+from mapFolding import getPathFilenameFoldsTotal, MapFoldingState, packageSettings
+from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
-from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
+from mapFolding.someAssemblyRequired.toolkitNumba import (
+	decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba,
+)
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from pathlib import PurePosixPath
 from typing import cast, NamedTuple
-from Z0Z_tools import autoDecodingRLE
+from Z0Z_tools import autoDecodingRLE, raiseIfNone
 import ast
+
 """Synthesize one file to compute `foldsTotal` of `mapShape`."""
 
 listIdentifiersNotUsedAllHARDCODED = ['concurrencyLimit', 'foldsTotal', 'mapShape',]
@@ -155,8 +149,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 
 def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 
-	astFunctionDef = extractFunctionDef(job.source_astModule, job.countCallable)
-	if not astFunctionDef: raise raiseIfNoneGitHubIssueNumber3
+	astFunctionDef = raiseIfNone(extractFunctionDef(job.source_astModule, job.countCallable))
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
 
 	# Remove `foldGroups` and any other unused statements, so you can dynamically determine which variables are not used
@@ -200,7 +193,7 @@ if __name__ == '__main__':
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
 	class DatatypeConfig(NamedTuple):
-		Z0Z_module: str_nameDOTname
+		Z0Z_module: identifierDotAttribute
 		fml: str
 		Z0Z_type_name: str
 		Z0Z_asname: str | None = None

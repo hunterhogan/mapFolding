@@ -1,38 +1,25 @@
 from astToolkit import (
-	astModuleToIngredientsFunction,
-	Be,
-	ClassIsAndAttribute,
-	DOT,
-	extractClassDef,
-	Mult,
-	Mod,
-	extractFunctionDef,
-	Grab,
-	IngredientsFunction,
-	IngredientsModule,
-	LedgerOfImports,
-	Make,
-	NodeChanger,
-	NodeTourist,
-	parseLogicalPath2astModule,
-	parsePathFilename2astModule,
-	str_nameDOTname,
-	Then,
+	astModuleToIngredientsFunction, Be, ClassIsAndAttribute, DOT, extractClassDef, extractFunctionDef,
+	Grab, identifierDotAttribute, IngredientsFunction, IngredientsModule, LedgerOfImports, Make,
+	NodeChanger, NodeTourist, parseLogicalPath2astModule, parsePathFilename2astModule, Then,
 )
-from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
+from astToolkit.transformationTools import (
+	inlineFunctionDef, removeUnusedParameters, write_astModule,
+)
 from collections.abc import Sequence
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
-	DeReConstructField2ast,
-	IfThis,
-	ShatteredDataclass,
-	sourceCallableDispatcherDEFAULT,
+	DeReConstructField2ast, IfThis, ShatteredDataclass, sourceCallableDispatcherDEFAULT,
 )
-from mapFolding.someAssemblyRequired.infoBooth import algorithmSourceModuleDEFAULT, dataPackingModuleIdentifierDEFAULT, logicalPathInfixDEFAULT, sourceCallableIdentifierDEFAULT, theCountingIdentifierDEFAULT
-from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
+from mapFolding.someAssemblyRequired.infoBooth import (
+	algorithmSourceModuleDEFAULT, dataPackingModuleIdentifierDEFAULT, logicalPathInfixDEFAULT,
+	sourceCallableIdentifierDEFAULT, theCountingIdentifierDEFAULT,
+)
+from mapFolding.someAssemblyRequired.toolkitNumba import (
+	decorateCallableWithNumba, parametersNumbaLight,
+)
 from mapFolding.someAssemblyRequired.transformationTools import (
-	removeDataclassFromFunction,
-	shatter_dataclassesDOTdataclass,
+	removeDataclassFromFunction, shatter_dataclassesDOTdataclass,
 	unpackDataclassCallFunctionRepackDataclass,
 )
 from os import PathLike
@@ -46,7 +33,7 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[str, str, s
 	dataclassName: ast.expr = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	dataclassIdentifier: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
 	dataclassLogicalPathModule = None
-	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports.dictionaryImportFrom.items():
+	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():
 		for nameTuple in listNameTuples:
 			if nameTuple[0] == dataclassIdentifier:
 				dataclassLogicalPathModule = moduleWithLogicalPath
@@ -56,7 +43,7 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[str, str, s
 	dataclassInstanceIdentifier = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	return raiseIfNone(dataclassLogicalPathModule), dataclassIdentifier, dataclassInstanceIdentifier
 
-def _getLogicalPath(packageName: str | None = None, logicalPathInfix: str | None = None, moduleIdentifier: str | None = None, *modules: str) -> str_nameDOTname:
+def _getLogicalPath(packageName: str | None = None, logicalPathInfix: str | None = None, moduleIdentifier: str | None = None, *modules: str) -> identifierDotAttribute:
 	listLogicalPathParts: list[str] = []
 	if packageName:
 		listLogicalPathParts.append(packageName)
@@ -154,14 +141,14 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 	dataclassIdentifier: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
 
 	dataclassLogicalPathModule = None
-	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports.dictionaryImportFrom.items():
+	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():
 		for nameTuple in listNameTuples:
 			if nameTuple[0] == dataclassIdentifier:
 				dataclassLogicalPathModule = moduleWithLogicalPath
 				break
 		if dataclassLogicalPathModule:
 			break
-	if dataclassLogicalPathModule is None: 
+	if dataclassLogicalPathModule is None:
 		raise Exception
 	dataclassInstanceIdentifier = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	shatteredDataclass = shatter_dataclassesDOTdataclass(dataclassLogicalPathModule, dataclassIdentifier, dataclassInstanceIdentifier)
@@ -176,7 +163,7 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
 	dataclassClassDef = extractClassDef(parseLogicalPath2astModule(dataclassLogicalPathModule), dataclassIdentifierParallel)
-	if not isinstance(dataclassClassDef, ast.ClassDef): 
+	if not isinstance(dataclassClassDef, ast.ClassDef):
 		raise ValueError(f"I could not find `{dataclassIdentifierParallel = }` in `{dataclassLogicalPathModule = }`.")
 
 	for aField in onlyParallelFields:
@@ -218,7 +205,7 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 
 	thisIsMyTaskIndexCodeBlock = ast.If(ast.BoolOp(ast.Or()
 		, values=[ast.Compare(ast.Name('leaf1ndex'), ops=[ast.NotEq()], comparators=[ast.Name('taskDivisions')])
-				, ast.Compare(Mod().join([ast.Name('leafConnectee'), ast.Name('taskDivisions')]), ops=[ast.Eq()], comparators=[ast.Name('taskIndex')])])
+				, ast.Compare(Make.Mod.join([ast.Name('leafConnectee'), ast.Name('taskDivisions')]), ops=[ast.Eq()], comparators=[ast.Name('taskIndex')])])
 	, body=list(countGapsCodeBlock[0:-1]))
 
 	countGapsCodeBlockNew: list[ast.stmt] = [thisIsMyTaskIndexCodeBlock, countGapsCodeBlock[-1]]
@@ -254,33 +241,33 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 
 	ingredientsDoTheNeedful: IngredientsFunction = IngredientsFunction(
 		astFunctionDef = Make.FunctionDef('doTheNeedful'
-			, args=Make.arguments(args=[Make.arg('state', annotation=Make.Name(dataclassIdentifierParallel)), Make.arg('concurrencyLimit', annotation=Make.Name('int'))])
-			, body=[Make.Assign([Make.Name('stateParallel', ast.Store())], value=Make.Call(Make.Name('deepcopy'), args=[Make.Name('state')]))
+			, argumentSpecification=Make.arguments(list_arg=[Make.arg('state', annotation=Make.Name(dataclassIdentifierParallel)), Make.arg('concurrencyLimit', annotation=Make.Name('int'))])
+			, body=[Make.Assign([Make.Name('stateParallel', ast.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('state')]))
 				, Make.AnnAssign(Make.Name('listStatesParallel', ast.Store()), annotation=Make.Subscript(value=Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))
-					, value=Mult().join([Make.List([Make.Name('stateParallel')]), Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')]))
+					, value=Make.Mult.join([Make.List([Make.Name('stateParallel')]), Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')]))
 				, Make.AnnAssign(Make.Name('groupsOfFoldsTotal', ast.Store()), annotation=Make.Name('int'), value=Make.Constant(value=0))
 
 				, Make.AnnAssign(Make.Name('dictionaryConcurrency', ast.Store()), annotation=Make.Subscript(value=Make.Name('dict'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(value=Make.Name('ConcurrentFuture'), slice=Make.Name(dataclassIdentifierParallel))])), value=Make.Dict())
-				, Make.With(items=[Make.withitem(context_expr=Make.Call(Make.Name('ProcessPoolExecutor'), args=[Make.Name('concurrencyLimit')]), optional_vars=Make.Name('concurrencyManager', ast.Store()))]
-					, body=[Make.For(Make.Name('indexSherpa', ast.Store()), iter=Make.Call(Make.Name('range'), args=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
-							, body=[Make.Assign([Make.Name('state', ast.Store())], value=Make.Call(Make.Name('deepcopy'), args=[Make.Name('stateParallel')]))
+				, Make.With(items=[Make.withitem(context_expr=Make.Call(Make.Name('ProcessPoolExecutor'), listParameters=[Make.Name('concurrencyLimit')]), optional_vars=Make.Name('concurrencyManager', ast.Store()))]
+					, body=[Make.For(Make.Name('indexSherpa', ast.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
+							, body=[Make.Assign([Make.Name('state', ast.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('stateParallel')]))
 								, Make.Assign([Make.Attribute(Make.Name('state'), 'taskIndex', context=ast.Store())], value=Make.Name('indexSherpa'))
-								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=ast.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), args=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name('state')]))])
-						, Make.For(Make.Name('indexSherpa', ast.Store()), iter=Make.Call(Make.Name('range'), args=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
+								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=ast.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), listParameters=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name('state')]))])
+						, Make.For(Make.Name('indexSherpa', ast.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
 							, body=[Make.Assign([Make.Subscript(Make.Name('listStatesParallel'), slice=Make.Name('indexSherpa'), context=ast.Store())], value=Make.Call(Make.Attribute(Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa')), 'result')))
 								, Make.AugAssign(Make.Name('groupsOfFoldsTotal', ast.Store()), op=ast.Add(), value=Make.Attribute(Make.Subscript(Make.Name('listStatesParallel'), slice=Make.Name('indexSherpa')), 'groupsOfFolds'))])])
 
-				, Make.AnnAssign(Make.Name('foldsTotal', ast.Store()), annotation=Make.Name('int'), value=Mult().join([Make.Name('groupsOfFoldsTotal'), Make.Attribute(Make.Name('stateParallel'), 'leavesTotal')]))
+				, Make.AnnAssign(Make.Name('foldsTotal', ast.Store()), annotation=Make.Name('int'), value=Make.Mult.join([Make.Name('groupsOfFoldsTotal'), Make.Attribute(Make.Name('stateParallel'), 'leavesTotal')]))
 				, Make.Return(Make.Tuple([Make.Name('foldsTotal'), Make.Name('listStatesParallel')]))]
 			, returns=Make.Subscript(Make.Name('tuple'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))])))
 		, imports = LedgerOfImports(Make.Module([Make.ImportFrom('concurrent.futures', list_alias=[Make.alias('Future', asName='ConcurrentFuture'), Make.alias('ProcessPoolExecutor')]),
-			Make.ImportFrom(module='copy', list_alias=[Make.alias('deepcopy')]),
-			Make.ImportFrom(module='multiprocessing', list_alias=[Make.alias('set_start_method', asName='multiprocessing_set_start_method')]),])
+			Make.ImportFrom('copy', list_alias=[Make.alias('deepcopy')]),
+			Make.ImportFrom('multiprocessing', list_alias=[Make.alias('set_start_method', asName='multiprocessing_set_start_method')]),])
 		)
 	)
 
 	ingredientsModule = IngredientsModule([ingredientsFunction, unRepackDataclass, ingredientsDoTheNeedful]
-						, prologue = Make.Module([ast.If(test=ast.Compare(left=ast.Name('__name__'), ops=[ast.Eq()], comparators=[ast.Constant('__main__')]), body=[ast.Expr(ast.Call(ast.Name('multiprocessing_set_start_method'), args=[ast.Constant('spawn')]))])])
+						, prologue = Make.Module([Make.If(test=Make.Compare(left=Make.Name('__name__'), ops=[Make.Eq()], comparators=[Make.Constant('__main__')]), body=[Make.Expr(Make.Call(Make.Name('multiprocessing_set_start_method'), listParameters=[Make.Constant('spawn')]))])])
 	)
 	ingredientsModule.removeImportFromModule('numpy')
 

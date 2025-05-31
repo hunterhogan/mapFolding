@@ -6,8 +6,6 @@ sourceCallableDispatcherDEFAULT: str = 'doTheNeedful'
 sourceCallableIdentifierDEFAULT: str = 'count'
 theCountingIdentifierDEFAULT: str = 'groupsOfFolds'
 
-class raiseIfNoneGitHubIssueNumber3(Exception): pass
-
 dictionaryEstimates: dict[tuple[int, ...], int] = {
 	(2,2,2,2,2,2,2,2): 798148657152000,
 	(2,21): 776374224866624,

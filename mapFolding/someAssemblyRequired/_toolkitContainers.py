@@ -18,7 +18,10 @@ The containers work in conjunction with transformation tools that manipulate the
 specific optimizations and transformations.
 """
 
-from astToolkit import ClassIsAndAttribute, hasDOTtarget_NameOrAttributeOrSubscript, DOT, LedgerOfImports, Make, NodeTourist, str_nameDOTname, Then
+from astToolkit import (
+	ClassIsAndAttribute, DOT, hasDOTtarget_NameOrAttributeOrSubscript, identifierDotAttribute,
+	LedgerOfImports, Make, NodeTourist, Then,
+)
 from collections.abc import Callable
 from copy import deepcopy
 from mapFolding.someAssemblyRequired import IfThis
@@ -92,7 +95,7 @@ class DeReConstructField2ast:
 	Each field is processed according to its type and metadata to create appropriate
 	variable declarations, type annotations, and initialization code as AST nodes.
 	"""
-	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[str_nameDOTname]
+	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[identifierDotAttribute]
 	dataclassClassDef: dataclasses.InitVar[ast.ClassDef]
 	dataclassesDOTdataclassInstanceIdentifier: dataclasses.InitVar[str]
 	field: dataclasses.InitVar[dataclasses.Field[Any]]
@@ -118,7 +121,7 @@ class DeReConstructField2ast:
 	astAnnAssignConstructor: ast.AnnAssign|ast.Assign = dataclasses.field(init=False)
 	Z0Z_hack: tuple[ast.AnnAssign|ast.Assign, str] = dataclasses.field(init=False)
 
-	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: str_nameDOTname, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstanceIdentifier: str, field: dataclasses.Field[Any]) -> None:
+	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: identifierDotAttribute, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstanceIdentifier: str, field: dataclasses.Field[Any]) -> None:
 		self.compare = field.compare
 		self.default = field.default if field.default is not dataclasses.MISSING else None
 		self.default_factory = field.default_factory if field.default_factory is not dataclasses.MISSING else None
@@ -142,7 +145,7 @@ class DeReConstructField2ast:
 
 		dtype = self.metadata.get('dtype', None)
 		if dtype:
-			moduleWithLogicalPath: str_nameDOTname = 'numpy'
+			moduleWithLogicalPath: identifierDotAttribute = 'numpy'
 			annotationType = 'ndarray'
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, annotationType)
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, 'dtype')

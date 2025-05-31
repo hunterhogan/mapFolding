@@ -18,13 +18,12 @@ These utilities form a stable internal API that other modules depend on, particu
 theDao (core algorithm), and the synthetic module generators that produce optimized implementations.
 """
 from collections.abc import Sequence
-from mapFolding import Array1DElephino, Array1DFoldsTotal, Array1DLeavesTotal, Array3D, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, NumPyIntegerType
+from mapFolding import NumPyIntegerType
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
 from typing import Any
 from Z0Z_tools import defineConcurrencyLimit, intInnit, oopsieKwargsie
 import numpy
-import dataclasses
 
 def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 	"""

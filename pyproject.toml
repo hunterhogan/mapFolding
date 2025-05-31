@@ -1,97 +1,98 @@
+[project]
+name = "mapFolding"
+version = "0.12.1"
+description = "Map folding algorithm with code transformation framework for optimizing numerical computations"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.12"
+license = { 'text' = "CC-BY-NC-4.0" }
+authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
+keywords = [
+  "A000136",
+  "A001415",
+  "A001416",
+  "A001417",
+  "A001418",
+  "A195646",
+  "AST manipulation",
+  "Numba optimization",
+  "OEIS",
+  "algorithmic optimization",
+  "code generation",
+  "code transformation",
+  "combinatorics",
+  "computational geometry",
+  "dataclass transformation",
+  "folding pattern enumeration",
+  "just-in-time compilation",
+  "map folding",
+  "performance optimization",
+  "source code analysis",
+  "stamp folding",]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Software Development :: Code Generators",
+  "Topic :: Software Development :: Compilers",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",]
+urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Issues = "https://github.com/hunterhogan/mapFolding/issues", Repository = "https://github.com/hunterhogan/mapFolding.git" }
+scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", clearOEIScache = "mapFolding.oeis:clearOEIScache", getOEISids = "mapFolding.oeis:getOEISids" }
+dependencies = [
+  "Z0Z_tools",
+  "astToolkit>=0.5.0",
+  "autoflake",
+  "numba",
+  "numba_progress",
+  "numpy",
+  "platformdirs",
+  "python_minifier",
+  "sympy",
+  "tomli",]
+optional-dependencies = { testing = [
+  "mypy",
+  "pytest",
+  "pytest-cov",
+  "pytest-env",
+  "pytest-xdist",
+  "pyupgrade",
+  "ruff",
+  "setuptools-scm",] }
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[project]
-authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
-classifiers = [
-	"Development Status :: 4 - Beta",
-	"Environment :: Console",
-	"Intended Audience :: Developers",
-	"Intended Audience :: Education",
-	"Intended Audience :: Science/Research",
-	"Natural Language :: English",
-	"Operating System :: OS Independent",
-	"Programming Language :: Python",
-	"Programming Language :: Python :: 3",
-	"Programming Language :: Python :: 3.12",
-	"Programming Language :: Python :: 3.13",
-	"Topic :: Scientific/Engineering :: Mathematics",
-	"Topic :: Scientific/Engineering :: Information Analysis",
-	"Topic :: Software Development :: Code Generators",
-	"Topic :: Software Development :: Libraries :: Python Modules",
-	"Topic :: Software Development :: Compilers",
-	"Typing :: Typed",]
-dependencies = [
-	"astToolkit>=0.3.0",
-	"autoflake",
-	"numba_progress",
-	"numba",
-	"numpy",
-	"platformdirs",
-	"python_minifier",
-	"sympy",
-	"tomli",
-	"Z0Z_tools",]
-description = "Map folding algorithm with code transformation framework for optimizing numerical computations"
-keywords = [
-	"A000136",
-	"A001415",
-	"A001416",
-	"A001417",
-	"A001418",
-	"A195646",
-	"algorithmic optimization",
-	"AST manipulation",
-	"code generation",
-	"code transformation",
-	"combinatorics",
-	"computational geometry",
-	"dataclass transformation",
-	"folding pattern enumeration",
-	"just-in-time compilation",
-	"map folding",
-	"Numba optimization",
-	"OEIS",
-	"performance optimization",
-	"source code analysis",
-	"stamp folding",]
-license = { 'text' = "CC-BY-NC-4.0" }
-name = "mapFolding"
-optional-dependencies = { testing = [
-	"mypy",
-	"pytest",
-	"pytest-cov",
-	"pytest-env",
-	"pytest-xdist",
-	"pyupgrade",
-	"ruff",] }
-readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.12"
-scripts = { getOEISids = "mapFolding.oeis:getOEISids", clearOEIScache = "mapFolding.oeis:clearOEIScache", OEIS_for_n = "mapFolding.oeis:OEIS_for_n" }
-urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Repository = "https://github.com/hunterhogan/mapFolding.git", Issues = "https://github.com/hunterhogan/mapFolding/issues"}
-version = "0.12.1"
-
 [tool.coverage]
 report = { exclude_lines = [
-	"if TYPE_CHECKING:",
-	"if __name__ == \"__main__\":",
-	"numba.jit_module",
+  "if TYPE_CHECKING:",
+  "if __name__ == \"__main__\":",
+  "numba.jit_module",
 ], ignore_errors = false }
 run = { branch = true, concurrency = [
-	"multiprocessing",
+  "multiprocessing",
 ], data_file = "tests/coverage/.coverage", omit = [
-	"getLLVMforNoReason.py",
-	"mapFolding/reference/*",
-	"tests/*",
-	"Z0Z_*",
+  "getLLVMforNoReason.py",
+  "mapFolding/reference/*",
+  "tests/*",
+  "Z0Z_*",
 ], parallel = true, source = [
-	".",] }
+  ".",] }
 xml = { output = "tests/coverage/coverage.xml" }
 
 [tool.pytest.ini_options]
-log_auto_indent = true
 addopts = ["--color=auto", "-n 1"]
+log_auto_indent = true
 testpaths = ["tests"]
 
 [tool.pytest_env]
@@ -100,8 +101,8 @@ testpaths = ["tests"]
 
 [tool.setuptools]
 package-data = { "*" = ["py.typed"] }
-packages = { find = {} }
+packages = { find = {  } }
 
 [tool.updateCitation]
-filenameCitationDOTcff = 'CITATION.cff'
+filenameCitationDOTcff = "CITATION.cff"
 pathFilenameCitationSSOT = "citations/CITATION.cff"

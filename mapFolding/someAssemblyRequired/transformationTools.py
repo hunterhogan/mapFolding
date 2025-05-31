@@ -18,28 +18,17 @@ readable, maintainable implementations to highly optimized versions while preser
 logical structure and correctness.
 """
 
-from astToolkit import ClassIsAndAttribute
-from mapFolding.someAssemblyRequired import (
-	DeReConstructField2ast,
-	IfThis,
-	ShatteredDataclass,
-)
-from astToolkit import(
-	Be,
-	extractClassDef,
-	IngredientsFunction,
-	Make,
-	NodeChanger,
-	parseLogicalPath2astModule,
-	str_nameDOTname,
-	Then,
+from astToolkit import (
+	Be, ClassIsAndAttribute, extractClassDef, identifierDotAttribute, IngredientsFunction, Make,
+	NodeChanger, parseLogicalPath2astModule, Then,
 )
 from astToolkit.transformationTools import unparseFindReplace
+from mapFolding.someAssemblyRequired import DeReConstructField2ast, IfThis, ShatteredDataclass
 from Z0Z_tools import importLogicalPath2Callable
 import ast
 import dataclasses
 
-def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclassIdentifier: str, instanceIdentifier: str) -> ShatteredDataclass:
+def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, dataclassIdentifier: str, instanceIdentifier: str) -> ShatteredDataclass:
 	"""
 	Decompose a dataclass definition into AST components for manipulation and code generation.
 
@@ -73,7 +62,8 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
 	dataclassClassDef = extractClassDef(parseLogicalPath2astModule(logicalPathModule), dataclassIdentifier)
-	if not isinstance(dataclassClassDef, ast.ClassDef): raise ValueError(f"I could not find `{dataclassIdentifier = }` in `{logicalPathModule = }`.")
+	if not isinstance(dataclassClassDef, ast.ClassDef):
+		raise ValueError(f"I could not find `{dataclassIdentifier = }` in `{logicalPathModule = }`.")
 
 	countingVariable = None
 	for aField in dataclasses.fields(importLogicalPath2Callable(logicalPathModule, dataclassIdentifier)): # pyright: ignore [reportArgumentType]
@@ -109,7 +99,7 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: str_nameDOTname, dataclas
 	return shatteredDataclass
 
 def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
-	ingredientsTarget.astFunctionDef.args = Make.arguments(args=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
+	ingredientsTarget.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
 	changeReturnCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
 	changeReturnCallable.visit(ingredientsTarget.astFunctionDef)

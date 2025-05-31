@@ -46,7 +46,6 @@ test suite.
 
 from mapFolding.someAssemblyRequired.infoBooth import (
 	dataclassInstanceIdentifierDEFAULT as dataclassInstanceIdentifierDEFAULT,
-	raiseIfNoneGitHubIssueNumber3 as raiseIfNoneGitHubIssueNumber3,
 	sourceCallableDispatcherDEFAULT as sourceCallableDispatcherDEFAULT,
 )
 

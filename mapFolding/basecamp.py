@@ -11,12 +11,8 @@ appropriate algorithm implementation, and optional persistence of results.
 
 from collections.abc import Sequence
 from mapFolding import (
-	getPathFilenameFoldsTotal,
-	packageSettings,
-	saveFoldsTotal,
-	saveFoldsTotalFAILearly,
-	setProcessorLimit,
-	validateListDimensions,
+	getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly,
+	setProcessorLimit, validateListDimensions,
 )
 from os import PathLike
 from pathlib import PurePath

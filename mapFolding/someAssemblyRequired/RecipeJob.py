@@ -1,6 +1,9 @@
-from astToolkit import parseLogicalPath2astModule, str_nameDOTname
-from mapFolding import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState, packageSettings
-from mapFolding import DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal
+from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
+from mapFolding import (
+	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal,
+	DatatypeLeavesTotal as TheDatatypeLeavesTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT,
+	MapFoldingState, packageSettings,
+)
 from mapFolding.someAssemblyRequired import dataclassInstanceIdentifierDEFAULT, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
@@ -19,7 +22,7 @@ class RecipeJobTheorem2Numba:
 	source_astModule = parseLogicalPath2astModule('mapFolding.syntheticModules.theorem2Numba')
 	sourceCountCallable: str = 'count'
 
-	sourceLogicalPathModuleDataclass: str_nameDOTname = 'mapFolding.dataBaskets'
+	sourceLogicalPathModuleDataclass: identifierDotAttribute = 'mapFolding.dataBaskets'
 	sourceDataclassIdentifier: str = 'MapFoldingState'
 	sourceDataclassInstance: str = dataclassInstanceIdentifierDEFAULT
 
@@ -37,13 +40,13 @@ class RecipeJobTheorem2Numba:
 	# ========================================
 	# Logical identifiers (as opposed to physical identifiers)
 	packageIdentifier: str | None = None
-	logicalPathRoot: str_nameDOTname | None = None
+	logicalPathRoot: identifierDotAttribute | None = None
 	""" `logicalPathRoot` likely corresponds to a physical filesystem directory."""
 	moduleIdentifier: str = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 	countCallable: str = sourceCountCallable
 	dataclassIdentifier: str | None = sourceDataclassIdentifier
 	dataclassInstance: str | None = sourceDataclassInstance
-	logicalPathModuleDataclass: str_nameDOTname | None = sourceLogicalPathModuleDataclass
+	logicalPathModuleDataclass: identifierDotAttribute | None = sourceLogicalPathModuleDataclass
 
 	# ========================================
 	# Datatypes
@@ -53,7 +56,7 @@ class RecipeJobTheorem2Numba:
 
 	def _makePathFilename(self,
 			pathRoot: PurePosixPath | None = None,
-			logicalPathINFIX: str_nameDOTname | None = None,
+			logicalPathINFIX: identifierDotAttribute | None = None,
 			filenameStem: str | None = None,
 			fileExtension: str | None = None,
 			) -> PurePosixPath:
