@@ -27,8 +27,10 @@ keywords:
 - A001417
 - A001418
 - A195646
-- algorithmic optimization
 - AST manipulation
+- Numba optimization
+- OEIS
+- algorithmic optimization
 - code generation
 - code transformation
 - combinatorics
@@ -37,8 +39,6 @@ keywords:
 - folding pattern enumeration
 - just-in-time compilation
 - map folding
-- Numba optimization
-- OEIS
 - performance optimization
 - source code analysis
 - stamp folding
