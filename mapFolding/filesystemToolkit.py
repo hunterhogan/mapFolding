@@ -58,10 +58,9 @@ def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal
 
 	This function resolves paths for storing computation results, handling different input types including directories,
 	absolute paths, or relative paths. It ensures that all parent directories exist in the resulting path.
-
 	Parameters:
-		mapShape: List of dimensions for the map folding problem.
-		pathLikeWriteFoldsTotal (getPathJobRootDEFAULT): Path, filename, or relative path and filename. If None, uses
+		mapShape: A sequence of integers representing the map dimensions.
+		pathLikeWriteFoldsTotal (getPathRootJobDEFAULT): Path, filename, or relative path and filename. If None, uses
 			default path. If a directory, appends standardized filename.
 
 	Returns:
@@ -109,11 +108,19 @@ def getPathRootJobDEFAULT() -> Path:
 
 def _saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> None:
 	"""
-	Standardized function to save a `foldsTotal` value to a file.
+	Internal function to save a `foldsTotal` value to a file.
+
+	This function provides the core file writing functionality used by the public `saveFoldsTotal` function. It handles
+	the basic operations of creating parent directories and writing the integer value as text to the specified file
+	location.
 
 	Parameters:
-		pathFilename: Path where the `foldsTotal` value should be saved
-		foldsTotal: The integer value to save
+		pathFilename: Path where the `foldsTotal` value should be saved.
+		foldsTotal: The integer value to save.
+
+	Notes:
+		This is an internal function that doesn't include error handling or fallback mechanisms. Use `saveFoldsTotal`
+		for production code that requires robust error handling.
 	"""
 	pathFilenameFoldsTotal = Path(pathFilename)
 	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
@@ -125,16 +132,16 @@ def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> N
 
 	This function attempts to save the computed `foldsTotal` value to the specified location, with backup strategies in
 	case the primary save attempt fails. The robustness is critical since these computations may take days to complete.
-
 	Parameters:
-		pathFilename: Target save location for the `foldsTotal` value
-		foldsTotal: The computed value to save
-
+		pathFilename: Target save location for the `foldsTotal` value.
+		foldsTotal: The computed value to save.
 	Notes:
 		If the primary save fails, the function will attempt alternative save methods:
 		1. Print the value prominently to `stdout`.
 		2. Create a fallback file in the current working directory.
 		3. As a last resort, simply print the value.
+
+		The fallback filename includes a unique identifier based on the value itself to prevent conflicts.
 	"""
 	try:
 		_saveFoldsTotal(pathFilename, foldsTotal)
@@ -172,10 +179,10 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
 	Raises:
 		FileExistsError: If the target file already exists.
 		FileNotFoundError: If parent directories don't exist or if write tests fail.
-
 	Notes:
 		This function helps prevent a situation where a computation runs for hours or days only to discover at the end
-		that results cannot be saved.
+		that results cannot be saved. The test value used is a large integer that exercises both the writing and
+		reading mechanisms thoroughly.
 	"""
 	if Path(pathFilename).exists():
 		raise FileExistsError(f"`{pathFilename = }` exists: a battle of overwriting might cause tears.")

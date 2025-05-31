@@ -33,10 +33,18 @@ import urllib.request
 import warnings
 
 cacheDays = 30
+"""Number of days to retain cached OEIS data before refreshing from the online source."""
 
 pathCache: Path = packageSettings.pathPackage / ".cache"
+"""Local directory path for storing cached OEIS sequence data and metadata."""
 
 class SettingsOEIS(TypedDict):
+	"""
+	Complete configuration settings for a single OEIS sequence implementation.
+
+	This TypedDict defines the structure for storing all metadata, known values, and operational parameters
+	needed to work with an OEIS sequence within the map folding context.
+	"""
 	description: str
 	getMapShape: Callable[[int], tuple[int, ...]]
 	offset: int
@@ -47,6 +55,12 @@ class SettingsOEIS(TypedDict):
 	valueUnknown: int
 
 class SettingsOEIShardcodedValues(TypedDict):
+	"""
+	Hardcoded configuration values for OEIS sequences defined within the module.
+
+	This TypedDict contains the static configuration data that is embedded in the source code
+	rather than retrieved from external sources.
+	"""
 	getMapShape: Callable[[int], tuple[int, ...]]
 	valuesBenchmark: list[int]
 	valuesTestParallelization: list[int]
@@ -90,6 +104,13 @@ settingsOEIShardcodedValues: dict[str, SettingsOEIShardcodedValues] = {
 		'valuesTestValidation': [random.randint(2, 4)],
 	},
 }
+"""
+Registry of hardcoded OEIS sequence configurations implemented in this module.
+
+Each key is a standardized OEIS sequence identifier (e.g., 'A001415'), and each value contains
+the static configuration needed to work with that sequence, including the mapping function from
+sequence index to map shape and various test parameter sets.
+"""
 
 oeisIDsImplemented: Final[list[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues.keys()])
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
@@ -123,25 +144,37 @@ def validateOEISid(oeisIDcandidate: str) -> str:
 			)
 
 def getFilenameOEISbFile(oeisID: str) -> str:
+	"""
+	Generate the filename for an OEIS b-file given a sequence ID.
+
+	OEIS b-files contain sequence values in a standardized format and follow the naming convention
+	'b{sequence_number}.txt', where the sequence number excludes the 'A' prefix.
+
+	Parameters:
+		oeisID: The OEIS sequence identifier to convert to a b-file filename.
+
+	Returns:
+		filename: The corresponding b-file filename for the given sequence ID.
+	"""
 	oeisID = validateOEISid(oeisID)
 	return f"b{oeisID[1:]}.txt"
 
 def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 	"""
-	Parses the content of an OEIS b-file for a given sequence ID.
+	Parse the content of an OEIS b-file into a sequence dictionary.
 
-	This function processes a multiline string representing an OEIS b-file and creates a dictionary mapping integer
-	indices to their corresponding sequence values. The first line of the b-file is expected to contain a comment that
-	matches the given sequence ID. If it does not match, a ValueError is raised.
+	OEIS b-files contain sequence data in a standardized two-column format where each line represents
+	an index-value pair. Comment lines beginning with '#' are ignored during parsing.
 
 	Parameters:
-		OEISbFile: A multiline string representing an OEIS b-file. oeisID: The expected OEIS sequence identifier.
+		OEISbFile: A multiline string representing the content of an OEIS b-file.
+		oeisID: The expected OEIS sequence identifier for validation purposes.
+
 	Returns:
-		OEISsequence: A dictionary where each key is an integer index `n` and each value is the sequence value `a(n)`
-		corresponding to that index.
+		OEISsequence: A dictionary mapping sequence indices to their corresponding values.
+
 	Raises:
-		ValueError: If the first line of the file does not indicate the expected sequence ID or if the content format is
-		invalid.
+		ValueError: If the file content format is invalid or cannot be parsed.
 	"""
 	bFileLines: list[str] = OEISbFile.strip().splitlines()
 
@@ -155,23 +188,22 @@ def _parseBFileOEIS(OEISbFile: str, oeisID: str) -> dict[int, int]:
 
 def getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 	"""
-	Retrieve OEIS sequence data from cache or online source.
+	Retrieve OEIS sequence data from cache or online source with intelligent caching.
 
-	This function implements a caching strategy for OEIS sequence data, first checking if a local cached copy exists and
-	is not expired. If a valid cache exists, it returns the cached content; otherwise, it fetches the data from the OEIS
-	website and writes it to the cache for future use.
+	This function implements a caching strategy that prioritizes local cached data when it exists and
+	has not expired. Fresh data is retrieved from the OEIS website when the cache is stale or missing,
+	and the cache is updated for future use.
 
 	Parameters:
-		pathFilenameCache: Path to the local cache file. url: URL to retrieve the OEIS sequence data from if cache is
-		invalid or missing.
+		pathFilenameCache: Path to the local cache file for storing retrieved data.
+		url: URL to retrieve the OEIS sequence data from if cache is invalid or missing.
 
 	Returns:
-		oeisInformation: The retrieved OEIS sequence information as a string, or None if the information could not be
-		retrieved.
+		oeisInformation: The retrieved OEIS sequence information as a string, or None if retrieval failed.
 
 	Notes:
-		The cache expiration period is controlled by the global `cacheDays` variable. If the function fails to retrieve
-		data from both cache and online source, it will return None and issue a warning.
+		Cache expiration is controlled by the module-level `cacheDays` variable. The function validates
+		URL schemes and issues warnings for failed retrievals.
 	"""
 	tryCache: bool = False
 	if pathFilenameCache.exists():
@@ -202,20 +234,22 @@ def getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 
 def getOEISidValues(oeisID: str) -> dict[int, int]:
 	"""
-	Retrieves the specified OEIS sequence as a dictionary mapping integer indices to their corresponding values.
+	Retrieve known sequence values for a specified OEIS sequence.
 
-	This function checks for a cached local copy of the sequence data, using it if it has not expired. Otherwise, it
-	fetches the sequence data from the OEIS website and writes it to the cache. The parsed data is returned as a
-	dictionary mapping each index to its sequence value.
+	This function fetches the complete set of known values for an OEIS sequence by accessing cached
+	data when available or retrieving fresh data from the OEIS website. The data is parsed from the
+	standard OEIS b-file format.
 
 	Parameters:
 		oeisID: The identifier of the OEIS sequence to retrieve.
+
 	Returns:
-		OEISsequence: A dictionary where each key is an integer index, `n`, and each value is the corresponding `a(n)`
-		from the OEIS entry.
+		OEISsequence: A dictionary mapping sequence indices to their corresponding values, or a fallback
+		dictionary containing {-1: -1} if retrieval fails.
+
 	Raises:
-		ValueError: If the cached or downloaded file format is invalid. IOError: If there is an error reading from or
-		writing to the local cache.
+		ValueError: If the cached or downloaded file format is invalid.
+		IOError: If there is an error reading from or writing to the local cache.
 	"""
 
 	pathFilenameCache: Path = pathCache / getFilenameOEISbFile(oeisID)
@@ -229,21 +263,22 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 
 def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	"""
-	Retrieve the description and offset for an OEIS sequence.
+	Retrieve the description and offset metadata for an OEIS sequence.
 
-	This function fetches the metadata for a given OEIS sequence ID, including its textual description and index offset
-	value. It uses a caching mechanism to avoid redundant network requests while ensuring data freshness.
+	This function extracts the mathematical description and starting index offset from OEIS sequence
+	metadata using the machine-readable text format. It employs the same caching mechanism as other
+	retrieval functions to minimize network requests.
 
 	Parameters:
-		oeisID: The OEIS sequence identifier to retrieve information for.
+		oeisID: The OEIS sequence identifier to retrieve metadata for.
 
 	Returns:
-		A tuple containing: - description: A string describing the sequence's mathematical meaning. - offset: An integer
-		representing the starting index of the sequence. Usually 0 or 1, depending on the mathematical context.
+		description: A human-readable string describing the sequence's mathematical meaning.
+		offset: The starting index of the sequence, typically 0 or 1 depending on mathematical context.
 
 	Notes:
-		Sequence descriptions are parsed from the machine-readable format of OEIS. If information cannot be retrieved,
-		warning messages are issued and fallback values are returned.
+		Descriptions are parsed from OEIS %N entries and offsets from %O entries. If metadata cannot
+		be retrieved, warning messages are issued and fallback values are returned.
 	"""
 	oeisID = validateOEISid(oeisID)
 	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
@@ -253,16 +288,17 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 
 	if not oeisInformation:
 		return "Not found", -1
-
 	listDescriptionDeconstructed: list[str] = []
 	offset = None
-	for ImaStr in oeisInformation.splitlines():
-		ImaStr = ImaStr.strip() + "I am writing code to string parse machine readable data because in 2025, people can't even spell enteroperableity."
-		secretCode, title, secretData =ImaStr.split(maxsplit=2)
-		if secretCode == '%N' and title == oeisID:
-			listDescriptionDeconstructed.append(secretData)
-		if secretCode == '%O' and title == oeisID:
-			offsetAsStr: str = secretData.split(',')[0]
+	for lineOEIS in oeisInformation.splitlines():
+		lineOEIS = lineOEIS.strip()
+		if not lineOEIS or len(lineOEIS.split()) < 3:
+			continue
+		fieldCode, sequenceID, fieldData = lineOEIS.split(maxsplit=2)
+		if fieldCode == '%N' and sequenceID == oeisID:
+			listDescriptionDeconstructed.append(fieldData)
+		if fieldCode == '%O' and sequenceID == oeisID:
+			offsetAsStr: str = fieldData.split(',')[0]
 			offset = int(offsetAsStr)
 	if not listDescriptionDeconstructed:
 		warnings.warn(f"No description found for {oeisID}")
@@ -277,22 +313,20 @@ def makeSettingsOEIS() -> dict[str, SettingsOEIS]:
 	"""
 	Construct the comprehensive settings dictionary for all implemented OEIS sequences.
 
-	This function builds a complete configuration dictionary for all supported OEIS sequences by retrieving and
-	combining:
-	1. Sequence values from OEIS b-files
-	2. Sequence metadata (descriptions and offsets)
-	3. Hardcoded mapping functions and test values
+	This function builds the complete configuration dictionary by merging hardcoded settings with
+	dynamically retrieved data from OEIS. For each implemented sequence, it combines:
 
-	The resulting dictionary provides a single authoritative source for all OEIS-related configurations used throughout
-	the package, including:
-	- Mathematical descriptions of each sequence
-	- Functions to convert between sequence indices and map dimensions
-	- Known sequence values retrieved from OEIS
-	- Testing and benchmarking reference values
+	1. Sequence values from OEIS b-files
+	2. Sequence metadata including descriptions and offsets
+	3. Hardcoded mapping functions and test parameter sets
+
+	The resulting dictionary serves as the authoritative configuration source for all OEIS-related
+	operations throughout the package, enabling consistent access to sequence definitions, known values,
+	and operational parameters.
 
 	Returns:
-		A dictionary mapping OEIS sequence IDs to their complete settings objects, containing all metadata and known
-		values needed for computation and validation.
+		settingsTarget: A comprehensive dictionary mapping OEIS sequence IDs to their complete settings
+		objects, containing all metadata and known values needed for computation and validation.
 	"""
 	settingsTarget: dict[str, SettingsOEIS] = {}
 	for oeisID in oeisIDsImplemented:
@@ -311,11 +345,29 @@ def makeSettingsOEIS() -> dict[str, SettingsOEIS]:
 	return settingsTarget
 
 settingsOEIS: dict[str, SettingsOEIS] = makeSettingsOEIS()
-"""All values and settings for `oeisIDsImplemented`."""
+"""
+Complete settings and metadata for all implemented OEIS sequences.
+
+This dictionary contains the comprehensive configuration for each OEIS sequence supported by the module,
+including known values retrieved from OEIS, mathematical descriptions, offset information, and all
+operational parameters needed for computation and testing. The dictionary is populated by combining
+hardcoded configurations with dynamically retrieved OEIS data during module initialization.
+"""
 
 @cache
 def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
-	"""Returns a dictionary mapping dimension tuples to their known folding totals."""
+	"""
+	Create a cached lookup dictionary mapping map shapes to their known folding totals.
+
+	This function processes all known sequence values from implemented OEIS sequences and creates
+	a unified dictionary that maps map dimension tuples to their corresponding folding totals. The
+	resulting dictionary enables rapid lookup of known values without requiring knowledge of which
+	specific OEIS sequence contains the data.
+
+	Returns:
+		dictionaryMapDimensionsToFoldsTotalKnown: A dictionary where keys are tuples representing
+		map shapes and values are the total number of distinct folding patterns for those shapes.
+	"""
 	dictionaryMapDimensionsToFoldsTotalKnown: dict[tuple[int, ...], int] = {}
 
 	for settings in settingsOEIS.values():
@@ -329,28 +381,36 @@ def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 
 def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	"""
-	Retrieve the known total number of foldings for a given map shape.
+	Retrieve the known total number of distinct folding patterns for a given map shape.
 
-	This function looks up precalculated folding totals for specific map dimensions from OEIS sequences. It serves as a
-	rapid reference for known values without requiring computation, and can be used to validate algorithm results.
+	This function provides rapid access to precalculated folding totals from OEIS sequences without
+	requiring computation. It serves as a validation reference for algorithm results and enables
+	quick lookup of known values across all implemented sequences.
 
 	Parameters:
 		mapShape: A tuple of integers representing the dimensions of the map.
 
 	Returns:
-		foldingsTotal: The known total number of foldings for the given map shape, or -1 if the map shape doesn't match
-		any known values in the OEIS sequences.
+		foldingsTotal: The known total number of distinct folding patterns for the given map shape,
+		or -1 if the map shape does not match any known values in the OEIS sequences.
 
 	Notes:
-		The function uses a cached dictionary (via makeDictionaryFoldsTotalKnown) to efficiently retrieve values without
-		repeatedly parsing OEIS data. Map shape tuples are sorted internally to ensure consistent lookup regardless of
-		dimension order.
+		The function uses a cached dictionary for efficient retrieval without repeatedly processing
+		OEIS data. Map shapes are matched exactly as provided without internal sorting or normalization.
 	"""
 	lookupFoldsTotal = makeDictionaryFoldsTotalKnown()
 	return lookupFoldsTotal.get(tuple(mapShape), -1)
 
 def _formatHelpText() -> str:
-	"""Format standardized help text for both CLI and interactive use."""
+	"""
+	Format comprehensive help text for both command-line and interactive use.
+
+	This function generates standardized help documentation that includes all available OEIS sequences
+	with their descriptions and provides usage examples for both command-line and programmatic interfaces.
+
+	Returns:
+		helpText: A formatted string containing complete usage information and examples.
+	"""
 	exampleOEISid: str = oeisIDsImplemented[0]
 	exampleN: int = settingsOEIS[exampleOEISid]['valuesTestValidation'][-1]
 
@@ -366,7 +426,15 @@ def _formatHelpText() -> str:
 	)
 
 def _formatOEISsequenceInfo() -> str:
-	"""Format information about available OEIS sequences for display or error messages."""
+	"""
+	Format information about available OEIS sequences for display in help messages and error output.
+
+	This function creates a standardized listing of all implemented OEIS sequences with their mathematical
+	descriptions, suitable for inclusion in help text and error messages.
+
+	Returns:
+		sequenceInfo: A formatted string listing each OEIS sequence ID with its description.
+	"""
 	return "\n".join(
 		f"  {oeisID}: {settingsOEIS[oeisID]['description']}"
 		for oeisID in oeisIDsImplemented
@@ -374,16 +442,24 @@ def _formatOEISsequenceInfo() -> str:
 
 def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 	"""
-	Calculate `a(n)` of a sequence from "The On-Line Encyclopedia of Integer Sequences" (OEIS).
+	Calculate the value a(n) for a specified OEIS sequence and index.
+
+	This function serves as the primary interface for computing OEIS sequence values within the map folding
+	context. For small values or values within the known range, it returns cached OEIS data. For larger
+	values, it computes the result using the map folding algorithm with the appropriate map shape derived
+	from the sequence definition.
 
 	Parameters:
-		oeisID: The ID of the OEIS sequence. n: A non-negative integer for which to calculate the sequence value.
+		oeisID: The identifier of the OEIS sequence to evaluate.
+		n: A non-negative integer index for which to calculate the sequence value.
 
 	Returns:
-		sequenceValue: `a(n)` of the OEIS sequence.
+		sequenceValue: The value a(n) of the specified OEIS sequence.
 
 	Raises:
-		ValueError: If `n` is negative. KeyError: If the OEIS sequence ID is not directly implemented.
+		ValueError: If n is not a non-negative integer.
+		KeyError: If the OEIS sequence ID is not directly implemented.
+		ArithmeticError: If n is below the sequence's defined offset.
 	"""
 	oeisID = validateOEISid(oeisID)
 
@@ -401,7 +477,23 @@ def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 	return countFolds(mapShape)
 
 def OEIS_for_n() -> None:
-	"""Command-line interface for oeisIDfor_n."""
+	"""
+	Command-line interface for calculating OEIS sequence values.
+
+	This function provides a command-line interface to the oeisIDfor_n function, enabling users to
+	calculate specific values of implemented OEIS sequences from the terminal. It includes argument
+	parsing, error handling, and performance timing to provide a complete user experience.
+
+	The function accepts two command-line arguments: an OEIS sequence identifier and an integer index,
+	then outputs the calculated sequence value along with execution time. Error messages are directed
+	to stderr with appropriate exit codes for shell scripting integration.
+
+	Usage:
+		python -m mapFolding.oeis OEIS_for_n A001415 10
+
+	Raises:
+		SystemExit: With code 1 if invalid arguments are provided or computation fails.
+	"""
 	parserCLI = argparse.ArgumentParser(
 		description="Calculate a(n) for an OEIS sequence.",
 		epilog=_formatHelpText(),
@@ -424,7 +516,16 @@ def OEIS_for_n() -> None:
 	print(f"Time elapsed: {timeElapsed:.3f} seconds")
 
 def clearOEIScache() -> None:
-	"""Delete all cached OEIS sequence files."""
+	"""
+	Delete all cached OEIS sequence files from the local cache directory.
+
+	This function removes all cached OEIS data files, including both sequence value files (b-files)
+	and metadata files, forcing fresh retrieval from the OEIS website on the next access. This is
+	useful for clearing stale cache data or troubleshooting network-related issues.
+
+	The function safely handles missing files and provides user feedback about the cache clearing
+	operation. If the cache directory does not exist, an informative message is displayed.
+	"""
 	if not pathCache.exists():
 		print(f"Cache directory, {pathCache}, not found - nothing to clear.")
 		return
@@ -434,7 +535,17 @@ def clearOEIScache() -> None:
 	print(f"Cache cleared from {pathCache}")
 
 def getOEISids() -> None:
-	"""Print all available OEIS sequence IDs that are directly implemented."""
+	"""
+	Display comprehensive information about all implemented OEIS sequences.
+
+	This function serves as the primary help interface for the module, displaying detailed information
+	about all directly implemented OEIS sequences along with usage examples for both command-line and
+	programmatic interfaces. It provides users with a complete overview of available sequences and
+	their mathematical meanings.
+
+	The output includes sequence identifiers, mathematical descriptions, and practical usage examples
+	to help users understand how to access and utilize the OEIS interface functionality.
+	"""
 	print(_formatHelpText())
 
 if __name__ == "__main__":

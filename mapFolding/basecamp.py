@@ -166,7 +166,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		parallelMapFoldingState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
 		from mapFolding.syntheticModules.countParallel import doTheNeedful
-		foldsTotal, listStatesParallel = doTheNeedful(parallelMapFoldingState, concurrencyLimit)
+		# `listStatesParallel` exists in case you want to research the parallel computation.
+		foldsTotal, listStatesParallel = doTheNeedful(parallelMapFoldingState, concurrencyLimit) # pyright: ignore[reportUnusedVariable]
 
 	else:
 		from mapFolding.dataBaskets import MapFoldingState
