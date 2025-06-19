@@ -1,20 +1,22 @@
-abstract: A computational framework for enumerating distinct folding patterns of maps
-  and implementing algorithmic transformations. This repository provides (1) a pure
-  Python implementation of Lunnon's 1971 algorithm, (2) a sophisticated code transformation
-  system that converts human-readable algorithms into highly-optimized implementations,
-  and (3) numerical validation against established sequences in the Online Encyclopedia
-  of Integer Sequences (OEIS). Notably, it includes first-ever calculations for 2x19
-  and 2x20 map foldings, extending OEIS sequence A001415. The framework balances theoretical
-  rigor with performance optimization through abstract syntax tree manipulation, dataclass
-  decomposition, and just-in-time compilation techniques. Beyond map folding, the
-  transformation tools offer a general-purpose approach for optimizing numerical algorithms
-  while maintaining readable source implementations.
+abstract: A computational framework for enumerating distinct folding patterns of
+  maps and implementing algorithmic transformations. This repository provides 
+  (1) a pure Python implementation of Lunnon's 1971 algorithm, (2) a 
+  sophisticated code transformation system that converts human-readable 
+  algorithms into highly-optimized implementations, and (3) numerical validation
+  against established sequences in the Online Encyclopedia of Integer Sequences 
+  (OEIS). Notably, it includes first-ever calculations for 2x19 and 2x20 map 
+  foldings, extending OEIS sequence A001415. The framework balances theoretical 
+  rigor with performance optimization through abstract syntax tree manipulation,
+  dataclass decomposition, and just-in-time compilation techniques. Beyond map 
+  folding, the transformation tools offer a general-purpose approach for 
+  optimizing numerical algorithms while maintaining readable source 
+  implementations.
 authors:
 - given-names: Hunter
   family-names: Hogan
   email: HunterHogan@pm.me
 cff-version: 1.2.0
-commit: f3ff30c005f55b221139149026beed5e481c9981
+commit: 7ee0f72511b8ce36811bd15aa4e2a78071c0f213
 date-released: '2025-05-31'
 identifiers:
 - type: url
