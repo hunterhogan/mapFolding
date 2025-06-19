@@ -39,4 +39,3 @@ Showing 1-1 of 1
 %A A000136 _N. J. A. Sloane_
 
 # Content is available under The OEIS End-User License Agreement: http://oeis.org/LICENSE
-

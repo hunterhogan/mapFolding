@@ -26,8 +26,7 @@ the compilation process.
 """
 
 from astToolkit import (
-	ClassIsAndAttribute, DOT, hasDOTtarget_NameOrAttributeOrSubscript, identifierDotAttribute,
-	LedgerOfImports, Make, NodeTourist, Then,
+	Be, DOT, hasDOTtarget_NameOrAttributeOrSubscript, identifierDotAttribute, LedgerOfImports, Make, NodeTourist, Then,
 )
 from collections.abc import Callable
 from copy import deepcopy
@@ -215,7 +214,7 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstanceIdentifier), self.name)
 
-		findThis=ClassIsAndAttribute.targetIs(ast.AnnAssign, IfThis.isNameIdentifier(self.name))
+		findThis= Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
 		doThat=cast(Callable[[hasDOTtarget_NameOrAttributeOrSubscript], ast.expr], Then.extractIt(DOT.annotation))
 		self.astAnnotation = raiseIfNone(NodeTourist(findThis, doThat).captureLastMatch(dataclassClassDef))
 

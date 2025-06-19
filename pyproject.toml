@@ -2,7 +2,7 @@
 name = "mapFolding"
 version = "0.12.2"
 description = "Map folding algorithm with code transformation framework for optimizing numerical computations"
-readme = { file = "README.md", content-type = "text/markdown" }
+readme = "README.md"
 requires-python = ">=3.12"
 license = { 'text' = "CC-BY-NC-4.0" }
 authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
@@ -27,7 +27,8 @@ keywords = [
   "map folding",
   "performance optimization",
   "source code analysis",
-  "stamp folding",]
+  "stamp folding",
+]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
@@ -45,7 +46,8 @@ classifiers = [
   "Topic :: Software Development :: Code Generators",
   "Topic :: Software Development :: Compilers",
   "Topic :: Software Development :: Libraries :: Python Modules",
-  "Typing :: Typed",]
+  "Typing :: Typed",
+]
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Issues = "https://github.com/hunterhogan/mapFolding/issues", Repository = "https://github.com/hunterhogan/mapFolding.git" }
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", clearOEIScache = "mapFolding.oeis:clearOEIScache", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
@@ -58,7 +60,8 @@ dependencies = [
   "platformdirs",
   "python_minifier",
   "sympy",
-  "tomli",]
+  "tomli",
+]
 optional-dependencies = { testing = [
   "mypy",
   "pytest",
@@ -67,7 +70,8 @@ optional-dependencies = { testing = [
   "pytest-xdist",
   "pyupgrade",
   "ruff",
-  "setuptools-scm",] }
+  "setuptools-scm",
+] }
 
 [build-system]
 requires = ["setuptools"]
@@ -87,7 +91,8 @@ run = { branch = true, concurrency = [
   "tests/*",
   "Z0Z_*",
 ], parallel = true, source = [
-  ".",] }
+  ".",
+] }
 xml = { output = "tests/coverage/coverage.xml" }
 
 [tool.pytest.ini_options]

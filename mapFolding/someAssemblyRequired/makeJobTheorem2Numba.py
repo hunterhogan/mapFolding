@@ -29,19 +29,18 @@ essential progress feedback capabilities for large-scale computational research.
 """
 
 from astToolkit import (
-	Be, ClassIsAndAttribute, extractFunctionDef, identifierDotAttribute, IngredientsFunction,
-	IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, Then,
+	Be, extractFunctionDef, identifierDotAttribute, IngredientsFunction, IngredientsModule, LedgerOfImports, Make,
+	NodeChanger, NodeTourist, Then,
 )
 from astToolkit.transformationTools import write_astModule
+from collections.abc import Callable
 from mapFolding import getPathFilenameFoldsTotal, MapFoldingState, packageSettings
 from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
-from mapFolding.someAssemblyRequired.toolkitNumba import (
-	decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba,
-)
+from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from pathlib import PurePosixPath
-from typing import cast, NamedTuple
+from typing import cast, NamedTuple, TypeIs
 from Z0Z_tools import autoDecodingRLE, raiseIfNone
 import ast
 
@@ -107,9 +106,9 @@ if __name__ == '__main__':
 	ast_argNumbaProgress = ast.arg(arg=spices.numbaProgressBarIdentifier, annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
 
-	findThis = ClassIsAndAttribute.targetIs(ast.AugAssign, IfThis.isNameIdentifier(job.shatteredDataclass.countingVariableName.id))
-	doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
-	countWithProgressBar = NodeChanger(findThis, doThat)
+	findThis: Callable[[ast.AST], TypeIs[ast.AugAssign] | bool] = Be.AugAssign.targetIs(IfThis.isNameIdentifier(job.shatteredDataclass.countingVariableName.id))
+	doThat: Callable[[ast.AugAssign], ast.Expr] = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
+	countWithProgressBar: NodeChanger[ast.AugAssign, ast.Expr] = NodeChanger(findThis, doThat)
 	countWithProgressBar.visit(ingredientsFunction.astFunctionDef)
 
 	removeReturnStatement = NodeChanger(Be.Return, Then.removeIt)
@@ -212,17 +211,16 @@ def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
 
 	# Remove `foldGroups` and any other unused statements, so you can dynamically determine which variables are not used
-	findThis = ClassIsAndAttribute.targetsIs(ast.Assign, lambda list_expr: any([IfThis.isSubscriptIdentifier('foldGroups')(node) for node in list_expr ]))
+	findThis = Be.Assign.targetsIs(lambda list_expr: any([IfThis.isSubscriptIdentifier('foldGroups')(node) for node in list_expr ]))
 	# findThis = IfThis.isAssignAndTargets0Is(IfThis.isSubscriptIdentifier('foldGroups'))
-	doThat = Then.removeIt
-	remove_foldGroups = NodeChanger(findThis, doThat)
+	remove_foldGroups: NodeChanger[ast.Name, None] = NodeChanger(findThis, Then.removeIt)  # noqa: F841
 	# remove_foldGroups.visit(ingredientsCount.astFunctionDef)
 
 	# replace identifiers with static values with their values, so you can dynamically determine which variables are not used
 	listIdentifiersStaticValues: list[str] = listIdentifiersStaticValuesHARDCODED
 	for identifier in listIdentifiersStaticValues:
-		findThis = IfThis.isNameIdentifier(identifier)
-		doThat = Then.replaceWith(Make.Constant(int(job.state.__dict__[identifier])))
+		findThis: Callable[[ast.AST], TypeIs[ast.Name] | bool] = IfThis.isNameIdentifier(identifier)
+		doThat: Callable[[ast.Name], ast.Constant] = Then.replaceWith(Make.Constant(int(job.state.__dict__[identifier])))
 		NodeChanger(findThis, doThat).visit(ingredientsCount.astFunctionDef)
 
 	ingredientsModule = IngredientsModule()

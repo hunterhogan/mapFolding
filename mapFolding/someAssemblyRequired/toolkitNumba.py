@@ -26,9 +26,8 @@ system to produce standalone modules optimized for specific map dimensions and c
 """
 
 from astToolkit import identifierDotAttribute, IngredientsFunction, Make
-from collections.abc import Callable, Sequence
-from numba.core.compiler import CompilerBase as numbaCompilerBase
-from typing import Any, cast, Final, NotRequired, TypedDict
+from collections.abc import Sequence
+from typing import cast, Final, NotRequired, TypedDict
 import ast
 import dataclasses
 import warnings
@@ -67,7 +66,7 @@ class ParametersNumba(TypedDict):
 	forceinline: NotRequired[bool]
 	forceobj: NotRequired[bool]
 	inline: NotRequired[str]
-	locals: NotRequired[dict[str, Any]]
+	# locals: NotRequired[dict[str, Any]]
 	looplift: NotRequired[bool]
 	no_cfunc_wrapper: NotRequired[bool]
 	no_cpython_wrapper: NotRequired[bool]
@@ -75,8 +74,8 @@ class ParametersNumba(TypedDict):
 	nogil: NotRequired[bool]
 	nopython: NotRequired[bool]
 	parallel: NotRequired[bool]
-	pipeline_class: NotRequired[type[numbaCompilerBase]]
-	signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
+	# pipeline_class: NotRequired[type[numbaCompilerBase]]
+	# signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
 	target: NotRequired[str]
 
 parametersNumbaDefault: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }
@@ -243,7 +242,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.astFunctionDef = Z0Z_UnhandledDecorators(ingredientsFunction.astFunctionDef)
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
-	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()] # pyright: ignore[reportArgumentType]
+	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
 	decoratorModule = Z0Z_numbaDataTypeModule
 	decoratorCallable = Z0Z_decoratorCallable

@@ -27,8 +27,7 @@ through specialized compilation paths essential for computationally intensive ma
 """
 
 from astToolkit import (
-	Be, ClassIsAndAttribute, extractClassDef, identifierDotAttribute, IngredientsFunction, Make,
-	NodeChanger, parseLogicalPath2astModule, Then,
+	Be, extractClassDef, identifierDotAttribute, IngredientsFunction, Make, NodeChanger, parseLogicalPath2astModule, Then,
 )
 from astToolkit.transformationTools import unparseFindReplace
 from mapFolding.someAssemblyRequired import DeReConstructField2ast, IfThis, ShatteredDataclass
@@ -162,9 +161,9 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 		ingredientsCaller: The modified caller function with appropriate unpacking and repacking around the target call.
 	"""
 	astCallTargetCallable = Make.Call(Make.Name(targetCallableIdentifier), shatteredDataclass.listName4Parameters)
-	replaceAssignTargetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCallIdentifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
-	unpack4targetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCallIdentifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
-	repack4targetCallable = NodeChanger(ClassIsAndAttribute.valueIs(ast.Assign, IfThis.isCallIdentifier(targetCallableIdentifier)), Then.insertThisBelow([shatteredDataclass.repack]))
+	replaceAssignTargetCallable = NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
+	unpack4targetCallable = NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
+	repack4targetCallable = NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier)), Then.insertThisBelow([shatteredDataclass.repack]))
 	replaceAssignTargetCallable.visit(ingredientsCaller.astFunctionDef)
 	unpack4targetCallable.visit(ingredientsCaller.astFunctionDef)
 	repack4targetCallable.visit(ingredientsCaller.astFunctionDef)
