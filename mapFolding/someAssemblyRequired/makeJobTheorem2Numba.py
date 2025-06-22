@@ -175,8 +175,8 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 
 				ingredientsFunction.astFunctionDef.body.insert(0, ImaAnnAssign)
 
-			findThis = IfThis.is_argIdentifier(ast_arg.arg)
-			remove_arg = NodeChanger(findThis, Then.removeIt)
+			findThis: Callable[[ast.AST], TypeIs[ast.arg] | bool] = IfThis.is_argIdentifier(ast_arg.arg)
+			remove_arg: NodeChanger[ast.arg, None] = NodeChanger(findThis, Then.removeIt)
 			remove_arg.visit(ingredientsFunction.astFunctionDef)
 
 	ast.fix_missing_locations(ingredientsFunction.astFunctionDef)
@@ -211,9 +211,9 @@ def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
 
 	# Remove `foldGroups` and any other unused statements, so you can dynamically determine which variables are not used
-	findThis = Be.Assign.targetsIs(lambda list_expr: any([IfThis.isSubscriptIdentifier('foldGroups')(node) for node in list_expr ]))
 	# findThis = IfThis.isAssignAndTargets0Is(IfThis.isSubscriptIdentifier('foldGroups'))
-	remove_foldGroups: NodeChanger[ast.Name, None] = NodeChanger(findThis, Then.removeIt)  # noqa: F841
+	findThis = Be.Assign.targetsIs(lambda list_expr: any([IfThis.isSubscriptIdentifier('foldGroups')(node) for node in list_expr ]))
+	remove_foldGroups: NodeChanger[ast.Name, None] = NodeChanger(findThis, Then.removeIt)
 	# remove_foldGroups.visit(ingredientsCount.astFunctionDef)
 
 	# replace identifiers with static values with their values, so you can dynamically determine which variables are not used

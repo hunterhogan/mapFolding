@@ -25,13 +25,11 @@ to low-level optimized functions while maintaining semantic equivalence and type
 the compilation process.
 """
 
-from astToolkit import (
-	Be, DOT, hasDOTtarget_NameOrAttributeOrSubscript, identifierDotAttribute, LedgerOfImports, Make, NodeTourist, Then,
-)
+from astToolkit import Be, DOT, identifierDotAttribute, LedgerOfImports, Make, NodeTourist, Then
 from collections.abc import Callable
 from copy import deepcopy
 from mapFolding.someAssemblyRequired import IfThis
-from typing import Any, cast
+from typing import Any, TypeIs
 from Z0Z_tools import raiseIfNone
 import ast
 import dataclasses
@@ -214,9 +212,9 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstanceIdentifier), self.name)
 
-		findThis= Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
-		doThat=cast(Callable[[hasDOTtarget_NameOrAttributeOrSubscript], ast.expr], Then.extractIt(DOT.annotation))
-		self.astAnnotation = raiseIfNone(NodeTourist(findThis, doThat).captureLastMatch(dataclassClassDef))
+		findThis: Callable[[ast.AST], TypeIs[ast.AnnAssign] | bool] = Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
+		doThat: Callable[[ast.AnnAssign], ast.Name] = Then.extractIt(DOT.annotation)
+		self.astAnnotation = raiseIfNone(NodeTourist[ast.AnnAssign, ast.Name](findThis, doThat).captureLastMatch(dataclassClassDef))
 
 		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
 
@@ -227,7 +225,7 @@ class DeReConstructField2ast:
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, annotationType)
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, 'dtype')
 			axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Name('uint8'))
-			dtype_asnameName: ast.Name = cast(ast.Name, self.astAnnotation)
+			dtype_asnameName: ast.Name = self.astAnnotation
 			if dtype_asnameName.id == 'Array3D':
 				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8'), Make.Name('uint8')]))
 			ast_expr = Make.Subscript(Make.Name(annotationType), Make.Tuple([axesSubscript, Make.Subscript(Make.Name('dtype'), dtype_asnameName)]))

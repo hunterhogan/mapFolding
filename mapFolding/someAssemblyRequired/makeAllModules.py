@@ -37,7 +37,7 @@ from astToolkit import (
 	parsePathFilename2astModule, Then,
 )
 from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
 	DeReConstructField2ast, IfThis, ShatteredDataclass, sourceCallableDispatcherDEFAULT,
@@ -52,7 +52,7 @@ from mapFolding.someAssemblyRequired.transformationTools import (
 )
 from os import PathLike
 from pathlib import PurePath
-from typing import Any, cast
+from typing import Any, TypeIs
 from Z0Z_tools import importLogicalPath2Callable, raiseIfNone
 import ast
 import dataclasses
@@ -258,11 +258,11 @@ def makeDaoOfMapFolding(astModule: ast.Module, moduleIdentifier: str, callableId
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
-		astTuple = raiseIfNone(NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
-		cast(ast.Tuple, astTuple).ctx = ast.Store()
+		astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)) # pyright: ignore[reportArgumentType]
+		astTuple.ctx = ast.Store()
 
-		findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-		doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), cast(ast.Tuple, astTuple).elts)))
+		findThis: Callable[[ast.AST], TypeIs[ast.Assign] | bool] = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
+		doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
 		changeAssignCallToTarget = NodeChanger(findThis, doThat)
 		changeAssignCallToTarget.visit(ingredientsFunctionDispatcher.astFunctionDef)
 
@@ -374,8 +374,7 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 	# Start add the parallel logic to the count function ================================================
 
 	findThis = Be.While.testIs(Be.Compare.leftIs(IfThis.isNameIdentifier('leafConnectee')))
-	doThat = Then.extractIt(DOT.body)
-	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat)
+	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat = Then.extractIt(DOT.body))
 	countGapsCodeBlock: Sequence[ast.stmt] = raiseIfNone(captureCountGapsCodeBlock.captureLastMatch(ingredientsFunction.astFunctionDef))
 
 	thisIsMyTaskIndexCodeBlock = ast.If(ast.BoolOp(ast.Or()
@@ -384,9 +383,7 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 	, body=list(countGapsCodeBlock[0:-1]))
 
 	countGapsCodeBlockNew: list[ast.stmt] = [thisIsMyTaskIndexCodeBlock, countGapsCodeBlock[-1]]
-
-	doThat = Grab.bodyAttribute(Then.replaceWith(countGapsCodeBlockNew))
-	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
+	NodeChanger[ast.While, Sequence[ast.stmt]](findThis, doThat = Grab.bodyAttribute(Then.replaceWith(countGapsCodeBlockNew))).visit(ingredientsFunction.astFunctionDef) # pyright: ignore[reportArgumentType]
 
 	# End add the parallel logic to the count function ================================================
 
@@ -400,18 +397,20 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclassIdentifierParallel
 	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
-	findThis = Be.arg.annotationIs(IfThis.isNameIdentifier(dataclassIdentifier))
-	doThat = Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel)))
-	NodeChanger(findThis, doThat).visit(unRepackDataclass.astFunctionDef)
+	NodeChanger(
+			# findThis = Be.arg.annotationIs(IfThis.isNameIdentifier(dataclassIdentifier))
+			findThis = Be.arg.annotationIs(Be.Name.idIs(lambda thisAttribute: thisAttribute == dataclassIdentifier))
+			, doThat = Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel)))
+		).visit(unRepackDataclass.astFunctionDef)
 	unRepackDataclass.astFunctionDef.returns = Make.Name(dataclassIdentifierParallel)
 	targetCallableIdentifier: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
 	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
 
-	astTuple: ast.expr = raiseIfNone(NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	cast(ast.Tuple, astTuple).ctx = ast.Store()
-	findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-	doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), cast(ast.Tuple, astTuple).elts)))
-	changeAssignCallToTarget = NodeChanger(findThis, doThat)
+	astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)) # pyright: ignore[reportArgumentType]
+	astTuple.ctx = ast.Store()
+	findThis: Callable[[ast.AST], TypeIs[ast.Assign] | bool] = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
+	doThat: Callable[[ast.Assign], ast.Assign] = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
+	changeAssignCallToTarget: NodeChanger[ast.Assign, ast.Assign] = NodeChanger(findThis, doThat)
 	changeAssignCallToTarget.visit(unRepackDataclass.astFunctionDef)
 
 	ingredientsDoTheNeedful: IngredientsFunction = IngredientsFunction(
@@ -670,11 +669,11 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	targetCallableIdentifier = astImportFrom.names[0].name
 	ingredientsFunction = raiseIfNone(unpackDataclassCallFunctionRepackDataclass(ingredientsFunction, targetCallableIdentifier, shatteredDataclass))
 	targetFunctionDef: ast.FunctionDef = raiseIfNone(extractFunctionDef(parseLogicalPath2astModule(raiseIfNone(astImportFrom.module)), targetCallableIdentifier))
-	astTuple: ast.expr = raiseIfNone(NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef))
-	cast(ast.Tuple, astTuple).ctx = ast.Store()
+	astTuple: ast.Tuple = raiseIfNone(NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef)) # pyright: ignore[reportAssignmentType]
+	astTuple.ctx = ast.Store()
 
 	findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-	doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), cast(ast.Tuple, astTuple).elts)))
+	doThat: Callable[[ast.Assign], ast.Assign] = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
