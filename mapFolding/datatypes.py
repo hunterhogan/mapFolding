@@ -20,9 +20,7 @@ complex multi-dimensional folding patterns. The array types built from these
 base types provide the structured data containers that computational state
 management depends upon.
 """
-from numpy import (
-	dtype, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64,
-)
+from numpy import dtype, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64
 from typing import Any, TypeAlias, TypeVar
 
 NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)

@@ -23,13 +23,14 @@ consistent, reliable, and efficiently computed folding pattern counts.
 
 from collections.abc import Sequence
 from mapFolding import (
-	getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly,
-	setProcessorLimit, validateListDimensions,
+	getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly, setProcessorLimit,
+	validateListDimensions,
 )
 from os import PathLike
 from pathlib import PurePath
+import contextlib
 
-def countFolds(listDimensions: Sequence[int] | None = None
+def countFolds(listDimensions: Sequence[int] | None = None  # noqa: C901
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 				, computationDivisions: int | str | None = None
 				, CPUlimit: int | float | bool | None = None
@@ -86,32 +87,33 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	computation time. If logicalCores >= `leavesTotal`, it will probably be faster. If logicalCores <= 2 * `leavesTotal`, it
 	will almost certainly be slower for all map dimensions.
 	"""
-	# mapShape =====================================================================
+	# mapShape ---------------------------------------------------------------------
 
 	if mapShape:
 		pass
 	else:
 		if oeisID and oeis_n:
-			from mapFolding.oeis import settingsOEIS
-			try:
+			from mapFolding.oeis import settingsOEIS  # noqa: PLC0415
+			with contextlib.suppress(KeyError):
 				mapShape = settingsOEIS[oeisID]['getMapShape'](oeis_n)
-			except KeyError:
-				pass
 		if not mapShape and listDimensions:
 			mapShape = validateListDimensions(listDimensions)
 
 	if mapShape is None:
-		raise ValueError(f"""I received these values:
+		message = (
+			f"""I received these values:
 	`{listDimensions = }`,
 	`{mapShape = }`,
 	`{oeisID = }` and `{oeis_n = }`,
-	but I was unable to select a map for which to count the folds.""")
+	but I was unable to select a map for which to count the folds."""
+		)
+		raise ValueError(message)
 
-	# task division instructions ===============================================
+	# task division instructions -----------------------------------------------------
 
 	if computationDivisions:
 		concurrencyLimit: int = setProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
-		from mapFolding.beDRY import getLeavesTotal, getTaskDivisions
+		from mapFolding.beDRY import getLeavesTotal, getTaskDivisions  # noqa: PLC0415
 		leavesTotal: int = getLeavesTotal(mapShape)
 		taskDivisions = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
 		del leavesTotal
@@ -119,7 +121,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		concurrencyLimit = 1
 		taskDivisions = 0
 
-	# memorialization instructions ===========================================
+	# memorialization instructions ---------------------------------------------
 
 	if pathLikeWriteFoldsTotal is not None:
 		pathFilenameFoldsTotal = getPathFilenameFoldsTotal(mapShape, pathLikeWriteFoldsTotal)
@@ -127,70 +129,70 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	else:
 		pathFilenameFoldsTotal = None
 
-	# Flow control until I can figure out a good way ===============================
+	# Flow control until I can figure out a good way ---------------------------------
 
 	if flow == 'daoOfMapFolding':
-		from mapFolding.dataBaskets import MapFoldingState
+		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.daoOfMapFolding import doTheNeedful
+		from mapFolding.daoOfMapFolding import doTheNeedful  # noqa: PLC0415
 		mapFoldingState = doTheNeedful(mapFoldingState)
 		foldsTotal = mapFoldingState.foldsTotal
 
-	elif flow == 'theorem2' and any(dimension > 2 for dimension in mapShape):
-		from mapFolding.dataBaskets import MapFoldingState
+	elif flow == 'theorem2' and any(dimension > 2 for dimension in mapShape):  # noqa: PLR2004
+		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
+		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds  # noqa: PLC0415
 		mapFoldingState = initializeGroupsOfFolds(mapFoldingState)
 
-		from mapFolding.syntheticModules.theorem2 import count
+		from mapFolding.syntheticModules.theorem2 import count  # noqa: PLC0415
 		mapFoldingState = count(mapFoldingState)
 
 		foldsTotal = mapFoldingState.foldsTotal
 
-	elif flow == 'theorem2Trimmed' and any(dimension > 2 for dimension in mapShape):
-		from mapFolding.dataBaskets import MapFoldingState
+	elif flow == 'theorem2Trimmed' and any(dimension > 2 for dimension in mapShape):  # noqa: PLR2004
+		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
+		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds  # noqa: PLC0415
 		mapFoldingState = initializeGroupsOfFolds(mapFoldingState)
 
-		from mapFolding.syntheticModules.theorem2Trimmed import count
+		from mapFolding.syntheticModules.theorem2Trimmed import count  # noqa: PLC0415
 		mapFoldingState = count(mapFoldingState)
 
 		foldsTotal = mapFoldingState.foldsTotal
 
-	elif (flow == 'theorem2Numba' or taskDivisions == 0) and any(dimension > 2 for dimension in mapShape):
-		from mapFolding.dataBaskets import MapFoldingState
+	elif (flow == 'theorem2Numba' or taskDivisions == 0) and any(dimension > 2 for dimension in mapShape):  # noqa: PLR2004
+		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
+		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds  # noqa: PLC0415
 		mapFoldingState = initializeGroupsOfFolds(mapFoldingState)
 
-		from mapFolding.syntheticModules.dataPacking import sequential
+		from mapFolding.syntheticModules.dataPacking import sequential  # noqa: PLC0415
 		mapFoldingState = sequential(mapFoldingState)
 
 		foldsTotal = mapFoldingState.foldsTotal
 
 	elif taskDivisions > 1:
-		from mapFolding.dataBaskets import ParallelMapFoldingState
+		from mapFolding.dataBaskets import ParallelMapFoldingState  # noqa: PLC0415
 		parallelMapFoldingState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
-		from mapFolding.syntheticModules.countParallel import doTheNeedful
+		from mapFolding.syntheticModules.countParallel import doTheNeedful  # noqa: PLC0415
 
 		# `listStatesParallel` exists in case you want to research the parallel computation.
 		foldsTotal, listStatesParallel = doTheNeedful(parallelMapFoldingState, concurrencyLimit) # pyright: ignore[reportUnusedVariable]
 
 	else:
-		from mapFolding.dataBaskets import MapFoldingState
+		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.syntheticModules.daoOfMapFolding import doTheNeedful
+		from mapFolding.syntheticModules.daoOfMapFolding import doTheNeedful  # noqa: PLC0415
 		mapFoldingState = doTheNeedful(mapFoldingState)
 		foldsTotal = mapFoldingState.foldsTotal
 
-	# Follow memorialization instructions ===========================================
+	# Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameFoldsTotal is not None:
 		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)

@@ -31,13 +31,14 @@ from astToolkit import (
 )
 from astToolkit.transformationTools import unparseFindReplace
 from mapFolding.someAssemblyRequired import DeReConstructField2ast, IfThis, ShatteredDataclass
-from Z0Z_tools import importLogicalPath2Callable
+from Z0Z_tools import importLogicalPath2Identifier
 import ast
 import dataclasses
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, dataclassIdentifier: str, instanceIdentifier: str) -> ShatteredDataclass:
-	"""
-	Decompose a dataclass definition into AST components for manipulation and code generation.
+	"""Decompose a dataclass definition into AST components for manipulation and code generation.
+
+	(AI generated docstring)
 
 	This function breaks down a complete dataclass (like ComputationState) into its constituent
 	parts as AST nodes, enabling fine-grained manipulation of its fields for code generation.
@@ -53,35 +54,44 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, d
 	where dataclass instances can't be directly used but their fields need to be individually
 	manipulated and passed to computational functions.
 
-	Parameters:
-		logicalPathModule: The fully qualified module path containing the dataclass definition.
-		dataclassIdentifier: The name of the dataclass to decompose.
-		instanceIdentifier: The variable name to use for the dataclass instance in generated code.
+	Parameters
+	----------
+	logicalPathModule : identifierDotAttribute
+		The fully qualified module path containing the dataclass definition.
+	dataclassIdentifier : str
+		The name of the dataclass to decompose.
+	instanceIdentifier : str
+		The variable name to use for the dataclass instance in generated code.
 
-	Returns:
-		shatteredDataclass: A ShatteredDataclass containing AST representations of all dataclass components,
-			with imports, field definitions, annotations, and repackaging code.
+	Returns
+	-------
+	ShatteredDataclass
+		A ShatteredDataclass containing AST representations of all dataclass components,
+		with imports, field definitions, annotations, and repackaging code.
 
-	Raises:
-		ValueError: If the dataclass cannot be found in the specified module or if no counting variable is identified in the dataclass.
+	Raises
+	------
+	ValueError
+		If the dataclass cannot be found in the specified module or if no counting variable is identified in the dataclass.
+
 	"""
 	Official_fieldOrder: list[str] = []
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
 	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(logicalPathModule), dataclassIdentifier)
-	if not isinstance(dataclassClassDef, ast.ClassDef):
-		raise ValueError(f"I could not find `{dataclassIdentifier = }` in `{logicalPathModule = }`.")
+	if not dataclassClassDef:
+		message = f"I could not find `{dataclassIdentifier = }` in `{logicalPathModule = }`."
+		raise ValueError(message)
 
 	countingVariable = None
-	for aField in dataclasses.fields(importLogicalPath2Callable(logicalPathModule, dataclassIdentifier)): # pyright: ignore [reportArgumentType]
+	for aField in dataclasses.fields(importLogicalPath2Identifier(logicalPathModule, dataclassIdentifier)): # pyright: ignore [reportArgumentType]
 		Official_fieldOrder.append(aField.name)
 		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathModule, dataclassClassDef, instanceIdentifier, aField)
 		if aField.metadata.get('theCountingIdentifier', False):
 			countingVariable = dictionaryDeReConstruction[aField.name].name
 	if countingVariable is None:
-		# import warnings
-		# warnings.warn(message=f"I could not find the counting variable in `{dataclassIdentifier = }` in `{logicalPathModule = }`.", category=UserWarning)
-		raise ValueError(f"I could not find the counting variable in `{dataclassIdentifier = }` in `{logicalPathModule = }`.")
+		message = f"I could not find the counting variable in `{dataclassIdentifier = }` in `{logicalPathModule = }`."
+		raise ValueError(message)
 
 	shatteredDataclass = ShatteredDataclass(
 		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation,
@@ -105,8 +115,9 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, d
 	return shatteredDataclass
 
 def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
-	"""
-	Transform a function that operates on dataclass instances to work with individual field parameters.
+	"""Transform a function that operates on dataclass instances to work with individual field parameters.
+
+	(AI generated docstring)
 
 	This function performs the core transformation required for Numba compatibility by removing dataclass
 	dependencies from function signatures and implementations. It modifies the target function to:
@@ -120,12 +131,18 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 	implementations, as Numba cannot handle dataclass instances directly but can efficiently
 	process individual primitive values and tuples.
 
-	Parameters:
-		ingredientsTarget: The function definition and its dependencies to be transformed.
-		shatteredDataclass: The decomposed dataclass components providing AST mappings and transformations.
+	Parameters
+	----------
+	ingredientsTarget : IngredientsFunction
+		The function definition and its dependencies to be transformed.
+	shatteredDataclass : ShatteredDataclass
+		The decomposed dataclass components providing AST mappings and transformations.
 
-	Returns:
-		ingredientsTarget: The modified function ingredients with dataclass dependencies removed.
+	Returns
+	-------
+	IngredientsFunction
+		The modified function ingredients with dataclass dependencies removed.
+
 	"""
 	ingredientsTarget.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
@@ -135,8 +152,9 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 	return ingredientsTarget
 
 def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, targetCallableIdentifier: str, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
-	"""
-	Transform a caller function to interface with a dataclass-free target function.
+	"""Transform a caller function to interface with a dataclass-free target function.
+
+	(AI generated docstring)
 
 	This function complements `removeDataclassFromFunction` by modifying calling code to work with
 	the transformed target function. It implements the unpacking and repacking pattern required
@@ -152,13 +170,20 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 	field-based implementations, maintaining the original interface while enabling performance
 	optimizations in the target function.
 
-	Parameters:
-		ingredientsCaller: The calling function definition and its dependencies to be transformed.
-		targetCallableIdentifier: The name of the target function being called.
-		shatteredDataclass: The decomposed dataclass components providing unpacking and repacking logic.
+	Parameters
+	----------
+	ingredientsCaller : IngredientsFunction
+		The calling function definition and its dependencies to be transformed.
+	targetCallableIdentifier : str
+		The name of the target function being called.
+	shatteredDataclass : ShatteredDataclass
+		The decomposed dataclass components providing unpacking and repacking logic.
 
-	Returns:
-		ingredientsCaller: The modified caller function with appropriate unpacking and repacking around the target call.
+	Returns
+	-------
+	IngredientsFunction
+		The modified caller function with appropriate unpacking and repacking around the target call.
+
 	"""
 	astCallTargetCallable = Make.Call(Make.Name(targetCallableIdentifier), shatteredDataclass.listName4Parameters)
 	replaceAssignTargetCallable = NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))

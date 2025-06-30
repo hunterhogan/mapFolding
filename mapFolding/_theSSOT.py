@@ -23,7 +23,7 @@ main computational interface that users interact with to solve map folding probl
 from importlib import import_module as importlib_import_module
 from inspect import getfile as inspect_getfile
 from pathlib import Path
-from tomli import load as tomli_load
+from tomli import loads as tomli_loads
 import dataclasses
 
 packageNamePACKAGING_HARDCODED = "mapFolding"
@@ -47,7 +47,7 @@ to use alternative packages like 'numba' for specialized performance scenarios.
 # Evaluate When Packaging
 # https://github.com/hunterhogan/mapFolding/issues/18
 try:
-	packageNamePACKAGING: str = tomli_load(Path("../pyproject.toml").open('rb'))["project"]["name"]
+	packageNamePACKAGING: str = tomli_loads(Path("../pyproject.toml").read_text())["project"]["name"]
 	"""
 	Package name dynamically resolved from pyproject.toml during packaging.
 
@@ -55,27 +55,32 @@ try:
 	the packaging process, ensuring consistency between the package metadata
 	and runtime identification. Falls back to hardcoded value if resolution fails.
 	"""
-except Exception:
+except Exception:  # noqa: BLE001
 	packageNamePACKAGING = packageNamePACKAGING_HARDCODED
 
 # Evaluate When Installing
 # https://github.com/hunterhogan/mapFolding/issues/18
 def getPathPackageINSTALLING() -> Path:
-	"""
-	Resolve the absolute filesystem path to the installed package directory.
+	"""Resolve the absolute filesystem path to the installed package directory.
+
+	(AI generated docstring)
 
 	This function determines the package location at runtime by introspecting
 	the imported module's file location. It handles both regular Python files
 	and package directories, ensuring reliable path resolution across different
 	installation methods and environments.
 
-	Returns:
-		pathPackage: Absolute path to the package directory containing the module files.
+	Returns
+	-------
+	pathPackage : Path
+		Absolute path to the package directory containing the module files.
 
-	Notes:
-		The function automatically handles the case where module introspection
-		returns a file path by extracting the parent directory, ensuring the
-		returned path always points to the package directory itself.
+	Notes
+	-----
+	The function automatically handles the case where module introspection
+	returns a file path by extracting the parent directory, ensuring the
+	returned path always points to the package directory itself.
+
 	"""
 	pathPackage: Path = Path(inspect_getfile(importlib_import_module(packageNamePACKAGING)))
 	if pathPackage.is_file():
@@ -84,8 +89,9 @@ def getPathPackageINSTALLING() -> Path:
 
 @dataclasses.dataclass
 class PackageSettings:
-	"""
-	Centralized configuration container for all package-wide settings.
+	"""Centralized configuration container for all package-wide settings.
+
+	(AI generated docstring)
 
 	This dataclass serves as the single source of truth for package configuration,
 	providing both static and dynamically-resolved values needed throughout the
@@ -93,16 +99,22 @@ class PackageSettings:
 	determined - either during packaging or at installation/runtime.
 
 	The design supports different evaluation phases to optimize performance and
-	reliability:
-	- Packaging-time: Values that can be determined during package creation
-	- Installing-time: Values that require filesystem access or module introspection
+	reliability. Packaging-time values can be determined during package creation,
+	while installing-time values require filesystem access or module introspection.
 
-	Attributes:
-		fileExtension: Standard file extension for Python modules in this package.
-		packageName: Canonical name of the package as defined in project configuration.
-		pathPackage: Absolute filesystem path to the installed package directory.
-		concurrencyPackage: Package to use for concurrent execution operations.
+	Attributes
+	----------
+	fileExtension : str = '.py'
+		Standard file extension for Python modules in this package.
+	packageName : str
+		Canonical name of the package as defined in project configuration.
+	pathPackage : Path
+		Absolute filesystem path to the installed package directory.
+	concurrencyPackage : str | None = None
+		Package identifier for concurrent execution operations.
+
 	"""
+
 	fileExtension: str = dataclasses.field(default='.py', metadata={'evaluateWhen': 'installing'})
 	packageName: str = dataclasses.field(default = packageNamePACKAGING, metadata={'evaluateWhen': 'packaging'})
 	pathPackage: Path = dataclasses.field(default_factory=getPathPackageINSTALLING, metadata={'evaluateWhen': 'installing'})

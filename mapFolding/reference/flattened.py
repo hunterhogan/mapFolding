@@ -380,7 +380,7 @@ def parseDimensions(dimensions: Sequence[int], parameterName: str = 'unnamed par
 def setCPUlimit(CPUlimit: bool | float | int | None) -> int:
 	# if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
 	#	 CPUlimit = oopsieKwargsie(CPUlimit)
-	# concurrencyLimit = defineConcurrencyLimit(CPUlimit)
+	# concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
 	# numba.set_num_threads(concurrencyLimit)
 	concurrencyLimitHARDCODED = 1
 	concurrencyLimit = concurrencyLimitHARDCODED

@@ -41,7 +41,7 @@ if __name__ == '__main__':
 # TODO test synthesis
 
 @pytest.mark.parametrize('flow', ['daoOfMapFolding', 'theorem2', 'theorem2Trimmed', 'theorem2numba'])
-def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: Literal['daoOfMapFolding'] | Literal['theorem2'] | Literal['theorem2numba']) -> None:
+def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: Literal['daoOfMapFolding', 'theorem2', 'theorem2numba']) -> None:
 	"""Validate that different computational flows produce identical results.
 
 	This is the primary test for ensuring mathematical consistency across different
@@ -54,6 +54,24 @@ def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: Literal['dao
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, flow)
 
 def test_aOFn_calculate_value(oeisID: str) -> None:
+	"""Verify OEIS sequence value calculations against known reference values.
+
+	(AI generated docstring)
+
+	Tests the `oeisIDfor_n` function by comparing its calculated output against
+	known correct values from the OEIS database. This ensures that sequence
+	value computations remain mathematically accurate across code changes.
+
+	The test iterates through validation test cases defined in `settingsOEIS`
+	for the given OEIS sequence identifier, verifying that each computed value
+	matches its corresponding known reference value.
+
+	Parameters
+	----------
+	oeisID : str
+		The OEIS sequence identifier to test calculations for.
+
+	"""
 	for n in settingsOEIS[oeisID]['valuesTestValidation']:
 		standardizedEqualToCallableReturn(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
@@ -69,8 +87,8 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	that the generated code produces mathematically correct results. This pattern
 	can be adapted for testing other dynamically generated computational approaches.
 	"""
-	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba
-	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba
+	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # noqa: PLC0415
+	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba  # noqa: PLC0415
 	mapShape = oneTestCuzTestsOverwritingTests
 	state = MapFoldingState(mapShape)
 	state = initializeGroupsOfFolds(state)
@@ -88,9 +106,11 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 
 	Don_Lapre_Road_to_Self_Improvement = importlib.util.spec_from_file_location("__main__", pathFilenameModule)
 	if Don_Lapre_Road_to_Self_Improvement is None:
-		raise ImportError(f"Failed to create module specification from {pathFilenameModule}")
+		msg = f"Failed to create module specification from {pathFilenameModule}"
+		raise ImportError(msg)
 	if Don_Lapre_Road_to_Self_Improvement.loader is None:
-		raise ImportError(f"Failed to get loader for module {pathFilenameModule}")
+		msg = f"Failed to get loader for module {pathFilenameModule}"
+		raise ImportError(msg)
 	module = importlib.util.module_from_spec(Don_Lapre_Road_to_Self_Improvement)
 
 	module.__name__ = "__main__"

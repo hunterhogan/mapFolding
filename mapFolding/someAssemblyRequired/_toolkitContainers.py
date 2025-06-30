@@ -29,7 +29,8 @@ from astToolkit import Be, DOT, identifierDotAttribute, LedgerOfImports, Make, N
 from collections.abc import Callable
 from copy import deepcopy
 from mapFolding.someAssemblyRequired import IfThis
-from typing import Any, TypeIs
+from typing import Any, cast
+from typing_extensions import TypeIs
 from Z0Z_tools import raiseIfNone
 import ast
 import dataclasses
@@ -40,8 +41,7 @@ dummyTuple = Make.Tuple([Make.Name("dummyElement")])
 
 @dataclasses.dataclass
 class ShatteredDataclass:
-	"""
-	Container for decomposed dataclass components organized as AST nodes for code generation.
+	"""Container for decomposed dataclass components organized as AST nodes for code generation.
 
 	This class holds the decomposed representation of a dataclass, breaking it down into individual
 	AST components that can be manipulated and recombined for different code generation contexts.
@@ -56,6 +56,7 @@ class ShatteredDataclass:
 	dataclass fields into individual parameters) and result reconstruction (packing individual
 	values back into dataclass instances).
 	"""
+
 	countingVariableAnnotation: ast.expr
 	"""Type annotation for the counting variable extracted from the dataclass."""
 
@@ -191,11 +192,16 @@ class DeReConstructField2ast:
 		scalar types, and complex type annotations, creating appropriate constructor
 		calls and import requirements.
 
-		Parameters:
-			dataclassesDOTdataclassLogicalPathModule: Module path containing the dataclass
-			dataclassClassDef: AST class definition for type annotation extraction
-			dataclassesDOTdataclassInstanceIdentifier: Instance variable name for attribute access
-			field: Dataclass field to transform
+		Parameters
+		----------
+		dataclassesDOTdataclassLogicalPathModule : identifierDotAttribute
+			Module path containing the dataclass
+		dataclassClassDef : ast.ClassDef
+			AST class definition for type annotation extraction
+		dataclassesDOTdataclassInstanceIdentifier : str
+			Instance variable name for attribute access
+		field : dataclasses.Field[Any]
+			Dataclass field to transform
 		"""
 		self.compare = field.compare
 		self.default = field.default if field.default is not dataclasses.MISSING else None
@@ -212,9 +218,10 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstanceIdentifier), self.name)
 
-		findThis: Callable[[ast.AST], TypeIs[ast.AnnAssign] | bool] = Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
-		doThat: Callable[[ast.AnnAssign], ast.Name] = Then.extractIt(DOT.annotation)
-		self.astAnnotation = raiseIfNone(NodeTourist[ast.AnnAssign, ast.Name](findThis, doThat).captureLastMatch(dataclassClassDef))
+		self.astAnnotation = raiseIfNone(NodeTourist[ast.AnnAssign, ast.Name | None](
+			findThis = Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
+			, doThat = Then.extractIt(cast("Callable[[ast.AnnAssign], ast.Name | None]", DOT.annotation))
+			).captureLastMatch(dataclassClassDef))
 
 		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
 

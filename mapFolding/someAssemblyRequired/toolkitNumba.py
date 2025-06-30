@@ -26,11 +26,13 @@ system to produce standalone modules optimized for specific map dimensions and c
 """
 
 from astToolkit import identifierDotAttribute, IngredientsFunction, Make
-from collections.abc import Sequence
-from typing import cast, Final, NotRequired, TypedDict
+from typing import cast, Final, NotRequired, TYPE_CHECKING, TypedDict
 import ast
 import dataclasses
 import warnings
+
+if TYPE_CHECKING:
+	from collections.abc import Sequence
 
 class ParametersNumba(TypedDict):
 	"""
@@ -55,6 +57,7 @@ class ParametersNumba(TypedDict):
 	optional via `NotRequired`, allowing flexible configuration while requiring explicit
 	decisions on critical performance and correctness parameters.
 	"""
+
 	_dbg_extend_lifetimes: NotRequired[bool]
 	_dbg_optnone: NotRequired[bool]
 	_nrt: NotRequired[bool]
@@ -78,7 +81,7 @@ class ParametersNumba(TypedDict):
 	# signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
 	target: NotRequired[str]
 
-parametersNumbaDefault: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False, }
+parametersNumbaDefault: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False }
 """
 Comprehensive Numba configuration for maximum performance optimization.
 
@@ -131,54 +134,69 @@ While Numba offers multiple decorators (`@jit`, `@njit`, `@vectorize`), this too
 on the general-purpose `@jit` decorator with configurable parameters for flexibility.
 """
 
-def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:
-	"""
-	Transform a Python function into a Numba-accelerated version with appropriate decorators.
+def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:  # noqa: C901
+	"""Transform a Python function into a Numba-accelerated version with appropriate decorators.
 
-	This function applies Numba's @jit decorator to an existing function definition within
-	an IngredientsFunction container. It handles the complete transformation pipeline:
+	(AI generated docstring)
 
-	1. Removes any existing decorators that might conflict with Numba
-	2. Constructs type signatures for Numba compilation when possible
-	3. Applies the @jit decorator with specified or default parameters
-	4. Updates import requirements to include necessary Numba modules
+	This function applies Numba's `@jit` decorator to an existing function definition within
+	an `IngredientsFunction` container. It handles the complete transformation pipeline
+	including removing any existing decorators that might conflict with Numba, constructing
+	type signatures for Numba compilation when possible, applying the `@jit` decorator with
+	specified or default parameters, and updating import requirements to include necessary
+	Numba modules.
 
 	The transformation preserves function semantics while enabling significant performance
 	improvements through just-in-time compilation. Type inference is attempted for
 	function parameters and return values to enable optimized compilation paths.
-	Parameters:
-		ingredientsFunction: Container holding the function definition and associated metadata
-		parametersNumba: Optional Numba configuration; uses parametersNumbaDefault if None
-	Returns:
-		Modified IngredientsFunction with Numba decorator applied and imports updated
+
+	Parameters
+	----------
+	ingredientsFunction : IngredientsFunction
+		Container holding the function definition and associated metadata.
+	parametersNumba : ParametersNumba | None = None
+		Optional Numba configuration; uses `parametersNumbaDefault` if `None`.
+
+	Returns
+	-------
+	ingredientsFunction : IngredientsFunction
+		Modified `IngredientsFunction` with Numba decorator applied and imports updated.
+
 	"""
 	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
-		"""
-		Remove existing decorators from function definition to prevent conflicts with Numba.
+		"""Remove existing decorators from function definition to prevent conflicts with Numba.
+
+		(AI generated docstring)
 
 		Numba compilation can be incompatible with certain Python decorators, so this
 		function strips all existing decorators from a function definition before
-		applying the Numba @jit decorator. Removed decorators are logged as warnings
+		applying the Numba `@jit` decorator. Removed decorators are logged as warnings
 		for debugging purposes.
 
 		TODO: Implement more sophisticated decorator handling that can preserve
 		compatible decorators and intelligently handle decorator composition.
 
-		Parameters:
-			astCallable: Function definition AST node to process
+		Parameters
+		----------
+		astCallable : ast.FunctionDef
+			Function definition AST node to process.
 
-		Returns:
-			astCallable: Function definition with decorator list cleared
+		Returns
+		-------
+		astCallable : ast.FunctionDef
+			Function definition with decorator list cleared.
+
 		"""
-		# TODO: more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
+		# TODO more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
 		for decoratorItem in astCallable.decorator_list.copy():
 			astCallable.decorator_list.remove(decoratorItem)
-			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}")
+			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}", stacklevel=2)
 		return astCallable
 
 	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None: # pyright: ignore[reportUnusedFunction]
-		"""
-		Generate Numba-compatible type signatures for function parameters.
+		"""Generate Numba-compatible type signatures for function parameters.
+
+		(AI generated docstring)
 
 		This function analyzes function parameter type annotations and converts them into
 		Numba-compatible type signature expressions. It handles various annotation patterns
@@ -188,20 +206,25 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		The generated signatures enable Numba to perform more efficient compilation by
 		providing explicit type information rather than relying solely on type inference.
 
-		Parameters:
-			signatureElement: Function parameter with type annotation to convert
+		Parameters
+		----------
+		signatureElement : ast.arg
+			Function parameter with type annotation to convert.
 
-		Returns:
-			Numba-compatible type signature AST node, or None if conversion not possible
+		Returns
+		-------
+		ast.Subscript | ast.Name | None
+			Numba-compatible type signature AST node, or None if conversion not possible.
+
 		"""
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape: ast.expr = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
 				shapeAsListSlices: list[ast.Slice] = [ast.Slice() for _axis in range(len(annotationShape.slice.elts))]
-				shapeAsListSlices[-1] = ast.Slice(step=ast.Constant(value=1))
-				shapeAST: ast.Slice | ast.Tuple = ast.Tuple(elts=list(shapeAsListSlices), ctx=ast.Load())
+				shapeAsListSlices[-1] = Make.Slice(step=Make.Constant(1))
+				shapeAST: ast.Slice | ast.Tuple = Make.Tuple(list(shapeAsListSlices))
 			else:
-				shapeAST = ast.Slice(step=ast.Constant(value=1))
+				shapeAST = Make.Slice(step=Make.Constant(1))
 
 			annotationDtype: ast.expr = signatureElement.annotation.slice.elts[1]
 			if (isinstance(annotationDtype, ast.Subscript) and isinstance(annotationDtype.slice, ast.Attribute)):
@@ -213,9 +236,9 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			Z0Z_hacky_dtype: str = ndarrayName
 			datatype_attr = datatypeAST or Z0Z_hacky_dtype
 			ingredientsFunction.imports.addImportFrom_asStr(datatypeModuleDecorator, datatype_attr)
-			datatypeNumba = ast.Name(id=datatype_attr, ctx=ast.Load())
+			datatypeNumba = Make.Name(datatype_attr)
 
-			return ast.Subscript(value=datatypeNumba, slice=shapeAST, ctx=ast.Load())
+			return Make.Subscript(datatypeNumba, slice=shapeAST)
 
 		elif isinstance(signatureElement.annotation, ast.Name):
 			return signatureElement.annotation
@@ -234,14 +257,16 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 
 	if ingredientsFunction.astFunctionDef.returns and isinstance(ingredientsFunction.astFunctionDef.returns, ast.Name):
 		theReturn: ast.Name = ingredientsFunction.astFunctionDef.returns
-		list_argsDecorator = [cast(ast.expr, ast.Call(func=ast.Name(id=theReturn.id, ctx=ast.Load())
-							, args=list_arg4signature_or_function if list_arg4signature_or_function else [], keywords=[] ) )]
+		list_argsDecorator = [cast("ast.expr", Make.Call(Make.Name(theReturn.id)
+							, list_arg4signature_or_function if list_arg4signature_or_function else [], [] ) )]
 	elif list_arg4signature_or_function:
-		list_argsDecorator = [cast(ast.expr, ast.Tuple(elts=list_arg4signature_or_function, ctx=ast.Load()))]
+		list_argsDecorator = [cast("ast.expr", Make.Tuple(list_arg4signature_or_function))]
 
 	ingredientsFunction.astFunctionDef = Z0Z_UnhandledDecorators(ingredientsFunction.astFunctionDef)
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
+	# https://github.com/microsoft/pylance-release/issues/7298 Four weeks without responding.  # noqa: ERA001
+	# https://github.com/microsoft/pylance-release/issues/7377  # noqa: ERA001
 	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
 
 	decoratorModule = Z0Z_numbaDataTypeModule
@@ -256,8 +281,9 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 
 @dataclasses.dataclass
 class SpicesJobNumba:
-	"""
-	Configuration container for Numba-specific job processing options.
+	"""Configuration container for Numba-specific job processing options.
+
+	(AI generated docstring)
 
 	This dataclass encapsulates configuration settings that control how Numba
 	compilation and execution is applied to job processing functions. It provides
@@ -268,11 +294,17 @@ class SpicesJobNumba:
 	Numba's specialized requirements, enabling consistent application of
 	optimization settings across different computational contexts.
 
-	Attributes:
-		useNumbaProgressBar: Enable progress bar display for long-running computations
-		numbaProgressBarIdentifier: Progress bar implementation identifier
-		parametersNumba: Numba compilation parameters with sensible defaults
+	Attributes
+	----------
+	useNumbaProgressBar : bool
+		Enable progress bar display for long-running computations.
+	numbaProgressBarIdentifier : str
+		Progress bar implementation identifier.
+	parametersNumba : ParametersNumba
+		Numba compilation parameters with sensible defaults.
+
 	"""
+
 	useNumbaProgressBar: bool = True
 	"""Enable progress bar display for Numba-compiled functions with long execution times."""
 

@@ -30,32 +30,41 @@ from typing import TypeGuard
 import ast
 
 class IfThis(astToolkit_IfThis):
-	"""
-	Provide predicate functions for matching and filtering AST nodes based on various criteria.
+	"""Provide predicate functions for matching and filtering AST nodes based on various criteria.
 
-	The IfThis class contains static methods that generate predicate functions used to test whether AST nodes match
-	specific criteria. These predicates can be used with NodeChanger and NodeTourist to identify and process specific
+	(AI generated docstring)
+
+	The `IfThis` `class` contains static methods that generate predicate functions used to test whether AST nodes match
+	specific criteria. These predicates can be used with `NodeChanger` and `NodeTourist` to identify and process specific
 	patterns in the AST.
 
-	The class provides predicates for matching various node types, attributes, identifiers, and structural patterns,
+	The `class` provides predicates for matching various node types, attributes, identifiers, and structural patterns,
 	enabling precise targeting of AST elements for analysis or transformation.
+
 	"""
 
 	@staticmethod
 	def isAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
-		"""
-		Generate a predicate that matches comparison expressions testing if a namespaced attribute is greater than 0.
+		"""Generate a predicate that matches comparison expressions testing if a namespaced attribute is greater than 0.
+
+		(AI generated docstring)
 
 		This function creates a predicate that identifies AST nodes representing comparisons
 		of the form `namespace.identifier > 0`. It's commonly used to identify conditional
 		expressions that test positive values of counting variables or similar constructs.
 
-		Parameters:
-			namespace: The namespace or object name containing the attribute
-			identifier: The attribute name to test
+		Parameters
+		----------
+		namespace : str
+			The namespace or object name containing the attribute.
+		identifier : str
+			The attribute name to test.
 
-		Returns:
-			A predicate function that returns True for Compare nodes matching the pattern
+		Returns
+		-------
+		predicate : Callable[[ast.AST], TypeGuard[ast.Compare] | bool]
+			A predicate function that returns `True` for `Compare` nodes matching the pattern.
+
 		"""
 		return lambda node: (Be.Compare(node)
 					and IfThis.isAttributeNamespaceIdentifier(namespace, identifier)(DOT.left(node))
@@ -64,56 +73,77 @@ class IfThis(astToolkit_IfThis):
 
 	@staticmethod
 	def isIfAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeGuard[ast.If] | bool]:
-		"""
-		Generate a predicate that matches If statements testing if a namespaced attribute is greater than 0.
+		"""Generate a predicate that matches If statements testing if a namespaced attribute is greater than 0.
+
+		(AI generated docstring)
 
 		This function creates a predicate that identifies AST nodes representing conditional
 		statements of the form `if namespace.identifier > 0:`. It's used to find control
 		flow structures that depend on positive values of specific attributes.
 
-		Parameters:
-			namespace: The namespace or object name containing the attribute
-			identifier: The attribute name to test
+		Parameters
+		----------
+		namespace : str
+			The namespace or object name containing the attribute.
+		identifier : str
+			The attribute name to test.
 
-		Returns:
-			A predicate function that returns True for If nodes with the specified test condition
+		Returns
+		-------
+		predicate : Callable[[ast.AST], TypeGuard[ast.If] | bool]
+			A predicate function that returns `True` for `If` nodes with the specified test condition.
+
 		"""
 		return lambda node: (Be.If(node)
 					and IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier)(DOT.test(node)))
 
 	@staticmethod
 	def isWhileAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeGuard[ast.While] | bool]:
-		"""
-		Generate a predicate that matches While loops testing if a namespaced attribute is greater than 0.
+		"""Generate a predicate that matches While loops testing if a namespaced attribute is greater than 0.
+
+		(AI generated docstring)
 
 		This function creates a predicate that identifies AST nodes representing loop
 		statements of the form `while namespace.identifier > 0:`. It's used to find
 		iteration constructs that continue while specific attributes remain positive.
 
-		Parameters:
-			namespace: The namespace or object name containing the attribute
-			identifier: The attribute name to test
+		Parameters
+		----------
+		namespace : str
+			The namespace or object name containing the attribute.
+		identifier : str
+			The attribute name to test.
 
-		Returns:
-			A predicate function that returns True for While nodes with the specified test condition
+		Returns
+		-------
+		predicate : Callable[[ast.AST], TypeGuard[ast.While] | bool]
+			A predicate function that returns `True` for `While` nodes with the specified test condition.
+
 		"""
 		return lambda node: (Be.While(node)
 					and IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier)(DOT.test(node)))
 	@staticmethod
 	def isAttributeNamespaceIdentifierLessThanOrEqual0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeGuard[ast.Compare] | bool]:
-		"""
-		Generate a predicate that matches comparison expressions testing if a namespaced attribute is less than or equal to 0.
+		"""Generate a predicate that matches comparison expressions testing if a namespaced attribute is less than or equal to 0.
+
+		(AI generated docstring)
 
 		This function creates a predicate that identifies AST nodes representing comparisons
 		of the form `namespace.identifier <= 0`. It's used to identify conditional
 		expressions that test non-positive values of counting variables or similar constructs.
 
-		Parameters:
-			namespace: The namespace or object name containing the attribute
-			identifier: The attribute name to test
+		Parameters
+		----------
+		namespace : str
+			The namespace or object name containing the attribute.
+		identifier : str
+			The attribute name to test.
 
-		Returns:
-			A predicate function that returns True for Compare nodes matching the pattern
+		Returns
+		-------
+		predicate : Callable[[ast.AST], TypeGuard[ast.Compare] | bool]
+			A predicate function that returns `True` for `Compare` nodes matching the pattern.
+
 		"""
 		return lambda node: (Be.Compare(node)
 					and IfThis.isAttributeNamespaceIdentifier(namespace, identifier)(DOT.left(node))
