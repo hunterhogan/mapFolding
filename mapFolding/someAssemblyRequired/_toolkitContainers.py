@@ -28,10 +28,10 @@ the compilation process.
 from astToolkit import Be, DOT, identifierDotAttribute, LedgerOfImports, Make, NodeTourist, Then
 from collections.abc import Callable
 from copy import deepcopy
+from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import IfThis
 from typing import Any, cast
 from typing_extensions import TypeIs
-from Z0Z_tools import raiseIfNone
 import ast
 import dataclasses
 

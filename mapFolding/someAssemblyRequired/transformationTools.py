@@ -27,11 +27,10 @@ through specialized compilation paths essential for computationally intensive ma
 """
 
 from astToolkit import (
-	Be, extractClassDef, identifierDotAttribute, IngredientsFunction, Make, NodeChanger, parseLogicalPath2astModule, Then,
-)
+	Be, extractClassDef, identifierDotAttribute, IngredientsFunction, Make, NodeChanger, parseLogicalPath2astModule, Then)
 from astToolkit.transformationTools import unparseFindReplace
+from hunterMakesPy import importLogicalPath2Identifier
 from mapFolding.someAssemblyRequired import DeReConstructField2ast, IfThis, ShatteredDataclass
-from Z0Z_tools import importLogicalPath2Identifier
 import ast
 import dataclasses
 

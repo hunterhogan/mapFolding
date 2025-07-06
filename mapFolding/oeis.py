@@ -25,11 +25,11 @@ completes the journey from configuration foundation to mathematical discovery.
 from collections.abc import Callable
 from datetime import datetime, timedelta, UTC
 from functools import cache
+from hunterMakesPy import writeStringToHere
 from mapFolding import countFolds, packageSettings
 from pathlib import Path
 from typing import Any, Final, TypedDict
 from urllib.request import urlopen
-from Z0Z_tools import writeStringToHere
 import argparse
 import random
 import sys
@@ -255,7 +255,7 @@ def getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 	oeisInformation: str | None = None
 	if tryCache:
 		try:
-			oeisInformation = pathFilenameCache.read_text()
+			oeisInformation = pathFilenameCache.read_text(encoding="utf-8")
 		except OSError:
 			tryCache = False
 

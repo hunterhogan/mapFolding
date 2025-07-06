@@ -21,16 +21,16 @@ patterns and show how to handle edge cases gracefully. The parametrized tests
 provide examples of comprehensive boundary testing that you can adapt for your
 own functions.
 
-The integration with external utility modules (Z0Z_tools) shows how to test
+The integration with external utility modules (hunterMakesPy) shows how to test
 dependencies while maintaining clear separation of concerns.
 """
 
 from collections.abc import Callable
+from hunterMakesPy import intInnit
+from hunterMakesPy.pytestForYourUse import PytestFor_intInnit, PytestFor_oopsieKwargsie
 from mapFolding import getLeavesTotal, setProcessorLimit, validateListDimensions
 from tests.conftest import standardizedEqualToCallableReturn
 from typing import Any, Literal
-from Z0Z_tools import intInnit
-from Z0Z_tools.pytestForYourUse import PytestFor_intInnit, PytestFor_oopsieKwargsie
 import multiprocessing
 import numba
 import pytest

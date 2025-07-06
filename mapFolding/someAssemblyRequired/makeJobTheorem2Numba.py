@@ -30,9 +30,9 @@ essential progress feedback capabilities for large-scale computational research.
 
 from astToolkit import (
 	Be, extractFunctionDef, identifierDotAttribute, IngredientsFunction, IngredientsModule, LedgerOfImports, Make,
-	NodeChanger, NodeTourist, Then,
-)
+	NodeChanger, NodeTourist, Then)
 from astToolkit.transformationTools import write_astModule
+from hunterMakesPy import autoDecodingRLE, raiseIfNone
 from mapFolding import getPathFilenameFoldsTotal, MapFoldingState, packageSettings
 from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
@@ -41,7 +41,6 @@ from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from pathlib import PurePosixPath
 from typing import cast, NamedTuple, TYPE_CHECKING
 from typing_extensions import TypeIs
-from Z0Z_tools import autoDecodingRLE, raiseIfNone
 import ast
 
 if TYPE_CHECKING:

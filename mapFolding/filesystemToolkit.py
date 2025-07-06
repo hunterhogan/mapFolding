@@ -231,7 +231,7 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
 	if not Path(pathFilename).exists():
 		message = f"I just wrote a test file to `{pathFilename = }`, but it does not exist. Fix that now, so your computation doesn't get deleted later. And continually improve your empathy skills."
 		raise FileNotFoundError(message)
-	foldsTotalRead = int(Path(pathFilename).read_text())
+	foldsTotalRead = int(Path(pathFilename).read_text(encoding="utf-8"))
 	if foldsTotalRead != foldsTotal:
 		message = f"I wrote a test file to `{pathFilename = }` with contents of `{str(foldsTotal) = }`, but I read `{foldsTotalRead = }` from the file. Python says the values are not equal. Fix that now, so your computation doesn't get corrupted later. And be pro-social."
 		raise FileNotFoundError(message)

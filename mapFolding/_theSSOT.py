@@ -47,7 +47,7 @@ to use alternative packages like 'numba' for specialized performance scenarios.
 # Evaluate When Packaging
 # https://github.com/hunterhogan/mapFolding/issues/18
 try:
-	packageNamePACKAGING: str = tomli_loads(Path("../pyproject.toml").read_text())["project"]["name"]
+	packageNamePACKAGING: str = tomli_loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["name"]
 	"""
 	Package name dynamically resolved from pyproject.toml during packaging.
 
