@@ -24,7 +24,7 @@ Classes:
             algorithm transformations.
 """
 
-from astToolkit import Be, DOT, IfThis as astToolkit_IfThis
+from astToolkit import Be, IfThis as astToolkit_IfThis
 from collections.abc import Callable
 from typing_extensions import TypeIs
 import ast

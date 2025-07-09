@@ -31,7 +31,6 @@ from copy import deepcopy
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import IfThis
 from typing import Any, cast
-from typing_extensions import TypeIs
 import ast
 import dataclasses
 
