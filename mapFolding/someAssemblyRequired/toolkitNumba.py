@@ -265,9 +265,8 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.astFunctionDef = Z0Z_UnhandledDecorators(ingredientsFunction.astFunctionDef)
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
-	# https://github.com/microsoft/pylance-release/issues/7298 Four weeks without responding.  # noqa: ERA001
-	# https://github.com/microsoft/pylance-release/issues/7377  # noqa: ERA001
-	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]
+
+	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()] # pyright: ignore[reportArgumentType]
 
 	decoratorModule = Z0Z_numbaDataTypeModule
 	decoratorCallable = Z0Z_decoratorCallable
