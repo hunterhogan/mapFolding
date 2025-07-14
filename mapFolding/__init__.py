@@ -1,5 +1,7 @@
 """Computational toolkit for analyzing multi-dimensional map folding patterns.
 
+(AI generated docstring)
+
 The mapFolding package provides a complete implementation of Lunnon's 1971 algorithm
 for counting distinct folding patterns in multi-dimensional maps. This toolkit
 transforms the complex combinatorial mathematics of map folding into accessible
@@ -40,7 +42,7 @@ For practitioners: The robust result persistence and type safety ensure
 reliable completion of complex analytical tasks.
 """
 
-from mapFolding.datatypes import (
+from mapFolding._theTypes import (
 	Array1DElephino as Array1DElephino,
 	Array1DFoldsTotal as Array1DFoldsTotal,
 	Array1DLeavesTotal as Array1DLeavesTotal,
@@ -54,7 +56,7 @@ from mapFolding.datatypes import (
 	NumPyLeavesTotal as NumPyLeavesTotal,
 )
 
-from mapFolding._theSSOT import PackageSettings as PackageSettings, packageSettings as packageSettings
+from mapFolding._theSSOT import packageSettings as packageSettings
 
 from mapFolding.beDRY import (
 	getConnectionGraph as getConnectionGraph,

@@ -53,7 +53,7 @@ import ast
 import dataclasses
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Sequence
+	from collections.abc import Sequence
 
 def _findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[str, str, str]:
 	"""Extract dataclass information from a function's AST for transformation operations.
@@ -135,7 +135,7 @@ def _getLogicalPath(packageName: str | None = None, logicalPathInfix: str | None
 		listLogicalPathParts.extend(modules)
 	return '.'.join(listLogicalPathParts)
 
-def _getModule(packageName: str | None = packageSettings.packageName, logicalPathInfix: str | None = logicalPathInfixDEFAULT, moduleIdentifier: str | None = algorithmSourceModuleDEFAULT) -> ast.Module:
+def _getModule(packageName: str | None = packageSettings.identifierPackage, logicalPathInfix: str | None = logicalPathInfixDEFAULT, moduleIdentifier: str | None = algorithmSourceModuleDEFAULT) -> ast.Module:
 	"""Load source algorithm module as AST for transformation operations.
 
 	(AI generated docstring)
@@ -147,7 +147,7 @@ def _getModule(packageName: str | None = packageSettings.packageName, logicalPat
 
 	Parameters
 	----------
-	packageName : str | None = packageSettings.packageName
+	packageName : str | None = packageSettings.identifierPackage
 		Package containing the source module.
 	logicalPathInfix : str | None = logicalPathInfixDEFAULT
 		Path component within the package structure.
@@ -241,7 +241,7 @@ def makeInitializeGroupsOfFolds(astModule: ast.Module, moduleIdentifier: str, ca
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef.body[0])
 
 	pathFilename: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
-	write_astModule(IngredientsModule(ingredientsFunction), pathFilename, packageSettings.packageName)
+	write_astModule(IngredientsModule(ingredientsFunction), pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -314,7 +314,7 @@ def makeDaoOfMapFolding(astModule: ast.Module, moduleIdentifier: str, callableId
 
 	pathFilename: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -492,7 +492,7 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 
 	pathFilename: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -582,7 +582,7 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	pathFilename: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -636,7 +636,7 @@ def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	pathFilename: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -695,7 +695,7 @@ def numbaOnTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdenti
 
 	pathFilename: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -730,7 +730,7 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 
 	algorithmSourceModule: identifierDotAttribute = algorithmSourceModuleDEFAULT
 	sourceCallableIdentifier: identifierDotAttribute = sourceCallableDispatcherDEFAULT
-	logicalPathSourceModule: identifierDotAttribute = '.'.join([packageSettings.packageName, algorithmSourceModule])  # noqa: FLY002
+	logicalPathSourceModule: identifierDotAttribute = '.'.join([packageSettings.identifierPackage, algorithmSourceModule])  # noqa: FLY002
 
 	logicalPathInfix: identifierDotAttribute = logicalPathInfixDEFAULT
 	moduleIdentifier: identifierDotAttribute = dataPackingModuleIdentifierDEFAULT
@@ -760,7 +760,7 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 
 	pathFilename: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.packageName)
+	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
 if __name__ == '__main__':
 	astModule: ast.Module = _getModule(logicalPathInfix=None)
@@ -781,5 +781,5 @@ if __name__ == '__main__':
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixDEFAULT, None)
 
-	astImportFrom: ast.ImportFrom = Make.ImportFrom(_getLogicalPath(packageSettings.packageName, logicalPathInfixDEFAULT, 'theorem2Numba'), list_alias=[Make.alias(sourceCallableIdentifierDEFAULT)])
+	astImportFrom: ast.ImportFrom = Make.ImportFrom(_getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2Numba'), list_alias=[Make.alias(sourceCallableIdentifierDEFAULT)])
 	makeUnRePackDataclass(astImportFrom)

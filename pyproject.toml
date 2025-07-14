@@ -1,7 +1,7 @@
 [project]
 name = "mapFolding"
-version = "0.12.2"
-description = "Map folding algorithm with code transformation framework for optimizing numerical computations"
+version = "0.12.3"
+description = "Map folding algorithm with code transformation framework for optimizing numerical computations."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { 'text' = "CC-BY-NC-4.0" }
@@ -52,26 +52,21 @@ urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://gith
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", clearOEIScache = "mapFolding.oeis:clearOEIScache", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
   "astToolkit>=0.5.0",
-  "autoflake",
   "hunterMakesPy",
-  "numba_progress",
   "numba",
+  "numba_progress",
   "numpy",
   "platformdirs",
-  "python_minifier",
-  "sympy",
-  "tomli",
-  "hunterMakesPy",
 ]
-optional-dependencies = { testing = [
+optional-dependencies = { development = [
   "mypy",
+  "pyupgrade",
+  "setuptools-scm",
+], testing = [
   "pytest",
   "pytest-cov",
   "pytest-env",
   "pytest-xdist",
-  "pyupgrade",
-  "ruff",
-  "setuptools-scm",
 ] }
 
 [build-system]

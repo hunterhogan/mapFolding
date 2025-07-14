@@ -1,6 +1,8 @@
 """
 Mathematical validation and discovery through OEIS integration.
 
+(AI generated docstring)
+
 Complementing the unified computational interface, this module extends the map
 folding ecosystem into the broader mathematical community through comprehensive
 integration with the Online Encyclopedia of Integer Sequences (OEIS). This bridge

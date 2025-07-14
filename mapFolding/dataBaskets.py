@@ -1,6 +1,8 @@
 """
 Computational state orchestration for map folding analysis.
 
+(AI generated docstring)
+
 Building upon the core utilities and their generated data structures, this module
 orchestrates the complex computational state required for Lunnon's recursive
 algorithm execution. The state classes serve as both data containers and computational
@@ -20,8 +22,7 @@ access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
 	Array1DElephino, Array1DLeavesTotal, Array3D, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	getConnectionGraph, getLeavesTotal, makeDataContainer,
-)
+	getConnectionGraph, getLeavesTotal, makeDataContainer)
 import dataclasses
 
 @dataclasses.dataclass

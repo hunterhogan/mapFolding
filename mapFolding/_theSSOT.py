@@ -1,6 +1,8 @@
 """
 Foundation layer for the map folding computational ecosystem.
 
+(AI generated docstring)
+
 This module establishes the fundamental configuration infrastructure that underpins
 all map folding operations. Map folding, as defined by Lunnon's 1971 algorithm,
 requires precise coordination of computational resources, type systems, and data
@@ -20,75 +22,17 @@ functions, computational state management, result persistence, and ultimately th
 main computational interface that users interact with to solve map folding problems.
 """
 
-from importlib import import_module as importlib_import_module
-from inspect import getfile as inspect_getfile
-from pathlib import Path
-from tomli import loads as tomli_loads
+from hunterMakesPy import PackageSettings
 import dataclasses
 
-packageNamePACKAGING_HARDCODED = "mapFolding"
-"""
-Hardcoded package name used as fallback when dynamic resolution fails.
-
-This constant serves as the ultimate fallback for package name resolution,
-ensuring the package can function even when pyproject.toml is not accessible
-during packaging or when module introspection fails during installation.
-"""
+packageNameHARDCODED = "mapFolding"
+"""Hardcoded package name used as fallback when dynamic resolution fails."""
 
 concurrencyPackageHARDCODED = 'multiprocessing'
-"""
-Default package identifier for concurrent execution operations.
-
-Specifies which Python concurrency package should be used as the default
-for parallel computations. This can be overridden through PackageSettings
-to use alternative packages like 'numba' for specialized performance scenarios.
-"""
-
-# Evaluate When Packaging
-# https://github.com/hunterhogan/mapFolding/issues/18
-try:
-	packageNamePACKAGING: str = tomli_loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["name"]
-	"""
-	Package name dynamically resolved from pyproject.toml during packaging.
-
-	This value is determined by reading the project configuration file during
-	the packaging process, ensuring consistency between the package metadata
-	and runtime identification. Falls back to hardcoded value if resolution fails.
-	"""
-except Exception:  # noqa: BLE001
-	packageNamePACKAGING = packageNamePACKAGING_HARDCODED
-
-# Evaluate When Installing
-# https://github.com/hunterhogan/mapFolding/issues/18
-def getPathPackageINSTALLING() -> Path:
-	"""Resolve the absolute filesystem path to the installed package directory.
-
-	(AI generated docstring)
-
-	This function determines the package location at runtime by introspecting
-	the imported module's file location. It handles both regular Python files
-	and package directories, ensuring reliable path resolution across different
-	installation methods and environments.
-
-	Returns
-	-------
-	pathPackage : Path
-		Absolute path to the package directory containing the module files.
-
-	Notes
-	-----
-	The function automatically handles the case where module introspection
-	returns a file path by extracting the parent directory, ensuring the
-	returned path always points to the package directory itself.
-
-	"""
-	pathPackage: Path = Path(inspect_getfile(importlib_import_module(packageNamePACKAGING)))
-	if pathPackage.is_file():
-		pathPackage = pathPackage.parent
-	return pathPackage
+"""Default package identifier for concurrent execution operations."""
 
 @dataclasses.dataclass
-class PackageSettings:
+class mapFoldingPackageSettings(PackageSettings):
 	"""Centralized configuration container for all package-wide settings.
 
 	(AI generated docstring)
@@ -115,12 +59,11 @@ class PackageSettings:
 
 	"""
 
-	fileExtension: str = dataclasses.field(default='.py', metadata={'evaluateWhen': 'installing'})
-	packageName: str = dataclasses.field(default = packageNamePACKAGING, metadata={'evaluateWhen': 'packaging'})
-	pathPackage: Path = dataclasses.field(default_factory=getPathPackageINSTALLING, metadata={'evaluateWhen': 'installing'})
 	concurrencyPackage: str | None = None
 	"""
 	Package identifier for concurrent execution operations.
+
+	(AI generated docstring)
 
 	Specifies which Python package should be used for parallel processing
 	in computationally intensive operations. When None, the default concurrency
@@ -130,20 +73,9 @@ class PackageSettings:
 	"""
 
 concurrencyPackage = concurrencyPackageHARDCODED
-"""
-Active concurrency package configuration for the current session.
+"""Active concurrency package configuration for the current session."""
 
-This module-level variable holds the currently selected concurrency package
-identifier, initialized from the hardcoded default but available for runtime
-modification through the package settings system.
-"""
-
-packageSettings = PackageSettings(concurrencyPackage=concurrencyPackage)
-"""
-Global package settings instance providing access to all configuration values.
-
-This singleton instance serves as the primary interface for accessing package
-configuration throughout the codebase. It combines statically-defined defaults
-with dynamically-resolved values to provide a complete configuration profile
-for the current package installation and runtime environment.
-"""
+packageSettings = mapFoldingPackageSettings(
+	identifierPackageFALLBACK=packageNameHARDCODED
+	, concurrencyPackage=concurrencyPackage)
+"""Global package settings."""

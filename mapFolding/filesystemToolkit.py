@@ -1,6 +1,8 @@
 """
 Persistent storage infrastructure for map folding computation results.
 
+(AI generated docstring)
+
 As computational state management orchestrates the complex recursive analysis,
 this module ensures that the valuable results of potentially multi-day computations
 are safely preserved and reliably retrievable. Map folding problems can require
@@ -113,9 +115,9 @@ def getPathRootJobDEFAULT() -> Path:
 	Creates the directory if it doesn't exist.
 
 	"""
-	pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=packageSettings.packageName, appauthor=False, ensure_exists=True))
+	pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=packageSettings.identifierPackage, appauthor=False, ensure_exists=True))
 	if 'google.colab' in sysModules:
-		pathJobDEFAULT = Path("/content/drive/MyDrive") / packageSettings.packageName
+		pathJobDEFAULT = Path("/content/drive/MyDrive") / packageSettings.identifierPackage
 	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
 	return pathJobDEFAULT
 

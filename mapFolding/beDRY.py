@@ -1,6 +1,8 @@
 """
 Core computational utilities implementing Lunnon's map folding algorithm.
 
+(AI generated docstring)
+
 With the configuration foundation established and the type system defined, this
 module provides the essential building blocks that transform mathematical theory
 into executable computation. These utilities implement the fundamental operations

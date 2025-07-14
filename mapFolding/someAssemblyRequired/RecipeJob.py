@@ -101,7 +101,7 @@ class RecipeJobTheorem2Numba:
 	sourceDataclassInstance: str = dataclassInstanceIdentifierDEFAULT
 
 	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageSettings.pathPackage)  # noqa: RUF009
-	sourcePackageIdentifier: str | None = packageSettings.packageName
+	sourcePackageIdentifier: str | None = packageSettings.identifierPackage
 
 	# Filesystem, names of physical objects ------------------------------------------
 	pathPackage: PurePosixPath | None = None

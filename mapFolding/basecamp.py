@@ -1,6 +1,8 @@
 """
 Unified interface for map folding computation orchestration.
 
+(AI generated docstring)
+
 This module represents the culmination of the computational ecosystem, providing
 the primary entry point where users interact with the complete map folding analysis
 system. It orchestrates all preceding layers: the configuration foundation,
@@ -24,8 +26,7 @@ consistent, reliable, and efficiently computed folding pattern counts.
 from collections.abc import Sequence
 from mapFolding import (
 	getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly, setProcessorLimit,
-	validateListDimensions,
-)
+	validateListDimensions)
 from os import PathLike
 from pathlib import PurePath
 import contextlib
@@ -42,6 +43,8 @@ def countFolds(listDimensions: Sequence[int] | None = None  # noqa: C901
 				) -> int:
 	"""
 	Count the total number of possible foldings for a given map dimensions.
+
+	(AI generated docstring)
 
 	This function serves as the main public interface to the map folding algorithm, handling all parameter validation,
 	computation state management, and result persistence in a user-friendly way.
