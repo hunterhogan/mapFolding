@@ -21,23 +21,20 @@ stores computational results or adding new file formats.
 
 from contextlib import redirect_stdout
 from mapFolding import (
-	getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal,
-	validateListDimensions,
-)
+	getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, validateListDimensions)
 from pathlib import Path
 import io
 import pytest
 import unittest.mock
 
-def test_saveFoldsTotal_fallback(pathTmpTesting: Path) -> None:
+def test_saveFoldsTotal_fallback(path_tmpTesting: Path) -> None:
 	foldsTotal = 123
-	pathFilename = pathTmpTesting / "foldsTotal.txt"
-	with unittest.mock.patch("pathlib.Path.write_text", side_effect=OSError("Simulated write failure")):
-		with unittest.mock.patch("os.getcwd", return_value=str(pathTmpTesting)):
-			capturedOutput = io.StringIO()
-			with redirect_stdout(capturedOutput):
-				saveFoldsTotal(pathFilename, foldsTotal)
-	fallbackFiles = list(pathTmpTesting.glob("foldsTotalYO_*.txt"))
+	pathFilename = path_tmpTesting / "foldsTotal.txt"
+	with unittest.mock.patch("pathlib.Path.write_text", side_effect=OSError("Simulated write failure")), unittest.mock.patch("os.getcwd", return_value=str(path_tmpTesting)):
+		capturedOutput = io.StringIO()
+		with redirect_stdout(capturedOutput):
+			saveFoldsTotal(pathFilename, foldsTotal)
+	fallbackFiles = list(path_tmpTesting.glob("foldsTotalYO_*.txt"))
 	assert len(fallbackFiles) == 1, "Fallback file was not created upon write failure."
 
 @pytest.mark.parametrize("listDimensions, expectedFilename", [
@@ -64,9 +61,9 @@ def test_getPathFilenameFoldsTotal_relativeFilename(mapShapeTestFunctionality: t
 	assert pathFilenameFoldsTotal.is_absolute(), "Path should be absolute"
 	assert pathFilenameFoldsTotal == getPathRootJobDEFAULT() / relativeFilename, "Relative path should be appended to default job root"
 
-def test_getPathFilenameFoldsTotal_createsDirs(pathTmpTesting: Path, mapShapeTestFunctionality: tuple[int, ...]) -> None:
+def test_getPathFilenameFoldsTotal_createsDirs(path_tmpTesting: Path, mapShapeTestFunctionality: tuple[int, ...]) -> None:
 	"""Test that getPathFilenameFoldsTotal creates necessary directories."""
-	nestedPath = pathTmpTesting / "deep/nested/structure"
+	nestedPath = path_tmpTesting / "deep/nested/structure"
 	pathFilenameFoldsTotal = getPathFilenameFoldsTotal(mapShapeTestFunctionality, nestedPath)
 	assert pathFilenameFoldsTotal.parent.exists(), "Parent directories should be created"
 	assert pathFilenameFoldsTotal.parent.is_dir(), "Created path should be a directory"

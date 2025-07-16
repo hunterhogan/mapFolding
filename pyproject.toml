@@ -51,7 +51,7 @@ classifiers = [
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Issues = "https://github.com/hunterhogan/mapFolding/issues", Repository = "https://github.com/hunterhogan/mapFolding.git" }
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", clearOEIScache = "mapFolding.oeis:clearOEIScache", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
-  "astToolkit>=0.5.0",
+  "astToolkit",
   "hunterMakesPy",
   "numba",
   "numba_progress",
@@ -84,17 +84,16 @@ run = { branch = true, concurrency = [
 ], data_file = "tests/coverage/.coverage", omit = [
   "getLLVMforNoReason.py",
   "mapFolding/reference/*",
-  "tests/*",
+  "mapFolding/tests/*",
   "Z0Z_*",
 ], parallel = true, source = [
   ".",
 ] }
-xml = { output = "tests/coverage/coverage.xml" }
 
 [tool.pytest.ini_options]
 addopts = ["--color=auto", "-n 1"]
 log_auto_indent = true
-testpaths = ["tests"]
+testpaths = ["mapFolding/tests"]
 
 [tool.pytest_env]
 # NUMBA_JIT_COVERAGE = "1" # This does not work, whether it is 0 or 1.

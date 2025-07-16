@@ -591,15 +591,12 @@ def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	(AI generated docstring)
 
-	Creates a trimmed version of the Theorem 2 implementation by eliminating
-	conditional logic that is not needed under specific constraint assumptions.
-	This transformation removes checks for unconstrained dimensions, simplifying
-	the algorithm for cases where dimensional constraints are guaranteed to be
-	satisfied by external conditions.
+	Creates a trimmed version of the Theorem 2 implementation by eliminating conditional logic that is not needed under specific
+	constraint assumptions. This transformation removes checks for unconstrained dimensions, simplifying the algorithm for cases
+	where dimensional constraints are guaranteed to be satisfied by external conditions.
 
-	The trimming operation is particularly valuable for generating lean implementations
-	where the calling context ensures that certain conditions will always be met,
-	allowing the removal of defensive programming constructs that add computational
+	The trimming operation is particularly valuable for generating lean implementations where the calling context ensures that
+	certain conditions will always be met, allowing the removal of defensive programming constructs that add computational
 	overhead without providing benefits in the constrained environment.
 
 	Parameters

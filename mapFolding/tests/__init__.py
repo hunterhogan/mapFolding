@@ -4,7 +4,7 @@ This test suite provides comprehensive validation of map folding computations,
 file system operations, OEIS integration, task division, and foundational
 utilities. The tests are designed to support multiple audiences and use cases.
 
-Test Module Organization:
+Test Module Organization (in mapFolding/tests/):
 - conftest.py: Testing infrastructure and shared fixtures
 - test_computations.py: Core mathematical validation and algorithm testing
 - test_filesystem.py: File operations and path management

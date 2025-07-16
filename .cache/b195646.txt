@@ -1,5 +1,0 @@
-# A195646 (b-file synthesized from sequence entry)
-0 1
-1 6
-2 1368
-3 85109616

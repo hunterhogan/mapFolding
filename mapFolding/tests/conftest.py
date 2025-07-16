@@ -24,7 +24,7 @@ research domain.
 """
 
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import getLeavesTotal, makeDataContainer, validateListDimensions
+from mapFolding import getLeavesTotal, makeDataContainer, oeis, packageSettings, validateListDimensions
 from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
 from pathlib import Path
 from typing import Any
@@ -34,50 +34,90 @@ import random
 import shutil
 import unittest.mock
 import uuid
+import warnings
+
+# ruff: noqa: S311
 
 # SSOT for test data paths and filenames
-pathDataSamples: Path = Path("tests/dataSamples").absolute()
-pathTmpRoot: Path = pathDataSamples / "tmp"
-pathTmpRoot.mkdir(parents=True, exist_ok=True)
+pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
+path_tmpRoot: Path = pathDataSamples / "tmp"
+path_tmpRoot.mkdir(parents=True, exist_ok=True)
 
 # The registrar maintains the register of temp files
 registerOfTemporaryFilesystemObjects: set[Path] = set()
 
-def registrarRecordsTmpObject(path: Path) -> None:
-	"""The registrar adds a tmp file to the register."""
+def registrarRecordsTemporaryFilesystemObject(path: Path) -> None:
+	"""The registrar adds a tmp file to the register.
+
+	Parameters
+	----------
+	path : Path
+		The filesystem path to register for cleanup.
+
+	"""
 	registerOfTemporaryFilesystemObjects.add(path)
 
-def registrarDeletesTmpObjects() -> None:
+def registrarDeletesTemporaryFilesystemObjects() -> None:
 	"""The registrar cleans up tmp files in the register."""
-	for pathTmp in sorted(registerOfTemporaryFilesystemObjects, reverse=True):
-		try:
-			if pathTmp.is_file():
-				pathTmp.unlink(missing_ok=True)
-			elif pathTmp.is_dir():
-				shutil.rmtree(pathTmp, ignore_errors=True)
-		except Exception as ERRORmessage:
-			print(f"Warning: Failed to clean up {pathTmp}: {ERRORmessage}")
+	for path_tmp in sorted(registerOfTemporaryFilesystemObjects, reverse=True):
+		if path_tmp.is_file():
+			path_tmp.unlink(missing_ok=True)
+		elif path_tmp.is_dir():
+			shutil.rmtree(path_tmp, ignore_errors=True)
 	registerOfTemporaryFilesystemObjects.clear()
 
 @pytest.fixture(scope="session", autouse=True)
-def setupTeardownTmpObjects() -> Generator[None, None, None]:
-	"""Auto-fixture to setup test data directories and cleanup after."""
+def setupTeardownTemporaryFilesystemObjects() -> Generator[None, None, None]:
+	"""Auto-fixture to setup test data directories and cleanup after.
+
+	Returns
+	-------
+	contextManager : Generator[None, None, None]
+		Context manager that sets up test directories and ensures cleanup.
+
+	"""
 	pathDataSamples.mkdir(exist_ok=True)
-	pathTmpRoot.mkdir(exist_ok=True)
+	path_tmpRoot.mkdir(exist_ok=True)
 	yield
-	registrarDeletesTmpObjects()
+	registrarDeletesTemporaryFilesystemObjects()
 
 @pytest.fixture
-def pathTmpTesting(request: pytest.FixtureRequest) -> Path:
+def path_tmpTesting(request: pytest.FixtureRequest) -> Path:
+	"""Creates a unique temporary directory for testing.
+
+	Parameters
+	----------
+	request : pytest.FixtureRequest
+		The pytest request object providing test context.
+
+	Returns
+	-------
+	temporaryPath : Path
+		Path to a unique temporary directory that will be cleaned up automatically.
+
+	"""
 	# "Z0Z_" ensures the directory name does not start with a number, which would make it an invalid Python identifier
-	pathTmp: Path = pathTmpRoot / ("Z0Z_" + str(uuid.uuid4().hex))
-	pathTmp.mkdir(parents=True, exist_ok=False)
+	path_tmp: Path = path_tmpRoot / ("Z0Z_" + str(uuid.uuid4().hex))
+	path_tmp.mkdir(parents=True, exist_ok=False)
 
-	registrarRecordsTmpObject(pathTmp)
-	return pathTmp
+	registrarRecordsTemporaryFilesystemObject(path_tmp)
+	return path_tmp
 
 @pytest.fixture
-def pathFilenameTmpTesting(request: pytest.FixtureRequest) -> Path:
+def pathFilename_tmpTesting(request: pytest.FixtureRequest) -> Path:
+	"""Creates a unique temporary file path for testing.
+
+	Parameters
+	----------
+	request : pytest.FixtureRequest
+		The pytest request object, optionally containing `param` for file extension.
+
+	Returns
+	-------
+	temporaryFilePath : Path
+		Path to a unique temporary file that will be cleaned up automatically.
+
+	"""
 	try:
 		extension = request.param
 	except AttributeError:
@@ -88,32 +128,62 @@ def pathFilenameTmpTesting(request: pytest.FixtureRequest) -> Path:
 	subpath = "Z0Z_" + uuidHex[0:-8]
 	filenameStem = "Z0Z_" + uuidHex[-8:None]
 
-	pathFilenameTmp = Path(pathTmpRoot, subpath, filenameStem + extension)
-	pathFilenameTmp.parent.mkdir(parents=True, exist_ok=False)
+	pathFilename_tmp = Path(path_tmpRoot, subpath, filenameStem + extension)
+	pathFilename_tmp.parent.mkdir(parents=True, exist_ok=False)
 
-	registrarRecordsTmpObject(pathFilenameTmp)
-	return pathFilenameTmp
+	registrarRecordsTemporaryFilesystemObject(pathFilename_tmp.parent)
+	return pathFilename_tmp
 
 @pytest.fixture
-def pathCacheTesting(pathTmpTesting: Path) -> Generator[Path, Any, None]:
-	"""Temporarily replace the OEIS cache directory with a test directory."""
-	import mapFolding.oeis as oeis
+def pathCacheTesting(path_tmpTesting: Path) -> Generator[Path, Any, None]:
+	"""Temporarily replace the OEIS cache directory with a test directory.
+
+	Parameters
+	----------
+	pathTmpTesting : Path
+		Temporary directory path from the `pathTmpTesting` fixture.
+
+	Returns
+	-------
+	temporaryCachePath : Generator[Path, Any, None]
+		Context manager that provides the temporary cache path and restores original.
+
+	"""
 	pathCacheOriginal = oeis.pathCache
-	oeis.pathCache = pathTmpTesting
-	yield pathTmpTesting
+	oeis.pathCache = path_tmpTesting
+	yield path_tmpTesting
 	oeis.pathCache = pathCacheOriginal
 
 @pytest.fixture
-def pathFilenameFoldsTotalTesting(pathTmpTesting: Path) -> Path:
-	return pathTmpTesting.joinpath("foldsTotalTest.txt")
+def pathFilenameFoldsTotalTesting(path_tmpTesting: Path) -> Path:
+	"""Creates a temporary file path for folds total testing.
+
+	Parameters
+	----------
+	pathTmpTesting : Path
+		Temporary directory path from the `pathTmpTesting` fixture.
+
+	Returns
+	-------
+	foldsTotalFilePath : Path
+		Path to a temporary file for testing folds total functionality.
+
+	"""
+	return path_tmpTesting.joinpath("foldsTotalTest.txt")
 
 """
 Section: Fixtures"""
 
 @pytest.fixture(autouse=True)
 def setupWarningsAsErrors() -> Generator[None, Any, None]:
-	"""Convert all warnings to errors for all tests."""
-	import warnings
+	"""Convert all warnings to errors for all tests.
+
+	Returns
+	-------
+	contextManager : Generator[None, Any, None]
+		Context manager that configures warnings as errors and restores settings.
+
+	"""
 	warnings.filterwarnings("error")
 	yield
 	warnings.resetwarnings()
@@ -129,6 +199,17 @@ def oneTestCuzTestsOverwritingTests(oeisID_1random: str) -> tuple[int, ...]:
 
 	The returned map shape is guaranteed to be computationally feasible for testing purposes,
 	avoiding cases that would take excessive time to complete during test runs.
+
+	Parameters
+	----------
+	oeisID_1random : str
+		Random OEIS sequence identifier from the `oeisID_1random` fixture.
+
+	Returns
+	-------
+	mapDimensions : tuple[int, ...]
+		Valid map dimensions suitable for testing fold counting operations.
+
 	"""
 	while True:
 		n = random.choice(settingsOEIS[oeisID_1random]['valuesTestValidation'])
@@ -143,8 +224,19 @@ def oneTestCuzTestsOverwritingTests(oeisID_1random: str) -> tuple[int, ...]:
 
 @pytest.fixture
 def mapShapeTestCountFolds(oeisID: str) -> tuple[int, ...]:
-	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
-	if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts."""
+	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation` if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts.
+
+	Parameters
+	----------
+	oeisID : str
+		OEIS sequence identifier from the `oeisID` fixture.
+
+	Returns
+	-------
+	mapDimensions : tuple[int, ...]
+		Valid map dimensions suitable for testing fold counting operations.
+
+	"""
 	while True:
 		n = random.choice(settingsOEIS[oeisID]['valuesTestValidation'])
 		if n < 2:
@@ -158,9 +250,21 @@ def mapShapeTestCountFolds(oeisID: str) -> tuple[int, ...]:
 
 @pytest.fixture
 def mapShapeTestFunctionality(oeisID_1random: str) -> tuple[int, ...]:
-	"""To test functionality, get one `listDimensions` from `valuesTestValidation` if
-	`validateListDimensions` approves. The algorithm can count the folds of the returned
-	`listDimensions` in a short enough time suitable for testing."""
+	"""To test functionality, get one `listDimensions` from `valuesTestValidation` if `validateListDimensions` approves.
+
+	The algorithm can count the folds of the returned `listDimensions` in a short enough time suitable for testing.
+
+	Parameters
+	----------
+	oeisID_1random : str
+		Random OEIS sequence identifier from the `oeisID_1random` fixture.
+
+	Returns
+	-------
+	mapDimensions : tuple[int, ...]
+		Valid map dimensions that can be processed quickly for functional testing.
+
+	"""
 	while True:
 		n = random.choice(settingsOEIS[oeisID_1random]['valuesTestValidation'])
 		if n < 2:
@@ -174,20 +278,46 @@ def mapShapeTestFunctionality(oeisID_1random: str) -> tuple[int, ...]:
 
 @pytest.fixture
 def mapShapeTestParallelization(oeisID: str) -> tuple[int, ...]:
-	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestParallelization`"""
+	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestParallelization`.
+
+	Parameters
+	----------
+	oeisID : str
+		OEIS sequence identifier from the `oeisID` fixture.
+
+	Returns
+	-------
+	mapDimensions : tuple[int, ...]
+		Map dimensions suitable for testing parallelization features.
+
+	"""
 	n = random.choice(settingsOEIS[oeisID]['valuesTestParallelization'])
 	return settingsOEIS[oeisID]['getMapShape'](n)
 
 @pytest.fixture
 def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]:
-	"""Mock time.perf_counter_ns for consistent benchmark timing."""
+	"""Mock time.perf_counter_ns for consistent benchmark timing.
+
+	Returns
+	-------
+	mockTimer : Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]
+		Mock timer that returns predictable timing values for testing benchmarks.
+
+	"""
 	with unittest.mock.patch('time.perf_counter_ns') as mockTimer:
 		mockTimer.side_effect = [0, 1e9]  # Start and end times for 1 second
 		yield mockTimer
 
 @pytest.fixture
 def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
-	"""Creates a mock function that simulates _countFolds behavior."""
+	"""Creates a mock function that simulates _countFolds behavior.
+
+	Returns
+	-------
+	mockFactory : Callable[..., Callable[..., None]]
+		Factory function that creates mock folding functions with specified behavior.
+
+	"""
 	def make_mock(foldsValue: int, listDimensions: list[int]) -> Callable[..., None]:
 		mock_array = makeDataContainer(2, numpy.int32)
 		mock_array[0] = foldsValue
@@ -196,18 +326,39 @@ def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
 
 		def mock_countFolds(**keywordArguments: Any) -> None:
 			keywordArguments['foldGroups'][:] = mock_array
-			return None
 
 		return mock_countFolds
 	return make_mock
 
 @pytest.fixture(params=oeisIDsImplemented)
 def oeisID(request: pytest.FixtureRequest) -> Any:
+	"""Parametrized fixture providing all implemented OEIS sequence identifiers.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	request : pytest.FixtureRequest
+		The pytest request object containing the current parameter value.
+
+	Returns
+	-------
+	sequenceIdentifier : Any
+		OEIS sequence identifier for testing across all implemented sequences.
+
+	"""
 	return request.param
 
 @pytest.fixture
 def oeisID_1random() -> str:
-	"""Return one random valid OEIS ID."""
+	"""Return one random valid OEIS ID.
+
+	Returns
+	-------
+	randomSequenceIdentifier : str
+		Randomly selected OEIS sequence identifier from implemented sequences.
+
+	"""
 	return random.choice(oeisIDsImplemented)
 
 def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
@@ -219,13 +370,21 @@ def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments
 	test suite.
 
 	Parameters
-		expected: The value or exception type that was expected
-		actual: The value or exception type that was actually received
-		functionName: Name of the function being tested
-		arguments: Arguments that were passed to the function
+	----------
+	expected : Any
+		The value or exception type that was expected.
+	actual : Any
+		The value or exception type that was actually received.
+	functionName : str
+		Name of the function being tested.
+	arguments : Any
+		Arguments that were passed to the function.
 
 	Returns
-		formattedMessage: A formatted string showing the test context and comparison
+	-------
+	formattedMessage : str
+		A formatted string showing the test context and comparison.
+
 	"""
 	return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"
 			f"Expected: {expected}\n"
@@ -243,9 +402,14 @@ def standardizedEqualToCallableReturn(expected: Any, functionTarget: Callable[..
 	return value.
 
 	Parameters
-		expected: Expected return value or exception type
-		functionTarget: The function to test
-		arguments: Arguments to pass to the function
+	----------
+	expected : Any
+		Expected return value or exception type.
+	functionTarget : Callable[..., Any]
+		The function to test.
+	arguments : Any
+		Arguments to pass to the function.
+
 	"""
 	if type(expected) is type[Exception]:
 		messageExpected = expected.__name__
@@ -264,13 +428,18 @@ def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: 
 	"""Template for tests expecting SystemExit.
 
 	Parameters
-		expected: Exit code expectation:
-			- "error": any non-zero exit code
-			- "nonError": specifically zero exit code
-			- int: exact exit code match
-			- Sequence[int]: exit code must be one of these values
-		functionTarget: The function to test
-		arguments: Arguments to pass to the function
+	----------
+	expected : str | int | Sequence[int]
+		Exit code expectation:
+		- "error": any non-zero exit code
+		- "nonError": specifically zero exit code
+		- int: exact exit code match
+		- Sequence[int]: exit code must be one of these values
+	functionTarget : Callable[..., Any]
+		The function to test.
+	arguments : Any
+		Arguments to pass to the function.
+
 	"""
 	with pytest.raises(SystemExit) as exitInfo:
 		functionTarget(*arguments)

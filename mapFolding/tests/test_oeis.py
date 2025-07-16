@@ -26,19 +26,14 @@ which is crucial for maintaining package reliability in production environments.
 
 from contextlib import redirect_stdout
 from mapFolding.oeis import (
-	clearOEIScache, getOEISids, getOEISidValues, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented,
-	settingsOEIS, validateOEISid,
-)
-from pathlib import Path
-from tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
-from typing import Any, NoReturn
-from urllib.error import URLError
+	clearOEIScache, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented, settingsOEIS, validateOEISid)
+from mapFolding.tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
+from typing import Any
 import io
 import pytest
 import random
 import re as regex
 import unittest.mock
-import urllib.request
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID: str) -> None:
@@ -56,11 +51,11 @@ def test__validateOEISid_valid_id_case_insensitive(oeisID: str) -> None:
 	standardizedEqualToCallableReturn(oeisID.upper(), validateOEISid, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [
-	(-random.randint(1, 100), "randomNegative"),
+	(-random.randint(1, 100), "randomNegative"),  # noqa: S311
 	("foo", "string"),
 	(1.5, "float")
 ]
-badValues, badValuesIDs = zip(*parameters_test_aOFn_invalid_n)
+badValues, badValuesIDs = zip(*parameters_test_aOFn_invalid_n, strict=True)
 @pytest.mark.parametrize("badN", badValues, ids=badValuesIDs)
 def test_aOFn_invalid_n(oeisID_1random: str, badN: Any) -> None:
 	"""Check that negative or non-integer n raises ValueError."""
@@ -86,15 +81,6 @@ def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unitt
 	else:
 		mock_exists.assert_called_once()
 		mock_unlink.assert_not_called()
-
-# Monkey tests
-# def testNetworkError(monkeypatch: pytest.MonkeyPatch, pathCacheTesting: Path) -> None:
-# 	"""Test network error handling."""
-# 	def mockUrlopen(*args: Any, **kwargs: Any) -> NoReturn:
-# 		raise URLError("Network error")
-
-# 	monkeypatch.setattr(urllib.request, 'urlopen', mockUrlopen)
-# 	standardizedEqualToCallableReturn(URLError, getOEISidValues, next(iter(settingsOEIS)))
 
 # ===== Command Line Interface Tests =====
 def testHelpText() -> None:

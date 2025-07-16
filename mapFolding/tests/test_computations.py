@@ -1,5 +1,7 @@
 """Core computational verification and algorithm validation tests.
 
+(AI generated docstring)
+
 This module validates the mathematical correctness of map folding computations and
 serves as the primary testing ground for new computational approaches. It's the most
 important module for users who create custom folding algorithms or modify existing ones.
@@ -28,8 +30,8 @@ from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import settingsOEIS
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
+from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
 from pathlib import Path, PurePosixPath
-from tests.conftest import registrarRecordsTmpObject, standardizedEqualToCallableReturn
 from typing import Literal
 import importlib.util
 import multiprocessing
@@ -42,12 +44,22 @@ if __name__ == '__main__':
 def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: Literal['daoOfMapFolding', 'theorem2', 'theorem2numba']) -> None:
 	"""Validate that different computational flows produce identical results.
 
+	(AI generated docstring)
+
 	This is the primary test for ensuring mathematical consistency across different
 	algorithmic implementations. When adding a new computational approach, include
 	it in the parametrized flow list to verify it produces correct results.
 
 	The test compares the output of each flow against known correct values from
 	OEIS sequences, ensuring that optimization techniques don't compromise accuracy.
+
+	Parameters
+	----------
+	mapShapeTestCountFolds : tuple[int, ...]
+		The map shape dimensions to test fold counting for.
+	flow : Literal['daoOfMapFolding', 'theorem2', 'theorem2numba']
+		The computational flow algorithm to validate.
+
 	"""
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, flow)
 
@@ -73,9 +85,11 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 	for n in settingsOEIS[oeisID]['valuesTestValidation']:
 		standardizedEqualToCallableReturn(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
-@pytest.mark.parametrize('pathFilenameTmpTesting', ['.py'], indirect=True)
-def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilenameTmpTesting: Path) -> None:
+@pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
+def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:
 	"""Test dynamic code generation and execution for computational modules.
+
+	(AI generated docstring)
 
 	This test validates the package's ability to generate, compile, and execute
 	optimized computational code at runtime. It's essential for users working with
@@ -84,6 +98,14 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	The test creates a complete computational module, executes it, and verifies
 	that the generated code produces mathematically correct results. This pattern
 	can be adapted for testing other dynamically generated computational approaches.
+
+	Parameters
+	----------
+	oneTestCuzTestsOverwritingTests : tuple[int, ...]
+		The map shape dimensions for testing code generation.
+	pathFilename_tmpTesting : Path
+		The temporary file path for generated module testing.
+
 	"""
 	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # noqa: PLC0415
 	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba  # noqa: PLC0415
@@ -91,9 +113,9 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	state = MapFoldingState(mapShape)
 	state = initializeGroupsOfFolds(state)
 
-	pathFilenameModule = pathFilenameTmpTesting.absolute()
+	pathFilenameModule = pathFilename_tmpTesting.absolute()
 	pathFilenameFoldsTotal = pathFilenameModule.with_suffix('.foldsTotalTesting')
-	registrarRecordsTmpObject(pathFilenameFoldsTotal)
+	registrarRecordsTemporaryFilesystemObject(pathFilenameFoldsTotal)
 
 	jobTest = RecipeJobTheorem2Numba(state
 						, pathModule=PurePosixPath(pathFilenameModule.parent)
@@ -104,11 +126,11 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 
 	Don_Lapre_Road_to_Self_Improvement = importlib.util.spec_from_file_location("__main__", pathFilenameModule)
 	if Don_Lapre_Road_to_Self_Improvement is None:
-		msg = f"Failed to create module specification from {pathFilenameModule}"
-		raise ImportError(msg)
+		message = f"Failed to create module specification from {pathFilenameModule}"
+		raise ImportError(message)
 	if Don_Lapre_Road_to_Self_Improvement.loader is None:
-		msg = f"Failed to get loader for module {pathFilenameModule}"
-		raise ImportError(msg)
+		message = f"Failed to get loader for module {pathFilenameModule}"
+		raise ImportError(message)
 	module = importlib.util.module_from_spec(Don_Lapre_Road_to_Self_Improvement)
 
 	module.__name__ = "__main__"

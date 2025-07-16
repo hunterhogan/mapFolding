@@ -64,29 +64,12 @@ For larger maps, these calculations require hours or days to complete. A 2×20 s
 
 **Combinatorial Problem Solving**: Use the framework as a template for optimizing other recursive combinatorial algorithms.
 
-## Example Usage
-
-```python
-from mapFolding import countFolds
-
-# Count folding patterns for a 3×3 square
-result = countFolds([3, 3])
-
-# Access OEIS sequences directly
-from mapFolding import oeisIDfor_n
-strip_foldings = oeisIDfor_n('A001415', 6)  # 2×6 strip
-
-# Generate optimized code for specific dimensions
-from mapFolding.someAssemblyRequired import makeJobTheorem2Numba
-# Creates specialized modules for maximum performance
-```
-
 ## Repository Structure
 
 - `mapFolding/`: Core implementation with modular architecture
 - `reference/`: Historical algorithm implementations and performance studies
 - `someAssemblyRequired/`: AST transformation framework
-- `tests/`: Comprehensive validation suite
+- `mapFolding/tests/`: Comprehensive validation suite
 - `jobs/`: Generated optimized modules for specific calculations
 
 ## Performance Characteristics

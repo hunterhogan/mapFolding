@@ -31,11 +31,11 @@ from os import PathLike
 from pathlib import PurePath
 import contextlib
 
-def countFolds(listDimensions: Sequence[int] | None = None  # noqa: C901
+def countFolds(listDimensions: Sequence[int] | None = None  # noqa: C901, PLR0912, PLR0915
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 				, computationDivisions: int | str | None = None
-				, CPUlimit: int | float | bool | None = None
-				# , * I need to improve `standardizedEqualToCallableReturn` so it will work with keyword arguments
+				# , * # TODO improve `standardizedEqualToCallableReturn` so it will work with keyword arguments
+				, CPUlimit: int | float | bool | None = None  # noqa: FBT001
 				, mapShape: tuple[int, ...] | None = None
 				, oeisID: str | None = None
 				, oeis_n: int | None = None
@@ -142,7 +142,7 @@ def countFolds(listDimensions: Sequence[int] | None = None  # noqa: C901
 		mapFoldingState = doTheNeedful(mapFoldingState)
 		foldsTotal = mapFoldingState.foldsTotal
 
-	elif flow == 'theorem2' and any(dimension > 2 for dimension in mapShape):  # noqa: PLR2004
+	elif flow == 'theorem2' and any(dimension > 2 for dimension in mapShape):
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
@@ -154,7 +154,7 @@ def countFolds(listDimensions: Sequence[int] | None = None  # noqa: C901
 
 		foldsTotal = mapFoldingState.foldsTotal
 
-	elif flow == 'theorem2Trimmed' and any(dimension > 2 for dimension in mapShape):  # noqa: PLR2004
+	elif flow == 'theorem2Trimmed' and any(dimension > 2 for dimension in mapShape):
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
@@ -166,7 +166,7 @@ def countFolds(listDimensions: Sequence[int] | None = None  # noqa: C901
 
 		foldsTotal = mapFoldingState.foldsTotal
 
-	elif (flow == 'theorem2Numba' or taskDivisions == 0) and any(dimension > 2 for dimension in mapShape):  # noqa: PLR2004
+	elif (flow == 'theorem2Numba' or taskDivisions == 0) and any(dimension > 2 for dimension in mapShape):
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 

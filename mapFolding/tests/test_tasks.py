@@ -29,7 +29,7 @@ from collections.abc import Callable
 from hunterMakesPy.pytestForYourUse import PytestFor_defineConcurrencyLimit
 from mapFolding import (
 	countFolds, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions, setProcessorLimit, validateListDimensions)
-from tests.conftest import standardizedEqualToCallableReturn
+from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import Literal
 import multiprocessing
 import pytest
@@ -60,10 +60,10 @@ def test_countFolds_cpuLimitOopsie(mapShapeTestFunctionality: tuple[int, ...], C
 	(["invalid"], 4, [19, 23], ValueError),
 	(20, 4, [3,5], ValueError)
 ])
-def test_getTaskDivisions(computationDivisions: None | list[str] | Literal['maximum'] | Literal['cpu'] | Literal[20],
-							concurrencyLimit: Literal[4],
-							listDimensions: list[int],
-							expectedTaskDivisions: type[ValueError] | Literal[0] | Literal[77] | Literal[4]) -> None:
+def test_getTaskDivisions(computationDivisions: Literal['maximum', 'cpu', 20] | None | list[str]
+						, concurrencyLimit: Literal[4]
+						, listDimensions: list[int]
+						, expectedTaskDivisions: Literal[0, 77, 4] | type[ValueError]) -> None:
 	mapShape = validateListDimensions(listDimensions)
 	leavesTotal = getLeavesTotal(mapShape)
 	standardizedEqualToCallableReturn(expectedTaskDivisions, getTaskDivisions, computationDivisions, concurrencyLimit, leavesTotal)

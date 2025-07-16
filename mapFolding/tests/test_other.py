@@ -29,7 +29,7 @@ from collections.abc import Callable
 from hunterMakesPy import intInnit
 from hunterMakesPy.pytestForYourUse import PytestFor_intInnit, PytestFor_oopsieKwargsie
 from mapFolding import getLeavesTotal, setProcessorLimit, validateListDimensions
-from tests.conftest import standardizedEqualToCallableReturn
+from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import Any, Literal
 import multiprocessing
 import numba
@@ -60,11 +60,11 @@ import sys
 	([float('nan')], ValueError, ValueError),  # NaN
 	([sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], (sys.maxsize, sys.maxsize)),  # overflow protection
 	(range(3, 7), [3, 4, 5, 6], (3, 4, 5, 6)),  # range sequence type
-	(tuple([3, 5, 7]), [3, 5, 7], (3, 5, 7)),  # tuple sequence type
+	(tuple([3, 5, 7]), [3, 5, 7], (3, 5, 7)),  # tuple sequence type  # noqa: C409
 ])
-def test_listDimensionsAsParameter(listDimensions: None | list[str] | list[int] | list[float] | list[None] | list[bool] | list[list[int]] | list[complex] | range | tuple[int, ...],
-							expected_intInnit: type[ValueError] | list[int] | type[TypeError],
-							expected_validateListDimensions: type[ValueError] | type[NotImplementedError] | tuple[int, ...] | type[TypeError]) -> None:
+def test_listDimensionsAsParameter(listDimensions: None | list[Any] | range | tuple[Any, ...]
+	, expected_intInnit: type[Any] | list[int]
+	, expected_validateListDimensions: type[Any] | tuple[int, ...]) -> None:
 	"""Test both validateListDimensions and getLeavesTotal with the same inputs."""
 	standardizedEqualToCallableReturn(expected_intInnit, intInnit, listDimensions)
 	standardizedEqualToCallableReturn(expected_validateListDimensions, validateListDimensions, listDimensions)
@@ -98,6 +98,6 @@ def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> N
 	(0, numba.get_num_threads()),
 	(1, 1),
 ])
-def test_setCPUlimitNumba(CPUlimit: None | float | bool | Literal[4] | Literal[-2] | Literal[0] | Literal[1], expectedLimit: Any | int) -> None:
+def test_setCPUlimitNumba(CPUlimit: Literal[4, -2, 0, 1] | None | float | bool, expectedLimit: Any | int) -> None:
 	numba.set_num_threads(multiprocessing.cpu_count())
 	standardizedEqualToCallableReturn(expectedLimit, setProcessorLimit, CPUlimit, 'numba')
