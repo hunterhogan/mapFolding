@@ -70,10 +70,11 @@ optional-dependencies = { development = [
   "numba",
   "numba_progress",
 ], testing = [
-  "pytest",
+  "numba",
   "pytest-cov",
   "pytest-env",
   "pytest-xdist",
+  "pytest",
 ] }
 
 [build-system]
