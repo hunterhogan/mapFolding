@@ -16,12 +16,12 @@ authors:
   family-names: Hogan
   email: HunterHogan@pm.me
 cff-version: 1.2.0
-commit: d115651b4e2411b1823a055c6ff3c762176ffc00
-date-released: '2025-07-14'
+commit: 2f2d11d7091583f46374e17e42e58b3e45e24622
+date-released: '2025-07-18'
 identifiers:
 - type: url
-  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.12.3
-  description: The URL for mapFolding 0.12.3.
+  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.13.0
+  description: The URL for mapFolding 0.13.0.
 keywords:
 - A000136
 - A001415
@@ -35,6 +35,7 @@ keywords:
 - algorithmic optimization
 - code generation
 - code transformation
+- codon optimization
 - combinatorics
 - computational geometry
 - dataclass transformation
@@ -47,9 +48,9 @@ keywords:
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.12.3/
-repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.12.3
+repository-artifact: https://pypi.org/project/mapfolding/0.13.0/
+repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.13.0
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.12.3
+version: 0.13.0
