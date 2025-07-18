@@ -28,7 +28,8 @@ which is useful if you're working with the code synthesis features of the packag
 from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import settingsOEIS
-from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
+from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
+from mapFolding.someAssemblyRequired.makeAllModules import parametersNumbaLight
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
 from pathlib import Path, PurePosixPath
@@ -110,18 +111,17 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # noqa: PLC0415
 	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba  # noqa: PLC0415
 	mapShape = oneTestCuzTestsOverwritingTests
-	state = MapFoldingState(mapShape)
-	state = initializeGroupsOfFolds(state)
+	state = initializeGroupsOfFolds(MapFoldingState(mapShape))
 
 	pathFilenameModule = pathFilename_tmpTesting.absolute()
 	pathFilenameFoldsTotal = pathFilenameModule.with_suffix('.foldsTotalTesting')
 	registrarRecordsTemporaryFilesystemObject(pathFilenameFoldsTotal)
 
-	jobTest = RecipeJobTheorem2Numba(state
+	jobTest = RecipeJobTheorem2(state
 						, pathModule=PurePosixPath(pathFilenameModule.parent)
 						, moduleIdentifier=pathFilenameModule.stem
 						, pathFilenameFoldsTotal=PurePosixPath(pathFilenameFoldsTotal))
-	spices = SpicesJobNumba(useNumbaProgressBar=False)
+	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
 	makeJobNumba(jobTest, spices)
 
 	Don_Lapre_Road_to_Self_Improvement = importlib.util.spec_from_file_location("__main__", pathFilenameModule)

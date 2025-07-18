@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.12.3"
+version = "0.13.0"
 description = "Map folding algorithm with code transformation framework for optimizing numerical computations."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -19,6 +19,7 @@ keywords = [
   "algorithmic optimization",
   "code generation",
   "code transformation",
+  "codon optimization",
   "combinatorics",
   "computational geometry",
   "dataclass transformation",
@@ -36,16 +37,21 @@ classifiers = [
   "Intended Audience :: Education",
   "Intended Audience :: Science/Research",
   "Natural Language :: English",
+  "Operating System :: MacOS",
   "Operating System :: OS Independent",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python",
   "Topic :: Scientific/Engineering :: Information Analysis",
   "Topic :: Scientific/Engineering :: Mathematics",
   "Topic :: Software Development :: Code Generators",
   "Topic :: Software Development :: Compilers",
   "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Software Development :: Pre-processors",
   "Typing :: Typed",
 ]
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Issues = "https://github.com/hunterhogan/mapFolding/issues", Repository = "https://github.com/hunterhogan/mapFolding.git" }
@@ -53,8 +59,6 @@ scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", clearOEIScache = "mapFold
 dependencies = [
   "astToolkit",
   "hunterMakesPy",
-  "numba",
-  "numba_progress",
   "numpy",
   "platformdirs",
 ]
@@ -62,6 +66,9 @@ optional-dependencies = { development = [
   "mypy",
   "pyupgrade",
   "setuptools-scm",
+], numba = [
+  "numba",
+  "numba_progress",
 ], testing = [
   "pytest",
   "pytest-cov",

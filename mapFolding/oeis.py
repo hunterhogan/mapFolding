@@ -8,7 +8,7 @@ folding ecosystem into the broader mathematical community through comprehensive
 integration with the Online Encyclopedia of Integer Sequences (OEIS). This bridge
 enables validation of computational results against established mathematical
 knowledge while supporting the discovery of new sequence values through the
-sophisticated computational pipeline.
+sophisticated computational assembly line.
 
 The integration provides multiple pathways for mathematical verification: direct
 computation of OEIS sequences using the complete algorithmic implementation,

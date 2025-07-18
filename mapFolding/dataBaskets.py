@@ -29,122 +29,109 @@ import dataclasses
 class MapFoldingState:
 	"""Core computational state for map folding algorithms.
 
-	(AI generated docstring)
-
-	This class encapsulates all data needed to perform map folding computations,
-	from the basic map dimensions through the complex internal arrays needed
-	for efficient algorithmic processing. It serves as both a data container
-	and a computational interface, providing properties and methods that
-	abstract the underlying complexity.
-
-	The class handles automatic initialization of all computational arrays
-	based on the map dimensions, ensuring consistent sizing and type usage
-	throughout the computation. It also manages the relationship between
-	different data domains (leaves, elephino, folds) defined in the type system.
-
-	Key Design Features include automatic array sizing based on map dimensions,
-	type-safe access to computational data, lazy initialization of expensive arrays,
-	integration with NumPy for performance, and metadata preservation for code generation.
+	This class encapsulates all data needed to perform map folding computations and metadata useful for code transformations.
 
 	Attributes
 	----------
 	mapShape : tuple[DatatypeLeavesTotal, ...]
 		Dimensions of the map being analyzed for folding patterns.
 	groupsOfFolds : DatatypeFoldsTotal = DatatypeFoldsTotal(0)
-		Current count of distinct folding pattern groups discovered.
+		Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings.
 	gap1ndex : DatatypeElephino = DatatypeElephino(0)
-		Current position in gap enumeration algorithms.
+		The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed.
 	gap1ndexCeiling : DatatypeElephino = DatatypeElephino(0)
-		Upper bound for gap enumeration operations.
+		The upper bound of `gap1ndex`.
 	indexDimension : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
-		Current dimension being processed in multi-dimensional algorithms.
+		The current 0-indexed position of the dimension during computation.
 	indexLeaf : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
-		Current leaf being processed in sequential algorithms.
+		The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`.
 	indexMiniGap : DatatypeElephino = DatatypeElephino(0)
-		Current position within a gap subdivision.
+		The current 0-indexed position of a 'gap' in a loop during computation.
 	leaf1ndex : DatatypeLeavesTotal = DatatypeLeavesTotal(1)
-		One-based leaf index for algorithmic compatibility.
+		The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed.
 	leafConnectee : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 		Target leaf for connection operations.
 	dimensionsUnconstrained : DatatypeLeavesTotal = None
 		Count of dimensions not subject to folding constraints.
 	countDimensionsGapped : Array1DLeavesTotal = None
-		Array tracking gap counts across dimensions.
+		Array tracking computed number of dimensions with gaps.
 	gapRangeStart : Array1DElephino = None
-		Array of starting positions for gap ranges.
+		Array tracking computed starting positions of gap ranges.
 	gapsWhere : Array1DLeavesTotal = None
 		Array indicating locations of gaps in the folding pattern.
 	leafAbove : Array1DLeavesTotal = None
-		Array mapping each leaf to the leaf above it in the folding.
+		Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation.
 	leafBelow : Array1DLeavesTotal = None
-		Array mapping each leaf to the leaf below it in the folding.
+		Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation.
 	connectionGraph : Array3D
-		Three-dimensional representation of leaf connectivity.
+		Unchanging array representing connections between all leaves.
 	dimensionsTotal : DatatypeLeavesTotal
-		Total number of dimensions in the map.
+		Unchanging total number of dimensions in the map.
 	leavesTotal : DatatypeLeavesTotal
-		Total number of individual leaves in the map.
+		Unchanging total number of leaves in the map.
 
 	"""
 
 	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
+	"""Dimensions of the map being analyzed for folding patterns."""
 
 	groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})
+	"""Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings."""
 
 	gap1ndex: DatatypeElephino = DatatypeElephino(0)  # noqa: RUF009
+	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
 	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)  # noqa: RUF009
+	"""The upper bound of `gap1ndex`."""
 	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)  # noqa: RUF009
+	"""The current 0-indexed position of the dimension during computation."""
 	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)  # noqa: RUF009
+	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
 	indexMiniGap: DatatypeElephino = DatatypeElephino(0)  # noqa: RUF009
+	"""The current 0-indexed position of a 'gap' in a loop during computation."""
 	leaf1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
+	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
 	leafConnectee: DatatypeLeavesTotal = DatatypeLeavesTotal(0)  # noqa: RUF009
+	"""Target leaf for connection operations."""
 
 	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Count of dimensions not subject to folding constraints."""
 
 	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array tracking computed number of dimensions with gaps."""
 	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array tracking computed starting positions of gap ranges."""
 	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array indicating locations of gaps in the folding pattern."""
 	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation."""
 	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
 
 	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'dtype': Array3D.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+	"""Unchanging array representing connections between all leaves."""
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	"""Unchanging total number of dimensions in the map."""
 	leavesTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	"""Unchanging total number of leaves in the map."""
 	@property
 	def foldsTotal(self) -> DatatypeFoldsTotal:
-		"""Calculate the total number of possible folding patterns for this map.
-
-		(AI generated docstring)
+		"""The total number of possible folding patterns for this map.
 
 		Returns
 		-------
-		totalFoldingPatterns : DatatypeFoldsTotal
+		totalFoldings : DatatypeFoldsTotal
 			The complete count of distinct folding patterns achievable with the current map configuration.
-
-		Notes
-		-----
-		This represents the fundamental result of map folding analysis - the total
-		number of unique ways a map can be folded given its dimensional constraints.
 
 		"""
 		return DatatypeFoldsTotal(self.leavesTotal) * self.groupsOfFolds
 
 	def __post_init__(self) -> None:
-		"""Initialize all computational arrays and derived values after dataclass construction.
-
-		(AI generated docstring)
-
-		This method performs the expensive operations needed to prepare the state
-		for computation, including array allocation, dimension calculation, and
-		connection graph generation. It runs automatically after the dataclass
-		constructor completes.
+		"""Ensure all fields have a value.
 
 		Notes
 		-----
-		Arrays that are not explicitly provided (None) are automatically
-		allocated with appropriate sizes based on the map dimensions.
-		The connection graph is always regenerated to ensure consistency
-		with the provided map shape.
+		Arrays that are not explicitly provided (None) are automatically allocated with appropriate sizes based on the map
+		dimensions. `dimensionsTotal`, `leavesTotal`, and `connectionGraph` cannot be set: they are calculated.
 
 		"""
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))

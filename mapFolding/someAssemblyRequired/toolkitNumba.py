@@ -140,7 +140,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	(AI generated docstring)
 
 	This function applies Numba's `@jit` decorator to an existing function definition within
-	an `IngredientsFunction` container. It handles the complete transformation pipeline
+	an `IngredientsFunction` container. It handles the complete transformation assembly line
 	including removing any existing decorators that might conflict with Numba, constructing
 	type signatures for Numba compilation when possible, applying the `@jit` decorator with
 	specified or default parameters, and updating import requirements to include necessary

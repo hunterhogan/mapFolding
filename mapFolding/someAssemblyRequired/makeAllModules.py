@@ -329,7 +329,7 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 
 	The generated module contains multiple functions including core counting function with parallel-aware task filtering,
 	dataclass unpacking/repacking function for process communication, and main dispatcher function that manages the parallel
-	execution pipeline.
+	execution assembly line.
 
 	Parameters
 	----------

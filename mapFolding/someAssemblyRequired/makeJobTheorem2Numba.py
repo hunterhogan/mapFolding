@@ -35,7 +35,7 @@ from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import autoDecodingRLE, raiseIfNone
 from mapFolding import getPathFilenameFoldsTotal, MapFoldingState, packageSettings
 from mapFolding.someAssemblyRequired import IfThis
-from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2Numba
+from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from pathlib import PurePosixPath
@@ -46,26 +46,9 @@ import ast
 if TYPE_CHECKING:
 	from collections.abc import Callable
 
-# Configuration lists for code optimization and dead code elimination
-listIdentifiersNotUsedAllHARDCODED: list[str] = ['concurrencyLimit', 'foldsTotal', 'mapShape']
-"""Identifiers that are universally unused across all optimization contexts."""
-
-listIdentifiersNotUsedParallelSequentialHARDCODED: list[str] = ['indexLeaf']
-"""Identifiers unused in both parallel and sequential execution modes."""
-
-listIdentifiersNotUsedSequentialHARDCODED: list[str] = ['foldGroups', 'taskDivisions', 'taskIndex']
-"""Identifiers unused specifically in sequential execution mode."""
-
-listIdentifiersReplacedHARDCODED: list[str] = ['groupsOfFolds']
-"""Identifiers that get replaced with optimized equivalents during transformation."""
-
 listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal']
-"""Identifiers with compile-time constant values that can be embedded directly."""
 
-listIdentifiersNotUsedHARDCODED: list[str] = listIdentifiersStaticValuesHARDCODED + listIdentifiersReplacedHARDCODED + listIdentifiersNotUsedAllHARDCODED + listIdentifiersNotUsedParallelSequentialHARDCODED + listIdentifiersNotUsedSequentialHARDCODED
-"""Complete list of all identifiers that can be eliminated during optimization."""
-
-def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> tuple[IngredientsModule, IngredientsFunction]:
+def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2, spices: SpicesJobNumba) -> tuple[IngredientsModule, IngredientsFunction]:
 	"""Add progress tracking capabilities to a Numba-optimized function.
 
 	(AI generated docstring)
@@ -130,7 +113,7 @@ if __name__ == '__main__':
 
 	return ingredientsModule, ingredientsFunction
 
-def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2Numba) -> IngredientsFunction:
+def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
 	"""Convert function parameters into initialized variables with concrete values.
 
 	(AI generated docstring)
@@ -201,12 +184,12 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	ast.fix_missing_locations(ingredientsFunction.astFunctionDef)
 	return ingredientsFunction
 
-def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
+def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 	"""Generate an optimized Numba-compiled computation module for map folding calculations.
 
 	(AI generated docstring)
 
-	This function orchestrates the complete code transformation pipeline to convert
+	This function orchestrates the complete code transformation assembly line to convert
 	a generic map folding algorithm into a highly optimized, specialized computation
 	module. The transformation process includes:
 
@@ -234,10 +217,6 @@ def makeJobNumba(job: RecipeJobTheorem2Numba, spices: SpicesJobNumba) -> None:
 	astFunctionDef: ast.FunctionDef = raiseIfNone(extractFunctionDef(job.source_astModule, job.countCallable))
 	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
 
-	# Remove `foldGroups` and any other unused statements, so you can dynamically determine which variables are not used
-	# NodeChanger[ast.Name, None](Be.Assign.targetsIs(lambda list_expr: any(IfThis.isSubscriptIdentifier('foldGroups')(node) for node in list_expr)) , Then.removeIt).visit(ingredientsCount.astFunctionDef)  # noqa: ERA001
-
-	# replace identifiers with static values with their values, so you can dynamically determine which variables are not used
 	listIdentifiersStaticValues: list[str] = listIdentifiersStaticValuesHARDCODED
 	for identifier in listIdentifiersStaticValues:
 		findThis: Callable[[ast.AST], TypeIs[ast.Name] | bool] = IfThis.isNameIdentifier(identifier)
@@ -308,7 +287,7 @@ if __name__ == '__main__':
 		)
 		ingredientsModule.appendPrologue(statement=statement)
 
-	ingredientsCount.imports.removeImportFromModule('mapFolding.theSSOT')
+	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
 
 	listNumPyTypeConfigs = [
 		DatatypeConfig(fml='Array1DLeavesTotal', Z0Z_module='numpy', Z0Z_type_name='uint8', Z0Z_asname='Array1DLeavesTotal'),
@@ -347,15 +326,11 @@ if __name__ == '__main__':
 	"""
 
 if __name__ == '__main__':
-	mapShape = (2,4)
-	state = MapFoldingState(mapShape)
-	state = initializeGroupsOfFolds(state)
-	# foldsTotalEstimated = getFoldsTotalKnown(state.mapShape) // state.leavesTotal  # noqa: ERA001
-	# foldsTotalEstimated = dictionaryEstimates[state.mapShape] // state.leavesTotal  # noqa: ERA001
-	foldsTotalEstimated = 0
+	state = initializeGroupsOfFolds(MapFoldingState((2,4)))
 	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
-	aJob = RecipeJobTheorem2Numba(state, foldsTotalEstimated, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
+	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
-	# spices = SpicesJobNumba()  # noqa: ERA001
 	makeJobNumba(aJob, spices)
+
+# TODO Improve this module with lessons learned in `makeJobTheorem2codon`.

@@ -1,31 +1,4 @@
-"""
-Map folding AST transformation system: Configuration management and transformation orchestration.
-
-This module provides the configuration orchestration layer of the map folding AST transformation
-system, implementing comprehensive recipes that coordinate the entire transformation process from
-abstract mathematical algorithms to optimized computational modules. The `RecipeJobTheorem2Numba`
-dataclass serves as the central configuration blueprint that bridges pattern recognition, dataclass
-decomposition, function optimization, and Numba compilation into a unified transformation process.
-
-The recipe system addresses the complexity of managing transformation parameters across multiple
-stages while maintaining consistency between source algorithm metadata and target optimization
-requirements. The orchestration layer coordinates the systematic extraction of mathematical
-functions from source modules, embedding of concrete parameter values, elimination of dead code
-paths, and generation of standalone Python modules optimized for specific map dimensions through
-the complete transformation process.
-
-Configuration management separates source analysis capabilities from target generation parameters,
-enabling systematic exploration of computational spaces through automated generation of optimized
-solvers. Source analysis encompasses parsing and analysis of abstract syntax trees from generic
-algorithm modules, extraction of specific mathematical functions for specialization, and
-identification of dataclass structures for parameter embedding. Target generation coordinates
-creation of standalone Python modules with optimized implementations, integration of Numba
-optimization directives, and preservation of mathematical correctness throughout optimization.
-
-The recipe system enables the broader map folding research framework by providing systematic
-control over the transformation process while ensuring that generated modules achieve maximum
-performance through compile-time specialization and runtime optimization strategies.
-"""
+"""Configuration by dataclass."""
 
 from ast import Module
 from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
@@ -40,20 +13,18 @@ from typing import TypeAlias
 import dataclasses
 
 @dataclasses.dataclass
-class RecipeJobTheorem2Numba:
-	"""Configuration recipe for generating Numba-optimized map folding computation jobs.
+class RecipeJobTheorem2:
+	"""Configuration recipe for generating map folding computation jobs.
 
 	This dataclass serves as the central configuration hub for the code transformation
-	pipeline that converts generic map folding algorithms into highly optimized,
+	assembly line that converts generic map folding algorithms into highly optimized,
 	specialized computation modules. The recipe encapsulates all parameters required
 	for source code analysis, target file generation, datatype mapping, and compilation
 	optimization settings.
 
 	The transformation process operates by extracting functions from source modules,
 	embedding concrete parameter values, eliminating dead code paths, and generating
-	standalone Python modules optimized for specific map dimensions. These generated
-	modules achieve maximum performance through Numba just-in-time compilation and
-	embedded compile-time constants.
+	standalone Python modules optimized for specific map dimensions.
 
 	The recipe maintains both source configuration (where to find the generic algorithm)
 	and target configuration (where to write the optimized module), along with the
@@ -61,83 +32,117 @@ class RecipeJobTheorem2Numba:
 
 	Attributes
 	----------
-	state: The map folding computation state containing dimensions and initial values.
-	foldsTotalEstimated: Estimated total number of folds for progress tracking (0).
-	shatteredDataclass: Deconstructed dataclass metadata for code transformation.
-	source_astModule: Parsed AST of the source module containing the generic algorithm.
-	sourceCountCallable: Name of the counting function to extract ('count').
-	sourceLogicalPathModuleDataclass: Logical path to the dataclass module.
-	sourceDataclassIdentifier: Name of the source dataclass ('MapFoldingState').
-	sourceDataclassInstance: Instance identifier for the dataclass.
-	sourcePathPackage: Path to the source package.
-	sourcePackageIdentifier: Name of the source package.
-	pathPackage: Override path for the target package (None).
-	pathModule: Override path for the target module directory.
-	fileExtension: File extension for generated modules.
-	pathFilenameFoldsTotal: Path for writing fold count results.
-	packageIdentifier: Target package identifier (None).
-	logicalPathRoot: Logical path root corresponding to filesystem directory.
-	moduleIdentifier: Target module identifier.
-	countCallable: Name of the counting function in generated module.
-	dataclassIdentifier: Target dataclass identifier.
-	dataclassInstance: Target dataclass instance identifier.
-	logicalPathModuleDataclass: Logical path to target dataclass module.
-	DatatypeFoldsTotal: Type alias for fold count datatype.
-	DatatypeElephino: Type alias for intermediate computation datatype.
-	DatatypeLeavesTotal: Type alias for leaf count datatype.
+	state : MapFoldingState
+		The map folding computation state containing dimensions and initial values.
+	foldsTotalEstimated : int = 0
+		Estimated total number of folds for progress tracking.
+	shatteredDataclass : ShatteredDataclass = None
+		Deconstructed dataclass metadata for code transformation.
+	source_astModule : Module
+		Parsed AST of the source module containing the generic algorithm.
+	sourceCountCallable : str = 'count'
+		Name of the counting function to extract.
+	sourceLogicalPathModuleDataclass : identifierDotAttribute
+		Logical path to the dataclass module.
+	sourceDataclassIdentifier : str = 'MapFoldingState'
+		Name of the source dataclass.
+	sourceDataclassInstance : str
+		Instance identifier for the dataclass.
+	sourcePathPackage : PurePosixPath | None
+		Path to the source package.
+	sourcePackageIdentifier : str | None
+		Name of the source package.
+	pathPackage : PurePosixPath | None = None
+		Override path for the target package.
+	pathModule : PurePosixPath | None
+		Override path for the target module directory.
+	fileExtension : str
+		File extension for generated modules.
+	pathFilenameFoldsTotal : PurePosixPath = None
+		Path for writing fold count results.
+	packageIdentifier : str | None = None
+		Target package identifier.
+	logicalPathRoot : identifierDotAttribute | None = None
+		Logical path root; probably corresponds to physical filesystem directory.
+	moduleIdentifier : str = None
+		Target module identifier.
+	countCallable : str
+		Name of the counting function in generated module.
+	dataclassIdentifier : str | None
+		Target dataclass identifier.
+	dataclassInstance : str | None
+		Target dataclass instance identifier.
+	logicalPathModuleDataclass : identifierDotAttribute | None
+		Logical path to target dataclass module.
+	DatatypeFoldsTotal : TypeAlias
+		Type alias for fold count datatype.
+	DatatypeElephino : TypeAlias
+		Type alias for intermediate computation datatype.
+	DatatypeLeavesTotal : TypeAlias
+		Type alias for leaf count datatype.
 	"""
 
 	state: MapFoldingState
-	# TODO create function to calculate `foldsTotalEstimated`
+	"""The map folding computation state containing dimensions and initial values."""
 	foldsTotalEstimated: int = 0
+	"""Estimated total number of folds for progress tracking."""
 	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
+	"""Deconstructed dataclass metadata for code transformation."""
 
 	# Source -----------------------------------------
 	source_astModule: Module = parseLogicalPath2astModule('mapFolding.syntheticModules.theorem2Numba')  # noqa: RUF009
+	"""Parsed AST of the source module containing the generic algorithm."""
 	sourceCountCallable: str = 'count'
+	"""Name of the counting function to extract."""
 
 	sourceLogicalPathModuleDataclass: identifierDotAttribute = 'mapFolding.dataBaskets'
+	"""Logical path to the dataclass module."""
 	sourceDataclassIdentifier: str = 'MapFoldingState'
+	"""Name of the source dataclass."""
 	sourceDataclassInstance: str = dataclassInstanceIdentifierDEFAULT
+	"""Instance identifier for the dataclass."""
 
 	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageSettings.pathPackage)  # noqa: RUF009
+	"""Path to the source package."""
 	sourcePackageIdentifier: str | None = packageSettings.identifierPackage
+	"""Name of the source package."""
 
 	# Filesystem, names of physical objects ------------------------------------------
 	pathPackage: PurePosixPath | None = None
+	"""Override path for the target package."""
 	pathModule: PurePosixPath | None = PurePosixPath(getPathRootJobDEFAULT())  # noqa: RUF009
-	""" `pathModule` will override `pathPackage` and `logicalPathRoot`."""
+	"""Override path for the target module directory."""
 	fileExtension: str = packageSettings.fileExtension
+	"""File extension for generated modules."""
 	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
+	"""Path for writing fold count results."""
 
 	# Logical identifiers, as opposed to physical identifiers ------------------------
 	packageIdentifier: str | None = None
+	"""Target package identifier."""
 	logicalPathRoot: identifierDotAttribute | None = None
-	""" `logicalPathRoot` likely corresponds to a physical filesystem directory."""
+	"""Logical path root; probably corresponds to physical filesystem directory."""
 	moduleIdentifier: str = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
+	"""Target module identifier."""
 	countCallable: str = sourceCountCallable
+	"""Name of the counting function in generated module."""
 	dataclassIdentifier: str | None = sourceDataclassIdentifier
+	"""Target dataclass identifier."""
 	dataclassInstance: str | None = sourceDataclassInstance
+	"""Target dataclass instance identifier."""
 	logicalPathModuleDataclass: identifierDotAttribute | None = sourceLogicalPathModuleDataclass
+	"""Logical path to target dataclass module."""
 
 	# Datatypes ------------------------------------------
 	DatatypeFoldsTotal: TypeAlias = TheDatatypeFoldsTotal
+	"""Type alias for datatype linked to the magnitude of `foldsTotal`."""
 	DatatypeElephino: TypeAlias = TheDatatypeElephino
+	"""Type alias for intermediate computation datatype."""
 	DatatypeLeavesTotal: TypeAlias = TheDatatypeLeavesTotal
+	"""Type alias for datatype linked to the magnitude of `leavesTotal`."""
 
-	def _makePathFilename(self,
-			pathRoot: PurePosixPath | None = None,
-			logicalPathINFIX: identifierDotAttribute | None = None,
-			filenameStem: str | None = None,
-			fileExtension: str | None = None,
-			) -> PurePosixPath:
+	def _makePathFilename(self, pathRoot: PurePosixPath | None = None, logicalPathINFIX: identifierDotAttribute | None = None, filenameStem: str | None = None, fileExtension: str | None = None) -> PurePosixPath:
 		"""Construct a complete file path from component parts.
-
-		(AI generated docstring)
-
-		This helper method builds filesystem paths by combining a root directory,
-		optional subdirectory structure, filename stem, and file extension. It provides
-		sensible defaults for missing components based on the recipe configuration.
 
 		Parameters
 		----------
@@ -172,8 +177,6 @@ class RecipeJobTheorem2Numba:
 	def pathFilenameModule(self) -> PurePosixPath:
 		"""Generate the complete path and filename for the output module.
 
-		(AI generated docstring)
-
 		This property computes the target location where the generated computation
 		module will be written. It respects the `pathModule` override if specified,
 		otherwise constructs the path using the default package structure.
@@ -191,8 +194,6 @@ class RecipeJobTheorem2Numba:
 
 	def __post_init__(self) -> None:
 		"""Initialize computed fields and validate configuration after dataclass creation.
-
-		(AI generated docstring)
 
 		This method performs post-initialization setup including deriving module
 		identifier from map shape if not explicitly provided, setting default paths

@@ -46,6 +46,7 @@ For larger maps, these calculations require hours or days to complete. A 2×20 s
 - **Automatic code generation** that produces standalone, highly optimized computation modules
 - **Dataclass decomposition** to enable Numba compatibility while preserving readable source code
 - **Comprehensive optimization** including dead code elimination, static value embedding, and aggressive compilation settings
+- **codon code generation**: compile map folding computation modules using [Codon](https://docs.exaloop.io/start/install/), enabling high-performance native binaries from Python source code.
 
 ### Educational Resources
 
@@ -58,7 +59,7 @@ For larger maps, these calculations require hours or days to complete. A 2×20 s
 
 **Mathematical Research**: Explore folding pattern properties, extend known sequences, or validate theoretical results against computed values.
 
-**Algorithm Optimization Learning**: Study a complete transformation pipeline that converts high-level algorithms into production-ready optimized code.
+**Algorithm Optimization Learning**: Study a complete transformation assembly line that converts high-level algorithms into production-ready optimized code.
 
 **Performance Computing Education**: Examine techniques for achieving maximum Python performance through Numba integration, AST manipulation, and specialized code generation.
 
