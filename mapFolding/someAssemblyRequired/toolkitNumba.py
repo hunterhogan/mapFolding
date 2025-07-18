@@ -26,7 +26,9 @@ system to produce standalone modules optimized for specific map dimensions and c
 """
 
 from astToolkit import identifierDotAttribute, IngredientsFunction, Make
-from typing import cast, Final, NotRequired, TYPE_CHECKING, TypedDict
+from collections.abc import Callable
+from numba.core.compiler import CompilerBase as numbaCompilerBase
+from typing import Any, Final, NotRequired, TYPE_CHECKING, TypedDict
 import ast
 import dataclasses
 import warnings
@@ -69,7 +71,7 @@ class ParametersNumba(TypedDict):
 	forceinline: NotRequired[bool]
 	forceobj: NotRequired[bool]
 	inline: NotRequired[str]
-	# locals: NotRequired[dict[str, Any]]
+	locals: NotRequired[dict[str, Any]]
 	looplift: NotRequired[bool]
 	no_cfunc_wrapper: NotRequired[bool]
 	no_cpython_wrapper: NotRequired[bool]
@@ -77,8 +79,8 @@ class ParametersNumba(TypedDict):
 	nogil: NotRequired[bool]
 	nopython: NotRequired[bool]
 	parallel: NotRequired[bool]
-	# pipeline_class: NotRequired[type[numbaCompilerBase]]
-	# signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
+	pipeline_class: NotRequired[type[numbaCompilerBase]]
+	signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
 	target: NotRequired[str]
 
 parametersNumbaDefault: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False }
@@ -257,10 +259,10 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 
 	if ingredientsFunction.astFunctionDef.returns and isinstance(ingredientsFunction.astFunctionDef.returns, ast.Name):
 		theReturn: ast.Name = ingredientsFunction.astFunctionDef.returns
-		list_argsDecorator = [cast("ast.expr", Make.Call(Make.Name(theReturn.id)
-							, list_arg4signature_or_function if list_arg4signature_or_function else [], [] ) )]
+		list_argsDecorator = [Make.Call(Make.Name(theReturn.id)
+							, list_arg4signature_or_function if list_arg4signature_or_function else [], [] )]
 	elif list_arg4signature_or_function:
-		list_argsDecorator = [cast("ast.expr", Make.Tuple(list_arg4signature_or_function))]
+		list_argsDecorator = [Make.Tuple(list_arg4signature_or_function)]
 
 	ingredientsFunction.astFunctionDef = Z0Z_UnhandledDecorators(ingredientsFunction.astFunctionDef)
 	if parametersNumba is None:

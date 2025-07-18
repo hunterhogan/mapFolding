@@ -9,7 +9,6 @@ from mapFolding import (
 from mapFolding.someAssemblyRequired import dataclassInstanceIdentifierDEFAULT, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
-from typing import TypeAlias
 import dataclasses
 
 @dataclasses.dataclass
@@ -134,11 +133,11 @@ class RecipeJobTheorem2:
 	"""Logical path to target dataclass module."""
 
 	# Datatypes ------------------------------------------
-	DatatypeFoldsTotal: TypeAlias = TheDatatypeFoldsTotal
+	type DatatypeFoldsTotal = TheDatatypeFoldsTotal
 	"""Type alias for datatype linked to the magnitude of `foldsTotal`."""
-	DatatypeElephino: TypeAlias = TheDatatypeElephino
+	type DatatypeElephino = TheDatatypeElephino
 	"""Type alias for intermediate computation datatype."""
-	DatatypeLeavesTotal: TypeAlias = TheDatatypeLeavesTotal
+	type DatatypeLeavesTotal = TheDatatypeLeavesTotal
 	"""Type alias for datatype linked to the magnitude of `leavesTotal`."""
 
 	def _makePathFilename(self, pathRoot: PurePosixPath | None = None, logicalPathINFIX: identifierDotAttribute | None = None, filenameStem: str | None = None, fileExtension: str | None = None) -> PurePosixPath:

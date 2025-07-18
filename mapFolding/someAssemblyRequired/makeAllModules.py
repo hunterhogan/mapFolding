@@ -299,7 +299,7 @@ def makeDaoOfMapFolding(astModule: ast.Module, moduleIdentifier: str, callableId
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
-		astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist[ast.Return, ast.expr | None](Be.Return.valueIs(Be.Tuple)
+		astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
 				, doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)))
 		astTuple.ctx = ast.Store()
 
@@ -743,7 +743,7 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	targetCallableIdentifier = astImportFrom.names[0].name
 	ingredientsFunction = raiseIfNone(unpackDataclassCallFunctionRepackDataclass(ingredientsFunction, targetCallableIdentifier, shatteredDataclass))
 	targetFunctionDef: ast.FunctionDef = raiseIfNone(extractFunctionDef(parseLogicalPath2astModule(raiseIfNone(astImportFrom.module)), targetCallableIdentifier))
-	astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist[ast.Return, ast.expr | None](Be.Return.valueIs(Be.Tuple)
+	astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
 			, doThat=Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef)))
 	astTuple.ctx = ast.Store()
 

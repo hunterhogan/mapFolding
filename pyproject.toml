@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.13.0"
+version = "0.13.1"
 description = "Map folding algorithm with code transformation framework for optimizing numerical computations."
 readme = "README.md"
 requires-python = ">=3.12"

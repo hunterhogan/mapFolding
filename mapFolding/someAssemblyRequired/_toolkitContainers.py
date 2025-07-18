@@ -217,10 +217,10 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstanceIdentifier), self.name)
 
-		self.astAnnotation = raiseIfNone(NodeTourist[ast.AnnAssign, ast.Name | None](
+		self.astAnnotation = cast('ast.Name', raiseIfNone(NodeTourist(
 			findThis = Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
-			, doThat = Then.extractIt(cast("Callable[[ast.AnnAssign], ast.Name | None]", DOT.annotation))
-			).captureLastMatch(dataclassClassDef))
+			, doThat = Then.extractIt(DOT.annotation)
+			).captureLastMatch(dataclassClassDef)))
 
 		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
 
