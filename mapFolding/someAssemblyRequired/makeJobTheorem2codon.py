@@ -8,7 +8,7 @@ from astToolkit import (
 	NodeTourist, Then)
 from astToolkit.transformationTools import removeUnusedParameters, write_astModule
 from hunterMakesPy import autoDecodingRLE, raiseIfNone
-from mapFolding import getPathFilenameFoldsTotal, MapFoldingState
+from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, MapFoldingState
 from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
@@ -45,16 +45,17 @@ class DatatypeConfiguration(NamedTuple):
 # TODO replace with dynamic system. Probably use `Final` in the dataclass.
 listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal']
 
+# TODO Dynamically calculate the bitwidths of the datatypes.
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
-	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numpy', typeIdentifier='uint16', type_asname='DatatypeLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numpy', typeIdentifier='uint16', type_asname='DatatypeElephino'),
+	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
+	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeElephino'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numpy', typeIdentifier='int64', type_asname='DatatypeFoldsTotal'),
 ]
 
 listNumPy_dtype: list[DatatypeConfiguration] = [
-	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint16', type_asname='Array1DLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint16', type_asname='Array1DElephino'),
-	DatatypeConfiguration(datatypeIdentifier='Array3D', typeModule='numpy', typeIdentifier='uint16', type_asname='Array3D'),
+	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DLeavesTotal'),
+	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DElephino'),
+	DatatypeConfiguration(datatypeIdentifier='Array3D', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3D'),
 ]
 
 def _addWriteFoldsTotal(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
@@ -187,10 +188,28 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 			str(job.pathFilenameModule)]
 		subprocess.run(buildCommand, check=False)
 		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)
+		sys.stdout.write(f"sudo nice -n 19 taskset -c 0 {job.pathFilenameModule.with_suffix('')}\n")
 
-if __name__ == '__main__':
-	state = initializeGroupsOfFolds(MapFoldingState((2,4)))
+def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
+	"""Create and execute a map-folding job from map dimensions.
+
+	This function initializes a map folding computation state from the given map shape,
+	sets up the necessary file paths, and generates an optimized executable for the
+	specific map configuration.
+
+	Parameters
+	----------
+	mapShape : tuple[DatatypeLeavesTotal, ...]
+		Dimensions of the map as a tuple where each element represents the size
+		along one axis.
+
+	"""
+	state = initializeGroupsOfFolds(MapFoldingState(mapShape))
 	pathModule = PurePosixPath(Path.home(), 'mapFolding', 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	makeJob(aJob)
+
+if __name__ == '__main__':
+	mapShape = (3, 15)
+	fromMapShape(mapShape)
