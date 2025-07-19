@@ -185,6 +185,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 	if sys.platform == 'linux':
 		buildCommand: list[str] = ['codon', 'build', '--exe', '--release',
 			'--fast-math', '--enable-unsafe-fp-math', '--disable-exceptions',
+			'--mcpu=native',
 			str(job.pathFilenameModule)]
 		subprocess.run(buildCommand, check=False)
 		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)
