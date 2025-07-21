@@ -27,9 +27,9 @@ which is useful if you're working with the code synthesis features of the packag
 
 from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import settingsOEIS
-from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
+from mapFolding.oeis import dictionaryOEIS
 from mapFolding.someAssemblyRequired.makeAllModules import parametersNumbaLight
+from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
 from pathlib import Path, PurePosixPath
@@ -83,8 +83,8 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 		The OEIS sequence identifier to test calculations for.
 
 	"""
-	for n in settingsOEIS[oeisID]['valuesTestValidation']:
-		standardizedEqualToCallableReturn(settingsOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
+	for n in dictionaryOEIS[oeisID]['valuesTestValidation']:
+		standardizedEqualToCallableReturn(dictionaryOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
 @pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:

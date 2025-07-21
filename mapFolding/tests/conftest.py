@@ -24,8 +24,8 @@ research domain.
 """
 
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import getLeavesTotal, makeDataContainer, oeis, packageSettings, validateListDimensions
-from mapFolding.oeis import oeisIDsImplemented, settingsOEIS
+from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
+from mapFolding.oeis import dictionaryOEIS, oeisIDsImplemented
 from pathlib import Path
 from typing import Any
 import numpy
@@ -149,10 +149,10 @@ def pathCacheTesting(path_tmpTesting: Path) -> Generator[Path, Any, None]:
 		Context manager that provides the temporary cache path and restores original.
 
 	"""
-	pathCacheOriginal = oeis.pathCache
-	oeis.pathCache = path_tmpTesting
+	pathCacheOriginal = _theSSOT.pathCache
+	_theSSOT.pathCache = path_tmpTesting
 	yield path_tmpTesting
-	oeis.pathCache = pathCacheOriginal
+	_theSSOT.pathCache = pathCacheOriginal
 
 @pytest.fixture
 def pathFilenameFoldsTotalTesting(path_tmpTesting: Path) -> Path:
@@ -212,10 +212,10 @@ def oneTestCuzTestsOverwritingTests(oeisID_1random: str) -> tuple[int, ...]:
 
 	"""
 	while True:
-		n = random.choice(settingsOEIS[oeisID_1random]['valuesTestValidation'])
+		n = random.choice(dictionaryOEIS[oeisID_1random]['valuesTestValidation'])
 		if n < 2:
 			continue
-		listDimensionsCandidate = list(settingsOEIS[oeisID_1random]['getMapShape'](n))
+		listDimensionsCandidate = list(dictionaryOEIS[oeisID_1random]['getMapShape'](n))
 
 		try:
 			return validateListDimensions(listDimensionsCandidate)
@@ -238,10 +238,10 @@ def mapShapeTestCountFolds(oeisID: str) -> tuple[int, ...]:
 
 	"""
 	while True:
-		n = random.choice(settingsOEIS[oeisID]['valuesTestValidation'])
+		n = random.choice(dictionaryOEIS[oeisID]['valuesTestValidation'])
 		if n < 2:
 			continue
-		listDimensionsCandidate = list(settingsOEIS[oeisID]['getMapShape'](n))
+		listDimensionsCandidate = list(dictionaryOEIS[oeisID]['getMapShape'](n))
 
 		try:
 			return validateListDimensions(listDimensionsCandidate)
@@ -266,10 +266,10 @@ def mapShapeTestFunctionality(oeisID_1random: str) -> tuple[int, ...]:
 
 	"""
 	while True:
-		n = random.choice(settingsOEIS[oeisID_1random]['valuesTestValidation'])
+		n = random.choice(dictionaryOEIS[oeisID_1random]['valuesTestValidation'])
 		if n < 2:
 			continue
-		listDimensionsCandidate = list(settingsOEIS[oeisID_1random]['getMapShape'](n))
+		listDimensionsCandidate = list(dictionaryOEIS[oeisID_1random]['getMapShape'](n))
 
 		try:
 			return validateListDimensions(listDimensionsCandidate)
@@ -291,8 +291,8 @@ def mapShapeTestParallelization(oeisID: str) -> tuple[int, ...]:
 		Map dimensions suitable for testing parallelization features.
 
 	"""
-	n = random.choice(settingsOEIS[oeisID]['valuesTestParallelization'])
-	return settingsOEIS[oeisID]['getMapShape'](n)
+	n = random.choice(dictionaryOEIS[oeisID]['valuesTestParallelization'])
+	return dictionaryOEIS[oeisID]['getMapShape'](n)
 
 @pytest.fixture
 def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]:

@@ -26,108 +26,42 @@ completes the journey from configuration foundation to mathematical discovery.
 
 from collections.abc import Callable
 from datetime import datetime, timedelta, UTC
-from functools import cache
 from hunterMakesPy import writeStringToHere
-from mapFolding import countFolds, packageSettings
+from itertools import chain
+from mapFolding import countFolds
+from mapFolding._theSSOT import cacheDays, pathCache, settingsOEISManuallySelected
 from pathlib import Path
 from typing import Any, Final, TypedDict
 from urllib.request import urlopen
 import argparse
-import random
 import sys
 import time
 import warnings
 
-cacheDays = 30
-"""Number of days to retain cached OEIS data before refreshing from the online source."""
-
-pathCache: Path = packageSettings.pathPackage / ".cache"
-"""Local directory path for storing cached OEIS sequence data and metadata."""
-
-class SettingsOEIS(TypedDict):
-	"""Complete configuration settings for a single OEIS sequence implementation.
-
-	(AI generated docstring)
-
-	This `TypedDict` defines the structure for storing all metadata, known values, and operational parameters
-	needed to work with an OEIS sequence within the map folding context.
-
-	"""
+class MetadataOEISid(TypedDict):
+	"""Settings for an implemented OEIS sequence."""
 
 	description: str
+	"""The OEIS.org description of the integer sequence."""
 	getMapShape: Callable[[int], tuple[int, ...]]
+	"""Function to convert the OEIS sequence index, 'n', to its `mapShape` tuple."""
 	offset: int
+	"""The starting index, 'n', of the sequence, typically 0 or 1."""
 	valuesBenchmark: list[int]
+	"""List of index values, 'n', to use when benchmarking the algorithm performance."""
 	valuesKnown: dict[int, int]
+	"""Dictionary of sequence indices, 'n', to their known values, `foldsTotal`."""
 	valuesTestParallelization: list[int]
+	"""List of index values, 'n', to use when testing parallelization performance."""
 	valuesTestValidation: list[int]
+	"""List of index values, 'n', to use when testing validation performance."""
 	valueUnknown: int
+	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
 
-class SettingsOEIShardcodedValues(TypedDict):
-	"""Hardcoded configuration values for OEIS sequences defined within the module.
-
-	(AI generated docstring)
-
-	This `TypedDict` contains the static configuration data that is embedded in the source code
-	rather than retrieved from external sources.
-
-	"""
-
-	getMapShape: Callable[[int], tuple[int, ...]]
-	valuesBenchmark: list[int]
-	valuesTestParallelization: list[int]
-	valuesTestValidation: list[int]
-
-settingsOEIShardcodedValues: dict[str, SettingsOEIShardcodedValues] = {
-	'A000136': {
-		'getMapShape': lambda n: tuple(sorted([1, n])),
-		'valuesBenchmark': [14],
-		'valuesTestParallelization': [*range(3, 7)],
-		'valuesTestValidation': [random.randint(2, 9)],  # noqa: S311
-	},
-	'A001415': {
-		'getMapShape': lambda n: tuple(sorted([2, n])),
-		'valuesBenchmark': [14],
-		'valuesTestParallelization': [*range(3, 7)],
-		'valuesTestValidation': [random.randint(2, 9)],  # noqa: S311
-	},
-	'A001416': {
-		'getMapShape': lambda n: tuple(sorted([3, n])),
-		'valuesBenchmark': [9],
-		'valuesTestParallelization': [*range(3, 5)],
-		'valuesTestValidation': [random.randint(2, 6)],  # noqa: S311
-	},
-	'A001417': {
-		'getMapShape': lambda n: tuple(2 for _dimension in range(n)),
-		'valuesBenchmark': [6],
-		'valuesTestParallelization': [*range(2, 4)],
-		'valuesTestValidation': [random.randint(2, 4)],  # noqa: S311
-	},
-	'A195646': {
-		'getMapShape': lambda n: tuple(3 for _dimension in range(n)),
-		'valuesBenchmark': [3],
-		'valuesTestParallelization': [*range(2, 3)],
-		'valuesTestValidation': [2],
-	},
-	'A001418': {
-		'getMapShape': lambda n: (n, n),
-		'valuesBenchmark': [5],
-		'valuesTestParallelization': [*range(2, 4)],
-		'valuesTestValidation': [random.randint(2, 4)],  # noqa: S311
-	},
-}
-"""
-Registry of hardcoded OEIS sequence configurations implemented in this module.
-
-Each key is a standardized OEIS sequence identifier (e.g., 'A001415'), and each value contains
-the static configuration needed to work with that sequence, including the mapping function from
-sequence index to map shape and various test parameter sets.
-"""
-
-oeisIDsImplemented: Final[list[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEIShardcodedValues])
+oeisIDsImplemented: Final[list[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEISManuallySelected])
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
-def validateOEISid(oeisIDcandidate: str) -> str:
+def _validateOEISid(oeisIDcandidate: str) -> str:
 	"""Validate an OEIS sequence ID against implemented sequences.
 
 	(AI generated docstring)
@@ -158,15 +92,11 @@ def validateOEISid(oeisIDcandidate: str) -> str:
 		if oeisIDcleaned in oeisIDsImplemented:
 			return oeisIDcleaned
 		else:
-			message = (
-				f"OEIS ID {oeisIDcandidate} is not directly implemented.\n"
-				f"Available sequences:\n{_formatOEISsequenceInfo()}"
-			)
-			raise KeyError(
-				message
-			)
+			message = (f"OEIS ID {oeisIDcandidate} is not directly implemented.\n"
+				f"Available sequences:\n{_formatOEISsequenceInfo()}")
+			raise KeyError(message)
 
-def getFilenameOEISbFile(oeisID: str) -> str:
+def _getFilenameOEISbFile(oeisID: str) -> str:
 	"""Generate the filename for an OEIS b-file given a sequence ID.
 
 	(AI generated docstring)
@@ -185,7 +115,7 @@ def getFilenameOEISbFile(oeisID: str) -> str:
 		The corresponding b-file filename for the given sequence ID.
 
 	"""
-	oeisID = validateOEISid(oeisID)
+	oeisID = _validateOEISid(oeisID)
 	return f"b{oeisID[1:]}.txt"
 
 def _parseBFileOEIS(OEISbFile: str) -> dict[int, int]:
@@ -222,7 +152,7 @@ def _parseBFileOEIS(OEISbFile: str) -> dict[int, int]:
 		OEISsequence[n] = aOFn
 	return OEISsequence
 
-def getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
+def _getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 	"""Retrieve OEIS sequence data from cache or online source with intelligent caching.
 
 	(AI generated docstring)
@@ -263,7 +193,8 @@ def getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 
 	if not tryCache:
 		if not url.startswith(("http:", "https:")):
-			raise ValueError("URL must start with 'http:' or 'https:'")
+			message = "URL must start with 'http:' or 'https:'"
+			raise ValueError(message)
 		with urlopen(url) as response:
 			oeisInformationRaw = response.read().decode('utf-8')
 		oeisInformation = str(oeisInformationRaw)
@@ -274,7 +205,7 @@ def getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 
 	return oeisInformation
 
-def getOEISidValues(oeisID: str) -> dict[int, int]:
+def _getOEISidValues(oeisID: str) -> dict[int, int]:
 	"""Retrieve known sequence values for a specified OEIS sequence.
 
 	(AI generated docstring)
@@ -302,16 +233,16 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 		If there is an error reading from or writing to the local cache.
 
 	"""
-	pathFilenameCache: Path = pathCache / getFilenameOEISbFile(oeisID)
-	url: str = f"https://oeis.org/{oeisID}/{getFilenameOEISbFile(oeisID)}"
+	pathFilenameCache: Path = pathCache / _getFilenameOEISbFile(oeisID)
+	url: str = f"https://oeis.org/{oeisID}/{_getFilenameOEISbFile(oeisID)}"
 
-	oeisInformation: None | str = getOEISofficial(pathFilenameCache, url)
+	oeisInformation: None | str = _getOEISofficial(pathFilenameCache, url)
 
 	if oeisInformation:
 		return _parseBFileOEIS(oeisInformation)
 	return {-1: -1}
 
-def getOEISidInformation(oeisID: str) -> tuple[str, int]:
+def _getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	"""Retrieve the description and offset metadata for an OEIS sequence.
 
 	(AI generated docstring)
@@ -338,11 +269,11 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	be retrieved, warning messages are issued and fallback values are returned.
 
 	"""
-	oeisID = validateOEISid(oeisID)
+	oeisID = _validateOEISid(oeisID)
 	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
 	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
-	oeisInformation: None | str = getOEISofficial(pathFilenameCache, url)
+	oeisInformation: None | str = _getOEISofficial(pathFilenameCache, url)
 
 	if not oeisInformation:
 		return "Not found", -1
@@ -350,7 +281,7 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	offset = None
 	for lineOEIS in oeisInformation.splitlines():
 		lineOEIS = lineOEIS.strip()  # noqa: PLW2901
-		if not lineOEIS or len(lineOEIS.split()) < 3:  # noqa: PLR2004
+		if not lineOEIS or len(lineOEIS.split()) < 3:
 			continue
 		fieldCode, sequenceID, fieldData = lineOEIS.split(maxsplit=2)
 		if fieldCode == '%N' and sequenceID == oeisID:
@@ -367,7 +298,7 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	description: str = ' '.join(listDescriptionDeconstructed)
 	return description, offset
 
-def makeSettingsOEIS() -> dict[str, SettingsOEIS]:
+def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	"""Construct the comprehensive settings dictionary for all implemented OEIS sequences.
 
 	(AI generated docstring)
@@ -390,60 +321,37 @@ def makeSettingsOEIS() -> dict[str, SettingsOEIS]:
 		objects, containing all metadata and known values needed for computation and validation.
 
 	"""
-	settingsTarget: dict[str, SettingsOEIS] = {}
+	dictionaryOEIS: dict[str, MetadataOEISid] = {}
 	for oeisID in oeisIDsImplemented:
-		valuesKnownSherpa: dict[int, int] = getOEISidValues(oeisID)
-		descriptionSherpa, offsetSherpa = getOEISidInformation(oeisID)
-		settingsTarget[oeisID] = SettingsOEIS(
+		valuesKnownSherpa: dict[int, int] = _getOEISidValues(oeisID)
+		descriptionSherpa, offsetSherpa = _getOEISidInformation(oeisID)
+		dictionaryOEIS[oeisID] = MetadataOEISid(
 			description=descriptionSherpa,
 			offset=offsetSherpa,
-			getMapShape=settingsOEIShardcodedValues[oeisID]['getMapShape'],
-			valuesBenchmark=settingsOEIShardcodedValues[oeisID]['valuesBenchmark'],
-			valuesTestParallelization=settingsOEIShardcodedValues[oeisID]['valuesTestParallelization'],
-			valuesTestValidation=settingsOEIShardcodedValues[oeisID]['valuesTestValidation'] + list(range(offsetSherpa, 2)),
+			getMapShape=settingsOEISManuallySelected[oeisID]['getMapShape'],
+			valuesBenchmark=settingsOEISManuallySelected[oeisID]['valuesBenchmark'],
+			valuesTestParallelization=settingsOEISManuallySelected[oeisID]['valuesTestParallelization'],
+			valuesTestValidation=settingsOEISManuallySelected[oeisID]['valuesTestValidation'] + list(range(offsetSherpa, 2)),
 			valuesKnown=valuesKnownSherpa,
 			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1
 		)
-	return settingsTarget
+	return dictionaryOEIS
 
-settingsOEIS: dict[str, SettingsOEIS] = makeSettingsOEIS()
-"""
-Complete settings and metadata for all implemented OEIS sequences.
+dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
+"""Metadata for each OEIS sequence ID."""
 
-This dictionary contains the comprehensive configuration for each OEIS sequence supported by the module,
-including known values retrieved from OEIS, mathematical descriptions, offset information, and all
-operational parameters needed for computation and testing. The dictionary is populated by combining
-hardcoded configurations with dynamically retrieved OEIS data during module initialization.
-"""
-
-@cache
 def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
-	"""Create a cached lookup dictionary mapping map shapes to their known folding totals.
-
-	(AI generated docstring)
-
-	This function processes all known sequence values from implemented OEIS sequences and creates
-	a unified dictionary that maps map dimension tuples to their corresponding folding totals. The
-	resulting dictionary enables rapid lookup of known values without requiring knowledge of which
-	specific OEIS sequence contains the data.
+	"""Make a `mapShape` to known `foldsTotal` dictionary.
 
 	Returns
 	-------
-	dictionaryMapDimensionsToFoldsTotalKnown : dict[tuple[int, ...], int]
+	dictionaryFoldsTotalKnown : dict[tuple[int, ...], int]
 		A dictionary where keys are tuples representing map shapes and values are the total number
 		of distinct folding patterns for those shapes.
 
 	"""
-	dictionaryMapDimensionsToFoldsTotalKnown: dict[tuple[int, ...], int] = {}
-
-	for settings in settingsOEIS.values():
-		sequence = settings['valuesKnown']
-
-		for n, foldingsTotal in sequence.items():
-			mapShape = settings['getMapShape'](n)
-			mapShape = tuple(mapShape)
-			dictionaryMapDimensionsToFoldsTotalKnown[mapShape] = foldingsTotal
-	return dictionaryMapDimensionsToFoldsTotalKnown
+	return dict(chain.from_iterable(zip(map(oeisID['getMapShape'], oeisID['valuesKnown'].keys())
+	, oeisID['valuesKnown'].values(), strict=True) for oeisID in dictionaryOEIS.values()))
 
 def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	"""Retrieve the known total number of distinct folding patterns for a given map shape.
@@ -489,7 +397,7 @@ def _formatHelpText() -> str:
 
 	"""
 	exampleOEISid: str = oeisIDsImplemented[0]
-	exampleN: int = settingsOEIS[exampleOEISid]['valuesTestValidation'][-1]
+	exampleN: int = dictionaryOEIS[exampleOEISid]['valuesTestValidation'][-1]
 
 	return (
 		"\nAvailable OEIS sequences:\n"
@@ -517,7 +425,7 @@ def _formatOEISsequenceInfo() -> str:
 
 	"""
 	return "\n".join(
-		f"  {oeisID}: {settingsOEIS[oeisID]['description']}"
+		f"  {oeisID}: {dictionaryOEIS[oeisID]['description']}"
 		for oeisID in oeisIDsImplemented
 	)
 
@@ -553,20 +461,20 @@ def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 		If n is below the sequence's defined offset.
 
 	"""
-	oeisID = validateOEISid(oeisID)
+	oeisID = _validateOEISid(oeisID)
 
 	if not isinstance(n, int) or n < 0:
 		message = f"I received `{n = }` in the form of `{type(n) = }`, but it must be non-negative integer in the form of `{int}`."
 		raise ValueError(message)
 
-	mapShape: tuple[int, ...] = settingsOEIS[oeisID]['getMapShape'](n)
+	mapShape: tuple[int, ...] = dictionaryOEIS[oeisID]['getMapShape'](n)
 
-	if n <= 1 or len(mapShape) < 2:  # noqa: PLR2004
-		offset: int = settingsOEIS[oeisID]['offset']
+	if n <= 1 or len(mapShape) < 2:
+		offset: int = dictionaryOEIS[oeisID]['offset']
 		if n < offset:
 			message = f"OEIS sequence {oeisID} is not defined at {n = }."
 			raise ArithmeticError(message)
-		foldsTotal: int = settingsOEIS[oeisID]['valuesKnown'][n]
+		foldsTotal: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
 		return foldsTotal
 	return countFolds(mapShape)
 
@@ -630,9 +538,9 @@ def clearOEIScache() -> None:
 	if not pathCache.exists():
 		print(f"Cache directory, {pathCache}, not found - nothing to clear.")  # noqa: T201
 		return
-	for oeisID in settingsOEIS:
+	for oeisID in dictionaryOEIS:
 		( pathCache / f"{oeisID}.txt" ).unlink(missing_ok=True)
-		( pathCache / getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
+		( pathCache / _getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
 	print(f"Cache cleared from {pathCache}")  # noqa: T201
 
 def getOEISids() -> None:

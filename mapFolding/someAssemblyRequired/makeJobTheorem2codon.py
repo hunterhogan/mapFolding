@@ -9,6 +9,7 @@ from astToolkit import (
 from astToolkit.transformationTools import removeUnusedParameters, write_astModule
 from hunterMakesPy import autoDecodingRLE, raiseIfNone
 from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, MapFoldingState
+from mapFolding.oeis import dictionaryOEIS, makeDictionaryFoldsTotalKnown
 from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
@@ -211,6 +212,13 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	makeJob(aJob)
 
+def makeAllModules() -> None:
+	"""Generate all map folding modules for known configurations."""
+	listMapShapes: list[tuple[int, ...]] = list(makeDictionaryFoldsTotalKnown().keys())
+	for mapShape in listMapShapes:
+		if len(mapShape) >= 2 and any(dimension > 2 for dimension in mapShape):
+			fromMapShape(mapShape)
+
 if __name__ == '__main__':
-	mapShape = (3, 15)
+	mapShape = (2, 21)
 	fromMapShape(mapShape)

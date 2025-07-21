@@ -26,7 +26,7 @@ which is crucial for maintaining package reliability in production environments.
 
 from contextlib import redirect_stdout
 from mapFolding.oeis import (
-	clearOEIScache, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented, settingsOEIS, validateOEISid)
+	_validateOEISid, clearOEIScache, dictionaryOEIS, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented)
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
 from typing import Any
 import io
@@ -37,18 +37,18 @@ import unittest.mock
 
 @pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
 def test__validateOEISid_invalid_id(badID: str) -> None:
-	standardizedEqualToCallableReturn(KeyError, validateOEISid, badID)
+	standardizedEqualToCallableReturn(KeyError, _validateOEISid, badID)
 
 def test__validateOEISid_partially_valid(oeisID_1random: str) -> None:
-	standardizedEqualToCallableReturn(KeyError, validateOEISid, f"{oeisID_1random}extra")
+	standardizedEqualToCallableReturn(KeyError, _validateOEISid, f"{oeisID_1random}extra")
 
 def test__validateOEISid_valid_id(oeisID: str) -> None:
-	standardizedEqualToCallableReturn(oeisID, validateOEISid, oeisID)
+	standardizedEqualToCallableReturn(oeisID, _validateOEISid, oeisID)
 
 def test__validateOEISid_valid_id_case_insensitive(oeisID: str) -> None:
-	standardizedEqualToCallableReturn(oeisID.upper(), validateOEISid, oeisID.lower())
-	standardizedEqualToCallableReturn(oeisID.upper(), validateOEISid, oeisID.upper())
-	standardizedEqualToCallableReturn(oeisID.upper(), validateOEISid, oeisID.swapcase())
+	standardizedEqualToCallableReturn(oeisID.upper(), _validateOEISid, oeisID.lower())
+	standardizedEqualToCallableReturn(oeisID.upper(), _validateOEISid, oeisID.upper())
+	standardizedEqualToCallableReturn(oeisID.upper(), _validateOEISid, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [
 	(-random.randint(1, 100), "randomNegative"),  # noqa: S311
@@ -75,7 +75,7 @@ def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unitt
 
 	if cacheExists:
 		# Each OEIS ID has two cache files
-		expected_calls = len(settingsOEIS) * 2
+		expected_calls = len(dictionaryOEIS) * 2
 		assert mock_unlink.call_count == expected_calls
 		mock_unlink.assert_has_calls([unittest.mock.call(missing_ok=True)] * expected_calls)
 	else:
@@ -94,7 +94,7 @@ def testHelpText() -> None:
 	# Verify content
 	for oeisID in oeisIDsImplemented:
 		assert oeisID in helpText
-		assert settingsOEIS[oeisID]['description'] in helpText
+		assert dictionaryOEIS[oeisID]['description'] in helpText
 
 	# Extract and verify examples
 

@@ -1,35 +1,30 @@
-"""
-Foundation layer for the map folding computational ecosystem.
+"""Primary goal: access and configure package settings and metadata.
 
-(AI generated docstring)
-
-This module establishes the fundamental configuration infrastructure that underpins
-all map folding operations. Map folding, as defined by Lunnon's 1971 algorithm,
-requires precise coordination of computational resources, type systems, and data
-flow management to solve the complex combinatorial problem of counting distinct
-folding patterns across multi-dimensional maps.
-
-The Single Source Of Truth (SSOT) principle governs this foundation, ensuring that
-package identity, filesystem locations, and concurrency configuration remain
-consistent across all computational phases. During packaging, static metadata is
-resolved from pyproject.toml. During installation, filesystem-dependent paths are
-dynamically discovered. During runtime, the `packageSettings` instance provides
-unified access to all configuration values, enabling the sophisticated computational
-framework that follows.
-
-This configuration foundation supports the type system definition, core utility
-functions, computational state management, result persistence, and ultimately the
-main computational interface that users interact with to solve map folding problems.
+Secondary goal: store hardcoded values until I implement a dynamic solution.
 """
 
+from collections.abc import Callable
 from hunterMakesPy import PackageSettings
+from pathlib import Path
+from typing import TypedDict
 import dataclasses
+import random
 
-packageNameHARDCODED = "mapFolding"
-"""Hardcoded package name used as fallback when dynamic resolution fails."""
-
+# TODO eliminate hardcoding
 concurrencyPackageHARDCODED = 'multiprocessing'
 """Default package identifier for concurrent execution operations."""
+
+class MetadataOEISidManuallySet(TypedDict):
+	"""Settings that are best selected by a human instead of algorithmically."""
+
+	getMapShape: Callable[[int], tuple[int, ...]]
+	"""Function to convert the OEIS sequence index, 'n', to its `mapShape` tuple."""
+	valuesBenchmark: list[int]
+	"""List of index values, 'n', to use when benchmarking the algorithm performance."""
+	valuesTestParallelization: list[int]
+	"""List of index values, 'n', to use when testing parallelization performance."""
+	valuesTestValidation: list[int]
+	"""List of index values, 'n', to use when testing validation performance."""
 
 @dataclasses.dataclass
 class mapFoldingPackageSettings(PackageSettings):
@@ -72,10 +67,57 @@ class mapFoldingPackageSettings(PackageSettings):
 	specialized numerical computations.
 	"""
 
+identifierPackageFALLBACK = "mapFolding"
+"""Hardcoded package name used as fallback when dynamic resolution fails."""
+
 concurrencyPackage = concurrencyPackageHARDCODED
 """Active concurrency package configuration for the current session."""
 
+# TODO I made a `TypedDict` before I knew how to make dataclasses and classes. Think about other data structures.
+settingsOEISManuallySelected: dict[str, MetadataOEISidManuallySet] = {
+	'A000136': {
+		'getMapShape': lambda n: tuple(sorted([1, n])),
+		'valuesBenchmark': [14],
+		'valuesTestParallelization': [*range(3, 7)],
+		'valuesTestValidation': [random.randint(2, 9)],  # noqa: S311
+	},
+	'A001415': {
+		'getMapShape': lambda n: tuple(sorted([2, n])),
+		'valuesBenchmark': [14],
+		'valuesTestParallelization': [*range(3, 7)],
+		'valuesTestValidation': [random.randint(2, 9)],  # noqa: S311
+	},
+	'A001416': {
+		'getMapShape': lambda n: tuple(sorted([3, n])),
+		'valuesBenchmark': [9],
+		'valuesTestParallelization': [*range(3, 5)],
+		'valuesTestValidation': [random.randint(2, 6)],  # noqa: S311
+	},
+	'A001417': {
+		'getMapShape': lambda n: tuple(2 for _dimension in range(n)),
+		'valuesBenchmark': [6],
+		'valuesTestParallelization': [*range(2, 4)],
+		'valuesTestValidation': [random.randint(2, 4)],  # noqa: S311
+	},
+	'A195646': {
+		'getMapShape': lambda n: tuple(3 for _dimension in range(n)),
+		'valuesBenchmark': [3],
+		'valuesTestParallelization': [*range(2, 3)],
+		'valuesTestValidation': [2],
+	},
+	'A001418': {
+		'getMapShape': lambda n: (n, n),
+		'valuesBenchmark': [5],
+		'valuesTestParallelization': [*range(2, 4)],
+		'valuesTestValidation': [random.randint(2, 4)],  # noqa: S311
+	},
+}
+
 packageSettings = mapFoldingPackageSettings(
-	identifierPackageFALLBACK=packageNameHARDCODED
+	identifierPackageFALLBACK=identifierPackageFALLBACK
 	, concurrencyPackage=concurrencyPackage)
 """Global package settings."""
+cacheDays = 30
+"""Number of days to retain cached OEIS data before refreshing from the online source."""
+pathCache: Path = packageSettings.pathPackage / ".cache"
+"""Local directory path for storing cached OEIS sequence data and metadata."""

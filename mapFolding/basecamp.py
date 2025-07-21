@@ -96,9 +96,9 @@ def countFolds(listDimensions: Sequence[int] | None = None  # noqa: C901, PLR091
 		pass
 	else:
 		if oeisID and oeis_n:
-			from mapFolding.oeis import settingsOEIS  # noqa: PLC0415
+			from mapFolding.oeis import dictionaryOEIS  # noqa: PLC0415
 			with contextlib.suppress(KeyError):
-				mapShape = settingsOEIS[oeisID]['getMapShape'](oeis_n)
+				mapShape = dictionaryOEIS[oeisID]['getMapShape'](oeis_n)
 		if not mapShape and listDimensions:
 			mapShape = validateListDimensions(listDimensions)
 
