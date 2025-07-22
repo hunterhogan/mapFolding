@@ -57,8 +57,9 @@ classifiers = [
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Issues = "https://github.com/hunterhogan/mapFolding/issues", Repository = "https://github.com/hunterhogan/mapFolding.git" }
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", clearOEIScache = "mapFolding.oeis:clearOEIScache", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
-  "astToolkit>=0.7.0",
+  "astToolkit>=0.7.1",
   "hunterMakesPy",
+  "numba",
   "numpy",
   "platformdirs",
 ]

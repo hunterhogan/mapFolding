@@ -9,22 +9,24 @@ from astToolkit import (
 from astToolkit.transformationTools import removeUnusedParameters, write_astModule
 from hunterMakesPy import autoDecodingRLE, raiseIfNone
 from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, MapFoldingState
-from mapFolding.oeis import dictionaryOEIS, makeDictionaryFoldsTotalKnown
 from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
 from pathlib import Path, PurePosixPath
-from typing import cast, NamedTuple
+from typing import cast, NamedTuple, TYPE_CHECKING
 import ast
 import subprocess
 import sys
+
+if TYPE_CHECKING:
+	from io import TextIOBase
 
 class DatatypeConfiguration(NamedTuple):
 	"""Configuration for mapping framework datatypes to compiled datatypes.
 
 	This configuration class defines how abstract datatypes used in the map folding framework should be replaced with compiled
-	datatypes during code generation. Each configuration specifies the source module, target type name, and optional import
-	alias for the transformation.
+	datatypes during code generation. Each configuration specifies the source module, target type name, and optional import alias
+	for the transformation.
 
 	Attributes
 	----------
@@ -46,7 +48,7 @@ class DatatypeConfiguration(NamedTuple):
 # TODO replace with dynamic system. Probably use `Final` in the dataclass.
 listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal']
 
-# TODO Dynamically calculate the bitwidths of the datatypes.
+# TODO Dynamically calculate the bitwidth of each datatype.
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeElephino'),
@@ -147,9 +149,8 @@ def _move_arg2body(identifier: str, job: RecipeJobTheorem2) -> ast.AnnAssign | a
 def makeJob(job: RecipeJobTheorem2) -> None:
 	"""Generate an optimized module for map folding calculations.
 
-	This function orchestrates the complete code transformation assembly line to convert
-	a generic map folding algorithm into a highly optimized, specialized computation
-	module.
+	This function orchestrates the complete code transformation assembly line to convert a generic map folding algorithm into a
+	highly optimized, specialized computation module.
 
 	Parameters
 	----------
@@ -181,23 +182,28 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 	ingredientsCount, ingredientsModule = _datatypeDefinitions(ingredientsCount, ingredientsModule)
 
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
-	write_astModule(ingredientsModule, pathFilename=job.pathFilenameModule, packageName=job.packageIdentifier)
 
 	if sys.platform == 'linux':
 		buildCommand: list[str] = ['codon', 'build', '--exe', '--release',
 			'--fast-math', '--enable-unsafe-fp-math', '--disable-exceptions',
 			'--mcpu=native',
-			str(job.pathFilenameModule)]
-		subprocess.run(buildCommand, check=False)
+			'-o', str(job.pathFilenameModule.with_suffix('')),
+			'-']
+		streamText = subprocess.Popen(buildCommand, stdin=subprocess.PIPE, text=True)
+		if streamText.stdin is not None:
+			write_astModule(ingredientsModule, pathFilename=cast('TextIOBase', streamText.stdin), packageName=job.packageIdentifier)
+			streamText.stdin.close()
+		streamText.wait()
 		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)
-		sys.stdout.write(f"sudo nice -n 19 taskset -c 0 {job.pathFilenameModule.with_suffix('')}\n")
+		sys.stdout.write(f"sudo systemd-run --unit={job.moduleIdentifier} --nice=-10 --property=CPUAffinity=0 {job.pathFilenameModule.with_suffix('')}\n")
+	else:
+		write_astModule(ingredientsModule, pathFilename=job.pathFilenameModule, packageName=job.packageIdentifier)
 
 def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
-	"""Create and execute a map-folding job from map dimensions.
+	"""Create a binary executable for a map-folding job from map dimensions.
 
-	This function initializes a map folding computation state from the given map shape,
-	sets up the necessary file paths, and generates an optimized executable for the
-	specific map configuration.
+	This function initializes a map folding computation state from the given map shape, sets up the necessary file paths, and
+	generates an optimized executable for the specific map configuration.
 
 	Parameters
 	----------
@@ -212,13 +218,7 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	makeJob(aJob)
 
-def makeAllModules() -> None:
-	"""Generate all map folding modules for known configurations."""
-	listMapShapes: list[tuple[int, ...]] = list(makeDictionaryFoldsTotalKnown().keys())
-	for mapShape in listMapShapes:
-		if len(mapShape) >= 2 and any(dimension > 2 for dimension in mapShape):
-			fromMapShape(mapShape)
-
 if __name__ == '__main__':
 	mapShape = (2, 21)
 	fromMapShape(mapShape)
+
