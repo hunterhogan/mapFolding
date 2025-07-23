@@ -319,7 +319,7 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 			message = f"I received `{dimension = }` in `{listDimensions = }`, but all dimensions must be a non-negative integer."
 			raise ValueError(message)
 		mapDimensions.append(dimension)
-	if len(mapDimensions) < 2:  # noqa: PLR2004
+	if len(mapDimensions) < 2:
 		message = f"This function requires `{listDimensions = }` to have at least two dimensions greater than 0. You may want to look at https://oeis.org/."
 		raise NotImplementedError(message)
 
