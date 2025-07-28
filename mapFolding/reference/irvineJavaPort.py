@@ -6,7 +6,7 @@ This implementation is a Python version of a Java implementation of Lunnon's alg
 
 Key characteristics:
 - Identifiers tend to match Irvine.
-- A procedural paradigm more similar to Lunnan and unlike Irvine's object-oriented implementation.
+- A procedural paradigm more similar to Lunnon and unlike Irvine's object-oriented implementation.
 - Only primitive Python data structures.
 
 Citation: https://github.com/hunterhogan/mapFolding/blob/134f2e6ecdf59fb6f6829c775475544a6aaaa800/citations/jOEIS.bibtex
