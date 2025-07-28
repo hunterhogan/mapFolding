@@ -2,16 +2,12 @@
 Ported from the Java version by Sean A. Irvine:
 https://github.com/archmageirvine/joeis/blob/80e3e844b11f149704acbab520bc3a3a25ac34ff/src/irvine/oeis/a001/A001415.java
 
-This implementation is a conversion from a well-known Java implementation of Lunnon's algorithm
-by Sean A. Irvine, a contributor to the OEIS project. It provides a clean, procedural implementation
-with straightforward variable naming and control flow that may be more approachable for
-programmers familiar with modern languages.
+This implementation is a Python version of a Java implementation of Lunnon's algorithm by Sean A. Irvine.
 
 Key characteristics:
-- Clear variable naming following modern programming conventions
-- Procedural implementation style similar to Java but adapted for Python
-- Follows the same algorithmic structure as Lunnon's original but with cleaner organization
-- Uses primitive Python data structures (lists) without NumPy dependencies
+- Identifiers tend to match Irvine.
+- A procedural paradigm more similar to Lunnan and unlike Irvine's object-oriented implementation.
+- Only primitive Python data structures.
 
 Citation: https://github.com/hunterhogan/mapFolding/blob/134f2e6ecdf59fb6f6829c775475544a6aaaa800/citations/jOEIS.bibtex
 """
