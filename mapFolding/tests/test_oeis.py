@@ -26,7 +26,7 @@ which is crucial for maintaining package reliability in production environments.
 
 from contextlib import redirect_stdout
 from mapFolding.oeis import (
-	_validateOEISid, clearOEIScache, dictionaryOEIS, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented)
+	_standardizeOEISid, clearOEIScache, dictionaryOEIS, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented)
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
 from typing import Any
 import io
@@ -35,20 +35,13 @@ import random
 import re as regex
 import unittest.mock
 
-@pytest.mark.parametrize("badID", ["A999999", "  A999999  ", "A999999extra"])
-def test__validateOEISid_invalid_id(badID: str) -> None:
-	standardizedEqualToCallableReturn(KeyError, _validateOEISid, badID)
-
-def test__validateOEISid_partially_valid(oeisID_1random: str) -> None:
-	standardizedEqualToCallableReturn(KeyError, _validateOEISid, f"{oeisID_1random}extra")
-
 def test__validateOEISid_valid_id(oeisID: str) -> None:
-	standardizedEqualToCallableReturn(oeisID, _validateOEISid, oeisID)
+	standardizedEqualToCallableReturn(oeisID, _standardizeOEISid, oeisID)
 
 def test__validateOEISid_valid_id_case_insensitive(oeisID: str) -> None:
-	standardizedEqualToCallableReturn(oeisID.upper(), _validateOEISid, oeisID.lower())
-	standardizedEqualToCallableReturn(oeisID.upper(), _validateOEISid, oeisID.upper())
-	standardizedEqualToCallableReturn(oeisID.upper(), _validateOEISid, oeisID.swapcase())
+	standardizedEqualToCallableReturn(oeisID.upper(), _standardizeOEISid, oeisID.lower())
+	standardizedEqualToCallableReturn(oeisID.upper(), _standardizeOEISid, oeisID.upper())
+	standardizedEqualToCallableReturn(oeisID.upper(), _standardizeOEISid, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [
 	(-random.randint(1, 100), "randomNegative"),  # noqa: S311

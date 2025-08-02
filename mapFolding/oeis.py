@@ -61,40 +61,21 @@ class MetadataOEISid(TypedDict):
 oeisIDsImplemented: Final[list[str]]  = sorted([oeisID.upper().strip() for oeisID in settingsOEISManuallySelected])
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
-def _validateOEISid(oeisIDcandidate: str) -> str:
-	"""Validate an OEIS sequence ID against implemented sequences.
-
-	(AI generated docstring)
-
-	If the provided ID is recognized within the application's implemented OEIS sequences, the function returns the
-	verified ID in uppercase. Otherwise, a KeyError is raised indicating that the sequence is not directly supported.
+def _standardizeOEISid(oeisID: str) -> str:
+	"""Standardize an OEIS sequence ID to uppercase and without whitespace.
 
 	Parameters
 	----------
-	oeisIDcandidate : str
-		The OEIS sequence identifier to validate.
+	oeisID : str
+		The OEIS sequence identifier to standardize.
 
 	Returns
 	-------
-	str
-		The validated and possibly modified OEIS sequence ID, if recognized.
-
-	Raises
-	------
-	KeyError
-		If the provided sequence ID is not directly implemented.
+	oeisIDstandardized : str
+		Uppercase, alphanumeric OEIS ID.
 
 	"""
-	if oeisIDcandidate in oeisIDsImplemented:
-		return oeisIDcandidate
-	else:
-		oeisIDcleaned: str = str(oeisIDcandidate).upper().strip()
-		if oeisIDcleaned in oeisIDsImplemented:
-			return oeisIDcleaned
-		else:
-			message = (f"OEIS ID {oeisIDcandidate} is not directly implemented.\n"
-				f"Available sequences:\n{_formatOEISsequenceInfo()}")
-			raise KeyError(message)
+	return str(oeisID).upper().strip()
 
 def _getFilenameOEISbFile(oeisID: str) -> str:
 	"""Generate the filename for an OEIS b-file given a sequence ID.
@@ -115,7 +96,7 @@ def _getFilenameOEISbFile(oeisID: str) -> str:
 		The corresponding b-file filename for the given sequence ID.
 
 	"""
-	oeisID = _validateOEISid(oeisID)
+	oeisID = _standardizeOEISid(oeisID)
 	return f"b{oeisID[1:]}.txt"
 
 def _parseBFileOEIS(OEISbFile: str) -> dict[int, int]:
@@ -205,7 +186,7 @@ def _getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 
 	return oeisInformation
 
-def _getOEISidValues(oeisID: str) -> dict[int, int]:
+def getOEISidValues(oeisID: str) -> dict[int, int]:
 	"""Retrieve known sequence values for a specified OEIS sequence.
 
 	(AI generated docstring)
@@ -242,7 +223,7 @@ def _getOEISidValues(oeisID: str) -> dict[int, int]:
 		return _parseBFileOEIS(oeisInformation)
 	return {-1: -1}
 
-def _getOEISidInformation(oeisID: str) -> tuple[str, int]:
+def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	"""Retrieve the description and offset metadata for an OEIS sequence.
 
 	(AI generated docstring)
@@ -269,7 +250,7 @@ def _getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	be retrieved, warning messages are issued and fallback values are returned.
 
 	"""
-	oeisID = _validateOEISid(oeisID)
+	oeisID = _standardizeOEISid(oeisID)
 	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
 	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
@@ -323,8 +304,8 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	"""
 	dictionaryOEIS: dict[str, MetadataOEISid] = {}
 	for oeisID in oeisIDsImplemented:
-		valuesKnownSherpa: dict[int, int] = _getOEISidValues(oeisID)
-		descriptionSherpa, offsetSherpa = _getOEISidInformation(oeisID)
+		valuesKnownSherpa: dict[int, int] = getOEISidValues(oeisID)
+		descriptionSherpa, offsetSherpa = getOEISidInformation(oeisID)
 		dictionaryOEIS[oeisID] = MetadataOEISid(
 			description=descriptionSherpa,
 			offset=offsetSherpa,
@@ -461,7 +442,7 @@ def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 		If n is below the sequence's defined offset.
 
 	"""
-	oeisID = _validateOEISid(oeisID)
+	oeisID = _standardizeOEISid(oeisID)
 
 	if not isinstance(n, int) or n < 0:
 		message = f"I received `{n = }` in the form of `{type(n) = }`, but it must be non-negative integer in the form of `{int}`."
