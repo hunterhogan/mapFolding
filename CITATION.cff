@@ -16,41 +16,112 @@ authors:
   family-names: Hogan
   email: HunterHogan@pm.me
 cff-version: 1.2.0
-commit: a304cd54f8a6c4b606b394cd44e211b17ce3260d
-date-released: '2025-07-18'
+commit: 0e444c71e9429db39638844ea6b3e3c3e1dd860f
+date-released: '2025-08-02'
 identifiers:
 - type: url
-  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.13.1
-  description: The URL for mapFolding 0.13.1.
+  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.14.0
+  description: The URL for mapFolding 0.14.0.
 keywords:
 - A000136
+- A000560
+- A000682
 - A001415
 - A001416
 - A001417
 - A001418
+- A005315
+- A005316
 - A195646
-- AST manipulation
-- Numba optimization
-- OEIS
+- A223094
+- A259702
+- A301620
+- abstract syntax tree
+- algorithmic combinatorics
 - algorithmic optimization
+- arch configurations
+- AST manipulation
+- automated code generation
+- bit-packed arrays
+- bitwise state machines
+- cache-efficient algorithms
+- closed meandric numbers
 - code generation
+- code optimization
+- code synthesis
 - code transformation
 - codon optimization
+- combinatorial computing
+- combinatorial enumeration
+- combinatorial geometry
+- combinatorial mathematics
+- combinatorial problem solver
 - combinatorics
+- computational combinatorics
 - computational geometry
+- crossing patterns
+- curve crossings
 - dataclass transformation
+- discrete mathematics
+- dynamic compilation
+- enumerative combinatorics
 - folding pattern enumeration
+- folding problems
+- GPU acceleration
+- high-performance computing
+- integer sequences
+- JIT compilation
 - just-in-time compilation
+- kernel optimization
+- labeled stamp folding
+- low-level computation
 - map folding
+- mapFolding
+- mathematical algorithms
+- mathematical modeling
+- mathematical optimization
+- mathematical patterns
+- mathematical software
+- mathematical tool
+- mathematical visualization
+- meander enumeration
+- meanders
+- meandric systems
+- memory-efficient enumeration
+- metaprogramming
+- Numba optimization
+- numerical algorithms
+- numerical computation
+- OEIS
+- open meandric systems
+- paper folding mathematics
+- parallel computing
+- pattern recognition
 - performance optimization
+- permutation patterns
+- permutations
+- post-setup optimization
+- pyproject
+- Python optimization
+- scientific computing
+- semi-meanders
+- sequence analysis
+- sequence calculator
+- sequence enumeration
+- sequence explorer
+- sequence generation
 - source code analysis
 - stamp folding
+- symbolic computation
+- topological combinatorics
+- topological patterns
+- typed Python
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.13.1/
-repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.13.1
+repository-artifact: https://pypi.org/project/mapfolding/0.14.0/
+repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.14.0
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.13.1
+version: 0.14.0
