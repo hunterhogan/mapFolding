@@ -1,5 +1,4 @@
 from mapFolding._oeisFormulas.A000136 import A000136
-from mapFolding._oeisFormulas.matrixMeanders import curveMaximum
 from mapFolding.oeis import dictionaryOEIS
 import sys
 import time

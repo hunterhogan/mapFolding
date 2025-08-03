@@ -35,7 +35,7 @@ curveMaximum: dict[int, limitLocators] = {
 25: limitLocators(18014398509481984, 0xaaaaaaaaaaaaaa, 0x55555555555555),
 26: limitLocators(72057594037927936, 0x2aaaaaaaaaaaaaa, 0x155555555555555),
 27: limitLocators(288230376151711744, 0xaaaaaaaaaaaaaaa, 0x555555555555555),
-28: limitLocators(1152921504606846976, 0x2aaaaaaaaaaaaaaa, 0x1555555555555555),
+28: limitLocators(1152921504606846976, 0x2aaaaaaaaaaaaaaa, 0x1555555555555555), # 0x2aaaaaaaaaaaaaaa.bit_length() = 62
 29: limitLocators(4611686018427387904, 0xaaaaaaaaaaaaaaaa, 0x5555555555555555),
 30: limitLocators(18446744073709551616, 0x2aaaaaaaaaaaaaaaa, 0x15555555555555555),
 31: limitLocators(73786976294838206464, 0xaaaaaaaaaaaaaaaaa, 0x55555555555555555),
