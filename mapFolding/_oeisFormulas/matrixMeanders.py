@@ -1,5 +1,8 @@
 from mapFolding._oeisFormulas.matrixMeandersAnnex import curveMaximum as curveMaximum
+from queue import Empty, SimpleQueue
+from time import sleep
 from typing import NamedTuple
+import contextlib
 
 class BifurcatedCurves(NamedTuple):
     bifurcationEven: int
@@ -7,24 +10,33 @@ class BifurcatedCurves(NamedTuple):
     distinctCrossings: int
     curveLocationsMAXIMUM: int
 
-dictionaryCurveLocations: dict[int, list[int]] = {}
+dictionaryCurveLocations: dict[int, int] = {}
+simpleQueueCurveLocations: SimpleQueue[tuple[int, int]] = SimpleQueue()
+
+def unpackQueue() -> dict[int, int]:
+	with contextlib.suppress(Empty):
+		while True:
+			curveLocations, distinctCrossings = simpleQueueCurveLocations.get_nowait()
+			dictionaryCurveLocations[curveLocations] = dictionaryCurveLocations.get(curveLocations, 0) + distinctCrossings
+
+	return dictionaryCurveLocations
 
 def getCurveLocations(bridges: int) -> list[BifurcatedCurves]:
 	global dictionaryCurveLocations  # noqa: PLW0603
+	dictionaryCurveLocations = unpackQueue()
 	curveLocationsMAXIMUM, bifurcationEvenLocator, bifurcationOddLocator = curveMaximum[bridges]
 	listBifurcatedCurves: list[BifurcatedCurves] = []
 	# TODO This is ready for concurrency and/or vectorization.
-	for curveLocations, listDistinctCrossings in dictionaryCurveLocations.items():
+	for curveLocations, distinctCrossings in dictionaryCurveLocations.items():
 		bifurcationEven = (curveLocations & bifurcationEvenLocator) >> 1
 		bifurcationOdd = (curveLocations & bifurcationOddLocator)
-		distinctCrossings = sum(listDistinctCrossings)
 		listBifurcatedCurves.append(BifurcatedCurves(bifurcationEven, bifurcationOdd, distinctCrossings, curveLocationsMAXIMUM))
 	dictionaryCurveLocations = {}
 	return listBifurcatedCurves
 
 def recordAnalysis(curveLocationAnalysis: int, curveLocationsMAXIMUM: int, distinctCrossings: int) -> None:
 	if curveLocationAnalysis < curveLocationsMAXIMUM:
-		dictionaryCurveLocations.setdefault(curveLocationAnalysis, []).append(distinctCrossings)
+		simpleQueueCurveLocations.put((curveLocationAnalysis, distinctCrossings))
 
 def analyzeCurve(bifurcationEven: int, bifurcationOdd: int, distinctCrossings: int, curveLocationsMAXIMUM: int) -> None:
 	bifurcationEvenFinalZero = (bifurcationEven & 0b1) == 0
@@ -64,7 +76,7 @@ def analyzeCurve(bifurcationEven: int, bifurcationOdd: int, distinctCrossings: i
 
 def initializeCurveLocations(startingCurveLocations: dict[int, int]) -> None:
 	global dictionaryCurveLocations  # noqa: PLW0603
-	dictionaryCurveLocations = {curve: [distinctCrossings] for curve, distinctCrossings in startingCurveLocations.items()}
+	dictionaryCurveLocations = startingCurveLocations.copy()
 
 def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 	initializeCurveLocations(startingCurveLocations)
