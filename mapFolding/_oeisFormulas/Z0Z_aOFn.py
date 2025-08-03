@@ -7,7 +7,7 @@ import time
 
 if __name__ == '__main__':
 	oeisID = 'A000136'
-	for n in range(28,34):
+	for n in range(3,32):
 
 		# print(n)
 

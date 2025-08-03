@@ -1,7 +1,7 @@
-from mapFolding._oeisFormulas.matrixMeanders import count, curveMaximum
+from mapFolding._oeisFormulas.matrixMeanders import count
 
 def initializeA000682(n: int) -> dict[int, int]:
-	curveLocationsMAXIMUM = curveMaximum[n].curveLocationsMAXIMUM
+	curveLocationsMAXIMUM = 1 << (2 * n + 4)
 
 	curveSeed: int = 5 - (n & 0b1) * 4
 	listCurveLocations = [(curveSeed << 1) | curveSeed]
