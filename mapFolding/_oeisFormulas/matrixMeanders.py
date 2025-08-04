@@ -1,52 +1,68 @@
 def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 	listCurveMaximums: list[tuple[int, int, int]] = [
-	(16, 0x2a, 0x15),
-	(64, 0xaa, 0x55),
-	(256, 0x2aa, 0x155),
-	(1024, 0xaaa, 0x555),
-	(4096, 0x2aaa, 0x1555),
-	(16384, 0xaaaa, 0x5555),
-	(65536, 0x2aaaa, 0x15555),
-	(262144, 0xaaaaa, 0x55555),
-	(1048576, 0x2aaaaa, 0x155555),
-	(4194304, 0xaaaaaa, 0x555555),
-	(16777216, 0x2aaaaaa, 0x1555555),
-	(67108864, 0xaaaaaaa, 0x5555555),
-	(268435456, 0x2aaaaaaa, 0x15555555),
-	(1073741824, 0xaaaaaaaa, 0x55555555),
-	(4294967296, 0x2aaaaaaaa, 0x155555555),
-	(17179869184, 0xaaaaaaaaa, 0x555555555),
-	(68719476736, 0x2aaaaaaaaa, 0x1555555555),
-	(274877906944, 0xaaaaaaaaaa, 0x5555555555),
-	(1099511627776, 0x2aaaaaaaaaa, 0x15555555555),
-	(4398046511104, 0xaaaaaaaaaaa, 0x55555555555),
-	(17592186044416, 0x2aaaaaaaaaaa, 0x155555555555),
-	(70368744177664, 0xaaaaaaaaaaaa, 0x555555555555),
-	(281474976710656, 0x2aaaaaaaaaaaa, 0x1555555555555),
-	(1125899906842624, 0xaaaaaaaaaaaaa, 0x5555555555555),
-	(4503599627370496, 0x2aaaaaaaaaaaaa, 0x15555555555555),
-	(18014398509481984, 0xaaaaaaaaaaaaaa, 0x55555555555555),
-	(72057594037927936, 0x2aaaaaaaaaaaaaa, 0x155555555555555),
-	(288230376151711744, 0xaaaaaaaaaaaaaaa, 0x555555555555555),
-	(1152921504606846976, 0x2aaaaaaaaaaaaaaa, 0x1555555555555555), # 0x2aaaaaaaaaaaaaaa.bit_length() = 62
-	(4611686018427387904, 0xaaaaaaaaaaaaaaaa, 0x5555555555555555),
-	(18446744073709551616, 0x2aaaaaaaaaaaaaaaa, 0x15555555555555555),
-	(73786976294838206464, 0xaaaaaaaaaaaaaaaaa, 0x55555555555555555),
-	(295147905179352825856, 0x2aaaaaaaaaaaaaaaaa, 0x155555555555555555),
-	(1180591620717411303424, 0xaaaaaaaaaaaaaaaaaa, 0x555555555555555555),
-	(4722366482869645213696, 0x2aaaaaaaaaaaaaaaaaa, 0x1555555555555555555),
-	(18889465931478580854784, 0xaaaaaaaaaaaaaaaaaaa, 0x5555555555555555555),
-	(75557863725914323419136, 0x2aaaaaaaaaaaaaaaaaaa, 0x15555555555555555555),
-	(302231454903657293676544, 0xaaaaaaaaaaaaaaaaaaaa, 0x55555555555555555555),
-	(1208925819614629174706176, 0x2aaaaaaaaaaaaaaaaaaaa, 0x155555555555555555555),
-	(4835703278458516698824704, 0xaaaaaaaaaaaaaaaaaaaaa, 0x555555555555555555555),
-	(19342813113834066795298816, 0x2aaaaaaaaaaaaaaaaaaaaa, 0x1555555555555555555555),
-	(77371252455336267181195264, 0xaaaaaaaaaaaaaaaaaaaaaa, 0x5555555555555555555555),
-	(309485009821345068724781056, 0x2aaaaaaaaaaaaaaaaaaaaaa, 0x15555555555555555555555),
-	(1237940039285380274899124224, 0xaaaaaaaaaaaaaaaaaaaaaaa, 0x55555555555555555555555),
-	(4951760157141521099596496896, 0x2aaaaaaaaaaaaaaaaaaaaaaa, 0x155555555555555555555555),
-	(19807040628566084398385987584, 0xaaaaaaaaaaaaaaaaaaaaaaaa, 0x555555555555555555555555),
-	]
+(0x15, 0x2a, 0x10),
+(0x55, 0xaa, 0x40),
+(0x155, 0x2aa, 0x100),
+(0x555, 0xaaa, 0x400),
+(0x1555, 0x2aaa, 0x1000),
+(0x5555, 0xaaaa, 0x4000),
+(0x15555, 0x2aaaa, 0x10000),
+(0x55555, 0xaaaaa, 0x40000),
+(0x155555, 0x2aaaaa, 0x100000),
+(0x555555, 0xaaaaaa, 0x400000),
+(0x1555555, 0x2aaaaaa, 0x1000000),
+(0x5555555, 0xaaaaaaa, 0x4000000),
+(0x15555555, 0x2aaaaaaa, 0x10000000),
+(0x55555555, 0xaaaaaaaa, 0x40000000),
+(0x155555555, 0x2aaaaaaaa, 0x100000000),
+(0x555555555, 0xaaaaaaaaa, 0x400000000),
+(0x1555555555, 0x2aaaaaaaaa, 0x1000000000),
+(0x5555555555, 0xaaaaaaaaaa, 0x4000000000),
+(0x15555555555, 0x2aaaaaaaaaa, 0x10000000000),
+(0x55555555555, 0xaaaaaaaaaaa, 0x40000000000),
+(0x155555555555, 0x2aaaaaaaaaaa, 0x100000000000),
+(0x555555555555, 0xaaaaaaaaaaaa, 0x400000000000),
+(0x1555555555555, 0x2aaaaaaaaaaaa, 0x1000000000000),
+(0x5555555555555, 0xaaaaaaaaaaaaa, 0x4000000000000),
+(0x15555555555555, 0x2aaaaaaaaaaaaa, 0x10000000000000),
+(0x55555555555555, 0xaaaaaaaaaaaaaa, 0x40000000000000),
+(0x155555555555555, 0x2aaaaaaaaaaaaaa, 0x100000000000000),
+(0x555555555555555, 0xaaaaaaaaaaaaaaa, 0x400000000000000),
+(0x1555555555555555, 0x2aaaaaaaaaaaaaaa, 0x1000000000000000),
+(0x5555555555555555, 0xaaaaaaaaaaaaaaaa, 0x4000000000000000),
+(0x15555555555555555, 0x2aaaaaaaaaaaaaaaa, 0x10000000000000000),
+(0x55555555555555555, 0xaaaaaaaaaaaaaaaaa, 0x40000000000000000),
+(0x155555555555555555, 0x2aaaaaaaaaaaaaaaaa, 0x100000000000000000),
+(0x555555555555555555, 0xaaaaaaaaaaaaaaaaaa, 0x400000000000000000),
+(0x1555555555555555555, 0x2aaaaaaaaaaaaaaaaaa, 0x1000000000000000000),
+(0x5555555555555555555, 0xaaaaaaaaaaaaaaaaaaa, 0x4000000000000000000),
+(0x15555555555555555555, 0x2aaaaaaaaaaaaaaaaaaa, 0x10000000000000000000),
+(0x55555555555555555555, 0xaaaaaaaaaaaaaaaaaaaa, 0x40000000000000000000),
+(0x155555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaa, 0x100000000000000000000),
+(0x555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaa, 0x400000000000000000000),
+(0x1555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaa, 0x1000000000000000000000),
+(0x5555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaa, 0x4000000000000000000000),
+(0x15555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaa, 0x10000000000000000000000),
+(0x55555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaa, 0x40000000000000000000000),
+(0x155555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaa, 0x100000000000000000000000),
+(0x555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaa, 0x400000000000000000000000),
+(0x1555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaa, 0x1000000000000000000000000),
+(0x5555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaa, 0x4000000000000000000000000),
+(0x15555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaaa, 0x10000000000000000000000000),
+(0x55555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x40000000000000000000000000),
+(0x155555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaaaa, 0x100000000000000000000000000),
+(0x555555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x400000000000000000000000000),
+(0x1555555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x1000000000000000000000000000),
+(0x5555555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x4000000000000000000000000000),
+(0x15555555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x10000000000000000000000000000),
+(0x55555555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x40000000000000000000000000000),
+(0x155555555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x100000000000000000000000000000),
+(0x555555555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x400000000000000000000000000000),
+(0x1555555555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x1000000000000000000000000000000),
+(0x5555555555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x4000000000000000000000000000000),
+(0x15555555555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x10000000000000000000000000000000),
+(0x55555555555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x40000000000000000000000000000000),
+]
 
 	listCurveMaximums = listCurveMaximums[0:bridges]
 
@@ -57,52 +73,63 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 
 		bridges -= 1
 
-		curveLocationsMAXIMUM, bifurcationEvenLocator, bifurcationOddLocator = listCurveMaximums[bridges]
+		bifurcationAlphaLocator, bifurcationZuluLocator, curveLocationsMAXIMUM = listCurveMaximums[bridges]
 
 		while True:
+			# START "Decision-making block". The "decision" is stupid, but it is a decision and it can be seamlessly replaced with non-stupid logic.
 			try:
 				curveLocations, distinctCrossings = dictionaryCurveLocations[bridges+1].popitem()
 			except KeyError:
 				break
-			bifurcationEven = (curveLocations & bifurcationEvenLocator) >> 1
-			bifurcationOdd = (curveLocations & bifurcationOddLocator)
-			bifurcationEvenFinalZero = (bifurcationEven & 0b1) == 0
-			bifurcationEvenHasCurves = bifurcationEven != 1
-			bifurcationOddFinalZero = (bifurcationOdd & 0b1) == 0
-			bifurcationOddHasCurves = bifurcationOdd != 1
+			# END "Decision-making block".
 
-			if bifurcationEvenHasCurves:
-				curveLocationAnalysis = (bifurcationEven >> 1) | (bifurcationOdd << 2) | bifurcationEvenFinalZero
-				if curveLocationAnalysis < curveLocationsMAXIMUM:
-					dictionaryCurveLocations[bridges][curveLocationAnalysis] = dictionaryCurveLocations[bridges].get(curveLocationAnalysis, 0) + distinctCrossings
+			bifurcationAlpha = (curveLocations & bifurcationAlphaLocator)
+			bifurcationZulu = (curveLocations & bifurcationZuluLocator) >> 1
 
-			if bifurcationOddHasCurves:
-				curveLocationAnalysis = (bifurcationOdd >> 2) | (bifurcationEven << 3) | (bifurcationOddFinalZero << 1)
-				if curveLocationAnalysis < curveLocationsMAXIMUM:
-					dictionaryCurveLocations[bridges][curveLocationAnalysis] = dictionaryCurveLocations[bridges].get(curveLocationAnalysis, 0) + distinctCrossings
+			bifurcationAlphaHasCurves = bifurcationAlpha != 1
+			bifurcationZuluHasCurves = bifurcationZulu != 1
 
-			curveLocationAnalysis = ((bifurcationOdd | (bifurcationEven << 1)) << 2) | 3
+			# Curve location analysis
+			curveLocationAnalysis = ((bifurcationAlpha | (bifurcationZulu << 1)) << 2) | 3
 			if curveLocationAnalysis < curveLocationsMAXIMUM:
 				dictionaryCurveLocations[bridges][curveLocationAnalysis] = dictionaryCurveLocations[bridges].get(curveLocationAnalysis, 0) + distinctCrossings
 
-			if bifurcationEvenHasCurves and bifurcationOddHasCurves and (bifurcationEvenFinalZero or bifurcationOddFinalZero):
-				XOrHere2makePair = 0b1
-				findUnpairedBinary1 = 0
-
-				if bifurcationEvenFinalZero and not bifurcationOddFinalZero:
-					while findUnpairedBinary1 >= 0:
-						XOrHere2makePair <<= 2
-						findUnpairedBinary1 += 1 if (bifurcationEven & XOrHere2makePair) == 0 else -1
-					bifurcationEven ^= XOrHere2makePair
-
-				elif bifurcationOddFinalZero and not bifurcationEvenFinalZero:
-					while findUnpairedBinary1 >= 0:
-						XOrHere2makePair <<= 2
-						findUnpairedBinary1 += 1 if (bifurcationOdd & XOrHere2makePair) == 0 else -1
-					bifurcationOdd ^= XOrHere2makePair
-
-				curveLocationAnalysis = ((bifurcationEven >> 2) << 1) | (bifurcationOdd >> 2)
+			# Curve location analysis, conditional
+			if bifurcationZuluHasCurves:
+				curveLocationAnalysis = (bifurcationZulu >> 1) | (bifurcationAlpha << 2) | (bifurcationZuluIsEven := not (bifurcationZulu & 1))
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
 					dictionaryCurveLocations[bridges][curveLocationAnalysis] = dictionaryCurveLocations[bridges].get(curveLocationAnalysis, 0) + distinctCrossings
+
+			# Curve location analysis, conditional
+			if bifurcationAlphaHasCurves:
+				curveLocationAnalysis = (bifurcationAlphaShiftRight2 := bifurcationAlpha >> 2) | (bifurcationZulu << 3) | ((bifurcationAlphaIsEven := 1 - (bifurcationAlpha & 0b1)) << 1)
+				if curveLocationAnalysis < curveLocationsMAXIMUM:
+					dictionaryCurveLocations[bridges][curveLocationAnalysis] = dictionaryCurveLocations[bridges].get(curveLocationAnalysis, 0) + distinctCrossings
+
+			# Curve location analysis, uber-conditional
+			if bifurcationZuluHasCurves and bifurcationAlphaHasCurves:
+				# One Truth-check to select a code path
+				finalZeroCombination = (bifurcationZuluIsEven << 1) | bifurcationAlphaIsEven # pyright: ignore[reportPossiblyUnboundVariable]
+
+				if finalZeroCombination != 0:  # Case 0 (False, False)
+					XOrHere2makePair = 0b1
+					findUnpairedBinary1 = 0
+
+					if finalZeroCombination == 1:  # Case 1: (False, True)
+						while findUnpairedBinary1 >= 0:
+							XOrHere2makePair <<= 2
+							findUnpairedBinary1 += 1 if (bifurcationAlpha & XOrHere2makePair) == 0 else -1
+						bifurcationAlphaShiftRight2 = (bifurcationAlpha ^ XOrHere2makePair) >> 2
+					elif finalZeroCombination == 2:  # Case 2: (True, False)
+						while findUnpairedBinary1 >= 0:
+							XOrHere2makePair <<= 2
+							findUnpairedBinary1 += 1 if (bifurcationZulu & XOrHere2makePair) == 0 else -1
+						bifurcationZulu ^= XOrHere2makePair
+
+					# Cases 1, 2, and 3 all compute curveLocationAnalysis
+# TODO https://github.com/hunterhogan/mapFolding/issues/19
+					curveLocationAnalysis = ((bifurcationZulu >> 2) << 1) | bifurcationAlphaShiftRight2 # pyright: ignore[reportPossiblyUnboundVariable]
+					if curveLocationAnalysis < curveLocationsMAXIMUM:
+						dictionaryCurveLocations[bridges][curveLocationAnalysis] = dictionaryCurveLocations[bridges].get(curveLocationAnalysis, 0) + distinctCrossings
 
 	return sum(dictionaryCurveLocations[bridges].values())

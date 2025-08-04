@@ -1,5 +1,5 @@
-bifurcationOddLocator = 0x55555555555555555555555555555555
-bitWidth = 1 << (bifurcationOddLocator.bit_length() - 1).bit_length()
+bifurcationAlphaLocator = 0x55555555555555555555555555555555
+bitWidth = 1 << (bifurcationAlphaLocator.bit_length() - 1).bit_length()
 
 def count(bridges: int, dictionaryCurveLocationsKnown: dict[int, int]) -> int:
 	while bridges > 0:
@@ -9,53 +9,53 @@ def count(bridges: int, dictionaryCurveLocationsKnown: dict[int, int]) -> int:
 		dictionaryCurveLocationsDiscovered: dict[int, int] = {}
 
 		for curveLocations, distinctCrossings in dictionaryCurveLocationsKnown.items():
-			global bifurcationOddLocator, bitWidth  # noqa: PLW0603
+			global bifurcationAlphaLocator, bitWidth  # noqa: PLW0603
 
-			if curveLocations > bifurcationOddLocator:
-				while curveLocations > bifurcationOddLocator:
-					bifurcationOddLocator |= bifurcationOddLocator << bitWidth
+			if curveLocations > bifurcationAlphaLocator:
+				while curveLocations > bifurcationAlphaLocator:
+					bifurcationAlphaLocator |= bifurcationAlphaLocator << bitWidth
 					bitWidth <<= 1
 
-			bifurcationOdd = curveLocations & bifurcationOddLocator
-			bifurcationEven = (curveLocations ^ bifurcationOdd) >> 1
+			bifurcationAlpha = curveLocations & bifurcationAlphaLocator
+			bifurcationZulu = (curveLocations ^ bifurcationAlpha) >> 1
 
-			bifurcationOddHasCurves = bifurcationOdd != 1
-			bifurcationEvenHasCurves = bifurcationEven != 1
-			bifurcationOddFinalZero = (bifurcationOdd & 1) == 0
-			bifurcationEvenFinalZero = (bifurcationEven & 1) == 0
+			bifurcationAlphaHasCurves = bifurcationAlpha != 1
+			bifurcationZuluHasCurves = bifurcationZulu != 1
+			bifurcationAlphaFinalZero = (bifurcationAlpha & 1) == 0
+			bifurcationZuluFinalZero = (bifurcationZulu & 1) == 0
 
-			if bifurcationOddHasCurves:
-				curveLocationAnalysis = (bifurcationOdd >> 2) | (bifurcationEven << 3) | (bifurcationOddFinalZero << 1)
+			if bifurcationAlphaHasCurves:
+				curveLocationAnalysis = (bifurcationAlpha >> 2) | (bifurcationZulu << 3) | (bifurcationAlphaFinalZero << 1)
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
 					dictionaryCurveLocationsDiscovered[curveLocationAnalysis] = dictionaryCurveLocationsDiscovered.get(curveLocationAnalysis, 0) + distinctCrossings
 
-			if bifurcationEvenHasCurves:
-				curveLocationAnalysis = (bifurcationEven >> 1) | ((bifurcationOdd << 2) | bifurcationEvenFinalZero)
+			if bifurcationZuluHasCurves:
+				curveLocationAnalysis = (bifurcationZulu >> 1) | ((bifurcationAlpha << 2) | bifurcationZuluFinalZero)
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
 					dictionaryCurveLocationsDiscovered[curveLocationAnalysis] = dictionaryCurveLocationsDiscovered.get(curveLocationAnalysis, 0) + distinctCrossings
 
-			curveLocationAnalysis = ((bifurcationOdd | (bifurcationEven << 1)) << 2) | 3
+			curveLocationAnalysis = ((bifurcationAlpha | (bifurcationZulu << 1)) << 2) | 3
 			if curveLocationAnalysis < curveLocationsMAXIMUM:
 				dictionaryCurveLocationsDiscovered[curveLocationAnalysis] = dictionaryCurveLocationsDiscovered.get(curveLocationAnalysis, 0) + distinctCrossings
 
-			if bifurcationOddHasCurves and bifurcationEvenHasCurves and (bifurcationOddFinalZero or bifurcationEvenFinalZero):
-				if bifurcationOddFinalZero and not bifurcationEvenFinalZero:
+			if bifurcationAlphaHasCurves and bifurcationZuluHasCurves and (bifurcationAlphaFinalZero or bifurcationZuluFinalZero):
+				if bifurcationAlphaFinalZero and not bifurcationZuluFinalZero:
 					Z0Z_idk = 0
 					Z0Z_indexIDK = 1
 					while Z0Z_idk >= 0:
 						Z0Z_indexIDK <<= 2
-						Z0Z_idk += 1 if (bifurcationOdd & Z0Z_indexIDK) == 0 else -1
-					bifurcationOdd ^= Z0Z_indexIDK
+						Z0Z_idk += 1 if (bifurcationAlpha & Z0Z_indexIDK) == 0 else -1
+					bifurcationAlpha ^= Z0Z_indexIDK
 
-				if bifurcationEvenFinalZero and not bifurcationOddFinalZero:
+				if bifurcationZuluFinalZero and not bifurcationAlphaFinalZero:
 					Z0Z_idk = 0
 					Z0Z_indexIDK = 1
 					while Z0Z_idk >= 0:
 						Z0Z_indexIDK <<= 2
-						Z0Z_idk += 1 if (bifurcationEven & Z0Z_indexIDK) == 0 else -1
-					bifurcationEven ^= Z0Z_indexIDK
+						Z0Z_idk += 1 if (bifurcationZulu & Z0Z_indexIDK) == 0 else -1
+					bifurcationZulu ^= Z0Z_indexIDK
 
-				curveLocationAnalysis = (bifurcationOdd >> 2) | ((bifurcationEven >> 2) << 1)
+				curveLocationAnalysis = (bifurcationAlpha >> 2) | ((bifurcationZulu >> 2) << 1)
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
 					dictionaryCurveLocationsDiscovered[curveLocationAnalysis] = dictionaryCurveLocationsDiscovered.get(curveLocationAnalysis, 0) + distinctCrossings
 

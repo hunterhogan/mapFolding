@@ -21,45 +21,45 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 
 	while bridges > 0:
 		bridges -= 1
-		curveLocationsMAXIMUM, bifurcationEvenLocator, bifurcationOddLocator = curveMaximum[bridges]
+		curveLocationsMAXIMUM, bifurcationZuluLocator, bifurcationAlphaLocator = curveMaximum[bridges]
 
 		for curveLocations, distinctCrossings in getCurveLocations().items():
-			bifurcationEven = (curveLocations & bifurcationEvenLocator) >> 1
-			bifurcationOdd = curveLocations & bifurcationOddLocator
+			bifurcationZulu = (curveLocations & bifurcationZuluLocator) >> 1
+			bifurcationAlpha = curveLocations & bifurcationAlphaLocator
 
-			bifurcationEvenFinalZero = (bifurcationEven & 0b1) == 0
-			bifurcationEvenHasCurves = bifurcationEven != 1
-			bifurcationOddFinalZero = (bifurcationOdd & 0b1) == 0
-			bifurcationOddHasCurves = bifurcationOdd != 1
+			bifurcationZuluFinalZero = (bifurcationZulu & 0b1) == 0
+			bifurcationZuluHasCurves = bifurcationZulu != 1
+			bifurcationAlphaFinalZero = (bifurcationAlpha & 0b1) == 0
+			bifurcationAlphaHasCurves = bifurcationAlpha != 1
 
-			if bifurcationEvenHasCurves:
-				curveLocationAnalysis = (bifurcationEven >> 1) | (bifurcationOdd << 2) | bifurcationEvenFinalZero
+			if bifurcationZuluHasCurves:
+				curveLocationAnalysis = (bifurcationZulu >> 1) | (bifurcationAlpha << 2) | bifurcationZuluFinalZero
 				recordAnalysis(curveLocationAnalysis, curveLocationsMAXIMUM, distinctCrossings)
 
-			if bifurcationOddHasCurves:
-				curveLocationAnalysis = (bifurcationOdd >> 2) | (bifurcationEven << 3) | (bifurcationOddFinalZero << 1)
+			if bifurcationAlphaHasCurves:
+				curveLocationAnalysis = (bifurcationAlpha >> 2) | (bifurcationZulu << 3) | (bifurcationAlphaFinalZero << 1)
 				recordAnalysis(curveLocationAnalysis, curveLocationsMAXIMUM, distinctCrossings)
 
-			curveLocationAnalysis = ((bifurcationOdd | (bifurcationEven << 1)) << 2) | 3
+			curveLocationAnalysis = ((bifurcationAlpha | (bifurcationZulu << 1)) << 2) | 3
 			recordAnalysis(curveLocationAnalysis, curveLocationsMAXIMUM, distinctCrossings)
 
-			if bifurcationEvenHasCurves and bifurcationOddHasCurves and (bifurcationEvenFinalZero or bifurcationOddFinalZero):
+			if bifurcationZuluHasCurves and bifurcationAlphaHasCurves and (bifurcationZuluFinalZero or bifurcationAlphaFinalZero):
 				XOrHere2makePair = 0b1
 				findUnpairedBinary1 = 0
 
-				if bifurcationEvenFinalZero and not bifurcationOddFinalZero:
+				if bifurcationZuluFinalZero and not bifurcationAlphaFinalZero:
 					while findUnpairedBinary1 >= 0:
 						XOrHere2makePair <<= 2
-						findUnpairedBinary1 += 1 if (bifurcationEven & XOrHere2makePair) == 0 else -1
-					bifurcationEven ^= XOrHere2makePair
+						findUnpairedBinary1 += 1 if (bifurcationZulu & XOrHere2makePair) == 0 else -1
+					bifurcationZulu ^= XOrHere2makePair
 
-				elif bifurcationOddFinalZero and not bifurcationEvenFinalZero:
+				elif bifurcationAlphaFinalZero and not bifurcationZuluFinalZero:
 					while findUnpairedBinary1 >= 0:
 						XOrHere2makePair <<= 2
-						findUnpairedBinary1 += 1 if (bifurcationOdd & XOrHere2makePair) == 0 else -1
-					bifurcationOdd ^= XOrHere2makePair
+						findUnpairedBinary1 += 1 if (bifurcationAlpha & XOrHere2makePair) == 0 else -1
+					bifurcationAlpha ^= XOrHere2makePair
 
-				curveLocationAnalysis = ((bifurcationEven >> 2) << 1) | (bifurcationOdd >> 2)
+				curveLocationAnalysis = ((bifurcationZulu >> 2) << 1) | (bifurcationAlpha >> 2)
 				recordAnalysis(curveLocationAnalysis, curveLocationsMAXIMUM, distinctCrossings)
 
 	return sum(getCurveLocations().values())

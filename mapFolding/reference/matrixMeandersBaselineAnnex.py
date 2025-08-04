@@ -3,8 +3,8 @@ import sys
 
 class limitLocators(NamedTuple):
 	curveLocationsMAXIMUM: int
-	bifurcationEvenLocator: int
-	bifurcationOddLocator: int
+	bifurcationZuluLocator: int
+	bifurcationAlphaLocator: int
 
 curveMaximum: dict[int, limitLocators] = {
 0: limitLocators(16, 0x2a, 0x15),
@@ -75,8 +75,8 @@ def makeCurveMaximum() -> None:
 	sys.stdout.write("curveMaximum: dict[int, limitLocators] = {\n")
 	for n in range(62):
 		curveLocationsMAXIMUM = 1 << (2 * n + 4)
-		bifurcationOddLocator = int('01' * ((curveLocationsMAXIMUM.bit_length() + 1) // 2), 2)
-		sys.stdout.write(f"{n}: limitLocators({curveLocationsMAXIMUM}, {hex(bifurcationOddLocator << 1)}, {hex(bifurcationOddLocator)}),\n")
+		bifurcationAlphaLocator = int('01' * ((curveLocationsMAXIMUM.bit_length() + 1) // 2), 2)
+		sys.stdout.write(f"{n}: limitLocators({curveLocationsMAXIMUM}, {hex(bifurcationAlphaLocator << 1)}, {hex(bifurcationAlphaLocator)}),\n")
 	sys.stdout.write("}\n")
 
 if __name__ == '__main__':

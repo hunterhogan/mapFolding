@@ -7,9 +7,9 @@ import time
 
 if __name__ == '__main__':
 	oeisID = 'A000136'
-	for n in range(5,30):
+	for n in range(3, 30):
 
-		# print(n)
+		# sys.stdout.write(f"{n = }\n")
 
 		timeStart = time.perf_counter()
 		foldsTotal = A000136(n)
