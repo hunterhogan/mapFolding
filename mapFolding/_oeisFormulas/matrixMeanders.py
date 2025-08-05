@@ -63,26 +63,14 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 (0x15555555555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x10000000000000000000000000000000),
 (0x55555555555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x40000000000000000000000000000000),
 ]
-
 	listCurveMaximums = listCurveMaximums[0:bridges]
 
-	dictionaryCurveLocations: dict[int, dict[int, int]] = {n: {} for n in range(bridges + 1)}
-	dictionaryCurveLocations[bridges] = startingCurveLocations.copy()
-
+	dictionaryCurveLocations: dict[int, int] = {}
 	while bridges > 0:
-
 		bridges -= 1
 
 		bifurcationAlphaLocator, bifurcationZuluLocator, curveLocationsMAXIMUM = listCurveMaximums[bridges]
-
-		while True:
-			# START "Decision-making block". The "decision" is stupid, but it is a decision and it can be seamlessly replaced with non-stupid logic.
-			try:
-				curveLocations, distinctCrossings = dictionaryCurveLocations[bridges+1].popitem()
-			except KeyError:
-				break
-			# END "Decision-making block".
-
+		for curveLocations, distinctCrossings in startingCurveLocations.items():
 			bifurcationAlpha = (curveLocations & bifurcationAlphaLocator)
 			bifurcationZulu = (curveLocations & bifurcationZuluLocator) >> 1
 
@@ -92,19 +80,19 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 			# Curve location analysis
 			curveLocationAnalysis = ((bifurcationAlpha | (bifurcationZulu << 1)) << 2) | 3
 			if curveLocationAnalysis < curveLocationsMAXIMUM:
-				dictionaryCurveLocations[bridges][curveLocationAnalysis] = dictionaryCurveLocations[bridges].get(curveLocationAnalysis, 0) + distinctCrossings
+				dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
 			# Curve location analysis, conditional
 			if bifurcationZuluHasCurves:
 				curveLocationAnalysis = (bifurcationZulu >> 1) | (bifurcationAlpha << 2) | (bifurcationZuluIsEven := not (bifurcationZulu & 1))
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
-					dictionaryCurveLocations[bridges][curveLocationAnalysis] = dictionaryCurveLocations[bridges].get(curveLocationAnalysis, 0) + distinctCrossings
+					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
 			# Curve location analysis, conditional
 			if bifurcationAlphaHasCurves:
 				curveLocationAnalysis = (bifurcationAlphaShiftRight2 := bifurcationAlpha >> 2) | (bifurcationZulu << 3) | ((bifurcationAlphaIsEven := 1 - (bifurcationAlpha & 0b1)) << 1)
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
-					dictionaryCurveLocations[bridges][curveLocationAnalysis] = dictionaryCurveLocations[bridges].get(curveLocationAnalysis, 0) + distinctCrossings
+					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
 			# Curve location analysis, uber-conditional
 			if bifurcationZuluHasCurves and bifurcationAlphaHasCurves:
@@ -130,6 +118,9 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 # TODO https://github.com/hunterhogan/mapFolding/issues/19
 					curveLocationAnalysis = ((bifurcationZulu >> 2) << 1) | bifurcationAlphaShiftRight2 # pyright: ignore[reportPossiblyUnboundVariable]
 					if curveLocationAnalysis < curveLocationsMAXIMUM:
-						dictionaryCurveLocations[bridges][curveLocationAnalysis] = dictionaryCurveLocations[bridges].get(curveLocationAnalysis, 0) + distinctCrossings
+						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
-	return sum(dictionaryCurveLocations[bridges].values())
+		startingCurveLocations = dictionaryCurveLocations.copy()
+		dictionaryCurveLocations = {}
+
+	return sum(startingCurveLocations.values())

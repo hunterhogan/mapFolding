@@ -31,7 +31,7 @@ from os import PathLike
 from pathlib import PurePath
 import contextlib
 
-def countFolds(listDimensions: Sequence[int] | None = None  # noqa: C901, PLR0912, PLR0915
+def countFolds(listDimensions: Sequence[int] | None = None
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 				, computationDivisions: int | str | None = None
 				# , * # TODO improve `standardizedEqualToCallableReturn` so it will work with keyword arguments

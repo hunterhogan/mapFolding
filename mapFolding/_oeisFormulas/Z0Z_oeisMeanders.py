@@ -8,6 +8,8 @@ from mapFolding._oeisFormulas.A301620 import A301620
 from mapFolding.oeis import getOEISidInformation, getOEISidValues
 import sys
 
+'A001010'
+'A001011'
 oeisIDsMeanders: list[str] = [
 	'A000560',
 	'A000682',

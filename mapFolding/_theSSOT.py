@@ -111,6 +111,12 @@ settingsOEISManuallySelected: dict[str, MetadataOEISidManuallySet] = {
 		'valuesTestParallelization': [*range(2, 4)],
 		'valuesTestValidation': [random.randint(2, 4)],  # noqa: S311
 	},
+	'A007822': {
+		'getMapShape': lambda n: (1, 2 * (n) + 1),
+		'valuesBenchmark': [7],
+		'valuesTestParallelization': [*range(2, 4)],
+		'valuesTestValidation': [random.randint(2, 4)],  # noqa: S311
+	},
 }
 
 packageSettings = mapFoldingPackageSettings(
