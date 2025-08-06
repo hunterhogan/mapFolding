@@ -121,12 +121,6 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray[tuple[int, int, int], numpy_dtype[numpy_int64]]:
 	"""Implement connection graph generation for map folding.
 
-	(AI generated docstring)
-
-	This is the internal implementation that calculates all possible connections between leaves in a map folding problem
-	based on Lunnon's algorithm. The function constructs a three-dimensional array representing which leaves can be
-	connected to each other for each dimension of the map.
-
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
@@ -176,12 +170,6 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray
 
 def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]:
 	"""Create a properly typed connection graph for the map folding algorithm.
-
-	(AI generated docstring)
-
-	This function serves as a typed wrapper around the internal implementation that generates connection graphs. It
-	provides the correct type information for the returned array, ensuring consistency throughout the computation
-	assembly-line.
 
 	Parameters
 	----------

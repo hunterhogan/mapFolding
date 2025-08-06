@@ -63,6 +63,8 @@ class MapFoldingState:
 		Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation.
 	leafBelow : Array1DLeavesTotal = None
 		Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation.
+	leafComparison : Array1DLeavesTotal = None
+		Array for finding symmetric folds.
 	connectionGraph : Array3DLeavesTotal
 		Unchanging array representing connections between all leaves.
 	dimensionsTotal : DatatypeLeavesTotal
@@ -106,6 +108,8 @@ class MapFoldingState:
 	"""Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation."""
 	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
 	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
+	leafComparison: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array for finding symmetric folds."""
 
 	connectionGraph: Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array3DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 	"""Unchanging array representing connections between all leaves."""
@@ -147,6 +151,7 @@ class MapFoldingState:
 		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
 		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
 		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
+		if self.leafComparison is None: self.leafComparison = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
 
 @dataclasses.dataclass
 class ParallelMapFoldingState(MapFoldingState):

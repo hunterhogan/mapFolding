@@ -1,4 +1,4 @@
-from mapFolding import makeDataContainer
+from mapFolding import Array1DLeavesTotal, makeDataContainer, NumPyLeavesTotal
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import dictionaryOEIS
 import numpy
@@ -114,40 +114,32 @@ def undoLastLeafPlacement(state: MapFoldingState) -> MapFoldingState:
 	state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leafAbove[state.leaf1ndex]
 	return state
 
-def symmetricFolds(state: MapFoldingState) -> int:
-	foldsSymmetric = 0
+def filterAsymmetricFolds(state: MapFoldingState) -> MapFoldingState:
+	lengthLeafBelow = len(state.leafBelow)
 
-	leafComparison: numpy.ndarray[tuple[int], numpy.dtype[numpy.int_]] = makeDataContainer(len(state.leafAbove), numpy.int_)
+	indexLeaf: int = 0
+	for leafConnectee in range(lengthLeafBelow):
+		leafNumber = int(state.leafBelow[indexLeaf])
+		state.leafComparison[leafConnectee] = (leafNumber - indexLeaf + lengthLeafBelow - 1) % (lengthLeafBelow - 1)
+		indexLeaf = leafNumber
 
-	Z0Z_signedIndexLeaf: int = 0
-
-	leafConnectee = 0
-	while (leafConnectee < len(state.leafBelow)):
-		leafComparison[leafConnectee] = int(state.leafBelow[Z0Z_signedIndexLeaf]) - Z0Z_signedIndexLeaf
-		Z0Z_signedIndexLeaf = int(state.leafBelow[Z0Z_signedIndexLeaf])
-		leafConnectee += 1
-
-	delta = 0
-	while (delta < len(state.leafAbove)):
-		isSymmetric = True
-		leafConnectee = 0
-		while leafConnectee < (len(leafComparison) - 1) // 2:
-			if (leafComparison[(delta + leafConnectee) % len(leafComparison)] != leafComparison[(delta + len(leafComparison) - 2 - leafConnectee) % len(leafComparison)]):
-				isSymmetric = False
+	indexInMiddle = (lengthLeafBelow - 1) // 2
+	for delta in range(lengthLeafBelow):
+		ImaSymmetricFold = True
+		for leafConnectee in range(indexInMiddle):
+			if state.leafComparison[(delta + leafConnectee) % lengthLeafBelow] != state.leafComparison[(delta + lengthLeafBelow - 2 - leafConnectee) % lengthLeafBelow]:
+				ImaSymmetricFold = False
 				break
-			leafConnectee += 1
+		if ImaSymmetricFold:
+			state.groupsOfFolds += 1
 
-		if isSymmetric:
-			foldsSymmetric += 1
-		delta += 1
+	return state
 
-	return foldsSymmetric
-def count(state: MapFoldingState) -> int:
-	foldsTotal: int = 0
+def count(state: MapFoldingState) -> MapFoldingState:
 	while activeLeafGreaterThan0(state):
 		if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
 			if activeLeafGreaterThanLeavesTotal(state):
-				foldsTotal += symmetricFolds(state)
+				state = filterAsymmetricFolds(state)
 			else:
 				state = initializeVariablesToFindGaps(state)
 				while loopingThroughTheDimensions(state):
@@ -169,20 +161,21 @@ def count(state: MapFoldingState) -> int:
 			state = undoLastLeafPlacement(state)
 		if gapAvailable(state):
 			state = insertActiveLeafAtGap(state)
-	return foldsTotal
+	return state
 
-def doTheNeedful(state: MapFoldingState) -> int:
-	foldsTotal: int = count(state)
-	return (foldsTotal + 1) // 2
+def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
+	state = count(state)
+	state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
+	return state
 
 def Z0Z_flowNeedsFixing(mapShape: tuple[int, ...]) -> int:
-	return doTheNeedful(MapFoldingState(mapShape))
+	return doTheNeedful(MapFoldingState(mapShape)).groupsOfFolds
 
 if __name__ == '__main__':
-	for n in range(3, 8):
+	for n in range(3, 7):
 		mapShape = dictionaryOEIS['A007822']['getMapShape'](n)
 
 		state = MapFoldingState(mapShape)
 		timeStart = time.perf_counter()
-		foldsTotal = doTheNeedful(state)
+		foldsTotal = doTheNeedful(state).groupsOfFolds
 		sys.stdout.write(f"{foldsTotal == dictionaryOEIS['A007822']['valuesKnown'][n]} {n} {foldsTotal = } {time.perf_counter() - timeStart:.2f}\n")
