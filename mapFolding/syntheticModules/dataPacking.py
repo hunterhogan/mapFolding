@@ -1,4 +1,6 @@
-from mapFolding.dataBaskets import Array1DElephino, Array1DLeavesTotal, Array3D, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, MapFoldingState
+from mapFolding.dataBaskets import (
+	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
+	MapFoldingState)
 from mapFolding.syntheticModules.theorem2Numba import count
 
 def sequential(state: MapFoldingState) -> MapFoldingState:
@@ -17,7 +19,7 @@ def sequential(state: MapFoldingState) -> MapFoldingState:
     gapsWhere: Array1DLeavesTotal = state.gapsWhere
     leafAbove: Array1DLeavesTotal = state.leafAbove
     leafBelow: Array1DLeavesTotal = state.leafBelow
-    connectionGraph: Array3D = state.connectionGraph
+    connectionGraph: Array3DLeavesTotal = state.connectionGraph
     dimensionsTotal: DatatypeLeavesTotal = state.dimensionsTotal
     leavesTotal: DatatypeLeavesTotal = state.leavesTotal
     groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal)

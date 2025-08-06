@@ -31,7 +31,7 @@ from itertools import chain
 from mapFolding import countFolds
 from mapFolding._theSSOT import cacheDays, pathCache, settingsOEISManuallySelected
 from pathlib import Path
-from typing import Any, Final, TypedDict
+from typing import Final, TypedDict
 from urllib.request import urlopen
 import argparse
 import sys
@@ -331,8 +331,8 @@ def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 		of distinct folding patterns for those shapes.
 
 	"""
-	return dict(chain.from_iterable(zip(map(oeisID['getMapShape'], oeisID['valuesKnown'].keys())
-	, oeisID['valuesKnown'].values(), strict=True) for oeisID in dictionaryOEIS.values()))
+	return dict(chain.from_iterable(zip(map(oeisIDmetadata['getMapShape'], oeisIDmetadata['valuesKnown'].keys())
+	, oeisIDmetadata['valuesKnown'].values(), strict=True) for oeisID, oeisIDmetadata in dictionaryOEIS.items() if oeisID != 'A007822'))
 
 def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	"""Retrieve the known total number of distinct folding patterns for a given map shape.
@@ -410,26 +410,19 @@ def _formatOEISsequenceInfo() -> str:
 		for oeisID in oeisIDsImplemented
 	)
 
-def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
-	"""Calculate the value a(n) for a specified OEIS sequence and index.
-
-	(AI generated docstring)
-
-	This function serves as the primary interface for computing OEIS sequence values within the map folding
-	context. For small values or values within the known range, it returns cached OEIS data. For larger
-	values, it computes the result using the map folding algorithm with the appropriate map shape derived
-	from the sequence definition.
+def oeisIDfor_n(oeisID: str, n: int) -> int:
+	"""Calculate the value a(n) for a specified OEIS ID and index.
 
 	Parameters
 	----------
 	oeisID : str
 		The identifier of the OEIS sequence to evaluate.
-	n : int | Any
+	n : int
 		A non-negative integer index for which to calculate the sequence value.
 
 	Returns
 	-------
-	int
+	a(n) : int
 		The value a(n) of the specified OEIS sequence.
 
 	Raises
@@ -448,7 +441,7 @@ def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 		message = f"I received `{n = }` in the form of `{type(n) = }`, but it must be non-negative integer in the form of `{int}`."
 		raise ValueError(message)
 
-	mapShape: tuple[int, ...] = dictionaryOEIS[oeisID]['getMapShape'](n)
+	mapShape = dictionaryOEIS[oeisID]['getMapShape'](n)
 
 	if n <= 1 or len(mapShape) < 2:
 		offset: int = dictionaryOEIS[oeisID]['offset']
@@ -457,6 +450,11 @@ def oeisIDfor_n(oeisID: str, n: int | Any) -> int:
 			raise ArithmeticError(message)
 		foldsTotal: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
 		return foldsTotal
+
+	if oeisID == 'A007822':
+		from mapFolding._A007822 import Z0Z_flowNeedsFixing  # noqa: PLC0415
+		return Z0Z_flowNeedsFixing(mapShape)
+
 	return countFolds(mapShape)
 
 def OEIS_for_n() -> None:

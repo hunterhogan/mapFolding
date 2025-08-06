@@ -21,7 +21,7 @@ integrity throughout the recursive analysis while providing the structured data
 access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
-	Array1DElephino, Array1DLeavesTotal, Array3D, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
+	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
 	getConnectionGraph, getLeavesTotal, makeDataContainer)
 import dataclasses
 
@@ -63,7 +63,7 @@ class MapFoldingState:
 		Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation.
 	leafBelow : Array1DLeavesTotal = None
 		Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation.
-	connectionGraph : Array3D
+	connectionGraph : Array3DLeavesTotal
 		Unchanging array representing connections between all leaves.
 	dimensionsTotal : DatatypeLeavesTotal
 		Unchanging total number of dimensions in the map.
@@ -107,7 +107,7 @@ class MapFoldingState:
 	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
 	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
 
-	connectionGraph: Array3D = dataclasses.field(init=False, metadata={'dtype': Array3D.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+	connectionGraph: Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array3DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 	"""Unchanging array representing connections between all leaves."""
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""

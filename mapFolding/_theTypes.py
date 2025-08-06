@@ -1,148 +1,52 @@
-"""
-Type system architecture for map folding computational domains.
+"""Types for defensive coding and for computation optimization."""
 
-(AI generated docstring)
-
-Building upon the configuration foundation, this module defines the complete type
-hierarchy that ensures type safety and semantic clarity throughout the map folding
-computational framework. The type system recognizes three distinct computational
-domains, each with specific data characteristics and performance requirements
-that emerge from Lunnon's algorithm implementation.
-
-The Leaves domain handles map sections, their indices, and dimensional parameters.
-The Elephino domain manages internal computational state, gap calculations, and
-temporary indices used during the recursive folding analysis. The Folds domain
-represents final pattern counts and computation results. Each domain employs both
-Python types for general computation and NumPy types for performance-critical
-array operations.
-
-This dual-type strategy enables the core utility functions to operate with type
-safety while maintaining the computational efficiency required for analyzing
-complex multi-dimensional folding patterns. The array types built from these
-base types provide the structured data containers that computational state
-management depends upon.
-"""
-from numpy import dtype, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64
+from numpy import dtype, int_ as numpy_int, integer, ndarray, uint64 as numpy_uint64
 from typing import Any, TypeAlias, TypeVar
 
 NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)
-"""
-Generic type variable for NumPy integer types used in computational operations.
+"""Any NumPy integer type, which is usually between 8-bit signed and 64-bit unsigned."""
 
-(AI generated docstring)
+DatatypeLeavesTotal: TypeAlias = int  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""Use on unsigned integers that will never exceed the magnitude of `leavesTotal`."""
 
-This type variable enables generic programming with NumPy integer types while
-maintaining type safety. It supports covariant relationships between different
-NumPy integer types and their array containers.
-"""
+NumPyLeavesTotal: TypeAlias = numpy_int  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""Use in NumPy data structures whose elements are unsigned integers that will never exceed the magnitude of `leavesTotal`."""
 
-DatatypeLeavesTotal: TypeAlias = int
-"""
-Python type for leaf-related counts and indices in map folding computations.
+DatatypeElephino: TypeAlias = int  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""Use on unsigned integers that will exceed the magnitude of `leavesTotal` but that are not "colossal."
 
-(AI generated docstring)
+Note well
+---------
+Colossal values are found with the cross humpy inequality:
 
-Represents quantities related to individual map sections (leaves), including
-total leaf counts, leaf indices, and dimensional parameters. Uses standard
-Python integers for compatibility with general computations while enabling
-conversion to NumPy types when performance optimization is needed.
-"""
+    ⎡ el  ⎤   ⎡     ⎤
+    ⎢ eph ⎥ X ⎢ rhi ⎥ <= elephino
+    ⎣ ant ⎦   ⎣ no  ⎦
 
-NumPyLeavesTotal: TypeAlias = numpy_uint8
-"""
-NumPy type for efficient leaf-related computations and array operations.
-
-(AI generated docstring)
-
-Corresponds to `DatatypeLeavesTotal` but optimized for NumPy operations.
-Uses 8-bit unsigned integers since leaf counts in practical map folding
-scenarios typically remain small (under 256).
 """
 
-DatatypeElephino: TypeAlias = int
-"""
-Python type for internal computational indices and intermediate values.
+NumPyElephino: TypeAlias = numpy_int  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""Use in NumPy data structures whose elements are unsigned integers that might exceed the magnitude of `leavesTotal` but that are not 'colossal.'"""
 
-(AI generated docstring)
+DatatypeFoldsTotal: TypeAlias = int  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""Use on unsigned integers that might have colossal magnitudes similar to `foldsTotal`."""
 
-Used for temporary variables, gap indices, and other internal computational
-state that doesn't directly correspond to leaves or final fold counts. The
-name follows the package convention for internal computational domains.
-"""
+NumPyFoldsTotal: TypeAlias = numpy_uint64  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""Use in NumPy data structures whose elements are unsigned integers that might have colossal magnitudes similar to `foldsTotal`.
 
-NumPyElephino: TypeAlias = numpy_uint16
-"""
-NumPy type for internal computational operations requiring moderate value ranges.
+Note well
+---------
+If your elements might exceed 1.8 × 10^19, then you should take extra steps to ensure the integrity of the data in NumPy or use a
+different data structure."""
 
-(AI generated docstring)
+Array3DLeavesTotal: TypeAlias = ndarray[tuple[int, int, int], dtype[NumPyLeavesTotal]]  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""A `numpy.ndarray` with three axes and elements of type `NumPyLeavesTotal`."""
 
-Corresponds to `DatatypeElephino` with 16-bit unsigned integer storage,
-providing sufficient range for internal computations while maintaining
-memory efficiency in array operations.
-"""
+Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyLeavesTotal]]  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""A `numpy.ndarray` with one axis and elements of type `NumPyLeavesTotal`."""
 
-DatatypeFoldsTotal: TypeAlias = int
-"""
-Python type for final fold counts and pattern totals.
+Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[NumPyElephino]]  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""A `numpy.ndarray` with one axis and elements of type `NumPyElephino`."""
 
-(AI generated docstring)
-
-Represents the ultimate results of map folding computations - the total number
-of distinct folding patterns possible for a given map configuration. These
-values can grow exponentially with map size, requiring flexible integer types.
-"""
-
-NumPyFoldsTotal: TypeAlias = numpy_uint64
-"""
-NumPy type for large fold count computations and high-precision results.
-
-(AI generated docstring)
-
-Corresponds to `DatatypeFoldsTotal` using 64-bit unsigned integers to
-accommodate the exponentially large values that can result from map folding
-computations on even moderately-sized maps.
-"""
-
-Array3D: TypeAlias = ndarray[tuple[int, int, int], dtype[NumPyLeavesTotal]]
-"""
-Three-dimensional NumPy array type for connection graph representations.
-
-(AI generated docstring)
-
-Used to store the connectivity relationships between map leaves in a
-3D array structure. The array uses `NumPyLeavesTotal` element type since
-the stored values represent leaf indices and connection states.
-"""
-
-Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyLeavesTotal]]
-"""
-One-dimensional NumPy array type for leaf-related data sequences.
-
-(AI generated docstring)
-
-Stores sequences of leaf counts, indices, or related values in efficient
-array format. Common uses include leaf sequences, gap locations, and
-dimensional data where each element relates to the leaves domain.
-"""
-
-Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[NumPyElephino]]
-"""
-One-dimensional NumPy array type for internal computational sequences.
-
-(AI generated docstring)
-
-Used for storing sequences of internal computational values such as
-gap range starts, temporary indices, and other intermediate results
-that require the elephino computational domain's value range.
-"""
-
-Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]
-"""
-One-dimensional NumPy array type for sequences of fold count results.
-
-(AI generated docstring)
-
-Stores sequences of fold totals and pattern counts, using the large
-integer type to accommodate the potentially enormous values that
-result from complex map folding computations.
-"""
+Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""A `numpy.ndarray` with one axis and elements of type `NumPyFoldsTotal`."""

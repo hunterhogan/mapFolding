@@ -76,19 +76,19 @@ concurrencyPackage = concurrencyPackageHARDCODED
 # TODO I made a `TypedDict` before I knew how to make dataclasses and classes. Think about other data structures.
 settingsOEISManuallySelected: dict[str, MetadataOEISidManuallySet] = {
 	'A000136': {
-		'getMapShape': lambda n: tuple(sorted([1, n])),
+		'getMapShape': lambda n: (1, n),
 		'valuesBenchmark': [14],
 		'valuesTestParallelization': [*range(3, 7)],
 		'valuesTestValidation': [random.randint(2, 9)],  # noqa: S311
 	},
 	'A001415': {
-		'getMapShape': lambda n: tuple(sorted([2, n])),
+		'getMapShape': lambda n: (2, n),
 		'valuesBenchmark': [14],
 		'valuesTestParallelization': [*range(3, 7)],
 		'valuesTestValidation': [random.randint(2, 9)],  # noqa: S311
 	},
 	'A001416': {
-		'getMapShape': lambda n: tuple(sorted([3, n])),
+		'getMapShape': lambda n: (3, n),
 		'valuesBenchmark': [9],
 		'valuesTestParallelization': [*range(3, 5)],
 		'valuesTestValidation': [random.randint(2, 6)],  # noqa: S311
@@ -112,7 +112,7 @@ settingsOEISManuallySelected: dict[str, MetadataOEISidManuallySet] = {
 		'valuesTestValidation': [random.randint(2, 4)],  # noqa: S311
 	},
 	'A007822': {
-		'getMapShape': lambda n: (1, 2 * (n) + 1),
+		'getMapShape': lambda n: (1, 2 * n),
 		'valuesBenchmark': [7],
 		'valuesTestParallelization': [*range(2, 4)],
 		'valuesTestValidation': [random.randint(2, 4)],  # noqa: S311

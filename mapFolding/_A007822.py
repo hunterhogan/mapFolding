@@ -1,5 +1,7 @@
+from mapFolding import makeDataContainer
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import dictionaryOEIS
+import numpy
 import sys
 import time
 
@@ -112,125 +114,40 @@ def undoLastLeafPlacement(state: MapFoldingState) -> MapFoldingState:
 	state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leafAbove[state.leaf1ndex]
 	return state
 
-"""src/irvine/oeis/a007/A007822.java
-package irvine.oeis.a007;
+def symmetricFolds(state: MapFoldingState) -> int:
+	foldsSymmetric = 0
 
-import irvine.math.z.Z;
-import irvine.oeis.a001.A001415;
+	leafComparison: numpy.ndarray[tuple[int], numpy.dtype[numpy.int_]] = makeDataContainer(len(state.leafAbove), numpy.int_)
 
-/**
- * A007822 Number of symmetric foldings of 2n+1 stamps.
- * @author Sean A. Irvine (Java port)
- */
-public class A007822 extends A001415 {
+	Z0Z_signedIndexLeaf: int = 0
 
-  /** Construct the sequence. */
-  public A007822() {
-	super(1);
-  }
+	leafConnectee = 0
+	while (leafConnectee < len(state.leafBelow)):
+		leafComparison[leafConnectee] = int(state.leafBelow[Z0Z_signedIndexLeaf]) - Z0Z_signedIndexLeaf
+		Z0Z_signedIndexLeaf = int(state.leafBelow[Z0Z_signedIndexLeaf])
+		leafConnectee += 1
 
-  private int mN = 1;
-  private long mCount = 0;
+	delta = 0
+	while (delta < len(state.leafAbove)):
+		isSymmetric = True
+		leafConnectee = 0
+		while leafConnectee < (len(leafComparison) - 1) // 2:
+			if (leafComparison[(delta + leafConnectee) % len(leafComparison)] != leafComparison[(delta + len(leafComparison) - 2 - leafConnectee) % len(leafComparison)]):
+				isSymmetric = False
+				break
+			leafConnectee += 1
 
-  private boolean isSymmetric(final int[] c, final int delta) {
-	for (int k = 0; k < (c.length - 1) / 2; ++k) {
-	  if (c[(delta + k) % c.length] != c[(delta + c.length - 2 - k) % c.length]) {
-		return false;
-	  }
-	}
-	return true;
-  }
+		if isSymmetric:
+			foldsSymmetric += 1
+		delta += 1
 
-  @Override
-  protected void process(final int[] a, final int[] b, final int n) {
-	final int[] c = new int[a.length];
-	int j = 0;
-	for (int k = 0; k < b.length; k++) {
-	  c[k] = b[j] - j;
-	  j = b[j];
-	}
-	for (int k = 0; k < a.length; ++k) {
-	  if (isSymmetric(c, k)) {
-		++mCount;
-	  }
-	}
-  }
-  protected void process(final int[] a, final int[] b, final int n) {
-	final int[] c = new int[a.length];
-	int j = 0;
-	for (int k = 0; k < b.length; k++) {
-	  c[k] = b[j] - j;
-	  j = b[j];
-	}
-	for (int k = 0; k < a.length; ++k) {
-	  if (isSymmetric(c, k)) {
-		++mCount;
-	  }
-	}
-  }
-
-  @Override
-  public Z next() {
-	mN += 2;
-	mCount = 0;
-	foldings(new int[] {mN - 1}, true, 0, 0);
-	return Z.valueOf((mCount + 1) / 2);
-  }
-}
-"""  # noqa: E101
-
-"""NOTE Temporary identifiers during porting:
-
-a
-b
-c
-delta
-foldings
-isSymmetric
-j
-k
-mCount
-n
-process
-
-"""
-
-def isSymmetric(c: list[int], delta: int) -> bool:
-	k = 0
-	while k < (len(c) - 1) // 2: # NOTE in a `while` loop, the comparator can be a float. Important?
-		if (c[(delta + k) % len(c)] != c[(delta + len(c) - 2 - k) % len(c)]):
-			return False
-		k += 1
-	return True
-
-def process(a: list[int], b: list[int], n: int) -> int:  # noqa: ARG001
-	mCount = 0
-	c: list[int] = [0] * len(a)
-	j = 0
-
-	k = 0
-	while (k < len(b)):
-		c[k] = b[j] - j
-		j = b[j]
-		k += 1
-
-	k = 0
-	while (k < len(a)):
-		if (isSymmetric(c, k)):
-			mCount += 1
-		k += 1
-
-	return mCount
-
-def foldings(state: MapFoldingState) -> int:
-	mCount: int = 0
+	return foldsSymmetric
+def count(state: MapFoldingState) -> int:
+	foldsTotal: int = 0
 	while activeLeafGreaterThan0(state):
 		if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
 			if activeLeafGreaterThanLeavesTotal(state):
-				a: list[int] = state.leafAbove.tolist()
-				b: list[int] = state.leafBelow.tolist()
-				n = int(state.leavesTotal)
-				mCount += process(a, b, n)
+				foldsTotal += symmetricFolds(state)
 			else:
 				state = initializeVariablesToFindGaps(state)
 				while loopingThroughTheDimensions(state):
@@ -252,30 +169,20 @@ def foldings(state: MapFoldingState) -> int:
 			state = undoLastLeafPlacement(state)
 		if gapAvailable(state):
 			state = insertActiveLeafAtGap(state)
-	return mCount
+	return foldsTotal
 
 def doTheNeedful(state: MapFoldingState) -> int:
-	mCount: int = foldings(state)
-	"""NOTE
+	foldsTotal: int = count(state)
+	return (foldsTotal + 1) // 2
 
-	```java
-	mN += 2;
-	mCount = 0;
-	foldings(new int[] {mN - 1}, true, 0, 0);
-	return Z.valueOf((mCount + 1) / 2);
-	```
-
-	I am deeply suspicious of `(mCount + 1) / 2`.
-	`mN - 1` and `mCount + 1` might cancel each other out.
-	But `mN += 2` is not obviously an inversion of `... / 2`.
-
-	"""
-	return (mCount + 1) // 2
+def Z0Z_flowNeedsFixing(mapShape: tuple[int, ...]) -> int:
+	return doTheNeedful(MapFoldingState(mapShape))
 
 if __name__ == '__main__':
-	for n in range(2, 7):
+	for n in range(3, 8):
 		mapShape = dictionaryOEIS['A007822']['getMapShape'](n)
+
 		state = MapFoldingState(mapShape)
 		timeStart = time.perf_counter()
 		foldsTotal = doTheNeedful(state)
-		sys.stdout.write(f"{mapShape = } {foldsTotal == dictionaryOEIS['A007822']['valuesKnown'][n]} {n = } {foldsTotal = } {dictionaryOEIS['A007822']['valuesKnown'][n]} {time.perf_counter() - timeStart:.2f}\n")
+		sys.stdout.write(f"{foldsTotal == dictionaryOEIS['A007822']['valuesKnown'][n]} {n} {foldsTotal = } {time.perf_counter() - timeStart:.2f}\n")

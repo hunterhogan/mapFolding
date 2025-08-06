@@ -292,7 +292,7 @@ if __name__ == '__main__':
 	listNumPyTypeConfigs = [
 		DatatypeConfig(fml='Array1DLeavesTotal', Z0Z_module='numpy', Z0Z_type_name='uint8', Z0Z_asname='Array1DLeavesTotal'),
 		DatatypeConfig(fml='Array1DElephino', Z0Z_module='numpy', Z0Z_type_name='uint16', Z0Z_asname='Array1DElephino'),
-		DatatypeConfig(fml='Array3D', Z0Z_module='numpy', Z0Z_type_name='uint8', Z0Z_asname='Array3D'),
+		DatatypeConfig(fml='Array3DLeavesTotal', Z0Z_module='numpy', Z0Z_type_name='uint8', Z0Z_asname='Array3DLeavesTotal'),
 	]
 
 	for typeConfig in listNumPyTypeConfigs:

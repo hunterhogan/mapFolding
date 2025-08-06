@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.14.1"
+version = "0.15.0"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations and code optimization."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -16,6 +16,7 @@ keywords = [
   "A001418",
   "A005315",
   "A005316",
+  "A007822",
   "A195646",
   "A223094",
   "A259702",
@@ -97,6 +98,7 @@ keywords = [
   "source code analysis",
   "stamp folding",
   "symbolic computation",
+  "symmetric foldings",
   "topological combinatorics",
   "topological patterns",
   "typed Python",

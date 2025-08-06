@@ -204,25 +204,21 @@ def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: ty
 	return connectionGraph.astype(datatype)
 
 def makeDataContainer(shape: int | tuple[int, ...], datatype: type[NumPyIntegerType]) -> ndarray[Any, numpy_dtype[NumPyIntegerType]]:
-	"""Create a typed NumPy array container with initialized values.
+	"""Create any data container as long as it is a `numpy.ndarray` full of zeroes of type `numpy.integer`.
 
-	(AI generated docstring)
-
-	This function centralizes the creation of data containers used throughout the computation assembly-line, enabling
-	easy switching between different container types or implementation strategies if needed in the future.
+	By centralizing data container creation, you can more easily make global changes.
 
 	Parameters
 	----------
 	shape : int | tuple[int, ...]
-		Either an integer (for 1D arrays) or a tuple of integers (for multi-dimensional arrays) specifying the
-		dimensions of the array.
+		The array shape, either as a single axis length or a tuple of axes lengths.
 	datatype : type[NumPyIntegerType]
-		The NumPy integer type to use for the array elements, ensuring proper type consistency and memory efficiency.
+		The `numpy.integer` type for the array elements.
 
 	Returns
 	-------
 	container : ndarray[Any, numpy_dtype[NumPyIntegerType]]
-		A NumPy array of zeros with the specified shape and `datatype`.
+		A zero-filled `ndarray` with the specified `shape` and `datatype`.
 
 	"""
 	return numpy.zeros(shape, dtype=datatype)

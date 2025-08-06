@@ -58,7 +58,7 @@ listDatatypeConfigurations: list[DatatypeConfiguration] = [
 listNumPy_dtype: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DLeavesTotal'),
 	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DElephino'),
-	DatatypeConfiguration(datatypeIdentifier='Array3D', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3D'),
+	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
 ]
 
 def _addWriteFoldsTotal(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
