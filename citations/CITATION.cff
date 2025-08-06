@@ -16,12 +16,12 @@ authors:
   family-names: Hogan
   email: HunterHogan@pm.me
 cff-version: 1.2.0
-commit: 1855bea9beaa604029b1a7944b95e401ec15bfb5
-date-released: '2025-08-03'
+commit: 80e1c14058586d79549bceb79999b44ea462ba53
+date-released: '2025-08-06'
 identifiers:
 - type: url
-  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.14.1
-  description: The URL for mapFolding 0.14.1.
+  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.15.0
+  description: The URL for mapFolding 0.15.0.
 keywords:
 - A000136
 - A000560
@@ -32,6 +32,7 @@ keywords:
 - A001418
 - A005315
 - A005316
+- A007822
 - A195646
 - A223094
 - A259702
@@ -113,15 +114,16 @@ keywords:
 - source code analysis
 - stamp folding
 - symbolic computation
+- symmetric foldings
 - topological combinatorics
 - topological patterns
 - typed Python
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.14.1/
-repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.14.1
+repository-artifact: https://pypi.org/project/mapfolding/0.15.0/
+repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.15.0
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.14.1
+version: 0.15.0
