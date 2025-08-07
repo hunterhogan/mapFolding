@@ -1,3 +1,4 @@
+# ruff: noqa: D100 D103
 from mapFolding.dataBaskets import MapFoldingState
 
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:

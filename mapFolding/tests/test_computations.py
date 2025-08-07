@@ -30,7 +30,7 @@ from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import dictionaryOEIS
 from mapFolding.someAssemblyRequired.makeAllModules import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
-from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
+from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
 from pathlib import Path, PurePosixPath
 from typing import Literal
@@ -86,6 +86,31 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 	for n in dictionaryOEIS[oeisID]['valuesTestValidation']:
 		standardizedEqualToCallableReturn(dictionaryOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
+@pytest.mark.parametrize('flow', ['numba'])
+def test_flowControlByOEISid(flow: str) -> None:
+	"""Crappy.
+
+	I'm making this while pushing through pain, so it's not great but it's a step in the right direction.
+
+	Notes for future me:
+
+	`oeisID` is a fixture: don't use it here.
+
+	`OEISid` matches `test_flowControlByOEISid`. It's pseudo-hardcoded to A007822 because that's currently the only OEISid that needs this test.
+	I tried:
+	`def test_flowControlByOEISid(OEISid: str | None, flow: str) -> None:`
+
+	But that's wrong.
+
+	So, I'm changing the local identifier `OEISid` back to `oeisID` because I use `oeisID` everywhere else.
+	"""
+
+	oeisID = 'A007822'
+
+	for n in dictionaryOEIS[oeisID]['valuesTestValidation']:
+		mapShape = dictionaryOEIS[oeisID]['getMapShape'](n)
+		standardizedEqualToCallableReturn(dictionaryOEIS[oeisID]['valuesKnown'][n], countFolds, None, None, None, None, mapShape, oeisID, None, flow)
+
 @pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:
 	"""Test dynamic code generation and execution for computational modules.
@@ -111,7 +136,7 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # noqa: PLC0415
 	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba  # noqa: PLC0415
 	mapShape = oneTestCuzTestsOverwritingTests
-	state = initializeGroupsOfFolds(MapFoldingState(mapShape))
+	state = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 
 	pathFilenameModule = pathFilename_tmpTesting.absolute()
 	pathFilenameFoldsTotal = pathFilenameModule.with_suffix('.foldsTotalTesting')

@@ -18,8 +18,8 @@ structure can be creatively redesigned while maintaining the core computational 
 
 from mapFolding import outfitFoldings
 from numba import njit
-import numpy
 from numpy.typing import NDArray
+import numpy
 
 """
 It is possible to enter the main `while` loop from an arbitrary point. This version is "rotated" to effectively enter at the modulo operator.

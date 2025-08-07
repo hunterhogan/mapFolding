@@ -1,6 +1,5 @@
-from mapFolding.dataBaskets import MapFoldingState  # noqa: D100
+from mapFolding.dataBaskets import MapFoldingState
 
-# ruff: noqa: D103
 def filterAsymmetricFolds(state: MapFoldingState) -> MapFoldingState:
     state.indexLeaf = 0
     leafConnectee = 0
@@ -164,4 +163,4 @@ def count(state: MapFoldingState) -> MapFoldingState:
 
 def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
     state = count(state)
-    return state  # noqa: RET504
+    return state

@@ -159,9 +159,15 @@ def countFolds(listDimensions: Sequence[int] | None = None
 			possible routes are predictable.
 
 		"""
-		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
-		from mapFolding.syntheticModules.algorithmA007822 import doTheNeedful  # noqa: PLC0415
-		return doTheNeedful(MapFoldingState(mapShape)).groupsOfFolds
+		match flow:
+			case 'numba':
+				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+				from mapFolding.syntheticModules.algorithmA007822Numba import doTheNeedful  # noqa: PLC0415
+				return doTheNeedful(MapFoldingState(mapShape)).groupsOfFolds
+			case _:
+				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+				from mapFolding.syntheticModules.algorithmA007822 import doTheNeedful  # noqa: PLC0415
+				return doTheNeedful(MapFoldingState(mapShape)).groupsOfFolds
 
 	elif flow == 'daoOfMapFolding':
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
@@ -175,8 +181,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds  # noqa: PLC0415
-		mapFoldingState = initializeGroupsOfFolds(mapFoldingState)
+		from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
+		mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
 		from mapFolding.syntheticModules.theorem2 import count  # noqa: PLC0415
 		mapFoldingState = count(mapFoldingState)
@@ -187,8 +193,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds  # noqa: PLC0415
-		mapFoldingState = initializeGroupsOfFolds(mapFoldingState)
+		from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
+		mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
 		from mapFolding.syntheticModules.theorem2Trimmed import count  # noqa: PLC0415
 		mapFoldingState = count(mapFoldingState)
@@ -199,8 +205,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds  # noqa: PLC0415
-		mapFoldingState = initializeGroupsOfFolds(mapFoldingState)
+		from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
+		mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
 		from mapFolding.syntheticModules.dataPacking import sequential  # noqa: PLC0415
 		mapFoldingState = sequential(mapFoldingState)

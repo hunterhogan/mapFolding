@@ -11,7 +11,7 @@ from hunterMakesPy import autoDecodingRLE, raiseIfNone
 from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, MapFoldingState
 from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
-from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
+from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, NamedTuple, TYPE_CHECKING
 import ast
@@ -212,7 +212,7 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 		along one axis.
 
 	"""
-	state = initializeGroupsOfFolds(MapFoldingState(mapShape))
+	state = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	pathModule = PurePosixPath(Path.home(), 'mapFolding', 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)

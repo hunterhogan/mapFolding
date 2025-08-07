@@ -425,7 +425,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 
 	return pathFilename
 
-def makeInitializeGroupsOfFolds(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Generate initialization module for counting variable setup.
 
 	(AI generated docstring)
@@ -730,8 +730,10 @@ if __name__ == '__main__':
 	pathFilename = makeDaoOfMapFoldingParallelNumba(astModule, 'countParallelNumba', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
 
 	astModule: ast.Module = _getModule(logicalPathInfix=None)
-	makeInitializeGroupsOfFolds(astModule, 'initializeCount', 'initializeGroupsOfFolds', logicalPathInfixDEFAULT)
-
+	makeInitializeState(astModule, 'initializeState', 'transitionOnGroupsOfFolds', logicalPathInfixDEFAULT)
+# initializeCount
+# initializeCount2 initializeStateA007822
+# initializeGroupsOfFolds
 	astModule = _getModule(logicalPathInfix=None)
 	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixDEFAULT, None)
 
@@ -749,11 +751,18 @@ if __name__ == '__main__':
 	pathFilename = addSymmetryCheck(astModule, 'algorithmA007822', None, logicalPathInfixDEFAULT, None)
 
 	astModule = _getModule(moduleIdentifier='algorithmA007822')
-	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfA007822', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
+	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'algorithmA007822Numba', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
 
-# TODO Implement logic that lets me amend modules instead of only overwriting them.
+	# I can't handle parallel right now.
+
+# TODO Implement logic that lets me amend modules instead of only overwriting them. "initializeCount" could/should include state
+# initialization for multiple algorithms.
 	astModule = _getModule(moduleIdentifier='algorithmA007822')
-	makeInitializeGroupsOfFolds(astModule, 'initializeCount2', 'initializeA007822', logicalPathInfixDEFAULT)
+# NOTE `initializeState.transitionOnGroupsOfFolds` will collide with `initializeStateA007822.transitionOnGroupsOfFolds` if the
+# modules are merged. This problem is a side effect of the problem with `MapFoldingState.groupsOfFolds` and
+# `MapFoldingState.foldsTotal`. If I fix that issue, then the identifier `initializeStateA007822.transitionOnGroupsOfFolds` will
+# naturally change to something more appropriate (and remove the collision).
+	makeInitializeState(astModule, 'initializeStateA007822', 'transitionOnGroupsOfFolds', logicalPathInfixDEFAULT)
 
 	astModule = _getModule(moduleIdentifier='algorithmA007822')
 	pathFilename = makeTheorem2(astModule, 'theorem2A007822', None, logicalPathInfixDEFAULT, None)

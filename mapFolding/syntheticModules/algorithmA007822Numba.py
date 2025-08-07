@@ -4,11 +4,30 @@ from mapFolding.dataBaskets import (
 from numba import jit
 
 @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
-def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1ndexCeiling: DatatypeElephino, indexDimension: DatatypeLeavesTotal, indexLeaf: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeLeavesTotal, leafConnectee: DatatypeLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, connectionGraph: Array3DLeavesTotal, dimensionsTotal: DatatypeLeavesTotal, leavesTotal: DatatypeLeavesTotal) -> tuple[DatatypeFoldsTotal, DatatypeElephino, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, Array1DLeavesTotal, Array1DElephino, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal]:
+def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1ndexCeiling: DatatypeElephino, indexDimension: DatatypeLeavesTotal, indexLeaf: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeLeavesTotal, leafConnectee: DatatypeLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, leafComparison: Array1DLeavesTotal, connectionGraph: Array3DLeavesTotal, dimensionsTotal: DatatypeLeavesTotal, leavesTotal: DatatypeLeavesTotal) -> tuple[DatatypeFoldsTotal, DatatypeElephino, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, Array1DLeavesTotal, Array1DElephino, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal]:
     while leaf1ndex > 0:
         if leaf1ndex <= 1 or leafBelow[0] == 1:
             if leaf1ndex > leavesTotal:
-                groupsOfFolds += 1
+                indexLeaf = 0
+                leafConnectee = 0
+                while leafConnectee < leavesTotal + 1:
+                    leafNumber = int(leafBelow[indexLeaf])
+                    leafComparison[leafConnectee] = (leafNumber - indexLeaf + leavesTotal) % leavesTotal
+                    indexLeaf = leafNumber
+                    leafConnectee += 1
+                indexInMiddle = leavesTotal // 2
+                indexMiniGap = 0
+                while indexMiniGap < leavesTotal + 1:
+                    ImaSymmetricFold = True
+                    leafConnectee = 0
+                    while leafConnectee < indexInMiddle:
+                        if leafComparison[(indexMiniGap + leafConnectee) % (leavesTotal + 1)] != leafComparison[(indexMiniGap + leavesTotal + 1 - 2 - leafConnectee) % (leavesTotal + 1)]:
+                            ImaSymmetricFold = False
+                            break
+                        leafConnectee += 1
+                    if ImaSymmetricFold:
+                        groupsOfFolds += 1
+                    indexMiniGap += 1
             else:
                 dimensionsUnconstrained = dimensionsTotal
                 gap1ndexCeiling = gapRangeStart[leaf1ndex - 1]
@@ -50,7 +69,8 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
             leafAbove[leafBelow[leaf1ndex]] = leaf1ndex
             gapRangeStart[leaf1ndex] = gap1ndex
             leaf1ndex += 1
-    return (groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal)
+    groupsOfFolds = (groupsOfFolds + 1) // 2
+    return (groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, connectionGraph, dimensionsTotal, leavesTotal)
 
 def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
     mapShape: tuple[DatatypeLeavesTotal, ...] = state.mapShape
@@ -72,6 +92,6 @@ def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
     connectionGraph: Array3DLeavesTotal = state.connectionGraph
     dimensionsTotal: DatatypeLeavesTotal = state.dimensionsTotal
     leavesTotal: DatatypeLeavesTotal = state.leavesTotal
-    groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal)
+    groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, connectionGraph, dimensionsTotal, leavesTotal = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, connectionGraph, dimensionsTotal, leavesTotal)
     state = MapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, indexDimension=indexDimension, indexLeaf=indexLeaf, indexMiniGap=indexMiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, leafComparison=leafComparison)
     return state

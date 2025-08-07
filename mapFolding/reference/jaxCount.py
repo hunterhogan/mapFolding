@@ -18,7 +18,7 @@ over other approaches and presented additional complexity. It serves as a valuab
 for exploring alternative acceleration strategies and understanding the limitations of
 different computational frameworks for this specific algorithm.
 """
-from flattened import validateListDimensions, getLeavesTotal, makeConnectionGraph
+from flattened import getLeavesTotal, makeConnectionGraph, validateListDimensions
 from numpy.typing import NDArray
 from typing import Any
 import jax

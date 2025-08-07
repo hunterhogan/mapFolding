@@ -37,7 +37,7 @@ from mapFolding import getPathFilenameFoldsTotal, MapFoldingState, packageSettin
 from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
-from mapFolding.syntheticModules.initializeCount import initializeGroupsOfFolds
+from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import PurePosixPath
 from typing import cast, NamedTuple, TYPE_CHECKING
 from typing_extensions import TypeIs
@@ -326,7 +326,7 @@ if __name__ == '__main__':
 	"""
 
 if __name__ == '__main__':
-	state = initializeGroupsOfFolds(MapFoldingState((2,4)))
+	state = transitionOnGroupsOfFolds(MapFoldingState((2,4)))
 	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)

@@ -1,10 +1,29 @@
 from mapFolding.dataBaskets import MapFoldingState
 
-def initializeGroupsOfFolds(state: MapFoldingState) -> MapFoldingState:
+def transitionOnGroupsOfFolds(state: MapFoldingState) -> MapFoldingState:
     while state.groupsOfFolds == 0:
         if state.leaf1ndex <= 1 or state.leafBelow[0] == 1:
             if state.leaf1ndex > state.leavesTotal:
-                state.groupsOfFolds += 1
+                state.indexLeaf = 0
+                leafConnectee = 0
+                while leafConnectee < state.leavesTotal + 1:
+                    leafNumber = int(state.leafBelow[state.indexLeaf])
+                    state.leafComparison[leafConnectee] = (leafNumber - state.indexLeaf + state.leavesTotal) % state.leavesTotal
+                    state.indexLeaf = leafNumber
+                    leafConnectee += 1
+                indexInMiddle = state.leavesTotal // 2
+                state.indexMiniGap = 0
+                while state.indexMiniGap < state.leavesTotal + 1:
+                    ImaSymmetricFold = True
+                    leafConnectee = 0
+                    while leafConnectee < indexInMiddle:
+                        if state.leafComparison[(state.indexMiniGap + leafConnectee) % (state.leavesTotal + 1)] != state.leafComparison[(state.indexMiniGap + state.leavesTotal + 1 - 2 - leafConnectee) % (state.leavesTotal + 1)]:
+                            ImaSymmetricFold = False
+                            break
+                        leafConnectee += 1
+                    if ImaSymmetricFold:
+                        state.groupsOfFolds += 1
+                    state.indexMiniGap += 1
             else:
                 state.dimensionsUnconstrained = state.dimensionsTotal
                 state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
@@ -46,4 +65,5 @@ def initializeGroupsOfFolds(state: MapFoldingState) -> MapFoldingState:
             state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leaf1ndex
             state.gapRangeStart[state.leaf1ndex] = state.gap1ndex
             state.leaf1ndex += 1
+    state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
     return state
