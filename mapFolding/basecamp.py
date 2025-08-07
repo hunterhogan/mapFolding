@@ -159,8 +159,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 			possible routes are predictable.
 
 		"""
-		from mapFolding._A007822 import doTheNeedful  # noqa: PLC0415
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+		from mapFolding.syntheticModules.algorithmA007822 import doTheNeedful  # noqa: PLC0415
 		return doTheNeedful(MapFoldingState(mapShape)).groupsOfFolds
 
 	elif flow == 'daoOfMapFolding':
@@ -211,7 +211,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		from mapFolding.dataBaskets import ParallelMapFoldingState  # noqa: PLC0415
 		parallelMapFoldingState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
-		from mapFolding.syntheticModules.countParallel import doTheNeedful  # noqa: PLC0415
+		from mapFolding.syntheticModules.countParallelNumba import doTheNeedful  # noqa: PLC0415
 
 		# `listStatesParallel` exists in case you want to research the parallel computation.
 		foldsTotal, listStatesParallel = doTheNeedful(parallelMapFoldingState, concurrencyLimit) # pyright: ignore[reportUnusedVariable]
@@ -220,7 +220,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.syntheticModules.daoOfMapFolding import doTheNeedful  # noqa: PLC0415
+		from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful  # noqa: PLC0415
 		mapFoldingState = doTheNeedful(mapFoldingState)
 		foldsTotal = mapFoldingState.foldsTotal
 
