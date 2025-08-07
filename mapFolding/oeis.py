@@ -451,11 +451,7 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 		foldsTotal: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
 		return foldsTotal
 
-	if oeisID == 'A007822':
-		from mapFolding._A007822 import Z0Z_flowNeedsFixing  # noqa: PLC0415
-		return Z0Z_flowNeedsFixing(mapShape)
-
-	return countFolds(mapShape)
+	return countFolds(mapShape, oeisID=oeisID)
 
 def OEIS_for_n() -> None:
 	"""Command-line interface for calculating OEIS sequence values.

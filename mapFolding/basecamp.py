@@ -134,7 +134,36 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	# Flow control until I can figure out a good way ---------------------------------
 
-	if flow == 'daoOfMapFolding':
+	# A007822 flow control until I can figure out a good way ---------------------------------
+	if oeisID == 'A007822':
+		"""Temporary notes.
+
+		The REAL motivation for integrating into basecamp is to integrate into the test modules. No, wait: to stop having to work
+		around the test modules.
+
+		I put `if oeisID == 'A007822'` in the `elif flow ==` cascade, before the `flow` checks because I want to remove A007822
+		from those flow paths. It is fundamentally incompatible and it will cause `Exception` or incorrect computations.
+
+		To use A007822, oeisID is mandatory.
+
+		Parameters:
+			listDimensions should work. mapShape should work. oeis_n should work. `pathLikeWriteFoldsTotal` should work!!! I
+			didn't think about that, and I like it.
+
+		Parallel version:
+			idk. The computation division logic will try to execute. As of 2025 Aug 6 at 7 PM, I haven't tried or thought about a
+			parallel version. TODO Watch out for errors.
+
+		`flow`:
+			It looks like I will need to make decisions tree just for A007822. That's probably not a big deal since all of the
+			possible routes are predictable.
+
+		"""
+		from mapFolding._A007822 import doTheNeedful  # noqa: PLC0415
+		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+		return doTheNeedful(MapFoldingState(mapShape)).groupsOfFolds
+
+	elif flow == 'daoOfMapFolding':
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 

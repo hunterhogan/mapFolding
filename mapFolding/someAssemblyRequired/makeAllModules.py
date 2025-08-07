@@ -318,18 +318,8 @@ def makeDaoOfMapFolding(astModule: ast.Module, moduleIdentifier: str, callableId
 
 	return pathFilename
 
-def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001, PLR0915
+def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Generate parallel implementation with concurrent execution and task division.
-
-	This version of the algorithm: Creates a parallel processing version of the map folding algorithm that distributes
-	computational work across multiple processes using `ProcessPoolExecutor`. The implementation includes dataclass decomposition
-	for both base and parallel state fields, task division logic that partitions work based on leaf indices, concurrent execution
-	management with future objects, result aggregation from multiple parallel computations, and Numba optimization for the core
-	computational kernels.
-
-	The generated module contains multiple functions including core counting function with parallel-aware task filtering,
-	dataclass unpacking/repacking function for process communication, and main dispatcher function that manages the parallel
-	execution assembly line.
 
 	Parameters
 	----------
@@ -497,21 +487,7 @@ def makeDaoOfMapFoldingParallel(astModule: ast.Module, moduleIdentifier: str, ca
 	return pathFilename
 
 def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
-	"""Generate optimized implementation applying Theorem 2 mathematical optimizations.
-
-	(AI generated docstring)
-
-	Creates a specialized version of the map folding algorithm that applies Theorem 2
-	optimizations for improved computational efficiency. The transformation includes
-	modifying loop termination conditions from general cases to Theorem 2 specifics,
-	restructuring conditional logic to eliminate unnecessary branch evaluations,
-	adding count doubling operations to leverage mathematical properties, and
-	removing redundant computations that are not needed under Theorem 2 constraints.
-
-	Theorem 2 provides mathematical guarantees that allow certain computational
-	shortcuts and optimizations that would not be valid in the general case. This
-	implementation capitalizes on those properties to achieve significant performance
-	improvements for maps that satisfy Theorem 2 conditions.
+	"""Generate optimized implementation applying optimization predicted by Theorem 2.
 
 	Parameters
 	----------
@@ -760,14 +736,14 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
 if __name__ == '__main__':
-	astModule: ast.Module = _getModule(logicalPathInfix=None)
-	makeInitializeGroupsOfFolds(astModule, 'initializeCount', 'initializeGroupsOfFolds', logicalPathInfixDEFAULT)
-
 	astModule = _getModule(logicalPathInfix=None)
 	pathFilename: PurePath = makeDaoOfMapFolding(astModule, 'daoOfMapFolding', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
 
 	astModule = _getModule(logicalPathInfix=None)
 	pathFilename = makeDaoOfMapFoldingParallel(astModule, 'countParallel', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
+
+	astModule: ast.Module = _getModule(logicalPathInfix=None)
+	makeInitializeGroupsOfFolds(astModule, 'initializeCount', 'initializeGroupsOfFolds', logicalPathInfixDEFAULT)
 
 	astModule = _getModule(logicalPathInfix=None)
 	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixDEFAULT, None)
@@ -780,3 +756,20 @@ if __name__ == '__main__':
 
 	astImportFrom: ast.ImportFrom = Make.ImportFrom(_getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2Numba'), list_alias=[Make.alias(sourceCallableIdentifierDEFAULT)])
 	makeUnRePackDataclass(astImportFrom)
+
+	astModule = _getModule(logicalPathInfix=None, moduleIdentifier='_A007822')
+	pathFilename: PurePath = makeDaoOfMapFolding(astModule, 'daoOfA007822', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
+
+# TODO Implement logic that lets me amend modules instead of only overwriting them.
+	astModule = _getModule(logicalPathInfix=None, moduleIdentifier='_A007822')
+	makeInitializeGroupsOfFolds(astModule, 'initializeCount2', 'initializeA007822', logicalPathInfixDEFAULT)
+
+	astModule = _getModule(logicalPathInfix=None, moduleIdentifier='_A007822')
+	pathFilename = makeTheorem2(astModule, 'theorem2A007822', None, logicalPathInfixDEFAULT, None)
+
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = trimTheorem2(astModule, 'theorem2A007822Trimmed', None, logicalPathInfixDEFAULT, None)
+
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = numbaOnTheorem2(astModule, 'theorem2A007822Numba', None, logicalPathInfixDEFAULT, None)
+

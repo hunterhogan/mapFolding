@@ -139,4 +139,4 @@ def count(state: MapFoldingState) -> MapFoldingState:
 
 def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
 	state = count(state)
-	return state
+	return state  # noqa: RET504

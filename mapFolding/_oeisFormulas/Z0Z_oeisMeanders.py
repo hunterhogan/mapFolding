@@ -1,5 +1,6 @@
 from mapFolding._oeisFormulas.A000560 import A000560
 from mapFolding._oeisFormulas.A000682 import A000682
+from mapFolding._oeisFormulas.A001010 import A001010
 from mapFolding._oeisFormulas.A005315 import A005315
 from mapFolding._oeisFormulas.A005316 import A005316
 from mapFolding._oeisFormulas.A223094 import A223094
@@ -8,11 +9,13 @@ from mapFolding._oeisFormulas.A301620 import A301620
 from mapFolding.oeis import getOEISidInformation, getOEISidValues
 import sys
 
-'A001010'
 'A001011'
+# a(n) = (A001010(n) + A000136(n)) / 4
+
 oeisIDsMeanders: list[str] = [
 	'A000560',
 	'A000682',
+	'A001010',
 	'A005315',
 	'A005316',
 	'A223094',
@@ -41,6 +44,8 @@ if __name__ == '__main__':
 		assert A000560for_n == dictionaryOEISMeanders['A000560']['valuesKnown'][n]
 		A000682for_n = A000682(n)
 		assert A000682for_n == dictionaryOEISMeanders['A000682']['valuesKnown'][n]
+		nComputed, foldsTotal = A001010(n)
+		assert foldsTotal == dictionaryOEISMeanders['A001010']['valuesKnown'][nComputed]
 		A005315for_n = A005315(n)
 		assert A005315for_n == dictionaryOEISMeanders['A005315']['valuesKnown'][n]
 		A005316for_n = A005316(n)

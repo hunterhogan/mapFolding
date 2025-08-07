@@ -85,4 +85,5 @@ from mapFolding.oeis import (
 	getOEISids as getOEISids,
 	OEIS_for_n as OEIS_for_n,
 	oeisIDfor_n as oeisIDfor_n,
+    dictionaryOEIS as dictionaryOEIS,
 )
