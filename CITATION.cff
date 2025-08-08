@@ -16,16 +16,18 @@ authors:
   family-names: Hogan
   email: HunterHogan@pm.me
 cff-version: 1.2.0
-commit: 45ae97af670dac9b4ac2588ac780baa3e81c9e0b
+commit: 66167c3b4870e3ce616de30b011bcfc0199a2f0d
 date-released: '2025-08-08'
 identifiers:
 - type: url
-  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.15.1
-  description: The URL for mapFolding 0.15.1.
+  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.15.2
+  description: The URL for mapFolding 0.15.2.
 keywords:
 - A000136
 - A000560
 - A000682
+- A001010
+- A001011
 - A001415
 - A001416
 - A001417
@@ -37,11 +39,16 @@ keywords:
 - A223094
 - A259702
 - A301620
+- AST manipulation
+- GPU acceleration
+- JIT compilation
+- Numba optimization
+- OEIS
+- Python optimization
 - abstract syntax tree
 - algorithmic combinatorics
 - algorithmic optimization
 - arch configurations
-- AST manipulation
 - automated code generation
 - bit-packed arrays
 - bitwise state machines
@@ -68,10 +75,8 @@ keywords:
 - enumerative combinatorics
 - folding pattern enumeration
 - folding problems
-- GPU acceleration
 - high-performance computing
 - integer sequences
-- JIT compilation
 - just-in-time compilation
 - kernel optimization
 - labeled stamp folding
@@ -90,10 +95,8 @@ keywords:
 - meandric systems
 - memory-efficient enumeration
 - metaprogramming
-- Numba optimization
 - numerical algorithms
 - numerical computation
-- OEIS
 - open meandric systems
 - paper folding mathematics
 - parallel computing
@@ -103,7 +106,6 @@ keywords:
 - permutations
 - post-setup optimization
 - pyproject
-- Python optimization
 - scientific computing
 - semi-meanders
 - sequence analysis
@@ -121,9 +123,9 @@ keywords:
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.15.1/
-repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.15.1
+repository-artifact: https://pypi.org/project/mapfolding/0.15.2/
+repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.15.2
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.15.1
+version: 0.15.2
