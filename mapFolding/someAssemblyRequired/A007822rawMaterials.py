@@ -21,7 +21,7 @@ def {Z0Z_identifier}(state: MapFoldingState) -> MapFoldingState:
 		ImaSymmetricFold = True
 		leafConnectee = 0
 		while leafConnectee < indexInMiddle:
-			if state.leafComparison[(state.indexMiniGap + leafConnectee) % (state.leavesTotal + 1)] != state.leafComparison[(state.indexMiniGap + state.leavesTotal + 1 - 2 - leafConnectee) % (state.leavesTotal + 1)]:
+			if state.leafComparison[(state.indexMiniGap + leafConnectee) % (state.leavesTotal + 1)] != state.leafComparison[(state.indexMiniGap + state.leavesTotal - 1 - leafConnectee) % (state.leavesTotal + 1)]:
 				ImaSymmetricFold = False
 				break
 			leafConnectee += 1

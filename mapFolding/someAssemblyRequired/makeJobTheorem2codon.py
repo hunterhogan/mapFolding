@@ -5,13 +5,13 @@ https://docs.exaloop.io/start/install/
 
 from astToolkit import (
 	Be, DOT, extractFunctionDef, Grab, identifierDotAttribute, IngredientsFunction, IngredientsModule, Make, NodeChanger,
-	NodeTourist, Then)
+	NodeTourist, parseLogicalPath2astModule, Then)
 from astToolkit.transformationTools import removeUnusedParameters, write_astModule
 from hunterMakesPy import autoDecodingRLE, raiseIfNone
 from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, MapFoldingState
 from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
-from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, NamedTuple, TYPE_CHECKING
 import ast
@@ -214,11 +214,12 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	"""
 	state = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	pathModule = PurePosixPath(Path.home(), 'mapFolding', 'jobs')
+	source_astModule = parseLogicalPath2astModule('mapFolding.syntheticModules.theorem2A007822Numba')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
-	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
+	aJob = RecipeJobTheorem2(state, source_astModule=source_astModule, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	makeJob(aJob)
 
 if __name__ == '__main__':
-	mapShape = (2, 21)
+	mapShape = (1, 15)
 	fromMapShape(mapShape)
 

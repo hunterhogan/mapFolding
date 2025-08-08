@@ -14,16 +14,16 @@ if __name__ == '__main__':
 			f"{(match:=foldsTotal == dictionaryOEISMeanders[oeisID]['valuesKnown'][n])}\t"
 			f"\033[{(not match)*91}m"
 			f"{n}\t"
-			f"{foldsTotal=}\t"
-			f"{dictionaryOEISMeanders[oeisID]['valuesKnown'][n]=}\t"
+			f"{foldsTotal}\t"
+			# f"{dictionaryOEISMeanders[oeisID]['valuesKnown'][n]=}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
 			# f"{description}\t"
 			"\033[0m\n"
 		)
+	oeisID = 'A001010'
 	oeisID = 'A000136'
 	oeisID = 'A000682'
-	oeisID = 'A001010'
-	for n in range(2, 13):
+	for n in range(3, 30):
 
 		# sys.stdout.write(f"{n = }\n")
 

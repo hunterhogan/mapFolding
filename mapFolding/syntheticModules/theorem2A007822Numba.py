@@ -19,7 +19,7 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
                     ImaSymmetricFold = True
                     leafConnectee = 0
                     while leafConnectee < indexInMiddle:
-                        if leafComparison[(indexMiniGap + leafConnectee) % (leavesTotal + 1)] != leafComparison[(indexMiniGap + leavesTotal + 1 - 2 - leafConnectee) % (leavesTotal + 1)]:
+                        if leafComparison[(indexMiniGap + leafConnectee) % (leavesTotal + 1)] != leafComparison[(indexMiniGap + leavesTotal - 1 - leafConnectee) % (leavesTotal + 1)]:
                             ImaSymmetricFold = False
                             break
                         leafConnectee += 1

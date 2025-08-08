@@ -120,7 +120,7 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 					if curveLocationAnalysis < curveLocationsMAXIMUM:
 						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
-		startingCurveLocations = dictionaryCurveLocations.copy()
-		dictionaryCurveLocations = {}
+		startingCurveLocations.clear()
+		startingCurveLocations, dictionaryCurveLocations = dictionaryCurveLocations, startingCurveLocations
 
 	return sum(startingCurveLocations.values())
