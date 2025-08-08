@@ -41,8 +41,8 @@ import pytest
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
-@pytest.mark.parametrize('flow', ['daoOfMapFolding', 'theorem2', 'theorem2Trimmed', 'theorem2numba'])
-def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: Literal['daoOfMapFolding', 'theorem2', 'theorem2numba']) -> None:
+@pytest.mark.parametrize('flow', ['daoOfMapFolding', 'numba', 'theorem2', 'theorem2numba', 'theorem2Trimmed'])
+def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: str) -> None:
 	"""Validate that different computational flows produce identical results.
 
 	(AI generated docstring)
@@ -86,7 +86,7 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 	for n in dictionaryOEIS[oeisID]['valuesTestValidation']:
 		standardizedEqualToCallableReturn(dictionaryOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
-@pytest.mark.parametrize('flow', ['numba'])
+@pytest.mark.parametrize('flow', ['numba', 'theorem2', 'theorem2numba', 'theorem2Trimmed'])
 def test_flowControlByOEISid(flow: str) -> None:
 	"""Crappy.
 

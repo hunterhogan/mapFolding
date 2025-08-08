@@ -1,11 +1,8 @@
 from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
 from copy import deepcopy
-from mapFolding.dataBaskets import (
-	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	ParallelMapFoldingState)
+from mapFolding.dataBaskets import Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, ParallelMapFoldingState
 from multiprocessing import set_start_method as multiprocessing_set_start_method
 from numba import jit
-
 if __name__ == '__main__':
     multiprocessing_set_start_method('spawn')
 

@@ -42,5 +42,6 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
         leafAbove[leafBelow[leaf1ndex]] = leaf1ndex
         gapRangeStart[leaf1ndex] = gap1ndex
         leaf1ndex += 1
-    groupsOfFolds *= 2
+    else:
+        groupsOfFolds *= 2
     return (groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal)

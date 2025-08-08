@@ -162,18 +162,63 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		match flow:
 			case 'numba':
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
 				from mapFolding.syntheticModules.algorithmA007822Numba import doTheNeedful  # noqa: PLC0415
-				return doTheNeedful(MapFoldingState(mapShape)).groupsOfFolds
+				mapFoldingState = doTheNeedful(mapFoldingState)
+
+			case 'theorem2':
+				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
+				from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds  # noqa: PLC0415
+				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+				from mapFolding.syntheticModules.theorem2A007822 import count  # noqa: PLC0415
+				mapFoldingState = count(mapFoldingState)
+
+			case 'theorem2Numba':
+				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
+				from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds  # noqa: PLC0415
+				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+				from mapFolding.syntheticModules.theorem2A007822Numba import count  # noqa: PLC0415
+				mapFoldingState = count(mapFoldingState)
+
+			case 'theorem2Trimmed':
+				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
+				from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds  # noqa: PLC0415
+				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+				from mapFolding.syntheticModules.theorem2A007822Trimmed import count  # noqa: PLC0415
+				mapFoldingState = count(mapFoldingState)
+
 			case _:
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
 				from mapFolding.syntheticModules.algorithmA007822 import doTheNeedful  # noqa: PLC0415
-				return doTheNeedful(MapFoldingState(mapShape)).groupsOfFolds
+				mapFoldingState = doTheNeedful(mapFoldingState)
+
+		foldsTotal = mapFoldingState.groupsOfFolds
 
 	elif flow == 'daoOfMapFolding':
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
 		from mapFolding.daoOfMapFolding import doTheNeedful  # noqa: PLC0415
+		mapFoldingState = doTheNeedful(mapFoldingState)
+		foldsTotal = mapFoldingState.foldsTotal
+
+	elif flow == 'numba':
+		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
+		from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful  # noqa: PLC0415
 		mapFoldingState = doTheNeedful(mapFoldingState)
 		foldsTotal = mapFoldingState.foldsTotal
 

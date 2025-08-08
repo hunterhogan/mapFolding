@@ -151,7 +151,8 @@ def _getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings
 
 # TODO Where is the generalized form of these functions?!
 
-def addSymmetryCheck(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+def addSymmetryCheck(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+	"""Add logic to check for symmetric folds."""
 	imports=LedgerOfImports(astModule)
 
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
@@ -474,7 +475,7 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 	return pathFilename
 
 def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
-	"""Generate optimized implementation applying optimization predicted by Theorem 2.
+	"""Generate module by applying optimization predicted by Theorem 2.
 
 	Parameters
 	----------
@@ -506,6 +507,14 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 
+	theCountingIdentifier: identifierDotAttribute = theCountingIdentifierDEFAULT
+	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(Make.Name(dataclassInstanceIdentifier), theCountingIdentifier), Make.Mult(), Make.Constant(2))
+
+	NodeChanger(
+		findThis = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+		, doThat = Grab.orelseAttribute(Then.replaceWith([doubleTheCount]))
+	).visit(ingredientsFunction.astFunctionDef)
+
 	NodeChanger(
 		findThis = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
 		, doThat = Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)])))
@@ -528,13 +537,6 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 	NodeChanger(
 		findThis = IfThis.isAttributeNamespaceIdentifierLessThanOrEqual0(dataclassInstanceIdentifier, 'leaf1ndex')
 		, doThat = Then.removeIt
-	).visit(ingredientsFunction.astFunctionDef)
-
-	theCountingIdentifier: identifierDotAttribute = theCountingIdentifierDEFAULT
-	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(ast.Name(dataclassInstanceIdentifier), theCountingIdentifier), ast.Mult(), Make.Constant(2))
-	NodeChanger(
-		findThis = Be.Return
-		, doThat = Then.insertThisAbove([doubleTheCount])
 	).visit(ingredientsFunction.astFunctionDef)
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
@@ -731,9 +733,7 @@ if __name__ == '__main__':
 
 	astModule: ast.Module = _getModule(logicalPathInfix=None)
 	makeInitializeState(astModule, 'initializeState', 'transitionOnGroupsOfFolds', logicalPathInfixDEFAULT)
-# initializeCount
-# initializeCount2 initializeStateA007822
-# initializeGroupsOfFolds
+
 	astModule = _getModule(logicalPathInfix=None)
 	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixDEFAULT, None)
 
@@ -755,7 +755,7 @@ if __name__ == '__main__':
 
 	# I can't handle parallel right now.
 
-# TODO Implement logic that lets me amend modules instead of only overwriting them. "initializeCount" could/should include state
+# TODO Implement logic that lets me amend modules instead of only overwriting them. "initializeState" could/should include state
 # initialization for multiple algorithms.
 	astModule = _getModule(moduleIdentifier='algorithmA007822')
 # NOTE `initializeState.transitionOnGroupsOfFolds` will collide with `initializeStateA007822.transitionOnGroupsOfFolds` if the

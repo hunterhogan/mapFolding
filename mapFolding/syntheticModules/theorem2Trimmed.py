@@ -39,5 +39,6 @@ def count(state: MapFoldingState) -> MapFoldingState:
         state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leaf1ndex
         state.gapRangeStart[state.leaf1ndex] = state.gap1ndex
         state.leaf1ndex += 1
-    state.groupsOfFolds *= 2
+    else:
+        state.groupsOfFolds *= 2
     return state
