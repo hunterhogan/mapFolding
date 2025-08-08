@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.15.1"
+version = "0.15.2"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations and code optimization."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -10,6 +10,8 @@ keywords = [
   "A000136",
   "A000560",
   "A000682",
+  "A001010",
+  "A001011",
   "A001415",
   "A001416",
   "A001417",
@@ -21,11 +23,16 @@ keywords = [
   "A223094",
   "A259702",
   "A301620",
+  "AST manipulation",
+  "GPU acceleration",
+  "JIT compilation",
+  "Numba optimization",
+  "OEIS",
+  "Python optimization",
   "abstract syntax tree",
   "algorithmic combinatorics",
   "algorithmic optimization",
   "arch configurations",
-  "AST manipulation",
   "automated code generation",
   "bit-packed arrays",
   "bitwise state machines",
@@ -52,10 +59,8 @@ keywords = [
   "enumerative combinatorics",
   "folding pattern enumeration",
   "folding problems",
-  "GPU acceleration",
   "high-performance computing",
   "integer sequences",
-  "JIT compilation",
   "just-in-time compilation",
   "kernel optimization",
   "labeled stamp folding",
@@ -74,10 +79,8 @@ keywords = [
   "meandric systems",
   "memory-efficient enumeration",
   "metaprogramming",
-  "Numba optimization",
   "numerical algorithms",
   "numerical computation",
-  "OEIS",
   "open meandric systems",
   "paper folding mathematics",
   "parallel computing",
@@ -87,7 +90,6 @@ keywords = [
   "permutations",
   "post-setup optimization",
   "pyproject",
-  "Python optimization",
   "scientific computing",
   "semi-meanders",
   "sequence analysis",

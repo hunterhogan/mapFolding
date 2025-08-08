@@ -551,21 +551,8 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	return pathFilename
 
-def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
+def makeUnRePackDataclass(astImportFrom: ast.ImportFrom, moduleIdentifier: identifierDotAttribute = dataPackingModuleIdentifierDEFAULT) -> None:
 	"""Generate interface module for dataclass unpacking and repacking operations.
-
-	(AI generated docstring)
-
-	Creates a specialized module that serves as an interface between dataclass-based
-	calling code and optimized implementations that operate on decomposed primitive
-	values. The generated module includes a function that unpacks dataclass instances
-	into individual primitive values, calls to the specified optimized target function
-	with decomposed parameters, repacking of results back into appropriate dataclass
-	instances, and import management for all required dependencies.
-
-	This bridge module enables seamless integration between high-level dataclass-based
-	APIs and low-level optimized implementations, maintaining type safety and usability
-	while leveraging performance optimizations that require primitive value operations.
 
 	Parameters
 	----------
@@ -585,7 +572,6 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom) -> None:
 	logicalPathSourceModule: identifierDotAttribute = '.'.join([packageSettings.identifierPackage, algorithmSourceModule])  # noqa: FLY002
 
 	logicalPathInfix: identifierDotAttribute = logicalPathInfixDEFAULT
-	moduleIdentifier: identifierDotAttribute = dataPackingModuleIdentifierDEFAULT
 	callableIdentifier: identifierDotAttribute = callableIdentifierHARDCODED
 
 	ingredientsFunction: IngredientsFunction = astModuleToIngredientsFunction(parseLogicalPath2astModule(logicalPathSourceModule), sourceCallableIdentifier)
@@ -772,4 +758,7 @@ if __name__ == '__main__':
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = numbaOnTheorem2(astModule, 'theorem2A007822Numba', None, logicalPathInfixDEFAULT, None)
+
+	astImportFrom: ast.ImportFrom = Make.ImportFrom(_getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2A007822Numba'), list_alias=[Make.alias(sourceCallableIdentifierDEFAULT)])
+	makeUnRePackDataclass(astImportFrom, 'dataPackingA007822')
 

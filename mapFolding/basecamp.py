@@ -184,8 +184,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 				from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds  # noqa: PLC0415
 				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
-				from mapFolding.syntheticModules.theorem2A007822Numba import count  # noqa: PLC0415
-				mapFoldingState = count(mapFoldingState)
+				from mapFolding.syntheticModules.dataPackingA007822 import sequential  # noqa: PLC0415
+				mapFoldingState = sequential(mapFoldingState)
 
 			case 'theorem2Trimmed':
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
