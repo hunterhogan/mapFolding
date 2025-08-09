@@ -1,0 +1,111 @@
+"""The signature CANNOT change."""
+import numpy
+
+def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
+	"""NOTE All `int` are non-negative integers < 2^64-1."""
+# curveLocationAnalysis, distinctCrossings, 691136700
+# shape (3, 691136700), dtype=numpy.uint64
+# Could NumPy handle an ndarray of shape (3, 691136700), dtype=numpy.uint64?
+
+
+	listCurveMaximums: list[tuple[int, int, int]] = [
+		(0x15, 0x2a, 0x10), # `bridges = 0`
+		(0x55, 0xaa, 0x40),
+		(0x155, 0x2aa, 0x100),
+		(0x555, 0xaaa, 0x400),
+		(0x1555, 0x2aaa, 0x1000),
+		(0x5555, 0xaaaa, 0x4000),
+		(0x15555, 0x2aaaa, 0x10000),
+		(0x55555, 0xaaaaa, 0x40000),
+		(0x155555, 0x2aaaaa, 0x100000),
+		(0x555555, 0xaaaaaa, 0x400000),
+		(0x1555555, 0x2aaaaaa, 0x1000000),
+		(0x5555555, 0xaaaaaaa, 0x4000000),
+		(0x15555555, 0x2aaaaaaa, 0x10000000),
+		(0x55555555, 0xaaaaaaaa, 0x40000000), # `bridges = 13`, 0xaaaaaaaa.bit_length() = 32
+		(0x155555555, 0x2aaaaaaaa, 0x100000000),
+		(0x555555555, 0xaaaaaaaaa, 0x400000000),
+		(0x1555555555, 0x2aaaaaaaaa, 0x1000000000),
+		(0x5555555555, 0xaaaaaaaaaa, 0x4000000000),
+		(0x15555555555, 0x2aaaaaaaaaa, 0x10000000000),
+		(0x55555555555, 0xaaaaaaaaaaa, 0x40000000000),
+		(0x155555555555, 0x2aaaaaaaaaaa, 0x100000000000),
+		(0x555555555555, 0xaaaaaaaaaaaa, 0x400000000000),
+		(0x1555555555555, 0x2aaaaaaaaaaaa, 0x1000000000000),
+		(0x5555555555555, 0xaaaaaaaaaaaaa, 0x4000000000000),
+		(0x15555555555555, 0x2aaaaaaaaaaaaa, 0x10000000000000),
+		(0x55555555555555, 0xaaaaaaaaaaaaaa, 0x40000000000000),
+		(0x155555555555555, 0x2aaaaaaaaaaaaaa, 0x100000000000000),
+		(0x555555555555555, 0xaaaaaaaaaaaaaaa, 0x400000000000000),
+		(0x1555555555555555, 0x2aaaaaaaaaaaaaaa, 0x1000000000000000),
+		(0x5555555555555555, 0xaaaaaaaaaaaaaaaa, 0x4000000000000000),
+		# `bridges = 29`
+		# 0x5000000000000000.bit_length() = 63;
+		# 0xaaaaaaaaaaaaaaaa.bit_length() = 64;
+		# 0x5555555555555555.bit_length() = 63
+	]
+
+	listCurveMaximums = listCurveMaximums[0:bridges]
+
+	dictionaryCurveLocations: dict[int, int] = {}
+
+	# This might stay a loop.
+	while bridges > 0:
+		bridges -= 1
+
+		bifurcationAlphaLocator, bifurcationZuluLocator, curveLocationsMAXIMUM = listCurveMaximums[bridges]
+
+		# This should NOT be a loop. It should be vectorized operations.
+		for curveLocations, distinctCrossings in startingCurveLocations.items():
+			bifurcationAlpha = (curveLocations & bifurcationAlphaLocator)
+			bifurcationZulu = (curveLocations & bifurcationZuluLocator) >> 1
+
+			bifurcationAlphaHasCurves = bifurcationAlpha != 1
+			bifurcationZuluHasCurves = bifurcationZulu != 1
+
+			# Curve location analysis
+			curveLocationAnalysis = ((bifurcationAlpha | (bifurcationZulu << 1)) << 2) | 3
+			if curveLocationAnalysis < curveLocationsMAXIMUM:
+				dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+
+			# Curve location analysis, conditional
+			if bifurcationZuluHasCurves:
+				curveLocationAnalysis = (bifurcationZulu >> 1) | (bifurcationAlpha << 2) | (bifurcationZuluIsEven := not (bifurcationZulu & 1))
+				if curveLocationAnalysis < curveLocationsMAXIMUM:
+					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+
+			# Curve location analysis, conditional
+			if bifurcationAlphaHasCurves:
+				curveLocationAnalysis = (bifurcationAlphaShiftRight2 := bifurcationAlpha >> 2) | (bifurcationZulu << 3) | ((bifurcationAlphaIsEven := 1 - (bifurcationAlpha & 0b1)) << 1)
+				if curveLocationAnalysis < curveLocationsMAXIMUM:
+					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+
+			# Curve location analysis, uber-conditional
+			if bifurcationZuluHasCurves and bifurcationAlphaHasCurves:
+				# One Truth-check to select a code path
+				finalZeroCombination = (bifurcationZuluIsEven << 1) | bifurcationAlphaIsEven # pyright: ignore[reportPossiblyUnboundVariable]
+
+				if finalZeroCombination != 0:  # Case 0 (False, False)
+					XOrHere2makePair = 0b1
+					findUnpaired_0b1 = 0
+
+					if finalZeroCombination == 1:  # Case 1: (False, True)
+						while findUnpaired_0b1 >= 0:
+							XOrHere2makePair <<= 2
+							findUnpaired_0b1 += 1 if (bifurcationAlpha & XOrHere2makePair) == 0 else -1
+						bifurcationAlphaShiftRight2 = (bifurcationAlpha ^ XOrHere2makePair) >> 2
+					elif finalZeroCombination == 2:  # Case 2: (True, False)
+						while findUnpaired_0b1 >= 0:
+							XOrHere2makePair <<= 2
+							findUnpaired_0b1 += 1 if (bifurcationZulu & XOrHere2makePair) == 0 else -1
+						bifurcationZulu ^= XOrHere2makePair
+
+					# Cases 1, 2, and 3 all compute curveLocationAnalysis
+					curveLocationAnalysis = ((bifurcationZulu >> 2) << 1) | bifurcationAlphaShiftRight2 # pyright: ignore[reportPossiblyUnboundVariable]
+					if curveLocationAnalysis < curveLocationsMAXIMUM:
+						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+
+		startingCurveLocations.clear()
+		startingCurveLocations, dictionaryCurveLocations = dictionaryCurveLocations, startingCurveLocations
+
+	return sum(startingCurveLocations.values())

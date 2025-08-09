@@ -29,7 +29,7 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 (0x155555555555555, 0x2aaaaaaaaaaaaaa, 0x100000000000000),
 (0x555555555555555, 0xaaaaaaaaaaaaaaa, 0x400000000000000),
 (0x1555555555555555, 0x2aaaaaaaaaaaaaaa, 0x1000000000000000),
-(0x5555555555555555, 0xaaaaaaaaaaaaaaaa, 0x4000000000000000),
+(0x5555555555555555, 0xaaaaaaaaaaaaaaaa, 0x4000000000000000), # 0x5000000000000000.bit_length() = 63; 0xaaaaaaaaaaaaaaaa.bit_length() = 64; 0x5555555555555555.bit_length() = 63
 (0x15555555555555555, 0x2aaaaaaaaaaaaaaaa, 0x10000000000000000),
 (0x55555555555555555, 0xaaaaaaaaaaaaaaaaa, 0x40000000000000000),
 (0x155555555555555555, 0x2aaaaaaaaaaaaaaaaa, 0x100000000000000000),
@@ -101,17 +101,17 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 
 				if finalZeroCombination != 0:  # Case 0 (False, False)
 					XOrHere2makePair = 0b1
-					findUnpairedBinary1 = 0
+					findUnpaired_0b1 = 0
 
 					if finalZeroCombination == 1:  # Case 1: (False, True)
-						while findUnpairedBinary1 >= 0:
+						while findUnpaired_0b1 >= 0:
 							XOrHere2makePair <<= 2
-							findUnpairedBinary1 += 1 if (bifurcationAlpha & XOrHere2makePair) == 0 else -1
+							findUnpaired_0b1 += 1 if (bifurcationAlpha & XOrHere2makePair) == 0 else -1
 						bifurcationAlphaShiftRight2 = (bifurcationAlpha ^ XOrHere2makePair) >> 2
 					elif finalZeroCombination == 2:  # Case 2: (True, False)
-						while findUnpairedBinary1 >= 0:
+						while findUnpaired_0b1 >= 0:
 							XOrHere2makePair <<= 2
-							findUnpairedBinary1 += 1 if (bifurcationZulu & XOrHere2makePair) == 0 else -1
+							findUnpaired_0b1 += 1 if (bifurcationZulu & XOrHere2makePair) == 0 else -1
 						bifurcationZulu ^= XOrHere2makePair
 
 					# Cases 1, 2, and 3 all compute curveLocationAnalysis
@@ -124,3 +124,4 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 		startingCurveLocations, dictionaryCurveLocations = dictionaryCurveLocations, startingCurveLocations
 
 	return sum(startingCurveLocations.values())
+

@@ -138,6 +138,7 @@ dependencies = [
   "platformdirs",
 ]
 optional-dependencies = { development = [
+  "memray; sys_platform == 'linux'",
   "mypy",
   "pyupgrade",
   "py-spy",
