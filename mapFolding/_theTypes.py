@@ -36,7 +36,7 @@ NumPyFoldsTotal: TypeAlias = numpy_uint64  # noqa: UP040 The TypeAlias may be us
 
 Note well
 ---------
-If your elements might exceed 1.8 x 10^19, then you should take extra steps to ensure the integrity of the data in NumPy or use a
+If your element values might exceed 1.8 x 10^19, then you should take extra steps to ensure the integrity of the data in NumPy or use a
 different data structure."""
 
 Array3DLeavesTotal: TypeAlias = ndarray[tuple[int, int, int], dtype[NumPyLeavesTotal]]  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.

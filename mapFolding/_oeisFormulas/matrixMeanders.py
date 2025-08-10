@@ -13,7 +13,7 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 (0x1555555, 0x2aaaaaa, 0x1000000),
 (0x5555555, 0xaaaaaaa, 0x4000000),
 (0x15555555, 0x2aaaaaaa, 0x10000000),
-(0x55555555, 0xaaaaaaaa, 0x40000000),
+(0x55555555, 0xaaaaaaaa, 0x40000000), # `bridges = 13`, 0xaaaaaaaa.bit_length() = 32
 (0x155555555, 0x2aaaaaaaa, 0x100000000),
 (0x555555555, 0xaaaaaaaaa, 0x400000000),
 (0x1555555555, 0x2aaaaaaaaa, 0x1000000000),
@@ -63,6 +63,11 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 (0x15555555555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x10000000000000000000000000000000),
 (0x55555555555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x40000000000000000000000000000000),
 ]
+	"""`bridges = 29`
+	0x5000000000000000.bit_length() = 63;
+	0xaaaaaaaaaaaaaaaa.bit_length() = 64;
+	0x5555555555555555.bit_length() = 63"""
+
 	listCurveMaximums = listCurveMaximums[0:bridges]
 
 	dictionaryCurveLocations: dict[int, int] = {}
@@ -97,18 +102,18 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 			# Curve location analysis, uber-conditional
 			if bifurcationZuluHasCurves and bifurcationAlphaHasCurves:
 				# One Truth-check to select a code path
-				finalZeroCombination = (bifurcationZuluIsEven << 1) | bifurcationAlphaIsEven # pyright: ignore[reportPossiblyUnboundVariable]
+				bifurcationsCanBePairedTogether = (bifurcationZuluIsEven << 1) | bifurcationAlphaIsEven # pyright: ignore[reportPossiblyUnboundVariable]
 
-				if finalZeroCombination != 0:  # Case 0 (False, False)
+				if bifurcationsCanBePairedTogether != 0:  # Case 0 (False, False)
 					XOrHere2makePair = 0b1
 					findUnpaired_0b1 = 0
 
-					if finalZeroCombination == 1:  # Case 1: (False, True)
+					if bifurcationsCanBePairedTogether == 1:  # Case 1: (False, True)
 						while findUnpaired_0b1 >= 0:
 							XOrHere2makePair <<= 2
 							findUnpaired_0b1 += 1 if (bifurcationAlpha & XOrHere2makePair) == 0 else -1
 						bifurcationAlphaShiftRight2 = (bifurcationAlpha ^ XOrHere2makePair) >> 2
-					elif finalZeroCombination == 2:  # Case 2: (True, False)
+					elif bifurcationsCanBePairedTogether == 2:  # Case 2: (True, False)
 						while findUnpaired_0b1 >= 0:
 							XOrHere2makePair <<= 2
 							findUnpaired_0b1 += 1 if (bifurcationZulu & XOrHere2makePair) == 0 else -1
