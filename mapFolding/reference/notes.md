@@ -21,7 +21,44 @@ For each leaf:
 
 ## Identifiers and their sizes
 
-I would like to make a comprehensive and authoritative list of variables and formulas for their maximum bit-width.
+I would like to make a comprehensive and authoritative list of variables and formulas for their maximum bit-width. This is not it, but it does help align identifiers from different algorithms.
+
+Assume `listDimensions`:
+
+1. is in an implemented OEIS sequence, and
+2. is <= the first unknown in the OEIS sequence.
+
+| Type     | max(x)      | Hunter Hogan            | alternative   | Lunnon | Irvine |
+| -------- | ----------- | ----------------------- | ------------- | ------ | ------ |
+| 3D array | n           | connectionGraph         |               | D      | d      |
+| integer  | n           | computationalDivisions  | taskDivisions |        | mod    |
+| integer  | n-1         | computationalIndex      | taskIndex     |        | res    |
+| 2D array | max(p)      | coordinateSystem        |               | C      | c      |
+| 1D array | n           | cumulativeProduct       |               | P      | bigP   |
+| 1D array | d           | countDimensionsGapped   |               | count  | count  |
+| integer  | d           | indexDimension          |               | i      | i      |
+| integer  | d           | dimensionsUnconstrained |               | dd     | dd     |
+| integer  | 8*          | dimensionsTotal         |               | d      | dim    |
+| integer  |             | distance                |               | delta  | delta  |
+| integer  | ~10^17      | foldingsTotal           | f             | G      | mCount |
+| integer  |             | gap1ndex                |               | g      | g      |
+| integer  |             | gap1ndexCeiling         |               | gg     | gg     |
+| 1D array |             | gapRangeStart           |               | gapter | gapter |
+| 1D array | n-1         | gapsWhere               |               | gap    | gap    |
+| integer  | gg-1        | indexMiniGap            |               | j      | j      |
+| integer  | n           | indexLeaf               |               | m      | m      |
+| integer  | n+1         | leaf1ndex               |               | l      | l      |
+| 1D array | n+1         | leafAbove               |               | A      | a      |
+| 1D array | n+1         | leafBelow               |               | B      | b      |
+| integer  | n           | leafConnectee           |               | m      | m      |
+| integer  | n           | leafIndex               |               | m      | m      |
+| integer  | 256*        | leavesTotal             |               | n      |        |
+| 1D array | 19 (2x19)   | listDimensions          | mapShape      | p      | p      |
+| 1D array | (container) | my                      |               |        |        |
+| 1D array | (container) | the                     | static        |        |        |
+| 2D array | (container) | track                   | s             |        |        |
+
+*2x2x2x2x2x2x2x2 (2x2... 8-dimensional)
 
 ## Replace `for` with `while`
 

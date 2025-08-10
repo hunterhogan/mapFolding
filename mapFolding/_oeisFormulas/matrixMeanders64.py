@@ -20,56 +20,17 @@ Flow:
 	- distinctCrossings are summed for identical curveLocationsAnalysis
 - replace `arrayCurveLocations` with new ndarray
 
-listCurveMaximums will be disassembled
-- bifurcationAlphaLocator: computing ndarray
-- bifurcationZuluLocator: computing ndarray
-- curveLocationsMAXIMUM: mask component
-
 """
 
 def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
-	listCurveMaximums: list[tuple[int, int, int]] = [
-		(0x15, 0x2a, 0x10), # `bridges = 0`
-		(0x55, 0xaa, 0x40),
-		(0x155, 0x2aa, 0x100),
-		(0x555, 0xaaa, 0x400),
-		(0x1555, 0x2aaa, 0x1000),
-		(0x5555, 0xaaaa, 0x4000),
-		(0x15555, 0x2aaaa, 0x10000),
-		(0x55555, 0xaaaaa, 0x40000),
-		(0x155555, 0x2aaaaa, 0x100000),
-		(0x555555, 0xaaaaaa, 0x400000),
-		(0x1555555, 0x2aaaaaa, 0x1000000),
-		(0x5555555, 0xaaaaaaa, 0x4000000),
-		(0x15555555, 0x2aaaaaaa, 0x10000000),
-		(0x55555555, 0xaaaaaaaa, 0x40000000),
-		(0x155555555, 0x2aaaaaaaa, 0x100000000),
-		(0x555555555, 0xaaaaaaaaa, 0x400000000),
-		(0x1555555555, 0x2aaaaaaaaa, 0x1000000000),
-		(0x5555555555, 0xaaaaaaaaaa, 0x4000000000),
-		(0x15555555555, 0x2aaaaaaaaaa, 0x10000000000),
-		(0x55555555555, 0xaaaaaaaaaaa, 0x40000000000),
-		(0x155555555555, 0x2aaaaaaaaaaa, 0x100000000000),
-		(0x555555555555, 0xaaaaaaaaaaaa, 0x400000000000),
-		(0x1555555555555, 0x2aaaaaaaaaaaa, 0x1000000000000),
-		(0x5555555555555, 0xaaaaaaaaaaaaa, 0x4000000000000),
-		(0x15555555555555, 0x2aaaaaaaaaaaaa, 0x10000000000000),
-		(0x55555555555555, 0xaaaaaaaaaaaaaa, 0x40000000000000),
-		(0x155555555555555, 0x2aaaaaaaaaaaaaa, 0x100000000000000),
-		(0x555555555555555, 0xaaaaaaaaaaaaaaa, 0x400000000000000),
-		(0x1555555555555555, 0x2aaaaaaaaaaaaaaa, 0x1000000000000000),
-		(0x5555555555555555, 0xaaaaaaaaaaaaaaaa, 0x4000000000000000),
-	]
-
-	listCurveMaximums = listCurveMaximums[0:bridges]
 
 	dictionaryCurveLocations: dict[int, int] = {}
 
-	# This might stay a loop.
 	while bridges > 0:
 		bridges -= 1
-
-		bifurcationAlphaLocator, bifurcationZuluLocator, curveLocationsMAXIMUM = listCurveMaximums[bridges]
+		curveLocationsMAXIMUM = 1 << (2 * bridges + 4)
+		bifurcationAlphaLocator = int('01' * ((curveLocationsMAXIMUM.bit_length() + 1) // 2), 2)
+		bifurcationZuluLocator = bifurcationAlphaLocator << 1
 
 		for curveLocations, distinctCrossings in startingCurveLocations.items():
 			bifurcationAlpha = (curveLocations & bifurcationAlphaLocator)
