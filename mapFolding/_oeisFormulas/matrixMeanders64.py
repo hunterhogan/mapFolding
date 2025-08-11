@@ -1,9 +1,5 @@
 import numpy
 
-distinctCrossings = int(0)
-bifurcationAlpha = int(1)
-bifurcationZulu = int(2)
-
 """TODO temporary notes:
 
 Flow:
@@ -21,49 +17,69 @@ Flow:
 
 """
 
+indexDistinctCrossings = int(0)  # noqa: RUF046, UP018
+indexBifurcationAlpha = int(1)  # noqa: RUF046, UP018
+indexBifurcationZulu = int(2)  # noqa: RUF046, UP018
+
 def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
+
+	# Legacy
 	dictionaryCurveLocations: dict[int, int] = {}
 
 	while bridges > 0:
 		bridges -= 1
 
-		curveLocationsMAXIMUM = numpy.uint64(1) << numpy.uint64(2 * bridges + 4)
-		bifurcationAlphaLocator = (
-			(1 << 2 * ((int(curveLocationsMAXIMUM).bit_length() + 1) // 2)
-			) - 1
-		) // 3
-		bifurcationZuluLocator  = bifurcationAlphaLocator << numpy.uint64(1)
+		# Vector conditional
+		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1) << numpy.uint64(2 * bridges + 4)
 
-		arrayKeys = numpy.fromiter(startingCurveLocations.keys(), dtype=numpy.uint64)
-		arrayCurveLocations = numpy.column_stack((
+		# Convert startingCurveLocations to ndarray
+		bifurcationAlphaLocator: numpy.uint64 = numpy.uint64(0x5555555555555555)
+		bifurcationZuluLocator: numpy.uint64 = numpy.uint64(0xaaaaaaaaaaaaaaaa)
+		arrayKeys: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.fromiter(startingCurveLocations.keys(), dtype=numpy.uint64)
+		arrayCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.column_stack((
 			numpy.fromiter(startingCurveLocations.values(), dtype=numpy.uint64),
 			arrayKeys & bifurcationAlphaLocator,
 			(arrayKeys & bifurcationZuluLocator) >> numpy.uint64(1),
 		))
 
+		# Z0Z_simpleBridges
+		curveLocation_Z0Z_simpleBridges: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
+			((arrayCurveLocations[:, indexBifurcationAlpha] | (arrayCurveLocations[:, indexBifurcationZulu] << numpy.uint64(1))) << numpy.uint64(2)) | numpy.uint64(3))
+
+		arrayCurveLocationsAnalyzed_Z0Z_simpleBridges: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.column_stack((
+			arrayCurveLocations[:, indexDistinctCrossings][curveLocation_Z0Z_simpleBridges < curveLocationsMAXIMUM],
+			curveLocation_Z0Z_simpleBridges[curveLocation_Z0Z_simpleBridges < curveLocationsMAXIMUM]
+		))
+
+		bifurcationAlphaHasCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveLocations[:, indexBifurcationAlpha] > numpy.uint64(1)
+
+		# bifurcationAlphaCurves
+		_bifurcationAlphaShiftRight2 = arrayCurveLocations[bifurcationAlphaHasCurves][:, indexBifurcationAlpha] >> numpy.uint64(2)
+		_bifurcatedZuluShiftLeft3 = arrayCurveLocations[bifurcationAlphaHasCurves][:, indexBifurcationZulu] << numpy.uint64(3)
+		_bifurcationAlphaIsEven = (numpy.uint64(1) - (arrayCurveLocations[bifurcationAlphaHasCurves][:, indexBifurcationAlpha] & numpy.uint64(1))) << numpy.uint64(1)
+		curveLocation_bifurcationAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
+			_bifurcationAlphaShiftRight2 | _bifurcatedZuluShiftLeft3 | _bifurcationAlphaIsEven
+		)
+
+		arrayCurveLocationsAnalyzed_bifurcationAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.column_stack((
+			arrayCurveLocations[bifurcationAlphaHasCurves][:, indexDistinctCrossings][curveLocation_bifurcationAlphaCurves < curveLocationsMAXIMUM],
+			curveLocation_bifurcationAlphaCurves[curveLocation_bifurcationAlphaCurves < curveLocationsMAXIMUM]
+		))
+
 		for index in range(len(arrayCurveLocations)):
-			bifurcationAlphaHasCurves = arrayCurveLocations[index, bifurcationAlpha] != 1
-			bifurcationZuluHasCurves = arrayCurveLocations[index, bifurcationZulu] != 1
-
-			# Z0Z_simpleBridges
-			curveLocationAnalysis = ((arrayCurveLocations[index, bifurcationAlpha] | (arrayCurveLocations[index, bifurcationZulu] << 1)) << 2) | 3
-			if curveLocationAnalysis < curveLocationsMAXIMUM:
-				dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + arrayCurveLocations[index, distinctCrossings]
-
-			# bifurcationAlphaCurves
-			if bifurcationAlphaHasCurves:
-				curveLocationAnalysis = (bifurcationAlphaShiftRight2 := arrayCurveLocations[index, bifurcationAlpha] >> 2) | (arrayCurveLocations[index, bifurcationZulu] << 3) | ((bifurcationAlphaIsEven := 1 - (arrayCurveLocations[index, bifurcationAlpha] & 0b1)) << 1)
-				if curveLocationAnalysis < curveLocationsMAXIMUM:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + arrayCurveLocations[index, distinctCrossings]
 
 			# bifurcationZuluCurves
-			if bifurcationZuluHasCurves:
-				curveLocationAnalysis = (arrayCurveLocations[index, bifurcationZulu] >> 1) | (arrayCurveLocations[index, bifurcationAlpha] << 2) | (bifurcationZuluIsEven := not (arrayCurveLocations[index, bifurcationZulu] & 1))
+			_bifurcationZuluHasCurves = arrayCurveLocations[index, indexBifurcationZulu] != 1
+			if _bifurcationZuluHasCurves:
+				curveLocationAnalysis = (arrayCurveLocations[index, indexBifurcationZulu] >> 1) | (arrayCurveLocations[index, indexBifurcationAlpha] << 2) | (bifurcationZuluIsEven := not (arrayCurveLocations[index, indexBifurcationZulu] & 1))
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + arrayCurveLocations[index, distinctCrossings]
+					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + arrayCurveLocations[index, indexDistinctCrossings]
 
 			# Z0Z_alignedBridges
-			if bifurcationAlphaHasCurves and bifurcationZuluHasCurves:
+			_bifurcationAlphaHasCurves = arrayCurveLocations[index, indexBifurcationAlpha] != 1
+			bifurcationAlphaShiftRight2 = arrayCurveLocations[index, indexBifurcationAlpha] >> 2
+			bifurcationAlphaIsEven = 1 - (arrayCurveLocations[index, indexBifurcationAlpha] & 0b1)
+			if _bifurcationAlphaHasCurves and _bifurcationZuluHasCurves:
 				# One Truth-check to select a code path
 				bifurcationsCanBePairedTogether = (bifurcationZuluIsEven << 1) | bifurcationAlphaIsEven # pyright: ignore[reportPossiblyUnboundVariable]
 
@@ -74,19 +90,58 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 					if bifurcationsCanBePairedTogether == 1:
 						while findUnpaired_0b1 >= 0:
 							XOrHere2makePair <<= 2
-							findUnpaired_0b1 += 1 if (arrayCurveLocations[index, bifurcationAlpha] & XOrHere2makePair) == 0 else -1
-						bifurcationAlphaShiftRight2 = (arrayCurveLocations[index, bifurcationAlpha] ^ XOrHere2makePair) >> 2
+							findUnpaired_0b1 += 1 if (arrayCurveLocations[index, indexBifurcationAlpha] & XOrHere2makePair) == 0 else -1
+						bifurcationAlphaShiftRight2 = (arrayCurveLocations[index, indexBifurcationAlpha] ^ XOrHere2makePair) >> 2
 					elif bifurcationsCanBePairedTogether == 2:
 						while findUnpaired_0b1 >= 0:
 							XOrHere2makePair <<= 2
-							findUnpaired_0b1 += 1 if (arrayCurveLocations[index, bifurcationZulu] & XOrHere2makePair) == 0 else -1
-						arrayCurveLocations[index, bifurcationZulu] ^= XOrHere2makePair
+							findUnpaired_0b1 += 1 if (arrayCurveLocations[index, indexBifurcationZulu] & XOrHere2makePair) == 0 else -1
+						arrayCurveLocations[index, indexBifurcationZulu] ^= XOrHere2makePair
 
-					curveLocationAnalysis = ((arrayCurveLocations[index, bifurcationZulu] >> 2) << 1) | bifurcationAlphaShiftRight2 # pyright: ignore[reportPossiblyUnboundVariable]
+					curveLocationAnalysis = ((arrayCurveLocations[index, indexBifurcationZulu] >> 2) << 1) | bifurcationAlphaShiftRight2 # pyright: ignore[reportPossiblyUnboundVariable]
 					if curveLocationAnalysis < curveLocationsMAXIMUM:
-						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + arrayCurveLocations[index, distinctCrossings]
+						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + arrayCurveLocations[index, indexDistinctCrossings]
 
 		startingCurveLocations.clear()
+
+		# Aggregate arrayCurveLocationsAnalyzed_Z0Z_simpleBridges and dictionaryCurveLocations
+		if arrayCurveLocationsAnalyzed_Z0Z_simpleBridges.size != 0:
+			curveLocationColumn: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = arrayCurveLocationsAnalyzed_Z0Z_simpleBridges[:, 1]
+			distinctCrossingsColumn: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = arrayCurveLocationsAnalyzed_Z0Z_simpleBridges[:, 0]
+
+			orderByCurveLocation: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.argsort(curveLocationColumn, kind='mergesort')
+			sortedCurveLocation: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = curveLocationColumn[orderByCurveLocation]
+			sortedDistinctCrossings: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = distinctCrossingsColumn[orderByCurveLocation]
+
+			indicesWhereKeyChanges: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(numpy.diff(sortedCurveLocation) != 0)[0] + 1
+			groupStarts: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.concatenate((numpy.array([0], dtype=numpy.int64), indicesWhereKeyChanges))
+			segmentSums: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.add.reduceat(sortedDistinctCrossings, groupStarts)
+			uniqueCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = sortedCurveLocation[groupStarts]
+
+			for indexGroup in range(uniqueCurveLocations.shape[0]):
+				keyCurveLocation = int(uniqueCurveLocations[indexGroup])
+				valueDistinctCrossings = int(segmentSums[indexGroup])
+				dictionaryCurveLocations[keyCurveLocation] = dictionaryCurveLocations.get(keyCurveLocation, 0) + valueDistinctCrossings
+
+		# Aggregate arrayCurveLocationsAnalyzed_bifurcationAlphaCurves and dictionaryCurveLocations
+		if arrayCurveLocationsAnalyzed_bifurcationAlphaCurves.size != 0:
+			curveLocationColumn: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = arrayCurveLocationsAnalyzed_bifurcationAlphaCurves[:, 1]
+			distinctCrossingsColumn: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = arrayCurveLocationsAnalyzed_bifurcationAlphaCurves[:, 0]
+
+			orderByCurveLocation: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.argsort(curveLocationColumn, kind='mergesort')
+			sortedCurveLocation: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = curveLocationColumn[orderByCurveLocation]
+			sortedDistinctCrossings: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = distinctCrossingsColumn[orderByCurveLocation]
+
+			indicesWhereKeyChanges: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(numpy.diff(sortedCurveLocation) != 0)[0] + 1
+			groupStarts: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.concatenate((numpy.array([0], dtype=numpy.int64), indicesWhereKeyChanges))
+			segmentSums: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.add.reduceat(sortedDistinctCrossings, groupStarts)
+			uniqueCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = sortedCurveLocation[groupStarts]
+
+			for indexGroup in range(uniqueCurveLocations.shape[0]):
+				keyCurveLocation = int(uniqueCurveLocations[indexGroup])
+				valueDistinctCrossings = int(segmentSums[indexGroup])
+				dictionaryCurveLocations[keyCurveLocation] = dictionaryCurveLocations.get(keyCurveLocation, 0) + valueDistinctCrossings
+
 		startingCurveLocations, dictionaryCurveLocations = dictionaryCurveLocations, startingCurveLocations
 
 	return sum(startingCurveLocations.values())

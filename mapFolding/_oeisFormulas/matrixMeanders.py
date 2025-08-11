@@ -75,6 +75,7 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 		bridges -= 1
 
 		bifurcationAlphaLocator, bifurcationZuluLocator, curveLocationsMAXIMUM = listCurveMaximums[bridges]
+
 		for curveLocations, distinctCrossings in startingCurveLocations.items():
 			bifurcationAlpha = (curveLocations & bifurcationAlphaLocator)
 			bifurcationZulu = (curveLocations & bifurcationZuluLocator) >> 1
@@ -82,24 +83,24 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 			bifurcationAlphaHasCurves = bifurcationAlpha != 1
 			bifurcationZuluHasCurves = bifurcationZulu != 1
 
-			# Curve location analysis
+			# Z0Z_simpleBridges
 			curveLocationAnalysis = ((bifurcationAlpha | (bifurcationZulu << 1)) << 2) | 3
 			if curveLocationAnalysis < curveLocationsMAXIMUM:
 				dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
-			# Curve location analysis, conditional
-			if bifurcationZuluHasCurves:
-				curveLocationAnalysis = (bifurcationZulu >> 1) | (bifurcationAlpha << 2) | (bifurcationZuluIsEven := not (bifurcationZulu & 1))
-				if curveLocationAnalysis < curveLocationsMAXIMUM:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
-
-			# Curve location analysis, conditional
+			# bifurcationAlphaCurves
 			if bifurcationAlphaHasCurves:
 				curveLocationAnalysis = (bifurcationAlphaShiftRight2 := bifurcationAlpha >> 2) | (bifurcationZulu << 3) | ((bifurcationAlphaIsEven := 1 - (bifurcationAlpha & 0b1)) << 1)
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
 					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
-			# Curve location analysis, uber-conditional
+			# bifurcationZuluCurves
+			if bifurcationZuluHasCurves:
+				curveLocationAnalysis = (bifurcationZulu >> 1) | (bifurcationAlpha << 2) | (bifurcationZuluIsEven := not (bifurcationZulu & 1))
+				if curveLocationAnalysis < curveLocationsMAXIMUM:
+					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+
+			# Z0Z_alignedBridges
 			if bifurcationZuluHasCurves and bifurcationAlphaHasCurves:
 				# One Truth-check to select a code path
 				bifurcationsCanBePairedTogether = (bifurcationZuluIsEven << 1) | bifurcationAlphaIsEven # pyright: ignore[reportPossiblyUnboundVariable]
