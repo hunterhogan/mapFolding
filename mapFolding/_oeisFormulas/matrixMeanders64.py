@@ -68,7 +68,7 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 		))
 
 		# bifurcationZuluCurves
-		bifurcationZuluHasCurves = arrayCurveLocations[:, indexBifurcationZulu] > numpy.uint64(1)
+		bifurcationZuluHasCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveLocations[:, indexBifurcationZulu] > numpy.uint64(1)
 
 		_bifurcationZuluShiftRight1 = arrayCurveLocations[bifurcationZuluHasCurves][:, indexBifurcationZulu] >> numpy.uint64(1)
 		_bifurcationAlphaShiftLeft2 = arrayCurveLocations[bifurcationZuluHasCurves][:, indexBifurcationAlpha] << numpy.uint64(2)
@@ -80,36 +80,42 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 			curveLocation_bifurcationZuluCurves[curveLocation_bifurcationZuluCurves < curveLocationsMAXIMUM]
 		))
 
+		# Z0Z_alreadyEven
+		bifurcationAlphaIsEven = arrayCurveLocations % numpy.uint64(2) == numpy.uint64(0)
+		bifurcationZuluIsEven = (arrayCurveLocations[:, indexBifurcationZulu] & numpy.uint8(1)) == numpy.uint8(0)
+
+		Z0Z_alreadyEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = bifurcationAlphaHasCurves and bifurcationZuluHasCurves
+		curveLocation_Z0Z_alreadyEven = ((arrayCurveLocations[Z0Z_alreadyEven][:, indexBifurcationZulu] >> numpy.uint64(2)) << numpy.uint64(1)) | _bifurcationAlphaShiftRight2
+
 		for index in range(len(arrayCurveLocations)):
 
 			# Z0Z_alignedBridges
 			_bifurcationAlphaHasCurves = arrayCurveLocations[index, indexBifurcationAlpha] != 1
 			_bifurcationZuluHasCurves = arrayCurveLocations[index, indexBifurcationZulu] != 1
 			bifurcationAlphaShiftRight2 = arrayCurveLocations[index, indexBifurcationAlpha] >> 2
-			bifurcationAlphaIsEven = 1 - (arrayCurveLocations[index, indexBifurcationAlpha] & 0b1)
+			bifurcationAlphaIsEven = not (arrayCurveLocations[index, indexBifurcationAlpha] & 1)
 			bifurcationZuluIsEven = not (arrayCurveLocations[index, indexBifurcationZulu] & 1)
-			if _bifurcationAlphaHasCurves and _bifurcationZuluHasCurves:
-				# One Truth-check to select a code path
-				bifurcationsCanBePairedTogether = (bifurcationZuluIsEven << 1) | bifurcationAlphaIsEven # pyright: ignore[reportPossiblyUnboundVariable]
+			if _bifurcationAlphaHasCurves and _bifurcationZuluHasCurves and (bifurcationZuluIsEven ^ bifurcationAlphaIsEven):
+				XOrHere2makePair = 0b1
+				findUnpaired_0b1 = 0
 
-				if bifurcationsCanBePairedTogether != 0:
-					XOrHere2makePair = 0b1
-					findUnpaired_0b1 = 0
+				if bifurcationAlphaIsEven:
+					while findUnpaired_0b1 >= 0:
+						XOrHere2makePair <<= 2
+						findUnpaired_0b1 += 1 if (arrayCurveLocations[index, indexBifurcationAlpha] & XOrHere2makePair) == 0 else -1
+					bifurcationAlphaShiftRight2 = (arrayCurveLocations[index, indexBifurcationAlpha] ^ XOrHere2makePair) >> 2
+				elif bifurcationZuluIsEven:
+					while findUnpaired_0b1 >= 0:
+						XOrHere2makePair <<= 2
+						findUnpaired_0b1 += 1 if (arrayCurveLocations[index, indexBifurcationZulu] & XOrHere2makePair) == 0 else -1
+					arrayCurveLocations[index, indexBifurcationZulu] ^= XOrHere2makePair
+				else:
+					msg = "Hunter, check the crazy loops."
+					raise Exception(msg)  # noqa: TRY002
 
-					if bifurcationsCanBePairedTogether == 1:
-						while findUnpaired_0b1 >= 0:
-							XOrHere2makePair <<= 2
-							findUnpaired_0b1 += 1 if (arrayCurveLocations[index, indexBifurcationAlpha] & XOrHere2makePair) == 0 else -1
-						bifurcationAlphaShiftRight2 = (arrayCurveLocations[index, indexBifurcationAlpha] ^ XOrHere2makePair) >> 2
-					elif bifurcationsCanBePairedTogether == 2:
-						while findUnpaired_0b1 >= 0:
-							XOrHere2makePair <<= 2
-							findUnpaired_0b1 += 1 if (arrayCurveLocations[index, indexBifurcationZulu] & XOrHere2makePair) == 0 else -1
-						arrayCurveLocations[index, indexBifurcationZulu] ^= XOrHere2makePair
-
-					curveLocationAnalysis = ((arrayCurveLocations[index, indexBifurcationZulu] >> 2) << 1) | bifurcationAlphaShiftRight2 # pyright: ignore[reportPossiblyUnboundVariable]
-					if curveLocationAnalysis < curveLocationsMAXIMUM:
-						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + arrayCurveLocations[index, indexDistinctCrossings]
+				curveLocationAnalysis = ((arrayCurveLocations[index, indexBifurcationZulu] >> 2) << 1) | bifurcationAlphaShiftRight2 # pyright: ignore[reportPossiblyUnboundVariable]
+				if curveLocationAnalysis < curveLocationsMAXIMUM:
+					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + arrayCurveLocations[index, indexDistinctCrossings]
 
 		startingCurveLocations.clear()
 

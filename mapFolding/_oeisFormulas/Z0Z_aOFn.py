@@ -1,3 +1,4 @@
+# pyright: reportUnusedImport=false
 from mapFolding._oeisFormulas.A000136 import A000136
 from mapFolding._oeisFormulas.A000682 import A000682
 from mapFolding._oeisFormulas.A001010 import A001010
@@ -11,8 +12,8 @@ import time
 if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
-			f"{(match:=foldsTotal == dictionaryOEISMeanders[oeisID]['valuesKnown'][n])}\t"
-			f"\033[{(not match)*91}m"
+			f"{(booleanColor:=(foldsTotal == dictionaryOEISMeanders[oeisID]['valuesKnown'][n]))}\t" # pyright: ignore[reportIndexIssue, reportUnknownVariableType]
+			f"\033[{(not booleanColor)*91}m"
 			f"{n}\t"
 			f"{foldsTotal}\t"
 			# f"{dictionaryOEISMeanders[oeisID]['valuesKnown'][n]=}\t"
@@ -28,6 +29,6 @@ if __name__ == '__main__':
 		# sys.stdout.write(f"{n = }\n")
 
 		timeStart = time.perf_counter()
-		foldsTotal = eval(oeisID)(n)
+		foldsTotal = eval(oeisID)(n)  # noqa: S307
 		# sys.stdout.write(f"{n} {foldsTotal} {time.perf_counter() - timeStart:.2f}\n")
 		_write()
