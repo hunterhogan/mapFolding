@@ -26,6 +26,7 @@ which is useful if you're working with the code synthesis features of the packag
 """
 
 from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n
+from mapFolding._oeisFormulas.Z0Z_oeisMeanders import dictionaryOEISMeanders
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import dictionaryOEIS
 from mapFolding.someAssemblyRequired.makeAllModules import parametersNumbaLight
@@ -41,33 +42,8 @@ import pytest
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
-@pytest.mark.parametrize('flow', ['daoOfMapFolding', 'numba', 'theorem2', 'theorem2numba', 'theorem2Trimmed'])
-def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: str) -> None:
-	"""Validate that different computational flows produce identical results.
-
-	(AI generated docstring)
-
-	This is the primary test for ensuring mathematical consistency across different
-	algorithmic implementations. When adding a new computational approach, include
-	it in the parametrized flow list to verify it produces correct results.
-
-	The test compares the output of each flow against known correct values from
-	OEIS sequences, ensuring that optimization techniques don't compromise accuracy.
-
-	Parameters
-	----------
-	mapShapeTestCountFolds : tuple[int, ...]
-		The map shape dimensions to test fold counting for.
-	flow : Literal['daoOfMapFolding', 'theorem2', 'theorem2numba']
-		The computational flow algorithm to validate.
-
-	"""
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, flow)
-
 def test_aOFn_calculate_value(oeisID: str) -> None:
 	"""Verify OEIS sequence value calculations against known reference values.
-
-	(AI generated docstring)
 
 	Tests the `oeisIDfor_n` function by comparing its calculated output against
 	known correct values from the OEIS database. This ensures that sequence
@@ -86,30 +62,61 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 	for n in dictionaryOEIS[oeisID]['valuesTestValidation']:
 		standardizedEqualToCallableReturn(dictionaryOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
-@pytest.mark.parametrize('flow', ['numba', 'theorem2', 'theorem2numba', 'theorem2Trimmed'])
-def test_flowControlByOEISid(flow: str) -> None:
-	"""Crappy.
+@pytest.mark.parametrize('flow', ['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'])
+def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: str) -> None:
+	"""Validate that different computational flows produce valid results.
 
-	I'm making this while pushing through pain, so it's not great but it's a step in the right direction.
+	(AI generated docstring)
 
-	Notes for future me:
+	This is the primary test for ensuring mathematical consistency across different
+	algorithmic implementations. When adding a new computational approach, include
+	it in the parametrized flow list to verify it produces correct results.
 
-	`oeisID` is a fixture: don't use it here.
+	The test compares the output of each flow against known correct values from
+	OEIS sequences, ensuring that optimization techniques don't compromise accuracy.
 
-	`OEISid` matches `test_flowControlByOEISid`. It's pseudo-hardcoded to A007822 because that's currently the only OEISid that needs this test.
-	I tried:
-	`def test_flowControlByOEISid(OEISid: str | None, flow: str) -> None:`
+	Parameters
+	----------
+	mapShapeTestCountFolds : tuple[int, ...]
+		The map shape dimensions to test fold counting for.
+	flow : str
+		The computational flow algorithm to validate.
 
-	But that's wrong.
-
-	So, I'm changing the local identifier `OEISid` back to `oeisID` because I use `oeisID` everywhere else.
 	"""
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, None, None, flow)
 
-	oeisID = 'A007822'
+@pytest.mark.parametrize('flow', ['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'])
+def test_flowControlByOEISid(oeisID: str, flow: str) -> None:
+	"""Validate that different flow paths using oeisID produce valid results.
 
-	for n in dictionaryOEIS[oeisID]['valuesTestValidation']:
-		mapShape = dictionaryOEIS[oeisID]['getMapShape'](n)
-		standardizedEqualToCallableReturn(dictionaryOEIS[oeisID]['valuesKnown'][n], countFolds, None, None, None, None, mapShape, oeisID, None, flow)
+	Parameters
+	----------
+	oeisID : str
+		The OEIS sequence identifier to test.
+	flow : str
+		The computational flow algorithm to validate.
+
+	"""
+	listDimensions = None
+	pathLikeWriteFoldsTotal = None
+	computationDivisions = None
+	CPUlimit = None
+	mapShape = None
+
+	oeis_n = 2
+	for oeis_n in dictionaryOEIS[oeisID]['valuesTestValidation']:
+		if oeis_n < 2:
+			continue
+
+		if oeisID in dictionaryOEISMeanders:
+			expected = dictionaryOEISMeanders[oeisID]['valuesKnown'][oeis_n]
+		else:
+			expected = dictionaryOEIS[oeisID]['valuesKnown'][oeis_n]
+
+		standardizedEqualToCallableReturn(
+			expected
+			, countFolds, listDimensions, pathLikeWriteFoldsTotal, computationDivisions, CPUlimit, mapShape
+			, oeisID, oeis_n, flow)
 
 @pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:

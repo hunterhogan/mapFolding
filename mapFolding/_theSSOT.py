@@ -115,7 +115,7 @@ settingsOEISManuallySelected: dict[str, MetadataOEISidManuallySet] = {
 		'getMapShape': lambda n: (1, 2 * n),
 		'valuesBenchmark': [7],
 		'valuesTestParallelization': [*range(2, 4)],
-		'valuesTestValidation': [random.randint(2, 4)],  # noqa: S311
+		'valuesTestValidation': [random.randint(2, 8)],  # noqa: S311
 	},
 }
 

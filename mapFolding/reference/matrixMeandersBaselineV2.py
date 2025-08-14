@@ -90,7 +90,7 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 
 			# bifurcationAlphaCurves
 			if bifurcationAlphaHasCurves:
-				curveLocationAnalysis = (bifurcationAlpha >> 2) | (bifurcationZulu << 3) | ((bifurcationAlphaIsEven := 1 - (bifurcationAlpha & 0b1)) << 1)
+				curveLocationAnalysis = (bifurcationAlphaShiftRight2 := bifurcationAlpha >> 2) | (bifurcationZulu << 3) | ((bifurcationAlphaIsEven := 1 - (bifurcationAlpha & 0b1)) << 1)
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
 					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
@@ -113,7 +113,7 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 						while findUnpaired_0b1 >= 0:
 							XOrHere2makePair <<= 2
 							findUnpaired_0b1 += 1 if (bifurcationAlpha & XOrHere2makePair) == 0 else -1
-						bifurcationAlpha ^= XOrHere2makePair
+						bifurcationAlphaShiftRight2 = (bifurcationAlpha ^ XOrHere2makePair) >> 2
 					elif bifurcationsCanBePairedTogether == 2:  # Case 2: (True, False)
 						while findUnpaired_0b1 >= 0:
 							XOrHere2makePair <<= 2
@@ -122,13 +122,12 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 
 					# Cases 1, 2, and 3 all compute curveLocationAnalysis
 # TODO https://github.com/hunterhogan/mapFolding/issues/19
-					curveLocationAnalysis = ((bifurcationZulu >> 2) << 1) | (bifurcationAlpha >> 2)
+					curveLocationAnalysis = ((bifurcationZulu >> 2) << 1) | bifurcationAlphaShiftRight2 # pyright: ignore[reportPossiblyUnboundVariable]
 					if curveLocationAnalysis < curveLocationsMAXIMUM:
 						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
 		startingCurveLocations.clear()
 		startingCurveLocations, dictionaryCurveLocations = dictionaryCurveLocations, startingCurveLocations
 
-		print(sum(startingCurveLocations.values()))
 	return sum(startingCurveLocations.values())
 

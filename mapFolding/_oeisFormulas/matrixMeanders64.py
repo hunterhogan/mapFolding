@@ -1,26 +1,25 @@
+# ruff: noqa
 import numpy
 
-# ruff: noqa: ERA001
 indexDistinctCrossings = int(0)  # noqa: RUF046, UP018
 indexBifurcationAlpha = int(1)  # noqa: RUF046, UP018
 indexBifurcationZulu = int(2)  # noqa: RUF046, UP018
-# indexCurveLocations = imaginary(3)
+indexCurveLocations = int(3)  # noqa: RUF046, UP018
 
 def make1array(listArrays: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
-		setCurveLocations: set[numpy.uint64] = set()
-		for stupidSystem in listArrays:
-			setCurveLocations.update(set(stupidSystem[:, 0]))
+	arrayCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.fromiter({element for stupidSystem in listArrays for element in stupidSystem[:, 1]}, dtype=numpy.uint64)
 
-		# `arrayOut` has `setCurveLocations`-many rows and 3 columns
-		# Vector this:
-		# 0 is for distinctCrossings: the sum of `distinctCrossings` with the same `curveLocations` value in any row in any array in `listArrays`
-		# Vector this:
-		# 1 is for bifurcationAlpha: `curveLocations` & numpy.uint64(0x5555555555555555)
-		# Vector this:
-		# 2 is for bifurcationZulu: `curveLocations` & numpy.uint64(0xaaaaaaaaaaaaaaaa)) >> numpy.uint64(1)
-		# 3 does not exist: if we had infinite memory, then 3 would be for `curveLocations`. We don't have enough memory, so we precompute the bifurcations and discard `curveLocations`.
+	arrayOut = numpy.column_stack((
+		numpy.zeros(len(arrayCurveLocations), dtype=numpy.uint64)
+		, arrayCurveLocations & numpy.uint64(0x5555555555555555)
+		, (arrayCurveLocations & numpy.uint64(0xaaaaaaaaaaaaaaaa)) >> numpy.uint64(1)
+		, arrayCurveLocations
+	))
 
-		return arrayOut # The next `arrayCurveLocations`
+	for arrayCurveLocations in listArrays:
+		arrayOut[:, indexDistinctCrossings] += numpy.sum(arrayCurveLocations[:, 0] * (arrayCurveLocations[:, -1][:, numpy.newaxis] == arrayOut[:, indexCurveLocations]).T, axis=1)
+
+	return arrayOut  # The next `arrayBifurcations`
 
 def convertDictionaryToNumPy(dictionaryIn: dict[int, int]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
 	arrayKeys: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.fromiter(dictionaryIn.keys(), dtype=numpy.uint64)
@@ -29,116 +28,125 @@ def convertDictionaryToNumPy(dictionaryIn: dict[int, int]) -> numpy.ndarray[tupl
 		numpy.fromiter(dictionaryIn.values(), dtype=numpy.uint64)
 		, arrayKeys & numpy.uint64(0x5555555555555555)
 		, (arrayKeys & numpy.uint64(0xaaaaaaaaaaaaaaaa)) >> numpy.uint64(1)
+		, arrayKeys
 	))
 
 def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
-	arrayCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = convertDictionaryToNumPy(startingCurveLocations)
+	arrayBifurcations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = convertDictionaryToNumPy(startingCurveLocations)
 
 	while bridges > 0:
 		bridges -= 1
 
-		IDKlistArrayCurveLocationsAnalyzedIDK: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]] = []
+		listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]] = []
 
-		# Vector conditional
+		# Selector-adjacent
 		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1) << numpy.uint64(2 * bridges + 4)
+		# Selectors, general
+		selectBifurcationAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayBifurcations[:, indexBifurcationAlpha] > numpy.uint64(1)
+		selectBifurcationAlphaEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayBifurcations[:, indexBifurcationAlpha] & numpy.uint64(1)) == numpy.uint64(0)
+		selectBifurcationZuluCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayBifurcations[:, indexBifurcationZulu] > numpy.uint64(1)
+		selectBifurcationZuluEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayBifurcations[:, indexBifurcationZulu] & numpy.uint64(1)) == numpy.uint64(0)
 
-		# selectSimpleBridges
-		curveLocationsSimpleBridges: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
-			((arrayCurveLocations[:, indexBifurcationAlpha] | (arrayCurveLocations[:, indexBifurcationZulu] << numpy.uint64(1))) << numpy.uint64(2)) | numpy.uint64(3))
-		IDKlistArrayCurveLocationsAnalyzedIDK.append(numpy.column_stack((
-			arrayCurveLocations[curveLocationsSimpleBridges < curveLocationsMAXIMUM, indexDistinctCrossings]
-			, curveLocationsSimpleBridges[curveLocationsSimpleBridges < curveLocationsMAXIMUM]
-		)))
+		# BridgesSimple
+		selector: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayBifurcations[:, indexDistinctCrossings] >= numpy.uint64(0) # This had better always be `True`.
+		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (((arrayBifurcations[selector, indexBifurcationAlpha] | (arrayBifurcations[selector, indexBifurcationZulu] << numpy.uint64(1))) << numpy.uint64(2)) | numpy.uint64(3))
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayBifurcations[selector, indexDistinctCrossings][curveLocations < curveLocationsMAXIMUM], curveLocations[curveLocations < curveLocationsMAXIMUM])))
 
-		selectBifurcationAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveLocations[:, indexBifurcationAlpha] > numpy.uint64(1)
+		# BifurcationAlphaCurves
+		selector = selectBifurcationAlphaCurves
+		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.bitwise_or.reduce((
+			arrayBifurcations[selector, indexBifurcationAlpha] >> numpy.uint64(2)
+			, arrayBifurcations[selector, indexBifurcationZulu] << numpy.uint64(3)
+			, (numpy.uint64(1) - (arrayBifurcations[selector, indexBifurcationAlpha] & numpy.uint64(1))) << numpy.uint64(1)
+		))
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayBifurcations[selector, indexDistinctCrossings][curveLocations < curveLocationsMAXIMUM], curveLocations[curveLocations < curveLocationsMAXIMUM])))
 
-		curveLocationsBifurcationAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.bitwise_or.reduce((
-			arrayCurveLocations[selectBifurcationAlphaCurves, indexBifurcationAlpha] >> numpy.uint64(2),
-			arrayCurveLocations[selectBifurcationAlphaCurves, indexBifurcationZulu] << numpy.uint64(3),
-			(numpy.uint64(1) - (arrayCurveLocations[selectBifurcationAlphaCurves, indexBifurcationAlpha] & numpy.uint64(1))) << numpy.uint64(1)
-		), axis=0)
+		# BifurcationZuluCurves
+		selector = selectBifurcationZuluCurves
+		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.bitwise_or.reduce((
+			arrayBifurcations[selector, indexBifurcationZulu] >> numpy.uint64(1)
+			, arrayBifurcations[selector, indexBifurcationAlpha] << numpy.uint64(2)
+			, (1 - (arrayBifurcations[selector, indexBifurcationZulu] & numpy.uint64(1)))
+		))
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayBifurcations[selector, indexDistinctCrossings][curveLocations < curveLocationsMAXIMUM], curveLocations[curveLocations < curveLocationsMAXIMUM])))
 
-		IDKlistArrayCurveLocationsAnalyzedIDK.append(numpy.column_stack((
-			arrayCurveLocations[selectBifurcationAlphaCurves, indexDistinctCrossings][curveLocationsBifurcationAlphaCurves < curveLocationsMAXIMUM]
-			, curveLocationsBifurcationAlphaCurves[curveLocationsBifurcationAlphaCurves < curveLocationsMAXIMUM]
-		)))
+		# Z0Z_bridgesBifurcationAlphaToRepair
+		selector: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((
+			selectBifurcationAlphaCurves, selectBifurcationZuluCurves, selectBifurcationAlphaEven, ~selectBifurcationZuluEven
+		))
 
-		selectBifurcationZuluCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveLocations[:, indexBifurcationZulu] > numpy.uint64(1)
-
-		curveLocationsBifurcationZuluCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.bitwise_or.reduce((
-			arrayCurveLocations[selectBifurcationZuluCurves, indexBifurcationZulu] >> numpy.uint64(1)
-			, arrayCurveLocations[selectBifurcationZuluCurves, indexBifurcationAlpha] << numpy.uint64(2)
-			, ~ (arrayCurveLocations[selectBifurcationZuluCurves, indexBifurcationZulu] & numpy.uint64(1))
-		), axis=0)
-
-		IDKlistArrayCurveLocationsAnalyzedIDK.append(numpy.column_stack((
-			arrayCurveLocations[selectBifurcationZuluCurves, indexDistinctCrossings][curveLocationsBifurcationZuluCurves < curveLocationsMAXIMUM]
-			, curveLocationsBifurcationZuluCurves[curveLocationsBifurcationZuluCurves < curveLocationsMAXIMUM]
-		)))
-
-		# Defining selectors
-		selectBifurcationAlphaEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveLocations[:, indexBifurcationAlpha] & numpy.uint64(1)) == numpy.uint64(0)
-		selectBifurcationZuluEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveLocations[:, indexBifurcationZulu] & numpy.uint64(1)) == numpy.uint64(0)
-		selectBifurcationsEven = numpy.logical_or.reduce((selectBifurcationAlphaEven, selectBifurcationZuluEven))
-		Z0Z_selectBridgesAlignedAll: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((selectBifurcationAlphaCurves, selectBifurcationZuluCurves, selectBifurcationsEven))
-		Z0Z_selectBridgesBifurcationAlphaToRepair: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((Z0Z_selectBridgesAlignedAll, ~selectBifurcationZuluEven))
-		Z0Z_selectBridgesBifurcationZuluToRepair: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((Z0Z_selectBridgesAlignedAll, ~selectBifurcationAlphaEven))
-
-		# Z0Z_bifurcationAlphaPaired
 			# Initialize
-		Z0Z_bifurcationAlphaPairedRemainingToModify = Z0Z_selectBridgesBifurcationAlphaToRepair.copy()
+		Z0Z_selectBridgesBifurcationAlphaToModify = selector.copy()
 		XOrHere2makePair = numpy.uint64(1)
 		selectToModifyByXOR: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.array([])
 		selectorUnified: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.array([])
 
-		while Z0Z_bifurcationAlphaPairedRemainingToModify.any():
+		while Z0Z_selectBridgesBifurcationAlphaToModify.any():
 			XOrHere2makePair <<= numpy.uint64(2)
 
-			# New condition
-			selectToModifyByXOR: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveLocations[:, indexBifurcationAlpha] & XOrHere2makePair) == numpy.uint64(0)
-			selectorUnified: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((Z0Z_bifurcationAlphaPairedRemainingToModify, selectToModifyByXOR))
+			selectToModifyByXOR: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayBifurcations[:, indexBifurcationAlpha] & XOrHere2makePair) == numpy.uint64(0)
+			selectorUnified: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((Z0Z_selectBridgesBifurcationAlphaToModify, selectToModifyByXOR))
 
 			# Modify in place
-			arrayCurveLocations[selectorUnified, indexBifurcationAlpha] = (arrayCurveLocations[selectorUnified, indexBifurcationAlpha] ^ XOrHere2makePair) >> numpy.uint64(2)
+			arrayBifurcations[selectorUnified, indexBifurcationAlpha] ^= XOrHere2makePair
 
 			# Remove the modified elements
-			Z0Z_bifurcationAlphaPairedRemainingToModify: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((Z0Z_bifurcationAlphaPairedRemainingToModify, ~selectorUnified))
+			Z0Z_selectBridgesBifurcationAlphaToModify: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((Z0Z_selectBridgesBifurcationAlphaToModify, ~selectorUnified))
 
-		# Z0Z_bifurcationZuluPaired
+		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
+			((arrayBifurcations[selector, indexBifurcationZulu] >> numpy.uint64(2)) << numpy.uint64(1))
+			| (arrayBifurcations[selector, indexBifurcationAlpha] >> numpy.uint64(2))
+		)
+
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayBifurcations[selector, indexDistinctCrossings][curveLocations < curveLocationsMAXIMUM], curveLocations[curveLocations < curveLocationsMAXIMUM])))
+
+		# Z0Z_bridgesBifurcationZuluToRepair
+		selector: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((
+			selectBifurcationAlphaCurves, selectBifurcationZuluCurves, ~selectBifurcationAlphaEven, selectBifurcationZuluEven
+		))
+
 			# Initialize
-		Z0Z_selectBifurcationZuluToModify: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = Z0Z_selectBridgesBifurcationZuluToRepair.copy()
+		Z0Z_selectBridgesBifurcationZuluToModify: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = selector.copy()
 		XOrHere2makePair: numpy.uint64 = numpy.uint64(1)
 		selectToModifyByXOR: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.array([])
 		selectorUnified: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.array([])
 
-		while Z0Z_selectBifurcationZuluToModify.any():
+		while Z0Z_selectBridgesBifurcationZuluToModify.any():
 			XOrHere2makePair <<= numpy.uint64(2)
 
 			# New condition
-			selectUnpaired_0b1: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveLocations[:, indexBifurcationZulu] & XOrHere2makePair) == numpy.uint64(0)
-			selectorUnified: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((Z0Z_selectBifurcationZuluToModify, selectUnpaired_0b1))
+			selectUnpaired_0b1: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayBifurcations[:, indexBifurcationZulu] & XOrHere2makePair) == numpy.uint64(0)
+			selectorUnified: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((Z0Z_selectBridgesBifurcationZuluToModify, selectUnpaired_0b1))
 
 			# Modify in place
-			arrayCurveLocations[selectorUnified, indexBifurcationZulu] ^= XOrHere2makePair
+			arrayBifurcations[selectorUnified, indexBifurcationZulu] ^= XOrHere2makePair
 
 			# Remove the modified elements from the selector
-			Z0Z_selectBifurcationZuluToModify: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((Z0Z_selectBifurcationZuluToModify, ~selectorUnified))
+			Z0Z_selectBridgesBifurcationZuluToModify: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((Z0Z_selectBridgesBifurcationZuluToModify, ~selectorUnified))
 
-		curveLocation_Z0Z_allAlignedBridges: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
-			((arrayCurveLocations[Z0Z_selectBridgesAlignedAll, indexBifurcationZulu] >> numpy.uint64(2)) << numpy.uint64(1))
-			| (arrayCurveLocations[Z0Z_selectBridgesAlignedAll, indexBifurcationAlpha] >> numpy.uint64(2))
+		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
+			((arrayBifurcations[selector, indexBifurcationZulu] >> numpy.uint64(2)) << numpy.uint64(1))
+			| (arrayBifurcations[selector, indexBifurcationAlpha] >> numpy.uint64(2))
 		)
 
-		IDKlistArrayCurveLocationsAnalyzedIDK.append(numpy.column_stack((
-			arrayCurveLocations[Z0Z_selectBridgesAlignedAll, indexDistinctCrossings][curveLocation_Z0Z_allAlignedBridges < curveLocationsMAXIMUM]
-			, curveLocation_Z0Z_allAlignedBridges[curveLocation_Z0Z_allAlignedBridges < curveLocationsMAXIMUM]
-		)))
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayBifurcations[selector, indexDistinctCrossings][curveLocations < curveLocationsMAXIMUM], curveLocations[curveLocations < curveLocationsMAXIMUM])))
 
-		arrayCurveLocations = make1array(IDKlistArrayCurveLocationsAnalyzedIDK)
+		# Z0Z_bridgesAligned
+		selector: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((
+			selectBifurcationAlphaCurves, selectBifurcationZuluCurves, selectBifurcationAlphaEven, selectBifurcationZuluEven
+		))
 
-		print(sum(arrayCurveLocations[:, 0]))  # noqa: T201
+		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
+			((arrayBifurcations[selector, indexBifurcationZulu] >> numpy.uint64(2)) << numpy.uint64(1))
+			| (arrayBifurcations[selector, indexBifurcationAlpha] >> numpy.uint64(2))
+		)
 
-		IDKlistArrayCurveLocationsAnalyzedIDK.clear()
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayBifurcations[selector, indexDistinctCrossings][curveLocations < curveLocationsMAXIMUM], curveLocations[curveLocations < curveLocationsMAXIMUM])))
 
-	return int(sum(arrayCurveLocations[:, 0]))
+		arrayBifurcations = make1array(listArrayCurveLocationsAnalyzed)
+
+		listArrayCurveLocationsAnalyzed.clear()
+
+		print(int(sum(arrayBifurcations[:, 0])))
+	return int(sum(arrayBifurcations[:, 0]))
 

@@ -1,27 +1,4 @@
-"""
-Unified interface for map folding computation orchestration.
-
-(AI generated docstring)
-
-This module represents the culmination of the computational ecosystem, providing
-the primary entry point where users interact with the complete map folding analysis
-system. It orchestrates all preceding layers: the configuration foundation,
-type system, core utilities, state management, and persistent storage to deliver
-a seamless computational experience.
-
-The interface handles multiple computation flows including sequential algorithms,
-experimental task division strategies, and various mathematical theorem implementations.
-It provides flexible parameter validation, computation method selection, task
-division management, processor utilization control, and automatic result persistence.
-Integration with OEIS sequences enables research validation and mathematical
-verification of computed results.
-
-Through this unified interface, researchers and practitioners can access the full
-power of Lunnon's algorithm implementation while the underlying computational
-complexity remains elegantly abstracted. The interface ensures that whether
-solving simple 2D problems or complex multi-dimensional challenges, users receive
-consistent, reliable, and efficiently computed folding pattern counts.
-"""
+"""Unified interface for map folding computation."""
 
 from collections.abc import Sequence
 from mapFolding import (
@@ -35,42 +12,62 @@ def countFolds(listDimensions: Sequence[int] | None = None
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 				, computationDivisions: int | str | None = None
 				# , * # TODO improve `standardizedEqualToCallableReturn` so it will work with keyword arguments
-				, CPUlimit: int | float | bool | None = None  # noqa: FBT001
+				, CPUlimit: bool | float | int | None = None  # noqa: FBT001
 				, mapShape: tuple[int, ...] | None = None
 				, oeisID: str | None = None
 				, oeis_n: int | None = None
 				, flow: str | None = None
 				) -> int:
 	"""
-	Count the total number of possible foldings for a given map dimensions.
+	Count the total number of distinct ways to fold a map.
 
-	(AI generated docstring)
-
-	This function serves as the main public interface to the map folding algorithm, handling all parameter validation,
-	computation state management, and result persistence in a user-friendly way.
+	Mathematicians also describe this as folding a strip of stamps, and they usually call the total "number of distinct ways to
+	fold" a map the map's "foldings."
 
 	Parameters
 	----------
-	listDimensions
+	listDimensions : Sequence[int] | None = None
 		List of integers representing the dimensions of the map to be folded.
-	pathLikeWriteFoldsTotal: None
-		Path, filename, or pathFilename to write the total fold count to. If a directory is provided, creates a file
-		with a default name based on map dimensions.
-	computationDivisions: None
+	pathLikeWriteFoldsTotal : PathLike[str] | PurePath | None = None
+		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
+		value of `foldsTotal`. If `pathLikeWriteFoldsTotal` is a path of only directories, `countFolds` creates a filename based
+		on the map dimensions.
+	computationDivisions : int | str | None = None
 		Whether and how to divide the computational work.
-		- `None`: no division of the computation into tasks; sets task divisions to 0.
-		- int: directly set the number of task divisions; cannot exceed the map's total leaves.
-		- `'maximum'`: divides into `leavesTotal`-many `taskDivisions`.
-		- `'cpu'`: limits the divisions to the number of available CPUs: i.e., `concurrencyLimit`.
-	CPUlimit: None
-		This is only relevant if there are `computationDivisions`: whether and how to limit the CPU usage.
+		- `None`: no division of the computation into tasks.
+		- `int`: into how many tasks `countFolds` will divide the computation. The values 0 or 1 are identical to `None`. It is
+		mathematically impossible to divide the computation into more tasks than the map's total leaves.
+		- 'maximum': divides the computation into `leavesTotal`-many tasks.
+		- 'cpu': divides the computation into the number of available CPUs.
+	CPUlimit : bool | float | int | None = None
+		If relevant, whether and how to limit the number of processors `countFolds` will use. `CPUlimit` is an irrelevant setting
+		unless the computation is divided into more than one task with the `computationDivisions` parameter.
 		- `False`, `None`, or `0`: No limits on processor usage; uses all available processors. All other values will
 		potentially limit processor usage.
 		- `True`: Yes, limit the processor usage; limits to 1 processor.
-		- Integer `>= 1`: Limits usage to the specified number of processors.
-		- Decimal value (`float`) between 0 and 1: Fraction of total processors to use.
-		- Decimal value (`float`) between -1 and 0: Fraction of processors to _not_ use.
-		- Integer `<= -1`: Subtract the absolute value from total processors.
+		- `int >= 1`: The maximum number of available processors to use.
+		- `0 < float < 1`: The maximum number of processors to use expressed as a fraction of available processors.
+		- `-1 < float < 0`: The number of processors to *not* use expressed as a fraction of available processors.
+		- `int <= -1`: The number of available processors to *not* use.
+		- If the value of `CPUlimit` is a `float` greater than 1 or less than -1, `countFolds` truncates the value to an `int`
+		with the same sign as the `float`.
+	mapShape : tuple[int, ...] | None = None
+		Tuple of integers representing the dimensions of the map to be folded. Mathematicians almost always use the term
+		"dimensions", such as in the seminal paper, "Multi-dimensional map-folding". Nevertheless, in contemporary Python
+		programming, in the context of these algorithms, the term "shape" makes it much easier to align the mathematics with the
+		syntax of the programming language.
+	oeisID : str | None = None
+		The On-Line Encyclopedia of Integer Sequences (OEIS) ID for which to compute a(n) for value of 'n' set in `oeis_n`.
+	oeis_n : int | None = None
+		The 'n' value for the `oeisID`.
+	flow : str | None = None
+		My stupid way of selecting the version of the algorithm to use in the computation. There are certainly better ways to do
+		this, but I have not yet solved this issue. As of 2025 Aug 14, these values will work:
+		- 'daoOfMapFolding'
+		- 'numba'
+		- 'theorem2'
+		- 'theorem2Numba'
+		- 'theorem2Trimmed'
 
 	Returns
 	-------
@@ -83,7 +80,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	If you want to compute a large `foldsTotal`, dividing the computation into tasks is usually a bad idea. Dividing the
 	algorithm into tasks is inherently inefficient: efficient division into tasks means there would be no overlap in the
 	work performed by each task. When dividing this algorithm, the amount of overlap is between 50% and 90% by all
-	tasks: at least 50% of the work done by every task must be done by _all_ tasks. If you improve the computation time,
+	tasks: at least 50% of the work done by every task must be done by each task. If you improve the computation time,
 	it will only change by -10 to -50% depending on (at the very least) the ratio of the map dimensions and the number
 	of leaves. If an undivided computation would take 10 hours on your computer, for example, the computation will still
 	take at least 5 hours but you might reduce the time to 9 hours. Most of the time, however, you will increase the
@@ -136,27 +133,16 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	# A007822 flow control until I can figure out a good way ---------------------------------
 	if oeisID == 'A007822':
-		"""Temporary notes.
+		"""To use A007822, oeisID is mandatory.
 
-		The REAL motivation for integrating into basecamp is to integrate into the test modules. No, wait: to stop having to work
-		around the test modules.
-
-		I put `if oeisID == 'A007822'` in the `elif flow ==` cascade, before the `flow` checks because I want to remove A007822
-		from those flow paths. It is fundamentally incompatible and it will cause `Exception` or incorrect computations.
-
-		To use A007822, oeisID is mandatory.
-
-		Parameters:
-			listDimensions should work. mapShape should work. oeis_n should work. `pathLikeWriteFoldsTotal` should work!!! I
-			didn't think about that, and I like it.
+		`if oeisID == 'A007822'` precedes the `elif flow ==` cascade because A007822 is fundamentally incompatible with those flow
+		paths and it will cause `Exception` or incorrect computations.
 
 		Parallel version:
-			idk. The computation division logic will try to execute. As of 2025 Aug 6 at 7 PM, I haven't tried or thought about a
-			parallel version. TODO Watch out for errors.
-
-		`flow`:
-			It looks like I will need to make decisions tree just for A007822. That's probably not a big deal since all of the
-			possible routes are predictable.
+			idk. The computation division logic will try to execute. As of 2025 Aug 13 at 11 PM, I haven't tried or thought about
+			a parallel version. And I don't really care. Potential parallelism is certainly present in `filterAsymmetricFolds`.
+			But, if I want to implement that, I should almost certainly replace `filterAsymmetricFolds` with a non-blocking
+			function to which `count` can pass the necessary values to. TODO Watch out for errors.
 
 		"""
 		match flow:

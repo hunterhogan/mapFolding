@@ -8,6 +8,7 @@ from mapFolding._oeisFormulas.A223094 import A223094
 from mapFolding._oeisFormulas.A259702 import A259702
 from mapFolding._oeisFormulas.A301620 import A301620
 from mapFolding.oeis import getOEISidInformation, getOEISidValues
+from typing import TypedDict
 import sys
 
 oeisIDsMeanders: list[str] = [
@@ -22,11 +23,32 @@ oeisIDsMeanders: list[str] = [
 	'A301620',
 ]
 
-dictionaryOEISMeanders: dict[str, dict[str, dict[int, int] | str | int]] = {
+# ruff: noqa: ERA001
+class MetadataOEISidMeanders(TypedDict):
+	"""Settings for an implemented OEIS sequence."""
+
+	description: str
+	"""The OEIS.org description of the integer sequence."""
+	# getMapShape: Callable[[int], tuple[int, ...]]
+	"""Function to convert the OEIS sequence index, 'n', to its `mapShape` tuple."""
+	offset: int
+	"""The starting index, 'n', of the sequence, typically 0 or 1."""
+	# valuesBenchmark: list[int]
+	"""List of index values, 'n', to use when benchmarking the algorithm performance."""
+	valuesKnown: dict[int, int]
+	"""Dictionary of sequence indices, 'n', to their known values, `foldsTotal`."""
+	# valuesTestParallelization: list[int]
+	"""List of index values, 'n', to use when testing parallelization performance."""
+	# valuesTestValidation: list[int]
+	"""List of index values, 'n', to use when testing validation performance."""
+	# valueUnknown: int
+	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
+
+dictionaryOEISMeanders: dict[str, MetadataOEISidMeanders] = {
 	oeisID: {
-		'valuesKnown': getOEISidValues(oeisID),
 		'description': getOEISidInformation(oeisID)[0],
 		'offset': getOEISidInformation(oeisID)[1],
+		'valuesKnown': getOEISidValues(oeisID),
 	}
 	for oeisID in oeisIDsMeanders
 }

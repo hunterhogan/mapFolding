@@ -224,7 +224,8 @@ def oneTestCuzTestsOverwritingTests(oeisID_1random: str) -> tuple[int, ...]:
 
 @pytest.fixture
 def mapShapeTestCountFolds(oeisID: str) -> tuple[int, ...]:
-	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation` if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts.
+	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation` if
+	`validateListDimensions` approves. Each `listDimensions` is suitable for testing counts.
 
 	Parameters
 	----------
