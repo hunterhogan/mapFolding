@@ -1,3 +1,4 @@
+"""Meanders."""
 from mapFolding._oeisFormulas.matrixMeanders import count
 
 def initializeA005316(n: int) -> dict[int, int]:

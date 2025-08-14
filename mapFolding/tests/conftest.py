@@ -25,7 +25,7 @@ research domain.
 
 from collections.abc import Callable, Generator, Sequence
 from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
-from mapFolding.oeis import dictionaryOEIS, oeisIDsImplemented
+from mapFolding.oeis import dictionaryOEISMapFolding, oeisIDsImplemented
 from pathlib import Path
 from typing import Any
 import numpy
@@ -212,10 +212,10 @@ def oneTestCuzTestsOverwritingTests(oeisID_1random: str) -> tuple[int, ...]:
 
 	"""
 	while True:
-		n = random.choice(dictionaryOEIS[oeisID_1random]['valuesTestValidation'])
+		n = random.choice(dictionaryOEISMapFolding[oeisID_1random]['valuesTestValidation'])
 		if n < 2:
 			continue
-		listDimensionsCandidate = list(dictionaryOEIS[oeisID_1random]['getMapShape'](n))
+		listDimensionsCandidate = list(dictionaryOEISMapFolding[oeisID_1random]['getMapShape'](n))
 
 		try:
 			return validateListDimensions(listDimensionsCandidate)
@@ -239,10 +239,10 @@ def mapShapeTestCountFolds(oeisID: str) -> tuple[int, ...]:
 
 	"""
 	while True:
-		n = random.choice(dictionaryOEIS[oeisID]['valuesTestValidation'])
+		n = random.choice(dictionaryOEISMapFolding[oeisID]['valuesTestValidation'])
 		if n < 2:
 			continue
-		listDimensionsCandidate = list(dictionaryOEIS[oeisID]['getMapShape'](n))
+		listDimensionsCandidate = list(dictionaryOEISMapFolding[oeisID]['getMapShape'](n))
 
 		try:
 			return validateListDimensions(listDimensionsCandidate)
@@ -267,10 +267,10 @@ def mapShapeTestFunctionality(oeisID_1random: str) -> tuple[int, ...]:
 
 	"""
 	while True:
-		n = random.choice(dictionaryOEIS[oeisID_1random]['valuesTestValidation'])
+		n = random.choice(dictionaryOEISMapFolding[oeisID_1random]['valuesTestValidation'])
 		if n < 2:
 			continue
-		listDimensionsCandidate = list(dictionaryOEIS[oeisID_1random]['getMapShape'](n))
+		listDimensionsCandidate = list(dictionaryOEISMapFolding[oeisID_1random]['getMapShape'](n))
 
 		try:
 			return validateListDimensions(listDimensionsCandidate)
@@ -292,8 +292,8 @@ def mapShapeTestParallelization(oeisID: str) -> tuple[int, ...]:
 		Map dimensions suitable for testing parallelization features.
 
 	"""
-	n = random.choice(dictionaryOEIS[oeisID]['valuesTestParallelization'])
-	return dictionaryOEIS[oeisID]['getMapShape'](n)
+	n = random.choice(dictionaryOEISMapFolding[oeisID]['valuesTestParallelization'])
+	return dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 
 @pytest.fixture
 def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]:

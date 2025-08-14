@@ -1,14 +1,9 @@
-from mapFolding._oeisFormulas.A000560 import A000560
+from mapFolding import dictionaryOEISMapFolding, MetadataOEISidMeanders
 from mapFolding._oeisFormulas.A000682 import A000682
-from mapFolding._oeisFormulas.A001010 import A001010
-from mapFolding._oeisFormulas.A001011 import A001011
-from mapFolding._oeisFormulas.A005315 import A005315
 from mapFolding._oeisFormulas.A005316 import A005316
-from mapFolding._oeisFormulas.A223094 import A223094
-from mapFolding._oeisFormulas.A259702 import A259702
-from mapFolding._oeisFormulas.A301620 import A301620
+from mapFolding._oeisFormulas.oeisIDbyFormula import (
+	A000136, A000560, A001010, A001011, A005315, A223094, A259702, A301620)
 from mapFolding.oeis import getOEISidInformation, getOEISidValues
-from typing import TypedDict
 import sys
 
 oeisIDsMeanders: list[str] = [
@@ -23,27 +18,6 @@ oeisIDsMeanders: list[str] = [
 	'A301620',
 ]
 
-# ruff: noqa: ERA001
-class MetadataOEISidMeanders(TypedDict):
-	"""Settings for an implemented OEIS sequence."""
-
-	description: str
-	"""The OEIS.org description of the integer sequence."""
-	# getMapShape: Callable[[int], tuple[int, ...]]
-	"""Function to convert the OEIS sequence index, 'n', to its `mapShape` tuple."""
-	offset: int
-	"""The starting index, 'n', of the sequence, typically 0 or 1."""
-	# valuesBenchmark: list[int]
-	"""List of index values, 'n', to use when benchmarking the algorithm performance."""
-	valuesKnown: dict[int, int]
-	"""Dictionary of sequence indices, 'n', to their known values, `foldsTotal`."""
-	# valuesTestParallelization: list[int]
-	"""List of index values, 'n', to use when testing parallelization performance."""
-	# valuesTestValidation: list[int]
-	"""List of index values, 'n', to use when testing validation performance."""
-	# valueUnknown: int
-	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
-
 dictionaryOEISMeanders: dict[str, MetadataOEISidMeanders] = {
 	oeisID: {
 		'description': getOEISidInformation(oeisID)[0],
@@ -54,13 +28,15 @@ dictionaryOEISMeanders: dict[str, MetadataOEISidMeanders] = {
 }
 
 # ruff: noqa: S101
-# pyright: reportIndexIssue=false
 
-rangeTest = range(5, 13)
+rangeTest = range(5, 15)
 
 if __name__ == '__main__':
+	import time
+	start = time.perf_counter()
 	for n in rangeTest:
 
+		assert A000136(n) == dictionaryOEISMapFolding['A000136']['valuesKnown'][n]
 		assert A000560(n) == dictionaryOEISMeanders['A000560']['valuesKnown'][n]
 		assert A000682(n) == dictionaryOEISMeanders['A000682']['valuesKnown'][n]
 		assert A001010(n) == dictionaryOEISMeanders['A001010']['valuesKnown'][n]
@@ -72,3 +48,4 @@ if __name__ == '__main__':
 		assert A301620(n) == dictionaryOEISMeanders['A301620']['valuesKnown'][n]
 
 	sys.stdout.write(f"\nTrue for {str(rangeTest)}\n")
+	print(f"Time taken: {time.perf_counter() - start:.2f} seconds")

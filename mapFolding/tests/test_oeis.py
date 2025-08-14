@@ -26,7 +26,7 @@ which is crucial for maintaining package reliability in production environments.
 
 from contextlib import redirect_stdout
 from mapFolding.oeis import (
-	_standardizeOEISid, clearOEIScache, dictionaryOEIS, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented)
+	_standardizeOEISid, clearOEIScache, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented)
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
 from typing import Any
 import io
@@ -68,7 +68,7 @@ def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unitt
 
 	if cacheExists:
 		# Each OEIS ID has two cache files
-		expected_calls = len(dictionaryOEIS) * 2
+		expected_calls = len(dictionaryOEISMapFolding) * 2
 		assert mock_unlink.call_count == expected_calls
 		mock_unlink.assert_has_calls([unittest.mock.call(missing_ok=True)] * expected_calls)
 	else:
@@ -87,7 +87,7 @@ def testHelpText() -> None:
 	# Verify content
 	for oeisID in oeisIDsImplemented:
 		assert oeisID in helpText
-		assert dictionaryOEIS[oeisID]['description'] in helpText
+		assert dictionaryOEISMapFolding[oeisID]['description'] in helpText
 
 	# Extract and verify examples
 

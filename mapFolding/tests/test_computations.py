@@ -28,7 +28,7 @@ which is useful if you're working with the code synthesis features of the packag
 from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n
 from mapFolding._oeisFormulas.Z0Z_oeisMeanders import dictionaryOEISMeanders
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import dictionaryOEIS
+from mapFolding.oeis import dictionaryOEISMapFolding
 from mapFolding.someAssemblyRequired.makeAllModules import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -59,8 +59,8 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 		The OEIS sequence identifier to test calculations for.
 
 	"""
-	for n in dictionaryOEIS[oeisID]['valuesTestValidation']:
-		standardizedEqualToCallableReturn(dictionaryOEIS[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
+	for n in dictionaryOEISMapFolding[oeisID]['valuesTestValidation']:
+		standardizedEqualToCallableReturn(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
 
 @pytest.mark.parametrize('flow', ['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'])
 def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: str) -> None:
@@ -104,14 +104,14 @@ def test_flowControlByOEISid(oeisID: str, flow: str) -> None:
 	mapShape = None
 
 	oeis_n = 2
-	for oeis_n in dictionaryOEIS[oeisID]['valuesTestValidation']:
+	for oeis_n in dictionaryOEISMapFolding[oeisID]['valuesTestValidation']:
 		if oeis_n < 2:
 			continue
 
 		if oeisID in dictionaryOEISMeanders:
 			expected = dictionaryOEISMeanders[oeisID]['valuesKnown'][oeis_n]
 		else:
-			expected = dictionaryOEIS[oeisID]['valuesKnown'][oeis_n]
+			expected = dictionaryOEISMapFolding[oeisID]['valuesKnown'][oeis_n]
 
 		standardizedEqualToCallableReturn(
 			expected

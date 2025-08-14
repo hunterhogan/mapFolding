@@ -15,17 +15,17 @@ The computational framework integrates type safety, persistent result storage,
 and mathematical validation through OEIS sequence integration.
 
 Core Transformation Tools:
-    countFolds: Primary interface for computing folding pattern counts
-    MapFoldingState: Computational state management for recursive analysis
-    Connection graph generation: Mathematical foundation for folding relationships
-    Task division utilities: Experimental parallel computation options
-    OEIS integration: Mathematical validation and sequence discovery
+	countFolds: Primary interface for computing folding pattern counts
+	MapFoldingState: Computational state management for recursive analysis
+	Connection graph generation: Mathematical foundation for folding relationships
+	Task division utilities: Experimental parallel computation options
+	OEIS integration: Mathematical validation and sequence discovery
 
 Primary Use Cases:
-    Mathematical research into folding pattern properties and relationships
-    Educational exploration of combinatorial mathematics concepts
-    Computational validation of theoretical results
-    Extension of known mathematical sequences through new discoveries
+	Mathematical research into folding pattern properties and relationships
+	Educational exploration of combinatorial mathematics concepts
+	Computational validation of theoretical results
+	Extension of known mathematical sequences through new discoveries
 
 The package handles the full spectrum of map folding analysis, from simple
 educational examples to research-grade computations requiring multi-day processing
@@ -50,6 +50,9 @@ from mapFolding._theTypes import (
 	DatatypeElephino as DatatypeElephino,
 	DatatypeFoldsTotal as DatatypeFoldsTotal,
 	DatatypeLeavesTotal as DatatypeLeavesTotal,
+	MetadataOEISidMapFolding as MetadataOEISidMapFolding,
+	MetadataOEISidMapFoldingManuallySet as MetadataOEISidMapFoldingManuallySet,
+	MetadataOEISidMeanders as MetadataOEISidMeanders,
 	NumPyElephino as NumPyElephino,
 	NumPyFoldsTotal as NumPyFoldsTotal,
 	NumPyIntegerType as NumPyIntegerType,
@@ -85,5 +88,5 @@ from mapFolding.oeis import (
 	getOEISids as getOEISids,
 	OEIS_for_n as OEIS_for_n,
 	oeisIDfor_n as oeisIDfor_n,
-    dictionaryOEIS as dictionaryOEIS,
+	dictionaryOEISMapFolding as dictionaryOEISMapFolding,
 )

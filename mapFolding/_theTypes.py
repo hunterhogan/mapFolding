@@ -1,7 +1,8 @@
 """Types for defensive coding and for computation optimization."""
 
+from collections.abc import Callable
 from numpy import dtype, int_ as numpy_int, integer, ndarray, uint64 as numpy_uint64
-from typing import Any, TypeAlias, TypeVar
+from typing import Any, TypeAlias, TypedDict, TypeVar
 
 NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)
 """Any NumPy integer type, which is usually between 8-bit signed and 64-bit unsigned."""
@@ -19,9 +20,9 @@ Note well
 ---------
 Colossal values are found with the cross humpy inequality:
 
-    ⎡ el  ⎤   ⎡     ⎤
-    ⎢ eph ⎥ X ⎢ rhi ⎥ <= elephino
-    ⎣ ant ⎦   ⎣ no  ⎦
+	⎡ el  ⎤   ⎡     ⎤
+	⎢ eph ⎥ X ⎢ rhi ⎥ <= elephino
+	⎣ ant ⎦   ⎣ no  ⎦
 
 """
 
@@ -50,3 +51,58 @@ Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[NumPyElephino]]  # noqa: 
 
 Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
 """A `numpy.ndarray` with one axis and elements of type `NumPyFoldsTotal`."""
+
+class MetadataOEISidMapFoldingManuallySet(TypedDict):
+	"""Settings that are best selected by a human instead of algorithmically."""
+
+	getMapShape: Callable[[int], tuple[int, ...]]
+	"""Function to convert the OEIS sequence index, 'n', to its `mapShape` tuple."""
+	valuesBenchmark: list[int]
+	"""List of index values, 'n', to use when benchmarking the algorithm performance."""
+	valuesTestParallelization: list[int]
+	"""List of index values, 'n', to use when testing parallelization performance."""
+	valuesTestValidation: list[int]
+	"""List of index values, 'n', to use when testing validation performance."""
+
+
+class MetadataOEISidMapFolding(TypedDict):
+	"""Settings for an implemented OEIS sequence."""
+
+	description: str
+	"""The OEIS.org description of the integer sequence."""
+	getMapShape: Callable[[int], tuple[int, ...]]
+	"""Function to convert the OEIS sequence index, 'n', to its `mapShape` tuple."""
+	offset: int
+	"""The starting index, 'n', of the sequence, typically 0 or 1."""
+	valuesBenchmark: list[int]
+	"""List of index values, 'n', to use when benchmarking the algorithm performance."""
+	valuesKnown: dict[int, int]
+	"""Dictionary of sequence indices, 'n', to their known values, `foldsTotal`."""
+	valuesTestParallelization: list[int]
+	"""List of index values, 'n', to use when testing parallelization performance."""
+	valuesTestValidation: list[int]
+	"""List of index values, 'n', to use when testing validation performance."""
+	valueUnknown: int
+	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
+
+
+# ruff: noqa: ERA001
+class MetadataOEISidMeanders(TypedDict):
+	"""Settings for an implemented OEIS sequence."""
+
+	description: str
+	"""The OEIS.org description of the integer sequence."""
+	# getMapShape: Callable[[int], tuple[int, ...]]
+	"""Function to convert the OEIS sequence index, 'n', to its `mapShape` tuple."""
+	offset: int
+	"""The starting index, 'n', of the sequence, typically 0 or 1."""
+	# valuesBenchmark: list[int]
+	"""List of index values, 'n', to use when benchmarking the algorithm performance."""
+	valuesKnown: dict[int, int]
+	"""Dictionary of sequence indices, 'n', to their known values, `foldsTotal`."""
+	# valuesTestParallelization: list[int]
+	"""List of index values, 'n', to use when testing parallelization performance."""
+	# valuesTestValidation: list[int]
+	"""List of index values, 'n', to use when testing validation performance."""
+	# valueUnknown: int
+	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
