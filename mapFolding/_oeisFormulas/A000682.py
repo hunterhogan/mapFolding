@@ -81,5 +81,5 @@ def initializeA000682(n: int) -> dict[int, int]:
 def A000682(n: int) -> int:
 	# count64(n - 1, initializeA000682(n - 1))
 	# print()
-	# return count(n - 1, initializeA000682(n - 1))
-	return count64(n - 1, initializeA000682(n - 1))
+	return count(n - 1, initializeA000682(n - 1))
+	# return count64(n - 1, initializeA000682(n - 1))

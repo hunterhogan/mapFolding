@@ -129,6 +129,6 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 		startingCurveLocations.clear()
 		startingCurveLocations, dictionaryCurveLocations = dictionaryCurveLocations, startingCurveLocations
 
-		print(sum(startingCurveLocations.values()))
+		# print(sum(startingCurveLocations.values()))
 	return sum(startingCurveLocations.values())
 
