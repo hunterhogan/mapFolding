@@ -75,6 +75,8 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 		bridges -= 1
 
 		bifurcationAlphaLocator, bifurcationZuluLocator, curveLocationsMAXIMUM = listCurveMaximums[bridges]
+		listBridgesSimple: list[tuple[int, int]] = []
+		listBifurcationAlphaCurves: list[tuple[int, int]] = []
 
 		for curveLocations, distinctCrossings in startingCurveLocations.items():
 			bifurcationAlpha = (curveLocations & bifurcationAlphaLocator)
@@ -83,16 +85,20 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 			bifurcationAlphaHasCurves = bifurcationAlpha != 1
 			bifurcationZuluHasCurves = bifurcationZulu != 1
 
-			# Z0Z_simpleBridges
+			# bridgesSimple
 			curveLocationAnalysis = ((bifurcationAlpha | (bifurcationZulu << 1)) << 2) | 3
 			if curveLocationAnalysis < curveLocationsMAXIMUM:
 				dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+
+				listBridgesSimple.append((dictionaryCurveLocations[curveLocationAnalysis], curveLocationAnalysis))
 
 			# bifurcationAlphaCurves
 			if bifurcationAlphaHasCurves:
 				curveLocationAnalysis = (bifurcationAlpha >> 2) | (bifurcationZulu << 3) | ((bifurcationAlphaIsEven := 1 - (bifurcationAlpha & 0b1)) << 1)
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
 					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+
+					listBifurcationAlphaCurves.append((dictionaryCurveLocations[curveLocationAnalysis], curveLocationAnalysis))
 
 			# bifurcationZuluCurves
 			if bifurcationZuluHasCurves:
@@ -129,6 +135,5 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 		startingCurveLocations.clear()
 		startingCurveLocations, dictionaryCurveLocations = dictionaryCurveLocations, startingCurveLocations
 
-		# print(sum(startingCurveLocations.values()))
 	return sum(startingCurveLocations.values())
 

@@ -61,10 +61,7 @@ n = 60  `startingCurveLocations` keys = 32
 n = 61  `startingCurveLocations` keys = 32
 """
 
-# TODO figure out how to call the correct module
-# In other situations, I use a so-called dispatcher amd that has helped make code transformation easier, too.
-from mapFolding._oeisFormulas.matrixMeanders import count  # noqa: ERA001
-from mapFolding._oeisFormulas.matrixMeanders64 import count as count64
+from mapFolding._oeisFormulas.matrixMeanders import count
 
 def initializeA000682(n: int) -> dict[int, int]:
 	curveLocationsMAXIMUM = 1 << (2 * n + 4)
@@ -79,7 +76,4 @@ def initializeA000682(n: int) -> dict[int, int]:
 	return dict.fromkeys(listCurveLocations, 1)
 
 def A000682(n: int) -> int:
-	# count64(n - 1, initializeA000682(n - 1))
-	# print()
 	return count(n - 1, initializeA000682(n - 1))
-	# return count64(n - 1, initializeA000682(n - 1))
