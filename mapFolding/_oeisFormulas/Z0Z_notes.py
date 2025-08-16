@@ -14,3 +14,19 @@ that scenario, the dictionary is effectively a list of jobs. And instead of bein
 needed by each decrement, bridges -= 1, we can use well-researched techniques to manage resources and the order of
 execution.
 """
+
+"""NOTE Time comparison for the `selectCurvesXorAtEven` loop: `numpy.uint64` vs `int`
+
+`numpy.uint64`:
+n =    25      1.40 seconds
+n =    26      2.17 seconds
+n =    27      3.49 seconds
+
+`int`:
+n =    25      0.50 seconds
+n =    26      0.79 seconds
+n =    27      1.34 seconds
+
+Dramatic, counterintuitive differences in performance.
+"""
+
