@@ -1,78 +1,77 @@
 import numpy
 
-"""TODO temporary notes while refactoring from `for` to vectorized operations:
-
-Compute a(n) from n and a pre-populated dictionary.
-
-"n" is the initial number of bridges.
-
-function `count` flow:
-- loop by decrementing `bridges` to 0
-	- Convert dictionaryCurveLocationsStarting to arrayCurveLocations
-		- arrayCurveLocations is used as the source of data
-	- Selector construction, data analysis, and data storage
-		- listArrayCurveLocationsAnalyzed
-			- bridgesSimple
-			- groupAlphaCurves
-			- groupZuluCurves
-			- bridgesAlignedAtEven
-		- dictionaryCurveLocationsAnalyzed
-			- bridgesGroupAlphaPairedToOdd
-			- bridgesGroupZuluPairedToOdd
-	- aggregate listArrayCurveLocationsAnalyzed and dictionaryCurveLocationsAnalyzed
-		- create a new _dictionary_
-		- assigned to dictionaryCurveLocationsStarting
-- "sum" dictionaryCurveLocationsStarting.values(), but the dictionary only has one item.
-"""
-
+# NOTE `arrayCurveLocations`: Always use semantic index identifiers: Never hardcode the indices.
 indexDistinctCrossings: int = 0
 indexGroupAlpha: int = 1
 indexGroupZulu: int = 2
 
-def convert(listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]], dictionaryCurveLocationsAnalyzed: dict[int, int]) -> dict[int, int]:
-	# Combine all arrays into single array
-	CONVERTarrayCurveLocationsAnalyzedMerged: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.vstack(listArrayCurveLocationsAnalyzed)
+# NOTE `arrayCurveLocationsAnalyzed`: Always use semantic index identifiers: Never hardcode the indices.
+indexDistinctCrossings: int = 0
+indexCurveLocations: int = 1
 
-	CONVERTcurveLocationColumn: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = CONVERTarrayCurveLocationsAnalyzedMerged[:, 1]
-	CONVERTdistinctCrossingsColumn: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = CONVERTarrayCurveLocationsAnalyzedMerged[:, 0]
+groupAlphaLocator: numpy.uint64 = numpy.uint64(0x5555555555555555)
+groupZuluLocator: numpy.uint64 = numpy.uint64(0xaaaaaaaaaaaaaaaa)
 
-	CONVERTorderByCurveLocation: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.argsort(CONVERTcurveLocationColumn, kind='mergesort')
-	CONVERTsortedCurveLocation: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = CONVERTcurveLocationColumn[CONVERTorderByCurveLocation]
-	CONVERTsortedDistinctCrossings: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = CONVERTdistinctCrossingsColumn[CONVERTorderByCurveLocation]
+def _aggregate(listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> tuple[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]], numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]:
+	arrayCurveLocationsAnalyzedMerged: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.vstack(listArrayCurveLocationsAnalyzed)
+	curveLocationColumn: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = arrayCurveLocationsAnalyzedMerged[:, indexCurveLocations]
+	distinctCrossingsColumn: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = arrayCurveLocationsAnalyzedMerged[:, indexDistinctCrossings]
+	orderByCurveLocation: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.argsort(curveLocationColumn, kind='mergesort')
+	sortedCurveLocation: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = curveLocationColumn[orderByCurveLocation]
+	sortedDistinctCrossings: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = distinctCrossingsColumn[orderByCurveLocation]
+	indicesWhereKeyChanges: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(numpy.diff(sortedCurveLocation) != 0)[0] + 1
+	groupStarts: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.concatenate((numpy.array([0], dtype=numpy.int64), indicesWhereKeyChanges))
+	segmentSums: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.add.reduceat(sortedDistinctCrossings, groupStarts)
+	uniqueCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = sortedCurveLocation[groupStarts]
+	return (uniqueCurveLocations, segmentSums)
+r"""
+True    42      22124273546267785420    dictionaryOEISMeanders[oeisID]['valuesKnown'][n]=22124273546267785420   697.78
+Traceback (most recent call last):
+  File "C:\apps\mapFolding\mapFolding\_oeisFormulas\Z0Z_new64.py", line 58, in <module>
+    # sys.stdout.write(f"{n} {foldsTotal} {time.perf_counter() - timeStart:.2f}\n")
+  File "C:\apps\mapFolding\mapFolding\_oeisFormulas\Z0Z_new64.py", line 32, in A000682
+    n += 1
 
-	CONVERTindicesWhereKeyChanges: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(numpy.diff(CONVERTsortedCurveLocation) != 0)[0] + 1
-	CONVERTgroupStarts: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.concatenate((numpy.array([0], dtype=numpy.int64), CONVERTindicesWhereKeyChanges))
-	CONVERTsegmentSums: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.add.reduceat(CONVERTsortedDistinctCrossings, CONVERTgroupStarts)
-	CONVERTuniqueCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = CONVERTsortedCurveLocation[CONVERTgroupStarts]
+  File "C:\apps\mapFolding\mapFolding\_oeisFormulas\matrixMeanders64.py", line 152, in count64
+  File "C:\apps\mapFolding\mapFolding\_oeisFormulas\matrixMeanders64.py", line 52, in aggregateAnalyzedCurves
+    arrayCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = convertDictionaryCurveLocations2array(dictionaryCurveLocations)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\apps\mapFolding\mapFolding\_oeisFormulas\matrixMeanders64.py", line 47, in _aggregate
+    , arrayKeys & groupAlphaLocator
 
-	for CONVERTindexGroup in range(CONVERTuniqueCurveLocations.shape[0]):
-		CONVERTkeyCurveLocation = int(CONVERTuniqueCurveLocations[CONVERTindexGroup])
-		CONVERTvalueDistinctCrossings = int(CONVERTsegmentSums[CONVERTindexGroup])
-		dictionaryCurveLocationsAnalyzed[CONVERTkeyCurveLocation] = dictionaryCurveLocationsAnalyzed.get(CONVERTkeyCurveLocation, 0) + CONVERTvalueDistinctCrossings
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 1.28 GiB for an array with shape (171738576,) and data type uint64
+"""
+def aggregateAnalyzedCurves(listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
+	uniqueCurveLocations, segmentSums = _aggregate(listArrayCurveLocationsAnalyzed)
 
-	return dictionaryCurveLocationsAnalyzed
+	groupAlpha: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = uniqueCurveLocations & groupAlphaLocator
+	groupZulu: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (uniqueCurveLocations & groupZuluLocator) >> numpy.uint64(1)
+	return numpy.column_stack((segmentSums, groupAlpha, groupZulu))
 
-def convertStartingCurveLocationsToArray(dictionaryCurveLocationsStarting: dict[int, int]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
-	"""Convert dictionaryCurveLocationsStarting dict to ndarray for curve location analysis."""
-	groupAlphaLocator: numpy.uint64 = numpy.uint64(0x5555555555555555)
-	groupZuluLocator: numpy.uint64 = numpy.uint64(0xaaaaaaaaaaaaaaaa)
+def convertArrayCurveLocations2dictionary(listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> dict[int, int]:
+	uniqueCurveLocations, segmentSums = _aggregate(listArrayCurveLocationsAnalyzed)
+	dictionaryCurveLocations: dict[int, int] = {}
+	for index in range(len(uniqueCurveLocations)):
+		dictionaryCurveLocations[int(uniqueCurveLocations[index])] = int(segmentSums[index])
+	return dictionaryCurveLocations
 
-	arrayKeys: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.fromiter(dictionaryCurveLocationsStarting.keys(), dtype=numpy.uint64)
+def convertDictionaryCurveLocations2array(dictionaryCurveLocations: dict[int, int]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
+	arrayKeys: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.fromiter(dictionaryCurveLocations.keys(), dtype=numpy.uint64)
 
 	return numpy.column_stack((
-		numpy.fromiter(dictionaryCurveLocationsStarting.values(), dtype=numpy.uint64)
+		numpy.fromiter(dictionaryCurveLocations.values(), dtype=numpy.uint64)
 		, arrayKeys & groupAlphaLocator
 		, (arrayKeys & groupZuluLocator) >> numpy.uint64(1)
 	))
 
-def count64(bridges: int, dictionaryCurveLocationsStarting: dict[int, int]) -> int:
+def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinimum: int = 0) -> tuple[int, dict[int, int]]:
+	arrayCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = convertDictionaryCurveLocations2array(dictionaryCurveLocations)
+	listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]] = []
 
-	while bridges > 0:
-		# while ------------------------------------------------------------------------------------------------
+	while bridges > bridgesMinimum:
 		bridges -= 1
+		listArrayCurveLocationsAnalyzed = []
 		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1) << numpy.uint64(2 * bridges + 4)
-		listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]] = []
-		arrayCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = convertStartingCurveLocationsToArray(dictionaryCurveLocationsStarting)
 
 		# Selectors -------------------------------------------------------------------------------------------
 		selectGroupAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveLocations[:, indexGroupAlpha] > numpy.uint64(1)
@@ -81,88 +80,69 @@ def count64(bridges: int, dictionaryCurveLocationsStarting: dict[int, int]) -> i
 		selectGroupZuluAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveLocations[:, indexGroupZulu] & numpy.uint64(1)) == numpy.uint64(0)
 
 		# bridgesSimple ----------------------------------------------------------------------------------------------
-		curveLocation_bridgesSimple: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
-			((arrayCurveLocations[:, indexGroupAlpha] | (arrayCurveLocations[:, indexGroupZulu] << numpy.uint64(1))) << numpy.uint64(2)) | numpy.uint64(3))
+		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
+			((arrayCurveLocations[:, indexGroupAlpha] | (arrayCurveLocations[:, indexGroupZulu] << numpy.uint64(1))) << numpy.uint64(2)) | numpy.uint64(3)
+		)
+
+		# NOTE convergent code block, `bridgesSimple` does not have a `selector`.
+		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
+		selectNonZero: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(curveLocations)[0]
 		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((
-			arrayCurveLocations[:, indexDistinctCrossings][curveLocation_bridgesSimple < curveLocationsMAXIMUM]
-			, curveLocation_bridgesSimple[curveLocation_bridgesSimple < curveLocationsMAXIMUM]
-		)))
+				arrayCurveLocations[:, indexDistinctCrossings][selectNonZero]
+				, curveLocations[selectNonZero])))
 
 		# groupAlphaCurves -----------------------------------------------------------------------------------
-		selector = selectGroupAlphaCurves
-		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
-			(arrayCurveLocations[selector, indexGroupAlpha] >> numpy.uint64(2))
+		selector: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = selectGroupAlphaCurves
+		curveLocations = ((arrayCurveLocations[selector, indexGroupAlpha] >> numpy.uint64(2))
 			| (arrayCurveLocations[selector, indexGroupZulu] << numpy.uint64(3))
 			| ((numpy.uint64(1) - (arrayCurveLocations[selector, indexGroupAlpha] & numpy.uint64(1))) << numpy.uint64(1))
 		)
 
-		# Can this be combined with the step above or the step below?
+		# NOTE converged code block
 		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
-
-		# After zeroes are added to `curveLocations`, it is effectively a boolean selector.
-		selectNonZero: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(curveLocations)[0]
-
-		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((
-				arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero]
-				, curveLocations[selectNonZero]
-		)))
+		selectNonZero = numpy.nonzero(curveLocations)[0]
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
 
 		# groupZuluCurves -----------------------------------------------------------------------------------
 		selector = selectGroupZuluCurves
-		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
-			arrayCurveLocations[selector, indexGroupZulu] >> numpy.uint64(1)
+		curveLocations = (arrayCurveLocations[selector, indexGroupZulu] >> numpy.uint64(1)
 			| arrayCurveLocations[selector, indexGroupAlpha] << numpy.uint64(2)
 			| (numpy.uint64(1) - (arrayCurveLocations[selector, indexGroupZulu] & numpy.uint64(1)))
 		)
 
+		# NOTE converged code block
 		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
-		selectNonZero: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(curveLocations)[0]
+		selectNonZero = numpy.nonzero(curveLocations)[0]
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
 
-		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((
-				arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero]
-				, curveLocations[selectNonZero]
-		)))
-
-		# bridgesAlignedAtEven -----------------------------------------------------------------------------------
-		selector: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((selectGroupAlphaCurves, selectGroupZuluCurves, selectGroupAlphaAtEven, selectGroupZuluAtEven))
-		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
-			((arrayCurveLocations[selector, indexGroupZulu] >> numpy.uint64(2)) << numpy.uint64(1))
-			| (arrayCurveLocations[selector, indexGroupAlpha] >> numpy.uint64(2))
-		)
-
-		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
-		selectNonZero: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(curveLocations)[0]
-
-		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((
-				arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero]
-				, curveLocations[selectNonZero]
-		)))
-
-		# REFACTOR TARGET start -----------------------------------------------------------------------------------
-		# REFACTOR TARGET end -----------------------------------------------------------------------------------
-		# selectGroupAlphaPairedToOdd and selectGroupZuluPairedToOdd -----------------------------------------------------
-		dictionaryCurveLocationsAnalyzed: dict[int, int] = {}
-		for LOOPindex in numpy.nonzero(selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven ^ selectGroupZuluAtEven))[0].tolist():
-			if (arrayCurveLocations[LOOPindex, indexGroupAlpha] & 1) == 0:
-				indexer = indexGroupAlpha
+		# NOTE this MODIFIES `arrayCurveLocations` for bridgesPairedToOdd ---------------------------------------------------------------------------------------
+		for indexRow in numpy.nonzero(selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven ^ selectGroupZuluAtEven))[0].tolist():
+			if (arrayCurveLocations[indexRow, indexGroupAlpha] & 1) == 0:
+				indexGroupToModify: int = indexGroupAlpha
 			else:
-				indexer = indexGroupZulu
+				indexGroupToModify = indexGroupZulu
 
 			XOrHere2makePair = 0b1
 			findUnpaired_0b1 = 0
 
 			while findUnpaired_0b1 >= 0:
 				XOrHere2makePair <<= 2
-				findUnpaired_0b1 += 1 if (arrayCurveLocations[LOOPindex, indexer] & XOrHere2makePair) == 0 else -1
+				findUnpaired_0b1 += 1 if (arrayCurveLocations[indexRow, indexGroupToModify] & XOrHere2makePair) == 0 else -1
 
-			arrayCurveLocations[LOOPindex, indexer] ^= XOrHere2makePair
+			arrayCurveLocations[indexRow, indexGroupToModify] ^= XOrHere2makePair
 
-			curveLocationsAnalyzed = ((arrayCurveLocations[LOOPindex, indexGroupZulu] >> 2) << 1) | (arrayCurveLocations[LOOPindex, indexGroupAlpha] >> 2)
-			if curveLocationsAnalyzed < curveLocationsMAXIMUM:
-				dictionaryCurveLocationsAnalyzed[curveLocationsAnalyzed] = dictionaryCurveLocationsAnalyzed.get(curveLocationsAnalyzed, 0) + arrayCurveLocations[LOOPindex, indexDistinctCrossings]
+		# bridgesAligned; bridgesAlignedAtEven, bridgesGroupAlphaPairedToOdd, bridgesGroupZuluPairedToOdd -----------------
+		selector = selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven | selectGroupZuluAtEven)
+		curveLocations = (((arrayCurveLocations[selector, indexGroupZulu] >> numpy.uint64(2)) << numpy.uint64(1))
+			| (arrayCurveLocations[selector, indexGroupAlpha] >> numpy.uint64(2))
+		)
 
-		dictionaryCurveLocationsStarting = convert(listArrayCurveLocationsAnalyzed, dictionaryCurveLocationsAnalyzed)
+		# NOTE converged code block
+		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
+		selectNonZero = numpy.nonzero(curveLocations)[0]
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
 
-	return sum(dictionaryCurveLocationsStarting.values())
+		arrayCurveLocations = aggregateAnalyzedCurves(listArrayCurveLocationsAnalyzed)
 
+	return (bridges, convertArrayCurveLocations2dictionary(listArrayCurveLocationsAnalyzed))
 

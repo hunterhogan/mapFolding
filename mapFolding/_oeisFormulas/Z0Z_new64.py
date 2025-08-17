@@ -1,6 +1,8 @@
+"""Semi-meanders."""
 # pyright: reportUnusedImport=false
+from mapFolding._oeisFormulas.matrixMeanders import count
 from mapFolding._oeisFormulas.matrixMeanders64 import count64
-from mapFolding._oeisFormulas.matrixMeandersMimic import count
+from mapFolding._oeisFormulas.matrixMeandersMimic import countMimic
 from mapFolding._oeisFormulas.Z0Z_oeisMeanders import dictionaryOEISMeanders
 import sys
 import time
@@ -18,11 +20,21 @@ def initializeA000682(n: int) -> dict[int, int]:
 	return dict.fromkeys(listCurveLocations, 1)
 
 def A000682(n: int) -> int:
-	dictionaryCurveLocationsStarting: dict[int, int] = initializeA000682(n - 1)
-	if n >= 29:
-		n, dictionaryCurveLocationsStarting = count(n - 1, dictionaryCurveLocationsStarting)
+	count64Maximum = 29
+	bridgesMinimum = 0
+	distinctCrossingsMaximum = 40
+	distinctCrossingsSlack = 2
+	dictionaryCurveLocations: dict[int, int] = initializeA000682(n - 1)
+	if n >= count64Maximum:
+		if n >= distinctCrossingsMaximum:
+			bridgesMinimum = n - distinctCrossingsMaximum + distinctCrossingsSlack
+		n, dictionaryCurveLocations = countMimic(n - 1, dictionaryCurveLocations, count64Maximum)
 		n += 1
-	return count64(n - 1, dictionaryCurveLocationsStarting)
+	n, dictionaryCurveLocations = count64(n - 1, dictionaryCurveLocations, bridgesMinimum)
+	if n > 0:
+		n += 1
+		return count(n - 1, dictionaryCurveLocations)
+	return sum(dictionaryCurveLocations.values())
 
 # ruff: noqa: ERA001
 
@@ -39,7 +51,7 @@ if __name__ == '__main__':
 			"\033[0m\n"
 		)
 	oeisID = 'A000682'
-	for n in range(30,37):
+	for n in range(35,47):
 
 		timeStart = time.perf_counter()
 		foldsTotal = A000682(n)

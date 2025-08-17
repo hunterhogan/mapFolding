@@ -1,4 +1,4 @@
-def count(bridges: int, dictionaryCurveLocationsStarting: dict[int, int]) -> tuple[int, dict[int, int]]:
+def countMimic(bridges: int, dictionaryCurveLocationsStarting: dict[int, int], bridgesMinimum: int = 0) -> tuple[int, dict[int, int]]:
 	listCurveMaximums: list[tuple[int, int, int]] = [
 (0x15, 0x2a, 0x10),
 (0x55, 0xaa, 0x40),
@@ -66,12 +66,16 @@ def count(bridges: int, dictionaryCurveLocationsStarting: dict[int, int]) -> tup
 	"""`bridges = 29`
 	0x5000000000000000.bit_length() = 63;
 	0xaaaaaaaaaaaaaaaa.bit_length() = 64;
-	0x5555555555555555.bit_length() = 63"""
+	0x5555555555555555.bit_length() = 63
+
+	a(41) = 63 bits
+	print((6664356253639465480).bit_length())
+	"""
 
 	listCurveMaximums = listCurveMaximums[0:bridges]
 
 	dictionaryCurveLocationsAnalyzed: dict[int, int] = {}
-	while bridges >= 29:
+	while bridges >= bridgesMinimum:
 		bridges -= 1
 
 		groupAlphaLocator, groupZuluLocator, curveLocationsMAXIMUM = listCurveMaximums[bridges]
