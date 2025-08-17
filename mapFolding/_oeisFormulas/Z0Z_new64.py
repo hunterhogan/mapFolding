@@ -1,8 +1,28 @@
 # pyright: reportUnusedImport=false
-from mapFolding._oeisFormulas.matrixMeanders64 import A000682
+from mapFolding._oeisFormulas.matrixMeanders64 import count64
+from mapFolding._oeisFormulas.matrixMeandersMimic import count
 from mapFolding._oeisFormulas.Z0Z_oeisMeanders import dictionaryOEISMeanders
 import sys
 import time
+
+def initializeA000682(n: int) -> dict[int, int]:
+	curveLocationsMAXIMUM: int = 1 << (2 * n + 4)
+
+	curveSeed: int = 5 - (n & 0b1) * 4
+	listCurveLocations: list[int] = [(curveSeed << 1) | curveSeed]
+
+	while listCurveLocations[-1] < curveLocationsMAXIMUM:
+		curveSeed = (curveSeed << 4) | 0b101
+		listCurveLocations.append((curveSeed << 1) | curveSeed)
+
+	return dict.fromkeys(listCurveLocations, 1)
+
+def A000682(n: int) -> int:
+	dictionaryCurveLocationsStarting: dict[int, int] = initializeA000682(n - 1)
+	if n >= 29:
+		n, dictionaryCurveLocationsStarting = count(n - 1, dictionaryCurveLocationsStarting)
+		n += 1
+	return count64(n - 1, dictionaryCurveLocationsStarting)
 
 # ruff: noqa: ERA001
 
@@ -19,11 +39,7 @@ if __name__ == '__main__':
 			"\033[0m\n"
 		)
 	oeisID = 'A000682'
-	for n in range(3,30):
-		# for _profileTime in range(6):
-		# 	A000682(n)
-
-		# sys.stdout.write(f"{n = }\n")
+	for n in range(30,37):
 
 		timeStart = time.perf_counter()
 		foldsTotal = A000682(n)
