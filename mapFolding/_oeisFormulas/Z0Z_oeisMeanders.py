@@ -48,4 +48,4 @@ if __name__ == '__main__':
 		assert A301620(n) == dictionaryOEISMeanders['A301620']['valuesKnown'][n]
 
 	sys.stdout.write(f"\nTrue for {str(rangeTest)}\n")
-	print(f"Time taken: {time.perf_counter() - start:.2f} seconds")
+	sys.stdout.write(f"Time taken: {time.perf_counter() - start:.2f} seconds\n")

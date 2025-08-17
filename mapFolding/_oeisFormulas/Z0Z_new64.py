@@ -19,7 +19,9 @@ if __name__ == '__main__':
 			"\033[0m\n"
 		)
 	oeisID = 'A000682'
-	for n in range(3,28):
+	for n in range(3,30):
+		# for _profileTime in range(6):
+		# 	A000682(n)
 
 		# sys.stdout.write(f"{n = }\n")
 

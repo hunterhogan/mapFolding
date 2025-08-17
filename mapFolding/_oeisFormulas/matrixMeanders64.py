@@ -89,11 +89,12 @@ def count(bridges: int, dictionaryCurveLocationsStarting: dict[int, int]) -> int
 		)))
 
 		# groupAlphaCurves -----------------------------------------------------------------------------------
+		selector = selectGroupAlphaCurves
 		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
-			(arrayCurveLocations[selectGroupAlphaCurves, indexGroupAlpha] >> numpy.uint64(2))
-			| (arrayCurveLocations[selectGroupAlphaCurves, indexGroupZulu] << numpy.uint64(3))
-			| ((numpy.uint64(1) - (arrayCurveLocations[selectGroupAlphaCurves, indexGroupAlpha] & numpy.uint64(1))) << numpy.uint64(1))
-		) #& (curveLocationsMAXIMUM - numpy.uint64(1))
+			(arrayCurveLocations[selector, indexGroupAlpha] >> numpy.uint64(2))
+			| (arrayCurveLocations[selector, indexGroupZulu] << numpy.uint64(3))
+			| ((numpy.uint64(1) - (arrayCurveLocations[selector, indexGroupAlpha] & numpy.uint64(1))) << numpy.uint64(1))
+		)
 
 		# Can this be combined with the step above or the step below?
 		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
@@ -101,82 +102,73 @@ def count(bridges: int, dictionaryCurveLocationsStarting: dict[int, int]) -> int
 		# After zeroes are added to `curveLocations`, it is effectively a boolean selector.
 		selectNonZero: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(curveLocations)[0]
 
-		listArrayCurveLocationsAnalyzed.append(
-			numpy.column_stack((
-				arrayCurveLocations[selectGroupAlphaCurves, indexDistinctCrossings][selectNonZero]
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((
+				arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero]
 				, curveLocations[selectNonZero]
-			))
+		)))
+
+		# groupZuluCurves -----------------------------------------------------------------------------------
+		selector = selectGroupZuluCurves
+		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
+			arrayCurveLocations[selector, indexGroupZulu] >> numpy.uint64(1)
+			| arrayCurveLocations[selector, indexGroupAlpha] << numpy.uint64(2)
+			| (numpy.uint64(1) - (arrayCurveLocations[selector, indexGroupZulu] & numpy.uint64(1)))
 		)
 
-		# groupZuluCurves
-		curveLocationComputation_groupZuluCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.bitwise_or.reduce((
-			arrayCurveLocations[selectGroupZuluCurves, indexGroupZulu] >> numpy.uint64(1)
-			, arrayCurveLocations[selectGroupZuluCurves, indexGroupAlpha] << numpy.uint64(2)
-			, numpy.uint64(1) - (arrayCurveLocations[selectGroupZuluCurves, indexGroupZulu] & numpy.uint64(1))
-		), axis=0)
-		curveLocation_groupZuluCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = curveLocationComputation_groupZuluCurves
+		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
+		selectNonZero: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(curveLocations)[0]
 
-		arrayCurveLocationsAnalyzed_groupZuluCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.column_stack((
-			arrayCurveLocations[selectGroupZuluCurves, indexDistinctCrossings][curveLocation_groupZuluCurves < curveLocationsMAXIMUM]
-			, curveLocation_groupZuluCurves[curveLocation_groupZuluCurves < curveLocationsMAXIMUM]
-		))
-		listArrayCurveLocationsAnalyzed.append(arrayCurveLocationsAnalyzed_groupZuluCurves)
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((
+				arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero]
+				, curveLocations[selectNonZero]
+		)))
 
-		# selectBridgesAlignedAtEven
-		selectBridgesAlignedAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((selectGroupAlphaCurves, selectGroupZuluCurves, selectGroupAlphaAtEven, selectGroupZuluAtEven))
-		curveLocation_Z0Z_alignedBridges: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
-			((arrayCurveLocations[selectBridgesAlignedAtEven, indexGroupZulu] >> numpy.uint64(2)) << numpy.uint64(1))
-			| (arrayCurveLocations[selectBridgesAlignedAtEven, indexGroupAlpha] >> numpy.uint64(2))
+		# bridgesAlignedAtEven -----------------------------------------------------------------------------------
+		selector: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((selectGroupAlphaCurves, selectGroupZuluCurves, selectGroupAlphaAtEven, selectGroupZuluAtEven))
+		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
+			((arrayCurveLocations[selector, indexGroupZulu] >> numpy.uint64(2)) << numpy.uint64(1))
+			| (arrayCurveLocations[selector, indexGroupAlpha] >> numpy.uint64(2))
 		)
 
-		arrayCurveLocationsAnalyzed_Z0Z_alignedBridges: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.column_stack((
-			arrayCurveLocations[selectBridgesAlignedAtEven, indexDistinctCrossings][curveLocation_Z0Z_alignedBridges < curveLocationsMAXIMUM]
-			, curveLocation_Z0Z_alignedBridges[curveLocation_Z0Z_alignedBridges < curveLocationsMAXIMUM]
-		))
-		listArrayCurveLocationsAnalyzed.append(arrayCurveLocationsAnalyzed_Z0Z_alignedBridges)
+		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
+		selectNonZero: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(curveLocations)[0]
+
+		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((
+				arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero]
+				, curveLocations[selectNonZero]
+		)))
 
 		# REFACTOR TARGET start -----------------------------------------------------------------------------------
-		# REFACTOR TARGET end -----------------------------------------------------------------------------------
-		selectCurvesXorAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = numpy.logical_and.reduce((
-			selectGroupAlphaCurves
-			, selectGroupZuluCurves
-			, numpy.logical_xor.reduce((
-				selectGroupAlphaAtEven
-				, selectGroupZuluAtEven
-		))))
-
+		# selectGroupAlphaPairedToOdd and selectGroupZuluPairedToOdd -----------------------------------------------------
 		dictionaryCurveLocationsAnalyzed: dict[int, int] = {}
-		for LOOPindex in (index for index, selectorBoolean in enumerate(selectCurvesXorAtEven) if selectorBoolean):
-			XOrHere2makePair = 1
+		for LOOPindex in numpy.nonzero(selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven ^ selectGroupZuluAtEven))[0].tolist():
+			XOrHere2makePair = 0b1
 			findUnpaired_0b1 = 0
 
-			# selectGroupAlphaPairedToOdd
 			if (arrayCurveLocations[LOOPindex, indexGroupAlpha] & 1) == 0:
-				while findUnpaired_0b1 >= 0:
-					XOrHere2makePair <<= 2
-					findUnpaired_0b1 += 1 if (arrayCurveLocations[LOOPindex, indexGroupAlpha] & XOrHere2makePair) == 0 else -1
-				arrayCurveLocations[LOOPindex, indexGroupAlpha] ^= XOrHere2makePair
-
-			# selectGroupZuluPairedToOdd
+				indexer = indexGroupAlpha
 			else:
-				while findUnpaired_0b1 >= 0:
-					XOrHere2makePair <<= 2
-					findUnpaired_0b1 += 1 if (arrayCurveLocations[LOOPindex, indexGroupZulu] & XOrHere2makePair) == 0 else -1
-				arrayCurveLocations[LOOPindex, indexGroupZulu] ^= XOrHere2makePair
+				indexer = indexGroupZulu
+
+			while findUnpaired_0b1 >= 0:
+				XOrHere2makePair <<= 2
+				findUnpaired_0b1 += 1 if (arrayCurveLocations[LOOPindex, indexer] & XOrHere2makePair) == 0 else -1
+			arrayCurveLocations[LOOPindex, indexer] ^= XOrHere2makePair
 
 			curveLocationsAnalyzed = ((arrayCurveLocations[LOOPindex, indexGroupZulu] >> 2) << 1) | (arrayCurveLocations[LOOPindex, indexGroupAlpha] >> 2)
 			if curveLocationsAnalyzed < curveLocationsMAXIMUM:
 				dictionaryCurveLocationsAnalyzed[curveLocationsAnalyzed] = dictionaryCurveLocationsAnalyzed.get(curveLocationsAnalyzed, 0) + arrayCurveLocations[LOOPindex, indexDistinctCrossings]
+		# REFACTOR TARGET end -----------------------------------------------------------------------------------
 
 		dictionaryCurveLocationsStarting = convert(listArrayCurveLocationsAnalyzed, dictionaryCurveLocationsAnalyzed)
 
 	return sum(dictionaryCurveLocationsStarting.values())
 
 def initializeA000682(n: int) -> dict[int, int]:
-	curveLocationsMAXIMUM = 1 << (2 * n + 4)
+	curveLocationsMAXIMUM: int = 1 << (2 * n + 4)
 
 	curveSeed: int = 5 - (n & 0b1) * 4
-	listCurveLocations = [(curveSeed << 1) | curveSeed]
+	listCurveLocations: list[int] = [(curveSeed << 1) | curveSeed]
 
 	while listCurveLocations[-1] < curveLocationsMAXIMUM:
 		curveSeed = (curveSeed << 4) | 0b101

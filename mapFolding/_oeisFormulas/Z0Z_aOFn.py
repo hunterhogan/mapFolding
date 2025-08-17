@@ -14,7 +14,7 @@ if __name__ == '__main__':
 			f"{(booleanColor:=(foldsTotal == dictionaryOEISMeanders[oeisID]['valuesKnown'][n]))}\t" # pyright: ignore[reportIndexIssue, reportUnknownVariableType]
 			f"\033[{(not booleanColor)*91}m"
 			f"{n}\t"
-			f"{foldsTotal}\t"
+			# f"{foldsTotal}\t"
 			# f"{dictionaryOEISMeanders[oeisID]['valuesKnown'][n]=}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
 			# f"{description}\t"
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 	oeisID = 'A001010'
 	oeisID = 'A000136'
 	oeisID = 'A000682'
-	for n in range(3,33):
+	for n in range(3,30):
 
 		# sys.stdout.write(f"{n = }\n")
 

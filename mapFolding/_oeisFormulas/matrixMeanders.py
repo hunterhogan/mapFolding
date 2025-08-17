@@ -1,4 +1,4 @@
-def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
+def count(bridges: int, dictionaryCurveLocationsStarting: dict[int, int]) -> int:
 	listCurveMaximums: list[tuple[int, int, int]] = [
 (0x15, 0x2a, 0x10),
 (0x55, 0xaa, 0x40),
@@ -70,64 +70,64 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 
 	listCurveMaximums = listCurveMaximums[0:bridges]
 
-	dictionaryCurveLocations: dict[int, int] = {}
+	dictionaryCurveLocationsAnalyzed: dict[int, int] = {}
 	while bridges > 0:
 		bridges -= 1
 
-		bifurcationAlphaLocator, bifurcationZuluLocator, curveLocationsMAXIMUM = listCurveMaximums[bridges]
+		groupAlphaLocator, groupZuluLocator, curveLocationsMAXIMUM = listCurveMaximums[bridges]
 
-		for curveLocations, distinctCrossings in startingCurveLocations.items():
-			bifurcationAlpha = (curveLocations & bifurcationAlphaLocator)
-			bifurcationZulu = (curveLocations & bifurcationZuluLocator) >> 1
+		for curveLocations, distinctCrossings in dictionaryCurveLocationsStarting.items():
+			groupAlpha = (curveLocations & groupAlphaLocator)
+			groupZulu = (curveLocations & groupZuluLocator) >> 1
 
-			bifurcationAlphaHasCurves = bifurcationAlpha != 1
-			bifurcationZuluHasCurves = bifurcationZulu != 1
+			groupAlphaCurves = groupAlpha != 1
+			groupZuluCurves = groupZulu != 1
 
 			# bridgesSimple
-			curveLocationAnalysis = ((bifurcationAlpha | (bifurcationZulu << 1)) << 2) | 3
+			curveLocationAnalysis = ((groupAlpha | (groupZulu << 1)) << 2) | 3
 			if curveLocationAnalysis < curveLocationsMAXIMUM:
-				dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+				dictionaryCurveLocationsAnalyzed[curveLocationAnalysis] = dictionaryCurveLocationsAnalyzed.get(curveLocationAnalysis, 0) + distinctCrossings
 
 			# bifurcationAlphaCurves
-			if bifurcationAlphaHasCurves:
-				curveLocationAnalysis = (bifurcationAlpha >> 2) | (bifurcationZulu << 3) | ((bifurcationAlphaIsEven := 1 - (bifurcationAlpha & 0b1)) << 1)
+			if groupAlphaCurves:
+				curveLocationAnalysis = (groupAlpha >> 2) | (groupZulu << 3) | ((groupAlphaIsEven := 1 - (groupAlpha & 0b1)) << 1)
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+					dictionaryCurveLocationsAnalyzed[curveLocationAnalysis] = dictionaryCurveLocationsAnalyzed.get(curveLocationAnalysis, 0) + distinctCrossings
 
 			# bifurcationZuluCurves
-			if bifurcationZuluHasCurves:
-				curveLocationAnalysis = (bifurcationZulu >> 1) | (bifurcationAlpha << 2) | (bifurcationZuluIsEven := 1 - (bifurcationZulu & 1))
+			if groupZuluCurves:
+				curveLocationAnalysis = (groupZulu >> 1) | (groupAlpha << 2) | (groupZuluIsEven := 1 - (groupZulu & 1))
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+					dictionaryCurveLocationsAnalyzed[curveLocationAnalysis] = dictionaryCurveLocationsAnalyzed.get(curveLocationAnalysis, 0) + distinctCrossings
 
 			# Z0Z_alignedBridges
-			if bifurcationZuluHasCurves and bifurcationAlphaHasCurves:
+			if groupZuluCurves and groupAlphaCurves:
 				# One Truth-check to select a code path
-				bifurcationsCanBePairedTogether = (bifurcationZuluIsEven << 1) | bifurcationAlphaIsEven # pyright: ignore[reportPossiblyUnboundVariable]
+				groupsCanBePairedTogether = (groupZuluIsEven << 1) | groupAlphaIsEven # pyright: ignore[reportPossiblyUnboundVariable]
 
-				if bifurcationsCanBePairedTogether != 0:  # Case 0 (False, False)
+				if groupsCanBePairedTogether != 0:  # Case 0 (False, False)
 					XOrHere2makePair = 0b1
 					findUnpaired_0b1 = 0
 
-					if bifurcationsCanBePairedTogether == 1:  # Case 1: (False, True)
+					if groupsCanBePairedTogether == 1:  # Case 1: (False, True)
 						while findUnpaired_0b1 >= 0:
 							XOrHere2makePair <<= 2
-							findUnpaired_0b1 += 1 if (bifurcationAlpha & XOrHere2makePair) == 0 else -1
-						bifurcationAlpha ^= XOrHere2makePair
-					elif bifurcationsCanBePairedTogether == 2:  # Case 2: (True, False)
+							findUnpaired_0b1 += 1 if (groupAlpha & XOrHere2makePair) == 0 else -1
+						groupAlpha ^= XOrHere2makePair
+					elif groupsCanBePairedTogether == 2:  # Case 2: (True, False)
 						while findUnpaired_0b1 >= 0:
 							XOrHere2makePair <<= 2
-							findUnpaired_0b1 += 1 if (bifurcationZulu & XOrHere2makePair) == 0 else -1
-						bifurcationZulu ^= XOrHere2makePair
+							findUnpaired_0b1 += 1 if (groupZulu & XOrHere2makePair) == 0 else -1
+						groupZulu ^= XOrHere2makePair
 
 					# Cases 1, 2, and 3 all compute curveLocationAnalysis
 # TODO https://github.com/hunterhogan/mapFolding/issues/19
-					curveLocationAnalysis = ((bifurcationZulu >> 2) << 1) | (bifurcationAlpha >> 2)
+					curveLocationAnalysis = ((groupZulu >> 2) << 1) | (groupAlpha >> 2)
 					if curveLocationAnalysis < curveLocationsMAXIMUM:
-						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+						dictionaryCurveLocationsAnalyzed[curveLocationAnalysis] = dictionaryCurveLocationsAnalyzed.get(curveLocationAnalysis, 0) + distinctCrossings
 
-		startingCurveLocations.clear()
-		startingCurveLocations, dictionaryCurveLocations = dictionaryCurveLocations, startingCurveLocations
+		dictionaryCurveLocationsStarting.clear()
+		dictionaryCurveLocationsStarting, dictionaryCurveLocationsAnalyzed = dictionaryCurveLocationsAnalyzed, dictionaryCurveLocationsStarting
 
-	return sum(startingCurveLocations.values())
+	return sum(dictionaryCurveLocationsStarting.values())
 
