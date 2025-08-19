@@ -51,9 +51,11 @@ if __name__ == '__main__':
 			"\033[0m\n"
 		)
 	oeisID = 'A000682'
-	for n in range(35,47):
+	for n in range(3,20):
 
 		timeStart = time.perf_counter()
 		foldsTotal = A000682(n)
-		# sys.stdout.write(f"{n} {foldsTotal} {time.perf_counter() - timeStart:.2f}\n")
-		_write()
+		if n <= 45:
+			_write()
+		else:
+			sys.stdout.write(f"{n} {foldsTotal} {time.perf_counter() - timeStart:.2f}\n")

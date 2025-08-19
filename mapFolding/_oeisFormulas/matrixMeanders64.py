@@ -1,5 +1,6 @@
 import numpy
 
+# TODO change identifier `arrayCurveLocations`: it doesn't have curve locations.
 # NOTE `arrayCurveLocations`: Always use semantic index identifiers: Never hardcode the indices.
 indexDistinctCrossings: int = 0
 indexGroupAlpha: int = 1
@@ -24,23 +25,7 @@ def _aggregate(listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ..
 	segmentSums: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.add.reduceat(sortedDistinctCrossings, groupStarts)
 	uniqueCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = sortedCurveLocation[groupStarts]
 	return (uniqueCurveLocations, segmentSums)
-r"""
-True    42      22124273546267785420    dictionaryOEISMeanders[oeisID]['valuesKnown'][n]=22124273546267785420   697.78
-Traceback (most recent call last):
-  File "C:\apps\mapFolding\mapFolding\_oeisFormulas\Z0Z_new64.py", line 58, in <module>
-    # sys.stdout.write(f"{n} {foldsTotal} {time.perf_counter() - timeStart:.2f}\n")
-  File "C:\apps\mapFolding\mapFolding\_oeisFormulas\Z0Z_new64.py", line 32, in A000682
-    n += 1
 
-  File "C:\apps\mapFolding\mapFolding\_oeisFormulas\matrixMeanders64.py", line 152, in count64
-  File "C:\apps\mapFolding\mapFolding\_oeisFormulas\matrixMeanders64.py", line 52, in aggregateAnalyzedCurves
-    arrayCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = convertDictionaryCurveLocations2array(dictionaryCurveLocations)
-                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\apps\mapFolding\mapFolding\_oeisFormulas\matrixMeanders64.py", line 47, in _aggregate
-    , arrayKeys & groupAlphaLocator
-
-numpy._core._exceptions._ArrayMemoryError: Unable to allocate 1.28 GiB for an array with shape (171738576,) and data type uint64
-"""
 def aggregateAnalyzedCurves(listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
 	uniqueCurveLocations, segmentSums = _aggregate(listArrayCurveLocationsAnalyzed)
 
