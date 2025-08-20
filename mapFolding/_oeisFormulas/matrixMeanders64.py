@@ -1,54 +1,62 @@
 from functools import reduce
 import numpy
 
-# TODO change identifier `arrayCurveLocations`: it doesn't have curve locations.
-# NOTE `arrayCurveLocations`: Always use semantic index identifiers: Never hardcode the indices.
+# NOTE `arrayCurveGroups`: Always use semantic index identifiers: Never hardcode the indices.
 indexDistinctCrossings: int = 0
 indexGroupAlpha: int = 1
 indexGroupZulu: int = 2
 
-# NOTE `arrayCurveLocationsAnalyzed` and tuples in `listOfCoordinates`: Always use semantic index identifiers: Never hardcode the indices.
+# NOTE `arrayCurveLocations` and tuples in `listOfCoordinates`: Always use semantic index identifiers: Never hardcode the indices.
 indexDistinctCrossings: int = 0
 indexCurveLocations: int = 1
 
 groupAlphaLocator: numpy.uint64 = numpy.uint64(0x5555555555555555)
 groupZuluLocator: numpy.uint64 = numpy.uint64(0xaaaaaaaaaaaaaaaa)
 
-def _aggregate(listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
-	listOfCoordinates: list[tuple[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.intp]], numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]], int]] = []
-	for index, arrayCurveLocationsAnalyzed in enumerate(listArrayCurveLocationsAnalyzed):
-		arrayCurveLocationsUniqueHere , indicesDistinctCurvesToSum = numpy.unique(arrayCurveLocationsAnalyzed[:, indexCurveLocations], return_inverse=True)
-		listOfCoordinates.append((indicesDistinctCurvesToSum, arrayCurveLocationsUniqueHere, index))
+def _aggregate(listArrayCurveLocations: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
+	listOfUniquenessCoordinates: list[tuple[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.intp]], numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]], int]] = []
+	for index, arrayCurveLocations in enumerate(listArrayCurveLocations):
+		arrayCurveLocationsUniqueHere , indicesDistinctCurvesToSum = numpy.unique(arrayCurveLocations[:, indexCurveLocations], return_inverse=True)
+		listOfUniquenessCoordinates.append((indicesDistinctCurvesToSum, arrayCurveLocationsUniqueHere, index))
 
 	arrayAggregated: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.tile(
-		A=reduce(numpy.union1d, [tupleCoordinates[indexCurveLocations] for tupleCoordinates in listOfCoordinates])
+		A=reduce(numpy.union1d, [tupleCoordinates[indexCurveLocations] for tupleCoordinates in listOfUniquenessCoordinates])
 		, reps=(2, 1)
 	).T
 
 	arrayAggregated[:, indexDistinctCrossings] = 0
+# Above this line is surprisingly fast --------------------------------------------------------------------------
 
-	listOfAlignment = [0] * len(arrayAggregated[:, indexCurveLocations])
-	for indicesDistinctCurvesToSum, arrayCurveLocationsUniqueHere, index in listOfCoordinates:
-		for whyDoYouNotKnowTheTypeAnnotation in range(len(arrayCurveLocationsUniqueHere)):
-			curveLocations = arrayCurveLocationsUniqueHere[whyDoYouNotKnowTheTypeAnnotation]
-			Z0Z_number = numpy.searchsorted(a=arrayAggregated[:, indexCurveLocations], v=curveLocations)
+	listSelectorCoordinates:list[list[tuple[int, int]]] = [[] for _curveLocation in arrayAggregated[:, indexCurveLocations]]
+	for _indicesDistinctCurvesToSum, arrayCurveLocationsUniqueHere, indexForLists in listOfUniquenessCoordinates:
+		for indexCurveLocationsUniqueHere, curveLocations in enumerate(arrayCurveLocationsUniqueHere):
+			indexRow: numpy.intp = numpy.searchsorted(arrayAggregated[:, indexCurveLocations], curveLocations)
+			listSelectorCoordinates[indexRow].append((indexForLists, indexCurveLocationsUniqueHere))
 
+	indexRow = numpy.intp(0)
+	listOfCoordinatesAtRow = listSelectorCoordinates[indexRow]
 
-# This section is incomplete because I got too frustrated with the annotations.
-
-
+	arrayAggregated[indexRow, indexDistinctCrossings] = numpy.add.reduce([listArrayCurveLocations[indexForLists][listOfUniquenessCoordinates[indexForLists][indexDistinctCrossings] == indexCurveLocationsUniqueHere, indexDistinctCrossings]
+		for indexForLists, indexCurveLocationsUniqueHere in listOfCoordinatesAtRow
+	])
+	print(arrayAggregated[indexRow])  # noqa: T201
+	"""
+	[174  22]
+	DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+	arrayAggregated[indexRow, indexDistinctCrossings] = numpy.add.reduce([listArrayCurveLocations[indexForLists][listOfUniquenessCoordinates[indexForLists][indexDistinctCrossings] == indexCurveLocationsUniqueHere, indexDistinctCrossings]
+	"""
 	return arrayAggregated
 
-def aggregateAnalyzedCurves(listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
-	arrayAggregated = _aggregate(listArrayCurveLocationsAnalyzed)
+def aggregateAnalyzedCurves(listArrayCurveLocations: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
+	arrayAggregated = _aggregate(listArrayCurveLocations)
 
 	return numpy.column_stack((arrayAggregated[:, indexDistinctCrossings]
 				, arrayAggregated[:, indexCurveLocations] & groupAlphaLocator
 				, (arrayAggregated[:, indexCurveLocations] & groupZuluLocator) >> numpy.uint64(1)
 	))
 
-def convertArrayCurveLocations2dictionary(listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> dict[int, int]:
-	arrayAggregated = _aggregate(listArrayCurveLocationsAnalyzed)
+def convertArrayCurveLocations2dictionary(listArrayCurveLocations: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]]) -> dict[int, int]:
+	arrayAggregated = _aggregate(listArrayCurveLocations)
 	dictionaryCurveLocations: dict[int, int] = {}
 	for distinctCrossings, curveLocations in arrayAggregated:
 		dictionaryCurveLocations[int(curveLocations)] = int(distinctCrossings)
@@ -64,59 +72,59 @@ def convertDictionaryCurveLocations2array(dictionaryCurveLocations: dict[int, in
 	))
 
 def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinimum: int = 0) -> tuple[int, dict[int, int]]:
-	arrayCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = convertDictionaryCurveLocations2array(dictionaryCurveLocations)
-	listArrayCurveLocationsAnalyzed: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]] = []
+	arrayCurveGroups: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = convertDictionaryCurveLocations2array(dictionaryCurveLocations)
+	listArrayCurveLocations: list[numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]] = []
 
 	while bridges > bridgesMinimum:
 		bridges -= 1
-		listArrayCurveLocationsAnalyzed = []
+		listArrayCurveLocations = []
 		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1) << numpy.uint64(2 * bridges + 4)
 
 		# Selectors -------------------------------------------------------------------------------------------
-		selectGroupAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveLocations[:, indexGroupAlpha] > numpy.uint64(1)
-		selectGroupZuluCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveLocations[:, indexGroupZulu] > numpy.uint64(1)
-		selectGroupAlphaAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveLocations[:, indexGroupAlpha] & numpy.uint64(1)) == numpy.uint64(0)
-		selectGroupZuluAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveLocations[:, indexGroupZulu] & numpy.uint64(1)) == numpy.uint64(0)
+		selectGroupAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveGroups[:, indexGroupAlpha] > numpy.uint64(1)
+		selectGroupZuluCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveGroups[:, indexGroupZulu] > numpy.uint64(1)
+		selectGroupAlphaAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveGroups[:, indexGroupAlpha] & numpy.uint64(1)) == numpy.uint64(0)
+		selectGroupZuluAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveGroups[:, indexGroupZulu] & numpy.uint64(1)) == numpy.uint64(0)
 
 		# bridgesSimple ----------------------------------------------------------------------------------------------
 		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
-			((arrayCurveLocations[:, indexGroupAlpha] | (arrayCurveLocations[:, indexGroupZulu] << numpy.uint64(1))) << numpy.uint64(2)) | numpy.uint64(3)
+			((arrayCurveGroups[:, indexGroupAlpha] | (arrayCurveGroups[:, indexGroupZulu] << numpy.uint64(1))) << numpy.uint64(2)) | numpy.uint64(3)
 		)
 
 		# NOTE convergent code block, `bridgesSimple` does not have a `selector`.
 		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
 		selectNonZero: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(curveLocations)[0]
-		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((
-				arrayCurveLocations[:, indexDistinctCrossings][selectNonZero]
+		listArrayCurveLocations.append(numpy.column_stack((
+				arrayCurveGroups[:, indexDistinctCrossings][selectNonZero]
 				, curveLocations[selectNonZero])))
 
 		# groupAlphaCurves -----------------------------------------------------------------------------------
 		selector: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = selectGroupAlphaCurves
-		curveLocations = ((arrayCurveLocations[selector, indexGroupAlpha] >> numpy.uint64(2))
-			| (arrayCurveLocations[selector, indexGroupZulu] << numpy.uint64(3))
-			| ((numpy.uint64(1) - (arrayCurveLocations[selector, indexGroupAlpha] & numpy.uint64(1))) << numpy.uint64(1))
+		curveLocations = ((arrayCurveGroups[selector, indexGroupAlpha] >> numpy.uint64(2))
+			| (arrayCurveGroups[selector, indexGroupZulu] << numpy.uint64(3))
+			| ((numpy.uint64(1) - (arrayCurveGroups[selector, indexGroupAlpha] & numpy.uint64(1))) << numpy.uint64(1))
 		)
 
 		# NOTE converged code block
 		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
 		selectNonZero = numpy.nonzero(curveLocations)[0]
-		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
+		listArrayCurveLocations.append(numpy.column_stack((arrayCurveGroups[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
 
 		# groupZuluCurves -----------------------------------------------------------------------------------
 		selector = selectGroupZuluCurves
-		curveLocations = (arrayCurveLocations[selector, indexGroupZulu] >> numpy.uint64(1)
-			| arrayCurveLocations[selector, indexGroupAlpha] << numpy.uint64(2)
-			| (numpy.uint64(1) - (arrayCurveLocations[selector, indexGroupZulu] & numpy.uint64(1)))
+		curveLocations = (arrayCurveGroups[selector, indexGroupZulu] >> numpy.uint64(1)
+			| arrayCurveGroups[selector, indexGroupAlpha] << numpy.uint64(2)
+			| (numpy.uint64(1) - (arrayCurveGroups[selector, indexGroupZulu] & numpy.uint64(1)))
 		)
 
 		# NOTE converged code block
 		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
 		selectNonZero = numpy.nonzero(curveLocations)[0]
-		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
+		listArrayCurveLocations.append(numpy.column_stack((arrayCurveGroups[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
 
-		# NOTE this MODIFIES `arrayCurveLocations` for bridgesPairedToOdd ---------------------------------------------------------------------------------------
+		# NOTE this MODIFIES `arrayCurveGroups` for bridgesPairedToOdd ---------------------------------------------------------------------------------------
 		for indexRow in numpy.nonzero(selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven ^ selectGroupZuluAtEven))[0].tolist():
-			if (arrayCurveLocations[indexRow, indexGroupAlpha] & 1) == 0:
+			if (arrayCurveGroups[indexRow, indexGroupAlpha] & 1) == 0:
 				indexGroupToModify: int = indexGroupAlpha
 			else:
 				indexGroupToModify = indexGroupZulu
@@ -126,22 +134,22 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 
 			while findUnpaired_0b1 >= 0:
 				XOrHere2makePair <<= 2
-				findUnpaired_0b1 += 1 if (arrayCurveLocations[indexRow, indexGroupToModify] & XOrHere2makePair) == 0 else -1
+				findUnpaired_0b1 += 1 if (arrayCurveGroups[indexRow, indexGroupToModify] & XOrHere2makePair) == 0 else -1
 
-			arrayCurveLocations[indexRow, indexGroupToModify] ^= XOrHere2makePair
+			arrayCurveGroups[indexRow, indexGroupToModify] ^= XOrHere2makePair
 
 		# bridgesAligned; bridgesAlignedAtEven, bridgesGroupAlphaPairedToOdd, bridgesGroupZuluPairedToOdd -----------------
 		selector = selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven | selectGroupZuluAtEven)
-		curveLocations = (((arrayCurveLocations[selector, indexGroupZulu] >> numpy.uint64(2)) << numpy.uint64(1))
-			| (arrayCurveLocations[selector, indexGroupAlpha] >> numpy.uint64(2))
+		curveLocations = (((arrayCurveGroups[selector, indexGroupZulu] >> numpy.uint64(2)) << numpy.uint64(1))
+			| (arrayCurveGroups[selector, indexGroupAlpha] >> numpy.uint64(2))
 		)
 
 		# NOTE converged code block
 		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
 		selectNonZero = numpy.nonzero(curveLocations)[0]
-		listArrayCurveLocationsAnalyzed.append(numpy.column_stack((arrayCurveLocations[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
+		listArrayCurveLocations.append(numpy.column_stack((arrayCurveGroups[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
 
-		arrayCurveLocations = aggregateAnalyzedCurves(listArrayCurveLocationsAnalyzed)
+		arrayCurveGroups = aggregateAnalyzedCurves(listArrayCurveLocations)
 
-	return (bridges, convertArrayCurveLocations2dictionary(listArrayCurveLocationsAnalyzed))
+	return (bridges, convertArrayCurveLocations2dictionary(listArrayCurveLocations))
 
