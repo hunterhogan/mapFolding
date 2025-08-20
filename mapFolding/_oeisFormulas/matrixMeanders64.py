@@ -51,49 +51,58 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 		listArrayCurveLocations = []
 		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1) << numpy.uint64(2 * bridges + 4)
 
-		# Selectors -------------------------------------------------------------------------------------------
+		# groupAlphaCurves -----------------------------------------------------------------------------------
 		selectGroupAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveGroups[:, indexGroupAlpha] > numpy.uint64(1)
+		curveLocationsGroupAlpha = ((arrayCurveGroups[selectGroupAlphaCurves, indexGroupAlpha] >> numpy.uint64(2))
+			| (arrayCurveGroups[selectGroupAlphaCurves, indexGroupZulu] << numpy.uint64(3))
+			| ((numpy.uint64(1) - (arrayCurveGroups[selectGroupAlphaCurves, indexGroupAlpha] & numpy.uint64(1))) << numpy.uint64(1))
+		)
+
+		selectNonZeroGroupAlpha = numpy.flatnonzero(selectGroupAlphaCurves)[
+			numpy.nonzero(curveLocationsGroupAlpha < curveLocationsMAXIMUM)[0]
+		]
+		sizeGroupAlpha = numpy.nonzero(curveLocationsGroupAlpha < curveLocationsMAXIMUM)[0].size
+
 		selectGroupZuluCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveGroups[:, indexGroupZulu] > numpy.uint64(1)
-		selectGroupAlphaAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveGroups[:, indexGroupAlpha] & numpy.uint64(1)) == numpy.uint64(0)
-		selectGroupZuluAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveGroups[:, indexGroupZulu] & numpy.uint64(1)) == numpy.uint64(0)
+		curveLocationsGroupZulu = (arrayCurveGroups[selectGroupZuluCurves, indexGroupZulu] >> numpy.uint64(1)
+			| arrayCurveGroups[selectGroupZuluCurves, indexGroupAlpha] << numpy.uint64(2)
+			| (numpy.uint64(1) - (arrayCurveGroups[selectGroupZuluCurves, indexGroupZulu] & numpy.uint64(1)))
+		)
+
+		selectNonZeroGroupZulu = numpy.flatnonzero(selectGroupZuluCurves)[
+			numpy.nonzero(curveLocationsGroupZulu < curveLocationsMAXIMUM)[0]
+		]
+		sizeGroupZulu = numpy.nonzero(curveLocationsGroupZulu < curveLocationsMAXIMUM)[0].size
 
 		# bridgesSimple ----------------------------------------------------------------------------------------------
-		curveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = (
-			((arrayCurveGroups[:, indexGroupAlpha] | (arrayCurveGroups[:, indexGroupZulu] << numpy.uint64(1))) << numpy.uint64(2)) | numpy.uint64(3)
+		selectNonZeroBridgesSimple: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(
+			(((arrayCurveGroups[:, indexGroupAlpha] << numpy.uint64(2)) | (arrayCurveGroups[:, indexGroupZulu] << numpy.uint64(3)) | numpy.uint64(3)) < curveLocationsMAXIMUM)
+		)[0]
+		sizeBridgesSimple = selectNonZeroBridgesSimple.size
+
+		# NOTE one array for the first three selectors
+		listArrayCurveLocations.append(numpy.empty((sizeGroupAlpha + sizeGroupZulu + sizeBridgesSimple, 2), dtype=arrayCurveGroups.dtype))
+
+		listArrayCurveLocations[-1][:sizeGroupAlpha, indexDistinctCrossings] = arrayCurveGroups[selectNonZeroGroupAlpha, indexDistinctCrossings]
+		listArrayCurveLocations[-1][:sizeGroupAlpha, indexCurveLocations] = curveLocationsGroupAlpha[
+			numpy.nonzero(curveLocationsGroupAlpha < curveLocationsMAXIMUM)[0]
+		]
+
+		listArrayCurveLocations[-1][sizeGroupAlpha:sizeGroupAlpha+sizeGroupZulu, indexDistinctCrossings] = arrayCurveGroups[selectNonZeroGroupZulu, indexDistinctCrossings]
+		listArrayCurveLocations[-1][sizeGroupAlpha:sizeGroupAlpha+sizeGroupZulu, indexCurveLocations] = curveLocationsGroupZulu[
+			numpy.nonzero(curveLocationsGroupZulu < curveLocationsMAXIMUM)[0]
+		]
+
+		listArrayCurveLocations[-1][sizeGroupAlpha+sizeGroupZulu:, indexDistinctCrossings] = arrayCurveGroups[selectNonZeroBridgesSimple, indexDistinctCrossings]
+		listArrayCurveLocations[-1][sizeGroupAlpha+sizeGroupZulu:, indexCurveLocations] = (
+			(arrayCurveGroups[selectNonZeroBridgesSimple, indexGroupAlpha] << numpy.uint64(2))
+			| (arrayCurveGroups[selectNonZeroBridgesSimple, indexGroupZulu] << numpy.uint64(3))
+			| numpy.uint64(3)
 		)
-
-		# NOTE convergent code block, `bridgesSimple` does not have a `selector`.
-		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
-		selectNonZero: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.int64]] = numpy.nonzero(curveLocations)[0]
-		listArrayCurveLocations.append(numpy.column_stack((
-				arrayCurveGroups[:, indexDistinctCrossings][selectNonZero]
-				, curveLocations[selectNonZero])))
-
-		# groupAlphaCurves -----------------------------------------------------------------------------------
-		selector: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = selectGroupAlphaCurves
-		curveLocations = ((arrayCurveGroups[selector, indexGroupAlpha] >> numpy.uint64(2))
-			| (arrayCurveGroups[selector, indexGroupZulu] << numpy.uint64(3))
-			| ((numpy.uint64(1) - (arrayCurveGroups[selector, indexGroupAlpha] & numpy.uint64(1))) << numpy.uint64(1))
-		)
-
-		# NOTE converged code block
-		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
-		selectNonZero = numpy.nonzero(curveLocations)[0]
-		listArrayCurveLocations.append(numpy.column_stack((arrayCurveGroups[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
-
-		# groupZuluCurves -----------------------------------------------------------------------------------
-		selector = selectGroupZuluCurves
-		curveLocations = (arrayCurveGroups[selector, indexGroupZulu] >> numpy.uint64(1)
-			| arrayCurveGroups[selector, indexGroupAlpha] << numpy.uint64(2)
-			| (numpy.uint64(1) - (arrayCurveGroups[selector, indexGroupZulu] & numpy.uint64(1)))
-		)
-
-		# NOTE converged code block
-		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
-		selectNonZero = numpy.nonzero(curveLocations)[0]
-		listArrayCurveLocations.append(numpy.column_stack((arrayCurveGroups[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
 
 		# NOTE this MODIFIES `arrayCurveGroups` for bridgesPairedToOdd ---------------------------------------------------------------------------------------
+		selectGroupAlphaAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveGroups[:, indexGroupAlpha] & numpy.uint64(1)) == numpy.uint64(0)
+		selectGroupZuluAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveGroups[:, indexGroupZulu] & numpy.uint64(1)) == numpy.uint64(0)
 		for indexRow in numpy.nonzero(selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven ^ selectGroupZuluAtEven))[0].tolist():
 			if (arrayCurveGroups[indexRow, indexGroupAlpha] & 1) == 0:
 				indexGroupToModify: int = indexGroupAlpha
@@ -115,7 +124,6 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 			| (arrayCurveGroups[selector, indexGroupAlpha] >> numpy.uint64(2))
 		)
 
-		# NOTE converged code block
 		curveLocations[curveLocations >= curveLocationsMAXIMUM] = numpy.uint64(0)
 		selectNonZero = numpy.nonzero(curveLocations)[0]
 		listArrayCurveLocations.append(numpy.column_stack((arrayCurveGroups[selector, indexDistinctCrossings][selectNonZero], curveLocations[selectNonZero])))
