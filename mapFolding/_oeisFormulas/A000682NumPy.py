@@ -1,11 +1,8 @@
 """Semi-meanders."""
 # pyright: reportUnusedImport=false
-from mapFolding._oeisFormulas.matrixMeanders import count
 from mapFolding._oeisFormulas.matrixMeanders64 import count64
 from mapFolding._oeisFormulas.matrixMeandersMimic import countMimic
 from mapFolding._oeisFormulas.Z0Z_oeisMeanders import dictionaryOEISMeanders
-from typing import Any
-import numpy
 import sys
 import time
 
@@ -80,7 +77,8 @@ def A000682(n: int) -> int:
 	n, dictionaryCurveLocations = count64(n - 1, dictionaryCurveLocations, bridgesMinimum)
 	if n > 0:
 		n += 1
-		return count(n - 1, dictionaryCurveLocations)
+		n, dictionaryCurveLocations = countMimic(n - 1, dictionaryCurveLocations, 0)
+		# return count(n - 1, dictionaryCurveLocations)
 	return sum(dictionaryCurveLocations.values())
 
 # ruff: noqa: ERA001
@@ -98,7 +96,7 @@ if __name__ == '__main__':
 			"\033[0m\n"
 		)
 	oeisID = 'A000682'
-	for n in range(33,43):
+	for n in range(33,36):
 
 		timeStart = time.perf_counter()
 		foldsTotal = A000682(n)
