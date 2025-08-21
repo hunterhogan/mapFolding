@@ -23,7 +23,7 @@ if __name__ == '__main__':
 	oeisID = 'A001010'
 	oeisID = 'A000136'
 	oeisID = 'A000682'
-	for n in range(3,37):
+	for n in range(30,39):
 
 		# sys.stdout.write(f"{n = }\n")
 
