@@ -8,6 +8,52 @@ from os import PathLike
 from pathlib import PurePath
 import contextlib
 
+"""TODO new flow paradigm, incomplete
+
+- count______
+	- countFolds
+	- countFoldsSymmetric
+	- countMeanders
+- oeisIDfor_n
+	- Only works for IDs defined in this app
+	- Calls the correct count_____ function
+
+- Incomplete: how to count
+	- currently in parameters computationDivisions, CPUlimit, and flow
+
+- Flow in count______
+	- DEFENSIVE PROGRAMMING
+	- FAIL EARLY
+	- Implement "common foundational logic".
+		- IDK what the correct technical term is, but I'm sure other people have researched excellent ways to do this.
+        - Example: in `countFolds`, every possible flow path needs `mapShape`. Therefore, `mapShape` is foundational logic that
+			all flow paths have in common: "common foundational logic".
+        - Example: in `countFolds`, some flow paths have more than one "task division" (i.e., the computation is divided into
+            multiple tasks), while other flow paths only have one task division. One reasonable perspective is that computing task
+            divisions is NOT "common foundational logic". My perspective for this example: to compute whether or not there are
+            task divisions and if so, how many task divisions is identical for all flow paths. Therefore, I handle computing task
+            divisions as "common foundational logic".
+		- Incomplete
+	- Initialize memorialization instructions, if asked
+	- MORE DEFENSIVE PROGRAMMING
+	- FAIL EARLIER THAN EARLY
+	- Incomplete
+	- DEFENSIVE PROGRAMMING ON BEHALF of downstream modules and functions
+	- FAIL SO EARLY IT IS BEFORE THE USER INSTALLS THE APP
+	- Incomplete
+	- REPEAT MANY OR ALL OF THE DEFENSIVE PROGRAMMING YOU HAVE ALREADY DONE
+
+	- Incomplete
+	- Pass control to the correct `doTheNeedful`
+	- I don't know how to "elegantly" pass control without putting `doTheNeedful` over `count______` in the stack, therefore,
+		control will come back here.
+    - DO NOT, for the love of puppies and cookies, DO NOT use defensive programming here. Defensive programming AFTER a
+		four-week-long computation is a tacit admission of incompetent programming.
+	- Follow memorialization instructions: which means pass control to a function will tenaciously follow the instructions.
+	- return "a(n)" (as OEIS calls it), such as foldsTotal
+
+"""
+
 def countFolds(listDimensions: Sequence[int] | None = None
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 				, computationDivisions: int | str | None = None
