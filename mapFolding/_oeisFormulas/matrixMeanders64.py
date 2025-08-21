@@ -13,32 +13,17 @@ import numpy
 #   control flow harder to analyze and transform.
 # - Our AST/Numba job generator assumes one consistent exit path with stable shapes/dtypes;
 #   early returns often create shape/type divergence that breaks specialization.
-# - Short-circuit returns in this module have led to unbound intermediates downstream and
-#   inconsistent accumulator initialization across branches.
 #
 # Summary: No early-return guard clauses for empty inputs; preserve a single return statement
-# and uniform shapes/dtypes throughout the function body.
+# and uniform shapes/dtypes throughout the function body; an empty input is a problem: fail early.
+# Always use semantic index identifiers: Never hardcode the indices.
 
-"""Ideas, whether plausible or crazy
-
-MEMORY MANAGEMENT is the ONLY issue that matters until we fix the crashes when trying to compute `bridges = 46` (or a lower value).
-
-- `for indexRow in` "selectBridgesPairedToOdd": vectorize or add concurrency.
-- numba
-- codon for multiple modules, but I don't think I have figure out how to do that yet.
-- codon compiled executable.
-- ast construction of modules for only one value of n, especially converting the module to an executable with codon.
-- The best, but craziest idea: fuck this shit: Somehow get healthcare so I can be healthy, not poor, not alone, and doing something I am good at.
-- Use numpy bit shift operations.
-
-"""
-
-# NOTE `arrayCurveGroups`: Always use semantic index identifiers: Never hardcode the indices.
+# NOTE `arrayCurveGroups`
 indexDistinctCrossings: int = 0
 indexGroupAlpha: int = 1
 indexGroupZulu: int = 2
 
-# NOTE `arrayCurveLocations`: Always use semantic index identifiers: Never hardcode the indices.
+# NOTE `arrayCurveLocations`
 indexDistinctCrossings: int = 0
 indexCurveLocations: int = 1
 
@@ -55,12 +40,10 @@ def aggregateCurveLocations(arrayCurveLocations: numpy.ndarray[tuple[int, ...], 
 
 	return arrayCurveGroups
 
-def convertArrayCurveLocations2dictionary(arrayCurveLocations: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]) -> dict[int, int]:
-	uniqueness = numpy.unique_inverse(arrayCurveLocations[:, indexCurveLocations])
-
-	arrayCurveGroups = numpy.zeros((uniqueness.values.shape[0], 2), dtype=numpy.uint64)
-	numpy.add.at(arrayCurveGroups[:, indexDistinctCrossings], uniqueness.inverse_indices, arrayCurveLocations[:, indexDistinctCrossings])
-	return {int(row[indexCurveLocations]): int(row[indexDistinctCrossings]) for row in arrayCurveGroups}
+def convertArrayCurveGroups2dictionary(arrayCurveGroups: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]) -> dict[int, int]:
+	"""'Smush' `groupAlpha` and `groupZulu` back together into `curveLocations`."""
+	arrayCurveGroups[:, indexCurveLocations] = arrayCurveGroups[:, indexGroupAlpha] | (arrayCurveGroups[:, indexGroupZulu] << numpy.uint64(1))
+	return {int(row[indexCurveLocations]): int(row[indexDistinctCrossings]) for row in arrayCurveGroups[:, [indexDistinctCrossings, indexCurveLocations]]}
 
 def convertDictionaryCurveLocations2array(dictionaryCurveLocations: dict[int, int]) -> numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]:
 	arrayKeys: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = numpy.fromiter(dictionaryCurveLocations.keys(), dtype=numpy.uint64)
@@ -70,7 +53,7 @@ def convertDictionaryCurveLocations2array(dictionaryCurveLocations: dict[int, in
 		, (arrayKeys & groupZuluLocator) >> numpy.uint64(1)
 	))
 
-def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinimum: int = 0) -> tuple[int, numpy.ndarray[tuple[int, ...], numpy.dtype[Any]]]:
+def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinimum: int = 0) -> tuple[int, dict[int, int]]:
 	arrayCurveGroups: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] = convertDictionaryCurveLocations2array(dictionaryCurveLocations)
 
 	while bridges > bridgesMinimum:
@@ -162,5 +145,5 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 		gc.collect()
 
 	else:  # noqa: PLW0120
-		return (bridges, arrayCurveGroups.astype(__builtins__.int))
+		return (bridges, convertArrayCurveGroups2dictionary(arrayCurveGroups))
 

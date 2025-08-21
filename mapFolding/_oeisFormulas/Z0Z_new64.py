@@ -98,7 +98,7 @@ if __name__ == '__main__':
 			"\033[0m\n"
 		)
 	oeisID = 'A000682'
-	for n in range(30,40):
+	for n in range(33,43):
 
 		timeStart = time.perf_counter()
 		foldsTotal = A000682(n)
