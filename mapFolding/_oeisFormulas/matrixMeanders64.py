@@ -1,4 +1,3 @@
-from typing import Any
 import gc
 import numpy
 
@@ -110,9 +109,9 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 		del selectGroupAlphaCurvesLessThanMaximum
 		del selectGroupZuluCurvesLessThanMaximum
 		del selectBridgesSimpleLessThanMaximum
-		gc.collect()
 
 		# NOTE this MODIFIES `arrayCurveGroups` for bridgesPairedToOdd ---------------------------------------------------------------------------------------
+# TODO START refactor area -----------------------------------------------------------------------------------------------------------------------------------------------------
 		for indexRow in numpy.nonzero(selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven ^ selectGroupZuluAtEven))[0].tolist():
 			if (arrayCurveGroups[indexRow, indexGroupAlpha] & 1) == 0:
 				indexGroupToModify: int = indexGroupAlpha
@@ -127,6 +126,7 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 				findUnpaired_0b1 += 1 if (arrayCurveGroups[indexRow, indexGroupToModify] & XOrHere2makePair) == 0 else -1
 
 			arrayCurveGroups[indexRow, indexGroupToModify] ^= XOrHere2makePair
+# TODO END refactor area ----------------------------------------------------------------------------------------------------------------------------------------------------
 
 		# bridgesAligned; bridgesAlignedAtEven, bridgesGroupAlphaPairedToOdd, bridgesGroupZuluPairedToOdd -----------------
 		curveLocationsBridgesAligned = (((arrayCurveGroups[selectBridgesAligned, indexGroupZulu] >> numpy.uint64(2)) << numpy.uint64(1))
@@ -144,6 +144,5 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 		arrayCurveGroups = aggregateCurveLocations(arrayCurveLocations[0:SliceΩ.stop])
 		gc.collect()
 
-	else:  # noqa: PLW0120
-		return (bridges, convertArrayCurveGroups2dictionary(arrayCurveGroups))
+	return (bridges, convertArrayCurveGroups2dictionary(arrayCurveGroups))
 
