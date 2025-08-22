@@ -1,4 +1,5 @@
 from gc import collect as goByeBye
+from typing import Literal
 import numpy
 
 # DEVELOPMENT INSTRUCTIONS FOR THIS MODULE
@@ -12,6 +13,11 @@ import numpy
 #   control flow harder to analyze and transform.
 # - Our AST/Numba job generator assumes one consistent exit path with stable shapes/dtypes;
 #   early returns often create shape/type divergence that breaks specialization.
+#
+# Do NOT add artificial safety limits (e.g., maxIterations counters) to prevent infinite loops.
+# Such limits mask underlying algorithmic problems and create non-deterministic behavior.
+# If an algorithm has potential for infinite loops, fix the root cause in the mathematical logic,
+# not by adding arbitrary iteration caps that could truncate valid computations.
 #
 # Summary: No early-return guard clauses for empty inputs; preserve a single return statement
 # and uniform shapes/dtypes throughout the function body; an empty input is a problem: fail early.
@@ -88,7 +94,7 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 		selectGroupZuluAtEven: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = (arrayCurveGroups[:, indexGroupZulu] & 1) == numpy.uint64(0)
 		selectBridgesAligned = selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven | selectGroupZuluAtEven)
 
-		SliceΩ: slice = slice(0,0)
+		SliceΩ: slice[int, int, Literal[1]] = slice(0,0)
 		sliceGroupAlpha = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectGroupAlphaCurvesLessThanMaximum.size)
 		sliceGroupZulu = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectGroupZuluCurvesLessThanMaximum.size)
 		sliceBridgesSimple = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectBridgesSimpleLessThanMaximum.size)
@@ -117,9 +123,12 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 		selectBridgesSimpleLessThanMaximum = None; del selectBridgesSimpleLessThanMaximum # pyright: ignore[reportAssignmentType]  # noqa: E702
 
 		# NOTE this MODIFIES `arrayCurveGroups` for bridgesPairedToOdd ---------------------------------------------------------------------------------------
-# TODO START refactor area -----------------------------------------------------------------------------------------------------------------------------------------------------
-		for indexRow in numpy.nonzero(selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven ^ selectGroupZuluAtEven))[0].tolist():
-			if (arrayCurveGroups[indexRow, indexGroupAlpha] & 1) == 0:
+		# I don't think Claude's changes are an improvement. But, I'll get rid of these UNNECESSARY intermediates and see if that is better.
+# OPTIMIZED bridgesPairedToOdd: Memory-optimized replacement eliminates .tolist() conversion and Python loop overhead
+
+		# Process each target row with memory-optimized operations
+		for indexRow in numpy.nonzero(selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven ^ selectGroupZuluAtEven))[0]:
+			if selectGroupAlphaAtEven[indexRow]:
 				indexGroupToModify: int = indexGroupAlpha
 			else:
 				indexGroupToModify = indexGroupZulu

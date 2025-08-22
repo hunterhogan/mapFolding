@@ -4,6 +4,10 @@ from mapFolding._oeisFormulas.matrixMeanders64 import count64
 from mapFolding._oeisFormulas.matrixMeandersMimic import countMimic
 import gc
 
+# TODO merge `matrixMeanders.count` and `matrixMeandersMimic.countMimic`.
+# BUT, the thing that has prevented me from merging them before is `A005316` also calls `matrixMeanders.count`.
+# And when I make the changes that I think should work, `A005315`, not `A005316`, breaks.
+
 def initializeA000682(n: int) -> dict[int, int]:
 	curveLocationsMAXIMUM: int = 1 << (2 * n + 4)
 
@@ -75,7 +79,7 @@ def A000682(n: int) -> int:
 		gc.collect()
 	n, dictionaryCurveLocations = count64(n - 1, dictionaryCurveLocations, bridgesMinimum)
 	if n > 0:
-		print('count')
+		print('Stage 3: `count`')
 		n += 1
 		gc.collect()
 		return count(n - 1, dictionaryCurveLocations)
