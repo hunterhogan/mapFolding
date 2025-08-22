@@ -1,6 +1,8 @@
 """Semi-meanders."""
+from mapFolding._oeisFormulas.matrixMeanders import count
 from mapFolding._oeisFormulas.matrixMeanders64 import count64
 from mapFolding._oeisFormulas.matrixMeandersMimic import countMimic
+import gc
 
 def initializeA000682(n: int) -> dict[int, int]:
 	curveLocationsMAXIMUM: int = 1 << (2 * n + 4)
@@ -58,11 +60,11 @@ def A000682(n: int) -> int:
 # 30` or a larger number, `OverflowError: int too big to convert`. Conclusion: '29' isn't necessarily correct or the best value:
 # it merely fits within my limited ability to assess the correct value.
 	count64_bridgesMaximum = 29
-	bridgesMinimum = 0  # This default value is necessary: it prevents `count64` from returning an incomplete dictionary when that is not necessary.
+	bridgesMinimum = 0  # NOTE This default value is necessary: it prevents `count64` from returning an incomplete dictionary when that is not necessary.
 
 	distinctCrossings64bitLimitAsValueOf_n = 41
-	distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG = distinctCrossings64bitLimitAsValueOf_n - 1
-	distinctCrossings64bitLimitSafetyMargin = 2
+	distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG = distinctCrossings64bitLimitAsValueOf_n - 2
+	distinctCrossings64bitLimitSafetyMargin = 3
 	# Oh, uh, I suddenly had an intuition that this method of computing 64bitLimitAsValueOf_n is, at best, wrong.
 	dictionaryCurveLocations: dict[int, int] = initializeA000682(n - 1)
 	if n >= count64_bridgesMaximum:
@@ -70,9 +72,12 @@ def A000682(n: int) -> int:
 			bridgesMinimum = n - distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG + distinctCrossings64bitLimitSafetyMargin
 		n, dictionaryCurveLocations = countMimic(n - 1, dictionaryCurveLocations, count64_bridgesMaximum)
 		n += 1
+		gc.collect()
 	n, dictionaryCurveLocations = count64(n - 1, dictionaryCurveLocations, bridgesMinimum)
 	if n > 0:
+		print('count')
 		n += 1
-		n, dictionaryCurveLocations = countMimic(n - 1, dictionaryCurveLocations, 0)
+		gc.collect()
+		return count(n - 1, dictionaryCurveLocations)
 	return sum(dictionaryCurveLocations.values())
 

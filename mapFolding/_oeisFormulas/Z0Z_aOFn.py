@@ -3,6 +3,7 @@ from mapFolding._oeisFormulas.A000682NumPy import A000682
 from mapFolding._oeisFormulas.oeisIDbyFormula import A000136, A001010
 from mapFolding._oeisFormulas.Z0Z_oeisMeanders import dictionaryOEISMeanders
 from mapFolding.oeis import dictionaryOEISMapFolding
+import gc
 import sys
 import time
 
@@ -23,10 +24,11 @@ if __name__ == '__main__':
 	oeisID = 'A001010'
 	oeisID = 'A000136'
 	oeisID = 'A000682'
-	for n in range(30,39):
+	for n in range(38,40):
+	# for n in range(3,33):
 
 		# sys.stdout.write(f"{n = }\n")
-
+		gc.collect()
 		timeStart = time.perf_counter()
 		foldsTotal = A000682(n)
 		if n <= 45:

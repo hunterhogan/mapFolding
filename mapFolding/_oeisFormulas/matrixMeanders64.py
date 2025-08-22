@@ -1,4 +1,4 @@
-import gc
+from gc import collect as goByeBye
 import numpy
 
 # DEVELOPMENT INSTRUCTIONS FOR THIS MODULE
@@ -110,11 +110,11 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 			| 3
 		)
 
-		del curveLocationsGroupAlpha
-		del curveLocationsGroupZulu
-		del selectGroupAlphaCurvesLessThanMaximum
-		del selectGroupZuluCurvesLessThanMaximum
-		del selectBridgesSimpleLessThanMaximum
+		curveLocationsGroupAlpha = None; del curveLocationsGroupAlpha  # noqa: E702
+		curveLocationsGroupZulu = None; del curveLocationsGroupZulu  # noqa: E702
+		selectGroupAlphaCurvesLessThanMaximum = None; del selectGroupAlphaCurvesLessThanMaximum # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectGroupZuluCurvesLessThanMaximum = None; del selectGroupZuluCurvesLessThanMaximum # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectBridgesSimpleLessThanMaximum = None; del selectBridgesSimpleLessThanMaximum # pyright: ignore[reportAssignmentType]  # noqa: E702
 
 		# NOTE this MODIFIES `arrayCurveGroups` for bridgesPairedToOdd ---------------------------------------------------------------------------------------
 # TODO START refactor area -----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -132,7 +132,13 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 				findUnpaired_0b1 += 1 if (arrayCurveGroups[indexRow, indexGroupToModify] & XOrHere2makePair) == 0 else -1
 
 			arrayCurveGroups[indexRow, indexGroupToModify] ^= XOrHere2makePair
+
 # TODO END refactor area ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+		selectGroupAlphaCurves = None; del selectGroupAlphaCurves # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectGroupZuluCurves = None; del selectGroupZuluCurves # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectGroupAlphaAtEven = None; del selectGroupAlphaAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectGroupZuluAtEven = None; del selectGroupZuluAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
 
 		# bridgesAligned; bridgesAlignedAtEven, bridgesGroupAlphaPairedToOdd, bridgesGroupZuluPairedToOdd -----------------
 		curveLocationsBridgesAligned = (((arrayCurveGroups[selectBridgesAligned, indexGroupZulu] >> 2) << 1)
@@ -144,11 +150,22 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 		arrayCurveLocations[sliceBridgesAligned, indexDistinctCrossings] = arrayCurveGroups[selectBridgesAlignedLessThanMaximum, indexDistinctCrossings]
 		arrayCurveLocations[sliceBridgesAligned, indexCurveLocations] = curveLocationsBridgesAligned[numpy.nonzero(curveLocationsBridgesAligned < curveLocationsMAXIMUM)[0]]
 
-		del curveLocationsBridgesAligned
-		del selectBridgesAlignedLessThanMaximum
+		selectBridgesAligned = None; del selectBridgesAligned  # noqa: E702
+		curveLocationsBridgesAligned = None; del curveLocationsBridgesAligned  # noqa: E702
+		selectBridgesAlignedLessThanMaximum = None; del selectBridgesAlignedLessThanMaximum # pyright: ignore[reportAssignmentType]  # noqa: E702
+		del curveLocationsMAXIMUM
+
+		arrayCurveGroups = None; del arrayCurveGroups # pyright: ignore[reportAssignmentType]  # noqa: E702
 
 		arrayCurveGroups = aggregateCurveLocations(arrayCurveLocations[0:SliceΩ.stop])
-		gc.collect()
+		arrayCurveLocations = None; del arrayCurveLocations # pyright: ignore[reportAssignmentType]  # noqa: E702
+		del SliceΩ
+		del sliceGroupAlpha
+		del sliceGroupZulu
+		del sliceBridgesSimple
+		del sliceBridgesAligned
+
+		goByeBye()
 
 	return (bridges, convertArrayCurveGroups2dictionary(arrayCurveGroups))
 
