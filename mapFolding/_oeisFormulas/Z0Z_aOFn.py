@@ -24,7 +24,7 @@ if __name__ == '__main__':
 	oeisID = 'A001010'
 	oeisID = 'A000136'
 	oeisID = 'A000682'
-	for n in range(30,38):
+	for n in range(44,47):
 	# for n in range(30,38):
 	# for n in range(3,30):
 

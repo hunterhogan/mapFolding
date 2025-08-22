@@ -1,3 +1,14 @@
+"""Accuracy.
+
+n=45 crashed trying to allocate (823958692,) during the statement
+`uniqueness = numpy.unique_inverse(arrayCurveLocations[:, indexCurveLocations])`
+
+I think that array was the inverse_index array. I estimated 691 million unique curveLocations for n=45 at bridges=18.5 and I
+estimate total non-unique curveLocations to be around 120% of unique values on average.
+
+824 million is 119% of 691 million, so my estimates are accurate enough for making design decisions.
+"""
+
 """Half-formed thoughts.
 
 I have unintentionally made `bridges -= 1` almost meaningless.

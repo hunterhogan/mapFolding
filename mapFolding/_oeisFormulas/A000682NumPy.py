@@ -67,8 +67,8 @@ def A000682(n: int) -> int:
 	bridgesMinimum = 0  # NOTE This default value is necessary: it prevents `count64` from returning an incomplete dictionary when that is not necessary.
 
 	distinctCrossings64bitLimitAsValueOf_n = 41
-	distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG = distinctCrossings64bitLimitAsValueOf_n - 2
-	distinctCrossings64bitLimitSafetyMargin = 3
+	distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG = distinctCrossings64bitLimitAsValueOf_n - 3
+	distinctCrossings64bitLimitSafetyMargin = 4
 	# Oh, uh, I suddenly had an intuition that this method of computing 64bitLimitAsValueOf_n is, at best, wrong.
 	dictionaryCurveLocations: dict[int, int] = initializeA000682(n - 1)
 	if n >= count64_bridgesMaximum:
