@@ -79,7 +79,6 @@ def A000682(n: int) -> int:
 		gc.collect()
 	n, dictionaryCurveLocations = count64(n - 1, dictionaryCurveLocations, bridgesMinimum)
 	if n > 0:
-		print('Stage 3: `count`')
 		n += 1
 		gc.collect()
 		return count(n - 1, dictionaryCurveLocations)

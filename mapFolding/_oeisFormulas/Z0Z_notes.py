@@ -1,3 +1,10 @@
+"""'1' is the new zero.
+
+`selectGroupAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveGroups[:, indexGroupAlpha] > numpy.uint64(1)`
+AFAIK, there is never a value of zero in arrayCurveGroups[:, indexGroupAlpha] or arrayCurveGroups[:, indexGroupZulu].
+Therefore, I _feel_ like there is a more efficient way to get the selector than `> 1`, but I have no idea what that might be.
+"""
+
 """Accuracy.
 
 n=45 crashed trying to allocate (823958692,) during the statement
@@ -7,6 +14,11 @@ I think that array was the inverse_index array. I estimated 691 million unique c
 estimate total non-unique curveLocations to be around 120% of unique values on average.
 
 824 million is 119% of 691 million, so my estimates are accurate enough for making design decisions.
+
+WAIT! I wrote the above observation at 4 am or something. I estimated 691 million for n=46, not 45, but the computation was for
+n=45. I'm too exhausted right now to analyze all potential implications, but a simple explanation is that 120% is too low. I did
+not compute 120%: I looked at some summary data of how often curveLocations were repeated in an array, and I thought, "That's
+probably around 120% on average."
 """
 
 """Half-formed thoughts.
@@ -27,6 +39,10 @@ execution.
 """
 
 """NOTE Time comparison for the `selectCurvesXorAtEven` loop: `numpy.uint64` vs `int`
+NOTE NOTE NOTE I also improved speed by changing from
+`(arrayCurveGroups[:, indexGroupAlpha] << numpy.uint64(2))`
+to
+`(arrayCurveGroups[:, indexGroupAlpha] << 2)`
 
 `numpy.uint64`:
 n =    25      1.40 seconds
@@ -103,4 +119,3 @@ n = 59  `startingCurveLocations` keys = 31
 n = 60  `startingCurveLocations` keys = 32
 n = 61  `startingCurveLocations` keys = 32
 """
-
