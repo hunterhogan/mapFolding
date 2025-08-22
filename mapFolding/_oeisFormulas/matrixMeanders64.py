@@ -1,5 +1,6 @@
 from gc import collect as goByeBye
-from typing import Literal
+from itertools import repeat
+from typing import Any, Literal
 import numpy
 
 # DEVELOPMENT INSTRUCTIONS FOR THIS MODULE
@@ -14,7 +15,9 @@ import numpy
 #
 # Always use semantic index identifiers: Never hardcode the indices.
 
-type DataArray = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]
+type DataArray1D = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64 | numpy.signedinteger[Any]]]
+type DataArray2D = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]
+type DataArray3D = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]
 type SelectorBoolean = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]]
 type SelectorIndices = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.intp]]
 
@@ -30,8 +33,8 @@ indexCurveLocations: int = 1
 groupAlphaLocator: int = 0x5555555555555555
 groupZuluLocator: int = 0xaaaaaaaaaaaaaaaa
 
-def aggregateCurveLocations(arrayCurveLocations: DataArray) -> DataArray:
-	arrayCurveGroups = numpy.tile(numpy.unique(arrayCurveLocations[:, indexCurveLocations]), (columnsArrayCurveGroups, 1)).T
+def aggregateCurveLocations(arrayCurveLocations: DataArray2D) -> DataArray3D:
+	arrayCurveGroups: DataArray3D = numpy.tile(numpy.unique(arrayCurveLocations[:, indexCurveLocations]), (columnsArrayCurveGroups, 1)).T
 	arrayCurveGroups[:, indexDistinctCrossings] = 0
 	numpy.add.at(arrayCurveGroups[:, indexDistinctCrossings], numpy.searchsorted(arrayCurveGroups[:, indexCurveLocations], arrayCurveLocations[:, indexCurveLocations]), arrayCurveLocations[:, indexDistinctCrossings])
 	# I'm computing groupZulu from curveLocations that are physically in `arrayCurveGroups`, so I'm using `indexCurveLocations`.
@@ -41,13 +44,13 @@ def aggregateCurveLocations(arrayCurveLocations: DataArray) -> DataArray:
 
 	return arrayCurveGroups
 
-def convertArrayCurveGroups2dictionary(arrayCurveGroups: DataArray) -> dict[int, int]:
+def convertArrayCurveGroups2dictionary(arrayCurveGroups: DataArray3D) -> dict[int, int]:
 	"""'Smush' `groupAlpha` and `groupZulu` back together into `curveLocations`."""
 	arrayCurveGroups[:, indexCurveLocations] = arrayCurveGroups[:, indexGroupAlpha] | (arrayCurveGroups[:, indexGroupZulu] << 1)
 	return {int(row[indexCurveLocations]): int(row[indexDistinctCrossings]) for row in arrayCurveGroups[:, [indexDistinctCrossings, indexCurveLocations]]}
 
-def convertDictionaryCurveLocations2array(dictionaryCurveLocations: dict[int, int]) -> DataArray:
-	arrayCurveGroups = numpy.tile(numpy.fromiter(dictionaryCurveLocations.values(), dtype=numpy.uint64), (columnsArrayCurveGroups, 1)).T
+def convertDictionaryCurveLocations2array(dictionaryCurveLocations: dict[int, int]) -> DataArray3D:
+	arrayCurveGroups: DataArray3D = numpy.tile(numpy.fromiter(dictionaryCurveLocations.values(), dtype=numpy.uint64), (columnsArrayCurveGroups, 1)).T
 
 	# I'm putting curveLocations into `arrayCurveGroups`, so I'm using `indexCurveLocations` even though it's not an index for this array.
 	arrayCurveGroups[:, indexCurveLocations] = numpy.fromiter(dictionaryCurveLocations.keys(), dtype=numpy.uint64)
@@ -58,8 +61,9 @@ def convertDictionaryCurveLocations2array(dictionaryCurveLocations: dict[int, in
 
 	return arrayCurveGroups
 
+type WhyDoesThisIteratorRefuseToDie = int
 def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinimum: int = 0) -> tuple[int, dict[int, int]]:
-	arrayCurveGroups: DataArray = convertDictionaryCurveLocations2array(dictionaryCurveLocations)
+	arrayCurveGroups: DataArray3D = convertDictionaryCurveLocations2array(dictionaryCurveLocations)
 	del dictionaryCurveLocations
 
 	while bridges > bridgesMinimum:
@@ -67,27 +71,27 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1 << (2 * bridges + 4))
 
 		selectGroupAlphaCurves: SelectorBoolean = arrayCurveGroups[:, indexGroupAlpha] > numpy.uint64(1)
-		curveLocationsGroupAlpha = ((arrayCurveGroups[selectGroupAlphaCurves, indexGroupAlpha] >> 2)
+		curveLocationsGroupAlpha: DataArray1D = ((arrayCurveGroups[selectGroupAlphaCurves, indexGroupAlpha] >> 2)
 			| (arrayCurveGroups[selectGroupAlphaCurves, indexGroupZulu] << 3)
 			| ((numpy.uint64(1) - (arrayCurveGroups[selectGroupAlphaCurves, indexGroupAlpha] & 1)) << 1)
 		)
-		selectGroupAlphaCurvesLessThanMaximum: SelectorIndices = numpy.flatnonzero(selectGroupAlphaCurves)[numpy.nonzero(curveLocationsGroupAlpha < curveLocationsMAXIMUM)[0]]
+		selectGroupAlphaCurvesLessThanMaximum: SelectorIndices = numpy.flatnonzero(selectGroupAlphaCurves)[numpy.flatnonzero(curveLocationsGroupAlpha < curveLocationsMAXIMUM)]
 
 		selectGroupZuluCurves: SelectorBoolean = arrayCurveGroups[:, indexGroupZulu] > numpy.uint64(1)
-		curveLocationsGroupZulu = (arrayCurveGroups[selectGroupZuluCurves, indexGroupZulu] >> 1
+		curveLocationsGroupZulu: DataArray1D = (arrayCurveGroups[selectGroupZuluCurves, indexGroupZulu] >> 1
 			| arrayCurveGroups[selectGroupZuluCurves, indexGroupAlpha] << 2
 			| (numpy.uint64(1) - (arrayCurveGroups[selectGroupZuluCurves, indexGroupZulu] & 1))
 		)
-		selectGroupZuluCurvesLessThanMaximum: SelectorIndices = numpy.flatnonzero(selectGroupZuluCurves)[numpy.nonzero(curveLocationsGroupZulu < curveLocationsMAXIMUM)[0]]
+		selectGroupZuluCurvesLessThanMaximum: SelectorIndices = numpy.flatnonzero(selectGroupZuluCurves)[numpy.flatnonzero(curveLocationsGroupZulu < curveLocationsMAXIMUM)]
 
-		selectBridgesSimpleLessThanMaximum: SelectorIndices = numpy.nonzero(
+		selectBridgesSimpleLessThanMaximum: SelectorIndices = numpy.flatnonzero(
 			((arrayCurveGroups[:, indexGroupAlpha] << 2) | (arrayCurveGroups[:, indexGroupZulu] << 3) | 3) < curveLocationsMAXIMUM
-		)[0]
+		)
 
 		# Selectors for bridgesAligned -------------------------------------------------
 		selectGroupAlphaAtEven: SelectorBoolean = (arrayCurveGroups[:, indexGroupAlpha] & 1) == numpy.uint64(0)
 		selectGroupZuluAtEven: SelectorBoolean = (arrayCurveGroups[:, indexGroupZulu] & 1) == numpy.uint64(0)
-		selectBridgesAligned = selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven | selectGroupZuluAtEven)
+		selectBridgesAligned: SelectorBoolean = selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven | selectGroupZuluAtEven)
 
 		SliceΩ: slice[int, int, Literal[1]] = slice(0,0)
 		sliceGroupAlpha = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectGroupAlphaCurvesLessThanMaximum.size)
@@ -96,13 +100,13 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 		# NOTE Maximum size, not actual size.
 		sliceBridgesAligned = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectBridgesAligned.size)
 
-		arrayCurveLocations: DataArray = numpy.zeros((SliceΩ.stop, columnsArrayCurveLocations), dtype=arrayCurveGroups.dtype)
+		arrayCurveLocations: DataArray2D = numpy.zeros((SliceΩ.stop, columnsArrayCurveLocations), dtype=arrayCurveGroups.dtype)
 
 		arrayCurveLocations[sliceGroupAlpha, indexDistinctCrossings] = arrayCurveGroups[selectGroupAlphaCurvesLessThanMaximum, indexDistinctCrossings]
-		arrayCurveLocations[sliceGroupAlpha, indexCurveLocations] = curveLocationsGroupAlpha[numpy.nonzero(curveLocationsGroupAlpha < curveLocationsMAXIMUM)[0]]
+		arrayCurveLocations[sliceGroupAlpha, indexCurveLocations] = curveLocationsGroupAlpha[numpy.flatnonzero(curveLocationsGroupAlpha < curveLocationsMAXIMUM)]
 
 		arrayCurveLocations[sliceGroupZulu, indexDistinctCrossings] = arrayCurveGroups[selectGroupZuluCurvesLessThanMaximum, indexDistinctCrossings]
-		arrayCurveLocations[sliceGroupZulu, indexCurveLocations] = curveLocationsGroupZulu[numpy.nonzero(curveLocationsGroupZulu < curveLocationsMAXIMUM)[0]]
+		arrayCurveLocations[sliceGroupZulu, indexCurveLocations] = curveLocationsGroupZulu[numpy.flatnonzero(curveLocationsGroupZulu < curveLocationsMAXIMUM)]
 
 		arrayCurveLocations[sliceBridgesSimple, indexDistinctCrossings] = arrayCurveGroups[selectBridgesSimpleLessThanMaximum, indexDistinctCrossings]
 		arrayCurveLocations[sliceBridgesSimple, indexCurveLocations] = (
@@ -111,23 +115,24 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 			| 3
 		)
 
-		curveLocationsGroupAlpha = None; del curveLocationsGroupAlpha  # noqa: E702
-		curveLocationsGroupZulu = None; del curveLocationsGroupZulu  # noqa: E702
+		curveLocationsGroupAlpha = None; del curveLocationsGroupAlpha  # pyright: ignore[reportAssignmentType] # noqa: E702
+		curveLocationsGroupZulu = None; del curveLocationsGroupZulu  # pyright: ignore[reportAssignmentType] # noqa: E702
 		selectBridgesSimpleLessThanMaximum = None; del selectBridgesSimpleLessThanMaximum # pyright: ignore[reportAssignmentType]  # noqa: E702
 		selectGroupAlphaCurvesLessThanMaximum = None; del selectGroupAlphaCurvesLessThanMaximum # pyright: ignore[reportAssignmentType]  # noqa: E702
 		selectGroupZuluCurvesLessThanMaximum = None; del selectGroupZuluCurvesLessThanMaximum # pyright: ignore[reportAssignmentType]  # noqa: E702
 		goByeBye()
 
-		# NOTE this MODIFIES `arrayCurveGroups` for bridgesPairedToOdd ---------------------------------------------------------------------------------------
-		for indexRow in numpy.nonzero(selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven ^ selectGroupZuluAtEven))[0]:
-			if selectGroupAlphaAtEven[indexRow]:
-				indexGroupToModify: int = indexGroupAlpha
-			else:
-				indexGroupToModify = indexGroupZulu
+		"""NOTE Potentially useful code if we figure out vectorization of bridgesPairedToOdd:
+		selectBridgesGroupAlphaPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & selectGroupAlphaAtEven & (~selectGroupZuluAtEven))
+		selectBridgesGroupZuluPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & (~selectGroupAlphaAtEven) & selectGroupZuluAtEven)"""
 
-# TODO START refactor area ----------------------------------------------------------------------------------------------------------------------------------------------------
-			XOrHere2makePair = 1
-			findUnpaired_0b1 = 0
+		# NOTE this MODIFIES `arrayCurveGroups` for bridgesPairedToOdd ---------------------------------------------------------------------------------------
+		for indexRow, indexGroupToModify in [*zip(numpy.flatnonzero(selectBridgesAligned & selectGroupAlphaAtEven & (~selectGroupZuluAtEven)), repeat(indexGroupAlpha))
+											, *zip(numpy.flatnonzero(selectBridgesAligned & (~selectGroupAlphaAtEven) & selectGroupZuluAtEven), repeat(indexGroupZulu))]:
+
+# TODO START refactor area 84.44s out of 166.83s = 50.61% of ALL run time in the test ------------------------------------------------------------------------
+			XOrHere2makePair: int = 1
+			findUnpaired_0b1: WhyDoesThisIteratorRefuseToDie = 0
 
 			while findUnpaired_0b1 >= 0:
 				XOrHere2makePair <<= 2
@@ -144,19 +149,19 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 		goByeBye()
 
 		# bridgesAligned; bridgesAlignedAtEven, bridgesGroupAlphaPairedToOdd, bridgesGroupZuluPairedToOdd -----------------
-		curveLocationsBridgesAligned = (((arrayCurveGroups[selectBridgesAligned, indexGroupZulu] >> 2) << 1)
+		curveLocationsBridgesAligned: DataArray1D = (((arrayCurveGroups[selectBridgesAligned, indexGroupZulu] >> 2) << 1)
 			| (arrayCurveGroups[selectBridgesAligned, indexGroupAlpha] >> 2)
 		)
 
-		selectBridgesAlignedLessThanMaximum: SelectorIndices = numpy.flatnonzero(selectBridgesAligned)[numpy.nonzero(curveLocationsBridgesAligned < curveLocationsMAXIMUM)[0]]
+		selectBridgesAlignedLessThanMaximum: SelectorIndices = numpy.flatnonzero(selectBridgesAligned)[numpy.flatnonzero(curveLocationsBridgesAligned < curveLocationsMAXIMUM)]
 		sliceBridgesAligned = SliceΩ  = slice(sliceBridgesAligned.start, sliceBridgesAligned.stop - selectBridgesAligned.size + selectBridgesAlignedLessThanMaximum.size)
 		arrayCurveLocations[sliceBridgesAligned, indexDistinctCrossings] = arrayCurveGroups[selectBridgesAlignedLessThanMaximum, indexDistinctCrossings]
-		arrayCurveLocations[sliceBridgesAligned, indexCurveLocations] = curveLocationsBridgesAligned[numpy.nonzero(curveLocationsBridgesAligned < curveLocationsMAXIMUM)[0]]
+		arrayCurveLocations[sliceBridgesAligned, indexCurveLocations] = curveLocationsBridgesAligned[numpy.flatnonzero(curveLocationsBridgesAligned < curveLocationsMAXIMUM)]
 
 		arrayCurveGroups = None; del arrayCurveGroups # pyright: ignore[reportAssignmentType]  # noqa: E702
-		curveLocationsBridgesAligned = None; del curveLocationsBridgesAligned  # noqa: E702
+		curveLocationsBridgesAligned = None; del curveLocationsBridgesAligned  # pyright: ignore[reportAssignmentType] # noqa: E702
 		del curveLocationsMAXIMUM
-		selectBridgesAligned = None; del selectBridgesAligned  # noqa: E702
+		selectBridgesAligned = None; del selectBridgesAligned  # pyright: ignore[reportAssignmentType] # noqa: E702
 		selectBridgesAlignedLessThanMaximum = None; del selectBridgesAlignedLessThanMaximum # pyright: ignore[reportAssignmentType]  # noqa: E702
 		goByeBye()
 

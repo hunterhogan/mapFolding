@@ -25,8 +25,9 @@ if __name__ == '__main__':
 	oeisID = 'A000136'
 	oeisID = 'A000682'
 	# for n in range(46,47):
-	# for n in range(30,38):
-	for n in range(3, 30):
+	for n in range(30,38):
+	# for n in range(3, 30):
+	# for n in range(3, 10):
 
 		# sys.stdout.write(f"{n = }\n")
 		gc.collect()
@@ -36,3 +37,9 @@ if __name__ == '__main__':
 			_write()
 		else:
 			sys.stdout.write(f"{n} {foldsTotal} {time.perf_counter() - timeStart:.2f}\n")
+
+r"""
+deactivate && C:\apps\mapFolding\.vtail\Scripts\activate.bat && CD C:\apps\mapFolding\mapFolding\_oeisFormulas && title good && cls
+title running && py Z0Z_aOFn.py && title I'm done || title Error
+
+"""
