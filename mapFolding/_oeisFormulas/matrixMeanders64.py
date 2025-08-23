@@ -1,5 +1,5 @@
 from functools import cache
-from gc import collect as goByeBye
+from gc import collect as goByeBye, set_threshold
 from typing import Any, Literal
 import numpy
 
@@ -13,6 +13,8 @@ import numpy
 # counters) to prevent infinite loops.
 #
 # Always use semantic index identifiers: Never hardcode the indices.
+
+set_threshold(1, 1, 1)
 
 type DataArray1D = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64 | numpy.signedinteger[Any]]]
 type DataArray2D = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]
@@ -59,7 +61,8 @@ def aggregateCurveLocations(arrayCurveLocations: DataArray2D) -> DataArray3D:
 	arrayCurveGroups[:, indexDistinctCrossings] = 0
 	numpy.add.at(arrayCurveGroups[:, indexDistinctCrossings], numpy.searchsorted(arrayCurveGroups[:, indexCurveLocations], arrayCurveLocations[:, indexCurveLocations]), arrayCurveLocations[:, indexDistinctCrossings])
 	# I'm computing groupZulu from curveLocations that are physically in `arrayCurveGroups`, so I'm using `indexCurveLocations`.
-	arrayCurveGroups[:, indexGroupZulu] = (arrayCurveGroups[:, indexCurveLocations] & groupZuluLocator) >> 1
+	numpy.bitwise_and(arrayCurveGroups[:, indexCurveLocations], numpy.uint64(groupZuluLocator), out=arrayCurveGroups[:, indexGroupZulu])
+	numpy.right_shift(arrayCurveGroups[:, indexGroupZulu], 1, out=arrayCurveGroups[:, indexGroupZulu])
 	# NOTE Do not alphabetize these operations. This column has curveLocations data that groupZulu needs.
 	arrayCurveGroups[:, indexGroupAlpha] &= groupAlphaLocator
 
