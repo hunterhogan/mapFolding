@@ -1,3 +1,14 @@
+"""'Hidden' array allocations.
+
+Some numpy operations create temporary arrays in memory that do not have identifiers. I don't know anything about the long-term
+affects on memory.
+
+Actually, I don't usually know which operations create temporary arrays. So, I may need to investigate that first.
+
+gc.set_threshold?
+
+"""
+
 """'1' is the new zero.
 
 `selectGroupAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveGroups[:, indexGroupAlpha] > numpy.uint64(1)`

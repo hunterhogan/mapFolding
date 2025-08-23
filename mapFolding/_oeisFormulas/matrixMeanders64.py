@@ -1,3 +1,4 @@
+from collections import defaultdict
 from gc import collect as goByeBye
 from itertools import repeat
 from typing import Any, Literal
@@ -124,23 +125,42 @@ def count64(bridges: int, dictionaryCurveLocations: dict[int, int], bridgesMinim
 
 		"""NOTE Potentially useful code if we figure out vectorization of bridgesPairedToOdd:
 		selectBridgesGroupAlphaPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & selectGroupAlphaAtEven & (~selectGroupZuluAtEven))
-		selectBridgesGroupZuluPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & (~selectGroupAlphaAtEven) & selectGroupZuluAtEven)"""
+		selectBridgesGroupZuluPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & (~selectGroupAlphaAtEven) & selectGroupZuluAtEven)
+		"""
+		# Z0Z_dictionary: dict[int, list[tuple[int, int]]] = defaultdict(list)
 
+# ruff: noqa: ERA001  # noqa: RUF100
+# TODO START refactor area 96.24s out of 168.12s = 57.24% of ALL run time in the test ------------------------------------------------------------------------
 		# NOTE this MODIFIES `arrayCurveGroups` for bridgesPairedToOdd ---------------------------------------------------------------------------------------
 		for indexRow, indexGroupToModify in [*zip(numpy.flatnonzero(selectBridgesAligned & selectGroupAlphaAtEven & (~selectGroupZuluAtEven)), repeat(indexGroupAlpha))
 											, *zip(numpy.flatnonzero(selectBridgesAligned & (~selectGroupAlphaAtEven) & selectGroupZuluAtEven), repeat(indexGroupZulu))]:
 
-# TODO START refactor area 84.44s out of 166.83s = 50.61% of ALL run time in the test ------------------------------------------------------------------------
 			XOrHere2makePair: int = 1
-			findUnpaired_0b1: WhyDoesThisIteratorRefuseToDie = 0
-
-			while findUnpaired_0b1 >= 0:
+			balancePairs: int = 0
+			valueGroup: int = int(arrayCurveGroups[indexRow, indexGroupToModify])
+			while True:
 				XOrHere2makePair <<= 2
-				findUnpaired_0b1 += 1 if (arrayCurveGroups[indexRow, indexGroupToModify] & XOrHere2makePair) == 0 else -1
+				if (valueGroup & XOrHere2makePair) == 0:
+					balancePairs += 1
+				else:
+					balancePairs -= 1
+				if balancePairs < 0:
+					break
 
-			arrayCurveGroups[indexRow, indexGroupToModify] ^= XOrHere2makePair
+			arrayCurveGroups[indexRow, indexGroupToModify] ^= XOrHere2makePair 
 
 # TODO END refactor area ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+		# 	Z0Z_dictionary[XOrHere2makePair].append((indexRow, indexGroupToModify))
+		# for XOrHere2makePair, Z0Z_list in Z0Z_dictionary.items():
+		# 	selectXOrHere2makePair: SelectorIndices = numpy.array(Z0Z_list, dtype=int)
+		# 	print(selectXOrHere2makePair.shape)
+		# 	arrayCurveGroups[selectXOrHere2makePair] ^= XOrHere2makePair
+
+
 
 		selectGroupAlphaAtEven = None; del selectGroupAlphaAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
 		selectGroupAlphaCurves = None; del selectGroupAlphaCurves # pyright: ignore[reportAssignmentType]  # noqa: E702
