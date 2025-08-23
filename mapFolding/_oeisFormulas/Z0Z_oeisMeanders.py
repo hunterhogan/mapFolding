@@ -2,7 +2,7 @@ from mapFolding import dictionaryOEISMapFolding, MetadataOEISidMeanders
 from mapFolding._oeisFormulas.A000682 import A000682
 from mapFolding._oeisFormulas.A005316 import A005316
 from mapFolding._oeisFormulas.oeisIDbyFormula import (
-	A000136, A000560, A001010, A001011, A005315, A223094, A259702, A301620)
+	A000136, A000560, A001010, A001011, A005315, A060206, A077460, A078591, A223094, A259702, A301620)
 from mapFolding.oeis import getOEISidInformation, getOEISidValues
 import sys
 
@@ -13,6 +13,9 @@ oeisIDsMeanders: list[str] = [
 	'A001011',
 	'A005315',
 	'A005316',
+	'A060206',
+	'A077460',
+	'A078591',
 	'A223094',
 	'A259702',
 	'A301620',
@@ -29,7 +32,7 @@ dictionaryOEISMeanders: dict[str, MetadataOEISidMeanders] = {
 
 # ruff: noqa: S101
 
-rangeTest = range(5, 15)
+rangeTest = range(5, 12)
 
 if __name__ == '__main__':
 	import time
@@ -43,6 +46,9 @@ if __name__ == '__main__':
 		assert A001011(n) == dictionaryOEISMeanders['A001011']['valuesKnown'][n]
 		assert A005315(n) == dictionaryOEISMeanders['A005315']['valuesKnown'][n]
 		assert A005316(n) == dictionaryOEISMeanders['A005316']['valuesKnown'][n]
+		assert A060206(n) == dictionaryOEISMeanders['A060206']['valuesKnown'][n]
+		assert A077460(n) == dictionaryOEISMeanders['A077460']['valuesKnown'][n]
+		assert A078591(n) == dictionaryOEISMeanders['A078591']['valuesKnown'][n]
 		assert A223094(n) == dictionaryOEISMeanders['A223094']['valuesKnown'][n]
 		assert A259702(n) == dictionaryOEISMeanders['A259702']['valuesKnown'][n]
 		assert A301620(n) == dictionaryOEISMeanders['A301620']['valuesKnown'][n]

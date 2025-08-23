@@ -30,6 +30,36 @@ def A001011(n: int) -> int:
 def A005315(n: int) -> int:
 	return A005316(2 * n - 1)
 
+def A060206(n: int) -> int:
+	return A000682(2 * n + 1)
+
+"""Go.
+
+A000682 = Import["https://oeis.org/A000682/b000682.txt", "Table"][[All, 2]];
+A005316 = Cases[Import["https://oeis.org/A005316/b005316.txt", "Table"], {_, _}][[All, 2]];
+a[0] = a[1] = 1;
+a[n_] := If[OddQ[n], (A005316[[n + 1]] + A005316[[2n]] + A000682[[n]])/4, (A005316[[2n]] + 2 A005316[[n + 1]])/4];
+a /@ Range[0, 20]
+
+(* Jean-François Alcover, Sep 06 2019, after Andrew Howroyd *)
+
+a(2n+1) = (A005315(2n+1) + A005316(2n+1) + A060206(n)) / 4.
+a(2n) = (A005315(2n) + 2 * A005316(2n)) / 4.
+
+"""
+def A077460(n: int) -> int:
+	if n in {0, 1}:
+		foldsTotal = 1
+	elif n & 0b1:
+		foldsTotal = (A005315(n) + A005316(n) + A060206((n-1)//2)) // 4
+	else:
+		foldsTotal = (A005315(n) + 2 * A005316(n)) // 4
+
+	return foldsTotal
+
+def A078591(n: int) -> int:
+	return A005315(n) // 2 # but maybe n+1
+
 def A223094(n: int) -> int:
 	return A000136(n) - A000682(n + 1)
 # TODO A223094 For n >= 3: a(n) = n! - Sum_{k=3..n-1} (a(k)*n!/k!) - A000682(n+1). - _Roger Ford_, Aug 24 2024
