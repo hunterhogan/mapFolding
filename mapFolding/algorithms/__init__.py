@@ -1,0 +1,1 @@
+"""Hand-made algorithms."""

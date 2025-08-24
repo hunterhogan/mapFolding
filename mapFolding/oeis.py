@@ -12,27 +12,25 @@ sophisticated computational assembly line.
 
 The integration provides multiple pathways for mathematical verification: direct
 computation of OEIS sequences using the complete algorithmic implementation,
-cached access to published sequence data for rapid validation, and research
+automatic HTTP caching of published sequence data for rapid validation, and research
 support for extending known sequences through new computational discoveries.
 The module handles sequence families ranging from simple strip folding to
 complex multi-dimensional hypercube problems.
 
-Through intelligent caching and optimized lookup mechanisms, this module ensures
-that the computational power developed through the foundational layers can contribute
-meaningfully to mathematical research. Whether validating results, avoiding
-redundant computation, or extending mathematical knowledge, this integration
-completes the journey from configuration foundation to mathematical discovery.
+Through RFC 9111 compliant HTTP caching via Hishel and optimized lookup mechanisms,
+this module ensures that the computational power developed through the foundational
+layers can contribute meaningfully to mathematical research. Whether validating
+results, avoiding redundant computation, or extending mathematical knowledge, this
+integration completes the journey from configuration foundation to mathematical discovery.
 """
 
-from datetime import datetime, timedelta, UTC
-from hunterMakesPy import writeStringToHere
 from itertools import chain
 from mapFolding import countFolds, MetadataOEISidMapFolding, packageSettings
 from mapFolding._theSSOT import pathCache
 from pathlib import Path
 from typing import Final
-from urllib.request import urlopen
 import argparse
+import hishel
 import sys
 import time
 import warnings
@@ -112,21 +110,16 @@ def _parseBFileOEIS(OEISbFile: str) -> dict[int, int]:
 		OEISsequence[n] = aOFn
 	return OEISsequence
 
-def _getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
-	"""Retrieve OEIS sequence data from cache or online source with intelligent caching.
+def _getOEISofficial(url: str) -> None | str:
+	"""Retrieve OEIS data from oeis.org with automatic HTTP caching.
 
-	(AI generated docstring)
-
-	This function implements a caching strategy that prioritizes local cached data when it exists and
-	has not expired. Fresh data is retrieved from the OEIS website when the cache is stale or missing,
-	and the cache is updated for future use.
+	This function uses Hishel for RFC 9111 compliant HTTP caching, automatically
+	managing cache storage and expiration based on package settings.
 
 	Parameters
 	----------
-	pathFilenameCache : Path
-		Path to the local cache file for storing retrieved data.
 	url : str
-		URL to retrieve the OEIS sequence data from if cache is invalid or missing.
+		URL to retrieve the OEIS sequence data from.
 
 	Returns
 	-------
@@ -135,35 +128,44 @@ def _getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 
 	Notes
 	-----
-	Cache expiration is controlled by the module-level `cacheDays` variable. The function validates
-	URL schemes and issues warnings for failed retrievals.
-
+	Cache expiration is controlled by `packageSettings.cacheDays`. All caching is handled
+	automatically by Hishel using the configured cache directory.
 	"""
-	tryCache: bool = False
-	if pathFilenameCache.exists():
-		fileAge: timedelta = datetime.now(tz=UTC) - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime, tz=UTC)
-		tryCache = fileAge < timedelta(days=packageSettings.cacheDays)
+	if not url.startswith(("http:", "https:")):
+		message = "URL must start with 'http:' or 'https:'"
+		raise ValueError(message)
 
-	oeisInformation: str | None = None
-	if tryCache:
-		try:
-			oeisInformation = pathFilenameCache.read_text(encoding="utf-8")
-		except OSError:
-			tryCache = False
+	# Configure Hishel storage to use our cache directory
+	storage = hishel.FileStorage(
+		base_path=pathCache,
+		check_ttl_every=60  # Check TTL every minute
+	)
 
-	if not tryCache:
-		if not url.startswith(("http:", "https:")):
-			message = "URL must start with 'http:' or 'https:'"
-			raise ValueError(message)
-		with urlopen(url) as response:
-			oeisInformationRaw = response.read().decode('utf-8')
-		oeisInformation = str(oeisInformationRaw)
-		writeStringToHere(oeisInformation, pathFilenameCache)
+	# Configure cache controller with our cache days setting
+	controller = hishel.Controller(
+		cacheable_methods=["GET"],
+		cacheable_status_codes=[200],
+		allow_stale=False
+	)
 
-	if not oeisInformation:
-		warnings.warn(f"Failed to retrieve OEIS sequence information for {pathFilenameCache.stem}.", stacklevel=2)
+	try:
+		# Create cache client with configured storage and controller
+		with hishel.CacheClient(
+			storage=storage,
+			controller=controller
+		) as client:
+			# Set cache expiry header based on our settings
+			headers = {
+				"Cache-Control": f"max-age={packageSettings.cacheDays * 24 * 3600}"
+			}
 
-	return oeisInformation
+			response = client.get(url, headers=headers)
+			response.raise_for_status()
+			return response.text
+
+	except (OSError, ValueError, ConnectionError, TimeoutError) as exception:
+		warnings.warn(f"Failed to retrieve OEIS data from {url}: {exception}", stacklevel=2)
+		return None
 
 def getOEISidValues(oeisID: str) -> dict[int, int]:
 	"""Retrieve known sequence values for a specified OEIS sequence.
@@ -193,10 +195,9 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 		If there is an error reading from or writing to the local cache.
 
 	"""
-	pathFilenameCache: Path = pathCache / _getFilenameOEISbFile(oeisID)
 	url: str = f"https://oeis.org/{oeisID}/{_getFilenameOEISbFile(oeisID)}"
 
-	oeisInformation: None | str = _getOEISofficial(pathFilenameCache, url)
+	oeisInformation: None | str = _getOEISofficial(url)
 
 	if oeisInformation:
 		return _parseBFileOEIS(oeisInformation)
@@ -208,8 +209,7 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	(AI generated docstring)
 
 	This function extracts the mathematical description and starting index offset from OEIS sequence
-	metadata using the machine-readable text format. It employs the same caching mechanism as other
-	retrieval functions to minimize network requests.
+	metadata using the machine-readable text format. HTTP caching is handled automatically.
 
 	Parameters
 	----------
@@ -230,10 +230,9 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 
 	"""
 	oeisID = _standardizeOEISid(oeisID)
-	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
 	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
-	oeisInformation: None | str = _getOEISofficial(pathFilenameCache, url)
+	oeisInformation: None | str = _getOEISofficial(url)
 
 	if not oeisInformation:
 		return "Not found", -1
@@ -435,19 +434,16 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 def OEIS_for_n() -> None:
 	"""Command-line interface for calculating OEIS sequence values.
 
-	(AI generated docstring)
-
-	This function provides a command-line interface to the `oeisIDfor_n` function, enabling users to
-	calculate specific values of implemented OEIS sequences from the terminal. It includes argument
-	parsing, error handling, and performance timing to provide a complete user experience.
-
-	The function accepts two command-line arguments: an OEIS sequence identifier and an integer index,
-	then outputs the calculated sequence value along with execution time. Error messages are directed
-	to stderr with appropriate exit codes for shell scripting integration.
+	This is a command-line interface for computing a(n) for implemented OEIS IDs. You only need two command-line arguments: the
+	OEIS identifier and the integer value of n for which you want a(n). The output is the computed value and the execution time.
 
 	Usage
 	-----
-	python -m mapFolding.oeis OEIS_for_n A001415 10
+	In an environment with mapFolding installed, run:
+
+	```
+	OEIS_for_n A001415 10
+	```
 
 	Raises
 	------
@@ -468,34 +464,13 @@ def OEIS_for_n() -> None:
 	timeStart: float = time.perf_counter()
 
 	try:
-		print(oeisIDfor_n(argumentsCLI.oeisID, argumentsCLI.n), "distinct folding patterns.")  # noqa: T201
+		sys.stdout.write(f"{oeisIDfor_n(argumentsCLI.oeisID, argumentsCLI.n)} distinct folding patterns.\n")
 	except (KeyError, ValueError, ArithmeticError) as ERRORmessage:
-		print(f"Error: {ERRORmessage}", file=sys.stderr)  # noqa: T201
+		sys.stderr.write(f"Error: {ERRORmessage}\n")
 		sys.exit(1)
 
 	timeElapsed: float = time.perf_counter() - timeStart
-	print(f"Time elapsed: {timeElapsed:.3f} seconds")  # noqa: T201
-
-def clearOEIScache() -> None:
-	"""Delete all cached OEIS sequence files from the local cache directory.
-
-	(AI generated docstring)
-
-	This function removes all cached OEIS data files, including both sequence value files (b-files)
-	and metadata files, forcing fresh retrieval from the OEIS website on the next access. This is
-	useful for clearing stale cache data or troubleshooting network-related issues.
-
-	The function safely handles missing files and provides user feedback about the cache clearing
-	operation. If the cache directory does not exist, an informative message is displayed.
-
-	"""
-	if not pathCache.exists():
-		print(f"Cache directory, {pathCache}, not found - nothing to clear.")  # noqa: T201
-		return
-	for oeisID in dictionaryOEISMapFolding:
-		( pathCache / f"{oeisID}.txt" ).unlink(missing_ok=True)
-		( pathCache / _getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
-	print(f"Cache cleared from {pathCache}")  # noqa: T201
+	sys.stdout.write(f"Time elapsed: {timeElapsed:.3f} seconds\n")
 
 def getOEISids() -> None:
 	"""Display comprehensive information about all implemented OEIS sequences.
@@ -511,7 +486,7 @@ def getOEISids() -> None:
 	to help users understand how to access and utilize the OEIS interface functionality.
 
 	"""
-	print(_formatHelpText())  # noqa: T201
+	sys.stdout.write(_formatHelpText())
 
 if __name__ == "__main__":
 	getOEISids()

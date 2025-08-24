@@ -26,7 +26,7 @@ which is crucial for maintaining package reliability in production environments.
 
 from contextlib import redirect_stdout
 from mapFolding.oeis import (
-	_standardizeOEISid, clearOEIScache, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented)
+	_standardizeOEISid, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented)
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
 from typing import Any
 import io
@@ -56,24 +56,6 @@ def test_aOFn_invalid_n(oeisID_1random: str, badN: Any) -> None:
 
 def test_aOFn_zeroDim_A001418() -> None:
 	standardizedEqualToCallableReturn(ArithmeticError, oeisIDfor_n, 'A001418', 0)
-
-# ===== OEIS Cache Tests =====
-@pytest.mark.parametrize("cacheExists", [True, False])
-@unittest.mock.patch('pathlib.Path.exists')
-@unittest.mock.patch('pathlib.Path.unlink')
-def test_clearOEIScache(mock_unlink: unittest.mock.MagicMock, mock_exists: unittest.mock.MagicMock, cacheExists: bool) -> None:
-	"""Test OEIS cache clearing with both existing and non-existing cache."""
-	mock_exists.return_value = cacheExists
-	clearOEIScache()
-
-	if cacheExists:
-		# Each OEIS ID has two cache files
-		expected_calls = len(dictionaryOEISMapFolding) * 2
-		assert mock_unlink.call_count == expected_calls
-		mock_unlink.assert_has_calls([unittest.mock.call(missing_ok=True)] * expected_calls)
-	else:
-		mock_exists.assert_called_once()
-		mock_unlink.assert_not_called()
 
 # ===== Command Line Interface Tests =====
 def testHelpText() -> None:

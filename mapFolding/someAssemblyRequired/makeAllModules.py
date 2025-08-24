@@ -711,16 +711,16 @@ def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 	return pathFilename
 
 if __name__ == '__main__':
-	astModule = _getModule(logicalPathInfix=None)
+	astModule = _getModule(logicalPathInfix='algorithms')
 	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
 
-	astModule = _getModule(logicalPathInfix=None)
+	astModule = _getModule(logicalPathInfix='algorithms')
 	pathFilename = makeDaoOfMapFoldingParallelNumba(astModule, 'countParallelNumba', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
 
-	astModule: ast.Module = _getModule(logicalPathInfix=None)
+	astModule: ast.Module = _getModule(logicalPathInfix='algorithms')
 	makeInitializeState(astModule, 'initializeState', 'transitionOnGroupsOfFolds', logicalPathInfixDEFAULT)
 
-	astModule = _getModule(logicalPathInfix=None)
+	astModule = _getModule(logicalPathInfix='algorithms')
 	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixDEFAULT, None)
 
 	astModule = parsePathFilename2astModule(pathFilename)
@@ -733,7 +733,7 @@ if __name__ == '__main__':
 	makeUnRePackDataclass(astImportFrom)
 
 # A007822 -----------------------------------------------------------
-	astModule = _getModule(logicalPathInfix=None)
+	astModule = _getModule(logicalPathInfix='algorithms')
 	pathFilename = addSymmetryCheck(astModule, 'algorithmA007822', None, logicalPathInfixDEFAULT, None)
 
 	astModule = _getModule(moduleIdentifier='algorithmA007822')

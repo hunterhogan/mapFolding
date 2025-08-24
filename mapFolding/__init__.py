@@ -83,7 +83,6 @@ from mapFolding.filesystemToolkit import (
 from mapFolding.basecamp import countFolds as countFolds
 
 from mapFolding.oeis import (
-	clearOEIScache as clearOEIScache,
 	getFoldsTotalKnown as getFoldsTotalKnown,
 	getOEISids as getOEISids,
 	OEIS_for_n as OEIS_for_n,

@@ -36,7 +36,7 @@ rangeTest = range(5, 12)
 
 if __name__ == '__main__':
 	import time
-	start = time.perf_counter()
+	start: float = time.perf_counter()
 	for n in rangeTest:
 
 		assert A000136(n) == dictionaryOEISMapFolding['A000136']['valuesKnown'][n]
