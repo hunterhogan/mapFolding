@@ -1,8 +1,6 @@
 from mapFolding import dictionaryOEISMapFolding, MetadataOEISidMeanders
-from mapFolding._oeisFormulas.A000682 import A000682
-from mapFolding._oeisFormulas.A005316 import A005316
 from mapFolding._oeisFormulas.oeisIDbyFormula import (
-	A000136, A000560, A001010, A001011, A005315, A060206, A077460, A078591, A223094, A259702, A301620)
+	A000136, A000560, A000682, A001010, A001011, A005315, A005316, A060206, A077460, A078591, A223094, A259702, A301620)
 from mapFolding.oeis import getOEISidInformation, getOEISidValues
 import sys
 

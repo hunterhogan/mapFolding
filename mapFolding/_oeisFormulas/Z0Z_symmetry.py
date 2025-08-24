@@ -1,4 +1,4 @@
-from mapFolding._oeisFormulas.A000682 import A000682
+from mapFolding._oeisFormulas.oeisIDbyFormula import A000682
 
 """
 
