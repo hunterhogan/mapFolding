@@ -1,12 +1,12 @@
 """Semi-meanders."""
-
-from mapFolding._oeisFormulas.matrixMeanders import count
+from functools import cache
+from mapFolding._oeisFormulas.matrixMeanders import doTheNeedful
 
 def initializeA000682(n: int) -> dict[int, int]:
-	curveLocationsMAXIMUM = 1 << (2 * n + 4)
+	curveLocationsMAXIMUM: int = 1 << (2 * n + 4)
 
 	curveSeed: int = 5 - (n & 0b1) * 4
-	listCurveLocations = [(curveSeed << 1) | curveSeed]
+	listCurveLocations: list[int] = [(curveSeed << 1) | curveSeed]
 
 	while listCurveLocations[-1] < curveLocationsMAXIMUM:
 		curveSeed = (curveSeed << 4) | 0b101
@@ -14,5 +14,6 @@ def initializeA000682(n: int) -> dict[int, int]:
 
 	return dict.fromkeys(listCurveLocations, 1)
 
+@cache
 def A000682(n: int) -> int:
-	return count(n - 1, initializeA000682(n - 1))
+	return doTheNeedful(n - 1, initializeA000682(n - 1))

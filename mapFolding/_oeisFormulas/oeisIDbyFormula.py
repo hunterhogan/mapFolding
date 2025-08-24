@@ -9,7 +9,7 @@ def A000560(n: int) -> int:
 	return A000682(n + 1) // 2
 
 def A001010(n: int) -> int:
-	"""Complicated.
+	"""Formulas.
 
 	a(2n-1) = 2*A007822(n)
 	OddQ[n], 2*A007822[[(n - 1)/2 + 1]]]
@@ -17,37 +17,42 @@ def A001010(n: int) -> int:
 	a(2n) = 2*A000682(n+1)
 	EvenQ[n], 2*A000682[[n/2 + 1]]
 	"""
-	if n & 0b1:
+	if n == 1:
+		foldsTotal = 1
+	elif n & 0b1:
 		foldsTotal = 2 * countFolds(oeisID='A007822', oeis_n=(n - 1)//2 + 1, flow='theorem2Numba')
 	else:
 		foldsTotal = 2 * A000682(n // 2 + 1)
-
 	return foldsTotal
 
 def A001011(n: int) -> int:
-	return (A001010(n) + A000136(n)) // 4
+	if n == 0:
+		foldsTotal = 1
+	else:
+		foldsTotal = (A001010(n) + A000136(n)) // 4
+	return foldsTotal
 
 def A005315(n: int) -> int:
-	return A005316(2 * n - 1)
+	if n == 1:
+		foldsTotal = 1
+	else:
+		foldsTotal = A005316(2 * n - 1)
+	return foldsTotal
 
 def A060206(n: int) -> int:
 	return A000682(2 * n + 1)
 
-"""Go.
-
-A000682 = Import["https://oeis.org/A000682/b000682.txt", "Table"][[All, 2]];
-A005316 = Cases[Import["https://oeis.org/A005316/b005316.txt", "Table"], {_, _}][[All, 2]];
-a[0] = a[1] = 1;
-a[n_] := If[OddQ[n], (A005316[[n + 1]] + A005316[[2n]] + A000682[[n]])/4, (A005316[[2n]] + 2 A005316[[n + 1]])/4];
-a /@ Range[0, 20]
-
-(* Jean-François Alcover, Sep 06 2019, after Andrew Howroyd *)
-
-a(2n+1) = (A005315(2n+1) + A005316(2n+1) + A060206(n)) / 4.
-a(2n) = (A005315(2n) + 2 * A005316(2n)) / 4.
-
-"""
 def A077460(n: int) -> int:
+	"""Formulas.
+
+	a[0] = a[1] = 1;
+	a[n_] := If[OddQ[n], (A005316[[n + 1]] + A005316[[2n]] + A000682[[n]])/4
+	a(2n+1) = (A005315(2n+1) + A005316(2n+1) + A060206(n)) / 4.
+
+	a(2n) = (A005315(2n) + 2 * A005316(2n)) / 4.
+	(A005316[[2n]] + 2 A005316[[n + 1]])/4];
+
+	"""
 	if n in {0, 1}:
 		foldsTotal = 1
 	elif n & 0b1:

@@ -32,7 +32,7 @@ dictionaryOEISMeanders: dict[str, MetadataOEISidMeanders] = {
 
 # ruff: noqa: S101
 
-rangeTest = range(5, 12)
+rangeTest = range(5, 10)
 
 if __name__ == '__main__':
 	import time

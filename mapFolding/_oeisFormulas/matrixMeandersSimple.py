@@ -1,4 +1,4 @@
-def countMimic(bridges: int, dictionaryCurveLocationsStarting: dict[int, int], bridgesMinimum: int = 0) -> tuple[int, dict[int, int]]:
+def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	listCurveMaximums: list[tuple[int, int, int]] = [
 (0x15, 0x2a, 0x10),
 (0x55, 0xaa, 0x40),
@@ -66,21 +66,17 @@ def countMimic(bridges: int, dictionaryCurveLocationsStarting: dict[int, int], b
 	"""`bridges = 29`
 	0x5000000000000000.bit_length() = 63;
 	0xaaaaaaaaaaaaaaaa.bit_length() = 64;
-	0x5555555555555555.bit_length() = 63
-
-	a(41) = 63 bits
-	print((6664356253639465480).bit_length())
-	"""
+	0x5555555555555555.bit_length() = 63"""
 
 	listCurveMaximums = listCurveMaximums[0:bridges]
 
 	dictionaryCurveLocationsAnalyzed: dict[int, int] = {}
-	while bridges >= bridgesMinimum:
+	while bridges > 0:
 		bridges -= 1
 
 		groupAlphaLocator, groupZuluLocator, curveLocationsMAXIMUM = listCurveMaximums[bridges]
 
-		for curveLocations, distinctCrossings in dictionaryCurveLocationsStarting.items():
+		for curveLocations, distinctCrossings in dictionaryCurveLocations.items():
 			groupAlpha = (curveLocations & groupAlphaLocator)
 			groupZulu = (curveLocations & groupZuluLocator) >> 1
 
@@ -130,8 +126,8 @@ def countMimic(bridges: int, dictionaryCurveLocationsStarting: dict[int, int], b
 					if curveLocationAnalysis < curveLocationsMAXIMUM:
 						dictionaryCurveLocationsAnalyzed[curveLocationAnalysis] = dictionaryCurveLocationsAnalyzed.get(curveLocationAnalysis, 0) + distinctCrossings
 
-		dictionaryCurveLocationsStarting.clear()
-		dictionaryCurveLocationsStarting, dictionaryCurveLocationsAnalyzed = dictionaryCurveLocationsAnalyzed, dictionaryCurveLocationsStarting
+		dictionaryCurveLocations.clear()
+		dictionaryCurveLocations, dictionaryCurveLocationsAnalyzed = dictionaryCurveLocationsAnalyzed, dictionaryCurveLocations
 
-	return (bridges, dictionaryCurveLocationsStarting)
+	return sum(dictionaryCurveLocations.values())
 
