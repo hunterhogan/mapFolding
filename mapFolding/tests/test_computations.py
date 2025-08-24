@@ -26,7 +26,7 @@ which is useful if you're working with the code synthesis features of the packag
 """
 
 from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n
-from mapFolding._oeisFormulas.Z0Z_oeisMeanders import dictionaryOEISMeanders
+from mapFolding.Z0Z_dictionary_oeisMeanders import dictionaryOEISMeanders
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import dictionaryOEISMapFolding
 from mapFolding.someAssemblyRequired.makeAllModules import parametersNumbaLight

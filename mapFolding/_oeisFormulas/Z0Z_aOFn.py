@@ -1,7 +1,7 @@
 # pyright: reportUnusedImport=false
 from mapFolding.algorithms.oeisIDbyFormula import A000136, A000682, A001010, A005316, A077460
-from mapFolding._oeisFormulas.Z0Z_oeisMeanders import dictionaryOEISMeanders
 from mapFolding.oeis import dictionaryOEISMapFolding
+from mapFolding.Z0Z_dictionary_oeisMeanders import dictionaryOEISMeanders
 import gc
 import sys
 import time
