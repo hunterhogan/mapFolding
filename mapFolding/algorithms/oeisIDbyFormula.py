@@ -1,8 +1,8 @@
 from functools import cache
 from mapFolding import countFolds
-from mapFolding._oeisFormulas.matrixMeanders import doTheNeedful
-from mapFolding._oeisFormulas.matrixMeandersSimple import count
+from mapFolding.algorithms.matrixMeanders import doTheNeedful
 
+@cache
 def A000136(n: int) -> int:
 	return n * A000682(n)
 
@@ -12,12 +12,12 @@ def A000560(n: int) -> int:
 def A000682getCurveLocations(n: int) -> dict[int, int]:
 	curveLocationsMAXIMUM: int = 1 << (2 * n + 4)
 
-	curveSeed: int = 5 - (n & 0b1) * 4
-	listCurveLocations: list[int] = [(curveSeed << 1) | curveSeed]
+	curveStart: int = 5 - (n & 0b1) * 4
+	listCurveLocations: list[int] = [(curveStart << 1) | curveStart]
 
 	while listCurveLocations[-1] < curveLocationsMAXIMUM:
-		curveSeed = (curveSeed << 4) | 0b101
-		listCurveLocations.append((curveSeed << 1) | curveSeed)
+		curveStart = (curveStart << 4) | 0b101
+		listCurveLocations.append((curveStart << 1) | curveStart)
 
 	return dict.fromkeys(listCurveLocations, 1)
 
@@ -57,7 +57,7 @@ def A005316getCurveLocations(n: int) -> dict[int, int]:
 
 @cache
 def A005316(n: int) -> int:
-	return count(n-1, A005316getCurveLocations(n-1))
+	return doTheNeedful(n-1, A005316getCurveLocations(n-1))
 
 @cache
 def A005315(n: int) -> int:
@@ -84,14 +84,14 @@ def A077460(n: int) -> int:
 	if n in {0, 1}:
 		foldsTotal = 1
 	elif n & 0b1:
-		foldsTotal = (A005315(n) + A005316(n) + A060206((n-1)//2)) // 4
+		foldsTotal = (A005315(n) + A005316(n) + A060206((n - 1) // 2)) // 4
 	else:
 		foldsTotal = (A005315(n) + 2 * A005316(n)) // 4
 
 	return foldsTotal
 
 def A078591(n: int) -> int:
-	return A005315(n) // 2 # but maybe n+1
+	return A005315(n) // 2
 
 def A178961(n: int) -> int:
 	from mapFolding._oeisFormulas.Z0Z_oeisMeanders import dictionaryOEISMeanders  # noqa: PLC0415

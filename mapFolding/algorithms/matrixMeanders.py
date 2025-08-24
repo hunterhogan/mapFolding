@@ -1,6 +1,6 @@
 from functools import cache
 from gc import collect as goByeBye, set_threshold
-from mapFolding._oeisFormulas.matrixMeandersSimple import count as countSimple
+from mapFolding.algorithms.matrixMeandersSimple import count as countSimple
 from typing import Any, Literal
 import gc
 import numpy

@@ -1,5 +1,5 @@
 # pyright: reportUnusedImport=false
-from mapFolding._oeisFormulas.oeisIDbyFormula import A000136, A000682, A001010, A077460
+from mapFolding.algorithms.oeisIDbyFormula import A000136, A000682, A001010, A005316, A077460
 from mapFolding._oeisFormulas.Z0Z_oeisMeanders import dictionaryOEISMeanders
 from mapFolding.oeis import dictionaryOEISMapFolding
 import gc
@@ -22,19 +22,20 @@ if __name__ == '__main__':
 		)
 	# oeisID = 'A001010'
 	# oeisID = 'A000136'
-	oeisID = 'A000682'
+	# oeisID = 'A000682'
+	oeisID = 'A005316'
 	# oeisID = 'A077460'
 	# for n in range(46,47):
 	# for n in range(38,46):
 	# for n in range(38,41):
-	for n in range(30,40):
+	# for n in range(30,40):
 	# for n in range(3, 30):
-	# for n in range(3, 10):
+	for n in range(3, 10):
 
 		# sys.stdout.write(f"{n = }\n")
 		gc.collect()
 		timeStart = time.perf_counter()
-		foldsTotal = A000682(n)
+		foldsTotal = A005316(n)
 		# foldsTotal = A077460(n)
 		if n <= 45:
 			_write()
