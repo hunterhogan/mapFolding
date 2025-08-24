@@ -15,8 +15,8 @@ if __name__ == '__main__':
 			f"{(booleanColor:=(foldsTotal == dictionaryOEISMeanders[oeisID]['valuesKnown'][n]))}\t" # pyright: ignore[reportIndexIssue, reportUnknownVariableType]
 			f"\033[{(not booleanColor)*91}m"
 			f"{n}\t"
-			f"{foldsTotal}\t"
-			f"{dictionaryOEISMeanders[oeisID]['valuesKnown'][n]=}\t"
+			# f"{foldsTotal}\t"
+			# f"{dictionaryOEISMeanders[oeisID]['valuesKnown'][n]=}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
 			# f"{description}\t"
 			"\033[0m\n"
@@ -30,7 +30,7 @@ if __name__ == '__main__':
 	# for n in range(30,38):
 	# for n in range(30,31):
 	# for n in range(3, 30):
-	for n in range(0, 10):
+	for n in range(3, 10):
 
 		# sys.stdout.write(f"{n = }\n")
 		gc.collect()
