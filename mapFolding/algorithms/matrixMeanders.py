@@ -16,6 +16,7 @@ import numpy
 #
 # Always use semantic index identifiers: Never hardcode the indices.
 
+# TODO `set_threshold`: I know 0 means disabled, but I don't even understand if 1 means "as frequently as possible" or "almost never"
 set_threshold(1, 1, 1)
 
 def count(bridges: int, dictionaryCurveLocationsStarting: dict[int, int], bridgesMinimum: int = 0) -> tuple[int, dict[int, int]]:
@@ -33,7 +34,7 @@ def count(bridges: int, dictionaryCurveLocationsStarting: dict[int, int], bridge
 (0x1555555, 0x2aaaaaa, 0x1000000),
 (0x5555555, 0xaaaaaaa, 0x4000000),
 (0x15555555, 0x2aaaaaaa, 0x10000000),
-(0x55555555, 0xaaaaaaaa, 0x40000000), # `bridges = 13`, 0xaaaaaaaa.bit_length() = 32, 0x40000000.bit_length() = 31
+(0x55555555, 0xaaaaaaaa, 0x40000000),
 (0x155555555, 0x2aaaaaaaa, 0x100000000),
 (0x555555555, 0xaaaaaaaaa, 0x400000000),
 (0x1555555555, 0x2aaaaaaaaa, 0x1000000000),
@@ -49,7 +50,7 @@ def count(bridges: int, dictionaryCurveLocationsStarting: dict[int, int], bridge
 (0x155555555555555, 0x2aaaaaaaaaaaaaa, 0x100000000000000),
 (0x555555555555555, 0xaaaaaaaaaaaaaaa, 0x400000000000000),
 (0x1555555555555555, 0x2aaaaaaaaaaaaaaa, 0x1000000000000000),
-(0x5555555555555555, 0xaaaaaaaaaaaaaaaa, 0x4000000000000000), # 0x5000000000000000.bit_length() = 63; 0xaaaaaaaaaaaaaaaa.bit_length() = 64; 0x5555555555555555.bit_length() = 63
+(0x5555555555555555, 0xaaaaaaaaaaaaaaaa, 0x4000000000000000),
 (0x15555555555555555, 0x2aaaaaaaaaaaaaaaa, 0x10000000000000000),
 (0x55555555555555555, 0xaaaaaaaaaaaaaaaaa, 0x40000000000000000),
 (0x155555555555555555, 0x2aaaaaaaaaaaaaaaaa, 0x100000000000000000),
@@ -83,14 +84,6 @@ def count(bridges: int, dictionaryCurveLocationsStarting: dict[int, int], bridge
 (0x15555555555555555555555555555555, 0x2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x10000000000000000000000000000000),
 (0x55555555555555555555555555555555, 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, 0x40000000000000000000000000000000),
 ]
-	"""`bridges = 29`
-	0x5000000000000000.bit_length() = 63;
-	0xaaaaaaaaaaaaaaaa.bit_length() = 64;
-	0x5555555555555555.bit_length() = 63
-
-	a(41) = 63 bits
-	print((6664356253639465480).bit_length())
-	"""
 
 	listCurveMaximums = listCurveMaximums[0:bridges]
 
