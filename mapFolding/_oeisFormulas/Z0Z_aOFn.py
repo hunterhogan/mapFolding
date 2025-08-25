@@ -27,10 +27,10 @@ if __name__ == '__main__':
 	# oeisID = 'A077460'
 	# for n in range(46,47):
 	# for n in range(38,46):
-	# for n in range(38,41):
+	for n in range(38,41):
 	# for n in range(30,40):
 	# for n in range(3, 30):
-	for n in range(3, 10):
+	# for n in range(3, 10):
 
 		# sys.stdout.write(f"{n = }\n")
 		gc.collect()
