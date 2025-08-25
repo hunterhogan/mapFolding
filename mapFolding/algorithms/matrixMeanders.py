@@ -1,7 +1,6 @@
 # ruff: noqa: D100 D103
 from functools import cache
 from gc import collect as goByeBye, set_threshold
-from mapFolding.algorithms.matrixMeandersSimple import count as countSimple
 from typing import Any, Literal
 import gc
 import numpy
@@ -19,6 +18,7 @@ import numpy
 
 # TODO `set_threshold`: I know 0 means disabled, but I don't even understand if 1 means "as frequently as possible" or "almost never".
 set_threshold(1, 1, 1)
+Z0Z_bit_length: int = 61
 
 type DataArray1D = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64 | numpy.signedinteger[Any]]]
 type DataArray2columns = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]
@@ -58,7 +58,7 @@ def convertDictionaryCurveLocations2CurveGroups(dictionaryCurveLocations: dict[i
 def count(bridges: int, dictionaryCurveGroups: dict[tuple[int, int], int], bridgesMinimum: int = 0) -> tuple[int, dict[tuple[int, int], int]]:
 
 	dictionaryCurveLocations: dict[int, int] = {}
-	while bridges >= bridgesMinimum:
+	while bridges > bridgesMinimum:
 		bridges -= 1
 
 		curveLocationsMAXIMUM: int = 1 << (2 * bridges + 4)
@@ -156,7 +156,7 @@ def convertDictionaryCurveGroups2array(dictionaryCurveGroups: dict[tuple[int, in
 
 def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: int = 0) -> tuple[int, DataArray3columns]:
 
-	while bridges > bridgesMinimum:
+	while bridges > bridgesMinimum and int(arrayCurveGroups[:, columnDistinctCrossings].max()).bit_length() < Z0Z_bit_length:
 		bridges -= 1
 		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1 << (2 * bridges + 4))
 
@@ -286,7 +286,7 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	Making sausage
 	--------------
 
-	As first computed by Iwan Jensen in 2000, a(41) = 6664356253639465480.
+	As first computed by Iwan Jensen in 2000, A000682(41) = 6664356253639465480.
 	Citation: https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bibtex
 	See also https://oeis.org/A000682
 
@@ -296,7 +296,7 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	If you ask NumPy 2.3, "What is your relationship with integers with more than 64 bits?"
 	NumPy will say, "It's complicated."
 
-	Therefore, to take advantage of the computational excellence of NumPy when computing a(n) for n > 41, I must make some
+	Therefore, to take advantage of the computational excellence of NumPy when computing A000682(n) for n > 41, I must make some
 	adjustments at the total count approaches 64 bits.
 
 	The second complication is bit-packed integers. I use a loop that starts at `bridges = n` and decrements (`bridges -= 1`)
@@ -304,23 +304,24 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	bit-packed integers with more than 64 bits?" NumPy: "It's complicated." Therefore, while `bridges` is decrementing, I don't
 	use NumPy until I believe the bit-packed integers will be less than 64 bits.
 
-	A third fact that works in my favor is that peak memory usage occurs when all of the integers are well under 64 bits wide.
+	A third factor that works in my favor is that peak memory usage occurs when all types of integers are well under 64-bits wide.
 
 	In total, to compute a(n) for "large" n, I use three-stages.
 	1. I use Python primitive `int` contained in a Python primitive `dict`.
-	2. When the bit width of `bridges` is small enough to use `numpy.uint64`, switch to `numpy` for the heavy lifting.
-	3. When distinctCrossings subtotals exceed 64 bits, I must switch back to Python primitives.
+	2. When the bit width of the bit-packed integers connected to `bridges` is small enough to use `numpy.uint64`, I switch to NumPy for the heavy lifting.
+	3. When `distinctCrossings` subtotals might exceed 64 bits, I must switch back to Python primitives.
 	"""
 # NOTE '29' is based on two things. 1) `bridges = 29`, groupZuluLocator = 0xaaaaaaaaaaaaaaaa.bit_length() = 64. 2) If `bridges =
 # 30` or a larger number, `OverflowError: int too big to convert`. Conclusion: '29' isn't necessarily correct or the best value:
 # it merely fits within my limited ability to assess the correct value.
-	count64_bridgesMaximum = 29
-	bridgesMinimum = 0  # NOTE This default value is necessary: it prevents `count64` from returning an incomplete dictionary when that is not necessary.
+# NOTE This default value is necessary: it prevents `count64` from returning an incomplete dictionary when that is not necessary.
 # TODO `count64_bridgesMaximum` might be a VERY good idea as a second safeguard against overflowing distinctCrossingsTotal. But
 # I'm pretty sure I should use an actual check on maximum bit-width in arrayCurveGroups[:, columnDistinctCrossings] at the start
 # of each while loop. Tests on A000682 showed that the max bit-width of arrayCurveGroups[:, columnDistinctCrossings] always
 # increased by 1 or 2 bits on each iteration: never 0 and never 3. I did not test A005316. And I do not have a mathematical proof of the limit.
 
+	count64_bridgesMaximum = 29
+	bridgesMinimum = 0
 	distinctCrossings64bitLimitAsValueOf_n = 41
 	distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG = distinctCrossings64bitLimitAsValueOf_n - 3
 	distinctCrossings64bitLimitSafetyMargin = 4
@@ -335,13 +336,7 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	n, arrayCurveGroups = count64(n, convertDictionaryCurveGroups2array(dictionaryCurveGroups), bridgesMinimum)
 	if n > 0:
 		gc.collect()
-# TODO eliminate `countSimple`. My previous attempts have failed. In each case, the logic I used had at least one error that I
-# could not find: the net result would be that the values returned by the second call to `count` would be wrong. There might be
-# one or more errors in THIS module that are hidden until I try to eliminate `countSimple`. Or, the way I am thinking about the
-# second call to `count` might be flawed. Or, bad luck. Whatever the case, when implementing this TODO, use it as an opportunity
-# to scrutinize all of the code.
-		return countSimple(n, convertArrayCurveGroups2dictionaryCurveLocations(arrayCurveGroups))
-		n, dictionaryCurveGroups = count(n, dictionaryCurveGroups, bridgesMinimum=0)
+		n, dictionaryCurveGroups = count(n, convertArrayCurveGroups2dictionaryCurveGroups(arrayCurveGroups), bridgesMinimum=0)
 		distinctCrossingsTotal = sum(dictionaryCurveGroups.values())
 	else:
 		distinctCrossingsTotal = int(arrayCurveGroups[0, columnDistinctCrossings])
