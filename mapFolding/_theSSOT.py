@@ -1,7 +1,7 @@
 """Access and configure package settings and metadata."""
 
 from hunterMakesPy import PackageSettings
-from mapFolding import MetadataOEISidMapFoldingManuallySet
+from mapFolding._theTypes import MetadataOEISidMapFoldingManuallySet, MetadataOEISidMeandersManuallySet
 from pathlib import Path
 import dataclasses
 import random
@@ -27,10 +27,15 @@ class mapFoldingPackageSettings(PackageSettings):
 		Package identifier for concurrent execution operations.
 	OEISidMapFoldingManuallySet : dict[str, MetadataOEISidMapFoldingManuallySet]
 		Settings that are best selected by a human instead of algorithmically.
+	OEISidMeandersManuallySet : dict[str, MetadataOEISidMeandersManuallySet]
+		Settings that are best selected by a human instead of algorithmically for meander sequences.
 	"""
 
 	OEISidMapFoldingManuallySet: dict[str, MetadataOEISidMapFoldingManuallySet] = dataclasses.field(default_factory=dict[str, MetadataOEISidMapFoldingManuallySet])
 	"""Settings that are best selected by a human instead of algorithmically."""
+
+	OEISidMeandersManuallySet: dict[str, MetadataOEISidMeandersManuallySet] = dataclasses.field(default_factory=dict[str, MetadataOEISidMeandersManuallySet])
+	"""Settings that are best selected by a human instead of algorithmically for meander sequences."""
 
 	cacheDays: int = 30
 	"""Number of days to retain cached OEIS data before refreshing from the online source."""
@@ -93,3 +98,25 @@ packageSettings = mapFoldingPackageSettings(identifierPackageFALLBACK=identifier
 # TODO integrate into packageSettings
 pathCache: Path = packageSettings.pathPackage / ".cache"
 """Local directory path for storing cached OEIS sequence data and metadata."""
+OEISidMeandersManuallySet: dict[str, MetadataOEISidMeandersManuallySet] = {
+	'A000560': {'valuesTestValidation': [*range(3, 7)]},
+	'A000682': {'valuesTestValidation': [*range(3, 7)]},
+	'A001010': {'valuesTestValidation': [*range(3, 7)]},
+	'A001011': {'valuesTestValidation': [*range(3, 7)]},
+	'A005315': {'valuesTestValidation': [*range(3, 7)]},
+	'A005316': {'valuesTestValidation': [*range(3, 7)]},
+	'A060206': {'valuesTestValidation': [*range(3, 7)]},
+	'A077460': {'valuesTestValidation': [*range(3, 7)]},
+	'A078591': {'valuesTestValidation': [*range(3, 7)]},
+	'A223094': {'valuesTestValidation': [*range(3, 7)]},
+	'A259702': {'valuesTestValidation': [*range(3, 7)]},
+	'A301620': {'valuesTestValidation': [*range(3, 7)]},
+}
+
+# Recreate packageSettings with meanders settings included
+packageSettings = mapFoldingPackageSettings(
+	identifierPackageFALLBACK=identifierPackageFALLBACK,
+	OEISidMapFoldingManuallySet=OEISidMapFoldingManuallySet,
+	OEISidMeandersManuallySet=OEISidMeandersManuallySet,
+)
+"""Global package settings."""

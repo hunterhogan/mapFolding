@@ -25,10 +25,8 @@ The `test_writeJobNumba` function shows how to test dynamically generated code,
 which is useful if you're working with the code synthesis features of the package.
 """
 
-from mapFolding import countFolds, getFoldsTotalKnown, oeisIDfor_n
-from mapFolding.Z0Z_dictionary_oeisMeanders import dictionaryOEISMeanders
+from mapFolding import countFolds, dictionaryOEISMapFolding, dictionaryOEISMeanders, getFoldsTotalKnown, oeisIDfor_n
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import dictionaryOEISMapFolding
 from mapFolding.someAssemblyRequired.makeAllModules import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds

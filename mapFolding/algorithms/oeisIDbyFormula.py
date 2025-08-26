@@ -94,7 +94,7 @@ def A078591(n: int) -> int:
 	return A005315(n) // 2
 
 def A178961(n: int) -> int:
-	from mapFolding.Z0Z_dictionary_oeisMeanders import dictionaryOEISMeanders  # noqa: PLC0415
+	from mapFolding.oeis import dictionaryOEISMeanders  # noqa: PLC0415
 	A001010valuesKnown: dict[int, int] = dictionaryOEISMeanders['A001010']['valuesKnown']
 	foldsTotal: int = 0
 	for n下i in range(1, n+1):

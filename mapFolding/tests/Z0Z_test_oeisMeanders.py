@@ -1,7 +1,6 @@
-from mapFolding import dictionaryOEISMapFolding
+from mapFolding import dictionaryOEISMapFolding, dictionaryOEISMeanders
 from mapFolding.algorithms.oeisIDbyFormula import (
 	A000136, A000560, A000682, A001010, A001011, A005315, A005316, A060206, A077460, A078591, A223094, A259702, A301620)
-from mapFolding.Z0Z_dictionary_oeisMeanders import dictionaryOEISMeanders
 import sys
 
 rangeTest = range(3, 7)

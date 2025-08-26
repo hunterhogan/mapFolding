@@ -64,7 +64,6 @@ class MetadataOEISidMapFoldingManuallySet(TypedDict):
 	valuesTestValidation: list[int]
 	"""List of index values, 'n', to use when testing validation performance."""
 
-
 class MetadataOEISidMapFolding(TypedDict):
 	"""Settings for an implemented OEIS sequence."""
 
@@ -85,15 +84,22 @@ class MetadataOEISidMapFolding(TypedDict):
 	valueUnknown: int
 	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
 
-
 # ruff: noqa: ERA001
+class MetadataOEISidMeandersManuallySet(TypedDict):
+	"""Settings that are best selected by a human instead of algorithmically."""
+
+	# valuesBenchmark: list[int]
+	"""List of index values, 'n', to use when benchmarking the algorithm performance."""
+	# valuesTestParallelization: list[int]
+	"""List of index values, 'n', to use when testing parallelization performance."""
+	valuesTestValidation: list[int]
+	"""List of index values, 'n', to use when testing validation performance."""
+
 class MetadataOEISidMeanders(TypedDict):
 	"""Settings for an implemented OEIS sequence."""
 
 	description: str
 	"""The OEIS.org description of the integer sequence."""
-	# getMapShape: Callable[[int], tuple[int, ...]]
-	"""Function to convert the OEIS sequence index, 'n', to its `mapShape` tuple."""
 	offset: int
 	"""The starting index, 'n', of the sequence, typically 0 or 1."""
 	# valuesBenchmark: list[int]
@@ -102,7 +108,7 @@ class MetadataOEISidMeanders(TypedDict):
 	"""Dictionary of sequence indices, 'n', to their known values, `foldsTotal`."""
 	# valuesTestParallelization: list[int]
 	"""List of index values, 'n', to use when testing parallelization performance."""
-	# valuesTestValidation: list[int]
+	valuesTestValidation: list[int]
 	"""List of index values, 'n', to use when testing validation performance."""
-	# valueUnknown: int
+	valueUnknown: int
 	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""

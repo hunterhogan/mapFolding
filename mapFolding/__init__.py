@@ -53,6 +53,7 @@ from mapFolding._theTypes import (
 	MetadataOEISidMapFolding as MetadataOEISidMapFolding,
 	MetadataOEISidMapFoldingManuallySet as MetadataOEISidMapFoldingManuallySet,
 	MetadataOEISidMeanders as MetadataOEISidMeanders,
+	MetadataOEISidMeandersManuallySet as MetadataOEISidMeandersManuallySet,
 	NumPyElephino as NumPyElephino,
 	NumPyFoldsTotal as NumPyFoldsTotal,
 	NumPyIntegerType as NumPyIntegerType,
@@ -83,9 +84,10 @@ from mapFolding.filesystemToolkit import (
 from mapFolding.basecamp import countFolds as countFolds
 
 from mapFolding.oeis import (
+	dictionaryOEISMapFolding as dictionaryOEISMapFolding,
+	dictionaryOEISMeanders as dictionaryOEISMeanders,
 	getFoldsTotalKnown as getFoldsTotalKnown,
 	getOEISids as getOEISids,
 	OEIS_for_n as OEIS_for_n,
 	oeisIDfor_n as oeisIDfor_n,
-	dictionaryOEISMapFolding as dictionaryOEISMapFolding,
 )

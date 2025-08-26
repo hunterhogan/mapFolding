@@ -27,7 +27,7 @@ completes the journey from configuration foundation to mathematical discovery.
 from datetime import datetime, timedelta, UTC
 from hunterMakesPy import writeStringToHere
 from itertools import chain
-from mapFolding import countFolds, MetadataOEISidMapFolding, packageSettings
+from mapFolding import countFolds, MetadataOEISidMapFolding, MetadataOEISidMeanders, packageSettings
 from mapFolding._theSSOT import pathCache
 from pathlib import Path
 from typing import Final
@@ -503,5 +503,22 @@ def getOEISids() -> None:
 	"""
 	print(_formatHelpText())  # noqa: T201
 
+def _makeDictionaryOEISMeanders() -> dict[str, MetadataOEISidMeanders]:
+	dictionary: dict[str, MetadataOEISidMeanders] = {}
+	for oeisID in packageSettings.OEISidMeandersManuallySet:
+		valuesKnownSherpa: dict[int, int] = getOEISidValues(oeisID)
+		descriptionSherpa, offsetSherpa = getOEISidInformation(oeisID)
+		dictionary[oeisID] = MetadataOEISidMeanders(
+			description=descriptionSherpa,
+			offset=offsetSherpa,
+			valuesKnown=valuesKnownSherpa,
+			valuesTestValidation=packageSettings.OEISidMeandersManuallySet[oeisID]['valuesTestValidation'] + list(range(offsetSherpa, 2)),
+			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1,
+		)
+	return dictionary
+
+dictionaryOEISMeanders: dict[str, MetadataOEISidMeanders] = _makeDictionaryOEISMeanders()
+
 if __name__ == "__main__":
 	getOEISids()
+
