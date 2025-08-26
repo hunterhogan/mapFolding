@@ -141,6 +141,8 @@ gc.set_threshold?
 """
 
 """'1' is the new zero.
+https://en.wikipedia.org/wiki/Heaviside_step_function
+https://numpy.org/doc/stable/reference/generated/numpy.heaviside.html#numpy.heaviside
 
 `selectGroupAlphaCurves: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]] = arrayCurveGroups[:, indexGroupAlpha] > numpy.uint64(1)`
 AFAIK, there is never a value of zero in arrayCurveGroups[:, indexGroupAlpha] or arrayCurveGroups[:, indexGroupZulu].

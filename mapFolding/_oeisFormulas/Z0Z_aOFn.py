@@ -22,20 +22,21 @@ if __name__ == '__main__':
 		)
 	# oeisID = 'A001010'
 	# oeisID = 'A000136'
-	# oeisID = 'A000682'
-	oeisID = 'A005316'
+	oeisID = 'A000682'
+	# oeisID = 'A005316'
 	# oeisID = 'A077460'
 	# for n in range(46,47):
 	# for n in range(38,46):
-	for n in range(38,41):
-	# for n in range(30,40):
+	# for n in range(38,41):
+	for n in range(30,40):
 	# for n in range(3, 30):
 	# for n in range(3, 10):
 
 		# sys.stdout.write(f"{n = }\n")
 		gc.collect()
 		timeStart = time.perf_counter()
-		foldsTotal = A005316(n)
+		foldsTotal = A000682(n)
+		# foldsTotal = A005316(n)
 		# foldsTotal = A077460(n)
 		if n <= 45:
 			_write()

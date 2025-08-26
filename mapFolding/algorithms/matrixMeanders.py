@@ -18,7 +18,7 @@ import numpy
 
 # TODO `set_threshold`: I know 0 means disabled, but I don't even understand if 1 means "as frequently as possible" or "almost never".
 set_threshold(1, 1, 1)
-Z0Z_bit_length: int = 61
+Z0Z_bit_lengthSafetyLimit: int = 61
 
 type DataArray1D = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64 | numpy.signedinteger[Any]]]
 type DataArray2columns = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]
@@ -136,15 +136,23 @@ flipTheExtra_0b1 = numpy.vectorize(_flipTheExtra_0b1, otypes=[numpy.uint64])
 """The vectorize function is provided primarily for convenience, not for performance. The implementation is essentially a for loop."""
 
 def aggregateCurveLocations(arrayCurveLocations: DataArray2columns) -> DataArray3columns:
-	arrayCurveGroups: DataArray3columns = numpy.tile(numpy.unique(arrayCurveLocations[:, columnCurveLocations]), (columnsArrayCurveGroups, 1)).T
+	arrayCurveGroups: DataArray3columns = numpy.tile(
+		A=numpy.unique(arrayCurveLocations[:, columnCurveLocations])
+		, reps=(columnsArrayCurveGroups, 1)
+		).T
 	arrayCurveGroups[:, columnDistinctCrossings] = 0
-	numpy.add.at(arrayCurveGroups[:, columnDistinctCrossings], numpy.searchsorted(arrayCurveGroups[:, columnCurveLocations], arrayCurveLocations[:, columnCurveLocations]), arrayCurveLocations[:, columnDistinctCrossings])
+	numpy.add.at(
+		arrayCurveGroups[:, columnDistinctCrossings]
+		, numpy.searchsorted(
+			a=arrayCurveGroups[:, columnCurveLocations]
+			, v=arrayCurveLocations[:, columnCurveLocations])
+		, arrayCurveLocations[:, columnDistinctCrossings]
+	)
 	# I'm computing groupZulu from curveLocations that are physically in `arrayCurveGroups`, so I'm using `columnCurveLocations`.
 	numpy.bitwise_and(arrayCurveGroups[:, columnCurveLocations], numpy.uint64(groupZuluLocator64), out=arrayCurveGroups[:, columnGroupZulu])
 	numpy.right_shift(arrayCurveGroups[:, columnGroupZulu], 1, out=arrayCurveGroups[:, columnGroupZulu])
 	# NOTE Do not alphabetize these operations. This column has curveLocations data that groupZulu needs.
 	arrayCurveGroups[:, columnGroupAlpha] &= groupAlphaLocator64
-
 	return arrayCurveGroups
 
 def convertDictionaryCurveGroups2array(dictionaryCurveGroups: dict[tuple[int, int], int]) -> DataArray3columns:
@@ -156,7 +164,7 @@ def convertDictionaryCurveGroups2array(dictionaryCurveGroups: dict[tuple[int, in
 
 def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: int = 0) -> tuple[int, DataArray3columns]:
 
-	while bridges > bridgesMinimum and int(arrayCurveGroups[:, columnDistinctCrossings].max()).bit_length() < Z0Z_bit_length:
+	while bridges > bridgesMinimum and int(arrayCurveGroups[:, columnDistinctCrossings].max()).bit_length() < Z0Z_bit_lengthSafetyLimit:
 		bridges -= 1
 		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1 << (2 * bridges + 4))
 
@@ -176,7 +184,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 
 		selectBridgesSimpleLessThanMaximum: SelectorIndices = numpy.flatnonzero(
 			((arrayCurveGroups[:, columnGroupAlpha] << 2) | (arrayCurveGroups[:, columnGroupZulu] << 3) | 3) < curveLocationsMAXIMUM
-		)
+		) # Computation, but including `< curveLocationsMAXIMUM` is ~2% of total time.
 
 		# Selectors for bridgesAligned -------------------------------------------------
 		selectGroupAlphaAtEven: SelectorBoolean = (arrayCurveGroups[:, columnGroupAlpha] & 1) == numpy.uint64(0)
@@ -184,26 +192,26 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		selectBridgesAligned: SelectorBoolean = selectGroupAlphaCurves & selectGroupZuluCurves & (selectGroupAlphaAtEven | selectGroupZuluAtEven)
 
 		SliceΩ: slice[int, int, Literal[1]] = slice(0,0)
-		sliceGroupAlpha = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectGroupAlphaCurvesLessThanMaximum.size)
-		sliceGroupZulu = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectGroupZuluCurvesLessThanMaximum.size)
-		sliceBridgesSimple = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectBridgesSimpleLessThanMaximum.size)
-		# NOTE Maximum size, not actual size.
-		sliceBridgesAligned = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectBridgesAligned.size)
+		sliceAllocateGroupAlpha = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectGroupAlphaCurvesLessThanMaximum.size)
+		sliceAllocateGroupZulu = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectGroupZuluCurvesLessThanMaximum.size)
+		sliceAllocateBridgesSimple = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectBridgesSimpleLessThanMaximum.size)
+		sliceAllocateBridgesAligned = SliceΩ  = slice(SliceΩ.stop, SliceΩ.stop + selectBridgesAligned.size)
 
 		arrayCurveLocations: DataArray2columns = numpy.zeros((SliceΩ.stop, columnsArrayCurveLocations), dtype=arrayCurveGroups.dtype)
 
-		arrayCurveLocations[sliceGroupAlpha, columnDistinctCrossings] = arrayCurveGroups[selectGroupAlphaCurvesLessThanMaximum, columnDistinctCrossings]
-		arrayCurveLocations[sliceGroupAlpha, columnCurveLocations] = curveLocationsGroupAlpha[numpy.flatnonzero(curveLocationsGroupAlpha < curveLocationsMAXIMUM)]
+		arrayCurveLocations[sliceAllocateGroupAlpha, columnCurveLocations] = curveLocationsGroupAlpha[numpy.flatnonzero(curveLocationsGroupAlpha < curveLocationsMAXIMUM)]
+		arrayCurveLocations[sliceAllocateGroupAlpha, columnDistinctCrossings] = arrayCurveGroups[selectGroupAlphaCurvesLessThanMaximum, columnDistinctCrossings]
 
-		arrayCurveLocations[sliceGroupZulu, columnDistinctCrossings] = arrayCurveGroups[selectGroupZuluCurvesLessThanMaximum, columnDistinctCrossings]
-		arrayCurveLocations[sliceGroupZulu, columnCurveLocations] = curveLocationsGroupZulu[numpy.flatnonzero(curveLocationsGroupZulu < curveLocationsMAXIMUM)]
+		arrayCurveLocations[sliceAllocateGroupZulu, columnCurveLocations] = curveLocationsGroupZulu[numpy.flatnonzero(curveLocationsGroupZulu < curveLocationsMAXIMUM)]
+		arrayCurveLocations[sliceAllocateGroupZulu, columnDistinctCrossings] = arrayCurveGroups[selectGroupZuluCurvesLessThanMaximum, columnDistinctCrossings]
 
-		arrayCurveLocations[sliceBridgesSimple, columnDistinctCrossings] = arrayCurveGroups[selectBridgesSimpleLessThanMaximum, columnDistinctCrossings]
-		arrayCurveLocations[sliceBridgesSimple, columnCurveLocations] = (
+# TODO Uh, it sure looks like I am doing this computation twice. Computation (without assignment) ~ 1.5% of total time.
+		arrayCurveLocations[sliceAllocateBridgesSimple, columnCurveLocations] = (
 			(arrayCurveGroups[selectBridgesSimpleLessThanMaximum, columnGroupAlpha] << 2)
 			| (arrayCurveGroups[selectBridgesSimpleLessThanMaximum, columnGroupZulu] << 3)
 			| 3
 		)
+		arrayCurveLocations[sliceAllocateBridgesSimple, columnDistinctCrossings] = arrayCurveGroups[selectBridgesSimpleLessThanMaximum, columnDistinctCrossings]
 
 		curveLocationsGroupAlpha = None; del curveLocationsGroupAlpha  # pyright: ignore[reportAssignmentType] # noqa: E702
 		curveLocationsGroupZulu = None; del curveLocationsGroupZulu  # pyright: ignore[reportAssignmentType] # noqa: E702
@@ -237,9 +245,9 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		)
 		selectBridgesAlignedLessThanMaximum: SelectorIndices = numpy.flatnonzero(selectBridgesAligned)[numpy.flatnonzero(curveLocationsBridgesAligned < curveLocationsMAXIMUM)]
 
-		sliceBridgesAligned = SliceΩ  = slice(sliceBridgesAligned.start, sliceBridgesAligned.stop - selectBridgesAligned.size + selectBridgesAlignedLessThanMaximum.size)
-		arrayCurveLocations[sliceBridgesAligned, columnDistinctCrossings] = arrayCurveGroups[selectBridgesAlignedLessThanMaximum, columnDistinctCrossings]
-		arrayCurveLocations[sliceBridgesAligned, columnCurveLocations] = curveLocationsBridgesAligned[numpy.flatnonzero(curveLocationsBridgesAligned < curveLocationsMAXIMUM)]
+		sliceAllocateBridgesAligned = SliceΩ  = slice(sliceAllocateBridgesAligned.start, sliceAllocateBridgesAligned.stop - selectBridgesAligned.size + selectBridgesAlignedLessThanMaximum.size)
+		arrayCurveLocations[sliceAllocateBridgesAligned, columnDistinctCrossings] = arrayCurveGroups[selectBridgesAlignedLessThanMaximum, columnDistinctCrossings]
+		arrayCurveLocations[sliceAllocateBridgesAligned, columnCurveLocations] = curveLocationsBridgesAligned[numpy.flatnonzero(curveLocationsBridgesAligned < curveLocationsMAXIMUM)]
 
 		arrayCurveGroups = None; del arrayCurveGroups # pyright: ignore[reportAssignmentType]  # noqa: E702
 		curveLocationsBridgesAligned = None; del curveLocationsBridgesAligned  # pyright: ignore[reportAssignmentType] # noqa: E702
@@ -248,13 +256,14 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		selectBridgesAlignedLessThanMaximum = None; del selectBridgesAlignedLessThanMaximum # pyright: ignore[reportAssignmentType]  # noqa: E702
 		goByeBye()
 
-		arrayCurveGroups = aggregateCurveLocations(arrayCurveLocations[0:SliceΩ.stop])
+		arrayCurveLocations.resize((SliceΩ.stop, columnsArrayCurveLocations))
+		arrayCurveGroups = aggregateCurveLocations(arrayCurveLocations)
 
 		arrayCurveLocations = None; del arrayCurveLocations # pyright: ignore[reportAssignmentType]  # noqa: E702
-		del sliceBridgesAligned
-		del sliceBridgesSimple
-		del sliceGroupAlpha
-		del sliceGroupZulu
+		del sliceAllocateBridgesAligned
+		del sliceAllocateBridgesSimple
+		del sliceAllocateGroupAlpha
+		del sliceAllocateGroupZulu
 		del SliceΩ
 		goByeBye()
 
@@ -262,11 +271,6 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 
 def convertArrayCurveGroups2dictionaryCurveGroups(arrayCurveGroups: DataArray3columns) -> dict[tuple[int, int], int]:
 	return {(int(row[columnGroupAlpha]), int(row[columnGroupZulu])): int(row[columnDistinctCrossings]) for row in arrayCurveGroups}
-
-def convertArrayCurveGroups2dictionaryCurveLocations(arrayCurveGroups: DataArray3columns) -> dict[int, int]:
-	"""'Smush' `groupAlpha` and `groupZulu` back together into `curveLocations`."""
-	arrayCurveGroups[:, columnCurveLocations] = arrayCurveGroups[:, columnGroupAlpha] | (arrayCurveGroups[:, columnGroupZulu] << 1)
-	return {int(row[columnCurveLocations]): int(row[columnDistinctCrossings]) for row in arrayCurveGroups[:, [columnDistinctCrossings, columnCurveLocations]]}
 
 def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	"""Compute a(n) meanders with the transfer matrix algorithm.
@@ -314,13 +318,14 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 # NOTE '29' is based on two things. 1) `bridges = 29`, groupZuluLocator = 0xaaaaaaaaaaaaaaaa.bit_length() = 64. 2) If `bridges =
 # 30` or a larger number, `OverflowError: int too big to convert`. Conclusion: '29' isn't necessarily correct or the best value:
 # it merely fits within my limited ability to assess the correct value.
+# NOTE the above was written when I had the `bridges >= bridgesMinimum` bug. So, apply '-1' to everything.
 # NOTE This default value is necessary: it prevents `count64` from returning an incomplete dictionary when that is not necessary.
 # TODO `count64_bridgesMaximum` might be a VERY good idea as a second safeguard against overflowing distinctCrossingsTotal. But
 # I'm pretty sure I should use an actual check on maximum bit-width in arrayCurveGroups[:, columnDistinctCrossings] at the start
 # of each while loop. Tests on A000682 showed that the max bit-width of arrayCurveGroups[:, columnDistinctCrossings] always
 # increased by 1 or 2 bits on each iteration: never 0 and never 3. I did not test A005316. And I do not have a mathematical proof of the limit.
 
-	count64_bridgesMaximum = 29
+	count64_bridgesMaximum = 28
 	bridgesMinimum = 0
 	distinctCrossings64bitLimitAsValueOf_n = 41
 	distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG = distinctCrossings64bitLimitAsValueOf_n - 3
