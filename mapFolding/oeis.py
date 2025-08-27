@@ -512,7 +512,7 @@ def _makeDictionaryOEISMeanders() -> dict[str, MetadataOEISidMeanders]:
 			description=descriptionSherpa,
 			offset=offsetSherpa,
 			valuesKnown=valuesKnownSherpa,
-			valuesTestValidation=packageSettings.OEISidMeandersManuallySet[oeisID]['valuesTestValidation'] + list(range(offsetSherpa, 2)),
+			valuesTestValidation=packageSettings.OEISidMeandersManuallySet[oeisID]['valuesTestValidation'],
 			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1,
 		)
 	return dictionary

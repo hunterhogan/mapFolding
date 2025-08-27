@@ -10,14 +10,19 @@ import contextlib
 
 """TODO new flow paradigm, incomplete
 
-NO NO NO NO NO
-- count______ NO
-	- countFolds Yes: multidimensional map folding
-	- countFoldsSymmetric NO
-	- countMeanders yes-ish
-- oeisIDfor_n
-	- Only works for IDs defined in this app
-	- Calls the correct count_____ function
+algorithms directory
+	manually coded algorithms or formulas
+	countFolds will be a stable interface for multidimensional map folding, including synthetic modules
+		This has special treatment because people may want to call mapShape not defined in OEIS
+	countMeanders will be a stable interface for meanders
+		This has special treatment because people may want to call meanders not defined in OEIS
+	an enhanced version of oeisIDfor_n will be a stable interface for calling by ID and n
+
+General flow structure
+	doTheNeedful
+		specific to that version of that algorithm
+		abstracts the API for that algorithm, so that algorithm (such as multidimensional map folding) has a stable interface
+		The last place to do defensive programming
 
 - Incomplete: how to count
 	- currently in parameters computationDivisions, CPUlimit, and flow
@@ -27,13 +32,13 @@ NO NO NO NO NO
 	- FAIL EARLY
 	- Implement "common foundational logic".
 		- IDK what the correct technical term is, but I'm sure other people have researched excellent ways to do this.
-        - Example: in `countFolds`, every possible flow path needs `mapShape`. Therefore, `mapShape` is foundational logic that
+		- Example: in `countFolds`, every possible flow path needs `mapShape`. Therefore, `mapShape` is foundational logic that
 			all flow paths have in common: "common foundational logic".
-        - Example: in `countFolds`, some flow paths have more than one "task division" (i.e., the computation is divided into
-            multiple tasks), while other flow paths only have one task division. One reasonable perspective is that computing task
-            divisions is NOT "common foundational logic". My perspective for this example: to compute whether or not there are
-            task divisions and if so, how many task divisions is identical for all flow paths. Therefore, I handle computing task
-            divisions as "common foundational logic".
+		- Example: in `countFolds`, some flow paths have more than one "task division" (i.e., the computation is divided into
+			multiple tasks), while other flow paths only have one task division. One reasonable perspective is that computing task
+			divisions is NOT "common foundational logic". My perspective for this example: to compute whether or not there are
+			task divisions and if so, how many task divisions is identical for all flow paths. Therefore, I handle computing task
+			divisions as "common foundational logic".
 		- Incomplete
 	- Initialize memorialization instructions, if asked
 	- MORE DEFENSIVE PROGRAMMING
@@ -48,7 +53,7 @@ NO NO NO NO NO
 	- Pass control to the correct `doTheNeedful`
 	- I don't know how to "elegantly" pass control without putting `doTheNeedful` over `count______` in the stack, therefore,
 		control will come back here.
-    - DO NOT, for the love of puppies and cookies, DO NOT use defensive programming here. Defensive programming AFTER a
+	- DO NOT, for the love of puppies and cookies, DO NOT use defensive programming here. Defensive programming AFTER a
 		four-week-long computation is a tacit admission of incompetent programming.
 	- Follow memorialization instructions: which means pass control to a function will tenaciously follow the instructions.
 	- return "a(n)" (as OEIS calls it), such as foldsTotal

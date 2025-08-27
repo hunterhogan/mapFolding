@@ -25,7 +25,7 @@ research domain.
 
 from collections.abc import Callable, Generator, Sequence
 from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
-from mapFolding.oeis import dictionaryOEISMapFolding, oeisIDsImplemented
+from mapFolding.oeis import dictionaryOEISMapFolding, dictionaryOEISMeanders, oeisIDsImplemented
 from pathlib import Path
 from typing import Any
 import numpy
@@ -346,6 +346,25 @@ def oeisID(request: pytest.FixtureRequest) -> Any:
 	-------
 	sequenceIdentifier : Any
 		OEIS sequence identifier for testing across all implemented sequences.
+
+	"""
+	return request.param
+
+@pytest.fixture(params=tuple(dictionaryOEISMeanders.keys()))
+def oeisIDMeanders(request: pytest.FixtureRequest) -> Any:
+	"""Parametrized fixture providing all implemented Meanders OEIS sequence identifiers.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	request : pytest.FixtureRequest
+		The pytest request object containing the current parameter value.
+
+	Returns
+	-------
+	sequenceIdentifier : Any
+		OEIS sequence identifier for testing across all implemented Meanders sequences.
 
 	"""
 	return request.param

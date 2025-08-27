@@ -26,21 +26,25 @@ which is useful if you're working with the code synthesis features of the packag
 """
 
 from mapFolding import countFolds, dictionaryOEISMapFolding, dictionaryOEISMeanders, getFoldsTotalKnown, oeisIDfor_n
+from mapFolding.algorithms import oeisIDbyFormula
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired.makeAllModules import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
 from pathlib import Path, PurePosixPath
-from typing import Literal
+from typing import Literal, TYPE_CHECKING
 import importlib.util
 import multiprocessing
 import pytest
 
+if TYPE_CHECKING:
+	from collections.abc import Callable
+
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
-def test_aOFn_calculate_value(oeisID: str) -> None:
+def test_aOFn_calculate_value_mapFolding(oeisID: str) -> None:
 	"""Verify OEIS sequence value calculations against known reference values.
 
 	Tests the `oeisIDfor_n` function by comparing its calculated output against
@@ -59,6 +63,26 @@ def test_aOFn_calculate_value(oeisID: str) -> None:
 	"""
 	for n in dictionaryOEISMapFolding[oeisID]['valuesTestValidation']:
 		standardizedEqualToCallableReturn(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisIDfor_n, oeisID, n)
+
+def test_aOFn_calculate_value_meanders(oeisIDMeanders: str) -> None:
+	"""Verify Meanders OEIS sequence value calculations against known reference values.
+
+	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
+	calculated output against known correct values from the OEIS database for Meanders IDs.
+
+	Parameters
+	----------
+	oeisIDMeanders : str
+		The Meanders OEIS sequence identifier to test calculations for.
+
+	"""
+	oeisIDcallable: Callable[[int], int] = getattr(oeisIDbyFormula, oeisIDMeanders)
+	for n in dictionaryOEISMeanders[oeisIDMeanders]['valuesTestValidation']:
+		standardizedEqualToCallableReturn(
+			dictionaryOEISMeanders[oeisIDMeanders]['valuesKnown'][n],
+			oeisIDcallable,
+			n,
+		)
 
 @pytest.mark.parametrize('flow', ['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'])
 def test_flowControl(mapShapeTestCountFolds: tuple[int, ...], flow: str) -> None:

@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.15.3"
+version = "0.15.4"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations and code optimization."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -133,7 +133,6 @@ urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://gith
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
   "astToolkit",
-  "hishel",
   "hunterMakesPy",
   "numpy",
   "platformdirs",
@@ -177,7 +176,7 @@ run = { branch = true, concurrency = [
 ] }
 
 [tool.pytest.ini_options]
-addopts = ["--color=auto", "-n 1"]
+addopts = ["--color=auto", "-n 4"]
 log_auto_indent = true
 testpaths = ["mapFolding/tests"]
 

@@ -99,18 +99,18 @@ packageSettings = mapFoldingPackageSettings(identifierPackageFALLBACK=identifier
 pathCache: Path = packageSettings.pathPackage / ".cache"
 """Local directory path for storing cached OEIS sequence data and metadata."""
 OEISidMeandersManuallySet: dict[str, MetadataOEISidMeandersManuallySet] = {
-	'A000560': {'valuesTestValidation': [*range(3, 7)]},
-	'A000682': {'valuesTestValidation': [*range(3, 7)]},
-	'A001010': {'valuesTestValidation': [*range(3, 7)]},
+	'A000560': {'valuesTestValidation': [*range(3, 12)]},
+	'A000682': {'valuesTestValidation': [*range(3, 12)]},
+	'A001010': {'valuesTestValidation': [*range(3, 11)]},
 	'A001011': {'valuesTestValidation': [*range(3, 7)]},
-	'A005315': {'valuesTestValidation': [*range(3, 7)]},
-	'A005316': {'valuesTestValidation': [*range(3, 7)]},
-	'A060206': {'valuesTestValidation': [*range(3, 7)]},
-	'A077460': {'valuesTestValidation': [*range(3, 7)]},
-	'A078591': {'valuesTestValidation': [*range(3, 7)]},
-	'A223094': {'valuesTestValidation': [*range(3, 7)]},
-	'A259702': {'valuesTestValidation': [*range(3, 7)]},
-	'A301620': {'valuesTestValidation': [*range(3, 7)]},
+	'A005315': {'valuesTestValidation': [*range(3, 9)]},
+	'A005316': {'valuesTestValidation': [*range(3, 13)]},
+	'A060206': {'valuesTestValidation': [*range(3, 9)]},
+	'A077460': {'valuesTestValidation': [*range(3, 8)]},
+	'A078591': {'valuesTestValidation': [*range(3, 10)]},
+	'A223094': {'valuesTestValidation': [*range(3, 11)]},
+	'A259702': {'valuesTestValidation': [*range(3, 13)]},
+	'A301620': {'valuesTestValidation': [*range(3, 11)]},
 }
 
 # Recreate packageSettings with meanders settings included
