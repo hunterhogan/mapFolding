@@ -12,11 +12,11 @@ import contextlib
 
 algorithms directory
 	manually coded algorithms or formulas
-	countFolds will be a stable interface for multidimensional map folding, including synthetic modules
+	`countFolds` will be a stable interface for multidimensional map folding, including synthetic modules
 		This has special treatment because people may want to call mapShape not defined in OEIS
-	countMeanders will be a stable interface for meanders
+	`countMeanders` will be a stable interface for meanders
 		This has special treatment because people may want to call meanders not defined in OEIS
-	an enhanced version of oeisIDfor_n will be a stable interface for calling by ID and n
+	an enhanced version of `oeisIDfor_n` will be a stable interface for calling by ID and n
 
 General flow structure
 	doTheNeedful
@@ -59,6 +59,14 @@ General flow structure
 	- return "a(n)" (as OEIS calls it), such as foldsTotal
 
 """
+
+# Parameters
+	# What you want to compute
+	# Memorialization
+	# Concurrency
+	# How you want to compute it
+# Interpretation of parameters
+	# Input data
 
 def countFolds(listDimensions: Sequence[int] | None = None
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None

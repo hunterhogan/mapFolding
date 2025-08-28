@@ -1,7 +1,6 @@
 """Compute a(n) for an OEIS ID by computing other OEIS IDs."""
-# ruff: noqa D103
 from functools import cache
-from mapFolding import countFolds, dictionaryOEISMapFolding, dictionaryOEISMeanders
+from mapFolding import countFolds
 from mapFolding.algorithms.matrixMeanders import A000682, A005316
 
 @cache
@@ -12,14 +11,6 @@ def A000560(n: int) -> int:
 	return A000682(n + 1) // 2
 
 def A001010(n: int) -> int:
-	"""Formulas.
-
-	a(2n-1) = 2*A007822(n)
-	OddQ[n], 2*A007822[[(n - 1)/2 + 1]]]
-
-	a(2n) = 2*A000682(n+1)
-	EvenQ[n], 2*A000682[[n/2 + 1]]
-	"""
 	if n == 1:
 		foldsTotal = 1
 	elif n & 0b1:
@@ -47,16 +38,6 @@ def A060206(n: int) -> int:
 	return A000682(2 * n + 1)
 
 def A077460(n: int) -> int:
-	"""Formulas.
-
-	a[0] = a[1] = 1;
-	a[n_] := If[OddQ[n], (A005316[[n + 1]] + A005316[[2n]] + A000682[[n]])/4
-	a(2n+1) = (A005315(2n+1) + A005316(2n+1) + A060206(n)) / 4.
-
-	a(2n) = (A005315(2n) + 2 * A005316(2n)) / 4.
-	(A005316[[2n]] + 2 A005316[[n + 1]])/4];
-
-	"""
 	if n in {0, 1}:
 		foldsTotal = 1
 	elif n & 0b1:

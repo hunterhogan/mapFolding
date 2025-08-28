@@ -33,7 +33,7 @@ from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
 from pathlib import Path, PurePosixPath
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import importlib.util
 import multiprocessing
 import pytest

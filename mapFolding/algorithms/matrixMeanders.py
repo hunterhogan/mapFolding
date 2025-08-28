@@ -2,7 +2,6 @@
 from functools import cache
 from gc import collect as goByeBye, set_threshold
 from typing import Any, Literal
-import gc
 import numpy
 
 # DEVELOPMENT INSTRUCTIONS FOR THIS MODULE
@@ -147,11 +146,7 @@ def aggregateCurveLocations2CurveGroups(arrayCurveLocations: DataArray2columns) 
 	del curveLocations
 	goByeBye()
 
-	numpy.add.at(
-		arrayCurveGroups[:, columnDistinctCrossings]
-		, indices
-		, arrayCurveLocations[:, columnDistinctCrossings]
-	)
+	numpy.add.at(arrayCurveGroups[:, columnDistinctCrossings], indices, arrayCurveLocations[:, columnDistinctCrossings])
 	return arrayCurveGroups
 
 def aggregateColumns2CurveLocations(curveLocations: DataArray1D, distinctCrossings: DataArray1D) -> DataArray2columns:
@@ -159,12 +154,9 @@ def aggregateColumns2CurveLocations(curveLocations: DataArray1D, distinctCrossin
 	global SliceAssign  # noqa: PLW0603
 	miniCurveLocations, indices = numpy.unique_inverse(curveLocations)
 	miniDistinctCrossings = numpy.zeros_like(miniCurveLocations, numpy.uint64)
-	numpy.add.at(
-		miniDistinctCrossings
-		, indices
-		, distinctCrossings
-	)
+	numpy.add.at(miniDistinctCrossings, indices, distinctCrossings)
 	SliceAssign = slice(SliceAssign.stop, SliceAssign.stop + len(miniCurveLocations))
+# TODO I think column_stack is slightly more expensive than tile.
 	return numpy.column_stack((miniDistinctCrossings, miniCurveLocations)).astype(numpy.uint64)
 
 def convertDictionaryCurveGroups2array(dictionaryCurveGroups: dict[tuple[int, int], int]) -> DataArray3columns:
@@ -176,6 +168,7 @@ def convertDictionaryCurveGroups2array(dictionaryCurveGroups: dict[tuple[int, in
 
 def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: int = 0) -> tuple[int, DataArray3columns]:
 	global SliceAssign  # noqa: PLW0603
+# TODO tqdm?
 	while bridges > bridgesMinimum and int(arrayCurveGroups[:, columnDistinctCrossings].max()).bit_length() < Z0Z_bit_lengthSafetyLimit:
 		bridges -= 1
 		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1 << (2 * bridges + 4))
@@ -329,18 +322,18 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	2. When the bit width of the bit-packed integers connected to `bridges` is small enough to use `numpy.uint64`, I switch to NumPy for the heavy lifting.
 	3. When `distinctCrossings` subtotals might exceed 64 bits, I must switch back to Python primitives.
 	"""
-# NOTE '29' is based on two things. 1) `bridges = 29`, groupZuluLocator = 0xaaaaaaaaaaaaaaaa.bit_length() = 64. 2) If `bridges =
-# 30` or a larger number, `OverflowError: int too big to convert`. Conclusion: '29' isn't necessarily correct or the best value:
-# it merely fits within my limited ability to assess the correct value.
-# NOTE the above was written when I had the `bridges >= bridgesMinimum` bug. So, apply '-1' to everything.
-# NOTE This default value is necessary: it prevents `count64` from returning an incomplete dictionary when that is not necessary.
-# TODO `count64_bridgesMaximum` might be a VERY good idea as a second safeguard against overflowing distinctCrossingsTotal. But
-# I'm pretty sure I should use an actual check on maximum bit-width in arrayCurveGroups[:, columnDistinctCrossings] at the start
-# of each while loop. Tests on A000682 showed that the max bit-width of arrayCurveGroups[:, columnDistinctCrossings] always
-# increased by 1 or 2 bits on each iteration: never 0 and never 3. I did not test A005316. And I do not have a mathematical proof of the limit.
-
+# NOTE `count64_bridgesMaximum = 28` is based on empirical evidence. I do not have a mathematical proof that it is correct.
 	count64_bridgesMaximum = 28
 	bridgesMinimum = 0
+
+# TODO Setting `bridgesMinimum` > 0 in `count64` might be a VERY good idea as a second safeguard against overflowing
+# distinctCrossingsTotal. As a the first safeguard I've added an actual check on maximum bit-width in arrayCurveGroups[:,
+# columnDistinctCrossings] at the start of each while loop. The computational cost seems to be too low to measure. `count`, when
+# `bridges` have decremented to < ~8 is very fast. So the real issue is avoiding overflow during peak memory usage. Tests on
+# A000682 showed that the max bit-width of arrayCurveGroups[:, columnDistinctCrossings] always increased by 1 or 2 bits on each
+# iteration: never 0 and never 3. I did not test A005316. And I do not have a mathematical proof of the limit. And I prefer less complex code.
+# So, for `count64`, I might just set `bridgesMinimum = 0` and I check the bit-width at the start of each while loop. That would allow me to remove
+# `distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG` code. Testing this, however, requires large values of n, which take a long time to compute.
 	distinctCrossings64bitLimitAsValueOf_n = 41
 	distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG = distinctCrossings64bitLimitAsValueOf_n - 3
 	distinctCrossings64bitLimitSafetyMargin = 4
@@ -349,14 +342,44 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 
 	if n >= count64_bridgesMaximum:
 		if n >= distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG:
-			bridgesMinimum = n - distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG + distinctCrossings64bitLimitSafetyMargin
+			bridgesMinimum: int = n - distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG + distinctCrossings64bitLimitSafetyMargin
 		n, dictionaryCurveGroups = count(n, dictionaryCurveGroups, count64_bridgesMaximum)
-		gc.collect()
+		goByeBye()
 	n, arrayCurveGroups = count64(n, convertDictionaryCurveGroups2array(dictionaryCurveGroups), bridgesMinimum)
 	if n > 0:
-		gc.collect()
-		n, dictionaryCurveGroups = count(n, convertArrayCurveGroups2dictionaryCurveGroups(arrayCurveGroups), bridgesMinimum=0)
-		distinctCrossingsTotal = sum(dictionaryCurveGroups.values())
+		goByeBye()
+		n, dictionaryCurveGroups = count(n, convertArrayCurveGroups2dictionaryCurveGroups(arrayCurveGroups))
+		distinctCrossingsTotal: int = sum(dictionaryCurveGroups.values())
 	else:
 		distinctCrossingsTotal = int(arrayCurveGroups[0, columnDistinctCrossings])
 	return distinctCrossingsTotal
+
+
+def A000682getCurveLocations(n: int) -> dict[int, int]:
+	curveLocationsMAXIMUM: int = 1 << (2 * n + 4)
+
+	curveStart: int = 5 - (n & 0b1) * 4
+	listCurveLocations: list[int] = [(curveStart << 1) | curveStart]
+
+	while listCurveLocations[-1] < curveLocationsMAXIMUM:
+		curveStart = (curveStart << 4) | 0b101
+		listCurveLocations.append((curveStart << 1) | curveStart)
+
+	return dict.fromkeys(listCurveLocations, 1)
+
+
+@cache
+def A000682(n: int) -> int:
+	return doTheNeedful(n - 1, A000682getCurveLocations(n - 1))
+
+
+def A005316getCurveLocations(n: int) -> dict[int, int]:
+	if n & 0b1:
+		return {22: 1}
+	else:
+		return {15: 1}
+
+
+@cache
+def A005316(n: int) -> int:
+	return doTheNeedful(n-1, A005316getCurveLocations(n-1))
