@@ -1,24 +1,9 @@
 # ruff: noqa: D100 D103
 from functools import cache
-from gc import collect as goByeBye
+from gc import collect as goByeBye, set_threshold
 from tqdm import tqdm
 from typing import Any
 import numpy
-
-# DEVELOPMENT INSTRUCTIONS FOR THIS MODULE
-#
-# Avoid early-return guard clauses, short-circuit returns, and multiple exit points. This codebase enforces a
-# single-return-per-function pattern with stable shapes/dtypes due to AST transforms. An empty input is a problem, so allow it to
-# fail early.
-#
-# If an algorithm has potential for infinite loops, fix the root cause: do NOT add artificial safety limits (e.g., maxIterations
-# counters) to prevent infinite loops.
-#
-# Do not guard vectorized or masked operations behind data-dependent boolean reductions. Never write conditionals like
-# `if numpy.any(mask):` or `if numpy.all(mask):` (or the moral equivalent using `count_nonzero`). Apply the masked operation
-# directly; empty masks naturally no-op. This keeps control flow stable for AST transforms and avoids data-dependent branching.
-#
-# Always use semantic column, index, or slice identifiers: Never hardcode the locations.
 
 # TODO `set_threshold`: Low numbers nullify the `walkDyckPath` cache. Can I use this more effectively than merely disabled or 1,1,1?
 Z0Z_bit_lengthSafetyLimit: int = 61
@@ -83,6 +68,7 @@ def count(bridges: int, dictionaryCurveGroups: dict[tuple[int, int], int], bridg
 			curveLocationsMAXIMUM: int = 1 << (2 * bridges + 4)
 
 			for (groupAlpha, groupZulu), distinctCrossings in dictionaryCurveGroups.items():
+				set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
 				groupAlphaCurves: bool = groupAlpha != 1
 				groupZuluCurves: bool = groupZulu != 1
 				groupAlphaIsEven = groupZuluIsEven = 0
@@ -93,7 +79,7 @@ def count(bridges: int, dictionaryCurveGroups: dict[tuple[int, int], int], bridg
 					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
 				if groupAlphaCurves:
-					curveLocationAnalysis = (groupAlpha >> 2) | (groupZulu << 3) | ((groupAlphaIsEven := 1 - (groupAlpha & 0b1)) << 1)
+					curveLocationAnalysis = (groupAlpha >> 2) | (groupZulu << 3) | ((groupAlphaIsEven := 1 - (groupAlpha & 1)) << 1)
 					if curveLocationAnalysis < curveLocationsMAXIMUM:
 						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
@@ -178,6 +164,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 			bridges -= 1
 			curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1 << (2 * bridges + 4))
 
+			set_threshold(1, 1, 1)  # Re-enable the garbage collector.
 # ----------------------------------------------- groupAlpha ----------------------------------------------------------
 			selectGroupAlphaCurves: SelectorBoolean = arrayCurveGroups[:, columnGroupAlpha] > numpy.uint64(1)
 			allocateGroupAlphaCurves: int = selectGroupAlphaCurves.sum()
@@ -231,11 +218,6 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 			goByeBye()
 
 # ----------------------------------------------- groupAlpha ----------------------------------------------------------
-			curveLocationsGroupAlpha: DataArray1D = ((arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha] >> 2)
-				| (arrayCurveGroups[selectGroupAlphaCurves, columnGroupZulu] << 3)
-				| ((numpy.uint64(1) - (arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha] & 1)) << 1)
-			)
-
 			curveLocationsGroupAlpha: DataArray1D = arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha].copy()
 			numpy.right_shift(curveLocationsGroupAlpha, 2, out=curveLocationsGroupAlpha)
 			numpy.bitwise_or(curveLocationsGroupAlpha, numpy.left_shift(arrayCurveGroups[selectGroupAlphaCurves, columnGroupZulu], 3), out=curveLocationsGroupAlpha)
@@ -284,6 +266,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 
 # bridgesAligned -------------------------------- bridgesGroupAlphaPairedToOdd ----------------------------------------
 # NOTE this code block MODIFIES `arrayCurveGroups` NOTE
+			set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
 			selectBridgesGroupAlphaPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & selectGroupAlphaAtEven & (~selectGroupZuluAtEven))
 			arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
 
@@ -291,9 +274,11 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 
 # bridgesAligned -------------------------------- bridgesGroupZuluPairedToOdd ------------------------------------------
 # NOTE this code block MODIFIES `arrayCurveGroups` NOTE
+			set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
 			selectBridgesGroupZuluPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & (~selectGroupAlphaAtEven) & selectGroupZuluAtEven)
 			arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu])
 
+			set_threshold(1, 1, 1)  # Re-enable the garbage collector.
 			selectBridgesGroupZuluPairedToOdd = None; del selectBridgesGroupZuluPairedToOdd # pyright: ignore[reportAssignmentType]  # noqa: E702
 			selectGroupAlphaAtEven = None; del selectGroupAlphaAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
 			selectGroupZuluAtEven = None; del selectGroupZuluAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
@@ -387,29 +372,12 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	"""
 # NOTE `count64_bridgesMaximum = 28` is based on empirical evidence. I do not have a mathematical proof that it is correct.
 	count64_bridgesMaximum = 28
-	bridgesMinimum = 0
-
-# TODO Setting `bridgesMinimum` > 0 in `count64` might be a VERY good idea as a second safeguard against overflowing
-# distinctCrossingsTotal. As a the first safeguard I've added an actual check on maximum bit-width in arrayCurveGroups[:,
-# columnDistinctCrossings] at the start of each while loop. The computational cost seems to be too low to measure. `count`, when
-# `bridges` have decremented to < ~8 is very fast. So the real issue is avoiding overflow during peak memory usage. Tests on
-# A000682 showed that the max bit-width of arrayCurveGroups[:, columnDistinctCrossings] always increased by 1 or 2 bits on each
-# iteration: never 0 and never 3. I did not test A005316. And I do not have a mathematical proof of the limit. And I prefer less complex code.
-# So, for `count64`, I might just set `bridgesMinimum = 0` and I check the bit-width at the start of each while loop. That would allow me to remove
-# `distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG` code. Testing this, however, requires large values of n, which take a long time to compute.
-	distinctCrossings64bitLimitAsValueOf_n = 41
-	distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG = distinctCrossings64bitLimitAsValueOf_n - 3
-	distinctCrossings64bitLimitSafetyMargin = 4
-
 	dictionaryCurveGroups: dict[tuple[int, int], int] = convertDictionaryCurveLocations2CurveGroups(dictionaryCurveLocations)
 
 	if n >= count64_bridgesMaximum:
-		if n >= distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG:
-			bridgesMinimum: int = n - distinctCrossingsSubtotal64bitLimitAsValueOf_n_WAG + distinctCrossings64bitLimitSafetyMargin
-
 		n, dictionaryCurveGroups = count(n, dictionaryCurveGroups, count64_bridgesMaximum)
 		goByeBye()
-	n, arrayCurveGroups = count64(n, convertDictionaryCurveGroups2array(dictionaryCurveGroups), bridgesMinimum)
+	n, arrayCurveGroups = count64(n, convertDictionaryCurveGroups2array(dictionaryCurveGroups))
 	if n > 0:
 		goByeBye()
 
@@ -421,14 +389,11 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 
 def A000682getCurveLocations(n: int) -> dict[int, int]:
 	curveLocationsMAXIMUM: int = 1 << (2 * n + 4)
-
 	curveStart: int = 5 - (n & 0b1) * 4
 	listCurveLocations: list[int] = [(curveStart << 1) | curveStart]
-
 	while listCurveLocations[-1] < curveLocationsMAXIMUM:
 		curveStart = (curveStart << 4) | 0b101
 		listCurveLocations.append((curveStart << 1) | curveStart)
-
 	return dict.fromkeys(listCurveLocations, 1)
 
 @cache
