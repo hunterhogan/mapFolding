@@ -1,11 +1,7 @@
-# ruff: noqa
-# pyright: basic
-from collections import Counter
+# ruff: noqa: D100 D103
 from functools import cache
 from gc import collect as goByeBye, set_threshold
-from tqdm import tqdm
 from typing import Any
-import itertools
 import numpy
 
 Z0Z_bit_lengthSafetyLimit: int = 61
@@ -62,58 +58,44 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
 
 def count(bridges: int, dictionaryCurveGroups: dict[tuple[int, int], int], bridgesMinimum: int = 0) -> tuple[int, dict[tuple[int, int], int]]:
 	dictionaryCurveLocations: dict[int, int] = {}
-	with tqdm(total=bridges, initial=bridges) as tqdmBar:
-		# learnByExperiment = 0  # noqa: ERA001
-		while (bridges > bridgesMinimum):# or any(curveGroup.bit_length() > (64 - learnByExperiment) for curveGroup in itertools.chain(*dictionaryCurveGroups.keys())):
-			"""A005316, not A000682
-	curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1 << (2 * bridges + 4))
-										~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
-OverflowError: int too big to convert
-			"""
-			# if bridgesMinimum > 0 and all(curveGroup.bit_length() <= (64 - learnByExperiment) for curveGroup in itertools.chain(*dictionaryCurveGroups.keys())):  # noqa: ERA001
-# NOTE NOTE NOTE NOTE HUNTER!!!!!!!! You do not understand the implications of `numpy.left_shift(arrayCurveGroups[:,
-# columnGroupZulu], 3)` well enough to send 64-bit groupZulu values. Is the value effectively 67 bits now? If so, it won't fit. If
-# it doesn't fit, what are the implications for the computation? You don't know.
-# Furthermore, this implementation completely breaks A005316 for n >= 32.
-				# break  # noqa: ERA001
-			bridges -= 1
-			curveLocationsMAXIMUM: int = 1 << (2 * bridges + 4)
+	while (bridges > bridgesMinimum):
+		bridges -= 1
+		curveLocationsMAXIMUM: int = 1 << (2 * bridges + 4)
 
-			for (groupAlpha, groupZulu), distinctCrossings in dictionaryCurveGroups.items():
-				set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
-				groupAlphaCurves: bool = groupAlpha > 1
-				groupZuluCurves: bool = groupZulu > 1
-				groupAlphaIsEven = groupZuluIsEven = 0
+		for (groupAlpha, groupZulu), distinctCrossings in dictionaryCurveGroups.items():
+			set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
+			groupAlphaCurves: bool = groupAlpha > 1
+			groupZuluCurves: bool = groupZulu > 1
+			groupAlphaIsEven = groupZuluIsEven = 0
 
-				# bridgesSimple
-				curveLocationAnalysis = ((groupAlpha | (groupZulu << 1)) << 2) | 3
+			# bridgesSimple
+			curveLocationAnalysis = ((groupAlpha | (groupZulu << 1)) << 2) | 3
+			if curveLocationAnalysis < curveLocationsMAXIMUM:
+				dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+
+			if groupAlphaCurves:
+				curveLocationAnalysis = (groupAlpha >> 2) | (groupZulu << 3) | ((groupAlphaIsEven := 1 - (groupAlpha & 1)) << 1)
 				if curveLocationAnalysis < curveLocationsMAXIMUM:
 					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
-				if groupAlphaCurves:
-					curveLocationAnalysis = (groupAlpha >> 2) | (groupZulu << 3) | ((groupAlphaIsEven := 1 - (groupAlpha & 1)) << 1)
-					if curveLocationAnalysis < curveLocationsMAXIMUM:
-						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+			if groupZuluCurves:
+				curveLocationAnalysis = (groupZulu >> 1) | (groupAlpha << 2) | (groupZuluIsEven := 1 - (groupZulu & 1))
+				if curveLocationAnalysis < curveLocationsMAXIMUM:
+					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
-				if groupZuluCurves:
-					curveLocationAnalysis = (groupZulu >> 1) | (groupAlpha << 2) | (groupZuluIsEven := 1 - (groupZulu & 1))
-					if curveLocationAnalysis < curveLocationsMAXIMUM:
-						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+			# bridgesAligned
+			if groupAlphaCurves and groupZuluCurves and (groupAlphaIsEven or groupZuluIsEven):
+				if groupAlphaIsEven and not groupZuluIsEven:
+					groupAlpha ^= walkDyckPath(groupAlpha)  # noqa: PLW2901
+				elif groupZuluIsEven and not groupAlphaIsEven:
+					groupZulu ^= walkDyckPath(groupZulu)  # noqa: PLW2901
 
-				# bridgesAligned
-				if groupAlphaCurves and groupZuluCurves and (groupAlphaIsEven or groupZuluIsEven):
-					if groupAlphaIsEven and not groupZuluIsEven:
-						groupAlpha ^= walkDyckPath(groupAlpha)  # noqa: PLW2901
-					elif groupZuluIsEven and not groupAlphaIsEven:
-						groupZulu ^= walkDyckPath(groupZulu)  # noqa: PLW2901
+				curveLocationAnalysis: int = ((groupZulu >> 2) << 1) | (groupAlpha >> 2)
+				if curveLocationAnalysis < curveLocationsMAXIMUM:
+					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
-					curveLocationAnalysis: int = ((groupZulu >> 2) << 1) | (groupAlpha >> 2)
-					if curveLocationAnalysis < curveLocationsMAXIMUM:
-						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
-
-			dictionaryCurveGroups = convertDictionaryCurveLocations2CurveGroups(dictionaryCurveLocations)
-			dictionaryCurveLocations = {}
-			tqdmBar.update(-1)
+		dictionaryCurveGroups = convertDictionaryCurveLocations2CurveGroups(dictionaryCurveLocations)
+		dictionaryCurveLocations = {}
 	return (bridges, dictionaryCurveGroups)
 
 @cache
@@ -121,7 +103,6 @@ def _flipTheExtra_0b1(avoidingLookupsInPerRowLoop: int) -> numpy.uint64:
 	return numpy.uint64(avoidingLookupsInPerRowLoop ^ walkDyckPath(avoidingLookupsInPerRowLoop))
 
 flipTheExtra_0b1 = numpy.vectorize(_flipTheExtra_0b1, otypes=[numpy.uint64])
-"""NOTE NumPy docs: The vectorize function is provided primarily for convenience, not for performance. The implementation is essentially a for loop."""
 
 def aggregateCurveLocations2CurveGroups(arrayCurveLocations: DataArray2columns) -> DataArray3columns:
 	"""Deduplicate `curveLocations` by summing `distinctCrossings`; create curve groups."""
@@ -140,8 +121,6 @@ def aggregateCurveLocations2CurveGroups(arrayCurveLocations: DataArray2columns) 
 def aggregateBridgesSimple2CurveLocations(arrayCurveLocations: DataArray2columns, indexStart: int, curveLocations: DataArray1D, distinctCrossings: DataArray1D) -> int:
 	"""Deduplicate `curveLocations` by summing `distinctCrossings`."""
 	miniCurveLocations, indices = numpy.unique_inverse(curveLocations[numpy.flatnonzero(curveLocations)])
-	global COUNTERcurveLocations
-	COUNTERcurveLocations.update(curveLocations[numpy.flatnonzero(curveLocations)])  # noqa: ERA001
 
 	indexStop: int = indexStart + int(miniCurveLocations.size)
 	arrayCurveLocations[indexStart:indexStop, columnCurveLocations] = miniCurveLocations
@@ -156,8 +135,6 @@ def aggregateBridgesSimple2CurveLocations(arrayCurveLocations: DataArray2columns
 def aggregateData2CurveLocations(arrayCurveLocations: DataArray2columns, indexStart: int, curveLocations: DataArray1D, distinctCrossings: DataArray1D, selector: SelectorBoolean, limiter: numpy.uint64) -> int:
 	"""Deduplicate `curveLocations` by summing `distinctCrossings`."""
 	miniCurveLocations, indices = numpy.unique_inverse(curveLocations[numpy.flatnonzero(curveLocations < limiter)])
-	global COUNTERcurveLocations
-	COUNTERcurveLocations.update(curveLocations[numpy.flatnonzero(curveLocations < limiter)])  # noqa: ERA001
 
 	indexStop: int = indexStart + int(miniCurveLocations.size)
 	arrayCurveLocations[indexStart:indexStop, columnCurveLocations] = miniCurveLocations
@@ -170,208 +147,200 @@ def aggregateData2CurveLocations(arrayCurveLocations: DataArray2columns, indexSt
 	return indexStop
 
 def convertDictionaryCurveGroups2array(dictionaryCurveGroups: dict[tuple[int, int], int]) -> DataArray3columns:
-	"""I greatly dislike this logic."""
 	arrayCurveGroups: DataArray3columns = numpy.tile(numpy.fromiter(dictionaryCurveGroups.values(), dtype=numpy.uint64), (columnsArrayCurveGroups, 1)).T
 	arrayCurveGroups[:, columnGroupAlpha:columnGroupZulu+1] = numpy.array(list(dictionaryCurveGroups.keys()), dtype=numpy.uint64)
 	return arrayCurveGroups
 
 def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: int = 0) -> tuple[int, DataArray3columns]:
-	global COUNTERcurveLocations
-	with tqdm(total=bridges, initial=bridges, disable=True) as tqdmBar:
-		while bridges > bridgesMinimum and int(arrayCurveGroups[:, columnDistinctCrossings].max()).bit_length() < Z0Z_bit_lengthSafetyLimit:
-			COUNTERcurveLocations = Counter()  # noqa: ERA001
-			bridges -= 1
-			curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1 << (2 * bridges + 4))
+	while bridges > bridgesMinimum and int(arrayCurveGroups[:, columnDistinctCrossings].max()).bit_length() < Z0Z_bit_lengthSafetyLimit:
+		bridges -= 1
+		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1 << (2 * bridges + 4))
 
-			set_threshold(1, 1, 1)  # Re-enable the garbage collector.
+		set_threshold(1, 1, 1)  # Re-enable the garbage collector.
 
-			allocateGroupAlphaCurves: int = (arrayCurveGroups[:, columnGroupAlpha] > numpy.uint64(1)).sum()
-			allocateGroupZuluCurves: int = (arrayCurveGroups[:, columnGroupZulu] > numpy.uint64(1)).sum()
+		allocateGroupAlphaCurves: int = (arrayCurveGroups[:, columnGroupAlpha] > numpy.uint64(1)).sum()
+		allocateGroupZuluCurves: int = (arrayCurveGroups[:, columnGroupZulu] > numpy.uint64(1)).sum()
 
-			selectBridgesAligned: SelectorBoolean = numpy.empty_like(arrayCurveGroups[:, columnGroupAlpha], dtype=bool)
-			numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupAlpha], 1), 0, out=selectBridgesAligned, dtype=bool)
-			numpy.bitwise_or(selectBridgesAligned, (numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupZulu], 1), 0, dtype=bool)), out=selectBridgesAligned)
-			numpy.bitwise_and(selectBridgesAligned, (arrayCurveGroups[:, columnGroupAlpha] > numpy.uint64(1)), out=selectBridgesAligned)
-			numpy.bitwise_and(selectBridgesAligned, (arrayCurveGroups[:, columnGroupZulu] > numpy.uint64(1)), out=selectBridgesAligned)
+		selectBridgesAligned: SelectorBoolean = numpy.empty_like(arrayCurveGroups[:, columnGroupAlpha], dtype=bool)
+		numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupAlpha], 1), 0, out=selectBridgesAligned, dtype=bool)
+		numpy.bitwise_or(selectBridgesAligned, (numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupZulu], 1), 0, dtype=bool)), out=selectBridgesAligned)
+		numpy.bitwise_and(selectBridgesAligned, (arrayCurveGroups[:, columnGroupAlpha] > numpy.uint64(1)), out=selectBridgesAligned)
+		numpy.bitwise_and(selectBridgesAligned, (arrayCurveGroups[:, columnGroupZulu] > numpy.uint64(1)), out=selectBridgesAligned)
 
-			allocateBridgesAligned: int = int(numpy.count_nonzero(selectBridgesAligned))
+		allocateBridgesAligned: int = int(numpy.count_nonzero(selectBridgesAligned))
 
 # ----------------------------------------------- bridgesSimple -------------------------------------------------------
-			curveLocationsBridgesSimpleLessThanMaximum: DataArray1D = arrayCurveGroups[:, columnGroupAlpha].copy()
-			numpy.left_shift(curveLocationsBridgesSimpleLessThanMaximum, 2, out=curveLocationsBridgesSimpleLessThanMaximum)
-			numpy.bitwise_or(curveLocationsBridgesSimpleLessThanMaximum, numpy.left_shift(arrayCurveGroups[:, columnGroupZulu], 3), out=curveLocationsBridgesSimpleLessThanMaximum)
-			numpy.bitwise_or(curveLocationsBridgesSimpleLessThanMaximum, 3, out=curveLocationsBridgesSimpleLessThanMaximum)
-			curveLocationsBridgesSimpleLessThanMaximum[curveLocationsBridgesSimpleLessThanMaximum >= curveLocationsMAXIMUM] = 0
+		curveLocationsBridgesSimpleLessThanMaximum: DataArray1D = arrayCurveGroups[:, columnGroupZulu].copy()
+		numpy.left_shift(curveLocationsBridgesSimpleLessThanMaximum, 1, out=curveLocationsBridgesSimpleLessThanMaximum)
+		numpy.bitwise_or(curveLocationsBridgesSimpleLessThanMaximum, arrayCurveGroups[:, columnGroupAlpha], out=curveLocationsBridgesSimpleLessThanMaximum)
+		numpy.left_shift(curveLocationsBridgesSimpleLessThanMaximum, 2, out=curveLocationsBridgesSimpleLessThanMaximum)
+		numpy.bitwise_or(curveLocationsBridgesSimpleLessThanMaximum, 3, out=curveLocationsBridgesSimpleLessThanMaximum)
+		curveLocationsBridgesSimpleLessThanMaximum[curveLocationsBridgesSimpleLessThanMaximum >= curveLocationsMAXIMUM] = 0
 
-			allocateBridgesSimple: int = int(numpy.count_nonzero(curveLocationsBridgesSimpleLessThanMaximum))
+		allocateBridgesSimple: int = int(numpy.count_nonzero(curveLocationsBridgesSimpleLessThanMaximum))
 
 # ----------------------------------------------- arrayCurveLocations -------------------------------------------------
-			rowsAllocatedTotal: int = allocateGroupAlphaCurves + allocateGroupZuluCurves + allocateBridgesSimple + allocateBridgesAligned
-			arrayCurveLocations: DataArray2columns = numpy.zeros((rowsAllocatedTotal, columnsArrayCurveLocations), dtype=arrayCurveGroups.dtype)
+		rowsAllocatedTotal: int = allocateGroupAlphaCurves + allocateGroupZuluCurves + allocateBridgesSimple + allocateBridgesAligned
+		arrayCurveLocations: DataArray2columns = numpy.zeros((rowsAllocatedTotal, columnsArrayCurveLocations), dtype=arrayCurveGroups.dtype)
 
-			rowsAggregatedTotal: int = 0
-			rowsDeallocatedTotal: int = 0
+		rowsAggregatedTotal: int = 0
+		rowsDeallocatedTotal: int = 0
 
 # ----------------------------------------------- bridgesSimple -------------------------------------------------------
-			rowsAggregatedTotal = aggregateBridgesSimple2CurveLocations(arrayCurveLocations
-				, rowsAggregatedTotal
-				, curveLocationsBridgesSimpleLessThanMaximum
-				, arrayCurveGroups[:, columnDistinctCrossings]
-			)
+		rowsAggregatedTotal = aggregateBridgesSimple2CurveLocations(arrayCurveLocations
+			, rowsAggregatedTotal
+			, curveLocationsBridgesSimpleLessThanMaximum
+			, arrayCurveGroups[:, columnDistinctCrossings]
+		)
 
-			rowsDeallocatedTotal += allocateBridgesSimple
-			arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
+		rowsDeallocatedTotal += allocateBridgesSimple
+		arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
 
-			curveLocationsBridgesSimpleLessThanMaximum = None; del curveLocationsBridgesSimpleLessThanMaximum  # pyright: ignore[reportAssignmentType] # noqa: E702
-			del allocateBridgesSimple
-			goByeBye()
+		curveLocationsBridgesSimpleLessThanMaximum = None; del curveLocationsBridgesSimpleLessThanMaximum  # pyright: ignore[reportAssignmentType] # noqa: E702
+		del allocateBridgesSimple
+		goByeBye()
 
 # ----------------------------------------------- groupAlpha ----------------------------------------------------------
-			selectGroupAlphaCurves: SelectorBoolean = arrayCurveGroups[:, columnGroupAlpha] > numpy.uint64(1)
-			curveLocationsGroupAlpha: DataArray1D = arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha].copy()
-			numpy.right_shift(curveLocationsGroupAlpha, 2, out=curveLocationsGroupAlpha)
-			numpy.bitwise_or(curveLocationsGroupAlpha, numpy.left_shift(arrayCurveGroups[selectGroupAlphaCurves, columnGroupZulu], 3), out=curveLocationsGroupAlpha)
-			numpy.bitwise_or(curveLocationsGroupAlpha, numpy.left_shift(numpy.subtract(numpy.uint64(1), numpy.bitwise_and(arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha], 1)), 1), out=curveLocationsGroupAlpha)
+		selectGroupAlphaCurves: SelectorBoolean = arrayCurveGroups[:, columnGroupAlpha] > numpy.uint64(1)
+		curveLocationsGroupAlpha: DataArray1D = arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha].copy()
 
-			rowsAggregatedTotal = aggregateData2CurveLocations(arrayCurveLocations
-				, rowsAggregatedTotal
-				, curveLocationsGroupAlpha
-				, arrayCurveGroups[:, columnDistinctCrossings]
-				, selectGroupAlphaCurves
-				, curveLocationsMAXIMUM
-			)
+		numpy.bitwise_and(curveLocationsGroupAlpha, 1, out=curveLocationsGroupAlpha)
+		numpy.subtract(numpy.uint64(1), curveLocationsGroupAlpha, out=curveLocationsGroupAlpha)
+		numpy.left_shift(curveLocationsGroupAlpha, 3, out=curveLocationsGroupAlpha)
+		numpy.bitwise_or(curveLocationsGroupAlpha, arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha], out=curveLocationsGroupAlpha)
+		numpy.right_shift(curveLocationsGroupAlpha, 2, out=curveLocationsGroupAlpha)
 
-			rowsDeallocatedTotal += allocateGroupAlphaCurves
-			arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
+		arrayLockbox: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint8]] = numpy.full_like(a=curveLocationsGroupAlpha, fill_value=numpy.uint8(0b111), dtype=numpy.uint8)
+		numpy.bitwise_and(arrayLockbox, curveLocationsGroupAlpha, out=arrayLockbox, dtype=numpy.uint8)
+		numpy.right_shift(curveLocationsGroupAlpha, 3, out=curveLocationsGroupAlpha)
+		numpy.bitwise_or(curveLocationsGroupAlpha, arrayCurveGroups[selectGroupAlphaCurves, columnGroupZulu], out=curveLocationsGroupAlpha)
+		numpy.left_shift(curveLocationsGroupAlpha, 3, out=curveLocationsGroupAlpha)
+		numpy.bitwise_or(curveLocationsGroupAlpha, arrayLockbox, out=curveLocationsGroupAlpha)
 
-			curveLocationsGroupAlpha = None; del curveLocationsGroupAlpha  # pyright: ignore[reportAssignmentType] # noqa: E702
-			del allocateGroupAlphaCurves
-			selectGroupAlphaCurves = None; del selectGroupAlphaCurves # pyright: ignore[reportAssignmentType]  # noqa: E702
-			goByeBye()
+		arrayLockbox = None; del arrayLockbox  # pyright: ignore[reportAssignmentType] # noqa: E702
+		goByeBye()
+
+		rowsAggregatedTotal = aggregateData2CurveLocations(arrayCurveLocations
+			, rowsAggregatedTotal
+			, curveLocationsGroupAlpha
+			, arrayCurveGroups[:, columnDistinctCrossings]
+			, selectGroupAlphaCurves
+			, curveLocationsMAXIMUM
+		)
+
+		rowsDeallocatedTotal += allocateGroupAlphaCurves
+		arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
+
+		curveLocationsGroupAlpha = None; del curveLocationsGroupAlpha  # pyright: ignore[reportAssignmentType] # noqa: E702
+		del allocateGroupAlphaCurves
+		selectGroupAlphaCurves = None; del selectGroupAlphaCurves # pyright: ignore[reportAssignmentType]  # noqa: E702
+		goByeBye()
 
 # ----------------------------------------------- groupZulu -----------------------------------------------------------
-			selectGroupZuluCurves: SelectorBoolean = arrayCurveGroups[:, columnGroupZulu] > numpy.uint64(1)
-			curveLocationsGroupZulu: DataArray1D = arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu].copy()
-			numpy.right_shift(curveLocationsGroupZulu, 1, out=curveLocationsGroupZulu)
-			numpy.bitwise_or(curveLocationsGroupZulu, numpy.left_shift(arrayCurveGroups[selectGroupZuluCurves, columnGroupAlpha], 2), out=curveLocationsGroupZulu)
-			numpy.bitwise_or(curveLocationsGroupZulu, numpy.subtract(numpy.uint64(1), numpy.bitwise_and(arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu], 1)), out=curveLocationsGroupZulu)
+		selectGroupZuluCurves: SelectorBoolean = arrayCurveGroups[:, columnGroupZulu] > numpy.uint64(1)
+		curveLocationsGroupZulu: DataArray1D = arrayCurveGroups[selectGroupZuluCurves, columnGroupAlpha].copy()
+		numpy.left_shift(curveLocationsGroupZulu, 2, out=curveLocationsGroupZulu)
+# NOTE (groupAlpha << 2)
 
-			rowsAggregatedTotal = aggregateData2CurveLocations(arrayCurveLocations
-				, rowsAggregatedTotal
-				, curveLocationsGroupZulu
-				, arrayCurveGroups[:, columnDistinctCrossings]
-				, selectGroupZuluCurves
-				, curveLocationsMAXIMUM
-			)
 
-			rowsDeallocatedTotal += allocateGroupZuluCurves
-			arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
+		numpy.bitwise_or(curveLocationsGroupZulu, numpy.subtract(numpy.uint64(1), numpy.bitwise_and(arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu], 1)), out=curveLocationsGroupZulu)
+# TODO | (1 - (groupZulu & 1))
 
-			curveLocationsGroupZulu = None; del curveLocationsGroupZulu  # pyright: ignore[reportAssignmentType] # noqa: E702
-			del allocateGroupZuluCurves
-			selectGroupZuluCurves = None; del selectGroupZuluCurves # pyright: ignore[reportAssignmentType]  # noqa: E702
-			goByeBye()
+
+
+
+# NOTE | (groupZulu >> 1)
+		numpy.left_shift(curveLocationsGroupZulu, 1, out=curveLocationsGroupZulu)
+		numpy.bitwise_or(curveLocationsGroupZulu, arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu], out=curveLocationsGroupZulu)
+		numpy.right_shift(curveLocationsGroupZulu, 1, out=curveLocationsGroupZulu)
+
+
+		rowsAggregatedTotal = aggregateData2CurveLocations(arrayCurveLocations
+			, rowsAggregatedTotal
+			, curveLocationsGroupZulu
+			, arrayCurveGroups[:, columnDistinctCrossings]
+			, selectGroupZuluCurves
+			, curveLocationsMAXIMUM
+		)
+
+		rowsDeallocatedTotal += allocateGroupZuluCurves
+		arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
+
+		curveLocationsGroupZulu = None; del curveLocationsGroupZulu  # pyright: ignore[reportAssignmentType] # noqa: E702
+		del allocateGroupZuluCurves
+		selectGroupZuluCurves = None; del selectGroupZuluCurves # pyright: ignore[reportAssignmentType]  # noqa: E702
+		goByeBye()
 
 # ----------------------------------------------- bridgesAligned ------------------------------------------------------
 # `bridgesAligned` = `bridgesGroupAlphaPairedToOdd` UNION WITH `bridgesGroupZuluPairedToOdd` UNION WITH `bridgesAlignedAtEven`
 
 # bridgesAligned -------------------------------- bridgesGroupAlphaPairedToOdd ----------------------------------------
 # NOTE this code block MODIFIES `arrayCurveGroups` NOTE
-			set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
+		set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
 
-			selectGroupAlphaAtEven: SelectorBoolean = numpy.empty_like(arrayCurveGroups[:, columnGroupAlpha], dtype=bool)
-			numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupAlpha], 1), 0, out=selectGroupAlphaAtEven, dtype=bool)
+		selectGroupAlphaAtEven: SelectorBoolean = numpy.empty_like(arrayCurveGroups[:, columnGroupAlpha], dtype=bool)
+		numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupAlpha], 1), 0, out=selectGroupAlphaAtEven, dtype=bool)
 
-			selectGroupZuluAtEven: SelectorBoolean = numpy.empty_like(arrayCurveGroups[:, columnGroupZulu], dtype=bool)
-			numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupZulu], 1), 0, out=selectGroupZuluAtEven, dtype=bool)
+		selectGroupZuluAtEven: SelectorBoolean = numpy.empty_like(arrayCurveGroups[:, columnGroupZulu], dtype=bool)
+		numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupZulu], 1), 0, out=selectGroupZuluAtEven, dtype=bool)
 
-			selectBridgesGroupAlphaPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & selectGroupAlphaAtEven & (~selectGroupZuluAtEven))
-			arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
+		selectBridgesGroupAlphaPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & selectGroupAlphaAtEven & (~selectGroupZuluAtEven))
+		arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
 
-			selectBridgesGroupAlphaPairedToOdd = None; del selectBridgesGroupAlphaPairedToOdd # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectBridgesGroupAlphaPairedToOdd = None; del selectBridgesGroupAlphaPairedToOdd # pyright: ignore[reportAssignmentType]  # noqa: E702
 
 # bridgesAligned -------------------------------- bridgesGroupZuluPairedToOdd ------------------------------------------
 # NOTE this code block MODIFIES `arrayCurveGroups` NOTE
-			set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
-			selectBridgesGroupZuluPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & (~selectGroupAlphaAtEven) & selectGroupZuluAtEven)
-			arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu])
+		set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
+		selectBridgesGroupZuluPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & (~selectGroupAlphaAtEven) & selectGroupZuluAtEven)
+		arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu])
 
-			set_threshold(1, 1, 1)  # Re-enable the garbage collector.
-			selectBridgesGroupZuluPairedToOdd = None; del selectBridgesGroupZuluPairedToOdd # pyright: ignore[reportAssignmentType]  # noqa: E702
-			selectGroupAlphaAtEven = None; del selectGroupAlphaAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
-			selectGroupZuluAtEven = None; del selectGroupZuluAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
-			goByeBye()
+		set_threshold(1, 1, 1)  # Re-enable the garbage collector.
+		selectBridgesGroupZuluPairedToOdd = None; del selectBridgesGroupZuluPairedToOdd # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectGroupAlphaAtEven = None; del selectGroupAlphaAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectGroupZuluAtEven = None; del selectGroupZuluAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
+		goByeBye()
 
 # NOTE: All computations for `bridgesAlignedAtEven` are handled by the computations for `bridgesAligned`.
 
 # ----------------------------------------------- bridgesAligned ------------------------------------------------------
 
-			curveLocationsBridgesAlignedLessThanMaximum: DataArray1D = numpy.zeros((selectBridgesAligned.sum(),), dtype=numpy.uint64)
-			numpy.right_shift(arrayCurveGroups[selectBridgesAligned, columnGroupZulu], 2, out=curveLocationsBridgesAlignedLessThanMaximum)
-			curveLocationsBridgesAlignedLessThanMaximum <<= 1
-			curveLocationsBridgesAlignedLessThanMaximum |= arrayCurveGroups[selectBridgesAligned, columnGroupAlpha] >> 2
-			curveLocationsBridgesAlignedLessThanMaximum[curveLocationsBridgesAlignedLessThanMaximum >= curveLocationsMAXIMUM] = 0
+		curveLocationsBridgesAlignedLessThanMaximum: DataArray1D = numpy.zeros((selectBridgesAligned.sum(),), dtype=numpy.uint64)
+		numpy.right_shift(arrayCurveGroups[selectBridgesAligned, columnGroupZulu], 2, out=curveLocationsBridgesAlignedLessThanMaximum)
+		curveLocationsBridgesAlignedLessThanMaximum <<= 1
+		curveLocationsBridgesAlignedLessThanMaximum |= arrayCurveGroups[selectBridgesAligned, columnGroupAlpha] >> 2
+		curveLocationsBridgesAlignedLessThanMaximum[curveLocationsBridgesAlignedLessThanMaximum >= curveLocationsMAXIMUM] = 0
 
-			COUNTERcurveLocations.update(curveLocationsBridgesAlignedLessThanMaximum[numpy.flatnonzero(curveLocationsBridgesAlignedLessThanMaximum)])  # noqa: ERA001
+		Z0Z_indexStart: int = rowsAggregatedTotal
+		rowsAggregatedTotal += int(numpy.count_nonzero(curveLocationsBridgesAlignedLessThanMaximum))
 
-			Z0Z_indexStart: int = rowsAggregatedTotal
-			rowsAggregatedTotal += int(numpy.count_nonzero(curveLocationsBridgesAlignedLessThanMaximum))
+		arrayCurveLocations[Z0Z_indexStart:rowsAggregatedTotal, columnCurveLocations] = curveLocationsBridgesAlignedLessThanMaximum[numpy.flatnonzero(curveLocationsBridgesAlignedLessThanMaximum)]
+		arrayCurveLocations[Z0Z_indexStart:rowsAggregatedTotal, columnDistinctCrossings] = arrayCurveGroups[(numpy.flatnonzero(selectBridgesAligned)[numpy.flatnonzero(curveLocationsBridgesAlignedLessThanMaximum)]), columnDistinctCrossings]
 
-			arrayCurveLocations[Z0Z_indexStart:rowsAggregatedTotal, columnCurveLocations] = curveLocationsBridgesAlignedLessThanMaximum[numpy.flatnonzero(curveLocationsBridgesAlignedLessThanMaximum)]
-			arrayCurveLocations[Z0Z_indexStart:rowsAggregatedTotal, columnDistinctCrossings] = arrayCurveGroups[(numpy.flatnonzero(selectBridgesAligned)[numpy.flatnonzero(curveLocationsBridgesAlignedLessThanMaximum)]), columnDistinctCrossings]
+		rowsDeallocatedTotal += allocateBridgesAligned
+		arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
 
-			rowsDeallocatedTotal += allocateBridgesAligned
-			arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
-
-			arrayCurveGroups = None; del arrayCurveGroups # pyright: ignore[reportAssignmentType]  # noqa: E702
-			curveLocationsBridgesAlignedLessThanMaximum = None; del curveLocationsBridgesAlignedLessThanMaximum  # pyright: ignore[reportAssignmentType] # noqa: E702
-			del allocateBridgesAligned
-			del curveLocationsMAXIMUM
-			del rowsAllocatedTotal
-			del rowsDeallocatedTotal
-			del Z0Z_indexStart
-			del rowsAggregatedTotal
-			selectBridgesAligned = None; del selectBridgesAligned  # pyright: ignore[reportAssignmentType] # noqa: E702
-			goByeBye()
+		arrayCurveGroups = None; del arrayCurveGroups # pyright: ignore[reportAssignmentType]  # noqa: E702
+		curveLocationsBridgesAlignedLessThanMaximum = None; del curveLocationsBridgesAlignedLessThanMaximum  # pyright: ignore[reportAssignmentType] # noqa: E702
+		del allocateBridgesAligned
+		del curveLocationsMAXIMUM
+		del rowsAllocatedTotal
+		del rowsDeallocatedTotal
+		del Z0Z_indexStart
+		del rowsAggregatedTotal
+		selectBridgesAligned = None; del selectBridgesAligned  # pyright: ignore[reportAssignmentType] # noqa: E702
+		goByeBye()
 
 # ----------------------------------------------- aggregation ---------------------------------------------------------
-			arrayCurveGroups = aggregateCurveLocations2CurveGroups(arrayCurveLocations)
+		arrayCurveGroups = aggregateCurveLocations2CurveGroups(arrayCurveLocations)
 
-			arrayCurveLocations = None; del arrayCurveLocations # pyright: ignore[reportAssignmentType]  # noqa: E702
-			goByeBye()
-
-			tqdmBar.update(-1)
-
-			global oeisID, oeis_n
-			print(oeisID, oeis_n, sep='\t', end='\t')  # noqa: ERA001
-			# pprint(COUNTERcurveLocations)  # noqa: ERA001
-			# end="\n"  # noqa: ERA001
-			# print(f"{len(COUNTERcurveLocations.keys())=}", end=end) # noqa: ERA001
-			# print(f"{float(numpy.average(list(COUNTERcurveLocations.values())))=}", end=end) # noqa: ERA001
-			# print(f"{int(max(COUNTERcurveLocations.keys())).bit_length()=}", end=end) # noqa: ERA001
-			# print(f"{int(min(COUNTERcurveLocations.keys()))=}", end=end) # noqa: ERA001
-			# print(f"{COUNTERcurveLocations.total()=}", end=end) # noqa: ERA001
-			# print(f"{int(COUNTERcurveLocations.most_common(1)[0][0])=}", end=end) # noqa: ERA001
-			# print(f"{COUNTERcurveLocations.most_common(1)[0][1]=}", end=end) # noqa: ERA001
-			# print(f"{bridges=}", end=end) # noqa: ERA001
-			# print() # noqa: ERA001
-			end="\t" # noqa: ERA001
-			print(f"{len(COUNTERcurveLocations.keys())}", end=end) # noqa: ERA001
-			print(f"{float(numpy.average(list(COUNTERcurveLocations.values())))}", end=end) # noqa: ERA001
-			print(f"{int(max(COUNTERcurveLocations.keys())).bit_length()}", end=end) # noqa: ERA001
-			print(f"{int(min(COUNTERcurveLocations.keys()))}", end=end) # noqa: ERA001
-			print(f"{COUNTERcurveLocations.total()}", end=end) # noqa: ERA001
-			print(f"{int(COUNTERcurveLocations.most_common(1)[0][0])}", end=end) # noqa: ERA001
-			print(f"{COUNTERcurveLocations.most_common(1)[0][1]}", end=end) # noqa: ERA001
-			print(f"{bridges}", end=end) # noqa: ERA001
-			print() # noqa: ERA001
+		arrayCurveLocations = None; del arrayCurveLocations # pyright: ignore[reportAssignmentType]  # noqa: E702
+		goByeBye()
 
 	return (bridges, arrayCurveGroups)
 
 def convertArrayCurveGroups2dictionaryCurveGroups(arrayCurveGroups: DataArray3columns) -> dict[tuple[int, int], int]:
 	return {(int(row[columnGroupAlpha]), int(row[columnGroupZulu])): int(row[columnDistinctCrossings]) for row in arrayCurveGroups}
-
-COUNTERcurveLocations = Counter()  # noqa: ERA001
 
 def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	"""Compute a(n) meanders with the transfer matrix algorithm.
@@ -416,34 +385,13 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	2. When the bit width of the bit-packed integers connected to `bridges` is small enough to use `numpy.uint64`, I switch to NumPy for the heavy lifting.
 	3. When `distinctCrossings` subtotals might exceed 64 bits, I must switch back to Python primitives.
 	"""
-# NOTE `count64_bridgesMaximum = 28` is based on empirical evidence. I do not have a mathematical proof that it is correct.
 	count64_bridgesMaximum = 28
 	dictionaryCurveGroups: dict[tuple[int, int], int] = convertDictionaryCurveLocations2CurveGroups(dictionaryCurveLocations)
 
 	if n >= count64_bridgesMaximum:
 		n, dictionaryCurveGroups = count(n, dictionaryCurveGroups, count64_bridgesMaximum)
 		goByeBye()
-	# global COUNTERcurveLocations
-	# COUNTERcurveLocations = Counter(dictionaryCurveLocations.keys())  # noqa: ERA001
 	n, arrayCurveGroups = count64(n, convertDictionaryCurveGroups2array(dictionaryCurveGroups))
-	# pprint(COUNTERcurveLocations) # noqa: ERA001
-	# end="\n" # noqa: ERA001
-	# print(f"{len(COUNTERcurveLocations.keys())=}", end=end) # noqa: ERA001
-	# print(f"{float(numpy.average(list(COUNTERcurveLocations.values())))=}", end=end) # noqa: ERA001
-	# print(f"{int(max(COUNTERcurveLocations.keys())).bit_length()=}", end=end) # noqa: ERA001
-	# print(f"{int(min(COUNTERcurveLocations.keys()))=}", end=end) # noqa: ERA001
-	# print(f"{COUNTERcurveLocations.total()=}", end=end) # noqa: ERA001
-	# print(f"{int(COUNTERcurveLocations.most_common(1)[0][0])=}", end=end) # noqa: ERA001
-	# print(f"{COUNTERcurveLocations.most_common(1)[0][1]=}", end=end) # noqa: ERA001
-	# end="\t" # noqa: ERA001
-	# print(f"{len(COUNTERcurveLocations.keys())}", end=end) # noqa: ERA001
-	# print(f"{float(numpy.average(list(COUNTERcurveLocations.values())))}", end=end) # noqa: ERA001
-	# print(f"{int(max(COUNTERcurveLocations.keys())).bit_length()}", end=end) # noqa: ERA001
-	# print(f"{int(min(COUNTERcurveLocations.keys()))}", end=end) # noqa: ERA001
-	# print(f"{COUNTERcurveLocations.total()}", end=end) # noqa: ERA001
-	# print(f"{int(COUNTERcurveLocations.most_common(1)[0][0])}", end=end) # noqa: ERA001
-	# print(f"{COUNTERcurveLocations.most_common(1)[0][1]}", end=end)  # noqa: ERA001
-	# print()  # noqa: ERA001
 	if n > 0:
 		goByeBye()
 
@@ -462,14 +410,8 @@ def A000682getCurveLocations(n: int) -> dict[int, int]:
 		listCurveLocations.append((curveStart << 1) | curveStart)
 	return dict.fromkeys(listCurveLocations, 1)
 
-oeisID = ""
-oeis_n = 0
-
 @cache
 def A000682(n: int) -> int:
-	global oeisID, oeis_n
-	oeisID = "A000682"
-	oeis_n = n
 	return doTheNeedful(n - 1, A000682getCurveLocations(n - 1))
 
 def A005316getCurveLocations(n: int) -> dict[int, int]:
@@ -480,7 +422,4 @@ def A005316getCurveLocations(n: int) -> dict[int, int]:
 
 @cache
 def A005316(n: int) -> int:
-	global oeisID, oeis_n
-	oeisID = "A005316"
-	oeis_n = n
 	return doTheNeedful(n - 1, A005316getCurveLocations(n - 1))
