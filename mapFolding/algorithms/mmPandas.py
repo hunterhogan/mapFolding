@@ -1,4 +1,4 @@
-# ruff noqa
+# ruff: noqa
 # ruff: noqa: D100 D103 ERA001 F841
 """
 You should never modify something you are iterating over. This is not guaranteed to work in all cases.
@@ -12,8 +12,8 @@ import pandas
 datatypeCurveLocationsHARDCODED = numpy.uint64
 datatypeDistinctCrossingsHARDCODED = numpy.uint64
 
-locator64GroupAlpha: int = 0x5555555555555555
-locator64GroupZulu: int = 0xaaaaaaaaaaaaaaaa
+locator64GroupAlpha = numpy.uint64(0x5555555555555555)
+locator64GroupZulu = numpy.uint64(0xaaaaaaaaaaaaaaaa)
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -29,32 +29,51 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
 			break
 	return flipExtra_0b1_Here
 
+@cache
+def _flipTheExtra_0b1(intWithExtra_0b1: int) -> int:
+	return intWithExtra_0b1 ^ walkDyckPath(intWithExtra_0b1)
+
+flipTheExtra_0b1 = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
+
 def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 
 	def computeCurveGroups() -> None:
 		dataframeCurveLocations['groupAlpha'] = dataframeCurveLocations['curveLocations'] & locator64GroupAlpha
-		dataframeCurveLocations['groupZulu'] = (dataframeCurveLocations['curveLocations'] & locator64GroupZulu) // 2**1
+		dataframeCurveLocations['groupZulu'] = dataframeCurveLocations['curveLocations'] & locator64GroupZulu
+		dataframeCurveLocations['groupZulu'] //= 2**1
+
+	def outfitDataframeCurveLocations() -> None:
+		dataframeCurveLocations['curveLocations'] = dataframeAnalyzed['analyzed']
+		dataframeCurveLocations['distinctCrossings'] = dataframeAnalyzed['distinctCrossings']
+		dataframeCurveLocations['alignAt'] = 'oddBoth'
+		dataframeAnalyzed['analyzed'] = None
+		dataframeAnalyzed['distinctCrossings'] = None
+		computeCurveGroups()
 
 	datatypeCurveLocations = datatypeCurveLocationsHARDCODED
 	datatypeDistinctCrossings = datatypeDistinctCrossingsHARDCODED
 
 	CategoriesAlignAt = pandas.CategoricalDtype(categories=['evenAlpha', 'evenZulu', 'evenBoth', 'oddBoth'], ordered=False)
 
+	dataframeAnalyzed = pandas.DataFrame({
+		'analyzed': pandas.Series(name='analyzed', data=list(dictionaryCurveLocations.keys()), dtype=datatypeCurveLocations)
+		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=list(dictionaryCurveLocations.values()), dtype=datatypeDistinctCrossings)
+		}
+	)
+
 	dataframeCurveLocations = pandas.DataFrame({
-		'curveLocations': pandas.Series(name='curveLocations', data=list(dictionaryCurveLocations.keys()), dtype=datatypeCurveLocations)
+		'curveLocations': pandas.Series(name='curveLocations', data=None, dtype=datatypeCurveLocations)
 		, 'groupAlpha': pandas.Series(name='groupAlpha', data=None, dtype=datatypeCurveLocations)
 		, 'groupZulu': pandas.Series(name='groupZulu', data=None, dtype=datatypeCurveLocations)
 		, 'analyzed': pandas.Series(name='analyzed', data=None, dtype=datatypeCurveLocations)
-		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=list(dictionaryCurveLocations.values()), dtype=datatypeDistinctCrossings)
+		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=None, dtype=datatypeDistinctCrossings)
 		, 'alignAt': pandas.Series(name='alignAt', data='oddBoth', dtype=CategoriesAlignAt)
 		}
 	)
 
 	for countdown in range((bridges - 1), (0 - 1), -1):
-		dataframeCurveLocations['alignAt'] = 'oddBoth'
 		MAXIMUMcurveLocations: int = 1 << (2 * countdown + 4)
-
-		computeCurveGroups()
+		outfitDataframeCurveLocations()
 
 # ------------------------------------- curveLocationsSimple ----------------------------------------------------------
 # NOTE ((groupAlpha | (groupZulu << 1)) << 2) | 3
@@ -112,8 +131,12 @@ def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 		dataframeCurveLocations.drop(dataframeCurveLocations[dataframeCurveLocations['alignAt'] == 'oddBoth'].index, inplace=True)
 
 # ------------------------------------- modifyGroupAlphaPairedToOdd ---------------------------------------------------
+		# if groupAlphaIsEven and not groupZuluIsEven
+		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'] = datatypeCurveLocations(flipTheExtra_0b1(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha']))
 
 # ------------------------------------- modifyGroupZuluPairedToOdd ----------------------------------------------------
+		# if groupZuluIsEven and not groupAlphaIsEven
+		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'] = datatypeCurveLocations(flipTheExtra_0b1(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu']))
 
 # ------------------------------------- curveLocationsAligned ---------------------------------------------------------
 # NOTE (groupAlpha >> 2) | ((groupZulu >> 2) << 1)
@@ -125,7 +148,7 @@ def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= MAXIMUMcurveLocations, 'analyzed'] = None
 		dataframeAnalyzed = dataframeCurveLocations.groupby('analyzed')['distinctCrossings'].sum().reset_index()
 
-	return int(dataframeCurveLocations['distinctCrossings'].sum())
+	return int(dataframeAnalyzed['distinctCrossings'].sum())
 
 def doTheNeedful(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	return count(bridges, dictionaryCurveLocations)
