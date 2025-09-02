@@ -99,10 +99,10 @@ def count(bridges: int, dictionaryCurveGroups: dict[tuple[int, int], int], bridg
 	return (bridges, dictionaryCurveGroups)
 
 @cache
-def _flipTheExtra_0b1(avoidingLookupsInPerRowLoop: int) -> numpy.uint64:
-	return numpy.uint64(avoidingLookupsInPerRowLoop ^ walkDyckPath(avoidingLookupsInPerRowLoop))
+def _flipTheExtra_0b1(intWithExtra_0b1: int) -> numpy.uint64:
+	return numpy.uint64(intWithExtra_0b1 ^ walkDyckPath(intWithExtra_0b1))
 
-flipTheExtra_0b1 = numpy.vectorize(_flipTheExtra_0b1, otypes=[numpy.uint64])
+flipTheExtra_0b1 = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
 def aggregateCurveLocations2CurveGroups(arrayCurveLocations: DataArray2columns) -> DataArray3columns:
 	"""Deduplicate `curveLocations` by summing `distinctCrossings`; create curve groups."""
@@ -209,7 +209,8 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		numpy.left_shift(curveLocationsGroupAlpha, 3, out=curveLocationsGroupAlpha)
 		numpy.bitwise_or(curveLocationsGroupAlpha, arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha], out=curveLocationsGroupAlpha)
 		numpy.right_shift(curveLocationsGroupAlpha, 2, out=curveLocationsGroupAlpha)
-
+# NOTE (groupAlpha >> 2) | (groupZulu << 3) | ((1 - (groupAlpha & 1)) << 1)
+# TODO eliminate temporary arrayLockbox
 		arrayLockbox: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint8]] = numpy.full_like(a=curveLocationsGroupAlpha, fill_value=numpy.uint8(0b111), dtype=numpy.uint8)
 		numpy.bitwise_and(arrayLockbox, curveLocationsGroupAlpha, out=arrayLockbox, dtype=numpy.uint8)
 		numpy.right_shift(curveLocationsGroupAlpha, 3, out=curveLocationsGroupAlpha)
@@ -242,18 +243,13 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		numpy.left_shift(curveLocationsGroupZulu, 2, out=curveLocationsGroupZulu)
 # NOTE (groupAlpha << 2)
 
-
 		numpy.bitwise_or(curveLocationsGroupZulu, numpy.subtract(numpy.uint64(1), numpy.bitwise_and(arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu], 1)), out=curveLocationsGroupZulu)
 # TODO | (1 - (groupZulu & 1))
-
-
-
 
 # NOTE | (groupZulu >> 1)
 		numpy.left_shift(curveLocationsGroupZulu, 1, out=curveLocationsGroupZulu)
 		numpy.bitwise_or(curveLocationsGroupZulu, arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu], out=curveLocationsGroupZulu)
 		numpy.right_shift(curveLocationsGroupZulu, 1, out=curveLocationsGroupZulu)
-
 
 		rowsAggregatedTotal = aggregateData2CurveLocations(arrayCurveLocations
 			, rowsAggregatedTotal
@@ -286,6 +282,8 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 
 		selectBridgesGroupAlphaPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & selectGroupAlphaAtEven & (~selectGroupZuluAtEven))
 		arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
+# Without changing `flipTheExtra_0b1`, above works, but `out=` does not. Why? Elephino.
+# NOTE flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha], casting='unsafe', out=arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
 
 		selectBridgesGroupAlphaPairedToOdd = None; del selectBridgesGroupAlphaPairedToOdd # pyright: ignore[reportAssignmentType]  # noqa: E702
 
@@ -307,8 +305,9 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 
 		curveLocationsBridgesAlignedLessThanMaximum: DataArray1D = numpy.zeros((selectBridgesAligned.sum(),), dtype=numpy.uint64)
 		numpy.right_shift(arrayCurveGroups[selectBridgesAligned, columnGroupZulu], 2, out=curveLocationsBridgesAlignedLessThanMaximum)
-		curveLocationsBridgesAlignedLessThanMaximum <<= 1
-		curveLocationsBridgesAlignedLessThanMaximum |= arrayCurveGroups[selectBridgesAligned, columnGroupAlpha] >> 2
+		numpy.left_shift(curveLocationsBridgesAlignedLessThanMaximum, 3, out=curveLocationsBridgesAlignedLessThanMaximum)
+		numpy.bitwise_or(curveLocationsBridgesAlignedLessThanMaximum, arrayCurveGroups[selectBridgesAligned, columnGroupAlpha], out=curveLocationsBridgesAlignedLessThanMaximum)
+		numpy.right_shift(curveLocationsBridgesAlignedLessThanMaximum, 2, out=curveLocationsBridgesAlignedLessThanMaximum)
 		curveLocationsBridgesAlignedLessThanMaximum[curveLocationsBridgesAlignedLessThanMaximum >= curveLocationsMAXIMUM] = 0
 
 		Z0Z_indexStart: int = rowsAggregatedTotal
