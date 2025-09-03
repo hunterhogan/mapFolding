@@ -146,8 +146,11 @@ optional-dependencies = { development = [
 ], numba = [
   "numba",
   "numba_progress",
+], pandas = [
+  "pandas",
 ], testing = [
   "numba",
+  "pandas",
   "pytest-cov",
   "pytest-env",
   "pytest-xdist",
