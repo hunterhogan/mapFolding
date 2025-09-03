@@ -1,4 +1,5 @@
 """Count meanders with matrix transfer algorithm using pandas DataFrame."""
+# ruff: noqa: T201 ERA001 T203  # noqa: RUF100
 from functools import cache
 import numpy
 import pandas
@@ -28,38 +29,142 @@ flipTheExtra_0b1 = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
 def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	"""Count meanders with matrix transfer algorithm using pandas DataFrame."""
-	def computeCurveGroups() -> None:
+	def computeCurveGroups(*, alpha: bool = True, zulu: bool = True) -> None:
+		"""Compute `groupAlpha` and `groupZulu` with 'bit-masks' on `curveLocations`.
+
+		3L33T H@X0R
+		-----------
+		- `locatorGroupAlpha`: odd-parity bit-mask
+		- `groupAlpha`: odd-parity bit-masked `curveLocations`
+		- `locatorGroupZulu`: even-parity bit-mask
+		- `groupZulu`: even-parity bit-masked `curveLocations`
+
+		Notes
+		-----
+		In binary, `locatorGroupAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
+		digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
+		from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
+		counting this way, `locatorGroupAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
+		therefore, tend to call `locatorGroupAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
+		mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
+		odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
+		"""
 		nonlocal dataframeCurveLocations
 		bitWidth: int = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
-		locatorGroupAlpha: int = sum(1 << one for one in range(0, bitWidth, 2))
-		locatorGroupZulu: int = sum(1 << one for one in range(1, bitWidth, 2))
-
-		dataframeCurveLocations['groupAlpha'] = dataframeCurveLocations['curveLocations'] & locatorGroupAlpha
-		dataframeCurveLocations['groupZulu'] = dataframeCurveLocations['curveLocations'] & locatorGroupZulu
-		dataframeCurveLocations['groupZulu'] //= 2**1
+# TODO scratch this itch: I _feel_ it must be possible to bifurcate `curvesLocations` with one formula. Even if implementation is infeasible, I want to know.
+		if alpha:
+			locatorGroupAlpha = datatypeCurveLocations(sum(1 << one for one in range(0, bitWidth, 2)))
+			dataframeCurveLocations['groupAlpha'] = dataframeCurveLocations['curveLocations'] & locatorGroupAlpha # pyright: ignore[reportOperatorIssue]
+		if zulu:
+			locatorGroupZulu = datatypeCurveLocations(sum(1 << one for one in range(1, bitWidth, 2)))
+			dataframeCurveLocations['groupZulu'] = dataframeCurveLocations['curveLocations'] & locatorGroupZulu # pyright: ignore[reportOperatorIssue]
+			dataframeCurveLocations['groupZulu'] //= 2**1 # (groupZulu >> 1)
 
 	def outfitDataframeCurveLocations() -> None:
 		nonlocal dataframeAnalyzed, dataframeCurveLocations
-		dataframeCurveLocations['curveLocations'] = dataframeAnalyzed['analyzed'].copy()
-		dataframeCurveLocations['distinctCrossings'] = dataframeAnalyzed['distinctCrossings'].copy()
-		dataframeCurveLocations = dataframeCurveLocations.drop_duplicates(['curveLocations', 'distinctCrossings'])
+		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
+		dataframeCurveLocations['curveLocations'] = dataframeAnalyzed['analyzed']
+		dataframeCurveLocations['distinctCrossings'] = dataframeAnalyzed['distinctCrossings']
 		dataframeCurveLocations['alignAt'] = 'oddBoth'
-		dataframeAnalyzed['analyzed'] = 0
-		dataframeAnalyzed['distinctCrossings'] = 0
-		dataframeAnalyzed = dataframeAnalyzed.drop_duplicates()
+		dataframeCurveLocations['analyzed'] = datatypeCurveLocations(0)
+		dataframeAnalyzed = dataframeAnalyzed.iloc[0:0]
 		computeCurveGroups()
 
-	def analyzeCurveLocations(MAXIMUMcurveLocations: int) -> None:
+	def aggregateCurveLocations(MAXIMUMcurveLocations: int) -> None:
 		nonlocal dataframeAnalyzed, dataframeCurveLocations
-		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= MAXIMUMcurveLocations, 'analyzed'] = 0
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= MAXIMUMcurveLocations, 'analyzed'] = datatypeCurveLocations(0)
+		Z0Z_concat = dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0)].groupby('analyzed')['distinctCrossings'].aggregate('sum').reset_index().astype({'analyzed': datatypeCurveLocations, 'distinctCrossings' : datatypeDistinctCrossings})
+		dataframeAnalyzed = pandas.concat([dataframeAnalyzed, Z0Z_concat], ignore_index=True)
+		dataframeAnalyzed = dataframeAnalyzed.groupby('analyzed')['distinctCrossings'].aggregate('sum').reset_index().astype({'analyzed': datatypeCurveLocations, 'distinctCrossings' : datatypeDistinctCrossings})
 
-		dataframeAnalyzed = dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].add(
-			dataframeCurveLocations.groupby('analyzed')['distinctCrossings'].sum()
-		).reset_index().astype({'analyzed': datatypeCurveLocations, 'distinctCrossings': datatypeDistinctCrossings})
+		dataframeCurveLocations['analyzed'] = datatypeCurveLocations(0)
+		# dataframeAnalyzed.loc[dataframeAnalyzed['analyzed'] == 0, 'distinctCrossings'] = datatypeDistinctCrossings(0)
 
-		dataframeAnalyzed = dataframeAnalyzed.drop(dataframeAnalyzed[dataframeAnalyzed['analyzed'] == 0].index)
+	def analyzeCurveLocationsSimple(MAXIMUMcurveLocations: int) -> None:
+		"""Compute curveLocations with the 'simple' bridges formula.
 
-		dataframeCurveLocations['analyzed'] = 0
+		((groupAlpha | (groupZulu << 1)) << 2) | 3
+		"""
+		nonlocal dataframeCurveLocations
+		dataframeCurveLocations['groupZulu'] *= 2**1 # (groupZulu << 1)
+		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupAlpha'] | dataframeCurveLocations['groupZulu'] # ((groupAlpha | (groupZulu ...))
+		dataframeCurveLocations['analyzed'] *= 2**2 # (... << 2)
+		dataframeCurveLocations['analyzed'] += 3 # (...) | 3
+		"""NOTE about substituting `+= 3` for `|= 3`: (I hope my substitution is valid!)
+		Given "n" is a Python `int` >= 0, "0bk" = `bin(n)`, I claim:
+		n * 2**2 == n << 2
+		bin(n * 2**2) == 0bk00
+		0b11 = 0b00 | 0b11
+		0bk11 = 0bk00 | 0b11
+		0b11 = 0bk11 - 0bk00
+		0b11 == int(3)
+
+		therefore, for any non-zero integer, 0bk00, the operation 0bk00 | 0b11 is equivalent to 0bk00 + 0b11.
+
+		Why substitute? I've been having problems implementing bitwise operations in pandas, so I am avoiding them until I learn
+		how to implement them in pandas.
+		"""
+
+		aggregateCurveLocations(MAXIMUMcurveLocations)
+
+		computeCurveGroups(alpha=False)
+
+	def analyzeCurveLocationsAlpha(MAXIMUMcurveLocations: int) -> None:
+		# ((1 - (groupAlpha & 1)) << 1) | (groupZulu << 3) | (groupAlpha >> 2)
+		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupAlpha'] & 1 # (groupAlpha & 1)
+		dataframeCurveLocations['analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupAlpha ...))
+
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] == 1, 'alignAt'] = 'evenAlpha' # groupAlphaIsEven
+
+		dataframeCurveLocations['analyzed'] *= 2**1 # ((groupAlpha ...) << 1)
+		dataframeCurveLocations['groupZulu'] *= 2**3 # (groupZulu << 3)
+		dataframeCurveLocations['analyzed'] |= dataframeCurveLocations['groupZulu'] # ... | (groupZulu ...)
+		dataframeCurveLocations['analyzed'] |= (dataframeCurveLocations['groupAlpha'] // 2**2) # ... | (groupAlpha >> 2)
+		dataframeCurveLocations.loc[dataframeCurveLocations['groupAlpha'] <= 1, 'analyzed'] = 0 # if groupAlpha > 1
+
+		aggregateCurveLocations(MAXIMUMcurveLocations)
+
+		computeCurveGroups(alpha=False)
+
+	def analyzeCurveLocationsAligned(MAXIMUMcurveLocations: int) -> None:
+		nonlocal dataframeCurveLocations
+
+		# if groupAlphaCurves and groupZuluCurves
+		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations[(dataframeCurveLocations['groupAlpha'] <= 1) | (dataframeCurveLocations['groupZulu'] <= 1)].index)
+
+		# if groupAlphaIsEven or groupZuluIsEven
+		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations[dataframeCurveLocations['alignAt'] == 'oddBoth'].index)
+
+		# if groupAlphaIsEven and not groupZuluIsEven, modifyGroupAlphaPairedToOdd
+		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'] = datatypeCurveLocations(flipTheExtra_0b1(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha']))
+
+		# if groupZuluIsEven and not groupAlphaIsEven, modifyGroupZuluPairedToOdd
+		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'] = datatypeCurveLocations(flipTheExtra_0b1(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu']))
+
+		# (groupAlpha >> 2) | ((groupZulu >> 2) << 1)
+		dataframeCurveLocations['groupAlpha'] //= 2**2 # (groupAlpha >> 2)
+		dataframeCurveLocations['groupZulu'] //= 2**2 # (groupZulu >> 2)
+		dataframeCurveLocations['groupZulu'] *= 2**1 # ((groupZulu ...) << 1)
+		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupAlpha'] | dataframeCurveLocations['groupZulu'] # (groupZulu ...) | (groupAlpha ...)
+
+		aggregateCurveLocations(MAXIMUMcurveLocations)
+
+	def analyzeCurveLocationsZulu(MAXIMUMcurveLocations: int) -> None:
+		nonlocal dataframeCurveLocations
+		# (1 - (groupZulu & 1)) | (groupAlpha << 2) | (groupZulu >> 1)
+		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupZulu'] & 1 # (groupZulu & 1)
+		dataframeCurveLocations['analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupZulu ...))
+
+		dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] == 1) & (dataframeCurveLocations['alignAt'] == 'evenAlpha'), 'alignAt'] = 'evenBoth' # groupZuluIsEven
+		dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] == 1) & (dataframeCurveLocations['alignAt'] == 'oddBoth'), 'alignAt'] = 'evenZulu' # groupZuluIsEven
+
+		dataframeCurveLocations['groupAlpha'] *= 2**2 # (groupAlpha << 2)
+		dataframeCurveLocations['analyzed'] |= dataframeCurveLocations['groupAlpha'] # ... | (groupAlpha ...)
+		dataframeCurveLocations['analyzed'] |= (dataframeCurveLocations['groupZulu'] // 2**1) # ... | (groupZulu >> 1)
+		dataframeCurveLocations.loc[dataframeCurveLocations['groupZulu'] <= 1, 'analyzed'] = 0 # if groupZulu > 1
+
+		aggregateCurveLocations(MAXIMUMcurveLocations)
+		computeCurveGroups(zulu=False)
 
 	datatypeCurveLocations = datatypeCurveLocationsHARDCODED
 	datatypeDistinctCrossings = datatypeDistinctCrossingsHARDCODED
@@ -86,74 +191,10 @@ def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 		MAXIMUMcurveLocations: int = 1 << (2 * countdown + 4)
 		outfitDataframeCurveLocations()
 
-# ------------------------------------- curveLocationsSimple ----------------------------------------------------------
-# NOTE ((groupAlpha | (groupZulu << 1)) << 2) | 3
-		dataframeCurveLocations['groupZulu'] *= 2**1
-		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupAlpha'] | dataframeCurveLocations['groupZulu']
-		dataframeCurveLocations['analyzed'] *= 2**2
-		dataframeCurveLocations['analyzed'] += 0b11
-
-		analyzeCurveLocations(MAXIMUMcurveLocations)
-
-		computeCurveGroups()
-
-# ------------------------------------- curveLocationsAlpha -----------------------------------------------------------
-# NOTE ((1 - (groupAlpha & 1)) << 1) | (groupZulu << 3) | (groupAlpha >> 2)
-		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupAlpha'] & 1 # (groupAlpha & 1)
-		dataframeCurveLocations['analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupAlpha ...))
-
-		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] == 1, 'alignAt'] = 'evenAlpha' # groupAlphaIsEven
-
-		dataframeCurveLocations['analyzed'] *= 2**1 # ((groupAlpha ...) << 1)
-		dataframeCurveLocations['groupZulu'] *= 2**3 # (groupZulu << 3)
-		dataframeCurveLocations['analyzed'] |= dataframeCurveLocations['groupZulu'] # ... | (groupZulu ...)
-		dataframeCurveLocations['analyzed'] |= (dataframeCurveLocations['groupAlpha'] // 2**2) # ... | (groupAlpha >> 2)
-		dataframeCurveLocations.loc[dataframeCurveLocations['groupAlpha'] <= 1, 'analyzed'] = 0 # if groupAlpha > 1
-
-		analyzeCurveLocations(MAXIMUMcurveLocations)
-
-		computeCurveGroups()
-
-# ------------------------------------- curveLocationsZulu ------------------------------------------------------------
-# NOTE (1 - (groupZulu & 1)) | (groupAlpha << 2) | (groupZulu >> 1)
-		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupZulu'] & 1 # (groupZulu & 1)
-		dataframeCurveLocations['analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupZulu ...))
-
-		dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] == 1) & (dataframeCurveLocations['alignAt'] == 'evenAlpha'), 'alignAt'] = 'evenBoth' # groupZuluIsEven
-		dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] == 1) & (dataframeCurveLocations['alignAt'] == 'oddBoth'), 'alignAt'] = 'evenZulu' # groupZuluIsEven
-
-		dataframeCurveLocations['groupAlpha'] *= 2**2 # (groupAlpha << 2)
-		dataframeCurveLocations['analyzed'] |= dataframeCurveLocations['groupAlpha'] # ... | (groupAlpha ...)
-		dataframeCurveLocations['analyzed'] |= (dataframeCurveLocations['groupZulu'] // 2**1) # ... | (groupZulu >> 1)
-		dataframeCurveLocations.loc[dataframeCurveLocations['groupZulu'] <= 1, 'analyzed'] = 0 # if groupZulu > 1
-
-		analyzeCurveLocations(MAXIMUMcurveLocations)
-
-		computeCurveGroups()
-
-# ------------------------------------- aligning ----------------------------------------------------------------------
-		# if groupAlphaCurves and groupZuluCurves
-		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations[(dataframeCurveLocations['groupAlpha'] <= 1) & (dataframeCurveLocations['groupZulu'] <= 1)].index)
-
-		# if groupAlphaIsEven or groupZuluIsEven
-		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations[dataframeCurveLocations['alignAt'] == 'oddBoth'].index)
-
-# ------------------------------------- modifyGroupAlphaPairedToOdd ---------------------------------------------------
-		# if groupAlphaIsEven and not groupZuluIsEven
-		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'] = datatypeCurveLocations(flipTheExtra_0b1(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha']))
-
-# ------------------------------------- modifyGroupZuluPairedToOdd ----------------------------------------------------
-		# if groupZuluIsEven and not groupAlphaIsEven
-		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'] = datatypeCurveLocations(flipTheExtra_0b1(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu']))
-
-# ------------------------------------- curveLocationsAligned ---------------------------------------------------------
-# NOTE (groupAlpha >> 2) | ((groupZulu >> 2) << 1)
-		dataframeCurveLocations['groupAlpha'] //= 2**2 # (groupAlpha >> 2)
-		dataframeCurveLocations['groupZulu'] //= 2**2 # (groupZulu >> 2)
-		dataframeCurveLocations['groupZulu'] *= 2**1 # ((groupZulu ...) << 1)
-		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupAlpha'] | dataframeCurveLocations['groupZulu'] # (groupZulu ...) | (groupAlpha ...)
-
-		analyzeCurveLocations(MAXIMUMcurveLocations)
+		analyzeCurveLocationsSimple(MAXIMUMcurveLocations)
+		analyzeCurveLocationsAlpha(MAXIMUMcurveLocations)
+		analyzeCurveLocationsZulu(MAXIMUMcurveLocations)
+		analyzeCurveLocationsAligned(MAXIMUMcurveLocations)
 
 	return int(dataframeAnalyzed['distinctCrossings'].sum())
 
