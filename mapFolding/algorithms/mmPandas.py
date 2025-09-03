@@ -8,8 +8,12 @@ datatypeCurveLocationsHARDCODED = numpy.uint64
 datatypeDistinctCrossingsHARDCODED = numpy.uint64
 datatypeCurveLocations = datatypeCurveLocationsHARDCODED
 datatypeDistinctCrossings = datatypeDistinctCrossingsHARDCODED
-# idk why this works for values too large for uint64
-CategoriesAlignAt = pandas.CategoricalDtype(categories=['evenAlpha', 'evenZulu', 'evenBoth', 'oddBoth'], ordered=False)
+# A000682 at n=39, `dictionaryCurveLocations` has a `curveLocations` > 64 bits
+# if `int`: OverflowError: The elements provided in the data cannot all be casted to the dtype int64
+# if `numpy.uint64`: OverflowError: The elements provided in the data cannot all be casted to the dtype uint64
+# A005316: overflow of `distinctCrossings` at n=44
+# True    43      1364.89
+# False   44      2228.25
 
 @cache
 def _walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -31,7 +35,7 @@ def _flipTheExtra_0b1(intWithExtra_0b1: int) -> int:
 
 flipTheExtra_0b1 = numpy.vectorize(_flipTheExtra_0b1, otypes=[datatypeCurveLocations])
 
-def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
+def countPandas(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	"""Count meanders with matrix transfer algorithm using pandas DataFrame."""
 	def aggregateCurveLocations(MAXIMUMcurveLocations: int) -> None:
 		nonlocal dataframeAnalyzed, dataframeCurveLocations
@@ -54,6 +58,11 @@ def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 		if groupAlpha > 1 and groupZulu > 1 and (groupAlphaIsEven or groupZuluIsEven):
 			curveLocations = (groupAlpha >> 2) | ((groupZulu >> 2) << 1)
 		```
+
+		Parameters
+		----------
+		MAXIMUMcurveLocations : int
+			Maximum value of `curveLocations` for the current iteration of `bridges`.
 		"""
 		nonlocal dataframeCurveLocations
 
@@ -195,6 +204,8 @@ def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 		dataframeAnalyzed = dataframeAnalyzed.iloc[0:0]
 		computeCurveGroups()
 
+	CategoriesAlignAt = pandas.CategoricalDtype(categories=['evenAlpha', 'evenZulu', 'evenBoth', 'oddBoth'], ordered=False)
+
 	dataframeAnalyzed = pandas.DataFrame({
 		'analyzed': pandas.Series(name='analyzed', data=list(dictionaryCurveLocations.keys()), dtype=datatypeCurveLocations)
 		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=list(dictionaryCurveLocations.values()), dtype=datatypeDistinctCrossings)
@@ -211,7 +222,7 @@ def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 		}
 	)
 
-	for countdown in tqdm(range((bridges - 1), (0 - 1), -1)):
+	for countdown in tqdm(range((bridges - 1), (0 - 1), -1), leave=False):
 		MAXIMUMcurveLocations: int = 1 << (2 * countdown + 4)
 		outfitDataframeCurveLocations()
 
@@ -224,7 +235,7 @@ def count(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 
 def doTheNeedful(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	"""Do the needful."""
-	return count(bridges, dictionaryCurveLocations)
+	return countPandas(bridges, dictionaryCurveLocations)
 
 def A000682getCurveLocations(n: int) -> dict[int, int]:
 	"""A000682."""
