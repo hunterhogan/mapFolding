@@ -1,44 +1,157 @@
 # ruff: noqa: D100 D103
+# ERA001
 from functools import cache
 from gc import collect as goByeBye, set_threshold
+from tqdm import tqdm
 from typing import Any
 import numpy
+import pandas
+import sys
 
-Z0Z_bit_lengthSafetyLimit: int = 61
+# ----------------- environment configuration -------------------------------------------------------------------------
 
-type DataArray1D = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64 | numpy.signedinteger[Any]]]
-type DataArray2columns = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]
-type DataArray3columns = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]]
+bitWidthOfFixedSizeInteger: int = 64
+bitWidthOffsetCurveLocationsNecessary: int = 3 # `curveLocations` analysis may need 3 extra bits. For example, `groupZulu << 3`.
+bitWidthOffsetCurveLocationsSafety: int = 1 # I don't have mathematical proof of how many extra bits I need.
+bitWidthOffsetCurveLocations: int = bitWidthOffsetCurveLocationsNecessary + bitWidthOffsetCurveLocationsSafety
+del bitWidthOffsetCurveLocationsNecessary, bitWidthOffsetCurveLocationsSafety
+bitWidthCurveLocationsMaximum: int = bitWidthOfFixedSizeInteger - bitWidthOffsetCurveLocations
+
+bitWidthOffsetDistinctCrossingsNecessary: int = 0 # I don't know of any.
+bitWidthOffsetDistinctCrossingsEstimation: int = 3
+bitWidthOffsetDistinctCrossingsSafety: int = 0
+bitWidthOffsetDistinctCrossings: int = bitWidthOffsetDistinctCrossingsNecessary + bitWidthOffsetDistinctCrossingsEstimation + bitWidthOffsetDistinctCrossingsSafety
+del bitWidthOffsetDistinctCrossingsNecessary, bitWidthOffsetDistinctCrossingsEstimation, bitWidthOffsetDistinctCrossingsSafety
+bitWidthDistinctCrossingsMaximum: int = bitWidthOfFixedSizeInteger
+
+datatypeCurveLocations = numpy.uint64
+datatypeDistinctCrossings = numpy.uint64
+# A005316: overflow of `distinctCrossings` at n=44
+# True    43      1364.89
+# False   44      2228.25
+
+# ----------------- environment configuration: NumPy ------------------------------------------------------------------
+
+datatypeCurveLocationsNumPy = numpy.uint64
+type DataArray1D = numpy.ndarray[tuple[int, ...], numpy.dtype[datatypeCurveLocationsNumPy | numpy.signedinteger[Any]]]
+type DataArray2columns = numpy.ndarray[tuple[int, ...], numpy.dtype[datatypeCurveLocationsNumPy]]
+type DataArray3columns = numpy.ndarray[tuple[int, ...], numpy.dtype[datatypeCurveLocationsNumPy]]
 type SelectorBoolean = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]]
 type SelectorIndices = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.intp]]
 
-# NOTE This code blocks enables semantic references to your data.
-columnsArrayCurveGroups = columnsArrayTotal = 3
-columnΩ: int = (columnsArrayTotal - columnsArrayTotal) - 1
+# NOTE This code blocks enables semantic references to your NumPy arrays.
+columnsArrayCurveGroups = columnsTotal = 3
+columnΩ: int = (columnsTotal - columnsTotal) - 1
 columnDistinctCrossings = columnΩ = columnΩ + 1
 columnGroupAlpha = columnΩ = columnΩ + 1
 columnGroupZulu = columnΩ = columnΩ + 1
-if columnΩ != columnsArrayTotal - 1:
-	message = f"Please inspect the code above this `if` check. '{columnsArrayTotal = }', therefore '{columnΩ = }' must be '{columnsArrayTotal - 1 = }' due to 'zero-indexing.'"
+if columnΩ != columnsTotal - 1:
+	message = f"Please inspect the code above this `if` check. '{columnsTotal = }', therefore '{columnΩ = }' must be '{columnsTotal - 1 = }' due to 'zero-indexing.'"
 	raise ValueError(message)
-del columnsArrayTotal, columnΩ
+del columnsTotal, columnΩ
 
-columnsArrayCurveLocations = columnsArrayTotal = 2
-columnΩ: int = (columnsArrayTotal - columnsArrayTotal) - 1
+columnsArrayCurveLocations = columnsTotal = 2
+columnΩ: int = (columnsTotal - columnsTotal) - 1
 columnDistinctCrossings = columnΩ = columnΩ + 1
 columnCurveLocations = columnΩ = columnΩ + 1
-if columnΩ != columnsArrayTotal - 1:
-	message = f"Please inspect the code above this `if` check. '{columnsArrayTotal = }', therefore '{columnΩ = }' must be '{columnsArrayTotal - 1 = }' due to 'zero-indexing.'"
+if columnΩ != columnsTotal - 1:
+	message = f"Please inspect the code above this `if` check. '{columnsTotal = }', therefore '{columnΩ = }' must be '{columnsTotal - 1 = }' due to 'zero-indexing.'"
 	raise ValueError(message)
-del columnsArrayTotal, columnΩ
+del columnsTotal, columnΩ
 
-groupAlphaLocator: int = 0x55555555555555555555555555555555
-groupAlphaLocator64: int = 0x5555555555555555
-groupZuluLocator: int = 0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-groupZuluLocator64: int = 0xaaaaaaaaaaaaaaaa
+locatorGroupAlphaNumPy: int = 0x5555555555555555
+locatorGroupZuluNumPy: int = 0xaaaaaaaaaaaaaaaa
 
-def convertDictionaryCurveLocations2CurveGroups(dictionaryCurveLocations: dict[int, int]) -> dict[tuple[int, int], int]:
-	return {(curveLocations & groupAlphaLocator, (curveLocations & groupZuluLocator) >> 1): distinctCrossings
+# ----------------- support functions ---------------------------------------------------------------------------------
+
+def aggregateBridgesSimple2CurveLocations(arrayCurveLocations: DataArray2columns, indexStart: int, curveLocations: DataArray1D, distinctCrossings: DataArray1D) -> int:
+	"""Deduplicate `curveLocations` by summing `distinctCrossings`."""
+	miniCurveLocations, indices = numpy.unique_inverse(curveLocations[numpy.flatnonzero(curveLocations)])
+
+	indexStop: int = indexStart + int(miniCurveLocations.size)
+	arrayCurveLocations[indexStart:indexStop, columnCurveLocations] = miniCurveLocations
+
+	miniCurveLocations = None; del miniCurveLocations  # noqa: E702
+	goByeBye()
+
+	numpy.add.at(arrayCurveLocations[indexStart:indexStop, columnDistinctCrossings], indices, distinctCrossings[numpy.flatnonzero(curveLocations)])
+
+	return indexStop
+
+def aggregateCurveLocations2CurveGroups(arrayCurveLocations: DataArray2columns) -> DataArray3columns:
+	"""Deduplicate `curveLocations` by summing `distinctCrossings`; create curve groups."""
+	curveLocations, indices = numpy.unique_inverse(arrayCurveLocations[:, columnCurveLocations])
+	arrayCurveGroups: DataArray3columns = numpy.zeros((len(curveLocations), columnsArrayCurveGroups), dtype=datatypeCurveLocationsNumPy)
+	numpy.bitwise_and(curveLocations, locatorGroupAlphaNumPy, out=arrayCurveGroups[:, columnGroupAlpha])
+	numpy.bitwise_and(curveLocations, locatorGroupZuluNumPy, out=arrayCurveGroups[:, columnGroupZulu])
+
+	curveLocations = None; del curveLocations  # noqa: E702
+	goByeBye()
+
+	arrayCurveGroups[:, columnGroupZulu] >>= 1
+	numpy.add.at(arrayCurveGroups[:, columnDistinctCrossings], indices, arrayCurveLocations[:, columnDistinctCrossings])
+	return arrayCurveGroups
+
+def aggregateData2CurveLocations(arrayCurveLocations: DataArray2columns, indexStart: int, curveLocations: DataArray1D, distinctCrossings: DataArray1D, selector: SelectorBoolean, limiter: int) -> int:
+	"""Deduplicate `curveLocations` by summing `distinctCrossings`."""
+	miniCurveLocations, indices = numpy.unique_inverse(curveLocations[numpy.flatnonzero(curveLocations < limiter)])
+
+	indexStop: int = indexStart + int(miniCurveLocations.size)
+	arrayCurveLocations[indexStart:indexStop, columnCurveLocations] = miniCurveLocations
+
+	miniCurveLocations = None; del miniCurveLocations  # noqa: E702
+	goByeBye()
+
+	numpy.add.at(arrayCurveLocations[indexStart:indexStop, columnDistinctCrossings], indices, distinctCrossings[numpy.flatnonzero(selector)[numpy.flatnonzero(curveLocations < limiter)]])
+
+	return indexStop
+
+def convertArrayCurveGroups2dictionaryCurveGroups(arrayCurveGroups: DataArray3columns) -> dict[tuple[int, int], int]:
+	return {(int(row[columnGroupAlpha]), int(row[columnGroupZulu])): int(row[columnDistinctCrossings]) for row in arrayCurveGroups}
+
+def convertDictionaryCurveGroups2array(dictionaryCurveGroups: dict[tuple[int, int], int]) -> DataArray3columns:
+	arrayCurveGroups: DataArray3columns = numpy.tile(numpy.fromiter(dictionaryCurveGroups.values(), dtype=datatypeCurveLocationsNumPy), (columnsArrayCurveGroups, 1)).T
+	arrayCurveGroups[:, columnGroupAlpha:columnGroupZulu+1] = numpy.array(list(dictionaryCurveGroups.keys()), dtype=datatypeCurveLocationsNumPy)
+	return arrayCurveGroups
+
+def convertDictionaryCurveLocations2array(dictionaryCurveLocations: dict[int, int]) -> DataArray2columns:
+	return numpy.column_stack((numpy.fromiter(dictionaryCurveLocations.values(), dtype=datatypeDistinctCrossings), numpy.fromiter(dictionaryCurveLocations.keys(), dtype=datatypeCurveLocationsNumPy)))
+
+@cache
+def flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
+	return numpy.uint64(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
+
+flipTheExtra_0b1AsUfunc = numpy.frompyfunc(flipTheExtra_0b1, 1, 1)
+flipTheExtra_0b1vectorized = numpy.vectorize(flipTheExtra_0b1, otypes=[datatypeCurveLocations])
+
+def getLocatorGroupAlpha(bitWidth: int) -> int:
+	"""Compute an odd-parity bit-mask with `bitWidth` bits.
+
+	Notes
+	-----
+	In binary, `locatorGroupAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
+	digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
+	from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
+	counting this way, `locatorGroupAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
+	therefore, tend to call `locatorGroupAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
+	mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
+	odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
+
+	"""
+	return sum(1 << one for one in range(0, bitWidth, 2))
+
+def getLocatorGroupZulu(bitWidth: int) -> int:
+	"""Compute an even-parity bit-mask with `bitWidth` bits."""
+	return sum(1 << one for one in range(1, bitWidth, 2))
+
+def getMAXIMUMcurveLocations(indexTransferMatrix: int) -> int:
+	return 1 << (2 * indexTransferMatrix + 4)
+
+def outfitDictionaryCurveGroups(dictionaryCurveLocations: dict[int, int]) -> dict[tuple[int, int], int]:
+	bitWidth: int = max(dictionaryCurveLocations.keys()).bit_length()
+	locatorGroupAlpha: int = getLocatorGroupAlpha(bitWidth)
+	locatorGroupZulu: int = getLocatorGroupZulu(bitWidth)
+	return {(curveLocations & locatorGroupAlpha, (curveLocations & locatorGroupZulu) >> 1): distinctCrossings
 		for curveLocations, distinctCrossings in dictionaryCurveLocations.items()}
 
 @cache
@@ -56,34 +169,43 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
 			break
 	return flipExtra_0b1_Here
 
-def count(bridges: int, dictionaryCurveGroups: dict[tuple[int, int], int], bridgesMinimum: int = 0) -> tuple[int, dict[tuple[int, int], int]]:
-	dictionaryCurveLocations: dict[int, int] = {}
-	while (bridges > bridgesMinimum):
-		bridges -= 1
-		curveLocationsMAXIMUM: int = 1 << (2 * bridges + 4)
+# ----------------- counting functions --------------------------------------------------------------------------------
+
+def countBigInt(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, int], indexTransferMatrixMinimum: int = 0) -> tuple[int, dict[int, int]]:
+	dictionaryCurveGroups: dict[tuple[int, int], int] = {}
+
+	set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
+	listIndicesTransferMatrix: list[int] = list(range(indexTransferMatrix -1, indexTransferMatrixMinimum -1, -1))
+	for indexTransferMatrix in tqdm(listIndicesTransferMatrix, leave=False):  # noqa: PLR1704
+		if max(dictionaryCurveLocations.keys()).bit_length() <= bitWidthCurveLocationsMaximum:
+			indexTransferMatrix += 1  # noqa: PLW2901
+			sys.stdout.write(f"Switching at {indexTransferMatrix =} .")
+			break
+		MAXIMUMcurveLocations: int = getMAXIMUMcurveLocations(indexTransferMatrix)
+		dictionaryCurveGroups = outfitDictionaryCurveGroups(dictionaryCurveLocations)
+		dictionaryCurveLocations = {}
 
 		for (groupAlpha, groupZulu), distinctCrossings in dictionaryCurveGroups.items():
-			set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
 			groupAlphaCurves: bool = groupAlpha > 1
 			groupZuluCurves: bool = groupZulu > 1
 			groupAlphaIsEven = groupZuluIsEven = 0
 
-			# bridgesSimple
+			# simple
 			curveLocationAnalysis = ((groupAlpha | (groupZulu << 1)) << 2) | 3
-			if curveLocationAnalysis < curveLocationsMAXIMUM:
+			if curveLocationAnalysis < MAXIMUMcurveLocations:
 				dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
 			if groupAlphaCurves:
 				curveLocationAnalysis = (groupAlpha >> 2) | (groupZulu << 3) | ((groupAlphaIsEven := 1 - (groupAlpha & 1)) << 1)
-				if curveLocationAnalysis < curveLocationsMAXIMUM:
+				if curveLocationAnalysis < MAXIMUMcurveLocations:
 					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
 			if groupZuluCurves:
 				curveLocationAnalysis = (groupZulu >> 1) | (groupAlpha << 2) | (groupZuluIsEven := 1 - (groupZulu & 1))
-				if curveLocationAnalysis < curveLocationsMAXIMUM:
+				if curveLocationAnalysis < MAXIMUMcurveLocations:
 					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
-			# bridgesAligned
+			# aligned
 			if groupAlphaCurves and groupZuluCurves and (groupAlphaIsEven or groupZuluIsEven):
 				if groupAlphaIsEven and not groupZuluIsEven:
 					groupAlpha ^= walkDyckPath(groupAlpha)  # noqa: PLW2901
@@ -91,81 +213,35 @@ def count(bridges: int, dictionaryCurveGroups: dict[tuple[int, int], int], bridg
 					groupZulu ^= walkDyckPath(groupZulu)  # noqa: PLW2901
 
 				curveLocationAnalysis: int = ((groupZulu >> 2) << 1) | (groupAlpha >> 2)
-				if curveLocationAnalysis < curveLocationsMAXIMUM:
+				if curveLocationAnalysis < MAXIMUMcurveLocations:
 					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 
-		dictionaryCurveGroups = convertDictionaryCurveLocations2CurveGroups(dictionaryCurveLocations)
-		dictionaryCurveLocations = {}
-	return (bridges, dictionaryCurveGroups)
+	return (indexTransferMatrix, dictionaryCurveLocations)
 
-@cache
-def _flipTheExtra_0b1(intWithExtra_0b1: int) -> numpy.uint64:
-	return numpy.uint64(intWithExtra_0b1 ^ walkDyckPath(intWithExtra_0b1))
+def countNumPy(indexTransferMatrix: int, arrayCurveLocations: DataArray2columns, indexTransferMatrixMinimum: int = 0) -> tuple[int, DataArray2columns]:
+	listIndicesTransferMatrix: list[int] = list(range(indexTransferMatrix -1, indexTransferMatrixMinimum -1, -1))
+	for indexTransferMatrix in listIndicesTransferMatrix:  # noqa: PLR1704
+		if int(arrayCurveLocations[:, columnDistinctCrossings].max()).bit_length() > bitWidthDistinctCrossingsMaximum:
+			indexTransferMatrix += 1  # noqa: PLW2901
+			sys.stdout.write(f"Switching at {indexTransferMatrix =} .")
+			break
 
-flipTheExtra_0b1 = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
+		MAXIMUMcurveLocations: int = getMAXIMUMcurveLocations(indexTransferMatrix)
+		arrayCurveGroups = aggregateCurveLocations2CurveGroups(arrayCurveLocations)
 
-def aggregateCurveLocations2CurveGroups(arrayCurveLocations: DataArray2columns) -> DataArray3columns:
-	"""Deduplicate `curveLocations` by summing `distinctCrossings`; create curve groups."""
-	curveLocations, indices = numpy.unique_inverse(arrayCurveLocations[:, columnCurveLocations])
-	arrayCurveGroups: DataArray3columns = numpy.zeros((len(curveLocations), columnsArrayCurveGroups), dtype=numpy.uint64)
-	numpy.bitwise_and(curveLocations, groupAlphaLocator64, out=arrayCurveGroups[:, columnGroupAlpha])
-	numpy.bitwise_and(curveLocations, groupZuluLocator64, out=arrayCurveGroups[:, columnGroupZulu])
-
-	curveLocations = None; del curveLocations  # noqa: E702
-	goByeBye()
-
-	arrayCurveGroups[:, columnGroupZulu] >>= 1
-	numpy.add.at(arrayCurveGroups[:, columnDistinctCrossings], indices, arrayCurveLocations[:, columnDistinctCrossings])
-	return arrayCurveGroups
-
-def aggregateBridgesSimple2CurveLocations(arrayCurveLocations: DataArray2columns, indexStart: int, curveLocations: DataArray1D, distinctCrossings: DataArray1D) -> int:
-	"""Deduplicate `curveLocations` by summing `distinctCrossings`."""
-	miniCurveLocations, indices = numpy.unique_inverse(curveLocations[numpy.flatnonzero(curveLocations)])
-
-	indexStop: int = indexStart + int(miniCurveLocations.size)
-	arrayCurveLocations[indexStart:indexStop, columnCurveLocations] = miniCurveLocations
-
-	miniCurveLocations = None; del miniCurveLocations  # noqa: E702
-	goByeBye()
-
-	numpy.add.at(arrayCurveLocations[indexStart:indexStop, columnDistinctCrossings], indices, distinctCrossings[numpy.flatnonzero(curveLocations)])
-
-	return indexStop
-
-def aggregateData2CurveLocations(arrayCurveLocations: DataArray2columns, indexStart: int, curveLocations: DataArray1D, distinctCrossings: DataArray1D, selector: SelectorBoolean, limiter: numpy.uint64) -> int:
-	"""Deduplicate `curveLocations` by summing `distinctCrossings`."""
-	miniCurveLocations, indices = numpy.unique_inverse(curveLocations[numpy.flatnonzero(curveLocations < limiter)])
-
-	indexStop: int = indexStart + int(miniCurveLocations.size)
-	arrayCurveLocations[indexStart:indexStop, columnCurveLocations] = miniCurveLocations
-
-	miniCurveLocations = None; del miniCurveLocations  # noqa: E702
-	goByeBye()
-
-	numpy.add.at(arrayCurveLocations[indexStart:indexStop, columnDistinctCrossings], indices, distinctCrossings[numpy.flatnonzero(selector)[numpy.flatnonzero(curveLocations < limiter)]])
-
-	return indexStop
-
-def convertDictionaryCurveGroups2array(dictionaryCurveGroups: dict[tuple[int, int], int]) -> DataArray3columns:
-	arrayCurveGroups: DataArray3columns = numpy.tile(numpy.fromiter(dictionaryCurveGroups.values(), dtype=numpy.uint64), (columnsArrayCurveGroups, 1)).T
-	arrayCurveGroups[:, columnGroupAlpha:columnGroupZulu+1] = numpy.array(list(dictionaryCurveGroups.keys()), dtype=numpy.uint64)
-	return arrayCurveGroups
-
-def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: int = 0) -> tuple[int, DataArray3columns]:
-	while bridges > bridgesMinimum and int(arrayCurveGroups[:, columnDistinctCrossings].max()).bit_length() < Z0Z_bit_lengthSafetyLimit:
-		bridges -= 1
-		curveLocationsMAXIMUM: numpy.uint64 = numpy.uint64(1 << (2 * bridges + 4))
+		arrayCurveLocations = None; del arrayCurveLocations # pyright: ignore[reportAssignmentType]  # noqa: E702
+		goByeBye()
 
 		set_threshold(1, 1, 1)  # Re-enable the garbage collector.
 
-		allocateGroupAlphaCurves: int = (arrayCurveGroups[:, columnGroupAlpha] > numpy.uint64(1)).sum()
-		allocateGroupZuluCurves: int = (arrayCurveGroups[:, columnGroupZulu] > numpy.uint64(1)).sum()
+		allocateGroupAlphaCurves: int = (arrayCurveGroups[:, columnGroupAlpha] > datatypeCurveLocationsNumPy(1)).sum()
+		allocateGroupZuluCurves: int = (arrayCurveGroups[:, columnGroupZulu] > datatypeCurveLocationsNumPy(1)).sum()
 
 		selectBridgesAligned: SelectorBoolean = numpy.empty_like(arrayCurveGroups[:, columnGroupAlpha], dtype=bool)
 		numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupAlpha], 1), 0, out=selectBridgesAligned, dtype=bool)
 		numpy.bitwise_or(selectBridgesAligned, (numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupZulu], 1), 0, dtype=bool)), out=selectBridgesAligned)
-		numpy.bitwise_and(selectBridgesAligned, (arrayCurveGroups[:, columnGroupAlpha] > numpy.uint64(1)), out=selectBridgesAligned)
-		numpy.bitwise_and(selectBridgesAligned, (arrayCurveGroups[:, columnGroupZulu] > numpy.uint64(1)), out=selectBridgesAligned)
+		numpy.bitwise_and(selectBridgesAligned, (arrayCurveGroups[:, columnGroupAlpha] > datatypeCurveLocationsNumPy(1)), out=selectBridgesAligned)
+		numpy.bitwise_and(selectBridgesAligned, (arrayCurveGroups[:, columnGroupZulu] > datatypeCurveLocationsNumPy(1)), out=selectBridgesAligned)
 
 		allocateBridgesAligned: int = int(numpy.count_nonzero(selectBridgesAligned))
 
@@ -175,13 +251,13 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		numpy.bitwise_or(curveLocationsBridgesSimpleLessThanMaximum, arrayCurveGroups[:, columnGroupAlpha], out=curveLocationsBridgesSimpleLessThanMaximum)
 		numpy.left_shift(curveLocationsBridgesSimpleLessThanMaximum, 2, out=curveLocationsBridgesSimpleLessThanMaximum)
 		numpy.bitwise_or(curveLocationsBridgesSimpleLessThanMaximum, 3, out=curveLocationsBridgesSimpleLessThanMaximum)
-		curveLocationsBridgesSimpleLessThanMaximum[curveLocationsBridgesSimpleLessThanMaximum >= curveLocationsMAXIMUM] = 0
+		curveLocationsBridgesSimpleLessThanMaximum[curveLocationsBridgesSimpleLessThanMaximum >= MAXIMUMcurveLocations] = 0
 
 		allocateBridgesSimple: int = int(numpy.count_nonzero(curveLocationsBridgesSimpleLessThanMaximum))
 
 # ----------------------------------------------- arrayCurveLocations -------------------------------------------------
 		rowsAllocatedTotal: int = allocateGroupAlphaCurves + allocateGroupZuluCurves + allocateBridgesSimple + allocateBridgesAligned
-		arrayCurveLocations: DataArray2columns = numpy.zeros((rowsAllocatedTotal, columnsArrayCurveLocations), dtype=arrayCurveGroups.dtype)
+		arrayCurveLocations = numpy.zeros((rowsAllocatedTotal, columnsArrayCurveLocations), dtype=datatypeCurveLocationsNumPy)
 
 		rowsAggregatedTotal: int = 0
 		rowsDeallocatedTotal: int = 0
@@ -201,11 +277,11 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		goByeBye()
 
 # ----------------------------------------------- groupAlpha ----------------------------------------------------------
-		selectGroupAlphaCurves: SelectorBoolean = arrayCurveGroups[:, columnGroupAlpha] > numpy.uint64(1)
+		selectGroupAlphaCurves: SelectorBoolean = arrayCurveGroups[:, columnGroupAlpha] > datatypeCurveLocationsNumPy(1)
 		curveLocationsGroupAlpha: DataArray1D = arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha].copy()
 
 		numpy.bitwise_and(curveLocationsGroupAlpha, 1, out=curveLocationsGroupAlpha)
-		numpy.subtract(numpy.uint64(1), curveLocationsGroupAlpha, out=curveLocationsGroupAlpha)
+		numpy.subtract(datatypeCurveLocationsNumPy(1), curveLocationsGroupAlpha, out=curveLocationsGroupAlpha)
 		numpy.left_shift(curveLocationsGroupAlpha, 3, out=curveLocationsGroupAlpha)
 		numpy.bitwise_or(curveLocationsGroupAlpha, arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha], out=curveLocationsGroupAlpha)
 		numpy.right_shift(curveLocationsGroupAlpha, 2, out=curveLocationsGroupAlpha)
@@ -226,7 +302,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 			, curveLocationsGroupAlpha
 			, arrayCurveGroups[:, columnDistinctCrossings]
 			, selectGroupAlphaCurves
-			, curveLocationsMAXIMUM
+			, MAXIMUMcurveLocations
 		)
 
 		rowsDeallocatedTotal += allocateGroupAlphaCurves
@@ -238,12 +314,12 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		goByeBye()
 
 # ----------------------------------------------- groupZulu -----------------------------------------------------------
-		selectGroupZuluCurves: SelectorBoolean = arrayCurveGroups[:, columnGroupZulu] > numpy.uint64(1)
+		selectGroupZuluCurves: SelectorBoolean = arrayCurveGroups[:, columnGroupZulu] > datatypeCurveLocationsNumPy(1)
 		curveLocationsGroupZulu: DataArray1D = arrayCurveGroups[selectGroupZuluCurves, columnGroupAlpha].copy()
 		numpy.left_shift(curveLocationsGroupZulu, 2, out=curveLocationsGroupZulu)
 # NOTE (groupAlpha << 2)
 
-		numpy.bitwise_or(curveLocationsGroupZulu, numpy.subtract(numpy.uint64(1), numpy.bitwise_and(arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu], 1)), out=curveLocationsGroupZulu)
+		numpy.bitwise_or(curveLocationsGroupZulu, numpy.subtract(datatypeCurveLocationsNumPy(1), numpy.bitwise_and(arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu], 1)), out=curveLocationsGroupZulu)
 # TODO | (1 - (groupZulu & 1))
 
 # NOTE | (groupZulu >> 1)
@@ -256,7 +332,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 			, curveLocationsGroupZulu
 			, arrayCurveGroups[:, columnDistinctCrossings]
 			, selectGroupZuluCurves
-			, curveLocationsMAXIMUM
+			, MAXIMUMcurveLocations
 		)
 
 		rowsDeallocatedTotal += allocateGroupZuluCurves
@@ -281,7 +357,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		numpy.equal(numpy.bitwise_and(arrayCurveGroups[:, columnGroupZulu], 1), 0, out=selectGroupZuluAtEven, dtype=bool)
 
 		selectBridgesGroupAlphaPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & selectGroupAlphaAtEven & (~selectGroupZuluAtEven))
-		arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
+		arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha] = flipTheExtra_0b1AsUfunc(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
 # Without changing `flipTheExtra_0b1`, above works, but `out=` does not. Why? Elephino.
 # NOTE flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha], casting='unsafe', out=arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
 
@@ -291,7 +367,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 # NOTE this code block MODIFIES `arrayCurveGroups` NOTE
 		set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
 		selectBridgesGroupZuluPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & (~selectGroupAlphaAtEven) & selectGroupZuluAtEven)
-		arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu])
+		arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu] = flipTheExtra_0b1AsUfunc(arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu])
 
 		set_threshold(1, 1, 1)  # Re-enable the garbage collector.
 		selectBridgesGroupZuluPairedToOdd = None; del selectBridgesGroupZuluPairedToOdd # pyright: ignore[reportAssignmentType]  # noqa: E702
@@ -303,12 +379,12 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 
 # ----------------------------------------------- bridgesAligned ------------------------------------------------------
 
-		curveLocationsBridgesAlignedLessThanMaximum: DataArray1D = numpy.zeros((selectBridgesAligned.sum(),), dtype=numpy.uint64)
+		curveLocationsBridgesAlignedLessThanMaximum: DataArray1D = numpy.zeros((selectBridgesAligned.sum(),), dtype=datatypeCurveLocationsNumPy)
 		numpy.right_shift(arrayCurveGroups[selectBridgesAligned, columnGroupZulu], 2, out=curveLocationsBridgesAlignedLessThanMaximum)
 		numpy.left_shift(curveLocationsBridgesAlignedLessThanMaximum, 3, out=curveLocationsBridgesAlignedLessThanMaximum)
 		numpy.bitwise_or(curveLocationsBridgesAlignedLessThanMaximum, arrayCurveGroups[selectBridgesAligned, columnGroupAlpha], out=curveLocationsBridgesAlignedLessThanMaximum)
 		numpy.right_shift(curveLocationsBridgesAlignedLessThanMaximum, 2, out=curveLocationsBridgesAlignedLessThanMaximum)
-		curveLocationsBridgesAlignedLessThanMaximum[curveLocationsBridgesAlignedLessThanMaximum >= curveLocationsMAXIMUM] = 0
+		curveLocationsBridgesAlignedLessThanMaximum[curveLocationsBridgesAlignedLessThanMaximum >= MAXIMUMcurveLocations] = 0
 
 		Z0Z_indexStart: int = rowsAggregatedTotal
 		rowsAggregatedTotal += int(numpy.count_nonzero(curveLocationsBridgesAlignedLessThanMaximum))
@@ -322,7 +398,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		arrayCurveGroups = None; del arrayCurveGroups # pyright: ignore[reportAssignmentType]  # noqa: E702
 		curveLocationsBridgesAlignedLessThanMaximum = None; del curveLocationsBridgesAlignedLessThanMaximum  # pyright: ignore[reportAssignmentType] # noqa: E702
 		del allocateBridgesAligned
-		del curveLocationsMAXIMUM
+		del MAXIMUMcurveLocations
 		del rowsAllocatedTotal
 		del rowsDeallocatedTotal
 		del Z0Z_indexStart
@@ -330,18 +406,208 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		selectBridgesAligned = None; del selectBridgesAligned  # pyright: ignore[reportAssignmentType] # noqa: E702
 		goByeBye()
 
-# ----------------------------------------------- aggregation ---------------------------------------------------------
-		arrayCurveGroups = aggregateCurveLocations2CurveGroups(arrayCurveLocations)
+	return (indexTransferMatrix, arrayCurveLocations)
 
-		arrayCurveLocations = None; del arrayCurveLocations # pyright: ignore[reportAssignmentType]  # noqa: E702
-		goByeBye()
+def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, int], indexTransferMatrixMinimum: int = 0) -> tuple[int, dict[Any, Any]]:
+	"""Count meanders with matrix transfer algorithm using pandas DataFrame."""
+	def aggregateCurveLocations(MAXIMUMcurveLocations: int) -> None:
+		nonlocal dataframeAnalyzed, dataframeCurveLocations
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= MAXIMUMcurveLocations, 'analyzed'] = 0
+		dataframeAnalyzed = pandas.concat([dataframeAnalyzed
+									, dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0)].groupby('analyzed')['distinctCrossings'].aggregate('sum').reset_index()
+						], ignore_index=True)
+		dataframeAnalyzed = dataframeAnalyzed.groupby('analyzed')['distinctCrossings'].aggregate('sum').reset_index()
 
-	return (bridges, arrayCurveGroups)
+		dataframeCurveLocations.loc[:, 'analyzed'] = 0
 
-def convertArrayCurveGroups2dictionaryCurveGroups(arrayCurveGroups: DataArray3columns) -> dict[tuple[int, int], int]:
-	return {(int(row[columnGroupAlpha]), int(row[columnGroupZulu])): int(row[columnDistinctCrossings]) for row in arrayCurveGroups}
+	def analyzeCurveLocationsAligned(MAXIMUMcurveLocations: int) -> None:
+		"""Compute `curveLocations` from `groupAlpha` and `groupZulu` if at least one is an even number.
 
-def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
+		Before computing `curveLocations`, some values of `groupAlpha` and `groupZulu` are modified.
+
+		Formula
+		-------
+		```python
+		if groupAlpha > 1 and groupZulu > 1 and (groupAlphaIsEven or groupZuluIsEven):
+			curveLocations = (groupAlpha >> 2) | ((groupZulu >> 2) << 1)
+		```
+
+		Parameters
+		----------
+		MAXIMUMcurveLocations : int
+			Maximum value of `curveLocations` for the current iteration of `bridges`.
+		"""
+		nonlocal dataframeCurveLocations
+
+		# if groupAlphaIsEven or groupZuluIsEven
+		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations[dataframeCurveLocations['alignAt'] == 'oddBoth'].index)
+
+		# if groupAlphaCurves and groupZuluCurves
+		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations[(dataframeCurveLocations['groupAlpha'] <= 1) | (dataframeCurveLocations['groupZulu'] <= 1)].index)
+
+		# if groupAlphaIsEven and not groupZuluIsEven, modifyGroupAlphaPairedToOdd
+		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'] = flipTheExtra_0b1vectorized(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'])
+
+		# if groupZuluIsEven and not groupAlphaIsEven, modifyGroupZuluPairedToOdd
+		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'] = flipTheExtra_0b1vectorized(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'])
+
+		dataframeCurveLocations.loc[:, 'groupAlpha'] //= 2**2 # (groupAlpha >> 2)
+		dataframeCurveLocations.loc[:, 'groupZulu'] //= 2**2 # (groupZulu >> 2)
+		dataframeCurveLocations.loc[:, 'groupZulu'] *= 2**1 # ((groupZulu ...) << 1)
+		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['groupAlpha'] | dataframeCurveLocations['groupZulu'] # (groupZulu ...) | (groupAlpha ...)
+
+		aggregateCurveLocations(MAXIMUMcurveLocations)
+
+	def analyzeCurveLocationsAlpha(MAXIMUMcurveLocations: int) -> None:
+		"""Compute `curveLocations` from `groupAlpha`.
+
+		Formula
+		-------
+		```python
+		if groupAlpha > 1:
+			curveLocations = ((1 - (groupAlpha & 1)) << 1) | (groupZulu << 3) | (groupAlpha >> 2)
+		```
+		"""
+		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['groupAlpha'] & 1 # (groupAlpha & 1)
+		dataframeCurveLocations.loc[:, 'analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupAlpha ...))
+
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] == 1, 'alignAt'] = 'evenAlpha' # groupAlphaIsEven
+
+		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**1 # ((groupAlpha ...) << 1)
+		dataframeCurveLocations.loc[:, 'groupZulu'] *= 2**3 # (groupZulu << 3)
+		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupZulu'] # ... | (groupZulu ...)
+		dataframeCurveLocations.loc[:, 'analyzed'] |= (dataframeCurveLocations['groupAlpha'] // 2**2) # ... | (groupAlpha >> 2)
+		dataframeCurveLocations.loc[dataframeCurveLocations['groupAlpha'] <= 1, 'analyzed'] = 0 # if groupAlpha > 1
+
+		aggregateCurveLocations(MAXIMUMcurveLocations)
+		computeCurveGroups(alpha=False)
+
+	def analyzeCurveLocationsSimple(MAXIMUMcurveLocations: int) -> None:
+		"""Compute curveLocations with the 'simple' bridges formula.
+
+		((groupAlpha | (groupZulu << 1)) << 2) | 3
+		"""
+		nonlocal dataframeCurveLocations
+		dataframeCurveLocations.loc[:, 'groupZulu'] *= 2**1 # (groupZulu << 1)
+		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupAlpha'] | dataframeCurveLocations['groupZulu'] # ((groupAlpha | (groupZulu ...))
+		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # (... << 2)
+		dataframeCurveLocations.loc[:, 'analyzed'] += 3 # (...) | 3
+		"""NOTE about substituting `+= 3` for `|= 3`: (I hope my substitution is valid!)
+		Given "n" is a Python `int` >= 0, "0bk" = `bin(n)`, I claim:
+		n * 2**2 == n << 2
+		bin(n * 2**2) == 0bk00
+		0b11 = 0b00 | 0b11
+		0bk11 = 0bk00 | 0b11
+		0b11 = 0bk11 - 0bk00
+		0b11 == int(3)
+
+		therefore, for any non-zero integer, 0bk00, the operation 0bk00 | 0b11 is equivalent to 0bk00 + 0b11.
+
+		Why substitute? I've been having problems implementing bitwise operations in pandas, so I am avoiding them until I learn
+		how to implement them in pandas.
+		"""
+
+		aggregateCurveLocations(MAXIMUMcurveLocations)
+
+		computeCurveGroups(alpha=False)
+
+	def analyzeCurveLocationsZulu(MAXIMUMcurveLocations: int) -> None:
+		"""Compute `curveLocations` from `groupZulu`.
+
+		Formula
+		-------
+		```python
+		if groupZulu > 1:
+			curveLocations = (1 - (groupZulu & 1)) | (groupAlpha << 2) | (groupZulu >> 1)
+		```
+		"""
+		nonlocal dataframeCurveLocations
+		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['groupZulu'] & 1 # (groupZulu & 1)
+		dataframeCurveLocations.loc[:, 'analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupZulu ...))
+
+		dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] == 1) & (dataframeCurveLocations['alignAt'] == 'evenAlpha'), 'alignAt'] = 'evenBoth' # groupZuluIsEven
+		dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] == 1) & (dataframeCurveLocations['alignAt'] == 'oddBoth'), 'alignAt'] = 'evenZulu' # groupZuluIsEven
+
+		dataframeCurveLocations.loc[:, 'groupAlpha'] *= 2**2 # (groupAlpha << 2)
+		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupAlpha'] # ... | (groupAlpha ...)
+		dataframeCurveLocations.loc[:, 'analyzed'] |= (dataframeCurveLocations['groupZulu'] // 2**1) # ... | (groupZulu >> 1)
+		dataframeCurveLocations.loc[dataframeCurveLocations['groupZulu'] <= 1, 'analyzed'] = 0 # if groupZulu > 1
+
+		aggregateCurveLocations(MAXIMUMcurveLocations)
+		computeCurveGroups(zulu=False)
+
+	def computeCurveGroups(*, alpha: bool = True, zulu: bool = True) -> None:
+		"""Compute `groupAlpha` and `groupZulu` with 'bit-masks' on `curveLocations`.
+
+		Parameters
+		----------
+		alpha : bool = True
+			Should column `groupAlpha` be computed?
+
+		zulu : bool = True
+			Should column `groupZulu` be computed?
+
+		3L33T H@X0R
+		-----------
+		- `groupAlpha`: odd-parity bit-masked `curveLocations`
+		- `groupZulu`: even-parity bit-masked `curveLocations`
+		"""
+		nonlocal dataframeCurveLocations
+		bitWidth: int = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
+# TODO scratch this itch: I _feel_ it must be possible to bifurcate `curvesLocations` with one formula. Even if implementation is infeasible, I want to know.
+		if alpha:
+			dataframeCurveLocations['groupAlpha'] = dataframeCurveLocations['curveLocations'] & getLocatorGroupAlpha(bitWidth)
+		if zulu:
+			dataframeCurveLocations['groupZulu'] = dataframeCurveLocations['curveLocations'] & getLocatorGroupZulu(bitWidth)
+			dataframeCurveLocations.loc[:, 'groupZulu'] //= 2**1 # (groupZulu >> 1)
+
+	def outfitDataframeCurveLocations() -> None:
+		nonlocal dataframeAnalyzed, dataframeCurveLocations
+		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
+		dataframeCurveLocations['curveLocations'] = dataframeAnalyzed['analyzed']
+		dataframeCurveLocations['distinctCrossings'] = dataframeAnalyzed['distinctCrossings']
+		dataframeCurveLocations['alignAt'] = 'oddBoth'
+		dataframeCurveLocations['analyzed'] = 0
+		dataframeAnalyzed = dataframeAnalyzed.iloc[0:0]
+		computeCurveGroups()
+
+	CategoriesAlignAt = pandas.CategoricalDtype(categories=['evenAlpha', 'evenZulu', 'evenBoth', 'oddBoth'], ordered=False)
+
+	dataframeAnalyzed = pandas.DataFrame({
+		'analyzed': pandas.Series(name='analyzed', data=list(dictionaryCurveLocations.keys()), dtype=datatypeCurveLocations)
+		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=list(dictionaryCurveLocations.values()), dtype=datatypeDistinctCrossings)
+		}
+	)
+
+	dataframeCurveLocations = pandas.DataFrame({
+		'curveLocations': pandas.Series(name='curveLocations', data=0, dtype=datatypeCurveLocations)
+		, 'groupAlpha': pandas.Series(name='groupAlpha', data=0, dtype=datatypeCurveLocations)
+		, 'groupZulu': pandas.Series(name='groupZulu', data=0, dtype=datatypeCurveLocations)
+		, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=datatypeCurveLocations)
+		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=0, dtype=datatypeDistinctCrossings)
+		, 'alignAt': pandas.Series(name='alignAt', data='oddBoth', dtype=CategoriesAlignAt)
+		}
+	)
+
+	listIndicesTransferMatrix: list[int] = list(range(indexTransferMatrix -1, indexTransferMatrixMinimum -1, -1))
+	for indexTransferMatrix in tqdm(listIndicesTransferMatrix, leave=False):  # noqa: PLR1704
+		if int(dataframeAnalyzed['distinctCrossings'].max()).bit_length() > bitWidthDistinctCrossingsMaximum:
+			indexTransferMatrix += 1  # noqa: PLW2901
+			sys.stdout.write(f"Switching at {indexTransferMatrix =} .")
+			break
+		MAXIMUMcurveLocations: int = 1 << (2 * indexTransferMatrix + 4)
+		outfitDataframeCurveLocations()
+
+		analyzeCurveLocationsSimple(MAXIMUMcurveLocations)
+		analyzeCurveLocationsAlpha(MAXIMUMcurveLocations)
+		analyzeCurveLocationsZulu(MAXIMUMcurveLocations)
+		analyzeCurveLocationsAligned(MAXIMUMcurveLocations)
+
+	return (indexTransferMatrix, dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].to_dict())
+
+# ----------------- doTheNeedful --------------------------------------------------------------------------------------
+
+def doTheNeedful(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	"""Compute a(n) meanders with the transfer matrix algorithm.
 
 	Parameters
@@ -384,41 +650,54 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	2. When the bit width of the bit-packed integers connected to `bridges` is small enough to use `numpy.uint64`, I switch to NumPy for the heavy lifting.
 	3. When `distinctCrossings` subtotals might exceed 64 bits, I must switch back to Python primitives.
 	"""
-	count64_bridgesMaximum = 28
-	dictionaryCurveGroups: dict[tuple[int, int], int] = convertDictionaryCurveLocations2CurveGroups(dictionaryCurveLocations)
+	bitWidth: int = max(dictionaryCurveLocations.keys()).bit_length()
+	indexTransferMatrixMinimum = max(0, (indexTransferMatrix + 1 - 41))
 
-	if n >= count64_bridgesMaximum:
-		n, dictionaryCurveGroups = count(n, dictionaryCurveGroups, count64_bridgesMaximum)
-		goByeBye()
-	n, arrayCurveGroups = count64(n, convertDictionaryCurveGroups2array(dictionaryCurveGroups))
-	if n > 0:
+	# NOTE Stage 1 if `curveLocations` bit-width is too wide for `numpy.uint64`.
+	if bitWidth > bitWidthCurveLocationsMaximum:
+		indexTransferMatrixMinimumEstimatedA000682 = 28
+		indexTransferMatrix, dictionaryCurveLocations = countBigInt(indexTransferMatrix, dictionaryCurveLocations, indexTransferMatrixMinimumEstimatedA000682)
 		goByeBye()
 
-		n, dictionaryCurveGroups = count(n, convertArrayCurveGroups2dictionaryCurveGroups(arrayCurveGroups))
-		distinctCrossingsTotal: int = sum(dictionaryCurveGroups.values())
+	# Stage 2 Goldilocks
+	# NumPy
+	# indexTransferMatrix, arrayCurveLocations = countNumPy(indexTransferMatrix, convertDictionaryCurveLocations2array(dictionaryCurveLocations))  # noqa: ERA001
+
+	# Pandas
+	indexTransferMatrix, dictionaryCurveLocations = countPandas(indexTransferMatrix, dictionaryCurveLocations, indexTransferMatrixMinimum)
+
+	# NOTE Stage 3 if `distinctCrossings` bit-width is too wide for `numpy.uint64`.
+	if indexTransferMatrix > 0:
+		goByeBye()
+		indexTransferMatrix, dictionaryCurveLocations = countBigInt(indexTransferMatrix, dictionaryCurveLocations)
+	return sum(dictionaryCurveLocations.values())
+"""	NumPy
+		distinctCrossingsTotal: int = sum(dictionaryCurveLocations.values())
 	else:
-		distinctCrossingsTotal = int(arrayCurveGroups[0, columnDistinctCrossings])
+		distinctCrossingsTotal = int(arrayCurveLocations[:, columnDistinctCrossings].sum())
 	return distinctCrossingsTotal
 
-def A000682getCurveLocations(n: int) -> dict[int, int]:
-	curveLocationsMAXIMUM: int = 1 << (2 * n + 4)
-	curveStart: int = 5 - (n & 0b1) * 4
-	listCurveLocations: list[int] = [(curveStart << 1) | curveStart]
-	while listCurveLocations[-1] < curveLocationsMAXIMUM:
-		curveStart = (curveStart << 4) | 0b101
-		listCurveLocations.append((curveStart << 1) | curveStart)
-	return dict.fromkeys(listCurveLocations, 1)
-
+"""
 @cache
 def A000682(n: int) -> int:
-	return doTheNeedful(n - 1, A000682getCurveLocations(n - 1))
-
-def A005316getCurveLocations(n: int) -> dict[int, int]:
+	"""Compute A000682(n)."""
 	if n & 0b1:
-		return {22: 1}
+		curveLocations: int = 5
 	else:
-		return {15: 1}
+		curveLocations = 1
+	listCurveLocations: list[int] = [(curveLocations << 1) | curveLocations]
+
+	MAXIMUMcurveLocations: int = getMAXIMUMcurveLocations(n-1)
+	while listCurveLocations[-1] < MAXIMUMcurveLocations:
+		curveLocations = (curveLocations << 4) | 0b101 # == curveLocations * 2**4 + 5
+		listCurveLocations.append((curveLocations << 1) | curveLocations)
+	return doTheNeedful(n - 1, dict.fromkeys(listCurveLocations, 1))
 
 @cache
 def A005316(n: int) -> int:
-	return doTheNeedful(n - 1, A005316getCurveLocations(n - 1))
+	"""Compute A005316(n)."""
+	if n & 0b1:
+		dictionaryCurveLocations: dict[int, int] = {15: 1}
+	else:
+		dictionaryCurveLocations = {22: 1}
+	return doTheNeedful(n - 1, dictionaryCurveLocations)

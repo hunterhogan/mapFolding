@@ -4,10 +4,8 @@ from tqdm import tqdm
 import numpy
 import pandas
 
-datatypeCurveLocationsHARDCODED = numpy.uint64
-datatypeDistinctCrossingsHARDCODED = numpy.uint64
-datatypeCurveLocations = datatypeCurveLocationsHARDCODED
-datatypeDistinctCrossings = datatypeDistinctCrossingsHARDCODED
+datatypeCurveLocations = numpy.uint64
+datatypeDistinctCrossings = numpy.uint64
 # A000682 at n=39, `dictionaryCurveLocations` has a `curveLocations` > 64 bits
 # if `int`: OverflowError: The elements provided in the data cannot all be casted to the dtype int64
 # if `numpy.uint64`: OverflowError: The elements provided in the data cannot all be casted to the dtype uint64
@@ -15,8 +13,29 @@ datatypeDistinctCrossings = datatypeDistinctCrossingsHARDCODED
 # True    43      1364.89
 # False   44      2228.25
 
+def getLocatorGroupAlpha(bitWidth: int) -> int:
+	"""Compute an odd-parity bit-mask with `bitWidth` bits.
+
+	Notes
+	-----
+	In binary, `locatorGroupAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
+	digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
+	from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
+	counting this way, `locatorGroupAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
+	therefore, tend to call `locatorGroupAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
+	mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
+	odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
+
+	"""
+	return sum(1 << one for one in range(0, bitWidth, 2))
+
+def getLocatorGroupZulu(bitWidth: int) -> int:
+	"""Compute an even-parity bit-mask with `bitWidth` bits."""
+	return sum(1 << one for one in range(1, bitWidth, 2))
+
 @cache
-def _walkDyckPath(intWithExtra_0b1: int) -> int:
+def walkDyckPath(intWithExtra_0b1: int) -> int:
+	"""NOTE `gc.set_threshold`: Low numbers nullify the `walkDyckPath` cache."""
 	findTheExtra_0b1: int = 0
 	flipExtra_0b1_Here: int = 1
 	while True:
@@ -30,10 +49,11 @@ def _walkDyckPath(intWithExtra_0b1: int) -> int:
 	return flipExtra_0b1_Here
 
 @cache
-def _flipTheExtra_0b1(intWithExtra_0b1: int) -> int:
-	return intWithExtra_0b1 ^ _walkDyckPath(intWithExtra_0b1)
+def flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
+	"""Flip."""
+	return numpy.uint64(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
 
-flipTheExtra_0b1 = numpy.vectorize(_flipTheExtra_0b1, otypes=[datatypeCurveLocations])
+flipTheExtra_0b1vectorized = numpy.vectorize(flipTheExtra_0b1, otypes=[datatypeCurveLocations])
 
 def countPandas(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	"""Count meanders with matrix transfer algorithm using pandas DataFrame."""
@@ -73,10 +93,10 @@ def countPandas(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations[(dataframeCurveLocations['groupAlpha'] <= 1) | (dataframeCurveLocations['groupZulu'] <= 1)].index)
 
 		# if groupAlphaIsEven and not groupZuluIsEven, modifyGroupAlphaPairedToOdd
-		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'] = flipTheExtra_0b1(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'])
+		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'] = flipTheExtra_0b1vectorized(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'])
 
 		# if groupZuluIsEven and not groupAlphaIsEven, modifyGroupZuluPairedToOdd
-		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'] = flipTheExtra_0b1(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'])
+		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'] = flipTheExtra_0b1vectorized(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'])
 
 		dataframeCurveLocations.loc[:, 'groupAlpha'] //= 2**2 # (groupAlpha >> 2)
 		dataframeCurveLocations.loc[:, 'groupZulu'] //= 2**2 # (groupZulu >> 2)
@@ -166,32 +186,26 @@ def countPandas(bridges: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	def computeCurveGroups(*, alpha: bool = True, zulu: bool = True) -> None:
 		"""Compute `groupAlpha` and `groupZulu` with 'bit-masks' on `curveLocations`.
 
+		Parameters
+		----------
+		alpha : bool = True
+			Should column `groupAlpha` be computed?
+
+		zulu : bool = True
+			Should column `groupZulu` be computed?
+
 		3L33T H@X0R
 		-----------
-		- `locatorGroupAlpha`: odd-parity bit-mask
 		- `groupAlpha`: odd-parity bit-masked `curveLocations`
-		- `locatorGroupZulu`: even-parity bit-mask
 		- `groupZulu`: even-parity bit-masked `curveLocations`
-
-		Notes
-		-----
-		In binary, `locatorGroupAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
-		digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
-		from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
-		counting this way, `locatorGroupAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
-		therefore, tend to call `locatorGroupAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
-		mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
-		odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
 		"""
 		nonlocal dataframeCurveLocations
 		bitWidth: int = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
 # TODO scratch this itch: I _feel_ it must be possible to bifurcate `curvesLocations` with one formula. Even if implementation is infeasible, I want to know.
 		if alpha:
-			locatorGroupAlpha = sum(1 << one for one in range(0, bitWidth, 2))
-			dataframeCurveLocations['groupAlpha'] = dataframeCurveLocations['curveLocations'] & locatorGroupAlpha
+			dataframeCurveLocations['groupAlpha'] = dataframeCurveLocations['curveLocations'] & getLocatorGroupAlpha(bitWidth)
 		if zulu:
-			locatorGroupZulu = sum(1 << one for one in range(1, bitWidth, 2))
-			dataframeCurveLocations['groupZulu'] = dataframeCurveLocations['curveLocations'] & locatorGroupZulu
+			dataframeCurveLocations['groupZulu'] = dataframeCurveLocations['curveLocations'] & getLocatorGroupZulu(bitWidth)
 			dataframeCurveLocations.loc[:, 'groupZulu'] //= 2**1 # (groupZulu >> 1)
 
 	def outfitDataframeCurveLocations() -> None:
