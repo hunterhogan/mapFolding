@@ -199,7 +199,12 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		dataframeAnalyzed = pandas.concat(
 			[dataframeAnalyzed
 			, dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']].reset_index()
-		], ignore_index=True).groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
+		], ignore_index=True
+		).groupby('analyzed'
+			, sort=False
+			)['distinctCrossings'
+				].aggregate('sum'
+				).reset_index()
 
 		dataframeCurveLocations.loc[:, 'analyzed'] = 0
 
@@ -207,6 +212,10 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		"""Compute `curveLocations` from `groupAlpha` and `groupZulu` if at least one is an even number.
 
 		Before computing `curveLocations`, some values of `groupAlpha` and `groupZulu` are modified.
+
+		Warning
+		-------
+		This function deletes rows from `dataframeCurveLocations`. Always run this analysis last.
 
 		Formula
 		-------
@@ -219,21 +228,30 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		----------
 		MAXIMUMcurveLocations : int
 			Maximum value of `curveLocations` for the current iteration of `bridges`.
+
+		Notes
+		-----
+		The 'dropModify' column in `dataframeCurveLocations` controls what is dropped and what is modified. If a row fails `if
+		groupAlpha > 1 and groupZulu > 1`, its 'dropModify' value will be between -10 and -8. If a row passes that check but fails
+		`(groupAlphaIsEven or groupZuluIsEven)`, meaning both values are odd numbers, its 'dropModify' value will be 0. Rows with
+		`['dropModify'] <= 0]` get dropped.
+
+		If `groupAlphaIsEven` then 'dropModify' += 1. If `groupZuluIsEven` then 'dropModify' += 2. So the remaining rows:
+		- `['dropModify'] == 1`: `groupAlphaIsEven` and not `groupZuluIsEven`
+		- `['dropModify'] == 2`: `groupZuluIsEven` and not `groupAlphaIsEven`
+		- `['dropModify'] == 3`: `groupAlphaIsEven` and `groupZuluIsEven`
+
+		I strongly prefer semantic, self-documenting code, but the semantic version required 20x more time to run.
 		"""
 		nonlocal dataframeCurveLocations
 
-		# if groupAlphaIsEven or groupZuluIsEven
-		# NOTE Options. The CPU cost is the same. Pay to drop. Pay for a mask. Pay to evaluate and set to 0. I assume memory is cheaper to drop.
-		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations[dataframeCurveLocations['alignAt'] == 'oddBoth'].index)
-
-		# if groupAlphaCurves and groupZuluCurves
-		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations[(dataframeCurveLocations['groupAlpha'] <= 1) | (dataframeCurveLocations['groupZulu'] <= 1)].index)
+		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations[dataframeCurveLocations['dropModify'] <= 0].index) # if groupAlphaCurves and groupZuluCurves and (groupAlphaIsEven or groupZuluIsEven)
 
 		# if groupAlphaIsEven and not groupZuluIsEven, modifyGroupAlphaPairedToOdd
-		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'] = datatypeCurveLocations(flipTheExtra_0b1AsUfunc(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenAlpha', 'groupAlpha'])) # 32s
+		dataframeCurveLocations.loc[dataframeCurveLocations['dropModify'] == 1, 'groupAlpha'] = datatypeCurveLocations(flipTheExtra_0b1AsUfunc(dataframeCurveLocations.loc[dataframeCurveLocations['dropModify'] == 1, 'groupAlpha']))
 
 		# if groupZuluIsEven and not groupAlphaIsEven, modifyGroupZuluPairedToOdd
-		dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'] = datatypeCurveLocations(flipTheExtra_0b1AsUfunc(dataframeCurveLocations.loc[dataframeCurveLocations['alignAt'] == 'evenZulu', 'groupZulu'])) # 31s
+		dataframeCurveLocations.loc[dataframeCurveLocations['dropModify'] == 2, 'groupZulu'] = datatypeCurveLocations(flipTheExtra_0b1AsUfunc(dataframeCurveLocations.loc[dataframeCurveLocations['dropModify'] == 2, 'groupZulu']))
 
 		dataframeCurveLocations.loc[:, 'groupAlpha'] //= 2**2 # (groupAlpha >> 2)
 		dataframeCurveLocations.loc[:, 'groupZulu'] //= 2**2 # (groupZulu >> 2)
@@ -241,7 +259,7 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['groupAlpha']
 		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupZulu'] # (groupZulu ...) | (groupAlpha ...)
 
-		aggregateCurveLocations(MAXIMUMcurveLocations) # 106
+		aggregateCurveLocations(MAXIMUMcurveLocations)
 
 	def analyzeCurveLocationsAlpha(MAXIMUMcurveLocations: int) -> None:
 		"""Compute `curveLocations` from `groupAlpha`.
@@ -263,14 +281,15 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupAlpha & 1)
 		dataframeCurveLocations.loc[:, 'analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupAlpha ...))
 
-		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] == 1, 'alignAt'] = 'evenAlpha' # groupAlphaIsEven
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] == 1, 'dropModify'] += 1 # groupAlphaIsEven
 
 		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**1 # ((groupAlpha ...) << 1)
 		dataframeCurveLocations.loc[:, 'groupZulu'] *= 2**3 # (groupZulu << 3)
 		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupZulu'] # ... | (groupZulu ...)
-# NOTE potential memory optimization
-		dataframeCurveLocations.loc[:, 'analyzed'] |= (dataframeCurveLocations['groupAlpha'] // 2**2) # ... | (groupAlpha >> 2)
-		dataframeCurveLocations.loc[dataframeCurveLocations['groupAlpha'] <= 1, 'analyzed'] = 0 # if groupAlpha > 1
+		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # ... | (groupAlpha >> 2)
+		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupAlpha'] # ... | (groupAlpha)
+		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (... >> 2)
+		dataframeCurveLocations.loc[dataframeCurveLocations['groupAlpha'] <= 1, ['analyzed', 'dropModify']] = [0, -10] # if groupAlpha > 1
 
 		aggregateCurveLocations(MAXIMUMcurveLocations)
 		computeCurveGroups(alpha=False)
@@ -319,7 +338,7 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # (... << 2)
 		dataframeCurveLocations.loc[:, 'analyzed'] += 3 # (...) | 3
 
-		aggregateCurveLocations(MAXIMUMcurveLocations) # 34
+		aggregateCurveLocations(MAXIMUMcurveLocations)
 		computeCurveGroups(alpha=False)
 
 	def analyzeCurveLocationsZulu(MAXIMUMcurveLocations: int) -> None:
@@ -342,14 +361,14 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupZulu & 1)
 		dataframeCurveLocations.loc[:, 'analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupZulu ...))
 
-		dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] == 1) & (dataframeCurveLocations['alignAt'] == 'evenAlpha'), 'alignAt'] = 'evenBoth' # groupZuluIsEven
-		dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] == 1) & (dataframeCurveLocations['alignAt'] == 'oddBoth'), 'alignAt'] = 'evenZulu' # groupZuluIsEven
+		dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] == 1), 'dropModify'] += 2 # groupZuluIsEven
 
 		dataframeCurveLocations.loc[:, 'groupAlpha'] *= 2**2 # (groupAlpha << 2)
 		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupAlpha'] # ... | (groupAlpha ...)
-# NOTE potential memory optimization
-		dataframeCurveLocations.loc[:, 'analyzed'] |= (dataframeCurveLocations['groupZulu'] // 2**1) # ... | (groupZulu >> 1)
-		dataframeCurveLocations.loc[dataframeCurveLocations['groupZulu'] <= 1, 'analyzed'] = 0 # if groupZulu > 1
+		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**1 # ... | (groupZulu >> 1)
+		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupZulu'] # ... | (groupZulu)
+		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**1 # (... >> 1)
+		dataframeCurveLocations.loc[dataframeCurveLocations['groupZulu'] <= 1, ['analyzed', 'dropModify']] = [0, -10] # if groupZulu > 1
 
 		aggregateCurveLocations(MAXIMUMcurveLocations)
 		computeCurveGroups(zulu=False)
@@ -385,12 +404,10 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
 		dataframeCurveLocations['curveLocations'] = dataframeAnalyzed['analyzed']
 		dataframeCurveLocations['distinctCrossings'] = dataframeAnalyzed['distinctCrossings']
-		dataframeCurveLocations['alignAt'] = 'oddBoth'
+		dataframeCurveLocations['dropModify'] = 0
 		dataframeCurveLocations['analyzed'] = 0
 		dataframeAnalyzed = dataframeAnalyzed.iloc[0:0]
 		computeCurveGroups()
-
-	CategoriesAlignAt = pandas.CategoricalDtype(categories=['evenAlpha', 'evenZulu', 'evenBoth', 'oddBoth'], ordered=False)
 
 	dataframeAnalyzed = pandas.DataFrame({
 		'analyzed': pandas.Series(name='analyzed', data=list(dictionaryCurveLocations.keys()), dtype=datatypeCurveLocations)
@@ -404,7 +421,7 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		, 'groupZulu': pandas.Series(name='groupZulu', data=0, dtype=datatypeCurveLocations)
 		, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=datatypeCurveLocations)
 		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=0, dtype=datatypeDistinctCrossings)
-		, 'alignAt': pandas.Series(name='alignAt', data='oddBoth', dtype=CategoriesAlignAt)
+		, 'dropModify': pandas.Series(name='dropModify', data=0, dtype=numpy.int8)
 		}
 	)
 
@@ -470,7 +487,8 @@ def doTheNeedful(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, i
 
 	In total, to compute a(n) for "large" n, I use three-stages.
 	1. I use Python primitive `int` contained in a Python primitive `dict`.
-	2. When the bit width of the bit-packed integers connected to `bridges` is small enough to use `numpy.uint64`, I switch to NumPy for the heavy lifting.
+	2. When the bit width of the bit-packed integers connected to `bridges` is small enough to use `numpy.uint64`, I switch to
+	NumPy for the heavy lifting.
 	3. When `distinctCrossings` subtotals might exceed 64 bits, I must switch back to Python primitives.
 	"""
 	global tqdmInitial, tqdmTotal  # noqa: PLW0603
