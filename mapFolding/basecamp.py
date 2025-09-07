@@ -206,6 +206,13 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 		"""
 		match flow:
+			case 'asynchronous':
+				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
+				from mapFolding.syntheticModules.algorithmA007822Asynchronous import doTheNeedful  # noqa: PLC0415
+				mapFoldingState = doTheNeedful(mapFoldingState)
+
 			case 'numba':
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)

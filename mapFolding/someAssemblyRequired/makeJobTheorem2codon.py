@@ -220,6 +220,6 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	makeJob(aJob)
 
 if __name__ == '__main__':
-	mapShape = (1, 15)
+	mapShape = (1, 2)
 	fromMapShape(mapShape)
 

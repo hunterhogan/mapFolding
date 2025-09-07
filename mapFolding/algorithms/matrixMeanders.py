@@ -6,7 +6,6 @@ import pandas
 import sys
 
 # ----------------- environment configuration -------------------------------------------------------------------------
-
 _bitWidthOfFixedSizeInteger: int = 64
 
 _bitWidthOffsetCurveLocationsNecessary: int = 3 # `curveLocations` analysis may need 3 extra bits. For example, `groupZulu << 3`.
@@ -37,7 +36,6 @@ groupAlphaAtEven = 1
 groupZuluAtEven = 2
 
 # ----------------- support functions ---------------------------------------------------------------------------------
-
 @cache
 def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 	return numpy.uint64(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
@@ -91,7 +89,30 @@ def outfitDictionaryCurveGroups(dictionaryCurveLocations: dict[int, int]) -> dic
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
-	"""NOTE `gc.set_threshold`: Low numbers nullify the `walkDyckPath` cache."""
+	"""Find the bit position for flipping paired curve endpoints in meander transfer matrices.
+
+	Parameters
+	----------
+	intWithExtra_0b1 : int
+		Binary representation of curve locations with an extra bit encoding parity information.
+
+	Returns
+	-------
+	flipExtra_0b1_Here : int
+		Bit mask indicating the position where the balance condition fails, formatted as 2^(2k).
+
+	3L33T H@X0R
+	------------
+	Binary search for first negative balance in shifted bit pairs. Returns 2^(2k) mask for
+	bit position k where cumulative balance counter transitions from non-negative to negative.
+
+	Mathematics
+	-----------
+	Implements the Dyck path balance verification algorithm from Jensen's transfer matrix
+	enumeration. Computes the position where ∑(i=0 to k) (-1)^b_i < 0 for the first time,
+	where b_i are the bits of the input at positions 2i.
+
+	"""
 	findTheExtra_0b1: int = 0
 	flipExtra_0b1_Here: int = 1
 	while True:
@@ -182,8 +203,6 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		The current index in the transfer matrix algorithm.
 	dictionaryCurveLocations : dict[int, int]
 		A dictionary of `curveLocations` to `distinctCrossings`.
-	indexTransferMatrixMinimum : int = 0
-		The last index value to compute, even if the full algorithm computation is incomplete.
 
 	Returns
 	-------
@@ -192,32 +211,14 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 	"""
 	def aggregateCurveLocations(MAXIMUMcurveLocations: int) -> None:
 		nonlocal dataframeAnalyzed, dataframeCurveLocations
+
 		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= MAXIMUMcurveLocations, 'analyzed'] = 0
-		dataframeAnalyzed = pandas.concat(
-			[dataframeAnalyzed
-			, dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']].reset_index()
-		], ignore_index=True
-		).groupby('analyzed'
-			, sort=False
-			)['distinctCrossings'
-				].aggregate('sum'
-				).reset_index()
-		"""IDK why, but this works until A000682(37), then the value is off by 16 or something absurdly small.
 
-		dataframeAnalyzed = dataframeAnalyzed.set_index('analyzed').add(
-			(dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0)
-									].groupby('analyzed'
-									, sort=True # YO! Pay a little extra to sort now, save >100x the time during `.add()`, later.
-									)['distinctCrossings'
-										].aggregate('sum'
-										).reset_index(
-										).set_index('analyzed')
-								), axis='columns'
-								, fill_value=0
-								).reset_index()
-
-
-		"""
+		dataframeAnalyzed = pandas.concat([dataframeAnalyzed
+			, dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']].reset_index(
+				).groupby(by='analyzed', as_index=False, sort=True, group_keys=False)['distinctCrossings'
+					].aggregate('sum').reset_index()
+		], ignore_index=True)
 
 		dataframeCurveLocations.loc[:, 'analyzed'] = 0
 
@@ -261,7 +262,6 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		- `['dropModify'] == 1`: `groupAlphaIsEven` and not `groupZuluIsEven`
 		- `['dropModify'] == 2`: `groupZuluIsEven` and not `groupAlphaIsEven`
 		- `['dropModify'] == 3`: `groupAlphaIsEven` and `groupZuluIsEven`
-
 		"""
 		nonlocal dataframeCurveLocations
 
@@ -330,26 +330,9 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 
 		Notes
 		-----
-		About substituting `+= 3` for `|= 3`:
+		Using `+= 3` instead of `|= 3` is valid in this specific case. Left shift by two means the last bits are '0b00'. '0 + 3'
+		is '0b11', and '0b00 | 0b11' is also '0b11'.
 
-		- Givens
-			1. "n" is a Python `int` >= 0
-			2. "0bk" = `bin(n)`
-
-		- Claims
-			1. n * 2**2 == n << 2
-			2. bin(n * 2**2) == 0bk00
-			3. 0b11 = 0b00 | 0b11
-			4. 0bk11 = 0bk00 | 0b11
-			5. 0b11 = 0bk11 - 0bk00
-			6. 0b11 == int(3)
-
-		- Therefore
-			- For any non-zero integer, 0bk00, the operation 0bk00 | 0b11 is equivalent to 0bk00 + 0b11.
-			- I hope my substitution is valid!
-
-		Why substitute? I've been having problems implementing bitwise operations in pandas, so I am avoiding them until I learn
-		how to implement them in pandas.
 		"""
 		nonlocal dataframeCurveLocations
 		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupAlpha']
@@ -432,7 +415,7 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 	dataframeAnalyzed = pandas.DataFrame({
 		'analyzed': pandas.Series(name='analyzed', data=list(dictionaryCurveLocations.keys()), dtype=datatypeCurveLocations)
 		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=list(dictionaryCurveLocations.values()), dtype=datatypeDistinctCrossings)
-		}
+		}, dtype=datatypeCurveLocations
 	)
 	del dictionaryCurveLocations
 
@@ -447,8 +430,8 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 	)
 
 	while (indexTransferMatrix > 0
-		and ((int(dataframeAnalyzed['analyzed'].max()).bit_length() <= bitWidthCurveLocationsMaximum)
-		or (int(dataframeAnalyzed['distinctCrossings'].max()).bit_length() <= bitWidthDistinctCrossingsMaximum))):
+		and (int(dataframeAnalyzed['analyzed'].max()).bit_length() <= bitWidthCurveLocationsMaximum)
+		and (int(dataframeAnalyzed['distinctCrossings'].max()).bit_length() <= bitWidthDistinctCrossingsMaximum)):
 
 		indexTransferMatrix -= 1
 
@@ -464,6 +447,8 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		goByeBye()
 		analyzeCurveLocationsAligned(MAXIMUMcurveLocations)
 		goByeBye()
+
+		dataframeAnalyzed = dataframeAnalyzed.groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
 
 	return (indexTransferMatrix, dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].to_dict())
 

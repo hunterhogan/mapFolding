@@ -42,7 +42,10 @@ from mapFolding.someAssemblyRequired import (
 	dataclassInstanceIdentifierDEFAULT, DeReConstructField2ast, IfThis, ShatteredDataclass,
 	sourceCallableDispatcherDEFAULT)
 from mapFolding.someAssemblyRequired.A007822rawMaterials import (
-	FunctionDef_filterAsymmetricFolds, Z0Z_adjustFoldsTotal, Z0Z_incrementCount)
+	A007822adjustFoldsTotal, A007822incrementCount, AssignTotal2CountingIdentifier, astExprCall_filterAsymmetricFolds,
+	astExprCall_initializeConcurrencyManager, astModule_initializeConcurrencyManager, FunctionDef_filterAsymmetricFolds,
+	FunctionDef_getAsymmetricFoldsTotal, FunctionDef_initializeConcurrencyManager, globalIdentifiers4Concurrency,
+	identifier_filterAsymmetricFolds, ingredientsFunctionConcurrencyManager)
 from mapFolding.someAssemblyRequired.infoBooth import (
 	algorithmSourceModuleDEFAULT, dataPackingModuleIdentifierDEFAULT, logicalPathInfixDEFAULT,
 	sourceCallableIdentifierDEFAULT, theCountingIdentifierDEFAULT)
@@ -152,36 +155,125 @@ def _getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings
 # TODO Where is the generalized form of these functions?!
 
 def addSymmetryCheck(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
-	"""Add logic to check for symmetric folds."""
-	imports=LedgerOfImports(astModule)
+	"""Add logic to check for symmetric folds.
+
+	Process:
+	- Create a `LedgerOfImports` to holds the import statements of `astModule`.
+	- Modify `astModule` in place.
+	- Create an `IngredientsFunction` for `filterAsymmetricFolds`.
+	- Create an `IngredientsModule` with `filterAsymmetricFolds` before everything else from `astModule`.
+	"""
+	imports = LedgerOfImports(astModule)
+
+# NOTE The `astFunctionDef_count` object is actually a reference to objects inside the `astModule` object. To visit Austin, you
+# must visit Texas. So, `.visit(astFunctionDef_count)` means `.visit(astModule)` (but only this one place).
+# 3L33T H4X0R: `astModule` is mutable. `ast.NodeVisitor` returns `astFunctionDef_count` as a reference, not a copy.
+	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
+		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableIdentifierDEFAULT))
+		, doThat = Then.extractIt
+		).captureLastMatch(astModule))
+
+	NodeChanger(Be.Return, Then.insertThisAbove([A007822adjustFoldsTotal])).visit(astFunctionDef_count)
+
+	NodeChanger(
+		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(dataclassInstanceIdentifierDEFAULT, theCountingIdentifierDEFAULT))
+		, doThat=Then.replaceWith(A007822incrementCount)
+		).visit(astFunctionDef_count)
+
+	NodeChanger(Be.ImportFrom, Then.removeIt).visit(astModule)
+
+	ingredientsModule = IngredientsModule(ingredientsFunction=IngredientsFunction(FunctionDef_filterAsymmetricFolds), epilogue=astModule, imports=imports)
+
+	pathFilename: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
+
+	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
+
+	return pathFilename
+
+def addSymmetryCheckAsynchronous(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+	"""Add logic to check for symmetric folds in a separate module so it won't get inlined.
+
+	The dispatcher (doTheNeedful()) will call `initializeConcurrencyManager()` once, which should initialize whatever needs to be
+	turned on. At the end, there is only one call to `getAsymmetricFoldsTotal()`, which will decommission whatever needs to be
+	turned off, then return the total. In between, there are non-blocking calls to `filterAsymmetricFolds(state)`. For a
+	relatively small number, like n=20, there will be over 7 trillion calls to `filterAsymmetricFolds(state)`. Everything must be
+	lean.
+
+	initializeConcurrencyManager is not implemented correctly. My idea is: create a process that doesn't stop running until
+	`getAsymmetricFoldsTotal` stops it. The process is getting each future.return(), adding to the total, and releasing the
+	instance of `state` from memory. Each `state` is 4KB, so we must do this or we will run out of memory.
+
+	"""
+	imports = LedgerOfImports(astModule)
+	NodeChanger(Be.ImportFrom, Then.removeIt).visit(astModule)
 
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
 		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableIdentifierDEFAULT))
 		, doThat = Then.extractIt
 		).captureLastMatch(astModule))
 
-# NOTE 2025 August 7. I am SHOCKED to discover that `astFunctionDef_count: ast.FunctionDef` returned by `NodeTourist` (subclass of
-# `ast.NodeVisitor`) is a so-called mutable `object`!!!!!!
-# !!!!!! Using the mutability of `ast.AST` subclasses, makes `astToolkit` SIGNIFICANTLY more powerful and solves "obstacles" I
-# have been trying to overcome.
-# (Side note: fuck you, Python, for your idiotic paradigms around mutability, its documentation, its identifiers, and its types.)
-
-	NodeChanger(Be.Return, Then.insertThisAbove([Z0Z_adjustFoldsTotal])).visit(astFunctionDef_count)
+	NodeChanger(Be.Return, Then.insertThisAbove([A007822adjustFoldsTotal])).visit(astFunctionDef_count)
 
 	NodeChanger(
 		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(dataclassInstanceIdentifierDEFAULT, theCountingIdentifierDEFAULT))
-		, doThat=Then.replaceWith(Z0Z_incrementCount)
+		, doThat=Then.replaceWith(astExprCall_filterAsymmetricFolds)
 		).visit(astFunctionDef_count)
 
-	ingredientsFunction=IngredientsFunction(FunctionDef_filterAsymmetricFolds)
+	NodeChanger(
+		findThis=Be.While.testIs(IfThis.isCallIdentifier('activeLeafGreaterThan0'))
+		, doThat=Grab.orelseAttribute(Then.replaceWith([AssignTotal2CountingIdentifier]))
+	).visit(astFunctionDef_count)
 
-	NodeChanger(Be.ImportFrom, Then.removeIt).visit(astModule)
+	NodeChanger(
+		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableIdentifierDEFAULT))
+		, doThat=Then.replaceWith(astFunctionDef_count)
+		).visit(astModule)
 
-	ingredientsModule = IngredientsModule(ingredientsFunction=ingredientsFunction, epilogue=astModule, imports=imports)
+	astFunctionDef_doTheNeedful: ast.FunctionDef = raiseIfNone(NodeTourist(
+		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableDispatcher))
+		, doThat = Then.extractIt
+		).captureLastMatch(astModule))
+
+	astFunctionDef_doTheNeedful.body.insert(0, astExprCall_initializeConcurrencyManager)
+
+	NodeChanger(
+		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableDispatcher))
+		, doThat=Then.replaceWith(astFunctionDef_doTheNeedful)
+		).visit(astModule)
 
 	pathFilename: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
+	pathFilenameAnnex: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier + 'Annex')
+
+	imports.walkThis(ast.parse("from mapFolding.syntheticModules.algorithmA007822AsynchronousAnnex import (filterAsymmetricFolds, getAsymmetricFoldsTotal, initializeConcurrencyManager)"))
+
+	ingredientsModule = IngredientsModule(epilogue=astModule, imports=imports)
 
 	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
+
+# ----------------- make Annex ----------------------------------------------------------------------------------------
+	importsAnnex = LedgerOfImports(ast.parse("""from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
+from copy import deepcopy
+from mapFolding.dataBaskets import MapFoldingState
+from queue import Empty, Queue
+from threading import Thread
+"""))
+
+	ingredientsFunctionWorker = IngredientsFunction(FunctionDef_filterAsymmetricFolds)
+	ingredientsFunctionWorker.astFunctionDef.name = '_' + identifier_filterAsymmetricFolds
+
+	ingredientsModuleAnnex = IngredientsModule(
+		imports=importsAnnex
+		, prologue=globalIdentifiers4Concurrency
+		, ingredientsFunction=[IngredientsFunction(FunctionDef_initializeConcurrencyManager)
+							, ingredientsFunctionWorker
+							, ingredientsFunctionConcurrencyManager
+							, IngredientsFunction(FunctionDef_getAsymmetricFoldsTotal)
+							]
+	)
+
+	ingredientsModuleAnnex.appendPrologue(astModule_initializeConcurrencyManager)
+
+	write_astModule(ingredientsModuleAnnex, pathFilenameAnnex, packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -241,7 +333,7 @@ def makeDaoOfMapFoldingNumba(astModule: ast.Module, moduleIdentifier: str, calla
 		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
 		astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
 				, doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)))
-		astTuple.ctx = ast.Store()
+		astTuple.ctx = Make.Store()
 
 		changeAssignCallToTarget = NodeChanger(
 			findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
@@ -332,7 +424,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 		listUnpack=shatteredDataclass.listUnpack + [Make.AnnAssign(dictionaryDeReConstruction[field].astName, dictionaryDeReConstruction[field].astAnnotation, dictionaryDeReConstruction[field].ast_nameDOTname) for field in Official_fieldOrder],
 		map_stateDOTfield2Name={**shatteredDataclass.map_stateDOTfield2Name, **{dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder}},
 		)
-	shatteredDataclassParallel.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclassParallel.listName4Parameters, ast.Store())
+	shatteredDataclassParallel.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclassParallel.listName4Parameters, Make.Store())
 	shatteredDataclassParallel.repack = Make.Assign([Make.Name(dataclassInstanceIdentifier)], value=Make.Call(Make.Name(dataclassIdentifierParallel), list_keyword=shatteredDataclassParallel.list_keyword_field__field4init))
 	shatteredDataclassParallel.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclassParallel.listAnnotations))
 
@@ -381,7 +473,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
 
 	astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)) # pyright: ignore[reportArgumentType]
-	astTuple.ctx = ast.Store()
+	astTuple.ctx = Make.Store()
 	changeAssignCallToTarget: NodeChanger[ast.Assign, ast.Assign] = NodeChanger(
 		findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
 		, doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
@@ -391,22 +483,22 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 	ingredientsDoTheNeedful: IngredientsFunction = IngredientsFunction(
 		astFunctionDef = Make.FunctionDef('doTheNeedful'
 			, argumentSpecification=Make.arguments(list_arg=[Make.arg('state', annotation=Make.Name(dataclassIdentifierParallel)), Make.arg('concurrencyLimit', annotation=Make.Name('int'))])
-			, body=[Make.Assign([Make.Name('stateParallel', ast.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('state')]))
-				, Make.AnnAssign(Make.Name('listStatesParallel', ast.Store()), annotation=Make.Subscript(value=Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))
+			, body=[Make.Assign([Make.Name('stateParallel', Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('state')]))
+				, Make.AnnAssign(Make.Name('listStatesParallel', Make.Store()), annotation=Make.Subscript(value=Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))
 					, value=Make.Mult.join([Make.List([Make.Name('stateParallel')]), Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')]))
-				, Make.AnnAssign(Make.Name('groupsOfFoldsTotal', ast.Store()), annotation=Make.Name('int'), value=Make.Constant(value=0))
+				, Make.AnnAssign(Make.Name('groupsOfFoldsTotal', Make.Store()), annotation=Make.Name('int'), value=Make.Constant(value=0))
 
-				, Make.AnnAssign(Make.Name('dictionaryConcurrency', ast.Store()), annotation=Make.Subscript(value=Make.Name('dict'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(value=Make.Name('ConcurrentFuture'), slice=Make.Name(dataclassIdentifierParallel))])), value=Make.Dict())
-				, Make.With(items=[Make.withitem(context_expr=Make.Call(Make.Name('ProcessPoolExecutor'), listParameters=[Make.Name('concurrencyLimit')]), optional_vars=Make.Name('concurrencyManager', ast.Store()))]
-					, body=[Make.For(Make.Name('indexSherpa', ast.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
-							, body=[Make.Assign([Make.Name('state', ast.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('stateParallel')]))
-								, Make.Assign([Make.Attribute(Make.Name('state'), 'taskIndex', context=ast.Store())], value=Make.Name('indexSherpa'))
-								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=ast.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), listParameters=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name('state')]))])
-						, Make.For(Make.Name('indexSherpa', ast.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
-							, body=[Make.Assign([Make.Subscript(Make.Name('listStatesParallel'), slice=Make.Name('indexSherpa'), context=ast.Store())], value=Make.Call(Make.Attribute(Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa')), 'result')))
-								, Make.AugAssign(Make.Name('groupsOfFoldsTotal', ast.Store()), op=ast.Add(), value=Make.Attribute(Make.Subscript(Make.Name('listStatesParallel'), slice=Make.Name('indexSherpa')), 'groupsOfFolds'))])])
+				, Make.AnnAssign(Make.Name('dictionaryConcurrency', Make.Store()), annotation=Make.Subscript(value=Make.Name('dict'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(value=Make.Name('ConcurrentFuture'), slice=Make.Name(dataclassIdentifierParallel))])), value=Make.Dict())
+				, Make.With(items=[Make.withitem(context_expr=Make.Call(Make.Name('ProcessPoolExecutor'), listParameters=[Make.Name('concurrencyLimit')]), optional_vars=Make.Name('concurrencyManager', Make.Store()))]
+					, body=[Make.For(Make.Name('indexSherpa', Make.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
+							, body=[Make.Assign([Make.Name('state', Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('stateParallel')]))
+								, Make.Assign([Make.Attribute(Make.Name('state'), 'taskIndex', context=Make.Store())], value=Make.Name('indexSherpa'))
+								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), listParameters=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name('state')]))])
+						, Make.For(Make.Name('indexSherpa', Make.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
+							, body=[Make.Assign([Make.Subscript(Make.Name('listStatesParallel'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa')), 'result')))
+								, Make.AugAssign(Make.Name('groupsOfFoldsTotal', Make.Store()), op=ast.Add(), value=Make.Attribute(Make.Subscript(Make.Name('listStatesParallel'), slice=Make.Name('indexSherpa')), 'groupsOfFolds'))])])
 
-				, Make.AnnAssign(Make.Name('foldsTotal', ast.Store()), annotation=Make.Name('int'), value=Make.Mult.join([Make.Name('groupsOfFoldsTotal'), Make.Attribute(Make.Name('stateParallel'), 'leavesTotal')]))
+				, Make.AnnAssign(Make.Name('foldsTotal', Make.Store()), annotation=Make.Name('int'), value=Make.Mult.join([Make.Name('groupsOfFoldsTotal'), Make.Attribute(Make.Name('stateParallel'), 'leavesTotal')]))
 				, Make.Return(Make.Tuple([Make.Name('foldsTotal'), Make.Name('listStatesParallel')]))]
 			, returns=Make.Subscript(Make.Name('tuple'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))])))
 		, imports = LedgerOfImports(Make.Module([Make.ImportFrom('concurrent.futures', list_alias=[Make.alias('Future', asName='ConcurrentFuture'), Make.alias('ProcessPoolExecutor')]),
@@ -569,7 +661,7 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom, moduleIdentifier: ident
 
 	algorithmSourceModule: identifierDotAttribute = algorithmSourceModuleDEFAULT
 	sourceCallableIdentifier: identifierDotAttribute = sourceCallableDispatcherDEFAULT
-	logicalPathSourceModule: identifierDotAttribute = '.'.join([packageSettings.identifierPackage, algorithmSourceModule])  # noqa: FLY002
+	logicalPathSourceModule: identifierDotAttribute = '.'.join([packageSettings.identifierPackage, 'algorithms', algorithmSourceModule])  # noqa: FLY002
 
 	logicalPathInfix: identifierDotAttribute = logicalPathInfixDEFAULT
 	callableIdentifier: identifierDotAttribute = callableIdentifierHARDCODED
@@ -586,7 +678,7 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom, moduleIdentifier: ident
 	targetFunctionDef: ast.FunctionDef = raiseIfNone(extractFunctionDef(parseLogicalPath2astModule(raiseIfNone(astImportFrom.module)), targetCallableIdentifier))
 	astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
 			, doThat=Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef)))
-	astTuple.ctx = ast.Store()
+	astTuple.ctx = Make.Store()
 
 	changeAssignCallToTarget = NodeChanger(
 		findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
@@ -735,6 +827,9 @@ if __name__ == '__main__':
 # A007822 -----------------------------------------------------------
 	astModule = _getModule(logicalPathInfix='algorithms')
 	pathFilename = addSymmetryCheck(astModule, 'algorithmA007822', None, logicalPathInfixDEFAULT, None)
+
+	astModule = _getModule(logicalPathInfix='algorithms')
+	pathFilename = addSymmetryCheckAsynchronous(astModule, 'algorithmA007822Asynchronous', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
 
 	astModule = _getModule(moduleIdentifier='algorithmA007822')
 	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'algorithmA007822Numba', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
