@@ -5,7 +5,6 @@ from math import exp
 from warnings import warn
 import numpy
 import pandas
-import sys
 
 # ----------------- environment configuration -------------------------------------------------------------------------
 _bitWidthOfFixedSizeInteger: int = 64
@@ -38,6 +37,25 @@ groupZuluAtEven = 2
 
 _n: int = 0
 
+# ----------------- lookup tables -------------------------------------------------------------------------------------
+
+rowsMaximumByIndexTransferMatrix: dict[int, int] = {
+	1:3,
+	2:12,
+	3:40,
+	4:125,
+	5:392,
+	6:1254,
+	7:4087,
+	8:13623,
+	9:46181,
+	10:159137,
+	11:555469,
+	12:1961369,
+	13:6991893,
+	14:25134208,
+}
+
 # ----------------- support functions ---------------------------------------------------------------------------------
 @cache
 def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
@@ -45,32 +63,13 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
-def getEstimatedLengthCurveLocationsAnalyzed(indexTransferMatrix: int, safetyMultiplicand: float = 1.2, safetyAddend: int = 1000) -> int:
-	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations.
-
-	Parameters
-	----------
-	curveLocationsDistinct : int
-		The number of distinct `curveLocations` in the current iteration of the transfer matrix.
-	indexTransferMatrix : int
-		The current index in the transfer matrix algorithm.
-	safetyMultiplicand : float = 1.05
-		A multiplicative safety factor to ensure the estimate is slightly larger than necessary.
-	safetyAddend : int = 100
-		An additive safety factor to ensure the estimate is slightly larger than necessary.
-
-	Returns
-	-------
-	estimatedLengthCurveLocationsAnalyzed : int
-		An estimate of the total number of non-unique `curveLocations` that will be computed from the existing `curveLocations`.
-
-	Notes
-	-----
-	`int` truncates, so `+ 1` to round up.
-
-	In the 'reference' directory, I have a Jupyter notebook that derives this formula.
-	"""
-	return int(predict_less_than_max(indexTransferMatrix) * safetyMultiplicand) + safetyAddend + 1
+# TODO Collect/correct bridges/indexTransferMatrix/k data because bridges is off by 1.
+def getLengthDataframeAnalyzed(indexTransferMatrix: int, safetyMultiplicand: float = 1.3, safetyAddend: int = 100000) -> int:
+	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations."""
+	if indexTransferMatrix in rowsMaximumByIndexTransferMatrix:
+		return rowsMaximumByIndexTransferMatrix[indexTransferMatrix]
+	else:
+		return int(predict_less_than_max(indexTransferMatrix - 1) * safetyMultiplicand) + safetyAddend + 1
 
 def predict_less_than_max(indexTransferMatrix: int) -> float:
 	"""Predict."""
@@ -341,16 +340,25 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		dataframeCurveLocations = dataframeCurveLocations.drop(dataframeCurveLocations.loc[dataframeCurveLocations['dropModify'] <= groupsHaveCurvesNotEven].index) # if groupAlphaCurves and groupZuluCurves and (groupAlphaIsEven or groupZuluIsEven)
 
 		# if groupAlphaIsEven and not groupZuluIsEven, modifyGroupAlphaPairedToOdd
-		dataframeCurveLocations.loc[dataframeCurveLocations['dropModify'] == groupAlphaAtEven, 'groupAlpha'] = datatypeCurveLocations(flipTheExtra_0b1AsUfunc(dataframeCurveLocations.loc[dataframeCurveLocations['dropModify'] == groupAlphaAtEven, 'groupAlpha']))
+		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
+		ImaGroupZulpha &= getLocatorGroupAlpha(bitWidth) # Ima `groupAlpha`.
+
+		ImaGroupZulpha.loc[(dataframeCurveLocations['dropModify'] == groupAlphaAtEven)] = datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
+			flipTheExtra_0b1AsUfunc(ImaGroupZulpha.loc[(dataframeCurveLocations['dropModify'] == groupAlphaAtEven)]))
+		ImaGroupZulpha //= 2**2 # (groupAlpha >> 2)
+		dataframeCurveLocations.loc[:, 'analyzed'] = ImaGroupZulpha
 
 		# if groupZuluIsEven and not groupAlphaIsEven, modifyGroupZuluPairedToOdd
-		dataframeCurveLocations.loc[dataframeCurveLocations['dropModify'] == groupZuluAtEven, 'groupZulu'] = datatypeCurveLocations(flipTheExtra_0b1AsUfunc(dataframeCurveLocations.loc[dataframeCurveLocations['dropModify'] == groupZuluAtEven, 'groupZulu']))
+		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+		ImaGroupZulpha &= getLocatorGroupZulu(bitWidth) # Ima `groupZulu`.
+		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 
-		dataframeCurveLocations.loc[:, 'groupAlpha'] //= 2**2 # (groupAlpha >> 2)
-		dataframeCurveLocations.loc[:, 'groupZulu'] //= 2**2 # (groupZulu >> 2)
-		dataframeCurveLocations.loc[:, 'groupZulu'] *= 2**1 # ((groupZulu ...) << 1)
-		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['groupAlpha']
-		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupZulu'] # (groupZulu ...) | (groupAlpha ...)
+		ImaGroupZulpha.loc[(dataframeCurveLocations['dropModify'] == groupZuluAtEven)] = datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
+			flipTheExtra_0b1AsUfunc(ImaGroupZulpha.loc[(dataframeCurveLocations['dropModify'] == groupZuluAtEven)]))
+		ImaGroupZulpha //= 2**2 # (groupZulu >> 2)
+		ImaGroupZulpha *= 2**1 # ((groupZulu ...) << 1)
+
+		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # (groupAlpha ...) | (groupZulu ...)
 
 		aggregateCurveLocations(MAXIMUMcurveLocations)
 
@@ -370,22 +378,35 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 			Maximum value of `curveLocations` for the current iteration of `bridges`.
 		"""
 		nonlocal dataframeCurveLocations
-		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['groupAlpha']
+		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
+		dataframeCurveLocations.loc[:, 'analyzed'] &= getLocatorGroupAlpha(bitWidth)
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] <= 1, 'dropModify'] = groupAlphaNoCurves # if groupAlpha > 1
+
 		dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupAlpha & 1)
 		dataframeCurveLocations.loc[:, 'analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupAlpha ...))
 
 		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] == 1, 'dropModify'] += groupAlphaAtEven # groupAlphaIsEven
 
 		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**1 # ((groupAlpha ...) << 1)
-		dataframeCurveLocations.loc[:, 'groupZulu'] *= 2**3 # (groupZulu << 3)
-		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupZulu'] # ... | (groupZulu ...)
+
+		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+		ImaGroupZulpha &= getLocatorGroupZulu(bitWidth) # Ima `groupZulu`.
+		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
+
+		ImaGroupZulpha *= 2**3 # (groupZulu << 3)
+		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
 		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # ... | (groupAlpha >> 2)
-		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupAlpha'] # ... | (groupAlpha)
+
+		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
+		ImaGroupZulpha &= getLocatorGroupAlpha(bitWidth) # Ima `groupAlpha`.
+		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupAlpha)
+
 		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (... >> 2)
-		dataframeCurveLocations.loc[dataframeCurveLocations['groupAlpha'] <= 1, ['analyzed', 'dropModify']] = [0, groupAlphaNoCurves] # if groupAlpha > 1
+		dataframeCurveLocations.loc[(dataframeCurveLocations['dropModify'] <= (groupAlphaNoCurves + groupAlphaAtEven))
+			& (dataframeCurveLocations['dropModify'] > (groupZuluNoCurves + groupAlphaAtEven + groupZuluAtEven)) # This `>` check is only necessary if `analyzeCurveLocationsZulu` is evaluated first or concurrently.
+			, 'analyzed'] = 0 # if groupAlpha > 1
 
 		aggregateCurveLocations(MAXIMUMcurveLocations)
-		computeCurveGroups(alpha=False)
 
 	def analyzeCurveLocationsSimple(MAXIMUMcurveLocations: int) -> None:
 		"""Compute curveLocations with the 'simple' bridges formula.
@@ -408,14 +429,19 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 
 		"""
 		nonlocal dataframeCurveLocations
-		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['groupAlpha']
-		dataframeCurveLocations.loc[:, 'groupZulu'] *= 2**1 # (groupZulu << 1)
-		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupZulu'] # ((groupAlpha | (groupZulu ...))
+		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
+		dataframeCurveLocations.loc[:, 'analyzed'] &= getLocatorGroupAlpha(bitWidth)
+
+		groupZulu = dataframeCurveLocations['curveLocations'].copy()
+		groupZulu &= getLocatorGroupZulu(bitWidth)
+		groupZulu //= 2**1 # (groupZulu >> 1)
+		groupZulu *= 2**1 # (groupZulu << 1)
+
+		dataframeCurveLocations.loc[:, 'analyzed'] |= groupZulu # ((groupAlpha | (groupZulu ...))
 		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # (... << 2)
 		dataframeCurveLocations.loc[:, 'analyzed'] += 3 # (...) | 3
 
 		aggregateCurveLocations(MAXIMUMcurveLocations)
-		computeCurveGroups(alpha=False)
 
 	def analyzeCurveLocationsZulu(MAXIMUMcurveLocations: int) -> None:
 		"""Compute `curveLocations` from `groupZulu`.
@@ -433,64 +459,49 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 			Maximum value of `curveLocations` for the current iteration of `bridges`.
 		"""
 		nonlocal dataframeCurveLocations
-		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['groupZulu']
+		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations']
+		dataframeCurveLocations.loc[:, 'analyzed'] &= getLocatorGroupZulu(bitWidth)
+		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**1 # (groupZulu >> 1)
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] <= 1, 'dropModify'] = groupZuluNoCurves # if groupZulu > 1
+
 		dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupZulu & 1)
 		dataframeCurveLocations.loc[:, 'analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupZulu ...))
 
 		dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] == 1), 'dropModify'] += groupZuluAtEven # groupZuluIsEven
 
-		dataframeCurveLocations.loc[:, 'groupAlpha'] *= 2**2 # (groupAlpha << 2)
-		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupAlpha'] # ... | (groupAlpha ...)
-		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**1 # ... | (groupZulu >> 1)
-		dataframeCurveLocations.loc[:, 'analyzed'] |= dataframeCurveLocations['groupZulu'] # ... | (groupZulu)
-		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**1 # (... >> 1)
-		dataframeCurveLocations.loc[dataframeCurveLocations['groupZulu'] <= 1, ['analyzed', 'dropModify']] = [0, groupZuluNoCurves] # if groupZulu > 1
+		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
+		ImaGroupZulpha &= getLocatorGroupAlpha(bitWidth) # Ima `groupAlpha`.
+
+		ImaGroupZulpha *= 2**2 # (groupAlpha << 2)
+		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupAlpha ...)
+
+		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+		ImaGroupZulpha &= getLocatorGroupZulu(bitWidth) # Ima `groupZulu`.
+		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
+
+		ImaGroupZulpha //= 2**1 # (groupZulu >> 1)
+
+		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
+
+		dataframeCurveLocations.loc[dataframeCurveLocations['dropModify'] <= (groupZuluNoCurves + groupAlphaAtEven + groupZuluAtEven), 'analyzed'] = 0 # if groupZulu > 1
 
 		aggregateCurveLocations(MAXIMUMcurveLocations)
-		computeCurveGroups(zulu=False)
-
-	def computeCurveGroups(*, alpha: bool = True, zulu: bool = True) -> None:
-		"""Compute `groupAlpha` and `groupZulu` with 'bit-masks' on `curveLocations`.
-
-		Parameters
-		----------
-		alpha : bool = True
-			Should column `groupAlpha` be computed?
-
-		zulu : bool = True
-			Should column `groupZulu` be computed?
-
-		3L33T H@X0R
-		-----------
-		- `groupAlpha`: odd-parity bit-masked `curveLocations`
-		- `groupZulu`: even-parity bit-masked `curveLocations`
-		"""
-		nonlocal dataframeCurveLocations
-		bitWidth: int = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
-		if alpha:
-			dataframeCurveLocations['groupAlpha'] = dataframeCurveLocations['curveLocations']
-			dataframeCurveLocations.loc[:, 'groupAlpha'] &= getLocatorGroupAlpha(bitWidth)
-		if zulu:
-			dataframeCurveLocations['groupZulu'] = dataframeCurveLocations['curveLocations']
-			dataframeCurveLocations.loc[:, 'groupZulu'] &= getLocatorGroupZulu(bitWidth)
-			dataframeCurveLocations.loc[:, 'groupZulu'] //= 2**1 # (groupZulu >> 1)
 
 	def outfitDataframeAnalyzed(indexTransferMatrix: int) -> None:
 		nonlocal dataframeAnalyzed, indexStartAnalyzed
-		lengthDataframe: int = max(100000, getEstimatedLengthCurveLocationsAnalyzed(indexTransferMatrix))
-		dataframeAnalyzed = dataframeAnalyzed.reindex(range(lengthDataframe), fill_value=0)
+		dataframeAnalyzed = dataframeAnalyzed.reindex(range(getLengthDataframeAnalyzed(indexTransferMatrix)), fill_value=0)
 		indexStartAnalyzed = 0
 
 	def outfitDataframeCurveLocations() -> None:
-		nonlocal dataframeAnalyzed, dataframeCurveLocations
+		nonlocal bitWidth, dataframeAnalyzed, dataframeCurveLocations
 		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
 		dataframeCurveLocations['curveLocations'] = dataframeAnalyzed['analyzed']
 		dataframeCurveLocations['distinctCrossings'] = dataframeAnalyzed['distinctCrossings']
 		dataframeCurveLocations['dropModify'] = groupsHaveCurvesNotEven
 		dataframeCurveLocations['analyzed'] = 0
+		bitWidth = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
 
 		dataframeAnalyzed = dataframeAnalyzed.iloc[0:0]
-		computeCurveGroups()
 
 	dataframeAnalyzed = pandas.DataFrame({
 		'analyzed': pandas.Series(name='analyzed', data=list(dictionaryCurveLocations.keys()), dtype=datatypeCurveLocations)
@@ -501,29 +512,27 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 
 	dataframeCurveLocations = pandas.DataFrame({
 		'curveLocations': pandas.Series(name='curveLocations', data=0, dtype=datatypeCurveLocations)
-		, 'groupAlpha': pandas.Series(name='groupAlpha', data=0, dtype=datatypeCurveLocations)
-		, 'groupZulu': pandas.Series(name='groupZulu', data=0, dtype=datatypeCurveLocations)
 		, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=datatypeCurveLocations)
 		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=0, dtype=datatypeDistinctCrossings)
 		, 'dropModify': pandas.Series(name='dropModify', data=groupsHaveCurvesNotEven, dtype=numpy.int8)
 		}
 	)
 
+	bitWidth: int = 0
 	indexStartAnalyzed: int = 0
 
 	while (indexTransferMatrix > 0
 		and (int(dataframeAnalyzed['analyzed'].max()).bit_length() <= bitWidthCurveLocationsMaximum)
 		and (int(dataframeAnalyzed['distinctCrossings'].max()).bit_length() <= bitWidthDistinctCrossingsMaximum)):
 
-		indexTransferMatrix -= 1
-
-		MAXIMUMcurveLocations: int = getMAXIMUMcurveLocations(indexTransferMatrix)
-
 		outfitDataframeCurveLocations()
 		goByeBye()
 
 		outfitDataframeAnalyzed(indexTransferMatrix)
 		goByeBye()
+
+		indexTransferMatrix -= 1
+		MAXIMUMcurveLocations: int = getMAXIMUMcurveLocations(indexTransferMatrix)
 
 		analyzeCurveLocationsSimple(MAXIMUMcurveLocations)
 		goByeBye()
@@ -532,10 +541,11 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		analyzeCurveLocationsZulu(MAXIMUMcurveLocations)
 		goByeBye()
 		analyzeCurveLocationsAligned(MAXIMUMcurveLocations)
+		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
 		goByeBye()
 
 		dataframeAnalyzed = dataframeAnalyzed.iloc[0:indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
-		print(_n, indexTransferMatrix, indexStartAnalyzed, sep=',')
+		print(_n, indexTransferMatrix+1, indexStartAnalyzed, sep=',')
 
 	return (indexTransferMatrix, dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].to_dict())
 
@@ -574,10 +584,8 @@ def doTheNeedful(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, i
 		goByeBye()
 
 		if (bitWidthCurveLocations > bitWidthCurveLocationsMaximum) or (bitWidthDistinctCrossings > bitWidthDistinctCrossingsMaximum):
-			# sys.stdout.write(f"countBigInt({indexTransferMatrix}).\t")
 			indexTransferMatrix, dictionaryCurveLocations = countBigInt(indexTransferMatrix, dictionaryCurveLocations)
 		else:
-			# sys.stdout.write(f"countPandas({indexTransferMatrix}).\t")
 			indexTransferMatrix, dictionaryCurveLocations = countPandas(indexTransferMatrix, dictionaryCurveLocations)
 
 	return sum(dictionaryCurveLocations.values())
