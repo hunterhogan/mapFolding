@@ -1,6 +1,8 @@
 """Count meanders with matrix transfer algorithm."""
 from functools import cache
 from gc import collect as goByeBye
+from math import exp
+from warnings import warn
 import numpy
 import pandas
 import sys
@@ -26,8 +28,7 @@ bitWidthDistinctCrossingsMaximum: int = _bitWidthOfFixedSizeInteger - _bitWidthO
 del _bitWidthOffsetDistinctCrossingsNecessary, _bitWidthOffsetDistinctCrossingsEstimation, _bitWidthOffsetDistinctCrossingsSafety, _bitWidthOffsetDistinctCrossings
 del _bitWidthOfFixedSizeInteger
 
-datatypeCurveLocations = numpy.uint64
-datatypeDistinctCrossings = numpy.uint64
+datatypeCurveLocations = datatypeDistinctCrossings = numpy.uint64
 
 groupAlphaNoCurves = -10
 groupZuluNoCurves = -20
@@ -35,12 +36,73 @@ groupsHaveCurvesNotEven = 0
 groupAlphaAtEven = 1
 groupZuluAtEven = 2
 
+_n: int = 0
+
 # ----------------- support functions ---------------------------------------------------------------------------------
 @cache
 def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 	return numpy.uint64(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
 
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
+
+def getEstimatedLengthCurveLocationsAnalyzed(indexTransferMatrix: int, safetyMultiplicand: float = 1.2, safetyAddend: int = 1000) -> int:
+	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations.
+
+	Parameters
+	----------
+	curveLocationsDistinct : int
+		The number of distinct `curveLocations` in the current iteration of the transfer matrix.
+	indexTransferMatrix : int
+		The current index in the transfer matrix algorithm.
+	safetyMultiplicand : float = 1.05
+		A multiplicative safety factor to ensure the estimate is slightly larger than necessary.
+	safetyAddend : int = 100
+		An additive safety factor to ensure the estimate is slightly larger than necessary.
+
+	Returns
+	-------
+	estimatedLengthCurveLocationsAnalyzed : int
+		An estimate of the total number of non-unique `curveLocations` that will be computed from the existing `curveLocations`.
+
+	Notes
+	-----
+	`int` truncates, so `+ 1` to round up.
+
+	In the 'reference' directory, I have a Jupyter notebook that derives this formula.
+	"""
+	return int(predict_less_than_max(indexTransferMatrix) * safetyMultiplicand) + safetyAddend + 1
+
+def predict_less_than_max(indexTransferMatrix: int) -> float:
+	"""Predict."""
+	n = float(_n)
+	b = max(0.0, min(float(indexTransferMatrix), n))
+	x = b / n
+	x1 = x
+	x2 = x**2
+	x3 = x**3
+	x4 = x**4
+	vals: list[float] = []
+	vals.append(n)  # n
+	vals.append(n**2)  # n2
+	vals.append(x1)  # x1
+	vals.append(x2)  # x2
+	vals.append(x3)  # x3
+	vals.append(x4)  # x4
+	vals.append(n * x1)  # nx1
+	vals.append(n * x2)  # nx2
+	vals.append(n * x3)  # nx3
+	z_hat = -24.817496909
+	z_hat += (-0.242059151721) * vals[0]
+	z_hat += (-2.663008305e-06) * vals[1]
+	z_hat += (183.309622727) * vals[2]
+	z_hat += (-522.471797116) * vals[3]
+	z_hat += (679.612786304) * vals[4]
+	z_hat += (-330.496162948) * vals[5]
+	z_hat += (4.44033168706) * vals[6]
+	z_hat += (-8.61595855772) * vals[7]
+	z_hat += (4.75288013279) * vals[8]
+	y_hat = exp(z_hat) - 1.0
+	return max(y_hat, 0.0)
 
 def getLocatorGroupAlpha(bitWidth: int) -> int:
 	"""Compute an odd-parity bit-mask with `bitWidth` bits.
@@ -210,15 +272,26 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		The state of the algorithm computation: the current `indexTransferMatrix`, `curveLocations`, and `distinctCrossings`.
 	"""
 	def aggregateCurveLocations(MAXIMUMcurveLocations: int) -> None:
-		nonlocal dataframeAnalyzed, dataframeCurveLocations
+		nonlocal dataframeAnalyzed, dataframeCurveLocations, indexStartAnalyzed
 
 		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= MAXIMUMcurveLocations, 'analyzed'] = 0
 
-		dataframeAnalyzed = pandas.concat([dataframeAnalyzed
-			, dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']].reset_index(
-				).groupby(by='analyzed', as_index=False, sort=True, group_keys=False)['distinctCrossings'
-					].aggregate('sum').reset_index()
-		], ignore_index=True)
+		indexStopAnalyzed: int = indexStartAnalyzed + int((dataframeCurveLocations['analyzed'] > 0).sum())
+
+		if indexStopAnalyzed > indexStartAnalyzed:
+			currentLengthAnalyzed: int = len(dataframeAnalyzed.index)
+			if currentLengthAnalyzed < indexStopAnalyzed:
+				dataframeAnalyzed = dataframeAnalyzed.reindex(range(indexStopAnalyzed), fill_value=0)
+				warn(
+					f"matrixMeanders.countPandas: expanded dataframeAnalyzed to length {indexStopAnalyzed} to avoid overflow; n={_n}, indexTransferMatrix={indexTransferMatrix}, indexStopAnalyzed={indexStopAnalyzed}",
+					stacklevel=2
+				)
+
+			dataframeAnalyzed.loc[indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
+				dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']].to_numpy(dtype=datatypeCurveLocations, copy=False)
+			)
+
+			indexStartAnalyzed = indexStopAnalyzed
 
 		dataframeCurveLocations.loc[:, 'analyzed'] = 0
 
@@ -402,6 +475,12 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 			dataframeCurveLocations.loc[:, 'groupZulu'] &= getLocatorGroupZulu(bitWidth)
 			dataframeCurveLocations.loc[:, 'groupZulu'] //= 2**1 # (groupZulu >> 1)
 
+	def outfitDataframeAnalyzed(indexTransferMatrix: int) -> None:
+		nonlocal dataframeAnalyzed, indexStartAnalyzed
+		lengthDataframe: int = max(100000, getEstimatedLengthCurveLocationsAnalyzed(indexTransferMatrix))
+		dataframeAnalyzed = dataframeAnalyzed.reindex(range(lengthDataframe), fill_value=0)
+		indexStartAnalyzed = 0
+
 	def outfitDataframeCurveLocations() -> None:
 		nonlocal dataframeAnalyzed, dataframeCurveLocations
 		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
@@ -409,6 +488,7 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		dataframeCurveLocations['distinctCrossings'] = dataframeAnalyzed['distinctCrossings']
 		dataframeCurveLocations['dropModify'] = groupsHaveCurvesNotEven
 		dataframeCurveLocations['analyzed'] = 0
+
 		dataframeAnalyzed = dataframeAnalyzed.iloc[0:0]
 		computeCurveGroups()
 
@@ -429,6 +509,8 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		}
 	)
 
+	indexStartAnalyzed: int = 0
+
 	while (indexTransferMatrix > 0
 		and (int(dataframeAnalyzed['analyzed'].max()).bit_length() <= bitWidthCurveLocationsMaximum)
 		and (int(dataframeAnalyzed['distinctCrossings'].max()).bit_length() <= bitWidthDistinctCrossingsMaximum)):
@@ -436,7 +518,11 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		indexTransferMatrix -= 1
 
 		MAXIMUMcurveLocations: int = getMAXIMUMcurveLocations(indexTransferMatrix)
+
 		outfitDataframeCurveLocations()
+		goByeBye()
+
+		outfitDataframeAnalyzed(indexTransferMatrix)
 		goByeBye()
 
 		analyzeCurveLocationsSimple(MAXIMUMcurveLocations)
@@ -448,7 +534,8 @@ def countPandas(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, in
 		analyzeCurveLocationsAligned(MAXIMUMcurveLocations)
 		goByeBye()
 
-		dataframeAnalyzed = dataframeAnalyzed.groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
+		dataframeAnalyzed = dataframeAnalyzed.iloc[0:indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
+		print(_n, indexTransferMatrix, indexStartAnalyzed, sep=',')
 
 	return (indexTransferMatrix, dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].to_dict())
 
@@ -478,6 +565,8 @@ def doTheNeedful(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, i
 	https://oeis.org/A000682
 	https://oeis.org/A005316
 	"""
+	global _n  # noqa: PLW0603
+	_n = indexTransferMatrix + 1
 	while indexTransferMatrix > 0:
 		bitWidthCurveLocations: int = max(dictionaryCurveLocations.keys()).bit_length()
 		bitWidthDistinctCrossings: int = max(dictionaryCurveLocations.values()).bit_length()
@@ -485,10 +574,10 @@ def doTheNeedful(indexTransferMatrix: int, dictionaryCurveLocations: dict[int, i
 		goByeBye()
 
 		if (bitWidthCurveLocations > bitWidthCurveLocationsMaximum) or (bitWidthDistinctCrossings > bitWidthDistinctCrossingsMaximum):
-			sys.stdout.write(f"countBigInt({indexTransferMatrix}).\t")
+			# sys.stdout.write(f"countBigInt({indexTransferMatrix}).\t")
 			indexTransferMatrix, dictionaryCurveLocations = countBigInt(indexTransferMatrix, dictionaryCurveLocations)
 		else:
-			sys.stdout.write(f"countPandas({indexTransferMatrix}).\t")
+			# sys.stdout.write(f"countPandas({indexTransferMatrix}).\t")
 			indexTransferMatrix, dictionaryCurveLocations = countPandas(indexTransferMatrix, dictionaryCurveLocations)
 
 	return sum(dictionaryCurveLocations.values())

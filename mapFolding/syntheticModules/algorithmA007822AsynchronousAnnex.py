@@ -14,7 +14,7 @@ def _processCompletedFutures() -> None:
     while True:
         try:
             claimTicket = queueFutures.get(timeout=1)
-            if claimTicket is None: # pyright: ignore[reportUnnecessaryComparison]
+            if claimTicket is None:
                 break
             state: MapFoldingState = claimTicket.result()
             groupsOfFoldsTotal += state.groupsOfFolds

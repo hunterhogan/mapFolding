@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-09-08T01:06:46.934751Z",
+  "parametric_best": {
+    "degree": 4,
+    "tau": 0.9,
+    "alpha": 1e-06,
+    "mean_err": 0.1631780113341799,
+    "p90_err": 0.26355198877727587,
+    "features": [
+      "n",
+      "n2",
+      "x1",
+      "x2",
+      "x3",
+      "x4",
+      "nx1",
+      "nx2",
+      "nx3"
+    ]
+  },
+  "parametric_cv_mean_err": 0.1631780113341799,
+  "benchmark_best": {
+    "params": {
+      "n_estimators": 300,
+      "max_depth": 3,
+      "learning_rate": 0.05
+    },
+    "mean_err": 5.024721319001477
+  }
+}

@@ -828,9 +828,6 @@ if __name__ == '__main__':
 	astModule = _getModule(logicalPathInfix='algorithms')
 	pathFilename = addSymmetryCheck(astModule, 'algorithmA007822', None, logicalPathInfixDEFAULT, None)
 
-	astModule = _getModule(logicalPathInfix='algorithms')
-	pathFilename = addSymmetryCheckAsynchronous(astModule, 'algorithmA007822Asynchronous', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
-
 	astModule = _getModule(moduleIdentifier='algorithmA007822')
 	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'algorithmA007822Numba', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
 
@@ -856,4 +853,7 @@ if __name__ == '__main__':
 
 	astImportFrom: ast.ImportFrom = Make.ImportFrom(_getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2A007822Numba'), list_alias=[Make.alias(sourceCallableIdentifierDEFAULT)])
 	makeUnRePackDataclass(astImportFrom, 'dataPackingA007822')
+
+	astModule = _getModule(logicalPathInfix='algorithms')
+	pathFilename = addSymmetryCheckAsynchronous(astModule, 'algorithmA007822Asynchronous', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
 
