@@ -344,6 +344,8 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha > 1)] # if groupAlphaHasCurves
 
+		del ImaGroupZulpha
+
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
 		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
@@ -353,7 +355,9 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		ImaGroupZulpha = ImaGroupZulpha.loc[(ImaGroupZulpha > 1)] # decrease size to match dataframeCurveLocations
 		ImaGroupZulpha &= 1 # (groupZulu & 1)
 		ImaGroupZulpha ^= 1 # (1 - (groupZulu ...))
-		dataframeCurveLocations.loc[:, 'analyzed'] = ImaGroupZulpha.copy()
+		dataframeCurveLocations.loc[:, 'analyzed'] = ImaGroupZulpha
+
+		del ImaGroupZulpha
 
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
 		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
@@ -363,38 +367,37 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha) | (dataframeCurveLocations.loc[:, 'analyzed'])] # if (groupAlphaIsEven or groupZuluIsEven)
 
-# NOTE Above this line, I am only using the current minimum of data structures: i.e., no selectors.
+		del ImaGroupZulpha
 
 # NOTE Step 2: modify rows
 
-# NOTE `selectorGroupZuluAtEven` until I can figure out how to eliminate it.
+		# Make a selector for groupZuluAtEven, so you can modify groupAlpha
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
 		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 		ImaGroupZulpha &= 1 # (groupZulu & 1)
 		ImaGroupZulpha ^= 1 # (1 - (groupZulu ...))
-		selectorGroupZuluAtEven: pandas.Series = ImaGroupZulpha.astype(bool)
+		ImaGroupZulpha = ImaGroupZulpha.astype(bool)
+
+		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations'] # Ima `groupAlpha`.
+		dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupAlpha # (groupAlpha)
 
 		# if groupAlphaIsEven and not groupZuluIsEven, modifyGroupAlphaPairedToOdd
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
+		dataframeCurveLocations.loc[(~ImaGroupZulpha), 'analyzed'] = state.datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
+			flipTheExtra_0b1AsUfunc(dataframeCurveLocations.loc[(~ImaGroupZulpha), 'analyzed']))
 
-		ImaGroupZulpha.loc[(~selectorGroupZuluAtEven)] = state.datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
-			flipTheExtra_0b1AsUfunc(ImaGroupZulpha.loc[(~selectorGroupZuluAtEven)]))
-		del selectorGroupZuluAtEven
-		goByeBye()
+		del ImaGroupZulpha
 
-# NOTE Step 3: pit stop to free memory by some computation of curveLocations
-		ImaGroupZulpha //= 2**2 # (groupAlpha >> 2)
-		dataframeCurveLocations.loc[:, 'analyzed'] = ImaGroupZulpha # (groupAlpha ...)
+# NOTE Above this line, I am only using the current minimum of data structures: i.e., no selectors.
 
-# NOTE Step 2: modify rows, continued
-# NOTE `selectorGroupAlphaAtEven` until I can figure out how to eliminate it.
+# TODO `selectorGroupAlphaAtEven` until I can figure out how to eliminate it.
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
 		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
 		ImaGroupZulpha &= 1 # (groupAlpha & 1)
 		ImaGroupZulpha ^= 1 # (1 - (groupAlpha ...))
 		selectorGroupAlphaAtEven: pandas.Series = ImaGroupZulpha.astype(bool)
+
+		del ImaGroupZulpha
 
 		# if groupZuluIsEven and not groupAlphaIsEven, modifyGroupZuluPairedToOdd
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
@@ -407,7 +410,9 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		del selectorGroupAlphaAtEven
 		goByeBye()
 
-# NOTE Step 3: compute curveLocations (for real this time)
+# NOTE Step 3: compute curveLocations
+		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (groupAlpha >> 2)
+
 		ImaGroupZulpha //= 2**2 # (groupZulu >> 2)
 		ImaGroupZulpha *= 2**1 # ((groupZulu ...) << 1)
 
@@ -441,6 +446,9 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		ImaGroupZulpha *= 2**3 # (groupZulu << 3)
 		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
+
+		del ImaGroupZulpha
+
 		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # ... | (groupAlpha >> 2)
 
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
@@ -515,6 +523,8 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		ImaGroupZulpha *= 2**2 # (groupAlpha << 2)
 		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupAlpha ...)
 
+		del ImaGroupZulpha
+
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
 		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
@@ -522,6 +532,8 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		ImaGroupZulpha //= 2**1 # (groupZulu >> 1)
 
 		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
+
+		del ImaGroupZulpha
 
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
 		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
