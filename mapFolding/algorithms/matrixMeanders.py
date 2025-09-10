@@ -1,38 +1,85 @@
 """Count meanders with matrix transfer algorithm."""
 from functools import cache
-from gc import collect as goByeBye
+from hunterMakesPy import raiseIfNone
 from mapFolding.reference.A005316facts import (
 	bucketsIf_k_EVEN_by_nLess_k as rowsA005316If_k_EVEN_by_nLess_k,
 	bucketsIf_k_ODD_by_nLess_k as rowsA005316If_k_ODD_by_nLess_k)
+from mapFolding.trim_memory import trim_ram as goByeBye
 from math import e, exp
 from warnings import warn
+import dataclasses
 import numpy
 import pandas
 
-# ----------------- environment configuration -------------------------------------------------------------------------
-datatypeCurveLocations = datatypeDistinctCrossings = numpy.uint64
+@dataclasses.dataclass
+class MatrixMeandersState:
+	"""State."""
 
-_bitWidthOfFixedSizeInteger: int = numpy.dtype(datatypeCurveLocations).itemsize * 8 # bits
+	n: int
+	oeisID: str
+	kOfMatrix: int
+	dictionaryCurveLocations: dict[int, int]
 
-_offsetNecessary: int = 3 # For example, `groupZulu << 3`.
-_offsetSafety: int = 1 # I don't have mathematical proof of how many extra bits I need.
-_offset: int = _offsetNecessary + _offsetSafety
-bitWidthCurveLocationsMaximum: int = _bitWidthOfFixedSizeInteger - _offset
+	datatypeCurveLocations: type = numpy.uint64
+	datatypeDistinctCrossings: type = numpy.uint64
 
-del _offsetNecessary, _offsetSafety, _offset
+	bitWidthCurveLocationsMaximum: int | None = None
+	bitWidthDistinctCrossingsMaximum: int | None = None
 
-_offsetNecessary: int = 0 # I don't know of any.
-_offsetEstimation: int = 3 # See reference directory.
-_offsetSafety: int = 1
-_offset: int = _offsetNecessary + _offsetEstimation + _offsetSafety
+	bitWidth: int = 0
+	indexStartAnalyzed: int = 0
 
-bitWidthDistinctCrossingsMaximum: int = _bitWidthOfFixedSizeInteger - _offset
+	def __post_init__(self) -> None:
+		"""Post init."""
+		if self.bitWidthCurveLocationsMaximum is None:
+			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeCurveLocations).itemsize * 8 # bits
 
-del _offsetNecessary, _offsetEstimation, _offsetSafety, _offset
-del _bitWidthOfFixedSizeInteger
+			_offsetNecessary: int = 3 # For example, `groupZulu << 3`.
+			_offsetSafety: int = 1 # I don't have mathematical proof of how many extra bits I need.
+			_offset: int = _offsetNecessary + _offsetSafety
 
-_n: int = 0
-_oeisID: str | None = None
+			self.bitWidthCurveLocationsMaximum = _bitWidthOfFixedSizeInteger - _offset
+
+			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetSafety, _offset
+
+		if self.bitWidthDistinctCrossingsMaximum is None:
+			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeDistinctCrossings).itemsize * 8 # bits
+
+			_offsetNecessary: int = 0 # I don't know of any.
+			_offsetEstimation: int = 3 # See reference directory.
+			_offsetSafety: int = 1
+			_offset: int = _offsetNecessary + _offsetEstimation + _offsetSafety
+
+			self.bitWidthDistinctCrossingsMaximum = _bitWidthOfFixedSizeInteger - _offset
+
+			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetEstimation, _offsetSafety, _offset
+
+	@property
+	def MAXIMUMcurveLocations(self) -> int:
+		"""Compute the maximum value of `curveLocations` for the current iteration of the transfer matrix."""
+		return 1 << (2 * self.kOfMatrix + 4)
+
+	@property
+	def locatorGroupAlpha(self) -> int:
+		"""Compute an odd-parity bit-mask with `bitWidth` bits.
+
+		Notes
+		-----
+		In binary, `locatorGroupAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
+		digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
+		from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
+		counting this way, `locatorGroupAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
+		therefore, tend to call `locatorGroupAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
+		mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
+		odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
+
+		"""
+		return sum(1 << one for one in range(0, self.bitWidth, 2))
+
+	@property
+	def locatorGroupZulu(self) -> int:
+		"""Compute an even-parity bit-mask with `bitWidth` bits."""
+		return sum(1 << one for one in range(1, self.bitWidth, 2))
 
 # ----------------- lookup tables -------------------------------------------------------------------------------------
 
@@ -46,17 +93,17 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
-def getLengthDataframeAnalyzed(k: int, safetyMultiplicand: float = 1.3, safetyAddend: int = 100000) -> int:
+def getLengthDataframeAnalyzed(state: MatrixMeandersState, safetyMultiplicand: float = 1.3, safetyAddend: int = 100000) -> int:
 	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations."""
-	nLess_k: int = _n - k
+	nLess_k: int = state.n - state.kOfMatrix
 
 	length: int = -10000
 	rowsEstimated: float = 0
 	rowsKnown: int = -10
-	if (k in rowsMaximumBy_kOfMatrix) and (k*2+2 <= nLess_k):
-		rowsKnown = rowsMaximumBy_kOfMatrix[k]
-	elif (_oeisID == 'A005316') and (k > nLess_k):
-		if k & 1: # k is odd
+	if (state.kOfMatrix in rowsMaximumBy_kOfMatrix) and (state.kOfMatrix*2+2 <= nLess_k):
+		rowsKnown = rowsMaximumBy_kOfMatrix[state.kOfMatrix]
+	elif (state.oeisID == 'A005316') and (state.kOfMatrix > nLess_k):
+		if state.kOfMatrix & 1: # k is odd
 			if nLess_k in rowsA005316If_k_ODD_by_nLess_k:
 				rowsKnown = rowsA005316If_k_ODD_by_nLess_k[nLess_k]
 			elif nLess_k & 1: # k is odd; n-k is odd
@@ -74,21 +121,21 @@ def getLengthDataframeAnalyzed(k: int, safetyMultiplicand: float = 1.3, safetyAd
 			nLess_k = nLess_k//2
 			rowsEstimated = 1.826639 + 1.867297*e**(1.525544*nLess_k)
 		rowsEstimated = int(rowsEstimated)
-	elif k <= max(rowsMaximumBy_kOfMatrix.keys()):
-		rowsKnown = rowsMaximumBy_kOfMatrix[k]
+	elif state.kOfMatrix <= max(rowsMaximumBy_kOfMatrix.keys()):
+		rowsKnown = rowsMaximumBy_kOfMatrix[state.kOfMatrix]
 	else:
-		rowsEstimated = predict_less_than_max(k - 1)
+		rowsEstimated = predict_less_than_max(state)
 	if rowsEstimated:
 		length = int(rowsEstimated * safetyMultiplicand) + safetyAddend + 1
 	else:
 		length = rowsKnown
 	return length
 
-def predict_less_than_max(k: int) -> float:
+def predict_less_than_max(state: MatrixMeandersState) -> float:
 	"""Predict."""
 # TODO replace this old estimate.
-	n = _n
-	b = max(0.0, min(float(k), n))
+	n = float(state.n)
+	b = max(0.0, min(float(state.kOfMatrix-1), n))
 	x = b / n
 	x1 = x
 	x2 = x**2
@@ -117,31 +164,7 @@ def predict_less_than_max(k: int) -> float:
 	y_hat = exp(z_hat) - 1.0
 	return max(y_hat, 0.0)
 
-def getLocatorGroupAlpha(bitWidth: int) -> int:
-	"""Compute an odd-parity bit-mask with `bitWidth` bits.
-
-	Notes
-	-----
-	In binary, `locatorGroupAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
-	digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
-	from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
-	counting this way, `locatorGroupAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
-	therefore, tend to call `locatorGroupAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
-	mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
-	odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
-
-	"""
-	return sum(1 << one for one in range(0, bitWidth, 2))
-
-def getLocatorGroupZulu(bitWidth: int) -> int:
-	"""Compute an even-parity bit-mask with `bitWidth` bits."""
-	return sum(1 << one for one in range(1, bitWidth, 2))
-
-def getMAXIMUMcurveLocations(kOfMatrix: int) -> int:
-	"""Compute the maximum value of `curveLocations` for the current iteration of the transfer matrix."""
-	return 1 << (2 * kOfMatrix + 4)
-
-def outfitDictionaryCurveGroups(dictionaryCurveLocations: dict[int, int]) -> dict[tuple[int, int], int]:
+def outfitDictionaryCurveGroups(state: MatrixMeandersState) -> dict[tuple[int, int], int]:
 	"""Outfit `dictionaryCurveGroups` so it may manage the computations for one iteration of the transfer matrix.
 
 	`dictionaryCurveGroups` holds the input data, and `dictionaryCurveLocations` aggregates the output data as it is computed.
@@ -156,11 +179,9 @@ def outfitDictionaryCurveGroups(dictionaryCurveLocations: dict[int, int]) -> dic
 	dictionaryCurveGroups : dict[tuple[int, int], int]
 		A dictionary of `(groupAlpha, groupZulu)` to `distinctCrossings`.
 	"""
-	bitWidth: int = max(dictionaryCurveLocations.keys()).bit_length()
-	locatorGroupAlpha: int = getLocatorGroupAlpha(bitWidth)
-	locatorGroupZulu: int = getLocatorGroupZulu(bitWidth)
-	return {(curveLocations & locatorGroupAlpha, (curveLocations & locatorGroupZulu) >> 1): distinctCrossings
-		for curveLocations, distinctCrossings in dictionaryCurveLocations.items()}
+	state.bitWidth = max(state.dictionaryCurveLocations.keys()).bit_length()
+	return {(curveLocations & state.locatorGroupAlpha, (curveLocations & state.locatorGroupZulu) >> 1): distinctCrossings
+		for curveLocations, distinctCrossings in state.dictionaryCurveLocations.items()}
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -202,20 +223,13 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
 
 # ----------------- counting functions --------------------------------------------------------------------------------
 
-def countBigInt(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tuple[int, dict[int, int]]:
+def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 	"""Count meanders with matrix transfer algorithm using Python primitive `int` contained in a Python primitive `dict`.
 
 	Parameters
 	----------
-	kOfMatrix : int
-		The current index in the transfer matrix algorithm.
-	dictionaryCurveLocations : dict[int, int]
-		A dictionary of `curveLocations` to `distinctCrossings`.
-
-	Returns
-	-------
-	matrixMeandersState : tuple[int, dict[int, int]]
-		The state of the algorithm computation: the current `kOfMatrix`, `curveLocations`, and `distinctCrossings`.
+	state : MatrixMeandersState
+		The algorithm state containing current `kOfMatrix`, `dictionaryCurveLocations`, and thresholds.
 
 	Notes
 	-----
@@ -224,15 +238,15 @@ def countBigInt(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tup
 	"""
 	dictionaryCurveGroups: dict[tuple[int, int], int] = {}
 
-	while (kOfMatrix > 0
-		and ((max(dictionaryCurveLocations.keys()).bit_length() > bitWidthCurveLocationsMaximum)
-		or (max(dictionaryCurveLocations.values()).bit_length() > bitWidthDistinctCrossingsMaximum))):
+	while (state.kOfMatrix > 0
+		and ((max(state.dictionaryCurveLocations.keys()).bit_length() > raiseIfNone(state.bitWidthCurveLocationsMaximum))
+		or (max(state.dictionaryCurveLocations.values()).bit_length() > raiseIfNone(state.bitWidthDistinctCrossingsMaximum)))):
 
-		kOfMatrix -= 1
+		state.kOfMatrix -= 1
 
-		MAXIMUMcurveLocations: int = getMAXIMUMcurveLocations(kOfMatrix)
-		dictionaryCurveGroups = outfitDictionaryCurveGroups(dictionaryCurveLocations)
-		dictionaryCurveLocations.clear()
+		dictionaryCurveGroups = outfitDictionaryCurveGroups(state)
+		state.dictionaryCurveLocations.clear()
+		LessThanMaximumTotal: int = 0 # for data collection
 
 		for (groupAlpha, groupZulu), distinctCrossings in dictionaryCurveGroups.items():
 			groupAlphaCurves: bool = groupAlpha > 1
@@ -241,18 +255,21 @@ def countBigInt(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tup
 
 			# simple
 			curveLocationAnalysis = ((groupAlpha | (groupZulu << 1)) << 2) | 3
-			if curveLocationAnalysis < MAXIMUMcurveLocations:
-				dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+			if curveLocationAnalysis < state.MAXIMUMcurveLocations:
+				state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+				LessThanMaximumTotal += 1
 
 			if groupAlphaCurves:
 				curveLocationAnalysis = (groupAlpha >> 2) | (groupZulu << 3) | ((groupAlphaIsEven := 1 - (groupAlpha & 1)) << 1)
-				if curveLocationAnalysis < MAXIMUMcurveLocations:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+				if curveLocationAnalysis < state.MAXIMUMcurveLocations:
+					state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+					LessThanMaximumTotal += 1
 
 			if groupZuluHasCurves:
 				curveLocationAnalysis = (groupZulu >> 1) | (groupAlpha << 2) | (groupZuluIsEven := 1 - (groupZulu & 1))
-				if curveLocationAnalysis < MAXIMUMcurveLocations:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+				if curveLocationAnalysis < state.MAXIMUMcurveLocations:
+					state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+					LessThanMaximumTotal += 1
 
 			# aligned
 			if groupAlphaCurves and groupZuluHasCurves and (groupAlphaIsEven or groupZuluIsEven):
@@ -262,48 +279,45 @@ def countBigInt(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tup
 					groupZulu ^= walkDyckPath(groupZulu)  # noqa: PLW2901
 
 				curveLocationAnalysis: int = ((groupZulu >> 2) << 1) | (groupAlpha >> 2)
-				if curveLocationAnalysis < MAXIMUMcurveLocations:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+				if curveLocationAnalysis < state.MAXIMUMcurveLocations:
+					state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+					LessThanMaximumTotal += 1
 
-		if _n >= 45: # for data collection
-			print(_n, kOfMatrix+1, len(dictionaryCurveLocations), sep=',')  # noqa: T201
+		if state.n >= 45: # for data collection
+			print(state.n, state.kOfMatrix+1, LessThanMaximumTotal, sep=',')  # noqa: T201
 
-	return (kOfMatrix, dictionaryCurveLocations)
+	return state
 
-def countPandas(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tuple[int, dict[int, int]]:
+def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 	"""Count meanders with matrix transfer algorithm using pandas DataFrame.
 
-	kOfMatrix : int
-		The current index in the transfer matrix algorithm.
-	dictionaryCurveLocations : dict[int, int]
-		A dictionary of `curveLocations` to `distinctCrossings`.
+	Parameters
+	----------
+	state : MatrixMeandersState
+		The algorithm state containing current `kOfMatrix`, `dictionaryCurveLocations`, and thresholds.
 
 	Returns
 	-------
-	matrixMeandersState : tuple[int, dict[int, int]]
-		The state of the algorithm computation: the current `kOfMatrix`, `curveLocations`, and `distinctCrossings`.
+	state : MatrixMeandersState
+		Updated state with new `kOfMatrix` and `dictionaryCurveLocations`.
 	"""
-	def aggregateCurveLocations(MAXIMUMcurveLocations: int) -> None:
-		nonlocal dataframeAnalyzed, dataframeCurveLocations, indexStartAnalyzed
+	def recordCurveLocations() -> None:
+		nonlocal dataframeAnalyzed
 
-		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= MAXIMUMcurveLocations, 'analyzed'] = 0
-
-		indexStopAnalyzed: int = indexStartAnalyzed + int((dataframeCurveLocations['analyzed'] > 0).sum())
+		indexStopAnalyzed: int = state.indexStartAnalyzed + int((dataframeCurveLocations['analyzed'] > 0).sum())
 
 		goByeBye()
 
-		if indexStopAnalyzed > indexStartAnalyzed:
+		if indexStopAnalyzed > state.indexStartAnalyzed:
 			if len(dataframeAnalyzed.index) < indexStopAnalyzed:
 				dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
-				warn(f"Lengthened `dataframeAnalyzed` to {indexStopAnalyzed=}; n={_n}, {kOfMatrix=}.", stacklevel=2)
+				warn(f"Lengthened `dataframeAnalyzed` to {indexStopAnalyzed=}; n={state.n}, {state.kOfMatrix=}.", stacklevel=2)
 
-			dataframeAnalyzed.loc[indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
-				dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']].to_numpy(dtype=datatypeCurveLocations, copy=False)
+			dataframeAnalyzed.loc[state.indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
+				dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']].to_numpy(dtype=state.datatypeCurveLocations, copy=False)
 			)
 
-			indexStartAnalyzed = indexStopAnalyzed
-
-		dataframeCurveLocations.loc[:, 'analyzed'] = 0
+			state.indexStartAnalyzed = indexStopAnalyzed
 
 	def analyzeCurveLocationsAligned() -> None:
 		"""Compute `curveLocations` from `groupAlpha` and `groupZulu` if at least one is an even number.
@@ -320,95 +334,85 @@ def countPandas(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tup
 		if groupAlpha > 1 and groupZulu > 1 and (groupAlphaIsEven or groupZuluIsEven):
 			curveLocations = (groupAlpha >> 2) | ((groupZulu >> 2) << 1)
 		```
-
-		Notes
-		-----
-		"IsEven" vs "AtEven":
-		- `groupAlphaIsEven` ≅ `groupAlphaAtEven`
-		- `groupZuluIsEven` ≅ `groupZuluAtEven`
-		- Semantically, "IsEven" is the evaluation of a single value, while "AtEven" is the evaluation of multiple values telling
-		us where the even numbers are *at*, hence "AtEven".
-		- Pragmatically, I need to avoid a name collision between global `groupAlphaIsEven` and local `groupAlphaIsEven` in
-		`countBigInt`.
 		"""
 		nonlocal dataframeCurveLocations
 
-# NOTE drop unqualified rows
+# NOTE Step 1: drop unqualified rows
 
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= getLocatorGroupAlpha(bitWidth) # Ima `groupAlpha`.
+		ImaGroupZulpha: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
+		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
 
 		dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha > 1)] # if groupAlphaHasCurves
 
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= getLocatorGroupZulu(bitWidth) # Ima `groupZulu`.
+		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 
 		dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha > 1)] # if groupZuluHasCurves
 
 		ImaGroupZulpha = ImaGroupZulpha.loc[(ImaGroupZulpha > 1)] # decrease size to match dataframeCurveLocations
 		ImaGroupZulpha &= 1 # (groupZulu & 1)
-		ImaGroupZulpha = 1 - ImaGroupZulpha # (1 - (groupZulu ...))
+		ImaGroupZulpha ^= 1 # (1 - (groupZulu ...))
 		dataframeCurveLocations.loc[:, 'analyzed'] = ImaGroupZulpha.copy()
 
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= getLocatorGroupAlpha(bitWidth) # Ima `groupAlpha`.
+		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
 		ImaGroupZulpha &= 1 # (groupAlpha & 1)
-		ImaGroupZulpha = 1 - ImaGroupZulpha # (1 - (groupAlpha ...))
+		ImaGroupZulpha ^= 1 # (1 - (groupAlpha ...))
 		ImaGroupZulpha = ImaGroupZulpha.astype(bool)
 
 		dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha) | (dataframeCurveLocations.loc[:, 'analyzed'])] # if (groupAlphaIsEven or groupZuluIsEven)
 
 # NOTE Above this line, I am only using the current minimum of data structures: i.e., no selectors.
 
-# NOTE unqualified rows are dropped
-# NOTE modify rows
+# NOTE Step 2: modify rows
 
 # NOTE `selectorGroupZuluAtEven` until I can figure out how to eliminate it.
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= getLocatorGroupZulu(bitWidth) # Ima `groupZulu`.
+		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 		ImaGroupZulpha &= 1 # (groupZulu & 1)
-		ImaGroupZulpha = 1 - ImaGroupZulpha # (1 - (groupZulu ...))
-		selectorGroupZuluAtEven = ImaGroupZulpha.astype(bool)
+		ImaGroupZulpha ^= 1 # (1 - (groupZulu ...))
+		selectorGroupZuluAtEven: pandas.Series = ImaGroupZulpha.astype(bool)
 
 		# if groupAlphaIsEven and not groupZuluIsEven, modifyGroupAlphaPairedToOdd
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= getLocatorGroupAlpha(bitWidth) # Ima `groupAlpha`.
+		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
 
-		ImaGroupZulpha.loc[(~selectorGroupZuluAtEven)] = datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
+		ImaGroupZulpha.loc[(~selectorGroupZuluAtEven)] = state.datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
 			flipTheExtra_0b1AsUfunc(ImaGroupZulpha.loc[(~selectorGroupZuluAtEven)]))
-		ImaGroupZulpha //= 2**2 # (groupAlpha >> 2)
-
 		del selectorGroupZuluAtEven
 		goByeBye()
 
+# NOTE Step 3: pit stop to free memory by some computation of curveLocations
+		ImaGroupZulpha //= 2**2 # (groupAlpha >> 2)
 		dataframeCurveLocations.loc[:, 'analyzed'] = ImaGroupZulpha # (groupAlpha ...)
 
+# NOTE Step 2: modify rows, continued
 # NOTE `selectorGroupAlphaAtEven` until I can figure out how to eliminate it.
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= getLocatorGroupAlpha(bitWidth) # Ima `groupAlpha`.
+		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
 		ImaGroupZulpha &= 1 # (groupAlpha & 1)
-		ImaGroupZulpha = 1 - ImaGroupZulpha # (1 - (groupAlpha ...))
-		selectorGroupAlphaAtEven = ImaGroupZulpha.astype(bool)
+		ImaGroupZulpha ^= 1 # (1 - (groupAlpha ...))
+		selectorGroupAlphaAtEven: pandas.Series = ImaGroupZulpha.astype(bool)
 
 		# if groupZuluIsEven and not groupAlphaIsEven, modifyGroupZuluPairedToOdd
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= getLocatorGroupZulu(bitWidth) # Ima `groupZulu`.
+		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 
-		ImaGroupZulpha.loc[(~selectorGroupAlphaAtEven)] = datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
+		ImaGroupZulpha.loc[(~selectorGroupAlphaAtEven)] = state.datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
 			flipTheExtra_0b1AsUfunc(ImaGroupZulpha.loc[(~selectorGroupAlphaAtEven)]))
 
 		del selectorGroupAlphaAtEven
 		goByeBye()
 
-# NOTE finish compute curveLocations
-
+# NOTE Step 3: compute curveLocations (for real this time)
 		ImaGroupZulpha //= 2**2 # (groupZulu >> 2)
 		ImaGroupZulpha *= 2**1 # ((groupZulu ...) << 1)
 
 		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
 
 		del ImaGroupZulpha
 
@@ -424,15 +428,15 @@ def countPandas(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tup
 		"""
 		nonlocal dataframeCurveLocations
 		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
-		dataframeCurveLocations.loc[:, 'analyzed'] &= getLocatorGroupAlpha(bitWidth)
+		dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupAlpha
 
 		dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupAlpha & 1)
-		dataframeCurveLocations.loc[:, 'analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupAlpha ...))
+		dataframeCurveLocations.loc[:, 'analyzed'] ^= 1 # (1 - (groupAlpha ...))
 
 		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**1 # ((groupAlpha ...) << 1)
 
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= getLocatorGroupZulu(bitWidth) # Ima `groupZulu`.
+		ImaGroupZulpha: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 
 		ImaGroupZulpha *= 2**3 # (groupZulu << 3)
@@ -440,12 +444,13 @@ def countPandas(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tup
 		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # ... | (groupAlpha >> 2)
 
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= getLocatorGroupAlpha(bitWidth) # Ima `groupAlpha`.
+		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
 
 		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupAlpha)
 		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (... >> 2)
 
 		dataframeCurveLocations.loc[(ImaGroupZulpha <= 1), 'analyzed'] = 0 # if groupAlpha > 1
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
 
 		del ImaGroupZulpha
 
@@ -471,10 +476,10 @@ def countPandas(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tup
 		"""
 		nonlocal dataframeCurveLocations
 		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
-		dataframeCurveLocations.loc[:, 'analyzed'] &= getLocatorGroupAlpha(bitWidth)
+		dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupAlpha
 
-		groupZulu = dataframeCurveLocations['curveLocations'].copy()
-		groupZulu &= getLocatorGroupZulu(bitWidth)
+		groupZulu: pandas.Series = dataframeCurveLocations['curveLocations'].copy()
+		groupZulu &= state.locatorGroupZulu
 		groupZulu //= 2**1 # (groupZulu >> 1)
 		groupZulu *= 2**1 # (groupZulu << 1)
 
@@ -484,6 +489,7 @@ def countPandas(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tup
 
 		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # (... << 2)
 		dataframeCurveLocations.loc[:, 'analyzed'] += 3 # (...) | 3
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
 
 	def analyzeCurveLocationsZulu() -> None:
 		"""Compute `curveLocations` from `groupZulu`.
@@ -497,20 +503,20 @@ def countPandas(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tup
 		"""
 		nonlocal dataframeCurveLocations
 		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations']
-		dataframeCurveLocations.loc[:, 'analyzed'] &= getLocatorGroupZulu(bitWidth)
+		dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupZulu
 		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**1 # (groupZulu >> 1)
 
 		dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupZulu & 1)
-		dataframeCurveLocations.loc[:, 'analyzed'] = 1 - dataframeCurveLocations['analyzed'] # (1 - (groupZulu ...))
+		dataframeCurveLocations.loc[:, 'analyzed'] ^= 1 # (1 - (groupZulu ...))
 
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= getLocatorGroupAlpha(bitWidth) # Ima `groupAlpha`.
+		ImaGroupZulpha: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
+		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
 
 		ImaGroupZulpha *= 2**2 # (groupAlpha << 2)
 		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupAlpha ...)
 
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= getLocatorGroupZulu(bitWidth) # Ima `groupZulu`.
+		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 
 		ImaGroupZulpha //= 2**1 # (groupZulu >> 1)
@@ -518,89 +524,85 @@ def countPandas(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> tup
 		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
 
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= getLocatorGroupZulu(bitWidth) # Ima `groupZulu`.
+		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 
 		dataframeCurveLocations.loc[ImaGroupZulpha <= 1, 'analyzed'] = 0 # if groupZulu > 1
+		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
 
 		del ImaGroupZulpha
 
-	def outfitDataframeAnalyzed(kOfMatrix: int) -> None:
-		nonlocal dataframeAnalyzed, indexStartAnalyzed
-		dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(getLengthDataframeAnalyzed(kOfMatrix)), fill_value=0)
-		indexStartAnalyzed = 0
+	def outfitDataframeAnalyzed() -> None:
+		nonlocal dataframeAnalyzed
+		dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(getLengthDataframeAnalyzed(state)), fill_value=0)
 
 	def outfitDataframeCurveLocations() -> None:
-		nonlocal bitWidth, dataframeAnalyzed, dataframeCurveLocations
+		nonlocal dataframeAnalyzed, dataframeCurveLocations
 		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
 		dataframeCurveLocations['curveLocations'] = dataframeAnalyzed['analyzed']
 		dataframeCurveLocations['distinctCrossings'] = dataframeAnalyzed['distinctCrossings']
 		dataframeCurveLocations['analyzed'] = 0
-		bitWidth = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
+		state.bitWidth = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
 
 		dataframeAnalyzed = dataframeAnalyzed.iloc[0:0]
 
 	dataframeAnalyzed = pandas.DataFrame({
-		'analyzed': pandas.Series(name='analyzed', data=list(dictionaryCurveLocations.keys()), dtype=datatypeCurveLocations)
-		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=list(dictionaryCurveLocations.values()), dtype=datatypeDistinctCrossings)
-		}, dtype=datatypeCurveLocations
+		'analyzed': pandas.Series(name='analyzed', data=state.dictionaryCurveLocations.keys(), dtype=state.datatypeCurveLocations)
+		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=state.dictionaryCurveLocations.values(), dtype=state.datatypeDistinctCrossings)
+		}, dtype=state.datatypeCurveLocations
 	)
-	del dictionaryCurveLocations
+	state.dictionaryCurveLocations.clear()
 
 	dataframeCurveLocations = pandas.DataFrame({
-		'curveLocations': pandas.Series(name='curveLocations', data=0, dtype=datatypeCurveLocations)
-		, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=datatypeCurveLocations)
-		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=0, dtype=datatypeDistinctCrossings)
-		}, dtype=datatypeCurveLocations
+		'curveLocations': pandas.Series(name='curveLocations', data=0, dtype=state.datatypeCurveLocations)
+		, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=state.datatypeCurveLocations)
+		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=0, dtype=state.datatypeDistinctCrossings)
+		}, dtype=state.datatypeCurveLocations # pyright: ignore[reportUnknownArgumentType]
 	)
 
-	bitWidth: int = 0
-	indexStartAnalyzed: int = 0
-
-	while (kOfMatrix > 0
-		and (int(dataframeAnalyzed['analyzed'].max()).bit_length() <= bitWidthCurveLocationsMaximum)
-		and (int(dataframeAnalyzed['distinctCrossings'].max()).bit_length() <= bitWidthDistinctCrossingsMaximum)):
+	while (state.kOfMatrix > 0
+		and (int(dataframeAnalyzed['analyzed'].max()).bit_length() <= raiseIfNone(state.bitWidthCurveLocationsMaximum))
+		and (int(dataframeAnalyzed['distinctCrossings'].max()).bit_length() <= raiseIfNone(state.bitWidthDistinctCrossingsMaximum))):
 
 		outfitDataframeCurveLocations()
 		goByeBye()
 
-		outfitDataframeAnalyzed(kOfMatrix)
+		outfitDataframeAnalyzed()
+		state.indexStartAnalyzed = 0
 		goByeBye()
 
-		kOfMatrix -= 1
-		MAXIMUMcurveLocations: int = getMAXIMUMcurveLocations(kOfMatrix)
+		state.kOfMatrix -= 1
 
 		analyzeCurveLocationsSimple()
-		aggregateCurveLocations(MAXIMUMcurveLocations)
+		recordCurveLocations()
 		goByeBye()
 		analyzeCurveLocationsAlpha()
-		aggregateCurveLocations(MAXIMUMcurveLocations)
+		recordCurveLocations()
 		goByeBye()
 		analyzeCurveLocationsZulu()
-		aggregateCurveLocations(MAXIMUMcurveLocations)
+		recordCurveLocations()
 		goByeBye()
 		analyzeCurveLocationsAligned()
-		aggregateCurveLocations(MAXIMUMcurveLocations)
+		recordCurveLocations()
 		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
 		goByeBye()
 
-		dataframeAnalyzed = dataframeAnalyzed.iloc[0:indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
-		if _n >= 45:  # for data collection
-			print(_n, kOfMatrix+1, indexStartAnalyzed, sep=',')  # noqa: T201
+		dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
+		if state.n >= 45:  # for data collection
+			print(state.n, state.kOfMatrix+1, state.indexStartAnalyzed, sep=',')  # noqa: T201
 
-	return (kOfMatrix, dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].to_dict())
+	state.dictionaryCurveLocations = dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].to_dict()
+	return state
 
 # ----------------- doTheNeedful --------------------------------------------------------------------------------------
 
-def doTheNeedful(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> int:
+def doTheNeedful(state: MatrixMeandersState) -> int:
 	"""Compute a(n) meanders with the transfer matrix algorithm.
 
 	Parameters
 	----------
-	kOfMatrix : int
-		The current index in the transfer matrix algorithm.
-	dictionaryCurveLocations : dict[int, int]
-		A dictionary of `curveLocations` to `distinctCrossings`.
+	state : MatrixMeandersState
+		The algorithm state containing current `kOfMatrix`, `dictionaryCurveLocations`, and thresholds.
 
 	Returns
 	-------
@@ -616,25 +618,25 @@ def doTheNeedful(kOfMatrix: int, dictionaryCurveLocations: dict[int, int]) -> in
 	https://oeis.org/A000682
 	https://oeis.org/A005316
 	"""
-	while kOfMatrix > 0:
-		bitWidthCurveLocations: int = max(dictionaryCurveLocations.keys()).bit_length()
-		bitWidthDistinctCrossings: int = max(dictionaryCurveLocations.values()).bit_length()
+	while state.kOfMatrix > 0:
+		bitWidthCurveLocations: int = max(state.dictionaryCurveLocations.keys()).bit_length()
+		bitWidthDistinctCrossings: int = max(state.dictionaryCurveLocations.values()).bit_length()
 
 		goByeBye()
 
-		if (bitWidthCurveLocations > bitWidthCurveLocationsMaximum) or (bitWidthDistinctCrossings > bitWidthDistinctCrossingsMaximum):
-			kOfMatrix, dictionaryCurveLocations = countBigInt(kOfMatrix, dictionaryCurveLocations)
+		if (bitWidthCurveLocations > raiseIfNone(state.bitWidthCurveLocationsMaximum)) or (bitWidthDistinctCrossings > raiseIfNone(state.bitWidthDistinctCrossingsMaximum)):
+			state = countBigInt(state)
 		else:
-			kOfMatrix, dictionaryCurveLocations = countPandas(kOfMatrix, dictionaryCurveLocations)
+			state = countPandas(state)
 
-	return sum(dictionaryCurveLocations.values())
+	return sum(state.dictionaryCurveLocations.values())
 
 @cache
 def A000682(n: int) -> int:
 	"""Compute A000682(n)."""
-	global _n, _oeisID  # noqa: PLW0603
-	_n = n
-	_oeisID = 'A000682'
+	oeisID = 'A000682'
+
+	kOfMatrix: int = n - 1
 
 	if n & 0b1:
 		curveLocations: int = 5
@@ -642,21 +644,29 @@ def A000682(n: int) -> int:
 		curveLocations = 1
 	listCurveLocations: list[int] = [(curveLocations << 1) | curveLocations]
 
-	MAXIMUMcurveLocations: int = getMAXIMUMcurveLocations(n-1)
+	MAXIMUMcurveLocations: int = 1 << (2 * kOfMatrix + 4)
 	while listCurveLocations[-1] < MAXIMUMcurveLocations:
 		curveLocations = (curveLocations << 4) | 0b101 # == curveLocations * 2**4 + 5
 		listCurveLocations.append((curveLocations << 1) | curveLocations)
-	return doTheNeedful(n - 1, dict.fromkeys(listCurveLocations, 1))
+
+	dictionaryCurveLocations=dict.fromkeys(listCurveLocations, 1)
+
+	state = MatrixMeandersState(n, oeisID, kOfMatrix, dictionaryCurveLocations)
+
+	return doTheNeedful(state)
 
 @cache
 def A005316(n: int) -> int:
 	"""Compute A005316(n)."""
-	global _n, _oeisID  # noqa: PLW0603
-	_n = n
-	_oeisID = 'A005316'
+	oeisID = 'A005316'
+
+	kOfMatrix: int = n - 1
 
 	if n & 0b1:
 		dictionaryCurveLocations: dict[int, int] = {15: 1}
 	else:
 		dictionaryCurveLocations = {22: 1}
-	return doTheNeedful(n - 1, dictionaryCurveLocations)
+
+	state = MatrixMeandersState(n, oeisID, kOfMatrix, dictionaryCurveLocations)
+
+	return doTheNeedful(state)
