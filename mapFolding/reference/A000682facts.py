@@ -12,7 +12,7 @@ bitWidthIncreaseMaximum = 2
 bitWidthIncreaseMean = 1.57
 bitWidthIncreaseMedian = 2
 
-dictionary_nToNumberOfCurveLocations: dict[int, int] = {
+dictionary_nToNumberOfCurveLocations: dict[int, int] = { # numberOfCurveLocations = (n // 2) + 2
     2: 3, 4: 4, 6: 5, 8: 6, 10: 7, 12: 8, 14: 9, 16: 10, 18: 11, 20: 12, 22: 13, 24: 14, 26: 15, 28: 16, 30: 17, 32: 18, 34: 19, 36: 20, 38: 21, 40: 22, 42: 23, 44: 24, 46: 25, 48: 26
 ,   3: 3, 5: 4, 7: 5, 9: 6, 11: 7, 13: 8, 15: 9, 17: 10, 19: 11, 21: 12, 23: 13, 25: 14, 27: 15, 29: 16, 31: 17, 33: 18, 35: 19, 37: 20, 39: 21, 41: 22, 43: 23, 45: 24, 47: 25, 49: 26}
 

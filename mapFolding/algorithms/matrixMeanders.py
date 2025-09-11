@@ -1,13 +1,12 @@
 """Count meanders with matrix transfer algorithm."""
 from functools import cache
 from hunterMakesPy import raiseIfNone
-from mapFolding.reference.A005316facts import (
-	bucketsIf_k_EVEN_by_nLess_k as rowsA005316If_k_EVEN_by_nLess_k,
-	bucketsIf_k_ODD_by_nLess_k as rowsA005316If_k_ODD_by_nLess_k)
+from mapFolding.reference.A005316facts import bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k
 from mapFolding.trim_memory import trim_ram as goByeBye
 from math import e, exp
 from warnings import warn
 import dataclasses
+import math
 import numpy
 import pandas
 
@@ -83,7 +82,7 @@ class MatrixMeandersState:
 
 # ----------------- lookup tables -------------------------------------------------------------------------------------
 
-rowsMaximumBy_kOfMatrix: dict[int, int] = {1:3, 2:12, 3:40, 4:125, 5:392, 6:1254, 7:4087, 8:13623, 9:46181
+bucketsTotalMaximumBy_kOfMatrix: dict[int, int] = {1:3, 2:12, 3:40, 4:125, 5:392, 6:1254, 7:4087, 8:13623, 9:46181
 	, 10:159137, 11:555469, 12:1961369, 13:6991893, 14:25134208}
 
 # ----------------- support functions ---------------------------------------------------------------------------------
@@ -93,42 +92,59 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
-def getLengthDataframeAnalyzed(state: MatrixMeandersState, safetyMultiplicand: float = 1.3, safetyAddend: int = 100000) -> int:
+def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.3, safetyAddend: int = 100000) -> int:
 	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations."""
+	xCommon = 1.57
+
 	nLess_k: int = state.n - state.kOfMatrix
 
+	kIsOdd: bool = bool(state.kOfMatrix & 1)
+	kIsEven: bool = not kIsOdd
+	nLess_kIsOdd: bool = bool(nLess_k & 1)
+	nLess_kIsEven: bool = not nLess_kIsOdd
+
 	length: int = -10000
-	rowsEstimated: float = 0
-	rowsKnown: int = -10
-	if (state.kOfMatrix in rowsMaximumBy_kOfMatrix) and (state.kOfMatrix*2+2 <= nLess_k):
-		rowsKnown = rowsMaximumBy_kOfMatrix[state.kOfMatrix]
+	bucketsEstimated: float = 0
+	bucketsTotal: int = -10
+	xInstant = nLess_k // 2 + 1
+	startingConditionsCoefficient = 1.8047
+
+	# If I know bucketsTotal is maxed out.
+	if ((state.kOfMatrix in bucketsTotalMaximumBy_kOfMatrix) and (state.kOfMatrix >= ((state.n - (state.n % 3)) // 3))):
+		bucketsTotal = bucketsTotalMaximumBy_kOfMatrix[state.kOfMatrix]
+	# If I already know bucketsTotal.
+	elif (state.oeisID == 'A005316') and (state.kOfMatrix > nLess_k) and kIsOdd and (nLess_k in bucketsIf_k_ODD_by_nLess_k):
+		bucketsTotal = bucketsIf_k_ODD_by_nLess_k[nLess_k]
+	# If I already know bucketsTotal.
+	elif (state.oeisID == 'A005316') and (state.kOfMatrix > nLess_k) and kIsEven and (nLess_k in bucketsIf_k_EVEN_by_nLess_k):
+		bucketsTotal = bucketsIf_k_EVEN_by_nLess_k[nLess_k]
+	# If I can estimate bucketsTotal during exponential growth with a formula.
 	elif (state.oeisID == 'A005316') and (state.kOfMatrix > nLess_k):
-		if state.kOfMatrix & 1: # k is odd
-			if nLess_k in rowsA005316If_k_ODD_by_nLess_k:
-				rowsKnown = rowsA005316If_k_ODD_by_nLess_k[nLess_k]
-			elif nLess_k & 1: # k is odd; n-k is odd
-				nLess_k = nLess_k//2 + 1
-				rowsEstimated = 7.498868 + 0.8513946*e**(1.527641*nLess_k)
-			else: # k is odd; n-k is even
-				nLess_k = nLess_k//2
-				rowsEstimated = -13.50074 + 2.175569*e**(1.528578*nLess_k)
-		elif nLess_k in rowsA005316If_k_EVEN_by_nLess_k: # k is even
-			rowsKnown = rowsA005316If_k_EVEN_by_nLess_k[nLess_k]
-		elif nLess_k & 1: # k is even; n-k is odd
-			nLess_k = nLess_k//2 + 1
-			rowsEstimated = 6.399027 + 1.042025*e**(1.526213*nLess_k)
-		else: # k is even; n-k is even
-			nLess_k = nLess_k//2
-			rowsEstimated = 1.826639 + 1.867297*e**(1.525544*nLess_k)
-		rowsEstimated = int(rowsEstimated)
-	elif state.kOfMatrix <= max(rowsMaximumBy_kOfMatrix.keys()):
-		rowsKnown = rowsMaximumBy_kOfMatrix[state.kOfMatrix]
+		if kIsEven and nLess_kIsOdd:
+			startingConditionsCoefficient = 0.834
+			xInstant = nLess_k // 2 + 1
+		elif kIsEven and nLess_kIsEven:
+			startingConditionsCoefficient = 1.5803
+			xInstant = nLess_k // 2
+		elif kIsOdd and nLess_kIsOdd:
+			startingConditionsCoefficient = 1.556
+			xInstant = nLess_k // 2 + 1
+		elif kIsOdd and nLess_kIsEven:
+			startingConditionsCoefficient = 1.8047
+			xInstant = nLess_k // 2
+		else:
+			message = "I shouldn't be here."
+			raise SystemError(message)
+		bucketsTotal = int(startingConditionsCoefficient * math.exp(xCommon * xInstant))
+# TODO elif (state.oeisID == 'A005316') and (state.kOfMatrix < ((state.n - (state.n % 3)) // 3)):
+	elif state.kOfMatrix <= max(bucketsTotalMaximumBy_kOfMatrix.keys()):
+		bucketsTotal = bucketsTotalMaximumBy_kOfMatrix[state.kOfMatrix]
 	else:
-		rowsEstimated = predict_less_than_max(state)
-	if rowsEstimated:
-		length = int(rowsEstimated * safetyMultiplicand) + safetyAddend + 1
+		bucketsEstimated = predict_less_than_max(state)
+	if bucketsEstimated:
+		length = int(bucketsEstimated * safetyMultiplicand) + safetyAddend + 1
 	else:
-		length = rowsKnown
+		length = bucketsTotal
 	return length
 
 def predict_less_than_max(state: MatrixMeandersState) -> float:
@@ -546,7 +562,7 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 	def outfitDataframeAnalyzed() -> None:
 		nonlocal dataframeAnalyzed
-		dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(getLengthDataframeAnalyzed(state)), fill_value=0)
+		dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(getBucketsTotal(state)), fill_value=0)
 
 	def outfitDataframeCurveLocations() -> None:
 		nonlocal dataframeAnalyzed, dataframeCurveLocations
