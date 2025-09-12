@@ -328,288 +328,290 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 	state : MatrixMeandersState
 		Updated state with new `kOfMatrix` and `dictionaryCurveLocations`.
 	"""
-	def recordCurveLocations() -> None:
-		nonlocal dataframeAnalyzed
-
-		indexStopAnalyzed: int = state.indexStartAnalyzed + int((dataframeCurveLocations['analyzed'] > 0).sum())
-
-		goByeBye()
-
-		if indexStopAnalyzed > state.indexStartAnalyzed:
-			if len(dataframeAnalyzed.index) < indexStopAnalyzed:
-				dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
-				warn(f"Lengthened `dataframeAnalyzed` to {indexStopAnalyzed=}; n={state.n}, {state.kOfMatrix=}.", stacklevel=2)
-
-			dataframeAnalyzed.loc[state.indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
-				dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']].to_numpy(dtype=state.datatypeCurveLocations, copy=False)
-			) # TODO 98 seconds ?!!
-
-			state.indexStartAnalyzed = indexStopAnalyzed
-
-	def analyzeCurveLocationsAligned() -> None:
-		"""Compute `curveLocations` from `groupAlpha` and `groupZulu` if at least one is an even number.
-
-		Before computing `curveLocations`, some values of `groupAlpha` and `groupZulu` are modified.
-
-		Warning
-		-------
-		This function deletes rows from `dataframeCurveLocations`. Always run this analysis last.
-
-		Formula
-		-------
-		```python
-		if groupAlpha > 1 and groupZulu > 1 and (groupAlphaIsEven or groupZuluIsEven):
-			curveLocations = (groupAlpha >> 2) | ((groupZulu >> 2) << 1)
-		```
-		"""
-		nonlocal dataframeCurveLocations
-
-# NOTE Step 1: drop unqualified rows
-
-		ImaGroupZulpha: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
-
-		dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha > 1)] # if groupAlphaHasCurves
-
-		del ImaGroupZulpha
-
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
-		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
-
-		dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha > 1)] # if groupZuluHasCurves
-
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= 0b10 # Ima `groupZulu`.
-		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
-		ImaGroupZulpha &= 1 # (groupZulu & 1)
-		ImaGroupZulpha ^= 1 # (1 - (groupZulu ...))
-		dataframeCurveLocations.loc[:, 'analyzed'] = ImaGroupZulpha # selectorGroupZuluAtEven
-
-		del ImaGroupZulpha
-
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= 1 # (groupAlpha & 1)
-		ImaGroupZulpha ^= 1 # (1 - (groupAlpha ...))
-		ImaGroupZulpha = ImaGroupZulpha.astype(bool) # selectorGroupAlphaAtODD
-
-		dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha) | (dataframeCurveLocations.loc[:, 'analyzed'])] # if (groupAlphaIsEven or groupZuluIsEven)
-
-		del ImaGroupZulpha
-
-# NOTE Step 2: modify rows
-
-		# Make a selector for groupZuluAtEven, so you can modify groupAlpha
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= 0b10 # Ima `groupZulu`.
-		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
-		ImaGroupZulpha &= 1 # (groupZulu & 1)
-		ImaGroupZulpha ^= 1 # (1 - (groupZulu ...))
-		ImaGroupZulpha = ImaGroupZulpha.astype(bool) # selectorGroupZuluAtEven
-
-		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations'] # Ima `groupAlpha`.
-		dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupAlpha # (groupAlpha)
-
-		# if groupAlphaIsEven and not groupZuluIsEven, modifyGroupAlphaPairedToOdd
-		dataframeCurveLocations.loc[(~ImaGroupZulpha), 'analyzed'] = state.datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
-			flipTheExtra_0b1AsUfunc(dataframeCurveLocations.loc[(~ImaGroupZulpha), 'analyzed']))
-
-		del ImaGroupZulpha
-
-		# if groupZuluIsEven and not groupAlphaIsEven, modifyGroupZuluPairedToOdd
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
-		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
-
-		ImaGroupZulpha.loc[(dataframeCurveLocations.loc[:, 'curveLocations'] & 1).astype(bool)] = state.datatypeCurveLocations( # pyright: ignore[reportArgumentType, reportCallIssue]
-			flipTheExtra_0b1AsUfunc(ImaGroupZulpha.loc[(dataframeCurveLocations.loc[:, 'curveLocations'] & 1).astype(bool)])) # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
-
-# NOTE Step 3: compute curveLocations
-		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (groupAlpha >> 2)
-
-		ImaGroupZulpha //= 2**2 # (groupZulu >> 2)
-		ImaGroupZulpha *= 2**1 # ((groupZulu ...) << 1)
-
-		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
-		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
-
-		del ImaGroupZulpha
-
-	def analyzeCurveLocationsAlpha() -> None:
-		"""Compute `curveLocations` from `groupAlpha`.
-
-		Formula
-		-------
-		```python
-		if groupAlpha > 1:
-			curveLocations = ((1 - (groupAlpha & 1)) << 1) | (groupZulu << 3) | (groupAlpha >> 2)
-		# `(1 - (groupAlpha & 1)` is an evenness test.
-		```
-		"""
-		nonlocal dataframeCurveLocations
-		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
-		dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupAlpha & 1)
-		dataframeCurveLocations.loc[:, 'analyzed'] ^= 1 # (1 - (groupAlpha ...))
-
-		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**1 # ((groupAlpha ...) << 1)
-
-		ImaGroupZulpha: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
-		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
-
-		ImaGroupZulpha *= 2**3 # (groupZulu << 3)
-		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
-
-		del ImaGroupZulpha
-
-		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # ... | (groupAlpha >> 2)
-
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
-
-		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupAlpha)
-		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (... >> 2)
-
-		dataframeCurveLocations.loc[(ImaGroupZulpha <= 1), 'analyzed'] = 0 # if groupAlpha > 1
-		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
-
-		del ImaGroupZulpha
-
-	def analyzeCurveLocationsSimple() -> None:
-		"""Compute curveLocations with the 'simple' bridges formula.
-
-		Formula
-		-------
-		```python
-		curveLocations = ((groupAlpha | (groupZulu << 1)) << 2) | 3
-		```
-
-		Parameters
-		----------
-		MAXIMUMcurveLocations : int
-			Maximum value of `curveLocations` for the current iteration of `bridges`.
-
-		Notes
-		-----
-		Using `+= 3` instead of `|= 3` is valid in this specific case. Left shift by two means the last bits are '0b00'. '0 + 3'
-		is '0b11', and '0b00 | 0b11' is also '0b11'.
-
-		"""
-		nonlocal dataframeCurveLocations
-		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
-		dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupAlpha
-
-		groupZulu: pandas.Series = dataframeCurveLocations['curveLocations'].copy()
-		groupZulu &= state.locatorGroupZulu
-		groupZulu //= 2**1 # (groupZulu >> 1)
-		groupZulu *= 2**1 # (groupZulu << 1)
-
-		dataframeCurveLocations.loc[:, 'analyzed'] |= groupZulu # ((groupAlpha | (groupZulu ...))
-
-		del groupZulu
-
-		dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # (... << 2)
-		dataframeCurveLocations.loc[:, 'analyzed'] += 3 # (...) | 3
-		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
-
-	def analyzeCurveLocationsZulu() -> None:
-		"""Compute `curveLocations` from `groupZulu`.
-
-		Formula
-		-------
-		```python
-		if groupZulu > 1:
-			curveLocations = (1 - (groupZulu & 1)) | (groupAlpha << 2) | (groupZulu >> 1)
-		```
-		"""
-		nonlocal dataframeCurveLocations
-		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations'] # Ima `groupZulu`.
-		dataframeCurveLocations.loc[:, 'analyzed'] &= 0b10 # Ima `groupZulu`.
-		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
-		dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupZulu & 1)
-		dataframeCurveLocations.loc[:, 'analyzed'] ^= 1 # (1 - (groupZulu ...))
-
-		ImaGroupZulpha: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
-
-		ImaGroupZulpha *= 2**2 # (groupAlpha << 2)
-		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupAlpha ...)
-
-		del ImaGroupZulpha
-
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
-		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
-
-		ImaGroupZulpha //= 2**1 # (groupZulu >> 1)
-
-		dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
-
-		del ImaGroupZulpha
-
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
-		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
-
-		dataframeCurveLocations.loc[ImaGroupZulpha <= 1, 'analyzed'] = 0 # if groupZulu > 1
-		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
-
-		del ImaGroupZulpha
-# TODO 69 seconds to create zeros. Obviously, there is a better way.
-	def outfitDataframeAnalyzed() -> None:
-		nonlocal dataframeAnalyzed
-		dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(getBucketsTotal(state)), fill_value=0)
-
-	def outfitDataframeCurveLocations() -> None:
-		nonlocal dataframeAnalyzed, dataframeCurveLocations
-		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
-		dataframeCurveLocations['curveLocations'] = dataframeAnalyzed['analyzed']
-		dataframeCurveLocations['distinctCrossings'] = dataframeAnalyzed['distinctCrossings']
-		dataframeCurveLocations['analyzed'] = 0
-		state.bitWidth = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
-
-		dataframeAnalyzed = dataframeAnalyzed.iloc[0:0]
-
 	dataframeAnalyzed = pandas.DataFrame({
-		'analyzed': pandas.Series(name='analyzed', data=state.dictionaryCurveLocations.keys(), dtype=state.datatypeCurveLocations)
-		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=state.dictionaryCurveLocations.values(), dtype=state.datatypeDistinctCrossings)
+		'analyzed': pandas.Series(name='analyzed', data=state.dictionaryCurveLocations.keys(), copy=False, dtype=state.datatypeCurveLocations)
+		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=state.dictionaryCurveLocations.values(), copy=False, dtype=state.datatypeDistinctCrossings)
 		}, dtype=state.datatypeCurveLocations
 	)
 	state.dictionaryCurveLocations.clear()
-
-	dataframeCurveLocations = pandas.DataFrame({
-		'curveLocations': pandas.Series(name='curveLocations', data=0, dtype=state.datatypeCurveLocations)
-		, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=state.datatypeCurveLocations)
-		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=0, dtype=state.datatypeDistinctCrossings)
-		}, dtype=state.datatypeCurveLocations # pyright: ignore[reportUnknownArgumentType]
-	)
 
 	while (state.kOfMatrix > 0
 		and (int(dataframeAnalyzed['analyzed'].max()).bit_length() <= raiseIfNone(state.bitWidthCurveLocationsMaximum))
 		and (int(dataframeAnalyzed['distinctCrossings'].max()).bit_length() <= raiseIfNone(state.bitWidthDistinctCrossingsMaximum))):
 
-		outfitDataframeCurveLocations()
+# ruff: noqa: B023
+
+		def recordCurveLocations() -> None:
+			nonlocal dataframeAnalyzed
+
+			indexStopAnalyzed: int = state.indexStartAnalyzed + int((dataframeCurveLocations['analyzed'] > 0).sum()) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+
+			if indexStopAnalyzed > state.indexStartAnalyzed:
+				if len(dataframeAnalyzed.index) < indexStopAnalyzed:
+					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
+					warn(f"Lengthened `dataframeAnalyzed` to {indexStopAnalyzed=}; n={state.n}, {state.kOfMatrix=}.", stacklevel=2)
+
+				dataframeAnalyzed.loc[state.indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
+					dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']
+								].to_numpy(dtype=state.datatypeCurveLocations, copy=False)
+				)
+
+				state.indexStartAnalyzed = indexStopAnalyzed
+
+			del indexStopAnalyzed
+
+		def analyzeCurveLocationsAligned() -> None:
+			"""Compute `curveLocations` from `groupAlpha` and `groupZulu` if at least one is an even number.
+
+			Before computing `curveLocations`, some values of `groupAlpha` and `groupZulu` are modified.
+
+			Warning
+			-------
+			This function deletes rows from `dataframeCurveLocations`. Always run this analysis last.
+
+			Formula
+			-------
+			```python
+			if groupAlpha > 1 and groupZulu > 1 and (groupAlphaIsEven or groupZuluIsEven):
+				curveLocations = (groupAlpha >> 2) | ((groupZulu >> 2) << 1)
+			```
+			"""
+			nonlocal dataframeCurveLocations
+
+# NOTE Step 1: drop unqualified rows
+
+			ImaGroupZulpha: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
+			ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
+
+			dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha > 1)] # if groupAlphaHasCurves
+
+			del ImaGroupZulpha
+
+			ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+			ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
+			ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
+
+			dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha > 1)] # if groupZuluHasCurves
+
+			del ImaGroupZulpha
+
+			ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+			ImaGroupZulpha &= 0b10 # Ima `groupZulu`.
+			ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
+			ImaGroupZulpha &= 1 # (groupZulu & 1)
+			ImaGroupZulpha ^= 1 # (1 - (groupZulu ...))
+			dataframeCurveLocations.loc[:, 'analyzed'] = ImaGroupZulpha # selectorGroupZuluAtEven
+
+			del ImaGroupZulpha
+
+			ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
+			ImaGroupZulpha &= 1 # (groupAlpha & 1)
+			ImaGroupZulpha ^= 1 # (1 - (groupAlpha ...))
+			ImaGroupZulpha = ImaGroupZulpha.astype(bool) # selectorGroupAlphaAtODD
+
+			dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha) | (dataframeCurveLocations.loc[:, 'analyzed'])] # if (groupAlphaIsEven or groupZuluIsEven)
+
+			del ImaGroupZulpha
+
+# NOTE Step 2: modify rows
+
+			# Make a selector for groupZuluAtEven, so you can modify groupAlpha
+			ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+			ImaGroupZulpha &= 0b10 # Ima `groupZulu`.
+			ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
+			ImaGroupZulpha &= 1 # (groupZulu & 1)
+			ImaGroupZulpha ^= 1 # (1 - (groupZulu ...))
+			ImaGroupZulpha = ImaGroupZulpha.astype(bool) # selectorGroupZuluAtEven
+
+			dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations'] # Ima `groupAlpha`.
+			dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupAlpha # (groupAlpha)
+
+			# if groupAlphaIsEven and not groupZuluIsEven, modifyGroupAlphaPairedToOdd
+			dataframeCurveLocations.loc[(~ImaGroupZulpha), 'analyzed'] = state.datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
+				flipTheExtra_0b1AsUfunc(dataframeCurveLocations.loc[(~ImaGroupZulpha), 'analyzed']))
+
+			del ImaGroupZulpha
+
+			# if groupZuluIsEven and not groupAlphaIsEven, modifyGroupZuluPairedToOdd
+			ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+			ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
+			ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
+
+			ImaGroupZulpha.loc[(dataframeCurveLocations.loc[:, 'curveLocations'] & 1).astype(bool)] = state.datatypeCurveLocations( # pyright: ignore[reportArgumentType, reportCallIssue]
+				flipTheExtra_0b1AsUfunc(ImaGroupZulpha.loc[(dataframeCurveLocations.loc[:, 'curveLocations'] & 1).astype(bool)])) # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+
+# NOTE Step 3: compute curveLocations
+			dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (groupAlpha >> 2)
+
+			ImaGroupZulpha //= 2**2 # (groupZulu >> 2)
+			ImaGroupZulpha *= 2**1 # ((groupZulu ...) << 1)
+
+			dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
+
+			del ImaGroupZulpha
+
+			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
+
+		def analyzeCurveLocationsAlpha() -> None:
+			"""Compute `curveLocations` from `groupAlpha`.
+
+			Formula
+			-------
+			```python
+			if groupAlpha > 1:
+				curveLocations = ((1 - (groupAlpha & 1)) << 1) | (groupZulu << 3) | (groupAlpha >> 2)
+			# `(1 - (groupAlpha & 1)` is an evenness test.
+			```
+			"""
+			nonlocal dataframeCurveLocations
+			dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
+			dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupAlpha & 1)
+			dataframeCurveLocations.loc[:, 'analyzed'] ^= 1 # (1 - (groupAlpha ...))
+
+			dataframeCurveLocations.loc[:, 'analyzed'] *= 2**1 # ((groupAlpha ...) << 1)
+
+			ImaGroupZulpha: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+			ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
+			ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
+
+			ImaGroupZulpha *= 2**3 # (groupZulu << 3)
+			dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
+
+			del ImaGroupZulpha
+
+			dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # ... | (groupAlpha >> 2)
+
+			ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
+			ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
+
+			dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupAlpha)
+			dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (... >> 2)
+
+			dataframeCurveLocations.loc[(ImaGroupZulpha <= 1), 'analyzed'] = 0 # if groupAlpha > 1
+
+			del ImaGroupZulpha
+
+			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
+
+		def analyzeCurveLocationsSimple() -> None:
+			"""Compute curveLocations with the 'simple' bridges formula.
+
+			Formula
+			-------
+			```python
+			curveLocations = ((groupAlpha | (groupZulu << 1)) << 2) | 3
+			```
+
+			Parameters
+			----------
+			MAXIMUMcurveLocations : int
+				Maximum value of `curveLocations` for the current iteration of `bridges`.
+
+			Notes
+			-----
+			Using `+= 3` instead of `|= 3` is valid in this specific case. Left shift by two means the last bits are '0b00'. '0 + 3'
+			is '0b11', and '0b00 | 0b11' is also '0b11'.
+
+			"""
+			nonlocal dataframeCurveLocations
+			dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
+			dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupAlpha
+
+			groupZulu: pandas.Series = dataframeCurveLocations['curveLocations'].copy()
+			groupZulu &= state.locatorGroupZulu
+			groupZulu //= 2**1 # (groupZulu >> 1)
+			groupZulu *= 2**1 # (groupZulu << 1)
+
+			dataframeCurveLocations.loc[:, 'analyzed'] |= groupZulu # ((groupAlpha | (groupZulu ...))
+
+			del groupZulu
+
+			dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # (... << 2)
+			dataframeCurveLocations.loc[:, 'analyzed'] += 3 # (...) | 3
+			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
+
+		def analyzeCurveLocationsZulu() -> None:
+			"""Compute `curveLocations` from `groupZulu`.
+
+			Formula
+			-------
+			```python
+			if groupZulu > 1:
+				curveLocations = (1 - (groupZulu & 1)) | (groupAlpha << 2) | (groupZulu >> 1)
+			```
+			"""
+			nonlocal dataframeCurveLocations
+			dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations'] # Ima `groupZulu`.
+			dataframeCurveLocations.loc[:, 'analyzed'] &= 0b10 # Ima `groupZulu`.
+			dataframeCurveLocations.loc[:, 'analyzed'] //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
+			dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupZulu & 1)
+			dataframeCurveLocations.loc[:, 'analyzed'] ^= 1 # (1 - (groupZulu ...))
+
+			ImaGroupZulpha: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
+			ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
+
+			ImaGroupZulpha *= 2**2 # (groupAlpha << 2)
+			dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupAlpha ...)
+
+			del ImaGroupZulpha
+
+			ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+			ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
+			ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
+
+			ImaGroupZulpha //= 2**1 # (groupZulu >> 1)
+
+			dataframeCurveLocations.loc[:, 'analyzed'] |= ImaGroupZulpha # ... | (groupZulu ...)
+
+			del ImaGroupZulpha
+
+			ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+			ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
+			ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
+
+			dataframeCurveLocations.loc[ImaGroupZulpha <= 1, 'analyzed'] = 0 # if groupZulu > 1
+
+			del ImaGroupZulpha
+
+			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
+
+		dataframeCurveLocations = pandas.DataFrame({
+			'curveLocations': pandas.Series(name='curveLocations', data=dataframeAnalyzed['analyzed'], copy=True, dtype=state.datatypeCurveLocations)
+			, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=state.datatypeCurveLocations)
+			, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=dataframeAnalyzed['distinctCrossings'], copy=True, dtype=state.datatypeDistinctCrossings)
+			} # pyright: ignore[reportUnknownArgumentType]
+		)
+
+		state.bitWidth = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
+
+		del dataframeAnalyzed
 		goByeBye()
 
-		outfitDataframeAnalyzed()
+		length: int = getBucketsTotal(state) # 8 seconds
+		dataframeAnalyzed = pandas.DataFrame({
+			'analyzed': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeCurveLocations, name='analyzed')
+			, 'distinctCrossings': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeDistinctCrossings, name='distinctCrossings')
+			}, index=pandas.RangeIndex(length), columns=['analyzed', 'distinctCrossings'], dtype=state.datatypeCurveLocations # pyright: ignore[reportUnknownArgumentType]
+		)
+
 		state.indexStartAnalyzed = 0
-		goByeBye()
 
 		state.kOfMatrix -= 1
 
 		analyzeCurveLocationsSimple()
 		recordCurveLocations()
-		goByeBye()
+
 		analyzeCurveLocationsAlpha()
 		recordCurveLocations()
-		goByeBye()
+
 		analyzeCurveLocationsZulu()
 		recordCurveLocations()
-		goByeBye()
+
 		analyzeCurveLocationsAligned()
 		recordCurveLocations()
-		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
+		del dataframeCurveLocations
 		goByeBye()
+
 # This is only 75 seconds now!
 		dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
 		if state.n >= 45:  # for data collection
