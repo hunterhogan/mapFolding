@@ -1,8 +1,14 @@
-"""Count meanders with matrix transfer algorithm."""
+"""Count meanders with matrix transfer algorithm.
+
+Notes
+-----
+- Odd/even of `groupAlpha` == the odd/even of `curveLocations`. Proof: `groupAlphaIsEven = curveLocations & 1 & 1 ^ 1`.
+- Odd/even of `groupZulu` == `curveLocations` second-least significant bit. So `groupZuluIsEven = bool(curveLocations & 2 ^ 2)`.
+"""
 from functools import cache
+from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
 from mapFolding.reference.A005316facts import bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k
-from mapFolding.trim_memory import trim_ram as goByeBye
 from math import exp
 from warnings import warn
 import dataclasses
@@ -93,7 +99,7 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
 # NOTE HEY! It's not obvious, but this function does NOT use either safety value for most requests. (I _think_ that is good.)
-# TODO Create "tests" (perhaps pytest) to make sure this is not wildly overestimating (the large values), which would waste memory.
+# NOTE Create "tests" (perhaps pytest) to make sure this is not wildly overestimating (the large values), which would waste memory.
 def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.3, safetyAddend: int = 100000) -> int:
 	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations."""
 	xCommon = 1.57
@@ -136,8 +142,8 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.3,
 		if state.oeisID == 'A000682': # NOTE Net effect is between `*= n` and `*= n * 2.2` if n=46.
 			startingConditionsCoefficient *= state.n * (((state.n // 2) + 2) ** A000682adjustStartingCurveLocations)
 		bucketsTotal = int(startingConditionsCoefficient * math.exp(xCommon * xInstant))
-# TODO elif (state.oeisID == 'A000682') and (state.kOfMatrix < ((state.n - (state.n % 3)) // 3)):
-# TODO elif (state.oeisID == 'A005316') and (state.kOfMatrix < ((state.n - (state.n % 3)) // 3)):
+# NOTE elif (state.oeisID == 'A000682') and (state.kOfMatrix < ((state.n - (state.n % 3)) // 3)):
+# NOTE elif (state.oeisID == 'A005316') and (state.kOfMatrix < ((state.n - (state.n % 3)) // 3)):
 # But the shockingly simple unification of the exponential growth estimates suggests I'll be able to unify the sub-exponential
 # growth estimates too.
 	# If `kOfMatrix` is low, use maximum bucketsTotal. 1. Can't underestimate. 2. Skip computation that can underestimate. 3. The
@@ -152,7 +158,7 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.3,
 		length = bucketsTotal
 	return length
 
-# TODO replace this old estimate.
+# NOTE replace this old estimate.
 def predict_less_than_max(state: MatrixMeandersState) -> float:
 	"""Predict."""
 	n = float(state.n)
@@ -336,7 +342,7 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 			dataframeAnalyzed.loc[state.indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
 				dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']].to_numpy(dtype=state.datatypeCurveLocations, copy=False)
-			)
+			) # TODO 98 seconds ?!!
 
 			state.indexStartAnalyzed = indexStopAnalyzed
 
@@ -373,18 +379,19 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha > 1)] # if groupZuluHasCurves
 
-		ImaGroupZulpha = ImaGroupZulpha.loc[(ImaGroupZulpha > 1)] # decrease size to match dataframeCurveLocations
+		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
+		ImaGroupZulpha &= 0b10 # Ima `groupZulu`.
+		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 		ImaGroupZulpha &= 1 # (groupZulu & 1)
 		ImaGroupZulpha ^= 1 # (1 - (groupZulu ...))
-		dataframeCurveLocations.loc[:, 'analyzed'] = ImaGroupZulpha
+		dataframeCurveLocations.loc[:, 'analyzed'] = ImaGroupZulpha # selectorGroupZuluAtEven
 
 		del ImaGroupZulpha
 
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
 		ImaGroupZulpha &= 1 # (groupAlpha & 1)
 		ImaGroupZulpha ^= 1 # (1 - (groupAlpha ...))
-		ImaGroupZulpha = ImaGroupZulpha.astype(bool)
+		ImaGroupZulpha = ImaGroupZulpha.astype(bool) # selectorGroupAlphaAtODD
 
 		dataframeCurveLocations = dataframeCurveLocations.loc[(ImaGroupZulpha) | (dataframeCurveLocations.loc[:, 'analyzed'])] # if (groupAlphaIsEven or groupZuluIsEven)
 
@@ -394,11 +401,11 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		# Make a selector for groupZuluAtEven, so you can modify groupAlpha
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
-		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
+		ImaGroupZulpha &= 0b10 # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 		ImaGroupZulpha &= 1 # (groupZulu & 1)
 		ImaGroupZulpha ^= 1 # (1 - (groupZulu ...))
-		ImaGroupZulpha = ImaGroupZulpha.astype(bool)
+		ImaGroupZulpha = ImaGroupZulpha.astype(bool) # selectorGroupZuluAtEven
 
 		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations'] # Ima `groupAlpha`.
 		dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupAlpha # (groupAlpha)
@@ -409,27 +416,13 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		del ImaGroupZulpha
 
-# NOTE Above this line, I am only using the current minimum of data structures: i.e., no selectors.
-
-# TODO `selectorGroupAlphaAtEven` until I can figure out how to eliminate it.
-		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupAlpha`.
-		ImaGroupZulpha &= state.locatorGroupAlpha # Ima `groupAlpha`.
-		ImaGroupZulpha &= 1 # (groupAlpha & 1)
-		ImaGroupZulpha ^= 1 # (1 - (groupAlpha ...))
-		selectorGroupAlphaAtEven: pandas.Series = ImaGroupZulpha.astype(bool)
-
-		del ImaGroupZulpha
-
 		# if groupZuluIsEven and not groupAlphaIsEven, modifyGroupZuluPairedToOdd
 		ImaGroupZulpha = dataframeCurveLocations['curveLocations'].copy() # Ima `groupZulu`.
 		ImaGroupZulpha &= state.locatorGroupZulu # Ima `groupZulu`.
 		ImaGroupZulpha //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 
-		ImaGroupZulpha.loc[(~selectorGroupAlphaAtEven)] = state.datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
-			flipTheExtra_0b1AsUfunc(ImaGroupZulpha.loc[(~selectorGroupAlphaAtEven)]))
-
-		del selectorGroupAlphaAtEven
-		goByeBye()
+		ImaGroupZulpha.loc[(dataframeCurveLocations.loc[:, 'curveLocations'] & 1).astype(bool)] = state.datatypeCurveLocations( # pyright: ignore[reportArgumentType, reportCallIssue]
+			flipTheExtra_0b1AsUfunc(ImaGroupZulpha.loc[(dataframeCurveLocations.loc[:, 'curveLocations'] & 1).astype(bool)])) # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
 
 # NOTE Step 3: compute curveLocations
 		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (groupAlpha >> 2)
@@ -450,12 +443,11 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		```python
 		if groupAlpha > 1:
 			curveLocations = ((1 - (groupAlpha & 1)) << 1) | (groupZulu << 3) | (groupAlpha >> 2)
+		# `(1 - (groupAlpha & 1)` is an evenness test.
 		```
 		"""
 		nonlocal dataframeCurveLocations
 		dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
-		dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupAlpha
-
 		dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupAlpha & 1)
 		dataframeCurveLocations.loc[:, 'analyzed'] ^= 1 # (1 - (groupAlpha ...))
 
@@ -531,10 +523,9 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		```
 		"""
 		nonlocal dataframeCurveLocations
-		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations']
-		dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorGroupZulu
-		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**1 # (groupZulu >> 1)
-
+		dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations'] # Ima `groupZulu`.
+		dataframeCurveLocations.loc[:, 'analyzed'] &= 0b10 # Ima `groupZulu`.
+		dataframeCurveLocations.loc[:, 'analyzed'] //= 2**1 # Ima `groupZulu` (groupZulu >> 1)
 		dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (groupZulu & 1)
 		dataframeCurveLocations.loc[:, 'analyzed'] ^= 1 # (1 - (groupZulu ...))
 
@@ -564,7 +555,7 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
 
 		del ImaGroupZulpha
-
+# TODO 69 seconds to create zeros. Obviously, there is a better way.
 	def outfitDataframeAnalyzed() -> None:
 		nonlocal dataframeAnalyzed
 		dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(getBucketsTotal(state)), fill_value=0)
@@ -619,7 +610,7 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		recordCurveLocations()
 		dataframeCurveLocations = dataframeCurveLocations.iloc[0:0]
 		goByeBye()
-
+# This is only 75 seconds now!
 		dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
 		if state.n >= 45:  # for data collection
 			print(state.n, state.kOfMatrix+1, state.indexStartAnalyzed, sep=',')  # noqa: T201
