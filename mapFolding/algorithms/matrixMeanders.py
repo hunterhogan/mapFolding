@@ -98,8 +98,6 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
-# NOTE HEY! It's not obvious, but this function does NOT use either safety value for most requests. (I _think_ that is good.)
-# NOTE Create "tests" (perhaps pytest) to make sure this is not wildly overestimating (the large values), which would waste memory.
 def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.3, safetyAddend: int = 100000) -> int:
 	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations."""
 	xCommon = 1.57
@@ -587,7 +585,7 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		del dataframeAnalyzed
 		goByeBye()
 
-		length: int = getBucketsTotal(state) # 8 seconds
+		length: int = getBucketsTotal(state)
 		dataframeAnalyzed = pandas.DataFrame({
 			'analyzed': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeCurveLocations, name='analyzed')
 			, 'distinctCrossings': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeDistinctCrossings, name='distinctCrossings')
@@ -612,7 +610,6 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		del dataframeCurveLocations
 		goByeBye()
 
-# This is only 75 seconds now!
 		dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
 		if state.n >= 45:  # for data collection
 			print(state.n, state.kOfMatrix+1, state.indexStartAnalyzed, sep=',')  # noqa: T201
