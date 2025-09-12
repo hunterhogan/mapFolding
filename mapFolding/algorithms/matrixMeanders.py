@@ -3,7 +3,7 @@ from functools import cache
 from hunterMakesPy import raiseIfNone
 from mapFolding.reference.A005316facts import bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k
 from mapFolding.trim_memory import trim_ram as goByeBye
-from math import e, exp
+from math import exp
 from warnings import warn
 import dataclasses
 import math
@@ -92,25 +92,24 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
+# NOTE HEY! It's not obvious, but this function does NOT use either safety value for most requests. (I _think_ that is good.)
+# TODO Create "tests" (perhaps pytest) to make sure this is not wildly overestimating (the large values), which would waste memory.
 def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.3, safetyAddend: int = 100000) -> int:
 	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations."""
 	xCommon = 1.57
 
 	nLess_k: int = state.n - state.kOfMatrix
-
 	kIsOdd: bool = bool(state.kOfMatrix & 1)
 	kIsEven: bool = not kIsOdd
 	nLess_kIsOdd: bool = bool(nLess_k & 1)
 	nLess_kIsEven: bool = not nLess_kIsOdd
 
-	length: int = -10000
+	length: int = -73
 	bucketsEstimated: float = 0
-	bucketsTotal: int = -10
-	xInstant = nLess_k // 2 + 1
-	startingConditionsCoefficient = 1.8047
+	bucketsTotal: int = -8
 
 	# If I know bucketsTotal is maxed out.
-	if ((state.kOfMatrix in bucketsTotalMaximumBy_kOfMatrix) and (state.kOfMatrix >= ((state.n - (state.n % 3)) // 3))):
+	if (state.kOfMatrix in bucketsTotalMaximumBy_kOfMatrix) and (state.kOfMatrix <= ((state.n - 1 - (state.kOfMatrix % 2)) // 3)):
 		bucketsTotal = bucketsTotalMaximumBy_kOfMatrix[state.kOfMatrix]
 	# If I already know bucketsTotal.
 	elif (state.oeisID == 'A005316') and (state.kOfMatrix > nLess_k) and kIsOdd and (nLess_k in bucketsIf_k_ODD_by_nLess_k):
@@ -119,24 +118,30 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.3,
 	elif (state.oeisID == 'A005316') and (state.kOfMatrix > nLess_k) and kIsEven and (nLess_k in bucketsIf_k_EVEN_by_nLess_k):
 		bucketsTotal = bucketsIf_k_EVEN_by_nLess_k[nLess_k]
 	# If I can estimate bucketsTotal during exponential growth with a formula.
-	elif (state.oeisID == 'A005316') and (state.kOfMatrix > nLess_k):
+	elif (state.oeisID in ['A000682', 'A005316']) and (state.kOfMatrix > nLess_k):
+		xInstant: int = math.ceil(nLess_k / 2)
+		A000682adjustStartingCurveLocations: float = 0.25
 		if kIsEven and nLess_kIsOdd:
 			startingConditionsCoefficient = 0.834
-			xInstant = nLess_k // 2 + 1
 		elif kIsEven and nLess_kIsEven:
 			startingConditionsCoefficient = 1.5803
-			xInstant = nLess_k // 2
 		elif kIsOdd and nLess_kIsOdd:
 			startingConditionsCoefficient = 1.556
-			xInstant = nLess_k // 2 + 1
+			A000682adjustStartingCurveLocations = 0.0
 		elif kIsOdd and nLess_kIsEven:
 			startingConditionsCoefficient = 1.8047
-			xInstant = nLess_k // 2
 		else:
 			message = "I shouldn't be here."
 			raise SystemError(message)
+		if state.oeisID == 'A000682': # NOTE Net effect is between `*= n` and `*= n * 2.2` if n=46.
+			startingConditionsCoefficient *= state.n * (((state.n // 2) + 2) ** A000682adjustStartingCurveLocations)
 		bucketsTotal = int(startingConditionsCoefficient * math.exp(xCommon * xInstant))
+# TODO elif (state.oeisID == 'A000682') and (state.kOfMatrix < ((state.n - (state.n % 3)) // 3)):
 # TODO elif (state.oeisID == 'A005316') and (state.kOfMatrix < ((state.n - (state.n % 3)) // 3)):
+# But the shockingly simple unification of the exponential growth estimates suggests I'll be able to unify the sub-exponential
+# growth estimates too.
+	# If `kOfMatrix` is low, use maximum bucketsTotal. 1. Can't underestimate. 2. Skip computation that can underestimate. 3. The
+	# potential difference in memory use is relatively small.
 	elif state.kOfMatrix <= max(bucketsTotalMaximumBy_kOfMatrix.keys()):
 		bucketsTotal = bucketsTotalMaximumBy_kOfMatrix[state.kOfMatrix]
 	else:
@@ -147,9 +152,9 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.3,
 		length = bucketsTotal
 	return length
 
+# TODO replace this old estimate.
 def predict_less_than_max(state: MatrixMeandersState) -> float:
 	"""Predict."""
-# TODO replace this old estimate.
 	n = float(state.n)
 	b = max(0.0, min(float(state.kOfMatrix-1), n))
 	x = b / n
