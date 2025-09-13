@@ -1,3 +1,4 @@
+# ruff: noqa
 """Count meanders with matrix transfer algorithm.
 
 Notes
@@ -9,7 +10,8 @@ from functools import cache
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
 from mapFolding.reference.A005316facts import bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k
-from math import exp
+from math import exp, log
+from typing import NamedTuple
 from warnings import warn
 import dataclasses
 import math
@@ -86,11 +88,6 @@ class MatrixMeandersState:
 		"""Compute an even-parity bit-mask with `bitWidth` bits."""
 		return sum(1 << one for one in range(1, self.bitWidth, 2))
 
-# ----------------- lookup tables -------------------------------------------------------------------------------------
-
-bucketsTotalMaximumBy_kOfMatrix: dict[int, int] = {1:3, 2:12, 3:40, 4:125, 5:392, 6:1254, 7:4087, 8:13623, 9:46181
-	, 10:159137, 11:555469, 12:1961369, 13:6991893, 14:25134208}
-
 # ----------------- support functions ---------------------------------------------------------------------------------
 @cache
 def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
@@ -98,96 +95,132 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
-def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.3, safetyAddend: int = 100000) -> int:
-	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations."""
+def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2) -> int:
+	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations.
+
+	Notes
+	-----
+	Subexponential bucketsTotal unified estimator parameters (derived in reference notebook).
+
+	The model is: log(buckets) = intercept + bN*log(n) + bK*log(k) + bD*log(n-k) + g_r*(k/n) + g_r2*(k/n)^2 + g_s*((n-k)/n) + offset(subseries)
+	Subseries key: f"{oeisID}_kOdd={int(kIsOdd)}_dOdd={int(nLess_kIsOdd)}" with a reference subseries offset of zero.
+	These coefficients intentionally remain in-source (SSOT) to avoid runtime JSON parsing overhead and to support reproducibility.
+	"""
+	class ImaKey(NamedTuple):
+		"""keys for dictionaries."""
+
+		oeisID: str
+		kIsOdd: bool
+		nLess_kIsOdd: bool
+
+	dictionaryExponentialCoefficients: dict[ImaKey, float] = {
+		(ImaKey(oeisID='', kIsOdd=False, nLess_kIsOdd=True)): 0.834,
+		(ImaKey(oeisID='', kIsOdd=False, nLess_kIsOdd=False)): 1.5803,
+		(ImaKey(oeisID='', kIsOdd=True, nLess_kIsOdd=True)): 1.556,
+		(ImaKey(oeisID='', kIsOdd=True, nLess_kIsOdd=False)): 1.8047,
+	}
+
+	logarithmicOffsets: dict[ImaKey, float] ={
+		(ImaKey('A000682', kIsOdd=False, nLess_kIsOdd=False)): 0.0,
+		(ImaKey('A000682', kIsOdd=False, nLess_kIsOdd=True)): -0.07302547148212568,
+		(ImaKey('A000682', kIsOdd=True, nLess_kIsOdd=False)): -0.00595307513938792,
+		(ImaKey('A000682', kIsOdd=True, nLess_kIsOdd=True)): -0.012201222865243722,
+		(ImaKey('A005316', kIsOdd=False, nLess_kIsOdd=False)): -0.6392728422078733,
+		(ImaKey('A005316', kIsOdd=False, nLess_kIsOdd=True)): -0.6904925299923548,
+		(ImaKey('A005316', kIsOdd=True, nLess_kIsOdd=False)): 0.0,
+		(ImaKey('A005316', kIsOdd=True, nLess_kIsOdd=True)): 0.0,
+	}
+
+	logarithmicParameters: dict[str, float] = {
+		'intercept': -166.1750299793178,
+		'log(n)': 1259.0051001675547,
+		'log(k)': -396.4306071056408,
+		'log(nLess_k)': -854.3309503739766,
+		'k/n': 716.530410654819,
+		'(k/n)^2': -2527.035113444166,
+		'normalized k': -882.7054406339189,
+	}
+
+	bucketsTotalMaximumBy_kOfMatrix: dict[int, int] = {1:3, 2:12, 3:40, 4:125, 5:392, 6:1254, 7:4087, 8:13623, 9:46181
+		, 10:159137, 11:555469, 12:1961369, 13:6991893, 14:25134208}
+
 	xCommon = 1.57
 
 	nLess_k: int = state.n - state.kOfMatrix
 	kIsOdd: bool = bool(state.kOfMatrix & 1)
-	kIsEven: bool = not kIsOdd
 	nLess_kIsOdd: bool = bool(nLess_k & 1)
-	nLess_kIsEven: bool = not nLess_kIsOdd
-
-	length: int = -73
-	bucketsEstimated: float = 0
+	kIsEven: bool = not kIsOdd
 	bucketsTotal: int = -8
 
+	"""NOTE temporary notes
+	I have a fault in my thinking. bucketsTotal increases as k decreases until ~0.4k, then bucketsTotal decreases rapidly to 1. I
+	have ignored the decreasing side. In the formulas for estimation, I didn't differentiate between increasing and decreasing.
+	So, I probably need to refine the formulas. I guess I need to add checks to the if/else monster, too.
+
+	While buckets is increasing:
+	3 types of estimates:
+	1. Exponential growth.
+	2. Logarithmic growth.
+	3. Hard ceiling.
+
+	"""
+
 	# If I know bucketsTotal is maxed out.
-	if (state.kOfMatrix in bucketsTotalMaximumBy_kOfMatrix) and (state.kOfMatrix <= ((state.n - 1 - (state.kOfMatrix % 2)) // 3)):
-		bucketsTotal = bucketsTotalMaximumBy_kOfMatrix[state.kOfMatrix]
-	# If I already know bucketsTotal.
-	elif (state.oeisID == 'A005316') and (state.kOfMatrix > nLess_k) and kIsOdd and (nLess_k in bucketsIf_k_ODD_by_nLess_k):
-		bucketsTotal = bucketsIf_k_ODD_by_nLess_k[nLess_k]
-	# If I already know bucketsTotal.
-	elif (state.oeisID == 'A005316') and (state.kOfMatrix > nLess_k) and kIsEven and (nLess_k in bucketsIf_k_EVEN_by_nLess_k):
-		bucketsTotal = bucketsIf_k_EVEN_by_nLess_k[nLess_k]
-	# If I can estimate bucketsTotal during exponential growth with a formula.
-	elif (state.oeisID in ['A000682', 'A005316']) and (state.kOfMatrix > nLess_k):
-		xInstant: int = math.ceil(nLess_k / 2)
-		A000682adjustStartingCurveLocations: float = 0.25
-		if kIsEven and nLess_kIsOdd:
-			startingConditionsCoefficient = 0.834
-		elif kIsEven and nLess_kIsEven:
-			startingConditionsCoefficient = 1.5803
-		elif kIsOdd and nLess_kIsOdd:
-			startingConditionsCoefficient = 1.556
-			A000682adjustStartingCurveLocations = 0.0
-		elif kIsOdd and nLess_kIsEven:
-			startingConditionsCoefficient = 1.8047
+	if state.kOfMatrix <= ((state.n - 1 - (state.kOfMatrix % 2)) // 3):
+		if (state.kOfMatrix in bucketsTotalMaximumBy_kOfMatrix):
+			bucketsTotal = bucketsTotalMaximumBy_kOfMatrix[state.kOfMatrix]
 		else:
-			message = "I shouldn't be here."
-			raise SystemError(message)
-		if state.oeisID == 'A000682': # NOTE Net effect is between `*= n` and `*= n * 2.2` if n=46.
-			startingConditionsCoefficient *= state.n * (((state.n // 2) + 2) ** A000682adjustStartingCurveLocations)
-		bucketsTotal = int(startingConditionsCoefficient * math.exp(xCommon * xInstant))
-# NOTE elif (state.oeisID == 'A000682') and (state.kOfMatrix < ((state.n - (state.n % 3)) // 3)):
-# NOTE elif (state.oeisID == 'A005316') and (state.kOfMatrix < ((state.n - (state.n % 3)) // 3)):
-# But the shockingly simple unification of the exponential growth estimates suggests I'll be able to unify the sub-exponential
-# growth estimates too.
+			c = 0.95037
+			r = 3.3591258254
+			if kIsOdd:
+				c = 0.92444
+				r = 3.35776
+
+			bucketsTotal = int(c * r**state.kOfMatrix * safetyMultiplicand)
+
+	# Exponential growth.
+	elif state.kOfMatrix > nLess_k:
+		# If I already know bucketsTotal.
+		if (state.oeisID == 'A005316') and kIsOdd and (nLess_k in bucketsIf_k_ODD_by_nLess_k):
+			bucketsTotal = bucketsIf_k_ODD_by_nLess_k[nLess_k]
+		# If I already know bucketsTotal.
+		elif (state.oeisID == 'A005316') and kIsEven and (nLess_k in bucketsIf_k_EVEN_by_nLess_k):
+			bucketsTotal = bucketsIf_k_EVEN_by_nLess_k[nLess_k]
+		# If I can estimate bucketsTotal during exponential growth.
+		elif state.kOfMatrix > nLess_k:
+			xInstant: int = math.ceil(nLess_k / 2)
+			A000682adjustStartingCurveLocations: float = 0.25
+			startingConditionsCoefficient: float = dictionaryExponentialCoefficients[ImaKey('', kIsOdd, nLess_kIsOdd)]
+			if kIsOdd and nLess_kIsOdd:
+				A000682adjustStartingCurveLocations = 0.0
+			if state.oeisID == 'A000682': # NOTE Net effect is between `*= n` and `*= n * 2.2` if n=46.
+				startingConditionsCoefficient *= state.n * (((state.n // 2) + 2) ** A000682adjustStartingCurveLocations)
+			bucketsTotal = int(startingConditionsCoefficient * math.exp(xCommon * xInstant))
+
 	# If `kOfMatrix` is low, use maximum bucketsTotal. 1. Can't underestimate. 2. Skip computation that can underestimate. 3. The
 	# potential difference in memory use is relatively small.
 	elif state.kOfMatrix <= max(bucketsTotalMaximumBy_kOfMatrix.keys()):
 		bucketsTotal = bucketsTotalMaximumBy_kOfMatrix[state.kOfMatrix]
-	else:
-		bucketsEstimated = predict_less_than_max(state)
-	if bucketsEstimated:
-		length = int(bucketsEstimated * safetyMultiplicand) + safetyAddend + 1
-	else:
-		length = bucketsTotal
-	return length
 
-# NOTE replace this old estimate.
-def predict_less_than_max(state: MatrixMeandersState) -> float:
-	"""Predict."""
-	n = float(state.n)
-	b = max(0.0, min(float(state.kOfMatrix-1), n))
-	x = b / n
-	x1 = x
-	x2 = x**2
-	x3 = x**3
-	x4 = x**4
-	vals: list[float] = []
-	vals.append(n)  # n
-	vals.append(n**2)  # n2
-	vals.append(x1)  # x1
-	vals.append(x2)  # x2
-	vals.append(x3)  # x3
-	vals.append(x4)  # x4
-	vals.append(n * x1)  # nx1
-	vals.append(n * x2)  # nx2
-	vals.append(n * x3)  # nx3
-	z_hat = -24.817496909
-	z_hat += (-0.242059151721) * vals[0]
-	z_hat += (-2.663008305e-06) * vals[1]
-	z_hat += (183.309622727) * vals[2]
-	z_hat += (-522.471797116) * vals[3]
-	z_hat += (679.612786304) * vals[4]
-	z_hat += (-330.496162948) * vals[5]
-	z_hat += (4.44033168706) * vals[6]
-	z_hat += (-8.61595855772) * vals[7]
-	z_hat += (4.75288013279) * vals[8]
-	y_hat = exp(z_hat) - 1.0
-	return max(y_hat, 0.0)
+	# Logarithmic growth, power-law + ratio curvature + subseries offset
+	elif state.kOfMatrix > ((state.n - (state.n % 3)) // 3):  # noqa: ERA001
+		xPower: float = (0
+			+ logarithmicParameters['intercept']
+			+ logarithmicParameters['log(n)'] * log(state.n)
+			+ logarithmicParameters['log(k)'] * log(state.kOfMatrix)
+			+ logarithmicParameters['log(nLess_k)'] * log(nLess_k)
+			+ logarithmicParameters['k/n'] * (state.kOfMatrix / state.n)
+			+ logarithmicParameters['(k/n)^2'] * (state.kOfMatrix / state.n)**2
+			+ logarithmicParameters['normalized k'] * nLess_k / state.n
+			+ logarithmicOffsets[ImaKey(state.oeisID, kIsOdd, nLess_kIsOdd)]
+		)
+
+		bucketsTotal = int(exp(xPower * safetyMultiplicand))
+
+	else:
+		message = "I shouldn't be here."
+		raise SystemError(message)
+	return bucketsTotal
 
 def outfitDictionaryCurveGroups(state: MatrixMeandersState) -> dict[tuple[int, int], int]:
 	"""Outfit `dictionaryCurveGroups` so it may manage the computations for one iteration of the transfer matrix.
@@ -339,24 +372,9 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 # ruff: noqa: B023
 
-		def recordCurveLocations() -> None:
+		def aggregateCurveLocations() -> None:
 			nonlocal dataframeAnalyzed
-
-			indexStopAnalyzed: int = state.indexStartAnalyzed + int((dataframeCurveLocations['analyzed'] > 0).sum()) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
-
-			if indexStopAnalyzed > state.indexStartAnalyzed:
-				if len(dataframeAnalyzed.index) < indexStopAnalyzed:
-					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
-					warn(f"Lengthened `dataframeAnalyzed` to {indexStopAnalyzed=}; n={state.n}, {state.kOfMatrix=}.", stacklevel=2)
-
-				dataframeAnalyzed.loc[state.indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
-					dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']
-								].to_numpy(dtype=state.datatypeCurveLocations, copy=False)
-				)
-
-				state.indexStartAnalyzed = indexStopAnalyzed
-
-			del indexStopAnalyzed
+			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
 
 		def analyzeCurveLocationsAligned() -> None:
 			"""Compute `curveLocations` from `groupAlpha` and `groupZulu` if at least one is an even number.
@@ -573,6 +591,25 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
 
+		def recordCurveLocations() -> None:
+			nonlocal dataframeAnalyzed
+
+			indexStopAnalyzed: int = state.indexStartAnalyzed + int((dataframeCurveLocations['analyzed'] > 0).sum()) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+
+			if indexStopAnalyzed > state.indexStartAnalyzed:
+				if len(dataframeAnalyzed.index) < indexStopAnalyzed:
+					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
+					warn(f"Lengthened `dataframeAnalyzed` to {indexStopAnalyzed=}; n={state.n}, {state.kOfMatrix=}.", stacklevel=2)
+
+				dataframeAnalyzed.loc[state.indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
+					dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']
+								].to_numpy(dtype=state.datatypeCurveLocations, copy=False)
+				)
+
+				state.indexStartAnalyzed = indexStopAnalyzed
+
+			del indexStopAnalyzed
+
 		dataframeCurveLocations = pandas.DataFrame({
 			'curveLocations': pandas.Series(name='curveLocations', data=dataframeAnalyzed['analyzed'], copy=True, dtype=state.datatypeCurveLocations)
 			, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=state.datatypeCurveLocations)
@@ -610,7 +647,8 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		del dataframeCurveLocations
 		goByeBye()
 
-		dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
+		aggregateCurveLocations()
+
 		if state.n >= 45:  # for data collection
 			print(state.n, state.kOfMatrix+1, state.indexStartAnalyzed, sep=',')  # noqa: T201
 
