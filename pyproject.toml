@@ -150,6 +150,7 @@ optional-dependencies = { development = [
 ], pandas = [
   "pandas",
   "pyarrow",
+  "pyarrow-stubs",
 ], testing = [
   "numba",
   "pandas",

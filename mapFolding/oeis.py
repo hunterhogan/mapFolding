@@ -418,9 +418,10 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 			message = f"OEIS sequence {oeisID} is not defined at {n = }."
 			raise ArithmeticError(message)
 		foldsTotal: int = dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]
-		return foldsTotal
+	else:
+		foldsTotal = countFolds(oeisID=oeisID, oeis_n=n)
 
-	return countFolds(mapShape, oeisID=oeisID)
+	return foldsTotal
 
 def OEIS_for_n() -> None:
 	"""Command-line interface for calculating OEIS sequence values.

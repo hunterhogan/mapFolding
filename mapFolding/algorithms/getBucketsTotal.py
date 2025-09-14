@@ -60,10 +60,16 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2)
 	So, I probably need to refine the formulas. I guess I need to add checks to the if/else monster, too.
 
 	While buckets is increasing:
-	3 types of estimates:
-	1. Exponential growth.
-	2. Logarithmic growth.
-	3. Hard ceiling.
+		3 types of estimates:
+			1. Exponential growth.
+			2. Logarithmic growth.
+			3. Hard ceiling.
+	While buckets is decreasing:
+		1. Hard ceiling, same as increasing side.
+		2. ???
+		3. buckets = 1.
+
+	The formula for exponential growth _never_ underestimates. I haven't measured by how much it overestimates.
 
 	"""
 

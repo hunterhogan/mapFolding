@@ -34,12 +34,10 @@ flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 def outfitDictionaryCurveGroups(state: MatrixMeandersState) -> dict[tuple[int, int], int]:
 	"""Outfit `dictionaryCurveGroups` so it may manage the computations for one iteration of the transfer matrix.
 
-	`dictionaryCurveGroups` holds the input data, and `dictionaryCurveLocations` aggregates the output data as it is computed.
-
 	Parameters
 	----------
-	dictionaryCurveLocations : dict[int, int]
-		A dictionary of `curveLocations` to `distinctCrossings`.
+	state : MatrixMeandersState
+		The current state of the computation, including `dictionaryCurveLocations`.
 
 	Returns
 	-------
@@ -180,14 +178,10 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		and (int(dataframeAnalyzed['distinctCrossings'].max()).bit_length() <= raiseIfNone(state.bitWidthDistinctCrossingsMaximum))):
 
 		def aggregateCurveLocations() -> pandas.DataFrame:
-			pathFilename = pathRoot / f"n{state.n:02}k{state.kOfMatrix:02}.csv"
+			pathFilename = pathRoot / f"n{state.n:02}k{state.kOfMatrix:02}.hdf5"
 
-			dataframeAnalyzed = pandas.read_csv(pathFilename
-						, header=None
-						, names=['analyzed', 'distinctCrossings']
-						, dtype={'analyzed' : state.datatypeCurveLocations, 'distinctCrossings': state.datatypeDistinctCrossings}
-						, engine='pyarrow'
-						, compression=None
+			dataframeAnalyzed = pandas.read_hdf(pathFilename
+						, key=state.oeisID
 					)
 
 			pathFilename.unlink()
@@ -338,11 +332,6 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 			curveLocations = ((groupAlpha | (groupZulu << 1)) << 2) | 3
 			```
 
-			Parameters
-			----------
-			MAXIMUMcurveLocations : int
-				Maximum value of `curveLocations` for the current iteration of `bridges`.
-
 			Notes
 			-----
 			Using `+= 3` instead of `|= 3` is valid in this specific case. Left shift by two means the last bits are '0b00'. '0 + 3'
@@ -412,9 +401,32 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
 
 		def recordCurveLocations() -> None:
-			pathFilename = pathRoot / f"n{state.n:02}k{state.kOfMatrix:02}.csv"
+			"""TODO Ideas for intermediary on disk.
+
+			Characteristics
+				Sorted/unsorted
+				Compressed/uncompressed: is it faster to read/write less data, because it is compressed?
+				Append or not
+				One file or many files
+				File format
+				Automatically do everything in memory if the data is small enough
+
+			Idea: unique now, sum later
+			Similar to /apps/mapFolding/mapFolding/reference/meandersDumpingGround/A005316write2disk.py, write to disk in this format:
+				curveLocations unique: list of distinctCrossings
+			When reading from disk, sum the lists of distinctCrossings for each curveLocations.
+
+			Idea: sort now for efficient groupby/sum later.
+			Write multiple sorted files.
+			Use a magical function to read the sorted files at the same time, creating unique curveLocations with summed distinctCrossings.
+			Which would eliminate `dataframeAnalyzed` because I would read directly into `dataframeCurveLocations`.
+
+			Idea: don't reinvent the wheel.
+			Learn by asking the right question in the right place.
+			"""
+			pathFilename = pathRoot / f"n{state.n:02}k{state.kOfMatrix:02}.hdf5"
 			dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']
-								].to_csv(pathFilename, header=False, index=False, mode='a', compression=None)
+								].to_hdf(pathFilename, key=state.oeisID, mode='a', complevel=None, append=True, format='table', index=False, data_columns=['analyzed'])
 
 		dataframeCurveLocations = pandas.DataFrame({
 			'curveLocations': pandas.Series(name='curveLocations', data=dataframeAnalyzed['analyzed'], copy=True, dtype=state.datatypeCurveLocations)
