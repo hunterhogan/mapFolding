@@ -108,6 +108,7 @@ OEISidMeandersManuallySet: dict[str, MetadataOEISidMeandersManuallySet] = {
 	'A060206': {'valuesTestValidation': [*range(3, 9)]},
 	'A077460': {'valuesTestValidation': [*range(3, 8)]},
 	'A078591': {'valuesTestValidation': [*range(3, 10)]},
+	'A178961': {'valuesTestValidation': [*range(3, 11)]},
 	'A223094': {'valuesTestValidation': [*range(3, 11)]},
 	'A259702': {'valuesTestValidation': [*range(3, 13)]},
 	'A301620': {'valuesTestValidation': [*range(3, 11)]},

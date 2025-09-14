@@ -1,9 +1,11 @@
 """Unified interface for map folding computation."""
 
 from collections.abc import Sequence
+from functools import cache
 from mapFolding import (
-	getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly, setProcessorLimit,
-	validateListDimensions)
+	getPathFilenameFoldsTotal, MatrixMeandersState, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly,
+	setProcessorLimit, validateListDimensions)
+from mapFolding.algorithms.matrixMeanders import doTheNeedful
 from os import PathLike
 from pathlib import PurePath
 import contextlib
@@ -317,8 +319,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 		from mapFolding.syntheticModules.countParallelNumba import doTheNeedful  # noqa: PLC0415
 
-		# `listStatesParallel` exists in case you want to research the parallel computation.
-		foldsTotal, listStatesParallel = doTheNeedful(parallelMapFoldingState, concurrencyLimit) # pyright: ignore[reportUnusedVariable]
+		# `listStatesParallel` exists so you can research the parallel computation.
+		foldsTotal, listStatesParallel = doTheNeedful(parallelMapFoldingState, concurrencyLimit) # pyright: ignore[reportUnusedVariable]  # noqa: RUF059
 
 	else:
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
@@ -334,3 +336,43 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
 
 	return foldsTotal
+
+@cache
+def A000682(n: int) -> int:
+	"""Compute A000682(n)."""
+	oeisID = 'A000682'
+
+	kOfMatrix: int = n - 1
+
+	if n & 0b1:
+		curveLocations: int = 5
+	else:
+		curveLocations = 1
+	listCurveLocations: list[int] = [(curveLocations << 1) | curveLocations]
+
+	MAXIMUMcurveLocations: int = 1 << (2 * kOfMatrix + 4)
+	while listCurveLocations[-1] < MAXIMUMcurveLocations:
+		curveLocations = (curveLocations << 4) | 0b101 # == curveLocations * 2**4 + 5
+		listCurveLocations.append((curveLocations << 1) | curveLocations)
+
+	dictionaryCurveLocations=dict.fromkeys(listCurveLocations, 1)
+
+	state = MatrixMeandersState(n, oeisID, kOfMatrix, dictionaryCurveLocations)
+
+	return doTheNeedful(state)
+
+@cache
+def A005316(n: int) -> int:
+	"""Compute A005316(n)."""
+	oeisID = 'A005316'
+
+	kOfMatrix: int = n - 1
+
+	if n & 0b1:
+		dictionaryCurveLocations: dict[int, int] = {15: 1}
+	else:
+		dictionaryCurveLocations = {22: 1}
+
+	state = MatrixMeandersState(n, oeisID, kOfMatrix, dictionaryCurveLocations)
+
+	return doTheNeedful(state)

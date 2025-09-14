@@ -57,8 +57,7 @@ from mapFolding._theTypes import (
 	NumPyElephino as NumPyElephino,
 	NumPyFoldsTotal as NumPyFoldsTotal,
 	NumPyIntegerType as NumPyIntegerType,
-	NumPyLeavesTotal as NumPyLeavesTotal,
-)
+	NumPyLeavesTotal as NumPyLeavesTotal)
 
 from mapFolding._theSSOT import packageSettings as packageSettings
 
@@ -68,18 +67,18 @@ from mapFolding.beDRY import (
 	getTaskDivisions as getTaskDivisions,
 	makeDataContainer as makeDataContainer,
 	setProcessorLimit as setProcessorLimit,
-	validateListDimensions as validateListDimensions,
-)
+	validateListDimensions as validateListDimensions)
 
-from mapFolding.dataBaskets import MapFoldingState as MapFoldingState
+from mapFolding.dataBaskets import (
+    MapFoldingState as MapFoldingState,
+    MatrixMeandersState as MatrixMeandersState)
 
 from mapFolding.filesystemToolkit import (
 	getFilenameFoldsTotal as getFilenameFoldsTotal,
 	getPathFilenameFoldsTotal as getPathFilenameFoldsTotal,
 	getPathRootJobDEFAULT as getPathRootJobDEFAULT,
 	saveFoldsTotal as saveFoldsTotal,
-	saveFoldsTotalFAILearly as saveFoldsTotalFAILearly,
-)
+	saveFoldsTotalFAILearly as saveFoldsTotalFAILearly)
 
 from mapFolding.basecamp import countFolds as countFolds
 
@@ -89,5 +88,4 @@ from mapFolding.oeis import (
 	getFoldsTotalKnown as getFoldsTotalKnown,
 	getOEISids as getOEISids,
 	OEIS_for_n as OEIS_for_n,
-	oeisIDfor_n as oeisIDfor_n,
-)
+	oeisIDfor_n as oeisIDfor_n)

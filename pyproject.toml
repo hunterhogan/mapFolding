@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.15.4"
+version = "0.16.0"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations and code optimization."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -19,6 +19,7 @@ keywords = [
   "A005315",
   "A005316",
   "A007822",
+  "A178961",
   "A195646",
   "A223094",
   "A259702",
@@ -148,9 +149,11 @@ optional-dependencies = { development = [
   "numba_progress",
 ], pandas = [
   "pandas",
+  "pyarrow",
 ], testing = [
   "numba",
   "pandas",
+  "pyarrow",
   "pytest-cov",
   "pytest-env",
   "pytest-xdist",

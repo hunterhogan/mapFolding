@@ -24,6 +24,7 @@ from mapFolding import (
 	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
 	getConnectionGraph, getLeavesTotal, makeDataContainer)
 import dataclasses
+import numpy
 
 @dataclasses.dataclass
 class MapFoldingState:
@@ -268,3 +269,73 @@ class LeafSequenceState(MapFoldingState):
 		if self.leafSequence is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
 			self.leafSequence[self.groupsOfFolds] = self.leaf1ndex
+
+@dataclasses.dataclass
+class MatrixMeandersState:
+	"""State."""
+
+	n: int
+	oeisID: str
+	kOfMatrix: int
+	dictionaryCurveLocations: dict[int, int]
+
+	datatypeCurveLocations: type = numpy.uint64
+	datatypeDistinctCrossings: type = numpy.uint64
+
+	bitWidthCurveLocationsMaximum: int | None = None
+	bitWidthDistinctCrossingsMaximum: int | None = None
+
+	bitWidth: int = 0
+	indexStartAnalyzed: int = 0
+
+	def __post_init__(self) -> None:
+		"""Post init."""
+		if self.bitWidthCurveLocationsMaximum is None:
+			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeCurveLocations).itemsize * 8 # bits
+
+			_offsetNecessary: int = 3 # For example, `groupZulu << 3`.
+			_offsetSafety: int = 1 # I don't have mathematical proof of how many extra bits I need.
+			_offset: int = _offsetNecessary + _offsetSafety
+
+			self.bitWidthCurveLocationsMaximum = _bitWidthOfFixedSizeInteger - _offset
+
+			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetSafety, _offset
+
+		if self.bitWidthDistinctCrossingsMaximum is None:
+			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeDistinctCrossings).itemsize * 8 # bits
+
+			_offsetNecessary: int = 0 # I don't know of any.
+			_offsetEstimation: int = 3 # See reference directory.
+			_offsetSafety: int = 1
+			_offset: int = _offsetNecessary + _offsetEstimation + _offsetSafety
+
+			self.bitWidthDistinctCrossingsMaximum = _bitWidthOfFixedSizeInteger - _offset
+
+			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetEstimation, _offsetSafety, _offset
+
+	@property
+	def MAXIMUMcurveLocations(self) -> int:
+		"""Compute the maximum value of `curveLocations` for the current iteration of the transfer matrix."""
+		return 1 << (2 * self.kOfMatrix + 4)
+
+	@property
+	def locatorGroupAlpha(self) -> int:
+		"""Compute an odd-parity bit-mask with `bitWidth` bits.
+
+		Notes
+		-----
+		In binary, `locatorGroupAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
+		digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
+		from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
+		counting this way, `locatorGroupAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
+		therefore, tend to call `locatorGroupAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
+		mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
+		odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
+
+		"""
+		return sum(1 << one for one in range(0, self.bitWidth, 2))
+
+	@property
+	def locatorGroupZulu(self) -> int:
+		"""Compute an even-parity bit-mask with `bitWidth` bits."""
+		return sum(1 << one for one in range(1, self.bitWidth, 2))
