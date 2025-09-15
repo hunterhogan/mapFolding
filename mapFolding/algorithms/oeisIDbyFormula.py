@@ -13,7 +13,7 @@ def A000136(n: int) -> int:
     """
     Compute A000136(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A000136 is: "Number of ways of folding a strip of n labeled stamps."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000136 is: "Number of ways of folding a strip of n labeled stamps."
 
     The domain of A000136 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 46.
@@ -39,7 +39,7 @@ def A000560(n: int) -> int:
     """
     Compute A000560(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A000560 is: "Number of ways of folding a strip of n labeled stamps."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000560 is: "Number of ways of folding a strip of n labeled stamps."
 
     The domain of A000560 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 45.
@@ -65,7 +65,7 @@ def A001010(n: int) -> int:
     """
     Compute A001010(n) as a function of A000682 or A007822.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A001010 is: "Number of symmetric foldings of a strip of n stamps."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001010 is: "Number of symmetric foldings of a strip of n stamps."
 
     The domain of A001010 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 53.
@@ -97,7 +97,7 @@ def A001011(n: int) -> int:
     """
     Compute A001011(n) as a function of A000136 and A001010.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A001011 is: "Number of ways to fold a strip of n blank stamps."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001011 is: "Number of ways to fold a strip of n blank stamps."
 
     The domain of A001011 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 46.
@@ -128,7 +128,7 @@ def A005315(n: int) -> int:
     """
     Compute A005315(n) as a function of A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A005315 is: "Closed meandric numbers (or meanders): number of ways a loop can cross a road 2n times."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005315 is: "Closed meandric numbers (or meanders): number of ways a loop can cross a road 2n times."
 
     The domain of A005315 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 29.
@@ -158,7 +158,7 @@ def A060206(n: int) -> int:
     """
     Compute A060206(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A060206 is: "Number of rotationally symmetric closed meanders of length 4n+2."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A060206 is: "Number of rotationally symmetric closed meanders of length 4n+2."
 
     The domain of A060206 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 21.
@@ -184,7 +184,7 @@ def A077460(n: int) -> int:
     """
     Compute A077460(n) as a function of A005315, A005316, and A060206.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A077460 is: "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077460 is: "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times."
 
     The domain of A077460 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 21.
@@ -216,7 +216,7 @@ def A078591(n: int) -> int:
     """
     Compute A078591(n) as a function of A005315.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A078591 is: "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078591 is: "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times."
 
     The domain of A078591 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 29.
@@ -242,7 +242,7 @@ def A178961(n: int) -> int:
     """
     Compute A178961(n) as a function of A001010.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A178961 is: "Partial sums of A001010."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A178961 is: "Partial sums of A001010."
 
     The domain of A178961 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 53.
@@ -272,7 +272,7 @@ def A223094(n: int) -> int:
     """
     Compute A223094(n) as a function of A000136 and A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A223094 is: "Number of foldings of n labeled stamps in which leaf n is inwards."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223094 is: "Number of foldings of n labeled stamps in which leaf n is inwards."
 
     The domain of A223094 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 44.
@@ -298,7 +298,7 @@ def A259702(n: int) -> int:
     """
     Compute A259702(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A259702 is: "Row sums of A259701 except first column."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259702 is: "Row sums of A259701 except first column."
 
     The domain of A259702 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 33.
@@ -324,7 +324,7 @@ def A301620(n: int) -> int:
     """
     Compute A301620(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says A301620 is: "a(n) is the total number of top arches with exactly one covering arch for semi-meanders with n top arches."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A301620 is: "a(n) is the total number of top arches with exactly one covering arch for semi-meanders with n top arches."
 
     The domain of A301620 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 44.

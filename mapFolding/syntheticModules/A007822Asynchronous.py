@@ -1,5 +1,7 @@
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.syntheticModules.algorithmA007822AsynchronousAnnex import (
+from mapFolding.syntheticModules.A007822AsynchronousAnnex import (
+	()
+	()
 	filterAsymmetricFolds, getAsymmetricFoldsTotal, initializeConcurrencyManager)
 
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
@@ -115,7 +117,7 @@ def count(state: MapFoldingState) -> MapFoldingState:
     while activeLeafGreaterThan0(state):
         if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
             if activeLeafGreaterThanLeavesTotal(state):
-                filterAsymmetricFolds(state)
+                filterAsymmetricFolds(state.leafBelow)
             else:
                 state = initializeVariablesToFindGaps(state)
                 while loopingThroughTheDimensions(state):

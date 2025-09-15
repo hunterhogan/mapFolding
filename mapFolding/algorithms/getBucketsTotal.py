@@ -1,9 +1,16 @@
 """Buckets."""
-from mapFolding.algorithms.matrixMeanders import ImaKey
-from mapFolding.dataBaskets import MatrixMeandersState
+from mapFolding import MatrixMeandersState
 from mapFolding.reference.A005316facts import bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k
 from math import exp, log
+from typing import NamedTuple
 import math
+
+class ImaKey(NamedTuple):
+	"""keys for dictionaries."""
+
+	oeisID: str
+	kIsOdd: bool
+	nLess_kIsOdd: bool
 
 def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2) -> int:
 	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations.

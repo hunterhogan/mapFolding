@@ -1,5 +1,5 @@
 """Make docstrings."""
-from astToolkit import IfThis, Make, NodeChanger, parsePathFilename2astModule
+from astToolkit import Grab, IfThis, Make, NodeChanger, parsePathFilename2astModule, Then
 from astToolkit.transformationTools import makeDictionaryFunctionDef
 from hunterMakesPy import raiseIfNone, writeStringToHere
 from mapFolding import dictionaryOEISMapFolding, dictionaryOEISMeanders, packageSettings
@@ -30,7 +30,7 @@ for oeisID, FunctionDef in dictionaryFunctionDef.items():
     ImaDocstring= 	f"""
     Compute {oeisID}(n) as a function of {functionOf}.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) says {oeisID} is: "{dictionaryOEIS[oeisID]['description']}"
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{dictionaryOEIS[oeisID]['description']}"
 
     The domain of {oeisID} starts at {dictionaryOEIS[oeisID]['offset']}, therefore for values of `n` < {dictionaryOEIS[oeisID]['offset']}, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is {dictionaryOEIS[oeisID]['valueUnknown']}.
@@ -53,14 +53,10 @@ for oeisID, FunctionDef in dictionaryFunctionDef.items():
 
     astExprDocstring = Make.Expr(Make.Constant(ImaDocstring))
 
-    findThis = IfThis.isFunctionDefIdentifier(oeisID)
-    def _doThat(node: ast.FunctionDef) -> ast.AST:
-        node.body[0] = astExprDocstring
-        return node
-
-    # doThat = Grab.bodyAttribute(lambda body: Then.replaceWith(astExprDocstring)((body[0])))  # noqa: ERA001
-
-    NodeChanger(findThis, _doThat).visit(astModule)
+    NodeChanger(
+        findThis = IfThis.isFunctionDefIdentifier(oeisID)
+        , doThat = Grab.bodyAttribute(Grab.index(0, Then.replaceWith(astExprDocstring)))
+    ).visit(astModule)
 
 ast.fix_missing_locations(astModule)
 

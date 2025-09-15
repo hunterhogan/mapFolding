@@ -10,19 +10,11 @@ from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
 from mapFolding import MatrixMeandersState
 from pathlib import Path
-from typing import NamedTuple
 import numpy
 import pandas
 
 pathRoot: Path = Path.cwd() / 'curves'
 pathRoot.mkdir(exist_ok=True, parents=True)
-
-class ImaKey(NamedTuple):
-	"""keys for dictionaries."""
-
-	oeisID: str
-	kIsOdd: bool
-	nLess_kIsOdd: bool
 
 @cache
 def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
@@ -103,13 +95,14 @@ def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 
 	while (state.kOfMatrix > 0
 		and ((max(state.dictionaryCurveLocations.keys()).bit_length() > raiseIfNone(state.bitWidthCurveLocationsMaximum))
-		or (max(state.dictionaryCurveLocations.values()).bit_length() > raiseIfNone(state.bitWidthDistinctCrossingsMaximum)))):
+		or (max(state.dictionaryCurveLocations.values()).bit_length() > raiseIfNone(state.bitWidthDistinctCrossingsMaximum)))
+		):
 
 		state.kOfMatrix -= 1
 
 		dictionaryCurveGroups = outfitDictionaryCurveGroups(state)
 		state.dictionaryCurveLocations.clear()
-		LessThanMaximumTotal: int = 0 # for data collection
+		goByeBye()
 
 		for (groupAlpha, groupZulu), distinctCrossings in dictionaryCurveGroups.items():
 			groupAlphaCurves: bool = groupAlpha > 1
@@ -120,19 +113,16 @@ def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 			# simple
 			if curveLocationAnalysis < state.MAXIMUMcurveLocations:
 				state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
-				LessThanMaximumTotal += 1
 
 			if groupAlphaCurves:
 				curveLocationAnalysis = (groupAlpha >> 2) | (groupZulu << 3) | ((groupAlphaIsEven := 1 - (groupAlpha & 1)) << 1)
 				if curveLocationAnalysis < state.MAXIMUMcurveLocations:
 					state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
-					LessThanMaximumTotal += 1
 
 			if groupZuluHasCurves:
 				curveLocationAnalysis = (groupZulu >> 1) | (groupAlpha << 2) | (groupZuluIsEven := 1 - (groupZulu & 1))
 				if curveLocationAnalysis < state.MAXIMUMcurveLocations:
 					state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
-					LessThanMaximumTotal += 1
 
 			if groupAlphaCurves and groupZuluHasCurves and (groupAlphaIsEven or groupZuluIsEven):
 				# aligned
@@ -144,10 +134,6 @@ def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 				curveLocationAnalysis: int = ((groupZulu >> 2) << 1) | (groupAlpha >> 2)
 				if curveLocationAnalysis < state.MAXIMUMcurveLocations:
 					state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
-					LessThanMaximumTotal += 1
-
-		if state.n >= 45: # for data collection
-			print(state.n, state.kOfMatrix+1, LessThanMaximumTotal, sep=',')  # noqa: T201
 
 	return state
 
@@ -487,12 +473,10 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
 	https://oeis.org/A005316
 	"""
 	while state.kOfMatrix > 0:
-		bitWidthCurveLocations: int = max(state.dictionaryCurveLocations.keys()).bit_length()
-		bitWidthDistinctCrossings: int = max(state.dictionaryCurveLocations.values()).bit_length()
-
 		goByeBye()
 
-		if (bitWidthCurveLocations > raiseIfNone(state.bitWidthCurveLocationsMaximum)) or (bitWidthDistinctCrossings > raiseIfNone(state.bitWidthDistinctCrossingsMaximum)):
+		if ((max(state.dictionaryCurveLocations.keys()).bit_length() > raiseIfNone(state.bitWidthCurveLocationsMaximum))
+			or (max(state.dictionaryCurveLocations.values()).bit_length() > raiseIfNone(state.bitWidthDistinctCrossingsMaximum))):
 			state = countBigInt(state)
 		else:
 			state = countPandas(state)

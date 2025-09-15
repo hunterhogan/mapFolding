@@ -42,10 +42,11 @@ from mapFolding.someAssemblyRequired import (
 	dataclassInstanceIdentifierDEFAULT, DeReConstructField2ast, IfThis, ShatteredDataclass,
 	sourceCallableDispatcherDEFAULT)
 from mapFolding.someAssemblyRequired.A007822rawMaterials import (
-	A007822adjustFoldsTotal, A007822incrementCount, AssignTotal2CountingIdentifier, astExprCall_filterAsymmetricFolds,
-	astExprCall_initializeConcurrencyManager, astModule_initializeConcurrencyManager, FunctionDef_filterAsymmetricFolds,
-	FunctionDef_getAsymmetricFoldsTotal, FunctionDef_initializeConcurrencyManager, globalIdentifiers4Concurrency,
-	identifier_filterAsymmetricFolds, ingredientsFunctionConcurrencyManager)
+	A007822adjustFoldsTotal, A007822incrementCount, AssignTotal2CountingIdentifier,
+	astExprCall_filterAsymmetricFoldsDataclass, astExprCall_filterAsymmetricFoldsLeafBelow,
+	astExprCall_initializeConcurrencyManager, FunctionDef_filterAsymmetricFolds, identifier_filterAsymmetricFolds,
+	identifier_getAsymmetricFoldsTotal, identifier_initializeConcurrencyManager, identifier_processCompletedFutures,
+	identifierCounting)
 from mapFolding.someAssemblyRequired.infoBooth import (
 	algorithmSourceModuleDEFAULT, dataPackingModuleIdentifierDEFAULT, logicalPathInfixDEFAULT,
 	sourceCallableIdentifierDEFAULT, theCountingIdentifierDEFAULT)
@@ -216,7 +217,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, moduleIdentifier: str, c
 
 	NodeChanger(
 		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(dataclassInstanceIdentifierDEFAULT, theCountingIdentifierDEFAULT))
-		, doThat=Then.replaceWith(astExprCall_filterAsymmetricFolds)
+		, doThat=Then.replaceWith(astExprCall_filterAsymmetricFoldsDataclass)
 		).visit(astFunctionDef_count)
 
 	NodeChanger(
@@ -243,37 +244,107 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, moduleIdentifier: str, c
 
 	pathFilename: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
 	pathFilenameAnnex: PurePath = _getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier + 'Annex')
-
-	imports.walkThis(ast.parse("from mapFolding.syntheticModules.algorithmA007822AsynchronousAnnex import (filterAsymmetricFolds, getAsymmetricFoldsTotal, initializeConcurrencyManager)"))
+# TODO no hardcoding
+	imports.walkThis(ast.parse("from mapFolding.syntheticModules.A007822AsynchronousAnnex import (filterAsymmetricFolds, getAsymmetricFoldsTotal, initializeConcurrencyManager)"))
 
 	ingredientsModule = IngredientsModule(epilogue=astModule, imports=imports)
 
 	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
-# ----------------- make Annex ----------------------------------------------------------------------------------------
-	importsAnnex = LedgerOfImports(ast.parse("""from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
-from copy import deepcopy
-from mapFolding.dataBaskets import MapFoldingState
-from queue import Empty, Queue
-from threading import Thread
-"""))
+# ----------------- Ingredients Module Annex ------------------------------------------------------------------------------
+	ingredientsModuleA007822AsynchronousAnnex = IngredientsModule()
 
-	ingredientsFunctionWorker = IngredientsFunction(FunctionDef_filterAsymmetricFolds)
-	ingredientsFunctionWorker.astFunctionDef.name = '_' + identifier_filterAsymmetricFolds
+	ImaString = f"""concurrencyManager = None
+{identifierCounting}Total: int = 0
+processingThread = None
+queueFutures: Queue[ConcurrentFuture[int]] = Queue()
+	"""
+	ingredientsModuleA007822AsynchronousAnnex.appendPrologue(ast.parse(ImaString))
+	ingredientsModuleA007822AsynchronousAnnex.imports.addImportFrom_asStr('concurrent.futures', 'Future', 'ConcurrentFuture')
+	ingredientsModuleA007822AsynchronousAnnex.imports.addImportFrom_asStr('queue', 'Queue')
+	del ImaString
 
-	ingredientsModuleAnnex = IngredientsModule(
-		imports=importsAnnex
-		, prologue=globalIdentifiers4Concurrency
-		, ingredientsFunction=[IngredientsFunction(FunctionDef_initializeConcurrencyManager)
-							, ingredientsFunctionWorker
-							, ingredientsFunctionConcurrencyManager
-							, IngredientsFunction(FunctionDef_getAsymmetricFoldsTotal)
-							]
-	)
+	ImaString = f"""def {identifier_initializeConcurrencyManager}(maxWorkers: int | None = None, {identifierCounting}: int = 0) -> None:
+	global concurrencyManager, queueFutures, {identifierCounting}Total, processingThread
+	concurrencyManager = ProcessPoolExecutor(max_workers=maxWorkers)
+	queueFutures = Queue()
+	{identifierCounting}Total = {identifierCounting}
+	processingThread = Thread(target={identifier_processCompletedFutures})
+	processingThread.start()
+	"""
+	ingredientsModuleA007822AsynchronousAnnex.appendIngredientsFunction(IngredientsFunction(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_initializeConcurrencyManager))
+			, LedgerOfImports(ast.parse("from threading import Thread; from concurrent.futures import ProcessPoolExecutor"))))
+	del ImaString
 
-	ingredientsModuleAnnex.appendPrologue(astModule_initializeConcurrencyManager)
+	ImaString = f"""def {identifier_processCompletedFutures}() -> None:
+	global queueFutures, {identifierCounting}Total
+	while True:
+		try:
+			claimTicket: ConcurrentFuture[int] = queueFutures.get(timeout=1)
+			if claimTicket is None:
+				break
+			{identifierCounting}Total += claimTicket.result()
+		except Empty:
+			continue
+	"""
+	ingredientsModuleA007822AsynchronousAnnex.appendIngredientsFunction(IngredientsFunction(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_processCompletedFutures))
+			, LedgerOfImports(ast.parse("from queue import Empty"))))
+	del ImaString
 
-	write_astModule(ingredientsModuleAnnex, pathFilenameAnnex, packageSettings.identifierPackage)
+	ImaString = f"""def _{identifier_filterAsymmetricFolds}(leafBelow: Array1DLeavesTotal) -> int:
+	{identifierCounting} = 0
+	leafComparison: Array1DLeavesTotal = numpy.zeros_like(leafBelow)
+	leavesTotal = leafBelow.size - 1
+
+	indexLeaf = 0
+	leafConnectee = 0
+	while leafConnectee < leavesTotal + 1:
+		leafNumber = int(leafBelow[indexLeaf])
+		leafComparison[leafConnectee] = (leafNumber - indexLeaf + leavesTotal) % leavesTotal
+		indexLeaf = leafNumber
+		leafConnectee += 1
+
+	indexInMiddle = leavesTotal // 2
+	indexDistance = 0
+	while indexDistance < leavesTotal + 1:
+		ImaSymmetricFold = True
+		leafConnectee = 0
+		while leafConnectee < indexInMiddle:
+			if leafComparison[(indexDistance + leafConnectee) % (leavesTotal + 1)] != leafComparison[(indexDistance + leavesTotal - 1 - leafConnectee) % (leavesTotal + 1)]:
+				ImaSymmetricFold = False
+				break
+			leafConnectee += 1
+		if ImaSymmetricFold:
+			{identifierCounting} += 1
+		indexDistance += 1
+	return {identifierCounting}
+	"""
+	ingredientsModuleA007822AsynchronousAnnex.appendIngredientsFunction(IngredientsFunction(raiseIfNone(extractFunctionDef(ast.parse(ImaString), f'_{identifier_filterAsymmetricFolds}'))
+			, LedgerOfImports(ast.parse("import numpy; from mapFolding import Array1DLeavesTotal"))))
+	del ImaString
+
+	ImaString = f"""
+def {identifier_filterAsymmetricFolds}(leafBelow: Array1DLeavesTotal) -> None:
+	global concurrencyManager, queueFutures
+	queueFutures.put(raiseIfNone(concurrencyManager).submit(_{identifier_filterAsymmetricFolds}, leafBelow.copy()))
+	"""
+	ingredientsModuleA007822AsynchronousAnnex.appendIngredientsFunction(IngredientsFunction(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_filterAsymmetricFolds)),
+		LedgerOfImports(ast.parse("from mapFolding import Array1DLeavesTotal;from hunterMakesPy import raiseIfNone"))))
+	del ImaString
+
+	ImaString = f"""
+def {identifier_getAsymmetricFoldsTotal}() -> int:
+	global concurrencyManager, queueFutures, processingThread
+	raiseIfNone(concurrencyManager).shutdown(wait=True)
+	queueFutures.put(None)
+	raiseIfNone(processingThread).join()
+	return {identifierCounting}Total
+	"""
+	ingredientsModuleA007822AsynchronousAnnex.appendIngredientsFunction(IngredientsFunction(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_getAsymmetricFoldsTotal)),
+			LedgerOfImports(ast.parse("from hunterMakesPy import raiseIfNone"))))
+	del ImaString
+
+	write_astModule(ingredientsModuleA007822AsynchronousAnnex, pathFilenameAnnex, packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -603,7 +674,16 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(Make.Name(dataclassInstanceIdentifier), theCountingIdentifier), Make.Mult(), Make.Constant(2))
 
 	NodeChanger(
-		findThis = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+		findThis = IfThis.isAllOf(
+			IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+			, Be.While.orelseIs(lambda ImaList: ImaList))
+		, doThat = Grab.orelseAttribute(Grab.index(0, Then.insertThisBelow([doubleTheCount])))
+	).visit(ingredientsFunction.astFunctionDef)
+
+	NodeChanger(
+		findThis = IfThis.isAllOf(
+			IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+			, Be.While.orelseIs(lambda ImaList: not ImaList))
 		, doThat = Grab.orelseAttribute(Then.replaceWith([doubleTheCount]))
 	).visit(ingredientsFunction.astFunctionDef)
 
@@ -692,7 +772,7 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom, moduleIdentifier: ident
 
 	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
-def numbaOnTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def numbaOnTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate Numba-accelerated Theorem 2 implementation with dataclass decomposition.
 
 	(AI generated docstring)
@@ -739,6 +819,13 @@ def numbaOnTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdenti
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclass)
+
+	if sourceCallableDispatcher is not None:
+		NodeChanger(
+			findThis=IfThis.isCallIdentifier(sourceCallableDispatcher)
+			, doThat=Then.replaceWith(astExprCall_filterAsymmetricFoldsLeafBelow)
+			).visit(ingredientsFunction.astFunctionDef)
+
 	ingredientsFunction = removeUnusedParameters(ingredientsFunction)
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
@@ -802,7 +889,7 @@ def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	return pathFilename
 
-if __name__ == '__main__':
+def _makeMapFoldingModules() -> None:
 	astModule = _getModule(logicalPathInfix='algorithms')
 	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
 
@@ -824,7 +911,7 @@ if __name__ == '__main__':
 	astImportFrom: ast.ImportFrom = Make.ImportFrom(_getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2Numba'), list_alias=[Make.alias(sourceCallableIdentifierDEFAULT)])
 	makeUnRePackDataclass(astImportFrom)
 
-# A007822 -----------------------------------------------------------
+def _makeA007822Modules() -> None:
 	astModule = _getModule(logicalPathInfix='algorithms')
 	pathFilename = addSymmetryCheck(astModule, 'algorithmA007822', None, logicalPathInfixDEFAULT, None)
 
@@ -851,9 +938,25 @@ if __name__ == '__main__':
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = numbaOnTheorem2(astModule, 'theorem2A007822Numba', None, logicalPathInfixDEFAULT, None)
 
-	astImportFrom: ast.ImportFrom = Make.ImportFrom(_getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2A007822Numba'), list_alias=[Make.alias(sourceCallableIdentifierDEFAULT)])
-	makeUnRePackDataclass(astImportFrom, 'dataPackingA007822')
+	# astImportFrom: ast.ImportFrom = Make.ImportFrom(_getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2A007822Numba'), list_alias=[Make.alias(sourceCallableIdentifierDEFAULT)])  # noqa: ERA001
+	# makeUnRePackDataclass(astImportFrom, 'dataPackingA007822')  # noqa: ERA001
+
+def _makeA007822AsynchronousModules() -> None:
 
 	astModule = _getModule(logicalPathInfix='algorithms')
-	pathFilename = addSymmetryCheckAsynchronous(astModule, 'algorithmA007822Asynchronous', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
+	pathFilename = addSymmetryCheckAsynchronous(astModule, 'A007822Asynchronous', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
+
+	astModule = _getModule(moduleIdentifier='A007822Asynchronous')
+	pathFilename = makeTheorem2(astModule, 'A007822AsynchronousTheorem2', None, logicalPathInfixDEFAULT, None)
+
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = trimTheorem2(astModule, 'A007822AsynchronousTrimmed', None, logicalPathInfixDEFAULT, None)
+
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = numbaOnTheorem2(astModule, 'A007822AsynchronousNumba', None, logicalPathInfixDEFAULT, identifier_filterAsymmetricFolds)
+
+if __name__ == '__main__':
+	# _makeMapFoldingModules()
+	# _makeA007822Modules()
+	_makeA007822AsynchronousModules()
 

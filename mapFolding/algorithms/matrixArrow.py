@@ -8,17 +8,111 @@ Notes
 from functools import cache
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
-from mapFolding import MatrixMeandersState
 from mapFolding.algorithms.getBucketsTotal import getBucketsTotal
+from pyarrow.compute import bit_wise_and, bit_wise_or, shift_left  # pyright: ignore[reportUnknownVariableType]
+from typing import cast
 from warnings import warn
+import dataclasses
 import numpy
 import pyarrow
 import pyarrow.compute as pyarrowCompute
 
-datatypeCurveLocations = pyarrow.uint64()
-datatypeDistinctCrossings = pyarrow.uint64()
-bitWidthCurveLocationsMaximum: int = 60
-bitWidthDistinctCrossingsMaximum: int = 60
+@dataclasses.dataclass
+class MatrixArrowState:
+	"""State for matrix meanders pyarrow."""
+
+	n: int
+	oeisID: str
+	kOfMatrix: int
+	dictionaryCurveLocations: dict[int, int]
+
+	datatypeCurveLocations: pyarrow.DataType = dataclasses.field(default_factory=pyarrow.uint64)
+	datatypeDistinctCrossings: pyarrow.DataType = dataclasses.field(default_factory=pyarrow.uint64)
+
+	bitWidthCurveLocationsMaximum: int | None = None
+	bitWidthDistinctCrossingsMaximum: int | None = None
+
+	bitWidth: int = 0
+	indexStartAnalyzed: int = 0
+
+	def __post_init__(self) -> None:
+		"""Post init."""
+		if self.bitWidthCurveLocationsMaximum is None:
+			_bitWidthOfFixedSizeInteger = self.datatypeCurveLocations.bit_width
+
+			_offsetNecessary: int = 3 # For example, `groupZulu << 3`.
+			_offsetSafety: int = 1 # I don't have mathematical proof of how many extra bits I need.
+			_offset: int = _offsetNecessary + _offsetSafety
+
+			self.bitWidthCurveLocationsMaximum = _bitWidthOfFixedSizeInteger - _offset
+
+			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetSafety, _offset
+
+		if self.bitWidthDistinctCrossingsMaximum is None:
+			_bitWidthOfFixedSizeInteger = self.datatypeDistinctCrossings.bit_width
+
+			_offsetNecessary: int = 0 # I don't know of any.
+			_offsetEstimation: int = 3 # See reference directory.
+			_offsetSafety: int = 1
+			_offset: int = _offsetNecessary + _offsetEstimation + _offsetSafety
+
+			self.bitWidthDistinctCrossingsMaximum = _bitWidthOfFixedSizeInteger - _offset
+
+			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetEstimation, _offsetSafety, _offset
+
+	@property
+	def MAXIMUMcurveLocations(self) -> int:
+		"""Compute the maximum value of `curveLocations` for the current iteration of the transfer matrix."""
+		return 1 << (2 * self.kOfMatrix + 4)
+
+	@property
+	def arrowMAXIMUMcurveLocations(self) -> pyarrow.Scalar: # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+		"""Compute the maximum value of `curveLocations` for the current iteration of the transfer matrix."""
+		return pyarrow.scalar(self.MAXIMUMcurveLocations, self.datatypeCurveLocations)
+
+	@property
+	def locatorGroupAlpha(self) -> int:
+		"""Compute an odd-parity bit-mask with `bitWidth` bits.
+
+		Notes
+		-----
+		In binary, `locatorGroupAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
+		digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
+		from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
+		counting this way, `locatorGroupAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
+		therefore, tend to call `locatorGroupAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
+		mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
+		odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
+
+		"""
+		return sum(1 << one for one in range(0, self.bitWidth, 2))
+
+	@property
+	def locatorGroupZulu(self) -> int:
+		"""Compute an even-parity bit-mask with `bitWidth` bits."""
+		return sum(1 << one for one in range(1, self.bitWidth, 2))
+
+	@property
+	def arrowLocatorAlpha(self) -> pyarrow.Scalar: # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+		"""Compute an odd-parity bit-mask with `bitWidth` bits.
+
+		Notes
+		-----
+		In binary, `locatorGroupAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
+		digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
+		from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
+		counting this way, `locatorGroupAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
+		therefore, tend to call `locatorGroupAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
+		mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
+		odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
+
+		"""
+		return pyarrow.scalar(self.locatorGroupAlpha, self.datatypeCurveLocations)
+
+	@property
+	def arrowLocatorZulu(self) -> pyarrow.Scalar: # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+		"""Compute an even-parity bit-mask with `bitWidth` bits."""
+		return pyarrow.scalar(self.locatorGroupZulu, self.datatypeCurveLocations)
 
 @cache
 def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
@@ -26,12 +120,12 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
-def outfitDictionaryCurveGroups(state: MatrixMeandersState, dictionaryCurveLocations: dict[int, int]) -> tuple[MatrixMeandersState, dict[tuple[int, int], int]]:
+def outfitDictionaryCurveGroups(state: MatrixArrowState) -> dict[tuple[int, int], int]:
 	"""Outfit `dictionaryCurveGroups` so it may manage the computations for one iteration of the transfer matrix.
 
 	Parameters
 	----------
-	state : MatrixMeandersState
+	state : MatrixArrowState
 		The current state of the computation, including `dictionaryCurveLocations`.
 
 	Returns
@@ -39,10 +133,9 @@ def outfitDictionaryCurveGroups(state: MatrixMeandersState, dictionaryCurveLocat
 	dictionaryCurveGroups : dict[tuple[int, int], int]
 		A dictionary of `(groupAlpha, groupZulu)` to `distinctCrossings`.
 	"""
-	state.bitWidth = max(dictionaryCurveLocations.keys()).bit_length()
-	dictionaryCurveGroups: dict[tuple[int, int], int] = {(curveLocations & state.locatorGroupAlpha, (curveLocations & state.locatorGroupZulu) >> 1): distinctCrossings
-		for curveLocations, distinctCrossings in dictionaryCurveLocations.items()}
-	return state, dictionaryCurveGroups
+	state.bitWidth = max(state.dictionaryCurveLocations.keys()).bit_length()
+	return {(curveLocations & state.locatorGroupAlpha, (curveLocations & state.locatorGroupZulu) >> 1): distinctCrossings
+		for curveLocations, distinctCrossings in state.dictionaryCurveLocations.items()}
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -82,12 +175,12 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
 			break
 	return flipExtra_0b1_Here
 
-def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
+def countBigInt(state: MatrixArrowState) -> MatrixArrowState:
 	"""Count meanders with matrix transfer algorithm using Python primitive `int` contained in a Python primitive `dict`.
 
 	Parameters
 	----------
-	state : MatrixMeandersState
+	state : MatrixArrowState
 		The algorithm state containing current `kOfMatrix`, `dictionaryCurveLocations`, and thresholds.
 
 	Notes
@@ -96,21 +189,17 @@ def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 	`curveLocations` one at a time, and compute each type of analysis one at a time.
 	"""
 	dictionaryCurveGroups: dict[tuple[int, int], int] = {}
-	dictionaryCurveLocations: dict[int, int] = state.dictionaryCurveLocations.copy()
-	state.dictionaryCurveLocations.clear()
-	k: int = state.kOfMatrix
-	MAXIMUMcurveLocations = 1 << (2 * k + 4)
-	while (k > 0
-			and (((max(dictionaryCurveLocations.keys()).bit_length()) > raiseIfNone(state.bitWidthCurveLocationsMaximum))
-				or (MAXIMUMcurveLocations.bit_length() > raiseIfNone(state.bitWidthCurveLocationsMaximum))
-				or ((max(dictionaryCurveLocations.values()).bit_length()) > raiseIfNone(state.bitWidthDistinctCrossingsMaximum))
-		)):
 
-		k -= 1
-		MAXIMUMcurveLocations = 1 << (2 * k + 4)
+	while (state.kOfMatrix > 0
+		and ((max(state.dictionaryCurveLocations.keys()).bit_length() > raiseIfNone(state.bitWidthCurveLocationsMaximum))
+		or (state.MAXIMUMcurveLocations.bit_length() > raiseIfNone(state.bitWidthCurveLocationsMaximum))
+		or (max(state.dictionaryCurveLocations.values()).bit_length() > raiseIfNone(state.bitWidthDistinctCrossingsMaximum)))):
 
-		state, dictionaryCurveGroups = outfitDictionaryCurveGroups(state, dictionaryCurveLocations)
-		dictionaryCurveLocations.clear()
+		state.kOfMatrix -= 1
+
+		dictionaryCurveGroups = outfitDictionaryCurveGroups(state)
+		state.dictionaryCurveLocations.clear()
+		LessThanMaximumTotal: int = 0 # for data collection
 
 		for (groupAlpha, groupZulu), distinctCrossings in dictionaryCurveGroups.items():
 			groupAlphaCurves: bool = groupAlpha > 1
@@ -119,52 +208,73 @@ def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 
 			curveLocationAnalysis = ((groupAlpha | (groupZulu << 1)) << 2) | 3
 			# simple
-			if curveLocationAnalysis < MAXIMUMcurveLocations:
-				dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+			if curveLocationAnalysis < state.MAXIMUMcurveLocations:
+				state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+				LessThanMaximumTotal += 1
 
 			if groupAlphaCurves:
 				curveLocationAnalysis = (groupAlpha >> 2) | (groupZulu << 3) | ((groupAlphaIsEven := 1 - (groupAlpha & 1)) << 1)
-				if curveLocationAnalysis < MAXIMUMcurveLocations:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+				if curveLocationAnalysis < state.MAXIMUMcurveLocations:
+					state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+					LessThanMaximumTotal += 1
 
 			if groupZuluHasCurves:
 				curveLocationAnalysis = (groupZulu >> 1) | (groupAlpha << 2) | (groupZuluIsEven := 1 - (groupZulu & 1))
-				if curveLocationAnalysis < MAXIMUMcurveLocations:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+				if curveLocationAnalysis < state.MAXIMUMcurveLocations:
+					state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+					LessThanMaximumTotal += 1
 
 			if groupAlphaCurves and groupZuluHasCurves and (groupAlphaIsEven or groupZuluIsEven):
 				# aligned
 				if groupAlphaIsEven and not groupZuluIsEven:
-					groupAlpha ^= walkDyckPath(groupAlpha)
+					groupAlpha ^= walkDyckPath(groupAlpha)  # noqa: PLW2901
 				elif groupZuluIsEven and not groupAlphaIsEven:
-					groupZulu ^= walkDyckPath(groupZulu)
+					groupZulu ^= walkDyckPath(groupZulu)  # noqa: PLW2901
 
 				curveLocationAnalysis: int = ((groupZulu >> 2) << 1) | (groupAlpha >> 2)
-				if curveLocationAnalysis < MAXIMUMcurveLocations:
-					dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+				if curveLocationAnalysis < state.MAXIMUMcurveLocations:
+					state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+					LessThanMaximumTotal += 1
 
-	state.kOfMatrix = k
-	state.dictionaryCurveLocations = dictionaryCurveLocations
+		if state.n >= 45: # for data collection
+			print(state.n, state.kOfMatrix+1, LessThanMaximumTotal, sep=',')  # noqa: T201
+
 	return state
 
-def countArrow(state: MatrixMeandersState) -> MatrixMeandersState:
+def countArrow(state: MatrixArrowState) -> MatrixArrowState:
 	"""Count meanders with matrix transfer algorithm using pyarrow.
 
 	Parameters
 	----------
-	state : MatrixMeandersState
+	state : MatrixArrowState
 		The computation state and settings.
 
 	Returns
 	-------
-	state : MatrixMeandersState
+	state : MatrixArrowState
 		The computation state.
 	"""
-	arrowAnalyzed = pyarrow.table([
-		pyarrow.array(list(state.dictionaryCurveLocations.keys()), type=state.datatypeCurveLocations)
-		, pyarrow.array(list(state.dictionaryCurveLocations.values()), type=state.datatypeDistinctCrossings)
-	], names=['analyzed', 'distinctCrossings'])
+	schemaAnalyzed: pyarrow.Schema = pyarrow.schema([
+		pyarrow.field('analyzed', state.datatypeCurveLocations, nullable=False)
+		, pyarrow.field('distinctCrossings', state.datatypeDistinctCrossings, nullable=False)
+	])
+
+	schemaCurveLocations: pyarrow.Schema = pyarrow.schema([
+		pyarrow.field('curveLocations', state.datatypeCurveLocations, nullable=False)
+		, pyarrow.field('analyzed', state.datatypeCurveLocations, nullable=False)
+		, pyarrow.field('distinctCrossings', state.datatypeDistinctCrossings, nullable=False)
+	])
+
+	arrowAnalyzed: pyarrow.Table = pyarrow.table({
+		'analyzed': list(state.dictionaryCurveLocations.keys())
+		, 'distinctCrossings': list(state.dictionaryCurveLocations.values())
+	}, schema=schemaAnalyzed)
 	state.dictionaryCurveLocations.clear()
+
+	a0 = pyarrow.scalar(0, type=state.datatypeCurveLocations)
+	a1 = pyarrow.scalar(1, type=state.datatypeCurveLocations)
+	a2 = pyarrow.scalar(2, type=state.datatypeCurveLocations)
+	a3 = pyarrow.scalar(3, type=state.datatypeCurveLocations)
 
 	while (state.kOfMatrix > 0
 		and (int(pyarrowCompute.max(arrowAnalyzed['analyzed']).as_py()).bit_length() <= raiseIfNone(state.bitWidthCurveLocationsMaximum))
@@ -200,12 +310,12 @@ def countArrow(state: MatrixMeandersState) -> MatrixMeandersState:
 
 			ImaGroupZulpha = pyarrowCompute.bit_wise_and(arrowCurveLocations['curveLocations'], pyarrow.scalar(state.locatorGroupAlpha)) # Ima `groupAlpha`.
 
-			arrowCurveLocations = arrowCurveLocations.filter(pyarrowCompute.greater(ImaGroupZulpha, pyarrow.scalar(1))) # if groupAlphaHasCurves
+			arrowCurveLocations = arrowCurveLocations.filter(pyarrowCompute.greater(ImaGroupZulpha, pyarrow.scalar(1))) # pyright: ignore[reportUnknownMemberType] # if groupAlphaHasCurves
 
 			ImaGroupZulpha = pyarrowCompute.bit_wise_and(arrowCurveLocations['curveLocations'], pyarrow.scalar(state.locatorGroupZulu)) # Ima `groupZulu`.
 			ImaGroupZulpha = pyarrowCompute.shift_right(ImaGroupZulpha, pyarrow.scalar(1)) # Ima `groupZulu` (groupZulu >> 1)
 
-			arrowCurveLocations = arrowCurveLocations.filter(pyarrowCompute.greater(ImaGroupZulpha, pyarrow.scalar(1))) # if groupZuluHasCurves
+			arrowCurveLocations = arrowCurveLocations.filter(pyarrowCompute.greater(ImaGroupZulpha, pyarrow.scalar(1))) # pyright: ignore[reportUnknownMemberType] # if groupZuluHasCurves
 
 			ImaGroupZulpha = pyarrowCompute.bit_wise_and(arrowCurveLocations['curveLocations'], pyarrow.scalar(0b10)) # Ima `groupZulu`.
 			ImaGroupZulpha = pyarrowCompute.shift_right(ImaGroupZulpha, pyarrow.scalar(1)) # Ima `groupZulu` (groupZulu >> 1)
@@ -215,10 +325,10 @@ def countArrow(state: MatrixMeandersState) -> MatrixMeandersState:
 
 			ImaGroupZulpha = pyarrowCompute.bit_wise_and(arrowCurveLocations['curveLocations'], pyarrow.scalar(1)) # (groupAlpha & 1)
 			ImaGroupZulpha = pyarrowCompute.bit_wise_xor(ImaGroupZulpha, pyarrow.scalar(1)) # (1 - (groupAlpha ...))
-			selectorGroupAlphaAtODD = pyarrowCompute.cast(ImaGroupZulpha, pyarrow.bool_()) # selectorGroupAlphaAtODD
+			selectorGroupAlphaAtODD = pyarrowCompute.cast(ImaGroupZulpha, pyarrow.bool_()) # pyright: ignore[reportUnknownMemberType] # selectorGroupAlphaAtODD
 
-			filterCondition = pyarrowCompute.or_(selectorGroupAlphaAtODD, pyarrowCompute.cast(arrowCurveLocations['analyzed'], pyarrow.bool_())) # if (groupAlphaIsEven or groupZuluIsEven)
-			arrowCurveLocations = arrowCurveLocations.filter(filterCondition)
+			filterCondition = pyarrowCompute.or_(selectorGroupAlphaAtODD, pyarrowCompute.cast(arrowCurveLocations['analyzed'], pyarrow.bool_())) # pyright: ignore[reportArgumentType, reportCallIssue, reportUnknownMemberType, reportUnknownVariableType] # if (groupAlphaIsEven or groupZuluIsEven)
+			arrowCurveLocations = arrowCurveLocations.filter(filterCondition) # pyright: ignore[reportUnknownArgumentType]
 
 			# NOTE Step 2 modify rows
 
@@ -227,20 +337,20 @@ def countArrow(state: MatrixMeandersState) -> MatrixMeandersState:
 			ImaGroupZulpha = pyarrowCompute.shift_right(ImaGroupZulpha, pyarrow.scalar(1)) # Ima `groupZulu` (groupZulu >> 1)
 			ImaGroupZulpha = pyarrowCompute.bit_wise_and(ImaGroupZulpha, pyarrow.scalar(1)) # (groupZulu & 1)
 			ImaGroupZulpha = pyarrowCompute.bit_wise_xor(ImaGroupZulpha, pyarrow.scalar(1)) # (1 - (groupZulu ...))
-			selectorGroupZuluAtEven = pyarrowCompute.cast(ImaGroupZulpha, pyarrow.bool_()) # selectorGroupZuluAtEven
+			selectorGroupZuluAtEven = pyarrowCompute.cast(ImaGroupZulpha, pyarrow.bool_()) # pyright: ignore[reportUnknownMemberType] # selectorGroupZuluAtEven
 
 			analyzedColumn = pyarrowCompute.bit_wise_and(arrowCurveLocations['curveLocations'], pyarrow.scalar(state.locatorGroupAlpha)) # (groupAlpha)
 
 			# if groupAlphaIsEven and not groupZuluIsEven, modifyGroupAlphaPairedToOdd
-			notGroupZuluAtEven = pyarrowCompute.invert(selectorGroupZuluAtEven)
+			notGroupZuluAtEven = pyarrowCompute.invert(selectorGroupZuluAtEven) # pyright: ignore[reportArgumentType, reportCallIssue, reportUnknownVariableType]
 			# Handle the conditional modification more carefully for array length matching
 			modifiedAnalyzedColumn = []
 			analyzedColumnList = analyzedColumn.to_pylist()
-			notGroupZuluAtEvenList = notGroupZuluAtEven.to_pylist()
+			notGroupZuluAtEvenList = notGroupZuluAtEven.to_pylist() # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
 
-			for analyzed_val, should_modify in zip(analyzedColumnList, notGroupZuluAtEvenList, strict=True):
+			for analyzed_val, should_modify in zip(analyzedColumnList, notGroupZuluAtEvenList, strict=True): # pyright: ignore[reportUnknownArgumentType, reportUnknownVariableType]
 				if should_modify:
-					modifiedAnalyzedColumn.append(int(analyzed_val) ^ walkDyckPath(int(analyzed_val)))
+					modifiedAnalyzedColumn.append(int(analyzed_val) ^ walkDyckPath(int(analyzed_val))) # pyright: ignore[reportUnknownMemberType]
 				else:
 					modifiedAnalyzedColumn.append(analyzed_val)
 
@@ -331,31 +441,53 @@ def countArrow(state: MatrixMeandersState) -> MatrixMeandersState:
 			```python
 			curveLocations = ((groupAlpha | (groupZulu << 1)) << 2) | 3
 			```
-
-			Notes
-			-----
-			Using `+= 3` instead of `|= 3` is valid in this specific case. Left shift by two means the last bits are '0b00'. '0 + 3'
-			is '0b11', and '0b00 | 0b11' is also '0b11'.
-
 			"""
 			nonlocal arrowCurveLocations
-			analyzedColumn = pyarrowCompute.bit_wise_and(arrowCurveLocations['curveLocations'], pyarrow.scalar(state.locatorGroupAlpha))
+			analyzed =	cast('pyarrow.UInt64Array', bit_wise_or( # pyright: ignore[reportUnknownVariableType, reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+				shift_left(  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+					bit_wise_or(  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+						bit_wise_and(  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+							arrowCurveLocations['curveLocations']  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+							, state.arrowLocatorAlpha # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+						)  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+						, shift_left(  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+							bit_wise_and(  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+								arrowCurveLocations['curveLocations']  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+								, state.arrowLocatorZulu # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+							)  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+							, a1  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+						)  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+					)  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+					, a2  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+				)  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+				, a3  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+			))  # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
 
-			groupZulu = pyarrowCompute.bit_wise_and(arrowCurveLocations['curveLocations'], pyarrow.scalar(state.locatorGroupZulu))
-			groupZulu = pyarrowCompute.shift_right(groupZulu, pyarrow.scalar(1)) # (groupZulu >> 1)
-			groupZulu = pyarrowCompute.shift_left(groupZulu, pyarrow.scalar(1)) # (groupZulu << 1)
-
-			analyzedColumn = pyarrowCompute.bit_wise_or(analyzedColumn, groupZulu) # ((groupAlpha | (groupZulu ...))
-
-			analyzedColumn = pyarrowCompute.shift_left(analyzedColumn, pyarrow.scalar(2)) # (... << 2)
-			analyzedColumn = pyarrowCompute.add(analyzedColumn, pyarrow.scalar(3)) # (...) | 3
-
-			analyzedColumn = pyarrowCompute.if_else(
-				pyarrowCompute.greater_equal(analyzedColumn, pyarrow.scalar(state.MAXIMUMcurveLocations)),
-				pyarrow.scalar(0, type=state.datatypeCurveLocations),
-				analyzedColumn
+			analyzed = pyarrowCompute.if_else(
+				pyarrowCompute.greater_equal(analyzed, state.arrowMAXIMUMcurveLocations), # pyright: ignore[reportUnknownMemberType]
+				a0,
+				analyzed
 			)
-			arrowCurveLocations = arrowCurveLocations.set_column(1, 'analyzed', analyzedColumn)
+
+			arrowCurveLocations = arrowCurveLocations.set_column(1, 'analyzed', analyzed)
+
+			# analyzedColumn = pyarrowCompute.bit_wise_and(arrowCurveLocations['curveLocations'], state.arrowLocatorAlpha) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+
+			# groupZulu = pyarrowCompute.bit_wise_and(arrowCurveLocations['curveLocations'], state.arrowLocatorZulu) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+			# groupZulu = pyarrowCompute.shift_right(groupZulu, pyarrow.scalar(1)) # (groupZulu >> 1)
+			# groupZulu = pyarrowCompute.shift_left(groupZulu, pyarrow.scalar(1)) # (groupZulu << 1)
+
+			# analyzedColumn = pyarrowCompute.bit_wise_or(analyzedColumn, groupZulu) # ((groupAlpha | (groupZulu ...))
+
+			# analyzedColumn = pyarrowCompute.shift_left(analyzedColumn, pyarrow.scalar(2)) # (... << 2)
+			# analyzedColumn = pyarrowCompute.add(analyzedColumn, pyarrow.scalar(3)) # (...) | 3
+
+			# analyzedColumn = pyarrowCompute.if_else(
+			# 	pyarrowCompute.greater_equal(analyzedColumn, pyarrow.scalar(state.MAXIMUMcurveLocations)),
+			# 	pyarrow.scalar(0, type=state.datatypeCurveLocations),
+			# 	analyzedColumn
+			# )
+			# arrowCurveLocations = arrowCurveLocations.set_column(1, 'analyzed', analyzedColumn)
 
 		def analyzeCurveLocationsZulu() -> None:
 			"""Compute `curveLocations` from `groupZulu`.
@@ -401,7 +533,22 @@ def countArrow(state: MatrixMeandersState) -> MatrixMeandersState:
 			)
 			arrowCurveLocations = arrowCurveLocations.set_column(1, 'analyzed', analyzedColumn)
 
-		def recordCurveLocations() -> None:
+		# def recordCurveLocations() -> None:
+		# 	nonlocal dataframeAnalyzed
+
+		# 	indexStopAnalyzed: int = state.indexStartAnalyzed + int((dataframeCurveLocations['analyzed'] > 0).sum()) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+
+		# 	if indexStopAnalyzed > state.indexStartAnalyzed:
+		# 		dataframeAnalyzed.loc[state.indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
+		# 			dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']
+		# 						].to_numpy(dtype=state.datatypeCurveLocations, copy=False)
+		# 		)
+
+		# 		state.indexStartAnalyzed = indexStopAnalyzed
+
+		# 	del indexStopAnalyzed
+
+		def effYouClaude() -> None:
 			nonlocal arrowAnalyzed
 
 			nonZeroMask = pyarrowCompute.greater(arrowCurveLocations['analyzed'], pyarrow.scalar(0))
@@ -453,55 +600,55 @@ def countArrow(state: MatrixMeandersState) -> MatrixMeandersState:
 
 				state.indexStartAnalyzed = indexStopAnalyzed
 
-		arrowCurveLocations = pyarrow.table([
-			arrowAnalyzed['analyzed']
-			, pyarrow.array([0] * arrowAnalyzed.num_rows, type=state.datatypeCurveLocations)
-			, arrowAnalyzed['distinctCrossings']
-		], names=['curveLocations', 'analyzed', 'distinctCrossings'])
-
-		state.bitWidth = int(pyarrowCompute.max(arrowCurveLocations['curveLocations']).as_py()).bit_length()
+		arrowCurveLocations = pyarrow.table({
+			'curveLocations': cast('pyarrow.UInt64Array', arrowAnalyzed['analyzed'])
+			, 'analyzed': [0] * arrowAnalyzed.num_rows
+			, 'distinctCrossings': cast('pyarrow.UInt64Array', arrowAnalyzed['distinctCrossings'])
+		}, schema=schemaCurveLocations)
 
 		del arrowAnalyzed
 		goByeBye()
 
+		state.bitWidth = int(pyarrowCompute.max(arrowCurveLocations['curveLocations'])).bit_length()
+
 		length: int = getBucketsTotal(state)
-		arrowAnalyzed = pyarrow.table([
-			pyarrow.array([0] * length, type=state.datatypeCurveLocations)
-			, pyarrow.array([0] * length, type=state.datatypeDistinctCrossings)
-		], names=['analyzed', 'distinctCrossings'])
+		arrowAnalyzed: pyarrow.Table = pyarrow.table({
+			'analyzed': [0] * length
+			, 'distinctCrossings': [0] * length
+		}, schema=schemaAnalyzed)
 
 		state.indexStartAnalyzed = 0
 
 		state.kOfMatrix -= 1
 
 		analyzeCurveLocationsSimple()
-		recordCurveLocations()
+		effYouClaude()
 
 		analyzeCurveLocationsAlpha()
-		recordCurveLocations()
+		effYouClaude()
 
 		analyzeCurveLocationsZulu()
-		recordCurveLocations()
+		effYouClaude()
 
 		analyzeCurveLocationsAligned()
-		recordCurveLocations()
+		effYouClaude()
 		del arrowCurveLocations
 		goByeBye()
 
 		aggregateCurveLocations()
 
-	# Convert back to dictionary
+	# Garbage
 	analyzedList = arrowAnalyzed['analyzed'].to_pylist()
 	distinctCrossingsList = arrowAnalyzed['distinctCrossings'].to_pylist()
 	state.dictionaryCurveLocations = {analyzed: distinctCrossings for analyzed, distinctCrossings in zip(analyzedList, distinctCrossingsList, strict=True) if analyzed != 0}
 	return state
 
-def doTheNeedful(state: MatrixMeandersState) -> int:
+def doTheNeedful(state: MatrixArrowState) -> int:
 	"""Compute a(n) meanders with the transfer matrix algorithm.
 
 	Parameters
 	----------
-	state : MatrixMeandersState
+	state : MatrixArrowState
 		The algorithm state containing current `kOfMatrix`, `dictionaryCurveLocations`, and thresholds.
 
 	Returns
@@ -553,8 +700,7 @@ def A000682(n: int) -> int:
 
 	dictionaryCurveLocations: dict[int, int] = dict.fromkeys(listCurveLocations, 1)
 
-	state = MatrixMeandersState(n, oeisID, kOfMatrix, dictionaryCurveLocations
-		, datatypeCurveLocations, datatypeDistinctCrossings, bitWidthCurveLocationsMaximum, bitWidthDistinctCrossingsMaximum)
+	state = MatrixArrowState(n, oeisID, kOfMatrix, dictionaryCurveLocations)
 
 	return doTheNeedful(state)
 
@@ -570,7 +716,7 @@ def A005316(n: int) -> int:
 	else:
 		dictionaryCurveLocations = {22: 1}
 
-	state = MatrixMeandersState(n, oeisID, kOfMatrix, dictionaryCurveLocations
-		, datatypeCurveLocations, datatypeDistinctCrossings, bitWidthCurveLocationsMaximum, bitWidthDistinctCrossingsMaximum)
+	state = MatrixArrowState(n, oeisID, kOfMatrix, dictionaryCurveLocations)
 
+	return doTheNeedful(state)
 	return doTheNeedful(state)

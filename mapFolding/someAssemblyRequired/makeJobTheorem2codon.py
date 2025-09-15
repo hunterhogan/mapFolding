@@ -100,7 +100,9 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 		# `identifier` in Augmented Assignment, or in Assignments and value is Constant.
 		NodeChanger(findThis=IfThis.isAnyOf(
 				Be.AugAssign.targetIs(IfThis.isNestedNameIdentifier(identifier))
-				, IfThis.isAllOf(IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(identifier))
+				, IfThis.isAllOf(
+					Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
+					# IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(identifier))
 					, Be.Assign.valueIs(Be.Constant))
 			)
 			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)
@@ -113,6 +115,7 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 
 		# `identifier` in Comparison.
 		NodeChanger(Be.Compare.leftIs(IfThis.isNestedNameIdentifier(identifier))
+			# , doThat=Grab.comparatorsAttribute(Grab.index(0, lambda comparator, annotation=annotation: Then.replaceWith(Make.Call(annotation, listParameters=[comparator]))))
 			, doThat=lambda node, annotation=annotation: Grab.comparatorsAttribute(lambda at, annotation=annotation: Then.replaceWith([Make.Call(annotation, listParameters=[node.comparators[0]])])(at[0]))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
@@ -220,6 +223,6 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	makeJob(aJob)
 
 if __name__ == '__main__':
-	mapShape = (1, 2)
+	mapShape = (1, 3)
 	fromMapShape(mapShape)
 

@@ -270,6 +270,7 @@ class LeafSequenceState(MapFoldingState):
 			self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
 			self.leafSequence[self.groupsOfFolds] = self.leaf1ndex
 
+
 @dataclasses.dataclass
 class MatrixMeandersState:
 	"""State."""
@@ -339,3 +340,5 @@ class MatrixMeandersState:
 	def locatorGroupZulu(self) -> int:
 		"""Compute an even-parity bit-mask with `bitWidth` bits."""
 		return sum(1 << one for one in range(1, self.bitWidth, 2))
+
+

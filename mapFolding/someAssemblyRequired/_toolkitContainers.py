@@ -62,10 +62,10 @@ class ShatteredDataclass:
 	countingVariableName: ast.Name
 	"""AST name node representing the counting variable identifier."""
 
-	field2AnnAssign: dict[str, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=lambda: dict[str, ast.AnnAssign | ast.Assign]())
+	field2AnnAssign: dict[str, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=dict[str, ast.AnnAssign | ast.Assign])
 	"""Maps field names to their corresponding AST assignment expressions for initialization."""
 
-	Z0Z_field2AnnAssign: dict[str, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=lambda: dict[str, tuple[ast.AnnAssign | ast.Assign, str]]())
+	Z0Z_field2AnnAssign: dict[str, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=dict[str, tuple[ast.AnnAssign | ast.Assign, str]])
 	"""Temporary mapping for field assignments with constructor type information."""
 
 	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
@@ -74,22 +74,22 @@ class ShatteredDataclass:
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	"""Import records for the dataclass and its constituent field types."""
 
-	list_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=lambda: list[ast.arg]())
+	list_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list[ast.arg])
 	"""Function argument nodes with type annotations for parameter specification."""
 
-	list_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=lambda: list[ast.keyword]())
+	list_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list[ast.keyword])
 	"""Keyword arguments for dataclass initialization using field=field format."""
 
-	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=lambda: list[ast.expr]())
+	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=list[ast.expr])
 	"""Type annotations for each dataclass field in declaration order."""
 
-	listName4Parameters: list[ast.Name] = dataclasses.field(default_factory=lambda: list[ast.Name]())
+	listName4Parameters: list[ast.Name] = dataclasses.field(default_factory=list[ast.Name])
 	"""Name nodes for each dataclass field used as function parameters."""
 
-	listUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=lambda: list[ast.AnnAssign]())
+	listUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list[ast.AnnAssign])
 	"""Annotated assignment statements to extract individual fields from dataclass instances."""
 
-	map_stateDOTfield2Name: dict[ast.AST, ast.Name] = dataclasses.field(default_factory=lambda: dict[ast.AST, ast.Name]())
+	map_stateDOTfield2Name: dict[ast.AST, ast.Name] = dataclasses.field(default_factory=dict[ast.AST, ast.Name])
 	"""Maps dataclass attribute access expressions to field name nodes for find-replace operations."""
 
 	repack: ast.Assign = dummyAssign

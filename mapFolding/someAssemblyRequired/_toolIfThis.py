@@ -67,7 +67,7 @@ class IfThis(astToolkit_IfThis):
 
 		"""
 		return lambda node: (Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(namespace, identifier))(node)
-					and Be.Compare.opsIs(lambda at: Be.LtE(at[0]))(node)
+					and Be.Compare.opsIs(Be.at(0, Be.LtE))(node)
 				)
 
 	@staticmethod
@@ -94,8 +94,9 @@ class IfThis(astToolkit_IfThis):
 
 		"""
 		return lambda node: (Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(namespace, identifier))(node)
-					and Be.Gt(node.ops[0])
-					and IfThis.isConstant_value(0)(node.comparators[0]))
+					and Be.Compare.opsIs(Be.at(0, Be.Gt))(node)
+					and Be.Compare.comparatorsIs(Be.at(0, IfThis.isConstant_value(0)))(node)
+				)
 
 	@staticmethod
 	def isIfAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeIs[ast.If]]:
