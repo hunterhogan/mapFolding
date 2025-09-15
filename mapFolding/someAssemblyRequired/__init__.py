@@ -73,8 +73,14 @@ calculations through the strategic application of compiler optimization techniqu
 """
 
 from mapFolding.someAssemblyRequired.infoBooth import (
+	algorithmSourceModuleDEFAULT as algorithmSourceModuleDEFAULT,
 	dataclassInstanceIdentifierDEFAULT as dataclassInstanceIdentifierDEFAULT,
+	dataPackingModuleIdentifierDEFAULT as dataPackingModuleIdentifierDEFAULT,
+	dictionaryEstimates as dictionaryEstimates,
+	logicalPathInfixDEFAULT as logicalPathInfixDEFAULT,
 	sourceCallableDispatcherDEFAULT as sourceCallableDispatcherDEFAULT,
+	sourceCallableIdentifierDEFAULT as sourceCallableIdentifierDEFAULT,
+	theCountingIdentifierDEFAULT as theCountingIdentifierDEFAULT,
 )
 
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis
