@@ -110,13 +110,7 @@ def getModule(identifierPackage: str | None = packageSettings.identifierPackage,
 	return astModule
 
 def getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.pathPackage, logicalPathInfix: PathLike[str] | PurePath | str | None = None, moduleIdentifier: str = '', fileExtension: str = packageSettings.fileExtension) -> PurePath:
-	"""Construct filesystem path for generated module files.
-
-	(AI generated docstring)
-
-	Builds the complete filesystem path where generated modules will be written,
-	combining root path, optional infix directory, module name, and file extension.
-	This ensures consistent file organization across all generated code.
+	"""Construct filesystem path from logical path.
 
 	Parameters
 	----------
@@ -137,7 +131,7 @@ def getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.
 	"""
 	pathFilename = PurePath(moduleIdentifier + fileExtension)
 	if logicalPathInfix:
-		pathFilename = PurePath(logicalPathInfix, pathFilename)
+		pathFilename = PurePath(str(logicalPathInfix).replace('.', '/'), pathFilename)
 	if pathRoot:
 		pathFilename = PurePath(pathRoot, pathFilename)
 	return pathFilename
@@ -516,6 +510,3 @@ def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
-
-
-

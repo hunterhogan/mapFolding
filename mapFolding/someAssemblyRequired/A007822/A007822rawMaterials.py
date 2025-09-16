@@ -1,15 +1,17 @@
 from astToolkit import extractFunctionDef, Make  # noqa: D100
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import dataclassInstanceIdentifierDEFAULT, theCountingIdentifierDEFAULT
+from mapFolding.someAssemblyRequired import (
+	dataclassInstanceIdentifierDEFAULT, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT,
+	sourceCallableIdentifierDEFAULT, theCountingIdentifierDEFAULT)
 import ast
 
 identifierDataclass: str = dataclassInstanceIdentifierDEFAULT
 identifierCounting: str = theCountingIdentifierDEFAULT
+logicalPathInfixA007822: str = logicalPathInfixDEFAULT + '.A007822'
+sourceCallableDispatcherA007822: str = sourceCallableDispatcherDEFAULT
+sourceCallableIdentifierA007822: str = sourceCallableIdentifierDEFAULT
 
 identifier_filterAsymmetricFolds = 'filterAsymmetricFolds'
-identifier_getAsymmetricFoldsTotal = 'getAsymmetricFoldsTotal'
-identifier_initializeConcurrencyManager = 'initializeConcurrencyManager'
-identifier_processCompletedFutures = '_processCompletedFutures'
 
 ImaString = f"""
 def {identifier_filterAsymmetricFolds}({identifierDataclass}: MapFoldingState) -> MapFoldingState:
@@ -36,7 +38,7 @@ def {identifier_filterAsymmetricFolds}({identifierDataclass}: MapFoldingState) -
 		{identifierDataclass}.indexMiniGap += 1
 
 	return {identifierDataclass}
-"""
+"""  # noqa: E501
 
 FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_filterAsymmetricFolds))
 del ImaString
@@ -50,13 +52,4 @@ A007822adjustFoldsTotal = ast.parse(ImaString).body[0]
 del ImaString
 
 astExprCall_filterAsymmetricFoldsDataclass: ast.Expr = Make.Expr(Make.Call(Make.Name(identifier_filterAsymmetricFolds), listParameters=[Make.Attribute(Make.Name(identifierDataclass), 'leafBelow')]))
-# ----------------- Asynchronous --------------------------------------------------------------------------------------
 astExprCall_filterAsymmetricFoldsLeafBelow: ast.Expr = Make.Expr(Make.Call(Make.Name(identifier_filterAsymmetricFolds), listParameters=[Make.Name('leafBelow')]))
-
-AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
-	[Make.Attribute(Make.Name(identifierDataclass), identifierCounting, context=Make.Store())]
-	, value=Make.Call(Make.Name(identifier_getAsymmetricFoldsTotal))
-)
-
-astExprCall_initializeConcurrencyManager = Make.Expr(Make.Call(Make.Name(identifier_initializeConcurrencyManager)))
-

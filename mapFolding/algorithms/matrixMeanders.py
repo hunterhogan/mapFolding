@@ -9,7 +9,9 @@ from functools import cache
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
 from mapFolding import MatrixMeandersState
+from mapFolding.algorithms.getBucketsTotal import getBucketsTotal
 from pathlib import Path
+from warnings import warn
 import numpy
 import pandas
 
@@ -21,7 +23,6 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 	return numpy.uint64(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
 
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
-"""Vectorized version of `_flipTheExtra_0b1`."""
 
 def outfitDictionaryCurveGroups(state: MatrixMeandersState) -> dict[tuple[int, int], int]:
 	"""Outfit `dictionaryCurveGroups` so it may manage the computations for one iteration of the transfer matrix.
@@ -78,6 +79,55 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
 			break
 	return flipExtra_0b1_Here
 
+def areIntegersWide(state: MatrixMeandersState, dataframe: pandas.DataFrame | None = None, *, fixedSizeMAXIMUMcurveLocations: bool = False) -> bool:
+	"""Check if the largest values are wider than the maximum limits.
+
+	Parameters
+	----------
+	state : MatrixMeandersState
+		The current state of the computation, including `dictionaryCurveLocations`.
+	dataframe : pandas.DataFrame | None = None
+		Optional DataFrame containing 'analyzed' and 'distinctCrossings' columns. If provided, use this instead of `state.dictionaryCurveLocations`.
+	fixedSizeMAXIMUMcurveLocations : bool = False
+		Set this to `True` if you cast `state.MAXIMUMcurveLocations` to the same fixed size integer type as `state.datatypeCurveLocations`.
+
+	Returns
+	-------
+	wider : bool
+		True if at least one integer is too wide.
+
+	Notes
+	-----
+	Casting `state.MAXIMUMcurveLocations` to a fixed-size 64-bit unsigned integer might cause the flow to be a little more
+	complicated because `MAXIMUMcurveLocations` is usually 1-bit larger than the `max(curveLocations)` value.
+
+	If you start the algorithm with very large `curveLocations` in your `dictionaryCurveLocations` (*i.e.,* A000682), then the
+	flow will go to a function that does not use fixed size integers. When the integers are below the limits (*e.g.,*
+	`bitWidthCurveLocationsMaximum`), the flow will go to a function with fixed size integers. In that case, casting
+	`MAXIMUMcurveLocations` to a fixed size merely delays the transition from one function to the other by one iteration.
+
+	If you start with small values in `dictionaryCurveLocations`, however, then the flow goes to the function with fixed size
+	integers and usually stays there until `distinctCrossings` is huge, which is near the end of the computation. If you cast
+	`MAXIMUMcurveLocations` into a 64-bit unsigned integer, however, then around `state.kOfMatrix == 28`, the bit width of
+	`MAXIMUMcurveLocations` might exceed the limit. That will cause the flow to go to the function that does not have fixed size
+	integers for a few iterations before returning to the function with fixed size integers.
+	"""
+	if dataframe is None:
+		curveLocationsWidest: int = max(state.dictionaryCurveLocations.keys()).bit_length()
+		distinctCrossingsWidest: int = max(state.dictionaryCurveLocations.values()).bit_length()
+	else:
+		curveLocationsWidest = int(dataframe['analyzed'].max()).bit_length()
+		distinctCrossingsWidest = int(dataframe['distinctCrossings'].max()).bit_length()
+
+	MAXIMUMcurveLocations: int = 0
+	if fixedSizeMAXIMUMcurveLocations:
+		MAXIMUMcurveLocations = state.MAXIMUMcurveLocations
+
+	return (curveLocationsWidest > raiseIfNone(state.bitWidthCurveLocationsMaximum)
+		or distinctCrossingsWidest > raiseIfNone(state.bitWidthDistinctCrossingsMaximum)
+		or MAXIMUMcurveLocations > raiseIfNone(state.bitWidthCurveLocationsMaximum)
+		)
+
 def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 	"""Count meanders with matrix transfer algorithm using Python primitive `int` contained in a Python primitive `dict`.
 
@@ -93,11 +143,7 @@ def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 	"""
 	dictionaryCurveGroups: dict[tuple[int, int], int] = {}
 
-	while (state.kOfMatrix > 0
-		and ((max(state.dictionaryCurveLocations.keys()).bit_length() > raiseIfNone(state.bitWidthCurveLocationsMaximum))
-		or (max(state.dictionaryCurveLocations.values()).bit_length() > raiseIfNone(state.bitWidthDistinctCrossingsMaximum)))
-		):
-
+	while (state.kOfMatrix > 0 and areIntegersWide(state)):
 		state.kOfMatrix -= 1
 
 		dictionaryCurveGroups = outfitDictionaryCurveGroups(state)
@@ -159,22 +205,11 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 	)
 	state.dictionaryCurveLocations.clear()
 
-	while (state.kOfMatrix > 0
-		and (int(dataframeAnalyzed['analyzed'].max()).bit_length() <= raiseIfNone(state.bitWidthCurveLocationsMaximum))
-		and (int(dataframeAnalyzed['distinctCrossings'].max()).bit_length() <= raiseIfNone(state.bitWidthDistinctCrossingsMaximum))):
+	while (state.kOfMatrix > 0 and not areIntegersWide(state, dataframeAnalyzed)):
 
-		def aggregateCurveLocations() -> pandas.DataFrame:
-			pathFilename = pathRoot / f"n{state.n:02}k{state.kOfMatrix:02}.hdf5"
-
-			dataframeAnalyzed = pandas.read_hdf(pathFilename
-						, key=state.oeisID
-					)
-
-			pathFilename.unlink()
-
-			dataframeAnalyzed = dataframeAnalyzed.groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
-
-			return dataframeAnalyzed
+		def aggregateCurveLocations()  -> None:
+			nonlocal dataframeAnalyzed
+			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
 
 		def analyzeCurveLocationsAligned() -> None:
 			"""Compute `curveLocations` from `groupAlpha` and `groupZulu` if at least one is an even number.
@@ -257,6 +292,7 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 				flipTheExtra_0b1AsUfunc(ImaGroupZulpha.loc[(dataframeCurveLocations.loc[:, 'curveLocations'] & 1).astype(bool)])) # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
 
 			# NOTE Step 3 compute curveLocations
+
 			dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (groupAlpha >> 2)
 
 			ImaGroupZulpha //= 2**2 # (groupZulu >> 2)
@@ -387,37 +423,28 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
 
 		def recordCurveLocations() -> None:
-			"""TODO Ideas for intermediary on disk.
+			nonlocal dataframeAnalyzed
 
-			Characteristics
-				Sorted/unsorted
-				Compressed/uncompressed: is it faster to read/write less data, because it is compressed?
-				Append or not
-				One file or many files
-				File format
-				Automatically do everything in memory if the data is small enough
+			indexStopAnalyzed: int = state.indexStartAnalyzed + int((dataframeCurveLocations['analyzed'] > 0).sum()) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
 
-			Idea: unique now, sum later
-			Similar to /apps/mapFolding/mapFolding/reference/meandersDumpingGround/A005316write2disk.py, write to disk in this format:
-				curveLocations unique: list of distinctCrossings
-			When reading from disk, sum the lists of distinctCrossings for each curveLocations.
+			if indexStopAnalyzed > state.indexStartAnalyzed:
+				if len(dataframeAnalyzed.index) < indexStopAnalyzed:
+					warn(f"Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to {indexStopAnalyzed=}; n={state.n}, {state.kOfMatrix=}.", stacklevel=2)
+					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
 
-			Idea: sort now for efficient groupby/sum later.
-			Write multiple sorted files.
-			Use a magical function to read the sorted files at the same time, creating unique curveLocations with summed distinctCrossings.
-			Which would eliminate `dataframeAnalyzed` because I would read directly into `dataframeCurveLocations`.
+				dataframeAnalyzed.loc[state.indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
+					dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']
+								].to_numpy(dtype=state.datatypeCurveLocations, copy=False)
+				)
 
-			Idea: don't reinvent the wheel.
-			Learn by asking the right question in the right place.
-			"""
-			pathFilename = pathRoot / f"n{state.n:02}k{state.kOfMatrix:02}.hdf5"
-			dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']
-								].to_hdf(pathFilename, key=state.oeisID, mode='a', complevel=None, append=True, format='table', index=False, data_columns=['analyzed'])
+				state.indexStartAnalyzed = indexStopAnalyzed
+
+			del indexStopAnalyzed
 
 		dataframeCurveLocations = pandas.DataFrame({
-			'curveLocations': pandas.Series(name='curveLocations', data=dataframeAnalyzed['analyzed'], copy=True, dtype=state.datatypeCurveLocations)
+			'curveLocations': pandas.Series(name='curveLocations', data=dataframeAnalyzed['analyzed'], copy=False, dtype=state.datatypeCurveLocations)
 			, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=state.datatypeCurveLocations)
-			, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=dataframeAnalyzed['distinctCrossings'], copy=True, dtype=state.datatypeDistinctCrossings)
+			, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=dataframeAnalyzed['distinctCrossings'], copy=False, dtype=state.datatypeDistinctCrossings)
 			} # pyright: ignore[reportUnknownArgumentType]
 		)
 
@@ -425,8 +452,16 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		goByeBye()
 
 		state.bitWidth = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
+		length: int = getBucketsTotal(state)
+		dataframeAnalyzed = pandas.DataFrame({
+			'analyzed': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeCurveLocations, name='analyzed')
+			, 'distinctCrossings': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeDistinctCrossings, name='distinctCrossings')
+			}, index=pandas.RangeIndex(length), columns=['analyzed', 'distinctCrossings'], dtype=state.datatypeCurveLocations # pyright: ignore[reportUnknownArgumentType]
+		)
 
 		state.kOfMatrix -= 1
+
+		state.indexStartAnalyzed = 0
 
 		analyzeCurveLocationsSimple()
 		recordCurveLocations()
@@ -442,7 +477,7 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		del dataframeCurveLocations
 		goByeBye()
 
-		dataframeAnalyzed = aggregateCurveLocations()
+		aggregateCurveLocations()
 
 		if state.n >= 45:  # for data collection
 			print(state.n, state.kOfMatrix+1, state.indexStartAnalyzed, sep=',')  # noqa: T201
@@ -475,8 +510,7 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
 	while state.kOfMatrix > 0:
 		goByeBye()
 
-		if ((max(state.dictionaryCurveLocations.keys()).bit_length() > raiseIfNone(state.bitWidthCurveLocationsMaximum))
-			or (max(state.dictionaryCurveLocations.values()).bit_length() > raiseIfNone(state.bitWidthDistinctCrossingsMaximum))):
+		if areIntegersWide(state):
 			state = countBigInt(state)
 		else:
 			state = countPandas(state)

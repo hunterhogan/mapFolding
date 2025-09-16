@@ -192,7 +192,6 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 
 	return pathFilename
 
-
 def _makeMapFoldingModules() -> None:
 	astModule = getModule(logicalPathInfix='algorithms')
 	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)

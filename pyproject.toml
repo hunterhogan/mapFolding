@@ -134,6 +134,7 @@ urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://gith
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
   "astToolkit",
+  "autoflake",
   "hunterMakesPy",
   "numpy",
   "platformdirs",
