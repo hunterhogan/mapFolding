@@ -21,7 +21,7 @@ from pathlib import PurePath
 from typing import cast
 import ast
 
-def makeDaoOfMapFoldingNumba(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+def makeDaoOfMapFoldingNumba(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate Numba-optimized sequential implementation of map folding algorithm.
 
 	(AI generated docstring)
@@ -94,7 +94,7 @@ def makeDaoOfMapFoldingNumba(astModule: ast.Module, moduleIdentifier: str, calla
 
 	return pathFilename
 
-def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate module by applying optimization predicted by Theorem 2.
 
 	Parameters
@@ -180,7 +180,7 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	return pathFilename
 
-def numbaOnTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+def numbaOnTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Generate Numba-accelerated Theorem 2 implementation with dataclass decomposition.
 
 	(AI generated docstring)
@@ -227,13 +227,6 @@ def numbaOnTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdenti
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclass)
-
-	if sourceCallableDispatcher is not None:
-		NodeChanger(
-			findThis=IfThis.isCallIdentifier(sourceCallableDispatcher)
-			, doThat=Then.replaceWith(astExprCall_filterAsymmetricFoldsLeafBelow)
-			).visit(ingredientsFunction.astFunctionDef)
-
 	ingredientsFunction = removeUnusedParameters(ingredientsFunction)
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
@@ -246,7 +239,7 @@ def numbaOnTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdenti
 
 	return pathFilename
 
-def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Generate constrained Theorem 2 implementation by removing unnecessary logic.
 
 	(AI generated docstring)

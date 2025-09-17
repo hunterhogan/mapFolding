@@ -1,6 +1,5 @@
+from mapFolding.syntheticModules.A007822.asynchronousAnnex import filterAsymmetricFolds, getAsymmetricFoldsTotal, initializeConcurrencyManager
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.syntheticModules.A007822.asynchronousAnnex import (
-	filterAsymmetricFolds, getAsymmetricFoldsTotal, initializeConcurrencyManager)
 
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
     return state.leaf1ndex > 0

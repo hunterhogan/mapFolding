@@ -18,8 +18,7 @@ def filterAsymmetricFolds(state: MapFoldingState) -> MapFoldingState:
                 ImaSymmetricFold = False
                 break
             leafConnectee += 1
-        if ImaSymmetricFold:
-            state.groupsOfFolds += 1
+        state.groupsOfFolds += ImaSymmetricFold
         state.indexMiniGap += 1
     return state
 

@@ -5,7 +5,6 @@ from queue import Empty, Queue
 from threading import Thread
 import numpy
 
-
 concurrencyManager = None
 groupsOfFoldsTotal: int = 0
 processingThread = None
@@ -51,8 +50,7 @@ def _filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> int:
                 ImaSymmetricFold = False
                 break
             leafConnectee += 1
-        if ImaSymmetricFold:
-            groupsOfFolds += 1
+        groupsOfFolds += ImaSymmetricFold
         indexDistance += 1
     return groupsOfFolds
 

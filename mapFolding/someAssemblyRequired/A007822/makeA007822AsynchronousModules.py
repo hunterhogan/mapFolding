@@ -13,18 +13,31 @@ from os import PathLike
 from pathlib import PurePath
 import ast
 
+identifier_getAsymmetricFoldsTotal = 'getAsymmetricFoldsTotal'
 identifier_initializeConcurrencyManager = 'initializeConcurrencyManager'
+identifier_processCompletedFutures = '_processCompletedFutures'
 
 astExprCall_initializeConcurrencyManager = Make.Expr(Make.Call(Make.Name(identifier_initializeConcurrencyManager)))
-identifier_getAsymmetricFoldsTotal = 'getAsymmetricFoldsTotal'
 AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
 	[Make.Attribute(Make.Name(identifierDataclass), identifierCounting, context=Make.Store())]
 	, value=Make.Call(Make.Name(identifier_getAsymmetricFoldsTotal))
 )
-identifier_processCompletedFutures = '_processCompletedFutures'
 
 def addSymmetryCheckAsynchronous(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
-	"""Add symmetry check to the counting function."""
+	"""Add symmetry check to the counting function.
+
+	To do asynchronous filtering, a few things must happen.
+	1. When the algorithm finds a `groupOfFolds`, the call to `filterAsymmetricFolds` must be non-blocking.
+	2. Filtering the `groupOfFolds` into symmetric folds must start immediately, and run concurrently.
+	3. When filtering, the module must immediately discard `leafBelow` and sum the filtered folds into a global total.
+	4. Of course, the filtering must be complete before `getAsymmetricFoldsTotal` fulfills the request for the total.
+
+	Why _must_ those things happen?
+	1. Filtering takes as long as finding the `groupOfFolds`, so we can't block.
+	2. Filtering must start immediately to keep up with the finding process.
+	3. To discover A007822(27), which is currently unknown, I estimate there will be 369192702554 calls to filterAsymmetricFolds.
+	Each `leafBelow` array will be 28 * 8-bits, so if the queue has only 0.3% of the total calls in it, that is 28 GiB of data.
+	"""
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
 		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableIdentifierA007822))
 		, doThat = Then.extractIt
@@ -136,8 +149,7 @@ queueFutures: Queue[ConcurrentFuture[int]] = Queue()
 				ImaSymmetricFold = False
 				break
 			leafConnectee += 1
-		if ImaSymmetricFold:
-			{identifierCounting} += 1
+		{identifierCounting} += ImaSymmetricFold
 		indexDistance += 1
 	return {identifierCounting}
 	"""
@@ -178,8 +190,8 @@ def _makeA007822AsynchronousModules() -> None:
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', None, logicalPathInfixA007822, None)
 
-	# astModule = parsePathFilename2astModule(pathFilename)
-	# pathFilename = numbaOnTheorem2(astModule, 'asynchronousNumba', None, logicalPathInfixA007822, identifier_filterAsymmetricFolds)
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = numbaOnTheorem2(astModule, 'asynchronousNumba', None, logicalPathInfixA007822, None)
 
 if __name__ == '__main__':
 	_makeA007822AsynchronousModules()

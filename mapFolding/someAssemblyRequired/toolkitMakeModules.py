@@ -86,7 +86,7 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[str, str, s
 	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	return raiseIfNone(dataclassLogicalPathModule), dataclassIdentifier, dataclassInstanceIdentifier
 
-def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: str | None = None, *moduleIdentifier: str | None) -> identifierDotAttribute:
+def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, *moduleIdentifier: str | None) -> identifierDotAttribute:
 	"""Get logical path from components."""
 	listLogicalPathParts: list[str] = []
 	if identifierPackage:
@@ -97,7 +97,7 @@ def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: str |
 		listLogicalPathParts.extend([module for module in moduleIdentifier if module is not None])
 	return '.'.join(listLogicalPathParts)
 
-def getModule(identifierPackage: str | None = packageSettings.identifierPackage, logicalPathInfix: str | None = logicalPathInfixDEFAULT, moduleIdentifier: str | None = identifierModuleSourceAlgorithmDEFAULT) -> ast.Module:
+def getModule(identifierPackage: str | None = packageSettings.identifierPackage, logicalPathInfix: identifierDotAttribute | None = logicalPathInfixDEFAULT, moduleIdentifier: str | None = identifierModuleSourceAlgorithmDEFAULT) -> ast.Module:
 	"""Get Module."""
 	logicalPathSourceModule: identifierDotAttribute = getLogicalPath(identifierPackage, logicalPathInfix, moduleIdentifier)
 	astModule: ast.Module = parseLogicalPath2astModule(logicalPathSourceModule)

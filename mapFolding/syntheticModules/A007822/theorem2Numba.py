@@ -1,4 +1,5 @@
-from mapFolding.dataBaskets import Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
+from mapFolding.dataBaskets import (
+	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal)
 from numba import jit
 
 @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
@@ -23,8 +24,7 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
                             ImaSymmetricFold = False
                             break
                         leafConnectee += 1
-                    if ImaSymmetricFold:
-                        groupsOfFolds += 1
+                    groupsOfFolds += ImaSymmetricFold
                     indexMiniGap += 1
             else:
                 dimensionsUnconstrained = dimensionsTotal

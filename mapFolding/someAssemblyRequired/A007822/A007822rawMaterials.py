@@ -33,8 +33,7 @@ def {identifier_filterAsymmetricFolds}({identifierDataclass}: MapFoldingState) -
 				ImaSymmetricFold = False
 				break
 			leafConnectee += 1
-		if ImaSymmetricFold:
-			{identifierDataclass}.{identifierCounting} += 1
+		{identifierDataclass}.{identifierCounting} += ImaSymmetricFold
 		{identifierDataclass}.indexMiniGap += 1
 
 	return {identifierDataclass}

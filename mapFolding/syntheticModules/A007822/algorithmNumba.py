@@ -23,8 +23,7 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
                             ImaSymmetricFold = False
                             break
                         leafConnectee += 1
-                    if ImaSymmetricFold:
-                        groupsOfFolds += 1
+                    groupsOfFolds += ImaSymmetricFold
                     indexMiniGap += 1
             else:
                 dimensionsUnconstrained = dimensionsTotal
