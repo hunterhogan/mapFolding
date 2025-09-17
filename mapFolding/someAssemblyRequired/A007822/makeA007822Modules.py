@@ -3,14 +3,15 @@ from astToolkit import Be, Make, NodeChanger, NodeTourist, parsePathFilename2ast
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
-	dataclassInstanceIdentifierDEFAULT, IfThis, sourceCallableIdentifierDEFAULT, theCountingIdentifierDEFAULT)
+	identifierCallableSourceDEFAULT, identifierCountingDEFAULT, identifierDataclassInstanceDEFAULT, IfThis)
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
 	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds, logicalPathInfixA007822,
 	sourceCallableDispatcherA007822, sourceCallableIdentifierA007822)
-from mapFolding.someAssemblyRequired.makeAllModules import (
-	getLogicalPath, getModule, getPathFilename, makeDaoOfMapFoldingNumba, makeInitializeState, makeTheorem2,
-	makeUnRePackDataclass, numbaOnTheorem2, trimTheorem2)
-from mapFolding.someAssemblyRequired.transformationTools import write_astModule
+from mapFolding.someAssemblyRequired.makingModules_count import (
+	makeDaoOfMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
+from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState, makeUnRePackDataclass
+from mapFolding.someAssemblyRequired.toolkitMakeModules import (
+	getLogicalPath, getModule, getPathFilename, write_astModule)
 from os import PathLike
 from pathlib import PurePath
 import ast
@@ -20,7 +21,7 @@ def addSymmetryCheck(astModule: ast.Module, moduleIdentifier: str, callableIdent
 # NOTE HEY HEY! Are you trying to figure out why there is more than one copy of `filterAsymmetricFolds`? See the TODO NOTE, below.
 
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
-		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableIdentifierDEFAULT))
+		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(identifierCallableSourceDEFAULT))
 		, doThat = Then.extractIt
 		).captureLastMatch(astModule))
 	astFunctionDef_count.name = sourceCallableIdentifierA007822
@@ -28,7 +29,7 @@ def addSymmetryCheck(astModule: ast.Module, moduleIdentifier: str, callableIdent
 	NodeChanger(Be.Return, Then.insertThisAbove([A007822adjustFoldsTotal])).visit(astFunctionDef_count)
 
 	NodeChanger(
-		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(dataclassInstanceIdentifierDEFAULT, theCountingIdentifierDEFAULT))
+		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(identifierDataclassInstanceDEFAULT, identifierCountingDEFAULT))
 		, doThat=Then.replaceWith(A007822incrementCount)
 		).visit(astFunctionDef_count)
 
@@ -63,11 +64,8 @@ def _makeA007822Modules() -> None:
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixA007822, None)
 
-	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixA007822, None)
-
 	astImportFrom: ast.ImportFrom = Make.ImportFrom(getLogicalPath(packageSettings.identifierPackage, logicalPathInfixA007822, 'theorem2Numba'), list_alias=[Make.alias(sourceCallableIdentifierA007822)])
-	makeUnRePackDataclass(astImportFrom, 'dataPacking')
+	makeUnRePackDataclass(astImportFrom, 'dataPackingA007822')
 
 if __name__ == '__main__':
 	_makeA007822Modules()

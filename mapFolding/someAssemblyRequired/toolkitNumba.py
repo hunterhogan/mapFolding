@@ -136,7 +136,7 @@ While Numba offers multiple decorators (`@jit`, `@njit`, `@vectorize`), this too
 on the general-purpose `@jit` decorator with configurable parameters for flexibility.
 """
 
-def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:  # noqa: C901
+def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:
 	"""Transform a Python function into a Numba-accelerated version with appropriate decorators.
 
 	(AI generated docstring)

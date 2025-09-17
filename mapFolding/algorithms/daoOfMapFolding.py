@@ -1,4 +1,3 @@
-# ruff: noqa: D100 D103
 from mapFolding.dataBaskets import MapFoldingState
 
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
@@ -140,4 +139,4 @@ def count(state: MapFoldingState) -> MapFoldingState:
 
 def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
 	state = count(state)
-	return state  # noqa: RET504
+	return state

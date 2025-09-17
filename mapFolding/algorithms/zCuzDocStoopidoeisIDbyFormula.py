@@ -4,7 +4,6 @@ TODO Implement A178961 for unknown values of A001010
 TODO A223094 For n >= 3: a(n) = n! - Sum_{k=3..n-1} (a(k)*n!/k!) - A000682(n+1). - _Roger Ford_, Aug 24 2024
 TODO A301620 a(n) = Sum_{k=3..floor((n+3)/2)} (A259689(n+1,k)*(k-2)). - _Roger Ford_, Dec 10 2018
 """
-# ruff: noqa D103
 from functools import cache
 from mapFolding import countFolds, dictionaryOEISMeanders
 from mapFolding.basecamp import A000682, A005316

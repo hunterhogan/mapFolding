@@ -60,4 +60,4 @@ for oeisID, FunctionDef in dictionaryFunctionDef.items():
 
 ast.fix_missing_locations(astModule)
 
-writeStringToHere(ast.unparse(astModule), pathFilenameWrite)
+writeStringToHere((ast.unparse(astModule)+"\n"), pathFilenameWrite)

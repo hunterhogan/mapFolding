@@ -5,6 +5,7 @@ from queue import Empty, Queue
 from threading import Thread
 import numpy
 
+
 concurrencyManager = None
 groupsOfFoldsTotal: int = 0
 processingThread = None
@@ -64,4 +65,4 @@ def getAsymmetricFoldsTotal() -> int:
     raiseIfNone(concurrencyManager).shutdown(wait=True)
     queueFutures.put(None)
     raiseIfNone(processingThread).join()
-    return groupsOfFoldsTotal    return groupsOfFoldsTotal
+    return groupsOfFoldsTotal

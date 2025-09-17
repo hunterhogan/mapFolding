@@ -1,46 +1,18 @@
+"""Make the `count` function for an algorithm.
+
+These transformation functions will work on at least two different algorithms. If a transformation function only works on a
+specific type of algorithm, it will be in a subdirectory.
 """
-Map folding AST transformation system: Comprehensive transformation orchestration and module generation.
-
-This module provides the orchestration layer of the map folding AST transformation system,
-implementing comprehensive tools that coordinate all transformation stages to generate optimized
-implementations with diverse computational strategies and performance characteristics. Building
-upon the foundational pattern recognition, structural decomposition, core transformation tools,
-Numba integration, and configuration management established in previous layers, this module
-executes complete transformation processes that convert high-level dataclass-based algorithms
-into specialized variants optimized for specific execution contexts.
-
-The transformation orchestration addresses the full spectrum of optimization requirements for
-map folding computational research through systematic application of the complete transformation
-toolkit. The comprehensive approach decomposes dataclass parameters into primitive values for
-Numba compatibility while removing object-oriented overhead and preserving computational logic,
-generates concurrent execution variants using ProcessPoolExecutor with task division and result
-aggregation, creates dedicated modules for counting variable setup with transformed loop conditions,
-and provides theorem-specific transformations with configurable optimization levels including
-trimmed variants and Numba-accelerated implementations.
-
-The orchestration process operates through systematic AST manipulation that analyzes source
-algorithms to extract dataclass dependencies, transforms data access patterns, applies performance
-optimizations, and generates specialized modules with consistent naming conventions and filesystem
-organization. The comprehensive transformation process coordinates pattern recognition for structural
-analysis, dataclass decomposition for parameter optimization, function transformation for signature
-adaptation, Numba integration for compilation optimization, and configuration management for
-systematic generation control.
-
-Generated modules maintain algorithmic correctness while providing significant performance
-improvements through just-in-time compilation, parallel execution, and optimized data structures
-tailored for specific computational requirements essential to large-scale map folding research.
-"""
-
 from astToolkit import (
-	astModuleToIngredientsFunction, Be, DOT, extractFunctionDef, Grab, identifierDotAttribute, IngredientsFunction,
-	IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then)
+	astModuleToIngredientsFunction, Be, DOT, Grab, identifierDotAttribute, IngredientsFunction, IngredientsModule,
+	LedgerOfImports, Make, NodeChanger, NodeTourist, Then)
 from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
-	algorithmSourceModuleDEFAULT, dataPackingModuleIdentifierDEFAULT, IfThis, logicalPathInfixDEFAULT, ShatteredDataclass,
-	sourceCallableDispatcherDEFAULT, sourceCallableIdentifierDEFAULT, theCountingIdentifierDEFAULT)
+	identifierCallableSourceDEFAULT, identifierCountingDEFAULT, IfThis, ShatteredDataclass)
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import astExprCall_filterAsymmetricFoldsLeafBelow
+from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getPathFilename
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
@@ -48,95 +20,6 @@ from os import PathLike
 from pathlib import PurePath
 from typing import cast
 import ast
-
-def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[str, str, str]:
-	"""Extract dataclass information from a function's AST for transformation operations.
-
-	(AI generated docstring)
-
-	Analyzes the first parameter of a function to identify the dataclass type annotation
-	and instance identifier, then locates the module where the dataclass is defined by
-	examining the function's import statements. This information is essential for
-	dataclass decomposition and transformation operations.
-
-	Parameters
-	----------
-	ingredientsFunction : IngredientsFunction
-		Function container with AST and import information.
-
-	Returns
-	-------
-	dataclassLogicalPathModule : str
-		Module logical path where the dataclass is defined.
-	dataclassIdentifier : str
-		Class name of the dataclass.
-	dataclassInstanceIdentifier : str
-		Parameter name for the dataclass instance.
-
-	Raises
-	------
-	ValueError
-		If dataclass information cannot be extracted from the function.
-
-	"""
-	dataclassName: ast.expr = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	dataclassIdentifier: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
-	dataclassLogicalPathModule = None
-	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # noqa: SLF001
-		for nameTuple in listNameTuples:
-			if nameTuple[0] == dataclassIdentifier:
-				dataclassLogicalPathModule = moduleWithLogicalPath
-				break
-		if dataclassLogicalPathModule:
-			break
-	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	return raiseIfNone(dataclassLogicalPathModule), dataclassIdentifier, dataclassInstanceIdentifier
-
-def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: str | None = None, *moduleIdentifier: str | None) -> identifierDotAttribute:
-	"""Get logical path from components."""
-	listLogicalPathParts: list[str] = []
-	if identifierPackage:
-		listLogicalPathParts.append(identifierPackage)
-	if logicalPathInfix:
-		listLogicalPathParts.append(logicalPathInfix)
-	if moduleIdentifier:
-		listLogicalPathParts.extend([module for module in moduleIdentifier if module is not None])
-	return '.'.join(listLogicalPathParts)
-
-def getModule(identifierPackage: str | None = packageSettings.identifierPackage, logicalPathInfix: str | None = logicalPathInfixDEFAULT, moduleIdentifier: str | None = algorithmSourceModuleDEFAULT) -> ast.Module:
-	"""Get Module."""
-	logicalPathSourceModule: identifierDotAttribute = getLogicalPath(identifierPackage, logicalPathInfix, moduleIdentifier)
-	astModule: ast.Module = parseLogicalPath2astModule(logicalPathSourceModule)
-	return astModule
-
-def getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.pathPackage, logicalPathInfix: PathLike[str] | PurePath | str | None = None, moduleIdentifier: str = '', fileExtension: str = packageSettings.fileExtension) -> PurePath:
-	"""Construct filesystem path from logical path.
-
-	Parameters
-	----------
-	pathRoot : PathLike[str] | PurePath | None = packageSettings.pathPackage
-		Base directory for the package structure.
-	logicalPathInfix : PathLike[str] | PurePath | str | None = None
-		Subdirectory for organizing generated modules.
-	moduleIdentifier : str = ''
-		Name of the specific module file.
-	fileExtension : str = packageSettings.fileExtension
-		File extension for Python modules.
-
-	Returns
-	-------
-	pathFilename : PurePath
-		Complete filesystem path for the generated module file.
-
-	"""
-	pathFilename = PurePath(moduleIdentifier + fileExtension)
-	if logicalPathInfix:
-		pathFilename = PurePath(str(logicalPathInfix).replace('.', '/'), pathFilename)
-	if pathRoot:
-		pathFilename = PurePath(pathRoot, pathFilename)
-	return pathFilename
-
-# TODO Where is the generalized form of these functions?!
 
 def makeDaoOfMapFoldingNumba(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate Numba-optimized sequential implementation of map folding algorithm.
@@ -173,7 +56,7 @@ def makeDaoOfMapFoldingNumba(astModule: ast.Module, moduleIdentifier: str, calla
 		Filesystem path where the optimized module was written.
 
 	"""
-	sourceCallableIdentifier: identifierDotAttribute = sourceCallableIdentifierDEFAULT
+	sourceCallableIdentifier: identifierDotAttribute = identifierCallableSourceDEFAULT
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = callableIdentifier or sourceCallableIdentifier
 
@@ -211,54 +94,6 @@ def makeDaoOfMapFoldingNumba(astModule: ast.Module, moduleIdentifier: str, calla
 
 	return pathFilename
 
-def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
-	"""Generate initialization module for counting variable setup.
-
-	(AI generated docstring)
-
-	Creates a specialized module containing initialization logic for the counting variables
-	used in map folding computations. The generated function transforms the original
-	algorithm's loop conditions to use equality comparisons instead of greater-than
-	comparisons, optimizing the initialization phase.
-
-	This transformation is particularly important for ensuring that counting variables
-	are properly initialized before the main computational loops begin executing.
-
-	Parameters
-	----------
-	astModule : ast.Module
-		Source module containing the base algorithm.
-	moduleIdentifier : str
-		Name for the generated initialization module.
-	callableIdentifier : str | None = None
-		Name for the initialization function.
-	logicalPathInfix : PathLike[str] | PurePath | str | None = None
-		Directory path for organizing the generated module.
-	sourceCallableDispatcher : str | None = None
-		Optional dispatcher function identifier.
-
-	Returns
-	-------
-	pathFilename : PurePath
-		Filesystem path where the initialization module was written.
-
-	"""
-	sourceCallableIdentifier: identifierDotAttribute = sourceCallableIdentifierDEFAULT
-	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = callableIdentifier or sourceCallableIdentifier
-
-	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	theCountingIdentifier: identifierDotAttribute = theCountingIdentifierDEFAULT
-
-	findThis = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-	doThat = Grab.testAttribute(Grab.andDoAllOf([Grab.opsAttribute(Then.replaceWith([ast.Eq()])), Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(theCountingIdentifier)))]))
-	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef.body[0])
-
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
-	write_astModule(IngredientsModule(ingredientsFunction), pathFilename, packageSettings.identifierPackage)
-
-	return pathFilename
-
 def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate module by applying optimization predicted by Theorem 2.
 
@@ -286,13 +121,13 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 		If `sourceCallableDispatcher` is provided.
 
 	"""
-	sourceCallableIdentifier = sourceCallableIdentifierDEFAULT
+	sourceCallableIdentifier = identifierCallableSourceDEFAULT
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = callableIdentifier or sourceCallableIdentifier
 
 	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 
-	theCountingIdentifier: identifierDotAttribute = theCountingIdentifierDEFAULT
+	theCountingIdentifier: identifierDotAttribute = identifierCountingDEFAULT
 	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(Make.Name(dataclassInstanceIdentifier), theCountingIdentifier), Make.Mult(), Make.Constant(2))
 
 	NodeChanger(
@@ -345,55 +180,6 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	return pathFilename
 
-def makeUnRePackDataclass(astImportFrom: ast.ImportFrom, moduleIdentifier: identifierDotAttribute = dataPackingModuleIdentifierDEFAULT) -> None:
-	"""Generate interface module for dataclass unpacking and repacking operations.
-
-	Parameters
-	----------
-	astImportFrom : ast.ImportFrom
-		Import statement specifying the target optimized function to call.
-
-	Returns
-	-------
-	None
-		The generated module is written directly to the filesystem.
-
-	"""
-	callableIdentifierHARDCODED: str = 'sequential'
-
-	algorithmSourceModule: identifierDotAttribute = algorithmSourceModuleDEFAULT
-	sourceCallableIdentifier: identifierDotAttribute = sourceCallableDispatcherDEFAULT
-	logicalPathSourceModule: identifierDotAttribute = '.'.join([packageSettings.identifierPackage, 'algorithms', algorithmSourceModule])  # noqa: FLY002
-
-	logicalPathInfix: identifierDotAttribute = logicalPathInfixDEFAULT
-	callableIdentifier: identifierDotAttribute = callableIdentifierHARDCODED
-
-	ingredientsFunction: IngredientsFunction = astModuleToIngredientsFunction(parseLogicalPath2astModule(logicalPathSourceModule), sourceCallableIdentifier)
-	ingredientsFunction.astFunctionDef.name = callableIdentifier
-
-	shatteredDataclass: ShatteredDataclass = shatter_dataclassesDOTdataclass(*findDataclass(ingredientsFunction))
-
-	ingredientsFunction.imports.update(shatteredDataclass.imports)
-	ingredientsFunction.imports.addAst(astImportFrom)
-	targetCallableIdentifier = astImportFrom.names[0].name
-	ingredientsFunction = raiseIfNone(unpackDataclassCallFunctionRepackDataclass(ingredientsFunction, targetCallableIdentifier, shatteredDataclass))
-	targetFunctionDef: ast.FunctionDef = raiseIfNone(extractFunctionDef(parseLogicalPath2astModule(raiseIfNone(astImportFrom.module)), targetCallableIdentifier))
-	astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
-			, doThat=Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef)))
-	astTuple.ctx = Make.Store()
-
-	changeAssignCallToTarget = NodeChanger(
-		findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-		, doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts))))
-	changeAssignCallToTarget.visit(ingredientsFunction.astFunctionDef)
-
-	ingredientsModule = IngredientsModule(ingredientsFunction)
-	ingredientsModule.removeImportFromModule('numpy')
-
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
-
-	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
-
 def numbaOnTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate Numba-accelerated Theorem 2 implementation with dataclass decomposition.
 
@@ -431,7 +217,7 @@ def numbaOnTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdenti
 		Filesystem path where the accelerated module was written.
 
 	"""
-	sourceCallableIdentifier = sourceCallableIdentifierDEFAULT
+	sourceCallableIdentifier = identifierCallableSourceDEFAULT
 	if callableIdentifier is None:
 		callableIdentifier = sourceCallableIdentifier
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
@@ -492,7 +278,7 @@ def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 		Filesystem path where the trimmed module was written.
 
 	"""
-	sourceCallableIdentifier = sourceCallableIdentifierDEFAULT
+	sourceCallableIdentifier = identifierCallableSourceDEFAULT
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = callableIdentifier or sourceCallableIdentifier
 
@@ -510,3 +296,6 @@ def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
+
+
+

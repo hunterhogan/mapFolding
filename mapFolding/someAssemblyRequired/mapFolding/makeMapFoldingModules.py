@@ -7,11 +7,12 @@ from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParame
 from hunterMakesPy import importLogicalPath2Identifier, raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
-	DeReConstructField2ast, IfThis, logicalPathInfixDEFAULT, ShatteredDataclass, sourceCallableDispatcherDEFAULT,
-	sourceCallableIdentifierDEFAULT)
-from mapFolding.someAssemblyRequired.makeAllModules import (
-	getLogicalPath, getModule, getPathFilename, makeDaoOfMapFoldingNumba, makeInitializeState, makeTheorem2,
-	makeUnRePackDataclass, numbaOnTheorem2, trimTheorem2)
+	DeReConstructField2ast, identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, IfThis,
+	logicalPathInfixDEFAULT, ShatteredDataclass)
+from mapFolding.someAssemblyRequired.makingModules_count import (
+	makeDaoOfMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
+from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState, makeUnRePackDataclass
+from mapFolding.someAssemblyRequired.toolkitMakeModules import getLogicalPath, getModule, getPathFilename
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
@@ -46,7 +47,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 		Filesystem path where the parallel module was written.
 
 	"""
-	sourceCallableIdentifier = sourceCallableIdentifierDEFAULT
+	sourceCallableIdentifier = identifierCallableSourceDEFAULT
 	if callableIdentifier is None:
 		callableIdentifier = sourceCallableIdentifier
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
@@ -133,7 +134,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
 	# START unpack/repack the dataclass function ------------------------------------------------
-	sourceCallableIdentifier = sourceCallableDispatcherDEFAULT
+	sourceCallableIdentifier = identifierCallableSourceDispatcherDEFAULT
 
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclassIdentifierParallel
@@ -192,12 +193,13 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 
 	return pathFilename
 
-def _makeMapFoldingModules() -> None:
+def makeMapFoldingModules() -> None:
+	"""Make multidimensional map folding modules."""
 	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
+	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
 
 	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename = makeDaoOfMapFoldingParallelNumba(astModule, 'countParallelNumba', None, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT)
+	pathFilename = makeDaoOfMapFoldingParallelNumba(astModule, 'countParallelNumba', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
 
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
 	makeInitializeState(astModule, 'initializeState', 'transitionOnGroupsOfFolds', logicalPathInfixDEFAULT)
@@ -211,10 +213,8 @@ def _makeMapFoldingModules() -> None:
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixDEFAULT, None)
 
-	astImportFrom: ast.ImportFrom = Make.ImportFrom(getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2Numba'), list_alias=[Make.alias(sourceCallableIdentifierDEFAULT)])
-	makeUnRePackDataclass(astImportFrom)
-	astImportFrom: ast.ImportFrom = Make.ImportFrom(getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2Numba'), list_alias=[Make.alias(sourceCallableIdentifierDEFAULT)])
+	astImportFrom: ast.ImportFrom = Make.ImportFrom(getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2Numba'), list_alias=[Make.alias(identifierCallableSourceDEFAULT)])
 	makeUnRePackDataclass(astImportFrom)
 
 if __name__ == '__main__':
-	_makeMapFoldingModules()
+	makeMapFoldingModules()

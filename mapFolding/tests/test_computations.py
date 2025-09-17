@@ -28,8 +28,8 @@ which is useful if you're working with the code synthesis features of the packag
 from mapFolding import countFolds, dictionaryOEISMapFolding, dictionaryOEISMeanders, getFoldsTotalKnown, oeisIDfor_n
 from mapFolding.algorithms import oeisIDbyFormula
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.someAssemblyRequired.makeAllModules import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
+from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
 from pathlib import Path, PurePosixPath

@@ -11,45 +11,39 @@ on empirical measurements and theoretical analysis of map folding algorithms for
 specific dimensional configurations.
 """
 
+from hunterMakesPy import identifierDotAttribute
 from typing import Final
 
-algorithmSourceModuleDEFAULT: Final[str] = 'daoOfMapFolding'
-"""Default identifier for the algorithm source module containing the base implementation."""
-
-dataclassInstanceIdentifierDEFAULT: Final[str] = 'state'
-"""Default variable name for dataclass instances in generated code."""
-
-dataPackingModuleIdentifierDEFAULT: Final[str] = 'dataPacking'
-"""Default identifier for modules containing data packing and unpacking functions."""
-
-dictionaryEstimates: Final[dict[tuple[int, ...], int]] = {
+dictionaryEstimatesMapFolding: Final[dict[tuple[int, ...], int]] = {
 	(2,2,2,2,2,2,2,2): 798148657152000,
 	(2,21): 776374224866624,
 	(3,15): 824761667826225,
 	(3,3,3,3): 85109616000000000000000000000000,
 	(8,8): 791274195985524900,
 }
-"""
-Registry of computational complexity estimates for specific map dimension configurations.
+"""Estimates of multidimensional map folding `foldsTotal`."""
 
-Maps dimensional tuples to estimated fold counts based on empirical measurements and
-theoretical analysis. These estimates guide optimization decisions and resource planning
-for computational tasks with known dimensional parameters.
-
-The estimates represent the expected number of computational operations or fold
-configurations for the given map dimensions, helping determine appropriate optimization
-strategies and computational resource allocation.
-"""
-
-logicalPathInfixDEFAULT: Final[str] = 'syntheticModules'
-"""Default path component for organizing synthetic generated modules."""
-
-sourceCallableDispatcherDEFAULT: Final[str] = 'doTheNeedful'
-"""Default identifier for dispatcher functions that route computational tasks."""
-
-sourceCallableIdentifierDEFAULT: Final[str] = 'count'
+identifierCallableSourceDEFAULT: Final[str] = 'count'
 """Default identifier for the core counting function in algorithms."""
 
-theCountingIdentifierDEFAULT: Final[str] = 'groupsOfFolds'
+identifierCallableSourceDispatcherDEFAULT: Final[str] = 'doTheNeedful'
+"""Default identifier for dispatcher functions that route computational tasks."""
+
+identifierCountingDEFAULT: Final[str] = 'groupsOfFolds'
 """Default identifier for the primary counting variable in map folding computations."""
+
+identifierDataclassInstanceDEFAULT: Final[str] = 'state'
+"""Default variable name for dataclass instances in generated code."""
+
+identifierModuleDataPackingDEFAULT: Final[str] = 'dataPacking'
+"""Default identifier for modules containing data packing and unpacking functions."""
+
+identifierModuleSourceAlgorithmDEFAULT: Final[str] = 'daoOfMapFolding'
+"""Default identifier for the algorithm source module containing the base implementation."""
+
+logicalPathInfixAlgorithmDEFAULT: Final[identifierDotAttribute] = 'algorithms'
+"""Default logical path component for handmade algorithms."""
+
+logicalPathInfixDEFAULT: Final[identifierDotAttribute] = 'syntheticModules'
+"""Default logical path component for organizing synthetic generated modules."""
 

@@ -212,59 +212,59 @@ def countFolds(listDimensions: Sequence[int] | None = None
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-				from mapFolding.syntheticModules.A007822Asynchronous import doTheNeedful  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful  # noqa: PLC0415
 				mapFoldingState = doTheNeedful(mapFoldingState)
 
 			case 'asynchronousTheorem2':
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-				from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
 				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
-				from mapFolding.syntheticModules.A007822AsynchronousAnnex import initializeConcurrencyManager  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.asynchronousAnnex import initializeConcurrencyManager  # noqa: PLC0415
 				initializeConcurrencyManager(groupsOfFolds=mapFoldingState.groupsOfFolds)
 				mapFoldingState.groupsOfFolds = 0
 
-				from mapFolding.syntheticModules.A007822AsynchronousTheorem2 import count  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.asynchronousTheorem2 import count  # noqa: PLC0415
 				mapFoldingState = count(mapFoldingState)
 
 			case 'asynchronousTrimmed':
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-				from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
 				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
-				from mapFolding.syntheticModules.A007822AsynchronousAnnex import initializeConcurrencyManager  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.asynchronousAnnex import initializeConcurrencyManager  # noqa: PLC0415
 				initializeConcurrencyManager(groupsOfFolds=mapFoldingState.groupsOfFolds)
 				mapFoldingState.groupsOfFolds = 0
 
-				from mapFolding.syntheticModules.A007822AsynchronousTrimmed import count  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.asynchronousTrimmed import count  # noqa: PLC0415
 				mapFoldingState = count(mapFoldingState)
 
 			case 'numba':
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-				from mapFolding.syntheticModules.algorithmA007822Numba import doTheNeedful  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.algorithmNumba import doTheNeedful  # noqa: PLC0415
 				mapFoldingState = doTheNeedful(mapFoldingState)
 
 			case 'theorem2':
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-				from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
 				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
-				from mapFolding.syntheticModules.theorem2A007822 import count  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.theorem2 import count  # noqa: PLC0415
 				mapFoldingState = count(mapFoldingState)
 
 			case 'theorem2Numba':
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-				from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
 				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
 				from mapFolding.syntheticModules.dataPackingA007822 import sequential  # noqa: PLC0415
@@ -274,17 +274,17 @@ def countFolds(listDimensions: Sequence[int] | None = None
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-				from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
 				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
-				from mapFolding.syntheticModules.theorem2A007822Trimmed import count  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.theorem2Trimmed import count  # noqa: PLC0415
 				mapFoldingState = count(mapFoldingState)
 
 			case _:
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
 				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-				from mapFolding.syntheticModules.algorithmA007822 import doTheNeedful  # noqa: PLC0415
+				from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful  # noqa: PLC0415
 				mapFoldingState = doTheNeedful(mapFoldingState)
 
 		foldsTotal = mapFoldingState.groupsOfFolds

@@ -1,15 +1,15 @@
 from astToolkit import extractFunctionDef, Make  # noqa: D100
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import (
-	dataclassInstanceIdentifierDEFAULT, logicalPathInfixDEFAULT, sourceCallableDispatcherDEFAULT,
-	sourceCallableIdentifierDEFAULT, theCountingIdentifierDEFAULT)
+	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT,
+	identifierDataclassInstanceDEFAULT, logicalPathInfixDEFAULT)
 import ast
 
-identifierDataclass: str = dataclassInstanceIdentifierDEFAULT
-identifierCounting: str = theCountingIdentifierDEFAULT
+identifierDataclass: str = identifierDataclassInstanceDEFAULT
+identifierCounting: str = identifierCountingDEFAULT
 logicalPathInfixA007822: str = logicalPathInfixDEFAULT + '.A007822'
-sourceCallableDispatcherA007822: str = sourceCallableDispatcherDEFAULT
-sourceCallableIdentifierA007822: str = sourceCallableIdentifierDEFAULT
+sourceCallableDispatcherA007822: str = identifierCallableSourceDispatcherDEFAULT
+sourceCallableIdentifierA007822: str = identifierCallableSourceDEFAULT
 
 identifier_filterAsymmetricFolds = 'filterAsymmetricFolds'
 

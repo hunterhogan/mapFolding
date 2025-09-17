@@ -1,5 +1,5 @@
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.syntheticModules.A007822.A007822AsynchronousAnnex import (
+from mapFolding.syntheticModules.A007822.asynchronousAnnex import (
 	filterAsymmetricFolds, getAsymmetricFoldsTotal, initializeConcurrencyManager)
 
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
@@ -145,4 +145,4 @@ def count(state: MapFoldingState) -> MapFoldingState:
 def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
     initializeConcurrencyManager()
     state = count(state)
-    return state    return state
+    return state

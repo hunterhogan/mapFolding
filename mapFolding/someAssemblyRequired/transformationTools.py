@@ -29,15 +29,10 @@ through specialized compilation paths essential for computationally intensive ma
 from astToolkit import (
 	Be, extractClassDef, identifierDotAttribute, IngredientsFunction, Make, NodeChanger, parseLogicalPath2astModule, Then)
 from astToolkit.transformationTools import unparseFindReplace
-from autoflake import fix_code as autoflake_fix_code
-from hunterMakesPy import importLogicalPath2Identifier, writeStringToHere
+from hunterMakesPy import importLogicalPath2Identifier
 from mapFolding.someAssemblyRequired import DeReConstructField2ast, IfThis, ShatteredDataclass
-from os import PathLike
-from pathlib import PurePath
-from typing import Any
 import ast
 import dataclasses
-import io
 
 def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, dataclassIdentifier: str, instanceIdentifier: str) -> ShatteredDataclass:
 	"""Decompose a dataclass definition into AST components for manipulation and code generation.
@@ -198,22 +193,3 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 	repack4targetCallable.visit(ingredientsCaller.astFunctionDef)
 	return ingredientsCaller
 
-def write_astModule(astModule: ast.Module, pathFilename: PathLike[Any] | PurePath | io.TextIOBase, packageName: str | None = None) -> None:
-	"""Prototype.
-
-	Parameters
-	----------
-	astModule : ast.Module
-		The AST module to be written to a file.
-	pathFilename : PathLike[Any] | PurePath
-		The file path where the module should be written.
-	packageName : str | None = None
-		Optional package name to preserve in import optimization.
-	"""
-	ast.fix_missing_locations(astModule)
-	pythonSource: str = ast.unparse(astModule)
-	autoflake_additional_imports: list[str] = []
-	if packageName:
-		autoflake_additional_imports.append(packageName)
-	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=True, remove_duplicate_keys = False, remove_unused_variables = False)
-	writeStringToHere(pythonSource, pathFilename)

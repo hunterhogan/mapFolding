@@ -2,14 +2,13 @@
 from astToolkit import Be, extractFunctionDef, Grab, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import IfThis
+from mapFolding.someAssemblyRequired import IfThis, logicalPathInfixAlgorithmDEFAULT
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
 	A007822adjustFoldsTotal, astExprCall_filterAsymmetricFoldsDataclass, identifier_filterAsymmetricFolds,
 	identifierCounting, identifierDataclass, logicalPathInfixA007822, sourceCallableDispatcherA007822,
 	sourceCallableIdentifierA007822)
-from mapFolding.someAssemblyRequired.makeAllModules import (
-	getModule, getPathFilename, makeTheorem2, numbaOnTheorem2, trimTheorem2)
-from mapFolding.someAssemblyRequired.transformationTools import write_astModule
+from mapFolding.someAssemblyRequired.makingModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
+from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename, write_astModule
 from os import PathLike
 from pathlib import PurePath
 import ast
@@ -170,17 +169,17 @@ def {identifier_getAsymmetricFoldsTotal}() -> int:
 
 def _makeA007822AsynchronousModules() -> None:
 
-	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename = addSymmetryCheckAsynchronous(astModule, 'A007822Asynchronous', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
+	astModule = getModule(logicalPathInfix=logicalPathInfixAlgorithmDEFAULT)
+	pathFilename = addSymmetryCheckAsynchronous(astModule, 'asynchronous', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
 
-	astModule = getModule(moduleIdentifier='A007822Asynchronous')
-	pathFilename = makeTheorem2(astModule, 'A007822AsynchronousTheorem2', None, logicalPathInfixA007822, None)
-
-	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = trimTheorem2(astModule, 'A007822AsynchronousTrimmed', None, logicalPathInfixA007822, None)
+	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, moduleIdentifier='asynchronous')
+	pathFilename = makeTheorem2(astModule, 'asynchronousTheorem2', None, logicalPathInfixA007822, None)
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = numbaOnTheorem2(astModule, 'A007822AsynchronousNumba', None, logicalPathInfixA007822, identifier_filterAsymmetricFolds)
+	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', None, logicalPathInfixA007822, None)
+
+	# astModule = parsePathFilename2astModule(pathFilename)
+	# pathFilename = numbaOnTheorem2(astModule, 'asynchronousNumba', None, logicalPathInfixA007822, identifier_filterAsymmetricFolds)
 
 if __name__ == '__main__':
 	_makeA007822AsynchronousModules()

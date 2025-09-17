@@ -6,7 +6,7 @@ from mapFolding import (
 	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal,
 	DatatypeLeavesTotal as TheDatatypeLeavesTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState,
 	packageSettings)
-from mapFolding.someAssemblyRequired import dataclassInstanceIdentifierDEFAULT, ShatteredDataclass
+from mapFolding.someAssemblyRequired import identifierDataclassInstanceDEFAULT, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 import dataclasses
@@ -98,7 +98,7 @@ class RecipeJobTheorem2:
 	"""Logical path to the dataclass module."""
 	sourceDataclassIdentifier: str = 'MapFoldingState'
 	"""Name of the source dataclass."""
-	sourceDataclassInstance: str = dataclassInstanceIdentifierDEFAULT
+	sourceDataclassInstance: str = identifierDataclassInstanceDEFAULT
 	"""Instance identifier for the dataclass."""
 
 	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageSettings.pathPackage)  # noqa: RUF009
