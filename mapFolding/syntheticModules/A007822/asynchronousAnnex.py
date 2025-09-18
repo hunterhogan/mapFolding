@@ -4,7 +4,6 @@ from mapFolding import Array1DLeavesTotal
 from queue import Empty, Queue
 from threading import Thread
 import numpy
-
 concurrencyManager = None
 groupsOfFoldsTotal: int = 0
 processingThread = None

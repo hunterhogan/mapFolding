@@ -6,28 +6,25 @@ from mapFolding import dictionaryOEISMapFolding, dictionaryOEISMeanders, package
 from pathlib import Path
 import ast
 
+# ----------------- General Settings ----------------------------------------------------------------------------------
 sourcePrefix: str = 'zCuzDocStoopid'
 
-pathRoot: Path = packageSettings.pathPackage / "algorithms"
+moduleWarning = "NOTE: This is a generated file; edit the source file."
 
-pathFilenameSource: Path = next(iter(pathRoot.glob(f"{sourcePrefix}*.py"))).absolute()
-pathFilenameWrite: Path = pathFilenameSource.with_stem(pathFilenameSource.stem.removeprefix(sourcePrefix))
+def transformOEISidByFormula(pathFilenameSource: Path) -> None:
+    """Transform the docstrings of functions corresponding to OEIS sequences."""
+    pathFilenameWrite: Path = pathFilenameSource.with_stem(pathFilenameSource.stem.removeprefix(sourcePrefix))
+    astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource)
+    dictionaryFunctionDef: dict[str, ast.FunctionDef] = makeDictionaryFunctionDef(astModule)
 
-astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource)
-dictionaryFunctionDef: dict[str, ast.FunctionDef] = makeDictionaryFunctionDef(astModule)
+    oeisID = 'Error during transformation' # `ast.FunctionDef.name` of function in `pathFilenameSource`.
+    functionOf: str = 'Error during transformation' # The value of `functionOf` is in the docstring of function `oeisID` in `pathFilenameSource`.
 
-moduleWarning = """
-NOTE: This is a generated file; edit the source file.
-"""
+    for oeisID, FunctionDef in dictionaryFunctionDef.items():
+        dictionaryOEIS = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEISMeanders
+        functionOf = raiseIfNone(ast.get_docstring(FunctionDef))
 
-oeisID = 'Error during transformation' # `ast.FunctionDef.name` of function in `pathFilenameSource`.
-functionOf: str = 'Error during transformation' # The value of `functionOf` is in the docstring of function `oeisID` in `pathFilenameSource`.
-
-for oeisID, FunctionDef in dictionaryFunctionDef.items():
-    dictionaryOEIS = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEISMeanders
-    functionOf = raiseIfNone(ast.get_docstring(FunctionDef))
-
-    ImaDocstring= 	f"""
+        ImaDocstring= 	f"""
     Compute {oeisID}(n) as a function of {functionOf}.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{dictionaryOEIS[oeisID]['description']}"
@@ -51,13 +48,21 @@ for oeisID, FunctionDef in dictionaryFunctionDef.items():
         https://oeis.org/{oeisID}
     """
 
-    astExprDocstring = Make.Expr(Make.Constant(ImaDocstring))
+        astExprDocstring = Make.Expr(Make.Constant(ImaDocstring))
 
-    NodeChanger(
-        findThis = IfThis.isFunctionDefIdentifier(oeisID)
-        , doThat = Grab.bodyAttribute(Grab.index(0, Then.replaceWith(astExprDocstring)))
-    ).visit(astModule)
+        NodeChanger(
+            findThis = IfThis.isFunctionDefIdentifier(oeisID)
+            , doThat = Grab.bodyAttribute(Grab.index(0, Then.replaceWith(astExprDocstring)))
+        ).visit(astModule)
 
-ast.fix_missing_locations(astModule)
+    ast.fix_missing_locations(astModule)
 
-writeStringToHere((ast.unparse(astModule)+"\n"), pathFilenameWrite)
+    docstringModule = raiseIfNone(ast.get_docstring(astModule))
+    moduleAsString = ast.unparse(astModule) + "\n"
+    moduleAsString = moduleAsString.replace(docstringModule,docstringModule + "\n\n" + moduleWarning)
+
+    writeStringToHere(moduleAsString, pathFilenameWrite)
+
+pathRoot: Path = packageSettings.pathPackage / "algorithms"
+pathFilenameSource: Path = next(iter(pathRoot.glob(f"{sourcePrefix}*.py"))).absolute()
+transformOEISidByFormula(pathFilenameSource)

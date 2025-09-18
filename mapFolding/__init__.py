@@ -28,8 +28,10 @@ from mapFolding.beDRY import (
 	validateListDimensions as validateListDimensions)
 
 from mapFolding.dataBaskets import (
-    MapFoldingState as MapFoldingState,
-    MatrixMeandersState as MatrixMeandersState)
+	ParallelMapFoldingState as ParallelMapFoldingState,
+	MapFoldingState as MapFoldingState,
+	MatrixMeandersNumPyState as MatrixMeandersNumPyState,
+	MatrixMeandersState as MatrixMeandersState)
 
 from mapFolding.filesystemToolkit import (
 	getFilenameFoldsTotal as getFilenameFoldsTotal,

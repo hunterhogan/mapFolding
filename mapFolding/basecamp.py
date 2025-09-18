@@ -344,12 +344,12 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	elif taskDivisions > 1:
 		from mapFolding.dataBaskets import ParallelMapFoldingState  # noqa: PLC0415
-		parallelMapFoldingState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
+		mapFoldingParallelState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
 		from mapFolding.syntheticModules.countParallelNumba import doTheNeedful  # noqa: PLC0415
 
 		# `listStatesParallel` exists so you can research the parallel computation.
-		foldsTotal, listStatesParallel = doTheNeedful(parallelMapFoldingState, concurrencyLimit) # pyright: ignore[reportUnusedVariable]  # noqa: RUF059
+		foldsTotal, listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit) # pyright: ignore[reportUnusedVariable]  # noqa: RUF059
 
 	else:
 		from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415

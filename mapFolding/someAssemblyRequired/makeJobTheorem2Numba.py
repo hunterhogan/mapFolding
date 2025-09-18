@@ -161,9 +161,9 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 				ImaAnnAssign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[ast_arg.arg]
 				match elementConstructor:
 					case 'scalar':
-						cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(job.state.__dict__[ast_arg.arg])
+						cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # noqa: S307
 					case 'array':
-						dataAsStrRLE: str = autoDecodingRLE(job.state.__dict__[ast_arg.arg], assumeAddSpaces=True)
+						dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{ast_arg.arg}"), assumeAddSpaces=True)  # noqa: S307
 						dataAs_astExpr: ast.expr = cast('ast.Expr', ast.parse(dataAsStrRLE).body[0]).value
 						cast('ast.Call', ImaAnnAssign.value).args = [dataAs_astExpr]
 					case _:
@@ -220,7 +220,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 	listIdentifiersStaticValues: list[str] = listIdentifiersStaticValuesHARDCODED
 	for identifier in listIdentifiersStaticValues:
 		findThis: Callable[[ast.AST], TypeIs[ast.Name] | bool] = IfThis.isNameIdentifier(identifier)
-		doThat: Callable[[ast.Name], ast.Constant] = Then.replaceWith(Make.Constant(int(job.state.__dict__[identifier])))
+		doThat: Callable[[ast.Name], ast.Constant] = Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # noqa: S307
 		NodeChanger(findThis, doThat).visit(ingredientsCount.astFunctionDef)
 
 	ingredientsModule = IngredientsModule()

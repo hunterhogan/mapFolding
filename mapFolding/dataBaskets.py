@@ -26,7 +26,7 @@ from mapFolding import (
 import dataclasses
 import numpy
 
-@dataclasses.dataclass
+@dataclasses.dataclass(slots=True)
 class MapFoldingState:
 	"""Core computational state for map folding algorithms.
 
@@ -155,7 +155,7 @@ class MapFoldingState:
 		if self.leafComparison is None: self.leafComparison = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
 
 @dataclasses.dataclass
-class ParallelMapFoldingState(MapFoldingState):
+class ParallelMapFoldingState(MapFoldingState): # This identifier because of `dataclassIdentifierParallel: identifierDotAttribute = 'Parallel' + dataclassIdentifier`.
 	"""Computational state for task division operations.
 
 	(AI generated docstring)
@@ -270,7 +270,7 @@ class LeafSequenceState(MapFoldingState):
 			self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
 			self.leafSequence[self.groupsOfFolds] = self.leaf1ndex
 
-@dataclasses.dataclass
+@dataclasses.dataclass(slots=True)
 class MatrixMeandersState:
 	"""Hold the state of a meanders transfer matrix algorithm computation."""
 
@@ -285,44 +285,9 @@ class MatrixMeandersState:
 	(*int*eger), which may be arbitrarily large. Because of that property, `int` may also be called a 'bignum' (big *num*ber) or
 	'bigint' (big *int*eger)."""
 
-	datatypeCurveLocations: type = numpy.uint64
-	"""The fixed-size integer type used to store `curveLocations`, when applicable."""
-	datatypeDistinctCrossings: type = numpy.uint64
-	"""The fixed-size integer type used to store `distinctCrossings`, when applicable."""
-
-	bitWidthCurveLocationsMaximum: int | None = None
-	bitWidthDistinctCrossingsMaximum: int | None = None
-
 	bitWidth: int = 0
 	"""At the start of an iteration enumerated by `kOfMatrix`, the number of bits of the largest value `curveLocations`. The
 	`dataclass` computes a `property` from `bitWidth`."""
-	indexTarget: int = 0
-	"""What is being indexed depends on the algorithm flavor."""
-
-	def __post_init__(self) -> None:
-		"""Post init."""
-		if self.bitWidthCurveLocationsMaximum is None:
-			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeCurveLocations).itemsize * 8 # bits
-
-			_offsetNecessary: int = 3 # For example, `groupZulu << 3`.
-			_offsetSafety: int = 1 # I don't have mathematical proof of how many extra bits I need.
-			_offset: int = _offsetNecessary + _offsetSafety
-
-			self.bitWidthCurveLocationsMaximum = _bitWidthOfFixedSizeInteger - _offset
-
-			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetSafety, _offset
-
-		if self.bitWidthDistinctCrossingsMaximum is None:
-			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeDistinctCrossings).itemsize * 8 # bits
-
-			_offsetNecessary: int = 0 # I don't know of any.
-			_offsetEstimation: int = 3 # See reference directory.
-			_offsetSafety: int = 1
-			_offset: int = _offsetNecessary + _offsetEstimation + _offsetSafety
-
-			self.bitWidthDistinctCrossingsMaximum = _bitWidthOfFixedSizeInteger - _offset
-
-			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetEstimation, _offsetSafety, _offset
 
 	@property
 	def MAXIMUMcurveLocations(self) -> int:
@@ -330,16 +295,16 @@ class MatrixMeandersState:
 		return 1 << (2 * self.kOfMatrix + 4)
 
 	@property
-	def locatorGroupAlpha(self) -> int:
+	def locatorBitsAlpha(self) -> int:
 		"""Compute an odd-parity bit-mask with `bitWidth` bits.
 
 		Notes
 		-----
-		In binary, `locatorGroupAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
+		In binary, `locatorBitsAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
 		digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
 		from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
-		counting this way, `locatorGroupAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
-		therefore, tend to call `locatorGroupAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
+		counting this way, `locatorBitsAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
+		therefore, tend to call `locatorBitsAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
 		mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
 		odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
 
@@ -347,7 +312,46 @@ class MatrixMeandersState:
 		return sum(1 << one for one in range(0, self.bitWidth, 2))
 
 	@property
-	def locatorGroupZulu(self) -> int:
+	def locatorBitsZulu(self) -> int:
 		"""Compute an even-parity bit-mask with `bitWidth` bits."""
 		return sum(1 << one for one in range(1, self.bitWidth, 2))
 
+@dataclasses.dataclass(slots=True)
+class MatrixMeandersNumPyState(MatrixMeandersState):
+	"""Hold the state of a meanders transfer matrix algorithm computation."""
+
+	datatypeCurveLocations: type = numpy.uint64
+	"""The fixed-size integer type used to store `curveLocations`."""
+	datatypeDistinctCrossings: type = numpy.uint64
+	"""The fixed-size integer type used to store `distinctCrossings`."""
+
+	bitWidthLimitCurveLocations: int | None = None
+	bitWidthLimitDistinctCrossings: int | None = None
+
+	indexTarget: int = 0
+	"""What is being indexed depends on the algorithm flavor."""
+
+	def __post_init__(self) -> None:
+		"""Post init."""
+		if self.bitWidthLimitCurveLocations is None:
+			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeCurveLocations).itemsize * 8 # bits
+
+			_offsetNecessary: int = 3 # For example, `bitsZulu << 3`.
+			_offsetSafety: int = 1 # I don't have mathematical proof of how many extra bits I need.
+			_offset: int = _offsetNecessary + _offsetSafety
+
+			self.bitWidthLimitCurveLocations = _bitWidthOfFixedSizeInteger - _offset
+
+			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetSafety, _offset
+
+		if self.bitWidthLimitDistinctCrossings is None:
+			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeDistinctCrossings).itemsize * 8 # bits
+
+			_offsetNecessary: int = 0 # I don't know of any.
+			_offsetEstimation: int = 3 # See reference directory.
+			_offsetSafety: int = 1
+			_offset: int = _offsetNecessary + _offsetEstimation + _offsetSafety
+
+			self.bitWidthLimitDistinctCrossings = _bitWidthOfFixedSizeInteger - _offset
+
+			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetEstimation, _offsetSafety, _offset
