@@ -1,7 +1,7 @@
 [project]
 name = "mapFolding"
 version = "0.16.0"
-description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations and code optimization."
+description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { 'text' = "CC-BY-NC-4.0" }

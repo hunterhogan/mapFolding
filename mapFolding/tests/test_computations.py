@@ -140,6 +140,38 @@ def test_flowControlByOEISid(oeisID: str, flow: str) -> None:
 			, countFolds, listDimensions, pathLikeWriteFoldsTotal, computationDivisions, CPUlimit, mapShape
 			, oeisID, oeis_n, flow)
 
+@pytest.mark.parametrize('flow', ['asynchronous', 'asynchronousTrimmed'])
+def test_flowControlAsynchronous(flow: str) -> None:
+	"""Test A007822 asynchronous flow options.
+
+	Parameters
+	----------
+	flow : str
+		The computational flow algorithm to validate.
+
+	"""
+	oeisID = 'A007822'
+	listDimensions = None
+	pathLikeWriteFoldsTotal = None
+	computationDivisions = None
+	CPUlimit = .5
+	mapShape = None
+
+	oeis_n = 2
+	for oeis_n in dictionaryOEISMapFolding[oeisID]['valuesTestValidation']:
+		if oeis_n < 2:
+			continue
+
+		if oeisID in dictionaryOEISMeanders:
+			expected = dictionaryOEISMeanders[oeisID]['valuesKnown'][oeis_n]
+		else:
+			expected = dictionaryOEISMapFolding[oeisID]['valuesKnown'][oeis_n]
+
+		standardizedEqualToCallableReturn(
+			expected
+			, countFolds, listDimensions, pathLikeWriteFoldsTotal, computationDivisions, CPUlimit, mapShape
+			, oeisID, oeis_n, flow)
+
 @pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:
 	"""Test dynamic code generation and execution for computational modules.

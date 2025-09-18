@@ -83,7 +83,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, moduleIdentifier: str, c
 	write_astModule(astModule, pathFilename, packageSettings.identifierPackage)
 	del astModule
 # ----------------- Ingredients Module Annex ------------------------------------------------------------------------------
-	ImaString = """from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
+	ImaString = """from concurrent.futures import Future as ConcurrentFuture, ThreadPoolExecutor
 from hunterMakesPy import raiseIfNone
 from mapFolding import Array1DLeavesTotal
 from queue import Empty, Queue
@@ -103,7 +103,7 @@ queueFutures: Queue[ConcurrentFuture[int]] = Queue()
 
 	ImaString = f"""def {identifier_initializeConcurrencyManager}(maxWorkers: int | None = None, {identifierCounting}: int = 0) -> None:
 	global concurrencyManager, queueFutures, {identifierCounting}Total, processingThread
-	concurrencyManager = ProcessPoolExecutor(max_workers=maxWorkers)
+	concurrencyManager = ThreadPoolExecutor(max_workers=maxWorkers)
 	queueFutures = Queue()
 	{identifierCounting}Total = {identifierCounting}
 	processingThread = Thread(target={identifier_processCompletedFutures})

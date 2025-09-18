@@ -1,26 +1,4 @@
-"""
-Core computational utilities implementing Lunnon's map folding algorithm.
-
-(AI generated docstring)
-
-With the configuration foundation established and the type system defined, this
-module provides the essential building blocks that transform mathematical theory
-into executable computation. These utilities implement the fundamental operations
-required by Lunnon's 1971 algorithm, handling dimension validation, connection
-graph generation, and computational resource management.
-
-The connection graph generation represents the mathematical heart of the algorithm,
-calculating how leaves connect across dimensions using coordinate systems, parity
-rules, and boundary conditions. This graph becomes the foundation upon which the
-recursive folding analysis operates. Validation functions ensure computational
-of large-scale problems. Validation functions ensure computational
-integrity, while task division management enables experimental task division strategies.
-
-These utilities follow DRY and SSOT principles, providing reusable functions that
-serve as the computational assembly-line components. They prepare the essential
-data structures and computational parameters that the state management system
-requires to orchestrate the complex recursive algorithms.
-"""
+"""Oft-needed computations or actions, especially for multi-dimensional map folding."""
 
 from collections.abc import Sequence
 from hunterMakesPy import defineConcurrencyLimit, intInnit, oopsieKwargsie
@@ -32,8 +10,6 @@ import numpy
 
 def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 	"""Calculate the total number of leaves in a map with the given dimensions.
-
-	(AI generated docstring)
 
 	The total number of leaves is the product of all dimensions in the map shape.
 
@@ -65,8 +41,6 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 
 def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, leavesTotal: int) -> int:
 	"""Determine whether to divide the computation into tasks and how many divisions.
-
-	(AI generated docstring)
 
 	Parameters
 	----------
@@ -214,12 +188,10 @@ def makeDataContainer(shape: int | tuple[int, ...], datatype: type[NumPyIntegerT
 def setProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = None) -> int:
 	"""Set the CPU usage limit for concurrent operations.
 
-	(AI generated docstring)
-
 	Parameters
 	----------
 	CPUlimit : Any | None
-		Please see the documentation for in `countFolds` for details. I know it is annoying, but I want to be sure you
+		Please see the documentation in `countFolds` for details. I know it is annoying, but I want to be sure you
 		have the most accurate information.
 	concurrencyPackage : str | None = None
 		Specifies which concurrency package to use.

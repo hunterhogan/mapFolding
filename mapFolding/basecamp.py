@@ -102,8 +102,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		- 'maximum': divides the computation into `leavesTotal`-many tasks.
 		- 'cpu': divides the computation into the number of available CPUs.
 	CPUlimit : bool | float | int | None = None
-		If relevant, whether and how to limit the number of processors `countFolds` will use. `CPUlimit` is an irrelevant setting
-		unless the computation is divided into more than one task with the `computationDivisions` parameter.
+		If relevant, whether and how to limit the number of processors `countFolds` will use.
 		- `False`, `None`, or `0`: No limits on processor usage; uses all available processors. All other values will
 		potentially limit processor usage.
 		- `True`: Yes, limit the processor usage; limits to 1 processor.
@@ -171,16 +170,18 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		)
 		raise ValueError(message)
 
+	# CPU usage instructions -----------------------------------------------------
+
+	concurrencyLimit: int = setProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
+
 	# task division instructions -----------------------------------------------------
 
 	if computationDivisions:
-		concurrencyLimit: int = setProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
 		from mapFolding.beDRY import getLeavesTotal, getTaskDivisions  # noqa: PLC0415
 		leavesTotal: int = getLeavesTotal(mapShape)
 		taskDivisions = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
 		del leavesTotal
 	else:
-		concurrencyLimit = 1
 		taskDivisions = 0
 
 	# memorialization instructions ---------------------------------------------
@@ -215,19 +216,19 @@ def countFolds(listDimensions: Sequence[int] | None = None
 				from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful  # noqa: PLC0415
 				mapFoldingState = doTheNeedful(mapFoldingState)
 
-			case 'asynchronousTheorem2':
-				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
-				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+			# case 'asynchronousNumba':
+			# 	from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
+			# 	mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-				from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
-				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+			# 	from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
+			# 	mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
-				from mapFolding.syntheticModules.A007822.asynchronousAnnex import initializeConcurrencyManager  # noqa: PLC0415
-				initializeConcurrencyManager(groupsOfFolds=mapFoldingState.groupsOfFolds)
-				mapFoldingState.groupsOfFolds = 0
+			# 	from mapFolding.syntheticModules.A007822.asynchronousAnnexNumba import initializeConcurrencyManager  # noqa: PLC0415
+			# 	initializeConcurrencyManager(groupsOfFolds=mapFoldingState.groupsOfFolds)
+			# 	mapFoldingState.groupsOfFolds = 0
 
-				from mapFolding.syntheticModules.A007822.asynchronousTheorem2 import count  # noqa: PLC0415
-				mapFoldingState = count(mapFoldingState)
+			# 	from mapFolding.syntheticModules.A007822.asynchronousNumba import count  # noqa: PLC0415
+			# 	mapFoldingState = count(mapFoldingState)
 
 			case 'asynchronousTrimmed':
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415
@@ -237,7 +238,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
 				from mapFolding.syntheticModules.A007822.asynchronousAnnex import initializeConcurrencyManager  # noqa: PLC0415
-				initializeConcurrencyManager(groupsOfFolds=mapFoldingState.groupsOfFolds)
+				initializeConcurrencyManager(maxWorkers=concurrencyLimit, groupsOfFolds=mapFoldingState.groupsOfFolds)
 				mapFoldingState.groupsOfFolds = 0
 
 				from mapFolding.syntheticModules.A007822.asynchronousTrimmed import count  # noqa: PLC0415
@@ -267,8 +268,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 				from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
 				mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
-				from mapFolding.syntheticModules.dataPackingA007822 import sequential  # noqa: PLC0415
-				mapFoldingState = sequential(mapFoldingState)
+				from mapFolding.syntheticModules.A007822.theorem2Numba import count  # noqa: PLC0415
+				mapFoldingState = count(mapFoldingState)
 
 			case 'theorem2Trimmed':
 				from mapFolding.dataBaskets import MapFoldingState  # noqa: PLC0415

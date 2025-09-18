@@ -1,4 +1,4 @@
-from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
+from concurrent.futures import Future as ConcurrentFuture, ThreadPoolExecutor
 from hunterMakesPy import raiseIfNone
 from mapFolding import Array1DLeavesTotal
 from queue import Empty, Queue
@@ -12,7 +12,7 @@ queueFutures: Queue[ConcurrentFuture[int]] = Queue()
 
 def initializeConcurrencyManager(maxWorkers: int | None=None, groupsOfFolds: int=0) -> None:
     global concurrencyManager, queueFutures, groupsOfFoldsTotal, processingThread
-    concurrencyManager = ProcessPoolExecutor(max_workers=maxWorkers)
+    concurrencyManager = ThreadPoolExecutor(max_workers=maxWorkers)
     queueFutures = Queue()
     groupsOfFoldsTotal = groupsOfFolds
     processingThread = Thread(target=_processCompletedFutures)

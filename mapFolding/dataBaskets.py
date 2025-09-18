@@ -156,7 +156,7 @@ class MapFoldingState:
 
 @dataclasses.dataclass
 class ParallelMapFoldingState(MapFoldingState):
-	"""Experimental computational state for task division operations.
+	"""Computational state for task division operations.
 
 	(AI generated docstring)
 
@@ -270,24 +270,34 @@ class LeafSequenceState(MapFoldingState):
 			self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
 			self.leafSequence[self.groupsOfFolds] = self.leaf1ndex
 
-
 @dataclasses.dataclass
 class MatrixMeandersState:
-	"""State."""
+	"""Hold the state of a meanders transfer matrix algorithm computation."""
 
 	n: int
+	"""The index of the meanders problem being solved."""
 	oeisID: str
+	"""'A000682', semi-meanders, or 'A005316', meanders."""
 	kOfMatrix: int
+	"""The number of iterations remaining in the transfer matrix algorithm."""
 	dictionaryCurveLocations: dict[int, int]
+	"""A Python `dict` (*dict*ionary) of `curveLocations` to `distinctCrossings`. The values are stored as Python `int`
+	(*int*eger), which may be arbitrarily large. Because of that property, `int` may also be called a 'bignum' (big *num*ber) or
+	'bigint' (big *int*eger)."""
 
 	datatypeCurveLocations: type = numpy.uint64
+	"""The fixed-size integer type used to store `curveLocations`, when applicable."""
 	datatypeDistinctCrossings: type = numpy.uint64
+	"""The fixed-size integer type used to store `distinctCrossings`, when applicable."""
 
 	bitWidthCurveLocationsMaximum: int | None = None
 	bitWidthDistinctCrossingsMaximum: int | None = None
 
 	bitWidth: int = 0
-	indexStartAnalyzed: int = 0
+	"""At the start of an iteration enumerated by `kOfMatrix`, the number of bits of the largest value `curveLocations`. The
+	`dataclass` computes a `property` from `bitWidth`."""
+	indexTarget: int = 0
+	"""What is being indexed depends on the algorithm flavor."""
 
 	def __post_init__(self) -> None:
 		"""Post init."""
@@ -340,5 +350,4 @@ class MatrixMeandersState:
 	def locatorGroupZulu(self) -> int:
 		"""Compute an even-parity bit-mask with `bitWidth` bits."""
 		return sum(1 << one for one in range(1, self.bitWidth, 2))
-
 

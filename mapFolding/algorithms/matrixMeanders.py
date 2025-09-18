@@ -209,7 +209,7 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		def aggregateCurveLocations()  -> None:
 			nonlocal dataframeAnalyzed
-			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexStartAnalyzed].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
+			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexTarget].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
 
 		def analyzeCurveLocationsAligned() -> None:
 			"""Compute `curveLocations` from `groupAlpha` and `groupZulu` if at least one is an even number.
@@ -425,19 +425,19 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		def recordCurveLocations() -> None:
 			nonlocal dataframeAnalyzed
 
-			indexStopAnalyzed: int = state.indexStartAnalyzed + int((dataframeCurveLocations['analyzed'] > 0).sum()) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+			indexStopAnalyzed: int = state.indexTarget + int((dataframeCurveLocations['analyzed'] > 0).sum()) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
 
-			if indexStopAnalyzed > state.indexStartAnalyzed:
+			if indexStopAnalyzed > state.indexTarget:
 				if len(dataframeAnalyzed.index) < indexStopAnalyzed:
 					warn(f"Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to {indexStopAnalyzed=}; n={state.n}, {state.kOfMatrix=}.", stacklevel=2)
 					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
 
-				dataframeAnalyzed.loc[state.indexStartAnalyzed:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
+				dataframeAnalyzed.loc[state.indexTarget:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
 					dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']
 								].to_numpy(dtype=state.datatypeCurveLocations, copy=False)
 				)
 
-				state.indexStartAnalyzed = indexStopAnalyzed
+				state.indexTarget = indexStopAnalyzed
 
 			del indexStopAnalyzed
 
@@ -461,7 +461,7 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		state.kOfMatrix -= 1
 
-		state.indexStartAnalyzed = 0
+		state.indexTarget = 0
 
 		analyzeCurveLocationsSimple()
 		recordCurveLocations()
@@ -480,7 +480,7 @@ def countPandas(state: MatrixMeandersState) -> MatrixMeandersState:
 		aggregateCurveLocations()
 
 		if state.n >= 45:  # for data collection
-			print(state.n, state.kOfMatrix+1, state.indexStartAnalyzed, sep=',')  # noqa: T201
+			print(state.n, state.kOfMatrix+1, state.indexTarget, sep=',')  # noqa: T201
 
 	state.dictionaryCurveLocations = dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].to_dict()
 	return state

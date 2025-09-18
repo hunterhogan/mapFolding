@@ -63,9 +63,12 @@ def _makeA007822Modules() -> None:
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixA007822, None)
+# TODO from mapFolding.syntheticModules.dataPackingA007822 import unRePackDataclass
+# @unRePackDataclass
 
-	astImportFrom: ast.ImportFrom = Make.ImportFrom(getLogicalPath(packageSettings.identifierPackage, logicalPathInfixA007822, 'theorem2Numba'), list_alias=[Make.alias(sourceCallableIdentifierA007822)])
-	makeUnRePackDataclass(astImportFrom, 'dataPackingA007822')
+# TODO Make this decorator.
+	# astImportFrom: ast.ImportFrom = Make.ImportFrom(getLogicalPath(packageSettings.identifierPackage, logicalPathInfixA007822, 'theorem2Numba'), list_alias=[Make.alias(sourceCallableIdentifierA007822)])
+	# makeUnRePackDataclass(astImportFrom, 'dataPackingA007822')
 
 if __name__ == '__main__':
 	_makeA007822Modules()
