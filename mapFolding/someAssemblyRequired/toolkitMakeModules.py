@@ -43,15 +43,19 @@ from typing import Any
 import ast
 import io
 
-def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[str, str, str]:
-	"""Extract dataclass information from a function's AST for transformation operations.
+def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
+	"""Dynamically extract information about a `dataclass`: the instance identifier, the identifier, and the logical path module.
 
-	(AI generated docstring)
+	Like many things in the "IngredientsFunction/IngredientsModule" ecosystem, this has specific requirements.
+	`ingredientsFunction` must have the dataclass as its first parameter. The `LedgerOfImports` in `ingredientsFunction` must have
+	the import information for the dataclass. If you are not using `IngredientsFunction`, you can still use this function to get
+	the information you want.
 
-	Analyzes the first parameter of a function to identify the dataclass type annotation
-	and instance identifier, then locates the module where the dataclass is defined by
-	examining the function's import statements. This information is essential for
-	dataclass decomposition and transformation operations.
+	```python
+	from astToolkit import astModuleToIngredientsFunction
+
+	tupleInformation = findDataclass(astModuleToIngredientsFunction(astAST, identifier))
+	```
 
 	Parameters
 	----------
@@ -60,31 +64,25 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[str, str, s
 
 	Returns
 	-------
-	dataclassLogicalPathModule : str
-		Module logical path where the dataclass is defined.
-	dataclassIdentifier : str
-		Class name of the dataclass.
-	dataclassInstanceIdentifier : str
-		Parameter name for the dataclass instance.
-
-	Raises
-	------
-	ValueError
-		If dataclass information cannot be extracted from the function.
-
+	logicalPathDataclass : identifierDotAttribute
+		Logical path from which the `dataclass` is imported, which might not be the real source of the `dataclass`.
+	identifierDataclass : str
+		Identifier of the `dataclass`.
+	identifierDataclassInstance : str
+		Identifier of the `dataclass` instance.
 	"""
 	dataclassName: ast.expr = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	dataclassIdentifier: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
-	dataclassLogicalPathModule = None
+	identifierDataclass: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
+	logicalPathDataclass = None
 	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # noqa: SLF001
 		for nameTuple in listNameTuples:
-			if nameTuple[0] == dataclassIdentifier:
-				dataclassLogicalPathModule = moduleWithLogicalPath
+			if nameTuple[0] == identifierDataclass:
+				logicalPathDataclass = moduleWithLogicalPath
 				break
-		if dataclassLogicalPathModule:
+		if logicalPathDataclass:
 			break
-	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	return raiseIfNone(dataclassLogicalPathModule), dataclassIdentifier, dataclassInstanceIdentifier
+	identifierDataclassInstance: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
+	return raiseIfNone(logicalPathDataclass), identifierDataclass, identifierDataclassInstance
 
 def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, *moduleIdentifier: str | None) -> identifierDotAttribute:
 	"""Get logical path from components."""
@@ -148,5 +146,5 @@ def write_astModule(astModule: ast.Module, pathFilename: PathLike[Any] | PurePat
 	if packageName:
 		autoflake_additional_imports.append(packageName)
 	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=True, remove_duplicate_keys = False, remove_unused_variables = False)
-	writeStringToHere(pythonSource, pathFilename)
+	writeStringToHere(pythonSource + '\n', pathFilename)
 

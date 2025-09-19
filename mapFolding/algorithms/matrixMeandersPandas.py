@@ -1,8 +1,8 @@
 from functools import cache
 from gc import collect as goByeBye
 from mapFolding import MatrixMeandersNumPyState
-from mapFolding.algorithms.getBucketsTotal import getBucketsTotal
-from mapFolding.syntheticModules.matrixMeanders.bigInt import areIntegersWide, count, walkDyckPath
+from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide, getBucketsTotal
+from mapFolding.syntheticModules.meanders.bigInt import countBigInt, walkDyckPath
 from warnings import warn
 import numpy
 import pandas
@@ -341,7 +341,7 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 	"""
 	while state.kOfMatrix > 0:
 		if areIntegersWide(state):
-			state = count(state)
+			state = countBigInt(state)
 		else:
 			state = countPandas(state)
 

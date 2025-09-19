@@ -12,6 +12,10 @@ import contextlib
 
 """TODO new flow paradigm, incomplete
 
+I don't want to FORCE people to use the meaningless OEIS ids without providing the definition of the ID at the same time.
+
+On the other hand, I don't have any evidence that anyone is using this package except me.
+
 algorithms directory
 	manually coded algorithms or formulas
 	`countFolds` will be a stable interface for multidimensional map folding, including synthetic modules

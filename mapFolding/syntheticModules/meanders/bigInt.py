@@ -1,7 +1,8 @@
 from functools import cache
-from mapFolding import MatrixMeandersState
+from mapFolding import MatrixMeandersNumPyState
+from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide
 
-def outfitDictionaryBitGroups(state: MatrixMeandersState) -> dict[tuple[int, int], int]:
+def outfitDictionaryBitGroups(state: MatrixMeandersNumPyState) -> dict[tuple[int, int], int]:
     """Outfit `dictionaryBitGroups` so it may manage the computations for one iteration of the transfer matrix.
 
     Parameters
@@ -15,8 +16,7 @@ def outfitDictionaryBitGroups(state: MatrixMeandersState) -> dict[tuple[int, int
         A dictionary of `(bitsAlpha, bitsZulu)` to `distinctCrossings`.
     """
     state.bitWidth = max(state.dictionaryCurveLocations.keys()).bit_length()
-    return {(curveLocations & state.locatorBitsAlpha, (curveLocations & state.locatorBitsZulu) >> 1): distinctCrossings
-        for curveLocations, distinctCrossings in state.dictionaryCurveLocations.items()}
+    return {(curveLocations & state.locatorBitsAlpha, (curveLocations & state.locatorBitsZulu) >> 1): distinctCrossings for curveLocations, distinctCrossings in state.dictionaryCurveLocations.items()}
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -48,7 +48,7 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
     flipExtra_0b1_Here: int = 1
     while True:
         flipExtra_0b1_Here <<= 2
-        if (intWithExtra_0b1 & flipExtra_0b1_Here) == 0:
+        if intWithExtra_0b1 & flipExtra_0b1_Here == 0:
             findTheExtra_0b1 += 1
         else:
             findTheExtra_0b1 -= 1
@@ -56,7 +56,7 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
             break
     return flipExtra_0b1_Here
 
-def count(state: MatrixMeandersState) -> MatrixMeandersState:
+def countBigInt(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
     """Count meanders with matrix transfer algorithm using Python `int` (*int*eger) contained in a Python `dict` (*dict*ionary).
 
     Parameters
@@ -70,70 +70,32 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
     compute each `curveLocations` one at a time, and compute each type of analysis one at a time.
     """
     dictionaryBitGroups: dict[tuple[int, int], int] = {}
-
-    while state.kOfMatrix > 0:
+    while state.kOfMatrix > 0 and areIntegersWide(state):
         state.kOfMatrix -= 1
-
         dictionaryBitGroups = outfitDictionaryBitGroups(state)
         state.dictionaryCurveLocations = {}
-
         for (bitsAlpha, bitsZulu), distinctCrossings in dictionaryBitGroups.items():
             bitsAlphaCurves: bool = bitsAlpha > 1
             bitsZuluHasCurves: bool = bitsZulu > 1
             bitsAlphaIsEven = bitsZuluIsEven = 0
-
-            curveLocationAnalysis = ((bitsAlpha | (bitsZulu << 1)) << 2) | 3
-            # simple
+            curveLocationAnalysis = (bitsAlpha | bitsZulu << 1) << 2 | 3
             if curveLocationAnalysis < state.MAXIMUMcurveLocations:
                 state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
-
             if bitsAlphaCurves:
-                curveLocationAnalysis = (bitsAlpha >> 2) | (bitsZulu << 3) | ((bitsAlphaIsEven := 1 - (bitsAlpha & 1)) << 1)
+                curveLocationAnalysis = bitsAlpha >> 2 | bitsZulu << 3 | (bitsAlphaIsEven := (1 - (bitsAlpha & 1))) << 1
                 if curveLocationAnalysis < state.MAXIMUMcurveLocations:
                     state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
-
             if bitsZuluHasCurves:
-                curveLocationAnalysis = (bitsZulu >> 1) | (bitsAlpha << 2) | (bitsZuluIsEven := 1 - (bitsZulu & 1))
+                curveLocationAnalysis = bitsZulu >> 1 | bitsAlpha << 2 | (bitsZuluIsEven := (1 - (bitsZulu & 1)))
                 if curveLocationAnalysis < state.MAXIMUMcurveLocations:
                     state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
-
             if bitsAlphaCurves and bitsZuluHasCurves and (bitsAlphaIsEven or bitsZuluIsEven):
-                # aligned
-                if bitsAlphaIsEven and not bitsZuluIsEven:
-                    bitsAlpha ^= walkDyckPath(bitsAlpha)  # noqa: PLW2901
-                elif bitsZuluIsEven and not bitsAlphaIsEven:
-                    bitsZulu ^= walkDyckPath(bitsZulu)  # noqa: PLW2901
-
-                curveLocationAnalysis: int = ((bitsZulu >> 2) << 1) | (bitsAlpha >> 2)
+                if bitsAlphaIsEven and (not bitsZuluIsEven):
+                    bitsAlpha ^= walkDyckPath(bitsAlpha)
+                elif bitsZuluIsEven and (not bitsAlphaIsEven):
+                    bitsZulu ^= walkDyckPath(bitsZulu)
+                curveLocationAnalysis: int = bitsZulu >> 2 << 1 | bitsAlpha >> 2
                 if curveLocationAnalysis < state.MAXIMUMcurveLocations:
                     state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
-
         dictionaryBitGroups = {}
-
     return state
-
-def doTheNeedful(state: MatrixMeandersState) -> int:
-    """Compute `distinctCrossings` with a transfer matrix algorithm.
-
-    Parameters
-    ----------
-    state : MatrixMeandersState
-        The algorithm state.
-
-    Returns
-    -------
-    distinctCrossings : int
-        The computed value of `distinctCrossings`.
-
-    Notes
-    -----
-    Citation: https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bibtex
-
-    See Also
-    --------
-    https://oeis.org/A000682
-    https://oeis.org/A005316
-    """
-    state = count(state)
-
-    return sum(state.dictionaryCurveLocations.values())
