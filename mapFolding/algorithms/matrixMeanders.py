@@ -1,5 +1,5 @@
 from functools import cache
-from mapFolding import MatrixMeandersState
+from mapFolding.dataBaskets import MatrixMeandersState
 
 def outfitDictionaryBitGroups(state: MatrixMeandersState) -> dict[tuple[int, int], int]:
     """Outfit `dictionaryBitGroups` so it may manage the computations for one iteration of the transfer matrix.

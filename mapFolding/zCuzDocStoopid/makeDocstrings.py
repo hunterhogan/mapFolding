@@ -2,7 +2,7 @@
 from astToolkit import Grab, IfThis, Make, NodeChanger, parsePathFilename2astModule, Then
 from astToolkit.transformationTools import makeDictionaryFunctionDef
 from hunterMakesPy import raiseIfNone, writeStringToHere
-from mapFolding import dictionaryOEISMapFolding, dictionaryOEISMeanders, packageSettings
+from mapFolding import dictionaryOEIS, dictionaryOEISMapFolding, packageSettings
 from pathlib import Path
 import ast
 
@@ -21,16 +21,16 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> None:
     functionOf: str = 'Error during transformation' # The value of `functionOf` is in the docstring of function `oeisID` in `pathFilenameSource`.
 
     for oeisID, FunctionDef in dictionaryFunctionDef.items():
-        dictionaryOEIS = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEISMeanders
+        dictionary = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
         functionOf = raiseIfNone(ast.get_docstring(FunctionDef))
 
         ImaDocstring= 	f"""
     Compute {oeisID}(n) as a function of {functionOf}.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{dictionaryOEIS[oeisID]['description']}"
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{dictionary[oeisID]['description']}"
 
-    The domain of {oeisID} starts at {dictionaryOEIS[oeisID]['offset']}, therefore for values of `n` < {dictionaryOEIS[oeisID]['offset']}, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is {dictionaryOEIS[oeisID]['valueUnknown']}.
+    The domain of {oeisID} starts at {dictionary[oeisID]['offset']}, therefore for values of `n` < {dictionary[oeisID]['offset']}, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is {dictionary[oeisID]['valueUnknown']}.
 
     Parameters
     ----------
@@ -40,7 +40,7 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> None:
     Returns
     -------
     a(n) : int
-        {dictionaryOEIS[oeisID]['description']}
+        {dictionary[oeisID]['description']}
 
     Would You Like to Know More?
     ----------------------------

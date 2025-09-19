@@ -33,7 +33,8 @@ from astToolkit import (
 	NodeChanger, NodeTourist, Then)
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import autoDecodingRLE, raiseIfNone
-from mapFolding import getPathFilenameFoldsTotal, MapFoldingState, packageSettings
+from mapFolding import getPathFilenameFoldsTotal, packageSettings
+from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba

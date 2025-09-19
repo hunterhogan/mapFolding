@@ -1,6 +1,6 @@
 """Buckets."""
 from hunterMakesPy import raiseIfNone
-from mapFolding import MatrixMeandersNumPyState
+from mapFolding.dataBaskets import MatrixMeandersNumPyState
 from mapFolding.reference.A005316facts import bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k
 from math import exp, log
 from typing import NamedTuple

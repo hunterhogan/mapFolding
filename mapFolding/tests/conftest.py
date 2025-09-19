@@ -25,7 +25,7 @@ research domain.
 
 from collections.abc import Callable, Generator, Sequence
 from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
-from mapFolding.oeis import dictionaryOEISMapFolding, dictionaryOEISMeanders, oeisIDsImplemented
+from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, oeisIDsImplemented
 from pathlib import Path
 from typing import Any
 import numpy
@@ -223,7 +223,7 @@ def oneTestCuzTestsOverwritingTests(oeisID_1random: str) -> tuple[int, ...]:
 			pass
 
 @pytest.fixture
-def mapShapeTestCountFolds(oeisID: str) -> tuple[int, ...]:
+def mapShapeTestCountFolds(oeisIDmapFolding: str) -> tuple[int, ...]:
 	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation` if
 	`validateListDimensions` approves. Each `listDimensions` is suitable for testing counts.
 
@@ -239,10 +239,10 @@ def mapShapeTestCountFolds(oeisID: str) -> tuple[int, ...]:
 
 	"""
 	while True:
-		n = random.choice(dictionaryOEISMapFolding[oeisID]['valuesTestValidation'])
+		n = random.choice(dictionaryOEISMapFolding[oeisIDmapFolding]['valuesTestValidation'])
 		if n < 2:
 			continue
-		listDimensionsCandidate = list(dictionaryOEISMapFolding[oeisID]['getMapShape'](n))
+		listDimensionsCandidate = list(dictionaryOEISMapFolding[oeisIDmapFolding]['getMapShape'](n))
 
 		try:
 			return validateListDimensions(listDimensionsCandidate)
@@ -278,7 +278,7 @@ def mapShapeTestFunctionality(oeisID_1random: str) -> tuple[int, ...]:
 			pass
 
 @pytest.fixture
-def mapShapeTestParallelization(oeisID: str) -> tuple[int, ...]:
+def mapShapeTestParallelization(oeisIDmapFolding: str) -> tuple[int, ...]:
 	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestParallelization`.
 
 	Parameters
@@ -292,8 +292,8 @@ def mapShapeTestParallelization(oeisID: str) -> tuple[int, ...]:
 		Map dimensions suitable for testing parallelization features.
 
 	"""
-	n = random.choice(dictionaryOEISMapFolding[oeisID]['valuesTestParallelization'])
-	return dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
+	n = random.choice(dictionaryOEISMapFolding[oeisIDmapFolding]['valuesTestParallelization'])
+	return dictionaryOEISMapFolding[oeisIDmapFolding]['getMapShape'](n)
 
 @pytest.fixture
 def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]:
@@ -332,7 +332,7 @@ def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
 	return make_mock
 
 @pytest.fixture(params=oeisIDsImplemented)
-def oeisID(request: pytest.FixtureRequest) -> Any:
+def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:
 	"""Parametrized fixture providing all implemented OEIS sequence identifiers.
 
 	(AI generated docstring)
@@ -350,8 +350,8 @@ def oeisID(request: pytest.FixtureRequest) -> Any:
 	"""
 	return request.param
 
-@pytest.fixture(params=tuple(dictionaryOEISMeanders.keys()))
-def oeisIDMeanders(request: pytest.FixtureRequest) -> Any:
+@pytest.fixture(params=tuple(dictionaryOEIS.keys()))
+def oeisIDother(request: pytest.FixtureRequest) -> Any:
 	"""Parametrized fixture providing all implemented Meanders OEIS sequence identifiers.
 
 	(AI generated docstring)

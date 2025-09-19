@@ -4,8 +4,8 @@ from ast import Module
 from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
 from mapFolding import (
 	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal,
-	DatatypeLeavesTotal as TheDatatypeLeavesTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, MapFoldingState,
-	packageSettings)
+	DatatypeLeavesTotal as TheDatatypeLeavesTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, packageSettings)
+from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired import identifierDataclassInstanceDEFAULT, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath

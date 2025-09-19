@@ -1,7 +1,7 @@
 from functools import cache
 from gc import collect as goByeBye
-from mapFolding import MatrixMeandersNumPyState
 from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide, getBucketsTotal
+from mapFolding.dataBaskets import MatrixMeandersNumPyState
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt, walkDyckPath
 from warnings import warn
 import numpy

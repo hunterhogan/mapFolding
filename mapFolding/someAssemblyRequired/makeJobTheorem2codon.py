@@ -8,10 +8,11 @@ from astToolkit import (
 	NodeTourist, parseLogicalPath2astModule, Then)
 from astToolkit.transformationTools import removeUnusedParameters, write_astModule
 from hunterMakesPy import autoDecodingRLE, raiseIfNone
-from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, MapFoldingState
+from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal
+from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired import IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
-from mapFolding.syntheticModules.initializeStateA007822 import transitionOnGroupsOfFolds
+from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, NamedTuple, TYPE_CHECKING
 import ast
@@ -102,7 +103,6 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 				Be.AugAssign.targetIs(IfThis.isNestedNameIdentifier(identifier))
 				, IfThis.isAllOf(
 					Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
-					# IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(identifier))
 					, Be.Assign.valueIs(Be.Constant))
 			)
 			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)
@@ -115,7 +115,6 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 
 		# `identifier` in Comparison.
 		NodeChanger(Be.Compare.leftIs(IfThis.isNestedNameIdentifier(identifier))
-			# , doThat=Grab.comparatorsAttribute(Grab.index(0, lambda comparator, annotation=annotation: Then.replaceWith(Make.Call(annotation, listParameters=[comparator]))))
 			, doThat=lambda node, annotation=annotation: Grab.comparatorsAttribute(lambda at, annotation=annotation: Then.replaceWith([Make.Call(annotation, listParameters=[node.comparators[0]])])(at[0]))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 

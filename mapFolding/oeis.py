@@ -27,7 +27,7 @@ completes the journey from configuration foundation to mathematical discovery.
 from datetime import datetime, timedelta, UTC
 from hunterMakesPy import writeStringToHere
 from itertools import chain
-from mapFolding import countFolds, MetadataOEISidMapFolding, MetadataOEISidMeanders, packageSettings
+from mapFolding import countFolds, MetadataOEISid, MetadataOEISidMapFolding, packageSettings
 from mapFolding._theSSOT import pathCache
 from pathlib import Path
 from typing import Final
@@ -248,7 +248,7 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	description: str = ' '.join(listDescriptionDeconstructed)
 	return description, offset
 
-def _makeDictionaryOEIS() -> dict[str, MetadataOEISidMapFolding]:
+def _makeDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMapFolding]:
 	"""Construct the comprehensive settings dictionary for all implemented OEIS sequences.
 
 	(AI generated docstring)
@@ -287,8 +287,8 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISidMapFolding]:
 		)
 	return dictionaryOEIS
 
-dictionaryOEISMapFolding: dict[str, MetadataOEISidMapFolding] = _makeDictionaryOEIS()
-"""Metadata for each OEIS sequence ID."""
+dictionaryOEISMapFolding: dict[str, MetadataOEISidMapFolding] = _makeDictionaryOEISMapFolding()
+"""Metadata for each MapFolding OEIS ID."""
 
 def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 	"""Make a `mapShape` to known `foldsTotal` dictionary.
@@ -419,7 +419,7 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 			raise ArithmeticError(message)
 		foldsTotal: int = dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]
 	else:
-		foldsTotal = countFolds(oeisID=oeisID, oeis_n=n)
+		foldsTotal = countFolds(mapShape=mapShape)
 
 	return foldsTotal
 
@@ -504,21 +504,21 @@ def getOEISids() -> None:
 	"""
 	print(_formatHelpText())  # noqa: T201
 
-def _makeDictionaryOEISMeanders() -> dict[str, MetadataOEISidMeanders]:
-	dictionary: dict[str, MetadataOEISidMeanders] = {}
-	for oeisID in packageSettings.OEISidMeandersManuallySet:
+def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
+	dictionary: dict[str, MetadataOEISid] = {}
+	for oeisID in packageSettings.OEISidManuallySet:
 		valuesKnownSherpa: dict[int, int] = getOEISidValues(oeisID)
 		descriptionSherpa, offsetSherpa = getOEISidInformation(oeisID)
-		dictionary[oeisID] = MetadataOEISidMeanders(
+		dictionary[oeisID] = MetadataOEISid(
 			description=descriptionSherpa,
 			offset=offsetSherpa,
 			valuesKnown=valuesKnownSherpa,
-			valuesTestValidation=packageSettings.OEISidMeandersManuallySet[oeisID]['valuesTestValidation'],
+			valuesTestValidation=packageSettings.OEISidManuallySet[oeisID]['valuesTestValidation'],
 			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1,
 		)
 	return dictionary
 
-dictionaryOEISMeanders: dict[str, MetadataOEISidMeanders] = _makeDictionaryOEISMeanders()
+dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
 
 if __name__ == "__main__":
 	getOEISids()

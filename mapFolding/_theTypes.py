@@ -65,7 +65,7 @@ class MetadataOEISidMapFoldingManuallySet(TypedDict):
 	"""List of index values, 'n', to use when testing validation performance."""
 
 class MetadataOEISidMapFolding(TypedDict):
-	"""Settings for an implemented OEIS sequence."""
+	"""Settings for an OEIS ID that may be computed by a multidimensional map folding algorithm."""
 
 	description: str
 	"""The OEIS.org description of the integer sequence."""
@@ -85,7 +85,7 @@ class MetadataOEISidMapFolding(TypedDict):
 	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
 
 # ruff: noqa: ERA001
-class MetadataOEISidMeandersManuallySet(TypedDict):
+class MetadataOEISidManuallySet(TypedDict):
 	"""Settings that are best selected by a human instead of algorithmically."""
 
 	# valuesBenchmark: list[int]
@@ -95,7 +95,7 @@ class MetadataOEISidMeandersManuallySet(TypedDict):
 	valuesTestValidation: list[int]
 	"""List of index values, 'n', to use when testing validation performance."""
 
-class MetadataOEISidMeanders(TypedDict):
+class MetadataOEISid(TypedDict):
 	"""Settings for an implemented OEIS sequence."""
 
 	description: str

@@ -8,10 +8,10 @@ from mapFolding._theTypes import (
 	DatatypeElephino as DatatypeElephino,
 	DatatypeFoldsTotal as DatatypeFoldsTotal,
 	DatatypeLeavesTotal as DatatypeLeavesTotal,
+	MetadataOEISid as MetadataOEISid,
+	MetadataOEISidManuallySet as MetadataOEISidManuallySet,
 	MetadataOEISidMapFolding as MetadataOEISidMapFolding,
 	MetadataOEISidMapFoldingManuallySet as MetadataOEISidMapFoldingManuallySet,
-	MetadataOEISidMeanders as MetadataOEISidMeanders,
-	MetadataOEISidMeandersManuallySet as MetadataOEISidMeandersManuallySet,
 	NumPyElephino as NumPyElephino,
 	NumPyFoldsTotal as NumPyFoldsTotal,
 	NumPyIntegerType as NumPyIntegerType,
@@ -27,12 +27,6 @@ from mapFolding.beDRY import (
 	setProcessorLimit as setProcessorLimit,
 	validateListDimensions as validateListDimensions)
 
-from mapFolding.dataBaskets import (
-	ParallelMapFoldingState as ParallelMapFoldingState,
-	MapFoldingState as MapFoldingState,
-	MatrixMeandersNumPyState as MatrixMeandersNumPyState,
-	MatrixMeandersState as MatrixMeandersState)
-
 from mapFolding.filesystemToolkit import (
 	getFilenameFoldsTotal as getFilenameFoldsTotal,
 	getPathFilenameFoldsTotal as getPathFilenameFoldsTotal,
@@ -43,8 +37,8 @@ from mapFolding.filesystemToolkit import (
 from mapFolding.basecamp import countFolds as countFolds
 
 from mapFolding.oeis import (
+	dictionaryOEIS as dictionaryOEIS,
 	dictionaryOEISMapFolding as dictionaryOEISMapFolding,
-	dictionaryOEISMeanders as dictionaryOEISMeanders,
 	getFoldsTotalKnown as getFoldsTotalKnown,
 	getOEISids as getOEISids,
 	OEIS_for_n as OEIS_for_n,

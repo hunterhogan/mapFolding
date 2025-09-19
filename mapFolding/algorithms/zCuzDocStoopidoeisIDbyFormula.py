@@ -5,8 +5,8 @@ TODO A223094 For n >= 3: a(n) = n! - Sum_{k=3..n-1} (a(k)*n!/k!) - A000682(n+1).
 TODO A301620 a(n) = Sum_{k=3..floor((n+3)/2)} (A259689(n+1,k)*(k-2)). - _Roger Ford_, Dec 10 2018
 """
 from functools import cache
-from mapFolding import countFolds, dictionaryOEISMeanders
-from mapFolding.basecamp import A000682, A005316
+from mapFolding import dictionaryOEIS
+from mapFolding.basecamp import A000682, A005316, NOTcountingFolds
 
 @cache
 def A000136(n: int) -> int:
@@ -22,7 +22,7 @@ def A001010(n: int) -> int:
 	if n == 1:
 		foldsTotal = 1
 	elif n & 0b1:
-		foldsTotal = 2 * countFolds(oeisID='A007822', oeis_n=(n - 1)//2 + 1, flow='theorem2Numba')
+		foldsTotal = 2 * NOTcountingFolds(oeisID='A007822', oeis_n=(n - 1)//2 + 1, flow='theorem2Numba')
 	else:
 		foldsTotal = 2 * A000682(n // 2 + 1)
 	return foldsTotal
@@ -65,7 +65,7 @@ def A078591(n: int) -> int:
 
 def A178961(n: int) -> int:
 	"""A001010"""
-	A001010valuesKnown: dict[int, int] = dictionaryOEISMeanders['A001010']['valuesKnown']
+	A001010valuesKnown: dict[int, int] = dictionaryOEIS['A001010']['valuesKnown']
 	foldsTotal: int = 0
 	for n下i in range(1, n+1):
 		foldsTotal += A001010valuesKnown[n下i]

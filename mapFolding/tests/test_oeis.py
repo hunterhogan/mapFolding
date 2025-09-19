@@ -35,13 +35,13 @@ import random
 import re as regex
 import unittest.mock
 
-def test__validateOEISid_valid_id(oeisID: str) -> None:
-	standardizedEqualToCallableReturn(oeisID, _standardizeOEISid, oeisID)
+def test__validateOEISid_valid_id(oeisIDmapFolding: str) -> None:
+	standardizedEqualToCallableReturn(oeisIDmapFolding, _standardizeOEISid, oeisIDmapFolding)
 
-def test__validateOEISid_valid_id_case_insensitive(oeisID: str) -> None:
-	standardizedEqualToCallableReturn(oeisID.upper(), _standardizeOEISid, oeisID.lower())
-	standardizedEqualToCallableReturn(oeisID.upper(), _standardizeOEISid, oeisID.upper())
-	standardizedEqualToCallableReturn(oeisID.upper(), _standardizeOEISid, oeisID.swapcase())
+def test__validateOEISid_valid_id_case_insensitive(oeisIDmapFolding: str) -> None:
+	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _standardizeOEISid, oeisIDmapFolding.lower())
+	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _standardizeOEISid, oeisIDmapFolding.upper())
+	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _standardizeOEISid, oeisIDmapFolding.swapcase())
 
 parameters_test_aOFn_invalid_n = [
 	(-random.randint(1, 100), "randomNegative"),  # noqa: S311
