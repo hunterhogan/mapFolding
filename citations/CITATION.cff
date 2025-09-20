@@ -41,7 +41,6 @@ keywords:
 - A259702
 - A301620
 - AST manipulation
-- GPU acceleration
 - JIT compilation
 - Numba optimization
 - OEIS
