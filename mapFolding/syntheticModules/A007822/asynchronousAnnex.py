@@ -4,6 +4,7 @@ from mapFolding import Array1DLeavesTotal
 from queue import Empty, Queue
 from threading import Thread
 import numpy
+
 concurrencyManager = None
 groupsOfFoldsTotal: int = 0
 processingThread = None
@@ -55,7 +56,7 @@ def _filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> int:
 
 def filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> None:
     global concurrencyManager, queueFutures
-    queueFutures.put(raiseIfNone(concurrencyManager).submit(_filterAsymmetricFolds, leafBelow.copy()))
+    queueFutures.put_nowait(raiseIfNone(concurrencyManager).submit(_filterAsymmetricFolds, leafBelow.copy()))
 
 def getAsymmetricFoldsTotal() -> int:
     global concurrencyManager, queueFutures, processingThread

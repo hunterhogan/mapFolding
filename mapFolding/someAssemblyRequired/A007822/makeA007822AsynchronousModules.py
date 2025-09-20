@@ -17,7 +17,7 @@ identifier_getAsymmetricFoldsTotal = 'getAsymmetricFoldsTotal'
 identifier_initializeConcurrencyManager = 'initializeConcurrencyManager'
 identifier_processCompletedFutures = '_processCompletedFutures'
 
-astExprCall_initializeConcurrencyManager = Make.Expr(Make.Call(Make.Name(identifier_initializeConcurrencyManager)))
+astExprCall_initializeConcurrencyManager: ast.Expr = Make.Expr(Make.Call(Make.Name(identifier_initializeConcurrencyManager)))
 AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
 	[Make.Attribute(Make.Name(identifierDataclass), identifierCounting, context=Make.Store())]
 	, value=Make.Call(Make.Name(identifier_getAsymmetricFoldsTotal))
@@ -159,7 +159,7 @@ queueFutures: Queue[ConcurrentFuture[int]] = Queue()
 	ImaString = f"""
 def {identifier_filterAsymmetricFolds}(leafBelow: Array1DLeavesTotal) -> None:
 	global concurrencyManager, queueFutures
-	queueFutures.put(raiseIfNone(concurrencyManager).submit(_{identifier_filterAsymmetricFolds}, leafBelow.copy()))
+	queueFutures.put_nowait(raiseIfNone(concurrencyManager).submit(_{identifier_filterAsymmetricFolds}, leafBelow.copy()))
 	"""
 	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_filterAsymmetricFolds)))
 	del ImaString

@@ -37,7 +37,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	)
 	state.dictionaryCurveLocations.clear()
 
-	while (state.kOfMatrix > 0 and not areIntegersWide(state, dataframeAnalyzed)):
+	while (state.kOfMatrix > 0 and not areIntegersWide(state, dataframe=dataframeAnalyzed)):
 
 		def aggregateCurveLocations()  -> None:
 			nonlocal dataframeAnalyzed
@@ -163,6 +163,14 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			del bitsTarget
 
+			"""NOTE In this code block, I rearranged the "formula" to use `bitsTarget` for two goals. 1. `(bitsAlpha >> 2)`.
+			2. `if bitsAlpha > 1`. The trick is in the equivalence of v1 and v2.
+				v1: BITScow | (BITSwalk >> 2)
+				v2: ((BITScow << 2) | BITSwalk) >> 2
+
+			The "formula" calls for v1, but by using v2, `bitsTarget` is not changed. Therefore, because `bitsTarget` is
+			`bitsAlpha`, I can use `bitsTarget` for goal 2, `if bitsAlpha > 1`.
+			"""
 			dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # ... | (bitsAlpha >> 2)
 
 			bitsTarget = dataframeCurveLocations['curveLocations'].copy() # `bitsAlpha`
@@ -234,6 +242,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			del bitsTarget
 
+			# NOTE No, IDK why I didn't use the same trick as in `analyzeCurveLocationsAlpha`. I _think_ I wrote this code before I figured out that trick.
 			bitsTarget = dataframeCurveLocations['curveLocations'].copy() # `bitsZulu`
 			bitsTarget &= state.locatorBitsZulu # `bitsZulu`
 			bitsTarget //= 2**1 # `bitsZulu` (bitsZulu >> 1)
@@ -348,41 +357,3 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 		goByeBye()
 
 	return sum(state.dictionaryCurveLocations.values())
-
-def A000682(n: int) -> int:
-	"""Compute A000682(n)."""
-	oeisID = 'A000682'
-
-	kOfMatrix: int = n - 1
-
-	if n & 0b1:
-		curveLocations: int = 5
-	else:
-		curveLocations = 1
-	listCurveLocations: list[int] = [(curveLocations << 1) | curveLocations]
-
-	MAXIMUMcurveLocations: int = 1 << (2 * kOfMatrix + 4)
-	while listCurveLocations[-1] < MAXIMUMcurveLocations:
-		curveLocations = (curveLocations << 4) | 0b101 # == curveLocations * 2**4 + 5
-		listCurveLocations.append((curveLocations << 1) | curveLocations)
-
-	dictionaryCurveLocations=dict.fromkeys(listCurveLocations, 1)
-
-	state = MatrixMeandersNumPyState(n, oeisID, kOfMatrix, dictionaryCurveLocations)
-
-	return doTheNeedful(state)
-
-def A005316(n: int) -> int:
-	"""Compute A005316(n)."""
-	oeisID = 'A005316'
-
-	kOfMatrix: int = n - 1
-
-	if n & 0b1:
-		dictionaryCurveLocations: dict[int, int] = {15: 1}
-	else:
-		dictionaryCurveLocations = {22: 1}
-
-	state = MatrixMeandersNumPyState(n, oeisID, kOfMatrix, dictionaryCurveLocations)
-
-	return doTheNeedful(state)

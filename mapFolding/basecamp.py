@@ -261,12 +261,15 @@ def countFolds(listDimensions: Sequence[int] | None = None
 def A000682(n: int, flow: str | None = None) -> int:
 	"""Compute A000682(n)."""
 	match flow:
+		case 'matrixNumPy':
+			from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
+			from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
 		case 'matrixPandas':
-			from mapFolding.algorithms.matrixMeanders import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersState as State
-		case _:
 			from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
 			from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
+		case _:
+			from mapFolding.algorithms.matrixMeanders import doTheNeedful
+			from mapFolding.dataBaskets import MatrixMeandersState as State
 
 	oeisID = 'A000682'
 
@@ -293,12 +296,15 @@ def A000682(n: int, flow: str | None = None) -> int:
 def A005316(n: int, flow: str | None = None) -> int:
 	"""Compute A005316(n)."""
 	match flow:
+		case 'matrixNumPy':
+			from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
+			from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
 		case 'matrixPandas':
-			from mapFolding.algorithms.matrixMeanders import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersState as State
-		case _:
 			from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
 			from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
+		case _:
+			from mapFolding.algorithms.matrixMeanders import doTheNeedful
+			from mapFolding.dataBaskets import MatrixMeandersState as State
 
 	oeisID = 'A005316'
 
@@ -352,6 +358,23 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 
 					from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
 					mapFoldingState = doTheNeedful(mapFoldingState)
+
+				case 'asynchronousNumba':
+					from mapFolding.dataBaskets import MapFoldingState
+					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
+					from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
+					mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+					from mapFolding import setProcessorLimit
+					concurrencyLimit = setProcessorLimit(CPUlimit)
+
+					from mapFolding.syntheticModules.A007822.asynchronousAnnex import initializeConcurrencyManager
+					initializeConcurrencyManager(maxWorkers=concurrencyLimit, groupsOfFolds=mapFoldingState.groupsOfFolds)
+					mapFoldingState.groupsOfFolds = 0
+
+					from mapFolding.syntheticModules.A007822.asynchronousNumba import count
+					mapFoldingState = count(mapFoldingState)
 
 				case 'asynchronousTrimmed':
 					from mapFolding.dataBaskets import MapFoldingState

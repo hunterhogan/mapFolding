@@ -1,30 +1,15 @@
 """makeMeandersModules."""
 from astToolkit import (
-	astModuleToIngredientsFunction, Be, DOT, extractClassDef, Grab, hasDOTbody, identifierDotAttribute,
-	IngredientsFunction, IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule,
-	parsePathFilename2astModule, Then)
-from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters
-from hunterMakesPy import importLogicalPath2Identifier, raiseIfNone
+	astModuleToIngredientsFunction, Be, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then)
+from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
-	DeReConstructField2ast, identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, IfThis,
-	logicalPathInfixDEFAULT, ShatteredDataclass)
-from mapFolding.someAssemblyRequired.makingModules_count import (
-	makeDaoOfMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
-from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState, makeUnRePackDataclass
+	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, IfThis, logicalPathInfixDEFAULT)
 from mapFolding.someAssemblyRequired.toolkitMakeModules import (
-	findDataclass, getLogicalPath, getModule, getPathFilename, write_astModule)
-from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
-from mapFolding.someAssemblyRequired.transformationTools import (
-	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
+	findDataclass, getModule, getPathFilename, write_astModule)
 from os import PathLike
 from pathlib import PurePath
-from typing import Any, TYPE_CHECKING
 import ast
-import dataclasses
-
-if TYPE_CHECKING:
-	from collections.abc import Sequence
 
 identifierDataclassNumPyHARDCODED = 'MatrixMeandersNumPyState'
 

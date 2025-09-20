@@ -42,6 +42,7 @@ from pathlib import PurePath
 from typing import Any
 import ast
 import io
+import isort
 
 def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
 	"""Dynamically extract information about a `dataclass`: the instance identifier, the identifier, and the logical path module.
@@ -129,7 +130,7 @@ def getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.
 	return pathFilename
 
 def write_astModule(astModule: ast.Module, pathFilename: PathLike[Any] | PurePath | io.TextIOBase, packageName: str | None = None) -> None:
-	"""Prototype.
+	"""Prototype that will likely be moved to astToolkit.
 
 	Parameters
 	----------
@@ -146,5 +147,12 @@ def write_astModule(astModule: ast.Module, pathFilename: PathLike[Any] | PurePat
 	if packageName:
 		autoflake_additional_imports.append(packageName)
 	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=True, remove_duplicate_keys = False, remove_unused_variables = False)
+
+	if isinstance(pathFilename, io.TextIOBase):
+		pythonSource = isort.code(pythonSource)
+
 	writeStringToHere(pythonSource + '\n', pathFilename)
+
+	if not isinstance(pathFilename, io.TextIOBase):
+		isort.file(str(pathFilename))
 

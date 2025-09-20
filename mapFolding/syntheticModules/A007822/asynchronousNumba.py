@@ -1,7 +1,10 @@
-from mapFolding.dataBaskets import Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
-from mapFolding.syntheticModules.A007822.asynchronousAnnex import filterAsymmetricFolds, getAsymmetricFoldsTotal
+from mapFolding.dataBaskets import (
+	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal)
+from mapFolding.syntheticModules.A007822.asynchronousAnnexNumba import filterAsymmetricFolds, getAsymmetricFoldsTotal
+from mapFolding.syntheticModules.dataPackingA007822 import unRePackDataclassAsynchronous
 from numba import jit
 
+@unRePackDataclassAsynchronous
 @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
 def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1ndexCeiling: DatatypeElephino, indexDimension: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeLeavesTotal, leafConnectee: DatatypeLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, connectionGraph: Array3DLeavesTotal, dimensionsTotal: DatatypeLeavesTotal, leavesTotal: DatatypeLeavesTotal) -> tuple[DatatypeFoldsTotal, DatatypeElephino, DatatypeElephino, DatatypeLeavesTotal, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, Array1DLeavesTotal, Array1DElephino, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal]:
     while leaf1ndex > 4:

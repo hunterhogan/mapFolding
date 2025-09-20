@@ -3,8 +3,9 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import MatrixMeandersNumPyState
 from mapFolding.reference.A005316facts import bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k
 from math import exp, log
-from typing import NamedTuple
+from typing import Any, Final, NamedTuple
 import math
+import numpy
 import pandas
 
 class ImaKey(NamedTuple):
@@ -13,6 +14,10 @@ class ImaKey(NamedTuple):
 	oeisID: str
 	kIsOdd: bool
 	nLess_kIsOdd: bool
+
+indexAnalyzed: Final[int] = 0
+indexDistinctCrossings: Final[int] = 1
+indexCurveLocations: Final[int] = 2
 
 def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float = 1.2) -> int:
 	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations.
@@ -139,7 +144,7 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 	return bucketsTotal
 
 
-def areIntegersWide(state: MatrixMeandersNumPyState, dataframe: pandas.DataFrame | None = None, *, fixedSizeMAXIMUMcurveLocations: bool = False) -> bool:
+def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFrame | None = None, array: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]] | None = None, fixedSizeMAXIMUMcurveLocations: bool = False) -> bool:
 	"""Check if the largest values are wider than the maximum limits.
 
 	Parameters
@@ -172,12 +177,15 @@ def areIntegersWide(state: MatrixMeandersNumPyState, dataframe: pandas.DataFrame
 	`MAXIMUMcurveLocations` might exceed the limit. That will cause the flow to go to the function that does not have fixed size
 	integers for a few iterations before returning to the function with fixed size integers.
 	"""
-	if dataframe is None:
-		curveLocationsWidest: int = max(state.dictionaryCurveLocations.keys()).bit_length()
-		distinctCrossingsWidest: int = max(state.dictionaryCurveLocations.values()).bit_length()
-	else:
+	if dataframe is not None:
 		curveLocationsWidest = int(dataframe['analyzed'].max()).bit_length()
 		distinctCrossingsWidest = int(dataframe['distinctCrossings'].max()).bit_length()
+	elif array is not None:
+		curveLocationsWidest = int(array[..., indexAnalyzed].max()).bit_length()
+		distinctCrossingsWidest = int(array[..., indexDistinctCrossings].max()).bit_length()
+	else:
+		curveLocationsWidest: int = max(state.dictionaryCurveLocations.keys()).bit_length()
+		distinctCrossingsWidest: int = max(state.dictionaryCurveLocations.values()).bit_length()
 
 	MAXIMUMcurveLocations: int = 0
 	if fixedSizeMAXIMUMcurveLocations:
@@ -187,3 +195,4 @@ def areIntegersWide(state: MatrixMeandersNumPyState, dataframe: pandas.DataFrame
 		or distinctCrossingsWidest > raiseIfNone(state.bitWidthLimitDistinctCrossings)
 		or MAXIMUMcurveLocations > raiseIfNone(state.bitWidthLimitCurveLocations)
 		)
+
