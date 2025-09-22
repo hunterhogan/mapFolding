@@ -1,13 +1,11 @@
 from copy import copy
 from gc import collect as goByeBye
-from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
 from mapFolding.dataBaskets import MatrixMeandersNumPyState
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from numpy import (
-	bitwise_and, bitwise_invert, bitwise_left_shift, bitwise_not, bitwise_or, bitwise_right_shift, bitwise_xor, greater,
-	logical_and, logical_not, logical_or, multiply)
-from numpy.typing import NDArray
+	bitwise_and, bitwise_invert, bitwise_left_shift, bitwise_or, bitwise_right_shift, greater, logical_and, logical_not,
+	logical_or, multiply)
 from types import EllipsisType
 from typing import NamedTuple
 import numpy
@@ -21,7 +19,7 @@ class ShapeArray(NamedTuple):
 class ShapeSlicer(NamedTuple):
 	"""Always use this to construct slicers, so you can reorder the axes merely by reordering this class."""
 
-# TODO Figure out how to have a SSOT for the axis order.
+# Figure out how to have a SSOT for the axis order.
 	length: EllipsisType
 	indices: int
 
@@ -83,41 +81,55 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	while (state.kOfMatrix > 0 and not areIntegersWide(state, array=state.arrayCurveLocations)):
 		length: int = getBucketsTotal(state)
 		shape = ShapeArray(length=length, indices=indicesArrayAnalyzed)
+		del length
 		arrayAnalyzed = numpy.zeros(shape, dtype=state.datatypeCurveLocations)
+		del shape
 		shape = ShapeArray(length=len(state.arrayCurveLocations[slicerCurveLocations]), indices=indicesArrayPrepArea)
+		print(state.arrayCurveLocations.shape, shape)
 		arrayPrepArea = numpy.zeros(shape, dtype=state.datatypeCurveLocations)
+		del shape
 
 		state.bitWidth = int(state.arrayCurveLocations[slicerCurveLocations].max()).bit_length()
 		state.indexTarget = 0
 		state.kOfMatrix -= 1
 
-# NOTE ((bitsAlpha | (bitsZulu << 1)) << 2) | 3
+# ----------------- analyze simple ------------------------------------------------------------------------------------
+# ------- assign bitsAlpha and bitsZulu -------------------
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsAlpha, out=arrayPrepArea[slicerAlpha])
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsZulu, out=arrayPrepArea[slicerZulu])
+		bitwise_right_shift(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 
+# ------- ((bitsAlpha | (bitsZulu << 1)) << 2) | 3 --------
 		bitwise_left_shift(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 		bitwise_or(arrayPrepArea[slicerAlpha], arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerAnalyzed])
 		bitwise_left_shift(arrayPrepArea[slicerAnalyzed], 2, out=arrayPrepArea[slicerAnalyzed])
 		bitwise_or(arrayPrepArea[slicerAnalyzed], 3, out=arrayPrepArea[slicerAnalyzed])
 
+# ------- remove overlimit --------------------------------
 		multiply(arrayPrepArea[slicerAnalyzed], 0, out=arrayPrepArea[slicerAnalyzed], where=arrayPrepArea[slicerAnalyzed] > state.MAXIMUMcurveLocations)
 
+# ------- record analysis ---------------------------------
 		viewKeepThese = arrayPrepArea[slicerAnalyzed].view(dtype=numpy.bool_)
-		indexStop = int(viewKeepThese.sum())
-		sliceKeepThese: slice = slice(copy(state.indexTarget), copy(state.indexTarget) + indexStop)
+		indexStop = numpy.count_nonzero(viewKeepThese)
+		sliceKeepThese: slice = slice(copy(state.indexTarget), state.indexTarget + indexStop)
 		state.indexTarget += indexStop
+		del indexStop
 
 		viewArrayAnalyzedSlicerAnalyzed = arrayAnalyzed[slicerAnalyzed].view()
 		viewArrayAnalyzedSlicerDistinctCrossings = arrayAnalyzed[slicerDistinctCrossings].view()
-
+		print(f"{viewKeepThese}\n{viewKeepThese.shape = }\n{sliceKeepThese = }\n{arrayAnalyzed.shape = }\n{slicerAnalyzed = }\n{viewArrayAnalyzedSlicerAnalyzed.shape = }\n{slicerDistinctCrossings = }\n{viewArrayAnalyzedSlicerDistinctCrossings.shape = }\n{arrayPrepArea.shape = }\n{arrayPrepArea[slicerAnalyzed].shape = }")
 		viewArrayAnalyzedSlicerAnalyzed[sliceKeepThese] = arrayPrepArea[slicerAnalyzed][viewKeepThese]
+		del viewArrayAnalyzedSlicerAnalyzed
 		viewArrayAnalyzedSlicerDistinctCrossings[sliceKeepThese] = state.arrayCurveLocations[slicerDistinctCrossings][viewKeepThese]
+		del sliceKeepThese, viewArrayAnalyzedSlicerDistinctCrossings, viewKeepThese
 
-# NOTE if bitsAlpha > 1:
-# NOTE 		curveLocations = ((((1 - (bitsAlpha & 1)) << 1) | (bitsZulu << 3) << 2) | bitsAlpha) >> 2
+# ----------------- analyze bitsAlpha ---------------------------------------------------------------------------------
+# ------- assign bitsAlpha and bitsZulu -------------------
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsAlpha, out=arrayPrepArea[slicerAlpha])
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsZulu, out=arrayPrepArea[slicerZulu])
+		bitwise_right_shift(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 
+# ------- ((((1 - (bitsAlpha & 1)) << 1) | (bitsZulu << 3) << 2) | bitsAlpha) >> 2 ---
 		bitwise_and(arrayPrepArea[slicerAlpha], 1, out=arrayPrepArea[slicerAlpha])
 		bitwise_invert(arrayPrepArea[slicerAlpha], out=arrayPrepArea[slicerAlpha])
 		bitwise_left_shift(arrayPrepArea[slicerAlpha], 1, out=arrayPrepArea[slicerAlpha])
@@ -125,66 +137,90 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_or(arrayPrepArea[slicerAlpha], arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerAnalyzed])
 		bitwise_left_shift(arrayPrepArea[slicerAnalyzed], 2, out=arrayPrepArea[slicerAnalyzed])
 
+		# ------- assign bitsAlpha ------------------------
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsAlpha, out=arrayPrepArea[slicerAlpha])
 
 		bitwise_or(arrayPrepArea[slicerAnalyzed], arrayPrepArea[slicerAlpha], out=arrayPrepArea[slicerAnalyzed])
 		bitwise_right_shift(arrayPrepArea[slicerAnalyzed], 2, out=arrayPrepArea[slicerAnalyzed])
 
+# ------- if bitsAlpha > 1 --------------------------------
 		multiply(arrayPrepArea[slicerAnalyzed], 0, out=arrayPrepArea[slicerAnalyzed], where=arrayPrepArea[slicerAlpha] <= 1)
+# ------- remove overlimit --------------------------------
 		multiply(arrayPrepArea[slicerAnalyzed], 0, out=arrayPrepArea[slicerAnalyzed], where=arrayPrepArea[slicerAnalyzed] > state.MAXIMUMcurveLocations)
 
+# ------- record analysis ---------------------------------
 		viewKeepThese = arrayPrepArea[slicerAnalyzed].view(dtype=numpy.bool_)
 		indexStop = int(viewKeepThese.sum())
 		sliceKeepThese = slice(copy(state.indexTarget), copy(state.indexTarget) + indexStop)
 		state.indexTarget += indexStop
+		del indexStop
 
 		viewArrayAnalyzedSlicerAnalyzed = arrayAnalyzed[slicerAnalyzed].view()
 		viewArrayAnalyzedSlicerDistinctCrossings = arrayAnalyzed[slicerDistinctCrossings].view()
 
 		viewArrayAnalyzedSlicerAnalyzed[sliceKeepThese] = arrayPrepArea[slicerAnalyzed][viewKeepThese]
+		del viewArrayAnalyzedSlicerAnalyzed
 		viewArrayAnalyzedSlicerDistinctCrossings[sliceKeepThese] = state.arrayCurveLocations[slicerDistinctCrossings][viewKeepThese]
+		del sliceKeepThese, viewArrayAnalyzedSlicerDistinctCrossings, viewKeepThese
 
-# NOTE if bitsZulu > 1:
-# NOTE 		curveLocations = (((1 - (bitsZulu & 1)) | (bitsAlpha << 2) << 1) | bitsZulu) >> 1
+# ----------------- analyze bitsZulu ----------------------------------------------------------------------------------
+# ------- assign bitsAlpha and bitsZulu -------------------
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsAlpha, out=arrayPrepArea[slicerAlpha])
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsZulu, out=arrayPrepArea[slicerZulu])
+		bitwise_right_shift(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 
+# ------- (((1 - (bitsZulu & 1)) | (bitsAlpha << 2) << 1) | bitsZulu) >> 1 ----
 		bitwise_and(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 		bitwise_invert(arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerZulu])
 		bitwise_left_shift(arrayPrepArea[slicerAlpha], 2, out=arrayPrepArea[slicerAlpha])
 		bitwise_or(arrayPrepArea[slicerZulu], arrayPrepArea[slicerAlpha], out=arrayPrepArea[slicerAnalyzed])
 		bitwise_left_shift(arrayPrepArea[slicerAnalyzed], 1, out=arrayPrepArea[slicerAnalyzed])
 
+		# ------- assign bitsZulu -------------------------
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsZulu, out=arrayPrepArea[slicerZulu])
+		bitwise_right_shift(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 
 		bitwise_or(arrayPrepArea[slicerAnalyzed], arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerAnalyzed])
 		bitwise_right_shift(arrayPrepArea[slicerAnalyzed], 1, out=arrayPrepArea[slicerAnalyzed])
 
+# ------- if bitsZulu > 1 ---------------------------------
 		multiply(arrayPrepArea[slicerAnalyzed], 0, out=arrayPrepArea[slicerAnalyzed], where=arrayPrepArea[slicerZulu] <= 1)
+# ------- remove overlimit --------------------------------
 		multiply(arrayPrepArea[slicerAnalyzed], 0, out=arrayPrepArea[slicerAnalyzed], where=arrayPrepArea[slicerAnalyzed] > state.MAXIMUMcurveLocations)
 
+# ------- record analysis ---------------------------------
 		viewKeepThese = arrayPrepArea[slicerAnalyzed].view(dtype=numpy.bool_)
 		indexStop = int(viewKeepThese.sum())
 		sliceKeepThese = slice(copy(state.indexTarget), copy(state.indexTarget) + indexStop)
 		state.indexTarget += indexStop
+		del indexStop
 
 		viewArrayAnalyzedSlicerAnalyzed = arrayAnalyzed[slicerAnalyzed].view()
 		viewArrayAnalyzedSlicerDistinctCrossings = arrayAnalyzed[slicerDistinctCrossings].view()
 
 		viewArrayAnalyzedSlicerAnalyzed[sliceKeepThese] = arrayPrepArea[slicerAnalyzed][viewKeepThese]
+		del viewArrayAnalyzedSlicerAnalyzed
 		viewArrayAnalyzedSlicerDistinctCrossings[sliceKeepThese] = state.arrayCurveLocations[slicerDistinctCrossings][viewKeepThese]
+		del sliceKeepThese, viewArrayAnalyzedSlicerDistinctCrossings, viewKeepThese
 
-# NOTE if bitsAlpha > 1 and bitsZulu > 1 and (bitsAlphaIsEven or bitsZuluIsEven):
+# ----------------- analyze aligned -----------------------------------------------------------------------------------
+# ------- assign bitsAlpha and bitsZulu -------------------
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsAlpha, out=arrayPrepArea[slicerAlpha])
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsZulu, out=arrayPrepArea[slicerZulu])
+		bitwise_right_shift(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 
+# ------- if bitsAlpha > 1 and bitsZulu > 1 and (bitsAlphaIsEven or bitsZuluIsEven) -----
+# ------- if bitsAlpha > 1 and bitsZulu > 1 ---------------
 		greater(arrayPrepArea[slicerAlpha], 1, out=arrayPrepArea[slicerAlpha])
 		greater(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 		logical_and(arrayPrepArea[slicerAlpha], arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerAnalyzed])
 
+# ------- assign bitsAlpha and bitsZulu -------------------
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsAlpha, out=arrayPrepArea[slicerAlpha])
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsZulu, out=arrayPrepArea[slicerZulu])
+		bitwise_right_shift(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 
+# ------- ... and (bitsAlphaIsEven or bitsZuluIsEven) -----
 		bitwise_and(arrayPrepArea[slicerAlpha], 1, out=arrayPrepArea[slicerAlpha])
 		bitwise_invert(arrayPrepArea[slicerAlpha], out=arrayPrepArea[slicerAlpha])
 		bitwise_and(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
@@ -192,38 +228,90 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		logical_or(arrayPrepArea[slicerAlpha], arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerAlpha], casting='unsafe') # NOTE atypical pattern for `out=`
 		logical_and(arrayPrepArea[slicerAnalyzed], arrayPrepArea[slicerAlpha], out=arrayPrepArea[slicerAnalyzed])
 
+# ------- arrayCurveLocations.resize(qualified values) ----
 		logical_not(arrayPrepArea[slicerAnalyzed], out=arrayPrepArea[slicerAnalyzed])
-
 		viewZeroOut = arrayPrepArea[slicerAnalyzed].view(dtype=numpy.bool_)
-
 		multiply(state.arrayCurveLocations[viewZeroOut], 0, out=state.arrayCurveLocations[viewZeroOut])
 
-		# sort, in-place, `state.arrayCurveLocations` properly, meaning it will work for any ordering of `ShapeArray`
-		# figure out how to "address" the non-zero values
-		# resize, in-place, `state.arrayCurveLocations` to keep only the non-zero values
-		# recreate `arrayPrepArea` so it is the same length as `state.arrayCurveLocations`
-		# modify some bitsAlpha and some bitsZulu
-		# finish the analysis
+# TODO sort, in-place, `state.arrayCurveLocations` properly, meaning it will work for any ordering of `ShapeArray`
+		state.arrayCurveLocations.sort()
 
-# NOTE if bitsAlphaAtEven and not bitsZuluAtEven:
+# TODO figure out how to "address" the non-zero values
+		# shape = ShapeArray()  # noqa: ERA001
+
+# resize, in-place, to keep only the non-zero values
+		# state.arrayCurveLocations.resize(shape)  # noqa: ERA001
+
+		# del shape
+
+# Put in right location.
+		del viewZeroOut
+
+# ------- recreate arrayPrepArea --------------------------
+		shape = ShapeArray(length=len(state.arrayCurveLocations[slicerCurveLocations]), indices=indicesArrayPrepArea)
+		arrayPrepArea = numpy.zeros(shape, dtype=state.datatypeCurveLocations)
+		del shape
+
+# ------- align bitsAlpha and bitsZulu ----------------------------------------
+# ------- assign bitsAlpha and bitsZulu -------------------
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsAlpha, out=arrayPrepArea[slicerAlpha])
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsZulu, out=arrayPrepArea[slicerZulu])
+		bitwise_right_shift(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 
+# ------- if bitsAlphaAtEven and not bitsZuluAtEven -------
 		bitwise_and(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
-
 		viewModifyHere = arrayPrepArea[slicerZulu].view(dtype=numpy.bool_)
+		flipTheExtra_0b1AsUfunc(arrayPrepArea[slicerAlpha], where=viewModifyHere, out=arrayPrepArea[slicerAlpha])
+		del viewModifyHere
 
+		# ------- assign bitsZulu -------------------------
+		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], state.locatorBitsZulu, out=arrayPrepArea[slicerZulu])
+		bitwise_right_shift(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 
+# ------- if bitsZuluAtEven and not bitsAlphaAtEven -------
+		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], 1, out=state.arrayCurveLocations[slicerCurveLocations]) # NOTE atypical pattern for `out=`
+		viewModifyHere = state.arrayCurveLocations[slicerCurveLocations].view(dtype=numpy.bool_)
+		flipTheExtra_0b1AsUfunc(arrayPrepArea[slicerZulu], where=viewModifyHere, out=arrayPrepArea[slicerZulu])
+		del viewModifyHere
 
-
-# NOTE curveLocations = (bitsAlpha >> 2) | ((bitsZulu >> 2) << 1)
+# ------- (bitsAlpha >> 2) | ((bitsZulu >> 2) << 1) -------
 		bitwise_right_shift(arrayPrepArea[slicerAlpha], 2, out=arrayPrepArea[slicerAlpha])
 		bitwise_right_shift(arrayPrepArea[slicerZulu], 2, out=arrayPrepArea[slicerZulu])
 		bitwise_left_shift(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 		bitwise_or(arrayPrepArea[slicerAlpha], arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerAnalyzed])
 
+# ------- remove overlimit --------------------------------
+		multiply(arrayPrepArea[slicerAnalyzed], 0, out=arrayPrepArea[slicerAnalyzed], where=arrayPrepArea[slicerAnalyzed] > state.MAXIMUMcurveLocations)
 
+# ------- record analysis ---------------------------------
+		viewKeepThese = arrayPrepArea[slicerAnalyzed].view(dtype=numpy.bool_)
+		indexStop = int(viewKeepThese.sum())
+		sliceKeepThese = slice(copy(state.indexTarget), copy(state.indexTarget) + indexStop)
+		state.indexTarget += indexStop
+		del indexStop
 
+		viewArrayAnalyzedSlicerAnalyzed = arrayAnalyzed[slicerAnalyzed].view()
+		viewArrayAnalyzedSlicerDistinctCrossings = arrayAnalyzed[slicerDistinctCrossings].view()
+
+		viewArrayAnalyzedSlicerAnalyzed[sliceKeepThese] = arrayPrepArea[slicerAnalyzed][viewKeepThese]
+		del arrayPrepArea, viewArrayAnalyzedSlicerAnalyzed
+		viewArrayAnalyzedSlicerDistinctCrossings[sliceKeepThese] = state.arrayCurveLocations[slicerDistinctCrossings][viewKeepThese]
+		del sliceKeepThese, viewArrayAnalyzedSlicerDistinctCrossings, viewKeepThese
+# Should I use .resize or .empty?
+		state.arrayCurveLocations = numpy.empty((0,), dtype=state.datatypeCurveLocations)
+
+# ------- aggregate all analyses --------------------------------------------------------------------------------------
+		unique = numpy.unique_inverse(arrayAnalyzed[slicerAnalyzed])
+
+		shape = ShapeArray(length=len(unique.values), indices=indicesArrayCurveLocations)
+		state.arrayCurveLocations = numpy.zeros(shape, dtype=state.datatypeCurveLocations)
+		del shape
+		state.arrayCurveLocations[slicerCurveLocations] = unique.values
+		numpy.add.at(state.arrayCurveLocations[slicerDistinctCrossings], unique.inverse_indices, arrayAnalyzed[slicerDistinctCrossings])
+		del arrayAnalyzed, unique
+# I have always had a very strong feeling the above process could be more memory efficient. If I recall correctly, I estimate
+# A000682(46) will peak at 1.6 billion 64-bit elements in `unique.values`. I don't want to COPY that: I want to put the values
+# into their "forever home."
 
 	return state
 
@@ -253,15 +341,53 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 		if areIntegersWide(state):
 			state = countBigInt(state)
 		else:
-			state = Z0Z_makeArray(state)
+			state = Z0Z_makeArrayCurveLocations(state)
 			goByeBye()
 			state = countNumPy(state)
-			# Make dict?
+			state = Z0Z_makeDictionaryCurveLocations(state)
+			goByeBye()
 
 	return sum(state.dictionaryCurveLocations.values())
 
-def Z0Z_makeArray(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
+def Z0Z_makeArrayCurveLocations(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	"""Convert `state` to use NumPy arrays.
+
+	`state.dictionaryCurveLocations` is converted to `state.arrayCurveLocations`.
+
+	Parameters
+	----------
+	state : MatrixMeandersState
+		The algorithm state.
+
+	Returns
+	-------
+	state : MatrixMeandersState
+		The updated algorithm state.
+
+	Notes
+	-----
+	Contradictory thoughts and feelings:
+	1. This should probably be a method on `MatrixMeandersState`.
+	2. I didn't make it a method because I'm overly concerned about memory allocation and deallocation.
+	3. I didn't try very hard to control memory use because I believed `dictionaryCurveLocations` would "only" be a few hundred thousand items.
+	4. Quick test: A000682(46) at k = 27, the normal transition point from bigInt to NumPy, has 20095980 items in `dictionaryCurveLocations`.
+	5. 20 million * 2 int * ~60 bits/int = 2.4 GB for just the dictionary.
+
+	Conclusion: I need to put more effort into memory management of this conversion process.
+	"""
+	shape = ShapeArray(length=len(state.dictionaryCurveLocations), indices=indicesArrayCurveLocations)
+	arrayWorkbench = numpy.zeros(shape, dtype=state.datatypeCurveLocations)
+	arrayWorkbench[slicerCurveLocations] = list(state.dictionaryCurveLocations.keys())
+	arrayWorkbench[slicerDistinctCrossings] = list(state.dictionaryCurveLocations.values())
+	state.arrayCurveLocations = arrayWorkbench.copy()
+	state.dictionaryCurveLocations = {}
+	del arrayWorkbench
+	return state
+
+def Z0Z_makeDictionaryCurveLocations(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
+	"""Convert `state` to use a dictionary.
+
+	`state.arrayCurveLocations` is converted to `state.dictionaryCurveLocations`.
 
 	Parameters
 	----------
@@ -273,11 +399,9 @@ def Z0Z_makeArray(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	state : MatrixMeandersState
 		The updated algorithm state.
 	"""
-	shape = ShapeArray(length=len(state.dictionaryCurveLocations), indices=indicesArrayCurveLocations)
-	arrayWorkbench = numpy.zeros(shape, dtype=state.datatypeCurveLocations)
-	arrayWorkbench[slicerCurveLocations] = list(state.dictionaryCurveLocations.keys())
-	arrayWorkbench[slicerDistinctCrossings] = list(state.dictionaryCurveLocations.values())
-	state.arrayCurveLocations = arrayWorkbench.copy()
-	state.dictionaryCurveLocations = {}
-	del arrayWorkbench
+	state.dictionaryCurveLocations = {int(key): int(value) for key, value in zip(
+		state.arrayCurveLocations[slicerCurveLocations], state.arrayCurveLocations[slicerDistinctCrossings]
+		, strict=True)
+	}
+	state.arrayCurveLocations = numpy.empty((0,), dtype=state.datatypeCurveLocations)
 	return state
