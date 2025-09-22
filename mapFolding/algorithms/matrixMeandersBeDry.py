@@ -1,4 +1,5 @@
 """Buckets."""
+from functools import cache
 from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import MatrixMeandersNumPyState
 from mapFolding.reference.A005316facts import bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k
@@ -15,9 +16,66 @@ class ImaKey(NamedTuple):
 	kIsOdd: bool
 	nLess_kIsOdd: bool
 
-indexAnalyzed: Final[int] = 0
+indexCurveLocations: Final[int] = 0
 indexDistinctCrossings: Final[int] = 1
-indexCurveLocations: Final[int] = 2
+
+def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFrame | None = None, array: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]] | None = None, fixedSizeMAXIMUMcurveLocations: bool = False) -> bool:
+	"""Check if the largest values are wider than the maximum limits.
+
+	Parameters
+	----------
+	state : MatrixMeandersState
+		The current state of the computation, including `dictionaryCurveLocations`.
+	dataframe : pandas.DataFrame | None = None
+		Optional DataFrame containing 'analyzed' and 'distinctCrossings' columns. If provided, use this instead of `state.dictionaryCurveLocations`.
+	fixedSizeMAXIMUMcurveLocations : bool = False
+		Set this to `True` if you cast `state.MAXIMUMcurveLocations` to the same fixed size integer type as `state.datatypeCurveLocations`.
+
+	Returns
+	-------
+	wider : bool
+		True if at least one integer is too wide.
+
+	Notes
+	-----
+	Casting `state.MAXIMUMcurveLocations` to a fixed-size 64-bit unsigned integer might cause the flow to be a little more
+	complicated because `MAXIMUMcurveLocations` is usually 1-bit larger than the `max(curveLocations)` value.
+
+	If you start the algorithm with very large `curveLocations` in your `dictionaryCurveLocations` (*i.e.,* A000682), then the
+	flow will go to a function that does not use fixed size integers. When the integers are below the limits (*e.g.,*
+	`bitWidthCurveLocationsMaximum`), the flow will go to a function with fixed size integers. In that case, casting
+	`MAXIMUMcurveLocations` to a fixed size merely delays the transition from one function to the other by one iteration.
+
+	If you start with small values in `dictionaryCurveLocations`, however, then the flow goes to the function with fixed size
+	integers and usually stays there until `distinctCrossings` is huge, which is near the end of the computation. If you cast
+	`MAXIMUMcurveLocations` into a 64-bit unsigned integer, however, then around `state.kOfMatrix == 28`, the bit width of
+	`MAXIMUMcurveLocations` might exceed the limit. That will cause the flow to go to the function that does not have fixed size
+	integers for a few iterations before returning to the function with fixed size integers.
+	"""
+	if dataframe is not None:
+		curveLocationsWidest = int(dataframe['analyzed'].max()).bit_length()
+		distinctCrossingsWidest = int(dataframe['distinctCrossings'].max()).bit_length()
+	elif array is not None:
+		curveLocationsWidest = int(array[..., indexCurveLocations].max()).bit_length()
+		distinctCrossingsWidest = int(array[..., indexDistinctCrossings].max()).bit_length()
+	else:
+		curveLocationsWidest: int = max(state.dictionaryCurveLocations.keys()).bit_length()
+		distinctCrossingsWidest: int = max(state.dictionaryCurveLocations.values()).bit_length()
+
+	MAXIMUMcurveLocations: int = 0
+	if fixedSizeMAXIMUMcurveLocations:
+		MAXIMUMcurveLocations = state.MAXIMUMcurveLocations
+
+	return (curveLocationsWidest > raiseIfNone(state.bitWidthLimitCurveLocations)
+		or distinctCrossingsWidest > raiseIfNone(state.bitWidthLimitDistinctCrossings)
+		or MAXIMUMcurveLocations > raiseIfNone(state.bitWidthLimitCurveLocations)
+		)
+
+@cache
+def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
+	return numpy.uint64(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
+
+flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
 def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float = 1.2) -> int:
 	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations.
@@ -143,56 +201,41 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 		raise SystemError(message)
 	return bucketsTotal
 
-
-def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFrame | None = None, array: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]] | None = None, fixedSizeMAXIMUMcurveLocations: bool = False) -> bool:
-	"""Check if the largest values are wider than the maximum limits.
+@cache
+def walkDyckPath(intWithExtra_0b1: int) -> int:
+	"""Find the bit position for flipping paired curve endpoints in meander transfer matrices.
 
 	Parameters
 	----------
-	state : MatrixMeandersState
-		The current state of the computation, including `dictionaryCurveLocations`.
-	dataframe : pandas.DataFrame | None = None
-		Optional DataFrame containing 'analyzed' and 'distinctCrossings' columns. If provided, use this instead of `state.dictionaryCurveLocations`.
-	fixedSizeMAXIMUMcurveLocations : bool = False
-		Set this to `True` if you cast `state.MAXIMUMcurveLocations` to the same fixed size integer type as `state.datatypeCurveLocations`.
+	intWithExtra_0b1 : int
+		Binary representation of curve locations with an extra bit encoding parity information.
 
 	Returns
 	-------
-	wider : bool
-		True if at least one integer is too wide.
+	flipExtra_0b1_Here : int
+		Bit mask indicating the position where the balance condition fails, formatted as 2^(2k).
 
-	Notes
-	-----
-	Casting `state.MAXIMUMcurveLocations` to a fixed-size 64-bit unsigned integer might cause the flow to be a little more
-	complicated because `MAXIMUMcurveLocations` is usually 1-bit larger than the `max(curveLocations)` value.
+	3L33T H@X0R
+	------------
+	Binary search for first negative balance in shifted bit pairs. Returns 2^(2k) mask for
+	bit position k where cumulative balance counter transitions from non-negative to negative.
 
-	If you start the algorithm with very large `curveLocations` in your `dictionaryCurveLocations` (*i.e.,* A000682), then the
-	flow will go to a function that does not use fixed size integers. When the integers are below the limits (*e.g.,*
-	`bitWidthCurveLocationsMaximum`), the flow will go to a function with fixed size integers. In that case, casting
-	`MAXIMUMcurveLocations` to a fixed size merely delays the transition from one function to the other by one iteration.
+	Mathematics
+	-----------
+	Implements the Dyck path balance verification algorithm from Jensen's transfer matrix
+	enumeration. Computes the position where ∑(i=0 to k) (-1)^b_i < 0 for the first time,
+	where b_i are the bits of the input at positions 2i.
 
-	If you start with small values in `dictionaryCurveLocations`, however, then the flow goes to the function with fixed size
-	integers and usually stays there until `distinctCrossings` is huge, which is near the end of the computation. If you cast
-	`MAXIMUMcurveLocations` into a 64-bit unsigned integer, however, then around `state.kOfMatrix == 28`, the bit width of
-	`MAXIMUMcurveLocations` might exceed the limit. That will cause the flow to go to the function that does not have fixed size
-	integers for a few iterations before returning to the function with fixed size integers.
 	"""
-	if dataframe is not None:
-		curveLocationsWidest = int(dataframe['analyzed'].max()).bit_length()
-		distinctCrossingsWidest = int(dataframe['distinctCrossings'].max()).bit_length()
-	elif array is not None:
-		curveLocationsWidest = int(array[..., indexAnalyzed].max()).bit_length()
-		distinctCrossingsWidest = int(array[..., indexDistinctCrossings].max()).bit_length()
-	else:
-		curveLocationsWidest: int = max(state.dictionaryCurveLocations.keys()).bit_length()
-		distinctCrossingsWidest: int = max(state.dictionaryCurveLocations.values()).bit_length()
-
-	MAXIMUMcurveLocations: int = 0
-	if fixedSizeMAXIMUMcurveLocations:
-		MAXIMUMcurveLocations = state.MAXIMUMcurveLocations
-
-	return (curveLocationsWidest > raiseIfNone(state.bitWidthLimitCurveLocations)
-		or distinctCrossingsWidest > raiseIfNone(state.bitWidthLimitDistinctCrossings)
-		or MAXIMUMcurveLocations > raiseIfNone(state.bitWidthLimitCurveLocations)
-		)
+	findTheExtra_0b1: int = 0
+	flipExtra_0b1_Here: int = 1
+	while True:
+		flipExtra_0b1_Here <<= 2
+		if intWithExtra_0b1 & flipExtra_0b1_Here == 0:
+			findTheExtra_0b1 += 1
+		else:
+			findTheExtra_0b1 -= 1
+		if findTheExtra_0b1 < 0:
+			break
+	return flipExtra_0b1_Here
 

@@ -1,19 +1,11 @@
-from functools import cache
 from gc import collect as goByeBye
-from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide, getBucketsTotal
+from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
 from mapFolding.dataBaskets import MatrixMeandersNumPyState
-from mapFolding.syntheticModules.meanders.bigInt import countBigInt, walkDyckPath
+from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from warnings import warn
-import numpy
 import pandas
 
 # TODO investigate adding another condition to `areIntegersWide`: while dict is faster than pandas, stay in bigInt.
-
-@cache
-def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
-	return numpy.uint64(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
-
-flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
 # ruff: noqa: B023
 
@@ -186,7 +178,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
 
 		def analyzeCurveLocationsSimple() -> None:
-			"""Compute curveLocations with the 'simple' bridges formula.
+			"""Compute curveLocations with the 'simple' formula.
 
 			Formula
 			-------

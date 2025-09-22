@@ -23,6 +23,7 @@ access patterns that enable efficient result persistence and retrieval.
 from mapFolding import (
 	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
 	getConnectionGraph, getLeavesTotal, makeDataContainer)
+from numpy.typing import NDArray
 from typing import TypeAlias
 import dataclasses
 import numpy
@@ -321,13 +322,15 @@ class MatrixMeandersState:
 class MatrixMeandersNumPyState(MatrixMeandersState):
 	"""Hold the state of a meanders transfer matrix algorithm computation."""
 
+	arrayCurveLocations: NDArray[numpy.uint64] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=numpy.uint64))
+
+	bitWidthLimitCurveLocations: int | None = None
+	bitWidthLimitDistinctCrossings: int | None = None
+
 	datatypeCurveLocations: TypeAlias = numpy.uint64  # noqa: UP040
 	"""The fixed-size integer type used to store `curveLocations`."""
 	datatypeDistinctCrossings: TypeAlias = numpy.uint64  # noqa: UP040
 	"""The fixed-size integer type used to store `distinctCrossings`."""
-
-	bitWidthLimitCurveLocations: int | None = None
-	bitWidthLimitDistinctCrossings: int | None = None
 
 	indexTarget: int = 0
 	"""What is being indexed depends on the algorithm flavor."""
