@@ -4,7 +4,7 @@ from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide, flipTheEx
 from mapFolding.dataBaskets import MatrixMeandersNumPyState
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from numpy import (
-	bitwise_and, bitwise_invert, bitwise_left_shift, bitwise_or, bitwise_right_shift, greater, logical_and, logical_not,
+	bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, logical_and, logical_not,
 	logical_or, multiply)
 from types import EllipsisType
 from typing import NamedTuple
@@ -51,9 +51,9 @@ if indexΩ != indicesTotal - 1:
 	raise ValueError(message)
 del indicesTotal, indexΩ
 
-slicerAnalyzed: ShapeSlicer = ShapeSlicer(length=..., indices=indexAnalyzed)
 slicerCurveLocations: ShapeSlicer = ShapeSlicer(length=..., indices=indexCurveLocations)
 slicerDistinctCrossings: ShapeSlicer = ShapeSlicer(length=..., indices=indexDistinctCrossings)
+slicerAnalyzed: ShapeSlicer = ShapeSlicer(length=..., indices=indexAnalyzed)
 slicerAlpha: ShapeSlicer = ShapeSlicer(length=..., indices=indexAlpha)
 slicerZulu: ShapeSlicer = ShapeSlicer(length=..., indices=indexZulu)
 
@@ -85,7 +85,6 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		arrayAnalyzed = numpy.zeros(shape, dtype=state.datatypeCurveLocations)
 		del shape
 		shape = ShapeArray(length=len(state.arrayCurveLocations[slicerCurveLocations]), indices=indicesArrayPrepArea)
-		print(state.arrayCurveLocations.shape, shape)
 		arrayPrepArea = numpy.zeros(shape, dtype=state.datatypeCurveLocations)
 		del shape
 
@@ -109,7 +108,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		multiply(arrayPrepArea[slicerAnalyzed], 0, out=arrayPrepArea[slicerAnalyzed], where=arrayPrepArea[slicerAnalyzed] > state.MAXIMUMcurveLocations)
 
 # ------- record analysis ---------------------------------
-		viewKeepThese = arrayPrepArea[slicerAnalyzed].view(dtype=numpy.bool_)
+		viewKeepThese = arrayPrepArea[slicerAnalyzed].astype(dtype=numpy.bool_)
 		indexStop = numpy.count_nonzero(viewKeepThese)
 		sliceKeepThese: slice = slice(copy(state.indexTarget), state.indexTarget + indexStop)
 		state.indexTarget += indexStop
@@ -117,7 +116,6 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		viewArrayAnalyzedSlicerAnalyzed = arrayAnalyzed[slicerAnalyzed].view()
 		viewArrayAnalyzedSlicerDistinctCrossings = arrayAnalyzed[slicerDistinctCrossings].view()
-		print(f"{viewKeepThese}\n{viewKeepThese.shape = }\n{sliceKeepThese = }\n{arrayAnalyzed.shape = }\n{slicerAnalyzed = }\n{viewArrayAnalyzedSlicerAnalyzed.shape = }\n{slicerDistinctCrossings = }\n{viewArrayAnalyzedSlicerDistinctCrossings.shape = }\n{arrayPrepArea.shape = }\n{arrayPrepArea[slicerAnalyzed].shape = }")
 		viewArrayAnalyzedSlicerAnalyzed[sliceKeepThese] = arrayPrepArea[slicerAnalyzed][viewKeepThese]
 		del viewArrayAnalyzedSlicerAnalyzed
 		viewArrayAnalyzedSlicerDistinctCrossings[sliceKeepThese] = state.arrayCurveLocations[slicerDistinctCrossings][viewKeepThese]
@@ -131,7 +129,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 # ------- ((((1 - (bitsAlpha & 1)) << 1) | (bitsZulu << 3) << 2) | bitsAlpha) >> 2 ---
 		bitwise_and(arrayPrepArea[slicerAlpha], 1, out=arrayPrepArea[slicerAlpha])
-		bitwise_invert(arrayPrepArea[slicerAlpha], out=arrayPrepArea[slicerAlpha])
+		bitwise_xor(arrayPrepArea[slicerAlpha], 1, out=arrayPrepArea[slicerAlpha])
 		bitwise_left_shift(arrayPrepArea[slicerAlpha], 1, out=arrayPrepArea[slicerAlpha])
 		bitwise_left_shift(arrayPrepArea[slicerZulu], 3, out=arrayPrepArea[slicerZulu])
 		bitwise_or(arrayPrepArea[slicerAlpha], arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerAnalyzed])
@@ -149,7 +147,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		multiply(arrayPrepArea[slicerAnalyzed], 0, out=arrayPrepArea[slicerAnalyzed], where=arrayPrepArea[slicerAnalyzed] > state.MAXIMUMcurveLocations)
 
 # ------- record analysis ---------------------------------
-		viewKeepThese = arrayPrepArea[slicerAnalyzed].view(dtype=numpy.bool_)
+		viewKeepThese = arrayPrepArea[slicerAnalyzed].astype(dtype=numpy.bool_)
 		indexStop = int(viewKeepThese.sum())
 		sliceKeepThese = slice(copy(state.indexTarget), copy(state.indexTarget) + indexStop)
 		state.indexTarget += indexStop
@@ -171,7 +169,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 # ------- (((1 - (bitsZulu & 1)) | (bitsAlpha << 2) << 1) | bitsZulu) >> 1 ----
 		bitwise_and(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
-		bitwise_invert(arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerZulu])
+		bitwise_xor(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 		bitwise_left_shift(arrayPrepArea[slicerAlpha], 2, out=arrayPrepArea[slicerAlpha])
 		bitwise_or(arrayPrepArea[slicerZulu], arrayPrepArea[slicerAlpha], out=arrayPrepArea[slicerAnalyzed])
 		bitwise_left_shift(arrayPrepArea[slicerAnalyzed], 1, out=arrayPrepArea[slicerAnalyzed])
@@ -189,7 +187,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		multiply(arrayPrepArea[slicerAnalyzed], 0, out=arrayPrepArea[slicerAnalyzed], where=arrayPrepArea[slicerAnalyzed] > state.MAXIMUMcurveLocations)
 
 # ------- record analysis ---------------------------------
-		viewKeepThese = arrayPrepArea[slicerAnalyzed].view(dtype=numpy.bool_)
+		viewKeepThese = arrayPrepArea[slicerAnalyzed].astype(dtype=numpy.bool_)
 		indexStop = int(viewKeepThese.sum())
 		sliceKeepThese = slice(copy(state.indexTarget), copy(state.indexTarget) + indexStop)
 		state.indexTarget += indexStop
@@ -222,30 +220,16 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 # ------- ... and (bitsAlphaIsEven or bitsZuluIsEven) -----
 		bitwise_and(arrayPrepArea[slicerAlpha], 1, out=arrayPrepArea[slicerAlpha])
-		bitwise_invert(arrayPrepArea[slicerAlpha], out=arrayPrepArea[slicerAlpha])
+		bitwise_xor(arrayPrepArea[slicerAlpha], 1, out=arrayPrepArea[slicerAlpha])
 		bitwise_and(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
-		bitwise_invert(arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerZulu])
+		bitwise_xor(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
 		logical_or(arrayPrepArea[slicerAlpha], arrayPrepArea[slicerZulu], out=arrayPrepArea[slicerAlpha], casting='unsafe') # NOTE atypical pattern for `out=`
 		logical_and(arrayPrepArea[slicerAnalyzed], arrayPrepArea[slicerAlpha], out=arrayPrepArea[slicerAnalyzed])
 
 # ------- arrayCurveLocations.resize(qualified values) ----
-		logical_not(arrayPrepArea[slicerAnalyzed], out=arrayPrepArea[slicerAnalyzed])
-		viewZeroOut = arrayPrepArea[slicerAnalyzed].view(dtype=numpy.bool_)
-		multiply(state.arrayCurveLocations[viewZeroOut], 0, out=state.arrayCurveLocations[viewZeroOut])
-
-# TODO sort, in-place, `state.arrayCurveLocations` properly, meaning it will work for any ordering of `ShapeArray`
-		state.arrayCurveLocations.sort()
-
-# TODO figure out how to "address" the non-zero values
-		# shape = ShapeArray()  # noqa: ERA001
-
-# resize, in-place, to keep only the non-zero values
-		# state.arrayCurveLocations.resize(shape)  # noqa: ERA001
-
-		# del shape
-
-# Put in right location.
-		del viewZeroOut
+		viewKeepThese = arrayPrepArea[slicerAnalyzed].astype(dtype=numpy.bool_)
+		state.arrayCurveLocations = state.arrayCurveLocations[viewKeepThese]
+		del viewKeepThese
 
 # ------- recreate arrayPrepArea --------------------------
 		shape = ShapeArray(length=len(state.arrayCurveLocations[slicerCurveLocations]), indices=indicesArrayPrepArea)
@@ -260,8 +244,8 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 # ------- if bitsAlphaAtEven and not bitsZuluAtEven -------
 		bitwise_and(arrayPrepArea[slicerZulu], 1, out=arrayPrepArea[slicerZulu])
-		viewModifyHere = arrayPrepArea[slicerZulu].view(dtype=numpy.bool_)
-		flipTheExtra_0b1AsUfunc(arrayPrepArea[slicerAlpha], where=viewModifyHere, out=arrayPrepArea[slicerAlpha])
+		viewModifyHere = arrayPrepArea[slicerZulu].astype(dtype=numpy.bool_)
+		flipTheExtra_0b1AsUfunc(arrayPrepArea[slicerAlpha], where=viewModifyHere, out=arrayPrepArea[slicerAlpha], casting='unsafe')
 		del viewModifyHere
 
 		# ------- assign bitsZulu -------------------------
@@ -270,8 +254,8 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 # ------- if bitsZuluAtEven and not bitsAlphaAtEven -------
 		bitwise_and(state.arrayCurveLocations[slicerCurveLocations], 1, out=state.arrayCurveLocations[slicerCurveLocations]) # NOTE atypical pattern for `out=`
-		viewModifyHere = state.arrayCurveLocations[slicerCurveLocations].view(dtype=numpy.bool_)
-		flipTheExtra_0b1AsUfunc(arrayPrepArea[slicerZulu], where=viewModifyHere, out=arrayPrepArea[slicerZulu])
+		viewModifyHere = state.arrayCurveLocations[slicerCurveLocations].astype(dtype=numpy.bool_)
+		flipTheExtra_0b1AsUfunc(arrayPrepArea[slicerZulu], where=viewModifyHere, out=arrayPrepArea[slicerZulu], casting='unsafe')
 		del viewModifyHere
 
 # ------- (bitsAlpha >> 2) | ((bitsZulu >> 2) << 1) -------
@@ -284,7 +268,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		multiply(arrayPrepArea[slicerAnalyzed], 0, out=arrayPrepArea[slicerAnalyzed], where=arrayPrepArea[slicerAnalyzed] > state.MAXIMUMcurveLocations)
 
 # ------- record analysis ---------------------------------
-		viewKeepThese = arrayPrepArea[slicerAnalyzed].view(dtype=numpy.bool_)
+		viewKeepThese = arrayPrepArea[slicerAnalyzed].astype(dtype=numpy.bool_)
 		indexStop = int(viewKeepThese.sum())
 		sliceKeepThese = slice(copy(state.indexTarget), copy(state.indexTarget) + indexStop)
 		state.indexTarget += indexStop
@@ -315,39 +299,6 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 	return state
 
-def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
-	"""Compute `distinctCrossings` with a transfer matrix algorithm implemented in NumPy.
-
-	Parameters
-	----------
-	state : MatrixMeandersState
-		The algorithm state.
-
-	Returns
-	-------
-	distinctCrossings : int
-		The computed value of `distinctCrossings`.
-
-	Notes
-	-----
-	Citation: https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bibtex
-
-	See Also
-	--------
-	https://oeis.org/A000682
-	https://oeis.org/A005316
-	"""
-	while state.kOfMatrix > 0:
-		if areIntegersWide(state):
-			state = countBigInt(state)
-		else:
-			state = Z0Z_makeArrayCurveLocations(state)
-			goByeBye()
-			state = countNumPy(state)
-			state = Z0Z_makeDictionaryCurveLocations(state)
-			goByeBye()
-
-	return sum(state.dictionaryCurveLocations.values())
 
 def Z0Z_makeArrayCurveLocations(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	"""Convert `state` to use NumPy arrays.
@@ -384,6 +335,7 @@ def Z0Z_makeArrayCurveLocations(state: MatrixMeandersNumPyState) -> MatrixMeande
 	del arrayWorkbench
 	return state
 
+
 def Z0Z_makeDictionaryCurveLocations(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	"""Convert `state` to use a dictionary.
 
@@ -405,3 +357,38 @@ def Z0Z_makeDictionaryCurveLocations(state: MatrixMeandersNumPyState) -> MatrixM
 	}
 	state.arrayCurveLocations = numpy.empty((0,), dtype=state.datatypeCurveLocations)
 	return state
+
+def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
+	"""Compute `distinctCrossings` with a transfer matrix algorithm implemented in NumPy.
+
+	Parameters
+	----------
+	state : MatrixMeandersState
+		The algorithm state.
+
+	Returns
+	-------
+	distinctCrossings : int
+		The computed value of `distinctCrossings`.
+
+	Notes
+	-----
+	Citation: https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bibtex
+
+	See Also
+	--------
+	https://oeis.org/A000682
+	https://oeis.org/A005316
+	"""
+	while state.kOfMatrix > 0:
+		if areIntegersWide(state):
+			state = countBigInt(state)
+		else:
+			state = Z0Z_makeArrayCurveLocations(state)
+			goByeBye()
+			state = countNumPy(state)
+			state = Z0Z_makeDictionaryCurveLocations(state)
+			goByeBye()
+
+	return sum(state.dictionaryCurveLocations.values())
+
