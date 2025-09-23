@@ -359,3 +359,19 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 			self.bitWidthLimitDistinctCrossings = _bitWidthOfFixedSizeInteger - _offset
 
 			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetEstimation, _offsetSafety, _offset
+
+	def makeDictionary(self) -> None:
+		"""Convert from NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array) to Python `dict` (*dict*ionary)."""
+		self.dictionaryCurveLocations = {int(key): int(value) for key, value in zip(
+			self.arrayCurveLocations[..., 0], self.arrayCurveLocations[..., 1]
+			, strict=True)}
+		self.arrayCurveLocations = numpy.empty((0,), dtype=self.datatypeCurveLocations)
+
+	def makeArray(self) -> None:
+		"""Convert from Python `dict` (*dict*ionary) to NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array)."""
+		shape = (len(self.dictionaryCurveLocations), 2)
+		self.arrayCurveLocations = numpy.zeros(shape, dtype=self.datatypeCurveLocations)
+		self.arrayCurveLocations[..., 0] = list(self.dictionaryCurveLocations.keys())
+		self.arrayCurveLocations[..., 1] = list(self.dictionaryCurveLocations.values())
+		self.bitWidth = int(self.arrayCurveLocations[..., 0].max()).bit_length()
+		self.dictionaryCurveLocations = {}

@@ -1,4 +1,4 @@
-"""Buckets."""
+"""Be DRY."""
 from functools import cache
 from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import MatrixMeandersNumPyState
@@ -58,6 +58,9 @@ def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFr
 	elif array is not None:
 		curveLocationsWidest = int(array[..., indexCurveLocations].max()).bit_length()
 		distinctCrossingsWidest = int(array[..., indexDistinctCrossings].max()).bit_length()
+	elif not state.dictionaryCurveLocations:
+		curveLocationsWidest = int(state.arrayCurveLocations[..., indexCurveLocations].max()).bit_length()
+		distinctCrossingsWidest = int(state.arrayCurveLocations[..., indexDistinctCrossings].max()).bit_length()
 	else:
 		curveLocationsWidest: int = max(state.dictionaryCurveLocations.keys()).bit_length()
 		distinctCrossingsWidest: int = max(state.dictionaryCurveLocations.values()).bit_length()
@@ -160,6 +163,11 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 				r = 3.35776
 			bucketsTotal = int(c * r**state.kOfMatrix * safetyMultiplicand)
 
+	elif state.kOfMatrix <= max(bucketsTotalMaximumBy_kOfMatrix.keys()):
+		# If `kOfMatrix` is low, use maximum bucketsTotal. 1. Can't underestimate. 2. Skip computation that can underestimate.
+		# 3. The potential difference in memory use is relatively small.
+		bucketsTotal = bucketsTotalMaximumBy_kOfMatrix[state.kOfMatrix]
+
 	elif bucketsTotalGrowsExponentially:
 		if (state.oeisID == 'A005316') and kIsOdd and (nLess_k in bucketsIf_k_ODD_by_nLess_k):
 			# If I already know bucketsTotal.
@@ -176,11 +184,6 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 			if state.oeisID == 'A000682': # NOTE Net effect is between `*= n` and `*= n * 2.2` if n=46.
 				startingConditionsCoefficient *= state.n * (((state.n // 2) + 2) ** A000682adjustStartingCurveLocations)
 			bucketsTotal = int(startingConditionsCoefficient * math.exp(xCommon * xInstant))
-
-	elif state.kOfMatrix <= max(bucketsTotalMaximumBy_kOfMatrix.keys()):
-		# If `kOfMatrix` is low, use maximum bucketsTotal. 1. Can't underestimate. 2. Skip computation that can underestimate.
-		# 3. The potential difference in memory use is relatively small.
-		bucketsTotal = bucketsTotalMaximumBy_kOfMatrix[state.kOfMatrix]
 
 	elif bucketsTotalGrowsLogarithmically:
 		xPower: float = (0
@@ -238,4 +241,3 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
 		if findTheExtra_0b1 < 0:
 			break
 	return flipExtra_0b1_Here
-
