@@ -7,16 +7,16 @@ def outfitDictionaryBitGroups(state: MatrixMeandersState) -> dict[tuple[int, int
     Parameters
     ----------
     state : MatrixMeandersState
-        The current state of the computation, including `dictionaryCurveLocations`.
+        The current state of the computation, including `dictionaryMeanders`.
 
     Returns
     -------
     dictionaryBitGroups : dict[tuple[int, int], int]
         A dictionary of `(bitsAlpha, bitsZulu)` to `distinctCrossings`.
     """
-    state.bitWidth = max(state.dictionaryCurveLocations.keys()).bit_length()
-    return {(curveLocations & state.locatorBitsAlpha, (curveLocations & state.locatorBitsZulu) >> 1): distinctCrossings
-        for curveLocations, distinctCrossings in state.dictionaryCurveLocations.items()}
+    state.bitWidth = max(state.dictionaryMeanders.keys()).bit_length()
+    return {(arcCode & state.locatorBitsAlpha, (arcCode & state.locatorBitsZulu) >> 1): distinctCrossings
+        for arcCode, distinctCrossings in state.dictionaryMeanders.items()}
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -67,7 +67,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
     Notes
     -----
     The matrix transfer algorithm is sophisticated, but this implementation is straightforward: compute each index one at a time,
-    compute each `curveLocations` one at a time, and compute each type of analysis one at a time.
+    compute each `arcCode` one at a time, and compute each type of analysis one at a time.
     """
     dictionaryBitGroups: dict[tuple[int, int], int] = {}
 
@@ -75,38 +75,38 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
         state.kOfMatrix -= 1
 
         dictionaryBitGroups = outfitDictionaryBitGroups(state)
-        state.dictionaryCurveLocations = {}
+        state.dictionaryMeanders = {}
 
         for (bitsAlpha, bitsZulu), distinctCrossings in dictionaryBitGroups.items():
-            bitsAlphaCurves: bool = bitsAlpha > 1
-            bitsZuluHasCurves: bool = bitsZulu > 1
+            bitsAlphaHasArcs: bool = bitsAlpha > 1
+            bitsZuluHasArcs: bool = bitsZulu > 1
             bitsAlphaIsEven = bitsZuluIsEven = 0
 
-            curveLocationAnalysis = ((bitsAlpha | (bitsZulu << 1)) << 2) | 3
+            arcCurveAnalysis = ((bitsAlpha | (bitsZulu << 1)) << 2) | 3
             # simple
-            if curveLocationAnalysis < state.MAXIMUMcurveLocations:
-                state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+            if arcCurveAnalysis < state.MAXIMUMarcCode:
+                state.dictionaryMeanders[arcCurveAnalysis] = state.dictionaryMeanders.get(arcCurveAnalysis, 0) + distinctCrossings
 
-            if bitsAlphaCurves:
-                curveLocationAnalysis = (bitsAlpha >> 2) | (bitsZulu << 3) | ((bitsAlphaIsEven := 1 - (bitsAlpha & 1)) << 1)
-                if curveLocationAnalysis < state.MAXIMUMcurveLocations:
-                    state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+            if bitsAlphaHasArcs:
+                arcCurveAnalysis = (bitsAlpha >> 2) | (bitsZulu << 3) | ((bitsAlphaIsEven := 1 - (bitsAlpha & 1)) << 1)
+                if arcCurveAnalysis < state.MAXIMUMarcCode:
+                    state.dictionaryMeanders[arcCurveAnalysis] = state.dictionaryMeanders.get(arcCurveAnalysis, 0) + distinctCrossings
 
-            if bitsZuluHasCurves:
-                curveLocationAnalysis = (bitsZulu >> 1) | (bitsAlpha << 2) | (bitsZuluIsEven := 1 - (bitsZulu & 1))
-                if curveLocationAnalysis < state.MAXIMUMcurveLocations:
-                    state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+            if bitsZuluHasArcs:
+                arcCurveAnalysis = (bitsZulu >> 1) | (bitsAlpha << 2) | (bitsZuluIsEven := 1 - (bitsZulu & 1))
+                if arcCurveAnalysis < state.MAXIMUMarcCode:
+                    state.dictionaryMeanders[arcCurveAnalysis] = state.dictionaryMeanders.get(arcCurveAnalysis, 0) + distinctCrossings
 
-            if bitsAlphaCurves and bitsZuluHasCurves and (bitsAlphaIsEven or bitsZuluIsEven):
+            if bitsAlphaHasArcs and bitsZuluHasArcs and (bitsAlphaIsEven or bitsZuluIsEven):
                 # aligned
                 if bitsAlphaIsEven and not bitsZuluIsEven:
                     bitsAlpha ^= walkDyckPath(bitsAlpha)  # noqa: PLW2901
                 elif bitsZuluIsEven and not bitsAlphaIsEven:
                     bitsZulu ^= walkDyckPath(bitsZulu)  # noqa: PLW2901
 
-                curveLocationAnalysis: int = ((bitsZulu >> 2) << 1) | (bitsAlpha >> 2)
-                if curveLocationAnalysis < state.MAXIMUMcurveLocations:
-                    state.dictionaryCurveLocations[curveLocationAnalysis] = state.dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
+                arcCurveAnalysis: int = ((bitsZulu >> 2) << 1) | (bitsAlpha >> 2)
+                if arcCurveAnalysis < state.MAXIMUMarcCode:
+                    state.dictionaryMeanders[arcCurveAnalysis] = state.dictionaryMeanders.get(arcCurveAnalysis, 0) + distinctCrossings
 
         dictionaryBitGroups = {}
 
@@ -136,4 +136,4 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
     """
     state = count(state)
 
-    return sum(state.dictionaryCurveLocations.values())
+    return sum(state.dictionaryMeanders.values())

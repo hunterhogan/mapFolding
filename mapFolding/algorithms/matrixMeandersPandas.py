@@ -15,143 +15,143 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	Parameters
 	----------
 	state : MatrixMeandersState
-		The algorithm state containing current `kOfMatrix`, `dictionaryCurveLocations`, and thresholds.
+		The algorithm state containing current `kOfMatrix`, `dictionaryMeanders`, and thresholds.
 
 	Returns
 	-------
 	state : MatrixMeandersState
-		Updated state with new `kOfMatrix` and `dictionaryCurveLocations`.
+		Updated state with new `kOfMatrix` and `dictionaryMeanders`.
 	"""
 	dataframeAnalyzed = pandas.DataFrame({
-		'analyzed': pandas.Series(name='analyzed', data=state.dictionaryCurveLocations.keys(), copy=False, dtype=state.datatypeCurveLocations)
-		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=state.dictionaryCurveLocations.values(), copy=False, dtype=state.datatypeDistinctCrossings)
-		}, dtype=state.datatypeCurveLocations
+		'analyzed': pandas.Series(name='analyzed', data=state.dictionaryMeanders.keys(), copy=False, dtype=state.datatypeArcCode)
+		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=state.dictionaryMeanders.values(), copy=False, dtype=state.datatypeDistinctCrossings)
+		}, dtype=state.datatypeArcCode
 	)
-	state.dictionaryCurveLocations.clear()
+	state.dictionaryMeanders.clear()
 
 	while (state.kOfMatrix > 0 and not areIntegersWide(state, dataframe=dataframeAnalyzed)):
 
-		def aggregateCurveLocations()  -> None:
+		def aggregateArcCodes()  -> None:
 			nonlocal dataframeAnalyzed
 			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexTarget].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
 
-		def analyzeCurveLocationsAligned() -> None:
-			"""Compute `curveLocations` from `bitsAlpha` and `bitsZulu` if at least one is an even number.
+		def analyzeArcCodesAligned() -> None:
+			"""Compute `arcCode` from `bitsAlpha` and `bitsZulu` if at least one is an even number.
 
-			Before computing `curveLocations`, some values of `bitsAlpha` and `bitsZulu` are modified.
+			Before computing `arcCode`, some values of `bitsAlpha` and `bitsZulu` are modified.
 
 			Warning
 			-------
-			This function deletes rows from `dataframeCurveLocations`. Always run this analysis last.
+			This function deletes rows from `dataframeMeanders`. Always run this analysis last.
 
 			Formula
 			-------
 			```python
 			if bitsAlpha > 1 and bitsZulu > 1 and (bitsAlphaIsEven or bitsZuluIsEven):
-				curveLocations = (bitsAlpha >> 2) | ((bitsZulu >> 2) << 1)
+				arcCode = (bitsAlpha >> 2) | ((bitsZulu >> 2) << 1)
 			```
 			"""
-			nonlocal dataframeCurveLocations
+			nonlocal dataframeMeanders
 
 			# NOTE Step 1 drop unqualified rows
 
-			bitsTarget: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # `bitsAlpha`
+			bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy() # `bitsAlpha`
 			bitsTarget &= state.locatorBitsAlpha # `bitsAlpha`
 
-			dataframeCurveLocations = dataframeCurveLocations.loc[(bitsTarget > 1)] # if bitsAlphaHasCurves
+			dataframeMeanders = dataframeMeanders.loc[(bitsTarget > 1)] # if bitsAlphaHasCurves
 
 			del bitsTarget
 
-			bitsTarget = dataframeCurveLocations['curveLocations'].copy() # `bitsZulu`
+			bitsTarget = dataframeMeanders['arcCode'].copy() # `bitsZulu`
 			bitsTarget &= state.locatorBitsZulu # `bitsZulu`
 			bitsTarget //= 2**1 # `bitsZulu` (bitsZulu >> 1)
 
-			dataframeCurveLocations = dataframeCurveLocations.loc[(bitsTarget > 1)] # if bitsZuluHasCurves
+			dataframeMeanders = dataframeMeanders.loc[(bitsTarget > 1)] # if bitsZuluHasCurves
 
 			del bitsTarget
 
-			bitsTarget = dataframeCurveLocations['curveLocations'].copy() # `bitsZulu`
+			bitsTarget = dataframeMeanders['arcCode'].copy() # `bitsZulu`
 			bitsTarget &= 0b10 # `bitsZulu`
 			bitsTarget //= 2**1 # `bitsZulu` (bitsZulu >> 1)
 			bitsTarget &= 1 # (bitsZulu & 1)
 			bitsTarget ^= 1 # (1 - (bitsZulu ...))
-			dataframeCurveLocations.loc[:, 'analyzed'] = bitsTarget # selectorBitsZuluAtEven
+			dataframeMeanders.loc[:, 'analyzed'] = bitsTarget # selectorBitsZuluAtEven
 
 			del bitsTarget
 
-			bitsTarget = dataframeCurveLocations['curveLocations'].copy() # `bitsAlpha`
+			bitsTarget = dataframeMeanders['arcCode'].copy() # `bitsAlpha`
 			bitsTarget &= 1 # (bitsAlpha & 1)
 			bitsTarget ^= 1 # (1 - (bitsAlpha ...))
 			bitsTarget = bitsTarget.astype(bool) # selectorBitsAlphaAtODD
 
-			dataframeCurveLocations = dataframeCurveLocations.loc[(bitsTarget) | (dataframeCurveLocations.loc[:, 'analyzed'])] # if (bitsAlphaIsEven or bitsZuluIsEven)
+			dataframeMeanders = dataframeMeanders.loc[(bitsTarget) | (dataframeMeanders.loc[:, 'analyzed'])] # if (bitsAlphaIsEven or bitsZuluIsEven)
 
 			del bitsTarget
 
 			# NOTE Step 2 modify rows
 
 			# Make a selector for bitsZuluAtEven, so you can modify bitsAlpha
-			bitsTarget = dataframeCurveLocations['curveLocations'].copy() # `bitsZulu`
+			bitsTarget = dataframeMeanders['arcCode'].copy() # `bitsZulu`
 			bitsTarget &= 0b10 # `bitsZulu`
 			bitsTarget //= 2**1 # `bitsZulu` (bitsZulu >> 1)
 			bitsTarget &= 1 # (bitsZulu & 1)
 			bitsTarget ^= 1 # (1 - (bitsZulu ...))
 			bitsTarget = bitsTarget.astype(bool) # selectorBitsZuluAtEven
 
-			dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations'] # `bitsAlpha`
-			dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorBitsAlpha # `bitsAlpha`
+			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'] # `bitsAlpha`
+			dataframeMeanders.loc[:, 'analyzed'] &= state.locatorBitsAlpha # `bitsAlpha`
 
 			# if bitsAlphaIsEven and not bitsZuluIsEven, modify bitsAlphaPairedToOdd
-			dataframeCurveLocations.loc[(~bitsTarget), 'analyzed'] = state.datatypeCurveLocations( # pyright: ignore[reportCallIssue, reportArgumentType]
-				flipTheExtra_0b1AsUfunc(dataframeCurveLocations.loc[(~bitsTarget), 'analyzed']))
+			dataframeMeanders.loc[(~bitsTarget), 'analyzed'] = state.datatypeArcCode( # pyright: ignore[reportCallIssue, reportArgumentType]
+				flipTheExtra_0b1AsUfunc(dataframeMeanders.loc[(~bitsTarget), 'analyzed']))
 
 			del bitsTarget
 
 			# if bitsZuluIsEven and not bitsAlphaIsEven, modify bitsZuluPairedToOdd
-			bitsTarget = dataframeCurveLocations['curveLocations'].copy() # `bitsZulu`
+			bitsTarget = dataframeMeanders['arcCode'].copy() # `bitsZulu`
 			bitsTarget &= state.locatorBitsZulu # `bitsZulu`
 			bitsTarget //= 2**1 # `bitsZulu` (bitsZulu >> 1)
 
-			bitsTarget.loc[(dataframeCurveLocations.loc[:, 'curveLocations'] & 1).astype(bool)] = state.datatypeCurveLocations( # pyright: ignore[reportArgumentType, reportCallIssue]
-				flipTheExtra_0b1AsUfunc(bitsTarget.loc[(dataframeCurveLocations.loc[:, 'curveLocations'] & 1).astype(bool)])) # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
+			bitsTarget.loc[(dataframeMeanders.loc[:, 'arcCode'] & 1).astype(bool)] = state.datatypeArcCode( # pyright: ignore[reportArgumentType, reportCallIssue]
+				flipTheExtra_0b1AsUfunc(bitsTarget.loc[(dataframeMeanders.loc[:, 'arcCode'] & 1).astype(bool)])) # pyright: ignore[reportCallIssue, reportUnknownArgumentType, reportArgumentType]
 
-			# NOTE Step 3 compute curveLocations
+			# NOTE Step 3 compute arcCode
 
-			dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (bitsAlpha >> 2)
+			dataframeMeanders.loc[:, 'analyzed'] //= 2**2 # (bitsAlpha >> 2)
 
 			bitsTarget //= 2**2 # (bitsZulu >> 2)
 			bitsTarget *= 2**1 # ((bitsZulu ...) << 1)
 
-			dataframeCurveLocations.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsZulu ...)
+			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsZulu ...)
 
 			del bitsTarget
 
-			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
+			dataframeMeanders.loc[dataframeMeanders['analyzed'] >= state.MAXIMUMarcCode, 'analyzed'] = 0
 
-		def analyzeCurveLocationsAlpha() -> None:
-			"""Compute `curveLocations` from `bitsAlpha`.
+		def analyzeBitsAlpha() -> None:
+			"""Compute `arcCode` from `bitsAlpha`.
 
 			Formula
 			-------
 			```python
 			if bitsAlpha > 1:
-				curveLocations = ((1 - (bitsAlpha & 1)) << 1) | (bitsZulu << 3) | (bitsAlpha >> 2)
+				arcCode = ((1 - (bitsAlpha & 1)) << 1) | (bitsZulu << 3) | (bitsAlpha >> 2)
 			# `(1 - (bitsAlpha & 1)` is an evenness test.
 			```
 			"""
-			nonlocal dataframeCurveLocations
-			dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
-			dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (bitsAlpha & 1)
-			dataframeCurveLocations.loc[:, 'analyzed'] ^= 1 # (1 - (bitsAlpha ...))
+			nonlocal dataframeMeanders
+			dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']
+			dataframeMeanders.loc[:, 'analyzed'] &= 1 # (bitsAlpha & 1)
+			dataframeMeanders.loc[:, 'analyzed'] ^= 1 # (1 - (bitsAlpha ...))
 
-			dataframeCurveLocations.loc[:, 'analyzed'] *= 2**1 # ((bitsAlpha ...) << 1)
+			dataframeMeanders.loc[:, 'analyzed'] *= 2**1 # ((bitsAlpha ...) << 1)
 
-			bitsTarget: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # `bitsZulu`
+			bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy() # `bitsZulu`
 			bitsTarget &= state.locatorBitsZulu # `bitsZulu`
 			bitsTarget //= 2**1 # `bitsZulu` (bitsZulu >> 1)
 
 			bitsTarget *= 2**3 # (bitsZulu << 3)
-			dataframeCurveLocations.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsZulu ...)
+			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsZulu ...)
 
 			del bitsTarget
 
@@ -163,27 +163,27 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			The "formula" calls for v1, but by using v2, `bitsTarget` is not changed. Therefore, because `bitsTarget` is
 			`bitsAlpha`, I can use `bitsTarget` for goal 2, `if bitsAlpha > 1`.
 			"""
-			dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # ... | (bitsAlpha >> 2)
+			dataframeMeanders.loc[:, 'analyzed'] *= 2**2 # ... | (bitsAlpha >> 2)
 
-			bitsTarget = dataframeCurveLocations['curveLocations'].copy() # `bitsAlpha`
+			bitsTarget = dataframeMeanders['arcCode'].copy() # `bitsAlpha`
 			bitsTarget &= state.locatorBitsAlpha # `bitsAlpha`
 
-			dataframeCurveLocations.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsAlpha)
-			dataframeCurveLocations.loc[:, 'analyzed'] //= 2**2 # (... >> 2)
+			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsAlpha)
+			dataframeMeanders.loc[:, 'analyzed'] //= 2**2 # (... >> 2)
 
-			dataframeCurveLocations.loc[(bitsTarget <= 1), 'analyzed'] = 0 # if bitsAlpha > 1
+			dataframeMeanders.loc[(bitsTarget <= 1), 'analyzed'] = 0 # if bitsAlpha > 1
 
 			del bitsTarget
 
-			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
+			dataframeMeanders.loc[dataframeMeanders['analyzed'] >= state.MAXIMUMarcCode, 'analyzed'] = 0
 
-		def analyzeCurveLocationsSimple() -> None:
-			"""Compute curveLocations with the 'simple' formula.
+		def analyzeArcCodesSimple() -> None:
+			"""Compute arcCode with the 'simple' formula.
 
 			Formula
 			-------
 			```python
-			curveLocations = ((bitsAlpha | (bitsZulu << 1)) << 2) | 3
+			arcCode = ((bitsAlpha | (bitsZulu << 1)) << 2) | 3
 			```
 
 			Notes
@@ -192,73 +192,73 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			is '0b11', and '0b00 | 0b11' is also '0b11'.
 
 			"""
-			nonlocal dataframeCurveLocations
-			dataframeCurveLocations['analyzed'] = dataframeCurveLocations['curveLocations']
-			dataframeCurveLocations.loc[:, 'analyzed'] &= state.locatorBitsAlpha
+			nonlocal dataframeMeanders
+			dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']
+			dataframeMeanders.loc[:, 'analyzed'] &= state.locatorBitsAlpha
 
-			bitsZulu: pandas.Series = dataframeCurveLocations['curveLocations'].copy()
+			bitsZulu: pandas.Series = dataframeMeanders['arcCode'].copy()
 			bitsZulu &= state.locatorBitsZulu
 			bitsZulu //= 2**1 # (bitsZulu >> 1)
 			bitsZulu *= 2**1 # (bitsZulu << 1)
 
-			dataframeCurveLocations.loc[:, 'analyzed'] |= bitsZulu # ((bitsAlpha | (bitsZulu ...))
+			dataframeMeanders.loc[:, 'analyzed'] |= bitsZulu # ((bitsAlpha | (bitsZulu ...))
 
 			del bitsZulu
 
-			dataframeCurveLocations.loc[:, 'analyzed'] *= 2**2 # (... << 2)
-			dataframeCurveLocations.loc[:, 'analyzed'] += 3 # (...) | 3
-			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
+			dataframeMeanders.loc[:, 'analyzed'] *= 2**2 # (... << 2)
+			dataframeMeanders.loc[:, 'analyzed'] += 3 # (...) | 3
+			dataframeMeanders.loc[dataframeMeanders['analyzed'] >= state.MAXIMUMarcCode, 'analyzed'] = 0
 
-		def analyzeCurveLocationsZulu() -> None:
-			"""Compute `curveLocations` from `bitsZulu`.
+		def analyzeBitsZulu() -> None:
+			"""Compute `arcCode` from `bitsZulu`.
 
 			Formula
 			-------
 			```python
 			if bitsZulu > 1:
-				curveLocations = (1 - (bitsZulu & 1)) | (bitsAlpha << 2) | (bitsZulu >> 1)
+				arcCode = (1 - (bitsZulu & 1)) | (bitsAlpha << 2) | (bitsZulu >> 1)
 			```
 			"""
-			nonlocal dataframeCurveLocations
-			dataframeCurveLocations.loc[:, 'analyzed'] = dataframeCurveLocations['curveLocations'] # `bitsZulu`
-			dataframeCurveLocations.loc[:, 'analyzed'] &= 0b10 # `bitsZulu`
-			dataframeCurveLocations.loc[:, 'analyzed'] //= 2**1 # `bitsZulu` (bitsZulu >> 1)
-			dataframeCurveLocations.loc[:, 'analyzed'] &= 1 # (bitsZulu & 1)
-			dataframeCurveLocations.loc[:, 'analyzed'] ^= 1 # (1 - (bitsZulu ...))
+			nonlocal dataframeMeanders
+			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'] # `bitsZulu`
+			dataframeMeanders.loc[:, 'analyzed'] &= 0b10 # `bitsZulu`
+			dataframeMeanders.loc[:, 'analyzed'] //= 2**1 # `bitsZulu` (bitsZulu >> 1)
+			dataframeMeanders.loc[:, 'analyzed'] &= 1 # (bitsZulu & 1)
+			dataframeMeanders.loc[:, 'analyzed'] ^= 1 # (1 - (bitsZulu ...))
 
-			bitsTarget: pandas.Series = dataframeCurveLocations['curveLocations'].copy() # `bitsAlpha`
+			bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy() # `bitsAlpha`
 			bitsTarget &= state.locatorBitsAlpha # `bitsAlpha`
 
 			bitsTarget *= 2**2 # (bitsAlpha << 2)
-			dataframeCurveLocations.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsAlpha ...)
+			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsAlpha ...)
 
 			del bitsTarget
 
-			# NOTE No, IDK why I didn't use the same trick as in `analyzeCurveLocationsAlpha`. I _think_ I wrote this code before I figured out that trick.
-			bitsTarget = dataframeCurveLocations['curveLocations'].copy() # `bitsZulu`
+			# NOTE No, IDK why I didn't use the same trick as in `analyzeBitsAlpha`. I _think_ I wrote this code before I figured out that trick.
+			bitsTarget = dataframeMeanders['arcCode'].copy() # `bitsZulu`
 			bitsTarget &= state.locatorBitsZulu # `bitsZulu`
 			bitsTarget //= 2**1 # `bitsZulu` (bitsZulu >> 1)
 
 			bitsTarget //= 2**1 # (bitsZulu >> 1)
 
-			dataframeCurveLocations.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsZulu ...)
+			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsZulu ...)
 
 			del bitsTarget
 
-			bitsTarget = dataframeCurveLocations['curveLocations'].copy() # `bitsZulu`
+			bitsTarget = dataframeMeanders['arcCode'].copy() # `bitsZulu`
 			bitsTarget &= state.locatorBitsZulu # `bitsZulu`
 			bitsTarget //= 2**1 # `bitsZulu` (bitsZulu >> 1)
 
-			dataframeCurveLocations.loc[bitsTarget <= 1, 'analyzed'] = 0 # if bitsZulu > 1
+			dataframeMeanders.loc[bitsTarget <= 1, 'analyzed'] = 0 # if bitsZulu > 1
 
 			del bitsTarget
 
-			dataframeCurveLocations.loc[dataframeCurveLocations['analyzed'] >= state.MAXIMUMcurveLocations, 'analyzed'] = 0
+			dataframeMeanders.loc[dataframeMeanders['analyzed'] >= state.MAXIMUMarcCode, 'analyzed'] = 0
 
-		def recordCurveLocations() -> None:
+		def recordArcCodes() -> None:
 			nonlocal dataframeAnalyzed
 
-			indexStopAnalyzed: int = state.indexTarget + int((dataframeCurveLocations['analyzed'] > 0).sum()) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+			indexStopAnalyzed: int = state.indexTarget + int((dataframeMeanders['analyzed'] > 0).sum()) # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
 
 			if indexStopAnalyzed > state.indexTarget:
 				if len(dataframeAnalyzed.index) < indexStopAnalyzed:
@@ -266,17 +266,17 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
 
 				dataframeAnalyzed.loc[state.indexTarget:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
-					dataframeCurveLocations.loc[(dataframeCurveLocations['analyzed'] > 0), ['analyzed', 'distinctCrossings']
-								].to_numpy(dtype=state.datatypeCurveLocations, copy=False)
+					dataframeMeanders.loc[(dataframeMeanders['analyzed'] > 0), ['analyzed', 'distinctCrossings']
+								].to_numpy(dtype=state.datatypeArcCode, copy=False)
 				)
 
 				state.indexTarget = indexStopAnalyzed
 
 			del indexStopAnalyzed
 
-		dataframeCurveLocations = pandas.DataFrame({
-			'curveLocations': pandas.Series(name='curveLocations', data=dataframeAnalyzed['analyzed'], copy=False, dtype=state.datatypeCurveLocations)
-			, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=state.datatypeCurveLocations)
+		dataframeMeanders = pandas.DataFrame({
+			'arcCode': pandas.Series(name='arcCode', data=dataframeAnalyzed['analyzed'], copy=False, dtype=state.datatypeArcCode)
+			, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=state.datatypeArcCode)
 			, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=dataframeAnalyzed['distinctCrossings'], copy=False, dtype=state.datatypeDistinctCrossings)
 			} # pyright: ignore[reportUnknownArgumentType]
 		)
@@ -284,38 +284,38 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		del dataframeAnalyzed
 		goByeBye()
 
-		state.bitWidth = int(dataframeCurveLocations['curveLocations'].max()).bit_length()
+		state.bitWidth = int(dataframeMeanders['arcCode'].max()).bit_length()
 		length: int = getBucketsTotal(state)
 		dataframeAnalyzed = pandas.DataFrame({
-			'analyzed': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeCurveLocations, name='analyzed')
+			'analyzed': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeArcCode, name='analyzed')
 			, 'distinctCrossings': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeDistinctCrossings, name='distinctCrossings')
-			}, index=pandas.RangeIndex(length), columns=['analyzed', 'distinctCrossings'], dtype=state.datatypeCurveLocations # pyright: ignore[reportUnknownArgumentType]
+			}, index=pandas.RangeIndex(length), columns=['analyzed', 'distinctCrossings'], dtype=state.datatypeArcCode # pyright: ignore[reportUnknownArgumentType]
 		)
 
 		state.kOfMatrix -= 1
 
 		state.indexTarget = 0
 
-		analyzeCurveLocationsSimple()
-		recordCurveLocations()
+		analyzeArcCodesSimple()
+		recordArcCodes()
 
-		analyzeCurveLocationsAlpha()
-		recordCurveLocations()
+		analyzeBitsAlpha()
+		recordArcCodes()
 
-		analyzeCurveLocationsZulu()
-		recordCurveLocations()
+		analyzeBitsZulu()
+		recordArcCodes()
 
-		analyzeCurveLocationsAligned()
-		recordCurveLocations()
-		del dataframeCurveLocations
+		analyzeArcCodesAligned()
+		recordArcCodes()
+		del dataframeMeanders
 		goByeBye()
 
-		aggregateCurveLocations()
+		aggregateArcCodes()
 
 		if state.n >= 45:  # for data collection
 			print(state.n, state.kOfMatrix+1, state.indexTarget, sep=',')  # noqa: T201
 
-	state.dictionaryCurveLocations = dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].to_dict()
+	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].to_dict()
 	return state
 
 def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
@@ -348,4 +348,4 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 
 		goByeBye()
 
-	return sum(state.dictionaryCurveLocations.values())
+	return sum(state.dictionaryMeanders.values())

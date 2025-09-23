@@ -16,20 +16,20 @@ class ImaKey(NamedTuple):
 	kIsOdd: bool
 	nLess_kIsOdd: bool
 
-indexCurveLocations: Final[int] = 0
+indexArcCode: Final[int] = 0
 indexDistinctCrossings: Final[int] = 1
 
-def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFrame | None = None, array: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]] | None = None, fixedSizeMAXIMUMcurveLocations: bool = False) -> bool:
+def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFrame | None = None, array: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]] | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
 	"""Check if the largest values are wider than the maximum limits.
 
 	Parameters
 	----------
 	state : MatrixMeandersState
-		The current state of the computation, including `dictionaryCurveLocations`.
+		The current state of the computation, including `dictionaryMeanders`.
 	dataframe : pandas.DataFrame | None = None
-		Optional DataFrame containing 'analyzed' and 'distinctCrossings' columns. If provided, use this instead of `state.dictionaryCurveLocations`.
-	fixedSizeMAXIMUMcurveLocations : bool = False
-		Set this to `True` if you cast `state.MAXIMUMcurveLocations` to the same fixed size integer type as `state.datatypeCurveLocations`.
+		Optional DataFrame containing 'analyzed' and 'distinctCrossings' columns. If provided, use this instead of `state.dictionaryMeanders`.
+	fixedSizeMAXIMUMarcCode : bool = False
+		Set this to `True` if you cast `state.MAXIMUMarcCode` to the same fixed size integer type as `state.datatypeArcCode`.
 
 	Returns
 	-------
@@ -38,40 +38,40 @@ def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFr
 
 	Notes
 	-----
-	Casting `state.MAXIMUMcurveLocations` to a fixed-size 64-bit unsigned integer might cause the flow to be a little more
-	complicated because `MAXIMUMcurveLocations` is usually 1-bit larger than the `max(curveLocations)` value.
+	Casting `state.MAXIMUMarcCode` to a fixed-size 64-bit unsigned integer might cause the flow to be a little more
+	complicated because `MAXIMUMarcCode` is usually 1-bit larger than the `max(arcCode)` value.
 
-	If you start the algorithm with very large `curveLocations` in your `dictionaryCurveLocations` (*i.e.,* A000682), then the
+	If you start the algorithm with very large `arcCode` in your `dictionaryMeanders` (*i.e.,* A000682), then the
 	flow will go to a function that does not use fixed size integers. When the integers are below the limits (*e.g.,*
-	`bitWidthCurveLocationsMaximum`), the flow will go to a function with fixed size integers. In that case, casting
-	`MAXIMUMcurveLocations` to a fixed size merely delays the transition from one function to the other by one iteration.
+	`bitWidthArcCodeMaximum`), the flow will go to a function with fixed size integers. In that case, casting
+	`MAXIMUMarcCode` to a fixed size merely delays the transition from one function to the other by one iteration.
 
-	If you start with small values in `dictionaryCurveLocations`, however, then the flow goes to the function with fixed size
+	If you start with small values in `dictionaryMeanders`, however, then the flow goes to the function with fixed size
 	integers and usually stays there until `distinctCrossings` is huge, which is near the end of the computation. If you cast
-	`MAXIMUMcurveLocations` into a 64-bit unsigned integer, however, then around `state.kOfMatrix == 28`, the bit width of
-	`MAXIMUMcurveLocations` might exceed the limit. That will cause the flow to go to the function that does not have fixed size
+	`MAXIMUMarcCode` into a 64-bit unsigned integer, however, then around `state.kOfMatrix == 28`, the bit width of
+	`MAXIMUMarcCode` might exceed the limit. That will cause the flow to go to the function that does not have fixed size
 	integers for a few iterations before returning to the function with fixed size integers.
 	"""
 	if dataframe is not None:
-		curveLocationsWidest = int(dataframe['analyzed'].max()).bit_length()
+		arcCodeWidest = int(dataframe['analyzed'].max()).bit_length()
 		distinctCrossingsWidest = int(dataframe['distinctCrossings'].max()).bit_length()
 	elif array is not None:
-		curveLocationsWidest = int(array[..., indexCurveLocations].max()).bit_length()
+		arcCodeWidest = int(array[..., indexArcCode].max()).bit_length()
 		distinctCrossingsWidest = int(array[..., indexDistinctCrossings].max()).bit_length()
-	elif not state.dictionaryCurveLocations:
-		curveLocationsWidest = int(state.arrayCurveLocations[..., indexCurveLocations].max()).bit_length()
-		distinctCrossingsWidest = int(state.arrayCurveLocations[..., indexDistinctCrossings].max()).bit_length()
+	elif not state.dictionaryMeanders:
+		arcCodeWidest = int(state.arrayMeanders[..., indexArcCode].max()).bit_length()
+		distinctCrossingsWidest = int(state.arrayMeanders[..., indexDistinctCrossings].max()).bit_length()
 	else:
-		curveLocationsWidest: int = max(state.dictionaryCurveLocations.keys()).bit_length()
-		distinctCrossingsWidest: int = max(state.dictionaryCurveLocations.values()).bit_length()
+		arcCodeWidest: int = max(state.dictionaryMeanders.keys()).bit_length()
+		distinctCrossingsWidest: int = max(state.dictionaryMeanders.values()).bit_length()
 
-	MAXIMUMcurveLocations: int = 0
-	if fixedSizeMAXIMUMcurveLocations:
-		MAXIMUMcurveLocations = state.MAXIMUMcurveLocations
+	MAXIMUMarcCode: int = 0
+	if fixedSizeMAXIMUMarcCode:
+		MAXIMUMarcCode = state.MAXIMUMarcCode
 
-	return (curveLocationsWidest > raiseIfNone(state.bitWidthLimitCurveLocations)
+	return (arcCodeWidest > raiseIfNone(state.bitWidthLimitArcCode)
 		or distinctCrossingsWidest > raiseIfNone(state.bitWidthLimitDistinctCrossings)
-		or MAXIMUMcurveLocations > raiseIfNone(state.bitWidthLimitCurveLocations)
+		or MAXIMUMarcCode > raiseIfNone(state.bitWidthLimitArcCode)
 		)
 
 @cache
@@ -81,7 +81,7 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 
 def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float = 1.2) -> int:
-	"""Estimate the total number of non-unique curveLocations that will be computed from the existing curveLocations.
+	"""Estimate the total number of non-unique arcCode that will be computed from the existing arcCode.
 
 	Notes
 	-----
@@ -177,12 +177,12 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 			bucketsTotal = bucketsIf_k_EVEN_by_nLess_k[nLess_k]
 		else: # I estimate bucketsTotal during exponential growth.
 			xInstant: int = math.ceil(nLess_k / 2)
-			A000682adjustStartingCurveLocations: float = 0.25
+			A000682adjustStartingArcCode: float = 0.25
 			startingConditionsCoefficient: float = dictionaryExponentialCoefficients[ImaKey('', kIsOdd, nLess_kIsOdd)]
 			if kIsOdd and nLess_kIsOdd:
-				A000682adjustStartingCurveLocations = 0.0
+				A000682adjustStartingArcCode = 0.0
 			if state.oeisID == 'A000682': # NOTE Net effect is between `*= n` and `*= n * 2.2` if n=46.
-				startingConditionsCoefficient *= state.n * (((state.n // 2) + 2) ** A000682adjustStartingCurveLocations)
+				startingConditionsCoefficient *= state.n * (((state.n // 2) + 2) ** A000682adjustStartingArcCode)
 			bucketsTotal = int(startingConditionsCoefficient * math.exp(xCommon * xInstant))
 
 	elif bucketsTotalGrowsLogarithmically:

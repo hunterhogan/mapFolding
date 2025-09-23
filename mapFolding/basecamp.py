@@ -276,19 +276,19 @@ def A000682(n: int, flow: str | None = None) -> int:
 	kOfMatrix: int = n - 1
 
 	if n & 0b1:
-		curveLocations: int = 5
+		arcCode: int = 5
 	else:
-		curveLocations = 1
-	listCurveLocations: list[int] = [(curveLocations << 1) | curveLocations]
+		arcCode = 1
+	listCurveLocations: list[int] = [(arcCode << 1) | arcCode]
 
-	MAXIMUMcurveLocations: int = 1 << (2 * kOfMatrix + 4)
-	while listCurveLocations[-1] < MAXIMUMcurveLocations:
-		curveLocations = (curveLocations << 4) | 0b101 # == curveLocations * 2**4 + 5
-		listCurveLocations.append((curveLocations << 1) | curveLocations)
+	MAXIMUMarcCode: int = 1 << (2 * kOfMatrix + 4)
+	while listCurveLocations[-1] < MAXIMUMarcCode:
+		arcCode = (arcCode << 4) | 0b101 # == arcCode * 2**4 + 5
+		listCurveLocations.append((arcCode << 1) | arcCode)
 
-	dictionaryCurveLocations=dict.fromkeys(listCurveLocations, 1)
+	dictionaryMeanders=dict.fromkeys(listCurveLocations, 1)
 
-	state = State(n, oeisID, kOfMatrix, dictionaryCurveLocations)
+	state = State(n, oeisID, kOfMatrix, dictionaryMeanders)
 
 	return doTheNeedful(state) # pyright: ignore[reportArgumentType]
 
@@ -311,11 +311,11 @@ def A005316(n: int, flow: str | None = None) -> int:
 	kOfMatrix: int = n - 1
 
 	if n & 0b1:
-		dictionaryCurveLocations: dict[int, int] = {15: 1}
+		dictionaryMeanders: dict[int, int] = {15: 1}
 	else:
-		dictionaryCurveLocations = {22: 1}
+		dictionaryMeanders = {22: 1}
 
-	state = State(n, oeisID, kOfMatrix, dictionaryCurveLocations)
+	state = State(n, oeisID, kOfMatrix, dictionaryMeanders)
 
 	return doTheNeedful(state) # pyright: ignore[reportArgumentType]
 

@@ -147,12 +147,6 @@ def write_astModule(astModule: ast.Module, pathFilename: PathLike[Any] | PurePat
 	if packageName:
 		autoflake_additional_imports.append(packageName)
 	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=True, remove_duplicate_keys = False, remove_unused_variables = False)
-
-	if isinstance(pathFilename, io.TextIOBase):
-		pythonSource = isort.code(pythonSource)
-
+	pythonSource = isort.code(pythonSource)
 	writeStringToHere(pythonSource + '\n', pathFilename)
-
-	if not isinstance(pathFilename, io.TextIOBase):
-		isort.file(str(pathFilename))
 

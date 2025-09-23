@@ -282,18 +282,18 @@ class MatrixMeandersState:
 	"""'A000682', semi-meanders, or 'A005316', meanders."""
 	kOfMatrix: int
 	"""The number of iterations remaining in the transfer matrix algorithm."""
-	dictionaryCurveLocations: dict[int, int]
-	"""A Python `dict` (*dict*ionary) of `curveLocations` to `distinctCrossings`. The values are stored as Python `int`
+	dictionaryMeanders: dict[int, int]
+	"""A Python `dict` (*dict*ionary) of `arcCode` to `distinctCrossings`. The values are stored as Python `int`
 	(*int*eger), which may be arbitrarily large. Because of that property, `int` may also be called a 'bignum' (big *num*ber) or
 	'bigint' (big *int*eger)."""
 
 	bitWidth: int = 0
-	"""At the start of an iteration enumerated by `kOfMatrix`, the number of bits of the largest value `curveLocations`. The
+	"""At the start of an iteration enumerated by `kOfMatrix`, the number of bits of the largest value `arcCode`. The
 	`dataclass` computes a `property` from `bitWidth`."""
 
 	@property
-	def MAXIMUMcurveLocations(self) -> int:
-		"""Compute the maximum value of `curveLocations` for the current iteration of the transfer matrix."""
+	def MAXIMUMarcCode(self) -> int:
+		"""Compute the maximum value of `arcCode` for the current iteration of the transfer matrix."""
 		return 1 << (2 * self.kOfMatrix + 4)
 
 	@property
@@ -322,13 +322,13 @@ class MatrixMeandersState:
 class MatrixMeandersNumPyState(MatrixMeandersState):
 	"""Hold the state of a meanders transfer matrix algorithm computation."""
 
-	arrayCurveLocations: NDArray[numpy.uint64] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=numpy.uint64))
+	arrayMeanders: NDArray[numpy.uint64] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=numpy.uint64))
 
-	bitWidthLimitCurveLocations: int | None = None
+	bitWidthLimitArcCode: int | None = None
 	bitWidthLimitDistinctCrossings: int | None = None
 
-	datatypeCurveLocations: TypeAlias = numpy.uint64  # noqa: UP040
-	"""The fixed-size integer type used to store `curveLocations`."""
+	datatypeArcCode: TypeAlias = numpy.uint64  # noqa: UP040
+	"""The fixed-size integer type used to store `arcCode`."""
 	datatypeDistinctCrossings: TypeAlias = numpy.uint64  # noqa: UP040
 	"""The fixed-size integer type used to store `distinctCrossings`."""
 
@@ -337,14 +337,14 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 
 	def __post_init__(self) -> None:
 		"""Post init."""
-		if self.bitWidthLimitCurveLocations is None:
-			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeCurveLocations).itemsize * 8 # bits
+		if self.bitWidthLimitArcCode is None:
+			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeArcCode).itemsize * 8 # bits
 
 			_offsetNecessary: int = 3 # For example, `bitsZulu << 3`.
 			_offsetSafety: int = 1 # I don't have mathematical proof of how many extra bits I need.
 			_offset: int = _offsetNecessary + _offsetSafety
 
-			self.bitWidthLimitCurveLocations = _bitWidthOfFixedSizeInteger - _offset
+			self.bitWidthLimitArcCode = _bitWidthOfFixedSizeInteger - _offset
 
 			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetSafety, _offset
 
@@ -362,16 +362,16 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 
 	def makeDictionary(self) -> None:
 		"""Convert from NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array) to Python `dict` (*dict*ionary)."""
-		self.dictionaryCurveLocations = {int(key): int(value) for key, value in zip(
-			self.arrayCurveLocations[..., 0], self.arrayCurveLocations[..., 1]
+		self.dictionaryMeanders = {int(key): int(value) for key, value in zip(
+			self.arrayMeanders[..., 0], self.arrayMeanders[..., 1]
 			, strict=True)}
-		self.arrayCurveLocations = numpy.empty((0,), dtype=self.datatypeCurveLocations)
+		self.arrayMeanders = numpy.empty((0,), dtype=self.datatypeArcCode)
 
 	def makeArray(self) -> None:
 		"""Convert from Python `dict` (*dict*ionary) to NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array)."""
-		shape = (len(self.dictionaryCurveLocations), 2)
-		self.arrayCurveLocations = numpy.zeros(shape, dtype=self.datatypeCurveLocations)
-		self.arrayCurveLocations[..., 0] = list(self.dictionaryCurveLocations.keys())
-		self.arrayCurveLocations[..., 1] = list(self.dictionaryCurveLocations.values())
-		self.bitWidth = int(self.arrayCurveLocations[..., 0].max()).bit_length()
-		self.dictionaryCurveLocations = {}
+		shape = (len(self.dictionaryMeanders), 2)
+		self.arrayMeanders = numpy.zeros(shape, dtype=self.datatypeArcCode)
+		self.arrayMeanders[..., 0] = list(self.dictionaryMeanders.keys())
+		self.arrayMeanders[..., 1] = list(self.dictionaryMeanders.values())
+		self.bitWidth = int(self.arrayMeanders[..., 0].max()).bit_length()
+		self.dictionaryMeanders = {}
