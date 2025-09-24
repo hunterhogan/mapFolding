@@ -2,7 +2,9 @@
 from functools import cache
 from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import MatrixMeandersNumPyState
-from mapFolding.reference.A005316facts import bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k
+from mapFolding.reference.A000682facts import A000682_n_k_buckets
+from mapFolding.reference.A005316facts import (
+	A005316_n_k_buckets, bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k)
 from math import exp, log
 from typing import Any, Final, NamedTuple
 import math
@@ -79,18 +81,48 @@ def _flipTheExtra_0b1(intWithExtra_0b1: numpy.uint64) -> numpy.uint64:
 	return numpy.uint64(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
 
 flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
+"""Flip a bit based on Dyck path: element-wise ufunc (*u*niversal *func*tion) for a NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array).
+
+Warning
+-------
+The function will loop infinitely if an element does not have a bit that needs flipping.
+
+Parameters
+----------
+arrayTarget : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
+	An array with one axis of unsigned integers and unbalanced closures.
+
+Returns
+-------
+arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
+	An array with the same shape as `arrayTarget` but with one bit flipped in each element.
+"""
 
 def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float = 1.2) -> int:
 	"""Estimate the total number of non-unique arcCode that will be computed from the existing arcCode.
 
 	Notes
 	-----
-	Subexponential bucketsTotal unified estimator parameters (derived in reference notebook).
+	TODO remake this function from scratch.
 
-	The model is: log(buckets) = intercept + bN*log(n) + bK*log(k) + bD*log(n-k) + g_r*(k/n) + g_r2*(k/n)^2 + g_s*((n-k)/n) + offset(subseries)
-	Subseries key: f"{oeisID}_kOdd={int(kIsOdd)}_dOdd={int(nLess_kIsOdd)}" with a reference subseries offset of zero.
-	These coefficients intentionally remain in-source (SSOT) to avoid runtime JSON parsing overhead and to support reproducibility.
+	Factors:
+		- The starting quantity of `arcCode`.
+		- The value(s) of the starting `arcCode`.
+		- n
+		- k
+		- Whether this bucketsTotal is increasing, as compared to all of the prior bucketsTotal.
+		- If increasing, is it exponential or logarithmic?
+		- The maximum value.
+		- If decreasing, I don't really know the factors.
+		- If I know the actual value or if I must estimate it.
+
+	Figure out an intelligent flow for so many factors.
 	"""
+	theDictionary: dict[str, dict[int, dict[int, int]]] = {'A005316': A005316_n_k_buckets, 'A000682': A000682_n_k_buckets}
+	bucketsTotal: int = theDictionary.get(state.oeisID, {}).get(state.n, {}).get(state.kOfMatrix, -8)
+	if bucketsTotal > 0:
+		return bucketsTotal
+
 	dictionaryExponentialCoefficients: dict[ImaKey, float] = {
 		(ImaKey(oeisID='', kIsOdd=False, nLess_kIsOdd=True)): 0.834,
 		(ImaKey(oeisID='', kIsOdd=False, nLess_kIsOdd=False)): 1.5803,
@@ -100,6 +132,7 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 
 	logarithmicOffsets: dict[ImaKey, float] ={
 		(ImaKey('A000682', kIsOdd=False, nLess_kIsOdd=False)): 0.0,
+
 		(ImaKey('A000682', kIsOdd=False, nLess_kIsOdd=True)): -0.07302547148212568,
 		(ImaKey('A000682', kIsOdd=True, nLess_kIsOdd=False)): -0.00595307513938792,
 		(ImaKey('A000682', kIsOdd=True, nLess_kIsOdd=True)): -0.012201222865243722,
@@ -127,26 +160,6 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 	kIsOdd: bool = bool(state.kOfMatrix & 1)
 	nLess_kIsOdd: bool = bool(nLess_k & 1)
 	kIsEven: bool = not kIsOdd
-	bucketsTotal: int = -8
-
-	"""NOTE temporary notes
-	I have a fault in my thinking. bucketsTotal increases as k decreases until ~0.4k, then bucketsTotal decreases rapidly to 1. I
-	have ignored the decreasing side. In the formulas for estimation, I didn't differentiate between increasing and decreasing.
-	So, I probably need to refine the formulas. I guess I need to add checks to the if/else monster, too.
-
-	While buckets is increasing:
-		3 types of estimates:
-			1. Exponential growth.
-			2. Logarithmic growth.
-			3. Hard ceiling.
-	While buckets is decreasing:
-		1. Hard ceiling, same as increasing side.
-		2. ???
-		3. buckets = 1.
-
-	The formula for exponential growth _never_ underestimates. I haven't measured by how much it overestimates.
-
-	"""
 
 	bucketsTotalAtMaximum: bool = state.kOfMatrix <= ((state.n - 1 - (state.kOfMatrix % 2)) // 3)
 	bucketsTotalGrowsExponentially: bool = state.kOfMatrix > nLess_k
