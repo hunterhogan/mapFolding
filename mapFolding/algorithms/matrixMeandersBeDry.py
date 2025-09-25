@@ -6,10 +6,21 @@ from mapFolding.reference.A000682facts import A000682_n_k_buckets
 from mapFolding.reference.A005316facts import (
 	A005316_n_k_buckets, bucketsIf_k_EVEN_by_nLess_k, bucketsIf_k_ODD_by_nLess_k)
 from math import exp, log
-from typing import Any, Final, NamedTuple
+from typing import Any, NamedTuple
 import math
 import numpy
 import pandas
+
+"""Goals:
+- Extreme abstraction.
+- Find operations with latent intermediate arrays and make the intermediate array explicit.
+- Reduce or eliminate intermediate arrays and selector arrays.
+- Write formulas in prefix notation.
+- For each formula, find an equivalent prefix notation formula that never uses the same variable as input more than once: that
+	would allow the evaluation of the expression with only a single stack, which saves memory.
+- Standardize code as much as possible to create duplicate code.
+- Convert duplicate code to procedures.
+"""
 
 class ImaKey(NamedTuple):
 	"""keys for dictionaries."""
@@ -17,9 +28,6 @@ class ImaKey(NamedTuple):
 	oeisID: str
 	kIsOdd: bool
 	nLess_kIsOdd: bool
-
-indexArcCode: Final[int] = 0
-indexDistinctCrossings: Final[int] = 1
 
 def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFrame | None = None, array: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.integer[Any]]] | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
 	"""Check if the largest values are wider than the maximum limits.
@@ -58,11 +66,11 @@ def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFr
 		arcCodeWidest = int(dataframe['analyzed'].max()).bit_length()
 		distinctCrossingsWidest = int(dataframe['distinctCrossings'].max()).bit_length()
 	elif array is not None:
-		arcCodeWidest = int(array[..., indexArcCode].max()).bit_length()
-		distinctCrossingsWidest = int(array[..., indexDistinctCrossings].max()).bit_length()
+		arcCodeWidest = int(array[state.slicerArcCode].max()).bit_length()
+		distinctCrossingsWidest = int(array[state.slicerDistinctCrossings].max()).bit_length()
 	elif not state.dictionaryMeanders:
-		arcCodeWidest = int(state.arrayMeanders[..., indexArcCode].max()).bit_length()
-		distinctCrossingsWidest = int(state.arrayMeanders[..., indexDistinctCrossings].max()).bit_length()
+		arcCodeWidest = int(state.arrayMeanders[state.slicerArcCode].max()).bit_length()
+		distinctCrossingsWidest = int(state.arrayMeanders[state.slicerDistinctCrossings].max()).bit_length()
 	else:
 		arcCodeWidest: int = max(state.dictionaryMeanders.keys()).bit_length()
 		distinctCrossingsWidest: int = max(state.dictionaryMeanders.values()).bit_length()

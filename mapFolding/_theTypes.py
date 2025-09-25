@@ -2,7 +2,8 @@
 
 from collections.abc import Callable
 from numpy import dtype, int_ as numpy_int, integer, ndarray, uint64 as numpy_uint64
-from typing import Any, TypeAlias, TypedDict, TypeVar
+from types import EllipsisType
+from typing import Any, Final, NamedTuple, TypeAlias, TypedDict, TypeVar
 
 NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)
 """Any NumPy integer type, which is usually between 8-bit signed and 64-bit unsigned."""
@@ -112,3 +113,19 @@ class MetadataOEISid(TypedDict):
 	"""List of index values, 'n', to use when testing validation performance."""
 	valueUnknown: int
 	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
+
+# TODO Figure out how to have a SSOT for the axis order.
+axisOfLength: Final[int] = 0
+
+class ShapeArray(NamedTuple):
+	"""Always use this to construct arrays, so you can reorder the axes merely by reordering this class."""
+
+	length: int
+	indices: int
+
+class ShapeSlicer(NamedTuple):
+	"""Always use this to construct slicers, so you can reorder the axes merely by reordering this class."""
+
+	length: EllipsisType | slice
+	indices: int
+

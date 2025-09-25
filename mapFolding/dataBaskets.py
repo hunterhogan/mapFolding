@@ -22,9 +22,9 @@ access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
 	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	getConnectionGraph, getLeavesTotal, makeDataContainer)
+	getConnectionGraph, getLeavesTotal, makeDataContainer, ShapeArray, ShapeSlicer)
 from numpy.typing import NDArray
-from typing import TypeAlias
+from typing import Final, TypeAlias
 import dataclasses
 import numpy
 
@@ -297,7 +297,7 @@ class MatrixMeandersState:
 		return 1 << (2 * self.kOfMatrix + 4)
 
 	@property
-	def locatorBitsAlpha(self) -> int:
+	def locatorBits(self) -> int:
 		"""Compute an odd-parity bit-mask with `bitWidth` bits.
 
 		Notes
@@ -312,11 +312,6 @@ class MatrixMeandersState:
 
 		"""
 		return sum(1 << one for one in range(0, self.bitWidth, 2))
-
-	@property
-	def locatorBitsZulu(self) -> int:
-		"""Compute an even-parity bit-mask with `bitWidth` bits."""
-		return sum(1 << one for one in range(1, self.bitWidth, 2))
 
 @dataclasses.dataclass(slots=True)
 class MatrixMeandersNumPyState(MatrixMeandersState):
@@ -334,6 +329,20 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 
 	indexTarget: int = 0
 	"""What is being indexed depends on the algorithm flavor."""
+
+# TODO Integrate this better into the dataclasses paradigm.
+	indicesMeanders: Final[int] = 2
+	indexArcCode, indexDistinctCrossings = range(indicesMeanders)
+
+	@property
+	def slicerArcCode(self) -> ShapeSlicer:
+		"""Get a `ShapeSlicer` to extract the `arcCode` column from `arrayMeanders`."""
+		return ShapeSlicer(length=..., indices=self.indexArcCode)
+
+	@property
+	def slicerDistinctCrossings(self) -> ShapeSlicer:
+		"""Get a `ShapeSlicer` to extract the `distinctCrossings` column from `arrayMeanders`."""
+		return ShapeSlicer(length=..., indices=self.indexDistinctCrossings)
 
 	def __post_init__(self) -> None:
 		"""Post init."""
@@ -363,15 +372,15 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 	def makeDictionary(self) -> None:
 		"""Convert from NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array) to Python `dict` (*dict*ionary)."""
 		self.dictionaryMeanders = {int(key): int(value) for key, value in zip(
-			self.arrayMeanders[..., 0], self.arrayMeanders[..., 1]
+			self.arrayMeanders[self.slicerArcCode], self.arrayMeanders[self.slicerDistinctCrossings]
 			, strict=True)}
 		self.arrayMeanders = numpy.empty((0,), dtype=self.datatypeArcCode)
 
 	def makeArray(self) -> None:
 		"""Convert from Python `dict` (*dict*ionary) to NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array)."""
-		shape = (len(self.dictionaryMeanders), 2)
+		shape = ShapeArray(length=len(self.dictionaryMeanders), indices=self.indicesMeanders)
 		self.arrayMeanders = numpy.zeros(shape, dtype=self.datatypeArcCode)
-		self.arrayMeanders[..., 0] = list(self.dictionaryMeanders.keys())
-		self.arrayMeanders[..., 1] = list(self.dictionaryMeanders.values())
-		self.bitWidth = int(self.arrayMeanders[..., 0].max()).bit_length()
+		self.arrayMeanders[self.slicerArcCode] = list(self.dictionaryMeanders.keys())
+		self.arrayMeanders[self.slicerDistinctCrossings] = list(self.dictionaryMeanders.values())
+		self.bitWidth = int(self.arrayMeanders[self.slicerArcCode].max()).bit_length()
 		self.dictionaryMeanders = {}

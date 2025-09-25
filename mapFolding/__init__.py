@@ -5,6 +5,7 @@ from mapFolding._theTypes import (
 	Array1DFoldsTotal as Array1DFoldsTotal,
 	Array1DLeavesTotal as Array1DLeavesTotal,
 	Array3DLeavesTotal as Array3DLeavesTotal,
+    axisOfLength as axisOfLength,
 	DatatypeElephino as DatatypeElephino,
 	DatatypeFoldsTotal as DatatypeFoldsTotal,
 	DatatypeLeavesTotal as DatatypeLeavesTotal,
@@ -15,7 +16,9 @@ from mapFolding._theTypes import (
 	NumPyElephino as NumPyElephino,
 	NumPyFoldsTotal as NumPyFoldsTotal,
 	NumPyIntegerType as NumPyIntegerType,
-	NumPyLeavesTotal as NumPyLeavesTotal)
+	NumPyLeavesTotal as NumPyLeavesTotal,
+	ShapeArray as ShapeArray,
+	ShapeSlicer as ShapeSlicer)
 
 from mapFolding._theSSOT import packageSettings as packageSettings
 

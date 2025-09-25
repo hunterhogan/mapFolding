@@ -16,7 +16,7 @@ def outfitDictionaryBitGroups(state: MatrixMeandersNumPyState) -> dict[tuple[int
         A dictionary of `(bitsAlpha, bitsZulu)` to `distinctCrossings`.
     """
     state.bitWidth = max(state.dictionaryMeanders.keys()).bit_length()
-    return {(arcCode & state.locatorBitsAlpha, (arcCode & state.locatorBitsZulu) >> 1): distinctCrossings for arcCode, distinctCrossings in state.dictionaryMeanders.items()}
+    return {(arcCode & state.locatorBits, arcCode >> 1 & state.locatorBits): distinctCrossings for arcCode, distinctCrossings in state.dictionaryMeanders.items()}
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:

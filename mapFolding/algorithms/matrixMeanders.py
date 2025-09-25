@@ -15,7 +15,7 @@ def outfitDictionaryBitGroups(state: MatrixMeandersState) -> dict[tuple[int, int
         A dictionary of `(bitsAlpha, bitsZulu)` to `distinctCrossings`.
     """
     state.bitWidth = max(state.dictionaryMeanders.keys()).bit_length()
-    return {(arcCode & state.locatorBitsAlpha, (arcCode & state.locatorBitsZulu) >> 1): distinctCrossings
+    return {(arcCode & state.locatorBits, (arcCode >> 1) & state.locatorBits): distinctCrossings
         for arcCode, distinctCrossings in state.dictionaryMeanders.items()}
 
 @cache
