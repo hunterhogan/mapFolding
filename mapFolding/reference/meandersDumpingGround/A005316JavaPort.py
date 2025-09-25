@@ -37,7 +37,7 @@ class BasicMeanderProblem:
 
 		return initialStatesList
 
-	def enumerate(self, packedState: int) -> list[int]:  # noqa: C901
+	def enumerate(self, packedState: int) -> list[int]:
 		"""Enumerate next states from previous state."""
 		bitMask = ODD_BITS
 		bitWidth = 64

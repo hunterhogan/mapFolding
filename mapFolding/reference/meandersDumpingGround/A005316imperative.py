@@ -1,4 +1,4 @@
-def count(bridges: int, dictionaryStateToTotal: dict[int, int]) -> int:  # noqa: C901, PLR0912
+def count(bridges: int, dictionaryStateToTotal: dict[int, int]) -> int:
     while bridges > 0:
         bridges -= 1
         archStateLimit = 1 << (2 + (2 * (bridges + 1)))
