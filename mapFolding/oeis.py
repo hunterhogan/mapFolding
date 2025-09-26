@@ -467,27 +467,6 @@ def OEIS_for_n() -> None:
 	timeElapsed: float = time.perf_counter() - timeStart
 	print(f"Time elapsed: {timeElapsed:.3f} seconds")  # noqa: T201
 
-def clearOEIScache() -> None:
-	"""Delete all cached OEIS sequence files from the local cache directory.
-
-	(AI generated docstring)
-
-	This function removes all cached OEIS data files, including both sequence value files (b-files)
-	and metadata files, forcing fresh retrieval from the OEIS website on the next access. This is
-	useful for clearing stale cache data or troubleshooting network-related issues.
-
-	The function safely handles missing files and provides user feedback about the cache clearing
-	operation. If the cache directory does not exist, an informative message is displayed.
-
-	"""
-	if not pathCache.exists():
-		print(f"Cache directory, {pathCache}, not found - nothing to clear.")  # noqa: T201
-		return
-	for oeisID in dictionaryOEISMapFolding:
-		( pathCache / f"{oeisID}.txt" ).unlink(missing_ok=True)
-		( pathCache / _getFilenameOEISbFile(oeisID) ).unlink(missing_ok=True)
-	print(f"Cache cleared from {pathCache}")  # noqa: T201
-
 def getOEISids() -> None:
 	"""Display comprehensive information about all implemented OEIS sequences.
 
@@ -513,7 +492,7 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 			description=descriptionSherpa,
 			offset=offsetSherpa,
 			valuesKnown=valuesKnownSherpa,
-			valuesTestValidation=packageSettings.OEISidManuallySet[oeisID]['valuesTestValidation'],
+			valuesTestValidation=[*(packageSettings.OEISidManuallySet[oeisID]['valuesTestValidation']), offsetSherpa],
 			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1,
 		)
 	return dictionary

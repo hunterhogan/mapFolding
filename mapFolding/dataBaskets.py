@@ -283,7 +283,7 @@ class MatrixMeandersState:
 	kOfMatrix: int
 	"""The number of iterations remaining in the transfer matrix algorithm."""
 	dictionaryMeanders: dict[int, int]
-	"""A Python `dict` (*dict*ionary) of `arcCode` to `distinctCrossings`. The values are stored as Python `int`
+	"""A Python `dict` (*dict*ionary) of `arcCode` to `crossings`. The values are stored as Python `int`
 	(*int*eger), which may be arbitrarily large. Because of that property, `int` may also be called a 'bignum' (big *num*ber) or
 	'bigint' (big *int*eger)."""
 
@@ -320,19 +320,19 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 	arrayMeanders: NDArray[numpy.uint64] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=numpy.uint64))
 
 	bitWidthLimitArcCode: int | None = None
-	bitWidthLimitDistinctCrossings: int | None = None
+	bitWidthLimitCrossings: int | None = None
 
 	datatypeArcCode: TypeAlias = numpy.uint64  # noqa: UP040
 	"""The fixed-size integer type used to store `arcCode`."""
-	datatypeDistinctCrossings: TypeAlias = numpy.uint64  # noqa: UP040
-	"""The fixed-size integer type used to store `distinctCrossings`."""
+	datatypeCrossings: TypeAlias = numpy.uint64  # noqa: UP040
+	"""The fixed-size integer type used to store `crossings`."""
 
 	indexTarget: int = 0
 	"""What is being indexed depends on the algorithm flavor."""
 
 # TODO Integrate this better into the dataclasses paradigm.
 	indicesMeanders: Final[int] = 2
-	indexArcCode, indexDistinctCrossings = range(indicesMeanders)
+	indexArcCode, indexCrossings = range(indicesMeanders)
 
 	@property
 	def slicerArcCode(self) -> ShapeSlicer:
@@ -340,9 +340,9 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 		return ShapeSlicer(length=..., indices=self.indexArcCode)
 
 	@property
-	def slicerDistinctCrossings(self) -> ShapeSlicer:
-		"""Get a `ShapeSlicer` to extract the `distinctCrossings` column from `arrayMeanders`."""
-		return ShapeSlicer(length=..., indices=self.indexDistinctCrossings)
+	def slicerCrossings(self) -> ShapeSlicer:
+		"""Get a `ShapeSlicer` to extract the `crossings` column from `arrayMeanders`."""
+		return ShapeSlicer(length=..., indices=self.indexCrossings)
 
 	def __post_init__(self) -> None:
 		"""Post init."""
@@ -357,22 +357,22 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 
 			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetSafety, _offset
 
-		if self.bitWidthLimitDistinctCrossings is None:
-			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeDistinctCrossings).itemsize * 8 # bits
+		if self.bitWidthLimitCrossings is None:
+			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeCrossings).itemsize * 8 # bits
 
 			_offsetNecessary: int = 0 # I don't know of any.
 			_offsetEstimation: int = 3 # See reference directory.
 			_offsetSafety: int = 1
 			_offset: int = _offsetNecessary + _offsetEstimation + _offsetSafety
 
-			self.bitWidthLimitDistinctCrossings = _bitWidthOfFixedSizeInteger - _offset
+			self.bitWidthLimitCrossings = _bitWidthOfFixedSizeInteger - _offset
 
 			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetEstimation, _offsetSafety, _offset
 
 	def makeDictionary(self) -> None:
 		"""Convert from NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array) to Python `dict` (*dict*ionary)."""
 		self.dictionaryMeanders = {int(key): int(value) for key, value in zip(
-			self.arrayMeanders[self.slicerArcCode], self.arrayMeanders[self.slicerDistinctCrossings]
+			self.arrayMeanders[self.slicerArcCode], self.arrayMeanders[self.slicerCrossings]
 			, strict=True)}
 		self.arrayMeanders = numpy.empty((0,), dtype=self.datatypeArcCode)
 
@@ -381,6 +381,6 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 		shape = ShapeArray(length=len(self.dictionaryMeanders), indices=self.indicesMeanders)
 		self.arrayMeanders = numpy.zeros(shape, dtype=self.datatypeArcCode)
 		self.arrayMeanders[self.slicerArcCode] = list(self.dictionaryMeanders.keys())
-		self.arrayMeanders[self.slicerDistinctCrossings] = list(self.dictionaryMeanders.values())
+		self.arrayMeanders[self.slicerCrossings] = list(self.dictionaryMeanders.values())
 		self.bitWidth = int(self.arrayMeanders[self.slicerArcCode].max()).bit_length()
 		self.dictionaryMeanders = {}

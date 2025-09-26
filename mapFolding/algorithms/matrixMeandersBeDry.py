@@ -37,7 +37,7 @@ def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFr
 	state : MatrixMeandersState
 		The current state of the computation, including `dictionaryMeanders`.
 	dataframe : pandas.DataFrame | None = None
-		Optional DataFrame containing 'analyzed' and 'distinctCrossings' columns. If provided, use this instead of `state.dictionaryMeanders`.
+		Optional DataFrame containing 'analyzed' and 'crossings' columns. If provided, use this instead of `state.dictionaryMeanders`.
 	fixedSizeMAXIMUMarcCode : bool = False
 		Set this to `True` if you cast `state.MAXIMUMarcCode` to the same fixed size integer type as `state.datatypeArcCode`.
 
@@ -57,30 +57,30 @@ def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFr
 	`MAXIMUMarcCode` to a fixed size merely delays the transition from one function to the other by one iteration.
 
 	If you start with small values in `dictionaryMeanders`, however, then the flow goes to the function with fixed size
-	integers and usually stays there until `distinctCrossings` is huge, which is near the end of the computation. If you cast
+	integers and usually stays there until `crossings` is huge, which is near the end of the computation. If you cast
 	`MAXIMUMarcCode` into a 64-bit unsigned integer, however, then around `state.kOfMatrix == 28`, the bit width of
 	`MAXIMUMarcCode` might exceed the limit. That will cause the flow to go to the function that does not have fixed size
 	integers for a few iterations before returning to the function with fixed size integers.
 	"""
 	if dataframe is not None:
 		arcCodeWidest = int(dataframe['analyzed'].max()).bit_length()
-		distinctCrossingsWidest = int(dataframe['distinctCrossings'].max()).bit_length()
+		crossingsWidest = int(dataframe['crossings'].max()).bit_length()
 	elif array is not None:
 		arcCodeWidest = int(array[state.slicerArcCode].max()).bit_length()
-		distinctCrossingsWidest = int(array[state.slicerDistinctCrossings].max()).bit_length()
+		crossingsWidest = int(array[state.slicerCrossings].max()).bit_length()
 	elif not state.dictionaryMeanders:
 		arcCodeWidest = int(state.arrayMeanders[state.slicerArcCode].max()).bit_length()
-		distinctCrossingsWidest = int(state.arrayMeanders[state.slicerDistinctCrossings].max()).bit_length()
+		crossingsWidest = int(state.arrayMeanders[state.slicerCrossings].max()).bit_length()
 	else:
 		arcCodeWidest: int = max(state.dictionaryMeanders.keys()).bit_length()
-		distinctCrossingsWidest: int = max(state.dictionaryMeanders.values()).bit_length()
+		crossingsWidest: int = max(state.dictionaryMeanders.values()).bit_length()
 
 	MAXIMUMarcCode: int = 0
 	if fixedSizeMAXIMUMarcCode:
 		MAXIMUMarcCode = state.MAXIMUMarcCode
 
 	return (arcCodeWidest > raiseIfNone(state.bitWidthLimitArcCode)
-		or distinctCrossingsWidest > raiseIfNone(state.bitWidthLimitDistinctCrossings)
+		or crossingsWidest > raiseIfNone(state.bitWidthLimitCrossings)
 		or MAXIMUMarcCode > raiseIfNone(state.bitWidthLimitArcCode)
 		)
 

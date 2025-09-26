@@ -350,11 +350,9 @@ def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:
 	"""
 	return request.param
 
-@pytest.fixture(params=tuple(dictionaryOEIS.keys()))
-def oeisIDother(request: pytest.FixtureRequest) -> Any:
-	"""Parametrized fixture providing all implemented Meanders OEIS sequence identifiers.
-
-	(AI generated docstring)
+@pytest.fixture(params=('A000682', 'A005316'))
+def oeisIDmeanders(request: pytest.FixtureRequest) -> Any:
+	"""Parametrized fixture providing all Meanders OEIS sequence identifiers.
 
 	Parameters
 	----------
@@ -364,7 +362,24 @@ def oeisIDother(request: pytest.FixtureRequest) -> Any:
 	Returns
 	-------
 	sequenceIdentifier : Any
-		OEIS sequence identifier for testing across all implemented Meanders sequences.
+		OEIS sequence identifier for testing across all Meanders sequences.
+
+	"""
+	return request.param
+
+@pytest.fixture(params=tuple(dictionaryOEIS.keys()))
+def oeisIDother(request: pytest.FixtureRequest) -> Any:
+	"""Parametrized fixture providing all other OEIS sequence identifiers.
+
+	Parameters
+	----------
+	request : pytest.FixtureRequest
+		The pytest request object containing the current parameter value.
+
+	Returns
+	-------
+	sequenceIdentifier : Any
+		OEIS sequence identifier for testing across all other sequences.
 
 	"""
 	return request.param

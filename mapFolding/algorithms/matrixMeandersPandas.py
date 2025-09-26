@@ -24,7 +24,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	"""
 	dataframeAnalyzed = pandas.DataFrame({
 		'analyzed': pandas.Series(name='analyzed', data=state.dictionaryMeanders.keys(), copy=False, dtype=state.datatypeArcCode)
-		, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=state.dictionaryMeanders.values(), copy=False, dtype=state.datatypeDistinctCrossings)
+		, 'crossings': pandas.Series(name='crossings', data=state.dictionaryMeanders.values(), copy=False, dtype=state.datatypeCrossings)
 		}, dtype=state.datatypeArcCode
 	)
 	state.dictionaryMeanders.clear()
@@ -33,7 +33,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		def aggregateArcCodes()  -> None:
 			nonlocal dataframeAnalyzed
-			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexTarget].groupby('analyzed', sort=False)['distinctCrossings'].aggregate('sum').reset_index()
+			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexTarget].groupby('analyzed', sort=False)['crossings'].aggregate('sum').reset_index()
 
 		def analyzeArcCodesAligned() -> None:
 			"""Compute `arcCode` from `bitsAlpha` and `bitsZulu` if at least one is an even number.
@@ -265,8 +265,8 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 					warn(f"Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to {indexStopAnalyzed=}; n={state.n}, {state.kOfMatrix=}.", stacklevel=2)
 					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
 
-				dataframeAnalyzed.loc[state.indexTarget:indexStopAnalyzed - 1, ['analyzed', 'distinctCrossings']] = (
-					dataframeMeanders.loc[(dataframeMeanders['analyzed'] > 0), ['analyzed', 'distinctCrossings']
+				dataframeAnalyzed.loc[state.indexTarget:indexStopAnalyzed - 1, ['analyzed', 'crossings']] = (
+					dataframeMeanders.loc[(dataframeMeanders['analyzed'] > 0), ['analyzed', 'crossings']
 								].to_numpy(dtype=state.datatypeArcCode, copy=False)
 				)
 
@@ -277,7 +277,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		dataframeMeanders = pandas.DataFrame({
 			'arcCode': pandas.Series(name='arcCode', data=dataframeAnalyzed['analyzed'], copy=False, dtype=state.datatypeArcCode)
 			, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=state.datatypeArcCode)
-			, 'distinctCrossings': pandas.Series(name='distinctCrossings', data=dataframeAnalyzed['distinctCrossings'], copy=False, dtype=state.datatypeDistinctCrossings)
+			, 'crossings': pandas.Series(name='crossings', data=dataframeAnalyzed['crossings'], copy=False, dtype=state.datatypeCrossings)
 			} # pyright: ignore[reportUnknownArgumentType]
 		)
 
@@ -288,8 +288,8 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		length: int = getBucketsTotal(state)
 		dataframeAnalyzed = pandas.DataFrame({
 			'analyzed': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeArcCode, name='analyzed')
-			, 'distinctCrossings': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeDistinctCrossings, name='distinctCrossings')
-			}, index=pandas.RangeIndex(length), columns=['analyzed', 'distinctCrossings'], dtype=state.datatypeArcCode # pyright: ignore[reportUnknownArgumentType]
+			, 'crossings': pandas.Series(0, pandas.RangeIndex(length), dtype=state.datatypeCrossings, name='crossings')
+			}, index=pandas.RangeIndex(length), columns=['analyzed', 'crossings'], dtype=state.datatypeArcCode # pyright: ignore[reportUnknownArgumentType]
 		)
 
 		state.kOfMatrix -= 1
@@ -315,11 +315,11 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		if state.n >= 45:  # for data collection
 			print(state.n, state.kOfMatrix+1, state.indexTarget, sep=',')  # noqa: T201
 
-	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['distinctCrossings'].to_dict()
+	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()
 	return state
 
 def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
-	"""Compute `distinctCrossings` with a transfer matrix algorithm implemented in pandas.
+	"""Compute `crossings` with a transfer matrix algorithm implemented in pandas.
 
 	Parameters
 	----------
@@ -328,8 +328,8 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 
 	Returns
 	-------
-	distinctCrossings : int
-		The computed value of `distinctCrossings`.
+	crossings : int
+		The computed value of `crossings`.
 
 	Notes
 	-----

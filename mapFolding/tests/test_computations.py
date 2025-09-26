@@ -40,29 +40,9 @@ import pytest
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
-def test_aOFn_calculate_value_mapFolding(oeisIDmapFolding: str) -> None:
-	"""Verify OEIS sequence value calculations against known reference values.
-
-	Tests the `oeisIDfor_n` function by comparing its calculated output against
-	known correct values from the OEIS database. This ensures that sequence
-	value computations remain mathematically accurate across code changes.
-
-	The test iterates through validation test cases defined in `settingsOEIS`
-	for the given OEIS sequence identifier, verifying that each computed value
-	matches its corresponding known reference value.
-
-	Parameters
-	----------
-	oeisID : str
-		The OEIS sequence identifier to test calculations for.
-
-	"""
-	for n in dictionaryOEISMapFolding[oeisIDmapFolding]['valuesTestValidation']:
-		standardizedEqualToCallableReturn(dictionaryOEISMapFolding[oeisIDmapFolding]['valuesKnown'][n], oeisIDfor_n, oeisIDmapFolding, n)
-
 @pytest.mark.parametrize('flow', ['algorithm', 'asynchronous', 'asynchronousTrimmed', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'])
 def test_A007822(flow: str) -> None:
-	"""Test A007822 asynchronous flow options.
+	"""Test A007822 flow options.
 
 	Parameters
 	----------
@@ -108,6 +88,26 @@ def test_countFolds(mapShapeTestCountFolds: tuple[int, ...], flow: str) -> None:
 	"""
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, flow)
 
+@pytest.mark.parametrize('flow', ['matrixNumPy', 'matrixPandas'])
+def test_meanders(oeisIDmeanders: str, flow: str) -> None:
+	"""Verify Meanders OEIS sequence value calculations against known reference values.
+
+	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
+	calculated output against known correct values from the OEIS database for Meanders IDs.
+
+	Parameters
+	----------
+	oeisIDMeanders : str
+		The Meanders OEIS sequence identifier to test calculations for.
+
+	"""
+	dictionary = dictionaryOEISMapFolding if oeisIDmeanders in dictionaryOEISMapFolding else dictionaryOEIS
+	for n in dictionary[oeisIDmeanders]['valuesTestValidation']:
+		standardizedEqualToCallableReturn(
+			dictionary[oeisIDmeanders]['valuesKnown'][n]
+			, NOTcountingFolds, oeisIDmeanders, n, flow, None
+			)
+
 def test_NOTcountingFolds(oeisIDother: str) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
@@ -126,6 +126,26 @@ def test_NOTcountingFolds(oeisIDother: str) -> None:
 			dictionary[oeisIDother]['valuesKnown'][n]
 			, NOTcountingFolds, oeisIDother, n, None, None
 			)
+
+def test_oeisIDfor_n(oeisIDmapFolding: str) -> None:
+	"""Verify OEIS sequence value calculations against known reference values.
+
+	Tests the `oeisIDfor_n` function by comparing its calculated output against
+	known correct values from the OEIS database. This ensures that sequence
+	value computations remain mathematically accurate across code changes.
+
+	The test iterates through validation test cases defined in `settingsOEIS`
+	for the given OEIS sequence identifier, verifying that each computed value
+	matches its corresponding known reference value.
+
+	Parameters
+	----------
+	oeisID : str
+		The OEIS sequence identifier to test calculations for.
+
+	"""
+	for n in dictionaryOEISMapFolding[oeisIDmapFolding]['valuesTestValidation']:
+		standardizedEqualToCallableReturn(dictionaryOEISMapFolding[oeisIDmapFolding]['valuesKnown'][n], oeisIDfor_n, oeisIDmapFolding, n)
 
 @pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:

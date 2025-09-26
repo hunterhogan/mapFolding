@@ -1,33 +1,25 @@
-"""NOTES.
-
-`bitsAlpha`, `bitsZulu`, `viewStackAnalysis`, and `arrayPrepArea` are now completely abstract, so I can replace the underlying
-data structures with anything. For example, `bitsAlpha` could be computed on the fly as needed instead of being stored in memory.
-"""
-from gc import collect
-from mapFolding import axisOfLength, ShapeArray, ShapeSlicer
+from gc import collect as goByeBye
+from mapFolding import ShapeArray, ShapeSlicer
 from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
 from mapFolding.dataBaskets import MatrixMeandersNumPyState
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from numpy import (
-	bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, logical_and, logical_not,
-	multiply, subtract)
+	bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract)
 from numpy.typing import NDArray
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
 	from numpy.lib._arraysetops_impl import UniqueInverseResult
 
-indicesPrepArea: int = 3
-indexAnalysis, indexAlpha, indexZulu = range(indicesPrepArea)
+indicesPrepArea: int = 1
+indexAnalysis = 0
 slicerAnalysis: ShapeSlicer = ShapeSlicer(length=..., indices=indexAnalysis)
-slicerAlpha: ShapeSlicer = ShapeSlicer(length=..., indices=indexAlpha)
-slicerZulu: ShapeSlicer = ShapeSlicer(length=..., indices=indexZulu)
 
 indicesAnalyzed: int = 2
-indexAnalyzedArcCode, indexAnalyzedDistinctCrossings = range(indicesAnalyzed)
-slicerAnalyzedArcCode: ShapeSlicer = ShapeSlicer(length=..., indices=indexAnalyzedArcCode)
-slicerAnalyzedDistinctCrossings: ShapeSlicer = ShapeSlicer(length=..., indices=indexAnalyzedDistinctCrossings)
+indexArcCode, indexCrossings = range(indicesAnalyzed)
+slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., indices=indexArcCode)
+slicerCrossings: ShapeSlicer = ShapeSlicer(length=..., indices=indexCrossings)
 
 def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	"""Count crossings with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
@@ -44,61 +36,70 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	"""
 	while state.kOfMatrix > 0 and not areIntegersWide(state):
 		def aggregateAnalyzed(arrayAnalyzed: NDArray[numpy.uint64], state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
-			"""Create new `arrayMeanders` by deduplicating `arcCode` and summing `distinctCrossings`."""
-			unique: UniqueInverseResult[numpy.uint64] = numpy.unique_inverse(arrayAnalyzed[slicerAnalyzedArcCode])
+			"""Create new `arrayMeanders` by deduplicating `arcCode` and summing `crossings`."""
+			unique: UniqueInverseResult[numpy.uint64] = numpy.unique_inverse(arrayAnalyzed[slicerArcCode])
 
 			shape = ShapeArray(length=len(unique.values), indices=state.indicesMeanders)
 			state.arrayMeanders = numpy.zeros(shape, dtype=state.datatypeArcCode)
 			del shape
 
 			state.arrayMeanders[state.slicerArcCode] = unique.values
-			numpy.add.at(state.arrayMeanders[state.slicerDistinctCrossings], unique.inverse_indices, arrayAnalyzed[slicerAnalyzedDistinctCrossings])
+			numpy.add.at(state.arrayMeanders[state.slicerCrossings], unique.inverse_indices, arrayAnalyzed[slicerCrossings])
 			del unique
 
 			return state
 
-		def makePrepArea(state: MatrixMeandersNumPyState) -> NDArray[numpy.uint64]:
-			"""Create `arrayPrepArea`."""
-			shape = ShapeArray(length=len(state.arrayMeanders[state.slicerArcCode]), indices=indicesPrepArea)
-			arrayPrepArea: NDArray[numpy.uint64] = numpy.zeros(shape, dtype=state.datatypeArcCode)
-			del shape
+		def bitsAlpha(state: MatrixMeandersNumPyState) -> NDArray[numpy.uint64]:
+			return bitwise_and(state.arrayMeanders[state.slicerArcCode], state.locatorBits)
 
-			bitwise_and(state.arrayMeanders[state.slicerArcCode], state.locatorBits, out=arrayPrepArea[slicerAlpha])
-			bitwise_right_shift(state.arrayMeanders[state.slicerArcCode], 1, out=arrayPrepArea[slicerZulu])
-			bitwise_and(arrayPrepArea[slicerZulu], state.locatorBits, out=arrayPrepArea[slicerZulu])
+		def bitsZulu(state: MatrixMeandersNumPyState) -> NDArray[numpy.uint64]:
+			IsThisMemoryEfficient: NDArray[numpy.uint64] = bitwise_right_shift(state.arrayMeanders[state.slicerArcCode], 1)
+			return bitwise_and(IsThisMemoryEfficient, state.locatorBits)
 
-			return arrayPrepArea
+		def makeStorage[个: numpy.integer[Any]](dataTarget: NDArray[个], state: MatrixMeandersNumPyState, storageTarget: NDArray[numpy.uint64], indexAssignment: int = indexArcCode) -> NDArray[个]:
+			"""Store `dataTarget` in `storageTarget` on `indexAssignment` if there is enough space, otherwise allocate a new array."""
+			lengthStorageTarget: int = len(storageTarget)
+			storageAvailable: int = lengthStorageTarget - state.indexTarget
+			lengthDataTarget: int = len(dataTarget)
 
-		def makeViews(state: MatrixMeandersNumPyState) -> tuple[NDArray[numpy.uint64], NDArray[numpy.uint64], NDArray[numpy.uint64]]:
-			"""Create views of prep area."""
-			arrayTarget: NDArray[numpy.uint64] = makePrepArea(state)
-			viewStackAnalysis: NDArray[numpy.uint64] = arrayTarget[slicerAnalysis].view()
-			viewAlpha: NDArray[numpy.uint64] = arrayTarget[slicerAlpha].view()
-			viewZulu: NDArray[numpy.uint64] = arrayTarget[slicerZulu].view()
-			return viewStackAnalysis, viewAlpha, viewZulu # match the order of `indicesPrepArea`
+			if storageAvailable >= lengthDataTarget:
+				indexStart: int = lengthStorageTarget - lengthDataTarget
+				sliceStorage: slice = slice(indexStart, lengthStorageTarget)
+				del indexStart
+				slicerStorageAtIndex: ShapeSlicer = ShapeSlicer(length=sliceStorage, indices=indexAssignment)
+				del sliceStorage
+				storageTarget[slicerStorageAtIndex] = dataTarget.copy()
+				arrayStorage = storageTarget[slicerStorageAtIndex].view() # pyright: ignore[reportAssignmentType]
+				del slicerStorageAtIndex
+			else:
+				arrayStorage: NDArray[个] = dataTarget.copy()
+
+			del storageAvailable, lengthDataTarget, lengthStorageTarget
+
+			return arrayStorage
 
 		def recordAnalysis(arrayAnalyzed: NDArray[numpy.uint64], state: MatrixMeandersNumPyState, arcCode: NDArray[numpy.uint64]) -> MatrixMeandersNumPyState:
-			"""Record valid `arcCode` and corresponding `distinctCrossings` in `arrayAnalyzed`."""
+			"""Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`."""
 			selectorOverLimit = arcCode > state.MAXIMUMarcCode
-			multiply(arcCode, 0, out=arcCode, where=selectorOverLimit)
+			arcCode[selectorOverLimit] = 0
 			del selectorOverLimit
 
-			selectorNonzero: NDArray[numpy.intp] = numpy.flatnonzero(arcCode)
+			selectorAnalysis: NDArray[numpy.intp] = numpy.flatnonzero(arcCode)
 
-			indexStop: int = state.indexTarget + len(selectorNonzero)
+			indexStop: int = state.indexTarget + len(selectorAnalysis)
 			sliceNonzero: slice = slice(state.indexTarget, indexStop)
 			state.indexTarget = indexStop
 			del indexStop
 
-			slicerArcCodeNonzero = ShapeSlicer(length=sliceNonzero, indices=indexAnalyzedArcCode)
-			slicerDistinctCrossingsNonzero = ShapeSlicer(length=sliceNonzero, indices=indexAnalyzedDistinctCrossings)
+			slicerArcCodeNonzero = ShapeSlicer(length=sliceNonzero, indices=indexArcCode)
+			slicerCrossingsNonzero = ShapeSlicer(length=sliceNonzero, indices=indexCrossings)
 			del sliceNonzero
 
-			arrayAnalyzed[slicerArcCodeNonzero] = arcCode[selectorNonzero]
+			arrayAnalyzed[slicerArcCodeNonzero] = arcCode[selectorAnalysis]
 			del slicerArcCodeNonzero
 
-			arrayAnalyzed[slicerDistinctCrossingsNonzero] = state.arrayMeanders[state.slicerDistinctCrossings][selectorNonzero]
-			del slicerDistinctCrossingsNonzero, selectorNonzero
+			arrayAnalyzed[slicerCrossingsNonzero] = state.arrayMeanders[state.slicerCrossings][selectorAnalysis]
+			del slicerCrossingsNonzero, selectorAnalysis
 
 			return state
 
@@ -108,151 +109,153 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		lengthArrayAnalyzed: int = getBucketsTotal(state, 1.2)
 		shape = ShapeArray(length=lengthArrayAnalyzed, indices=indicesAnalyzed)
 		del lengthArrayAnalyzed
+		goByeBye()
+
 		arrayAnalyzed: NDArray[numpy.uint64] = numpy.zeros(shape, dtype=state.datatypeArcCode)
 		del shape
 
-		# Just one explicit, long-form, annotated unpacking for demonstration and for the type checker.
-		views: tuple[NDArray[numpy.uint64], NDArray[numpy.uint64], NDArray[numpy.uint64]] = makeViews(state)
-		viewStackAnalysis: NDArray[numpy.uint64] = views[indexAnalysis]
-		bitsAlpha: NDArray[numpy.uint64] = views[indexAlpha]
-		bitsZulu: NDArray[numpy.uint64] = views[indexZulu]
+		shape = ShapeArray(length=len(state.arrayMeanders[state.slicerArcCode]), indices=indicesPrepArea)
+		arrayPrepArea: NDArray[numpy.uint64] = numpy.zeros(shape, dtype=state.datatypeArcCode)
+		del shape
+
+		prepArea: NDArray[numpy.uint64] = arrayPrepArea[slicerAnalysis].view()
 
 		state.indexTarget = 0
 
 		state.kOfMatrix -= 1
 
-# ----------------- analyze simple ------------------------------------------------------------------------------------
-# ------- ((bitsAlpha | (bitsZulu << 1)) << 2) | 3 --------
-# ------- | << | bitsAlpha << bitsZulu 1 2 3 --------------
-		bitwise_left_shift(bitsZulu, 1, out=viewStackAnalysis)
-		bitwise_or(bitsAlpha, viewStackAnalysis, out=viewStackAnalysis)
-		bitwise_left_shift(viewStackAnalysis, 2, out=viewStackAnalysis)
-		bitwise_or(viewStackAnalysis, 3, out=viewStackAnalysis)
+# =============== analyze aligned ===== if bitsAlpha > 1 and bitsZulu > 1 =============================================
+# ======= > * > bitsAlpha 1 bitsZulu 1 ====================
+		greater(bitsAlpha(state), 1, out=prepArea)
+		multiply(bitsZulu(state), prepArea, out=prepArea)
+		greater(prepArea, 1, out=prepArea)
+		selectorGreaterThan1: NDArray[numpy.uint64] = makeStorage(prepArea, state, arrayAnalyzed, indexArcCode)
 
-		state = recordAnalysis(arrayAnalyzed, state, viewStackAnalysis)
-
-# ----------------- analyze bitsAlpha ---------------------------------------------------------------------------------
-		stackInMemory: NDArray[numpy.uint64] = numpy.zeros_like(viewStackAnalysis)
-
-# ------- (((((1 - (bitsAlpha & 1)) << 1) | (bitsZulu << 3)) << 2) | bitsAlpha) >> 2 ---
-# ------- >> | << | (<< - 1 & bitsAlpha 1 1) << bitsZulu 3 2 bitsAlpha 2 --------------
-		bitwise_and(bitsAlpha, 1, out=stackInMemory)
-		subtract(1, stackInMemory, out=stackInMemory)
-		bitwise_left_shift(stackInMemory, 1, out=stackInMemory)
-		bitwise_left_shift(bitsZulu, 3, out=viewStackAnalysis)
-		bitwise_or(stackInMemory, viewStackAnalysis, out=viewStackAnalysis)
-		del stackInMemory
-		bitwise_left_shift(viewStackAnalysis, 2, out=viewStackAnalysis)
-		bitwise_or(bitsAlpha, viewStackAnalysis, out=viewStackAnalysis)
-		bitwise_right_shift(viewStackAnalysis, 2, out=viewStackAnalysis)
-
-# ------- if bitsAlpha > 1 --------------------------------
-		selectorUnderLimit: NDArray[numpy.bool_] = numpy.less_equal(bitsAlpha, 1, dtype=numpy.bool_)
-		multiply(viewStackAnalysis, 0, out=viewStackAnalysis, where=selectorUnderLimit)
-		del selectorUnderLimit
-
-		state = recordAnalysis(arrayAnalyzed, state, viewStackAnalysis)
-
-# ----------------- analyze bitsZulu ----------------------------------------------------------------------------------
-		stackInMemory: NDArray[numpy.uint64] = numpy.zeros_like(viewStackAnalysis)
-
-# ------- ((((1 - (bitsZulu & 1)) | (bitsAlpha << 2)) << 1) | bitsZulu) >> 1 ----
-# ------- >> | << | (- 1 & bitsZulu 1) << bitsAlpha 2 1 bitsZulu 1 --------------
-		bitwise_and(bitsZulu, 1, out=stackInMemory)
-		subtract(1, stackInMemory, out=stackInMemory)
-		bitwise_left_shift(bitsAlpha, 2, out=viewStackAnalysis)
-		bitwise_or(stackInMemory, viewStackAnalysis, out=viewStackAnalysis)
-		del stackInMemory
-		bitwise_left_shift(viewStackAnalysis, 1, out=viewStackAnalysis)
-		bitwise_or(bitsZulu, viewStackAnalysis, out=viewStackAnalysis)
-		bitwise_right_shift(viewStackAnalysis, 1, out=viewStackAnalysis)
-
-# ------- if bitsZulu > 1 ---------------------------------
-		selectorUnderLimit: NDArray[numpy.bool_] = numpy.less_equal(bitsZulu, 1, dtype=numpy.bool_)
-		multiply(viewStackAnalysis, 0, out=viewStackAnalysis, where=selectorUnderLimit)
-		del selectorUnderLimit
-
-		state = recordAnalysis(arrayAnalyzed, state, viewStackAnalysis)
-
-# ================= analyze aligned ===================================================================================
-# ======= if bitsAlpha > 1 and bitsZulu > 1 and (bitsAlphaIsEven or bitsZuluIsEven) =====
-# ======= if bitsAlpha > 1 and bitsZulu > 1 ===============
-		greater(bitsAlpha, 1, out=viewStackAnalysis)
-		multiply(bitsZulu, viewStackAnalysis, out=viewStackAnalysis)
-		greater(viewStackAnalysis, 1, out=viewStackAnalysis)
-
-# ======= arrayMeanders resize(remove disqualified values) ====
-# TODO shrink the array in place
-		selectorKeepThese: NDArray[numpy.intp] = numpy.flatnonzero(viewStackAnalysis)
-		state.arrayMeanders = numpy.take(state.arrayMeanders, selectorKeepThese, axis=axisOfLength)
-		del selectorKeepThese
-
-		del viewStackAnalysis, bitsAlpha, bitsZulu
-		viewStackAnalysis, bitsAlpha, bitsZulu = makeViews(state)
-
-# ======= if ... and (bitsAlphaIsEven or bitsZuluIsEven) ============
-# ======= ^ & & bitsAlpha 1 bitsZulu 1 ============
-		bitwise_and(bitsAlpha, 1, out=viewStackAnalysis)
-		bitwise_and(bitsZulu, viewStackAnalysis, out=viewStackAnalysis)
-		bitwise_xor(viewStackAnalysis, 1, out=viewStackAnalysis)
-
-# ======= arrayMeanders resize(qualified values) ====
-		selectorKeepThese = numpy.flatnonzero(viewStackAnalysis)
-		state.arrayMeanders = numpy.take(state.arrayMeanders, selectorKeepThese, axis=axisOfLength)
-		del selectorKeepThese
-
-		del viewStackAnalysis, bitsAlpha, bitsZulu
-		viewStackAnalysis, bitsAlpha, bitsZulu = makeViews(state)
-		goByeBye()
-
-# ======= align bitsAlpha and bitsZulu ========================================
 # ======= if bitsAlphaAtEven and not bitsZuluAtEven =======
-# ======= (1 - (bitsAlpha & 1)) & (bitsZulu & 1) ==========
-		bitwise_and(bitsAlpha, 1, out=viewStackAnalysis)
-		selectorAlphaAtOdd: NDArray[numpy.bool_] = viewStackAnalysis.astype(dtype=numpy.bool_)
-		bitwise_and(bitsZulu, 1, out=viewStackAnalysis)
-		selectorZuluAtOdd: NDArray[numpy.bool_] = viewStackAnalysis.astype(dtype=numpy.bool_)
+# ======= ^ & | ^ & bitsZulu 1 1 bitsAlpha 1 1 ============
+		bitwise_and(bitsZulu(state), 1, out=prepArea)
+		bitwise_xor(prepArea, 1, out=prepArea)
+		bitwise_or(bitsAlpha(state), prepArea, out=prepArea)
+		bitwise_and(prepArea, 1, out=prepArea)
+		bitwise_xor(prepArea, 1, out=prepArea)
 
-		arrayBitsAlpha: NDArray[numpy.uint64] = bitsAlpha.copy()
+		bitwise_and(selectorGreaterThan1, prepArea, out=prepArea)
+		selectorAlignAlpha: NDArray[numpy.intp] = makeStorage(numpy.flatnonzero(prepArea), state, arrayAnalyzed, indexCrossings)
 
-		flipTheExtra_0b1AsUfunc(bitsAlpha, out=arrayBitsAlpha
-			, where=logical_and(logical_not(selectorAlphaAtOdd), selectorZuluAtOdd)
-			, casting='unsafe')
+		arrayBitsAlpha: NDArray[numpy.uint64] = bitsAlpha(state)
+
+		arrayBitsAlpha[selectorAlignAlpha] = flipTheExtra_0b1AsUfunc(arrayBitsAlpha[selectorAlignAlpha])
+		del selectorAlignAlpha 													# NOTE FREE indexCrossings
 
 # ======= if bitsZuluAtEven and not bitsAlphaAtEven =======
-# ======= (1 - (bitsZulu & 1)) & (bitsAlpha & 1) ==========
-		arrayBitsZulu: NDArray[numpy.uint64] = bitsZulu.copy()
+# ======= ^ & | ^ & bitsAlpha 1 1 bitsZulu 1 1 ============
+		bitwise_and(bitsAlpha(state), 1, out=prepArea)
+		bitwise_xor(prepArea, 1, out=prepArea)
+		bitwise_or(bitsZulu(state), prepArea, out=prepArea)
+		bitwise_and(prepArea, 1, out=prepArea)
+		bitwise_xor(prepArea, 1, out=prepArea)
 
-		flipTheExtra_0b1AsUfunc(bitsZulu, out=arrayBitsZulu
-			, where=logical_and(selectorAlphaAtOdd, logical_not(selectorZuluAtOdd))
-			, casting='unsafe')
-		del selectorAlphaAtOdd
-		del selectorZuluAtOdd
+		bitwise_and(selectorGreaterThan1, prepArea, out=prepArea)
+		selectorAlignZulu: NDArray[numpy.intp] = makeStorage(numpy.flatnonzero(prepArea), state, arrayAnalyzed, indexCrossings)
+
+# ======= bitsAlphaAtEven or bitsZuluAtEven ===============
+# ======= ^ & & bitsAlpha 1 bitsZulu 1 ====================
+		bitwise_and(bitsAlpha(state), 1, out=prepArea)
+		bitwise_and(bitsZulu(state), prepArea, out=prepArea)
+		bitwise_xor(prepArea, 1, out=prepArea)
+
+		bitwise_and(selectorGreaterThan1, prepArea, out=prepArea) # selectorBitsAtEven
+		del selectorGreaterThan1 												# NOTE FREE indexArcCode
+		bitwise_xor(prepArea, 1, out=prepArea)
+		selectorDisqualified: NDArray[numpy.intp] = makeStorage(numpy.flatnonzero(prepArea), state, arrayAnalyzed, indexArcCode)
+
+		prepArea = bitsZulu(state)
+
+		prepArea[selectorAlignZulu] = flipTheExtra_0b1AsUfunc(prepArea[selectorAlignZulu])
+		del selectorAlignZulu 													# NOTE FREE indexCrossings
+
+		arrayBitsZulu: NDArray[numpy.uint64] = makeStorage(prepArea, state, arrayAnalyzed, indexCrossings)
 
 # ======= (((bitsZulu >> 2) << 3) | bitsAlpha) >> 2 =======
 # ======= >> | << >> bitsZulu 2 3 bitsAlpha 2 =============
-		bitwise_right_shift(arrayBitsZulu, 2, out=viewStackAnalysis)
-		del arrayBitsZulu
-		bitwise_left_shift(viewStackAnalysis, 3, out=viewStackAnalysis)
-		bitwise_or(arrayBitsAlpha, viewStackAnalysis, out=viewStackAnalysis)
+		bitwise_right_shift(arrayBitsZulu, 2, out=prepArea)
+		del arrayBitsZulu 														# NOTE FREE indexCrossings
+		bitwise_left_shift(prepArea, 3, out=prepArea)
+		bitwise_or(arrayBitsAlpha, prepArea, out=prepArea)
 		del arrayBitsAlpha
-		bitwise_right_shift(viewStackAnalysis, 2, out=viewStackAnalysis)
+		bitwise_right_shift(prepArea, 2, out=prepArea)
 
-		state = recordAnalysis(arrayAnalyzed, state, viewStackAnalysis)
+		prepArea[selectorDisqualified] = 0
+		del selectorDisqualified 												# NOTE FREE indexArcCode
 
-		del viewStackAnalysis, bitsAlpha, bitsZulu
+		state = recordAnalysis(arrayAnalyzed, state, prepArea)
+
+# ----------------- analyze bitsAlpha ------- (bitsAlpha >> 2) | (bitsZulu << 3) | ((1 - (bitsAlpha & 1)) << 1) ---------
+# ------- >> | << | (<< - 1 & bitsAlpha 1 1) << bitsZulu 3 2 bitsAlpha 2 ----------
+		bitsAlphaStack: NDArray[numpy.uint64] = makeStorage(bitsAlpha(state), state, arrayAnalyzed, indexCrossings)
+		bitwise_and(bitsAlphaStack, 1, out=bitsAlphaStack)
+		subtract(1, bitsAlphaStack, out=bitsAlphaStack)
+		bitwise_left_shift(bitsAlphaStack, 1, out=bitsAlphaStack)
+		bitwise_left_shift(bitsZulu(state), 3, out=prepArea)
+		bitwise_or(bitsAlphaStack, prepArea, out=prepArea)
+		del bitsAlphaStack 														# NOTE FREE indexCrossings
+		bitwise_left_shift(prepArea, 2, out=prepArea)
+		bitwise_or(bitsAlpha(state), prepArea, out=prepArea)
+		bitwise_right_shift(prepArea, 2, out=prepArea)
+
+# ------- if bitsAlpha > 1 ------------ > bitsAlpha 1 -----
+		bitsAlphaStack: NDArray[numpy.uint64] = makeStorage(bitsAlpha(state), state, arrayAnalyzed, indexCrossings)
+		less_equal(bitsAlphaStack, 1, out=bitsAlphaStack)
+		selectorUnderLimit: NDArray[numpy.intp] = makeStorage(numpy.flatnonzero(bitsAlphaStack), state, arrayAnalyzed, indexArcCode)
+		prepArea[selectorUnderLimit] = 0
+		del selectorUnderLimit 													# NOTE FREE indexArcCode
+
+		state = recordAnalysis(arrayAnalyzed, state, prepArea)
+
+# ----------------- analyze bitsZulu ---------- (bitsZulu >> 1) | (bitsAlpha << 2) | (1 - (bitsZulu & 1)) -------------
+# ------- >> | << | (- 1 & bitsZulu 1) << bitsAlpha 2 1 bitsZulu 1 ----------
+		bitsZuluStack: NDArray[numpy.uint64] = makeStorage(bitsZulu(state), state, arrayAnalyzed, indexCrossings)
+		bitwise_and(bitsZuluStack, 1, out=bitsZuluStack)
+		subtract(1, bitsZuluStack, out=bitsZuluStack)
+		bitwise_left_shift(bitsAlpha(state), 2, out=prepArea)
+		bitwise_or(bitsZuluStack, prepArea, out=prepArea)
+		del bitsZuluStack 														# NOTE FREE indexCrossings
+		bitwise_left_shift(prepArea, 1, out=prepArea)
+		bitwise_or(bitsZulu(state), prepArea, out=prepArea)
+		bitwise_right_shift(prepArea, 1, out=prepArea)
+
+# ------- if bitsZulu > 1 ------------- > bitsZulu 1 ------
+		bitsZuluStack: NDArray[numpy.uint64] = makeStorage(bitsZulu(state), state, arrayAnalyzed, indexCrossings)
+		less_equal(bitsZuluStack, 1, out=bitsZuluStack)
+		selectorUnderLimit = makeStorage(numpy.flatnonzero(bitsZuluStack), state, arrayAnalyzed, indexArcCode)
+		del bitsZuluStack 														# NOTE FREE indexCrossings
+		prepArea[selectorUnderLimit] = 0
+		del selectorUnderLimit 													# NOTE FREE indexArcCode
+
+		state = recordAnalysis(arrayAnalyzed, state, prepArea)
+
+# ----------------- analyze simple ------------------------ ((bitsAlpha | (bitsZulu << 1)) << 2) | 3 ------------------
+# ------- | << | bitsAlpha << bitsZulu 1 2 3 --------------
+		bitwise_left_shift(bitsZulu(state), 1, out=prepArea)
+		bitwise_or(bitsAlpha(state), prepArea, out=prepArea)
+		bitwise_left_shift(prepArea, 2, out=prepArea)
+		bitwise_or(prepArea, 3, out=prepArea)
+
+		state = recordAnalysis(arrayAnalyzed, state, prepArea)
+
+		del prepArea, arrayPrepArea
+# ----------------------------------------------- aggregation ---------------------------------------------------------
 		arrayAnalyzed.resize((state.indexTarget, indicesAnalyzed))
 
-# ----------------------------------------------- aggregation ---------------------------------------------------------
+		goByeBye()
 		state = aggregateAnalyzed(arrayAnalyzed, state)
 
 		del arrayAnalyzed
-		goByeBye()
 
 	return state
 
 def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
-	"""Compute `distinctCrossings` with a transfer matrix algorithm implemented in NumPy.
+	"""Compute `crossings` with a transfer matrix algorithm implemented in NumPy.
 
 	Parameters
 	----------
@@ -261,8 +264,8 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 
 	Returns
 	-------
-	distinctCrossings : int
-		The computed value of `distinctCrossings`.
+	crossings : int
+		The computed value of `crossings`.
 
 	Notes
 	-----
@@ -278,14 +281,6 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 			state = countBigInt(state)
 		else:
 			state.makeArray()
-			goByeBye()
 			state = countNumPy(state)
 			state.makeDictionary()
-			goByeBye()
 	return sum(state.dictionaryMeanders.values())
-
-# TODO FIXME
-def goByeBye() -> None:
-	if True:
-		collect()
-

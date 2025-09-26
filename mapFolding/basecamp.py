@@ -275,7 +275,9 @@ def A000682(n: int, flow: str | None = None) -> int:
 
 	kOfMatrix: int = n - 1
 
-	if n & 0b1:
+	if n == 1:
+		return 1
+	elif n & 0b1:
 		arcCode: int = 5
 	else:
 		arcCode = 1
@@ -324,7 +326,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 		, CPUlimit: bool | float | int | None = None  # noqa: FBT001
 		) -> int:
 	"""Do stuff."""
-	countTotal = -1
+	countTotal: int = -1
 
 	match oeisID:
 		case 'A000136':

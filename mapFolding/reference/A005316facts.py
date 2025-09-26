@@ -1,6 +1,6 @@
 """A005316 facts."""
 
-dictionary_nToBitWidthDistinctCrossings: dict[int, int] = {
+dictionary_nToBitWidthCrossings: dict[int, int] = {
     0: 1, 1: 1, 2: 1, 3: 2, 4: 2, 5: 4, 6: 4, 7: 6, 8: 7, 9: 9
     , 10: 10, 11: 11, 12: 12, 13: 14, 14: 15, 15: 17, 16: 18, 17: 20, 18: 22, 19: 23
     , 20: 25, 21: 27, 22: 28, 23: 30, 24: 31, 25: 33, 26: 34, 27: 36, 28: 38, 29: 40

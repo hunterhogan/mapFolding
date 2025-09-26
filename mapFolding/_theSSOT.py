@@ -92,14 +92,14 @@ packageSettings = mapFoldingPackageSettings(identifierPackageFALLBACK=identifier
 """Local directory path for storing cached OEIS sequence data and metadata."""
 OEISidManuallySet: dict[str, MetadataOEISidManuallySet] = {
 	'A000560': {'valuesTestValidation': [random.randint(3, 12)]},
-	'A000682': {'valuesTestValidation': [random.randint(3, 12)]},
-	'A001010': {'valuesTestValidation': [random.randint(3, 11)]},
-	'A001011': {'valuesTestValidation': [random.randint(3, 7)]},
+	'A000682': {'valuesTestValidation': [random.randint(3, 12), 32]},
+	'A001010': {'valuesTestValidation': [3, 4, random.randint(5, 11)]},
+	'A001011': {'valuesTestValidation': [3, 4, random.randint(5, 7)]},
 	'A005315': {'valuesTestValidation': [random.randint(3, 9)]},
 	'A005316': {'valuesTestValidation': [random.randint(3, 13)]},
 	'A007822': {'valuesTestValidation': [random.randint(2, 8)]}, #, 'valuesBenchmark': [7], 'valuesTestParallelization': [*range(2, 4)]},
 	'A060206': {'valuesTestValidation': [random.randint(3, 9)]},
-	'A077460': {'valuesTestValidation': [random.randint(3, 8)]},
+	'A077460': {'valuesTestValidation': [3, 4, random.randint(5, 8)]},
 	'A078591': {'valuesTestValidation': [random.randint(3, 10)]},
 	'A178961': {'valuesTestValidation': [random.randint(3, 11)]},
 	'A223094': {'valuesTestValidation': [random.randint(3, 11)]},

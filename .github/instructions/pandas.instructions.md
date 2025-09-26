@@ -18,7 +18,7 @@ Row counts:
   - When the number of rows is decreasing, the groupby will reduce the number of rows by a large amount.
 - The peak number of rows is an estimated: rows = 0.71 * e**(0.4668 * bridges+1); using the value of bridges when passed as a parameter.
   - For bridges = 40, the peak is an estimated 146 million rows. MEMORY USAGE IS CRITICAL.
-  - To discover a new distinctCrossings, the peak rows will be more than 1.5 billion.
+  - To discover a new value of "crossings", the peak rows will be more than 1.5 billion.
 
 No lambda functions.
 
