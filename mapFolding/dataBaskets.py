@@ -280,21 +280,21 @@ class MatrixMeandersState:
 	"""The index of the meanders problem being solved."""
 	oeisID: str
 	"""'A000682', semi-meanders, or 'A005316', meanders."""
-	kOfMatrix: int
-	"""The number of iterations remaining in the transfer matrix algorithm."""
+	boundary: int
+	"""The algorithm analyzes `n` boundaries starting at `boundary = n - 1`."""
 	dictionaryMeanders: dict[int, int]
 	"""A Python `dict` (*dict*ionary) of `arcCode` to `crossings`. The values are stored as Python `int`
 	(*int*eger), which may be arbitrarily large. Because of that property, `int` may also be called a 'bignum' (big *num*ber) or
 	'bigint' (big *int*eger)."""
 
 	bitWidth: int = 0
-	"""At the start of an iteration enumerated by `kOfMatrix`, the number of bits of the largest value `arcCode`. The
+	"""At the start of an iteration enumerated by `boundary`, the number of bits of the largest value `arcCode`. The
 	`dataclass` computes a `property` from `bitWidth`."""
 
 	@property
 	def MAXIMUMarcCode(self) -> int:
 		"""Compute the maximum value of `arcCode` for the current iteration of the transfer matrix."""
-		return 1 << (2 * self.kOfMatrix + 4)
+		return 1 << (2 * self.boundary + 4)
 
 	@property
 	def locatorBits(self) -> int:
@@ -317,7 +317,8 @@ class MatrixMeandersState:
 class MatrixMeandersNumPyState(MatrixMeandersState):
 	"""Hold the state of a meanders transfer matrix algorithm computation."""
 
-	arrayMeanders: NDArray[numpy.uint64] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=numpy.uint64))
+	arrayArcCodes: NDArray[numpy.uint64] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=numpy.uint64))
+	arrayCrossings: NDArray[numpy.uint64] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=numpy.uint64))
 
 	bitWidthLimitArcCode: int | None = None
 	bitWidthLimitCrossings: int | None = None
@@ -329,20 +330,6 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 
 	indexTarget: int = 0
 	"""What is being indexed depends on the algorithm flavor."""
-
-# TODO Integrate this better into the dataclasses paradigm.
-	indicesMeanders: Final[int] = 2
-	indexArcCode, indexCrossings = range(indicesMeanders)
-
-	@property
-	def slicerArcCode(self) -> ShapeSlicer:
-		"""Get a `ShapeSlicer` to extract the `arcCode` column from `arrayMeanders`."""
-		return ShapeSlicer(length=..., indices=self.indexArcCode)
-
-	@property
-	def slicerCrossings(self) -> ShapeSlicer:
-		"""Get a `ShapeSlicer` to extract the `crossings` column from `arrayMeanders`."""
-		return ShapeSlicer(length=..., indices=self.indexCrossings)
 
 	def __post_init__(self) -> None:
 		"""Post init."""
@@ -371,16 +358,13 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 
 	def makeDictionary(self) -> None:
 		"""Convert from NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array) to Python `dict` (*dict*ionary)."""
-		self.dictionaryMeanders = {int(key): int(value) for key, value in zip(
-			self.arrayMeanders[self.slicerArcCode], self.arrayMeanders[self.slicerCrossings]
-			, strict=True)}
-		self.arrayMeanders = numpy.empty((0,), dtype=self.datatypeArcCode)
+		self.dictionaryMeanders = {int(key): int(value) for key, value in zip(self.arrayArcCodes, self.arrayCrossings, strict=True)}
+		self.arrayArcCodes = numpy.empty((0,), dtype=self.datatypeArcCode)
+		self.arrayCrossings = numpy.empty((0,), dtype=self.datatypeCrossings)
 
 	def makeArray(self) -> None:
 		"""Convert from Python `dict` (*dict*ionary) to NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array)."""
-		shape = ShapeArray(length=len(self.dictionaryMeanders), indices=self.indicesMeanders)
-		self.arrayMeanders = numpy.zeros(shape, dtype=self.datatypeArcCode)
-		self.arrayMeanders[self.slicerArcCode] = list(self.dictionaryMeanders.keys())
-		self.arrayMeanders[self.slicerCrossings] = list(self.dictionaryMeanders.values())
-		self.bitWidth = int(self.arrayMeanders[self.slicerArcCode].max()).bit_length()
+		self.arrayArcCodes = numpy.array(list(self.dictionaryMeanders.keys()), dtype=self.datatypeArcCode)
+		self.arrayCrossings = numpy.array(list(self.dictionaryMeanders.values()), dtype=self.datatypeCrossings)
+		self.bitWidth = int(self.arrayArcCodes.max()).bit_length()
 		self.dictionaryMeanders = {}

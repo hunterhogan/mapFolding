@@ -327,11 +327,11 @@ if __name__ == '__main__':
 	"""
 
 if __name__ == '__main__':
-	state = transitionOnGroupsOfFolds(MapFoldingState((1,27)))
+	state = transitionOnGroupsOfFolds(MapFoldingState((2,5)))
 	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
-	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
+	spices = SpicesJobNumba(useNumbaProgressBar=True, parametersNumba=parametersNumbaLight)
 	makeJobNumba(aJob, spices)
 
 # TODO Improve this module with lessons learned in `makeJobTheorem2codon`.

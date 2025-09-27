@@ -31,8 +31,8 @@ def countBigInt(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
     compute each `arcCode` one at a time, and compute each type of analysis one at a time.
     """
     dictionaryBitGroups: dict[tuple[int, int], int] = {}
-    while state.kOfMatrix > 0 and areIntegersWide(state):
-        state.kOfMatrix -= 1
+    while state.boundary > 0 and areIntegersWide(state):
+        state.boundary -= 1
         dictionaryBitGroups = outfitDictionaryBitGroups(state)
         state.dictionaryMeanders = {}
         for (bitsAlpha, bitsZulu), crossings in dictionaryBitGroups.items():

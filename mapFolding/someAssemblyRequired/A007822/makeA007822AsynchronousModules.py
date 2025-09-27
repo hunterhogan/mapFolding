@@ -17,7 +17,7 @@ identifier_getAsymmetricFoldsTotal = 'getAsymmetricFoldsTotal'
 identifier_initializeConcurrencyManager = 'initializeConcurrencyManager'
 identifier_processCompletedFutures = '_processCompletedFutures'
 
-astExprCall_initializeConcurrencyManager: ast.Expr = Make.Expr(Make.Call(Make.Name(identifier_initializeConcurrencyManager)))
+astExprCall_initializeConcurrencyManager: ast.Expr = Make.Expr(Make.Call(Make.Name(identifier_initializeConcurrencyManager), listParameters=[Make.Name('maxWorkers')]))
 AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
 	[Make.Attribute(Make.Name(identifierDataclass), identifierCounting, context=Make.Store())]
 	, value=Make.Call(Make.Name(identifier_getAsymmetricFoldsTotal))
@@ -66,6 +66,8 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, moduleIdentifier: str, c
 		).captureLastMatch(astModule))
 
 	astFunctionDef_doTheNeedful.body.insert(0, astExprCall_initializeConcurrencyManager)
+	astFunctionDef_doTheNeedful.args.args.append(Make.arg('maxWorkers', Make.BitOr.join([Make.Name('int'), Make.Constant(None)])))
+	astFunctionDef_doTheNeedful.args.defaults.append(Make.Constant(None))
 
 	NodeChanger(
 		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableDispatcher))
@@ -190,8 +192,8 @@ def _makeA007822AsynchronousModules() -> None:
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', None, logicalPathInfixA007822, None)
 
-	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = numbaOnTheorem2(astModule, 'asynchronousNumba', None, logicalPathInfixA007822, None)
+	# astModule = parsePathFilename2astModule(pathFilename)
+	# pathFilename = numbaOnTheorem2(astModule, 'asynchronousNumba', None, logicalPathInfixA007822, None)
 
 if __name__ == '__main__':
 	_makeA007822AsynchronousModules()

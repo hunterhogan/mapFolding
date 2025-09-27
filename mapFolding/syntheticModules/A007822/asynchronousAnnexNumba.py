@@ -61,9 +61,7 @@ def _filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> int:
 def _go(leafBelow: Array1DLeavesTotal) -> None:
 	queueFutures.put_nowait(leafBelow.copy())
 
-
-# @numba.jit(numba.int64(numba.int64[:]), cache=True, error_model='numpy', fastmath=True)
-def filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> int:  # non-blocking submission
+def filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> int:
 	# Must not block caller; enqueue for background processing
 	_go(leafBelow)
 	return 60  # GO
@@ -77,9 +75,6 @@ def _stop() -> DatatypeFoldsTotal:
 		thread.join()
 	return groupsOfFoldsTotal
 
-
-
-@numba.jit(numba.uint64(), cache=True, error_model='numpy', fastmath=True, forceobj=True)
 def getAsymmetricFoldsTotal() -> DatatypeFoldsTotal:
 	total = _stop()
 	return total

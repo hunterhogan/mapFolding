@@ -661,7 +661,7 @@ dictionary_nToDictionaryArcCode: dict[int, dict[int, int]] = {
 			0xffffffffffffffffffffffffff: 1}
 }
 
-A000682_n_k_buckets: dict[int, dict[int, int]] = {2: {1: 1},
+A000682_n_boundary_buckets: dict[int, dict[int, int]] = {2: {1: 1},
  3: {2: 3, 1: 2},
  4: {3: 4, 2: 7, 1: 2},
  5: {4: 6, 3: 11, 2: 9, 1: 3},

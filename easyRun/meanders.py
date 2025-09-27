@@ -35,27 +35,26 @@ if __name__ == '__main__':
 		sys.stdout.write(f"\n{oeisID}\n")
 
 		"""TODO Identifiers. improve
-		kOfMatrix: I don't think the paper uses 'k'. step?
+		"generate up to four targets."
+		1. Adding a new loop.
+		2. Dragging up a loop end.
+		3. Dragging down a loop end.
+		4. Connect ends across the line.
 
 		ReidemeisterMove?
 		flipTheExtra_0b1AsUfunc: what is extra?
-
-		"strand" is an interesting word.
 		"""
 
-		# for n in range(44,45):
+		nList: list[int] = []
+		nList.extend(range(2, 10))
+		# nList.extend(range(2, 28))
+		nList.extend(range(28,33))
+		# nList.extend(range(33,38))
+		# nList.extend(range(38,43))
+		# nList.extend(range(43,45))
+		# nList.extend(range(47,57))
 
-		# for n in range(43,56):
-		# for n in range(46,47):
-		# for n in range(43,47):
-		# for n in range(38,43):
-		# for n in range(28,38):
-		# for n in [*range(2, 10), *range(28,33)]:
-		# for n in range(28,33):
-		# for n in range(2, 28):
-		# for n in range(2, 10):
-		for n in range(1, 6):
-
+		for n in nList:
 			gc.collect()
 			timeStart = time.perf_counter()
 			countTotal = NOTcountingFolds(oeisID, n, flow)
@@ -66,6 +65,6 @@ if __name__ == '__main__':
 
 r"""
 deactivate && C:\apps\mapFolding\.vtail\Scripts\activate.bat && title good && cls
-title running && py Z0Z_aOFn.py && title I'm done || title Error
+title running && start "meanders" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\meanders.py && title I'm done || title Error
 
 """

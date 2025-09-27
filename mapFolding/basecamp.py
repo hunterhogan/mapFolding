@@ -181,59 +181,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	# Flow control until I can figure out a good way ---------------------------------
 
-	if flow == 'daoOfMapFolding':
-		from mapFolding.dataBaskets import MapFoldingState
-		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-		from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
-		mapFoldingState = doTheNeedful(mapFoldingState)
-		foldsTotal = mapFoldingState.foldsTotal
-
-	elif flow == 'numba':
-		from mapFolding.dataBaskets import MapFoldingState
-		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-		from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
-		mapFoldingState = doTheNeedful(mapFoldingState)
-		foldsTotal = mapFoldingState.foldsTotal
-
-	elif flow == 'theorem2' and any(dimension > 2 for dimension in mapShape):
-		from mapFolding.dataBaskets import MapFoldingState
-		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-		from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
-		mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-		from mapFolding.syntheticModules.theorem2 import count
-		mapFoldingState = count(mapFoldingState)
-
-		foldsTotal = mapFoldingState.foldsTotal
-
-	elif (flow == 'theorem2Numba' or taskDivisions == 0) and any(dimension > 2 for dimension in mapShape):
-		from mapFolding.dataBaskets import MapFoldingState
-		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-		from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
-		mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-		from mapFolding.syntheticModules.dataPacking import sequential
-		mapFoldingState = sequential(mapFoldingState)
-
-		foldsTotal = mapFoldingState.foldsTotal
-
-	elif flow == 'theorem2Trimmed' and any(dimension > 2 for dimension in mapShape):
-		from mapFolding.dataBaskets import MapFoldingState
-		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-		from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
-		mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-		from mapFolding.syntheticModules.theorem2Trimmed import count
-		mapFoldingState = count(mapFoldingState)
-
-		foldsTotal = mapFoldingState.foldsTotal
-
-	elif taskDivisions > 1:
+	if taskDivisions > 1:
 		from mapFolding.dataBaskets import ParallelMapFoldingState
 		mapFoldingParallelState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
@@ -246,9 +194,47 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		from mapFolding.dataBaskets import MapFoldingState
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-		from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
-		mapFoldingState = doTheNeedful(mapFoldingState)
-		foldsTotal = mapFoldingState.foldsTotal
+		if flow == 'daoOfMapFolding':
+			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+			mapFoldingState = doTheNeedful(mapFoldingState)
+			foldsTotal = mapFoldingState.foldsTotal
+
+		elif flow == 'numba':
+			from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
+			mapFoldingState = doTheNeedful(mapFoldingState)
+			foldsTotal = mapFoldingState.foldsTotal
+
+		elif flow == 'theorem2' and any(dimension > 2 for dimension in mapShape):
+			from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+			mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+			from mapFolding.syntheticModules.theorem2 import count
+			mapFoldingState = count(mapFoldingState)
+
+			foldsTotal = mapFoldingState.foldsTotal
+
+		elif (flow == 'theorem2Numba' or taskDivisions == 0) and any(dimension > 2 for dimension in mapShape):
+			from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+			mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+			from mapFolding.syntheticModules.dataPacking import sequential
+			mapFoldingState = sequential(mapFoldingState)
+
+			foldsTotal = mapFoldingState.foldsTotal
+
+		elif flow == 'theorem2Trimmed' and any(dimension > 2 for dimension in mapShape):
+			from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+			mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+			from mapFolding.syntheticModules.theorem2Trimmed import count
+			mapFoldingState = count(mapFoldingState)
+
+			foldsTotal = mapFoldingState.foldsTotal
+
+		else:
+			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+			mapFoldingState = doTheNeedful(mapFoldingState)
+			foldsTotal = mapFoldingState.foldsTotal
 
 	# Follow memorialization instructions ---------------------------------------------
 
@@ -352,31 +338,24 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 			mapShape: tuple[Literal[1], int] = (1, 2 * oeis_n)
 			match flow:
 				case 'asynchronous':
+					from mapFolding import setProcessorLimit
+					concurrencyLimit: int = setProcessorLimit(CPUlimit)
+
 					from mapFolding.dataBaskets import MapFoldingState
 					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-					from mapFolding import setProcessorLimit
-					concurrencyLimit = setProcessorLimit(CPUlimit)
 
 					from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
-					mapFoldingState = doTheNeedful(mapFoldingState)
+					mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
 
 				case 'asynchronousNumba':
-					from mapFolding.dataBaskets import MapFoldingState
-					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-					from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
-					mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
 					from mapFolding import setProcessorLimit
 					concurrencyLimit = setProcessorLimit(CPUlimit)
 
-					from mapFolding.syntheticModules.A007822.asynchronousAnnex import initializeConcurrencyManager
-					initializeConcurrencyManager(maxWorkers=concurrencyLimit, groupsOfFolds=mapFoldingState.groupsOfFolds)
-					mapFoldingState.groupsOfFolds = 0
+					from mapFolding.dataBaskets import MapFoldingState
+					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 
-					from mapFolding.syntheticModules.A007822.asynchronousNumba import count
-					mapFoldingState = count(mapFoldingState)
+					from mapFolding.syntheticModules.A007822.asynchronousNumba import doTheNeedful
+					mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
 
 				case 'asynchronousTrimmed':
 					from mapFolding.dataBaskets import MapFoldingState

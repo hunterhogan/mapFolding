@@ -33,8 +33,8 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
     """
     dictionaryBitGroups: dict[tuple[int, int], int] = {}
 
-    while state.kOfMatrix > 0:
-        state.kOfMatrix -= 1
+    while state.boundary > 0:
+        state.boundary -= 1
 
         dictionaryBitGroups = outfitDictionaryBitGroups(state)
         state.dictionaryMeanders = {}

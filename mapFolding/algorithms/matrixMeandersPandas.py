@@ -15,12 +15,12 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	Parameters
 	----------
 	state : MatrixMeandersState
-		The algorithm state containing current `kOfMatrix`, `dictionaryMeanders`, and thresholds.
+		The algorithm state containing current `boundary`, `dictionaryMeanders`, and thresholds.
 
 	Returns
 	-------
 	state : MatrixMeandersState
-		Updated state with new `kOfMatrix` and `dictionaryMeanders`.
+		Updated state with new `boundary` and `dictionaryMeanders`.
 	"""
 	dataframeAnalyzed = pandas.DataFrame({
 		'analyzed': pandas.Series(name='analyzed', data=state.dictionaryMeanders.keys(), copy=False, dtype=state.datatypeArcCode)
@@ -29,7 +29,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	)
 	state.dictionaryMeanders.clear()
 
-	while (state.kOfMatrix > 0 and not areIntegersWide(state, dataframe=dataframeAnalyzed)):
+	while (state.boundary > 0 and not areIntegersWide(state, dataframe=dataframeAnalyzed)):
 
 		def aggregateArcCodes()  -> None:
 			nonlocal dataframeAnalyzed
@@ -262,7 +262,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			if indexStopAnalyzed > state.indexTarget:
 				if len(dataframeAnalyzed.index) < indexStopAnalyzed:
-					warn(f"Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to {indexStopAnalyzed=}; n={state.n}, {state.kOfMatrix=}.", stacklevel=2)
+					warn(f"Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to {indexStopAnalyzed=}; n={state.n}, {state.boundary=}.", stacklevel=2)
 					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
 
 				dataframeAnalyzed.loc[state.indexTarget:indexStopAnalyzed - 1, ['analyzed', 'crossings']] = (
@@ -292,7 +292,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			}, index=pandas.RangeIndex(length), columns=['analyzed', 'crossings'], dtype=state.datatypeArcCode # pyright: ignore[reportUnknownArgumentType]
 		)
 
-		state.kOfMatrix -= 1
+		state.boundary -= 1
 
 		state.indexTarget = 0
 
@@ -313,7 +313,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		aggregateArcCodes()
 
 		if state.n >= 45:  # for data collection
-			print(state.n, state.kOfMatrix+1, state.indexTarget, sep=',')  # noqa: T201
+			print(state.n, state.boundary+1, state.indexTarget, sep=',')  # noqa: T201
 
 	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()
 	return state
@@ -340,7 +340,7 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 	https://oeis.org/A000682
 	https://oeis.org/A005316
 	"""
-	while state.kOfMatrix > 0:
+	while state.boundary > 0:
 		if areIntegersWide(state):
 			state = countBigInt(state)
 		else:
