@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 - `numpy.unique_inverse` uses a ton of memory, but I've failed to find a better way. BUT I might be able to improve
 	`aggregateAnalyzed` now that `arrayArcCodes` is a single axis.
 - For analyzeBitsAlpha and analyzeBitsZulu, find an equivalent formula that does not require a secondary stack.
-- Analyze aligned requires a ton of memory. By analyzing it before the other three analyses (therefore `arrayAnalyzed` is empty)
+- analyzeAligned requires a ton of memory. By analyzing it before the other three analyses (therefore `arrayAnalyzed` is empty)
 	and using `makeStorage`, I've offset much of the usage, but I don't have confidence it's a good flow.
 
 To mitigate memory problems:

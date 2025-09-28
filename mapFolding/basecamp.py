@@ -259,7 +259,7 @@ def A000682(n: int, flow: str | None = None) -> int:
 
 	oeisID = 'A000682'
 
-	kOfMatrix: int = n - 1
+	boundary: int = n - 1
 
 	if n == 1:
 		return 1
@@ -269,14 +269,14 @@ def A000682(n: int, flow: str | None = None) -> int:
 		arcCode = 1
 	listCurveLocations: list[int] = [(arcCode << 1) | arcCode]
 
-	MAXIMUMarcCode: int = 1 << (2 * kOfMatrix + 4)
+	MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
 	while listCurveLocations[-1] < MAXIMUMarcCode:
 		arcCode = (arcCode << 4) | 0b101 # == arcCode * 2**4 + 5
 		listCurveLocations.append((arcCode << 1) | arcCode)
 
 	dictionaryMeanders=dict.fromkeys(listCurveLocations, 1)
 
-	state = State(n, oeisID, kOfMatrix, dictionaryMeanders)
+	state = State(n, oeisID, boundary, dictionaryMeanders)
 
 	return doTheNeedful(state) # pyright: ignore[reportArgumentType]
 
@@ -296,14 +296,14 @@ def A005316(n: int, flow: str | None = None) -> int:
 
 	oeisID = 'A005316'
 
-	kOfMatrix: int = n - 1
+	boundary: int = n - 1
 
 	if n & 0b1:
 		dictionaryMeanders: dict[int, int] = {15: 1}
 	else:
 		dictionaryMeanders = {22: 1}
 
-	state = State(n, oeisID, kOfMatrix, dictionaryMeanders)
+	state = State(n, oeisID, boundary, dictionaryMeanders)
 
 	return doTheNeedful(state) # pyright: ignore[reportArgumentType]
 

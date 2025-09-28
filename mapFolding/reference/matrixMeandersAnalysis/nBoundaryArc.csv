@@ -1,4 +1,4 @@
-oeisID,n,k,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
+oeisID,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
 A000682,2,2,0,3,10,1
 A000682,2,1,1,1,4,1
 A000682,3,3,0,3,12,1

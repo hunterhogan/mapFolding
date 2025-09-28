@@ -36,15 +36,15 @@ def makeCountBigInt(astModule: ast.Module, moduleIdentifier: str, callableIdenti
 			, Grab.nameAttribute(Then.replaceWith(identifierDataclassNumPy))
 		).visit(astModule)
 
-	# while (state.kOfMatrix > 0 and areIntegersWide(state)):  # noqa: ERA001
+	# while (state.boundary > 0 and areIntegersWide(state)):  # noqa: ERA001
 	Call_areIntegersWide: ast.Call = Make.Call(Make.Name('areIntegersWide'), listParameters=[Make.Name('state')])
 	astCompare: ast.Compare = raiseIfNone(NodeTourist(
-		findThis=IfThis.isAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'kOfMatrix')
+		findThis=IfThis.isAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'boundary')
 		, doThat=Then.extractIt
 	).captureLastMatch(astModule))
 	newTest: ast.expr = Make.And.join([astCompare, Call_areIntegersWide])
 
-	NodeChanger(IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'kOfMatrix')
+	NodeChanger(IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'boundary')
 			, Grab.testAttribute(Then.replaceWith(newTest))
 	).visit(astModule)
 

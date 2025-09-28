@@ -24,9 +24,9 @@ if __name__ == '__main__':
 	if sys.version_info >= (3, 14):
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
-	flow = 'matrixMeanders'
 	flow = 'matrixNumPy'
 	flow = 'matrixPandas'
+	flow = 'matrixMeanders'
 
 	for oeisID in [
 			'A005316',
@@ -41,14 +41,13 @@ if __name__ == '__main__':
 		3. Dragging down a loop end.
 		4. Connect ends across the line.
 
-		ReidemeisterMove?
 		flipTheExtra_0b1AsUfunc: what is extra?
 		"""
 
 		nList: list[int] = []
-		nList.extend(range(2, 10))
-		# nList.extend(range(2, 28))
-		nList.extend(range(28,33))
+		# nList.extend(range(2, 10))
+		nList.extend(range(2, 28))
+		# nList.extend(range(28,33))
 		# nList.extend(range(33,38))
 		# nList.extend(range(38,43))
 		# nList.extend(range(43,45))
