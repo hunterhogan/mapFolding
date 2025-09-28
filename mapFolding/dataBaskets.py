@@ -22,9 +22,9 @@ access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
 	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	getConnectionGraph, getLeavesTotal, makeDataContainer, ShapeArray, ShapeSlicer)
+	getConnectionGraph, getLeavesTotal, makeDataContainer)
 from numpy.typing import NDArray
-from typing import Final, TypeAlias
+from typing import TypeAlias
 import dataclasses
 import numpy
 
