@@ -1,4 +1,4 @@
-from astToolkit import extractFunctionDef, Make  # noqa: D100
+from astToolkit import extractFunctionDef, identifierDotAttribute, Make  # noqa: D100
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import (
 	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT,
@@ -7,7 +7,7 @@ import ast
 
 identifierDataclass: str = identifierDataclassInstanceDEFAULT
 identifierCounting: str = identifierCountingDEFAULT
-logicalPathInfixA007822: str = logicalPathInfixDEFAULT + '.A007822'
+logicalPathInfixA007822: identifierDotAttribute = logicalPathInfixDEFAULT + '.A007822'
 sourceCallableDispatcherA007822: str = identifierCallableSourceDispatcherDEFAULT
 sourceCallableIdentifierA007822: str = identifierCallableSourceDEFAULT
 

@@ -1,4 +1,5 @@
 from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
 
 def count(state: MapFoldingState) -> MapFoldingState:
     while state.leaf1ndex > 4:
@@ -69,5 +70,6 @@ def count(state: MapFoldingState) -> MapFoldingState:
     return state
 
 def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
+    state = transitionOnGroupsOfFolds(state)
     state = count(state)
     return state

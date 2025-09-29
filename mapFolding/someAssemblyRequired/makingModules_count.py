@@ -10,9 +10,10 @@ from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParame
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT, IfThis, ShatteredDataclass)
+	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT, IfThis,
+	ShatteredDataclass)
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import astExprCall_filterAsymmetricFoldsLeafBelow
-from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getPathFilename
+from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getLogicalPath, getPathFilename
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
@@ -21,6 +22,10 @@ from pathlib import PurePath
 from typing import cast
 import ast
 
+# TODO `logicalPathInfix: PathLike[str] | PurePath | identifierDotAttribute`
+# Iqbal says, "Hunter, you are of two minds about this parameter."
+# A `PurePath` fragment would look like `syntheticModules\A007822`, but an `identifierDotAttribute` fragment would look like
+# `syntheticModules.A007822`. Those are not fungible.
 def makeDaoOfMapFoldingNumba(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate Numba-optimized sequential implementation of map folding algorithm.
 
@@ -121,6 +126,11 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 		If `sourceCallableDispatcher` is provided.
 
 	"""
+	identifierCallableInitializeDataclassHARDCODED = 'transitionOnGroupsOfFolds'
+	identifierModuleInitializeDataclassHARDCODED = 'initializeState'
+	identifierCallableInitializeDataclass = identifierCallableInitializeDataclassHARDCODED
+	identifierModuleInitializeDataclass = identifierModuleInitializeDataclassHARDCODED
+
 	sourceCallableIdentifier = identifierCallableSourceDEFAULT
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = callableIdentifier or sourceCallableIdentifier
@@ -170,26 +180,24 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 
-	# Transform dispatcher function if requested
 	if sourceCallableDispatcher is not None:
 		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
-		
-		# Add transitionOnGroupsOfFolds call before the main function call
-		initializeStateCall = Make.Assign([Make.Name('state')], value=Make.Call(Make.Name('transitionOnGroupsOfFolds'), [Make.Name('state')]))
-		
+
 		# Update any calls to the original function name with the new target function name
 		NodeChanger(
 			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(identifierCallableSourceDEFAULT)))
 			, doThat = Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
 		).visit(ingredientsFunctionDispatcher.astFunctionDef)
-		
+
+		AssignInitializedDataclass: ast.Assign = Make.Assign([Make.Name(dataclassInstanceIdentifier)], value=Make.Call(Make.Name(identifierCallableInitializeDataclass), [Make.Name(dataclassInstanceIdentifier)]))
+
 		# Insert the transitionOnGroupsOfFolds call at the beginning of the function
-		ingredientsFunctionDispatcher.astFunctionDef.body.insert(0, initializeStateCall)
-		
-		# Add the required import
-		ingredientsFunctionDispatcher.imports.addImportFrom_asStr('mapFolding.syntheticModules.initializeState', 'transitionOnGroupsOfFolds')
-		
+		ingredientsFunctionDispatcher.astFunctionDef.body.insert(0, AssignInitializedDataclass)
+
+		dotModule: identifierDotAttribute = getLogicalPath(packageSettings.identifierPackage, str(logicalPathInfix), identifierModuleInitializeDataclass)
+		ingredientsFunctionDispatcher.imports.addImportFrom_asStr(dotModule, identifierCallableInitializeDataclass)
+
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
