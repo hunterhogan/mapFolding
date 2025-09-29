@@ -10,9 +10,10 @@ from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParame
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT, IfThis, ShatteredDataclass)
+	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT, IfThis,
+	ShatteredDataclass)
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import astExprCall_filterAsymmetricFoldsLeafBelow
-from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getPathFilename
+from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getLogicalPath, getPathFilename
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
@@ -21,6 +22,10 @@ from pathlib import PurePath
 from typing import cast
 import ast
 
+# TODO `logicalPathInfix: PathLike[str] | PurePath | identifierDotAttribute`
+# Iqbal says, "Hunter, you are of two minds about this parameter."
+# A `PurePath` fragment would look like `syntheticModules\A007822`, but an `identifierDotAttribute` fragment would look like
+# `syntheticModules.A007822`. Those are not fungible.
 def makeDaoOfMapFoldingNumba(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate Numba-optimized sequential implementation of map folding algorithm.
 
@@ -121,6 +126,11 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 		If `sourceCallableDispatcher` is provided.
 
 	"""
+	identifierCallableInitializeDataclassHARDCODED = 'transitionOnGroupsOfFolds'
+	identifierModuleInitializeDataclassHARDCODED = 'initializeState'
+	identifierCallableInitializeDataclass = identifierCallableInitializeDataclassHARDCODED
+	identifierModuleInitializeDataclass = identifierModuleInitializeDataclassHARDCODED
+
 	sourceCallableIdentifier = identifierCallableSourceDEFAULT
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = callableIdentifier or sourceCallableIdentifier
@@ -170,36 +180,25 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 
-	# Generate dispatcher function if requested
 	if sourceCallableDispatcher is not None:
-		# Create the dispatcher function body statements
-		dispatcherBody = [
-			# state = transitionOnGroupsOfFolds(state)
-			Make.Assign([Make.Name('state')], value=Make.Call(Make.Name('transitionOnGroupsOfFolds'), [Make.Name('state')])),
-			# state = count(state) 
-			Make.Assign([Make.Name('state')], value=Make.Call(Make.Name(ingredientsFunction.astFunctionDef.name), [Make.Name('state')])),
-			# return state
-			Make.Return(Make.Name('state'))
-		]
-		
-		# Create the dispatcher function
-		dispatcherFunctionDef = Make.FunctionDef(
-			name=sourceCallableDispatcher,
-			argumentSpecification=Make.arguments([Make.arg('state', annotation=Make.Name('MapFoldingState'))]),
-			body=dispatcherBody,
-			returns=Make.Name('MapFoldingState')
-		)
-		
-		# Create IngredientsFunction for the dispatcher
-		dispatcherLedger = LedgerOfImports()
-		# Add the imports
-		dispatcherLedger.addImportFrom_asStr('mapFolding.dataBaskets', 'MapFoldingState')
-		dispatcherLedger.addImportFrom_asStr('mapFolding.syntheticModules.initializeState', 'transitionOnGroupsOfFolds')
-		
-		dispatcherIngredientsFunction = IngredientsFunction(dispatcherFunctionDef, dispatcherLedger)
-		
-		# Add the dispatcher to the module
-		ingredientsModule.appendIngredientsFunction(dispatcherIngredientsFunction)
+		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
+		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
+
+		# Update any calls to the original function name with the new target function name
+		NodeChanger(
+			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(identifierCallableSourceDEFAULT)))
+			, doThat = Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
+		).visit(ingredientsFunctionDispatcher.astFunctionDef)
+
+		AssignInitializedDataclass: ast.Assign = Make.Assign([Make.Name(dataclassInstanceIdentifier)], value=Make.Call(Make.Name(identifierCallableInitializeDataclass), [Make.Name(dataclassInstanceIdentifier)]))
+
+		# Insert the transitionOnGroupsOfFolds call at the beginning of the function
+		ingredientsFunctionDispatcher.astFunctionDef.body.insert(0, AssignInitializedDataclass)
+
+		dotModule: identifierDotAttribute = getLogicalPath(packageSettings.identifierPackage, str(logicalPathInfix), identifierModuleInitializeDataclass)
+		ingredientsFunctionDispatcher.imports.addImportFrom_asStr(dotModule, identifierCallableInitializeDataclass)
+
+		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
 
@@ -309,24 +308,6 @@ def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
-	
-	# Preserve dispatcher function if it exists in the input module
-	from astToolkit import extractFunctionDef
-	try:
-		if sourceCallableDispatcher is None:
-			sourceCallableDispatcher = identifierCallableSourceDispatcherDEFAULT
-		
-		dispatcherFunctionDef = extractFunctionDef(astModule, sourceCallableDispatcher)
-		if dispatcherFunctionDef is not None:
-			# Create IngredientsFunction for the dispatcher
-			dispatcherLedger = LedgerOfImports(astModule)
-			dispatcherIngredientsFunction = IngredientsFunction(dispatcherFunctionDef, dispatcherLedger)
-			# Add the dispatcher to the module
-			ingredientsModule.appendIngredientsFunction(dispatcherIngredientsFunction)
-	except Exception:
-		# If dispatcher doesn't exist in input module, that's fine
-		pass
-	
 	ingredientsModule.removeImportFromModule('numpy')
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
