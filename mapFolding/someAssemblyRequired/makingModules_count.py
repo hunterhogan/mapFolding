@@ -175,11 +175,20 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 		
+		# Add transitionOnGroupsOfFolds call before the main function call
+		initializeStateCall = Make.Assign([Make.Name('state')], value=Make.Call(Make.Name('transitionOnGroupsOfFolds'), [Make.Name('state')]))
+		
 		# Update any calls to the original function name with the new target function name
 		NodeChanger(
 			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(identifierCallableSourceDEFAULT)))
 			, doThat = Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
 		).visit(ingredientsFunctionDispatcher.astFunctionDef)
+		
+		# Insert the transitionOnGroupsOfFolds call at the beginning of the function
+		ingredientsFunctionDispatcher.astFunctionDef.body.insert(0, initializeStateCall)
+		
+		# Add the required import
+		ingredientsFunctionDispatcher.imports.addImportFrom_asStr('mapFolding.syntheticModules.initializeState', 'transitionOnGroupsOfFolds')
 		
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
 

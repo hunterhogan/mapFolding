@@ -50,7 +50,7 @@ def count(state: MapFoldingState) -> MapFoldingState:
         state.groupsOfFolds *= 2
     return state
 
-def doTheNeedful(state: MapFoldingState, /) -> MapFoldingState:
+def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
     state = transitionOnGroupsOfFolds(state)
     state = count(state)
     return state
