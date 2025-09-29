@@ -1,5 +1,6 @@
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.syntheticModules.A007822.asynchronousAnnex import filterAsymmetricFolds, getAsymmetricFoldsTotal
+from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 
 def count(state: MapFoldingState) -> MapFoldingState:
     while state.leaf1ndex > 4:
@@ -50,4 +51,9 @@ def count(state: MapFoldingState) -> MapFoldingState:
         state.groupsOfFolds = getAsymmetricFoldsTotal()
         state.groupsOfFolds *= 2
     state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
+    return state
+
+def doTheNeedful(state: MapFoldingState, /) -> MapFoldingState:
+    state = transitionOnGroupsOfFolds(state)
+    state = count(state)
     return state

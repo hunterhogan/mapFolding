@@ -2,7 +2,7 @@
 from astToolkit import Be, extractFunctionDef, Grab, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import IfThis, logicalPathInfixAlgorithmDEFAULT
+from mapFolding.someAssemblyRequired import identifierCallableSourceDispatcherDEFAULT, IfThis, logicalPathInfixAlgorithmDEFAULT
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
 	A007822adjustFoldsTotal, astExprCall_filterAsymmetricFoldsDataclass, identifier_filterAsymmetricFolds,
 	identifierCounting, identifierDataclass, logicalPathInfixA007822, sourceCallableDispatcherA007822,
@@ -187,8 +187,7 @@ def _makeA007822AsynchronousModules() -> None:
 	pathFilename = addSymmetryCheckAsynchronous(astModule, 'asynchronous', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
 
 	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, moduleIdentifier='asynchronous')
-	# TODO theorem2 dispatcher
-	pathFilename = makeTheorem2(astModule, 'asynchronousTheorem2', None, logicalPathInfixA007822, None)
+	pathFilename = makeTheorem2(astModule, 'asynchronousTheorem2', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', None, logicalPathInfixA007822, None)

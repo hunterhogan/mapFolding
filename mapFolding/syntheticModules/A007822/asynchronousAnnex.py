@@ -1,9 +1,12 @@
-from concurrent.futures import Future as ConcurrentFuture, ThreadPoolExecutor
-from hunterMakesPy import raiseIfNone
-from mapFolding import Array1DLeavesTotal
+from concurrent.futures import Future as ConcurrentFuture
+from concurrent.futures import ThreadPoolExecutor
 from queue import Empty, Queue
 from threading import Thread
+
 import numpy
+from hunterMakesPy import raiseIfNone
+
+from mapFolding import Array1DLeavesTotal
 
 concurrencyManager = None
 groupsOfFoldsTotal: int = 0

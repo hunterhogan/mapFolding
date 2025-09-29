@@ -1,5 +1,6 @@
 from mapFolding.dataBaskets import MapFoldingState
 
+
 def filterAsymmetricFolds(state: MapFoldingState) -> MapFoldingState:
     state.indexLeaf = 0
     leafConnectee = 0

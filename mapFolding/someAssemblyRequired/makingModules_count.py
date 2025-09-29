@@ -10,7 +10,7 @@ from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParame
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDEFAULT, identifierCountingDEFAULT, IfThis, ShatteredDataclass)
+	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT, IfThis, ShatteredDataclass)
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import astExprCall_filterAsymmetricFoldsLeafBelow
 from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getPathFilename
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
@@ -170,10 +170,36 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 
-	# TODO theorem2 dispatcher
+	# Generate dispatcher function if requested
 	if sourceCallableDispatcher is not None:
-		message = 'sourceCallableDispatcher is not implemented yet'
-		raise NotImplementedError(message)
+		# Create the dispatcher function body statements
+		dispatcherBody = [
+			# state = transitionOnGroupsOfFolds(state)
+			Make.Assign([Make.Name('state')], value=Make.Call(Make.Name('transitionOnGroupsOfFolds'), [Make.Name('state')])),
+			# state = count(state) 
+			Make.Assign([Make.Name('state')], value=Make.Call(Make.Name(ingredientsFunction.astFunctionDef.name), [Make.Name('state')])),
+			# return state
+			Make.Return(Make.Name('state'))
+		]
+		
+		# Create the dispatcher function
+		dispatcherFunctionDef = Make.FunctionDef(
+			name=sourceCallableDispatcher,
+			argumentSpecification=Make.arguments([Make.arg('state', annotation=Make.Name('MapFoldingState'))]),
+			body=dispatcherBody,
+			returns=Make.Name('MapFoldingState')
+		)
+		
+		# Create IngredientsFunction for the dispatcher
+		dispatcherLedger = LedgerOfImports()
+		# Add the imports
+		dispatcherLedger.addImportFrom_asStr('mapFolding.dataBaskets', 'MapFoldingState')
+		dispatcherLedger.addImportFrom_asStr('mapFolding.syntheticModules.initializeState', 'transitionOnGroupsOfFolds')
+		
+		dispatcherIngredientsFunction = IngredientsFunction(dispatcherFunctionDef, dispatcherLedger)
+		
+		# Add the dispatcher to the module
+		ingredientsModule.appendIngredientsFunction(dispatcherIngredientsFunction)
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
 
@@ -283,6 +309,24 @@ def trimTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
+	
+	# Preserve dispatcher function if it exists in the input module
+	from astToolkit import extractFunctionDef
+	try:
+		if sourceCallableDispatcher is None:
+			sourceCallableDispatcher = identifierCallableSourceDispatcherDEFAULT
+		
+		dispatcherFunctionDef = extractFunctionDef(astModule, sourceCallableDispatcher)
+		if dispatcherFunctionDef is not None:
+			# Create IngredientsFunction for the dispatcher
+			dispatcherLedger = LedgerOfImports(astModule)
+			dispatcherIngredientsFunction = IngredientsFunction(dispatcherFunctionDef, dispatcherLedger)
+			# Add the dispatcher to the module
+			ingredientsModule.appendIngredientsFunction(dispatcherIngredientsFunction)
+	except Exception:
+		# If dispatcher doesn't exist in input module, that's fine
+		pass
+	
 	ingredientsModule.removeImportFromModule('numpy')
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
