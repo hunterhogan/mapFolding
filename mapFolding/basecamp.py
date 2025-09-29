@@ -1,7 +1,6 @@
 """Unified interface for map folding computation."""
 
 from collections.abc import Sequence
-from functools import cache
 from mapFolding import (
 	getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly, validateListDimensions)
 from os import PathLike
@@ -24,6 +23,7 @@ algorithms directory
 	an enhanced version of `oeisIDfor_n` will be a stable interface for calling by ID and n
 
 General flow structure
+	basecamp should call `doTheNeedful` instead of `count` and `doTheNeedful` should handle things like `initializeState`.
 	doTheNeedful
 		specific to that version of that algorithm
 		abstracts the API for that algorithm, so that algorithm (such as multidimensional map folding) has a stable interface
@@ -165,7 +165,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		from mapFolding.beDRY import getLeavesTotal, getTaskDivisions, setProcessorLimit
 		concurrencyLimit: int = setProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
 		leavesTotal: int = getLeavesTotal(mapShape)
-		taskDivisions = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
+		taskDivisions: int = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
 		del leavesTotal
 	else:
 		concurrencyLimit = 1
@@ -197,21 +197,18 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		if flow == 'daoOfMapFolding':
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 			mapFoldingState = doTheNeedful(mapFoldingState)
-			foldsTotal = mapFoldingState.foldsTotal
 
 		elif flow == 'numba':
 			from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
 			mapFoldingState = doTheNeedful(mapFoldingState)
-			foldsTotal = mapFoldingState.foldsTotal
 
 		elif flow == 'theorem2' and any(dimension > 2 for dimension in mapShape):
+			# TODO theorem2 dispatcher
 			from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 			mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
 
 			from mapFolding.syntheticModules.theorem2 import count
 			mapFoldingState = count(mapFoldingState)
-
-			foldsTotal = mapFoldingState.foldsTotal
 
 		elif (flow == 'theorem2Numba' or taskDivisions == 0) and any(dimension > 2 for dimension in mapShape):
 			from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -220,8 +217,6 @@ def countFolds(listDimensions: Sequence[int] | None = None
 			from mapFolding.syntheticModules.dataPacking import sequential
 			mapFoldingState = sequential(mapFoldingState)
 
-			foldsTotal = mapFoldingState.foldsTotal
-
 		elif flow == 'theorem2Trimmed' and any(dimension > 2 for dimension in mapShape):
 			from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 			mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
@@ -229,12 +224,11 @@ def countFolds(listDimensions: Sequence[int] | None = None
 			from mapFolding.syntheticModules.theorem2Trimmed import count
 			mapFoldingState = count(mapFoldingState)
 
-			foldsTotal = mapFoldingState.foldsTotal
-
 		else:
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 			mapFoldingState = doTheNeedful(mapFoldingState)
-			foldsTotal = mapFoldingState.foldsTotal
+
+		foldsTotal = mapFoldingState.foldsTotal
 
 	# Follow memorialization instructions ---------------------------------------------
 
@@ -243,206 +237,149 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	return foldsTotal
 
-@cache
-def A000682(n: int, flow: str | None = None) -> int:
-	"""Compute A000682(n)."""
-	match flow:
-		case 'matrixNumPy':
-			from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
-		case 'matrixPandas':
-			from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
-		case _:
-			from mapFolding.algorithms.matrixMeanders import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersState as State
-
-	oeisID = 'A000682'
-
-	boundary: int = n - 1
-
-	if n == 1:
-		return 1
-	elif n & 0b1:
-		arcCode: int = 5
-	else:
-		arcCode = 1
-	listCurveLocations: list[int] = [(arcCode << 1) | arcCode]
-
-	MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
-	while listCurveLocations[-1] < MAXIMUMarcCode:
-		arcCode = (arcCode << 4) | 0b101 # == arcCode * 2**4 + 5
-		listCurveLocations.append((arcCode << 1) | arcCode)
-
-	dictionaryMeanders=dict.fromkeys(listCurveLocations, 1)
-
-	state = State(n, oeisID, boundary, dictionaryMeanders)
-
-	return doTheNeedful(state) # pyright: ignore[reportArgumentType]
-
-@cache
-def A005316(n: int, flow: str | None = None) -> int:
-	"""Compute A005316(n)."""
-	match flow:
-		case 'matrixNumPy':
-			from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
-		case 'matrixPandas':
-			from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
-		case _:
-			from mapFolding.algorithms.matrixMeanders import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersState as State
-
-	oeisID = 'A005316'
-
-	boundary: int = n - 1
-
-	if n & 0b1:
-		dictionaryMeanders: dict[int, int] = {15: 1}
-	else:
-		dictionaryMeanders = {22: 1}
-
-	state = State(n, oeisID, boundary, dictionaryMeanders)
-
-	return doTheNeedful(state) # pyright: ignore[reportArgumentType]
-
 def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 		# , pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None  # noqa: ERA001
 		, CPUlimit: bool | float | int | None = None  # noqa: FBT001
 		) -> int:
 	"""Do stuff."""
-	countTotal: int = -1
+	countTotal: int = -31212012 # ERROR
+	matched_oeisID: bool = True
 
 	match oeisID:
 		case 'A000136':
-			from mapFolding.algorithms.oeisIDbyFormula import A000136
-			countTotal = A000136(oeis_n)
+			from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
 		case 'A000560':
-			from mapFolding.algorithms.oeisIDbyFormula import A000560
-			countTotal = A000560(oeis_n)
-		case 'A000682':
-			countTotal = A000682(oeis_n, flow)
+			from mapFolding.algorithms.oeisIDbyFormula import A000560 as doTheNeedful
 		case 'A001010':
-			from mapFolding.algorithms.oeisIDbyFormula import A001010
-			countTotal = A001010(oeis_n)
+			from mapFolding.algorithms.oeisIDbyFormula import A001010 as doTheNeedful
 		case 'A001011':
-			from mapFolding.algorithms.oeisIDbyFormula import A001011
-			countTotal = A001011(oeis_n)
+			from mapFolding.algorithms.oeisIDbyFormula import A001011 as doTheNeedful
 		case 'A005315':
-			from mapFolding.algorithms.oeisIDbyFormula import A005315
-			countTotal = A005315(oeis_n)
-		case 'A005316':
-			countTotal = A005316(oeis_n, flow)
-		case 'A007822':
-			mapShape: tuple[Literal[1], int] = (1, 2 * oeis_n)
-			match flow:
-				case 'asynchronous':
-					from mapFolding import setProcessorLimit
-					concurrencyLimit: int = setProcessorLimit(CPUlimit)
-
-					from mapFolding.dataBaskets import MapFoldingState
-					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-					from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
-					mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
-
-				case 'asynchronousNumba':
-					from mapFolding import setProcessorLimit
-					concurrencyLimit = setProcessorLimit(CPUlimit)
-
-					from mapFolding.dataBaskets import MapFoldingState
-					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-					from mapFolding.syntheticModules.A007822.asynchronousNumba import doTheNeedful
-					mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
-
-				case 'asynchronousTrimmed':
-					from mapFolding.dataBaskets import MapFoldingState
-					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-					from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
-					mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-					from mapFolding import setProcessorLimit
-					concurrencyLimit = setProcessorLimit(CPUlimit)
-
-					from mapFolding.syntheticModules.A007822.asynchronousAnnex import initializeConcurrencyManager
-					initializeConcurrencyManager(maxWorkers=concurrencyLimit, groupsOfFolds=mapFoldingState.groupsOfFolds)
-					mapFoldingState.groupsOfFolds = 0
-
-					from mapFolding.syntheticModules.A007822.asynchronousTrimmed import count
-					mapFoldingState = count(mapFoldingState)
-
-				case 'numba':
-					from mapFolding.dataBaskets import MapFoldingState
-					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-					from mapFolding.syntheticModules.A007822.algorithmNumba import doTheNeedful
-					mapFoldingState = doTheNeedful(mapFoldingState)
-
-				case 'theorem2':
-					from mapFolding.dataBaskets import MapFoldingState
-					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-					from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
-					mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-					from mapFolding.syntheticModules.A007822.theorem2 import count
-					mapFoldingState = count(mapFoldingState)
-
-				case 'theorem2Numba':
-					from mapFolding.dataBaskets import MapFoldingState
-					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-					from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
-					mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-					from mapFolding.syntheticModules.A007822.theorem2Numba import count
-					mapFoldingState = count(mapFoldingState)
-
-				case 'theorem2Trimmed':
-					from mapFolding.dataBaskets import MapFoldingState
-					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-					from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
-					mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-					from mapFolding.syntheticModules.A007822.theorem2Trimmed import count
-					mapFoldingState = count(mapFoldingState)
-
-				case _:
-					from mapFolding.dataBaskets import MapFoldingState
-					mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-					from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful
-					mapFoldingState = doTheNeedful(mapFoldingState)
-
-			countTotal = mapFoldingState.groupsOfFolds
+			from mapFolding.algorithms.oeisIDbyFormula import A005315 as doTheNeedful
 		case 'A060206':
-			from mapFolding.algorithms.oeisIDbyFormula import A060206
-			countTotal = A060206(oeis_n)
+			from mapFolding.algorithms.oeisIDbyFormula import A060206 as doTheNeedful
 		case 'A077460':
-			from mapFolding.algorithms.oeisIDbyFormula import A077460
-			countTotal = A077460(oeis_n)
+			from mapFolding.algorithms.oeisIDbyFormula import A077460 as doTheNeedful
 		case 'A078591':
-			from mapFolding.algorithms.oeisIDbyFormula import A078591
-			countTotal = A078591(oeis_n)
+			from mapFolding.algorithms.oeisIDbyFormula import A078591 as doTheNeedful
 		case 'A178961':
-			from mapFolding.algorithms.oeisIDbyFormula import A178961
-			countTotal = A178961(oeis_n)
+			from mapFolding.algorithms.oeisIDbyFormula import A178961 as doTheNeedful
 		case 'A223094':
-			from mapFolding.algorithms.oeisIDbyFormula import A223094
-			countTotal = A223094(oeis_n)
+			from mapFolding.algorithms.oeisIDbyFormula import A223094 as doTheNeedful
 		case 'A259702':
-			from mapFolding.algorithms.oeisIDbyFormula import A259702
-			countTotal = A259702(oeis_n)
+			from mapFolding.algorithms.oeisIDbyFormula import A259702 as doTheNeedful
 		case 'A301620':
-			from mapFolding.algorithms.oeisIDbyFormula import A301620
-			countTotal = A301620(oeis_n)
-
+			from mapFolding.algorithms.oeisIDbyFormula import A301620 as doTheNeedful
 		case _:
-			pass
+			matched_oeisID = False
+	if matched_oeisID:
+		countTotal = doTheNeedful(oeis_n) # pyright: ignore[reportPossiblyUnboundVariable]
+	else:
+		matched_oeisID = True
+		match oeisID:
+			case 'A000682' | 'A005316':
+				match flow:
+					case 'matrixNumPy':
+						from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
+						from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
+					case 'matrixPandas':
+						from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
+						from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
+					case _:
+						from mapFolding.algorithms.matrixMeanders import doTheNeedful
+						from mapFolding.dataBaskets import MatrixMeandersState as State
+
+				boundary: int = oeis_n - 1
+
+				if oeisID == 'A000682':
+					if oeis_n == 1:
+						return 1
+					elif oeis_n & 0b1:
+						arcCode: int = 0b101
+					else:
+						arcCode = 0b1
+					listArcCodes: list[int] = [(arcCode << 1) | arcCode]
+
+					MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
+					while listArcCodes[-1] < MAXIMUMarcCode:
+						arcCode = (arcCode << 4) | 0b0101 # e.g., 0b 10000 | 0b 0101 = 0b 10101
+						listArcCodes.append((arcCode << 1) | arcCode) # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
+						# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
+						# See "mapFolding/reference/A000682facts.py"
+					dictionaryMeanders=dict.fromkeys(listArcCodes, 1)
+
+				elif oeisID == 'A005316':
+					if oeis_n & 0b1:
+						dictionaryMeanders: dict[int, int] = {0b1111: 1} # 0xf
+					else:
+						dictionaryMeanders = {0b10110: 1}
+				else:
+					message = f"Programming error: I should never have received `{oeisID = }`."
+					raise ValueError(message)
+
+				state = State(oeis_n, oeisID, boundary, dictionaryMeanders)
+				countTotal = doTheNeedful(state) # pyright: ignore[reportArgumentType]
+			case 'A007822':
+				mapShape: tuple[Literal[1], int] = (1, 2 * oeis_n)
+				from mapFolding import setProcessorLimit
+				concurrencyLimit: int = setProcessorLimit(CPUlimit)
+
+				from mapFolding.dataBaskets import MapFoldingState
+				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+
+				match flow:
+					case 'asynchronous':
+						from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
+						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
+
+					case 'asynchronousNumba':
+						from mapFolding.syntheticModules.A007822.asynchronousNumba import doTheNeedful
+						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
+
+					case 'asynchronousTrimmed':
+						from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
+						mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+						from mapFolding.syntheticModules.A007822.asynchronousAnnex import initializeConcurrencyManager
+						initializeConcurrencyManager(maxWorkers=concurrencyLimit, groupsOfFolds=mapFoldingState.groupsOfFolds)
+						mapFoldingState.groupsOfFolds = 0
+
+						from mapFolding.syntheticModules.A007822.asynchronousTrimmed import count
+						mapFoldingState = count(mapFoldingState)
+
+					case 'numba':
+						from mapFolding.syntheticModules.A007822.algorithmNumba import doTheNeedful
+						mapFoldingState = doTheNeedful(mapFoldingState)
+
+					case 'theorem2':
+						# TODO theorem2 dispatcher
+						from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
+						mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+						from mapFolding.syntheticModules.A007822.theorem2 import count
+						mapFoldingState = count(mapFoldingState)
+
+					case 'theorem2Numba':
+						from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
+						mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+						from mapFolding.syntheticModules.A007822.theorem2Numba import count
+						mapFoldingState = count(mapFoldingState)
+
+					case 'theorem2Trimmed':
+						from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
+						mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
+
+						from mapFolding.syntheticModules.A007822.theorem2Trimmed import count
+						mapFoldingState = count(mapFoldingState)
+
+					case _:
+						from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful
+						mapFoldingState = doTheNeedful(mapFoldingState)
+
+				countTotal = mapFoldingState.groupsOfFolds
+			case _:
+				matched_oeisID = False
 
 	return countTotal
 

@@ -105,15 +105,6 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 	-----
 	TODO remake this function from scratch.
 
-	I'm all but certain that DELECROIX, VINCENT, ÉLISE GOUJARD, PETER ZOGRAF, and ANTON ZORICH. “ENUMERATION OF MEANDERS AND
-	MASUR-VEECH VOLUMES.” Forum of Mathematics, Pi 8 (2020): e4. https://doi.org/10.1017/fmp.2020.2 has exceptionally useful ideas
-	and formulas, but it's over my head. Formulas it might contain:
-	- Peak unique signatures for a value of n. I call them "arcCodes."
-	- Peak total signatures for a value of n. I call them "bucketsTotal."
-	Actually, I can't imagine what they write about for 80 pages, so there might be tons of useful things in there.
-
-
-
 	Factors:
 		- The starting quantity of `arcCode`.
 		- The value(s) of the starting `arcCode`.

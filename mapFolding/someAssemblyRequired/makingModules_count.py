@@ -170,6 +170,7 @@ def makeTheorem2(astModule: ast.Module, moduleIdentifier: str, callableIdentifie
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 
+	# TODO theorem2 dispatcher
 	if sourceCallableDispatcher is not None:
 		message = 'sourceCallableDispatcher is not implemented yet'
 		raise NotImplementedError(message)

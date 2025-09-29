@@ -187,6 +187,7 @@ def _makeA007822AsynchronousModules() -> None:
 	pathFilename = addSymmetryCheckAsynchronous(astModule, 'asynchronous', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
 
 	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, moduleIdentifier='asynchronous')
+	# TODO theorem2 dispatcher
 	pathFilename = makeTheorem2(astModule, 'asynchronousTheorem2', None, logicalPathInfixA007822, None)
 
 	astModule = parsePathFilename2astModule(pathFilename)

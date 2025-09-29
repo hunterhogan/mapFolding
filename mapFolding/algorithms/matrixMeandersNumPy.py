@@ -296,6 +296,9 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		del arrayAnalyzed
 
+		if state.n >= 45:
+		# oeisID,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
+			print(state.oeisID, state.n, state.boundary+1, state.indexTarget, len(state.arrayArcCodes), int(state.arrayArcCodes.max()).bit_length(), int(state.arrayCrossings.max()).bit_length(), sep=',')  # noqa: T201
 	return state
 
 def doTheNeedful(state: MatrixMeandersNumPyState) -> int:

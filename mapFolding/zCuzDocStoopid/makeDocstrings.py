@@ -21,6 +21,8 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> None:
     functionOf: str = 'Error during transformation' # The value of `functionOf` is in the docstring of function `oeisID` in `pathFilenameSource`.
 
     for oeisID, FunctionDef in dictionaryFunctionDef.items():
+        if not oeisID.startswith('A') or not oeisID[1:7].isdigit():
+            continue
         dictionary = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
         functionOf = raiseIfNone(ast.get_docstring(FunctionDef))
 

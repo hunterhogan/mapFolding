@@ -56,13 +56,14 @@ def _makeA007822Modules() -> None:
 	makeInitializeState(astModule, 'initializeState', 'transitionOnGroupsOfFolds', logicalPathInfixA007822)
 
 	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, moduleIdentifier='algorithm')
+	# TODO theorem2 dispatcher
 	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixA007822, None)
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, logicalPathInfixA007822, None)
 
-	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixA007822, None)
+	# astModule = parsePathFilename2astModule(pathFilename)
+	# pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixA007822, None)
 # TODO from mapFolding.syntheticModules.dataPackingA007822 import unRePackDataclass
 # @unRePackDataclass
 

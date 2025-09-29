@@ -10,7 +10,7 @@ if sys.version_info >= (3, 14):
 def main():
 	oeisID = 'A000682'
 	n=45
-	print(NOTcountingFolds(oeisID, n, 'matrixPandas'))
+	print(NOTcountingFolds(oeisID, n, 'matrixNumPy'))
 
 	from mapFolding import dictionaryOEIS
 	if n < dictionaryOEIS[oeisID]['valueUnknown']:
