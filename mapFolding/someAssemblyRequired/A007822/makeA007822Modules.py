@@ -3,7 +3,7 @@ from astToolkit import Be, Make, NodeChanger, NodeTourist, parsePathFilename2ast
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDEFAULT, identifierCountingDEFAULT, identifierDataclassInstanceDEFAULT, IfThis)
+	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT, identifierDataclassInstanceDEFAULT, IfThis)
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
 	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds, logicalPathInfixA007822,
 	sourceCallableDispatcherA007822, sourceCallableIdentifierA007822)
@@ -56,8 +56,7 @@ def _makeA007822Modules() -> None:
 	makeInitializeState(astModule, 'initializeState', 'transitionOnGroupsOfFolds', logicalPathInfixA007822)
 
 	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, moduleIdentifier='algorithm')
-	# TODO theorem2 dispatcher
-	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixA007822, None)
+	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, logicalPathInfixA007822, None)

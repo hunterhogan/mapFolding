@@ -205,8 +205,7 @@ def makeMapFoldingModules() -> None:
 	makeInitializeState(astModule, 'initializeState', 'transitionOnGroupsOfFolds', logicalPathInfixDEFAULT)
 
 	astModule = getModule(logicalPathInfix='algorithms')
-	# TODO theorem2 dispatcher
-	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixDEFAULT, None)
+	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, logicalPathInfixDEFAULT, None)

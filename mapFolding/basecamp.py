@@ -203,12 +203,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 			mapFoldingState = doTheNeedful(mapFoldingState)
 
 		elif flow == 'theorem2' and any(dimension > 2 for dimension in mapShape):
-			# TODO theorem2 dispatcher
-			from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
-			mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-			from mapFolding.syntheticModules.theorem2 import count
-			mapFoldingState = count(mapFoldingState)
+			from mapFolding.syntheticModules.theorem2 import doTheNeedful
+			mapFoldingState = doTheNeedful(mapFoldingState)
 
 		elif (flow == 'theorem2Numba' or taskDivisions == 0) and any(dimension > 2 for dimension in mapShape):
 			from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -218,11 +214,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 			mapFoldingState = sequential(mapFoldingState)
 
 		elif flow == 'theorem2Trimmed' and any(dimension > 2 for dimension in mapShape):
-			from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
-			mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-			from mapFolding.syntheticModules.theorem2Trimmed import count
-			mapFoldingState = count(mapFoldingState)
+			from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
+			mapFoldingState = doTheNeedful(mapFoldingState)
 
 		else:
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
@@ -354,12 +347,8 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 						mapFoldingState = doTheNeedful(mapFoldingState)
 
 					case 'theorem2':
-						# TODO theorem2 dispatcher
-						from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
-						mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-						from mapFolding.syntheticModules.A007822.theorem2 import count
-						mapFoldingState = count(mapFoldingState)
+						from mapFolding.syntheticModules.A007822.theorem2 import doTheNeedful
+						mapFoldingState = doTheNeedful(mapFoldingState)
 
 					case 'theorem2Numba':
 						from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
