@@ -299,6 +299,8 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 					else:
 						arcCode = 0b1
 					listArcCodes: list[int] = [(arcCode << 1) | arcCode]
+													#  0b1010 | 0b0101 is 0b1111, or 0xf
+													#    0b10 |   0b01 is   0b11, or 0x3
 
 					MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
 					while listArcCodes[-1] < MAXIMUMarcCode:
