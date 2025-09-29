@@ -4,25 +4,7 @@ def count(state: MapFoldingState) -> MapFoldingState:
     while state.leaf1ndex > 4:
         if state.leafBelow[0] == 1:
             if state.leaf1ndex > state.leavesTotal:
-                state.indexLeaf = 0
-                leafConnectee = 0
-                while leafConnectee < state.leavesTotal + 1:
-                    leafNumber = int(state.leafBelow[state.indexLeaf])
-                    state.leafComparison[leafConnectee] = (leafNumber - state.indexLeaf + state.leavesTotal) % state.leavesTotal
-                    state.indexLeaf = leafNumber
-                    leafConnectee += 1
-                indexInMiddle = state.leavesTotal // 2
-                state.indexMiniGap = 0
-                while state.indexMiniGap < state.leavesTotal + 1:
-                    ImaSymmetricFold = True
-                    leafConnectee = 0
-                    while leafConnectee < indexInMiddle:
-                        if state.leafComparison[(state.indexMiniGap + leafConnectee) % (state.leavesTotal + 1)] != state.leafComparison[(state.indexMiniGap + state.leavesTotal - 1 - leafConnectee) % (state.leavesTotal + 1)]:
-                            ImaSymmetricFold = False
-                            break
-                        leafConnectee += 1
-                    state.groupsOfFolds += ImaSymmetricFold
-                    state.indexMiniGap += 1
+                state.groupsOfFolds += 1
             else:
                 state.dimensionsUnconstrained = state.dimensionsTotal
                 state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
@@ -65,7 +47,6 @@ def count(state: MapFoldingState) -> MapFoldingState:
         state.leaf1ndex += 1
     else:
         state.groupsOfFolds *= 2
-    state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
     return state
 
 def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
