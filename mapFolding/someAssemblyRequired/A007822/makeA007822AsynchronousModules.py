@@ -1,29 +1,32 @@
 """addSymmetryCheckAsynchronous."""
-from astToolkit import Be, extractFunctionDef, Grab, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
+from astToolkit import (
+	Be, extractFunctionDef, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, parsePathFilename2astModule,
+	Then)
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import identifierCallableSourceDispatcherDEFAULT, IfThis, logicalPathInfixAlgorithmDEFAULT
+from mapFolding.someAssemblyRequired import (
+	identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT, identifierDataclassInstanceDEFAULT, IfThis,
+	logicalPathInfixAlgorithmDEFAULT)
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
 	A007822adjustFoldsTotal, astExprCall_filterAsymmetricFoldsDataclass, identifier_filterAsymmetricFolds,
 	identifierCounting, identifierDataclass, logicalPathInfixA007822, sourceCallableDispatcherA007822,
 	sourceCallableIdentifierA007822)
 from mapFolding.someAssemblyRequired.makingModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename, write_astModule
-from os import PathLike
 from pathlib import PurePath
 import ast
 
-identifier_getAsymmetricFoldsTotal = 'getAsymmetricFoldsTotal'
+identifier_getSymmetricFoldsTotal = 'getSymmetricFoldsTotal'
 identifier_initializeConcurrencyManager = 'initializeConcurrencyManager'
 identifier_processCompletedFutures = '_processCompletedFutures'
 
 astExprCall_initializeConcurrencyManager: ast.Expr = Make.Expr(Make.Call(Make.Name(identifier_initializeConcurrencyManager), listParameters=[Make.Name('maxWorkers')]))
 AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
 	[Make.Attribute(Make.Name(identifierDataclass), identifierCounting, context=Make.Store())]
-	, value=Make.Call(Make.Name(identifier_getAsymmetricFoldsTotal))
+	, value=Make.Call(Make.Name(identifier_getSymmetricFoldsTotal))
 )
 
-def addSymmetryCheckAsynchronous(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute  | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Add symmetry check to the counting function.
 
 	To do asynchronous filtering, a few things must happen.
@@ -74,13 +77,13 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, moduleIdentifier: str, c
 		, doThat=Then.replaceWith(astFunctionDef_doTheNeedful)
 		).visit(astModule)
 
-	astImportFrom = ast.ImportFrom(f'{packageSettings.identifierPackage}.{logicalPathInfix}.{moduleIdentifier}Annex'
-			, [Make.alias(identifier_filterAsymmetricFolds), Make.alias(identifier_getAsymmetricFoldsTotal), Make.alias(identifier_initializeConcurrencyManager)], 0)
+	astImportFrom = ast.ImportFrom(f'{packageSettings.identifierPackage}.{logicalPathInfix}.{identifierModule}Annex'
+			, [Make.alias(identifier_filterAsymmetricFolds), Make.alias(identifier_getSymmetricFoldsTotal), Make.alias(identifier_initializeConcurrencyManager)], 0)
 
 	astModule.body.insert(0, astImportFrom)
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
-	pathFilenameAnnex: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier + 'Annex')
+	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
+	pathFilenameAnnex: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule + 'Annex')
 
 	write_astModule(astModule, pathFilename, packageSettings.identifierPackage)
 	del astModule
@@ -167,33 +170,57 @@ def {identifier_filterAsymmetricFolds}(leafBelow: Array1DLeavesTotal) -> None:
 	del ImaString
 
 	ImaString = f"""
-def {identifier_getAsymmetricFoldsTotal}() -> int:
+def {identifier_getSymmetricFoldsTotal}() -> int:
 	global concurrencyManager, queueFutures, processingThread
 	raiseIfNone(concurrencyManager).shutdown(wait=True)
 	queueFutures.put(None)
 	raiseIfNone(processingThread).join()
 	return {identifierCounting}Total
 	"""
-	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_getAsymmetricFoldsTotal)))
+	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_getSymmetricFoldsTotal)))
 	del ImaString
 
 	write_astModule(astModule, pathFilenameAnnex, packageSettings.identifierPackage)
 
 	return pathFilename
 
-def _makeA007822AsynchronousModules() -> None:
-
-	astModule = getModule(logicalPathInfix=logicalPathInfixAlgorithmDEFAULT)
-	pathFilename = addSymmetryCheckAsynchronous(astModule, 'asynchronous', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
-
-	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, moduleIdentifier='asynchronous')
-	pathFilename = makeTheorem2(astModule, 'asynchronousTheorem2', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
+def makeAsynchronousTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+	"""Make the asynchronous theorem2 module."""
+	pathFilename = makeTheorem2(astModule, identifierModule, identifierCallable, logicalPathInfix, sourceCallableDispatcher)
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', None, logicalPathInfixA007822, None)
 
-	# astModule = parsePathFilename2astModule(pathFilename)
-	# pathFilename = numbaOnTheorem2(astModule, 'asynchronousNumba', None, logicalPathInfixA007822, None)
+	astAttribute = Make.Attribute(Make.Name(identifierDataclassInstanceDEFAULT), identifierCountingDEFAULT)
+	astAssign = Make.Assign([astAttribute], value=Make.Constant(0))
+
+	NodeChanger[ast.Call, ast.Call](
+		findThis = IfThis.isCallIdentifier(identifier_initializeConcurrencyManager)
+		, doThat = Grab.argsAttribute(lambda args: [*args, astAttribute]) # pyright: ignore[reportArgumentType]
+	).visit(astModule)
+
+	NodeChanger(
+		findThis = Be.Expr.valueIs(IfThis.isCallIdentifier(identifier_initializeConcurrencyManager))
+		, doThat = Then.insertThisBelow([astAssign])
+	).visit(astModule)
+
+	write_astModule(astModule, pathFilename, packageSettings.identifierPackage)
+
+	return pathFilename
+
+def _makeA007822AsynchronousModules() -> None:
+
+	astModule: ast.Module = getModule(logicalPathInfix=logicalPathInfixAlgorithmDEFAULT)
+	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, 'asynchronous', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
+
+	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, identifierModule='asynchronous')
+	pathFilename = makeAsynchronousTheorem2(astModule, 'asynchronousTheorem2', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
+
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
+
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = numbaOnTheorem2(astModule, 'asynchronousNumba', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
 
 if __name__ == '__main__':
 	_makeA007822AsynchronousModules()
+

@@ -1,12 +1,9 @@
-from concurrent.futures import Future as ConcurrentFuture
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future as ConcurrentFuture, ThreadPoolExecutor
+from hunterMakesPy import raiseIfNone
+from mapFolding import Array1DLeavesTotal
 from queue import Empty, Queue
 from threading import Thread
-
 import numpy
-from hunterMakesPy import raiseIfNone
-
-from mapFolding import Array1DLeavesTotal
 
 concurrencyManager = None
 groupsOfFoldsTotal: int = 0
@@ -61,7 +58,7 @@ def filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> None:
     global concurrencyManager, queueFutures
     queueFutures.put_nowait(raiseIfNone(concurrencyManager).submit(_filterAsymmetricFolds, leafBelow.copy()))
 
-def getAsymmetricFoldsTotal() -> int:
+def getSymmetricFoldsTotal() -> int:
     global concurrencyManager, queueFutures, processingThread
     raiseIfNone(concurrencyManager).shutdown(wait=True)
     queueFutures.put(None)

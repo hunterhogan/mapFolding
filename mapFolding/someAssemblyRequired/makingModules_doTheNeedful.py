@@ -17,7 +17,7 @@ from pathlib import PurePath
 from typing import cast
 import ast
 
-def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Generate initialization module for counting variable setup.
 
 	(AI generated docstring)
@@ -65,7 +65,7 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 
 	return pathFilename
 
-def makeUnRePackDataclass(astImportFrom: ast.ImportFrom, moduleIdentifier: str = identifierModuleDataPackingDEFAULT) -> None:
+def makeUnRePackDataclass(astImportFrom: ast.ImportFrom, moduleIdentifier: str = identifierModuleDataPackingDEFAULT) -> PurePath:
 	"""Generate interface module for dataclass unpacking and repacking operations.
 
 	Parameters
@@ -73,19 +73,21 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom, moduleIdentifier: str =
 	astImportFrom : ast.ImportFrom
 		Import statement specifying the target optimized function to call.
 
+	moduleIdentifier : str = identifierModuleDataPackingDEFAULT
+		Name for the generated interface module.
+
 	Returns
 	-------
-	None
-		The generated module is written directly to the filesystem.
-
+	pathFilename : PurePath
+		Filesystem path where the interface module was written.
 	"""
 	callableIdentifierHARDCODED: str = 'sequential'
 
 	algorithmSourceModule: identifierDotAttribute = identifierModuleSourceAlgorithmDEFAULT
-	callableIdentifier: identifierDotAttribute = callableIdentifierHARDCODED
+	callableIdentifier: str = callableIdentifierHARDCODED
 	logicalPathInfix: identifierDotAttribute = logicalPathInfixDEFAULT
 	logicalPathInfixAlgorithm: identifierDotAttribute = logicalPathInfixAlgorithmDEFAULT
-	sourceCallableIdentifier: identifierDotAttribute = identifierCallableSourceDispatcherDEFAULT
+	sourceCallableIdentifier: str = identifierCallableSourceDispatcherDEFAULT
 
 	logicalPathSourceModule: identifierDotAttribute = '.'.join([packageSettings.identifierPackage, logicalPathInfixAlgorithm, algorithmSourceModule])  # noqa: FLY002
 
@@ -114,4 +116,6 @@ def makeUnRePackDataclass(astImportFrom: ast.ImportFrom, moduleIdentifier: str =
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
 
 	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
+
+	return pathFilename
 

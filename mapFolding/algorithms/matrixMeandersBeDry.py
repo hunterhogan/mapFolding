@@ -92,7 +92,7 @@ arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]
 	An array with the same shape as `arrayTarget` but with one bit flipped in each element.
 """
 
-def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float = 1.2) -> int:
+def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float = 1.2) -> int:  # noqa: ARG001
 	"""Under renovation: Estimate the total number of non-unique arcCode that will be computed from the existing arcCode.
 
 	Warning
@@ -124,6 +124,23 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 		bucketsTotal = int(3.55 * len(state.arrayArcCodes))
 
 	return bucketsTotal
+
+def getSignaturesTotal(state: MatrixMeandersNumPyState) -> int:
+	"""Get the total number of signatures for the current `n` and `boundary`.
+
+	Parameters
+	----------
+	state : MatrixMeandersState
+		The current state of the computation.
+
+	Returns
+	-------
+	signaturesTotal : int
+		The total number of signatures for the current `n` and `boundary`.
+
+	"""
+	from mapFolding.reference.matrixMeandersAnalysis.signatures import signatures  # noqa: PLC0415
+	return signatures[state.oeisID].get(state.n, {}).get(state.boundary, int(3.55 * len(state.arrayArcCodes)))
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -162,3 +179,4 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
 		if findTheExtra_0b1 < 0:
 			break
 	return flipExtra_0b1_Here
+

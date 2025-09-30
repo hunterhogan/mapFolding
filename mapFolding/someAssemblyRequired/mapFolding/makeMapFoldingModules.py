@@ -10,7 +10,7 @@ from mapFolding.someAssemblyRequired import (
 	DeReConstructField2ast, identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, IfThis,
 	logicalPathInfixDEFAULT, ShatteredDataclass)
 from mapFolding.someAssemblyRequired.makingModules_count import (
-	makeDaoOfMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
+	makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
 from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState, makeUnRePackDataclass
 from mapFolding.someAssemblyRequired.toolkitMakeModules import getLogicalPath, getModule, getPathFilename
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
@@ -196,7 +196,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 def makeMapFoldingModules() -> None:
 	"""Make multidimensional map folding modules."""
 	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
+	pathFilename: PurePath = makeMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
 
 	astModule = getModule(logicalPathInfix='algorithms')
 	pathFilename = makeDaoOfMapFoldingParallelNumba(astModule, 'countParallelNumba', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)

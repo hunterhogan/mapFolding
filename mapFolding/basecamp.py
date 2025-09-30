@@ -331,16 +331,13 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 						from mapFolding.syntheticModules.A007822.asynchronousNumba import doTheNeedful
 						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
 
+					case 'asynchronousTheorem2':
+						from mapFolding.syntheticModules.A007822.asynchronousTheorem2 import doTheNeedful
+						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
+
 					case 'asynchronousTrimmed':
-						from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
-						mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-						from mapFolding.syntheticModules.A007822.asynchronousAnnex import initializeConcurrencyManager
-						initializeConcurrencyManager(maxWorkers=concurrencyLimit, groupsOfFolds=mapFoldingState.groupsOfFolds)
-						mapFoldingState.groupsOfFolds = 0
-
-						from mapFolding.syntheticModules.A007822.asynchronousTrimmed import count
-						mapFoldingState = count(mapFoldingState)
+						from mapFolding.syntheticModules.A007822.asynchronousTrimmed import doTheNeedful
+						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
 
 					case 'numba':
 						from mapFolding.syntheticModules.A007822.algorithmNumba import doTheNeedful
@@ -351,18 +348,12 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 						mapFoldingState = doTheNeedful(mapFoldingState)
 
 					case 'theorem2Numba':
-						from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
-						mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-						from mapFolding.syntheticModules.A007822.theorem2Numba import count
-						mapFoldingState = count(mapFoldingState)
+						from mapFolding.syntheticModules.A007822.theorem2Numba import doTheNeedful
+						mapFoldingState = doTheNeedful(mapFoldingState)
 
 					case 'theorem2Trimmed':
-						from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
-						mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-						from mapFolding.syntheticModules.A007822.theorem2Trimmed import count
-						mapFoldingState = count(mapFoldingState)
+						from mapFolding.syntheticModules.A007822.theorem2Trimmed import doTheNeedful
+						mapFoldingState = doTheNeedful(mapFoldingState)
 
 					case _:
 						from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful

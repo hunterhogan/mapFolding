@@ -34,7 +34,7 @@ from mapFolding.someAssemblyRequired import DeReConstructField2ast, IfThis, Shat
 import ast
 import dataclasses
 
-def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, dataclassIdentifier: str, instanceIdentifier: str) -> ShatteredDataclass:
+def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute, identifierDataclass: str, identifierDataclassInstance: str) -> ShatteredDataclass:
 	"""Decompose a dataclass definition into AST components for manipulation and code generation.
 
 	(AI generated docstring)
@@ -77,19 +77,19 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, d
 	Official_fieldOrder: list[str] = []
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
-	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(logicalPathModule), dataclassIdentifier)
+	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(logicalPathDataclass), identifierDataclass)
 	if not dataclassClassDef:
-		message = f"I could not find `{dataclassIdentifier = }` in `{logicalPathModule = }`."
+		message = f"I could not find `{identifierDataclass = }` in `{logicalPathDataclass = }`."
 		raise ValueError(message)
 
 	countingVariable = None
-	for aField in dataclasses.fields(importLogicalPath2Identifier(logicalPathModule, dataclassIdentifier)): # pyright: ignore [reportArgumentType]
+	for aField in dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)): # pyright: ignore [reportArgumentType]
 		Official_fieldOrder.append(aField.name)
-		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathModule, dataclassClassDef, instanceIdentifier, aField)
+		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathDataclass, dataclassClassDef, identifierDataclassInstance, aField)
 		if aField.metadata.get('theCountingIdentifier', False):
 			countingVariable = dictionaryDeReConstruction[aField.name].name
 	if countingVariable is None:
-		message = f"I could not find the counting variable in `{dataclassIdentifier = }` in `{logicalPathModule = }`."
+		message = f"I could not find the counting variable in `{identifierDataclass = }` in `{logicalPathDataclass = }`."
 		raise ValueError(message)
 
 	shatteredDataclass = ShatteredDataclass(
@@ -105,11 +105,11 @@ def shatter_dataclassesDOTdataclass(logicalPathModule: identifierDotAttribute, d
 		map_stateDOTfield2Name={dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder},
 		)
 	shatteredDataclass.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclass.listName4Parameters, ast.Store())
-	shatteredDataclass.repack = Make.Assign([Make.Name(instanceIdentifier)], value=Make.Call(Make.Name(dataclassIdentifier), list_keyword=shatteredDataclass.list_keyword_field__field4init))
+	shatteredDataclass.repack = Make.Assign([Make.Name(identifierDataclassInstance)], value=Make.Call(Make.Name(identifierDataclass), list_keyword=shatteredDataclass.list_keyword_field__field4init))
 	shatteredDataclass.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.listAnnotations))
 
 	shatteredDataclass.imports.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
-	shatteredDataclass.imports.addImportFrom_asStr(logicalPathModule, dataclassIdentifier)
+	shatteredDataclass.imports.addImportFrom_asStr(logicalPathDataclass, identifierDataclass)
 
 	return shatteredDataclass
 

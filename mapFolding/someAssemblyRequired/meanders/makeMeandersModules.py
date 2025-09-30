@@ -7,7 +7,6 @@ from mapFolding.someAssemblyRequired import (
 	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, IfThis, logicalPathInfixDEFAULT)
 from mapFolding.someAssemblyRequired.toolkitMakeModules import (
 	findDataclass, getModule, getPathFilename, write_astModule)
-from os import PathLike
 from pathlib import PurePath
 import ast
 
@@ -15,7 +14,7 @@ identifierDataclassNumPyHARDCODED = 'MatrixMeandersNumPyState'
 
 logicalPathInfixMeanders: str = logicalPathInfixDEFAULT + '.meanders'
 
-def makeCountBigInt(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Make `countBigInt` module for meanders using `MatrixMeandersNumPyState` dataclass."""
 	identifierDataclassNumPy: str = identifierDataclassNumPyHARDCODED
 	_logicalPathDataclass, identifierDataclassOld, identifierDataclassInstance = findDataclass(astModuleToIngredientsFunction(astModule, raiseIfNone(sourceCallableDispatcher)))
@@ -51,14 +50,14 @@ def makeCountBigInt(astModule: ast.Module, moduleIdentifier: str, callableIdenti
 	# from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide  # noqa: ERA001
 	astModule.body.insert(0, Make.ImportFrom('mapFolding.algorithms.matrixMeandersBeDry', list_alias=[Make.alias('areIntegersWide')]))
 
-	pathFilename = getPathFilename(logicalPathInfix=logicalPathInfix, moduleIdentifier=moduleIdentifier)
+	pathFilename: PurePath = getPathFilename(logicalPathInfix=logicalPathInfix, identifierModule=identifierModule)
 
 	write_astModule(astModule, pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
 
 if __name__ == '__main__':
-	astModule = getModule(logicalPathInfix='algorithms', moduleIdentifier='matrixMeanders')
-	pathFilename = makeCountBigInt(astModule, 'bigInt', 'countBigInt', logicalPathInfixMeanders, identifierCallableSourceDispatcherDEFAULT)
+	astModule: ast.Module = getModule(logicalPathInfix='algorithms', identifierModule='matrixMeanders')
+	pathFilename: PurePath = makeCountBigInt(astModule, 'bigInt', 'countBigInt', logicalPathInfixMeanders, identifierCallableSourceDispatcherDEFAULT)
 
 

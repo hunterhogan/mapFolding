@@ -85,32 +85,32 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierD
 	identifierDataclassInstance: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	return raiseIfNone(logicalPathDataclass), identifierDataclass, identifierDataclassInstance
 
-def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, *moduleIdentifier: str | None) -> identifierDotAttribute:
+def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, *identifierModule: str | None) -> identifierDotAttribute:
 	"""Get logical path from components."""
 	listLogicalPathParts: list[str] = []
 	if identifierPackage:
 		listLogicalPathParts.append(identifierPackage)
 	if logicalPathInfix:
 		listLogicalPathParts.append(logicalPathInfix)
-	if moduleIdentifier:
-		listLogicalPathParts.extend([module for module in moduleIdentifier if module is not None])
+	if identifierModule:
+		listLogicalPathParts.extend([module for module in identifierModule if module is not None])
 	return '.'.join(listLogicalPathParts)
 
-def getModule(identifierPackage: str | None = packageSettings.identifierPackage, logicalPathInfix: identifierDotAttribute | None = logicalPathInfixDEFAULT, moduleIdentifier: str | None = identifierModuleSourceAlgorithmDEFAULT) -> ast.Module:
+def getModule(identifierPackage: str | None = packageSettings.identifierPackage, logicalPathInfix: identifierDotAttribute | None = logicalPathInfixDEFAULT, identifierModule: str | None = identifierModuleSourceAlgorithmDEFAULT) -> ast.Module:
 	"""Get Module."""
-	logicalPathSourceModule: identifierDotAttribute = getLogicalPath(identifierPackage, logicalPathInfix, moduleIdentifier)
+	logicalPathSourceModule: identifierDotAttribute = getLogicalPath(identifierPackage, logicalPathInfix, identifierModule)
 	astModule: ast.Module = parseLogicalPath2astModule(logicalPathSourceModule)
 	return astModule
 
-def getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.pathPackage, logicalPathInfix: PathLike[str] | PurePath | str | None = None, moduleIdentifier: str = '', fileExtension: str = packageSettings.fileExtension) -> PurePath:
+def getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.pathPackage, logicalPathInfix: identifierDotAttribute | None = None, identifierModule: str = '', fileExtension: str = packageSettings.fileExtension) -> PurePath:
 	"""Construct filesystem path from logical path.
 
 	Parameters
 	----------
 	pathRoot : PathLike[str] | PurePath | None = packageSettings.pathPackage
 		Base directory for the package structure.
-	logicalPathInfix : PathLike[str] | PurePath | str | None = None
-		Subdirectory for organizing generated modules.
+	logicalPathInfix : identifierDotAttribute | None = None
+		Logical path in dot notation.
 	moduleIdentifier : str = ''
 		Name of the specific module file.
 	fileExtension : str = packageSettings.fileExtension
@@ -122,7 +122,7 @@ def getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.
 		Complete filesystem path for the generated module file.
 
 	"""
-	pathFilename = PurePath(moduleIdentifier + fileExtension)
+	pathFilename = PurePath(identifierModule + fileExtension)
 	if logicalPathInfix:
 		pathFilename = PurePath(*(str(logicalPathInfix).split('.')), pathFilename)
 	if pathRoot:

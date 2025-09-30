@@ -1,8 +1,6 @@
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.syntheticModules.A007822.asynchronousAnnex import (
-    filterAsymmetricFolds, getAsymmetricFoldsTotal,
-    initializeConcurrencyManager)
-
+	filterAsymmetricFolds, getSymmetricFoldsTotal, initializeConcurrencyManager)
 
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
     return state.leaf1ndex > 0
@@ -140,7 +138,7 @@ def count(state: MapFoldingState) -> MapFoldingState:
         if gapAvailable(state):
             state = insertActiveLeafAtGap(state)
     else:
-        state.groupsOfFolds = getAsymmetricFoldsTotal()
+        state.groupsOfFolds = getSymmetricFoldsTotal()
     state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
     return state
 

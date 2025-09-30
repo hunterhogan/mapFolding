@@ -1,14 +1,15 @@
 """addSymmetryCheck."""
-from astToolkit import Be, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
+from astToolkit import Be, identifierDotAttribute, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT, identifierDataclassInstanceDEFAULT, IfThis)
+	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT,
+	identifierDataclassInstanceDEFAULT, IfThis)
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
 	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds, logicalPathInfixA007822,
 	sourceCallableDispatcherA007822, sourceCallableIdentifierA007822)
 from mapFolding.someAssemblyRequired.makingModules_count import (
-	makeDaoOfMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
+	makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
 from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState, makeUnRePackDataclass
 from mapFolding.someAssemblyRequired.toolkitMakeModules import (
 	getLogicalPath, getModule, getPathFilename, write_astModule)
@@ -16,7 +17,7 @@ from os import PathLike
 from pathlib import PurePath
 import ast
 
-def addSymmetryCheck(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Add logic to check for symmetric folds."""
 # NOTE HEY HEY! Are you trying to figure out why there is more than one copy of `filterAsymmetricFolds`? See the TODO NOTE, below.
 
@@ -37,7 +38,7 @@ def addSymmetryCheck(astModule: ast.Module, moduleIdentifier: str, callableIdent
 # system to replace the `Ingredients` paradigm.
 	NodeChanger(Be.ImportFrom, Then.insertThisBelow([FunctionDef_filterAsymmetricFolds])).visit(astModule)
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
+	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
 
 	write_astModule(astModule, pathFilename, packageSettings.identifierPackage)
 
@@ -47,22 +48,22 @@ def _makeA007822Modules() -> None:
 	astModule = getModule(logicalPathInfix='algorithms')
 	pathFilename = addSymmetryCheck(astModule, 'algorithm', None, logicalPathInfixA007822, None)
 
-	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, moduleIdentifier='algorithm')
-	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'algorithmNumba', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
+	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, identifierModule='algorithm')
+	pathFilename: PurePath = makeMapFoldingNumba(astModule, 'algorithmNumba', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
 
 	# NOTE I can't handle parallel right now.
 
-	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, moduleIdentifier='algorithm')
+	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, identifierModule='algorithm')
 	makeInitializeState(astModule, 'initializeState', 'transitionOnGroupsOfFolds', logicalPathInfixA007822)
 
-	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, moduleIdentifier='algorithm')
+	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, identifierModule='algorithm')
 	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, logicalPathInfixA007822, None)
+	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
 
-	# astModule = parsePathFilename2astModule(pathFilename)
-	# pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixA007822, None)
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
 # TODO from mapFolding.syntheticModules.dataPackingA007822 import unRePackDataclass
 # @unRePackDataclass
 
