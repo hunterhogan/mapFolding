@@ -1,5 +1,5 @@
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.syntheticModules.A007822.asynchronousAnnex import (
+from mapFolding.syntheticModules.A007822.asynchronousAnnexNumba import (
 	filterAsymmetricFolds, getSymmetricFoldsTotal, initializeConcurrencyManager)
 from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
 

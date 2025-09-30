@@ -58,23 +58,13 @@ def _filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> int:
 		indexDistance += 1
 	return groupsOfFolds
 
-def _go(leafBelow: Array1DLeavesTotal) -> None:
+def filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> None:
 	queueFutures.put_nowait(leafBelow.copy())
 
-def filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> int:
-	# Must not block caller; enqueue for background processing
-	_go(leafBelow)
-	return 60  # GO
-
-def _stop() -> DatatypeFoldsTotal:
+def getSymmetricFoldsTotal() -> DatatypeFoldsTotal:
 	global listThreads  # noqa: PLW0602
-	# Signal all workers to stop after queue drained
 	for _thread in listThreads:
 		queueFutures.put(sentinelStop)  # pyright: ignore[reportArgumentType]
 	for thread in listThreads:
 		thread.join()
 	return groupsOfFoldsTotal
-
-def getAsymmetricFoldsTotal() -> DatatypeFoldsTotal:
-	total = _stop()
-	return total

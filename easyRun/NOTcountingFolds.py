@@ -22,13 +22,13 @@ if __name__ == '__main__':
 
 	oeisID = 'A007822'
 
-	flow = 'asynchronousTrimmed'
 	flow = 'asynchronous'
 	flow = 'algorithm'
-	flow = 'theorem2Numba'
 	flow = 'asynchronousNumba'
+	flow = 'theorem2Numba'
+	flow = 'asynchronousTrimmed'
 
-	for n in range(5,7):
+	for n in range(3,9):
 
 		timeStart = time.perf_counter()
 		countTotal = NOTcountingFolds(oeisID, n, flow, CPUlimit)

@@ -1,7 +1,10 @@
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.syntheticModules.A007822.asynchronousAnnex import (
-	filterAsymmetricFolds, getSymmetricFoldsTotal, initializeConcurrencyManager)
-from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
+from mapFolding.syntheticModules.A007822.asynchronousAnnexNumba import (
+    filterAsymmetricFolds, getSymmetricFoldsTotal,
+    initializeConcurrencyManager)
+from mapFolding.syntheticModules.A007822.initializeState import \
+    transitionOnGroupsOfFolds
+
 
 def count(state: MapFoldingState) -> MapFoldingState:
     while state.leaf1ndex > 4:

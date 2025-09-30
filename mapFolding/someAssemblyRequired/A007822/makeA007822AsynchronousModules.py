@@ -11,11 +11,14 @@ from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
 	A007822adjustFoldsTotal, astExprCall_filterAsymmetricFoldsDataclass, identifier_filterAsymmetricFolds,
 	identifierCounting, identifierDataclass, logicalPathInfixA007822, sourceCallableDispatcherA007822,
 	sourceCallableIdentifierA007822)
+from mapFolding.someAssemblyRequired.infoBooth import identifierCallableSourceDEFAULT
 from mapFolding.someAssemblyRequired.makingModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
-from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename, write_astModule
+from mapFolding.someAssemblyRequired.toolkitMakeModules import (
+	getLogicalPath, getModule, getPathFilename, write_astModule)
 from pathlib import PurePath
 import ast
 
+identifier_asynchronous = 'asynchronous'
 identifier_getSymmetricFoldsTotal = 'getSymmetricFoldsTotal'
 identifier_initializeConcurrencyManager = 'initializeConcurrencyManager'
 identifier_processCompletedFutures = '_processCompletedFutures'
@@ -77,7 +80,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 		, doThat=Then.replaceWith(astFunctionDef_doTheNeedful)
 		).visit(astModule)
 
-	astImportFrom = ast.ImportFrom(f'{packageSettings.identifierPackage}.{logicalPathInfix}.{identifierModule}Annex'
+	astImportFrom = ast.ImportFrom(getLogicalPath(packageSettings.identifierPackage, logicalPathInfix, identifierModule + 'Annex')
 			, [Make.alias(identifier_filterAsymmetricFolds), Make.alias(identifier_getSymmetricFoldsTotal), Make.alias(identifier_initializeConcurrencyManager)], 0)
 
 	astModule.body.insert(0, astImportFrom)
@@ -179,14 +182,36 @@ def {identifier_getSymmetricFoldsTotal}() -> int:
 	"""
 	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_getSymmetricFoldsTotal)))
 	del ImaString
-
 	write_astModule(astModule, pathFilenameAnnex, packageSettings.identifierPackage)
+
+	return pathFilename
+
+def makeAsynchronousNumbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+	"""Make the asynchronous numba on theorem2 module."""
+	pathFilename: PurePath = numbaOnTheorem2(astModule, identifierModule, identifierCallable, logicalPathInfix, sourceCallableDispatcher)
+
+	astModule = parsePathFilename2astModule(pathFilename)
+
+	listAssignToMove: list[ast.Assign] = []
+
+	findThis = IfThis.isAnyOf(IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(identifierCountingDEFAULT))
+					, Be.AugAssign.targetIs(IfThis.isNameIdentifier(identifierCountingDEFAULT)))
+	NodeTourist(findThis, Then.appendTo(listAssignToMove)).visit(astModule)
+
+	NodeChanger(findThis, Then.removeIt).visit(astModule)
+
+	NodeChanger(
+		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallableSourceDEFAULT))
+		, doThat=Then.insertThisBelow(listAssignToMove)
+	).visit(astModule)
+
+	write_astModule(astModule, pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
 
 def makeAsynchronousTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Make the asynchronous theorem2 module."""
-	pathFilename = makeTheorem2(astModule, identifierModule, identifierCallable, logicalPathInfix, sourceCallableDispatcher)
+	pathFilename: PurePath = makeTheorem2(astModule, identifierModule, identifierCallable, logicalPathInfix, sourceCallableDispatcher)
 
 	astModule = parsePathFilename2astModule(pathFilename)
 
@@ -201,6 +226,14 @@ def makeAsynchronousTheorem2(astModule: ast.Module, identifierModule: str, ident
 	NodeChanger(
 		findThis = Be.Expr.valueIs(IfThis.isCallIdentifier(identifier_initializeConcurrencyManager))
 		, doThat = Then.insertThisBelow([astAssign])
+	).visit(astModule)
+
+	identifierAnnex: identifierDotAttribute = getLogicalPath(packageSettings.identifierPackage, logicalPathInfix, identifier_asynchronous + 'Annex')
+	identifierAnnexNumba: identifierDotAttribute = identifierAnnex + 'Numba'
+
+	NodeChanger(
+		findThis=Be.ImportFrom.moduleIs(IfThis.isIdentifier(identifierAnnex))
+		, doThat=Grab.moduleAttribute(Then.replaceWith(identifierAnnexNumba))
 	).visit(astModule)
 
 	write_astModule(astModule, pathFilename, packageSettings.identifierPackage)
@@ -219,7 +252,7 @@ def _makeA007822AsynchronousModules() -> None:
 	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = numbaOnTheorem2(astModule, 'asynchronousNumba', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
+	pathFilename = makeAsynchronousNumbaOnTheorem2(astModule, 'asynchronousNumba', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
 
 if __name__ == '__main__':
 	_makeA007822AsynchronousModules()
