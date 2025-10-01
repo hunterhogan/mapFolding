@@ -59,6 +59,12 @@ def _filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> int:
 	return groupsOfFolds
 
 def filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> None:
+	"""Queue leafBelow for asynchronous processing.
+	
+	This function is called from the jitted count function in asynchronousNumba.py
+	using numba's objmode context manager. It queues the array for processing
+	by worker threads, which call the jitted _filterAsymmetricFolds function.
+	"""
 	queueFutures.put_nowait(leafBelow.copy())
 
 def getSymmetricFoldsTotal() -> DatatypeFoldsTotal:

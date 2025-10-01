@@ -11,6 +11,10 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
     while leaf1ndex > 4:
         if leafBelow[0] == 1:
             if leaf1ndex > leavesTotal:
+                # Use objmode to pass leafBelow data from jitted code to Python.
+                # Similar technique to numba-progress (https://github.com/mortacious/numba-progress),
+                # this allows calling filterAsymmetricFolds from within the jitted function.
+                # filterAsymmetricFolds queues the array for asynchronous processing.
                 with objmode():
                     filterAsymmetricFolds(leafBelow)
             else:
