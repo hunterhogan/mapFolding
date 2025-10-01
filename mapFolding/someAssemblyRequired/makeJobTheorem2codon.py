@@ -67,8 +67,8 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 	# On some assignment or comparison values, add a type constructor to ensure compatibility.
 	# On some values-as-indexer, add a type constructor to ensure indexing-method compatibility.
 	for ast_arg in job.shatteredDataclass.list_argAnnotated4ArgumentsSpecification:
-		identifier = ast_arg.arg
-		annotation = raiseIfNone(ast_arg.annotation)
+		identifier: str = ast_arg.arg
+		annotation: ast.expr = raiseIfNone(ast_arg.annotation)
 
 		# `identifier` in Augmented Assignment, or in Assignments and value is Constant.
 		NodeChanger(findThis=IfThis.isAnyOf(

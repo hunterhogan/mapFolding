@@ -29,18 +29,18 @@ essential progress feedback capabilities for large-scale computational research.
 """
 
 from astToolkit import (
-	Be, extractFunctionDef, identifierDotAttribute, IngredientsFunction, IngredientsModule, LedgerOfImports, Make,
-	NodeChanger, NodeTourist, Then)
+	Be, extractFunctionDef, IngredientsFunction, IngredientsModule, Make, NodeChanger, NodeTourist, Then)
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import autoDecodingRLE, raiseIfNone
-from mapFolding import getPathFilenameFoldsTotal, packageSettings
+from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired import IfThis
+from mapFolding.someAssemblyRequired._toolkitContainers import DatatypeConfiguration
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import PurePosixPath
-from typing import cast, NamedTuple, TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 from typing_extensions import TypeIs
 import ast
 
@@ -48,6 +48,40 @@ if TYPE_CHECKING:
 	from collections.abc import Callable
 
 listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal']
+
+listDatatypeConfigurations: list[DatatypeConfiguration] = [
+	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numba', typeIdentifier='uint8'),
+	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint16'),
+	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numba', typeIdentifier='uint64'),
+]
+
+listNumPy_dtype: list[DatatypeConfiguration] = [
+	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DLeavesTotal'),
+	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint16', type_asname='Array1DElephino'),
+	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
+]
+
+def addLauncher(ingredientsModule: IngredientsModule, ingredientsCount: IngredientsFunction, job: RecipeJobTheorem2) -> tuple[IngredientsModule, IngredientsFunction]:
+	"""Add a standalone launcher section to a computation module."""
+	linesLaunch: str = f"""
+if __name__ == '__main__':
+	import time
+	timeStart = time.perf_counter()
+	foldsTotal = int({job.countCallable}() * {job.state.leavesTotal})
+	print(time.perf_counter() - timeStart)
+	print('\\nmap {job.state.mapShape} =', foldsTotal)
+	writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
+	writeStream.write(str(foldsTotal))
+	writeStream.close()
+"""
+	# from mapFolding.oeis import getFoldsTotalKnown  # noqa: ERA001
+	# print(foldsTotal == getFoldsTotalKnown({job.state.mapShape}))  # noqa: ERA001
+	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
+	changeReturnParallelCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName)))
+	changeReturnParallelCallable.visit(ingredientsCount.astFunctionDef)
+	ingredientsCount.astFunctionDef.returns = job.shatteredDataclass.countingVariableAnnotation
+
+	return ingredientsModule, ingredientsCount
 
 def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2, spices: SpicesJobNumba) -> tuple[IngredientsModule, IngredientsFunction]:
 	"""Add progress tracking capabilities to a Numba-optimized function.
@@ -215,8 +249,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 		Optimization settings including Numba parameters and progress options.
 
 	"""
-	astFunctionDef: ast.FunctionDef = raiseIfNone(extractFunctionDef(job.source_astModule, job.countCallable))
-	ingredientsCount: IngredientsFunction = IngredientsFunction(astFunctionDef, LedgerOfImports())
+	ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.countCallable)))
 
 	listIdentifiersStaticValues: list[str] = listIdentifiersStaticValuesHARDCODED
 	for identifier in listIdentifiersStaticValues:
@@ -230,75 +263,23 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 		ingredientsModule, ingredientsCount = addLauncherNumbaProgress(ingredientsModule, ingredientsCount, job, spices)
 		spices.parametersNumba['nogil'] = True
 	else:
-		linesLaunch: str = f"""
-if __name__ == '__main__':
-	import time
-	timeStart = time.perf_counter()
-	foldsTotal = int({job.countCallable}() * {job.state.leavesTotal})
-	print(time.perf_counter() - timeStart)
-	print('\\nmap {job.state.mapShape} =', foldsTotal)
-	writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
-	writeStream.write(str(foldsTotal))
-	writeStream.close()
-"""
-	# from mapFolding.oeis import getFoldsTotalKnown  # noqa: ERA001
-	# print(foldsTotal == getFoldsTotalKnown({job.state.mapShape}))  # noqa: ERA001
-		ingredientsModule.appendLauncher(ast.parse(linesLaunch))
-		changeReturnParallelCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName)))
-		changeReturnParallelCallable.visit(ingredientsCount.astFunctionDef)
-		ingredientsCount.astFunctionDef.returns = job.shatteredDataclass.countingVariableAnnotation
+		ingredientsModule, ingredientsCount = addLauncher(ingredientsModule, ingredientsCount, job)
 
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
-	class DatatypeConfig(NamedTuple):
-		"""Configuration for mapping framework datatypes to Numba-compatible types.
 
-		This configuration class defines how abstract datatypes used in the map folding
-		framework should be replaced with concrete Numba-compatible types during code
-		generation. Each configuration specifies the source module, target type name,
-		and optional import alias for the transformation.
-
-		Attributes
-		----------
-		fml : str
-			Framework datatype identifier to be replaced.
-		Z0Z_module : identifierDotAttribute
-			Module containing the target datatype (e.g., 'numba', 'numpy').
-		Z0Z_type_name : str
-			Concrete type name in the target module.
-		Z0Z_asname : str | None = None
-			Optional import alias for the type.
-		"""
-
-		fml: str
-		Z0Z_module: identifierDotAttribute
-		Z0Z_type_name: str
-		Z0Z_asname: str | None = None
-
-	listDatatypeConfigs: list[DatatypeConfig] = [
-		DatatypeConfig(fml='DatatypeLeavesTotal', Z0Z_module='numba', Z0Z_type_name='uint8'),
-		DatatypeConfig(fml='DatatypeElephino', Z0Z_module='numba', Z0Z_type_name='uint16'),
-		DatatypeConfig(fml='DatatypeFoldsTotal', Z0Z_module='numba', Z0Z_type_name='uint64'),
-	]
-
-	for datatypeConfig in listDatatypeConfigs:
-		ingredientsModule.imports.addImportFrom_asStr(datatypeConfig.Z0Z_module, datatypeConfig.Z0Z_type_name)
+	for datatypeConfig in listDatatypeConfigurations:
+		ingredientsModule.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier)
 		statement = Make.Assign(
-			[Make.Name(datatypeConfig.fml, ast.Store())],
-			Make.Name(datatypeConfig.Z0Z_type_name)
+			[Make.Name(datatypeConfig.datatypeIdentifier, ast.Store())],
+			Make.Name(datatypeConfig.typeIdentifier)
 		)
 		ingredientsModule.appendPrologue(statement=statement)
 
 	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
 
-	listNumPyTypeConfigs = [
-		DatatypeConfig(fml='Array1DLeavesTotal', Z0Z_module='numpy', Z0Z_type_name='uint8', Z0Z_asname='Array1DLeavesTotal'),
-		DatatypeConfig(fml='Array1DElephino', Z0Z_module='numpy', Z0Z_type_name='uint16', Z0Z_asname='Array1DElephino'),
-		DatatypeConfig(fml='Array3DLeavesTotal', Z0Z_module='numpy', Z0Z_type_name='uint8', Z0Z_asname='Array3DLeavesTotal'),
-	]
-
-	for typeConfig in listNumPyTypeConfigs:
-		ingredientsCount.imports.removeImportFrom(typeConfig.Z0Z_module, None, typeConfig.fml)
-		ingredientsCount.imports.addImportFrom_asStr(typeConfig.Z0Z_module, typeConfig.Z0Z_type_name, typeConfig.Z0Z_asname)
+	for typeConfig in listNumPy_dtype:
+		ingredientsCount.imports.removeImportFrom(typeConfig.typeModule, None, typeConfig.datatypeIdentifier)
+		ingredientsCount.imports.addImportFrom_asStr(typeConfig.typeModule, typeConfig.typeIdentifier, typeConfig.type_asname)
 
 	ingredientsCount.astFunctionDef.decorator_list = [] # TODO low-priority, handle this more elegantly
 	ingredientsCount = decorateCallableWithNumba(ingredientsCount, spices.parametersNumba)
@@ -326,12 +307,17 @@ if __name__ == '__main__':
 	- do not use `with` statement inside numba jitted code, except to use numba's obj mode
 	"""
 
-if __name__ == '__main__':
-	state = transitionOnGroupsOfFolds(MapFoldingState((2,5)))
+def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
+	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
+	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	spices = SpicesJobNumba(useNumbaProgressBar=True, parametersNumba=parametersNumbaLight)
 	makeJobNumba(aJob, spices)
+
+if __name__ == '__main__':
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (2,14)
+	fromMapShape(mapShape)
 
 # TODO Improve this module with lessons learned in `makeJobTheorem2codon`.
