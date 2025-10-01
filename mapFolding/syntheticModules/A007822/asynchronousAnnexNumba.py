@@ -127,7 +127,10 @@ def getLeafBelowSender() -> LeafBelowSender:
 		If the sender has not been initialized
 	"""
 	if leafBelowSender is None:
-		msg = "LeafBelowSender not initialized. Call initializeConcurrencyManager first."
+		msg = (
+			"LeafBelowSender not initialized. "
+			"Call initializeConcurrencyManager first."
+		)
 		raise RuntimeError(msg)
 	return leafBelowSender
 
