@@ -50,7 +50,7 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
 
 def doTheNeedful(state: MapFoldingState, maxWorkers: int | None=None) -> MapFoldingState:
     state = transitionOnGroupsOfFolds(state)
-    initializeConcurrencyManager(maxWorkers or 4, state.groupsOfFolds)
+    initializeConcurrencyManager(maxWorkers or 4, 0)
     state.groupsOfFolds = 0
     mapShape: tuple[DatatypeLeavesTotal, ...] = state.mapShape
     groupsOfFolds: DatatypeFoldsTotal = state.groupsOfFolds
@@ -74,7 +74,6 @@ def doTheNeedful(state: MapFoldingState, maxWorkers: int | None=None) -> MapFold
     leafBelowSender = getLeafBelowSender()
     groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal, leafBelowSender)
     groupsOfFolds = getSymmetricFoldsTotal()
-    groupsOfFolds *= 2
     groupsOfFolds = (groupsOfFolds + 1) // 2
     state = MapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, indexDimension=indexDimension, indexLeaf=indexLeaf, indexMiniGap=indexMiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, leafComparison=leafComparison)
     return state
