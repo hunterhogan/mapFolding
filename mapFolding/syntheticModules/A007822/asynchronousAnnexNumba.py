@@ -1,36 +1,45 @@
 from mapFolding import Array1DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
-from queue import Queue
-from threading import Lock, Thread
+from mapFolding.syntheticModules.A007822.leafBelowSender import LeafBelowSender
+from threading import Lock
 import numba
 import numpy
 
-listThreads: list[Thread] = []
-queueFutures: Queue[Array1DLeavesTotal] = Queue()
 groupsOfFoldsTotal: int = 0
 groupsOfFoldsTotalLock = Lock()
-sentinelStop = object()
+leafBelowSender: LeafBelowSender | None = None
 
 def initializeConcurrencyManager(maxWorkers: int, groupsOfFolds: int=0) -> None:
-	global listThreads, groupsOfFoldsTotal, queueFutures  # noqa: PLW0603
-	listThreads = []
-	queueFutures = Queue()
+	"""Initialize the concurrent processing system.
+	
+	Parameters
+	----------
+	maxWorkers : int
+		Number of worker threads (not used in this implementation, 
+		but kept for API compatibility)
+	groupsOfFolds : int
+		Initial value for groupsOfFoldsTotal counter
+	"""
+	global leafBelowSender, groupsOfFoldsTotal  # noqa: PLW0603
 	groupsOfFoldsTotal = groupsOfFolds
-	indexThread = 0
-	while indexThread < maxWorkers:
-		thread = Thread(target=_threadDoesSomething, name=f"thread{indexThread}", daemon=True)
-		thread.start()
-		listThreads.append(thread)
-		indexThread += 1
+	
+	# Create the leaf sender with a processor function
+	# Buffer size of 10000 should be sufficient for most cases
+	# Array size should match the maximum size of leafBelow arrays
+	leafBelowSender = LeafBelowSender(
+		buffer_size=10000,
+		array_size=100,  # Adjust based on expected maximum leavesTotal
+		processor_func=_processLeafBelow
+	)
 
-def _threadDoesSomething() -> None:
+def _processLeafBelow(leafBelow: Array1DLeavesTotal) -> None:
+	"""Process a leafBelow array by filtering asymmetric folds.
+	
+	This function is called by the LeafBelowSender's background thread.
+	"""
 	global groupsOfFoldsTotal  # noqa: PLW0603
-	while True:
-		leafBelow = queueFutures.get()
-		if leafBelow is sentinelStop:  # pyright: ignore[reportUnnecessaryComparison]
-			break
-		symmetricFolds = _filterAsymmetricFolds(leafBelow)
-		with groupsOfFoldsTotalLock:
-			groupsOfFoldsTotal += symmetricFolds
+	symmetricFolds = _filterAsymmetricFolds(leafBelow)
+	with groupsOfFoldsTotalLock:
+		groupsOfFoldsTotal += symmetricFolds
 
 @numba.jit(cache=True, error_model='numpy', fastmath=True)
 def _filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> int:
@@ -59,12 +68,41 @@ def _filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> int:
 	return groupsOfFolds
 
 def filterAsymmetricFolds(leafBelow: Array1DLeavesTotal) -> None:
-	queueFutures.put_nowait(leafBelow.copy())
+	"""Push a leafBelow array for asynchronous processing.
+	
+	This function is designed to be called from numba-jitted code.
+	It uses the LeafBelowSender to pass the array to a background thread.
+	
+	Parameters
+	----------
+	leafBelow : Array1DLeavesTotal
+		The leaf array to process
+	"""
+	if leafBelowSender is not None:
+		leafBelowSender.push(leafBelow)
+
+def getLeafBelowSender():
+	"""Get the LeafBelowSender instance for passing to numba-jitted code.
+	
+	Returns
+	-------
+	LeafBelowSender
+		The sender instance that can be used from numba
+	"""
+	return leafBelowSender
 
 def getSymmetricFoldsTotal() -> DatatypeFoldsTotal:
-	global listThreads  # noqa: PLW0602
-	for _thread in listThreads:
-		queueFutures.put(sentinelStop)  # pyright: ignore[reportArgumentType]
-	for thread in listThreads:
-		thread.join()
+	"""Finalize processing and return the total count of symmetric folds.
+	
+	This function waits for all pending arrays to be processed and
+	returns the final count.
+	
+	Returns
+	-------
+	DatatypeFoldsTotal
+		Total number of symmetric folds found
+	"""
+	global leafBelowSender  # noqa: PLW0602
+	if leafBelowSender is not None:
+		leafBelowSender.close()
 	return groupsOfFoldsTotal
