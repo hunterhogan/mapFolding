@@ -87,6 +87,7 @@ from mapFolding.someAssemblyRequired.infoBooth import (
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis
 
 from mapFolding.someAssemblyRequired._toolkitContainers import (
+	DatatypeConfiguration as DatatypeConfiguration,
 	DeReConstructField2ast as DeReConstructField2ast,
 	ShatteredDataclass as ShatteredDataclass,
 )

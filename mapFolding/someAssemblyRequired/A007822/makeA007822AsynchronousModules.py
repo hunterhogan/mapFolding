@@ -205,6 +205,9 @@ def makeAsynchronousNumbaOnTheorem2(astModule: ast.Module, identifierModule: str
 		, doThat=Then.insertThisBelow(listAssignToMove)
 	).visit(astModule)
 
+# TODO Use `numba_update` as a model to call `identifierCallableSourceDEFAULT` with an object that can pass `leafBelow` to the
+# asynchronous `identifier_filterAsymmetricFolds` without disrupting numba or `identifierCallableSourceDEFAULT`.
+
 	write_astModule(astModule, pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename

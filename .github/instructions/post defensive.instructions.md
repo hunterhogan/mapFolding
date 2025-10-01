@@ -1,8 +1,6 @@
 ---
 applyTo: 'mapFolding/algorithms/*.py'
 ---
-Provide project context and coding guidelines that AI should follow when generating code, answering questions, or reviewing changes.
-
 Avoid early-return guard clauses, short-circuit returns, and multiple exit points. This codebase enforces a
 single-return-per-function pattern with stable shapes/dtypes due to AST transforms. An empty input is a problem, so allow it to
 fail early.

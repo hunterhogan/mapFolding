@@ -1,3 +1,6 @@
+"""buckets and signatures."""
+bucketsTotalMaximumBy_boundary: dict[int, int] = {1:3, 2:12, 3:40, 4:125, 5:392, 6:1254, 7:4087, 8:13623, 9:46181, 10:159137, 11:555469, 12:1961369, 13:6991893, 14:25134208}
+
 signatures: dict[str, dict[int, dict[int, int]]] = {'A000682': {2: {1: 1, 2: 3},
 3: {1: 1, 2: 3, 3: 3},
 4: {1: 1, 2: 3, 3: 4, 4: 4},

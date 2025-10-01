@@ -5,7 +5,7 @@ from astToolkit import (
 	parsePathFilename2astModule, Then)
 from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
 from hunterMakesPy import importLogicalPath2Identifier, raiseIfNone
-from mapFolding import packageSettings
+from mapFolding import DatatypeLeavesTotal, packageSettings
 from mapFolding.someAssemblyRequired import (
 	DeReConstructField2ast, identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, IfThis,
 	logicalPathInfixDEFAULT, ShatteredDataclass)
@@ -16,7 +16,6 @@ from mapFolding.someAssemblyRequired.toolkitMakeModules import getLogicalPath, g
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
-from os import PathLike
 from pathlib import PurePath
 from typing import Any, TYPE_CHECKING
 import ast
@@ -25,7 +24,7 @@ import dataclasses
 if TYPE_CHECKING:
 	from collections.abc import Sequence
 
-def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: PathLike[str] | PurePath | str | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Generate parallel implementation with concurrent execution and task division.
 
 	Parameters
@@ -48,10 +47,10 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 
 	"""
 	sourceCallableIdentifier = identifierCallableSourceDEFAULT
-	if callableIdentifier is None:
-		callableIdentifier = sourceCallableIdentifier
+	if identifierCallable is None:
+		identifierCallable = sourceCallableIdentifier
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = callableIdentifier
+	ingredientsFunction.astFunctionDef.name = identifierCallable
 
 	dataclassName: ast.expr = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	dataclassIdentifier: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
@@ -69,10 +68,10 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	shatteredDataclass: ShatteredDataclass = shatter_dataclassesDOTdataclass(dataclassLogicalPathModule, dataclassIdentifier, dataclassInstanceIdentifier)
 
-	# START add the parallel state fields to the count function ------------------------------------------------
-	dataclassBaseFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(dataclassLogicalPathModule, dataclassIdentifier))  # pyright: ignore [reportArgumentType]
+# START add the parallel state fields to the count function ------------------------------------------------
+	dataclassBaseFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(dataclassLogicalPathModule, dataclassIdentifier))
 	dataclassIdentifierParallel: identifierDotAttribute = 'Parallel' + dataclassIdentifier
-	dataclassFieldsParallel: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(dataclassLogicalPathModule, dataclassIdentifierParallel))  # pyright: ignore [reportArgumentType]
+	dataclassFieldsParallel: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(dataclassLogicalPathModule, dataclassIdentifierParallel))
 	onlyParallelFields: list[dataclasses.Field[Any]] = [field for field in dataclassFieldsParallel if field.name not in [fieldBase.name for fieldBase in dataclassBaseFields]]
 
 	Official_fieldOrder: list[str] = []
@@ -108,12 +107,12 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 	shatteredDataclassParallel.imports.update(shatteredDataclass.imports)
 	shatteredDataclassParallel.imports.removeImportFrom(dataclassLogicalPathModule, dataclassIdentifier)
 
-	# END add the parallel state fields to the count function ------------------------------------------------
+# END add the parallel state fields to the count function ------------------------------------------------
 
 	ingredientsFunction.imports.update(shatteredDataclassParallel.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclassParallel)
 
-	# START add the parallel logic to the count function ------------------------------------------------
+# START add the parallel logic to the count function ------------------------------------------------
 
 	findThis = Be.While.testIs(Be.Compare.leftIs(IfThis.isNameIdentifier('leafConnectee')))
 	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat = Then.extractIt(DOT.body))
@@ -127,20 +126,20 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 	countGapsCodeBlockNew: list[ast.stmt] = [thisIsMyTaskIndexCodeBlock, countGapsCodeBlock[-1]]
 	NodeChanger[ast.While, hasDOTbody](findThis, doThat = Grab.bodyAttribute(Then.replaceWith(countGapsCodeBlockNew))).visit(ingredientsFunction.astFunctionDef)
 
-	# END add the parallel logic to the count function ------------------------------------------------
+# END add the parallel logic to the count function ------------------------------------------------
 
 	ingredientsFunction = removeUnusedParameters(ingredientsFunction)
 
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
-	# START unpack/repack the dataclass function ------------------------------------------------
+# START unpack/repack the dataclass function ------------------------------------------------
 	sourceCallableIdentifier = identifierCallableSourceDispatcherDEFAULT
 
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclassIdentifierParallel
 	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
 	NodeChanger(
-			findThis = Be.arg.annotationIs(Be.Name.idIs(lambda thisAttribute: thisAttribute == dataclassIdentifier)) # pyright: ignore[reportArgumentType]
+			findThis = Be.arg.annotationIs(Be.Name.idIs(lambda thisAttribute: thisAttribute == dataclassIdentifier))
 			, doThat = Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel)))
 		).visit(unRepackDataclass.astFunctionDef)
 	unRepackDataclass.astFunctionDef.returns = Make.Name(dataclassIdentifierParallel)
@@ -187,7 +186,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, moduleIdentifier: st
 	)
 	ingredientsModule.removeImportFromModule('numpy')
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
+	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
 
 	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
 

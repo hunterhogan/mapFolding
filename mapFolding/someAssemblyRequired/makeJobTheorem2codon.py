@@ -4,47 +4,23 @@ https://docs.exaloop.io/start/install/
 """
 
 from astToolkit import (
-	Be, DOT, extractFunctionDef, Grab, identifierDotAttribute, IngredientsFunction, IngredientsModule, Make, NodeChanger,
-	NodeTourist, parseLogicalPath2astModule, Then)
+	Be, extractFunctionDef, Grab, IngredientsFunction, IngredientsModule, Make, NodeChanger, parseLogicalPath2astModule,
+	Then)
 from astToolkit.transformationTools import removeUnusedParameters, write_astModule
-from hunterMakesPy import autoDecodingRLE, raiseIfNone
+from hunterMakesPy import raiseIfNone
 from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.someAssemblyRequired import IfThis
-from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
+from mapFolding.someAssemblyRequired import DatatypeConfiguration, IfThis
+from mapFolding.someAssemblyRequired.RecipeJob import moveShatteredDataclass_arg2body, RecipeJobTheorem2
 from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
-from typing import cast, NamedTuple, TYPE_CHECKING
-import ast
+from typing import cast, TYPE_CHECKING
 import subprocess
 import sys
 
 if TYPE_CHECKING:
 	from io import TextIOBase
-
-class DatatypeConfiguration(NamedTuple):
-	"""Configuration for mapping framework datatypes to compiled datatypes.
-
-	This configuration class defines how abstract datatypes used in the map folding framework should be replaced with compiled
-	datatypes during code generation. Each configuration specifies the source module, target type name, and optional import alias
-	for the transformation.
-
-	Attributes
-	----------
-	datatypeIdentifier : str
-		Framework datatype identifier to be replaced.
-	typeModule : identifierDotAttribute
-		Module containing the target datatype (e.g., 'codon', 'numpy').
-	typeIdentifier : str
-		Concrete type name in the target module.
-	type_asname : str | None = None
-		Optional import alias for the type.
-	"""
-
-	datatypeIdentifier: str
-	typeModule: identifierDotAttribute
-	typeIdentifier: str
-	type_asname: str | None = None
+	import ast
 
 # TODO replace with dynamic system. Probably use `Final` in the dataclass.
 listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal']
@@ -86,10 +62,6 @@ def _datatypeDefinitions(ingredientsFunction: IngredientsFunction, ingredientsMo
 	ingredientsFunction.imports.removeImportFromModule('mapFolding.dataBaskets')
 
 	return ingredientsFunction, ingredientsModule
-
-def _pythonCode2expr(string: str) -> ast.expr:
-	"""Convert *one* expression as a string of Python code to an `ast.expr`."""
-	return raiseIfNone(NodeTourist(Be.Expr, Then.extractIt(DOT.value)).captureLastMatch(ast.parse(string)))
 
 def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
 	# On some assignment or comparison values, add a type constructor to ensure compatibility.
@@ -135,19 +107,6 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 
 	return ingredientsFunction
 
-def _move_arg2body(identifier: str, job: RecipeJobTheorem2) -> ast.AnnAssign | ast.Assign:
-	Ima___Assign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[identifier]
-	match elementConstructor:
-		case 'scalar':
-			cast('ast.Constant', cast('ast.Call', Ima___Assign.value).args[0]).value = int(job.state.__dict__[identifier])
-		case 'array':
-			dataAsStrRLE: str = autoDecodingRLE(job.state.__dict__[identifier], assumeAddSpaces=True)
-			dataAs_ast_expr: ast.expr = _pythonCode2expr(dataAsStrRLE)
-			cast('ast.Call', Ima___Assign.value).args = [dataAs_ast_expr]
-		case _:
-			pass
-	return Ima___Assign
-
 def makeJob(job: RecipeJobTheorem2) -> None:
 	"""Generate an optimized module for map folding calculations.
 
@@ -167,12 +126,12 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 	listIdentifiersStaticValues: list[str] = listIdentifiersStaticValuesHARDCODED
 	for identifier in listIdentifiersStaticValues:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
-			, Then.replaceWith(Make.Constant(int(job.state.__dict__[identifier])))
+			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # noqa: S307
 		).visit(ingredientsCount.astFunctionDef)
 
 	ingredientsCount.imports.update(job.shatteredDataclass.imports)
 	ingredientsCount = removeUnusedParameters(ingredientsCount)
-	NodeChanger(Be.arg, lambda removeIt: ingredientsCount.astFunctionDef.body.insert(0, _move_arg2body(removeIt.arg, job))).visit(ingredientsCount.astFunctionDef)
+	NodeChanger(Be.arg, lambda removeIt: ingredientsCount.astFunctionDef.body.insert(0, moveShatteredDataclass_arg2body(removeIt.arg, job))).visit(ingredientsCount.astFunctionDef)
 
 	ingredientsCount = _addWriteFoldsTotal(ingredientsCount, job)
 	ingredientsCount = _variableCompatibility(ingredientsCount, job)
@@ -214,14 +173,14 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 		along one axis.
 
 	"""
-	state = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
+	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	pathModule = PurePosixPath(Path.home(), 'mapFolding', 'jobs')
-	source_astModule = parseLogicalPath2astModule('mapFolding.syntheticModules.theorem2A007822Numba')
+	source_astModule: ast.Module = parseLogicalPath2astModule('mapFolding.syntheticModules.A007822.theorem2Numba')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, source_astModule=source_astModule, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	makeJob(aJob)
 
 if __name__ == '__main__':
-	mapShape = (1, 3)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (1, 3)
 	fromMapShape(mapShape)
 

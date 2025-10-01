@@ -1,5 +1,5 @@
 """addSymmetryCheck."""
-from astToolkit import Be, identifierDotAttribute, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
+from astToolkit import Be, identifierDotAttribute, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
@@ -10,10 +10,8 @@ from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
 	sourceCallableDispatcherA007822, sourceCallableIdentifierA007822)
 from mapFolding.someAssemblyRequired.makingModules_count import (
 	makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
-from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState, makeUnRePackDataclass
-from mapFolding.someAssemblyRequired.toolkitMakeModules import (
-	getLogicalPath, getModule, getPathFilename, write_astModule)
-from os import PathLike
+from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState
+from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename, write_astModule
 from pathlib import PurePath
 import ast
 
@@ -45,13 +43,11 @@ def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCal
 	return pathFilename
 
 def _makeA007822Modules() -> None:
-	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename = addSymmetryCheck(astModule, 'algorithm', None, logicalPathInfixA007822, None)
+	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
+	pathFilename: PurePath = addSymmetryCheck(astModule, 'algorithm', None, logicalPathInfixA007822, None)
 
 	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, identifierModule='algorithm')
-	pathFilename: PurePath = makeMapFoldingNumba(astModule, 'algorithmNumba', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
-
-	# NOTE I can't handle parallel right now.
+	pathFilename = makeMapFoldingNumba(astModule, 'algorithmNumba', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
 
 	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, identifierModule='algorithm')
 	makeInitializeState(astModule, 'initializeState', 'transitionOnGroupsOfFolds', logicalPathInfixA007822)
@@ -64,12 +60,6 @@ def _makeA007822Modules() -> None:
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
-# TODO from mapFolding.syntheticModules.dataPackingA007822 import unRePackDataclass
-# @unRePackDataclass
-
-# TODO Make this decorator.
-	# astImportFrom: ast.ImportFrom = Make.ImportFrom(getLogicalPath(packageSettings.identifierPackage, logicalPathInfixA007822, 'theorem2Numba'), list_alias=[Make.alias(sourceCallableIdentifierA007822)])
-	# makeUnRePackDataclass(astImportFrom, 'dataPackingA007822')
 
 if __name__ == '__main__':
 	_makeA007822Modules()

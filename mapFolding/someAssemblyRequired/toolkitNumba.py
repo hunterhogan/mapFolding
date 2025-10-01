@@ -281,7 +281,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	return ingredientsFunction
 
 @dataclasses.dataclass
-class SpicesJobNumba:
+class SpicesJobNumba: # slots?
 	"""Configuration container for Numba-specific job processing options.
 
 	(AI generated docstring)

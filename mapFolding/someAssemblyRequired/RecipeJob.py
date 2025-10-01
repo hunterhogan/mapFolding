@@ -2,6 +2,8 @@
 
 from ast import Module
 from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
+from astToolkit.transformationTools import pythonCode2ast_expr
+from hunterMakesPy import autoDecodingRLE
 from mapFolding import (
 	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal,
 	DatatypeLeavesTotal as TheDatatypeLeavesTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, packageSettings)
@@ -9,10 +11,12 @@ from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired import identifierDataclassInstanceDEFAULT, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
+from typing import cast
+import ast
 import dataclasses
 
 @dataclasses.dataclass
-class RecipeJobTheorem2:
+class RecipeJobTheorem2: # slots?
 	"""Configuration recipe for generating map folding computation jobs.
 
 	This dataclass serves as the central configuration hub for the code transformation
@@ -213,3 +217,16 @@ class RecipeJobTheorem2:
 
 		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.dataclassIdentifier and self.dataclassInstance: # pyright: ignore[reportUnnecessaryComparison]
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.dataclassIdentifier, self.dataclassInstance)
+
+def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> ast.AnnAssign | ast.Assign:
+	Ima___Assign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[identifier]
+	match elementConstructor:
+		case 'scalar':
+			cast('ast.Constant', cast('ast.Call', Ima___Assign.value).args[0]).value = int(eval(f"job.state.{identifier}"))  # noqa: S307
+		case 'array':
+			dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{identifier}"), assumeAddSpaces=True)  # noqa: S307
+			dataAs_ast_expr: ast.expr = pythonCode2ast_expr(dataAsStrRLE)
+			cast('ast.Call', Ima___Assign.value).args = [dataAs_ast_expr]
+		case _:
+			pass
+	return Ima___Assign

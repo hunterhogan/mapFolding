@@ -140,6 +140,8 @@ dependencies = [
   "platformdirs",
 ]
 optional-dependencies = { development = [
+  "ipykernel",
+  "ipywidgets",
   "memray; sys_platform == 'linux'",
   "mypy",
   "pyupgrade",

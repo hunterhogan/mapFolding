@@ -30,7 +30,7 @@ from collections.abc import Callable
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import IfThis
-from typing import Any, cast
+from typing import Any, cast, NamedTuple
 import ast
 import dataclasses
 
@@ -39,7 +39,7 @@ dummySubscript = Make.Subscript(Make.Name("dummy"), Make.Name("slice"))
 dummyTuple = Make.Tuple([Make.Name("dummyElement")])
 
 @dataclasses.dataclass
-class ShatteredDataclass:
+class ShatteredDataclass: # slots?
 	"""Container for decomposed dataclass components organized as AST nodes for code generation.
 
 	This class holds the decomposed representation of a dataclass, breaking it down into individual
@@ -99,7 +99,7 @@ class ShatteredDataclass:
 	"""Tuple-based return type annotation for functions returning decomposed field values."""
 
 @dataclasses.dataclass
-class DeReConstructField2ast:
+class DeReConstructField2ast: # slots?
 	"""
 	Transform a dataclass field into AST node representations for code generation.
 
@@ -253,3 +253,27 @@ class DeReConstructField2ast:
 			self.Z0Z_hack = (self.astAnnAssignConstructor, elementConstructor)
 		if isinstance(self.astAnnotation, ast.Name):
 			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
+
+class DatatypeConfiguration(NamedTuple):
+	"""Configuration for mapping framework datatypes to compiled datatypes.
+
+	This configuration class defines how abstract datatypes used in the map folding framework should be replaced with compiled
+	datatypes during code generation. Each configuration specifies the source module, target type name, and optional import alias
+	for the transformation.
+
+	Attributes
+	----------
+	datatypeIdentifier : str
+		Framework datatype identifier to be replaced.
+	typeModule : identifierDotAttribute
+		Module containing the target datatype (e.g., 'codon', 'numpy').
+	typeIdentifier : str
+		Concrete type name in the target module.
+	type_asname : str | None = None
+		Optional import alias for the type.
+	"""
+
+	datatypeIdentifier: str
+	typeModule: identifierDotAttribute
+	typeIdentifier: str
+	type_asname: str | None = None
