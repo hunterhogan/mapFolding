@@ -72,8 +72,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 		).captureLastMatch(astModule))
 
 	astFunctionDef_doTheNeedful.body.insert(0, astExprCall_initializeConcurrencyManager)
-	astFunctionDef_doTheNeedful.args.args.append(Make.arg('maxWorkers', Make.BitOr.join([Make.Name('int'), Make.Constant(None)])))
-	astFunctionDef_doTheNeedful.args.defaults.append(Make.Constant(None))
+	astFunctionDef_doTheNeedful.args.args.append(Make.arg('maxWorkers', Make.Name('int')))
 
 	NodeChanger(
 		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableDispatcher))
@@ -91,7 +90,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	write_astModule(astModule, pathFilename, packageSettings.identifierPackage)
 	del astModule
 # ----------------- Ingredients Module Annex ------------------------------------------------------------------------------
-	ImaString = """from concurrent.futures import Future as ConcurrentFuture, ThreadPoolExecutor
+	ImaString: str = """from concurrent.futures import Future as ConcurrentFuture, ThreadPoolExecutor
 from hunterMakesPy import raiseIfNone
 from mapFolding import Array1DLeavesTotal
 from queue import Empty, Queue
@@ -109,7 +108,7 @@ queueFutures: Queue[ConcurrentFuture[int]] = Queue()
 	astModule.body.extend(ast.parse(ImaString).body)
 	del ImaString
 
-	ImaString = f"""def {identifier_initializeConcurrencyManager}(maxWorkers: int | None = None, {identifierCounting}: int = 0) -> None:
+	ImaString = f"""def {identifier_initializeConcurrencyManager}(maxWorkers: int, {identifierCounting}: int = 0) -> None:
 	global concurrencyManager, queueFutures, {identifierCounting}Total, processingThread
 	concurrencyManager = ThreadPoolExecutor(max_workers=maxWorkers)
 	queueFutures = Queue()

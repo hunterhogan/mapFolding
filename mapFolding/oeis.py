@@ -306,12 +306,6 @@ def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	"""Retrieve the known total number of distinct folding patterns for a given map shape.
 
-	(AI generated docstring)
-
-	This function provides rapid access to precalculated folding totals from OEIS sequences without
-	requiring computation. It serves as a validation reference for algorithm results and enables
-	quick lookup of known values across all implemented sequences.
-
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
@@ -320,17 +314,16 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	Returns
 	-------
 	foldingsTotal : int
-		The known total number of distinct folding patterns for the given map shape,
-		or -1 if the map shape does not match any known values in the OEIS sequences.
+		The known total number of distinct folding patterns for the given map shape, or 0 if the map shape does not match any
+		known values in the OEIS sequences.
 
 	Notes
 	-----
-	The function uses a cached dictionary for efficient retrieval without repeatedly processing
-	OEIS data. Map shapes are matched exactly as provided without internal sorting or normalization.
+	Map shapes are matched exactly as provided without internal sorting or normalization.
 
 	"""
-	lookupFoldsTotal = makeDictionaryFoldsTotalKnown()
-	return lookupFoldsTotal.get(tuple(mapShape), -1)
+	lookupFoldsTotal: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
+	return lookupFoldsTotal.get(tuple(mapShape), 0)
 
 def _formatHelpText() -> str:
 	"""Format comprehensive help text for both command-line and interactive use.

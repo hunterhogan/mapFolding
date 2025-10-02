@@ -5,7 +5,7 @@ from astToolkit import (
 	parsePathFilename2astModule, Then)
 from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
 from hunterMakesPy import importLogicalPath2Identifier, raiseIfNone
-from mapFolding import DatatypeLeavesTotal, packageSettings
+from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import (
 	DeReConstructField2ast, identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, IfThis,
 	logicalPathInfixDEFAULT, ShatteredDataclass)

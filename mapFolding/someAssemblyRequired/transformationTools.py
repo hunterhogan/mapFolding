@@ -79,10 +79,10 @@ def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute
 
 	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(logicalPathDataclass), identifierDataclass)
 	if not dataclassClassDef:
-		message = f"I could not find `{identifierDataclass = }` in `{logicalPathDataclass = }`."
+		message: str = f"I could not find `{identifierDataclass = }` in `{logicalPathDataclass = }`."
 		raise ValueError(message)
 
-	countingVariable = None
+	countingVariable: str | None = None
 	for aField in dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)): # pyright: ignore [reportArgumentType]
 		Official_fieldOrder.append(aField.name)
 		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathDataclass, dataclassClassDef, identifierDataclassInstance, aField)
@@ -145,12 +145,11 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 	"""
 	ingredientsTarget.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
 	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
-	changeReturnCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters)))
-	changeReturnCallable.visit(ingredientsTarget.astFunctionDef)
+	NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters))).visit(ingredientsTarget.astFunctionDef)
 	ingredientsTarget.astFunctionDef = unparseFindReplace(ingredientsTarget.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
 	return ingredientsTarget
 
-def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, targetCallableIdentifier: str, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
+def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, identifierCallee: str, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
 	"""Transform a caller function to interface with a dataclass-free target function.
 
 	(AI generated docstring)
@@ -184,13 +183,10 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 		The modified caller function with appropriate unpacking and repacking around the target call.
 
 	"""
-	astCallTargetCallable = Make.Call(Make.Name(targetCallableIdentifier), shatteredDataclass.listName4Parameters)
-	replaceAssignTargetCallable = NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier)), Then.replaceWith(Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=astCallTargetCallable)))
-	unpack4targetCallable = NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier)), Then.insertThisAbove(shatteredDataclass.listUnpack))
-	repack4targetCallable = NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier)), Then.insertThisBelow([shatteredDataclass.repack]))
-	replaceAssignTargetCallable.visit(ingredientsCaller.astFunctionDef)
-	unpack4targetCallable.visit(ingredientsCaller.astFunctionDef)
-	repack4targetCallable.visit(ingredientsCaller.astFunctionDef)
+	AssignAndCall: ast.Assign = Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=Make.Call(Make.Name(identifierCallee), shatteredDataclass.listName4Parameters))
+	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.replaceWith(AssignAndCall)).visit(ingredientsCaller.astFunctionDef)
+	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisAbove(shatteredDataclass.listUnpack)).visit(ingredientsCaller.astFunctionDef)
+	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisBelow([shatteredDataclass.repack])).visit(ingredientsCaller.astFunctionDef)
 	return ingredientsCaller
 
 

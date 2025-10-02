@@ -1,6 +1,5 @@
 """Configuration by dataclass."""
 
-from ast import Module
 from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
 from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy import autoDecodingRLE
@@ -8,15 +7,17 @@ from mapFolding import (
 	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal,
 	DatatypeLeavesTotal as TheDatatypeLeavesTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, packageSettings)
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.someAssemblyRequired import identifierDataclassInstanceDEFAULT, ShatteredDataclass
+from mapFolding.someAssemblyRequired import (
+	identifierCallableSourceDEFAULT, identifierDataclassDEFAULT, identifierDataclassInstanceDEFAULT,
+	logicalPathInfixDEFAULT, ShatteredDataclass)
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 from typing import cast
 import ast
 import dataclasses
 
-@dataclasses.dataclass
-class RecipeJobTheorem2: # slots?
+@dataclasses.dataclass(slots=True)
+class RecipeJobTheorem2:
 	"""Configuration recipe for generating map folding computation jobs.
 
 	This dataclass serves as the central configuration hub for the code transformation
@@ -92,15 +93,15 @@ class RecipeJobTheorem2: # slots?
 	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 	"""Deconstructed dataclass metadata for code transformation."""
 
-	# Source -----------------------------------------
-	source_astModule: Module = parseLogicalPath2astModule('mapFolding.syntheticModules.theorem2Numba')  # noqa: RUF009
+# ------- Source -----------------------------------------
+	source_astModule: ast.Module = parseLogicalPath2astModule(f'{packageSettings.identifierPackage}.{logicalPathInfixDEFAULT}.theorem2Numba')  # noqa: RUF009
 	"""Parsed AST of the source module containing the generic algorithm."""
-	sourceCountCallable: str = 'count'
+	identifierCallableSource: str = identifierCallableSourceDEFAULT
 	"""Name of the counting function to extract."""
 
-	sourceLogicalPathModuleDataclass: identifierDotAttribute = 'mapFolding.dataBaskets'
+	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{packageSettings.identifierPackage}.dataBaskets'
 	"""Logical path to the dataclass module."""
-	sourceDataclassIdentifier: str = 'MapFoldingState'
+	sourceDataclassIdentifier: str = identifierDataclassDEFAULT
 	"""Name of the source dataclass."""
 	sourceDataclassInstance: str = identifierDataclassInstanceDEFAULT
 	"""Instance identifier for the dataclass."""
@@ -110,7 +111,7 @@ class RecipeJobTheorem2: # slots?
 	sourcePackageIdentifier: str | None = packageSettings.identifierPackage
 	"""Name of the source package."""
 
-	# Filesystem, names of physical objects ------------------------------------------
+# ------- Filesystem, names of physical objects ------------------------------------------
 	pathPackage: PurePosixPath | None = None
 	"""Override path for the target package."""
 	pathModule: PurePosixPath | None = PurePosixPath(getPathRootJobDEFAULT())  # noqa: RUF009
@@ -120,23 +121,23 @@ class RecipeJobTheorem2: # slots?
 	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 	"""Path for writing fold count results."""
 
-	# Logical identifiers, as opposed to physical identifiers ------------------------
+# ------- Logical identifiers, as opposed to physical identifiers ------------------------
 	packageIdentifier: str | None = None
 	"""Target package identifier."""
 	logicalPathRoot: identifierDotAttribute | None = None
 	"""Logical path root; probably corresponds to physical filesystem directory."""
 	moduleIdentifier: str = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 	"""Target module identifier."""
-	countCallable: str = sourceCountCallable
+	countCallable: str = identifierCallableSource
 	"""Name of the counting function in generated module."""
-	dataclassIdentifier: str | None = sourceDataclassIdentifier
+	identifierDataclass: str | None = sourceDataclassIdentifier
 	"""Target dataclass identifier."""
-	dataclassInstance: str | None = sourceDataclassInstance
+	identifierDataclassInstance: str | None = sourceDataclassInstance
 	"""Target dataclass instance identifier."""
 	logicalPathModuleDataclass: identifierDotAttribute | None = sourceLogicalPathModuleDataclass
 	"""Logical path to target dataclass module."""
 
-	# Datatypes ------------------------------------------
+# ------- Datatypes ------------------------------------------
 	type DatatypeFoldsTotal = TheDatatypeFoldsTotal
 	"""Type alias for datatype linked to the magnitude of `foldsTotal`."""
 	type DatatypeElephino = TheDatatypeElephino
@@ -215,8 +216,8 @@ class RecipeJobTheorem2: # slots?
 		if self.pathFilenameFoldsTotal is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
 
-		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.dataclassIdentifier and self.dataclassInstance: # pyright: ignore[reportUnnecessaryComparison]
-			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.dataclassIdentifier, self.dataclassInstance)
+		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.identifierDataclass and self.identifierDataclassInstance: # pyright: ignore[reportUnnecessaryComparison]
+			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)
 
 def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> ast.AnnAssign | ast.Assign:
 	Ima___Assign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[identifier]

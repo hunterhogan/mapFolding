@@ -32,6 +32,9 @@ identifierCallableSourceDispatcherDEFAULT: Final[str] = 'doTheNeedful'
 identifierCountingDEFAULT: Final[str] = 'groupsOfFolds'
 """Default identifier for the primary counting variable in map folding computations."""
 
+identifierDataclassDEFAULT: Final[str] = 'MapFoldingState'
+"""Default identifier for the dataclass used in map folding computations."""
+
 identifierDataclassInstanceDEFAULT: Final[str] = 'state'
 """Default variable name for dataclass instances in generated code."""
 

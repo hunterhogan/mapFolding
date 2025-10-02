@@ -1,6 +1,5 @@
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.syntheticModules.A007822.asynchronousAnnexNumba import (
-	filterAsymmetricFolds, getSymmetricFoldsTotal, initializeConcurrencyManager)
+from mapFolding.syntheticModules.A007822.asynchronousAnnexNumba import filterAsymmetricFolds, getSymmetricFoldsTotal, initializeConcurrencyManager
 from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
 
 def count(state: MapFoldingState) -> MapFoldingState:
@@ -48,7 +47,7 @@ def count(state: MapFoldingState) -> MapFoldingState:
     state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
     return state
 
-def doTheNeedful(state: MapFoldingState, maxWorkers: int | None=None) -> MapFoldingState:
+def doTheNeedful(state: MapFoldingState, maxWorkers: int) -> MapFoldingState:
     state = transitionOnGroupsOfFolds(state)
     initializeConcurrencyManager(maxWorkers, state.groupsOfFolds)
     state.groupsOfFolds = 0

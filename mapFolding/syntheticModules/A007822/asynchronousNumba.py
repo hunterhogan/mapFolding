@@ -48,7 +48,7 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
         leaf1ndex += 1
     return (groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal)
 
-def doTheNeedful(state: MapFoldingState, maxWorkers: int | None=None) -> MapFoldingState:
+def doTheNeedful(state: MapFoldingState, maxWorkers: int) -> MapFoldingState:
     state = transitionOnGroupsOfFolds(state)
     initializeConcurrencyManager(maxWorkers, state.groupsOfFolds)
     state.groupsOfFolds = 0

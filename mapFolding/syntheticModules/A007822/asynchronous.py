@@ -144,7 +144,7 @@ def count(state: MapFoldingState) -> MapFoldingState:
     state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
     return state
 
-def doTheNeedful(state: MapFoldingState, maxWorkers: int | None=None) -> MapFoldingState:
+def doTheNeedful(state: MapFoldingState, maxWorkers: int) -> MapFoldingState:
     initializeConcurrencyManager(maxWorkers)
     state = count(state)
     return state

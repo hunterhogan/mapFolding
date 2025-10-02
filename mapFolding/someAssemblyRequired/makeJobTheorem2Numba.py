@@ -32,9 +32,9 @@ from astToolkit import (
 	Be, extractFunctionDef, IngredientsFunction, IngredientsModule, Make, NodeChanger, NodeTourist, Then)
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import autoDecodingRLE, raiseIfNone
-from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, packageSettings
+from mapFolding import DatatypeLeavesTotal, getFoldsTotalKnown, getPathFilenameFoldsTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.someAssemblyRequired import IfThis
+from mapFolding.someAssemblyRequired import dictionaryEstimatesMapFolding, IfThis
 from mapFolding.someAssemblyRequired._toolkitContainers import DatatypeConfiguration
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
@@ -119,7 +119,7 @@ def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFu
 	"""
 	linesLaunch: str = f"""
 if __name__ == '__main__':
-	with ProgressBar(total={job.foldsTotalEstimated}, update_interval=2) as statusUpdate:
+	with ProgressBar(total={job.foldsTotalEstimated//job.state.leavesTotal}, update_interval=2) as statusUpdate:
 		{job.countCallable}(statusUpdate)
 		foldsTotal = statusUpdate.n * {job.state.leavesTotal}
 		print('\\nmap {job.state.mapShape} =', foldsTotal)
@@ -132,16 +132,15 @@ if __name__ == '__main__':
 	ingredientsModule.imports.addImportFrom_asStr('numba_progress', numba_progressPythonClass)
 	ingredientsModule.imports.addImportFrom_asStr('numba_progress', numba_progressNumbaType)
 
-	ast_argNumbaProgress = ast.arg(arg=spices.numbaProgressBarIdentifier, annotation=ast.Name(id=numba_progressPythonClass, ctx=ast.Load()))
+	ast_argNumbaProgress = Make.arg(spices.numbaProgressBarIdentifier, annotation=Make.Name(numba_progressPythonClass))
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
 
-	findThis: Callable[[ast.AST], TypeIs[ast.AugAssign] | bool] = Be.AugAssign.targetIs(IfThis.isNameIdentifier(job.shatteredDataclass.countingVariableName.id))
-	doThat: Callable[[ast.AugAssign], ast.Expr] = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
-	countWithProgressBar: NodeChanger[ast.AugAssign, ast.Expr] = NodeChanger(findThis, doThat)
-	countWithProgressBar.visit(ingredientsFunction.astFunctionDef)
+	NodeChanger(
+		findThis = Be.AugAssign.targetIs(IfThis.isNameIdentifier(job.shatteredDataclass.countingVariableName.id))
+		, doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
+	).visit(ingredientsFunction.astFunctionDef)
 
-	removeReturnStatement = NodeChanger(Be.Return, Then.removeIt)
-	removeReturnStatement.visit(ingredientsFunction.astFunctionDef)
+	NodeChanger(Be.Return, Then.removeIt).visit(ingredientsFunction.astFunctionDef)
 	ingredientsFunction.astFunctionDef.returns = Make.Constant(value=None)
 
 	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
@@ -310,14 +309,15 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
+	foldsTotalEstimated: int = getFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
 	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
-	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
+	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal, foldsTotalEstimated=foldsTotalEstimated)
 	spices = SpicesJobNumba(useNumbaProgressBar=True, parametersNumba=parametersNumbaLight)
 	makeJobNumba(aJob, spices)
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (2,14)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (3,15)
 	fromMapShape(mapShape)
 
 # TODO Improve this module with lessons learned in `makeJobTheorem2codon`.

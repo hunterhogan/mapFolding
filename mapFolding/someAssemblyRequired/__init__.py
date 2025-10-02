@@ -82,6 +82,7 @@ from mapFolding.someAssemblyRequired.infoBooth import (
 	identifierModuleSourceAlgorithmDEFAULT as identifierModuleSourceAlgorithmDEFAULT,
 	logicalPathInfixAlgorithmDEFAULT as logicalPathInfixAlgorithmDEFAULT,
 	logicalPathInfixDEFAULT as logicalPathInfixDEFAULT,
+    identifierDataclassDEFAULT as identifierDataclassDEFAULT,
 )
 
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis

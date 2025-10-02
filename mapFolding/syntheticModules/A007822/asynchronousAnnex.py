@@ -1,16 +1,19 @@
-from concurrent.futures import Future as ConcurrentFuture, ThreadPoolExecutor
-from hunterMakesPy import raiseIfNone
-from mapFolding import Array1DLeavesTotal
+from concurrent.futures import Future as ConcurrentFuture
+from concurrent.futures import ThreadPoolExecutor
 from queue import Empty, Queue
 from threading import Thread
+
 import numpy
+from hunterMakesPy import raiseIfNone
+
+from mapFolding import Array1DLeavesTotal
 
 concurrencyManager = None
 groupsOfFoldsTotal: int = 0
 processingThread = None
 queueFutures: Queue[ConcurrentFuture[int]] = Queue()
 
-def initializeConcurrencyManager(maxWorkers: int | None=None, groupsOfFolds: int=0) -> None:
+def initializeConcurrencyManager(maxWorkers: int, groupsOfFolds: int=0) -> None:
     global concurrencyManager, queueFutures, groupsOfFoldsTotal, processingThread
     concurrencyManager = ThreadPoolExecutor(max_workers=maxWorkers)
     queueFutures = Queue()
