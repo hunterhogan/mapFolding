@@ -56,12 +56,10 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
 
 def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None) -> Path:
-	"""Get a standardized path and filename for the computed `foldsTotal` value.
+	"""Get a standardized filename and create a configurable path to store the computed `foldsTotal` value.
 
-	(AI generated docstring)
-
-	This function resolves paths for storing computation results, handling different input types including directories,
-	absolute paths, or relative paths. It ensures that all parent directories exist in the resulting path.
+	To help reduce duplicate code and to increase predictability, this function creates a standardized filename, has a default but
+	configurable path, and creates the path.
 
 	Parameters
 	----------
@@ -78,10 +76,9 @@ def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal
 	Notes
 	-----
 	The function creates any necessary directories in the path if they don't exist.
-
 	"""
 	if pathLikeWriteFoldsTotal is None:
-		pathFilenameFoldsTotal = getPathRootJobDEFAULT() / getFilenameFoldsTotal(mapShape)
+		pathFilenameFoldsTotal: Path = getPathRootJobDEFAULT() / getFilenameFoldsTotal(mapShape)
 	else:
 		pathLikeSherpa = Path(pathLikeWriteFoldsTotal)
 		if pathLikeSherpa.is_dir():

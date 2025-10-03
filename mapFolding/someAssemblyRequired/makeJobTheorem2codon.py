@@ -4,15 +4,16 @@ https://docs.exaloop.io/start/install/
 """
 
 from astToolkit import (
-	Be, extractFunctionDef, Grab, IngredientsFunction, IngredientsModule, Make, NodeChanger, parseLogicalPath2astModule,
-	Then)
+	Be, extractFunctionDef, Grab, identifierDotAttribute, IngredientsFunction, IngredientsModule, Make, NodeChanger,
+	parseLogicalPath2astModule, Then)
 from astToolkit.transformationTools import removeUnusedParameters, write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal
+from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import moveShatteredDataclass_arg2body, RecipeJobTheorem2
-from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
+from mapFolding.someAssemblyRequired.infoBooth import logicalPathInfixDEFAULT
+from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
 import subprocess
@@ -64,41 +65,59 @@ def _datatypeDefinitions(ingredientsFunction: IngredientsFunction, ingredientsMo
 	return ingredientsFunction, ingredientsModule
 
 def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
-	# On some assignment or comparison values, add a type constructor to ensure compatibility.
-	# On some values-as-indexer, add a type constructor to ensure indexing-method compatibility.
+	"""Ensure the variable is compiled to the correct type.
+
+	Add a type constructor to `identifier` to ensure compatibility if
+	- an incompatible type might be assigned to it,
+	- it might be compared with an incompatible type,
+	- it is used as an indexer but its type is not a valid indexer type.
+
+	Parameters
+	----------
+	ingredientsFunction : IngredientsFunction
+		Function to modify.
+	job : RecipeJobTheorem2
+		Configuration settings with identifiers and their type annotations.
+
+	Returns
+	-------
+	ingredientsFunction : IngredientsFunction
+		Modified function.
+	"""
 	for ast_arg in job.shatteredDataclass.list_argAnnotated4ArgumentsSpecification:
 		identifier: str = ast_arg.arg
 		annotation: ast.expr = raiseIfNone(ast_arg.annotation)
 
-		# `identifier` in Augmented Assignment, or in Assignments and value is Constant.
-		NodeChanger(findThis=IfThis.isAnyOf(
-				Be.AugAssign.targetIs(IfThis.isNestedNameIdentifier(identifier))
-				, IfThis.isAllOf(
-					Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
-					, Be.Assign.valueIs(Be.Constant))
+	# ------- `identifier` is target of Augmented Assignment, or --------------
+	# ------- `identifier` is target of Assignment and value is Constant. -----
+		NodeChanger(
+			IfThis.isAnyOf(
+							Be.AugAssign.targetIs(IfThis.isNestedNameIdentifier(identifier))
+			,   IfThis.isAllOf(Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
+							,  Be.Assign.valueIs(Be.Constant))
 			)
 			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
-		# `identifier` - 1.
+	# ------- `identifier` - 1. ----------------------------------------------
 		NodeChanger(Be.BinOp.leftIs(IfThis.isNestedNameIdentifier(identifier))
 			, doThat=lambda node, annotation=annotation: Grab.rightAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.right])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
-		# `identifier` in Comparison.
+	# ------- `identifier` in Comparison. -------------------------------------
 		NodeChanger(Be.Compare.leftIs(IfThis.isNestedNameIdentifier(identifier))
 			, doThat=lambda node, annotation=annotation: Grab.comparatorsAttribute(lambda at, annotation=annotation: Then.replaceWith([Make.Call(annotation, listParameters=[node.comparators[0]])])(at[0]))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
-		# `identifier` has exactly one index value.
+	# ------- `identifier` has exactly one index value. -----------------------
 		NodeChanger(IfThis.isAllOf(Be.Subscript.valueIs(IfThis.isNestedNameIdentifier(identifier))
 			, lambda node: not Be.Subscript.sliceIs(Be.Tuple)(node))
 			, doThat=lambda node: Grab.sliceAttribute(Then.replaceWith(Make.Call(Make.Name('int'), listParameters=[node.slice])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
-		# `identifier` has multiple index values.
+	# ------- `identifier` has multiple index values. -------------------------
 		NodeChanger(IfThis.isAllOf(Be.Subscript.valueIs(IfThis.isNestedNameIdentifier(identifier))
-			, Be.Subscript.sliceIs(Be.Tuple))
+								,  Be.Subscript.sliceIs(Be.Tuple))
 			, doThat=lambda node: Grab.sliceAttribute(Grab.eltsAttribute(
 				Then.replaceWith([
 					Make.Call(Make.Name('int'), listParameters=[cast('ast.Tuple', node.slice).elts[index]])
@@ -116,7 +135,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 	Parameters
 	----------
 	job : RecipeJobTheorem2
-		Configuration recipe containing source locations, target paths, and state.
+		Configuration recipe containing source locations, target paths, raw materials, and state.
 
 	"""
 	ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.countCallable)))
@@ -145,6 +164,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
 
 	if sys.platform == 'linux':
+		Path(job.pathFilenameModule).parent.mkdir(parents=True, exist_ok=True)
 		buildCommand: list[str] = ['codon', 'build', '--exe', '--release',
 			'--fast-math', '--enable-unsafe-fp-math', '--disable-exceptions',
 			'--mcpu=native',
@@ -175,12 +195,13 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	"""
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	pathModule = PurePosixPath(Path.home(), 'mapFolding', 'jobs')
-	source_astModule: ast.Module = parseLogicalPath2astModule('mapFolding.syntheticModules.A007822.theorem2Numba')
+	logicalPath2astModule: identifierDotAttribute = f'{packageSettings.identifierPackage}.{logicalPathInfixDEFAULT}.theorem2Numba'
+	source_astModule: ast.Module = parseLogicalPath2astModule(logicalPath2astModule)
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, source_astModule=source_astModule, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	makeJob(aJob)
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (1, 3)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (3, 10)
 	fromMapShape(mapShape)
 
