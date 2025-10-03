@@ -43,7 +43,7 @@ class mapFoldingPackageSettings(PackageSettings):
 	concurrencyPackage: str = 'multiprocessing'
 	"""Package identifier for concurrent execution operations."""
 # ruff: noqa: S311
-# TODO I made a `TypedDict` before I knew how to make dataclasses and classes. Think about other data structures.
+# TODO I made this a `TypedDict` before I knew how to make dataclasses and classes. Think about other data structures.
 OEISidMapFoldingManuallySet: dict[str, MetadataOEISidMapFoldingManuallySet] = {
 	'A000136': {
 		'getMapShape': lambda n: (1, n),
@@ -89,7 +89,6 @@ identifierPackageFALLBACK = "mapFolding"
 packageSettings = mapFoldingPackageSettings(identifierPackageFALLBACK=identifierPackageFALLBACK, OEISidMapFoldingManuallySet=OEISidMapFoldingManuallySet)
 """Global package settings."""
 
-"""Local directory path for storing cached OEIS sequence data and metadata."""
 OEISidManuallySet: dict[str, MetadataOEISidManuallySet] = {
 	'A000560': {'valuesTestValidation': [random.randint(3, 12)]},
 	'A000682': {'valuesTestValidation': [random.randint(3, 12), 32]},
@@ -101,6 +100,7 @@ OEISidManuallySet: dict[str, MetadataOEISidManuallySet] = {
 	'A060206': {'valuesTestValidation': [random.randint(3, 9)]},
 	'A077460': {'valuesTestValidation': [3, 4, random.randint(5, 8)]},
 	'A078591': {'valuesTestValidation': [random.randint(3, 10)]},
+	'A086345': {'valuesTestValidation': [random.randint(3, 10), random.randint(11, 20), random.randint(21, 30), random.randint(31, 40)]},
 	'A178961': {'valuesTestValidation': [random.randint(3, 11)]},
 	'A223094': {'valuesTestValidation': [random.randint(3, 11)]},
 	'A259702': {'valuesTestValidation': [random.randint(3, 13)]},
@@ -117,3 +117,4 @@ packageSettings = mapFoldingPackageSettings(
 
 # TODO integrate into packageSettings
 pathCache: Path = packageSettings.pathPackage / ".cache"
+"""Local directory path for storing cached OEIS sequence data and metadata."""

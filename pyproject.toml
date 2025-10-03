@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.16.2"
+version = "0.16.3"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -177,6 +177,7 @@ report = { exclude_lines = [
 run = { branch = true, concurrency = [
   "multiprocessing",
 ], data_file = "tests/coverage/.coverage", omit = [
+  "easyRun/",
   "getLLVMforNoReason.py",
   "mapFolding/reference/*",
   "mapFolding/tests/*",

@@ -237,28 +237,3 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
 	if foldsTotalRead != foldsTotal:
 		message = f"I wrote a test file to `{pathFilename = }` with contents of `{str(foldsTotal) = }`, but I read `{foldsTotalRead = }` from the file. Python says the values are not equal. Fix that now, so your computation doesn't get corrupted later. And be pro-social."
 		raise FileNotFoundError(message)
-
-def writeStringToHere(this: str, pathFilename: PathLike[str] | PurePath) -> None:
-	"""Write a string to a file, creating parent directories if needed.
-
-	(AI generated docstring)
-
-	This utility function provides a consistent interface for writing string content to files across the package. It
-	handles path creation and ensures proper string conversion.
-
-	Parameters
-	----------
-	this : str
-		The string content to write to the file.
-	pathFilename : PathLike[str] | PurePath
-		The target file path where the string should be written.
-
-	Notes
-	-----
-	This function creates all parent directories in the path if they don't exist, making it safe to use with newly
-	created directory structures.
-
-	"""
-	pathFilename = Path(pathFilename)
-	pathFilename.parent.mkdir(parents=True, exist_ok=True)
-	pathFilename.write_text(str(this))

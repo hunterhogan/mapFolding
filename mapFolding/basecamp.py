@@ -4,37 +4,39 @@ from collections.abc import Sequence
 from mapFolding import (
 	getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly, validateListDimensions)
 from os import PathLike
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from typing import Literal
 
 # ruff: noqa: PLC0415
 """TODO new flow paradigm, incomplete
 
-I don't want to FORCE people to use the meaningless OEIS ids without providing the definition of the ID at the same time.
+- I don't want to FORCE people to use the meaningless OEIS ids without providing the definition of the ID at the same time.
+- On the other hand, I don't have any evidence that anyone is using this package except me.
+- algorithms directory: manually coded algorithms or formulas.
+- 'basecamp' should be able to call any algorithm version.
+- Quickly call the algorithm or the algorithm's dispatcher, i.e., `doTheNeedful`.
+- `countFolds` will be a stable interface for multidimensional map folding, including synthetic modules.
+- `NOTcountingFolds` is sufficient for now. I'll make an analogue to `countFolds` for some algorithms if it would be useful.
 
-On the other hand, I don't have any evidence that anyone is using this package except me.
+- state vs ? environment?
+	In multidimensional map folding, computationDivisions is part of the state because it is used in the algorithm during a module
+	operation. In contrast, CPUlimit is not used in the algorithm, so I feel like it is not part of the state. Storing the state
+	in a databasket (i.e., a dataclass) makes things much easier.
 
-algorithms directory
-	manually coded algorithms or formulas
-	`countFolds` will be a stable interface for multidimensional map folding, including synthetic modules
-		This has special treatment because people may want to call mapShape not defined in OEIS
-	`countMeanders` will be a stable interface for meanders
-		This has special treatment because people may want to call meanders not defined in OEIS
-	an enhanced version of `oeisIDfor_n` will be a stable interface for calling by ID and n
+	Environment settings that I sometimes need:
+		Concurrency
+			CPUlimit.
+			Package for concurrency operations.
+			Settings for that package, if it were a GPU, for example.
+		Memorialization
+			Path
+			Filename standardization
+			Record only a(n), the entire state, or something else?
+		Status updates, such as tqdm.
 
-General flow structure
-	basecamp should call `doTheNeedful` instead of `count` and `doTheNeedful` should handle things like `initializeState`.
-	doTheNeedful
-		specific to that version of that algorithm
-		abstracts the API for that algorithm, so that algorithm (such as multidimensional map folding) has a stable interface
-		The last place to do defensive programming
-
-- Incomplete: how to count
-	- currently in parameters computationDivisions, CPUlimit, and flow
-
-- Flow in count______
-	- DEFENSIVE PROGRAMMING
-	- FAIL EARLY
+- Flow in basecamp
+	- Interpret parameters
+	- DEFENSIVE PROGRAMMING; FAIL EARLY
 	- Implement "common foundational logic".
 		- IDK what the correct technical term is, but I'm sure other people have researched excellent ways to do this.
 		- Example: in `countFolds`, every possible flow path needs `mapShape`. Therefore, `mapShape` is foundational logic that
@@ -42,36 +44,16 @@ General flow structure
 		- Example: in `countFolds`, some flow paths have more than one "task division" (i.e., the computation is divided into
 			multiple tasks), while other flow paths only have one task division. One reasonable perspective is that computing task
 			divisions is NOT "common foundational logic". My perspective for this example: to compute whether or not there are
-			task divisions and if so, how many task divisions is identical for all flow paths. Therefore, I handle computing task
-			divisions as "common foundational logic".
-		- Incomplete
-	- Initialize memorialization instructions, if asked
-	- MORE DEFENSIVE PROGRAMMING
-	- FAIL EARLIER THAN EARLY
-	- Incomplete
-	- DEFENSIVE PROGRAMMING ON BEHALF of downstream modules and functions
-	- FAIL SO EARLY IT IS BEFORE THE USER INSTALLS THE APP
-	- Incomplete
-	- REPEAT MANY OR ALL OF THE DEFENSIVE PROGRAMMING YOU HAVE ALREADY DONE
-
-	- Incomplete
+			task divisions is identical for all flow paths. Therefore, it is "common foundational logic".
+	- Initialize memorialization instructions, if asked.
 	- Pass control to the correct `doTheNeedful`
-	- I don't know how to "elegantly" pass control without putting `doTheNeedful` over `count______` in the stack, therefore,
+	- I don't know how to "elegantly" pass control without putting `doTheNeedful` on `count______` in the stack, therefore,
 		control will come back here.
-	- DO NOT, for the love of puppies and cookies, DO NOT use defensive programming here. Defensive programming AFTER a
-		four-week-long computation is a tacit admission of incompetent programming.
-	- Follow memorialization instructions: which means pass control to a function will tenaciously follow the instructions.
-	- return "a(n)" (as OEIS calls it), such as foldsTotal
-
+	- DO NOT, for the love of puppies and cookies, DO NOT use defensive programming when control returns here. Defensive
+		programming AFTER a four-week-long computation is a tacit admission of incompetent programming.
+	- Follow memorialization instructions: which means pass control to a function that will tenaciously follow the instructions.
+	- return "a(n)" (as OEIS calls it), such as foldsTotal.
 """
-
-# Parameters
-	# What you want to compute
-	# Memorialization
-	# Concurrency
-	# How you want to compute it
-# Interpretation of parameters
-	# Input data
 
 def countFolds(listDimensions: Sequence[int] | None = None
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
@@ -82,7 +64,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 				, flow: str | None = None
 				) -> int:
 	"""
-	Count the total number of distinct ways to fold a map.
+	Count the number of distinct ways to fold a map.
 
 	Mathematicians also describe this as folding a strip of stamps, and they usually call the total "number of distinct ways to
 	fold" a map the map's "foldings."
@@ -129,7 +111,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	Returns
 	-------
-	foldsTotal: Total number of distinct ways to fold a map of the given dimensions.
+	foldsTotal : int
+		Number of distinct ways to fold a map of the given dimensions.
 
 	Note well
 	---------
@@ -145,7 +128,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	computation time. If logicalCores >= `leavesTotal`, it will probably be faster. If logicalCores <= 2 * `leavesTotal`, it
 	will almost certainly be slower for all map dimensions.
 	"""
-	# mapShape ---------------------------------------------------------------------
+# ------- mapShape ---------------------------------------------------------------------
 
 	if mapShape:
 		pass
@@ -159,7 +142,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		)
 		raise ValueError(message)
 
-	# task division instructions -----------------------------------------------------
+# ------- task division instructions -----------------------------------------------------
 
 	if computationDivisions:
 		from mapFolding.beDRY import getLeavesTotal, getTaskDivisions, setProcessorLimit
@@ -171,59 +154,40 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		concurrencyLimit = 1
 		taskDivisions = 0
 
-	# memorialization instructions ---------------------------------------------
+# ------- memorialization instructions ---------------------------------------------
 
 	if pathLikeWriteFoldsTotal is not None:
-		pathFilenameFoldsTotal = getPathFilenameFoldsTotal(mapShape, pathLikeWriteFoldsTotal)
+		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(mapShape, pathLikeWriteFoldsTotal)
 		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
 	else:
 		pathFilenameFoldsTotal = None
 
-	# Flow control until I can figure out a good way ---------------------------------
-
+# ------- Algorithm version -----------------------------------------------------
 	if taskDivisions > 1:
 		from mapFolding.dataBaskets import ParallelMapFoldingState
-		mapFoldingParallelState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
-
 		from mapFolding.syntheticModules.countParallelNumba import doTheNeedful
 
-		# `listStatesParallel` exists so you can research the parallel computation.
-		foldsTotal, listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit) # pyright: ignore[reportUnusedVariable]  # noqa: RUF059
+		mapFoldingParallelState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
+		# `listStatesParallel` exists so you can research the parallel computation.
+		foldsTotal, _listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
+
+# ruff: noqa: E701
 	else:
+		match flow:
+			case 'daoOfMapFolding': from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+			case 'numba': from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
+			case 'theorem2': from mapFolding.syntheticModules.theorem2 import doTheNeedful
+			case 'theorem2Numba': from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
+			case 'theorem2Trimmed': from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
+			case _: from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+
 		from mapFolding.dataBaskets import MapFoldingState
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
-
-		if flow == 'daoOfMapFolding':
-			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
-			mapFoldingState = doTheNeedful(mapFoldingState)
-
-		elif flow == 'numba':
-			from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
-			mapFoldingState = doTheNeedful(mapFoldingState)
-
-		elif flow == 'theorem2' and any(dimension > 2 for dimension in mapShape):
-			from mapFolding.syntheticModules.theorem2 import doTheNeedful
-			mapFoldingState = doTheNeedful(mapFoldingState)
-
-		elif (flow == 'theorem2Numba' or taskDivisions == 0) and any(dimension > 2 for dimension in mapShape):
-			from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
-			mapFoldingState = transitionOnGroupsOfFolds(mapFoldingState)
-
-			from mapFolding.syntheticModules.dataPacking import sequential
-			mapFoldingState = sequential(mapFoldingState)
-
-		elif flow == 'theorem2Trimmed' and any(dimension > 2 for dimension in mapShape):
-			from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
-			mapFoldingState = doTheNeedful(mapFoldingState)
-
-		else:
-			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
-			mapFoldingState = doTheNeedful(mapFoldingState)
-
+		mapFoldingState = doTheNeedful(mapFoldingState)
 		foldsTotal = mapFoldingState.foldsTotal
 
-	# Follow memorialization instructions ---------------------------------------------
+# ------- Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameFoldsTotal is not None:
 		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
@@ -231,7 +195,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	return foldsTotal
 
 def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
-		# , pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None  # noqa: ERA001
+# TODO , pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 		, CPUlimit: bool | float | int | None = None  # noqa: FBT001
 		) -> int:
 	"""Do stuff."""
@@ -239,32 +203,20 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 	matched_oeisID: bool = True
 
 	match oeisID:
-		case 'A000136':
-			from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
-		case 'A000560':
-			from mapFolding.algorithms.oeisIDbyFormula import A000560 as doTheNeedful
-		case 'A001010':
-			from mapFolding.algorithms.oeisIDbyFormula import A001010 as doTheNeedful
-		case 'A001011':
-			from mapFolding.algorithms.oeisIDbyFormula import A001011 as doTheNeedful
-		case 'A005315':
-			from mapFolding.algorithms.oeisIDbyFormula import A005315 as doTheNeedful
-		case 'A060206':
-			from mapFolding.algorithms.oeisIDbyFormula import A060206 as doTheNeedful
-		case 'A077460':
-			from mapFolding.algorithms.oeisIDbyFormula import A077460 as doTheNeedful
-		case 'A078591':
-			from mapFolding.algorithms.oeisIDbyFormula import A078591 as doTheNeedful
-		case 'A178961':
-			from mapFolding.algorithms.oeisIDbyFormula import A178961 as doTheNeedful
-		case 'A223094':
-			from mapFolding.algorithms.oeisIDbyFormula import A223094 as doTheNeedful
-		case 'A259702':
-			from mapFolding.algorithms.oeisIDbyFormula import A259702 as doTheNeedful
-		case 'A301620':
-			from mapFolding.algorithms.oeisIDbyFormula import A301620 as doTheNeedful
-		case _:
-			matched_oeisID = False
+		case 'A000136': from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
+		case 'A000560': from mapFolding.algorithms.oeisIDbyFormula import A000560 as doTheNeedful
+		case 'A001010': from mapFolding.algorithms.oeisIDbyFormula import A001010 as doTheNeedful
+		case 'A001011': from mapFolding.algorithms.oeisIDbyFormula import A001011 as doTheNeedful
+		case 'A005315': from mapFolding.algorithms.oeisIDbyFormula import A005315 as doTheNeedful
+		case 'A060206': from mapFolding.algorithms.oeisIDbyFormula import A060206 as doTheNeedful
+		case 'A077460': from mapFolding.algorithms.oeisIDbyFormula import A077460 as doTheNeedful
+		case 'A078591': from mapFolding.algorithms.oeisIDbyFormula import A078591 as doTheNeedful
+		case 'A086345': from mapFolding.algorithms.A086345 import A086345 as doTheNeedful
+		case 'A178961': from mapFolding.algorithms.oeisIDbyFormula import A178961 as doTheNeedful
+		case 'A223094': from mapFolding.algorithms.oeisIDbyFormula import A223094 as doTheNeedful
+		case 'A259702': from mapFolding.algorithms.oeisIDbyFormula import A259702 as doTheNeedful
+		case 'A301620': from mapFolding.algorithms.oeisIDbyFormula import A301620 as doTheNeedful
+		case _: matched_oeisID = False
 	if matched_oeisID:
 		countTotal = doTheNeedful(oeis_n) # pyright: ignore[reportPossiblyUnboundVariable]
 	else:
@@ -326,35 +278,27 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 					case 'asynchronous':
 						from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
 						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
-
 					case 'asynchronousNumba':
 						from mapFolding.syntheticModules.A007822.asynchronousNumba import doTheNeedful
 						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
-
 					case 'asynchronousTheorem2':
 						from mapFolding.syntheticModules.A007822.asynchronousTheorem2 import doTheNeedful
 						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
-
 					case 'asynchronousTrimmed':
 						from mapFolding.syntheticModules.A007822.asynchronousTrimmed import doTheNeedful
 						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
-
 					case 'numba':
 						from mapFolding.syntheticModules.A007822.algorithmNumba import doTheNeedful
 						mapFoldingState = doTheNeedful(mapFoldingState)
-
 					case 'theorem2':
 						from mapFolding.syntheticModules.A007822.theorem2 import doTheNeedful
 						mapFoldingState = doTheNeedful(mapFoldingState)
-
 					case 'theorem2Numba':
 						from mapFolding.syntheticModules.A007822.theorem2Numba import doTheNeedful
 						mapFoldingState = doTheNeedful(mapFoldingState)
-
 					case 'theorem2Trimmed':
 						from mapFolding.syntheticModules.A007822.theorem2Trimmed import doTheNeedful
 						mapFoldingState = doTheNeedful(mapFoldingState)
-
 					case _:
 						from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful
 						mapFoldingState = doTheNeedful(mapFoldingState)
@@ -364,4 +308,3 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 				matched_oeisID = False
 
 	return countTotal
-

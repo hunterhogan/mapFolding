@@ -1,4 +1,5 @@
-from mapFolding.dataBaskets import Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
+from mapFolding.dataBaskets import Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, MapFoldingState
+from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from numba import jit
 
 @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
@@ -44,3 +45,28 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
     else:
         groupsOfFolds *= 2
     return (groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal)
+
+def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
+    state = transitionOnGroupsOfFolds(state)
+    mapShape: tuple[DatatypeLeavesTotal, ...] = state.mapShape
+    groupsOfFolds: DatatypeFoldsTotal = state.groupsOfFolds
+    gap1ndex: DatatypeElephino = state.gap1ndex
+    gap1ndexCeiling: DatatypeElephino = state.gap1ndexCeiling
+    indexDimension: DatatypeLeavesTotal = state.indexDimension
+    indexLeaf: DatatypeLeavesTotal = state.indexLeaf
+    indexMiniGap: DatatypeElephino = state.indexMiniGap
+    leaf1ndex: DatatypeLeavesTotal = state.leaf1ndex
+    leafConnectee: DatatypeLeavesTotal = state.leafConnectee
+    dimensionsUnconstrained: DatatypeLeavesTotal = state.dimensionsUnconstrained
+    countDimensionsGapped: Array1DLeavesTotal = state.countDimensionsGapped
+    gapRangeStart: Array1DElephino = state.gapRangeStart
+    gapsWhere: Array1DLeavesTotal = state.gapsWhere
+    leafAbove: Array1DLeavesTotal = state.leafAbove
+    leafBelow: Array1DLeavesTotal = state.leafBelow
+    leafComparison: Array1DLeavesTotal = state.leafComparison
+    connectionGraph: Array3DLeavesTotal = state.connectionGraph
+    dimensionsTotal: DatatypeLeavesTotal = state.dimensionsTotal
+    leavesTotal: DatatypeLeavesTotal = state.leavesTotal
+    groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal)
+    state = MapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, indexDimension=indexDimension, indexLeaf=indexLeaf, indexMiniGap=indexMiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, leafComparison=leafComparison)
+    return state

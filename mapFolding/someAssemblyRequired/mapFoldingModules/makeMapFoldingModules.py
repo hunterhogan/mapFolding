@@ -11,8 +11,8 @@ from mapFolding.someAssemblyRequired import (
 	logicalPathInfixDEFAULT, ShatteredDataclass)
 from mapFolding.someAssemblyRequired.makingModules_count import (
 	makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
-from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState, makeUnRePackDataclass
-from mapFolding.someAssemblyRequired.toolkitMakeModules import getLogicalPath, getModule, getPathFilename
+from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState
+from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
@@ -207,13 +207,10 @@ def makeMapFoldingModules() -> None:
 	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, logicalPathInfixDEFAULT, None)
+	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixDEFAULT, None)
-
-	astImportFrom: ast.ImportFrom = Make.ImportFrom(getLogicalPath(packageSettings.identifierPackage, logicalPathInfixDEFAULT, 'theorem2Numba'), list_alias=[Make.alias(identifierCallableSourceDEFAULT)])
-	makeUnRePackDataclass(astImportFrom)
+	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
 
 if __name__ == '__main__':
 	makeMapFoldingModules()
