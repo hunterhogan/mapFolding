@@ -1,31 +1,11 @@
 """
 Map folding AST transformation system: Specialized job generation and optimization implementation.
 
-This module implements the specialized job generation layer of the map folding AST transformation
-system, executing the complete transformation process to convert generic map folding algorithms
-into highly optimized, standalone computation modules. Building upon the configuration orchestration
-established in the recipe system, this module applies the full sequence of transformations from
-pattern recognition through Numba compilation to produce self-contained computational solutions
-optimized for specific map dimensions and calculation contexts.
+Each generated module targets a specific map shape and calculation mode.
 
-The transformation implementation addresses the computational demands of map folding research where
-calculations can require hours or days to complete. The specialization process converts abstract
-algorithms with flexible parameters into concrete, statically-optimized code that leverages
-just-in-time compilation for maximum performance. Each generated module targets specific map
-shapes and calculation modes, enabling aggressive compiler optimizations based on known constraints
-and embedded constants.
-
-The optimization process executes systematic transformations including static value embedding to
-replace parameterized values with compile-time constants, dead code elimination to remove unused
-variables and code paths, parameter internalization to convert function parameters into embedded
-variables, import optimization to replace generic imports with specific implementations, Numba
-decoration with appropriate compilation directives, progress integration for long-running calculations,
-and launcher generation for standalone execution entry points.
-
-The resulting modules represent the culmination of the entire AST transformation system, producing
-self-contained Python scripts that execute independently with dramatically improved performance
-compared to original generic algorithms while maintaining mathematical correctness and providing
-essential progress feedback capabilities for large-scale computational research.
+The optimization process executes systematic transformations including static value embedding, dead code elimination, parameter
+internalization to convert function parameters into embedded variables, Numba decoration with appropriate compilation directives,
+progress integration for long-running calculations, and launcher generation for standalone execution entry points.
 """
 
 from astToolkit import (
@@ -34,18 +14,13 @@ from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import autoDecodingRLE, raiseIfNone
 from mapFolding import DatatypeLeavesTotal, getFoldsTotalKnown, getPathFilenameFoldsTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.someAssemblyRequired import dictionaryEstimatesMapFolding, IfThis
-from mapFolding.someAssemblyRequired._toolkitContainers import DatatypeConfiguration
+from mapFolding.someAssemblyRequired import DatatypeConfiguration, dictionaryEstimatesMapFolding, IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import PurePosixPath
-from typing import cast, TYPE_CHECKING
-from typing_extensions import TypeIs
+from typing import cast
 import ast
-
-if TYPE_CHECKING:
-	from collections.abc import Callable
 
 listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal']
 
@@ -74,31 +49,14 @@ if __name__ == '__main__':
 	writeStream.write(str(foldsTotal))
 	writeStream.close()
 """
-	# from mapFolding.oeis import getFoldsTotalKnown  # noqa: ERA001
-	# print(foldsTotal == getFoldsTotalKnown({job.state.mapShape}))  # noqa: ERA001
 	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
-	changeReturnParallelCallable = NodeChanger(Be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName)))
-	changeReturnParallelCallable.visit(ingredientsCount.astFunctionDef)
+	NodeChanger(Be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName))).visit(ingredientsCount.astFunctionDef)
 	ingredientsCount.astFunctionDef.returns = job.shatteredDataclass.countingVariableAnnotation
 
 	return ingredientsModule, ingredientsCount
 
 def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2, spices: SpicesJobNumba) -> tuple[IngredientsModule, IngredientsFunction]:
-	"""Add progress tracking capabilities to a Numba-optimized function.
-
-	(AI generated docstring)
-
-	This function modifies both the module and the function to integrate Numba-compatible
-	progress tracking for long-running calculations. It performs several key transformations:
-
-	1. Adds a progress bar parameter to the function signature
-	2. Replaces counting increments with progress bar updates
-	3. Creates a launcher section that displays and updates progress
-	4. Configures file output to save results upon completion
-
-	The progress tracking is particularly important for map folding calculations
-	which can take hours or days to complete, providing visual feedback and
-	estimated completion times.
+	"""Add a tqdm progress bar to a Numba-optimized function.
 
 	Parameters
 	----------
@@ -115,8 +73,9 @@ def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFu
 	-------
 	moduleAndFunction : tuple[IngredientsModule, IngredientsFunction]
 		Modified module and function with integrated progress tracking capabilities.
-
 	"""
+# TODO When using the progress bar, `count` does not return `groupsOfFolds`, so `count` does not `*= 2`. So, I have to manually
+# change the update value. This should be dynamic.
 	linesLaunch: str = f"""
 if __name__ == '__main__':
 	with ProgressBar(total={job.foldsTotalEstimated//job.state.leavesTotal}, update_interval=2) as statusUpdate:
@@ -137,11 +96,11 @@ if __name__ == '__main__':
 
 	NodeChanger(
 		findThis = Be.AugAssign.targetIs(IfThis.isNameIdentifier(job.shatteredDataclass.countingVariableName.id))
-		, doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(1)])))
+		, doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(2)])))
 	).visit(ingredientsFunction.astFunctionDef)
 
 	NodeChanger(Be.Return, Then.removeIt).visit(ingredientsFunction.astFunctionDef)
-	ingredientsFunction.astFunctionDef.returns = Make.Constant(value=None)
+	ingredientsFunction.astFunctionDef.returns = Make.Constant(None)
 
 	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
 
@@ -176,7 +135,6 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	-------
 	modifiedFunction : IngredientsFunction
 		The modified function with parameters converted to initialized variables.
-
 	"""
 	ingredientsFunction.imports.update(job.shatteredDataclass.imports)
 
@@ -211,9 +169,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 
 				ingredientsFunction.astFunctionDef.body.insert(0, ImaAnnAssign)
 
-			findThis: Callable[[ast.AST], TypeIs[ast.arg] | bool] = IfThis.is_argIdentifier(ast_arg.arg)
-			remove_arg: NodeChanger[ast.arg, None] = NodeChanger(findThis, Then.removeIt)
-			remove_arg.visit(ingredientsFunction.astFunctionDef)
+			NodeChanger(IfThis.is_argIdentifier(ast_arg.arg), Then.removeIt).visit(ingredientsFunction.astFunctionDef)
 
 	ast.fix_missing_locations(ingredientsFunction.astFunctionDef)
 	return ingredientsFunction
@@ -252,9 +208,9 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 	listIdentifiersStaticValues: list[str] = listIdentifiersStaticValuesHARDCODED
 	for identifier in listIdentifiersStaticValues:
-		findThis: Callable[[ast.AST], TypeIs[ast.Name] | bool] = IfThis.isNameIdentifier(identifier)
-		doThat: Callable[[ast.Name], ast.Constant] = Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # noqa: S307
-		NodeChanger(findThis, doThat).visit(ingredientsCount.astFunctionDef)
+		NodeChanger(IfThis.isNameIdentifier(identifier)
+			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # noqa: S307
+		).visit(ingredientsCount.astFunctionDef)
 
 	ingredientsModule = IngredientsModule()
 	# This launcher eliminates the use of one identifier, so run it now and you can dynamically determine which variables are not used
@@ -268,11 +224,10 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 	for datatypeConfig in listDatatypeConfigurations:
 		ingredientsModule.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier)
-		statement = Make.Assign(
-			[Make.Name(datatypeConfig.datatypeIdentifier, ast.Store())],
-			Make.Name(datatypeConfig.typeIdentifier)
+		pseudoTypeAlias = Make.Assign([Make.Name(datatypeConfig.datatypeIdentifier, ast.Store())]
+			, Make.Name(datatypeConfig.typeIdentifier)
 		)
-		ingredientsModule.appendPrologue(statement=statement)
+		ingredientsModule.appendPrologue(statement=pseudoTypeAlias)
 
 	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
 
@@ -292,18 +247,8 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 		- `makeJobNumba` increases optimization especially by limiting its capabilities to just one set of parameters
 	- the synthesized module must run well as a standalone interpreted-Python script
 	- the next major optimization step will (probably) be to use the module synthesized by `makeJobNumba` to compile a standalone executable
-	- Nevertheless, at each major optimization step, the code is constantly being improved and optimized, so everything must be well organized (read: semantic) and able to handle a range of arbitrary upstream and not disrupt downstream transformations
-
-	Necessary
-	- Move the function's parameters to the function body,
-	- initialize identifiers with their state types and values,
-
-	Optimizations
-	- replace static-valued identifiers with their values
-	- narrowly focused imports
-
-	Minutia
-	- do not use `with` statement inside numba jitted code, except to use numba's obj mode
+	- Nevertheless, at each major optimization step, the code is constantly being improved and optimized, so everything must be
+		well organized (read: semantic) and able to handle a range of arbitrary upstream and not disrupt downstream transformations
 	"""
 
 def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
@@ -317,7 +262,7 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	makeJobNumba(aJob, spices)
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (3,15)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (8,8)
 	fromMapShape(mapShape)
 
 # TODO Improve this module with lessons learned in `makeJobTheorem2codon`.

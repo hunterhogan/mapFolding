@@ -31,3 +31,4 @@
 | 2025 April 8     | 623    |     |       |        |         |       | 312831   | custom module for job                      |
 | 2025 July 17     | 491    |     |       | 111    |         |       | 230151   | codon and custom module for job            |
 | 2025 July 21     |        |     |       |        |         |       | 306260   | Azure VM                                   |
+| 2025 October 03  |        |     |       |        |         |       | 256188   | 3.13, job, Numba                           |
