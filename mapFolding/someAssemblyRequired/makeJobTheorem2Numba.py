@@ -22,6 +22,7 @@ from pathlib import PurePosixPath
 from typing import cast
 import ast
 
+# TODO More convergence with `makeJobTheorem2codon`
 listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal']
 
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
@@ -213,7 +214,9 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 		).visit(ingredientsCount.astFunctionDef)
 
 	ingredientsModule = IngredientsModule()
-	# This launcher eliminates the use of one identifier, so run it now and you can dynamically determine which variables are not used
+# TODO Refactor the subtly complicated interactions of these launchers with `move_arg2FunctionDefDOTbodyAndAssignInitialValues`
+# Consider `astToolkit.transformationTools.removeUnusedParameters`.
+# Generalize some parts of the launchers, especially writing to disk. Writing to disk is NOT robust enough. It doesn't even try to make a directory.
 	if spices.useNumbaProgressBar:
 		ingredientsModule, ingredientsCount = addLauncherNumbaProgress(ingredientsModule, ingredientsCount, job, spices)
 		spices.parametersNumba['nogil'] = True
@@ -264,5 +267,3 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 if __name__ == '__main__':
 	mapShape: tuple[DatatypeLeavesTotal, ...] = (8,8)
 	fromMapShape(mapShape)
-
-# TODO Improve this module with lessons learned in `makeJobTheorem2codon`.

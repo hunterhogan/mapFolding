@@ -10,9 +10,8 @@ from astToolkit.transformationTools import removeUnusedParameters, write_astModu
 from hunterMakesPy import raiseIfNone
 from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.someAssemblyRequired import DatatypeConfiguration, IfThis
+from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import moveShatteredDataclass_arg2body, RecipeJobTheorem2
-from mapFolding.someAssemblyRequired.infoBooth import logicalPathInfixDEFAULT
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
@@ -22,7 +21,7 @@ import sys
 if TYPE_CHECKING:
 	from io import TextIOBase
 	import ast
-
+# TODO Converge with `makeJobTheorem2Numba`.
 # TODO replace with dynamic system. Probably use `Final` in the dataclass.
 listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal']
 
@@ -195,7 +194,7 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	"""
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	pathModule = PurePosixPath(Path.home(), 'mapFolding', 'jobs')
-	logicalPath2astModule: identifierDotAttribute = f'{packageSettings.identifierPackage}.{logicalPathInfixDEFAULT}.theorem2Numba'
+	logicalPath2astModule: identifierDotAttribute = f'{packageSettings.identifierPackage}.{default['logicalPath']['synthetic']}.theorem2Numba'
 	source_astModule: ast.Module = parseLogicalPath2astModule(logicalPath2astModule)
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, source_astModule=source_astModule, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)

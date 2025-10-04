@@ -4,29 +4,19 @@ from astToolkit import (
 	Then)
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT, identifierDataclassInstanceDEFAULT, IfThis,
-	logicalPathInfixAlgorithmDEFAULT)
+from mapFolding.someAssemblyRequired import default, defaultA007822, IfThis
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
-	A007822adjustFoldsTotal, astExprCall_filterAsymmetricFoldsDataclass, identifier_filterAsymmetricFolds,
-	identifierCounting, identifierDataclass, logicalPathInfixA007822, sourceCallableDispatcherA007822,
-	sourceCallableIdentifierA007822)
-from mapFolding.someAssemblyRequired.infoBooth import identifierCallableSourceDEFAULT
+	A007822adjustFoldsTotal, astExprCall_filterAsymmetricFoldsDataclass)
 from mapFolding.someAssemblyRequired.makingModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.toolkitMakeModules import (
 	getLogicalPath, getModule, getPathFilename, write_astModule)
 from pathlib import PurePath
 import ast
 
-identifier_asynchronous = 'asynchronous'
-identifier_getSymmetricFoldsTotal = 'getSymmetricFoldsTotal'
-identifier_initializeConcurrencyManager = 'initializeConcurrencyManager'
-identifier_processCompletedFutures = '_processCompletedFutures'
-
-astExprCall_initializeConcurrencyManager: ast.Expr = Make.Expr(Make.Call(Make.Name(identifier_initializeConcurrencyManager), listParameters=[Make.Name('maxWorkers')]))
+astExprCall_initializeConcurrencyManager: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultA007822['function']['initializeConcurrencyManager']), listParameters=[Make.Name('maxWorkers')]))
 AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
-	[Make.Attribute(Make.Name(identifierDataclass), identifierCounting, context=Make.Store())]
-	, value=Make.Call(Make.Name(identifier_getSymmetricFoldsTotal))
+	[Make.Attribute(Make.Name(defaultA007822['variable']['stateInstance']), defaultA007822['variable']['counting'], context=Make.Store())]
+	, value=Make.Call(Make.Name(defaultA007822['function']['getSymmetricFoldsTotal']))
 )
 
 def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute  | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
@@ -45,14 +35,14 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	Each `leafBelow` array will be 28 * 8-bits, so if the queue has only 0.3% of the total calls in it, that is 28 GiB of data.
 	"""
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
-		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableIdentifierA007822))
+		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultA007822['function']['counting']))
 		, doThat = Then.extractIt
 		).captureLastMatch(astModule))
 
 	NodeChanger(Be.Return, Then.insertThisAbove([A007822adjustFoldsTotal])).visit(astFunctionDef_count)
 
 	NodeChanger(
-		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(identifierDataclass, identifierCounting))
+		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(defaultA007822['variable']['stateInstance'], defaultA007822['variable']['counting']))
 		, doThat=Then.replaceWith(astExprCall_filterAsymmetricFoldsDataclass)
 		).visit(astFunctionDef_count)
 
@@ -62,7 +52,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	).visit(astFunctionDef_count)
 
 	NodeChanger(
-		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableIdentifierA007822))
+		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultA007822['function']['counting']))
 		, doThat=Then.replaceWith(astFunctionDef_count)
 		).visit(astModule)
 
@@ -80,7 +70,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 		).visit(astModule)
 
 	astImportFrom = ast.ImportFrom(getLogicalPath(packageSettings.identifierPackage, logicalPathInfix, identifierModule + 'Annex')
-			, [Make.alias(identifier_filterAsymmetricFolds), Make.alias(identifier_getSymmetricFoldsTotal), Make.alias(identifier_initializeConcurrencyManager)], 0)
+			, [Make.alias(defaultA007822['function']['filterAsymmetricFolds']), Make.alias(defaultA007822['function']['getSymmetricFoldsTotal']), Make.alias(defaultA007822['function']['initializeConcurrencyManager'])], 0)
 
 	astModule.body.insert(0, astImportFrom)
 
@@ -101,40 +91,40 @@ import numpy"""
 	del ImaString
 
 	ImaString = f"""concurrencyManager = None
-{identifierCounting}Total: int = 0
+{defaultA007822['variable']['counting']}Total: int = 0
 processingThread = None
 queueFutures: Queue[ConcurrentFuture[int]] = Queue()
 	"""
 	astModule.body.extend(ast.parse(ImaString).body)
 	del ImaString
 
-	ImaString = f"""def {identifier_initializeConcurrencyManager}(maxWorkers: int, {identifierCounting}: int = 0) -> None:
-	global concurrencyManager, queueFutures, {identifierCounting}Total, processingThread
+	ImaString = f"""def {defaultA007822['function']['initializeConcurrencyManager']}(maxWorkers: int, {defaultA007822['variable']['counting']}: int = 0) -> None:
+	global concurrencyManager, queueFutures, {defaultA007822['variable']['counting']}Total, processingThread
 	concurrencyManager = ThreadPoolExecutor(max_workers=maxWorkers)
 	queueFutures = Queue()
-	{identifierCounting}Total = {identifierCounting}
-	processingThread = Thread(target={identifier_processCompletedFutures})
+	{defaultA007822['variable']['counting']}Total = {defaultA007822['variable']['counting']}
+	processingThread = Thread(target={defaultA007822['function']['_processCompletedFutures']})
 	processingThread.start()
 	"""
-	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_initializeConcurrencyManager)))
+	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), defaultA007822['function']['initializeConcurrencyManager'])))
 	del ImaString
 
-	ImaString = f"""def {identifier_processCompletedFutures}() -> None:
-	global queueFutures, {identifierCounting}Total
+	ImaString = f"""def {defaultA007822['function']['_processCompletedFutures']}() -> None:
+	global queueFutures, {defaultA007822['variable']['counting']}Total
 	while True:
 		try:
 			claimTicket: ConcurrentFuture[int] = queueFutures.get(timeout=1)
 			if claimTicket is None:
 				break
-			{identifierCounting}Total += claimTicket.result()
+			{defaultA007822['variable']['counting']}Total += claimTicket.result()
 		except Empty:
 			continue
 	"""
-	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_processCompletedFutures)))
+	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), defaultA007822['function']['_processCompletedFutures'])))
 	del ImaString
 
-	ImaString = f"""def _{identifier_filterAsymmetricFolds}(leafBelow: Array1DLeavesTotal) -> int:
-	{identifierCounting} = 0
+	ImaString = f"""def _{defaultA007822['function']['filterAsymmetricFolds']}(leafBelow: Array1DLeavesTotal) -> int:
+	{defaultA007822['variable']['counting']} = 0
 	leafComparison: Array1DLeavesTotal = numpy.zeros_like(leafBelow)
 	leavesTotal = leafBelow.size - 1
 
@@ -156,30 +146,30 @@ queueFutures: Queue[ConcurrentFuture[int]] = Queue()
 				ImaSymmetricFold = False
 				break
 			leafConnectee += 1
-		{identifierCounting} += ImaSymmetricFold
+		{defaultA007822['variable']['counting']} += ImaSymmetricFold
 		indexDistance += 1
-	return {identifierCounting}
+	return {defaultA007822['variable']['counting']}
 	"""
-	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), f'_{identifier_filterAsymmetricFolds}')))
+	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), f'_{defaultA007822['function']['filterAsymmetricFolds']}')))
 	del ImaString
 
 	ImaString = f"""
-def {identifier_filterAsymmetricFolds}(leafBelow: Array1DLeavesTotal) -> None:
+def {defaultA007822['function']['filterAsymmetricFolds']}(leafBelow: Array1DLeavesTotal) -> None:
 	global concurrencyManager, queueFutures
-	queueFutures.put_nowait(raiseIfNone(concurrencyManager).submit(_{identifier_filterAsymmetricFolds}, leafBelow.copy()))
+	queueFutures.put_nowait(raiseIfNone(concurrencyManager).submit(_{defaultA007822['function']['filterAsymmetricFolds']}, leafBelow.copy()))
 	"""
-	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_filterAsymmetricFolds)))
+	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), defaultA007822['function']['filterAsymmetricFolds'])))
 	del ImaString
 
 	ImaString = f"""
-def {identifier_getSymmetricFoldsTotal}() -> int:
+def {defaultA007822['function']['getSymmetricFoldsTotal']}() -> int:
 	global concurrencyManager, queueFutures, processingThread
 	raiseIfNone(concurrencyManager).shutdown(wait=True)
 	queueFutures.put(None)
 	raiseIfNone(processingThread).join()
-	return {identifierCounting}Total
+	return {defaultA007822['variable']['counting']}Total
 	"""
-	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_getSymmetricFoldsTotal)))
+	astModule.body.append(raiseIfNone(extractFunctionDef(ast.parse(ImaString), defaultA007822['function']['getSymmetricFoldsTotal'])))
 	del ImaString
 	write_astModule(astModule, pathFilenameAnnex, packageSettings.identifierPackage)
 
@@ -193,14 +183,14 @@ def makeAsynchronousNumbaOnTheorem2(astModule: ast.Module, identifierModule: str
 
 	listAssignToMove: list[ast.Assign] = []
 
-	findThis = IfThis.isAnyOf(IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(identifierCountingDEFAULT))
-					, Be.AugAssign.targetIs(IfThis.isNameIdentifier(identifierCountingDEFAULT)))
+	findThis = IfThis.isAnyOf(IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(default['variable']['counting']))
+					, Be.AugAssign.targetIs(IfThis.isNameIdentifier(default['variable']['counting'])))
 	NodeTourist(findThis, Then.appendTo(listAssignToMove)).visit(astModule)
 
 	NodeChanger(findThis, Then.removeIt).visit(astModule)
 
 	NodeChanger(
-		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallableSourceDEFAULT))
+		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(default['function']['counting']))
 		, doThat=Then.insertThisBelow(listAssignToMove)
 	).visit(astModule)
 
@@ -217,20 +207,20 @@ def makeAsynchronousTheorem2(astModule: ast.Module, identifierModule: str, ident
 
 	astModule = parsePathFilename2astModule(pathFilename)
 
-	astAttribute = Make.Attribute(Make.Name(identifierDataclassInstanceDEFAULT), identifierCountingDEFAULT)
+	astAttribute = Make.Attribute(Make.Name(default['variable']['stateInstance']), default['variable']['counting'])
 	astAssign = Make.Assign([astAttribute], value=Make.Constant(0))
 
 	NodeChanger[ast.Call, ast.Call](
-		findThis = IfThis.isCallIdentifier(identifier_initializeConcurrencyManager)
+		findThis = IfThis.isCallIdentifier(defaultA007822['function']['initializeConcurrencyManager'])
 		, doThat = Grab.argsAttribute(lambda args: [*args, astAttribute]) # pyright: ignore[reportArgumentType]
 	).visit(astModule)
 
 	NodeChanger(
-		findThis = Be.Expr.valueIs(IfThis.isCallIdentifier(identifier_initializeConcurrencyManager))
+		findThis = Be.Expr.valueIs(IfThis.isCallIdentifier(defaultA007822['function']['initializeConcurrencyManager']))
 		, doThat = Then.insertThisBelow([astAssign])
 	).visit(astModule)
 
-	identifierAnnex: identifierDotAttribute = getLogicalPath(packageSettings.identifierPackage, logicalPathInfix, identifier_asynchronous + 'Annex')
+	identifierAnnex: identifierDotAttribute = getLogicalPath(packageSettings.identifierPackage, logicalPathInfix, defaultA007822['module']['asynchronous'] + 'Annex')
 	identifierAnnexNumba: identifierDotAttribute = identifierAnnex + 'Numba'
 
 	NodeChanger(
@@ -242,20 +232,20 @@ def makeAsynchronousTheorem2(astModule: ast.Module, identifierModule: str, ident
 
 	return pathFilename
 
-def _makeA007822AsynchronousModules() -> None:
+def makeA007822AsynchronousModules() -> None:
 
-	astModule: ast.Module = getModule(logicalPathInfix=logicalPathInfixAlgorithmDEFAULT)
-	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, 'asynchronous', None, logicalPathInfixA007822, sourceCallableDispatcherA007822)
+	astModule: ast.Module = getModule(logicalPathInfix=default['logicalPath']['algorithm'])
+	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultA007822['module']['asynchronous'], None, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
 
-	astModule = getModule(logicalPathInfix=logicalPathInfixA007822, identifierModule='asynchronous')
-	pathFilename = makeAsynchronousTheorem2(astModule, 'asynchronousTheorem2', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
-
-	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
+	astModule = getModule(logicalPathInfix=defaultA007822['logicalPath']['synthetic'], identifierModule=defaultA007822['module']['asynchronous'])
+	pathFilename = makeAsynchronousTheorem2(astModule, 'asynchronousTheorem2', None, defaultA007822['logicalPath']['synthetic'], default['function']['dispatcher'])
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = makeAsynchronousNumbaOnTheorem2(astModule, 'asynchronousNumba', None, logicalPathInfixA007822, identifierCallableSourceDispatcherDEFAULT)
+	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', None, defaultA007822['logicalPath']['synthetic'], default['function']['dispatcher'])
+
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = makeAsynchronousNumbaOnTheorem2(astModule, 'asynchronousNumba', None, defaultA007822['logicalPath']['synthetic'], default['function']['dispatcher'])
 
 if __name__ == '__main__':
-	_makeA007822AsynchronousModules()
+	makeA007822AsynchronousModules()
 

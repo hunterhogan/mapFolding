@@ -1,54 +1,44 @@
-from astToolkit import extractFunctionDef, identifierDotAttribute, Make  # noqa: D100
+from astToolkit import extractFunctionDef, Make  # noqa: D100
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT,
-	identifierDataclassInstanceDEFAULT, logicalPathInfixDEFAULT)
+from mapFolding.someAssemblyRequired import defaultA007822
 import ast
 
-identifierDataclass: str = identifierDataclassInstanceDEFAULT
-identifierCounting: str = identifierCountingDEFAULT
-logicalPathInfixA007822: identifierDotAttribute = logicalPathInfixDEFAULT + '.A007822'
-sourceCallableDispatcherA007822: str = identifierCallableSourceDispatcherDEFAULT
-sourceCallableIdentifierA007822: str = identifierCallableSourceDEFAULT
-
-identifier_filterAsymmetricFolds = 'filterAsymmetricFolds'
-
-ImaString = f"""
-def {identifier_filterAsymmetricFolds}({identifierDataclass}: MapFoldingState) -> MapFoldingState:
-	{identifierDataclass}.indexLeaf = 0
+ImaString: str = f"""
+def {defaultA007822['function']['filterAsymmetricFolds']}({defaultA007822['variable']['stateInstance']}: MapFoldingState) -> MapFoldingState:
+	{defaultA007822['variable']['stateInstance']}.indexLeaf = 0
 	leafConnectee = 0
-	while leafConnectee < {identifierDataclass}.leavesTotal + 1:
-		leafNumber = int({identifierDataclass}.leafBelow[{identifierDataclass}.indexLeaf])
-		{identifierDataclass}.leafComparison[leafConnectee] = (leafNumber - {identifierDataclass}.indexLeaf + {identifierDataclass}.leavesTotal) % {identifierDataclass}.leavesTotal
-		{identifierDataclass}.indexLeaf = leafNumber
+	while leafConnectee < {defaultA007822['variable']['stateInstance']}.leavesTotal + 1:
+		leafNumber = int({defaultA007822['variable']['stateInstance']}.leafBelow[{defaultA007822['variable']['stateInstance']}.indexLeaf])
+		{defaultA007822['variable']['stateInstance']}.leafComparison[leafConnectee] = (leafNumber - {defaultA007822['variable']['stateInstance']}.indexLeaf + {defaultA007822['variable']['stateInstance']}.leavesTotal) % {defaultA007822['variable']['stateInstance']}.leavesTotal
+		{defaultA007822['variable']['stateInstance']}.indexLeaf = leafNumber
 		leafConnectee += 1
 
-	indexInMiddle = {identifierDataclass}.leavesTotal // 2
-	{identifierDataclass}.indexMiniGap = 0
-	while {identifierDataclass}.indexMiniGap < {identifierDataclass}.leavesTotal + 1:
+	indexInMiddle = {defaultA007822['variable']['stateInstance']}.leavesTotal // 2
+	{defaultA007822['variable']['stateInstance']}.indexMiniGap = 0
+	while {defaultA007822['variable']['stateInstance']}.indexMiniGap < {defaultA007822['variable']['stateInstance']}.leavesTotal + 1:
 		ImaSymmetricFold = True
 		leafConnectee = 0
 		while leafConnectee < indexInMiddle:
-			if {identifierDataclass}.leafComparison[({identifierDataclass}.indexMiniGap + leafConnectee) % ({identifierDataclass}.leavesTotal + 1)] != {identifierDataclass}.leafComparison[({identifierDataclass}.indexMiniGap + {identifierDataclass}.leavesTotal - 1 - leafConnectee) % ({identifierDataclass}.leavesTotal + 1)]:
+			if {defaultA007822['variable']['stateInstance']}.leafComparison[({defaultA007822['variable']['stateInstance']}.indexMiniGap + leafConnectee) % ({defaultA007822['variable']['stateInstance']}.leavesTotal + 1)] != {defaultA007822['variable']['stateInstance']}.leafComparison[({defaultA007822['variable']['stateInstance']}.indexMiniGap + {defaultA007822['variable']['stateInstance']}.leavesTotal - 1 - leafConnectee) % ({defaultA007822['variable']['stateInstance']}.leavesTotal + 1)]:
 				ImaSymmetricFold = False
 				break
 			leafConnectee += 1
-		{identifierDataclass}.{identifierCounting} += ImaSymmetricFold
-		{identifierDataclass}.indexMiniGap += 1
+		{defaultA007822['variable']['stateInstance']}.{defaultA007822['variable']['counting']} += ImaSymmetricFold
+		{defaultA007822['variable']['stateInstance']}.indexMiniGap += 1
 
-	return {identifierDataclass}
-"""  # noqa: E501
+	return {defaultA007822['variable']['stateInstance']}
+"""
 
-FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(ast.parse(ImaString), identifier_filterAsymmetricFolds))
+FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(ast.parse(ImaString), defaultA007822['function']['filterAsymmetricFolds']))
 del ImaString
 
-ImaString = f"{identifierDataclass} = {identifier_filterAsymmetricFolds}({identifierDataclass})"
+ImaString = f"{defaultA007822['variable']['stateInstance']} = {defaultA007822['function']['filterAsymmetricFolds']}({defaultA007822['variable']['stateInstance']})"
 A007822incrementCount = ast.parse(ImaString).body[0]
 del ImaString
 
-ImaString = f'{identifierDataclass}.{identifierCounting} = ({identifierDataclass}.{identifierCounting} + 1) // 2'
+ImaString = f'{defaultA007822['variable']['stateInstance']}.{defaultA007822['variable']['counting']} = ({defaultA007822['variable']['stateInstance']}.{defaultA007822['variable']['counting']} + 1) // 2'
 A007822adjustFoldsTotal = ast.parse(ImaString).body[0]
 del ImaString
 
-astExprCall_filterAsymmetricFoldsDataclass: ast.Expr = Make.Expr(Make.Call(Make.Name(identifier_filterAsymmetricFolds), listParameters=[Make.Attribute(Make.Name(identifierDataclass), 'leafBelow')]))
-astExprCall_filterAsymmetricFoldsLeafBelow: ast.Expr = Make.Expr(Make.Call(Make.Name(identifier_filterAsymmetricFolds), listParameters=[Make.Name('leafBelow')]))
+astExprCall_filterAsymmetricFoldsDataclass: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultA007822['function']['filterAsymmetricFolds']), listParameters=[Make.Attribute(Make.Name(defaultA007822['variable']['stateInstance']), 'leafBelow')]))
+astExprCall_filterAsymmetricFoldsLeafBelow: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultA007822['function']['filterAsymmetricFolds']), listParameters=[Make.Name('leafBelow')]))

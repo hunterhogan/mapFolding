@@ -10,7 +10,7 @@ if __name__ == '__main__':
 			f"{(match:=countTotal == dictionaryOEIS[oeisID]['valuesKnown'][n])}\t"
 			f"\033[{(not match)*91}m"
 			f"{n}\t"
-			f"{countTotal}\t"
+			# f"{countTotal}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
 			"\033[0m\n"
 		)

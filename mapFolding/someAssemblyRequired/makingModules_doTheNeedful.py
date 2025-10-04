@@ -1,20 +1,13 @@
 """Make functions that are complementary to the `count` function and are often called by `doTheNeedful`."""
 from astToolkit import (
-	astModuleToIngredientsFunction, Be, DOT, extractFunctionDef, Grab, identifierDotAttribute, IngredientsFunction,
-	IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then)
+	Be, DOT, Grab, identifierDotAttribute, IngredientsFunction, IngredientsModule, LedgerOfImports, NodeChanger,
+	NodeTourist, Then)
 from astToolkit.transformationTools import inlineFunctionDef, write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, identifierCountingDEFAULT,
-	identifierModuleDataPackingDEFAULT, identifierModuleSourceAlgorithmDEFAULT, IfThis, logicalPathInfixAlgorithmDEFAULT,
-	logicalPathInfixDEFAULT, ShatteredDataclass)
-from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getPathFilename
-from mapFolding.someAssemblyRequired.transformationTools import (
-	shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
-from os import PathLike
+from mapFolding.someAssemblyRequired import default, IfThis
+from mapFolding.someAssemblyRequired.toolkitMakeModules import getPathFilename
 from pathlib import PurePath
-from typing import cast
 import ast
 
 def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
@@ -49,12 +42,12 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 		Filesystem path where the initialization module was written.
 
 	"""
-	sourceCallableIdentifier: identifierDotAttribute = identifierCallableSourceDEFAULT
+	sourceCallableIdentifier: identifierDotAttribute = default['function']['counting']
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = callableIdentifier or sourceCallableIdentifier
 
 	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	theCountingIdentifier: identifierDotAttribute = identifierCountingDEFAULT
+	theCountingIdentifier: identifierDotAttribute = default['variable']['counting']
 
 	findThis = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
 	doThat = Grab.testAttribute(Grab.andDoAllOf([Grab.opsAttribute(Then.replaceWith([ast.Eq()])), Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(theCountingIdentifier)))]))
@@ -64,58 +57,3 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 	write_astModule(IngredientsModule(ingredientsFunction), pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
-
-def makeUnRePackDataclass(astImportFrom: ast.ImportFrom, moduleIdentifier: str = identifierModuleDataPackingDEFAULT) -> PurePath:
-	"""Generate interface module for dataclass unpacking and repacking operations.
-
-	Parameters
-	----------
-	astImportFrom : ast.ImportFrom
-		Import statement specifying the target optimized function to call.
-
-	moduleIdentifier : str = identifierModuleDataPackingDEFAULT
-		Name for the generated interface module.
-
-	Returns
-	-------
-	pathFilename : PurePath
-		Filesystem path where the interface module was written.
-	"""
-	callableIdentifierHARDCODED: str = 'sequential'
-
-	algorithmSourceModule: identifierDotAttribute = identifierModuleSourceAlgorithmDEFAULT
-	callableIdentifier: str = callableIdentifierHARDCODED
-	logicalPathInfix: identifierDotAttribute = logicalPathInfixDEFAULT
-	logicalPathInfixAlgorithm: identifierDotAttribute = logicalPathInfixAlgorithmDEFAULT
-	sourceCallableIdentifier: str = identifierCallableSourceDispatcherDEFAULT
-
-	logicalPathSourceModule: identifierDotAttribute = '.'.join([packageSettings.identifierPackage, logicalPathInfixAlgorithm, algorithmSourceModule])  # noqa: FLY002
-
-	ingredientsFunction: IngredientsFunction = astModuleToIngredientsFunction(parseLogicalPath2astModule(logicalPathSourceModule), sourceCallableIdentifier)
-	ingredientsFunction.astFunctionDef.name = callableIdentifier
-
-	shatteredDataclass: ShatteredDataclass = shatter_dataclassesDOTdataclass(*findDataclass(ingredientsFunction))
-
-	ingredientsFunction.imports.update(shatteredDataclass.imports)
-	ingredientsFunction.imports.addAst(astImportFrom)
-	targetCallableIdentifier: str = astImportFrom.names[0].name
-	ingredientsFunction = raiseIfNone(unpackDataclassCallFunctionRepackDataclass(ingredientsFunction, targetCallableIdentifier, shatteredDataclass))
-	targetFunctionDef: ast.FunctionDef = raiseIfNone(extractFunctionDef(parseLogicalPath2astModule(raiseIfNone(astImportFrom.module)), targetCallableIdentifier))
-	astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
-			, doThat=Then.extractIt(DOT.value)).captureLastMatch(targetFunctionDef)))
-	astTuple.ctx = Make.Store()
-
-	changeAssignCallToTarget = NodeChanger(
-		findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-		, doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts))))
-	changeAssignCallToTarget.visit(ingredientsFunction.astFunctionDef)
-
-	ingredientsModule = IngredientsModule(ingredientsFunction)
-	ingredientsModule.removeImportFromModule('numpy')
-
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
-
-	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
-
-	return pathFilename
-

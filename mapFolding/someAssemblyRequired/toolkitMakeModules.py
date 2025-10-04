@@ -36,7 +36,7 @@ from astToolkit import (
 from autoflake import fix_code as autoflake_fix_code
 from hunterMakesPy import raiseIfNone, writeStringToHere
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import identifierModuleSourceAlgorithmDEFAULT, logicalPathInfixDEFAULT
+from mapFolding.someAssemblyRequired import default
 from os import PathLike
 from pathlib import PurePath
 from typing import Any
@@ -96,7 +96,7 @@ def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: ident
 		listLogicalPathParts.extend([module for module in identifierModule if module is not None])
 	return '.'.join(listLogicalPathParts)
 
-def getModule(identifierPackage: str | None = packageSettings.identifierPackage, logicalPathInfix: identifierDotAttribute | None = logicalPathInfixDEFAULT, identifierModule: str | None = identifierModuleSourceAlgorithmDEFAULT) -> ast.Module:
+def getModule(identifierPackage: str | None = packageSettings.identifierPackage, logicalPathInfix: identifierDotAttribute | None = default['logicalPath']['synthetic'], identifierModule: str | None = default['module']['algorithm']) -> ast.Module:
 	"""Get Module."""
 	logicalPathSourceModule: identifierDotAttribute = getLogicalPath(identifierPackage, logicalPathInfix, identifierModule)
 	astModule: ast.Module = parseLogicalPath2astModule(logicalPathSourceModule)

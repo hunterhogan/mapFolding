@@ -6,9 +6,7 @@ from astToolkit import (
 from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
 from hunterMakesPy import importLogicalPath2Identifier, raiseIfNone
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import (
-	DeReConstructField2ast, identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, IfThis,
-	logicalPathInfixDEFAULT, ShatteredDataclass)
+from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
 from mapFolding.someAssemblyRequired.makingModules_count import (
 	makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
 from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState
@@ -46,7 +44,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 		Filesystem path where the parallel module was written.
 
 	"""
-	sourceCallableIdentifier = identifierCallableSourceDEFAULT
+	sourceCallableIdentifier = default['function']['counting']
 	if identifierCallable is None:
 		identifierCallable = sourceCallableIdentifier
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
@@ -133,7 +131,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
 # START unpack/repack the dataclass function ------------------------------------------------
-	sourceCallableIdentifier = identifierCallableSourceDispatcherDEFAULT
+	sourceCallableIdentifier = default['function']['dispatcher']
 
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclassIdentifierParallel
@@ -195,22 +193,22 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 def makeMapFoldingModules() -> None:
 	"""Make multidimensional map folding modules."""
 	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename: PurePath = makeMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
+	pathFilename: PurePath = makeMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
 
 	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename = makeDaoOfMapFoldingParallelNumba(astModule, 'countParallelNumba', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
+	pathFilename = makeDaoOfMapFoldingParallelNumba(astModule, 'countParallelNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
 
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
-	makeInitializeState(astModule, 'initializeState', 'transitionOnGroupsOfFolds', logicalPathInfixDEFAULT)
+	makeInitializeState(astModule, default['module']['initializeState'], default['function']['initializeState'], default['logicalPath']['synthetic'])
 
 	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename = makeTheorem2(astModule, 'theorem2', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
+	pathFilename = makeTheorem2(astModule, 'theorem2', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
+	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, logicalPathInfixDEFAULT, identifierCallableSourceDispatcherDEFAULT)
+	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
 
 if __name__ == '__main__':
 	makeMapFoldingModules()

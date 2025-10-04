@@ -9,13 +9,11 @@ from astToolkit import (
 from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDEFAULT, identifierCountingDEFAULT, IfThis, ShatteredDataclass)
+from mapFolding.someAssemblyRequired import default, IfThis, ShatteredDataclass
 from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getLogicalPath, getPathFilename
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
-from os import PathLike
 from pathlib import PurePath
 from typing import cast
 import ast
@@ -42,7 +40,7 @@ def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifier
 		Filesystem path where the optimized module was written.
 
 	"""
-	sourceCallableIdentifier: str = identifierCallableSourceDEFAULT
+	sourceCallableIdentifier: str = default['function']['counting']
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
 
@@ -107,13 +105,13 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	identifierCallableInitializeDataclass = identifierCallableInitializeDataclassHARDCODED
 	identifierModuleInitializeDataclass = identifierModuleInitializeDataclassHARDCODED
 
-	sourceCallableIdentifier = identifierCallableSourceDEFAULT
+	sourceCallableIdentifier = default['function']['counting']
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
 
 	dataclassInstanceIdentifier: str = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 
-	theCountingIdentifier: str = identifierCountingDEFAULT
+	theCountingIdentifier: str = default['variable']['counting']
 	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(Make.Name(dataclassInstanceIdentifier), theCountingIdentifier), Make.Mult(), Make.Constant(2))
 
 	NodeChanger(
@@ -162,7 +160,7 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 		# Update any calls to the original function name with the new target function name
 		NodeChanger(
-			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(identifierCallableSourceDEFAULT)))
+			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(default['function']['counting'])))
 			, doThat = Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
 		).visit(ingredientsFunctionDispatcher.astFunctionDef)
 
@@ -182,7 +180,7 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 	return pathFilename
 
-def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate Numba-accelerated Theorem 2 implementation with dataclass decomposition.
 
 	Parameters
@@ -204,7 +202,7 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 		Filesystem path where the accelerated module was written.
 
 	"""
-	sourceCallableIdentifier = identifierCallableSourceDEFAULT
+	sourceCallableIdentifier = default['function']['counting']
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
 
@@ -244,7 +242,7 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 
 	return pathFilename
 
-def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate constrained Theorem 2 implementation by removing unnecessary logic.
 
 	Parameters
@@ -266,7 +264,7 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 		Filesystem path where the trimmed module was written.
 
 	"""
-	sourceCallableIdentifier: str = identifierCallableSourceDEFAULT
+	sourceCallableIdentifier: str = default['function']['counting']
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
 
@@ -286,7 +284,7 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 		# Update any calls to the original function name with the new target function name
 		NodeChanger(
-			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(identifierCallableSourceDEFAULT)))
+			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(default['function']['counting'])))
 			, doThat = Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
 		).visit(ingredientsFunctionDispatcher.astFunctionDef)
 

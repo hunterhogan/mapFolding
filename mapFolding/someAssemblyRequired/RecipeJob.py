@@ -7,9 +7,8 @@ from mapFolding import (
 	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal,
 	DatatypeLeavesTotal as TheDatatypeLeavesTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, packageSettings)
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDEFAULT, identifierDataclassDEFAULT, identifierDataclassInstanceDEFAULT,
-	logicalPathInfixDEFAULT, ShatteredDataclass)
+from mapFolding.someAssemblyRequired import default
+from mapFolding.someAssemblyRequired._toolkitContainers import ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 from typing import cast
@@ -94,16 +93,16 @@ class RecipeJobTheorem2:
 	"""Deconstructed dataclass metadata for code transformation."""
 
 # ------- Source -----------------------------------------
-	source_astModule: ast.Module = parseLogicalPath2astModule(f'{packageSettings.identifierPackage}.{logicalPathInfixDEFAULT}.theorem2Numba')  # noqa: RUF009
+	source_astModule: ast.Module = parseLogicalPath2astModule(f'{packageSettings.identifierPackage}.{default['logicalPath']['synthetic']}.theorem2Numba')  # noqa: RUF009
 	"""Parsed AST of the source module containing the generic algorithm."""
-	identifierCallableSource: str = identifierCallableSourceDEFAULT
+	identifierCallableSource: str = default['function']['counting']
 	"""Name of the counting function to extract."""
 
 	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{packageSettings.identifierPackage}.dataBaskets'
 	"""Logical path to the dataclass module."""
-	sourceDataclassIdentifier: str = identifierDataclassDEFAULT
+	sourceDataclassIdentifier: str = default['variable']['stateDataclass']
 	"""Name of the source dataclass."""
-	sourceDataclassInstance: str = identifierDataclassInstanceDEFAULT
+	sourceDataclassInstance: str = default['variable']['stateInstance']
 	"""Instance identifier for the dataclass."""
 
 	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageSettings.pathPackage)  # noqa: RUF009

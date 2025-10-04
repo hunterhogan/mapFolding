@@ -11,8 +11,9 @@ on empirical measurements and theoretical analysis of map folding algorithms for
 specific dimensional configurations.
 """
 
+from copy import deepcopy
 from hunterMakesPy import identifierDotAttribute
-from typing import Final
+from typing import Final, TypedDict
 
 dictionaryEstimatesMapFolding: Final[dict[tuple[int, ...], int]] = {
 	(2,2,2,2,2,2,2,2): 798148657152000,
@@ -23,30 +24,40 @@ dictionaryEstimatesMapFolding: Final[dict[tuple[int, ...], int]] = {
 }
 """Estimates of multidimensional map folding `foldsTotal`."""
 
-identifierCallableSourceDEFAULT: Final[str] = 'count'
-"""Default identifier for the core counting function in algorithms."""
+class Default(TypedDict):
+	"""Default identifiers."""
 
-identifierCallableSourceDispatcherDEFAULT: Final[str] = 'doTheNeedful'
-"""Default identifier for dispatcher functions that route computational tasks."""
+	function: dict[str, str]
+	logicalPath: dict[str, identifierDotAttribute]
+	module: dict[str, str]
+	variable: dict[str, str]
 
-identifierCountingDEFAULT: Final[str] = 'groupsOfFolds'
-"""Default identifier for the primary counting variable in map folding computations."""
+default = Default(
+	function = {
+		'counting': 'count',
+		'dispatcher': 'doTheNeedful',
+		'initializeState': 'transitionOnGroupsOfFolds',
+	},
+	logicalPath = {
+		'algorithm': 'algorithms',
+		'synthetic': 'syntheticModules',
+	},
+	module = {
+		'algorithm': 'daoOfMapFolding',
+		'initializeState': 'initializeState',
+	},
+	variable = {
+		'counting': 'groupsOfFolds',
+		'stateDataclass': 'MapFoldingState',
+		'stateInstance': 'state',
+	},
+)
 
-identifierDataclassDEFAULT: Final[str] = 'MapFoldingState'
-"""Default identifier for the dataclass used in map folding computations."""
-
-identifierDataclassInstanceDEFAULT: Final[str] = 'state'
-"""Default variable name for dataclass instances in generated code."""
-
-identifierModuleDataPackingDEFAULT: Final[str] = 'dataPacking'
-"""Default identifier for modules containing data packing and unpacking functions."""
-
-identifierModuleSourceAlgorithmDEFAULT: Final[str] = 'daoOfMapFolding'
-"""Default identifier for the algorithm source module containing the base implementation."""
-
-logicalPathInfixAlgorithmDEFAULT: Final[identifierDotAttribute] = 'algorithms'
-"""Default logical path component for handmade algorithms."""
-
-logicalPathInfixDEFAULT: Final[identifierDotAttribute] = 'syntheticModules'
-"""Default logical path component for organizing synthetic generated modules."""
-
+defaultA007822: Default = deepcopy(default)
+defaultA007822['function']['_processCompletedFutures'] = '_processCompletedFutures'
+defaultA007822['function']['filterAsymmetricFolds'] = 'filterAsymmetricFolds'
+defaultA007822['function']['getSymmetricFoldsTotal'] = 'getSymmetricFoldsTotal'
+defaultA007822['function']['initializeConcurrencyManager'] = 'initializeConcurrencyManager'
+defaultA007822['logicalPath']['synthetic'] += '.A007822'
+defaultA007822['module']['algorithm'] = 'algorithm'
+defaultA007822['module']['asynchronous'] = 'asynchronous'

@@ -6,16 +6,16 @@ from mapFolding.dataBaskets import MatrixMeandersNumPyState
 def countBigInt(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
     """Count meanders with matrix transfer algorithm using Python `int` (*int*eger) contained in a Python `dict` (*dict*ionary).
 
-	Parameters
-	----------
-	state : MatrixMeandersState
-		The algorithm state.
+    Parameters
+    ----------
+    state : MatrixMeandersState
+        The algorithm state.
 
-	Notes
-	-----
-	The matrix transfer algorithm is sophisticated, but this implementation is straightforward: compute each index one at a time,
-	compute each `arcCode` one at a time, and compute each type of analysis one at a time.
-	"""
+    Notes
+    -----
+    The matrix transfer algorithm is sophisticated, but this implementation is straightforward: compute each index one at a time,
+    compute each `arcCode` one at a time, and compute each type of analysis one at a time.
+    """
     dictionaryArcCodeToCrossings: dict[int, int] = {}
     while state.boundary > 0 and areIntegersWide(state):
         state.boundary -= 1

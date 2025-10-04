@@ -29,7 +29,7 @@ if __name__ == '__main__':
 	flow = 'matrixNumPy'
 
 	for oeisID in [
-			# 'A005316',
+			'A005316',
 			'A000682',
 				]:
 		sys.stdout.write(f"\n{oeisID}\n")

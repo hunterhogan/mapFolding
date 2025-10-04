@@ -3,8 +3,7 @@ from astToolkit import (
 	astModuleToIngredientsFunction, Be, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then)
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import (
-	identifierCallableSourceDEFAULT, identifierCallableSourceDispatcherDEFAULT, IfThis, logicalPathInfixDEFAULT)
+from mapFolding.someAssemblyRequired import default, IfThis
 from mapFolding.someAssemblyRequired.toolkitMakeModules import (
 	findDataclass, getModule, getPathFilename, write_astModule)
 from pathlib import PurePath
@@ -12,14 +11,14 @@ import ast
 
 identifierDataclassNumPyHARDCODED = 'MatrixMeandersNumPyState'
 
-logicalPathInfixMeanders: str = logicalPathInfixDEFAULT + '.meanders'
+logicalPathInfixMeanders: str = default['logicalPath']['synthetic'] + '.meanders'
 
 def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Make `countBigInt` module for meanders using `MatrixMeandersNumPyState` dataclass."""
 	identifierDataclassNumPy: str = identifierDataclassNumPyHARDCODED
 	_logicalPathDataclass, identifierDataclassOld, identifierDataclassInstance = findDataclass(astModuleToIngredientsFunction(astModule, raiseIfNone(sourceCallableDispatcher)))
 
-	NodeChanger(findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(identifierCallableSourceDEFAULT))
+	NodeChanger(findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(default['function']['counting']))
 		, doThat=Grab.nameAttribute(Then.replaceWith(raiseIfNone(callableIdentifier)))
 	).visit(astModule)
 
@@ -56,8 +55,11 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 
 	return pathFilename
 
-if __name__ == '__main__':
+def makeMeandersModules() -> None:
+	"""Make meanders modules."""
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms', identifierModule='matrixMeanders')
-	pathFilename: PurePath = makeCountBigInt(astModule, 'bigInt', 'countBigInt', logicalPathInfixMeanders, identifierCallableSourceDispatcherDEFAULT)
+	pathFilename: PurePath = makeCountBigInt(astModule, 'bigInt', 'countBigInt', logicalPathInfixMeanders, default['function']['dispatcher'])
 
+if __name__ == '__main__':
+	makeMeandersModules()
 
