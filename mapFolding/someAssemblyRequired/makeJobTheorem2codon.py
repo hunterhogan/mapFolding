@@ -11,7 +11,8 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfThis
-from mapFolding.someAssemblyRequired.RecipeJob import moveShatteredDataclass_arg2body, RecipeJobTheorem2
+from mapFolding.someAssemblyRequired.RecipeJob import (
+	customizeDatatypeViaImport, moveShatteredDataclass_arg2body, RecipeJobTheorem2)
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
@@ -21,18 +22,13 @@ import sys
 if TYPE_CHECKING:
 	from io import TextIOBase
 	import ast
-# TODO Converge with `makeJobTheorem2Numba`.
-# TODO replace with dynamic system. Probably use `Final` in the dataclass.
-listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal']
 
-# TODO Dynamically calculate the bitwidth of each datatype.
+# TODO Converge with `makeJobTheorem2Numba`.
+
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeElephino'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numpy', typeIdentifier='int64', type_asname='DatatypeFoldsTotal'),
-]
-
-listNumPy_dtype: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DLeavesTotal'),
 	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DElephino'),
 	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
@@ -53,15 +49,6 @@ def _addWriteFoldsTotal(ingredientsFunction: IngredientsFunction, job: RecipeJob
 	).visit(ingredientsFunction.astFunctionDef)
 
 	return ingredientsFunction
-
-def _datatypeDefinitions(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule) -> tuple[IngredientsFunction, IngredientsModule]:
-	for datatypeConfig in [*listDatatypeConfigurations, *listNumPy_dtype]:
-		ingredientsFunction.imports.removeImportFrom(datatypeConfig.typeModule, None, datatypeConfig.datatypeIdentifier)
-		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier, datatypeConfig.type_asname)
-
-	ingredientsFunction.imports.removeImportFromModule('mapFolding.dataBaskets')
-
-	return ingredientsFunction, ingredientsModule
 
 def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
 	"""Ensure the variable is compiled to the correct type.
@@ -141,8 +128,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 	ingredientsCount.astFunctionDef.decorator_list = []
 
 	# Replace identifiers-with-static-values with their values.
-	listIdentifiersStaticValues: list[str] = listIdentifiersStaticValuesHARDCODED
-	for identifier in listIdentifiersStaticValues:
+	for identifier in job.shatteredDataclass.listIdentifiersStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
 			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # noqa: S307
 		).visit(ingredientsCount.astFunctionDef)
@@ -158,7 +144,9 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 		Make.If(Make.Compare(Make.Name('__name__'), [Make.Eq()], [Make.Constant('__main__')])
 			, body=[Make.Expr(Make.Call(Make.Name(job.countCallable)))])]))
 
-	ingredientsCount, ingredientsModule = _datatypeDefinitions(ingredientsCount, ingredientsModule)
+	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, listDatatypeConfigurations)
+
+	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
 
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
 
@@ -178,6 +166,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 		sys.stdout.write(f"sudo systemd-run --unit={job.moduleIdentifier} --nice=-10 --property=CPUAffinity=0 {job.pathFilenameModule.with_suffix('')}\n")
 	else:
 		write_astModule(ingredientsModule, pathFilename=job.pathFilenameModule, packageName=job.packageIdentifier)
+		sys.stdout.write(f"python {Path(job.pathFilenameModule)}\n")
 
 def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	"""Create a binary executable for a map-folding job from map dimensions.
@@ -201,6 +190,6 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	makeJob(aJob)
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (3, 10)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (3, 5)
 	fromMapShape(mapShape)
 

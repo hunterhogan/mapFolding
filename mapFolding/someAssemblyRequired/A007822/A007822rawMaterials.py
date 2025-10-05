@@ -3,8 +3,24 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import defaultA007822
 import ast
 
+ImaString = f"""
+def getListIndicesSymmetricInGroupOfFolds({defaultA007822['variable']['stateInstance']}: {defaultA007822['variable']['stateDataclass']}) -> list[list[tuple[int, int]]]:
+	indexAtMidpoint: int = {defaultA007822['variable']['stateInstance']}.leavesTotal // 2
+	normalizedRangeLeft: list[int] = [*range({defaultA007822['variable']['stateInstance']}.leavesTotal + 1), *range((({defaultA007822['variable']['stateInstance']}.leavesTotal + 1)// 2) - 1)]
+	normalizedRangeRight: list[int] = [*range({defaultA007822['variable']['stateInstance']}.leavesTotal - 2, -1, -1), *range({defaultA007822['variable']['stateInstance']}.leavesTotal, indexAtMidpoint - 1, -1)]
+	listIndicesSymmetricInGroupOfFolds: list[list[tuple[int, int]]] = []
+	for group in range({defaultA007822['variable']['stateInstance']}.leavesTotal + 1):
+		normalIndicesLeft: list[int] = normalizedRangeLeft[group:group+indexAtMidpoint]
+		normalIndicesRight: list[int] = normalizedRangeRight[{defaultA007822['variable']['stateInstance']}.leavesTotal-group:{defaultA007822['variable']['stateInstance']}.leavesTotal-group+indexAtMidpoint]
+		listIndicesSymmetric: list[tuple[int, int]] = [(indexLeft, indexRight) for indexLeft, indexRight in zip(normalIndicesLeft, normalIndicesRight, strict=True)]
+		listIndicesSymmetricInGroupOfFolds.append(listIndicesSymmetric)
+	return listIndicesSymmetricInGroupOfFolds
+"""
+FunctionDefGetIndices: ast.FunctionDef = raiseIfNone(extractFunctionDef(ast.parse(ImaString), 'getListIndicesSymmetricInGroupOfFolds'))
+del ImaString
+
 ImaString: str = f"""
-def {defaultA007822['function']['filterAsymmetricFolds']}({defaultA007822['variable']['stateInstance']}: MapFoldingState) -> MapFoldingState:
+def {defaultA007822['function']['filterAsymmetricFolds']}({defaultA007822['variable']['stateInstance']}: {defaultA007822['variable']['stateDataclass']}) -> {defaultA007822['variable']['stateDataclass']}:
 	{defaultA007822['variable']['stateInstance']}.indexLeaf = 0
 	leafConnectee = 0
 	while leafConnectee < {defaultA007822['variable']['stateInstance']}.leavesTotal + 1:

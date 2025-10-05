@@ -1,7 +1,7 @@
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.dataBaskets import SymmetricFoldsState
 from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
 
-def count(state: MapFoldingState) -> MapFoldingState:
+def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
     while state.leaf1ndex > 4:
         if state.leafBelow[0] == 1:
             if state.leaf1ndex > state.leavesTotal:
@@ -69,7 +69,7 @@ def count(state: MapFoldingState) -> MapFoldingState:
     state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
     return state
 
-def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
+def doTheNeedful(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state = transitionOnGroupsOfFolds(state)
     state = count(state)
     return state

@@ -72,14 +72,13 @@ def unRepackParallelMapFoldingState(state: ParallelMapFoldingState) -> ParallelM
     gapsWhere: Array1DLeavesTotal = state.gapsWhere
     leafAbove: Array1DLeavesTotal = state.leafAbove
     leafBelow: Array1DLeavesTotal = state.leafBelow
-    leafComparison: Array1DLeavesTotal = state.leafComparison
     connectionGraph: Array3DLeavesTotal = state.connectionGraph
     dimensionsTotal: DatatypeLeavesTotal = state.dimensionsTotal
     leavesTotal: DatatypeLeavesTotal = state.leavesTotal
     taskDivisions: DatatypeLeavesTotal = state.taskDivisions
     taskIndex: DatatypeLeavesTotal = state.taskIndex
     groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal, taskDivisions, taskIndex = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal, taskDivisions, taskIndex)
-    state = ParallelMapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, indexDimension=indexDimension, indexLeaf=indexLeaf, indexMiniGap=indexMiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, leafComparison=leafComparison, taskDivisions=taskDivisions, taskIndex=taskIndex)
+    state = ParallelMapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, indexDimension=indexDimension, indexLeaf=indexLeaf, indexMiniGap=indexMiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, taskDivisions=taskDivisions, taskIndex=taskIndex)
     return state
 
 def doTheNeedful(state: ParallelMapFoldingState, concurrencyLimit: int) -> tuple[int, list[ParallelMapFoldingState]]:

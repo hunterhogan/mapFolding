@@ -183,14 +183,14 @@ def makeAsynchronousNumbaOnTheorem2(astModule: ast.Module, identifierModule: str
 
 	listAssignToMove: list[ast.Assign] = []
 
-	findThis = IfThis.isAnyOf(IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(default['variable']['counting']))
-					, Be.AugAssign.targetIs(IfThis.isNameIdentifier(default['variable']['counting'])))
+	findThis = IfThis.isAnyOf(IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(defaultA007822['variable']['counting']))
+					, Be.AugAssign.targetIs(IfThis.isNameIdentifier(defaultA007822['variable']['counting'])))
 	NodeTourist(findThis, Then.appendTo(listAssignToMove)).visit(astModule)
 
 	NodeChanger(findThis, Then.removeIt).visit(astModule)
 
 	NodeChanger(
-		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(default['function']['counting']))
+		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(defaultA007822['function']['counting']))
 		, doThat=Then.insertThisBelow(listAssignToMove)
 	).visit(astModule)
 
@@ -207,7 +207,7 @@ def makeAsynchronousTheorem2(astModule: ast.Module, identifierModule: str, ident
 
 	astModule = parsePathFilename2astModule(pathFilename)
 
-	astAttribute = Make.Attribute(Make.Name(default['variable']['stateInstance']), default['variable']['counting'])
+	astAttribute = Make.Attribute(Make.Name(defaultA007822['variable']['stateInstance']), defaultA007822['variable']['counting'])
 	astAssign = Make.Assign([astAttribute], value=Make.Constant(0))
 
 	NodeChanger[ast.Call, ast.Call](
@@ -235,16 +235,20 @@ def makeAsynchronousTheorem2(astModule: ast.Module, identifierModule: str, ident
 def makeA007822AsynchronousModules() -> None:
 
 	astModule: ast.Module = getModule(logicalPathInfix=default['logicalPath']['algorithm'])
-	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultA007822['module']['asynchronous'], None, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
+	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultA007822['module']['asynchronous'], defaultA007822['function']['counting']
+		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
 
 	astModule = getModule(logicalPathInfix=defaultA007822['logicalPath']['synthetic'], identifierModule=defaultA007822['module']['asynchronous'])
-	pathFilename = makeAsynchronousTheorem2(astModule, 'asynchronousTheorem2', None, defaultA007822['logicalPath']['synthetic'], default['function']['dispatcher'])
+	pathFilename = makeAsynchronousTheorem2(astModule, 'asynchronousTheorem2', defaultA007822['function']['counting']
+		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', None, defaultA007822['logicalPath']['synthetic'], default['function']['dispatcher'])
+	pathFilename = trimTheorem2(astModule, 'asynchronousTrimmed', defaultA007822['function']['counting']
+		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = makeAsynchronousNumbaOnTheorem2(astModule, 'asynchronousNumba', None, defaultA007822['logicalPath']['synthetic'], default['function']['dispatcher'])
+	pathFilename = makeAsynchronousNumbaOnTheorem2(astModule, 'asynchronousNumba', defaultA007822['function']['counting']
+		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
 
 if __name__ == '__main__':
 	makeA007822AsynchronousModules()

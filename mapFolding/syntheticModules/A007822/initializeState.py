@@ -1,6 +1,6 @@
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.dataBaskets import SymmetricFoldsState
 
-def transitionOnGroupsOfFolds(state: MapFoldingState) -> MapFoldingState:
+def transitionOnGroupsOfFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
     while state.groupsOfFolds == 0:
         if state.leaf1ndex <= 1 or state.leafBelow[0] == 1:
             if state.leaf1ndex > state.leavesTotal:

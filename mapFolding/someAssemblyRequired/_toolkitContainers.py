@@ -80,6 +80,9 @@ class ShatteredDataclass: # slots?
 	list_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list[ast.keyword])
 	"""Keyword arguments for dataclass initialization using field=field format."""
 
+	listIdentifiersStaticScalars: list[str] = dataclasses.field(default_factory=list[str])
+	"""Identifiers of unchanging scalar fields with `init=False`; mutually exclusive with `list_keyword_field__field4init`."""
+
 	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=list[ast.expr])
 	"""Type annotations for each dataclass field in declaration order."""
 

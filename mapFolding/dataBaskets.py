@@ -111,8 +111,6 @@ class MapFoldingState:
 	"""Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation."""
 	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
 	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
-	leafComparison: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
-	"""Array for finding symmetric folds."""
 
 	connectionGraph: Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array3DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 	"""Unchanging array representing connections between all leaves."""
@@ -126,11 +124,127 @@ class MapFoldingState:
 
 		Returns
 		-------
-		totalFoldings : DatatypeFoldsTotal
+		foldsTotal : DatatypeFoldsTotal
 			The complete count of distinct folding patterns achievable with the current map configuration.
 
 		"""
 		return DatatypeFoldsTotal(self.leavesTotal) * self.groupsOfFolds
+
+	def __post_init__(self) -> None:
+		"""Ensure all fields have a value.
+
+		Notes
+		-----
+		Arrays that are not explicitly provided (None) are automatically allocated with appropriate sizes based on the map
+		dimensions. `dimensionsTotal`, `leavesTotal`, and `connectionGraph` cannot be set: they are calculated.
+
+		"""
+		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
+		self.leavesTotal = DatatypeLeavesTotal(getLeavesTotal(self.mapShape))
+
+		leavesTotalAsInt = int(self.leavesTotal)
+
+		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
+
+		if self.dimensionsUnconstrained is None: self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal)) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
+		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
+		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
+		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
+		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
+		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
+
+@dataclasses.dataclass(slots=True)
+class SymmetricFoldsState:
+	"""Core computational state for map folding algorithms.
+
+	This class encapsulates all data needed to perform map folding computations and metadata useful for code transformations.
+
+	Attributes
+	----------
+	mapShape : tuple[DatatypeLeavesTotal, ...]
+		Dimensions of the map being analyzed for folding patterns.
+	groupsOfFolds : DatatypeFoldsTotal = DatatypeFoldsTotal(0)
+		Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings.
+	gap1ndex : DatatypeElephino = DatatypeElephino(0)
+		The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed.
+	gap1ndexCeiling : DatatypeElephino = DatatypeElephino(0)
+		The upper bound of `gap1ndex`.
+	indexDimension : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+		The current 0-indexed position of the dimension during computation.
+	indexLeaf : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+		The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`.
+	indexMiniGap : DatatypeElephino = DatatypeElephino(0)
+		The current 0-indexed position of a 'gap' in a loop during computation.
+	leaf1ndex : DatatypeLeavesTotal = DatatypeLeavesTotal(1)
+		The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed.
+	leafConnectee : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+		Target leaf for connection operations.
+	dimensionsUnconstrained : DatatypeLeavesTotal = None
+		Count of dimensions not subject to folding constraints.
+	countDimensionsGapped : Array1DLeavesTotal = None
+		Array tracking computed number of dimensions with gaps.
+	gapRangeStart : Array1DElephino = None
+		Array tracking computed starting positions of gap ranges.
+	gapsWhere : Array1DLeavesTotal = None
+		Array indicating locations of gaps in the folding pattern.
+	leafAbove : Array1DLeavesTotal = None
+		Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation.
+	leafBelow : Array1DLeavesTotal = None
+		Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation.
+	leafComparison : Array1DLeavesTotal = None
+		Array for finding symmetric folds.
+	connectionGraph : Array3DLeavesTotal
+		Unchanging array representing connections between all leaves.
+	dimensionsTotal : DatatypeLeavesTotal
+		Unchanging total number of dimensions in the map.
+	leavesTotal : DatatypeLeavesTotal
+		Unchanging total number of leaves in the map.
+
+	"""
+
+	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
+	"""Dimensions of the map being analyzed for folding patterns."""
+
+	groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})
+	"""Current count of symmetric folds."""
+
+	gap1ndex: DatatypeElephino = DatatypeElephino(0)  # noqa: RUF009
+	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
+	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)  # noqa: RUF009
+	"""The upper bound of `gap1ndex`."""
+	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)  # noqa: RUF009
+	"""The current 0-indexed position of the dimension during computation."""
+	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)  # noqa: RUF009
+	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
+	indexMiniGap: DatatypeElephino = DatatypeElephino(0)  # noqa: RUF009
+	"""The current 0-indexed position of a 'gap' in a loop during computation."""
+	leaf1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
+	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
+	leafConnectee: DatatypeLeavesTotal = DatatypeLeavesTotal(0)  # noqa: RUF009
+	"""Target leaf for connection operations."""
+
+	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Count of dimensions not subject to folding constraints."""
+
+	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array tracking computed number of dimensions with gaps."""
+	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array tracking computed starting positions of gap ranges."""
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array indicating locations of gaps in the folding pattern."""
+	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation."""
+	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
+	leafComparison: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	"""Array for finding symmetric folds."""
+
+	connectionGraph: Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array3DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+	"""Unchanging array representing connections between all leaves."""
+	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	"""Unchanging total number of dimensions in the map."""
+	leavesTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	"""Unchanging total number of leaves in the map."""
 
 	def __post_init__(self) -> None:
 		"""Ensure all fields have a value.

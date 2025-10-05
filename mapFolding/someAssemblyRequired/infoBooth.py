@@ -61,3 +61,5 @@ defaultA007822['function']['initializeConcurrencyManager'] = 'initializeConcurre
 defaultA007822['logicalPath']['synthetic'] += '.A007822'
 defaultA007822['module']['algorithm'] = 'algorithm'
 defaultA007822['module']['asynchronous'] = 'asynchronous'
+# defaultA007822['variable']['counting'] = 'symmetricFolds'
+defaultA007822['variable']['stateDataclass'] = 'SymmetricFoldsState'

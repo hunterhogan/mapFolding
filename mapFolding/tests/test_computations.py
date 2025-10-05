@@ -40,7 +40,7 @@ import pytest
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
-@pytest.mark.parametrize('flow', ['algorithm', 'asynchronous',  'asynchronousTheorem2', 'asynchronousTrimmed', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'])
+@pytest.mark.parametrize('flow', ['algorithm', 'asynchronous',  'asynchronousTheorem2', 'asynchronousTrimmed', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'])
 def test_A007822(flow: str) -> None:
 	"""Test A007822 flow options.
 

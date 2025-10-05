@@ -1,10 +1,15 @@
-from mapFolding.dataBaskets import (
-	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	MapFoldingState)
-from mapFolding.syntheticModules.A007822.asynchronousAnnexNumba import (
-	filterAsymmetricFolds, getSymmetricFoldsTotal, initializeConcurrencyManager)
-from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
 from numba import jit
+
+from mapFolding.dataBaskets import (Array1DElephino, Array1DLeavesTotal,
+                                    Array3DLeavesTotal, DatatypeElephino,
+                                    DatatypeFoldsTotal, DatatypeLeavesTotal,
+                                    MapFoldingState)
+from mapFolding.syntheticModules.A007822.asynchronousAnnexNumba import (
+    filterAsymmetricFolds, getSymmetricFoldsTotal,
+    initializeConcurrencyManager)
+from mapFolding.syntheticModules.A007822.initializeState import \
+    transitionOnGroupsOfFolds
+
 
 @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
 def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1ndexCeiling: DatatypeElephino, indexDimension: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeLeavesTotal, leafConnectee: DatatypeLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, connectionGraph: Array3DLeavesTotal, dimensionsTotal: DatatypeLeavesTotal, leavesTotal: DatatypeLeavesTotal) -> tuple[DatatypeFoldsTotal, DatatypeElephino, DatatypeElephino, DatatypeLeavesTotal, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, Array1DLeavesTotal, Array1DElephino, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal]:
@@ -67,7 +72,6 @@ def doTheNeedful(state: MapFoldingState, maxWorkers: int) -> MapFoldingState:
     gapsWhere: Array1DLeavesTotal = state.gapsWhere
     leafAbove: Array1DLeavesTotal = state.leafAbove
     leafBelow: Array1DLeavesTotal = state.leafBelow
-    leafComparison: Array1DLeavesTotal = state.leafComparison
     connectionGraph: Array3DLeavesTotal = state.connectionGraph
     dimensionsTotal: DatatypeLeavesTotal = state.dimensionsTotal
     leavesTotal: DatatypeLeavesTotal = state.leavesTotal
@@ -75,5 +79,5 @@ def doTheNeedful(state: MapFoldingState, maxWorkers: int) -> MapFoldingState:
     groupsOfFolds = getSymmetricFoldsTotal()
     groupsOfFolds *= 2
     groupsOfFolds = (groupsOfFolds + 1) // 2
-    state = MapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, indexDimension=indexDimension, indexLeaf=indexLeaf, indexMiniGap=indexMiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, leafComparison=leafComparison)
+    state = MapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, indexDimension=indexDimension, indexLeaf=indexLeaf, indexMiniGap=indexMiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow)
     return state

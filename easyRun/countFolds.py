@@ -25,7 +25,7 @@ if __name__ == '__main__':
 	# mapShape: tuple[int, ...] | None = None
 	flow: str | None = 'theorem2Numba'
 
-	oeisID: str = 'A001415'
+	oeisID: str = 'A001416'
 	for n in range(3,8):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)

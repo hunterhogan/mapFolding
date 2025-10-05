@@ -99,6 +99,7 @@ def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute
 		Z0Z_field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].Z0Z_hack for field in Official_fieldOrder},
 		list_argAnnotated4ArgumentsSpecification=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
 		list_keyword_field__field4init=[dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
+		listIdentifiersStaticScalars=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].Z0Z_hack[1] == 'scalar' and not dictionaryDeReConstruction[field].init)],
 		listAnnotations=[dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],
 		listName4Parameters=[dictionaryDeReConstruction[field].astName for field in Official_fieldOrder],
 		listUnpack=[Make.AnnAssign(dictionaryDeReConstruction[field].astName, dictionaryDeReConstruction[field].astAnnotation, dictionaryDeReConstruction[field].ast_nameDOTname) for field in Official_fieldOrder],

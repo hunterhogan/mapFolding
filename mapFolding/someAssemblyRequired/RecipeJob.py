@@ -1,13 +1,15 @@
 """Configuration by dataclass."""
 
-from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
+from astToolkit import identifierDotAttribute, IngredientsFunction, IngredientsModule, parseLogicalPath2astModule
 from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy import autoDecodingRLE
+# TODO 'The...' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different
+# identifiers better integrate into the current semiotics?
 from mapFolding import (
 	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal,
 	DatatypeLeavesTotal as TheDatatypeLeavesTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, packageSettings)
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.someAssemblyRequired import default
+from mapFolding.someAssemblyRequired import DatatypeConfiguration, default
 from mapFolding.someAssemblyRequired._toolkitContainers import ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
@@ -219,6 +221,27 @@ class RecipeJobTheorem2:
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)
 
 def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> ast.AnnAssign | ast.Assign:
+	"""Embed a shattered dataclass field assignment into the function body.
+
+	(AI generated docstring)
+
+	This helper retrieves the pre-fabricated assignment for `identifier` from `job.shatteredDataclass`, hydrates the literal
+	payload from `job.state`, and returns the node ready for insertion into a generated function body. Scalar entries receive the
+	concrete integer value, array entries are encoded using the auto-decoding run-length encoded method from `hunterMakesPy`, and
+	other constructors are left untouched so downstream tooling can decide how to finalize them.
+
+	Parameters
+	----------
+	identifier : str
+		Field name keyed in `job.shatteredDataclass.Z0Z_field2AnnAssign`.
+	job : RecipeJobTheorem2
+		Job descriptor that supplies the current computation state and shattered metadata.
+
+	Returns
+	-------
+	Ima___Assign : ast.AnnAssign | ast.Assign
+		Assignment node mutated with state-backed values for the requested field.
+	"""
 	Ima___Assign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[identifier]
 	match elementConstructor:
 		case 'scalar':
@@ -230,3 +253,23 @@ def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> 
 		case _:
 			pass
 	return Ima___Assign
+
+# TODO Use this concept in general modules, not just custom jobs.
+def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, listDatatypeConfigurations: list[DatatypeConfiguration]) -> tuple[IngredientsFunction, IngredientsModule]:
+	"""Customize data types in the given ingredients by adjusting imports.
+
+	In the ecosystem of "Ingredients", "Recipes", "DataBaskets," and "shattered dataclasses," a ton of code is dedicated to
+	preserving _abstract_ names for datatypes, such as `Array1DLeavesTotal` and `DatatypeFoldsTotal`. This function well
+	illustrates why I put so much effort into preserving the abstract names. (Normally, Python will _immediately_ replace an alias
+	name with the type for which it is a proxy.) Because transformed code, even if it has been through 10 transformations (see,
+	for example, `mapFolding.syntheticModules.A007822.asynchronousNumba` or its equivalent), ought to still have the abstract
+	names, this function gives you the power to change the datatype from numpy to numba and/or from 8-bits to 16-bits merely by
+	changing the import statements. You shouldn't need to change any "business" logic.
+
+	NOTE This will not remove potentially conflicting existing imports from other modules.
+	"""
+	for datatypeConfig in listDatatypeConfigurations:
+		ingredientsFunction.imports.removeImportFrom(datatypeConfig.typeModule, None, datatypeConfig.datatypeIdentifier)
+		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier, datatypeConfig.type_asname)
+
+	return ingredientsFunction, ingredientsModule

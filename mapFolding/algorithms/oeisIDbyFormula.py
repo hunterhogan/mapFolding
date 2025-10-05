@@ -41,7 +41,7 @@ def A000560(n: int) -> int:
     """
     Compute A000560(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000560 is: "Number of ways of folding a strip of n labeled stamps."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000560 is: "Number of symmetric ways of folding a strip of n labeled stamps."
 
     The domain of A000560 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 45.
@@ -54,7 +54,7 @@ def A000560(n: int) -> int:
     Returns
     -------
     a(n) : int
-        Number of ways of folding a strip of n labeled stamps.
+        Number of symmetric ways of folding a strip of n labeled stamps.
 
     Would You Like to Know More?
     ----------------------------

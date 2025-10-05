@@ -271,39 +271,36 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 				from mapFolding import setProcessorLimit
 				concurrencyLimit: int = setProcessorLimit(CPUlimit)
 
-				from mapFolding.dataBaskets import MapFoldingState
-				mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+				from mapFolding.dataBaskets import SymmetricFoldsState
+				symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
 
 				match flow:
 					case 'asynchronous':
 						from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
-						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
+						symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
 					case 'asynchronousNumba':
 						from mapFolding.syntheticModules.A007822.asynchronousNumba import doTheNeedful
-						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
+						symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
 					case 'asynchronousTheorem2':
 						from mapFolding.syntheticModules.A007822.asynchronousTheorem2 import doTheNeedful
-						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
+						symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
 					case 'asynchronousTrimmed':
 						from mapFolding.syntheticModules.A007822.asynchronousTrimmed import doTheNeedful
-						mapFoldingState = doTheNeedful(mapFoldingState, concurrencyLimit)
-					case 'numba':
-						from mapFolding.syntheticModules.A007822.algorithmNumba import doTheNeedful
-						mapFoldingState = doTheNeedful(mapFoldingState)
+						symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
 					case 'theorem2':
 						from mapFolding.syntheticModules.A007822.theorem2 import doTheNeedful
-						mapFoldingState = doTheNeedful(mapFoldingState)
+						symmetricState = doTheNeedful(symmetricState)
 					case 'theorem2Numba':
 						from mapFolding.syntheticModules.A007822.theorem2Numba import doTheNeedful
-						mapFoldingState = doTheNeedful(mapFoldingState)
+						symmetricState = doTheNeedful(symmetricState)
 					case 'theorem2Trimmed':
 						from mapFolding.syntheticModules.A007822.theorem2Trimmed import doTheNeedful
-						mapFoldingState = doTheNeedful(mapFoldingState)
+						symmetricState = doTheNeedful(symmetricState)
 					case _:
 						from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful
-						mapFoldingState = doTheNeedful(mapFoldingState)
+						symmetricState = doTheNeedful(symmetricState)
 
-				countTotal = mapFoldingState.groupsOfFolds
+				countTotal = symmetricState.groupsOfFolds
 			case _:
 				matched_oeisID = False
 

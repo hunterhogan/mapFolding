@@ -188,7 +188,7 @@ run = { branch = true, concurrency = [
 ] }
 
 [tool.pytest.ini_options]
-addopts = ["--color=auto", "-n 4"]
+addopts = ["--color=auto", "-n 3"]
 log_auto_indent = true
 testpaths = ["mapFolding/tests"]
 

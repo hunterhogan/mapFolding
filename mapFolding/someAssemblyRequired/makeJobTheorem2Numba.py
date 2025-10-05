@@ -15,7 +15,7 @@ from hunterMakesPy import autoDecodingRLE, raiseIfNone
 from mapFolding import DatatypeLeavesTotal, getFoldsTotalKnown, getPathFilenameFoldsTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, dictionaryEstimatesMapFolding, IfThis
-from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
+from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport, RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import PurePosixPath
@@ -23,15 +23,14 @@ from typing import cast
 import ast
 
 # TODO More convergence with `makeJobTheorem2codon`
-listIdentifiersStaticValuesHARDCODED: list[str] = ['dimensionsTotal', 'leavesTotal']
 
+# TODO Dynamically calculate the bitwidth of each datatype. NOTE I've delayed dynamic calculation because I don't know how to
+# calculate 'elephino' needs. But perhaps I can dynamically calculate 'leavesTotal' and 'foldsTotal' and hardcode 'elephino.' That
+# would probably be an improvement.
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
-	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numba', typeIdentifier='uint8'),
-	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint16'),
-	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numba', typeIdentifier='uint64'),
-]
-
-listNumPy_dtype: list[DatatypeConfiguration] = [
+	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
+	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint16', type_asname='DatatypeElephino'),
+	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numba', typeIdentifier='uint64', type_asname='DatatypeFoldsTotal'),
 	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DLeavesTotal'),
 	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint16', type_asname='Array1DElephino'),
 	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
@@ -207,8 +206,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 	"""
 	ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.countCallable)))
 
-	listIdentifiersStaticValues: list[str] = listIdentifiersStaticValuesHARDCODED
-	for identifier in listIdentifiersStaticValues:
+	for identifier in job.shatteredDataclass.listIdentifiersStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
 			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # noqa: S307
 		).visit(ingredientsCount.astFunctionDef)
@@ -225,18 +223,9 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
-	for datatypeConfig in listDatatypeConfigurations:
-		ingredientsModule.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier)
-		pseudoTypeAlias = Make.Assign([Make.Name(datatypeConfig.datatypeIdentifier, ast.Store())]
-			, Make.Name(datatypeConfig.typeIdentifier)
-		)
-		ingredientsModule.appendPrologue(statement=pseudoTypeAlias)
+	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, listDatatypeConfigurations)
 
 	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
-
-	for typeConfig in listNumPy_dtype:
-		ingredientsCount.imports.removeImportFrom(typeConfig.typeModule, None, typeConfig.datatypeIdentifier)
-		ingredientsCount.imports.addImportFrom_asStr(typeConfig.typeModule, typeConfig.typeIdentifier, typeConfig.type_asname)
 
 	ingredientsCount.astFunctionDef.decorator_list = [] # TODO low-priority, handle this more elegantly
 	ingredientsCount = decorateCallableWithNumba(ingredientsCount, spices.parametersNumba)
@@ -265,5 +254,5 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	makeJobNumba(aJob, spices)
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (8,8)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (5,5)
 	fromMapShape(mapShape)
