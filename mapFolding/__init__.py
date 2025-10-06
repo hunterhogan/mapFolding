@@ -4,6 +4,7 @@ from mapFolding._theTypes import (
 	Array1DElephino as Array1DElephino,
 	Array1DFoldsTotal as Array1DFoldsTotal,
 	Array1DLeavesTotal as Array1DLeavesTotal,
+    Array2DLeavesTotal as Array2DLeavesTotal,
 	Array3DLeavesTotal as Array3DLeavesTotal,
     axisOfLength as axisOfLength,
 	DatatypeElephino as DatatypeElephino,

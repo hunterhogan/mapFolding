@@ -21,8 +21,8 @@ integrity throughout the recursive analysis while providing the structured data
 access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
-	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	getConnectionGraph, getLeavesTotal, makeDataContainer)
+	Array1DElephino, Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal,
+	DatatypeLeavesTotal, getConnectionGraph, getLeavesTotal, makeDataContainer)
 from numpy.typing import NDArray
 from typing import TypeAlias
 import dataclasses
@@ -155,9 +155,7 @@ class MapFoldingState:
 
 @dataclasses.dataclass(slots=True)
 class SymmetricFoldsState:
-	"""Core computational state for map folding algorithms.
-
-	This class encapsulates all data needed to perform map folding computations and metadata useful for code transformations.
+	"""Core computational state for symmetric map folding algorithms.
 
 	Attributes
 	----------
@@ -239,10 +237,12 @@ class SymmetricFoldsState:
 	leafComparison: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
 	"""Array for finding symmetric folds."""
 
+	arrayGroupOfFolds: Array2DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array2DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 	connectionGraph: Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array3DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 	"""Unchanging array representing connections between all leaves."""
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
+	indicesArrayGroupOfFolds: Array2DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array2DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 	leavesTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""
 
@@ -261,6 +261,10 @@ class SymmetricFoldsState:
 		leavesTotalAsInt = int(self.leavesTotal)
 
 		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
+
+		self.indicesArrayGroupOfFolds = (numpy.arange(leavesTotalAsInt + 1)[:, None] + numpy.arange(leavesTotalAsInt)[None, :]) % (leavesTotalAsInt + 1)
+		self.indicesArrayGroupOfFolds[..., leavesTotalAsInt // 2:None] = self.indicesArrayGroupOfFolds[..., leavesTotalAsInt - 1: leavesTotalAsInt - leavesTotalAsInt // 2 - 1: -1]
+		self.arrayGroupOfFolds = numpy.zeros_like(self.indicesArrayGroupOfFolds)
 
 		if self.dimensionsUnconstrained is None: self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal)) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
 		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701

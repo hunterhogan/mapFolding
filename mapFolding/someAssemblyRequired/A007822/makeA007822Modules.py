@@ -3,8 +3,8 @@ from astToolkit import Be, Grab, identifierDotAttribute, NodeChanger, NodeTouris
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, defaultA007822, IfThis
-from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
-	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds, FunctionDefGetIndices)
+from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (Import_numpy,
+	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.makingModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState
 from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename, write_astModule
@@ -38,8 +38,7 @@ def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCal
 
 # TODO NOTE This will insert a copy of `filterAsymmetricFolds` for each `ast.ImportFrom` in the source module. Find or make a
 # system to replace the `Ingredients` paradigm.
-	# NodeChanger(Be.ImportFrom, Then.insertThisBelow([FunctionDefGetIndices, FunctionDef_filterAsymmetricFolds])).visit(astModule)
-	NodeChanger(Be.ImportFrom, Then.insertThisBelow([FunctionDef_filterAsymmetricFolds])).visit(astModule)
+	NodeChanger(Be.ImportFrom, Then.insertThisBelow([Import_numpy, FunctionDef_filterAsymmetricFolds])).visit(astModule)
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
 

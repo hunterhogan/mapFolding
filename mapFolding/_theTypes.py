@@ -44,6 +44,9 @@ different data structure."""
 Array3DLeavesTotal: TypeAlias = ndarray[tuple[int, int, int], dtype[NumPyLeavesTotal]]  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
 """A `numpy.ndarray` with three axes and elements of type `NumPyLeavesTotal`."""
 
+Array2DLeavesTotal: TypeAlias = ndarray[tuple[int, int], dtype[NumPyLeavesTotal]]  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
+"""A `numpy.ndarray` with two axes and elements of type `NumPyLeavesTotal`."""
+
 Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyLeavesTotal]]  # noqa: UP040 The TypeAlias may be used to construct ("cast") a value to the type. And the identifier may be changed to a different type.
 """A `numpy.ndarray` with one axis and elements of type `NumPyLeavesTotal`."""
 

@@ -1,29 +1,21 @@
 from mapFolding.dataBaskets import SymmetricFoldsState
 from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
+import numpy
 
 def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
     while state.leaf1ndex > 4:
         if state.leafBelow[0] == 1:
             if state.leaf1ndex > state.leavesTotal:
-                state.indexLeaf = 0
-                leafConnectee = 0
-                while leafConnectee < state.leavesTotal + 1:
-                    leafNumber = int(state.leafBelow[state.indexLeaf])
-                    state.leafComparison[leafConnectee] = (leafNumber - state.indexLeaf + state.leavesTotal) % state.leavesTotal
-                    state.indexLeaf = leafNumber
-                    leafConnectee += 1
-                indexInMiddle = state.leavesTotal // 2
-                state.indexMiniGap = 0
-                while state.indexMiniGap < state.leavesTotal + 1:
-                    ImaSymmetricFold = True
-                    leafConnectee = 0
-                    while leafConnectee < indexInMiddle:
-                        if state.leafComparison[(state.indexMiniGap + leafConnectee) % (state.leavesTotal + 1)] != state.leafComparison[(state.indexMiniGap + state.leavesTotal - 1 - leafConnectee) % (state.leavesTotal + 1)]:
-                            ImaSymmetricFold = False
-                            break
-                        leafConnectee += 1
-                    state.groupsOfFolds += ImaSymmetricFold
-                    state.indexMiniGap += 1
+                state.indexLeaf = 1
+                state.leafComparison[0] = 1
+                state.leafConnectee = 1
+                while state.leafConnectee < state.leavesTotal + 1:
+                    state.indexMiniGap = state.leafBelow[state.indexLeaf]
+                    state.leafComparison[state.leafConnectee] = (state.indexMiniGap - state.indexLeaf + state.leavesTotal) % state.leavesTotal
+                    state.indexLeaf = state.indexMiniGap
+                    state.leafConnectee += 1
+                state.arrayGroupOfFolds = state.leafComparison[state.indicesArrayGroupOfFolds]
+                state.groupsOfFolds += int(numpy.count_nonzero(numpy.all(numpy.equal(state.arrayGroupOfFolds[..., slice(0, state.leavesTotal // 2)], state.arrayGroupOfFolds[..., slice(state.leavesTotal // 2, None)]), axis=1)))
             else:
                 state.dimensionsUnconstrained = state.dimensionsTotal
                 state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]

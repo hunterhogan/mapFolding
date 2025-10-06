@@ -1,31 +1,24 @@
-from mapFolding.dataBaskets import Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, SymmetricFoldsState
+from mapFolding.dataBaskets import Array1DElephino, Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, SymmetricFoldsState
 from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
 from numba import jit
+import numpy
 
 @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
-def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1ndexCeiling: DatatypeElephino, indexDimension: DatatypeLeavesTotal, indexLeaf: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeLeavesTotal, leafConnectee: DatatypeLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, leafComparison: Array1DLeavesTotal, connectionGraph: Array3DLeavesTotal, dimensionsTotal: DatatypeLeavesTotal, leavesTotal: DatatypeLeavesTotal) -> tuple[DatatypeFoldsTotal, DatatypeElephino, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, Array1DLeavesTotal, Array1DElephino, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal]:
+def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1ndexCeiling: DatatypeElephino, indexDimension: DatatypeLeavesTotal, indexLeaf: DatatypeLeavesTotal, indexMiniGap: DatatypeElephino, leaf1ndex: DatatypeLeavesTotal, leafConnectee: DatatypeLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, leafComparison: Array1DLeavesTotal, arrayGroupOfFolds: Array2DLeavesTotal, connectionGraph: Array3DLeavesTotal, dimensionsTotal: DatatypeLeavesTotal, indicesArrayGroupOfFolds: Array2DLeavesTotal, leavesTotal: DatatypeLeavesTotal) -> tuple[DatatypeFoldsTotal, DatatypeElephino, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, Array1DLeavesTotal, Array1DElephino, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, DatatypeLeavesTotal, Array2DLeavesTotal, DatatypeLeavesTotal]:
     while leaf1ndex > 4:
         if leafBelow[0] == 1:
             if leaf1ndex > leavesTotal:
-                indexLeaf = 0
-                leafConnectee = 0
+                indexLeaf = 1
+                leafComparison[0] = 1
+                leafConnectee = 1
                 while leafConnectee < leavesTotal + 1:
-                    leafNumber = int(leafBelow[indexLeaf])
-                    leafComparison[leafConnectee] = (leafNumber - indexLeaf + leavesTotal) % leavesTotal
-                    indexLeaf = leafNumber
+                    indexMiniGap = leafBelow[indexLeaf]
+                    leafComparison[leafConnectee] = (indexMiniGap - indexLeaf + leavesTotal) % leavesTotal
+                    indexLeaf = indexMiniGap
                     leafConnectee += 1
-                indexInMiddle = leavesTotal // 2
-                indexMiniGap = 0
-                while indexMiniGap < leavesTotal + 1:
-                    ImaSymmetricFold = True
-                    leafConnectee = 0
-                    while leafConnectee < indexInMiddle:
-                        if leafComparison[(indexMiniGap + leafConnectee) % (leavesTotal + 1)] != leafComparison[(indexMiniGap + leavesTotal - 1 - leafConnectee) % (leavesTotal + 1)]:
-                            ImaSymmetricFold = False
-                            break
-                        leafConnectee += 1
-                    groupsOfFolds += ImaSymmetricFold
-                    indexMiniGap += 1
+				#     NumbaTypeError Multi-dimensional indices are not supported.
+                arrayGroupOfFolds = leafComparison[indicesArrayGroupOfFolds]
+                groupsOfFolds += int(numpy.count_nonzero(numpy.all(numpy.equal(arrayGroupOfFolds[..., slice(0, leavesTotal // 2)], arrayGroupOfFolds[..., slice(leavesTotal // 2, None)]), axis=1)))
             else:
                 dimensionsUnconstrained = dimensionsTotal
                 gap1ndexCeiling = gapRangeStart[leaf1ndex - 1]
@@ -63,7 +56,7 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
     else:
         groupsOfFolds *= 2
     groupsOfFolds = (groupsOfFolds + 1) // 2
-    return (groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, connectionGraph, dimensionsTotal, leavesTotal)
+    return (groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, arrayGroupOfFolds, connectionGraph, dimensionsTotal, indicesArrayGroupOfFolds, leavesTotal)
 
 def doTheNeedful(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state = transitionOnGroupsOfFolds(state)
@@ -83,9 +76,11 @@ def doTheNeedful(state: SymmetricFoldsState) -> SymmetricFoldsState:
     leafAbove: Array1DLeavesTotal = state.leafAbove
     leafBelow: Array1DLeavesTotal = state.leafBelow
     leafComparison: Array1DLeavesTotal = state.leafComparison
+    arrayGroupOfFolds: Array2DLeavesTotal = state.arrayGroupOfFolds
     connectionGraph: Array3DLeavesTotal = state.connectionGraph
     dimensionsTotal: DatatypeLeavesTotal = state.dimensionsTotal
+    indicesArrayGroupOfFolds: Array2DLeavesTotal = state.indicesArrayGroupOfFolds
     leavesTotal: DatatypeLeavesTotal = state.leavesTotal
-    groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, connectionGraph, dimensionsTotal, leavesTotal = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, connectionGraph, dimensionsTotal, leavesTotal)
+    groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, arrayGroupOfFolds, connectionGraph, dimensionsTotal, indicesArrayGroupOfFolds, leavesTotal = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexLeaf, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, arrayGroupOfFolds, connectionGraph, dimensionsTotal, indicesArrayGroupOfFolds, leavesTotal)
     state = SymmetricFoldsState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, indexDimension=indexDimension, indexLeaf=indexLeaf, indexMiniGap=indexMiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, leafComparison=leafComparison)
     return state

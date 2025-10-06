@@ -10,7 +10,7 @@ if __name__ == '__main__':
 			f"{(match:=countTotal == dictionaryOEIS[oeisID]['valuesKnown'][n])}\t"
 			f"\033[{(not match)*91}m"
 			f"{n}\t"
-			# f"{countTotal}\t"
+			f"{countTotal}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
 			"\033[0m\n"
 		)
@@ -30,7 +30,8 @@ if __name__ == '__main__':
 	flow = 'theorem2Trimmed'
 	flow = 'theorem2Numba'
 
-	for n in range(3,11):
+	for n in range(5,8):
+	# for n in range(8,10):
 
 		timeStart = time.perf_counter()
 		countTotal = NOTcountingFolds(oeisID, n, flow, CPUlimit)
