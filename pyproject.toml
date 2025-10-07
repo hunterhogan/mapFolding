@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.16.3"
+version = "0.16.4"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.12"

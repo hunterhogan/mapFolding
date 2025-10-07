@@ -14,10 +14,9 @@ def transitionOnGroupsOfFolds(state: SymmetricFoldsState) -> SymmetricFoldsState
                     state.indexLeaf = state.indexMiniGap
                     state.leafConnectee += 1
                 state.arrayGroupOfFolds = numpy.take(state.leafComparison, state.indicesArrayGroupOfFolds)
-                state.indexMiniGap = 0
-                while state.indexMiniGap < len(state.arrayGroupOfFolds):
-                    state.groupsOfFolds += int(numpy.all(numpy.equal(state.arrayGroupOfFolds[state.indexMiniGap, slice(0, state.leavesTotal // 2)], state.arrayGroupOfFolds[state.indexMiniGap, slice(state.leavesTotal // 2, None)])))
-                    state.indexMiniGap += 1
+                compared = state.arrayGroupOfFolds[..., 0:state.leavesTotal // 2] == state.arrayGroupOfFolds[..., state.leavesTotal // 2:None]
+                for indexRow in range(len(compared)):
+                    state.groupsOfFolds += compared[indexRow].all()
             else:
                 state.dimensionsUnconstrained = state.dimensionsTotal
                 state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]

@@ -3,13 +3,13 @@
 Notes
 -----
 - About constructing `leafComparison`:
-	- This branch of the algorithm executes IFF `leafBelow[0] == 1`.
-	- Therefore, `leafComparison[0]` must be `1`.
-	- Therefore, the first iteration of the loop is hardcoded to save processing time.
-	- I _feel_ there must be a more efficient way to do this.
+    - This branch of the algorithm executes IFF `leafBelow[0] == 1`.
+    - Therefore, `leafComparison[0]` must be `1`.
+    - Therefore, the first iteration of the loop is hardcoded to save processing time.
+    - I _feel_ there must be a more efficient way to do this.
 - Some implementation details are based on Numba compatibility. Incompatible:
-	- `numpy.take(..., out=...)`
-	- `numpy.all(..., axis=...)`
+    - `numpy.take(..., out=...)`
+    - `numpy.all(..., axis=...)`
 """
 from mapFolding.dataBaskets import SymmetricFoldsState
 import numpy
@@ -27,12 +27,10 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
         state.leafConnectee += 1
 
     state.arrayGroupOfFolds = numpy.take(state.leafComparison, state.indicesArrayGroupOfFolds)
+    compared = state.arrayGroupOfFolds[..., 0:state.leavesTotal // 2] == state.arrayGroupOfFolds[..., state.leavesTotal // 2:None]
 
-    state.indexMiniGap = 0
-    while state.indexMiniGap < len(state.arrayGroupOfFolds):
-        state.groupsOfFolds += int(numpy.all(numpy.equal(state.arrayGroupOfFolds[state.indexMiniGap, slice(0, state.leavesTotal // 2)]
-                                                    ,    state.arrayGroupOfFolds[state.indexMiniGap, slice(state.leavesTotal // 2, None)])))
-        state.indexMiniGap += 1
+    for indexRow in range(len(compared)):
+        state.groupsOfFolds += compared[indexRow].all()
 
     return state
 

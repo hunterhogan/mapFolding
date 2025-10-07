@@ -17,10 +17,9 @@ def count(groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nde
                     indexLeaf = indexMiniGap
                     leafConnectee += 1
                 arrayGroupOfFolds = numpy.take(leafComparison, indicesArrayGroupOfFolds)
-                indexMiniGap = 0
-                while indexMiniGap < len(arrayGroupOfFolds):
-                    groupsOfFolds += int(numpy.all(numpy.equal(arrayGroupOfFolds[indexMiniGap, slice(0, leavesTotal // 2)], arrayGroupOfFolds[indexMiniGap, slice(leavesTotal // 2, None)])))
-                    indexMiniGap += 1
+                compared = arrayGroupOfFolds[..., 0:leavesTotal // 2] == arrayGroupOfFolds[..., leavesTotal // 2:None]
+                for indexRow in range(len(compared)):
+                    groupsOfFolds += compared[indexRow].all()
             else:
                 dimensionsUnconstrained = dimensionsTotal
                 gap1ndexCeiling = gapRangeStart[leaf1ndex - 1]
