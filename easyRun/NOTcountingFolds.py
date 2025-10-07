@@ -23,14 +23,12 @@ if __name__ == '__main__':
 	oeisID = 'A001010'
 	oeisID = 'A007822'
 
-	flow = 'asynchronous'
-	flow = 'algorithm'
-	flow = 'asynchronousTrimmed'
-	flow = 'asynchronousNumba'
 	flow = 'theorem2Trimmed'
 	flow = 'theorem2Numba'
+	flow = 'algorithm'
+	flow = 'asynchronous'
 
-	for n in range(5,8):
+	for n in range(2,8):
 	# for n in range(8,10):
 
 		timeStart = time.perf_counter()

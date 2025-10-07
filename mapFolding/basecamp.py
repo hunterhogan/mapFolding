@@ -278,15 +278,6 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 					case 'asynchronous':
 						from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
 						symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
-					case 'asynchronousNumba':
-						from mapFolding.syntheticModules.A007822.asynchronousNumba import doTheNeedful
-						symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
-					case 'asynchronousTheorem2':
-						from mapFolding.syntheticModules.A007822.asynchronousTheorem2 import doTheNeedful
-						symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
-					case 'asynchronousTrimmed':
-						from mapFolding.syntheticModules.A007822.asynchronousTrimmed import doTheNeedful
-						symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
 					case 'theorem2':
 						from mapFolding.syntheticModules.A007822.theorem2 import doTheNeedful
 						symmetricState = doTheNeedful(symmetricState)

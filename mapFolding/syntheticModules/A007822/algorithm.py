@@ -12,8 +12,11 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
         state.leafComparison[state.leafConnectee] = (state.indexMiniGap - state.indexLeaf + state.leavesTotal) % state.leavesTotal
         state.indexLeaf = state.indexMiniGap
         state.leafConnectee += 1
-    state.arrayGroupOfFolds = state.leafComparison[state.indicesArrayGroupOfFolds]
-    state.groupsOfFolds += int(numpy.count_nonzero(numpy.all(numpy.equal(state.arrayGroupOfFolds[..., slice(0, state.leavesTotal // 2)], state.arrayGroupOfFolds[..., slice(state.leavesTotal // 2, None)]), axis=1)))
+    state.arrayGroupOfFolds = numpy.take(state.leafComparison, state.indicesArrayGroupOfFolds)
+    state.indexMiniGap = 0
+    while state.indexMiniGap < len(state.arrayGroupOfFolds):
+        state.groupsOfFolds += int(numpy.all(numpy.equal(state.arrayGroupOfFolds[state.indexMiniGap, slice(0, state.leavesTotal // 2)], state.arrayGroupOfFolds[state.indexMiniGap, slice(state.leavesTotal // 2, None)])))
+        state.indexMiniGap += 1
     return state
 
 def activeLeafGreaterThan0(state: SymmetricFoldsState) -> bool:

@@ -8,13 +8,12 @@ from astToolkit import (
 	parseLogicalPath2astModule, Then)
 from astToolkit.transformationTools import removeUnusedParameters, write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, packageSettings, dictionaryOEIS
-from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
-from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfThis, defaultA007822
-from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
+from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, packageSettings
+from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import (
 	customizeDatatypeViaImport, moveShatteredDataclass_arg2body, RecipeJobTheorem2)
-from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
+from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
 import subprocess
@@ -182,14 +181,12 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 		along one axis.
 
 	"""
-	# state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
-	state: SymmetricFoldsState = transitionOnGroupsOfFolds(SymmetricFoldsState(mapShape))
+	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	pathModule = PurePosixPath(Path.home(), 'mapFolding', 'jobs')
-	logicalPath2astModule: identifierDotAttribute = f'{packageSettings.identifierPackage}.{defaultA007822['logicalPath']['synthetic']}.theorem2Numba'
+	logicalPath2astModule: identifierDotAttribute = f'{packageSettings.identifierPackage}.{default['logicalPath']['synthetic']}.theorem2Numba'
 	source_astModule: ast.Module = parseLogicalPath2astModule(logicalPath2astModule)
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
-	shatteredDataclass = shatter_dataclassesDOTdataclass('mapFolding.dataBaskets', 'SymmetricFoldsState', 'state')
-	aJob = RecipeJobTheorem2(state, shatteredDataclass=shatteredDataclass, source_astModule=source_astModule, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal, sourceDataclassIdentifier='SymmetricFoldsState')
+	aJob = RecipeJobTheorem2(state, source_astModule=source_astModule, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
 	makeJob(aJob)
 
 if __name__ == '__main__':

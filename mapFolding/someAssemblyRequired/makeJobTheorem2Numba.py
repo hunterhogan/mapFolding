@@ -25,8 +25,8 @@ import ast
 # TODO More convergence with `makeJobTheorem2codon`
 
 # TODO Dynamically calculate the bitwidth of each datatype. NOTE I've delayed dynamic calculation because I don't know how to
-# calculate 'elephino' needs. But perhaps I can dynamically calculate 'leavesTotal' and 'foldsTotal' and hardcode 'elephino.' That
-# would probably be an improvement.
+# calculate what 'elephino' needs. But perhaps I can dynamically calculate 'leavesTotal' and 'foldsTotal' and hardcode 'elephino.'
+# That would probably be an improvement.
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint16', type_asname='DatatypeElephino'),

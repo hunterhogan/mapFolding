@@ -58,6 +58,7 @@ defaultA007822['function']['_processCompletedFutures'] = '_processCompletedFutur
 defaultA007822['function']['filterAsymmetricFolds'] = 'filterAsymmetricFolds'
 defaultA007822['function']['getSymmetricFoldsTotal'] = 'getSymmetricFoldsTotal'
 defaultA007822['function']['initializeConcurrencyManager'] = 'initializeConcurrencyManager'
+defaultA007822['logicalPath']['assembly'] = 'someAssemblyRequired.A007822'
 defaultA007822['logicalPath']['synthetic'] += '.A007822'
 defaultA007822['module']['algorithm'] = 'algorithm'
 defaultA007822['module']['asynchronous'] = 'asynchronous'

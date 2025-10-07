@@ -1,9 +1,10 @@
 """addSymmetryCheck."""
-from astToolkit import Be, Grab, identifierDotAttribute, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
+from astToolkit import (
+	Be, Grab, identifierDotAttribute, LedgerOfImports, NodeChanger, NodeTourist, parsePathFilename2astModule, Then)
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, defaultA007822, IfThis
-from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (Import_numpy,
+from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
 	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.makingModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState
@@ -12,9 +13,7 @@ from pathlib import PurePath
 import ast
 
 def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
-	"""Add logic to check for symmetric folds."""
-# NOTE HEY HEY! Are you trying to figure out why there is more than one copy of `filterAsymmetricFolds`? See the TODO NOTE, below.
-
+	"""Modify the multidimensional map folding algorithm by checking for symmetry in each folding pattern in a group of folds."""
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(default['variable']['stateDataclass']))
 			, Grab.idAttribute(Then.replaceWith(defaultA007822['variable']['stateDataclass']))
 		).visit(astModule)
@@ -36,9 +35,11 @@ def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCal
 		, doThat=Then.replaceWith(A007822incrementCount)
 		).visit(FunctionDef_count)
 
-# TODO NOTE This will insert a copy of `filterAsymmetricFolds` for each `ast.ImportFrom` in the source module. Find or make a
-# system to replace the `Ingredients` paradigm.
-	NodeChanger(Be.ImportFrom, Then.insertThisBelow([Import_numpy, FunctionDef_filterAsymmetricFolds])).visit(astModule)
+	imports = LedgerOfImports(astModule)
+	NodeChanger(IfThis.isAnyOf(Be.ImportFrom, Be.Import), Then.removeIt).visit(astModule)
+	imports.addImport_asStr('numpy')
+
+	astModule.body = [*imports.makeList_ast(), FunctionDef_filterAsymmetricFolds, *astModule.body]
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
 
