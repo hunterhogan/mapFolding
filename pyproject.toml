@@ -138,6 +138,7 @@ dependencies = [
   "isort",
   "numpy",
   "platformdirs",
+  "sympy",
 ]
 optional-dependencies = { development = [
   "ipykernel",
