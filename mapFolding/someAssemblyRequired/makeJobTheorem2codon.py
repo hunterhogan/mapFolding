@@ -124,7 +124,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 		Configuration recipe containing source locations, target paths, raw materials, and state.
 
 	"""
-	ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.countCallable)))
+	ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.identifierCallable)))
 	ingredientsCount.astFunctionDef.decorator_list = []
 
 	# Replace identifiers-with-static-values with their values.
@@ -142,7 +142,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 
 	ingredientsModule = IngredientsModule(launcher=Make.Module([
 		Make.If(Make.Compare(Make.Name('__name__'), [Make.Eq()], [Make.Constant('__main__')])
-			, body=[Make.Expr(Make.Call(Make.Name(job.countCallable)))])]))
+			, body=[Make.Expr(Make.Call(Make.Name(job.identifierCallable)))])]))
 
 	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, listDatatypeConfigurations)
 

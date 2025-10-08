@@ -3,12 +3,12 @@
 from astToolkit import identifierDotAttribute, IngredientsFunction, IngredientsModule, parseLogicalPath2astModule
 from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy import autoDecodingRLE
-# TODO 'The...' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different
+# TODO 'The____' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different
 # identifiers better integrate into the current semiotics?
 from mapFolding import (
 	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal,
 	DatatypeLeavesTotal as TheDatatypeLeavesTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, packageSettings)
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default
 from mapFolding.someAssemblyRequired._toolkitContainers import ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
@@ -22,18 +22,8 @@ class RecipeJobTheorem2:
 	"""Configuration recipe for generating map folding computation jobs.
 
 	This dataclass serves as the central configuration hub for the code transformation
-	assembly line that converts generic map folding algorithms into highly optimized,
-	specialized computation modules. The recipe encapsulates all parameters required
-	for source code analysis, target file generation, datatype mapping, and compilation
-	optimization settings.
-
-	The transformation process operates by extracting functions from source modules,
-	embedding concrete parameter values, eliminating dead code paths, and generating
-	standalone Python modules optimized for specific map dimensions.
-
-	The recipe maintains both source configuration (where to find the generic algorithm)
-	and target configuration (where to write the optimized module), along with the
-	computational state that provides concrete values for the transformation process.
+	assembly line that converts generic map folding algorithms into optimized,
+	specialized modules.
 
 	Attributes
 	----------
@@ -87,7 +77,7 @@ class RecipeJobTheorem2:
 		Type alias for leaf count datatype.
 	"""
 
-	state: MapFoldingState
+	state: MapFoldingState | SymmetricFoldsState
 	"""The map folding computation state containing dimensions and initial values."""
 	foldsTotalEstimated: int = 0
 	"""Estimated total number of folds for progress tracking."""
@@ -129,7 +119,7 @@ class RecipeJobTheorem2:
 	"""Logical path root; probably corresponds to physical filesystem directory."""
 	moduleIdentifier: str = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 	"""Target module identifier."""
-	countCallable: str = identifierCallableSource
+	identifierCallable: str = identifierCallableSource
 	"""Name of the counting function in generated module."""
 	identifierDataclass: str | None = sourceDataclassIdentifier
 	"""Target dataclass identifier."""
@@ -211,11 +201,11 @@ class RecipeJobTheorem2:
 		"""
 		pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(self.state.mapShape))
 
-		if self.moduleIdentifier is None: # pyright: ignore[reportUnnecessaryComparison]
-			self.moduleIdentifier = pathFilenameFoldsTotal.stem
-
 		if self.pathFilenameFoldsTotal is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
+
+		if self.moduleIdentifier is None: # pyright: ignore[reportUnnecessaryComparison]
+			self.moduleIdentifier = self.pathFilenameFoldsTotal.stem
 
 		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.identifierDataclass and self.identifierDataclassInstance: # pyright: ignore[reportUnnecessaryComparison]
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)

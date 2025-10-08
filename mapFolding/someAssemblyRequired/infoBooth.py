@@ -44,6 +44,7 @@ default = Default(
 	},
 	module = {
 		'algorithm': 'daoOfMapFolding',
+		'dataBasket': 'dataBaskets',
 		'initializeState': 'initializeState',
 	},
 	variable = {

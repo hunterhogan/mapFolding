@@ -203,7 +203,6 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 	matched_oeisID: bool = True
 
 	match oeisID:
-		case 'A000136': from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
 		case 'A000560': from mapFolding.algorithms.oeisIDbyFormula import A000560 as doTheNeedful
 		case 'A001010': from mapFolding.algorithms.oeisIDbyFormula import A001010 as doTheNeedful
 		case 'A001011': from mapFolding.algorithms.oeisIDbyFormula import A001011 as doTheNeedful
@@ -222,6 +221,19 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 	else:
 		matched_oeisID = True
 		match oeisID:
+			case 'A000136':
+				match flow:
+					case 'elimination':
+						from mapFolding.algorithms.elimination import doTheNeedful as doTheNeedful
+						countTotal = doTheNeedful(oeis_n)
+					case 'eliminationParallel':
+						from mapFolding import setProcessorLimit
+						from mapFolding.algorithms.eliminationParallel import doTheNeedful
+						concurrencyLimit: int = setProcessorLimit(CPUlimit)
+						countTotal = doTheNeedful(oeis_n, concurrencyLimit)
+					case _:
+						from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
+						countTotal = doTheNeedful(oeis_n)
 			case 'A000682' | 'A005316':
 				match flow:
 					case 'matrixNumPy':

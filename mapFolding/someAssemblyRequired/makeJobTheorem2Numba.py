@@ -9,15 +9,17 @@ progress integration for long-running calculations, and launcher generation for 
 """
 
 from astToolkit import (
-	Be, extractFunctionDef, IngredientsFunction, IngredientsModule, Make, NodeChanger, NodeTourist, Then)
+	astModuleToIngredientsFunction, Be, IngredientsFunction, IngredientsModule, Make, NodeChanger, NodeTourist,
+	parseLogicalPath2astModule, Then)
 from astToolkit.transformationTools import write_astModule
-from hunterMakesPy import autoDecodingRLE, raiseIfNone
-from mapFolding import DatatypeLeavesTotal, getFoldsTotalKnown, getPathFilenameFoldsTotal, packageSettings
-from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.someAssemblyRequired import DatatypeConfiguration, dictionaryEstimatesMapFolding, IfThis
+from hunterMakesPy import autoDecodingRLE, identifierDotAttribute
+from mapFolding import (
+	DatatypeLeavesTotal, dictionaryOEIS, getFoldsTotalKnown, getPathFilenameFoldsTotal, packageSettings)
+from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
+from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultA007822, dictionaryEstimatesMapFolding, IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport, RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
-from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import PurePosixPath
 from typing import cast
 import ast
@@ -29,10 +31,10 @@ import ast
 # That would probably be an improvement.
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint16', type_asname='DatatypeElephino'),
+	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeElephino'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numba', typeIdentifier='uint64', type_asname='DatatypeFoldsTotal'),
 	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint16', type_asname='Array1DElephino'),
+	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DElephino'),
 	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
 ]
 
@@ -42,7 +44,26 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsCount: Ingredie
 if __name__ == '__main__':
 	import time
 	timeStart = time.perf_counter()
-	foldsTotal = int({job.countCallable}() * {job.state.leavesTotal})
+	foldsTotal = int({job.identifierCallable}() * {job.state.leavesTotal})
+	print(time.perf_counter() - timeStart)
+	print('\\nmap {job.state.mapShape} =', foldsTotal)
+	writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
+	writeStream.write(str(foldsTotal))
+	writeStream.close()
+"""
+	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
+	NodeChanger(Be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName))).visit(ingredientsCount.astFunctionDef)
+	ingredientsCount.astFunctionDef.returns = job.shatteredDataclass.countingVariableAnnotation
+
+	return ingredientsModule, ingredientsCount
+
+def addLauncherA007822(ingredientsModule: IngredientsModule, ingredientsCount: IngredientsFunction, job: RecipeJobTheorem2) -> tuple[IngredientsModule, IngredientsFunction]:
+	"""Add a standalone launcher section to a computation module."""
+	linesLaunch: str = f"""
+if __name__ == '__main__':
+	import time
+	timeStart = time.perf_counter()
+	foldsTotal = int({job.identifierCallable}())
 	print(time.perf_counter() - timeStart)
 	print('\\nmap {job.state.mapShape} =', foldsTotal)
 	writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
@@ -79,7 +100,7 @@ def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFu
 	linesLaunch: str = f"""
 if __name__ == '__main__':
 	with ProgressBar(total={job.foldsTotalEstimated//job.state.leavesTotal}, update_interval=2) as statusUpdate:
-		{job.countCallable}(statusUpdate)
+		{job.identifierCallable}(statusUpdate)
 		foldsTotal = statusUpdate.n * {job.state.leavesTotal}
 		print('\\nmap {job.state.mapShape} =', foldsTotal)
 		writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
@@ -204,7 +225,8 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 		Optimization settings including Numba parameters and progress options.
 
 	"""
-	ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.countCallable)))
+	# ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.identifierCallableSource)))  # noqa: ERA001
+	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(job.source_astModule, job.identifierCallableSource)
 
 	for identifier in job.shatteredDataclass.listIdentifiersStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
@@ -219,7 +241,8 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 		ingredientsModule, ingredientsCount = addLauncherNumbaProgress(ingredientsModule, ingredientsCount, job, spices)
 		spices.parametersNumba['nogil'] = True
 	else:
-		ingredientsModule, ingredientsCount = addLauncher(ingredientsModule, ingredientsCount, job)
+		ingredientsModule, ingredientsCount = addLauncher(ingredientsModule, ingredientsCount, job)  # noqa: ERA001
+		# ingredientsModule, ingredientsCount = addLauncherA007822(ingredientsModule, ingredientsCount, job)
 
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
@@ -245,6 +268,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
+	from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	foldsTotalEstimated: int = getFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
 	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
@@ -253,6 +277,39 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	spices = SpicesJobNumba(useNumbaProgressBar=True, parametersNumba=parametersNumbaLight)
 	makeJobNumba(aJob, spices)
 
+def A007822(n: int) -> None:
+	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
+	from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
+	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
+	foldsTotalEstimated: int = dictionaryOEIS['A007822']['valuesKnown'].get(n, 0)
+	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{packageSettings.identifierPackage}.{defaultA007822['module']['dataBasket']}"
+		, defaultA007822['variable']['stateDataclass'], defaultA007822['variable']['stateInstance'])
+	source_astModule: ast.Module = parseLogicalPath2astModule(f'{packageSettings.identifierPackage}.{defaultA007822['logicalPath']['synthetic']}.theorem2Numba')
+	identifierCallableSource: str = defaultA007822['function']['counting']
+	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{packageSettings.identifierPackage}.dataBaskets'
+	sourceDataclassIdentifier: str = defaultA007822['variable']['stateDataclass']
+	sourceDataclassInstance: str = defaultA007822['variable']['stateInstance']
+	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageSettings.pathPackage)
+	sourcePackageIdentifier: str | None = packageSettings.identifierPackage
+	pathPackage: PurePosixPath | None = None
+	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
+	fileExtension: str = packageSettings.fileExtension
+	pathFilenameFoldsTotal = pathModule / ('A007822_' + str(n))
+	packageIdentifier: str | None = None
+	logicalPathRoot: identifierDotAttribute | None = None
+	moduleIdentifier: str = pathFilenameFoldsTotal.stem
+	identifierCallable: str = identifierCallableSource
+	identifierDataclass: str | None = sourceDataclassIdentifier
+	identifierDataclassInstance: str | None = sourceDataclassInstance
+	logicalPathModuleDataclass: identifierDotAttribute | None = sourceLogicalPathModuleDataclass
+	aJob = RecipeJobTheorem2(state, foldsTotalEstimated, shatteredDataclass, source_astModule, identifierCallableSource, sourceLogicalPathModuleDataclass
+		, sourceDataclassIdentifier, sourceDataclassInstance, sourcePathPackage, sourcePackageIdentifier, pathPackage, pathModule, fileExtension
+		, pathFilenameFoldsTotal, packageIdentifier, logicalPathRoot, moduleIdentifier, identifierCallable, identifierDataclass, identifierDataclassInstance
+		, logicalPathModuleDataclass)
+	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
+	makeJobNumba(aJob, spices)
+
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (5,5)
-	fromMapShape(mapShape)
+	# mapShape: tuple[DatatypeLeavesTotal, ...] = (5,5)  # noqa: ERA001
+	# fromMapShape(mapShape)  # noqa: ERA001
+	A007822(8)
