@@ -360,7 +360,7 @@ def doTheNeedful(n: int, dictionaryCurveLocations: dict[int, int]) -> int:
 	--------------
 
 	As first computed by Iwan Jensen in 2000, A000682(41) = 6664356253639465480.
-	Citation: https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bibtex
+	Citation: https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bib
 	See also https://oeis.org/A000682
 
 	I'm sure you instantly observed that A000682(41) = (6664356253639465480).bit_length() = 63 bits. And A005316(44) =

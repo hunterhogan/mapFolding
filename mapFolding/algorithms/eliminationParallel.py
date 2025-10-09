@@ -62,6 +62,9 @@ def doTheNeedful(n: int, processesMaximum: int) -> int:
 # A valid sequence takes many times more cycles to process than a sequence that is proved invalid in the first few elements.
 # So, dividing purely on the number of sequences is not optimal.
 # Prefer generators of lists over lists of lists.
+
+# In the current system, each `Future` leads to a returned value, which is then summed. But, I don't care about any specific
+# `Future`. I would rather have the processes "consume" work from a common well and return their results when the work is done.
 	workers: int = min(processesMaximum, n - 1)
 	with ProcessPoolExecutor(max_workers=workers) as processPool:
 		listFutures: list[Future[int]] = []

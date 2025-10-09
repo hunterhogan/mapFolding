@@ -34,7 +34,7 @@ if __name__ == '__main__':
 	flow = 'eliminationParallel'
 	flow = 'elimination'
 
-	for n in range(3,12):
+	for n in range(7,12):
 	# for n in range(3,8):
 
 		timeStart = time.perf_counter()

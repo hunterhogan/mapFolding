@@ -134,6 +134,7 @@ scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.
 dependencies = [
   "astToolkit",
   "autoflake",
+  "cytoolz",
   "hunterMakesPy",
   "isort",
   "numpy",

@@ -76,7 +76,7 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
 
     Notes
     -----
-    Citation: https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bibtex
+    Citation: https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bib
 
     See Also
     --------
