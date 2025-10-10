@@ -106,8 +106,8 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 								,  Be.Subscript.sliceIs(Be.Tuple))
 			, doThat=lambda node: Grab.sliceAttribute(Grab.eltsAttribute(
 				Then.replaceWith([
-					Make.Call(Make.Name('int'), listParameters=[cast('ast.Tuple', node.slice).elts[index]])
-					for index in range(len(cast('ast.Tuple', node.slice).elts))])))(node)
+					Make.Call(Make.Name('int'), listParameters=[cast(ast.Tuple, node.slice).elts[index]])
+					for index in range(len(cast(ast.Tuple, node.slice).elts))])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
 	return ingredientsFunction
@@ -159,7 +159,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 			'-']
 		streamText = subprocess.Popen(buildCommand, stdin=subprocess.PIPE, text=True)
 		if streamText.stdin is not None:
-			write_astModule(ingredientsModule, pathFilename=cast('TextIOBase', streamText.stdin), packageName=job.packageIdentifier)
+			write_astModule(ingredientsModule, pathFilename=cast(TextIOBase, streamText.stdin), packageName=job.packageIdentifier)
 			streamText.stdin.close()
 		streamText.wait()
 		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)

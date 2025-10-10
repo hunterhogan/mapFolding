@@ -36,7 +36,8 @@ from pathlib import Path, PurePosixPath
 import importlib.util
 import multiprocessing
 import pytest
-
+import warnings
+from numba.core.errors import NumbaPendingDeprecationWarning
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
@@ -52,7 +53,7 @@ def test_A007822(flow: str) -> None:
 	"""
 	oeisID = 'A007822'
 	CPUlimit = .5
-
+	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
 	oeis_n = 2
 	for oeis_n in dictionaryOEIS[oeisID]['valuesTestValidation']:
 		if oeis_n < 2:

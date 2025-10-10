@@ -1,6 +1,6 @@
 """addSymmetryCheck."""
 from astToolkit import (
-	Be, Grab, identifierDotAttribute, LedgerOfImports, NodeChanger, NodeTourist, parsePathFilename2astModule, Then)
+	Be, Grab, identifierDotAttribute, LedgerOfImports, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then)
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, defaultA007822, IfThis
@@ -47,6 +47,20 @@ def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCal
 
 	return pathFilename
 
+def _numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+	pathFilename: PurePath = numbaOnTheorem2(astModule, identifierModule, identifierCallable, logicalPathInfix, sourceCallableDispatcher)
+	astModule = parsePathFilename2astModule(pathFilename)
+
+	NodeChanger(Be.AnnAssign.valueIs(IfThis.isAttributeNamespaceIdentifier(defaultA007822['variable']['stateInstance'], 'indices'))
+			, lambda node: Grab.valueAttribute(Then.replaceWith(Make.Call(Make.Name('List'), [raiseIfNone(node.value)])))(node)
+		).visit(astModule)
+
+	astModule.body.insert(0, Make.ImportFrom('numba.typed', [Make.alias('List')]))
+
+	write_astModule(astModule, pathFilename, packageSettings.identifierPackage)
+
+	return pathFilename
+
 def makeA007822Modules() -> None:
 	"""Make."""
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
@@ -66,7 +80,7 @@ def makeA007822Modules() -> None:
 		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', defaultA007822['function']['counting']
+	pathFilename = _numbaOnTheorem2(astModule, 'theorem2Numba', defaultA007822['function']['counting']
 		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
 
 if __name__ == '__main__':

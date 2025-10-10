@@ -237,12 +237,12 @@ class SymmetricFoldsState:
 	leafComparison: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
 	"""Array for finding symmetric folds."""
 
-	arrayGroupOfFolds: Array2DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array2DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 	connectionGraph: Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array3DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
 	"""Unchanging array representing connections between all leaves."""
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
-	indicesArrayGroupOfFolds: Array2DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array2DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+	indices: list[list[tuple[int, int]]] = dataclasses.field(init=False)
+	"""Precomputed index pairs for symmetric fold checking."""
 	leavesTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""
 
@@ -259,12 +259,9 @@ class SymmetricFoldsState:
 		self.leavesTotal = DatatypeLeavesTotal(getLeavesTotal(self.mapShape))
 
 		leavesTotalAsInt = int(self.leavesTotal)
-
 		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		self.indicesArrayGroupOfFolds = (numpy.arange(leavesTotalAsInt + 1)[:, None] + numpy.arange(leavesTotalAsInt)[None, :]) % (leavesTotalAsInt + 1)
-		self.indicesArrayGroupOfFolds[..., leavesTotalAsInt // 2:None] = self.indicesArrayGroupOfFolds[..., leavesTotalAsInt - 1: leavesTotalAsInt - leavesTotalAsInt // 2 - 1: -1]
-		self.arrayGroupOfFolds = numpy.zeros_like(self.indicesArrayGroupOfFolds)
+		self.indices = [[((index + folding) % (self.leavesTotal+1), (-2-index + folding) % (self.leavesTotal+1)) for index in range(self.leavesTotal//2)] for folding in range(self.leavesTotal + 1)]
 
 		if self.dimensionsUnconstrained is None: self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal)) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701
 		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype']) # pyright: ignore[reportUnnecessaryComparison]  # noqa: E701

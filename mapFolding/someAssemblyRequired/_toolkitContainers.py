@@ -220,7 +220,7 @@ class DeReConstructField2ast: # slots?
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstanceIdentifier), self.name)
 
-		self.astAnnotation = cast('ast.Name', raiseIfNone(NodeTourist(
+		self.astAnnotation = cast(ast.Name, raiseIfNone(NodeTourist(
 			findThis = Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
 			, doThat = Then.extractIt(DOT.annotation)
 			).captureLastMatch(dataclassClassDef)))
@@ -251,8 +251,9 @@ class DeReConstructField2ast: # slots?
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
 		elif isinstance(self.astAnnotation, ast.Subscript):
-			elementConstructor: str = self.metadata['elementConstructor']
-			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
+			elementConstructor: str = self.metadata.get('elementConstructor', 'generic')
+			if elementConstructor != 'generic':
+				self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
 			takeTheTuple = deepcopy(self.astAnnotation.slice)
 			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, takeTheTuple)
 			self.Z0Z_hack = (self.astAnnAssignConstructor, elementConstructor)

@@ -38,7 +38,7 @@ from hunterMakesPy import raiseIfNone, writeStringToHere
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default
 from os import PathLike
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from typing import Any
 import ast
 import io
@@ -147,6 +147,10 @@ def write_astModule(astModule: ast.Module, pathFilename: PathLike[Any] | PurePat
 	if packageName:
 		autoflake_additional_imports.append(packageName)
 	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=True, remove_duplicate_keys = False, remove_unused_variables = False)
-	pythonSource = isort.code(pythonSource)
+	pathFilenameConfig = Path(packageSettings.pathPackage, '..', '.isort.cfg')
+	Z0Z_config = isort.Config()
+	if pathFilenameConfig.exists():
+		Z0Z_config = isort.Config(str(pathFilenameConfig))
+	pythonSource = isort.code(pythonSource, config=Z0Z_config)
 	writeStringToHere(pythonSource + '\n', pathFilename)
 

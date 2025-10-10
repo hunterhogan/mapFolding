@@ -59,7 +59,7 @@ def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifier
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
-		astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
+		astTuple: ast.Tuple = cast(ast.Tuple, raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
 				, doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)))
 		astTuple.ctx = Make.Store()
 
@@ -223,7 +223,7 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
-		astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
+		astTuple: ast.Tuple = cast(ast.Tuple, raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
 				, doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)))
 		astTuple.ctx = Make.Store()
 

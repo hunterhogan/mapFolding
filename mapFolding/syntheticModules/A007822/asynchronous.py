@@ -1,11 +1,8 @@
 from copy import deepcopy
-from queue import Queue
-from threading import Lock, Thread
-
-import numpy
-
 from mapFolding import DatatypeFoldsTotal
 from mapFolding.dataBaskets import SymmetricFoldsState
+from queue import Queue
+from threading import Lock, Thread
 
 listThreads: list[Thread] = []
 queueFutures: Queue[SymmetricFoldsState] = Queue()
@@ -54,10 +51,13 @@ def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
         state.leafComparison[state.leafConnectee] = (state.indexMiniGap - state.indexLeaf + state.leavesTotal) % state.leavesTotal
         state.indexLeaf = state.indexMiniGap
         state.leafConnectee += 1
-    state.arrayGroupOfFolds = numpy.take(state.leafComparison, state.indicesArrayGroupOfFolds)
-    compared = state.arrayGroupOfFolds[..., 0:state.leavesTotal // 2] == state.arrayGroupOfFolds[..., state.leavesTotal // 2:None]
-    for indexRow in range(len(compared)):
-        state.groupsOfFolds += compared[indexRow].all()
+    for listTuples in state.indices:
+        state.leafConnectee = 1
+        for indexLeft, indexRight in listTuples:
+            if state.leafComparison[indexLeft] != state.leafComparison[indexRight]:
+                state.leafConnectee = 0
+                break
+        state.groupsOfFolds += state.leafConnectee
     return state
 
 def activeLeafGreaterThan0(state: SymmetricFoldsState) -> bool:

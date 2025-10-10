@@ -24,9 +24,10 @@ if __name__ == '__main__':
 	CPUlimit: bool | float | int | None = None
 	# mapShape: tuple[int, ...] | None = None
 	flow: str | None = 'theorem2Numba'
+	flow: str | None = None
 
-	oeisID: str = 'A001416'
-	for n in range(3,8):
+	oeisID: str = 'A000136'
+	for n in range(3,14,2):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 

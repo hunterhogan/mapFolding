@@ -1,8 +1,8 @@
-from itertools import permutations, product as CartesianProduct
+from cytoolz import curried as toolz
+from itertools import permutations, product as CartesianProduct, starmap
 from typing import Final
-import cytoolz
 
-def isThisValid(folding: list[int]) -> bool:
+def isThisValid(folding: tuple[int, ...]) -> bool:
 	"""Verify that a folding sequence is possible.
 
 	Parameters
@@ -76,7 +76,7 @@ def count(prefix: list[int], permutands: list[int], postfix: list[int]) -> int:
 	"""
 	groupsOfFolds: int = 0
 	for aPermutation in permutations(permutands):
-		groupsOfFolds += isThisValid([*prefix, *aPermutation, *postfix])
+		groupsOfFolds += isThisValid((*prefix, *aPermutation, *postfix))
 	return groupsOfFolds
 
 def staging(prefix: list[int], permutands: list[int]) -> int:
@@ -123,22 +123,44 @@ def staging(prefix: list[int], permutands: list[int]) -> int:
 
 def doTheNeedful(n: int) -> int:
 	"""Count the number of valid foldings for a given number of leaves."""
-	leavesTotal: int = n
-	groupsOfFolds: int = 0
+	leavesTotal: Final[int] = n
 	listToPermute: list[tuple[list[int], list[int]]] = []
 
 	prefix: list[int] = [1]
-	listLeaves: Final[list[int]] = list(range(n, 1, -1))
+	listLeaves: Final[list[int]] = list(range(leavesTotal, 1, -1))
 
 	permutands: list[int] = listLeaves.copy()
 
 # ------- Exclude leading 2 -------------------------------
+# NOTE 1,{3..n},{2..n}...
 	excludeLeading2: list[int] = permutands.copy()
 	excludeLeading2.remove(2)
-
 	listToPermute.extend([([*prefix, leafPrefix], [leaf for leaf in permutands if leaf != leafPrefix]) for leafPrefix in excludeLeading2])
+	del excludeLeading2
 
-	for (prefix, permutands) in listToPermute:
-		groupsOfFolds += staging(prefix, permutands)
+# ------- Exclude interposed 2 ----------------------------
+# NOTE 1,{3..n},{3..n},{2..n}...
+# NOTE 1,{n,if n&1},{2..n-1}...
+	for aTuple in listToPermute.copy():
+		if len(aTuple[0]) != 2 or leavesTotal < 4:
+			continue
+		interposer: int = aTuple[0][1]
+		excludeInterposed2: list[int] = permutands.copy()
+		excludeInterposed2.remove(2)
+		excludeInterposed2.remove(interposer)
+		if interposer == leavesTotal and interposer & 1:
+			listToPermute.append(([*aTuple[0], 2], excludeInterposed2))
+			listToPermute.extend([([*aTuple[0], leafPrefix], [leaf for leaf in permutands if leaf not in (leafPrefix, interposer)]) for leafPrefix in excludeInterposed2])
+		else:
+			listToPermute.extend([([*aTuple[0], leafPrefix], [leaf for leaf in permutands if leaf not in (leafPrefix, interposer)]) for leafPrefix in excludeInterposed2])
+		listToPermute.remove(aTuple)
+		del aTuple, excludeInterposed2, interposer
 
-	return groupsOfFolds * leavesTotal
+	return sum(starmap(staging, listToPermute)) * leavesTotal
+
+# ------- Exclude interposed 3 ----------------------------
+# NOTE 1,{3..n},{3..n},{2..n}...,{3..n}
+# NOTE 1,{3..n},{3..n},{3..n}...,{4..n},{3..n},{2}
+# NOTE 1,{3..n-1},...,{n,if ~n&1},{2}
+# NOTE 1,{n,if n&1},{2..n-1}...
+
