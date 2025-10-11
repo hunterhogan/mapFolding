@@ -1,5 +1,4 @@
-from cytoolz import curried as toolz
-from itertools import permutations, product as CartesianProduct, starmap
+from itertools import permutations, starmap
 from typing import Final
 
 def isThisValid(folding: tuple[int, ...]) -> bool:
@@ -17,7 +16,7 @@ def isThisValid(folding: tuple[int, ...]) -> bool:
 
 	Notes
 	-----
-	All 8 forms
+	All 8 forbidden forms
 		[k, r, k+1, r+1] [r, k+1, r+1, k] [k+1, r+1, k, r] [r+1, k, r, k+1]
 		[r, k, r+1, k+1] [k, r+1, k+1, r] [r+1, k+1, r, k] [k+1, r, k, r+1]
 
@@ -150,9 +149,7 @@ def doTheNeedful(n: int) -> int:
 		excludeInterposed2.remove(interposer)
 		if interposer == leavesTotal and interposer & 1:
 			listToPermute.append(([*aTuple[0], 2], excludeInterposed2))
-			listToPermute.extend([([*aTuple[0], leafPrefix], [leaf for leaf in permutands if leaf not in (leafPrefix, interposer)]) for leafPrefix in excludeInterposed2])
-		else:
-			listToPermute.extend([([*aTuple[0], leafPrefix], [leaf for leaf in permutands if leaf not in (leafPrefix, interposer)]) for leafPrefix in excludeInterposed2])
+		listToPermute.extend([([*aTuple[0], leafPrefix], [leaf for leaf in permutands if leaf not in (leafPrefix, interposer)]) for leafPrefix in excludeInterposed2])
 		listToPermute.remove(aTuple)
 		del aTuple, excludeInterposed2, interposer
 

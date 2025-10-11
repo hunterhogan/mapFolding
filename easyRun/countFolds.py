@@ -27,7 +27,7 @@ if __name__ == '__main__':
 	flow: str | None = None
 
 	oeisID: str = 'A000136'
-	for n in range(3,14,2):
+	for n in range(10,20):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 
