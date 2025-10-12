@@ -1,6 +1,7 @@
 """Configuration by dataclass."""
 
-from astToolkit import identifierDotAttribute, IngredientsFunction, IngredientsModule, parseLogicalPath2astModule
+from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
+from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy import autoDecodingRLE
 # TODO 'The____' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different

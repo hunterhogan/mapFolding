@@ -25,7 +25,8 @@ to low-level optimized functions while maintaining semantic equivalence and type
 the compilation process.
 """
 
-from astToolkit import Be, DOT, identifierDotAttribute, LedgerOfImports, Make, NodeTourist, Then
+from astToolkit import Be, DOT, identifierDotAttribute, Make, NodeTourist, Then
+from astToolkit.containers import LedgerOfImports
 from collections.abc import Callable
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone

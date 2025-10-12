@@ -25,7 +25,8 @@ computational modules. The compilation layer integrates seamlessly with the broa
 system to produce standalone modules optimized for specific map dimensions and computational contexts.
 """
 
-from astToolkit import identifierDotAttribute, IngredientsFunction, Make
+from astToolkit import identifierDotAttribute, Make
+from astToolkit.containers import IngredientsFunction
 from collections.abc import Callable
 from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, Final, NotRequired, TYPE_CHECKING, TypedDict

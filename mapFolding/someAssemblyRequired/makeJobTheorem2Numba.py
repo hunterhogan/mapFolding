@@ -8,9 +8,9 @@ internalization to convert function parameters into embedded variables, Numba de
 progress integration for long-running calculations, and launcher generation for standalone execution entry points.
 """
 
-from astToolkit import (
-	astModuleToIngredientsFunction, Be, IngredientsFunction, IngredientsModule, Make, NodeChanger, NodeTourist,
-	parseLogicalPath2astModule, Then)
+from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
+from astToolkit.containers import (
+	astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports)
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import autoDecodingRLE, identifierDotAttribute
 from mapFolding import (
@@ -253,7 +253,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 	ingredientsCount.astFunctionDef.decorator_list = [] # TODO low-priority, handle this more elegantly
 	ingredientsCount = decorateCallableWithNumba(ingredientsCount, spices.parametersNumba)
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
-	write_astModule(ingredientsModule, job.pathFilenameModule, job.packageIdentifier)
+	ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
 
 	"""
 	Overview

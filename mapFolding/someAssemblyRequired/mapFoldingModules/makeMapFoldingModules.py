@@ -1,8 +1,9 @@
 """makeMapFoldingModules."""
 from astToolkit import (
-	astModuleToIngredientsFunction, Be, DOT, extractClassDef, Grab, hasDOTbody, identifierDotAttribute,
-	IngredientsFunction, IngredientsModule, LedgerOfImports, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule,
-	parsePathFilename2astModule, Then)
+	Be, DOT, extractClassDef, Grab, hasDOTbody, identifierDotAttribute, Make, NodeChanger, NodeTourist,
+	parseLogicalPath2astModule, parsePathFilename2astModule, Then)
+from astToolkit.containers import (
+	astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports)
 from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
 from hunterMakesPy import importLogicalPath2Identifier, raiseIfNone
 from mapFolding import packageSettings
@@ -126,7 +127,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 
 # END add the parallel logic to the count function ------------------------------------------------
 
-	ingredientsFunction = removeUnusedParameters(ingredientsFunction)
+	ingredientsFunction.removeUnusedParameters()
 
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
@@ -186,7 +187,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, packageSettings.identifierPackage)
 
 	return pathFilename
 

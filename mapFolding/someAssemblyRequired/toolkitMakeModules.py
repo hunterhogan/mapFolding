@@ -31,18 +31,14 @@ improvements through just-in-time compilation, parallel execution, and optimized
 tailored for specific computational requirements essential to large-scale map folding research.
 """
 
-from astToolkit import (
-	Be, DOT, identifierDotAttribute, IngredientsFunction, NodeTourist, parseLogicalPath2astModule, Then)
-from autoflake import fix_code as autoflake_fix_code
-from hunterMakesPy import raiseIfNone, writeStringToHere
+from astToolkit import Be, DOT, identifierDotAttribute, NodeTourist, parseLogicalPath2astModule, Then
+from astToolkit.containers import IngredientsFunction
+from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default
 from os import PathLike
-from pathlib import Path, PurePath
-from typing import Any
+from pathlib import PurePath
 import ast
-import io
-import isort
 
 def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
 	"""Dynamically extract information about a `dataclass`: the instance identifier, the identifier, and the logical path module.
@@ -128,29 +124,3 @@ def getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.
 	if pathRoot:
 		pathFilename = PurePath(pathRoot, pathFilename)
 	return pathFilename
-
-def write_astModule(astModule: ast.Module, pathFilename: PathLike[Any] | PurePath | io.TextIOBase, packageName: str | None = None) -> None:
-	"""Prototype that will likely be moved to astToolkit.
-
-	Parameters
-	----------
-	astModule : ast.Module
-		The AST module to be written to a file.
-	pathFilename : PathLike[Any] | PurePath
-		The file path where the module should be written.
-	packageName : str | None = None
-		Optional package name to preserve in import optimization.
-	"""
-	ast.fix_missing_locations(astModule)
-	pythonSource: str = ast.unparse(astModule)
-	autoflake_additional_imports: list[str] = []
-	if packageName:
-		autoflake_additional_imports.append(packageName)
-	pythonSource = autoflake_fix_code(pythonSource, autoflake_additional_imports, expand_star_imports=False, remove_all_unused_imports=True, remove_duplicate_keys = False, remove_unused_variables = False)
-	pathFilenameConfig = Path(packageSettings.pathPackage, '..', '.isort.cfg')
-	Z0Z_config = isort.Config()
-	if pathFilenameConfig.exists():
-		Z0Z_config = isort.Config(str(pathFilenameConfig))
-	pythonSource = isort.code(pythonSource, config=Z0Z_config)
-	writeStringToHere(pythonSource + '\n', pathFilename)
-

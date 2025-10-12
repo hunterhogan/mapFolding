@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.16.4"
+version = "0.17.0"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -132,11 +132,8 @@ classifiers = [
 urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Issues = "https://github.com/hunterhogan/mapFolding/issues", Repository = "https://github.com/hunterhogan/mapFolding.git" }
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
-  "astToolkit",
-  "autoflake",
-  "cytoolz",
-  "hunterMakesPy",
-  "isort",
+  "astToolkit>=0.9.0",
+  "hunterMakesPy>=0.3.0",
   "numpy",
   "platformdirs",
   "sympy",
@@ -145,8 +142,6 @@ optional-dependencies = { development = [
   "ipykernel",
   "ipywidgets",
   "memray; sys_platform == 'linux'",
-  "mypy",
-  "pyupgrade",
   "py-spy",
   "setuptools-scm",
 ], numba = [

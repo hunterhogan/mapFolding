@@ -2,10 +2,9 @@
 
 https://docs.exaloop.io/start/install/
 """
-
 from astToolkit import (
-	Be, extractFunctionDef, Grab, identifierDotAttribute, IngredientsFunction, IngredientsModule, Make, NodeChanger,
-	parseLogicalPath2astModule, Then)
+	Be, extractFunctionDef, Grab, identifierDotAttribute, Make, NodeChanger, parseLogicalPath2astModule, Then)
+from astToolkit.containers import IngredientsFunction, IngredientsModule
 from astToolkit.transformationTools import removeUnusedParameters, write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, packageSettings
@@ -134,7 +133,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 		).visit(ingredientsCount.astFunctionDef)
 
 	ingredientsCount.imports.update(job.shatteredDataclass.imports)
-	ingredientsCount = removeUnusedParameters(ingredientsCount)
+	ingredientsCount.removeUnusedParameters()
 	NodeChanger(Be.arg, lambda removeIt: ingredientsCount.astFunctionDef.body.insert(0, moveShatteredDataclass_arg2body(removeIt.arg, job))).visit(ingredientsCount.astFunctionDef)
 
 	ingredientsCount = _addWriteFoldsTotal(ingredientsCount, job)
@@ -165,7 +164,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)
 		sys.stdout.write(f"sudo systemd-run --unit={job.moduleIdentifier} --nice=-10 --property=CPUAffinity=0 {job.pathFilenameModule.with_suffix('')}\n")
 	else:
-		write_astModule(ingredientsModule, pathFilename=job.pathFilenameModule, packageName=job.packageIdentifier)
+		ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
 		sys.stdout.write(f"python {Path(job.pathFilenameModule)}\n")
 
 def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:

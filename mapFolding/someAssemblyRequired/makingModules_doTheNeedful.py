@@ -1,7 +1,6 @@
 """Make functions that are complementary to the `count` function and are often called by `doTheNeedful`."""
-from astToolkit import (
-	Be, DOT, Grab, identifierDotAttribute, IngredientsFunction, IngredientsModule, LedgerOfImports, NodeChanger,
-	NodeTourist, Then)
+from astToolkit import Be, DOT, Grab, identifierDotAttribute, NodeChanger, NodeTourist, Then
+from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef, write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
@@ -54,6 +53,6 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef.body[0])
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
-	write_astModule(IngredientsModule(ingredientsFunction), pathFilename, packageSettings.identifierPackage)
+	IngredientsModule(ingredientsFunction).write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
 
 	return pathFilename

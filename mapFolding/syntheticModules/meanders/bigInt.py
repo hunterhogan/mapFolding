@@ -1,7 +1,5 @@
-from mapFolding.algorithms.matrixMeandersBeDry import (areIntegersWide,
-                                                       walkDyckPath)
+from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide, walkDyckPath
 from mapFolding.dataBaskets import MatrixMeandersNumPyState
-
 
 def countBigInt(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
     """Count meanders with matrix transfer algorithm using Python `int` (*int*eger) contained in a Python `dict` (*dict*ionary).

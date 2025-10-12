@@ -3,9 +3,9 @@
 These transformation functions will work on at least two different algorithms. If a transformation function only works on a
 specific type of algorithm, it will be in a subdirectory.
 """
-from astToolkit import (
-	astModuleToIngredientsFunction, Be, DOT, Grab, identifierDotAttribute, IngredientsFunction, IngredientsModule,
-	LedgerOfImports, Make, NodeChanger, NodeTourist, Then)
+from astToolkit import Be, DOT, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
+from astToolkit.containers import (
+	astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports)
 from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
@@ -48,7 +48,7 @@ def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifier
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclass)
-	ingredientsFunction = removeUnusedParameters(ingredientsFunction)
+	ingredientsFunction.removeUnusedParameters()
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
@@ -74,7 +74,7 @@ def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifier
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -176,7 +176,7 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -212,7 +212,7 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclass)
-	ingredientsFunction = removeUnusedParameters(ingredientsFunction)
+	ingredientsFunction.removeUnusedParameters()
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
@@ -238,7 +238,7 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
 
 	return pathFilename
 
@@ -292,7 +292,7 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
 
-	write_astModule(ingredientsModule, pathFilename, packageSettings.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
 
 	return pathFilename
 
