@@ -136,7 +136,6 @@ dependencies = [
   "hunterMakesPy>=0.3.0",
   "numpy",
   "platformdirs",
-  "sympy",
 ]
 optional-dependencies = { development = [
   "ipykernel",
@@ -148,11 +147,15 @@ optional-dependencies = { development = [
   "numba",
   "numba_progress",
 ], pandas = [
+  "ortools",
   "pandas",
   "pyarrow",
   "pyarrow-stubs",
+], "sympy" = [
+  "sympy",
 ], testing = [
   "numba",
+  "ortools",
   "pandas",
   "pyarrow",
   "pytest-cov",
