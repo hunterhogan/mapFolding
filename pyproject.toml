@@ -3,7 +3,7 @@ name = "mapFolding"
 version = "0.17.0"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12, <3.14"
 license = { 'text' = "CC-BY-NC-4.0" }
 authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 keywords = [
@@ -148,13 +148,13 @@ optional-dependencies = { development = [
   "numba",
   "numba_progress",
 ], pandas = [
-  "pandas; python_version < '3.14'",
-  "pyarrow; python_version < '3.14'",
-  "pyarrow-stubs; python_version < '3.14'",
+  "pandas",
+  "pyarrow",
+  "pyarrow-stubs",
 ], testing = [
-  "numba; python_version < '3.14'",
-  "pandas; python_version < '3.14'",
-  "pyarrow; python_version < '3.14'",
+  "numba",
+  "pandas",
+  "pyarrow",
   "pytest-cov",
   "pytest-env",
   "pytest-xdist",

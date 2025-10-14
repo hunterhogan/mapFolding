@@ -28,20 +28,16 @@ which is useful if you're working with the code synthesis features of the packag
 from mapFolding import countFolds, dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, oeisIDfor_n
 from mapFolding.basecamp import NOTcountingFolds
 from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
+from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight
+from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
+from numba.core.errors import NumbaPendingDeprecationWarning
 from pathlib import Path, PurePosixPath
 import importlib.util
 import multiprocessing
 import pytest
-import sys
 import warnings
-
-# Conditional imports for Python < 3.14
-if sys.version_info < (3, 14):
-	from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
-	from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight
-	from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
-	from numba.core.errors import NumbaPendingDeprecationWarning
 
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
@@ -80,13 +76,9 @@ def test_A007822(flow: str) -> None:
 		The computational flow algorithm to validate.
 
 	"""
-	if sys.version_info >= (3, 14) and flow in ('theorem2Numba',):
-		pytest.skip(f"Skipping {flow} on Python 3.14+ (numba not available)")
-
 	oeisID = 'A007822'
 	CPUlimit = .5
-	if sys.version_info < (3, 14):
-		warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
+	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
 	oeis_n = 2
 	for oeis_n in dictionaryOEIS[oeisID]['valuesTestValidation']:
 		if oeis_n < 2:
@@ -120,9 +112,6 @@ def test_countFolds(mapShapeTestCountFolds: tuple[int, ...], flow: str) -> None:
 		The computational flow algorithm to validate.
 
 	"""
-	if sys.version_info >= (3, 14) and flow in ('numba', 'theorem2Numba'):
-		pytest.skip(f"Skipping {flow} on Python 3.14+ (numba not available)")
-
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, flow)
 
 @pytest.mark.parametrize('flow', ['matrixMeanders', 'matrixNumPy', 'matrixPandas'])
@@ -138,9 +127,6 @@ def test_meanders(oeisIDmeanders: str, flow: str) -> None:
 		The Meanders OEIS sequence identifier to test calculations for.
 
 	"""
-	if sys.version_info >= (3, 14) and flow in ('matrixNumPy', 'matrixPandas'):
-		pytest.skip(f"Skipping {flow} on Python 3.14+ (pandas not available)")
-
 	dictionary = dictionaryOEISMapFolding if oeisIDmeanders in dictionaryOEISMapFolding else dictionaryOEIS
 	for n in dictionary[oeisIDmeanders]['valuesTestValidation']:
 		standardizedEqualToCallableReturn(
@@ -209,12 +195,8 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 		The temporary file path for generated module testing.
 
 	"""
-	if sys.version_info >= (3, 14):
-		pytest.skip("Skipping test_writeJobNumba on Python 3.14+ (numba not available)")
-
 	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # noqa: PLC0415
 	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba  # noqa: PLC0415
-	from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
 	mapShape = oneTestCuzTestsOverwritingTests
 	state = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 
