@@ -36,6 +36,7 @@ from pathlib import Path, PurePosixPath
 import importlib.util
 import multiprocessing
 import pytest
+import sys
 import warnings
 from numba.core.errors import NumbaPendingDeprecationWarning
 if __name__ == '__main__':
@@ -126,6 +127,9 @@ def test_meanders(oeisIDmeanders: str, flow: str) -> None:
 		The Meanders OEIS sequence identifier to test calculations for.
 
 	"""
+	if sys.version_info >= (3, 14) and flow in ('matrixNumPy', 'matrixPandas'):
+		pytest.skip(f"Skipping {flow} on Python 3.14+ (pandas not available)")
+
 	dictionary = dictionaryOEISMapFolding if oeisIDmeanders in dictionaryOEISMapFolding else dictionaryOEIS
 	for n in dictionary[oeisIDmeanders]['valuesTestValidation']:
 		standardizedEqualToCallableReturn(

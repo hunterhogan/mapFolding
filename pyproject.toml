@@ -148,13 +148,13 @@ optional-dependencies = { development = [
   "numba",
   "numba_progress",
 ], pandas = [
-  "pandas",
-  "pyarrow",
-  "pyarrow-stubs",
+  "pandas; python_version < '3.14'",
+  "pyarrow; python_version < '3.14'",
+  "pyarrow-stubs; python_version < '3.14'",
 ], testing = [
   "numba",
-  "pandas",
-  "pyarrow",
+  "pandas; python_version < '3.14'",
+  "pyarrow; python_version < '3.14'",
   "pytest-cov",
   "pytest-env",
   "pytest-xdist",
