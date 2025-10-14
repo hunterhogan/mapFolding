@@ -74,6 +74,7 @@ calculations through the strategic application of compiler optimization techniqu
 
 from mapFolding.someAssemblyRequired.infoBooth import (
     default as default,
+    Default as Default,
     defaultA007822 as defaultA007822,
 	dictionaryEstimatesMapFolding as dictionaryEstimatesMapFolding,
 )

@@ -23,15 +23,21 @@ if __name__ == '__main__':
 	computationDivisions: int | str | None = None
 	CPUlimit: bool | float | int | None = None
 	# mapShape: tuple[int, ...] | None = None
-	flow: str | None = 'theorem2Numba'
-	flow: str | None = None
+	flow = 'daoOfMapFolding'
+	flow = 'numba'
+	flow = 'theorem2'
+	flow = 'theorem2Numba'
+	flow: str | None = 'theorem2Trimmed'
 
+
+	oeisID: str = 'A001415'
 	oeisID: str = 'A000136'
-	for n in range(10,20):
+	for n in range(1,4):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 
 		timeStart = time.perf_counter()
+		# foldsTotal: int = countFolds(listDimensions=None, pathLikeWriteFoldsTotal=None, computationDivisions=None, CPUlimit=None, mapShape=(2, 3), flow='theorem2Trimmed')
 		foldsTotal: int = countFolds(listDimensions=listDimensions
 						, pathLikeWriteFoldsTotal=pathLikeWriteFoldsTotal
 						, computationDivisions=computationDivisions

@@ -50,13 +50,13 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			# NOTE Step 1 drop unqualified rows
 # ======= > * > bitsAlpha 1 bitsZulu 1 ====================
 			dataframeMeanders['analyzed'] = dataframeMeanders['arcCode'].copy()			# `bitsAlpha`
-			dataframeMeanders['analyzed'] &= state.locatorBits							# `bitsAlpha`
+			dataframeMeanders['analyzed'] &= state.bitsLocator							# `bitsAlpha`
 
 			dataframeMeanders['analyzed'] = dataframeMeanders['analyzed'].gt(1)			# if bitsAlphaHasArcs
 
 			bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy()				# `bitsZulu`
 			bitsTarget //= 2**1 														# `bitsZulu` (bitsZulu >> 1)
-			bitsTarget &= state.locatorBits 											# `bitsZulu`
+			bitsTarget &= state.bitsLocator 											# `bitsZulu`
 
 			dataframeMeanders['analyzed'] *= bitsTarget
 			del bitsTarget
@@ -64,13 +64,13 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 # ======= ^ & & bitsAlpha 1 bitsZulu 1 ====================
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()	# `bitsAlpha`
-			dataframeMeanders.loc[:, 'analyzed'] &= state.locatorBits					# `bitsAlpha`
+			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator					# `bitsAlpha`
 
 			dataframeMeanders.loc[:, 'analyzed'] &= 1									# `bitsAlpha`
 
 			bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy()				# `bitsZulu`
 			bitsTarget //= 2**1															# `bitsZulu` (bitsZulu >> 1)
-			bitsTarget &= state.locatorBits 											# `bitsZulu`
+			bitsTarget &= state.bitsLocator 											# `bitsZulu`
 
 			dataframeMeanders.loc[:, 'analyzed'] &= bitsTarget
 			del bitsTarget
@@ -85,7 +85,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			dataframeMeanders.loc[:, 'analyzed'] &= 1									# selectorBitsZuluAtOdd
 
 			bitsTarget = dataframeMeanders['arcCode'].copy()							# `bitsAlpha`
-			bitsTarget &= state.locatorBits												# `bitsAlpha`
+			bitsTarget &= state.bitsLocator												# `bitsAlpha`
 
 			# if bitsAlphaAtEven and not bitsZuluAtEven, modify bitsAlphaPairedToOdd
 			bitsTarget.loc[(dataframeMeanders['analyzed'] > 0)] = state.datatypeArcCode(
@@ -93,7 +93,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()	# `bitsZulu`
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**1								# `bitsZulu` (bitsZulu >> 1)
-			dataframeMeanders.loc[:, 'analyzed'] &= state.locatorBits					# `bitsZulu`
+			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator					# `bitsZulu`
 
 			# if bitsZuluAtEven and not bitsAlphaAtEven, modify bitsZuluPairedToOdd
 			dataframeMeanders.loc[((dataframeMeanders.loc[:, 'arcCode'] & 1) > 0), 'analyzed'] = state.datatypeArcCode(
@@ -127,11 +127,11 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			"""
 			dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']
-			dataframeMeanders.loc[:, 'analyzed'] &= state.locatorBits
+			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator
 
 			bitsZulu: pandas.Series = dataframeMeanders['arcCode'].copy()
 			bitsZulu //= 2**1 # (bitsZulu >> 1)
-			bitsZulu &= state.locatorBits # `bitsZulu`
+			bitsZulu &= state.bitsLocator # `bitsZulu`
 
 			bitsZulu *= 2**1 # (bitsZulu << 1)
 
@@ -164,7 +164,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy() # `bitsZulu`
 			bitsTarget //= 2**1 # `bitsZulu` (bitsZulu >> 1)
-			bitsTarget &= state.locatorBits # `bitsZulu`
+			bitsTarget &= state.bitsLocator # `bitsZulu`
 
 			bitsTarget *= 2**3 # (bitsZulu << 3)
 			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsZulu ...)
@@ -182,7 +182,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			dataframeMeanders.loc[:, 'analyzed'] *= 2**2 # ... | (bitsAlpha >> 2)
 
 			bitsTarget = dataframeMeanders['arcCode'].copy() # `bitsAlpha`
-			bitsTarget &= state.locatorBits # `bitsAlpha`
+			bitsTarget &= state.bitsLocator # `bitsAlpha`
 
 			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsAlpha)
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**2 # (... >> 2)
@@ -213,7 +213,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			dataframeMeanders.loc[:, 'analyzed'] ^= 1 # (1 - (bitsZulu ...))
 
 			bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy() # `bitsAlpha`
-			bitsTarget &= state.locatorBits # `bitsAlpha`
+			bitsTarget &= state.bitsLocator # `bitsAlpha`
 
 			bitsTarget *= 2**2 # (bitsAlpha << 2)
 			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsAlpha ...)
@@ -224,7 +224,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			bitsTarget = dataframeMeanders['arcCode'].copy() # `bitsZulu`
 			bitsTarget //= 2**1 # `bitsZulu` (bitsZulu >> 1)
-			bitsTarget &= state.locatorBits # `bitsZulu`
+			bitsTarget &= state.bitsLocator # `bitsZulu`
 
 			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget # ... | (bitsZulu)
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**1 # (... >> 1)
@@ -273,6 +273,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		goByeBye()
 
 		state.bitWidth = int(dataframeMeanders['arcCode'].max()).bit_length()
+		state.setBitsLocator()
 		length: int = getBucketsTotal(state)
 		dataframeAnalyzed = pandas.DataFrame({
 			'analyzed': pandas.Series(name='analyzed', data=0, index=pandas.RangeIndex(length), dtype=state.datatypeArcCode)
@@ -281,6 +282,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		)
 
 		state.boundary -= 1
+		state.setMAXIMUMarcCode()
 
 		state.indexTarget = 0
 

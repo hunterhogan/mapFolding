@@ -1,7 +1,7 @@
 from mapFolding.dataBaskets import SymmetricFoldsState
 
 def transitionOnGroupsOfFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    while state.groupsOfFolds == 0:
+    while state.symmetricFolds == 0:
         if state.leaf1ndex <= 1 or state.leafBelow[0] == 1:
             if state.leaf1ndex > state.leavesTotal:
                 state.indexLeaf = 1
@@ -18,7 +18,7 @@ def transitionOnGroupsOfFolds(state: SymmetricFoldsState) -> SymmetricFoldsState
                         if state.leafComparison[indexLeft] != state.leafComparison[indexRight]:
                             state.leafConnectee = 0
                             break
-                    state.groupsOfFolds += state.leafConnectee
+                    state.symmetricFolds += state.leafConnectee
             else:
                 state.dimensionsUnconstrained = state.dimensionsTotal
                 state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
@@ -60,5 +60,5 @@ def transitionOnGroupsOfFolds(state: SymmetricFoldsState) -> SymmetricFoldsState
             state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leaf1ndex
             state.gapRangeStart[state.leaf1ndex] = state.gap1ndex
             state.leaf1ndex += 1
-    state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
+    state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state

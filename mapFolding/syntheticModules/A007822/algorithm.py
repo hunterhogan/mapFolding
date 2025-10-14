@@ -15,7 +15,7 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
             if state.leafComparison[indexLeft] != state.leafComparison[indexRight]:
                 state.leafConnectee = 0
                 break
-        state.groupsOfFolds += state.leafConnectee
+        state.symmetricFolds += state.leafConnectee
     return state
 
 def activeLeafGreaterThan0(state: SymmetricFoldsState) -> bool:
@@ -153,7 +153,7 @@ def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
             state = undoLastLeafPlacement(state)
         if gapAvailable(state):
             state = insertActiveLeafAtGap(state)
-    state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
+    state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state
 
 def doTheNeedful(state: SymmetricFoldsState) -> SymmetricFoldsState:

@@ -203,7 +203,7 @@ class SymmetricFoldsState:
 	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
 	"""Dimensions of the map being analyzed for folding patterns."""
 
-	groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})
+	symmetricFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})
 	"""Current count of symmetric folds."""
 
 	gap1ndex: DatatypeElephino = DatatypeElephino(0)  # noqa: RUF009
@@ -395,6 +395,7 @@ class MatrixMeandersState:
 	"""The index of the meanders problem being solved."""
 	oeisID: str
 	"""'A000682', semi-meanders, or 'A005316', meanders."""
+
 	boundary: int
 	"""The algorithm analyzes `n` boundaries starting at `boundary = n - 1`."""
 	dictionaryMeanders: dict[int, int]
@@ -405,14 +406,19 @@ class MatrixMeandersState:
 	bitWidth: int = 0
 	"""At the start of an iteration enumerated by `boundary`, the number of bits of the largest value `arcCode`. The
 	`dataclass` computes a `property` from `bitWidth`."""
+	bitsLocator: int = 0
+	"""An odd-parity bit-mask with `bitWidth` bits."""
+	MAXIMUMarcCode: int = 0
+	"""The maximum value of `arcCode` for the current iteration of the transfer matrix."""
 
-	@property
-	def MAXIMUMarcCode(self) -> int:
-		"""Compute the maximum value of `arcCode` for the current iteration of the transfer matrix."""
-		return 1 << (2 * self.boundary + 4)
+	def reduceBoundary(self) -> None:
+		"""Prepare for the next iteration of the transfer matrix algorithm by reducing `boundary` by 1 and updating related fields."""
+		self.boundary -= 1
+		self.setBitWidth()
+		self.setBitsLocator()
+		self.setMAXIMUMarcCode()
 
-	@property
-	def locatorBits(self) -> int:
+	def setBitsLocator(self) -> None:
 		"""Compute an odd-parity bit-mask with `bitWidth` bits.
 
 		Notes
@@ -426,7 +432,21 @@ class MatrixMeandersState:
 		odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
 
 		"""
-		return sum(1 << one for one in range(0, self.bitWidth, 2))
+		self.bitsLocator = sum(1 << one for one in range(0, self.bitWidth, 2))
+
+	def setBitWidth(self) -> None:
+		"""Set `bitWidth` from the current `dictionaryMeanders`."""
+		self.bitWidth = max(self.dictionaryMeanders.keys()).bit_length()
+
+	def setMAXIMUMarcCode(self) -> None:
+		"""Compute the maximum value of `arcCode` for the current iteration of the transfer matrix."""
+		self.MAXIMUMarcCode = 1 << (2 * self.boundary + 4)
+
+	def __post_init__(self) -> None:
+		"""Post init."""
+		self.setBitWidth()
+		self.setBitsLocator()
+		self.setMAXIMUMarcCode()
 
 @dataclasses.dataclass(slots=True)
 class MatrixMeandersNumPyState(MatrixMeandersState):

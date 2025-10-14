@@ -30,7 +30,7 @@ def _threadDoesSomething() -> None:
             break
         state = _filterAsymmetricFolds(state)
         with LOCKsymmetricFoldsTotal:
-            symmetricFoldsTotal += state.groupsOfFolds
+            symmetricFoldsTotal += state.symmetricFolds
 
 def filterAsymmetricFolds(state: SymmetricFoldsState) -> None:
     queueFutures.put_nowait(deepcopy(state))
@@ -57,7 +57,7 @@ def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
             if state.leafComparison[indexLeft] != state.leafComparison[indexRight]:
                 state.leafConnectee = 0
                 break
-        state.groupsOfFolds += state.leafConnectee
+        state.symmetricFolds += state.leafConnectee
     return state
 
 def activeLeafGreaterThan0(state: SymmetricFoldsState) -> bool:
@@ -196,8 +196,8 @@ def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
         if gapAvailable(state):
             state = insertActiveLeafAtGap(state)
     else:
-        state.groupsOfFolds = getSymmetricFoldsTotal()
-    state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
+        state.symmetricFolds = getSymmetricFoldsTotal()
+    state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state
 
 def doTheNeedful(state: SymmetricFoldsState, maxWorkers: int) -> SymmetricFoldsState:

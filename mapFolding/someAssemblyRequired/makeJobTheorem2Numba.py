@@ -9,9 +9,7 @@ progress integration for long-running calculations, and launcher generation for 
 """
 
 from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
-from astToolkit.containers import (
-	astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports)
-from astToolkit.transformationTools import write_astModule
+from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import autoDecodingRLE, identifierDotAttribute
 from mapFolding import (
 	DatatypeLeavesTotal, dictionaryOEIS, getFoldsTotalKnown, getPathFilenameFoldsTotal, packageSettings)
@@ -31,10 +29,10 @@ import ast
 # That would probably be an improvement.
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeElephino'),
+	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint16', type_asname='DatatypeElephino'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numba', typeIdentifier='uint64', type_asname='DatatypeFoldsTotal'),
 	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DElephino'),
+	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint16', type_asname='Array1DElephino'),
 	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
 ]
 
@@ -310,6 +308,6 @@ def A007822(n: int) -> None:
 	makeJobNumba(aJob, spices)
 
 if __name__ == '__main__':
-	# mapShape: tuple[DatatypeLeavesTotal, ...] = (5,5)  # noqa: ERA001
-	# fromMapShape(mapShape)  # noqa: ERA001
-	A007822(8)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (2,21)  # noqa: ERA001
+	fromMapShape(mapShape)  # noqa: ERA001
+	# A007822(8)

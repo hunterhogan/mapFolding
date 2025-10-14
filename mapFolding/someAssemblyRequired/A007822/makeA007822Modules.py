@@ -71,11 +71,11 @@ def makeA007822Modules() -> None:
 
 	astModule = getModule(logicalPathInfix=defaultA007822['logicalPath']['synthetic'], identifierModule=defaultA007822['module']['algorithm'])
 	makeInitializeState(astModule, defaultA007822['module']['initializeState']
-		, defaultA007822['function']['initializeState'], defaultA007822['logicalPath']['synthetic'], None)
+		, defaultA007822['function']['initializeState'], defaultA007822['logicalPath']['synthetic'], None, identifiers=defaultA007822)
 
 	astModule = getModule(logicalPathInfix=defaultA007822['logicalPath']['synthetic'], identifierModule=defaultA007822['module']['algorithm'])
 	pathFilename = makeTheorem2(astModule, 'theorem2', defaultA007822['function']['counting']
-		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
+		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'], identifiers=defaultA007822)
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', defaultA007822['function']['counting']

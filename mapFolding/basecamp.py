@@ -174,13 +174,16 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 # ruff: noqa: E701
 	else:
-		match flow:
-			case 'daoOfMapFolding': from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
-			case 'numba': from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
-			case 'theorem2': from mapFolding.syntheticModules.theorem2 import doTheNeedful
-			case 'theorem2Numba': from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
-			case 'theorem2Trimmed': from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
-			case _: from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+		if all(dimension < 3 for dimension in mapShape):
+			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+		else:
+			match flow:
+				case 'daoOfMapFolding': from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+				case 'numba': from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
+				case 'theorem2': from mapFolding.syntheticModules.theorem2 import doTheNeedful
+				case 'theorem2Numba': from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
+				case 'theorem2Trimmed': from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
+				case _: from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 
 		from mapFolding.dataBaskets import MapFoldingState
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
@@ -226,13 +229,13 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 				concurrencyLimit: int = setProcessorLimit(CPUlimit)
 				match flow:
 					case 'elimination':
-						from mapFolding.algorithms.elimination import doTheNeedful
+						from mapFolding.algorithms.A000136elimination import doTheNeedful
 						countTotal = doTheNeedful(oeis_n)
 					case 'eliminationParallel':
-						from mapFolding.algorithms.eliminationParallel import doTheNeedful
+						from mapFolding.algorithms.A000136eliminationParallel import doTheNeedful
 						countTotal = doTheNeedful(oeis_n, concurrencyLimit)
 					case 'constraintPropagation':
-						from mapFolding.algorithms.constraintPropagation import doTheNeedful
+						from mapFolding.algorithms.A000136constraintPropagation import doTheNeedful
 						countTotal = doTheNeedful(oeis_n, concurrencyLimit)
 					case _:
 						from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
@@ -306,7 +309,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 						from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful
 						symmetricState = doTheNeedful(symmetricState)
 
-				countTotal = symmetricState.groupsOfFolds
+				countTotal = symmetricState.symmetricFolds
 			case _:
 				matched_oeisID = False
 

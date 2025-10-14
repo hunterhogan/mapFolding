@@ -41,6 +41,30 @@ from numba.core.errors import NumbaPendingDeprecationWarning
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
+@pytest.mark.parametrize('flow', ['elimination', 'eliminationParallel',  'constraintPropagation'])
+def test_A000136(flow: str) -> None:
+	"""Test A000136 flow options.
+
+	Parameters
+	----------
+	flow : str
+		The computational flow algorithm to validate.
+
+	"""
+	oeisID = 'A000136'
+	CPUlimit = .5
+	oeis_n = 2
+	for oeis_n in dictionaryOEISMapFolding[oeisID]['valuesTestValidation']:
+		if oeis_n < 2:
+			continue
+
+		expected = dictionaryOEISMapFolding[oeisID]['valuesKnown'][oeis_n]
+
+		standardizedEqualToCallableReturn(
+			expected
+			, NOTcountingFolds, oeisID, oeis_n, flow, CPUlimit
+			)
+
 @pytest.mark.parametrize('flow', ['algorithm', 'asynchronous',  'theorem2', 'theorem2Numba', 'theorem2Trimmed'])
 def test_A007822(flow: str) -> None:
 	"""Test A007822 flow options.

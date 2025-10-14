@@ -19,7 +19,7 @@ def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
                         if state.leafComparison[indexLeft] != state.leafComparison[indexRight]:
                             state.leafConnectee = 0
                             break
-                    state.groupsOfFolds += state.leafConnectee
+                    state.symmetricFolds += state.leafConnectee
             else:
                 state.dimensionsUnconstrained = state.dimensionsTotal
                 state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
@@ -61,8 +61,8 @@ def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
         state.gapRangeStart[state.leaf1ndex] = state.gap1ndex
         state.leaf1ndex += 1
     else:
-        state.groupsOfFolds *= 2
-    state.groupsOfFolds = (state.groupsOfFolds + 1) // 2
+        state.symmetricFolds *= 2
+    state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state
 
 def doTheNeedful(state: SymmetricFoldsState) -> SymmetricFoldsState:

@@ -174,7 +174,7 @@ report = { exclude_lines = [
 run = { branch = true, concurrency = [
   "multiprocessing",
 ], data_file = "tests/coverage/.coverage", omit = [
-  "easyRun/",
+  "easyRun/**",
   "getLLVMforNoReason.py",
   "mapFolding/reference/*",
   "mapFolding/tests/*",
@@ -185,7 +185,7 @@ run = { branch = true, concurrency = [
 ] }
 
 [tool.pytest.ini_options]
-addopts = ["--color=auto", "-n 3"]
+addopts = ["--color=auto", "-n 4"]
 log_auto_indent = true
 testpaths = ["mapFolding/tests"]
 

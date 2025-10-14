@@ -6,10 +6,10 @@ specific type of algorithm, it will be in a subdirectory.
 from astToolkit import Be, DOT, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import (
 	astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports)
-from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
+from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import default, IfThis, ShatteredDataclass
+from mapFolding.someAssemblyRequired import default, Default, IfThis, ShatteredDataclass
 from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getLogicalPath, getPathFilename
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
@@ -78,7 +78,7 @@ def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifier
 
 	return pathFilename
 
-def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:
 	"""Generate module by applying optimization predicted by Theorem 2.
 
 	Parameters
@@ -99,19 +99,17 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	pathFilename : PurePath
 		Filesystem path where the theorem-optimized module was written.
 	"""
-	identifierCallableInitializeDataclassHARDCODED = 'transitionOnGroupsOfFolds'
-	identifierModuleInitializeDataclassHARDCODED = 'initializeState'
+	dictionaryIdentifiers = identifiers or default
+	identifierCallableInitializeDataclass = dictionaryIdentifiers['function']['initializeState']
+	identifierModuleInitializeDataclass = dictionaryIdentifiers['module']['initializeState']
 
-	identifierCallableInitializeDataclass = identifierCallableInitializeDataclassHARDCODED
-	identifierModuleInitializeDataclass = identifierModuleInitializeDataclassHARDCODED
-
-	sourceCallableIdentifier = default['function']['counting']
+	sourceCallableIdentifier = dictionaryIdentifiers['function']['counting']
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
 
 	dataclassInstanceIdentifier: str = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 
-	theCountingIdentifier: str = default['variable']['counting']
+	theCountingIdentifier: str = dictionaryIdentifiers['variable']['counting']
 	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(Make.Name(dataclassInstanceIdentifier), theCountingIdentifier), Make.Mult(), Make.Constant(2))
 
 	NodeChanger(
@@ -160,7 +158,7 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 		# Update any calls to the original function name with the new target function name
 		NodeChanger(
-			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(default['function']['counting'])))
+			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(dictionaryIdentifiers['function']['counting'])))
 			, doThat = Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
 		).visit(ingredientsFunctionDispatcher.astFunctionDef)
 

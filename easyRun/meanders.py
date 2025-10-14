@@ -24,9 +24,9 @@ if __name__ == '__main__':
 	if sys.version_info >= (3, 14):
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
+	flow = 'matrixNumPy'
 	flow = 'matrixMeanders'
 	flow = 'matrixPandas'
-	flow = 'matrixNumPy'
 
 	for oeisID in [
 			'A005316',

@@ -34,7 +34,7 @@ def _threadDoesSomething() -> None:
 			break
 		state = _filterAsymmetricFolds(state)
 		with LOCKsymmetricFoldsTotal:
-			symmetricFoldsTotal += state.groupsOfFolds
+			symmetricFoldsTotal += state.symmetricFolds
 
 def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 	"""Add real function during generation; the signature is here to preview its interactions with the module."""

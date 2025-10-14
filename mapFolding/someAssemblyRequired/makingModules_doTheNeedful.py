@@ -1,15 +1,15 @@
 """Make functions that are complementary to the `count` function and are often called by `doTheNeedful`."""
 from astToolkit import Be, DOT, Grab, identifierDotAttribute, NodeChanger, NodeTourist, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
-from astToolkit.transformationTools import inlineFunctionDef, write_astModule
+from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
-from mapFolding.someAssemblyRequired import default, IfThis
+from mapFolding.someAssemblyRequired import default, Default, IfThis
 from mapFolding.someAssemblyRequired.toolkitMakeModules import getPathFilename
 from pathlib import PurePath
 import ast
 
-def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:  # noqa: ARG001
 	"""Generate initialization module for counting variable setup.
 
 	(AI generated docstring)
@@ -41,12 +41,13 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 		Filesystem path where the initialization module was written.
 
 	"""
-	sourceCallableIdentifier: identifierDotAttribute = default['function']['counting']
+	dictionaryIdentifiers: Default = identifiers or default
+	sourceCallableIdentifier: identifierDotAttribute = dictionaryIdentifiers['function']['counting']
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = callableIdentifier or sourceCallableIdentifier
 
 	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	theCountingIdentifier: identifierDotAttribute = default['variable']['counting']
+	theCountingIdentifier: identifierDotAttribute = dictionaryIdentifiers['variable']['counting']
 
 	findThis = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
 	doThat = Grab.testAttribute(Grab.andDoAllOf([Grab.opsAttribute(Then.replaceWith([ast.Eq()])), Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(theCountingIdentifier)))]))

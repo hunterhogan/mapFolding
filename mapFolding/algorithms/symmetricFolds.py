@@ -29,7 +29,7 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 			if state.leafComparison[indexLeft] != state.leafComparison[indexRight]:
 				state.leafConnectee = 0
 				break
-		state.groupsOfFolds += state.leafConnectee
+		state.symmetricFolds += state.leafConnectee
 
 	return state
 
