@@ -152,7 +152,7 @@ optional-dependencies = { development = [
   "pyarrow; python_version < '3.14'",
   "pyarrow-stubs; python_version < '3.14'",
 ], testing = [
-  "numba",
+  "numba; python_version < '3.14'",
   "pandas; python_version < '3.14'",
   "pyarrow; python_version < '3.14'",
   "pytest-cov",
