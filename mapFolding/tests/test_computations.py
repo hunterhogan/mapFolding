@@ -113,7 +113,7 @@ def test_countFolds(mapShapeTestCountFolds: tuple[int, ...], flow: str) -> None:
 	"""
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, flow)
 
-@pytest.mark.parametrize('flow', ['matrixNumPy', 'matrixPandas'])
+@pytest.mark.parametrize('flow', ['matrixMeanders', 'matrixNumPy', 'matrixPandas'])
 def test_meanders(oeisIDmeanders: str, flow: str) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 

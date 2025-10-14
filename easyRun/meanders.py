@@ -24,9 +24,9 @@ if __name__ == '__main__':
 	if sys.version_info >= (3, 14):
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
-	flow = 'matrixNumPy'
-	flow = 'matrixMeanders'
 	flow = 'matrixPandas'
+	flow = 'matrixMeanders'
+	flow = 'matrixNumPy'
 
 	for oeisID in [
 			'A005316',
@@ -46,8 +46,8 @@ if __name__ == '__main__':
 
 		nList: list[int] = []
 		nList.extend(range(2, 10))
-		# nList.extend(range(2, 28))
-		nList.extend(range(28,33))
+		# nList.extend(range(10, 28))
+		# nList.extend(range(28,33))
 		# nList.extend(range(33,38))
 		# nList.extend(range(38,43))
 		# nList.extend(range(43,45))

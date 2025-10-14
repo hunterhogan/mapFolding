@@ -178,12 +178,11 @@ def countFolds(listDimensions: Sequence[int] | None = None
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 		else:
 			match flow:
-				case 'daoOfMapFolding': from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 				case 'numba': from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
 				case 'theorem2': from mapFolding.syntheticModules.theorem2 import doTheNeedful
 				case 'theorem2Numba': from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
 				case 'theorem2Trimmed': from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
-				case _: from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+				case 'daoOfMapFolding' | _: from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 
 		from mapFolding.dataBaskets import MapFoldingState
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
@@ -243,12 +242,11 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 			case 'A000682' | 'A005316':
 				match flow:
 					case 'matrixNumPy':
-						from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
-						from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
+						from mapFolding.algorithms.matrixMeandersNumPyndas import doTheNeedful, MatrixMeandersNumPyState as State
 					case 'matrixPandas':
-						from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
-						from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
-					case _:
+						from mapFolding.algorithms.matrixMeandersNumPyndas import (
+							doTheNeedfulPandas as doTheNeedful, MatrixMeandersNumPyState as State)
+					case 'matrixMeanders' | _:
 						from mapFolding.algorithms.matrixMeanders import doTheNeedful
 						from mapFolding.dataBaskets import MatrixMeandersState as State
 

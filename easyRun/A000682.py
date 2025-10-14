@@ -10,7 +10,7 @@ if sys.version_info >= (3, 14):
 def main():
 	oeisID = 'A000682'
 	n=45
-	print(NOTcountingFolds(oeisID, n, 'matrixNumPy'))
+	print(NOTcountingFolds(oeisID, n, 'matrixMeanders'))
 
 	from mapFolding import dictionaryOEIS
 	if n < dictionaryOEIS[oeisID]['valueUnknown']:
@@ -21,5 +21,5 @@ if __name__ == "__main__":
 
 r"""
 deactivate && C:\apps\mapFolding\.vtail\Scripts\activate.bat && title good && cls
-title running && start "running" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\A000682.py && title I'm done || title Error
+title running && start "running" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\A000682.py & title I'm done
 """

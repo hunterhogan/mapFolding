@@ -21,12 +21,9 @@ integrity throughout the recursive analysis while providing the structured data
 access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
-	Array1DElephino, Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal,
-	DatatypeLeavesTotal, getConnectionGraph, getLeavesTotal, makeDataContainer)
-from numpy.typing import NDArray
-from typing import TypeAlias
+	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
+	getConnectionGraph, getLeavesTotal, makeDataContainer)
 import dataclasses
-import numpy
 
 @dataclasses.dataclass(slots=True)
 class MapFoldingState:
@@ -448,58 +445,3 @@ class MatrixMeandersState:
 		self.setBitsLocator()
 		self.setMAXIMUMarcCode()
 
-@dataclasses.dataclass(slots=True)
-class MatrixMeandersNumPyState(MatrixMeandersState):
-	"""Hold the state of a meanders transfer matrix algorithm computation."""
-
-	arrayArcCodes: NDArray[numpy.uint64] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=numpy.uint64))
-	arrayCrossings: NDArray[numpy.uint64] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=numpy.uint64))
-
-	bitWidthLimitArcCode: int | None = None
-	bitWidthLimitCrossings: int | None = None
-
-	datatypeArcCode: TypeAlias = numpy.uint64  # noqa: UP040
-	"""The fixed-size integer type used to store `arcCode`."""
-	datatypeCrossings: TypeAlias = numpy.uint64  # noqa: UP040
-	"""The fixed-size integer type used to store `crossings`."""
-
-	indexTarget: int = 0
-	"""What is being indexed depends on the algorithm flavor."""
-
-	def __post_init__(self) -> None:
-		"""Post init."""
-		if self.bitWidthLimitArcCode is None:
-			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeArcCode).itemsize * 8 # bits
-
-			_offsetNecessary: int = 3 # For example, `bitsZulu << 3`.
-			_offsetSafety: int = 1 # I don't have mathematical proof of how many extra bits I need.
-			_offset: int = _offsetNecessary + _offsetSafety
-
-			self.bitWidthLimitArcCode = _bitWidthOfFixedSizeInteger - _offset
-
-			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetSafety, _offset
-
-		if self.bitWidthLimitCrossings is None:
-			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeCrossings).itemsize * 8 # bits
-
-			_offsetNecessary: int = 0 # I don't know of any.
-			_offsetEstimation: int = 3 # See reference directory.
-			_offsetSafety: int = 1
-			_offset: int = _offsetNecessary + _offsetEstimation + _offsetSafety
-
-			self.bitWidthLimitCrossings = _bitWidthOfFixedSizeInteger - _offset
-
-			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetEstimation, _offsetSafety, _offset
-
-	def makeDictionary(self) -> None:
-		"""Convert from NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array) to Python `dict` (*dict*ionary)."""
-		self.dictionaryMeanders = {int(key): int(value) for key, value in zip(self.arrayArcCodes, self.arrayCrossings, strict=True)}
-		self.arrayArcCodes = numpy.empty((0,), dtype=self.datatypeArcCode)
-		self.arrayCrossings = numpy.empty((0,), dtype=self.datatypeCrossings)
-
-	def makeArray(self) -> None:
-		"""Convert from Python `dict` (*dict*ionary) to NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array)."""
-		self.arrayArcCodes = numpy.array(list(self.dictionaryMeanders.keys()), dtype=self.datatypeArcCode)
-		self.arrayCrossings = numpy.array(list(self.dictionaryMeanders.values()), dtype=self.datatypeCrossings)
-		self.bitWidth = int(self.arrayArcCodes.max()).bit_length()
-		self.dictionaryMeanders = {}
