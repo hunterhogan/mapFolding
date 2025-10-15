@@ -162,6 +162,7 @@ optional-dependencies = { development = [
   "pytest-env",
   "pytest-xdist",
   "pytest",
+  "sympy",
 ] }
 
 [build-system]
