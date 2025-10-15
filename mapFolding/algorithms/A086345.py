@@ -1,4 +1,9 @@
-"""Directly based on code Chai Wah Wu, https://oeis.org/wiki/User:Chai_Wah_Wu, posted on OEIS."""
+"""Directly based on code by Chai Wah Wu, https://oeis.org/wiki/User:Chai_Wah_Wu, posted on OEIS.
+
+See Also
+--------
+mapFolding/reference/A086345Wu.py
+"""
 from fractions import Fraction
 from functools import cache
 from itertools import combinations
@@ -32,7 +37,7 @@ def _blender(n: int) -> int:
 			nummaNumma += _goRight(integer, copies)
 			denominator *= _deFactorial(integer, copies)
 		numerator: int = 3 ** (numbinations + nummaNumma)
-		sumReBletionary += Fraction(numerator, denominator)
+		sumReBletionary += Fraction(numerator, denominator) # pyright: ignore[reportAssignmentType]
 	return sumReBletionary
 
 @cache
@@ -70,6 +75,6 @@ def A086345(n: int) -> int:
 	else:
 		aOFn: int = 0
 		for aDivisor in divisors(n, generator=True):
-			aOFn += mobius(aDivisor) * _recurser(n//aDivisor)
+			aOFn += mobius(aDivisor) * _recurser(n//aDivisor) # pyright: ignore[reportAssignmentType]
 		aOFn //= n
 	return aOFn
