@@ -16,8 +16,8 @@ authors:
   family-names: Hogan
   email: HunterHogan@pm.me
 cff-version: 1.2.0
-commit: 8be85e7ee950b80d9dfbdba28e49978530c481c9
-date-released: '2025-10-14'
+commit: 99ecc742ff5d34afc3152785b1bb6a57ca584ca0
+date-released: '2025-10-15'
 identifiers:
 - type: url
   value: https://github.com/hunterhogan/mapFolding/releases/tag/0.17.0
