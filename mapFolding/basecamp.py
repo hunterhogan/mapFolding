@@ -178,6 +178,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 		else:
 			match flow:
+				case 'constraintPropagation': from mapFolding.algorithms.constraintPropagation import doTheNeedful
 				case 'numba': from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
 				case 'theorem2': from mapFolding.syntheticModules.theorem2 import doTheNeedful
 				case 'theorem2Numba': from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
@@ -229,6 +230,9 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 				match flow:
 					case 'elimination':
 						from mapFolding.algorithms.A000136elimination import doTheNeedful
+						countTotal = doTheNeedful(oeis_n)
+					case 'elimination_combi':
+						from mapFolding.algorithms.A000136elimination_combi import doTheNeedful
 						countTotal = doTheNeedful(oeis_n)
 					case 'eliminationParallel':
 						from mapFolding.algorithms.A000136eliminationParallel import doTheNeedful

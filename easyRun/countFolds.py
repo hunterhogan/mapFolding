@@ -14,6 +14,7 @@ if __name__ == '__main__':
 			f"\033[{(not match)*91}m"
 			f"{n}\t"
 			f"{foldsTotal}\t"
+			f"{dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
 			"\033[0m\n"
 		)
@@ -27,17 +28,15 @@ if __name__ == '__main__':
 	flow = 'numba'
 	flow = 'theorem2'
 	flow = 'theorem2Numba'
-	flow: str | None = 'theorem2Trimmed'
+	flow = 'constraintPropagation'
 
-
-	oeisID: str = 'A001415'
 	oeisID: str = 'A000136'
-	for n in range(1,4):
+	oeisID: str = 'A001415'
+	for n in range(4,7):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 
 		timeStart = time.perf_counter()
-		# foldsTotal: int = countFolds(listDimensions=None, pathLikeWriteFoldsTotal=None, computationDivisions=None, CPUlimit=None, mapShape=(2, 3), flow='theorem2Trimmed')
 		foldsTotal: int = countFolds(listDimensions=listDimensions
 						, pathLikeWriteFoldsTotal=pathLikeWriteFoldsTotal
 						, computationDivisions=computationDivisions

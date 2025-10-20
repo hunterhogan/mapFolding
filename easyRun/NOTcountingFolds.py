@@ -24,17 +24,24 @@ if __name__ == '__main__':
 	oeisID = 'A007822'
 	oeisID = 'A000136'
 
-	flow = 'asynchronous'
-	flow = 'theorem2Trimmed'
-	flow = 'theorem2Numba'
-	flow = 'theorem2'
-	flow = 'constraintPropagation'
 	flow = 'algorithm'
+	flow = 'theorem2'
 	flow = 'elimination'
+	flow = 'eliminationParallel'
+	flow = 'elimination_combi'
+	flow = 'constraintPropagation'
 
-	# for n in range(11,15):
-	# for n in range(9,13):
-	for n in range(5,6):
+	sys.stdout.write(f"\033[{30+int(oeisID,11)%8};{40+int(oeisID,12)%8}m{oeisID} ")
+	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
+	sys.stdout.write("\033[0m\n")
+
+	nList: list[int] = []
+	nList.extend(range(7, 11))
+	# nList.extend(range(9, 13))
+	# nList.extend(range(11, 15))
+	# nList.extend(range(13, 17))
+
+	for n in dict.fromkeys(nList):
 
 		timeStart = time.perf_counter()
 		countTotal = NOTcountingFolds(oeisID, n, flow, CPUlimit)
@@ -45,4 +52,3 @@ r"""
 deactivate && C:\apps\mapFolding\.vtail\Scripts\activate.bat && title good && cls
 title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\NOTcountingFolds.py & title I'm done
 """
-

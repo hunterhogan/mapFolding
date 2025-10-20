@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.17.0"
+version = "0.17.1"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.12, <3.14"
@@ -137,7 +137,10 @@ dependencies = [
   "numpy",
   "platformdirs",
 ]
-optional-dependencies = { development = [
+optional-dependencies = { cytoolz = [
+  "cytoolz",
+  "cytoolz-stubs@git+https://github.com/py-stubs/cytoolz-stubs.git",
+], development = [
   "ipykernel",
   "ipywidgets",
   "memray; sys_platform == 'linux'",
@@ -151,7 +154,7 @@ optional-dependencies = { development = [
   "pandas",
   "pyarrow",
   "pyarrow-stubs",
-], "sympy" = [
+], sympy = [
   "sympy",
 ], testing = [
   "numba",
@@ -204,3 +207,6 @@ packages = { find = {  } }
 [tool.updateCitation]
 filenameCitationDOTcff = "CITATION.cff"
 pathFilenameCitationSSOT = "citations/CITATION.cff"
+
+[tool.uv.sources]
+cytoolz-stubs = { git = "https://github.com/py-stubs/cytoolz-stubs.git" }
