@@ -77,6 +77,6 @@ def findValidFoldings(leavesTotal: int, workersMaximum: int) -> list[list[int]]:
 
 def doTheNeedful(leavesTotal: int, workersMaximum: int = 1) -> int:
 	"""Count the number of valid foldings for a given number of leaves."""
-	if leavesTotal < 7:
+	if leavesTotal < 4:
 		return -1
 	return len(findValidFoldings(leavesTotal, workersMaximum)) * leavesTotal * 2

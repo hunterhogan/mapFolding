@@ -26,19 +26,19 @@ if __name__ == '__main__':
 
 	flow = 'algorithm'
 	flow = 'theorem2'
-	flow = 'elimination'
 	flow = 'eliminationParallel'
 	flow = 'elimination_combi'
 	flow = 'constraintPropagation'
+	flow = 'elimination'
 
 	sys.stdout.write(f"\033[{30+int(oeisID,11)%8};{40+int(oeisID,12)%8}m{oeisID} ")
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
 	sys.stdout.write("\033[0m\n")
 
 	nList: list[int] = []
-	nList.extend(range(7, 11))
+	# nList.extend(range(7, 11))
 	# nList.extend(range(9, 13))
-	# nList.extend(range(11, 15))
+	nList.extend(range(11, 15))
 	# nList.extend(range(13, 17))
 
 	for n in dict.fromkeys(nList):

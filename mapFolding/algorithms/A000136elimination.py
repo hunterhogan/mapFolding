@@ -1,26 +1,27 @@
 from collections.abc import Callable, Iterator
-from cytoolz.functoolz import curry as syntacticCurry, memoize
+from concurrent.futures import ProcessPoolExecutor
+from cytoolz.functoolz import compose
 from itertools import permutations, product as CartesianProduct, repeat
+from more_itertools import chunked_even, iter_index
 from operator import add, sub
 from typing import Final, NamedTuple
-import time
 
 limitColumnsInterposerBefore: float = .3
-limitColumnsInterposerAfter: float = 1 - limitColumnsInterposerBefore
+limitColumnsInterposerAfter: float = .7
 
 class Permutee(NamedTuple):
 	"""Data structure representing a permutation space for map foldings."""
 
-	pinnedLeaves: dict[int, int]
+	pinnedLeaves: tuple[int | None, ...]
 	permutands: tuple[int, ...]
 
-def isThisValid(folding: tuple[int, ...]) -> bool:
+def analyzeInequalities(folding: tuple[int, ...]) -> bool:
 	"""Verify that a folding sequence is possible.
 
 	Parameters
 	----------
-	folding : list[int]
-		`list` of integers representing the folding sequence.
+	folding : tuple[int, ...]
+		A sequence of leaves.
 
 	Returns
 	-------
@@ -50,49 +51,32 @@ def isThisValid(folding: tuple[int, ...]) -> bool:
 	"""
 	leafN: int = len(folding)
 
-	for column, leaf in enumerate(folding[0:-1]):												# `[0:-1]` Because no room to interpose.
-		if leaf == leafN:																		# leafNPlus1 does not exist.
+	for column, leaf in enumerate(folding[0:-1]):													# `[0:-1]` Because no room to interpose.
+		if leaf == leafN:																			# leafNPlus1 does not exist.
 			continue
-
-		columnLeafCreaseRight: int = folding.index(leaf+1)
 
 		leafIsOdd: int = leaf & 1
 
-		for columnInterposer, interposer in enumerate(folding[column+1:None], start=column+1):	# `[column+1:None]` Because column [k < r].
-			if (leafIsOdd != (interposer & 1)):													# Matching parity.
+		for columnComparand, comparand in enumerate(folding[column+1:None], start=column+1):		# `[column+1:None]` Because column [k < r].
+			if (leafIsOdd != (comparand & 1)):														# Matching parity.
 				continue
-			if (interposer == leafN):															# Impossible to interpose non-existent leafNPlus1.
+			if (comparand == leafN):																# Impossible to block crease with non-existent leafNPlus1.
 				continue
 
-			columnInterposerCreaseRight: int = folding.index(interposer + 1)
-
-			if column < columnInterposer:
-				if columnInterposerCreaseRight < column:
-					if columnLeafCreaseRight < columnInterposerCreaseRight:						# [k+1 < r+1 < k < r]
+			if column < columnComparand:
+				columnComparandCreaseRight: int = folding.index(comparand + 1)
+				if columnComparandCreaseRight < column:
+					columnLeafCreaseRight: int = folding.index(leaf+1)
+					if columnLeafCreaseRight < columnComparandCreaseRight:							# [k+1 < r+1 < k < r]
 						return False
-					if columnInterposer < columnLeafCreaseRight:								# [r+1 < k < r < k+1]
+					if columnComparand < columnLeafCreaseRight:										# [r+1 < k < r < k+1]
 						return False
-				elif columnInterposer < columnLeafCreaseRight:
-					if columnLeafCreaseRight < columnInterposerCreaseRight:						# [k < r < k+1 < r+1]
+				elif columnComparand < (columnLeafCreaseRight := folding.index(leaf+1)):
+					if columnLeafCreaseRight < columnComparandCreaseRight:							# [k < r < k+1 < r+1]
 						return False
-				elif column < columnInterposerCreaseRight < columnLeafCreaseRight < columnInterposer:	# [k < r+1 < k+1 < r]
+				elif column < columnComparandCreaseRight < columnLeafCreaseRight < columnComparand:	# [k < r+1 < k+1 < r]
 					return False
 	return True
-
-def count(someFoldings: tuple[tuple[int, ...], ...]) -> int:
-	"""Count the number of valid foldings.
-
-	Parameters
-	----------
-	listFoldings : list[tuple[int, ...]]
-		List of `folding` to be evaluated.
-
-	Returns
-	-------
-	groupsOfFolds : int
-		Number of valid foldings, which each represent a group of folds, for the given configuration.
-	"""
-	return sum(map(isThisValid, someFoldings))
 
 def deconstructPermutee(permutee: Permutee, column: int) -> dict[int, Permutee]:
 	"""Replace `permutee`, which doesn't pin a leaf at `column`, with the equivalent group of `Permutee` tuples, which each pin a distinct leaf at `column`.
@@ -117,32 +101,32 @@ def deconstructPermutee(permutee: Permutee, column: int) -> dict[int, Permutee]:
 	Its tertiary use assists the programmatic flow: calling the function with a `Permutee` that already has a `leaf` pinned at
 	`column` makes it easier to use variable identifiers to signal the status of the variable.
 	"""
-	deconstructedPermutee: dict[int, Permutee] = {}
-	if column in permutee.pinnedLeaves:
-		deconstructedPermutee = {permutee.pinnedLeaves[column]: permutee}
+	if permutee.pinnedLeaves[column]:
+		deconstructedPermutee: dict[int, Permutee] = {permutee.pinnedLeaves[column]: permutee}  # pyright: ignore[reportAssignmentType]
 	else:
-		for index, leaf in enumerate(permutee.permutands):
-			pinnedLeaves: dict[int, int] = permutee.pinnedLeaves.copy()
-			pinnedLeaves[column] = leaf
-			deconstructedPermutee[leaf] = Permutee(pinnedLeaves, permutee.permutands[0:index] + permutee.permutands[index+1:])
+		deconstructedPermutee = {
+			leaf: Permutee((*permutee.pinnedLeaves[0:column], leaf, *permutee.pinnedLeaves[column+1:None])
+				, (*permutee.permutands[0:index], *permutee.permutands[index+1:None]))
+			for index, leaf in enumerate(permutee.permutands)}
 	return deconstructedPermutee
 
 def _excludeLeafAtColumn(tuplePermutees: tuple[Permutee, ...], leaf: int, column: int) -> list[Permutee]:
 	listPermutees: list[Permutee] = []
 	for permutee in tuplePermutees:
+		leafAtColumn: int | None = permutee.pinnedLeaves[column]
 		if leaf not in permutee.permutands:
-			if leaf != permutee.pinnedLeaves.get(column, -248):
+			if leaf != leafAtColumn:
 				listPermutees.append(permutee)
-			continue														# Exclude `leaf` previously fixed at `column`.
-		if column in permutee.pinnedLeaves:
+			continue																		# Exclude `leaf` previously fixed at `column`.
+		if leafAtColumn is not None:
 			listPermutees.append(permutee)
-			continue														# `column` is occupied, which excludes `leaf`.
+			continue																		# `column` is occupied, which excludes `leaf`.
 		deconstructedPermutee: dict[int, Permutee] = deconstructPermutee(permutee, column)
-		deconstructedPermutee.pop(leaf)										# Exclude `Permutee` with `leaf` fixed at `column`.
+		deconstructedPermutee.pop(leaf)														# Exclude `Permutee` with `leaf` fixed at `column`.
 		listPermutees.extend(deconstructedPermutee.values())
 	return listPermutees
 
-def _excludeInterposedLeafRightCrease(tuplePermutees: tuple[Permutee, ...], leaf: int, column: int, operatorDirection: Callable[[int, int], int]) -> list[Permutee]:
+def _excludeInterposedLeafCreaseRight(tuplePermutees: tuple[Permutee, ...], leaf: int, column: int, operatorDirection: Callable[[int, int], int]) -> list[Permutee]:
 	"""Enforce rule against an interposed leaf.
 
 	Premise
@@ -162,60 +146,50 @@ def _excludeInterposedLeafRightCrease(tuplePermutees: tuple[Permutee, ...], leaf
 	leafN are both odd or both even.
 	"""
 	columnInterposer: Final[int] = operatorDirection(column, 1)
-	columnLeafCreaseRight: Final[int] = operatorDirection(column, 2)
-	leafCreaseRight: Final[int] = leaf + 1
-	leafN: Final[int] = len(tuplePermutees[0].pinnedLeaves) + len(tuplePermutees[0].permutands)
+	columnLeafCreaseLeft: Final[int] = operatorDirection(column, 2)
+	leafCreaseLeft: Final[int] = leaf - 1
+	leafN: Final[int] = len(tuplePermutees[0].pinnedLeaves)
 
 	listPermutees: list[Permutee] = []
 
 	for permutee in tuplePermutees:
-		if permutee.pinnedLeaves.get(column, -134134) not in [leaf, -134134]:							# `column` has `leaf` OR `column` can have `leaf`.
+		leafAtColumn: int | None = permutee.pinnedLeaves[column]
+		if not ((leafAtColumn == leaf) or (leaf in permutee.permutands)):												# `leaf` is OR can be defined at `column`.
 			listPermutees.append(permutee)
 			continue
-		if permutee.pinnedLeaves.get(columnLeafCreaseRight, -1216) not in [leafCreaseRight, -1216]:		# `columnLeafCreaseRight` has OR can have `leafCreaseRight`.
+		if leafAtColumn not in (leaf, None):																			# `column` has OR can have `leaf`.
 			listPermutees.append(permutee)
 			continue
-		if not ((leaf == permutee.pinnedLeaves.get(column, -192)) or (leaf in permutee.permutands)):	# `leaf` is OR can be defined at `column`.
+		leafCreaseLeftAtColumnLeafCreaseLeft: int | None = permutee.pinnedLeaves[columnLeafCreaseLeft]
+		if leafCreaseLeftAtColumnLeafCreaseLeft not in (leafCreaseLeft, None):											# `leafCreaseLeftAtColumnLeafCreaseLeft` has `leafCreaseLeft` OR `leafCreaseLeftAtColumnLeafCreaseLeft` can have `leafCreaseLeft`.
 			listPermutees.append(permutee)
 			continue
-		if not ((leafCreaseRight == permutee.pinnedLeaves.get(columnLeafCreaseRight, -195)) or (leafCreaseRight in permutee.permutands)):	# `leafCreaseRight` is OR can be defined at `columnLeafCreaseRight`.
+		if not ((leafCreaseLeftAtColumnLeafCreaseLeft == leafCreaseLeft) or (leafCreaseLeft in permutee.permutands)):	# `leafCreaseLeft` is OR can be defined at `leafCreaseLeftAtColumnLeafCreaseLeft`.
 			listPermutees.append(permutee)
 			continue
 
 		deconstructedPermutee: dict[int, Permutee] = deconstructPermutee(permutee, column)
-		del permutee
-		leafPinnedAtColumn: Permutee = deconstructedPermutee.pop(leaf)
-		listPermutees.extend(deconstructedPermutee.values())
+		deconstructedLeafPinnedAtColumn: dict[int, Permutee] = deconstructPermutee(deconstructedPermutee.pop(leaf), columnLeafCreaseLeft)
+		leafPinnedAtColumn: Permutee = deconstructedLeafPinnedAtColumn.pop(leafCreaseLeft)
+		listPermutees.extend((*deconstructedPermutee.values(), *deconstructedLeafPinnedAtColumn.values()))
 
-		deconstructedPermutee = deconstructPermutee(leafPinnedAtColumn, columnLeafCreaseRight)
-		del leafPinnedAtColumn
-		leafCreaseRightPinnedAtItsColumn: Permutee = deconstructedPermutee.pop(leafCreaseRight)
-		listPermutees.extend(deconstructedPermutee.values())
-
-		if (leafCreaseRightPinnedAtItsColumn.pinnedLeaves.get(columnInterposer, -17312) == -17312):
-
-# ------- Create the exception: allow leafN to interpose ----------------------------
-			if ((leafN - leaf) % 2 == 0) and ((leafN in leafCreaseRightPinnedAtItsColumn.permutands) or (leafN == leafCreaseRightPinnedAtItsColumn.pinnedLeaves.get(columnInterposer, -136))):
-				permutandsAsList: list[int] = list(leafCreaseRightPinnedAtItsColumn.permutands)
-				pinnedCopy: dict[int, int] = leafCreaseRightPinnedAtItsColumn.pinnedLeaves.copy()
-				pinnedCopy[columnInterposer] = permutandsAsList.pop(permutandsAsList.index(leafN))
-				listPermutees.append(Permutee(pinnedCopy, tuple(permutandsAsList)))
-
+		leafNAtColumnInterposer: int | None = leafPinnedAtColumn.pinnedLeaves[columnInterposer]
 # ------- Drop a `Permutee` that violates the rule against an interposed leaf ----------------------------
-		elif (	(leafCreaseRightPinnedAtItsColumn.pinnedLeaves.get(column, -219) == leaf)								# `leaf` is pinned at its column.
-			and (leafCreaseRightPinnedAtItsColumn.pinnedLeaves.get(columnLeafCreaseRight, -220) == leafCreaseRight)		# `leafCreaseRight` is pinned at its column.
-			and ((0 < leafCreaseRightPinnedAtItsColumn.pinnedLeaves.get(columnInterposer, -221) < leafN)				# `columnInterposer` has a pinned leaf that is not leafN with matching parity.
-				or	(((leafN - leaf) % 2 != 0)
-					and (leafN == leafCreaseRightPinnedAtItsColumn.pinnedLeaves.get(columnInterposer, -222))))
-			):
+		if ((leafNAtColumnInterposer not in (leafN, None)) or (((leafN - leafCreaseLeft) % 2 != 0) and (leafNAtColumnInterposer == leafN))): # `columnInterposer` has a pinned leaf that is not leafN with matching parity.
 			continue
 
-		else:
-			listPermutees.append(leafCreaseRightPinnedAtItsColumn)
+# ------- Create the exception: allow leafN to interpose ----------------------------
+		if ((leafN - leafCreaseLeft) % 2 == 0):
+			if (leafNAtColumnInterposer == leafN):
+				listPermutees.append(leafPinnedAtColumn)
+			elif leafN in leafPinnedAtColumn.permutands:
+				permutandsAsList: list[int] = list(leafPinnedAtColumn.permutands)
+				permutandsAsList.pop(permutandsAsList.index(leafN))
+				listPermutees.append(Permutee((*leafPinnedAtColumn.pinnedLeaves[0:columnInterposer], leafN, *leafPinnedAtColumn.pinnedLeaves[columnInterposer+1:None]), tuple(permutandsAsList)))
 
 	return listPermutees
 
-def findFoldings(tuplePermutees: tuple[Permutee, ...], listFoldings: list[tuple[int, ...]], columnsTotal: int) -> tuple[list[Permutee], list[tuple[int, ...]]]:
+def findFoldings(tuplePermutees: tuple[Permutee, ...], listFoldings: list[tuple[int, ...]]) -> tuple[list[Permutee], list[tuple[int, ...]]]:
 	"""Segregate `Permutee` with only one permutation.
 
 	Parameters
@@ -237,60 +211,34 @@ def findFoldings(tuplePermutees: tuple[Permutee, ...], listFoldings: list[tuple[
 		if permutee.permutands:
 			listPermutees.append(permutee)
 		else:
-			listFoldings.append(tuple(_getPinnedSequence(permutee, columnsTotal)))
+			listFoldings.append(permutee.pinnedLeaves) # pyright: ignore[reportArgumentType]
 	return listPermutees, listFoldings
 
-@memoize
-@syntacticCurry
-def _getColumnsForPermutands(permutee: Permutee, columnsTotal: int) -> tuple[int, ...]:
-	return tuple(set(range(columnsTotal)).difference(permutee.pinnedLeaves.keys()))
+def _getAttributePermutands(permutee: Permutee) -> tuple[int, ...]:
+	return permutee.permutands
 
-@syntacticCurry
-def _getPinnedSequence(permutee: Permutee, columnsTotal: int) -> list[int]:
-	return [permutee.pinnedLeaves.get(column, -229) for column in range(columnsTotal)]
+def _getAttributePinnedLeaves(permutee: Permutee) -> tuple[int | None, ...]:
+	return permutee.pinnedLeaves
 
-def _makeFolding(pinnedSequence: list[int], tupleColumns: tuple[int, ...], permutandsPermutation: tuple[int, ...]) -> tuple[int, ...]:
+def _getColumnsForPermutands(pinnedLeaves: tuple[int | None, ...]) -> tuple[int, ...]:
+	return tuple(iter_index(pinnedLeaves, None))
+
+def _makeFolding(pinnedSequence: list[int | None], tupleColumns: tuple[int, ...], permutandsPermutation: tuple[int, ...]) -> tuple[int, ...]:
 	for index, column in enumerate(tupleColumns):
 		pinnedSequence[column] = permutandsPermutation[index]
-	return tuple(pinnedSequence)
+	return tuple(pinnedSequence) # pyright: ignore[reportReturnType]
 
-@syntacticCurry
-def _permutePermutands(permutee: Permutee) -> Iterator[tuple[int, ...]]:
-	"""Generate all possible permutations for a given `Permutee.permutands`."""
-	return permutations(permutee.permutands)
-
-def permute(tuplePermutees: tuple[Permutee, ...]) -> int:
-	"""Create permutations.
-
-	Parameters
-	----------
-	listToPermute : list[Permutee]
-		List of tuples, each containing:
-		- A `dict` mapping pinned leaf positions (columns) to leaf numbers.
-		- A `list` of remaining leaf numbers to be permuted.
-
-	Returns
-	-------
-	groupsOfFolds : int
-		Number of valid foldings, which each represent a group of folds, for the given configuration.
-	"""
-	columnsTotal: Final[int] = len(tuplePermutees[0].pinnedLeaves) + len(tuplePermutees[0].permutands)
-
-	pinnedSequence: Callable[[Permutee], list[int]] = _getPinnedSequence(columnsTotal=columnsTotal)
-	getColumns: Callable[[Permutee], tuple[int, ...]] = _getColumnsForPermutands(columnsTotal=columnsTotal)
-
-	def countPermutee(permutee: Permutee) -> int:
-		return count(tuple(map(_makeFolding, repeat(pinnedSequence(permutee)), repeat(getColumns(permutee)), _permutePermutands(permutee))))
-
-	return sum(map(countPermutee, tuplePermutees))
-
-def makeListPermutees(leavesTotal: int) -> list[Permutee]:
-	"""Create initial list of `Permutee` configurations."""
+def doTask(listPermutees: list[Permutee]) -> int:
+	"""."""
+	leavesTotal: Final[int] = len(listPermutees[0].pinnedLeaves)
 	columnLast: Final[int] = leavesTotal - 1
 	leafN: Final[int] = leavesTotal
 
-# ------- Pin leaf1 in column0 and exclude leaf2--leafN at column0 ----------------------------
-	listPermutees: list[Permutee] = [Permutee({0: 1}, tuple(range(leavesTotal, 1, -1)))]
+# ------- Exclude leaf at column if interposed; interposer before leaf ----------------------
+	leavesΩ = tuple(range(2, leafN-1))
+	columnsΩ = tuple(range(3, min(int(columnLast * limitColumnsInterposerBefore) + 2, columnLast + 1)))
+	for leaf, column in CartesianProduct(leavesΩ, columnsΩ):
+		listPermutees = _excludeInterposedLeafCreaseRight(tuple(listPermutees), leaf, column, sub)
 
 # ------- It follows: if `leavesTotal` is even, leaf2 is not in column2, column4, ... -----------------------------
 	leavesΩ: tuple[int, ...] = ()
@@ -300,50 +248,58 @@ def makeListPermutees(leavesTotal: int) -> list[Permutee]:
 		leavesΩ = (2,)
 		columnsΩ = tuple(range(2, leavesTotal, 2))
 		CartesianProductΩ = CartesianProduct(leavesΩ, columnsΩ)
-		for leaf, column in CartesianProductΩ:
-			listPermutees = _excludeLeafAtColumn(tuple(listPermutees), leaf, column)
 
 # ------- Implement Theorem 2 -----------------------------
 	if (leavesTotal % 2 == 1) or (leavesTotal % 4 == 0):
-		leavesTheorem2 = (2,)
-		columnsTheorem2 = tuple(range(1, leavesTotal // 2 + 1))
+		leavesΩ = (2,)
+		columnsΩ = tuple(range(1, leavesTotal // 2 + 1))
 	else:
 		midline: int = leavesTotal // 2
-		leavesTheorem2: tuple[int, ...] = (midline, midline + 1)
-		columnsTheorem2: tuple[int, ...] = (*range(2, midline - 1, 2), midline + 1)
+		leavesΩ = (midline, midline + 1)
+		columnsΩ = (*tuple(range(2, midline - 1, 2)), midline + 1)
 
-	for leaf, column in tuple(set(CartesianProduct(leavesTheorem2, columnsTheorem2)).difference(CartesianProductΩ)):
+	for leaf, column in tuple(sorted(set(CartesianProduct(leavesΩ, columnsΩ)).union(CartesianProductΩ))):
 		listPermutees = _excludeLeafAtColumn(tuple(listPermutees), leaf, column)
 
-# ------- Exclude leafRightCrease at column - 2 if interposed; interposer after leafRightCrease ----------------------
-	leavesInterposerAfter = leavesΩ = tuple(range(2, leafN-1))
-	columnsΩ = tuple(range(columnLast, int(columnLast * limitColumnsInterposerAfter), -1))
-	for leaf, column in CartesianProduct(leavesΩ, columnsΩ):
-		listPermutees = _excludeInterposedLeafRightCrease(tuple(listPermutees), leaf, column, sub)
+	listFoldings: list[tuple[int, ...]] = []
+	listPermutees, listFoldings = findFoldings(tuple(listPermutees), listFoldings)
 
-# ------- Exclude leafRightCrease at column + 2 if interposed; interposer before leafRightCrease ----------------------
-	leavesΩ = leavesInterposerAfter
-	columnsΩ = tuple(range(1, int(columnLast * limitColumnsInterposerBefore)))
-	for leaf, column in CartesianProduct(leavesΩ, columnsΩ):
-		listPermutees = _excludeInterposedLeafRightCrease(tuple(listPermutees), leaf, column, add)
+	groupsOfFolds: int = 0
+	groupsOfFolds += sum(map(analyzeInequalities, listFoldings))
 
-# ------- Exclude interposed leaf2 at column2 ----------------------
-	leaf = 1
-	column = 0
-	return _excludeInterposedLeafRightCrease(tuple(listPermutees), leaf, column, add)
+	pinnedSequence: Callable[[Permutee], list[int | None]] = compose(list, _getAttributePinnedLeaves)
+	columnsForPermutands: Callable[[Permutee], tuple[int, ...]] = compose(_getColumnsForPermutands, _getAttributePinnedLeaves)
+	permutePermutands: Callable[[Permutee], Iterator[tuple[int, ...]]] = compose(permutations, _getAttributePermutands)
+
+	def countPermutee(permutee: Permutee) -> int:
+		return sum(map(analyzeInequalities, map(_makeFolding, repeat(pinnedSequence(permutee)), repeat(columnsForPermutands(permutee)), permutePermutands(permutee))))
+
+	groupsOfFolds += sum(map(countPermutee, listPermutees))
+	return groupsOfFolds
 
 def doTheNeedful(leavesTotal: int) -> int:
 	"""Count the number of valid foldings for a given number of leaves."""
-	listFoldings: list[tuple[int, ...]] = []
-	timeStart = time.perf_counter()
-	listPermutees: list[Permutee] = makeListPermutees(leavesTotal)
-	listPermutees, listFoldings = findFoldings(tuple(listPermutees), listFoldings.copy(), leavesTotal)
+	columnLast: Final[int] = leavesTotal - 1
+	leafN: Final[int] = leavesTotal
 
-	print(len(listFoldings), len(listPermutees), f"{time.perf_counter() - timeStart:.2f}", sep='\t', end='\t')  # noqa: T201
+# ------- Pin leaf1 in column0 and exclude leaf2--leafN at column0 ----------------------------
+	listPermutees: list[Permutee] = [Permutee(tuple([1] + [None] * (leavesTotal - 1)), tuple(range(leavesTotal, 1, -1)))]
 
-	groupsOfFolds: int = 0
-	groupsOfFolds += count(tuple(listFoldings))
-	groupsOfFolds += permute(tuple(listPermutees))
+# ------- Exclude interposed leaf2 at column2 ----------------------
+	leaf: int = 2
+	column: int = 2
+	listPermutees = _excludeInterposedLeafCreaseRight(tuple(listPermutees), leaf, column, sub)
+
+# ------- Exclude leaf at column if interposed; interposer after leaf ----------------------
+	leavesΩ: tuple[int, ...] = tuple(range(2, leafN-1))
+	columnsΩ: tuple[int, ...] = tuple(range(max(int(columnLast * limitColumnsInterposerAfter) - 1, 1), columnLast - 1))
+	for leaf, column in CartesianProduct(leavesΩ, columnsΩ):
+		listPermutees = _excludeInterposedLeafCreaseRight(tuple(listPermutees), leaf, column, add)
+	print(len(listPermutees), end='\t')
+	ww = 14
+	mm = int(max(leavesTotal-10, 1) ** 3.55)
+	with ProcessPoolExecutor(ww) as concurrencyManager:
+		groupsOfFolds: int = sum(concurrencyManager.map(doTask, chunked_even(listPermutees, len(listPermutees) // (ww * mm))))
 
 	return groupsOfFolds * leavesTotal * 2
 

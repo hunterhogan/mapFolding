@@ -140,6 +140,7 @@ dependencies = [
 optional-dependencies = { cytoolz = [
   "cytoolz",
   "cytoolz-stubs@git+https://github.com/py-stubs/cytoolz-stubs.git",
+  "more_itertools",
 ], development = [
   "ipykernel",
   "ipywidgets",
@@ -157,6 +158,8 @@ optional-dependencies = { cytoolz = [
 ], sympy = [
   "sympy",
 ], testing = [
+  "cytoolz",
+  "more_itertools",
   "numba",
   "ortools",
   "pandas",
