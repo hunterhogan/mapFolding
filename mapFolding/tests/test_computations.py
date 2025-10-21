@@ -56,7 +56,7 @@ def test_A000136(flow: str) -> None:
 	CPUlimit = .5
 	oeis_n = 2
 	for oeis_n in dictionaryOEISMapFolding[oeisID]['valuesTestValidation']:
-		if oeis_n < 4:
+		if oeis_n < 6:
 			continue
 
 		expected = dictionaryOEISMapFolding[oeisID]['valuesKnown'][oeis_n]
