@@ -11,7 +11,8 @@ def findValidFoldings(leavesTotal: int, workersMaximum: int) -> list[list[int]]:
 	listColumnIndicesInLeafIndexOrder: list[cp_model.IntVar] = [model.NewIntVar(0, columnNIndex, f"columnIndexOfLeafIndex[{leafIndex}]") for leafIndex in range(leavesTotal)]
 	model.AddInverse(listLeafIndicesInColumnIndexOrder, listColumnIndicesInLeafIndexOrder)
 
-	model.Add(listLeafIndicesInColumnIndexOrder[0] == 0) # Fix in columnIndex at 0, leafIndex at 0
+# ------- Fix in columnIndex at 0, leafIndex at 0 -----------------------------
+	model.Add(listLeafIndicesInColumnIndexOrder[0] == 0)
 
 # ------- It follows: if `leavesTotal` is even, leaf2 is not in column2, column4, ... -----------------------------
 	if leavesTotal % 2 == 0:
@@ -29,6 +30,7 @@ def findValidFoldings(leavesTotal: int, workersMaximum: int) -> list[list[int]]:
 		for leaf, column in CartesianProduct(leavesTheorem2, columnsTheorem2):
 			model.Add(listLeafIndicesInColumnIndexOrder[column] != leaf - 1)
 
+# ------- Forbidden inequalities -----------------------------
 	def addNewRuleΩ(comparatorLeft: int, comparatorRight: int) -> cp_model.IntVar:
 		ruleΩ: cp_model.IntVar = model.NewBoolVar(f"this_{comparatorLeft}_lessThan_{comparatorRight}")
 		model.Add(listColumnIndicesInLeafIndexOrder[comparatorLeft] < listColumnIndicesInLeafIndexOrder[comparatorRight]).OnlyEnforceIf(ruleΩ)
@@ -36,7 +38,7 @@ def findValidFoldings(leavesTotal: int, workersMaximum: int) -> list[list[int]]:
 		return ruleΩ
 
 	for k, r in CartesianProduct(range(leafNIndex), range(1, leafNIndex)):
-		if (k == r) or (k & 1) != (r & 1):
+		if (k & 1) != (r & 1):
 			continue
 		k1: int = k + 1
 		r1: int = r + 1
@@ -56,6 +58,7 @@ def findValidFoldings(leavesTotal: int, workersMaximum: int) -> list[list[int]]:
 		k1LessThan_r: cp_model.IntVar = addNewRuleΩ(k1, r)
 		model.AddBoolOr([kLessThan_r1.Not(), r1LessThan_k1.Not(), k1LessThan_r.Not()])
 
+# ------- Solver -----------------------------
 	solver = cp_model.CpSolver()
 	solver.parameters.enumerate_all_solutions = True
 	solver.parameters.num_workers = 0

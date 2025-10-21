@@ -42,7 +42,7 @@ import warnings
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
-@pytest.mark.parametrize('flow', ['elimination', 'eliminationParallel', 'constraintPropagation']) # ortools requires pandas, which doesn't have Py 3.14 yet.
+@pytest.mark.parametrize('flow', ['elimination', 'eliminationParallel', 'constraintPropagation'])
 def test_A000136(flow: str) -> None:
 	"""Test A000136 flow options.
 
