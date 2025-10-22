@@ -1,0 +1,44 @@
+{
+	"大于": {
+		"prefix": "dayu",
+		"body": [
+			"大于"
+		],
+		"description": "'greater than', '>' (大于, dàyú)"
+	},
+	"个": {
+		"prefix": "ge",
+		"body": [
+			"个"
+		],
+		"description": "Anything (个, gè)"
+	},
+	"木": {
+		"prefix": "mu",
+		"body": [
+			"木"
+		],
+		"description": "Tree (木, mù)"
+	},
+	"Ω": {
+		"prefix": "Omega",
+		"body": [
+			"Ω"
+		],
+		"description": "Last letter of Greek alphabet (Ω, Ōmega)"
+	},
+	"下": {
+		"prefix": "xia",
+		"body": [
+			"下"
+		],
+		"description": "'below', 'under', 'subscript', 'sub' (下, xià)"
+	},
+	"小于": {
+		"prefix": "xiaoyu",
+		"body": [
+			"小于"
+		],
+		"description": "'less than', '<' (小于, xiǎoyú)"
+	},
+}

@@ -37,12 +37,7 @@ def findValidFoldings(leavesTotal: int, workersMaximum: int) -> list[list[int]]:
 		model.Add(listColumnIndicesInLeafIndexOrder[comparatorLeft] >= listColumnIndicesInLeafIndexOrder[comparatorRight]).OnlyEnforceIf(ruleΩ.Not())
 		return ruleΩ
 
-	for k, r in CartesianProduct(range(leafNIndex), range(1, leafNIndex)):
-		if (k & 1) != (r & 1):
-			continue
-		k1: int = k + 1
-		r1: int = r + 1
-
+	def addForbiddenInequalityCycle(k: int, r: int, k1: int, r1: int) -> None:
 		kLessThan_r: cp_model.IntVar = addNewRuleΩ(k, r)
 		r1LessThan_k: cp_model.IntVar = addNewRuleΩ(r1, k)
 		k1LessThan_r1: cp_model.IntVar = addNewRuleΩ(k1, r1)
@@ -57,6 +52,12 @@ def findValidFoldings(leavesTotal: int, workersMaximum: int) -> list[list[int]]:
 		r1LessThan_k1: cp_model.IntVar = addNewRuleΩ(r1, k1)
 		k1LessThan_r: cp_model.IntVar = addNewRuleΩ(k1, r)
 		model.AddBoolOr([kLessThan_r1.Not(), r1LessThan_k1.Not(), k1LessThan_r.Not()])
+
+	for k, r in CartesianProduct(range(leafNIndex), range(1, leafNIndex)):
+		if (k & 1) != (r & 1):
+			continue
+
+		addForbiddenInequalityCycle(k, r, k + 1, r + 1)
 
 # ------- Solver -----------------------------
 	solver = cp_model.CpSolver()
