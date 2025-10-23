@@ -169,16 +169,15 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 		mapFoldingParallelState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
-		# `listStatesParallel` exists so you can research the parallel computation.
+		# NOTE `listStatesParallel` exists so you can research the parallel computation.
 		foldsTotal, _listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
 
 # ruff: noqa: E701
 	else:
-		if all(dimension < 3 for dimension in mapShape):
+		if all(dimension < 2 for dimension in mapShape):
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 		else:
 			match flow:
-				case 'constraintPropagation': from mapFolding.algorithms.constraintPropagation import doTheNeedful
 				case 'numba': from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
 				case 'theorem2': from mapFolding.syntheticModules.theorem2 import doTheNeedful
 				case 'theorem2Numba': from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
@@ -189,6 +188,80 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 		mapFoldingState = doTheNeedful(mapFoldingState)
 		foldsTotal = mapFoldingState.foldsTotal
+
+# ------- Follow memorialization instructions ---------------------------------------------
+
+	if pathFilenameFoldsTotal is not None:
+		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
+
+	return foldsTotal
+
+def eliminateFolds(mapShape: tuple[int, ...]
+				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
+				# , * # TODO improve `standardizedEqualToCallableReturn` so it will work with keyword arguments
+				, CPUlimit: bool | float | int | None = None  # noqa: FBT001
+				, flow: str | None = None
+				) -> int:
+	"""
+	Compute foldsTotal by elimination.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...] | None = None
+		Tuple of integers representing the dimensions of the map to be folded. Mathematicians almost always use the term
+		"dimensions", such as in the seminal paper, "Multi-dimensional map-folding". Nevertheless, in contemporary Python
+		programming, in the context of these algorithms, the term "shape" makes it much easier to align the mathematics with the
+		syntax of the programming language.
+	pathLikeWriteFoldsTotal : PathLike[str] | PurePath | None = None
+		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
+		value of `foldsTotal`. If `pathLikeWriteFoldsTotal` is a path of only directories, `countFolds` creates a filename based
+		on the map dimensions.
+	CPUlimit : bool | float | int | None = None
+		If relevant, whether and how to limit the number of processors `countFolds` will use.
+		- `False`, `None`, or `0`: No limits on processor usage; uses all available processors. All other values will
+		potentially limit processor usage.
+		- `True`: Yes, limit the processor usage; limits to 1 processor.
+		- `int >= 1`: The maximum number of available processors to use.
+		- `0 < float < 1`: The maximum number of processors to use expressed as a fraction of available processors.
+		- `-1 < float < 0`: The number of processors to *not* use expressed as a fraction of available processors.
+		- `int <= -1`: The number of available processors to *not* use.
+		- If the value of `CPUlimit` is a `float` greater than 1 or less than -1, `countFolds` truncates the value to an `int`
+		with the same sign as the `float`.
+	flow : str | None = None
+		My stupid way of selecting the version of the algorithm to use in the computation. There are certainly better ways to do
+		this, but I have not yet solved this issue. As of 2025 Aug 14, these values will work:
+		- 'daoOfMapFolding'
+		- 'numba'
+		- 'theorem2'
+		- 'theorem2Numba'
+		- 'theorem2Trimmed'
+
+	Returns
+	-------
+	foldsTotal : int
+		Number of distinct ways to fold a map of the given dimensions.
+	"""
+	from mapFolding.beDRY import setProcessorLimit
+	concurrencyLimit: int = setProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
+
+# ------- memorialization instructions ---------------------------------------------
+
+	if pathLikeWriteFoldsTotal is not None:
+		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(mapShape, pathLikeWriteFoldsTotal)
+		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
+	else:
+		pathFilenameFoldsTotal = None
+
+# ------- Algorithm version -----------------------------------------------------
+# ruff: noqa: E701
+	match flow:
+		case 'constraintPropagation': from mapFolding.algorithms.constraintPropagation import doTheNeedful
+		case 'elimination' | _: from mapFolding.algorithms.elimination import doTheNeedful
+
+	from mapFolding.dataBaskets import EliminationState
+	eliminationState: EliminationState = EliminationState(mapShape)
+	eliminationState = doTheNeedful(eliminationState)
+	foldsTotal = eliminationState.foldsTotal
 
 # ------- Follow memorialization instructions ---------------------------------------------
 
@@ -231,14 +304,8 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 					case 'elimination':
 						from mapFolding.algorithms.A000136elimination import doTheNeedful
 						countTotal = doTheNeedful(oeis_n)
-					case 'elimination_combi':
-						from mapFolding.algorithms.A000136elimination_combi import doTheNeedful
-						countTotal = doTheNeedful(oeis_n)
 					case 'eliminationParallel':
 						from mapFolding.algorithms.A000136eliminationParallel import doTheNeedful
-						countTotal = doTheNeedful(oeis_n, concurrencyLimit)
-					case 'constraintPropagation':
-						from mapFolding.algorithms.A000136constraintPropagation import doTheNeedful
 						countTotal = doTheNeedful(oeis_n, concurrencyLimit)
 					case _:
 						from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful

@@ -38,7 +38,7 @@ from mapFolding.filesystemToolkit import (
 	saveFoldsTotal as saveFoldsTotal,
 	saveFoldsTotalFAILearly as saveFoldsTotalFAILearly)
 
-from mapFolding.basecamp import countFolds as countFolds
+from mapFolding.basecamp import countFolds as countFolds, eliminateFolds as eliminateFolds
 
 from mapFolding.oeis import (
 	dictionaryOEIS as dictionaryOEIS,

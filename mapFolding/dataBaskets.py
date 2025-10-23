@@ -26,6 +26,62 @@ from mapFolding import (
 import dataclasses
 
 @dataclasses.dataclass(slots=True)
+class EliminationState:
+	"""Computational state for algorithms to compute foldsTotal by elimination.
+
+	Attributes
+	----------
+	mapShape : tuple[DatatypeLeavesTotal, ...]
+		Dimensions of the map being analyzed for folding patterns.
+	groupsOfFolds : DatatypeFoldsTotal = DatatypeFoldsTotal(0)
+		Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings.
+	dimensionsTotal : DatatypeLeavesTotal
+		Unchanging total number of dimensions in the map.
+	leavesTotal : DatatypeLeavesTotal
+		Unchanging total number of leaves in the map.
+	"""
+
+	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
+	"""Dimensions of the map being analyzed for folding patterns."""
+
+	groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})
+	"""Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings."""
+
+	pinnedLeaves: tuple[DatatypeLeavesTotal | None, ...] = dataclasses.field(default=(), init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
+
+	subsetsTheorem2: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
+	subsetsTheorem4: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
+
+	columnLast: DatatypeLeavesTotal = dataclasses.field(init=False)
+	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	"""Unchanging total number of dimensions in the map."""
+	leafN: DatatypeLeavesTotal = dataclasses.field(init=False)
+	leavesTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	"""Unchanging total number of leaves in the map."""
+
+	@property
+	def foldsTotal(self) -> DatatypeFoldsTotal:
+		"""The total number of possible folding patterns for this map.
+
+		Returns
+		-------
+		foldsTotal : DatatypeFoldsTotal
+			The complete count of distinct folding patterns achievable with the current map configuration.
+
+		"""
+		return DatatypeFoldsTotal(self.leavesTotal) * self.groupsOfFolds * self.subsetsTheorem2 * self.subsetsTheorem4
+
+	def __post_init__(self) -> None:
+		"""Ensure all fields have a value."""
+		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
+		self.leavesTotal = DatatypeLeavesTotal(getLeavesTotal(self.mapShape))
+		self.leafN = self.leavesTotal
+		self.columnLast = self.leavesTotal - DatatypeLeavesTotal(1)
+
+		if not self.pinnedLeaves:
+			self.pinnedLeaves = (None,) * self.leafN
+
+@dataclasses.dataclass(slots=True)
 class MapFoldingState:
 	"""Core computational state for map folding algorithms.
 

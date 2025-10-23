@@ -36,9 +36,9 @@ if __name__ == '__main__':
 	sys.stdout.write("\033[0m\n")
 
 	nList: list[int] = []
-	# nList.extend(range(7, 11))
+	nList.extend(range(7, 11))
 	# nList.extend(range(9, 13))
-	nList.extend(range(11, 15))
+	# nList.extend(range(11, 15))
 	# nList.extend(range(13, 17))
 
 	for n in dict.fromkeys(nList):

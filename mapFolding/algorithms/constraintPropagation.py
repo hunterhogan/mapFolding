@@ -1,46 +1,39 @@
-"""Compute pxq maps.
-
-NOTE The cornucopia of indices:
-- indexLeaf: index of a map leaf, from 0 to leavesTotal - 1. Programmers might call it a flat index or a ravel index.
-- indexPile: location in an ordering of map leaves, origin at 0, from 0 to leavesTotal - 1.
-- indicesCartesian: indices of a point in Cartesian space (e.g., a Cartesian graph): one 0-based, non-negative index per dimension.
-- indicesLeaf: plural of indexLeaf.
-- indicesPile: plural of indexPile.
-"""
-from itertools import pairwise, product as CartesianProduct
-from mapFolding.dataBaskets import MapFoldingState
+from concurrent.futures import Future, ProcessPoolExecutor
+from copy import deepcopy
+from itertools import pairwise, permutations, product as CartesianProduct
+from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
 from ortools.sat.python import cp_model
 
-def findValidFoldings(state: MapFoldingState) -> int:
+def findValidFoldings(state: EliminationState) -> int:
 	model = cp_model.CpModel()
 
 	listIndicesLeafInIndexPileOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 1, f"indexLeafInIndexPile[{indexPile}]") for indexPile in range(state.leavesTotal)]
 	listIndicesPileInIndexLeafOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 1, f"indexPileOfIndexLeaf[{indexLeaf}]") for indexLeaf in range(state.leavesTotal)]
 	model.AddInverse(listIndicesLeafInIndexPileOrder, listIndicesPileInIndexLeafOrder)
 
+# ------- Manual concurrency -----------------------------
+	for indexPile, indexLeaf in enumerate(state.pinnedLeaves):
+		if indexLeaf is not None:
+			model.Add(listIndicesLeafInIndexPileOrder[indexPile] == indexLeaf)
+
 # ------- Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal, so fix in indexPile at 0, indexLeaf at 0 -----------------------------
 	model.Add(listIndicesLeafInIndexPileOrder[0] == 0)
 
 # ------- Lunnon Theorem 4: axis swapping constraint for equal dimensions ---------------
-	subsetsTheorem4: int = 1
-	Z0Z_listListIndicesByDimensionMagnitude: list[list[int]] = [list(iter_index(state.mapShape, magnitude)) for magnitude in unique(state.mapShape)]
-
-	for listIndices in Z0Z_listListIndicesByDimensionMagnitude:
-		if len(listIndices) > 1:
-			subsetsTheorem4 *= factorial(len(listIndices))
-			for dimensionAlpha, dimensionBeta in pairwise(listIndices):
+	for listIndicesSameMagnitude in [list(iter_index(state.mapShape, magnitude)) for magnitude in unique(state.mapShape)]:
+		if len(listIndicesSameMagnitude) > 1:
+			state.subsetsTheorem4 *= factorial(len(listIndicesSameMagnitude))
+			for dimensionAlpha, dimensionBeta in pairwise(listIndicesSameMagnitude):
 				k, r = (prod(state.mapShape[0:dimension]) for dimension in (dimensionAlpha, dimensionBeta))
-				if k < state.leavesTotal and r < state.leavesTotal:
-					model.Add(listIndicesPileInIndexLeafOrder[k] <= listIndicesPileInIndexLeafOrder[r])
+				model.Add(listIndicesPileInIndexLeafOrder[k] < listIndicesPileInIndexLeafOrder[r])
 
 # ------- Lunnon Theorem 2(b): "If some pᵢ > 2, G is divisible by 2n." -----------------------------
-	subsetsTheorem2: int = 1
-	if subsetsTheorem4 == 1:
+	if state.subsetsTheorem4 == 1:
 		for dimension in range(state.dimensionsTotal):
 			if state.mapShape[dimension] > 2:
-				subsetsTheorem2 = 2
+				state.subsetsTheorem2 = 2
 				indexLeafDimensionOrigin: int = prod(state.mapShape[0:dimension])
 				model.Add(listIndicesPileInIndexLeafOrder[indexLeafDimensionOrigin] < listIndicesPileInIndexLeafOrder[2 * indexLeafDimensionOrigin])
 				break
@@ -77,7 +70,7 @@ def findValidFoldings(state: MapFoldingState) -> int:
 			indexLeafNext = indexLeaf + prod(state.mapShape[0:dimension])
 		return indexLeafNext
 
-	for k, r in CartesianProduct(range(state.leavesTotal), range(state.leavesTotal)):
+	for k, r in CartesianProduct(range(state.leavesTotal-1), range(1, state.leavesTotal-1)):
 		if k == r:
 			continue
 
@@ -94,7 +87,6 @@ def findValidFoldings(state: MapFoldingState) -> int:
 # ------- Solver -----------------------------
 	solver = cp_model.CpSolver()
 	solver.parameters.enumerate_all_solutions = True
-	solver.parameters.num_workers = 0
 
 	solver.parameters.log_search_progress = False
 
@@ -110,9 +102,27 @@ def findValidFoldings(state: MapFoldingState) -> int:
 	foldingCollector = FoldingCollector(listIndicesLeafInIndexPileOrder)
 	solver.Solve(model, foldingCollector)
 
-	return len(foldingCollector.listFoldings) * subsetsTheorem2 * subsetsTheorem4
+	return len(foldingCollector.listFoldings) * state.subsetsTheorem2 * state.subsetsTheorem4
 
-def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
+def doTheNeedful(state: EliminationState) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-	state.groupsOfFolds = findValidFoldings(state)
+# NOTE figuring out a formula for dividing the job into tasks.
+# NOTE A001417(5) is leavesTotal = 32, which is 32! permutations.
+# With 3 pinned indices, there were 32^3 = 32,768 tasks, and the computation time was around 8600 seconds.
+# Keeping all other things the same, with 2 pinned indices, there were 32^2 = 1024 tasks, and the time was 359 seconds.
+# For A001417(6) and 2 pinned indices, I stopped the computation after 5.5 hours.
+	Z0Z_indexPileStart = 2
+	Z0Z_pinnedIndices = 2
+	Z0Z_indexPileStop = Z0Z_indexPileStart + Z0Z_pinnedIndices
+
+	with ProcessPoolExecutor(14) as concurrencyManager:
+		listClaimTickets: list[Future[int]] = []
+		for indicesLeaf in permutations(range(1, state.leavesTotal), r=Z0Z_pinnedIndices):
+			stateCopy: EliminationState = deepcopy(state)
+			stateCopy.pinnedLeaves = tuple([None] * Z0Z_indexPileStart + list(indicesLeaf) + [None] * (state.leavesTotal - Z0Z_indexPileStop))
+			listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))
+
+		for claimTicket in listClaimTickets:
+			state.groupsOfFolds += claimTicket.result()
+
 	return state
