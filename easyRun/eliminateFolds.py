@@ -1,6 +1,5 @@
 # ruff: noqa
 # pyright: basic
-from collections.abc import Sequence
 from mapFolding import dictionaryOEISMapFolding, eliminateFolds
 from os import PathLike
 from pathlib import PurePath
@@ -13,32 +12,33 @@ if __name__ == '__main__':
 			f"{(match:=foldsTotal == dictionaryOEISMapFolding[oeisID]['valuesKnown'][n])}\t"
 			f"\033[{(not match)*91}m"
 			f"{n}\t"
+			# f"{mapShape}\t"
 			f"{foldsTotal}\t"
 			f"{dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
 			"\033[0m\n"
 		)
 
-	listDimensions: Sequence[int] | None = None
 	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
-	computationDivisions: int | str | None = None
-	CPUlimit: bool | float | int | None = None
-	# mapShape: tuple[int, ...] | None = None
-	flow = 'elimination'
-	flow = 'constraintPropagation'
+	oeisID: str = ''
+	flow: str = ''
+	CPUlimit: bool | float | int | None = -2
 
-	oeisID: str = 'A001416'
-	oeisID: str = 'A001417'
+	flow = 'constraintPropagation'
+	flow = 'elimination'
+
 	oeisID: str = 'A000136'
 	oeisID: str = 'A195646'
-	oeisID: str = 'A001415'
 	oeisID: str = 'A001418'
+	oeisID: str = 'A001417'
+	oeisID: str = 'A001416'
+	oeisID: str = 'A001415'
 
 	sys.stdout.write(f"\033[{30+int(oeisID,11)%8};{40+int(oeisID,12)%8}m{oeisID} ")
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
 	sys.stdout.write("\033[0m\n")
 
-	for n in range(3,4):
+	for n in range(3,5):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 
@@ -50,3 +50,11 @@ if __name__ == '__main__':
 						, flow=flow)
 
 		_write()
+
+r"""
+deactivate && C:\apps\mapFolding\.vtail\Scripts\activate.bat && title good && cls
+
+title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\eliminateFolds.py & title I'm done
+"""
+
+# maps of 3 x 3 ... x 3, divisible by leavesTotal * 2^dimensionsTotal * factorial(dimensionsTotal)

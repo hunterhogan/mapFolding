@@ -1,1 +1,1 @@
-"""Hand-made algorithms."""
+"""Hand-made algorithms and formulas."""

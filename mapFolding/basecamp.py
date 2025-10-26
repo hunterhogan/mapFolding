@@ -228,13 +228,7 @@ def eliminateFolds(mapShape: tuple[int, ...]
 		- If the value of `CPUlimit` is a `float` greater than 1 or less than -1, `countFolds` truncates the value to an `int`
 		with the same sign as the `float`.
 	flow : str | None = None
-		My stupid way of selecting the version of the algorithm to use in the computation. There are certainly better ways to do
-		this, but I have not yet solved this issue. As of 2025 Aug 14, these values will work:
-		- 'daoOfMapFolding'
-		- 'numba'
-		- 'theorem2'
-		- 'theorem2Numba'
-		- 'theorem2Trimmed'
+		My stupid way of selecting the version of the algorithm to use in the computation.
 
 	Returns
 	-------
@@ -260,7 +254,7 @@ def eliminateFolds(mapShape: tuple[int, ...]
 
 	from mapFolding.dataBaskets import EliminationState
 	eliminationState: EliminationState = EliminationState(mapShape)
-	eliminationState = doTheNeedful(eliminationState)
+	eliminationState = doTheNeedful(eliminationState, concurrencyLimit)
 	foldsTotal = eliminationState.foldsTotal
 
 # ------- Follow memorialization instructions ---------------------------------------------
@@ -279,6 +273,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 	matched_oeisID: bool = True
 
 	match oeisID:
+		case 'A000136': from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
 		case 'A000560': from mapFolding.algorithms.oeisIDbyFormula import A000560 as doTheNeedful
 		case 'A001010': from mapFolding.algorithms.oeisIDbyFormula import A001010 as doTheNeedful
 		case 'A001011': from mapFolding.algorithms.oeisIDbyFormula import A001011 as doTheNeedful
@@ -297,19 +292,6 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 	else:
 		matched_oeisID = True
 		match oeisID:
-			case 'A000136':
-				from mapFolding import setProcessorLimit
-				concurrencyLimit: int = setProcessorLimit(CPUlimit)
-				match flow:
-					case 'elimination':
-						from mapFolding.algorithms.A000136elimination import doTheNeedful
-						countTotal = doTheNeedful(oeis_n)
-					case 'eliminationParallel':
-						from mapFolding.algorithms.A000136eliminationParallel import doTheNeedful
-						countTotal = doTheNeedful(oeis_n, concurrencyLimit)
-					case _:
-						from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
-						countTotal = doTheNeedful(oeis_n)
 			case 'A000682' | 'A005316':
 				match flow:
 					case 'matrixNumPy':

@@ -131,4 +131,3 @@ class ShapeSlicer(NamedTuple):
 
 	length: EllipsisType | slice
 	indices: int
-

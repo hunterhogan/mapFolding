@@ -47,15 +47,17 @@ class EliminationState:
 	groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})
 	"""Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings."""
 
+	listPinnedLeaves: list[dict[int, int]] = dataclasses.field(default_factory=list[dict[int, int]], init=True)
+	"""column: leaf"""
 	pinnedLeaves: tuple[DatatypeLeavesTotal | None, ...] = dataclasses.field(default=(), init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
 
 	subsetsTheorem2: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
+	subsetsTheorem3: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
 	subsetsTheorem4: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
 
 	columnLast: DatatypeLeavesTotal = dataclasses.field(init=False)
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
-	leafN: DatatypeLeavesTotal = dataclasses.field(init=False)
 	leavesTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""
 
@@ -69,17 +71,16 @@ class EliminationState:
 			The complete count of distinct folding patterns achievable with the current map configuration.
 
 		"""
-		return DatatypeFoldsTotal(self.leavesTotal) * self.groupsOfFolds * self.subsetsTheorem2 * self.subsetsTheorem4
+		return DatatypeFoldsTotal(self.leavesTotal) * self.groupsOfFolds * self.subsetsTheorem2 * self.subsetsTheorem3 * self.subsetsTheorem4
 
 	def __post_init__(self) -> None:
 		"""Ensure all fields have a value."""
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
 		self.leavesTotal = DatatypeLeavesTotal(getLeavesTotal(self.mapShape))
-		self.leafN = self.leavesTotal
 		self.columnLast = self.leavesTotal - DatatypeLeavesTotal(1)
 
 		if not self.pinnedLeaves:
-			self.pinnedLeaves = (None,) * self.leafN
+			self.pinnedLeaves = (None,) * self.leavesTotal
 
 @dataclasses.dataclass(slots=True)
 class MapFoldingState:

@@ -1,6 +1,7 @@
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 
 from collections.abc import Sequence
+from functools import cache
 from hunterMakesPy import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from mapFolding import NumPyIntegerType
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
@@ -8,6 +9,7 @@ from sys import maxsize as sysMaxsize
 from typing import Any
 import numpy
 
+@cache
 def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 	"""Calculate the total number of leaves in a map with the given dimensions.
 

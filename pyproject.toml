@@ -133,19 +133,20 @@ urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://gith
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
   "astToolkit>=0.9.0",
+  "cytoolz",
+  "funcy",
   "hunterMakesPy>=0.3.0",
+  "more_itertools",
   "numpy",
   "platformdirs",
 ]
-optional-dependencies = { cytoolz = [
-  "cytoolz",
+optional-dependencies = { development = [
   "cytoolz-stubs@git+https://github.com/py-stubs/cytoolz-stubs.git",
-  "more_itertools",
-], development = [
   "ipykernel",
   "ipywidgets",
   "memray; sys_platform == 'linux'",
   "py-spy",
+  "pyarrow-stubs",
   "setuptools-scm",
 ], numba = [
   "numba",
@@ -154,12 +155,9 @@ optional-dependencies = { cytoolz = [
   "ortools",
   "pandas",
   "pyarrow",
-  "pyarrow-stubs",
 ], sympy = [
   "sympy",
 ], testing = [
-  "cytoolz",
-  "more_itertools",
   "numba",
   "ortools",
   "pandas",

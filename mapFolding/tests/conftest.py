@@ -242,7 +242,7 @@ def mapShapeTestCountFolds(oeisIDmapFolding: str) -> tuple[int, ...]:
 		n = random.choice(dictionaryOEISMapFolding[oeisIDmapFolding]['valuesTestValidation'])
 		if n < 2:
 			continue
-		listDimensionsCandidate = list(dictionaryOEISMapFolding[oeisIDmapFolding]['getMapShape'](n))
+		listDimensionsCandidate: list[int] = list(dictionaryOEISMapFolding[oeisIDmapFolding]['getMapShape'](n))
 
 		try:
 			return validateListDimensions(listDimensionsCandidate)
