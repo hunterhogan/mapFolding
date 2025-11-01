@@ -2,8 +2,10 @@ from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
 from itertools import pairwise, repeat
 from mapFolding.algorithms.eliminationCount import count, permutands
+from mapFolding.algorithms.iff import productOfDimensions
+from mapFolding.algorithms.pinning2Dn import parallelByNextLeaf
 from mapFolding.dataBaskets import EliminationState
-from math import factorial, prod
+from math import factorial
 from more_itertools import flatten, iter_index, unique
 from typing import Any, TYPE_CHECKING
 
@@ -23,6 +25,18 @@ def _excludeLeafAtColumn(sequencePinnedLeaves: list[dict[int, int]], leaf: int, 
 		deconstructedPinnedLeaves: dict[int, dict[int, int]] = deconstructPinnedLeaves(pinnedLeaves, column, leavesTotal)
 		deconstructedPinnedLeaves.pop(leaf)																	# Exclude dictionary with `leaf` fixed at `column`.
 		listPinnedLeaves.extend(deconstructedPinnedLeaves.values())
+	return listPinnedLeaves
+
+def pinLeafAtColumn(sequencePinnedLeaves: list[dict[int, int]], leaf: int, column: int, leavesTotal: int) -> list[dict[int, int]]:
+	listPinnedLeaves: list[dict[int, int]] = []
+	for pinnedLeaves in sequencePinnedLeaves:
+		leafAtColumn: int | None = pinnedLeaves.get(column)
+		if leaf == leafAtColumn:
+			listPinnedLeaves.append(pinnedLeaves)															# That was easy.
+			continue
+		if leafAtColumn is not None:																		# `column` is occupied, but not by `leaf`, so exclude it.
+			continue
+		listPinnedLeaves.append(deconstructPinnedLeaves(pinnedLeaves, column, leavesTotal).pop(leaf))		# Keep the dictionary with `leaf` fixed at `column`.
 	return listPinnedLeaves
 
 @syntacticCurry
@@ -69,35 +83,38 @@ def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
 def deconstructListPinnedLeaves(listPinnedLeaves: list[dict[int, int]], column: int, leavesTotal: int) -> list[dict[int, int]]:
 	return list(flatten(map(DOTvalues, map(deconstructPinnedLeaves, listPinnedLeaves, repeat(column), repeat(leavesTotal)))))
 
+def _excludeLeafRBeforeLeafK(state: EliminationState, k: int, r: int, columnK: int, listPinnedLeaves: list[dict[int, int]]) -> list[dict[int, int]]:
+	listPinnedLeaves = deconstructListPinnedLeaves(listPinnedLeaves, columnK, state.leavesTotal)
+	listPinned: list[dict[int, int]] = []
+	for column in range(columnK, state.columnLast + 1):
+		(listPinnedLeaves, listPinnedAtColumn) = _segregatePinnedAtColumn(listPinnedLeaves, k, column)
+		listPinned.extend(listPinnedAtColumn)
+	listPinnedLeaves.extend(_excludeLeafAtColumn(listPinned, r, columnK - 1, state.leavesTotal))
+	return listPinnedLeaves
+
 def excludeLeafRBeforeLeafK(state: EliminationState, k: int, r: int) -> EliminationState:
 	for columnK in range(state.columnLast, 0, -1):
-		state.listPinnedLeaves = deconstructListPinnedLeaves(state.listPinnedLeaves, columnK, state.leavesTotal)
-		listPinned: list[dict[int, int]] = []
-		for column in range(columnK, state.columnLast + 1):
-			(state.listPinnedLeaves, listPinnedAtColumn) = _segregatePinnedAtColumn(state.listPinnedLeaves, k, column)
-			listPinned.extend(listPinnedAtColumn)
-		state.listPinnedLeaves.extend(_excludeLeafAtColumn(listPinned, r, columnK - 1, state.leavesTotal))
+		state.listPinnedLeaves = _excludeLeafRBeforeLeafK(state, k, r, columnK, state.listPinnedLeaves)
 	return state
 
-def reduceSearchSpace(state: EliminationState) -> EliminationState:
+def theorem4(state: EliminationState) -> EliminationState:
 # ------- Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ---------------
 	for listIndicesSameMagnitude in [list(iter_index(state.mapShape, magnitude)) for magnitude in unique(state.mapShape)]:
 		if len(listIndicesSameMagnitude) > 1:
 			state.subsetsTheorem4 = factorial(len(listIndicesSameMagnitude))
 			for dimensionAlpha, dimensionBeta in pairwise(listIndicesSameMagnitude):
-				k, r = (prod(state.mapShape[0:dimension]) + 1 for dimension in (dimensionAlpha, dimensionBeta))
+				k, r = (productOfDimensions(state.mapShape, dimension) + 1 for dimension in (dimensionAlpha, dimensionBeta))
 				state = excludeLeafRBeforeLeafK(state, k, r)
+	return state
 
+def theorem2b(state: EliminationState) -> EliminationState:
 # ------- Lunnon Theorem 2(b): "If some pᵢ > 2, G is divisible by 2n." -----------------------------
-	if state.subsetsTheorem4 == 1:
-		for aDimension, magnitude in enumerate(state.mapShape):
-			if magnitude > 2:
-				state.subsetsTheorem2 = 2
-				leafOrigin下_aDimension: int = prod(state.mapShape[0:aDimension]) + 1
-				k: int = leafOrigin下_aDimension
-				r: int = 2 * leafOrigin下_aDimension
-				state = excludeLeafRBeforeLeafK(state, k, r)
-				break
+	if state.subsetsTheorem4 == 1 and max(state.mapShape) > 2:
+		state.subsetsTheorem2 = 2
+		dimension: int = state.mapShape.index(max(state.mapShape))
+		k: int = productOfDimensions(state.mapShape, dimension) + 1
+		r: int = 2 * k
+		state = excludeLeafRBeforeLeafK(state, k, r)
 
 	return state
 
@@ -106,7 +123,9 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 # ------- Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal; Pin leaf1 in column0 and exclude leaf2--leafN at column0 ----------------------------
 	state.listPinnedLeaves = [{0: 1}]
 
-	state = reduceSearchSpace(state)
+	state = theorem4(state)
+	state = theorem2b(state)
+	state = parallelByNextLeaf(state)
 	state = count(state)
 
 	return state

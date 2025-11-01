@@ -49,7 +49,8 @@ class EliminationState:
 
 	listPinnedLeaves: list[dict[int, int]] = dataclasses.field(default_factory=list[dict[int, int]], init=True)
 	"""column: leaf"""
-	pinnedLeaves: tuple[DatatypeLeavesTotal | None, ...] = dataclasses.field(default=(), init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
+	pinnedLeaves: dict[int, int] = dataclasses.field(default_factory=dict[int, int], init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
+	"""pile: indexLeaf"""
 
 	subsetsTheorem2: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
 	subsetsTheorem3: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
@@ -78,9 +79,6 @@ class EliminationState:
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
 		self.leavesTotal = DatatypeLeavesTotal(getLeavesTotal(self.mapShape))
 		self.columnLast = self.leavesTotal - DatatypeLeavesTotal(1)
-
-		if not self.pinnedLeaves:
-			self.pinnedLeaves = (None,) * self.leavesTotal
 
 @dataclasses.dataclass(slots=True)
 class MapFoldingState:
