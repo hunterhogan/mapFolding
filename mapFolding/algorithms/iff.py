@@ -22,7 +22,8 @@ See Also
 - Citations in BibTeX format "mapFolding/citations".
 """
 from collections.abc import Callable
-from cytoolz.functoolz import curry as syntacticCurry, memoize
+from cytoolz.functoolz import curry as syntacticCurry
+from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding import getLeavesTotal
 from math import prod
@@ -97,21 +98,21 @@ def thisIsAViolation(column: int, columnComparand: int, getLeafNextCrease: Calla
 	return False
 
 # ------- ad hoc computations -----------------------------
-@memoize
+# @cache
 def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
 	return len(mapShape)
 
-@memoize
+@cache
 def _leavesTotal(mapShape: tuple[int, ...]) -> int:
 	return getLeavesTotal(mapShape)
 
-@memoize
+# @cache
 def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
 	return prod(mapShape[0:dimension])
 
 # ------- Functions for 'leaf', named 1, 2, ... n, not for 'indexLeaf' -------------
 
-@memoize
+@cache
 def ImaOddLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int:
 	# NOTE `leaf-1` because `leaf` is not zero-based indexing.
 	return (((leaf-1) // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
@@ -126,7 +127,7 @@ def matchingParityLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple
 		return _matchingParityLeaf(mapShape, leaf, comparand, dimension)
 	return repack
 
-@memoize
+@cache
 def nextCreaseLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int | None:
 	leafNext: int | None = None
 	if (((leaf-1) // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:

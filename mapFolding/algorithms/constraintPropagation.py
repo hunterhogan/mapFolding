@@ -1,10 +1,15 @@
-from concurrent.futures import Future, ProcessPoolExecutor
+# ruff: noqa: ERA001
+from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
-from itertools import pairwise, permutations, product as CartesianProduct
+from itertools import pairwise, product as CartesianProduct
+from mapFolding.algorithms.patternFinder import getDictionaryLeafRanges
+from mapFolding.algorithms.pinning2Dn import parallelByNextLeaf, secondOrderFolds
 from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
 from ortools.sat.python import cp_model
+from tqdm import tqdm
+from typing import Final
 
 def findValidFoldings(state: EliminationState) -> int:
 	model = cp_model.CpModel()
@@ -13,15 +18,46 @@ def findValidFoldings(state: EliminationState) -> int:
 	listIndicesPileInIndexLeafOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 1, f"indexPileOfIndexLeaf[{indexLeaf}]") for indexLeaf in range(state.leavesTotal)]
 	model.AddInverse(listIndicesLeafInIndexPileOrder, listIndicesPileInIndexLeafOrder)
 
-# ------- Manual concurrency -----------------------------
-	for indexPile, indexLeaf in enumerate(state.pinnedLeaves):
-		if indexLeaf is not None:
-			model.Add(listIndicesLeafInIndexPileOrder[indexPile] == indexLeaf)
+	dictionaryLeafRanges: Final[dict[int, range]] = getDictionaryLeafRanges(state)
 
-# ------- Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal, so fix in indexPile at 0, indexLeaf at 0 -----------------------------
+# ------- Leaf domain restrictions from dictionaryLeafRanges -----------------------------
+	for indexLeaf, rangeIndicesPile in dictionaryLeafRanges.items():
+		if indexLeaf < 2:
+			continue
+		model.AddAllowedAssignments([listIndicesPileInIndexLeafOrder[indexLeaf]], [(pile,) for pile in rangeIndicesPile])
+
+	if state.leavesTotal in [64, 128]:
+		from mapFolding.algorithms.patternFinder import getDictionaryDifferences  # noqa: PLC0415
+		dictionaryDifferences: Final[dict[int, list[int]]] = getDictionaryDifferences(state)
+		dictionaryNextLeaf: dict[int, list[int]] = {}
+		for indexLeaf, listDifferences in dictionaryDifferences.items():
+			listAllowedNextLeaves: list[int] = []
+			for difference in listDifferences:
+				listAllowedNextLeaves.append(indexLeaf + difference)  # noqa: PERF401
+			dictionaryNextLeaf[indexLeaf] = listAllowedNextLeaves
+
+# ------- Constraints from dictionaryNextLeaf -----------------------------
+		for indexLeaf, listAllowedNextLeaves in dictionaryNextLeaf.items():
+			if not listAllowedNextLeaves:
+				continue
+			for indexPile in range(state.leavesTotal - 1):
+				currentLeafAtThisPile: cp_model.IntVar = listIndicesLeafInIndexPileOrder[indexPile]
+				nextLeafAtNextPile: cp_model.IntVar = listIndicesLeafInIndexPileOrder[indexPile + 1]
+
+				isCurrentLeafEqualToIndexLeaf: cp_model.IntVar = model.NewBoolVar(f"pile{indexPile}_leaf{indexLeaf}")
+				model.Add(currentLeafAtThisPile == indexLeaf).OnlyEnforceIf(isCurrentLeafEqualToIndexLeaf)
+				model.Add(currentLeafAtThisPile != indexLeaf).OnlyEnforceIf(isCurrentLeafEqualToIndexLeaf.Not())
+
+				model.AddAllowedAssignments([nextLeafAtNextPile], [(leaf,) for leaf in listAllowedNextLeaves]).OnlyEnforceIf(isCurrentLeafEqualToIndexLeaf)
+
+# ------- Manual concurrency -----------------------------
+	for indexPile, indexLeaf in state.pinnedLeaves.items():
+		model.Add(listIndicesLeafInIndexPileOrder[indexPile] == indexLeaf)
+
+# ------- Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal; fix in indexPile at 0, indexLeaf at 0 -----------------------------
 	model.Add(listIndicesLeafInIndexPileOrder[0] == 0)
 
-# ------- Lunnon Theorem 4: axis swapping constraint for equal dimensions ---------------
+# ------- Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ---------------
 	for listIndicesSameMagnitude in [list(iter_index(state.mapShape, magnitude)) for magnitude in unique(state.mapShape)]:
 		if len(listIndicesSameMagnitude) > 1:
 			state.subsetsTheorem4 *= factorial(len(listIndicesSameMagnitude))
@@ -29,13 +65,13 @@ def findValidFoldings(state: EliminationState) -> int:
 				k, r = (prod(state.mapShape[0:dimension]) for dimension in (dimensionAlpha, dimensionBeta))
 				model.Add(listIndicesPileInIndexLeafOrder[k] < listIndicesPileInIndexLeafOrder[r])
 
-# ------- Lunnon Theorem 2(b): "If some pᵢ > 2, G is divisible by 2n." -----------------------------
+# ------- Lunnon Theorem 2(b): "If some [magnitude in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." -----------------------------
 	if state.subsetsTheorem4 == 1:
-		for dimension in range(state.dimensionsTotal):
-			if state.mapShape[dimension] > 2:
+		for aDimension in range(state.dimensionsTotal - 1, -1, -1):
+			if state.mapShape[aDimension] > 2:
 				state.subsetsTheorem2 = 2
-				indexLeafDimensionOrigin: int = prod(state.mapShape[0:dimension])
-				model.Add(listIndicesPileInIndexLeafOrder[indexLeafDimensionOrigin] < listIndicesPileInIndexLeafOrder[2 * indexLeafDimensionOrigin])
+				indexLeafOrigin下_aDimension: int = prod(state.mapShape[0:aDimension])
+				model.Add(listIndicesPileInIndexLeafOrder[indexLeafOrigin下_aDimension] < listIndicesPileInIndexLeafOrder[2 * indexLeafOrigin下_aDimension])
 				break
 
 # ------- Forbidden inequalities -----------------------------
@@ -102,27 +138,42 @@ def findValidFoldings(state: EliminationState) -> int:
 	foldingCollector = FoldingCollector(listIndicesLeafInIndexPileOrder)
 	solver.Solve(model, foldingCollector)
 
+	if not foldingCollector.listFoldings:
+		print("\n",state.pinnedLeaves)
+	# if foldingCollector.listFoldings:
+	# 	print(*foldingCollector.listFoldings, sep="\n")
+
 	return len(foldingCollector.listFoldings) * state.subsetsTheorem2 * state.subsetsTheorem4
 
-def doTheNeedful(state: EliminationState) -> EliminationState:
+def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-# NOTE figuring out a formula for dividing the job into tasks.
-# NOTE A001417(5) is leavesTotal = 32, which is 32! permutations.
-# With 3 pinned indices, there were 32^3 = 32,768 tasks, and the computation time was around 8600 seconds.
-# Keeping all other things the same, with 2 pinned indices, there were 32^2 = 1024 tasks, and the time was 359 seconds.
-# For A001417(6) and 2 pinned indices, I stopped the computation after 5.5 hours.
-	Z0Z_indexPileStart = 2
-	Z0Z_pinnedIndices = 2
-	Z0Z_indexPileStop = Z0Z_indexPileStart + Z0Z_pinnedIndices
+	# state = parallelByNextLeaf(state)
+	state = secondOrderFolds(state)
 
-	with ProcessPoolExecutor(14) as concurrencyManager:
-		listClaimTickets: list[Future[int]] = []
-		for indicesLeaf in permutations(range(1, state.leavesTotal), r=Z0Z_pinnedIndices):
-			stateCopy: EliminationState = deepcopy(state)
-			stateCopy.pinnedLeaves = tuple([None] * Z0Z_indexPileStart + list(indicesLeaf) + [None] * (state.leavesTotal - Z0Z_indexPileStop))
-			listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))
+	if state.listPinnedLeaves:
 
-		for claimTicket in listClaimTickets:
-			state.groupsOfFolds += claimTicket.result()
+		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
+			listClaimTickets: list[Future[int]] = []
 
+			listPinnedLeavesCopy: list[dict[int, int]] = deepcopy(state.listPinnedLeaves)
+			state.listPinnedLeaves = []
+			for pinnedLeaves in listPinnedLeavesCopy:
+				stateCopy: EliminationState = deepcopy(state)
+				stateCopy.pinnedLeaves = pinnedLeaves
+				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))
+
+			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
+				state.groupsOfFolds += claimTicket.result()
+
+	else:
+		indexPile = 2
+		with ProcessPoolExecutor(14) as concurrencyManager:
+			listClaimTickets: list[Future[int]] = []
+			for indicesLeaf in range(1, state.leavesTotal):
+				stateCopy: EliminationState = deepcopy(state)
+				stateCopy.pinnedLeaves = {indexPile: indicesLeaf}
+				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))
+
+			for claimTicket in listClaimTickets:
+				state.groupsOfFolds += claimTicket.result()
 	return state

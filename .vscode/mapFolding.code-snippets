@@ -27,6 +27,13 @@
 		],
 		"description": "Last letter of Greek alphabet (Ω, Ōmega)"
 	},
+	"上": {
+		"prefix": "shang",
+		"body": [
+			"上"
+		],
+		"description": "'above', 'on', 'superior', 'superscript', 'raised' (上, shàng)"
+	},
 	"下": {
 		"prefix": "xia",
 		"body": [
