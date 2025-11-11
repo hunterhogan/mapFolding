@@ -24,6 +24,7 @@ from mapFolding._theTypes import (
 from mapFolding._theSSOT import packageSettings as packageSettings
 
 from mapFolding.beDRY import (
+    exclude as exclude,
 	getConnectionGraph as getConnectionGraph,
 	getLeavesTotal as getLeavesTotal,
 	getTaskDivisions as getTaskDivisions,

@@ -3,7 +3,7 @@ from cytoolz.itertoolz import groupby as toolz_groupby
 from itertools import pairwise, repeat
 from mapFolding.algorithms.eliminationCount import count, permutands
 from mapFolding.algorithms.iff import productOfDimensions
-from mapFolding.algorithms.pinning2Dn import parallelByNextLeaf
+from mapFolding.algorithms.pinning2Dn import pinByFormula
 from mapFolding.dataBaskets import EliminationState
 from math import factorial
 from more_itertools import flatten, iter_index, unique
@@ -125,7 +125,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	state = theorem4(state)
 	state = theorem2b(state)
-	state = parallelByNextLeaf(state)
+	state = pinByFormula(state)
 	state = count(state)
 
 	return state

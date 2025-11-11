@@ -3,7 +3,8 @@ from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
 from itertools import pairwise, product as CartesianProduct
 from mapFolding.algorithms.patternFinder import getDictionaryLeafRanges
-from mapFolding.algorithms.pinning2Dn import parallelByNextLeaf, secondOrderFolds
+from mapFolding.algorithms.pinning2Dn import pinByFormula
+from mapFolding.algorithms.pinning2DnAnnex import secondOrderLeaves, secondOrderPilings
 from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
@@ -14,48 +15,48 @@ from typing import Final
 def findValidFoldings(state: EliminationState) -> int:
 	model = cp_model.CpModel()
 
-	listIndicesLeafInIndexPileOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 1, f"indexLeafInIndexPile[{indexPile}]") for indexPile in range(state.leavesTotal)]
-	listIndicesPileInIndexLeafOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 1, f"indexPileOfIndexLeaf[{indexLeaf}]") for indexLeaf in range(state.leavesTotal)]
-	model.AddInverse(listIndicesLeafInIndexPileOrder, listIndicesPileInIndexLeafOrder)
-
-	dictionaryLeafRanges: Final[dict[int, range]] = getDictionaryLeafRanges(state)
+	listIndicesLeafInPilingsOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 1, f"indexLeafInPile[{pile}]") for pile in range(state.leavesTotal)]
+	listPilingsInIndexLeafOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 1, f"pileOfIndexLeaf[{indexLeaf}]") for indexLeaf in range(state.leavesTotal)]
+	model.AddInverse(listIndicesLeafInPilingsOrder, listPilingsInIndexLeafOrder)
 
 # ------- Leaf domain restrictions from dictionaryLeafRanges -----------------------------
-	for indexLeaf, rangeIndicesPile in dictionaryLeafRanges.items():
-		if indexLeaf < 2:
-			continue
-		model.AddAllowedAssignments([listIndicesPileInIndexLeafOrder[indexLeaf]], [(pile,) for pile in rangeIndicesPile])
-
-	if state.leavesTotal in [64, 128]:
-		from mapFolding.algorithms.patternFinder import getDictionaryDifferences  # noqa: PLC0415
-		dictionaryDifferences: Final[dict[int, list[int]]] = getDictionaryDifferences(state)
-		dictionaryNextLeaf: dict[int, list[int]] = {}
-		for indexLeaf, listDifferences in dictionaryDifferences.items():
-			listAllowedNextLeaves: list[int] = []
-			for difference in listDifferences:
-				listAllowedNextLeaves.append(indexLeaf + difference)  # noqa: PERF401
-			dictionaryNextLeaf[indexLeaf] = listAllowedNextLeaves
-
-# ------- Constraints from dictionaryNextLeaf -----------------------------
-		for indexLeaf, listAllowedNextLeaves in dictionaryNextLeaf.items():
-			if not listAllowedNextLeaves:
+	if (state.dimensionsTotal > 2) and (state.mapShape[0] == 2):
+		dictionaryLeafRanges: Final[dict[int, range]] = getDictionaryLeafRanges(state)
+		for indexLeaf, rangePilings in dictionaryLeafRanges.items():
+			if indexLeaf < 2:
 				continue
-			for indexPile in range(state.leavesTotal - 1):
-				currentLeafAtThisPile: cp_model.IntVar = listIndicesLeafInIndexPileOrder[indexPile]
-				nextLeafAtNextPile: cp_model.IntVar = listIndicesLeafInIndexPileOrder[indexPile + 1]
+			model.AddAllowedAssignments([listPilingsInIndexLeafOrder[indexLeaf]], [(pile,) for pile in rangePilings])
 
-				isCurrentLeafEqualToIndexLeaf: cp_model.IntVar = model.NewBoolVar(f"pile{indexPile}_leaf{indexLeaf}")
-				model.Add(currentLeafAtThisPile == indexLeaf).OnlyEnforceIf(isCurrentLeafEqualToIndexLeaf)
-				model.Add(currentLeafAtThisPile != indexLeaf).OnlyEnforceIf(isCurrentLeafEqualToIndexLeaf.Not())
+		if state.leavesTotal in [64, 128]:
+			from mapFolding.algorithms.patternFinder import getDictionaryAddends4Next  # noqa: PLC0415
+			dictionaryAddends4Next: Final[dict[int, list[int]]] = getDictionaryAddends4Next(state)
+			dictionaryNextLeaf: dict[int, list[int]] = {}
+			for indexLeaf, listDifferences in dictionaryAddends4Next.items():
+				listAllowedNextLeaves: list[int] = []
+				for difference in listDifferences:
+					listAllowedNextLeaves.append(indexLeaf + difference)  # noqa: PERF401
+				dictionaryNextLeaf[indexLeaf] = listAllowedNextLeaves
 
-				model.AddAllowedAssignments([nextLeafAtNextPile], [(leaf,) for leaf in listAllowedNextLeaves]).OnlyEnforceIf(isCurrentLeafEqualToIndexLeaf)
+	# ------- Constraints from dictionaryNextLeaf -----------------------------
+			for indexLeaf, listAllowedNextLeaves in dictionaryNextLeaf.items():
+				if not listAllowedNextLeaves:
+					continue
+				for pile in range(state.leavesTotal - 1):
+					currentLeafAtThisPile: cp_model.IntVar = listIndicesLeafInPilingsOrder[pile]
+					nextLeafAtNextPile: cp_model.IntVar = listIndicesLeafInPilingsOrder[pile + 1]
+
+					isCurrentLeafEqualToIndexLeaf: cp_model.IntVar = model.NewBoolVar(f"pile{pile}_leaf{indexLeaf}")
+					model.Add(currentLeafAtThisPile == indexLeaf).OnlyEnforceIf(isCurrentLeafEqualToIndexLeaf)
+					model.Add(currentLeafAtThisPile != indexLeaf).OnlyEnforceIf(isCurrentLeafEqualToIndexLeaf.Not())
+
+					model.AddAllowedAssignments([nextLeafAtNextPile], [(leaf,) for leaf in listAllowedNextLeaves]).OnlyEnforceIf(isCurrentLeafEqualToIndexLeaf)
 
 # ------- Manual concurrency -----------------------------
-	for indexPile, indexLeaf in state.pinnedLeaves.items():
-		model.Add(listIndicesLeafInIndexPileOrder[indexPile] == indexLeaf)
+	for pile, indexLeaf in state.pinnedLeaves.items():
+		model.Add(listIndicesLeafInPilingsOrder[pile] == indexLeaf)
 
-# ------- Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal; fix in indexPile at 0, indexLeaf at 0 -----------------------------
-	model.Add(listIndicesLeafInIndexPileOrder[0] == 0)
+# ------- Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal; fix in pile at 0, indexLeaf at 0 -----------------------------
+	model.Add(listIndicesLeafInPilingsOrder[0] == 0)
 
 # ------- Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ---------------
 	for listIndicesSameMagnitude in [list(iter_index(state.mapShape, magnitude)) for magnitude in unique(state.mapShape)]:
@@ -63,7 +64,7 @@ def findValidFoldings(state: EliminationState) -> int:
 			state.subsetsTheorem4 *= factorial(len(listIndicesSameMagnitude))
 			for dimensionAlpha, dimensionBeta in pairwise(listIndicesSameMagnitude):
 				k, r = (prod(state.mapShape[0:dimension]) for dimension in (dimensionAlpha, dimensionBeta))
-				model.Add(listIndicesPileInIndexLeafOrder[k] < listIndicesPileInIndexLeafOrder[r])
+				model.Add(listPilingsInIndexLeafOrder[k] < listPilingsInIndexLeafOrder[r])
 
 # ------- Lunnon Theorem 2(b): "If some [magnitude in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." -----------------------------
 	if state.subsetsTheorem4 == 1:
@@ -71,14 +72,14 @@ def findValidFoldings(state: EliminationState) -> int:
 			if state.mapShape[aDimension] > 2:
 				state.subsetsTheorem2 = 2
 				indexLeafOrigin下_aDimension: int = prod(state.mapShape[0:aDimension])
-				model.Add(listIndicesPileInIndexLeafOrder[indexLeafOrigin下_aDimension] < listIndicesPileInIndexLeafOrder[2 * indexLeafOrigin下_aDimension])
+				model.Add(listPilingsInIndexLeafOrder[indexLeafOrigin下_aDimension] < listPilingsInIndexLeafOrder[2 * indexLeafOrigin下_aDimension])
 				break
 
 # ------- Forbidden inequalities -----------------------------
 	def addLessThan(comparatorLeft: int, comparatorRight: int) -> cp_model.IntVar:
 		ruleΩ: cp_model.IntVar = model.NewBoolVar(f"this_{comparatorLeft}_lessThan_{comparatorRight}")
-		model.Add(listIndicesPileInIndexLeafOrder[comparatorLeft] < listIndicesPileInIndexLeafOrder[comparatorRight]).OnlyEnforceIf(ruleΩ)
-		model.Add(listIndicesPileInIndexLeafOrder[comparatorLeft] >= listIndicesPileInIndexLeafOrder[comparatorRight]).OnlyEnforceIf(ruleΩ.Not())
+		model.Add(listPilingsInIndexLeafOrder[comparatorLeft] < listPilingsInIndexLeafOrder[comparatorRight]).OnlyEnforceIf(ruleΩ)
+		model.Add(listPilingsInIndexLeafOrder[comparatorLeft] >= listPilingsInIndexLeafOrder[comparatorRight]).OnlyEnforceIf(ruleΩ.Not())
 		return ruleΩ
 
 	def addForbiddenInequalityCycle(k: int, r: int, k1: int, r1: int) -> None:
@@ -127,19 +128,19 @@ def findValidFoldings(state: EliminationState) -> int:
 	solver.parameters.log_search_progress = False
 
 	class FoldingCollector(cp_model.CpSolverSolutionCallback):
-		def __init__(self, _listOfIndicesLeafInIndexPileOrder: list[cp_model.IntVar]) -> None:
+		def __init__(self, _listOfIndicesLeafInPilingsOrder: list[cp_model.IntVar]) -> None:
 			super().__init__()
-			self._listOfIndicesLeafInIndexPileOrder: list[cp_model.IntVar] = _listOfIndicesLeafInIndexPileOrder
+			self._listOfIndicesLeafInPilingsOrder: list[cp_model.IntVar] = _listOfIndicesLeafInPilingsOrder
 			self.listFoldings: list[list[int]] = []
 
 		def OnSolutionCallback(self) -> None:
-			self.listFoldings.append([self.Value(indexLeaf) + 1 for indexLeaf in self._listOfIndicesLeafInIndexPileOrder]) # pyright: ignore[reportUnknownMemberType]
+			self.listFoldings.append([self.Value(indexLeaf) for indexLeaf in self._listOfIndicesLeafInPilingsOrder]) # pyright: ignore[reportUnknownMemberType]
 
-	foldingCollector = FoldingCollector(listIndicesLeafInIndexPileOrder)
+	foldingCollector = FoldingCollector(listIndicesLeafInPilingsOrder)
 	solver.Solve(model, foldingCollector)
 
-	if not foldingCollector.listFoldings:
-		print("\n",state.pinnedLeaves)
+	# if not foldingCollector.listFoldings:
+	# 	print("\n",state.pinnedLeaves)
 	# if foldingCollector.listFoldings:
 	# 	print(*foldingCollector.listFoldings, sep="\n")
 
@@ -147,8 +148,9 @@ def findValidFoldings(state: EliminationState) -> int:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-	# state = parallelByNextLeaf(state)
-	state = secondOrderFolds(state)
+	state = pinByFormula(state)
+	# state = secondOrderLeaves(state)
+	# state = secondOrderPilings(state)
 
 	if state.listPinnedLeaves:
 
@@ -165,15 +167,19 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
 				state.groupsOfFolds += claimTicket.result()
 
-	else:
-		indexPile = 2
-		with ProcessPoolExecutor(14) as concurrencyManager:
+	elif workersMaximum > 1:
+		pile = 2
+		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 			listClaimTickets: list[Future[int]] = []
 			for indicesLeaf in range(1, state.leavesTotal):
 				stateCopy: EliminationState = deepcopy(state)
-				stateCopy.pinnedLeaves = {indexPile: indicesLeaf}
+				stateCopy.pinnedLeaves = {pile: indicesLeaf}
 				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))
 
 			for claimTicket in listClaimTickets:
 				state.groupsOfFolds += claimTicket.result()
+
+	else:
+		state.groupsOfFolds = findValidFoldings(deepcopy(state))
+
 	return state

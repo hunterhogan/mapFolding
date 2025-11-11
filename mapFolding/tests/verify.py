@@ -1,8 +1,9 @@
 # ruff: noqa: T201
+from collections import Counter
 from cytoolz.curried import dissoc, filter, map as toolz_map, valmap  # noqa: A004
 from cytoolz.functoolz import compose
 from gmpy2 import fac
-from mapFolding.algorithms.patternFinder import getDictionaryDifferences
+from mapFolding.algorithms.patternFinder import getDictionaryAddends4Next
 from mapFolding.dataBaskets import EliminationState
 from math import prod
 from pathlib import Path
@@ -53,7 +54,7 @@ def verifyDictionaryLeafRanges(state: EliminationState, dictionaryLeafRanges: di
 		print("\33[92mNo issues found.\33[0m")
 	print(len(dictionaryLeafRanges), "of", state.leavesTotal)
 
-def verifyDictionaryDifferences(state: EliminationState, dictionaryDifferences: dict[int, list[int]]) -> None:
+def verifyDictionaryAddends4Next(state: EliminationState, dictionaryDifferences: dict[int, list[int]]) -> None:
 	dictionaryDifferencesKnown64: dict[int, list[int]] = {
 	0: [1],
 	1: [2, 4, 8, 16, 32],
@@ -129,8 +130,42 @@ def verifyDictionaryDifferences(state: EliminationState, dictionaryDifferences: 
 			print(f"\33[91m{indexLeaf = :2d}\t{listDifferences = } != {dictionaryDifferencesKnown64[indexLeaf]}, the known value.\33[0m")
 	print("\33[92mChecked known values.\33[0m")
 
-def verifyDictionaryDifferencesReverse(state: EliminationState, dictionaryDifferencesReverse: dict[int, list[int]]) -> None:
+def verifyDictionaryAddends4Prior(state: EliminationState, dictionaryDifferencesReverse: dict[int, list[int]]) -> None:
+	dictionaryDifferencesReverseKnown32: dict[int, list[int]] = {
+	0: [],
+	1: [-1],
+	2: [1],
+	3: [-2, 4, 8, 16],
+	4: [1, 2],
+	5: [2, -4, 8, 16],
+	6: [-4, 8, 16],
+	7: [-1, -2],
+	8: [1, 2, 4],
+	9: [2, 4, -8, 16],
+	10: [4, -8, 16],
+	11: [-1, -2, 4],
+	12: [-8, 16],
+	13: [-1, 2, -4],
+	14: [1, -2, -4],
+	15: [-2, -4, -8, 16],
+	16: [1, 2, 4, 8],
+	17: [2, 4, 8, -16],
+	18: [4, 8, -16],
+	19: [-1, -2, 4, 8],
+	20: [8, -16],
+	21: [-1, 2, -4, 8],
+	22: [1, -2, -4, 8],
+	23: [-2, -4, 8, -16],
+	24: [-16],
+	25: [-1, 2, 4, -8],
+	26: [1, -2, 4, -8],
+	27: [-2, 4, -8, -16],
+	28: [1, 2, -4, -8],
+	29: [2, -4, -8, -16],
+	30: [-4, -8, -16],
+	31: [-1, -2, -4, -8]}
 	dictionaryDifferencesReverseKnown64: dict[int, list[int]] = {
+	0: [],
 	1: [-1],
 	2: [1],
 	3: [-2, 4, 8, 16, 32],
@@ -206,20 +241,24 @@ def verifyDictionaryDifferencesReverse(state: EliminationState, dictionaryDiffer
 
 def verifyPinning2Dn(state: EliminationState) -> None:
 	colorReset = '\33[0m'
-	pathFilename: Path = Path("/apps/mapFolding/Z0Z_notes/arrayFoldingsP2d6.pkl")
-	arrayFoldingsP2d6: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())  # noqa: S301
+	pathFilename: Path = Path(f"/apps/mapFolding/Z0Z_notes/arrayFoldingsP2d{state.dimensionsTotal}.pkl")
+	arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())  # noqa: S301
 
-	rowsTotal: int = int(arrayFoldingsP2d6.shape[0])
+	rowsTotal: int = int(arrayFoldings.shape[0])
 	listMasks: list[numpy.ndarray] = []
 	listDictionaryPinned: list[dict[int, int]] = []
 	for dictionaryPinned in state.listPinnedLeaves:
 		maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
 		for indexPile, indexLeaf in dictionaryPinned.items():
-			maskMatches = maskMatches & (arrayFoldingsP2d6[:, indexPile] == indexLeaf)
+			maskMatches = maskMatches & (arrayFoldings[:, indexPile] == indexLeaf)
 		if not bool(maskMatches.any()):
-			print(f"\33[93m{(dictionaryPinned)}\33[0m")
+			# print(f"\33[93m{(dictionaryPinned)}\33[0m")
+			print(f"\33[93m", end='')
+			# pprint(dictionaryPinned)
+			print(colorReset, end='')
 			listDictionaryPinned.append(dictionaryPinned)
 		listMasks.append(maskMatches)
+	print(len(listDictionaryPinned), "surplus dictionaries.")
 
 	maskUnion = numpy.logical_or.reduce(listMasks)
 	rowsCovered: int = int(maskUnion.sum())
@@ -227,8 +266,8 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 	if rowsCovered < rowsTotal:
 		color = '\33[91m'
 		indicesMissingRows: numpy.ndarray = numpy.flatnonzero(~maskUnion)
-		for indexRow in indicesMissingRows[0:1]:
-			print(arrayFoldingsP2d6[indexRow, :])
+		for indexRow in indicesMissingRows[0:2]:
+			print(arrayFoldings[indexRow, :])
 	print(f"{color}Covered rows: {rowsCovered}/{rowsTotal}{colorReset}")
 
 	masksStacked: numpy.ndarray = numpy.column_stack(listMasks)
@@ -243,11 +282,117 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 			print("Overlapping", state.listPinnedLeaves[indexDictionary])
 
 def printStatisticsPermutations(state: EliminationState) -> None:
-	dictionaryDifferences: dict[int, list[int]] = getDictionaryDifferences(state)
+	dictionaryDifferences: dict[int, list[int]] = getDictionaryAddends4Next(state)
 	permutationsTotal: Callable[[dict[int, list[int]]], int] = compose(prod, filter(None), dict[int, list[int]].values, valmap(len))
 	permutationsPinnedLeaves: Callable[[dict[int, int]], int] = compose(permutationsTotal, lambda pinnedLeaves: dissoc(dictionaryDifferences, *pinnedLeaves.keys())) # pyright: ignore[reportUnknownLambdaType, reportUnknownArgumentType, reportUnknownMemberType]
 	permutationsPinnedLeavesTotal: Callable[[list[dict[int, int]]], int] = compose(sum, toolz_map(permutationsPinnedLeaves))
 
-	print(fac(64))
+	print(fac(state.leavesTotal))
 	print(permutationsTotal(dictionaryDifferences))
 	print(permutationsPinnedLeavesTotal(state.listPinnedLeaves))
+
+probablyPile2Leaves64: dict[int, list[int]] = {0: [0],
+	1: [1],
+	2: [3, 5, 9, 17, 33],
+	3: [2, 7, 11, 13, 19, 21, 25, 35, 37, 41, 49],
+	4: [3, 5, 6, 9, 10, 15, 17, 18, 23, 27, 29, 34, 39, 43, 45, 51, 53, 57],
+	5: [2, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31, 35, 37, 38, 41, 42, 47, 49, 50, 55, 59, 61],
+	6: [3, 5, 6, 9, 10, 15, 17, 18, 23, 27, 29, 30, 33, 34, 39, 43, 45, 46, 51, 53, 54, 57, 58, 63],
+	7: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31, 35, 37, 38, 41, 42, 47, 49, 50, 55, 59, 61, 62],
+	8: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 27, 29, 30, 34, 36, 39, 43, 45, 46, 51, 53, 54, 57, 58, 63],
+	9: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 59, 61, 62],
+	10: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 27, 29, 30, 33, 34, 36, 39, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	11: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 59, 61, 62],
+	12: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 27, 29, 30, 34, 36, 39, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	13: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 59, 61, 62],
+	14: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 27, 29, 30, 33, 34, 36, 39, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	15: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 59, 61, 62],
+	16: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	17: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	18: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	19: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	20: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	21: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	22: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	23: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	24: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	25: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	26: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	27: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	28: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	29: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	30: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63],
+	31: [2, 4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	32: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	33: [2, 4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	34: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	35: [4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	36: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	37: [4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	38: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	39: [4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	40: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	41: [4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	42: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	43: [4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	44: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	45: [4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	46: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	47: [4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	48: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	49: [4, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	50: [9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	51: [8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	52: [9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	53: [8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	54: [9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	55: [8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	56: [9, 10, 12, 17, 18, 20, 23, 24, 27, 29, 30, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	57: [8, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	58: [17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60, 63],
+	59: [16, 19, 21, 22, 25, 26, 28, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62],
+	60: [17, 18, 20, 24, 34, 36, 39, 40, 43, 45, 46, 48, 51, 53, 54, 57, 58, 60],
+	61: [16, 35, 37, 38, 41, 42, 44, 49, 50, 52, 56],
+	62: [33, 34, 36, 40, 48],
+	63: [32]}
+pile15: dict[int, dict[int, dict[int, dict[int, list[int]]]]] = {
+	3:{17:{2:{ 19:[4,7,8,11,13,14,21,22,26,28,31]
+				,21:[13,14,22]
+				,25:[4,7,13,14,21,22,26,28,31]}}
+		,20:{2:{28:[7,13,26,31]}}
+		,24:{2:{8:[4,7,11,13,14,21,22,25,28,31]}}}
+	,5:{17:{7:{ 21:[4,8,11,13,14,19,26,28,31]
+				,25:[28,31]}}
+		,24:{7:{8:[14,19,25,26]}}}
+	,9:{17:{11:{25:[4,7,8,13,14,19,21,22,28,31]}
+			,13:{25:[8,14,22,26,31]}}}
+	,17:{18:{19:{22:[7,11,13,14,31]
+				,26:[4,7,11,13,14,21,22,28,31]}}
+		,20:{19:{28:[11,13,14]}
+			,21:{28:[2,7,11,13,14,19,22,26,31]}}
+		,24:{19:{8:[4,7,13,14,21,22,26,28,31]}
+			,21:{8:[14,28,31]}
+			,25:{8:[2,4,7,11,13,14,19,21,22,26,31]}}}}
+pile31: dict[int, dict[int, list[int]]] = {
+	3: {
+		33: [47,37,4,7,11,50,59,61,62,55,52,56,28,16,22,31,25,14,26,19,13,44,8,38,41,21,42],
+		36: [50,26,8,47,13,62,59,42,11,28,41,14,61,25,7,31,55,56,21,44],
+		40: [25,28,50,55,62,21,22,61,11,31,37,41,38,47,7,4,44,52,13,14,59],
+		48: [14,61,8,42,11,13,55,31,7,19,41,44,4,26,47,21,37,25,28,62,38,49,59,56,52,22]},
+
+	5: {
+		33: [21,19,26,28,22,62,47,52,61,31,41,55,59,50,11,16,13,8,44,56,14,4,42,25],
+		40: [55,35,62,61,14,25,19,13],
+		48: [31,49,47,56,26,59,62,25,28,41,61,35,8,13,4,42,11,44,14,22]},
+
+	9: {
+		33: [16,31,47,26,56,59,55,50,52,62,42,28,13,22,19,21,25,35,44,8,38,37,4,14,7,61],
+		48: [62,50,47,61,22,37,28,49,38,55,35,44,26,31,42,7,13,52,21,14,4]},
+
+	17: {33: [47,16,35,8,31,50,62,28,61,14,42,11,13,25,55,44,41,56,26,38,37,52,22,7,21,4,59]},
+
+	33: {
+		34: [19,38,42,26,41,7,37,14,44,11,8,13,52,47,55,4,59,22,25,31,56,28,62,21,61],
+		36: [38,35,50,7,2,61,44,62,26,8,19,31,47,13,42,22,59,11,14,28,21,25,56,55,41],
+		40: [2,13,4,37,7,26,47,11,42,35,50,52,44,22,55,21,62,38,14,31,28,19,25,61],
+		48: [42,41,8,55,22,35,47,19,37,21,7,2,44,13,59,14,11,56,52,28,25,38,31,61,62,50,26,4]}}

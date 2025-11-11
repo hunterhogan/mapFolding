@@ -1,13 +1,24 @@
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Iterator, Sequence
 from functools import cache
 from hunterMakesPy import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from mapFolding import NumPyIntegerType
+from more_itertools import extract
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
 from typing import Any
 import numpy
+
+def exclude[个](iterable: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
+	"""Yield items from `iterable` whose positions are not in `indices`."""
+	lengthIterable: int = len(iterable)
+	def normalizeIndex(index: int) -> int:
+		if index < 0:
+			index = (index + lengthIterable) % lengthIterable
+		return index
+	indicesInclude: list[int] = sorted(set(range(lengthIterable)).difference(map(normalizeIndex, indices)))
+	return extract(iterable, indicesInclude)
 
 @cache
 def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
