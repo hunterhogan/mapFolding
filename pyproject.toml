@@ -141,7 +141,6 @@ dependencies = [
   "platformdirs",
 ]
 optional-dependencies = { development = [
-  "cytoolz-stubs@git+https://github.com/py-stubs/cytoolz-stubs.git",
   "ipykernel",
   "ipywidgets",
   "memray; sys_platform == 'linux'",

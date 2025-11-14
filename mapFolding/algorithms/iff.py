@@ -22,10 +22,12 @@ See Also
 - Citations in BibTeX format "mapFolding/citations".
 """
 from collections.abc import Callable
+from cytoolz.curried import get
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding import getLeavesTotal
+from mapFolding.dataBaskets import EliminationState
 from math import prod
 from operator import indexOf
 
@@ -134,12 +136,13 @@ def nextCreaseLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int 
 		leafNext = leaf + productOfDimensions(mapShape, dimension)
 	return leafNext
 
-inThis_ColumnOf = syntacticCurry(indexOf)
+inThis_pileOf = syntacticCurry(indexOf)
 
 def howToGetNextCreaseLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> Callable[[], int | None]:
 	return lambda: nextCreaseLeaf(mapShape, leaf, dimension)
 
-def analyzeInequalitiesLeaf(folding: tuple[int, ...], mapShape: tuple[int, ...]) -> bool:
+def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) -> bool:
+	"""Return `True` if the folding is valid."""
 	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda columnLeaf: columnLeaf[1] == _leavesTotal(mapShape), enumerate(folding)) # leafNPlus1 does not exist.
 	leafAndComparand: combinations[tuple[tuple[int, int], tuple[int, int]]] = combinations(foldingFiltered, 2)
 
@@ -147,5 +150,57 @@ def analyzeInequalitiesLeaf(folding: tuple[int, ...], mapShape: tuple[int, ...])
 	parityInThisDimension: Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool] = matchingParityLeaf(mapShape)
 	leafAndComparandAcrossDimensionsFiltered: filter[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = filter(parityInThisDimension, leafAndComparandAcrossDimensions)
 
-	return all(not thisIsAViolation(column, columnComparand, howToGetNextCreaseLeaf(mapShape, leaf, aDimension), howToGetNextCreaseLeaf(mapShape, comparand, aDimension), inThis_ColumnOf(folding))
+	return all(not thisIsAViolation(column, columnComparand, howToGetNextCreaseLeaf(mapShape, leaf, aDimension), howToGetNextCreaseLeaf(mapShape, comparand, aDimension), inThis_pileOf(folding))
 			for ((column, leaf), (columnComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
+
+# ------- Functions for `indexLeaf`, named 0, 1, ... n-1, not for `leaf` -------------
+
+@cache
+def ImaOddIndexLeaf(mapShape: tuple[int, ...], indexLeaf: int, dimension: int) -> int:
+	return ((indexLeaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
+
+def _matchingParityIndexLeaf(mapShape: tuple[int, ...], indexLeaf: int, comparand: int, dimension: int) -> bool:
+	return ImaOddIndexLeaf(mapShape, indexLeaf, dimension) == ImaOddIndexLeaf(mapShape, comparand, dimension)
+
+@syntacticCurry
+def matchingParityIndexLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
+	def repack(aCartesianProduct: tuple[tuple[tuple[int, int], tuple[int, int]], int]) -> bool:
+		((_pile, indexLeaf), (_pileComparand, comparand)), dimension = aCartesianProduct
+		return _matchingParityIndexLeaf(mapShape, indexLeaf, comparand, dimension)
+	return repack
+
+@cache
+def nextCreaseIndexLeaf(mapShape: tuple[int, ...], indexLeaf: int, dimension: int) -> int | None:
+	indexLeafNext: int | None = None
+	if ((indexLeaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:
+		indexLeafNext = indexLeaf + productOfDimensions(mapShape, dimension)
+	return indexLeafNext
+
+inThis_pileOf = syntacticCurry(indexOf)
+
+def getNextCreaseIndexLeaf(mapShape: tuple[int, ...], indexLeaf: int, dimension: int) -> Callable[[], int | None]:
+	return lambda: nextCreaseIndexLeaf(mapShape, indexLeaf, dimension)
+
+def thisIndexLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) -> bool:
+	"""Return `True` if the folding is valid."""
+	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileIndexLeaf: pileIndexLeaf[1] == _leavesTotal(mapShape) - 1, enumerate(folding)) # indexLeafNPlus1 does not exist.
+	indexLeafAndComparand: combinations[tuple[tuple[int, int], tuple[int, int]]] = combinations(foldingFiltered, 2)
+
+	indexLeafAndComparandAcrossDimensions: CartesianProduct[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = CartesianProduct(indexLeafAndComparand, range(_dimensionsTotal(mapShape)))
+	parityInThisDimension: Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool] = matchingParityIndexLeaf(mapShape)
+	indexLeafAndComparandAcrossDimensionsFiltered: filter[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = filter(parityInThisDimension, indexLeafAndComparandAcrossDimensions)
+
+	return all(not thisIsAViolation(pile, pileComparand, getNextCreaseIndexLeaf(mapShape, indexLeaf, aDimension), getNextCreaseIndexLeaf(mapShape, comparand, aDimension), inThis_pileOf(folding))
+			for ((pile, indexLeaf), (pileComparand, comparand)), aDimension in indexLeafAndComparandAcrossDimensionsFiltered)
+
+# ------- Functions for `indexLeaf` in `pinnedLeaves` dictionary, not for `leaf` in `folding` -------------
+
+def pinnedLeavesHasAViolation(state: EliminationState, indexLeaf: int) -> bool:
+	"""Return `True` if `state.pinnedLeaves` or the addition of `indexLeaf` at `state.pile` has a violation."""
+	pinnedLeaves: dict[int, int] = state.pinnedLeaves.copy()
+	pinnedLeaves[state.pile] = indexLeaf
+	indexLeaf2pile: dict[int, int] = {indexLeaf: pile for pile, indexLeaf in pinnedLeaves.items()}
+	pinnedLeavesFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileIndexLeaf: pileIndexLeaf[1] == state.leavesTotal, pinnedLeaves.items()) # indexLeafNPlus1 does not exist.
+	indexLeafAndComparandAcrossDimensions = filter(matchingParityIndexLeaf(state.mapShape), CartesianProduct(combinations(pinnedLeavesFiltered, 2), range(state.dimensionsTotal)))
+	return any(thisIsAViolation(pile, pileComparand, getNextCreaseIndexLeaf(state.mapShape, indexLeaf, aDimension), getNextCreaseIndexLeaf(state.mapShape, comparand, aDimension), get(seq=indexLeaf2pile, default=None))
+			for ((pile, indexLeaf), (pileComparand, comparand)), aDimension in indexLeafAndComparandAcrossDimensions)

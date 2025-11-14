@@ -48,9 +48,10 @@ class EliminationState:
 	"""Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings."""
 
 	listPinnedLeaves: list[dict[int, int]] = dataclasses.field(default_factory=list[dict[int, int]], init=True)
-	"""column: leaf"""
+	"""column: leaf or pile: indexLeaf"""
+	pile: DatatypeLeavesTotal = DatatypeLeavesTotal(-1)  # noqa: RUF009
 	pinnedLeaves: dict[int, int] = dataclasses.field(default_factory=dict[int, int], init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
-	"""pile: indexLeaf"""
+	"""column: leaf or pile: indexLeaf"""
 
 	subsetsTheorem2: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
 	subsetsTheorem3: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009

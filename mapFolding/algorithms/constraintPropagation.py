@@ -2,9 +2,8 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
 from itertools import pairwise, product as CartesianProduct
-from mapFolding.algorithms.patternFinder import getDictionaryLeafRanges
-from mapFolding.algorithms.pinning2Dn import pinByFormula
-from mapFolding.algorithms.pinning2DnAnnex import secondOrderLeaves, secondOrderPilings
+from mapFolding.algorithms.patternFinder import getDictionaryIndexLeafRanges
+from mapFolding.algorithms.pinning2Dn import pinByFormula, secondOrderLeaves, secondOrderPilings
 from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
@@ -21,7 +20,7 @@ def findValidFoldings(state: EliminationState) -> int:
 
 # ------- Leaf domain restrictions from dictionaryLeafRanges -----------------------------
 	if (state.dimensionsTotal > 2) and (state.mapShape[0] == 2):
-		dictionaryLeafRanges: Final[dict[int, range]] = getDictionaryLeafRanges(state)
+		dictionaryLeafRanges: Final[dict[int, range]] = getDictionaryIndexLeafRanges(state)
 		for indexLeaf, rangePilings in dictionaryLeafRanges.items():
 			if indexLeaf < 2:
 				continue
@@ -148,7 +147,7 @@ def findValidFoldings(state: EliminationState) -> int:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-	state = pinByFormula(state)
+	# state = pinByFormula(state)
 	# state = secondOrderLeaves(state)
 	# state = secondOrderPilings(state)
 
