@@ -1,4 +1,11 @@
 {
+	"八": {
+		"prefix": "ba",
+		"body": [
+			"八"
+		],
+		"description": "Eight (八, bā)"
+	},
 	"大于": {
 		"prefix": "dayu",
 		"body": [
@@ -6,12 +13,40 @@
 		],
 		"description": "'greater than', '>' (大于, dàyú)"
 	},
+	"二": {
+		"prefix": "er",
+		"body": [
+			"二"
+		],
+		"description": "Two (二, èr)"
+	},
 	"个": {
 		"prefix": "ge",
 		"body": [
 			"个"
 		],
 		"description": "Anything (个, gè)"
+	},
+	"九": {
+		"prefix": "jiu",
+		"body": [
+			"九"
+		],
+		"description": "Nine (九, jiǔ)"
+	},
+	"零": {
+		"prefix": "ling",
+		"body": [
+			"零"
+		],
+		"description": "Zero (零, líng)"
+	},
+	"六": {
+		"prefix": "liu",
+		"body": [
+			"六"
+		],
+		"description": "Six (六, liù)"
 	},
 	"木": {
 		"prefix": "mu",
@@ -27,12 +62,47 @@
 		],
 		"description": "Last letter of Greek alphabet (Ω, Ōmega)"
 	},
+	"七": {
+		"prefix": "qi",
+		"body": [
+			"七"
+		],
+		"description": "Seven (七, qī)"
+	},
+	"三": {
+		"prefix": "san",
+		"body": [
+			"三"
+		],
+		"description": "Three (三, sān)"
+	},
 	"上": {
 		"prefix": "shang",
 		"body": [
 			"上"
 		],
 		"description": "'above', 'on', 'superior', 'superscript', 'raised' (上, shàng)"
+	},
+	"首": {
+		"prefix": "shou",
+		"body": [
+			"首"
+		],
+		"description": "First, head (首, shǒu)"
+	},
+	"四": {
+		"prefix": "si",
+		"body": [
+			"四"
+		],
+		"description": "Four (四, sì)"
+	},
+	"五": {
+		"prefix": "wu",
+		"body": [
+			"五"
+		],
+		"description": "Five (五, wǔ)"
 	},
 	"下": {
 		"prefix": "xia",
@@ -47,5 +117,12 @@
 			"小于"
 		],
 		"description": "'less than', '<' (小于, xiǎoyú)"
+	},
+	"一": {
+		"prefix": "yi",
+		"body": [
+			"一"
+		],
+		"description": "One (一, yī)"
 	},
 }

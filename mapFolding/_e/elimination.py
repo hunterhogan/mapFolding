@@ -1,9 +1,9 @@
 from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
 from itertools import pairwise, repeat
-from mapFolding.algorithms.eliminationCount import count, permutands
+from mapFolding._e.eliminationCount import count, permutands
+from mapFolding._e.pinning2Dn import pinByFormula
 from mapFolding.algorithms.iff import productOfDimensions
-from mapFolding.algorithms.pinning2Dn import pinByFormula
 from mapFolding.dataBaskets import EliminationState
 from math import factorial
 from more_itertools import flatten, iter_index, unique
@@ -128,4 +128,4 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	state = pinByFormula(state)
 	state = count(state)
 
-	return state
+	return state  # noqa: RET504

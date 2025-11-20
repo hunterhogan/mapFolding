@@ -2,8 +2,8 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
 from itertools import pairwise, product as CartesianProduct
-from mapFolding.algorithms.patternFinder import getDictionaryIndexLeafRanges
-from mapFolding.algorithms.pinning2Dn import pinByFormula, secondOrderLeaves, secondOrderPilings
+from mapFolding._e._data import getDictionaryIndexLeafDomains
+from mapFolding._e.pinning2Dn import pinByFormula, secondOrderLeaves, secondOrderPilings
 from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
@@ -14,20 +14,20 @@ from typing import Final
 def findValidFoldings(state: EliminationState) -> int:
 	model = cp_model.CpModel()
 
-	listIndicesLeafInPilingsOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 1, f"indexLeafInPile[{pile}]") for pile in range(state.leavesTotal)]
-	listPilingsInIndexLeafOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 1, f"pileOfIndexLeaf[{indexLeaf}]") for indexLeaf in range(state.leavesTotal)]
+	listIndicesLeafInPilingsOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 零, f"indexLeafInPile[{pile}]") for pile in range(state.leavesTotal)]
+	listPilingsInIndexLeafOrder: list[cp_model.IntVar] = [model.NewIntVar(0, state.leavesTotal - 零, f"pileOfIndexLeaf[{indexLeaf}]") for indexLeaf in range(state.leavesTotal)]
 	model.AddInverse(listIndicesLeafInPilingsOrder, listPilingsInIndexLeafOrder)
 
 # ------- Leaf domain restrictions from dictionaryLeafRanges -----------------------------
 	if (state.dimensionsTotal > 2) and (state.mapShape[0] == 2):
-		dictionaryLeafRanges: Final[dict[int, range]] = getDictionaryIndexLeafRanges(state)
+		dictionaryLeafRanges: Final[dict[int, range]] = getDictionaryIndexLeafDomains(state)
 		for indexLeaf, rangePilings in dictionaryLeafRanges.items():
 			if indexLeaf < 2:
 				continue
 			model.AddAllowedAssignments([listPilingsInIndexLeafOrder[indexLeaf]], [(pile,) for pile in rangePilings])
 
 		if state.leavesTotal in [64, 128]:
-			from mapFolding.algorithms.patternFinder import getDictionaryAddends4Next  # noqa: PLC0415
+			from mapFolding._e._data import getDictionaryAddends4Next  # noqa: PLC0415
 			dictionaryAddends4Next: Final[dict[int, list[int]]] = getDictionaryAddends4Next(state)
 			dictionaryNextLeaf: dict[int, list[int]] = {}
 			for indexLeaf, listDifferences in dictionaryAddends4Next.items():
@@ -40,7 +40,7 @@ def findValidFoldings(state: EliminationState) -> int:
 			for indexLeaf, listAllowedNextLeaves in dictionaryNextLeaf.items():
 				if not listAllowedNextLeaves:
 					continue
-				for pile in range(state.leavesTotal - 1):
+				for pile in range(state.leavesTotal - 零):
 					currentLeafAtThisPile: cp_model.IntVar = listIndicesLeafInPilingsOrder[pile]
 					nextLeafAtNextPile: cp_model.IntVar = listIndicesLeafInPilingsOrder[pile + 1]
 

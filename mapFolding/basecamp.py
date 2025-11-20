@@ -250,8 +250,8 @@ def eliminateFolds(mapShape: tuple[int, ...]
 # ruff: noqa: E701
 	match flow:
 		case 'constraintPropagation': from mapFolding.algorithms.constraintPropagation import doTheNeedful
-		case 'pinned': from mapFolding.algorithms.eliminationPinned import doTheNeedful
-		case 'elimination' | _: from mapFolding.algorithms.elimination import doTheNeedful
+		case 'addend': from mapFolding._e.eliminationAddend import doTheNeedful
+		case 'elimination' | _: from mapFolding._e.elimination import doTheNeedful
 
 	from mapFolding.dataBaskets import EliminationState
 	eliminationState: EliminationState = EliminationState(mapShape)

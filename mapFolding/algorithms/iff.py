@@ -21,17 +21,18 @@ See Also
 - "[Annotated, corrected, scanned copy]" of Koehler (1968) at https://oeis.org/A001011.
 - Citations in BibTeX format "mapFolding/citations".
 """
-from collections.abc import Callable
-from cytoolz.curried import get
+from collections.abc import Callable, Iterator
+from cytoolz.dicttoolz import valfilter
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
-from itertools import combinations, filterfalse, product as CartesianProduct
+from itertools import combinations, filterfalse, product as CartesianProduct, starmap
 from mapFolding import getLeavesTotal
+from mapFolding._e import 零
 from mapFolding.dataBaskets import EliminationState
 from math import prod
-from operator import indexOf
+from operator import floordiv, indexOf
 
-def thisIsAViolation(column: int, columnComparand: int, getLeafNextCrease: Callable[[], int | None], getComparandNextCrease: Callable[[], int | None], columnOf: Callable[[int], int | None]) -> bool:  # noqa: PLR0911
+def thisIsAViolationComplicated(column: int, columnComparand: int, getLeafNextCrease: Callable[[], int | None], getComparandNextCrease: Callable[[], int | None], columnOf: Callable[[int], int | None]) -> bool:  # noqa: PLR0911
 	"""Validate.
 
 	Mathematical reasons for the design of this function
@@ -42,7 +43,7 @@ def thisIsAViolation(column: int, columnComparand: int, getLeafNextCrease: Calla
 
 	A "crease" is a convenient lie: it is a shorthand description of two leaves that are physically connected to each other.
 	Leaves in a one-dimensional folding are physically connected to at most two other leaves: the prior leaf and the next leaf.
-	When talking about a one-dimensional section of a multidimensional folding, we ignore the other dimension and still
+	When talking about a one-dimensional section of a multidimensional folding, we ignore the other dimensions and still
 	reference the prior and next leaves. To check whether two creases cross, we must compare the four leaves of the two creases.
 
 	¹ A so-called one-dimensional folding, map, or strip of stamps has two dimensions, but one of the dimensions has a width of 1.
@@ -50,10 +51,10 @@ def thisIsAViolation(column: int, columnComparand: int, getLeafNextCrease: Calla
 	Idiosyncratic reasons for the design of this function
 	-----------------------------------------------------
 
-	I name the first leaf of the first crease `leaf`. I name the leaf to which I am comparing it `comparand`. A crease² is a leaf
-	and the next leaf, therefore, the crease of `leaf` connects it to `leafNextCrease`, and the crease of `comparand` connects it
-	to `comparandNextCrease`. Nearly everyone else uses letters for names, such as k, k+1, r, and r+1. (Which stand for Kahlo and
-	Rivera, of course.)
+	I name the first leaf of the first crease `leaf`. I name the leaf to which I am comparing it `comparand`. A crease² is a
+	connection between a leaf and the next leaf, therefore, the crease of `leaf` connects it to `leafNextCrease`. The crease of
+	`comparand` connects it to `comparandNextCrease`. Nearly everyone else uses letters for these names, such as k, k+1, r, and
+	r+1. (Which stand for Kahlo and Rivera, of course.)
 
 	² "increase" from Latin *in-* "in" + *crescere* "to grow" (from PIE root ⋆ker- "to grow"). https://www.etymonline.com/word/increase
 
@@ -61,10 +62,10 @@ def thisIsAViolation(column: int, columnComparand: int, getLeafNextCrease: Calla
 	-----------------------------------------------------
 
 	If `leaf` and `comparand` do not have matching parity in the dimension, then their creases cannot cross. To call this
-	function, you need `leaf` and `comparand`, and because determining parity-by-dimension is easiest when you first select `leaf`
-	and `comparand`, this function will not check the parity of `leaf` and `comparand`.
+	function, you need to select values for `leaf` and `comparand`. You should check for matching parity-by-dimension before
+	calling this function, because the function will not check the parity of `leaf` and `comparand`.
 
-	Computing the next leaf is not expensive, but 100,000,000 unnecessary but cheap computations is expensive. Therefore, instead of
+	Computing the next leaf is not expensive, but 100,000,000 unnecessary-but-cheap-computations is expensive. Therefore, instead of
 	passing `leafNextCrease` and `comparandNextCrease`, pass the functions by which those values may be computed on demand.
 
 	Finally, we need to compare the relative positions of the leaves, so pass a function that returns the position of the "next" leaf.
@@ -100,7 +101,6 @@ def thisIsAViolation(column: int, columnComparand: int, getLeafNextCrease: Calla
 	return False
 
 # ------- ad hoc computations -----------------------------
-# @cache
 def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
 	return len(mapShape)
 
@@ -108,9 +108,8 @@ def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
 def _leavesTotal(mapShape: tuple[int, ...]) -> int:
 	return getLeavesTotal(mapShape)
 
-# @cache
 def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
-	return prod(mapShape[0:dimension])
+	return prod(mapShape[0:dimension], start=1)
 
 # ------- Functions for 'leaf', named 1, 2, ... n, not for 'indexLeaf' -------------
 
@@ -122,7 +121,6 @@ def ImaOddLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int:
 def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: int, comparand: int, dimension: int) -> bool:
 	return ImaOddLeaf(mapShape, leaf, dimension) == ImaOddLeaf(mapShape, comparand, dimension)
 
-@syntacticCurry
 def matchingParityLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
 	def repack(aCartesianProduct: tuple[tuple[tuple[int, int], tuple[int, int]], int]) -> bool:
 		((_column, leaf), (_columnComparand, comparand)), dimension = aCartesianProduct
@@ -150,19 +148,31 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 	parityInThisDimension: Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool] = matchingParityLeaf(mapShape)
 	leafAndComparandAcrossDimensionsFiltered: filter[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = filter(parityInThisDimension, leafAndComparandAcrossDimensions)
 
-	return all(not thisIsAViolation(column, columnComparand, howToGetNextCreaseLeaf(mapShape, leaf, aDimension), howToGetNextCreaseLeaf(mapShape, comparand, aDimension), inThis_pileOf(folding))
+	return all(not thisIsAViolationComplicated(column, columnComparand, howToGetNextCreaseLeaf(mapShape, leaf, aDimension), howToGetNextCreaseLeaf(mapShape, comparand, aDimension), inThis_pileOf(folding))
 			for ((column, leaf), (columnComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
 
 # ------- Functions for `indexLeaf`, named 0, 1, ... n-1, not for `leaf` -------------
 
+def thisIsAViolation(pile: int, pileIncrease: int, pileComparand: int, pileComparandIncrease: int) -> bool:
+	if pile < pileComparand:
+		if pileComparandIncrease < pile:
+			if pileIncrease < pileComparandIncrease:						# [k+1 < r+1 < k < r]
+				return True
+			return pileComparand < pileIncrease								# [r+1 < k < r < k+1]
+		if pileComparand < pileIncrease:
+			if pileIncrease < pileComparandIncrease:						# [k < r < k+1 < r+1]
+				return True
+		elif pile < pileComparandIncrease < pileIncrease < pileComparand:	# [k < r+1 < k+1 < r]
+			return True
+	return False
+
 @cache
 def ImaOddIndexLeaf(mapShape: tuple[int, ...], indexLeaf: int, dimension: int) -> int:
-	return ((indexLeaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
+	return (floordiv(indexLeaf, productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
 
 def _matchingParityIndexLeaf(mapShape: tuple[int, ...], indexLeaf: int, comparand: int, dimension: int) -> bool:
 	return ImaOddIndexLeaf(mapShape, indexLeaf, dimension) == ImaOddIndexLeaf(mapShape, comparand, dimension)
 
-@syntacticCurry
 def matchingParityIndexLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
 	def repack(aCartesianProduct: tuple[tuple[tuple[int, int], tuple[int, int]], int]) -> bool:
 		((_pile, indexLeaf), (_pileComparand, comparand)), dimension = aCartesianProduct
@@ -190,17 +200,33 @@ def thisIndexLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, .
 	parityInThisDimension: Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool] = matchingParityIndexLeaf(mapShape)
 	indexLeafAndComparandAcrossDimensionsFiltered: filter[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = filter(parityInThisDimension, indexLeafAndComparandAcrossDimensions)
 
-	return all(not thisIsAViolation(pile, pileComparand, getNextCreaseIndexLeaf(mapShape, indexLeaf, aDimension), getNextCreaseIndexLeaf(mapShape, comparand, aDimension), inThis_pileOf(folding))
+	return all(not thisIsAViolationComplicated(pile, pileComparand, getNextCreaseIndexLeaf(mapShape, indexLeaf, aDimension), getNextCreaseIndexLeaf(mapShape, comparand, aDimension), inThis_pileOf(folding))
 			for ((pile, indexLeaf), (pileComparand, comparand)), aDimension in indexLeafAndComparandAcrossDimensionsFiltered)
 
 # ------- Functions for `indexLeaf` in `pinnedLeaves` dictionary, not for `leaf` in `folding` -------------
 
 def pinnedLeavesHasAViolation(state: EliminationState, indexLeaf: int) -> bool:
 	"""Return `True` if `state.pinnedLeaves` or the addition of `indexLeaf` at `state.pile` has a violation."""
+	def notLastLeaf(indexLeaf: int) -> bool: # indexLeafNPlus1 does not exist.
+		return indexLeaf < state.leavesTotal - 零
+
+	def notNoneAt1(tupleElement: tuple[int, int | None, int, int, int]) -> bool:
+		return tupleElement[1] is not None
+
+	def notNoneAt3(tupleElement: tuple[int, int, int, int | None, int]) -> bool:
+		return tupleElement[3] is not None
+
 	pinnedLeaves: dict[int, int] = state.pinnedLeaves.copy()
 	pinnedLeaves[state.pile] = indexLeaf
+
 	indexLeaf2pile: dict[int, int] = {indexLeaf: pile for pile, indexLeaf in pinnedLeaves.items()}
-	pinnedLeavesFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileIndexLeaf: pileIndexLeaf[1] == state.leavesTotal, pinnedLeaves.items()) # indexLeafNPlus1 does not exist.
-	indexLeafAndComparandAcrossDimensions = filter(matchingParityIndexLeaf(state.mapShape), CartesianProduct(combinations(pinnedLeavesFiltered, 2), range(state.dimensionsTotal)))
-	return any(thisIsAViolation(pile, pileComparand, getNextCreaseIndexLeaf(state.mapShape, indexLeaf, aDimension), getNextCreaseIndexLeaf(state.mapShape, comparand, aDimension), get(seq=indexLeaf2pile, default=None))
-			for ((pile, indexLeaf), (pileComparand, comparand)), aDimension in indexLeafAndComparandAcrossDimensions)
+
+	# tuple[tuple[pile, indexLeaf], tuple[pileComparand, comparand]], dimension]  # noqa: ERA001
+	leavesAndDimensions: Iterator[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = CartesianProduct(combinations(sorted(valfilter(notLastLeaf, pinnedLeaves).items()), 2), range(state.dimensionsTotal))
+	getIncrease: Iterator[tuple[int, int | None, int, int, int]] = iter((pile, nextCreaseIndexLeaf(state.mapShape, indexLeaf, dimension), pileComparand, comparand, dimension) for (((pile, indexLeaf), (pileComparand, comparand)), dimension) in filter(matchingParityIndexLeaf(state.mapShape), leavesAndDimensions))
+	getPileIncrease: Iterator[tuple[int, int | None, int, int, int]] = iter((pile, indexLeaf2pile.get(indexLeafIncrease), pileComparand, comparand, dimension) for (pile, indexLeafIncrease, pileComparand, comparand, dimension) in filter(notNoneAt1, getIncrease)) # pyright: ignore[reportArgumentType]
+	getComparandIncrease: Iterator[tuple[int, int, int, int | None, int]] = iter((pile, pileIncrease, pileComparand, nextCreaseIndexLeaf(state.mapShape, comparand, dimension), dimension) for (pile, pileIncrease, pileComparand, comparand, dimension) in filter(notNoneAt1, getPileIncrease)) # pyright: ignore[reportAssignmentType]
+	getPileComparandIncrease: Iterator[tuple[int, int, int, int | None, int]] = iter((pile, pileIncrease, pileComparand, indexLeaf2pile.get(comparandIncrease), dimension) for (pile, pileIncrease, pileComparand, comparandIncrease, dimension) in filter(notNoneAt3, getComparandIncrease)) # pyright: ignore[reportArgumentType]
+	fourPiles: Iterator[tuple[int, int, int, int]] = iter((pile, pileIncrease, pileComparand, pileComparandIncrease) for (pile, pileIncrease, pileComparand, pileComparandIncrease, _dimension) in filter(notNoneAt3, getPileComparandIncrease)) # pyright: ignore[reportAssignmentType]
+
+	return any(starmap(thisIsAViolation, fourPiles))
