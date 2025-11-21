@@ -48,16 +48,16 @@ class EliminationState:
 	"""Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings."""
 
 	listPinnedLeaves: list[dict[int, int]] = dataclasses.field(default_factory=list[dict[int, int]], init=True)
-	"""column: leaf or pile: indexLeaf"""
+	"""pile: leaf"""
 	pile: DatatypeLeavesTotal = DatatypeLeavesTotal(-1)  # noqa: RUF009
 	pinnedLeaves: dict[int, int] = dataclasses.field(default_factory=dict[int, int], init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
-	"""column: leaf or pile: indexLeaf"""
+	"""pile: leaf"""
 
 	subsetsTheorem2: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
 	subsetsTheorem3: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
 	subsetsTheorem4: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
 
-	columnLast: DatatypeLeavesTotal = dataclasses.field(init=False)
+	pileLast: DatatypeLeavesTotal = dataclasses.field(init=False)
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
 	leavesTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
@@ -79,7 +79,7 @@ class EliminationState:
 		"""Ensure all fields have a value."""
 		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
 		self.leavesTotal = DatatypeLeavesTotal(getLeavesTotal(self.mapShape))
-		self.columnLast = self.leavesTotal - DatatypeLeavesTotal(1)
+		self.pileLast = self.leavesTotal - DatatypeLeavesTotal(1)
 
 @dataclasses.dataclass(slots=True)
 class MapFoldingState:

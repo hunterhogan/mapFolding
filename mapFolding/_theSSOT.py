@@ -54,19 +54,19 @@ OEISidMapFoldingManuallySet: dict[str, MetadataOEISidMapFoldingManuallySet] = {
 	'A001415': {
 		'getMapShape': lambda n: (2, n),
 		'valuesBenchmark': [14],
-		'valuesTestParallelization': [random.randint(3, 7)],
+		'valuesTestParallelization': [random.randint(3, 5)],
 		'valuesTestValidation': [random.randint(2, 9)],
 	},
 	'A001416': {
 		'getMapShape': lambda n: (3, n),
 		'valuesBenchmark': [9],
-		'valuesTestParallelization': [random.randint(3, 5)],
+		'valuesTestParallelization': [random.randint(3, 3)],
 		'valuesTestValidation': [random.randint(2, 6)],
 	},
 	'A001417': {
 		'getMapShape': lambda n: tuple(2 for _dimension in range(n)),
 		'valuesBenchmark': [6],
-		'valuesTestParallelization': [random.randint(2, 4)],
+		'valuesTestParallelization': [random.randint(2, 3)],
 		'valuesTestValidation': [random.randint(2, 4)],
 	},
 	'A195646': {

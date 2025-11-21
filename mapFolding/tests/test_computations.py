@@ -25,13 +25,14 @@ The `test_writeJobNumba` function shows how to test dynamically generated code,
 which is useful if you're working with the code synthesis features of the package.
 """
 
-from mapFolding import countFolds, dictionaryOEIS, dictionaryOEISMapFolding, eliminateFolds, getFoldsTotalKnown, oeisIDfor_n
+from mapFolding import (
+	countFolds, dictionaryOEIS, dictionaryOEISMapFolding, eliminateFolds, getFoldsTotalKnown, oeisIDfor_n)
 from mapFolding.basecamp import NOTcountingFolds
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
-from mapFolding.tests.conftest import mapShapeTestCountFolds, registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
+from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
 from numba.core.errors import NumbaPendingDeprecationWarning
 from pathlib import Path, PurePosixPath
 import importlib.util
@@ -90,20 +91,21 @@ def test_countFolds(mapShapeTestCountFolds: tuple[int, ...], flow: str) -> None:
 	"""
 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestCountFolds), countFolds, None, None, None, None, mapShapeTestCountFolds, flow)
 
-# @pytest.mark.parametrize('flow', ['constraintPropagation', 'elimination'])
-# def test_eliminateFolds(mapShapeTestParallelization: tuple[int, ...], flow: str) -> None:
-# 	"""Validate `eliminateFolds` and different flows produce valid results.
+# @pytest.mark.parametrize('flow', ['constraintPropagation', 'elimination', 'addend'])
+@pytest.mark.parametrize('flow', ['constraintPropagation', 'elimination'])
+def test_eliminateFolds(mapShapeTestParallelization: tuple[int, ...], flow: str) -> None:
+	"""Validate `eliminateFolds` and different flows produce valid results.
 
-# 	Parameters
-# 	----------
-# 	mapShapeTestCountFolds : tuple[int, ...]
-# 		The map shape dimensions to test fold counting for.
-# 	flow : str
-# 		The computational flow algorithm to validate.
-# 	"""
-# 	pathLikeWriteFoldsTotal: None = None
-# 	CPUlimit: bool | float | int | None = .25
-# 	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestParallelization), eliminateFolds, mapShapeTestParallelization, pathLikeWriteFoldsTotal, CPUlimit, flow)
+	Parameters
+	----------
+	mapShapeTestCountFolds : tuple[int, ...]
+		The map shape dimensions to test fold counting for.
+	flow : str
+		The computational flow algorithm to validate.
+	"""
+	pathLikeWriteFoldsTotal: None = None
+	CPUlimit: bool | float | int | None = .25
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestParallelization), eliminateFolds, mapShapeTestParallelization, pathLikeWriteFoldsTotal, CPUlimit, flow)
 
 @pytest.mark.parametrize('flow', ['matrixMeanders', 'matrixNumPy', 'matrixPandas'])
 def test_meanders(oeisIDmeanders: str, flow: str) -> None:

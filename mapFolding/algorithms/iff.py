@@ -32,7 +32,7 @@ from mapFolding.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf
 
-def thisIsAViolationComplicated(column: int, columnComparand: int, getLeafNextCrease: Callable[[], int | None], getComparandNextCrease: Callable[[], int | None], columnOf: Callable[[int], int | None]) -> bool:  # noqa: PLR0911
+def thisIsAViolationComplicated(pile: int, pileComparand: int, getLeafNextCrease: Callable[[], int | None], getComparandNextCrease: Callable[[], int | None], pileOf: Callable[[int], int | None]) -> bool:  # noqa: PLR0911
 	"""Validate.
 
 	Mathematical reasons for the design of this function
@@ -71,7 +71,7 @@ def thisIsAViolationComplicated(column: int, columnComparand: int, getLeafNextCr
 	Finally, we need to compare the relative positions of the leaves, so pass a function that returns the position of the "next" leaf.
 
 	"""
-	if column < columnComparand:
+	if pile < pileComparand:
 
 		comparandNextCrease: int | None = getComparandNextCrease()
 		if comparandNextCrease is None:
@@ -81,22 +81,22 @@ def thisIsAViolationComplicated(column: int, columnComparand: int, getLeafNextCr
 		if leafNextCrease is None:
 			return False
 
-		columnComparandNextCrease: int | None = columnOf(comparandNextCrease)
-		if columnComparandNextCrease is None:
+		pileComparandNextCrease: int | None = pileOf(comparandNextCrease)
+		if pileComparandNextCrease is None:
 			return False
-		columnLeafNextCrease: int | None = columnOf(leafNextCrease)
-		if columnLeafNextCrease is None:
+		pileLeafNextCrease: int | None = pileOf(leafNextCrease)
+		if pileLeafNextCrease is None:
 			return False
 
-		if columnComparandNextCrease < column:
-			if columnLeafNextCrease < columnComparandNextCrease:							# [k+1 < r+1 < k < r]
+		if pileComparandNextCrease < pile:
+			if pileLeafNextCrease < pileComparandNextCrease:						# [k+1 < r+1 < k < r]
 				return True
-			return columnComparand < columnLeafNextCrease									# [r+1 < k < r < k+1]
+			return pileComparand < pileLeafNextCrease								# [r+1 < k < r < k+1]
 
-		if columnComparand < columnLeafNextCrease:
-			if columnLeafNextCrease < columnComparandNextCrease:							# [k < r < k+1 < r+1]
+		if pileComparand < pileLeafNextCrease:
+			if pileLeafNextCrease < pileComparandNextCrease:						# [k < r < k+1 < r+1]
 				return True
-		elif column < columnComparandNextCrease < columnLeafNextCrease < columnComparand:	# [k < r+1 < k+1 < r]
+		elif pile < pileComparandNextCrease < pileLeafNextCrease < pileComparand:	# [k < r+1 < k+1 < r]
 			return True
 	return False
 
@@ -111,47 +111,7 @@ def _leavesTotal(mapShape: tuple[int, ...]) -> int:
 def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
 	return prod(mapShape[0:dimension], start=1)
 
-# ------- Functions for 'leaf', named 1, 2, ... n, not for 'indexLeaf' -------------
-
-@cache
-def ImaOddLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int:
-	# NOTE `leaf-1` because `leaf` is not zero-based indexing.
-	return (((leaf-1) // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
-
-def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: int, comparand: int, dimension: int) -> bool:
-	return ImaOddLeaf(mapShape, leaf, dimension) == ImaOddLeaf(mapShape, comparand, dimension)
-
-def matchingParityLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
-	def repack(aCartesianProduct: tuple[tuple[tuple[int, int], tuple[int, int]], int]) -> bool:
-		((_column, leaf), (_columnComparand, comparand)), dimension = aCartesianProduct
-		return _matchingParityLeaf(mapShape, leaf, comparand, dimension)
-	return repack
-
-@cache
-def nextCreaseLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int | None:
-	leafNext: int | None = None
-	if (((leaf-1) // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:
-		leafNext = leaf + productOfDimensions(mapShape, dimension)
-	return leafNext
-
-inThis_pileOf = syntacticCurry(indexOf)
-
-def howToGetNextCreaseLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> Callable[[], int | None]:
-	return lambda: nextCreaseLeaf(mapShape, leaf, dimension)
-
-def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) -> bool:
-	"""Return `True` if the folding is valid."""
-	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda columnLeaf: columnLeaf[1] == _leavesTotal(mapShape), enumerate(folding)) # leafNPlus1 does not exist.
-	leafAndComparand: combinations[tuple[tuple[int, int], tuple[int, int]]] = combinations(foldingFiltered, 2)
-
-	leafAndComparandAcrossDimensions: CartesianProduct[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = CartesianProduct(leafAndComparand, range(_dimensionsTotal(mapShape)))
-	parityInThisDimension: Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool] = matchingParityLeaf(mapShape)
-	leafAndComparandAcrossDimensionsFiltered: filter[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = filter(parityInThisDimension, leafAndComparandAcrossDimensions)
-
-	return all(not thisIsAViolationComplicated(column, columnComparand, howToGetNextCreaseLeaf(mapShape, leaf, aDimension), howToGetNextCreaseLeaf(mapShape, comparand, aDimension), inThis_pileOf(folding))
-			for ((column, leaf), (columnComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
-
-# ------- Functions for `indexLeaf`, named 0, 1, ... n-1, not for `leaf` -------------
+# ------- Functions for `leaf`, named 0, 1, ... n-1 -------------
 
 def thisIsAViolation(pile: int, pileIncrease: int, pileComparand: int, pileComparandIncrease: int) -> bool:
 	if pile < pileComparand:
@@ -167,66 +127,69 @@ def thisIsAViolation(pile: int, pileIncrease: int, pileComparand: int, pileCompa
 	return False
 
 @cache
-def ImaOddIndexLeaf(mapShape: tuple[int, ...], indexLeaf: int, dimension: int) -> int:
-	return (floordiv(indexLeaf, productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
+def ImaOddLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int:
+	return (floordiv(leaf, productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
 
-def _matchingParityIndexLeaf(mapShape: tuple[int, ...], indexLeaf: int, comparand: int, dimension: int) -> bool:
-	return ImaOddIndexLeaf(mapShape, indexLeaf, dimension) == ImaOddIndexLeaf(mapShape, comparand, dimension)
+def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: int, comparand: int, dimension: int) -> bool:
+	return ImaOddLeaf(mapShape, leaf, dimension) == ImaOddLeaf(mapShape, comparand, dimension)
 
-def matchingParityIndexLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
+def matchingParityLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
 	def repack(aCartesianProduct: tuple[tuple[tuple[int, int], tuple[int, int]], int]) -> bool:
-		((_pile, indexLeaf), (_pileComparand, comparand)), dimension = aCartesianProduct
-		return _matchingParityIndexLeaf(mapShape, indexLeaf, comparand, dimension)
+		((_pile, leaf), (_pileComparand, comparand)), dimension = aCartesianProduct
+		return _matchingParityLeaf(mapShape, leaf, comparand, dimension)
 	return repack
 
 @cache
-def nextCreaseIndexLeaf(mapShape: tuple[int, ...], indexLeaf: int, dimension: int) -> int | None:
-	indexLeafNext: int | None = None
-	if ((indexLeaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:
-		indexLeafNext = indexLeaf + productOfDimensions(mapShape, dimension)
-	return indexLeafNext
+def nextCreaseLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int | None:
+	leafNext: int | None = None
+	if ((leaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:
+		leafNext = leaf + productOfDimensions(mapShape, dimension)
+	return leafNext
 
 inThis_pileOf = syntacticCurry(indexOf)
 
-def getNextCreaseIndexLeaf(mapShape: tuple[int, ...], indexLeaf: int, dimension: int) -> Callable[[], int | None]:
-	return lambda: nextCreaseIndexLeaf(mapShape, indexLeaf, dimension)
+def getNextCreaseLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> Callable[[], int | None]:
+	return lambda: nextCreaseLeaf(mapShape, leaf, dimension)
 
-def thisIndexLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) -> bool:
+def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) -> bool:
 	"""Return `True` if the folding is valid."""
-	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileIndexLeaf: pileIndexLeaf[1] == _leavesTotal(mapShape) - 1, enumerate(folding)) # indexLeafNPlus1 does not exist.
-	indexLeafAndComparand: combinations[tuple[tuple[int, int], tuple[int, int]]] = combinations(foldingFiltered, 2)
+	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileLeaf: pileLeaf[1] == _leavesTotal(mapShape) - 1, enumerate(folding)) # leafNPlus1 does not exist.
+	leafAndComparand: combinations[tuple[tuple[int, int], tuple[int, int]]] = combinations(foldingFiltered, 2)
 
-	indexLeafAndComparandAcrossDimensions: CartesianProduct[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = CartesianProduct(indexLeafAndComparand, range(_dimensionsTotal(mapShape)))
-	parityInThisDimension: Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool] = matchingParityIndexLeaf(mapShape)
-	indexLeafAndComparandAcrossDimensionsFiltered: filter[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = filter(parityInThisDimension, indexLeafAndComparandAcrossDimensions)
+	leafAndComparandAcrossDimensions: CartesianProduct[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = CartesianProduct(leafAndComparand, range(_dimensionsTotal(mapShape)))
+	parityInThisDimension: Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool] = matchingParityLeaf(mapShape)
+	leafAndComparandAcrossDimensionsFiltered: filter[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = filter(parityInThisDimension, leafAndComparandAcrossDimensions)
 
-	return all(not thisIsAViolationComplicated(pile, pileComparand, getNextCreaseIndexLeaf(mapShape, indexLeaf, aDimension), getNextCreaseIndexLeaf(mapShape, comparand, aDimension), inThis_pileOf(folding))
-			for ((pile, indexLeaf), (pileComparand, comparand)), aDimension in indexLeafAndComparandAcrossDimensionsFiltered)
+	return all(not thisIsAViolationComplicated(pile, pileComparand, getNextCreaseLeaf(mapShape, leaf, aDimension), getNextCreaseLeaf(mapShape, comparand, aDimension), inThis_pileOf(folding))
+			for ((pile, leaf), (pileComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
 
-# ------- Functions for `indexLeaf` in `pinnedLeaves` dictionary, not for `leaf` in `folding` -------------
+# ------- Functions for `leaf` in `pinnedLeaves` dictionary -------------
 
-def pinnedLeavesHasAViolation(state: EliminationState, indexLeaf: int) -> bool:
-	"""Return `True` if `state.pinnedLeaves` or the addition of `indexLeaf` at `state.pile` has a violation."""
-	def notLastLeaf(indexLeaf: int) -> bool: # indexLeafNPlus1 does not exist.
-		return indexLeaf < state.leavesTotal - 零
+def pinnedLeavesHasAViolation(state: EliminationState) -> bool:
+	"""Return `True` if `state.pinnedLeaves` has a violation."""
+	def notLastLeaf(leaf: int) -> bool: # leafNPlus1 does not exist.
+		return leaf < state.leavesTotal - 零
 
-	def notNoneAt1(tupleElement: tuple[int, int | None, int, int, int]) -> bool:
+	def notNoneAt1(tupleElement: tuple[int | None, ...]) -> bool:
 		return tupleElement[1] is not None
 
-	def notNoneAt3(tupleElement: tuple[int, int, int, int | None, int]) -> bool:
+	def notNoneAt3(tupleElement: tuple[int | None, ...]) -> bool:
 		return tupleElement[3] is not None
 
-	pinnedLeaves: dict[int, int] = state.pinnedLeaves.copy()
-	pinnedLeaves[state.pile] = indexLeaf
+	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in state.pinnedLeaves.items()}
 
-	indexLeaf2pile: dict[int, int] = {indexLeaf: pile for pile, indexLeaf in pinnedLeaves.items()}
+	# tuple[tuple[pile, leaf], tuple[pileComparand, comparand]], dimension]  # noqa: ERA001
+	leavesAndDimensions: Iterator[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = CartesianProduct(combinations(sorted(valfilter(notLastLeaf, state.pinnedLeaves).items()), 2), range(state.dimensionsTotal))
 
-	# tuple[tuple[pile, indexLeaf], tuple[pileComparand, comparand]], dimension]  # noqa: ERA001
-	leavesAndDimensions: Iterator[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = CartesianProduct(combinations(sorted(valfilter(notLastLeaf, pinnedLeaves).items()), 2), range(state.dimensionsTotal))
-	getIncrease: Iterator[tuple[int, int | None, int, int, int]] = iter((pile, nextCreaseIndexLeaf(state.mapShape, indexLeaf, dimension), pileComparand, comparand, dimension) for (((pile, indexLeaf), (pileComparand, comparand)), dimension) in filter(matchingParityIndexLeaf(state.mapShape), leavesAndDimensions))
-	getPileIncrease: Iterator[tuple[int, int | None, int, int, int]] = iter((pile, indexLeaf2pile.get(indexLeafIncrease), pileComparand, comparand, dimension) for (pile, indexLeafIncrease, pileComparand, comparand, dimension) in filter(notNoneAt1, getIncrease)) # pyright: ignore[reportArgumentType]
-	getComparandIncrease: Iterator[tuple[int, int, int, int | None, int]] = iter((pile, pileIncrease, pileComparand, nextCreaseIndexLeaf(state.mapShape, comparand, dimension), dimension) for (pile, pileIncrease, pileComparand, comparand, dimension) in filter(notNoneAt1, getPileIncrease)) # pyright: ignore[reportAssignmentType]
-	getPileComparandIncrease: Iterator[tuple[int, int, int, int | None, int]] = iter((pile, pileIncrease, pileComparand, indexLeaf2pile.get(comparandIncrease), dimension) for (pile, pileIncrease, pileComparand, comparandIncrease, dimension) in filter(notNoneAt3, getComparandIncrease)) # pyright: ignore[reportArgumentType]
-	fourPiles: Iterator[tuple[int, int, int, int]] = iter((pile, pileIncrease, pileComparand, pileComparandIncrease) for (pile, pileIncrease, pileComparand, pileComparandIncrease, _dimension) in filter(notNoneAt3, getPileComparandIncrease)) # pyright: ignore[reportAssignmentType]
+	getIncreases: Iterator[tuple[int, int | None, int, int | None, int]] = iter(
+			(pile, nextCreaseLeaf(state.mapShape, leaf, dimension), pileComparand, nextCreaseLeaf(state.mapShape, comparand, dimension), dimension)
+					for (((pile, leaf), (pileComparand, comparand)), dimension) in filter(matchingParityLeaf(state.mapShape), leavesAndDimensions))
+
+	getPileIncreases: Iterator[tuple[int, int | None, int, int | None, int]] = iter(
+			(pile, leafToPile.get(leafIncrease), pileComparand, leafToPile.get(comparandIncrease), dimension) # pyright: ignore[reportArgumentType]
+					for (pile, leafIncrease, pileComparand, comparandIncrease, dimension) in filter(notNoneAt3, filter(notNoneAt1, getIncreases)))
+
+	fourPiles: Iterator[tuple[int, int, int, int]] = iter((pile, pileIncrease, pileComparand, pileComparandIncrease)
+					for (pile, pileIncrease, pileComparand, pileComparandIncrease, _dimension) in filter(notNoneAt3, filter(notNoneAt1, getPileIncreases))) # pyright: ignore[reportAssignmentType]
 
 	return any(starmap(thisIsAViolation, fourPiles))

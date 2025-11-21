@@ -10,6 +10,14 @@ from sys import maxsize as sysMaxsize
 from typing import Any
 import numpy
 
+def Z0Z_key[文件, 文义](dictionary: dict[文件, 文义], keyValue: 文义) -> 文件:
+	"""Return the key in `dictionary` that corresponds to `keyValue`."""
+	for key, value in dictionary.items():
+		if value == keyValue:
+			return key
+	message: str = f"I received `{keyValue = }`, but I couldn't find it in `dictionary`."
+	raise KeyError(message)
+
 def exclude[个](iterable: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
 	"""Yield items from `iterable` whose positions are not in `indices`."""
 	lengthIterable: int = len(iterable)

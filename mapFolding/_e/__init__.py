@@ -1,17 +1,17 @@
 """Developing elimination-based algorithms."""
 
-from mapFolding._e._measure import (dimensionNearest首 as dimensionNearest首, dimensionSecondNearest首 as dimensionSecondNearest首, indexLeafSubHyperplane as indexLeafSubHyperplane,
+from mapFolding._e._measure import (dimensionNearest首 as dimensionNearest首, dimensionSecondNearest首 as dimensionSecondNearest首, leafSubHyperplane as leafSubHyperplane,
 	coordinatesOf0AtTail as coordinatesOf0AtTail, ptount as ptount)
 
 from mapFolding._e._semiotics import 零 as 零, 一 as 一, 二 as 二, 三 as 三, 四 as 四, 五 as 五, 六 as 六, 七 as 七, 八 as 八, 九 as 九
-from mapFolding._e._semiotics import 首零 as 首零, 首一 as 首一, 首零一 as 首零一, 首二 as 首二, 首三 as 首三, 首零一二 as 首零一二
-from mapFolding._e._semiotics import decreasing as decreasing, indexLeaf0 as indexLeaf0, origin as origin
+from mapFolding._e._semiotics import 首零 as 首零, 首零二 as 首零二, 首一 as 首一, 首一二 as 首一二, 首零一 as 首零一, 首二 as 首二, 首三 as 首三, 首零一二 as 首零一二
+from mapFolding._e._semiotics import decreasing as decreasing, fullRange as fullRange, leaf0 as leaf0, origin as origin
 
 from mapFolding._e._data import (getDictionaryAddends4Next as getDictionaryAddends4Next,
 	getDictionaryAddends4Prior as getDictionaryAddends4Prior,
-	getDictionaryIndexLeafDomains as getDictionaryIndexLeafDomains,
-	getDictionaryPileToIndexLeaves as getDictionaryPileToIndexLeaves,
-    getIndexLeafDomain as getIndexLeafDomain)
+	getDictionaryLeafDomains as getDictionaryLeafDomains,
+	getDictionaryPileToLeaves as getDictionaryPileToLeaves,
+    getLeafDomain as getLeafDomain)
 
 """Equating pile = leavesTotal // 2 - 1.
 dict_keys([2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31])

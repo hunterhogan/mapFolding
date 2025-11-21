@@ -22,35 +22,35 @@ def dimensionSecondNearest首(integerAbove0: int, /) -> int | None:
 	return secondNearest if secondNearest >= 0 else None
 
 @cache
-def indexLeafSubHyperplane(indexLeafAbove1: int, /) -> int:
+def leafSubHyperplane(leafAbove1: int, /) -> int:
 	"""Compute the projection of a hyperplane leaf onto its lower-dimensional sub-hyperplane.
 
 	(AI generated docstring.)
 
-	For 2^d hyperplane maps, each leaf's `indexLeaf` encodes its d-dimensional coordinates
+	For 2^d hyperplane maps, each leaf's `leaf` encodes its d-dimensional coordinates
 	in binary (base-2 positional notation). The most significant bit (MSB) indicates the
 	highest dimension where the coordinate equals 1.
 
 	This function extracts the lower (MSB - 1) bits, which represent the leaf's position
 	when projected onto the sub-hyperplane formed by all dimensions below the MSB dimension.
-	That is equivalent to the `indexLeaf` of the leaf within the lower-dimensional sub-hyperplane.
+	That is equivalent to the `leaf` of the leaf within the lower-dimensional sub-hyperplane.
 
-	Technical implementation: `indexLeafAbove1 mod 2^(bit_length - 1)`
+	Technical implementation: `leafAbove1 mod 2^(bit_length - 1)`
 
 	Parameters
 	----------
-	indexLeafAbove1 : int
-		The `indexLeaf` > 1 representing a leaf in a 2^d hyperplane.
+	leafAbove1 : int
+		The `leaf` > 1 representing a leaf in a 2^d hyperplane.
 
 	Returns
 	-------
-	indexLeafSubHyperplane : int
+	leafSubHyperplane : int
 		The position of the leaf within the sub-hyperplane defined by dimensions [0, ..., MSB-1].
 		This is the value formed by all bits except the MSB.
 	"""
-	anInteger: int = intInnit([indexLeafAbove1], 'indexLeafAbove1', type[int])[0]
+	anInteger: int = intInnit([leafAbove1], 'leafAbove1', type[int])[0]
 	if anInteger <= 1:
-		message: str = f"I received `{indexLeafAbove1 = }`, but I need a value greater than 1."
+		message: str = f"I received `{leafAbove1 = }`, but I need a value greater than 1."
 		raise ValueError(message)
 	return int(gmpy2.f_mod_2exp(anInteger, anInteger.bit_length() - 1))
 
@@ -78,5 +78,5 @@ def ptount(integerAbove3: int, /) -> int:
 		message: str = f"I received `{integerAbove3 = }`, but I need a value greater than 3."
 		raise ValueError(message)
 
-	return indexLeafSubHyperplane(anInteger - 0b000011).bit_count()
+	return leafSubHyperplane(anInteger - 0b000011).bit_count()
 

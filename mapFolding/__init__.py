@@ -30,6 +30,7 @@ from mapFolding.beDRY import (
 	getTaskDivisions as getTaskDivisions,
 	makeDataContainer as makeDataContainer,
 	setProcessorLimit as setProcessorLimit,
+    Z0Z_key as Z0Z_key,
 	validateListDimensions as validateListDimensions)
 
 from mapFolding.filesystemToolkit import (

@@ -1,44 +1,43 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
-from mapFolding._e import (
-	getDictionaryAddends4Next, getDictionaryAddends4Prior, getDictionaryPileToIndexLeaves, indexLeaf0, origin, 一, 零, 首零)
+from mapFolding._e import getDictionaryAddends4Next, getDictionaryAddends4Prior, getDictionaryPileToLeaves
 from mapFolding._e.pinning2Dn import (
-	addendsToListIndexLeavesAtPile, appendPinnedLeavesAtPile, listPinnedLeavesDefault, nextPinnedLeavesWorkbench,
-	pinByFormula, secondOrderLeaves)
+	addendsToListLeavesAtPile, appendPinnedLeavesAtPile, listPinnedLeavesDefault, nextPinnedLeavesWorkbench, pinByFormula,
+	secondOrderLeaves, secondOrderPilings)
 from mapFolding.dataBaskets import EliminationState
 from math import factorial
 from tqdm import tqdm
 
 def pinByAddends(state: EliminationState) -> EliminationState:
-	from mapFolding.algorithms.iff import thisIndexLeafFoldingIsValid  # noqa: PLC0415
+	from mapFolding.algorithms.iff import thisLeafFoldingIsValid  # noqa: PLC0415
 	dictionaryAddends4Next: dict[int, list[int]] = getDictionaryAddends4Next(state)
 	dictionaryAddends4Prior: dict[int, list[int]] = getDictionaryAddends4Prior(state)
 
 	state = nextPinnedLeavesWorkbench(state)
 	while state.pinnedLeaves:
-		indexLeafAddend: int = 0
+		leafAddend: int = 0
 		listAddends: list[int] = []
 
 		if state.pile - 1 in state.pinnedLeaves:
-			indexLeafAddend = state.pinnedLeaves[state.pile - 1]
-			listAddends = dictionaryAddends4Next[indexLeafAddend]
+			leafAddend = state.pinnedLeaves[state.pile - 1]
+			listAddends = dictionaryAddends4Next[leafAddend]
 		elif state.pile + 1 in state.pinnedLeaves:
-			indexLeafAddend = state.pinnedLeaves[state.pile + 1]
-			listAddends = dictionaryAddends4Prior[indexLeafAddend]
+			leafAddend = state.pinnedLeaves[state.pile + 1]
+			listAddends = dictionaryAddends4Prior[leafAddend]
 
 		if listAddends:
-			listIndexLeavesAtPile: list[int] = addendsToListIndexLeavesAtPile(listAddends, indexLeafAddend, [])
+			listLeavesAtPile: list[int] = addendsToListLeavesAtPile(listAddends, leafAddend, [])
 		else:
-			listIndexLeavesAtPile = getDictionaryPileToIndexLeaves(state)[state.pile]
+			listLeavesAtPile = getDictionaryPileToLeaves(state)[state.pile]
 
-		state = appendPinnedLeavesAtPile(state, listIndexLeavesAtPile)
+		state = appendPinnedLeavesAtPile(state, listLeavesAtPile)
 		state = nextPinnedLeavesWorkbench(state)
 
 	listPinnedLeavesCopy: list[dict[int, int]] = state.listPinnedLeaves.copy()
 	state.listPinnedLeaves = []
 	for pinnedLeaves in listPinnedLeavesCopy:
 		folding: tuple[int, ...] = tuple([pinnedLeaves[pile] for pile in range(state.leavesTotal)])
-		if thisIndexLeafFoldingIsValid(folding, state.mapShape):
+		if thisLeafFoldingIsValid(folding, state.mapShape):
 			state.listPinnedLeaves.append(pinnedLeaves)
 
 	return state
@@ -52,8 +51,9 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		state = listPinnedLeavesDefault(state)
 
 	state = secondOrderLeaves(state)
-	if state.dimensionsTotal >= 5:
-		state = pinByFormula(state)
+	# state = secondOrderPilings(state)
+	# if state.dimensionsTotal >= 5:
+	# 	state = pinByFormula(state)
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 		listClaimTickets: list[Future[EliminationState]] = []

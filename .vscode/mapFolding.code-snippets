@@ -97,6 +97,16 @@
 		],
 		"description": "Four (四, sì)"
 	},
+	"文件": {
+		"prefix": "wenjian",
+		"body": "文件",
+		"description": "文件 (wénjiàn): dictionary key"
+	},
+	"文义": {
+		"prefix": "wenyi",
+		"body": "文义",
+		"description": "文义 (wényì): dictionary value"
+	},
 	"五": {
 		"prefix": "wu",
 		"body": [

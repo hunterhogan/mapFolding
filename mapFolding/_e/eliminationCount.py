@@ -6,11 +6,11 @@ from mapFolding.dataBaskets import EliminationState
 
 def _makeFolding(pinnedLeaves: dict[int, int], permutandsPermutation: tuple[int, ...], leavesTotal: int) -> tuple[int, ...]:
 	permutand: Iterator[int] = iter(permutandsPermutation)
-	return tuple([pinnedLeaves.get(column) or next(permutand) for column in range(leavesTotal)])
+	return tuple([pinnedLeaves[pile] if pile in pinnedLeaves else next(permutand) for pile in range(leavesTotal)])
 
 @memoize
 def setOfLeaves(leavesTotal: int) -> set[int]:
-	return set(range(1, leavesTotal + 1))
+	return set(range(leavesTotal))
 
 def permutands(pinnedLeaves: dict[int, int], leavesTotal: int) -> tuple[int, ...]:
 	return tuple(setOfLeaves(leavesTotal).difference(pinnedLeaves.values()))
