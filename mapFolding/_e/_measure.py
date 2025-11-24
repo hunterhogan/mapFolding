@@ -3,13 +3,13 @@ from hunterMakesPy import intInnit
 import gmpy2
 
 @cache
-def dimensionNearest首(integerAbove0: int, /) -> int:
-	"""Find the 0-indexed position of the most significant non-zero radix-2 digit in `integerAbove0`."""
-	anInteger: int = intInnit([integerAbove0], 'integerAbove0', type[int])[0]
-	if anInteger <= 0:
-		message: str = f"I received `{integerAbove0 = }`, but I need a value greater than 0."
+def dimensionNearest首(integerNonnegative: int, /) -> int:
+	"""Find the 0-indexed position of the most significant non-zero radix-2 digit in `integerNonnegative`."""
+	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
+	if anInteger < 0:
+		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
-	return anInteger.bit_length() - 1
+	return max(0, anInteger.bit_length() - 1)
 
 @cache
 def dimensionSecondNearest首(integerAbove0: int, /) -> int | None:
@@ -22,7 +22,7 @@ def dimensionSecondNearest首(integerAbove0: int, /) -> int | None:
 	return secondNearest if secondNearest >= 0 else None
 
 @cache
-def leafSubHyperplane(leafAbove1: int, /) -> int:
+def leafInSubHyperplane(leafAbove1: int, /) -> int:
 	"""Compute the projection of a hyperplane leaf onto its lower-dimensional sub-hyperplane.
 
 	(AI generated docstring.)
@@ -55,7 +55,7 @@ def leafSubHyperplane(leafAbove1: int, /) -> int:
 	return int(gmpy2.f_mod_2exp(anInteger, anInteger.bit_length() - 1))
 
 @cache
-def coordinatesOf0AtTail(integerNonnegative: int, /) -> int:
+def howMany0coordinatesAtTail(integerNonnegative: int, /) -> int:
 	"""Compute the number of times `integerNonnegative` is divisible by 2; aka 'CTZ', Count Trailing Zeros in the binary form."""
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
@@ -78,5 +78,5 @@ def ptount(integerAbove3: int, /) -> int:
 		message: str = f"I received `{integerAbove3 = }`, but I need a value greater than 3."
 		raise ValueError(message)
 
-	return leafSubHyperplane(anInteger - 0b000011).bit_count()
+	return leafInSubHyperplane(anInteger - 0b000011).bit_count()
 

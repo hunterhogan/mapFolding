@@ -1,12 +1,14 @@
 """Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."""
 
+from mapFolding._semiotics import decreasing as decreasing, inclusive as inclusive
+
 from mapFolding._theTypes import (
 	Array1DElephino as Array1DElephino,
 	Array1DFoldsTotal as Array1DFoldsTotal,
 	Array1DLeavesTotal as Array1DLeavesTotal,
-    Array2DLeavesTotal as Array2DLeavesTotal,
+	Array2DLeavesTotal as Array2DLeavesTotal,
 	Array3DLeavesTotal as Array3DLeavesTotal,
-    axisOfLength as axisOfLength,
+	axisOfLength as axisOfLength,
 	DatatypeElephino as DatatypeElephino,
 	DatatypeFoldsTotal as DatatypeFoldsTotal,
 	DatatypeLeavesTotal as DatatypeLeavesTotal,
@@ -24,13 +26,14 @@ from mapFolding._theTypes import (
 from mapFolding._theSSOT import packageSettings as packageSettings
 
 from mapFolding.beDRY import (
-    exclude as exclude,
+    DOTvalues as DOTvalues,
+	exclude as exclude,
 	getConnectionGraph as getConnectionGraph,
 	getLeavesTotal as getLeavesTotal,
 	getTaskDivisions as getTaskDivisions,
 	makeDataContainer as makeDataContainer,
-	setProcessorLimit as setProcessorLimit,
-    Z0Z_key as Z0Z_key,
+	reverseLookup as reverseLookup,
+	defineProcessorLimit as defineProcessorLimit,
 	validateListDimensions as validateListDimensions)
 
 from mapFolding.filesystemToolkit import (

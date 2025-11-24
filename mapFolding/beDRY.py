@@ -10,13 +10,55 @@ from sys import maxsize as sysMaxsize
 from typing import Any
 import numpy
 
-def Z0Z_key[文件, 文义](dictionary: dict[文件, 文义], keyValue: 文义) -> 文件:
-	"""Return the key in `dictionary` that corresponds to `keyValue`."""
-	for key, value in dictionary.items():
-		if value == keyValue:
-			return key
-	message: str = f"I received `{keyValue = }`, but I couldn't find it in `dictionary`."
-	raise KeyError(message)
+def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = None) -> int:
+	"""Compute the CPU usage limit for concurrent operations; for `numba` managed concurrency, set the global limit.
+
+	Parameters
+	----------
+	CPUlimit : Any | None
+		Please see the documentation in `countFolds` for details. I know it is annoying, but I want to be sure you
+		have the most accurate information.
+	concurrencyPackage : str | None = None
+		Specifies which concurrency package to use.
+		- `None` or `'multiprocessing'`: Uses standard `multiprocessing`.
+		- `'numba'`: Uses Numba's threading system.
+
+	Returns
+	-------
+	concurrencyLimit : int
+		The actual concurrency limit that was set.
+
+	Raises
+	------
+	TypeError
+		If `CPUlimit` is not of the expected types.
+	NotImplementedError
+		If `concurrencyPackage` is not supported.
+
+	Notes
+	-----
+	If using `'numba'` as the concurrency package, the maximum number of processors is retrieved from
+	`numba.get_num_threads()` rather than by polling the hardware. If Numba environment variables limit available
+	processors, that will affect this function.
+
+	When using Numba, this function must be called before importing any Numba-jitted function for this processor limit
+	to affect the Numba-jitted function.
+
+	"""
+	if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
+		CPUlimit = oopsieKwargsie(CPUlimit)
+
+	match concurrencyPackage:
+		case 'numba':
+			from numba import get_num_threads, set_num_threads  # noqa: PLC0415
+			concurrencyLimit: int = defineConcurrencyLimit(limit=CPUlimit, cpuTotal=get_num_threads())
+			set_num_threads(concurrencyLimit)
+			concurrencyLimit = get_num_threads()
+		case 'multiprocessing' | None | _:
+			# When to use multiprocessing.set_start_method
+			# https://github.com/hunterhogan/mapFolding/issues/6  # noqa: ERA001
+			concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
+	return concurrencyLimit
 
 def exclude[个](iterable: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
 	"""Yield items from `iterable` whose positions are not in `indices`."""
@@ -28,21 +70,42 @@ def exclude[个](iterable: Sequence[个], indices: Iterable[int]) -> Iterator[�
 	indicesInclude: list[int] = sorted(set(range(lengthIterable)).difference(map(normalizeIndex, indices)))
 	return extract(iterable, indicesInclude)
 
-@cache
-def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
-	"""Calculate the total number of leaves in a map with the given dimensions.
-
-	The total number of leaves is the product of all dimensions in the map shape.
+def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]:
+	"""Create a properly typed connection graph for the map folding algorithm.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
 		A tuple of integers representing the dimensions of the map.
+	leavesTotal : int
+		The total number of leaves in the map.
+	datatype : type[NumPyIntegerType]
+		The NumPy integer type to use for the array elements, ensuring proper memory usage and compatibility with the
+		computation state.
+
+	Returns
+	-------
+	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]
+		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) with the specified `datatype`,
+		representing all possible connections between leaves.
+
+	"""
+	connectionGraph = _makeConnectionGraph(mapShape, leavesTotal)
+	return connectionGraph.astype(datatype)
+
+@cache
+def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
+	"""The definitive calculation of the total number of leaves in a map with the given dimensions.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A tuple of integers with the length of each dimension of the map.
 
 	Returns
 	-------
 	leavesTotal : int
-		The total number of leaves in the map, calculated as the product of all dimensions.
+		The definitive total number of leaves in the map.
 
 	Raises
 	------
@@ -50,6 +113,12 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 		If the product of dimensions would exceed the system's maximum integer size. This check prevents silent numeric
 		overflow issues that could lead to incorrect results.
 
+	Notes
+	-----
+	It is impossible to overstate the importance of `leavesTotal` in every algorithm for counting folds. Therefore, in this
+	package, this function is the ***only*** permissible way to compute `leavesTotal`.
+
+	The total number of leaves is the product of all dimensions in `mapShape`.
 	"""
 	productDimensions = 1
 	for dimension in mapShape:
@@ -163,29 +232,6 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray
 					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
 	return connectionGraph
 
-def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]:
-	"""Create a properly typed connection graph for the map folding algorithm.
-
-	Parameters
-	----------
-	mapShape : tuple[int, ...]
-		A tuple of integers representing the dimensions of the map.
-	leavesTotal : int
-		The total number of leaves in the map.
-	datatype : type[NumPyIntegerType]
-		The NumPy integer type to use for the array elements, ensuring proper memory usage and compatibility with the
-		computation state.
-
-	Returns
-	-------
-	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]
-		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) with the specified `datatype`,
-		representing all possible connections between leaves.
-
-	"""
-	connectionGraph = _makeConnectionGraph(mapShape, leavesTotal)
-	return connectionGraph.astype(datatype)
-
 def makeDataContainer(shape: int | tuple[int, ...], datatype: type[NumPyIntegerType]) -> ndarray[Any, numpy_dtype[NumPyIntegerType]]:
 	"""Create any data container as long as it is a `numpy.ndarray` full of zeroes of type `numpy.integer`.
 
@@ -206,58 +252,19 @@ def makeDataContainer(shape: int | tuple[int, ...], datatype: type[NumPyIntegerT
 	"""
 	return numpy.zeros(shape, dtype=datatype)
 
-def setProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = None) -> int:
-	"""Set the CPU usage limit for concurrent operations.
+def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: 文义) -> 文件:
+	"""Return the key in `dictionary` that corresponds to `keyValue`.
 
-	Parameters
-	----------
-	CPUlimit : Any | None
-		Please see the documentation in `countFolds` for details. I know it is annoying, but I want to be sure you
-		have the most accurate information.
-	concurrencyPackage : str | None = None
-		Specifies which concurrency package to use.
-		- `None` or `'multiprocessing'`: Uses standard `multiprocessing`.
-		- `'numba'`: Uses Numba's threading system.
+	Prototype.
 
-	Returns
-	-------
-	concurrencyLimit : int
-		The actual concurrency limit that was set.
-
-	Raises
-	------
-	TypeError
-		If `CPUlimit` is not of the expected types.
-	NotImplementedError
-		If `concurrencyPackage` is not supported.
-
-	Notes
-	-----
-	If using `'numba'` as the concurrency package, the maximum number of processors is retrieved from
-	`numba.get_num_threads()` rather than by polling the hardware. If Numba environment variables limit available
-	processors, that will affect this function.
-
-	When using Numba, this function must be called before importing any Numba-jitted function for this processor limit
-	to affect the Numba-jitted function.
-
+	- `keyValue` must be in `dictionary.values()`.
+	- I'm assuming all `dictionary.values()` are distinct. If multiple keys contain `keyValue`, the first found key is returned.
 	"""
-	if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
-		CPUlimit = oopsieKwargsie(CPUlimit)
-
-	match concurrencyPackage:
-		case 'multiprocessing' | None:
-			# When to use multiprocessing.set_start_method
-			# https://github.com/hunterhogan/mapFolding/issues/6  # noqa: ERA001
-			concurrencyLimit: int = defineConcurrencyLimit(limit=CPUlimit)
-		case 'numba':
-			from numba import get_num_threads, set_num_threads  # noqa: PLC0415
-			concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit, cpuTotal=get_num_threads())
-			set_num_threads(concurrencyLimit)
-			concurrencyLimit = get_num_threads()
-		case _:
-			message = f"I received `{concurrencyPackage = }` but I don't know what to do with that."
-			raise NotImplementedError(message)
-	return concurrencyLimit
+	for key, value in sorted(dictionary.items()):
+		if value == keyValue:
+			return key
+	message: str = f"I received `{keyValue = }`, but I couldn't find it in `dictionary`."
+	raise KeyError(message)
 
 def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	"""Validate and normalize dimensions for a map folding problem.
@@ -315,3 +322,26 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	"""
 	# NOTE Do NOT sort the dimensions.
 	return tuple(mapDimensions)
+
+
+def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
+	"""Return the list of values from a dictionary (generic over type parameter `个`).
+
+	A tiny helper used only for its semantic clarity inside `deconstructListPinnedLeaves` when flattening expanded
+	dictionaries produced by `deconstructPinnedLeaves`.
+
+	Parameters
+	----------
+	dictionary : dict[Any, 个]
+		Source mapping.
+
+	Returns
+	-------
+	list[个]
+		List of the dictionary's values.
+
+	See Also
+	--------
+	deconstructPinnedLeaves, deconstructListPinnedLeaves
+	"""
+	return list(dictionary.values())

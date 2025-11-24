@@ -28,7 +28,7 @@ compatibility and proper resource isolation between test processes.
 from collections.abc import Callable
 from hunterMakesPy.pytestForYourUse import PytestFor_defineConcurrencyLimit
 from mapFolding import (
-	countFolds, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions, setProcessorLimit, validateListDimensions)
+	countFolds, defineProcessorLimit, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions, validateListDimensions)
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import Literal
 import multiprocessing
@@ -76,4 +76,4 @@ def test_getTaskDivisions(computationDivisions: Literal['maximum', 'cpu', 20] | 
 ])
 def test_setCPUlimitMalformedParameter(expected: type[ValueError] | Literal[2], parameter: list[int] | tuple[int] | set[int] | dict[str, int] | Literal['2']) -> None:
 	"""Test that invalid CPUlimit types are properly handled."""
-	standardizedEqualToCallableReturn(expected, setProcessorLimit, parameter)
+	standardizedEqualToCallableReturn(expected, defineProcessorLimit, parameter)

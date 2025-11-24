@@ -1,25 +1,27 @@
 # ruff: noqa ERA001
 from gmpy2 import bit_mask
-from mapFolding import exclude, Z0Z_key
-from mapFolding._e import decreasing, getLeafDomain, origin, 一, 二, 零, 首一, 首二, 首零, 首零一, 首零一二
+from mapFolding import exclude, reverseLookup
+from mapFolding._e import (
+	getLeafDomain, getListLeavesDecrease, getListLeavesIncrease, pileOrigin, PinnedLeaves, 一, 二, 零, 首一, 首二, 首零, 首零一, 首零一二)
+from mapFolding._e.pinIt import deconstructListPinnedLeavesAtPile, deconstructPinnedLeavesByLeaf
 from mapFolding._e.pinning2DnAnnex import (
 	addendsToListLeavesAtPile as addendsToListLeavesAtPile, appendPinnedLeavesAtPile as appendPinnedLeavesAtPile,
+	disqualifyAppendingLeafAtPile as disqualifyAppendingLeafAtPile, disqualifyDictionary,
 	listPinnedLeavesDefault as listPinnedLeavesDefault, nextPinnedLeavesWorkbench as nextPinnedLeavesWorkbench,
 	pinPileOriginFixed, pinPile一Addend, pinPile一零Addend, pinPile二Addend, pinPile零Fixed, pinPile首Less一Addend,
-	pinPile首Less一零Addend, pinPile首Less零Fixed, pinPile首零Less零Leaf, whereNext as whereNext)
+	pinPile首Less一零Addend, pinPile首Less零Fixed, pinPile首零Less零Leaf)
+from mapFolding._semiotics import decreasing
 from mapFolding.dataBaskets import EliminationState
-from mapFolding.tests.verify import printStatisticsPermutations, verifyPinning2Dn
-from pprint import pprint
 
-def pinByFormula(state: EliminationState, maximumListPinnedLeaves: int = 1000) -> EliminationState:
-	if not ((state.dimensionsTotal > 4) and (state.mapShape[0] == 2)):
+def pinByFormula(state: EliminationState, maximumListPinnedLeaves: int = 5000) -> EliminationState:
+	if not ((state.dimensionsTotal > 4) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
 
-	pileProcessingOrder: list[int] = [origin, 零, state.leavesTotal - 零]
+	pileProcessingOrder: list[int] = [pileOrigin, 零, state.leavesTotal - 零]
 	pileProcessingOrder.extend([一, state.leavesTotal - 一])
 	pileProcessingOrder.extend([一+零, state.leavesTotal - (一+零)])
 	pileProcessingOrder.extend([二])
-	# pileProcessingOrder.extend([首零(state.dimensionsTotal)-零])
+	pileProcessingOrder.extend([首零(state.dimensionsTotal)-零])
 
 	if not state.listPinnedLeaves:
 		state = listPinnedLeavesDefault(state)
@@ -28,7 +30,7 @@ def pinByFormula(state: EliminationState, maximumListPinnedLeaves: int = 1000) -
 	while (len(state.listPinnedLeaves) < maximumListPinnedLeaves) and (state.pinnedLeaves):
 		listLeavesAtPile: list[int] = []
 
-		if state.pile == origin:
+		if state.pile == pileOrigin:
 			listLeavesAtPile = pinPileOriginFixed(state)
 		if state.pile == 零:
 			listLeavesAtPile = pinPile零Fixed(state)
@@ -52,15 +54,36 @@ def pinByFormula(state: EliminationState, maximumListPinnedLeaves: int = 1000) -
 
 	return state
 
+def secondOrderLeavesV2(state: EliminationState) -> EliminationState:
+	if not ((state.dimensionsTotal > 2) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
+		return state
+
+	if not state.listPinnedLeaves:
+		state = listPinnedLeavesDefault(state)
+	# for leaf in [一+零, 首一(state.dimensionsTotal), 首零(state.dimensionsTotal)+零]:
+	for leaf in [首零(state.dimensionsTotal)+零, 二+一+零]:
+			listPinnedLeaves: list[PinnedLeaves] = state.listPinnedLeaves.copy()
+			state.listPinnedLeaves = []
+			qualifiedPinnedLeaves: list[PinnedLeaves] = []
+			for pinnedLeaves in listPinnedLeaves:
+				ww: list[PinnedLeaves] = deconstructPinnedLeavesByLeaf(pinnedLeaves, leaf, getLeafDomain(state, leaf))
+				for pp in ww:
+					state.pinnedLeaves = pp.copy()
+					if disqualifyDictionary(state):
+						continue
+					qualifiedPinnedLeaves.append(state.pinnedLeaves.copy())
+			state.listPinnedLeaves = qualifiedPinnedLeaves.copy()
+	return state
+
 def secondOrderLeaves(state: EliminationState) -> EliminationState:
-	if not ((state.dimensionsTotal > 2) and (state.mapShape[0] == 2)):
+	if not ((state.dimensionsTotal > 2) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
 
 	if not state.listPinnedLeaves:
 		state = listPinnedLeavesDefault(state)
 
 	for leaf in [一+零, 首一(state.dimensionsTotal), 首零(state.dimensionsTotal)+零]:
-		listPinnedLeavesCopy: list[dict[int, int]] = state.listPinnedLeaves.copy()
+		listPinnedLeavesCopy: list[PinnedLeaves] = state.listPinnedLeaves.copy()
 		state.listPinnedLeaves = []
 		for pinnedLeaves in listPinnedLeavesCopy:
 			state.pinnedLeaves = pinnedLeaves.copy()
@@ -68,7 +91,7 @@ def secondOrderLeaves(state: EliminationState) -> EliminationState:
 			domainOfPilesForLeaf: list[int] = list(getLeafDomain(state, leaf))
 
 			if (leaf == 首一(state.dimensionsTotal)) and (一+零 in state.pinnedLeaves.values()):
-				pileOfLeaf一零: int = Z0Z_key(state.pinnedLeaves, 一+零)
+				pileOfLeaf一零: int = reverseLookup(state.pinnedLeaves, 一+零)
 				pilesTotal: int = len(domainOfPilesForLeaf)
 
 				listIndicesPilesExcluded: list[int] = []
@@ -97,8 +120,8 @@ def secondOrderLeaves(state: EliminationState) -> EliminationState:
 				listIndicesPilesExcluded: list[int] = []
 				leaf首零一: int = 首零一(state.dimensionsTotal)
 				if (一+零 in state.pinnedLeaves.values()) and (leaf首零一 in state.pinnedLeaves.values()):
-					pileOfLeaf一零: int = Z0Z_key(state.pinnedLeaves, 一+零)
-					pileOfLeaf首零一: int = Z0Z_key(state.pinnedLeaves, leaf首零一)
+					pileOfLeaf一零: int = reverseLookup(state.pinnedLeaves, 一+零)
+					pileOfLeaf首零一: int = reverseLookup(state.pinnedLeaves, leaf首零一)
 					# Before the new symbols, I didn't see the symmetry of `leaf一零` and `leaf首零一`.
 
 					pilesTotal = 首一(state.dimensionsTotal)
@@ -200,20 +223,20 @@ def secondOrderLeaves(state: EliminationState) -> EliminationState:
 	return state
 
 def secondOrderPilings(state: EliminationState) -> EliminationState:
-	if not ((state.dimensionsTotal > 2) and (state.mapShape[0] == 2)):
+	if not ((state.dimensionsTotal > 2) and (all(dimensionLength == 2 for dimensionLength in state.mapShape))):
 		return state
 
 	if not state.listPinnedLeaves:
 		state = listPinnedLeavesDefault(state)
 
-	pileProcessingOrder: list[int] = [origin, 零, state.leavesTotal - 零]
+	pileProcessingOrder: list[int] = [pileOrigin, 零, state.leavesTotal - 零]
 	pileProcessingOrder.extend([一, state.leavesTotal - 一])
 
 	state = nextPinnedLeavesWorkbench(state, pileProcessingOrder)
 	while state.pinnedLeaves:
 		listLeavesAtPile: list[int] = []
 
-		if state.pile == origin:
+		if state.pile == pileOrigin:
 			listLeavesAtPile = pinPileOriginFixed(state)
 		if state.pile == 零:
 			listLeavesAtPile = pinPile零Fixed(state)
@@ -230,16 +253,3 @@ def secondOrderPilings(state: EliminationState) -> EliminationState:
 
 	return state
 
-if __name__ == '__main__':
-	state = EliminationState((2,) * 6)
-
-	# state: EliminationState = secondOrderLeaves(state)
-	# state: EliminationState = secondOrderPilings(state)
-	state: EliminationState = pinByFormula(state)
-
-	verifyPinning2Dn(state)
-
-	pprint(state.listPinnedLeaves)
-
-	printStatisticsPermutations(state)
-	print(f"{len(state.listPinnedLeaves)=}")

@@ -22,17 +22,17 @@ if __name__ == '__main__':
 	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 	oeisID: str = ''
 	flow: str = ''
-	CPUlimit: bool | float | int | None = -2
+	CPUlimit: bool | float | int | None = 1
 
 	flow = 'constraintPropagation'
 	flow = 'elimination'
-	flow = 'addend'
+	flow = 'crease'
 
 	oeisID: str = 'A195646'
-	oeisID: str = 'A001415'
 	oeisID: str = 'A001416'
 	oeisID: str = 'A001418'
 	oeisID: str = 'A000136'
+	oeisID: str = 'A001415'
 	oeisID: str = 'A001417'
 
 	sys.stdout.write(f"\033[{30+int(oeisID,11)%8};{40+int(oeisID,12)%8}m{oeisID} ")

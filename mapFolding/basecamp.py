@@ -3,6 +3,7 @@
 from collections.abc import Sequence
 from mapFolding import (
 	getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly, validateListDimensions)
+from mapFolding.dataBaskets import EliminationState
 from os import PathLike
 from pathlib import Path, PurePath
 from typing import Literal
@@ -145,8 +146,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 # ------- task division instructions -----------------------------------------------------
 
 	if computationDivisions:
-		from mapFolding.beDRY import getLeavesTotal, getTaskDivisions, setProcessorLimit
-		concurrencyLimit: int = setProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
+		from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions
+		concurrencyLimit: int = defineProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
 		leavesTotal: int = getLeavesTotal(mapShape)
 		taskDivisions: int = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
 		del leavesTotal
@@ -196,7 +197,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	return foldsTotal
 
-def eliminateFolds(mapShape: tuple[int, ...]
+def eliminateFolds(mapShape: tuple[int, ...] | None = None
+				, state: EliminationState | None = None
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 				# , * # TODO improve `standardizedEqualToCallableReturn` so it will work with keyword arguments
 				, CPUlimit: bool | float | int | None = None  # noqa: FBT001
@@ -235,13 +237,24 @@ def eliminateFolds(mapShape: tuple[int, ...]
 	foldsTotal : int
 		Number of distinct ways to fold a map of the given dimensions.
 	"""
-	from mapFolding.beDRY import setProcessorLimit
-	concurrencyLimit: int = setProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
+# ------- state ---------------------------------------------------------------------
+	if not state:
+		if not mapShape:
+			message = (f"""I received these values:
+	`{mapShape = }` and `{state = }`,
+	but I was unable to select a map for which to count the folds."""
+			)
+			raise ValueError(message)
+		state = EliminationState(mapShape)
+
+# ------- concurrency limit -----------------------------------------------------
+	from mapFolding.beDRY import defineProcessorLimit
+	concurrencyLimit: int = defineProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
 
 # ------- memorialization instructions ---------------------------------------------
 
 	if pathLikeWriteFoldsTotal is not None:
-		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(mapShape, pathLikeWriteFoldsTotal)
+		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(state.mapShape, pathLikeWriteFoldsTotal)
 		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
 	else:
 		pathFilenameFoldsTotal = None
@@ -250,20 +263,17 @@ def eliminateFolds(mapShape: tuple[int, ...]
 # ruff: noqa: E701
 	match flow:
 		case 'constraintPropagation': from mapFolding.algorithms.constraintPropagation import doTheNeedful
-		case 'addend': from mapFolding._e.eliminationAddend import doTheNeedful
-		case 'elimination' | _: from mapFolding._e.elimination import doTheNeedful
+		case 'crease': from mapFolding._e.eliminationCrease import doTheNeedful
+		case 'elimination' | _: from mapFolding.algorithms.elimination import doTheNeedful
 
-	from mapFolding.dataBaskets import EliminationState
-	eliminationState: EliminationState = EliminationState(mapShape)
-	eliminationState = doTheNeedful(eliminationState, concurrencyLimit)
-	foldsTotal = eliminationState.foldsTotal
+	state = doTheNeedful(state, concurrencyLimit)
 
 # ------- Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameFoldsTotal is not None:
-		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
+		saveFoldsTotal(pathFilenameFoldsTotal, state.foldsTotal)
 
-	return foldsTotal
+	return state.foldsTotal
 
 def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 # TODO , pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
@@ -338,8 +348,8 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 				countTotal = doTheNeedful(state) # pyright: ignore[reportArgumentType]
 			case 'A007822':
 				mapShape: tuple[Literal[1], int] = (1, 2 * oeis_n)
-				from mapFolding import setProcessorLimit
-				concurrencyLimit: int = setProcessorLimit(CPUlimit)
+				from mapFolding import defineProcessorLimit
+				concurrencyLimit: int = defineProcessorLimit(CPUlimit)
 
 				from mapFolding.dataBaskets import SymmetricFoldsState
 				symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)

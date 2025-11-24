@@ -22,7 +22,8 @@ access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
 	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	getConnectionGraph, getLeavesTotal, makeDataContainer)
+	getConnectionGraph, getLeavesTotal, inclusive, makeDataContainer)
+from math import prod
 import dataclasses
 
 @dataclasses.dataclass(slots=True)
@@ -31,55 +32,80 @@ class EliminationState:
 
 	Attributes
 	----------
-	mapShape : tuple[DatatypeLeavesTotal, ...]
-		Dimensions of the map being analyzed for folding patterns.
-	groupsOfFolds : DatatypeFoldsTotal = DatatypeFoldsTotal(0)
+	mapShape : tuple[int, ...]
+		Dimension lengths of the map being analyzed for folding patterns.
+	groupsOfFolds : int = 0
 		Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings.
-	dimensionsTotal : DatatypeLeavesTotal
+	listPinnedLeaves : list[dict[int, int]]
+		A list of dictionaries that each define an exclusive permutation space: no overlap between dictionaries.
+	pile : int = -1
+		The `pile` on the workbench.
+	pinnedLeaves : dict[int, int]
+		The `pinnedLeaves` dictionary on the workbench.
+	Theorem2Multiplier : int = 1
+		Multiplier for Theorem 2 optimizations.
+	Theorem3Multiplier : int = 1
+		Multiplier for Theorem 3 optimizations.
+	Theorem4Multiplier : int = 1
+		Multiplier for Theorem 4 optimizations.
+	dimensionsTotal : int
 		Unchanging total number of dimensions in the map.
-	leavesTotal : DatatypeLeavesTotal
+	leafLast : int
+		Unchanging 0-indexed final `leaf` in a `folding`.
+	leavesTotal : int
 		Unchanging total number of leaves in the map.
+	pileLast : int
+		Unchanging 0-indexed final `pile` in a `folding`.
+	productsOfDimensions : list[int]
+		Unchanging list of products of map dimensions from the product of no dimensions to the product of all dimensions.
+
+	Notes
+	-----
+	Fine control over integer bit-widths is not currently part of these algorithms, so removing `TypeAlias` reduces complexity.
+	(And will hopefully stop the intermittent false-positive Pylance diagnostic, `expected 0 positional arguments`.)
 	"""
 
-	mapShape: tuple[DatatypeLeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
+	mapShape: tuple[int, ...] = dataclasses.field(init=True)
 	"""Dimensions of the map being analyzed for folding patterns."""
 
-	groupsOfFolds: DatatypeFoldsTotal = dataclasses.field(default=DatatypeFoldsTotal(0), metadata={'theCountingIdentifier': True})
-	"""Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings."""
+	groupsOfFolds: int = 0
+	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `folding` that represents a group of `leavesTotal`-many foldings."""
 
 	listPinnedLeaves: list[dict[int, int]] = dataclasses.field(default_factory=list[dict[int, int]], init=True)
-	"""pile: leaf"""
-	pile: DatatypeLeavesTotal = DatatypeLeavesTotal(-1)  # noqa: RUF009
-	pinnedLeaves: dict[int, int] = dataclasses.field(default_factory=dict[int, int], init=True, metadata={'elementConstructor': 'DatatypeLeavesTotal'})
-	"""pile: leaf"""
+	"""A list of dictionaries (`{pile: leaf}`) that each define an exclusive permutation space: no overlap between dictionaries."""
 
-	subsetsTheorem2: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
-	subsetsTheorem3: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
-	subsetsTheorem4: DatatypeLeavesTotal = DatatypeLeavesTotal(1)  # noqa: RUF009
+	pile: int = -1
+	"""The `pile` on the workbench."""
+	pinnedLeaves: dict[int, int] = dataclasses.field(default_factory=dict[int, int], init=True)
+	"""The `pinnedLeaves` dictionary (`{pile: leaf}`) on the workbench."""
 
-	pileLast: DatatypeLeavesTotal = dataclasses.field(init=False)
-	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	Theorem2Multiplier: int = 1
+	Theorem3Multiplier: int = 1
+	Theorem4Multiplier: int = 1
+
+	dimensionsTotal: int = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
-	leavesTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
+	leafLast: int = dataclasses.field(init=False)
+	"""Unchanging 0-indexed final `leaf` in a `folding`."""
+	leavesTotal: int = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""
+	pileLast: int = dataclasses.field(init=False)
+	"""Unchanging 0-indexed final `pile` in a `folding`."""
+	productsOfDimensions: list[int] = dataclasses.field(init=False)
+	"""Unchanging list of products of map dimensions from the product of no dimensions, `[0]`, to the product of all dimensions, `[dimensionsTotal]`."""
 
 	@property
-	def foldsTotal(self) -> DatatypeFoldsTotal:
-		"""The total number of possible folding patterns for this map.
-
-		Returns
-		-------
-		foldsTotal : DatatypeFoldsTotal
-			The complete count of distinct folding patterns achievable with the current map configuration.
-
-		"""
-		return DatatypeFoldsTotal(self.leavesTotal) * self.groupsOfFolds * self.subsetsTheorem2 * self.subsetsTheorem3 * self.subsetsTheorem4
+	def foldsTotal(self) -> int:
+		"""The total number of possible `folding` patterns for this `mapShape`."""
+		return prod((self.groupsOfFolds, self.leavesTotal, self.Theorem2Multiplier, self.Theorem3Multiplier, self.Theorem4Multiplier))
 
 	def __post_init__(self) -> None:
-		"""Ensure all fields have a value."""
-		self.dimensionsTotal = DatatypeLeavesTotal(len(self.mapShape))
-		self.leavesTotal = DatatypeLeavesTotal(getLeavesTotal(self.mapShape))
-		self.pileLast = self.leavesTotal - DatatypeLeavesTotal(1)
+		"""One-time computation of unchanging values."""
+		self.dimensionsTotal = len(self.mapShape)
+		self.leavesTotal = getLeavesTotal(self.mapShape)
+		self.pileLast = self.leavesTotal - 1
+		self.leafLast = self.leavesTotal - 1
+		self.productsOfDimensions = [prod(self.mapShape[0:dimension], start=1) for dimension in range(self.dimensionsTotal + inclusive)]
 
 @dataclasses.dataclass(slots=True)
 class MapFoldingState:

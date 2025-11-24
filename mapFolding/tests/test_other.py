@@ -28,7 +28,7 @@ dependencies while maintaining clear separation of concerns.
 from collections.abc import Callable
 from hunterMakesPy import intInnit
 from hunterMakesPy.pytestForYourUse import PytestFor_intInnit, PytestFor_oopsieKwargsie
-from mapFolding import getLeavesTotal, setProcessorLimit, validateListDimensions
+from mapFolding import defineProcessorLimit, getLeavesTotal, validateListDimensions
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import Any, Literal
 import multiprocessing
@@ -100,4 +100,4 @@ def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> N
 ])
 def test_setCPUlimitNumba(CPUlimit: Literal[4, -2, 0, 1] | None | float | bool, expectedLimit: Any | int) -> None:
 	numba.set_num_threads(multiprocessing.cpu_count())
-	standardizedEqualToCallableReturn(expectedLimit, setProcessorLimit, CPUlimit, 'numba')
+	standardizedEqualToCallableReturn(expectedLimit, defineProcessorLimit, CPUlimit, 'numba')

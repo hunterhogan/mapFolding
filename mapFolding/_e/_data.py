@@ -1,30 +1,68 @@
 from functools import cache
+from gmpy2 import bit_flip, bit_mask, bit_test, is_even
 from itertools import product as CartesianProduct
-from mapFolding._e import coordinatesOf0AtTail, decreasing, leaf0, 零, 首零
+from mapFolding import decreasing
+from mapFolding._e import dimensionNearest首, howMany0coordinatesAtTail, leafOrigin, 零, 首零
 from mapFolding.dataBaskets import EliminationState
 from math import prod
-import gmpy2
+
+def getListLeavesIncrease(state: EliminationState, leaf: int) -> list[int]:
+	return _getCreases(state, leaf, increase=True)
+
+def getListLeavesDecrease(state: EliminationState, leaf: int) -> list[int]:
+	return _getCreases(state, leaf, increase=False)
+
+def _getCreases(state: EliminationState, leaf: int, *, increase: bool = True) -> list[int]:
+	@cache
+	def workhorse(leaf: int, dimensionsTotal: int) -> tuple[list[int], list[int]]:
+		listLeavesCrease: list[int] = [int(bit_flip(leaf, dimension)) for dimension in range(dimensionsTotal)]
+
+		if leaf == leafOrigin:
+			listLeavesIncrease: list[int] = [1]
+			listLeavesDecrease: list[int] = []
+		else:
+			slicingIndexStart: int = (leaf.bit_count() - 1) & 1 ^ 1
+			slicingIndexEnd: int | None = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
+
+			if (slicingIndexStart == 1) and is_even(leaf):
+				slicingIndexStart += howMany0coordinatesAtTail(leaf)
+			listLeavesIncrease = listLeavesCrease[slicingIndexStart: slicingIndexEnd]
+
+			slicingIndexStart = (leaf.bit_count() - 1) & 1
+			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
+
+			if (slicingIndexStart == 1) and is_even(leaf):
+				slicingIndexStart += howMany0coordinatesAtTail(leaf)
+			listLeavesDecrease = listLeavesCrease[slicingIndexStart: slicingIndexEnd]
+
+			if leaf == 1:
+				listLeavesDecrease = [0]
+		return (listLeavesIncrease, listLeavesDecrease)
+
+	(listLeavesIncrease, listLeavesDecrease) = workhorse(leaf, state.dimensionsTotal)
+
+	return listLeavesIncrease if increase else listLeavesDecrease
 
 def getDictionaryAddends4Next(state: EliminationState) -> dict[int, list[int]]:
 	@cache
 	def workhorse(mapShape: tuple[int, ...], dimensionsTotal: int, leavesTotal: int) -> dict[int, list[int]]:
-		dictionaryAddends: dict[int, list[int]] = {leaf0: [1]}
+		dictionaryAddends: dict[int, list[int]] = {leafOrigin: [1]}
 
 		productsOfDimensions: list[int] = [prod(mapShape[0:dimension], start=1) for dimension in range(dimensionsTotal)]
 
 		for leaf in range(零, leavesTotal):
 			products下_leaf: list[int] = productsOfDimensions.copy()
 
-			theMaskOfDirectionality = gmpy2.bit_mask(leavesTotal - 零) & leaf
+			theMaskOfDirectionality = bit_mask(leavesTotal - 零) & leaf
 			for index in range(dimensionsTotal):
-				if gmpy2.bit_test(theMaskOfDirectionality, index):
+				if bit_test(theMaskOfDirectionality, index):
 					products下_leaf[index] *= -1
 
 			slicingIndexStart: int = (leaf.bit_count() - 1) & 1 ^ 1
-			slicingIndexEnd = (leaf.bit_length() - 1) * (slicingIndexStart ^ 1) or None
+			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
 
-			if (slicingIndexStart == 1) and (gmpy2.is_even(leaf)):
-				slicingIndexStart += coordinatesOf0AtTail(leaf)
+			if (slicingIndexStart == 1) and is_even(leaf):
+				slicingIndexStart += howMany0coordinatesAtTail(leaf)
 
 			products下_leaf = products下_leaf[slicingIndexStart:None]
 			products下_leaf = products下_leaf[0:slicingIndexEnd]
@@ -36,23 +74,23 @@ def getDictionaryAddends4Next(state: EliminationState) -> dict[int, list[int]]:
 def getDictionaryAddends4Prior(state: EliminationState) -> dict[int, list[int]]:
 	@cache
 	def workhorse(mapShape: tuple[int, ...], dimensionsTotal: int, leavesTotal: int) -> dict[int, list[int]]:
-		dictionaryAddends: dict[int, list[int]] = {leaf0: [], 零: [-1]}
+		dictionaryAddends: dict[int, list[int]] = {leafOrigin: [], 零: [-1]}
 
 		productsOfDimensions: list[int] = [prod(mapShape[0:dimension], start=1) for dimension in range(dimensionsTotal)]
 
 		for leaf in range(leavesTotal + decreasing, 1, decreasing):
 			products下_leaf: list[int] = productsOfDimensions.copy()
 
-			theMaskOfDirectionality = gmpy2.bit_mask(leavesTotal - 零) & leaf
+			theMaskOfDirectionality = bit_mask(leavesTotal - 零) & leaf
 			for index in range(dimensionsTotal):
-				if gmpy2.bit_test(theMaskOfDirectionality, index):
+				if bit_test(theMaskOfDirectionality, index):
 					products下_leaf[index] *= -1
 
 			slicingIndexStart: int = (leaf.bit_count() - 1) & 1
-			slicingIndexEnd = (leaf.bit_length() - 1) * (slicingIndexStart ^ 1) or None
+			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
 
-			if (slicingIndexStart == 1) and (gmpy2.is_even(leaf)):
-				slicingIndexStart += coordinatesOf0AtTail(leaf)
+			if (slicingIndexStart == 1) and is_even(leaf):
+				slicingIndexStart += howMany0coordinatesAtTail(leaf)
 
 			products下_leaf = products下_leaf[slicingIndexStart:None]
 			products下_leaf = products下_leaf[0:slicingIndexEnd]
@@ -75,10 +113,10 @@ def getDictionaryPileToLeaves(state: EliminationState) -> dict[int, list[int]]:
 # TODO create the per-pile function analogous to getLeafDomain().
 
 	for pile, leaf in CartesianProduct(range(state.leavesTotal), range(state.leavesTotal)):
-		rangeStart: int = leaf.bit_count() + (2**(coordinatesOf0AtTail(leaf) + 1) - 2)
+		rangeStart: int = leaf.bit_count() + (2**(howMany0coordinatesAtTail(leaf) + 1) - 2)
 
-		binary: str = ('1' * (leaf.bit_length() - 1)).ljust(state.dimensionsTotal, '0')
-		rangeStop: int = int(binary, state.mapShape[0]) + 2 - (leaf.bit_count() - 1) - (leaf == leaf0)
+		binary: str = ('1' * dimensionNearest首(leaf)).ljust(state.dimensionsTotal, '0')
+		rangeStop: int = int(binary, state.mapShape[0]) + 2 - (leaf.bit_count() - 1) - (leaf == leafOrigin)
 
 		specialCase: bool = (leaf == 首零(state.dimensionsTotal)+零)
 		rangeStep: int = 2 + (2 * specialCase)
@@ -89,24 +127,10 @@ def getDictionaryPileToLeaves(state: EliminationState) -> dict[int, list[int]]:
 	return dictionaryPileToLeaves
 
 def getLeafDomain(state: EliminationState, leaf: int) -> range:
-
 	@cache
 	def workhorse(leaf: int, dimensionsTotal: int, dimensionLength: int) -> range:
-		return range(leaf.bit_count() + (2**(coordinatesOf0AtTail(leaf) + 1) - 2)
-					, int(('1' * (leaf.bit_length()-1)).ljust(dimensionsTotal, '0'), dimensionLength) + 2 - (leaf.bit_count() - 1) - (leaf == leaf0)
-									, 2 + (2 * (leaf == 首零(dimensionsTotal)+零)))
+		return range(leaf.bit_count() + (2**(howMany0coordinatesAtTail(leaf) + 1) - 2)
+				, int(('1' * dimensionNearest首(leaf)).ljust(dimensionsTotal, '0'), dimensionLength) + 2 - (leaf.bit_count() - 1) - (leaf == leafOrigin)
+				, 2 + (2 * (leaf == 首零(dimensionsTotal)+零)))
 	return workhorse(leaf, state.dimensionsTotal, state.mapShape[0])
 
-if __name__ == '__main__':
-	from mapFolding.tests.verify import (  # pyright: ignore[reportUnusedImport]
-		verifyDictionaryAddends4Next, verifyDictionaryAddends4Prior, verifyDictionaryLeafRanges, verifyDictionaryPileToLeaves)
-
-	state = EliminationState((2,) * 6)
-	dictionaryLeafRanges = getDictionaryLeafDomains(state)
-	# verifyDictionaryLeafRanges(state, dictionaryLeafRanges)  # noqa: ERA001
-	dictionaryAddends4Next = getDictionaryAddends4Next(state)
-	# verifyDictionaryAddends4Next(state, dictionaryAddends4Next)  # noqa: ERA001
-	dictionaryAddends4Prior = getDictionaryAddends4Prior(state)
-	# verifyDictionaryAddends4Prior(state, dictionaryAddends4Prior)  # noqa: ERA001
-	dictionaryPileToLeaves = getDictionaryPileToLeaves(state)
-	# verifyDictionaryPileToLeaves(state, dictionaryPileToLeaves)  # noqa: ERA001

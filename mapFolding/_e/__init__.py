@@ -1,17 +1,60 @@
 """Developing elimination-based algorithms."""
 
-from mapFolding._e._measure import (dimensionNearest首 as dimensionNearest首, dimensionSecondNearest首 as dimensionSecondNearest首, leafSubHyperplane as leafSubHyperplane,
-	coordinatesOf0AtTail as coordinatesOf0AtTail, ptount as ptount)
+from mapFolding._e._measure import (dimensionNearest首 as dimensionNearest首, dimensionSecondNearest首 as dimensionSecondNearest首, leafInSubHyperplane as leafInSubHyperplane,
+	howMany0coordinatesAtTail as howMany0coordinatesAtTail, ptount as ptount)
 
 from mapFolding._e._semiotics import 零 as 零, 一 as 一, 二 as 二, 三 as 三, 四 as 四, 五 as 五, 六 as 六, 七 as 七, 八 as 八, 九 as 九
 from mapFolding._e._semiotics import 首零 as 首零, 首零二 as 首零二, 首一 as 首一, 首一二 as 首一二, 首零一 as 首零一, 首二 as 首二, 首三 as 首三, 首零一二 as 首零一二
-from mapFolding._e._semiotics import decreasing as decreasing, fullRange as fullRange, leaf0 as leaf0, origin as origin
+from mapFolding._e._semiotics import leafOrigin as leafOrigin, pileOrigin as pileOrigin, PinnedLeaves as PinnedLeaves
 
 from mapFolding._e._data import (getDictionaryAddends4Next as getDictionaryAddends4Next,
 	getDictionaryAddends4Prior as getDictionaryAddends4Prior,
 	getDictionaryLeafDomains as getDictionaryLeafDomains,
 	getDictionaryPileToLeaves as getDictionaryPileToLeaves,
-    getLeafDomain as getLeafDomain)
+    getLeafDomain as getLeafDomain,
+    getListLeavesIncrease as getListLeavesIncrease,
+	getListLeavesDecrease as getListLeavesDecrease
+	)
+
+
+"""
+leaf1 is a dimension origin: its addends up to [-1], which equate to leaves 3, 5, 9, 17, come before the dimension origins, 2, 4, 8, 16.
+
+This is due to:
+leaf	{dimension: increase}
+0			{0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32} <- dimension origins
+1			{1: 3, 2: 5, 3: 9, 4: 17, 5: 33}
+
+If leaf2 were before leaf3, it would interpose the crease from leaf1 to leaf3 in dimension1.
+
+Similarly, leaf2 addends up to [-1], which equate to leaves 6, 10, 18 come before dimension origins, 4, 8, 16.
+2			{0: 3, 2: 6, 3: 10, 4: 18, 5: 34}
+
+The rule against interposing is so strong it extends to leaf3, which is not a dimension origin, but is the first increase from leaf1.
+leaf3 addends up to [-1], which equate to leaves 7, 11, 19, come before the dimension origins, 4, 8, 16.
+3			{2: 7, 3: 11, 4: 19, 5: 35}
+
+leaf4 is the dimension2 origin and its increases 12 and 20 come before dimension origins 8 and 16.
+4			{0: 5, 1: 6, 3: 12, 4: 20, 5: 36}
+
+leaf5, 0b101, 二 + 零, which absolutely has the coordinates of 1 in dimension2, 二, and 1 in dimension0, 零, comes before all multiples of 4.
+
+leaf6, 二 + 一, is the same as leaf5.
+
+leaf7, 二 + 一 + 零, is also the same as leaf5 and leaf6!
+
+leaf9, 三 + 零, comes before the dimension3 origin leaf8, as described above, and before all multiples of 8, or 三.
+
+Furthermore, all leaves between 三+零 and 三+二+一+零, inclusive, come before 三 (8) and its multiples.
+
+The same thing happens at the next dimension, 四. leaves 17-31 all come before 16, 32, and 48. This example is a 6 dimensional
+map. Because all leaves less than 32 must come before leaf32, it cannot appear before pile 32. It's fixed at the last pile, of course.
+
+wow.
+
+if `dimensionNearest首(k) <= coordinatesOf0AtTail(r)`, then must `pileOf_k < pileOf_r`
+"""
+
 
 """Equating pile = leavesTotal // 2 - 1.
 dict_keys([2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31])

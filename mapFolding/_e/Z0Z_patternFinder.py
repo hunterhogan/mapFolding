@@ -1,11 +1,12 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
 from gmpy2 import bit_mask, is_even, is_odd
 from itertools import filterfalse, repeat
+from mapFolding import reverseLookup
 from mapFolding._e import (
-	coordinatesOf0AtTail, getDictionaryAddends4Next, getDictionaryLeafDomains, getDictionaryPileToLeaves, getLeafDomain,
-	leafSubHyperplane, ptount, 一, 三, 二, 四, 零, 首一, 首二, 首零, 首零一)
-from mapFolding._e.pinning2DnData import dictionaryExclusions
+	getDictionaryAddends4Next, getDictionaryLeafDomains, getDictionaryPileToLeaves, getLeafDomain,
+	howMany0coordinatesAtTail, leafInSubHyperplane, ptount, 一, 三, 二, 四, 零, 首一, 首二, 首零, 首零一)
 from mapFolding.dataBaskets import EliminationState
+from more_itertools import extract
 from pathlib import Path
 from pprint import pprint
 import csv
@@ -64,18 +65,18 @@ def getExcludingDictionary(state: EliminationState, leafExcluder: int) -> dict[i
 
 				if is_odd(leaf):
 					excludingDictionary[pileExcluder][leaf].extend([indexDomainPileExcluder])
-					if 1 < coordinatesOf0AtTail(leaf - 1) < state.dimensionsTotal - 1:
+					if 1 < howMany0coordinatesAtTail(leaf - 1) < state.dimensionsTotal - 1:
 						excludingDictionary[pileExcluder][leaf].extend([indexDomainPileExcluder + 1])
 
-				if coordinatesOf0AtTail(leaf) == 1:
+				if howMany0coordinatesAtTail(leaf) == 1:
 					excludingDictionary[pileExcluder][leaf].extend([indexDomainPileExcluder - 1])
 					start = 0
-					stop = indexDomainPileExcluder - (leafSubHyperplane(leaf) == 2) - (2 * max(0, leaf.bit_count() - 3))
+					stop = indexDomainPileExcluder - (leafInSubHyperplane(leaf) == 2) - (2 * max(0, leaf.bit_count() - 3))
 					excludingDictionary[pileExcluder][leaf].extend([*range(start, stop)])
 
-				if coordinatesOf0AtTail(leaf) == 2:
+				if howMany0coordinatesAtTail(leaf) == 2:
 					start = 0
-					stop = indexDomainPileExcluder - 2 * (leafSubHyperplane(leaf) == 4) - 2
+					stop = indexDomainPileExcluder - 2 * (leafInSubHyperplane(leaf) == 4) - 2
 					excludingDictionary[pileExcluder][leaf].extend([*range(start, stop)])
 
 				if (leaf == 首一(state.dimensionsTotal)):
@@ -132,6 +133,26 @@ def getExcludingDictionary(state: EliminationState, leafExcluder: int) -> dict[i
 	# else:
 	# 	excludingDictionary: dict[int, dict[int, list[int]]] | None = dictionaryExclusions.get(leafExcluder)
 	return excludingDictionary
+
+def Z0Z_TESTexcluding2d5(state: EliminationState, leaf: int) -> bool:
+
+	for leafExcluder in range(state.leavesTotal):
+		excludingDictionary: dict[int, dict[int, list[int]]] | None = getExcludingDictionary(state, leafExcluder)
+		if excludingDictionary is None:
+			continue
+
+		if leaf != leafExcluder and leafExcluder in state.pinnedLeaves.values():
+			pileExcluder: int = reverseLookup(state.pinnedLeaves, leafExcluder)
+			if pileExcluder in excludingDictionary:
+				dictionaryIndicesPilesExcluded: dict[int, list[int]] = excludingDictionary[pileExcluder]
+				if leaf in dictionaryIndicesPilesExcluded:
+					listIndicesPilesExcluded: list[int] = dictionaryIndicesPilesExcluded[leaf]
+					domainOfPilesForLeaf: list[int] = list(getLeafDomain(state, leaf))
+					listPilesExcluded: list[int] = list(extract(domainOfPilesForLeaf, listIndicesPilesExcluded))
+					if state.pile in listPilesExcluded:
+						return True
+
+	return False
 
 def analyzeExclusions() -> None:
 	"""Analyze.

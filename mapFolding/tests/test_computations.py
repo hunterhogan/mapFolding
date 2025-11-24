@@ -103,9 +103,10 @@ def test_eliminateFolds(mapShapeTestParallelization: tuple[int, ...], flow: str)
 	flow : str
 		The computational flow algorithm to validate.
 	"""
+	state = None
 	pathLikeWriteFoldsTotal: None = None
 	CPUlimit: bool | float | int | None = .25
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestParallelization), eliminateFolds, mapShapeTestParallelization, pathLikeWriteFoldsTotal, CPUlimit, flow)
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(mapShapeTestParallelization), eliminateFolds, mapShapeTestParallelization, state, pathLikeWriteFoldsTotal, CPUlimit, flow)
 
 @pytest.mark.parametrize('flow', ['matrixMeanders', 'matrixNumPy', 'matrixPandas'])
 def test_meanders(oeisIDmeanders: str, flow: str) -> None:

@@ -2,7 +2,8 @@
 from cytoolz.curried import dissoc, filter, map as toolz_map, valmap  # noqa: A004
 from cytoolz.functoolz import compose
 from gmpy2 import fac
-from mapFolding._e import getDictionaryAddends4Next
+from mapFolding._e import PinnedLeaves, getDictionaryAddends4Next
+from mapFolding._e.pinning2DnAnnex import beansWithoutCornbread
 from mapFolding.dataBaskets import EliminationState
 from math import prod
 from pathlib import Path
@@ -108,7 +109,7 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		listMasks.append(maskMatches)
 
 	print("\33[93m", end='')
-	pprint(listDictionaryPinned[0:10], width=140, compact=True)
+	pprint(listDictionaryPinned[0:2], width=140)
 	print(colorReset, end='')
 	print(len(listDictionaryPinned), "surplus dictionaries.")
 
@@ -122,16 +123,6 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 			for pinnedLeaves in listDictionaryPinned:
 				writerCSV.writerow([pinnedLeaves.get(pile, '') for pile in listPiles])
 
-	maskUnion = numpy.logical_or.reduce(listMasks)
-	rowsCovered: int = int(maskUnion.sum())
-	color = colorReset
-	if rowsCovered < rowsTotal:
-		color = '\33[91m'
-		indicesMissingRows: numpy.ndarray = numpy.flatnonzero(~maskUnion)
-		for indexRow in indicesMissingRows[0:2]:
-			print(arrayFoldings[indexRow, :])
-	print(f"{color}Covered rows: {rowsCovered}/{rowsTotal}{colorReset}")
-
 	masksStacked: numpy.ndarray = numpy.column_stack(listMasks)
 	coverageCountPerRow: numpy.ndarray = masksStacked.sum(axis=1)
 	indicesOverlappedRows: numpy.ndarray = numpy.nonzero(coverageCountPerRow >= 2)[0]
@@ -140,8 +131,27 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		for indexMask, mask in enumerate(listMasks):
 			if bool(mask[indicesOverlappedRows].any()):
 				overlappingIndices.add(indexMask)
-		for indexDictionary in sorted(overlappingIndices):
-			print("Overlapping", state.listPinnedLeaves[indexDictionary])
+		color = '\33[91m'
+		print(f"{color}{len(overlappingIndices)} overlapping dictionaries", colorReset)
+		for indexDictionary in sorted(overlappingIndices)[0:2]:
+			pprint(state.listPinnedLeaves[indexDictionary], width=140)
+
+	beansOrCornbread: Callable[[PinnedLeaves], bool] = beansWithoutCornbread(state)
+	listBeans: list[PinnedLeaves] = list(filter(beansOrCornbread, state.listPinnedLeaves))
+	if listBeans:
+		color = '\33[95m'
+		print(f"{color}{len(listBeans)} dictionaries with beans but no cornbread.", colorReset)
+		pprint(listBeans[0], width=140)
+
+	maskUnion = numpy.logical_or.reduce(listMasks)
+	rowsCovered: int = int(maskUnion.sum())
+	color = colorReset
+	if rowsCovered < rowsTotal:
+		color = '\33[91m'
+		indicesMissingRows: numpy.ndarray = numpy.flatnonzero(~maskUnion)
+		for indexRow in indicesMissingRows[0:2]:
+			pprint(arrayFoldings[indexRow, :], width=140)
+	print(f"{color}Covered rows: {rowsCovered}/{rowsTotal}{colorReset}")
 
 def printStatisticsPermutations(state: EliminationState) -> None:
 	dictionaryAddends4Next: dict[int, list[int]] = getDictionaryAddends4Next(state)
