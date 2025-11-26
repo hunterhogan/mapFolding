@@ -1,8 +1,11 @@
+from collections.abc import Callable, Iterable
+from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, bit_test, is_even
 from itertools import product as CartesianProduct
 from mapFolding import decreasing
-from mapFolding._e import dimensionNearest首, howMany0coordinatesAtTail, leafOrigin, 零, 首零
+from mapFolding._e import (
+	dimensionNearest首, howMany0coordinatesAtTail, howManyDimensionsHaveOddParity, leafOrigin, 零, 首零)
 from mapFolding.dataBaskets import EliminationState
 from math import prod
 
@@ -106,31 +109,79 @@ def getDictionaryLeafDomains(state: EliminationState) -> dict[int, range]:
 	"""  # noqa: D205
 	return {leaf: getLeafDomain(state, leaf) for leaf in range(state.leavesTotal)}
 
-def getDictionaryPileToLeaves(state: EliminationState) -> dict[int, list[int]]:
-	"""At `pile`, which `leaf` values may be found in a `folding`."""
-	dictionaryPileToLeaves: dict[int, list[int]] = {pile: [] for pile in range(state.leavesTotal)}
+def getDictionaryPileRanges(state: EliminationState) -> dict[int, list[int]]:
+	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
+	@cache
+	def workhorse(dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> dict[int, list[int]]:
+		dictionaryPileRanges: dict[int, list[int]] = {pile: [] for pile in range(leavesTotal)}
 
-# TODO create the per-pile function analogous to getLeafDomain().
+		for pile, leaf in CartesianProduct(range(leavesTotal), range(leavesTotal)):
+			rangeStart: int = leaf.bit_count() + (2**(howMany0coordinatesAtTail(leaf) + 1) - 2)
 
-	for pile, leaf in CartesianProduct(range(state.leavesTotal), range(state.leavesTotal)):
-		rangeStart: int = leaf.bit_count() + (2**(howMany0coordinatesAtTail(leaf) + 1) - 2)
+			binary: str = ('1' * dimensionNearest首(leaf)).ljust(dimensionsTotal, '0')
+			rangeStop: int = int(binary, mapShape[0]) + 2 - (leaf.bit_count() - 1) - (leaf == leafOrigin)
 
-		binary: str = ('1' * dimensionNearest首(leaf)).ljust(state.dimensionsTotal, '0')
-		rangeStop: int = int(binary, state.mapShape[0]) + 2 - (leaf.bit_count() - 1) - (leaf == leafOrigin)
+			specialCase: bool = (leaf == 首零(dimensionsTotal)+零)
+			rangeStep: int = 2 + (2 * specialCase)
 
-		specialCase: bool = (leaf == 首零(state.dimensionsTotal)+零)
-		rangeStep: int = 2 + (2 * specialCase)
+			if rangeStart <= pile < rangeStop and (pile - rangeStart) % rangeStep == 0:
+				dictionaryPileRanges[pile].append(leaf)
 
-		if rangeStart <= pile < rangeStop and (pile - rangeStart) % rangeStep == 0:
-			dictionaryPileToLeaves[pile].append(leaf)
-
-	return dictionaryPileToLeaves
+		return dictionaryPileRanges
+	return workhorse(state.dimensionsTotal, state.mapShape, state.leavesTotal)
 
 def getLeafDomain(state: EliminationState, leaf: int) -> range:
 	@cache
-	def workhorse(leaf: int, dimensionsTotal: int, dimensionLength: int) -> range:
-		return range(leaf.bit_count() + (2**(howMany0coordinatesAtTail(leaf) + 1) - 2)
-				, int(('1' * dimensionNearest首(leaf)).ljust(dimensionsTotal, '0'), dimensionLength) + 2 - (leaf.bit_count() - 1) - (leaf == leafOrigin)
-				, 2 + (2 * (leaf == 首零(dimensionsTotal)+零)))
-	return workhorse(leaf, state.dimensionsTotal, state.mapShape[0])
+	def workhorse(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> range:
+		"""The subroutines assume `dimensionLength == 2`, but I think the concept could be extended to other `mapShape`."""
+		if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
+			originPinned =  leaf == leafOrigin
+			return range(
+						int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1))									# `start`, first value included in the `range`.
+							+ howManyDimensionsHaveOddParity(leaf)
+							- 1 - originPinned
+						, int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf)))	# `stop`, first value excluded from the `range`.
+							- howManyDimensionsHaveOddParity(leaf)
+							+ 2 - originPinned
+						, 2 + (2 * (leaf == 首零(dimensionsTotal)+零))											# `step`
+					)
+		else:
+			return range(leavesTotal)
+	return workhorse(leaf, state.dimensionsTotal, state.mapShape, state.leavesTotal)
 
+@syntacticCurry
+def filterCeiling(pile: int, dimensionsTotal: int, leaf: int) -> bool:
+	return pile <  int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin)
+
+@syntacticCurry
+def filterFloor(pile: int, leaf: int) -> bool:
+	return int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile
+
+@syntacticCurry
+def filterParity(pile: int, leaf: int) -> bool:
+	return (pile & 1) == ((int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1)
+
+@syntacticCurry
+def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: int) -> bool:
+	if leaf != 首零(dimensionsTotal)+零:
+		return True
+	return (pile >> 1 & 1) == ((int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
+
+def getPileRange(state: EliminationState, pile: int) -> Iterable[int]:
+	@cache
+	def workhorse(pile: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> Iterable[int]:
+		if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
+			parityMatch: Callable[[int], bool] = filterParity(pile)
+			pileAboveFloor: Callable[[int], bool] = filterFloor(pile)
+			pileBelowCeiling: Callable[[int], bool] = filterCeiling(pile, dimensionsTotal)
+			matchLargerStep: Callable[[int], bool] = filterDoubleParity(pile, dimensionsTotal)
+
+			pileRange = range(leavesTotal)
+			pileRange = filter(parityMatch, pileRange)
+			pileRange = filter(pileAboveFloor, pileRange)
+			pileRange = filter(pileBelowCeiling, pileRange)
+			return filter(matchLargerStep, pileRange)
+
+		else:
+			return range(leavesTotal)
+	return workhorse(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal)

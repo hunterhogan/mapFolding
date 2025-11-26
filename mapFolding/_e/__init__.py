@@ -1,23 +1,56 @@
 """Developing elimination-based algorithms."""
 
-from mapFolding._e._measure import (dimensionNearest首 as dimensionNearest首, dimensionSecondNearest首 as dimensionSecondNearest首, leafInSubHyperplane as leafInSubHyperplane,
-	howMany0coordinatesAtTail as howMany0coordinatesAtTail, ptount as ptount)
+# isort: split
+from mapFolding._e._semiotics import (
+	leafOrigin as leafOrigin, pileOrigin as pileOrigin, PinnedLeaves as PinnedLeaves, 一 as 一, 七 as 七, 三 as 三, 九 as 九,
+	二 as 二, 五 as 五, 八 as 八, 六 as 六, 四 as 四, 零 as 零, 首一 as 首一, 首一二 as 首一二, 首三 as 首三, 首二 as 首二, 首零 as 首零, 首零一 as 首零一,
+	首零一二 as 首零一二, 首零二 as 首零二)
 
-from mapFolding._e._semiotics import 零 as 零, 一 as 一, 二 as 二, 三 as 三, 四 as 四, 五 as 五, 六 as 六, 七 as 七, 八 as 八, 九 as 九
-from mapFolding._e._semiotics import 首零 as 首零, 首零二 as 首零二, 首一 as 首一, 首一二 as 首一二, 首零一 as 首零一, 首二 as 首二, 首三 as 首三, 首零一二 as 首零一二
-from mapFolding._e._semiotics import leafOrigin as leafOrigin, pileOrigin as pileOrigin, PinnedLeaves as PinnedLeaves
+# isort: split
+from mapFolding._e._measure import (
+	dimensionNearest首 as dimensionNearest首, dimensionSecondNearest首 as dimensionSecondNearest首,
+	howMany0coordinatesAtTail as howMany0coordinatesAtTail,
+	howManyDimensionsHaveOddParity as howManyDimensionsHaveOddParity, leafInSubHyperplane as leafInSubHyperplane,
+	ptount as ptount)
 
-from mapFolding._e._data import (getDictionaryAddends4Next as getDictionaryAddends4Next,
-	getDictionaryAddends4Prior as getDictionaryAddends4Prior,
-	getDictionaryLeafDomains as getDictionaryLeafDomains,
-	getDictionaryPileToLeaves as getDictionaryPileToLeaves,
-    getLeafDomain as getLeafDomain,
-    getListLeavesIncrease as getListLeavesIncrease,
-	getListLeavesDecrease as getListLeavesDecrease
-	)
+# isort: split
+from mapFolding._e._data import (
+	getDictionaryAddends4Next as getDictionaryAddends4Next, getDictionaryAddends4Prior as getDictionaryAddends4Prior,
+	getDictionaryLeafDomains as getDictionaryLeafDomains, getDictionaryPileRanges as getDictionaryPileRanges,
+	getLeafDomain as getLeafDomain, getListLeavesDecrease as getListLeavesDecrease,
+	getListLeavesIncrease as getListLeavesIncrease, getPileRange as getPileRange)
 
+"""Perspective changes and code changes:
 
+- Not `addends`: increment/decrement in ONE dimension.
+- To increment in a dimension means to add 1 in the dimensionIndex. If the current value is 0, then the new value is 1. If the
+	current value is 1, then the addition requires "carrying" values to "higher" dimensionIndices.
+- The `next` crease, in the sense of `k+1` and `r+1` in the inequalities is simple: given `k` and `dimension`,
+	`k1 = bit_flip(k, dimension); k1 = k1 if k1 > k else None`.
+    NOTE: this is because I evaluate the 4 `k < r`, not the 8 `k ? r` inequalities *a la* Koehler.
+- The union of `dictionaryAddends4Next` and `dictionaryAddends4Prior` are the equivalent of:
+	`listLeavesNextAndPriorInSequence = [int(bit_flip(leaf, dimension)) for dimension in range(state.dimensionsTotal)]`.
 """
+
+"""The 'meaning' of:
+- "CTZ" or `howMany0coordinatesAtTail()` measures trailing zeros.
+- `int.bit_length()` essentially measures leading zeros.
+- `int.bit_count() - 1` or `howManyDimensionsHaveOddParity()` measures how many ones other than the MSD, but unlike CTZ, it counts
+the absolute quantity, not just the consecutive ones relative to the LSD.
+"""
+
+"""leaf metadata:
+	per dimension:
+		for inequality checking:
+			next leaf or None
+			parity
+	dictionaryAddends4Next
+	dictionaryAddends4Prior
+    domain of leaf
+	range of leaves in piles
+"""
+
+"""if `dimensionNearest首(k) <= coordinatesOf0AtTail(r)`, then must `pileOf_k < pileOf_r`
 leaf1 is a dimension origin: its addends up to [-1], which equate to leaves 3, 5, 9, 17, come before the dimension origins, 2, 4, 8, 16.
 
 This is due to:
@@ -54,7 +87,6 @@ wow.
 
 if `dimensionNearest首(k) <= coordinatesOf0AtTail(r)`, then must `pileOf_k < pileOf_r`
 """
-
 
 """Equating pile = leavesTotal // 2 - 1.
 dict_keys([2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31])
@@ -110,10 +142,3 @@ for equate the piles:
 			make a rule
 """
 
-"""NOTE
-multiplicityOfPrimeFactor2 measures trailing zeros.
-.bit_length() essentially measures leading zeros.
-
-.bit_count() -1 measures ones, and the ones must be in the digits that trail the MSD.
-
-"""

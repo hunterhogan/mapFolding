@@ -151,10 +151,6 @@ def findValidFoldings(state: EliminationState) -> int:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-	# state = pinByFormula(state)
-	state = secondOrderLeaves(state)
-	# state = secondOrderPilings(state)
-
 	if state.listPinnedLeaves:
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:

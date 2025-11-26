@@ -64,6 +64,14 @@ def howMany0coordinatesAtTail(integerNonnegative: int, /) -> int:
 	return gmpy2.bit_scan1(anInteger) or 0
 
 @cache
+def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
+	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
+	if anInteger < 0:
+		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
+		raise ValueError(message)
+	return max(0, anInteger.bit_count() - 1)
+
+@cache
 def ptount(integerAbove3: int, /) -> int:
 	"""After subtracting 0b000011 from `integerAbove3`, measure the distance from a ***p***ower of ***t***wo's bit c***ount***.
 

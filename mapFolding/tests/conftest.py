@@ -25,6 +25,7 @@ research domain.
 
 from collections.abc import Callable, Generator, Sequence
 from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
+from mapFolding.dataBaskets import EliminationState
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, oeisIDsImplemented
 from pathlib import Path
 from typing import Any
@@ -395,6 +396,21 @@ def oeisID_1random() -> str:
 
 	"""
 	return random.choice(oeisIDsImplemented)
+
+@pytest.fixture
+def makeEliminationState() -> Callable[[tuple[int, ...]], EliminationState]:
+	"""Factory fixture for creating EliminationState instances.
+
+	Returns
+	-------
+	stateFactory : Callable[[tuple[int, ...]], EliminationState]
+		Factory function that creates EliminationState instances for a given mapShape.
+
+	"""
+	def factory(mapShape: tuple[int, ...]) -> EliminationState:
+		return EliminationState(mapShape=mapShape)
+
+	return factory
 
 def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
 	"""Format assertion message for any test comparison.

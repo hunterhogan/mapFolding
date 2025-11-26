@@ -1,28 +1,28 @@
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
 from cytoolz.dicttoolz import assoc as associate
-from cytoolz.functoolz import complement, curry as syntacticCurry
+from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
 from itertools import repeat
-from mapFolding import decreasing, DOTvalues, inclusive
-from mapFolding._e import PinnedLeaves
+from mapFolding import DOTvalues
+from mapFolding._e import getLeafDomain, getPileRange, PinnedLeaves
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import flatten
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-	from collections.abc import Callable, Iterator
+"""Rules for maintaining a valid permutation space:
 
-"""Maintaining a valid permutation space:
+1. In `pinnedLeaves`, if `leaf` is not pinned, deconstruct `pinnedLeaves` by the `pile` domain of `leaf`.
+	A. For each `pile` in the domain of `leaf`, if `pile` in `pinnedLeaves` is not occupied, create a new `PinnedLeaves` dictionary by appending `leaf` pinned at `pile` to `pinnedLeaves`.
+	B. Replace `pinnedLeaves` with the group of newly created `PinnedLeaves` dictionaries.
+2. If a `pile` is not pinned, deconstruct the dictionary into multiple dictionaries: for each `leaf` that is not already pinned and is in the range of `pile`, pin it at `pile`.
 
-- If a pile is not pinned, deconstruct the dictionary into multiple dictionaries: for each unpinned leaf, pin it a pile.
-- If I know the domain of a leaf, deconstruct the dictionary into multiple dictionaries: for each pile in the domain, pin the leaf at that pile.
-
-- Do not overwrite or delete a dictionary's pinned leaves because that could cause the permutation space to overlap with a different dictionary's permutation space.
+3. Do not overwrite or delete a dictionary's pinned leaves because that could cause the dictionary's permutation space to overlap with a different dictionary's permutation space.
 """
 # ======= Deconstruct a `pinnedLeaves` dictionary =======
-
 def deconstructPinnedLeavesAtPile(pinnedLeaves: PinnedLeaves, pile: int, leavesToPin: Iterable[int]) -> dict[int, PinnedLeaves]:
-	"""Return a dictionary of `PinnedLeaves` with either `pinnedLeaves` because it already has a `leaf` pinned at `pile` or one `PinnedLeaves` for each `leaf` in `leavesToPin` pinned at `pile`.
+	"""Deconstruct an open `pile` to the `leaf` range of `pile`.
+
+	Return a dictionary of `PinnedLeaves` with either `pinnedLeaves` because it already has a `leaf` pinned at `pile` or one
+	`PinnedLeaves` for each `leaf` in `leavesToPin` pinned at `pile`.
 
 	Parameters
 	----------
@@ -36,7 +36,7 @@ def deconstructPinnedLeavesAtPile(pinnedLeaves: PinnedLeaves, pile: int, leavesT
 	Returns
 	-------
 	deconstructedPinnedLeaves : dict[int, PinnedLeaves]
-		Dictionary mapping from `leaf` pinned at `pile` to the dictionary with the `leaf` pinned at `pile`.
+		Dictionary mapping from `leaf` pinned at `pile` to the `PinnedLeaves` dictionary with the `leaf` pinned at `pile`.
 	"""
 	if not pileIsOpen(pinnedLeaves, pile):
 		deconstructedPinnedLeaves: dict[int, PinnedLeaves] = {pinnedLeaves[pile]: pinnedLeaves}
@@ -46,38 +46,65 @@ def deconstructPinnedLeavesAtPile(pinnedLeaves: PinnedLeaves, pile: int, leavesT
 		deconstructedPinnedLeaves = {leaf: pin(leaf) for leaf in filter(leafCanBePinned, leavesToPin)}
 	return deconstructedPinnedLeaves
 
-def deconstructPinnedLeavesByLeaf(pinnedLeaves: PinnedLeaves, leaf: int, listPiles: Iterable[int]) -> list[PinnedLeaves]:
-	"""Pin `leaf` at each open `pile` is the domain of `leaf`.
+def deconstructPinnedLeavesByDomainOfLeaf(pinnedLeaves: PinnedLeaves, leaf: int, leafDomain: Iterable[int]) -> list[PinnedLeaves]:
+	"""Pin `leaf` at each open `pile` in the domain of `leaf`.
 
 	Return a `list` of `PinnedLeaves` with either `pinnedLeaves` because `leaf` is already pinned or one `PinnedLeaves` for each
-	open `pile` in `listPiles` with leaf pinned at `pile` and `pinnedLeaves` if a `pile` is occupied.
+	open `pile` in `leafDomain` with leaf pinned at `pile`.
 
 	Parameters
 	----------
 	pinnedLeaves : PinnedLeaves
 		Dictionary to divide and replace.
-	pile : int
-		`pile` at which to pin a `leaf`.
-	leavesToPin : list[int]
-		List of `leaves` to pin at `pile`.
+	leaf : int
+		`leaf` to pin.
+	leafDomain : Iterable[int]
+		Domain of `pile` indices for `leaf`.
 
 	Returns
 	-------
 	deconstructedPinnedLeaves : list[PinnedLeaves]
-		Dictionary mapping from `leaf` pinned at `pile` to the dictionary with the `leaf` pinned at `pile`.
+		List of `PinnedLeaves` dictionaries with `leaf` pinned at each open `pile` in `leafDomain`.
 	"""
 	if leafIsNotPinned(pinnedLeaves, leaf):
-		pinLeafTo: Callable[[int], PinnedLeaves] = atPilePinLeaf(pinnedLeaves, leaf=leaf)
+		pinLeafAt: Callable[[int], PinnedLeaves] = atPilePinLeaf(pinnedLeaves, leaf=leaf)
 		pileAvailable: Callable[[int], bool] = pileIsOpen(pinnedLeaves)
-		pileOccupied: Callable[[int], bool] = complement(pileIsOpen(pinnedLeaves))
-		deconstructedPinnedLeaves: list[PinnedLeaves] = [pinLeafTo(pile) for pile in filter(pileAvailable, listPiles)]
-		if tuple(filter(pileOccupied, listPiles)):
-			deconstructedPinnedLeaves.append(pinnedLeaves)
+		deconstructedPinnedLeaves: list[PinnedLeaves] = list(map(pinLeafAt, filter(pileAvailable, leafDomain)))
 	else:
 		deconstructedPinnedLeaves = [pinnedLeaves]
 	return deconstructedPinnedLeaves
 
-# ======= Fix one or more leaves in `pinnedLeaves` or `folding` =======================
+def deconstructPinnedLeavesByDomainOf2Leaves(pinnedLeaves: PinnedLeaves, leaves: tuple[int, int], leavesDomain: Iterable[tuple[int, int]]) -> list[PinnedLeaves]:
+	deconstructedPinnedLeaves: list[PinnedLeaves] = []
+
+	def Z0Z_pileOpen(index: int) -> Callable[[tuple[int, int]], bool]:
+		def workhorse(domain: tuple[int, int]) -> bool:
+			return pileIsOpen(pinnedLeaves, domain[index])
+		return workhorse
+
+	def Z0Z_isPinnedAtPile(leaf: int, index: int) -> Callable[[tuple[int, int]], bool]:
+		def workhorse(domain: tuple[int, int]) -> bool:
+			return isPinnedAtPile(pinnedLeaves, leaf, domain[index])
+		return workhorse
+
+	if any(map(leafIsNotPinned(pinnedLeaves), leaves)):
+		for index in range(len(leaves)):
+			if leafIsNotPinned(pinnedLeaves, leaves[index]):
+				leavesDomain = filter(Z0Z_pileOpen(index), leavesDomain)
+			else:
+				leavesDomain = filter(Z0Z_isPinnedAtPile(leaves[index], index), leavesDomain)
+
+		for domain in leavesDomain:
+			pinnedLeavesWIP: PinnedLeaves = pinnedLeaves.copy()
+			pinnedLeavesWIP[domain[0]] = leaves[0]
+			pinnedLeavesWIP[domain[1]] = leaves[1]
+			deconstructedPinnedLeaves.append(pinnedLeavesWIP)
+	else:
+		deconstructedPinnedLeaves = [pinnedLeaves]
+
+	return deconstructedPinnedLeaves
+
+# ======= Pin one or more leaves in `pinnedLeaves` or `folding` =======================
 
 @syntacticCurry
 def atPilePinLeaf(pinnedLeaves: PinnedLeaves, pile: int, leaf: int) -> PinnedLeaves:
@@ -165,9 +192,9 @@ def pileIsOpen(pinnedLeaves: PinnedLeaves, pile: int) -> bool:
 	"""
 	return pile not in pinnedLeaves
 
-# ======= Is this "group by", a "filter", "flow control", or something else? =======================
+# ======= Group by =======================
 
-def _segregatePinnedAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile: int) -> tuple[list[PinnedLeaves], list[PinnedLeaves]]:
+def _segregateLeafPinnedAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile: int) -> tuple[list[PinnedLeaves], list[PinnedLeaves]]:
 	"""Partition `listPinnedLeaves` into (notPinned, isPinned) groups for `leaf` pinned at `pile`.
 
 	Parameters
@@ -191,44 +218,34 @@ def _segregatePinnedAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile
 
 # ======= Bulk modifications =======================
 
-def deconstructListPinnedLeavesAtPile(listPinnedLeaves: list[PinnedLeaves], pile: int, leavesToPin: Iterable[int]) -> list[PinnedLeaves]:
+def deconstructListPinnedLeavesAtPile(listPinnedLeaves: Iterable[PinnedLeaves], pile: int, leavesToPin: Iterable[int]) -> Iterator[PinnedLeaves]:
 	"""Expand every dictionary in `listPinnedLeaves` at `pile` into all pinning variants.
 
 	Applies `deconstructPinnedLeaves` element-wise, then flattens the nested value collections (each a mapping leaf -> dictionary)
-	into a single list of dictionaries, discarding the intermediate keyed structure. Centralizes expansion logic for downstream
-
-	elimination predicates.
+	into a single list of dictionaries, discarding the intermediate keyed structure.
 
 	Parameters
 	----------
-	listPinnedLeaves : list[PinnedLeaves]
+	listPinnedLeaves : Iterable[PinnedLeaves]
 		Partial folding dictionaries.
 	pile : int
 		`pile` index to expand.
-	leavesTotal : int
-		Total number of leaves.
+	leavesToPin : Iterable[int]
+		`leaf` indices to pin at `pile`.
 
 	Returns
 	-------
-	listPinnedLeaves : list[PinnedLeaves]
-		Flat list of expanded dictionaries covering all possible `leaf` assignments at `pile`.
+	listPinnedLeaves : Iterator[PinnedLeaves]
+		Flat iterator of expanded dictionaries covering all possible `leaf` assignments at `pile`.
 
 	See Also
 	--------
 	deconstructPinnedLeaves
 	"""
-	return list(flatten(map(DOTvalues, map(deconstructPinnedLeavesAtPile, listPinnedLeaves, repeat(pile), repeat(leavesToPin)))))
+	return  flatten(map(DOTvalues, map(deconstructPinnedLeavesAtPile, listPinnedLeaves, repeat(pile), repeat(leavesToPin))))
 
-def _excludeLeafRBeforeLeafK(state: EliminationState, k: int, r: int, pileK: int, listPinnedLeaves: list[PinnedLeaves]) -> list[PinnedLeaves]:
+def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: int, r: int, pile_k: int, domain_r: Iterable[int] | None = None, rangePile_k: Iterable[int] | None = None) -> EliminationState:
 	"""Internal worker enforcing the ordering constraint: leaf `r` cannot precede leaf `k`.
-
-	Mechanics
-	---------
-	1. Fully expand dictionaries at `pileK` (since we will inspect / segregate pinning status for leaf `k`).
-	2. Scan piles from `pileK` upward, segregating dictionaries where `k` is pinned at each pile; accumulate those pinned sets.
-	3. After gathering all dictionaries that pin `k` at or after `pileK`, exclude leaf `r` from immediately preceding pile (`pileK - 1`).
-
-	This mirrors the structure required by Lunnon-style dimension product constraints (later applied in `theorem4` / `theorem2b`).
 
 	Parameters
 	----------
@@ -240,29 +257,59 @@ def _excludeLeafRBeforeLeafK(state: EliminationState, k: int, r: int, pileK: int
 		Leaf that must not appear before `k` (also dimension-derived).
 	pileK : int
 		Pile index currently under consideration for leaf `k`.
-	listPinnedLeaves : list[PinnedLeaves]
-		Working list of pinned dictionaries to transform.
 
 	Returns
 	-------
-	listPinnedLeaves : list[PinnedLeaves]
-		Updated list implementing the exclusion.
+	state : EliminationState
+		Same state instance, mutated with updated `listPinnedLeaves`.
 
 	See Also
 	--------
 	excludeLeafRBeforeLeafK, theorem4, theorem2b
 	"""
-	listPinnedLeaves = deconstructListPinnedLeavesAtPile(listPinnedLeaves, pileK, range(state.leavesTotal))
-	listPinned: list[PinnedLeaves] = []
-	for pile in range(pileK, state.pileLast + inclusive):
-		(listPinnedLeaves, listPinnedAtPile) = _segregatePinnedAtPile(listPinnedLeaves, k, pile)
-		listPinned.extend(listPinnedAtPile)
-	leavesToPin: list[int] = list(range(state.leavesTotal))
-	leavesToPin.remove(r)
-	listPinnedLeaves.extend(excludeLeafAtPile(listPinned, r, pileK - 1, leavesToPin))
-	return listPinnedLeaves
+	iterator_kPinnedAt_pile_k: Iterable[PinnedLeaves] = []
+	iterable_pile_kOccupied: Iterable[PinnedLeaves] = []
+	listPinnedLeaves: list[PinnedLeaves] = []
+	listPinnedLeavesCompleted: list[PinnedLeaves] = []
 
-def excludeLeafRBeforeLeafK(state: EliminationState, k: int, r: int) -> EliminationState:
+	pile_kIsOpen: Callable[[PinnedLeaves], bool] = pileIsOpen(pile=pile_k)
+	kIsNotPinned: Callable[[PinnedLeaves], bool] = leafIsNotPinned(leaf=k)
+
+	listPinnedLeaves, iterator_kPinnedAt_pile_k = _segregateLeafPinnedAtPile(state.listPinnedLeaves, k, pile_k)
+	state.listPinnedLeaves = []
+
+	grouped: dict[bool, list[PinnedLeaves]] = toolz_groupby(kIsNotPinned, listPinnedLeaves)
+	listPinnedLeavesCompleted, listPinnedLeaves = grouped.get(False, []), grouped.get(True, [])
+	grouped = toolz_groupby(pile_kIsOpen, listPinnedLeaves)
+	iterable_pile_kOccupied, listPinnedLeaves = grouped.get(False, []), grouped.get(True, [])
+	listPinnedLeavesCompleted.extend(iterable_pile_kOccupied)
+
+	if domain_r is None:
+		domain_r = getLeafDomain(state, r)
+
+	domain_r = filter(lambda pile_r: pile_r < pile_k, domain_r)
+
+	if rangePile_k is None:
+		rangePile_k = getPileRange(state, pile_k)
+
+	rangePile_k = tuple(rangePile_k)
+
+	if k in rangePile_k:
+		for pinnedLeaves_kPinnedAt_pile_k, iterable_pile_kOccupied in segregateLeafByDeconstructingListPinnedLeavesAtPile(listPinnedLeaves, k, pile_k, rangePile_k):
+			listPinnedLeavesCompleted.extend(iterable_pile_kOccupied)
+			iterator_kPinnedAt_pile_k.append(pinnedLeaves_kPinnedAt_pile_k)
+	else:
+		listPinnedLeavesCompleted.extend(listPinnedLeaves)
+
+	for pile_r in domain_r:
+		iterator_kPinnedAt_pile_k = excludeLeafAtPile(iterator_kPinnedAt_pile_k, r, pile_r, tuple(filter(lambda leaf: leaf != r, getPileRange(state, pile_r))))
+
+	state.listPinnedLeaves.extend(listPinnedLeavesCompleted)
+	state.listPinnedLeaves.extend(iterator_kPinnedAt_pile_k)
+
+	return state
+
+def excludeLeaf_rBeforeLeaf_k(state: EliminationState, k: int, r: int, domain_k: Iterable[int] | None = None, domain_r: Iterable[int] | None = None) -> EliminationState:
 	"""Apply the leaf ordering exclusion (r cannot precede k) over all piles.
 
 	Iterates `pileK` downward from `pileLast` to 1, invoking `_excludeLeafRBeforeLeafK` which performs localized expansion,
@@ -287,27 +334,29 @@ def excludeLeafRBeforeLeafK(state: EliminationState, k: int, r: int) -> Eliminat
 	--------
 	_excludeLeafRBeforeLeafK, theorem4, theorem2b
 	"""
-	for pileK in range(state.pileLast, 0, decreasing):
-		state.listPinnedLeaves = _excludeLeafRBeforeLeafK(state, k, r, pileK, state.listPinnedLeaves)
+	if domain_k is None:
+		domain_k = getLeafDomain(state, k)
+	for pile_k in reversed(tuple(domain_k)):
+		state = excludeLeaf_rBeforeLeaf_kAtPile_k(state, k, r, pile_k, domain_r=domain_r)
 	return state
 
-def excludeLeafAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile: int, leavesToPin: Iterable[int]) -> list[PinnedLeaves]:
+def excludeLeafAtPile(listPinnedLeaves: Iterable[PinnedLeaves], leaf: int, pile: int, leavesToPin: Iterable[int]) -> Iterator[PinnedLeaves]:
 	"""Return a new list of pinned-leaves dictionaries that forbid `leaf` at `pile`.
 
 	Parameters
 	----------
-	listPinnedLeaves : list[PinnedLeaves]
+	listPinnedLeaves : Iterable[PinnedLeaves]
 		Collection of partial pinning dictionaries to transform.
 	leaf : int
 		`leaf` to exclude from `pile`.
 	pile : int
 		`pile` at which `leaf` must not be fixed.
-	leavesToPin : list[int]
+	leavesToPin : Iterable[int]
 		List of leaves available for pinning at `pile`. Don't include `leaf`.
 
 	Returns
 	-------
-	listPinnedLeaves : list[PinnedLeaves]
+	listPinnedLeaves : Iterable[PinnedLeaves]
 		Expanded / filtered list respecting the exclusion constraint.
 
 	See Also
@@ -315,7 +364,7 @@ def excludeLeafAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile: int
 	deconstructPinnedLeaves : Performs the expansion for one dictionary.
 	pinLeafAtPile : Complementary operation that forces a leaf at a pile.
 	"""
-	return deconstructListPinnedLeavesAtPile(_segregatePinnedAtPile(listPinnedLeaves, leaf, pile)[0], pile, leavesToPin)
+	return deconstructListPinnedLeavesAtPile(_segregateLeafPinnedAtPile(list(listPinnedLeaves), leaf, pile)[0], pile, leavesToPin)
 
 def pinLeafAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile: int) -> list[PinnedLeaves]:
 	"""Return a new list of `pinnedLeaves` dictionaries with `leaf` pinned at `pile` and excluding every other `leaf` at `pile`.
@@ -341,6 +390,12 @@ def pinLeafAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile: int) ->
 	--------
 	deconstructPinnedLeaves, _excludeLeafAtPile
 	"""
-	listNeedsPinning, sequencePinnedLeaves = _segregatePinnedAtPile(listPinnedLeaves, leaf, pile)
+	listNeedsPinning, sequencePinnedLeaves = _segregateLeafPinnedAtPile(listPinnedLeaves, leaf, pile)
 	sequencePinnedLeaves.extend(deconstructListPinnedLeavesAtPile(list(filter(pileIsOpen(pile=pile), listNeedsPinning)), pile, [leaf]))
 	return sequencePinnedLeaves
+
+def segregateLeafByDeconstructingListPinnedLeavesAtPile(listPinnedLeaves: Iterable[PinnedLeaves], leaf: int, pile: int, leavesToPin: Iterable[int]) -> Iterator[tuple[PinnedLeaves, tuple[PinnedLeaves, ...]]]:
+	for pinnedLeaves in listPinnedLeaves:
+		deconstructedPinnedLeavesAtPile: dict[int, PinnedLeaves] = deconstructPinnedLeavesAtPile(pinnedLeaves, pile, leavesToPin)
+		leafPinnedAtPile: PinnedLeaves = deconstructedPinnedLeavesAtPile.pop(leaf)
+		yield (leafPinnedAtPile, tuple(deconstructedPinnedLeavesAtPile.values()))

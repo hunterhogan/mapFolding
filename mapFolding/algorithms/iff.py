@@ -27,7 +27,7 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct, starmap
 from mapFolding import getLeavesTotal
-from mapFolding._e import PinnedLeaves, 零
+from mapFolding._e import 零
 from mapFolding.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf

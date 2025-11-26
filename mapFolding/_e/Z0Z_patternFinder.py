@@ -3,8 +3,8 @@ from gmpy2 import bit_mask, is_even, is_odd
 from itertools import filterfalse, repeat
 from mapFolding import reverseLookup
 from mapFolding._e import (
-	getDictionaryAddends4Next, getDictionaryLeafDomains, getDictionaryPileToLeaves, getLeafDomain,
-	howMany0coordinatesAtTail, leafInSubHyperplane, ptount, 一, 三, 二, 四, 零, 首一, 首二, 首零, 首零一)
+	getDictionaryAddends4Next, getDictionaryLeafDomains, getDictionaryPileRanges, getLeafDomain, howMany0coordinatesAtTail,
+	leafInSubHyperplane, ptount, 一, 三, 二, 四, 零, 首一, 首二, 首零, 首零一)
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import extract
 from pathlib import Path
@@ -36,7 +36,7 @@ def getExcludedAddendIndices(state: EliminationState, leafAddend: int, pileTarge
 	return dictionaryExclusion
 
 def getExcludedLeaves(state: EliminationState, pileTarget: int, groupByLeavesAtPiles: tuple[int, ...]) -> dict[int | tuple[int, ...], list[int]]:
-	return {leaves: sorted(set(getDictionaryPileToLeaves(state)[pileTarget]).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
+	return {leaves: sorted(set(getDictionaryPileRanges(state)[pileTarget]).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
 def getExcludingDictionary(state: EliminationState, leafExcluder: int) -> dict[int, dict[int, list[int]]] | None:
 	"""Get.

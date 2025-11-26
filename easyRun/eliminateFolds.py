@@ -1,6 +1,8 @@
 # ruff: noqa
 # pyright: basic
 from mapFolding import dictionaryOEISMapFolding, eliminateFolds
+from mapFolding._e.pinning2Dn import secondOrderLeavesV2
+from mapFolding.dataBaskets import EliminationState
 from os import PathLike
 from pathlib import PurePath
 import sys
@@ -22,30 +24,35 @@ if __name__ == '__main__':
 	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 	oeisID: str = ''
 	flow: str = ''
-	CPUlimit: bool | float | int | None = 1
+	CPUlimit: bool | float | int | None = -2
+	state: EliminationState | None = None
 
-	flow = 'constraintPropagation'
-	flow = 'elimination'
 	flow = 'crease'
+	flow = 'elimination'
+	flow = 'constraintPropagation'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
-	oeisID: str = 'A001418'
-	oeisID: str = 'A000136'
 	oeisID: str = 'A001415'
+	oeisID: str = 'A000136'
+	oeisID: str = 'A001418'
 	oeisID: str = 'A001417'
 
 	sys.stdout.write(f"\033[{30+int(oeisID,11)%8};{40+int(oeisID,12)%8}m{oeisID} ")
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
 	sys.stdout.write("\033[0m\n")
 
-	for n in range(4,6):
+	for n in range(4,7):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
+		if oeisID == 'A001417':
+			state = EliminationState(mapShape)
+			state = secondOrderLeavesV2(state)
 
 		timeStart = time.perf_counter()
 		foldsTotal: int = eliminateFolds(
 						mapShape=mapShape
+						, state=state
 						, pathLikeWriteFoldsTotal=pathLikeWriteFoldsTotal
 						, CPUlimit=CPUlimit
 						, flow=flow)

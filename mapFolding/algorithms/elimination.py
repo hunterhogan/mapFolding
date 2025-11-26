@@ -1,29 +1,19 @@
-from collections.abc import Iterator
-from functools import cache
+from collections.abc import Iterable
 from itertools import pairwise, permutations, repeat
-from mapFolding._e import PinnedLeaves
-from mapFolding._e.pinIt import excludeLeafRBeforeLeafK, makeFolding
-from mapFolding.algorithms.iff import productOfDimensions, thisLeafFoldingIsValid
+from mapFolding._e import leafOrigin, pileOrigin, PinnedLeaves
+from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding
+from mapFolding.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding.dataBaskets import EliminationState
 from math import factorial
 from more_itertools import iter_index, unique
+from pprint import pprint
 
 def count(state: EliminationState) -> EliminationState:
-	state.groupsOfFolds += sum(map(countPinnedLeaves, state.listPinnedLeaves, repeat(state.mapShape), repeat(state.leavesTotal)))
+	state.groupsOfFolds += sum(map(countPinnedLeaves, state.listPinnedLeaves, repeat(state.mapShape), repeat(range(state.leavesTotal))))
 	return state
 
-def countPinnedLeaves(pinnedLeaves: PinnedLeaves, mapShape: tuple[int, ...], leavesTotal: int) -> int:
-	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(pinnedLeaves), permutePermutands(pinnedLeaves, leavesTotal)), repeat(mapShape)))
-
-@cache
-def setOfLeaves(leavesTotal: int) -> set[int]:
-	return set(range(leavesTotal))
-
-def permutands(pinnedLeaves: PinnedLeaves, leavesTotal: int) -> tuple[int, ...]:
-	return tuple(setOfLeaves(leavesTotal).difference(pinnedLeaves.values()))
-
-def permutePermutands(pinnedLeaves: PinnedLeaves, leavesTotal: int) -> Iterator[tuple[int, ...]]:
-	return permutations(permutands(pinnedLeaves, leavesTotal))
+def countPinnedLeaves(pinnedLeaves: PinnedLeaves, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
+	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(pinnedLeaves), permutations(tuple(set(leavesToInsert).difference(pinnedLeaves.values())))), repeat(mapShape)))
 
 def theorem2b(state: EliminationState) -> EliminationState:
 	"""Implement Lunnon Theorem 2(b): If some dimension pᵢ > 2 (with Theorem 4 inactive), G is divisible by 2·n.
@@ -57,31 +47,23 @@ def theorem2b(state: EliminationState) -> EliminationState:
 	if state.Theorem4Multiplier == 1 and max(state.mapShape) > 2 and (state.leavesTotal > 4):
 		state.Theorem2Multiplier = 2
 		dimension: int = state.mapShape.index(max(state.mapShape))
-		k: int = productOfDimensions(state.mapShape, dimension)
+		k: int = state.productsOfDimensions[dimension]
 		r: int = 2 * k
-		state = excludeLeafRBeforeLeafK(state, k, r)
-
+		state = excludeLeaf_rBeforeLeaf_k(state, k, r)
 	return state
 
 def theorem4(state: EliminationState) -> EliminationState:
-	"""Implement Lunnon Theorem 4 (divisibility by d! · p^d) via systematic leaf exclusions.
+	"""***Bluntly*** implement Lunnon Theorem 4 (divisibility by d! · p^d) via systematic leaf exclusions.
 
-	Statement
-	---------
+	This function is ignorant of the actual domains of the dimension-origin leaves, so it creates `PinnedLeaves` dictionaries to
+	exclude at every `pile`. The permutation space is still valid. However, for each `PinnedLeaves` dictionary, for each `pile`
+	*not* in the domain of a dimension-origin leaf, the function creates approximately `leavesTotal - 1` unnecessary
+	`PinnedLeaves` dictionaries. They are "unnecessary" because we didn't need to exclude the leaf from a pile in which it could
+	never appear. The net result is that the number of unnecessary dictionaries grows exponentially with the number of repeated
+	dimension magnitudes.
+
 	For a map whose shape has repeated dimension magnitudes (say a size `p` occurring `d` times), the total number of foldings
 	`G(p^d)` is divisible by `d! · p^d`. This routine encodes the constructive elimination implied by that divisibility.
-
-	Method
-	------
-	1. Group dimensions sharing the same magnitude (`listIndicesSameMagnitude`).
-	2. When a group size > 1, set `state.Theorem4Multiplier = factorial(group_size)` (the `d!` component).
-	3. For each adjacent pair of dimensions (alpha, beta) in the group, compute leaf indices
-	`k, r` as `productOfDimensions(mapShape, dimensionAlpha/Beta)` and exclude configurations where r precedes k using
-	`excludeLeafRBeforeLeafK`.
-
-	Side Effects
-	------------
-	Mutates `state.listPinnedLeaves` and potentially `state.Theorem4Multiplier`.
 
 	Returns
 	-------
@@ -90,26 +72,23 @@ def theorem4(state: EliminationState) -> EliminationState:
 
 	See Also
 	--------
-	theorem2b : Applies the complementary 2(b) divisibility when 4 does not trigger.
+	theorem2b : Applies the complementary 2(b) divisibility if theorem4 does not apply.
 	excludeLeafRBeforeLeafK : Performs the actual leaf ordering elimination.
 	"""
-	for listIndicesSameMagnitude in [list(iter_index(state.mapShape, magnitude)) for magnitude in unique(state.mapShape)]:
-		if len(listIndicesSameMagnitude) > 1:
-			state.Theorem4Multiplier = factorial(len(listIndicesSameMagnitude))
-			for dimensionAlpha, dimensionBeta in pairwise(listIndicesSameMagnitude):
-				k, r = (productOfDimensions(state.mapShape, dimension) for dimension in (dimensionAlpha, dimensionBeta))
-				state = excludeLeafRBeforeLeafK(state, k, r)
+	for listIndicesSameDimensionLength in [list(iter_index(state.mapShape, dimensionLength)) for dimensionLength in unique(state.mapShape)]:
+		if len(listIndicesSameDimensionLength) > 1:
+			state.Theorem4Multiplier = factorial(len(listIndicesSameDimensionLength))
+			for index_k, index_r in pairwise(listIndicesSameDimensionLength):
+				state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:  # noqa: ARG001
 	"""Count the number of valid foldings for a given number of leaves."""
-	from mapFolding._e.pinning2Dn import pinByFormula  # noqa: PLC0415
-# NOTE Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin leaf0 in pile0, which eliminates leaf1 through leafLast at pile0
-	state.listPinnedLeaves = [{0: 0}]
-
-	state = theorem4(state)
-	state = theorem2b(state)
-	state = pinByFormula(state)
+	if not state.listPinnedLeaves:
+		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
+		state.listPinnedLeaves = [{pileOrigin: leafOrigin}]
+		state = theorem4(state)
+		state = theorem2b(state)
 
 	return count(state)
 

@@ -1,6 +1,6 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
-from mapFolding._e import getDictionaryPileToLeaves, getListLeavesDecrease, getListLeavesIncrease, PinnedLeaves
+from mapFolding._e import getDictionaryPileRanges, getListLeavesDecrease, getListLeavesIncrease, PinnedLeaves
 from mapFolding._e.pinning2Dn import (
 	appendPinnedLeavesAtPile, listPinnedLeavesDefault, nextPinnedLeavesWorkbench, pinByFormula, secondOrderLeaves,
 	secondOrderLeavesV2, secondOrderPilings)
@@ -18,7 +18,7 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 		elif state.pile + 1 in state.pinnedLeaves:
 			listLeavesAtPile = getListLeavesDecrease(state, state.pinnedLeaves[state.pile + 1])
 		else:
-			listLeavesAtPile = getDictionaryPileToLeaves(state)[state.pile]
+			listLeavesAtPile = getDictionaryPileRanges(state)[state.pile]
 
 		state = appendPinnedLeavesAtPile(state, listLeavesAtPile)
 		state = nextPinnedLeavesWorkbench(state)
