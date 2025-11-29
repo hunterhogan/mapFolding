@@ -1,10 +1,10 @@
-# ruff: noqa: ERA001
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
-from itertools import pairwise, product as CartesianProduct
+from itertools import combinations, pairwise, product as CartesianProduct
 from mapFolding import decreasing
-from mapFolding._e import getDictionaryLeafDomains, leafOrigin, pileOrigin, PinnedLeaves, 零
-from mapFolding._e.pinning2Dn import pinByFormula, secondOrderLeaves, secondOrderPilings
+from mapFolding._e import (
+	dimensionNearest首, getDictionaryLeafDomains, getListLeavesIncrease, howMany0coordinatesAtTail, leafOrigin, pileOrigin,
+	PinnedLeaves, 零)
 from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
@@ -36,24 +36,14 @@ def findValidFoldings(state: EliminationState) -> int:
 
 # ------- Rules for 2^d maps -----------------------------
 	if (state.dimensionsTotal > 2) and all(dimensionLength == 2 for dimensionLength in state.mapShape):
-		dictionaryLeafRanges: Final[dict[int, range]] = getDictionaryLeafDomains(state)
-		for leaf, rangePilings in dictionaryLeafRanges.items():
+		dictionaryLeafDomains: Final[dict[int, range]] = getDictionaryLeafDomains(state)
+		for leaf, domain in dictionaryLeafDomains.items():
 			if leaf < 2:
 				continue
-			model.AddAllowedAssignments([listPilingsInLeafOrder[leaf]], [(pile,) for pile in rangePilings])
+			model.AddAllowedAssignments([listPilingsInLeafOrder[leaf]], [(pile,) for pile in domain])
 
-		from mapFolding._e import getDictionaryAddends4Next  # noqa: PLC0415
-		dictionaryAddends4Next: Final[dict[int, list[int]]] = getDictionaryAddends4Next(state)
-		dictionaryNextLeaf: dict[int, list[int]] = {}
-		for leaf, listDifferences in dictionaryAddends4Next.items():
-			listAllowedNextLeaves: list[int] = []
-			for difference in listDifferences:
-				listAllowedNextLeaves.append(leaf + difference)  # noqa: PERF401
-			dictionaryNextLeaf[leaf] = listAllowedNextLeaves
-
-		for leaf, listAllowedNextLeaves in dictionaryNextLeaf.items():
-			if not listAllowedNextLeaves:
-				continue
+		for leaf in range(state.leavesTotal):
+			listLeavesNext: list[int] = getListLeavesIncrease(state, leaf)
 			for pile in range(state.leavesTotal - 零):
 				currentLeafAtThisPile: cp_model.IntVar = listLeavesInPileOrder[pile]
 				nextLeafAtNextPile: cp_model.IntVar = listLeavesInPileOrder[pile + 1]
@@ -62,12 +52,24 @@ def findValidFoldings(state: EliminationState) -> int:
 				model.Add(currentLeafAtThisPile == leaf).OnlyEnforceIf(isCurrentLeafEqualToLeaf)
 				model.Add(currentLeafAtThisPile != leaf).OnlyEnforceIf(isCurrentLeafEqualToLeaf.Not())
 
-				model.AddAllowedAssignments([nextLeafAtNextPile], [(leaf,) for leaf in listAllowedNextLeaves]).OnlyEnforceIf(isCurrentLeafEqualToLeaf)
+				model.AddAllowedAssignments([nextLeafAtNextPile], [(leafNext,) for leafNext in listLeavesNext]).OnlyEnforceIf(isCurrentLeafEqualToLeaf)
 
 		for dimension in range(零, state.dimensionsTotal - 零):
-				firstCrease: int = 2**dimension
-				for leaf in range(firstCrease * 2, state.leavesTotal, firstCrease):
-					model.Add(listPilingsInLeafOrder[firstCrease] < listPilingsInLeafOrder[leaf])
+			firstCrease: int = 2**dimension
+			for leaf in range(firstCrease * 2, state.leavesTotal, firstCrease):
+				model.Add(listPilingsInLeafOrder[firstCrease] < listPilingsInLeafOrder[leaf])
+
+# ------- Leading zeros before trailing zeros: if dimensionNearest首(k) <= howMany0coordinatesAtTail(r), then pileOf_k < pileOf_r -----------------------------
+		for k, r in combinations(range(1, state.leavesTotal), 2):
+			leadingZerosOf_k: int = dimensionNearest首(k)
+			trailingZerosOf_r: int = howMany0coordinatesAtTail(r)
+			if leadingZerosOf_k <= trailingZerosOf_r:
+				model.Add(listPilingsInLeafOrder[k] < listPilingsInLeafOrder[r])
+
+			leadingZerosOf_r: int = dimensionNearest首(r)
+			trailingZerosOf_k: int = howMany0coordinatesAtTail(k)
+			if leadingZerosOf_r <= trailingZerosOf_k:
+				model.Add(listPilingsInLeafOrder[r] < listPilingsInLeafOrder[k])
 
 # ------- Lunnon Theorem 2(b): "If some [magnitude in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." -----------------------------
 	if state.Theorem4Multiplier == 1:
@@ -141,11 +143,6 @@ def findValidFoldings(state: EliminationState) -> int:
 
 	foldingCollector = FoldingCollector(listLeavesInPileOrder)
 	solver.Solve(model, foldingCollector)
-
-	# if not foldingCollector.listFoldings:
-	# 	print("\n",state.pinnedLeaves)
-	# if foldingCollector.listFoldings:
-	# 	print(*foldingCollector.listFoldings, sep="\n")
 
 	return len(foldingCollector.listFoldings) * state.Theorem2Multiplier * state.Theorem4Multiplier
 

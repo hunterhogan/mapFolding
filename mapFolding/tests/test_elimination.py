@@ -14,12 +14,13 @@ and the tests will automatically pick them up via parametrization.
 """
 
 from collections.abc import Callable, Iterable
+from mapFolding import packageSettings
 from mapFolding._e import (
 	getDictionaryAddends4Next, getDictionaryAddends4Prior, getDictionaryLeafDomains, getDictionaryPileRanges,
-	getLeafDomain, getPileRange)
+	getDomain二combined, getLeafDomain, getPileRange)
 from mapFolding._e.pinning2Dn import pinByFormula, secondOrderLeavesV2, secondOrderPilings
 from mapFolding.dataBaskets import EliminationState
-from mapFolding.tests.dataSamples import A001417
+from mapFolding.tests.dataSamples import A001417, p2DnDomain6_7_5_4
 from pathlib import Path
 from typing import TYPE_CHECKING
 import numpy
@@ -256,7 +257,7 @@ class TestGetPileRange:
 			)
 
 # Path to pickled test data
-pathDataSamples: Path = Path(__file__).parent / "dataSamples"
+pathDataSamples: Path = Path(f'{packageSettings.pathPackage}/tests/dataSamples')
 
 @pytest.fixture
 def loadArrayFoldings() -> Callable[[int], "NDArray[numpy.uint8]"]:
@@ -468,3 +469,50 @@ class TestSecondOrderPilings:
 			f"secondOrderPilings: found {countOverlappingDictionaries} overlapping dictionaries for {mapShape=}. "
 			f"Expected 0 overlaps."
 		)
+
+
+class TestCombinedDomains:
+	"""Tests for combined domain functions.
+
+	These tests verify that domain functions return domains containing all known valid
+	pile position tuples. The domains may be over-inclusive (contain extra tuples beyond
+	what is strictly necessary), which is acceptable behavior.
+
+	Test data is stored in `tests/dataSamples/p2DnDomain*.py` files. Each file contains
+	a `dictionaryCombinedDomainKnown` mapping mapShape tuples to lists of valid pile
+	position tuples.
+
+	To add tests for a new domain function:
+	1. Create a data file `tests/dataSamples/p2DnDomain<leaves>.py` with the known data
+	2. Import the data module in this test file
+	3. Add a test method following the pattern below, referencing the new data module
+	"""
+
+	@pytest.mark.parametrize(
+		"mapShape",
+		list(p2DnDomain6_7_5_4.dictionaryCombinedDomainKnown),
+		ids=[f"mapShape={shape}" for shape in p2DnDomain6_7_5_4.dictionaryCombinedDomainKnown],
+	)
+	def test_getDomain二combined_containsAllKnown(
+		self,
+		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
+		mapShape: tuple[int, ...],
+	) -> None:
+		"""Verify getDomain二combined contains all known valid pile position tuples.
+
+		The function may return additional tuples (over-inclusive), which is acceptable.
+		This test only verifies that all empirically known valid tuples are present.
+		"""
+		state = makeEliminationState(mapShape)
+		listTuplesKnown = p2DnDomain6_7_5_4.dictionaryCombinedDomainKnown[mapShape]
+
+		domainActual = getDomain二combined(state)
+		setDomainActual = set(domainActual)
+
+		listTuplesMissing = [tupleKnown for tupleKnown in listTuplesKnown if tupleKnown not in setDomainActual]
+
+		assert len(listTuplesMissing) == 0, (
+			f"getDomain二combined: missing {len(listTuplesMissing)} known tuples for {mapShape=}. "
+			f"Missing: {listTuplesMissing[:5]}{'...' if len(listTuplesMissing) > 5 else ''}."
+		)
+

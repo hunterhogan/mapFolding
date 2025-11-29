@@ -1,7 +1,7 @@
 # ruff: noqa
 # pyright: basic
 from mapFolding import dictionaryOEISMapFolding, eliminateFolds
-from mapFolding._e.pinning2Dn import secondOrderLeavesV2
+from mapFolding._e.pinning2Dn import pinByFormula, secondOrderLeaves, secondOrderLeavesV2
 from mapFolding.dataBaskets import EliminationState
 from os import PathLike
 from pathlib import PurePath
@@ -27,8 +27,8 @@ if __name__ == '__main__':
 	CPUlimit: bool | float | int | None = -2
 	state: EliminationState | None = None
 
-	flow = 'crease'
 	flow = 'elimination'
+	flow = 'crease'
 	flow = 'constraintPropagation'
 
 	oeisID: str = 'A195646'
@@ -42,11 +42,13 @@ if __name__ == '__main__':
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
 	sys.stdout.write("\033[0m\n")
 
-	for n in range(4,7):
+	for n in range(6,7):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
-		if oeisID == 'A001417':
+		if oeisID == 'A001417' and n > 3:
 			state = EliminationState(mapShape)
+			# state = pinByFormula(state)
+			# state = secondOrderLeaves(state)
 			state = secondOrderLeavesV2(state)
 
 		timeStart = time.perf_counter()

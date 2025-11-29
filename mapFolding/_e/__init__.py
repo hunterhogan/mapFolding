@@ -17,8 +17,12 @@ from mapFolding._e._measure import (
 from mapFolding._e._data import (
 	getDictionaryAddends4Next as getDictionaryAddends4Next, getDictionaryAddends4Prior as getDictionaryAddends4Prior,
 	getDictionaryLeafDomains as getDictionaryLeafDomains, getDictionaryPileRanges as getDictionaryPileRanges,
-	getLeafDomain as getLeafDomain, getListLeavesDecrease as getListLeavesDecrease,
-	getListLeavesIncrease as getListLeavesIncrease, getPileRange as getPileRange)
+	getDomain二combined as getDomain二combined, getDomain二一零and二一 as getDomain二一零and二一,
+	getDomain二一零and二一corners as getDomain二一零and二一corners, getDomain二一零and二一nonCorners as getDomain二一零and二一nonCorners,
+	getDomain二零and二 as getDomain二零and二, getDomain二零and二corners as getDomain二零and二corners,
+	getDomain二零and二nonCorners as getDomain二零and二nonCorners, getLeafDomain as getLeafDomain,
+	getListLeavesDecrease as getListLeavesDecrease, getListLeavesIncrease as getListLeavesIncrease,
+	getPileRange as getPileRange)
 
 """Perspective changes and code changes:
 
@@ -48,6 +52,37 @@ the absolute quantity, not just the consecutive ones relative to the LSD.
 	dictionaryAddends4Prior
     domain of leaf
 	range of leaves in piles
+"""
+
+"""products of dimensions and sums of products emerge from `getLeafDomain`
+state = EliminationState((2,) * 6)
+domainsOfDimensionOrigins = tuple(getLeafDomain(state, leaf) for leaf in state.productsOfDimensions)[0:-1]
+sumsOfDimensionOrigins = tuple(accumulate(state.productsOfDimensions))[0:-1]
+sumsOfDimensionOriginsReversed = tuple(accumulate(state.productsOfDimensions[::-1], initial=-state.leavesTotal))[1:None]
+for dimensionOrigin, domain, sumOrigins, sumReversed in zip(state.productsOfDimensions, domainsOfDimensionOrigins, sumsOfDimensionOrigins, sumsOfDimensionOriginsReversed, strict=False):
+	print(f"{dimensionOrigin:<2}\t{domain.start == sumOrigins = }\t{sumOrigins}\t{sumReversed+2}\t{domain.stop == sumReversed+2 = }")
+1       domain.start == sumOrigins = True       1       2       domain.stop == sumReversed+2 = True
+2       domain.start == sumOrigins = True       3       34      domain.stop == sumReversed+2 = True
+4       domain.start == sumOrigins = True       7       50      domain.stop == sumReversed+2 = True
+8       domain.start == sumOrigins = True       15      58      domain.stop == sumReversed+2 = True
+16      domain.start == sumOrigins = True       31      62      domain.stop == sumReversed+2 = True
+32      domain.start == sumOrigins = True       63      64      domain.stop == sumReversed+2 = True
+
+The sums of dimension origins (sums of products of dimensions) emerge from the following formulas!
+
+def getLeafDomain(state: EliminationState, leaf: int) -> range:
+	def workhorse(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> range:
+		originPinned =  leaf == leafOrigin
+		return range(
+					int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1))									# `start`, first value included in the `range`.
+						+ howManyDimensionsHaveOddParity(leaf)
+						- 1 - originPinned
+					, int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf)))	# `stop`, first value excluded from the `range`.
+						- howManyDimensionsHaveOddParity(leaf)
+						+ 2 - originPinned
+					, 2 + (2 * (leaf == 首零(dimensionsTotal)+零))											# `step`
+				)
+	return workhorse(leaf, state.dimensionsTotal, state.mapShape, state.leavesTotal)
 """
 
 """if `dimensionNearest首(k) <= coordinatesOf0AtTail(r)`, then must `pileOf_k < pileOf_r`

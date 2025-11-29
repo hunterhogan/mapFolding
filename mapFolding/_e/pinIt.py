@@ -17,6 +17,137 @@ from more_itertools import flatten
 
 3. Do not overwrite or delete a dictionary's pinned leaves because that could cause the dictionary's permutation space to overlap with a different dictionary's permutation space.
 """
+# ======= Boolean filters =======================
+# TODO make and use reusable filters.
+@syntacticCurry
+def isPinnedAtPile(pinnedLeaves: PinnedLeaves, leaf: int, pile: int) -> bool:
+	"""Return True if `leaf` is presently pinned at `pile` in `pinnedLeaves`.
+
+	Parameters
+	----------
+	pinnedLeaves : PinnedLeaves
+		Partial folding mapping from pile -> leaf.
+	leaf : int
+		`leaf` whose presence at `pile` is being checked.
+	pile : int
+		`pile` index.
+
+	Returns
+	-------
+	leafIsPinnedAtPile : bool
+		True if the mapping includes `pile: leaf`.
+	"""
+	return leaf == pinnedLeaves.get(pile)
+
+@syntacticCurry
+def leafIsNotPinned(pinnedLeaves: PinnedLeaves, leaf: int) -> bool:
+	"""Return True if `leaf` is not presently pinned in `pinnedLeaves`.
+
+	Parameters
+	----------
+	pinnedLeaves : PinnedLeaves
+		Partial folding mapping from pile -> leaf.
+	leaf : int
+		`leaf` index.
+
+	Returns
+	-------
+	leafIsNotPinned : bool
+		True if the mapping does not include `leaf`.
+	"""
+	return leaf not in pinnedLeaves.values()
+
+@syntacticCurry
+def leafIsPinned(pinnedLeaves: PinnedLeaves, leaf: int) -> bool:
+	"""Return True if `leaf` is pinned in `pinnedLeaves`.
+
+	Parameters
+	----------
+	pinnedLeaves : PinnedLeaves
+		Partial folding mapping from pile -> leaf.
+	leaf : int
+		`leaf` index.
+
+	Returns
+	-------
+	leafIsPinned : bool
+		True if the mapping includes `leaf`.
+	"""
+	return leaf in pinnedLeaves.values()
+
+@syntacticCurry
+def pileIsOpen(pinnedLeaves: PinnedLeaves, pile: int) -> bool:
+	"""Return True if `pile` is not presently pinned in `pinnedLeaves`.
+
+	Parameters
+	----------
+	pinnedLeaves : PinnedLeaves
+		Partial folding mapping from pile -> leaf.
+	pile : int
+		`pile` index.
+
+	Returns
+	-------
+	pileIsOpen : bool
+		True if `pile` is not a key in `pinnedLeaves`.
+	"""
+	return pile not in pinnedLeaves
+
+# ======= Group by =======================
+
+def _segregateLeafPinnedAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile: int) -> tuple[list[PinnedLeaves], list[PinnedLeaves]]:
+	"""Partition `listPinnedLeaves` into (notPinned, isPinned) groups for `leaf` pinned at `pile`.
+
+	Parameters
+	----------
+	listPinnedLeaves : list[PinnedLeaves]
+		Collection of partial folding dictionaries.
+	leaf : int
+		`leaf` to test.
+	pile : int
+		`pile` index.
+
+	Returns
+	-------
+	segregatedLists : tuple[list[PinnedLeaves], list[PinnedLeaves]]
+		First element: dictionaries where `leaf` is NOT pinned at `pile`.
+		Second element: dictionaries where `leaf` IS pinned at `pile`.
+	"""
+	isPinned: Callable[[PinnedLeaves], bool] = isPinnedAtPile(leaf=leaf, pile=pile)
+	grouped: dict[bool, list[PinnedLeaves]] = toolz_groupby(isPinned, listPinnedLeaves)
+	return (grouped.get(False, []), grouped.get(True, []))
+
+# ======= Pin one or more leaves in `pinnedLeaves` or `folding` =======================
+# NOTE The only functions that actually pin a leaf in a dictionary or folding ought to be in this section.
+
+@syntacticCurry
+def atPilePinLeaf(pinnedLeaves: PinnedLeaves, pile: int, leaf: int) -> PinnedLeaves:
+	"""Return a new dictionary with `leaf` pinned at `pile` based on `pinnedLeaves`.
+
+	Parameters
+	----------
+	pinnedLeaves : PinnedLeaves
+		Existing `pile` -> `leaf` mapping (partial folding).
+	pile : int
+		`pile` index at which to set the `leaf`.
+	leaf : int
+		`leaf` to pin.
+
+	Returns
+	-------
+	dictionaryPinnedLeaves : PinnedLeaves
+		New mapping including the assignment.
+
+	See Also
+	--------
+	deconstructPinnedLeaves
+	"""
+	return associate(pinnedLeaves, pile, leaf)
+
+def makeFolding(pinnedLeaves: PinnedLeaves, leavesToInsert: tuple[int, ...]) -> tuple[int, ...]:
+	permutand: Iterator[int] = iter(leavesToInsert)
+	return tuple([pinnedLeaves[pile] if pile in pinnedLeaves else next(permutand) for pile in range(len(pinnedLeaves) + len(leavesToInsert))])
+
 # ======= Deconstruct a `pinnedLeaves` dictionary =======
 def deconstructPinnedLeavesAtPile(pinnedLeaves: PinnedLeaves, pile: int, leavesToPin: Iterable[int]) -> dict[int, PinnedLeaves]:
 	"""Deconstruct an open `pile` to the `leaf` range of `pile`.
@@ -74,7 +205,39 @@ def deconstructPinnedLeavesByDomainOfLeaf(pinnedLeaves: PinnedLeaves, leaf: int,
 		deconstructedPinnedLeaves = [pinnedLeaves]
 	return deconstructedPinnedLeaves
 
+def deconstructPinnedLeavesByDomainsCombined(pinnedLeaves: PinnedLeaves, leaves: tuple[int, ...], leavesDomain: Iterable[tuple[int, ...]]) -> list[PinnedLeaves]:
+	"""Prototype."""
+	deconstructedPinnedLeaves: list[PinnedLeaves] = []
+
+	def Z0Z_pileOpen(index: int) -> Callable[[tuple[int, ...]], bool]:
+		def workhorse(domain: tuple[int, ...]) -> bool:
+			return pileIsOpen(pinnedLeaves, domain[index])
+		return workhorse
+
+	def Z0Z_isPinnedAtPile(leaf: int, index: int) -> Callable[[tuple[int, ...]], bool]:
+		def workhorse(domain: tuple[int, ...]) -> bool:
+			return isPinnedAtPile(pinnedLeaves, leaf, domain[index])
+		return workhorse
+
+	if any(map(leafIsNotPinned(pinnedLeaves), leaves)):
+		for index in range(len(leaves)):
+			if leafIsNotPinned(pinnedLeaves, leaves[index]):
+				leavesDomain = filter(Z0Z_pileOpen(index), leavesDomain)
+			else:
+				leavesDomain = filter(Z0Z_isPinnedAtPile(leaves[index], index), leavesDomain)
+
+		for domain in leavesDomain:
+			pinnedLeavesWIP: PinnedLeaves = pinnedLeaves.copy()
+			for index in range(len(leaves)):
+				pinnedLeavesWIP[domain[index]] = leaves[index]
+			deconstructedPinnedLeaves.append(pinnedLeavesWIP)
+	else:
+		deconstructedPinnedLeaves = [pinnedLeaves]
+
+	return deconstructedPinnedLeaves
+
 def deconstructPinnedLeavesByDomainOf2Leaves(pinnedLeaves: PinnedLeaves, leaves: tuple[int, int], leavesDomain: Iterable[tuple[int, int]]) -> list[PinnedLeaves]:
+	"""Prototype."""
 	deconstructedPinnedLeaves: list[PinnedLeaves] = []
 
 	def Z0Z_pileOpen(index: int) -> Callable[[tuple[int, int]], bool]:
@@ -103,118 +266,6 @@ def deconstructPinnedLeavesByDomainOf2Leaves(pinnedLeaves: PinnedLeaves, leaves:
 		deconstructedPinnedLeaves = [pinnedLeaves]
 
 	return deconstructedPinnedLeaves
-
-# ======= Pin one or more leaves in `pinnedLeaves` or `folding` =======================
-
-@syntacticCurry
-def atPilePinLeaf(pinnedLeaves: PinnedLeaves, pile: int, leaf: int) -> PinnedLeaves:
-	"""Return a new dictionary with `leaf` pinned at `pile` based on `pinnedLeaves`.
-
-	Parameters
-	----------
-	pinnedLeaves : PinnedLeaves
-		Existing `pile` -> `leaf` mapping (partial folding).
-	pile : int
-		`pile` index at which to set the `leaf`.
-	leaf : int
-		`leaf` to pin.
-
-	Returns
-	-------
-	dictionaryPinnedLeaves : PinnedLeaves
-		New mapping including the assignment.
-
-	See Also
-	--------
-	deconstructPinnedLeaves
-	"""
-	return associate(pinnedLeaves, pile, leaf)
-
-def makeFolding(pinnedLeaves: PinnedLeaves, leavesToInsert: tuple[int, ...]) -> tuple[int, ...]:
-	permutand: Iterator[int] = iter(leavesToInsert)
-	return tuple([pinnedLeaves[pile] if pile in pinnedLeaves else next(permutand) for pile in range(len(pinnedLeaves) + len(leavesToInsert))])
-
-# ======= Boolean filters =======================
-# TODO make and use reusable filters.
-@syntacticCurry
-def isPinnedAtPile(pinnedLeaves: PinnedLeaves, leaf: int, pile: int) -> bool:
-	"""Return True if `leaf` is presently pinned at `pile` in `pinnedLeaves`.
-
-	Parameters
-	----------
-	pinnedLeaves : PinnedLeaves
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` whose presence at `pile` is being checked.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	leafIsPinnedAtPile : bool
-		True if the mapping includes `pile: leaf`.
-	"""
-	return leaf == pinnedLeaves.get(pile)
-
-@syntacticCurry
-def leafIsNotPinned(pinnedLeaves: PinnedLeaves, leaf: int) -> bool:
-	"""Return True if `leaf` is not presently pinned in `pinnedLeaves`.
-
-	Parameters
-	----------
-	pinnedLeaves : PinnedLeaves
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` index.
-
-	Returns
-	-------
-	leafIsNotPinned : bool
-		True if the mapping does not include `leaf`.
-	"""
-	return leaf not in pinnedLeaves.values()
-
-@syntacticCurry
-def pileIsOpen(pinnedLeaves: PinnedLeaves, pile: int) -> bool:
-	"""Return True if `pile` is not presently pinned in `pinnedLeaves`.
-
-	Parameters
-	----------
-	pinnedLeaves : PinnedLeaves
-		Partial folding mapping from pile -> leaf.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	pileIsOpen : bool
-		True if `pile` is not a key in `pinnedLeaves`.
-	"""
-	return pile not in pinnedLeaves
-
-# ======= Group by =======================
-
-def _segregateLeafPinnedAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile: int) -> tuple[list[PinnedLeaves], list[PinnedLeaves]]:
-	"""Partition `listPinnedLeaves` into (notPinned, isPinned) groups for `leaf` pinned at `pile`.
-
-	Parameters
-	----------
-	listPinnedLeaves : list[PinnedLeaves]
-		Collection of partial folding dictionaries.
-	leaf : int
-		`leaf` to test.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	segregatedLists : tuple[list[PinnedLeaves], list[PinnedLeaves]]
-		First element: dictionaries where `leaf` is NOT pinned at `pile`.
-		Second element: dictionaries where `leaf` IS pinned at `pile`.
-	"""
-	isPinned: Callable[[PinnedLeaves], bool] = isPinnedAtPile(leaf=leaf, pile=pile)
-	grouped: dict[bool, list[PinnedLeaves]] = toolz_groupby(isPinned, listPinnedLeaves)
-	return (grouped.get(False, []), grouped.get(True, []))
 
 # ======= Bulk modifications =======================
 

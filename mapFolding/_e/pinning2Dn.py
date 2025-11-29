@@ -1,13 +1,13 @@
 # ruff: noqa ERA001
+from collections.abc import Sequence
 from gmpy2 import bit_mask
 from itertools import filterfalse
 from mapFolding import decreasing, exclude, reverseLookup
 from mapFolding._e import (
-	getLeafDomain, getListLeavesDecrease, getListLeavesIncrease, getPileRange, leafOrigin, pileOrigin, PinnedLeaves, 一, 二,
-	零, 首一, 首二, 首零, 首零一, 首零一二)
+	getDomain二combined, getLeafDomain, getPileRange, leafOrigin, pileOrigin, PinnedLeaves, 一, 二, 零, 首一, 首二, 首零, 首零一, 首零一二)
 from mapFolding._e.pinIt import (
-	deconstructListPinnedLeavesAtPile, deconstructPinnedLeavesByDomainOf2Leaves, deconstructPinnedLeavesByDomainOfLeaf,
-	excludeLeaf_rBeforeLeaf_kAtPile_k)
+	deconstructPinnedLeavesByDomainOf2Leaves, deconstructPinnedLeavesByDomainOfLeaf,
+	deconstructPinnedLeavesByDomainsCombined, excludeLeaf_rBeforeLeaf_kAtPile_k)
 from mapFolding._e.pinning2DnAnnex import (
 	appendPinnedLeavesAtPile as appendPinnedLeavesAtPile, creasesToListLeavesAtPile as creasesToListLeavesAtPile,
 	disqualifyAppendingLeafAtPile as disqualifyAppendingLeafAtPile, pinPileOriginFixed, pinPile一Crease, pinPile一零Crease,
@@ -49,7 +49,7 @@ def pileProcessingOrderDefault(state: EliminationState) -> list[int]:
 
 # ======= Pinning functions ===============================================
 
-def pinByFormula(state: EliminationState, maximumListPinnedLeaves: int = 5000) -> EliminationState:
+def pinByFormula(state: EliminationState, maximumListPinnedLeaves: int = 50000) -> EliminationState:
 	if not ((state.dimensionsTotal > 4) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
 
@@ -57,7 +57,7 @@ def pinByFormula(state: EliminationState, maximumListPinnedLeaves: int = 5000) -
 	pileProcessingOrder.extend([一, state.leavesTotal - 一])
 	pileProcessingOrder.extend([一+零, state.leavesTotal - (一+零)])
 	pileProcessingOrder.extend([二])
-	pileProcessingOrder.extend([首零(state.dimensionsTotal)-零])
+	# pileProcessingOrder.extend([首零(state.dimensionsTotal)-零])
 
 	if not state.listPinnedLeaves:
 		state = listPinnedLeavesDefault(state)
@@ -91,6 +91,9 @@ def pinByFormula(state: EliminationState, maximumListPinnedLeaves: int = 5000) -
 	state = removeInvalidPinnedLeaves(state)
 	return state
 
+def noDuplicates(sequenceHashable: Sequence[int]) -> bool:
+	return len(sequenceHashable) == len(set(sequenceHashable))
+
 def secondOrderLeavesV2(state: EliminationState) -> EliminationState:
 	if not ((state.dimensionsTotal > 2) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
@@ -99,10 +102,11 @@ def secondOrderLeavesV2(state: EliminationState) -> EliminationState:
 		state = listPinnedLeavesDefault(state)
 
 	for leaves in [(一+零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))]:
+		continue
 		listPinnedLeaves: list[PinnedLeaves] = state.listPinnedLeaves.copy()
 		state.listPinnedLeaves = []
 		qualifiedPinnedLeaves: list[PinnedLeaves] = []
-		leavesDomain: tuple[tuple[int, int], ...] = tuple(zip(getLeafDomain(state, leaves[0]), getLeafDomain(state, leaves[1]), strict=True))
+		leavesDomain = tuple(zip(getLeafDomain(state, leaves[0]), getLeafDomain(state, leaves[1]), strict=True))
 		for pinnedLeaves in listPinnedLeaves:
 			state.listPinnedLeaves = deconstructPinnedLeavesByDomainOf2Leaves(pinnedLeaves, leaves, leavesDomain)
 			state = removeInvalidPinnedLeaves(state)
@@ -122,6 +126,19 @@ def secondOrderLeavesV2(state: EliminationState) -> EliminationState:
 			state.listPinnedLeaves = []
 		state.listPinnedLeaves = qualifiedPinnedLeaves.copy()
 
+	for leaves, getDomain in [((二+一, 二+一+零, 二+零, 二), getDomain二combined)]:
+		# continue
+		listPinnedLeaves: list[PinnedLeaves] = state.listPinnedLeaves.copy()
+		state.listPinnedLeaves = []
+		qualifiedPinnedLeaves: list[PinnedLeaves] = []
+		leavesDomain: tuple[tuple[int, ...], ...] = getDomain(state)
+		for pinnedLeaves in listPinnedLeaves:
+			state.listPinnedLeaves = deconstructPinnedLeavesByDomainsCombined(pinnedLeaves, leaves, leavesDomain)
+			state = removeInvalidPinnedLeaves(state)
+			qualifiedPinnedLeaves.extend(state.listPinnedLeaves)
+			state.listPinnedLeaves = []
+		state.listPinnedLeaves = qualifiedPinnedLeaves.copy()
+
 	return state
 
 def secondOrderLeaves(state: EliminationState) -> EliminationState:
@@ -134,6 +151,7 @@ def secondOrderLeaves(state: EliminationState) -> EliminationState:
 	for leaf in [一+零, 首一(state.dimensionsTotal), 首零(state.dimensionsTotal)+零]:
 		listPinnedLeavesCopy: list[PinnedLeaves] = state.listPinnedLeaves.copy()
 		state.listPinnedLeaves = []
+		qualifiedPinnedLeaves: list[PinnedLeaves] = []
 		for pinnedLeaves in listPinnedLeavesCopy:
 			state.pinnedLeaves = pinnedLeaves.copy()
 
@@ -188,7 +206,7 @@ def secondOrderLeaves(state: EliminationState) -> EliminationState:
 						listIndicesPilesExcluded.extend(range(1, stop))
 
 						aDimensionPropertyNotFullyUnderstood = 5
-						for _dimension in range(state.dimensionsTotal - aDimensionPropertyNotFullyUnderstood):
+						for _dimension in tuple(range(state.dimensionsTotal - aDimensionPropertyNotFullyUnderstood)):
 							start: int = 1 + stop
 							stop += (stop+1) // 2
 							listIndicesPilesExcluded.extend([*range(start, stop)])
@@ -218,7 +236,7 @@ def secondOrderLeaves(state: EliminationState) -> EliminationState:
 						stop: int = pilesTotal // 2
 						listIndicesPilesExcluded.extend(range(-2, -stop, decreasing))
 
-						for _dimension in range(state.dimensionsTotal - aDimensionPropertyNotFullyUnderstood):
+						for _dimension in tuple(range(state.dimensionsTotal - aDimensionPropertyNotFullyUnderstood)):
 							start: int = 1 + stop
 							stop += (stop+1) // 2
 							listIndicesPilesExcluded.extend([*range(-start, -stop, decreasing)])
@@ -263,11 +281,11 @@ def secondOrderLeaves(state: EliminationState) -> EliminationState:
 							listIndicesPilesExcluded.extend([0b000000])
 				domainOfPilesForLeaf = list(exclude(domainOfPilesForLeaf, listIndicesPilesExcluded))
 
-			for pile in domainOfPilesForLeaf:
-				state.pile = pile
-				listLeavesAtPile: list[int] = [leaf]
-
-				state = appendPinnedLeavesAtPile(state, listLeavesAtPile)
+			state.listPinnedLeaves = deconstructPinnedLeavesByDomainOfLeaf(pinnedLeaves, leaf, domainOfPilesForLeaf)
+			state = removeInvalidPinnedLeaves(state)
+			qualifiedPinnedLeaves.extend(state.listPinnedLeaves)
+			state.listPinnedLeaves = []
+		state.listPinnedLeaves = qualifiedPinnedLeaves.copy()
 
 	return state
 
@@ -313,9 +331,9 @@ def Z0Z_k_r(state: EliminationState) -> EliminationState:
 	k = 5
 	r = 4
 
-	pile_k = tuple(getLeafDomain(state, k))[4]
+	for pile_k in tuple(getLeafDomain(state, k))[0:3]:
 
-	state = excludeLeaf_rBeforeLeaf_kAtPile_k(state, k, r, pile_k, getLeafDomain(state, r), getPileRange(state, pile_k))
-	state = removeInvalidPinnedLeaves(state)
+		state = excludeLeaf_rBeforeLeaf_kAtPile_k(state, k, r, pile_k, getLeafDomain(state, r), getPileRange(state, pile_k))
+		state = removeInvalidPinnedLeaves(state)
 
 	return state

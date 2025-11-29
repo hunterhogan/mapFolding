@@ -1,6 +1,7 @@
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 
 from collections.abc import Iterable, Iterator, Sequence
+from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from hunterMakesPy import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from mapFolding import NumPyIntegerType
@@ -9,6 +10,57 @@ from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
 from typing import Any
 import numpy
+
+# ======= Functional programming paradigm ===============================
+
+def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
+	"""Return the list of values from a dictionary (generic over type parameter `个`).
+
+	A tiny helper used only for its semantic clarity inside `deconstructListPinnedLeaves` when flattening expanded
+	dictionaries produced by `deconstructPinnedLeaves`.
+
+	Parameters
+	----------
+	dictionary : dict[Any, 个]
+		Source mapping.
+
+	Returns
+	-------
+	list[个]
+		List of the dictionary's values.
+
+	See Also
+	--------
+	deconstructPinnedLeaves, deconstructListPinnedLeaves
+	"""
+	return list(dictionary.values())
+
+def exclude[个](iterable: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
+	"""Yield items from `iterable` whose positions are not in `indices`."""
+	lengthIterable: int = len(iterable)
+	def normalizeIndex(index: int) -> int:
+		if index < 0:
+			index = (index + lengthIterable) % lengthIterable
+		return index
+	indicesInclude: list[int] = sorted(set(range(lengthIterable)).difference(map(normalizeIndex, indices)))
+	return extract(iterable, indicesInclude)
+
+@syntacticCurry
+def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: 文义) -> 文件 | None:
+	"""Return the key in `dictionary` that corresponds to `keyValue`.
+
+	Prototype.
+
+	- I assume all `dictionary.values()` are distinct. If multiple keys contain `keyValue`, the returned key is not predictable.
+	- I removed `sorted()` for speed.
+	- I return `None` if no key maps to `keyValue`, but it is not an efficient way to check for membership.
+	"""
+	for key, value in dictionary.items():
+		if value == keyValue:
+			return key
+	return None
+
+# ======= Flow control ======================================
 
 def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = None) -> int:
 	"""Compute the CPU usage limit for concurrent operations; for `numba` managed concurrency, set the global limit.
@@ -60,15 +112,7 @@ def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = 
 			concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
 	return concurrencyLimit
 
-def exclude[个](iterable: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
-	"""Yield items from `iterable` whose positions are not in `indices`."""
-	lengthIterable: int = len(iterable)
-	def normalizeIndex(index: int) -> int:
-		if index < 0:
-			index = (index + lengthIterable) % lengthIterable
-		return index
-	indicesInclude: list[int] = sorted(set(range(lengthIterable)).difference(map(normalizeIndex, indices)))
-	return extract(iterable, indicesInclude)
+# ======= map folding ===================================
 
 def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]:
 	"""Create a properly typed connection graph for the map folding algorithm.
@@ -252,20 +296,6 @@ def makeDataContainer(shape: int | tuple[int, ...], datatype: type[NumPyIntegerT
 	"""
 	return numpy.zeros(shape, dtype=datatype)
 
-def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: 文义) -> 文件:
-	"""Return the key in `dictionary` that corresponds to `keyValue`.
-
-	Prototype.
-
-	- `keyValue` must be in `dictionary.values()`.
-	- I'm assuming all `dictionary.values()` are distinct. If multiple keys contain `keyValue`, the first found key is returned.
-	"""
-	for key, value in sorted(dictionary.items()):
-		if value == keyValue:
-			return key
-	message: str = f"I received `{keyValue = }`, but I couldn't find it in `dictionary`."
-	raise KeyError(message)
-
 def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	"""Validate and normalize dimensions for a map folding problem.
 
@@ -322,26 +352,3 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	"""
 	# NOTE Do NOT sort the dimensions.
 	return tuple(mapDimensions)
-
-
-def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
-	"""Return the list of values from a dictionary (generic over type parameter `个`).
-
-	A tiny helper used only for its semantic clarity inside `deconstructListPinnedLeaves` when flattening expanded
-	dictionaries produced by `deconstructPinnedLeaves`.
-
-	Parameters
-	----------
-	dictionary : dict[Any, 个]
-		Source mapping.
-
-	Returns
-	-------
-	list[个]
-		List of the dictionary's values.
-
-	See Also
-	--------
-	deconstructPinnedLeaves, deconstructListPinnedLeaves
-	"""
-	return list(dictionary.values())
