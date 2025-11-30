@@ -27,9 +27,11 @@ from collections.abc import Callable, Generator, Sequence
 from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
 from mapFolding.dataBaskets import EliminationState
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, oeisIDsImplemented
+from numpy.typing import NDArray
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 import numpy
+import pickle
 import pytest
 import random
 import shutil
@@ -396,6 +398,22 @@ def oeisID_1random() -> str:
 
 	"""
 	return random.choice(oeisIDsImplemented)
+
+@pytest.fixture
+def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
+	"""Factory fixture for loading pickled array foldings data.
+
+	Returns
+	-------
+	loaderFunction : Callable[[int], NDArray[numpy.uint8]]
+		Function that loads arrayFoldings for a given dimensionsTotal.
+	"""
+	def loader(dimensionsTotal: int) -> NDArray[numpy.uint8]:
+		pathFilename = pathDataSamples / f"arrayFoldingsP2d{dimensionsTotal}.pkl"
+		arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())  # noqa: S301
+		return arrayFoldings
+
+	return loader
 
 @pytest.fixture
 def makeEliminationState() -> Callable[[tuple[int, ...]], EliminationState]:

@@ -7,9 +7,9 @@ from gmpy2 import fac
 from itertools import accumulate
 from mapFolding import packageSettings
 from mapFolding._e import (
-	getDictionaryAddends4Next, getDictionaryAddends4Prior, getDictionaryLeafDomains, getDictionaryPileRanges,
-	getDomain二combined, getLeafDomain, getListLeavesIncrease, getPileRange, PinnedLeaves, 一, 二, 零)
-from mapFolding._e.pinning2Dn import pinByFormula, secondOrderLeaves, secondOrderLeavesV2, secondOrderPilings, Z0Z_k_r
+	getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension二, getLeafDomain, getListLeavesIncrease,
+	getPileRange, PinnedLeaves, 一, 二, 零)
+from mapFolding._e.pinning2Dn import pinLeaf首零_零, secondOrderLeaves, secondOrderPilings, thirdOrderPilings, Z0Z_k_r
 from mapFolding._e.pinning2DnAnnex import beansWithoutCornbread
 from mapFolding.dataBaskets import EliminationState
 from math import prod
@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 import csv
 import numpy
 import pickle
+import time
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
@@ -45,7 +46,7 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 	print(colorReset, end='')
 	print(len(listDictionaryPinned), "surplus dictionaries.")
 
-	pathFilename = Path(f"/apps/mapFolding/Z0Z_notes/p2d{state.dimensionsTotal}SurplusDictionaries.csv")
+	pathFilename = Path(f"{packageSettings.pathPackage}/_e/analysisExcel/p2d{state.dimensionsTotal}SurplusDictionaries.csv")
 
 	if listDictionaryPinned:
 		with pathFilename.open('w', newline='') as writeStream:
@@ -103,28 +104,32 @@ if __name__ == '__main__':
 	printThis = True
 
 	if printThis:
+		timeStart = time.perf_counter()
+		state: EliminationState = secondOrderLeaves(state)
+		print(f"{time.perf_counter() - timeStart:.2f}\tsecondOrderLeaves")
+		verifyPinning2Dn(state)
+		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 		printStatisticsPermutations(state)
 		print(f"{len(state.listPinnedLeaves)=}")
-		pprint(getDomain二combined(state))
 
 	elif printThis:
-		state: EliminationState = secondOrderLeavesV2(state)
-		verifyPinning2Dn(state)
-		state: EliminationState = pinByFormula(state)
-		state: EliminationState = secondOrderLeaves(state)
+		state: EliminationState = thirdOrderPilings(state)
+		# print(f"{time.perf_counter() - timeStart:.2f}\tpinByFormula")  # noqa: ERA001
+		state: EliminationState = pinLeaf首零_零(state)
 		dictionaryLeafDomains = getDictionaryLeafDomains(state)
 		pprint(dictionaryLeafDomains)
-		dictionaryAddends4Next = getDictionaryAddends4Next(state)
-		dictionaryAddends4Prior = getDictionaryAddends4Prior(state)
+		state: EliminationState = secondOrderPilings(state)
 		dictionaryPileRanges = getDictionaryPileRanges(state)
 		domainsOfDimensionOrigins = tuple(getLeafDomain(state, leaf) for leaf in state.productsOfDimensions)[0:-1]
 		pprint(state.listPinnedLeaves)
 		pprint(state.listPinnedLeaves[0:5])
 		print(*domainsOfDimensionOrigins, sep='\n')
-		state: EliminationState = secondOrderPilings(state)
 		state: EliminationState = Z0Z_k_r(state)
+
+
 		sumsOfDimensionOrigins = tuple(accumulate(state.productsOfDimensions))[0:-1]
 		sumsOfDimensionOriginsReversed = tuple(accumulate(state.productsOfDimensions[::-1], initial=-state.leavesTotal))[1:None]
+
 		for dimensionOrigin, domain, sumOrigins, sumReversed in zip(state.productsOfDimensions, domainsOfDimensionOrigins, sumsOfDimensionOrigins, sumsOfDimensionOriginsReversed, strict=False):
 			print(f"{dimensionOrigin:<2}\t{domain.start == sumOrigins = }\t{sumOrigins}\t{sumReversed+2}\t{domain.stop == sumReversed+2 = }")
 

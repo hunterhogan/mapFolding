@@ -21,7 +21,7 @@ See Also
 - "[Annotated, corrected, scanned copy]" of Koehler (1968) at https://oeis.org/A001011.
 - Citations in BibTeX format "mapFolding/citations".
 """
-from collections.abc import Callable, Iterator
+from collections.abc import Callable
 from cytoolz.dicttoolz import valfilter
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
@@ -167,29 +167,24 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 
 def pinnedLeavesHasAViolation(state: EliminationState) -> bool:
 	"""Return `True` if `state.pinnedLeaves` has a violation."""
-	def notLastLeaf(leaf: int) -> bool: # leafNPlus1 does not exist.
-		return leaf < state.leavesTotal - 零
-
-	def notNoneAt1(tupleElement: tuple[int | None, ...]) -> bool:
-		return tupleElement[1] is not None
-
-	def notNoneAt3(tupleElement: tuple[int | None, ...]) -> bool:
-		return tupleElement[3] is not None
-
 	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in state.pinnedLeaves.items()}
-
-	# tuple[tuple[pile, leaf], tuple[pileComparand, comparand]], dimension]  # noqa: ERA001
-	leavesAndDimensions: Iterator[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = CartesianProduct(combinations(sorted(valfilter(notLastLeaf, state.pinnedLeaves).items()), 2), range(state.dimensionsTotal))
-
-	getIncreases: Iterator[tuple[int, int | None, int, int | None, int]] = iter(
-			(pile, nextCrease(state.mapShape, leaf, dimension), pileComparand, nextCrease(state.mapShape, comparand, dimension), dimension)
-					for (((pile, leaf), (pileComparand, comparand)), dimension) in filter(matchingParityLeaf(state.mapShape), leavesAndDimensions))
-
-	getPileIncreases: Iterator[tuple[int, int | None, int, int | None, int]] = iter(
-			(pile, leafToPile.get(leafIncrease), pileComparand, leafToPile.get(comparandIncrease), dimension) # pyright: ignore[reportArgumentType]
-					for (pile, leafIncrease, pileComparand, comparandIncrease, dimension) in filter(notNoneAt3, filter(notNoneAt1, getIncreases)))
-
-	fourPiles: Iterator[tuple[int, int, int, int]] = iter((pile, pileIncrease, pileComparand, pileComparandIncrease)
-					for (pile, pileIncrease, pileComparand, pileComparandIncrease, _dimension) in filter(notNoneAt3, filter(notNoneAt1, getPileIncreases))) # pyright: ignore[reportAssignmentType]
-
-	return any(starmap(thisIsAViolation, fourPiles))
+	listPileLeafCandidates: list[tuple[int, int]] = sorted(
+			pileLeaf for pileLeaf in state.pinnedLeaves.items() if pileLeaf[1] < state.leavesTotal - 零)
+	for dimension in range(state.dimensionsTotal):
+		listParityGroups: list[list[tuple[int, int]]] = [[], []]
+		for pileKey, leafValue in listPileLeafCandidates:
+			leafIncrease: int | None = nextCrease(state.mapShape, leafValue, dimension)
+			if leafIncrease is None:
+				continue
+			pileIncrease: int | None = leafToPile.get(leafIncrease)
+			if pileIncrease is None:
+				continue
+			parityValue: int = ImaOddLeaf(state.mapShape, leafValue, dimension)
+			listParityGroups[parityValue].append((pileKey, pileIncrease))
+		for parityGroup in listParityGroups:
+			if len(parityGroup) < 2:
+				continue
+			for (pilePrimary, pilePrimaryIncrease), (pileComparand, pileComparandIncrease) in combinations(parityGroup, 2):
+				if thisIsAViolation(pilePrimary, pilePrimaryIncrease, pileComparand, pileComparandIncrease):
+					return True
+	return False

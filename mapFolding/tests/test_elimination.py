@@ -13,272 +13,67 @@ When adding new test data for additional `mapShape` values, add the data to `A00
 and the tests will automatically pick them up via parametrization.
 """
 
-from collections.abc import Callable, Iterable
-from mapFolding import packageSettings
+from collections.abc import Callable, Iterable, Sequence
 from mapFolding._e import (
-	getDictionaryAddends4Next, getDictionaryAddends4Prior, getDictionaryLeafDomains, getDictionaryPileRanges,
-	getDomain二combined, getLeafDomain, getPileRange)
-from mapFolding._e.pinning2Dn import pinByFormula, secondOrderLeavesV2, secondOrderPilings
+	getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二,
+	getDomain二一零and二一, getDomain二零and二, getLeafDomain, getPileRange)
+from mapFolding._e.pinning2Dn import secondOrderLeaves, secondOrderPilings, thirdOrderPilings
 from mapFolding.dataBaskets import EliminationState
-from mapFolding.tests.dataSamples import A001417, p2DnDomain6_7_5_4
-from pathlib import Path
-from typing import TYPE_CHECKING
+from mapFolding.tests.dataSamples import (
+	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二)
+from numpy.typing import NDArray
+from types import ModuleType
 import numpy
-import pickle
 import pytest
 
-if TYPE_CHECKING:
-	from numpy.typing import NDArray
+dictionaryPinningFunctionDimensionsTotals: dict[Callable[[EliminationState], EliminationState], list[int]] = {
+	thirdOrderPilings: [5, 6],
+	secondOrderLeaves: [4, 5, 6],
+	secondOrderPilings: [4, 5, 6],
+}
 
-class TestGetDictionaryAddends4Next:
-	"""Tests for `getDictionaryAddends4Next` function."""
+listPinningFunctionDimensionsTotals: list[tuple[Callable[[EliminationState], EliminationState], int]] = [
+	(pinningFunction, dimensionsTotal)
+	for pinningFunction, listDimensionsTotals in dictionaryPinningFunctionDimensionsTotals.items()
+	for dimensionsTotal in listDimensionsTotals
+]
 
-	@pytest.mark.parametrize(
-		"mapShape",
-		list(A001417.dictionaryAddends4NextKnown),
-		ids=[f"mapShape={shape}" for shape in A001417.dictionaryAddends4NextKnown],
-	)
-	def test_getDictionaryAddends4Next_completeComparisonKnown(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		mapShape: tuple[int, ...],
-	) -> None:
-		state = makeEliminationState(mapShape)
-		dictionaryExpected = A001417.dictionaryAddends4NextKnown[mapShape]
+listCombinedDomainCases: list[tuple[str, Callable[[EliminationState], Sequence[tuple[int, ...]]], ModuleType, str]] = [
+	(
+		'getDomainDimension一',
+		getDomainDimension一,
+		p2DnDomain3_2_首一_首零一,
+		'Domain3_2_首一_首零一',
+	),
+	(
+		'getDomainDimension二',
+		getDomainDimension二,
+		p2DnDomain6_7_5_4,
+		'Domain6_7_5_4',
+	),
+	(
+		'getDomainDimension首二',
+		getDomainDimension首二,
+		p2DnDomain首二_首零二_首零一二_首一二,
+		'Domain首二_首零二_首零一二_首一二',
+	),
+	(
+		'getDomain二一零and二一',
+		getDomain二一零and二一,
+		p2DnDomain7_6,
+		'Domain7_6',
+	),
+	(
+		'getDomain二零and二',
+		getDomain二零and二,
+		p2DnDomain5_4,
+		'Domain5_4',
+	),
+]
 
-		dictionaryActual = getDictionaryAddends4Next(state)
+listCombinedDomainDimensions: list[int] = [4, 5, 6]
 
-		assert len(dictionaryActual) == state.leavesTotal, (
-			f"getDictionaryAddends4Next: dictionary length mismatch for {mapShape=}. "
-			f"Expected {state.leavesTotal}, got {len(dictionaryActual)}."
-		)
-
-		for leaf in range(state.leavesTotal):
-			assert dictionaryActual[leaf] == dictionaryExpected[leaf], (
-				f"getDictionaryAddends4Next: mismatch at {leaf=} for {mapShape=}. "
-				f"Expected {dictionaryExpected[leaf]}, got {dictionaryActual[leaf]}."
-			)
-
-class TestGetDictionaryAddends4Prior:
-	"""Tests for `getDictionaryAddends4Prior` function."""
-
-	@pytest.mark.parametrize(
-		"mapShape",
-		list(A001417.dictionaryAddends4PriorKnown),
-		ids=[f"mapShape={shape}" for shape in A001417.dictionaryAddends4PriorKnown],
-	)
-	def test_getDictionaryAddends4Prior_completeComparisonKnown(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		mapShape: tuple[int, ...],
-	) -> None:
-		state = makeEliminationState(mapShape)
-		dictionaryExpected = A001417.dictionaryAddends4PriorKnown[mapShape]
-
-		dictionaryActual = getDictionaryAddends4Prior(state)
-
-		assert len(dictionaryActual) == state.leavesTotal, (
-			f"getDictionaryAddends4Prior: dictionary length mismatch for {mapShape=}. "
-			f"Expected {state.leavesTotal}, got {len(dictionaryActual)}."
-		)
-
-		for leaf in range(state.leavesTotal):
-			assert dictionaryActual[leaf] == dictionaryExpected[leaf], (
-				f"getDictionaryAddends4Prior: mismatch at {leaf=} for {mapShape=}. "
-				f"Expected {dictionaryExpected[leaf]}, got {dictionaryActual[leaf]}."
-			)
-
-class TestGetDictionaryLeafDomains:
-	"""Tests for `getDictionaryLeafDomains` function."""
-
-	@pytest.mark.parametrize(
-		"mapShape",
-		list(A001417.dictionaryLeafDomainStartKnown),
-		ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainStartKnown],
-	)
-	def test_getDictionaryLeafDomains_startValuesMatch(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		mapShape: tuple[int, ...],
-	) -> None:
-		state = makeEliminationState(mapShape)
-		dictionaryStartExpected = A001417.dictionaryLeafDomainStartKnown[mapShape]
-
-		dictionaryActual = getDictionaryLeafDomains(state)
-
-		assert len(dictionaryActual) == state.leavesTotal, (
-			f"getDictionaryLeafDomains: dictionary length mismatch for {mapShape=}. "
-			f"Expected {state.leavesTotal}, got {len(dictionaryActual)}."
-		)
-
-		for leaf in range(state.leavesTotal):
-			rangeActual = dictionaryActual[leaf]
-			startExpected = dictionaryStartExpected[leaf]
-			assert rangeActual.start == startExpected, (
-				f"getDictionaryLeafDomains: range.start mismatch at {leaf=} for {mapShape=}. "
-				f"Expected start={startExpected}, got {rangeActual.start}."
-			)
-
-	@pytest.mark.parametrize(
-		"mapShape",
-		list(A001417.dictionaryLeafDomainStopKnown),
-		ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainStopKnown],
-	)
-	def test_getDictionaryLeafDomains_stopValuesMatch(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		mapShape: tuple[int, ...],
-	) -> None:
-		state = makeEliminationState(mapShape)
-		dictionaryStopExpected = A001417.dictionaryLeafDomainStopKnown[mapShape]
-
-		dictionaryActual = getDictionaryLeafDomains(state)
-
-		for leaf in range(state.leavesTotal):
-			rangeActual = dictionaryActual[leaf]
-			stopExpected = dictionaryStopExpected[leaf]
-			assert rangeActual.stop >= stopExpected, (
-				f"getDictionaryLeafDomains: range.stop too small at {leaf=} for {mapShape=}. "
-				f"Expected stop>={stopExpected}, got {rangeActual.stop}."
-			)
-			assert rangeActual.stop <= stopExpected + 1, (
-				f"getDictionaryLeafDomains: range.stop too large at {leaf=} for {mapShape=}. "
-				f"Expected stop<={stopExpected + 1}, got {rangeActual.stop}."
-			)
-
-class TestGetLeafDomain:
-	"""Tests for `getLeafDomain` function."""
-
-	@pytest.mark.parametrize(
-		"mapShape,leaf",
-		[
-			(mapShape, leaf)
-			for mapShape in A001417.dictionaryLeafDomainStartKnown
-			for leaf in A001417.leafIndicesSample2d6[:5] if leaf < 2**len(mapShape)
-		],
-		ids=lambda parameterValue: str(parameterValue),
-	)
-	def test_getLeafDomain_spotCheckStartValues(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		mapShape: tuple[int, ...],
-		leaf: int,
-	) -> None:
-		state = makeEliminationState(mapShape)
-		startExpected = A001417.dictionaryLeafDomainStartKnown[mapShape][leaf]
-
-		rangeActual = getLeafDomain(state, leaf)
-
-		assert rangeActual.start == startExpected, (
-			f"getLeafDomain: start mismatch for {leaf=} with {mapShape=}. "
-			f"Expected {startExpected}, got {rangeActual.start}."
-		)
-
-class TestGetDictionaryPileRanges:
-	"""Tests for `getDictionaryPileRanges` function."""
-
-	@pytest.mark.parametrize(
-		"mapShape",
-		list(A001417.dictionaryPileRangesKnown),
-		ids=[f"mapShape={shape}" for shape in A001417.dictionaryPileRangesKnown],
-	)
-	def test_getDictionaryPileRanges_completeComparisonKnown(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		mapShape: tuple[int, ...],
-	) -> None:
-		state = makeEliminationState(mapShape)
-		dictionaryExpected = A001417.dictionaryPileRangesKnown[mapShape]
-
-		dictionaryActual = getDictionaryPileRanges(state)
-
-		assert len(dictionaryActual) == state.leavesTotal, (
-			f"getDictionaryPileRanges: dictionary length mismatch for {mapShape=}. "
-			f"Expected {state.leavesTotal}, got {len(dictionaryActual)}."
-		)
-
-		for pile in range(state.leavesTotal):
-			assert dictionaryActual[pile] == dictionaryExpected[pile], (
-				f"getDictionaryPileRanges: mismatch at {pile=} for {mapShape=}. "
-				f"Expected {dictionaryExpected[pile]}, got {dictionaryActual[pile]}."
-			)
-
-class TestGetPileRange:
-	"""Tests for `getPileRange` function."""
-
-	@pytest.mark.parametrize(
-		"mapShape,pile",
-		[
-			(mapShape, pile)
-			for mapShape in A001417.dictionaryPileRangesKnown
-			for pile in A001417.pileIndicesSample2d4 if pile < 2**len(mapShape)
-		],
-		ids=lambda parameterValue: str(parameterValue),
-	)
-	def test_getPileRange_spotCheckValues(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		mapShape: tuple[int, ...],
-		pile: int,
-	) -> None:
-		state = makeEliminationState(mapShape)
-		listExpected = A001417.dictionaryPileRangesKnown[mapShape][pile]
-
-		iterableActual: Iterable[int] = getPileRange(state, pile)
-		listActual = list(iterableActual)
-
-		assert listActual == listExpected, (
-			f"getPileRange: mismatch for {pile=} with {mapShape=}. "
-			f"Expected {listExpected}, got {listActual}."
-		)
-
-	@pytest.mark.parametrize(
-		"mapShape",
-		list(A001417.dictionaryPileRangesKnown),
-		ids=[f"mapShape={shape}" for shape in A001417.dictionaryPileRangesKnown],
-	)
-	def test_getPileRange_consistencyWithDictionary(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		mapShape: tuple[int, ...],
-	) -> None:
-		"""Verify `getPileRange` results match `getDictionaryPileRanges` for all piles."""
-		state = makeEliminationState(mapShape)
-
-		dictionaryFromFunction = getDictionaryPileRanges(state)
-
-		for pile in range(state.leavesTotal):
-			listFromGetPileRange = list(getPileRange(state, pile))
-			listFromDictionary = dictionaryFromFunction[pile]
-
-			assert listFromGetPileRange == listFromDictionary, (
-				f"getPileRange inconsistent with getDictionaryPileRanges at {pile=} for {mapShape=}. "
-				f"getPileRange returned {listFromGetPileRange}, dictionary has {listFromDictionary}."
-			)
-
-# Path to pickled test data
-pathDataSamples: Path = Path(f'{packageSettings.pathPackage}/tests/dataSamples')
-
-@pytest.fixture
-def loadArrayFoldings() -> Callable[[int], "NDArray[numpy.uint8]"]:
-	"""Factory fixture for loading pickled array foldings data.
-
-	Returns
-	-------
-	loaderFunction : Callable[[int], NDArray[numpy.uint8]]
-		Function that loads arrayFoldings for a given dimensionsTotal.
-	"""
-	def loader(dimensionsTotal: int) -> "NDArray[numpy.uint8]":
-		pathFilename = pathDataSamples / f"arrayFoldingsP2d{dimensionsTotal}.pkl"
-		arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())  # noqa: S301
-		return arrayFoldings
-
-	return loader
-
-def verifyPinnedLeavesAgainstFoldings(
-	state: EliminationState,
-	arrayFoldings: "NDArray[numpy.uint8]",
-) -> tuple[int, int, int]:
+def verifyPinnedLeavesAgainstFoldings(state: EliminationState, arrayFoldings: NDArray[numpy.uint8]) -> tuple[int, int, int]:
 	"""Verify pinned leaves cover all foldings without overlap.
 
 	Parameters
@@ -317,202 +112,164 @@ def verifyPinnedLeavesAgainstFoldings(
 
 	return rowsCovered, rowsTotal, countOverlappingDictionaries
 
-class TestPinByFormula:
-	"""Tests for `pinByFormula` function coverage and correctness."""
+@pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainStartKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainStartKnown])
+def test_getDictionaryLeafDomains_startValuesMatch(mapShape: tuple[int, ...]) -> None:
+	state = EliminationState(mapShape=mapShape)
+	dictionaryStartExpected = A001417.dictionaryLeafDomainStartKnown[mapShape]
 
-	@pytest.mark.parametrize(
-		"dimensionsTotal",
-		[5, 6],
-		ids=["2d5_32leaves", "2d6_64leaves"],
+	dictionaryActual = getDictionaryLeafDomains(state)
+
+	assert len(dictionaryActual) == state.leavesTotal, (
+		f"getDictionaryLeafDomains: dictionary length mismatch for {mapShape=}. "
+		f"Expected {state.leavesTotal}, got {len(dictionaryActual)}."
 	)
-	def test_pinByFormula_fullCoverage(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		loadArrayFoldings: Callable[[int], "NDArray[numpy.uint8]"],
-		dimensionsTotal: int,
-	) -> None:
-		mapShape = (2,) * dimensionsTotal
-		state = makeEliminationState(mapShape)
-		arrayFoldings = loadArrayFoldings(dimensionsTotal)
 
-		state = pinByFormula(state)
-
-		rowsCovered, rowsTotal, _countOverlapping = verifyPinnedLeavesAgainstFoldings(state, arrayFoldings)
-
-		assert rowsCovered == rowsTotal, (
-			f"pinByFormula: incomplete coverage for {mapShape=}. "
-			f"Covered {rowsCovered}/{rowsTotal} rows ({100 * rowsCovered / rowsTotal:.2f}%)."
+	for leaf in range(state.leavesTotal):
+		rangeActual = dictionaryActual[leaf]
+		startExpected = dictionaryStartExpected[leaf]
+		assert rangeActual.start == startExpected, (
+			f"getDictionaryLeafDomains: range.start mismatch at {leaf=} for {mapShape=}. "
+			f"Expected start={startExpected}, got {rangeActual.start}."
 		)
 
-	@pytest.mark.parametrize(
-		"dimensionsTotal",
-		[5, 6],
-		ids=["2d5_32leaves", "2d6_64leaves"],
-	)
-	def test_pinByFormula_noOverlap(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		loadArrayFoldings: Callable[[int], "NDArray[numpy.uint8]"],
-		dimensionsTotal: int,
-	) -> None:
-		mapShape = (2,) * dimensionsTotal
-		state = makeEliminationState(mapShape)
-		arrayFoldings = loadArrayFoldings(dimensionsTotal)
+@pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainStopKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainStopKnown])
+def test_getDictionaryLeafDomains_stopValuesMatch(mapShape: tuple[int, ...]) -> None:
+	state = EliminationState(mapShape=mapShape)
+	dictionaryStopExpected = A001417.dictionaryLeafDomainStopKnown[mapShape]
 
-		state = pinByFormula(state)
+	dictionaryActual = getDictionaryLeafDomains(state)
 
-		_rowsCovered, _rowsTotal, countOverlappingDictionaries = verifyPinnedLeavesAgainstFoldings(state, arrayFoldings)
-
-		assert countOverlappingDictionaries == 0, (
-			f"pinByFormula: found {countOverlappingDictionaries} overlapping dictionaries for {mapShape=}. "
-			f"Expected 0 overlaps."
+	for leaf in range(state.leavesTotal):
+		rangeActual = dictionaryActual[leaf]
+		stopExpected = dictionaryStopExpected[leaf]
+		assert rangeActual.stop >= stopExpected, (
+			f"getDictionaryLeafDomains: range.stop too small at {leaf=} for {mapShape=}. "
+			f"Expected stop>={stopExpected}, got {rangeActual.stop}."
+		)
+		assert rangeActual.stop <= stopExpected + 1, (
+			f"getDictionaryLeafDomains: range.stop too large at {leaf=} for {mapShape=}. "
+			f"Expected stop<={stopExpected + 1}, got {rangeActual.stop}."
 		)
 
-class TestSecondOrderLeavesV2:
-	"""Tests for `secondOrderLeavesV2` function coverage and correctness."""
+@pytest.mark.parametrize("mapShape,leaf", [ (mapShape, leaf) for mapShape in A001417.dictionaryLeafDomainStartKnown for leaf in A001417.leafIndicesSample2d6[:5] if leaf < 2**len(mapShape) ], ids=lambda parameterValue: str(parameterValue))
+def test_getLeafDomain_spotCheckStartValues(mapShape: tuple[int, ...], leaf: int) -> None:
+	state = EliminationState(mapShape=mapShape)
+	startExpected = A001417.dictionaryLeafDomainStartKnown[mapShape][leaf]
 
-	@pytest.mark.parametrize(
-		"dimensionsTotal",
-		[4, 5, 6],
-		ids=["2d4_16leaves", "2d5_32leaves", "2d6_64leaves"],
+	rangeActual = getLeafDomain(state, leaf)
+
+	assert rangeActual.start == startExpected, (
+		f"getLeafDomain: start mismatch for {leaf=} with {mapShape=}. "
+		f"Expected {startExpected}, got {rangeActual.start}."
 	)
-	def test_secondOrderLeavesV2_fullCoverage(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		loadArrayFoldings: Callable[[int], "NDArray[numpy.uint8]"],
-		dimensionsTotal: int,
-	) -> None:
-		mapShape = (2,) * dimensionsTotal
-		state = makeEliminationState(mapShape)
-		arrayFoldings = loadArrayFoldings(dimensionsTotal)
 
-		state = secondOrderLeavesV2(state)
+@pytest.mark.parametrize("mapShape", list(A001417.dictionaryPileRangesKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryPileRangesKnown])
+def test_getDictionaryPileRanges_completeComparisonKnown(mapShape: tuple[int, ...]) -> None:
+	state = EliminationState(mapShape=mapShape)
+	dictionaryExpected = A001417.dictionaryPileRangesKnown[mapShape]
 
-		rowsCovered, rowsTotal, _countOverlapping = verifyPinnedLeavesAgainstFoldings(state, arrayFoldings)
+	dictionaryActual = getDictionaryPileRanges(state)
 
-		assert rowsCovered == rowsTotal, (
-			f"secondOrderLeavesV2: incomplete coverage for {mapShape=}. "
-			f"Covered {rowsCovered}/{rowsTotal} rows ({100 * rowsCovered / rowsTotal:.2f}%)."
+	assert len(dictionaryActual) == state.leavesTotal, (
+		f"getDictionaryPileRanges: dictionary length mismatch for {mapShape=}. "
+		f"Expected {state.leavesTotal}, got {len(dictionaryActual)}."
+	)
+
+	for pile in range(state.leavesTotal):
+		assert dictionaryActual[pile] == dictionaryExpected[pile], (
+			f"getDictionaryPileRanges: mismatch at {pile=} for {mapShape=}. "
+			f"Expected {dictionaryExpected[pile]}, got {dictionaryActual[pile]}."
 		)
 
-	@pytest.mark.parametrize(
-		"dimensionsTotal",
-		[4, 5, 6],
-		ids=["2d4_16leaves", "2d5_32leaves", "2d6_64leaves"],
+@pytest.mark.parametrize("mapShape,pile", [ (mapShape, pile) for mapShape in A001417.dictionaryPileRangesKnown for pile in A001417.pileIndicesSample2d4 if pile < 2**len(mapShape) ], ids=lambda parameterValue: str(parameterValue))
+def test_getPileRange_spotCheckValues(mapShape: tuple[int, ...], pile: int) -> None:
+	state = EliminationState(mapShape=mapShape)
+	listExpected = A001417.dictionaryPileRangesKnown[mapShape][pile]
+
+	iterableActual: Iterable[int] = getPileRange(state, pile)
+	listActual = list(iterableActual)
+
+	assert listActual == listExpected, (
+		f"getPileRange: mismatch for {pile=} with {mapShape=}. "
+		f"Expected {listExpected}, got {listActual}."
 	)
-	def test_secondOrderLeavesV2_noOverlap(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		loadArrayFoldings: Callable[[int], "NDArray[numpy.uint8]"],
-		dimensionsTotal: int,
-	) -> None:
-		mapShape = (2,) * dimensionsTotal
-		state = makeEliminationState(mapShape)
-		arrayFoldings = loadArrayFoldings(dimensionsTotal)
 
-		state = secondOrderLeavesV2(state)
+@pytest.mark.parametrize("mapShape", list(A001417.dictionaryPileRangesKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryPileRangesKnown])
+def test_getPileRange_consistencyWithDictionary(mapShape: tuple[int, ...]) -> None:
+	"""Verify `getPileRange` results match `getDictionaryPileRanges` for all piles."""
+	state = EliminationState(mapShape=mapShape)
 
-		_rowsCovered, _rowsTotal, countOverlappingDictionaries = verifyPinnedLeavesAgainstFoldings(state, arrayFoldings)
+	dictionaryFromFunction = getDictionaryPileRanges(state)
 
-		assert countOverlappingDictionaries == 0, (
-			f"secondOrderLeavesV2: found {countOverlappingDictionaries} overlapping dictionaries for {mapShape=}. "
-			f"Expected 0 overlaps."
-		)
+	for pile in range(state.leavesTotal):
+		listFromGetPileRange = list(getPileRange(state, pile))
+		listFromDictionary = dictionaryFromFunction[pile]
 
-class TestSecondOrderPilings:
-	"""Tests for `secondOrderPilings` function coverage and correctness."""
-
-	@pytest.mark.parametrize(
-		"dimensionsTotal",
-		[4, 5, 6],
-		ids=["2d4_16leaves", "2d5_32leaves", "2d6_64leaves"],
-	)
-	def test_secondOrderPilings_fullCoverage(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		loadArrayFoldings: Callable[[int], "NDArray[numpy.uint8]"],
-		dimensionsTotal: int,
-	) -> None:
-		mapShape = (2,) * dimensionsTotal
-		state = makeEliminationState(mapShape)
-		arrayFoldings = loadArrayFoldings(dimensionsTotal)
-
-		state = secondOrderPilings(state)
-
-		rowsCovered, rowsTotal, _countOverlapping = verifyPinnedLeavesAgainstFoldings(state, arrayFoldings)
-
-		assert rowsCovered == rowsTotal, (
-			f"secondOrderPilings: incomplete coverage for {mapShape=}. "
-			f"Covered {rowsCovered}/{rowsTotal} rows ({100 * rowsCovered / rowsTotal:.2f}%)."
-		)
-
-	@pytest.mark.parametrize(
-		"dimensionsTotal",
-		[4, 5, 6],
-		ids=["2d4_16leaves", "2d5_32leaves", "2d6_64leaves"],
-	)
-	def test_secondOrderPilings_noOverlap(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		loadArrayFoldings: Callable[[int], "NDArray[numpy.uint8]"],
-		dimensionsTotal: int,
-	) -> None:
-		mapShape = (2,) * dimensionsTotal
-		state = makeEliminationState(mapShape)
-		arrayFoldings = loadArrayFoldings(dimensionsTotal)
-
-		state = secondOrderPilings(state)
-
-		_rowsCovered, _rowsTotal, countOverlappingDictionaries = verifyPinnedLeavesAgainstFoldings(state, arrayFoldings)
-
-		assert countOverlappingDictionaries == 0, (
-			f"secondOrderPilings: found {countOverlappingDictionaries} overlapping dictionaries for {mapShape=}. "
-			f"Expected 0 overlaps."
+		assert listFromGetPileRange == listFromDictionary, (
+			f"getPileRange inconsistent with getDictionaryPileRanges at {pile=} for {mapShape=}. "
+			f"getPileRange returned {listFromGetPileRange}, dictionary has {listFromDictionary}."
 		)
 
 
-class TestCombinedDomains:
-	"""Tests for combined domain functions.
-
-	These tests verify that domain functions return domains containing all known valid
-	pile position tuples. The domains may be over-inclusive (contain extra tuples beyond
-	what is strictly necessary), which is acceptable behavior.
-
-	Test data is stored in `tests/dataSamples/p2DnDomain*.py` files. Each file contains
-	a `dictionaryCombinedDomainKnown` mapping mapShape tuples to lists of valid pile
-	position tuples.
-
-	To add tests for a new domain function:
-	1. Create a data file `tests/dataSamples/p2DnDomain<leaves>.py` with the known data
-	2. Import the data module in this test file
-	3. Add a test method following the pattern below, referencing the new data module
-	"""
-
-	@pytest.mark.parametrize(
-		"mapShape",
-		list(p2DnDomain6_7_5_4.dictionaryCombinedDomainKnown),
-		ids=[f"mapShape={shape}" for shape in p2DnDomain6_7_5_4.dictionaryCombinedDomainKnown],
-	)
-	def test_getDomain二combined_containsAllKnown(
-		self,
-		makeEliminationState: Callable[[tuple[int, ...]], EliminationState],
-		mapShape: tuple[int, ...],
-	) -> None:
-		"""Verify getDomain二combined contains all known valid pile position tuples.
-
-		The function may return additional tuples (over-inclusive), which is acceptable.
-		This test only verifies that all empirically known valid tuples are present.
-		"""
-		state = makeEliminationState(mapShape)
-		listTuplesKnown = p2DnDomain6_7_5_4.dictionaryCombinedDomainKnown[mapShape]
-
-		domainActual = getDomain二combined(state)
-		setDomainActual = set(domainActual)
-
-		listTuplesMissing = [tupleKnown for tupleKnown in listTuplesKnown if tupleKnown not in setDomainActual]
-
-		assert len(listTuplesMissing) == 0, (
-			f"getDomain二combined: missing {len(listTuplesMissing)} known tuples for {mapShape=}. "
-			f"Missing: {listTuplesMissing[:5]}{'...' if len(listTuplesMissing) > 5 else ''}."
+@pytest.mark.parametrize(
+	"dimensionsTotal",
+	listCombinedDomainDimensions,
+	ids=[f"2d{dimensionsTotal}" for dimensionsTotal in listCombinedDomainDimensions],
+)
+@pytest.mark.parametrize(
+	"caseName,domainFunction,moduleExpected,attributeSuffix",
+	listCombinedDomainCases,
+	ids=[caseName for caseName, _domainFunction, _moduleExpected, _attributeSuffix in listCombinedDomainCases],
+)
+def test_combinedDomainFunctions_matchVerificationData(
+	caseName: str,
+	domainFunction: Callable[[EliminationState], Sequence[tuple[int, ...]]],
+	moduleExpected: ModuleType,
+	attributeSuffix: str,
+	dimensionsTotal: int,
+) -> None:
+	"""Compare combined domain functions against empirical verification datasets."""
+	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
+	state = EliminationState(mapShape=mapShape)
+	domainActual: tuple[tuple[int, ...], ...] = tuple(domainFunction(state))
+	attributeName: str = f"list2D{dimensionsTotal}{attributeSuffix}"
+	domainExpected: Sequence[tuple[int, ...]] = getattr(moduleExpected, attributeName)
+	setActual: set[tuple[int, ...]] = set(domainActual)
+	setExpected: set[tuple[int, ...]] = set(domainExpected)
+	missingTuplesFull: list[tuple[int, ...]] = sorted(setExpected.difference(setActual))
+	if missingTuplesFull:
+		pytest.fail(
+			f"{caseName}: combined domain missing {len(missingTuplesFull)} tuples for mapShape={mapShape}. "
+			f"Missing samples: {missingTuplesFull[:3]}"
 		)
+
+@pytest.mark.parametrize("pinningFunction,dimensionsTotal", listPinningFunctionDimensionsTotals, ids=[f"{pinningFunction.__name__}_2d{dimensionsTotal}" for pinningFunction, dimensionsTotal in listPinningFunctionDimensionsTotals])
+def test_pinningFunction_fullCoverage(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8]], pinningFunction: Callable[[EliminationState], EliminationState], dimensionsTotal: int) -> None:
+	mapShape = (2,) * dimensionsTotal
+	state = EliminationState(mapShape=mapShape)
+	arrayFoldings = loadArrayFoldings(dimensionsTotal)
+
+	state = pinningFunction(state)
+
+	rowsCovered, rowsTotal, _countOverlapping = verifyPinnedLeavesAgainstFoldings(state, arrayFoldings)
+
+	assert rowsCovered == rowsTotal, (
+		f"{pinningFunction.__name__}: incomplete coverage for {mapShape=}. "
+		f"Covered {rowsCovered}/{rowsTotal} rows ({100 * rowsCovered / rowsTotal:.2f}%)."
+	)
+
+@pytest.mark.parametrize("pinningFunction,dimensionsTotal", listPinningFunctionDimensionsTotals, ids=[f"{pinningFunction.__name__}_2d{dimensionsTotal}" for pinningFunction, dimensionsTotal in listPinningFunctionDimensionsTotals])
+def test_pinningFunction_noOverlap(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8]], pinningFunction: Callable[[EliminationState], EliminationState], dimensionsTotal: int) -> None:
+	mapShape = (2,) * dimensionsTotal
+	state = EliminationState(mapShape=mapShape)
+	arrayFoldings = loadArrayFoldings(dimensionsTotal)
+
+	state = pinningFunction(state)
+
+	_rowsCovered, _rowsTotal, countOverlappingDictionaries = verifyPinnedLeavesAgainstFoldings(state, arrayFoldings)
+
+	assert countOverlappingDictionaries == 0, (
+		f"{pinningFunction.__name__}: found {countOverlappingDictionaries} overlapping dictionaries for {mapShape=}. "
+		f"Expected 0 overlaps."
+	)
 

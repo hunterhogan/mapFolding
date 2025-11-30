@@ -1,17 +1,14 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
 from collections.abc import Callable, Sequence
-from cytoolz.functoolz import curry as syntacticCurry
-from cytoolz.itertoolz import groupby
 from gmpy2 import bit_flip, bit_mask, is_odd
 from hunterMakesPy import writePython
 from itertools import filterfalse, repeat
-from mapFolding import inclusive, packageSettings, reverseLookup
+from mapFolding import exclude, inclusive, packageSettings, reverseLookup
 from mapFolding._e import (
-	getDictionaryAddends4Next, getDictionaryLeafDomains, getDictionaryPileRanges, getDomain二combined,
-	getDomain二一零and二一corners, getDomain二一零and二一nonCorners, getDomain二零and二corners, getDomain二零and二nonCorners,
-	getLeafDomain, howMany0coordinatesAtTail, leafInSubHyperplane, pileOrigin, ptount, 一, 三, 二, 四, 零, 首一, 首一二, 首二, 首零, 首零一,
-	首零一二, 首零二)
-from mapFolding._e._data import between
+	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeafDomain, howMany0coordinatesAtTail,
+	howManyDimensionsHaveOddParity, leafInSubHyperplane, pileOrigin, ptount, 一, 三, 二, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二,
+	首零二)
+from mapFolding.beDRY import between, noDuplicates
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import extract
 from pathlib import Path, PurePath
@@ -179,19 +176,6 @@ def _getGroupedBy(state: EliminationState, pileTarget: int, groupByLeavesAtPiles
 	groupedBy: dict[int | tuple[int, ...], list[int]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
-def getExcludedAddendIndices(state: EliminationState, leafAddend: int, pileTarget: int, groupByLeavesAtPiles: tuple[int, ...]) -> dict[int | tuple[int, ...], list[int]]:
-	groupedBy: dict[int | tuple[int, ...], list[int]] = _getGroupedBy(state, pileTarget, groupByLeavesAtPiles)
-
-	dictionaryExclusion: dict[int | tuple[int, ...], list[int]] = {}
-	listAddends: list[int] = getDictionaryAddends4Next(state)[leafAddend]
-
-	for groupByLeaves, listLeavesIncludedAtPile in groupedBy.items():
-		listAddendIndicesIncluded: list[int] = [addendIndex for addendIndex, addend in enumerate(listAddends) if leafAddend + addend in listLeavesIncludedAtPile]
-		listAddendIndicesExcluded: list[int] = sorted(set(range(len(listAddends))).difference(set(listAddendIndicesIncluded)))
-		dictionaryExclusion[groupByLeaves] = listAddendIndicesExcluded
-
-	return dictionaryExclusion
-
 def getExcludedLeaves(state: EliminationState, pileTarget: int, groupByLeavesAtPiles: tuple[int, ...]) -> dict[int | tuple[int, ...], list[int]]:
 	return {leaves: sorted(set(getDictionaryPileRanges(state)[pileTarget]).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
@@ -334,7 +318,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 	else:
 		pathFilename = Path(pathFilename)
 
-	dictionaryCombinedDomainKnown: dict[tuple[int, ...], list[tuple[int, ...]]] = {}
+	dictionaryDomainsByDimensions: dict[int, list[tuple[int, ...]]] = {}
 
 	for dimensionsTotal in listDimensions:
 		mapShape: tuple[int, ...] = (2,) * dimensionsTotal
@@ -350,7 +334,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 			listCombinedTuples.append(tuplePiles)
 
 		listUniqueTuples: list[tuple[int, ...]] = sorted(set(listCombinedTuples))
-		dictionaryCombinedDomainKnown[mapShape] = listUniqueTuples
+		dictionaryDomainsByDimensions[dimensionsTotal] = listUniqueTuples
 
 	listPythonSource: list[str] = [
 		'"""Verification data for combined leaf domains.',
@@ -358,13 +342,18 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 		'This module contains empirically extracted combined domain data for leaves',
 		f'{listLeafNames} across multiple mapShape configurations.',
 		'',
-		'Each key in `dictionaryCombinedDomainKnown` is a mapShape tuple, and the value is',
-		'a list of tuples representing valid pile positions for the specified leaves.',
-		'The tuple order corresponds to the leaf order in the original function call.',
+		f'Each list is named `list2D{{dimensionsTotal}}Domain{filenameLeafPart}` where `dimensionsTotal`',
+		'is the exponent in the 2^dimensionsTotal mapShape, and it contains tuples representing',
+		'valid pile positions for the specified leaves. The tuple order follows the original',
+		'leaf argument order.',
 		'"""',
 		'',
-		f'dictionaryCombinedDomainKnown: dict[tuple[int, ...], list[tuple[int, ...]]] = {dictionaryCombinedDomainKnown!r}',
 	]
+
+	for dimensionsTotal in sorted(dictionaryDomainsByDimensions):
+		variableName: str = f"list2D{dimensionsTotal}Domain{filenameLeafPart}"
+		listPythonSource.append(f'{variableName}: list[tuple[int, ...]] = {dictionaryDomainsByDimensions[dimensionsTotal]!r}')
+		listPythonSource.append('')
 
 	pythonSource: str = '\n'.join(listPythonSource)
 	writePython(pythonSource, pathFilename, settings)
@@ -518,31 +507,9 @@ if __name__ == '__main__':
 	state = EliminationState((2,) * 6)
 	# analyzeExclusions()
 
-	domain首二: tuple[int, ...] = tuple(getLeafDomain(state, 首二(state.dimensionsTotal)))
-	domain首零二: tuple[int, ...] = tuple(getLeafDomain(state, 首零二(state.dimensionsTotal)))
-	domain首零一二: tuple[int, ...] = tuple(getLeafDomain(state, 首零一二(state.dimensionsTotal)))
-	domain首一二: tuple[int, ...] = tuple(getLeafDomain(state, 首一二(state.dimensionsTotal)))
-	domainCombined: list[tuple[int, int, int, int]] = []
+	# makeVerificationDataLeavesDomain([4,5,6], (首二, 首零二, 首零一二, 首一二))
 
-	for pile首二 in domain首二:
-		ceiling = pile首二 + 首零(state.dimensionsTotal)
-		for pile首零一二 in filter(between(pile首二 + 2, ceiling), domain首零一二):
-			domainCombined.append((pile首二, pile首二 + 1, pile首零一二, pile首零一二 + 1))  # noqa: PERF401
+	from mapFolding.tests.dataSamples import p2DnDomain3_2_首一_首零一
 
-	for pile首二 in filter(between(pileOrigin, 首零(state.dimensionsTotal)), domain首二):
-		ceiling = pile首二 + 首零(state.dimensionsTotal) + inclusive
-		floor = state.leavesTotal - 2 - pile首二 * 2
-		for pile首零一二 in filter(between(floor, ceiling), domain首零一二):
-			domainCombined.append((pile首二, pile首零一二 + 1, pile首零一二, pile首二 + 1))  # noqa: PERF401
-
-	for pile首二 in filter(between(首零(state.dimensionsTotal), state.pileLast), domain首二):
-		ceiling = state.pileLast
-		floor = pile首二 + 4
-		for pile首零一二 in filter(between(floor, ceiling), domain首零一二):
-			domainCombined.append((pile首二, pile首零一二 + 1, pile首零一二, pile首二 + 1))  # noqa: PERF401
-
-
-	from mapFolding.tests.dataSamples import p2DnDomain首二_首零二_首零一二_首一二
-	domainKnown = p2DnDomain首二_首零二_首零一二_首一二.dictionaryCombinedDomainKnown[(2,) * 6]
-	verifyDomainAgainstKnown(domainCombined, domainKnown)
+	# verifyDomainAgainstKnown(domainCombined, p2DnDomain3_2_首一_首零一.list2D6Domain3_2_首一_首零一)
 

@@ -1,6 +1,6 @@
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Hashable, Iterable, Iterator, Sequence
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from hunterMakesPy import defineConcurrencyLimit, intInnit, oopsieKwargsie
@@ -8,10 +8,24 @@ from mapFolding import NumPyIntegerType
 from more_itertools import extract
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
-from typing import Any
+from typing import Any, Protocol
 import numpy
 
 # ======= Functional programming paradigm ===============================
+class Ordinals(Protocol):
+	"""Protocol for types that support ordering comparisons."""
+
+	def __le__(self, other: "Ordinals", /) -> bool:
+		"""Less than or equal to comparison."""
+		...
+	def __ge__(self, other: "Ordinals", /) -> bool:
+		"""Greater than or equal to comparison."""
+		...
+
+@syntacticCurry
+def between[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小于) -> bool:
+	"""Inclusive `floor <= comparand <= ceiling`."""
+	return floor <= comparand <= ceiling
 
 def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
 	"""Return the list of values from a dictionary (generic over type parameter `个`).
@@ -44,6 +58,10 @@ def exclude[个](iterable: Sequence[个], indices: Iterable[int]) -> Iterator[�
 		return index
 	indicesInclude: list[int] = sorted(set(range(lengthIterable)).difference(map(normalizeIndex, indices)))
 	return extract(iterable, indicesInclude)
+
+def noDuplicates(sequenceOfHashable: Sequence[Hashable], /) -> bool:
+	"""Return `True` if there are `noDuplicates` in `sequenceOfHashable`."""
+	return len(sequenceOfHashable) == len(set(sequenceOfHashable))
 
 @syntacticCurry
 def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: 文义) -> 文件 | None:
@@ -352,3 +370,4 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	"""
 	# NOTE Do NOT sort the dimensions.
 	return tuple(mapDimensions)
+

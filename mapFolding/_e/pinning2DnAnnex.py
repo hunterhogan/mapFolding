@@ -10,7 +10,7 @@ from mapFolding._e import (
 	dimensionNearest首, dimensionSecondNearest首, getDictionaryPileRanges, getLeafDomain, getListLeavesDecrease,
 	getListLeavesIncrease, howMany0coordinatesAtTail, leafInSubHyperplane, leafOrigin, pileOrigin, PinnedLeaves, ptount, 一,
 	三, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
-from mapFolding._e.pinIt import atPilePinLeaf, deconstructPinnedLeavesAtPile, leafIsPinned, pileIsOpen
+from mapFolding._e.pinIt import atPilePinLeaf, deconstructPinnedLeavesAtPile, leafIsNotPinned, leafIsPinned, pileIsOpen
 from mapFolding.algorithms.iff import pinnedLeavesHasAViolation
 from mapFolding.dataBaskets import EliminationState
 from math import log, prod
@@ -39,9 +39,6 @@ def _notLeafOriginOrLeaf零(leaf: int) -> bool:
 	return 零 < leaf
 
 # ======= append `pinnedLeaves` at `pile` if qualified =======
-
-# TODO Create a generalized solution for `beansWithoutCornbread`.
-# TODO Convert the rules in `secondOrderLeaves` to filters.
 
 def appendPinnedLeavesAtPile(state: EliminationState, listLeavesAtPile: list[int]) -> EliminationState:
 	disqualify: Callable[[int], bool] = disqualifyAppendingLeafAtPile(state)
@@ -102,11 +99,8 @@ def _leafDimensionOriginNotFirst(state: EliminationState, leaf: int) -> bool:
 				if state.pile < pileOfDimensionOrigin:
 					return True
 			else:
-				pilesOpenBeforeLeaf = pilesOpenBeforeLeaf.intersection(getLeafDomain(state, dimensionOrigin))
-				if not pilesOpenBeforeLeaf:
+				if not pilesOpenBeforeLeaf.intersection(getLeafDomain(state, dimensionOrigin)):
 					return True
-				else:
-					pilesOpenBeforeLeaf.remove(min(pilesOpenBeforeLeaf))
 
 	return False
 
@@ -150,6 +144,16 @@ def _leafDimensionOriginsNotInOrder(state: EliminationState, leaf: int) -> bool:
 
 # ======= Remove or disqualify `pinnedLeaves` dictionaries. =======
 
+def removeInvalidPinnedLeavesInequalityViolation(state: EliminationState) -> EliminationState:
+	listPinnedLeaves: list[PinnedLeaves] = state.listPinnedLeaves.copy()
+	state.listPinnedLeaves = []
+	for pinnedLeaves in listPinnedLeaves:
+		state.pinnedLeaves = pinnedLeaves
+		if pinnedLeavesHasAViolation(state):
+			continue
+		state.listPinnedLeaves.append(pinnedLeaves)
+	return state
+
 def removeInvalidPinnedLeaves(state: EliminationState) -> EliminationState:
 	listPinnedLeaves: list[PinnedLeaves] = state.listPinnedLeaves.copy()
 	state.listPinnedLeaves = []
@@ -157,60 +161,22 @@ def removeInvalidPinnedLeaves(state: EliminationState) -> EliminationState:
 		state.pinnedLeaves = pinnedLeaves
 		if disqualifyDictionary(state):
 			continue
-		state.pile = 一
-		if not pileIsOpen(state.pinnedLeaves, state.pile) and not pileIsOpen(state.pinnedLeaves, state.pile - 1):
-			pileRange = pinPile一Crease(state)
-			if pinnedLeaves[state.pile] not in pileRange:
-				continue
-		state.pile = state.leavesTotal - 一
-		if not pileIsOpen(state.pinnedLeaves, state.pile) and not pileIsOpen(state.pinnedLeaves, state.pile + 1):
-			pileRange = pinPile首Less一Crease(state)
-			if pinnedLeaves[state.pile] not in pileRange:
-				continue
-
-# FIXME
-		state.pile = 一+零
-		if (not pileIsOpen(state.pinnedLeaves, state.pile)
-			and not pileIsOpen(state.pinnedLeaves, state.pile - 1)
-			and not pileIsOpen(state.pinnedLeaves, state.leavesTotal - 一)):
-			pileRange = pinPile一零Crease(state)
-			if pinnedLeaves[state.pile] not in pileRange:
-				pass
-				# continue
-
-		state.pile = state.leavesTotal - (一+零)
-		if not pileIsOpen(state.pinnedLeaves, state.pile) and not pileIsOpen(state.pinnedLeaves, state.pile + 1) and not pileIsOpen(state.pinnedLeaves, 一):
-			pileRange = pinPile首Less一零Crease(state)
-			if pinnedLeaves[state.pile] not in pileRange:
-				continue
-		state.pile = 二
-		if (not pileIsOpen(state.pinnedLeaves, state.pile)
-			and not pileIsOpen(state.pinnedLeaves, state.pile - 1)
-			and not pileIsOpen(state.pinnedLeaves, state.leavesTotal - 一)
-			and not pileIsOpen(state.pinnedLeaves, state.leavesTotal - (一+零))
-			and not pileIsOpen(state.pinnedLeaves, 一)
-			):
-			pileRange = pinPile二Crease(state)
-			if pinnedLeaves[state.pile] not in pileRange:
-				continue
-
 		state.listPinnedLeaves.append(pinnedLeaves)
 	return state
 
 def disqualifyDictionary(state: EliminationState) -> bool:
 	return any([
-		_leafInWrongPile(state)
-		, _leading0notBeforeTrailing0dictionary(state.pinnedLeaves)
-		, _duplicateLeaves(state.pinnedLeaves)
-		, _dimension二or首二CornersNotAligned(state)
-		, _kBefore_rDictionary(state)
+		_leading0notBeforeTrailing0dictionary(state.pinnedLeaves)
+		# , _dimension二or首二CornersNotAligned(state)
+		, _leafTooEarlyInDomainDictionary(state)
 		, _noPilesOpenFor一Dictionary(state)
+		, _noPilesOpenForLeafDimensionOriginDictionary(state)
 		, _leafDimensionOriginNotFirstDictionary(state)
 		, _leafDimensionOriginsNotInOrderDictionary(state)
-		, pinnedLeavesHasAViolation(state)
+		# , _notInPinPileRange(state)
 	])
 
-def _kBefore_rDictionary(state: EliminationState) -> bool:
+def _leafTooEarlyInDomainDictionary(state: EliminationState) -> bool:
 	"""Some leaves can only be in the first pile of their domain if other leaves are before them."""
 	for pileOf_r, r in itemfilter(_leafInFirstPileOfDomain, valfilter(lambda leafPinned: 2 < leafPinned.bit_count(), state.pinnedLeaves)).items():
 		k = int(bit_flip(0, dimensionNearest首(r)).bit_flip(howMany0coordinatesAtTail(r)))
@@ -236,9 +202,6 @@ def _dimension二or首二CornersNotAligned(state: EliminationState) -> bool:
 		return True
 	return False
 
-def _duplicateLeaves(pinnedLeaves: PinnedLeaves) -> bool:
-	return len(pinnedLeaves.values()) != len(set(pinnedLeaves.values()))
-
 def _leading0notBeforeTrailing0dictionary(pinnedLeaves: PinnedLeaves) -> bool:
 	return any((pileOf_k > pileOf_r for (pileOf_k, _k), (pileOf_r, _r)
 			in filter(_moreLeading0thanTrailing0, combinations(sorted(valfilter(_notLeafOriginOrLeaf零, pinnedLeaves).items()), 2))))
@@ -261,17 +224,22 @@ def _leafDimensionOriginNotFirstDictionary(state: EliminationState) -> bool:
 def _leafDimensionOriginsNotInOrderDictionary(state: EliminationState) -> bool:
 	return not is_sorted(tuple(dict(sorted(valfilter(lambda leafPinned: leafPinned in state.productsOfDimensions, state.pinnedLeaves).items())).values()))
 
-def _leafInWrongPile(state: EliminationState) -> bool:
-	def pileNotInDomain(pile: int, leaf: int) -> bool:
-		return pile not in list(getLeafDomain(state, leaf))
-	return any(starmap(pileNotInDomain, valfilter(_notLeafOriginOrLeaf零, state.pinnedLeaves).items()))
+def _noPilesOpenForLeafDimensionOriginDictionary(state: EliminationState) -> bool:
+	for leaf in (filter(leafIsNotPinned(state.pinnedLeaves), state.productsOfDimensions[一: - (一)])):
+		pileStop: int | None = min(valfilter(lambda leafPinned: leafPinned % leaf == 0
+					, valfilter(_notLeafOriginOrLeaf零, keyfilter(lambda pilePinned: pilePinned != state.pileLast, state.pinnedLeaves))).keys(), default=None)
+		if pileStop:
+			pileStart: int = max(valfilter(lambda leafPinned: (leafPinned in state.productsOfDimensions) and leafPinned < leaf, state.pinnedLeaves).keys())
+			if not set(range(pileStart, pileStop)).difference(state.pinnedLeaves.keys()).intersection(getLeafDomain(state, leaf)):
+				return True
+	return False
 
 def _noPilesOpenFor一Dictionary(state: EliminationState) -> bool:
 	if (一 not in state.pinnedLeaves.values() and (一+零 not in state.pinnedLeaves.values())):
-		pile = min(valfilter(lambda leafPinned: leafPinned % 一 == 0, valfilter(_notLeafOriginOrLeaf零, keyfilter(lambda pilePinned: pilePinned != state.pileLast, state.pinnedLeaves))).keys(), default=None)
+		pile: int | None = min(valfilter(lambda leafPinned: leafPinned % 一 == 0, valfilter(_notLeafOriginOrLeaf零, keyfilter(lambda pilePinned: pilePinned != state.pileLast, state.pinnedLeaves))).keys(), default=None)
 		if pile:
 			pilesOpenInDimension: set[int] = set(range(pile)).difference(state.pinnedLeaves.keys())
-			domainOf一零 = list(getLeafDomain(state, 一+零))
+			domainOf一零: list[int] = list(getLeafDomain(state, 一+零))
 			if not pilesOpenInDimension.intersection(domainOf一零):
 				return True
 			else:
@@ -280,6 +248,45 @@ def _noPilesOpenFor一Dictionary(state: EliminationState) -> bool:
 					if (pileOpen + 1 in pilesOpenInDimension) and (pileOpen in domainOf一零):
 						noPilesOpenFor一 = False
 				return noPilesOpenFor一
+	return False
+
+def _notInPinPileRange(state: EliminationState) -> bool:
+	state.pile = 一
+	if not pileIsOpen(state.pinnedLeaves, state.pile) and not pileIsOpen(state.pinnedLeaves, state.pile - 1):
+		pileRange = pinPile一Crease(state)
+		if state.pinnedLeaves[state.pile] not in pileRange:
+			return True
+	state.pile = state.leavesTotal - 一
+	if not pileIsOpen(state.pinnedLeaves, state.pile) and not pileIsOpen(state.pinnedLeaves, state.pile + 1):
+		pileRange = pinPile首Less一Crease(state)
+		if state.pinnedLeaves[state.pile] not in pileRange:
+			return True
+
+# FIXME
+	state.pile = 一+零
+	if (not pileIsOpen(state.pinnedLeaves, state.pile)
+		and not pileIsOpen(state.pinnedLeaves, state.pile - 1)
+		and not pileIsOpen(state.pinnedLeaves, state.leavesTotal - 一)):
+		pileRange = pinPile一零Crease(state)
+		if state.pinnedLeaves[state.pile] not in pileRange:
+			pass
+			# return True
+
+	state.pile = state.leavesTotal - (一+零)
+	if not pileIsOpen(state.pinnedLeaves, state.pile) and not pileIsOpen(state.pinnedLeaves, state.pile + 1) and not pileIsOpen(state.pinnedLeaves, 一):
+		pileRange = pinPile首Less一零Crease(state)
+		if state.pinnedLeaves[state.pile] not in pileRange:
+			return True
+	state.pile = 二
+	if (not pileIsOpen(state.pinnedLeaves, state.pile)
+		and not pileIsOpen(state.pinnedLeaves, state.pile - 1)
+		and not pileIsOpen(state.pinnedLeaves, state.leavesTotal - 一)
+		and not pileIsOpen(state.pinnedLeaves, state.leavesTotal - (一+零))
+		and not pileIsOpen(state.pinnedLeaves, 一)
+		):
+		pileRange = pinPile二Crease(state)
+		if state.pinnedLeaves[state.pile] not in pileRange:
+			return True
 	return False
 
 # ======= crease-based subroutines for analyzing a specific `pile`. =======

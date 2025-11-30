@@ -15,25 +15,19 @@ from mapFolding._e._measure import (
 
 # isort: split
 from mapFolding._e._data import (
-	getDictionaryAddends4Next as getDictionaryAddends4Next, getDictionaryAddends4Prior as getDictionaryAddends4Prior,
 	getDictionaryLeafDomains as getDictionaryLeafDomains, getDictionaryPileRanges as getDictionaryPileRanges,
-	getDomain二combined as getDomain二combined, getDomain二一零and二一 as getDomain二一零and二一,
-	getDomain二一零and二一corners as getDomain二一零and二一corners, getDomain二一零and二一nonCorners as getDomain二一零and二一nonCorners,
-	getDomain二零and二 as getDomain二零and二, getDomain二零and二corners as getDomain二零and二corners,
-	getDomain二零and二nonCorners as getDomain二零and二nonCorners, getLeafDomain as getLeafDomain,
-	getListLeavesDecrease as getListLeavesDecrease, getListLeavesIncrease as getListLeavesIncrease,
-	getPileRange as getPileRange)
+	getDomainDimension一 as getDomainDimension一, getDomainDimension二 as getDomainDimension二,
+	getDomainDimension首二 as getDomainDimension首二, getDomain二一零and二一 as getDomain二一零and二一,
+	getDomain二零and二 as getDomain二零and二, getLeafDomain as getLeafDomain, getListLeavesDecrease as getListLeavesDecrease,
+	getListLeavesIncrease as getListLeavesIncrease, getPileRange as getPileRange)
 
 """Perspective changes and code changes:
 
-- Not `addends`: increment/decrement in ONE dimension.
 - To increment in a dimension means to add 1 in the dimensionIndex. If the current value is 0, then the new value is 1. If the
 	current value is 1, then the addition requires "carrying" values to "higher" dimensionIndices.
 - The `next` crease, in the sense of `k+1` and `r+1` in the inequalities is simple: given `k` and `dimension`,
 	`k1 = bit_flip(k, dimension); k1 = k1 if k1 > k else None`.
-    NOTE: this is because I evaluate the 4 `k < r`, not the 8 `k ? r` inequalities *a la* Koehler.
-- The union of `dictionaryAddends4Next` and `dictionaryAddends4Prior` are the equivalent of:
-	`listLeavesNextAndPriorInSequence = [int(bit_flip(leaf, dimension)) for dimension in range(state.dimensionsTotal)]`.
+	NOTE: this is because I evaluate the 4 `k < r`, not the 8 `k ? r` inequalities *a la* Koehler.
 """
 
 """The 'meaning' of:
@@ -48,9 +42,7 @@ the absolute quantity, not just the consecutive ones relative to the LSD.
 		for inequality checking:
 			next leaf or None
 			parity
-	dictionaryAddends4Next
-	dictionaryAddends4Prior
-    domain of leaf
+	domain of leaf
 	range of leaves in piles
 """
 

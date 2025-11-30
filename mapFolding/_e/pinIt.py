@@ -18,7 +18,6 @@ from more_itertools import flatten
 3. Do not overwrite or delete a dictionary's pinned leaves because that could cause the dictionary's permutation space to overlap with a different dictionary's permutation space.
 """
 # ======= Boolean filters =======================
-# TODO make and use reusable filters.
 @syntacticCurry
 def isPinnedAtPile(pinnedLeaves: PinnedLeaves, leaf: int, pile: int) -> bool:
 	"""Return True if `leaf` is presently pinned at `pile` in `pinnedLeaves`.
