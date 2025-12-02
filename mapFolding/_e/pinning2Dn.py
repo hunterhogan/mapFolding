@@ -178,7 +178,7 @@ def secondOrderLeaves(state: EliminationState) -> EliminationState:
 
 	for leaves, getDomain in [
 			((一+零, 一, 首一(state.dimensionsTotal), 首零一(state.dimensionsTotal)), getDomainDimension一)
-			, ((二+一, 二+一+零, 二+零, 二), getDomainDimension二)
+			# , ((二+一, 二+一+零, 二+零, 二), getDomainDimension二)
 			# , ((首二(state.dimensionsTotal), 首零二(state.dimensionsTotal), 首零一二(state.dimensionsTotal), 首一二(state.dimensionsTotal)), getDomainDimension首二)
 		]:
 		listPinnedLeaves: list[PinnedLeaves] = state.listPinnedLeaves.copy()

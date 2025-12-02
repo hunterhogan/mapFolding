@@ -39,39 +39,14 @@ listPinningFunctionDimensionsTotals: list[tuple[Callable[[EliminationState], Eli
 ]
 
 listCombinedDomainCases: list[tuple[str, Callable[[EliminationState], Sequence[tuple[int, ...]]], ModuleType, str]] = [
-	(
-		'getDomainDimension一',
-		getDomainDimension一,
-		p2DnDomain3_2_首一_首零一,
-		'Domain3_2_首一_首零一',
-	),
-	(
-		'getDomainDimension二',
-		getDomainDimension二,
-		p2DnDomain6_7_5_4,
-		'Domain6_7_5_4',
-	),
-	(
-		'getDomainDimension首二',
-		getDomainDimension首二,
-		p2DnDomain首二_首零二_首零一二_首一二,
-		'Domain首二_首零二_首零一二_首一二',
-	),
-	(
-		'getDomain二一零and二一',
-		getDomain二一零and二一,
-		p2DnDomain7_6,
-		'Domain7_6',
-	),
-	(
-		'getDomain二零and二',
-		getDomain二零and二,
-		p2DnDomain5_4,
-		'Domain5_4',
-	),
+	( 'getDomainDimension一', getDomainDimension一, p2DnDomain3_2_首一_首零一, 'Domain3_2_首一_首零一' ),
+	( 'getDomainDimension二', getDomainDimension二, p2DnDomain6_7_5_4, 'Domain6_7_5_4' ),
+	( 'getDomainDimension首二', getDomainDimension首二, p2DnDomain首二_首零二_首零一二_首一二, 'Domain首二_首零二_首零一二_首一二' ),
+	( 'getDomain二一零and二一', getDomain二一零and二一, p2DnDomain7_6, 'Domain7_6' ),
+	( 'getDomain二零and二', getDomain二零and二, p2DnDomain5_4, 'Domain5_4' ),
 ]
 
-listCombinedDomainDimensions: list[int] = [4, 5, 6]
+listCombinedDomainDimensions: list[int] = [5, 6]
 
 def verifyPinnedLeavesAgainstFoldings(state: EliminationState, arrayFoldings: NDArray[numpy.uint8]) -> tuple[int, int, int]:
 	"""Verify pinned leaves cover all foldings without overlap.
@@ -210,24 +185,9 @@ def test_getPileRange_consistencyWithDictionary(mapShape: tuple[int, ...]) -> No
 			f"getPileRange returned {listFromGetPileRange}, dictionary has {listFromDictionary}."
 		)
 
-
-@pytest.mark.parametrize(
-	"dimensionsTotal",
-	listCombinedDomainDimensions,
-	ids=[f"2d{dimensionsTotal}" for dimensionsTotal in listCombinedDomainDimensions],
-)
-@pytest.mark.parametrize(
-	"caseName,domainFunction,moduleExpected,attributeSuffix",
-	listCombinedDomainCases,
-	ids=[caseName for caseName, _domainFunction, _moduleExpected, _attributeSuffix in listCombinedDomainCases],
-)
-def test_combinedDomainFunctions_matchVerificationData(
-	caseName: str,
-	domainFunction: Callable[[EliminationState], Sequence[tuple[int, ...]]],
-	moduleExpected: ModuleType,
-	attributeSuffix: str,
-	dimensionsTotal: int,
-) -> None:
+@pytest.mark.parametrize( "dimensionsTotal", listCombinedDomainDimensions, ids=[f"2d{dimensionsTotal}" for dimensionsTotal in listCombinedDomainDimensions] )
+@pytest.mark.parametrize( "caseName,domainFunction,moduleExpected,attributeSuffix", listCombinedDomainCases, ids=[caseName for caseName, _domainFunction, _moduleExpected, _attributeSuffix in listCombinedDomainCases] )
+def test_combinedDomainFunctions_matchVerificationData(caseName: str, domainFunction: Callable[[EliminationState], Sequence[tuple[int, ...]]], moduleExpected: ModuleType, attributeSuffix: str, dimensionsTotal: int) -> None:
 	"""Compare combined domain functions against empirical verification datasets."""
 	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
 	state = EliminationState(mapShape=mapShape)

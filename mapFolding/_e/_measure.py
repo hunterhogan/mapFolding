@@ -12,14 +12,13 @@ def dimensionNearest首(integerNonnegative: int, /) -> int:
 	return max(0, anInteger.bit_length() - 1)
 
 @cache
-def dimensionSecondNearest首(integerAbove0: int, /) -> int | None:
+def dimensionSecondNearest首(integerAbove0: int, /) -> int:
 	"""Find the 0-indexed position of the second most significant non-zero radix-2 digit, if any, in `integerAbove0`."""
 	anInteger: int = intInnit([integerAbove0], 'integerAbove0', type[int])[0]
 	if anInteger <= 0:
 		message: str = f"I received `{integerAbove0 = }`, but I need a value greater than 0."
 		raise ValueError(message)
-	secondNearest: int = dimensionNearest首(int(gmpy2.bit_flip(anInteger, dimensionNearest首(anInteger))))
-	return secondNearest if secondNearest >= 0 else None
+	return dimensionNearest首(int(gmpy2.bit_flip(anInteger, dimensionNearest首(anInteger))))
 
 @cache
 def leafInSubHyperplane(leafAbove1: int, /) -> int:

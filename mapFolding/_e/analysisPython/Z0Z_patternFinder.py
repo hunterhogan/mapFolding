@@ -1,14 +1,14 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
 from collections.abc import Callable, Sequence
-from gmpy2 import bit_flip, bit_mask, is_odd
+from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
 from hunterMakesPy import writePython
 from itertools import filterfalse, repeat
-from mapFolding import exclude, inclusive, packageSettings, reverseLookup
+from mapFolding import (
+	between, consecutive, decreasing, exclude, inclusive, noDuplicates, packageSettings, reverseLookup)
 from mapFolding._e import (
-	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeafDomain, howMany0coordinatesAtTail,
-	howManyDimensionsHaveOddParity, leafInSubHyperplane, pileOrigin, ptount, 一, 三, 二, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二,
-	首零二)
-from mapFolding.beDRY import between, noDuplicates
+	dimensionNearest首, dimensionSecondNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension二,
+	getDomain二一零and二一, getDomain二零and二, getLeafDomain, howMany0coordinatesAtTail, howManyDimensionsHaveOddParity,
+	leafInSubHyperplane, pileOrigin, ptount, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import extract
 from pathlib import Path, PurePath
@@ -403,6 +403,7 @@ def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKn
 
 		print(f"Domain comparison: {countComputed} computed vs {countKnown} known")
 		print(f"  Matched: {countMatched} ({100 * countMatched / countKnown:.1f}% of known)")
+		# pprint(listMatched, width=140, compact=True)
 
 		if listMissing:
 			print(f"  Missing ({countMissing} tuples in known but not in computed):")
@@ -506,10 +507,3 @@ def analyzeExclusions() -> None:
 if __name__ == '__main__':
 	state = EliminationState((2,) * 6)
 	# analyzeExclusions()
-
-	# makeVerificationDataLeavesDomain([4,5,6], (首二, 首零二, 首零一二, 首一二))
-
-	from mapFolding.tests.dataSamples import p2DnDomain3_2_首一_首零一
-
-	# verifyDomainAgainstKnown(domainCombined, p2DnDomain3_2_首一_首零一.list2D6Domain3_2_首一_首零一)
-

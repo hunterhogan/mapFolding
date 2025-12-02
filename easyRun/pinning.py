@@ -113,12 +113,12 @@ if __name__ == '__main__':
 		print(f"{len(state.listPinnedLeaves)=}")
 
 	elif printThis:
+		state: EliminationState = secondOrderPilings(state)
 		state: EliminationState = thirdOrderPilings(state)
-		# print(f"{time.perf_counter() - timeStart:.2f}\tpinByFormula")  # noqa: ERA001
+		# print(f"{time.perf_counter() - timeStart:.2f}\tthirdOrderPilings")  # noqa: ERA001
 		state: EliminationState = pinLeaf首零_零(state)
 		dictionaryLeafDomains = getDictionaryLeafDomains(state)
 		pprint(dictionaryLeafDomains)
-		state: EliminationState = secondOrderPilings(state)
 		dictionaryPileRanges = getDictionaryPileRanges(state)
 		domainsOfDimensionOrigins = tuple(getLeafDomain(state, leaf) for leaf in state.productsOfDimensions)[0:-1]
 		pprint(state.listPinnedLeaves)

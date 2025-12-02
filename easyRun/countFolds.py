@@ -33,8 +33,8 @@ if __name__ == '__main__':
 	oeisID: str = 'A000136'
 	oeisID: str = 'A001416'
 	oeisID: str = 'A001415'
-	oeisID: str = 'A001417'
 	oeisID: str = 'A001418'
+	oeisID: str = 'A001417'
 
 	sys.stdout.write(f"\033[{30+int(oeisID,11)%8};{40+int(oeisID,12)%8}m{oeisID} ")
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")

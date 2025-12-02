@@ -5,7 +5,7 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from hunterMakesPy import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from mapFolding import NumPyIntegerType
-from more_itertools import extract
+from more_itertools import always_reversible, consecutive_groups, extract
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
 from typing import Any, Protocol
@@ -26,6 +26,11 @@ class Ordinals(Protocol):
 def between[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小于) -> bool:
 	"""Inclusive `floor <= comparand <= ceiling`."""
 	return floor <= comparand <= ceiling
+
+def consecutive(flatContainer: Iterable[int]) -> bool:
+	"""The integers in the `flatContainer` are consecutive, either ascending or descending."""
+	return ((len(list(next(consecutive_groups(flatContainer)))) == len(list(flatContainer)))
+	or (len(list(next(consecutive_groups(always_reversible(flatContainer))))) == len(list(flatContainer))))
 
 def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
 	"""Return the list of values from a dictionary (generic over type parameter `个`).
@@ -49,15 +54,15 @@ def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
 	"""
 	return list(dictionary.values())
 
-def exclude[个](iterable: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
-	"""Yield items from `iterable` whose positions are not in `indices`."""
-	lengthIterable: int = len(iterable)
+def exclude[个](flatContainer: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
+	"""Yield items from `flatContainer` whose positions are not in `indices`."""
+	lengthIterable: int = len(flatContainer)
 	def normalizeIndex(index: int) -> int:
 		if index < 0:
 			index = (index + lengthIterable) % lengthIterable
 		return index
 	indicesInclude: list[int] = sorted(set(range(lengthIterable)).difference(map(normalizeIndex, indices)))
-	return extract(iterable, indicesInclude)
+	return extract(flatContainer, indicesInclude)
 
 def noDuplicates(sequenceOfHashable: Sequence[Hashable], /) -> bool:
 	"""Return `True` if there are `noDuplicates` in `sequenceOfHashable`."""
@@ -370,4 +375,5 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	"""
 	# NOTE Do NOT sort the dimensions.
 	return tuple(mapDimensions)
+
 
