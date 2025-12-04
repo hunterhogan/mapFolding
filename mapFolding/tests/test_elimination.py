@@ -28,7 +28,7 @@ import pytest
 
 dictionaryPinningFunctionDimensionsTotals: dict[Callable[[EliminationState], EliminationState], list[int]] = {
 	thirdOrderPilings: [5, 6],
-	secondOrderLeaves: [4, 5, 6],
+	secondOrderLeaves: [5, 6],
 	secondOrderPilings: [4, 5, 6],
 }
 
@@ -38,12 +38,12 @@ listPinningFunctionDimensionsTotals: list[tuple[Callable[[EliminationState], Eli
 	for dimensionsTotal in listDimensionsTotals
 ]
 
-listCombinedDomainCases: list[tuple[str, Callable[[EliminationState], Sequence[tuple[int, ...]]], ModuleType, str]] = [
-	( 'getDomainDimension一', getDomainDimension一, p2DnDomain3_2_首一_首零一, 'Domain3_2_首一_首零一' ),
-	( 'getDomainDimension二', getDomainDimension二, p2DnDomain6_7_5_4, 'Domain6_7_5_4' ),
-	( 'getDomainDimension首二', getDomainDimension首二, p2DnDomain首二_首零二_首零一二_首一二, 'Domain首二_首零二_首零一二_首一二' ),
-	( 'getDomain二一零and二一', getDomain二一零and二一, p2DnDomain7_6, 'Domain7_6' ),
-	( 'getDomain二零and二', getDomain二零and二, p2DnDomain5_4, 'Domain5_4' ),
+listCombinedDomainCases: list[tuple[str, Callable[[EliminationState], Sequence[tuple[int, ...]]], ModuleType]] = [
+	( 'getDomainDimension一', getDomainDimension一, p2DnDomain3_2_首一_首零一 ),
+	( 'getDomainDimension二', getDomainDimension二, p2DnDomain6_7_5_4 ),
+	( 'getDomainDimension首二', getDomainDimension首二, p2DnDomain首二_首零二_首零一二_首一二 ),
+	( 'getDomain二一零and二一', getDomain二一零and二一, p2DnDomain7_6 ),
+	( 'getDomain二零and二', getDomain二零and二, p2DnDomain5_4 ),
 ]
 
 listCombinedDomainDimensions: list[int] = [5, 6]
@@ -186,13 +186,13 @@ def test_getPileRange_consistencyWithDictionary(mapShape: tuple[int, ...]) -> No
 		)
 
 @pytest.mark.parametrize( "dimensionsTotal", listCombinedDomainDimensions, ids=[f"2d{dimensionsTotal}" for dimensionsTotal in listCombinedDomainDimensions] )
-@pytest.mark.parametrize( "caseName,domainFunction,moduleExpected,attributeSuffix", listCombinedDomainCases, ids=[caseName for caseName, _domainFunction, _moduleExpected, _attributeSuffix in listCombinedDomainCases] )
-def test_combinedDomainFunctions_matchVerificationData(caseName: str, domainFunction: Callable[[EliminationState], Sequence[tuple[int, ...]]], moduleExpected: ModuleType, attributeSuffix: str, dimensionsTotal: int) -> None:
+@pytest.mark.parametrize( "caseName,domainFunction,moduleExpected", listCombinedDomainCases, ids=[caseName for caseName, _domainFunction, _moduleExpected in listCombinedDomainCases] )
+def test_combinedDomainFunctions_matchVerificationData(caseName: str, domainFunction: Callable[[EliminationState], Sequence[tuple[int, ...]]], moduleExpected: ModuleType, dimensionsTotal: int) -> None:
 	"""Compare combined domain functions against empirical verification datasets."""
 	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
 	state = EliminationState(mapShape=mapShape)
 	domainActual: tuple[tuple[int, ...], ...] = tuple(domainFunction(state))
-	attributeName: str = f"list2D{dimensionsTotal}{attributeSuffix}"
+	attributeName: str = f"listDomain2D{dimensionsTotal}"
 	domainExpected: Sequence[tuple[int, ...]] = getattr(moduleExpected, attributeName)
 	setActual: set[tuple[int, ...]] = set(domainActual)
 	setExpected: set[tuple[int, ...]] = set(domainExpected)

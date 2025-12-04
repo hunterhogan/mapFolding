@@ -3,12 +3,13 @@
 # isort: split
 from mapFolding._e._semiotics import (
 	leafOrigin as leafOrigin, pileOrigin as pileOrigin, PinnedLeaves as PinnedLeaves, 一 as 一, 七 as 七, 三 as 三, 九 as 九,
-	二 as 二, 五 as 五, 八 as 八, 六 as 六, 四 as 四, 零 as 零, 首一 as 首一, 首一二 as 首一二, 首三 as 首三, 首二 as 首二, 首零 as 首零, 首零一 as 首零一,
-	首零一二 as 首零一二, 首零二 as 首零二)
+	二 as 二, 五 as 五, 八 as 八, 六 as 六, 四 as 四, 零 as 零, 首一 as 首一, 首一三 as 首一三, 首一二 as 首一二, 首一二三 as 首一二三, 首三 as 首三, 首二 as 首二,
+	首二三 as 首二三, 首零 as 首零, 首零一 as 首零一, 首零一三 as 首零一三, 首零一二 as 首零一二, 首零一二三 as 首零一二三, 首零三 as 首零三, 首零二 as 首零二, 首零二三 as 首零二三)
 
 # isort: split
 from mapFolding._e._measure import (
-	dimensionNearest首 as dimensionNearest首, dimensionSecondNearest首 as dimensionSecondNearest首,
+	dimensionFourthNearest首 as dimensionFourthNearest首, dimensionNearest首 as dimensionNearest首,
+	dimensionSecondNearest首 as dimensionSecondNearest首, dimensionThirdNearest首 as dimensionThirdNearest首,
 	howMany0coordinatesAtTail as howMany0coordinatesAtTail,
 	howManyDimensionsHaveOddParity as howManyDimensionsHaveOddParity, leafInSubHyperplane as leafInSubHyperplane,
 	ptount as ptount)
@@ -18,7 +19,8 @@ from mapFolding._e._data import (
 	getDictionaryLeafDomains as getDictionaryLeafDomains, getDictionaryPileRanges as getDictionaryPileRanges,
 	getDomainDimension一 as getDomainDimension一, getDomainDimension二 as getDomainDimension二,
 	getDomainDimension首二 as getDomainDimension首二, getDomain二一零and二一 as getDomain二一零and二一,
-	getDomain二零and二 as getDomain二零and二, getLeafDomain as getLeafDomain, getListLeavesDecrease as getListLeavesDecrease,
+	getDomain二零and二 as getDomain二零and二, getDomain首零一二and首一二 as getDomain首零一二and首一二, getDomain首零二and首二 as getDomain首零二and首二,
+	getLeafDomain as getLeafDomain, getListLeavesDecrease as getListLeavesDecrease,
 	getListLeavesIncrease as getListLeavesIncrease, getPileRange as getPileRange)
 
 """Perspective changes and code changes:
@@ -44,6 +46,70 @@ the absolute quantity, not just the consecutive ones relative to the LSD.
 			parity
 	domain of leaf
 	range of leaves in piles
+"""
+
+"""Pairs of leaves with low entropy.
+Always consecutive:
+...3, 2
+...16, 48			1/4 leavesTotal
+
+7840 sequences total
+Consecutive in most sequences:
+6241	...5,4,
+6241	...6,7,
+6241	...8,40,	1/8 leavesTotal
+6241	...56,24,	1/8 leavesTotal
+5897	...4,36,	1/16 leavesTotal
+5897	...9,8,
+5889	...10,11,
+5889	...52,20,	1/16 leavesTotal
+
+`getDomain二一零and二一` has the same basic pattern as `getDomain二零and二` with the parity switched.
+
+Interestingly, the 22 pairs of `leaf二一, leaf二一零` in consecutive piles cover 6241 of 7840 foldsTotal for (2,) * 6 maps.
+The combined domain is very small, only 76 pairs, but 22 pairs cover 80% and the other 54 pairs only cover 20%. Furthermore,
+in the 22 pairs, `leaf二一零` follows `leaf二一`, but in the rest of the domain, `leaf二一` always follows `leaf二一零`.
+
+The same for leaf二零 and leaf二, but reversed.
+"""
+
+"""General observations and analyzing pinning options.
+6 dimensionsTotal, with equal lengths.
+a 2-dimensional plane abstracted in to 4 additional dimensions. Not a cube, hypercube, or "-hedron".
+5 products of dimensions.
+pile0 is a "corner".
+Declare pile0 as the origin.
+pile63 is a "corner", and is the "most" opposite corner from pile0.
+foldsTotal is divisible by 6! Implementing this includes a side effect that leavesTotal//2 is fixed at pile63 and that leaf0 is fixed at pile0.
+foldsTotal is divisible by leavesTotal, so we can pin a leaf to any one pile. We pin leaf0 to the origin by convention.
+Implementing both of these results in leaf0 pinned to pile0, leaf1 fixed to pile1, and leaf32 fixed to pile63.
+7840 total enumerated sequences * 6! * 2^6 = 361267200 foldsTotal.
+
+Pilings 2 and 62 are important as the first variable pilings: each pile has only 5 possible leaf assignments.
+
+The permutations of these 5 piles produce 5730 of the 7840 sequences.
+2	16	32	48	62	:	5730
+	16	32	48	62	:	4843
+2	16	32	48		:	4843
+	16	32	48		:	3425
+2	16	32	  	62	:	2947
+2	  	32	48	62	:	2947
+2	16	  	48	62	:	2897
+2	  	32	  	62	:	328
+2	  		48	62	:	307
+2	  			62	:	14
+----------------------------
+5	29	30	29	5	:	distinct leaf possibilities
+
+2	17	31	49	62	:	6068
+2	17	31	47	62	:	6055
+2	15	31	49	62	:	5964
+2	17	31	48	62	:	5958
+2	17	33	49	62	:	5863
+2	15	31	47	62	:	5863
+2	15	32	49	62	:	5856
+2	3	4	5	6	:	134 sequences
+
 """
 
 """products of dimensions and sums of products emerge from `getLeafDomain`

@@ -229,6 +229,104 @@ def 首三(dimensionsTotal: int, /) -> int:
 	"""
 	return int('0001' + '0' * (dimensionsTotal - 4), _dimensionLength)
 
+@cache
+def 首零一二三(dimensionsTotal: int, /) -> int:
+	"""Enumerate each `dimensionIndex` starting from the head `首`, assign `1` to `零`, `一`, `二`, and `三` (`dimensionIndex = 0`, `dimensionIndex = 1`, `dimensionIndex = 2`, and `dimensionIndex = 3`), and assign `0` to each other `dimensionIndex` in `dimensionsTotal`.
+
+	Read as (any of):
+	- from the head, indices zero-one-two-three
+	- shǒu líng yī èr sān
+	- sau2 ling4 jat1 ji6 saam1
+	- shu rei ichi ni san
+	- su yeong il i sam
+	- thủ linh nhất nhị tam
+	"""
+	return int('1111' + '0' * (dimensionsTotal - 4), _dimensionLength)
+
+@cache
+def 首零一三(dimensionsTotal: int, /) -> int:
+	"""Enumerate each `dimensionIndex` starting from the head `首`, assign `1` to `零`, `一`, and `三` (`dimensionIndex = 0`, `dimensionIndex = 1`, and `dimensionIndex = 3`), and assign `0` to each other `dimensionIndex` in `dimensionsTotal`.
+
+	Read as (any of):
+	- from the head, indices zero-one-three
+	- shǒu líng yī sān
+	- sau2 ling4 jat1 saam1
+	- shu rei ichi san
+	- su yeong il sam
+	- thủ linh nhất tam
+	"""
+	return int('1101' + '0' * (dimensionsTotal - 4), _dimensionLength)
+
+@cache
+def 首零二三(dimensionsTotal: int, /) -> int:
+	"""Enumerate each `dimensionIndex` starting from the head `首`, assign `1` to `零`, `二`, and `三` (`dimensionIndex = 0`, `dimensionIndex = 2`, and `dimensionIndex = 3`), and assign `0` to each other `dimensionIndex` in `dimensionsTotal`.
+
+	Read as (any of):
+	- from the head, indices zero-two-three
+	- shǒu líng èr sān
+	- sau2 ling4 ji6 saam1
+	- shu rei ni san
+	- su yeong i sam
+	- thủ linh nhị tam
+	"""
+	return int('1011' + '0' * (dimensionsTotal - 4), _dimensionLength)
+
+@cache
+def 首零三(dimensionsTotal: int, /) -> int:
+	"""Enumerate each `dimensionIndex` starting from the head `首`, assign `1` to `零` and `三` (`dimensionIndex = 0` and `dimensionIndex = 3`), and assign `0` to each other `dimensionIndex` in `dimensionsTotal`.
+
+	Read as (any of):
+	- from the head, indices zero-three
+	- shǒu líng sān
+	- sau2 ling4 saam1
+	- shu rei san
+	- su yeong sam
+	- thủ linh tam
+	"""
+	return int('1001' + '0' * (dimensionsTotal - 4), _dimensionLength)
+
+@cache
+def 首一二三(dimensionsTotal: int, /) -> int:
+	"""Enumerate each `dimensionIndex` starting from the head `首`, assign `1` to `一`, `二`, and `三` (`dimensionIndex = 1`, `dimensionIndex = 2`, and `dimensionIndex = 3`), and assign `0` to each other `dimensionIndex` in `dimensionsTotal`.
+
+	Read as (any of):
+	- from the head, indices one-two-three
+	- shǒu yī èr sān
+	- sau2 jat1 ji6 saam1
+	- shu ichi ni san
+	- su il i sam
+	- thủ nhất nhị tam
+	"""
+	return int('0111' + '0' * (dimensionsTotal - 4), _dimensionLength)
+
+@cache
+def 首一三(dimensionsTotal: int, /) -> int:
+	"""Enumerate each `dimensionIndex` starting from the head `首`, assign `1` to `一` and `三` (`dimensionIndex = 1` and `dimensionIndex = 3`), and assign `0` to each other `dimensionIndex` in `dimensionsTotal`.
+
+	Read as (any of):
+	- from the head, indices one-three
+	- shǒu yī sān
+	- sau2 jat1 saam1
+	- shu ichi san
+	- su il sam
+	- thủ nhất tam
+	"""
+	return int('0101' + '0' * (dimensionsTotal - 4), _dimensionLength)
+
+@cache
+def 首二三(dimensionsTotal: int, /) -> int:
+	"""Enumerate each `dimensionIndex` starting from the head `首`, assign `1` to `二` and `三` (`dimensionIndex = 2` and `dimensionIndex = 3`), and assign `0` to each other `dimensionIndex` in `dimensionsTotal`.
+
+	Read as (any of):
+	- from the head, indices two-three
+	- shǒu èr sān
+	- sau2 ji6 saam1
+	- shu ni san
+	- su i sam
+	- thủ nhị tam
+	"""
+	return int('0011' + '0' * (dimensionsTotal - 4), _dimensionLength)
+
 # ======= Semantic replacements for ambiguous values =======
 
 leafOrigin: int = (0 * 九) + (0 * 八) + (0 * 七) + (0 * 六) + (0 * 五) + (0 * 四) + (0 * 三) + (0 * 二) + (0 * 一) + (0 * 零)

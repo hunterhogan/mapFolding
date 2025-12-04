@@ -7,8 +7,8 @@ from gmpy2 import fac
 from itertools import accumulate
 from mapFolding import packageSettings
 from mapFolding._e import (
-	getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension二, getLeafDomain, getListLeavesIncrease,
-	getPileRange, PinnedLeaves, 一, 二, 零)
+	getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension二, getDomain二一零and二一, getDomain二零and二,
+	getLeafDomain, getListLeavesIncrease, getPileRange, PinnedLeaves, 一, 二, 零)
 from mapFolding._e.pinning2Dn import pinLeaf首零_零, secondOrderLeaves, secondOrderPilings, thirdOrderPilings, Z0Z_k_r
 from mapFolding._e.pinning2DnAnnex import beansWithoutCornbread
 from mapFolding.dataBaskets import EliminationState
@@ -99,7 +99,7 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(permutationsPinnedLeavesTotal(state.listPinnedLeaves))
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 6)
+	state = EliminationState((2,) * 5)
 
 	printThis = True
 
@@ -111,14 +111,14 @@ if __name__ == '__main__':
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 		printStatisticsPermutations(state)
 		print(f"{len(state.listPinnedLeaves)=}")
+		dictionaryLeafDomains = getDictionaryLeafDomains(state)
+		pprint(dictionaryLeafDomains)
 
 	elif printThis:
 		state: EliminationState = secondOrderPilings(state)
 		state: EliminationState = thirdOrderPilings(state)
 		# print(f"{time.perf_counter() - timeStart:.2f}\tthirdOrderPilings")  # noqa: ERA001
 		state: EliminationState = pinLeaf首零_零(state)
-		dictionaryLeafDomains = getDictionaryLeafDomains(state)
-		pprint(dictionaryLeafDomains)
 		dictionaryPileRanges = getDictionaryPileRanges(state)
 		domainsOfDimensionOrigins = tuple(getLeafDomain(state, leaf) for leaf in state.productsOfDimensions)[0:-1]
 		pprint(state.listPinnedLeaves)

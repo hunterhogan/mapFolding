@@ -1,12 +1,14 @@
 from collections.abc import Callable, Iterable
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
-from gmpy2 import bit_flip, bit_mask, bit_test, is_even
+from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
 from mapFolding import between, consecutive, decreasing, exclude, inclusive, noDuplicates
 from mapFolding._e import (
-	dimensionNearest首, dimensionSecondNearest首, howMany0coordinatesAtTail, howManyDimensionsHaveOddParity, leafOrigin,
-	pileOrigin, 一, 三, 二, 零, 首一, 首一二, 首三, 首二, 首零, 首零一二, 首零二)
+	dimensionFourthNearest首, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首, howMany0coordinatesAtTail,
+	howManyDimensionsHaveOddParity, leafOrigin, pileOrigin, 一, 三, 二, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding.dataBaskets import EliminationState
+from operator import add, sub
+from typing import Any
 
 # ======= Boolean filters =================================
 
@@ -155,15 +157,35 @@ def _getDomainDimension一(domain一零: tuple[int, ...], domain首一: tuple[in
 
 	return tuple(filter(noDuplicates, domainCombined))
 
-# TODO Figure out a system for choosing the order of leaves in multi-leaf domains.
-# If I change the order of dimension二 from (leaf二一, leaf二一零, leaf二零, leaf二), the `consecutive` filter probably won't work. But that's not a reason to choose the system.
+# TODO Figure out a system for choosing the order of leaves in multi-leaf domains. If I change the order of dimension二 from (leaf
+# 二一, leaf二一零, leaf二零, leaf二), the `consecutive` filter probably won't work. But that's not a reason to choose the system.
+# `getDomain二一零and二一` is opposite of dimension二, which is leaf二一, leaf二一零, ..., but because it is in that order, I got
+# lucky and the logic is almost identical to `getDomain二零and二`. I might be able to make them identical if I figure out more things.
+
+# Roughly ascending:
+# 2d6		Absolute	First corner
+# 二一		4			4
+# 二一零	3			5
+# 二零		2			6
+# 二		7			7
+
+# (less) Roughly ascending:
+# 首二		15			15
+# 首零二	16			16
+# 首零一二	17			17
+# 首一二	16			18
+
+# These are "mirror" images: the dimensions are reversed and the order is reversed, which suggests to me it is "right".
+# 1. 二一, 2. 二一零, 3. 二零, 4. 二
+# 1. 首二, 2. 首零二, 3. 首零一二, 4. 首一二
+
+# 1. 二一, 4. 首一二
+# 2. 二一零, 3. 首零一二,
+# 3. 二零, 2. 首零二,
+# 4. 二, 1. 首二,
 
 def getDomainDimension二(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
-	"""(leaf二一, leaf二一零, leaf二零, leaf二).
-
-	Clarified identifier semantics: each local variable whose value sequence enumerates possible piles for a specific leaf
-	is now prefixed with `domainOfLeaf` and each individual pile loop variable is prefixed with `pileOfLeaf`.
-	"""
+	"""(leaf二一, leaf二一零, leaf二零, leaf二)."""
 	domain二零and二: tuple[tuple[int, int], ...] = getDomain二零and二(state)
 	domain二一零and二一: tuple[tuple[int, int], ...] = getDomain二一零and二一(state)
 	return _getDomainDimension二(domain二零and二, domain二一零and二一, state.dimensionsTotal)
@@ -202,10 +224,10 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 			listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
 
 		# All other surplus is in the knock-out indices.
-		if (首一(dimensionsTotal) < pileOfLeaf二一 < 首一二(dimensionsTotal)) and (howManyDimensionsHaveOddParity(pileOfLeaf二一) == 1):
-			start = 3 * pilesTotal // 4
-			stop = 3 * pilesTotal // 4 + 4
-			listIndicesPilesExcluded.extend([*range(start, stop, 2)])
+# if (首一(dimensionsTotal) < pileOfLeaf二一 < 首一二(dimensionsTotal)) and (howManyDimensionsHaveOddParity(pileOfLeaf二一) == 1):
+# 	start = 3 * pilesTotal // 4
+# 	stop = 3 * pilesTotal // 4 + 4
+# 	listIndicesPilesExcluded.extend([*range(start, stop, 2)])
 
 		domainLeaves一and0 = tuple(exclude(domainLeaves一and0, listIndicesPilesExcluded))
 
@@ -215,17 +237,19 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 	domain二零and二nonCorners: tuple[tuple[int, int], ...] = tuple(set(domain二零and二).difference(set(domain二零and二corners)))
 	domainCombined.extend([(pileOfLeaf二 - 1, pileOfLeaf二零 + 1, pileOfLeaf二零, pileOfLeaf二) for pileOfLeaf二零, pileOfLeaf二 in domain二零and二nonCorners])
 
-	return tuple(domainCombined)
+	return tuple(sorted(filter(noDuplicates, set(domainCombined))))
 
 def getDomainDimension首二(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
+	"""(leaf首二, leaf首零二, leaf首零一二, leaf首一二)."""
 	domainOfLeaf首二: tuple[int, ...] = tuple(getLeafDomain(state, 首二(state.dimensionsTotal)))
 	domainOfLeaf首零一二: tuple[int, ...] = tuple(getLeafDomain(state, 首零一二(state.dimensionsTotal)))
-	return _getDomainDimension首二(domainOfLeaf首二, domainOfLeaf首零一二, state.dimensionsTotal, state.leavesTotal, state.pileLast)
+	domain首零二and首二: tuple[tuple[int, int], ...] = getDomain首零二and首二(state)
+	domain首零一二and首一二: tuple[tuple[int, int], ...] = getDomain首零一二and首一二(state)
+	return _getDomainDimension首二(domainOfLeaf首二, domainOfLeaf首零一二, state.dimensionsTotal, state.leavesTotal, state.pileLast, domain首零二and首二, domain首零一二and首一二)
 @cache
-def _getDomainDimension首二(domainOfLeaf首二: tuple[int, ...], domainOfLeaf首零一二: tuple[int, ...], dimensionsTotal: int, leavesTotal: int, pileLast: int) -> tuple[tuple[int, int, int, int], ...]:
+def _getDomainDimension首二(domainOfLeaf首二: tuple[int, ...], domainOfLeaf首零一二: tuple[int, ...], dimensionsTotal: int, leavesTotal: int, pileLast: int, domain首零二and首二: tuple[tuple[int, int], ...], domain首零一二and首一二: tuple[tuple[int, int], ...]) -> tuple[tuple[int, int, int, int], ...]:
 	domainCombined: list[tuple[int, int, int, int]] = []
 
-	# 46 surplus tuples
 	for pileOfLeaf首二 in domainOfLeaf首二:
 		ceiling = pileOfLeaf首二 + 首零(dimensionsTotal)
 
@@ -241,7 +265,6 @@ def _getDomainDimension首二(domainOfLeaf首二: tuple[int, ...], domainOfLeaf�
 		for pileOfLeaf首零一二 in filter(between(pileOfLeaf首二 + 2, ceiling), domainOfLeaf首零一二):
 			domainCombined.append((pileOfLeaf首二, pileOfLeaf首二 + 1, pileOfLeaf首零一二, pileOfLeaf首零一二 + 1))  # noqa: PERF401
 
-	# 22 surplus tuples
 	for pileOfLeaf首二 in filter(between(pileOrigin, 首零(dimensionsTotal)), domainOfLeaf首二):
 		ceiling = pileOfLeaf首二 + 首零(dimensionsTotal) + inclusive
 		floor = leavesTotal - 2 - pileOfLeaf首二
@@ -249,7 +272,6 @@ def _getDomainDimension首二(domainOfLeaf首二: tuple[int, ...], domainOfLeaf�
 		for pileOfLeaf首零一二 in tuple(filter(between(floor, ceiling), domainOfLeaf首零一二))[0:None:step]:
 			domainCombined.append((pileOfLeaf首二, pileOfLeaf首零一二 + 1, pileOfLeaf首零一二, pileOfLeaf首二 + 1))  # noqa: PERF401
 
-	# 18 surplus tuples
 	for pileOfLeaf首二 in filter(between(首零(dimensionsTotal), pileLast), domainOfLeaf首二):
 		ceiling = pileLast
 		floor = pileOfLeaf首二 + 4
@@ -257,148 +279,372 @@ def _getDomainDimension首二(domainOfLeaf首二: tuple[int, ...], domainOfLeaf�
 		for pileOfLeaf首零一二 in tuple(filter(between(floor, ceiling), domainOfLeaf首零一二))[0:None:step]:
 			domainCombined.append((pileOfLeaf首二, pileOfLeaf首零一二 + 1, pileOfLeaf首零一二, pileOfLeaf首二 + 1))  # noqa: PERF401
 
-	return tuple(filter(noDuplicates, domainCombined))
+	domainCombined = list(filter(noDuplicates, domainCombined))
+	index首二 = 0
+	index首零二 = 1
+	index首零一二 = 2
+	index首一二 = 3
+	domainCombined = [domain for domain in domainCombined if (domain[index首零二], domain[index首二]) in domain首零二and首二 and (domain[index首零一二], domain[index首一二]) in domain首零一二and首一二]
+
+	return tuple(sorted(set(domainCombined)))
 
 def getDomain二零and二(state: EliminationState) -> tuple[tuple[int, int], ...]:
-	"""Combined domain of leaf二零 and leaf二 with clarified identifier semantics."""
-	domainOfLeaf二零: tuple[int, ...] = tuple(getLeafDomain(state, 二+零))
-	domainOfLeaf二: tuple[int, ...] = tuple(getLeafDomain(state, 二))
-	return _getDomain二零and二(domainOfLeaf二零, domainOfLeaf二, state.dimensionsTotal)
+	"""Combined domain of leaf二零 and leaf二."""
+	domain二零: tuple[int, ...] = tuple(getLeafDomain(state, 二+零))
+	domain二: tuple[int, ...] = tuple(getLeafDomain(state, 二))
+	return _getDomain二零and二(domain二零, domain二, state.dimensionsTotal)
 @cache
-def _getDomain二零and二(domainOfLeaf二零: tuple[int, ...], domainOfLeaf二: tuple[int, ...], dimensionsTotal: int) -> tuple[tuple[int, int], ...]:
-	pilesTotal: int = len(domainOfLeaf二零)
-	pilesFewerDomainOfLeaf二: int = pilesTotal - len(domainOfLeaf二)
+def _getDomain二零and二(domain二零: tuple[int, ...], domain二: tuple[int, ...], dimensionsTotal: int) -> tuple[tuple[int, int], ...]:
 	domainCombined: list[tuple[int, int]] = []
 
-	domainCombined.extend([(pileOfLeaf二零, pileOfLeaf二零+零) for pileOfLeaf二零 in domainOfLeaf二零 if pileOfLeaf二零+零 in domainOfLeaf二])
+	domain零: tuple[int, ...] = domain二零
+	domain0: tuple[int, ...] = domain二
 
-	for index, pileOfLeaf二零 in enumerate(filter(between(pileOrigin, 首零(dimensionsTotal)-零), domainOfLeaf二零)):
-		domainOfLeaf二Working: tuple[int, ...] = domainOfLeaf二
+# ======= By inclusion of the piles, add consecutive piles (22 pairs)  ====================
+	direction: Callable[[Any, Any], Any] = add
+	domainCombined.extend([(pile, direction(pile, 零)) for pile in domain零 if direction(pile, 零) in domain0])
 
+# ======= By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
+	pilesTotal: int = len(domain零)
+	pilesFewerDomain0: int = pilesTotal - len(domain0)
+
+	for index, pileOfLeaf零 in enumerate(filter(between(pileOrigin, 首零(dimensionsTotal)-零), domain零)):
 		listIndicesPilesExcluded: list[int] = []
 
-		tailDimensions = howMany0coordinatesAtTail(pileOfLeaf二零)
-		if (首二(dimensionsTotal) < pileOfLeaf二零 < 首零(dimensionsTotal)-零) and (3 < pileOfLeaf二零.bit_length()) and (tailDimensions == 1):
-			if dimensionSecondNearest首(pileOfLeaf二零) == 1:
-				if 4 < domainOfLeaf二Working[pilesTotal // 2 - pilesFewerDomainOfLeaf二].bit_length():
-					listIndicesPilesExcluded.extend([pilesTotal // 2 - pilesFewerDomainOfLeaf二])
-				if 首一(dimensionsTotal) < pileOfLeaf二零:
-					listIndicesPilesExcluded.extend([-(pilesTotal // 4) + pilesFewerDomainOfLeaf二])
-			if dimensionSecondNearest首(pileOfLeaf二零) == 2:
-				if domainOfLeaf二Working[pilesTotal // 2 + 2 - pilesFewerDomainOfLeaf二] < 首零(dimensionsTotal):
-					listIndicesPilesExcluded.extend([pilesTotal // 2 + 2 - pilesFewerDomainOfLeaf二])
-				if 首一(dimensionsTotal) < pileOfLeaf二零:
-					listIndicesPilesExcluded.extend([-(pilesTotal // 4 - 2) + pilesFewerDomainOfLeaf二])
-			if dimensionSecondNearest首(pileOfLeaf二零) == 3:
-				listIndicesPilesExcluded.extend([-(pilesTotal // 4) + pilesFewerDomainOfLeaf二, -(pilesTotal // 4 - 2) + pilesFewerDomainOfLeaf二])
-			if pileOfLeaf二零 < 首一二(dimensionsTotal):
-				listIndicesPilesExcluded.extend([3 * pilesTotal // 4 - pilesFewerDomainOfLeaf二])
-			if bit_test(pileOfLeaf二零, 3):
-				if pileOfLeaf二零.bit_count() == 3:
-					listIndicesPilesExcluded.extend([3 * pilesTotal // 4 - 2 - pilesFewerDomainOfLeaf二])
-				if pileOfLeaf二零.bit_count() == 4:
-					listIndicesPilesExcluded.extend([3 * pilesTotal // 4 - pilesFewerDomainOfLeaf二])
+		tailDimensions: int = howMany0coordinatesAtTail(pileOfLeaf零 - is_odd(pileOfLeaf零))
 
-		dimensionSize = int(bit_flip(0, tailDimensions))
-		startExclude = abs(dimensionSize - 3)
-		stepExclude = dimensionSize
-		listIndicesPilesExcluded.extend(range(startExclude, pilesTotal, stepExclude))
-		tailDimensions -= 1
+# ******* All differences between `_getDomain二零and二` and `_getDomain二零and二` *******
+		excludeBelowAddend: int = 0
+		steppingBasisForUnknownReasons: int = int(bit_mask(tailDimensions - 1).bit_flip(0))
 
-		for dimension in range(tailDimensions + decreasing, decreasing, decreasing):
-			startExclude -= int(bit_flip(0, dimension))
-			stepExclude //= 2
-			listIndicesPilesExcluded.extend(range(startExclude, pilesTotal, stepExclude))
+		if pileOfLeaf零 == 二:
+			listIndicesPilesExcluded.extend([*range(index + 1)])
+		if pileOfLeaf零 == (首一(dimensionsTotal) + 首二(dimensionsTotal) + 首三(dimensionsTotal)):
+			indexDomain0 = int(7 * pilesTotal / 8)
+			indexDomain0 -= pilesFewerDomain0
+			listIndicesPilesExcluded.extend([indexDomain0])
 
-		excludeBelow: int = index - pilesFewerDomainOfLeaf二
-		if pileOfLeaf二零 == 二:
-			excludeBelow = index + 1
-		listIndicesPilesExcluded.extend(range(0, excludeBelow))  # noqa: PIE808
-		if pileOfLeaf二零 <= 首一(dimensionsTotal):
-			excludeAbove: int = index - pilesFewerDomainOfLeaf二 + (3 * pilesTotal // 4)
+# ------- `excludeBelow` `index` ---------------------------------
+		excludeBelow: int = index + excludeBelowAddend
+		excludeBelow -= pilesFewerDomain0
+		listIndicesPilesExcluded.extend(range(excludeBelow))
+
+# ------- `excludeAbove` `index` ---------------------------------
+		if pileOfLeaf零 <= 首一(dimensionsTotal):
+			excludeAbove: int = index + (3 * pilesTotal // 4)
+			excludeAbove -= pilesFewerDomain0
 			listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
-		if 首一(dimensionsTotal) < pileOfLeaf二零 < 首零(dimensionsTotal)-零:
-			excludeAbove = int(pileOfLeaf二零 ^ bit_mask(dimensionsTotal)) + 2 + inclusive
+		if 首一(dimensionsTotal) < pileOfLeaf零 < 首零(dimensionsTotal):
+			excludeAbove = int(pileOfLeaf零 ^ bit_mask(dimensionsTotal)) // 2
 			listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
-		if 首一(dimensionsTotal) + 首三(dimensionsTotal) == pileOfLeaf二零:
-			listIndicesPilesExcluded.extend([(3 * pilesTotal // 4) - 1 - pilesFewerDomainOfLeaf二])
-		if 首一(dimensionsTotal) + 首二(dimensionsTotal) + 首三(dimensionsTotal) == pileOfLeaf二零:
-			listIndicesPilesExcluded.extend([int(7 * pilesTotal / 8) - pilesFewerDomainOfLeaf二])
 
-		domainOfLeaf二Working = tuple(exclude(domainOfLeaf二Working, listIndicesPilesExcluded))
+# ------- Exclude by stepping: exclude ((2^tailDimensions - 1) / (2^tailDimensions))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
+		for dimension in range(tailDimensions):
+			listIndicesPilesExcluded.extend(range(steppingBasisForUnknownReasons + int(bit_mask(dimension)), pilesTotal, int(bit_flip(0, dimension + 1))))
 
-		domainCombined.extend([(pileOfLeaf二零, pileOfLeaf二) for pileOfLeaf二 in domainOfLeaf二Working])
+# ------- Exclude "knock-out" indices ---------------------------------
+		if tailDimensions == 1:
+			if (首二(dimensionsTotal) < pileOfLeaf零 < 首零(dimensionsTotal)-零) and (2 < dimensionNearest首(pileOfLeaf零)):
+				if dimensionSecondNearest首(pileOfLeaf零) == 零:
+					indexDomain0: int = pilesTotal // 2
+					indexDomain0 -= pilesFewerDomain0
+					if 4 < domain0[indexDomain0].bit_length():
+						listIndicesPilesExcluded.extend([indexDomain0])
+					if 首一(dimensionsTotal) < pileOfLeaf零:
+						indexDomain0 = -(pilesTotal // 4 - is_odd(pileOfLeaf零))
+						indexDomain0 -= -(pilesFewerDomain0)
+						listIndicesPilesExcluded.extend([indexDomain0])
+				if dimensionSecondNearest首(pileOfLeaf零) == 一:
+					indexDomain0 = pilesTotal // 2 + 2
+					indexDomain0 -= pilesFewerDomain0
+					if domain0[indexDomain0] < 首零(dimensionsTotal):
+						listIndicesPilesExcluded.extend([indexDomain0])
+					indexDomain0 = -(pilesTotal // 4 - 2)
+					indexDomain0 -= -(pilesFewerDomain0)
+					if 首一(dimensionsTotal) < pileOfLeaf零:
+						listIndicesPilesExcluded.extend([indexDomain0])
+				if dimensionSecondNearest首(pileOfLeaf零) == 一+零:
+					indexDomain0 = -(pilesTotal // 4)
+					indexDomain0 -= -(pilesFewerDomain0)
+					listIndicesPilesExcluded.extend([indexDomain0])
+
+				indexDomain0 = 3 * pilesTotal // 4
+				indexDomain0 -= pilesFewerDomain0
+				if pileOfLeaf零 < 首一二(dimensionsTotal):
+					listIndicesPilesExcluded.extend([indexDomain0])
+
+				if dimensionThirdNearest首(pileOfLeaf零) == 零:
+					if dimensionSecondNearest首(pileOfLeaf零) == 一+零:
+						listIndicesPilesExcluded.extend([indexDomain0 - 2])
+					if dimensionNearest首(pileOfLeaf零) == 一+零:
+						listIndicesPilesExcluded.extend([indexDomain0 - 2])
+
+		elif 首一(dimensionsTotal) + 首三(dimensionsTotal) + is_odd(pileOfLeaf零) == pileOfLeaf零:
+			indexDomain0 = (3 * pilesTotal // 4) - 1
+			indexDomain0 -= pilesFewerDomain0
+			listIndicesPilesExcluded.extend([indexDomain0])
+
+		domainCombined.extend([(pileOfLeaf零, pileOfLeaf0) for pileOfLeaf0 in exclude(domain0, listIndicesPilesExcluded)])
 
 	return tuple(sorted(set(domainCombined)))
 
 def getDomain二一零and二一(state: EliminationState) -> tuple[tuple[int, int], ...]:
-	"""Combined domain.
-
-	This combined domain has the same basic pattern as `getDomain二零and二`, with the parity switched.
-
-	Interestingly, the 22 pairs of `leaf二一, leaf二一零` in consecutive piles cover 6241 of 7840 foldsTotal for (2,) * 6 maps.
-	The combined domain is very small, only 76 pairs, but 22 pairs cover 80% and the other 54 pairs only cover 20%. Furthermore,
-	in the 22 pairs, `leaf二一零` follows `leaf二一`, but in the rest of the domain, `leaf二一` always follows `leaf二一零`.
-	"""
-	domainOfLeaf二一零: tuple[int, ...] = tuple(getLeafDomain(state, 二+一+零))
-	domainOfLeaf二一: tuple[int, ...] = tuple(getLeafDomain(state, 二+一))
-	return _getDomain二一零and二一(domainOfLeaf二一零, domainOfLeaf二一, state.dimensionsTotal)
+	"""Combined domain of leaf二一零 and leaf二一."""
+	domain二一零: tuple[int, ...] = tuple(getLeafDomain(state, 二+一+零))
+	domain二一: tuple[int, ...] = tuple(getLeafDomain(state, 二+一))
+	return _getDomain二一零and二一(domain二一零, domain二一, state.dimensionsTotal)
 @cache
 def _getDomain二一零and二一(domain二一零: tuple[int, ...], domain二一: tuple[int, ...], dimensionsTotal: int) -> tuple[tuple[int, int], ...]:
-	pilesTotal: int = len(domain二一零)
 	domainCombined: list[tuple[int, int]] = []
 
-	# NOTE Include corners.
-	domainCombined.extend([(pileOfLeaf二一零, pileOfLeaf二一零-零) for pileOfLeaf二一零 in domain二一零 if pileOfLeaf二一零-零 in domain二一])
+	domain零: tuple[int, ...] = domain二一零
+	domain0: tuple[int, ...] = domain二一
 
-	for index, pileOfLeaf二一零 in enumerate(filter(between(pileOrigin, 首零(dimensionsTotal)-零), domain二一零)):
-		domainOfLeaf二一: tuple[int, ...] = domain二一
+# ======= By inclusion of the piles, add consecutive piles (22 pairs)  ====================
+	direction: Callable[[Any, Any], Any] = sub
+	domainCombined.extend([(pile, direction(pile, 零)) for pile in domain零 if direction(pile, 零) in domain0])
+
+# ======= By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
+	pilesTotal: int = len(domain零)
+	pilesFewerDomain0: int = pilesTotal - len(domain0)
+
+	for index, pileOfLeaf零 in enumerate(filter(between(pileOrigin, 首零(dimensionsTotal)-零), domain零)):
 		listIndicesPilesExcluded: list[int] = []
 
-		tailDimensions: int = howMany0coordinatesAtTail(pileOfLeaf二一零 - 零)
+		tailDimensions: int = howMany0coordinatesAtTail(pileOfLeaf零 - is_odd(pileOfLeaf零))
 
-		# NOTE Exclude powers of 2.
-		for dimension in range(tailDimensions):
-			listIndicesPilesExcluded.extend(range(index + int(bit_mask(dimension)), pilesTotal, int(bit_flip(0, dimension + 1))))
+# ******* All differences between `_getDomain二零and二` and `_getDomain二一零and二一` *******
+		excludeBelowAddend: int = int(is_even(index) or tailDimensions)
+		steppingBasisForUnknownReasons: int = index
 
-		excludeBelow: int = index + (is_even(index) or tailDimensions)
+# ------- `excludeBelow` `index` ---------------------------------
+		excludeBelow: int = index + excludeBelowAddend
+		excludeBelow -= pilesFewerDomain0
 		listIndicesPilesExcluded.extend(range(excludeBelow))
 
-		if pileOfLeaf二一零 <= 首一(dimensionsTotal):
+# ------- `excludeAbove` `index` ---------------------------------
+		if pileOfLeaf零 <= 首一(dimensionsTotal):
 			excludeAbove: int = index + (3 * pilesTotal // 4)
+			excludeAbove -= pilesFewerDomain0
 			listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
-		if 首一(dimensionsTotal) < pileOfLeaf二一零 < 首零(dimensionsTotal):
-			excludeAbove = int(pileOfLeaf二一零 ^ bit_mask(dimensionsTotal)) // 2
+		if 首一(dimensionsTotal) < pileOfLeaf零 < 首零(dimensionsTotal):
+			excludeAbove = int(pileOfLeaf零 ^ bit_mask(dimensionsTotal)) // 2
 			listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
 
-		if 首一(dimensionsTotal) + 首三(dimensionsTotal) + 1 == pileOfLeaf二一零:
-			listIndicesPilesExcluded.extend([(3 * pilesTotal // 4) - 1])
+# ------- Exclude by stepping: exclude ((2^tailDimensions - 1) / (2^tailDimensions))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
+		for dimension in range(tailDimensions):
+			listIndicesPilesExcluded.extend(range(steppingBasisForUnknownReasons + int(bit_mask(dimension)), pilesTotal, int(bit_flip(0, dimension + 1))))
 
-		if (首二(dimensionsTotal) < pileOfLeaf二一零 < 首零(dimensionsTotal)-零) and (3 < pileOfLeaf二一零.bit_length()) and (tailDimensions == 1):
-			if dimensionSecondNearest首(pileOfLeaf二一零) == 1:
-				if 4 < domainOfLeaf二一[pilesTotal // 2].bit_length():
-					listIndicesPilesExcluded.extend([pilesTotal // 2])
-				if 首一(dimensionsTotal) < pileOfLeaf二一零:
-					listIndicesPilesExcluded.extend([-(pilesTotal // 4 - 1)])
-			if dimensionSecondNearest首(pileOfLeaf二一零) == 2:
-				if domainOfLeaf二一[pilesTotal // 2 + 2] < 首零(dimensionsTotal):
-					listIndicesPilesExcluded.extend([pilesTotal // 2 + 2])
-				if 首一(dimensionsTotal) < pileOfLeaf二一零:
-					listIndicesPilesExcluded.extend([-(pilesTotal // 4 - 2)])
-			if dimensionSecondNearest首(pileOfLeaf二一零) == 3:
-				listIndicesPilesExcluded.extend([-(pilesTotal // 4), -(pilesTotal // 4 - 2)])
-			if pileOfLeaf二一零 < 首一二(dimensionsTotal):
-				listIndicesPilesExcluded.extend([3 * pilesTotal // 4])
-			if bit_test(pileOfLeaf二一零, 3):
-				if pileOfLeaf二一零.bit_count() == 3:
-					listIndicesPilesExcluded.extend([3 * pilesTotal // 4])
-				if pileOfLeaf二一零.bit_count() == 4:
-					listIndicesPilesExcluded.extend([3 * pilesTotal // 4 - 2])
+# ------- Exclude "knock-out" indices ---------------------------------
+		if tailDimensions == 1:
+			if (首二(dimensionsTotal) < pileOfLeaf零 < 首零(dimensionsTotal)-零) and (2 < dimensionNearest首(pileOfLeaf零)):
+				if dimensionSecondNearest首(pileOfLeaf零) == 零:
+					indexDomain0: int = pilesTotal // 2
+					indexDomain0 -= pilesFewerDomain0
+					if 4 < domain0[indexDomain0].bit_length():
+						listIndicesPilesExcluded.extend([indexDomain0])
+					if 首一(dimensionsTotal) < pileOfLeaf零:
+						indexDomain0 = -(pilesTotal // 4 - is_odd(pileOfLeaf零))
+						indexDomain0 -= -(pilesFewerDomain0)
+						listIndicesPilesExcluded.extend([indexDomain0])
+				if dimensionSecondNearest首(pileOfLeaf零) == 一:
+					indexDomain0 = pilesTotal // 2 + 2
+					indexDomain0 -= pilesFewerDomain0
+					if domain0[indexDomain0] < 首零(dimensionsTotal):
+						listIndicesPilesExcluded.extend([indexDomain0])
+					indexDomain0 = -(pilesTotal // 4 - 2)
+					indexDomain0 -= -(pilesFewerDomain0)
+					if 首一(dimensionsTotal) < pileOfLeaf零:
+						listIndicesPilesExcluded.extend([indexDomain0])
+				if dimensionSecondNearest首(pileOfLeaf零) == 一+零:
+					indexDomain0 = -(pilesTotal // 4)
+					indexDomain0 -= -(pilesFewerDomain0)
+					listIndicesPilesExcluded.extend([indexDomain0])
 
-		domainOfLeaf二一 = tuple(exclude(domainOfLeaf二一, listIndicesPilesExcluded))
-		domainCombined.extend([(pileOfLeaf二一零, pileOfLeaf二一) for pileOfLeaf二一 in domainOfLeaf二一])
+				indexDomain0 = 3 * pilesTotal // 4
+				indexDomain0 -= pilesFewerDomain0
+				if pileOfLeaf零 < 首一二(dimensionsTotal):
+					listIndicesPilesExcluded.extend([indexDomain0])
 
-	return tuple(domainCombined)
+				if dimensionThirdNearest首(pileOfLeaf零) == 零:
+					if dimensionSecondNearest首(pileOfLeaf零) == 一+零:
+						listIndicesPilesExcluded.extend([indexDomain0 - 2])
+					if dimensionNearest首(pileOfLeaf零) == 一+零:
+						listIndicesPilesExcluded.extend([indexDomain0 - 2])
+
+		elif 首一(dimensionsTotal) + 首三(dimensionsTotal) + is_odd(pileOfLeaf零) == pileOfLeaf零:
+			indexDomain0 = (3 * pilesTotal // 4) - 1
+			indexDomain0 -= pilesFewerDomain0
+			listIndicesPilesExcluded.extend([indexDomain0])
+
+		domainCombined.extend([(pileOfLeaf零, pileOfLeaf0) for pileOfLeaf0 in exclude(domain0, listIndicesPilesExcluded)])
+
+	return tuple(sorted(set(domainCombined)))
+
+def getDomain首零二and首二(state: EliminationState) -> tuple[tuple[int, int], ...]:
+	"""Combined domain of leaf首零二 and leaf首二."""
+	domain首零二: tuple[int, ...] = tuple(getLeafDomain(state, 首零二(state.dimensionsTotal)))
+	domain首二: tuple[int, ...] = tuple(getLeafDomain(state, 首二(state.dimensionsTotal)))
+	return _getDomain首零二and首二(domain首零二, domain首二, state.dimensionsTotal)
+@cache
+def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二: tuple[int, ...], dimensionsTotal: int) -> tuple[tuple[int, int], ...]:
+	domainCombined: list[tuple[int, int]] = []
+
+	domain零: tuple[int, ...] = domain首零二
+	domain0: tuple[int, ...] = domain首二
+
+# ======= By inclusion of the piles, add consecutive piles (22 pairs)  ====================
+	direction: Callable[[Any, Any], Any] = sub
+	domainCombined.extend([(pile, direction(pile, 零)) for pile in domain零 if direction(pile, 零) in domain0])
+
+# ======= By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
+	pilesTotal: int = len(domain零)
+	pilesFewerDomain0: int = pilesTotal - len(domain0)
+
+	for index, pileOfLeaf零 in enumerate(domain零):
+		if pileOfLeaf零 < 首零(dimensionsTotal)+零:
+			continue
+		listIndicesPilesExcluded: list[int] = []
+
+		tailDimensions: int = howMany0coordinatesAtTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
+
+# # ------- `excludeBelow` `index` ---------------------------------
+		if 首零一(dimensionsTotal) < pileOfLeaf零:
+			excludeBelow: int = index + 3 - (3 * pilesTotal // 4)
+		else:
+			excludeBelow = 2 + (首零一(dimensionsTotal) - direction(pileOfLeaf零, is_odd(pileOfLeaf零))) // 2
+		excludeBelow -= pilesFewerDomain0
+		listIndicesPilesExcluded.extend(range(excludeBelow))
+
+# ------- `excludeAbove` `index` ---------------------------------
+		excludeAbove: int = index + 2 - int(bit_mask(tailDimensions))
+		excludeAbove -= pilesFewerDomain0
+		listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
+
+# ------- Exclude by stepping: exclude ((2^tailDimensions - 1) / (2^tailDimensions))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
+		countFromTheEnd: int = pilesTotal - 1
+		countFromTheEnd -= pilesFewerDomain0
+		steppingBasisForUnknownReasons: int = countFromTheEnd - int(bit_mask(tailDimensions - 1).bit_flip(0))
+		for dimension in range(tailDimensions):
+			listIndicesPilesExcluded.extend(range(steppingBasisForUnknownReasons - int(bit_mask(dimension)), decreasing, decreasing * int(bit_flip(0, dimension + 1))))
+
+# ------- Exclude "knock-out" indices ---------------------------------
+		if tailDimensions == 1:
+			if (dimensionThirdNearest首(pileOfLeaf零) == 一) and (二+零 <= dimensionNearest首(pileOfLeaf零)):
+				indexDomain0: int = (pilesTotal // 2) + 1
+				indexDomain0 -= pilesFewerDomain0
+				listIndicesPilesExcluded.extend([indexDomain0])
+				indexDomain0 = (pilesTotal // 4) + 1
+				indexDomain0 -= pilesFewerDomain0
+				listIndicesPilesExcluded.extend([indexDomain0])
+				if pileOfLeaf零 < 首零一(dimensionsTotal):
+					listIndicesPilesExcluded.extend([indexDomain0 - 2])
+
+			if howManyDimensionsHaveOddParity(pileOfLeaf零) == 一:
+				indexDomain0 = (pilesTotal // 4) + 3
+				indexDomain0 -= pilesFewerDomain0
+				if dimensionSecondNearest首(pileOfLeaf零) == 一:
+					listIndicesPilesExcluded.extend([indexDomain0])
+				if dimensionSecondNearest首(pileOfLeaf零) == 二:
+					listIndicesPilesExcluded.extend([indexDomain0])
+				if (((dimensionNearest首(pileOfLeaf零) == dimensionsTotal - 1) and (dimensionSecondNearest首(pileOfLeaf零) == dimensionsTotal - 3))
+					or (dimensionSecondNearest首(pileOfLeaf零) == 二)):
+					listIndicesPilesExcluded.extend([indexDomain0 - 2])
+					indexDomain0 = (pilesTotal // 2) - 1
+					indexDomain0 -= pilesFewerDomain0
+					listIndicesPilesExcluded.extend([indexDomain0])
+
+		elif (首零一(dimensionsTotal) - direction(首三(dimensionsTotal), is_odd(pileOfLeaf零))) == pileOfLeaf零:
+			indexDomain0 = (pilesTotal // 4) + 2
+			indexDomain0 -= pilesFewerDomain0
+			listIndicesPilesExcluded.extend([indexDomain0])
+
+		domainCombined.extend([(pileOfLeaf零, pileOfLeaf0) for pileOfLeaf0 in exclude(domain0, listIndicesPilesExcluded)])
+
+	return tuple(sorted(set(domainCombined)))
+
+def getDomain首零一二and首一二(state: EliminationState) -> tuple[tuple[int, int], ...]:
+	"""Combined domain of leaf首零一二 and leaf首一二."""
+	domain首零一二: tuple[int, ...] = tuple(getLeafDomain(state, 首零一二(state.dimensionsTotal)))
+	domain首一二: tuple[int, ...] = tuple(getLeafDomain(state, 首一二(state.dimensionsTotal)))
+	return _getDomain首零一二and首一二(domain首零一二, domain首一二, state.dimensionsTotal)
+@cache
+def _getDomain首零一二and首一二(domain首零一二: tuple[int, ...], domain首一二: tuple[int, ...], dimensionsTotal: int) -> tuple[tuple[int, int], ...]:
+	domainCombined: list[tuple[int, int]] = []
+
+	domain零: tuple[int, ...] = domain首零一二
+	domain0: tuple[int, ...] = domain首一二
+
+# ======= By inclusion of the piles, add consecutive piles (22 pairs)  ====================
+	direction: Callable[[Any, Any], Any] = add
+	domainCombined.extend([(pile, direction(pile, 零)) for pile in domain零 if direction(pile, 零) in domain0])
+
+# ======= By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
+	pilesTotal: int = len(domain零)
+	pilesFewerDomain0: int = pilesTotal - len(domain0)
+
+	for index, pileOfLeaf零 in enumerate(domain零):
+		if pileOfLeaf零 < 首零(dimensionsTotal):
+			continue
+		listIndicesPilesExcluded: list[int] = []
+
+		tailDimensions: int = howMany0coordinatesAtTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
+
+# ------- `excludeBelow` `index` ---------------------------------
+		if 首零一(dimensionsTotal) < pileOfLeaf零:
+			excludeBelow: int = index + 1 - (3 * pilesTotal // 4)
+		else:
+			excludeBelow = (首零一(dimensionsTotal) - direction(pileOfLeaf零, is_odd(pileOfLeaf零))) // 2
+		excludeBelow -= pilesFewerDomain0
+		listIndicesPilesExcluded.extend(range(excludeBelow))
+
+# ------- `excludeAbove` `index` ---------------------------------
+		excludeAbove: int = index + 1 - int(bit_mask(tailDimensions))
+		excludeAbove -= pilesFewerDomain0
+		listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
+
+# ------- Exclude by stepping: exclude ((2^tailDimensions - 1) / (2^tailDimensions))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
+		steppingBasisForUnknownReasons: int = index
+		for dimension in range(tailDimensions):
+			listIndicesPilesExcluded.extend(range(steppingBasisForUnknownReasons - int(bit_mask(dimension)), decreasing, decreasing * int(bit_flip(0, dimension + 1))))
+
+# ------- Exclude "knock-out" indices ---------------------------------
+		if tailDimensions == 1:
+			if (dimensionThirdNearest首(pileOfLeaf零) == 一) and (二+零 <= dimensionNearest首(pileOfLeaf零)):
+				indexDomain0: int = pilesTotal // 2
+				indexDomain0 -= pilesFewerDomain0
+				listIndicesPilesExcluded.extend([indexDomain0])
+				indexDomain0 = pilesTotal // 4
+				indexDomain0 -= pilesFewerDomain0
+				listIndicesPilesExcluded.extend([indexDomain0])
+				if pileOfLeaf零 < 首零一(dimensionsTotal):
+					listIndicesPilesExcluded.extend([indexDomain0 - 2])
+			if dimensionThirdNearest首(pileOfLeaf零) == 一+零:
+				indexDomain0 = pilesTotal // 4
+				indexDomain0 -= pilesFewerDomain0
+				if dimensionFourthNearest首(pileOfLeaf零) == 一:
+					listIndicesPilesExcluded.extend([indexDomain0])
+			if howManyDimensionsHaveOddParity(pileOfLeaf零) == 一:
+				indexDomain0 = (pilesTotal // 4) + 2
+				indexDomain0 -= pilesFewerDomain0
+				if dimensionSecondNearest首(pileOfLeaf零) == 一:
+					listIndicesPilesExcluded.extend([indexDomain0])
+				if dimensionSecondNearest首(pileOfLeaf零) == 二:
+					listIndicesPilesExcluded.extend([indexDomain0])
+				if (首零二(dimensionsTotal) < pileOfLeaf零) and (二+零 <= dimensionNearest首(pileOfLeaf零)):
+					listIndicesPilesExcluded.extend([indexDomain0 - 2])
+					indexDomain0 = (pilesTotal // 2) - 2
+					indexDomain0 -= pilesFewerDomain0
+					listIndicesPilesExcluded.extend([indexDomain0])
+
+		elif (首零一(dimensionsTotal) - direction(首三(dimensionsTotal), is_odd(pileOfLeaf零))) == pileOfLeaf零:
+			indexDomain0 = (pilesTotal // 4) + 1
+			indexDomain0 -= pilesFewerDomain0
+			listIndicesPilesExcluded.extend([indexDomain0])
+
+		domainCombined.extend([(pileOfLeaf零, pileOfLeaf0) for pileOfLeaf0 in exclude(domain0, listIndicesPilesExcluded)])
+
+	return tuple(sorted(set(domainCombined)))
 
 def getDictionaryLeafDomains(state: EliminationState) -> dict[int, range]:
 	"""For each `leaf`, the associated Python `range` defines the mathematical domain:

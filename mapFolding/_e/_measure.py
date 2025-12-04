@@ -1,5 +1,5 @@
 from functools import cache
-from hunterMakesPy import intInnit
+from hunterMakesPy import intInnit, raiseIfNone
 import gmpy2
 
 @cache
@@ -12,13 +12,64 @@ def dimensionNearest首(integerNonnegative: int, /) -> int:
 	return max(0, anInteger.bit_length() - 1)
 
 @cache
-def dimensionSecondNearest首(integerAbove0: int, /) -> int:
-	"""Find the 0-indexed position of the second most significant non-zero radix-2 digit, if any, in `integerAbove0`."""
-	anInteger: int = intInnit([integerAbove0], 'integerAbove0', type[int])[0]
-	if anInteger <= 0:
-		message: str = f"I received `{integerAbove0 = }`, but I need a value greater than 0."
+def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
+	"""Find the 0-indexed position of the second most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
+	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
+	if anInteger < 0:
+		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
-	return dimensionNearest首(int(gmpy2.bit_flip(anInteger, dimensionNearest首(anInteger))))
+	dimensionSecondNearest: int | None = None
+	anotherInteger = int(gmpy2.bit_flip(anInteger, dimensionNearest首(anInteger)))
+	if anotherInteger == 0:
+		dimensionSecondNearest = None
+	else:
+		dimensionSecondNearest = dimensionNearest首(anotherInteger)
+	return dimensionSecondNearest
+
+@cache
+def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
+	"""Find the 0-indexed position of the third most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
+	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
+	if anInteger < 0:
+		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
+		raise ValueError(message)
+
+	dimensionNearest: int = dimensionNearest首(anInteger)
+	dimensionSecondNearest: int | None = dimensionSecondNearest首(anInteger)
+	dimensionThirdNearest: int | None = None
+
+	if dimensionSecondNearest in [0, None]:
+		dimensionThirdNearest = None
+	else:
+		anotherInteger = int(gmpy2.bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)))
+		if anotherInteger == 0:
+			dimensionThirdNearest = None
+		else:
+			dimensionThirdNearest = dimensionNearest首(anotherInteger)
+	return dimensionThirdNearest
+
+@cache
+def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
+	"""Find the 0-indexed position of the fourth most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
+	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
+	if anInteger < 0:
+		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
+		raise ValueError(message)
+
+	dimensionNearest: int = dimensionNearest首(anInteger)
+	dimensionSecondNearest: int | None = dimensionSecondNearest首(anInteger)
+	dimensionThirdNearest: int | None = dimensionThirdNearest首(anInteger)
+	dimensionFourthNearest: int | None = None
+
+	if dimensionThirdNearest in [0, None]:
+		dimensionFourthNearest = None
+	else:
+		anotherInteger = int(gmpy2.bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)).bit_flip(raiseIfNone(dimensionThirdNearest)))
+		if anotherInteger == 0:
+			dimensionFourthNearest = None
+		else:
+			dimensionFourthNearest = dimensionNearest首(anotherInteger)
+	return dimensionFourthNearest
 
 @cache
 def leafInSubHyperplane(leafAbove1: int, /) -> int:

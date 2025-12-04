@@ -28,8 +28,8 @@ if __name__ == '__main__':
 	state: EliminationState | None = None
 
 	flow = 'elimination'
-	flow = 'constraintPropagation'
 	flow = 'crease'
+	flow = 'constraintPropagation'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
 	sys.stdout.write("\033[0m\n")
 
-	for n in range(5, 6):
+	for n in range(6,7):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:

@@ -1,33 +1,28 @@
-# ruff: noqa ERA001
-from collections.abc import Callable, Iterator
 from cytoolz.dicttoolz import itemfilter, keyfilter, valfilter
 from cytoolz.functoolz import complement, curry as syntacticCurry
 from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
 from hunterMakesPy import raiseIfNone
-from itertools import chain, combinations, filterfalse, repeat, starmap
+from itertools import chain, combinations, filterfalse, repeat
 from mapFolding import exclude, inclusive, reverseLookup
 from mapFolding._e import (
 	dimensionNearest首, dimensionSecondNearest首, getDictionaryPileRanges, getLeafDomain, getListLeavesDecrease,
 	getListLeavesIncrease, howMany0coordinatesAtTail, leafInSubHyperplane, leafOrigin, pileOrigin, PinnedLeaves, ptount, 一,
 	三, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
-from mapFolding._e.pinIt import atPilePinLeaf, deconstructPinnedLeavesAtPile, leafIsNotPinned, leafIsPinned, pileIsOpen
+from mapFolding._e.pinIt import atPilePinLeaf, deconstructPinnedLeavesAtPile, leafIsNotPinned, pileIsOpen
 from mapFolding.algorithms.iff import pinnedLeavesHasAViolation
 from mapFolding.dataBaskets import EliminationState
 from math import log, prod
 from more_itertools import is_sorted
-from pprint import pprint
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from collections.abc import Callable, Iterator
 
 #  ====== Boolean filters ======================
 
 @syntacticCurry
 def beansWithoutCornbread(state: EliminationState, pinnedLeaves: PinnedLeaves) -> bool:
-	beans, cornbread = 一+零, 一
-	if (beans in pinnedLeaves.values()) ^ (cornbread in pinnedLeaves.values()):
-		return True
-	beans, cornbread = 首一(state.dimensionsTotal), 首零一(state.dimensionsTotal)
-	if (beans in pinnedLeaves.values()) ^ (cornbread in pinnedLeaves.values()):
-		return True
-	return False
+	return any((beans in pinnedLeaves.values()) ^ (cornbread in pinnedLeaves.values()) for beans, cornbread in ((一+零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))))
 
 def _leafInFirstPileOfDomain(pileLeaf: tuple[int, int]) -> bool:
 	return pileLeaf[0] == pileLeaf[1].bit_count() + (2**(howMany0coordinatesAtTail(pileLeaf[1]) + 1) - 2)
@@ -98,9 +93,8 @@ def _leafDimensionOriginNotFirst(state: EliminationState, leaf: int) -> bool:
 			if pileOfDimensionOrigin := reverseLookup(state.pinnedLeaves, dimensionOrigin):
 				if state.pile < pileOfDimensionOrigin:
 					return True
-			else:
-				if not pilesOpenBeforeLeaf.intersection(getLeafDomain(state, dimensionOrigin)):
-					return True
+			elif not pilesOpenBeforeLeaf.intersection(getLeafDomain(state, dimensionOrigin)):
+				return True
 
 	return False
 
@@ -167,7 +161,6 @@ def removeInvalidPinnedLeaves(state: EliminationState) -> EliminationState:
 def disqualifyDictionary(state: EliminationState) -> bool:
 	return any([
 		_leading0notBeforeTrailing0dictionary(state.pinnedLeaves)
-		# , _dimension二or首二CornersNotAligned(state)
 		, _leafTooEarlyInDomainDictionary(state)
 		, _noPilesOpenFor一Dictionary(state)
 		, _noPilesOpenForLeafDimensionOriginDictionary(state)
@@ -187,19 +180,6 @@ def _leafTooEarlyInDomainDictionary(state: EliminationState) -> bool:
 			pilesOpenBefore_r: set[int] = set(range(pileOf_r)).difference(state.pinnedLeaves.keys()).intersection(getLeafDomain(state, k))
 			if not pilesOpenBefore_r:
 				return True
-	return False
-
-def _dimension二or首二CornersNotAligned(state: EliminationState) -> bool:
-	getPile: Callable[[int], int] = reverseLookup(state.pinnedLeaves)
-	if ((corner0 := getPile(二)) and (corner零 := getPile(二+零))
-	and (corner一 := getPile(二+一)) and (corner一零 := getPile(二+一+零))
-	and ((corner0 - corner零) == 1) != ((corner一零 - corner一) == 1)):
-		return True
-	if ((corner0 := getPile(首二(state.dimensionsTotal))) and (corner零 := getPile(首零二(state.dimensionsTotal)))
-	and (corner一 := getPile(首一二(state.dimensionsTotal))) and (corner一零 := getPile(首零一二(state.dimensionsTotal)))
-	# NOTE `... == -1`
-	and ((corner0 - corner零) == -1) != ((corner一零 - corner一) == -1)):
-		return True
 	return False
 
 def _leading0notBeforeTrailing0dictionary(pinnedLeaves: PinnedLeaves) -> bool:
@@ -226,11 +206,11 @@ def _leafDimensionOriginsNotInOrderDictionary(state: EliminationState) -> bool:
 
 def _noPilesOpenForLeafDimensionOriginDictionary(state: EliminationState) -> bool:
 	for leaf in (filter(leafIsNotPinned(state.pinnedLeaves), state.productsOfDimensions[一: - (一)])):
-		pileStop: int | None = min(valfilter(lambda leafPinned: leafPinned % leaf == 0
+		pileCeiling: int | None = min(valfilter(lambda leafPinned: leafPinned % leaf == 0
 					, valfilter(_notLeafOriginOrLeaf零, keyfilter(lambda pilePinned: pilePinned != state.pileLast, state.pinnedLeaves))).keys(), default=None)
-		if pileStop:
-			pileStart: int = max(valfilter(lambda leafPinned: (leafPinned in state.productsOfDimensions) and leafPinned < leaf, state.pinnedLeaves).keys())
-			if not set(range(pileStart, pileStop)).difference(state.pinnedLeaves.keys()).intersection(getLeafDomain(state, leaf)):
+		if pileCeiling:
+			pileFloor: int = max(valfilter(lambda leafPinned: (leafPinned in state.productsOfDimensions) and leafPinned < leaf, state.pinnedLeaves).keys())
+			if not set(range(pileFloor, pileCeiling)).difference(state.pinnedLeaves.keys()).intersection(getLeafDomain(state, leaf)):
 				return True
 	return False
 
@@ -323,7 +303,7 @@ def pinPile二Crease(state: EliminationState) -> list[int]:
 		listCreaseIndicesExcluded.append((int(log(leafInSubHyperplane(leafAt首Less一), state.mapShape[0])) + 4) % 5)
 	leafAt首Less一零: int = state.pinnedLeaves[state.leavesTotal - (一+零)]
 	if is_even(leafAtPileLess1) and leafAt首Less一零:
-		listCreaseIndicesExcluded.extend([*range(state.dimensionsTotal - 3)][(state.dimensionsTotal - 3) - ((state.dimensionsTotal - 2) - leafInSubHyperplane(leafAt首Less一零 - (leafAt首Less一零.bit_count() - is_even(leafAt首Less一零))).bit_count()) % (state.dimensionsTotal - 2) - is_even(leafAt首Less一零): None])  # noqa: E501
+		listCreaseIndicesExcluded.extend([*range(state.dimensionsTotal - 3)][(state.dimensionsTotal - 3) - ((state.dimensionsTotal - 2) - leafInSubHyperplane(leafAt首Less一零 - (leafAt首Less一零.bit_count() - is_even(leafAt首Less一零))).bit_count()) % (state.dimensionsTotal - 2) - is_even(leafAt首Less一零): None])
 	leafAt一: int = state.pinnedLeaves[一]
 	if (leafAt一 == 首零(state.dimensionsTotal)+零):
 		listCreaseIndicesExcluded.extend([(int(log(leafInSubHyperplane(leafAt首Less一), state.mapShape[0])) + 4) % 5, howMany0coordinatesAtTail(leafAt首Less一零) - 1])
@@ -530,11 +510,11 @@ def pinPile首零Less零PileRange(state: EliminationState) -> list[int]:
 
 # ======= Simple subroutines for a fixed `pile`. =======
 
-def pinPileOriginFixed(state: EliminationState) -> list[int]:
+def pinPileOriginFixed(state: EliminationState | None = None) -> list[int]:  # noqa: ARG001
 	listLeavesAtPile: list[int] = [leafOrigin]
 	return listLeavesAtPile
 
-def pinPile零Fixed(state: EliminationState) -> list[int]:
+def pinPile零Fixed(state: EliminationState | None = None) -> list[int]:  # noqa: ARG001
 	listLeavesAtPile: list[int] = [零]
 	return listLeavesAtPile
 
