@@ -175,7 +175,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 # ruff: noqa: E701
 	else:
-		if all(dimension < 2 for dimension in mapShape):
+		if all(dimension <= 2 for dimension in mapShape):
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 		else:
 			match flow:

@@ -6,7 +6,6 @@ from mapFolding.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding.dataBaskets import EliminationState
 from math import factorial
 from more_itertools import iter_index, unique
-from pprint import pprint
 
 def count(state: EliminationState) -> EliminationState:
 	state.groupsOfFolds += sum(map(countPinnedLeaves, state.listPinnedLeaves, repeat(state.mapShape), repeat(range(state.leavesTotal))))

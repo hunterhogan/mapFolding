@@ -23,6 +23,13 @@ from mapFolding._e._data import (
 	getLeafDomain as getLeafDomain, getListLeavesDecrease as getListLeavesDecrease,
 	getListLeavesIncrease as getListLeavesIncrease, getPileRange as getPileRange)
 
+# isort: split
+from mapFolding._e._exclusions import (
+	dictionary2d5AtPileLeafExcludedByPile as dictionary2d5AtPileLeafExcludedByPile,
+	dictionary2d5LeafExcludedAtPileByPile as dictionary2d5LeafExcludedAtPileByPile,
+	dictionary2d6AtPileLeafExcludedByPile as dictionary2d6AtPileLeafExcludedByPile,
+	dictionary2d6LeafExcludedAtPileByPile as dictionary2d6LeafExcludedAtPileByPile)
+
 """Perspective changes and code changes:
 
 - To increment in a dimension means to add 1 in the dimensionIndex. If the current value is 0, then the new value is 1. If the

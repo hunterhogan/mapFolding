@@ -18,9 +18,32 @@ from more_itertools import flatten
 3. Do not overwrite or delete a dictionary's pinned leaves because that could cause the dictionary's permutation space to overlap with a different dictionary's permutation space.
 """
 # ======= Boolean filters =======================
+
+@syntacticCurry
+def atPilePinLeafSafetyFilter(pinnedLeaves: PinnedLeaves, pile: int, leaf: int) -> bool:
+	"""Return `True` if it is safe to call `atPilePinLeafSafetyFilter(pinnedLeaves, pile, leaf)`.
+
+	For performance, you probably can and probably *should* create a set of filters for your circumstances.
+
+	Parameters
+	----------
+	pinnedLeaves : PinnedLeaves
+		A mapping of each `pile` with a pinned `leaf`.
+	pile : int
+		`pile` at which to pin.
+	leaf : int
+		`leaf` to pin.
+
+	Returns
+	-------
+	isSafeToPin : bool
+		True if it is safe to pin `leaf` at `pile` in `pinnedLeaves`.
+	"""
+	return isPinnedAtPile(pinnedLeaves, leaf, pile) or (pileIsOpen(pinnedLeaves, pile) and leafIsNotPinned(pinnedLeaves, leaf))
+
 @syntacticCurry
 def isPinnedAtPile(pinnedLeaves: PinnedLeaves, leaf: int, pile: int) -> bool:
-	"""Return True if `leaf` is presently pinned at `pile` in `pinnedLeaves`.
+	"""Return `True` if `leaf` is presently pinned at `pile` in `pinnedLeaves`.
 
 	Parameters
 	----------
@@ -123,12 +146,17 @@ def _segregateLeafPinnedAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, 
 def atPilePinLeaf(pinnedLeaves: PinnedLeaves, pile: int, leaf: int) -> PinnedLeaves:
 	"""Return a new dictionary with `leaf` pinned at `pile` based on `pinnedLeaves`.
 
+	Warning
+	-------
+	This function assumes either 1. `leaf` is not pinned and `pile` is open or 2. `leaf` is pinned at `pile`. Overwriting a
+	different `leaf` pinned at `pile` corrupts the permutation space.
+
 	Parameters
 	----------
 	pinnedLeaves : PinnedLeaves
 		Existing `pile` -> `leaf` mapping (partial folding).
 	pile : int
-		`pile` index at which to set the `leaf`.
+		`pile` at which to pin `leaf`.
 	leaf : int
 		`leaf` to pin.
 
@@ -416,33 +444,30 @@ def excludeLeafAtPile(listPinnedLeaves: Iterable[PinnedLeaves], leaf: int, pile:
 	"""
 	return deconstructListPinnedLeavesAtPile(_segregateLeafPinnedAtPile(list(listPinnedLeaves), leaf, pile)[0], pile, leavesToPin)
 
-def pinLeafAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile: int) -> list[PinnedLeaves]:
-	"""Return a new list of `pinnedLeaves` dictionaries with `leaf` pinned at `pile` and excluding every other `leaf` at `pile`.
-
-	Inverse of `_excludeLeafAtPile`: for each partial dictionary, if the pile is free and does not already pin the leaf elsewhere,
-	this expands the dictionary (via `deconstructPinnedLeaves`) and retains only the variant that pins the requested `leaf`.
+def requireLeafPinnedAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, pile: int) -> list[PinnedLeaves]:
+	"""In every `PinnedLeaves` dictionary, ensure `leaf`, and *only* `leaf`, is pinned at `pile`: excluding every other `leaf` at `pile`.
 
 	Parameters
 	----------
 	listPinnedLeaves : list[PinnedLeaves]
 		Collection of partial pinning dictionaries to transform.
 	leaf : int
-		`leaf` to force at `pile`.
+		`leaf` required at `pile`.
 	pile : int
-		`pile` index at which to pin the leaf.
+		`pile` at which to pin the leaf.
 
 	Returns
 	-------
-	sequencePinnedLeaves : list[PinnedLeaves]
-		Filtered / expanded list where each dictionary pins `leaf` to `pile` (unless impossible, in which case the dictionary is dropped).
+	listLeafAtPile : list[PinnedLeaves]
+		`list` of `PinnedLeaves` dictionaries with `leaf` pinned at `pile`.
 
 	See Also
 	--------
-	deconstructPinnedLeaves, _excludeLeafAtPile
+	deconstructPinnedLeaves, excludeLeafAtPile
 	"""
-	listNeedsPinning, sequencePinnedLeaves = _segregateLeafPinnedAtPile(listPinnedLeaves, leaf, pile)
-	sequencePinnedLeaves.extend(deconstructListPinnedLeavesAtPile(list(filter(pileIsOpen(pile=pile), listNeedsPinning)), pile, [leaf]))
-	return sequencePinnedLeaves
+	listPinnedLeaves, listLeafAtPile = _segregateLeafPinnedAtPile(listPinnedLeaves, leaf, pile)
+	listLeafAtPile.extend(map(atPilePinLeaf(pile=pile, leaf=leaf), filter(pileIsOpen(pile=pile), filter(leafIsNotPinned(leaf=leaf), listPinnedLeaves))))
+	return listLeafAtPile
 
 def segregateLeafByDeconstructingListPinnedLeavesAtPile(listPinnedLeaves: Iterable[PinnedLeaves], leaf: int, pile: int, leavesToPin: Iterable[int]) -> Iterator[tuple[PinnedLeaves, tuple[PinnedLeaves, ...]]]:
 	for pinnedLeaves in listPinnedLeaves:

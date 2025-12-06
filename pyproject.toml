@@ -141,6 +141,7 @@ dependencies = [
   "platformdirs",
 ]
 optional-dependencies = { development = [
+  "gmpy2-stubs",
   "ipykernel",
   "ipywidgets",
   "memray; sys_platform == 'linux'",
@@ -209,4 +210,4 @@ filenameCitationDOTcff = "CITATION.cff"
 pathFilenameCitationSSOT = "citations/CITATION.cff"
 
 [tool.uv.sources]
-cytoolz-stubs = { git = "https://github.com/py-stubs/cytoolz-stubs.git" }
+cytoolz-stubs = { git = "https://github.com/OutSquareCapital/cytoolz-stubs.git" }
