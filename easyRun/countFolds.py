@@ -40,7 +40,7 @@ if __name__ == '__main__':
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
 	sys.stdout.write("\033[0m\n")
 
-	for n in range(6,7):
+	for n in range(4,7):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 

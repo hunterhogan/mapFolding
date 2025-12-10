@@ -1,7 +1,8 @@
 # ruff: noqa
 # pyright: basic
 from mapFolding import dictionaryOEISMapFolding, eliminateFolds
-from mapFolding._e.pinning2Dn import pinLeaf首零_零, secondOrderLeaves, thirdOrderPilings
+from mapFolding._e.pinning2Dn import (
+	pinLeaf首零_零, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles)
 from mapFolding.dataBaskets import EliminationState
 from os import PathLike
 from pathlib import PurePath
@@ -28,8 +29,8 @@ if __name__ == '__main__':
 	state: EliminationState | None = None
 
 	flow = 'elimination'
-	flow = 'crease'
 	flow = 'constraintPropagation'
+	flow = 'crease'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
@@ -42,13 +43,16 @@ if __name__ == '__main__':
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
 	sys.stdout.write("\033[0m\n")
 
-	for n in range(6,7):
+	for n in range(5,6):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:
 			state = EliminationState(mapShape)
-			# state = thirdOrderPilings(state)
-			state = secondOrderLeaves(state)
+			state = pinPiles(state, 4)
+			# state = pinLeaf首零_零(state)
+			# state = pinLeavesDimension一(state)
+			# state = pinLeavesDimension二(state)
+			state = pinLeavesDimension首二(state)
 
 		timeStart = time.perf_counter()
 		foldsTotal: int = eliminateFolds(

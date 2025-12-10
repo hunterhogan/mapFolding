@@ -20,8 +20,8 @@ from mapFolding._theSSOT import packageSettings as packageSettings
 from mapFolding.beDRY import (
 	between as between, consecutive as consecutive, defineProcessorLimit as defineProcessorLimit, DOTvalues as DOTvalues,
 	exclude as exclude, getConnectionGraph as getConnectionGraph, getLeavesTotal as getLeavesTotal,
-	getTaskDivisions as getTaskDivisions, makeDataContainer as makeDataContainer, noDuplicates as noDuplicates,
-	reverseLookup as reverseLookup, validateListDimensions as validateListDimensions)
+	getTaskDivisions as getTaskDivisions, makeDataContainer as makeDataContainer, mappingHasKey as mappingHasKey,
+	noDuplicates as noDuplicates, reverseLookup as reverseLookup, validateListDimensions as validateListDimensions)
 
 # isort: split
 from mapFolding.filesystemToolkit import (

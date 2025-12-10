@@ -29,7 +29,7 @@ from mapFolding.dataBaskets import EliminationState
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, oeisIDsImplemented
 from numpy.typing import NDArray
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import Any
 import numpy
 import pickle
 import pytest
@@ -523,3 +523,39 @@ def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: 
 		assert exitCode in expected, f"Expected exit code to be one of {expected} but got {exitCode}"
 	else:
 		assert exitCode == expected, f"Expected exit code {expected} but got {exitCode}"
+
+@pytest.fixture
+def verifyPinnedLeavesAgainstFoldings() -> Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]]:
+	"""Fixture providing a function to verify pinned leaves against known foldings.
+
+	Returns
+	-------
+	verifier : Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]]
+		Function that returns (rowsCovered, rowsTotal, countOverlappingDictionaries).
+	"""
+	def _verify(state: EliminationState, arrayFoldings: NDArray[numpy.uint8]) -> tuple[int, int, int]:
+		rowsTotal: int = int(arrayFoldings.shape[0])
+		listMasks: list[numpy.ndarray] = []
+
+		for pinnedLeaves in state.listPinnedLeaves:
+			maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
+			for indexPile, leaf in pinnedLeaves.items():
+				maskMatches = maskMatches & (arrayFoldings[:, indexPile] == leaf)
+			listMasks.append(maskMatches)
+
+		masksStacked: numpy.ndarray = numpy.column_stack(listMasks)
+		coverageCountPerRow: numpy.ndarray = masksStacked.sum(axis=1)
+		indicesOverlappedRows: numpy.ndarray = numpy.nonzero(coverageCountPerRow >= 2)[0]
+
+		countOverlappingDictionaries: int = 0
+		if indicesOverlappedRows.size > 0:
+			for _indexMask, mask in enumerate(listMasks):
+				if bool(mask[indicesOverlappedRows].any()):
+					countOverlappingDictionaries += 1
+
+		maskUnion = numpy.logical_or.reduce(listMasks)
+		rowsCovered: int = int(maskUnion.sum())
+
+		return rowsCovered, rowsTotal, countOverlappingDictionaries
+
+	return _verify

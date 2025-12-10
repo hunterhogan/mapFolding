@@ -248,6 +248,7 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 		state = EliminationState(mapShape)
 
 # ------- concurrency limit -----------------------------------------------------
+
 	from mapFolding.beDRY import defineProcessorLimit
 	concurrencyLimit: int = defineProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
 

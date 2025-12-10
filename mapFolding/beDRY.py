@@ -1,6 +1,6 @@
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 
-from collections.abc import Hashable, Iterable, Iterator, Sequence
+from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from hunterMakesPy import defineConcurrencyLimit, intInnit, oopsieKwargsie
@@ -63,6 +63,11 @@ def exclude[个](flatContainer: Sequence[个], indices: Iterable[int]) -> Iterat
 		return index
 	indicesInclude: list[int] = sorted(set(range(lengthIterable)).difference(map(normalizeIndex, indices)))
 	return extract(flatContainer, indicesInclude)
+
+@syntacticCurry
+def mappingHasKey[文件: Hashable](lookup: Mapping[文件, Any], key: 文件) -> bool:
+	"""Return `True` if `key` is in `lookup`."""
+	return key in lookup
 
 def noDuplicates(sequenceOfHashable: Sequence[Hashable], /) -> bool:
 	"""Return `True` if there are `noDuplicates` in `sequenceOfHashable`."""
@@ -375,5 +380,6 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	"""
 	# NOTE Do NOT sort the dimensions.
 	return tuple(mapDimensions)
+
 
 

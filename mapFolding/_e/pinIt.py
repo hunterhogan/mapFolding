@@ -4,7 +4,7 @@ from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
 from itertools import repeat
 from mapFolding import DOTvalues
-from mapFolding._e import getLeafDomain, getPileRange, PinnedLeaves
+from mapFolding._e import getLeafDomain, getPileRange, PinnedLeaves, 零
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import flatten
 
@@ -97,6 +97,9 @@ def leafIsPinned(pinnedLeaves: PinnedLeaves, leaf: int) -> bool:
 	"""
 	return leaf in pinnedLeaves.values()
 
+def notLeafOriginOrLeaf零(leaf: int) -> bool:
+	return 零 < leaf
+
 @syntacticCurry
 def pileIsOpen(pinnedLeaves: PinnedLeaves, pile: int) -> bool:
 	"""Return True if `pile` is not presently pinned in `pinnedLeaves`.
@@ -144,7 +147,7 @@ def _segregateLeafPinnedAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, 
 
 @syntacticCurry
 def atPilePinLeaf(pinnedLeaves: PinnedLeaves, pile: int, leaf: int) -> PinnedLeaves:
-	"""Return a new dictionary with `leaf` pinned at `pile` based on `pinnedLeaves`.
+	"""Return a new `PinnedLeaves` with `leaf` pinned at `pile` without modifying `pinnedLeaves`.
 
 	Warning
 	-------
@@ -154,7 +157,7 @@ def atPilePinLeaf(pinnedLeaves: PinnedLeaves, pile: int, leaf: int) -> PinnedLea
 	Parameters
 	----------
 	pinnedLeaves : PinnedLeaves
-		Existing `pile` -> `leaf` mapping (partial folding).
+		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 	pile : int
 		`pile` at which to pin `leaf`.
 	leaf : int
@@ -163,7 +166,7 @@ def atPilePinLeaf(pinnedLeaves: PinnedLeaves, pile: int, leaf: int) -> PinnedLea
 	Returns
 	-------
 	dictionaryPinnedLeaves : PinnedLeaves
-		New mapping including the assignment.
+		New dictionary with `pile` : `leaf`.
 
 	See Also
 	--------
@@ -248,46 +251,27 @@ def deconstructPinnedLeavesByDomainsCombined(pinnedLeaves: PinnedLeaves, leaves:
 
 	if any(map(leafIsNotPinned(pinnedLeaves), leaves)):
 		for index in range(len(leaves)):
+			"""Redefine leavesDomain by filtering out domains that are not possible with the current `PinnedLeaves`."""
 			if leafIsNotPinned(pinnedLeaves, leaves[index]):
+				"""leaves[index] is not pinned, so it needs a pile.
+				In each iteration of leavesDomain, `listOfPiles`, the pile it needs is listOfPiles[index].
+				Therefore, if listOfPiles[index] is open, filter in the iteration. If listOfPiles[index] is occupied, filter out the iteration."""
 				leavesDomain = filter(Z0Z_pileOpen(index), leavesDomain)
 			else:
+				"""leaves[index] is pinned.
+				In each iteration of leavesDomain, `listOfPiles`, the pile in which leaves[index] is pinned must match listOfPiles[index].
+				Therefore, if the pile in which leaves[index] is pinned matches listOfPiles[index], filter in the iteration. Otherwise, filter out the iteration."""
 				leavesDomain = filter(Z0Z_isPinnedAtPile(leaves[index], index), leavesDomain)
 
-		for domain in leavesDomain:
+		for listOfPiles in leavesDomain:
+			"""Properly and safely deconstruct pinnedLeaves by the combined domain of leaves.
+			The parameter leavesDomain is the full domain of the leaves, so deconstructing with leavesDomain preserves the permutation space.
+			For each leaf in leaves, I filter out occupied piles, so I will not overwrite any pinned leaves--that would invalidate the permutation space.
+			I apply filters that prevent pinning the same leaf twice.
+			Therefore, for each domain in leavesDomain, I can safely pin leaves[index] at listOfPiles[index] without corrupting the permutation space."""
 			pinnedLeavesWIP: PinnedLeaves = pinnedLeaves.copy()
 			for index in range(len(leaves)):
-				pinnedLeavesWIP[domain[index]] = leaves[index]
-			deconstructedPinnedLeaves.append(pinnedLeavesWIP)
-	else:
-		deconstructedPinnedLeaves = [pinnedLeaves]
-
-	return deconstructedPinnedLeaves
-
-def deconstructPinnedLeavesByDomainOf2Leaves(pinnedLeaves: PinnedLeaves, leaves: tuple[int, int], leavesDomain: Iterable[tuple[int, int]]) -> list[PinnedLeaves]:
-	"""Prototype."""
-	deconstructedPinnedLeaves: list[PinnedLeaves] = []
-
-	def Z0Z_pileOpen(index: int) -> Callable[[tuple[int, int]], bool]:
-		def workhorse(domain: tuple[int, int]) -> bool:
-			return pileIsOpen(pinnedLeaves, domain[index])
-		return workhorse
-
-	def Z0Z_isPinnedAtPile(leaf: int, index: int) -> Callable[[tuple[int, int]], bool]:
-		def workhorse(domain: tuple[int, int]) -> bool:
-			return isPinnedAtPile(pinnedLeaves, leaf, domain[index])
-		return workhorse
-
-	if any(map(leafIsNotPinned(pinnedLeaves), leaves)):
-		for index in range(len(leaves)):
-			if leafIsNotPinned(pinnedLeaves, leaves[index]):
-				leavesDomain = filter(Z0Z_pileOpen(index), leavesDomain)
-			else:
-				leavesDomain = filter(Z0Z_isPinnedAtPile(leaves[index], index), leavesDomain)
-
-		for domain in leavesDomain:
-			pinnedLeavesWIP: PinnedLeaves = pinnedLeaves.copy()
-			pinnedLeavesWIP[domain[0]] = leaves[0]
-			pinnedLeavesWIP[domain[1]] = leaves[1]
+				pinnedLeavesWIP = atPilePinLeaf(pinnedLeavesWIP, listOfPiles[index], leaves[index])
 			deconstructedPinnedLeaves.append(pinnedLeavesWIP)
 	else:
 		deconstructedPinnedLeaves = [pinnedLeaves]
@@ -474,3 +458,4 @@ def segregateLeafByDeconstructingListPinnedLeavesAtPile(listPinnedLeaves: Iterab
 		deconstructedPinnedLeavesAtPile: dict[int, PinnedLeaves] = deconstructPinnedLeavesAtPile(pinnedLeaves, pile, leavesToPin)
 		leafPinnedAtPile: PinnedLeaves = deconstructedPinnedLeavesAtPile.pop(leaf)
 		yield (leafPinnedAtPile, tuple(deconstructedPinnedLeavesAtPile.values()))
+
