@@ -1,30 +1,23 @@
 from collections.abc import Callable
-from fractions import Fraction
 from functools import cache
 from mapFolding import exclude
 from mapFolding._e import getLeafDomain, getPileRange, PinnedLeaves
 from mapFolding._e._data import getDataFrameFoldings
-from mapFolding._e.analysisPython.exclusionData.collated import dictionaryExclusionData
 from mapFolding._e.analysisPython.theExcluderBeast import (
-	dictionaryFunctionsByName, resolveIndexFromFractionAddend, restructureAggregatedExclusionsForMapShape)
+	_fractionAddendToIndex, analyzeContiguousEndAbsolute, analyzeContiguousEndRelative, analyzeContiguousStartAbsolute,
+	analyzeContiguousStartRelative, analyzeNonContiguousIndicesRelative, dictionaryFunctionsByName, FractionAddend,
+	loadCollatedIndices, MapKind, restructureAggregatedExclusionsForMapShape, strLeafExcluded, strLeafExcluder,
+	strPileExcluder)
 from mapFolding._e.analysisPython.Z0Z_patternFinder import detectPermutationSpaceErrors, PermutationSpaceStatus
-from mapFolding._e.pinIt import deconstructPinnedLeavesAtPile, deconstructPinnedLeavesByDomainOfLeaf
+from mapFolding._e.pinIt import deconstructLeavesPinnedAtPile, deconstructLeavesPinnedByDomainOfLeaf
 from mapFolding._e.pinning2Dn import pinPiles
 from mapFolding.dataBaskets import EliminationState
 import numpy
 import sys
 
-type Addend = int
-type SignOperator = Callable[[int], int]
-type FractionAddend = tuple[SignOperator, Fraction, Addend]
-type IndexPilesTotal = int
 type Leaf = int
-type MapKind = str
 type Pile = int
-type strLeafExcluded = str
-type strLeafExcluder = str
 type strPileExcluded = str
-type strPileExcluder = str
 
 @cache
 def _getArrayFoldingsByDimensions(dimensionsTotal: int) -> numpy.ndarray:
@@ -78,17 +71,16 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				leafExcluded: int = leafExcludedFunction(dimensions)
 
 				listFractionAddends: list[FractionAddend] = exclusionsFromAnalysisMethod[leafExcluderName][pileExcluderName][leafExcludedName]
-				fractionAddendsOnly: list[FractionAddend] = [item for item in listFractionAddends[:-1] if isinstance(item, tuple)]
 
-				if not fractionAddendsOnly:
+				if not listFractionAddends:
 					continue
 
 				stateValidation: EliminationState = EliminationState(mapShape=(2,) * dimensions)
 				pilesTotalCurrent: int = len(list(getLeafDomain(stateValidation, dictionaryFunctionsByName[leafExcludedName](dimensions))))
 
 				listIndicesExcluded: list[int] = []
-				for fractionAddend in fractionAddendsOnly:
-					indexComputed: int = resolveIndexFromFractionAddend(fractionAddend, pilesTotalCurrent)
+				for fractionAddend in listFractionAddends:
+					indexComputed: int = _fractionAddendToIndex(fractionAddend, pilesTotalCurrent)
 					listIndicesExcluded.append(indexComputed)
 
 				if not listIndicesExcluded:
@@ -97,22 +89,22 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				stateValidation = pinPiles(stateValidation, 1)
 
 				pileRange: list[int] = list(getPileRange(stateValidation, pileExcluder))
-				dictionaryDeconstructed: dict[int, PinnedLeaves] = deconstructPinnedLeavesAtPile(stateValidation.listPinnedLeaves[0], pileExcluder, pileRange)
+				dictionaryDeconstructed: dict[int, PinnedLeaves] = deconstructLeavesPinnedAtPile(stateValidation.listLeavesPinned[0], pileExcluder, pileRange)
 
-				pinnedLeavesWithExcluder: PinnedLeaves | None = dictionaryDeconstructed.get(leafExcluder)
-				if pinnedLeavesWithExcluder is None:
+				leavesPinnedWithExcluder: PinnedLeaves | None = dictionaryDeconstructed.get(leafExcluder)
+				if leavesPinnedWithExcluder is None:
 					continue
 
-				listPinnedLeavesOther: list[PinnedLeaves] = [pinnedLeaves for leaf, pinnedLeaves in dictionaryDeconstructed.items() if leaf != leafExcluder]
+				listLeavesPinnedOther: list[PinnedLeaves] = [leavesPinned for leaf, leavesPinned in dictionaryDeconstructed.items() if leaf != leafExcluder]
 
 				domainOfLeafExcluded: list[int] = list(getLeafDomain(stateValidation, leafExcluded))
 				domainReduced: list[int] = list(exclude(domainOfLeafExcluded, listIndicesExcluded))
 
-				listPinnedLeavesFromExcluder: list[PinnedLeaves] = deconstructPinnedLeavesByDomainOfLeaf(pinnedLeavesWithExcluder, leafExcluded, domainReduced)
+				listLeavesPinnedFromExcluder: list[PinnedLeaves] = deconstructLeavesPinnedByDomainOfLeaf(leavesPinnedWithExcluder, leafExcluded, domainReduced)
 
-				stateValidation.listPinnedLeaves = listPinnedLeavesOther + listPinnedLeavesFromExcluder
+				stateValidation.listLeavesPinned = listLeavesPinnedOther + listLeavesPinnedFromExcluder
 
-				pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, stateValidation.listPinnedLeaves)
+				pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, stateValidation.listLeavesPinned)
 
 				if pinningCoverage.rowsRequired < rowsTotal:
 					listValidationErrors.append(
@@ -126,9 +118,9 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 	isValid: bool = len(listValidationErrors) == 0
 	return (isValid, listValidationErrors)
 
-def validateAnalysisMethod(analysisMethodCallable: Callable[[dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[IndexPilesTotal]]]]]], dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]]) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:  # noqa: E501
-	listMapShapeNames: list[str] = list(dictionaryExclusionData.keys())
-	exclusionsFromMethod: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]] = analysisMethodCallable(dictionaryExclusionData)
+def validateAnalysisMethod(analysisMethodCallable: Callable[[], dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]]) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
+	listMapShapeNames: list[str] = list(loadCollatedIndices().keys())
+	exclusionsFromMethod: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]] = analysisMethodCallable()
 	errorsByMapShape: dict[str, list[str]] = {}
 
 	for mapShapeName in listMapShapeNames:
@@ -155,3 +147,15 @@ def validateAnalysisMethod(analysisMethodCallable: Callable[[dict[MapKind, dict[
 				sys.stdout.write(f"{colorFailure}  {error}{colorReset}\n")
 
 	return exclusionsFromMethod
+
+if __name__ == '__main__':
+	listAnalysisMethods = [
+		analyzeNonContiguousIndicesRelative,
+		analyzeContiguousStartAbsolute,
+		analyzeContiguousEndAbsolute,
+		analyzeContiguousStartRelative,
+		analyzeContiguousEndRelative,
+	]
+
+	for analysisMethod in listAnalysisMethods:
+		validateAnalysisMethod(analysisMethod)

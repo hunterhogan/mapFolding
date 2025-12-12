@@ -19,14 +19,14 @@ import time
 def printStatisticsPermutations(state: EliminationState) -> None:
 	dictionaryPileRanges: dict[int, list[int]] = getDictionaryPileRanges(state)
 	permutationsTotal: Callable[[dict[int, list[int]]], int] = compose(prod, dict[int, list[int]].values, valmap(len), valfilter(bool))
-	def stripped(pinnedLeaves: PinnedLeaves) -> dict[int, list[int]]:
-		return dissoc(dictionaryPileRanges, *pinnedLeaves.keys())
-	permutationsPinnedLeaves: Callable[[dict[int, int]], int] = compose(permutationsTotal, stripped)
-	permutationsPinnedLeavesTotal: Callable[[list[dict[int, int]]], int] = compose(sum, toolz_map(permutationsPinnedLeaves))
+	def stripped(leavesPinned: PinnedLeaves) -> dict[int, list[int]]:
+		return dissoc(dictionaryPileRanges, *leavesPinned.keys())
+	permutationsLeavesPinned: Callable[[dict[int, int]], int] = compose(permutationsTotal, stripped)
+	permutationsLeavesPinnedTotal: Callable[[list[dict[int, int]]], int] = compose(sum, toolz_map(permutationsLeavesPinned))
 
 	print(fac(state.leavesTotal))
 	print(permutationsTotal(dictionaryPileRanges))
-	print(permutationsPinnedLeavesTotal(state.listPinnedLeaves))
+	print(permutationsLeavesPinnedTotal(state.listLeavesPinned))
 
 if __name__ == '__main__':
 	state = EliminationState((2,) * 6)
@@ -37,22 +37,22 @@ if __name__ == '__main__':
 		timeStart = time.perf_counter()
 		state = pinPiles(state, 4)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		state: EliminationState = pinLeavesDimension首二(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
+		state: EliminationState = pinLeavesDimension一(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 		printStatisticsPermutations(state)
-		print(f"{len(state.listPinnedLeaves)=}")
+		print(f"{len(state.listLeavesPinned)=}")
 
 	elif printThis:
-		state: EliminationState = pinLeavesDimension一(state)
+		state: EliminationState = pinLeavesDimension首二(state)
 		state: EliminationState = pinLeavesDimension二(state)
+		state: EliminationState = pinLeaf首零_零(state)
 		dictionaryLeafDomains = getDictionaryLeafDomains(state)
-		dictionaryPileRanges = getDictionaryPileRanges(state)
 		pprint(dictionaryLeafDomains)
-		pprint(state.listPinnedLeaves)
+		dictionaryPileRanges = getDictionaryPileRanges(state)
+		pprint(state.listLeavesPinned)
 		print(list(getLeafDomain(state, 32)))
 		print(list(getPileRange(state, 63)))
 		print(list(map(len, map(list, dictionaryLeafDomains.values()))))
-		state: EliminationState = pinLeaf首零_零(state)

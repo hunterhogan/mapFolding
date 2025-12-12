@@ -8,11 +8,11 @@ from math import factorial
 from more_itertools import iter_index, unique
 
 def count(state: EliminationState) -> EliminationState:
-	state.groupsOfFolds += sum(map(countPinnedLeaves, state.listPinnedLeaves, repeat(state.mapShape), repeat(range(state.leavesTotal))))
+	state.groupsOfFolds += sum(map(countLeavesPinned, state.listLeavesPinned, repeat(state.mapShape), repeat(range(state.leavesTotal))))
 	return state
 
-def countPinnedLeaves(pinnedLeaves: PinnedLeaves, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
-	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(pinnedLeaves), permutations(tuple(set(leavesToInsert).difference(pinnedLeaves.values())))), repeat(mapShape)))
+def countLeavesPinned(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
+	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(leavesPinned), permutations(tuple(set(leavesToInsert).difference(leavesPinned.values())))), repeat(mapShape)))
 
 def theorem2b(state: EliminationState) -> EliminationState:
 	"""Implement Lunnon Theorem 2(b): If some dimension pᵢ > 2 (with Theorem 4 inactive), G is divisible by 2·n.
@@ -32,7 +32,7 @@ def theorem2b(state: EliminationState) -> EliminationState:
 
 	Side Effects
 	------------
-	Mutates `state.listPinnedLeaves` and `state.Theorem2Multiplier` when applicable.
+	Mutates `state.listLeavesPinned` and `state.Theorem2Multiplier` when applicable.
 
 	Returns
 	-------
@@ -83,9 +83,9 @@ def theorem4(state: EliminationState) -> EliminationState:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:  # noqa: ARG001
 	"""Count the number of valid foldings for a given number of leaves."""
-	if not state.listPinnedLeaves:
+	if not state.listLeavesPinned:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.listPinnedLeaves = [{pileOrigin: leafOrigin}]
+		state.listLeavesPinned = [{pileOrigin: leafOrigin}]
 		state = theorem4(state)
 		state = theorem2b(state)
 

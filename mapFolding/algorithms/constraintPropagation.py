@@ -1,7 +1,7 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
 from itertools import combinations, pairwise, product as CartesianProduct
-from mapFolding import decreasing
+from mapFolding import decreasing, packageSettings
 from mapFolding._e import (
 	dimensionNearest首, getDictionaryLeafDomains, getListLeavesIncrease, howMany0coordinatesAtTail, leafOrigin, pileOrigin,
 	PinnedLeaves, 零)
@@ -9,8 +9,11 @@ from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
 from ortools.sat.python import cp_model
+from pathlib import Path
 from tqdm import tqdm
 from typing import Final
+import csv
+import uuid
 
 def findValidFoldings(state: EliminationState) -> int:
 	model = cp_model.CpModel()
@@ -20,7 +23,7 @@ def findValidFoldings(state: EliminationState) -> int:
 	model.AddInverse(listLeavesInPileOrder, listPilingsInLeafOrder)
 
 # ------- Manual concurrency -----------------------------
-	for pile, leaf in state.pinnedLeaves.items():
+	for pile, leaf in state.leavesPinned.items():
 		model.Add(listLeavesInPileOrder[pile] == leaf)
 
 # ------- Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal -----------------------------
@@ -144,20 +147,27 @@ def findValidFoldings(state: EliminationState) -> int:
 	foldingCollector = FoldingCollector(listLeavesInPileOrder)
 	solver.Solve(model, foldingCollector)
 
+	if foldingCollector.listFoldings:
+		pathFilename = packageSettings.pathPackage / "_e" / "rawData" / f"p2d7_{uuid.uuid4()}.csv"
+		with Path.open(pathFilename, mode="w", newline="") as fileCSV:
+			csvWriter = csv.writer(fileCSV)
+			csvWriter.writerows(foldingCollector.listFoldings)
+
+
 	return len(foldingCollector.listFoldings) * state.Theorem2Multiplier * state.Theorem4Multiplier
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-	if state.listPinnedLeaves:
+	if state.listLeavesPinned:
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 			listClaimTickets: list[Future[int]] = []
 
-			listPinnedLeavesCopy: list[PinnedLeaves] = deepcopy(state.listPinnedLeaves)
-			state.listPinnedLeaves = []
-			for pinnedLeaves in listPinnedLeavesCopy:
+			listLeavesPinnedCopy: list[PinnedLeaves] = deepcopy(state.listLeavesPinned)
+			state.listLeavesPinned = []
+			for leavesPinned in listLeavesPinnedCopy:
 				stateCopy: EliminationState = deepcopy(state)
-				stateCopy.pinnedLeaves = pinnedLeaves
+				stateCopy.leavesPinned = leavesPinned
 				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))
 
 			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
@@ -169,7 +179,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 			listClaimTickets: list[Future[int]] = []
 			for indicesLeaf in range(1, state.leavesTotal):
 				stateCopy: EliminationState = deepcopy(state)
-				stateCopy.pinnedLeaves = {pile: indicesLeaf}
+				stateCopy.leavesPinned = {pile: indicesLeaf}
 				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))
 
 			for claimTicket in listClaimTickets:

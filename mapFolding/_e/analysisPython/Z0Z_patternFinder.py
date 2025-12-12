@@ -3,11 +3,12 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from mapFolding import packageSettings
 from mapFolding._e import (
-	getDictionaryPileRanges, getDomainDimension二, getLeafDomain, howMany0coordinatesAtTail, pileOrigin, PinnedLeaves, 零)
+	dimensionNearest首, getDictionaryPileRanges, getDomainDimension二, getLeafDomain, howMany0coordinatesAtTail, pileOrigin,
+	PinnedLeaves, 零)
 from mapFolding._e._data import getDataFrameFoldings
 from mapFolding._e.pinning2DnAnnex import beansWithoutCornbread
 from mapFolding.dataBaskets import EliminationState
-from mapFolding.tests.dataSamples.p2DnDomain6_7_5_4 import listDomain2D6
+from mapFolding.tests.dataSamples.p2DnDomain6_7_5_4 import listDomain2D5, listDomain2D6
 from pathlib import Path
 from pprint import pprint
 from typing import Any
@@ -20,7 +21,7 @@ class PermutationSpaceStatus:
 	listSurplusDictionaries: list[PinnedLeaves]
 	maskUnion: numpy.ndarray
 	indicesOverlappingRows: numpy.ndarray
-	indicesOverlappingPinnedLeaves: set[int]
+	indicesOverlappingLeavesPinned: set[int]
 	rowsRequired: int
 	rowsTotal: int
 
@@ -234,16 +235,16 @@ def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKn
 
 	return comparisonResults
 
-def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPinnedLeaves: Sequence[PinnedLeaves]) -> PermutationSpaceStatus:
+def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listLeavesPinned: Sequence[PinnedLeaves]) -> PermutationSpaceStatus:
 	rowsTotal: int = int(arrayFoldings.shape[0])
 	listMasks: list[numpy.ndarray] = []
 	listSurplusDictionaries: list[PinnedLeaves] = []
-	for pinnedLeaves in listPinnedLeaves:
+	for leavesPinned in listLeavesPinned:
 		maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-		for pile, leaf in pinnedLeaves.items():
+		for pile, leaf in leavesPinned.items():
 			maskMatches = maskMatches & (arrayFoldings[:, pile] == leaf)
 		if not bool(maskMatches.any()):
-			listSurplusDictionaries.append(pinnedLeaves)
+			listSurplusDictionaries.append(leavesPinned)
 		listMasks.append(maskMatches)
 
 	if listMasks:
@@ -255,13 +256,13 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPinnedLeaves:
 	maskUnion: numpy.ndarray = coverageCountPerRow > 0
 	rowsRequired: int = int(maskUnion.sum())
 	indicesOverlappingRows: numpy.ndarray = numpy.flatnonzero(coverageCountPerRow >= 2)
-	indicesOverlappingPinnedLeaves: set[int] = set()
+	indicesOverlappingLeavesPinned: set[int] = set()
 	if indicesOverlappingRows.size > 0:
 		for indexMask, mask in enumerate(listMasks):
 			if bool(mask[indicesOverlappingRows].any()):
-				indicesOverlappingPinnedLeaves.add(indexMask)
+				indicesOverlappingLeavesPinned.add(indexMask)
 
-	return PermutationSpaceStatus(listSurplusDictionaries, maskUnion, indicesOverlappingRows, indicesOverlappingPinnedLeaves, rowsRequired, rowsTotal)
+	return PermutationSpaceStatus(listSurplusDictionaries, maskUnion, indicesOverlappingRows, indicesOverlappingLeavesPinned, rowsRequired, rowsTotal)
 
 def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None = None) -> pandas.DataFrame:
 	"""Measure the relative entropy and distributional properties of leaves across folding sequences.
@@ -354,7 +355,7 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 def verifyPinning2Dn(state: EliminationState) -> None:
 	colorReset = '\33[0m'
 	arrayFoldings = getDataFrameFoldings(state).to_numpy(dtype=numpy.uint8, copy=False)
-	pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.listPinnedLeaves)
+	pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.listLeavesPinned)
 
 	listDictionaryPinned: list[PinnedLeaves] = pinningCoverage.listSurplusDictionaries
 	print("\33[93m", end='')
@@ -369,17 +370,17 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 			writerCSV = csv.writer(writeStream)
 			listPiles: list[int] = list(range(state.leavesTotal))
 			writerCSV.writerow(listPiles)
-			for pinnedLeaves in listDictionaryPinned:
-				writerCSV.writerow([pinnedLeaves.get(pile, '') for pile in listPiles])
+			for leavesPinned in listDictionaryPinned:
+				writerCSV.writerow([leavesPinned.get(pile, '') for pile in listPiles])
 
-	if pinningCoverage.indicesOverlappingPinnedLeaves:
+	if pinningCoverage.indicesOverlappingLeavesPinned:
 		color = '\33[91m'
-		print(f"{color}{len(pinningCoverage.indicesOverlappingPinnedLeaves)} overlapping dictionaries", colorReset)
-		for indexDictionary in sorted(pinningCoverage.indicesOverlappingPinnedLeaves)[0:2]:
-			pprint(state.listPinnedLeaves[indexDictionary], width=140)
+		print(f"{color}{len(pinningCoverage.indicesOverlappingLeavesPinned)} overlapping dictionaries", colorReset)
+		for indexDictionary in sorted(pinningCoverage.indicesOverlappingLeavesPinned)[0:2]:
+			pprint(state.listLeavesPinned[indexDictionary], width=140)
 
 	beansOrCornbread: Callable[[PinnedLeaves], bool] = beansWithoutCornbread(state)
-	listBeans: list[PinnedLeaves] = list(filter(beansOrCornbread, state.listPinnedLeaves))
+	listBeans: list[PinnedLeaves] = list(filter(beansOrCornbread, state.listLeavesPinned))
 	if listBeans:
 		color = '\33[95m'
 		print(f"{color}{len(listBeans)} dictionaries with beans but no cornbread.", colorReset)
@@ -396,3 +397,9 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 			print(color, arrayFoldings[indexRow, :])
 	print(f"{color}Required rows: {rowsRequired}/{rowsTotal}{colorReset}")
 
+if __name__ == '__main__':
+	state = EliminationState((2,) * 6)
+	verifyDomainAgainstKnown(getDomainDimension二(state), listDomain2D6)
+	print()
+	state = EliminationState((2,) * 5)
+	verifyDomainAgainstKnown(getDomainDimension二(state), listDomain2D5)

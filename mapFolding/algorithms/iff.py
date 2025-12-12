@@ -163,13 +163,13 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 	return all(not thisIsAViolationComplicated(pile, pileComparand, callNextCrease(mapShape, leaf, aDimension), callNextCrease(mapShape, comparand, aDimension), inThis_pileOf(folding))
 			for ((pile, leaf), (pileComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
 
-# ------- Functions for `leaf` in `pinnedLeaves` dictionary -------------
+# ------- Functions for `leaf` in `leavesPinned` dictionary -------------
 
-def pinnedLeavesHasAViolation(state: EliminationState) -> bool:
-	"""Return `True` if `state.pinnedLeaves` has a violation."""
-	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in state.pinnedLeaves.items()}
+def leavesPinnedHasAViolation(state: EliminationState) -> bool:
+	"""Return `True` if `state.leavesPinned` has a violation."""
+	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in state.leavesPinned.items()}
 	listPileLeafCandidates: list[tuple[int, int]] = sorted(
-			pileLeaf for pileLeaf in state.pinnedLeaves.items() if pileLeaf[1] < state.leavesTotal - 零)
+			pileLeaf for pileLeaf in state.leavesPinned.items() if pileLeaf[1] < state.leavesTotal - 零)
 	for dimension in range(state.dimensionsTotal):
 		listParityGroups: list[list[tuple[int, int]]] = [[], []]
 		for pileKey, leafValue in listPileLeafCandidates:

@@ -199,7 +199,7 @@ def test_combinedDomains(domainFunction: Callable[[EliminationState], Sequence[t
 def test_pinningFunctions(
 	loadArrayFoldings: Callable[[int], NDArray[numpy.uint8]],
 	pinningFunction: Callable[[EliminationState], EliminationState],
-	verifyPinnedLeavesAgainstFoldings: Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]],
+	verifyLeavesPinnedAgainstFoldings: Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]],
 	dimensionsTotal: int
 ) -> None:
 	mapShape = (2,) * dimensionsTotal
@@ -208,7 +208,7 @@ def test_pinningFunctions(
 
 	state = pinningFunction(state)
 
-	rowsCovered, rowsTotal, countOverlappingDictionaries = verifyPinnedLeavesAgainstFoldings(state, arrayFoldings)
+	rowsCovered, rowsTotal, countOverlappingDictionaries = verifyLeavesPinnedAgainstFoldings(state, arrayFoldings)
 
 	assert rowsCovered == rowsTotal, f"{pinningFunction.__name__}, {mapShape = }: {rowsCovered}/{rowsTotal} rows covered."
 	assert countOverlappingDictionaries == 0, f"{pinningFunction.__name__}, {mapShape = }: {countOverlappingDictionaries = }"

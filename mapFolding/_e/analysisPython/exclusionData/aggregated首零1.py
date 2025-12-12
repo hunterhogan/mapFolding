@@ -1,7 +1,6 @@
-from collections.abc import Callable
 from fractions import Fraction
 
-type FractionAddend = tuple[Callable[[int], int], Fraction, int]
+type FractionAddend = tuple[Fraction, int]
 
 dictionaryExclusions: dict[str, dict[str, list[FractionAddend]]] = {'首一': {},
 '首一1': {},

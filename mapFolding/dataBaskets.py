@@ -36,12 +36,12 @@ class EliminationState:
 		Dimension lengths of the map being analyzed for folding patterns.
 	groupsOfFolds : int = 0
 		Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings.
-	listPinnedLeaves : list[dict[int, int]]
+	listLeavesPinned : list[dict[int, int]]
 		A list of dictionaries that each define an exclusive permutation space: no overlap between dictionaries.
 	pile : int = -1
 		The `pile` on the workbench.
-	pinnedLeaves : dict[int, int]
-		The `pinnedLeaves` dictionary on the workbench.
+	leavesPinned : dict[int, int]
+		The `leavesPinned` dictionary on the workbench.
 	Theorem2Multiplier : int = 1
 		Multiplier for Theorem 2 optimizations.
 	Theorem3Multiplier : int = 1
@@ -71,13 +71,13 @@ class EliminationState:
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `folding` that represents a group of `leavesTotal`-many foldings."""
 
-	listPinnedLeaves: list[dict[int, int]] = dataclasses.field(default_factory=list[dict[int, int]], init=True)
+	listLeavesPinned: list[dict[int, int]] = dataclasses.field(default_factory=list[dict[int, int]], init=True)
 	"""A list of dictionaries (`{pile: leaf}`) that each define an exclusive permutation space: no overlap between dictionaries."""
 
 	pile: int = -1
 	"""The `pile` on the workbench."""
-	pinnedLeaves: dict[int, int] = dataclasses.field(default_factory=dict[int, int], init=True)
-	"""The `pinnedLeaves` dictionary (`{pile: leaf}`) on the workbench."""
+	leavesPinned: dict[int, int] = dataclasses.field(default_factory=dict[int, int], init=True)
+	"""The `leavesPinned` dictionary (`{pile: leaf}`) on the workbench."""
 
 	Theorem2Multiplier: int = 1
 	Theorem3Multiplier: int = 1

@@ -525,7 +525,7 @@ def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: 
 		assert exitCode == expected, f"Expected exit code {expected} but got {exitCode}"
 
 @pytest.fixture
-def verifyPinnedLeavesAgainstFoldings() -> Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]]:
+def verifyLeavesPinnedAgainstFoldings() -> Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]]:
 	"""Fixture providing a function to verify pinned leaves against known foldings.
 
 	Returns
@@ -537,9 +537,9 @@ def verifyPinnedLeavesAgainstFoldings() -> Callable[[EliminationState, NDArray[n
 		rowsTotal: int = int(arrayFoldings.shape[0])
 		listMasks: list[numpy.ndarray] = []
 
-		for pinnedLeaves in state.listPinnedLeaves:
+		for leavesPinned in state.listLeavesPinned:
 			maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-			for indexPile, leaf in pinnedLeaves.items():
+			for indexPile, leaf in leavesPinned.items():
 				maskMatches = maskMatches & (arrayFoldings[:, indexPile] == leaf)
 			listMasks.append(maskMatches)
 

@@ -4,27 +4,16 @@ from functools import cache, reduce
 from gmpy2 import bit_flip
 from hunterMakesPy import importPathFilename2Identifier, updateExtendPolishDictionaryLists, writePython
 from itertools import product as CartesianProduct, repeat
-from mapFolding import (
-	between, consecutive, decreasing, DOTvalues, exclude, inclusive, mappingHasKey, noDuplicates, packageSettings,
-	reverseLookup)
+from mapFolding import between, inclusive, packageSettings
 from mapFolding._e import (
 	getDictionaryLeafDomains, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
 from mapFolding._e._data import getDataFrameFoldings
-from mapFolding._e.analysisPython.exclusionData.collated import dictionaryExclusionData as exclusionData
-from mapFolding._e.pinIt import notLeafOriginOrLeaf零
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import consecutive_groups
 from operator import indexOf, neg, pos
 from pathlib import Path, PurePath
 from pprint import pformat
 from typing import TYPE_CHECKING
-import cytoolz.dicttoolz
-import cytoolz.functoolz
-import cytoolz.itertoolz
-import functools
-import hunterMakesPy as humpy
-import itertools
-import more_itertools
 import sys
 
 if TYPE_CHECKING:
@@ -47,8 +36,7 @@ def 首零二1(dd: int, /) -> int: return 首零二(dd) + 1
 def 首零二三1(dd: int, /) -> int: return 首零二三(dd) + 1
 
 type Addend = int
-type OperatorSign = Callable[[int], int]
-type FractionAddend = tuple[OperatorSign, Fraction, Addend]
+type FractionAddend = tuple[Fraction, Addend]
 type IndexPilesTotal = int
 type Leaf = int
 type MapKind = str
@@ -57,6 +45,7 @@ type strLeafExcluded = str
 type strLeafExcluder = str
 type strPileExcluded = str
 type strPileExcluder = str
+type ExclusionData = dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]]
 
 functionsHeadDimensions: list[Callable[[int], int]] = [
 	首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三,
@@ -68,16 +57,16 @@ pathExclusionData.mkdir(parents=True, exist_ok=True)
 
 # ======= Collate exclusion data =======
 
-def writeExclusionDataCollated(listDimensions: Sequence[int] = (5, 6)) -> PurePath:
+def writeExclusionDataCollated(listDimensions: Sequence[int] = (5, 6)) -> list[PurePath]:
 	"""{mapShape: {leafExcluder: {pileExcluder: {leafExcluded: listIndicesExcluded}}}}."""
-	dictionaryExclusionData: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]] = {}
+	dictionaryIndices: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]] = {}
+	dictionaryIndicesNegative: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]] = {}
 
 # TODO Use the docstring to explain this computation, and change the computation to a simpler statement.
 	listsAreAlwaysLessThanHalfLeavesTotal = 1
 	integerDivisionIsSillyIfTheNumeratorIsLessThanTwiceTheDenominator = 1
 	qq = min(listDimensions) - listsAreAlwaysLessThanHalfLeavesTotal - integerDivisionIsSillyIfTheNumeratorIsLessThanTwiceTheDenominator
-	ww = int(bit_flip(0, qq))
-	denominatorsValid: tuple[int, ...] = tuple(range(2, ww + inclusive, 2))
+	denominatorsValid: tuple[int, ...] = tuple(int(bit_flip(0, ww)) for ww in range(1, qq))
 
 	for dimensionsTotal in listDimensions:
 		state: EliminationState = EliminationState((2,) * dimensionsTotal)
@@ -86,7 +75,8 @@ def writeExclusionDataCollated(listDimensions: Sequence[int] = (5, 6)) -> PurePa
 		dictionaryLeafDomains: dict[Leaf, range] = getDictionaryLeafDomains(state)
 
 		mapKind: MapKind = f"p2d{dimensionsTotal}"
-		dictionaryExclusionData[mapKind] = {}
+		dictionaryIndices[mapKind] = {}
+		dictionaryIndicesNegative[mapKind] = {}
 
 		for leafExcluder, pileExcluder, leafExcluded in CartesianProduct(functionsHeadDimensions, functionsHeadDimensions, functionsHeadDimensions):
 			if pileExcluder(dimensionsTotal) not in dictionaryLeafDomains.get(leafExcluder(dimensionsTotal), []):
@@ -101,55 +91,95 @@ def writeExclusionDataCollated(listDimensions: Sequence[int] = (5, 6)) -> PurePa
 
 			pilesTotal = len(listOfPiles)
 			denominators: list[int] = list(filter(between(0, pilesTotal), denominatorsValid))
-			listFractionAddends: list[FractionAddend] = [expressIndexAsFractionAddend(index, pilesTotal, tuple(denominators)) for index in listIndicesExcluded]
+			dictionaryIndices[mapKind].setdefault(leafExcluder.__name__, {}).setdefault(pileExcluder.__name__, {})[leafExcluded.__name__] = [
+				expressIndexAsFractionAddend(index, pilesTotal, tuple(denominators)) for index in listIndicesExcluded]
+			dictionaryIndicesNegative[mapKind].setdefault(leafExcluder.__name__, {}).setdefault(pileExcluder.__name__, {})[leafExcluded.__name__] = [
+				expressIndexAsFractionAddend(index - pilesTotal, pilesTotal, tuple(denominators)) for index in listIndicesExcluded]
 
-			dictionaryExclusionData[mapKind].setdefault(leafExcluder.__name__, {}).setdefault(pileExcluder.__name__, {})[leafExcluded.__name__] = listFractionAddends
+	listPathFilenames: list[PurePath] = []
 
-	pathFilename: Path = pathExclusionData / "collated.py"
-	pythonSource: str = f"dictionaryExclusionData: dict[str, dict[str, dict[str, dict[str, list[int]]]]] = {pformat(dictionaryExclusionData, indent=2, width=160)}"
-	writePython(pythonSource, pathFilename)
+	for mapKind in dictionaryIndices:  # noqa: PLC0206
+		for leafExcluderName, dictionary in dictionaryIndices[mapKind].items():
+			pythonSource: str = f"from fractions import Fraction\n\nleafExcluderData: dict[str, dict[str, list[tuple[Fraction, int]]]] = {pformat(dictionary, indent=0, width=160)}"
+			pathFilename: Path = pathExclusionData / f"collated{mapKind}{leafExcluderName}.py"
+			writePython(pythonSource, pathFilename)
+			listPathFilenames.append(PurePath(pathFilename))
 
-	return PurePath(pathFilename)
+	for mapKind in dictionaryIndicesNegative:  # noqa: PLC0206
+		for leafExcluderName, dictionary in dictionaryIndicesNegative[mapKind].items():
+			pythonSource: str = f"from fractions import Fraction\n\nleafExcluderData: dict[str, dict[str, list[tuple[Fraction, int]]]] = {pformat(dictionary, indent=0, width=160)}"
+			pathFilename: Path = pathExclusionData / f"collated{mapKind}{leafExcluderName}Negative.py"
+			writePython(pythonSource, pathFilename)
+			listPathFilenames.append(PurePath(pathFilename))
+
+	return listPathFilenames
 
 @cache
 def expressIndexAsFractionAddend(index: IndexPilesTotal, pilesTotal: int, denominators: tuple[int, ...]) -> FractionAddend:
-	indexSign: OperatorSign = pos if index >= 0 else neg
-	indexMagnitude: IndexPilesTotal = indexSign(index)
-	indexAsFractionAndAddend: FractionAddend = (indexSign, Fraction(0, 1), indexMagnitude)
+	indexAsFractionAndAddend: FractionAddend = (Fraction(0, 1), index)
+	direction = pos if index >= 0 else neg
 
 	if denominators:
 		addendsMagnitude: int = pilesTotal // max(denominators)
 		distanceBest: float = 9000.1
 
-# TODO This code block is a half-implemented idea. I got stuck: I don't think this is "right" way to do it.
-# The block needs to iterate computations, while skipping some combinations.
-# Skip equivalent, unreduced fractions: compute 1/2, but not 2/4.
-# If `indexSign` is positive, a negative addend must not accidentally convert the computed index to a negative index--and vice versa.
-		for sliceOfDenominators, Z0Z_addendFloor in [(denominators[0:1], 0), (denominators[1:None], -(addendsMagnitude))]:
-			for denominator, addend in CartesianProduct(sliceOfDenominators, range(Z0Z_addendFloor, addendsMagnitude + inclusive)):
-				for numerator in range(denominator):
-					if ((numerator / denominator).is_integer()) and (numerator // denominator in denominators):
-						continue
-					candidateMagnitude: int = (((numerator * pilesTotal) // denominator) + addend)
-					if indexMagnitude == candidateMagnitude:
-						distance: float = abs(indexMagnitude - (((numerator * pilesTotal) / denominator) + addend))
-						if distance < distanceBest:
-							indexAsFractionAndAddend = (indexSign, Fraction(numerator, denominator), addend)
-							distanceBest = distance
+		for denominator, addend in CartesianProduct(denominators, range(-(addendsMagnitude), addendsMagnitude + inclusive)):
+			for numerator in range(1, denominator):
+				if ((numerator / denominator).is_integer()) and (numerator // denominator in denominators):
+					continue
+				numerator = direction(numerator)  # noqa: PLW2901
+				if index == (((numerator * pilesTotal) // denominator) + addend):
+					distance: float = abs(index - (((numerator * pilesTotal) / denominator) + addend))
+					if distance < distanceBest:
+						indexAsFractionAndAddend = (Fraction(numerator, denominator), addend)
+						distanceBest = distance
 
 	return indexAsFractionAndAddend
 
 # ======= Analyze exclusion data =======
 
-def _fractionAddendFromIndex(indexValue: IndexPilesTotal) -> FractionAddend:
-	signOperator: OperatorSign = pos if indexValue >= 0 else neg
-	return (signOperator, Fraction(0, 1), signOperator(indexValue))
+def loadCollatedIndices(*, negative: bool = False) -> ExclusionData:
+	collatedIndices: ExclusionData = {}
+	stringGlob: str = 'collated*'
+	stringGlob += 'Negative' if negative else ''
+	for pathFilename in pathExclusionData.glob(stringGlob + ".py"):
+		stem: str = pathFilename.stem.removeprefix("collated").removesuffix("Negative")
+		mapKind, leafExcluderName = stem[0:4], stem[4:]
+		collatedIndices.setdefault(mapKind, {})[leafExcluderName] = importPathFilename2Identifier(pathFilename, "leafExcluderData")
+	return collatedIndices
 
-def _sortedFractionAddends(iterable: Iterable[FractionAddend]) -> list[FractionAddend]:
-	def _fractionAddendSortKey(fractionAddend: FractionAddend) -> tuple[str, Fraction, Addend]:
-		signOperator, indexFraction, addend = fractionAddend
-		return (signOperator.__name__, indexFraction, addend)
-	return sorted(iterable, key=_fractionAddendSortKey)
+@cache
+def _dictionaryLeafDomainsByMapKind(mapKind: MapKind) -> dict[Leaf, range]:
+	return getDictionaryLeafDomains(EliminationState((2,) * _dimensionsTotalFromMapKind(mapKind)))
+
+def _dimensionsTotalFromMapKind(mapKind: MapKind) -> int:
+	return int(mapKind.removeprefix("p2d"))
+
+@cache
+def _fractionAddendToIndex(fractionAddend: FractionAddend, pilesTotal: int) -> int:
+	fraction, addend = fractionAddend
+	index: int = ((fraction.numerator * pilesTotal) // fraction.denominator) + addend
+	if index < 0:
+		return pilesTotal + index
+	return index
+
+def _listFractionAddendsToIndices(mapKind: MapKind, leafExcludedName: strLeafExcluded, listFractionAddends: list[FractionAddend]) -> list[int]:
+	pilesTotal: int = _pilesTotalOfLeafExcluded(mapKind, leafExcludedName)
+	return [_fractionAddendToIndex(fractionAddend, pilesTotal) for fractionAddend in listFractionAddends]
+
+@cache
+def _pilesTotalOfLeafExcluded(mapKind: MapKind, leafExcludedName: strLeafExcluded) -> int:
+	leaf: Leaf = dictionaryFunctionsByName[leafExcludedName](_dimensionsTotalFromMapKind(mapKind))
+	return len(_dictionaryLeafDomainsByMapKind(mapKind)[leaf])
+
+def _fractionAddendsForIndexSubset(listFractionAddends: list[FractionAddend], listResolvedIndices: list[int], indicesSubset: list[int]) -> set[FractionAddend]:
+	if not indicesSubset:
+		return set()
+	indicesSet: set[int] = set(indicesSubset)
+	return {fractionAddend for fractionAddend, resolvedIndex in zip(listFractionAddends, listResolvedIndices, strict=True) if resolvedIndex in indicesSet}
+
+def _fractionAddendFromIndex(index: IndexPilesTotal) -> FractionAddend:
+	return (Fraction(0, 1), index)
 
 def _getContiguousFromStart(listIndices: list[IndexPilesTotal]) -> list[IndexPilesTotal]:
 	"""Return the first contiguous group starting at index 0, if it has at least 2 elements."""
@@ -160,234 +190,213 @@ def _getContiguousFromStart(listIndices: list[IndexPilesTotal]) -> list[IndexPil
 			listContiguous = []
 	return listContiguous
 
-def _getContiguousFromEnd(listIndices: list[IndexPilesTotal], pilesTotal: int) -> list[IndexPilesTotal]:
-	"""Return the last contiguous group ending at pilesTotal-1, if it has at least 2 elements."""
-	listContiguous: list[IndexPilesTotal] = []
-	if listIndices and listIndices[-1] == pilesTotal - 1:
-		for group in consecutive_groups(listIndices):
+def _getContiguousEndingAtNegativeOne(listRelativeIndices: list[int]) -> list[int]:
+	"""Return the last contiguous group ending at -1, if it has at least 2 elements."""
+	listContiguous: list[int] = []
+	listRelativeIndicesSorted: list[int] = sorted(listRelativeIndices)
+	if listRelativeIndicesSorted and listRelativeIndicesSorted[-1] == -1:
+		for group in consecutive_groups(listRelativeIndicesSorted):
 			listContiguous = list(group)
-		if len(listContiguous) < 2:
+		if (len(listContiguous) < 2) or (listContiguous[-1] != -1):
 			listContiguous = []
 	return listContiguous
 
-def analyzeContiguousStartAbsolute(exclusionDataSource: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[IndexPilesTotal]]]]]) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
+def analyzeContiguousStartAbsolute(dataset: ExclusionData) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
 	"""Find common contiguous indices starting from 0 across all map shapes, expressed as absolute indices."""
 	aggregatedExclusions: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]] = {}
-	listMapKinds: list[MapKind] = list(exclusionDataSource.keys())
-	mapShapeFirst: MapKind = listMapKinds[0]
+	listMapKinds: list[MapKind] = list(dataset.keys())
+	mapKind0: MapKind = listMapKinds[0]
 
-	for leafExcluderName in exclusionDataSource[mapShapeFirst]:
-		if any(leafExcluderName not in exclusionDataSource[mapShapeName] for mapShapeName in listMapKinds):
+	for leafExcluderName in dataset[mapKind0]:
+		if any(leafExcluderName not in dataset[mapKind] for mapKind in listMapKinds):
 			continue
 		aggregatedExclusions[leafExcluderName] = {}
 
-		for pileExcluderName in exclusionDataSource[mapShapeFirst][leafExcluderName]:
-			if any(pileExcluderName not in exclusionDataSource[mapShapeName][leafExcluderName] for mapShapeName in listMapKinds):
+		for pileExcluderName in dataset[mapKind0][leafExcluderName]:
+			if any(pileExcluderName not in dataset[mapKind][leafExcluderName] for mapKind in listMapKinds):
 				continue
 			aggregatedExclusions[leafExcluderName][pileExcluderName] = {}
 
-			for leafExcludedName in exclusionDataSource[mapShapeFirst][leafExcluderName][pileExcluderName]:
-				if any(leafExcludedName not in exclusionDataSource[mapShapeName][leafExcluderName][pileExcluderName] for mapShapeName in listMapKinds):
+			for leafExcludedName in dataset[mapKind0][leafExcluderName][pileExcluderName]:
+				if any(leafExcludedName not in dataset[mapKind][leafExcluderName][pileExcluderName] for mapKind in listMapKinds):
 					continue
 
 				listContiguousLengths: list[int] = []
-				maximumPilesTotal: int = 0
 
-				for mapShapeName in listMapKinds:
-					listIndicesWithPilesTotal: list[IndexPilesTotal] = exclusionDataSource[mapShapeName][leafExcluderName][pileExcluderName][leafExcludedName]
-					pilesTotal: int = listIndicesWithPilesTotal[-1]
-					indicesOnly: list[IndexPilesTotal] = listIndicesWithPilesTotal[:-1]
-					listContiguousLengths.append(len(_getContiguousFromStart(indicesOnly)))
-					maximumPilesTotal = max(maximumPilesTotal, pilesTotal)
+				for mapKind in listMapKinds:
+					listFractionAddends: list[FractionAddend] = dataset[mapKind][leafExcluderName][pileExcluderName][leafExcludedName]
+					resolvedIndices: list[int] = _listFractionAddendsToIndices(mapKind, leafExcludedName, listFractionAddends)
+					listContiguousLengths.append(len(_getContiguousFromStart(resolvedIndices)))
 
-				commonLength: int = min(listContiguousLengths)
-				listFractionAddends: list[FractionAddend] = [_fractionAddendFromIndex(index) for index in range(commonLength)] if commonLength >= 2 else []
-				listFractionAddends.append((pos, Fraction(*maximumPilesTotal.as_integer_ratio()), 0))
-				aggregatedExclusions[leafExcluderName][pileExcluderName][leafExcludedName] = listFractionAddends
+				commonLength: int = min(listContiguousLengths) if listContiguousLengths else 0
+				listFractionAddendsCommon: list[FractionAddend] = [_fractionAddendFromIndex(indexValue) for indexValue in range(commonLength)] if commonLength >= 2 else []
+				aggregatedExclusions[leafExcluderName][pileExcluderName][leafExcludedName] = listFractionAddendsCommon
 
 	return aggregatedExclusions
 
-def analyzeContiguousEndAbsolute(exclusionDataSource: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[IndexPilesTotal]]]]]) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
+def analyzeContiguousEndAbsolute(dataset: ExclusionData) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
 	"""Find common contiguous indices ending at pilesTotal-1 across all map shapes, expressed as negative absolute indices."""
 	aggregatedExclusions: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]] = {}
-	listMapKinds: list[MapKind] = list(exclusionDataSource.keys())
-	mapShapeFirst: MapKind = listMapKinds[0]
+	listMapKinds: list[MapKind] = list(dataset.keys())
+	mapKind0: MapKind = listMapKinds[0]
 
-	for leafExcluderName in exclusionDataSource[mapShapeFirst]:
-		if any(leafExcluderName not in exclusionDataSource[mapShapeName] for mapShapeName in listMapKinds):
+	for leafExcluderName in dataset[mapKind0]:
+		if any(leafExcluderName not in dataset[mapKind] for mapKind in listMapKinds):
 			continue
 		aggregatedExclusions[leafExcluderName] = {}
 
-		for pileExcluderName in exclusionDataSource[mapShapeFirst][leafExcluderName]:
-			if any(pileExcluderName not in exclusionDataSource[mapShapeName][leafExcluderName] for mapShapeName in listMapKinds):
+		for pileExcluderName in dataset[mapKind0][leafExcluderName]:
+			if any(pileExcluderName not in dataset[mapKind][leafExcluderName] for mapKind in listMapKinds):
 				continue
 			aggregatedExclusions[leafExcluderName][pileExcluderName] = {}
 
-			for leafExcludedName in exclusionDataSource[mapShapeFirst][leafExcluderName][pileExcluderName]:
-				if any(leafExcludedName not in exclusionDataSource[mapShapeName][leafExcluderName][pileExcluderName] for mapShapeName in listMapKinds):
+			for leafExcludedName in dataset[mapKind0][leafExcluderName][pileExcluderName]:
+				if any(leafExcludedName not in dataset[mapKind][leafExcluderName][pileExcluderName] for mapKind in listMapKinds):
 					continue
 
 				listContiguousLengths: list[int] = []
-				maximumPilesTotal: int = 0
 
-				for mapShapeName in listMapKinds:
-					listIndicesWithPilesTotal: list[IndexPilesTotal] = exclusionDataSource[mapShapeName][leafExcluderName][pileExcluderName][leafExcludedName]
-					pilesTotal: int = listIndicesWithPilesTotal[-1]
-					indicesOnly: list[IndexPilesTotal] = listIndicesWithPilesTotal[:-1]
-					listContiguousLengths.append(len(_getContiguousFromEnd(indicesOnly, pilesTotal)))
-					maximumPilesTotal = max(maximumPilesTotal, pilesTotal)
+				for mapKind in listMapKinds:
+					listFractionAddends: list[FractionAddend] = dataset[mapKind][leafExcluderName][pileExcluderName][leafExcludedName]
+					listRelativeIndices: list[int] = _listFractionAddendsToIndices(mapKind, leafExcludedName, listFractionAddends)
+					listContiguousLengths.append(len(_getContiguousEndingAtNegativeOne(listRelativeIndices)))
 
-				commonLength: int = min(listContiguousLengths)
-				listFractionAddends: list[FractionAddend] = [_fractionAddendFromIndex(index) for index in range(0 + decreasing, (commonLength * decreasing) + inclusive, decreasing)] if commonLength >= 2 else []
-				listFractionAddends.append((pos, Fraction(*maximumPilesTotal.as_integer_ratio()), 0))
-				aggregatedExclusions[leafExcluderName][pileExcluderName][leafExcludedName] = listFractionAddends
+				commonLength: int = min(listContiguousLengths) if listContiguousLengths else 0
+				rangeIndices: range = range(-commonLength, 0) if commonLength >= 2 else range(0)
+				aggregatedExclusions[leafExcluderName][pileExcluderName][leafExcludedName] = [_fractionAddendFromIndex(indexValue) for indexValue in rangeIndices]
 
 	return aggregatedExclusions
 
-def analyzeContiguousStartRelative(exclusionDataSource: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[IndexPilesTotal]]]]]) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
+def analyzeContiguousStartRelative(dataset: ExclusionData) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
 	"""Find common contiguous indices starting from 0 across all map shapes, expressed as fractions of pilesTotal."""
 	aggregatedExclusions: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]] = {}
-	listMapKinds: list[MapKind] = list(exclusionDataSource.keys())
-	mapShapeFirst: MapKind = listMapKinds[0]
+	listMapKinds: list[MapKind] = list(dataset.keys())
+	mapKind0: MapKind = listMapKinds[0]
 
-	for leafExcluderName in exclusionDataSource[mapShapeFirst]:
-		if any(leafExcluderName not in exclusionDataSource[mapShapeName] for mapShapeName in listMapKinds):
+	for leafExcluderName in dataset[mapKind0]:
+		if any(leafExcluderName not in dataset[mapKind] for mapKind in listMapKinds):
 			continue
 		aggregatedExclusions[leafExcluderName] = {}
 
-		for pileExcluderName in exclusionDataSource[mapShapeFirst][leafExcluderName]:
-			if any(pileExcluderName not in exclusionDataSource[mapShapeName][leafExcluderName] for mapShapeName in listMapKinds):
+		for pileExcluderName in dataset[mapKind0][leafExcluderName]:
+			if any(pileExcluderName not in dataset[mapKind][leafExcluderName] for mapKind in listMapKinds):
 				continue
 			aggregatedExclusions[leafExcluderName][pileExcluderName] = {}
 
-			for leafExcludedName in exclusionDataSource[mapShapeFirst][leafExcluderName][pileExcluderName]:
-				if any(leafExcludedName not in exclusionDataSource[mapShapeName][leafExcluderName][pileExcluderName] for mapShapeName in listMapKinds):
+			for leafExcludedName in dataset[mapKind0][leafExcluderName][pileExcluderName]:
+				if any(leafExcludedName not in dataset[mapKind][leafExcluderName][pileExcluderName] for mapKind in listMapKinds):
 					continue
 
 				listSetsFractionAddends: list[set[FractionAddend]] = []
-				maximumPilesTotal: int = 0
 
-				for mapShapeName in listMapKinds:
-					listIndicesWithPilesTotal: list[IndexPilesTotal] = exclusionDataSource[mapShapeName][leafExcluderName][pileExcluderName][leafExcludedName]
-					pilesTotal: int = listIndicesWithPilesTotal[-1]
-					indicesOnly: list[IndexPilesTotal] = listIndicesWithPilesTotal[:-1]
-					contiguousIndices: list[IndexPilesTotal] = _getContiguousFromStart(indicesOnly)
-					setFractionAddends: set[FractionAddend] = {expressIndexAsFractionAddend(index, pilesTotal) for index in contiguousIndices} if len(contiguousIndices) >= 2 else set()
+				for mapKind in listMapKinds:
+					listFractionAddends: list[FractionAddend] = dataset[mapKind][leafExcluderName][pileExcluderName][leafExcludedName]
+					resolvedIndices: list[int] = _listFractionAddendsToIndices(mapKind, leafExcludedName, listFractionAddends)
+					contiguousIndices: list[int] = _getContiguousFromStart(resolvedIndices)
+					setFractionAddends: set[FractionAddend] = _fractionAddendsForIndexSubset(listFractionAddends, resolvedIndices, contiguousIndices)
 					listSetsFractionAddends.append(setFractionAddends)
-					maximumPilesTotal = max(maximumPilesTotal, pilesTotal)
 
-				commonFractionAddends: set[FractionAddend] = reduce(set[FractionAddend].intersection, listSetsFractionAddends) if listSetsFractionAddends and all(listSetsFractionAddends) else set()
-				listFractionAddends: list[FractionAddend] = _sortedFractionAddends(commonFractionAddends)
-				listFractionAddends.append((pos, Fraction(*maximumPilesTotal.as_integer_ratio()), 0))
-				aggregatedExclusions[leafExcluderName][pileExcluderName][leafExcludedName] = listFractionAddends
+				commonFractionAddends: set[FractionAddend] = reduce(set[FractionAddend].intersection, listSetsFractionAddends)
+				aggregatedExclusions[leafExcluderName][pileExcluderName][leafExcludedName] = list(commonFractionAddends)
 
 	return aggregatedExclusions
 
-def analyzeContiguousEndRelative(exclusionDataSource: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[IndexPilesTotal]]]]]) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
+def analyzeContiguousEndRelative(dataset: ExclusionData) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
 	"""Find common contiguous indices ending at pilesTotal-1 across all map shapes, expressed as fractions of pilesTotal."""
 	aggregatedExclusions: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]] = {}
-	listMapKinds: list[MapKind] = list(exclusionDataSource.keys())
-	mapShapeFirst: MapKind = listMapKinds[0]
+	listMapKinds: list[MapKind] = list(dataset.keys())
+	mapKind0: MapKind = listMapKinds[0]
 
-	for leafExcluderName in exclusionDataSource[mapShapeFirst]:
-		if any(leafExcluderName not in exclusionDataSource[mapShapeName] for mapShapeName in listMapKinds):
+	for leafExcluderName in dataset[mapKind0]:
+		if any(leafExcluderName not in dataset[mapKind] for mapKind in listMapKinds):
 			continue
 		aggregatedExclusions[leafExcluderName] = {}
 
-		for pileExcluderName in exclusionDataSource[mapShapeFirst][leafExcluderName]:
-			if any(pileExcluderName not in exclusionDataSource[mapShapeName][leafExcluderName] for mapShapeName in listMapKinds):
+		for pileExcluderName in dataset[mapKind0][leafExcluderName]:
+			if any(pileExcluderName not in dataset[mapKind][leafExcluderName] for mapKind in listMapKinds):
 				continue
 			aggregatedExclusions[leafExcluderName][pileExcluderName] = {}
 
-			for leafExcludedName in exclusionDataSource[mapShapeFirst][leafExcluderName][pileExcluderName]:
-				if any(leafExcludedName not in exclusionDataSource[mapShapeName][leafExcluderName][pileExcluderName] for mapShapeName in listMapKinds):
+			for leafExcludedName in dataset[mapKind0][leafExcluderName][pileExcluderName]:
+				if any(leafExcludedName not in dataset[mapKind][leafExcluderName][pileExcluderName] for mapKind in listMapKinds):
 					continue
 
 				listSetsFractionAddends: list[set[FractionAddend]] = []
-				maximumPilesTotal: int = 0
 
-				for mapShapeName in listMapKinds:
-					listIndicesWithPilesTotal: list[IndexPilesTotal] = exclusionDataSource[mapShapeName][leafExcluderName][pileExcluderName][leafExcludedName]
-					pilesTotal: int = listIndicesWithPilesTotal[-1]
-					indicesOnly: list[IndexPilesTotal] = listIndicesWithPilesTotal[:-1]
-					contiguousIndices: list[IndexPilesTotal] = _getContiguousFromEnd(indicesOnly, pilesTotal)
-					setFractionAddends: set[FractionAddend] = {expressIndexAsFractionAddend(index, pilesTotal) for index in contiguousIndices} if len(contiguousIndices) >= 2 else set()
+				for mapKind in listMapKinds:
+					listFractionAddends: list[FractionAddend] = dataset[mapKind][leafExcluderName][pileExcluderName][leafExcludedName]
+					listRelativeIndices: list[int] = _listFractionAddendsToIndices(mapKind, leafExcludedName, listFractionAddends)
+					contiguousRelativeIndices: list[int] = _getContiguousEndingAtNegativeOne(listRelativeIndices)
+					setFractionAddends: set[FractionAddend] = _fractionAddendsForIndexSubset(listFractionAddends, listRelativeIndices, contiguousRelativeIndices)
 					listSetsFractionAddends.append(setFractionAddends)
-					maximumPilesTotal = max(maximumPilesTotal, pilesTotal)
 
-				commonFractionAddends: set[FractionAddend] = reduce(set[FractionAddend].intersection, listSetsFractionAddends) if listSetsFractionAddends and all(listSetsFractionAddends) else set()
-				listFractionAddends: list[FractionAddend] = _sortedFractionAddends(commonFractionAddends)
-				listFractionAddends.append((pos, Fraction(*maximumPilesTotal.as_integer_ratio()), 0))
-				aggregatedExclusions[leafExcluderName][pileExcluderName][leafExcludedName] = listFractionAddends
+				commonFractionAddends: set[FractionAddend] = reduce(set[FractionAddend].intersection, listSetsFractionAddends)
+				aggregatedExclusions[leafExcluderName][pileExcluderName][leafExcludedName] = list(commonFractionAddends)
 
 	return aggregatedExclusions
 
-def analyzeNonContiguousIndicesRelative(exclusionDataSource: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[IndexPilesTotal]]]]]) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
+def analyzeNonContiguousIndicesRelative(dataset: ExclusionData) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
 	"""Find common indices across all map shapes (contiguous or not), expressed as fractions of pilesTotal."""
 	aggregatedExclusions: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]] = {}
-	listMapKinds: list[MapKind] = list(exclusionDataSource.keys())
-	mapShapeFirst: MapKind = listMapKinds[0]
+	listMapKinds: list[MapKind] = list(dataset.keys())
+	mapKind0: MapKind = listMapKinds[0]
 
-	for leafExcluderName in exclusionDataSource[mapShapeFirst]:
-		if any(leafExcluderName not in exclusionDataSource[mapShapeName] for mapShapeName in listMapKinds):
+	for leafExcluderName in dataset[mapKind0]:
+		if any(leafExcluderName not in dataset[mapKind] for mapKind in listMapKinds):
 			continue
-		aggregatedExclusions[leafExcluderName] = {}
 
-		for pileExcluderName in exclusionDataSource[mapShapeFirst][leafExcluderName]:
-			if any(pileExcluderName not in exclusionDataSource[mapShapeName][leafExcluderName] for mapShapeName in listMapKinds):
+		for pileExcluderName in dataset[mapKind0][leafExcluderName]:
+			if any(pileExcluderName not in dataset[mapKind][leafExcluderName] for mapKind in listMapKinds):
 				continue
-			aggregatedExclusions[leafExcluderName][pileExcluderName] = {}
 
-			for leafExcludedName in exclusionDataSource[mapShapeFirst][leafExcluderName][pileExcluderName]:
-				if any(leafExcludedName not in exclusionDataSource[mapShapeName][leafExcluderName][pileExcluderName] for mapShapeName in listMapKinds):
+			for leafExcludedName in dataset[mapKind0][leafExcluderName][pileExcluderName]:
+				if any(leafExcludedName not in dataset[mapKind][leafExcluderName][pileExcluderName] for mapKind in listMapKinds):
 					continue
 
 				listSetsFractionAddends: list[set[FractionAddend]] = []
-				maximumPilesTotal: int = 0
 
-				for mapShapeName in listMapKinds:
-					listIndicesWithPilesTotal: list[IndexPilesTotal] = exclusionDataSource[mapShapeName][leafExcluderName][pileExcluderName][leafExcludedName]
-					pilesTotal: int = listIndicesWithPilesTotal[-1]
-					indicesOnly: list[IndexPilesTotal] = listIndicesWithPilesTotal[:-1]
-					setFractionAddends: set[FractionAddend] = {expressIndexAsFractionAddend(index, pilesTotal) for index in indicesOnly} if indicesOnly else set()
+				for mapKind in listMapKinds:
+					listFractionAddends: list[FractionAddend] = dataset[mapKind][leafExcluderName][pileExcluderName][leafExcludedName]
+					setFractionAddends: set[FractionAddend] = set(listFractionAddends)
 					listSetsFractionAddends.append(setFractionAddends)
-					maximumPilesTotal = max(maximumPilesTotal, pilesTotal)
 
-				commonFractionAddends: set[FractionAddend] = reduce(set[FractionAddend].intersection, listSetsFractionAddends) if listSetsFractionAddends and all(listSetsFractionAddends) else set()
-				listFractionAddends: list[FractionAddend] = _sortedFractionAddends(commonFractionAddends)
-				listFractionAddends.append((pos, Fraction(*maximumPilesTotal.as_integer_ratio()), 0))
-				aggregatedExclusions[leafExcluderName][pileExcluderName][leafExcludedName] = listFractionAddends
+				aggregatedExclusions.setdefault(leafExcluderName, {}).setdefault(pileExcluderName, {})[leafExcludedName] = list(reduce(set[FractionAddend].intersection, listSetsFractionAddends))
 
 	return aggregatedExclusions
 
 # ======= Aggregate exclusion data =======
 
-def aggregateExclusions(listAnalysisMethods: list[Callable[[dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[IndexPilesTotal]]]]]], dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]]]) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:  # noqa: E501
+def writeAggregatedExclusions(pathWrite: Path | None = None) -> list[PurePath]:
 	"""{leafExcluder: {pileExcluder: {leafExcluded: listIndicesAsFractionAddends}}}."""
-	listExclusions: list[dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]] = [analysisMethod(exclusionData) for analysisMethod in listAnalysisMethods]
+	if pathWrite is None:
+		pathWrite = pathExclusionData
+	listPathFilenames: list[PurePath] = []
+	collatedIndices: ExclusionData = loadCollatedIndices()
+	collatedIndicesNegative: ExclusionData = loadCollatedIndices(negative=True)
+
+	listExclusions: list[dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]] = [
+		analyzeContiguousEndAbsolute(collatedIndicesNegative),
+		analyzeContiguousEndRelative(collatedIndicesNegative),
+		analyzeContiguousStartAbsolute(collatedIndices),
+		analyzeContiguousStartRelative(collatedIndices),
+		analyzeNonContiguousIndicesRelative(collatedIndices),
+		analyzeNonContiguousIndicesRelative(collatedIndicesNegative),
+	]
 
 	aggregatedExclusions: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]] = {}
 
 	for leafExcluder, pileExcluder in CartesianProduct(functionsHeadDimensions, functionsHeadDimensions):
 		dictionaryMerged: dict[strLeafExcluded, list[FractionAddend]] = updateExtendPolishDictionaryLists(
 			*[dictionaryExclusions.get(leafExcluder.__name__, {}).get(pileExcluder.__name__, {}) for dictionaryExclusions in listExclusions]
-			, destroyDuplicates=True, reorderLists=False)
-		for leafExcludedName, listFractionAddends in dictionaryMerged.items():
-			dictionaryMerged[leafExcludedName] = _sortedFractionAddends(listFractionAddends)
+			, destroyDuplicates=True, reorderLists=True)
 		aggregatedExclusions.setdefault(leafExcluder.__name__, {})[pileExcluder.__name__] = dictionaryMerged
 
-	return aggregatedExclusions
-
-def writeAggregatedExclusions(listAnalysisMethods: list[Callable[[dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[IndexPilesTotal]]]]]], dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]]]) -> list[PurePath]:
-	listPathFilenames: list[PurePath] = []
-
-	for leafExcluderName, pileExcluderData in aggregateExclusions(listAnalysisMethods).items():
-		pythonSource: str = "from collections.abc import Callable\nfrom fractions import Fraction\nfrom operator import neg, pos\n\n"
-		pythonSource += "type FractionAddend = tuple[Callable[[int], int], Fraction, int]\n\n"
+	for leafExcluderName, pileExcluderData in aggregatedExclusions.items():
+		pythonSource: str = "from fractions import Fraction\n\n"
+		pythonSource += "type FractionAddend = tuple[Fraction, int]\n\n"
 		dataFormatted: str = pformat(pileExcluderData, indent=0, width=160, compact=True)
-		dataFormatted = dataFormatted.replace('<built-in function neg>', 'neg').replace('<built-in function pos>', 'pos')
 		pythonSource += f"dictionaryExclusions: dict[str, dict[str, list[FractionAddend]]] = {dataFormatted}\n"
-		pathFilename: Path = pathExclusionData / f"aggregated{leafExcluderName}.py"
+		pathFilename: Path = pathWrite / f"aggregated{leafExcluderName}.py"
 		writePython(pythonSource, pathFilename)
 		listPathFilenames.append(PurePath(pathFilename))
 
@@ -402,14 +411,6 @@ def loadAggregatedExclusions() -> dict[strLeafExcluder, dict[strPileExcluder, di
 		aggregatedExclusions[leafExcluderName] = importPathFilename2Identifier(pathFilename, "dictionaryExclusions")
 	return aggregatedExclusions
 
-def resolveIndexFromFractionAddend(fractionAddend: FractionAddend, pilesTotal: int) -> int:
-	signOperator, indexFraction, addend = fractionAddend
-	productNumerator: int = indexFraction.numerator * pilesTotal
-	indexMagnitude: int = (productNumerator // indexFraction.denominator) + addend
-	if signOperator is pos:
-		return indexMagnitude
-	return pilesTotal - indexMagnitude
-
 def restructureAggregatedExclusionsForMapShape(dimensionsTotal: int, aggregatedExclusions: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]) -> tuple[dict[Leaf, dict[Pile, dict[Pile, list[Leaf]]]], dict[Pile, dict[Leaf, dict[Pile, list[Leaf]]]]]:
 	leafDomains: dict[Leaf, range] = getDictionaryLeafDomains(EliminationState(mapShape=(2,) * dimensionsTotal))
 
@@ -418,24 +419,26 @@ def restructureAggregatedExclusionsForMapShape(dimensionsTotal: int, aggregatedE
 
 	for leafExcluderName, pileExcluderData in aggregatedExclusions.items():
 		for pileExcluderName, leafExcludedData in pileExcluderData.items():
-				for leafExcludedName, listFractionAddends in leafExcludedData.items():
-					leafExcluded: Leaf = dictionaryFunctionsByName[leafExcludedName](dimensionsTotal)
+			for leafExcludedName, listFractionAddends in leafExcludedData.items():
+				leafExcluded: Leaf = dictionaryFunctionsByName[leafExcludedName](dimensionsTotal)
+				leafExcluderValue: Leaf = dictionaryFunctionsByName[leafExcluderName](dimensionsTotal)
+				pileExcluderValue: Pile = dictionaryFunctionsByName[pileExcluderName](dimensionsTotal)
 
-					domainOfLeafExcluded: list[Pile] = list(leafDomains[leafExcluded])
-					pilesTotal: int = len(domainOfLeafExcluded)
+				domainOfLeafExcluded: list[Pile] = list(leafDomains[leafExcluded])
+				pilesTotal: int = len(domainOfLeafExcluded)
 
-					for fractionAddend in listFractionAddends[0:-1]:
-						indexResolved: int = resolveIndexFromFractionAddend(fractionAddend, pilesTotal)
-						pileExcluded: Pile = domainOfLeafExcluded[indexResolved]
+				for fractionAddend in listFractionAddends:
+					indexResolved: int = _fractionAddendToIndex(fractionAddend, pilesTotal)
+					pileExcluded: Pile = domainOfLeafExcluded[indexResolved]
 
-						dictionaryLeafExcludedAtPileByPile.setdefault(leafExcluded, {}
-							).setdefault(pileExcluded, {}
-								).setdefault(dictionaryFunctionsByName[pileExcluderName](dimensionsTotal), []
-									).append(dictionaryFunctionsByName[leafExcluderName](dimensionsTotal))
-						dictionaryAtPileLeafExcludedByPile.setdefault(pileExcluded, {}
-							).setdefault(leafExcluded, {}
-								).setdefault(dictionaryFunctionsByName[pileExcluderName](dimensionsTotal), []
-									).append(dictionaryFunctionsByName[leafExcluderName](dimensionsTotal))
+					dictionaryLeafExcludedAtPileByPile.setdefault(leafExcluded, {}
+						).setdefault(pileExcluded, {}
+							).setdefault(pileExcluderValue, []
+								).append(leafExcluderValue)
+					dictionaryAtPileLeafExcludedByPile.setdefault(pileExcluded, {}
+						).setdefault(leafExcluded, {}
+							).setdefault(pileExcluderValue, []
+								).append(leafExcluderValue)
 
 	for leafExcluded in dictionaryLeafExcludedAtPileByPile:  # noqa: PLC0206
 		for pileExcluded in dictionaryLeafExcludedAtPileByPile[leafExcluded]:
@@ -470,15 +473,8 @@ def writeExclusionDictionaries(pathExclusionsFile: PurePath | None = None) -> Pu
 	return PurePath(pathFilename)
 
 if __name__ == '__main__':
-	listAnalysisMethods: list[Callable[[dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[IndexPilesTotal]]]]]], dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]]] = [
-		analyzeNonContiguousIndicesRelative,
-		analyzeContiguousStartAbsolute,
-		analyzeContiguousEndAbsolute,
-		analyzeContiguousStartRelative,
-		analyzeContiguousEndRelative,
-	]
 
 	sys.stdout.write(f"{writeExclusionDataCollated() = }\n")
-	sys.stdout.write(f"{writeAggregatedExclusions(listAnalysisMethods) = }\n")
+	sys.stdout.write(f"{writeAggregatedExclusions() = }\n")
 	sys.stdout.write(f"{writeExclusionDictionaries() = }\n")
 
