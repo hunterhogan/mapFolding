@@ -158,14 +158,14 @@ def findValidFoldings(state: EliminationState) -> int:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-	if state.listLeavesPinned:
+	if state.listPinnedLeaves:
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 			listClaimTickets: list[Future[int]] = []
 
-			listLeavesPinnedCopy: list[PinnedLeaves] = deepcopy(state.listLeavesPinned)
-			state.listLeavesPinned = []
-			for leavesPinned in listLeavesPinnedCopy:
+			listPinnedLeavesCopy: list[PinnedLeaves] = deepcopy(state.listPinnedLeaves)
+			state.listPinnedLeaves = []
+			for leavesPinned in listPinnedLeavesCopy:
 				stateCopy: EliminationState = deepcopy(state)
 				stateCopy.leavesPinned = leavesPinned
 				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))

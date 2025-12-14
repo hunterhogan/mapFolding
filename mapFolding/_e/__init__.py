@@ -21,7 +21,7 @@ from mapFolding._e._data import (
 	getDomainDimension首二 as getDomainDimension首二, getDomain二一零and二一 as getDomain二一零and二一,
 	getDomain二零and二 as getDomain二零and二, getDomain首零一二and首一二 as getDomain首零一二and首一二, getDomain首零二and首二 as getDomain首零二and首二,
 	getLeafDomain as getLeafDomain, getListLeavesDecrease as getListLeavesDecrease,
-	getListLeavesIncrease as getListLeavesIncrease, getPileRange as getPileRange)
+	getListLeavesIncrease as getListLeavesIncrease, getPileRange as getPileRange, Z0Z_precedence as Z0Z_precedence)
 
 """Perspective changes and code changes:
 
@@ -126,7 +126,7 @@ for dimensionOrigin, domain, sumOrigins, sumReversed in zip(state.productsOfDime
 16      domain.start == sumOrigins = True       31      62      domain.stop == sumReversed+2 = True
 32      domain.start == sumOrigins = True       63      64      domain.stop == sumReversed+2 = True
 
-The sums of dimension origins (sums of products of dimensions) emerge from the following formulas!
+The piles of dimension origins (sums of products of dimensions) emerge from the following formulas!
 
 def getLeafDomain(state: EliminationState, leaf: int) -> range:
 	def workhorse(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> range:

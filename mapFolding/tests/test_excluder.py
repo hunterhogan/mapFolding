@@ -13,7 +13,7 @@ from mapFolding._e.analysisPython import theExcluderBeast
 from mapFolding._e.analysisPython.theExcluderBeast import (
 	_getContiguousEndingAtNegativeOne, _getContiguousFromStart, expressIndexAsFractionAddend, FractionAddend,
 	writeAggregatedExclusions, writeExclusionDataCollated, writeExclusionDictionaries)
-from mapFolding._e.pinning2DnAnnex import _Z0Z_excludeThisLeaf, Z0Z_excluder
+from mapFolding._e.pinning2DnAnnex import Z0Z_excluder
 from mapFolding.dataBaskets import EliminationState
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -21,28 +21,6 @@ import pandas
 import pytest
 
 # ======= Logic Tests (Adapted from test_excluder_logic.py) =======
-
-@pytest.mark.parametrize("dimensionsTotal, pile, leavesPinned, leafToCheck, expectedResult", [
-	(6, 7, {12: 36}, 4, True),
-], ids=["2d6_pile7_leaf4_pinned12_36"])
-def test_Z0Z_excludeThisLeaf(dimensionsTotal: int, pile: int, leavesPinned: dict[int, int], leafToCheck: int, expectedResult: bool, monkeypatch: pytest.MonkeyPatch) -> None:
-	"""Verify _Z0Z_excludeThisLeaf correctly identifies excluded leaves."""
-	state = MagicMock(spec=EliminationState)
-	state.dimensionsTotal = dimensionsTotal
-	state.pile = pile
-	state.leavesPinned = leavesPinned
-
-	stubLookup: dict[int, dict[int, dict[int, list[int]]]] = {
-		leafToCheck: {
-			pile: {
-				12: [36]
-			}
-		}
-	}
-	monkeypatch.setattr("mapFolding._e.pinning2DnAnnex.dictionary2d6LeafExcludedAtPileByPile", stubLookup)
-
-	result = _Z0Z_excludeThisLeaf(state, leafToCheck)
-	assert result == expectedResult
 
 @pytest.mark.parametrize("dimensionsTotal, pileLast, leavesPinned, expectedResult", [
 	(6, 99, {7: 4, 12: 36}, True),

@@ -3,7 +3,8 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
 from hunterMakesPy import raiseIfNone, writePython
-from mapFolding import between, consecutive, decreasing, exclude, inclusive, noDuplicates, packageSettings
+from mapFolding import (
+	asciiColorReset, asciiColorYellow, between, consecutive, decreasing, exclude, inclusive, noDuplicates, packageSettings)
 from mapFolding._e import (
 	dimensionFourthNearest首, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首, howMany0coordinatesAtTail,
 	howManyDimensionsHaveOddParity, leafOrigin, pileOrigin, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
@@ -13,6 +14,7 @@ from operator import add, sub
 from pathlib import Path, PurePath
 from typing import Any
 import pandas
+import sys
 
 # ======= Boolean filters =================================
 
@@ -37,40 +39,55 @@ def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: int) -> bool:
 # ======= Creases =================================
 
 def getListLeavesIncrease(state: EliminationState, leaf: int) -> list[int]:
+	"""1) I need to improve the identifier: the 'increase' describes creasing the `pile` number, not the `leaf` number.
+
+	2) The has at most `dimensionsTotal - 1` many creases.
+
+	3) The list of creases *might* be a list of Gray codes.
+
+	4) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
+		`leaf` number.
+	"""
 	return _getCreases(state, leaf, increase=True)
 
 def getListLeavesDecrease(state: EliminationState, leaf: int) -> list[int]:
+	"""1) I need to improve the identifier: the 'decrease' describes creasing the pile number, not the `leaf` number.
+
+	2) The has at most `dimensionsTotal - 1` many creases.
+
+	3) The list of creases *might* be a list of Gray codes.
+
+	4) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
+		`leaf` number.
+	"""
 	return _getCreases(state, leaf, increase=False)
 
 def _getCreases(state: EliminationState, leaf: int, *, increase: bool = True) -> list[int]:
-	(listLeavesIncrease, listLeavesDecrease) = _makeCreases(leaf, state.dimensionsTotal)
-	listTarget: list[int] = listLeavesIncrease if increase else listLeavesDecrease
-	return list(listTarget)
+	return _makeCreases(leaf, state.dimensionsTotal)[increase]
 @cache
 def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[list[int], list[int]]:
-	listLeavesCrease: list[int] = [int(bit_flip(leaf, dimension)) for dimension in range(dimensionsTotal)]
+	listLeavesCrease: list[int] = [int(bit_flip(leaf, dimensionIndex)) for dimensionIndex in range(dimensionsTotal)]
 
-	if leaf == leafOrigin:
+	if leaf == leafOrigin: # A special case I've been unable to figure out how to incorporate in the formula.
 		listLeavesIncrease: list[int] = [1]
 		listLeavesDecrease: list[int] = []
 	else:
-		slicingIndexStart: int = (leaf.bit_count() - 1) & 1 ^ 1
-		slicingIndexEnd: int | None = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
+		slicingIndices: int = howManyDimensionsHaveOddParity(leaf) & 1
 
-		if (slicingIndexStart == 1) and is_even(leaf):
-			slicingIndexStart += howMany0coordinatesAtTail(leaf)
-		listLeavesIncrease = listLeavesCrease[slicingIndexStart: slicingIndexEnd]
+		slicerDecreasing: slice = slice(slicingIndices, dimensionNearest首(leaf) * (slicingIndices ^ 1) or None)
+		slicerIncreasing: slice = slice(slicingIndices ^ 1, dimensionNearest首(leaf) * (slicingIndices) or None)
 
-		slicingIndexStart = (leaf.bit_count() - 1) & 1
-		slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
+		if is_even(leaf):
+			if slicerDecreasing.start == 1:
+				slicerDecreasing = slice(slicerDecreasing.start + howMany0coordinatesAtTail(leaf), slicerDecreasing.stop)
+			if slicerIncreasing.start == 1:
+				slicerIncreasing = slice(slicerIncreasing.start + howMany0coordinatesAtTail(leaf), slicerIncreasing.stop)
+		listLeavesDecrease = listLeavesCrease[slicerDecreasing]
+		listLeavesIncrease = listLeavesCrease[slicerIncreasing]
 
-		if (slicingIndexStart == 1) and is_even(leaf):
-			slicingIndexStart += howMany0coordinatesAtTail(leaf)
-		listLeavesDecrease = listLeavesCrease[slicingIndexStart: slicingIndexEnd]
-
-		if leaf == 1:
+		if leaf == 1: # A special case I've been unable to figure out how to incorporate in the formula.
 			listLeavesDecrease = [0]
-	return (listLeavesIncrease, listLeavesDecrease)
+	return (listLeavesDecrease, listLeavesIncrease)
 
 # ======= (mathematical) ranges of piles ====================
 
@@ -746,10 +763,15 @@ def getDictionaryLeafDomains(state: EliminationState) -> dict[int, range]:
 
 # ======= Specialized tools ===============================
 
-def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame:
+def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:
 	pathFilename = Path(f'{packageSettings.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
-	arrayFoldings = pandas.read_pickle(pathFilename)  # noqa: S301
-	return pandas.DataFrame(arrayFoldings)
+	if pathFilename.exists():
+		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))  # noqa: S301
+	else:
+		message: str = f"{asciiColorYellow}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{asciiColorReset}"
+		sys.stderr.write(message + '\n')
+		dataframeFoldings = None
+	return dataframeFoldings
 
 def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: Sequence[int | Callable[[int], int]], pathFilename: PurePath | None = None, settings: dict[str, dict[str, Any]] | None = None) -> PurePath:
 	"""Create a Python module containing combined domain data for multiple leaves across multiple mapShapes.
@@ -799,7 +821,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 	for dimensionsTotal in listDimensions:
 		mapShape: tuple[int, ...] = (2,) * dimensionsTotal
 		state: EliminationState = EliminationState(mapShape)
-		dataframeFoldings: pandas.DataFrame = getDataFrameFoldings(state)
+		dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 
 		listResolvedLeaves: list[int] = [resolveLeaf(leafSpec, dimensionsTotal) for leafSpec in listLeaves]
 
@@ -835,4 +857,48 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 	writePython(pythonSource, pathFilename, settings)
 
 	return pathFilename
+
+Z0Z_state = EliminationState((2,) * 6)
+
+addendModuloLength = [
+	( 7,  4, 0),
+	(14,  8, 2),
+	(13,  8, 4),
+	(28, 16, 6),
+	(26, 16, 10),
+	(25, 16, 12),
+	(56,  1, 14),
+	(52,  1, 22),
+	(50,  1, 26),
+	# (49,  1, 58)
+]
+
+dictionaryDomains = getDictionaryLeafDomains(Z0Z_state)
+
+Z0Z_precedence: dict[int, dict[int, list[int]]] = {}
+
+for leaf, domain in dictionaryDomains.items():
+	for addend, modulo, length in addendModuloLength:
+		if 0 <= (leaf - addend) and ((leaf - addend) % modulo == 0):
+			pp = list(domain)[0: ((length + 2) // 2)]
+			Z0Z_precedence[leaf] = {aPile: [] for aPile in pp}
+			break
+
+leaf = 17
+pp = list(dictionaryDomains[leaf])[1:2]
+Z0Z_precedence[leaf] = {aPile: [2 * Z0Z_state.productsOfDimensions[dimensionNearest首(leaf)] + Z0Z_state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]
+								, 3 * Z0Z_state.productsOfDimensions[dimensionNearest首(leaf)] + Z0Z_state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]] for aPile in pp}
+leaf = 33
+pp = list(dictionaryDomains[leaf])[1:None]
+# Z0Z_precedence[leaf] = {aPile: [] for aPile in pp}
+
+for leaf in (*range(7, Z0Z_state.leavesTotal, 4)
+			, *range(14, Z0Z_state.leavesTotal, 8), *range(13, Z0Z_state.leavesTotal, 8)
+			, *range(28, Z0Z_state.leavesTotal, 16), *range(26, Z0Z_state.leavesTotal, 16), *range(25, Z0Z_state.leavesTotal, 16)
+			, 56, 52, 50):
+	leafPredecessor = Z0Z_state.productsOfDimensions[dimensionNearest首(leaf)] + Z0Z_state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]
+	# crazy
+	# print(leafPredecessor == int(bit_flip(0, dimensionNearest首(leaf)).bit_flip(howMany0coordinatesAtTail(leaf))))
+	for pile in Z0Z_precedence[leaf]:
+		Z0Z_precedence[leaf][pile].append(leafPredecessor)
 

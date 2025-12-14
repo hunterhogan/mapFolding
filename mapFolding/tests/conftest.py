@@ -537,7 +537,7 @@ def verifyLeavesPinnedAgainstFoldings() -> Callable[[EliminationState, NDArray[n
 		rowsTotal: int = int(arrayFoldings.shape[0])
 		listMasks: list[numpy.ndarray] = []
 
-		for leavesPinned in state.listLeavesPinned:
+		for leavesPinned in state.listPinnedLeaves:
 			maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
 			for indexPile, leaf in leavesPinned.items():
 				maskMatches = maskMatches & (arrayFoldings[:, indexPile] == leaf)

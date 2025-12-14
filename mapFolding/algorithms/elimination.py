@@ -8,7 +8,7 @@ from math import factorial
 from more_itertools import iter_index, unique
 
 def count(state: EliminationState) -> EliminationState:
-	state.groupsOfFolds += sum(map(countLeavesPinned, state.listLeavesPinned, repeat(state.mapShape), repeat(range(state.leavesTotal))))
+	state.groupsOfFolds += sum(map(countLeavesPinned, state.listPinnedLeaves, repeat(state.mapShape), repeat(range(state.leavesTotal))))
 	return state
 
 def countLeavesPinned(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
@@ -32,7 +32,7 @@ def theorem2b(state: EliminationState) -> EliminationState:
 
 	Side Effects
 	------------
-	Mutates `state.listLeavesPinned` and `state.Theorem2Multiplier` when applicable.
+	Mutates `state.listPinnedLeaves` and `state.Theorem2Multiplier` when applicable.
 
 	Returns
 	-------
@@ -83,9 +83,9 @@ def theorem4(state: EliminationState) -> EliminationState:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:  # noqa: ARG001
 	"""Count the number of valid foldings for a given number of leaves."""
-	if not state.listLeavesPinned:
+	if not state.listPinnedLeaves:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.listLeavesPinned = [{pileOrigin: leafOrigin}]
+		state.listPinnedLeaves = [{pileOrigin: leafOrigin}]
 		state = theorem4(state)
 		state = theorem2b(state)
 

@@ -27,7 +27,7 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct, starmap
 from mapFolding import getLeavesTotal
-from mapFolding._e import 零
+from mapFolding._e import PinnedLeaves, 零
 from mapFolding.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf
@@ -163,7 +163,7 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 	return all(not thisIsAViolationComplicated(pile, pileComparand, callNextCrease(mapShape, leaf, aDimension), callNextCrease(mapShape, comparand, aDimension), inThis_pileOf(folding))
 			for ((pile, leaf), (pileComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
 
-# ------- Functions for `leaf` in `leavesPinned` dictionary -------------
+# ------- Functions for `leaf` in `PinnedLeaves` dictionary -------------
 
 def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 	"""Return `True` if `state.leavesPinned` has a violation."""
@@ -188,3 +188,13 @@ def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 				if thisIsAViolation(pilePrimary, pilePrimaryIncrease, pileComparand, pileComparandIncrease):
 					return True
 	return False
+
+def removePinnedLeavesViolations(state: EliminationState) -> EliminationState:
+	listPinnedLeaves: list[PinnedLeaves] = state.listPinnedLeaves.copy()
+	state.listPinnedLeaves = []
+	for leavesPinned in listPinnedLeaves:
+		state.leavesPinned = leavesPinned
+		if leavesPinnedHasAViolation(state):
+			continue
+		state.listPinnedLeaves.append(leavesPinned)
+	return state

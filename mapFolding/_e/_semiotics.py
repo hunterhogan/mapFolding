@@ -9,6 +9,12 @@ from functools import cache
 # https://en.wikipedia.org/wiki/Korean_numerals
 # https://en.wikipedia.org/wiki/Vietnamese_numerals
 
+"""NOTE Do you hate my system of ideographs for powers of 2?
+
+With relatively little effort you could use `astToolkit` (pip install astToolkit) to replace all of the ideographs with
+`state.productsOfDimensions[dimensionIndex]`. With `astToolkit`, you create a transformation that you can apply after any update.
+"""
+
 _dimensionLength: int	= 2
 _dimensionIndex:  int	= 0						# == 0
 

@@ -36,7 +36,7 @@ class EliminationState:
 		Dimension lengths of the map being analyzed for folding patterns.
 	groupsOfFolds : int = 0
 		Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings.
-	listLeavesPinned : list[dict[int, int]]
+	listPinnedLeaves : list[dict[int, int]]
 		A list of dictionaries that each define an exclusive permutation space: no overlap between dictionaries.
 	pile : int = -1
 		The `pile` on the workbench.
@@ -71,7 +71,7 @@ class EliminationState:
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `folding` that represents a group of `leavesTotal`-many foldings."""
 
-	listLeavesPinned: list[dict[int, int]] = dataclasses.field(default_factory=list[dict[int, int]], init=True)
+	listPinnedLeaves: list[dict[int, int]] = dataclasses.field(default_factory=list[dict[int, int]], init=True)
 	"""A list of dictionaries (`{pile: leaf}`) that each define an exclusive permutation space: no overlap between dictionaries."""
 
 	pile: int = -1

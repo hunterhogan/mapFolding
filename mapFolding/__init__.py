@@ -1,6 +1,14 @@
 """Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."""
 
-from mapFolding._semiotics import decreasing as decreasing, inclusive as inclusive
+from mapFolding._semiotics import (
+	asciiColorBackgroundBlack as asciiColorBackgroundBlack, asciiColorBackgroundBlue as asciiColorBackgroundBlue,
+	asciiColorBackgroundCyan as asciiColorBackgroundCyan, asciiColorBackgroundGreen as asciiColorBackgroundGreen,
+	asciiColorBackgroundMagenta as asciiColorBackgroundMagenta, asciiColorBackgroundRed as asciiColorBackgroundRed,
+	asciiColorBackgroundWhite as asciiColorBackgroundWhite, asciiColorBackgroundYellow as asciiColorBackgroundYellow,
+	asciiColorBlack as asciiColorBlack, asciiColorBlue as asciiColorBlue, asciiColorCyan as asciiColorCyan,
+	asciiColorGreen as asciiColorGreen, asciiColorMagenta as asciiColorMagenta, asciiColorRed as asciiColorRed,
+	asciiColorReset as asciiColorReset, asciiColorWhite as asciiColorWhite, asciiColorYellow as asciiColorYellow,
+	decreasing as decreasing, inclusive as inclusive)
 
 # isort: split
 from mapFolding._theTypes import (

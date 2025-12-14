@@ -4,13 +4,12 @@ from mapFolding._e import (
 	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, leafOrigin, pileOrigin, PinnedLeaves, 一,
 	二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.pinIt import (
-	deconstructLeavesPinnedByDomainOfLeaf, deconstructLeavesPinnedByDomainsCombined, pileIsOpen)
+	deconstructPinnedLeavesByDomainOfLeaf, deconstructPinnedLeavesByDomainsCombined, pileIsOpen)
 from mapFolding._e.pinning2DnAnnex import (
 	appendLeavesPinnedAtPile as appendLeavesPinnedAtPile, beansWithoutCornbread as beansWithoutCornbread,
 	disqualifyAppendingLeafAtPile as disqualifyAppendingLeafAtPile, pinLeafCornbread as pinLeafCornbread, pinPile一Crease,
 	pinPile一零Crease, pinPile二Crease, pinPile首Less一Crease, pinPile首Less一零Crease, pinPile首less二Crease,
-	pinPile首零Less零AfterFourthOrder, removeInvalidLeavesPinned as removeInvalidLeavesPinned,
-	removeInvalidLeavesPinnedInequalityViolation as removeInvalidLeavesPinnedInequalityViolation)
+	pinPile首零Less零AfterFourthOrder, removeInvalidPinnedLeaves as removeInvalidPinnedLeaves)
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import interleave_longest
 
@@ -27,9 +26,9 @@ def nextLeavesPinnedWorkbench(state: EliminationState, pileProcessingOrder: list
 		if pile == queueStopBefore:
 			break
 
-		for leavesPinned in filter(pileIsOpen(pile=pile), state.listLeavesPinned):
+		for leavesPinned in filter(pileIsOpen(pile=pile), state.listPinnedLeaves):
 			state.leavesPinned = leavesPinned
-			state.listLeavesPinned.remove(leavesPinned)
+			state.listPinnedLeaves.remove(leavesPinned)
 			state.pile = pile
 			return state
 	return state
@@ -42,13 +41,13 @@ def pileProcessingOrderDefault(state: EliminationState) -> list[int]:
 
 # ======= Pinning functions ===============================================
 
-def pinPiles(state: EliminationState, order: int = 4, maximumListLeavesPinned: int = 50000, queueStopBefore: int | None = None) -> EliminationState:
+def pinPiles(state: EliminationState, order: int = 4, maximumListPinnedLeaves: int = 50000, queueStopBefore: int | None = None) -> EliminationState:
 	youMustBeDimensionsTallToPinThis = 2
 	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
 
-	if not state.listLeavesPinned:
-		state.listLeavesPinned = [{pileOrigin: leafOrigin, 零: 零, state.leavesTotal - 零: 首零(state.dimensionsTotal)}]
+	if not state.listPinnedLeaves:
+		state.listPinnedLeaves = [{pileOrigin: leafOrigin, 零: 零, state.leavesTotal - 零: 首零(state.dimensionsTotal)}]
 
 	pileProcessingOrder: list[int] = [pileOrigin, 零, state.leavesTotal - 零]
 
@@ -65,7 +64,7 @@ def pinPiles(state: EliminationState, order: int = 4, maximumListLeavesPinned: i
 			pileProcessingOrder.extend([state.leavesTotal - 二])
 
 	state = nextLeavesPinnedWorkbench(state, pileProcessingOrder, queueStopBefore)
-	while (len(state.listLeavesPinned) < maximumListLeavesPinned) and (state.leavesPinned):
+	while (len(state.listPinnedLeaves) < maximumListPinnedLeaves) and (state.leavesPinned):
 		listLeavesAtPile: list[int] = []
 
 		if state.pile == pileOrigin:
@@ -88,21 +87,19 @@ def pinPiles(state: EliminationState, order: int = 4, maximumListLeavesPinned: i
 			listLeavesAtPile = pinPile首less二Crease(state)
 
 		state = appendLeavesPinnedAtPile(state, listLeavesAtPile)
-		if maximumListLeavesPinned <= len(state.listLeavesPinned):
-			state = removeInvalidLeavesPinned(state)
 		state = nextLeavesPinnedWorkbench(state, pileProcessingOrder, queueStopBefore)
 
 	return state
 
-def pinPile首零Less零(state: EliminationState, maximumListLeavesPinned: int = 50000) -> EliminationState:
+def pinPile首零Less零(state: EliminationState, maximumListPinnedLeaves: int = 50000) -> EliminationState:
 	youMustBeDimensionsTallToPinThis = 2
 	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
 
-	if not state.listLeavesPinned:
+	if not state.listPinnedLeaves:
 		state = pinPiles(state, 1)
 
-	state = pinPiles(state, 4, maximumListLeavesPinned)
+	state = pinPiles(state, 4, maximumListPinnedLeaves)
 
 	youMustBeDimensionsTallToPinThis = 4
 	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
@@ -111,15 +108,13 @@ def pinPile首零Less零(state: EliminationState, maximumListLeavesPinned: int =
 	pileProcessingOrder: list[int] = [首零(state.dimensionsTotal)-零]
 
 	state = nextLeavesPinnedWorkbench(state, pileProcessingOrder)
-	while (len(state.listLeavesPinned) < maximumListLeavesPinned) and (state.leavesPinned):
+	while (len(state.listPinnedLeaves) < maximumListPinnedLeaves) and (state.leavesPinned):
 		listLeavesAtPile: list[int] = []
 
 		if state.pile == 首零(state.dimensionsTotal)-零:
 			listLeavesAtPile = pinPile首零Less零AfterFourthOrder(state)
 
 		state = appendLeavesPinnedAtPile(state, listLeavesAtPile)
-		if maximumListLeavesPinned <= len(state.listLeavesPinned):
-			state = removeInvalidLeavesPinned(state)
 		state = nextLeavesPinnedWorkbench(state, pileProcessingOrder)
 
 	return state
@@ -128,19 +123,19 @@ def _pinLeavesByDomain(state: EliminationState, leaves: tuple[int, ...], leavesD
 	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
 
-	if not state.listLeavesPinned:
+	if not state.listPinnedLeaves:
 		state = pinPiles(state, 1)
 
-	listLeavesPinned: list[PinnedLeaves] = state.listLeavesPinned.copy()
-	state.listLeavesPinned = []
+	listPinnedLeaves: list[PinnedLeaves] = state.listPinnedLeaves.copy()
+	state.listPinnedLeaves = []
 	qualifiedLeavesPinned: list[PinnedLeaves] = []
-	for leavesPinned in listLeavesPinned:
-		state.listLeavesPinned = deconstructLeavesPinnedByDomainsCombined(leavesPinned, leaves, leavesDomain)
-		state = removeInvalidLeavesPinned(state)
-		qualifiedLeavesPinned.extend(state.listLeavesPinned)
-		state.listLeavesPinned = []
-	state.listLeavesPinned = qualifiedLeavesPinned.copy()
-	return removeInvalidLeavesPinnedInequalityViolation(state)
+	for leavesPinned in listPinnedLeaves:
+		state.listPinnedLeaves = deconstructPinnedLeavesByDomainsCombined(leavesPinned, leaves, leavesDomain)
+		state = removeInvalidPinnedLeaves(state)
+		qualifiedLeavesPinned.extend(state.listPinnedLeaves)
+		state.listPinnedLeaves = []
+	state.listPinnedLeaves = qualifiedLeavesPinned.copy()
+	return state
 
 def pinLeavesDimension一(state: EliminationState) -> EliminationState:
 	youMustBeDimensionsTallToPinThis = 2
@@ -168,14 +163,14 @@ def pinLeaf首零_零(state: EliminationState) -> EliminationState:
 	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
 
-	if not state.listLeavesPinned:
+	if not state.listPinnedLeaves:
 		state = pinPiles(state, 1)
 
 	leaf = 首零(state.dimensionsTotal)+零
-	listLeavesPinnedCopy: list[PinnedLeaves] = state.listLeavesPinned.copy()
-	state.listLeavesPinned = []
+	listPinnedLeavesCopy: list[PinnedLeaves] = state.listPinnedLeaves.copy()
+	state.listPinnedLeaves = []
 	qualifiedLeavesPinned: list[PinnedLeaves] = []
-	for leavesPinned in listLeavesPinnedCopy:
+	for leavesPinned in listPinnedLeavesCopy:
 		state.leavesPinned = leavesPinned.copy()
 
 		domainOfPilesForLeaf: list[int] = list(getLeafDomain(state, leaf))
@@ -277,11 +272,11 @@ def pinLeaf首零_零(state: EliminationState) -> EliminationState:
 					listIndicesPilesExcluded.extend([0])
 		domainOfPilesForLeaf = list(exclude(domainOfPilesForLeaf, listIndicesPilesExcluded))
 
-		state.listLeavesPinned = deconstructLeavesPinnedByDomainOfLeaf(leavesPinned, leaf, domainOfPilesForLeaf)
-		state = removeInvalidLeavesPinned(state)
-		qualifiedLeavesPinned.extend(state.listLeavesPinned)
-		state.listLeavesPinned = []
-	state.listLeavesPinned = qualifiedLeavesPinned
+		state.listPinnedLeaves = deconstructPinnedLeavesByDomainOfLeaf(leavesPinned, leaf, domainOfPilesForLeaf)
+		state = removeInvalidPinnedLeaves(state)
+		qualifiedLeavesPinned.extend(state.listPinnedLeaves)
+		state.listPinnedLeaves = []
+	state.listPinnedLeaves = qualifiedLeavesPinned
 
 	return state
 

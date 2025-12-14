@@ -35,7 +35,7 @@ def consecutive(flatContainer: Iterable[int]) -> bool:
 def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
 	"""Return the list of values from a dictionary (generic over type parameter `个`).
 
-	A tiny helper used only for its semantic clarity inside `deconstructListleavesPinned` when flattening expanded
+	A tiny helper used only for its semantic clarity inside `deconstructListPinnedLeaves` when flattening expanded
 	dictionaries produced by `deconstructLeavesPinned`.
 
 	Parameters
@@ -50,7 +50,7 @@ def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
 
 	See Also
 	--------
-	deconstructLeavesPinned, deconstructListleavesPinned
+	deconstructLeavesPinned, deconstructListPinnedLeaves
 	"""
 	return list(dictionary.values())
 
