@@ -16,7 +16,7 @@ from mapFolding._e._measure import (
 	Z0Z_sumsOfProductsOfDimensionsNearest首 as Z0Z_sumsOfProductsOfDimensionsNearest首)
 
 # isort: split
-from mapFolding._e._data import (
+from mapFolding._e._dataDynamic import (
 	getDictionaryLeafDomains as getDictionaryLeafDomains, getDictionaryPileRanges as getDictionaryPileRanges,
 	getDomainDimension一 as getDomainDimension一, getDomainDimension二 as getDomainDimension二,
 	getDomainDimension首二 as getDomainDimension首二, getDomain二一零and二一 as getDomain二一零and二一,
