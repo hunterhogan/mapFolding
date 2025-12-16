@@ -12,7 +12,8 @@ from mapFolding._e._measure import (
 	dimensionSecondNearest首 as dimensionSecondNearest首, dimensionThirdNearest首 as dimensionThirdNearest首,
 	howMany0coordinatesAtTail as howMany0coordinatesAtTail,
 	howManyDimensionsHaveOddParity as howManyDimensionsHaveOddParity, leafInSubHyperplane as leafInSubHyperplane,
-	ptount as ptount)
+	ptount as ptount, Z0Z_invert as Z0Z_invert,
+	Z0Z_sumsOfProductsOfDimensionsNearest首 as Z0Z_sumsOfProductsOfDimensionsNearest首)
 
 # isort: split
 from mapFolding._e._data import (
@@ -29,7 +30,8 @@ from mapFolding._e._data import (
 	current value is 1, then the addition requires "carrying" values to "higher" dimensionIndices.
 - The `next` crease, in the sense of `k+1` and `r+1` in the inequalities is simple: given `k` and `dimension`,
 	`k1 = bit_flip(k, dimension); k1 = k1 if k1 > k else None`.
-	NOTE: this is because I evaluate the 4 `k < r`, not the 8 `k ? r` inequalities *a la* Koehler.
+	Reminder: this is because I evaluate the four `k < r`, not the eight `k ? r` inequalities *a la* Koehler.
+- I suspect I want I want a perfect analog to `howMany0coordinatesAtTail()` and not just the imperfect analog `howManyDimensionsHaveOddParity()`.
 """
 
 """The 'meaning' of:
@@ -126,8 +128,11 @@ for dimensionOrigin, domain, sumOrigins, sumReversed in zip(state.productsOfDime
 16      domain.start == sumOrigins = True       31      62      domain.stop == sumReversed+2 = True
 32      domain.start == sumOrigins = True       63      64      domain.stop == sumReversed+2 = True
 
+(Note to self: in `sumReversed+2`, consider if this is better explained by `sumReversed - descending + inclusive` or something similar.)
+
 The piles of dimension origins (sums of products of dimensions) emerge from the following formulas!
 
+(Note: the function below is included to capture the function as it existed at this point in development. I hope the package has improved/evolved by the time you read this.)
 def getLeafDomain(state: EliminationState, leaf: int) -> range:
 	def workhorse(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> range:
 		originPinned =  leaf == leafOrigin

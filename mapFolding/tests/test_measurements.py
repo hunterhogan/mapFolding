@@ -170,8 +170,8 @@ class TestLeafInSubHyperplane:
 
 	@pytest.mark.parametrize(
 		"invalidInput",
-		[0, 1, -1, -7, -19],
-		ids=["n=0", "n=1", "n=-1", "n=-7", "n=-19"],
+		[0, -1, -7, -19],
+		ids=["n=0", "n=-1", "n=-7", "n=-19"],
 	)
 	def test_leafInSubHyperplane_invalidInputsRaiseValueError(
 		self,
@@ -260,8 +260,8 @@ class TestPtount:
 
 	@pytest.mark.parametrize(
 		"invalidInput",
-		[0, 1, 2, 3, 4, -1, -7, -41],
-		ids=["n=0", "n=1", "n=2", "n=3", "n=4", "n=-1", "n=-7", "n=-41"],
+		[0, 1, 2, -1, -7, -41],
+		ids=["n=0", "n=1", "n=2", "n=-1", "n=-7", "n=-41"],
 	)
 	def test_ptount_invalidInputsRaiseValueError(
 		self,

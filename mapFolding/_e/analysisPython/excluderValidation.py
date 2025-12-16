@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from functools import cache
+from hunterMakesPy import raiseIfNone
 from mapFolding import exclude
 from mapFolding._e import getLeafDomain, getPileRange, PinnedLeaves
 from mapFolding._e._data import getDataFrameFoldings
@@ -9,7 +10,7 @@ from mapFolding._e.analysisPython.theExcluderBeast import (
 	loadCollatedIndices, MapKind, restructureAggregatedExclusionsForMapShape, strLeafExcluded, strLeafExcluder,
 	strPileExcluder)
 from mapFolding._e.analysisPython.Z0Z_patternFinder import detectPermutationSpaceErrors, PermutationSpaceStatus
-from mapFolding._e.pinIt import deconstructLeavesPinnedAtPile, deconstructLeavesPinnedByDomainOfLeaf
+from mapFolding._e.pinIt import deconstructPinnedLeavesAtPile, deconstructPinnedLeavesByDomainOfLeaf
 from mapFolding._e.pinning2Dn import pinPiles
 from mapFolding.dataBaskets import EliminationState
 import numpy
@@ -21,7 +22,7 @@ type strPileExcluded = str
 
 @cache
 def _getArrayFoldingsByDimensions(dimensionsTotal: int) -> numpy.ndarray:
-	return getDataFrameFoldings(EliminationState((2,) * dimensionsTotal)).to_numpy(dtype=numpy.uint8, copy=False)
+	return raiseIfNone(getDataFrameFoldings(EliminationState((2,) * dimensionsTotal))).to_numpy(dtype=numpy.uint8, copy=False)
 
 def validateExclusionDictionaries(dictionaryLeafExcludedAtPileByPile: dict[Leaf, dict[Pile, dict[Pile, list[Leaf]]]], dictionaryAtPileLeafExcludedByPile: dict[Pile, dict[Leaf, dict[Pile, list[Leaf]]]], mapKind: MapKind) -> tuple[bool, list[str]]:
 	dimensions: int = int(mapKind[3:])
@@ -89,22 +90,22 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				stateValidation = pinPiles(stateValidation, 1)
 
 				pileRange: list[int] = list(getPileRange(stateValidation, pileExcluder))
-				dictionaryDeconstructed: dict[int, PinnedLeaves] = deconstructLeavesPinnedAtPile(stateValidation.listLeavesPinned[0], pileExcluder, pileRange)
+				dictionaryDeconstructed: dict[int, PinnedLeaves] = deconstructPinnedLeavesAtPile(stateValidation.listPinnedLeaves[0], pileExcluder, pileRange)
 
 				leavesPinnedWithExcluder: PinnedLeaves | None = dictionaryDeconstructed.get(leafExcluder)
 				if leavesPinnedWithExcluder is None:
 					continue
 
-				listLeavesPinnedOther: list[PinnedLeaves] = [leavesPinned for leaf, leavesPinned in dictionaryDeconstructed.items() if leaf != leafExcluder]
+				listPinnedLeavesOther: list[PinnedLeaves] = [leavesPinned for leaf, leavesPinned in dictionaryDeconstructed.items() if leaf != leafExcluder]
 
 				domainOfLeafExcluded: list[int] = list(getLeafDomain(stateValidation, leafExcluded))
 				domainReduced: list[int] = list(exclude(domainOfLeafExcluded, listIndicesExcluded))
 
-				listLeavesPinnedFromExcluder: list[PinnedLeaves] = deconstructLeavesPinnedByDomainOfLeaf(leavesPinnedWithExcluder, leafExcluded, domainReduced)
+				listPinnedLeavesFromExcluder: list[PinnedLeaves] = deconstructPinnedLeavesByDomainOfLeaf(leavesPinnedWithExcluder, leafExcluded, domainReduced)
 
-				stateValidation.listLeavesPinned = listLeavesPinnedOther + listLeavesPinnedFromExcluder
+				stateValidation.listPinnedLeaves = listPinnedLeavesOther + listPinnedLeavesFromExcluder
 
-				pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, stateValidation.listLeavesPinned)
+				pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, stateValidation.listPinnedLeaves)
 
 				if pinningCoverage.rowsRequired < rowsTotal:
 					listValidationErrors.append(

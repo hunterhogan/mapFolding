@@ -91,8 +91,10 @@ class EliminationState:
 	"""Unchanging total number of leaves in the map."""
 	pileLast: int = dataclasses.field(init=False)
 	"""Unchanging 0-indexed final `pile` in a `folding`."""
-	productsOfDimensions: list[int] = dataclasses.field(init=False)
-	"""Unchanging list of products of map dimensions from the product of no dimensions, `[0]`, to the product of all dimensions, `[dimensionsTotal]`."""
+	productsOfDimensions: tuple[int, ...] = dataclasses.field(init=False)
+	"""Unchanging list of products of map dimensions from the product of no dimensions, `[0]`, to the product of all dimensions, `[dimensionsTotal + inclusive]`."""
+	sumsOfProductsOfDimensions: tuple[int, ...] = dataclasses.field(init=False)
+	"""Unchanging list of sums of products of map dimensions from the sum of no products, `[0]`, to the sum of all products, `[dimensionsTotal + 1 + inclusive]`."""
 
 	@property
 	def foldsTotal(self) -> int:
@@ -105,7 +107,8 @@ class EliminationState:
 		self.leavesTotal = getLeavesTotal(self.mapShape)
 		self.pileLast = self.leavesTotal - 1
 		self.leafLast = self.leavesTotal - 1
-		self.productsOfDimensions = [prod(self.mapShape[0:dimension], start=1) for dimension in range(self.dimensionsTotal + inclusive)]
+		self.productsOfDimensions = tuple(prod(self.mapShape[0:dimension], start=1) for dimension in range(self.dimensionsTotal + inclusive))
+		self.sumsOfProductsOfDimensions = tuple(sum(self.productsOfDimensions[0:aProduct], start=0) for aProduct in range(self.dimensionsTotal + 1 + inclusive))
 
 @dataclasses.dataclass(slots=True)
 class MapFoldingState:

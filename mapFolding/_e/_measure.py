@@ -1,6 +1,9 @@
 from functools import cache
+from gmpy2 import bit_flip, bit_mask, bit_scan1, f_mod_2exp
 from hunterMakesPy import intInnit, raiseIfNone
-import gmpy2
+from mapFolding import inclusive
+from mapFolding._e import 一, 零
+from mapFolding.dataBaskets import EliminationState
 
 @cache
 def dimensionNearest首(integerNonnegative: int, /) -> int:
@@ -19,7 +22,7 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
 	dimensionSecondNearest: int | None = None
-	anotherInteger = int(gmpy2.bit_flip(anInteger, dimensionNearest首(anInteger)))
+	anotherInteger = int(bit_flip(anInteger, dimensionNearest首(anInteger)))
 	if anotherInteger == 0:
 		dimensionSecondNearest = None
 	else:
@@ -41,7 +44,7 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	if dimensionSecondNearest in [0, None]:
 		dimensionThirdNearest = None
 	else:
-		anotherInteger = int(gmpy2.bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)))
+		anotherInteger = int(bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)))
 		if anotherInteger == 0:
 			dimensionThirdNearest = None
 		else:
@@ -64,7 +67,7 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	if dimensionThirdNearest in [0, None]:
 		dimensionFourthNearest = None
 	else:
-		anotherInteger = int(gmpy2.bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)).bit_flip(raiseIfNone(dimensionThirdNearest)))
+		anotherInteger = int(bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)).bit_flip(raiseIfNone(dimensionThirdNearest)))
 		if anotherInteger == 0:
 			dimensionFourthNearest = None
 		else:
@@ -72,37 +75,34 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	return dimensionFourthNearest
 
 @cache
-def leafInSubHyperplane(leafAbove1: int, /) -> int:
-	"""Compute the projection of a hyperplane leaf onto its lower-dimensional sub-hyperplane.
+def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
+	"""For `notLeafOrigin` in a map with d-many dimensions, compute the projection of `notLeafOrigin` onto the sub-hyperplane that has one fewer dimension.
 
-	(AI generated docstring.)
+	(AI generated docstring, which may or may not have been accurate; edited by me, Hunter Hogan, which may or may not have improved it.)
 
-	For 2^d hyperplane maps, each leaf's `leaf` encodes its d-dimensional coordinates
-	in binary (base-2 positional notation). The most significant bit (MSB) indicates the
-	highest dimension where the coordinate equals 1.
+	For 2^d hyperplane maps, each leaf's `leaf` encodes its d-dimensional coordinates in binary (base-2 positional notation). The
+	most significant digit (MSD) indicates the dimension nearest the "head", 首, where the coordinate equals 1: it follows that
+	other dimensions closer to the "head" have coordinates equal to 0.
 
-	This function extracts the lower (MSB - 1) bits, which represent the leaf's position
-	when projected onto the sub-hyperplane formed by all dimensions below the MSB dimension.
-	That is equivalent to the `leaf` of the leaf within the lower-dimensional sub-hyperplane.
-
-	Technical implementation: `leafAbove1 mod 2^(bit_length - 1)`
+	The other coordinates might not be 0, and they represent the leaf's position when projected onto the sub-hyperplane: the
+	"equivalent" `leaf` of `notLeafOrigin` in space with one fewer dimension.
 
 	Parameters
 	----------
-	leafAbove1 : int
-		The `leaf` > 1 representing a leaf in a 2^d hyperplane.
+	notLeafOrigin : int
+		A `leaf` in a 2^d map.
 
 	Returns
 	-------
 	leafSubHyperplane : int
-		The position of the leaf within the sub-hyperplane defined by dimensions [0, ..., MSB-1].
-		This is the value formed by all bits except the MSB.
+		The position of the leaf within the sub-hyperplane defined by dimensions [0, ..., MSD-1]. This is the value formed by all
+		digits except the MSD.
 	"""
-	anInteger: int = intInnit([leafAbove1], 'leafAbove1', type[int])[0]
-	if anInteger <= 1:
-		message: str = f"I received `{leafAbove1 = }`, but I need a value greater than 1."
+	anInteger: int = intInnit([notLeafOrigin], 'notLeafOrigin', type[int])[0]
+	if anInteger < 1:
+		message: str = f"I received `{notLeafOrigin = }`, but I need a value greater than 0."
 		raise ValueError(message)
-	return int(gmpy2.f_mod_2exp(anInteger, anInteger.bit_length() - 1))
+	return int(f_mod_2exp(anInteger, dimensionNearest首(anInteger)))
 
 @cache
 def howMany0coordinatesAtTail(integerNonnegative: int, /) -> int:
@@ -111,7 +111,7 @@ def howMany0coordinatesAtTail(integerNonnegative: int, /) -> int:
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
-	return gmpy2.bit_scan1(anInteger) or 0
+	return bit_scan1(anInteger) or 0
 
 @cache
 def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
@@ -122,19 +122,33 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 	return max(0, anInteger.bit_count() - 1)
 
 @cache
-def ptount(integerAbove3: int, /) -> int:
-	"""After subtracting 0b000011 from `integerAbove3`, measure the distance from a ***p***ower of ***t***wo's bit c***ount***.
+def ptount(integerAbove2: int, /) -> int:
+	"""After subtracting 一+零 from `integerAbove2`, measure the distance from a ***p***ower of ***t***wo's "bit c***ount***".
 
 	Notes
 	-----
 	- Pronounced "tount" because the "p" is silent.
 	- Just like the "p", the reason why this is useful is silent.
 	- I suspect there is a more direct route to measure this but I am unaware of it.
+	- I have noticed that 16+3 and 32+3 are often special cases. 16 and 32 have `howMany0coordinatesAtTail` of 4 and 5 respectively.
 	"""
-	anInteger: int = intInnit([integerAbove3], 'integerAbove3', type[int])[0]
-	if anInteger <= 3:
-		message: str = f"I received `{integerAbove3 = }`, but I need a value greater than 3."
+	anInteger: int = intInnit([integerAbove2], 'integerAbove2', type[int])[0]
+	if anInteger <= 2:
+		message: str = f"I received `{integerAbove2 = }`, but I need a value greater than 2."
 		raise ValueError(message)
 
-	return leafInSubHyperplane(anInteger - 0b000011).bit_count()
+	return leafInSubHyperplane(anInteger - (一+零)).bit_count()
+
+def Z0Z_invert(state: EliminationState, integerNonnegative: int) -> int:
+	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
+	if anInteger < 0:
+		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
+		raise ValueError(message)
+	return int(anInteger ^ bit_mask(state.dimensionsTotal))
+
+def Z0Z_sumsOfProductsOfDimensionsNearest首(state: EliminationState, dimensionFrom首: int) -> tuple[int, ...]:
+	dimensionNormalizer = dimensionFrom首 - (state.dimensionsTotal + 1)
+	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = tuple(sum(list(reversed(state.productsOfDimensions[0:dimensionNormalizer]))[0:aProduct], start=0)
+											for aProduct in range(len(state.productsOfDimensions) + inclusive + dimensionNormalizer))
+	return sumsOfProductsOfDimensionsNearest首
 
