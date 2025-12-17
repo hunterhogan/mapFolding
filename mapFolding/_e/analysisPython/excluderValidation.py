@@ -3,7 +3,7 @@ from functools import cache
 from hunterMakesPy import raiseIfNone
 from mapFolding import exclude
 from mapFolding._e import getLeafDomain, getPileRange, PinnedLeaves
-from mapFolding._e._data import getDataFrameFoldings
+from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.analysisPython.theExcluderBeast import (
 	_fractionAddendToIndex, analyzeContiguousEndAbsolute, analyzeContiguousEndRelative, analyzeContiguousStartAbsolute,
 	analyzeContiguousStartRelative, analyzeNonContiguousIndicesRelative, dictionaryFunctionsByName, FractionAddend,

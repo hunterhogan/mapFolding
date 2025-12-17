@@ -7,7 +7,7 @@ from itertools import product as CartesianProduct, repeat
 from mapFolding import between, inclusive, packageSettings
 from mapFolding._e import (
 	getDictionaryLeafDomains, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
-from mapFolding._e._data import getDataFrameFoldings
+from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import consecutive_groups
 from operator import indexOf, neg, pos

@@ -1,14 +1,18 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from mapFolding import packageSettings
+from gmpy2 import bit_flip, bit_mask, is_even
+from hunterMakesPy import raiseIfNone
+from itertools import accumulate
+from mapFolding import (
+	asciiColorCyan, asciiColorGreen, asciiColorMagenta, asciiColorRed, asciiColorReset, asciiColorYellow, decreasing,
+	inclusive, packageSettings)
 from mapFolding._e import (
-	dimensionNearest首, getDictionaryPileRanges, getDomainDimension二, getLeafDomain, howMany0coordinatesAtTail, pileOrigin,
-	PinnedLeaves, 零)
-from mapFolding._e._data import getDataFrameFoldings
+	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeafDomain, howMany0coordinatesAtTail,
+	howManyDimensionsHaveOddParity, pileOrigin, PinnedLeaves, Z0Z_sumsOfProductsOfDimensionsNearest首, 零, 首零, 首零一三)
+from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.pinning2DnAnnex import beansWithoutCornbread
 from mapFolding.dataBaskets import EliminationState
-from mapFolding.tests.dataSamples.p2DnDomain6_7_5_4 import listDomain2D5, listDomain2D6
 from pathlib import Path
 from pprint import pprint
 from typing import Any
@@ -52,7 +56,7 @@ def getLeafUnconditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 		where the Earlier leaf unconditionally precedes the Later leaf.
 
 	"""
-	dataframeSequences: pandas.DataFrame = getDataFrameFoldings(state)
+	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	arraySequences: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = dataframeSequences.to_numpy(dtype=numpy.int16)
 
 	rowsCount: int
@@ -114,7 +118,7 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 		Only includes relationships not already present in unconditional precedence.
 
 	"""
-	dataframeSequences: pandas.DataFrame = getDataFrameFoldings(state)
+	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	columnsToExclude: list[int] | None = [pileOrigin, 零, state.pileLast]
 	if columnsToExclude is not None: # pyright: ignore[reportUnnecessaryComparison]
 		dataframeSequences = dataframeSequences.drop(columns=columnsToExclude)
@@ -169,8 +173,243 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 
 	return dataframeConditionalPrecedence
 
+def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) -> pandas.DataFrame:
+	"""Identify precedence relationships that emerge only when a leaf is at the last pile in its domain.
+
+	(AI generated docstring)
+
+	For each leaf, determines the last pile it can occupy within its mathematical
+	domain, then finds leaves that always precede it in the subset of foldings
+	where that leaf is observed at that last-in-domain pile. Excludes relationships
+	already captured by the unconditional precedence analysis.
+
+	The formula for the last pile *in* the domain of a leaf is.
+		pileLastOfLeaf = int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 1
+
+	Parameters
+	----------
+	state : EliminationState
+		The elimination state containing the map shape and dimension information.
+	columnsToExclude : list[int] | None = None
+		Column indices (as integers) to exclude from analysis. Pass [0, 1, leavesTotal-1]
+		to exclude the trivially-pinned positions.
+
+	Returns
+	-------
+	dataframeConditionalPrecedenceAtLastPile : pandas.DataFrame
+		A three-column DataFrame with 'Earlier', 'Later', and 'AtColumn' indicating
+		that when 'Later' is at column 'AtColumn' (its last-in-domain pile),
+		'Earlier' always precedes it. Only includes relationships not already
+		present in unconditional precedence.
+
+	"""
+	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
+	columnsToExclude: list[int] | None = [pileOrigin, 零, state.pileLast]
+	if columnsToExclude is not None: # pyright: ignore[reportUnnecessaryComparison]
+		dataframeSequences = dataframeSequences.drop(columns=columnsToExclude)
+	arraySequences: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = dataframeSequences.to_numpy(dtype=numpy.int16)
+
+	rowsCount: int
+	positionsCount: int
+	rowsCount, positionsCount = arraySequences.shape
+	valueMaximum: int = int(arraySequences.max())
+	positionsMatrix: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = numpy.full((rowsCount, valueMaximum + 1), -1, dtype=numpy.int16)
+
+	rowIndices: numpy.ndarray[Any, numpy.dtype[numpy.int32]] = numpy.arange(rowsCount, dtype=numpy.int32)[:, None]
+	columnIndices: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = numpy.broadcast_to(numpy.arange(positionsCount, dtype=numpy.int16), (rowsCount, positionsCount))
+	positionsMatrix[rowIndices, arraySequences] = columnIndices
+
+	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0 # pyright: ignore[reportUnnecessaryComparison]
+
+	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
+	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
+
+	listConditionalRelationships: list[dict[str, int]] = []
+
+	for leafLater in range(state.leavesTotal):
+		pileLastOfLeafOriginal: int = int(bit_mask(state.dimensionsTotal) ^ bit_mask(state.dimensionsTotal - dimensionNearest首(leafLater))) - howManyDimensionsHaveOddParity(leafLater) + 1
+		pileLastOfLeafIndex: int = pileLastOfLeafOriginal - columnOffset
+
+		if pileLastOfLeafIndex < 0:
+			continue
+
+		maskRowsAtLastPileOfLeaf: numpy.ndarray[Any, numpy.dtype[numpy.bool_]] = (positionsMatrix[:, leafLater] == pileLastOfLeafIndex)
+
+		if not numpy.any(maskRowsAtLastPileOfLeaf):
+			continue
+
+		positionsSubset: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsMatrix[maskRowsAtLastPileOfLeaf]
+
+		for leafEarlier in range(state.leavesTotal):
+			if leafEarlier == leafLater:
+				continue
+
+			positionsOfEarlier: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsSubset[:, leafEarlier]
+
+			isEarlierAlwaysPresentAndPrecedes: bool = bool(numpy.all((positionsOfEarlier >= 0) & (positionsOfEarlier < pileLastOfLeafIndex)))
+			if isEarlierAlwaysPresentAndPrecedes and (leafEarlier, leafLater) not in setUnconditional:
+				listConditionalRelationships.append({
+					'Earlier': leafEarlier,
+					'Later': leafLater,
+					'AtColumn': pileLastOfLeafOriginal
+				})
+
+	dataframeConditionalPrecedenceAtLastPile: pandas.DataFrame = pandas.DataFrame(listConditionalRelationships).sort_values(['Later', 'Earlier']).reset_index(drop=True)
+
+	return dataframeConditionalPrecedenceAtLastPile
+
+def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
+	"""When a leaf is at the last pile in its domain, identify leaves that must come after it."""
+	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
+	columnsToExclude: list[int] | None = [pileOrigin, 零, state.pileLast]
+	if columnsToExclude is not None: # pyright: ignore[reportUnnecessaryComparison]
+		dataframeSequences = dataframeSequences.drop(columns=columnsToExclude)
+	arraySequences: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = dataframeSequences.to_numpy(dtype=numpy.int16)
+
+	rowsCount: int
+	positionsCount: int
+	rowsCount, positionsCount = arraySequences.shape
+	valueMaximum: int = int(arraySequences.max())
+	positionsMatrix: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = numpy.full((rowsCount, valueMaximum + 1), -1, dtype=numpy.int16)
+
+	rowIndices: numpy.ndarray[Any, numpy.dtype[numpy.int32]] = numpy.arange(rowsCount, dtype=numpy.int32)[:, None]
+	columnIndices: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = numpy.broadcast_to(numpy.arange(positionsCount, dtype=numpy.int16), (rowsCount, positionsCount))
+	positionsMatrix[rowIndices, arraySequences] = columnIndices
+
+	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0 # pyright: ignore[reportUnnecessaryComparison]
+
+	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
+	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
+
+	listConditionalRelationships: list[dict[str, int]] = []
+
+	for leafEarlier in range(state.leavesTotal):
+		pileLastOfLeafOriginal: int = int(bit_mask(state.dimensionsTotal) ^ bit_mask(state.dimensionsTotal - dimensionNearest首(leafEarlier))) - howManyDimensionsHaveOddParity(leafEarlier) + 1
+		pileLastOfLeafIndex: int = pileLastOfLeafOriginal - columnOffset
+
+		if pileLastOfLeafIndex < 0:
+			continue
+
+		maskRowsAtLastPileOfLeaf: numpy.ndarray[Any, numpy.dtype[numpy.bool_]] = (positionsMatrix[:, leafEarlier] == pileLastOfLeafIndex)
+
+		if not numpy.any(maskRowsAtLastPileOfLeaf):
+			continue
+
+		positionsSubset: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsMatrix[maskRowsAtLastPileOfLeaf]
+
+		for leafLater in range(state.leavesTotal):
+			if leafLater == leafEarlier:
+				continue
+
+			positionsOfLater: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsSubset[:, leafLater]
+			isLaterAlwaysPresentAndFollows: bool = bool(numpy.all((positionsOfLater >= 0) & (pileLastOfLeafIndex < positionsOfLater)))
+			if isLaterAlwaysPresentAndFollows and (leafEarlier, leafLater) not in setUnconditional:
+				listConditionalRelationships.append({
+					'Earlier': leafEarlier,
+					'Later': leafLater,
+					'AtColumn': pileLastOfLeafOriginal,
+				})
+
+	dataframeConditionalSuccession: pandas.DataFrame = pandas.DataFrame(listConditionalRelationships, columns=['Earlier', 'Later', 'AtColumn']).sort_values(['Earlier', 'Later']).reset_index(drop=True)
+
+	return dataframeConditionalSuccession
+
+def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLater: int) -> pandas.DataFrame:
+	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
+	columnsToExclude: list[int] | None = [pileOrigin, 零, state.pileLast]
+	if columnsToExclude is not None: # pyright: ignore[reportUnnecessaryComparison]
+		dataframeSequences = dataframeSequences.drop(columns=columnsToExclude)
+	arraySequences: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = dataframeSequences.to_numpy(dtype=numpy.int16)
+
+	rowsCount: int
+	positionsCount: int
+	rowsCount, positionsCount = arraySequences.shape
+	valueMaximum: int = int(arraySequences.max())
+	positionsMatrix: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = numpy.full((rowsCount, valueMaximum + 1), -1, dtype=numpy.int16)
+
+	rowIndices: numpy.ndarray[Any, numpy.dtype[numpy.int32]] = numpy.arange(rowsCount, dtype=numpy.int32)[:, None]
+	columnIndices: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = numpy.broadcast_to(numpy.arange(positionsCount, dtype=numpy.int16), (rowsCount, positionsCount))
+	positionsMatrix[rowIndices, arraySequences] = columnIndices
+
+	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0 # pyright: ignore[reportUnnecessaryComparison]
+
+	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
+	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
+
+	leafDomain: range = getLeafDomain(state, leafLater)
+
+	listConditionalRelationships: list[dict[str, int]] = []
+	for pileOfLeafOriginal in leafDomain:
+		if pileOfLeafOriginal <= 1:
+			continue
+		if pileOfLeafOriginal >= state.pileLast:
+			continue
+
+		pileOfLeafIndex: int = pileOfLeafOriginal - columnOffset
+		if pileOfLeafIndex < 0:
+			continue
+
+		maskRowsAtPileOfLeaf: numpy.ndarray[Any, numpy.dtype[numpy.bool_]] = (positionsMatrix[:, leafLater] == pileOfLeafIndex)
+		if not numpy.any(maskRowsAtPileOfLeaf):
+			continue
+
+		positionsSubset: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsMatrix[maskRowsAtPileOfLeaf]
+		maskAlwaysEarlier: numpy.ndarray[Any, numpy.dtype[numpy.bool_]] = numpy.all((positionsSubset >= 0) & (positionsSubset < pileOfLeafIndex), axis=0)
+		maskAlwaysEarlier[leafLater] = False
+		indicesEarlier: numpy.ndarray[Any, numpy.dtype[numpy.intp]] = numpy.flatnonzero(maskAlwaysEarlier)
+
+		for leafEarlierCandidate in indicesEarlier.tolist():
+			leafEarlier: int = int(leafEarlierCandidate)
+			if (leafEarlier, leafLater) in setUnconditional:
+				continue
+			listConditionalRelationships.append({
+				'Earlier': leafEarlier,
+				'Later': leafLater,
+				'AtColumn': pileOfLeafOriginal,
+			})
+
+	dataframeConditionalPrecedenceAcrossDomain: pandas.DataFrame = pandas.DataFrame(listConditionalRelationships, columns=['Earlier', 'Later', 'AtColumn']).sort_values(['AtColumn', 'Earlier']).reset_index(drop=True)
+	return dataframeConditionalPrecedenceAcrossDomain
+
+def getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state: EliminationState, leafLater: int) -> list[list[int]]:
+	dataframeConditional: pandas.DataFrame = getLeafConditionalPrecedenceAcrossLeafDomain(state, leafLater)
+	pilesSortedUnique: list[int]
+	if dataframeConditional.empty:
+		pilesSortedUnique = []
+	else:
+		pilesSortedUnique = sorted({int(pile) for pile in dataframeConditional['AtColumn'].tolist()})
+
+	listPileGroups: list[list[int]] = []
+	for pile in pilesSortedUnique:
+		if not listPileGroups:
+			listPileGroups.append([pile])
+		elif pile == listPileGroups[-1][-1] + 2:
+			listPileGroups[-1].append(pile)
+		else:
+			listPileGroups.append([pile])
+	return listPileGroups
+
+def getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leaf: int) -> list[int]:
+	listPileGroups: list[list[int]] = getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state, leaf)
+	listPilesAtEnd: list[int] = []
+	if listPileGroups:
+		listPilesAtEnd = listPileGroups[-1]
+	return listPilesAtEnd
+
+def getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, listLeavesAnalyzed: list[int] | None = None) -> dict[int, list[int]]:
+	if listLeavesAnalyzed is None:
+		leavesExcluded: set[int] = {pileOrigin, 零, state.leavesTotal - 零}
+		listLeavesAnalyzed = [leaf for leaf in range(state.leavesTotal) if leaf not in leavesExcluded]
+
+	dictionaryPilesAtDomainEnds: dict[int, list[int]] = {}
+	for leaf in listLeavesAnalyzed:
+		listPilesAtEnd: list[int] = getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state, leaf)
+		if listPilesAtEnd:
+			dictionaryPilesAtDomainEnds[leaf] = listPilesAtEnd
+	return dictionaryPilesAtDomainEnds
+
 def _getGroupedBy(state: EliminationState, pileTarget: int, groupByLeavesAtPiles: tuple[int, ...]) -> dict[int | tuple[int, ...], list[int]]:
-	dataframeFoldings: pandas.DataFrame = getDataFrameFoldings(state)
+	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	groupedBy: dict[int | tuple[int, ...], list[int]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
@@ -235,11 +474,11 @@ def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKn
 
 	return comparisonResults
 
-def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listLeavesPinned: Sequence[PinnedLeaves]) -> PermutationSpaceStatus:
+def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPinnedLeaves: Sequence[PinnedLeaves]) -> PermutationSpaceStatus:
 	rowsTotal: int = int(arrayFoldings.shape[0])
 	listMasks: list[numpy.ndarray] = []
 	listSurplusDictionaries: list[PinnedLeaves] = []
-	for leavesPinned in listLeavesPinned:
+	for leavesPinned in listPinnedLeaves:
 		maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
 		for pile, leaf in leavesPinned.items():
 			maskMatches = maskMatches & (arrayFoldings[:, pile] == leaf)
@@ -305,7 +544,7 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 	position to the mean frequency. Higher values indicate more predictable placement.
 
 	"""
-	dataframeFoldings: pandas.DataFrame = getDataFrameFoldings(state)
+	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 
 	if listLeavesAnalyzed is None:
 		leavesExcluded: set[int] = {pileOrigin, 零, state.leavesTotal - 零}
@@ -353,53 +592,62 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 	return pandas.DataFrame(listEntropyRecords).sort_values('entropyRelative', ascending=False).reset_index(drop=True)
 
 def verifyPinning2Dn(state: EliminationState) -> None:
-	colorReset = '\33[0m'
-	arrayFoldings = getDataFrameFoldings(state).to_numpy(dtype=numpy.uint8, copy=False)
-	pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.listLeavesPinned)
+	arrayFoldings = getDataFrameFoldings(state)
+	if arrayFoldings is not None:
+		arrayFoldings = arrayFoldings.to_numpy(dtype=numpy.uint8, copy=False)
+		pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.listPinnedLeaves)
 
-	listDictionaryPinned: list[PinnedLeaves] = pinningCoverage.listSurplusDictionaries
-	print("\33[93m", end='')
-	pprint(listDictionaryPinned[0:5], width=140)
-	print(colorReset, end='')
-	print(len(listDictionaryPinned), "surplus dictionaries.")
+		listDictionaryPinned: list[PinnedLeaves] = pinningCoverage.listSurplusDictionaries
+		if listDictionaryPinned:
+			print(asciiColorYellow, end='')
+			pprint(listDictionaryPinned[0:5], width=140)
+		else:
+			print(asciiColorGreen, end='')
+		print(len(listDictionaryPinned), "surplus dictionaries.")
+		print(asciiColorReset, end='')
 
-	pathFilename = Path(f"{packageSettings.pathPackage}/_e/analysisExcel/p2d{state.dimensionsTotal}SurplusDictionaries.csv")
+		pathFilename = Path(f"{packageSettings.pathPackage}/_e/analysisExcel/p2d{state.dimensionsTotal}SurplusDictionaries.csv")
 
-	if listDictionaryPinned:
-		with pathFilename.open('w', newline='') as writeStream:
-			writerCSV = csv.writer(writeStream)
-			listPiles: list[int] = list(range(state.leavesTotal))
-			writerCSV.writerow(listPiles)
-			for leavesPinned in listDictionaryPinned:
-				writerCSV.writerow([leavesPinned.get(pile, '') for pile in listPiles])
+		if listDictionaryPinned:
+			with pathFilename.open('w', newline='') as writeStream:
+				writerCSV = csv.writer(writeStream)
+				listPiles: list[int] = list(range(state.leavesTotal))
+				writerCSV.writerow(listPiles)
+				for leavesPinned in listDictionaryPinned:
+					writerCSV.writerow([leavesPinned.get(pile, '') for pile in listPiles])
 
-	if pinningCoverage.indicesOverlappingLeavesPinned:
-		color = '\33[91m'
-		print(f"{color}{len(pinningCoverage.indicesOverlappingLeavesPinned)} overlapping dictionaries", colorReset)
-		for indexDictionary in sorted(pinningCoverage.indicesOverlappingLeavesPinned)[0:2]:
-			pprint(state.listLeavesPinned[indexDictionary], width=140)
+		if pinningCoverage.indicesOverlappingLeavesPinned:
+			print(f"{asciiColorRed}{len(pinningCoverage.indicesOverlappingLeavesPinned)} overlapping dictionaries", asciiColorReset)
+			for indexDictionary in sorted(pinningCoverage.indicesOverlappingLeavesPinned)[0:2]:
+				pprint(state.listPinnedLeaves[indexDictionary], width=140)
 
-	beansOrCornbread: Callable[[PinnedLeaves], bool] = beansWithoutCornbread(state)
-	listBeans: list[PinnedLeaves] = list(filter(beansOrCornbread, state.listLeavesPinned))
-	if listBeans:
-		color = '\33[95m'
-		print(f"{color}{len(listBeans)} dictionaries with beans but no cornbread.", colorReset)
-		pprint(listBeans[0], width=140)
+		beansOrCornbread: Callable[[PinnedLeaves], bool] = beansWithoutCornbread(state)
+		listBeans: list[PinnedLeaves] = list(filter(beansOrCornbread, state.listPinnedLeaves))
+		if listBeans:
+			print(f"{asciiColorMagenta}{len(listBeans)} dictionaries with beans but no cornbread.", asciiColorReset)
+			pprint(listBeans[0], width=140)
 
-	maskUnion: numpy.ndarray = pinningCoverage.maskUnion
-	rowsRequired: int = pinningCoverage.rowsRequired
-	rowsTotal: int = pinningCoverage.rowsTotal
-	color = colorReset
-	if rowsRequired < rowsTotal:
-		color = '\33[91m'
-		indicesMissingRows: numpy.ndarray = numpy.flatnonzero(~maskUnion)
-		for indexRow in indicesMissingRows[0:2]:
-			print(color, arrayFoldings[indexRow, :])
-	print(f"{color}Required rows: {rowsRequired}/{rowsTotal}{colorReset}")
+		maskUnion: numpy.ndarray = pinningCoverage.maskUnion
+		rowsRequired: int = pinningCoverage.rowsRequired
+		rowsTotal: int = pinningCoverage.rowsTotal
+		color = asciiColorReset
+		if rowsRequired < rowsTotal:
+			color = asciiColorRed
+			indicesMissingRows: numpy.ndarray = numpy.flatnonzero(~maskUnion)
+			for indexRow in indicesMissingRows[0:2]:
+				print(color, arrayFoldings[indexRow, :])
+		print(f"{color}Required rows: {rowsRequired}/{rowsTotal}{asciiColorReset}")
 
 if __name__ == '__main__':
 	state = EliminationState((2,) * 6)
-	verifyDomainAgainstKnown(getDomainDimension二(state), listDomain2D6)
-	print()
-	state = EliminationState((2,) * 5)
-	verifyDomainAgainstKnown(getDomainDimension二(state), listDomain2D5)
+
+	from mapFolding._e import getZ0Z_precedence
+
+	# leaf33 is wrong because of step = 4.
+	# leaf33 and leaf49 are already known from prior analysis.
+	# dictionaryPilesAtDomainEnds = getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state)
+	# print(asciiColorCyan + 'dictionaryPilesAtDomainEnds' + asciiColorReset)
+	# pprint(dictionaryPilesAtDomainEnds, width=140)
+	pprint(getZ0Z_precedence(state), width=180, compact=True)
+	# print()
+	# print(Z0Z_sumsOfProductsOfDimensionsNearest首(state, 5))

@@ -41,7 +41,7 @@ def pileProcessingOrderDefault(state: EliminationState) -> list[int]:
 
 # ======= Pinning functions ===============================================
 
-def pinPiles(state: EliminationState, order: int = 4, maximumListPinnedLeaves: int = 50000, queueStopBefore: int | None = None) -> EliminationState:
+def pinPiles(state: EliminationState, order: int = 4, maximumListPinnedLeaves: int = 5000, queueStopBefore: int | None = None) -> EliminationState:
 	youMustBeDimensionsTallToPinThis = 2
 	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
@@ -91,7 +91,7 @@ def pinPiles(state: EliminationState, order: int = 4, maximumListPinnedLeaves: i
 
 	return state
 
-def pinPile首零Less零(state: EliminationState, maximumListPinnedLeaves: int = 50000) -> EliminationState:
+def pinPile首零Less零(state: EliminationState, maximumListPinnedLeaves: int = 5000) -> EliminationState:
 	youMustBeDimensionsTallToPinThis = 2
 	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
@@ -158,7 +158,7 @@ def pinLeavesDimension首二(state: EliminationState) -> EliminationState:
 
 	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis)
 
-def pinLeaf首零_零(state: EliminationState) -> EliminationState:
+def pinLeaf首零Plus零(state: EliminationState) -> EliminationState:
 	youMustBeDimensionsTallToPinThis = 2
 	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
@@ -215,15 +215,15 @@ def pinLeaf首零_零(state: EliminationState) -> EliminationState:
 			aDimensionPropertyNotFullyUnderstood = 5
 
 			if pileOfLeaf首零一 == state.leavesTotal-二:
-				listIndicesPilesExcluded.extend([-零 -1, -一 -1])
+				listIndicesPilesExcluded.extend([-零 -1, -(一) -1])
 				if aDimensionPropertyNotFullyUnderstood <= state.dimensionsTotal:
 					listIndicesPilesExcluded.extend([-二 -1])
 
 			if ((首零一二(state.dimensionsTotal) < pileOfLeaf首零一 < state.leavesTotal-二)
 				and (首二(state.dimensionsTotal) < pileOfLeaf一零 <= 首零(state.dimensionsTotal))):
-				listIndicesPilesExcluded.extend([-零])
+				listIndicesPilesExcluded.extend([-1])
 
-			if 首零一二(state.dimensionsTotal) <= pileOfLeaf首零一 < state.leavesTotal-二:
+			if False: # 首零一二(state.dimensionsTotal) <= pileOfLeaf首零一 < state.leavesTotal-二:
 				stop: int = pilesTotal // 2 - 1
 				listIndicesPilesExcluded.extend(range((1 + inclusive) * decreasing, (stop + inclusive) * decreasing, decreasing))
 
@@ -239,11 +239,11 @@ def pinLeaf首零_零(state: EliminationState) -> EliminationState:
 
 			if ((pileOfLeaf首零一 == 首零一二(state.dimensionsTotal))
 				and (首一(state.dimensionsTotal) < pileOfLeaf一零 <= 首零(state.dimensionsTotal))):
-				listIndicesPilesExcluded.extend([-零])
+				listIndicesPilesExcluded.extend([-1])
 
 			if 首零一(state.dimensionsTotal) < pileOfLeaf首零一 < 首零一二(state.dimensionsTotal):
 				if pileOfLeaf一零 in [首一(state.dimensionsTotal), 首零(state.dimensionsTotal)]:
-					listIndicesPilesExcluded.extend([-零])
+					listIndicesPilesExcluded.extend([-1])
 				elif 二 < pileOfLeaf一零 < 首二(state.dimensionsTotal):
 					listIndicesPilesExcluded.extend([0])
 
@@ -263,11 +263,11 @@ def pinLeaf首零_零(state: EliminationState) -> EliminationState:
 					IDK = ImaPattern - 1
 					listIndicesPilesExcluded.extend([*range(1, 3 * pilesTotal // 4), *range(1 + 3 * pilesTotal // 4, IDK)])
 				if 首一(state.dimensionsTotal) < pileOfLeaf一零 <= 首零(state.dimensionsTotal):
-					listIndicesPilesExcluded.extend([-零])
+					listIndicesPilesExcluded.extend([-1])
 
 			if pileOfLeaf首零一 == 首零一(state.dimensionsTotal):
 				if pileOfLeaf一零 == 首零(state.dimensionsTotal):
-					listIndicesPilesExcluded.extend([-零])
+					listIndicesPilesExcluded.extend([-1])
 				elif (二 < pileOfLeaf一零 < 首二(state.dimensionsTotal)) or (首二(state.dimensionsTotal) < pileOfLeaf一零 < 首一(state.dimensionsTotal)):
 					listIndicesPilesExcluded.extend([0])
 		domainOfPilesForLeaf = list(exclude(domainOfPilesForLeaf, listIndicesPilesExcluded))

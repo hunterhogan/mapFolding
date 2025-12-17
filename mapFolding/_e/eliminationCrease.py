@@ -1,8 +1,7 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
 from mapFolding._e import getListLeavesDecrease, getListLeavesIncrease, getPileRange, PinnedLeaves
-from mapFolding._e.pinning2Dn import (
-	_removeInequalityViolations, appendLeavesPinnedAtPile, nextLeavesPinnedWorkbench, pinPiles)
+from mapFolding._e.pinning2Dn import appendLeavesPinnedAtPile, nextLeavesPinnedWorkbench, pinPiles
 from mapFolding.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding.dataBaskets import EliminationState
 from math import e, factorial
@@ -22,8 +21,6 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned.copy())
 		sherpa = appendLeavesPinnedAtPile(sherpa, listLeavesAtPile)
-		if int((e * state.leavesTotal) % len(sherpa.leavesPinned)) == 0:
-			sherpa = _removeInequalityViolations(sherpa)
 		state.listPinnedLeaves.extend(sherpa.listPinnedLeaves)
 		state = nextLeavesPinnedWorkbench(state)
 

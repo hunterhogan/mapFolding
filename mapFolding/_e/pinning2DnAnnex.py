@@ -7,8 +7,8 @@ from itertools import filterfalse
 from mapFolding import between, exclude, inclusive, mappingHasKey
 from mapFolding._e import (
 	dimensionNearest首, dimensionSecondNearest首, getDictionaryPileRanges, getLeafDomain, getListLeavesDecrease,
-	getListLeavesIncrease, howMany0coordinatesAtTail, howManyDimensionsHaveOddParity, leafInSubHyperplane, PinnedLeaves,
-	ptount, Z0Z_precedence, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+	getListLeavesIncrease, getZ0Z_precedence, howMany0coordinatesAtTail, howManyDimensionsHaveOddParity,
+	leafInSubHyperplane, PinnedLeaves, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e._exclusions import dictionary2d5AtPileLeafExcludedByPile, dictionary2d6AtPileLeafExcludedByPile
 from mapFolding._e.pinIt import (
 	atPilePinLeaf, deconstructPinnedLeavesAtPile, leafIsNotPinned, leafIsPinned, notLeafOriginOrLeaf零, notPileLast)
@@ -22,11 +22,6 @@ if TYPE_CHECKING:
 	from collections.abc import Callable
 
 #  ====== Boolean filters ======================
-
-def _leafInEarlyPileOfDomain(pileLeaf: tuple[int, int]) -> bool:
-	if mappingHasKey(Z0Z_precedence, pileLeaf[1]):
-		return mappingHasKey(Z0Z_precedence[pileLeaf[1]], pileLeaf[0])
-	return False
 
 def _leafInLastPileOfDomain(pileLeaf: tuple[int, int], dimensionsTotal: int) -> bool:
 	return pileLeaf[0] == int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(pileLeaf[1]))) - howManyDimensionsHaveOddParity(pileLeaf[1]) + 1
@@ -132,7 +127,8 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:  # noqa: PLR0911
 	leaves that are not pinned, somehow check if there are enough open piles for them.
 	"""
 	Z0Z_tester = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned.copy())
-
+	Z0Z_precedence = getZ0Z_precedence(state)
+	Z0Z_precedence = {}
 	while True:
 		pilesOpen: set[int] = set(range(Z0Z_tester.leavesTotal)) - set(Z0Z_tester.leavesPinned.keys())
 		Z0Z_restart = False
@@ -146,8 +142,10 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:  # noqa: PLR0911
 			def mustBeBeforeLeaf(k: int, leaf: int = leaf, pile: int = pile, tailCoordinates: int = tailCoordinates) -> bool:
 				if dimensionNearest首(k) <= tailCoordinates:
 					return True
-				if _leafInEarlyPileOfDomain((pile, leaf)):
-					return k == int(bit_flip(0, dimensionNearest首(leaf)).bit_flip(howMany0coordinatesAtTail(leaf)))
+				if mappingHasKey(Z0Z_precedence, leaf):
+					if mappingHasKey(Z0Z_precedence[leaf], pile):
+						return k in Z0Z_precedence[leaf][pile]
+
 				return False
 
 			leavesRequiredBefore: set[int] = set(filter(mustBeBeforeLeaf, filter(notLeaf, filter(notLeafOriginOrLeaf零, range(Z0Z_tester.leavesTotal)))))
@@ -392,7 +390,6 @@ def pinPile首less二Crease(state: EliminationState) -> list[int]:
 
 def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 	leaf: int = -1
-	sumsProductsOfDimensions: list[int] = [sum(state.productsOfDimensions[0:dimension]) for dimension in range(state.dimensionsTotal + inclusive)]
 
 	dictionaryPileToLeaves: dict[int, list[int]] = getDictionaryPileRanges(state)
 	listRemoveLeaves: list[int] = []
@@ -458,7 +455,7 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 	if is_odd(leafAtPileExcluder):
 		listRemoveLeaves.extend([leafAtPileExcluder, state.productsOfDimensions[raiseIfNone(dimensionSecondNearest首(leafAtPileExcluder))]])
 		if leafAtPileExcluder < 首零(state.dimensionsTotal):
-			comebackOffset: int = sumsProductsOfDimensions[ptount(leafAtPileExcluder) + 1]
+			comebackOffset: int = state.sumsOfProductsOfDimensions[ptount(leafAtPileExcluder) + 1]
 			listRemoveLeaves.extend([
 				一
 				, leafAtPileExcluder + 首零(state.dimensionsTotal)-零

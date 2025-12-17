@@ -22,7 +22,7 @@ from mapFolding._e._dataDynamic import (
 	getDomainDimension首二 as getDomainDimension首二, getDomain二一零and二一 as getDomain二一零and二一,
 	getDomain二零and二 as getDomain二零and二, getDomain首零一二and首一二 as getDomain首零一二and首一二, getDomain首零二and首二 as getDomain首零二and首二,
 	getLeafDomain as getLeafDomain, getListLeavesDecrease as getListLeavesDecrease,
-	getListLeavesIncrease as getListLeavesIncrease, getPileRange as getPileRange, Z0Z_precedence as Z0Z_precedence)
+	getListLeavesIncrease as getListLeavesIncrease, getPileRange as getPileRange, getZ0Z_precedence as getZ0Z_precedence)
 
 """Perspective changes and code changes:
 

@@ -25,7 +25,7 @@ def getDictionaryAddends4Next(state: EliminationState) -> dict[int, list[int]]:
 				if bit_test(theMaskOfDirectionality, index):
 					products下_leaf[index] *= -1
 
-			slicingIndexStart: int = (leaf.bit_count() - 1) & 1 ^ 1
+			slicingIndexStart: int = howManyDimensionsHaveOddParity(leaf) & 1 ^ 1
 			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
 
 			if (slicingIndexStart == 1) and is_even(leaf):
@@ -53,7 +53,7 @@ def getDictionaryAddends4Prior(state: EliminationState) -> dict[int, list[int]]:
 				if bit_test(theMaskOfDirectionality, index):
 					products下_leaf[index] *= -1
 
-			slicingIndexStart: int = (leaf.bit_count() - 1) & 1
+			slicingIndexStart: int = howManyDimensionsHaveOddParity(leaf) & 1
 			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
 
 			if (slicingIndexStart == 1) and is_even(leaf):
@@ -132,14 +132,14 @@ if __name__ == '__main__':
 			listLeavesNext = [1]
 			listLeavesPrior = []
 		else:
-			slicingIndexStart: int = (leaf.bit_count() - 1) & 1 ^ 1
+			slicingIndexStart: int = howManyDimensionsHaveOddParity(leaf) & 1 ^ 1
 			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
 
 			if (slicingIndexStart == 1) and is_even(leaf):
 				slicingIndexStart += howMany0coordinatesAtTail(leaf)
 			listLeavesNext = listLeavesNextAndPriorInSequence[slicingIndexStart: slicingIndexEnd]
 
-			slicingIndexStart = (leaf.bit_count() - 1) & 1
+			slicingIndexStart = howManyDimensionsHaveOddParity(leaf) & 1
 			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
 
 			if (slicingIndexStart == 1) and is_even(leaf):
