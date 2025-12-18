@@ -23,23 +23,7 @@ identifiers:
   value: https://github.com/hunterhogan/mapFolding/releases/tag/0.17.1
   description: The URL for mapFolding 0.17.1.
 keywords:
-- A000136
-- A000560
-- A000682
-- A001010
-- A001011
 - A001415
-- A001416
-- A001417
-- A001418
-- A005315
-- A005316
-- A007822
-- A178961
-- A195646
-- A223094
-- A259702
-- A301620
 - AST manipulation
 - JIT compilation
 - Numba optimization
