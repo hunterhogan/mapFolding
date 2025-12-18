@@ -279,9 +279,6 @@ def _makeDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMapFolding]:
 			description=descriptionSherpa,
 			offset=offsetSherpa,
 			getMapShape=packageSettings.OEISidMapFoldingManuallySet[oeisID]['getMapShape'],
-			valuesBenchmark=packageSettings.OEISidMapFoldingManuallySet[oeisID]['valuesBenchmark'],
-			valuesTestParallelization=packageSettings.OEISidMapFoldingManuallySet[oeisID]['valuesTestParallelization'],
-			valuesTestValidation=packageSettings.OEISidMapFoldingManuallySet[oeisID]['valuesTestValidation'] + list(range(offsetSherpa, 2)),
 			valuesKnown=valuesKnownSherpa,
 			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1
 		)
@@ -339,8 +336,8 @@ def _formatHelpText() -> str:
 		A formatted string containing complete usage information and examples.
 
 	"""
-	exampleOEISid: str = oeisIDsImplemented[0]
-	exampleN: int = dictionaryOEISMapFolding[exampleOEISid]['valuesTestValidation'][-1]
+	exampleOEISid: str = 'A001415'
+	exampleN: int = 6
 
 	return (
 		"\nAvailable OEIS sequences:\n"
@@ -485,7 +482,6 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 			description=descriptionSherpa,
 			offset=offsetSherpa,
 			valuesKnown=valuesKnownSherpa,
-			valuesTestValidation=[*(packageSettings.OEISidManuallySet[oeisID]['valuesTestValidation']), offsetSherpa],
 			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1,
 		)
 	return dictionary

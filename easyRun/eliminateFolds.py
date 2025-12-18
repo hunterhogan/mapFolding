@@ -29,8 +29,8 @@ if __name__ == '__main__':
 	state: EliminationState | None = None
 
 	flow = 'elimination'
-	flow = 'constraintPropagation'
 	flow = 'crease'
+	flow = 'constraintPropagation'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'

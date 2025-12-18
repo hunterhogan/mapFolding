@@ -147,11 +147,11 @@ def findValidFoldings(state: EliminationState) -> int:
 	foldingCollector = FoldingCollector(listLeavesInPileOrder)
 	solver.Solve(model, foldingCollector)
 
-	if foldingCollector.listFoldings:
-		pathFilename = packageSettings.pathPackage / "_e" / "rawData" / f"p2d7_{uuid.uuid4()}.csv"
-		with Path.open(pathFilename, mode="w", newline="") as fileCSV:
-			csvWriter = csv.writer(fileCSV)
-			csvWriter.writerows(foldingCollector.listFoldings)
+	# if foldingCollector.listFoldings:
+	# 	pathFilename = packageSettings.pathPackage / "_e" / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
+	# 	with Path.open(pathFilename, mode="w", newline="") as fileCSV:
+	# 		csvWriter = csv.writer(fileCSV)
+	# 		csvWriter.writerows(foldingCollector.listFoldings)
 
 
 	return len(foldingCollector.listFoldings) * state.Theorem2Multiplier * state.Theorem4Multiplier

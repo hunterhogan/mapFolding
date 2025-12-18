@@ -24,6 +24,7 @@ research domain.
 """
 
 from collections.abc import Callable, Generator, Sequence
+from dataclasses import dataclass
 from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
 from mapFolding.dataBaskets import EliminationState
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, oeisIDsImplemented
@@ -40,6 +41,141 @@ import uuid
 import warnings
 
 # ruff: noqa: S311
+
+@dataclass(frozen=True)
+class TestScenario:
+	testName: str
+	oeisID: str
+	index: int
+	flowName: str | None = None
+	cpuLimit: bool | float | int | None = None
+
+preferredTestIndices: dict[str, tuple[int, ...]] = {
+	'A000136': (3, 4),
+	'A001415': (3, 4),
+	'A001416': (3, 4),
+	'A001417': (3, 4, 5),
+	'A001418': (3, 4),
+	'A005315': (3, 4),
+	'A005316': (3, 4),
+	'A007822': (3, 4),
+	'A000560': (3, 4, 5),
+	'A000682': (3, 4),
+	'A001010': (3, 4),
+	'A001011': (3, 4),
+	'A060206': (3, 4),
+	'A077460': (3, 4),
+	'A078591': (3, 4),
+	'A086345': (3, 4, 5),
+	'A178961': (3, 4),
+	'A195646': (2, 3),
+	'A223094': (3, 4),
+	'A259702': (3, 4),
+	'A301620': (3, 4),
+}
+
+def scenarioIdentifier(scenario: TestScenario) -> str:
+	parts: list[str] = [scenario.testName, scenario.oeisID, f"n{scenario.index}"]
+	if scenario.flowName:
+		parts.append(scenario.flowName)
+	return '::'.join(parts)
+
+def _sequenceMetadata(oeisID: str) -> dict[str, Any]:
+	if oeisID in dictionaryOEISMapFolding:
+		return dictionaryOEISMapFolding[oeisID]
+	return dictionaryOEIS[oeisID]
+
+def pickTestIndex(oeisID: str, overrideIndex: int | None = None) -> int:
+	metadata = _sequenceMetadata(oeisID)
+	valuesKnown: dict[int, int] = metadata['valuesKnown']
+	candidates: list[int] = []
+	if overrideIndex is not None:
+		candidates.append(overrideIndex)
+	candidates.extend(preferredTestIndices.get(oeisID, ()))
+	candidates.append(metadata['offset'])
+	for candidate in candidates:
+		if candidate in valuesKnown:
+			return candidate
+	message = f"Unable to select a test index for `{oeisID}`."
+	raise ValueError(message)
+
+def buildScenario(testName: str, oeisID: str, *, flowName: str | None = None, overrideIndex: int | None = None,
+		cpuLimit: bool | float | int | None = None) -> TestScenario:
+	return TestScenario(testName, oeisID, pickTestIndex(oeisID, overrideIndex), flowName, cpuLimit)
+
+scenarioCatalog: dict[str, tuple[TestScenario, ...]] = {
+	'codegenSingleJob': (
+		buildScenario('codegenSingleJob', 'A000136'),
+	),
+	'mapShapeFunctionality': (
+		buildScenario('mapShapeFunctionality', 'A000136'),
+		buildScenario('mapShapeFunctionality', 'A001415'),
+	),
+	'mapShapeParallelization': (
+		buildScenario('mapShapeParallelization', 'A001417', overrideIndex=5),
+	),
+	'countFolds': (
+		buildScenario('countFolds', 'A000136', flowName='daoOfMapFolding'),
+		buildScenario('countFolds', 'A001415', flowName='numba'),
+		buildScenario('countFolds', 'A001417', flowName='theorem2'),
+		buildScenario('countFolds', 'A001416', flowName='theorem2Numba'),
+		buildScenario('countFolds', 'A001418', flowName='theorem2Trimmed'),
+	),
+	'eliminateFolds': (
+		buildScenario('eliminateFolds', 'A001417', flowName='constraintPropagation', overrideIndex=5),
+		buildScenario('eliminateFolds', 'A001417', flowName='elimination', overrideIndex=3),
+	),
+	'a007822': tuple(
+		buildScenario('a007822', 'A007822', flowName=flowName, overrideIndex=4, cpuLimit=0.5)
+		for flowName in ('algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
+	),
+	'meanders': (
+		buildScenario('meanders', 'A000682', flowName='matrixMeanders'),
+		buildScenario('meanders', 'A005316', flowName='matrixMeanders'),
+		buildScenario('meanders', 'A000682', flowName='matrixNumPy'),
+		buildScenario('meanders', 'A005316', flowName='matrixNumPy'),
+		buildScenario('meanders', 'A000682', flowName='matrixPandas'),
+		buildScenario('meanders', 'A005316', flowName='matrixPandas'),
+	),
+	'oeisFormula': (
+		buildScenario('oeisFormula', 'A000560'),
+		buildScenario('oeisFormula', 'A000682'),
+		buildScenario('oeisFormula', 'A001010'),
+		buildScenario('oeisFormula', 'A001011'),
+		buildScenario('oeisFormula', 'A005315'),
+		buildScenario('oeisFormula', 'A005316'),
+		buildScenario('oeisFormula', 'A007822'),
+		buildScenario('oeisFormula', 'A060206'),
+		buildScenario('oeisFormula', 'A077460'),
+		buildScenario('oeisFormula', 'A078591'),
+		buildScenario('oeisFormula', 'A086345'),
+		buildScenario('oeisFormula', 'A178961'),
+		buildScenario('oeisFormula', 'A223094'),
+		buildScenario('oeisFormula', 'A259702'),
+		buildScenario('oeisFormula', 'A301620'),
+	),
+	'oeisValue': (
+		buildScenario('oeisValue', 'A000136'),
+		buildScenario('oeisValue', 'A001415'),
+		buildScenario('oeisValue', 'A001416'),
+		buildScenario('oeisValue', 'A001417'),
+		buildScenario('oeisValue', 'A195646'),
+		buildScenario('oeisValue', 'A001418'),
+	),
+}
+
+def scenarioList(testName: str) -> tuple[TestScenario, ...]:
+	try:
+		return scenarioCatalog[testName]
+	except KeyError as error:
+		message = f"Unknown testName `{testName}`."
+		raise KeyError(message) from error
+
+def mapShapeFromScenario(scenario: TestScenario) -> tuple[int, ...]:
+	if scenario.oeisID not in dictionaryOEISMapFolding:
+		message = f"`{scenario.oeisID}` does not define a map shape."
+		raise ValueError(message)
+	return dictionaryOEISMapFolding[scenario.oeisID]['getMapShape'](scenario.index)
 
 # SSOT for test data paths and filenames
 pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
@@ -191,112 +327,25 @@ def setupWarningsAsErrors() -> Generator[None, Any, None]:
 	yield
 	warnings.resetwarnings()
 
-@pytest.fixture
-def oneTestCuzTestsOverwritingTests(oeisID_1random: str) -> tuple[int, ...]:
-	"""For each `oeisID_1random` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation`
-	if `validateListDimensions` approves. Each `listDimensions` is suitable for testing counts.
-
-	This fixture provides a single test case to avoid issues with tests that write to the same
-	output files. It's particularly useful when testing code generation or file output functions
-	where multiple concurrent tests could interfere with each other.
-
-	The returned map shape is guaranteed to be computationally feasible for testing purposes,
-	avoiding cases that would take excessive time to complete during test runs.
-
-	Parameters
-	----------
-	oeisID_1random : str
-		Random OEIS sequence identifier from the `oeisID_1random` fixture.
-
-	Returns
-	-------
-	mapDimensions : tuple[int, ...]
-		Valid map dimensions suitable for testing fold counting operations.
-
-	"""
-	while True:
-		n = random.choice(dictionaryOEISMapFolding[oeisID_1random]['valuesTestValidation'])
-		if n < 2:
-			continue
-		listDimensionsCandidate = list(dictionaryOEISMapFolding[oeisID_1random]['getMapShape'](n))
-
-		try:
-			return validateListDimensions(listDimensionsCandidate)
-		except (ValueError, NotImplementedError):
-			pass
+_SINGLE_JOB_SCENARIO: TestScenario = scenarioList('codegenSingleJob')[0]
 
 @pytest.fixture
-def mapShapeTestCountFolds(oeisIDmapFolding: str) -> tuple[int, ...]:
-	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestValidation` if
-	`validateListDimensions` approves. Each `listDimensions` is suitable for testing counts.
+def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:
+	"""Return one deterministic map shape suitable for code generation tests."""
+	mapShapeCandidate = list(mapShapeFromScenario(_SINGLE_JOB_SCENARIO))
+	return validateListDimensions(mapShapeCandidate)
 
-	Parameters
-	----------
-	oeisID : str
-		OEIS sequence identifier from the `oeisID` fixture.
-
-	Returns
-	-------
-	mapDimensions : tuple[int, ...]
-		Valid map dimensions suitable for testing fold counting operations.
-
-	"""
-	while True:
-		n = random.choice(dictionaryOEISMapFolding[oeisIDmapFolding]['valuesTestValidation'])
-		if n < 2:
-			continue
-		listDimensionsCandidate: list[int] = list(dictionaryOEISMapFolding[oeisIDmapFolding]['getMapShape'](n))
-
-		try:
-			return validateListDimensions(listDimensionsCandidate)
-		except (ValueError, NotImplementedError):
-			pass
+@pytest.fixture(params=scenarioList('mapShapeFunctionality'), ids=scenarioIdentifier)
+def mapShapeTestFunctionality(request: pytest.FixtureRequest) -> tuple[int, ...]:
+	"""Provide deterministic map shapes for filesystem and validation tests."""
+	scenario: TestScenario = request.param
+	return validateListDimensions(list(mapShapeFromScenario(scenario)))
 
 @pytest.fixture
-def mapShapeTestFunctionality(oeisID_1random: str) -> tuple[int, ...]:
-	"""To test functionality, get one `listDimensions` from `valuesTestValidation` if `validateListDimensions` approves.
-
-	The algorithm can count the folds of the returned `listDimensions` in a short enough time suitable for testing.
-
-	Parameters
-	----------
-	oeisID_1random : str
-		Random OEIS sequence identifier from the `oeisID_1random` fixture.
-
-	Returns
-	-------
-	mapDimensions : tuple[int, ...]
-		Valid map dimensions that can be processed quickly for functional testing.
-
-	"""
-	while True:
-		n = random.choice(dictionaryOEISMapFolding[oeisID_1random]['valuesTestValidation'])
-		if n < 2:
-			continue
-		listDimensionsCandidate = list(dictionaryOEISMapFolding[oeisID_1random]['getMapShape'](n))
-
-		try:
-			return validateListDimensions(listDimensionsCandidate)
-		except (ValueError, NotImplementedError):
-			pass
-
-@pytest.fixture
-def mapShapeTestParallelization(oeisIDmapFolding: str) -> tuple[int, ...]:
-	"""For each `oeisID` from the `pytest.fixture`, returns `listDimensions` from `valuesTestParallelization`.
-
-	Parameters
-	----------
-	oeisID : str
-		OEIS sequence identifier from the `oeisID` fixture.
-
-	Returns
-	-------
-	mapDimensions : tuple[int, ...]
-		Map dimensions suitable for testing parallelization features.
-
-	"""
-	n = random.choice(dictionaryOEISMapFolding[oeisIDmapFolding]['valuesTestParallelization'])
-	return dictionaryOEISMapFolding[oeisIDmapFolding]['getMapShape'](n)
+def mapShapeTestParallelization() -> list[int]:
+	"""Return a deterministic map shape that exercises task division logic."""
+	scenario: TestScenario = scenarioList('mapShapeParallelization')[0]
+	return list(mapShapeFromScenario(scenario))
 
 @pytest.fixture
 def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]:
@@ -353,40 +402,6 @@ def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:
 	"""
 	return request.param
 
-@pytest.fixture(params=('A000682', 'A005316'))
-def oeisIDmeanders(request: pytest.FixtureRequest) -> Any:
-	"""Parametrized fixture providing all Meanders OEIS sequence identifiers.
-
-	Parameters
-	----------
-	request : pytest.FixtureRequest
-		The pytest request object containing the current parameter value.
-
-	Returns
-	-------
-	sequenceIdentifier : Any
-		OEIS sequence identifier for testing across all Meanders sequences.
-
-	"""
-	return request.param
-
-@pytest.fixture(params=tuple(dictionaryOEIS.keys()))
-def oeisIDother(request: pytest.FixtureRequest) -> Any:
-	"""Parametrized fixture providing all other OEIS sequence identifiers.
-
-	Parameters
-	----------
-	request : pytest.FixtureRequest
-		The pytest request object containing the current parameter value.
-
-	Returns
-	-------
-	sequenceIdentifier : Any
-		OEIS sequence identifier for testing across all other sequences.
-
-	"""
-	return request.param
-
 @pytest.fixture
 def oeisID_1random() -> str:
 	"""Return one random valid OEIS ID.
@@ -398,6 +413,36 @@ def oeisID_1random() -> str:
 
 	"""
 	return random.choice(oeisIDsImplemented)
+
+@pytest.fixture(params=scenarioList('countFolds'), ids=scenarioIdentifier)
+def countFoldsScenario(request: pytest.FixtureRequest) -> TestScenario:
+	"""Provide flow-specific scenarios for `countFolds` validation."""
+	return request.param
+
+@pytest.fixture(params=scenarioList('eliminateFolds'), ids=scenarioIdentifier)
+def eliminateFoldsScenario(request: pytest.FixtureRequest) -> TestScenario:
+	"""Provide flow-specific scenarios for `eliminateFolds` validation."""
+	return request.param
+
+@pytest.fixture(params=scenarioList('a007822'), ids=scenarioIdentifier)
+def a007822Scenario(request: pytest.FixtureRequest) -> TestScenario:
+	"""Provide flow-specific scenarios for A007822 validations."""
+	return request.param
+
+@pytest.fixture(params=scenarioList('meanders'), ids=scenarioIdentifier)
+def meandersScenario(request: pytest.FixtureRequest) -> TestScenario:
+	"""Provide flow-specific scenarios for meanders transfer-matrix flows."""
+	return request.param
+
+@pytest.fixture(params=scenarioList('oeisFormula'), ids=scenarioIdentifier)
+def formulaScenario(request: pytest.FixtureRequest) -> TestScenario:
+	"""Provide OEIS IDs and indices for formula-based verification."""
+	return request.param
+
+@pytest.fixture(params=scenarioList('oeisValue'), ids=scenarioIdentifier)
+def oeisValueScenario(request: pytest.FixtureRequest) -> TestScenario:
+	"""Provide deterministic OEIS IDs and indices for `oeisIDfor_n` tests."""
+	return request.param
 
 @pytest.fixture
 def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:

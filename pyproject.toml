@@ -7,23 +7,7 @@ requires-python = ">=3.12, <3.14"
 license = { 'text' = "CC-BY-NC-4.0" }
 authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 keywords = [
-  "A000136",
-  "A000560",
-  "A000682",
-  "A001010",
-  "A001011",
   "A001415",
-  "A001416",
-  "A001417",
-  "A001418",
-  "A005315",
-  "A005316",
-  "A007822",
-  "A178961",
-  "A195646",
-  "A223094",
-  "A259702",
-  "A301620",
   "AST manipulation",
   "JIT compilation",
   "Numba optimization",
