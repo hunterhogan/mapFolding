@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from functools import cache
 
 # ======= Using a single-base positional-numeral system as a proxy for Cartesian coordinates =======

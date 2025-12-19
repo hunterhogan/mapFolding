@@ -21,8 +21,20 @@ from mapFolding._e._dataDynamic import (
 	getDomainDimension一 as getDomainDimension一, getDomainDimension二 as getDomainDimension二,
 	getDomainDimension首二 as getDomainDimension首二, getDomain二一零and二一 as getDomain二一零and二一,
 	getDomain二零and二 as getDomain二零and二, getDomain首零一二and首一二 as getDomain首零一二and首一二, getDomain首零二and首二 as getDomain首零二and首二,
-	getLeafDomain as getLeafDomain, getListLeavesDecrease as getListLeavesDecrease,
-	getListLeavesIncrease as getListLeavesIncrease, getPileRange as getPileRange, getZ0Z_precedence as getZ0Z_precedence)
+	getLeafDomain as getLeafDomain, getListLeavesCreaseDown as getListLeavesCreaseDown,
+	getListLeavesCreaseNext as getListLeavesCreaseNext, getPileRange as getPileRange,
+	getZ0Z_precedence as getZ0Z_precedence)
+
+"""Rules for maintaining a valid permutation space:
+
+1. In `leavesPinned`, if `leaf` is not pinned, deconstruct `leavesPinned` by the `pile` domain of `leaf`.
+	A. For each `pile` in the domain of `leaf`, if `pile` in `leavesPinned` is not occupied, create a new `PinnedLeaves` dictionary by appending `leaf` pinned at `pile` to `leavesPinned`.
+	B. Replace `leavesPinned` with the group of newly created `PinnedLeaves` dictionaries.
+2. In `leavesPinned`, if a `pile` is not pinned, deconstruct `leavesPinned` by the `leaf` range (mathematical range) of `pile`.
+	A. For each `leaf` in the range of `pile`, if `leaf` is not already pinned in `leavesPinned`, create a new `PinnedLeaves` dictionary by appending `leaf` pinned at `pile` to `leavesPinned`.
+	B. Replace `leavesPinned` with the group of newly created `PinnedLeaves` dictionaries.
+3. Do not overwrite or delete a dictionary's pinned leaves because that could cause the dictionary's permutation space to overlap with a different dictionary's permutation space.
+"""
 
 """Perspective changes and code changes:
 

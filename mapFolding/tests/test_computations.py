@@ -40,6 +40,11 @@ import importlib.util
 import multiprocessing
 import pytest
 import warnings
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from importlib.machinery import ModuleSpec
+	from mapFolding._theTypes import MetadataOEISid, MetadataOEISidMapFolding
 
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
@@ -53,9 +58,9 @@ def test_A007822(a007822Scenario: TestScenario) -> None:
 		Scenario describing the OEIS index and flow to validate.
 
 	"""
-	oeisID = a007822Scenario.oeisID
+	oeisID: str = a007822Scenario.oeisID
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
-	expected = dictionaryOEIS[oeisID]['valuesKnown'][a007822Scenario.index]
+	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][a007822Scenario.index]
 	standardizedEqualToCallableReturn(
 		expected,
 		NOTcountingFolds,
@@ -83,8 +88,8 @@ def test_countFolds(countFoldsScenario: TestScenario) -> None:
 		Scenario describing the OEIS index and flow to validate.
 
 	"""
-	mapShape = mapShapeFromScenario(countFoldsScenario)
-	expected = dictionaryOEISMapFolding[countFoldsScenario.oeisID]['valuesKnown'][countFoldsScenario.index]
+	mapShape: tuple[int, ...] = mapShapeFromScenario(countFoldsScenario)
+	expected: int = dictionaryOEISMapFolding[countFoldsScenario.oeisID]['valuesKnown'][countFoldsScenario.index]
 	standardizedEqualToCallableReturn(expected, countFolds, None, None, None, None, mapShape, countFoldsScenario.flowName)
 
 def test_eliminateFolds(eliminateFoldsScenario: TestScenario) -> None:
@@ -95,11 +100,11 @@ def test_eliminateFolds(eliminateFoldsScenario: TestScenario) -> None:
 	eliminateFoldsScenario : TestScenario
 		Scenario describing the OEIS index and flow to validate.
 	"""
-	mapShape = mapShapeFromScenario(eliminateFoldsScenario)
+	mapShape: tuple[int, ...] = mapShapeFromScenario(eliminateFoldsScenario)
 	state = None
 	pathLikeWriteFoldsTotal: None = None
 	CPUlimit: bool | float | int | None = .25
-	expected = dictionaryOEISMapFolding[eliminateFoldsScenario.oeisID]['valuesKnown'][eliminateFoldsScenario.index]
+	expected: int = dictionaryOEISMapFolding[eliminateFoldsScenario.oeisID]['valuesKnown'][eliminateFoldsScenario.index]
 	standardizedEqualToCallableReturn(expected, eliminateFolds, mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, eliminateFoldsScenario.flowName)
 
 def test_meanders(meandersScenario: TestScenario) -> None:
@@ -114,8 +119,8 @@ def test_meanders(meandersScenario: TestScenario) -> None:
 		Scenario describing the OEIS index and flow to validate.
 
 	"""
-	dictionaryCurrent = dictionaryOEISMapFolding if meandersScenario.oeisID in dictionaryOEISMapFolding else dictionaryOEIS
-	expected = dictionaryCurrent[meandersScenario.oeisID]['valuesKnown'][meandersScenario.index]
+	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if meandersScenario.oeisID in dictionaryOEISMapFolding else dictionaryOEIS
+	expected: int = dictionaryCurrent[meandersScenario.oeisID]['valuesKnown'][meandersScenario.index]
 	standardizedEqualToCallableReturn(
 		expected,
 		NOTcountingFolds,
@@ -137,8 +142,8 @@ def test_NOTcountingFolds(formulaScenario: TestScenario) -> None:
 		Scenario describing the OEIS index evaluated via formula dispatch.
 
 	"""
-	dictionaryCurrent = dictionaryOEISMapFolding if formulaScenario.oeisID in dictionaryOEISMapFolding else dictionaryOEIS
-	expected = dictionaryCurrent[formulaScenario.oeisID]['valuesKnown'][formulaScenario.index]
+	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if formulaScenario.oeisID in dictionaryOEISMapFolding else dictionaryOEIS
+	expected: int = dictionaryCurrent[formulaScenario.oeisID]['valuesKnown'][formulaScenario.index]
 	standardizedEqualToCallableReturn(
 		expected,
 		NOTcountingFolds,
@@ -192,11 +197,11 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	"""
 	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # noqa: PLC0415
 	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba  # noqa: PLC0415
-	mapShape = oneTestCuzTestsOverwritingTests
-	state = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
+	mapShape: tuple[int, ...] = oneTestCuzTestsOverwritingTests
+	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 
-	pathFilenameModule = pathFilename_tmpTesting.absolute()
-	pathFilenameFoldsTotal = pathFilenameModule.with_suffix('.foldsTotalTesting')
+	pathFilenameModule: Path = pathFilename_tmpTesting.absolute()
+	pathFilenameFoldsTotal: Path = pathFilenameModule.with_suffix('.foldsTotalTesting')
 	registrarRecordsTemporaryFilesystemObject(pathFilenameFoldsTotal)
 
 	jobTest = RecipeJobTheorem2(state
@@ -206,7 +211,7 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
 	makeJobNumba(jobTest, spices)
 
-	Don_Lapre_Road_to_Self_Improvement = importlib.util.spec_from_file_location("__main__", pathFilenameModule)
+	Don_Lapre_Road_to_Self_Improvement: ModuleSpec | None = importlib.util.spec_from_file_location("__main__", pathFilenameModule)
 	if Don_Lapre_Road_to_Self_Improvement is None:
 		message = f"Failed to create module specification from {pathFilenameModule}"
 		raise ImportError(message)

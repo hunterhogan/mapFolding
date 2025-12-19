@@ -642,12 +642,13 @@ if __name__ == '__main__':
 	state = EliminationState((2,) * 6)
 
 	from mapFolding._e import getZ0Z_precedence
+	# getZ0Z_precedence(state)
 
 	# leaf33 is wrong because of step = 4.
 	# leaf33 and leaf49 are already known from prior analysis.
 	# dictionaryPilesAtDomainEnds = getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state)
 	# print(asciiColorCyan + 'dictionaryPilesAtDomainEnds' + asciiColorReset)
 	# pprint(dictionaryPilesAtDomainEnds, width=140)
-	pprint(getZ0Z_precedence(state), width=180, compact=True)
+	pprint(getZ0Z_precedence(state), width=380, compact=True)
 	# print()
 	# print(Z0Z_sumsOfProductsOfDimensionsNearest首(state, 5))

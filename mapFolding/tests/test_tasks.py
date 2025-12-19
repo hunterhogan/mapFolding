@@ -60,12 +60,14 @@ def test_countFolds_cpuLimitOopsie(mapShapeTestFunctionality: tuple[int, ...], C
 	(["invalid"], 4, [19, 23], ValueError),
 	(20, 4, [3,5], ValueError)
 ])
-def test_getTaskDivisions(computationDivisions: Literal['maximum', 'cpu', 20] | None | list[str]
-						, concurrencyLimit: Literal[4]
-						, listDimensions: list[int]
-						, expectedTaskDivisions: Literal[0, 77, 4] | type[ValueError]) -> None:
-	mapShape = validateListDimensions(listDimensions)
-	leavesTotal = getLeavesTotal(mapShape)
+def test_getTaskDivisions(
+	computationDivisions: Literal['maximum', 'cpu', 20] | None | list[str],
+	concurrencyLimit: Literal[4],
+	listDimensions: list[int],
+	expectedTaskDivisions: int | type[ValueError]
+) -> None:
+	mapShape: tuple[int, ...] = validateListDimensions(listDimensions)
+	leavesTotal: int = getLeavesTotal(mapShape)
 	standardizedEqualToCallableReturn(expectedTaskDivisions, getTaskDivisions, computationDivisions, concurrencyLimit, leavesTotal)
 
 @pytest.mark.parametrize("expected,parameter", [
@@ -74,6 +76,9 @@ def test_getTaskDivisions(computationDivisions: Literal['maximum', 'cpu', 20] | 
 	(ValueError, {2}),  # set
 	(ValueError, {"cores": 2}),  # dict
 ])
-def test_setCPUlimitMalformedParameter(expected: type[ValueError] | Literal[2], parameter: list[int] | tuple[int] | set[int] | dict[str, int] | Literal['2']) -> None:
+def test_setCPUlimitMalformedParameter(
+	expected: type[ValueError] | Literal[2],
+	parameter: list[int] | tuple[int, ...] | set[int] | dict[str, int] | Literal['2']
+) -> None:
 	"""Test that invalid CPUlimit types are properly handled."""
 	standardizedEqualToCallableReturn(expected, defineProcessorLimit, parameter)

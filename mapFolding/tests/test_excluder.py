@@ -15,7 +15,8 @@ from mapFolding._e.analysisPython.theExcluderBeast import (
 	writeAggregatedExclusions, writeExclusionDataCollated, writeExclusionDictionaries)
 from mapFolding._e.pinning2DnAnnex import Z0Z_excluder
 from mapFolding.dataBaskets import EliminationState
-from pathlib import Path
+from pathlib import Path, PurePath
+from typing import Any
 from unittest.mock import MagicMock, patch
 import pandas
 import pytest
@@ -96,7 +97,7 @@ def test_writeExclusionDataCollated_creates_files(path_tmpTesting: Path, monkeyp
 
 	monkeypatch.setattr(theExcluderBeast, "getDataFrameFoldings", stubDataFrameFoldings)
 
-	pathsCreated = writeExclusionDataCollated(listDimensions=[5])
+	pathsCreated: list[PurePath] = writeExclusionDataCollated(listDimensions=[5])
 
 	assert pathsCreated
 	for pathCreated in pathsCreated:
@@ -111,20 +112,23 @@ def test_writeAggregatedExclusions_creates_files(path_tmpTesting: Path, monkeypa
 	monkeypatch.setattr(theExcluderBeast, "functionsHeadDimensions", [stubLeaf])
 	monkeypatch.setattr(theExcluderBeast, "pathExclusionData", path_tmpTesting)
 
-	stub_data = {
+	stub_data: dict[str, dict[str, dict[str, list[tuple[Fraction, int]]]]] = {
 		stubLeaf.__name__: {
 			stubLeaf.__name__: {
 				stubLeaf.__name__: [(Fraction(0, 1), 0), (Fraction(0, 1), 1)]
 			}
 		}
 	}
-	monkeypatch.setattr(theExcluderBeast, "analyzeContiguousEndAbsolute", lambda *_: stub_data)
-	monkeypatch.setattr(theExcluderBeast, "analyzeContiguousEndRelative", lambda *_: stub_data)
-	monkeypatch.setattr(theExcluderBeast, "analyzeContiguousStartAbsolute", lambda *_: stub_data)
-	monkeypatch.setattr(theExcluderBeast, "analyzeContiguousStartRelative", lambda *_: stub_data)
-	monkeypatch.setattr(theExcluderBeast, "analyzeNonContiguousIndicesRelative", lambda *_: stub_data)
+	def stub_analyze(*args: Any, **kwargs: Any) -> dict[str, dict[str, dict[str, list[tuple[Fraction, int]]]]]:
+		return stub_data
 
-	listPathFilenames = writeAggregatedExclusions(path_tmpTesting)
+	monkeypatch.setattr(theExcluderBeast, "analyzeContiguousEndAbsolute", stub_analyze)
+	monkeypatch.setattr(theExcluderBeast, "analyzeContiguousEndRelative", stub_analyze)
+	monkeypatch.setattr(theExcluderBeast, "analyzeContiguousStartAbsolute", stub_analyze)
+	monkeypatch.setattr(theExcluderBeast, "analyzeContiguousStartRelative", stub_analyze)
+	monkeypatch.setattr(theExcluderBeast, "analyzeNonContiguousIndicesRelative", stub_analyze)
+
+	listPathFilenames: list[PurePath] = writeAggregatedExclusions(path_tmpTesting)
 
 	assert listPathFilenames
 	for pathCreated in listPathFilenames:
@@ -141,7 +145,7 @@ def test_writeExclusionDictionaries_createsFile(path_tmpTesting: Path) -> None:
 			patch("mapFolding._e.analysisPython.theExcluderBeast.loadAggregatedExclusions", return_value={}):
 		# It also calls restructureAggregatedExclusionsForMapShape which needs to work with empty dict
 			pathExclusionsFile: Path = path_tmpTesting / "_exclusions.py"
-			pathCreated = writeExclusionDictionaries(pathExclusionsFile)
+			pathCreated: PurePath = writeExclusionDictionaries(pathExclusionsFile)
 
 			assert Path(pathCreated).exists()
 			assert Path(pathCreated).name == "_exclusions.py"

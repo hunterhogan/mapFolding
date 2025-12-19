@@ -96,7 +96,7 @@ def pickTestIndex(oeisID: str, overrideIndex: int | None = None) -> int:
 	for candidate in candidates:
 		if candidate in valuesKnown:
 			return candidate
-	message = f"Unable to select a test index for `{oeisID}`."
+	message: str = f"Unable to select a test index for `{oeisID}`."
 	raise ValueError(message)
 
 def buildScenario(testName: str, oeisID: str, *, flowName: str | None = None, overrideIndex: int | None = None,
@@ -263,9 +263,9 @@ def pathFilename_tmpTesting(request: pytest.FixtureRequest) -> Path:
 		extension = ".txt"
 
 	# "Z0Z_" ensures the name does not start with a number, which would make it an invalid Python identifier
-	uuidHex = uuid.uuid4().hex
-	subpath = "Z0Z_" + uuidHex[0:-8]
-	filenameStem = "Z0Z_" + uuidHex[-8:None]
+	uuidHex: str = uuid.uuid4().hex
+	subpath: str = "Z0Z_" + uuidHex[0:-8]
+	filenameStem: str = "Z0Z_" + uuidHex[-8:None]
 
 	pathFilename_tmp = Path(path_tmpRoot, subpath, filenameStem + extension)
 	pathFilename_tmp.parent.mkdir(parents=True, exist_ok=False)
@@ -288,7 +288,7 @@ def pathCacheTesting(path_tmpTesting: Path) -> Generator[Path, Any, None]:
 		Context manager that provides the temporary cache path and restores original.
 
 	"""
-	pathCacheOriginal = _theSSOT.pathCache
+	pathCacheOriginal: Path = _theSSOT.pathCache
 	_theSSOT.pathCache = path_tmpTesting
 	yield path_tmpTesting
 	_theSSOT.pathCache = pathCacheOriginal
@@ -332,7 +332,7 @@ _SINGLE_JOB_SCENARIO: TestScenario = scenarioList('codegenSingleJob')[0]
 @pytest.fixture
 def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:
 	"""Return one deterministic map shape suitable for code generation tests."""
-	mapShapeCandidate = list(mapShapeFromScenario(_SINGLE_JOB_SCENARIO))
+	mapShapeCandidate: list[int] = list(mapShapeFromScenario(_SINGLE_JOB_SCENARIO))
 	return validateListDimensions(mapShapeCandidate)
 
 @pytest.fixture(params=scenarioList('mapShapeFunctionality'), ids=scenarioIdentifier)
@@ -374,7 +374,7 @@ def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
 	def make_mock(foldsValue: int, listDimensions: list[int]) -> Callable[..., None]:
 		mock_array = makeDataContainer(2, numpy.int32)
 		mock_array[0] = foldsValue
-		mapShape = validateListDimensions(listDimensions)
+		mapShape: tuple[int, ...] = validateListDimensions(listDimensions)
 		mock_array[-1] = getLeavesTotal(mapShape)
 
 		def mock_countFolds(**keywordArguments: Any) -> None:

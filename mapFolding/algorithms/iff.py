@@ -22,15 +22,17 @@ See Also
 - Citations in BibTeX format "mapFolding/citations".
 """
 from collections.abc import Callable
-from cytoolz.dicttoolz import valfilter
+from cytoolz.dicttoolz import keyfilter, keymap, valfilter, valmap
 from cytoolz.functoolz import curry as syntacticCurry
-from functools import cache
-from itertools import combinations, filterfalse, product as CartesianProduct, starmap
-from mapFolding import getLeavesTotal
+from cytoolz.itertoolz import groupby as toolz_groupby
+from functools import cache, partial
+from itertools import combinations, filterfalse, product as CartesianProduct
+from mapFolding import between, getLeavesTotal, inclusive
 from mapFolding._e import PinnedLeaves, 零
 from mapFolding.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf
+from typing import TypeGuard
 
 def thisIsAViolationComplicated(pile: int, pileComparand: int, getLeafNextCrease: Callable[[], int | None], getComparandNextCrease: Callable[[], int | None], pileOf: Callable[[int], int | None]) -> bool:  # noqa: PLR0911
 	"""Validate.
@@ -168,23 +170,21 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 	"""Return `True` if `state.leavesPinned` has a violation."""
 	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in state.leavesPinned.items()}
-	listPileLeafCandidates: list[tuple[int, int]] = sorted(
-			pileLeaf for pileLeaf in state.leavesPinned.items() if pileLeaf[1] < state.leavesTotal - 零)
+	listPileLeaf: list[tuple[int, int]] = sorted(valfilter(between(0, state.leavesTotal - 零 - inclusive), state.leavesPinned).items())
 	for dimension in range(state.dimensionsTotal):
-		listParityGroups: list[list[tuple[int, int]]] = [[], []]
-		for pileKey, leafValue in listPileLeafCandidates:
-			leafIncrease: int | None = nextCrease(state.mapShape, leafValue, dimension)
-			if leafIncrease is None:
+		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
+		for pile, leaf in listPileLeaf:
+			leafCrease: int | None = nextCrease(state.mapShape, leaf, dimension)
+			if leafCrease is None:
 				continue
-			pileIncrease: int | None = leafToPile.get(leafIncrease)
-			if pileIncrease is None:
+			pileCrease: int | None = leafToPile.get(leafCrease)
+			if pileCrease is None:
 				continue
-			parityValue: int = ImaOddLeaf(state.mapShape, leafValue, dimension)
-			listParityGroups[parityValue].append((pileKey, pileIncrease))
-		for parityGroup in listParityGroups:
-			if len(parityGroup) < 2:
+			listPileCreaseByParity[ImaOddLeaf(state.mapShape, leaf, dimension)].append((pile, pileCrease))
+		for groupedParity in listPileCreaseByParity:
+			if len(groupedParity) < 2:
 				continue
-			for (pilePrimary, pilePrimaryIncrease), (pileComparand, pileComparandIncrease) in combinations(parityGroup, 2):
+			for (pilePrimary, pilePrimaryIncrease), (pileComparand, pileComparandIncrease) in combinations(groupedParity, 2):
 				if thisIsAViolation(pilePrimary, pilePrimaryIncrease, pileComparand, pileComparandIncrease):
 					return True
 	return False

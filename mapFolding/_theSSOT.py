@@ -43,24 +43,12 @@ class mapFoldingPackageSettings(PackageSettings):
 	"""Package identifier for concurrent execution operations."""
 # TODO I made this a `TypedDict` before I knew how to make dataclasses and classes. Think about other data structures.
 OEISidMapFoldingManuallySet: dict[str, MetadataOEISidMapFoldingManuallySet] = {
-	'A000136': {
-		'getMapShape': lambda n: (1, n),
-	},
-	'A001415': {
-		'getMapShape': lambda n: (2, n),
-	},
-	'A001416': {
-		'getMapShape': lambda n: (3, n),
-	},
-	'A001417': {
-		'getMapShape': lambda n: tuple(2 for _dimension in range(n)),
-	},
-	'A195646': {
-		'getMapShape': lambda n: tuple(3 for _dimension in range(n)),
-	},
-	'A001418': {
-		'getMapShape': lambda n: (n, n),
-	},
+	'A000136': {'getMapShape': lambda n: (1, n)},
+	'A001415': {'getMapShape': lambda n: (2, n)},
+	'A001416': {'getMapShape': lambda n: (3, n)},
+	'A001417': {'getMapShape': lambda n: tuple(2 for _dimension in range(n))},
+	'A195646': {'getMapShape': lambda n: tuple(3 for _dimension in range(n))},
+	'A001418': {'getMapShape': lambda n: (n, n)},
 }
 
 identifierPackageFALLBACK = "mapFolding"
@@ -69,23 +57,9 @@ identifierPackageFALLBACK = "mapFolding"
 packageSettings = mapFoldingPackageSettings(identifierPackageFALLBACK=identifierPackageFALLBACK, OEISidMapFoldingManuallySet=OEISidMapFoldingManuallySet)
 """Global package settings."""
 
-OEISidManuallySet: dict[str, MetadataOEISidManuallySet] = {
-	'A000560': {},
-	'A000682': {},
-	'A001010': {},
-	'A001011': {},
-	'A005315': {},
-	'A005316': {},
-	'A007822': {},
-	'A060206': {},
-	'A077460': {},
-	'A078591': {},
-	'A086345': {},
-	'A178961': {},
-	'A223094': {},
-	'A259702': {},
-	'A301620': {},
-}
+OEISidManuallySet: dict[str, MetadataOEISidManuallySet] = {'A000560': {}, 'A000682': {}, 'A001010': {}, 'A001011': {},
+	'A005315': {}, 'A005316': {}, 'A007822': {}, 'A060206': {}, 'A077460': {}, 'A078591': {},
+	'A086345': {}, 'A178961': {}, 'A223094': {}, 'A259702': {}, 'A301620': {}}
 
 # Recreate packageSettings with meanders settings included
 packageSettings = mapFoldingPackageSettings(

@@ -7,7 +7,8 @@ from mapFolding import (
 	asciiColorReset, asciiColorYellow, between, consecutive, decreasing, exclude, inclusive, noDuplicates, packageSettings)
 from mapFolding._e import (
 	dimensionFourthNearest首, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首, howMany0coordinatesAtTail,
-	howManyDimensionsHaveOddParity, leafOrigin, pileOrigin, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
+	howManyDimensionsHaveOddParity, leafInSubHyperplane, leafOrigin, pileOrigin, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一,
+	首零一二, 首零二)
 from mapFolding._e._measure import Z0Z_sumsOfProductsOfDimensionsNearest首
 from mapFolding.dataBaskets import EliminationState
 from operator import add, sub
@@ -19,27 +20,23 @@ import sys
 
 # ======= Creases =================================
 
-def getListLeavesIncrease(state: EliminationState, leaf: int) -> list[int]:
-	"""1) I need to improve the identifier: the 'increase' describes creasing the `pile` number, not the `leaf` number.
+def getListLeavesCreaseNext(state: EliminationState, leaf: int) -> list[int]:
+	"""1) The leaf has at most `dimensionsTotal - 1` many creases.
 
-	2) The has at most `dimensionsTotal - 1` many creases.
+	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
+		`leaf` number.
 
 	3) The list of creases *might* be a list of Gray codes.
-
-	4) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
-		`leaf` number.
 	"""
 	return _getCreases(state, leaf, increase=True)
 
-def getListLeavesDecrease(state: EliminationState, leaf: int) -> list[int]:
-	"""1) I need to improve the identifier: the 'decrease' describes creasing the pile number, not the `leaf` number.
+def getListLeavesCreaseDown(state: EliminationState, leaf: int) -> list[int]:
+	"""1) The leaf has at most `dimensionsTotal - 1` many creases.
 
-	2) The has at most `dimensionsTotal - 1` many creases.
+	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
+		`leaf` number.
 
 	3) The list of creases *might* be a list of Gray codes.
-
-	4) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
-		`leaf` number.
 	"""
 	return _getCreases(state, leaf, increase=False)
 
@@ -248,11 +245,11 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 				if 5 < dimensionsTotal:
 					addend = 四
 					start = domain0corners.index((pileOfLeaf二一 + addend, pileOfLeaf二一零 + addend))
-					stop = start + addend
+					stop: int = start + addend
 					step = 2
 					if (tailDimensions == 1) and (dimensionNearest首(pileOfLeaf二一) == 4):
 						start += 2
-						stop: int = start + 1
+						stop = start + 1
 					if tailDimensions == 2:
 						start += 3
 						if dimensionNearest首(pileOfLeaf二一) == 4:
@@ -863,128 +860,90 @@ def _getZ0Z_precedence(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[in
 	dictionaryPrecedence: dict[int, dict[int, list[int]]] = {}
 
 # ======= piles at the beginning of the leaf's domain ================
-	for dimension in range(3, state.dimensionsTotal + 1):
+	for dimension in range(3, state.dimensionsTotal + inclusive):
 		for countDown in range(dimension - 2 + decreasing, decreasing, decreasing):
-			start: int = state.productsOfDimensions[dimension] - sum(state.productsOfDimensions[countDown:dimension - 2])
-			step: int = state.productsOfDimensions[dimension - 1]
-			rangeOfLeaves = range(start, state.leavesTotal, step)
-			sliceOfPiles = slice(0, Z0Z_sumsOfProductsOfDimensionsNearest首(state, dimension-1)[dimension-2-countDown] // 2)
-
-			for leaf in rangeOfLeaves:
+			for leaf in range(state.productsOfDimensions[dimension] - sum(state.productsOfDimensions[countDown:dimension - 2]), state.leavesTotal, state.productsOfDimensions[dimension - 1]):
 				dictionaryPrecedence[leaf] = {aPile: [state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]]
-							for aPile in list(dictionaryDomains[leaf])[sliceOfPiles]}
+							for aPile in list(dictionaryDomains[leaf])[0: Z0Z_sumsOfProductsOfDimensionsNearest首(state, dimension - 1)[dimension - 2 - countDown] // 2]}
 
 # ------- The beginning of domain首一Plus零 --------------------------------
 	leaf = 首一(state.dimensionsTotal)+零
-	sliceOfPiles = slice(1, 2) # Reminder: slice.start = 1 is an "artificial" value that is due to the dataset excluding UNconditional precedences, which is leaf零 for leaf首一Plus零.
-	listOfPiles = list(dictionaryDomains[leaf])[sliceOfPiles]
 	dictionaryPrecedence[leaf] = {aPile: [2 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]
-									, 3 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]] for aPile in listOfPiles}
+									, 3 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]]
+							for aPile in list(dictionaryDomains[leaf])[1:2]}
+	del leaf
 
-# ======= leaf with conditional `leafPredecessor` in all piles of its domain ===========
+# ======= leaf首零一Plus零: conditional `leafPredecessor` in all piles of its domain ===========
 	leaf: int = 首零一(state.dimensionsTotal)+零
-	leafPredecessorPileFirst = [
-		# Describing leafPredecessor > 32; aka dimensionSecondNearest首dimensionSecondNearest首_is_odd_pileFirst
-
-# ------- Series-ish ------------
-# 	( 0,  0), ( 1, 1)
-#	(32, 63), (33, 3, 31); 32 is fixed at 63, conditional 33 stops at 31.
-# Why 31? Observation: pile31 is the second-to-last pile in the domain of leaf2.
-# Observation: pile31 is the first pile in the domain of leaf16.
-# Conceptually, pile31 is the last pile of the first half of the sequence: 011111 vs 111111 (pile63). Or, pile31 is the last pile in the subHyperplane (if that is a thing).
-# NOTE Z0Z_sumsOfProductsOfDimensionsNearest首(state, state.dimensionsTotal - 1) state.dimensionsTotal - 1 is the subHyperplane
-# (0, 16, 24, 28, 30, 31)
-	# (33,  3, 31) (34, 19, 19): 3 + 16 = 19
-	# (33,  3, 31) (35, 11, 31): 3 + 8 = 11
-	# (34, 19, 19) (34, 27, 31): 19 + 8 = 27
-	# (34, 27, 31) (35, 11, 31): 27 - 16 = 11
-	# (34, 27, 31) (38, 29, 29): 27 + 2 = 29
-	# (35, 11, 31) (38, 29, 29): 31 - 2 = 29
-# (0, 16, 24, 28, 30, 31)
-	# (34, 19, 19) (34, 27, 31): 16 + 3 = 19, 24 + 3 = 27, 28 + 3 = 31
-
-# ------- Series ------------
-	# (0, 32, 48, 56, 60, 62, 63)
-	( 2, 19), ( 3, 19),					# 32 - 13 = 19
-	(34, 59), (35, 61),
-# 	(34, 19, 19),												# "Special case" explained: (leafPredecessor == dimensionOrigin) and is_odd(howManyDimensionsHaveOddParity(leafPredecessor))
-																# , add one pile (leafPredecessor首零, pileFirstOfLeafPredecessor)
-# ------- Series ------------
-	( 6, 35), 	( 7, 35),				# 48 - 13 = 35
-	(38, 57), 	(39, 59),
-				( 4, 43), ( 5, 43),		# 56 - 13 = 43
-				(36, 59), (37, 61),
-
-# ------- Series ------------
-				(14, 47), 	(15, 47),	# 60 - 13 = 47
-				(46, 55), 	(47, 57),							# pileLast -= 2*is_even ; pileLast -= 2*the last level (delta of howManyDimensionsHaveOddParity)
-	(10, 51), (11, 51), 	(12, 51),	(13, 51),
-	(42, 57), (43, 59), 	(44, 57),	(45, 59),				# pileLast -= 2*is_even ; pileLast -= 2*the last level (delta of howManyDimensionsHaveOddParity)
-										( 8, 55), ( 9, 55),
-										(40, 59), (41, 61),		# pileLast -= 2*is_even ; pileLast = 61, which is the last pile in domain49
-							# 			(40, 55, 55)			# "Special case" explained: (leafPredecessor == dimensionOrigin) and is_odd(howManyDimensionsHaveOddParity(leafPredecessor))
-																# , add one pile (leafPredecessor首零, pileFirstOfLeafPredecessor)
-# ------- Series ------------
-	(30, 49), (31, 49),					# 62 - 13 = 49
-	(62, 55), (63, 57),
-
-	(26, 53), (27, 53), (28, 53), (29, 53), (22, 53), (23, 53),
-	(58, 57), (59, 59), (60, 57), (61, 59), (54, 57), (55, 59),
-
-	(18, 57), (19, 57), (20, 57), (21, 57), (24, 57), (25, 57),
-	(50, 59), (51, 61), (52, 59), (53, 61), (56, 59), (57, 61),
-
-	(16, 61), (17, 61),
-	(48, 61), #leafPredecessor49 does not exist before leaf49, you know?
-
-]
-
-	sliceOfPiles = slice(0, None)
-	listOfPiles = list(dictionaryDomains[leaf])[sliceOfPiles]
-	dictionary首零一Plus零: dict[int, list[int]] = {aPile: [] for aPile in listOfPiles}
+	listOfPiles = list(dictionaryDomains[leaf])
+	dictionaryPrecedence[leaf] = {aPile: [] for aPile in list(dictionaryDomains[leaf])}
 	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = Z0Z_sumsOfProductsOfDimensionsNearest首(state, state.dimensionsTotal)
-
+	sumsOfProductsOfDimensionsNearest首InSubHyperplane: tuple[int, ...] = Z0Z_sumsOfProductsOfDimensionsNearest首(state, state.dimensionsTotal - 1)
 	pileStepAbsolute = 2
+
+	for aPile in listOfPiles[listOfPiles.index(一+零): listOfPiles.index(首零(state.dimensionsTotal)-零) + inclusive]:
+		dictionaryPrecedence[leaf][aPile].append(首零(state.dimensionsTotal)+零)
+
 	for indexUniversal in range(state.dimensionsTotal - 2):
 		leafPredecessorTheFirst: int = state.sumsOfProductsOfDimensions[indexUniversal + 2]
 		leavesPredecessorInThisSeries: int = state.productsOfDimensions[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
 		for addend in range(leavesPredecessorInThisSeries):
 			leafPredecessor = leafPredecessorTheFirst + (addend * decreasing)
-			pileFirst: int = (sumsOfProductsOfDimensionsNearest首[indexUniversal]
-						+ 3
-						- (pileStepAbsolute * 2 * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + is_even(leafPredecessor)))
-						+ state.productsOfDimensions[state.dimensionsTotal - (indexUniversal + 2)]
-						- ((2 == (howManyDimensionsHaveOddParity(leafPredecessor) + is_even(leafPredecessor)) == dimensionNearest首(leafPredecessor))
-							* pileStepAbsolute
-							* 2
-							* (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + is_even(leafPredecessor)))
+			pileFirst: int = (
+				sumsOfProductsOfDimensionsNearest首[indexUniversal]
+				+ state.sumsOfProductsOfDimensions[2]
+				+ state.productsOfDimensions[state.dimensionsTotal - (indexUniversal + 2)]
+				- ((pileStepAbsolute * 2 * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + is_even(leafPredecessor)))
+					* (1 + (2 == (howManyDimensionsHaveOddParity(leafPredecessor) + is_even(leafPredecessor)) == dimensionNearest首(leafPredecessor)))
+				)
 			)
-			for pile in listOfPiles[listOfPiles.index(pileFirst): None]:
-				dictionary首零一Plus零[pile].append(leafPredecessor)
+			for aPile in listOfPiles[listOfPiles.index(pileFirst): None]:
+				dictionaryPrecedence[leaf][aPile].append(leafPredecessor)
 
 			leafPredecessor首零: int = leafPredecessor + 首零(state.dimensionsTotal)
+			if (leafInSubHyperplane(leafPredecessor) == 0) and is_odd(howMany0coordinatesAtTail(leafPredecessor)):
+				dictionaryPrecedence[leaf][pileFirst].append(leafPredecessor首零)
 			if leafPredecessor首零 == leaf:
 				continue
-			pileFirst = listOfPiles[-1] - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor首零) - 1))
-			for pile in listOfPiles[listOfPiles.index(pileFirst): None]:
-				dictionary首零一Plus零[pile].append(leafPredecessor首零)
+			pileFirst = listOfPiles[-1] - (
+					pileStepAbsolute * (
+					howManyDimensionsHaveOddParity(leafPredecessor首零)
+					- 1
+					+ is_even(leafPredecessor首零)
+					- is_odd(leafPredecessor首零)
+					- int(howMany0coordinatesAtTail(leafPredecessor首零) == state.dimensionsTotal - 2)
+					- int(leaf < leafPredecessor首零)
+				))
+			for aPile in listOfPiles[listOfPiles.index(pileFirst): None]:
+				dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
-	if state.dimensionsTotal == 6:
-		leafPredecessorPileFirstPileLast = [(33, 3, 31), (34, 19, 19), (34, 27, 31), (35, 11, 31), (38, 29, 29), (39, 29, 29), (40, 55, 55)]
-		for leafPredecessor, pileFirst, pileLast in leafPredecessorPileFirstPileLast:
-			for pile in listOfPiles[listOfPiles.index(pileFirst): listOfPiles.index(pileLast) + inclusive]:
-				dictionary首零一Plus零[pile].append(leafPredecessor)
+			if indexUniversal < state.dimensionsTotal - 4:
+				if is_odd(howMany0coordinatesAtTail(leafPredecessor - is_odd(leafPredecessor))):
+					pileFirst = (
+						sumsOfProductsOfDimensionsNearest首InSubHyperplane[indexUniversal]
+						+ state.sumsOfProductsOfDimensions[2 + 1 + indexUniversal]
+						- (pileStepAbsolute
+							* 2
+							* (howManyDimensionsHaveOddParity(leafPredecessor首零) - 1
+								+ is_even(leafPredecessor首零) * indexUniversal
+								- is_even(leafPredecessor首零) * (int(not(bool(indexUniversal))))
+							)
+						)
+						+ state.productsOfDimensions[state.dimensionsTotal - 1
+													+ addend * (int(not(bool(indexUniversal))))
+													- (indexUniversal + 2)]
+					)
+					for aPile in listOfPiles[listOfPiles.index(pileFirst) + indexUniversal: listOfPiles.index(首零(state.dimensionsTotal)-零) - indexUniversal + inclusive]:
+						dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
-	dictionaryPrecedence.update({leaf: dictionary首零一Plus零})
+	del leaf, listOfPiles, sumsOfProductsOfDimensionsNearest首, pileStepAbsolute, sumsOfProductsOfDimensionsNearest首InSubHyperplane
 
-# ======= Separate logic because the distance between absolute piles is 4, not 2 ==============
+# ======= leaf首零Plus零: Separate logic because the distance between absolute piles is 4, not 2 ==============
 # leaf has conditional `leafPredecessor` in all but the first pile of its domain
 # Reminder: has UNconditional `leafPredecessor` in the first pile: leaf零
 	leaf: int = 首零(state.dimensionsTotal)+零
-	sliceOfPiles: slice = slice(1, None)
-	listOfPiles: list[int] = list(dictionaryDomains[leaf])[sliceOfPiles]
-	dictionary首零Plus零: dict[int, list[int]] = {aPile: [] for aPile in listOfPiles}
-
+	listOfPiles: list[int] = list(dictionaryDomains[leaf])[1: None]
+	dictionaryPrecedence[leaf] = {aPile: [] for aPile in listOfPiles}
 	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = Z0Z_sumsOfProductsOfDimensionsNearest首(state, state.dimensionsTotal)
 	pileStepAbsolute = 4
 	for indexUniversal in range(state.dimensionsTotal - 2):
@@ -994,11 +953,11 @@ def _getZ0Z_precedence(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[in
 			leafPredecessor: int = leafPredecessorTheFirst + (addend * decreasing)
 			leafPredecessor首零: int = leafPredecessor + 首零(state.dimensionsTotal)
 			pileFirst = sumsOfProductsOfDimensionsNearest首[indexUniversal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + is_even(leafPredecessor)))
-			for pile in listOfPiles[listOfPiles.index(pileFirst): None]:
-				dictionary首零Plus零[pile].append(leafPredecessor)
-				dictionary首零Plus零[pile].append(leafPredecessor首零)
+			for aPile in listOfPiles[listOfPiles.index(pileFirst): None]:
+				dictionaryPrecedence[leaf][aPile].append(leafPredecessor)
+				dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
-	dictionaryPrecedence.update({首零(state.dimensionsTotal)+零: dictionary首零Plus零})
+	del leaf, listOfPiles, sumsOfProductsOfDimensionsNearest首, pileStepAbsolute
 
 # ======= piles at the end of the leaf's domain ================
 # ------- Example of special case: has conditional `leafPredecessor` two steps before the end of the domain --------------------------

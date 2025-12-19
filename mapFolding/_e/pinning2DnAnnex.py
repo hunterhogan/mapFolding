@@ -6,8 +6,8 @@ from hunterMakesPy import raiseIfNone
 from itertools import filterfalse
 from mapFolding import between, exclude, inclusive, mappingHasKey
 from mapFolding._e import (
-	dimensionNearest首, dimensionSecondNearest首, getDictionaryPileRanges, getLeafDomain, getListLeavesDecrease,
-	getListLeavesIncrease, getZ0Z_precedence, howMany0coordinatesAtTail, howManyDimensionsHaveOddParity,
+	dimensionNearest首, dimensionSecondNearest首, getDictionaryPileRanges, getLeafDomain, getListLeavesCreaseDown,
+	getListLeavesCreaseNext, getZ0Z_precedence, howMany0coordinatesAtTail, howManyDimensionsHaveOddParity,
 	leafInSubHyperplane, PinnedLeaves, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e._exclusions import dictionary2d5AtPileLeafExcludedByPile, dictionary2d6AtPileLeafExcludedByPile
 from mapFolding._e.pinIt import (
@@ -35,10 +35,10 @@ def beansWithoutCornbread(state: EliminationState, leavesPinned: PinnedLeaves) -
 def pinLeafCornbread(state: EliminationState) -> EliminationState:
 	leafBeans: int = state.leavesPinned[state.pile]
 	if leafBeans in [一+零, 首一(state.dimensionsTotal)]:
-		leafCornbread: int = getListLeavesIncrease(state, leafBeans)[-1]
+		leafCornbread: int = getListLeavesCreaseNext(state, leafBeans)[-1]
 		state.pile += 1
 	else:
-		leafCornbread = getListLeavesDecrease(state, leafBeans)[-1]
+		leafCornbread = getListLeavesCreaseDown(state, leafBeans)[-1]
 		state.pile -= 1
 
 	if disqualifyAppendingLeafAtPile(state, leafCornbread):
@@ -212,9 +212,9 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:  # noqa: PLR0911
 
 def _getListLeavesCrease(state: EliminationState, leaf: int) -> list[int]:
 	if 0 < leaf:
-		listLeavesCrease: list[int] = getListLeavesDecrease(state, abs(leaf))
+		listLeavesCrease: list[int] = getListLeavesCreaseDown(state, abs(leaf))
 	else:
-		listLeavesCrease: list[int] = getListLeavesIncrease(state, abs(leaf))
+		listLeavesCrease: list[int] = getListLeavesCreaseNext(state, abs(leaf))
 	return listLeavesCrease
 
 # Second order
@@ -551,7 +551,7 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 
 	if (leafAt一零 != 首零一(state.dimensionsTotal)+零) and (leafAt首Less一 == 首零一(state.dimensionsTotal)):
 		listRemoveLeaves.append(一)
-	if (leafAt首Less一零 != getListLeavesDecrease(state, 首零(state.dimensionsTotal)+零)[0]) and (leafAt一 == 一+零):
+	if (leafAt首Less一零 != getListLeavesCreaseDown(state, 首零(state.dimensionsTotal)+零)[0]) and (leafAt一 == 一+零):
 		listRemoveLeaves.append(首一(state.dimensionsTotal))
 	if (leafAt一 == 首二(state.dimensionsTotal)+零) and (leafAt首Less一 == 首零一(state.dimensionsTotal)):
 		listRemoveLeaves.extend([首二(state.dimensionsTotal), 首零一二(state.dimensionsTotal)])

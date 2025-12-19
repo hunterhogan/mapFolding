@@ -2,7 +2,7 @@ from collections.abc import Callable, Iterable, Sequence
 from fractions import Fraction
 from functools import cache, reduce
 from gmpy2 import bit_flip
-from hunterMakesPy import importPathFilename2Identifier, updateExtendPolishDictionaryLists, writePython
+from hunterMakesPy import importPathFilename2Identifier, raiseIfNone, updateExtendPolishDictionaryLists, writePython
 from itertools import product as CartesianProduct, repeat
 from mapFolding import between, inclusive, packageSettings
 from mapFolding._e import (
@@ -70,7 +70,7 @@ def writeExclusionDataCollated(listDimensions: Sequence[int] = (5, 6)) -> list[P
 
 	for dimensionsTotal in listDimensions:
 		state: EliminationState = EliminationState((2,) * dimensionsTotal)
-		dataframeFoldings: pandas.DataFrame = getDataFrameFoldings(state)
+		dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 
 		dictionaryLeafDomains: dict[Leaf, range] = getDictionaryLeafDomains(state)
 

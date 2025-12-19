@@ -3,21 +3,11 @@ from cytoolz.dicttoolz import assoc as associate
 from cytoolz.functoolz import complement, curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
 from itertools import repeat
-from mapFolding import DOTvalues, mappingHasKey
+from mapFolding import between, DOTvalues, inclusive, mappingHasKey
 from mapFolding._e import getLeafDomain, getPileRange, PinnedLeaves, 零
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import flatten
 
-"""Rules for maintaining a valid permutation space:
-
-1. In `leavesPinned`, if `leaf` is not pinned, deconstruct `leavesPinned` by the `pile` domain of `leaf`.
-	A. For each `pile` in the domain of `leaf`, if `pile` in `leavesPinned` is not occupied, create a new `PinnedLeaves` dictionary by appending `leaf` pinned at `pile` to `leavesPinned`.
-	B. Replace `leavesPinned` with the group of newly created `PinnedLeaves` dictionaries.
-2. In `leavesPinned`, if a `pile` is not pinned, deconstruct `leavesPinned` by the `leaf` range (mathematical range) of `pile`.
-	A. For each `leaf` in the range of `pile`, if `leaf` is not already pinned in `leavesPinned`, create a new `PinnedLeaves` dictionary by appending `leaf` pinned at `pile` to `leavesPinned`.
-	B. Replace `leavesPinned` with the group of newly created `PinnedLeaves` dictionaries.
-3. Do not overwrite or delete a dictionary's pinned leaves because that could cause the dictionary's permutation space to overlap with a different dictionary's permutation space.
-"""
 # ======= Boolean filters =======================
 
 @syntacticCurry
@@ -372,12 +362,12 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: int, r: int, p
 	if domain_r is None:
 		domain_r = getLeafDomain(state, r)
 
-	domain_r = filter(lambda pile_r: pile_r < pile_k, domain_r)
+	domain_r = filter(between(0, pile_k - inclusive), domain_r)
 
 	if rangePile_k is None:
 		rangePile_k = getPileRange(state, pile_k)
 
-	rangePile_k = tuple(rangePile_k)
+	rangePile_k = set(rangePile_k)
 
 	if k in rangePile_k:
 		for leavesPinned_kPinnedAt_pile_k, iterable_pile_kOccupied in segregateLeafByDeconstructingListPinnedLeavesAtPile(listPinnedLeaves, k, pile_k, rangePile_k):

@@ -9,7 +9,7 @@ Each function is tested across its valid input range (0-256 inclusive for most,
 exception handling on invalid inputs.
 """
 
-from mapFolding._e._measure import (
+from mapFolding._e import (
 	dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首, howMany0coordinatesAtTail,
 	howManyDimensionsHaveOddParity, leafInSubHyperplane, ptount)
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
@@ -23,42 +23,35 @@ def dataMeasurementDimensionNearest() -> dict[int, int]:
 	"""Provide verification data for dimensionNearest首."""
 	return dataDimensionNearest
 
-
 @pytest.fixture
 def dataMeasurementDimensionSecondNearest() -> dict[int, int | None]:
 	"""Provide verification data for dimensionSecondNearest首."""
 	return dataDimensionSecondNearest
-
 
 @pytest.fixture
 def dataMeasurementDimensionThirdNearest() -> dict[int, int | None]:
 	"""Provide verification data for dimensionThirdNearest首."""
 	return dataDimensionThirdNearest
 
-
 @pytest.fixture
 def dataMeasurementLeafInSubHyperplane() -> dict[int, int]:
 	"""Provide verification data for leafInSubHyperplane."""
 	return dataLeafInSubHyperplane
-
 
 @pytest.fixture
 def dataMeasurementHowMany0coordinatesAtTail() -> dict[int, int]:
 	"""Provide verification data for howMany0coordinatesAtTail."""
 	return dataHowMany0coordinatesAtTail
 
-
 @pytest.fixture
 def dataMeasurementHowManyDimensionsHaveOddParity() -> dict[int, int]:
 	"""Provide verification data for howManyDimensionsHaveOddParity."""
 	return dataHowManyDimensionsHaveOddParity
 
-
 @pytest.fixture
 def dataMeasurementPtount() -> dict[int, int]:
 	"""Provide verification data for ptount."""
 	return dataPtount
-
 
 class TestDimensionNearest:
 	"""Tests for dimensionNearest首: finds 0-indexed position of MSB."""
@@ -89,7 +82,6 @@ class TestDimensionNearest:
 	) -> None:
 		standardizedEqualToCallableReturn(ValueError, dimensionNearest首, invalidInput)
 
-
 class TestDimensionSecondNearest:
 	"""Tests for dimensionSecondNearest首: finds 0-indexed position of second MSB."""
 
@@ -118,7 +110,6 @@ class TestDimensionSecondNearest:
 		invalidInput: int,
 	) -> None:
 		standardizedEqualToCallableReturn(ValueError, dimensionSecondNearest首, invalidInput)
-
 
 class TestDimensionThirdNearest:
 	"""Tests for dimensionThirdNearest首: finds 0-indexed position of third MSB."""
@@ -149,7 +140,6 @@ class TestDimensionThirdNearest:
 	) -> None:
 		standardizedEqualToCallableReturn(ValueError, dimensionThirdNearest首, invalidInput)
 
-
 class TestLeafInSubHyperplane:
 	"""Tests for leafInSubHyperplane: projects hyperplane leaf onto sub-hyperplane."""
 
@@ -178,7 +168,6 @@ class TestLeafInSubHyperplane:
 		invalidInput: int,
 	) -> None:
 		standardizedEqualToCallableReturn(ValueError, leafInSubHyperplane, invalidInput)
-
 
 class TestHowMany0coordinatesAtTail:
 	"""Tests for howMany0coordinatesAtTail: counts trailing zeros (CTZ)."""
@@ -209,7 +198,6 @@ class TestHowMany0coordinatesAtTail:
 	) -> None:
 		standardizedEqualToCallableReturn(ValueError, howMany0coordinatesAtTail, invalidInput)
 
-
 class TestHowManyDimensionsHaveOddParity:
 	"""Tests for howManyDimensionsHaveOddParity: bit_count - 1, minimum 0."""
 
@@ -238,7 +226,6 @@ class TestHowManyDimensionsHaveOddParity:
 		invalidInput: int,
 	) -> None:
 		standardizedEqualToCallableReturn(ValueError, howManyDimensionsHaveOddParity, invalidInput)
-
 
 class TestPtount:
 	"""Tests for ptount: measures distance from power of two's bit count after subtracting 3."""

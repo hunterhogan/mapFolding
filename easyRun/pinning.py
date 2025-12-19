@@ -30,13 +30,14 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(permutationsLeavesPinnedTotal(state.listPinnedLeaves))
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 5)
+	state = EliminationState((2,) * 6)
 
 	printThis = True
 
 	if printThis:
 		timeStart = time.perf_counter()
-		state = pinPiles(state, 4)
+		state: EliminationState = pinPile首零Less零(state)
+		state: EliminationState = pinLeaf首零Plus零(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -44,11 +45,10 @@ if __name__ == '__main__':
 		print(f"{len(state.listPinnedLeaves)=}")
 
 	elif printThis:
+		state = pinPiles(state, 4)
 		state: EliminationState = pinLeavesDimension一(state)
-		state: EliminationState = pinLeaf首零Plus零(state)
 		print(list(getLeafDomain(state, 33)))
 		state: EliminationState = pinLeavesDimension二(state)
-		state: EliminationState = pinPile首零Less零(state)
 		state: EliminationState = pinLeavesDimension首二(state)
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))
 

@@ -3,8 +3,8 @@ from copy import deepcopy
 from itertools import combinations, pairwise, product as CartesianProduct
 from mapFolding import decreasing, packageSettings
 from mapFolding._e import (
-	dimensionNearest首, getDictionaryLeafDomains, getListLeavesIncrease, howMany0coordinatesAtTail, leafOrigin, pileOrigin,
-	PinnedLeaves, 零)
+	dimensionNearest首, getDictionaryLeafDomains, getListLeavesCreaseNext, howMany0coordinatesAtTail, leafOrigin,
+	pileOrigin, PinnedLeaves, 零)
 from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
@@ -46,7 +46,7 @@ def findValidFoldings(state: EliminationState) -> int:
 			model.AddAllowedAssignments([listPilingsInLeafOrder[leaf]], [(pile,) for pile in domain])
 
 		for leaf in range(state.leavesTotal):
-			listLeavesNext: list[int] = getListLeavesIncrease(state, leaf)
+			listLeavesNext: list[int] = getListLeavesCreaseNext(state, leaf)
 			for pile in range(state.leavesTotal - 零):
 				currentLeafAtThisPile: cp_model.IntVar = listLeavesInPileOrder[pile]
 				nextLeafAtNextPile: cp_model.IntVar = listLeavesInPileOrder[pile + 1]
