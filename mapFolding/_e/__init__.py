@@ -8,12 +8,11 @@ from mapFolding._e._semiotics import (
 
 # isort: split
 from mapFolding._e._measure import (
-	dimensionFourthNearest首 as dimensionFourthNearest首, dimensionNearest首 as dimensionNearest首,
-	dimensionSecondNearest首 as dimensionSecondNearest首, dimensionThirdNearest首 as dimensionThirdNearest首,
-	howMany0coordinatesAtTail as howMany0coordinatesAtTail,
-	howManyDimensionsHaveOddParity as howManyDimensionsHaveOddParity, leafInSubHyperplane as leafInSubHyperplane,
-	ptount as ptount, Z0Z_invert as Z0Z_invert,
-	Z0Z_sumsOfProductsOfDimensionsNearest首 as Z0Z_sumsOfProductsOfDimensionsNearest首)
+	dimensionFourthNearest首 as dimensionFourthNearest首, dimensionNearestTail as dimensionNearestTail,
+	dimensionNearest首 as dimensionNearest首, dimensionSecondNearest首 as dimensionSecondNearest首,
+	dimensionThirdNearest首 as dimensionThirdNearest首, howManyDimensionsHaveOddParity as howManyDimensionsHaveOddParity,
+	leafInSubHyperplane as leafInSubHyperplane, ptount as ptount, Z0Z_creaseNearestTail as Z0Z_creaseNearestTail,
+	Z0Z_invert as Z0Z_invert, Z0Z_sumsOfProductsOfDimensionsNearest首 as Z0Z_sumsOfProductsOfDimensionsNearest首)
 
 # isort: split
 from mapFolding._e._dataDynamic import (
@@ -23,7 +22,7 @@ from mapFolding._e._dataDynamic import (
 	getDomain二零and二 as getDomain二零and二, getDomain首零一二and首一二 as getDomain首零一二and首一二, getDomain首零二and首二 as getDomain首零二and首二,
 	getLeafDomain as getLeafDomain, getListLeavesCreaseDown as getListLeavesCreaseDown,
 	getListLeavesCreaseNext as getListLeavesCreaseNext, getPileRange as getPileRange,
-	getZ0Z_precedence as getZ0Z_precedence)
+	getZ0Z_precedence as getZ0Z_precedence, getZ0Z_successor as getZ0Z_successor)
 
 """Rules for maintaining a valid permutation space:
 
@@ -43,7 +42,6 @@ from mapFolding._e._dataDynamic import (
 - The `next` crease, in the sense of `k+1` and `r+1` in the inequalities is simple: given `k` and `dimension`,
 	`k1 = bit_flip(k, dimension); k1 = k1 if k1 > k else None`.
 	Reminder: this is because I evaluate the four `k < r`, not the eight `k ? r` inequalities *a la* Koehler.
-- I suspect I want I want a perfect analog to `howMany0coordinatesAtTail()` and not just the imperfect analog `howManyDimensionsHaveOddParity()`.
 """
 
 """The 'meaning' of:
@@ -60,6 +58,76 @@ the absolute quantity, not just the consecutive ones relative to the LSD.
 			parity
 	domain of leaf
 	range of leaves in piles
+"""
+
+"""
+2d6
+(0, 32, 48, 56, 60, 62, 63) = sumsOfProductsOfDimensionsNearest首
+(0, 1, 3, 7, 15, 31, 63, 127) = sumsOfProductsOfDimensions
+leaf descends from 63 in sumsOfProductsOfDimensionsNearest首
+first pile is dimensionsTotal and ascends by addends in sumsOfProductsOfDimensions
+leaf63 starts at pile6 = 6+0
+leaf62 starts at pile7 = 6+1
+leaf60 starts at pile10 = 7+3
+leaf56 starts at pile17 = 10+7
+leaf48 starts at pile32 = 17+15
+leaf32 starts at pile63 = 32+31
+
+2d5
+(0, 16, 24, 28, 30, 31)
+31, 5+0
+30, 5+1
+28, 6+3
+24, 9+7
+16, 16+15
+(0, 1, 3, 7, 15, 31, 63)
+{0: [0],
+ 1: [1],
+ 2: [3, 5, 9, 17],
+ 3: [2, 7, 11, 13, 19, 21, 25],
+ 4: [3, 5, 6, 9, 10, 15, 18, 23, 27, 29],
+ 5: [2, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31],
+ 6: [3, 5, 6, 9, 10, 15, 17, 18, 23, 27, 29, 30],
+ 7: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31],
+ 8: [3, 5, 6, 9, 10, 12, 15, 18, 20, 23, 27, 29, 30],
+ 9: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 10: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 27, 29, 30],
+ 11: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 12: [3, 5, 6, 9, 10, 12, 15, 18, 20, 23, 27, 29, 30],
+ 13: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 14: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 27, 29, 30],
+ 15: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 16: [3, 5, 6, 9, 10, 12, 15, 18, 20, 23, 24, 27, 29, 30],
+ 17: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 18: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30],
+ 19: [4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 20: [5, 6, 9, 10, 12, 15, 18, 20, 23, 24, 27, 29, 30],
+ 21: [4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 22: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30],
+ 23: [4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 24: [5, 6, 9, 10, 12, 15, 18, 20, 23, 24, 27, 29, 30],
+ 25: [4, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 26: [9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30],
+ 27: [8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 28: [9, 10, 12, 18, 20, 23, 24, 27, 29, 30],
+ 29: [8, 19, 21, 22, 25, 26, 28],
+ 30: [17, 18, 20, 24],
+ 31: [16]}
+"""
+
+
+"""crazy^2
+leafPredecessor = state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]
+print(leafPredecessor == int(bit_flip(0, dimensionNearest首(leaf)).bit_flip(howMany0coordinatesAtTail(leaf))))
+
+sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = Z0Z_sumsOfProductsOfDimensionsNearest首(state)
+def Z0Z_inverseIsSmallEnough(leaf: int, pile: int, sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = sumsOfProductsOfDimensionsNearest首) -> bool:
+	if leaf in sumsOfProductsOfDimensionsNearest首:
+		index首 = sumsOfProductsOfDimensionsNearest首.index(leaf)
+		firstPile_bb = state.dimensionsTotal + sum(state.sumsOfProductsOfDimensions[0:state.dimensionsTotal-index首+inclusive])
+		anotherFormula = int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)
+		print(firstPile_bb ==anotherFormula, leaf, firstPile_bb, anotherFormula)
+
 """
 
 """Pairs of leaves with low entropy.
@@ -126,6 +194,36 @@ The permutations of these 5 piles produce 5730 of the 7840 sequences.
 
 """
 
+"""Are these patterns useful?
+The list of leaves in the range of pile21 for a 2d6 map:
+			[2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62	],
+start	step
+2		12	[2, 				 14, 				 26, 				 38, 					 50,					 62	],
+4		17	[	4,						 21, 							 38,												],
+4		24	[	4,										 28,															 62	],
+7*		6	[	   7,		 13,	 19,		 25,		 31,	 37,		NOT 43,		 49,		 55,		 61,	],
+7		7	[	   7,			 14,	 21,			 28,	 35,			 42,		 49,			 56,			],
+7		15	[	   7,						 22,					 37,							 52,					],
+8		17	[		  8,						 25,							 42,							 59,		],
+8		18	[		  8,							 26,							 44,								 62	],
+11		15	[			 11,						 26,					 41,							 56,			],
+11		24	[			 11,									 35,											 59,		],
+14		21	[					 14,							 35,					  					 56,			],
+25		12	[									 25,				 37,					 49,					 61,	],
+35		12	[													 35,					 47,					 59,		],
+38		6	[															 38,		 44,		 50,		 56,		 62	],
+38		9	[															 38,			 47,				 56,			],
+41		9	[																 41,				 50,			 59,		],
+42		8	[																	 42,				 52,				 62	],
+49*		6	[																				 49,		 55,		 61,	],
+
+* If I take leaf7, step 6 to the end, it would generate leaf43, which is wrong. But, leaf49, step 6 to the end is valid.
+There are many step patterns that would be valid if the ended at approximately leaf32, such as leaf19, step 3, but I only included leaf7, step 6.
+
+[	   7, 	  11, 13, 14, 19, 21, 22, 25, 26, 28, 31, 		 38, 	 42, 44, 		 50, 52, 	 56,		 62	], # if leaf is odd, then leaf*2, leaf*4, and leaf*8 are in the range.
+
+"""
+
 """products of dimensions and sums of products emerge from the formulas in `getLeafDomain`.
 state = EliminationState((2,) * 6)
 domainsOfDimensionOrigins = tuple(getLeafDomain(state, leaf) for leaf in state.productsOfDimensions)[0:-1]
@@ -135,9 +233,9 @@ for dimensionOrigin, domain, sumOrigins, sumReversed in zip(state.productsOfDime
 	print(f"{dimensionOrigin:<2}\t{domain.start == sumOrigins = }\t{sumOrigins}\t{sumReversed+2}\t{domain.stop == sumReversed+2 = }")
 1       domain.start == sumOrigins = True       1       2       domain.stop == sumReversed+2 = True
 2       domain.start == sumOrigins = True       3       34      domain.stop == sumReversed+2 = True
-4       domain.start == sumOrigins = True       7       50      domain.stop == sumReversed+2 = True
+4       domain.start == sumOrigins = True       7      50      domain.stop == sumReversed+2 = True
 8       domain.start == sumOrigins = True       15      58      domain.stop == sumReversed+2 = True
-16      domain.start == sumOrigins = True       31      62      domain.stop == sumReversed+2 = True
+16      domain.start == sumOrigins = True       31     62	      domain.stop == sumReversed+2 = True
 32      domain.start == sumOrigins = True       63      64      domain.stop == sumReversed+2 = True
 
 (Note to self: in `sumReversed+2`, consider if this is better explained by `sumReversed - descending + inclusive` or something similar.)
@@ -251,3 +349,40 @@ for equate the piles:
 			make a rule
 """
 
+"""Random observation about progressions within a dimension:
+dimension end, 31, dimension origin, 16:
+11111 	10000 16
+1° crease 10010 18
+31 (2, 3) 10011 19 = 18 + 1
+31 (1, 3) 10101 21 = 18 + 3
+31 (1, 2) 11001 25 = 18 + 7
+31			< 33 = 18 + 15: not valid
+sums: 0, 1, 3, 7
+
+16 has 4 tail zeros.
+16 is a dimension origin: each of the 4 zeros is a "sub-dimension origin" relative to 16.
+All odd piles are covered by starting with a sub-dimension origin and adding the sums of products of dimensions.
+odds: 17, 19, 21, 23, 25, 27, 29, 31
+sums: 0, 1,  3,  7,  15
+cf:  16, 17, 19, 23, 31
+cf:  18, 19, 21, 25, NA
+cf:  20, 21, 23, 27, NA
+cf:  22, 23, 25, 29, NA
+
+evens: 16, 18, 20, 22, 24, 26, 28, 30
+16 is not in the table
+sums: 0, 1,  3,  7,  15
+cf:  17, 18, 20, 24, NA
+cf:  19, 20, 22, 26, NA
+cf:  21, 22, 24, 28, NA
+cf:  23, 24, 26, 30, NA
+
+To get the evens, count from the end.
+evens: 16, 18, 20, 22, 24, 26, 28, 30
+sums 15,  7,  3,  1, 0
+cf:  16, 24, 28, 30, 31
+cf:  NA, 22, 26, 28, 29
+cf:  NA, 20, 24, 26, 27
+cf:  NA, 18, 22, 24, 25
+
+"""

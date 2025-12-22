@@ -1,18 +1,26 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
+from cytoolz.functoolz import curry as syntacticCurry
 from dataclasses import dataclass
+from functools import partial, reduce
 from gmpy2 import bit_flip, bit_mask, is_even
 from hunterMakesPy import raiseIfNone
-from itertools import accumulate
+from itertools import accumulate, combinations, repeat
 from mapFolding import (
 	asciiColorCyan, asciiColorGreen, asciiColorMagenta, asciiColorRed, asciiColorReset, asciiColorYellow, decreasing,
 	inclusive, packageSettings)
 from mapFolding._e import (
-	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeafDomain, howMany0coordinatesAtTail,
-	howManyDimensionsHaveOddParity, pileOrigin, PinnedLeaves, Z0Z_sumsOfProductsOfDimensionsNearest首, 零, 首零, 首零一三)
-from mapFolding._e._dataDynamic import getDataFrameFoldings
+	dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, getDictionaryLeafDomains, getDictionaryPileRanges,
+	getLeafDomain, getPileRange, getZ0Z_successor, howManyDimensionsHaveOddParity, leafOrigin, pileOrigin, PinnedLeaves,
+	Z0Z_creaseNearestTail, Z0Z_invert, Z0Z_sumsOfProductsOfDimensionsNearest首, 一, 三, 二, 四, 零, 首一, 首三, 首二, 首零, 首零一, 首零一三,
+	首零一二)
+from mapFolding._e._dataDynamic import filterFloor, getDataFrameFoldings
+from mapFolding._e.pinIt import notLeafOriginOrLeaf零
 from mapFolding._e.pinning2DnAnnex import beansWithoutCornbread
 from mapFolding.dataBaskets import EliminationState
+from math import log2
+from more_itertools import flatten
+from operator import add, mul
 from pathlib import Path
 from pprint import pprint
 from typing import Any
@@ -142,7 +150,7 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 	listConditionalRelationships: list[dict[str, int]] = []
 
 	for leafLater in range(state.leavesTotal):
-		columnEarliestOriginal: int = leafLater.bit_count() + (2 ** (howMany0coordinatesAtTail(leafLater) + 1) - 2)
+		columnEarliestOriginal: int = leafLater.bit_count() + (2 ** (dimensionNearestTail(leafLater) + 1) - 2)
 		columnEarliestIndex: int = columnEarliestOriginal - columnOffset
 
 		if columnEarliestIndex < 0:
@@ -586,7 +594,7 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 			'concentrationMaximum': concentrationMaximum,
 			'bitPattern': bin(leaf),
 			'bitCount': leaf.bit_count(),
-			'trailingZeros': howMany0coordinatesAtTail(leaf),
+			'trailingZeros': dimensionNearestTail(leaf),
 		})
 
 	return pandas.DataFrame(listEntropyRecords).sort_values('entropyRelative', ascending=False).reset_index(drop=True)
@@ -639,16 +647,66 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		print(f"{color}Required rows: {rowsRequired}/{rowsTotal}{asciiColorReset}")
 
 if __name__ == '__main__':
+	# from mapFolding._e import getZ0Z_precedence
+
 	state = EliminationState((2,) * 6)
 
-	from mapFolding._e import getZ0Z_precedence
-	# getZ0Z_precedence(state)
+	# NOTE works for 9 <= odd piles <= 47
+	# I _think_ I need to be able to pass start/stop to intraDimensionalLeaves
 
+	@syntacticCurry
+	def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
+		return list(map(partial(add, dimensionOrigin+2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
+
+	@syntacticCurry
+	def Z0Z_alphaBeta(state: EliminationState, alphaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
+		return list(flatten(map(intraDimensionalLeaves(state), state.productsOfDimensions[2 + alphaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
+
+	def Z0Z_getPileRange(state: EliminationState, pile: int) -> Iterable[int]:
+		pileRange: list[int] = []
+
+		# odd leaves < 32.
+		# ? 12 < even leaves < 32.
+		# ? 24 < even leaves < 32.
+		# piles 49, 51, 53, 55 need a higher start on yy=0.
+		for yy in range(3):
+			pileRange.extend(map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy))))
+
+		# 32 < even leaves
+		for yy in range(1):
+			pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy])
+				, Z0Z_alphaBeta(state
+					, alphaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
+					, betaStop=-(yy)
+				))))
+		# ? 32 < odd leaves < 52
+		# ? 32 < odd leaves < 36
+		for yy in range(1,3):
+			pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
+
+		# dimension origins
+		# piles 51, 53, 55 need a higher start.
+		pileRange.extend(state.productsOfDimensions[1 + (首零(state.dimensionsTotal)+零 < pile):dimensionNearest首(pile+1)])
+		# inverse dimension origins: 62, 61, 59, 55, 47, 31
+		# pile5 needs a higher start.
+		pileRange.extend(map(partial(Z0Z_invert, state), state.productsOfDimensions[0:state.dimensionsTotal]))
+
+		return tuple(sorted(pileRange))
+
+	for pile in range(首三(state.dimensionsTotal)+零, 首零一二(state.dimensionsTotal), 2):
+		print(pile, (ll:=getPileRange(state, pile)) == (zz:=Z0Z_getPileRange(state, pile)), end=': ')
+		# print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
+		pprint(zz, width=180)
+
+	# print(measureEntropy(state))
+
+	# getZ0Z_precedence(state)
 	# leaf33 is wrong because of step = 4.
 	# leaf33 and leaf49 are already known from prior analysis.
 	# dictionaryPilesAtDomainEnds = getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state)
 	# print(asciiColorCyan + 'dictionaryPilesAtDomainEnds' + asciiColorReset)
 	# pprint(dictionaryPilesAtDomainEnds, width=140)
-	pprint(getZ0Z_precedence(state), width=380, compact=True)
+	# pprint(getZ0Z_precedence(state), width=380, compact=True)
+	# pprint(getZ0Z_successor(state), width=380, compact=True)
 	# print()
 	# print(Z0Z_sumsOfProductsOfDimensionsNearest首(state, 5))

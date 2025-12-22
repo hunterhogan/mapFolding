@@ -10,7 +10,7 @@ exception handling on invalid inputs.
 """
 
 from mapFolding._e import (
-	dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首, howMany0coordinatesAtTail,
+	dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
 	howManyDimensionsHaveOddParity, leafInSubHyperplane, ptount)
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from mapFolding.tests.dataSamples.measurementData import (
@@ -185,7 +185,7 @@ class TestHowMany0coordinatesAtTail:
 		inputValue: int,
 		expectedResult: int,
 	) -> None:
-		standardizedEqualToCallableReturn(expectedResult, howMany0coordinatesAtTail, inputValue)
+		standardizedEqualToCallableReturn(expectedResult, dimensionNearestTail, inputValue)
 
 	@pytest.mark.parametrize(
 		"invalidInput",
@@ -196,7 +196,7 @@ class TestHowMany0coordinatesAtTail:
 		self,
 		invalidInput: int,
 	) -> None:
-		standardizedEqualToCallableReturn(ValueError, howMany0coordinatesAtTail, invalidInput)
+		standardizedEqualToCallableReturn(ValueError, dimensionNearestTail, invalidInput)
 
 class TestHowManyDimensionsHaveOddParity:
 	"""Tests for howManyDimensionsHaveOddParity: bit_count - 1, minimum 0."""

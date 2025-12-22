@@ -1,14 +1,12 @@
-from gmpy2 import bit_mask
-from mapFolding import decreasing, exclude, inclusive, reverseLookup
+from mapFolding import decreasing
 from mapFolding._e import (
-	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, leafOrigin, pileOrigin, PinnedLeaves, 一,
-	二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
-from mapFolding._e.pinIt import (
-	deconstructPinnedLeavesByDomainOfLeaf, deconstructPinnedLeavesByDomainsCombined, pileIsOpen)
+	getDomainDimension一, getDomainDimension二, getDomainDimension首二, leafOrigin, pileOrigin, PinnedLeaves, 一, 二, 零, 首一, 首一二,
+	首二, 首零, 首零一, 首零一二, 首零二)
+from mapFolding._e.pinIt import deconstructPinnedLeavesByDomainsCombined, pileIsOpen
 from mapFolding._e.pinning2DnAnnex import (
 	appendLeavesPinnedAtPile as appendLeavesPinnedAtPile, beansWithoutCornbread as beansWithoutCornbread,
-	disqualifyAppendingLeafAtPile as disqualifyAppendingLeafAtPile, pinLeafCornbread as pinLeafCornbread, pinPile一Crease,
-	pinPile一零Crease, pinPile二Crease, pinPile首Less一Crease, pinPile首Less一零Crease, pinPile首less二Crease,
+	disqualifyAppendingLeafAtPile as disqualifyAppendingLeafAtPile, pinLeafCornbread as pinLeafCornbread, pinLeaf首零Plus零,
+	pinPile一Crease, pinPile一零Crease, pinPile二Crease, pinPile首Less一Crease, pinPile首Less一零Crease, pinPile首less二Crease,
 	pinPile首零Less零AfterFourthOrder, removeInvalidPinnedLeaves as removeInvalidPinnedLeaves)
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import interleave_longest
@@ -42,15 +40,18 @@ def pileProcessingOrderDefault(state: EliminationState) -> list[int]:
 # ======= Pinning functions ===============================================
 
 def pinPiles(state: EliminationState, order: int = 4, maximumListPinnedLeaves: int = 5000, queueStopBefore: int | None = None) -> EliminationState:
+	"""Pin up to 二 piles at both ends of the sequence without surplus `PinnedLeaves` dictionaries."""
 	youMustBeDimensionsTallToPinThis = 2
 	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
 
 	if not state.listPinnedLeaves:
-		state.listPinnedLeaves = [{pileOrigin: leafOrigin, 零: 零, state.leavesTotal - 零: 首零(state.dimensionsTotal)}]
+		state.listPinnedLeaves = [{pileOrigin: leafOrigin}]
 
-	pileProcessingOrder: list[int] = [pileOrigin, 零, state.leavesTotal - 零]
+	pileProcessingOrder: list[int] = [pileOrigin]
 
+	if 1 <= order:
+		pileProcessingOrder.extend([零, state.leavesTotal - 零])
 	if 2 <= order:
 		pileProcessingOrder.extend([一, state.leavesTotal - 一])
 	if 3 <= order:
@@ -91,7 +92,14 @@ def pinPiles(state: EliminationState, order: int = 4, maximumListPinnedLeaves: i
 
 	return state
 
-def pinPile首零Less零(state: EliminationState, maximumListPinnedLeaves: int = 5000) -> EliminationState:
+def pinPile首零Less零(state: EliminationState, maximumListPinnedLeaves: int = 2**14) -> EliminationState:
+	"""Incompletely, but safely, pin `pile首零Less零`: the last pile in the first half of the sequence.
+
+	Pinning all possible combinations at this pile is more valuable than pinning at most, if not all, other piles. Furthermore,
+	most of the time, bluntly deconstructing a pile's range or a leaf's domain creates 100-10000 times more surplus `PinnedLeaves`
+	dictionaries than useful dictionaries. At this pile, however, even though I have not figured out the formulas to pin most
+	leaves, the surplus ratio is only about one-to-one.
+	"""
 	youMustBeDimensionsTallToPinThis = 2
 	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
@@ -137,14 +145,34 @@ def _pinLeavesByDomain(state: EliminationState, leaves: tuple[int, ...], leavesD
 	state.listPinnedLeaves = qualifiedLeavesPinned.copy()
 	return state
 
+def pinLeavesDimension0(state: EliminationState) -> EliminationState:
+	"""'Pin' `leafOrigin` and `leaf首零`, which are always fixed in the same piles."""
+	youMustBeDimensionsTallToPinThis = 2
+	leaves: tuple[int, int] = (leafOrigin, 首零(state.dimensionsTotal))
+	leavesDomain: tuple[tuple[int, ...], ...] = ((pileOrigin, state.pileLast),)
+
+	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis)
+
+def pinLeavesDimension零(state: EliminationState) -> EliminationState:
+	"""'Pin' `leaf零`, which is always fixed in the same pile, and pin `leaf首零Plus零`: due to the formulas I've figured out, you should call `pinLeavesDimension一` first."""
+	state = pinPiles(state, 1)
+	return pinLeaf首零Plus零(state)
+
 def pinLeavesDimension一(state: EliminationState) -> EliminationState:
+	"""Pin `leaf一零`, `leaf一`, `leaf首一`, and `leaf首零一` without surplus `PinnedLeaves` dictionaries."""
 	youMustBeDimensionsTallToPinThis = 2
 	leaves: tuple[int, int, int, int] = (一+零, 一, 首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))
 	leavesDomain: tuple[tuple[int, ...], ...] = getDomainDimension一(state)
 
 	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis)
 
+def pinLeavesDimensions0零一(state: EliminationState) -> EliminationState:
+	"""Pin `leaf首零Plus零`, `leaf一零`, `leaf一`, `leaf首一`, and `leaf首零一` without surplus `PinnedLeaves` dictionaries."""
+	state = pinLeavesDimension一(state)
+	return pinLeavesDimension零(state)
+
 def pinLeavesDimension二(state: EliminationState) -> EliminationState:
+	"""Pin `leaf二一`, `leaf二一零`, `leaf二零`, and `leaf二` without surplus `PinnedLeaves` dictionaries."""
 	youMustBeDimensionsTallToPinThis = 4
 	leaves: tuple[int, int, int, int] = (二+一, 二+一+零, 二+零, 二)
 	leavesDomain: tuple[tuple[int, ...], ...] = getDomainDimension二(state)
@@ -152,131 +180,11 @@ def pinLeavesDimension二(state: EliminationState) -> EliminationState:
 	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis)
 
 def pinLeavesDimension首二(state: EliminationState) -> EliminationState:
+	"""Pin `leaf首二`, `leaf首零二`, `leaf首零一二`, and `leaf首一二` without surplus `PinnedLeaves` dictionaries."""
 	youMustBeDimensionsTallToPinThis = 4
 	leaves: tuple[int, int, int, int] = (首二(state.dimensionsTotal), 首零二(state.dimensionsTotal), 首零一二(state.dimensionsTotal), 首一二(state.dimensionsTotal))
 	leavesDomain: tuple[tuple[int, ...], ...] = getDomainDimension首二(state)
 
 	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis)
 
-def pinLeaf首零Plus零(state: EliminationState) -> EliminationState:
-	youMustBeDimensionsTallToPinThis = 2
-	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
-		return state
-
-	if not state.listPinnedLeaves:
-		state = pinPiles(state, 1)
-
-	leaf = 首零(state.dimensionsTotal)+零
-	listPinnedLeavesCopy: list[PinnedLeaves] = state.listPinnedLeaves.copy()
-	state.listPinnedLeaves = []
-	qualifiedLeavesPinned: list[PinnedLeaves] = []
-	for leavesPinned in listPinnedLeavesCopy:
-		state.leavesPinned = leavesPinned.copy()
-
-		domainOfPilesForLeaf: list[int] = list(getLeafDomain(state, leaf))
-
-		listIndicesPilesExcluded: list[int] = []
-		leaf首零一: int = 首零一(state.dimensionsTotal)
-		if (一+零 in state.leavesPinned.values()) and (leaf首零一 in state.leavesPinned.values()):
-			pileOfLeaf一零: int = reverseLookup(state.leavesPinned, 一+零)
-			pileOfLeaf首零一: int = reverseLookup(state.leavesPinned, leaf首零一)
-			# Before the new symbols, I didn't see the symmetry of `leaf一零` and `leaf首零一`.
-
-			pilesTotal = 首一(state.dimensionsTotal)
-
-			bump: int = 1 - int(pileOfLeaf一零.bit_count() == 1)
-			howMany: int = state.dimensionsTotal - (pileOfLeaf一零.bit_length() + bump)
-			onesInBinary = int(bit_mask(howMany))
-			ImaPattern: int = pilesTotal - onesInBinary
-
-			if pileOfLeaf一零 == 二:
-				listIndicesPilesExcluded.extend([零, 一, 二]) # These symbols make this pattern jump out.
-
-			if 二 < pileOfLeaf一零 <= 首二(state.dimensionsTotal):
-				stop: int = pilesTotal // 2 - 1
-				listIndicesPilesExcluded.extend(range(1, stop))
-
-				aDimensionPropertyNotFullyUnderstood = 5
-				for _dimension in tuple(range(state.dimensionsTotal - aDimensionPropertyNotFullyUnderstood)):
-					start: int = 1 + stop
-					stop += (stop+1) // 2
-					listIndicesPilesExcluded.extend([*range(start, stop)])
-
-				listIndicesPilesExcluded.extend([*range(1 + stop, ImaPattern)])
-
-			if 首二(state.dimensionsTotal) < pileOfLeaf一零:
-				listIndicesPilesExcluded.extend([*range(1, ImaPattern)])
-
-			bump = 1 - int((state.leavesTotal - pileOfLeaf首零一).bit_count() == 1)
-			howMany = state.dimensionsTotal - ((state.leavesTotal - pileOfLeaf首零一).bit_length() + bump)
-			onesInBinary = int(bit_mask(howMany))
-			ImaPattern = pilesTotal - onesInBinary
-
-			aDimensionPropertyNotFullyUnderstood = 5
-
-			if pileOfLeaf首零一 == state.leavesTotal-二:
-				listIndicesPilesExcluded.extend([-零 -1, -(一) -1])
-				if aDimensionPropertyNotFullyUnderstood <= state.dimensionsTotal:
-					listIndicesPilesExcluded.extend([-二 -1])
-
-			if ((首零一二(state.dimensionsTotal) < pileOfLeaf首零一 < state.leavesTotal-二)
-				and (首二(state.dimensionsTotal) < pileOfLeaf一零 <= 首零(state.dimensionsTotal))):
-				listIndicesPilesExcluded.extend([-1])
-
-			if False: # 首零一二(state.dimensionsTotal) <= pileOfLeaf首零一 < state.leavesTotal-二:
-				stop: int = pilesTotal // 2 - 1
-				listIndicesPilesExcluded.extend(range((1 + inclusive) * decreasing, (stop + inclusive) * decreasing, decreasing))
-
-				for _dimension in tuple(range(state.dimensionsTotal - aDimensionPropertyNotFullyUnderstood)):
-					start: int = 1 + stop
-					stop += (stop+1) // 2
-					listIndicesPilesExcluded.extend([*range(start * decreasing, stop * decreasing, decreasing)])
-
-				listIndicesPilesExcluded.extend([*range((1 + stop) * decreasing, ImaPattern * decreasing, decreasing)])
-
-				if 二 <= pileOfLeaf一零 <= 首零(state.dimensionsTotal):
-					listIndicesPilesExcluded.extend([零, 一, 二, pilesTotal//2])
-
-			if ((pileOfLeaf首零一 == 首零一二(state.dimensionsTotal))
-				and (首一(state.dimensionsTotal) < pileOfLeaf一零 <= 首零(state.dimensionsTotal))):
-				listIndicesPilesExcluded.extend([-1])
-
-			if 首零一(state.dimensionsTotal) < pileOfLeaf首零一 < 首零一二(state.dimensionsTotal):
-				if pileOfLeaf一零 in [首一(state.dimensionsTotal), 首零(state.dimensionsTotal)]:
-					listIndicesPilesExcluded.extend([-1])
-				elif 二 < pileOfLeaf一零 < 首二(state.dimensionsTotal):
-					listIndicesPilesExcluded.extend([0])
-
-			if pileOfLeaf首零一 < 首零一二(state.dimensionsTotal):
-				listIndicesPilesExcluded.extend([*range((1 + inclusive) * decreasing, (ImaPattern + inclusive) * decreasing, decreasing)])
-
-			pileOfLeaf一零ARCHETYPICAL: int = 首一(state.dimensionsTotal)
-			bump = 1 - int(pileOfLeaf一零ARCHETYPICAL.bit_count() == 1)
-			howMany = state.dimensionsTotal - (pileOfLeaf一零ARCHETYPICAL.bit_length() + bump)
-			onesInBinary = int(bit_mask(howMany))
-			ImaPattern = pilesTotal - onesInBinary
-
-			if pileOfLeaf首零一 == state.leavesTotal-二:
-				if pileOfLeaf一零 == 二:
-					listIndicesPilesExcluded.extend([零, 一, 二, pilesTotal//2 -1, pilesTotal//2])
-				if 二 < pileOfLeaf一零 <= 首零(state.dimensionsTotal):
-					IDK = ImaPattern - 1
-					listIndicesPilesExcluded.extend([*range(1, 3 * pilesTotal // 4), *range(1 + 3 * pilesTotal // 4, IDK)])
-				if 首一(state.dimensionsTotal) < pileOfLeaf一零 <= 首零(state.dimensionsTotal):
-					listIndicesPilesExcluded.extend([-1])
-
-			if pileOfLeaf首零一 == 首零一(state.dimensionsTotal):
-				if pileOfLeaf一零 == 首零(state.dimensionsTotal):
-					listIndicesPilesExcluded.extend([-1])
-				elif (二 < pileOfLeaf一零 < 首二(state.dimensionsTotal)) or (首二(state.dimensionsTotal) < pileOfLeaf一零 < 首一(state.dimensionsTotal)):
-					listIndicesPilesExcluded.extend([0])
-		domainOfPilesForLeaf = list(exclude(domainOfPilesForLeaf, listIndicesPilesExcluded))
-
-		state.listPinnedLeaves = deconstructPinnedLeavesByDomainOfLeaf(leavesPinned, leaf, domainOfPilesForLeaf)
-		state = removeInvalidPinnedLeaves(state)
-		qualifiedLeavesPinned.extend(state.listPinnedLeaves)
-		state.listPinnedLeaves = []
-	state.listPinnedLeaves = qualifiedLeavesPinned
-
-	return state
 

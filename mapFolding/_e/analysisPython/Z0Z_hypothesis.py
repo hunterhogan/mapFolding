@@ -4,7 +4,7 @@ from functools import cache
 from gmpy2 import bit_flip, bit_mask, bit_test, is_even
 from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing
-from mapFolding._e import dimensionNearest首, howMany0coordinatesAtTail, leafOrigin, 零
+from mapFolding._e import dimensionNearestTail, dimensionNearest首, leafOrigin, 零
 from mapFolding.algorithms.iff import ImaOddLeaf, nextCrease
 from mapFolding.dataBaskets import EliminationState
 from math import log2, prod
@@ -29,7 +29,7 @@ def getDictionaryAddends4Next(state: EliminationState) -> dict[int, list[int]]:
 			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
 
 			if (slicingIndexStart == 1) and is_even(leaf):
-				slicingIndexStart += howMany0coordinatesAtTail(leaf)
+				slicingIndexStart += dimensionNearestTail(leaf)
 
 			products下_leaf = products下_leaf[slicingIndexStart:None]
 			products下_leaf = products下_leaf[0:slicingIndexEnd]
@@ -57,7 +57,7 @@ def getDictionaryAddends4Prior(state: EliminationState) -> dict[int, list[int]]:
 			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
 
 			if (slicingIndexStart == 1) and is_even(leaf):
-				slicingIndexStart += howMany0coordinatesAtTail(leaf)
+				slicingIndexStart += dimensionNearestTail(leaf)
 
 			products下_leaf = products下_leaf[slicingIndexStart:None]
 			products下_leaf = products下_leaf[0:slicingIndexEnd]
@@ -136,14 +136,14 @@ if __name__ == '__main__':
 			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
 
 			if (slicingIndexStart == 1) and is_even(leaf):
-				slicingIndexStart += howMany0coordinatesAtTail(leaf)
+				slicingIndexStart += dimensionNearestTail(leaf)
 			listLeavesNext = listLeavesNextAndPriorInSequence[slicingIndexStart: slicingIndexEnd]
 
 			slicingIndexStart = howManyDimensionsHaveOddParity(leaf) & 1
 			slicingIndexEnd = dimensionNearest首(leaf) * (slicingIndexStart ^ 1) or None
 
 			if (slicingIndexStart == 1) and is_even(leaf):
-				slicingIndexStart += howMany0coordinatesAtTail(leaf)
+				slicingIndexStart += dimensionNearestTail(leaf)
 			listLeavesPrior = listLeavesNextAndPriorInSequence[slicingIndexStart: slicingIndexEnd]
 
 			if leaf == 1:
@@ -153,7 +153,7 @@ if __name__ == '__main__':
 				print(leaf, listAddendLeaves==listLeavesNext, listAddendPriorLeaves==listLeavesPrior, listLeavesNextAndPriorInSequence, sep='\t', end='\n')
 		else:
 			if printThis:
-				print(leaf, leaf.bit_count() - 1 & 1, howMany0coordinatesAtTail(leaf), sep='\t', end='\n')
+				print(leaf, leaf.bit_count() - 1 & 1, dimensionNearestTail(leaf), sep='\t', end='\n')
 				print(leaf, listAddendLeaves, listAddendPriorLeaves, listLeavesNextAndPriorInSequence, sep='\n', end='\n\n')
 				print(leaf, listLeavesNextAndPriorInSequence, sorted(list1) == sorted(listLeavesNextAndPriorInSequence), sep='\t', end='\n')
 				print(leaf, list1, listLeavesNextAndPriorInSequence, sorted(list1), sorted(listLeavesNextAndPriorInSequence), sep='\n', end='\n\n')

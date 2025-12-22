@@ -3,8 +3,8 @@ from copy import deepcopy
 from itertools import combinations, pairwise, product as CartesianProduct
 from mapFolding import decreasing, packageSettings
 from mapFolding._e import (
-	dimensionNearest首, getDictionaryLeafDomains, getListLeavesCreaseNext, howMany0coordinatesAtTail, leafOrigin,
-	pileOrigin, PinnedLeaves, 零)
+	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getListLeavesCreaseNext,
+	getZ0Z_precedence, getZ0Z_successor, leafOrigin, pileOrigin, PinnedLeaves, 零)
 from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
@@ -45,6 +45,30 @@ def findValidFoldings(state: EliminationState) -> int:
 				continue
 			model.AddAllowedAssignments([listPilingsInLeafOrder[leaf]], [(pile,) for pile in domain])
 
+		dictionaryPileRanges: Final[dict[int, list[int]]] = getDictionaryPileRanges(state)
+		for pile, listLeavesAllowedAtPile in dictionaryPileRanges.items():
+			model.AddAllowedAssignments([listLeavesInPileOrder[pile]], [(leaf,) for leaf in listLeavesAllowedAtPile])
+
+		# Z0Z_precedence: Final[dict[int, dict[int, list[int]]]] = getZ0Z_precedence(state)
+		# for leafLater, dictionaryPiles in Z0Z_precedence.items():
+		# 	pileOfLeafLater: cp_model.IntVar = listPilingsInLeafOrder[leafLater]
+		# 	for pileLater, listLeavesPredecessor in dictionaryPiles.items():
+		# 		leafLaterAtPileLater: cp_model.IntVar = model.NewBoolVar(f"leaf{leafLater}_atPile{pileLater}")
+		# 		model.Add(pileOfLeafLater == pileLater).OnlyEnforceIf(leafLaterAtPileLater)
+		# 		model.Add(pileOfLeafLater != pileLater).OnlyEnforceIf(leafLaterAtPileLater.Not())
+		# 		for leafPredecessor in listLeavesPredecessor:
+		# 			model.Add(listPilingsInLeafOrder[leafPredecessor] < pileLater).OnlyEnforceIf(leafLaterAtPileLater)
+
+		# Z0Z_successor: Final[dict[int, dict[int, list[int]]]] = getZ0Z_successor(state)
+		# for leafEarlier, dictionaryPiles in Z0Z_successor.items():
+		# 	pileOfLeafEarlier: cp_model.IntVar = listPilingsInLeafOrder[leafEarlier]
+		# 	for pileEarlier, listLeavesSuccessor in dictionaryPiles.items():
+		# 		leafEarlierAtPileEarlier: cp_model.IntVar = model.NewBoolVar(f"leaf{leafEarlier}_atPile{pileEarlier}")
+		# 		model.Add(pileOfLeafEarlier == pileEarlier).OnlyEnforceIf(leafEarlierAtPileEarlier)
+		# 		model.Add(pileOfLeafEarlier != pileEarlier).OnlyEnforceIf(leafEarlierAtPileEarlier.Not())
+		# 		for leafLater in listLeavesSuccessor:
+		# 			model.Add(listPilingsInLeafOrder[leafLater] > pileEarlier).OnlyEnforceIf(leafEarlierAtPileEarlier)
+
 		for leaf in range(state.leavesTotal):
 			listLeavesNext: list[int] = getListLeavesCreaseNext(state, leaf)
 			for pile in range(state.leavesTotal - 零):
@@ -65,12 +89,12 @@ def findValidFoldings(state: EliminationState) -> int:
 # ------- Leading zeros before trailing zeros: if dimensionNearest首(k) <= howMany0coordinatesAtTail(r), then pileOf_k < pileOf_r -----------------------------
 		for k, r in combinations(range(1, state.leavesTotal), 2):
 			leadingZerosOf_k: int = dimensionNearest首(k)
-			trailingZerosOf_r: int = howMany0coordinatesAtTail(r)
+			trailingZerosOf_r: int = dimensionNearestTail(r)
 			if leadingZerosOf_k <= trailingZerosOf_r:
 				model.Add(listPilingsInLeafOrder[k] < listPilingsInLeafOrder[r])
 
 			leadingZerosOf_r: int = dimensionNearest首(r)
-			trailingZerosOf_k: int = howMany0coordinatesAtTail(k)
+			trailingZerosOf_k: int = dimensionNearestTail(k)
 			if leadingZerosOf_r <= trailingZerosOf_k:
 				model.Add(listPilingsInLeafOrder[r] < listPilingsInLeafOrder[k])
 
@@ -147,11 +171,11 @@ def findValidFoldings(state: EliminationState) -> int:
 	foldingCollector = FoldingCollector(listLeavesInPileOrder)
 	solver.Solve(model, foldingCollector)
 
-	# if foldingCollector.listFoldings:
-	# 	pathFilename = packageSettings.pathPackage / "_e" / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
-	# 	with Path.open(pathFilename, mode="w", newline="") as fileCSV:
-	# 		csvWriter = csv.writer(fileCSV)
-	# 		csvWriter.writerows(foldingCollector.listFoldings)
+	if foldingCollector.listFoldings:
+		pathFilename = packageSettings.pathPackage / "_e" / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
+		with Path.open(pathFilename, mode="w", newline="") as fileCSV:
+			csvWriter = csv.writer(fileCSV)
+			csvWriter.writerows(foldingCollector.listFoldings)
 
 
 	return len(foldingCollector.listFoldings) * state.Theorem2Multiplier * state.Theorem4Multiplier

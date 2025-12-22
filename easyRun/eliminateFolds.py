@@ -2,7 +2,8 @@
 # pyright: basic
 from mapFolding import dictionaryOEISMapFolding, eliminateFolds
 from mapFolding._e.pinning2Dn import (
-	pinLeaf首零Plus零, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles, pinPile首零Less零)
+	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles, pinPile首零Less零)
+from mapFolding._e.pinning2DnAnnex import pinLeaf首零Plus零
 from mapFolding.dataBaskets import EliminationState
 from os import PathLike
 from pathlib import PurePath
@@ -29,8 +30,8 @@ if __name__ == '__main__':
 	state: EliminationState | None = None
 
 	flow = 'elimination'
-	flow = 'crease'
 	flow = 'constraintPropagation'
+	flow = 'crease'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
@@ -49,9 +50,9 @@ if __name__ == '__main__':
 		if oeisID == 'A001417' and n > 3:
 			state = EliminationState(mapShape)
 			state = pinPiles(state, 4)
+			# state = pinLeavesDimensions0零一(state)
 			# state = pinPile首零Less零(state)
 			# state = pinLeaf首零Plus零(state)
-			# state = pinLeavesDimension一(state)
 			# state = pinLeavesDimension二(state)
 			# state = pinLeavesDimension首二(state)
 

@@ -105,12 +105,23 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 	return int(f_mod_2exp(anInteger, dimensionNearest首(anInteger)))
 
 @cache
-def howMany0coordinatesAtTail(integerNonnegative: int, /) -> int:
-	"""Compute the number of times `integerNonnegative` is divisible by 2; aka 'CTZ', Count Trailing Zeros in the binary form."""
+def dimensionNearestTail(integerNonnegative: int, /) -> int:
+	"""Find the 0-indexed position of the least significant non-zero radix-2 digit in `integerNonnegative`.
+
+	Because I am using a radix-2 positional-numeral system as a proxy for Cartesian coordinates, this is functionally equivalent
+	to computing the number of times `integerNonnegative` is divisible by 2; aka 'CTZ', Count Trailing Zeros in the binary form.
+	"""
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
+	return bit_scan1(anInteger) or 0
+
+def Z0Z_creaseNearestTail(state: EliminationState, integerNonnegative: int) -> int:
+	"""Find the 0-indexed position of the least significant zero radix-2 digit in `integerNonnegative`."""
+# NOTE HEY! `Z0Z_invert` is pulling double duty: it sanitizes `integerNonnegative` and inverts it. So if you figure out how to
+# achieve this functionality without calling `Z0Z_invert`, you need to add defensive code here.
+	anInteger: int = Z0Z_invert(state, integerNonnegative)
 	return bit_scan1(anInteger) or 0
 
 @cache
@@ -140,13 +151,18 @@ def ptount(integerAbove2: int, /) -> int:
 	return leafInSubHyperplane(anInteger - (一+零)).bit_count()
 
 def Z0Z_invert(state: EliminationState, integerNonnegative: int) -> int:
+	return _Z0Z_invert(state.dimensionsTotal, integerNonnegative)
+@cache
+def _Z0Z_invert(dimensionsTotal: int, integerNonnegative: int) -> int:
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
-	return int(anInteger ^ bit_mask(state.dimensionsTotal))
+	return int(anInteger ^ bit_mask(dimensionsTotal))
 
-def Z0Z_sumsOfProductsOfDimensionsNearest首(state: EliminationState, dimensionFrom首: int) -> tuple[int, ...]:
+def Z0Z_sumsOfProductsOfDimensionsNearest首(state: EliminationState, dimensionFrom首: int | None = None) -> tuple[int, ...]:
+	if dimensionFrom首 is None:
+		dimensionFrom首 = state.dimensionsTotal
 	dimensionNormalizer = dimensionFrom首 - (state.dimensionsTotal + 1)
 	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = tuple(sum(list(reversed(state.productsOfDimensions[0:dimensionNormalizer]))[0:aProduct], start=0)
 											for aProduct in range(len(state.productsOfDimensions) + inclusive + dimensionNormalizer))

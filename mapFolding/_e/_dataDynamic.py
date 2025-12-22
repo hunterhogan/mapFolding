@@ -1,12 +1,14 @@
+from bisect import bisect_right
+from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from gmpy2 import bit_clear, bit_flip, bit_mask, bit_test, is_even, is_odd
-from hunterMakesPy import raiseIfNone, writePython
+from hunterMakesPy import intInnit, raiseIfNone, writePython
 from mapFolding import (
 	asciiColorReset, asciiColorYellow, between, consecutive, decreasing, exclude, inclusive, noDuplicates, packageSettings)
 from mapFolding._e import (
-	dimensionFourthNearest首, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首, howMany0coordinatesAtTail,
+	dimensionFourthNearest首, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
 	howManyDimensionsHaveOddParity, leafInSubHyperplane, leafOrigin, pileOrigin, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一,
 	首零一二, 首零二)
 from mapFolding._e._measure import Z0Z_sumsOfProductsOfDimensionsNearest首
@@ -57,9 +59,9 @@ def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[list[int], list[int]]
 
 		if is_even(leaf):
 			if slicerDecreasing.start == 1:
-				slicerDecreasing = slice(slicerDecreasing.start + howMany0coordinatesAtTail(leaf), slicerDecreasing.stop)
+				slicerDecreasing = slice(slicerDecreasing.start + dimensionNearestTail(leaf), slicerDecreasing.stop)
 			if slicerIncreasing.start == 1:
-				slicerIncreasing = slice(slicerIncreasing.start + howMany0coordinatesAtTail(leaf), slicerIncreasing.stop)
+				slicerIncreasing = slice(slicerIncreasing.start + dimensionNearestTail(leaf), slicerIncreasing.stop)
 		listLeavesDecrease = listLeavesCrease[slicerDecreasing]
 		listLeavesIncrease = listLeavesCrease[slicerIncreasing]
 
@@ -79,17 +81,17 @@ def filterCeiling(pile: int, dimensionsTotal: int, leaf: int) -> bool:
 
 @syntacticCurry
 def filterFloor(pile: int, leaf: int) -> bool:
-	return int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile
+	return int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile
 
 @syntacticCurry
 def filterParity(pile: int, leaf: int) -> bool:
-	return (pile & 1) == ((int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1)
+	return (pile & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1)
 
 @syntacticCurry
 def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: int) -> bool:
 	if leaf != 首零(dimensionsTotal)+零:
 		return True
-	return (pile >> 1 & 1) == ((int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
+	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
 
 def getPileRange(state: EliminationState, pile: int) -> Iterable[int]:
 	return _getPileRange(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal)
@@ -123,7 +125,7 @@ def _getLeafDomain(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], l
 	if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
 		originPinned =  leaf == leafOrigin
 		return range(
-					int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1))									# `start`, first value included in the `range`.
+					int(bit_flip(0, dimensionNearestTail(leaf) + 1))									# `start`, first value included in the `range`.
 						+ howManyDimensionsHaveOddParity(leaf)
 						- 1 - originPinned
 					, int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf)))	# `stop`, first value excluded from the `range`.
@@ -139,7 +141,7 @@ def getDomainDimension一(state: EliminationState) -> tuple[tuple[int, int, int,
 	(leaf一零, leaf一, leaf首一, leaf首零一)
 	^^^ Can you see the symmetry? ^^^
 
-	Accurate in 6 dimensions.
+	Accurate in at least six dimensions.
 	"""
 	domain一零: tuple[int, ...] = tuple(getLeafDomain(state, 一+零))
 	domain首一: tuple[int, ...] = tuple(getLeafDomain(state, 首一(state.dimensionsTotal)))
@@ -197,7 +199,7 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 	for index, (pileOfLeaf二一零, pileOfLeaf二一) in enumerate(domain一corners):
 		listIndicesPilesExcluded: list[int] = []
 
-		tailDimensions: int = howMany0coordinatesAtTail(pileOfLeaf二一)
+		tailDimensions: int = dimensionNearestTail(pileOfLeaf二一)
 
 # ------- `excludeBelow` `index` ---------------------------------
 		excludeBelow: int = index
@@ -301,7 +303,7 @@ def _getDomainDimension首二(dimensionsTotal: int, domain首零二and首二: tu
 	for index, (pileOfLeaf首零二, pileOfLeaf首二) in enumerate(domain0corners):
 		listIndicesPilesExcluded: list[int] = []
 
-		tailDimensions: int = howMany0coordinatesAtTail(pileOfLeaf首零二)
+		tailDimensions: int = dimensionNearestTail(pileOfLeaf首零二)
 
 # ------- `excludeBelow` `index` ---------------------------------
 		excludeBelow: int = index - 1
@@ -390,7 +392,7 @@ def _getDomain二零and二(domain二零: tuple[int, ...], domain二: tuple[int, 
 	for index, pileOfLeaf零 in enumerate(filter(between(pileOrigin, 首零(dimensionsTotal)-零), domain零)):
 		listIndicesPilesExcluded: list[int] = []
 
-		tailDimensions: int = howMany0coordinatesAtTail(pileOfLeaf零 - is_odd(pileOfLeaf零))
+		tailDimensions: int = dimensionNearestTail(pileOfLeaf零 - is_odd(pileOfLeaf零))
 
 # ******* All differences between `_getDomain二零and二` and `_getDomain二零and二` *******
 		excludeBelowAddend: int = 0
@@ -490,7 +492,7 @@ def _getDomain二一零and二一(domain二一零: tuple[int, ...], domain二一:
 	for index, pileOfLeaf零 in enumerate(filter(between(pileOrigin, 首零(dimensionsTotal)-零), domain零)):
 		listIndicesPilesExcluded: list[int] = []
 
-		tailDimensions: int = howMany0coordinatesAtTail(pileOfLeaf零 - is_odd(pileOfLeaf零))
+		tailDimensions: int = dimensionNearestTail(pileOfLeaf零 - is_odd(pileOfLeaf零))
 
 # ******* All differences between `_getDomain二零and二` and `_getDomain二一零and二一` *******
 		excludeBelowAddend: int = int(is_even(index) or tailDimensions)
@@ -585,7 +587,7 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 			continue
 		listIndicesPilesExcluded: list[int] = []
 
-		tailDimensions: int = howMany0coordinatesAtTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
+		tailDimensions: int = dimensionNearestTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
 
 # # ------- `excludeBelow` `index` ---------------------------------
 		if 首零一(dimensionsTotal) < pileOfLeaf零:
@@ -667,7 +669,7 @@ def _getDomain首零一二and首一二(domain首零一二: tuple[int, ...], doma
 			continue
 		listIndicesPilesExcluded: list[int] = []
 
-		tailDimensions: int = howMany0coordinatesAtTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
+		tailDimensions: int = dimensionNearestTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
 
 # ------- `excludeBelow` `index` ---------------------------------
 		if 首零一(dimensionsTotal) < pileOfLeaf零:
@@ -829,15 +831,12 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 
 	return pathFilename
 
-# crazy
-# leafPredecessor = Z0Z_state.productsOfDimensions[dimensionNearest首(leaf)] + Z0Z_state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]
-# print(leafPredecessor == int(bit_flip(0, dimensionNearest首(leaf)).bit_flip(howMany0coordinatesAtTail(leaf))))
-
-# ruff: noqa
 # ======= In development ========================
+# ruff: noqa: SIM102
 # I am developing in this module because of Python's effing namespace and "circular import" issues.
 
 def getZ0Z_precedence(state: EliminationState) -> dict[int, dict[int, list[int]]]:
+	"""leaf: pile: [conditional `leafPredecessor`]."""
 	return _getZ0Z_precedence(state.mapShape)
 @cache
 def _getZ0Z_precedence(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[int]]]:
@@ -863,13 +862,13 @@ def _getZ0Z_precedence(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[in
 	for dimension in range(3, state.dimensionsTotal + inclusive):
 		for countDown in range(dimension - 2 + decreasing, decreasing, decreasing):
 			for leaf in range(state.productsOfDimensions[dimension] - sum(state.productsOfDimensions[countDown:dimension - 2]), state.leavesTotal, state.productsOfDimensions[dimension - 1]):
-				dictionaryPrecedence[leaf] = {aPile: [state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]]
+				dictionaryPrecedence[leaf] = {aPile: [state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]]
 							for aPile in list(dictionaryDomains[leaf])[0: Z0Z_sumsOfProductsOfDimensionsNearest首(state, dimension - 1)[dimension - 2 - countDown] // 2]}
 
 # ------- The beginning of domain首一Plus零 --------------------------------
 	leaf = 首一(state.dimensionsTotal)+零
-	dictionaryPrecedence[leaf] = {aPile: [2 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]
-									, 3 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]]
+	dictionaryPrecedence[leaf] = {aPile: [2 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]
+									, 3 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]]
 							for aPile in list(dictionaryDomains[leaf])[1:2]}
 	del leaf
 
@@ -901,7 +900,7 @@ def _getZ0Z_precedence(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[in
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor)
 
 			leafPredecessor首零: int = leafPredecessor + 首零(state.dimensionsTotal)
-			if (leafInSubHyperplane(leafPredecessor) == 0) and is_odd(howMany0coordinatesAtTail(leafPredecessor)):
+			if (leafInSubHyperplane(leafPredecessor) == 0) and is_odd(dimensionNearestTail(leafPredecessor)):
 				dictionaryPrecedence[leaf][pileFirst].append(leafPredecessor首零)
 			if leafPredecessor首零 == leaf:
 				continue
@@ -911,14 +910,14 @@ def _getZ0Z_precedence(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[in
 					- 1
 					+ is_even(leafPredecessor首零)
 					- is_odd(leafPredecessor首零)
-					- int(howMany0coordinatesAtTail(leafPredecessor首零) == state.dimensionsTotal - 2)
+					- int(dimensionNearestTail(leafPredecessor首零) == state.dimensionsTotal - 2)
 					- int(leaf < leafPredecessor首零)
 				))
 			for aPile in listOfPiles[listOfPiles.index(pileFirst): None]:
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
 			if indexUniversal < state.dimensionsTotal - 4:
-				if is_odd(howMany0coordinatesAtTail(leafPredecessor - is_odd(leafPredecessor))):
+				if is_odd(dimensionNearestTail(leafPredecessor - is_odd(leafPredecessor))):
 					pileFirst = (
 						sumsOfProductsOfDimensionsNearest首InSubHyperplane[indexUniversal]
 						+ state.sumsOfProductsOfDimensions[2 + 1 + indexUniversal]
@@ -976,3 +975,33 @@ def _getZ0Z_precedence(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[in
 
 	return dictionaryPrecedence
 
+def getZ0Z_successor(state: EliminationState) -> dict[int, dict[int, list[int]]]:
+	"""leaf: pile: [conditional `leafSuccessor`]."""
+	return _getZ0Z_successor(state.mapShape)
+@cache
+def _getZ0Z_successor(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[int]]]:
+	state = EliminationState(mapShape)
+	dictionaryDomains: dict[int, range] = getDictionaryLeafDomains(state)
+
+	dictionarySuccessor: dict[int, dict[int, list[int]]] = {}
+
+	dictionaryPrecedence: dict[int, dict[int, list[int]]] = getZ0Z_precedence(state)
+
+	for leafLater, dictionaryPiles in dictionaryPrecedence.items():
+		tupleDomainLater: tuple[int, ...] = tuple(dictionaryDomains[leafLater])
+		dictionaryPilesByPredecessor: defaultdict[int, set[int]] = defaultdict(set)
+		for pileLater, listLeafPredecessors in dictionaryPiles.items():
+			for leafEarlier in listLeafPredecessors:
+				dictionaryPilesByPredecessor[leafEarlier].add(pileLater)
+
+		for leafEarlier, setPilesRequiring in dictionaryPilesByPredecessor.items():
+			tupleDomainEarlier: tuple[int, ...] = tuple(dictionaryDomains[leafEarlier])
+			listOptionalPiles: list[int] = sorted(pile for pile in tupleDomainLater if pile not in setPilesRequiring)
+			for pileEarlier in tupleDomainEarlier:
+				optionalLessEqualCount: int = bisect_right(listOptionalPiles, pileEarlier)
+				if optionalLessEqualCount == 0:
+					listSuccessors: list[int] = dictionarySuccessor.setdefault(leafEarlier, {}).setdefault(pileEarlier, [])
+					if leafLater not in listSuccessors:
+						listSuccessors.append(leafLater)
+
+	return dictionarySuccessor

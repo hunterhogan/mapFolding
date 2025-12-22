@@ -349,6 +349,9 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: int, r: int, p
 
 	pile_kIsOpen: Callable[[PinnedLeaves], bool] = pileIsOpen(pile=pile_k)
 	kIsNotPinned: Callable[[PinnedLeaves], bool] = leafIsNotPinned(leaf=k)
+	def notLeaf_r(comparand: int, r: int = r) -> bool:
+		return comparand != r
+
 
 	listPinnedLeaves, iterator_kPinnedAt_pile_k = _segregateLeafPinnedAtPile(state.listPinnedLeaves, k, pile_k)
 	state.listPinnedLeaves = []
@@ -377,7 +380,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: int, r: int, p
 		listPinnedLeavesCompleted.extend(listPinnedLeaves)
 
 	for pile_r in domain_r:
-		iterator_kPinnedAt_pile_k = excludeLeafAtPile(iterator_kPinnedAt_pile_k, r, pile_r, tuple(filter(lambda leaf: leaf != r, getPileRange(state, pile_r))))
+		iterator_kPinnedAt_pile_k = excludeLeafAtPile(iterator_kPinnedAt_pile_k, r, pile_r, tuple(filter(notLeaf_r, getPileRange(state, pile_r))))
 
 	state.listPinnedLeaves.extend(listPinnedLeavesCompleted)
 	state.listPinnedLeaves.extend(iterator_kPinnedAt_pile_k)

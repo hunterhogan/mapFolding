@@ -80,16 +80,22 @@ def test_getDictionaryPileRanges(mapShape: tuple[int, ...]) -> None:
 def test_getLeafDomain(mapShape: tuple[int, ...]) -> None:
 	"""Verify getLeafDomain results match getDictionaryLeafDomains for all leaves."""
 	state = EliminationState(mapShape=mapShape)
-
-	dictionaryFromFunction = getDictionaryLeafDomains(state)
+	dictionaryExpected = A001417.dictionaryLeafDomainKnown[mapShape]
 
 	for leaf in range(state.leavesTotal):
-		rangeFromGetLeafDomain = getLeafDomain(state, leaf)
-		rangeFromDictionary = dictionaryFromFunction[leaf]
-
-		assert rangeFromGetLeafDomain == rangeFromDictionary, (
-			f"getLeafDomain inconsistent with getDictionaryLeafDomains at {leaf=} for {mapShape=}. "
-			f"getLeafDomain returned {rangeFromGetLeafDomain}, dictionary has {rangeFromDictionary}."
+		rangeActual = getLeafDomain(state, leaf)
+		startExpected, stopExpected, stepExpected = dictionaryExpected[leaf]
+		assert rangeActual.start == startExpected, (
+			f"getLeafDomain: range.start mismatch at {leaf=} for {mapShape=}. "
+			f"Expected start={startExpected}, got {rangeActual.start}."
+		)
+		assert rangeActual.stop == stopExpected, (
+			f"getLeafDomain: range.stop mismatch at {leaf=} for {mapShape=}. "
+			f"Expected stop={stopExpected}, got {rangeActual.stop}."
+		)
+		assert rangeActual.step == stepExpected, (
+			f"getLeafDomain: range.step mismatch at {leaf=} for {mapShape=}. "
+			f"Expected step={stepExpected}, got {rangeActual.step}."
 		)
 
 @pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
@@ -122,12 +128,11 @@ def test_getLeafDomainsCombined(domainFunction: Callable[[EliminationState], Seq
 def test_getPileRange(mapShape: tuple[int, ...]) -> None:
 	"""Verify `getPileRange` results match `getDictionaryPileRanges` for all piles."""
 	state = EliminationState(mapShape=mapShape)
-
-	dictionaryFromFunction = getDictionaryPileRanges(state)
+	dictionaryExpected = A001417.dictionaryPileRangesKnown[mapShape]
 
 	for pile in range(state.leavesTotal):
 		listFromGetPileRange = list(getPileRange(state, pile))
-		listFromDictionary = dictionaryFromFunction[pile]
+		listFromDictionary = dictionaryExpected[pile]
 
 		assert listFromGetPileRange == listFromDictionary, (
 			f"getPileRange inconsistent with getDictionaryPileRanges at {pile=} for {mapShape=}. "
