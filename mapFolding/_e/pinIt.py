@@ -109,6 +109,11 @@ def notPileLast(pileLast: int, pile: int) -> bool:
 	"""
 	return pileLast != pile
 
+# If I use a system in which a pile can contain a leaf or the range of leaves for that pile, then "open pile" means either:
+# 1. pile is not a key in leavesPinned (current system), or
+# 2. leavesPinned[pile] > state.leavesTotal (new system).
+# CRAP. I don't pass `state`.
+# NOTE This will require some thought.
 @syntacticCurry
 def pileIsOpen(leavesPinned: PinnedLeaves, pile: int) -> bool:
 	"""Return True if `pile` is not presently pinned in `leavesPinned`.
@@ -185,9 +190,16 @@ def atPilePinLeaf(leavesPinned: PinnedLeaves, pile: int, leaf: int) -> PinnedLea
 
 def makeFolding(leavesPinned: PinnedLeaves, leavesToInsert: tuple[int, ...]) -> tuple[int, ...]:
 	permutand: Iterator[int] = iter(leavesToInsert)
-	return tuple([leavesPinned[pile] if pile in leavesPinned else next(permutand) for pile in range(len(leavesPinned) + len(leavesToInsert))])
+	return tuple([leavesPinned[pile] if not pileIsOpen(leavesPinned, pile) else next(permutand) for pile in range(len(leavesPinned) + len(leavesToInsert))])
 
 # ======= Deconstruct a `PinnedLeaves` dictionary =======
+# This function returns `deconstructedLeavesPinned : dict[int, LeavesPinned]` for pragmatic reasons. I typically deconstruct a
+# pile because I want to pin one leaf at the pile without invalidating the permutation space. So, the dictionary makes it easy for
+# me to segregate the one leaf I am working on from the umpteen other new dictionaries, each with a leaf pinned at the pile.
+# If I change to representing the range of a pile with "bit packing", then I only need to make two dictionaries: one dictionary
+# with the desired leaf pinned at pile, and another dictionary with a modified range at pile that excludes the desired leaf.
+# The two systems are complementary: I can completely deconstruct a pile into only pinned leaves, bifurcate into one pinned
+# dictionary and one pile-range dictionary, or any intermediate option.
 def deconstructPinnedLeavesAtPile(leavesPinned: PinnedLeaves, pile: int, leavesToPin: Iterable[int]) -> dict[int, PinnedLeaves]:
 	"""Deconstruct an open `pile` to the `leaf` range of `pile`.
 
@@ -352,7 +364,6 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: int, r: int, p
 	def notLeaf_r(comparand: int, r: int = r) -> bool:
 		return comparand != r
 
-
 	listPinnedLeaves, iterator_kPinnedAt_pile_k = _segregateLeafPinnedAtPile(state.listPinnedLeaves, k, pile_k)
 	state.listPinnedLeaves = []
 
@@ -388,20 +399,20 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: int, r: int, p
 	return state
 
 def excludeLeaf_rBeforeLeaf_k(state: EliminationState, k: int, r: int, domain_k: Iterable[int] | None = None, domain_r: Iterable[int] | None = None) -> EliminationState:
-	"""Apply the leaf ordering exclusion (r cannot precede k) over all piles.
-
-	Iterates `pileK` downward from `pileLast` to 1, invoking `_excludeLeafRBeforeLeafK` which performs localized expansion,
-	segregation, and exclusion. The descending order preserves correctness because earlier piles may depend on knowledge of
-	later pinning positions.
+	"""Apply a `leaf` ordering exclusion (`r` cannot precede `k`) at every `pile`.
 
 	Parameters
 	----------
 	state : EliminationState
-		Mutable elimination state.
+		Data basket, state of the local context, and state of the global context.
 	k : int
-		Leaf index representing the first of a dimension-derived pair.
+		`leaf` that must be in a `pile` preceding the `pile` of `r`.
 	r : int
-		Leaf index representing the second (excluded before `k`).
+		`leaf` that must be in a `pile` succeeding the `pile` of `k`.
+	domain_k : Iterable[int] | None = None
+		The domain of each `pile` at which `k` can be pinned. If `None`, every `pile` is in the domain.
+	domain_r : Iterable[int] | None = None
+		The domain of each `pile` at which `r` can be pinned. If `None`, every `pile` is in the domain.
 
 	Returns
 	-------

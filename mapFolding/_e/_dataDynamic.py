@@ -9,9 +9,8 @@ from mapFolding import (
 	asciiColorReset, asciiColorYellow, between, consecutive, decreasing, exclude, inclusive, noDuplicates, packageSettings)
 from mapFolding._e import (
 	dimensionFourthNearest首, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
-	howManyDimensionsHaveOddParity, leafInSubHyperplane, leafOrigin, pileOrigin, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一,
-	首零一二, 首零二)
-from mapFolding._e._measure import Z0Z_sumsOfProductsOfDimensionsNearest首
+	howManyDimensionsHaveOddParity, leafInSubHyperplane, leafOrigin, pileOrigin, Z0Z_sumsOfProductsOfDimensionsNearest首, 一,
+	三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding.dataBaskets import EliminationState
 from operator import add, sub
 from pathlib import Path, PurePath

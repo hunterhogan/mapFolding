@@ -1,10 +1,11 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
 from mapFolding._e import getListLeavesCreaseDown, getListLeavesCreaseNext, getPileRange, PinnedLeaves
+from mapFolding._e.pinIt import pileIsOpen
 from mapFolding._e.pinning2Dn import appendLeavesPinnedAtPile, nextLeavesPinnedWorkbench, pinPiles
 from mapFolding.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding.dataBaskets import EliminationState
-from math import e, factorial
+from math import factorial
 from tqdm import tqdm
 
 def pinByCrease(state: EliminationState) -> EliminationState:
@@ -12,15 +13,17 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 	state = nextLeavesPinnedWorkbench(state)
 	while state.leavesPinned:
 
-		if state.pile - 1 in state.leavesPinned:
+		if not pileIsOpen(state.leavesPinned, state.pile - 1):
 			listLeavesAtPile: list[int] = getListLeavesCreaseNext(state, state.leavesPinned[state.pile - 1])
-		elif state.pile + 1 in state.leavesPinned:
+		elif not pileIsOpen(state.leavesPinned, state.pile + 1):
 			listLeavesAtPile = getListLeavesCreaseDown(state, state.leavesPinned[state.pile + 1])
 		else:
 			listLeavesAtPile = list(getPileRange(state, state.pile))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned.copy())
 		sherpa = appendLeavesPinnedAtPile(sherpa, listLeavesAtPile)
+		# len(sherpa.listPinnedLeaves) <= 5 with a freshly pinned leaf at state.pile in each # noqa: ERA001
+		# The pile-range of state.pile+1 is now getListLeavesCreaseNext.intersection(the existing pile-range), so I should update it.  # noqa: ERA001
 		state.listPinnedLeaves.extend(sherpa.listPinnedLeaves)
 		state = nextLeavesPinnedWorkbench(state)
 
@@ -35,7 +38,8 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-	if not ((state.dimensionsTotal > 2) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
+	youMustBeDimensionsTallToPinThis = 2
+	if not ((youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)):
 		return state
 
 	if not state.listPinnedLeaves:

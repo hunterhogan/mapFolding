@@ -1,5 +1,6 @@
 from collections.abc import Iterable
-from itertools import pairwise, permutations, repeat
+from itertools import pairwise, permutations, product as CartesianProduct, repeat
+from mapFolding import noDuplicates
 from mapFolding._e import leafOrigin, pileOrigin, PinnedLeaves
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding
 from mapFolding.algorithms.iff import thisLeafFoldingIsValid
@@ -12,6 +13,7 @@ def count(state: EliminationState) -> EliminationState:
 	return state
 
 def countLeavesPinned(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
+	# replace `permutations` with the `noDuplicates` filter on `CartesianProduct` of the domains of each leaf.
 	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(leavesPinned), permutations(tuple(set(leavesToInsert).difference(leavesPinned.values())))), repeat(mapShape)))
 
 def theorem2b(state: EliminationState) -> EliminationState:

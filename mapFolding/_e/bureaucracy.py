@@ -44,9 +44,9 @@ Technical details
 - This is not a recursive or backtracking permutation generator. Cf., e.g., https://github.com/TheAlgorithms/Python/blob/master/data_structures/arrays/permutations.py.
 
 Observations
-- Implement your constraints by "hiring" a bureaucrat to create a filter at the appropriate time.
-- This complex system relies on simple rules and actions
-- The "actors" should be stupid, weak, and ignorant. Note, for example, the scribe, which is the most sophisticated actor, does not need to know the index of its position, which is an important piece of information.
+- This complex system relies on simple rules and actions.
+- The "actors" should be stupid, weak, and ignorant. Note that the scribe, the most sophisticated actor, for example, doesn't know the position index, the most important data point.
+- Implement your constraints by "hiring" a bureaucrat to create a filter.
 - The janitor is not a bureaucrat.
 - Filters only restrict the domain.
 - Nothing can add to the domain.

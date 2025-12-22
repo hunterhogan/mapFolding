@@ -12,7 +12,7 @@ from mapFolding._e import (
 from mapFolding._e._exclusions import dictionary2d5AtPileLeafExcludedByPile, dictionary2d6AtPileLeafExcludedByPile
 from mapFolding._e.pinIt import (
 	atPilePinLeaf, deconstructPinnedLeavesAtPile, deconstructPinnedLeavesByDomainOfLeaf, leafIsNotPinned, leafIsPinned,
-	notLeafOriginOrLeaf零, notPileLast)
+	notLeafOriginOrLeaf零, notPileLast, pileIsOpen)
 from mapFolding.algorithms.iff import removePinnedLeavesViolations
 from mapFolding.dataBaskets import EliminationState
 from math import log, log2
@@ -76,7 +76,11 @@ def appendLeavesPinnedAtPile(state: EliminationState, listLeavesAtPile: list[int
 
 @syntacticCurry
 def disqualifyAppendingLeafAtPile(state: EliminationState, leaf: int) -> bool:
-		return any([_pileNotInRangeByLeaf(state, leaf), leafIsPinned(state.leavesPinned, leaf), mappingHasKey(state.leavesPinned, state.pile)])
+	return any([
+		_pileNotInRangeByLeaf(state, leaf)
+		, leafIsPinned(state.leavesPinned, leaf)
+		, not pileIsOpen(state.leavesPinned, state.pile)
+	])
 
 def _pileNotInRangeByLeaf(state: EliminationState, leaf: int) -> bool:
 	return state.pile not in getLeafDomain(state, leaf)
@@ -155,9 +159,9 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:
 
 		def segregateLeavesPinned(pile: int, Z0Z_segregator: EliminationState = Z0Z_tester) -> tuple[set[int], set[int], set[int], set[int]]:
 			leavesPinnedBeforePile: PinnedLeaves = keyfilter(between(0, pile - 1), Z0Z_segregator.leavesPinned)
-			pilesOpenBeforeLeaf: set[int] = set(range(pile)).difference(leavesPinnedBeforePile.keys())
+			pilesOpenBeforeLeaf: set[int] = set(filter(pileIsOpen(Z0Z_segregator.leavesPinned), range(pile)))
 			leavesPinnedAfterPile: set[int] = set(dissoc(Z0Z_segregator.leavesPinned, *leavesPinnedBeforePile.keys(), pile).values())
-			pilesOpenAfterLeaf: set[int] = set(range(pile + 1, Z0Z_segregator.pileLast + inclusive)).difference(leavesPinnedAfterPile)
+			pilesOpenAfterLeaf: set[int] = set(filter(pileIsOpen(Z0Z_segregator.leavesPinned), range(pile + 1, Z0Z_segregator.pileLast + inclusive)))
 			return pilesOpenAfterLeaf, pilesOpenBeforeLeaf, leavesPinnedAfterPile, set(leavesPinnedBeforePile.values())
 
 		for pile, leaf in sorted(keyfilter(notPileLast, valfilter(notLeafOriginOrLeaf零, Z0Z_tester.leavesPinned)).items()):
