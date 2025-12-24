@@ -339,5 +339,4 @@ leafOrigin: int = (0 * 九) + (0 * 八) + (0 * 七) + (0 * 六) + (0 * 五) + (0
 """The `leaf` at the origin of all dimensions, with `0` in every `dimensionIndex`."""
 pileOrigin: int = (0 * 九) + (0 * 八) + (0 * 七) + (0 * 六) + (0 * 五) + (0 * 四) + (0 * 三) + (0 * 二) + (0 * 一) + (0 * 零)
 """The `pile` at the origin of all dimensions, with `0` in every `dimensionIndex`."""
-type PinnedLeaves = dict[int, int]
-"""A mapping of pinned leaves, where each key is a `pile` index and its corresponding value is the `leaf` index pinned at that `pile`."""
+

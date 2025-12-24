@@ -23,8 +23,10 @@ This makes tests more meaningful and easier to understand in the context of the
 research domain.
 """
 
+from mapFolding._e.pinIt import oopsAllLeaves
 from collections.abc import Callable, Generator, Sequence
 from dataclasses import dataclass
+from gmpy2 import xmpz
 from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
 from mapFolding.dataBaskets import EliminationState
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, oeisIDsImplemented
@@ -578,27 +580,36 @@ def verifyLeavesPinnedAgainstFoldings() -> Callable[[EliminationState, NDArray[n
 	verifier : Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]]
 		Function that returns (rowsCovered, rowsTotal, countOverlappingDictionaries).
 	"""
+
+	def maskRowsMatchingPileConstraint(arrayLeavesAtPile: numpy.ndarray, leafOrPileRangeOfLeaves: int, leavesTotal: int) -> numpy.ndarray:
+		if isinstance(leafOrPileRangeOfLeaves, int):
+			return arrayLeavesAtPile == leafOrPileRangeOfLeaves
+		if isinstance(leafOrPileRangeOfLeaves, xmpz):
+			allowedLeaves: numpy.ndarray = numpy.fromiter((bool(leafOrPileRangeOfLeaves[leaf]) for leaf in range(leavesTotal)), dtype=bool, count=leavesTotal)
+			return allowedLeaves[arrayLeavesAtPile]
+		return numpy.ones(arrayLeavesAtPile.shape[0], dtype=bool)
+
 	def _verify(state: EliminationState, arrayFoldings: NDArray[numpy.uint8]) -> tuple[int, int, int]:
 		rowsTotal: int = int(arrayFoldings.shape[0])
-		listMasks: list[numpy.ndarray] = []
+		listRowMasks: list[numpy.ndarray] = []
 
 		for leavesPinned in state.listPinnedLeaves:
-			maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-			for indexPile, leaf in leavesPinned.items():
-				maskMatches = maskMatches & (arrayFoldings[:, indexPile] == leaf)
-			listMasks.append(maskMatches)
+			maskRowsMatchThisDictionary: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
+			for pile, leafOrPileRangeOfLeaves in oopsAllLeaves(leavesPinned).items():
+				maskRowsMatchThisDictionary = maskRowsMatchThisDictionary & maskRowsMatchingPileConstraint(arrayFoldings[:, pile], leafOrPileRangeOfLeaves, state.leavesTotal)
+			listRowMasks.append(maskRowsMatchThisDictionary)
 
-		masksStacked: numpy.ndarray = numpy.column_stack(listMasks)
+		masksStacked: numpy.ndarray = numpy.column_stack(listRowMasks)
 		coverageCountPerRow: numpy.ndarray = masksStacked.sum(axis=1)
 		indicesOverlappedRows: numpy.ndarray = numpy.nonzero(coverageCountPerRow >= 2)[0]
 
 		countOverlappingDictionaries: int = 0
 		if indicesOverlappedRows.size > 0:
-			for _indexMask, mask in enumerate(listMasks):
-				if bool(mask[indicesOverlappedRows].any()):
+			for maskRowsMatchThisDictionary in listRowMasks:
+				if bool(maskRowsMatchThisDictionary[indicesOverlappedRows].any()):
 					countOverlappingDictionaries += 1
 
-		maskUnion = numpy.logical_or.reduce(listMasks)
+		maskUnion = numpy.logical_or.reduce(listRowMasks)
 		rowsCovered: int = int(maskUnion.sum())
 
 		return rowsCovered, rowsTotal, countOverlappingDictionaries

@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from importlib.machinery import ModuleSpec
-	from mapFolding._theTypes import MetadataOEISid, MetadataOEISidMapFolding
+	from mapFolding import MetadataOEISid, MetadataOEISidMapFolding
 
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')

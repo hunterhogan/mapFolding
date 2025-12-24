@@ -1,24 +1,20 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
 from collections.abc import Callable, Iterable, Sequence
+from cytoolz.dicttoolz import valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
 from dataclasses import dataclass
-from functools import partial, reduce
-from gmpy2 import bit_flip, bit_mask, is_even
+from functools import partial
+from gmpy2 import bit_mask
 from hunterMakesPy import raiseIfNone
-from itertools import accumulate, combinations, repeat
 from mapFolding import (
-	asciiColorCyan, asciiColorGreen, asciiColorMagenta, asciiColorRed, asciiColorReset, asciiColorYellow, decreasing,
-	inclusive, packageSettings)
+	asciiColorGreen, asciiColorMagenta, asciiColorRed, asciiColorReset, asciiColorYellow, packageSettings, PinnedLeaves)
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, getDictionaryLeafDomains, getDictionaryPileRanges,
-	getLeafDomain, getPileRange, getZ0Z_successor, howManyDimensionsHaveOddParity, leafOrigin, pileOrigin, PinnedLeaves,
-	Z0Z_creaseNearestTail, Z0Z_invert, Z0Z_sumsOfProductsOfDimensionsNearest首, 一, 三, 二, 四, 零, 首一, 首三, 首二, 首零, 首零一, 首零一三,
-	首零一二)
-from mapFolding._e._dataDynamic import filterFloor, getDataFrameFoldings
-from mapFolding._e.pinIt import notLeafOriginOrLeaf零
+	dimensionNearestTail, dimensionNearest首, getDictionaryPileRanges, getLeafDomain, getPileRange,
+	howManyDimensionsHaveOddParity, pileOrigin, Z0Z_invert, 零, 首二, 首零, 首零一)
+from mapFolding._e._dataDynamic import getDataFrameFoldings
+from mapFolding._e.pinIt import thisIsALeaf
 from mapFolding._e.pinning2DnAnnex import beansWithoutCornbread
 from mapFolding.dataBaskets import EliminationState
-from math import log2
 from more_itertools import flatten
 from operator import add, mul
 from pathlib import Path
@@ -488,7 +484,7 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPinnedLeaves:
 	listSurplusDictionaries: list[PinnedLeaves] = []
 	for leavesPinned in listPinnedLeaves:
 		maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-		for pile, leaf in leavesPinned.items():
+		for pile, leaf in leafFilter(thisIsALeaf, leavesPinned).items():
 			maskMatches = maskMatches & (arrayFoldings[:, pile] == leaf)
 		if not bool(maskMatches.any()):
 			listSurplusDictionaries.append(leavesPinned)
@@ -600,12 +596,18 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 	return pandas.DataFrame(listEntropyRecords).sort_values('entropyRelative', ascending=False).reset_index(drop=True)
 
 def verifyPinning2Dn(state: EliminationState) -> None:
+	def getLeavesPinnedWithLeafValuesOnly(leavesPinned: PinnedLeaves) -> PinnedLeaves:
+		return leafFilter(thisIsALeaf, leavesPinned)
 	arrayFoldings = getDataFrameFoldings(state)
 	if arrayFoldings is not None:
 		arrayFoldings = arrayFoldings.to_numpy(dtype=numpy.uint8, copy=False)
 		pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.listPinnedLeaves)
 
-		listDictionaryPinned: list[PinnedLeaves] = pinningCoverage.listSurplusDictionaries
+		listSurplusDictionariesOriginal: list[PinnedLeaves] = pinningCoverage.listSurplusDictionaries
+		listDictionaryPinned: list[PinnedLeaves] = [
+			getLeavesPinnedWithLeafValuesOnly(leavesPinned)
+			for leavesPinned in listSurplusDictionariesOriginal
+		]
 		if listDictionaryPinned:
 			print(asciiColorYellow, end='')
 			pprint(listDictionaryPinned[0:5], width=140)
@@ -627,13 +629,13 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		if pinningCoverage.indicesOverlappingLeavesPinned:
 			print(f"{asciiColorRed}{len(pinningCoverage.indicesOverlappingLeavesPinned)} overlapping dictionaries", asciiColorReset)
 			for indexDictionary in sorted(pinningCoverage.indicesOverlappingLeavesPinned)[0:2]:
-				pprint(state.listPinnedLeaves[indexDictionary], width=140)
+				pprint(leafFilter(thisIsALeaf, state.listPinnedLeaves[indexDictionary]), width=140)
 
 		beansOrCornbread: Callable[[PinnedLeaves], bool] = beansWithoutCornbread(state)
 		listBeans: list[PinnedLeaves] = list(filter(beansOrCornbread, state.listPinnedLeaves))
 		if listBeans:
 			print(f"{asciiColorMagenta}{len(listBeans)} dictionaries with beans but no cornbread.", asciiColorReset)
-			pprint(listBeans[0], width=140)
+			pprint(getLeavesPinnedWithLeafValuesOnly(listBeans[0]), width=140)
 
 		maskUnion: numpy.ndarray = pinningCoverage.maskUnion
 		rowsRequired: int = pinningCoverage.rowsRequired
@@ -693,10 +695,20 @@ if __name__ == '__main__':
 
 		return tuple(sorted(pileRange))
 
-	for pile in range(首三(state.dimensionsTotal)+零, 首零一二(state.dimensionsTotal), 2):
+	for pile in range(首二(state.dimensionsTotal)+零, 首零一(state.dimensionsTotal), 1):
 		print(pile, (ll:=getPileRange(state, pile)) == (zz:=Z0Z_getPileRange(state, pile)), end=': ')
-		# print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
+		print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 		pprint(zz, width=180)
+
+		# > 32: matches most tail0s != 1
+		# if pile > 32:
+		# 	pile-=1
+		# else:
+		# 	pile+=1
+		# zz = tuple(map(partial(xor, 1), zz))
+		# print(pile, (ll:=getPileRange(state, pile)) == (zz), end=': ')
+		# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
+		# pprint(zz, width=180)
 
 	# print(measureEntropy(state))
 

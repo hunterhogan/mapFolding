@@ -22,17 +22,15 @@ See Also
 - Citations in BibTeX format "mapFolding/citations".
 """
 from collections.abc import Callable
-from cytoolz.dicttoolz import keyfilter, keymap, valfilter, valmap
 from cytoolz.functoolz import curry as syntacticCurry
-from cytoolz.itertoolz import groupby as toolz_groupby
-from functools import cache, partial
+from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
-from mapFolding import between, getLeavesTotal, inclusive
-from mapFolding._e import PinnedLeaves, 零
+from mapFolding import between, getLeavesTotal, inclusive, PinnedLeaves
+from mapFolding._e import 零
+from mapFolding._e.pinIt import thisIsALeaf
 from mapFolding.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf
-from typing import TypeGuard
 
 def thisIsAViolationComplicated(pile: int, pileComparand: int, getLeafNextCrease: Callable[[], int | None], getComparandNextCrease: Callable[[], int | None], pileOf: Callable[[int], int | None]) -> bool:  # noqa: PLR0911
 	"""Validate.
@@ -169,8 +167,12 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 
 def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 	"""Return `True` if `state.leavesPinned` has a violation."""
-	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in state.leavesPinned.items()}
-	listPileLeaf: list[tuple[int, int]] = sorted(valfilter(between(0, state.leavesTotal - 零 - inclusive), state.leavesPinned).items())
+	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in state.leavesPinned.items() if thisIsALeaf(leafValue)}
+	listPileLeaf: list[tuple[int, int]] = sorted([
+		(pileKey, leafValue)
+		for pileKey, leafValue in state.leavesPinned.items()
+		if thisIsALeaf(leafValue) and between(0, state.leavesTotal - 零 - inclusive, leafValue)
+	])
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
 		for pile, leaf in listPileLeaf:

@@ -22,7 +22,7 @@ access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
 	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	getConnectionGraph, getLeavesTotal, inclusive, makeDataContainer)
+	getConnectionGraph, getLeavesTotal, inclusive, LeafOrPileRangeOfLeaves, makeDataContainer, PinnedLeaves)
 from math import prod
 import dataclasses
 
@@ -71,13 +71,13 @@ class EliminationState:
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `folding` that represents a group of `leavesTotal`-many foldings."""
 
-	listPinnedLeaves: list[dict[int, int]] = dataclasses.field(default_factory=list[dict[int, int]], init=True)
-	"""A list of dictionaries (`{pile: leaf}`) that each define an exclusive permutation space: no overlap between dictionaries."""
+	listPinnedLeaves: list[PinnedLeaves] = dataclasses.field(default_factory=list[PinnedLeaves], init=True)
+	"""A list of dictionaries (`{pile: leaf or possible leaves}`) that each define an exclusive permutation space: no overlap between dictionaries."""
 
 	pile: int = -1
 	"""The `pile` on the workbench."""
-	leavesPinned: dict[int, int] = dataclasses.field(default_factory=dict[int, int], init=True)
-	"""The `leavesPinned` dictionary (`{pile: leaf}`) on the workbench."""
+	leavesPinned: PinnedLeaves = dataclasses.field(default_factory=dict[int, LeafOrPileRangeOfLeaves], init=True)
+	"""The `leavesPinned` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
 	Theorem2Multiplier: int = 1
 	Theorem3Multiplier: int = 1
@@ -98,7 +98,7 @@ class EliminationState:
 
 	@property
 	def foldsTotal(self) -> int:
-		"""The total number of possible `folding` patterns for this `mapShape`."""
+		"""The computed number of distinct `folding` patterns for this `mapShape`."""
 		return prod((self.groupsOfFolds, self.leavesTotal, self.Theorem2Multiplier, self.Theorem3Multiplier, self.Theorem4Multiplier))
 
 	def __post_init__(self) -> None:

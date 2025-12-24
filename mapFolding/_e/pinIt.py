@@ -1,12 +1,16 @@
 from collections.abc import Callable, Iterable, Iterator
-from cytoolz.dicttoolz import assoc as associate
-from cytoolz.functoolz import complement, curry as syntacticCurry
+from cytoolz.dicttoolz import assoc as associate, valfilter as leafFilter
+from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
+from gmpy2 import bit_mask, xmpz
+from hunterMakesPy import raiseIfNone
 from itertools import repeat
-from mapFolding import between, DOTvalues, inclusive, mappingHasKey
-from mapFolding._e import getLeafDomain, getPileRange, PinnedLeaves, 零
+from mapFolding import between, DOTvalues, inclusive, LeafOrPileRangeOfLeaves, PinnedLeaves
+from mapFolding._e import getLeafDomain, getPileRange, 零
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import flatten
+from operator import iand
+from typing import TypeGuard
 
 # ======= Boolean filters =======================
 
@@ -109,11 +113,6 @@ def notPileLast(pileLast: int, pile: int) -> bool:
 	"""
 	return pileLast != pile
 
-# If I use a system in which a pile can contain a leaf or the range of leaves for that pile, then "open pile" means either:
-# 1. pile is not a key in leavesPinned (current system), or
-# 2. leavesPinned[pile] > state.leavesTotal (new system).
-# CRAP. I don't pass `state`.
-# NOTE This will require some thought.
 @syntacticCurry
 def pileIsOpen(leavesPinned: PinnedLeaves, pile: int) -> bool:
 	"""Return True if `pile` is not presently pinned in `leavesPinned`.
@@ -128,9 +127,9 @@ def pileIsOpen(leavesPinned: PinnedLeaves, pile: int) -> bool:
 	Returns
 	-------
 	pileIsOpen : bool
-		True if `pile` is not a key in `leavesPinned`.
+		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a pile-range (`xmpz`).
 	"""
-	return complement(mappingHasKey)(leavesPinned, pile)
+	return not thisIsALeaf(leavesPinned.get(pile))
 
 # ======= Group by =======================
 
@@ -156,6 +155,135 @@ def _segregateLeafPinnedAtPile(listPinnedLeaves: list[PinnedLeaves], leaf: int, 
 	grouped: dict[bool, list[PinnedLeaves]] = toolz_groupby(isPinned, listPinnedLeaves)
 	return (grouped.get(False, []), grouped.get(True, []))
 
+# ======= Working with variables that are a leaf or a pile's domain of leaves =======================
+# https://gmpy2.readthedocs.io/en/latest/advmpz.html
+
+def getLeaf(leavesPinned: PinnedLeaves, pile: int, default: int | None = None) -> int | None:
+	if thisIsALeaf(ImaLeaf := leavesPinned.get(pile)):
+		return ImaLeaf
+	return default
+
+def getIteratorOfLeaves(pileRangeOfLeaves: xmpz) -> Iterator[int]:
+	"""Return an iterator of leaves in `pileRangeOfLeaves`.
+
+	Parameters
+	----------
+	pileRangeOfLeaves : xmpz
+		`xmpz` representing the range of leaves in a pile.
+
+	Returns
+	-------
+	iteratorOfLeaves : Iterator[int]
+		Iterator of `leaves` in `pileRangeOfLeaves`.
+	"""
+	pileRangeOfLeaves[-1] = 0
+	return pileRangeOfLeaves.iter_set()
+
+def getXmpzAntiPileRange(leavesTotal: int, leaves: Iterable[int]) -> xmpz:
+	antiPileRange = xmpz(bit_mask(leavesTotal))
+	for leaf in leaves:
+		antiPileRange[leaf] = 0
+	return antiPileRange
+
+def getXmpzPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> xmpz:
+	pileRangeOfLeaves: xmpz = xmpz(0)
+	pileRangeOfLeaves[leavesTotal] = 1
+	for leaf in leaves:
+		pileRangeOfLeaves[leaf] = 1
+	return pileRangeOfLeaves
+
+def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[int]:
+	"""Return True if `leafOrPileRangeOfLeaves` is a `leaf`.
+
+	Parameters
+	----------
+	leafOrPileRangeOfLeaves : LeafOrPileRangeOfLeaves | None
+		`leaf`, `pile`-range, or `None` to check.
+
+	Returns
+	-------
+	intIsProbablyALeaf : TypeGuard[int]
+		Technically, we only know the type is `int`.
+	"""
+	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, int)
+
+def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[xmpz]:
+	"""Return True if `leafOrPileRangeOfLeaves` is a pile's range of leaves.
+
+	Parameters
+	----------
+	leafOrPileRangeOfLeaves : LeafOrPileRangeOfLeaves | None
+		`leaf`, `pile`-range, or `None` to check.
+
+	Returns
+	-------
+	youHaveAPileRange : TypeGuard[xmpz]
+		Congrats, you have a pile range!
+	"""
+	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, xmpz)
+
+def oopsAllLeaves(leavesPinned: PinnedLeaves) -> dict[int, int]:
+	"""Return a dictionary of all pinned leaves in `leavesPinned`.
+
+	Parameters
+	----------
+	leavesPinned : PinnedLeaves
+		Dictionary of `pile` with pinned `leaf` or pile-range of leaves, if a `leaf` is pinned at `pile` or the pile-range of
+		leaves is defined.
+
+	Returns
+	-------
+	dictionaryOfPinnedLeaves : dict[int, int]
+		Dictionary mapping from `pile` to pinned `leaf` for every pinned leaf in `leavesPinned`.
+	"""
+	return leafFilter(thisIsALeaf, leavesPinned) # pyright: ignore[reportReturnType]
+
+def oopsAllPileRangesOfLeaves(leavesPinned: PinnedLeaves) -> dict[int, xmpz]:
+	"""Return a dictionary of all pile-ranges of leaves in `leavesPinned`.
+
+	Parameters
+	----------
+	leavesPinned : PinnedLeaves
+		Dictionary of `pile` with pinned `leaf` or pile-range of leaves, if a `leaf` is pinned at `pile` or the pile-range of
+		leaves is defined.
+
+	Returns
+	-------
+	dictionaryOfPinnedLeaves : dict[int, xmpz]
+		Dictionary mapping from `pile` to pinned `leaf` for every pinned leaf in `leavesPinned`.
+	"""
+	return leafFilter(thisIsAPileRangeOfLeaves, leavesPinned) # pyright: ignore[reportReturnType]
+
+@syntacticCurry
+def pileRangeAND(antiPileRange: xmpz, pileRangeOfLeaves: xmpz) -> xmpz:
+	return iand(pileRangeOfLeaves, antiPileRange)
+
+def Z0Z_idk(leavesPinned: PinnedLeaves, antiPileRange: xmpz) -> PinnedLeaves:
+	for pile, pileRangeOfLeaves in leafFilter(thisIsAPileRangeOfLeaves, leavesPinned).items():
+		leavesPinned[pile] = pileRangeAND(antiPileRange, pileRangeOfLeaves)
+	return leavesPinned
+
+@syntacticCurry
+def Z0Z_updateDomains(leavesTotal: int, leavesPinned: PinnedLeaves) -> PinnedLeaves:
+	"""Updates elements but does not check for duplicates or validity."""
+	keepGoing = True
+	while keepGoing:
+		keepGoing = False
+		leaves = oopsAllLeaves(leavesPinned).values()
+		antiPileRange = getXmpzAntiPileRange(leavesTotal, leaves)
+		leavesPinned = Z0Z_idk(leavesPinned, antiPileRange)
+	return leavesPinned
+
+def Z0Z_JeanValjean(p24601: LeafOrPileRangeOfLeaves) -> LeafOrPileRangeOfLeaves:
+	whoAmI: LeafOrPileRangeOfLeaves = p24601
+	if thisIsAPileRangeOfLeaves(p24601):
+		if p24601.bit_count() == 1:
+			# dammit. this is wrong. this means the pile-range is null and the dictionary should be discarded.
+			whoAmI = 0
+		elif p24601.bit_count() == 2:
+			whoAmI = raiseIfNone(p24601.bit_scan1())
+	return whoAmI
+
 # ======= Pin one or more leaves in `leavesPinned` or `folding` =======================
 # NOTE The only functions that actually pin a leaf in a dictionary or folding ought to be in this section.
 
@@ -171,7 +299,8 @@ def atPilePinLeaf(leavesPinned: PinnedLeaves, pile: int, leaf: int) -> PinnedLea
 	Parameters
 	----------
 	leavesPinned : PinnedLeaves
-		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
+		Dictionary of `pile` with pinned `leaf` or pile-range of leaves, if a `leaf` is pinned at `pile` or the pile-range of
+		leaves is defined.
 	pile : int
 		`pile` at which to pin `leaf`.
 	leaf : int
@@ -190,7 +319,11 @@ def atPilePinLeaf(leavesPinned: PinnedLeaves, pile: int, leaf: int) -> PinnedLea
 
 def makeFolding(leavesPinned: PinnedLeaves, leavesToInsert: tuple[int, ...]) -> tuple[int, ...]:
 	permutand: Iterator[int] = iter(leavesToInsert)
-	return tuple([leavesPinned[pile] if not pileIsOpen(leavesPinned, pile) else next(permutand) for pile in range(len(leavesPinned) + len(leavesToInsert))])
+	pilesTotal: int = sum(map(thisIsALeaf, leavesPinned.values())) + len(leavesToInsert)
+	return tuple([
+		leafOrLeafRange if thisIsALeaf(leafOrLeafRange := leavesPinned.get(pile)) else next(permutand)
+		for pile in range(pilesTotal)
+	])
 
 # ======= Deconstruct a `PinnedLeaves` dictionary =======
 # This function returns `deconstructedLeavesPinned : dict[int, LeavesPinned]` for pragmatic reasons. I typically deconstruct a
@@ -220,8 +353,8 @@ def deconstructPinnedLeavesAtPile(leavesPinned: PinnedLeaves, pile: int, leavesT
 	deconstructedLeavesPinned : dict[int, LeavesPinned]
 		Dictionary mapping from `leaf` pinned at `pile` to the `PinnedLeaves` dictionary with the `leaf` pinned at `pile`.
 	"""
-	if not pileIsOpen(leavesPinned, pile):
-		deconstructedLeavesPinned: dict[int, PinnedLeaves] = {leavesPinned[pile]: leavesPinned}
+	if thisIsALeaf(leaf := leavesPinned.get(pile)):
+		deconstructedLeavesPinned: dict[int, PinnedLeaves] = {leaf: leavesPinned}
 	else:
 		pin: Callable[[int], PinnedLeaves] = atPilePinLeaf(leavesPinned, pile)
 		leafCanBePinned: Callable[[int], bool] = leafIsNotPinned(leavesPinned)

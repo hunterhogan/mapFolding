@@ -3,10 +3,11 @@ from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
-from gmpy2 import bit_clear, bit_flip, bit_mask, bit_test, is_even, is_odd
-from hunterMakesPy import intInnit, raiseIfNone, writePython
+from gmpy2 import bit_flip, bit_mask, is_even, is_odd
+from hunterMakesPy import raiseIfNone, writePython
 from mapFolding import (
-	asciiColorReset, asciiColorYellow, between, consecutive, decreasing, exclude, inclusive, noDuplicates, packageSettings)
+	asciiColorReset, asciiColorYellow, between, consecutive, decreasing, exclude, inclusive, LeafOrPileRangeOfLeaves,
+	noDuplicates, packageSettings)
 from mapFolding._e import (
 	dimensionFourthNearest首, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
 	howManyDimensionsHaveOddParity, leafInSubHyperplane, leafOrigin, pileOrigin, Z0Z_sumsOfProductsOfDimensionsNearest首, 一,
@@ -14,14 +15,13 @@ from mapFolding._e import (
 from mapFolding.dataBaskets import EliminationState
 from operator import add, sub
 from pathlib import Path, PurePath
-from pprint import pprint
 from typing import Any
 import pandas
 import sys
 
 # ======= Creases =================================
 
-def getListLeavesCreaseNext(state: EliminationState, leaf: int) -> list[int]:
+def getLeavesCreaseNext(state: EliminationState, leaf: int) -> tuple[int, ...]:
 	"""1) The leaf has at most `dimensionsTotal - 1` many creases.
 
 	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
@@ -31,7 +31,7 @@ def getListLeavesCreaseNext(state: EliminationState, leaf: int) -> list[int]:
 	"""
 	return _getCreases(state, leaf, increase=True)
 
-def getListLeavesCreaseDown(state: EliminationState, leaf: int) -> list[int]:
+def getLeavesCreaseBack(state: EliminationState, leaf: int) -> tuple[int, ...]:
 	"""1) The leaf has at most `dimensionsTotal - 1` many creases.
 
 	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
@@ -41,32 +41,32 @@ def getListLeavesCreaseDown(state: EliminationState, leaf: int) -> list[int]:
 	"""
 	return _getCreases(state, leaf, increase=False)
 
-def _getCreases(state: EliminationState, leaf: int, *, increase: bool = True) -> list[int]:
+def _getCreases(state: EliminationState, leaf: int, *, increase: bool = True) -> tuple[int, ...]:
 	return _makeCreases(leaf, state.dimensionsTotal)[increase]
 @cache
-def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[list[int], list[int]]:
+def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[tuple[int, ...], tuple[int, ...]]:
 	listLeavesCrease: list[int] = [int(bit_flip(leaf, dimensionIndex)) for dimensionIndex in range(dimensionsTotal)]
 
 	if leaf == leafOrigin: # A special case I've been unable to figure out how to incorporate in the formula.
-		listLeavesIncrease: list[int] = [1]
-		listLeavesDecrease: list[int] = []
+		listLeavesCreaseNext: list[int] = [1]
+		listLeavesCreaseBack: list[int] = []
 	else:
-		slicingIndices: int = howManyDimensionsHaveOddParity(leaf) & 1
+		slicingIndices: int = is_odd(howManyDimensionsHaveOddParity(leaf))
 
-		slicerDecreasing: slice = slice(slicingIndices, dimensionNearest首(leaf) * (slicingIndices ^ 1) or None)
-		slicerIncreasing: slice = slice(slicingIndices ^ 1, dimensionNearest首(leaf) * (slicingIndices) or None)
+		slicerBack: slice = slice(slicingIndices, dimensionNearest首(leaf) * bit_flip(slicingIndices, 0) or None)
+		slicerNext: slice = slice(bit_flip(slicingIndices, 0), dimensionNearest首(leaf) * slicingIndices or None)
 
 		if is_even(leaf):
-			if slicerDecreasing.start == 1:
-				slicerDecreasing = slice(slicerDecreasing.start + dimensionNearestTail(leaf), slicerDecreasing.stop)
-			if slicerIncreasing.start == 1:
-				slicerIncreasing = slice(slicerIncreasing.start + dimensionNearestTail(leaf), slicerIncreasing.stop)
-		listLeavesDecrease = listLeavesCrease[slicerDecreasing]
-		listLeavesIncrease = listLeavesCrease[slicerIncreasing]
+			if slicerBack.start == 1:
+				slicerBack = slice(slicerBack.start + dimensionNearestTail(leaf), slicerBack.stop)
+			if slicerNext.start == 1:
+				slicerNext = slice(slicerNext.start + dimensionNearestTail(leaf), slicerNext.stop)
+		listLeavesCreaseBack = listLeavesCrease[slicerBack]
+		listLeavesCreaseNext = listLeavesCrease[slicerNext]
 
 		if leaf == 1: # A special case I've been unable to figure out how to incorporate in the formula.
-			listLeavesDecrease = [0]
-	return (listLeavesDecrease, listLeavesIncrease)
+			listLeavesCreaseBack = [0]
+	return (tuple(listLeavesCreaseBack), tuple(listLeavesCreaseNext))
 
 # ======= (mathematical) ranges of piles ====================
 # TODO Ideally, figure out the formula for pile ranges instead of deconstructing leaf domains.
@@ -75,40 +75,40 @@ def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[list[int], list[int]]
 # ------- Boolean filters -----------------------------------
 
 @syntacticCurry
-def filterCeiling(pile: int, dimensionsTotal: int, leaf: int) -> bool:
-	return pile <  int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin)
+def filterCeiling(pile: int, dimensionsTotal: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
+	return pile <  int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin) # pyright: ignore[reportArgumentType]
 
 @syntacticCurry
-def filterFloor(pile: int, leaf: int) -> bool:
-	return int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile
+def filterFloor(pile: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
+	return int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile # pyright: ignore[reportArgumentType]
 
 @syntacticCurry
-def filterParity(pile: int, leaf: int) -> bool:
-	return (pile & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1)
+def filterParity(pile: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
+	return (pile & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1) # pyright: ignore[reportArgumentType]
 
 @syntacticCurry
-def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: int) -> bool:
+def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
 	if leaf != 首零(dimensionsTotal)+零:
 		return True
-	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
+	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1) # pyright: ignore[reportArgumentType]
 
 def getPileRange(state: EliminationState, pile: int) -> Iterable[int]:
 	return _getPileRange(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal)
 @cache
-def _getPileRange(pile: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> tuple[int, ...]:
+def _getPileRange(pile: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: LeafOrPileRangeOfLeaves) -> tuple[int, ...]:
 	if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
 		parityMatch: Callable[[int], bool] = filterParity(pile)
 		pileAboveFloor: Callable[[int], bool] = filterFloor(pile)
 		pileBelowCeiling: Callable[[int], bool] = filterCeiling(pile, dimensionsTotal)
 		matchLargerStep: Callable[[int], bool] = filterDoubleParity(pile, dimensionsTotal)
 
-		pileRange: Iterable[int] = range(leavesTotal)
+		pileRange: Iterable[int] = range(leavesTotal) # pyright: ignore[reportArgumentType]
 		pileRange = filter(parityMatch, pileRange)
 		pileRange = filter(pileAboveFloor, pileRange)
 		pileRange = filter(pileBelowCeiling, pileRange)
 		return tuple(filter(matchLargerStep, pileRange))
 
-	return tuple(range(leavesTotal))
+	return tuple(range(leavesTotal)) # pyright: ignore[reportArgumentType]
 
 def getDictionaryPileRanges(state: EliminationState) -> dict[int, list[int]]:
 	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
@@ -124,15 +124,15 @@ def _getLeafDomain(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], l
 	if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
 		originPinned =  leaf == leafOrigin
 		return range(
-					int(bit_flip(0, dimensionNearestTail(leaf) + 1))									# `start`, first value included in the `range`.
-						+ howManyDimensionsHaveOddParity(leaf)
+					int(bit_flip(0, dimensionNearestTail(leaf) + 1))									# `start`, first value included in the `range`. # pyright: ignore[reportArgumentType]
+						+ howManyDimensionsHaveOddParity(leaf) # pyright: ignore[reportArgumentType]
 						- 1 - originPinned
-					, int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf)))	# `stop`, first value excluded from the `range`.
-						- howManyDimensionsHaveOddParity(leaf)
+					, int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf)))	# `stop`, first value excluded from the `range`. # pyright: ignore[reportArgumentType]
+						- howManyDimensionsHaveOddParity(leaf) # pyright: ignore[reportArgumentType]
 						+ 2 - originPinned
 					, 2 + (2 * (leaf == 首零(dimensionsTotal)+零))											# `step`
 				)
-	return range(leavesTotal)
+	return range(leavesTotal) # pyright: ignore[reportArgumentType]
 
 def getDomainDimension一(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
 	"""The beans and cornbread and beans and cornbread dimension.

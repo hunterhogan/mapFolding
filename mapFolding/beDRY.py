@@ -32,11 +32,8 @@ def consecutive(flatContainer: Iterable[int]) -> bool:
 	return ((len(list(next(consecutive_groups(flatContainer)))) == len(list(flatContainer)))
 	or (len(list(next(consecutive_groups(always_reversible(flatContainer))))) == len(list(flatContainer))))
 
-def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
+def DOTvalues[个](dictionary: dict[Any, 个]) -> Iterator[个]:
 	"""Return the list of values from a dictionary (generic over type parameter `个`).
-
-	A tiny helper used only for its semantic clarity inside `deconstructListPinnedLeaves` when flattening expanded
-	dictionaries produced by `deconstructLeavesPinned`.
 
 	Parameters
 	----------
@@ -52,7 +49,7 @@ def DOTvalues[个](dictionary: dict[Any, 个]) -> list[个]:
 	--------
 	deconstructLeavesPinned, deconstructListPinnedLeaves
 	"""
-	return list(dictionary.values())
+	yield from dictionary.values()
 
 def exclude[个](flatContainer: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
 	"""Yield items from `flatContainer` whose positions are not in `indices`."""

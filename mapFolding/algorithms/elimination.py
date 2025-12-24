@@ -1,8 +1,11 @@
 from collections.abc import Iterable
+from gmpy2 import xmpz
 from itertools import pairwise, permutations, product as CartesianProduct, repeat
-from mapFolding import noDuplicates
-from mapFolding._e import leafOrigin, pileOrigin, PinnedLeaves
-from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding
+from mapFolding import between, getLeavesTotal, noDuplicates, PinnedLeaves
+from mapFolding._e import leafOrigin, pileOrigin
+from mapFolding._e.pinIt import (
+	excludeLeaf_rBeforeLeaf_k, getIteratorOfLeaves, makeFolding, oopsAllLeaves, oopsAllPileRangesOfLeaves, thisIsALeaf,
+	thisIsAPileRangeOfLeaves)
 from mapFolding.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding.dataBaskets import EliminationState
 from math import factorial
@@ -13,8 +16,29 @@ def count(state: EliminationState) -> EliminationState:
 	return state
 
 def countLeavesPinned(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
-	# replace `permutations` with the `noDuplicates` filter on `CartesianProduct` of the domains of each leaf.
-	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(leavesPinned), permutations(tuple(set(leavesToInsert).difference(leavesPinned.values())))), repeat(mapShape)))
+# TODO
+	"""Replace `permutations` with the `noDuplicates` filter on `CartesianProduct` of the domains of each leaf.
+
+	leavesPinned must be in order by `pile`.
+	filter with `oop`.
+	pileRangeOfLeaves.iter_set() returns an iterator of int corresponding to the leaves in the pile's range.
+	https://gmpy2.readthedocs.io/en/latest/advmpz.html#gmpy2.xmpz.iter_set
+	filter out "leaf" = state.leavesTotal
+	CartesianProduct over these iterators.
+	filter via noDuplicates.
+	each product tuple is a `leavesToInsert` argument to makeFolding.
+	return sum(
+		map(thisLeafFoldingIsValid
+			, map(makeFolding
+				, repeat(leavesPinned)
+				, CartesianProduct(*map(getIteratorOfLeaves, oopsAllPileRangesOfLeaves(leavesPinned).values()))
+			)
+			, repeat(mapShape)
+		)
+	)
+	"""
+	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(leavesPinned), permutations(tuple(set(leavesToInsert).difference(oopsAllLeaves(leavesPinned).values())))), repeat(mapShape)))
+
 
 def theorem2b(state: EliminationState) -> EliminationState:
 	"""Implement Lunnon Theorem 2(b): If some dimension pᵢ > 2 (with Theorem 4 inactive), G is divisible by 2·n.

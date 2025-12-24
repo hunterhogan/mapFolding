@@ -1,18 +1,22 @@
-from cytoolz.dicttoolz import dissoc, keyfilter, valfilter
+from collections.abc import Iterable
+from cytoolz.dicttoolz import dissoc, keyfilter, keyfilter as pileFilter, valfilter, valfilter as leafFilter
 from cytoolz.functoolz import complement, curry as syntacticCurry
 from functools import cache
-from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
+from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd, xmpz
 from hunterMakesPy import raiseIfNone
 from itertools import filterfalse
-from mapFolding import between, decreasing, exclude, inclusive, mappingHasKey, reverseLookup
+from mapFolding import (
+	between, decreasing, DOTvalues, exclude, inclusive, LeafOrPileRangeOfLeaves, mappingHasKey, noDuplicates, PinnedLeaves,
+	reverseLookup)
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, getDictionaryPileRanges, getLeafDomain,
-	getListLeavesCreaseDown, getListLeavesCreaseNext, getZ0Z_precedence, getZ0Z_successor, howManyDimensionsHaveOddParity,
-	leafInSubHyperplane, PinnedLeaves, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+	getLeavesCreaseBack, getLeavesCreaseNext, getZ0Z_precedence, getZ0Z_successor, howManyDimensionsHaveOddParity,
+	leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e._exclusions import dictionary2d5AtPileLeafExcludedByPile, dictionary2d6AtPileLeafExcludedByPile
 from mapFolding._e.pinIt import (
-	atPilePinLeaf, deconstructPinnedLeavesAtPile, deconstructPinnedLeavesByDomainOfLeaf, leafIsNotPinned, leafIsPinned,
-	notLeafOriginOrLeaf零, notPileLast, pileIsOpen)
+	atPilePinLeaf, deconstructPinnedLeavesAtPile, deconstructPinnedLeavesByDomainOfLeaf, getIteratorOfLeaves, getLeaf,
+	leafIsNotPinned, leafIsPinned, notLeafOriginOrLeaf零, notPileLast, oopsAllLeaves, oopsAllPileRangesOfLeaves, pileIsOpen,
+	thisIsALeaf, thisIsAPileRangeOfLeaves, Z0Z_JeanValjean, Z0Z_updateDomains)
 from mapFolding.algorithms.iff import removePinnedLeavesViolations
 from mapFolding.dataBaskets import EliminationState
 from math import log, log2
@@ -35,12 +39,12 @@ def beansWithoutCornbread(state: EliminationState, leavesPinned: PinnedLeaves) -
 	return any((beans in leavesPinned.values()) ^ (cornbread in leavesPinned.values()) for beans, cornbread in ((一+零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))))
 
 def pinLeafCornbread(state: EliminationState) -> EliminationState:
-	leafBeans: int = state.leavesPinned[state.pile]
+	leafBeans: int = raiseIfNone(getLeaf(state.leavesPinned, state.pile))
 	if leafBeans in [一+零, 首一(state.dimensionsTotal)]:
-		leafCornbread: int = getListLeavesCreaseNext(state, leafBeans)[-1]
+		leafCornbread: int = getLeavesCreaseNext(state, leafBeans)[-1]
 		state.pile += 1
 	else:
-		leafCornbread = getListLeavesCreaseDown(state, leafBeans)[-1]
+		leafCornbread = getLeavesCreaseBack(state, leafBeans)[-1]
 		state.pile -= 1
 
 	if disqualifyAppendingLeafAtPile(state, leafCornbread):
@@ -52,19 +56,16 @@ def pinLeafCornbread(state: EliminationState) -> EliminationState:
 
 # ======= append `leavesPinned` at `pile` if qualified =======
 
-def appendLeavesPinnedAtPile(state: EliminationState, listLeavesAtPile: list[int]) -> EliminationState:
-	disqualify: Callable[[int], bool] = disqualifyAppendingLeafAtPile(state)
-	leavesToPin: list[int] = list(filterfalse(disqualify, listLeavesAtPile))
-
-	dictionaryPinnedLeaves: dict[int, PinnedLeaves] = deconstructPinnedLeavesAtPile(state.leavesPinned, state.pile, leavesToPin)
-
+def appendLeavesPinnedAtPile(state: EliminationState, listLeavesAtPile: Iterable[int]) -> EliminationState:
 	sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned.copy())
-
+	disqualify: Callable[[int], bool] = disqualifyAppendingLeafAtPile(state)
 	beansOrCornbread: Callable[[PinnedLeaves], bool] = beansWithoutCornbread(sherpa)
 
-	sherpa.listPinnedLeaves.extend(tuple(valfilter(complement(beansOrCornbread), dictionaryPinnedLeaves).values()))
+	dictionaryPinnedLeaves: dict[int, PinnedLeaves] = deconstructPinnedLeavesAtPile(state.leavesPinned, state.pile, filterfalse(disqualify, listLeavesAtPile))
 
-	for leavesPinned in valfilter(beansOrCornbread, dictionaryPinnedLeaves).values():
+	sherpa.listPinnedLeaves.extend(leafFilter(complement(beansOrCornbread), dictionaryPinnedLeaves).values())
+
+	for leavesPinned in leafFilter(beansOrCornbread, dictionaryPinnedLeaves).values():
 		stateCornbread: EliminationState = pinLeafCornbread(EliminationState(state.mapShape, pile=state.pile, leavesPinned=leavesPinned))
 		if stateCornbread.leavesPinned:
 			sherpa.listPinnedLeaves.append(stateCornbread.leavesPinned)
@@ -76,11 +77,7 @@ def appendLeavesPinnedAtPile(state: EliminationState, listLeavesAtPile: list[int
 
 @syntacticCurry
 def disqualifyAppendingLeafAtPile(state: EliminationState, leaf: int) -> bool:
-	return any([
-		_pileNotInRangeByLeaf(state, leaf)
-		, leafIsPinned(state.leavesPinned, leaf)
-		, not pileIsOpen(state.leavesPinned, state.pile)
-	])
+	return any([_pileNotInRangeByLeaf(state, leaf), leafIsPinned(state.leavesPinned, leaf), not pileIsOpen(state.leavesPinned, state.pile)])
 
 def _pileNotInRangeByLeaf(state: EliminationState, leaf: int) -> bool:
 	return state.pile not in getLeafDomain(state, leaf)
@@ -110,14 +107,14 @@ def Z0Z_excluder(state: EliminationState) -> bool:
 	else:
 		return False
 
-	for pileExcluded, leafExcluded in keyfilter(mappingHasKey(lookup), valfilter(notLeafOriginOrLeaf零, state.leavesPinned)).items():
+	for pileExcluded, leafExcluded in keyfilter(mappingHasKey(lookup), leafFilter(notLeafOriginOrLeaf零, oopsAllLeaves(state.leavesPinned))).items():
 		if pileExcluded == state.pileLast:
 			continue
 		if leafExcluded not in lookup[pileExcluded]:
 			continue
 
 		for pileExcluder, listLeafExcluders in keyfilter(mappingHasKey(state.leavesPinned), lookup[pileExcluded][leafExcluded]).items():
-			leafExcluder: int = state.leavesPinned[pileExcluder]
+			leafExcluder: LeafOrPileRangeOfLeaves = state.leavesPinned[pileExcluder]
 			if leafExcluder in listLeafExcluders:
 				return True
 
@@ -152,24 +149,25 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:
 	Z0Z_successor: dict[int, dict[int, list[int]]] = getZ0Z_successor(state)
 	if state.dimensionsTotal < 6:
 		Z0Z_precedence = {}
-		Z0Z_successor = {}
+		Z0Z_successor = {}  # noqa: F841
 
 	while True:
 		Z0Z_restart = False
 
 		def segregateLeavesPinned(pile: int, Z0Z_segregator: EliminationState = Z0Z_tester) -> tuple[set[int], set[int], set[int], set[int]]:
-			leavesPinnedBeforePile: PinnedLeaves = keyfilter(between(0, pile - 1), Z0Z_segregator.leavesPinned)
+			leavesPinnedBeforePile: PinnedLeaves = leafFilter(thisIsALeaf, pileFilter(between(0, pile - 1), Z0Z_segregator.leavesPinned))
 			pilesOpenBeforeLeaf: set[int] = set(filter(pileIsOpen(Z0Z_segregator.leavesPinned), range(pile)))
-			leavesPinnedAfterPile: set[int] = set(dissoc(Z0Z_segregator.leavesPinned, *leavesPinnedBeforePile.keys(), pile).values())
+			leavesPinnedAfterPile: set[int] = set(filter(thisIsALeaf, dissoc(Z0Z_segregator.leavesPinned, *leavesPinnedBeforePile.keys(), pile).values()))
 			pilesOpenAfterLeaf: set[int] = set(filter(pileIsOpen(Z0Z_segregator.leavesPinned), range(pile + 1, Z0Z_segregator.pileLast + inclusive)))
-			return pilesOpenAfterLeaf, pilesOpenBeforeLeaf, leavesPinnedAfterPile, set(leavesPinnedBeforePile.values())
+			return pilesOpenAfterLeaf, pilesOpenBeforeLeaf, leavesPinnedAfterPile, set(filter(thisIsALeaf, leavesPinnedBeforePile.values()))
 
-		for pile, leaf in sorted(keyfilter(notPileLast, valfilter(notLeafOriginOrLeaf零, Z0Z_tester.leavesPinned)).items()):
+		for pile, leaf in sorted(pileFilter(notPileLast, leafFilter(notLeafOriginOrLeaf零, oopsAllLeaves(Z0Z_tester.leavesPinned))).items()):
 			tailCoordinates: int = dimensionNearestTail(leaf)
 			dimensionHead: int = dimensionNearest首(leaf)
 
 			def notLeaf(comparand: int, leaf: int = leaf) -> bool:
 				return comparand != leaf
+# ruff: noqa: ERA001
 
 			@cache
 			def mustBeAfterLeaf(r: int, leaf: int = leaf, pile: int = pile, dimensionHead: int = dimensionHead, dimensionsTotal: int = Z0Z_tester.dimensionsTotal) -> bool:
@@ -241,11 +239,11 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:
 
 # ======= crease-based subroutines for analyzing a specific `pile`. =======
 
-def _getListLeavesCrease(state: EliminationState, leaf: int) -> list[int]:
+def _getListLeavesCrease(state: EliminationState, leaf: int) -> tuple[int, ...]:
 	if 0 < leaf:
-		listLeavesCrease: list[int] = getListLeavesCreaseDown(state, abs(leaf))
+		listLeavesCrease: tuple[int, ...] = getLeavesCreaseBack(state, abs(leaf))
 	else:
-		listLeavesCrease: list[int] = getListLeavesCreaseNext(state, abs(leaf))
+		listLeavesCrease = getLeavesCreaseNext(state, abs(leaf))
 	return listLeavesCrease
 
 # Second order
@@ -253,10 +251,10 @@ def pinPile一Crease(state: EliminationState) -> list[int]:
 	direction: Callable[[int, int], int] = sub
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: int = state.leavesPinned[direction(state.pile, 1)]
-	listLeavesCrease: list[int] = _getListLeavesCrease(state, direction(0, leafRoot))
+	leafRoot: int = raiseIfNone(getLeaf(state.leavesPinned, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
+	listLeavesCrease: tuple[int, ...] = _getListLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt首Less一: int | None = state.leavesPinned.get(state.leavesTotal - 一)
+	leafAt首Less一: int | None = getLeaf(state.leavesPinned, state.leavesTotal - 一)
 
 	if leafAt首Less一 and (0 < dimensionNearestTail(leafAt首Less一)):
 		listCreaseIndicesExcluded.extend([*range(dimensionNearestTail(leafAt首Less一) - 零, state.dimensionsTotal - 一)])
@@ -266,10 +264,10 @@ def pinPile首Less一Crease(state: EliminationState) -> list[int]:
 	direction: Callable[[int, int], int] = add
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: int = state.leavesPinned[direction(state.pile, 1)]
-	listLeavesCrease: list[int] = _getListLeavesCrease(state, direction(0, leafRoot))
+	leafRoot: int = raiseIfNone(getLeaf(state.leavesPinned, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
+	listLeavesCrease: tuple[int, ...] = _getListLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一: int | None = state.leavesPinned.get(一)
+	leafAt一: int | None = getLeaf(state.leavesPinned, 一)
 
 	if leafAt一 and (leafAt一.bit_length() < state.dimensionsTotal):
 		listCreaseIndicesExcluded.extend([*range(零, leafAt一.bit_length())])
@@ -280,11 +278,11 @@ def pinPile一零Crease(state: EliminationState) -> list[int]:
 	direction: Callable[[int, int], int] = sub
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: int = state.leavesPinned[direction(state.pile, 1)]
-	listLeavesCrease: list[int] = _getListLeavesCrease(state, direction(0, leafRoot))
+	leafRoot: int = raiseIfNone(getLeaf(state.leavesPinned, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
+	listLeavesCrease: tuple[int, ...] = _getListLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一: int = state.leavesPinned[一]
-	leafAt首Less一: int = state.leavesPinned[state.leavesTotal - 一]
+	leafAt一: int = raiseIfNone(getLeaf(state.leavesPinned, 一))
+	leafAt首Less一: int = raiseIfNone(getLeaf(state.leavesPinned, state.leavesTotal - 一))
 
 	if 1 < len(listLeavesCrease):
 		listCreaseIndicesExcluded.append(0)
@@ -296,11 +294,11 @@ def pinPile首Less一零Crease(state: EliminationState) -> list[int]:
 	direction: Callable[[int, int], int] = add
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: int = state.leavesPinned[direction(state.pile, 1)]
-	listLeavesCrease: list[int] = _getListLeavesCrease(state, direction(0, leafRoot))
+	leafRoot: int = raiseIfNone(getLeaf(state.leavesPinned, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
+	listLeavesCrease: tuple[int, ...] = _getListLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一: int = state.leavesPinned[一]
-	leafAt首Less一: int = state.leavesPinned[state.leavesTotal - 一]
+	leafAt一: int = raiseIfNone(getLeaf(state.leavesPinned, 一))
+	leafAt首Less一: int = raiseIfNone(getLeaf(state.leavesPinned, state.leavesTotal - 一))
 
 	if leafAt首Less一 < 首零一(state.dimensionsTotal):
 		listCreaseIndicesExcluded.append(-1)
@@ -313,13 +311,13 @@ def pinPile二Crease(state: EliminationState) -> list[int]:
 	direction: Callable[[int, int], int] = sub
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: int = state.leavesPinned[direction(state.pile, 1)]
-	listLeavesCrease: list[int] = _getListLeavesCrease(state, direction(0, leafRoot))
+	leafRoot: int = raiseIfNone(getLeaf(state.leavesPinned, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
+	listLeavesCrease: tuple[int, ...] = _getListLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一: int = state.leavesPinned[一]
-	leafAt首Less一: int = state.leavesPinned[state.leavesTotal - 一]
-	leafAt一零: int = state.leavesPinned[一+零]
-	leafAt首Less一零: int = state.leavesPinned[state.leavesTotal - (一+零)]
+	leafAt一: int = raiseIfNone(getLeaf(state.leavesPinned, 一))
+	leafAt首Less一: int = raiseIfNone(getLeaf(state.leavesPinned, state.leavesTotal - 一))
+	leafAt一零: int = raiseIfNone(getLeaf(state.leavesPinned, 一+零))
+	leafAt首Less一零: int = raiseIfNone(getLeaf(state.leavesPinned, state.leavesTotal - (一+零)))
 
 	if is_odd(leafAt一零):
 		listCreaseIndicesExcluded.extend([*range(dimensionNearest首(leafAt一零), 5), ptount(leafAt一零)])
@@ -340,19 +338,19 @@ def pinPile首less二Crease(state: EliminationState) -> list[int]:
 	direction: Callable[[int, int], int] = add
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: int = state.leavesPinned[direction(state.pile, 1)]
-	listLeavesCrease: list[int] = _getListLeavesCrease(state, direction(0, leafRoot))
+	leafRoot: int = raiseIfNone(getLeaf(state.leavesPinned, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
+	listLeavesCrease: tuple[int, ...] = _getListLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一: int = state.leavesPinned[一]
-	leafAt首Less一: int = state.leavesPinned[state.leavesTotal - 一]
-	leafAt一零: int = state.leavesPinned[一+零]
-	leafAt首Less一零: int = state.leavesPinned[state.leavesTotal - (一+零)]
-	leafAt二: int = state.leavesPinned[二]
+	leafAt一: int = raiseIfNone(getLeaf(state.leavesPinned, 一))
+	leafAt首Less一: int = raiseIfNone(getLeaf(state.leavesPinned, state.leavesTotal - 一))
+	leafAt一零: int = raiseIfNone(getLeaf(state.leavesPinned, 一+零))
+	leafAt首Less一零: int = raiseIfNone(getLeaf(state.leavesPinned, state.leavesTotal - (一+零)))
+	leafAt二: int = raiseIfNone(getLeaf(state.leavesPinned, 二))
 
 	addendDimension首零: int = leafAt首Less一零 - leafAt首Less一
-	addendDimension零: int = 						leafAt一 - 零
-	addendDimension一: int = 			leafAt一零 - leafAt一
 	addendDimension一零: int = leafAt二 - leafAt一零
+	addendDimension一: int = 			 leafAt一零 - leafAt一
+	addendDimension零: int =						 leafAt一 - 零
 
 # ruff: noqa: SIM102
 
@@ -421,168 +419,162 @@ def pinPile首less二Crease(state: EliminationState) -> list[int]:
 
 def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 	leaf: int = -1
+	leafAt一: int = raiseIfNone(getLeaf(state.leavesPinned, 一))
+	leafAt首Less一: int = raiseIfNone(getLeaf(state.leavesPinned, state.leavesTotal - 一))
+	leafAt一零: int = raiseIfNone(getLeaf(state.leavesPinned, 一+零))
+	leafAt首Less一零: int = raiseIfNone(getLeaf(state.leavesPinned, state.leavesTotal - (一+零)))
+	leafAt二: int = raiseIfNone(getLeaf(state.leavesPinned, 二))
 
 	dictionaryPileToLeaves: dict[int, list[int]] = getDictionaryPileRanges(state)
 	listRemoveLeaves: list[int] = []
 
 	pileExcluder: int = 一
-	leafAtPileExcluder: int = state.leavesPinned[pileExcluder]
 	for dimension in range(state.dimensionsTotal):
 		if dimension < state.dimensionsTotal - 2:
 			leaf = dictionaryPileToLeaves[pileExcluder][dimension]
-			if leaf == leafAtPileExcluder:
-				listRemoveLeaves.extend([一, 首零(state.dimensionsTotal) + leafAtPileExcluder])
+			if leaf == leafAt一:
+				listRemoveLeaves.extend([一, 首零(state.dimensionsTotal) + leafAt一])
 		if 0 < dimension < state.dimensionsTotal - 2:
 			leaf = dictionaryPileToLeaves[pileExcluder][dimension]
-			if leaf == leafAtPileExcluder:
-				listRemoveLeaves.extend([一 + leafAtPileExcluder])
+			if leaf == leafAt一:
+				listRemoveLeaves.extend([一 + leafAt一])
 		if dimension == 1:
 			leaf = dictionaryPileToLeaves[pileExcluder][dimension]
-			if leaf == leafAtPileExcluder:
-				listRemoveLeaves.extend([首零(state.dimensionsTotal) + leafAtPileExcluder + 零])
+			if leaf == leafAt一:
+				listRemoveLeaves.extend([首零(state.dimensionsTotal) + leafAt一 + 零])
 		if dimension == state.dimensionsTotal - 2:
 			leaf = dictionaryPileToLeaves[pileExcluder][dimension]
-			if leaf == leafAtPileExcluder:
-				listRemoveLeaves.extend([首一(state.dimensionsTotal), 首一(state.dimensionsTotal) + leafAtPileExcluder])
-	del leafAtPileExcluder, pileExcluder
+			if leaf == leafAt一:
+				listRemoveLeaves.extend([首一(state.dimensionsTotal), 首一(state.dimensionsTotal) + leafAt一])
+	del pileExcluder
 	leaf = -1
 
 	pileExcluder = state.leavesTotal - 一
-	leafAtPileExcluder = state.leavesPinned[pileExcluder]
 	for dimension in range(state.dimensionsTotal):
 		if dimension == 0:
 			leaf = dictionaryPileToLeaves[pileExcluder][dimension]
-			if leaf == leafAtPileExcluder:
+			if leaf == leafAt首Less一:
 				listRemoveLeaves.extend([一])
 		if dimension < state.dimensionsTotal - 2:
 			leaf = dictionaryPileToLeaves[pileExcluder][dimension]
-			if leaf == leafAtPileExcluder:
-				listRemoveLeaves.extend([首一(state.dimensionsTotal) + leafAtPileExcluder])
+			if leaf == leafAt首Less一:
+				listRemoveLeaves.extend([首一(state.dimensionsTotal) + leafAt首Less一])
 		if 0 < dimension < state.dimensionsTotal - 2:
 			leaf = dictionaryPileToLeaves[pileExcluder][dimension]
-			if leaf == leafAtPileExcluder:
-				listRemoveLeaves.extend([int(bit_flip(0, dimension)), 首一(state.dimensionsTotal) + leafAtPileExcluder - (int(bit_flip(0, dimension)) - 零)])
+			if leaf == leafAt首Less一:
+				listRemoveLeaves.extend([int(bit_flip(0, dimension)), 首一(state.dimensionsTotal) + leafAt首Less一 - (int(bit_flip(0, dimension)) - 零)])
 		if 0 < dimension < state.dimensionsTotal - 3:
 			leaf = dictionaryPileToLeaves[pileExcluder][dimension]
-			if leaf == leafAtPileExcluder:
-				listRemoveLeaves.extend([零 + leafAtPileExcluder])
+			if leaf == leafAt首Less一:
+				listRemoveLeaves.extend([零 + leafAt首Less一])
 		if 0 < dimension < state.dimensionsTotal - 1:
 			leaf = dictionaryPileToLeaves[pileExcluder][dimension]
-			if leaf == leafAtPileExcluder:
+			if leaf == leafAt首Less一:
 				listRemoveLeaves.extend([首一(state.dimensionsTotal)])
-	del leafAtPileExcluder, pileExcluder
+	del pileExcluder
 	leaf = -1
 
 	pileExcluder = 一+零
-	leafAtPileExcluder = state.leavesPinned[pileExcluder]
-	if leafAtPileExcluder == 三+二+零:
+	if leafAt一零 == 三+二+零:
 		listRemoveLeaves.extend([二+一+零, 首零(state.dimensionsTotal)+二+零])
-	if leafAtPileExcluder == 首一(state.dimensionsTotal)+二+零:
+	if leafAt一零 == 首一(state.dimensionsTotal)+二+零:
 		listRemoveLeaves.extend([首二(state.dimensionsTotal), 首一二(state.dimensionsTotal)+零, 首零一二(state.dimensionsTotal)])
-	if leafAtPileExcluder == 首一二(state.dimensionsTotal)+零:
+	if leafAt一零 == 首一二(state.dimensionsTotal)+零:
 		listRemoveLeaves.extend([首一(state.dimensionsTotal)+一+零, 首零二(state.dimensionsTotal)+零])
-	if leafAtPileExcluder == 首零一(state.dimensionsTotal)+零:
+	if leafAt一零 == 首零一(state.dimensionsTotal)+零:
 		listRemoveLeaves.extend([首零一二(state.dimensionsTotal)])
-	if is_odd(leafAtPileExcluder):
-		listRemoveLeaves.extend([leafAtPileExcluder, state.productsOfDimensions[raiseIfNone(dimensionSecondNearest首(leafAtPileExcluder))]])
-		if leafAtPileExcluder < 首零(state.dimensionsTotal):
-			comebackOffset: int = state.sumsOfProductsOfDimensions[ptount(leafAtPileExcluder) + 1]
+	if is_odd(leafAt一零):
+		listRemoveLeaves.extend([leafAt一零, state.productsOfDimensions[raiseIfNone(dimensionSecondNearest首(leafAt一零))]])
+		if leafAt一零 < 首零(state.dimensionsTotal):
+			comebackOffset: int = state.sumsOfProductsOfDimensions[ptount(leafAt一零) + 1]
 			listRemoveLeaves.extend([
 				一
-				, leafAtPileExcluder + 首零(state.dimensionsTotal)-零
-				, leafAtPileExcluder + 首零(state.dimensionsTotal)-零 - comebackOffset
+				, leafAt一零 + 首零(state.dimensionsTotal)-零
+				, leafAt一零 + 首零(state.dimensionsTotal)-零 - comebackOffset
 			])
-			if ptount(leafAtPileExcluder) == 1:
+			if ptount(leafAt一零) == 1:
 				listRemoveLeaves.extend([
-					state.productsOfDimensions[dimensionNearest首(leafAtPileExcluder)] + comebackOffset
+					state.productsOfDimensions[dimensionNearest首(leafAt一零)] + comebackOffset
 					, 首零(state.dimensionsTotal) + comebackOffset
 				])
-		if 首零(state.dimensionsTotal) < leafAtPileExcluder:
-			listRemoveLeaves.extend([首零一(state.dimensionsTotal)+零, state.productsOfDimensions[dimensionNearest首(leafAtPileExcluder) - 1]])
-	del leafAtPileExcluder, pileExcluder
+		if 首零(state.dimensionsTotal) < leafAt一零:
+			listRemoveLeaves.extend([首零一(state.dimensionsTotal)+零, state.productsOfDimensions[dimensionNearest首(leafAt一零) - 1]])
+	del pileExcluder
 	leaf = -1
 
 	pileExcluder = state.leavesTotal - (一+零)
-	leafAtPileExcluder = state.leavesPinned[pileExcluder]
-	if 首零(state.dimensionsTotal) < leafAtPileExcluder:
-		listRemoveLeaves.extend([首零一(state.dimensionsTotal)+零, leafAtPileExcluder])
-		if is_even(leafAtPileExcluder):
+	if 首零(state.dimensionsTotal) < leafAt首Less一零:
+		listRemoveLeaves.extend([首零一(state.dimensionsTotal)+零, leafAt首Less一零])
+		if is_even(leafAt首Less一零):
 			listRemoveLeaves.extend([首一(state.dimensionsTotal)])
 			bit = 1
-			if bit_test(leafAtPileExcluder, bit):
+			if bit_test(leafAt首Less一零, bit):
 				listRemoveLeaves.extend([2**bit, 首零(state.dimensionsTotal) + 2**bit + 零])
 				listRemoveLeaves.extend([state.leavesTotal - sum(state.productsOfDimensions[bit: state.dimensionsTotal - 2])])
 			bit = 2
-			if bit_test(leafAtPileExcluder, bit):
+			if bit_test(leafAt首Less一零, bit):
 				listRemoveLeaves.extend([2**bit, 首零(state.dimensionsTotal) + 2**bit + 零])
-				if 1 < dimensionNearestTail(leafAtPileExcluder):
+				if 1 < dimensionNearestTail(leafAt首Less一零):
 					listRemoveLeaves.extend([state.leavesTotal - sum(state.productsOfDimensions[bit: state.dimensionsTotal - 2])])
 			bit = 3
-			if bit_test(leafAtPileExcluder, bit):
-				if 1 < dimensionNearestTail(leafAtPileExcluder):
+			if bit_test(leafAt首Less一零, bit):
+				if 1 < dimensionNearestTail(leafAt首Less一零):
 					listRemoveLeaves.extend([2**bit])
 					listRemoveLeaves.extend([state.leavesTotal - sum(state.productsOfDimensions[bit: state.dimensionsTotal - 2])])
-				if dimensionNearestTail(leafAtPileExcluder) < bit:
+				if dimensionNearestTail(leafAt首Less一零) < bit:
 					listRemoveLeaves.extend([首零(state.dimensionsTotal) + 2**bit + 零])
 
 			sheepOrGoat = 0
 			shepherdOfDimensions: int = int(bit_flip(0, state.dimensionsTotal - 5))
-			if (leafAtPileExcluder//shepherdOfDimensions) & bit_mask(5) == 0b10101:
+			if (leafAt首Less一零//shepherdOfDimensions) & bit_mask(5) == 0b10101:
 				listRemoveLeaves.extend([二])
-				sheepOrGoat = ptount(leafAtPileExcluder//shepherdOfDimensions)
+				sheepOrGoat = ptount(leafAt首Less一零//shepherdOfDimensions)
 				if 0 < sheepOrGoat < state.dimensionsTotal - 3:
-					comebackOffset = int(bit_flip(0, dimensionNearest首(leafAtPileExcluder))) - 二
-					listRemoveLeaves.extend([leafAtPileExcluder - comebackOffset])
+					comebackOffset = int(bit_flip(0, dimensionNearest首(leafAt首Less一零))) - 二
+					listRemoveLeaves.extend([leafAt首Less一零 - comebackOffset])
 				if 0 < sheepOrGoat < state.dimensionsTotal - 4:
-					comebackOffset = int(bit_flip(0, raiseIfNone(dimensionSecondNearest首(leafAtPileExcluder)))) - 二
-					listRemoveLeaves.extend([leafAtPileExcluder - comebackOffset])
+					comebackOffset = int(bit_flip(0, raiseIfNone(dimensionSecondNearest首(leafAt首Less一零)))) - 二
+					listRemoveLeaves.extend([leafAt首Less一零 - comebackOffset])
 
-		if is_odd(leafAtPileExcluder):
+		if is_odd(leafAt首Less一零):
 			listRemoveLeaves.extend([一])
-			if leafAtPileExcluder & bit_mask(4) == 0b001001:
+			if leafAt首Less一零 & bit_mask(4) == 0b001001:
 				listRemoveLeaves.extend([0b001011])
-			sheepOrGoat = ptount(leafAtPileExcluder)
+			sheepOrGoat = ptount(leafAt首Less一零)
 			if 0 < sheepOrGoat < state.dimensionsTotal - 3:
-				comebackOffset = int(bit_flip(0, dimensionNearest首(leafAtPileExcluder))) - 一
-				listRemoveLeaves.extend([leafAtPileExcluder - comebackOffset])
+				comebackOffset = int(bit_flip(0, dimensionNearest首(leafAt首Less一零))) - 一
+				listRemoveLeaves.extend([leafAt首Less一零 - comebackOffset])
 			if 0 < sheepOrGoat < state.dimensionsTotal - 4:
-				comebackOffset = int(bit_flip(0, raiseIfNone(dimensionSecondNearest首(leafAtPileExcluder)))) - 一
-				listRemoveLeaves.extend([leafAtPileExcluder - comebackOffset])
+				comebackOffset = int(bit_flip(0, raiseIfNone(dimensionSecondNearest首(leafAt首Less一零)))) - 一
+				listRemoveLeaves.extend([leafAt首Less一零 - comebackOffset])
 
 	pileExcluder = 二
-	leafAtPileExcluder = state.leavesPinned[pileExcluder]
-
-	if is_even(leafAtPileExcluder):
-		listRemoveLeaves.extend([一, leafAtPileExcluder + 零, 首零(state.dimensionsTotal)+一+零])
-	if is_odd(leafAtPileExcluder):
-		listRemoveLeaves.extend([leafAtPileExcluder - 零])
-		if 首一(state.dimensionsTotal) < leafAtPileExcluder < 首零(state.dimensionsTotal):
+	if is_even(leafAt二):
+		listRemoveLeaves.extend([一, leafAt二 + 零, 首零(state.dimensionsTotal)+一+零])
+	if is_odd(leafAt二):
+		listRemoveLeaves.extend([leafAt二 - 零])
+		if 首一(state.dimensionsTotal) < leafAt二 < 首零(state.dimensionsTotal):
 			listRemoveLeaves.extend([首一(state.dimensionsTotal)+一+零, 首零一(state.dimensionsTotal)+零])
-		if 首零(state.dimensionsTotal) < leafAtPileExcluder:
+		if 首零(state.dimensionsTotal) < leafAt二:
 			listRemoveLeaves.extend([首一(state.dimensionsTotal), 首零一(state.dimensionsTotal)+零])
 			bit = 1
-			if bit_test(leafAtPileExcluder, bit):
+			if bit_test(leafAt二, bit):
 				listRemoveLeaves.extend([2**bit, 首零(state.dimensionsTotal) + 2**bit + 零])
 			bit = 2
-			if bit_test(leafAtPileExcluder, bit):
+			if bit_test(leafAt二, bit):
 				listRemoveLeaves.extend([首零(state.dimensionsTotal) + 2**bit + 零])
 			bit = 3
-			if bit_test(leafAtPileExcluder, bit):
+			if bit_test(leafAt二, bit):
 				listRemoveLeaves.extend([首零(state.dimensionsTotal) + 2**bit + 零])
 			bit = 4
-			if bit_test(leafAtPileExcluder, bit) and (leafAtPileExcluder.bit_length() > 5):
+			if bit_test(leafAt二, bit) and (leafAt二.bit_length() > 5):
 				listRemoveLeaves.extend([首零一二(state.dimensionsTotal)])
-	del leafAtPileExcluder, pileExcluder
+	del pileExcluder
 	leaf = -1
-
-	leafAt一: int = state.leavesPinned[一]
-	leafAt首Less一: int = state.leavesPinned[state.leavesTotal - 一]
-	leafAt一零: int = state.leavesPinned[一+零]
-	leafAt首Less一零: int = state.leavesPinned[state.leavesTotal - (一+零)]
 
 	if (leafAt一零 != 首零一(state.dimensionsTotal)+零) and (leafAt首Less一 == 首零一(state.dimensionsTotal)):
 		listRemoveLeaves.append(一)
-	if (leafAt首Less一零 != getListLeavesCreaseDown(state, 首零(state.dimensionsTotal)+零)[0]) and (leafAt一 == 一+零):
+	if (leafAt首Less一零 != getLeavesCreaseBack(state, 首零(state.dimensionsTotal)+零)[0]) and (leafAt一 == 一+零):
 		listRemoveLeaves.append(首一(state.dimensionsTotal))
 	if (leafAt一 == 首二(state.dimensionsTotal)+零) and (leafAt首Less一 == 首零一(state.dimensionsTotal)):
 		listRemoveLeaves.extend([首二(state.dimensionsTotal), 首零一二(state.dimensionsTotal)])
@@ -596,6 +588,7 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 # ======= Insanity-based subroutines for analyzing a specific `leaf`. =======
 
 def pinLeaf首零Plus零(state: EliminationState) -> EliminationState:
+	"""You need listPinnedLeaves."""
 	leaf: int = 首零(state.dimensionsTotal)+零
 	listPinnedLeavesCopy: list[PinnedLeaves] = state.listPinnedLeaves.copy()
 	state.listPinnedLeaves = []

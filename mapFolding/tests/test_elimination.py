@@ -16,8 +16,8 @@ and the tests will automatically pick them up via parametrization.
 from collections.abc import Callable, Sequence
 from mapFolding._e import (
 	getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二,
-	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeafDomain, getListLeavesCreaseDown,
-	getListLeavesCreaseNext, getPileRange)
+	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeafDomain, getLeavesCreaseBack,
+	getLeavesCreaseNext, getPileRange)
 from mapFolding._e.pinning2Dn import (
 	pileProcessingOrderDefault, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles)
 from mapFolding.dataBaskets import EliminationState
@@ -197,17 +197,8 @@ def test_pileProcessingOrderDefault_no_out_of_range(mapShape: tuple[int, ...]) -
 		)
 
 @pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
-@pytest.mark.parametrize(
-	"pinningFunction",
-	[pinPiles, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二],
-	ids=lambda pinningFunction: pinningFunction.__name__
-)
-def test_pinningFunctions(
-	loadArrayFoldings: Callable[[int], NDArray[numpy.uint8]],
-	pinningFunction: Callable[[EliminationState], EliminationState],
-	verifyLeavesPinnedAgainstFoldings: Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]],
-	dimensionsTotal: int
-) -> None:
+@pytest.mark.parametrize("pinningFunction", [pinPiles, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二], ids=lambda pinningFunction: pinningFunction.__name__)
+def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8]], pinningFunction: Callable[[EliminationState], EliminationState], verifyLeavesPinnedAgainstFoldings: Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]], dimensionsTotal: int) -> None:
 	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
 	state = EliminationState(mapShape=mapShape)
 	arrayFoldings = loadArrayFoldings(dimensionsTotal)
@@ -223,8 +214,8 @@ def test_pinningFunctions(
 @pytest.mark.parametrize(
 	"creaseKind,creaseFunction,dictionaryExpectedByMapShape",
 	[
-		("increase", getListLeavesCreaseNext, A001417.dictionaryCreasesIncreaseKnown),
-		("decrease", getListLeavesCreaseDown, A001417.dictionaryCreasesDecreaseKnown),
+		("increase", getLeavesCreaseNext, A001417.dictionaryCreasesIncreaseKnown),
+		("decrease", getLeavesCreaseBack, A001417.dictionaryCreasesDecreaseKnown),
 	],
 	ids=["increase", "decrease"],
 )

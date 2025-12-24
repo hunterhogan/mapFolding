@@ -1,10 +1,11 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
 from itertools import combinations, pairwise, product as CartesianProduct
-from mapFolding import decreasing, packageSettings
+from mapFolding import decreasing, packageSettings, PinnedLeaves
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getListLeavesCreaseNext,
-	getZ0Z_precedence, getZ0Z_successor, leafOrigin, pileOrigin, PinnedLeaves, 零)
+	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseNext,
+	getZ0Z_precedence, getZ0Z_successor, leafOrigin, pileOrigin, 零)
+from mapFolding._e.pinIt import thisIsALeaf
 from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
@@ -21,10 +22,12 @@ def findValidFoldings(state: EliminationState) -> int:
 	listLeavesInPileOrder: list[cp_model.IntVar] = [model.NewIntVar(pileOrigin, state.leavesTotal - 零, f"leafInPile[{pile}]") for pile in range(state.leavesTotal)]
 	listPilingsInLeafOrder: list[cp_model.IntVar] = [model.NewIntVar(leafOrigin, state.leavesTotal - 零, f"pileOfLeaf[{leaf}]") for leaf in range(state.leavesTotal)]
 	model.AddInverse(listLeavesInPileOrder, listPilingsInLeafOrder)
+# ruff: noqa: ERA001
 
 # ------- Manual concurrency -----------------------------
-	for pile, leaf in state.leavesPinned.items():
-		model.Add(listLeavesInPileOrder[pile] == leaf)
+	for pile, leafOrLeafRange in state.leavesPinned.items():
+		if thisIsALeaf(leafOrLeafRange):
+			model.Add(listLeavesInPileOrder[pile] == leafOrLeafRange)
 
 # ------- Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal -----------------------------
 	model.Add(listLeavesInPileOrder[pileOrigin] == leafOrigin)
@@ -70,7 +73,7 @@ def findValidFoldings(state: EliminationState) -> int:
 		# 			model.Add(listPilingsInLeafOrder[leafLater] > pileEarlier).OnlyEnforceIf(leafEarlierAtPileEarlier)
 
 		for leaf in range(state.leavesTotal):
-			listLeavesNext: list[int] = getListLeavesCreaseNext(state, leaf)
+			leavesCreaseNext: tuple[int, ...] = getLeavesCreaseNext(state, leaf)
 			for pile in range(state.leavesTotal - 零):
 				currentLeafAtThisPile: cp_model.IntVar = listLeavesInPileOrder[pile]
 				nextLeafAtNextPile: cp_model.IntVar = listLeavesInPileOrder[pile + 1]
@@ -79,7 +82,7 @@ def findValidFoldings(state: EliminationState) -> int:
 				model.Add(currentLeafAtThisPile == leaf).OnlyEnforceIf(isCurrentLeafEqualToLeaf)
 				model.Add(currentLeafAtThisPile != leaf).OnlyEnforceIf(isCurrentLeafEqualToLeaf.Not())
 
-				model.AddAllowedAssignments([nextLeafAtNextPile], [(leafNext,) for leafNext in listLeavesNext]).OnlyEnforceIf(isCurrentLeafEqualToLeaf)
+				model.AddAllowedAssignments([nextLeafAtNextPile], [(leafNext,) for leafNext in leavesCreaseNext]).OnlyEnforceIf(isCurrentLeafEqualToLeaf)
 
 		for dimension in range(零, state.dimensionsTotal - 零):
 			firstCrease: int = 2**dimension

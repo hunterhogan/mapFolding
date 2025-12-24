@@ -3,7 +3,6 @@
 from mapFolding import dictionaryOEISMapFolding, eliminateFolds
 from mapFolding._e.pinning2Dn import (
 	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles, pinPile首零Less零)
-from mapFolding._e.pinning2DnAnnex import pinLeaf首零Plus零
 from mapFolding.dataBaskets import EliminationState
 from os import PathLike
 from pathlib import PurePath
@@ -29,9 +28,9 @@ if __name__ == '__main__':
 	CPUlimit: bool | float | int | None = -2
 	state: EliminationState | None = None
 
-	flow = 'elimination'
 	flow = 'constraintPropagation'
 	flow = 'crease'
+	flow = 'elimination'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
@@ -44,7 +43,7 @@ if __name__ == '__main__':
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
 	sys.stdout.write("\033[0m\n")
 
-	for n in range(5,6):
+	for n in range(4,5):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:

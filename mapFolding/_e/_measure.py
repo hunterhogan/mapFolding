@@ -1,12 +1,12 @@
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, bit_scan1, f_mod_2exp
 from hunterMakesPy import intInnit, raiseIfNone
-from mapFolding import inclusive
+from mapFolding import inclusive, LeafOrPileRangeOfLeaves
 from mapFolding._e import 一, 零
 from mapFolding.dataBaskets import EliminationState
 
 @cache
-def dimensionNearest首(integerNonnegative: int, /) -> int:
+def dimensionNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int:
 	"""Find the 0-indexed position of the most significant non-zero radix-2 digit in `integerNonnegative`."""
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
@@ -15,7 +15,7 @@ def dimensionNearest首(integerNonnegative: int, /) -> int:
 	return max(0, anInteger.bit_length() - 1)
 
 @cache
-def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
+def dimensionSecondNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int | None:
 	"""Find the 0-indexed position of the second most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
@@ -30,7 +30,7 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 	return dimensionSecondNearest
 
 @cache
-def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
+def dimensionThirdNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int | None:
 	"""Find the 0-indexed position of the third most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
@@ -52,7 +52,7 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	return dimensionThirdNearest
 
 @cache
-def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
+def dimensionFourthNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int | None:
 	"""Find the 0-indexed position of the fourth most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
@@ -75,7 +75,7 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	return dimensionFourthNearest
 
 @cache
-def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
+def leafInSubHyperplane(notLeafOrigin: LeafOrPileRangeOfLeaves, /) -> int:
 	"""For `notLeafOrigin` in a map with d-many dimensions, compute the projection of `notLeafOrigin` onto the sub-hyperplane that has one fewer dimension.
 
 	(AI generated docstring, which may or may not have been accurate; edited by me, Hunter Hogan, which may or may not have improved it.)
@@ -89,7 +89,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 
 	Parameters
 	----------
-	notLeafOrigin : int
+	notLeafOrigin : LeafOrPileRangeOfLeaves
 		A `leaf` in a 2^d map.
 
 	Returns
@@ -105,7 +105,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 	return int(f_mod_2exp(anInteger, dimensionNearest首(anInteger)))
 
 @cache
-def dimensionNearestTail(integerNonnegative: int, /) -> int:
+def dimensionNearestTail(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int:
 	"""Find the 0-indexed position of the least significant non-zero radix-2 digit in `integerNonnegative`.
 
 	Because I am using a radix-2 positional-numeral system as a proxy for Cartesian coordinates, this is functionally equivalent
@@ -117,7 +117,7 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 		raise ValueError(message)
 	return bit_scan1(anInteger) or 0
 
-def Z0Z_creaseNearestTail(state: EliminationState, integerNonnegative: int) -> int:
+def Z0Z_creaseNearestTail(state: EliminationState, integerNonnegative: LeafOrPileRangeOfLeaves) -> int:
 	"""Find the 0-indexed position of the least significant zero radix-2 digit in `integerNonnegative`."""
 # NOTE HEY! `Z0Z_invert` is pulling double duty: it sanitizes `integerNonnegative` and inverts it. So if you figure out how to
 # achieve this functionality without calling `Z0Z_invert`, you need to add defensive code here.
@@ -125,7 +125,7 @@ def Z0Z_creaseNearestTail(state: EliminationState, integerNonnegative: int) -> i
 	return bit_scan1(anInteger) or 0
 
 @cache
-def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
+def howManyDimensionsHaveOddParity(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int:
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
@@ -133,7 +133,7 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 	return max(0, anInteger.bit_count() - 1)
 
 @cache
-def ptount(integerAbove2: int, /) -> int:
+def ptount(integerAbove2: LeafOrPileRangeOfLeaves, /) -> int:
 	"""After subtracting 一+零 from `integerAbove2`, measure the distance from a ***p***ower of ***t***wo's "bit c***ount***".
 
 	Notes
@@ -150,10 +150,13 @@ def ptount(integerAbove2: int, /) -> int:
 
 	return leafInSubHyperplane(anInteger - (一+零)).bit_count()
 
-def Z0Z_invert(state: EliminationState, integerNonnegative: int) -> int:
-	return _Z0Z_invert(state.dimensionsTotal, integerNonnegative)
+def thisIsA2DnMap(state: EliminationState, *, youMustBeDimensionsTallToPinThis: int = 2) -> bool:
+	return (youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)
+
+def Z0Z_invert(state: EliminationState, integerNonnegative: LeafOrPileRangeOfLeaves) -> int:
+	return _Z0Z_invert(state.dimensionsTotal, int(integerNonnegative)) # pyright: ignore[reportArgumentType] # FIXME
 @cache
-def _Z0Z_invert(dimensionsTotal: int, integerNonnegative: int) -> int:
+def _Z0Z_invert(dimensionsTotal: int, integerNonnegative: LeafOrPileRangeOfLeaves) -> int:
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
