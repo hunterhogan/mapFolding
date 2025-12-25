@@ -1,9 +1,8 @@
 from functools import cache
-from gmpy2 import bit_flip, bit_mask, bit_scan1, f_mod_2exp
+from gmpy2 import bit_flip, bit_scan1, f_mod_2exp
 from hunterMakesPy import intInnit, raiseIfNone
-from mapFolding import inclusive, LeafOrPileRangeOfLeaves
-from mapFolding._e import 一, 零
-from mapFolding.dataBaskets import EliminationState
+from mapFolding._e import LeafOrPileRangeOfLeaves, Z0Z_invert, 一, 零
+from mapFolding._e.dataBaskets import EliminationState
 
 @cache
 def dimensionNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int:
@@ -150,24 +149,5 @@ def ptount(integerAbove2: LeafOrPileRangeOfLeaves, /) -> int:
 
 	return leafInSubHyperplane(anInteger - (一+零)).bit_count()
 
-def thisIsA2DnMap(state: EliminationState, *, youMustBeDimensionsTallToPinThis: int = 2) -> bool:
-	return (youMustBeDimensionsTallToPinThis < state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)
 
-def Z0Z_invert(state: EliminationState, integerNonnegative: LeafOrPileRangeOfLeaves) -> int:
-	return _Z0Z_invert(state.dimensionsTotal, int(integerNonnegative)) # pyright: ignore[reportArgumentType] # FIXME
-@cache
-def _Z0Z_invert(dimensionsTotal: int, integerNonnegative: LeafOrPileRangeOfLeaves) -> int:
-	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
-	if anInteger < 0:
-		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
-		raise ValueError(message)
-	return int(anInteger ^ bit_mask(dimensionsTotal))
-
-def Z0Z_sumsOfProductsOfDimensionsNearest首(state: EliminationState, dimensionFrom首: int | None = None) -> tuple[int, ...]:
-	if dimensionFrom首 is None:
-		dimensionFrom首 = state.dimensionsTotal
-	dimensionNormalizer = dimensionFrom首 - (state.dimensionsTotal + 1)
-	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = tuple(sum(list(reversed(state.productsOfDimensions[0:dimensionNormalizer]))[0:aProduct], start=0)
-											for aProduct in range(len(state.productsOfDimensions) + inclusive + dimensionNormalizer))
-	return sumsOfProductsOfDimensionsNearest首
 

@@ -5,18 +5,18 @@ from functools import cache
 from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
 from hunterMakesPy import raiseIfNone
 from itertools import filterfalse
-from mapFolding import (
-	between, decreasing, exclude, inclusive, LeafOrPileRangeOfLeaves, mappingHasKey, PermutationSpace, reverseLookup)
+from mapFolding import decreasing, inclusive
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, getDictionaryPileRanges, getLeafDomain,
-	getLeavesCreaseBack, getLeavesCreaseNext, getZ0Z_precedence, getZ0Z_successor, howManyDimensionsHaveOddParity,
-	leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+	between, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, exclude, getDictionaryPileRanges, getLeaf,
+	getLeafDomain, getLeavesCreaseBack, getLeavesCreaseNext, getZ0Z_precedence, howManyDimensionsHaveOddParity,
+	leafInSubHyperplane, leafIsNotPinned, leafIsPinned, LeafOrPileRangeOfLeaves, mappingHasKey, notLeafOriginOrLeaf零,
+	notPileLast, oopsAllLeaves, PermutationSpace, pileIsOpen, ptount, reverseLookup, thisIsALeaf, 一, 三, 二, 五, 四, 零, 首一,
+	首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e._exclusions import dictionary2d5AtPileLeafExcludedByPile, dictionary2d6AtPileLeafExcludedByPile
+from mapFolding._e.algorithms.iff import removePermutationSpaceViolations
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import (
-	atPilePinLeaf, deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf, getLeaf, leafIsNotPinned,
-	leafIsPinned, notLeafOriginOrLeaf零, notPileLast, oopsAllLeaves, pileIsOpen, thisIsALeaf)
-from mapFolding.algorithms.iff import removePermutationSpaceViolations
-from mapFolding.dataBaskets import EliminationState
+	atPilePinLeaf, deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf)
 from math import log, log2
 from more_itertools import loops, one
 from operator import add, neg, sub
@@ -66,6 +66,7 @@ def beansWithoutCornbread(state: EliminationState, leavesPinned: PermutationSpac
 
 def pinLeafCornbread(state: EliminationState) -> EliminationState:
 	leafBeans: int = raiseIfNone(getLeaf(state.leavesPinned, state.pile))
+	print(leafBeans, 首一(state.dimensionsTotal), state.pile)
 	if leafBeans in [一+零, 首一(state.dimensionsTotal)]:
 		leafCornbread: int = one(getLeavesCreaseNext(state, leafBeans))
 		state.pile += 1
@@ -144,10 +145,8 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:
 	"""
 	Z0Z_tester = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned.copy())
 	Z0Z_precedence: dict[int, dict[int, list[int]]] = getZ0Z_precedence(state)
-	Z0Z_successor: dict[int, dict[int, list[int]]] = getZ0Z_successor(state)
 	if state.dimensionsTotal < 6:
 		Z0Z_precedence = {}
-		Z0Z_successor = {}  # noqa: F841
 
 	while True:
 		Z0Z_restart = False
@@ -165,7 +164,6 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:
 
 			def notLeaf(comparand: int, leaf: int = leaf) -> bool:
 				return comparand != leaf
-# ruff: noqa: ERA001
 
 			@cache
 			def mustBeAfterLeaf(r: int, leaf: int = leaf, pile: int = pile, dimensionHead: int = dimensionHead, dimensionsTotal: int = Z0Z_tester.dimensionsTotal) -> bool:
@@ -173,11 +171,6 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:
 					return True
 				if _leafInLastPileOfDomain((pile, leaf), dimensionsTotal):
 					return r == int(bit_flip(0, dimensionNearest首(leaf)).bit_flip(dimensionNearestTail(leaf)))
-				# 	if r == int(bit_flip(0, dimensionNearest首(leaf)).bit_flip(dimensionNearestTail(leaf))):
-				# 		return True
-				# if mappingHasKey(Z0Z_successor, leaf):
-				# 	if mappingHasKey(Z0Z_successor[leaf], pile):
-				# 		return r in Z0Z_successor[leaf][pile]
 				return False
 
 			@cache
@@ -570,7 +563,7 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 
 	if (leafAt一零 != 首零一(state.dimensionsTotal)+零) and (leafAt首Less一 == 首零一(state.dimensionsTotal)):
 		listRemoveLeaves.append(一)
-	if (leafAt首Less一零 != one(getLeavesCreaseBack(state, 首零(state.dimensionsTotal)+零))) and (leafAt一 == 一+零):
+	if (leafAt首Less一零 != next(getLeavesCreaseBack(state, 首零(state.dimensionsTotal)+零))) and (leafAt一 == 一+零):
 		listRemoveLeaves.append(首一(state.dimensionsTotal))
 	if (leafAt一 == 首二(state.dimensionsTotal)+零) and (leafAt首Less一 == 首零一(state.dimensionsTotal)):
 		listRemoveLeaves.extend([首二(state.dimensionsTotal), 首零一二(state.dimensionsTotal)])

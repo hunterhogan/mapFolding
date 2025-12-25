@@ -1,9 +1,9 @@
 # ruff: noqa
 # pyright: basic
 from mapFolding import dictionaryOEISMapFolding, eliminateFolds
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinning2Dn import (
 	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles, pinPile首零Less零)
-from mapFolding.dataBaskets import EliminationState
 from os import PathLike
 from pathlib import PurePath
 import sys
@@ -29,8 +29,8 @@ if __name__ == '__main__':
 	state: EliminationState | None = None
 
 	flow = 'constraintPropagation'
-	flow = 'elimination'
 	flow = 'crease'
+	flow = 'elimination'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
@@ -43,12 +43,12 @@ if __name__ == '__main__':
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
 	sys.stdout.write("\033[0m\n")
 
-	for n in range(5,6):
+	for n in range(3,4):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:
 			state = EliminationState(mapShape)
-			# state = pinPiles(state, 4)
+			state = pinPiles(state, 1)
 			# state = pinLeavesDimensions0零一(state)
 			# state = pinPile首零Less零(state)
 			# state = pinLeaf首零Plus零(state)
@@ -71,4 +71,3 @@ deactivate && C:\apps\mapFolding\.vtail\Scripts\activate.bat && title good && cl
 title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\eliminateFolds.py & title I'm done
 """
 
-# maps of 3 x 3 ... x 3, divisible by leavesTotal * 2^dimensionsTotal * factorial(dimensionsTotal)

@@ -5,14 +5,14 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
 from hunterMakesPy import raiseIfNone, writePython
-from mapFolding import (
-	asciiColorReset, asciiColorYellow, between, consecutive, decreasing, exclude, inclusive, LeafOrPileRangeOfLeaves,
-	noDuplicates, packageSettings)
+from mapFolding import asciiColorReset, asciiColorYellow, decreasing, inclusive, packageSettings
 from mapFolding._e import (
-	dimensionFourthNearest首, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
-	howManyDimensionsHaveOddParity, leafInSubHyperplane, leafOrigin, pileOrigin, Z0Z_sumsOfProductsOfDimensionsNearest首, 一,
-	三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
-from mapFolding.dataBaskets import EliminationState
+	between, consecutive, dimensionFourthNearest首, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首,
+	dimensionThirdNearest首, exclude, howManyDimensionsHaveOddParity, leafInSubHyperplane, leafOrigin,
+	LeafOrPileRangeOfLeaves, pileOrigin, Z0Z_sumsOfProductsOfDimensionsNearest首, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一,
+	首零一二, 首零二)
+from mapFolding._e.dataBaskets import EliminationState
+from more_itertools import all_unique
 from operator import add, sub
 from pathlib import Path, PurePath
 from typing import Any
@@ -72,7 +72,7 @@ def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[tuple[int, ...], tupl
 # TODO Ideally, figure out the formula for pile ranges instead of deconstructing leaf domains.
 # TODO Second best, DRYer code.
 
-# ------- Boolean filters -----------------------------------
+# ------- Boolean filters for (mathematical) ranges of piles -----------------------------------
 
 @syntacticCurry
 def filterCeiling(pile: int, dimensionsTotal: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
@@ -177,7 +177,7 @@ def _getDomainDimension一(domain一零: tuple[int, ...], domain首一: tuple[in
 
 		domainCombined.extend([(pileOfLeaf一零, pileOfLeaf一零 + 1, pileOfLeaf首一, pileOfLeaf首一 + 1) for pileOfLeaf首一 in domainOfLeaf首一])
 
-	return tuple(filter(noDuplicates, domainCombined))
+	return tuple(filter(all_unique, domainCombined))
 
 def getDomainDimension二(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
 	"""(leaf二一, leaf二一零, leaf二零, leaf二)."""
@@ -283,7 +283,7 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 	domain一nonCorners: tuple[tuple[int, int], ...] = tuple(set(domain二一零and二一).difference(set(domain一corners)))
 	domainCombined.extend([(pileOfLeaf一二, pileOfLeaf二一零, pileOfLeaf二一零 - 1, pileOfLeaf一二 + 1) for pileOfLeaf二一零, pileOfLeaf一二 in domain一nonCorners])
 
-	return tuple(sorted(filter(noDuplicates, set(domainCombined))))
+	return tuple(sorted(filter(all_unique, set(domainCombined))))
 
 def getDomainDimension首二(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
 	"""(leaf首二, leaf首零二, leaf首零一二, leaf首一二)."""
@@ -366,7 +366,7 @@ def _getDomainDimension首二(dimensionsTotal: int, domain首零二and首二: tu
 	domain0nonCorners: tuple[tuple[int, int], ...] = tuple(set(domain首零二and首二).difference(set(domain0corners)))
 	domainCombined.extend([(pileOfLeaf首二, pileOfLeaf首零二, pileOfLeaf首零二 - 1, pileOfLeaf首二 + 1) for pileOfLeaf首零二, pileOfLeaf首二 in domain0nonCorners])
 
-	return tuple(sorted(filter(noDuplicates, set(domainCombined))))
+	return tuple(sorted(filter(all_unique, set(domainCombined))))
 
 def getDomain二零and二(state: EliminationState) -> tuple[tuple[int, int], ...]:
 	"""Combined domain of leaf二零 and leaf二."""

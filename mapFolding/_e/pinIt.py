@@ -2,15 +2,16 @@ from collections.abc import Callable, Iterable, Iterator
 from cytoolz.dicttoolz import assoc as associate, valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
-from gmpy2 import bit_mask, xmpz
+from gmpy2 import xmpz
 from hunterMakesPy import raiseIfNone
 from itertools import repeat
-from mapFolding import between, DOTvalues, inclusive, LeafOrPileRangeOfLeaves, PermutationSpace
-from mapFolding._e import getLeafDomain, getPileRange, 零
-from mapFolding.dataBaskets import EliminationState
+from mapFolding import inclusive
+from mapFolding._e import (
+	between, DOTvalues, getLeaf, getLeafDomain, getPileRange, getXmpzAntiPileRangeOfLeaves, leafIsNotPinned,
+	LeafOrPileRangeOfLeaves, oopsAllLeaves, PermutationSpace, pileIsOpen, pileRangeAND, thisIsALeaf,
+	thisIsAPileRangeOfLeaves)
+from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten
-from operator import iand
-from typing import TypeGuard
 
 # ======= Boolean filters =======================
 
@@ -56,81 +57,6 @@ def isPinnedAtPile(leavesPinned: PermutationSpace, leaf: int, pile: int) -> bool
 	"""
 	return leaf == leavesPinned.get(pile)
 
-@syntacticCurry
-def leafIsNotPinned(leavesPinned: PermutationSpace, leaf: int) -> bool:
-	"""Return True if `leaf` is not presently pinned in `leavesPinned`.
-
-	Parameters
-	----------
-	leavesPinned : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` index.
-
-	Returns
-	-------
-	leafIsNotPinned : bool
-		True if the mapping does not include `leaf`.
-	"""
-	return leaf not in leavesPinned.values()
-
-@syntacticCurry
-def leafIsPinned(leavesPinned: PermutationSpace, leaf: int) -> bool:
-	"""Return True if `leaf` is pinned in `leavesPinned`.
-
-	Parameters
-	----------
-	leavesPinned : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` index.
-
-	Returns
-	-------
-	leafIsPinned : bool
-		True if the mapping includes `leaf`.
-	"""
-	return leaf in leavesPinned.values()
-
-def notLeafOriginOrLeaf零(leaf: int) -> bool:
-	return 零 < leaf
-
-@syntacticCurry
-def notPileLast(pileLast: int, pile: int) -> bool:
-	"""Return True if `pile` is not the last pile.
-
-	Parameters
-	----------
-	pileLast : int
-		Index of the last pile.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	notPileLast : bool
-		True if `pile` is not equal to `pileLast`.
-	"""
-	return pileLast != pile
-
-@syntacticCurry
-def pileIsOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
-	"""Return True if `pile` is not presently pinned in `leavesPinned`.
-
-	Parameters
-	----------
-	leavesPinned : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	pileIsOpen : bool
-		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a pile-range (`xmpz`).
-	"""
-	return not thisIsALeaf(leavesPinned.get(pile))
-
 # ======= Group by =======================
 
 def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], leaf: int, pile: int) -> tuple[list[PermutationSpace], list[PermutationSpace]]:
@@ -158,107 +84,6 @@ def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], lea
 # ======= Working with variables that are a leaf or a pile's domain of leaves =======================
 # https://gmpy2.readthedocs.io/en/latest/advmpz.html
 
-def getLeaf(leavesPinned: PermutationSpace, pile: int, default: int | None = None) -> int | None:
-	"""Like `leavesPinned.get(pile)`, but only return a `leaf` or `default`."""
-	if thisIsALeaf(ImaLeaf := leavesPinned.get(pile)):
-		return ImaLeaf
-	return default
-
-def getIteratorOfLeaves(pileRangeOfLeaves: xmpz) -> Iterator[int]:
-	"""Return an iterator of leaves in `pileRangeOfLeaves`.
-
-	Parameters
-	----------
-	pileRangeOfLeaves : xmpz
-		`xmpz` representing the range of leaves in a pile.
-
-	Returns
-	-------
-	iteratorOfLeaves : Iterator[int]
-		Iterator of `leaves` in `pileRangeOfLeaves`.
-	"""
-	pileRangeOfLeaves[-1] = 0
-	return pileRangeOfLeaves.iter_set()
-
-def getXmpzAntiPileRange(leavesTotal: int, leaves: Iterable[int]) -> xmpz:
-	antiPileRange = xmpz(bit_mask(leavesTotal))
-	for leaf in leaves:
-		antiPileRange[leaf] = 0
-	return antiPileRange
-
-def getXmpzPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> xmpz:
-	pileRangeOfLeaves: xmpz = xmpz(0)
-	pileRangeOfLeaves[leavesTotal] = 1
-	for leaf in leaves:
-		pileRangeOfLeaves[leaf] = 1
-	return pileRangeOfLeaves
-
-def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[int]:
-	"""Return True if `leafOrPileRangeOfLeaves` is a `leaf`.
-
-	Parameters
-	----------
-	leafOrPileRangeOfLeaves : LeafOrPileRangeOfLeaves | None
-		`leaf`, `pile`-range, or `None` to check.
-
-	Returns
-	-------
-	intIsProbablyALeaf : TypeGuard[int]
-		Technically, we only know the type is `int`.
-	"""
-	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, int)
-
-def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[xmpz]:
-	"""Return True if `leafOrPileRangeOfLeaves` is a pile's range of leaves.
-
-	Parameters
-	----------
-	leafOrPileRangeOfLeaves : LeafOrPileRangeOfLeaves | None
-		`leaf`, `pile`-range, or `None` to check.
-
-	Returns
-	-------
-	youHaveAPileRange : TypeGuard[xmpz]
-		Congrats, you have a pile range!
-	"""
-	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, xmpz)
-
-def oopsAllLeaves(leavesPinned: PermutationSpace) -> dict[int, int]:
-	"""Return a dictionary of all pinned leaves in `leavesPinned`.
-
-	Parameters
-	----------
-	leavesPinned : PermutationSpace
-		Dictionary of `pile` with pinned `leaf` or pile-range of leaves, if a `leaf` is pinned at `pile` or the pile-range of
-		leaves is defined.
-
-	Returns
-	-------
-	dictionaryOfPermutationSpace : dict[int, int]
-		Dictionary mapping from `pile` to pinned `leaf` for every pinned leaf in `leavesPinned`.
-	"""
-	return leafFilter(thisIsALeaf, leavesPinned) # pyright: ignore[reportReturnType]
-
-def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, xmpz]:
-	"""Return a dictionary of all pile-ranges of leaves in `leavesPinned`.
-
-	Parameters
-	----------
-	leavesPinned : PermutationSpace
-		Dictionary of `pile` with pinned `leaf` or pile-range of leaves, if a `leaf` is pinned at `pile` or the pile-range of
-		leaves is defined.
-
-	Returns
-	-------
-	dictionaryOfPermutationSpace : dict[int, xmpz]
-		Dictionary mapping from `pile` to pinned `leaf` for every pinned leaf in `leavesPinned`.
-	"""
-	return leafFilter(thisIsAPileRangeOfLeaves, leavesPinned) # pyright: ignore[reportReturnType]
-
-@syntacticCurry
-def pileRangeAND(antiPileRange: xmpz, pileRangeOfLeaves: xmpz) -> xmpz:
-	return iand(pileRangeOfLeaves, antiPileRange)
-
 def Z0Z_idk(leavesPinned: PermutationSpace, antiPileRange: xmpz) -> PermutationSpace:
 	for pile, pileRangeOfLeaves in leafFilter(thisIsAPileRangeOfLeaves, leavesPinned).items():
 		leavesPinned[pile] = pileRangeAND(antiPileRange, pileRangeOfLeaves)
@@ -271,7 +96,7 @@ def Z0Z_updateDomains(leavesTotal: int, leavesPinned: PermutationSpace) -> Permu
 	while keepGoing:
 		keepGoing = False
 		leaves = oopsAllLeaves(leavesPinned).values()
-		antiPileRange = getXmpzAntiPileRange(leavesTotal, leaves)
+		antiPileRange = getXmpzAntiPileRangeOfLeaves(leavesTotal, leaves)
 		leavesPinned = Z0Z_idk(leavesPinned, antiPileRange)
 	return leavesPinned
 
@@ -317,6 +142,7 @@ def atPilePinLeaf(leavesPinned: PermutationSpace, pile: int, leaf: int) -> Permu
 	"""
 	return associate(leavesPinned, pile, leaf)
 
+# TODO more flexible.
 def makeFolding(leavesPinned: PermutationSpace, leavesToInsert: tuple[int, ...]) -> tuple[int, ...]:
 	permutand: Iterator[int] = iter(leavesToInsert)
 	pilesTotal: int = len(oopsAllLeaves(leavesPinned)) + len(leavesToInsert)

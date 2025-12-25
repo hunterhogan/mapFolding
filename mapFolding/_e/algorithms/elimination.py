@@ -1,13 +1,9 @@
 from collections.abc import Iterable
-from gmpy2 import xmpz
-from itertools import pairwise, permutations, product as CartesianProduct, repeat
-from mapFolding import between, getLeavesTotal, noDuplicates, PermutationSpace
-from mapFolding._e import leafOrigin, pileOrigin
-from mapFolding._e.pinIt import (
-	excludeLeaf_rBeforeLeaf_k, getIteratorOfLeaves, makeFolding, oopsAllLeaves, oopsAllPileRangesOfLeaves, thisIsALeaf,
-	thisIsAPileRangeOfLeaves)
-from mapFolding.algorithms.iff import thisLeafFoldingIsValid
-from mapFolding.dataBaskets import EliminationState
+from itertools import pairwise, permutations, repeat
+from mapFolding._e import leafOrigin, oopsAllLeaves, PermutationSpace, pileOrigin
+from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
+from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding
 from math import factorial
 from more_itertools import iter_index, unique
 
@@ -37,7 +33,7 @@ def countLeavesPinned(leavesPinned: PermutationSpace, mapShape: tuple[int, ...],
 		)
 	)
 	"""
-	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(leavesPinned), permutations(tuple(set(leavesToInsert).difference(oopsAllLeaves(leavesPinned).values())))), repeat(mapShape)))
+	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(leavesPinned), permutations(tuple(set(leavesToInsert).difference(leavesPinned.values())))), repeat(mapShape)))
 
 
 def theorem2b(state: EliminationState) -> EliminationState:

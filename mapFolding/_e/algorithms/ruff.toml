@@ -1,0 +1,7 @@
+extend = "../../../ruff.toml"
+
+[lint]
+ignore   = [
+	"D103",
+	"D100",
+]

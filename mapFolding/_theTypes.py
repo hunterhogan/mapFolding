@@ -1,7 +1,6 @@
 """Types for defensive coding and for computation optimization."""
 
 from collections.abc import Callable
-from gmpy2 import xmpz
 from numpy import dtype, int_ as numpy_int, integer, ndarray, uint64 as numpy_uint64
 from types import EllipsisType
 from typing import Any, Final, NamedTuple, TypeAlias, TypedDict, TypeVar
@@ -117,14 +116,3 @@ class ShapeSlicer(NamedTuple):
 
 	length: EllipsisType | slice
 	indices: int
-
-# ======= `EliminationState` =======
-
-type Folding = dict[int, int]
-"""`pile`: `leaf`, and length must be `leavesTotal`."""
-
-type LeafOrPileRangeOfLeaves = int | xmpz
-"""In `gmpy2`, the ONLY way to modify an `xmpz` object without converting it to another type is to use indexing, slicing, and symbolic operations, such as `^=`."""
-
-type PermutationSpace = dict[int, LeafOrPileRangeOfLeaves]
-"""`pile`: `leaf` or pile-range of leaves."""

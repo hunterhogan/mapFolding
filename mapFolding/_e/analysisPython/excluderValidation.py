@@ -1,8 +1,7 @@
 from collections.abc import Callable
 from functools import cache
 from hunterMakesPy import raiseIfNone
-from mapFolding import exclude, PermutationSpace
-from mapFolding._e import getLeafDomain, getPileRange
+from mapFolding._e import exclude, getLeafDomain, getPileRange, PermutationSpace
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.analysisPython.theExcluderBeast import (
 	_fractionAddendToIndex, analyzeContiguousEndAbsolute, analyzeContiguousEndRelative, analyzeContiguousStartAbsolute,
@@ -10,9 +9,9 @@ from mapFolding._e.analysisPython.theExcluderBeast import (
 	loadCollatedIndices, MapKind, restructureAggregatedExclusionsForMapShape, strLeafExcluded, strLeafExcluder,
 	strPileExcluder)
 from mapFolding._e.analysisPython.Z0Z_patternFinder import detectPermutationSpaceErrors, PermutationSpaceStatus
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
 from mapFolding._e.pinning2Dn import pinPiles
-from mapFolding.dataBaskets import EliminationState
 import numpy
 import sys
 

@@ -5,7 +5,7 @@ TODO A223094 For n >= 3: a(n) = n! - Sum_{k=3..n-1} (a(k)*n!/k!) - A000682(n+1).
 TODO A301620 a(n) = Sum_{k=3..floor((n+3)/2)} (A259689(n+1,k)*(k-2)). - _Roger Ford_, Dec 10 2018
 """
 from functools import cache
-from mapFolding import dictionaryOEIS
+from mapFolding import dictionaryOEIS, inclusive
 from mapFolding.basecamp import NOTcountingFolds
 
 # ruff: noqa: D400
@@ -72,7 +72,7 @@ def A178961(n: int) -> int:
 	"""A001010"""
 	A001010valuesKnown: dict[int, int] = dictionaryOEIS['A001010']['valuesKnown']
 	countTotal: int = 0
-	for n下i in range(1, n+1):
+	for n下i in range(1, n + inclusive):
 		countTotal += A001010valuesKnown[n下i]
 	return countTotal
 

@@ -1,89 +1,13 @@
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 
-from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
-from cytoolz.functoolz import curry as syntacticCurry
+from collections.abc import Sequence
 from functools import cache
 from hunterMakesPy import defineConcurrencyLimit, intInnit, oopsieKwargsie
-from mapFolding import NumPyIntegerType
-from more_itertools import always_reversible, consecutive_groups, extract
+from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, inclusive, NumPyIntegerType
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
-from typing import Any, Protocol
+from typing import Any
 import numpy
-
-# ======= Functional programming paradigm ===============================
-class Ordinals(Protocol):
-	"""Protocol for types that support ordering comparisons."""
-
-	def __le__(self, other: "Ordinals", /) -> bool:
-		"""Less than or equal to comparison."""
-		...
-	def __ge__(self, other: "Ordinals", /) -> bool:
-		"""Greater than or equal to comparison."""
-		...
-
-@syntacticCurry
-def between[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小于) -> bool:
-	"""Inclusive `floor <= comparand <= ceiling`."""
-	return floor <= comparand <= ceiling
-
-def consecutive(flatContainer: Iterable[int]) -> bool:
-	"""The integers in the `flatContainer` are consecutive, either ascending or descending."""
-	return ((len(list(next(consecutive_groups(flatContainer)))) == len(list(flatContainer)))
-	or (len(list(next(consecutive_groups(always_reversible(flatContainer))))) == len(list(flatContainer))))
-
-def DOTvalues[个](dictionary: dict[Any, 个]) -> Iterator[个]:
-	"""Return the list of values from a dictionary (generic over type parameter `个`).
-
-	Parameters
-	----------
-	dictionary : dict[Any, 个]
-		Source mapping.
-
-	Returns
-	-------
-	list[个]
-		List of the dictionary's values.
-
-	See Also
-	--------
-	deconstructLeavesPinned, deconstructListPermutationSpace
-	"""
-	yield from dictionary.values()
-
-def exclude[个](flatContainer: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
-	"""Yield items from `flatContainer` whose positions are not in `indices`."""
-	lengthIterable: int = len(flatContainer)
-	def normalizeIndex(index: int) -> int:
-		if index < 0:
-			index = (index + lengthIterable) % lengthIterable
-		return index
-	indicesInclude: list[int] = sorted(set(range(lengthIterable)).difference(map(normalizeIndex, indices)))
-	return extract(flatContainer, indicesInclude)
-
-@syntacticCurry
-def mappingHasKey[文件: Hashable](lookup: Mapping[文件, Any], key: 文件) -> bool:
-	"""Return `True` if `key` is in `lookup`."""
-	return key in lookup
-
-def noDuplicates(sequenceOfHashable: Sequence[Hashable], /) -> bool:
-	"""Return `True` if there are `noDuplicates` in `sequenceOfHashable`."""
-	return len(sequenceOfHashable) == len(set(sequenceOfHashable))
-
-@syntacticCurry
-def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: 文义) -> 文件 | None:
-	"""Return the key in `dictionary` that corresponds to `keyValue`.
-
-	Prototype.
-
-	- I assume all `dictionary.values()` are distinct. If multiple keys contain `keyValue`, the returned key is not predictable.
-	- I removed `sorted()` for speed.
-	- I return `None` if no key maps to `keyValue`, but it is not an efficient way to check for membership.
-	"""
-	for key, value in dictionary.items():
-		if value == keyValue:
-			return key
-	return None
 
 # ======= Flow control ======================================
 
@@ -159,7 +83,7 @@ def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: ty
 		representing all possible connections between leaves.
 
 	"""
-	connectionGraph = _makeConnectionGraph(mapShape, leavesTotal)
+	connectionGraph: Array3DLeavesTotal = _makeConnectionGraph(mapShape, leavesTotal)
 	return connectionGraph.astype(datatype)
 
 @cache
@@ -193,7 +117,7 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 	for dimension in mapShape:
 		# NOTE this check is one-degree short of absurd, but three lines of early absurdity is better than invalid output later. I'd add more checks if I could think of more.
 		if dimension > sysMaxsize // productDimensions:
-			message = f"I received `{dimension = }` in `{mapShape = }`, but the product of the dimensions exceeds the maximum size of an integer on this system."
+			message: str = f"I received `{dimension = }` in `{mapShape = }`, but the product of the dimensions exceeds the maximum size of an integer on this system."
 			raise OverflowError(message)
 		productDimensions *= dimension
 	return productDimensions
@@ -236,11 +160,11 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 			strComputationDivisions = strComputationDivisions.lower()
 			match strComputationDivisions:
 				case 'maximum':
-					taskDivisions = leavesTotal
+					taskDivisions: int = leavesTotal
 				case 'cpu':
 					taskDivisions = min(concurrencyLimit, leavesTotal)
 				case _:
-					message = f"I received '{strComputationDivisions}' for the parameter, `computationDivisions`, but the string value is not supported."
+					message: str = f"I received '{strComputationDivisions}' for the parameter, `computationDivisions`, but the string value is not supported."
 					raise ValueError(message)
 		case _:
 			message = f"I received {computationDivisions} for the parameter, `computationDivisions`, but the type {type(computationDivisions).__name__} is not supported."
@@ -276,22 +200,22 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray
 	conditions, and dimensional constraints.
 
 	"""
-	dimensionsTotal = len(mapShape)
-	cumulativeProduct = numpy.multiply.accumulate([1, *list(mapShape)], dtype=numpy_int64)
-	arrayDimensions = numpy.array(mapShape, dtype=numpy_int64)
-	coordinateSystem = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=numpy_int64)
+	dimensionsTotal: int = len(mapShape)
+	cumulativeProduct: Array1DLeavesTotal = numpy.multiply.accumulate([1, *list(mapShape)], dtype=numpy_int64)
+	arrayDimensions: Array1DLeavesTotal = numpy.array(mapShape, dtype=numpy_int64)
+	coordinateSystem: Array2DLeavesTotal = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=numpy_int64)
 	for indexDimension in range(dimensionsTotal):
-		for leaf1ndex in range(1, leavesTotal + 1):
+		for leaf1ndex in range(1, leavesTotal + inclusive):
 			coordinateSystem[indexDimension, leaf1ndex] = (((leaf1ndex - 1) // cumulativeProduct[indexDimension]) % arrayDimensions[indexDimension] + 1)
 
-	connectionGraph = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=numpy_int64)
+	connectionGraph: Array3DLeavesTotal = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=numpy_int64)
 	for indexDimension in range(dimensionsTotal):
-		for activeLeaf1ndex in range(1, leavesTotal + 1):
-			for connectee1ndex in range(1, activeLeaf1ndex + 1):
-				isFirstCoord = coordinateSystem[indexDimension, connectee1ndex] == 1
-				isLastCoord = coordinateSystem[indexDimension, connectee1ndex] == arrayDimensions[indexDimension]
-				exceedsActive = connectee1ndex + cumulativeProduct[indexDimension] > activeLeaf1ndex
-				isEvenParity = (coordinateSystem[indexDimension, activeLeaf1ndex] & 1) == (coordinateSystem[indexDimension, connectee1ndex] & 1)
+		for activeLeaf1ndex in range(1, leavesTotal + inclusive):
+			for connectee1ndex in range(1, activeLeaf1ndex + inclusive):
+				isFirstCoord: bool = coordinateSystem[indexDimension, connectee1ndex] == 1
+				isLastCoord: bool = coordinateSystem[indexDimension, connectee1ndex] == arrayDimensions[indexDimension]
+				exceedsActive: bool = connectee1ndex + cumulativeProduct[indexDimension] > activeLeaf1ndex
+				isEvenParity: bool = (coordinateSystem[indexDimension, activeLeaf1ndex] & 1) == (coordinateSystem[indexDimension, connectee1ndex] & 1)
 
 				if (isEvenParity and isFirstCoord) or (not isEvenParity and (isLastCoord or exceedsActive)):
 					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex
@@ -349,7 +273,7 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 
 	"""
 	if not listDimensions:
-		message = "`listDimensions` is a required parameter."
+		message: str = "`listDimensions` is a required parameter."
 		raise ValueError(message)
 	listOFint: list[int] = intInnit(listDimensions, 'listDimensions')
 	mapDimensions: list[int] = []

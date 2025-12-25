@@ -13,8 +13,8 @@ from mapFolding._e.analysisPython import theExcluderBeast
 from mapFolding._e.analysisPython.theExcluderBeast import (
 	_getContiguousEndingAtNegativeOne, _getContiguousFromStart, expressIndexAsFractionAddend, FractionAddend,
 	writeAggregatedExclusions, writeExclusionDataCollated, writeExclusionDictionaries)
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinning2DnAnnex import Z0Z_excluder
-from mapFolding.dataBaskets import EliminationState
 from pathlib import Path, PurePath
 from typing import Any
 from unittest.mock import MagicMock, patch

@@ -1,12 +1,11 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
 from itertools import combinations, pairwise, product as CartesianProduct
-from mapFolding import decreasing, packageSettings, PermutationSpace
+from mapFolding import decreasing, packageSettings
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseNext,
-	leafOrigin, pileOrigin, 零)
-from mapFolding._e.pinIt import thisIsALeaf
-from mapFolding.dataBaskets import EliminationState
+	leafOrigin, PermutationSpace, pileOrigin, thisIsALeaf, 零)
+from mapFolding._e.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
 from ortools.sat.python import cp_model
@@ -153,12 +152,11 @@ def findValidFoldings(state: EliminationState) -> int:
 	foldingCollector = FoldingCollector(listLeavesInPileOrder)
 	solver.Solve(model, foldingCollector)
 
-	if foldingCollector.listFoldings:
-		pathFilename = packageSettings.pathPackage / "_e" / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
+	if (state.dimensionsTotal == 7) and (foldingCollector.listFoldings):
+		pathFilename: Path = packageSettings.pathPackage / "_e" / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
 		with Path.open(pathFilename, mode="w", newline="") as fileCSV:
 			csvWriter = csv.writer(fileCSV)
 			csvWriter.writerows(foldingCollector.listFoldings)
-
 
 	return len(foldingCollector.listFoldings) * state.Theorem2Multiplier * state.Theorem4Multiplier
 

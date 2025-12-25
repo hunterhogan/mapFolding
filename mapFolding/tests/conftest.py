@@ -27,8 +27,8 @@ from collections.abc import Callable, Generator, Sequence
 from dataclasses import dataclass
 from gmpy2 import xmpz
 from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
-from mapFolding._e.pinIt import oopsAllLeaves
-from mapFolding.dataBaskets import EliminationState
+from mapFolding._e import oopsAllLeaves
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, oeisIDsImplemented
 from numpy.typing import NDArray
 from pathlib import Path

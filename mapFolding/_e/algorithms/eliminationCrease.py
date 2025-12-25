@@ -1,16 +1,17 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
-from mapFolding._e import getLeavesCreaseBack, getLeavesCreaseNext, thisIsA2DnMap
-from mapFolding._e.pinIt import getXmpzPileRangeOfLeaves, thisIsALeaf, thisIsAPileRangeOfLeaves
+from mapFolding._e import (
+	getLeavesCreaseBack, getLeavesCreaseNext, getXmpzPileRangeOfLeaves, thisIsA2DnMap, thisIsALeaf,
+	thisIsAPileRangeOfLeaves)
+from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinning2Dn import appendLeavesPinnedAtPile, nextLeavesPinnedWorkbench, pinPiles
-from mapFolding.algorithms.iff import thisLeafFoldingIsValid
-from mapFolding.dataBaskets import EliminationState
 from math import factorial
 from tqdm import tqdm
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding import PermutationSpace
+	from mapFolding._e import PermutationSpace
 
 def pinByCrease(state: EliminationState) -> EliminationState:
 	state = nextLeavesPinnedWorkbench(state, pileProcessingOrder=list(range(state.leavesTotal)))

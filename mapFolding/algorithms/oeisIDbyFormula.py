@@ -7,7 +7,7 @@ TODO A301620 a(n) = Sum_{k=3..floor((n+3)/2)} (A259689(n+1,k)*(k-2)). - _Roger F
 NOTE: This is a generated file; edit the source file.
 """
 from functools import cache
-from mapFolding import dictionaryOEIS
+from mapFolding import dictionaryOEIS, inclusive
 from mapFolding.basecamp import NOTcountingFolds
 
 @cache
@@ -67,7 +67,7 @@ def A001010(n: int) -> int:
     """
     Compute A001010(n) as a function of A000682 or A007822.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001010 is: "Number of symmetric foldings of a strip of n stamps."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001010 is: "Number of symmetric foldings of a strip of n blank stamps."
 
     The domain of A001010 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 53.
@@ -80,7 +80,7 @@ def A001010(n: int) -> int:
     Returns
     -------
     a(n) : int
-        Number of symmetric foldings of a strip of n stamps.
+        Number of symmetric foldings of a strip of n blank stamps.
 
     Would You Like to Know More?
     ----------------------------
@@ -270,7 +270,7 @@ def A178961(n: int) -> int:
     """
     A001010valuesKnown: dict[int, int] = dictionaryOEIS['A001010']['valuesKnown']
     countTotal: int = 0
-    for n下i in range(1, n + 1):
+    for n下i in range(1, n + inclusive):
         countTotal += A001010valuesKnown[n下i]
     return countTotal
 

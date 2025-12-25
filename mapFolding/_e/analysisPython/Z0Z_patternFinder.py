@@ -7,15 +7,13 @@ from functools import partial
 from gmpy2 import bit_mask
 from hunterMakesPy import raiseIfNone
 from mapFolding import (
-	asciiColorGreen, asciiColorMagenta, asciiColorRed, asciiColorReset, asciiColorYellow, packageSettings,
-	PermutationSpace)
+	asciiColorGreen, asciiColorMagenta, asciiColorRed, asciiColorReset, asciiColorYellow, packageSettings)
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryPileRanges, getLeafDomain, getPileRange,
-	howManyDimensionsHaveOddParity, pileOrigin, Z0Z_invert, 零, 首二, 首零, 首零一)
+	howManyDimensionsHaveOddParity, PermutationSpace, pileOrigin, thisIsALeaf, Z0Z_invert, 零, 首二, 首零, 首零一)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
-from mapFolding._e.pinIt import thisIsALeaf
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinning2DnAnnex import beansWithoutCornbread
-from mapFolding.dataBaskets import EliminationState
 from more_itertools import flatten
 from operator import add, mul
 from pathlib import Path

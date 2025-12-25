@@ -18,9 +18,9 @@ from mapFolding._e import (
 	getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二,
 	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeafDomain, getLeavesCreaseBack,
 	getLeavesCreaseNext, getPileRange)
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinning2Dn import (
 	pileProcessingOrderDefault, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles)
-from mapFolding.dataBaskets import EliminationState
 from mapFolding.tests.dataSamples import (
 	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二,
 	p2DnDomain首零一二_首一二, p2DnDomain首零二_首二)
@@ -128,15 +128,15 @@ def test_getLeafDomainsCombined(domainFunction: Callable[[EliminationState], Seq
 def test_getPileRange(mapShape: tuple[int, ...]) -> None:
 	"""Verify `getPileRange` results match `getDictionaryPileRanges` for all piles."""
 	state = EliminationState(mapShape=mapShape)
-	dictionaryExpected = A001417.dictionaryPileRangesKnown[mapShape]
+	dictionaryExpected: dict[int, tuple[int, ...]] = A001417.dictionaryPileRangesKnown[mapShape]
 
 	for pile in range(state.leavesTotal):
-		listFromGetPileRange = list(getPileRange(state, pile))
-		listFromDictionary = dictionaryExpected[pile]
+		tupleFromGetPileRange: tuple[int, ...] = tuple(getPileRange(state, pile))
+		tupleFromDictionary: tuple[int, ...] = dictionaryExpected[pile]
 
-		assert listFromGetPileRange == listFromDictionary, (
+		assert tupleFromGetPileRange == tupleFromDictionary, (
 			f"getPileRange inconsistent with getDictionaryPileRanges at {pile=} for {mapShape=}. "
-			f"getPileRange returned {listFromGetPileRange}, dictionary has {listFromDictionary}."
+			f"getPileRange returned {tupleFromGetPileRange}, dictionary has {tupleFromDictionary}."
 		)
 
 @pytest.mark.parametrize("mapShape", [

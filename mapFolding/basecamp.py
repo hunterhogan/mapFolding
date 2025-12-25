@@ -3,7 +3,7 @@
 from collections.abc import Sequence
 from mapFolding import (
 	getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly, validateListDimensions)
-from mapFolding.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import EliminationState
 from os import PathLike
 from pathlib import Path, PurePath
 from typing import Literal
@@ -263,9 +263,15 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 # ------- Algorithm version -----------------------------------------------------
 # ruff: noqa: E701
 	match flow:
-		case 'constraintPropagation': from mapFolding.algorithms.constraintPropagation import doTheNeedful
-		case 'crease': from mapFolding._e.eliminationCrease import doTheNeedful
-		case 'elimination' | _: from mapFolding.algorithms.elimination import doTheNeedful
+		case 'constraintPropagation': from mapFolding._e.algorithms.constraintPropagation import doTheNeedful
+		case 'crease':
+			from mapFolding._e import thisIsA2DnMap
+			if thisIsA2DnMap(state, youMustBeDimensionsTallToPinThis=4):
+				from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
+			else:
+				message: str = "As of 25 December 2025, this algorithm only works on mapShape = (2,) * n, n >= 4. Did I forget to update this barrier?"
+				raise NotImplementedError(message)
+		case 'elimination' | _: from mapFolding._e.algorithms.elimination import doTheNeedful
 
 	state = doTheNeedful(state, concurrencyLimit)
 

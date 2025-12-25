@@ -1,7 +1,7 @@
 # ruff: noqa: T201
 """Analyze entropy of leaves in folding sequences to understand their distributional properties."""
 from mapFolding._e.analysisPython.Z0Z_patternFinder import measureEntropy
-from mapFolding.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import EliminationState
 
 def analyzeEntropyForDimension(dimensionsTotal: int = 6) -> None:
 	"""Analyze entropy for all non-trivial leaves in a given dimension configuration."""

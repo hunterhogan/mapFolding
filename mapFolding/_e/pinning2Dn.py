@@ -1,19 +1,16 @@
-from gmpy2 import xmpz
 from hunterMakesPy import raiseIfNone
-from mapFolding import decreasing, LeafOrPileRangeOfLeaves, PermutationSpace
+from mapFolding import decreasing
 from mapFolding._e import (
-	getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二, leafOrigin, pileOrigin,
-	thisIsA2DnMap, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
-from mapFolding._e.pinIt import (
-	deconstructPermutationSpaceByDomainsCombined, getXmpzPileRangeOfLeaves, pileIsOpen, Z0Z_JeanValjean)
+	getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getXmpzPileRangeOfLeaves,
+	leafOrigin, PermutationSpace, pileIsOpen, pileOrigin, thisIsA2DnMap, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.pinIt import deconstructPermutationSpaceByDomainsCombined, Z0Z_JeanValjean
 from mapFolding._e.pinning2DnAnnex import (
 	appendLeavesPinnedAtPile as appendLeavesPinnedAtPile, beansWithoutCornbread as beansWithoutCornbread,
 	disqualifyAppendingLeafAtPile as disqualifyAppendingLeafAtPile, pinLeafCornbread as pinLeafCornbread, pinLeaf首零Plus零,
 	pinPile一Crease, pinPile一零Crease, pinPile二Crease, pinPile首Less一Crease, pinPile首Less一零Crease, pinPile首less二Crease,
 	pinPile首零Less零AfterFourthOrder, removeInvalidPermutationSpace as removeInvalidPermutationSpace)
-from mapFolding.dataBaskets import EliminationState
 from more_itertools import interleave_longest
-from pprint import pprint
 
 # ======= Flow control ===============================================
 
@@ -65,10 +62,10 @@ def pinPiles(state: EliminationState, order: int = 4, maximumListPermutationSpac
 	if 3 <= order:
 		pileProcessingOrder.extend([一+零, state.leavesTotal - (一+零)])
 	if 4 <= order:
-		youMustBeDimensionsTallToPinThis = 4
+		youMustBeDimensionsTallToPinThis = 5
 		if youMustBeDimensionsTallToPinThis < state.dimensionsTotal:
 			pileProcessingOrder.extend([二])
-		youMustBeDimensionsTallToPinThis = 5
+		youMustBeDimensionsTallToPinThis = 6
 		if youMustBeDimensionsTallToPinThis < state.dimensionsTotal:
 			pileProcessingOrder.extend([state.leavesTotal - 二])
 
@@ -84,11 +81,6 @@ def pinPiles(state: EliminationState, order: int = 4, maximumListPermutationSpac
 			listLeavesAtPile = [首零(state.dimensionsTotal)]
 		if state.pile == 一:
 			listLeavesAtPile = pinPile一Crease(state)
-# TODO
-			# listLeavesAtPile is a context-aware pile-domain. However, that function does not use an existing pile-domain.
-			# So hypothetically, I want the intersection of the existing pile-domain and the new pile-domain.
-			# In reality, the subroutines in this function are finely tuned and will not benefit from an intersection operation,
-			# but the "right" way to construct the flow is to combine all well-constructed filters.
 		if state.pile == state.leavesTotal - 一:
 			listLeavesAtPile = pinPile首Less一Crease(state)
 		if state.pile == 一+零:
@@ -121,7 +113,7 @@ def pinPile首零Less零(state: EliminationState, maximumListPermutationSpace: i
 
 	state = pinPiles(state, 4, maximumListPermutationSpace)
 
-	if not thisIsA2DnMap(state, youMustBeDimensionsTallToPinThis=4):
+	if not thisIsA2DnMap(state, youMustBeDimensionsTallToPinThis=5):
 		return state
 
 	pileProcessingOrder: list[int] = [首零(state.dimensionsTotal)-零]
@@ -138,7 +130,7 @@ def pinPile首零Less零(state: EliminationState, maximumListPermutationSpace: i
 
 	return state
 
-def _pinLeavesByDomain(state: EliminationState, leaves: tuple[int, ...], leavesDomain: tuple[tuple[int, ...], ...], *, youMustBeDimensionsTallToPinThis: int = 2) -> EliminationState:
+def _pinLeavesByDomain(state: EliminationState, leaves: tuple[int, ...], leavesDomain: tuple[tuple[int, ...], ...], *, youMustBeDimensionsTallToPinThis: int = 3) -> EliminationState:
 	if not thisIsA2DnMap(state, youMustBeDimensionsTallToPinThis=youMustBeDimensionsTallToPinThis):
 		return state
 
@@ -161,7 +153,7 @@ def pinLeavesDimension0(state: EliminationState) -> EliminationState:
 	leaves: tuple[int, int] = (leafOrigin, 首零(state.dimensionsTotal))
 	leavesDomain: tuple[tuple[int, ...], ...] = ((pileOrigin, state.pileLast),)
 
-	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis=2)
+	return _pinLeavesByDomain(state, leaves, leavesDomain)
 
 def pinLeavesDimension零(state: EliminationState) -> EliminationState:
 	"""'Pin' `leaf零`, which is always fixed in the same pile, and pin `leaf首零Plus零`: due to the formulas I've figured out, you should call `pinLeavesDimension一` first."""
@@ -173,7 +165,7 @@ def pinLeavesDimension一(state: EliminationState) -> EliminationState:
 	leaves: tuple[int, int, int, int] = (一+零, 一, 首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))
 	leavesDomain: tuple[tuple[int, ...], ...] = getDomainDimension一(state)
 
-	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis=2)
+	return _pinLeavesByDomain(state, leaves, leavesDomain)
 
 def pinLeavesDimensions0零一(state: EliminationState) -> EliminationState:
 	"""Pin `leaf首零Plus零`, `leaf一零`, `leaf一`, `leaf首一`, and `leaf首零一` without surplus `PermutationSpace` dictionaries."""
@@ -185,12 +177,12 @@ def pinLeavesDimension二(state: EliminationState) -> EliminationState:
 	leaves: tuple[int, int, int, int] = (二+一, 二+一+零, 二+零, 二)
 	leavesDomain: tuple[tuple[int, ...], ...] = getDomainDimension二(state)
 
-	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis=4)
+	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis=5)
 
 def pinLeavesDimension首二(state: EliminationState) -> EliminationState:
 	"""Pin `leaf首二`, `leaf首零二`, `leaf首零一二`, and `leaf首一二` without surplus `PermutationSpace` dictionaries."""
 	leaves: tuple[int, int, int, int] = (首二(state.dimensionsTotal), 首零二(state.dimensionsTotal), 首零一二(state.dimensionsTotal), 首一二(state.dimensionsTotal))
 	leavesDomain: tuple[tuple[int, ...], ...] = getDomainDimension首二(state)
 
-	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis=4)
+	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis=5)
 
