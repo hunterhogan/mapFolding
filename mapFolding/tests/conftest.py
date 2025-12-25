@@ -23,11 +23,11 @@ This makes tests more meaningful and easier to understand in the context of the
 research domain.
 """
 
-from mapFolding._e.pinIt import oopsAllLeaves
 from collections.abc import Callable, Generator, Sequence
 from dataclasses import dataclass
 from gmpy2 import xmpz
 from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
+from mapFolding._e.pinIt import oopsAllLeaves
 from mapFolding.dataBaskets import EliminationState
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, oeisIDsImplemented
 from numpy.typing import NDArray
@@ -593,7 +593,7 @@ def verifyLeavesPinnedAgainstFoldings() -> Callable[[EliminationState, NDArray[n
 		rowsTotal: int = int(arrayFoldings.shape[0])
 		listRowMasks: list[numpy.ndarray] = []
 
-		for leavesPinned in state.listPinnedLeaves:
+		for leavesPinned in state.listPermutationSpace:
 			maskRowsMatchThisDictionary: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
 			for pile, leafOrPileRangeOfLeaves in oopsAllLeaves(leavesPinned).items():
 				maskRowsMatchThisDictionary = maskRowsMatchThisDictionary & maskRowsMatchingPileConstraint(arrayFoldings[:, pile], leafOrPileRangeOfLeaves, state.leavesTotal)

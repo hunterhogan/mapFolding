@@ -22,12 +22,13 @@ See Also
 - Citations in BibTeX format "mapFolding/citations".
 """
 from collections.abc import Callable
+from cytoolz.dicttoolz import valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
-from mapFolding import between, getLeavesTotal, inclusive, PinnedLeaves
+from mapFolding import between, getLeavesTotal, inclusive, PermutationSpace
 from mapFolding._e import 零
-from mapFolding._e.pinIt import thisIsALeaf
+from mapFolding._e.pinIt import oopsAllLeaves
 from mapFolding.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf
@@ -163,19 +164,15 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 	return all(not thisIsAViolationComplicated(pile, pileComparand, callNextCrease(mapShape, leaf, aDimension), callNextCrease(mapShape, comparand, aDimension), inThis_pileOf(folding))
 			for ((pile, leaf), (pileComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
 
-# ------- Functions for `leaf` in `PinnedLeaves` dictionary -------------
+# ------- Functions for `leaf` in `PermutationSpace` dictionary -------------
 
 def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 	"""Return `True` if `state.leavesPinned` has a violation."""
-	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in state.leavesPinned.items() if thisIsALeaf(leafValue)}
-	listPileLeaf: list[tuple[int, int]] = sorted([
-		(pileKey, leafValue)
-		for pileKey, leafValue in state.leavesPinned.items()
-		if thisIsALeaf(leafValue) and between(0, state.leavesTotal - 零 - inclusive, leafValue)
-	])
+	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in oopsAllLeaves(state.leavesPinned).items()}
+
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
-		for pile, leaf in listPileLeaf:
+		for pile, leaf in sorted(leafFilter(between(0, state.leavesTotal - 零 - inclusive), state.leavesPinned).items()):
 			leafCrease: int | None = nextCrease(state.mapShape, leaf, dimension)
 			if leafCrease is None:
 				continue
@@ -191,12 +188,12 @@ def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 					return True
 	return False
 
-def removePinnedLeavesViolations(state: EliminationState) -> EliminationState:
-	listPinnedLeaves: list[PinnedLeaves] = state.listPinnedLeaves.copy()
-	state.listPinnedLeaves = []
-	for leavesPinned in listPinnedLeaves:
+def removePermutationSpaceViolations(state: EliminationState) -> EliminationState:
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace.copy()
+	state.listPermutationSpace = []
+	for leavesPinned in listPermutationSpace:
 		state.leavesPinned = leavesPinned
 		if leavesPinnedHasAViolation(state):
 			continue
-		state.listPinnedLeaves.append(leavesPinned)
+		state.listPermutationSpace.append(leavesPinned)
 	return state

@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from functools import cache
 from hunterMakesPy import raiseIfNone
-from mapFolding import exclude, PinnedLeaves
+from mapFolding import exclude, PermutationSpace
 from mapFolding._e import getLeafDomain, getPileRange
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.analysisPython.theExcluderBeast import (
@@ -10,7 +10,7 @@ from mapFolding._e.analysisPython.theExcluderBeast import (
 	loadCollatedIndices, MapKind, restructureAggregatedExclusionsForMapShape, strLeafExcluded, strLeafExcluder,
 	strPileExcluder)
 from mapFolding._e.analysisPython.Z0Z_patternFinder import detectPermutationSpaceErrors, PermutationSpaceStatus
-from mapFolding._e.pinIt import deconstructPinnedLeavesAtPile, deconstructPinnedLeavesByDomainOfLeaf
+from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
 from mapFolding._e.pinning2Dn import pinPiles
 from mapFolding.dataBaskets import EliminationState
 import numpy
@@ -90,22 +90,22 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				stateValidation = pinPiles(stateValidation, 1)
 
 				pileRange: list[int] = list(getPileRange(stateValidation, pileExcluder))
-				dictionaryDeconstructed: dict[int, PinnedLeaves] = deconstructPinnedLeavesAtPile(stateValidation.listPinnedLeaves[0], pileExcluder, pileRange)
+				dictionaryDeconstructed: dict[int, PermutationSpace] = deconstructPermutationSpaceAtPile(stateValidation.listPermutationSpace[0], pileExcluder, pileRange)
 
-				leavesPinnedWithExcluder: PinnedLeaves | None = dictionaryDeconstructed.get(leafExcluder)
+				leavesPinnedWithExcluder: PermutationSpace | None = dictionaryDeconstructed.get(leafExcluder)
 				if leavesPinnedWithExcluder is None:
 					continue
 
-				listPinnedLeavesOther: list[PinnedLeaves] = [leavesPinned for leaf, leavesPinned in dictionaryDeconstructed.items() if leaf != leafExcluder]
+				listPermutationSpaceOther: list[PermutationSpace] = [leavesPinned for leaf, leavesPinned in dictionaryDeconstructed.items() if leaf != leafExcluder]
 
 				domainOfLeafExcluded: list[int] = list(getLeafDomain(stateValidation, leafExcluded))
 				domainReduced: list[int] = list(exclude(domainOfLeafExcluded, listIndicesExcluded))
 
-				listPinnedLeavesFromExcluder: list[PinnedLeaves] = deconstructPinnedLeavesByDomainOfLeaf(leavesPinnedWithExcluder, leafExcluded, domainReduced)
+				listPermutationSpaceFromExcluder: list[PermutationSpace] = deconstructPermutationSpaceByDomainOfLeaf(leavesPinnedWithExcluder, leafExcluded, domainReduced)
 
-				stateValidation.listPinnedLeaves = listPinnedLeavesOther + listPinnedLeavesFromExcluder
+				stateValidation.listPermutationSpace = listPermutationSpaceOther + listPermutationSpaceFromExcluder
 
-				pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, stateValidation.listPinnedLeaves)
+				pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, stateValidation.listPermutationSpace)
 
 				if pinningCoverage.rowsRequired < rowsTotal:
 					listValidationErrors.append(

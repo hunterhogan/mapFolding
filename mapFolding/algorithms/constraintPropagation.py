@@ -1,10 +1,10 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
 from itertools import combinations, pairwise, product as CartesianProduct
-from mapFolding import decreasing, packageSettings, PinnedLeaves
+from mapFolding import decreasing, packageSettings, PermutationSpace
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseNext,
-	getZ0Z_precedence, getZ0Z_successor, leafOrigin, pileOrigin, 零)
+	leafOrigin, pileOrigin, 零)
 from mapFolding._e.pinIt import thisIsALeaf
 from mapFolding.dataBaskets import EliminationState
 from math import factorial, prod
@@ -22,7 +22,6 @@ def findValidFoldings(state: EliminationState) -> int:
 	listLeavesInPileOrder: list[cp_model.IntVar] = [model.NewIntVar(pileOrigin, state.leavesTotal - 零, f"leafInPile[{pile}]") for pile in range(state.leavesTotal)]
 	listPilingsInLeafOrder: list[cp_model.IntVar] = [model.NewIntVar(leafOrigin, state.leavesTotal - 零, f"pileOfLeaf[{leaf}]") for leaf in range(state.leavesTotal)]
 	model.AddInverse(listLeavesInPileOrder, listPilingsInLeafOrder)
-# ruff: noqa: ERA001
 
 # ------- Manual concurrency -----------------------------
 	for pile, leafOrLeafRange in state.leavesPinned.items():
@@ -48,32 +47,12 @@ def findValidFoldings(state: EliminationState) -> int:
 				continue
 			model.AddAllowedAssignments([listPilingsInLeafOrder[leaf]], [(pile,) for pile in domain])
 
-		dictionaryPileRanges: Final[dict[int, list[int]]] = getDictionaryPileRanges(state)
+		dictionaryPileRanges: Final[dict[int, tuple[int, ...]]] = getDictionaryPileRanges(state)
 		for pile, listLeavesAllowedAtPile in dictionaryPileRanges.items():
 			model.AddAllowedAssignments([listLeavesInPileOrder[pile]], [(leaf,) for leaf in listLeavesAllowedAtPile])
 
-		# Z0Z_precedence: Final[dict[int, dict[int, list[int]]]] = getZ0Z_precedence(state)
-		# for leafLater, dictionaryPiles in Z0Z_precedence.items():
-		# 	pileOfLeafLater: cp_model.IntVar = listPilingsInLeafOrder[leafLater]
-		# 	for pileLater, listLeavesPredecessor in dictionaryPiles.items():
-		# 		leafLaterAtPileLater: cp_model.IntVar = model.NewBoolVar(f"leaf{leafLater}_atPile{pileLater}")
-		# 		model.Add(pileOfLeafLater == pileLater).OnlyEnforceIf(leafLaterAtPileLater)
-		# 		model.Add(pileOfLeafLater != pileLater).OnlyEnforceIf(leafLaterAtPileLater.Not())
-		# 		for leafPredecessor in listLeavesPredecessor:
-		# 			model.Add(listPilingsInLeafOrder[leafPredecessor] < pileLater).OnlyEnforceIf(leafLaterAtPileLater)
-
-		# Z0Z_successor: Final[dict[int, dict[int, list[int]]]] = getZ0Z_successor(state)
-		# for leafEarlier, dictionaryPiles in Z0Z_successor.items():
-		# 	pileOfLeafEarlier: cp_model.IntVar = listPilingsInLeafOrder[leafEarlier]
-		# 	for pileEarlier, listLeavesSuccessor in dictionaryPiles.items():
-		# 		leafEarlierAtPileEarlier: cp_model.IntVar = model.NewBoolVar(f"leaf{leafEarlier}_atPile{pileEarlier}")
-		# 		model.Add(pileOfLeafEarlier == pileEarlier).OnlyEnforceIf(leafEarlierAtPileEarlier)
-		# 		model.Add(pileOfLeafEarlier != pileEarlier).OnlyEnforceIf(leafEarlierAtPileEarlier.Not())
-		# 		for leafLater in listLeavesSuccessor:
-		# 			model.Add(listPilingsInLeafOrder[leafLater] > pileEarlier).OnlyEnforceIf(leafEarlierAtPileEarlier)
-
 		for leaf in range(state.leavesTotal):
-			leavesCreaseNext: tuple[int, ...] = getLeavesCreaseNext(state, leaf)
+			leavesCreaseNext: tuple[int, ...] = tuple(getLeavesCreaseNext(state, leaf))
 			for pile in range(state.leavesTotal - 零):
 				currentLeafAtThisPile: cp_model.IntVar = listLeavesInPileOrder[pile]
 				nextLeafAtNextPile: cp_model.IntVar = listLeavesInPileOrder[pile + 1]
@@ -185,14 +164,14 @@ def findValidFoldings(state: EliminationState) -> int:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-	if state.listPinnedLeaves:
+	if state.listPermutationSpace:
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 			listClaimTickets: list[Future[int]] = []
 
-			listPinnedLeavesCopy: list[PinnedLeaves] = deepcopy(state.listPinnedLeaves)
-			state.listPinnedLeaves = []
-			for leavesPinned in listPinnedLeavesCopy:
+			listPermutationSpaceCopy: list[PermutationSpace] = deepcopy(state.listPermutationSpace)
+			state.listPermutationSpace = []
+			for leavesPinned in listPermutationSpaceCopy:
 				stateCopy: EliminationState = deepcopy(state)
 				stateCopy.leavesPinned = leavesPinned
 				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))

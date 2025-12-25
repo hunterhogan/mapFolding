@@ -27,11 +27,11 @@ from mapFolding._e._dataDynamic import (
 """Rules for maintaining a valid permutation space:
 
 1. In `leavesPinned`, if `leaf` is not pinned, deconstruct `leavesPinned` by the `pile` domain of `leaf`.
-	A. For each `pile` in the domain of `leaf`, if `pile` in `leavesPinned` is not occupied, create a new `PinnedLeaves` dictionary by appending `leaf` pinned at `pile` to `leavesPinned`.
-	B. Replace `leavesPinned` with the group of newly created `PinnedLeaves` dictionaries.
+	A. For each `pile` in the domain of `leaf`, if `pile` in `leavesPinned` is not occupied, create a new `PermutationSpace` dictionary by appending `leaf` pinned at `pile` to `leavesPinned`.
+	B. Replace `leavesPinned` with the group of newly created `PermutationSpace` dictionaries.
 2. In `leavesPinned`, if a `pile` is not pinned, deconstruct `leavesPinned` by the `leaf` range (mathematical range) of `pile`.
-	A. For each `leaf` in the range of `pile`, if `leaf` is not already pinned in `leavesPinned`, create a new `PinnedLeaves` dictionary by appending `leaf` pinned at `pile` to `leavesPinned`.
-	B. Replace `leavesPinned` with the group of newly created `PinnedLeaves` dictionaries.
+	A. For each `leaf` in the range of `pile`, if `leaf` is not already pinned in `leavesPinned`, create a new `PermutationSpace` dictionary by appending `leaf` pinned at `pile` to `leavesPinned`.
+	B. Replace `leavesPinned` with the group of newly created `PermutationSpace` dictionaries.
 3. Do not overwrite or delete a dictionary's pinned leaves because that could cause the dictionary's permutation space to overlap with a different dictionary's permutation space.
 """
 

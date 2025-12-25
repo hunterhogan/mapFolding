@@ -7,7 +7,8 @@ from functools import partial
 from gmpy2 import bit_mask
 from hunterMakesPy import raiseIfNone
 from mapFolding import (
-	asciiColorGreen, asciiColorMagenta, asciiColorRed, asciiColorReset, asciiColorYellow, packageSettings, PinnedLeaves)
+	asciiColorGreen, asciiColorMagenta, asciiColorRed, asciiColorReset, asciiColorYellow, packageSettings,
+	PermutationSpace)
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryPileRanges, getLeafDomain, getPileRange,
 	howManyDimensionsHaveOddParity, pileOrigin, Z0Z_invert, 零, 首二, 首零, 首零一)
@@ -26,7 +27,7 @@ import pandas
 
 @dataclass
 class PermutationSpaceStatus:
-	listSurplusDictionaries: list[PinnedLeaves]
+	listSurplusDictionaries: list[PermutationSpace]
 	maskUnion: numpy.ndarray
 	indicesOverlappingRows: numpy.ndarray
 	indicesOverlappingLeavesPinned: set[int]
@@ -478,11 +479,11 @@ def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKn
 
 	return comparisonResults
 
-def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPinnedLeaves: Sequence[PinnedLeaves]) -> PermutationSpaceStatus:
+def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPermutationSpace: Sequence[PermutationSpace]) -> PermutationSpaceStatus:
 	rowsTotal: int = int(arrayFoldings.shape[0])
 	listMasks: list[numpy.ndarray] = []
-	listSurplusDictionaries: list[PinnedLeaves] = []
-	for leavesPinned in listPinnedLeaves:
+	listSurplusDictionaries: list[PermutationSpace] = []
+	for leavesPinned in listPermutationSpace:
 		maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
 		for pile, leaf in leafFilter(thisIsALeaf, leavesPinned).items():
 			maskMatches = maskMatches & (arrayFoldings[:, pile] == leaf)
@@ -596,15 +597,15 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 	return pandas.DataFrame(listEntropyRecords).sort_values('entropyRelative', ascending=False).reset_index(drop=True)
 
 def verifyPinning2Dn(state: EliminationState) -> None:
-	def getLeavesPinnedWithLeafValuesOnly(leavesPinned: PinnedLeaves) -> PinnedLeaves:
+	def getLeavesPinnedWithLeafValuesOnly(leavesPinned: PermutationSpace) -> PermutationSpace:
 		return leafFilter(thisIsALeaf, leavesPinned)
 	arrayFoldings = getDataFrameFoldings(state)
 	if arrayFoldings is not None:
 		arrayFoldings = arrayFoldings.to_numpy(dtype=numpy.uint8, copy=False)
-		pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.listPinnedLeaves)
+		pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.listPermutationSpace)
 
-		listSurplusDictionariesOriginal: list[PinnedLeaves] = pinningCoverage.listSurplusDictionaries
-		listDictionaryPinned: list[PinnedLeaves] = [
+		listSurplusDictionariesOriginal: list[PermutationSpace] = pinningCoverage.listSurplusDictionaries
+		listDictionaryPinned: list[PermutationSpace] = [
 			getLeavesPinnedWithLeafValuesOnly(leavesPinned)
 			for leavesPinned in listSurplusDictionariesOriginal
 		]
@@ -629,10 +630,10 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		if pinningCoverage.indicesOverlappingLeavesPinned:
 			print(f"{asciiColorRed}{len(pinningCoverage.indicesOverlappingLeavesPinned)} overlapping dictionaries", asciiColorReset)
 			for indexDictionary in sorted(pinningCoverage.indicesOverlappingLeavesPinned)[0:2]:
-				pprint(leafFilter(thisIsALeaf, state.listPinnedLeaves[indexDictionary]), width=140)
+				pprint(leafFilter(thisIsALeaf, state.listPermutationSpace[indexDictionary]), width=140)
 
-		beansOrCornbread: Callable[[PinnedLeaves], bool] = beansWithoutCornbread(state)
-		listBeans: list[PinnedLeaves] = list(filter(beansOrCornbread, state.listPinnedLeaves))
+		beansOrCornbread: Callable[[PermutationSpace], bool] = beansWithoutCornbread(state)
+		listBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.listPermutationSpace))
 		if listBeans:
 			print(f"{asciiColorMagenta}{len(listBeans)} dictionaries with beans but no cornbread.", asciiColorReset)
 			pprint(getLeavesPinnedWithLeafValuesOnly(listBeans[0]), width=140)

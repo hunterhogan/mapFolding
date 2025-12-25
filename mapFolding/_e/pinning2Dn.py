@@ -1,16 +1,16 @@
 from gmpy2 import xmpz
 from hunterMakesPy import raiseIfNone
-from mapFolding import decreasing, LeafOrPileRangeOfLeaves, PinnedLeaves
+from mapFolding import decreasing, LeafOrPileRangeOfLeaves, PermutationSpace
 from mapFolding._e import (
 	getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二, leafOrigin, pileOrigin,
 	thisIsA2DnMap, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.pinIt import (
-	deconstructPinnedLeavesByDomainsCombined, getXmpzPileRangeOfLeaves, pileIsOpen, Z0Z_JeanValjean)
+	deconstructPermutationSpaceByDomainsCombined, getXmpzPileRangeOfLeaves, pileIsOpen, Z0Z_JeanValjean)
 from mapFolding._e.pinning2DnAnnex import (
 	appendLeavesPinnedAtPile as appendLeavesPinnedAtPile, beansWithoutCornbread as beansWithoutCornbread,
 	disqualifyAppendingLeafAtPile as disqualifyAppendingLeafAtPile, pinLeafCornbread as pinLeafCornbread, pinLeaf首零Plus零,
 	pinPile一Crease, pinPile一零Crease, pinPile二Crease, pinPile首Less一Crease, pinPile首Less一零Crease, pinPile首less二Crease,
-	pinPile首零Less零AfterFourthOrder, removeInvalidPinnedLeaves as removeInvalidPinnedLeaves)
+	pinPile首零Less零AfterFourthOrder, removeInvalidPermutationSpace as removeInvalidPermutationSpace)
 from mapFolding.dataBaskets import EliminationState
 from more_itertools import interleave_longest
 from pprint import pprint
@@ -28,9 +28,9 @@ def nextLeavesPinnedWorkbench(state: EliminationState, pileProcessingOrder: list
 		if pile == queueStopBefore:
 			break
 
-		for leavesPinned in filter(pileIsOpen(pile=pile), state.listPinnedLeaves):
+		for leavesPinned in filter(pileIsOpen(pile=pile), state.listPermutationSpace):
 			state.leavesPinned = leavesPinned
-			state.listPinnedLeaves.remove(leavesPinned)
+			state.listPermutationSpace.remove(leavesPinned)
 			state.pile = pile
 			return state
 	return state
@@ -44,16 +44,16 @@ def pileProcessingOrderDefault(state: EliminationState) -> list[int]:
 # ======= Pinning functions ===============================================
 
 def Z0Z_baseline(state: EliminationState) -> EliminationState:
-	state.listPinnedLeaves = [{pile: raiseIfNone(Z0Z_JeanValjean(getXmpzPileRangeOfLeaves(state.leavesTotal, pileRange)))
+	state.listPermutationSpace = [{pile: raiseIfNone(Z0Z_JeanValjean(getXmpzPileRangeOfLeaves(state.leavesTotal, pileRange)))
 								for pile, pileRange in getDictionaryPileRanges(state).items()}]
 	return state
 
-def pinPiles(state: EliminationState, order: int = 4, maximumListPinnedLeaves: int = 2**10, queueStopBefore: int | None = None) -> EliminationState:
-	"""Pin up to 二 piles at both ends of the sequence without surplus `PinnedLeaves` dictionaries."""
+def pinPiles(state: EliminationState, order: int = 4, maximumListPermutationSpace: int = 2**10, queueStopBefore: int | None = None) -> EliminationState:
+	"""Pin up to 二 piles at both ends of the sequence without surplus `PermutationSpace` dictionaries."""
 	if not thisIsA2DnMap(state):
 		return state
 
-	if not state.listPinnedLeaves:
+	if not state.listPermutationSpace:
 		state = Z0Z_baseline(state)
 
 	pileProcessingOrder: list[int] = [pileOrigin]
@@ -73,7 +73,7 @@ def pinPiles(state: EliminationState, order: int = 4, maximumListPinnedLeaves: i
 			pileProcessingOrder.extend([state.leavesTotal - 二])
 
 	state = nextLeavesPinnedWorkbench(state, pileProcessingOrder, queueStopBefore)
-	while (len(state.listPinnedLeaves) < maximumListPinnedLeaves) and (state.leavesPinned):
+	while (len(state.listPermutationSpace) < maximumListPermutationSpace) and (state.leavesPinned):
 		listLeavesAtPile: list[int] = []
 
 		if state.pile == pileOrigin:
@@ -105,21 +105,21 @@ def pinPiles(state: EliminationState, order: int = 4, maximumListPinnedLeaves: i
 
 	return state
 
-def pinPile首零Less零(state: EliminationState, maximumListPinnedLeaves: int = 2**14) -> EliminationState:
+def pinPile首零Less零(state: EliminationState, maximumListPermutationSpace: int = 2**14) -> EliminationState:
 	"""Incompletely, but safely, pin `pile首零Less零`: the last pile in the first half of the sequence.
 
 	Pinning all possible combinations at this pile is more valuable than pinning at most, if not all, other piles. Furthermore,
-	most of the time, bluntly deconstructing a pile's range or a leaf's domain creates 100-10000 times more surplus `PinnedLeaves`
+	most of the time, bluntly deconstructing a pile's range or a leaf's domain creates 100-10000 times more surplus `PermutationSpace`
 	dictionaries than useful dictionaries. At this pile, however, even though I have not figured out the formulas to pin most
 	leaves, the surplus ratio is only about one-to-one.
 	"""
 	if not thisIsA2DnMap(state):
 		return state
 
-	if not state.listPinnedLeaves:
+	if not state.listPermutationSpace:
 		state = pinPiles(state, 1)
 
-	state = pinPiles(state, 4, maximumListPinnedLeaves)
+	state = pinPiles(state, 4, maximumListPermutationSpace)
 
 	if not thisIsA2DnMap(state, youMustBeDimensionsTallToPinThis=4):
 		return state
@@ -127,7 +127,7 @@ def pinPile首零Less零(state: EliminationState, maximumListPinnedLeaves: int =
 	pileProcessingOrder: list[int] = [首零(state.dimensionsTotal)-零]
 
 	state = nextLeavesPinnedWorkbench(state, pileProcessingOrder)
-	while (len(state.listPinnedLeaves) < maximumListPinnedLeaves) and (state.leavesPinned):
+	while (len(state.listPermutationSpace) < maximumListPermutationSpace) and (state.leavesPinned):
 		listLeavesAtPile: list[int] = []
 
 		if state.pile == 首零(state.dimensionsTotal)-零:
@@ -142,18 +142,18 @@ def _pinLeavesByDomain(state: EliminationState, leaves: tuple[int, ...], leavesD
 	if not thisIsA2DnMap(state, youMustBeDimensionsTallToPinThis=youMustBeDimensionsTallToPinThis):
 		return state
 
-	if not state.listPinnedLeaves:
+	if not state.listPermutationSpace:
 		state = pinPiles(state, 1)
 
-	listPinnedLeaves: list[PinnedLeaves] = state.listPinnedLeaves.copy()
-	state.listPinnedLeaves = []
-	qualifiedLeavesPinned: list[PinnedLeaves] = []
-	for leavesPinned in listPinnedLeaves:
-		state.listPinnedLeaves = deconstructPinnedLeavesByDomainsCombined(leavesPinned, leaves, leavesDomain)
-		state = removeInvalidPinnedLeaves(state)
-		qualifiedLeavesPinned.extend(state.listPinnedLeaves)
-		state.listPinnedLeaves = []
-	state.listPinnedLeaves = qualifiedLeavesPinned.copy()
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace.copy()
+	state.listPermutationSpace = []
+	qualifiedLeavesPinned: list[PermutationSpace] = []
+	for leavesPinned in listPermutationSpace:
+		state.listPermutationSpace = deconstructPermutationSpaceByDomainsCombined(leavesPinned, leaves, leavesDomain)
+		state = removeInvalidPermutationSpace(state)
+		qualifiedLeavesPinned.extend(state.listPermutationSpace)
+		state.listPermutationSpace = []
+	state.listPermutationSpace = qualifiedLeavesPinned.copy()
 	return state
 
 def pinLeavesDimension0(state: EliminationState) -> EliminationState:
@@ -169,26 +169,26 @@ def pinLeavesDimension零(state: EliminationState) -> EliminationState:
 	return pinLeaf首零Plus零(state)
 
 def pinLeavesDimension一(state: EliminationState) -> EliminationState:
-	"""Pin `leaf一零`, `leaf一`, `leaf首一`, and `leaf首零一` without surplus `PinnedLeaves` dictionaries."""
+	"""Pin `leaf一零`, `leaf一`, `leaf首一`, and `leaf首零一` without surplus `PermutationSpace` dictionaries."""
 	leaves: tuple[int, int, int, int] = (一+零, 一, 首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))
 	leavesDomain: tuple[tuple[int, ...], ...] = getDomainDimension一(state)
 
 	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis=2)
 
 def pinLeavesDimensions0零一(state: EliminationState) -> EliminationState:
-	"""Pin `leaf首零Plus零`, `leaf一零`, `leaf一`, `leaf首一`, and `leaf首零一` without surplus `PinnedLeaves` dictionaries."""
+	"""Pin `leaf首零Plus零`, `leaf一零`, `leaf一`, `leaf首一`, and `leaf首零一` without surplus `PermutationSpace` dictionaries."""
 	state = pinLeavesDimension一(state)
 	return pinLeavesDimension零(state)
 
 def pinLeavesDimension二(state: EliminationState) -> EliminationState:
-	"""Pin `leaf二一`, `leaf二一零`, `leaf二零`, and `leaf二` without surplus `PinnedLeaves` dictionaries."""
+	"""Pin `leaf二一`, `leaf二一零`, `leaf二零`, and `leaf二` without surplus `PermutationSpace` dictionaries."""
 	leaves: tuple[int, int, int, int] = (二+一, 二+一+零, 二+零, 二)
 	leavesDomain: tuple[tuple[int, ...], ...] = getDomainDimension二(state)
 
 	return _pinLeavesByDomain(state, leaves, leavesDomain, youMustBeDimensionsTallToPinThis=4)
 
 def pinLeavesDimension首二(state: EliminationState) -> EliminationState:
-	"""Pin `leaf首二`, `leaf首零二`, `leaf首零一二`, and `leaf首一二` without surplus `PinnedLeaves` dictionaries."""
+	"""Pin `leaf首二`, `leaf首零二`, `leaf首零一二`, and `leaf首一二` without surplus `PermutationSpace` dictionaries."""
 	leaves: tuple[int, int, int, int] = (首二(state.dimensionsTotal), 首零二(state.dimensionsTotal), 首零一二(state.dimensionsTotal), 首一二(state.dimensionsTotal))
 	leavesDomain: tuple[tuple[int, ...], ...] = getDomainDimension首二(state)
 

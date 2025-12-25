@@ -1,8 +1,7 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from copy import deepcopy
-from gmpy2 import xmpz
-from mapFolding._e import getLeavesCreaseBack, getLeavesCreaseNext, getPileRange, thisIsA2DnMap
-from mapFolding._e.pinIt import pileIsOpen, thisIsALeaf
+from mapFolding._e import getLeavesCreaseBack, getLeavesCreaseNext, thisIsA2DnMap
+from mapFolding._e.pinIt import getXmpzPileRangeOfLeaves, thisIsALeaf, thisIsAPileRangeOfLeaves
 from mapFolding._e.pinning2Dn import appendLeavesPinnedAtPile, nextLeavesPinnedWorkbench, pinPiles
 from mapFolding.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding.dataBaskets import EliminationState
@@ -11,52 +10,37 @@ from tqdm import tqdm
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding import PinnedLeaves
+	from mapFolding import PermutationSpace
 
 def pinByCrease(state: EliminationState) -> EliminationState:
-	state = nextLeavesPinnedWorkbench(state)
+	state = nextLeavesPinnedWorkbench(state, pileProcessingOrder=list(range(state.leavesTotal)))
 	while state.leavesPinned:
-		if thisIsALeaf(leaf := state.leavesPinned.get(state.pile - 1)):
-			listLeavesAtPile: tuple[int, ...] = getLeavesCreaseNext(state, leaf)
-			# function
-			# listLeavesAtPile = current pile-range, if any, intersection with a collection of leaves passed to the function.
-		elif thisIsALeaf(leaf := state.leavesPinned.get(state.pile + 1)):
-			listLeavesAtPile = getLeavesCreaseBack(state, leaf)
-		else:
-			listLeavesAtPile = tuple(getPileRange(state, state.pile))
+		pileRangeOfLeaves = state.leavesPinned.get(state.pile)
+# TODO `if thisIsAPileRangeOfLeaves(pileRangeOfLeaves)` exists solely to appease the motherfucking typechecker. I know the fucking
+# type is xmpz. How do I signal that to the type checker without fucking up my flow? Or, as is often the case when the type
+# checker doesn't know what I am doing: is there a smarter way to design this flow?
+		if thisIsAPileRangeOfLeaves(pileRangeOfLeaves):
+			if thisIsALeaf(leaf := state.leavesPinned.get(state.pile - 1)):
+				pileRangeOfLeaves &= getXmpzPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseNext(state, leaf))
+			elif thisIsALeaf(leaf := state.leavesPinned.get(state.pile + 1)):
+				pileRangeOfLeaves &= getXmpzPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseBack(state, leaf))
 
-		sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned.copy())
-		sherpa = appendLeavesPinnedAtPile(sherpa, listLeavesAtPile)
-		# len(sherpa.listPinnedLeaves) <= 5 with a freshly pinned leaf at state.pile in each
-		# The pile-range of state.pile+1 is now getListLeavesCreaseNext.intersection(the existing pile-range), so I should update it.
-		for leavesPinned in sherpa.listPinnedLeaves:
-			if pileIsOpen(leavesPinned, state.pile + 1):
-				gg = getLeavesCreaseNext(state, leavesPinned[state.pile]) # pyright: ignore[reportArgumentType]
-				ff = xmpz(0)
-				ff.bit_set(state.leavesTotal)
-				for nn in gg:
-					ff.bit_set(nn)
-				leavesPinned[state.pile + 1] = ff
+			sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned.copy())
+			sherpa = appendLeavesPinnedAtPile(sherpa, pileRangeOfLeaves.iter_set(start=0, stop=state.leavesTotal))
+			del pileRangeOfLeaves
 
-			if pileIsOpen(leavesPinned, state.pile - 1):
-				gg = getLeavesCreaseBack(state, leavesPinned[state.pile]) # pyright: ignore[reportArgumentType]
-				ff = xmpz(0)
-				ff.bit_set(state.leavesTotal)
-				for nn in gg:
-					ff.bit_set(nn)
-				leavesPinned[state.pile - 1] = ff
-			state.listPinnedLeaves.append(leavesPinned)
+			state.listPermutationSpace.extend(sherpa.listPermutationSpace)
+			state = nextLeavesPinnedWorkbench(state, pileProcessingOrder=list(range(state.leavesTotal)))
 
-		# state.listPinnedLeaves.extend(sherpa.listPinnedLeaves)
-# ruff: noqa: ERA001
-		state = nextLeavesPinnedWorkbench(state)
+	return _purgeInvalidLeafFoldings(state)
 
-	listPinnedLeavesCopy: list[PinnedLeaves] = state.listPinnedLeaves.copy()
-	state.listPinnedLeaves = []
-	for leavesPinned in listPinnedLeavesCopy:
+def _purgeInvalidLeafFoldings(state: EliminationState) -> EliminationState:
+	listPermutationSpaceCopy: list[PermutationSpace] = state.listPermutationSpace.copy()
+	state.listPermutationSpace = []
+	for leavesPinned in listPermutationSpaceCopy:
 		folding: tuple[int, ...] = tuple([leavesPinned[pile] for pile in range(state.leavesTotal)]) # pyright: ignore[reportAssignmentType]
 		if thisLeafFoldingIsValid(folding, state.mapShape):
-			state.listPinnedLeaves.append(leavesPinned)
+			state.listPermutationSpace.append(leavesPinned)
 
 	return state
 
@@ -65,27 +49,27 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not thisIsA2DnMap(state):
 		return state
 
-	if not state.listPinnedLeaves:
+	if not state.listPermutationSpace:
 		state = pinPiles(state, 1)
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 		listClaimTickets: list[Future[EliminationState]] = []
 
-		listPinnedLeavesCopy: list[PinnedLeaves] = state.listPinnedLeaves.copy()
-		state.listPinnedLeaves = []
+		listPermutationSpaceCopy: list[PermutationSpace] = state.listPermutationSpace.copy()
+		state.listPermutationSpace = []
 
-		for leavesPinned in listPinnedLeavesCopy:
+		for leavesPinned in listPermutationSpaceCopy:
 			stateCopy: EliminationState = deepcopy(state)
-			stateCopy.listPinnedLeaves.append(leavesPinned)
+			stateCopy.listPermutationSpace.append(leavesPinned)
 
 			listClaimTickets.append(concurrencyManager.submit(pinByCrease, stateCopy))
 
-		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
+		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=True):
 			stateClaimed: EliminationState = claimTicket.result()
-			state.listPinnedLeaves.extend(stateClaimed.listPinnedLeaves)
+			state.listPermutationSpace.extend(stateClaimed.listPermutationSpace)
 
 	state.Theorem4Multiplier = factorial(state.dimensionsTotal)
-	state.groupsOfFolds = len(state.listPinnedLeaves)
+	state.groupsOfFolds = len(state.listPermutationSpace)
 
 	return state
 

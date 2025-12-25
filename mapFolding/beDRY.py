@@ -47,7 +47,7 @@ def DOTvalues[个](dictionary: dict[Any, 个]) -> Iterator[个]:
 
 	See Also
 	--------
-	deconstructLeavesPinned, deconstructListPinnedLeaves
+	deconstructLeavesPinned, deconstructListPermutationSpace
 	"""
 	yield from dictionary.values()
 

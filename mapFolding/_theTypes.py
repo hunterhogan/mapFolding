@@ -118,10 +118,13 @@ class ShapeSlicer(NamedTuple):
 	length: EllipsisType | slice
 	indices: int
 
-# ======= Other types =======
+# ======= `EliminationState` =======
+
+type Folding = dict[int, int]
+"""`pile`: `leaf`, and length must be `leavesTotal`."""
 
 type LeafOrPileRangeOfLeaves = int | xmpz
 """In `gmpy2`, the ONLY way to modify an `xmpz` object without converting it to another type is to use indexing, slicing, and symbolic operations, such as `^=`."""
 
-type PinnedLeaves = dict[int, LeafOrPileRangeOfLeaves]
+type PermutationSpace = dict[int, LeafOrPileRangeOfLeaves]
 """`pile`: `leaf` or pile-range of leaves."""

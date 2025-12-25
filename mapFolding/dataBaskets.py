@@ -22,7 +22,7 @@ access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
 	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	getConnectionGraph, getLeavesTotal, inclusive, LeafOrPileRangeOfLeaves, makeDataContainer, PinnedLeaves)
+	getConnectionGraph, getLeavesTotal, inclusive, LeafOrPileRangeOfLeaves, makeDataContainer, PermutationSpace)
 from math import prod
 import dataclasses
 
@@ -36,7 +36,7 @@ class EliminationState:
 		Dimension lengths of the map being analyzed for folding patterns.
 	groupsOfFolds : int = 0
 		Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings.
-	listPinnedLeaves : list[dict[int, int]]
+	listPermutationSpace : list[dict[int, int]]
 		A list of dictionaries that each define an exclusive permutation space: no overlap between dictionaries.
 	pile : int = -1
 		The `pile` on the workbench.
@@ -71,12 +71,12 @@ class EliminationState:
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `folding` that represents a group of `leavesTotal`-many foldings."""
 
-	listPinnedLeaves: list[PinnedLeaves] = dataclasses.field(default_factory=list[PinnedLeaves], init=True)
+	listPermutationSpace: list[PermutationSpace] = dataclasses.field(default_factory=list[PermutationSpace], init=True)
 	"""A list of dictionaries (`{pile: leaf or possible leaves}`) that each define an exclusive permutation space: no overlap between dictionaries."""
 
 	pile: int = -1
 	"""The `pile` on the workbench."""
-	leavesPinned: PinnedLeaves = dataclasses.field(default_factory=dict[int, LeafOrPileRangeOfLeaves], init=True)
+	leavesPinned: PermutationSpace = dataclasses.field(default_factory=dict[int, LeafOrPileRangeOfLeaves], init=True)
 	"""The `leavesPinned` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
 	Theorem2Multiplier: int = 1

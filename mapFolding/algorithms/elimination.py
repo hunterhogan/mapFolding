@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from gmpy2 import xmpz
 from itertools import pairwise, permutations, product as CartesianProduct, repeat
-from mapFolding import between, getLeavesTotal, noDuplicates, PinnedLeaves
+from mapFolding import between, getLeavesTotal, noDuplicates, PermutationSpace
 from mapFolding._e import leafOrigin, pileOrigin
 from mapFolding._e.pinIt import (
 	excludeLeaf_rBeforeLeaf_k, getIteratorOfLeaves, makeFolding, oopsAllLeaves, oopsAllPileRangesOfLeaves, thisIsALeaf,
@@ -12,10 +12,10 @@ from math import factorial
 from more_itertools import iter_index, unique
 
 def count(state: EliminationState) -> EliminationState:
-	state.groupsOfFolds += sum(map(countLeavesPinned, state.listPinnedLeaves, repeat(state.mapShape), repeat(range(state.leavesTotal))))
+	state.groupsOfFolds += sum(map(countLeavesPinned, state.listPermutationSpace, repeat(state.mapShape), repeat(range(state.leavesTotal))))
 	return state
 
-def countLeavesPinned(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
+def countLeavesPinned(leavesPinned: PermutationSpace, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
 # TODO
 	"""Replace `permutations` with the `noDuplicates` filter on `CartesianProduct` of the domains of each leaf.
 
@@ -58,7 +58,7 @@ def theorem2b(state: EliminationState) -> EliminationState:
 
 	Side Effects
 	------------
-	Mutates `state.listPinnedLeaves` and `state.Theorem2Multiplier` when applicable.
+	Mutates `state.listPermutationSpace` and `state.Theorem2Multiplier` when applicable.
 
 	Returns
 	-------
@@ -80,10 +80,10 @@ def theorem2b(state: EliminationState) -> EliminationState:
 def theorem4(state: EliminationState) -> EliminationState:
 	"""***Bluntly*** implement Lunnon Theorem 4 (divisibility by d! · p^d) via systematic leaf exclusions.
 
-	This function is ignorant of the actual domains of the dimension-origin leaves, so it creates `PinnedLeaves` dictionaries to
-	exclude at every `pile`. The permutation space is still valid. However, for each `PinnedLeaves` dictionary, for each `pile`
+	This function is ignorant of the actual domains of the dimension-origin leaves, so it creates `PermutationSpace` dictionaries to
+	exclude at every `pile`. The permutation space is still valid. However, for each `PermutationSpace` dictionary, for each `pile`
 	*not* in the domain of a dimension-origin leaf, the function creates approximately `leavesTotal - 1` unnecessary
-	`PinnedLeaves` dictionaries. They are "unnecessary" because we didn't need to exclude the leaf from a pile in which it could
+	`PermutationSpace` dictionaries. They are "unnecessary" because we didn't need to exclude the leaf from a pile in which it could
 	never appear. The net result is that the number of unnecessary dictionaries grows exponentially with the number of repeated
 	dimension magnitudes.
 
@@ -109,9 +109,9 @@ def theorem4(state: EliminationState) -> EliminationState:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:  # noqa: ARG001
 	"""Count the number of valid foldings for a given number of leaves."""
-	if not state.listPinnedLeaves:
+	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.listPinnedLeaves = [{pileOrigin: leafOrigin}]
+		state.listPermutationSpace = [{pileOrigin: leafOrigin}]
 		state = theorem4(state)
 		state = theorem2b(state)
 

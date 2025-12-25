@@ -1,6 +1,6 @@
 from bisect import bisect_right
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
@@ -21,7 +21,7 @@ import sys
 
 # ======= Creases =================================
 
-def getLeavesCreaseNext(state: EliminationState, leaf: int) -> tuple[int, ...]:
+def getLeavesCreaseBack(state: EliminationState, leaf: int) -> Iterator[int]:
 	"""1) The leaf has at most `dimensionsTotal - 1` many creases.
 
 	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
@@ -29,9 +29,9 @@ def getLeavesCreaseNext(state: EliminationState, leaf: int) -> tuple[int, ...]:
 
 	3) The list of creases *might* be a list of Gray codes.
 	"""
-	return _getCreases(state, leaf, increase=True)
+	return iter(_getCreases(state, leaf, increase=False))
 
-def getLeavesCreaseBack(state: EliminationState, leaf: int) -> tuple[int, ...]:
+def getLeavesCreaseNext(state: EliminationState, leaf: int) -> Iterator[int]:
 	"""1) The leaf has at most `dimensionsTotal - 1` many creases.
 
 	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
@@ -39,7 +39,7 @@ def getLeavesCreaseBack(state: EliminationState, leaf: int) -> tuple[int, ...]:
 
 	3) The list of creases *might* be a list of Gray codes.
 	"""
-	return _getCreases(state, leaf, increase=False)
+	return iter(_getCreases(state, leaf, increase=True))
 
 def _getCreases(state: EliminationState, leaf: int, *, increase: bool = True) -> tuple[int, ...]:
 	return _makeCreases(leaf, state.dimensionsTotal)[increase]
@@ -92,8 +92,8 @@ def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: LeafOrPileRangeOfL
 		return True
 	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1) # pyright: ignore[reportArgumentType]
 
-def getPileRange(state: EliminationState, pile: int) -> Iterable[int]:
-	return _getPileRange(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal)
+def getPileRange(state: EliminationState, pile: int) -> Iterator[int]:
+	return iter(_getPileRange(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal))
 @cache
 def _getPileRange(pile: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: LeafOrPileRangeOfLeaves) -> tuple[int, ...]:
 	if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
@@ -110,9 +110,9 @@ def _getPileRange(pile: int, dimensionsTotal: int, mapShape: tuple[int, ...], le
 
 	return tuple(range(leavesTotal)) # pyright: ignore[reportArgumentType]
 
-def getDictionaryPileRanges(state: EliminationState) -> dict[int, list[int]]:
+def getDictionaryPileRanges(state: EliminationState) -> dict[int, tuple[int, ...]]:
 	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
-	return {pile: list(getPileRange(state, pile)) for pile in range(state.leavesTotal)}
+	return {pile: tuple(getPileRange(state, pile)) for pile in range(state.leavesTotal)}
 
 # ======= Leaf domains ====================================
 

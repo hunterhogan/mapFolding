@@ -13,7 +13,7 @@ When adding new test data for additional `mapShape` values, add the data to `A00
 and the tests will automatically pick them up via parametrization.
 """
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from mapFolding._e import (
 	getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二,
 	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeafDomain, getLeavesCreaseBack,
@@ -219,9 +219,9 @@ def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8
 	],
 	ids=["increase", "decrease"],
 )
-def test_getListLeavesCreases_matches_foldingsTransitions(
+def test_getLeavesCreaseIterators_match_foldingsTransitions(
 	creaseKind: str,
-	creaseFunction: Callable[[EliminationState, int], list[int]],
+	creaseFunction: Callable[[EliminationState, int], Iterable[int]],
 	dictionaryExpectedByMapShape: dict[tuple[int, ...], dict[int, list[int]]],
 	dimensionsTotal: int,
 ) -> None:
@@ -230,7 +230,7 @@ def test_getListLeavesCreases_matches_foldingsTransitions(
 	dictionaryExpectedByLeaf: dict[int, list[int]] = dictionaryExpectedByMapShape[mapShape]
 
 	for leaf in range(state.leavesTotal):
-		listLeavesActual: list[int] = creaseFunction(state, leaf)
+		listLeavesActual: list[int] = list(creaseFunction(state, leaf))
 		listLeavesExpectedSorted: list[int] = dictionaryExpectedByLeaf[leaf]
 
 		assert sorted(listLeavesActual) == listLeavesExpectedSorted, (
