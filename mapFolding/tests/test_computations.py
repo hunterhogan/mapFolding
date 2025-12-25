@@ -36,11 +36,11 @@ from mapFolding.tests.conftest import (
 	mapShapeFromScenario, registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn, TestScenario)
 from numba.core.errors import NumbaPendingDeprecationWarning
 from pathlib import Path, PurePosixPath
+from typing import TYPE_CHECKING
 import importlib.util
 import multiprocessing
 import pytest
 import warnings
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from importlib.machinery import ModuleSpec
@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
 
-def test_A007822(a007822Scenario: TestScenario) -> None:
+def test_A007822(scenarioA007822: TestScenario) -> None:
 	"""Test A007822 flow options.
 
 	Parameters
@@ -58,19 +58,19 @@ def test_A007822(a007822Scenario: TestScenario) -> None:
 		Scenario describing the OEIS index and flow to validate.
 
 	"""
-	oeisID: str = a007822Scenario.oeisID
+	oeisID: str = scenarioA007822.oeisID
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
-	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][a007822Scenario.index]
+	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][scenarioA007822.n]
 	standardizedEqualToCallableReturn(
 		expected,
 		NOTcountingFolds,
 		oeisID,
-		a007822Scenario.index,
-		a007822Scenario.flowName,
-		a007822Scenario.cpuLimit,
+		scenarioA007822.n,
+		scenarioA007822.flow,
+		scenarioA007822.CPUlimit,
 	)
 
-def test_countFolds(countFoldsScenario: TestScenario) -> None:
+def test_countFolds(scenarioCountFolds: TestScenario) -> None:
 	"""Validate that different computational flows produce valid results.
 
 	(AI generated docstring)
@@ -88,11 +88,11 @@ def test_countFolds(countFoldsScenario: TestScenario) -> None:
 		Scenario describing the OEIS index and flow to validate.
 
 	"""
-	mapShape: tuple[int, ...] = mapShapeFromScenario(countFoldsScenario)
-	expected: int = dictionaryOEISMapFolding[countFoldsScenario.oeisID]['valuesKnown'][countFoldsScenario.index]
-	standardizedEqualToCallableReturn(expected, countFolds, None, None, None, None, mapShape, countFoldsScenario.flowName)
+	mapShape: tuple[int, ...] = mapShapeFromScenario(scenarioCountFolds)
+	expected: int = dictionaryOEISMapFolding[scenarioCountFolds.oeisID]['valuesKnown'][scenarioCountFolds.n]
+	standardizedEqualToCallableReturn(expected, countFolds, None, None, None, scenarioCountFolds.CPUlimit, mapShape, scenarioCountFolds.flow)
 
-def test_eliminateFolds(eliminateFoldsScenario: TestScenario) -> None:
+def test_eliminateFolds(scenarioEliminateFolds: TestScenario) -> None:
 	"""Validate `eliminateFolds` and different flows produce valid results.
 
 	Parameters
@@ -100,14 +100,13 @@ def test_eliminateFolds(eliminateFoldsScenario: TestScenario) -> None:
 	eliminateFoldsScenario : TestScenario
 		Scenario describing the OEIS index and flow to validate.
 	"""
-	mapShape: tuple[int, ...] = mapShapeFromScenario(eliminateFoldsScenario)
+	mapShape: tuple[int, ...] = mapShapeFromScenario(scenarioEliminateFolds)
 	state = None
 	pathLikeWriteFoldsTotal: None = None
-	CPUlimit: bool | float | int | None = .25
-	expected: int = dictionaryOEISMapFolding[eliminateFoldsScenario.oeisID]['valuesKnown'][eliminateFoldsScenario.index]
-	standardizedEqualToCallableReturn(expected, eliminateFolds, mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, eliminateFoldsScenario.flowName)
+	expected: int = dictionaryOEISMapFolding[scenarioEliminateFolds.oeisID]['valuesKnown'][scenarioEliminateFolds.n]
+	standardizedEqualToCallableReturn(expected, eliminateFolds, mapShape, state, pathLikeWriteFoldsTotal, scenarioEliminateFolds.CPUlimit, scenarioEliminateFolds.flow)
 
-def test_meanders(meandersScenario: TestScenario) -> None:
+def test_meanders(scenarioMeanders: TestScenario) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -119,18 +118,18 @@ def test_meanders(meandersScenario: TestScenario) -> None:
 		Scenario describing the OEIS index and flow to validate.
 
 	"""
-	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if meandersScenario.oeisID in dictionaryOEISMapFolding else dictionaryOEIS
-	expected: int = dictionaryCurrent[meandersScenario.oeisID]['valuesKnown'][meandersScenario.index]
+	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if scenarioMeanders.oeisID in dictionaryOEISMapFolding else dictionaryOEIS
+	expected: int = dictionaryCurrent[scenarioMeanders.oeisID]['valuesKnown'][scenarioMeanders.n]
 	standardizedEqualToCallableReturn(
 		expected,
 		NOTcountingFolds,
-		meandersScenario.oeisID,
-		meandersScenario.index,
-		meandersScenario.flowName,
+		scenarioMeanders.oeisID,
+		scenarioMeanders.n,
+		scenarioMeanders.flow,
 		None,
 	)
 
-def test_NOTcountingFolds(formulaScenario: TestScenario) -> None:
+def test_NOTcountingFolds(scenarioOeisFormula: TestScenario) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -142,18 +141,18 @@ def test_NOTcountingFolds(formulaScenario: TestScenario) -> None:
 		Scenario describing the OEIS index evaluated via formula dispatch.
 
 	"""
-	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if formulaScenario.oeisID in dictionaryOEISMapFolding else dictionaryOEIS
-	expected: int = dictionaryCurrent[formulaScenario.oeisID]['valuesKnown'][formulaScenario.index]
+	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if scenarioOeisFormula.oeisID in dictionaryOEISMapFolding else dictionaryOEIS
+	expected: int = dictionaryCurrent[scenarioOeisFormula.oeisID]['valuesKnown'][scenarioOeisFormula.n]
 	standardizedEqualToCallableReturn(
 		expected,
 		NOTcountingFolds,
-		formulaScenario.oeisID,
-		formulaScenario.index,
-		formulaScenario.flowName,
+		scenarioOeisFormula.oeisID,
+		scenarioOeisFormula.n,
+		scenarioOeisFormula.flow,
 		None,
 	)
 
-def test_oeisIDfor_n(oeisValueScenario: TestScenario) -> None:
+def test_oeisIDfor_n(scenarioOeisValue: TestScenario) -> None:
 	"""Verify OEIS sequence value calculations against known reference values.
 
 	Tests the `oeisIDfor_n` function by comparing its calculated output against
@@ -170,8 +169,8 @@ def test_oeisIDfor_n(oeisValueScenario: TestScenario) -> None:
 		Scenario describing the OEIS index validated through the public interface.
 
 	"""
-	expected = dictionaryOEISMapFolding[oeisValueScenario.oeisID]['valuesKnown'][oeisValueScenario.index]
-	standardizedEqualToCallableReturn(expected, oeisIDfor_n, oeisValueScenario.oeisID, oeisValueScenario.index)
+	expected = dictionaryOEISMapFolding[scenarioOeisValue.oeisID]['valuesKnown'][scenarioOeisValue.n]
+	standardizedEqualToCallableReturn(expected, oeisIDfor_n, scenarioOeisValue.oeisID, scenarioOeisValue.n)
 
 @pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:

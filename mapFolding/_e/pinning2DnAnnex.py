@@ -1,8 +1,9 @@
 from collections.abc import Iterable
-from cytoolz.dicttoolz import dissoc, keyfilter, keyfilter as pileFilter, valfilter as leafFilter
+from copy import deepcopy
+from cytoolz.dicttoolz import dissoc, keyfilter, keyfilter as pileFilter, valfilter as leafFilter, valmap as leafMap
 from cytoolz.functoolz import complement, curry as syntacticCurry
 from functools import cache
-from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
+from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd, xmpz
 from hunterMakesPy import raiseIfNone
 from itertools import filterfalse
 from mapFolding import decreasing, inclusive
@@ -10,15 +11,16 @@ from mapFolding._e import (
 	between, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, exclude, getDictionaryPileRanges, getLeaf,
 	getLeafDomain, getLeavesCreaseBack, getLeavesCreaseNext, getZ0Z_precedence, howManyDimensionsHaveOddParity,
 	leafInSubHyperplane, leafIsNotPinned, leafIsPinned, LeafOrPileRangeOfLeaves, mappingHasKey, notLeafOriginOrLeaf零,
-	notPileLast, oopsAllLeaves, PermutationSpace, pileIsOpen, ptount, reverseLookup, thisIsALeaf, 一, 三, 二, 五, 四, 零, 首一,
-	首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+	notPileLast, oopsAllLeaves, oopsAllPileRangesOfLeaves, PermutationSpace, pileIsOpen, pileRangeOfLeavesAND, ptount,
+	reverseLookup, thisIsALeaf, thisIsAPileRangeOfLeaves, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e._exclusions import dictionary2d5AtPileLeafExcludedByPile, dictionary2d6AtPileLeafExcludedByPile
 from mapFolding._e.algorithms.iff import removePermutationSpaceViolations
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import (
-	atPilePinLeaf, deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf)
+	atPilePinLeaf, deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf,
+	getXmpzAntiPileRangeOfLeaves)
 from math import log, log2
-from more_itertools import loops, one
+from more_itertools import loops, map_if, one
 from operator import add, neg, sub
 from typing import TYPE_CHECKING
 
@@ -46,6 +48,34 @@ def appendLeavesPinnedAtPile(state: EliminationState, leavesToPin: Iterable[int]
 		if stateCornbread.leavesPinned:
 			sherpa.listPermutationSpace.append(stateCornbread.leavesPinned)
 
+	if sherpa.listPermutationSpace:
+		sherpaDOTlistPermutationSpaceDeepCopy: list[PermutationSpace] = deepcopy(sherpa.listPermutationSpace)
+		sherpa.listPermutationSpace = []
+
+		for leavesPinnedOriginal70TechZone in sherpaDOTlistPermutationSpaceDeepCopy:
+			listOfLeavesAsInt: list[int] = []
+
+			for leafOrPileRangeOfLeavesOriginalTapones360 in deepcopy(leavesPinnedOriginal70TechZone).values():
+				if isinstance(leafOrPileRangeOfLeavesOriginalTapones360, int):
+					listOfLeavesAsInt.append(leafOrPileRangeOfLeavesOriginalTapones360)
+				del leafOrPileRangeOfLeavesOriginalTapones360
+
+			leavesPinnedHasADistinctIdentifierFrutas999: PermutationSpace = {}
+
+			for pile1reciclado, leafOrPileRangeOfLeavesMelox26HasADistinctIdentifier in deepcopy(leavesPinnedOriginal70TechZone).items():
+				if isinstance(leafOrPileRangeOfLeavesMelox26HasADistinctIdentifier, xmpz):
+					for leafAsInt0832Optimum in listOfLeavesAsInt:
+						leafOrPileRangeOfLeavesMelox26HasADistinctIdentifier[leafAsInt0832Optimum] = 0
+						del leafAsInt0832Optimum
+
+				leavesPinnedHasADistinctIdentifierFrutas999[pile1reciclado] = leafOrPileRangeOfLeavesMelox26HasADistinctIdentifier
+				del pile1reciclado
+
+			sherpa.listPermutationSpace.append(deepcopy(leavesPinnedHasADistinctIdentifierFrutas999))
+			del leavesPinnedHasADistinctIdentifierFrutas999
+
+		# SWEET BABY JESUS, THIS CODE WORKS. No, wait. The code isn't broken. I don't know if it actually does what I want.
+
 	sherpa = removeInvalidPermutationSpace(sherpa)
 	state.listPermutationSpace.extend(sherpa.listPermutationSpace)
 
@@ -66,7 +96,6 @@ def beansWithoutCornbread(state: EliminationState, leavesPinned: PermutationSpac
 
 def pinLeafCornbread(state: EliminationState) -> EliminationState:
 	leafBeans: int = raiseIfNone(getLeaf(state.leavesPinned, state.pile))
-	print(leafBeans, 首一(state.dimensionsTotal), state.pile)
 	if leafBeans in [一+零, 首一(state.dimensionsTotal)]:
 		leafCornbread: int = one(getLeavesCreaseNext(state, leafBeans))
 		state.pile += 1

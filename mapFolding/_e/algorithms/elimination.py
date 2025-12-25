@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 from itertools import pairwise, permutations, repeat
-from mapFolding._e import leafOrigin, oopsAllLeaves, PermutationSpace, pileOrigin
+from mapFolding._e import leafOrigin, PermutationSpace, pileOrigin
 from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding

@@ -9,16 +9,16 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import (
 	asciiColorGreen, asciiColorMagenta, asciiColorRed, asciiColorReset, asciiColorYellow, packageSettings)
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryPileRanges, getLeafDomain, getPileRange,
+	dimensionNearestTail, dimensionNearest首, getDictionaryPileRanges, getLeafDomain, getLeavesCreaseNext, getPileRange,
 	howManyDimensionsHaveOddParity, PermutationSpace, pileOrigin, thisIsALeaf, Z0Z_invert, 零, 首二, 首零, 首零一)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinning2DnAnnex import beansWithoutCornbread
 from more_itertools import flatten
 from operator import add, mul
-from pathlib import Path
+from pathlib import Path, PurePath
 from pprint import pprint
-from typing import Any
+from typing import Any, TextIO
 import csv
 import numpy
 import pandas
@@ -647,67 +647,251 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 				print(color, arrayFoldings[indexRow, :])
 		print(f"{color}Required rows: {rowsRequired}/{rowsTotal}{asciiColorReset}")
 
+def sortP2d7GeneratedCsvFiles() -> None:
+	pathDataRaw: Path = packageSettings.pathPackage / "_e" / "dataRaw"
+	pathSorted: Path = pathDataRaw / "sorted"
+	pathSorted.mkdir(exist_ok=True)
+
+	state: EliminationState = EliminationState((2,) * 7)
+	setLeavesAllowedAfterOne: set[int] = set(getLeavesCreaseNext(state, 1))
+	dictionaryAllowedAfterThird: dict[int, set[int]] = {
+		leafThird: set(getLeavesCreaseNext(state, leafThird))
+		for leafThird in setLeavesAllowedAfterOne
+	}
+
+	dictionaryAppendStreams: dict[tuple[int, int], TextIO] = {}
+	try:
+		for pathFilenameSource in sorted(pathDataRaw.glob("p2d7_*.csv")):
+			with pathFilenameSource.open('r', newline='') as readStream:
+				for lineRaw in readStream:
+					line: str = lineRaw.rstrip('\n').rstrip('\r')
+					if len(line) != 401:
+						continue
+					if line.count(',') != 127:
+						continue
+					if not line.startswith("0,1,"):
+						continue
+					if line[0] == ',' or line[-1] == ',' or ',,' in line:
+						continue
+
+					listPrefixParts: list[str] = line.split(',', 4)
+					if len(listPrefixParts) < 5:
+						continue
+					if not listPrefixParts[2].isdigit() or not listPrefixParts[3].isdigit():
+						continue
+					leafThird: int = int(listPrefixParts[2])
+					leafFourth: int = int(listPrefixParts[3])
+					if leafThird not in setLeavesAllowedAfterOne:
+						continue
+					if leafFourth not in dictionaryAllowedAfterThird[leafThird]:
+						continue
+
+					key: tuple[int, int] = (leafThird, leafFourth)
+					appendStream: TextIO | None = dictionaryAppendStreams.get(key)
+					if appendStream is None:
+						pathFilenameOutput: Path = pathDataRaw / f"p2d7s0_1_{leafThird}_{leafFourth}.csv"
+						appendStream = pathFilenameOutput.open('a', newline='')
+						dictionaryAppendStreams[key] = appendStream
+
+					appendStream.write(line)
+					appendStream.write('\n')
+
+			pathFilenameDestination: Path = pathSorted / pathFilenameSource.name
+			pathFilenameSource.rename(pathFilenameDestination)
+	finally:
+		for appendStream in dictionaryAppendStreams.values():
+			appendStream.close()
+
+def subdivideP2d7s0_1_3_2CsvFile() -> None:
+	pathDataRaw: Path = packageSettings.pathPackage / "_e" / "dataRaw"
+	pathSorted: Path = pathDataRaw / "sorted"
+	pathSorted.mkdir(exist_ok=True)
+
+	pathFilenameSource: Path = pathDataRaw / "p2d7s0_1_3_2.csv"
+	state: EliminationState = EliminationState((2,) * 7)
+	setLeavesAllowedAfterTwo: set[int] = set(getLeavesCreaseNext(state, 2))
+
+	dictionaryAppendStreams: dict[int, TextIO] = {}
+	try:
+		with pathFilenameSource.open('r', newline='') as readStream:
+			for lineRaw in readStream:
+				line: str = lineRaw.rstrip('\n').rstrip('\r')
+				if len(line) != 401:
+					continue
+				if line.count(',') != 127:
+					continue
+				if not line.startswith("0,1,3,2,"):
+					continue
+				if line[0] == ',' or line[-1] == ',' or ',,' in line:
+					continue
+
+				listPrefixParts: list[str] = line.split(',', 5)
+				if len(listPrefixParts) < 6:
+					continue
+				if not listPrefixParts[4].isdigit():
+					continue
+				leafFifth: int = int(listPrefixParts[4])
+				if leafFifth not in setLeavesAllowedAfterTwo:
+					continue
+
+				appendStream: TextIO | None = dictionaryAppendStreams.get(leafFifth)
+				if appendStream is None:
+					pathFilenameOutput: Path = pathDataRaw / f"p2d7s0_1_3_2_{leafFifth}.csv"
+					appendStream = pathFilenameOutput.open('a', newline='')
+					dictionaryAppendStreams[leafFifth] = appendStream
+
+				appendStream.write(line)
+				appendStream.write('\n')
+
+		pathFilenameDestination: Path = pathSorted / pathFilenameSource.name
+		pathFilenameSource.rename(pathFilenameDestination)
+	finally:
+		for appendStream in dictionaryAppendStreams.values():
+			appendStream.close()
+
+def cleanAndSortSequencesCsvFile(state: EliminationState, pathFilename: PurePath) -> None:
+	pathFilenameTarget: Path = Path(pathFilename)
+	pathSorted: Path = pathFilenameTarget.parent / "sorted"
+	pathSorted.mkdir(exist_ok=True)
+
+	lineHeader: str | None = None
+	tupleHeaderExpected: tuple[int, ...] = tuple(range(state.leavesTotal))
+
+	setSequences: set[tuple[int, ...]] = set()
+	listSequencesUnique: list[tuple[int, ...]] = []
+
+	duplicatesDetected: bool = False
+	invalidLinesDetected: bool = False
+	sortedAlready: bool = True
+	sequencePrior: tuple[int, ...] | None = None
+
+	with pathFilenameTarget.open('r', newline='') as readStream:
+		for indexLine, lineRaw in enumerate(readStream):
+			line: str = lineRaw.rstrip('\n').rstrip('\r')
+			if indexLine == 0 and line.startswith("0,1,2,"):
+				listHeaderParts: list[str] = line.split(',')
+				if len(listHeaderParts) == state.leavesTotal:
+					try:
+						tupleHeaderFound: tuple[int, ...] = tuple(int(part) for part in listHeaderParts)
+					except ValueError:
+						tupleHeaderFound = ()
+					if tupleHeaderFound == tupleHeaderExpected:
+						lineHeader = line
+						continue
+
+			if not line:
+				continue
+			if line[0] == ',' or line[-1] == ',' or ',,' in line:
+				invalidLinesDetected = True
+				continue
+			if line.count(',') != state.leavesTotal - 1:
+				invalidLinesDetected = True
+				continue
+			try:
+				tupleSequence: tuple[int, ...] = tuple(int(part) for part in line.split(','))
+			except ValueError:
+				invalidLinesDetected = True
+				continue
+			if len(tupleSequence) != state.leavesTotal:
+				invalidLinesDetected = True
+				continue
+
+			if sequencePrior is not None and tupleSequence < sequencePrior:
+				sortedAlready = False
+			sequencePrior = tupleSequence
+
+			if tupleSequence in setSequences:
+				duplicatesDetected = True
+				continue
+			setSequences.add(tupleSequence)
+			listSequencesUnique.append(tupleSequence)
+
+	if not (duplicatesDetected or invalidLinesDetected or not sortedAlready):
+		return
+
+	listSequencesSorted: list[tuple[int, ...]] = sorted(listSequencesUnique)
+	pathFilenameBackup: Path = pathSorted / pathFilenameTarget.name
+	pathFilenameTarget.rename(pathFilenameBackup)
+	with pathFilenameTarget.open('w', newline='') as writeStream:
+		if lineHeader is not None:
+			writeStream.write(lineHeader)
+			writeStream.write('\n')
+		for tupleSequence in listSequencesSorted:
+			writeStream.write(','.join(str(value) for value in tupleSequence))
+			writeStream.write('\n')
+
 if __name__ == '__main__':
 	# from mapFolding._e import getZ0Z_precedence
 
-	state = EliminationState((2,) * 6)
+	sortEm = False
+	if sortEm:
+		sortP2d7GeneratedCsvFiles()
+		subdivideP2d7s0_1_3_2CsvFile()
+		state = EliminationState((2,) * 7)
+		pathDataRaw: Path = packageSettings.pathPackage / "_e" / "dataRaw"
+		for pathFilename in pathDataRaw.glob("p2d7s*.csv"):
+			cleanAndSortSequencesCsvFile(state, pathFilename)
 
-	# NOTE works for 9 <= odd piles <= 47
-	# I _think_ I need to be able to pass start/stop to intraDimensionalLeaves
+	precedence: bool = False
+	if precedence:
+		state = EliminationState((2,) * 6)
 
-	@syntacticCurry
-	def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
-		return list(map(partial(add, dimensionOrigin+2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
+		# NOTE works for 9 <= odd piles <= 47
+		# I _think_ I need to be able to pass start/stop to intraDimensionalLeaves
 
-	@syntacticCurry
-	def Z0Z_alphaBeta(state: EliminationState, alphaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
-		return list(flatten(map(intraDimensionalLeaves(state), state.productsOfDimensions[2 + alphaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
+		@syntacticCurry
+		def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
+			return list(map(partial(add, dimensionOrigin+2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
 
-	def Z0Z_getPileRange(state: EliminationState, pile: int) -> Iterable[int]:
-		pileRange: list[int] = []
+		@syntacticCurry
+		def Z0Z_alphaBeta(state: EliminationState, alphaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
+			return list(flatten(map(intraDimensionalLeaves(state), state.productsOfDimensions[2 + alphaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
 
-		# odd leaves < 32.
-		# ? 12 < even leaves < 32.
-		# ? 24 < even leaves < 32.
-		# piles 49, 51, 53, 55 need a higher start on yy=0.
-		for yy in range(3):
-			pileRange.extend(map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy))))
+		def Z0Z_getPileRange(state: EliminationState, pile: int) -> Iterable[int]:
+			pileRange: list[int] = []
 
-		# 32 < even leaves
-		for yy in range(1):
-			pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy])
-				, Z0Z_alphaBeta(state
-					, alphaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
-					, betaStop=-(yy)
-				))))
-		# ? 32 < odd leaves < 52
-		# ? 32 < odd leaves < 36
-		for yy in range(1,3):
-			pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
+			# odd leaves < 32.
+			# ? 12 < even leaves < 32.
+			# ? 24 < even leaves < 32.
+			# piles 49, 51, 53, 55 need a higher start on yy=0.
+			for yy in range(3):
+				pileRange.extend(map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy))))
 
-		# dimension origins
-		# piles 51, 53, 55 need a higher start.
-		pileRange.extend(state.productsOfDimensions[1 + (首零(state.dimensionsTotal)+零 < pile):dimensionNearest首(pile+1)])
-		# inverse dimension origins: 62, 61, 59, 55, 47, 31
-		# pile5 needs a higher start.
-		pileRange.extend(map(partial(Z0Z_invert, state), state.productsOfDimensions[0:state.dimensionsTotal]))
+			# 32 < even leaves
+			for yy in range(1):
+				pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy])
+					, Z0Z_alphaBeta(state
+						, alphaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
+						, betaStop=-(yy)
+					))))
+			# ? 32 < odd leaves < 52
+			# ? 32 < odd leaves < 36
+			for yy in range(1,3):
+				pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
 
-		return tuple(sorted(pileRange))
+			# dimension origins
+			# piles 51, 53, 55 need a higher start.
+			pileRange.extend(state.productsOfDimensions[1 + (首零(state.dimensionsTotal)+零 < pile):dimensionNearest首(pile+1)])
+			# inverse dimension origins: 62, 61, 59, 55, 47, 31
+			# pile5 needs a higher start.
+			pileRange.extend(map(partial(Z0Z_invert, state), state.productsOfDimensions[0:state.dimensionsTotal]))
 
-	for pile in range(首二(state.dimensionsTotal)+零, 首零一(state.dimensionsTotal), 1):
-		print(pile, (ll:=getPileRange(state, pile)) == (zz:=Z0Z_getPileRange(state, pile)), end=': ')
-		print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
-		pprint(zz, width=180)
+			return tuple(sorted(pileRange))
 
-		# > 32: matches most tail0s != 1
-		# if pile > 32:
-		# 	pile-=1
-		# else:
-		# 	pile+=1
-		# zz = tuple(map(partial(xor, 1), zz))
-		# print(pile, (ll:=getPileRange(state, pile)) == (zz), end=': ')
-		# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
-		# pprint(zz, width=180)
+		for pile in range(首二(state.dimensionsTotal)+零, 首零一(state.dimensionsTotal), 1):
+			print(pile, (ll:=getPileRange(state, pile)) == (zz:=Z0Z_getPileRange(state, pile)), end=': ')
+			print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
+			pprint(zz, width=180)
+
+			# > 32: matches most tail0s != 1
+			# if pile > 32:
+			# 	pile-=1
+			# else:
+			# 	pile+=1
+			# zz = tuple(map(partial(xor, 1), zz))
+			# print(pile, (ll:=getPileRange(state, pile)) == (zz), end=': ')
+			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
+			# pprint(zz, width=180)
 
 	# print(measureEntropy(state))
 

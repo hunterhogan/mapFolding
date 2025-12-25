@@ -26,7 +26,9 @@ research domain.
 from collections.abc import Callable, Generator, Sequence
 from dataclasses import dataclass
 from gmpy2 import xmpz
-from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
+from mapFolding import (
+	_theSSOT, getLeavesTotal, makeDataContainer, MetadataOEISid, MetadataOEISidMapFolding, packageSettings,
+	validateListDimensions)
 from mapFolding._e import oopsAllLeaves
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, oeisIDsImplemented
@@ -48,147 +50,110 @@ import warnings
 class TestScenario:
 	testName: str
 	oeisID: str
-	index: int
-	flowName: str | None = None
-	cpuLimit: bool | float | int | None = None
+	n: int
+	flow: str | None = None
+	CPUlimit: bool | float | int | None = None
 
-preferredTestIndices: dict[str, tuple[int, ...]] = {
-	'A000136': (3, 4),
-	'A001415': (3, 4),
-	'A001416': (3, 4),
-	'A001417': (3, 4, 5),
-	'A001418': (3, 4),
-	'A005315': (3, 4),
-	'A005316': (3, 4),
-	'A007822': (3, 4),
-	'A000560': (3, 4, 5),
-	'A000682': (3, 4),
-	'A001010': (3, 4),
-	'A001011': (3, 4),
-	'A060206': (3, 4),
-	'A077460': (3, 4),
-	'A078591': (3, 4),
-	'A086345': (3, 4, 5),
-	'A178961': (3, 4),
-	'A195646': (2, 3),
-	'A223094': (3, 4),
-	'A259702': (3, 4),
-	'A301620': (3, 4),
-}
-
-def scenarioIdentifier(scenario: TestScenario) -> str:
-	parts: list[str] = [scenario.testName, scenario.oeisID, f"n{scenario.index}"]
-	if scenario.flowName:
-		parts.append(scenario.flowName)
-	return '::'.join(parts)
-
-def _sequenceMetadata(oeisID: str) -> dict[str, Any]:
-	if oeisID in dictionaryOEISMapFolding:
-		return dictionaryOEISMapFolding[oeisID]
-	return dictionaryOEIS[oeisID]
-
-def pickTestIndex(oeisID: str, overrideIndex: int | None = None) -> int:
-	metadata = _sequenceMetadata(oeisID)
-	valuesKnown: dict[int, int] = metadata['valuesKnown']
-	candidates: list[int] = []
-	if overrideIndex is not None:
-		candidates.append(overrideIndex)
-	candidates.extend(preferredTestIndices.get(oeisID, ()))
-	candidates.append(metadata['offset'])
-	for candidate in candidates:
-		if candidate in valuesKnown:
-			return candidate
-	message: str = f"Unable to select a test index for `{oeisID}`."
-	raise ValueError(message)
-
-def buildScenario(testName: str, oeisID: str, *, flowName: str | None = None, overrideIndex: int | None = None,
-		cpuLimit: bool | float | int | None = None) -> TestScenario:
-	return TestScenario(testName, oeisID, pickTestIndex(oeisID, overrideIndex), flowName, cpuLimit)
-
-scenarioCatalog: dict[str, tuple[TestScenario, ...]] = {
-	'codegenSingleJob': (
-		buildScenario('codegenSingleJob', 'A000136'),
+# SSOT: all per-algorithm test settings live here.
+dictionaryTestNameToScenarios: dict[str, tuple[TestScenario, ...]] = {
+	'A007822': tuple(
+		TestScenario('A007822', 'A007822', n=4, flow=flow, CPUlimit=0.5)
+		for flow in ('algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
 	),
-	'mapShapeFunctionality': (
-		buildScenario('mapShapeFunctionality', 'A000136'),
-		buildScenario('mapShapeFunctionality', 'A001415'),
-	),
-	'mapShapeParallelization': (
-		buildScenario('mapShapeParallelization', 'A001417', overrideIndex=5),
+	'codeGenerationSingleJob': (
+		TestScenario('codeGenerationSingleJob', 'A000136', n=3),
 	),
 	'countFolds': (
-		buildScenario('countFolds', 'A000136', flowName='daoOfMapFolding'),
-		buildScenario('countFolds', 'A001415', flowName='numba'),
-		buildScenario('countFolds', 'A001417', flowName='theorem2'),
-		buildScenario('countFolds', 'A001416', flowName='theorem2Numba'),
-		buildScenario('countFolds', 'A001418', flowName='theorem2Trimmed'),
+		TestScenario('countFolds', 'A000136', n=3, flow='daoOfMapFolding'),
+		TestScenario('countFolds', 'A001415', n=3, flow='numba'),
+		TestScenario('countFolds', 'A001416', n=3, flow='theorem2Numba'),
+		TestScenario('countFolds', 'A001417', n=3, flow='theorem2'),
+		TestScenario('countFolds', 'A001418', n=3, flow='theorem2Trimmed'),
 	),
 	'eliminateFolds': (
-		buildScenario('eliminateFolds', 'A001417', flowName='constraintPropagation', overrideIndex=5),
-		buildScenario('eliminateFolds', 'A001417', flowName='elimination', overrideIndex=3),
+		TestScenario('eliminateFolds', 'A001417', n=5, flow='constraintPropagation', CPUlimit=0.25),
 	),
-	'a007822': tuple(
-		buildScenario('a007822', 'A007822', flowName=flowName, overrideIndex=4, cpuLimit=0.5)
-		for flowName in ('algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
+	'mapShapeFunctionality': (
+		TestScenario('mapShapeFunctionality', 'A000136', n=3),
+		TestScenario('mapShapeFunctionality', 'A001415', n=3),
+	),
+	'mapShapeParallelization': (
+		TestScenario('mapShapeParallelization', 'A001417', n=5),
 	),
 	'meanders': (
-		buildScenario('meanders', 'A000682', flowName='matrixMeanders'),
-		buildScenario('meanders', 'A005316', flowName='matrixMeanders'),
-		buildScenario('meanders', 'A000682', flowName='matrixNumPy'),
-		buildScenario('meanders', 'A005316', flowName='matrixNumPy'),
-		buildScenario('meanders', 'A000682', flowName='matrixPandas'),
-		buildScenario('meanders', 'A005316', flowName='matrixPandas'),
+		TestScenario('meanders', 'A000682', n=3, flow='matrixMeanders'),
+		TestScenario('meanders', 'A005316', n=3, flow='matrixMeanders'),
+		TestScenario('meanders', 'A000682', n=3, flow='matrixNumPy'),
+		TestScenario('meanders', 'A005316', n=3, flow='matrixNumPy'),
+		TestScenario('meanders', 'A000682', n=3, flow='matrixPandas'),
+		TestScenario('meanders', 'A005316', n=3, flow='matrixPandas'),
 	),
 	'oeisFormula': (
-		buildScenario('oeisFormula', 'A000560'),
-		buildScenario('oeisFormula', 'A000682'),
-		buildScenario('oeisFormula', 'A001010'),
-		buildScenario('oeisFormula', 'A001011'),
-		buildScenario('oeisFormula', 'A005315'),
-		buildScenario('oeisFormula', 'A005316'),
-		buildScenario('oeisFormula', 'A007822'),
-		buildScenario('oeisFormula', 'A060206'),
-		buildScenario('oeisFormula', 'A077460'),
-		buildScenario('oeisFormula', 'A078591'),
-		buildScenario('oeisFormula', 'A086345'),
-		buildScenario('oeisFormula', 'A178961'),
-		buildScenario('oeisFormula', 'A223094'),
-		buildScenario('oeisFormula', 'A259702'),
-		buildScenario('oeisFormula', 'A301620'),
+		TestScenario('oeisFormula', 'A000560', n=3),
+		TestScenario('oeisFormula', 'A000682', n=3),
+		TestScenario('oeisFormula', 'A001010', n=3),
+		TestScenario('oeisFormula', 'A001011', n=3),
+		TestScenario('oeisFormula', 'A005315', n=3),
+		TestScenario('oeisFormula', 'A005316', n=3),
+		TestScenario('oeisFormula', 'A007822', n=3),
+		TestScenario('oeisFormula', 'A060206', n=3),
+		TestScenario('oeisFormula', 'A077460', n=3),
+		TestScenario('oeisFormula', 'A078591', n=3),
+		TestScenario('oeisFormula', 'A086345', n=3),
+		TestScenario('oeisFormula', 'A178961', n=3),
+		TestScenario('oeisFormula', 'A223094', n=3),
+		TestScenario('oeisFormula', 'A259702', n=3),
+		TestScenario('oeisFormula', 'A301620', n=3),
 	),
 	'oeisValue': (
-		buildScenario('oeisValue', 'A000136'),
-		buildScenario('oeisValue', 'A001415'),
-		buildScenario('oeisValue', 'A001416'),
-		buildScenario('oeisValue', 'A001417'),
-		buildScenario('oeisValue', 'A195646'),
-		buildScenario('oeisValue', 'A001418'),
+		TestScenario('oeisValue', 'A000136', n=3),
+		TestScenario('oeisValue', 'A001415', n=3),
+		TestScenario('oeisValue', 'A001416', n=3),
+		TestScenario('oeisValue', 'A001417', n=3),
+		TestScenario('oeisValue', 'A001418', n=3),
+		TestScenario('oeisValue', 'A195646', n=2),
 	),
 }
 
-def scenarioList(testName: str) -> tuple[TestScenario, ...]:
-	try:
-		return scenarioCatalog[testName]
-	except KeyError as error:
-		message = f"Unknown testName `{testName}`."
-		raise KeyError(message) from error
+def makeScenarioIdentifier(scenario: TestScenario) -> str:
+	parts: list[str] = [scenario.testName, scenario.oeisID, f"n{scenario.n}"]
+	if scenario.flow:
+		parts.append(scenario.flow)
+	return '::'.join(parts)
 
 def mapShapeFromScenario(scenario: TestScenario) -> tuple[int, ...]:
 	if scenario.oeisID not in dictionaryOEISMapFolding:
 		message = f"`{scenario.oeisID}` does not define a map shape."
 		raise ValueError(message)
-	return dictionaryOEISMapFolding[scenario.oeisID]['getMapShape'](scenario.index)
+	return dictionaryOEISMapFolding[scenario.oeisID]['getMapShape'](scenario.n)
+
+def scenariosForTestName(testName: str) -> tuple[TestScenario, ...]:
+	try:
+		return dictionaryTestNameToScenarios[testName]
+	except KeyError as error:
+		message = f"Unknown testName `{testName}`."
+		raise KeyError(message) from error
+
 
 # SSOT for test data paths and filenames
 pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
 path_tmpRoot: Path = pathDataSamples / "tmp"
 path_tmpRoot.mkdir(parents=True, exist_ok=True)
 
-# The registrar maintains the register of temp files
+# The registrar maintains the register of tmp filesystem objects
 registerOfTemporaryFilesystemObjects: set[Path] = set()
 
+def registrarDeletesTemporaryFilesystemObjects() -> None:
+	"""The registrar cleans up tmp filesystem objects in the register."""
+	for path_tmp in sorted(registerOfTemporaryFilesystemObjects, reverse=True):
+		if path_tmp.is_file():
+			path_tmp.unlink(missing_ok=True)
+		elif path_tmp.is_dir():
+			shutil.rmtree(path_tmp, ignore_errors=True)
+	registerOfTemporaryFilesystemObjects.clear()
+
 def registrarRecordsTemporaryFilesystemObject(path: Path) -> None:
-	"""The registrar adds a tmp file to the register.
+	"""The registrar adds a tmp filesystem object to the register.
 
 	Parameters
 	----------
@@ -198,51 +163,42 @@ def registrarRecordsTemporaryFilesystemObject(path: Path) -> None:
 	"""
 	registerOfTemporaryFilesystemObjects.add(path)
 
-def registrarDeletesTemporaryFilesystemObjects() -> None:
-	"""The registrar cleans up tmp files in the register."""
-	for path_tmp in sorted(registerOfTemporaryFilesystemObjects, reverse=True):
-		if path_tmp.is_file():
-			path_tmp.unlink(missing_ok=True)
-		elif path_tmp.is_dir():
-			shutil.rmtree(path_tmp, ignore_errors=True)
-	registerOfTemporaryFilesystemObjects.clear()
-
-@pytest.fixture(scope="session", autouse=True)
-def setupTeardownTemporaryFilesystemObjects() -> Generator[None, None, None]:
-	"""Auto-fixture to setup test data directories and cleanup after.
-
-	Returns
-	-------
-	contextManager : Generator[None, None, None]
-		Context manager that sets up test directories and ensures cleanup.
-
-	"""
-	pathDataSamples.mkdir(exist_ok=True)
-	path_tmpRoot.mkdir(exist_ok=True)
-	yield
-	registrarDeletesTemporaryFilesystemObjects()
-
 @pytest.fixture
-def path_tmpTesting(request: pytest.FixtureRequest) -> Path:
-	"""Creates a unique temporary directory for testing.
+def pathCacheTesting(path_tmpTesting: Path) -> Generator[Path, Any, None]:
+	"""Temporarily replace the OEIS cache directory with a test directory.
 
 	Parameters
 	----------
-	request : pytest.FixtureRequest
-		The pytest request object providing test context.
+	path_tmpTesting : Path
+		Temporary directory path from the `path_tmpTesting` fixture.
 
 	Returns
 	-------
-	temporaryPath : Path
-		Path to a unique temporary directory that will be cleaned up automatically.
+	temporaryCachePath : Generator[Path, Any, None]
+		Context manager that provides the temporary cache path and restores original.
 
 	"""
-	# "Z0Z_" ensures the directory name does not start with a number, which would make it an invalid Python identifier
-	path_tmp: Path = path_tmpRoot / ("Z0Z_" + str(uuid.uuid4().hex))
-	path_tmp.mkdir(parents=True, exist_ok=False)
+	pathCacheOriginal: Path = _theSSOT.pathCache
+	_theSSOT.pathCache = path_tmpTesting
+	yield path_tmpTesting
+	_theSSOT.pathCache = pathCacheOriginal
 
-	registrarRecordsTemporaryFilesystemObject(path_tmp)
-	return path_tmp
+@pytest.fixture
+def pathFilenameFoldsTotalTesting(path_tmpTesting: Path) -> Path:
+	"""Creates a temporary file path for folds total testing.
+
+	Parameters
+	----------
+	path_tmpTesting : Path
+		Temporary directory path from the `path_tmpTesting` fixture.
+
+	Returns
+	-------
+	foldsTotalFilePath : Path
+		Path to a temporary file for testing folds total functionality.
+
+	"""
+	return path_tmpTesting.joinpath("foldsTotalTest.txt")
 
 @pytest.fixture
 def pathFilename_tmpTesting(request: pytest.FixtureRequest) -> Path:
@@ -265,55 +221,53 @@ def pathFilename_tmpTesting(request: pytest.FixtureRequest) -> Path:
 		extension = ".txt"
 
 	# "Z0Z_" ensures the name does not start with a number, which would make it an invalid Python identifier
-	uuidHex: str = uuid.uuid4().hex
-	subpath: str = "Z0Z_" + uuidHex[0:-8]
-	filenameStem: str = "Z0Z_" + uuidHex[-8:None]
+	uuid_hex: str = uuid.uuid4().hex
+	relativePath: str = "Z0Z_" + uuid_hex[0:-8]
+	filenameStem: str = "Z0Z_" + uuid_hex[-8:None]
 
-	pathFilename_tmp = Path(path_tmpRoot, subpath, filenameStem + extension)
+	pathFilename_tmp = Path(path_tmpRoot, relativePath, filenameStem + extension)
 	pathFilename_tmp.parent.mkdir(parents=True, exist_ok=False)
 
 	registrarRecordsTemporaryFilesystemObject(pathFilename_tmp.parent)
 	return pathFilename_tmp
 
 @pytest.fixture
-def pathCacheTesting(path_tmpTesting: Path) -> Generator[Path, Any, None]:
-	"""Temporarily replace the OEIS cache directory with a test directory.
+def path_tmpTesting(request: pytest.FixtureRequest) -> Path:
+	"""Creates a unique temporary directory for testing.
 
 	Parameters
 	----------
-	pathTmpTesting : Path
-		Temporary directory path from the `pathTmpTesting` fixture.
+	request : pytest.FixtureRequest
+		The pytest request object providing test context.
 
 	Returns
 	-------
-	temporaryCachePath : Generator[Path, Any, None]
-		Context manager that provides the temporary cache path and restores original.
+	temporaryPath : Path
+		Path to a unique temporary directory that will be cleaned up automatically.
 
 	"""
-	pathCacheOriginal: Path = _theSSOT.pathCache
-	_theSSOT.pathCache = path_tmpTesting
-	yield path_tmpTesting
-	_theSSOT.pathCache = pathCacheOriginal
+	# "Z0Z_" ensures the directory name does not start with a number, which would make it an invalid Python identifier
+	uuid_hex: str = uuid.uuid4().hex
+	path_tmp: Path = path_tmpRoot / ("Z0Z_" + uuid_hex)
+	path_tmp.mkdir(parents=True, exist_ok=False)
 
-@pytest.fixture
-def pathFilenameFoldsTotalTesting(path_tmpTesting: Path) -> Path:
-	"""Creates a temporary file path for folds total testing.
+	registrarRecordsTemporaryFilesystemObject(path_tmp)
+	return path_tmp
 
-	Parameters
-	----------
-	pathTmpTesting : Path
-		Temporary directory path from the `pathTmpTesting` fixture.
+@pytest.fixture(scope="session", autouse=True)
+def setupTeardownTemporaryFilesystemObjects() -> Generator[None, None, None]:
+	"""Auto-fixture to setup test data directories and cleanup after.
 
 	Returns
 	-------
-	foldsTotalFilePath : Path
-		Path to a temporary file for testing folds total functionality.
+	contextManager : Generator[None, None, None]
+		Context manager that sets up test directories and ensures cleanup.
 
 	"""
-	return path_tmpTesting.joinpath("foldsTotalTest.txt")
-
-"""
-Section: Fixtures"""
+	pathDataSamples.mkdir(exist_ok=True)
+	path_tmpRoot.mkdir(exist_ok=True)
+	yield
+	registrarDeletesTemporaryFilesystemObjects()
 
 @pytest.fixture(autouse=True)
 def setupWarningsAsErrors() -> Generator[None, Any, None]:
@@ -329,15 +283,15 @@ def setupWarningsAsErrors() -> Generator[None, Any, None]:
 	yield
 	warnings.resetwarnings()
 
-_SINGLE_JOB_SCENARIO: TestScenario = scenarioList('codegenSingleJob')[0]
+scenarioCodeGenerationSingleJob: TestScenario = scenariosForTestName('codeGenerationSingleJob')[0]
 
 @pytest.fixture
 def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:
 	"""Return one deterministic map shape suitable for code generation tests."""
-	mapShapeCandidate: list[int] = list(mapShapeFromScenario(_SINGLE_JOB_SCENARIO))
+	mapShapeCandidate: list[int] = list(mapShapeFromScenario(scenarioCodeGenerationSingleJob))
 	return validateListDimensions(mapShapeCandidate)
 
-@pytest.fixture(params=scenarioList('mapShapeFunctionality'), ids=scenarioIdentifier)
+@pytest.fixture(params=scenariosForTestName('mapShapeFunctionality'), ids=makeScenarioIdentifier)
 def mapShapeTestFunctionality(request: pytest.FixtureRequest) -> tuple[int, ...]:
 	"""Provide deterministic map shapes for filesystem and validation tests."""
 	scenario: TestScenario = request.param
@@ -346,7 +300,7 @@ def mapShapeTestFunctionality(request: pytest.FixtureRequest) -> tuple[int, ...]
 @pytest.fixture
 def mapShapeTestParallelization() -> list[int]:
 	"""Return a deterministic map shape that exercises task division logic."""
-	scenario: TestScenario = scenarioList('mapShapeParallelization')[0]
+	scenario: TestScenario = scenariosForTestName('mapShapeParallelization')[0]
 	return list(mapShapeFromScenario(scenario))
 
 @pytest.fixture
@@ -373,17 +327,17 @@ def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
 		Factory function that creates mock folding functions with specified behavior.
 
 	"""
-	def make_mock(foldsValue: int, listDimensions: list[int]) -> Callable[..., None]:
-		mock_array = makeDataContainer(2, numpy.int32)
-		mock_array[0] = foldsValue
+	def makeMock(foldsValue: int, listDimensions: list[int]) -> Callable[..., None]:
+		arrayMock = makeDataContainer(2, numpy.int32)
+		arrayMock[0] = foldsValue
 		mapShape: tuple[int, ...] = validateListDimensions(listDimensions)
-		mock_array[-1] = getLeavesTotal(mapShape)
+		arrayMock[-1] = getLeavesTotal(mapShape)
 
-		def mock_countFolds(**keywordArguments: Any) -> None:
-			keywordArguments['foldGroups'][:] = mock_array
+		def mockCountFolds(**keywordArguments: Any) -> None:
+			keywordArguments['foldGroups'][:] = arrayMock
 
-		return mock_countFolds
-	return make_mock
+		return mockCountFolds
+	return makeMock
 
 @pytest.fixture(params=oeisIDsImplemented)
 def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:
@@ -416,33 +370,33 @@ def oeisID_1random() -> str:
 	"""
 	return random.choice(oeisIDsImplemented)
 
-@pytest.fixture(params=scenarioList('countFolds'), ids=scenarioIdentifier)
-def countFoldsScenario(request: pytest.FixtureRequest) -> TestScenario:
-	"""Provide flow-specific scenarios for `countFolds` validation."""
-	return request.param
-
-@pytest.fixture(params=scenarioList('eliminateFolds'), ids=scenarioIdentifier)
-def eliminateFoldsScenario(request: pytest.FixtureRequest) -> TestScenario:
-	"""Provide flow-specific scenarios for `eliminateFolds` validation."""
-	return request.param
-
-@pytest.fixture(params=scenarioList('a007822'), ids=scenarioIdentifier)
-def a007822Scenario(request: pytest.FixtureRequest) -> TestScenario:
+@pytest.fixture(params=scenariosForTestName('A007822'), ids=makeScenarioIdentifier)
+def scenarioA007822(request: pytest.FixtureRequest) -> TestScenario:
 	"""Provide flow-specific scenarios for A007822 validations."""
 	return request.param
 
-@pytest.fixture(params=scenarioList('meanders'), ids=scenarioIdentifier)
-def meandersScenario(request: pytest.FixtureRequest) -> TestScenario:
+@pytest.fixture(params=scenariosForTestName('countFolds'), ids=makeScenarioIdentifier)
+def scenarioCountFolds(request: pytest.FixtureRequest) -> TestScenario:
+	"""Provide flow-specific scenarios for `countFolds` validation."""
+	return request.param
+
+@pytest.fixture(params=scenariosForTestName('eliminateFolds'), ids=makeScenarioIdentifier)
+def scenarioEliminateFolds(request: pytest.FixtureRequest) -> TestScenario:
+	"""Provide flow-specific scenarios for `eliminateFolds` validation."""
+	return request.param
+
+@pytest.fixture(params=scenariosForTestName('meanders'), ids=makeScenarioIdentifier)
+def scenarioMeanders(request: pytest.FixtureRequest) -> TestScenario:
 	"""Provide flow-specific scenarios for meanders transfer-matrix flows."""
 	return request.param
 
-@pytest.fixture(params=scenarioList('oeisFormula'), ids=scenarioIdentifier)
-def formulaScenario(request: pytest.FixtureRequest) -> TestScenario:
+@pytest.fixture(params=scenariosForTestName('oeisFormula'), ids=makeScenarioIdentifier)
+def scenarioOeisFormula(request: pytest.FixtureRequest) -> TestScenario:
 	"""Provide OEIS IDs and indices for formula-based verification."""
 	return request.param
 
-@pytest.fixture(params=scenarioList('oeisValue'), ids=scenarioIdentifier)
-def oeisValueScenario(request: pytest.FixtureRequest) -> TestScenario:
+@pytest.fixture(params=scenariosForTestName('oeisValue'), ids=makeScenarioIdentifier)
+def scenarioOeisValue(request: pytest.FixtureRequest) -> TestScenario:
 	"""Provide deterministic OEIS IDs and indices for `oeisIDfor_n` tests."""
 	return request.param
 

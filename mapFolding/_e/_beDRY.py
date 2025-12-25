@@ -241,10 +241,21 @@ def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, xmpz]
 	return leafFilter(thisIsAPileRangeOfLeaves, leavesPinned) # pyright: ignore[reportReturnType]
 
 @syntacticCurry
-def pileRangeAND(antiPileRange: xmpz, pileRangeOfLeaves: xmpz) -> xmpz:
-	return iand(pileRangeOfLeaves, antiPileRange)
+def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: xmpz, pileRangeOfLeaves: xmpz) -> xmpz:
+	"""Modify `pileRangeOfLeaves` _in place_ by bitwise AND with `pileRangeOfLeavesDISPOSABLE`.
 
-# keep sorting
+	Important
+	---------
+	- As of 25 December 2025, `pileRangeOfLeaves &= pileRangeOfLeavesDISPOSABLE` does ***not*** reliably compute the correct value.
+	- The order of the parameters is likely the opposite of what you expect.
+
+	See Also
+	--------
+	https://gmpy2.readthedocs.io/en/latest/advmpz.html
+	"""
+	return iand(pileRangeOfLeaves, pileRangeOfLeavesDISPOSABLE)
+
+# ======= Workbench functions ===============================================
 
 def DOTvalues[个](dictionary: dict[Any, 个]) -> Iterator[个]:
 	"""Return the list of values from a dictionary (generic over type parameter `个`).

@@ -1,4 +1,4 @@
-# ruff: noqa: T201, T203, D100, D103, TC003, ERA001  # noqa: RUF100
+# ruff: noqa: T201, T203, D103, TC003, ERA001  # noqa: RUF100
 # pyright: reportUnusedImport=false
 from collections.abc import Callable
 from cytoolz.curried import map as toolz_map, valfilter, valmap
@@ -6,7 +6,7 @@ from cytoolz.dicttoolz import dissoc
 from cytoolz.functoolz import compose
 from gmpy2 import fac
 from mapFolding._e import (
-	getDictionaryLeafDomains, getDictionaryPileRanges, getLeafDomain, getPileRange, PermutationSpace)
+	getDictionaryLeafDomains, getDictionaryPileRanges, getLeafDomain, getLeavesCreaseNext, getPileRange, PermutationSpace)
 from mapFolding._e.analysisPython.Z0Z_patternFinder import verifyPinning2Dn
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinning2Dn import (
@@ -28,7 +28,7 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(permutationsLeavesPinnedTotal(state.listPermutationSpace))
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 5)
+	state = EliminationState((2,) * 6)
 
 	printThis = True
 
@@ -42,16 +42,17 @@ if __name__ == '__main__':
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinPile首零Less零(state)
+		state = pinPiles(state, 4)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 		print(f"{len(state.listPermutationSpace)=}")
-		pprint(dictionaryPileRanges := getDictionaryPileRanges(state), width=200)
 
 	elif printThis:
+		state: EliminationState = pinPile首零Less零(state)
+		print(*getLeavesCreaseNext(state, 2))
+		pprint(dictionaryPileRanges := getDictionaryPileRanges(state), width=200)
 		print(list(getPileRange(state, 14)))
-		state = pinPiles(state, 4)
 		state: EliminationState = pinLeavesDimensions0零一(state)
 		state: EliminationState = pinLeavesDimension首二(state)
 		state: EliminationState = pinLeavesDimension二(state)

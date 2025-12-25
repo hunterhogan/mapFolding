@@ -28,9 +28,9 @@ if __name__ == '__main__':
 	CPUlimit: bool | float | int | None = -2
 	state: EliminationState | None = None
 
+	flow = 'elimination'
 	flow = 'constraintPropagation'
 	flow = 'crease'
-	flow = 'elimination'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
@@ -43,12 +43,13 @@ if __name__ == '__main__':
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
 	sys.stdout.write("\033[0m\n")
 
-	for n in range(3,4):
+	for n in range(5,6):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:
 			state = EliminationState(mapShape)
-			state = pinPiles(state, 1)
+			state = pinPiles(state, 4)
+			state.listPermutationSpace = list(reversed(state.listPermutationSpace))
 			# state = pinLeavesDimensions0零一(state)
 			# state = pinPile首零Less零(state)
 			# state = pinLeaf首零Plus零(state)
@@ -68,6 +69,6 @@ if __name__ == '__main__':
 r"""
 deactivate && C:\apps\mapFolding\.vtail\Scripts\activate.bat && title good && cls
 
-title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\eliminateFolds.py & title I'm done
+title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on mapFolding\_e\easyRun\eliminateFolds.py & title I'm done
 """
 

@@ -8,10 +8,10 @@ from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
 	between, DOTvalues, getLeaf, getLeafDomain, getPileRange, getXmpzAntiPileRangeOfLeaves, leafIsNotPinned,
-	LeafOrPileRangeOfLeaves, oopsAllLeaves, PermutationSpace, pileIsOpen, pileRangeAND, thisIsALeaf,
+	LeafOrPileRangeOfLeaves, oopsAllLeaves, PermutationSpace, pileIsOpen, pileRangeOfLeavesAND, thisIsALeaf,
 	thisIsAPileRangeOfLeaves)
 from mapFolding._e.dataBaskets import EliminationState
-from more_itertools import flatten
+from more_itertools import flatten, map_if
 
 # ======= Boolean filters =======================
 
@@ -83,22 +83,6 @@ def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], lea
 
 # ======= Working with variables that are a leaf or a pile's domain of leaves =======================
 # https://gmpy2.readthedocs.io/en/latest/advmpz.html
-
-def Z0Z_idk(leavesPinned: PermutationSpace, antiPileRange: xmpz) -> PermutationSpace:
-	for pile, pileRangeOfLeaves in leafFilter(thisIsAPileRangeOfLeaves, leavesPinned).items():
-		leavesPinned[pile] = pileRangeAND(antiPileRange, pileRangeOfLeaves)
-	return leavesPinned
-
-@syntacticCurry
-def Z0Z_updateDomains(leavesTotal: int, leavesPinned: PermutationSpace) -> PermutationSpace:
-	"""Updates elements but does not check for duplicates or validity."""
-	keepGoing = True
-	while keepGoing:
-		keepGoing = False
-		leaves = oopsAllLeaves(leavesPinned).values()
-		antiPileRange = getXmpzAntiPileRangeOfLeaves(leavesTotal, leaves)
-		leavesPinned = Z0Z_idk(leavesPinned, antiPileRange)
-	return leavesPinned
 
 def Z0Z_JeanValjean(p24601: LeafOrPileRangeOfLeaves) -> int | xmpz | None:
 	whoAmI: int | xmpz | None = p24601

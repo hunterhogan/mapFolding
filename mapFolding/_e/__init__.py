@@ -18,9 +18,9 @@ from mapFolding._e._beDRY import (
 	hasDuplicates as hasDuplicates, leafIsNotPinned as leafIsNotPinned, leafIsPinned as leafIsPinned,
 	mappingHasKey as mappingHasKey, notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零, notPileLast as notPileLast,
 	oopsAllLeaves as oopsAllLeaves, oopsAllPileRangesOfLeaves as oopsAllPileRangesOfLeaves, pileIsNotOpen as pileIsNotOpen,
-	pileIsOpen as pileIsOpen, pileRangeAND as pileRangeAND, reverseLookup as reverseLookup, thisIsA2DnMap as thisIsA2DnMap,
-	thisIsALeaf as thisIsALeaf, thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves, Z0Z_invert as Z0Z_invert,
-	Z0Z_sumsOfProductsOfDimensionsNearest首 as Z0Z_sumsOfProductsOfDimensionsNearest首)
+	pileIsOpen as pileIsOpen, pileRangeOfLeavesAND as pileRangeOfLeavesAND, reverseLookup as reverseLookup,
+	thisIsA2DnMap as thisIsA2DnMap, thisIsALeaf as thisIsALeaf, thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves,
+	Z0Z_invert as Z0Z_invert, Z0Z_sumsOfProductsOfDimensionsNearest首 as Z0Z_sumsOfProductsOfDimensionsNearest首)
 
 # isort: split
 from mapFolding._e._measure import (

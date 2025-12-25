@@ -62,10 +62,10 @@ def pinPiles(state: EliminationState, order: int = 4, maximumListPermutationSpac
 	if 3 <= order:
 		pileProcessingOrder.extend([一+零, state.leavesTotal - (一+零)])
 	if 4 <= order:
-		youMustBeDimensionsTallToPinThis = 5
+		youMustBeDimensionsTallToPinThis = 4
 		if youMustBeDimensionsTallToPinThis < state.dimensionsTotal:
 			pileProcessingOrder.extend([二])
-		youMustBeDimensionsTallToPinThis = 6
+		youMustBeDimensionsTallToPinThis = 5
 		if youMustBeDimensionsTallToPinThis < state.dimensionsTotal:
 			pileProcessingOrder.extend([state.leavesTotal - 二])
 
