@@ -76,21 +76,21 @@ def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[tuple[int, ...], tupl
 
 @syntacticCurry
 def filterCeiling(pile: int, dimensionsTotal: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
-	return pile <  int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin) # pyright: ignore[reportArgumentType]
+	return pile <  int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin)
 
 @syntacticCurry
 def filterFloor(pile: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
-	return int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile # pyright: ignore[reportArgumentType]
+	return int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile
 
 @syntacticCurry
 def filterParity(pile: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
-	return (pile & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1) # pyright: ignore[reportArgumentType]
+	return (pile & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1)
 
 @syntacticCurry
 def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
 	if leaf != 首零(dimensionsTotal)+零:
 		return True
-	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1) # pyright: ignore[reportArgumentType]
+	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
 
 def getPileRange(state: EliminationState, pile: int) -> Iterator[int]:
 	return iter(_getPileRange(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal))
@@ -102,13 +102,13 @@ def _getPileRange(pile: int, dimensionsTotal: int, mapShape: tuple[int, ...], le
 		pileBelowCeiling: Callable[[int], bool] = filterCeiling(pile, dimensionsTotal)
 		matchLargerStep: Callable[[int], bool] = filterDoubleParity(pile, dimensionsTotal)
 
-		pileRange: Iterable[int] = range(leavesTotal) # pyright: ignore[reportArgumentType]
+		pileRange: Iterable[int] = range(leavesTotal)
 		pileRange = filter(parityMatch, pileRange)
 		pileRange = filter(pileAboveFloor, pileRange)
 		pileRange = filter(pileBelowCeiling, pileRange)
 		return tuple(filter(matchLargerStep, pileRange))
 
-	return tuple(range(leavesTotal)) # pyright: ignore[reportArgumentType]
+	return tuple(range(leavesTotal))
 
 def getDictionaryPileRanges(state: EliminationState) -> dict[int, tuple[int, ...]]:
 	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
@@ -124,15 +124,15 @@ def _getLeafDomain(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], l
 	if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
 		originPinned =  leaf == leafOrigin
 		return range(
-					int(bit_flip(0, dimensionNearestTail(leaf) + 1))									# `start`, first value included in the `range`. # pyright: ignore[reportArgumentType]
-						+ howManyDimensionsHaveOddParity(leaf) # pyright: ignore[reportArgumentType]
+					int(bit_flip(0, dimensionNearestTail(leaf) + 1))									# `start`, first value included in the `range`.
+						+ howManyDimensionsHaveOddParity(leaf)
 						- 1 - originPinned
-					, int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf)))	# `stop`, first value excluded from the `range`. # pyright: ignore[reportArgumentType]
-						- howManyDimensionsHaveOddParity(leaf) # pyright: ignore[reportArgumentType]
+					, int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf)))	# `stop`, first value excluded from the `range`.
+						- howManyDimensionsHaveOddParity(leaf)
 						+ 2 - originPinned
 					, 2 + (2 * (leaf == 首零(dimensionsTotal)+零))											# `step`
 				)
-	return range(leavesTotal) # pyright: ignore[reportArgumentType]
+	return range(leavesTotal)
 
 def getDomainDimension一(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
 	"""The beans and cornbread and beans and cornbread dimension.
@@ -588,7 +588,7 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 
 		tailDimensions: int = dimensionNearestTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
 
-# # ------- `excludeBelow` `index` ---------------------------------
+# ------- `excludeBelow` `index` ---------------------------------
 		if 首零一(dimensionsTotal) < pileOfLeaf零:
 			excludeBelow: int = index + 3 - (3 * pilesTotal // 4)
 		else:

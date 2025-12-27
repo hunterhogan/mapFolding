@@ -2,14 +2,11 @@ from collections.abc import Callable, Iterable, Iterator
 from cytoolz.dicttoolz import assoc as associate, valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
-from gmpy2 import xmpz
-from hunterMakesPy import raiseIfNone
 from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
-	between, DOTvalues, getLeaf, getLeafDomain, getPileRange, getXmpzAntiPileRangeOfLeaves, leafIsNotPinned,
-	LeafOrPileRangeOfLeaves, oopsAllLeaves, PermutationSpace, pileIsOpen, pileRangeOfLeavesAND, thisIsALeaf,
-	thisIsAPileRangeOfLeaves)
+	between, DOTvalues, get_mpzAntiPileRangeOfLeaves, getLeaf, getLeafDomain, getPileRange, leafIsNotPinned,
+	LeafOrPileRangeOfLeaves, oopsAllLeaves, PermutationSpace, pileIsOpen, pileRangeOfLeavesAND, thisIsALeaf)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten, map_if
 
@@ -80,18 +77,6 @@ def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], lea
 	isPinned: Callable[[PermutationSpace], bool] = isPinnedAtPile(leaf=leaf, pile=pile)
 	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(isPinned, listPermutationSpace)
 	return (grouped.get(False, []), grouped.get(True, []))
-
-# ======= Working with variables that are a leaf or a pile's domain of leaves =======================
-# https://gmpy2.readthedocs.io/en/latest/advmpz.html
-
-def Z0Z_JeanValjean(p24601: LeafOrPileRangeOfLeaves) -> int | xmpz | None:
-	whoAmI: int | xmpz | None = p24601
-	if thisIsAPileRangeOfLeaves(p24601):
-		if p24601.bit_count() == 1:
-			whoAmI = None
-		elif p24601.bit_count() == 2:
-			whoAmI = raiseIfNone(p24601.bit_scan1())
-	return whoAmI
 
 # ======= Pin one or more leaves in `leavesPinned` or `folding` =======================
 # NOTE The only functions that actually pin a leaf in a dictionary or folding ought to be in this section.

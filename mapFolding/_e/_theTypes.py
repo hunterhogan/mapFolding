@@ -1,7 +1,7 @@
 from gmpy2 import xmpz
 
-type Folding = dict[int, int]
-"""`pile`: `leaf`, and length must be `leavesTotal`."""
+type Folding = tuple[int, ...]
+"""`leaf` indexed to `pile`."""
 
 # NOTE HEY!!! When you change the name of this again, delete `type ` or VS Code will not do a global update.
 type LeafOrPileRangeOfLeaves = int | xmpz

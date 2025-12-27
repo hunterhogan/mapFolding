@@ -1,11 +1,11 @@
 from functools import cache
 from gmpy2 import bit_flip, bit_scan1, f_mod_2exp
 from hunterMakesPy import intInnit, raiseIfNone
-from mapFolding._e import LeafOrPileRangeOfLeaves, Z0Z_invert, 一, 零
+from mapFolding._e import Z0Z_invert, 一, 零
 from mapFolding._e.dataBaskets import EliminationState
 
 @cache
-def dimensionNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int:
+def dimensionNearest首(integerNonnegative: int, /) -> int:
 	"""Find the 0-indexed position of the most significant non-zero radix-2 digit in `integerNonnegative`."""
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
@@ -14,7 +14,7 @@ def dimensionNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int:
 	return max(0, anInteger.bit_length() - 1)
 
 @cache
-def dimensionSecondNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int | None:
+def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 	"""Find the 0-indexed position of the second most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
@@ -29,7 +29,7 @@ def dimensionSecondNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) ->
 	return dimensionSecondNearest
 
 @cache
-def dimensionThirdNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int | None:
+def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	"""Find the 0-indexed position of the third most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
@@ -51,7 +51,7 @@ def dimensionThirdNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> 
 	return dimensionThirdNearest
 
 @cache
-def dimensionFourthNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int | None:
+def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	"""Find the 0-indexed position of the fourth most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
@@ -74,7 +74,7 @@ def dimensionFourthNearest首(integerNonnegative: LeafOrPileRangeOfLeaves, /) ->
 	return dimensionFourthNearest
 
 @cache
-def leafInSubHyperplane(notLeafOrigin: LeafOrPileRangeOfLeaves, /) -> int:
+def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 	"""For `notLeafOrigin` in a map with d-many dimensions, compute the projection of `notLeafOrigin` onto the sub-hyperplane that has one fewer dimension.
 
 	(AI generated docstring, which may or may not have been accurate; edited by me, Hunter Hogan, which may or may not have improved it.)
@@ -88,8 +88,8 @@ def leafInSubHyperplane(notLeafOrigin: LeafOrPileRangeOfLeaves, /) -> int:
 
 	Parameters
 	----------
-	notLeafOrigin : LeafOrPileRangeOfLeaves
-		A `leaf` in a 2^d map.
+	notLeafOrigin : int
+		A `leaf` in a 2^d-dimensional map.
 
 	Returns
 	-------
@@ -104,7 +104,7 @@ def leafInSubHyperplane(notLeafOrigin: LeafOrPileRangeOfLeaves, /) -> int:
 	return int(f_mod_2exp(anInteger, dimensionNearest首(anInteger)))
 
 @cache
-def dimensionNearestTail(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int:
+def dimensionNearestTail(integerNonnegative: int, /) -> int:
 	"""Find the 0-indexed position of the least significant non-zero radix-2 digit in `integerNonnegative`.
 
 	Because I am using a radix-2 positional-numeral system as a proxy for Cartesian coordinates, this is functionally equivalent
@@ -116,7 +116,7 @@ def dimensionNearestTail(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int:
 		raise ValueError(message)
 	return bit_scan1(anInteger) or 0
 
-def Z0Z_creaseNearestTail(state: EliminationState, integerNonnegative: LeafOrPileRangeOfLeaves) -> int:
+def Z0Z_0NearestTail(state: EliminationState, integerNonnegative: int) -> int:
 	"""Find the 0-indexed position of the least significant zero radix-2 digit in `integerNonnegative`."""
 # NOTE HEY! `Z0Z_invert` is pulling double duty: it sanitizes `integerNonnegative` and inverts it. So if you figure out how to
 # achieve this functionality without calling `Z0Z_invert`, you need to add defensive code here.
@@ -124,7 +124,7 @@ def Z0Z_creaseNearestTail(state: EliminationState, integerNonnegative: LeafOrPil
 	return bit_scan1(anInteger) or 0
 
 @cache
-def howManyDimensionsHaveOddParity(integerNonnegative: LeafOrPileRangeOfLeaves, /) -> int:
+def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
@@ -132,7 +132,7 @@ def howManyDimensionsHaveOddParity(integerNonnegative: LeafOrPileRangeOfLeaves, 
 	return max(0, anInteger.bit_count() - 1)
 
 @cache
-def ptount(integerAbove2: LeafOrPileRangeOfLeaves, /) -> int:
+def ptount(integerAbove2: int, /) -> int:
 	"""After subtracting 一+零 from `integerAbove2`, measure the distance from a ***p***ower of ***t***wo's "bit c***ount***".
 
 	Notes

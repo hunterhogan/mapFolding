@@ -13,21 +13,21 @@ from mapFolding._e._theTypes import (
 # isort: split
 from mapFolding._e._beDRY import (
 	between as between, consecutive as consecutive, DOTvalues as DOTvalues, exclude as exclude,
-	getIteratorOfLeaves as getIteratorOfLeaves, getLeaf as getLeaf,
-	getXmpzAntiPileRangeOfLeaves as getXmpzAntiPileRangeOfLeaves, getXmpzPileRangeOfLeaves as getXmpzPileRangeOfLeaves,
-	hasDuplicates as hasDuplicates, leafIsNotPinned as leafIsNotPinned, leafIsPinned as leafIsPinned,
-	mappingHasKey as mappingHasKey, notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零, notPileLast as notPileLast,
-	oopsAllLeaves as oopsAllLeaves, oopsAllPileRangesOfLeaves as oopsAllPileRangesOfLeaves, pileIsNotOpen as pileIsNotOpen,
-	pileIsOpen as pileIsOpen, pileRangeOfLeavesAND as pileRangeOfLeavesAND, reverseLookup as reverseLookup,
-	thisIsA2DnMap as thisIsA2DnMap, thisIsALeaf as thisIsALeaf, thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves,
-	Z0Z_invert as Z0Z_invert, Z0Z_sumsOfProductsOfDimensionsNearest首 as Z0Z_sumsOfProductsOfDimensionsNearest首)
+	get_mpzAntiPileRangeOfLeaves as get_mpzAntiPileRangeOfLeaves, get_xmpzPileRangeOfLeaves as get_xmpzPileRangeOfLeaves,
+	getIteratorOfLeaves as getIteratorOfLeaves, getLeaf as getLeaf, hasDuplicates as hasDuplicates,
+	leafIsNotPinned as leafIsNotPinned, leafIsPinned as leafIsPinned, mappingHasKey as mappingHasKey,
+	notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零, notPileLast as notPileLast, oopsAllLeaves as oopsAllLeaves,
+	oopsAllPileRangesOfLeaves as oopsAllPileRangesOfLeaves, pileIsNotOpen as pileIsNotOpen, pileIsOpen as pileIsOpen,
+	pileRangeOfLeavesAND as pileRangeOfLeavesAND, reverseLookup as reverseLookup, thisIsA2DnMap as thisIsA2DnMap,
+	thisIsALeaf as thisIsALeaf, thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves, Z0Z_invert as Z0Z_invert,
+	Z0Z_JeanValjean as Z0Z_JeanValjean, Z0Z_sumsOfProductsOfDimensionsNearest首 as Z0Z_sumsOfProductsOfDimensionsNearest首)
 
 # isort: split
 from mapFolding._e._measure import (
 	dimensionFourthNearest首 as dimensionFourthNearest首, dimensionNearestTail as dimensionNearestTail,
 	dimensionNearest首 as dimensionNearest首, dimensionSecondNearest首 as dimensionSecondNearest首,
 	dimensionThirdNearest首 as dimensionThirdNearest首, howManyDimensionsHaveOddParity as howManyDimensionsHaveOddParity,
-	leafInSubHyperplane as leafInSubHyperplane, ptount as ptount, Z0Z_creaseNearestTail as Z0Z_creaseNearestTail)
+	leafInSubHyperplane as leafInSubHyperplane, ptount as ptount, Z0Z_0NearestTail as Z0Z_0NearestTail)
 
 # isort: split
 from mapFolding._e._dataDynamic import (

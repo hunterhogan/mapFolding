@@ -1,6 +1,6 @@
 # ruff: noqa
 # pyright: basic
-from mapFolding import dictionaryOEISMapFolding, eliminateFolds
+from mapFolding import asciiColorReset, dictionaryOEISMapFolding, eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinning2Dn import (
 	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles, pinPile首零Less零)
@@ -13,19 +13,19 @@ if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
 			f"{(match:=foldsTotal == dictionaryOEISMapFolding[oeisID]['valuesKnown'][n])}\t"
-			f"\033[{(not match)*91}m"
+			f"\033[{31+match}m"
 			f"{n}\t"
 			# f"{mapShape}\t"
 			f"{foldsTotal}\t"
 			f"{dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
-			"\033[0m\n"
+			f"{asciiColorReset}"
 		)
 
 	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 	oeisID: str = ''
 	flow: str = ''
-	CPUlimit: bool | float | int | None = -2
+	CPUlimit: bool | float | int | None = -4
 	state: EliminationState | None = None
 
 	flow = 'elimination'
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
 	sys.stdout.write(f"\033[{30+int(oeisID,11)%8};{40+int(oeisID,12)%8}m{oeisID} ")
 	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
-	sys.stdout.write("\033[0m\n")
+	sys.stdout.write(asciiColorReset + '\n')
 
 	for n in range(5,6):
 
@@ -49,7 +49,6 @@ if __name__ == '__main__':
 		if oeisID == 'A001417' and n > 3:
 			state = EliminationState(mapShape)
 			state = pinPiles(state, 4)
-			state.listPermutationSpace = list(reversed(state.listPermutationSpace))
 			# state = pinLeavesDimensions0零一(state)
 			# state = pinPile首零Less零(state)
 			# state = pinLeaf首零Plus零(state)

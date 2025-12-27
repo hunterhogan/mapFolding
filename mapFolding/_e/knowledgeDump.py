@@ -1,16 +1,5 @@
 """A dump of knowledge accumulated during development."""
 
-"""Rules for maintaining a valid permutation space:
-
-1. In `leavesPinned`, if `leaf` is not pinned, deconstruct `leavesPinned` by the `pile` domain of `leaf`.
-	A. For each `pile` in the domain of `leaf`, if `pile` in `leavesPinned` is not occupied, create a new `PermutationSpace` dictionary by appending `leaf` pinned at `pile` to `leavesPinned`.
-	B. Replace `leavesPinned` with the group of newly created `PermutationSpace` dictionaries.
-2. In `leavesPinned`, if a `pile` is not pinned, deconstruct `leavesPinned` by the `leaf` range (mathematical range) of `pile`.
-	A. For each `leaf` in the range of `pile`, if `leaf` is not already pinned in `leavesPinned`, create a new `PermutationSpace` dictionary by appending `leaf` pinned at `pile` to `leavesPinned`.
-	B. Replace `leavesPinned` with the group of newly created `PermutationSpace` dictionaries.
-3. Do not overwrite or delete a dictionary's pinned leaves because that could cause the dictionary's permutation space to overlap with a different dictionary's permutation space.
-"""
-
 """Perspective changes and code changes:
 
 - To increment in a dimension means to add 1 in the dimensionIndex. If the current value is 0, then the new value is 1. If the
@@ -242,40 +231,6 @@ def getLeafDomain(state: EliminationState, leaf: int) -> range:
 	return workhorse(leaf, state.dimensionsTotal, state.mapShape, state.leavesTotal)
 """
 
-"""if `dimensionNearest首(k) <= coordinatesOf0AtTail(r)`, then must `pileOf_k < pileOf_r`
-leaf1 is a dimension origin: its creases up to [-1], which are leaves 3, 5, 9, 17, come before the dimension origins, 2, 4, 8, 16.
-
-This is due to:
-leaf	{dimension: crease}
-0			{0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32} <- dimension origins
-1			{1: 3, 2: 5, 3: 9, 4: 17, 5: 33}
-
-If leaf2 were before leaf3, it would interpose the crease from leaf1 to leaf3 in dimension1.
-
-Similarly, leaf2 creases up to [-1], which are leaves 6, 10, 18 come before dimension origins, 4, 8, 16, respectively.
-2			{0: 3, 2: 6, 3: 10, 4: 18, 5: 34}
-
-The rule against interposing is so strong it extends to leaf3, which is not a dimension origin, but is the first crease from leaf1.
-leaf3 creases up to [-1], which are leaves 7, 11, 19, come before the dimension origins, 4, 8, 16, respectively.
-3			{2: 7, 3: 11, 4: 19, 5: 35}
-
-leaf4 is the dimension2 origin and its increases 12 and 20 come before dimension origins 8 and 16.
-4			{0: 5, 1: 6, 3: 12, 4: 20, 5: 36}
-
-leaf5, 0b101, 二 + 零, which absolutely has the coordinates of 1 in dimension2, 二, and 1 in dimension0, 零, comes before all multiples of 4.
-leaf6, 二 + 一, is the same as leaf5.
-leaf7, 二 + 一 + 零, is also the same as leaf5 and leaf6!
-
-leaf9, 三 + 零, comes before the dimension3 origin leaf8, as described above, and before all multiples of 8, or 三.
-Furthermore, all leaves between 三+零 and 三+二+一+零, inclusive, come before 三 (8) and its multiples.
-
-The same thing happens at the next dimension, 四. leaves 17-31 all come before 16, 32, and 48. This example is a 6 dimensional
-map. Because all leaves less than 32 must come before leaf32, it cannot appear before pile 32. It's fixed at the last pile, of course.
-
-wow.
-
-Therefore, if `dimensionNearest首(k) <= coordinatesOf0AtTail(r)`, then must `pileOf_k < pileOf_r`
-"""
 
 """Equating pile = leavesTotal // 2 - 1.
 dict_keys([2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31])

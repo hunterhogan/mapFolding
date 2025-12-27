@@ -697,7 +697,7 @@ def sortP2d7GeneratedCsvFiles() -> None:
 					appendStream.write('\n')
 
 			pathFilenameDestination: Path = pathSorted / pathFilenameSource.name
-			pathFilenameSource.rename(pathFilenameDestination)
+			pathFilenameSource.replace(pathFilenameDestination)
 	finally:
 		for appendStream in dictionaryAppendStreams.values():
 			appendStream.close()
@@ -708,46 +708,47 @@ def subdivideP2d7s0_1_3_2CsvFile() -> None:
 	pathSorted.mkdir(exist_ok=True)
 
 	pathFilenameSource: Path = pathDataRaw / "p2d7s0_1_3_2.csv"
-	state: EliminationState = EliminationState((2,) * 7)
-	setLeavesAllowedAfterTwo: set[int] = set(getLeavesCreaseNext(state, 2))
+	if pathFilenameSource.exists():
+		state: EliminationState = EliminationState((2,) * 7)
+		setLeavesAllowedAfterTwo: set[int] = set(getLeavesCreaseNext(state, 2))
 
-	dictionaryAppendStreams: dict[int, TextIO] = {}
-	try:
-		with pathFilenameSource.open('r', newline='') as readStream:
-			for lineRaw in readStream:
-				line: str = lineRaw.rstrip('\n').rstrip('\r')
-				if len(line) != 401:
-					continue
-				if line.count(',') != 127:
-					continue
-				if not line.startswith("0,1,3,2,"):
-					continue
-				if line[0] == ',' or line[-1] == ',' or ',,' in line:
-					continue
+		dictionaryAppendStreams: dict[int, TextIO] = {}
+		try:
+			with pathFilenameSource.open('r', newline='') as readStream:
+				for lineRaw in readStream:
+					line: str = lineRaw.rstrip('\n').rstrip('\r')
+					if len(line) != 401:
+						continue
+					if line.count(',') != 127:
+						continue
+					if not line.startswith("0,1,3,2,"):
+						continue
+					if line[0] == ',' or line[-1] == ',' or ',,' in line:
+						continue
 
-				listPrefixParts: list[str] = line.split(',', 5)
-				if len(listPrefixParts) < 6:
-					continue
-				if not listPrefixParts[4].isdigit():
-					continue
-				leafFifth: int = int(listPrefixParts[4])
-				if leafFifth not in setLeavesAllowedAfterTwo:
-					continue
+					listPrefixParts: list[str] = line.split(',', 5)
+					if len(listPrefixParts) < 6:
+						continue
+					if not listPrefixParts[4].isdigit():
+						continue
+					leafFifth: int = int(listPrefixParts[4])
+					if leafFifth not in setLeavesAllowedAfterTwo:
+						continue
 
-				appendStream: TextIO | None = dictionaryAppendStreams.get(leafFifth)
-				if appendStream is None:
-					pathFilenameOutput: Path = pathDataRaw / f"p2d7s0_1_3_2_{leafFifth}.csv"
-					appendStream = pathFilenameOutput.open('a', newline='')
-					dictionaryAppendStreams[leafFifth] = appendStream
+					appendStream: TextIO | None = dictionaryAppendStreams.get(leafFifth)
+					if appendStream is None:
+						pathFilenameOutput: Path = pathDataRaw / f"p2d7s0_1_3_2_{leafFifth}.csv"
+						appendStream = pathFilenameOutput.open('a', newline='')
+						dictionaryAppendStreams[leafFifth] = appendStream
 
-				appendStream.write(line)
-				appendStream.write('\n')
+					appendStream.write(line)
+					appendStream.write('\n')
 
-		pathFilenameDestination: Path = pathSorted / pathFilenameSource.name
-		pathFilenameSource.rename(pathFilenameDestination)
-	finally:
-		for appendStream in dictionaryAppendStreams.values():
-			appendStream.close()
+			pathFilenameDestination: Path = pathSorted / pathFilenameSource.name
+			pathFilenameSource.replace(pathFilenameDestination)
+		finally:
+			for appendStream in dictionaryAppendStreams.values():
+				appendStream.close()
 
 def cleanAndSortSequencesCsvFile(state: EliminationState, pathFilename: PurePath) -> None:
 	pathFilenameTarget: Path = Path(pathFilename)
@@ -811,7 +812,7 @@ def cleanAndSortSequencesCsvFile(state: EliminationState, pathFilename: PurePath
 
 	listSequencesSorted: list[tuple[int, ...]] = sorted(listSequencesUnique)
 	pathFilenameBackup: Path = pathSorted / pathFilenameTarget.name
-	pathFilenameTarget.rename(pathFilenameBackup)
+	pathFilenameTarget.replace(pathFilenameBackup)
 	with pathFilenameTarget.open('w', newline='') as writeStream:
 		if lineHeader is not None:
 			writeStream.write(lineHeader)
@@ -821,9 +822,9 @@ def cleanAndSortSequencesCsvFile(state: EliminationState, pathFilename: PurePath
 			writeStream.write('\n')
 
 if __name__ == '__main__':
-	# from mapFolding._e import getZ0Z_precedence
+	from mapFolding._e import getZ0Z_precedence
 
-	sortEm = False
+	sortEm = True
 	if sortEm:
 		sortP2d7GeneratedCsvFiles()
 		subdivideP2d7s0_1_3_2CsvFile()
@@ -832,8 +833,10 @@ if __name__ == '__main__':
 		for pathFilename in pathDataRaw.glob("p2d7s*.csv"):
 			cleanAndSortSequencesCsvFile(state, pathFilename)
 
-	precedence: bool = False
-	if precedence:
+	# type \apps\mapFolding\mapFolding\_e\dataRaw\p2d7s*.csv | find /c /v ""
+
+	pileRangeByFormula: bool = False
+	if pileRangeByFormula:
 		state = EliminationState((2,) * 6)
 
 		# NOTE works for 9 <= odd piles <= 47
@@ -878,9 +881,9 @@ if __name__ == '__main__':
 
 			return tuple(sorted(pileRange))
 
-		for pile in range(首二(state.dimensionsTotal)+零, 首零一(state.dimensionsTotal), 1):
-			print(pile, (ll:=getPileRange(state, pile)) == (zz:=Z0Z_getPileRange(state, pile)), end=': ')
-			print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
+		for pile in range(首二(state.dimensionsTotal)+零, 首零一(state.dimensionsTotal), 2):
+			print(pile, (ll:=tuple(getPileRange(state, pile))) == (zz:=Z0Z_getPileRange(state, pile)), end=': ')
+			# print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			pprint(zz, width=180)
 
 			# > 32: matches most tail0s != 1
@@ -893,6 +896,7 @@ if __name__ == '__main__':
 			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			# pprint(zz, width=180)
 
+	# state = EliminationState((2,) * 6)
 	# print(measureEntropy(state))
 
 	# getZ0Z_precedence(state)

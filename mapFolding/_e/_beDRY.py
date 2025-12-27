@@ -2,8 +2,8 @@ from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
 from cytoolz.dicttoolz import valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
-from gmpy2 import bit_mask, xmpz
-from hunterMakesPy import intInnit
+from gmpy2 import bit_mask, mpz, xmpz
+from hunterMakesPy import intInnit, raiseIfNone
 from mapFolding import inclusive
 from mapFolding._e import LeafOrPileRangeOfLeaves, PermutationSpace, 零
 from mapFolding._e.dataBaskets import EliminationState
@@ -195,13 +195,13 @@ def getIteratorOfLeaves(pileRangeOfLeaves: xmpz) -> Iterator[int]:
 	pileRangeOfLeaves[-1] = 0
 	return pileRangeOfLeaves.iter_set()
 
-def getXmpzAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> xmpz:
-	antiPileRange = xmpz(bit_mask(leavesTotal))
+def get_mpzAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> mpz:
+	antiPileRangeOfLeaves = xmpz(bit_mask(leavesTotal + inclusive))
 	for leaf in leaves:
-		antiPileRange[leaf] = 0
-	return antiPileRange
+		antiPileRangeOfLeaves[leaf] = 0
+	return mpz(antiPileRangeOfLeaves)
 
-def getXmpzPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> xmpz:
+def get_xmpzPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> xmpz:
 	pileRangeOfLeaves: xmpz = xmpz(0)
 	pileRangeOfLeaves[leavesTotal] = 1
 	for leaf in leaves:
@@ -214,15 +214,14 @@ def oopsAllLeaves(leavesPinned: PermutationSpace) -> dict[int, int]:
 	Parameters
 	----------
 	leavesPinned : PermutationSpace
-		Dictionary of `pile` with pinned `leaf` or pile-range of leaves, if a `leaf` is pinned at `pile` or the pile-range of
-		leaves is defined.
+		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 
 	Returns
 	-------
-	dictionaryOfPermutationSpace : dict[int, int]
+	dictionaryOfPileLeaf : dict[int, int]
 		Dictionary mapping from `pile` to pinned `leaf` for every pinned leaf in `leavesPinned`.
 	"""
-	return leafFilter(thisIsALeaf, leavesPinned) # pyright: ignore[reportReturnType]
+	return leafFilter(thisIsALeaf, leavesPinned)
 
 def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, xmpz]:
 	"""Return a dictionary of all pile-ranges of leaves in `leavesPinned`.
@@ -230,30 +229,38 @@ def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, xmpz]
 	Parameters
 	----------
 	leavesPinned : PermutationSpace
-		Dictionary of `pile` with pinned `leaf` or pile-range of leaves, if a `leaf` is pinned at `pile` or the pile-range of
-		leaves is defined.
+		Dictionary of `pile` with pile-range of leaves, if a pile-range of leaves is defined at `pile`.
 
 	Returns
 	-------
-	dictionaryOfPermutationSpace : dict[int, xmpz]
-		Dictionary mapping from `pile` to pinned `leaf` for every pinned leaf in `leavesPinned`.
+	dictionaryOfPilePileRangeOfLeaves : dict[int, xmpz]
+		Dictionary mapping from `pile` to pile-range of leaves for every pile-range of leaves in `leavesPinned`.
 	"""
-	return leafFilter(thisIsAPileRangeOfLeaves, leavesPinned) # pyright: ignore[reportReturnType]
+	return leafFilter(thisIsAPileRangeOfLeaves, leavesPinned)
 
 @syntacticCurry
-def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: xmpz, pileRangeOfLeaves: xmpz) -> xmpz:
+def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: mpz, pileRangeOfLeaves: xmpz) -> xmpz:
 	"""Modify `pileRangeOfLeaves` _in place_ by bitwise AND with `pileRangeOfLeavesDISPOSABLE`.
 
 	Important
 	---------
 	- As of 25 December 2025, `pileRangeOfLeaves &= pileRangeOfLeavesDISPOSABLE` does ***not*** reliably compute the correct value.
-	- The order of the parameters is likely the opposite of what you expect.
+	- The order of the parameters is likely the opposite of what you expect. This is to facilitate currying.
 
 	See Also
 	--------
 	https://gmpy2.readthedocs.io/en/latest/advmpz.html
 	"""
 	return iand(pileRangeOfLeaves, pileRangeOfLeavesDISPOSABLE)
+
+def Z0Z_JeanValjean(p24601: xmpz) -> int | xmpz | None:
+	whoAmI: int | xmpz | None = p24601
+	if thisIsAPileRangeOfLeaves(p24601):
+		if p24601.bit_count() == 1:
+			whoAmI = None
+		elif p24601.bit_count() == 2:
+			whoAmI = raiseIfNone(p24601.bit_scan1())
+	return whoAmI
 
 # ======= Workbench functions ===============================================
 
@@ -301,10 +308,10 @@ def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: �
 			return key
 	return None
 
-def Z0Z_invert(state: EliminationState, integerNonnegative: LeafOrPileRangeOfLeaves) -> int:
-	return _Z0Z_invert(state.dimensionsTotal, int(integerNonnegative)) # pyright: ignore[reportArgumentType] # FIXME
+def Z0Z_invert(state: EliminationState, integerNonnegative: int) -> int:
+	return _Z0Z_invert(state.dimensionsTotal, integerNonnegative)
 @cache
-def _Z0Z_invert(dimensionsTotal: int, integerNonnegative: LeafOrPileRangeOfLeaves) -> int:
+def _Z0Z_invert(dimensionsTotal: int, integerNonnegative: int) -> int:
 	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
@@ -325,3 +332,4 @@ def Z0Z_sumsOfProductsOfDimensionsNearest首(state: EliminationState, dimensionF
 
 def thisIsA2DnMap(state: EliminationState, *, youMustBeDimensionsTallToPinThis: int = 3) -> bool:
 	return (youMustBeDimensionsTallToPinThis <= state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)
+
