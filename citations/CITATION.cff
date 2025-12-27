@@ -24,86 +24,36 @@ identifiers:
   description: The URL for mapFolding 0.17.1.
 keywords:
 - A001415
-- AST manipulation
-- JIT compilation
-- Numba optimization
-- OEIS
-- Python optimization
-- abstract syntax tree
-- algorithmic combinatorics
-- algorithmic optimization
+- A001417
 - arch configurations
-- automated code generation
-- bit-packed arrays
-- bitwise state machines
-- cache-efficient algorithms
+- AST manipulation
 - closed meandric numbers
-- code generation
-- code optimization
-- code synthesis
-- code transformation
-- codon optimization
-- combinatorial computing
-- combinatorial enumeration
 - combinatorial geometry
 - combinatorial mathematics
-- combinatorial problem solver
 - combinatorics
 - computational combinatorics
 - computational geometry
 - crossing patterns
 - curve crossings
-- dataclass transformation
 - discrete mathematics
-- dynamic compilation
-- enumerative combinatorics
 - folding pattern enumeration
 - folding problems
-- high-performance computing
 - integer sequences
-- just-in-time compilation
-- kernel optimization
 - labeled stamp folding
-- low-level computation
 - map folding
 - mapFolding
-- mathematical algorithms
-- mathematical modeling
-- mathematical optimization
-- mathematical patterns
-- mathematical software
-- mathematical tool
-- mathematical visualization
 - meander enumeration
 - meanders
 - meandric systems
-- memory-efficient enumeration
-- metaprogramming
-- numerical algorithms
-- numerical computation
+- OEIS
 - open meandric systems
 - paper folding mathematics
-- parallel computing
-- pattern recognition
-- performance optimization
-- permutation patterns
-- permutations
-- post-setup optimization
-- pyproject
-- scientific computing
 - semi-meanders
-- sequence analysis
-- sequence calculator
-- sequence enumeration
-- sequence explorer
-- sequence generation
-- source code analysis
 - stamp folding
 - symbolic computation
 - symmetric foldings
 - topological combinatorics
 - topological patterns
-- typed Python
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
