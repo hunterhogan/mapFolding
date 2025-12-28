@@ -19,7 +19,7 @@ from mapFolding._e import (
 	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeafDomain, getLeavesCreaseBack,
 	getLeavesCreaseNext, getPileRange)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pinning2Dn import (
+from mapFolding._e.pin2上nDimensions import (
 	pileProcessingOrderDefault, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles)
 from mapFolding.tests.dataSamples import (
 	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二,

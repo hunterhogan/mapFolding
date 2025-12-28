@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from functools import cache
 from hunterMakesPy import raiseIfNone
+from mapFolding import ansiColorBlackOnCyan, ansiColorReset, ansiColorWhiteOnMagenta
 from mapFolding._e import exclude, getLeafDomain, getPileRange, PermutationSpace
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.analysisPython.theExcluderBeast import (
@@ -10,8 +11,8 @@ from mapFolding._e.analysisPython.theExcluderBeast import (
 	strPileExcluder)
 from mapFolding._e.analysisPython.Z0Z_patternFinder import detectPermutationSpaceErrors, PermutationSpaceStatus
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.pin2上nDimensions import pinPiles
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
-from mapFolding._e.pinning2Dn import pinPiles
 import numpy
 import sys
 
@@ -134,17 +135,16 @@ def validateAnalysisMethod(analysisMethodCallable: Callable[[], dict[strLeafExcl
 		if not isValidDictionaries:
 			errorsByMapShape.setdefault(mapShapeName, []).extend(listDictionaryErrors)
 
-	colorReset = '\33[0m'
 	if not errorsByMapShape:
-		colorSuccess = '\33[92m'
-		sys.stdout.write(f"{colorSuccess}{analysisMethodCallable.__name__} validated across {len(listMapShapeNames)} mapShapes{colorReset}\n")
+		colorSuccess = ansiColorBlackOnCyan
+		sys.stdout.write(f"{colorSuccess}{analysisMethodCallable.__name__} validated across {len(listMapShapeNames)} mapShapes{ansiColorReset}\n")
 	else:
-		colorFailure = '\33[91m'
-		sys.stdout.write(f"{colorFailure}{analysisMethodCallable.__name__} validation failed for {len(errorsByMapShape)} mapShapes{colorReset}\n")
+		colorFailure = ansiColorWhiteOnMagenta
+		sys.stdout.write(f"{colorFailure}{analysisMethodCallable.__name__} validation failed for {len(errorsByMapShape)} mapShapes{ansiColorReset}\n")
 		for mapShapeName, listErrors in errorsByMapShape.items():
-			sys.stdout.write(f"{colorFailure}{mapShapeName}: {len(listErrors)} issues{colorReset}\n")
+			sys.stdout.write(f"{colorFailure}{mapShapeName}: {len(listErrors)} issues{ansiColorReset}\n")
 			for error in listErrors[0:3]:
-				sys.stdout.write(f"{colorFailure}  {error}{colorReset}\n")
+				sys.stdout.write(f"{colorFailure}  {error}{ansiColorReset}\n")
 
 	return exclusionsFromMethod
 

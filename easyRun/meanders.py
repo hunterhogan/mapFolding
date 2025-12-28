@@ -1,6 +1,6 @@
 # ruff: noqa
 # pyright: basic
-from mapFolding import dictionaryOEIS
+from mapFolding import ansiColorGreenOnBlack, ansiColorReset, ansiColorYellowOnRed, dictionaryOEIS
 from mapFolding.basecamp import NOTcountingFolds
 import gc
 import multiprocessing
@@ -10,13 +10,13 @@ import warnings
 
 def write() -> None:
 	sys.stdout.write(
-		f"{(booleanColor:=(countTotal == dictionaryOEIS[oeisID]['valuesKnown'][n]))}\t"
-		f"\033[{(not booleanColor)*91}m"
+		f"{(match:=(countTotal == dictionaryOEIS[oeisID]['valuesKnown'][n]))}\t"
+		f"{(ansiColorYellowOnRed, ansiColorGreenOnBlack)[match]}"
 		f"{n}\t"
 		# f"{countTotal}\t"
 		# f"{dictionaryOEISMeanders[oeisID]['valuesKnown'][n]}\t"
 		f"{time.perf_counter() - timeStart:.2f}\t"
-		"\033[0m\n"
+		f"{ansiColorReset}\n"
 	)
 
 if __name__ == '__main__':

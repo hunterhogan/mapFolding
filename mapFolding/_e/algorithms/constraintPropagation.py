@@ -4,7 +4,7 @@ from itertools import combinations, pairwise, product as CartesianProduct
 from mapFolding import decreasing, packageSettings
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseNext,
-	leafOrigin, PermutationSpace, pileOrigin, thisIsALeaf, 零)
+	leafOrigin, PermutationSpace, pileOrigin, thisIsALeaf, thisIsAPileRangeOfLeaves, 零)
 from mapFolding._e.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
@@ -26,6 +26,8 @@ def findValidFoldings(state: EliminationState) -> int:
 	for pile, leafOrLeafRange in state.leavesPinned.items():
 		if thisIsALeaf(leafOrLeafRange):
 			model.Add(listLeavesInPileOrder[pile] == leafOrLeafRange)
+		elif thisIsAPileRangeOfLeaves(leafOrLeafRange):
+			model.AddAllowedAssignments([listLeavesInPileOrder[pile]], [(leaf,) for leaf in leafOrLeafRange.iter_set(stop=state.leavesTotal)])
 
 # ------- Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal -----------------------------
 	model.Add(listLeavesInPileOrder[pileOrigin] == leafOrigin)

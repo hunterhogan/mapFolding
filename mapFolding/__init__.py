@@ -2,14 +2,18 @@
 
 # isort: split
 from mapFolding._semiotics import (
-	asciiColorBackgroundBlack as asciiColorBackgroundBlack, asciiColorBackgroundBlue as asciiColorBackgroundBlue,
-	asciiColorBackgroundCyan as asciiColorBackgroundCyan, asciiColorBackgroundGreen as asciiColorBackgroundGreen,
-	asciiColorBackgroundMagenta as asciiColorBackgroundMagenta, asciiColorBackgroundRed as asciiColorBackgroundRed,
-	asciiColorBackgroundWhite as asciiColorBackgroundWhite, asciiColorBackgroundYellow as asciiColorBackgroundYellow,
-	asciiColorBlack as asciiColorBlack, asciiColorBlue as asciiColorBlue, asciiColorCyan as asciiColorCyan,
-	asciiColorGreen as asciiColorGreen, asciiColorMagenta as asciiColorMagenta, asciiColorRed as asciiColorRed,
-	asciiColorReset as asciiColorReset, asciiColorWhite as asciiColorWhite, asciiColorYellow as asciiColorYellow,
-	decreasing as decreasing, inclusive as inclusive)
+	ansiColorBlackOnCyan as ansiColorBlackOnCyan, ansiColorBlackOnMagenta as ansiColorBlackOnMagenta,
+	ansiColorBlackOnWhite as ansiColorBlackOnWhite, ansiColorBlackOnYellow as ansiColorBlackOnYellow,
+	ansiColorBlueOnWhite as ansiColorBlueOnWhite, ansiColorBlueOnYellow as ansiColorBlueOnYellow,
+	ansiColorCyanOnBlack as ansiColorCyanOnBlack, ansiColorCyanOnBlue as ansiColorCyanOnBlue,
+	ansiColorCyanOnMagenta as ansiColorCyanOnMagenta, ansiColorGreenOnBlack as ansiColorGreenOnBlack,
+	ansiColorMagentaOnBlack as ansiColorMagentaOnBlack, ansiColorMagentaOnBlue as ansiColorMagentaOnBlue,
+	ansiColorMagentaOnCyan as ansiColorMagentaOnCyan, ansiColorRedOnWhite as ansiColorRedOnWhite,
+	ansiColorReset as ansiColorReset, ansiColors as ansiColors, ansiColorWhiteOnBlack as ansiColorWhiteOnBlack,
+	ansiColorWhiteOnBlue as ansiColorWhiteOnBlue, ansiColorWhiteOnMagenta as ansiColorWhiteOnMagenta,
+	ansiColorWhiteOnRed as ansiColorWhiteOnRed, ansiColorYellowOnBlack as ansiColorYellowOnBlack,
+	ansiColorYellowOnBlue as ansiColorYellowOnBlue, ansiColorYellowOnRed as ansiColorYellowOnRed, decreasing as decreasing,
+	inclusive as inclusive)
 
 # isort: split
 from mapFolding._theTypes import (

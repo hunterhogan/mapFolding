@@ -39,7 +39,8 @@ class EliminationState:
 	Notes
 	-----
 	Fine control over integer bit-widths is not currently part of these algorithms, so removing `TypeAlias` reduces complexity.
-	(And will hopefully stop the intermittent false-positive Pylance diagnostic, `expected 0 positional arguments`.)
+	(And will hopefully stop the intermittent false-positive Pylance diagnostic, `expected 0 positional arguments`. The problem
+	has not stopped, but it is less frequent: but I don't know why it is less frequent.)
 	"""
 
 	mapShape: tuple[int, ...] = dataclasses.field(init=True)
@@ -85,4 +86,4 @@ class EliminationState:
 		self.pileLast = self.leavesTotal - 1
 		self.leafLast = self.leavesTotal - 1
 		self.productsOfDimensions = tuple(prod(self.mapShape[0:dimension], start=1) for dimension in range(self.dimensionsTotal + inclusive))
-		self.sumsOfProductsOfDimensions = tuple(sum(self.productsOfDimensions[0:aProduct], start=0) for aProduct in range(self.dimensionsTotal + 1 + inclusive))
+		self.sumsOfProductsOfDimensions = tuple(sum(self.productsOfDimensions[0:aProduct], start=0) for aProduct in range(len(self.productsOfDimensions) + inclusive))

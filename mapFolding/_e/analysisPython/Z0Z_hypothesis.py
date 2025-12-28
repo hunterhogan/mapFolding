@@ -4,7 +4,7 @@ from functools import cache
 from gmpy2 import bit_flip, bit_mask, bit_test, is_even
 from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing
-from mapFolding._e import dimensionNearestTail, dimensionNearest首, leafOrigin, 零
+from mapFolding._e import dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, leafOrigin, 零
 from mapFolding._e.algorithms.iff import ImaOddLeaf, nextCrease
 from mapFolding._e.dataBaskets import EliminationState
 from math import log2, prod

@@ -4,14 +4,14 @@
 
 Use this section to tell people about which versions of your project are currently being supported with security updates.
 
-| Version | Supported          |
-| ------- | ------------------ |
+| Version    | Supported          |
+| ---------- | ------------------ |
 | maintained | :white_check_mark: |
-|bolstered| ✅ |
-|affirmed| ✔️ |
-|upheld| ☑️ |
-|advocated| ☑️ |
-|buttressed| :white_check_mark: |
+| bolstered  | ✅                 |
+| affirmed   | ✔️                 |
+| upheld     | ☑️                 |
+| advocated  | ☑️                 |
+| buttressed | :white_check_mark: |
 
 ## Reporting a Vulnerability
 

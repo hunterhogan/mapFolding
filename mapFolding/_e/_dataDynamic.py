@@ -5,12 +5,11 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
 from hunterMakesPy import raiseIfNone, writePython
-from mapFolding import asciiColorReset, asciiColorYellow, decreasing, inclusive, packageSettings
+from mapFolding import ansiColorReset, ansiColorYellowOnBlack, decreasing, inclusive, packageSettings
 from mapFolding._e import (
 	between, consecutive, dimensionFourthNearest首, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首,
-	dimensionThirdNearest首, exclude, howManyDimensionsHaveOddParity, leafInSubHyperplane, leafOrigin,
-	LeafOrPileRangeOfLeaves, pileOrigin, Z0Z_sumsOfProductsOfDimensionsNearest首, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一,
-	首零一二, 首零二)
+	dimensionThirdNearest首, exclude, howManyDimensionsHaveOddParity, leafInSubHyperplane, leafOrigin, pileOrigin,
+	Z0Z_sumsOfProductsOfDimensionsNearest首, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import all_unique
 from operator import add, sub
@@ -75,19 +74,19 @@ def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[tuple[int, ...], tupl
 # ------- Boolean filters for (mathematical) ranges of piles -----------------------------------
 
 @syntacticCurry
-def filterCeiling(pile: int, dimensionsTotal: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
+def filterCeiling(pile: int, dimensionsTotal: int, leaf: int) -> bool:
 	return pile <  int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin)
 
 @syntacticCurry
-def filterFloor(pile: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
+def filterFloor(pile: int, leaf: int) -> bool:
 	return int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile
 
 @syntacticCurry
-def filterParity(pile: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
+def filterParity(pile: int, leaf: int) -> bool:
 	return (pile & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1)
 
 @syntacticCurry
-def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: LeafOrPileRangeOfLeaves) -> bool:
+def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: int) -> bool:
 	if leaf != 首零(dimensionsTotal)+零:
 		return True
 	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
@@ -95,7 +94,7 @@ def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: LeafOrPileRangeOfL
 def getPileRange(state: EliminationState, pile: int) -> Iterator[int]:
 	return iter(_getPileRange(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal))
 @cache
-def _getPileRange(pile: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: LeafOrPileRangeOfLeaves) -> tuple[int, ...]:
+def _getPileRange(pile: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> tuple[int, ...]:
 	if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
 		parityMatch: Callable[[int], bool] = filterParity(pile)
 		pileAboveFloor: Callable[[int], bool] = filterFloor(pile)
@@ -124,7 +123,7 @@ def _getLeafDomain(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], l
 	if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
 		originPinned =  leaf == leafOrigin
 		return range(
-					int(bit_flip(0, dimensionNearestTail(leaf) + 1))									# `start`, first value included in the `range`.
+					int(bit_flip(0, dimensionNearestTail(leaf) + 1))										# `start`, first value included in the `range`.
 						+ howManyDimensionsHaveOddParity(leaf)
 						- 1 - originPinned
 					, int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf)))	# `stop`, first value excluded from the `range`.
@@ -740,7 +739,7 @@ def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:
 	if pathFilename.exists():
 		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))  # noqa: S301
 	else:
-		message: str = f"{asciiColorYellow}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{asciiColorReset}"
+		message: str = f"{ansiColorYellowOnBlack}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
 		sys.stderr.write(message + '\n')
 		dataframeFoldings = None
 	return dataframeFoldings
@@ -841,16 +840,8 @@ def getZ0Z_precedence(state: EliminationState) -> dict[int, dict[int, list[int]]
 def _getZ0Z_precedence(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[int]]]:
 	"""Prototype.
 
-	A hierarchy of facts: each statement is *necessarily* true about statements below it.
-		Corollary: if two statements appear to contradict each other, apply the superior statement to its full scope, and apply
-			the inferior statement only where it does not contradict the superior statement.
-	- `leafOrigin` precedes all other leaves.
-	- `leaf零` precedes all other leaves.
-	- `leaf首零` is preceded by all other leaves.
-
 	Some leaves are always preceded by one or more leaves. Most leaves, however, are preceded by one or more other leaves only if
-	the leaf is in a specific pile. With a few exceptions, the piles at which a leaf has a conditional `leafPredecessor` are at
-	the beginning of the leaf's domain, the end of the leaf's domain, or both.
+	the leaf is in a specific pile.
 	"""
 	state = EliminationState(mapShape)
 	dictionaryDomains: dict[int, range] = getDictionaryLeafDomains(state)

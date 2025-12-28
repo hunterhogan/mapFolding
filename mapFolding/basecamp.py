@@ -265,8 +265,8 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 	match flow:
 		case 'constraintPropagation': from mapFolding._e.algorithms.constraintPropagation import doTheNeedful
 		case 'crease':
-			from mapFolding._e import thisIsA2DnMap
-			if thisIsA2DnMap(state, youMustBeDimensionsTallToPinThis=4):
+			from mapFolding._e import mapShapeIs2上nDimensions
+			if mapShapeIs2上nDimensions(state, youMustBeDimensionsTallToPinThis=4):
 				from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
 			else:
 				message: str = "As of 25 December 2025, this algorithm only works on mapShape = (2,) * n, n >= 4. Did I forget to update this barrier?"

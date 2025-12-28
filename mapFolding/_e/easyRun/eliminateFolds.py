@@ -1,11 +1,13 @@
 # ruff: noqa
 # pyright: basic
-from mapFolding import asciiColorReset, dictionaryOEISMapFolding, eliminateFolds
+from mapFolding import (
+	ansiColorGreenOnBlack, ansiColorReset, ansiColors, ansiColorYellowOnRed, dictionaryOEISMapFolding, eliminateFolds)
+from mapFolding._e import between, oopsAllLeaves
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pinning2Dn import (
+from mapFolding._e.pin2上nDimensions import (
 	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles, pinPile首零Less零)
 from os import PathLike
-from pathlib import PurePath
+from pathlib import Path, PurePath
 import sys
 import time
 
@@ -13,13 +15,13 @@ if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
 			f"{(match:=foldsTotal == dictionaryOEISMapFolding[oeisID]['valuesKnown'][n])}\t"
-			f"\033[{31+match}m"
+			f"{(ansiColorYellowOnRed, ansiColorGreenOnBlack)[match]}"
 			f"{n}\t"
 			# f"{mapShape}\t"
 			f"{foldsTotal}\t"
 			f"{dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
-			f"{asciiColorReset}"
+			f"{ansiColorReset}"
 		)
 
 	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
@@ -29,21 +31,21 @@ if __name__ == '__main__':
 	state: EliminationState | None = None
 
 	flow = 'elimination'
-	flow = 'constraintPropagation'
 	flow = 'crease'
+	flow = 'constraintPropagation'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
-	oeisID: str = 'A001415'
 	oeisID: str = 'A000136'
-	oeisID: str = 'A001418'
 	oeisID: str = 'A001417'
+	oeisID: str = 'A001418'
+	oeisID: str = 'A001415'
 
-	sys.stdout.write(f"\033[{30+int(oeisID,11)%8};{40+int(oeisID,12)%8}m{oeisID} ")
-	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
-	sys.stdout.write(asciiColorReset + '\n')
+	sys.stdout.write(f"{ansiColors[int(oeisID,36)%len(ansiColors)]}{oeisID} ")
+	sys.stdout.write(f"{ansiColors[int(flow,36)%len(ansiColors)]}{flow}")
+	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(5,6):
+	for n in range(2,3):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:
@@ -54,6 +56,25 @@ if __name__ == '__main__':
 			# state = pinLeaf首零Plus零(state)
 			# state = pinLeavesDimension二(state)
 			# state = pinLeavesDimension首二(state)
+			if n == 7:
+				pathDataRaw = Path(__file__).parent.parent / "dataRaw"
+				setSequences: set[tuple[int, ...]] = set()
+				indicesToCheck = (0, 1, 2, 3, 4, 124, 125, 126, 127)
+
+				sys.stdout.write(f"Scanning {pathDataRaw} for existing sequences...\n")
+				for pathFilename in pathDataRaw.glob("p2d7s*.csv"):
+					with pathFilename.open('r') as readStream:
+						for line in readStream:
+							parts = line.strip().split(',')
+							setSequences.add(tuple(int(parts[index]) for index in indicesToCheck))
+
+				if setSequences:
+					sys.stdout.write(f"Filtering {len(state.listPermutationSpace)} permutations against {len(setSequences)} existing signatures...\n")
+					state.listPermutationSpace = [
+						leavesPinned for leavesPinned in state.listPermutationSpace
+						if tuple(leavesPinned[pile] for pile in indicesToCheck) not in setSequences
+					]
+					sys.stdout.write(f"Remaining permutations: {len(state.listPermutationSpace)}\n")
 
 		timeStart = time.perf_counter()
 		foldsTotal: int = eliminateFolds(

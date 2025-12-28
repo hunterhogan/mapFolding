@@ -1,6 +1,7 @@
 # ruff: noqa
 from collections import ChainMap
-from mapFolding import dictionaryOEIS, dictionaryOEISMapFolding
+from mapFolding import (
+	ansiColorGreenOnBlack, ansiColorReset, ansiColors, ansiColorYellowOnRed, dictionaryOEIS, dictionaryOEISMapFolding)
 from mapFolding.basecamp import NOTcountingFolds
 import sys
 import time
@@ -11,11 +12,11 @@ if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
 			f"{(match:=countTotal == dictionaryONE[oeisID]['valuesKnown'][n])}\t"
-			f"\033[{(not match)*91}m"
+			f"{(ansiColorYellowOnRed, ansiColorGreenOnBlack)[match]}"
 			f"{n}\t"
 			f"{countTotal}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
-			"\033[0m\n"
+			f"{ansiColorReset}\n"
 		)
 
 	CPUlimit: bool | float | int | None = -2
@@ -26,14 +27,10 @@ if __name__ == '__main__':
 
 	flow = 'algorithm'
 	flow = 'theorem2'
-	flow = 'eliminationParallel'
-	flow = 'elimination_combi'
-	flow = 'constraintPropagation'
-	flow = 'elimination'
 
-	sys.stdout.write(f"\033[{30+int(oeisID,11)%8};{40+int(oeisID,12)%8}m{oeisID} ")
-	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
-	sys.stdout.write("\033[0m\n")
+	sys.stdout.write(f"{ansiColors[int(oeisID,36)%len(ansiColors)]}{oeisID} ")
+	sys.stdout.write(f"{ansiColors[int(flow,36)%len(ansiColors)]}{flow}")
+	sys.stdout.write(ansiColorReset + '\n')
 
 	nList: list[int] = []
 	nList.extend(range(7, 11))

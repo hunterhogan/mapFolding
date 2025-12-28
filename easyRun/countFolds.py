@@ -1,7 +1,8 @@
 # ruff: noqa
 # pyright: basic
 from collections.abc import Sequence
-from mapFolding import countFolds, dictionaryOEISMapFolding
+from mapFolding import (
+	ansiColorGreenOnBlack, ansiColorReset, ansiColors, ansiColorYellowOnRed, countFolds, dictionaryOEISMapFolding)
 from os import PathLike
 from pathlib import PurePath
 import sys
@@ -11,12 +12,12 @@ if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
 			f"{(match:=foldsTotal == dictionaryOEISMapFolding[oeisID]['valuesKnown'][n])}\t"
-			f"\033[{(not match)*91}m"
+			f"{(ansiColorYellowOnRed, ansiColorGreenOnBlack)[match]}"
 			f"{n}\t"
 			f"{foldsTotal}\t"
 			f"{dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
-			"\033[0m\n"
+			f"{ansiColorReset}\n"
 		)
 
 	listDimensions: Sequence[int] | None = None
@@ -36,9 +37,9 @@ if __name__ == '__main__':
 	oeisID: str = 'A001418'
 	oeisID: str = 'A001417'
 
-	sys.stdout.write(f"\033[{30+int(oeisID,11)%8};{40+int(oeisID,12)%8}m{oeisID} ")
-	sys.stdout.write(f"\033[{31+int(flow,35)%7};{41+int(flow,36)%7}m{flow}")
-	sys.stdout.write("\033[0m\n")
+	sys.stdout.write(f"{ansiColors[int(oeisID,36)%len(ansiColors)]}{oeisID} ")
+	sys.stdout.write(f"{ansiColors[int(flow,36)%len(ansiColors)]}{flow}")
+	sys.stdout.write(ansiColorReset + '\n')
 
 	for n in range(4,7):
 

@@ -3,11 +3,11 @@ from copy import deepcopy
 from functools import reduce
 from gmpy2 import xmpz
 from mapFolding._e import (
-	Folding, get_xmpzPileRangeOfLeaves, getLeavesCreaseBack, getLeavesCreaseNext, oopsAllLeaves, oopsAllPileRangesOfLeaves,
-	pileRangeOfLeavesAND, thisIsA2DnMap, thisIsALeaf)
+	Folding, get_xmpzPileRangeOfLeaves, getLeavesCreaseBack, getLeavesCreaseNext, mapShapeIs2上nDimensions, oopsAllLeaves,
+	oopsAllPileRangesOfLeaves, pileRangeOfLeavesAND, thisIsALeaf)
 from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pinning2Dn import appendLeavesPinnedAtPile, nextLeavesPinnedWorkbench, pinPiles
+from mapFolding._e.pin2上nDimensions import appendLeavesPinnedAtPile, nextLeavesPinnedWorkbench, pinPiles
 from math import factorial
 from operator import ior
 from pprint import pprint
@@ -48,7 +48,7 @@ def _purgeInvalidLeafFoldings(state: EliminationState) -> EliminationState:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-	if not thisIsA2DnMap(state):
+	if not mapShapeIs2上nDimensions(state):
 		return state
 
 	if not state.listPermutationSpace:

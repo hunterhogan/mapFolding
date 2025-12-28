@@ -1,4 +1,5 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
+# NOTE to AI assistants: this module is not representative of my coding style. Most of it is AI generated, but because it's temporary code, I didn't strictly enforce my usual standards.
 from collections.abc import Callable, Iterable, Sequence
 from cytoolz.dicttoolz import valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
@@ -7,15 +8,17 @@ from functools import partial
 from gmpy2 import bit_mask
 from hunterMakesPy import raiseIfNone
 from mapFolding import (
-	asciiColorGreen, asciiColorMagenta, asciiColorRed, asciiColorReset, asciiColorYellow, packageSettings)
+	ansiColorCyanOnBlack, ansiColorGreenOnBlack, ansiColorMagentaOnBlack, ansiColorRedOnWhite, ansiColorReset,
+	ansiColorYellowOnBlack, packageSettings)
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryPileRanges, getLeafDomain, getLeavesCreaseNext, getPileRange,
-	howManyDimensionsHaveOddParity, PermutationSpace, pileOrigin, thisIsALeaf, Z0Z_invert, 零, 首二, 首零, 首零一)
+	howManyDimensionsHaveOddParity, PermutationSpace, pileOrigin, thisIsALeaf, Z0Z_invert,
+	Z0Z_sumsOfProductsOfDimensionsNearest首, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pinning2DnAnnex import beansWithoutCornbread
+from mapFolding._e.pin2上nDimensionsAnnex import beansWithoutCornbread
 from more_itertools import flatten
-from operator import add, mul
+from operator import add, mul, sub
 from pathlib import Path, PurePath
 from pprint import pprint
 from typing import Any, TextIO
@@ -608,12 +611,12 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 			for leavesPinned in listSurplusDictionariesOriginal
 		]
 		if listDictionaryPinned:
-			print(asciiColorYellow, end='')
+			print(ansiColorYellowOnBlack, end='')
 			pprint(listDictionaryPinned[0:5], width=140)
 		else:
-			print(asciiColorGreen, end='')
+			print(ansiColorGreenOnBlack, end='')
 		print(len(listDictionaryPinned), "surplus dictionaries.")
-		print(asciiColorReset, end='')
+		print(ansiColorReset, end='')
 
 		pathFilename = Path(f"{packageSettings.pathPackage}/_e/analysisExcel/p2d{state.dimensionsTotal}SurplusDictionaries.csv")
 
@@ -626,26 +629,26 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 					writerCSV.writerow([leavesPinned.get(pile, '') for pile in listPiles])
 
 		if pinningCoverage.indicesOverlappingLeavesPinned:
-			print(f"{asciiColorRed}{len(pinningCoverage.indicesOverlappingLeavesPinned)} overlapping dictionaries", asciiColorReset)
+			print(f"{ansiColorRedOnWhite}{len(pinningCoverage.indicesOverlappingLeavesPinned)} overlapping dictionaries", ansiColorReset)
 			for indexDictionary in sorted(pinningCoverage.indicesOverlappingLeavesPinned)[0:2]:
 				pprint(leafFilter(thisIsALeaf, state.listPermutationSpace[indexDictionary]), width=140)
 
 		beansOrCornbread: Callable[[PermutationSpace], bool] = beansWithoutCornbread(state)
 		listBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.listPermutationSpace))
 		if listBeans:
-			print(f"{asciiColorMagenta}{len(listBeans)} dictionaries with beans but no cornbread.", asciiColorReset)
+			print(f"{ansiColorMagentaOnBlack}{len(listBeans)} dictionaries with beans but no cornbread.", ansiColorReset)
 			pprint(getLeavesPinnedWithLeafValuesOnly(listBeans[0]), width=140)
 
 		maskUnion: numpy.ndarray = pinningCoverage.maskUnion
 		rowsRequired: int = pinningCoverage.rowsRequired
 		rowsTotal: int = pinningCoverage.rowsTotal
-		color = asciiColorReset
+		color = ansiColorReset
 		if rowsRequired < rowsTotal:
-			color = asciiColorRed
+			color = ansiColorRedOnWhite
 			indicesMissingRows: numpy.ndarray = numpy.flatnonzero(~maskUnion)
 			for indexRow in indicesMissingRows[0:2]:
 				print(color, arrayFoldings[indexRow, :])
-		print(f"{color}Required rows: {rowsRequired}/{rowsTotal}{asciiColorReset}")
+		print(f"{color}Required rows: {rowsRequired}/{rowsTotal}{ansiColorReset}")
 
 def sortP2d7GeneratedCsvFiles() -> None:
 	pathDataRaw: Path = packageSettings.pathPackage / "_e" / "dataRaw"
@@ -841,6 +844,7 @@ if __name__ == '__main__':
 
 		# NOTE works for 9 <= odd piles <= 47
 		# I _think_ I need to be able to pass start/stop to intraDimensionalLeaves
+		# Yes, sort of. `Z0Z_alphaBeta` and `intraDimensionalLeaves` need to be the same function: and I need to be able to tweak all of the parameters.
 
 		@syntacticCurry
 		def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
@@ -881,10 +885,45 @@ if __name__ == '__main__':
 
 			return tuple(sorted(pileRange))
 
+		def Z0Z_getPileRangeEven(state: EliminationState, pile: int) -> Iterable[int]:
+			pileRange: list[int] = []
+
+			for yy in range(3):
+				pileRange.extend(map(
+					partial(add, 1)
+					, (map(
+						partial(mul, state.productsOfDimensions[yy])
+						, Z0Z_alphaBeta(state, alphaStart = 0, betaStop=-(yy))
+				)
+			)
+		)
+	)
+
+			# for yy in range(1):
+			# 	pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy])
+			# 		, Z0Z_alphaBeta(state
+			# 			, alphaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
+			# 			, betaStop=-(yy)
+			# 		))))
+			# for yy in range(1,3):
+			# 	pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
+
+			# dimension origins
+			pileRange.extend(map(partial(add, 1), state.productsOfDimensions[1 + (首零(state.dimensionsTotal)+零 < pile):dimensionNearest首(pile+1)]))
+			# inverse dimension origins: 62, 61, 59, 55, 47, 31
+			pileRange.extend(map(partial(Z0Z_invert, state), map(partial(add, 1), state.productsOfDimensions[1:state.dimensionsTotal])))
+
+			return tuple(sorted(pileRange))
+
+		for pile in range(首一(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
+			print(pile, (real:=tuple(getPileRange(state, pile))) == (computed:=Z0Z_getPileRangeEven(state, pile)), end=': ')
+			# print(f"{ansiColorGreen}surplus: {set(computed).difference(real)}", f"{ansiColorMagenta}missing: {set(real).difference(computed)}{ansiColorReset}", sep='\n')
+			pprint(f"{computed=}", width=180)
+
 		for pile in range(首二(state.dimensionsTotal)+零, 首零一(state.dimensionsTotal), 2):
-			print(pile, (ll:=tuple(getPileRange(state, pile))) == (zz:=Z0Z_getPileRange(state, pile)), end=': ')
-			# print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
-			pprint(zz, width=180)
+			print(pile, (real:=tuple(getPileRange(state, pile))) == (computed:=Z0Z_getPileRange(state, pile)), end=': ')
+			# print(f"surplus: {set(computed).difference(real)}", f"missing: {set(real).difference(computed)}", sep='\n')
+			pprint(f"{computed=}", width=180)
 
 			# > 32: matches most tail0s != 1
 			# if pile > 32:
@@ -896,14 +935,13 @@ if __name__ == '__main__':
 			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			# pprint(zz, width=180)
 
-	# state = EliminationState((2,) * 6)
+	state = EliminationState((2,) * 6)
 	# print(measureEntropy(state))
 
-	# getZ0Z_precedence(state)
 	# leaf33 is wrong because of step = 4.
 	# leaf33 and leaf49 are already known from prior analysis.
 	# dictionaryPilesAtDomainEnds = getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state)
-	# print(asciiColorCyan + 'dictionaryPilesAtDomainEnds' + asciiColorReset)
+	# print(ansiColorCyan + 'dictionaryPilesAtDomainEnds' + ansiColorReset)
 	# pprint(dictionaryPilesAtDomainEnds, width=140)
 	# pprint(getZ0Z_precedence(state), width=380, compact=True)
 	# pprint(getZ0Z_successor(state), width=380, compact=True)

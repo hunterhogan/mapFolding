@@ -1,3 +1,4 @@
+from operator import getitem
 from collections.abc import Callable, Iterable, Iterator
 from cytoolz.dicttoolz import assoc as associate, valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
@@ -5,7 +6,7 @@ from cytoolz.itertoolz import groupby as toolz_groupby
 from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
-	between, DOTvalues, get_mpzAntiPileRangeOfLeaves, getLeaf, getLeafDomain, getPileRange, leafIsNotPinned,
+	between, DOTvalues, Folding, get_mpzAntiPileRangeOfLeaves, getLeaf, getLeafDomain, getPileRange, leafIsNotPinned,
 	LeafOrPileRangeOfLeaves, oopsAllLeaves, PermutationSpace, pileIsOpen, pileRangeOfLeavesAND, thisIsALeaf)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten, map_if
@@ -112,7 +113,7 @@ def atPilePinLeaf(leavesPinned: PermutationSpace, pile: int, leaf: int) -> Permu
 	return associate(leavesPinned, pile, leaf)
 
 # TODO more flexible.
-def makeFolding(leavesPinned: PermutationSpace, leavesToInsert: tuple[int, ...]) -> tuple[int, ...]:
+def makeFolding(leavesPinned: PermutationSpace, leavesToInsert: tuple[int, ...]) -> Folding:
 	permutand: Iterator[int] = iter(leavesToInsert)
 	pilesTotal: int = len(oopsAllLeaves(leavesPinned)) + len(leavesToInsert)
 	return tuple([
@@ -381,7 +382,7 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: in
 	deconstructLeavesPinned : Performs the expansion for one dictionary.
 	pinLeafAtPile : Complementary operation that forces a leaf at a pile.
 	"""
-	return deconstructListPermutationSpaceAtPile(_segregateLeafPinnedAtPile(list(listPermutationSpace), leaf, pile)[0], pile, leavesToPin)
+	return deconstructListPermutationSpaceAtPile(getitem(_segregateLeafPinnedAtPile(list(listPermutationSpace), leaf, pile), 0), pile, leavesToPin)
 
 def requireLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], leaf: int, pile: int) -> list[PermutationSpace]:
 	"""In every `PermutationSpace` dictionary, ensure `leaf`, and *only* `leaf`, is pinned at `pile`: excluding every other `leaf` at `pile`.

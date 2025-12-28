@@ -8,17 +8,14 @@ from mapFolding import inclusive
 from mapFolding._e import LeafOrPileRangeOfLeaves, PermutationSpace, 零
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import all_unique, always_reversible, consecutive_groups, extract
-from operator import iand
-from typing import Any, Protocol, TypeGuard
+from operator import getitem, iand
+from typing import Any, Protocol, Self, TypeGuard
 
 class _Ordinals(Protocol):
-	"""Protocol for types that support ordering comparisons."""
+	"""Any Python `object` `type` that may be ordered before or after a comparable `object` `type` using a less-than-or-equal-to comparison."""
 
-	def __le__(self, other: "_Ordinals", /) -> bool:
-		"""Less than or equal to comparison."""
-		...
-	def __ge__(self, other: "_Ordinals", /) -> bool:
-		"""Greater than or equal to comparison."""
+	def __le__(self, not_self_selfButSelfSelf_youKnow: Self, /) -> bool:
+		"""Comparison by "***l***ess than or ***e***qual to"."""
 		...
 
 # ======= Boolean filters ================================================
@@ -264,24 +261,20 @@ def Z0Z_JeanValjean(p24601: xmpz) -> int | xmpz | None:
 
 # ======= Workbench functions ===============================================
 
-def DOTvalues[个](dictionary: dict[Any, 个]) -> Iterator[个]:
-	"""Return the list of values from a dictionary (generic over type parameter `个`).
+def DOTvalues[个](dictionary: Mapping[Any, 个], /) -> Iterator[个]:
+	"""Analogous to `dict.values()`: create an `Iterator` with the "values" from `dictionary`.
 
 	Parameters
 	----------
-	dictionary : dict[Any, 个]
+	dictionary : Mapping[Any, 个]
 		Source mapping.
 
 	Returns
 	-------
-	list[个]
-		List of the dictionary's values.
-
-	See Also
-	--------
-	deconstructLeavesPinned, deconstructListPermutationSpace
+	aRiverOfValues : Iterator[个]
+		`Iterator` of values from `dictionary`.
 	"""
-	yield from dictionary.values()
+	return iter(dictionary.values())
 
 def exclude[个](flatContainer: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
 	"""Yield items from `flatContainer` whose positions are not in `indices`."""
@@ -312,7 +305,7 @@ def Z0Z_invert(state: EliminationState, integerNonnegative: int) -> int:
 	return _Z0Z_invert(state.dimensionsTotal, integerNonnegative)
 @cache
 def _Z0Z_invert(dimensionsTotal: int, integerNonnegative: int) -> int:
-	anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -330,6 +323,6 @@ def Z0Z_sumsOfProductsOfDimensionsNearest首(state: EliminationState, dimensionF
 
 # ======= Flow control ================================================
 
-def thisIsA2DnMap(state: EliminationState, *, youMustBeDimensionsTallToPinThis: int = 3) -> bool:
+def mapShapeIs2上nDimensions(state: EliminationState, *, youMustBeDimensionsTallToPinThis: int = 3) -> bool:
 	return (youMustBeDimensionsTallToPinThis <= state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)
 
