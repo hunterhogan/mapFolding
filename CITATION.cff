@@ -25,35 +25,16 @@ identifiers:
 keywords:
 - A001415
 - A001417
-- arch configurations
-- AST manipulation
-- closed meandric numbers
+- Abstract Syntax Tree
+- AST
 - combinatorial geometry
-- combinatorial mathematics
 - combinatorics
 - computational combinatorics
 - computational geometry
-- crossing patterns
-- curve crossings
-- discrete mathematics
-- folding pattern enumeration
-- folding problems
-- integer sequences
-- labeled stamp folding
 - map folding
-- mapFolding
-- meander enumeration
 - meanders
-- meandric systems
 - OEIS
-- open meandric systems
-- paper folding mathematics
-- semi-meanders
 - stamp folding
-- symbolic computation
-- symmetric foldings
-- topological combinatorics
-- topological patterns
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
