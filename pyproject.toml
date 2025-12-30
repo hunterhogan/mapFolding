@@ -9,35 +9,16 @@ authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 keywords = [
   "A001415",
   "A001417",
-  "arch configurations",
-  "AST manipulation",
-  "closed meandric numbers",
+  "Abstract Syntax Tree",
+  "AST",
   "combinatorial geometry",
-  "combinatorial mathematics",
   "combinatorics",
   "computational combinatorics",
   "computational geometry",
-  "crossing patterns",
-  "curve crossings",
-  "discrete mathematics",
-  "folding pattern enumeration",
-  "folding problems",
-  "integer sequences",
-  "labeled stamp folding",
   "map folding",
-  "mapFolding",
-  "meander enumeration",
   "meanders",
-  "meandric systems",
   "OEIS",
-  "open meandric systems",
-  "paper folding mathematics",
-  "semi-meanders",
   "stamp folding",
-  "symbolic computation",
-  "symmetric foldings",
-  "topological combinatorics",
-  "topological patterns",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -46,7 +27,6 @@ classifiers = [
   "Intended Audience :: Education",
   "Intended Audience :: Science/Research",
   "Natural Language :: English",
-  "Operating System :: MacOS",
   "Operating System :: OS Independent",
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python",
@@ -54,6 +34,7 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Topic :: Scientific/Engineering :: Information Analysis",
   "Topic :: Scientific/Engineering :: Mathematics",
@@ -74,6 +55,7 @@ dependencies = [
   "more_itertools",
   "numpy",
   "platformdirs",
+  "tqdm",
 ]
 optional-dependencies = { development = [
   "gmpy2-stubs",
@@ -86,8 +68,9 @@ optional-dependencies = { development = [
 ], numba = [
   "numba",
   "numba_progress",
+], ortools = [
+  "ortools; python_version < '3.14'",
 ], pandas = [
-  "ortools",
   "pandas",
   "pyarrow",
 ], sympy = [
@@ -117,12 +100,13 @@ report = { exclude_lines = [
 run = { branch = true, concurrency = [
   "multiprocessing",
 ], data_file = "tests/coverage/.coverage", omit = [
-  "easyRun/**",
+  "**/easyRun/**",
+  "**/tests/*",
   "getLLVMforNoReason.py",
+  "mapFolding/algorithms/symmetricFolds.py",
   "mapFolding/reference/*",
-  "mapFolding/tests/*",
-  "zCuzDocStoopid*.py",
   "Z0Z_*",
+  "zCuzDocStoopid*.py",
 ], parallel = true, source = [
   ".",
 ] }
@@ -133,8 +117,10 @@ log_auto_indent = "On"
 testpaths = ["mapFolding/tests"]
 
 [tool.pytest_env]
+# https://github.com/hunterhogan/mapFolding/issues/20
+# Re-confirmed: numba Version: 0.63.1 2025 December 30
 # NUMBA_JIT_COVERAGE = "1" # This does not work, whether it is 0 or 1.
-# NUMBA_DISABLE_JIT = "1"
+# NUMBA_DISABLE_JIT = "1" # This is the only way to get coverage data
 
 [tool.setuptools]
 package-data = { "*" = ["py.typed"] }

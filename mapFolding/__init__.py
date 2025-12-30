@@ -13,7 +13,7 @@ from mapFolding._semiotics import (
 	ansiColorWhiteOnBlue as ansiColorWhiteOnBlue, ansiColorWhiteOnMagenta as ansiColorWhiteOnMagenta,
 	ansiColorWhiteOnRed as ansiColorWhiteOnRed, ansiColorYellowOnBlack as ansiColorYellowOnBlack,
 	ansiColorYellowOnBlue as ansiColorYellowOnBlue, ansiColorYellowOnRed as ansiColorYellowOnRed, decreasing as decreasing,
-	inclusive as inclusive)
+	inclusive as inclusive, zeroIndexed as zeroIndexed)
 
 # isort: split
 from mapFolding._theTypes import (
@@ -40,9 +40,6 @@ from mapFolding.filesystemToolkit import (
 	getFilenameFoldsTotal as getFilenameFoldsTotal, getPathFilenameFoldsTotal as getPathFilenameFoldsTotal,
 	getPathRootJobDEFAULT as getPathRootJobDEFAULT, saveFoldsTotal as saveFoldsTotal,
 	saveFoldsTotalFAILearly as saveFoldsTotalFAILearly)
-
-# isort: split
-from mapFolding.basecamp import countFolds as countFolds, eliminateFolds as eliminateFolds
 
 # isort: split
 from mapFolding.oeis import (

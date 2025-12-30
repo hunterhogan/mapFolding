@@ -1,8 +1,8 @@
 # ruff: noqa
 # pyright: basic
 from collections.abc import Sequence
-from mapFolding import (
-	ansiColorGreenOnBlack, ansiColorReset, ansiColors, ansiColorYellowOnRed, countFolds, dictionaryOEISMapFolding)
+from mapFolding import ansiColorGreenOnBlack, ansiColorReset, ansiColors, ansiColorYellowOnRed, dictionaryOEISMapFolding
+from mapFolding.basecamp import countFolds
 from os import PathLike
 from pathlib import PurePath
 import sys

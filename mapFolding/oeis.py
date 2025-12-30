@@ -27,8 +27,9 @@ completes the journey from configuration foundation to mathematical discovery.
 from datetime import datetime, timedelta, UTC
 from hunterMakesPy import writeStringToHere
 from itertools import chain
-from mapFolding import countFolds, MetadataOEISid, MetadataOEISidMapFolding, packageSettings
+from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, packageSettings
 from mapFolding._theSSOT import pathCache
+from mapFolding.basecamp import countFolds
 from pathlib import Path
 from typing import Final
 from urllib.request import urlopen
@@ -36,9 +37,6 @@ import argparse
 import sys
 import time
 import warnings
-
-oeisIDsImplemented: Final[list[str]]  = sorted([oeisID.upper().strip() for oeisID in packageSettings.OEISidMapFoldingManuallySet])
-"""Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
 def _standardizeOEISid(oeisID: str) -> str:
 	"""Standardize an OEIS sequence ID to uppercase and without whitespace.
@@ -55,6 +53,9 @@ def _standardizeOEISid(oeisID: str) -> str:
 
 	"""
 	return str(oeisID).upper().strip()
+
+oeisIDsImplemented: Final[list[str]]  = sorted(map(_standardizeOEISid, packageSettings.OEISidMapFoldingManuallySet))
+"""Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
 def _getFilenameOEISbFile(oeisID: str) -> str:
 	"""Generate the filename for an OEIS b-file given a sequence ID.

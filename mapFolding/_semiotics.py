@@ -4,6 +4,8 @@ decreasing: int = -1
 """Adjust the value due to Python syntax."""
 inclusive: int = 1
 """Include the last value in a `range`: change from [p, q) to [p, q]."""
+zeroIndexed: int = 1
+"""Adjust the value due to Python syntax."""
 
 # ------- Some color for printing text to the terminal -------
 # Many values and options at https://gist.github.com/JBlond/2fea43a3049b38287e5e9cefc87b2124

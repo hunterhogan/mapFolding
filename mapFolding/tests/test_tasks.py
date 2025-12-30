@@ -28,7 +28,8 @@ compatibility and proper resource isolation between test processes.
 from collections.abc import Callable
 from hunterMakesPy.pytestForYourUse import PytestFor_defineConcurrencyLimit
 from mapFolding import (
-	countFolds, defineProcessorLimit, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions, validateListDimensions)
+	defineProcessorLimit, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions, validateListDimensions)
+from mapFolding.basecamp import countFolds
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import Literal
 import multiprocessing

@@ -24,9 +24,13 @@ solutions to their map folding challenges.
 from mapFolding import packageSettings
 from os import PathLike
 from pathlib import Path, PurePath
-from sys import modules as sysModules
+from sys import modules as sysModules, stdout
+from typing import TYPE_CHECKING
 import os
 import platformdirs
+
+if TYPE_CHECKING:
+	from io import TextIOWrapper
 
 def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""Create a standardized filename for a computed `foldsTotal` value.
@@ -173,18 +177,18 @@ def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> N
 		_saveFoldsTotal(pathFilename, foldsTotal)
 	except Exception as ERRORmessage:  # noqa: BLE001
 		try:
-			print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal = }\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")  # noqa: T201
-			print(ERRORmessage)  # noqa: T201
-			print(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal = }\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")  # noqa: T201
-			randomnessPlanB = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
-			filenameInfixUnique = ''.join(randomnessPlanB)
-			pathFilenamePlanB = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')  # noqa: PTH109, PTH118
-			writeStreamFallback = open(pathFilenamePlanB, 'w')  # noqa: PTH123, SIM115
+			stdout.write(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal = }\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
+			stdout.writelines(str(ERRORmessage))
+			stdout.write(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal = }\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
+			randomnessPlanB: list[str] = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
+			filenameInfixUnique: str = ''.join(randomnessPlanB)
+			pathFilenamePlanB: str = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')  # noqa: PTH109, PTH118
+			writeStreamFallback: TextIOWrapper = open(pathFilenamePlanB, 'w')  # noqa: PTH123, SIM115
 			writeStreamFallback.write(str(foldsTotal))
 			writeStreamFallback.close()
-			print(str(pathFilenamePlanB))  # noqa: T201
+			stdout.write(str(pathFilenamePlanB))
 		except Exception:  # noqa: BLE001
-			print(foldsTotal)  # noqa: T201
+			stdout.write(str(foldsTotal))
 
 def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
 	"""Preemptively test file write capabilities before beginning computation.
@@ -220,7 +224,7 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
 
 	"""
 	if Path(pathFilename).exists():
-		message = f"`{pathFilename = }` exists: a battle of overwriting might cause tears."
+		message: str = f"`{pathFilename = }` exists: a battle of overwriting might cause tears."
 		raise FileExistsError(message)
 	if not Path(pathFilename).parent.exists():
 		message = f"I received `{pathFilename = }` 0.000139 seconds ago from a function that promised it created the parent directory, but the parent directory does not exist. Fix that now, so your computation doesn't get deleted later. And be compassionate to others."
