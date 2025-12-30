@@ -114,9 +114,11 @@ def test_getLeafDomainsCombined(domainFunction: Callable[[EliminationState], Seq
 	state = EliminationState(mapShape=mapShape)
 	domainActual: tuple[tuple[int, ...], ...] = tuple(domainFunction(state))
 	attributeName: str = f"listDomain2D{dimensionsTotal}"
+# TODO Do not store the static data in a format you don't want!
 	domainExpected: Sequence[tuple[int, ...]] = getattr(moduleExpected, attributeName)
-	setActual: set[tuple[int, ...]] = set(domainActual)
 	setExpected: set[tuple[int, ...]] = set(domainExpected)
+# TODO This is WRONG. If `domainActual` has duplicates, this test will not detect the duplicates.
+	setActual: set[tuple[int, ...]] = set(domainActual)
 	missingTuplesFull: list[tuple[int, ...]] = sorted(setExpected.difference(setActual))
 	if missingTuplesFull:
 		pytest.fail(

@@ -40,7 +40,7 @@ def test_Z0Z_excluder(dimensionsTotal: int, pileLast: int, leavesPinned: dict[in
 			}
 		}
 	}
-	monkeypatch.setattr("mapFolding._e.pinning2DnAnnex.dictionary2d6AtPileLeafExcludedByPile", stubLookup)
+	monkeypatch.setattr("mapFolding._e.pin2上nDimensionsAnnex.dictionary2d6AtPileLeafExcludedByPile", stubLookup)
 
 	result = Z0Z_excluder(state)
 	assert result == expectedResult

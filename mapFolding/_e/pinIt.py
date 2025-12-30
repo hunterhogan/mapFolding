@@ -1,15 +1,15 @@
-from operator import getitem
 from collections.abc import Callable, Iterable, Iterator
-from cytoolz.dicttoolz import assoc as associate, valfilter as leafFilter
+from cytoolz.dicttoolz import assoc as associate
 from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
 from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
-	between, DOTvalues, Folding, get_mpzAntiPileRangeOfLeaves, getLeaf, getLeafDomain, getPileRange, leafIsNotPinned,
-	LeafOrPileRangeOfLeaves, oopsAllLeaves, PermutationSpace, pileIsOpen, pileRangeOfLeavesAND, thisIsALeaf)
+	between, DOTvalues, Folding, getLeaf, getLeafDomain, getPileRange, leafIsNotPinned, oopsAllLeaves, PermutationSpace,
+	pileIsOpen, thisIsALeaf)
 from mapFolding._e.dataBaskets import EliminationState
-from more_itertools import flatten, map_if
+from more_itertools import flatten, ilen
+from operator import getitem
 
 # ======= Boolean filters =======================
 
@@ -114,12 +114,17 @@ def atPilePinLeaf(leavesPinned: PermutationSpace, pile: int, leaf: int) -> Permu
 
 # TODO more flexible.
 def makeFolding(leavesPinned: PermutationSpace, leavesToInsert: tuple[int, ...]) -> Folding:
-	permutand: Iterator[int] = iter(leavesToInsert)
-	pilesTotal: int = len(oopsAllLeaves(leavesPinned)) + len(leavesToInsert)
-	return tuple([
-		leafOrLeafRange if (leafOrLeafRange := getLeaf(leavesPinned, pile)) else next(permutand)
-		for pile in range(pilesTotal)
-	])
+	if leavesToInsert:
+		permutand: Iterator[int] = iter(leavesToInsert)
+		pilesTotal: int = ilen(filter(thisIsALeaf, DOTvalues(leavesPinned))) + len(leavesToInsert)
+		# pilesTotal: int = len(oopsAllLeaves(leavesPinned)) + len(leavesToInsert)  # noqa: ERA001
+		folding: Folding = tuple([
+			leafOrLeafRange if (leafOrLeafRange := getLeaf(leavesPinned, pile)) else next(permutand)
+			for pile in range(pilesTotal)
+		])
+	else:
+		folding = tuple(DOTvalues(oopsAllLeaves(leavesPinned)))
+	return folding
 
 # ======= Deconstruct a `PermutationSpace` dictionary =======
 # This function returns `deconstructedLeavesPinned : dict[int, LeavesPinned]` for pragmatic reasons. I typically deconstruct a
@@ -161,7 +166,7 @@ def deconstructPermutationSpaceByDomainOfLeaf(leavesPinned: PermutationSpace, le
 	"""Pin `leaf` at each open `pile` in the domain of `leaf`.
 
 	Return a `list` of `PermutationSpace` with either `leavesPinned` because `leaf` is already pinned or one `PermutationSpace` for each
-	open `pile` in `leafDomain` with leaf pinned at `pile`.
+	open `pile` in `leafDomain` with `leaf` pinned at `pile`.
 
 	Parameters
 	----------

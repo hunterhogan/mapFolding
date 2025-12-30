@@ -27,8 +27,7 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding import getLeavesTotal, inclusive
-from mapFolding._e import between, PermutationSpace, reverseLookup, 零
-# from mapFolding._e import between, oopsAllLeaves, PermutationSpace, 零
+from mapFolding._e import between, oopsAllLeaves, PermutationSpace, reverseLookup, 零
 from mapFolding._e.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf
@@ -168,7 +167,7 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 
 def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 	"""Return `True` if `state.leavesPinned` has a violation."""
-	# leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in oopsAllLeaves(state.leavesPinned).items()}
+	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in oopsAllLeaves(state.leavesPinned).items()}
 
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
@@ -176,8 +175,8 @@ def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 			leafCrease: int | None = nextCrease(state.mapShape, leaf, dimension)
 			if leafCrease is None:
 				continue
-			# pileCrease: int | None = leafToPile.get(leafCrease)
-			pileCrease: int | None = reverseLookup(state.leavesPinned, leafCrease)
+			pileCrease: int | None = leafToPile.get(leafCrease)
+			# pileCrease: int | None = reverseLookup(state.leavesPinned, leafCrease)
 			if pileCrease is None:
 				continue
 			listPileCreaseByParity[ImaOddLeaf(state.mapShape, leaf, dimension)].append((pile, pileCrease))

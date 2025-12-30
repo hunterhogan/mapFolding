@@ -1,11 +1,10 @@
-from gmpy2 import xmpz
+from gmpy2 import mpz
 
 type Folding = tuple[int, ...]
 """`leaf` indexed to `pile`."""
 
 # NOTE HEY!!! When you change the name of this again, delete `type ` or VS Code will not do a global update.
-type LeafOrPileRangeOfLeaves = int | xmpz
-"""In `gmpy2`, the ONLY way to modify an `xmpz` object without converting it to another type is to use in-place operations, such as indexing, slicing, `^=`, or `operator.iand()`."""
+type LeafOrPileRangeOfLeaves = int | mpz
 
 # NOTE HEY!!! When you change the name of this again, delete `type ` or VS Code will not do a global update.
 type PermutationSpace = dict[int, LeafOrPileRangeOfLeaves]

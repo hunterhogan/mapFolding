@@ -3,8 +3,8 @@ from copy import deepcopy
 from itertools import combinations, pairwise, product as CartesianProduct
 from mapFolding import decreasing, packageSettings
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseNext,
-	leafOrigin, PermutationSpace, pileOrigin, thisIsALeaf, thisIsAPileRangeOfLeaves, 零)
+	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getIteratorOfLeaves,
+	getLeavesCreaseNext, leafOrigin, PermutationSpace, pileOrigin, thisIsALeaf, thisIsAPileRangeOfLeaves, 零)
 from mapFolding._e.dataBaskets import EliminationState
 from math import factorial, prod
 from more_itertools import iter_index, unique
@@ -27,7 +27,7 @@ def findValidFoldings(state: EliminationState) -> int:
 		if thisIsALeaf(leafOrLeafRange):
 			model.Add(listLeavesInPileOrder[pile] == leafOrLeafRange)
 		elif thisIsAPileRangeOfLeaves(leafOrLeafRange):
-			model.AddAllowedAssignments([listLeavesInPileOrder[pile]], [(leaf,) for leaf in leafOrLeafRange.iter_set(stop=state.leavesTotal)])
+			model.AddAllowedAssignments([listLeavesInPileOrder[pile]], [(leaf,) for leaf in getIteratorOfLeaves(leafOrLeafRange)])
 
 # ------- Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal -----------------------------
 	model.Add(listLeavesInPileOrder[pileOrigin] == leafOrigin)
@@ -40,7 +40,7 @@ def findValidFoldings(state: EliminationState) -> int:
 				k, r = (prod(state.mapShape[0:dimension]) for dimension in (dimensionAlpha, dimensionBeta))
 				model.Add(listPilingsInLeafOrder[k] < listPilingsInLeafOrder[r])
 
-# ------- Rules for 2^d maps -----------------------------
+# ------- Rules for 2^n-dimensional maps -----------------------------
 	if (state.dimensionsTotal > 2) and all(dimensionLength == 2 for dimensionLength in state.mapShape):
 		dictionaryLeafDomains: Final[dict[int, range]] = getDictionaryLeafDomains(state)
 		for leaf, domain in dictionaryLeafDomains.items():

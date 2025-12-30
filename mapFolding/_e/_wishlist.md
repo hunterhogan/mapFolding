@@ -27,6 +27,14 @@ In Z0Z_literature\Lunnon1971.txt, I have transcribed most of the image-only PDF 
 
 ## Development tools
 
+### grepWin and WinMerge
+
+Integrate grepWin and WinMerge. Maybe nirSoft searchMyFiles, too.
+
+### ss64.com knowledge
+
+Batch file support sucks.
+
 ### VS Code importing deprecated types from typing instead of collections
 
 Fix that shit already. I'm waiting for a reboot to confirm, but I might have a workaround. When I first install a venv, Pylance

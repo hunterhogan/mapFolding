@@ -1,16 +1,12 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
-from copy import deepcopy
-from functools import reduce
-from gmpy2 import xmpz
 from mapFolding._e import (
-	Folding, get_xmpzPileRangeOfLeaves, getLeavesCreaseBack, getLeavesCreaseNext, mapShapeIs2上nDimensions, oopsAllLeaves,
-	oopsAllPileRangesOfLeaves, pileRangeOfLeavesAND, thisIsALeaf)
+	Folding, getIteratorOfLeaves, getLeavesCreaseBack, getLeavesCreaseNext, getPileRangeOfLeaves, mapShapeIs2上nDimensions,
+	pileRangeOfLeavesAND, thisIsALeaf)
 from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensions import appendLeavesPinnedAtPile, nextLeavesPinnedWorkbench, pinPiles
+from mapFolding._e.pinIt import makeFolding
 from math import factorial
-from operator import ior
-from pprint import pprint
 from tqdm import tqdm
 from typing import TYPE_CHECKING
 
@@ -22,12 +18,12 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 	while state.leavesPinned:
 		pileRangeOfLeaves = state.leavesPinned[state.pile]
 		if thisIsALeaf(leaf := state.leavesPinned.get(state.pile - 1)):
-			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, get_xmpzPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseNext(state, leaf)))
+			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, getPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseNext(state, leaf)))
 		if thisIsALeaf(leaf := state.leavesPinned.get(state.pile + 1)):
-			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, get_xmpzPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseBack(state, leaf)))
+			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, getPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseBack(state, leaf)))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned.copy())
-		sherpa = appendLeavesPinnedAtPile(sherpa, xmpz(pileRangeOfLeaves).iter_set(start=0, stop=state.leavesTotal))
+		sherpa = appendLeavesPinnedAtPile(sherpa, getIteratorOfLeaves(pileRangeOfLeaves))
 
 		state.listPermutationSpace.extend(sherpa.listPermutationSpace)
 
@@ -39,36 +35,31 @@ def _purgeInvalidLeafFoldings(state: EliminationState) -> EliminationState:
 	listPermutationSpaceCopy: list[PermutationSpace] = state.listPermutationSpace.copy()
 	state.listPermutationSpace = []
 	for leavesPinned in listPermutationSpaceCopy:
-# TODO centralize making Folding
-		folding: Folding = tuple([leavesPinned[pile] for pile in range(state.leavesTotal)])
+		folding: Folding = makeFolding(leavesPinned, ())
 		if thisLeafFoldingIsValid(folding, state.mapShape):
 			state.listPermutationSpace.append(leavesPinned)
-
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Find the quantity of valid foldings for a given map."""
-	if not mapShapeIs2上nDimensions(state):
+	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
 
 	if not state.listPermutationSpace:
 		state = pinPiles(state, 1)
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
-		listClaimTickets: list[Future[EliminationState]] = []
 
 		listPermutationSpaceCopy: list[PermutationSpace] = state.listPermutationSpace.copy()
 		state.listPermutationSpace = []
 
-		for leavesPinned in listPermutationSpaceCopy:
-			stateCopy: EliminationState = deepcopy(state)
-			stateCopy.listPermutationSpace.append(leavesPinned)
-
-			listClaimTickets.append(concurrencyManager.submit(pinByCrease, stateCopy))
+		listClaimTickets: list[Future[EliminationState]] = [
+			concurrencyManager.submit(pinByCrease, EliminationState(state.mapShape, listPermutationSpace=[leavesPinned]))
+			for leavesPinned in listPermutationSpaceCopy
+		]
 
 		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
-			stateClaimed: EliminationState = claimTicket.result()
-			state.listPermutationSpace.extend(stateClaimed.listPermutationSpace)
+			state.listPermutationSpace.extend(claimTicket.result().listPermutationSpace)
 
 	state.Theorem4Multiplier = factorial(state.dimensionsTotal)
 	state.groupsOfFolds = len(state.listPermutationSpace)

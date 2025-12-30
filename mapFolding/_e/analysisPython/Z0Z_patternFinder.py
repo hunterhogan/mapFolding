@@ -12,8 +12,7 @@ from mapFolding import (
 	ansiColorYellowOnBlack, packageSettings)
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryPileRanges, getLeafDomain, getLeavesCreaseNext, getPileRange,
-	howManyDimensionsHaveOddParity, PermutationSpace, pileOrigin, thisIsALeaf, Z0Z_invert,
-	Z0Z_sumsOfProductsOfDimensionsNearest首, 零, 首一, 首二, 首零, 首零一)
+	howManyDimensionsHaveOddParity, PermutationSpace, pileOrigin, thisIsALeaf, Z0Z_invert, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensionsAnnex import beansWithoutCornbread
@@ -827,7 +826,7 @@ def cleanAndSortSequencesCsvFile(state: EliminationState, pathFilename: PurePath
 if __name__ == '__main__':
 	from mapFolding._e import getZ0Z_precedence
 
-	sortEm = True
+	sortEm = False
 	if sortEm:
 		sortP2d7GeneratedCsvFiles()
 		subdivideP2d7s0_1_3_2CsvFile()
@@ -837,6 +836,7 @@ if __name__ == '__main__':
 			cleanAndSortSequencesCsvFile(state, pathFilename)
 
 	# type \apps\mapFolding\mapFolding\_e\dataRaw\p2d7s*.csv | find /c /v ""
+	# 492603 of 562000
 
 	pileRangeByFormula: bool = False
 	if pileRangeByFormula:
@@ -866,7 +866,7 @@ if __name__ == '__main__':
 
 			# 32 < even leaves
 			for yy in range(1):
-				pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy])
+				pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy])
 					, Z0Z_alphaBeta(state
 						, alphaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
 						, betaStop=-(yy)
@@ -874,14 +874,14 @@ if __name__ == '__main__':
 			# ? 32 < odd leaves < 52
 			# ? 32 < odd leaves < 36
 			for yy in range(1,3):
-				pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
+				pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
 			# piles 51, 53, 55 need a higher start.
 			pileRange.extend(state.productsOfDimensions[1 + (首零(state.dimensionsTotal)+零 < pile):dimensionNearest首(pile+1)])
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
 			# pile5 needs a higher start.
-			pileRange.extend(map(partial(Z0Z_invert, state), state.productsOfDimensions[0:state.dimensionsTotal]))
+			pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), state.productsOfDimensions[0:state.dimensionsTotal]))
 
 			return tuple(sorted(pileRange))
 
@@ -900,18 +900,18 @@ if __name__ == '__main__':
 	)
 
 			# for yy in range(1):
-			# 	pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy])
+			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy])
 			# 		, Z0Z_alphaBeta(state
 			# 			, alphaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
 			# 			, betaStop=-(yy)
 			# 		))))
 			# for yy in range(1,3):
-			# 	pileRange.extend(map(partial(Z0Z_invert, state), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
+			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
 			pileRange.extend(map(partial(add, 1), state.productsOfDimensions[1 + (首零(state.dimensionsTotal)+零 < pile):dimensionNearest首(pile+1)]))
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
-			pileRange.extend(map(partial(Z0Z_invert, state), map(partial(add, 1), state.productsOfDimensions[1:state.dimensionsTotal])))
+			pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(add, 1), state.productsOfDimensions[1:state.dimensionsTotal])))
 
 			return tuple(sorted(pileRange))
 

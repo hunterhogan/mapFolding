@@ -80,7 +80,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 
 	(AI generated docstring, which may or may not have been accurate; edited by me, Hunter Hogan, which may or may not have improved it.)
 
-	For 2^d hyperplane maps, each leaf's `leaf` encodes its d-dimensional coordinates in binary (base-2 positional notation). The
+	For 2^n-dimensional hyperplane maps, each leaf's `leaf` encodes its d-dimensional coordinates in binary (base-2 positional notation). The
 	most significant digit (MSD) indicates the dimension nearest the "head", 首, where the coordinate equals 1: it follows that
 	other dimensions closer to the "head" have coordinates equal to 0.
 
@@ -121,7 +121,7 @@ def Z0Z_0NearestTail(state: EliminationState, integerNonnegative: int) -> int:
 	"""Find the 0-indexed position of the least significant zero radix-2 digit in `integerNonnegative`."""
 # NOTE HEY! `Z0Z_invert` is pulling double duty: it sanitizes `integerNonnegative` and inverts it. So if you figure out how to
 # achieve this functionality without calling `Z0Z_invert`, you need to add defensive code here.
-	anInteger: int = Z0Z_invert(state, integerNonnegative)
+	anInteger: int = Z0Z_invert(state.dimensionsTotal, integerNonnegative)
 	return bit_scan1(anInteger) or 0
 
 @cache

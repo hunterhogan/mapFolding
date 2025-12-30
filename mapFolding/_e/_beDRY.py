@@ -1,14 +1,13 @@
 from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
-from cytoolz.dicttoolz import valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
-from functools import cache
-from gmpy2 import bit_mask, mpz, xmpz
+from functools import cache, reduce
+from gmpy2 import bit_clear, bit_mask, bit_set, mpz, xmpz
 from hunterMakesPy import intInnit, raiseIfNone
-from mapFolding import inclusive
+from itertools import accumulate
+from mapFolding import inclusive, zeroIndexed
 from mapFolding._e import LeafOrPileRangeOfLeaves, PermutationSpace, 零
-from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import all_unique, always_reversible, consecutive_groups, extract
-from operator import getitem, iand
+from operator import add, getitem, mul
 from typing import Any, Protocol, Self, TypeGuard
 
 class _Ordinals(Protocol):
@@ -152,7 +151,7 @@ def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> Type
 	"""
 	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, int)
 
-def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[xmpz]:
+def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[mpz]:
 	"""Return True if `leafOrPileRangeOfLeaves` is a pile's range of leaves.
 
 	Parameters
@@ -162,10 +161,10 @@ def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | 
 
 	Returns
 	-------
-	youHaveAPileRange : TypeGuard[xmpz]
+	youHaveAPileRange : TypeGuard[mpz]
 		Congrats, you have a pile range!
 	"""
-	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, xmpz)
+	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, mpz)
 
 # ======= `LeafOrPileRangeOfLeaves` stuff ================================================
 # https://gmpy2.readthedocs.io/en/latest/advmpz.html
@@ -176,33 +175,36 @@ def getLeaf(leavesPinned: PermutationSpace, pile: int, default: int | None = Non
 		return ImaLeaf
 	return default
 
-def getIteratorOfLeaves(pileRangeOfLeaves: xmpz) -> Iterator[int]:
-	"""Return an iterator of leaves in `pileRangeOfLeaves`.
+def getIteratorOfLeaves(pileRangeOfLeaves: mpz) -> Iterator[int]:
+	"""Convert `pileRangeOfLeaves` to an `Iterator` of `type` `int` `leaf`.
 
 	Parameters
 	----------
-	pileRangeOfLeaves : xmpz
-		`xmpz` representing the range of leaves in a pile.
+	pileRangeOfLeaves : mpz
+		An integer with one bit for each `leaf` in `leavesTotal`, plus an extra bit that means "I'm a `pileRangeOfLeaves` not a `leaf`.
 
 	Returns
 	-------
 	iteratorOfLeaves : Iterator[int]
-		Iterator of `leaves` in `pileRangeOfLeaves`.
+		An `Iterator` with one `int` for each `leaf` in `pileRangeOfLeaves`.
 	"""
-	pileRangeOfLeaves[-1] = 0
-	return pileRangeOfLeaves.iter_set()
+	iteratorOfLeaves = xmpz(pileRangeOfLeaves)
+	iteratorOfLeaves[-1] = 0
+	return iteratorOfLeaves.iter_set()
 
-def get_mpzAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> mpz:
-	antiPileRangeOfLeaves = xmpz(bit_mask(leavesTotal + inclusive))
+def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> mpz:
+	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))
+	antiPileRangeOfLeaves: mpz = bit_mask(leavesTotal + inclusive)
 	for leaf in leaves:
-		antiPileRangeOfLeaves[leaf] = 0
-	return mpz(antiPileRangeOfLeaves)
+		antiPileRangeOfLeaves = antiPileRangeOfLeaves.bit_clear(leaf)
+	return antiPileRangeOfLeaves
 
-def get_xmpzPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> xmpz:
-	pileRangeOfLeaves: xmpz = xmpz(0)
-	pileRangeOfLeaves[leavesTotal] = 1
+def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> mpz:
+	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
+	pileRangeOfLeaves: mpz = mpz(0)
+	pileRangeOfLeaves = pileRangeOfLeaves.bit_set(leavesTotal)
 	for leaf in leaves:
-		pileRangeOfLeaves[leaf] = 1
+		pileRangeOfLeaves = pileRangeOfLeaves.bit_set(leaf)
 	return pileRangeOfLeaves
 
 def oopsAllLeaves(leavesPinned: PermutationSpace) -> dict[int, int]:
@@ -218,9 +220,9 @@ def oopsAllLeaves(leavesPinned: PermutationSpace) -> dict[int, int]:
 	dictionaryOfPileLeaf : dict[int, int]
 		Dictionary mapping from `pile` to pinned `leaf` for every pinned leaf in `leavesPinned`.
 	"""
-	return leafFilter(thisIsALeaf, leavesPinned)
+	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in sorted(leavesPinned.items()) if thisIsALeaf(leafOrPileRangeOfLeaves)}
 
-def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, xmpz]:
+def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, mpz]:
 	"""Return a dictionary of all pile-ranges of leaves in `leavesPinned`.
 
 	Parameters
@@ -233,29 +235,26 @@ def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, xmpz]
 	dictionaryOfPilePileRangeOfLeaves : dict[int, xmpz]
 		Dictionary mapping from `pile` to pile-range of leaves for every pile-range of leaves in `leavesPinned`.
 	"""
-	return leafFilter(thisIsAPileRangeOfLeaves, leavesPinned)
+	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in leavesPinned.items() if thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves)}
 
 @syntacticCurry
-def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: mpz, pileRangeOfLeaves: xmpz) -> xmpz:
-	"""Modify `pileRangeOfLeaves` _in place_ by bitwise AND with `pileRangeOfLeavesDISPOSABLE`.
+def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: mpz, pileRangeOfLeaves: mpz) -> mpz:
+	"""Modify `pileRangeOfLeaves` by bitwise AND with `pileRangeOfLeavesDISPOSABLE`.
 
 	Important
 	---------
-	- As of 25 December 2025, `pileRangeOfLeaves &= pileRangeOfLeavesDISPOSABLE` does ***not*** reliably compute the correct value.
-	- The order of the parameters is likely the opposite of what you expect. This is to facilitate currying.
-
-	See Also
-	--------
-	https://gmpy2.readthedocs.io/en/latest/advmpz.html
+	The order of the parameters is likely the opposite of what you expect. This is to facilitate currying.
 	"""
-	return iand(pileRangeOfLeaves, pileRangeOfLeavesDISPOSABLE)
+	return pileRangeOfLeaves & pileRangeOfLeavesDISPOSABLE
 
-def Z0Z_JeanValjean(p24601: xmpz) -> int | xmpz | None:
-	whoAmI: int | xmpz | None = p24601
+def Z0Z_JeanValjean(p24601: mpz) -> int | mpz | None:
+	whoAmI: int | mpz | None = p24601
 	if thisIsAPileRangeOfLeaves(p24601):
 		if p24601.bit_count() == 1:
+			# The pile-range of leaves is null; the only "set bit" is the bit that means "I am a pileRangeOfLeaves."
 			whoAmI = None
 		elif p24601.bit_count() == 2:
+			# Only one `leaf` is in the pile-range of leaves, so convert it to a `type` `int`.
 			whoAmI = raiseIfNone(p24601.bit_scan1())
 	return whoAmI
 
@@ -301,28 +300,57 @@ def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: �
 			return key
 	return None
 
-def Z0Z_invert(state: EliminationState, integerNonnegative: int) -> int:
-	return _Z0Z_invert(state.dimensionsTotal, integerNonnegative)
 @cache
-def _Z0Z_invert(dimensionsTotal: int, integerNonnegative: int) -> int:
+def Z0Z_invert(dimensionsTotal: int, integerNonnegative: int) -> int:
 	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
 	return int(anInteger ^ bit_mask(dimensionsTotal))
 
-def Z0Z_sumsOfProductsOfDimensionsNearest首(state: EliminationState, dimensionFrom首: int | None = None) -> tuple[int, ...]:
+def getProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
+	return tuple(accumulate(mapShape, mul, initial=1))
+
+def getSumsOfProductsOfDimensions(productsOfDimensions: tuple[int, ...]) -> tuple[int, ...]:
+	return tuple(accumulate(productsOfDimensions, add, initial=0))
+
+def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...], dimensionsTotal: int | None = None, dimensionFrom首: int | None = None) -> tuple[int, ...]:
+	"""Get a useful list of numbers.
+
+	This list of numbers is useful because I am using integers as a proxy for Cartesian coordinates in multidimensional space--and
+	because I am trying to abstract the coordinates whether I am enumerating from the origin (0, 0, ..., 0) as represented by the
+	integer 0 or from the "anti-origin", which is represented by an integer: but that integer varies based on the mapShape.
+
+	By using products of dimensions and sums of products of dimensions, I can use the integer-as-coordinate by referencing its
+	relative location in the products and sums of products of dimensions.
+
+	`sumsOfProductsOfDimensionsNearest首` is yet another perspective on these abstractions. Instead of ordering the products in
+	ascending order, I order them descending. Then I sum the descending-ordered products.
+
+	(At least I think that is what I am doing. 2025 December 29.)
+
+	`dimensionFrom首` almost certainly needs a better identifier. The purpose of the parameter is to define the list of products
+	of which I want the sums.
+
+	"""
+	if dimensionsTotal is None:
+		dimensionsTotal = len(productsOfDimensions) - 1
+
 	if dimensionFrom首 is None:
-		dimensionFrom首 = state.dimensionsTotal
-	dimensionNormalizer: int = dimensionFrom首 - (state.dimensionsTotal + 1)
+		dimensionFrom首 = dimensionsTotal
+
+	productsOfDimensionsTruncator: int = dimensionFrom首 - (dimensionsTotal + zeroIndexed)
+
+	productsOfDimensionsFrom首: tuple[int, ...] = productsOfDimensions[0:productsOfDimensionsTruncator][::-1]
+
 	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = tuple(
-		sum(list(reversed(state.productsOfDimensions[0:dimensionNormalizer]))[0:aProduct], start=0)
-											for aProduct in range(len(state.productsOfDimensions) + inclusive + dimensionNormalizer)
+						sum(productsOfDimensionsFrom首[0:aProduct], start=0)
+							for aProduct in range(len(productsOfDimensionsFrom首) + inclusive)
 	)
 	return sumsOfProductsOfDimensionsNearest首
 
 # ======= Flow control ================================================
 
-def mapShapeIs2上nDimensions(state: EliminationState, *, youMustBeDimensionsTallToPinThis: int = 3) -> bool:
-	return (youMustBeDimensionsTallToPinThis <= state.dimensionsTotal) and all(dimensionLength == 2 for dimensionLength in state.mapShape)
+def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsTallToPinThis: int = 3) -> bool:
+	return (youMustBeDimensionsTallToPinThis <= len(mapShape)) and all(dimensionLength == 2 for dimensionLength in mapShape)
 

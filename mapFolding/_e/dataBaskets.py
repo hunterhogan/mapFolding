@@ -1,5 +1,7 @@
 from mapFolding import getLeavesTotal, inclusive
-from mapFolding._e import LeafOrPileRangeOfLeaves, PermutationSpace
+from mapFolding._e import (
+	getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, LeafOrPileRangeOfLeaves,
+	PermutationSpace)
 from math import prod
 import dataclasses
 
@@ -72,7 +74,9 @@ class EliminationState:
 	productsOfDimensions: tuple[int, ...] = dataclasses.field(init=False)
 	"""Unchanging list of products of map dimensions from the product of no dimensions, `[0]`, to the product of all dimensions, `[dimensionsTotal + inclusive]`."""
 	sumsOfProductsOfDimensions: tuple[int, ...] = dataclasses.field(init=False)
-	"""Unchanging list of sums of products of map dimensions from the sum of no products, `[0]`, to the sum of all products, `[dimensionsTotal + 1 + inclusive]`."""
+	"""Unchanging list of sums of products of map dimensions from the sum of no products, `[0]`, to the sum of all products, `[len(productsOfDimensions) + inclusive]`."""
+	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = dataclasses.field(init=False)
+	"""Unchanging list of sums of products of map dimensions starting from the head `首`, from the sum of no products, `[0]`, to the sum of all products, `[len(productsOfDimensions) + inclusive]`."""
 
 	@property
 	def foldsTotal(self) -> int:
@@ -85,5 +89,6 @@ class EliminationState:
 		self.leavesTotal = getLeavesTotal(self.mapShape)
 		self.pileLast = self.leavesTotal - 1
 		self.leafLast = self.leavesTotal - 1
-		self.productsOfDimensions = tuple(prod(self.mapShape[0:dimension], start=1) for dimension in range(self.dimensionsTotal + inclusive))
-		self.sumsOfProductsOfDimensions = tuple(sum(self.productsOfDimensions[0:aProduct], start=0) for aProduct in range(len(self.productsOfDimensions) + inclusive))
+		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
+		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.productsOfDimensions)
+		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)

@@ -1,8 +1,8 @@
 # ruff: noqa
 # pyright: basic
-from mapFolding import (
-	ansiColorGreenOnBlack, ansiColorReset, ansiColors, ansiColorYellowOnRed, dictionaryOEISMapFolding, eliminateFolds)
+from mapFolding import ansiColorGreenOnBlack, ansiColorReset, ansiColors, ansiColorYellowOnRed, dictionaryOEISMapFolding
 from mapFolding._e import between, oopsAllLeaves
+from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensions import (
 	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles, pinPile首零Less零)
@@ -31,21 +31,21 @@ if __name__ == '__main__':
 	state: EliminationState | None = None
 
 	flow = 'elimination'
-	flow = 'crease'
 	flow = 'constraintPropagation'
+	flow = 'crease'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
 	oeisID: str = 'A000136'
-	oeisID: str = 'A001417'
 	oeisID: str = 'A001418'
 	oeisID: str = 'A001415'
+	oeisID: str = 'A001417'
 
 	sys.stdout.write(f"{ansiColors[int(oeisID,36)%len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow,36)%len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(2,3):
+	for n in range(6,7):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:
@@ -53,13 +53,13 @@ if __name__ == '__main__':
 			state = pinPiles(state, 4)
 			# state = pinLeavesDimensions0零一(state)
 			# state = pinPile首零Less零(state)
-			# state = pinLeaf首零Plus零(state)
 			# state = pinLeavesDimension二(state)
 			# state = pinLeavesDimension首二(state)
+
 			if n == 7:
 				pathDataRaw = Path(__file__).parent.parent / "dataRaw"
 				setSequences: set[tuple[int, ...]] = set()
-				indicesToCheck = (0, 1, 2, 3, 4, 124, 125, 126, 127)
+				indicesToCheck = (0, 1, 2, 3, 4, 63, 124, 125, 126, 127)
 
 				sys.stdout.write(f"Scanning {pathDataRaw} for existing sequences...\n")
 				for pathFilename in pathDataRaw.glob("p2d7s*.csv"):

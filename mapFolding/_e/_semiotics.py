@@ -1,7 +1,7 @@
 from functools import cache
-from operator import getitem
 from hunterMakesPy import intInnit
 from math import log
+from operator import getitem
 
 # ======= Using a single-base positional-numeral system as a proxy for Cartesian coordinates =======
 # https://en.wikipedia.org/wiki/Positional_notation
