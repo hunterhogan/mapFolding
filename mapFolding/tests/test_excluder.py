@@ -9,8 +9,8 @@ The tests use `pytest` fixtures and parametrization to ensure flexibility and co
 """
 
 from fractions import Fraction
-from mapFolding._e.analysisPython import theExcluderBeast
-from mapFolding._e.analysisPython.theExcluderBeast import (
+from mapFolding._e.Z0Z_analysisPython import theExcluderBeast
+from mapFolding._e.Z0Z_analysisPython.theExcluderBeast import (
 	_getContiguousEndingAtNegativeOne, _getContiguousFromStart, expressIndexAsFractionAddend, FractionAddend,
 	writeAggregatedExclusions, writeExclusionDataCollated, writeExclusionDictionaries)
 from mapFolding._e.dataBaskets import EliminationState
@@ -141,8 +141,8 @@ def test_writeExclusionDictionaries_createsFile(path_tmpTesting: Path) -> None:
 	# This function calls loadAggregatedExclusions which looks for files in pathExclusionData.
 	# We need to ensure there are files there or mock loadAggregatedExclusions.
 
-	with patch("mapFolding._e.analysisPython.theExcluderBeast.pathExclusionData", path_tmpTesting), \
-			patch("mapFolding._e.analysisPython.theExcluderBeast.loadAggregatedExclusions", return_value={}):
+	with patch("mapFolding._e.Z0Z_analysisPython.theExcluderBeast.pathExclusionData", path_tmpTesting), \
+			patch("mapFolding._e.Z0Z_analysisPython.theExcluderBeast.loadAggregatedExclusions", return_value={}):
 		# It also calls restructureAggregatedExclusionsForMapShape which needs to work with empty dict
 			pathExclusionsFile: Path = path_tmpTesting / "_exclusions.py"
 			pathCreated: PurePath = writeExclusionDictionaries(pathExclusionsFile)

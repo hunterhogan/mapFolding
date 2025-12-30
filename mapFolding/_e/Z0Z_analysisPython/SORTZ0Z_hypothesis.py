@@ -66,13 +66,11 @@ def getDictionaryAddends4Prior(state: EliminationState) -> dict[int, list[int]]:
 		return dictionaryAddends
 	return workhorse(state.mapShape, state.dimensionsTotal, state.leavesTotal)
 
-
-
 if __name__ == '__main__':
 	state = EliminationState((2,) * 5)
 
-	dictionaryAddends4Next = getDictionaryAddends4Next(state)
-	dictionaryAddends4Prior = getDictionaryAddends4Prior(state)
+	dictionaryAddends4Next: dict[int, list[int]] = getDictionaryAddends4Next(state)
+	dictionaryAddends4Prior: dict[int, list[int]] = getDictionaryAddends4Prior(state)
 
 	printThis = False
 

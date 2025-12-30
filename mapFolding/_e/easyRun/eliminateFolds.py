@@ -45,7 +45,7 @@ if __name__ == '__main__':
 	sys.stdout.write(f"{ansiColors[int(flow,36)%len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(6,7):
+	for n in range(5,6):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:

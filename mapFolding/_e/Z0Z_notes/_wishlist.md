@@ -1,5 +1,9 @@
 # Brain dump of things I wish were different
 
+## At cmd, "python" forces a new terminal and it doesn't use the venv
+
+This is a relatively new problem.
+
 ## Decorators, signatures, and docstrings
 
 I wish @cache and @curry didn't obscure the function signature and docstring.
@@ -27,9 +31,9 @@ In Z0Z_literature\Lunnon1971.txt, I have transcribed most of the image-only PDF 
 
 ## Development tools
 
-### grepWin and WinMerge
+### grepWin
 
-Integrate grepWin and WinMerge. Maybe nirSoft searchMyFiles, too.
+Integrate grepWin. Maybe nirSoft searchMyFiles, too.
 
 ### ss64.com knowledge
 
@@ -41,7 +45,7 @@ Fix that shit already. I'm waiting for a reboot to confirm, but I might have a w
 uses the types from pandas in "site-packages", but if I open my pandas stub file that correlates with the pandas class/function in
 my code, then Pylance seems to magically prefer all of my stub files in my directory over "site-packages". And it seems to stay
 that way until I create a new venv. This is despite already setting a value for custom types in Pylance. So I am going to try the
-trick with "C:\apps\mapFolding\typings\stdlib\_collections_abc.pyi".
+trick with "C:\apps\mapFolding\typings\stdlib\_collections_abc.pyi". This did not work.
 
 ### A Python formatter that formats my style
 
@@ -73,11 +77,6 @@ function, I don't want diagnostics about commented out code or print or a bunch 
 ### Reduce the settings files in the repo root
 
 .editorconfig
-
-#### mapFolding.code-workspace
-
-move to "./.vscode"
-mapFolding.code-workspace
 
 #### isort and ruff
 

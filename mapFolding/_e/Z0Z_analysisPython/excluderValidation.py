@@ -4,15 +4,15 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import ansiColorBlackOnCyan, ansiColorReset, ansiColorWhiteOnMagenta
 from mapFolding._e import exclude, getLeafDomain, getPileRange, PermutationSpace
 from mapFolding._e._dataDynamic import getDataFrameFoldings
-from mapFolding._e.analysisPython.theExcluderBeast import (
+from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.pin2上nDimensions import pinPiles
+from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
+from mapFolding._e.Z0Z_analysisPython.theExcluderBeast import (
 	_fractionAddendToIndex, analyzeContiguousEndAbsolute, analyzeContiguousEndRelative, analyzeContiguousStartAbsolute,
 	analyzeContiguousStartRelative, analyzeNonContiguousIndicesRelative, dictionaryFunctionsByName, FractionAddend,
 	loadCollatedIndices, MapKind, restructureAggregatedExclusionsForMapShape, strLeafExcluded, strLeafExcluder,
 	strPileExcluder)
-from mapFolding._e.analysisPython.Z0Z_patternFinder import detectPermutationSpaceErrors, PermutationSpaceStatus
-from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensions import pinPiles
-from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
+from mapFolding._e.Z0Z_analysisPython.toolkit import detectPermutationSpaceErrors, PermutationSpaceStatus
 import numpy
 import sys
 

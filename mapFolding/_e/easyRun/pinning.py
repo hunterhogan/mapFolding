@@ -7,10 +7,10 @@ from gmpy2 import fac, mpz, xmpz
 from mapFolding._e import (
 	DOTvalues, getDictionaryLeafDomains, getDictionaryPileRanges, getLeafDomain, getLeavesCreaseNext, getPileRange,
 	oopsAllPileRangesOfLeaves, PermutationSpace)
-from mapFolding._e.analysisPython.Z0Z_patternFinder import verifyPinning2Dn
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensions import (
 	pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pinPiles, pinPile首零Less零)
+from mapFolding._e.Z0Z_analysisPython.toolkit import verifyPinning2Dn
 from math import prod
 from pprint import pprint
 import time
@@ -46,17 +46,17 @@ if __name__ == '__main__':
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state = pinPiles(state, 4)
-		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		state: EliminationState = pinLeavesDimensions0零一(state)
+		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
+		state = pinPiles(state, 4)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
-		printStatisticsPermutations(state)
-		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
 		state: EliminationState = pinPile首零Less零(state)
+		printStatisticsPermutations(state)
+		print(f"{len(state.listPermutationSpace)=}")
 		state: EliminationState = pinLeavesDimension首二(state)
 		state: EliminationState = pinLeavesDimension二(state)
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))

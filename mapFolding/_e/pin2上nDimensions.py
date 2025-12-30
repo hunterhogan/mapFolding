@@ -1,6 +1,7 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
+from cytoolz.dicttoolz import merge
 from functools import partial
-from hunterMakesPy import raiseIfNone
+from hunterMakesPy import intInnit, raiseIfNone
 from mapFolding import decreasing, defineProcessorLimit
 from mapFolding._e import (
 	getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain首零Plus零Conditional,
@@ -16,6 +17,7 @@ from mapFolding._e.pin2上nDimensionsByCrease import (
 from mapFolding._e.pin2上nDimensionsByDomain import pinPile首零Less零AfterFourthOrder
 from mapFolding._e.pinIt import deconstructPermutationSpaceByDomainOfLeaf, deconstructPermutationSpaceByDomainsCombined
 from more_itertools import interleave_longest
+from operator import getitem
 from tqdm import tqdm
 from typing import TYPE_CHECKING
 
@@ -50,28 +52,38 @@ def pileProcessingOrderDefault(state: EliminationState) -> list[int]:
 
 # ======= Pinning functions ===============================================
 
-def Z0Z_PermutationSpaceBaseline(state: EliminationState) -> EliminationState:
-	state.listPermutationSpace = [{pile: raiseIfNone(Z0Z_JeanValjean(getPileRangeOfLeaves(state.leavesTotal, pileRange)))
-								for pile, pileRange in getDictionaryPileRanges(state).items()}]
+# TODO This function should be in a different module. Creation of `qq` could possibly be a function. To future proof the performance, I probably want to cache `qq`.
+def addPileRangesOfLeaves(state: EliminationState) -> EliminationState:
+	qq: PermutationSpace = {pile: raiseIfNone(Z0Z_JeanValjean(getPileRangeOfLeaves(state.leavesTotal, pileRangeOfLeaves)))
+								for pile, pileRangeOfLeaves in getDictionaryPileRanges(state).items()}
+	state.leavesPinned = merge(qq, state.leavesPinned)
 	return state
 
-def pinPiles(state: EliminationState, order: int = 4, maximumSizeListPermutationSpace: int = 2**10, stopBeforePile: int | None = None) -> EliminationState:
+def pinPiles(state: EliminationState, Z0Z_pileDepth: int = 4, maximumSizeListPermutationSpace: int = 2**10, stopBeforePile: int | None = None) -> EliminationState:
 	"""Pin up to 二 piles at both ends of the sequence without surplus `PermutationSpace` dictionaries."""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
 
 	if not state.listPermutationSpace:
-		state = Z0Z_PermutationSpaceBaseline(state)
+		# NOTE `nextLeavesPinnedWorkbench` can't handle an empty `state.listPermutationSpace`.
+		state.leavesPinned = {}
+		state.listPermutationSpace = [addPileRangesOfLeaves(state).leavesPinned]
 
-	pileProcessingOrder: list[int] = [pileOrigin]
+	depth: int = getitem(intInnit((Z0Z_pileDepth,), 'Z0Z_pileDepth', type[int]), 0)
+	if depth < 0:
+		message: str = f"I received `{Z0Z_pileDepth = }`, but I need a value greater than or equal to 0."
+		raise ValueError(message)
 
-	if 1 <= order:
+	pileProcessingOrder: list[int] = []
+	if 0 < depth:
+		pileProcessingOrder.extend([pileOrigin])
+	if 1 <= depth:
 		pileProcessingOrder.extend([零, state.leavesTotal - 零])
-	if 2 <= order:
+	if 2 <= depth:
 		pileProcessingOrder.extend([一, state.leavesTotal - 一])
-	if 3 <= order:
+	if 3 <= depth:
 		pileProcessingOrder.extend([一+零, state.leavesTotal - (一+零)])
-	if 4 <= order:
+	if 4 <= depth:
 		youMustBeDimensionsTallToPinThis = 4
 		if youMustBeDimensionsTallToPinThis < state.dimensionsTotal:
 			pileProcessingOrder.extend([二])
@@ -119,7 +131,7 @@ def pinPile首零Less零(state: EliminationState, maximumListPermutationSpace: i
 		return state
 
 	if not state.listPermutationSpace:
-		state = pinPiles(state, 1)
+		state = pinPiles(state, 0)
 
 	state = pinPiles(state, 4, maximumListPermutationSpace)
 
@@ -140,11 +152,68 @@ def pinPile首零Less零(state: EliminationState, maximumListPermutationSpace: i
 
 	return state
 
-def processLeavesPinnedByDomain(leavesPinned: PermutationSpace, leaves: tuple[int, ...], leavesDomain: tuple[tuple[int, ...], ...], mapShape: tuple[int, ...]) -> EliminationState:
+def _pinLeavesByDomain(state: EliminationState, leaves: tuple[int, ...], leavesDomain: tuple[tuple[int, ...], ...], *, youMustBeDimensionsTallToPinThis: int = 3, CPUlimit: bool | float | int | None = None) -> EliminationState:
+	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=youMustBeDimensionsTallToPinThis):
+		return state
+
+	if not state.listPermutationSpace:
+		state = pinPiles(state, 0)
+
+	workersMaximum: int = defineProcessorLimit(CPUlimit)
+
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = []
+	qualifiedLeavesPinned: list[PermutationSpace] = []
+
+	Z0Z_assemblyLine: Callable[[PermutationSpace], EliminationState] = partial(_pinLeavesByDomainConcurrentTask, leaves=leaves, leavesDomain=leavesDomain, mapShape=state.mapShape)
+
+	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
+
+		listClaimTickets: list[Future[EliminationState]] = [concurrencyManager.submit(Z0Z_assemblyLine, leavesPinned)
+				for leavesPinned in listPermutationSpace]
+
+		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
+			qualifiedLeavesPinned.extend(claimTicket.result().listPermutationSpace)
+
+	state.listPermutationSpace = qualifiedLeavesPinned
+	return state
+
+def _pinLeavesByDomainConcurrentTask(leavesPinned: PermutationSpace, leaves: tuple[int, ...], leavesDomain: tuple[tuple[int, ...], ...], mapShape: tuple[int, ...]) -> EliminationState:
 	listPermutationSpace: list[PermutationSpace] = deconstructPermutationSpaceByDomainsCombined(leavesPinned, leaves=leaves, leavesDomain=leavesDomain)
 	return removeInvalidPermutationSpace(EliminationState(mapShape=mapShape, listPermutationSpace=listPermutationSpace))
 
-def processLeavesPinned首零Plus零(leavesPinned: PermutationSpace, mapShape: tuple[int, ...]) -> EliminationState:
+def pinLeavesDimension0(state: EliminationState, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
+	"""'Pin' `leafOrigin` and `leaf首零`, which are always fixed in the same piles.
+
+	This function exists 1) for consistency and 2) to explain the algorithm through narrative.
+	"""
+	leaves: tuple[int, int] = (leafOrigin, 首零(state.dimensionsTotal))
+	return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
+
+def pinLeavesDimension零(state: EliminationState, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
+	"""'Pin' `leaf零`, which is always fixed in the same pile, and pin `leaf首零Plus零`: due to the formulas I've figured out (and the formulas I haven't figured out), you should call `pinLeavesDimension一` first."""
+	state = pinPiles(state, 0)
+	return pinLeaf首零Plus零(state, CPUlimit=CPUlimit)
+
+def pinLeaf首零Plus零(state: EliminationState, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
+	"""You need `state.listPermutationSpace`."""
+	workersMaximum: int = defineProcessorLimit(CPUlimit)
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = []
+	qualifiedLeavesPinned: list[PermutationSpace] = []
+	Z0Z_assemblyLine: Callable[[PermutationSpace], EliminationState] = partial(_pinLeaf首零Plus零ConcurrentTask, mapShape=state.mapShape)
+
+	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
+		listClaimTickets: list[Future[EliminationState]] = [concurrencyManager.submit(Z0Z_assemblyLine, leavesPinned)
+				for leavesPinned in listPermutationSpace]
+
+		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
+			qualifiedLeavesPinned.extend(claimTicket.result().listPermutationSpace)
+
+	state.listPermutationSpace = qualifiedLeavesPinned
+	return state
+
+def _pinLeaf首零Plus零ConcurrentTask(leavesPinned: PermutationSpace, mapShape: tuple[int, ...]) -> EliminationState:
 	state: EliminationState = EliminationState(mapShape=mapShape, leavesPinned=leavesPinned.copy())
 	leaf首零一: int = 首零一(state.dimensionsTotal)
 	leaf: int = 首零(state.dimensionsTotal)+零
@@ -154,60 +223,6 @@ def processLeavesPinned首零Plus零(leavesPinned: PermutationSpace, mapShape: t
 		domain首零Plus零 = tuple(getLeafDomain(state, leaf))
 	state.listPermutationSpace = deconstructPermutationSpaceByDomainOfLeaf(leavesPinned, leaf, domain首零Plus零)
 	return removeInvalidPermutationSpace(state)
-
-def _pinLeavesByDomain(state: EliminationState, leaves: tuple[int, ...], leavesDomain: tuple[tuple[int, ...], ...], *, youMustBeDimensionsTallToPinThis: int = 3, CPUlimit: bool | float | int | None = None) -> EliminationState:
-	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=youMustBeDimensionsTallToPinThis):
-		return state
-
-	if not state.listPermutationSpace:
-		state = pinPiles(state, 1)
-
-	workersMaximum: int = defineProcessorLimit(CPUlimit)
-
-	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-	state.listPermutationSpace = []
-	qualifiedLeavesPinned: list[PermutationSpace] = []
-
-	Z0Z_assemblyLine: Callable[[PermutationSpace], EliminationState] = partial(processLeavesPinnedByDomain, leaves=leaves, leavesDomain=leavesDomain, mapShape=state.mapShape)
-
-	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
-
-		listClaimTickets: list[Future[EliminationState]] = [concurrencyManager.submit(Z0Z_assemblyLine, leavesPinned)
-				for leavesPinned in listPermutationSpace]
-
-		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
-			qualifiedLeavesPinned.extend(claimTicket.result().listPermutationSpace)
-
-	state.listPermutationSpace = qualifiedLeavesPinned
-	return state
-
-def pinLeavesDimension0(state: EliminationState) -> EliminationState:
-	"""'Pin' `leafOrigin` and `leaf首零`, which are always fixed in the same piles."""
-	leaves: tuple[int, int] = (leafOrigin, 首零(state.dimensionsTotal))
-	return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),))
-
-def pinLeaf首零Plus零(state: EliminationState, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
-	"""You need `state.listPermutationSpace`."""
-	workersMaximum: int = defineProcessorLimit(CPUlimit)
-	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-	state.listPermutationSpace = []
-	qualifiedLeavesPinned: list[PermutationSpace] = []
-	Z0Z_assemblyLine: Callable[[PermutationSpace], EliminationState] = partial(processLeavesPinned首零Plus零, mapShape=state.mapShape)
-
-	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
-		listClaimTickets: list[Future[EliminationState]] = [concurrencyManager.submit(Z0Z_assemblyLine, leavesPinned)
-				for leavesPinned in listPermutationSpace]
-
-		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
-			qualifiedLeavesPinned.extend(claimTicket.result().listPermutationSpace)
-
-	state.listPermutationSpace = qualifiedLeavesPinned
-	return state
-
-def pinLeavesDimension零(state: EliminationState, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
-	"""'Pin' `leaf零`, which is always fixed in the same pile, and pin `leaf首零Plus零`: due to the formulas I've figured out (and the formulas I haven't figured out), you should call `pinLeavesDimension一` first."""
-	state = pinPiles(state, 1)
-	return pinLeaf首零Plus零(state, CPUlimit=CPUlimit)
 
 def pinLeavesDimension一(state: EliminationState, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
 	"""Pin `leaf一零`, `leaf一`, `leaf首一`, and `leaf首零一` without surplus `PermutationSpace` dictionaries."""

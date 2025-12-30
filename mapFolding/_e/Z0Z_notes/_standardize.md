@@ -17,7 +17,7 @@ It is very easy to miss the purpose of the list brackets--or that the indexer is
 almost certainly has some valuable lessons for this specific index issue. Ironically, or perhaps appropriately, I think the
 relevant code is in class `DOT`; no, wait, I think it's in class `Grab`.
 
-## Unsorted thoughts
+## Semiotics: 2^n-dimensional
 
 2^d, 2Dn, p2d[x]: "d" is not obvious to all readers as "dimension". Define d as dimension wherever it appears.
 
@@ -28,7 +28,6 @@ relevant code is in class `DOT`; no, wait, I think it's in class `Grab`.
 
 ## Consolidate and organize knowledge in "Elimination.md"
 
-- mapFolding\_e\knowledgeDump.py
-- mapFolding\_e\analysisPython\Z0Z_patternFinder.py
 - mapFolding\_e\analysisPython\Z0Z_p2d6.py
 - mapFolding\_e\analysisPython\Z0Z_hypothesis.py
+- mapFolding\_e\knowledgeDump.py
