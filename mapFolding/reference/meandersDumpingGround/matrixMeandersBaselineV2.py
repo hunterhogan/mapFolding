@@ -121,7 +121,6 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 						bifurcationZulu ^= XOrHere2makePair
 
 					# Cases 1, 2, and 3 all compute curveLocationAnalysis
-# TODO https://github.com/hunterhogan/mapFolding/issues/19
 					curveLocationAnalysis = ((bifurcationZulu >> 2) << 1) | bifurcationAlphaShiftRight2 # pyright: ignore[reportPossiblyUnboundVariable]
 					if curveLocationAnalysis < curveLocationsMAXIMUM:
 						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings

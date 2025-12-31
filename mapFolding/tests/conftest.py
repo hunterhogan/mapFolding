@@ -423,6 +423,15 @@ def testCaseOeisValue(request: pytest.FixtureRequest) -> TestCase:
 
 # ------- The second "single source" of truth -----------------------
 
+@pytest.fixture(params=[
+	(2, 2, 2, 2),
+	(2, 2, 2, 2, 2),
+	(2, 2, 2, 2, 2, 2),
+], ids=["2d4", "2d5", "2d6"])
+def mapShape2上nDimensionsStandard(request: pytest.FixtureRequest) -> tuple[int, ...]:
+	"""Provide standard 2^n dimension test shapes: 2d4, 2d5, 2d6."""
+	return request.param
+
 @pytest.fixture
 def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:
 	"""Return one deterministic map shape suitable for code generation tests."""

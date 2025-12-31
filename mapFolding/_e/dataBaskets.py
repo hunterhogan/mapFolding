@@ -90,5 +90,5 @@ class EliminationState:
 		self.pileLast = self.leavesTotal - 1
 		self.leafLast = self.leavesTotal - 1
 		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
-		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.productsOfDimensions)
+		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)

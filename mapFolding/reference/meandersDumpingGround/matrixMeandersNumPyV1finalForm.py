@@ -210,7 +210,6 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		numpy.bitwise_or(curveLocationsGroupAlpha, arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha], out=curveLocationsGroupAlpha)
 		numpy.right_shift(curveLocationsGroupAlpha, 2, out=curveLocationsGroupAlpha)
 # NOTE (groupAlpha >> 2) | (groupZulu << 3) | ((1 - (groupAlpha & 1)) << 1)
-# TODO eliminate temporary arrayLockbox
 		arrayLockbox: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint8]] = numpy.full_like(a=curveLocationsGroupAlpha, fill_value=numpy.uint8(0b111), dtype=numpy.uint8)
 		numpy.bitwise_and(arrayLockbox, curveLocationsGroupAlpha, out=arrayLockbox, dtype=numpy.uint8)
 		numpy.right_shift(curveLocationsGroupAlpha, 3, out=curveLocationsGroupAlpha)
@@ -244,7 +243,6 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 # NOTE (groupAlpha << 2)
 
 		numpy.bitwise_or(curveLocationsGroupZulu, numpy.subtract(numpy.uint64(1), numpy.bitwise_and(arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu], 1)), out=curveLocationsGroupZulu)
-# TODO | (1 - (groupZulu & 1))
 
 # NOTE | (groupZulu >> 1)
 		numpy.left_shift(curveLocationsGroupZulu, 1, out=curveLocationsGroupZulu)

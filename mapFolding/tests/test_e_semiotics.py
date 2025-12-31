@@ -49,81 +49,80 @@ class TestOriginConstants:
 	def test_originConstants(self, actual: int, expected: int, identifier: str) -> None:
 		assert actual == expected, f"Expected {identifier} = {expected}, got {actual}"
 
-# TODO fix weird pytest error
-class Z0Z_TestDimensionCoordinateFunctions:
+class TestDimensionCoordinateFunctions:
 	"""Tests for cached functions that encode dimension coordinates."""
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首零)
-	def test_首零(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouLing(self, dimensionsTotal: int, expected: int) -> None:
 		actual: int = 首零(dimensionsTotal)
 		assert actual == expected, f"首零({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首零一)
-	def test_首零一(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouLingYi(self, dimensionsTotal: int, expected: int) -> None:
 		actual: int = 首零一(dimensionsTotal)
 		assert actual == expected, f"首零一({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首零一二)
-	def test_首零一二(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouLingYiEr(self, dimensionsTotal: int, expected: int) -> None:
 		actual: int = 首零一二(dimensionsTotal)
 		assert actual == expected, f"首零一二({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首零二)
-	def test_首零二(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouLingEr(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首零二(dimensionsTotal)
 		assert actual == expected, f"首零二({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首一)
-	def test_首一(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouYi(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首一(dimensionsTotal)
 		assert actual == expected, f"首一({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首一二)
-	def test_首一二(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouYiEr(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首一二(dimensionsTotal)
 		assert actual == expected, f"首一二({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首二)
-	def test_首二(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouEr(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首二(dimensionsTotal)
 		assert actual == expected, f"首二({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首三)
-	def test_首三(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouSan(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首三(dimensionsTotal)
 		assert actual == expected, f"首三({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首零一二三)
-	def test_首零一二三(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouLingYiErSan(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首零一二三(dimensionsTotal)
 		assert actual == expected, f"首零一二三({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首零一三)
-	def test_首零一三(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouLingYiSan(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首零一三(dimensionsTotal)
 		assert actual == expected, f"首零一三({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首零二三)
-	def test_首零二三(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouLingErSan(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首零二三(dimensionsTotal)
 		assert actual == expected, f"首零二三({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首零三)
-	def test_首零三(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouLingSan(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首零三(dimensionsTotal)
 		assert actual == expected, f"首零三({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首一二三)
-	def test_首一二三(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouYiErSan(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首一二三(dimensionsTotal)
 		assert actual == expected, f"首一二三({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首一三)
-	def test_首一三(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouYiSan(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首一三(dimensionsTotal)
 		assert actual == expected, f"首一三({dimensionsTotal}): expected {expected}, got {actual}"
 
 	@pytest.mark.parametrize("dimensionsTotal, expected", expected首二三)
-	def test_首二三(self, dimensionsTotal: int, expected: int) -> None:
+	def test_shouErSan(self, dimensionsTotal: int, expected: int) -> None:
 		actual = 首二三(dimensionsTotal)
 		assert actual == expected, f"首二三({dimensionsTotal}): expected {expected}, got {actual}"
