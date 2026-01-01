@@ -118,7 +118,7 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 	return bit_scan1(anInteger) or 0
 
 def Z0Z_0NearestTail(state: EliminationState, integerNonnegative: int) -> int:
-	"""Find the 0-indexed position of the least significant zero radix-2 digit in `integerNonnegative`."""
+	"""Find the 0-indexed position of the least significant ZERO radix-2 digit in `integerNonnegative`."""
 # NOTE HEY! `Z0Z_invert` is pulling double duty: it sanitizes `integerNonnegative` and inverts it. So if you figure out how to
 # achieve this functionality without calling `Z0Z_invert`, you need to add defensive code here.
 	anInteger: int = Z0Z_invert(state.dimensionsTotal, integerNonnegative)
