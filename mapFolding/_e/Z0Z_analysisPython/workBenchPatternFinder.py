@@ -1,9 +1,8 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
-# NOTE to AI assistants: this module is not representative of my coding style. Most of it is AI generated, but because it's temporary code, I didn't strictly enforce my usual standards. Do not emulate it.
 from collections.abc import Iterable
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import partial
-from mapFolding._e import dimensionNearest首, getDictionaryPileRanges, getPileRange, Z0Z_invert, 零, 首一, 首二, 首零, 首零一
+from mapFolding._e import dimensionNearest首, getPileRange, Z0Z_invert, 零, 首一, 首二, 首零, 首零一
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten
 from operator import add, mul
@@ -108,5 +107,5 @@ if __name__ == '__main__':
 			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			# pprint(zz, width=180)
 
-	state = EliminationState((2,) * 6)
+	state = EliminationState((2,) * 5)
 	# print(measureEntropy(state))

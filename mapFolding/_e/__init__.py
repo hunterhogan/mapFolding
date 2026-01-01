@@ -33,10 +33,11 @@ from mapFolding._e._measure import (
 
 # isort: split
 from mapFolding._e._dataDynamic import (
-	getDictionaryLeafDomains as getDictionaryLeafDomains, getDictionaryPileRanges as getDictionaryPileRanges,
-	getDomainDimension一 as getDomainDimension一, getDomainDimension二 as getDomainDimension二,
-	getDomainDimension首二 as getDomainDimension首二, getDomain二一零and二一 as getDomain二一零and二一,
-	getDomain二零and二 as getDomain二零and二, getDomain首零Plus零Conditional as getDomain首零Plus零Conditional,
-	getDomain首零一二and首一二 as getDomain首零一二and首一二, getDomain首零二and首二 as getDomain首零二and首二, getLeafDomain as getLeafDomain,
-	getLeavesCreaseBack as getLeavesCreaseBack, getLeavesCreaseNext as getLeavesCreaseNext, getPileRange as getPileRange,
-	getZ0Z_precedence as getZ0Z_precedence, getZ0Z_successor as getZ0Z_successor)
+	addPileRangesOfLeaves as addPileRangesOfLeaves, getDictionaryLeafDomains as getDictionaryLeafDomains,
+	getDictionaryPileRanges as getDictionaryPileRanges, getDomainDimension一 as getDomainDimension一,
+	getDomainDimension二 as getDomainDimension二, getDomainDimension首二 as getDomainDimension首二,
+	getDomain二一零and二一 as getDomain二一零and二一, getDomain二零and二 as getDomain二零and二,
+	getDomain首零Plus零Conditional as getDomain首零Plus零Conditional, getDomain首零一二and首一二 as getDomain首零一二and首一二,
+	getDomain首零二and首二 as getDomain首零二and首二, getLeafDomain as getLeafDomain, getLeavesCreaseBack as getLeavesCreaseBack,
+	getLeavesCreaseNext as getLeavesCreaseNext, getPileRange as getPileRange, getZ0Z_precedence as getZ0Z_precedence,
+	getZ0Z_successor as getZ0Z_successor)

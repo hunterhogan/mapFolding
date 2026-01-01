@@ -98,7 +98,7 @@ def theorem4(state: EliminationState) -> EliminationState:
 	"""
 	for listIndicesSameDimensionLength in [list(iter_index(state.mapShape, dimensionLength)) for dimensionLength in unique(state.mapShape)]:
 		if len(listIndicesSameDimensionLength) > 1:
-			state.Theorem4Multiplier = factorial(len(listIndicesSameDimensionLength))
+			state.Theorem4Multiplier *= factorial(len(listIndicesSameDimensionLength))
 			for index_k, index_r in pairwise(listIndicesSameDimensionLength):
 				state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])
 	return state

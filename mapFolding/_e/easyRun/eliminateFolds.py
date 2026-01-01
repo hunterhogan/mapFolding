@@ -30,9 +30,9 @@ if __name__ == '__main__':
 	CPUlimit: bool | float | int | None = -4
 	state: EliminationState | None = None
 
+	flow = 'crease'
 	flow = 'elimination'
 	flow = 'constraintPropagation'
-	flow = 'crease'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
@@ -45,36 +45,16 @@ if __name__ == '__main__':
 	sys.stdout.write(f"{ansiColors[int(flow,36)%len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(5,6):
+	for n in range(7,8):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:
 			state = EliminationState(mapShape)
-			state = pinPiles(state, 4)
-			# state = pinLeavesDimensions0零一(state)
+			# state = pinPiles(state, 4)
+			state = pinLeavesDimensions0零一(state)
 			# state = pinPile首零Less零(state)
 			# state = pinLeavesDimension二(state)
 			# state = pinLeavesDimension首二(state)
-
-			if n == 7:
-				pathDataRaw = Path(__file__).parent.parent / "dataRaw"
-				setSequences: set[tuple[int, ...]] = set()
-				indicesToCheck = (0, 1, 2, 3, 4, 63, 124, 125, 126, 127)
-
-				sys.stdout.write(f"Scanning {pathDataRaw} for existing sequences...\n")
-				for pathFilename in pathDataRaw.glob("p2d7s*.csv"):
-					with pathFilename.open('r') as readStream:
-						for line in readStream:
-							parts = line.strip().split(',')
-							setSequences.add(tuple(int(parts[index]) for index in indicesToCheck))
-
-				if setSequences:
-					sys.stdout.write(f"Filtering {len(state.listPermutationSpace)} permutations against {len(setSequences)} existing signatures...\n")
-					state.listPermutationSpace = [
-						leavesPinned for leavesPinned in state.listPermutationSpace
-						if tuple(leavesPinned[pile] for pile in indicesToCheck) not in setSequences
-					]
-					sys.stdout.write(f"Remaining permutations: {len(state.listPermutationSpace)}\n")
 
 		timeStart = time.perf_counter()
 		foldsTotal: int = eliminateFolds(

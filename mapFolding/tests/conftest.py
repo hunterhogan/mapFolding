@@ -285,8 +285,82 @@ class TestCase:
 	flow: str | None = None
 	CPUlimit: bool | float | int | None = None
 
-# TODO FIXME This is only about 10% of the tests I used to run.
-dictionaryTestNameToTestCase: dict[str, tuple[TestCase, ...]] = {
+# ruff: noqa fuck off
+
+# TODO FIXME This is only about 10% of the tests I used to run. (All of the following information WAS encoded
+# in the test suite: the reasoning wasn't necessarily described, but all of the following cases were previously covered.) A SHIT
+# TON of these values were in _theSSOT.py in dictionaries, one of which was of type `MetadataOEISidManuallySet`. It might be worth
+# the effort to dig through the commits to get the old data. Furthermore, some test parameters for not "ManuallySet": they were
+# automatically added in oeis.py, such as tests based on offset.
+"""What needs to get tested:
+
+Distinguish between tests that check computational correctness and those that check performance or other aspects. In this comment,
+I am only talking about computational tests.
+
+- Broadly (but imprecisely) speaking, the Cartesian product of the following factors
+	- basecamp functions: mapFolding._e.basecamp.py and mapFolding.basecamp.py
+	- OEIS ids
+	- n
+		- which n need to be tested come from multiple categories. See one example, below.
+		- The offset value
+		- Special values: in the example below, n = 1. Flow control statements based on `n` or `mapShape`, which is an extension of `n`, are presumed to be special values. See, for example, `if all(dimension <= 2 for dimension in mapShape): from mapFolding.algorithms.daoOfMapFolding import doTheNeedful`
+		The following range, inclusive, *sort of:
+			- The smallest non-special, non-offset value.
+			- The largest value of n that can be computed in a reasonable time.
+			- Computing the entire range does not scale.
+			- Hardcoding specific values creates blind spots.
+			- Randomly select one value from the range.
+			- Important values should be in the always-tested set.
+		- matrixNumPy has a weird special case ~n=23 because it triggers a transition from dictionary to ndarray data structures.
+    - flow / computationDivisions: previously, I segregated computational correctness of computationDivisions into
+        `test_countFoldsComputationDivisionsMaximum` in `test_taskDivisions.py`, but `mapShapeTestParallelization()` has been
+        hijacked: it now uses a bastardized form of `TestCase`. So move `mapShapeTestParallelization()` into test_computations.py,
+        and treat the test properly.
+- Factors to not test (here)
+	- CPUlimit (on parallel computations, use more than one process to the test doesn't take forever, but don't use the maximum
+		cores because pytest is configured to run the tests concurrently)
+	- pathLikeWriteFoldsTotal
+	- invalid input parameters
+
+Example of `n` categories:
+TestCase('oeisIDbyFormula', 'A001010', n=3),
+if n == 1:
+    countTotal = 1
+elif n & 1:
+    countTotal = 2 * _A007822((n - 1) // 2 + 1)
+else:
+    countTotal = 2 * _A000682(n // 2 + 1)
+At a minimum, this must test n=1, an odd n, and an even n.
+
+- I do not want, and I will not accept 800 lines that look like this:
+```
+		TestCase('oeisIDbyFormula', 'A000560', n=3),
+		TestCase('oeisIDbyFormula', 'A000682', n=3),
+		TestCase('oeisIDbyFormula', 'A001010', n=3),
+		TestCase('oeisIDbyFormula', 'A001011', n=3),
+		TestCase('oeisIDbyFormula', 'A005315', n=3),
+		TestCase('oeisIDbyFormula', 'A005316', n=3),
+		TestCase('oeisIDbyFormula', 'A007822', n=3),
+		TestCase('oeisIDbyFormula', 'A060206', n=3),
+		TestCase('oeisIDbyFormula', 'A077460', n=3),
+		TestCase('oeisIDbyFormula', 'A078591', n=3),
+		TestCase('oeisIDbyFormula', 'A086345', n=3),
+		TestCase('oeisIDbyFormula', 'A178961', n=3),
+		TestCase('oeisIDbyFormula', 'A223094', n=3),
+		TestCase('oeisIDbyFormula', 'A259702', n=3),
+		TestCase('oeisIDbyFormula', 'A301620', n=3),
+```
+
+This is more acceptable but inadequate:
+```
+	'A007822': tuple(
+		TestCase('A007822', 'A007822', n=4, flow=flow, CPUlimit=0.5)
+		for flow in ('algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
+	),
+```
+
+"""
+dictionaryTestNameToComputationalTestCase: dict[str, tuple[TestCase, ...]] = {
 	'A007822': tuple(
 		TestCase('A007822', 'A007822', n=4, flow=flow, CPUlimit=0.5)
 		for flow in ('algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
@@ -323,16 +397,7 @@ dictionaryTestNameToTestCase: dict[str, tuple[TestCase, ...]] = {
 	'oeisIDbyFormula': (
 		TestCase('oeisIDbyFormula', 'A000560', n=3),
 		TestCase('oeisIDbyFormula', 'A000682', n=3),
-# ruff: noqa fuck off
 		TestCase('oeisIDbyFormula', 'A001010', n=3),
-    # if n == 1:
-    #     countTotal = 1
-    # elif n & 1:
-    #     countTotal = 2 * _A007822((n - 1) // 2 + 1)
-    # else:
-    #     countTotal = 2 * _A000682(n // 2 + 1)
-	# At a minimum, this must test n=1, an odd n, and an even n.
-
 		TestCase('oeisIDbyFormula', 'A001011', n=3),
 		TestCase('oeisIDbyFormula', 'A005315', n=3),
 		TestCase('oeisIDbyFormula', 'A005316', n=3),
@@ -363,14 +428,6 @@ def makeTestCaseIdentifier(testCase: TestCase) -> str:
 		parts.append(testCase.flow)
 	return '::'.join(parts)
 
-# TODO Add explanation to error message instructions.
-"""Example of stupid error message:
-	if testCase.oeisID not in dictionaryOEISMapFolding:
-		message: str = f"`{testCase.oeisID}` does not define a map shape."
-"""
-# The basic thesis of the error message that was triggered by `if testCase.oeisID not in dictionaryOEISMapFolding:` ought to be
-# "`testCase.oeisID` is not in `dictionaryOEISMapFolding`, therefore ..."
-# TODO Add explanation in identifiers: past to future, LTR; cause to effect, LTR. So testCase to mapShape, not mapShape from testCase.
 def mapShapeFromTestCase(testCase: TestCase) -> tuple[int, ...]:
 	if testCase.oeisID not in dictionaryOEISMapFolding:
 		message: str = f"`{testCase.oeisID}` does not define a map shape."
@@ -379,7 +436,7 @@ def mapShapeFromTestCase(testCase: TestCase) -> tuple[int, ...]:
 
 def testCasesForTestName(testName: str) -> tuple[TestCase, ...]:
 	try:
-		return dictionaryTestNameToTestCase[testName]
+		return dictionaryTestNameToComputationalTestCase[testName]
 	except KeyError as error:
 		message = f"Unknown testName `{testName}`."
 		raise KeyError(message) from error
@@ -408,10 +465,6 @@ def testCaseMeanders(request: pytest.FixtureRequest) -> TestCase:
 	return request.param
 
 @pytest.fixture(params=testCasesForTestName('oeisIDbyFormula'), ids=makeTestCaseIdentifier)
-# "OeisFormula" is a diminutive form of oeisIDbyFormula: NO MOTHERFUCKING DIMINUTIVES
-# "OeisFormula" is referencing a very specific item, the module `oeisIDbyFormula`, and it is not a generalized form that includes
-	# `oeisIDbyFormula`, which means `oeisIDbyFormula` is used as a proper noun in this case: use the proper noun in the identifier
-# "Oeis" is not a word: use 'oeis' or 'OEIS' but not OeIs, oEIs, oeiS, or Oeis.
 def testCaseOeisFormula(request: pytest.FixtureRequest) -> TestCase:
 	"""Provide OEIS IDs and indices for formula-based verification."""
 	return request.param
@@ -423,17 +476,13 @@ def testCaseOeisValue(request: pytest.FixtureRequest) -> TestCase:
 
 # ------- The second "single source" of truth -----------------------
 
-@pytest.fixture(params=[
-	(2, 2, 2, 2),
-	(2, 2, 2, 2, 2),
-	(2, 2, 2, 2, 2, 2),
-], ids=["2d4", "2d5", "2d6"])
+@pytest.fixture(params=[(2, 2, 2, 2), (2, 2, 2, 2, 2), (2, 2, 2, 2, 2, 2)], ids=["2d4", "2d5", "2d6"])
 def mapShape2上nDimensionsStandard(request: pytest.FixtureRequest) -> tuple[int, ...]:
 	"""Provide standard 2^n dimension test shapes: 2d4, 2d5, 2d6."""
 	return request.param
 
 @pytest.fixture
-def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:
+def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]: # NOTE TO AI: DO NOT CHANGE THIS IDENTIFIER NAME.
 	"""Return one deterministic map shape suitable for code generation tests."""
 	mapShapeCandidate: list[int] = list(mapShapeFromTestCase(testCaseCodeGenerationSingleJob))
 	return validateListDimensions(mapShapeCandidate)

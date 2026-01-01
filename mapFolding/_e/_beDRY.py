@@ -311,8 +311,8 @@ def Z0Z_invert(dimensionsTotal: int, integerNonnegative: int) -> int:
 def getProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	return tuple(accumulate(mapShape, mul, initial=1))
 
-def getSumsOfProductsOfDimensions(productsOfDimensions: tuple[int, ...]) -> tuple[int, ...]:
-	return tuple(accumulate(productsOfDimensions, add, initial=0))
+def getSumsOfProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
+	return tuple(accumulate(getProductsOfDimensions(mapShape), add, initial=0))
 
 def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...], dimensionsTotal: int | None = None, dimensionFrom首: int | None = None) -> tuple[int, ...]:
 	"""Get a useful list of numbers.

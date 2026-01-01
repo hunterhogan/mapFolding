@@ -11,7 +11,6 @@ import pandas
 if TYPE_CHECKING:
 	from pandas import DataFrame, Series
 
-
 def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None = None) -> pandas.DataFrame:
 	"""Measure the relative entropy and distributional properties of leaves across folding sequences.
 

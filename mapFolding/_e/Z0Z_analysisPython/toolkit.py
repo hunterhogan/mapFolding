@@ -105,7 +105,6 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 				sys.stdout.write(f"{color}{arrayFoldings[indexRow, :]}\n")
 		sys.stdout.write(f"{color}Required rows: {rowsRequired}/{rowsTotal}{ansiColorReset}\n")
 
-
 def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKnown: Sequence[tuple[int, ...]], *, printResults: bool = True) -> dict[str, list[tuple[int, ...]]]:
 	"""Compare a computed domain against known verification data.
 

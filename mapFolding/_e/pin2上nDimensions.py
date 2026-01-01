@@ -1,12 +1,11 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
-from cytoolz.dicttoolz import merge
 from functools import partial
-from hunterMakesPy import intInnit, raiseIfNone
+from hunterMakesPy import intInnit
 from mapFolding import decreasing, defineProcessorLimit
 from mapFolding._e import (
-	getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain首零Plus零Conditional,
-	getLeafDomain, getPileRangeOfLeaves, leafOrigin, mapShapeIs2上nDimensions, PermutationSpace, pileIsOpen, pileOrigin,
-	Z0Z_JeanValjean, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+	addPileRangesOfLeaves, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain首零Plus零Conditional,
+	getLeafDomain, leafOrigin, mapShapeIs2上nDimensions, PermutationSpace, pileIsOpen, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零,
+	首零一, 首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensionsAnnex import (
 	appendLeavesPinnedAtPile as appendLeavesPinnedAtPile, beansWithoutCornbread as beansWithoutCornbread,
@@ -51,13 +50,6 @@ def pileProcessingOrderDefault(state: EliminationState) -> list[int]:
 	return pileProcessingOrder
 
 # ======= Pinning functions ===============================================
-
-# TODO This function should be in a different module. Creation of `qq` could possibly be a function. To future proof the performance, I probably want to cache `qq`.
-def addPileRangesOfLeaves(state: EliminationState) -> EliminationState:
-	qq: PermutationSpace = {pile: raiseIfNone(Z0Z_JeanValjean(getPileRangeOfLeaves(state.leavesTotal, pileRangeOfLeaves)))
-								for pile, pileRangeOfLeaves in getDictionaryPileRanges(state).items()}
-	state.leavesPinned = merge(qq, state.leavesPinned)
-	return state
 
 def pinPiles(state: EliminationState, Z0Z_pileDepth: int = 4, maximumSizeListPermutationSpace: int = 2**10, stopBeforePile: int | None = None) -> EliminationState:
 	"""Pin up to 二 piles at both ends of the sequence without surplus `PermutationSpace` dictionaries."""

@@ -1,5 +1,11 @@
 # Brain dump of things I wish were different
 
+## Consolidate and organize knowledge in "Elimination.md"
+
+- mapFolding\_e\analysisPython\Z0Z_p2d6.py
+- mapFolding\_e\analysisPython\Z0Z_hypothesis.py
+- mapFolding\_e\knowledgeDump.py
+
 ## At cmd, "python" forces a new terminal and it doesn't use the venv
 
 This is a relatively new problem.
@@ -59,7 +65,7 @@ I can easily sort lines. But I want a fast way to alpha sort functions.
 
 I very much like Fira Code and there might be other fonts I would like. I haven't looked because Fira Code is great. But Fira Code
 doesn't seem to have the CJK code points I need, so I currently have two monospaced fonts with different widths. I just want the
-same width for everything. Maybe I could change the pitch/CPI of the CJK font to match Fira Code?
+same width for everything. Maybe I could change the pitch/CPI of the CJK font to match Fira Code? CJK glyphs are double the width.
 
 ### An easier way to type CJK
 
