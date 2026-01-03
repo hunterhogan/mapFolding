@@ -133,8 +133,8 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 	return max(0, anInteger.bit_count() - 1)
 
 @cache
-def ptount(integerAbove2: int, /) -> int:
-	"""After subtracting 一+零 from `integerAbove2`, measure the distance from a ***p***ower of ***t***wo's "bit c***ount***".
+def ptount(integerAbove3: int, /) -> int:
+	"""After subtracting 一+零 from `integerAbove3`, measure the distance from a ***p***ower of ***t***wo's "bit c***ount***".
 
 	Notes
 	-----
@@ -142,10 +142,12 @@ def ptount(integerAbove2: int, /) -> int:
 	- Just like the "p", the reason why this is useful is silent.
 	- I suspect there is a more direct route to measure this but I am unaware of it.
 	- I have noticed that 16+3 and 32+3 are often special cases. 16 and 32 have `howMany0coordinatesAtTail` of 4 and 5 respectively.
+	- In one case, I was using `ptount(leafAt一零) + 1`, but I directly substituted
+		`raiseIfNone(dimensionSecondNearest首(leafAt一零))` for the same results. I created `ptount` well before I created `dimensionSecondNearest首`.
 	"""
-	anInteger: int = getitem(intInnit([integerAbove2], 'integerAbove2', type[int]), 0)
-	if anInteger <= 2:
-		message: str = f"I received `{integerAbove2 = }`, but I need a value greater than 2."
+	anInteger: int = getitem(intInnit([integerAbove3], 'integerAbove3', type[int]), 0)
+	if anInteger < 3:
+		message: str = f"I received `{integerAbove3 = }`, but I need a value greater than 3."
 		raise ValueError(message)
 
 	return leafInSubHyperplane(anInteger - (一+零)).bit_count()

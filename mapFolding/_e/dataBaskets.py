@@ -1,4 +1,5 @@
-from mapFolding import getLeavesTotal, inclusive
+"""Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
+from mapFolding import getLeavesTotal
 from mapFolding._e import (
 	getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, LeafOrPileRangeOfLeaves,
 	PermutationSpace)
@@ -66,17 +67,21 @@ class EliminationState:
 	dimensionsTotal: int = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
 	leafLast: int = dataclasses.field(init=False)
-	"""Unchanging 0-indexed final `leaf` in a `folding`."""
+	"""Unchanging 0-indexed largest `leaf` in a `folding`."""
 	leavesTotal: int = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""
 	pileLast: int = dataclasses.field(init=False)
 	"""Unchanging 0-indexed final `pile` in a `folding`."""
+	pilesTotal: int = dataclasses.field(init=False)
+	"""Unchanging total number of piles in the map."""
 	productsOfDimensions: tuple[int, ...] = dataclasses.field(init=False)
 	"""Unchanging list of products of map dimensions from the product of no dimensions, `[0]`, to the product of all dimensions, `[dimensionsTotal + inclusive]`."""
 	sumsOfProductsOfDimensions: tuple[int, ...] = dataclasses.field(init=False)
 	"""Unchanging list of sums of products of map dimensions from the sum of no products, `[0]`, to the sum of all products, `[len(productsOfDimensions) + inclusive]`."""
 	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = dataclasses.field(init=False)
 	"""Unchanging list of sums of products of map dimensions starting from the head `首`, from the sum of no products, `[0]`, to the sum of all products, `[len(productsOfDimensions) + inclusive]`."""
+	首: int = dataclasses.field(init=False)
+	"""Unchanging single-base positional-numeral value of the Cartesian coordinates that are the first to be _out-of-bounds_ for the mapShape."""
 
 	@property
 	def foldsTotal(self) -> int:
@@ -87,8 +92,10 @@ class EliminationState:
 		"""One-time computation of unchanging values."""
 		self.dimensionsTotal = len(self.mapShape)
 		self.leavesTotal = getLeavesTotal(self.mapShape)
-		self.pileLast = self.leavesTotal - 1
 		self.leafLast = self.leavesTotal - 1
+		self.pilesTotal = self.leavesTotal
+		self.pileLast = self.pilesTotal - 1
+		self.首 = self.leavesTotal
 		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)

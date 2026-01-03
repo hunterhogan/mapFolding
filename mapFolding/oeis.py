@@ -32,6 +32,7 @@ from mapFolding._theSSOT import pathCache
 from mapFolding.basecamp import countFolds
 from pathlib import Path
 from typing import Final
+from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 import argparse
 import sys
@@ -146,10 +147,13 @@ def _getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 			message = "URL must start with 'http:' or 'https:'"
 			raise ValueError(message)
 
-		with urlopen(url) as response:  # noqa: S310
-			oeisInformationRaw = response.read().decode('utf-8')
-		oeisInformation = str(oeisInformationRaw)
-		writeStringToHere(oeisInformation, pathFilenameCache)
+		try:
+			with urlopen(url) as response:  # noqa: S310
+				oeisInformationRaw = response.read().decode('utf-8')
+			oeisInformation = str(oeisInformationRaw)
+			writeStringToHere(oeisInformation, pathFilenameCache)
+		except (HTTPError, URLError):
+			oeisInformation = pathFilenameCache.read_text(encoding="utf-8")
 
 	if not oeisInformation:
 		warnings.warn(f"Failed to retrieve OEIS sequence information for {pathFilenameCache.stem}.", stacklevel=2)

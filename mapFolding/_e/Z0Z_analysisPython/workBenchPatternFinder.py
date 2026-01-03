@@ -2,13 +2,60 @@
 from collections.abc import Iterable
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import partial
-from mapFolding._e import dimensionNearest首, getPileRange, Z0Z_invert, 零, 首一, 首二, 首零, 首零一
+from hunterMakesPy import raiseIfNone
+from mapFolding._e import (
+	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseBack, getLeavesCreaseNext,
+	getPileRange, getSumsOfProductsOfDimensionsNearest首, leafInSubHyperplane, ptount, Z0Z_invert, 零, 首一, 首二, 首零, 首零一)
+from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten
 from operator import add, mul
 from pprint import pprint
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	import pandas
+
+def _getGroupedBy(state: EliminationState, pileTarget: int, groupByLeavesAtPiles: tuple[int, ...]) -> dict[int | tuple[int, ...], list[int]]:
+	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
+	groupedBy: dict[int | tuple[int, ...], list[int]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict() # pyright: ignore[reportAssignmentType]
+	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
+
+def getExcludedLeaves(state: EliminationState, pileTarget: int, groupByLeavesAtPiles: tuple[int, ...]) -> dict[int | tuple[int, ...], list[int]]:
+	return {leaves: sorted(set(getDictionaryPileRanges(state)[pileTarget]).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
 if __name__ == '__main__':
+
+	state = EliminationState((2,) * 6)
+	pileExcluder = 3
+	pileTarget=31
+	dictionaryExcluded = getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pileExcluder,))
+	domains = getDictionaryLeafDomains(state)
+	pileRange31 = frozenset(getPileRange(state, 31))
+
+	print(pileRange31)
+	# for nn in {2, 49, 19, 2, 49, 21, 8, 25, 56}:
+	# 	print(nn, nn^63)
+
+	for pile in range(state.leavesTotal):
+		continue
+		print(pile, set(getPileRange(state, pile)).difference(getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pile,)).keys()))
+
+	for excluder, listExcluded in dictionaryExcluded.items():
+		continue
+
+		invert = int(excluder^63) # pyright: ignore[reportUnknownArgumentType, reportOperatorIssue]
+		creaseNextSS = tuple(getLeavesCreaseNext(state, invert)) # pyright: ignore[reportArgumentType]
+		allCreaseNextSSInRange = set(creaseNextSS).intersection(pileRange31)
+		creaseBack = tuple(getLeavesCreaseBack(state, excluder)) # pyright: ignore[reportArgumentType]
+		creaseNext = tuple(getLeavesCreaseNext(state, excluder)) # pyright: ignore[reportArgumentType]
+		allCreaseBackInRange = set(creaseBack).intersection(pileRange31)
+		allCreaseNextInRange = set(creaseNext).intersection(pileRange31)
+		notExcluded = allCreaseNextInRange.difference(listExcluded)
+		# print(excluder, invert, allCreaseNextSSInRange.intersection(listExcluded), notExcluded, allCreaseNextSSInRange.difference(listExcluded), set(creaseNextSS).symmetric_difference(creaseNext), creaseNextSS, allCreaseNextSSInRange)
+		# print(excluder.__format__('06b'), excluder, f"{notExcluded}\t", f"{creaseNext}", sep='\t')
+		print(excluder, f"{allCreaseBackInRange=}", f"{allCreaseNextInRange=}", sep='\t')
+		print(excluder, f"{allCreaseBackInRange.difference(listExcluded)}", f"{allCreaseNextInRange.difference(listExcluded)}", sep='\t')
 
 	pileRangeByFormula: bool = False
 	if pileRangeByFormula:
@@ -107,5 +154,3 @@ if __name__ == '__main__':
 			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			# pprint(zz, width=180)
 
-	state = EliminationState((2,) * 5)
-	# print(measureEntropy(state))
