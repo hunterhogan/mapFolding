@@ -27,13 +27,13 @@ def getExcludedLeaves(state: EliminationState, pileTarget: int, groupByLeavesAtP
 if __name__ == '__main__':
 
 	state = EliminationState((2,) * 6)
-	pileExcluder = 3
+	pileExcluder = 60
 	pileTarget=31
 	dictionaryExcluded = getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pileExcluder,))
 	domains = getDictionaryLeafDomains(state)
 	pileRange31 = frozenset(getPileRange(state, 31))
 
-	print(pileRange31)
+	print(*getPileRange(state, pileExcluder))
 	# for nn in {2, 49, 19, 2, 49, 21, 8, 25, 56}:
 	# 	print(nn, nn^63)
 

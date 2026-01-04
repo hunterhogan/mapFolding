@@ -45,15 +45,15 @@ if __name__ == '__main__':
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 		printStatisticsPermutations(state)
 		print(f"{len(state.listPermutationSpace)=}")
-		# print(*getLeavesCreaseNext(state, 6))
-		# print(*getLeavesCreaseBack(state, 6))
+		# print(*getLeavesCreaseNext(state, 22))
+		# print(*getLeavesCreaseBack(state, 53))
 
 	elif printThis:
+		state = pinPiles(state, 4)
 		print(*(format(x, '06b') for x in getPileRange(state, 60)))
 		print(state.sumsOfProductsOfDimensionsNearest首)
 		state: EliminationState = pinLeavesDimensions0零一(state)
 		state: EliminationState = pinLeavesDimension首二(state)
-		state = pinPiles(state, 4)
 		state: EliminationState = pinLeavesDimension二(state)
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))
 		print(list(getLeafDomain(state, 37)))
