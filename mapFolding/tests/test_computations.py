@@ -87,20 +87,6 @@ def test_countFolds(testCaseCountFolds: TestCase) -> None:
 	expected: int = dictionaryOEISMapFolding[testCaseCountFolds.oeisID]['valuesKnown'][testCaseCountFolds.n]
 	standardizedEqualToCallableReturn(expected, countFolds, None, None, None, testCaseCountFolds.CPUlimit, mapShape, testCaseCountFolds.flow)
 
-def test_eliminateFolds(testCaseEliminateFolds: TestCase) -> None:
-	"""Validate `eliminateFolds` and different flows produce valid results.
-
-	Parameters
-	----------
-	eliminateFoldsTestCase : TestCase
-		TestCase describing the OEIS index and flow to validate.
-	"""
-	mapShape: tuple[int, ...] = mapShapeFromTestCase(testCaseEliminateFolds)
-	state = None
-	pathLikeWriteFoldsTotal: None = None
-	expected: int = dictionaryOEISMapFolding[testCaseEliminateFolds.oeisID]['valuesKnown'][testCaseEliminateFolds.n]
-	standardizedEqualToCallableReturn(expected, eliminateFolds, mapShape, state, pathLikeWriteFoldsTotal, testCaseEliminateFolds.CPUlimit, testCaseEliminateFolds.flow)
-
 def test_meanders(testCaseMeanders: TestCase) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 

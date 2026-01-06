@@ -5,7 +5,7 @@ from gmpy2 import bit_clear, bit_mask, bit_set, mpz, xmpz
 from hunterMakesPy import intInnit, raiseIfNone
 from itertools import accumulate
 from mapFolding import inclusive, zeroIndexed
-from mapFolding._e import LeafOrPileRangeOfLeaves, PermutationSpace, 零
+from mapFolding._e import LeafOrPileRangeOfLeaves, PermutationSpace, PileRangeOfLeaves, 零
 from more_itertools import all_unique, always_reversible, consecutive_groups, extract
 from operator import add, getitem, mul
 from typing import Any, Protocol, Self, TypeGuard
@@ -31,6 +31,10 @@ def consecutive(flatContainer: Iterable[int]) -> bool:
 
 def hasDuplicates(flatContainer: Iterable[Any]) -> bool:
 	return not all_unique(flatContainer)
+
+@syntacticCurry
+def leafIsInPileRange(leaf: int, pileRangeOfLeaves: PileRangeOfLeaves) -> bool:
+	return pileRangeOfLeaves.bit_test(leaf)
 
 @syntacticCurry
 def leafIsNotPinned(leavesPinned: PermutationSpace, leaf: int) -> bool:
@@ -110,7 +114,7 @@ def pileIsNotOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
 	Returns
 	-------
 	pileIsOpen : bool
-		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a pile-range (`xmpz`).
+		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a pile-range (`mpz`).
 
 	See Also
 	--------
@@ -118,6 +122,7 @@ def pileIsNotOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
 	"""
 	return thisIsALeaf(leavesPinned.get(pile))
 
+# TODO Consider if it is possible to return TypeGuard[mpz] (or TypeGuard[None]?) here.
 @syntacticCurry
 def pileIsOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
 	"""Return True if `pile` is not presently pinned in `leavesPinned`.
@@ -132,7 +137,7 @@ def pileIsOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
 	Returns
 	-------
 	pileIsOpen : bool
-		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a pile-range (`xmpz`).
+		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a pile-range (`mpz`).
 	"""
 	return not thisIsALeaf(leavesPinned.get(pile))
 
@@ -169,10 +174,21 @@ def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | 
 # ======= `LeafOrPileRangeOfLeaves` stuff ================================================
 # https://gmpy2.readthedocs.io/en/latest/advmpz.html
 
-def getLeaf(leavesPinned: PermutationSpace, pile: int, default: int | None = None) -> int | None:
+# TODO I have a vague memory of using overload/TypeGuard in a similar function: I think it was in the stub file for `networkx`. Check that out.
+def DOTgetPileIfLeaf(leavesPinned: PermutationSpace, pile: int, default: int | None = None) -> int | None:
+# TODO I have a bad feeling that I am going to make `PermutationSpace` a subclass of `dict` and add methods.
+# NOTE I REFUSE TO BE AN OBJECT-ORIENTED PROGRAMMER!!! But, I'll use some OOP if it makes sense.
+# I think collections has some my-first-dict-subclass functions.
 	"""Like `leavesPinned.get(pile)`, but only return a `leaf` or `default`."""
-	if thisIsALeaf(ImaLeaf := leavesPinned.get(pile)):
+	ImaLeaf = leavesPinned.get(pile)
+	if thisIsALeaf(ImaLeaf):
 		return ImaLeaf
+	return default
+
+def DOTgetPileIfPileRangeOfLeaves(leavesPinned: PermutationSpace, pile: int, default: PileRangeOfLeaves | None = None) -> PileRangeOfLeaves | None:
+	ImaPileRangeOfLeaves = leavesPinned.get(pile)
+	if thisIsAPileRangeOfLeaves(ImaPileRangeOfLeaves):
+		return ImaPileRangeOfLeaves
 	return default
 
 def getIteratorOfLeaves(pileRangeOfLeaves: mpz) -> Iterator[int]:
@@ -193,47 +209,38 @@ def getIteratorOfLeaves(pileRangeOfLeaves: mpz) -> Iterator[int]:
 	return iteratorOfLeaves.iter_set()
 
 def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> mpz:
-	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))
-	antiPileRangeOfLeaves: mpz = bit_mask(leavesTotal + inclusive)
-	for leaf in leaves:
-		antiPileRangeOfLeaves = antiPileRangeOfLeaves.bit_clear(leaf)
-	return antiPileRangeOfLeaves
+	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))  # ty:ignore[invalid-return-type]
 
 def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> mpz:
-	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
-	pileRangeOfLeaves: mpz = mpz(0)
-	pileRangeOfLeaves = pileRangeOfLeaves.bit_set(leavesTotal)
-	for leaf in leaves:
-		pileRangeOfLeaves = pileRangeOfLeaves.bit_set(leaf)
-	return pileRangeOfLeaves
+	return reduce(bit_set, leaves, bit_set(0, leavesTotal))  # ty:ignore[invalid-return-type]
 
 def oopsAllLeaves(leavesPinned: PermutationSpace) -> dict[int, int]:
-	"""Return a dictionary of all pinned leaves in `leavesPinned`.
+	"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: pileRangeOfLeaves`.
 
 	Parameters
 	----------
 	leavesPinned : PermutationSpace
-		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
+		Dictionary of `pile: leaf` and `pile: pileRangeOfLeaves`.
 
 	Returns
 	-------
 	dictionaryOfPileLeaf : dict[int, int]
-		Dictionary mapping from `pile` to pinned `leaf` for every pinned leaf in `leavesPinned`.
+		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 	"""
 	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in sorted(leavesPinned.items()) if thisIsALeaf(leafOrPileRangeOfLeaves)}
 
-def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, mpz]:
+def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, PileRangeOfLeaves]:
 	"""Return a dictionary of all pile-ranges of leaves in `leavesPinned`.
 
 	Parameters
 	----------
 	leavesPinned : PermutationSpace
-		Dictionary of `pile` with pile-range of leaves, if a pile-range of leaves is defined at `pile`.
+		Dictionary of `pile: leaf` and `pile: pileRangeOfLeaves`.
 
 	Returns
 	-------
-	dictionaryOfPilePileRangeOfLeaves : dict[int, xmpz]
-		Dictionary mapping from `pile` to pile-range of leaves for every pile-range of leaves in `leavesPinned`.
+	dictionaryOfPilePileRangeOfLeaves : dict[int, PileRangeOfLeaves]
+		Dictionary of `pile: pileRangeOfLeaves`, if a `pileRangeOfLeaves` is defined at `pile`.
 	"""
 	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in leavesPinned.items() if thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves)}
 
@@ -302,7 +309,7 @@ def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: �
 
 @cache
 def Z0Z_invert(dimensionsTotal: int, integerNonnegative: int) -> int:
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)  # ty:ignore[invalid-argument-type]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -353,4 +360,5 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 
 def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsTallToPinThis: int = 3) -> bool:
 	return (youMustBeDimensionsTallToPinThis <= len(mapShape)) and all(dimensionLength == 2 for dimensionLength in mapShape)
+
 

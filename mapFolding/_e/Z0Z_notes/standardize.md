@@ -1,64 +1,77 @@
 # Standardizing instructions, identifiers, descriptions, and other semiotic elements for clarity
 
-## pick: always less that or always greater than
+## Replace "trailing operators", "hidden" operators, and semantically-useless operators
 
-I've been standardizing on `<` and `<=`, but `==` sometimes looks odd. Would `>` be better? I doubt it.
+Computers parse and understand statements starting from the innermost nesting. Humans cannot naturally do that: we more easily
+parse and understand a statement LTR or RTL. In `state.productsOfDimensions[dimensionNearest首(leafAt一零) - 1]`, we see these elements from LTR:
 
-## `if` trees of comparisons
+1. state
+2. .productsOfDimensions
+3. []
+4. dimensionNearest首
+5. ()
+6. leafAt一零
+7. - 1
 
-example:
+At step 3, we learn we will modify state.productsOfDimensions.
+At step 4, we know we will use the function's return.
+But at step 7, we learn we need to modify the function's return.
+
+`getitem(state.productsOfDimensions, (dimensionNearest首(leafAt一零) - 1))`
+
+At step 1, we already know the first argument will be modified by the second element, so we are looking for those two elements.
+At step 5, we know that whatever element is next will be combined with at least one more element, so we are not surprised by `-1`.
+
+1. getitem
+2. ()
+3. state
+4. .productsOfDimensions,
+5. ()
+6. dimensionNearest首
+7. ()
+8. leafAt一零
+9. - 1
+
+In simple statements, we don't need signals such as `getitem`, and excessive parentheses can make the statement more confusing.
+
+In complex statements, use signals that allow the human to read LTR and anticipate later elements. Useful signals for complex statements include:
+
+- parentheses
+- `getitem`
+- `DOTvalues` (for `dict.values()`)
+
+In complex statements, some operators are easy to miss, such as `~` and `-` when used to mean "negative". `operator.invert` and
+`operator.neg` can ensure the human sees the operator.
+
+In the expression `range(bottles + 1)`, why is there a `+ 1`? We can often figure it out by analyzing the context, but the easiest way to erase ambiguity is to replace `+ 1` with a semantic identifier. In my packages look for modules named "_semiotics.py" to find replacements such as:
 
 ```python
-   if dimension == 0:
-    ...
-   if dimension < state.dimensionsTotal - 2:
-    ...
-   if 0 < dimension < state.dimensionsTotal - 2:
-    ...
-   if 0 < dimension < state.dimensionsTotal - 3:
-    ...
-   if 0 < dimension < state.dimensionsTotal - 1:
-    ...
+decreasing: int = -1
+"""Adjust the value due to Python syntax."""
+inclusive: int = 1
+"""Include the last value in a `range`: change from [p, q) to [p, q]."""
+zeroIndexed: int = 1
+"""Adjust the value due to Python syntax."""
 ```
 
-If the order matters, either use flow control to enforce the order or document what matters and why.
-
-If the order doesn't matter, then pick a standard order and use it everywhere.
-
-## Replace `k` and `r` in most places with something semantic
-
-It's probably ok or maybe preferable in "iff.py", but other than that, the reader must know the math conventions to understand what `k` and `r` are.
-
-## Replace "trailing operators", "hidden" operators, and semantically void operators
-
-Example
-
-```python
-anInteger: int = intInnit([integerNonnegative], 'integerNonnegative', type[int])[0]
-```
-
-It is very easy to miss the purpose of the list brackets--or that the indexer is even there. As a comparison, I've replaced
-`dict.values()` with `DOTvalues` in many places, and I like it. In `astToolkit`, I have struggled with an indexing problem that
-almost certainly has some valuable lessons for this specific index issue. Ironically, or perhaps appropriately, I think the
-relevant code is in class `DOT`; no, wait, I think it's in class `Grab`.
+In the above example, `range(bottles + 1)`, `range(bottles + inclusive)`, and `range(bottles + zeroIndexed)` all have the same effect, but semantic identifiers explain why the adjustment is needed.
 
 ## Semiotics: 2^n-dimensional
 
+Previously, I used terms such as 2^d, 2Dn, p2d6. Furthermore, some (all?) academic papers use similar terms. But "d" is not obvious to all readers as "dimension". Therefore, I am standardizing on "2^n-dimensional" and `2上nDimensional`.
+
 - Text
-  - 2^n-dimensional
-  - 2^n-dimensions
+  - Morpheme root: 2^n-dimensional
+  - Alternatives:
+    - 2^n-dimensions
 - Identifiers, pseudo-identifiers (e.g., function parameters), and file system objects
-  - 2上n
-  - 2上nDimensional
-  - p2上n
-  - p2上nDimensional
-
-2^d, 2Dn, p2d[x]: "d" is not obvious to all readers as "dimension". Define d as dimension wherever it appears.
-
-- 2^d-dimensional
-- mapShapeIs2上nDimensions
-- 2^n-dimensional (semantic similarities with `ndarray`, "n-dimensional array" from NumPy)
-- 2^n-dimensions
+  - Morpheme suffix: 2上nDimensional
+  - Always use a string that would be a valid Python identifier even if the string is not being used as an identifier.
+  - Alternatives:
+    - 2上n
+  - Fallback prefix: p
+    - p2上nDimensional
+    - p2上n
 
 ## Example: OEIS
 
@@ -66,14 +79,14 @@ relevant code is in class `DOT`; no, wait, I think it's in class `Grab`.
 
 - "OeisFormula" is a diminutive form of oeisIDbyFormula: NO MOTHERFUCKING DIMINUTIVES.
 - "OeisFormula" is referencing a very specific item, the module `oeisIDbyFormula`, and it is not a generalized form that includes
-  `oeisIDbyFormula`, which means `oeisIDbyFormula` is used as a proper noun in this case: use the proper noun in the identifier.
+ `oeisIDbyFormula`, which means `oeisIDbyFormula` is used as a proper noun in this case: use the proper noun in the identifier.
 - "Oeis" is not a word: use 'oeis' or 'OEIS' but not OeIs, oEIs, oeiS, or Oeis.
 
 ## Example of stupid error message
 
 ```python
 if testCase.oeisID not in dictionaryOEISMapFolding:
-    message: str = f"`{testCase.oeisID}` does not define a map shape."
+  message: str = f"`{testCase.oeisID}` does not define a map shape."
 ```
 
 The basic thesis of the error message that was triggered by `if testCase.oeisID not in dictionaryOEISMapFolding:` ought to be
@@ -85,7 +98,38 @@ The basic thesis of the error message that was triggered by `if testCase.oeisID 
 
 So testCase to mapShape, not mapShape from testCase.
 
-## Semantics of oddness/evenness apathy
+## Needs more analysis or more details
+
+### pick: always `<` or always `>`
+
+I've been standardizing on `<` and `<=`, but `==` sometimes looks odd. Would `>` be better? I doubt it.
+
+### `if`-trees of comparisons
+
+example:
+
+```python
+  if dimension == 0:
+  ...
+  if dimension < state.dimensionsTotal - 2:
+  ...
+  if 0 < dimension < state.dimensionsTotal - 2:
+  ...
+  if 0 < dimension < state.dimensionsTotal - 3:
+  ...
+  if 0 < dimension < state.dimensionsTotal - 1:
+  ...
+```
+
+If the order matters, either use flow control to enforce the order or document what matters and why.
+
+If the order doesn't matter, then pick a standard order and use it everywhere.
+
+### Replace `k` and `r` in most places with something semantic
+
+It's probably ok or maybe preferable in "iff.py", but other than that, the reader must know the math conventions to understand what `k` and `r` are.
+
+### Semantics of oddness/evenness apathy
 
 Be definition, for all odd numbers `dimensionNearestTail == 0`. Therefore, in cases like the one below and is some other cases
 when I want to perform a test/measurement at the tail and I want to ignore oddness/evenness, I do not have a good standardized
@@ -110,6 +154,6 @@ is merely bit_count()-1, but the name describes the semantics of what the functi
 situations when I want to ignore oddness/evenness.
 
 ```python
-  if is_odd(leafAt二):
-    if dimensionNearestTail(leafAt二 - 1) == 1:
+ if is_odd(leafAt二):
+  if dimensionNearestTail(leafAt二 - 1) == 1:
 ```

@@ -25,7 +25,7 @@ the absolute quantity, not just the consecutive ones relative to the LSD.
 	range of leaves in piles
 """
 
-"""crazy^2
+"""Different ways to compute the same values.
 leafPredecessor = state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[howMany0coordinatesAtTail(leaf)]
 print(leafPredecessor == int(bit_flip(0, dimensionNearest首(leaf)).bit_flip(howMany0coordinatesAtTail(leaf))))
 

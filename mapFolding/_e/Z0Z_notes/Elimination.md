@@ -20,7 +20,7 @@
 | tuple     | fixed    | yes     |                           |
 | list      | changing | yes     |                           |
 
-## 2^ⁿ-dimensional maps: given leaves `k` and `r`, if `dimensionNearest首(k) <= dimensionNearestTail(r)`, then `pileOf_k < pileOf_r`
+## 2^n-dimensional maps: given leaves `k` and `r`, if `dimensionNearest首(k) <= dimensionNearestTail(r)`, then `pileOf_k < pileOf_r`
 
 Physically, `pileOf_r` can exist before `pileOf_k`, but due to Lunnon Theorem 4, we can enumerate a subset of foldings and multiply by a formula.
 

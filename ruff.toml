@@ -34,6 +34,7 @@ ignore = [
   "TC006",
   "TD",
   "W191",
+  "W292",
 ]
 select = ["ALL"]
 task-tags = ["NOTE", "TODO"]

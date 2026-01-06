@@ -1,18 +1,14 @@
 # Brain dump of things I wish were different
 
+## At cmd, "python" forces a new terminal and it doesn't use the venv
+
+This is a relatively new problem.
+
 ## Consolidate and organize knowledge in "Elimination.md"
 
 - mapFolding\_e\analysisPython\Z0Z_p2d6.py
 - mapFolding\_e\analysisPython\Z0Z_hypothesis.py
 - mapFolding\_e\knowledgeDump.py
-
-## At cmd, "python" forces a new terminal and it doesn't use the venv
-
-This is a relatively new problem.
-
-## Decorators, signatures, and docstrings
-
-I wish @cache and @curry didn't obscure the function signature and docstring.
 
 ## "./easyRun" functions
 
@@ -21,15 +17,15 @@ of the codebase, and I wish they were more consistent with it. They are not dry:
 
 ## `toolz.dicttoolz.keyfilter` and `valfilter` don't do type narrowing
 
-In the following function, for example, `valfilter` removes all `xmpz` types from the dictionary, but Pylance thinks the return type is wrong.
+In the following function, for example, `valfilter` removes all `mpz` types from the dictionary, but Pylance thinks the return type is wrong.
 
 ```python
 
-def oopsAllLeaves(leavesPinned: int | xmpz) -> dict[int, int]:
+def oopsAllLeaves(leavesPinned: int | mpz) -> dict[int, int]:
     return valFilter(thisIsALeaf, leavesPinned)
 ```
 
-> Type "dict[int, int | xmpz]" is not assignable to return type "dict[int, int]"
+> Type "dict[int, int | mpz]" is not assignable to return type "dict[int, int]"
 
 ## Share transcription of Lunnon 1971
 
@@ -37,13 +33,9 @@ In Z0Z_literature\Lunnon1971.txt, I have transcribed most of the image-only PDF 
 
 ## Development tools
 
-### grepWin
+### Reconfigure instruction files to the new system of skills and whatever
 
-Integrate grepWin. Maybe nirSoft searchMyFiles, too.
-
-### ss64.com knowledge
-
-Batch file support sucks.
+[Customization options](https://code.visualstudio.com/docs/copilot/customization/overview)
 
 ### VS Code importing deprecated types from typing instead of collections
 
@@ -100,3 +92,11 @@ pyproject.toml
 README.md
 SECURITY.md
 uv.lock
+
+### grepWin
+
+Integrate grepWin. Maybe nirSoft searchMyFiles, too.
+
+### ss64.com knowledge
+
+Batch file support sucks.

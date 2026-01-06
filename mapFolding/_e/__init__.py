@@ -8,21 +8,23 @@ from mapFolding._e._semiotics import (
 
 # isort: split
 from mapFolding._e._theTypes import (
-	Folding as Folding, LeafOrPileRangeOfLeaves as LeafOrPileRangeOfLeaves, PermutationSpace as PermutationSpace)
+	Folding as Folding, LeafOrPileRangeOfLeaves as LeafOrPileRangeOfLeaves, PermutationSpace as PermutationSpace,
+	PileRangeOfLeaves as PileRangeOfLeaves)
 
 # isort: split
 from mapFolding._e._beDRY import (
-	between as between, consecutive as consecutive, DOTvalues as DOTvalues, exclude as exclude,
-	getAntiPileRangeOfLeaves as getAntiPileRangeOfLeaves, getIteratorOfLeaves as getIteratorOfLeaves, getLeaf as getLeaf,
+	between as between, consecutive as consecutive, DOTgetPileIfLeaf as DOTgetPileIfLeaf,
+	DOTgetPileIfPileRangeOfLeaves as DOTgetPileIfPileRangeOfLeaves, DOTvalues as DOTvalues, exclude as exclude,
+	getAntiPileRangeOfLeaves as getAntiPileRangeOfLeaves, getIteratorOfLeaves as getIteratorOfLeaves,
 	getPileRangeOfLeaves as getPileRangeOfLeaves, getProductsOfDimensions as getProductsOfDimensions,
 	getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
 	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首, hasDuplicates as hasDuplicates,
-	leafIsNotPinned as leafIsNotPinned, leafIsPinned as leafIsPinned, mappingHasKey as mappingHasKey,
-	mapShapeIs2上nDimensions as mapShapeIs2上nDimensions, notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零,
-	notPileLast as notPileLast, oopsAllLeaves as oopsAllLeaves, oopsAllPileRangesOfLeaves as oopsAllPileRangesOfLeaves,
-	pileIsNotOpen as pileIsNotOpen, pileIsOpen as pileIsOpen, pileRangeOfLeavesAND as pileRangeOfLeavesAND,
-	reverseLookup as reverseLookup, thisIsALeaf as thisIsALeaf, thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves,
-	Z0Z_invert as Z0Z_invert, Z0Z_JeanValjean as Z0Z_JeanValjean)
+	leafIsInPileRange as leafIsInPileRange, leafIsNotPinned as leafIsNotPinned, leafIsPinned as leafIsPinned,
+	mappingHasKey as mappingHasKey, mapShapeIs2上nDimensions as mapShapeIs2上nDimensions,
+	notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零, notPileLast as notPileLast, oopsAllLeaves as oopsAllLeaves,
+	oopsAllPileRangesOfLeaves as oopsAllPileRangesOfLeaves, pileIsNotOpen as pileIsNotOpen, pileIsOpen as pileIsOpen,
+	pileRangeOfLeavesAND as pileRangeOfLeavesAND, reverseLookup as reverseLookup, thisIsALeaf as thisIsALeaf,
+	thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves, Z0Z_invert as Z0Z_invert, Z0Z_JeanValjean as Z0Z_JeanValjean)
 
 # isort: split
 from mapFolding._e._measure import (
@@ -36,8 +38,7 @@ from mapFolding._e._dataDynamic import (
 	addPileRangesOfLeaves as addPileRangesOfLeaves, getDictionaryLeafDomains as getDictionaryLeafDomains,
 	getDictionaryPileRanges as getDictionaryPileRanges, getDomainDimension一 as getDomainDimension一,
 	getDomainDimension二 as getDomainDimension二, getDomainDimension首二 as getDomainDimension首二,
-	getDomain二一零and二一 as getDomain二一零and二一, getDomain二零and二 as getDomain二零and二,
-	getDomain首零Plus零Conditional as getDomain首零Plus零Conditional, getDomain首零一二and首一二 as getDomain首零一二and首一二,
-	getDomain首零二and首二 as getDomain首零二and首二, getLeafDomain as getLeafDomain, getLeavesCreaseBack as getLeavesCreaseBack,
-	getLeavesCreaseNext as getLeavesCreaseNext, getPileRange as getPileRange, getZ0Z_precedence as getZ0Z_precedence,
-	getZ0Z_successor as getZ0Z_successor)
+	getDomain二一零and二一 as getDomain二一零and二一, getDomain二零and二 as getDomain二零and二, getDomain首零一二and首一二 as getDomain首零一二and首一二,
+	getDomain首零二and首二 as getDomain首零二and首二, getLeafDomain as getLeafDomain, getLeaf首零Plus零Domain as getLeaf首零Plus零Domain,
+	getLeavesCreaseBack as getLeavesCreaseBack, getLeavesCreaseNext as getLeavesCreaseNext, getPileRange as getPileRange,
+	getZ0Z_precedence as getZ0Z_precedence, getZ0Z_successor as getZ0Z_successor)

@@ -10,8 +10,8 @@ from mapFolding import ansiColorReset, ansiColorYellowOnBlack, decreasing, inclu
 from mapFolding._e import (
 	between, consecutive, dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首,
 	dimensionSecondNearest首, dimensionThirdNearest首, exclude, getPileRangeOfLeaves, getSumsOfProductsOfDimensionsNearest首,
-	howManyDimensionsHaveOddParity, leafInSubHyperplane, leafOrigin, mapShapeIs2上nDimensions, PermutationSpace, pileOrigin,
-	reverseLookup, Z0Z_JeanValjean, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
+	howManyDimensionsHaveOddParity, leafInSubHyperplane, leafIsPinned, leafOrigin, mapShapeIs2上nDimensions,
+	PermutationSpace, pileOrigin, reverseLookup, Z0Z_JeanValjean, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import all_unique, loops
 from operator import add, sub
@@ -791,15 +791,20 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 
 	return tuple(sorted(set(domainCombined)))
 
-def getDomain首零Plus零Conditional(state: EliminationState) -> tuple[int, ...]:
-	leaf: int = 首零(state.dimensionsTotal)+零
+def getLeaf首零Plus零Domain(state: EliminationState, leaf: int | None = None) -> tuple[int, ...]:
+	"""Get the full domain of `leaf首零Plus零` that is valid in all cases, or if `leaf一零` and `leaf首零一` are pinned in `state.leavesPinned`, get a domain of `leaf首零Plus零` customized to `pileOfLeaf一零` and `pileOfLeaf首零一`."""
+	if leaf is None:
+		leaf = 首零(state.dimensionsTotal)+零
 	domain首零Plus零: tuple[int, ...] = tuple(getLeafDomain(state, leaf))
+	leaf一零: int = 一+零
 	leaf首零一: int = 首零一(state.dimensionsTotal)
-	pileOfLeaf一零: int = reverseLookup(state.leavesPinned, 一+零)
-	pileOfLeaf首零一: int = reverseLookup(state.leavesPinned, leaf首零一)
-	return _getDomain首零Plus零Conditional(domain首零Plus零, pileOfLeaf一零, pileOfLeaf首零一, state.dimensionsTotal, state.leavesTotal)
+	if leafIsPinned(state.leavesPinned, leaf一零) and leafIsPinned(state.leavesPinned, leaf首零一):
+		pileOfLeaf一零: int = reverseLookup(state.leavesPinned, leaf一零)
+		pileOfLeaf首零一: int = reverseLookup(state.leavesPinned, leaf首零一)
+		domain首零Plus零 = _getLeaf首零Plus零Domain(domain首零Plus零, pileOfLeaf一零, pileOfLeaf首零一, state.dimensionsTotal, state.leavesTotal)
+	return domain首零Plus零
 @cache
-def _getDomain首零Plus零Conditional(domain首零Plus零: tuple[int, ...], pileOfLeaf一零: int, pileOfLeaf首零一: int, dimensionsTotal: int, leavesTotal: int) -> tuple[int, ...]:
+def _getLeaf首零Plus零Domain(domain首零Plus零: tuple[int, ...], pileOfLeaf一零: int, pileOfLeaf首零一: int, dimensionsTotal: int, leavesTotal: int) -> tuple[int, ...]:
 	pilesTotal: int = 首一(dimensionsTotal)
 
 	bump: int = 1 - int(pileOfLeaf一零.bit_count() == 1)
@@ -1169,4 +1174,5 @@ def addPileRangesOfLeaves(state: EliminationState) -> EliminationState:
 								for pile, pileRangeOfLeaves in getDictionaryPileRanges(state).items()}
 	state.leavesPinned = merge(leavesPinned2上nDomainDefaults, state.leavesPinned)
 	return state
+
 

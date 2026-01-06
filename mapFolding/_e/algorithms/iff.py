@@ -27,7 +27,7 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding import getLeavesTotal, inclusive
-from mapFolding._e import between, oopsAllLeaves, PermutationSpace, reverseLookup, 零
+from mapFolding._e import between, oopsAllLeaves, PermutationSpace, 零
 from mapFolding._e.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf
@@ -176,7 +176,6 @@ def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 			if leafCrease is None:
 				continue
 			pileCrease: int | None = leafToPile.get(leafCrease)
-			# pileCrease: int | None = reverseLookup(state.leavesPinned, leafCrease)
 			if pileCrease is None:
 				continue
 			listPileCreaseByParity[ImaOddLeaf(state.mapShape, leaf, dimension)].append((pile, pileCrease))

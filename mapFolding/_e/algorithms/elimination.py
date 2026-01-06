@@ -7,6 +7,8 @@ from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding
 from math import factorial
 from more_itertools import iter_index, unique
 
+# TODO make sure all leavesPinned have pile-ranges and update their pile-ranges
+
 def count(state: EliminationState) -> EliminationState:
 	state.groupsOfFolds += sum(map(countLeavesPinned, state.listPermutationSpace, repeat(state.mapShape), repeat(range(state.leavesTotal))))
 	return state

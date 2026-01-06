@@ -1,12 +1,23 @@
+"""Generalized pinning functions in the "Elimination" algorithm for any `mapShape`.
+
+Functions for 2^n-dimensional maps must go in other modules.
+
+The development of this generalized module is severely hampered, however. Functions for 2^n-dimensional maps have a "beans and
+cornbread" problem that was difficult for me to "solve"--due to my programming skills. If I were able to decouple the "beans and
+cornbread" solution from the 2^n-dimensional functions, I would generalize more functions and move them here.
+"""
 from collections.abc import Callable, Iterable, Iterator
 from cytoolz.dicttoolz import assoc as associate
-from cytoolz.functoolz import curry as syntacticCurry
+from cytoolz.functoolz import compose, curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
+from functools import partial
+from gmpy2 import bit_flip, bit_mask, bit_set, mpz
 from itertools import repeat
-from mapFolding import inclusive
+from mapFolding import inclusive, zeroIndexed
 from mapFolding._e import (
-	between, DOTvalues, Folding, getLeaf, getLeafDomain, getPileRange, leafIsNotPinned, oopsAllLeaves, PermutationSpace,
-	pileIsOpen, thisIsALeaf)
+	between, DOTgetPileIfLeaf, DOTgetPileIfPileRangeOfLeaves, DOTvalues, Folding, getLeafDomain, getPileRange,
+	leafIsInPileRange, leafIsNotPinned, oopsAllLeaves, oopsAllPileRangesOfLeaves, PermutationSpace, pileIsOpen,
+	PileRangeOfLeaves, thisIsALeaf)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten, ilen
 from operator import getitem
@@ -79,8 +90,8 @@ def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], lea
 	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(isPinned, listPermutationSpace)
 	return (grouped.get(False, []), grouped.get(True, []))
 
-# ======= Pin one or more leaves in `leavesPinned` or `folding` =======================
-# NOTE The only functions that actually pin a leaf in a dictionary or folding ought to be in this section.
+# ======= Pin a `leaf` in a `PermutationSpace` or `Folding` =======================
+# NOTE This section ought to contain all functions based on the "Elimination" algorithm that pin a `leaf` in a `PermutationSpace` or `Folding`.
 
 @syntacticCurry
 def atPilePinLeaf(leavesPinned: PermutationSpace, pile: int, leaf: int) -> PermutationSpace:
@@ -119,7 +130,7 @@ def makeFolding(leavesPinned: PermutationSpace, leavesToInsert: tuple[int, ...])
 		pilesTotal: int = ilen(filter(thisIsALeaf, DOTvalues(leavesPinned))) + len(leavesToInsert)
 		# pilesTotal: int = len(oopsAllLeaves(leavesPinned)) + len(leavesToInsert)  # noqa: ERA001
 		folding: Folding = tuple([
-			leafOrLeafRange if (leafOrLeafRange := getLeaf(leavesPinned, pile)) else next(permutand)
+			leafOrLeafRange if (leafOrLeafRange := DOTgetPileIfLeaf(leavesPinned, pile)) else next(permutand)
 			for pile in range(pilesTotal)
 		])
 	else:
@@ -127,13 +138,6 @@ def makeFolding(leavesPinned: PermutationSpace, leavesToInsert: tuple[int, ...])
 	return folding
 
 # ======= Deconstruct a `PermutationSpace` dictionary =======
-# This function returns `deconstructedLeavesPinned : dict[int, LeavesPinned]` for pragmatic reasons. I typically deconstruct a
-# pile because I want to pin one leaf at the pile without invalidating the permutation space. So, the dictionary makes it easy for
-# me to segregate the one leaf I am working on from the umpteen other new dictionaries, each with a leaf pinned at the pile.
-# If I change to representing the range of a pile with "bit packing", then I only need to make two dictionaries: one dictionary
-# with the desired leaf pinned at pile, and another dictionary with a modified range at pile that excludes the desired leaf.
-# The two systems are complementary: I can completely deconstruct a pile into only pinned leaves, bifurcate into one pinned
-# dictionary and one pile-range dictionary, or any intermediate option.
 def deconstructPermutationSpaceAtPile(leavesPinned: PermutationSpace, pile: int, leavesToPin: Iterable[int]) -> dict[int, PermutationSpace]:
 	"""Deconstruct an open `pile` to the `leaf` range of `pile`.
 
@@ -155,7 +159,7 @@ def deconstructPermutationSpaceAtPile(leavesPinned: PermutationSpace, pile: int,
 		Dictionary mapping from `leaf` pinned at `pile` to the `PermutationSpace` dictionary with the `leaf` pinned at `pile`.
 	"""
 	if thisIsALeaf(leaf := leavesPinned.get(pile)):
-		deconstructedLeavesPinned: dict[int, PermutationSpace] = {leaf: leavesPinned}
+		deconstructedLeavesPinned: dict[int, PermutationSpace] = {leaf: leavesPinned}  # ty:ignore[invalid-assignment]
 	else:
 		pin: Callable[[int], PermutationSpace] = atPilePinLeaf(leavesPinned, pile)
 		leafCanBePinned: Callable[[int], bool] = leafIsNotPinned(leavesPinned)
@@ -183,9 +187,10 @@ def deconstructPermutationSpaceByDomainOfLeaf(leavesPinned: PermutationSpace, le
 		List of `PermutationSpace` dictionaries with `leaf` pinned at each open `pile` in `leafDomain`.
 	"""
 	if leafIsNotPinned(leavesPinned, leaf):
+		pileOpen: Callable[[int], bool] = pileIsOpen(leavesPinned)
+		leafInPileRange: Callable[[int], bool] = compose(leafIsInPileRange(leaf), partial(DOTgetPileIfPileRangeOfLeaves, leavesPinned, default=bit_mask(len(leavesPinned))))
 		pinLeafAt: Callable[[int], PermutationSpace] = atPilePinLeaf(leavesPinned, leaf=leaf)
-		pileAvailable: Callable[[int], bool] = pileIsOpen(leavesPinned)
-		deconstructedLeavesPinned: list[PermutationSpace] = list(map(pinLeafAt, filter(pileAvailable, leafDomain)))
+		deconstructedLeavesPinned: list[PermutationSpace] = list(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
 	else:
 		deconstructedLeavesPinned = [leavesPinned]
 	return deconstructedLeavesPinned
@@ -197,6 +202,12 @@ def deconstructPermutationSpaceByDomainsCombined(leavesPinned: PermutationSpace,
 	def pileOpenByIndex(index: int) -> Callable[[tuple[int, ...]], bool]:
 		def workhorse(domain: tuple[int, ...]) -> bool:
 			return pileIsOpen(leavesPinned, domain[index])
+		return workhorse
+
+	def leafInPileRangeByIndex(index: int) -> Callable[[tuple[int, ...]], bool]:
+		def workhorse(domain: tuple[int, ...]) -> bool:
+			pileRangeOfLeaves = DOTgetPileIfPileRangeOfLeaves(leavesPinned, domain[index], default=bit_mask(len(leavesPinned)))
+			return leafIsInPileRange(leaves[index], pileRangeOfLeaves)
 		return workhorse
 
 	def isPinnedAtPileByIndex(leaf: int, index: int) -> Callable[[tuple[int, ...]], bool]:
@@ -212,6 +223,9 @@ def deconstructPermutationSpaceByDomainsCombined(leavesPinned: PermutationSpace,
 				In each iteration of `leavesDomain`, `listOfPiles`, the pile it needs is `listOfPiles[index]`.
 				Therefore, if `listOfPiles[index]` is open, filter in the iteration. If `listOfPiles[index]` is occupied, filter out the iteration."""
 				leavesDomain = filter(pileOpenByIndex(index), leavesDomain)
+				"""`leaves[index]` is not pinned, it wants `listOfPiles[index]`, and `listOfPiles[index]` is open.
+				Is `leaves[index]` in the pile-range of `listOfPiles[index]`?"""
+				leavesDomain = filter(leafInPileRangeByIndex(index), leavesDomain)
 			else:
 				"""`leaves[index]` is pinned.
 				In each iteration of `leavesDomain`, `listOfPiles`, the pile in which `leaves[index]` is pinned must match `listOfPiles[index]`.

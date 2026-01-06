@@ -2,8 +2,8 @@ from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
 from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing, zeroIndexed
 from mapFolding._e import (
-	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, exclude, getDictionaryPileRanges,
-	getLeaf, getLeavesCreaseBack, getLeavesCreaseNext, getSumsOfProductsOfDimensionsNearest首,
+	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, DOTgetPileIfLeaf, exclude,
+	getDictionaryPileRanges, getLeavesCreaseBack, getLeavesCreaseNext, getSumsOfProductsOfDimensionsNearest首,
 	howManyDimensionsHaveOddParity, leafInSubHyperplane, notLeafOriginOrLeaf零, ptount, Z0Z_0NearestTail, 一, 三, 二, 五, 四, 零,
 	首一, 首一二, 首二, 首零, 首零一, 首零一二)
 from mapFolding._e.dataBaskets import EliminationState
@@ -44,12 +44,12 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 
 	Therefore, if I continue to pin pile 首零Less零, I should probably focus on different strategies.
 	"""
-	leafAt一:			int = raiseIfNone(getLeaf(state.leavesPinned, 			一))
-	leafAt首Less一:		int = raiseIfNone(getLeaf(state.leavesPinned, state.首 - 一))
-	leafAt一零:			int = raiseIfNone(getLeaf(state.leavesPinned, 			(一+零)))
-	leafAt首Less一零:	int = raiseIfNone(getLeaf(state.leavesPinned, state.首 - (一+零)))
-	leafAt二:			int = raiseIfNone(getLeaf(state.leavesPinned, 			二))
-	leafAt首Less二:		int = raiseIfNone(getLeaf(state.leavesPinned, state.首 - (二)))
+	leafAt一:			int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, 			一))
+	leafAt首Less一:		int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, state.首 - 一))
+	leafAt一零:			int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, 			(一+零)))
+	leafAt首Less一零:	int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, state.首 - (一+零)))
+	leafAt二:			int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, 			二))
+	leafAt首Less二:		int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, state.首 - (二)))
 
 	dictionaryPileRanges: dict[int, tuple[int, ...]] = getDictionaryPileRanges(state)
 	listRemoveLeaves: list[int] = []

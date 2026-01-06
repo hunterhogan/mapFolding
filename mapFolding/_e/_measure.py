@@ -90,7 +90,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 	Parameters
 	----------
 	notLeafOrigin : int
-		A `leaf` in a 2^d-dimensional map.
+		A `leaf` in a 2^n-dimensional map.
 
 	Returns
 	-------
