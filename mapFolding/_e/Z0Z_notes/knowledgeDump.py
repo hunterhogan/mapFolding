@@ -1,12 +1,52 @@
 """A dump of knowledge accumulated during development."""
 
 """Perspective changes and code changes:
+The `next` crease, in the sense of `k+1` and `r+1` in the inequalities is simple.
+- For example, given `k` and `dimension`, `k1 = bit_flip(k, dimension); k1 = k1 if k1 > k else None`. This doesn't require bit_test(k, dimension) first.
+"""
 
-- To increment in a dimension means to add 1 in the dimensionIndex. If the current value is 0, then the new value is 1. If the
-	current value is 1, then the addition requires "carrying" values to "higher" dimensionIndices.
-- The `next` crease, in the sense of `k+1` and `r+1` in the inequalities is simple: given `k` and `dimension`,
-	`k1 = bit_flip(k, dimension); k1 = k1 if k1 > k else None`.
-	Reminder: this is because I evaluate the four `k < r`, not the eight `k ? r` inequalities *a la* Koehler.
+"""Random observation about progressions within a dimension:
+dimension end, 31, dimension origin, 16:
+11111 	10000 16
+1° crease 10010 18
+31 (2, 3) 10011 19 = 18 + 1
+31 (1, 3) 10101 21 = 18 + 3
+31 (1, 2) 11001 25 = 18 + 7
+31			  < 33 = 18 + 15: not valid
+sums: 0, 1, 3, 7
+
+2° crease 10100 20
+31 (1, 3) 10101 21 = 20 + 1
+31 (3)    10111 23 = 20 + 3
+31 (2)    11011 27 = 20 + 7
+31			  < 35 = 20 + 15: not valid
+
+16 has 4 tail zeros.
+16 is a dimension origin: each of the 4 zeros is a "sub-dimension origin" relative to 16.
+All odd piles are covered by starting with a sub-dimension origin and adding the sums of products of dimensions.
+odds: 17, 19, 21, 23, 25, 27, 29, 31
+sums: 0, 1,  3,  7,  15
+cf:  16, 17, 19, 23, 31
+cf:  18, 19, 21, 25, NA
+cf:  20, 21, 23, 27, NA
+cf:  22, 23, 25, 29, NA
+
+evens: 16, 18, 20, 22, 24, 26, 28, 30
+16 is not in the table
+sums: 0, 1,  3,  7,  15
+cf:  17, 18, 20, 24, NA
+cf:  19, 20, 22, 26, NA
+cf:  21, 22, 24, 28, NA
+cf:  23, 24, 26, 30, NA
+
+To get the evens, count from the end.
+evens: 16, 18, 20, 22, 24, 26, 28, 30
+sums 15,  7,  3,  1, 0
+cf:  16, 24, 28, 30, 31
+cf:  NA, 22, 26, 28, 29
+cf:  NA, 20, 24, 26, 27
+cf:  NA, 18, 22, 24, 25
+
 """
 
 """The 'meaning' of:
@@ -187,44 +227,6 @@ for equate the piles:
 	for equate the excluderLeaf:
 		for equate the excluded leaf:
 			make a rule
-"""
-
-"""Random observation about progressions within a dimension:
-dimension end, 31, dimension origin, 16:
-11111 	10000 16
-1° crease 10010 18
-31 (2, 3) 10011 19 = 18 + 1
-31 (1, 3) 10101 21 = 18 + 3
-31 (1, 2) 11001 25 = 18 + 7
-31			< 33 = 18 + 15: not valid
-sums: 0, 1, 3, 7
-
-16 has 4 tail zeros.
-16 is a dimension origin: each of the 4 zeros is a "sub-dimension origin" relative to 16.
-All odd piles are covered by starting with a sub-dimension origin and adding the sums of products of dimensions.
-odds: 17, 19, 21, 23, 25, 27, 29, 31
-sums: 0, 1,  3,  7,  15
-cf:  16, 17, 19, 23, 31
-cf:  18, 19, 21, 25, NA
-cf:  20, 21, 23, 27, NA
-cf:  22, 23, 25, 29, NA
-
-evens: 16, 18, 20, 22, 24, 26, 28, 30
-16 is not in the table
-sums: 0, 1,  3,  7,  15
-cf:  17, 18, 20, 24, NA
-cf:  19, 20, 22, 26, NA
-cf:  21, 22, 24, 28, NA
-cf:  23, 24, 26, 30, NA
-
-To get the evens, count from the end.
-evens: 16, 18, 20, 22, 24, 26, 28, 30
-sums 15,  7,  3,  1, 0
-cf:  16, 24, 28, 30, 31
-cf:  NA, 22, 26, 28, 29
-cf:  NA, 20, 24, 26, 27
-cf:  NA, 18, 22, 24, 25
-
 """
 
 """Leaf precedence rules.
