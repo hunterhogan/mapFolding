@@ -1,3 +1,4 @@
+from collections import deque
 from collections.abc import Callable
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from functools import partial
@@ -17,6 +18,7 @@ from mapFolding._e.pin2上nDimensionsByCrease import (
 	pinPile一Crease, pinPile一零Crease, pinPile二Crease, pinPile首Less一Crease, pinPile首Less一零Crease, pinPile首Less二Crease)
 from mapFolding._e.pin2上nDimensionsByDomain import pinPile首零Less零AfterFourthOrder
 from mapFolding._e.pinIt import deconstructPermutationSpaceByDomainOfLeaf, deconstructPermutationSpaceByDomainsCombined
+from more_itertools import partition
 from operator import getitem
 from tqdm import tqdm
 
@@ -24,54 +26,56 @@ from tqdm import tqdm
 
 # ------- Shared logic ---------------------------------------
 
-def Z0Z_while(state: EliminationState, maximumSizeListPermutationSpace: int, pileProcessingOrder: list[int]) -> EliminationState:
-	def nextLeavesPinnedWorkbench(state: EliminationState, pileProcessingOrder: list[int]) -> EliminationState:
+def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pileProcessingOrder: deque[int], *, CPUlimit: bool | float | int | None = None) -> EliminationState:
+	workersMaximum: int = defineProcessorLimit(CPUlimit)
 
-		# NOTE If you delete this, there will be an infinite loop and you will be sad.
-		state.leavesPinned = {}
+	while pileProcessingOrder and (len(state.listPermutationSpace) < maximumSizeListPermutationSpace):
+		pile: int = pileProcessingOrder.popleft()
 
-		for pile in pileProcessingOrder:
+		Z0Z_thesePilesAreOpen = partition(pileIsOpen(pile=pile), state.listPermutationSpace)
+		state.listPermutationSpace = list(Z0Z_thesePilesAreOpen[False])
 
-			for leavesPinned in filter(pileIsOpen(pile=pile), state.listPermutationSpace):
-				state.leavesPinned = leavesPinned
-				state.listPermutationSpace.remove(leavesPinned)
-				state.pile = pile
-				return state
-		return state
+		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
+			listClaimTickets: list[Future[EliminationState]] = [
+				concurrencyManager.submit(_pinPilesConcurrentTask, EliminationState(mapShape=state.mapShape, leavesPinned=leavesPinned, pile=pile))
+				for leavesPinned in Z0Z_thesePilesAreOpen[True]
+			]
 
-	state = nextLeavesPinnedWorkbench(state, pileProcessingOrder)
-	while (len(state.listPermutationSpace) < maximumSizeListPermutationSpace) and (state.leavesPinned):
-		listLeavesAtPile: list[int] = []
-
-		if state.pile == pileOrigin:
-			listLeavesAtPile = [leafOrigin]
-		elif state.pile == 零:
-			listLeavesAtPile = [零]
-		elif state.pile == state.首 - 零:
-			listLeavesAtPile = [首零(state.dimensionsTotal)]
-		elif state.pile == 一:
-			listLeavesAtPile = pinPile一Crease(state)
-		elif state.pile == state.首 - 一:
-			listLeavesAtPile = pinPile首Less一Crease(state)
-		elif state.pile == 一+零:
-			listLeavesAtPile = pinPile一零Crease(state)
-		elif state.pile == state.首 - (一+零):
-			listLeavesAtPile = pinPile首Less一零Crease(state)
-		elif state.pile == 二:
-			listLeavesAtPile = pinPile二Crease(state)
-		elif state.pile == state.首 - 二:
-			listLeavesAtPile = pinPile首Less二Crease(state)
-		elif state.pile == 首零(state.dimensionsTotal)-零:
-			listLeavesAtPile = pinPile首零Less零AfterFourthOrder(state)
-
-		state = appendLeavesPinnedAtPile(state, listLeavesAtPile)
-		state = nextLeavesPinnedWorkbench(state, pileProcessingOrder)
+			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), desc=f"Pinning pile {pile:3d} of {state.pileLast:3d}", disable=False):
+				state.listPermutationSpace.extend(claimTicket.result().listPermutationSpace)
 
 	return state
 
+def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
+	return appendLeavesPinnedAtPile(state, _getLeavesAtPile(state))
+
+def _getLeavesAtPile(state: EliminationState) -> list[int]:
+	listLeavesAtPile: list[int] = []
+	if state.pile == pileOrigin:
+		listLeavesAtPile = [leafOrigin]
+	elif state.pile == 零:
+		listLeavesAtPile = [零]
+	elif state.pile == state.首 - 零:
+		listLeavesAtPile = [首零(state.dimensionsTotal)]
+	elif state.pile == 一:
+		listLeavesAtPile = pinPile一Crease(state)
+	elif state.pile == state.首 - 一:
+		listLeavesAtPile = pinPile首Less一Crease(state)
+	elif state.pile == 一+零:
+		listLeavesAtPile = pinPile一零Crease(state)
+	elif state.pile == state.首 - (一+零):
+		listLeavesAtPile = pinPile首Less一零Crease(state)
+	elif state.pile == 二:
+		listLeavesAtPile = pinPile二Crease(state)
+	elif state.pile == state.首 - 二:
+		listLeavesAtPile = pinPile首Less二Crease(state)
+	elif state.pile == 首零(state.dimensionsTotal)-零:
+		listLeavesAtPile = pinPile首零Less零AfterFourthOrder(state)
+	return listLeavesAtPile
+
 # ------- Plebian functions -----------------------------------------
 
-def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListPermutationSpace: int = 2**10) -> EliminationState:
+def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListPermutationSpace: int = 2**14, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
 	"""Pin up to 二 piles at both ends of the sequence without surplus `PermutationSpace` dictionaries."""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
@@ -86,7 +90,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		message: str = f"I received `{pileDepth = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
 
-	pileProcessingOrder: list[int] = []
+	pileProcessingOrder: deque[int] = deque()
 	if 0 < depth:
 		pileProcessingOrder.extend([pileOrigin])
 	if 1 <= depth:
@@ -103,9 +107,9 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		if youMustBeDimensionsTallToPinThis < state.dimensionsTotal:
 			pileProcessingOrder.extend([state.首 - 二])
 
-	return Z0Z_while(state, maximumSizeListPermutationSpace, pileProcessingOrder)
+	return _pinPiles(state, maximumSizeListPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
-def pinPile首零Less零(state: EliminationState, maximumSizeListPermutationSpace: int = 2**14) -> EliminationState:
+def pinPile首零Less零(state: EliminationState, maximumSizeListPermutationSpace: int = 2**14, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
 	"""Incompletely, but safely, pin `pile首零Less零`: the last pile in the first half of the sequence.
 
 	Pinning all possible combinations at this pile is more valuable than pinning at most, if not all, other piles. Furthermore,
@@ -124,20 +128,22 @@ def pinPile首零Less零(state: EliminationState, maximumSizeListPermutationSpac
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=5):
 		return state
 
-	pileProcessingOrder: list[int] = [首零(state.dimensionsTotal)-零]
+	pileProcessingOrder: deque[int] = deque([首零(state.dimensionsTotal)-零])
 
-	return Z0Z_while(state, maximumSizeListPermutationSpace, pileProcessingOrder)
+	return _pinPiles(state, maximumSizeListPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
 # ======= Pin by `leaf` ======================================================
 
-# ------- Shared logic --------------------------------------------
-
+# ------- Shared logic ---------------------------------------------
 def _pinLeavesByDomain(state: EliminationState, leaves: tuple[int, ...], leavesDomain: tuple[tuple[int, ...], ...], *, youMustBeDimensionsTallToPinThis: int = 3, CPUlimit: bool | float | int | None = None) -> EliminationState:
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=youMustBeDimensionsTallToPinThis):
 		return state
 
 	if not state.listPermutationSpace:
 		state = pinPilesAtEnds(state, 0)
+
+	intWidth: int = len(str(state.leavesTotal))
+	leavesDescriptor: str = ", ".join(f"{aLeaf:{intWidth}d}" for aLeaf in leaves)
 
 	workersMaximum: int = defineProcessorLimit(CPUlimit)
 
@@ -154,7 +160,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: tuple[int, ...], leavesD
 			for leavesPinned in listPermutationSpace
 		]
 
-		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
+		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), desc=f"Pinning leaves {leavesDescriptor} of {state.leafLast:{intWidth}d}", disable=False):
 			qualifiedLeavesPinned.extend(claimTicket.result().listPermutationSpace)
 
 	state.listPermutationSpace = qualifiedLeavesPinned
@@ -190,7 +196,7 @@ def _pinLeafByDomain(state: EliminationState, leaf: int, getLeafDomain: Callable
 			for leavesPinned in listPermutationSpace
 		]
 
-		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
+		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), desc=f"Pinning leaf {leaf:15d} of {state.leafLast:3d}", disable=False):
 			qualifiedLeavesPinned.extend(claimTicket.result().listPermutationSpace)
 
 	state.listPermutationSpace = qualifiedLeavesPinned

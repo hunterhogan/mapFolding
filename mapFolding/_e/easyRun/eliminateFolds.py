@@ -1,14 +1,18 @@
 # ruff: noqa
 # pyright: basic
+from functools import partial
+from itertools import filterfalse
 from mapFolding import (
 	ansiColorGreenOnBlack, ansiColorReset, ansiColors, ansiColorYellowOnRed, dictionaryOEISMapFolding, packageSettings)
-from mapFolding._e import between, oopsAllLeaves
+from mapFolding._e import between, oopsAllLeaves, PermutationSpace
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensions import (
 	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile首零Less零)
 from os import PathLike
 from pathlib import Path, PurePath
+from tqdm import tqdm
+import csv
 import sys
 import time
 
@@ -28,7 +32,7 @@ if __name__ == '__main__':
 	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 	oeisID: str = ''
 	flow: str = ''
-	CPUlimit: bool | float | int | None = -4
+	CPUlimit: bool | float | int | None = .5
 	state: EliminationState | None = None
 
 	flow = 'elimination'
@@ -51,51 +55,37 @@ if __name__ == '__main__':
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:
 			state = EliminationState(mapShape)
-			# state = pinPiles(state, 4)
-			state = pinLeavesDimensions0零一(state)
+			state = pinPilesAtEnds(state, 2)
+			# state = pinLeavesDimensions0零一(state)
 			# state = pinPile首零Less零(state)
 			# state = pinLeavesDimension二(state)
 			# state = pinLeavesDimension首二(state)
 			if n == 7:
-				pathFilenameGlob: Path = packageSettings.pathPackage / "_e" / "dataRaw" / "p2d7_*.csv"
+				pathDataRaw: Path = packageSettings.pathPackage / "_e" / "dataRaw"
+				stringGlob: str = "p2d7s*.csv"
 
-				import csv
-				listSignatures = []
-				folderDataRaw = packageSettings.pathPackage / "_e" / "dataRaw"
-				for pathFile in folderDataRaw.glob("p2d7_*.csv"):
-					try:
-						with open(pathFile, newline='') as f:
-							reader = csv.reader(f)
-							first_row = next(reader, None)
-							if first_row:
-								listSignatures.append([int(x) for x in first_row])
-					except Exception:
-						pass
+				listSequences: list[tuple[int, ...]] = []
+				for pathFilename in tqdm(pathDataRaw.glob(stringGlob)):
+					with pathFilename.open(newline='') as readStream:
+						for row in csv.reader(readStream):
+							listSequences.append(tuple(map(int, row)))
 
-				if listSignatures and state.listPermutationSpace:
-					def is_task_done(leavesPinned):
-						for signature in listSignatures:
-							match = True
-							for pile, leaf in leavesPinned.items():
-								if pile >= len(signature):
-									match = False
-									break
-								if isinstance(leaf, int):
-									if signature[pile] != leaf:
-										match = False
-										break
-								elif isinstance(leaf, range):
-									if signature[pile] not in leaf:
-										match = False
-										break
-							if match:
-								return True
-						return False
+				def qq(sequence: tuple[int, ...], pileLeaf: tuple[int, int]) -> bool:
+					return sequence[pileLeaf[0]] == pileLeaf[1]
 
-					state.listPermutationSpace = [
-						task for task in state.listPermutationSpace
-						if not is_task_done(task)
-					]
+				def ww(allLeaves: dict[int, int], sequence: tuple[int, ...]) -> bool:
+					return all(map(partial(qq, sequence), allLeaves.items()))
+
+				def taskIsDone(leavesPinned: PermutationSpace) -> bool:
+					return any(map(partial(ww, oopsAllLeaves(leavesPinned)), listSequences))
+
+				state.listPermutationSpace = list(filterfalse(taskIsDone, tqdm(state.listPermutationSpace)))
+
+				if not state.listPermutationSpace:
+					print("No permutations remain after applying known sequences.")
+					exit(0)
+
+				del listSequences
 
 
 		timeStart = time.perf_counter()

@@ -171,7 +171,7 @@ def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
-		for pile, leaf in sorted(leafFilter(between(0, state.leavesTotal - 零 - inclusive), state.leavesPinned).items()):
+		for pile, leaf in sorted(leafFilter(between(0, state.leafLast - inclusive), state.leavesPinned).items()):
 			leafCrease: int | None = nextCrease(state.mapShape, leaf, dimension)
 			if leafCrease is None:
 				continue

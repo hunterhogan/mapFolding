@@ -1005,16 +1005,16 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 # ruff: noqa: SIM102
 # I am developing in this module because of Python's effing namespace and "circular import" issues.
 
-def getZ0Z_precedence(state: EliminationState) -> dict[int, dict[int, list[int]]]:
-	"""leaf: pile: [conditional `leafPredecessor`]."""
-	return _getZ0Z_precedence(state.mapShape)
-@cache
-def _getZ0Z_precedence(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[int]]]:
-	"""Prototype.
+def getDictionaryConditionalLeafPredecessors(state: EliminationState) -> dict[int, dict[int, list[int]]]:
+	"""leaf: pile: [conditional `leafPredecessor`].
 
 	Some leaves are always preceded by one or more leaves. Most leaves, however, are preceded by one or more other leaves only if
 	the leaf is in a specific pile.
 	"""
+	return _getDictionaryConditionalLeafPredecessors(state.mapShape)
+@cache
+def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[int]]]:
+	"""Prototype."""
 	state = EliminationState(mapShape)
 	dictionaryDomains: dict[int, range] = getDictionaryLeafDomains(state)
 
@@ -1147,7 +1147,7 @@ def _getZ0Z_successor(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[int
 
 	dictionarySuccessor: dict[int, dict[int, list[int]]] = {}
 
-	dictionaryPrecedence: dict[int, dict[int, list[int]]] = getZ0Z_precedence(state)
+	dictionaryPrecedence: dict[int, dict[int, list[int]]] = getDictionaryConditionalLeafPredecessors(state)
 
 	for leafLater, dictionaryPiles in dictionaryPrecedence.items():
 		tupleDomainLater: tuple[int, ...] = tuple(dictionaryDomains[leafLater])
@@ -1174,5 +1174,4 @@ def addPileRangesOfLeaves(state: EliminationState) -> EliminationState:
 								for pile, pileRangeOfLeaves in getDictionaryPileRanges(state).items()}
 	state.leavesPinned = merge(leavesPinned2上nDomainDefaults, state.leavesPinned)
 	return state
-
 

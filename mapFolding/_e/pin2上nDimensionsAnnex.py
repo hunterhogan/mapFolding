@@ -1,17 +1,20 @@
+# ruff: noqa: ERA001
+from collections import deque
 from collections.abc import Iterable
 from cytoolz.dicttoolz import keyfilter, valfilter
 from cytoolz.functoolz import complement, curry as syntacticCurry
 from cytoolz.itertoolz import frequencies
 from functools import cache
-from gmpy2 import mpz, xmpz
+from gmpy2 import bit_flip, mpz, xmpz
 from hunterMakesPy import raiseIfNone
-from itertools import filterfalse
+from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding import inclusive
 from mapFolding._e import (
-	between, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, DOTvalues, getAntiPileRangeOfLeaves, getLeafDomain,
-	getLeavesCreaseBack, getLeavesCreaseNext, getZ0Z_precedence, leafIsPinned, mappingHasKey, mapShapeIs2上nDimensions,
-	notLeafOriginOrLeaf零, notPileLast, oopsAllLeaves, oopsAllPileRangesOfLeaves, PermutationSpace, pileIsOpen,
-	PileRangeOfLeaves, pileRangeOfLeavesAND, thisIsALeaf, Z0Z_JeanValjean, 一, 零, 首一, 首零一)
+	between, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, DOTitems, DOTvalues, getAntiPileRangeOfLeaves,
+	getDictionaryConditionalLeafPredecessors, getLeafDomain, getLeavesCreaseBack, getLeavesCreaseNext, leafIsPinned,
+	leafParityInDimension, mappingHasKey, mapShapeIs2上nDimensions, notLeafOriginOrLeaf零, notPileLast, oopsAllLeaves,
+	oopsAllPileRangesOfLeaves, PermutationSpace, pileIsOpen, PileRangeOfLeaves, pileRangeOfLeavesAND, thisHasThat,
+	thisIsALeaf, Z0Z_JeanValjean, 一, 零, 首一, 首零一)
 from mapFolding._e.algorithms.iff import removePermutationSpaceViolations
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import atPilePinLeaf, deconstructPermutationSpaceAtPile
@@ -51,97 +54,260 @@ def disqualifyAppendingLeafAtPile(state: EliminationState, leaf: int) -> bool:
 def _pileNotInRangeByLeaf(state: EliminationState, leaf: int) -> bool:
 	return state.pile not in getLeafDomain(state, leaf)
 
-# ======= Updating pile-ranges of leaves =======
+# ======= Updating `PileRangeOfLeaves` =======
 
 def updateListPermutationSpacePileRangesOfLeaves(state: EliminationState) -> EliminationState:
 	"""Flow control to apply per-`PermutationSpace` functions to all of `state.listPermutationSpace`."""
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
 	state.listPermutationSpace = []
-	state.listPermutationSpace.extend(filter_map(_leafIsPinned(state), listPermutationSpace))
+	state.listPermutationSpace.extend(filter_map(_updatePileRangesOfLeavesLeafIsPinned(state), listPermutationSpace))
 
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
 	state.listPermutationSpace = []
-	state.listPermutationSpace.extend(filter_map(_headsBeforeTails(state), listPermutationSpace))
+	state.listPermutationSpace.extend(filter_map(_updatePileRangesOfLeavesHeadsBeforeTails(state), listPermutationSpace))
 
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
 	state.listPermutationSpace = []
-	state.listPermutationSpace.extend(filter_map(_conditionalPredecessors(state), listPermutationSpace))
+	state.listPermutationSpace.extend(filter_map(_updatePileRangesOfLeavesConditionalPredecessors(state), listPermutationSpace))
+
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = []
+	state.listPermutationSpace.extend(filter_map(_updatePileRangesOfLeavesCrossedCreases(state), listPermutationSpace))
 
 	return state
 
 @syntacticCurry
-def _conditionalPredecessors(state: EliminationState, leavesPinned: PermutationSpace) -> PermutationSpace | None:
-	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
-		return leavesPinned
-	doItAgain: bool = True
-	Z0Z_precedence: dict[int, dict[int, list[int]]] = getZ0Z_precedence(state)
-	while doItAgain:
-		doItAgain = False
-		for pile, leaf in sorted(valfilter(mappingHasKey(Z0Z_precedence), keyfilter(notPileLast, valfilter(notLeafOriginOrLeaf零, oopsAllLeaves(leavesPinned)))).items()):
-			if mappingHasKey(Z0Z_precedence[leaf], pile):
-				antiPileRangeOfLeaves: mpz = getAntiPileRangeOfLeaves(state.leavesTotal, Z0Z_precedence[leaf][pile])
-				for pileOf_k, leafOrPileRangeOfLeaves in oopsAllPileRangesOfLeaves(keyfilter(between(pile + inclusive, state.pileLast), leavesPinned)).items():
-					if (Z0Z_ImNotASubscript := Z0Z_JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, leafOrPileRangeOfLeaves))) is None:
-						return None
-					leavesPinned[pileOf_k] = Z0Z_ImNotASubscript
-					if thisIsALeaf(leavesPinned[pileOf_k]):
-						if beansWithoutCornbread(state, leavesPinned):
-							leavesPinned = pinLeafCornbread(EliminationState(state.mapShape, pile=pileOf_k, leavesPinned=leavesPinned)).leavesPinned
-							if not leavesPinned:
+def _updatePileRangesOfLeavesCrossedCreases(state: EliminationState, leavesPinned: PermutationSpace) -> PermutationSpace | None:  # noqa: PLR0911
+	"""Development notes.
+
+	Even parity cases.
+	case leaves: k, r
+		I don't think I have enough information.
+	case leaves: k,	   k+1
+		I guess I can compute the combined domain of r, r+1. I'm not sure if I can do much with it. But if I am willing to bifurcate the PermutationSpace, I could probably exclude impossible r,r+1 domains.
+
+	case leaves: k, r, k+1
+		I should be able to compute the domain of r+1.
+	case leaves: k, r,		r+1
+		I should be able to compute the domain of k+1.
+
+	case leaves: k,	   k+1, r+1
+		Equivalent to odd parity: k, r, k-1
+	case leaves: 	r, k+1, r+1
+		Equivalent to odd parity: k, r, 	 r-1
+
+	case leaves: k, r, k+1, r+1
+		Case will be checked by `leavesPinnedHasAViolation`. Should I punt the case directly to `leavesPinnedHasAViolation`, `pass`, or something else?
+
+	If they are leaves, k+1 and r+1 will be in `oddInDimension`.
+	NOTE I'm intentionally doing everything in small incremental steps.
+	"""
+	# NOTE Reminder this is for 2^n-dimensional maps
+
+	for dimension in range(state.dimensionsTotal):
+		leavesPinnedHasNewLeaf = True
+		while leavesPinnedHasNewLeaf:
+			leavesPinnedHasNewLeaf = False
+
+			dictionaryLeafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in oopsAllLeaves(leavesPinned).items()}
+			dictionaryPileLeaf: dict[int, int] = oopsAllLeaves(leavesPinned)
+
+			dictionaryPileLeafEvenInDimension: dict[int, int] = valfilter(complement(leafParityInDimension(dimension=dimension)), dictionaryPileLeaf)
+			dictionaryPileLeafOddInDimension: dict[int, int] = valfilter(leafParityInDimension(dimension=dimension), dictionaryPileLeaf) # For efficiency, I wish I could create these dictionaries with one operation.
+
+			dequeCombinationsToCheck: deque[tuple[dict[int, int], tuple[tuple[int, int], tuple[int, int]]]] = deque(CartesianProduct((dictionaryPileLeafOddInDimension,), combinations(dictionaryPileLeafEvenInDimension.items(), 2)))
+			dequeCombinationsToCheck.extend(deque(CartesianProduct((dictionaryPileLeafEvenInDimension,), combinations(dictionaryPileLeafOddInDimension.items(), 2))))
+
+			while dequeCombinationsToCheck and not leavesPinnedHasNewLeaf:
+				dictionaryOtherParity, ((pileOf_k, k), (pileOf_r, r)) = dequeCombinationsToCheck.pop()
+				kCrease = int(bit_flip(k, dimension))
+				rCrease = int(bit_flip(r, dimension))
+
+				pileOf_kCrease: bool | int = leafIsPinned(dictionaryOtherParity, kCrease)
+				if pileOf_kCrease:
+					pileOf_kCrease = dictionaryLeafToPile[kCrease]
+
+				pileOf_rCrease: bool | int = leafIsPinned(dictionaryOtherParity, rCrease)
+				if pileOf_rCrease:
+					pileOf_rCrease = dictionaryLeafToPile[rCrease]
+
+				match pileOf_kCrease, pileOf_rCrease:
+					case int(), False: # case leaves: k, r, kCrease
+						antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, (rCrease,))
+
+						pilesLeafIsExcludedFrom: Iterable[int] = []
+						if pileOf_k < pileOf_r < pileOf_kCrease: # pileOf_k < pileOf_r < pileOf_kCrease < pileOf_rCrease or pileOf_rCrease < pileOf_k < pileOf_r < pileOf_kCrease
+							pilesLeafIsExcludedFrom: Iterable[int] = [*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)]
+						elif pileOf_kCrease < pileOf_r < pileOf_k: # pileOf_rCrease < pileOf_kCrease < pileOf_r < pileOf_k or pileOf_kCrease < pileOf_r < pileOf_k < pileOf_rCrease
+							pilesLeafIsExcludedFrom = [*range(pileOf_kCrease), *range(pileOf_k + 1, state.pileLast + inclusive)]
+						elif (pileOf_r < pileOf_kCrease < pileOf_k): # pileOf_r < pileOf_kCrease < pileOf_rCrease < pileOf_k
+							pilesLeafIsExcludedFrom = range(pileOf_kCrease + 1, pileOf_k)
+						elif (pileOf_r < pileOf_k < pileOf_kCrease) or (pileOf_k < pileOf_kCrease < pileOf_r): # pileOf_k < pileOf_rCrease < pileOf_kCrease < pileOf_r or  pileOf_r < pileOf_k < pileOf_rCrease < pileOf_kCrease
+							pilesLeafIsExcludedFrom = range(pileOf_k + 1, pileOf_kCrease)
+						# elif (pileOf_kCrease < pileOf_k < pileOf_r): # pileOf_kCrease < pileOf_rCrease < pileOf_k < pileOf_r
+						# 	pilesLeafIsExcludedFrom = range(pileOf_kCrease + 1, pileOf_k)
+
+						pilesWithPileRangeOfLeavesToUpdate: deque[tuple[int, PileRangeOfLeaves]] = deque(DOTitems(keyfilter(thisHasThat(pilesLeafIsExcludedFrom), oopsAllPileRangesOfLeaves(leavesPinned))))
+
+# Start subroutine
+						while pilesWithPileRangeOfLeavesToUpdate and not leavesPinnedHasNewLeaf:
+							pileToUpdate, pileRangeOfLeaves = pilesWithPileRangeOfLeavesToUpdate.pop()
+							pileRangeOfLeaves = leavesPinned[pileToUpdate]
+							if (ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript := Z0Z_JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, pileRangeOfLeaves))) is None:
 								return None
-						doItAgain = True
-				if doItAgain:
-					if not (leavesPinned := _leafIsPinned(state, leavesPinned)):
-						return None
-					break
+							leavesPinned[pileToUpdate] = ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript
+							if thisIsALeaf(leavesPinned[pileToUpdate]):
+								if beansWithoutCornbread(state, leavesPinned) and not (leavesPinned := pinLeafCornbread(EliminationState(state.mapShape, pile=pileToUpdate, leavesPinned=leavesPinned)).leavesPinned):
+									return None
+								leavesPinnedHasNewLeaf = True
+						if leavesPinnedHasNewLeaf and not (leavesPinned := _updatePileRangesOfLeavesLeafIsPinned(state, leavesPinned)):
+							return None
+# End subroutine
+
+					case False, int(): # case leaves: k, r,		rCrease
+						antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, (kCrease,))
+
+						pilesLeafIsExcludedFrom: Iterable[int] = []
+						if pileOf_rCrease < pileOf_k < pileOf_r: # pileOf_kCrease < pileOf_rCrease < pileOf_k < pileOf_r or pileOf_rCrease < pileOf_k < pileOf_r < pileOf_kCrease
+							pilesLeafIsExcludedFrom = [*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)]
+						elif pileOf_r < pileOf_k < pileOf_rCrease: # pileOf_kCrease < pileOf_r < pileOf_k < pileOf_rCrease or pileOf_r < pileOf_k < pileOf_rCrease < pileOf_kCrease
+							pilesLeafIsExcludedFrom = [*range(pileOf_r), *range(pileOf_rCrease + 1, state.pileLast + inclusive)]
+						elif (pileOf_k < pileOf_r < pileOf_rCrease) or (pileOf_r < pileOf_rCrease < pileOf_k): # pileOf_k < pileOf_r < pileOf_kCrease < pileOf_rCrease or  pileOf_r < pileOf_kCrease < pileOf_rCrease < pileOf_k
+							pilesLeafIsExcludedFrom = range(pileOf_r + 1, pileOf_rCrease)
+						elif (pileOf_k < pileOf_rCrease < pileOf_r) or (pileOf_rCrease < pileOf_r < pileOf_k): # pileOf_k < pileOf_rCrease < pileOf_kCrease < pileOf_r or pileOf_rCrease < pileOf_kCrease < pileOf_r < pileOf_k
+							pilesLeafIsExcludedFrom = range(pileOf_rCrease + 1, pileOf_r)
+
+						pilesWithPileRangeOfLeavesToUpdate: deque[tuple[int, PileRangeOfLeaves]] = deque(DOTitems(keyfilter(thisHasThat(pilesLeafIsExcludedFrom), oopsAllPileRangesOfLeaves(leavesPinned))))
+
+# Start subroutine
+						while pilesWithPileRangeOfLeavesToUpdate and not leavesPinnedHasNewLeaf:
+							pileToUpdate, pileRangeOfLeaves = pilesWithPileRangeOfLeavesToUpdate.pop()
+							pileRangeOfLeaves = leavesPinned[pileToUpdate]
+							if (ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript := Z0Z_JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, pileRangeOfLeaves))) is None:
+								return None
+							leavesPinned[pileToUpdate] = ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript
+							if thisIsALeaf(leavesPinned[pileToUpdate]):
+								if beansWithoutCornbread(state, leavesPinned) and not (leavesPinned := pinLeafCornbread(EliminationState(state.mapShape, pile=pileToUpdate, leavesPinned=leavesPinned)).leavesPinned):
+									return None
+								leavesPinnedHasNewLeaf = True
+						if leavesPinnedHasNewLeaf and not (leavesPinned := _updatePileRangesOfLeavesLeafIsPinned(state, leavesPinned)):
+							return None
+# End subroutine
+
+					case int(), int():
+					# case leaves: k, r, k+1, r+1
+					# 	Case will be checked by `leavesPinnedHasAViolation`. Should I punt the case directly to `leavesPinnedHasAViolation`, `pass`, or something else?
+						pass
+					case False, False: # pyright: ignore[reportUnnecessaryComparison]
+					# case leaves: k, r
+					# 	I don't think I have enough information.
+						# TODO ??? Pattern will never be matched for subject type "Never"
+						pass
+					case _:
+						pass
+
 	return leavesPinned
 
 @syntacticCurry
-def _headsBeforeTails(state: EliminationState, leavesPinned: PermutationSpace) -> PermutationSpace | None:  # noqa: PLR0911
-	doItAgain: bool = True
-	while doItAgain:
-		doItAgain = False
-		for pile, leaf in sorted(keyfilter(notPileLast, valfilter(notLeafOriginOrLeaf零, oopsAllLeaves(leavesPinned))).items()):
+def _updatePileRangesOfLeavesConditionalPredecessors(state: EliminationState, leavesPinned: PermutationSpace) -> PermutationSpace | None:
+	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
+		return leavesPinned
+
+	dictionaryConditionalLeafPredecessors: dict[int, dict[int, list[int]]] = getDictionaryConditionalLeafPredecessors(state)
+
+	leavesPinnedHasNewLeaf: bool = True
+	while leavesPinnedHasNewLeaf:
+		leavesPinnedHasNewLeaf = False
+
+		dequePileLeafToCheck: deque[tuple[int, int]] = deque(sorted(DOTitems(valfilter(mappingHasKey(dictionaryConditionalLeafPredecessors), keyfilter(notPileLast, valfilter(notLeafOriginOrLeaf零, oopsAllLeaves(leavesPinned)))))))
+
+		while dequePileLeafToCheck and not leavesPinnedHasNewLeaf:
+			pile, leaf = dequePileLeafToCheck.pop()
+
+			if mappingHasKey(dictionaryConditionalLeafPredecessors[leaf], pile):
+				# For this `pile:leaf` in `leavesPinned`, `dictionaryConditionalLeafPredecessors` has a `list` of at least one
+				# `leaf` that must precede this `pile:leaf`, so the `list` cannot follow this `pile:leaf`, so remove the `list`
+				# from the `PileRangeOfLeaves` at piles after `pile`.
+				antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, dictionaryConditionalLeafPredecessors[leaf][pile])
+
+				pilesWithPileRangeOfLeavesToUpdate: deque[tuple[int, PileRangeOfLeaves]] = deque(DOTitems(oopsAllPileRangesOfLeaves(keyfilter(between(pile + inclusive, state.pileLast), leavesPinned))))
+
+# TODO This is a subroutine, but the current flow cannot be directly converted to a function.
+				while pilesWithPileRangeOfLeavesToUpdate and not leavesPinnedHasNewLeaf:
+					pileToUpdate, pileRangeOfLeaves = pilesWithPileRangeOfLeavesToUpdate.pop()
+					# NOTE subroutine to modify subject-of-the-function, then maybe efficiently return early
+					if (ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript := Z0Z_JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, pileRangeOfLeaves))) is None:
+						return None
+# TODO These statements are syntactically necessary because I'm using subscripts AND walrus operators. Does that suggest there is
+# a "better" flow paradigm, or is this merely a limitation of Python syntax?
+					leavesPinned[pileToUpdate] = ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript
+					if thisIsALeaf(leavesPinned[pileToUpdate]):
+						# NOTE subroutine to modify subject-of-the-function, then maybe efficiently return early
+						if beansWithoutCornbread(state, leavesPinned) and not (leavesPinned := pinLeafCornbread(EliminationState(state.mapShape, pile=pileToUpdate, leavesPinned=leavesPinned)).leavesPinned):
+							return None
+						leavesPinnedHasNewLeaf = True
+				# NOTE subroutine to modify subject-of-the-function, then maybe efficiently return early
+				if leavesPinnedHasNewLeaf and not (leavesPinned := _updatePileRangesOfLeavesLeafIsPinned(state, leavesPinned)):
+					return None
+# End subroutine
+
+	return leavesPinned
+
+@syntacticCurry
+def _updatePileRangesOfLeavesHeadsBeforeTails(state: EliminationState, leavesPinned: PermutationSpace) -> PermutationSpace | None:  # noqa: PLR0911
+	leavesPinnedHasNewLeaf: bool = True
+	while leavesPinnedHasNewLeaf:
+		leavesPinnedHasNewLeaf = False
+		dequePileLeafToCheck: deque[tuple[int, int]] = deque(sorted(keyfilter(notPileLast, valfilter(notLeafOriginOrLeaf零, oopsAllLeaves(leavesPinned))).items()))
+		while dequePileLeafToCheck and not leavesPinnedHasNewLeaf:
+			pile, leaf = dequePileLeafToCheck.pop()
 			dimensionTail: int = dimensionNearestTail(leaf)
 			dimensionHead: int = dimensionNearest首(leaf)
 			if 0 < dimensionHead:
-				leaves_r = range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead])
-				antiPileRangeOfLeaves: mpz = getAntiPileRangeOfLeaves(state.leavesTotal, leaves_r)
-				for pileOf_r, leafOrPileRangeOfLeaves in oopsAllPileRangesOfLeaves(keyfilter(between(2, pile - inclusive), leavesPinned)).items():
-					if (Z0Z_ImNotASubscript := Z0Z_JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, leafOrPileRangeOfLeaves))) is None:
+				leavesForbidden = range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead])
+				Z0Z_fromHereToThere = (2, pile - inclusive)
+
+				antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, leavesForbidden)
+				pilesWithPileRangeOfLeavesToUpdate: deque[tuple[int, PileRangeOfLeaves]] = deque(oopsAllPileRangesOfLeaves(keyfilter(between(*Z0Z_fromHereToThere), leavesPinned)).items())
+
+# Start subroutine
+				while pilesWithPileRangeOfLeavesToUpdate and not leavesPinnedHasNewLeaf:
+					pileToUpdate, pileRangeOfLeaves = pilesWithPileRangeOfLeavesToUpdate.pop()
+					if (ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript := Z0Z_JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, pileRangeOfLeaves))) is None:
 						return None
-					leavesPinned[pileOf_r] = Z0Z_ImNotASubscript
-					if thisIsALeaf(leavesPinned[pileOf_r]):
-						if beansWithoutCornbread(state, leavesPinned):
-							leavesPinned = pinLeafCornbread(EliminationState(state.mapShape, pile=pileOf_r, leavesPinned=leavesPinned)).leavesPinned
-							if not leavesPinned:
-								return None
-						doItAgain = True
-				if doItAgain:
-					if not (leavesPinned := _leafIsPinned(state, leavesPinned)):
-						return None
-					break
+					leavesPinned[pileToUpdate] = ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript
+					if thisIsALeaf(leavesPinned[pileToUpdate]):
+						if beansWithoutCornbread(state, leavesPinned) and not (leavesPinned := pinLeafCornbread(EliminationState(state.mapShape, pile=pileToUpdate, leavesPinned=leavesPinned)).leavesPinned):
+							return None
+						leavesPinnedHasNewLeaf = True
+				if leavesPinnedHasNewLeaf and not (leavesPinned := _updatePileRangesOfLeavesLeafIsPinned(state, leavesPinned)):
+					return None
+# End subroutine
+
 			if 0 < dimensionTail:
-				leaves_k = range(0, state.sumsOfProductsOfDimensions[dimensionTail], 1)
-				antiPileRangeOfLeaves: mpz = getAntiPileRangeOfLeaves(state.leavesTotal, leaves_k)
-				for pileOf_k, leafOrPileRangeOfLeaves in oopsAllPileRangesOfLeaves(keyfilter(between(pile + inclusive, state.pileLast), leavesPinned)).items():
-					if (Z0Z_ImNotASubscript := Z0Z_JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, leafOrPileRangeOfLeaves))) is None:
+				leavesForbidden = range(0, state.sumsOfProductsOfDimensions[dimensionTail], 1)
+				Z0Z_fromHereToThere = (pile + inclusive, state.pileLast)
+
+				antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, leavesForbidden)
+				pilesWithPileRangeOfLeavesToUpdate: deque[tuple[int, PileRangeOfLeaves]] = deque(oopsAllPileRangesOfLeaves(keyfilter(between(*Z0Z_fromHereToThere), leavesPinned)).items())
+
+# Start subroutine
+				while pilesWithPileRangeOfLeavesToUpdate and not leavesPinnedHasNewLeaf:
+					pileToUpdate, pileRangeOfLeaves = pilesWithPileRangeOfLeavesToUpdate.pop()
+					if (ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript := Z0Z_JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, pileRangeOfLeaves))) is None:
 						return None
-					leavesPinned[pileOf_k] = Z0Z_ImNotASubscript
-					if thisIsALeaf(leavesPinned[pileOf_k]):
-						if beansWithoutCornbread(state, leavesPinned):
-							leavesPinned = pinLeafCornbread(EliminationState(state.mapShape, pile=pileOf_k, leavesPinned=leavesPinned)).leavesPinned
-							if not leavesPinned:
-								return None
-						doItAgain = True
-				if doItAgain:
-					if not (leavesPinned := _leafIsPinned(state, leavesPinned)):
-						return None
-					break
+					leavesPinned[pileToUpdate] = ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript
+					if thisIsALeaf(leavesPinned[pileToUpdate]):
+						if beansWithoutCornbread(state, leavesPinned) and not (leavesPinned := pinLeafCornbread(EliminationState(state.mapShape, pile=pileToUpdate, leavesPinned=leavesPinned)).leavesPinned):
+							return None
+						leavesPinnedHasNewLeaf = True
+				if leavesPinnedHasNewLeaf and not (leavesPinned := _updatePileRangesOfLeavesLeafIsPinned(state, leavesPinned)):
+					return None
+# End subroutine
 	return leavesPinned
 
 @syntacticCurry
-def _leafIsPinned(state: EliminationState, leavesPinned: PermutationSpace) -> PermutationSpace | None:
+def _updatePileRangesOfLeavesLeafIsPinned(state: EliminationState, leavesPinned: PermutationSpace) -> PermutationSpace | None:
 	"""Update or invalidate `leavesPinned`: for every `leaf` pinned at a `pile`, remove `leaf` from `PileRangeOfLeaves` from every other `pile`; or return `None` if the updated `leavesPinned` is invalid.
 
 	If the `PileRangeOfLeaves` for a `pile` is reduced to one `leaf`, then convert from `pile: pileRangeOfLeaves` to `pile: leaf`.
@@ -161,24 +327,26 @@ def _leafIsPinned(state: EliminationState, leavesPinned: PermutationSpace) -> Pe
 		An updated `leavesPinned` if valid; otherwise `None`.
 
 	"""
-	doItAgain: bool = True
+	leavesPinnedHasNewLeaf: bool = True
 
-	while doItAgain:
-		doItAgain = False
+	while leavesPinnedHasNewLeaf:
+		leavesPinnedHasNewLeaf = False
 		antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, DOTvalues(oopsAllLeaves(leavesPinned)))
-		for pile, leafOrPileRangeOfLeaves in oopsAllPileRangesOfLeaves(leavesPinned).items():
+
+		pileRangesOfLeavesToUpdate: deque[tuple[int, PileRangeOfLeaves]] = deque(oopsAllPileRangesOfLeaves(leavesPinned).items())
+		while pileRangesOfLeavesToUpdate and not leavesPinnedHasNewLeaf:
+			pile, leafOrPileRangeOfLeaves = pileRangesOfLeavesToUpdate.pop()
+
 			if (ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript := Z0Z_JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, leafOrPileRangeOfLeaves))) is None:
 				return None
+
 			leavesPinned[pile] = ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript
 			if thisIsALeaf(leavesPinned[pile]):
-				if beansWithoutCornbread(state, leavesPinned):
-					leavesPinned = pinLeafCornbread(EliminationState(state.mapShape, pile=pile, leavesPinned=leavesPinned)).leavesPinned
-					if not leavesPinned:
-						return None
-				doItAgain = True
-				break
+				if beansWithoutCornbread(state, leavesPinned) and not (leavesPinned := pinLeafCornbread(EliminationState(state.mapShape, pile=pile, leavesPinned=leavesPinned)).leavesPinned):
+					return None
+				leavesPinnedHasNewLeaf = True
+
 	return leavesPinned
-# TODO There must be flow control more sophisticated than `for`-`break` for this situation.
 
 @syntacticCurry
 def suDONTku(state: EliminationState, leavesPinned: PermutationSpace) -> PermutationSpace | None:
@@ -210,7 +378,7 @@ def suDONTku(state: EliminationState, leavesPinned: PermutationSpace) -> Permuta
 								return None
 						doItAgain = True
 				if doItAgain:
-					if not (leavesPinned := _leafIsPinned(state, leavesPinned)):
+					if not (leavesPinned := _updatePileRangesOfLeavesLeafIsPinned(state, leavesPinned)):
 						return None
 					break
 	return leavesPinned
@@ -262,7 +430,7 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:  # noqa: PLR0911
 	leaves that are not pinned, check if there are enough open piles for them.
 	"""
 	Z0Z_tester = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned)
-	Z0Z_precedence: dict[int, dict[int, list[int]]] = getZ0Z_precedence(state)
+	Z0Z_precedence: dict[int, dict[int, list[int]]] = getDictionaryConditionalLeafPredecessors(state)
 	if state.dimensionsTotal < 6:
 		Z0Z_precedence = {}
 

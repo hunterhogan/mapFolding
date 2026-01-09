@@ -1,7 +1,7 @@
 from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache, reduce
-from gmpy2 import bit_clear, bit_mask, bit_set, mpz, xmpz
+from gmpy2 import bit_clear, bit_mask, bit_set, bit_test, mpz, xmpz
 from hunterMakesPy import intInnit, raiseIfNone
 from itertools import accumulate
 from mapFolding import inclusive, zeroIndexed
@@ -114,7 +114,7 @@ def pileIsNotOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
 	Returns
 	-------
 	pileIsOpen : bool
-		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a pile-range (`mpz`).
+		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a `PileRangeOfLeaves`.
 
 	See Also
 	--------
@@ -137,9 +137,13 @@ def pileIsOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
 	Returns
 	-------
 	pileIsOpen : bool
-		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a pile-range (`mpz`).
+		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a `PileRangeOfLeaves`.
 	"""
 	return not thisIsALeaf(leavesPinned.get(pile))
+
+@syntacticCurry
+def thisHasThat[个](this: Iterable[个], that: 个) -> bool:
+	return that in this
 
 def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[int]:
 	"""Return True if `leafOrPileRangeOfLeaves` is a `leaf`.
@@ -156,7 +160,7 @@ def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> Type
 	"""
 	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, int)
 
-def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[mpz]:
+def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[PileRangeOfLeaves]:
 	"""Return True if `leafOrPileRangeOfLeaves` is a pile's range of leaves.
 
 	Parameters
@@ -166,13 +170,14 @@ def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | 
 
 	Returns
 	-------
-	youHaveAPileRange : TypeGuard[mpz]
+	youHaveAPileRange : TypeGuard[PileRangeOfLeaves]
 		Congrats, you have a pile range!
 	"""
 	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, mpz)
 
 # ======= `LeafOrPileRangeOfLeaves` stuff ================================================
-# https://gmpy2.readthedocs.io/en/latest/advmpz.html
+# https://gmpy2.readthedocs.io/en/latest/mpz.html
+# xmpz: https://gmpy2.readthedocs.io/en/latest/advmpz.html
 
 # TODO I have a vague memory of using overload/TypeGuard in a similar function: I think it was in the stub file for `networkx`. Check that out.
 def DOTgetPileIfLeaf(leavesPinned: PermutationSpace, pile: int, default: int | None = None) -> int | None:
@@ -180,23 +185,23 @@ def DOTgetPileIfLeaf(leavesPinned: PermutationSpace, pile: int, default: int | N
 # NOTE I REFUSE TO BE AN OBJECT-ORIENTED PROGRAMMER!!! But, I'll use some OOP if it makes sense.
 # I think collections has some my-first-dict-subclass functions.
 	"""Like `leavesPinned.get(pile)`, but only return a `leaf` or `default`."""
-	ImaLeaf = leavesPinned.get(pile)
+	ImaLeaf: int | PileRangeOfLeaves | None = leavesPinned.get(pile)
 	if thisIsALeaf(ImaLeaf):
 		return ImaLeaf
 	return default
 
 def DOTgetPileIfPileRangeOfLeaves(leavesPinned: PermutationSpace, pile: int, default: PileRangeOfLeaves | None = None) -> PileRangeOfLeaves | None:
-	ImaPileRangeOfLeaves = leavesPinned.get(pile)
+	ImaPileRangeOfLeaves: int | PileRangeOfLeaves | None = leavesPinned.get(pile)
 	if thisIsAPileRangeOfLeaves(ImaPileRangeOfLeaves):
 		return ImaPileRangeOfLeaves
 	return default
 
-def getIteratorOfLeaves(pileRangeOfLeaves: mpz) -> Iterator[int]:
+def getIteratorOfLeaves(pileRangeOfLeaves: PileRangeOfLeaves) -> Iterator[int]:
 	"""Convert `pileRangeOfLeaves` to an `Iterator` of `type` `int` `leaf`.
 
 	Parameters
 	----------
-	pileRangeOfLeaves : mpz
+	pileRangeOfLeaves : PileRangeOfLeaves
 		An integer with one bit for each `leaf` in `leavesTotal`, plus an extra bit that means "I'm a `pileRangeOfLeaves` not a `leaf`.
 
 	Returns
@@ -208,11 +213,15 @@ def getIteratorOfLeaves(pileRangeOfLeaves: mpz) -> Iterator[int]:
 	iteratorOfLeaves[-1] = 0
 	return iteratorOfLeaves.iter_set()
 
-def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> mpz:
+def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> PileRangeOfLeaves:
 	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))  # ty:ignore[invalid-return-type]
 
-def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> mpz:
+def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> PileRangeOfLeaves:
 	return reduce(bit_set, leaves, bit_set(0, leavesTotal))  # ty:ignore[invalid-return-type]
+
+@syntacticCurry
+def leafParityInDimension(leaf: int, dimension: int) -> int:
+	return int(bit_test(leaf, dimension))
 
 def oopsAllLeaves(leavesPinned: PermutationSpace) -> dict[int, int]:
 	"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: pileRangeOfLeaves`.
@@ -245,7 +254,7 @@ def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, PileR
 	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in leavesPinned.items() if thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves)}
 
 @syntacticCurry
-def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: mpz, pileRangeOfLeaves: mpz) -> mpz:
+def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: PileRangeOfLeaves, pileRangeOfLeaves: PileRangeOfLeaves) -> PileRangeOfLeaves:
 	"""Modify `pileRangeOfLeaves` by bitwise AND with `pileRangeOfLeavesDISPOSABLE`.
 
 	Important
@@ -254,8 +263,8 @@ def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: mpz, pileRangeOfLeaves: mp
 	"""
 	return pileRangeOfLeaves & pileRangeOfLeavesDISPOSABLE
 
-def Z0Z_JeanValjean(p24601: mpz) -> int | mpz | None:
-	whoAmI: int | mpz | None = p24601
+def Z0Z_JeanValjean(p24601: PileRangeOfLeaves) -> int | PileRangeOfLeaves | None:
+	whoAmI: int | PileRangeOfLeaves | None = p24601
 	if thisIsAPileRangeOfLeaves(p24601):
 		if p24601.bit_count() == 1:
 			# The pile-range of leaves is null; the only "set bit" is the bit that means "I am a pileRangeOfLeaves."
@@ -266,6 +275,36 @@ def Z0Z_JeanValjean(p24601: mpz) -> int | mpz | None:
 	return whoAmI
 
 # ======= Workbench functions ===============================================
+
+def DOTitems[文件, 文义](dictionary: Mapping[文件, 文义], /) -> Iterator[tuple[文件, 文义]]:
+	"""Analogous to `dict.items()`: create an `Iterator` with the "items" from `dictionary`.
+
+	Parameters
+	----------
+	dictionary : Mapping[文件, 文义]
+		Source mapping.
+
+	Returns
+	-------
+	aRiverOfItems : Iterator[tuple[文件, 文义]]
+		`Iterator` of items from `dictionary`.
+	"""
+	return iter(dictionary.items())
+
+def DOTkeys[个](dictionary: Mapping[个, Any], /) -> Iterator[个]:
+	"""Analogous to `dict.keys()`: create an `Iterator` with the "keys" from `dictionary`.
+
+	Parameters
+	----------
+	dictionary : Mapping[个, Any]
+		Source mapping.
+
+	Returns
+	-------
+	aRiverOfKeys : Iterator[个]
+		`Iterator` of keys from `dictionary`.
+	"""
+	return iter(dictionary.keys())
 
 def DOTvalues[个](dictionary: Mapping[Any, 个], /) -> Iterator[个]:
 	"""Analogous to `dict.values()`: create an `Iterator` with the "values" from `dictionary`.
@@ -360,5 +399,4 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 
 def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsTallToPinThis: int = 3) -> bool:
 	return (youMustBeDimensionsTallToPinThis <= len(mapShape)) and all(dimensionLength == 2 for dimensionLength in mapShape)
-
 

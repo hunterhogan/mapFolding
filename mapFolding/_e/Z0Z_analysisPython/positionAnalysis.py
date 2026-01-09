@@ -4,7 +4,7 @@ from gmpy2 import bit_mask
 from hunterMakesPy import raiseIfNone
 from mapFolding import ansiColorBlackOnCyan, ansiColorReset
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getLeafDomain, getZ0Z_precedence, getZ0Z_successor,
+	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeafDomain, getZ0Z_successor,
 	howManyDimensionsHaveOddParity, pileOrigin, 零)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
@@ -399,5 +399,5 @@ if __name__ == '__main__':
 	dictionaryPilesAtDomainEnds = getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state)
 	print(ansiColorBlackOnCyan + 'dictionaryPilesAtDomainEnds' + ansiColorReset)
 	pprint(dictionaryPilesAtDomainEnds, width=140)
-	pprint(getZ0Z_precedence(state), width=380, compact=True)
+	pprint(getDictionaryConditionalLeafPredecessors(state), width=380, compact=True)
 	pprint(getZ0Z_successor(state), width=380, compact=True)

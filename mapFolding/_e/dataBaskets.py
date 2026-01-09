@@ -66,6 +66,8 @@ class EliminationState:
 
 	dimensionsTotal: int = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
+	foldingCheckSum: int = dataclasses.field(init=False)
+	"""Unchanging triangular number check-sum for valid `folding`."""
 	leafLast: int = dataclasses.field(init=False)
 	"""Unchanging 0-indexed largest `leaf` in a `folding`."""
 	leavesTotal: int = dataclasses.field(init=False)
@@ -93,6 +95,7 @@ class EliminationState:
 		self.dimensionsTotal = len(self.mapShape)
 		self.leavesTotal = getLeavesTotal(self.mapShape)
 		self.leafLast = self.leavesTotal - 1
+		self.foldingCheckSum = self.leafLast * self.leavesTotal // 2 # https://en.wikipedia.org/wiki/Triangular_number
 		self.pilesTotal = self.leavesTotal
 		self.pileLast = self.pilesTotal - 1
 		self.首 = self.leavesTotal

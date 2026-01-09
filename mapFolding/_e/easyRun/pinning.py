@@ -1,12 +1,12 @@
 # ruff: noqa: T201, T203, D103, TC003, ERA001  # noqa: RUF100
 # pyright: reportUnusedImport=false
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable
 from cytoolz.curried import map as toolz_map
 from cytoolz.functoolz import compose
-from gmpy2 import fac, mpz, xmpz
+from gmpy2 import fac
 from mapFolding._e import (
-	DOTvalues, getDictionaryLeafDomains, getDictionaryPileRanges, getLeafDomain, getLeavesCreaseBack, getLeavesCreaseNext,
-	getPileRange, oopsAllPileRangesOfLeaves, PermutationSpace)
+	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryPileRanges, getLeafDomain,
+	getLeavesCreaseBack, getLeavesCreaseNext, getPileRange, oopsAllPileRangesOfLeaves, PermutationSpace, PileRangeOfLeaves)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensions import (
 	pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile首零Less零)
@@ -16,16 +16,15 @@ from pprint import pprint
 import time
 
 def printStatisticsPermutations(state: EliminationState) -> None:
-	def prodOfDOTvalues(pileRanges: Iterable[mpz]) -> int:
-		jj: list[int] = [mm.bit_count() - 1 for mm in pileRanges]
-		return prod(jj)
+	def prodOfDOTvalues(listPileRangeOfLeaves: Iterable[PileRangeOfLeaves]) -> int:
+		return prod([pileRangeOfLeaves.bit_count() - 1 for pileRangeOfLeaves in listPileRangeOfLeaves])
 	permutationsLeavesPinnedTotal: Callable[[list[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, oopsAllPileRangesOfLeaves)))
-	print(fac(state.leavesTotal))
-	print(prod(toolz_map(len, filter(None, DOTvalues(getDictionaryPileRanges(state))))))
-	print(permutationsLeavesPinnedTotal(state.listPermutationSpace))
+	print(len(str(mm:=fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
+	print(len(str(rr:=prod(toolz_map(len, filter(None, DOTvalues(getDictionaryPileRanges(state))))))), rr, "dictionaryPileRanges")
+	print(len(str(pp:=permutationsLeavesPinnedTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 6)
+	state = EliminationState((2,) * 5)
 
 	printThis = True
 
@@ -41,7 +40,6 @@ if __name__ == '__main__':
 		timeStart: float = time.perf_counter()
 		state: EliminationState = pinPilesAtEnds(state, 4)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		state: EliminationState = pinLeavesDimensions0零一(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -49,9 +47,11 @@ if __name__ == '__main__':
 		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
-		state: EliminationState = pinLeavesDimension首二(state)
-		state: EliminationState = pinLeavesDimension二(state)
+		state: EliminationState = pinLeavesDimensions0零一(state)
 		state: EliminationState = pinPile首零Less零(state)
+		state: EliminationState = pinLeavesDimension首二(state)
+		pprint(getDictionaryConditionalLeafPredecessors(state), width=260)
+		state: EliminationState = pinLeavesDimension二(state)
 		print(*getLeavesCreaseNext(state, 22))
 		print(*getLeavesCreaseBack(state, 53))
 		print(*(format(x, '06b') for x in getPileRange(state, 60)))

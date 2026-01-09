@@ -2,6 +2,19 @@
 
 ## Replace "trailing operators", "hidden" operators, and semantically-useless operators
 
+### Trailing operators
+
+#### Definition
+
+There is certainly a better term than "trailing operators". Ideas:
+
+- non-sequential operators
+- dangling operator: as an analogy to dangling modifiers in English grammar
+- surprise operators
+- un-anticipated operators
+
+#### Explanation
+
 Computers parse and understand statements starting from the innermost nesting. Humans cannot naturally do that: we more easily
 parse and understand a statement LTR or RTL. In `state.productsOfDimensions[dimensionNearest首(leafAt一零) - 1]`, we see these elements from LTR:
 
@@ -40,8 +53,12 @@ In complex statements, use signals that allow the human to read LTR and anticipa
 - `getitem`
 - `DOTvalues` (for `dict.values()`)
 
+### "hidden" operators
+
 In complex statements, some operators are easy to miss, such as `~` and `-` when used to mean "negative". `operator.invert` and
 `operator.neg` can ensure the human sees the operator.
+
+### Semantically-useless operators
 
 In the expression `range(bottles + 1)`, why is there a `+ 1`? We can often figure it out by analyzing the context, but the easiest way to erase ambiguity is to replace `+ 1` with a semantic identifier. In my packages look for modules named "_semiotics.py" to find replacements such as:
 

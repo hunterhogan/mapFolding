@@ -1,5 +1,4 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
-from copy import deepcopy
 from itertools import combinations, pairwise, product as CartesianProduct
 from mapFolding import decreasing, packageSettings
 from mapFolding._e import (
@@ -181,14 +180,13 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if state.listPermutationSpace:
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
-			listClaimTickets: list[Future[int]] = []
 
-			listPermutationSpaceCopy: list[PermutationSpace] = deepcopy(state.listPermutationSpace)
+			listPermutationSpaceCopy: list[PermutationSpace] = state.listPermutationSpace
 			state.listPermutationSpace = []
-			for leavesPinned in listPermutationSpaceCopy:
-				stateCopy: EliminationState = deepcopy(state)
-				stateCopy.leavesPinned = leavesPinned
-				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))
+			listClaimTickets: list[Future[int]] = [
+				concurrencyManager.submit(findValidFoldings, EliminationState(state.mapShape, leavesPinned=leavesPinned))
+				for leavesPinned in listPermutationSpaceCopy
+			]
 
 			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
 				state.groupsOfFolds += claimTicket.result()
@@ -198,14 +196,12 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 			listClaimTickets: list[Future[int]] = []
 			for indicesLeaf in range(1, state.leavesTotal):
-				stateCopy: EliminationState = deepcopy(state)
-				stateCopy.leavesPinned = {pile: indicesLeaf}
-				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, stateCopy))
+				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, EliminationState(state.mapShape, leavesPinned={pile: indicesLeaf})))
 
-			for claimTicket in listClaimTickets:
+			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
 				state.groupsOfFolds += claimTicket.result()
 
 	else:
-		state.groupsOfFolds = findValidFoldings(deepcopy(state))
+		state.groupsOfFolds = findValidFoldings(state)
 
 	return state
