@@ -36,8 +36,8 @@ if __name__ == '__main__':
 	state: EliminationState | None = None
 
 	flow = 'elimination'
-	flow = 'constraintPropagation'
 	flow = 'crease'
+	flow = 'constraintPropagation'
 
 	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:
 			state = EliminationState(mapShape)
-			state = pinPilesAtEnds(state, 2)
+			# state = pinPilesAtEnds(state, 4)
 			# state = pinLeavesDimensions0零一(state)
 			# state = pinPile首零Less零(state)
 			# state = pinLeavesDimension二(state)
@@ -99,8 +99,6 @@ if __name__ == '__main__':
 		_write()
 
 r"""
-deactivate && C:\apps\mapFolding\.vtail\Scripts\activate.bat && title good && cls
-
 title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on mapFolding\_e\easyRun\eliminateFolds.py & title I'm done
 """
 

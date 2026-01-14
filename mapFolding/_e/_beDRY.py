@@ -10,17 +10,21 @@ from more_itertools import all_unique, always_reversible, consecutive_groups, ex
 from operator import add, getitem, mul
 from typing import Any, Protocol, Self, TypeGuard
 
-class _Ordinals(Protocol):
-	"""Any Python `object` `type` that may be ordered before or after a comparable `object` `type` using a less-than-or-equal-to comparison."""
+class Ordinals(Protocol):
+	"""Any Python `object` `type` that may be ordered before or after a comparable `object` `type` by comparison operators."""
 
 	def __le__(self, not_self_selfButSelfSelf_youKnow: Self, /) -> bool:
 		"""Comparison by "***l***ess than or ***e***qual to"."""
 		...
 
+	def __lt__(self, not_self_selfButSelfSelf_youKnow: Self, /) -> bool:
+		"""Comparison by "***l***ess ***t***han"."""
+		...
+
 # ======= Boolean filters ================================================
 
 @syntacticCurry
-def between[小于: _Ordinals](floor: 小于, ceiling: 小于, comparand: 小于) -> bool:
+def between[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小于) -> bool:
 	"""Inclusive `floor <= comparand <= ceiling`."""
 	return floor <= comparand <= ceiling
 

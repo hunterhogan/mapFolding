@@ -25,10 +25,9 @@ The `test_writeJobNumba` function shows how to test dynamically generated code,
 which is useful if you're working with the code synthesis features of the package.
 """
 
-from mapFolding import (
-	dictionaryOEIS, dictionaryOEISMapFolding,  getFoldsTotalKnown, oeisIDfor_n)
+from mapFolding import dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, oeisIDfor_n
 from mapFolding._e.basecamp import eliminateFolds
-from mapFolding.basecamp import NOTcountingFolds, countFolds
+from mapFolding.basecamp import countFolds, NOTcountingFolds
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight
@@ -39,7 +38,6 @@ from numba.core.errors import NumbaPendingDeprecationWarning
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 import importlib.util
-import multiprocessing
 import pytest
 import warnings
 
@@ -47,9 +45,6 @@ if TYPE_CHECKING:
 	from importlib.machinery import ModuleSpec
 	from mapFolding import MetadataOEISid, MetadataOEISidMapFolding
 	from types import ModuleType
-
-if __name__ == '__main__':
-	multiprocessing.set_start_method('spawn')
 
 def test_A007822(testCaseA007822: TestCase) -> None:
 	"""Test A007822 flow options.

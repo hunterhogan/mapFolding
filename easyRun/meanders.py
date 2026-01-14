@@ -3,7 +3,6 @@
 from mapFolding import ansiColorGreenOnBlack, ansiColorReset, ansiColorYellowOnRed, dictionaryOEIS
 from mapFolding.basecamp import NOTcountingFolds
 import gc
-import multiprocessing
 import sys
 import time
 import warnings
@@ -20,7 +19,6 @@ def write() -> None:
 	)
 
 if __name__ == '__main__':
-	multiprocessing.set_start_method('spawn')
 	if sys.version_info >= (3, 14):
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -63,7 +61,7 @@ if __name__ == '__main__':
 				sys.stdout.write(f"{n} {countTotal} {time.perf_counter() - timeStart:.2f}\n")
 
 r"""
-deactivate && C:\apps\mapFolding\.vtail\Scripts\activate.bat && title good && cls
+
 title running && start "meanders" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\meanders.py && title I'm done || title Error
 
 """

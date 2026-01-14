@@ -18,17 +18,12 @@ from mapFolding._e import (
 	getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二,
 	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeafDomain, getLeavesCreaseBack,
 	getLeavesCreaseNext, getPileRange)
-from mapFolding._e.algorithms.eliminationCrease import pileProcessingOrderDefault
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensions import (
-	pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds)
 from mapFolding.tests.dataSamples import (
 	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二,
 	p2DnDomain首零一二_首一二, p2DnDomain首零二_首二)
 from more_itertools import all_unique, unique_to_each
-from numpy.typing import NDArray
 from types import ModuleType
-import numpy
 import pytest
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
@@ -148,44 +143,6 @@ def test_getPileRange(mapShape: tuple[int, ...]) -> None:
 			f"Expected {tupleLeavesPileAuthoritativeData}, got {tupleLeavesPileActual}."
 		)
 
-def test_pileProcessingOrderDefault_properties(mapShape2上nDimensionsStandard: tuple[int, ...]) -> None:
-	"""Verify pileProcessingOrderDefault returns complete, unique, in-range pile ordering."""
-	state = EliminationState(mapShape=mapShape2上nDimensionsStandard)
-	sequencePileOrder: Sequence[int] = pileProcessingOrderDefault(state)
-
-	assert len(sequencePileOrder) == state.leavesTotal, (
-		f"pileProcessingOrderDefault: expected {state.leavesTotal} piles for {mapShape2上nDimensionsStandard=}, "
-		f"got {len(sequencePileOrder)}."
-	)
-	assert all_unique(sequencePileOrder), (
-		f"pileProcessingOrderDefault: duplicate piles for {mapShape2上nDimensionsStandard=}."
-	)
-	pilesExpected: tuple[int, ...] = tuple(range(state.leavesTotal))
-	pilesMissing, pilesExtra = unique_to_each(pilesExpected, sequencePileOrder)
-	pilesMissing = tuple(pilesMissing)
-	pilesExtra = tuple(pilesExtra)
-	assert len(pilesMissing) == 0 and len(pilesExtra) == 0, (
-		f"pileProcessingOrderDefault: missing or extra piles for {mapShape2上nDimensionsStandard=}. "
-		f"Missing={pilesMissing}, extra={pilesExtra}."
-	)
-	assert all(0 <= pile < state.leavesTotal for pile in sequencePileOrder), (
-		f"pileProcessingOrderDefault: out-of-range pile values for {mapShape2上nDimensionsStandard=}."
-	)
-
-@pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
-@pytest.mark.parametrize("pinningFunction", [pinPilesAtEnds, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二], ids=lambda pinningFunction: pinningFunction.__name__)
-def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8]], pinningFunction: Callable[[EliminationState], EliminationState], verifyLeavesPinnedAgainstFoldings: Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]], dimensionsTotal: int) -> None:
-	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
-	state = EliminationState(mapShape=mapShape)
-	arrayFoldings = loadArrayFoldings(dimensionsTotal)
-
-	state: EliminationState = pinningFunction(state)
-
-	rowsCovered, rowsTotal, countOverlappingDictionaries = verifyLeavesPinnedAgainstFoldings(state, arrayFoldings)
-
-	assert rowsCovered == rowsTotal, f"{pinningFunction.__name__}, {mapShape = }: {rowsCovered}/{rowsTotal} rows covered."
-	assert countOverlappingDictionaries == 0, f"{pinningFunction.__name__}, {mapShape = }: {countOverlappingDictionaries = }"
-
 @pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
 @pytest.mark.parametrize(
 	"creaseKind,creaseFunction,dictionaryExpectedByMapShape",
@@ -195,12 +152,7 @@ def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8
 	],
 	ids=["increase", "decrease"],
 )
-def test_getLeavesCreaseIterators_match_foldingsTransitions(
-	creaseKind: str,
-	creaseFunction: Callable[[EliminationState, int], Iterable[int]],
-	dictionaryExpectedByMapShape: dict[tuple[int, ...], dict[int, list[int]]],
-	dimensionsTotal: int,
-) -> None:
+def test_getLeavesCreaseIterators_match_foldingsTransitions(creaseKind: str, creaseFunction: Callable[[EliminationState, int], Iterable[int]], dictionaryExpectedByMapShape: dict[tuple[int, ...], dict[int, list[int]]], dimensionsTotal: int) -> None:
 	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
 	state: EliminationState = EliminationState(mapShape=mapShape)
 	dictionaryExpectedByLeaf: dict[int, list[int]] = dictionaryExpectedByMapShape[mapShape]

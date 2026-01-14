@@ -74,10 +74,6 @@ The math is far less complex with 2^n-dimensional maps: the computational saving
 
 ## Development tools
 
-### Reconfigure instruction files to the new system of skills and whatever
-
-[Customization options](https://code.visualstudio.com/docs/copilot/customization/overview)
-
 ### VS Code importing deprecated types from typing instead of collections
 
 Fix that shit already. I'm waiting for a reboot to confirm, but I might have a workaround. When I first install a venv, Pylance

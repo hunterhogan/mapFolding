@@ -46,6 +46,6 @@ if __name__ == '__main__':
 		_write()
 
 r"""
-deactivate && C:\apps\mapFolding\.vtail\Scripts\activate.bat && title good && cls
+
 title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\NOTcountingFolds.py & title I'm done
 """

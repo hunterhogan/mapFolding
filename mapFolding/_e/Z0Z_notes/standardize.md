@@ -1,6 +1,8 @@
 # Standardizing instructions, identifiers, descriptions, and other semiotic elements for clarity
 
-## Replace "trailing operators", "hidden" operators, and semantically-useless operators
+## Replace "trailing operators" and "hidden" operators
+
+This concept is a form of "A very broad concept: foreshadow from left to right and from top to bottom."
 
 ### Trailing operators
 
@@ -58,6 +60,21 @@ In complex statements, use signals that allow the human to read LTR and anticipa
 In complex statements, some operators are easy to miss, such as `~` and `-` when used to mean "negative". `operator.invert` and
 `operator.neg` can ensure the human sees the operator.
 
+## Improve identifier instructions, example: OEIS
+
+`def testCaseOeisFormula(request: pytest.FixtureRequest) -> TestCase:`
+
+- "OeisFormula" is a diminutive form of oeisIDbyFormula: NO MOTHERFUCKING DIMINUTIVES.
+- "OeisFormula" is referencing a very specific item, the module `oeisIDbyFormula`, and it is not a generalized form that includes
+ `oeisIDbyFormula`, which means `oeisIDbyFormula` is used as a proper noun in this case: use the proper noun in the identifier.
+- "Oeis" is not a word: use 'oeis' or 'OEIS' but not OeIs, oEIs, oeiS, or Oeis.
+
+## Identifiers: past to future, LTR; cause to effect, LTR; general to specific, LTR
+
+`mapShapeFromTestCase`
+
+So testCase to mapShape, not mapShape from testCase.
+
 ### Semantically-useless operators
 
 In the expression `range(bottles + 1)`, why is there a `+ 1`? We can often figure it out by analyzing the context, but the easiest way to erase ambiguity is to replace `+ 1` with a semantic identifier. In my packages look for modules named "_semiotics.py" to find replacements such as:
@@ -90,15 +107,6 @@ Previously, I used terms such as 2^d, 2Dn, p2d6. Furthermore, some (all?) academ
     - p2上nDimensional
     - p2上n
 
-## Example: OEIS
-
-`def testCaseOeisFormula(request: pytest.FixtureRequest) -> TestCase:`
-
-- "OeisFormula" is a diminutive form of oeisIDbyFormula: NO MOTHERFUCKING DIMINUTIVES.
-- "OeisFormula" is referencing a very specific item, the module `oeisIDbyFormula`, and it is not a generalized form that includes
- `oeisIDbyFormula`, which means `oeisIDbyFormula` is used as a proper noun in this case: use the proper noun in the identifier.
-- "Oeis" is not a word: use 'oeis' or 'OEIS' but not OeIs, oEIs, oeiS, or Oeis.
-
 ## Example of stupid error message
 
 ```python
@@ -109,17 +117,11 @@ if testCase.oeisID not in dictionaryOEISMapFolding:
 The basic thesis of the error message that was triggered by `if testCase.oeisID not in dictionaryOEISMapFolding:` ought to be
 "`testCase.oeisID` is not in `dictionaryOEISMapFolding`, therefore ..."
 
-## Identifiers: past to future, LTR; cause to effect, LTR; general to specific, LTR
+### always `<`
 
-`mapShapeFromTestCase`
-
-So testCase to mapShape, not mapShape from testCase.
+I've been standardizing on `<` or `<=`, not `>`.
 
 ## Needs more analysis or more details
-
-### pick: always `<` or always `>`
-
-I've been standardizing on `<` and `<=`, but `==` sometimes looks odd. Would `>` be better? I doubt it.
 
 ### `if`-trees of comparisons
 

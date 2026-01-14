@@ -1,9 +1,9 @@
 [project]
 name = "mapFolding"
-version = "0.17.1"
+version = "0.18.0"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
-requires-python = ">=3.12, <3.14"
+requires-python = ">=3.12"
 license = { 'text' = "CC-BY-NC-4.0" }
 authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 keywords = [
@@ -49,9 +49,8 @@ scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.
 dependencies = [
   "astToolkit>=0.9.0",
   "cytoolz",
-  "cytoolz-stubs",
   "gmpy2",
-  "hunterMakesPy>=0.3.0",
+  "hunterMakesPy>=0.3.2",
   "more_itertools",
   "numpy",
   "platformdirs",
@@ -69,7 +68,7 @@ optional-dependencies = { development = [
   "numba",
   "numba_progress",
 ], ortools = [
-  "ortools; python_version < '3.14'",
+  "ortools",
 ], pandas = [
   "pandas",
   "pyarrow",
@@ -129,6 +128,3 @@ packages = { find = {  } }
 [tool.updateCitation]
 filenameCitationDOTcff = "CITATION.cff"
 pathFilenameCitationSSOT = "citations/CITATION.cff"
-
-[tool.uv.sources]
-cytoolz-stubs = { git = "https://github.com/OutSquareCapital/cytoolz-stubs.git" }

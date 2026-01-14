@@ -285,8 +285,6 @@ class TestCase:
 	flow: str | None = None
 	CPUlimit: bool | float | int | None = None
 
-# ruff: noqa fuck off
-
 # TODO FIXME This is only about 10% of the tests I used to run. (All of the following information WAS encoded
 # in the test suite: the reasoning wasn't necessarily described, but all of the following cases were previously covered.) A SHIT
 # TON of these values were in _theSSOT.py in dictionaries, one of which was of type `MetadataOEISidManuallySet`. It might be worth

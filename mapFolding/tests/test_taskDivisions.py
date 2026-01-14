@@ -21,8 +21,6 @@ For users working with large-scale computations: these tests demonstrate how to
 configure and validate parallel processing setups. The concurrency limit tests
 show how to balance performance with system resource constraints.
 
-The multiprocessing configuration (spawn method) is essential for cross-platform
-compatibility and proper resource isolation between test processes.
 """
 
 from collections.abc import Callable
@@ -32,13 +30,7 @@ from mapFolding import (
 from mapFolding.basecamp import countFolds
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import Literal
-import multiprocessing
 import pytest
-
-# When to use multiprocessing.set_start_method
-# https://github.com/hunterhogan/mapFolding/issues/6
-if __name__ == '__main__':
-	multiprocessing.set_start_method('spawn')
 
 def test_countFoldsComputationDivisionsInvalid(mapShapeTestFunctionality: tuple[int, ...]) -> None:
 	standardizedEqualToCallableReturn(ValueError, countFolds, mapShapeTestFunctionality, None, {"wrong": "value"})
