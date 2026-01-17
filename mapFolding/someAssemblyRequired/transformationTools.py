@@ -28,7 +28,7 @@ through specialized compilation paths essential for computationally intensive ma
 from astToolkit import Be, extractClassDef, identifierDotAttribute, Make, NodeChanger, parseLogicalPath2astModule, Then
 from astToolkit.containers import IngredientsFunction
 from astToolkit.transformationTools import unparseFindReplace
-from hunterMakesPy import importLogicalPath2Identifier
+from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.someAssemblyRequired import DeReConstructField2ast, IfThis, ShatteredDataclass
 import ast
 import dataclasses

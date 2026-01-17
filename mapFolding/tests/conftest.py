@@ -24,14 +24,8 @@ research domain.
 """
 
 from collections.abc import Callable, Generator, Sequence
-from dataclasses import dataclass
-from gmpy2 import xmpz
-from mapFolding import (
-	_theSSOT, getLeavesTotal, makeDataContainer, MetadataOEISid, MetadataOEISidMapFolding, packageSettings,
-	validateListDimensions)
-from mapFolding._e import oopsAllLeaves
-from mapFolding._e.dataBaskets import EliminationState
-from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, oeisIDsImplemented
+from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
+from mapFolding.oeis import oeisIDsImplemented
 from numpy.typing import NDArray
 from pathlib import Path
 from typing import Any
@@ -44,7 +38,7 @@ import unittest.mock
 import uuid
 import warnings
 
-# ======= uniform messages and standardized test formats ==========
+#======== uniform messages and standardized test formats ==========
 
 def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
 	"""Format assertion message for any test comparison.
@@ -107,7 +101,8 @@ def standardizedEqualToCallableReturn(expected: Any, functionTarget: Callable[..
 		messageActual = type(actualError).__name__
 		actual = type(actualError)
 
-	assert actual == expected, uniformTestMessage(messageExpected, messageActual, functionTarget.__name__, *arguments)
+	functionName: str = getattr(functionTarget, "__name__", functionTarget.__class__.__name__)
+	assert actual == expected, uniformTestMessage(messageExpected, messageActual, functionName, *arguments)
 
 def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: Callable[..., Any], *arguments: Any) -> None:
 	"""Template for tests expecting SystemExit.
@@ -140,7 +135,7 @@ def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: 
 	else:
 		assert exitCode == expected, f"Expected exit code {expected} but got {exitCode}"
 
-# ======= SSOT for test data paths and filenames ==============
+#======== SSOT for test data paths and filenames ==============
 pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
 path_tmpRoot: Path = pathDataSamples / "tmp"
 path_tmpRoot.mkdir(parents=True, exist_ok=True)
@@ -274,229 +269,6 @@ def setupTeardownTemporaryFilesystemObjects() -> Generator[None, None, None]:
 	yield
 	registrarDeletesTemporaryFilesystemObjects()
 
-# ======= SSOT*: per-algorithm test settings ==========================================
-# *except the test settings not in this "single" source
-
-@dataclass(frozen=True)
-class TestCase:
-	testName: str
-	oeisID: str
-	n: int
-	flow: str | None = None
-	CPUlimit: bool | float | int | None = None
-
-# TODO FIXME This is only about 10% of the tests I used to run. (All of the following information WAS encoded
-# in the test suite: the reasoning wasn't necessarily described, but all of the following cases were previously covered.) A SHIT
-# TON of these values were in _theSSOT.py in dictionaries, one of which was of type `MetadataOEISidManuallySet`. It might be worth
-# the effort to dig through the commits to get the old data. Furthermore, some test parameters for not "ManuallySet": they were
-# automatically added in oeis.py, such as tests based on offset.
-"""What needs to get tested:
-
-Distinguish between tests that check computational correctness and those that check performance or other aspects. In this comment,
-I am only talking about computational tests.
-
-- Broadly (but imprecisely) speaking, the Cartesian product of the following factors
-	- basecamp functions: mapFolding._e.basecamp.py and mapFolding.basecamp.py
-	- OEIS ids
-	- n
-		- which n need to be tested come from multiple categories. See one example, below.
-		- The offset value
-		- Special values: in the example below, n = 1. Flow control statements based on `n` or `mapShape`, which is an extension of `n`, are presumed to be special values. See, for example, `if all(dimension <= 2 for dimension in mapShape): from mapFolding.algorithms.daoOfMapFolding import doTheNeedful`
-		The following range, inclusive, *sort of:
-			- The smallest non-special, non-offset value.
-			- The largest value of n that can be computed in a reasonable time.
-			- Computing the entire range does not scale.
-			- Hardcoding specific values creates blind spots.
-			- Randomly select one value from the range.
-			- Important values should be in the always-tested set.
-		- matrixNumPy has a weird special case ~n=23 because it triggers a transition from dictionary to ndarray data structures.
-    - flow / computationDivisions: previously, I segregated computational correctness of computationDivisions into
-        `test_countFoldsComputationDivisionsMaximum` in `test_taskDivisions.py`, but `mapShapeTestParallelization()` has been
-        hijacked: it now uses a bastardized form of `TestCase`. So move `mapShapeTestParallelization()` into test_computations.py,
-        and treat the test properly.
-- Factors to not test (here)
-	- CPUlimit (on parallel computations, use more than one process to the test doesn't take forever, but don't use the maximum
-		cores because pytest is configured to run the tests concurrently)
-	- pathLikeWriteFoldsTotal
-	- invalid input parameters
-
-Example of `n` categories:
-TestCase('oeisIDbyFormula', 'A001010', n=3),
-if n == 1:
-    countTotal = 1
-elif n & 1:
-    countTotal = 2 * _A007822((n - 1) // 2 + 1)
-else:
-    countTotal = 2 * _A000682(n // 2 + 1)
-At a minimum, this must test n=1, an odd n, and an even n.
-
-- I do not want, and I will not accept 800 lines that look like this:
-```
-		TestCase('oeisIDbyFormula', 'A000560', n=3),
-		TestCase('oeisIDbyFormula', 'A000682', n=3),
-		TestCase('oeisIDbyFormula', 'A001010', n=3),
-		TestCase('oeisIDbyFormula', 'A001011', n=3),
-		TestCase('oeisIDbyFormula', 'A005315', n=3),
-		TestCase('oeisIDbyFormula', 'A005316', n=3),
-		TestCase('oeisIDbyFormula', 'A007822', n=3),
-		TestCase('oeisIDbyFormula', 'A060206', n=3),
-		TestCase('oeisIDbyFormula', 'A077460', n=3),
-		TestCase('oeisIDbyFormula', 'A078591', n=3),
-		TestCase('oeisIDbyFormula', 'A086345', n=3),
-		TestCase('oeisIDbyFormula', 'A178961', n=3),
-		TestCase('oeisIDbyFormula', 'A223094', n=3),
-		TestCase('oeisIDbyFormula', 'A259702', n=3),
-		TestCase('oeisIDbyFormula', 'A301620', n=3),
-```
-
-This is more acceptable but inadequate:
-```
-	'A007822': tuple(
-		TestCase('A007822', 'A007822', n=4, flow=flow, CPUlimit=0.5)
-		for flow in ('algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
-	),
-```
-
-"""
-dictionaryTestNameToComputationalTestCase: dict[str, tuple[TestCase, ...]] = {
-	'A007822': tuple(
-		TestCase('A007822', 'A007822', n=4, flow=flow, CPUlimit=0.5)
-		for flow in ('algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
-	),
-	'codeGenerationSingleJob': (
-		TestCase('codeGenerationSingleJob', 'A000136', n=3),
-	),
-	'countFolds': (
-		# Fuck no. All ids on all flows, with appropriate n values for the id+flow.
-		TestCase('countFolds', 'A000136', n=3, flow='daoOfMapFolding'),
-		TestCase('countFolds', 'A001415', n=3, flow='numba'),
-		TestCase('countFolds', 'A001416', n=3, flow='theorem2Numba'),
-		TestCase('countFolds', 'A001417', n=3, flow='theorem2'),
-		TestCase('countFolds', 'A001418', n=3, flow='theorem2Trimmed'),
-	),
-	'eliminateFolds': (
-		TestCase('eliminateFolds', 'A001417', n=5, flow='constraintPropagation', CPUlimit=0.25),
-	),
-	'mapShapeFunctionality': (
-		TestCase('mapShapeFunctionality', 'A000136', n=3),
-		TestCase('mapShapeFunctionality', 'A001415', n=3),
-	),
-	'mapShapeParallelization': (
-		TestCase('mapShapeParallelization', 'A001417', n=5),
-	),
-	'meanders': (
-		TestCase('meanders', 'A000682', n=3, flow='matrixMeanders'),
-		TestCase('meanders', 'A005316', n=3, flow='matrixMeanders'),
-		TestCase('meanders', 'A000682', n=3, flow='matrixNumPy'),
-		TestCase('meanders', 'A005316', n=3, flow='matrixNumPy'),
-		TestCase('meanders', 'A000682', n=3, flow='matrixPandas'),
-		TestCase('meanders', 'A005316', n=3, flow='matrixPandas'),
-	),
-	'oeisIDbyFormula': (
-		TestCase('oeisIDbyFormula', 'A000560', n=3),
-		TestCase('oeisIDbyFormula', 'A000682', n=3),
-		TestCase('oeisIDbyFormula', 'A001010', n=3),
-		TestCase('oeisIDbyFormula', 'A001011', n=3),
-		TestCase('oeisIDbyFormula', 'A005315', n=3),
-		TestCase('oeisIDbyFormula', 'A005316', n=3),
-		TestCase('oeisIDbyFormula', 'A007822', n=3),
-		TestCase('oeisIDbyFormula', 'A060206', n=3),
-		TestCase('oeisIDbyFormula', 'A077460', n=3),
-		TestCase('oeisIDbyFormula', 'A078591', n=3),
-		TestCase('oeisIDbyFormula', 'A086345', n=3),
-		TestCase('oeisIDbyFormula', 'A178961', n=3),
-		TestCase('oeisIDbyFormula', 'A223094', n=3),
-		TestCase('oeisIDbyFormula', 'A259702', n=3),
-		TestCase('oeisIDbyFormula', 'A301620', n=3),
-	),
-	# I don't know what this stupid fucking diminutive identifier "oeisValue" means. I made this package and I have no fucking clue what this might be testing.
-	'oeisValue': (
-		TestCase('oeisValue', 'A000136', n=3),
-		TestCase('oeisValue', 'A001415', n=3),
-		TestCase('oeisValue', 'A001416', n=3),
-		TestCase('oeisValue', 'A001417', n=3),
-		TestCase('oeisValue', 'A001418', n=3),
-		TestCase('oeisValue', 'A195646', n=2),
-	),
-}
-
-def makeTestCaseIdentifier(testCase: TestCase) -> str:
-	parts: list[str] = [testCase.testName, testCase.oeisID, f"n{testCase.n}"]
-	if testCase.flow:
-		parts.append(testCase.flow)
-	return '::'.join(parts)
-
-def mapShapeFromTestCase(testCase: TestCase) -> tuple[int, ...]:
-	if testCase.oeisID not in dictionaryOEISMapFolding:
-		message: str = f"`{testCase.oeisID}` does not define a map shape."
-		raise ValueError(message)
-	return dictionaryOEISMapFolding[testCase.oeisID]['getMapShape'](testCase.n)
-
-def testCasesForTestName(testName: str) -> tuple[TestCase, ...]:
-	try:
-		return dictionaryTestNameToComputationalTestCase[testName]
-	except KeyError as error:
-		message = f"Unknown testName `{testName}`."
-		raise KeyError(message) from error
-
-# "codeGeneration" doesn't mean anything to me. I don't know what the fuck this might be testing.
-testCaseCodeGenerationSingleJob: TestCase = testCasesForTestName('codeGenerationSingleJob')[0]
-
-@pytest.fixture(params=testCasesForTestName('A007822'), ids=makeTestCaseIdentifier)
-def testCaseA007822(request: pytest.FixtureRequest) -> TestCase:
-	"""Provide flow-specific testCases for A007822 validations."""
-	return request.param
-
-@pytest.fixture(params=testCasesForTestName('countFolds'), ids=makeTestCaseIdentifier)
-def testCaseCountFolds(request: pytest.FixtureRequest) -> TestCase:
-	"""Provide flow-specific testCases for `countFolds` validation."""
-	return request.param
-
-@pytest.fixture(params=testCasesForTestName('eliminateFolds'), ids=makeTestCaseIdentifier)
-def testCaseEliminateFolds(request: pytest.FixtureRequest) -> TestCase:
-	"""Provide flow-specific testCases for `eliminateFolds` validation."""
-	return request.param
-
-@pytest.fixture(params=testCasesForTestName('meanders'), ids=makeTestCaseIdentifier)
-def testCaseMeanders(request: pytest.FixtureRequest) -> TestCase:
-	"""Provide flow-specific testCases for meanders transfer-matrix flows."""
-	return request.param
-
-@pytest.fixture(params=testCasesForTestName('oeisIDbyFormula'), ids=makeTestCaseIdentifier)
-def testCaseOeisFormula(request: pytest.FixtureRequest) -> TestCase:
-	"""Provide OEIS IDs and indices for formula-based verification."""
-	return request.param
-
-@pytest.fixture(params=testCasesForTestName('oeisValue'), ids=makeTestCaseIdentifier)
-def testCaseOeisValue(request: pytest.FixtureRequest) -> TestCase:
-	"""Provide deterministic OEIS IDs and indices for `oeisIDfor_n` tests."""
-	return request.param
-
-# ------- The second "single source" of truth -----------------------
-
-@pytest.fixture(params=[(2, 2, 2, 2), (2, 2, 2, 2, 2), (2, 2, 2, 2, 2, 2)], ids=["2d4", "2d5", "2d6"])
-def mapShape2上nDimensionsStandard(request: pytest.FixtureRequest) -> tuple[int, ...]:
-	"""Provide standard 2^n dimension test shapes: 2d4, 2d5, 2d6."""
-	return request.param
-
-@pytest.fixture
-def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]: # NOTE TO AI: DO NOT CHANGE THIS IDENTIFIER NAME.
-	"""Return one deterministic map shape suitable for code generation tests."""
-	mapShapeCandidate: list[int] = list(mapShapeFromTestCase(testCaseCodeGenerationSingleJob))
-	return validateListDimensions(mapShapeCandidate)
-
-@pytest.fixture(params=testCasesForTestName('mapShapeFunctionality'), ids=makeTestCaseIdentifier)
-def mapShapeTestFunctionality(request: pytest.FixtureRequest) -> tuple[int, ...]:
-	"""Provide deterministic map shapes for filesystem and validation tests."""
-	testCase: TestCase = request.param
-	return validateListDimensions(list(mapShapeFromTestCase(testCase)))
-
-@pytest.fixture
-def mapShapeTestParallelization() -> list[int]:
-	"""Return a deterministic map shape that exercises task division logic."""
-	testCase: TestCase = testCasesForTestName('mapShapeParallelization')[0]
-	return list(mapShapeFromTestCase(testCase))
-
 @pytest.fixture(params=oeisIDsImplemented)
 def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:
 	"""Parametrized fixture providing all implemented OEIS sequence identifiers.
@@ -528,7 +300,7 @@ def oeisID_1random() -> str:
 	"""
 	return random.choice(oeisIDsImplemented)  # noqa: S311
 
-# ======= Miscellaneous =====================================
+#======== Miscellaneous =====================================
 
 @pytest.fixture(autouse=True)
 def setupWarningsAsErrors() -> Generator[None, Any, None]:
@@ -596,62 +368,3 @@ def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
 
 	return loader
 
-@pytest.fixture
-def makeEliminationState() -> Callable[[tuple[int, ...]], EliminationState]:
-	"""Factory fixture for creating EliminationState instances.
-
-	Returns
-	-------
-	stateFactory : Callable[[tuple[int, ...]], EliminationState]
-		Factory function that creates EliminationState instances for a given mapShape.
-
-	"""
-	def factory(mapShape: tuple[int, ...]) -> EliminationState:
-		return EliminationState(mapShape=mapShape)
-
-	return factory
-
-@pytest.fixture
-def verifyLeavesPinnedAgainstFoldings() -> Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]]:
-	"""Fixture providing a function to verify pinned leaves against known foldings.
-
-	Returns
-	-------
-	verifier : Callable[[EliminationState, NDArray[numpy.uint8]], tuple[int, int, int]]
-		Function that returns (rowsCovered, rowsTotal, countOverlappingDictionaries).
-	"""
-
-	def maskRowsMatchingPileConstraint(arrayLeavesAtPile: numpy.ndarray, leafOrPileRangeOfLeaves: int, leavesTotal: int) -> numpy.ndarray:
-		if isinstance(leafOrPileRangeOfLeaves, int):
-			return arrayLeavesAtPile == leafOrPileRangeOfLeaves
-		if isinstance(leafOrPileRangeOfLeaves, xmpz):
-			allowedLeaves: numpy.ndarray = numpy.fromiter((bool(leafOrPileRangeOfLeaves[leaf]) for leaf in range(leavesTotal)), dtype=bool, count=leavesTotal)
-			return allowedLeaves[arrayLeavesAtPile]
-		return numpy.ones(arrayLeavesAtPile.shape[0], dtype=bool)
-
-	def _verify(state: EliminationState, arrayFoldings: NDArray[numpy.uint8]) -> tuple[int, int, int]:
-		rowsTotal: int = int(arrayFoldings.shape[0])
-		listRowMasks: list[numpy.ndarray] = []
-
-		for leavesPinned in state.listPermutationSpace:
-			maskRowsMatchThisDictionary: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-			for pile, leafOrPileRangeOfLeaves in oopsAllLeaves(leavesPinned).items():
-				maskRowsMatchThisDictionary = maskRowsMatchThisDictionary & maskRowsMatchingPileConstraint(arrayFoldings[:, pile], leafOrPileRangeOfLeaves, state.leavesTotal)
-			listRowMasks.append(maskRowsMatchThisDictionary)
-
-		masksStacked: numpy.ndarray = numpy.column_stack(listRowMasks)
-		coverageCountPerRow: numpy.ndarray = masksStacked.sum(axis=1)
-		indicesOverlappedRows: numpy.ndarray = numpy.nonzero(coverageCountPerRow >= 2)[0]
-
-		countOverlappingDictionaries: int = 0
-		if indicesOverlappedRows.size > 0:
-			for maskRowsMatchThisDictionary in listRowMasks:
-				if bool(maskRowsMatchThisDictionary[indicesOverlappedRows].any()):
-					countOverlappingDictionaries += 1
-
-		maskUnion = numpy.logical_or.reduce(listRowMasks)
-		rowsCovered: int = int(maskUnion.sum())
-
-		return rowsCovered, rowsTotal, countOverlappingDictionaries
-
-	return _verify

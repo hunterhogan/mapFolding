@@ -5,7 +5,8 @@ from astToolkit import (
 from astToolkit.containers import (
 	astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports)
 from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
-from hunterMakesPy import importLogicalPath2Identifier, raiseIfNone
+from hunterMakesPy import raiseIfNone
+from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
 from mapFolding.someAssemblyRequired.makingModules_count import (

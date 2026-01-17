@@ -9,7 +9,7 @@ from sys import maxsize as sysMaxsize
 from typing import Any
 import numpy
 
-# ======= Flow control ======================================
+#======== Flow control ======================================
 
 def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = None) -> int:
 	"""Compute the CPU usage limit for concurrent operations; for `numba` managed concurrency, set the global limit.
@@ -61,7 +61,7 @@ def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = 
 			concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
 	return concurrencyLimit
 
-# ======= map folding ===================================
+#======== map folding ===================================
 
 def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]:
 	"""Create a properly typed connection graph for the map folding algorithm.

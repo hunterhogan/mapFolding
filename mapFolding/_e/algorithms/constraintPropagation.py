@@ -1,124 +1,69 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
-from itertools import combinations, pairwise, product as CartesianProduct
-from mapFolding import decreasing, packageSettings
+from cytoolz.itertoolz import last
+from itertools import pairwise, product as CartesianProduct
+from mapFolding import packageSettings
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getIteratorOfLeaves, getLeavesCreaseBack,
-	getLeavesCreaseNext, leafOrigin, mapShapeIs2上nDimensions, PermutationSpace, pileOrigin, thisIsALeaf,
-	thisIsAPileRangeOfLeaves, 零)
+	between, getIteratorOfLeaves, getLeavesCreaseNext, leafOrigin, mapShapeIs2上nDimensions, oopsAllLeaves,
+	oopsAllPileRangesOfLeaves, pileOrigin, PileRangeOfLeaves, Z0Z_getIndicesSameDimensionLength)
 from mapFolding._e.dataBaskets import EliminationState
 from math import factorial, prod
-from more_itertools import iter_index, unique
 from ortools.sat.python import cp_model
 from pathlib import Path
 from tqdm import tqdm
-from typing import Final
 import csv
 import uuid
 
-def findValidFoldings(state: EliminationState) -> int:
+def count(state: EliminationState) -> int:
 	model = cp_model.CpModel()
 
-	listLeavesInPileOrder: list[cp_model.IntVar] = [model.new_int_var(pileOrigin, state.leavesTotal - 零, f"leafInPile[{pile}]") for pile in range(state.leavesTotal)]
-	listPilingsInLeafOrder: list[cp_model.IntVar] = [model.new_int_var(leafOrigin, state.leavesTotal - 零, f"pileOfLeaf[{leaf}]") for leaf in range(state.leavesTotal)]
+	listLeavesInPileOrder: list[cp_model.IntVar] = [model.new_int_var(pileOrigin, state.pileLast, f"leafInPile[{pile}]") for pile in range(state.leavesTotal)]
+	listPilingsInLeafOrder: list[cp_model.IntVar] = [model.new_int_var(leafOrigin, state.leafLast, f"pileOfLeaf[{leaf}]") for leaf in range(state.leavesTotal)]
 	model.add_inverse(listLeavesInPileOrder, listPilingsInLeafOrder)
 
-# ======= Manual concurrency and targeted constraints ============================
-	for pile, leafOrLeafRange in state.leavesPinned.items():
-		if thisIsALeaf(leafOrLeafRange):
-			model.add(listLeavesInPileOrder[pile] == leafOrLeafRange)
-		elif thisIsAPileRangeOfLeaves(leafOrLeafRange):
-			model.add_allowed_assignments([listLeavesInPileOrder[pile]], [(leaf,) for leaf in getIteratorOfLeaves(leafOrLeafRange)])
+#======== Manual concurrency and targeted constraints ============================
+	dictionaryOfPileLeaf: dict[int, int] = oopsAllLeaves(state.leavesPinned)
+	for aPile, aLeaf in dictionaryOfPileLeaf.items():
+		model.add(listLeavesInPileOrder[aPile] == aLeaf)
 
-# ======= Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal ============================
+	pilesWithPileRangeOfLeaves: dict[int, PileRangeOfLeaves] = oopsAllPileRangesOfLeaves(state.leavesPinned)
+	for aPile, aLeaf in pilesWithPileRangeOfLeaves.items():
+		model.add_allowed_assignments([listLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(aLeaf))))
+
+#======== Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal ============================
 	model.add(listLeavesInPileOrder[pileOrigin] == leafOrigin)
 
-# ------- Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ---------------
-	for listIndicesSameMagnitude in [list(iter_index(state.mapShape, magnitude)) for magnitude in unique(state.mapShape)]:
-		if len(listIndicesSameMagnitude) > 1:
-			state.Theorem4Multiplier *= factorial(len(listIndicesSameMagnitude))
-			for dimensionAlpha, dimensionBeta in pairwise(listIndicesSameMagnitude):
-				k, r = (prod(state.mapShape[0:dimension]) for dimension in (dimensionAlpha, dimensionBeta))
-				model.add(listPilingsInLeafOrder[k] < listPilingsInLeafOrder[r])
+#======== Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ============================
+	for indicesSameDimensionLength in Z0Z_getIndicesSameDimensionLength(state.mapShape):
+		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
+		for index_k, index_r in pairwise(indicesSameDimensionLength):
+			model.add(listPilingsInLeafOrder[state.productsOfDimensions[index_k]] < listPilingsInLeafOrder[state.productsOfDimensions[index_r]])
 
-# ------- Rules for 2^n-dimensional maps ---------------------
-	# if mapShapeIs2上nDimensions(state.mapShape):
-	if False:
+#======== Rules for 2^n-dimensional maps ============================
 
-		dictionaryLeafDomains: Final[dict[int, range]] = getDictionaryLeafDomains(state)
-		# ------- Leaf domains ---------------------
-		for leaf, domain in dictionaryLeafDomains.items():
-			if leaf > 1:
-				model.add_allowed_assignments([listPilingsInLeafOrder[leaf]], [(pile,) for pile in frozenset(domain)])
+	if mapShapeIs2上nDimensions(state.mapShape):
+		pass
 
-		# # ------- Leaf in the next pile ----------------------------
-		for leaf in range(state.leavesTotal):
-			for pile in frozenset(dictionaryLeafDomains[leaf]):
-				if pile == state.pileLast:
-					continue
-				leafAtPile: cp_model.IntVar = listLeavesInPileOrder[pile]
-				creaseNextAtPileAfter: cp_model.IntVar = listLeavesInPileOrder[pile + 1]
+#======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================-
+	if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
+		state.Theorem2Multiplier = 2
+		leafOrigin下_aDimension: int = last(filter(between(0, state.leafLast // 2), state.productsOfDimensions))
+		model.add(listPilingsInLeafOrder[leafOrigin下_aDimension] < listPilingsInLeafOrder[2 * leafOrigin下_aDimension])
 
-				isSmurfSmurfSmurfToSmurf: cp_model.IntVar = model.new_bool_var(f"pile{pile}_leaf{leaf}")
-				model.add(leafAtPile == leaf).only_enforce_if(isSmurfSmurfSmurfToSmurf)
-				model.add(leafAtPile != leaf).only_enforce_if(isSmurfSmurfSmurfToSmurf.Not())
-
-				model.add_allowed_assignments([creaseNextAtPileAfter], [(creaseNext,) for creaseNext in getLeavesCreaseNext(state, leaf)]).only_enforce_if(isSmurfSmurfSmurfToSmurf)
-
-		# ------- Leaf in the prior pile ----------------------------
-		for leaf in range(state.leavesTotal):
-			for pile in frozenset(dictionaryLeafDomains[leaf]):
-				if pile == 0:
-					continue
-				leafAtPile: cp_model.IntVar = listLeavesInPileOrder[pile]
-				creaseBackAtPileBefore: cp_model.IntVar = listLeavesInPileOrder[pile - 1]
-
-				buffaloBuffalo_buffaloBuffalo: cp_model.IntVar = model.new_bool_var(f"pile{pile}_leaf{leaf}")
-				model.add(leafAtPile == leaf).only_enforce_if(buffaloBuffalo_buffaloBuffalo)
-				model.add(leafAtPile != leaf).only_enforce_if(buffaloBuffalo_buffaloBuffalo.Not())
-
-				model.add_allowed_assignments([creaseBackAtPileBefore], [(creaseBack,) for creaseBack in getLeavesCreaseBack(state, leaf)]).only_enforce_if(buffaloBuffalo_buffaloBuffalo)
-
-# ------- Dimension origins must be in order ---------------------
-		for dimensionOrigin_k, dimensionOrigin_r in pairwise(state.productsOfDimensions[1: state.dimensionsTotal - 1]):
-			model.add(listPilingsInLeafOrder[dimensionOrigin_k] < listPilingsInLeafOrder[dimensionOrigin_r])
-
-# ------- Dimension origin must precede other leaves in its dimension ---------------------
-		for dimensionOrigin_k in state.productsOfDimensions[1: state.dimensionsTotal - 1]:
-			for leaf in range(dimensionOrigin_k * 2, state.leavesTotal, dimensionOrigin_k):
-				model.add(listPilingsInLeafOrder[dimensionOrigin_k] < listPilingsInLeafOrder[leaf])
-
-# ------- Leading zeros before trailing zeros: if dimensionNearest首(k) <= dimensionNearestTail(r), then pileOf_k < pileOf_r ---------------------
-		for k, r in combinations(range(1, state.leavesTotal), 2):
-			if dimensionNearest首(k) <= dimensionNearestTail(r):
-				model.add(listPilingsInLeafOrder[k] < listPilingsInLeafOrder[r])
-
-			if dimensionNearest首(r) <= dimensionNearestTail(k):
-				model.add(listPilingsInLeafOrder[r] < listPilingsInLeafOrder[k])
-
-# ======= Lunnon Theorem 2(b): "If some [magnitude in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================-
-	if state.Theorem4Multiplier == 1:
-		for aDimension in range(state.dimensionsTotal + decreasing, decreasing, decreasing):
-			if state.mapShape[aDimension] > 2:
-				state.Theorem2Multiplier = 2
-				leafOrigin下_aDimension: int = prod(state.mapShape[0:aDimension])
-				model.add(listPilingsInLeafOrder[leafOrigin下_aDimension] < listPilingsInLeafOrder[2 * leafOrigin下_aDimension])
-				break
-
-# ======= Forbidden inequalities ============================-
+#======== Forbidden inequalities ============================-
 	def addLessThan(comparatorLeft: int, comparatorRight: int) -> cp_model.IntVar:
 		ruleΩ: cp_model.IntVar = model.new_bool_var(f"this_{comparatorLeft}_lessThan_{comparatorRight}")
 		model.add(listPilingsInLeafOrder[comparatorLeft] < listPilingsInLeafOrder[comparatorRight]).only_enforce_if(ruleΩ)
-		model.add(listPilingsInLeafOrder[comparatorLeft] >= listPilingsInLeafOrder[comparatorRight]).only_enforce_if(ruleΩ.Not())
+		model.add(listPilingsInLeafOrder[comparatorRight] <= listPilingsInLeafOrder[comparatorLeft]).only_enforce_if(ruleΩ.Not())
 		return ruleΩ
 
 	def addForbiddenInequalityCycle(k: int, r: int, k1: int, r1: int) -> None:
 		k__小于_r: cp_model.IntVar = addLessThan(k, r) # 小, xiǎo: small, less; as in 李小龍, Lǐ Xiǎolóng, Lǐ little dragon, aka Bruce Lee
 		r1_小于_k: cp_model.IntVar = addLessThan(r1, k)
 		k1_小于_r1: cp_model.IntVar = addLessThan(k1, r1)
-		model.add_bool_or([k1_小于_r1.Not(), r1_小于_k.Not(), k__小于_r.Not()])	# [k+1 < r+1 < k < r]
+		model.add_bool_or([k1_小于_r1.Not(), r1_小于_k.Not(), k__小于_r.Not()])		# [k+1 < r+1 < k < r]
 
 		r__小于_k1: cp_model.IntVar = addLessThan(r, k1)
-		model.add_bool_or([r1_小于_k.Not(), k__小于_r.Not(), r__小于_k1.Not()])	# [r+1 < k < r < k+1]
+		model.add_bool_or([r1_小于_k.Not(), k__小于_r.Not(), r__小于_k1.Not()])		# [r+1 < k < r < k+1]
 
 		model.add_bool_or([k__小于_r.Not(), r__小于_k1.Not(), k1_小于_r1.Not()])	# [k < r < k+1 < r+1]
 
@@ -136,21 +81,21 @@ def findValidFoldings(state: EliminationState) -> int:
 			leafNext = leaf + prod(state.mapShape[0:dimension])
 		return leafNext
 
-	for k, r in CartesianProduct(range(state.leavesTotal-1), range(1, state.leavesTotal-1)):
-		if k == r:
+	for leaf_k, leaf_r in CartesianProduct(range(state.leafLast), range(1, state.leafLast)):
+		if leaf_k == leaf_r:
 			continue
 
-		k下_indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(k) # 下, xià: below, subscript
-		r下_indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(r)
+		k下_indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_k) # 下, xià: below, subscript
+		r下_indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_r)
 
 		for aDimension in range(state.dimensionsTotal):
-			k1下_aDimension: int | None = leafNextCrease(k, aDimension)
-			r1下_aDimension: int | None = leafNextCrease(r, aDimension)
+			k1下_aDimension: int | None = leafNextCrease(leaf_k, aDimension)
+			r1下_aDimension: int | None = leafNextCrease(leaf_r, aDimension)
 
 			if k1下_aDimension and r1下_aDimension and ((k下_indicesCartesian[aDimension] - r下_indicesCartesian[aDimension]) % 2 == 0):
-				addForbiddenInequalityCycle(k, r, k1下_aDimension, r1下_aDimension)
+				addForbiddenInequalityCycle(leaf_k, leaf_r, k1下_aDimension, r1下_aDimension)
 
-# ======= Solver ============================-
+#======== Solver ================================
 	solver = cp_model.CpSolver()
 	solver.parameters.enumerate_all_solutions = True
 
@@ -168,6 +113,7 @@ def findValidFoldings(state: EliminationState) -> int:
 	foldingCollector = FoldingCollector(listLeavesInPileOrder)
 	solver.solve(model, foldingCollector)
 
+# TODO NOTE temporary data collection for p2d7
 	if (state.dimensionsTotal == 7) and (foldingCollector.listFoldings):
 		pathFilename: Path = packageSettings.pathPackage / "_e" / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
 		with Path.open(pathFilename, mode="w", newline="") as fileCSV:
@@ -177,32 +123,24 @@ def findValidFoldings(state: EliminationState) -> int:
 	return len(foldingCollector.listFoldings) * state.Theorem2Multiplier * state.Theorem4Multiplier
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	"""Find the quantity of valid foldings for a given map."""
-	if state.listPermutationSpace:
+	"""Do the things necessary so that `count` operates efficiently."""
+	if state.listPermutationSpace or (workersMaximum > 1):
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
-			listPermutationSpaceCopy: list[PermutationSpace] = state.listPermutationSpace
-			state.listPermutationSpace = []
+			if not state.listPermutationSpace:
+				pileForConcurrency: int = state.pileLast // 2
+				state.listPermutationSpace = [{pileForConcurrency: leaf} for leaf in range(state.leavesTotal)]
+
 			listClaimTickets: list[Future[int]] = [
-				concurrencyManager.submit(findValidFoldings, EliminationState(state.mapShape, leavesPinned=leavesPinned))
-				for leavesPinned in listPermutationSpaceCopy
+				concurrencyManager.submit(count, EliminationState(state.mapShape, leavesPinned=leavesPinned))
+					for leavesPinned in state.listPermutationSpace
 			]
 
 			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
 				state.groupsOfFolds += claimTicket.result()
 
-	elif workersMaximum > 1:
-		pile = 2
-		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
-			listClaimTickets: list[Future[int]] = []
-			for indicesLeaf in range(1, state.leavesTotal):
-				listClaimTickets.append(concurrencyManager.submit(findValidFoldings, EliminationState(state.mapShape, leavesPinned={pile: indicesLeaf})))
-
-			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
-				state.groupsOfFolds += claimTicket.result()
-
 	else:
-		state.groupsOfFolds = findValidFoldings(state)
+		state.groupsOfFolds = count(state)
 
 	return state

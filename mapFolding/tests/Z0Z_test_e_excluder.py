@@ -21,7 +21,7 @@ from unittest.mock import MagicMock, patch
 import pandas
 import pytest
 
-# ======= Logic Tests (Adapted from test_excluder_logic.py) =======
+#======== Logic Tests (Adapted from test_excluder_logic.py) =======
 
 @pytest.mark.parametrize("dimensionsTotal, pileLast, leavesPinned, expectedResult", [
 	(6, 99, {7: 4, 12: 36}, True),
@@ -45,7 +45,7 @@ def test_Z0Z_excluder(dimensionsTotal: int, pileLast: int, leavesPinned: dict[in
 	result = Z0Z_excluder(state)
 	assert result == expectedResult
 
-# ======= Transformation Tests =======
+#======== Transformation Tests =======
 
 @pytest.mark.parametrize("index, pilesTotal, denominators, expected", [
 	(0, 10, (), (Fraction(0, 1), 0)),
@@ -56,7 +56,7 @@ def test_expressIndexAsFractionAddend(index: int, pilesTotal: int, denominators:
 	"""Verify index to fraction/addend conversion."""
 	assert expressIndexAsFractionAddend(index, pilesTotal, denominators) == expected
 
-# ======= Analysis Method Tests =======
+#======== Analysis Method Tests =======
 
 @pytest.mark.parametrize("indices, expected", [
 	([0, 1, 2, 5], [0, 1, 2]),
@@ -74,7 +74,7 @@ def test_getContiguousFromStart(indices: list[int], expected: list[int]) -> None
 def test_getContiguousEndingAtNegativeOne(offsets: list[int], expected: list[int]) -> None:
 	assert _getContiguousEndingAtNegativeOne(offsets) == expected
 
-# ======= File Generation Tests =======
+#======== File Generation Tests =======
 
 def test_writeExclusionDataCollated_creates_files(path_tmpTesting: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 	def stubLeafZero(dimensionsTotal: int) -> int:

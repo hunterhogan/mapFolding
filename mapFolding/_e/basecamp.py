@@ -46,7 +46,7 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 	foldsTotal : int
 		Number of distinct ways to fold a map of the given dimensions.
 	"""
-# ------- state ---------------------------------------------------------------------
+#-------- state ---------------------------------------------------------------------
 	if not state:
 		if not mapShape:
 			message = (f"""I received these values:
@@ -56,11 +56,11 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 			raise ValueError(message)
 		state = EliminationState(mapShape)
 
-# ------- concurrency limit -----------------------------------------------------
+#-------- concurrency limit -----------------------------------------------------
 
 	concurrencyLimit: int = defineProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
 
-# ------- memorialization instructions ---------------------------------------------
+#-------- memorialization instructions ---------------------------------------------
 
 	if pathLikeWriteFoldsTotal is not None:
 		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(state.mapShape, pathLikeWriteFoldsTotal)
@@ -68,7 +68,7 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 	else:
 		pathFilenameFoldsTotal = None
 
-# ------- Algorithm version -----------------------------------------------------
+#-------- Algorithm version -----------------------------------------------------
 	match flow:
 		case 'constraintPropagation': from mapFolding._e.algorithms.constraintPropagation import doTheNeedful  # noqa: PLC0415
 		case 'crease':
@@ -81,7 +81,7 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 
 	state = doTheNeedful(state, concurrencyLimit)
 
-# ------- Follow memorialization instructions ---------------------------------------------
+#-------- Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameFoldsTotal is not None:
 		saveFoldsTotal(pathFilenameFoldsTotal, state.foldsTotal)

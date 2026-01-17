@@ -49,13 +49,13 @@ This grouping revealed that `pileFirst` values clustered, but the `leafPredecess
 After multiple reorganizations, a "series" structure emerged. The key insight came from analyzing **binary representations**:
 
 ```python
-# ------- New series ------
+#-------- New series ------
 # >>> 60^0b111111 = 3
 #   0b000011
 ( 2, 6), ( 3, 6),
 (34, 6), (35, 6),     # 0 + 6
 
-# ------- New series ------
+#-------- New series ------
 # >>> 56^0b111111 = 7
 #   0b000111
 ( 6, 34), ( 7, 34),

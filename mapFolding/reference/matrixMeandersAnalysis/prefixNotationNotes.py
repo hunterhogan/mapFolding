@@ -1,6 +1,6 @@
 # ruff: noqa
-# ================= analyze aligned ===================================================================================
-# ======= if bitsAlpha > 1 and bitsZulu > 1 and (bitsAlphaIsEven or bitsZuluIsEven) =====
+#================== analyze aligned ===================================================================================
+#======== if bitsAlpha > 1 and bitsZulu > 1 and (bitsAlphaIsEven or bitsZuluIsEven) =====
 """NOTE find `bitsAlpha > 1 and bitsZulu > 1 and (bitsAlphaIsEven or bitsZuluIsEven)` without bitsAlpha or bitsZulu.
 - `bitsAlpha` is even IFF `arcCode` is even.
 - `bitsAlpha` > 1, so arcCode's LSB is irrelevant; locatorBits ends with 0b101, so arcCode's 2° LSB is irrelevant.

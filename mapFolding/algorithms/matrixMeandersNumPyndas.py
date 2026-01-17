@@ -327,10 +327,10 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		state.boundary -= 1
 		state.setMAXIMUMarcCode()
 
-# =============== analyze aligned ===== if bitsAlpha > 1 and bitsZulu > 1 =============================================
+#================ analyze aligned ===== if bitsAlpha > 1 and bitsZulu > 1 =============================================
 # NOTE In other versions, this analysis step is last because I modify the data. In this version, I don't modify the data.
 		arrayBitsAlpha: NDArray[numpy.uint64] = bitwise_and(state.arrayArcCodes, state.bitsLocator)	# NOTE extra array
-# ======= > * > bitsAlpha 1 bitsZulu 1 ====================
+#======== > * > bitsAlpha 1 bitsZulu 1 ====================
 		greater(arrayBitsAlpha, 1, out=prepArea)
 		bitsZuluStack: NDArray[numpy.uint64] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexCrossings)
 		bitwise_right_shift(bitsZuluStack, 1, out=bitsZuluStack)					# O indexArcCode X indexCrossings
@@ -339,7 +339,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		greater(prepArea, 1, out=prepArea)
 		selectorGreaterThan1: NDArray[numpy.uint64] = makeStorage(prepArea, state, arrayAnalyzed, indexArcCode)
 																					# X indexArcCode X indexCrossings
-# ======= if bitsAlphaAtEven and not bitsZuluAtEven ======= # ======= ^ & | ^ & bitsZulu 1 1 bitsAlpha 1 1 ============
+#======== if bitsAlphaAtEven and not bitsZuluAtEven ======= #======== ^ & | ^ & bitsZulu 1 1 bitsAlpha 1 1 ============
 		bitwise_and(bitsZuluStack, 1, out=prepArea)
 		del bitsZuluStack 															# X indexArcCode O indexCrossings
 		bitwise_xor(prepArea, 1, out=prepArea)
@@ -353,7 +353,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		arrayBitsAlpha[selectorAlignAlpha] = flipTheExtra_0b1AsUfunc(arrayBitsAlpha[selectorAlignAlpha])
 		del selectorAlignAlpha 														# X indexArcCode O indexCrossings
 
-# ======= if bitsZuluAtEven and not bitsAlphaAtEven ======= # ======= ^ & | ^ & bitsAlpha 1 1 bitsZulu 1 1 ============
+#======== if bitsZuluAtEven and not bitsAlphaAtEven ======= #======== ^ & | ^ & bitsAlpha 1 1 bitsZulu 1 1 ============
 		bitsAlphaStack: NDArray[numpy.uint64] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexCrossings)
 		bitwise_and(bitsAlphaStack, state.bitsLocator, out=bitsAlphaStack)
 		bitwise_and(bitsAlphaStack, 1, out=prepArea)
@@ -370,7 +370,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_and(selectorGreaterThan1, prepArea, out=prepArea)
 		selectorAlignZulu: NDArray[numpy.intp] = makeStorage(numpy.flatnonzero(prepArea), state, arrayAnalyzed, indexCrossings)
 																					# X indexArcCode X indexCrossings
-# ======= bitsAlphaAtEven or bitsZuluAtEven =============== # ======= ^ & & bitsAlpha 1 bitsZulu 1 ====================
+#======== bitsAlphaAtEven or bitsZuluAtEven =============== #======== ^ & & bitsAlpha 1 bitsZulu 1 ====================
 		bitwise_and(state.arrayArcCodes, state.bitsLocator, out=prepArea)
 		bitwise_and(prepArea, 1, out=prepArea)
 		sherpaBitsZulu: NDArray[numpy.uint64] = bitwise_right_shift(state.arrayArcCodes, 1) # NOTE 2° extra array
@@ -392,7 +392,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		bitsZuluStack: NDArray[numpy.uint64] = makeStorage(prepArea, state, arrayAnalyzed, indexCrossings)
 
-# ======= (bitsZulu >> 2 << 3 | bitsAlpha) >> 2 =========== # ======= >> | << >> bitsZulu 2 3 bitsAlpha 2 =============
+#======== (bitsZulu >> 2 << 3 | bitsAlpha) >> 2 =========== #======== >> | << >> bitsZulu 2 3 bitsAlpha 2 =============
 		bitwise_right_shift(bitsZuluStack, 2, out=prepArea)
 		del bitsZuluStack 															# X indexArcCode O indexCrossings
 		bitwise_left_shift(prepArea, 3, out=prepArea)
@@ -405,10 +405,10 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		state = recordAnalysis(arrayAnalyzed, state, prepArea)
 
-# ----------------- analyze bitsAlpha ------- (1 - (bitsAlpha & 1)) << 1 | bitsAlpha >> 2 | bitsZulu << 3 ---------
+#------------------ analyze bitsAlpha ------- (1 - (bitsAlpha & 1)) << 1 | bitsAlpha >> 2 | bitsZulu << 3 ---------
 		bitsAlphaStack: NDArray[numpy.uint64] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexArcCode)
 		bitwise_and(bitsAlphaStack, state.bitsLocator, out=bitsAlphaStack)			# X indexArcCode O indexCrossings
-# ------- >> | << | (<< - 1 & bitsAlpha 1 1) << bitsZulu 3 2 bitsAlpha 2 ----------
+#-------- >> | << | (<< - 1 & bitsAlpha 1 1) << bitsZulu 3 2 bitsAlpha 2 ----------
 		bitwise_and(bitsAlphaStack, 1, out=bitsAlphaStack)
 		subtract(1, bitsAlphaStack, out=bitsAlphaStack)
 		bitwise_left_shift(bitsAlphaStack, 1, out=bitsAlphaStack)
@@ -425,7 +425,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_or(bitsAlphaStack, prepArea, out=prepArea)
 		bitwise_right_shift(prepArea, 2, out=prepArea)
 
-# ------- if bitsAlpha > 1 ------------ > bitsAlpha 1 -----
+#-------- if bitsAlpha > 1 ------------ > bitsAlpha 1 -----
 		less_equal(bitsAlphaStack, 1, out=bitsAlphaStack)
 		selectorUnderLimit: NDArray[numpy.intp] = makeStorage(numpy.flatnonzero(bitsAlphaStack), state, arrayAnalyzed, indexArcCode)
 		del bitsAlphaStack 															# X indexArcCode O indexCrossings
@@ -434,11 +434,11 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		state = recordAnalysis(arrayAnalyzed, state, prepArea)
 
-# ----------------- analyze bitsZulu ---------- (1 - (bitsZulu & 1)) | bitsAlpha << 2 | bitsZulu >> 1 -------------
+#------------------ analyze bitsZulu ---------- (1 - (bitsZulu & 1)) | bitsAlpha << 2 | bitsZulu >> 1 -------------
 		arrayBitsZulu: NDArray[numpy.uint64] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexCrossings)
 		arrayBitsZulu = bitwise_right_shift(arrayBitsZulu, 1)						# O indexArcCode X indexCrossings
 		arrayBitsZulu = bitwise_and(arrayBitsZulu, state.bitsLocator)
-# ------- >> | << | (- 1 & bitsZulu 1) << bitsAlpha 2 1 bitsZulu 1 ----------
+#-------- >> | << | (- 1 & bitsZulu 1) << bitsAlpha 2 1 bitsZulu 1 ----------
 		bitwise_and(arrayBitsZulu, 1, out=arrayBitsZulu)
 		subtract(1, arrayBitsZulu, out=arrayBitsZulu)
 		bitsAlphaStack: NDArray[numpy.uint64] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexArcCode)
@@ -454,7 +454,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_or(bitsZuluStack, prepArea, out=prepArea)
 		bitwise_right_shift(prepArea, 1, out=prepArea)
 
-# ------- if bitsZulu > 1 ------------- > bitsZulu 1 ------
+#-------- if bitsZulu > 1 ------------- > bitsZulu 1 ------
 		less_equal(bitsZuluStack, 1, out=bitsZuluStack)
 		selectorUnderLimit = makeStorage(numpy.flatnonzero(bitsZuluStack), state, arrayAnalyzed, indexArcCode)
 		del bitsZuluStack 															# X indexArcCode O indexCrossings
@@ -463,11 +463,11 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		state = recordAnalysis(arrayAnalyzed, state, prepArea)
 
-# ----------------- analyze simple ------------------------ (bitsZulu << 1 | bitsAlpha) << 2 | 3 ------------------
+#------------------ analyze simple ------------------------ (bitsZulu << 1 | bitsAlpha) << 2 | 3 ------------------
 		bitsZuluStack: NDArray[numpy.uint64] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexCrossings)
 		bitwise_right_shift(bitsZuluStack, 1, out=bitsZuluStack)					# O indexArcCode X indexCrossings
 		bitwise_and(bitsZuluStack, state.bitsLocator, out=bitsZuluStack)
-# ------- | << | bitsAlpha << bitsZulu 1 2 3 --------------
+#-------- | << | bitsAlpha << bitsZulu 1 2 3 --------------
 		bitwise_left_shift(bitsZuluStack, 1, out=prepArea)
 		del bitsZuluStack 															# O indexArcCode O indexCrossings
 		bitsAlphaStack: NDArray[numpy.uint64] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexArcCode)
@@ -480,7 +480,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		state = recordAnalysis(arrayAnalyzed, state, prepArea)
 
 		del prepArea, arrayPrepArea
-# ----------------------------------------------- aggregation ---------------------------------------------------------
+#------------------------------------------------ aggregation ---------------------------------------------------------
 		state.arrayArcCodes = numpy.zeros((0,), dtype=state.datatypeArcCode)
 		arrayAnalyzed.resize((state.indexTarget, indicesAnalyzed))
 
@@ -536,7 +536,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 				arcCode = (bitsAlpha >> 2) | ((bitsZulu >> 2) << 1)
 			```
 			"""
-			# -------- Step 1 drop unqualified rows ---------------------------
+			#--------- Step 1 drop unqualified rows ---------------------------
 			dataframeMeanders['analyzed'] = dataframeMeanders['arcCode'].copy()
 			dataframeMeanders['analyzed'] &= state.bitsLocator       				# `bitsAlpha`
 
@@ -565,7 +565,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			dataframeMeanders = dataframeMeanders.loc[(dataframeMeanders['analyzed'] > 0)]  # `if (bitsAlphaIsEven or bitsZuluIsEven)`
 
-			# ------- Step 2 modify rows --------------------------------------
+			#-------- Step 2 modify rows --------------------------------------
 			# Make a selector for bitsZuluAtOdd, so you can modify bitsAlpha
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**1        					# Truncated conversion to `bitsZulu`
@@ -586,7 +586,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			dataframeMeanders.loc[((dataframeMeanders.loc[:, 'arcCode'] & 1) > 0), 'analyzed'] = state.datatypeArcCode(
 				flipTheExtra_0b1AsUfunc(dataframeMeanders.loc[((dataframeMeanders.loc[:, 'arcCode'] & 1) > 0), 'analyzed']))
 
-			# -------- Step 3 compute `arcCode` -------------------------------
+			#--------- Step 3 compute `arcCode` -------------------------------
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**2 							# (bitsZulu >> 2)
 			dataframeMeanders.loc[:, 'analyzed'] *= 2**3 							# (... << 3)
 			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget						# (... | bitsAlpha)

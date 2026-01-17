@@ -1,4 +1,4 @@
-# ======= Semantic replacements for ambiguous values =======
+#======== Semantic replacements for ambiguous values =======
 
 decreasing: int = -1
 """Adjust the value due to Python syntax."""
@@ -7,7 +7,7 @@ inclusive: int = 1
 zeroIndexed: int = 1
 """Adjust the value due to Python syntax."""
 
-# ------- Some color for printing text to the terminal -------
+#-------- Some color for printing text to the terminal -------
 # Many values and options at https://gist.github.com/JBlond/2fea43a3049b38287e5e9cefc87b2124
 # Many, many, many at https://stackoverflow.com/a/33206814/4403878
 # NOTE Always define color and background color at the same time.

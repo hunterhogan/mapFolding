@@ -10,7 +10,7 @@ from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import last
 from operator import getitem
 
-# ======= Domain-based subroutines for analyzing a specific `pile`. =======
+#======== Domain-based subroutines for analyzing a specific `pile`. =======
 
 def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 	"""All fourth-order piles must be pinned or you will get an error.
@@ -54,7 +54,7 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 	dictionaryPileRanges: dict[int, tuple[int, ...]] = getDictionaryPileRanges(state)
 	listRemoveLeaves: list[int] = []
 
-# ======== use `leafAt一` to exclude a `leaf` from `pile` ===================
+#========= use `leafAt一` to exclude a `leaf` from `pile` ===================
 
 	pileExcluder: int = 一
 	for dimension, leaf in enumerate(dictionaryPileRanges[pileExcluder]):
@@ -69,13 +69,13 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 				listRemoveLeaves.extend([首一(state.dimensionsTotal), 首一(state.dimensionsTotal) + leafAt一])
 	del pileExcluder
 
-# ------- Use information from other piles to select which leaves to exclude. -------
+#-------- Use information from other piles to select which leaves to exclude. -------
 	if leafAt一 == 首零(state.dimensionsTotal)+零:
 		listRemoveLeaves.extend([首一(state.dimensionsTotal), leafAt首Less一 + 零])
 	if dimensionNearest首(leafAt一) < state.dimensionsTotal - 3:
 		listRemoveLeaves.extend([一, leafAt首Less一 + 一])
 
-# ======== use `leafAt首Less一` to exclude a `leaf` from `pile` ===================
+#========= use `leafAt首Less一` to exclude a `leaf` from `pile` ===================
 
 	pileExcluder = state.首 - 一
 	for dimension, leaf in enumerate(dictionaryPileRanges[pileExcluder]):
@@ -92,11 +92,11 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 				listRemoveLeaves.extend([首一(state.dimensionsTotal)])
 	del pileExcluder
 
-# ------- Use information from other piles to decide whether to exclude some leaves. -------
+#-------- Use information from other piles to decide whether to exclude some leaves. -------
 	if (leafAt一 == 首二(state.dimensionsTotal)+零) and (leafAt首Less一 == 首零一(state.dimensionsTotal)):
 		listRemoveLeaves.extend([首二(state.dimensionsTotal), 首零一二(state.dimensionsTotal)])
 
-# ======== use `leafAt一零` to exclude a `leaf` from `pile` ===================
+#========= use `leafAt一零` to exclude a `leaf` from `pile` ===================
 # NOTE a leaf in pile一零 does not have leafCrease in the pile-range of pile首零Less零, but `leafInSubHyperplane(leafAt一零)` does
 # have leafCrease in the pile-range of pile首零Less零. `ptount` uses leafInSubHyperplane. I wrote this code block long before I
 # understood this.
@@ -126,7 +126,7 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 		if 首零(state.dimensionsTotal) < leafAt一零:
 			listRemoveLeaves.extend([首零一(state.dimensionsTotal)+零, getitem(state.productsOfDimensions, (dimensionNearest首(leafAt一零) - 1))])
 
-# ======== use `leafAt首Less一零` to exclude a `leaf` from `pile` ===================
+#========= use `leafAt首Less一零` to exclude a `leaf` from `pile` ===================
 # NOTE a leaf in pile首Less一零 does not have leafCrease in the pile-range of pile首零Less零, but `leafInSubHyperplane(leafAt首
 # Less一零)` does have leafCrease in the pile-range of pile首零Less零. `ptount` uses leafInSubHyperplane. I wrote this code block
 # long before I understood this.
@@ -179,12 +179,12 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 				comebackOffset = state.productsOfDimensions[raiseIfNone(dimensionSecondNearest首(leafAt首Less一零))] - 一
 				listRemoveLeaves.extend([leafAt首Less一零 - comebackOffset])
 
-# ------- Use information from other piles to decide whether to exclude some leaves. -------
+#-------- Use information from other piles to decide whether to exclude some leaves. -------
 	if (leafAt一 == 一+零) and (leafAt首Less一零 != next(getLeavesCreaseBack(state, 首零(state.dimensionsTotal)+零))):
 		listRemoveLeaves.append(首一(state.dimensionsTotal))
 
 # NOTE Above this line, all exclusions based on only one leaf in a pile are covered. 😊
-# ======== use leafAt二 to exclude a `leaf` from `pile` ===================
+#========= use leafAt二 to exclude a `leaf` from `pile` ===================
 # NOTE Below this line, abandon all hope, the who code here. 😈
 
 	dimensionHead: int = dimensionNearest首(leafAt二)
@@ -327,12 +327,12 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 
 	listRemoveLeaves.extend(exclude(creaseNextAt二, listIndicesCreaseNextToKeep))
 
-# ======== use leafAt首Less二 to exclude a `leaf` from `pile` ===================
+#========= use leafAt首Less二 to exclude a `leaf` from `pile` ===================
 
 	dimensionHead: int = dimensionNearest首(leafAt首Less二)
 	dimensionTail: int = dimensionNearestTail(leafAt首Less二)
 
-	# ------- I DON'T KNOW AND I DON'T CARE WHY THIS WORKS AS LONG AS IT WORKS -------
+	#-------- I DON'T KNOW AND I DON'T CARE WHY THIS WORKS AS LONG AS IT WORKS -------
 	if (leafAt首Less二 - 1) in getitem(dictionaryPileRanges, (state.首 - 二)):
 		dimension = 三
 		if not bit_test(leafAt首Less二, dimensionIndex(dimension)):

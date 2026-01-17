@@ -25,7 +25,7 @@ completes the journey from configuration foundation to mathematical discovery.
 """
 
 from datetime import datetime, timedelta, UTC
-from hunterMakesPy import writeStringToHere
+from hunterMakesPy.filesystemToolkit import writeStringToHere
 from itertools import chain
 from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, packageSettings
 from mapFolding._theSSOT import pathCache
@@ -235,7 +235,7 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	listDescriptionDeconstructed: list[str] = []
 	offset = None
 	for lineOEIS in oeisInformation.splitlines():
-		lineOEIS = lineOEIS.strip()  # noqa: PLW2901
+		lineOEIS = lineOEIS.strip()
 		if not lineOEIS or len(lineOEIS.split()) < 3:
 			continue
 		fieldCode, sequenceID, fieldData = lineOEIS.split(maxsplit=2)

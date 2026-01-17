@@ -26,7 +26,7 @@ dependencies while maintaining clear separation of concerns.
 """
 
 from collections.abc import Callable
-from hunterMakesPy import intInnit
+from hunterMakesPy.parseParameters import intInnit
 from hunterMakesPy.pytestForYourUse import PytestFor_intInnit, PytestFor_oopsieKwargsie
 from mapFolding import defineProcessorLimit, getLeavesTotal, validateListDimensions
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn

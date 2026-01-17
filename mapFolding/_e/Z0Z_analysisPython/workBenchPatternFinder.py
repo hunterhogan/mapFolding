@@ -1,15 +1,20 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
+from math import prod
+from mapFolding import decreasing
+from bisect import bisect_left
 from collections.abc import Iterable
 from cytoolz.functoolz import curry as syntacticCurry
+from cytoolz.itertoolz import unique
 from functools import partial
+from gmpy2 import is_even, is_odd
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import (
 	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseBack, getLeavesCreaseNext,
 	getPileRange, getSumsOfProductsOfDimensionsNearest首, leafInSubHyperplane, ptount, Z0Z_invert, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
-from more_itertools import flatten
-from operator import add, mul
+from more_itertools import flatten, iter_index
+from operator import add, iadd, isub, mul
 from pprint import pprint
 from typing import TYPE_CHECKING
 
@@ -27,35 +32,157 @@ def getExcludedLeaves(state: EliminationState, pileTarget: int, groupByLeavesAtP
 if __name__ == '__main__':
 
 	state = EliminationState((2,) * 6)
-	pileExcluder = 60
-	pileTarget=31
-	dictionaryExcluded = getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pileExcluder,))
-	domains = getDictionaryLeafDomains(state)
-	pileRange31 = frozenset(getPileRange(state, 31))
+	"""
+000011	3
+		5	(5, 6, 10, 18, 34)
+		9	(9, 10, 12, 20, 36)
+001111	15
+		17	17	(17, 18, 20, 24, 40)
+010111	(23, 24, 40)
+011011	(27, 29, 45)
+		33	33	(33, 34, 36, 40)
 
-	print(*getPileRange(state, pileExcluder))
-	# for nn in {2, 49, 19, 2, 49, 21, 8, 25, 56}:
-	# 	print(nn, nn^63)
+100111	39		(39, 40)
+101011		43
+			45	(45, 46, 54)
+110011	51
+		53	53	(53, 54, 58)
+		57		(57, 58, 60)
 
-	for pile in range(state.leavesTotal):
-		continue
-		print(pile, set(getPileRange(state, pile)).difference(getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pile,)).keys()))
+111111	63
 
-	for excluder, listExcluded in dictionaryExcluded.items():
-		continue
+even bit count
+0	0	00	11	its creases: crease+1
+0	0	11	11	its creases: crease+1
+0	1	01	11	crease+1
+0	1	10	11	its creases: crease+1
 
-		invert = int(excluder^63) # pyright: ignore[reportUnknownArgumentType, reportOperatorIssue]
-		creaseNextSS = tuple(getLeavesCreaseNext(state, invert)) # pyright: ignore[reportArgumentType]
-		allCreaseNextSSInRange = set(creaseNextSS).intersection(pileRange31)
-		creaseBack = tuple(getLeavesCreaseBack(state, excluder)) # pyright: ignore[reportArgumentType]
-		creaseNext = tuple(getLeavesCreaseNext(state, excluder)) # pyright: ignore[reportArgumentType]
-		allCreaseBackInRange = set(creaseBack).intersection(pileRange31)
-		allCreaseNextInRange = set(creaseNext).intersection(pileRange31)
-		notExcluded = allCreaseNextInRange.difference(listExcluded)
-		# print(excluder, invert, allCreaseNextSSInRange.intersection(listExcluded), notExcluded, allCreaseNextSSInRange.difference(listExcluded), set(creaseNextSS).symmetric_difference(creaseNext), creaseNextSS, allCreaseNextSSInRange)
-		# print(excluder.__format__('06b'), excluder, f"{notExcluded}\t", f"{creaseNext}", sep='\t')
-		print(excluder, f"{allCreaseBackInRange=}", f"{allCreaseNextInRange=}", sep='\t')
-		print(excluder, f"{allCreaseBackInRange.difference(listExcluded)}", f"{allCreaseNextInRange.difference(listExcluded)}", sep='\t')
+odd bit count
+1	0	01	11	crease+1
+1	0	10	11	its creases: crease+1
+1	1	00	11	its creases: crease+1
+1	1	11	11	n/a
+
+tt = (3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30, 33, 34, 36, 39, 40, 43, 45, 46, 51, 53, 54, 57, 58, 60, 63)
+pp = (1, 2, 4, 8, 16, 32)
+
+pp63 = (63,)
+pp60 = (60,)
+pp58 = (58, 60)
+pp57 = (57, 58, 60)
+pp54 = (54, 58)
+pp53 = (53, 54, 58)
+pp51 = (51, 53, 57)
+pp46 = (46, 54)
+pp45 = (45, 46, 54)
+pp43 = (43, 45, 53)
+pp40 = (40,)
+pp39 = (39, 40)
+pp36 = (36, 40)
+pp34 = (34, 36, 40)
+pp33 = (33, 34, 36, 40)
+pp30 = (30, 34)
+pp29 = (29, 30, 34)
+pp27 = (27, 29, 45)
+pp24 = (24, 40)
+pp23 = (23, 24, 40)
+pp20 = (20, 24, 40)
+pp18 = (18, 20, 24, 40)
+pp17 = (17, 18, 20, 24, 40)
+pp15 = (15, 17, 33)
+pp12 = (12, 20, 36)
+pp10 = (10, 12, 20, 36)
+pp9  = (9, 10, 12, 20, 36)
+pp6  = (6, 10, 18, 34)
+pp5  = (5, 6, 10, 18, 34)
+pp3  = (3, 5, 9, 17, 33)
+
+	"""
+
+	pile: int = 4
+	pileDimension = bisect_left(state.sumsOfProductsOfDimensionsNearest首, pile>>1<<1)
+	leafMinimum = is_even(pile) + state.productsOfDimensions[pileDimension]
+	pileRange: list[int] = []
+
+	# pileRange.append(leafMinimum)
+
+	if is_even(pile):
+		dd = pileDimension
+
+		ss = state.sumsOfProductsOfDimensions[dd]
+		# pileRange.extend(map(partial(iadd, leafMinimum - ss), state.sumsOfProductsOfDimensions[1:dd]))
+		# pileRange.extend(map(partial(iadd, leafMinimum - ss), state.sumsOfProductsOfDimensions[dd + 1: state.dimensionsTotal]))
+
+		if dd < dimensionNearest首(pile):
+			dd += 1
+
+			ss = state.productsOfDimensions[dd]
+			pileRange.extend(map(partial(isub, leafMinimum + ss), state.sumsOfProductsOfDimensions[1:dd]))
+			pileRange.extend(map(partial(iadd, leafMinimum + ss), state.sumsOfProductsOfDimensions[dd + 1: state.dimensionsTotal]))
+
+	if is_odd(pile):
+		dd = pileDimension
+
+		ss = state.sumsOfProductsOfDimensions[dd]
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[1:dd]))
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+
+		dd += 1
+
+		ss = state.sumsOfProductsOfDimensions[dd]
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[1:dd]))
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+
+		dd += 1
+
+		ss = state.sumsOfProductsOfDimensions[dd]
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[1:dd]))
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+
+		dd += 1
+
+		ss = state.sumsOfProductsOfDimensions[dd]
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[1:dd]))
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+
+	print(pile, pileDimension)
+	print(sorted(set(pileRange)))
+	rr = tuple(getPileRange(state, pile))
+	print(rr)
+	rrLess1 = tuple(getPileRange(state, pile - 1))
+	print(rrLess1)
+
+	"""Notes
+	33 has step = 4
+	"""
+
+	leafExcluderStuff = False
+	if leafExcluderStuff:
+		pileExcluder = 60
+		pileTarget=31
+		dictionaryExcluded = getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pileExcluder,))
+		domains = getDictionaryLeafDomains(state)
+		pileRange31 = frozenset(getPileRange(state, 31))
+
+		for pile in range(state.leavesTotal):
+			continue
+			print(pile, set(getPileRange(state, pile)).difference(getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pile,)).keys()))
+
+		for excluder, listExcluded in dictionaryExcluded.items():
+			continue
+
+			invert = int(excluder^63) # pyright: ignore[reportUnknownArgumentType, reportOperatorIssue]
+			creaseNextSS = tuple(getLeavesCreaseNext(state, invert)) # pyright: ignore[reportArgumentType]
+			allCreaseNextSSInRange = set(creaseNextSS).intersection(pileRange31)
+			creaseBack = tuple(getLeavesCreaseBack(state, excluder)) # pyright: ignore[reportArgumentType]
+			creaseNext = tuple(getLeavesCreaseNext(state, excluder)) # pyright: ignore[reportArgumentType]
+			allCreaseBackInRange = set(creaseBack).intersection(pileRange31)
+			allCreaseNextInRange = set(creaseNext).intersection(pileRange31)
+			notExcluded = allCreaseNextInRange.difference(listExcluded)
+			# print(excluder, invert, allCreaseNextSSInRange.intersection(listExcluded), notExcluded, allCreaseNextSSInRange.difference(listExcluded), set(creaseNextSS).symmetric_difference(creaseNext), creaseNextSS, allCreaseNextSSInRange)
+			# print(excluder.__format__('06b'), excluder, f"{notExcluded}\t", f"{creaseNext}", sep='\t')
+			print(excluder, f"{allCreaseBackInRange=}", f"{allCreaseNextInRange=}", sep='\t')
+			print(excluder, f"{allCreaseBackInRange.difference(listExcluded)}", f"{allCreaseNextInRange.difference(listExcluded)}", sep='\t')
 
 	pileRangeByFormula: bool = False
 	if pileRangeByFormula:

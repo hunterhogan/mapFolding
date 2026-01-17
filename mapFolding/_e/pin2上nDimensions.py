@@ -2,7 +2,7 @@ from collections import deque
 from collections.abc import Callable
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from functools import partial
-from hunterMakesPy import intInnit
+from hunterMakesPy.parseParameters import intInnit
 from mapFolding import defineProcessorLimit
 from mapFolding._e import (
 	addPileRangesOfLeaves, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeaf首零Plus零Domain,
@@ -22,9 +22,9 @@ from more_itertools import partition
 from operator import getitem
 from tqdm import tqdm
 
-# ======= Pin by `pile` ===========================================
+#======== Pin by `pile` ===========================================
 
-# ------- Shared logic ---------------------------------------
+#-------- Shared logic ---------------------------------------
 
 def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pileProcessingOrder: deque[int], *, CPUlimit: bool | float | int | None = None) -> EliminationState:
 	workersMaximum: int = defineProcessorLimit(CPUlimit)
@@ -73,7 +73,7 @@ def _getLeavesAtPile(state: EliminationState) -> list[int]:
 		listLeavesAtPile = pinPile首零Less零AfterFourthOrder(state)
 	return listLeavesAtPile
 
-# ------- Plebian functions -----------------------------------------
+#-------- Plebian functions -----------------------------------------
 
 def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListPermutationSpace: int = 2**14, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
 	"""Pin up to 二 piles at both ends of the sequence without surplus `PermutationSpace` dictionaries."""
@@ -132,9 +132,9 @@ def pinPile首零Less零(state: EliminationState, maximumSizeListPermutationSpac
 
 	return _pinPiles(state, maximumSizeListPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
-# ======= Pin by `leaf` ======================================================
+#======== Pin by `leaf` ======================================================
 
-# ------- Shared logic ---------------------------------------------
+#-------- Shared logic ---------------------------------------------
 def _pinLeavesByDomain(state: EliminationState, leaves: tuple[int, ...], leavesDomain: tuple[tuple[int, ...], ...], *, youMustBeDimensionsTallToPinThis: int = 3, CPUlimit: bool | float | int | None = None) -> EliminationState:
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=youMustBeDimensionsTallToPinThis):
 		return state
@@ -206,7 +206,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: int, leavesD
 	state.listPermutationSpace = deconstructPermutationSpaceByDomainOfLeaf(state.leavesPinned, leaves, leavesDomain)
 	return removeInvalidPermutationSpace(updateListPermutationSpacePileRangesOfLeaves(state))
 
-# ------- Plebian functions -----------------------------------------
+#-------- Plebian functions -----------------------------------------
 
 def pinLeavesDimension0(state: EliminationState, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
 	"""'Pin' `leafOrigin` and `leaf首零`, which are always fixed in the same piles.

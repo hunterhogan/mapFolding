@@ -11,18 +11,17 @@ from cytoolz.dicttoolz import assoc as associate
 from cytoolz.functoolz import compose, curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
 from functools import partial
-from gmpy2 import bit_flip, bit_mask, bit_set, mpz
+from gmpy2 import bit_mask
 from itertools import repeat
-from mapFolding import inclusive, zeroIndexed
+from mapFolding import inclusive
 from mapFolding._e import (
 	between, DOTgetPileIfLeaf, DOTgetPileIfPileRangeOfLeaves, DOTvalues, Folding, getLeafDomain, getPileRange,
-	leafIsInPileRange, leafIsNotPinned, oopsAllLeaves, oopsAllPileRangesOfLeaves, PermutationSpace, pileIsOpen,
-	PileRangeOfLeaves, thisIsALeaf)
+	leafIsInPileRange, leafIsNotPinned, oopsAllLeaves, PermutationSpace, pileIsOpen, thisIsALeaf)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten, ilen
 from operator import getitem
 
-# ======= Boolean filters =======================
+#======== Boolean filters =======================
 
 @syntacticCurry
 def atPilePinLeafSafetyFilter(leavesPinned: PermutationSpace, pile: int, leaf: int) -> bool:
@@ -66,7 +65,7 @@ def isPinnedAtPile(leavesPinned: PermutationSpace, leaf: int, pile: int) -> bool
 	"""
 	return leaf == leavesPinned.get(pile)
 
-# ======= Group by =======================
+#======== Group by =======================
 
 def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], leaf: int, pile: int) -> tuple[list[PermutationSpace], list[PermutationSpace]]:
 	"""Partition `listPermutationSpace` into (notPinned, isPinned) groups for `leaf` pinned at `pile`.
@@ -90,7 +89,7 @@ def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], lea
 	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(isPinned, listPermutationSpace)
 	return (grouped.get(False, []), grouped.get(True, []))
 
-# ======= Pin a `leaf` in a `PermutationSpace` or `Folding` =======================
+#======== Pin a `leaf` in a `PermutationSpace` or `Folding` =======================
 # NOTE This section ought to contain all functions based on the "Elimination" algorithm that pin a `leaf` in a `PermutationSpace` or `Folding`.
 
 @syntacticCurry
@@ -137,7 +136,7 @@ def makeFolding(leavesPinned: PermutationSpace, leavesToInsert: tuple[int, ...])
 		folding = tuple(DOTvalues(oopsAllLeaves(leavesPinned)))
 	return folding
 
-# ======= Deconstruct a `PermutationSpace` dictionary =======
+#======== Deconstruct a `PermutationSpace` dictionary =======
 def deconstructPermutationSpaceAtPile(leavesPinned: PermutationSpace, pile: int, leavesToPin: Iterable[int]) -> dict[int, PermutationSpace]:
 	"""Deconstruct an open `pile` to the `leaf` range of `pile`.
 
@@ -159,7 +158,7 @@ def deconstructPermutationSpaceAtPile(leavesPinned: PermutationSpace, pile: int,
 		Dictionary mapping from `leaf` pinned at `pile` to the `PermutationSpace` dictionary with the `leaf` pinned at `pile`.
 	"""
 	if thisIsALeaf(leaf := leavesPinned.get(pile)):
-		deconstructedLeavesPinned: dict[int, PermutationSpace] = {leaf: leavesPinned}  # ty:ignore[invalid-assignment]
+		deconstructedLeavesPinned: dict[int, PermutationSpace] = {leaf: leavesPinned}
 	else:
 		pin: Callable[[int], PermutationSpace] = atPilePinLeaf(leavesPinned, pile)
 		leafCanBePinned: Callable[[int], bool] = leafIsNotPinned(leavesPinned)
@@ -247,7 +246,7 @@ def deconstructPermutationSpaceByDomainsCombined(leavesPinned: PermutationSpace,
 
 	return deconstructedLeavesPinned
 
-# ======= Bulk modifications =======================
+#======== Bulk modifications =======================
 
 def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], pile: int, leavesToPin: Iterable[int]) -> Iterator[PermutationSpace]:
 	"""Expand every dictionary in `listPermutationSpace` at `pile` into all pinning variants.

@@ -1,12 +1,13 @@
 """Make docstrings."""
 from astToolkit import Grab, IfThis, Make, NodeChanger, parsePathFilename2astModule, Then
 from astToolkit.transformationTools import makeDictionaryFunctionDef
-from hunterMakesPy import raiseIfNone, writeStringToHere
+from hunterMakesPy import raiseIfNone
+from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding import dictionaryOEIS, dictionaryOEISMapFolding, packageSettings
 from pathlib import Path
 import ast
 
-# ----------------- General Settings ----------------------------------------------------------------------------------
+#------------------ General Settings ----------------------------------------------------------------------------------
 sourcePrefix: str = 'zCuzDocStoopid'
 
 moduleWarning = "NOTE: This is a generated file; edit the source file."

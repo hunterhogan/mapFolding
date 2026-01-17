@@ -5,7 +5,8 @@ from cytoolz.dicttoolz import merge
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
-from hunterMakesPy import raiseIfNone, writePython
+from hunterMakesPy import raiseIfNone
+from hunterMakesPy.filesystemToolkit import writePython
 from mapFolding import ansiColorReset, ansiColorYellowOnBlack, decreasing, inclusive, packageSettings
 from mapFolding._e import (
 	between, consecutive, dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首,
@@ -20,10 +21,10 @@ from typing import Any
 import pandas
 import sys
 
-# ======= Creases =================================
+#======== Creases =================================
 
 def getLeavesCreaseBack(state: EliminationState, leaf: int) -> Iterator[int]:
-	"""1) The leaf has at most `dimensionsTotal - 1` many creases.
+	"""1) `leaf` has at most `dimensionsTotal - 1` many creases.
 
 	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
 		`leaf` number.
@@ -33,7 +34,7 @@ def getLeavesCreaseBack(state: EliminationState, leaf: int) -> Iterator[int]:
 	return iter(_getCreases(state, leaf, increase=False))
 
 def getLeavesCreaseNext(state: EliminationState, leaf: int) -> Iterator[int]:
-	"""1) The leaf has at most `dimensionsTotal - 1` many creases.
+	"""1) `leaf` has at most `dimensionsTotal - 1` many creases.
 
 	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
 		`leaf` number.
@@ -69,11 +70,11 @@ def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[tuple[int, ...], tupl
 			listLeavesCreaseBack = [0]
 	return (tuple(listLeavesCreaseBack), tuple(listLeavesCreaseNext))
 
-# ======= (mathematical) ranges of piles ====================
+#======== (mathematical) ranges of piles ====================
 # TODO Ideally, figure out the formula for pile ranges instead of deconstructing leaf domains.
 # TODO Second best, DRYer code.
 
-# ------- Boolean filters for (mathematical) ranges of piles -----------------------------------
+#-------- Boolean filters for (mathematical) ranges of piles -----------------------------------
 
 @syntacticCurry
 def filterCeiling(pile: int, dimensionsTotal: int, leaf: int) -> bool:
@@ -115,7 +116,7 @@ def getDictionaryPileRanges(state: EliminationState) -> dict[int, tuple[int, ...
 	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
 	return {pile: tuple(getPileRange(state, pile)) for pile in range(state.leavesTotal)}
 
-# ======= Leaf domains ====================================
+#======== Leaf domains ====================================
 
 def getLeafDomain(state: EliminationState, leaf: int) -> range:
 	return _getLeafDomain(leaf, state.dimensionsTotal, state.mapShape, state.leavesTotal)
@@ -289,24 +290,24 @@ def getDomainDimension二(state: EliminationState) -> tuple[tuple[int, int, int,
 @cache
 def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], domain二一零and二一: tuple[tuple[int, int], ...], dimensionsTotal: int) -> tuple[tuple[int, int, int, int], ...]:
 	domain0corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive, domain二零and二))
-	domain一corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive, domain二一零and二一))
+	domain一corners = tuple(filter(consecutive, domain二一零and二一))
 	pilesTotal: int = len(domain一corners)
 
 	domainCombined: list[tuple[int, int, int, int]] = []
 
 	productsOfDimensions: tuple[int, ...] = tuple(int(bit_flip(0, dimension)) for dimension in range(dimensionsTotal + 1))
 
-# ======= By exclusion of the indices, add pairs of corners (160 tuples) ====================
+#======== By exclusion of the indices, add pairs of corners (160 tuples) ====================
 	for index, (pileOfLeaf二一零, pileOfLeaf二一) in enumerate(domain一corners):
 		listIndicesPilesExcluded: list[int] = []
 
 		dimensionTail: int = dimensionNearestTail(pileOfLeaf二一)
 
-# ------- `excludeBelow` `index` ---------------------------------
+#-------- `excludeBelow` `index` ---------------------------------
 		excludeBelow: int = index
 		listIndicesPilesExcluded.extend(range(excludeBelow))
 
-# ------- `excludeAbove` `index` ---------------------------------
+#-------- `excludeAbove` `index` ---------------------------------
 		excludeAbove: int = pilesTotal
 		if pileOfLeaf二一 <= 首一(dimensionsTotal):
 			if dimensionTail == 1:
@@ -332,7 +333,7 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 					excludeAbove = domain0corners.index((pileOfLeaf二一 + addend, pileOfLeaf二一零 + addend))
 		listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
 
-# ------- Exclude "knock-out" indices ---------------------------------
+#-------- Exclude "knock-out" indices ---------------------------------
 		if pileOfLeaf二一 < 首一二(dimensionsTotal):
 			if dimensionTail == 4:
 				addend = int(bit_flip(0, dimensionTail))
@@ -381,7 +382,7 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 
 		domainCombined.extend([(pileOfLeaf二一, pileOfLeaf二一零, pileOfLeaf二零, pileOfLeaf二) for pileOfLeaf二零, pileOfLeaf二 in exclude(domain0corners, listIndicesPilesExcluded)])
 
-# ======= By inclusion of the piles, add non-corners (52 tuples) ====================
+#======== By inclusion of the piles, add non-corners (52 tuples) ====================
 	domain一nonCorners: tuple[tuple[int, int], ...] = tuple(set(domain二一零and二一).difference(set(domain一corners)))
 	domainCombined.extend([(pileOfLeaf一二, pileOfLeaf二一零, pileOfLeaf二一零 - 1, pileOfLeaf一二 + 1) for pileOfLeaf二一零, pileOfLeaf一二 in domain一nonCorners])
 
@@ -394,23 +395,23 @@ def getDomainDimension首二(state: EliminationState) -> tuple[tuple[int, int, i
 	return _getDomainDimension首二(state.dimensionsTotal, domain首零二and首二, domain首零一二and首一二)
 @cache
 def _getDomainDimension首二(dimensionsTotal: int, domain首零二and首二: tuple[tuple[int, int], ...], domain首零一二and首一二: tuple[tuple[int, int], ...]) -> tuple[tuple[int, int, int, int], ...]:
-	domain0corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive, domain首零二and首二))
-	domain一corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive, domain首零一二and首一二))
+	domain0corners = tuple(filter(consecutive, domain首零二and首二))
+	domain一corners = tuple(filter(consecutive, domain首零一二and首一二))
 	pilesTotal = len(domain一corners)
 
 	domainCombined: list[tuple[int, int, int, int]] = []
 
-# ======= By exclusion of the indices, add pairs of corners (160 tuples) ====================
+#======== By exclusion of the indices, add pairs of corners (160 tuples) ====================
 	for index, (pileOfLeaf首零二, pileOfLeaf首二) in enumerate(domain0corners):
 		listIndicesPilesExcluded: list[int] = []
 
 		dimensionTail: int = dimensionNearestTail(pileOfLeaf首零二)
 
-# ------- `excludeBelow` `index` ---------------------------------
+#-------- `excludeBelow` `index` ---------------------------------
 		excludeBelow: int = index - 1
 		listIndicesPilesExcluded.extend(range(excludeBelow))
 
-# ------- `excludeAbove` `index` ---------------------------------
+#-------- `excludeAbove` `index` ---------------------------------
 		excludeAbove: int = pilesTotal
 		if dimensionTail == 1:
 			excludeAbove = (pilesTotal - (int((pileOfLeaf首二) ^ bit_mask(dimensionsTotal)) // 4 - 1))
@@ -449,7 +450,7 @@ def _getDomainDimension首二(dimensionsTotal: int, domain首零二and首二: tu
 				excludeAbove = pilesTotal - int(bit_mask(dimensionsTotal - 3)) - (dimensionTail == 2)
 		listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
 
-# ------- Exclude "knock-out" indices ---------------------------------
+#-------- Exclude "knock-out" indices ---------------------------------
 		if dimensionTail == 1 and (abs(pileOfLeaf首零二 - 首零(dimensionsTotal)) == 2) and is_even(dimensionsTotal):
 			listIndicesPilesExcluded.extend([excludeAbove - 2])
 		if dimensionTail != 1 and 首一二(dimensionsTotal) <= pileOfLeaf首零二 <= 首零一(dimensionsTotal):
@@ -464,7 +465,7 @@ def _getDomainDimension首二(dimensionsTotal: int, domain首零二and首二: tu
 
 		domainCombined.extend([(pileOfLeaf首二, pileOfLeaf首零二, pileOfLeaf首零一二, pileOfLeaf首一二) for pileOfLeaf首零一二, pileOfLeaf首一二 in exclude(domain一corners, listIndicesPilesExcluded)])
 
-# ======= By inclusion of the piles, add non-corners (52 tuples) ====================
+#======== By inclusion of the piles, add non-corners (52 tuples) ====================
 	domain0nonCorners: tuple[tuple[int, int], ...] = tuple(set(domain首零二and首二).difference(set(domain0corners)))
 	domainCombined.extend([(pileOfLeaf首二, pileOfLeaf首零二, pileOfLeaf首零二 - 1, pileOfLeaf首二 + 1) for pileOfLeaf首零二, pileOfLeaf首二 in domain0nonCorners])
 
@@ -515,7 +516,7 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 
 	domainCombined: list[tuple[int, int]] = []
 
-# ======= By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
+#======== By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
 	pilesTotal: int = len(domain零)
 	pilesFewerDomain0: int = pilesTotal - len(domain0)
 
@@ -525,7 +526,7 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 		dimensionTail: int = dimensionNearestTail(pileOfLeaf零 - is_odd(pileOfLeaf零))
 
 # ******* (Almost) All differences between `_getDomain二零and二` and `_getDomain二一零and二一` *******
-# ------- Two identifiers with different values -------------------
+#-------- Two identifiers with different values -------------------
 		# One default value from each option is a type of defensive coding, and the type checkers won't complain about possibly unbound values.
 		excludeBelowAddend: int = 0
 		steppingBasisForUnknownReasons: int = indexDomain零
@@ -546,12 +547,12 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 				indicesDomain0ToExclude.extend([indexDomain0])
 # ******* end *******
 
-# ------- `excludeBelow` `index` ---------------------------------
+#-------- `excludeBelow` `index` ---------------------------------
 		excludeBelow: int = indexDomain零 + excludeBelowAddend
 		excludeBelow -= pilesFewerDomain0
 		indicesDomain0ToExclude.extend(range(excludeBelow))
 
-# ------- `excludeAbove` `index` ---------------------------------
+#-------- `excludeAbove` `index` ---------------------------------
 		if pileOfLeaf零 <= 首一(dimensionsTotal):
 			excludeAbove: int = indexDomain零 + (3 * pilesTotal // 4)
 			excludeAbove -= pilesFewerDomain0
@@ -560,11 +561,11 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 			excludeAbove = int(pileOfLeaf零 ^ bit_mask(dimensionsTotal)) // 2
 			indicesDomain0ToExclude.extend(range(excludeAbove, pilesTotal))
 
-# ------- Exclude by stepping: exclude ((2^dimensionTail - 1) / (2^dimensionTail))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
+#-------- Exclude by stepping: exclude ((2^dimensionTail - 1) / (2^dimensionTail))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
 		for dimension in range(dimensionTail):
 			indicesDomain0ToExclude.extend(range(steppingBasisForUnknownReasons + int(bit_mask(dimension)), pilesTotal, int(bit_flip(0, dimension + 1))))
 
-# ------- Exclude "knock-out" indices ---------------------------------
+#-------- Exclude "knock-out" indices ---------------------------------
 		if dimensionTail == 1:
 			if (首二(dimensionsTotal) < pileOfLeaf零 < 首零(dimensionsTotal)-零) and (2 < dimensionNearest首(pileOfLeaf零)):
 				if dimensionSecondNearest首(pileOfLeaf零) == 零:
@@ -623,7 +624,7 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 
 		domainCombined.extend([(pileOfLeaf零, pileOfLeaf0) for pileOfLeaf0 in exclude(domain0, indicesDomain0ToExclude)])
 
-# ======= By inclusion of the piles, add consecutive piles (22 pairs)  ====================
+#======== By inclusion of the piles, add consecutive piles (22 pairs)  ====================
 	domainCombined.extend([(pile, direction(pile, 零)) for pile in domain零 if direction(pile, 零) in domain0])
 
 	return tuple(sorted(set(domainCombined)))
@@ -640,11 +641,11 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 	domain零: tuple[int, ...] = domain首零二
 	domain0: tuple[int, ...] = domain首二
 
-# ======= By inclusion of the piles, add consecutive piles (22 pairs)  ====================
+#======== By inclusion of the piles, add consecutive piles (22 pairs)  ====================
 	direction: Callable[[Any, Any], Any] = sub
 	domainCombined.extend([(pile, direction(pile, 零)) for pile in domain零 if direction(pile, 零) in domain0])
 
-# ======= By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
+#======== By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
 	pilesTotal: int = len(domain零)
 	pilesFewerDomain0: int = pilesTotal - len(domain0)
 
@@ -655,7 +656,7 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 
 		dimensionTail: int = dimensionNearestTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
 
-# ------- `excludeBelow` `index` ---------------------------------
+#-------- `excludeBelow` `index` ---------------------------------
 		if 首零一(dimensionsTotal) < pileOfLeaf零:
 			excludeBelow: int = index + 3 - (3 * pilesTotal // 4)
 		else:
@@ -663,19 +664,19 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 		excludeBelow -= pilesFewerDomain0
 		listIndicesPilesExcluded.extend(range(excludeBelow))
 
-# ------- `excludeAbove` `index` ---------------------------------
+#-------- `excludeAbove` `index` ---------------------------------
 		excludeAbove: int = index + 2 - int(bit_mask(dimensionTail))
 		excludeAbove -= pilesFewerDomain0
 		listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
 
-# ------- Exclude by stepping: exclude ((2^dimensionTail - 1) / (2^dimensionTail))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
+#-------- Exclude by stepping: exclude ((2^dimensionTail - 1) / (2^dimensionTail))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
 		countFromTheEnd: int = pilesTotal - 1
 		countFromTheEnd -= pilesFewerDomain0
 		steppingBasisForUnknownReasons: int = countFromTheEnd - int(bit_mask(dimensionTail - 1).bit_flip(0))
 		for dimension in range(dimensionTail):
 			listIndicesPilesExcluded.extend(range(steppingBasisForUnknownReasons - int(bit_mask(dimension)), decreasing, decreasing * int(bit_flip(0, dimension + 1))))
 
-# ------- Exclude "knock-out" indices ---------------------------------
+#-------- Exclude "knock-out" indices ---------------------------------
 		if dimensionTail == 1:
 			if (dimensionThirdNearest首(pileOfLeaf零) == 一) and (二+零 <= dimensionNearest首(pileOfLeaf零)):
 				indexDomain0: int = (pilesTotal // 2) + 1
@@ -720,7 +721,7 @@ def getDomain首零一二and首一二(state: EliminationState) -> tuple[tuple[in
 def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tuple[int, ...], direction: Callable[[Any, Any], Any], dimensionsTotal: int) -> tuple[tuple[int, int], ...]:
 	domainCombined: list[tuple[int, int]] = []
 
-# ======= By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
+#======== By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
 	pilesTotal: int = len(domain零)
 	pilesFewerDomain0: int = pilesTotal - len(domain0)
 
@@ -731,7 +732,7 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 
 		dimensionTail: int = dimensionNearestTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
 
-# ------- `excludeBelow` `index` ---------------------------------
+#-------- `excludeBelow` `index` ---------------------------------
 		if 首零一(dimensionsTotal) < pileOfLeaf零:
 			excludeBelow: int = indexDomain零 + 1 - (3 * pilesTotal // 4)
 		else:
@@ -739,17 +740,17 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 		excludeBelow -= pilesFewerDomain0
 		indicesDomain0ToExclude.extend(range(excludeBelow))
 
-# ------- `excludeAbove` `index` ---------------------------------
+#-------- `excludeAbove` `index` ---------------------------------
 		excludeAbove: int = indexDomain零 + 1 - int(bit_mask(dimensionTail))
 		excludeAbove -= pilesFewerDomain0
 		indicesDomain0ToExclude.extend(range(excludeAbove, pilesTotal))
 
-# ------- Exclude by stepping: exclude ((2^dimensionTail - 1) / (2^dimensionTail))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
+#-------- Exclude by stepping: exclude ((2^dimensionTail - 1) / (2^dimensionTail))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
 		steppingBasisForUnknownReasons: int = indexDomain零
 		for dimension in range(dimensionTail):
 			indicesDomain0ToExclude.extend(range(steppingBasisForUnknownReasons - int(bit_mask(dimension)), decreasing, decreasing * int(bit_flip(0, dimension + 1))))
 
-# ------- Exclude "knock-out" indices ---------------------------------
+#-------- Exclude "knock-out" indices ---------------------------------
 		if dimensionTail == 1:
 			if (dimensionThirdNearest首(pileOfLeaf零) == 一) and (二+零 <= dimensionNearest首(pileOfLeaf零)):
 				indexDomain0: int = pilesTotal // 2
@@ -786,7 +787,7 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 
 		domainCombined.extend([(pileOfLeaf零, pileOfLeaf0) for pileOfLeaf0 in exclude(domain0, indicesDomain0ToExclude)])
 
-# ======= By inclusion of the piles, add consecutive piles (22 pairs)  ====================
+#======== By inclusion of the piles, add consecutive piles (22 pairs)  ====================
 	domainCombined.extend([(pile, direction(pile, 零)) for pile in domain零 if direction(pile, 零) in domain0])
 
 	return tuple(sorted(set(domainCombined)))
@@ -904,7 +905,7 @@ def getDictionaryLeafDomains(state: EliminationState) -> dict[int, range]:
 	"""  # noqa: D205
 	return {leaf: getLeafDomain(state, leaf) for leaf in range(state.leavesTotal)}
 
-# ======= Specialized tools ===============================
+#======== Specialized tools ===============================
 
 def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:
 	pathFilename = Path(f'{packageSettings.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
@@ -1001,7 +1002,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 
 	return pathFilename
 
-# ======= In development ========================
+#======== In development ========================
 # ruff: noqa: SIM102
 # I am developing in this module because of Python's effing namespace and "circular import" issues.
 
@@ -1020,21 +1021,21 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 
 	dictionaryPrecedence: dict[int, dict[int, list[int]]] = {}
 
-# ======= piles at the beginning of the leaf's domain ================
+#======== piles at the beginning of the leaf's domain ================
 	for dimension in range(3, state.dimensionsTotal + inclusive):
 		for countDown in range(dimension - 2 + decreasing, decreasing, decreasing):
 			for leaf in range(state.productsOfDimensions[dimension] - sum(state.productsOfDimensions[countDown:dimension - 2]), state.leavesTotal, state.productsOfDimensions[dimension - 1]):
 				dictionaryPrecedence[leaf] = {aPile: [state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]]
 							for aPile in list(dictionaryDomains[leaf])[0: getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, dimensionFrom首=dimension - 1)[dimension - 2 - countDown] // 2]}
 
-# ------- The beginning of domain首一Plus零 --------------------------------
+#-------- The beginning of domain首一Plus零 --------------------------------
 	leaf = 首一(state.dimensionsTotal)+零
 	dictionaryPrecedence[leaf] = {aPile: [2 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]
 									, 3 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]]
 							for aPile in list(dictionaryDomains[leaf])[1:2]}
 	del leaf
 
-# ======= leaf首零一Plus零: conditional `leafPredecessor` in all piles of its domain ===========
+#======== leaf首零一Plus零: conditional `leafPredecessor` in all piles of its domain ===========
 	leaf: int = 首零一(state.dimensionsTotal)+零
 	listOfPiles = list(dictionaryDomains[leaf])
 	dictionaryPrecedence[leaf] = {aPile: [] for aPile in list(dictionaryDomains[leaf])}
@@ -1099,7 +1100,7 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 
 	del leaf, listOfPiles, sumsOfProductsOfDimensionsNearest首, pileStepAbsolute, sumsOfProductsOfDimensionsNearest首InSubHyperplane
 
-# ======= leaf首零Plus零: Separate logic because the distance between absolute piles is 4, not 2 ==============
+#======== leaf首零Plus零: Separate logic because the distance between absolute piles is 4, not 2 ==============
 # leaf has conditional `leafPredecessor` in all but the first pile of its domain
 # Reminder: has UNconditional `leafPredecessor` in the first pile: leaf零
 	leaf: int = 首零(state.dimensionsTotal)+零
@@ -1120,8 +1121,8 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 
 	del leaf, listOfPiles, sumsOfProductsOfDimensionsNearest首, pileStepAbsolute
 
-# ======= piles at the end of the leaf's domain ================
-# ------- Example of special case: has conditional `leafPredecessor` two steps before the end of the domain --------------------------
+#======== piles at the end of the leaf's domain ================
+#-------- Example of special case: has conditional `leafPredecessor` two steps before the end of the domain --------------------------
 	if state.dimensionsTotal == 6:
 		leaf = 22
 		sliceOfPiles = slice(0, None)

@@ -1,9 +1,9 @@
 from functools import cache
-from hunterMakesPy import intInnit
+from hunterMakesPy.parseParameters import intInnit
 from math import log
 from operator import getitem
 
-# ======= Using a single-base positional-numeral system as a proxy for Cartesian coordinates =======
+#======== Using a single-base positional-numeral system as a proxy for Cartesian coordinates =======
 # https://en.wikipedia.org/wiki/Positional_notation
 
 # Ideogram pronunciation references:
@@ -127,11 +127,11 @@ _place_ValueIndex: int	= _dimensionIndex
 @cache
 def dimensionIndex(dimensionAsNonnegativeInteger: int, /, *, dimensionLength: int = _dimensionLength) -> int:
 	"""Convert the integer value of a single dimension into its corresponding `dimensionIndex`."""
-	dimension: int = getitem(intInnit([dimensionAsNonnegativeInteger], 'dimensionNonnegative', type[int]), 0)
+	dimension: int = getitem(intInnit([dimensionAsNonnegativeInteger], 'dimensionNonnegative', int), 0)
 	if dimension < 0:
 		message: str = f"I received `{dimensionAsNonnegativeInteger = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
-	base: int = getitem(intInnit([dimensionLength], 'dimensionLength', type[int]), 0)
+	base: int = getitem(intInnit([dimensionLength], 'dimensionLength', int), 0)
 	if base < 1:
 		message: str = f"I received `{dimensionLength = }`, but I need an integer value greater than 1."
 		raise ValueError(message)
@@ -141,7 +141,7 @@ def dimensionIndex(dimensionAsNonnegativeInteger: int, /, *, dimensionLength: in
 		raise ValueError(message)
 	return int(place_ValueIndex)
 
-# ------- Access the dimension coordinates encoded in a number relative to the number's most significant digit -------
+#-------- Access the dimension coordinates encoded in a number relative to the number's most significant digit -------
 
 @cache
 def 首零(dimensionsTotal: int, /) -> int:
@@ -353,7 +353,7 @@ def 首二三(dimensionsTotal: int, /) -> int:
 	"""
 	return int('0011' + '0' * (dimensionsTotal - 4), _dimensionLength)
 
-# ======= Semantic replacements for ambiguous values =======
+#======== Semantic replacements for ambiguous values =======
 
 leafOrigin: int = (0 * 九) + (0 * 八) + (0 * 七) + (0 * 六) + (0 * 五) + (0 * 四) + (0 * 三) + (0 * 二) + (0 * 一) + (0 * 零)
 """The `leaf` at the origin of all dimensions, with `0` in every `dimensionIndex`."""

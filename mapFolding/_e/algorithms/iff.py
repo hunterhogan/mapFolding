@@ -113,7 +113,7 @@ def thisIsAViolation(pile: int, pileIncrease: int, pileComparand: int, pileCompa
 			return True
 	return False
 
-# ------- ad hoc computations -----------------------------
+#-------- ad hoc computations -----------------------------
 def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
 	return len(mapShape)
 
@@ -124,7 +124,7 @@ def _leavesTotal(mapShape: tuple[int, ...]) -> int:
 def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
 	return prod(mapShape[0:dimension], start=1)
 
-# ------- Functions for `leaf`, named 0, 1, ... n-1, in a `folding` -------------
+#-------- Functions for `leaf`, named 0, 1, ... n-1, in a `folding` -------------
 
 @cache
 def ImaOddLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int:
@@ -163,7 +163,7 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 	return all(not thisIsAViolationComplicated(pile, pileComparand, callNextCrease(mapShape, leaf, aDimension), callNextCrease(mapShape, comparand, aDimension), inThis_pileOf(folding))
 			for ((pile, leaf), (pileComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
 
-# ------- Functions for `leaf` in `PermutationSpace` dictionary -------------
+#-------- Functions for `leaf` in `PermutationSpace` dictionary -------------
 
 def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 	"""Return `True` if `state.leavesPinned` has a violation."""

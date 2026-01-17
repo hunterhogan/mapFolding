@@ -1,11 +1,10 @@
 from collections.abc import Iterable
 from itertools import pairwise, permutations, repeat
-from mapFolding._e import leafOrigin, PermutationSpace, pileOrigin
+from mapFolding._e import leafOrigin, PermutationSpace, pileOrigin, Z0Z_getIndicesSameDimensionLength
 from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding
 from math import factorial
-from more_itertools import iter_index, unique
 
 # TODO make sure all leavesPinned have pile-ranges and update their pile-ranges
 
@@ -98,11 +97,10 @@ def theorem4(state: EliminationState) -> EliminationState:
 	theorem2b : Applies the complementary 2(b) divisibility if theorem4 does not apply.
 	excludeLeafRBeforeLeafK : Performs the actual leaf ordering elimination.
 	"""
-	for listIndicesSameDimensionLength in [list(iter_index(state.mapShape, dimensionLength)) for dimensionLength in unique(state.mapShape)]:
-		if len(listIndicesSameDimensionLength) > 1:
-			state.Theorem4Multiplier *= factorial(len(listIndicesSameDimensionLength))
-			for index_k, index_r in pairwise(listIndicesSameDimensionLength):
-				state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])
+	for indicesSameDimensionLength in Z0Z_getIndicesSameDimensionLength(state.mapShape):
+		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
+		for index_k, index_r in pairwise(indicesSameDimensionLength):
+			state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:  # noqa: ARG001

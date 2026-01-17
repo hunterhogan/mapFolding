@@ -128,7 +128,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	computation time. If logicalCores >= `leavesTotal`, it will probably be faster. If logicalCores <= 2 * `leavesTotal`, it
 	will almost certainly be slower for all map dimensions.
 	"""
-# ------- mapShape ---------------------------------------------------------------------
+#-------- mapShape ---------------------------------------------------------------------
 
 	if mapShape:
 		pass
@@ -142,7 +142,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		)
 		raise ValueError(message)
 
-# ------- task division instructions -----------------------------------------------------
+#-------- task division instructions -----------------------------------------------------
 
 	if computationDivisions:
 		from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions
@@ -154,7 +154,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		concurrencyLimit = 1
 		taskDivisions = 0
 
-# ------- memorialization instructions ---------------------------------------------
+#-------- memorialization instructions ---------------------------------------------
 
 	if pathLikeWriteFoldsTotal is not None:
 		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(mapShape, pathLikeWriteFoldsTotal)
@@ -162,7 +162,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	else:
 		pathFilenameFoldsTotal = None
 
-# ------- Algorithm version -----------------------------------------------------
+#-------- Algorithm version -----------------------------------------------------
 	if taskDivisions > 1:
 		from mapFolding.dataBaskets import ParallelMapFoldingState
 		from mapFolding.syntheticModules.countParallelNumba import doTheNeedful
@@ -189,7 +189,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		mapFoldingState = doTheNeedful(mapFoldingState)
 		foldsTotal = mapFoldingState.foldsTotal
 
-# ------- Follow memorialization instructions ---------------------------------------------
+#-------- Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameFoldsTotal is not None:
 		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)

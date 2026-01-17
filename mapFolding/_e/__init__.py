@@ -25,7 +25,9 @@ from mapFolding._e._beDRY import (
 	notPileLast as notPileLast, oopsAllLeaves as oopsAllLeaves, oopsAllPileRangesOfLeaves as oopsAllPileRangesOfLeaves,
 	pileIsNotOpen as pileIsNotOpen, pileIsOpen as pileIsOpen, pileRangeOfLeavesAND as pileRangeOfLeavesAND,
 	reverseLookup as reverseLookup, thisHasThat as thisHasThat, thisIsALeaf as thisIsALeaf,
-	thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves, Z0Z_invert as Z0Z_invert, Z0Z_JeanValjean as Z0Z_JeanValjean)
+	thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves,
+	Z0Z_getIndicesSameDimensionLength as Z0Z_getIndicesSameDimensionLength, Z0Z_invert as Z0Z_invert,
+	Z0Z_JeanValjean as Z0Z_JeanValjean)
 
 # isort: split
 from mapFolding._e._measure import (

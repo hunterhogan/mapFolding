@@ -73,8 +73,8 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 		identifier: str = ast_arg.arg
 		annotation: ast.expr = raiseIfNone(ast_arg.annotation)
 
-	# ------- `identifier` is target of Augmented Assignment, or --------------
-	# ------- `identifier` is target of Assignment and value is Constant. -----
+	#-------- `identifier` is target of Augmented Assignment, or --------------
+	#-------- `identifier` is target of Assignment and value is Constant. -----
 		NodeChanger(
 			IfThis.isAnyOf(
 							Be.AugAssign.targetIs(IfThis.isNestedNameIdentifier(identifier))
@@ -84,23 +84,23 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
-	# ------- `identifier` - 1. ----------------------------------------------
+	#-------- `identifier` - 1. ----------------------------------------------
 		NodeChanger(Be.BinOp.leftIs(IfThis.isNestedNameIdentifier(identifier))
 			, doThat=lambda node, annotation=annotation: Grab.rightAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.right])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
-	# ------- `identifier` in Comparison. -------------------------------------
+	#-------- `identifier` in Comparison. -------------------------------------
 		NodeChanger(Be.Compare.leftIs(IfThis.isNestedNameIdentifier(identifier))
 			, doThat=lambda node, annotation=annotation: Grab.comparatorsAttribute(lambda at, annotation=annotation: Then.replaceWith([Make.Call(annotation, listParameters=[node.comparators[0]])])(at[0]))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
-	# ------- `identifier` has exactly one index value. -----------------------
+	#-------- `identifier` has exactly one index value. -----------------------
 		NodeChanger(IfThis.isAllOf(Be.Subscript.valueIs(IfThis.isNestedNameIdentifier(identifier))
 			, lambda node: not Be.Subscript.sliceIs(Be.Tuple)(node))
 			, doThat=lambda node: Grab.sliceAttribute(Then.replaceWith(Make.Call(Make.Name('int'), listParameters=[node.slice])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
-	# ------- `identifier` has multiple index values. -------------------------
+	#-------- `identifier` has multiple index values. -------------------------
 		NodeChanger(IfThis.isAllOf(Be.Subscript.valueIs(IfThis.isNestedNameIdentifier(identifier))
 								,  Be.Subscript.sliceIs(Be.Tuple))
 			, doThat=lambda node: Grab.sliceAttribute(Grab.eltsAttribute(

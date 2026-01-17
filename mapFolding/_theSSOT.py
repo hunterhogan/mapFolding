@@ -2,6 +2,7 @@
 
 from hunterMakesPy import PackageSettings
 from mapFolding import MetadataOEISidManuallySet, MetadataOEISidMapFoldingManuallySet
+from more_itertools import loops
 from pathlib import Path
 import dataclasses
 
@@ -46,8 +47,8 @@ OEISidMapFoldingManuallySet: dict[str, MetadataOEISidMapFoldingManuallySet] = {
 	'A000136': {'getMapShape': lambda n: (1, n)},
 	'A001415': {'getMapShape': lambda n: (2, n)},
 	'A001416': {'getMapShape': lambda n: (3, n)},
-	'A001417': {'getMapShape': lambda n: tuple(2 for _dimension in range(n))},
-	'A195646': {'getMapShape': lambda n: tuple(3 for _dimension in range(n))},
+	'A001417': {'getMapShape': lambda n: tuple(2 for _dimension in loops(n))},
+	'A195646': {'getMapShape': lambda n: tuple(3 for _dimension in loops(n))},
 	'A001418': {'getMapShape': lambda n: (n, n)},
 }
 

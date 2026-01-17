@@ -3,12 +3,12 @@
 
 from typing import Final
 
-# ======= Expected values from mapFolding/_semiotics.py =======
+#======== Expected values from mapFolding/_semiotics.py =======
 
 expectedDecreasing: Final[int] = -1
 expectedInclusive: Final[int] = 1
 
-# ======= Expected values from mapFolding/_e/_semiotics.py =======
+#======== Expected values from mapFolding/_e/_semiotics.py =======
 
 # Dimension index constants (powers of 2)
 expected零: Final[int] = 1

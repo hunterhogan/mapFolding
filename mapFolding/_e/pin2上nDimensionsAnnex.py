@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Callable
 
-# ======= append `leavesPinned` at `pile` if qualified =======
+#======== append `leavesPinned` at `pile` if qualified =======
 
 def appendLeavesPinnedAtPile(state: EliminationState, leavesToPin: Iterable[int]) -> EliminationState:
 	sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned)
@@ -54,7 +54,7 @@ def disqualifyAppendingLeafAtPile(state: EliminationState, leaf: int) -> bool:
 def _pileNotInRangeByLeaf(state: EliminationState, leaf: int) -> bool:
 	return state.pile not in getLeafDomain(state, leaf)
 
-# ======= Updating `PileRangeOfLeaves` =======
+#======== Updating `PileRangeOfLeaves` =======
 
 def updateListPermutationSpacePileRangesOfLeaves(state: EliminationState) -> EliminationState:
 	"""Flow control to apply per-`PermutationSpace` functions to all of `state.listPermutationSpace`."""
@@ -383,7 +383,7 @@ def suDONTku(state: EliminationState, leavesPinned: PermutationSpace) -> Permuta
 					break
 	return leavesPinned
 
-# ======= "Beans and cornbread" functions =======
+#======== "Beans and cornbread" functions =======
 
 @syntacticCurry
 def beansWithoutCornbread(state: EliminationState, leavesPinned: PermutationSpace) -> bool:
@@ -405,7 +405,7 @@ def pinLeafCornbread(state: EliminationState) -> EliminationState:
 
 	return state
 
-# ======= Remove or disqualify `PermutationSpace` dictionaries. =======
+#======== Remove or disqualify `PermutationSpace` dictionaries. =======
 
 def removeInvalidPermutationSpace(state: EliminationState) -> EliminationState:
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace

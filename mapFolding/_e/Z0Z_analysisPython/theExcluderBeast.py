@@ -3,7 +3,9 @@ from collections.abc import Callable, Sequence
 from fractions import Fraction
 from functools import cache, reduce
 from gmpy2 import bit_flip
-from hunterMakesPy import importPathFilename2Identifier, raiseIfNone, updateExtendPolishDictionaryLists, writePython
+from hunterMakesPy import raiseIfNone
+from hunterMakesPy.dataStructures import updateExtendPolishDictionaryLists
+from hunterMakesPy.filesystemToolkit import importPathFilename2Identifier, writePython
 from itertools import product as CartesianProduct, repeat
 from mapFolding import ansiColorBlackOnCyan, ansiColorReset, ansiColorWhiteOnMagenta, inclusive, packageSettings
 from mapFolding._e import (
@@ -61,7 +63,7 @@ functionsHeadDimensions: list[Callable[[int], int]] = [
 	首一1, 首一三1, 首一二1, 首一二三1, 首三1, 首二1, 首二三1, 首零1, 首零一1, 首零一三1, 首零一二1, 首零一二三1, 首零三1, 首零二1, 首零二三1]
 dictionaryFunctionsByName: dict[str, Callable[[int], int]] = {function.__name__: function for function in functionsHeadDimensions}
 
-# ======= Collate exclusion data =======
+#======== Collate exclusion data =======
 
 def writeExclusionDataCollated(listDimensions: Sequence[int] = (5, 6)) -> list[PurePath]:
 	"""{mapShape: {leafExcluder: {pileExcluder: {leafExcluded: listIndicesExcluded}}}}."""
@@ -142,7 +144,7 @@ def expressIndexAsFractionAddend(index: IndexPilesTotal, pilesTotal: int, denomi
 
 	return indexAsFractionAndAddend
 
-# ======= Analyze exclusion data =======
+#======== Analyze exclusion data =======
 
 def loadCollatedIndices(*, negative: bool = False) -> ExclusionData:
 	collatedIndices: ExclusionData = {}
@@ -370,7 +372,7 @@ def analyzeNonContiguousIndicesRelative(dataset: ExclusionData) -> dict[strLeafE
 
 	return aggregatedExclusions
 
-# ======= Aggregate exclusion data =======
+#======== Aggregate exclusion data =======
 
 def writeAggregatedExclusions(pathWrite: Path | None = None) -> list[PurePath]:
 	"""{leafExcluder: {pileExcluder: {leafExcluded: listIndicesAsFractionAddends}}}."""
@@ -408,7 +410,7 @@ def writeAggregatedExclusions(pathWrite: Path | None = None) -> list[PurePath]:
 
 	return listPathFilenames
 
-# ======= Create exclusion dictionaries for elimination tools =======
+#======== Create exclusion dictionaries for elimination tools =======
 
 def loadAggregatedExclusions() -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
 	aggregatedExclusions: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]] = {}
@@ -478,7 +480,7 @@ def writeExclusionDictionaries(pathExclusionsFile: PurePath | None = None) -> Pu
 
 	return PurePath(pathFilename)
 
-# ======= Validation functions =======
+#======== Validation functions =======
 
 @cache
 def _getArrayFoldingsByDimensions(dimensionsTotal: int) -> numpy.ndarray:

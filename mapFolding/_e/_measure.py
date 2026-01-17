@@ -1,6 +1,7 @@
 from functools import cache
 from gmpy2 import bit_flip, bit_scan1, f_mod_2exp
-from hunterMakesPy import intInnit, raiseIfNone
+from hunterMakesPy import raiseIfNone
+from hunterMakesPy.parseParameters import intInnit
 from mapFolding._e import Z0Z_invert, 一, 零
 from mapFolding._e.dataBaskets import EliminationState
 from operator import getitem
@@ -8,7 +9,7 @@ from operator import getitem
 @cache
 def dimensionNearest首(integerNonnegative: int, /) -> int:
 	"""Find the 0-indexed position of the most significant non-zero radix-2 digit in `integerNonnegative`."""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -17,7 +18,7 @@ def dimensionNearest首(integerNonnegative: int, /) -> int:
 @cache
 def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 	"""Find the 0-indexed position of the second most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -32,7 +33,7 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 @cache
 def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	"""Find the 0-indexed position of the third most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -54,7 +55,7 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 @cache
 def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	"""Find the 0-indexed position of the fourth most significant non-zero radix-2 digit, if any, in `integerNonnegative`."""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -98,7 +99,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 		The position of the leaf within the sub-hyperplane defined by dimensions [0, ..., MSD-1]. This is the value formed by all
 		digits except the MSD.
 	"""
-	anInteger: int = getitem(intInnit([notLeafOrigin], 'notLeafOrigin', type[int]), 0)
+	anInteger: int = getitem(intInnit([notLeafOrigin], 'notLeafOrigin', int), 0)
 	if anInteger < 1:
 		message: str = f"I received `{notLeafOrigin = }`, but I need a value greater than 0."
 		raise ValueError(message)
@@ -111,7 +112,7 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 	Because I am using a radix-2 positional-numeral system as a proxy for Cartesian coordinates, this is functionally equivalent
 	to computing the number of times `integerNonnegative` is divisible by 2; aka 'CTZ', Count Trailing Zeros in the binary form.
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -126,7 +127,7 @@ def Z0Z_0NearestTail(state: EliminationState, integerNonnegative: int) -> int:
 
 @cache
 def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -145,7 +146,7 @@ def ptount(integerAbove3: int, /) -> int:
 	- In one case, I was using `ptount(leafAt一零) + 1`, but I directly substituted
 		`raiseIfNone(dimensionSecondNearest首(leafAt一零))` for the same results. I created `ptount` well before I created `dimensionSecondNearest首`.
 	"""
-	anInteger: int = getitem(intInnit([integerAbove3], 'integerAbove3', type[int]), 0)
+	anInteger: int = getitem(intInnit([integerAbove3], 'integerAbove3', int), 0)
 	if anInteger < 3:
 		message: str = f"I received `{integerAbove3 = }`, but I need a value greater than 3."
 		raise ValueError(message)

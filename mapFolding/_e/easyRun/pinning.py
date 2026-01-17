@@ -24,7 +24,7 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(len(str(pp:=permutationsLeavesPinnedTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 5)
+	state = EliminationState((2,) * 6)
 
 	printThis = True
 
@@ -40,23 +40,22 @@ if __name__ == '__main__':
 		timeStart: float = time.perf_counter()
 		state: EliminationState = pinPilesAtEnds(state, 4)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 		printStatisticsPermutations(state)
 		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
-		state: EliminationState = pinLeavesDimensions0零一(state)
 		state: EliminationState = pinPile首零Less零(state)
+		print(state.sumsOfProductsOfDimensionsNearest首)
+		pprint(dictionaryPileRanges := getDictionaryPileRanges(state), width=200)
+		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))
+		state: EliminationState = pinLeavesDimensions0零一(state)
 		state: EliminationState = pinLeavesDimension首二(state)
 		pprint(getDictionaryConditionalLeafPredecessors(state), width=260)
 		state: EliminationState = pinLeavesDimension二(state)
 		print(*getLeavesCreaseNext(state, 22))
 		print(*getLeavesCreaseBack(state, 53))
 		print(*(format(x, '06b') for x in getPileRange(state, 60)))
-		print(state.sumsOfProductsOfDimensionsNearest首)
-		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))
 		print(list(getLeafDomain(state, 37)))
 		pprint(state.listPermutationSpace)
-		pprint(dictionaryPileRanges := getDictionaryPileRanges(state), width=200)

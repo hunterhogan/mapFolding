@@ -26,25 +26,46 @@ show how to balance performance with system resource constraints.
 from collections.abc import Callable
 from hunterMakesPy.pytestForYourUse import PytestFor_defineConcurrencyLimit
 from mapFolding import (
-	defineProcessorLimit, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions, validateListDimensions)
+	defineProcessorLimit, dictionaryOEISMapFolding, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions,
+	validateListDimensions)
 from mapFolding.basecamp import countFolds
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import Literal
 import pytest
 
-def test_countFoldsComputationDivisionsInvalid(mapShapeTestFunctionality: tuple[int, ...]) -> None:
-	standardizedEqualToCallableReturn(ValueError, countFolds, mapShapeTestFunctionality, None, {"wrong": "value"})
+@pytest.mark.parametrize(
+	"mapShape",
+	[
+		pytest.param(dictionaryOEISMapFolding["A000136"]["getMapShape"](3), id="A000136::n3"),
+		pytest.param(dictionaryOEISMapFolding["A001415"]["getMapShape"](3), id="A001415::n3"),
+	],
+)
+def test_countFoldsComputationDivisionsInvalid(mapShape: tuple[int, ...]) -> None:
+	standardizedEqualToCallableReturn(ValueError, countFolds, mapShape, None, {"wrong": "value"})
 
-def test_countFoldsComputationDivisionsMaximum(mapShapeTestParallelization: list[int]) -> None:
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(mapShapeTestParallelization)), countFolds, mapShapeTestParallelization, None, 'maximum', None)
+@pytest.mark.parametrize(
+	"mapShapeList",
+	[
+		pytest.param(list(dictionaryOEISMapFolding["A001417"]["getMapShape"](5)), id="A001417::n5"),
+	],
+)
+def test_countFoldsComputationDivisionsMaximum(mapShapeList: list[int]) -> None:
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(mapShapeList)), countFolds, mapShapeList, None, 'maximum', None)
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_defineConcurrencyLimit())
 def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
 	callablePytest()
 
+@pytest.mark.parametrize(
+	"mapShape",
+	[
+		pytest.param(dictionaryOEISMapFolding["A000136"]["getMapShape"](3), id="A000136::n3"),
+		pytest.param(dictionaryOEISMapFolding["A001415"]["getMapShape"](3), id="A001415::n3"),
+	],
+)
 @pytest.mark.parametrize("CPUlimitParameter", [{"invalid": True}, ["weird"]])
-def test_countFolds_cpuLimitOopsie(mapShapeTestFunctionality: tuple[int, ...], CPUlimitParameter: dict[str, bool] | list[str]) -> None:
-	standardizedEqualToCallableReturn(ValueError, countFolds, mapShapeTestFunctionality, None, 'cpu', CPUlimitParameter)
+def test_countFolds_cpuLimitOopsie(mapShape: tuple[int, ...], CPUlimitParameter: dict[str, bool] | list[str]) -> None:
+	standardizedEqualToCallableReturn(ValueError, countFolds, mapShape, None, 'cpu', CPUlimitParameter)
 
 @pytest.mark.parametrize("computationDivisions, concurrencyLimit, listDimensions, expectedTaskDivisions", [
 	(None, 4, [9, 11], 0),

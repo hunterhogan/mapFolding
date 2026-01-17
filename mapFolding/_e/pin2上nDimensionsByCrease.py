@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Callable
 
-# ======= crease-based subroutines for analyzing a specific `pile`. =======
+#======== crease-based subroutines for analyzing a specific `pile`. =======
 def _getLeavesCrease(state: EliminationState, leaf: int) -> tuple[int, ...]:
 	if 0 < leaf:
 		return tuple(getLeavesCreaseBack(state, abs(leaf)))

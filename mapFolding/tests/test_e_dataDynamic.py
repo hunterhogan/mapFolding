@@ -152,7 +152,7 @@ def test_getPileRange(mapShape: tuple[int, ...]) -> None:
 	],
 	ids=["increase", "decrease"],
 )
-def test_getLeavesCreaseIterators_match_foldingsTransitions(creaseKind: str, creaseFunction: Callable[[EliminationState, int], Iterable[int]], dictionaryExpectedByMapShape: dict[tuple[int, ...], dict[int, list[int]]], dimensionsTotal: int) -> None:
+def test_getLeavesCrease(creaseKind: str, creaseFunction: Callable[[EliminationState, int], Iterable[int]], dictionaryExpectedByMapShape: dict[tuple[int, ...], dict[int, list[int]]], dimensionsTotal: int) -> None:
 	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
 	state: EliminationState = EliminationState(mapShape=mapShape)
 	dictionaryExpectedByLeaf: dict[int, list[int]] = dictionaryExpectedByMapShape[mapShape]

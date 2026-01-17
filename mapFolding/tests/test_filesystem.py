@@ -21,14 +21,15 @@ stores computational results or adding new file formats.
 
 from contextlib import redirect_stdout
 from mapFolding import (
-	getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, validateListDimensions)
+	dictionaryOEISMapFolding, getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal,
+	validateListDimensions)
 from pathlib import Path
 import io
 import pytest
 import unittest.mock
 
-def test_saveFoldsTotal_fallback(path_tmpTesting: Path) -> None:
-	foldsTotal: int = 123
+@pytest.mark.parametrize("foldsTotal", [pytest.param(123, id="foldsTotal-123")])
+def test_saveFoldsTotal_fallback(path_tmpTesting: Path, foldsTotal: int) -> None:
 	pathFilename: Path = path_tmpTesting / "foldsTotal.txt"
 	with unittest.mock.patch("pathlib.Path.write_text", side_effect=OSError("Simulated write failure")), unittest.mock.patch("os.getcwd", return_value=str(path_tmpTesting)):
 		capturedOutput: io.StringIO = io.StringIO()
@@ -47,23 +48,44 @@ def test_getFilenameFoldsTotal(listDimensions: list[int], expectedFilename: str)
 	filenameActual: str = getFilenameFoldsTotal(mapShape)
 	assert filenameActual == expectedFilename, f"Expected filename {expectedFilename} but got {filenameActual}"
 
-def test_getPathFilenameFoldsTotal_defaultPath(mapShapeTestFunctionality: tuple[int, ...]) -> None:
+@pytest.mark.parametrize(
+	"mapShape",
+	[
+		pytest.param(dictionaryOEISMapFolding["A000136"]["getMapShape"](3), id="A000136::n3"),
+		pytest.param(dictionaryOEISMapFolding["A001415"]["getMapShape"](3), id="A001415::n3"),
+	],
+)
+def test_getPathFilenameFoldsTotal_defaultPath(mapShape: tuple[int, ...]) -> None:
 	"""Test getPathFilenameFoldsTotal with default path."""
-	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(mapShapeTestFunctionality)
+	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(mapShape)
 	assert pathFilenameFoldsTotal.is_absolute(), "Path should be absolute"
-	assert pathFilenameFoldsTotal.name == getFilenameFoldsTotal(mapShapeTestFunctionality), "Filename should match getFilenameFoldsTotal output"
+	assert pathFilenameFoldsTotal.name == getFilenameFoldsTotal(mapShape), "Filename should match getFilenameFoldsTotal output"
 	assert pathFilenameFoldsTotal.parent == getPathRootJobDEFAULT(), "Parent directory should match default job root"
 
-def test_getPathFilenameFoldsTotal_relativeFilename(mapShapeTestFunctionality: tuple[int, ...]) -> None:
+@pytest.mark.parametrize(
+	"mapShape",
+	[
+		pytest.param(dictionaryOEISMapFolding["A000136"]["getMapShape"](3), id="A000136::n3"),
+		pytest.param(dictionaryOEISMapFolding["A001415"]["getMapShape"](3), id="A001415::n3"),
+	],
+)
+def test_getPathFilenameFoldsTotal_relativeFilename(mapShape: tuple[int, ...]) -> None:
 	"""Test getPathFilenameFoldsTotal with relative filename."""
 	relativeFilename: Path = Path("custom/path/test.foldsTotal")
-	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(mapShapeTestFunctionality, relativeFilename)
+	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(mapShape, relativeFilename)
 	assert pathFilenameFoldsTotal.is_absolute(), "Path should be absolute"
 	assert pathFilenameFoldsTotal == getPathRootJobDEFAULT() / relativeFilename, "Relative path should be appended to default job root"
 
-def test_getPathFilenameFoldsTotal_createsDirs(path_tmpTesting: Path, mapShapeTestFunctionality: tuple[int, ...]) -> None:
+@pytest.mark.parametrize(
+	"mapShape",
+	[
+		pytest.param(dictionaryOEISMapFolding["A000136"]["getMapShape"](3), id="A000136::n3"),
+		pytest.param(dictionaryOEISMapFolding["A001415"]["getMapShape"](3), id="A001415::n3"),
+	],
+)
+def test_getPathFilenameFoldsTotal_createsDirs(path_tmpTesting: Path, mapShape: tuple[int, ...]) -> None:
 	"""Test that getPathFilenameFoldsTotal creates necessary directories."""
 	nestedPath: Path = path_tmpTesting / "deep/nested/structure"
-	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(mapShapeTestFunctionality, nestedPath)
+	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(mapShape, nestedPath)
 	assert pathFilenameFoldsTotal.parent.exists(), "Parent directories should be created"
 	assert pathFilenameFoldsTotal.parent.is_dir(), "Created path should be a directory"

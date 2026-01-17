@@ -10,7 +10,7 @@ progress integration for long-running calculations, and launcher generation for 
 
 from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
-from hunterMakesPy import autoDecodingRLE, identifierDotAttribute
+from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding import (
 	DatatypeLeavesTotal, dictionaryOEIS, getFoldsTotalKnown, getPathFilenameFoldsTotal, packageSettings)
 from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
@@ -19,8 +19,11 @@ from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import PurePosixPath
-from typing import cast
+from typing import cast, TYPE_CHECKING
 import ast
+
+if TYPE_CHECKING:
+	from hunterMakesPy import identifierDotAttribute
 
 # TODO More convergence with `makeJobTheorem2codon`
 

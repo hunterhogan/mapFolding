@@ -1,27 +1,18 @@
 from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
 from cytoolz.functoolz import curry as syntacticCurry
-from functools import cache, reduce
+from cytoolz.itertoolz import unique
+from functools import cache, partial, reduce
 from gmpy2 import bit_clear, bit_mask, bit_set, bit_test, mpz, xmpz
-from hunterMakesPy import intInnit, raiseIfNone
+from hunterMakesPy import Ordinals, raiseIfNone
+from hunterMakesPy.parseParameters import intInnit
 from itertools import accumulate
 from mapFolding import inclusive, zeroIndexed
 from mapFolding._e import LeafOrPileRangeOfLeaves, PermutationSpace, PileRangeOfLeaves, 零
-from more_itertools import all_unique, always_reversible, consecutive_groups, extract
+from more_itertools import all_unique, always_reversible, consecutive_groups, extract, iter_index
 from operator import add, getitem, mul
-from typing import Any, Protocol, Self, TypeGuard
+from typing import Any, TypeGuard
 
-class Ordinals(Protocol):
-	"""Any Python `object` `type` that may be ordered before or after a comparable `object` `type` by comparison operators."""
-
-	def __le__(self, not_self_selfButSelfSelf_youKnow: Self, /) -> bool:
-		"""Comparison by "***l***ess than or ***e***qual to"."""
-		...
-
-	def __lt__(self, not_self_selfButSelfSelf_youKnow: Self, /) -> bool:
-		"""Comparison by "***l***ess ***t***han"."""
-		...
-
-# ======= Boolean filters ================================================
+#======== Boolean filters ================================================
 
 @syntacticCurry
 def between[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小于) -> bool:
@@ -179,7 +170,7 @@ def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | 
 	"""
 	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, mpz)
 
-# ======= `LeafOrPileRangeOfLeaves` stuff ================================================
+#======== `LeafOrPileRangeOfLeaves` stuff ================================================
 # https://gmpy2.readthedocs.io/en/latest/mpz.html
 # xmpz: https://gmpy2.readthedocs.io/en/latest/advmpz.html
 
@@ -218,10 +209,10 @@ def getIteratorOfLeaves(pileRangeOfLeaves: PileRangeOfLeaves) -> Iterator[int]:
 	return iteratorOfLeaves.iter_set()
 
 def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> PileRangeOfLeaves:
-	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))  # ty:ignore[invalid-return-type]
+	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))
 
 def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> PileRangeOfLeaves:
-	return reduce(bit_set, leaves, bit_set(0, leavesTotal))  # ty:ignore[invalid-return-type]
+	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
 
 @syntacticCurry
 def leafParityInDimension(leaf: int, dimension: int) -> int:
@@ -252,10 +243,23 @@ def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, PileR
 
 	Returns
 	-------
-	dictionaryOfPilePileRangeOfLeaves : dict[int, PileRangeOfLeaves]
+	pilesWithPileRangeOfLeaves : dict[int, PileRangeOfLeaves]
 		Dictionary of `pile: pileRangeOfLeaves`, if a `pileRangeOfLeaves` is defined at `pile`.
 	"""
 	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in leavesPinned.items() if thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves)}
+
+def Z0Z_bifurcateLeavesPinned(leavesPinned: PermutationSpace) -> tuple[dict[int, int], dict[int, PileRangeOfLeaves]]:
+	"""Separate `leavesPinned` into two dictionaries: one of `pile: leaf` and one of `pile: pileRangeOfLeaves`.
+
+	Parameters
+	----------
+	leavesPinned : PermutationSpace
+		Dictionary of `pile: leaf` and `pile: pileRangeOfLeaves`.
+
+	Returns
+	-------
+	dictionaryOfPileLeaf, pilesWithPileRangeOfLeaves : tuple[dict[int, int], dict[int, PileRangeOfLeaves]]
+	"""
 
 @syntacticCurry
 def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: PileRangeOfLeaves, pileRangeOfLeaves: PileRangeOfLeaves) -> PileRangeOfLeaves:
@@ -278,7 +282,7 @@ def Z0Z_JeanValjean(p24601: PileRangeOfLeaves) -> int | PileRangeOfLeaves | None
 			whoAmI = raiseIfNone(p24601.bit_scan1())
 	return whoAmI
 
-# ======= Workbench functions ===============================================
+#======== Workbench functions ===============================================
 
 def DOTitems[文件, 文义](dictionary: Mapping[文件, 文义], /) -> Iterator[tuple[文件, 文义]]:
 	"""Analogous to `dict.items()`: create an `Iterator` with the "items" from `dictionary`.
@@ -399,8 +403,10 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 	)
 	return sumsOfProductsOfDimensionsNearest首
 
-# ======= Flow control ================================================
+#======== Flow control ================================================
 
 def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsTallToPinThis: int = 3) -> bool:
 	return (youMustBeDimensionsTallToPinThis <= len(mapShape)) and all(dimensionLength == 2 for dimensionLength in mapShape)
 
+def Z0Z_getIndicesSameDimensionLength(mapShape: tuple[int, ...]) -> Iterator[tuple[int, ...]]:
+	return filter(lambda indices: 1 < len(indices), map(tuple, map(partial(iter_index, mapShape), unique(mapShape))))

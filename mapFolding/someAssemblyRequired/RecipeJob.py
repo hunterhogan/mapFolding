@@ -3,7 +3,7 @@
 from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import pythonCode2ast_expr
-from hunterMakesPy import autoDecodingRLE
+from hunterMakesPy.dataStructures import autoDecodingRLE
 # TODO 'The____' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different
 # identifiers better integrate into the current semiotics?
 from mapFolding import (
@@ -84,7 +84,7 @@ class RecipeJobTheorem2:
 	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 	"""Deconstructed dataclass metadata for code transformation."""
 
-# ------- Source -----------------------------------------
+#-------- Source -----------------------------------------
 	source_astModule: ast.Module = parseLogicalPath2astModule(f'{packageSettings.identifierPackage}.{default['logicalPath']['synthetic']}.theorem2Numba')  # noqa: RUF009
 	"""Parsed AST of the source module containing the generic algorithm."""
 	identifierCallableSource: str = default['function']['counting']
@@ -102,7 +102,7 @@ class RecipeJobTheorem2:
 	sourcePackageIdentifier: str | None = packageSettings.identifierPackage
 	"""Name of the source package."""
 
-# ------- Filesystem, names of physical objects ------------------------------------------
+#-------- Filesystem, names of physical objects ------------------------------------------
 	pathPackage: PurePosixPath | None = None
 	"""Override path for the target package."""
 	pathModule: PurePosixPath | None = PurePosixPath(getPathRootJobDEFAULT())  # noqa: RUF009
@@ -112,7 +112,7 @@ class RecipeJobTheorem2:
 	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
 	"""Path for writing fold count results."""
 
-# ------- Logical identifiers, as opposed to physical identifiers ------------------------
+#-------- Logical identifiers, as opposed to physical identifiers ------------------------
 	packageIdentifier: str | None = None
 	"""Target package identifier."""
 	logicalPathRoot: identifierDotAttribute | None = None
@@ -128,7 +128,7 @@ class RecipeJobTheorem2:
 	logicalPathModuleDataclass: identifierDotAttribute | None = sourceLogicalPathModuleDataclass
 	"""Logical path to target dataclass module."""
 
-# ------- Datatypes ------------------------------------------
+#-------- Datatypes ------------------------------------------
 	type DatatypeFoldsTotal = TheDatatypeFoldsTotal
 	"""Type alias for datatype linked to the magnitude of `foldsTotal`."""
 	type DatatypeElephino = TheDatatypeElephino
