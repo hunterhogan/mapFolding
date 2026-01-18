@@ -27,12 +27,12 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding import getLeavesTotal, inclusive
-from mapFolding._e import between, oopsAllLeaves, PermutationSpace, 零
+from mapFolding._e import between, Leaf, oopsAllLeaves, PermutationSpace, Pile, 零
 from mapFolding._e.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf
 
-def thisIsAViolationComplicated(pile: int, pileComparand: int, getLeafNextCrease: Callable[[], int | None], getComparandNextCrease: Callable[[], int | None], pileOf: Callable[[int], int | None]) -> bool:  # noqa: PLR0911
+def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafNextCrease: Callable[[], Leaf | None], getComparandNextCrease: Callable[[], Leaf | None], pileOf: Callable[[Leaf], Pile | None]) -> bool:  # noqa: PLR0911
 	"""Validate.
 
 	Mathematical reasons for the design of this function
@@ -100,7 +100,7 @@ def thisIsAViolationComplicated(pile: int, pileComparand: int, getLeafNextCrease
 			return True
 	return False
 
-def thisIsAViolation(pile: int, pileIncrease: int, pileComparand: int, pileComparandIncrease: int) -> bool:
+def thisIsAViolation(pile: Pile, pileIncrease: Pile, pileComparand: Pile, pileComparandIncrease: Pile) -> bool:
 	if pile < pileComparand:
 		if pileComparandIncrease < pile:
 			if pileIncrease < pileComparandIncrease:						# [k+1 < r+1 < k < r]
@@ -127,10 +127,10 @@ def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
 #-------- Functions for `leaf`, named 0, 1, ... n-1, in a `folding` -------------
 
 @cache
-def ImaOddLeaf(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int:
+def ImaOddLeaf(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
 	return (floordiv(leaf, productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
 
-def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: int, comparand: int, dimension: int) -> bool:
+def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: Leaf, comparand: Leaf, dimension: int) -> bool:
 	return ImaOddLeaf(mapShape, leaf, dimension) == ImaOddLeaf(mapShape, comparand, dimension)
 
 def matchingParityLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
@@ -140,15 +140,15 @@ def matchingParityLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple
 	return repack
 
 @cache
-def nextCrease(mapShape: tuple[int, ...], leaf: int, dimension: int) -> int | None:
-	leafNext: int | None = None
+def nextCrease(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf | None:
+	leafNext: Leaf | None = None
 	if ((leaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:
 		leafNext = leaf + productOfDimensions(mapShape, dimension)
 	return leafNext
 
 inThis_pileOf = syntacticCurry(indexOf)
 
-def callNextCrease(mapShape: tuple[int, ...], leaf: int, dimension: int) -> Callable[[], int | None]:
+def callNextCrease(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Callable[[], Leaf | None]:
 	return lambda: nextCrease(mapShape, leaf, dimension)
 
 def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) -> bool:
@@ -165,13 +165,13 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 
 #-------- Functions for `leaf` in `PermutationSpace` dictionary -------------
 
-def leavesPinnedHasAViolation(state: EliminationState) -> bool:
-	"""Return `True` if `state.leavesPinned` has a violation."""
-	leafToPile: dict[int, int] = {leafValue: pileKey for pileKey, leafValue in oopsAllLeaves(state.leavesPinned).items()}
+def permutationSpaceHasAViolation(state: EliminationState) -> bool:
+	"""Return `True` if `state.permutationSpace` has a violation."""
+	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in oopsAllLeaves(state.permutationSpace).items()}
 
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
-		for pile, leaf in sorted(leafFilter(between(0, state.leafLast - inclusive), state.leavesPinned).items()):
+		for pile, leaf in sorted(leafFilter(between(0, state.leafLast - inclusive), state.permutationSpace).items()):
 			leafCrease: int | None = nextCrease(state.mapShape, leaf, dimension)
 			if leafCrease is None:
 				continue
@@ -190,9 +190,9 @@ def leavesPinnedHasAViolation(state: EliminationState) -> bool:
 def removePermutationSpaceViolations(state: EliminationState) -> EliminationState:
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace.copy()
 	state.listPermutationSpace = []
-	for leavesPinned in listPermutationSpace:
-		state.leavesPinned = leavesPinned
-		if leavesPinnedHasAViolation(state):
+	for permutationSpace in listPermutationSpace:
+		state.permutationSpace = permutationSpace
+		if permutationSpaceHasAViolation(state):
 			continue
-		state.listPermutationSpace.append(leavesPinned)
+		state.listPermutationSpace.append(permutationSpace)
 	return state

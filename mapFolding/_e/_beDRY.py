@@ -2,13 +2,14 @@ from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
 from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import unique
 from functools import cache, partial, reduce
-from gmpy2 import bit_clear, bit_mask, bit_set, bit_test, mpz, xmpz
+from gmpy2 import bit_clear, bit_mask, bit_set, bit_test as isBit1吗, mpz, xmpz
 from hunterMakesPy import Ordinals, raiseIfNone
 from hunterMakesPy.parseParameters import intInnit
 from itertools import accumulate
 from mapFolding import inclusive, zeroIndexed
-from mapFolding._e import LeafOrPileRangeOfLeaves, PermutationSpace, PileRangeOfLeaves, 零
-from more_itertools import all_unique, always_reversible, consecutive_groups, extract, iter_index
+from mapFolding._e import (
+	Leaf, LeafOrPileRangeOfLeaves, PermutationSpace, Pile, PileRangeOfLeaves, PilesWithPileRangeOfLeaves, PinnedLeaves, 零)
+from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract, iter_index
 from operator import add, getitem, mul
 from typing import Any, TypeGuard
 
@@ -25,19 +26,19 @@ def consecutive(flatContainer: Iterable[int]) -> bool:
 	or (len(list(next(consecutive_groups(always_reversible(flatContainer))))) == len(list(flatContainer))))
 
 def hasDuplicates(flatContainer: Iterable[Any]) -> bool:
-	return not all_unique(flatContainer)
+	return not allUnique吗(flatContainer)
 
 @syntacticCurry
-def leafIsInPileRange(leaf: int, pileRangeOfLeaves: PileRangeOfLeaves) -> bool:
+def leafIsInPileRange(leaf: Leaf, pileRangeOfLeaves: PileRangeOfLeaves) -> bool:
 	return pileRangeOfLeaves.bit_test(leaf)
 
 @syntacticCurry
-def leafIsNotPinned(leavesPinned: PermutationSpace, leaf: int) -> bool:
-	"""Return True if `leaf` is not presently pinned in `leavesPinned`.
+def leafIsNotPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
+	"""Return True if `leaf` is not presently pinned in `permutationSpace`.
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Partial folding mapping from pile -> leaf.
 	leaf : int
 		`leaf` index.
@@ -47,15 +48,15 @@ def leafIsNotPinned(leavesPinned: PermutationSpace, leaf: int) -> bool:
 	leafIsNotPinned : bool
 		True if the mapping does not include `leaf`.
 	"""
-	return leaf not in leavesPinned.values()
+	return leaf not in permutationSpace.values()
 
 @syntacticCurry
-def leafIsPinned(leavesPinned: PermutationSpace, leaf: int) -> bool:
-	"""Return True if `leaf` is pinned in `leavesPinned`.
+def leafIsPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
+	"""Return True if `leaf` is pinned in `permutationSpace`.
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Partial folding mapping from pile -> leaf.
 	leaf : int
 		`leaf` index.
@@ -65,18 +66,18 @@ def leafIsPinned(leavesPinned: PermutationSpace, leaf: int) -> bool:
 	leafIsPinned : bool
 		True if the mapping includes `leaf`.
 	"""
-	return leaf in leavesPinned.values()
+	return leaf in permutationSpace.values()
 
 @syntacticCurry
 def mappingHasKey[文件: Hashable](lookup: Mapping[文件, Any], key: 文件) -> bool:
 	"""Return `True` if `key` is in `lookup`."""
 	return key in lookup
 
-def notLeafOriginOrLeaf零(leaf: int) -> bool:
+def notLeafOriginOrLeaf零(leaf: Leaf) -> bool:
 	return 零 < leaf
 
 @syntacticCurry
-def notPileLast(pileLast: int, pile: int) -> bool:
+def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	"""Return True if `pile` is not the last pile.
 
 	Parameters
@@ -94,14 +95,14 @@ def notPileLast(pileLast: int, pile: int) -> bool:
 	return pileLast != pile
 
 @syntacticCurry
-def pileIsNotOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
-	"""Return True if `pile` is not presently pinned in `leavesPinned`.
+def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
+	"""Return True if `pile` is not presently pinned in `permutationSpace`.
 
 	Do you want to know if the pile is open or do you really want to know the Python `type` of the value at that key?
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Partial folding mapping from pile -> leaf.
 	pile : int
 		`pile` index.
@@ -109,22 +110,22 @@ def pileIsNotOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
 	Returns
 	-------
 	pileIsOpen : bool
-		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a `PileRangeOfLeaves`.
+		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is a `PileRangeOfLeaves`.
 
 	See Also
 	--------
 	thisIsALeaf, thisIsAPileRangeOfLeaves
 	"""
-	return thisIsALeaf(leavesPinned.get(pile))
+	return thisIsALeaf(permutationSpace.get(pile))
 
 # TODO Consider if it is possible to return TypeGuard[mpz] (or TypeGuard[None]?) here.
 @syntacticCurry
-def pileIsOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
-	"""Return True if `pile` is not presently pinned in `leavesPinned`.
+def pileIsOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
+	"""Return True if `pile` is not presently pinned in `permutationSpace`.
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Partial folding mapping from pile -> leaf.
 	pile : int
 		`pile` index.
@@ -132,15 +133,15 @@ def pileIsOpen(leavesPinned: PermutationSpace, pile: int) -> bool:
 	Returns
 	-------
 	pileIsOpen : bool
-		True if either `pile` is not a key in `leavesPinned` or `leavesPinned[pile]` is a `PileRangeOfLeaves`.
+		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is a `PileRangeOfLeaves`.
 	"""
-	return not thisIsALeaf(leavesPinned.get(pile))
+	return not thisIsALeaf(permutationSpace.get(pile))
 
 @syntacticCurry
 def thisHasThat[个](this: Iterable[个], that: 个) -> bool:
 	return that in this
 
-def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[int]:
+def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[Leaf]:
 	"""Return True if `leafOrPileRangeOfLeaves` is a `leaf`.
 
 	Parameters
@@ -175,23 +176,23 @@ def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | 
 # xmpz: https://gmpy2.readthedocs.io/en/latest/advmpz.html
 
 # TODO I have a vague memory of using overload/TypeGuard in a similar function: I think it was in the stub file for `networkx`. Check that out.
-def DOTgetPileIfLeaf(leavesPinned: PermutationSpace, pile: int, default: int | None = None) -> int | None:
+def DOTgetPileIfLeaf(permutationSpace: PermutationSpace, pile: Pile, default: Leaf | None = None) -> Leaf | None:
 # TODO I have a bad feeling that I am going to make `PermutationSpace` a subclass of `dict` and add methods.
 # NOTE I REFUSE TO BE AN OBJECT-ORIENTED PROGRAMMER!!! But, I'll use some OOP if it makes sense.
 # I think collections has some my-first-dict-subclass functions.
-	"""Like `leavesPinned.get(pile)`, but only return a `leaf` or `default`."""
-	ImaLeaf: int | PileRangeOfLeaves | None = leavesPinned.get(pile)
+	"""Like `permutationSpace.get(pile)`, but only return a `leaf` or `default`."""
+	ImaLeaf: LeafOrPileRangeOfLeaves | None = permutationSpace.get(pile)
 	if thisIsALeaf(ImaLeaf):
 		return ImaLeaf
 	return default
 
-def DOTgetPileIfPileRangeOfLeaves(leavesPinned: PermutationSpace, pile: int, default: PileRangeOfLeaves | None = None) -> PileRangeOfLeaves | None:
-	ImaPileRangeOfLeaves: int | PileRangeOfLeaves | None = leavesPinned.get(pile)
+def DOTgetPileIfPileRangeOfLeaves(permutationSpace: PermutationSpace, pile: Pile, default: PileRangeOfLeaves | None = None) -> PileRangeOfLeaves | None:
+	ImaPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None = permutationSpace.get(pile)
 	if thisIsAPileRangeOfLeaves(ImaPileRangeOfLeaves):
 		return ImaPileRangeOfLeaves
 	return default
 
-def getIteratorOfLeaves(pileRangeOfLeaves: PileRangeOfLeaves) -> Iterator[int]:
+def getIteratorOfLeaves(pileRangeOfLeaves: PileRangeOfLeaves) -> Iterator[Leaf]:
 	"""Convert `pileRangeOfLeaves` to an `Iterator` of `type` `int` `leaf`.
 
 	Parameters
@@ -208,22 +209,22 @@ def getIteratorOfLeaves(pileRangeOfLeaves: PileRangeOfLeaves) -> Iterator[int]:
 	iteratorOfLeaves[-1] = 0
 	return iteratorOfLeaves.iter_set()
 
-def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> PileRangeOfLeaves:
+def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRangeOfLeaves:
 	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))
 
-def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[int]) -> PileRangeOfLeaves:
+def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRangeOfLeaves:
 	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
 
 @syntacticCurry
-def leafParityInDimension(leaf: int, dimension: int) -> int:
-	return int(bit_test(leaf, dimension))
+def leafParityInDimension(leaf: Leaf, dimension: int) -> int:
+	return int(isBit1吗(leaf, dimension))
 
-def oopsAllLeaves(leavesPinned: PermutationSpace) -> dict[int, int]:
+def oopsAllLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: pileRangeOfLeaves`.
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Dictionary of `pile: leaf` and `pile: pileRangeOfLeaves`.
 
 	Returns
@@ -231,14 +232,14 @@ def oopsAllLeaves(leavesPinned: PermutationSpace) -> dict[int, int]:
 	dictionaryOfPileLeaf : dict[int, int]
 		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 	"""
-	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in sorted(leavesPinned.items()) if thisIsALeaf(leafOrPileRangeOfLeaves)}
+	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in sorted(permutationSpace.items()) if thisIsALeaf(leafOrPileRangeOfLeaves)}
 
-def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, PileRangeOfLeaves]:
-	"""Return a dictionary of all pile-ranges of leaves in `leavesPinned`.
+def oopsAllPileRangesOfLeaves(permutationSpace: PermutationSpace) -> PilesWithPileRangeOfLeaves:
+	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Dictionary of `pile: leaf` and `pile: pileRangeOfLeaves`.
 
 	Returns
@@ -246,20 +247,24 @@ def oopsAllPileRangesOfLeaves(leavesPinned: PermutationSpace) -> dict[int, PileR
 	pilesWithPileRangeOfLeaves : dict[int, PileRangeOfLeaves]
 		Dictionary of `pile: pileRangeOfLeaves`, if a `pileRangeOfLeaves` is defined at `pile`.
 	"""
-	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in leavesPinned.items() if thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves)}
+	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in permutationSpace.items() if thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves)}
 
-def Z0Z_bifurcateLeavesPinned(leavesPinned: PermutationSpace) -> tuple[dict[int, int], dict[int, PileRangeOfLeaves]]:
-	"""Separate `leavesPinned` into two dictionaries: one of `pile: leaf` and one of `pile: pileRangeOfLeaves`.
+def Z0Z_bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[PinnedLeaves, PilesWithPileRangeOfLeaves]:
+	"""Separate `permutationSpace` into two dictionaries: one of `pile: leaf` and one of `pile: pileRangeOfLeaves`.
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Dictionary of `pile: leaf` and `pile: pileRangeOfLeaves`.
 
 	Returns
 	-------
 	dictionaryOfPileLeaf, pilesWithPileRangeOfLeaves : tuple[dict[int, int], dict[int, PileRangeOfLeaves]]
 	"""
+	permutationSpace = {}
+	del permutationSpace
+	yoMama: tuple[PinnedLeaves, PilesWithPileRangeOfLeaves] = ({}, {})
+	return yoMama
 
 @syntacticCurry
 def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: PileRangeOfLeaves, pileRangeOfLeaves: PileRangeOfLeaves) -> PileRangeOfLeaves:
@@ -271,8 +276,8 @@ def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: PileRangeOfLeaves, pileRan
 	"""
 	return pileRangeOfLeaves & pileRangeOfLeavesDISPOSABLE
 
-def Z0Z_JeanValjean(p24601: PileRangeOfLeaves) -> int | PileRangeOfLeaves | None:
-	whoAmI: int | PileRangeOfLeaves | None = p24601
+def Z0Z_JeanValjean(p24601: PileRangeOfLeaves) -> LeafOrPileRangeOfLeaves | None:
+	whoAmI: LeafOrPileRangeOfLeaves | None = p24601
 	if thisIsAPileRangeOfLeaves(p24601):
 		if p24601.bit_count() == 1:
 			# The pile-range of leaves is null; the only "set bit" is the bit that means "I am a pileRangeOfLeaves."

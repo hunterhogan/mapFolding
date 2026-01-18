@@ -6,17 +6,17 @@ from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding
 from math import factorial
 
-# TODO make sure all leavesPinned have pile-ranges and update their pile-ranges
+# TODO make sure all permutationSpace have pile-ranges and update their pile-ranges
 
 def count(state: EliminationState) -> EliminationState:
-	state.groupsOfFolds += sum(map(countLeavesPinned, state.listPermutationSpace, repeat(state.mapShape), repeat(range(state.leavesTotal))))
+	state.groupsOfFolds += sum(map(countPermutationSpace, state.listPermutationSpace, repeat(state.mapShape), repeat(range(state.leavesTotal))))
 	return state
 
-def countLeavesPinned(leavesPinned: PermutationSpace, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
+def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
 # TODO
 	"""Replace `permutations` with the `noDuplicates` filter on `CartesianProduct` of the domains of each leaf.
 
-	leavesPinned must be in order by `pile`.
+	permutationSpace must be in order by `pile`.
 	filter with `oop`.
 	pileRangeOfLeaves.iter_set() returns an iterator of int corresponding to the leaves in the pile's range.
 	https://gmpy2.readthedocs.io/en/latest/advmpz.html#gmpy2.xmpz.iter_set
@@ -27,14 +27,14 @@ def countLeavesPinned(leavesPinned: PermutationSpace, mapShape: tuple[int, ...],
 	return sum(
 		map(thisLeafFoldingIsValid
 			, map(makeFolding
-				, repeat(leavesPinned)
-				, CartesianProduct(*map(getIteratorOfLeaves, oopsAllPileRangesOfLeaves(leavesPinned).values()))
+				, repeat(permutationSpace)
+				, CartesianProduct(*map(getIteratorOfLeaves, oopsAllPileRangesOfLeaves(permutationSpace).values()))
 			)
 			, repeat(mapShape)
 		)
 	)
 	"""
-	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(leavesPinned), permutations(tuple(set(leavesToInsert).difference(leavesPinned.values())))), repeat(mapShape)))
+	return sum(map(thisLeafFoldingIsValid, map(makeFolding, repeat(permutationSpace), permutations(tuple(set(leavesToInsert).difference(permutationSpace.values())))), repeat(mapShape)))
 
 
 def theorem2b(state: EliminationState) -> EliminationState:

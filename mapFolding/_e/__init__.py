@@ -8,8 +8,9 @@ from mapFolding._e._semiotics import (
 
 # isort: split
 from mapFolding._e._theTypes import (
-	Folding as Folding, LeafOrPileRangeOfLeaves as LeafOrPileRangeOfLeaves, PermutationSpace as PermutationSpace,
-	PileRangeOfLeaves as PileRangeOfLeaves)
+	Folding as Folding, Leaf as Leaf, LeafOrPileRangeOfLeaves as LeafOrPileRangeOfLeaves,
+	PermutationSpace as PermutationSpace, Pile as Pile, PileRangeOfLeaves as PileRangeOfLeaves,
+	PilesWithPileRangeOfLeaves as PilesWithPileRangeOfLeaves, PinnedLeaves as PinnedLeaves)
 
 # isort: split
 from mapFolding._e._beDRY import (

@@ -7,7 +7,7 @@ from mapFolding._e import (
 	thisIsALeaf, 一, 零, 首零)
 from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensions import appendLeavesPinnedAtPile, pinPilesAtEnds
+from mapFolding._e.pin2上nDimensions import appendPermutationSpaceAtPile, pinPilesAtEnds
 from mapFolding._e.pinIt import makeFolding
 from math import factorial
 from more_itertools import interleave_longest
@@ -19,20 +19,20 @@ if TYPE_CHECKING:
 
 #======== Flow control ===============================================
 
-def nextLeavesPinnedWorkbench(state: EliminationState, pileProcessingOrder: list[int] | None = None, queueStopBefore: int | None = None) -> EliminationState:
+def nextPermutationSpaceWorkbench(state: EliminationState, pileProcessingOrder: list[int] | None = None, queueStopBefore: int | None = None) -> EliminationState:
 	if pileProcessingOrder is None:
 		pileProcessingOrder = pileProcessingOrderDefault(state)
 
 	# NOTE If you delete this, there will be an infinite loop and you will be sad.
-	state.leavesPinned = {}
+	state.permutationSpace = {}
 
 	for pile in pileProcessingOrder:
 		if pile == queueStopBefore:
 			break
 
-		for leavesPinned in filter(pileIsOpen(pile=pile), state.listPermutationSpace):
-			state.leavesPinned = leavesPinned
-			state.listPermutationSpace.remove(leavesPinned)
+		for permutationSpace in filter(pileIsOpen(pile=pile), state.listPermutationSpace):
+			state.permutationSpace = permutationSpace
+			state.listPermutationSpace.remove(permutationSpace)
 			state.pile = pile
 			return state
 	return state
@@ -44,30 +44,30 @@ def pileProcessingOrderDefault(state: EliminationState) -> list[int]:
 	return pileProcessingOrder
 
 def pinByCrease(state: EliminationState) -> EliminationState:
-	state = nextLeavesPinnedWorkbench(state)
-	while state.leavesPinned:
-		pileRangeOfLeaves: PileRangeOfLeaves = raiseIfNone(DOTgetPileIfPileRangeOfLeaves(state.leavesPinned, state.pile))
-		if thisIsALeaf(leaf := state.leavesPinned.get(state.pile - 1)):
+	state = nextPermutationSpaceWorkbench(state)
+	while state.permutationSpace:
+		pileRangeOfLeaves: PileRangeOfLeaves = raiseIfNone(DOTgetPileIfPileRangeOfLeaves(state.permutationSpace, state.pile))
+		if thisIsALeaf(leaf := state.permutationSpace.get(state.pile - 1)):
 			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, getPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseNext(state, leaf)))
-		if thisIsALeaf(leaf := state.leavesPinned.get(state.pile + 1)):
+		if thisIsALeaf(leaf := state.permutationSpace.get(state.pile + 1)):
 			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, getPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseBack(state, leaf)))
 
-		sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, leavesPinned=state.leavesPinned.copy())
-		sherpa = appendLeavesPinnedAtPile(sherpa, getIteratorOfLeaves(pileRangeOfLeaves)) # pyright: ignore[reportArgumentType]
+		sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, permutationSpace=state.permutationSpace.copy())
+		sherpa = appendPermutationSpaceAtPile(sherpa, getIteratorOfLeaves(pileRangeOfLeaves)) # pyright: ignore[reportArgumentType]
 
 		state.listPermutationSpace.extend(sherpa.listPermutationSpace)
 
-		state = nextLeavesPinnedWorkbench(state)
+		state = nextPermutationSpaceWorkbench(state)
 
 	return _purgeInvalidLeafFoldings(state)
 
 def _purgeInvalidLeafFoldings(state: EliminationState) -> EliminationState:
 	listPermutationSpaceCopy: list[PermutationSpace] = state.listPermutationSpace.copy()
 	state.listPermutationSpace = []
-	for leavesPinned in listPermutationSpaceCopy:
-		folding: Folding = makeFolding(leavesPinned, ())
+	for permutationSpace in listPermutationSpaceCopy:
+		folding: Folding = makeFolding(permutationSpace, ())
 		if thisLeafFoldingIsValid(folding, state.mapShape):
-			state.listPermutationSpace.append(leavesPinned)
+			state.listPermutationSpace.append(permutationSpace)
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
@@ -84,8 +84,8 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		state.listPermutationSpace = []
 
 		listClaimTickets: list[Future[EliminationState]] = [
-			concurrencyManager.submit(pinByCrease, EliminationState(state.mapShape, listPermutationSpace=[leavesPinned]))
-			for leavesPinned in listPermutationSpaceCopy
+			concurrencyManager.submit(pinByCrease, EliminationState(state.mapShape, listPermutationSpace=[permutationSpace]))
+			for permutationSpace in listPermutationSpaceCopy
 		]
 
 		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):

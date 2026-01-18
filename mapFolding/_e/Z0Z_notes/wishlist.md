@@ -19,18 +19,6 @@ This is a relatively new problem.
 These functions have matured, and I'll probably be using them for the foreseeable future. But their style diverges from the rest
 of the codebase, and I wish they were more consistent with it. They are not dry: I copy-paste the code from one module to another.
 
-## `toolz.dicttoolz.keyfilter` and `valfilter` don't do type narrowing
-
-In the following function, for example, `valfilter` removes all `mpz` types from the dictionary, but Pylance thinks the return type is wrong.
-
-```python
-
-def oopsAllLeaves(leavesPinned: int | mpz) -> dict[int, int]:
-    return valFilter(thisIsALeaf, leavesPinned)
-```
-
-> Type "dict[int, int | mpz]" is not assignable to return type "dict[int, int]"
-
 ## Share transcription of Lunnon 1971
 
 In Z0Z_literature\Lunnon1971.txt, I have transcribed most of the image-only PDF into text.
@@ -60,21 +48,13 @@ advantageous to divide the `PermutationSpace` into four dictionaries:
 
 Then other effects would cascade through the four dictionaries due to other functions.
 
-### Add `listFoldings` field to `EliminationState`
-
-If a `PermutationSpace` has only one permutation, moving it to `listFoldings` would mean I wouldn't keep checking it with every
-function. If sum(leavesPinned.values()) == state.foldingCheckSum, then it is a `folding`.
-
-Also, there must be a tipping point when the `PermutationSpace` is small enough that enumerating all permutations and
-running them through `thisLeafFoldingIsValid` is computationally cheaper than continuing to refine the `PermutationSpace`.
-
 ### Make a 2^n-dimensional version of `thisLeafFoldingIsValid`
 
 The math is far less complex with 2^n-dimensional maps: the computational savings might be multiple orders of magnitude.
 
 ## Development tools
 
-### VS Code importing deprecated types from typing instead of collections
+### Pylance importing deprecated types from typing instead of collections
 
 Fix that shit already. I'm waiting for a reboot to confirm, but I might have a workaround. When I first install a venv, Pylance
 uses the types from pandas in "site-packages", but if I open my pandas stub file that correlates with the pandas class/function in

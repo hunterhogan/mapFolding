@@ -1,6 +1,4 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
-from math import prod
-from mapFolding import decreasing
 from bisect import bisect_left
 from collections.abc import Iterable
 from cytoolz.functoolz import curry as syntacticCurry
@@ -8,11 +6,14 @@ from cytoolz.itertoolz import unique
 from functools import partial
 from gmpy2 import is_even, is_odd
 from hunterMakesPy import raiseIfNone
+from mapFolding import decreasing
 from mapFolding._e import (
 	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseBack, getLeavesCreaseNext,
-	getPileRange, getSumsOfProductsOfDimensionsNearest首, leafInSubHyperplane, ptount, Z0Z_invert, 零, 首一, 首二, 首零, 首零一)
+	getPileRange, getSumsOfProductsOfDimensionsNearest首, Leaf, leafInSubHyperplane, Pile, ptount, Z0Z_invert, 零, 首一, 首二,
+	首零, 首零一)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
+from math import prod
 from more_itertools import flatten, iter_index
 from operator import add, iadd, isub, mul
 from pprint import pprint
@@ -21,12 +22,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	import pandas
 
-def _getGroupedBy(state: EliminationState, pileTarget: int, groupByLeavesAtPiles: tuple[int, ...]) -> dict[int | tuple[int, ...], list[int]]:
+def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
-	groupedBy: dict[int | tuple[int, ...], list[int]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict() # pyright: ignore[reportAssignmentType]
+	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict() # pyright: ignore[reportAssignmentType]
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
-def getExcludedLeaves(state: EliminationState, pileTarget: int, groupByLeavesAtPiles: tuple[int, ...]) -> dict[int | tuple[int, ...], list[int]]:
+def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
 	return {leaves: sorted(set(getDictionaryPileRanges(state)[pileTarget]).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
 if __name__ == '__main__':
@@ -99,10 +100,10 @@ pp3  = (3, 5, 9, 17, 33)
 
 	"""
 
-	pile: int = 4
+	pile: Pile = 4
 	pileDimension = bisect_left(state.sumsOfProductsOfDimensionsNearest首, pile>>1<<1)
 	leafMinimum = is_even(pile) + state.productsOfDimensions[pileDimension]
-	pileRange: list[int] = []
+	pileRange: list[Leaf] = []
 
 	# pileRange.append(leafMinimum)
 
@@ -200,8 +201,8 @@ pp3  = (3, 5, 9, 17, 33)
 		def Z0Z_alphaBeta(state: EliminationState, alphaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
 			return list(flatten(map(intraDimensionalLeaves(state), state.productsOfDimensions[2 + alphaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
 
-		def Z0Z_getPileRange(state: EliminationState, pile: int) -> Iterable[int]:
-			pileRange: list[int] = []
+		def Z0Z_getPileRange(state: EliminationState, pile: Pile) -> Iterable[Leaf]:
+			pileRange: list[Leaf] = []
 
 			# odd leaves < 32.
 			# ? 12 < even leaves < 32.
@@ -231,8 +232,8 @@ pp3  = (3, 5, 9, 17, 33)
 
 			return tuple(sorted(pileRange))
 
-		def Z0Z_getPileRangeEven(state: EliminationState, pile: int) -> Iterable[int]:
-			pileRange: list[int] = []
+		def Z0Z_getPileRangeEven(state: EliminationState, pile: Pile) -> Iterable[Leaf]:
+			pileRange: list[Leaf] = []
 
 			for yy in range(3):
 				pileRange.extend(map(

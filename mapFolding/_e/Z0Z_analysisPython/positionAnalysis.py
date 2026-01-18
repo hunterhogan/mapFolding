@@ -5,7 +5,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import ansiColorBlackOnCyan, ansiColorReset
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeafDomain, getZ0Z_successor,
-	howManyDimensionsHaveOddParity, pileOrigin, 零)
+	howManyDimensionsHaveOddParity, Leaf, Pile, pileOrigin, 零)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
 from pprint import pprint
@@ -298,9 +298,9 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 
 	return dataframeConditionalSuccession
 
-def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLater: int) -> pandas.DataFrame:
+def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLater: Leaf) -> pandas.DataFrame:
 	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
-	columnsToExclude: list[int] | None = [pileOrigin, 零, state.pileLast]
+	columnsToExclude: list[Pile] | None = [pileOrigin, 零, state.pileLast]
 	if columnsToExclude is not None: # pyright: ignore[reportUnnecessaryComparison]
 		dataframeSequences = dataframeSequences.drop(columns=columnsToExclude)
 	arraySequences: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = dataframeSequences.to_numpy(dtype=numpy.int16)
@@ -343,7 +343,7 @@ def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLa
 		indicesEarlier: numpy.ndarray[Any, numpy.dtype[numpy.intp]] = numpy.flatnonzero(maskAlwaysEarlier)
 
 		for leafEarlierCandidate in indicesEarlier.tolist():
-			leafEarlier: int = int(leafEarlierCandidate)
+			leafEarlier: Leaf = int(leafEarlierCandidate)
 			if (leafEarlier, leafLater) in setUnconditional:
 				continue
 			listConditionalRelationships.append({
@@ -355,15 +355,15 @@ def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLa
 	dataframeConditionalPrecedenceAcrossDomain: pandas.DataFrame = pandas.DataFrame(listConditionalRelationships, columns=['Earlier', 'Later', 'AtColumn']).sort_values(['AtColumn', 'Earlier']).reset_index(drop=True)
 	return dataframeConditionalPrecedenceAcrossDomain
 
-def getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state: EliminationState, leafLater: int) -> list[list[int]]:
+def getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state: EliminationState, leafLater: Leaf) -> list[list[Pile]]:
 	dataframeConditional: pandas.DataFrame = getLeafConditionalPrecedenceAcrossLeafDomain(state, leafLater)
-	pilesSortedUnique: list[int]
+	pilesSortedUnique: list[Pile]
 	if dataframeConditional.empty:
 		pilesSortedUnique = []
 	else:
 		pilesSortedUnique = sorted({int(pile) for pile in dataframeConditional['AtColumn'].tolist()})
 
-	listPileGroups: list[list[int]] = []
+	listPileGroups: list[list[Pile]] = []
 	for pile in pilesSortedUnique:
 		if not listPileGroups:
 			listPileGroups.append([pile])
@@ -373,21 +373,21 @@ def getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state: EliminationSta
 			listPileGroups.append([pile])
 	return listPileGroups
 
-def getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leaf: int) -> list[int]:
-	listPileGroups: list[list[int]] = getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state, leaf)
-	listPilesAtEnd: list[int] = []
+def getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leaf: Leaf) -> list[Pile]:
+	listPileGroups: list[list[Pile]] = getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state, leaf)
+	listPilesAtEnd: list[Pile] = []
 	if listPileGroups:
 		listPilesAtEnd = listPileGroups[-1]
 	return listPilesAtEnd
 
-def getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, listLeavesAnalyzed: list[int] | None = None) -> dict[int, list[int]]:
+def getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, listLeavesAnalyzed: list[Leaf] | None = None) -> dict[Leaf, list[Pile]]:
 	if listLeavesAnalyzed is None:
-		leavesExcluded: set[int] = {pileOrigin, 零, state.leavesTotal - 零}
+		leavesExcluded: set[Leaf] = {pileOrigin, 零, state.leavesTotal - 零}
 		listLeavesAnalyzed = [leaf for leaf in range(state.leavesTotal) if leaf not in leavesExcluded]
 
-	dictionaryPilesAtDomainEnds: dict[int, list[int]] = {}
+	dictionaryPilesAtDomainEnds: dict[Leaf, list[Pile]] = {}
 	for leaf in listLeavesAnalyzed:
-		listPilesAtEnd: list[int] = getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state, leaf)
+		listPilesAtEnd: list[Pile] = getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state, leaf)
 		if listPilesAtEnd:
 			dictionaryPilesAtDomainEnds[leaf] = listPilesAtEnd
 	return dictionaryPilesAtDomainEnds

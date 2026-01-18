@@ -23,15 +23,15 @@ import pytest
 
 #======== Logic Tests (Adapted from test_excluder_logic.py) =======
 
-@pytest.mark.parametrize("dimensionsTotal, pileLast, leavesPinned, expectedResult", [
+@pytest.mark.parametrize("dimensionsTotal, pileLast, permutationSpace, expectedResult", [
 	(6, 99, {7: 4, 12: 36}, True),
 ], ids=["2d6_pileLast99_pinned7_4_12_36"])
-def test_Z0Z_excluder(dimensionsTotal: int, pileLast: int, leavesPinned: dict[int, int], expectedResult: bool, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_Z0Z_excluder(dimensionsTotal: int, pileLast: int, permutationSpace: dict[int, int], expectedResult: bool, monkeypatch: pytest.MonkeyPatch) -> None:
 	"""Verify Z0Z_excluder correctly identifies invalid states."""
 	state = MagicMock(spec=EliminationState)
 	state.dimensionsTotal = dimensionsTotal
 	state.pileLast = pileLast
-	state.leavesPinned = leavesPinned
+	state.permutationSpace = permutationSpace
 
 	stubLookup: dict[int, dict[int, dict[int, list[int]]]] = {
 		7: {

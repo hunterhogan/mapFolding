@@ -11,8 +11,8 @@ from mapFolding import ansiColorReset, ansiColorYellowOnBlack, decreasing, inclu
 from mapFolding._e import (
 	between, consecutive, dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首,
 	dimensionSecondNearest首, dimensionThirdNearest首, exclude, getPileRangeOfLeaves, getSumsOfProductsOfDimensionsNearest首,
-	howManyDimensionsHaveOddParity, leafInSubHyperplane, leafIsPinned, leafOrigin, mapShapeIs2上nDimensions,
-	PermutationSpace, pileOrigin, reverseLookup, Z0Z_JeanValjean, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
+	howManyDimensionsHaveOddParity, Leaf, leafInSubHyperplane, leafIsPinned, leafOrigin, mapShapeIs2上nDimensions,
+	PermutationSpace, Pile, pileOrigin, reverseLookup, Z0Z_JeanValjean, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import all_unique, loops
 from operator import add, sub
@@ -23,7 +23,7 @@ import sys
 
 #======== Creases =================================
 
-def getLeavesCreaseBack(state: EliminationState, leaf: int) -> Iterator[int]:
+def getLeavesCreaseBack(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
 	"""1) `leaf` has at most `dimensionsTotal - 1` many creases.
 
 	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
@@ -33,7 +33,7 @@ def getLeavesCreaseBack(state: EliminationState, leaf: int) -> Iterator[int]:
 	"""
 	return iter(_getCreases(state, leaf, increase=False))
 
-def getLeavesCreaseNext(state: EliminationState, leaf: int) -> Iterator[int]:
+def getLeavesCreaseNext(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
 	"""1) `leaf` has at most `dimensionsTotal - 1` many creases.
 
 	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
@@ -43,15 +43,15 @@ def getLeavesCreaseNext(state: EliminationState, leaf: int) -> Iterator[int]:
 	"""
 	return iter(_getCreases(state, leaf, increase=True))
 
-def _getCreases(state: EliminationState, leaf: int, *, increase: bool = True) -> tuple[int, ...]:
+def _getCreases(state: EliminationState, leaf: Leaf, *, increase: bool = True) -> tuple[Leaf, ...]:
 	return _makeCreases(leaf, state.dimensionsTotal)[increase]
 @cache
-def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[tuple[int, ...], tuple[int, ...]]:
-	listLeavesCrease: list[int] = [int(bit_flip(leaf, dimensionIndex)) for dimensionIndex in range(dimensionsTotal)]
+def _makeCreases(leaf: Leaf, dimensionsTotal: int) -> tuple[tuple[Leaf, ...], tuple[Leaf, ...]]:
+	listLeavesCrease: list[Leaf] = [int(bit_flip(leaf, dimensionIndex)) for dimensionIndex in range(dimensionsTotal)]
 
 	if leaf == leafOrigin: # A special case I've been unable to figure out how to incorporate in the formula.
-		listLeavesCreaseNext: list[int] = [1]
-		listLeavesCreaseBack: list[int] = []
+		listLeavesCreaseNext: list[Leaf] = [1]
+		listLeavesCreaseBack: list[Leaf] = []
 	else:
 		slicingIndices: int = is_odd(howManyDimensionsHaveOddParity(leaf))
 
@@ -77,34 +77,34 @@ def _makeCreases(leaf: int, dimensionsTotal: int) -> tuple[tuple[int, ...], tupl
 #-------- Boolean filters for (mathematical) ranges of piles -----------------------------------
 
 @syntacticCurry
-def filterCeiling(pile: int, dimensionsTotal: int, leaf: int) -> bool:
+def filterCeiling(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
 	return pile <  int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin)
 
 @syntacticCurry
-def filterFloor(pile: int, leaf: int) -> bool:
+def filterFloor(pile: Pile, leaf: Leaf) -> bool:
 	return int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile
 
 @syntacticCurry
-def filterParity(pile: int, leaf: int) -> bool:
+def filterParity(pile: Pile, leaf: Leaf) -> bool:
 	return (pile & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1)
 
 @syntacticCurry
-def filterDoubleParity(pile: int, dimensionsTotal: int, leaf: int) -> bool:
+def filterDoubleParity(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
 	if leaf != 首零(dimensionsTotal)+零:
 		return True
 	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
 
-def getPileRange(state: EliminationState, pile: int) -> Iterator[int]:
+def getPileRange(state: EliminationState, pile: Pile) -> Iterator[Leaf]:
 	return iter(_getPileRange(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal))
 @cache
-def _getPileRange(pile: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> tuple[int, ...]:
+def _getPileRange(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> tuple[Leaf, ...]:
 	if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
-		parityMatch: Callable[[int], bool] = filterParity(pile)
-		pileAboveFloor: Callable[[int], bool] = filterFloor(pile)
-		pileBelowCeiling: Callable[[int], bool] = filterCeiling(pile, dimensionsTotal)
-		matchLargerStep: Callable[[int], bool] = filterDoubleParity(pile, dimensionsTotal)
+		parityMatch: Callable[[Leaf], bool] = filterParity(pile)
+		pileAboveFloor: Callable[[Leaf], bool] = filterFloor(pile)
+		pileBelowCeiling: Callable[[Leaf], bool] = filterCeiling(pile, dimensionsTotal)
+		matchLargerStep: Callable[[Leaf], bool] = filterDoubleParity(pile, dimensionsTotal)
 
-		pileRange: Iterable[int] = range(leavesTotal)
+		pileRange: Iterable[Leaf] = range(leavesTotal)
 		pileRange = filter(parityMatch, pileRange)
 		pileRange = filter(pileAboveFloor, pileRange)
 		pileRange = filter(pileBelowCeiling, pileRange)
@@ -112,16 +112,16 @@ def _getPileRange(pile: int, dimensionsTotal: int, mapShape: tuple[int, ...], le
 
 	return tuple(range(leavesTotal))
 
-def getDictionaryPileRanges(state: EliminationState) -> dict[int, tuple[int, ...]]:
+def getDictionaryPileRanges(state: EliminationState) -> dict[Pile, tuple[Leaf, ...]]:
 	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
 	return {pile: tuple(getPileRange(state, pile)) for pile in range(state.leavesTotal)}
 
 #======== Leaf domains ====================================
 
-def getLeafDomain(state: EliminationState, leaf: int) -> range:
+def getLeafDomain(state: EliminationState, leaf: Leaf) -> range:
 	return _getLeafDomain(leaf, state.dimensionsTotal, state.mapShape, state.leavesTotal)
 @cache
-def _getLeafDomain(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> range:
+def _getLeafDomain(leaf: Leaf, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> range:
 	"""The subroutines assume `dimensionLength == 2`, but I think the concept could be extended to other `mapShape`."""
 	state = EliminationState(mapShape)
 	if mapShapeIs2上nDimensions(state.mapShape):
@@ -792,20 +792,20 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 
 	return tuple(sorted(set(domainCombined)))
 
-def getLeaf首零Plus零Domain(state: EliminationState, leaf: int | None = None) -> tuple[int, ...]:
-	"""Get the full domain of `leaf首零Plus零` that is valid in all cases, or if `leaf一零` and `leaf首零一` are pinned in `state.leavesPinned`, get a domain of `leaf首零Plus零` customized to `pileOfLeaf一零` and `pileOfLeaf首零一`."""
+def getLeaf首零Plus零Domain(state: EliminationState, leaf: Leaf | None = None) -> tuple[Pile, ...]:
+	"""Get the full domain of `leaf首零Plus零` that is valid in all cases, or if `leaf一零` and `leaf首零一` are pinned in `state.permutationSpace`, get a domain of `leaf首零Plus零` customized to `pileOfLeaf一零` and `pileOfLeaf首零一`."""
 	if leaf is None:
 		leaf = 首零(state.dimensionsTotal)+零
-	domain首零Plus零: tuple[int, ...] = tuple(getLeafDomain(state, leaf))
-	leaf一零: int = 一+零
-	leaf首零一: int = 首零一(state.dimensionsTotal)
-	if leafIsPinned(state.leavesPinned, leaf一零) and leafIsPinned(state.leavesPinned, leaf首零一):
-		pileOfLeaf一零: int = reverseLookup(state.leavesPinned, leaf一零)
-		pileOfLeaf首零一: int = reverseLookup(state.leavesPinned, leaf首零一)
+	domain首零Plus零: tuple[Pile, ...] = tuple(getLeafDomain(state, leaf))
+	leaf一零: Leaf = 一+零
+	leaf首零一: Leaf = 首零一(state.dimensionsTotal)
+	if leafIsPinned(state.permutationSpace, leaf一零) and leafIsPinned(state.permutationSpace, leaf首零一):
+		pileOfLeaf一零: Pile = reverseLookup(state.permutationSpace, leaf一零)
+		pileOfLeaf首零一: Pile = reverseLookup(state.permutationSpace, leaf首零一)
 		domain首零Plus零 = _getLeaf首零Plus零Domain(domain首零Plus零, pileOfLeaf一零, pileOfLeaf首零一, state.dimensionsTotal, state.leavesTotal)
 	return domain首零Plus零
 @cache
-def _getLeaf首零Plus零Domain(domain首零Plus零: tuple[int, ...], pileOfLeaf一零: int, pileOfLeaf首零一: int, dimensionsTotal: int, leavesTotal: int) -> tuple[int, ...]:
+def _getLeaf首零Plus零Domain(domain首零Plus零: tuple[Pile, ...], pileOfLeaf一零: Pile, pileOfLeaf首零一: Pile, dimensionsTotal: int, leavesTotal: int) -> tuple[Pile, ...]:
 	pilesTotal: int = 首一(dimensionsTotal)
 
 	bump: int = 1 - int(pileOfLeaf一零.bit_count() == 1)
@@ -1006,7 +1006,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 # ruff: noqa: SIM102
 # I am developing in this module because of Python's effing namespace and "circular import" issues.
 
-def getDictionaryConditionalLeafPredecessors(state: EliminationState) -> dict[int, dict[int, list[int]]]:
+def getDictionaryConditionalLeafPredecessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafPredecessor`].
 
 	Some leaves are always preceded by one or more leaves. Most leaves, however, are preceded by one or more other leaves only if
@@ -1014,12 +1014,12 @@ def getDictionaryConditionalLeafPredecessors(state: EliminationState) -> dict[in
 	"""
 	return _getDictionaryConditionalLeafPredecessors(state.mapShape)
 @cache
-def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[int]]]:
+def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""Prototype."""
 	state = EliminationState(mapShape)
-	dictionaryDomains: dict[int, range] = getDictionaryLeafDomains(state)
+	dictionaryDomains: dict[Leaf, range] = getDictionaryLeafDomains(state)
 
-	dictionaryPrecedence: dict[int, dict[int, list[int]]] = {}
+	dictionaryPrecedence: dict[Leaf, dict[Pile, list[Leaf]]] = {}
 
 #======== piles at the beginning of the leaf's domain ================
 	for dimension in range(3, state.dimensionsTotal + inclusive):
@@ -1036,7 +1036,7 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 	del leaf
 
 #======== leaf首零一Plus零: conditional `leafPredecessor` in all piles of its domain ===========
-	leaf: int = 首零一(state.dimensionsTotal)+零
+	leaf: Leaf = 首零一(state.dimensionsTotal)+零
 	listOfPiles = list(dictionaryDomains[leaf])
 	dictionaryPrecedence[leaf] = {aPile: [] for aPile in list(dictionaryDomains[leaf])}
 	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions)
@@ -1103,8 +1103,8 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 #======== leaf首零Plus零: Separate logic because the distance between absolute piles is 4, not 2 ==============
 # leaf has conditional `leafPredecessor` in all but the first pile of its domain
 # Reminder: has UNconditional `leafPredecessor` in the first pile: leaf零
-	leaf: int = 首零(state.dimensionsTotal)+零
-	listOfPiles: list[int] = list(dictionaryDomains[leaf])[1: None]
+	leaf: Leaf = 首零(state.dimensionsTotal)+零
+	listOfPiles: list[Pile] = list(dictionaryDomains[leaf])[1: None]
 	dictionaryPrecedence[leaf] = {aPile: [] for aPile in listOfPiles}
 	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions)
 	pileStepAbsolute = 4
@@ -1138,41 +1138,41 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 
 	return dictionaryPrecedence
 
-def getZ0Z_successor(state: EliminationState) -> dict[int, dict[int, list[int]]]:
+def getZ0Z_successor(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafSuccessor`]."""
 	return _getZ0Z_successor(state.mapShape)
 @cache
-def _getZ0Z_successor(mapShape: tuple[int, ...]) -> dict[int, dict[int, list[int]]]:
+def _getZ0Z_successor(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	state = EliminationState(mapShape)
-	dictionaryDomains: dict[int, range] = getDictionaryLeafDomains(state)
+	dictionaryDomains: dict[Leaf, range] = getDictionaryLeafDomains(state)
 
-	dictionarySuccessor: dict[int, dict[int, list[int]]] = {}
+	dictionarySuccessor: dict[Leaf, dict[Pile, list[Leaf]]] = {}
 
-	dictionaryPrecedence: dict[int, dict[int, list[int]]] = getDictionaryConditionalLeafPredecessors(state)
+	dictionaryPrecedence: dict[Leaf, dict[Pile, list[Leaf]]] = getDictionaryConditionalLeafPredecessors(state)
 
 	for leafLater, dictionaryPiles in dictionaryPrecedence.items():
-		tupleDomainLater: tuple[int, ...] = tuple(dictionaryDomains[leafLater])
-		dictionaryPilesByPredecessor: defaultdict[int, set[int]] = defaultdict(set)
+		tupleDomainLater: tuple[Pile, ...] = tuple(dictionaryDomains[leafLater])
+		dictionaryPilesByPredecessor: defaultdict[Leaf, set[Pile]] = defaultdict(set)
 		for pileLater, listLeafPredecessors in dictionaryPiles.items():
 			for leafEarlier in listLeafPredecessors:
 				dictionaryPilesByPredecessor[leafEarlier].add(pileLater)
 
 		for leafEarlier, setPilesRequiring in dictionaryPilesByPredecessor.items():
-			tupleDomainEarlier: tuple[int, ...] = tuple(dictionaryDomains[leafEarlier])
-			listOptionalPiles: list[int] = sorted(pile for pile in tupleDomainLater if pile not in setPilesRequiring)
+			tupleDomainEarlier: tuple[Pile, ...] = tuple(dictionaryDomains[leafEarlier])
+			listOptionalPiles: list[Pile] = sorted(pile for pile in tupleDomainLater if pile not in setPilesRequiring)
 			for pileEarlier in tupleDomainEarlier:
 				optionalLessEqualCount: int = bisect_right(listOptionalPiles, pileEarlier)
 				if optionalLessEqualCount == 0:
-					listSuccessors: list[int] = dictionarySuccessor.setdefault(leafEarlier, {}).setdefault(pileEarlier, [])
+					listSuccessors: list[Leaf] = dictionarySuccessor.setdefault(leafEarlier, {}).setdefault(pileEarlier, [])
 					if leafLater not in listSuccessors:
 						listSuccessors.append(leafLater)
 
 	return dictionarySuccessor
 
-# TODO Creation of `leavesPinned2上nDomainDefaults` could possibly be a function. To future proof the performance, I probably want to cache `leavesPinned2上nDomainDefaults`.
+# TODO Creation of `permutationSpace2上nDomainDefaults` could possibly be a function. To future proof the performance, I probably want to cache `permutationSpace2上nDomainDefaults`.
 def addPileRangesOfLeaves(state: EliminationState) -> EliminationState:
-	leavesPinned2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(Z0Z_JeanValjean(getPileRangeOfLeaves(state.leavesTotal, pileRangeOfLeaves)))
+	permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(Z0Z_JeanValjean(getPileRangeOfLeaves(state.leavesTotal, pileRangeOfLeaves)))
 								for pile, pileRangeOfLeaves in getDictionaryPileRanges(state).items()}
-	state.leavesPinned = merge(leavesPinned2上nDomainDefaults, state.leavesPinned)
+	state.permutationSpace = merge(permutationSpace2上nDomainDefaults, state.permutationSpace)
 	return state
 

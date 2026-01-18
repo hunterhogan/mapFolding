@@ -44,12 +44,12 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 
 	Therefore, if I continue to pin pile 首零Less零, I should probably focus on different strategies.
 	"""
-	leafAt一:			int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, 			一))
-	leafAt首Less一:		int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, state.首 - 一))
-	leafAt一零:			int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, 			(一+零)))
-	leafAt首Less一零:	int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, state.首 - (一+零)))
-	leafAt二:			int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, 			二))
-	leafAt首Less二:		int = raiseIfNone(DOTgetPileIfLeaf(state.leavesPinned, state.首 - (二)))
+	leafAt一:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 			一))
+	leafAt首Less一:		int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, state.首 - 一))
+	leafAt一零:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 			(一+零)))
+	leafAt首Less一零:	int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, state.首 - (一+零)))
+	leafAt二:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 			二))
+	leafAt首Less二:		int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, state.首 - (二)))
 
 	dictionaryPileRanges: dict[int, tuple[int, ...]] = getDictionaryPileRanges(state)
 	listRemoveLeaves: list[int] = []

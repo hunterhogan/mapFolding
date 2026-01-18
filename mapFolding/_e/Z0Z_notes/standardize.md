@@ -1,5 +1,33 @@
 # Standardizing instructions, identifiers, descriptions, and other semiotic elements for clarity
 
+## "Identifiers and other labels"
+
+Labels include:
+
+- identifiers
+- file names
+- directory names
+- key names in mappings
+- parameter names
+
+## Vertical alignment helps humans to skim information and understand relationships
+
+Vertical alignment of related elements helps humans to skim information.
+
+In some cases, vertical alignment of type annotations, for example, would help humans to understand the lateral relationships of the variables.
+
+## Identifier thoughts
+
+- Functions and methods
+  - SVO
+  - More emphasis on actors, e.g., librarian, quartermaster
+  - thisIsEven, not isEven, which I already do. use `import as` and append `吗` for poorly named boolean functions.
+- modules: places
+- types: Adjective-Noun (capitalization and order switched to increase distinction)
+- other: noun-adjective-adverb
+
+I wonder if this matches what I have been doing.
+
 ## Replace "trailing operators" and "hidden" operators
 
 This concept is a form of "A very broad concept: foreshadow from left to right and from top to bottom."

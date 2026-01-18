@@ -15,8 +15,8 @@ from gmpy2 import bit_mask
 from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
-	between, DOTgetPileIfLeaf, DOTgetPileIfPileRangeOfLeaves, DOTvalues, Folding, getLeafDomain, getPileRange,
-	leafIsInPileRange, leafIsNotPinned, oopsAllLeaves, PermutationSpace, pileIsOpen, thisIsALeaf)
+	between, DOTgetPileIfLeaf, DOTgetPileIfPileRangeOfLeaves, DOTvalues, Folding, getLeafDomain, getPileRange, Leaf,
+	leafIsInPileRange, leafIsNotPinned, oopsAllLeaves, PermutationSpace, Pile, pileIsOpen, thisIsALeaf)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten, ilen
 from operator import getitem
@@ -24,14 +24,14 @@ from operator import getitem
 #======== Boolean filters =======================
 
 @syntacticCurry
-def atPilePinLeafSafetyFilter(leavesPinned: PermutationSpace, pile: int, leaf: int) -> bool:
-	"""Return `True` if it is safe to call `atPilePinLeafSafetyFilter(leavesPinned, pile, leaf)`.
+def atPilePinLeafSafetyFilter(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) -> bool:
+	"""Return `True` if it is safe to call `atPilePinLeafSafetyFilter(permutationSpace, pile, leaf)`.
 
 	For performance, you probably can and probably *should* create a set of filters for your circumstances.
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		A mapping of each `pile` with a pinned `leaf`.
 	pile : int
 		`pile` at which to pin.
@@ -41,17 +41,17 @@ def atPilePinLeafSafetyFilter(leavesPinned: PermutationSpace, pile: int, leaf: i
 	Returns
 	-------
 	isSafeToPin : bool
-		True if it is safe to pin `leaf` at `pile` in `leavesPinned`.
+		True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
 	"""
-	return isPinnedAtPile(leavesPinned, leaf, pile) or (pileIsOpen(leavesPinned, pile) and leafIsNotPinned(leavesPinned, leaf))
+	return isPinnedAtPile(permutationSpace, leaf, pile) or (pileIsOpen(permutationSpace, pile) and leafIsNotPinned(permutationSpace, leaf))
 
 @syntacticCurry
-def isPinnedAtPile(leavesPinned: PermutationSpace, leaf: int, pile: int) -> bool:
-	"""Return `True` if `leaf` is presently pinned at `pile` in `leavesPinned`.
+def isPinnedAtPile(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pile) -> bool:
+	"""Return `True` if `leaf` is presently pinned at `pile` in `permutationSpace`.
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Partial folding mapping from pile -> leaf.
 	leaf : int
 		`leaf` whose presence at `pile` is being checked.
@@ -63,11 +63,11 @@ def isPinnedAtPile(leavesPinned: PermutationSpace, leaf: int, pile: int) -> bool
 	leafIsPinnedAtPile : bool
 		True if the mapping includes `pile: leaf`.
 	"""
-	return leaf == leavesPinned.get(pile)
+	return leaf == permutationSpace.get(pile)
 
 #======== Group by =======================
 
-def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], leaf: int, pile: int) -> tuple[list[PermutationSpace], list[PermutationSpace]]:
+def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], leaf: Leaf, pile: Pile) -> tuple[list[PermutationSpace], list[PermutationSpace]]:
 	"""Partition `listPermutationSpace` into (notPinned, isPinned) groups for `leaf` pinned at `pile`.
 
 	Parameters
@@ -93,8 +93,8 @@ def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], lea
 # NOTE This section ought to contain all functions based on the "Elimination" algorithm that pin a `leaf` in a `PermutationSpace` or `Folding`.
 
 @syntacticCurry
-def atPilePinLeaf(leavesPinned: PermutationSpace, pile: int, leaf: int) -> PermutationSpace:
-	"""Return a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `leavesPinned`.
+def atPilePinLeaf(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) -> PermutationSpace:
+	"""Return a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `permutationSpace`.
 
 	Warning
 	-------
@@ -103,7 +103,7 @@ def atPilePinLeaf(leavesPinned: PermutationSpace, pile: int, leaf: int) -> Permu
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Dictionary of `pile` with pinned `leaf` or pile-range of leaves, if a `leaf` is pinned at `pile` or the pile-range of
 		leaves is defined.
 	pile : int
@@ -113,39 +113,39 @@ def atPilePinLeaf(leavesPinned: PermutationSpace, pile: int, leaf: int) -> Permu
 
 	Returns
 	-------
-	dictionaryLeavesPinned : PermutationSpace
+	dictionaryPermutationSpace : PermutationSpace
 		New dictionary with `pile` mapped to `leaf`.
 
 	See Also
 	--------
-	deconstructLeavesPinned
+	deconstructPermutationSpace
 	"""
-	return associate(leavesPinned, pile, leaf)
+	return associate(permutationSpace, pile, leaf)
 
 # TODO more flexible.
-def makeFolding(leavesPinned: PermutationSpace, leavesToInsert: tuple[int, ...]) -> Folding:
+def makeFolding(permutationSpace: PermutationSpace, leavesToInsert: tuple[Leaf, ...]) -> Folding:
 	if leavesToInsert:
-		permutand: Iterator[int] = iter(leavesToInsert)
-		pilesTotal: int = ilen(filter(thisIsALeaf, DOTvalues(leavesPinned))) + len(leavesToInsert)
-		# pilesTotal: int = len(oopsAllLeaves(leavesPinned)) + len(leavesToInsert)  # noqa: ERA001
+		permutand: Iterator[Leaf] = iter(leavesToInsert)
+		pilesTotal: int = ilen(filter(thisIsALeaf, DOTvalues(permutationSpace))) + len(leavesToInsert)
+		# pilesTotal: int = len(oopsAllLeaves(permutationSpace)) + len(leavesToInsert)  # noqa: ERA001
 		folding: Folding = tuple([
-			leafOrLeafRange if (leafOrLeafRange := DOTgetPileIfLeaf(leavesPinned, pile)) else next(permutand)
+			leafOrLeafRange if (leafOrLeafRange := DOTgetPileIfLeaf(permutationSpace, pile)) else next(permutand)
 			for pile in range(pilesTotal)
 		])
 	else:
-		folding = tuple(DOTvalues(oopsAllLeaves(leavesPinned)))
+		folding = tuple(DOTvalues(oopsAllLeaves(permutationSpace)))
 	return folding
 
 #======== Deconstruct a `PermutationSpace` dictionary =======
-def deconstructPermutationSpaceAtPile(leavesPinned: PermutationSpace, pile: int, leavesToPin: Iterable[int]) -> dict[int, PermutationSpace]:
+def deconstructPermutationSpaceAtPile(permutationSpace: PermutationSpace, pile: Pile, leavesToPin: Iterable[Leaf]) -> dict[Leaf, PermutationSpace]:
 	"""Deconstruct an open `pile` to the `leaf` range of `pile`.
 
-	Return a dictionary of `PermutationSpace` with either `leavesPinned` because it already has a `leaf` pinned at `pile` or one
+	Return a dictionary of `PermutationSpace` with either `permutationSpace` because it already has a `leaf` pinned at `pile` or one
 	`PermutationSpace` for each `leaf` in `leavesToPin` pinned at `pile`.
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Dictionary to divide and replace.
 	pile : int
 		`pile` at which to pin a `leaf`.
@@ -154,26 +154,26 @@ def deconstructPermutationSpaceAtPile(leavesPinned: PermutationSpace, pile: int,
 
 	Returns
 	-------
-	deconstructedLeavesPinned : dict[int, LeavesPinned]
+	deconstructedPermutationSpace : dict[int, PermutationSpace]
 		Dictionary mapping from `leaf` pinned at `pile` to the `PermutationSpace` dictionary with the `leaf` pinned at `pile`.
 	"""
-	if thisIsALeaf(leaf := leavesPinned.get(pile)):
-		deconstructedLeavesPinned: dict[int, PermutationSpace] = {leaf: leavesPinned}
+	if thisIsALeaf(leaf := permutationSpace.get(pile)):
+		deconstructedPermutationSpace: dict[Leaf, PermutationSpace] = {leaf: permutationSpace}
 	else:
-		pin: Callable[[int], PermutationSpace] = atPilePinLeaf(leavesPinned, pile)
-		leafCanBePinned: Callable[[int], bool] = leafIsNotPinned(leavesPinned)
-		deconstructedLeavesPinned = {leaf: pin(leaf) for leaf in filter(leafCanBePinned, leavesToPin)}
-	return deconstructedLeavesPinned
+		pin: Callable[[Leaf], PermutationSpace] = atPilePinLeaf(permutationSpace, pile)
+		leafCanBePinned: Callable[[Leaf], bool] = leafIsNotPinned(permutationSpace)
+		deconstructedPermutationSpace = {leaf: pin(leaf) for leaf in filter(leafCanBePinned, leavesToPin)}
+	return deconstructedPermutationSpace
 
-def deconstructPermutationSpaceByDomainOfLeaf(leavesPinned: PermutationSpace, leaf: int, leafDomain: Iterable[int]) -> list[PermutationSpace]:
+def deconstructPermutationSpaceByDomainOfLeaf(permutationSpace: PermutationSpace, leaf: Leaf, leafDomain: Iterable[Pile]) -> list[PermutationSpace]:
 	"""Pin `leaf` at each open `pile` in the domain of `leaf`.
 
-	Return a `list` of `PermutationSpace` with either `leavesPinned` because `leaf` is already pinned or one `PermutationSpace` for each
+	Return a `list` of `PermutationSpace` with either `permutationSpace` because `leaf` is already pinned or one `PermutationSpace` for each
 	open `pile` in `leafDomain` with `leaf` pinned at `pile`.
 
 	Parameters
 	----------
-	leavesPinned : PermutationSpace
+	permutationSpace : PermutationSpace
 		Dictionary to divide and replace.
 	leaf : int
 		`leaf` to pin.
@@ -182,42 +182,42 @@ def deconstructPermutationSpaceByDomainOfLeaf(leavesPinned: PermutationSpace, le
 
 	Returns
 	-------
-	deconstructedLeavesPinned : list[PermutationSpace]
+	deconstructedPermutationSpace : list[PermutationSpace]
 		List of `PermutationSpace` dictionaries with `leaf` pinned at each open `pile` in `leafDomain`.
 	"""
-	if leafIsNotPinned(leavesPinned, leaf):
-		pileOpen: Callable[[int], bool] = pileIsOpen(leavesPinned)
-		leafInPileRange: Callable[[int], bool] = compose(leafIsInPileRange(leaf), partial(DOTgetPileIfPileRangeOfLeaves, leavesPinned, default=bit_mask(len(leavesPinned))))
-		pinLeafAt: Callable[[int], PermutationSpace] = atPilePinLeaf(leavesPinned, leaf=leaf)
-		deconstructedLeavesPinned: list[PermutationSpace] = list(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
+	if leafIsNotPinned(permutationSpace, leaf):
+		pileOpen: Callable[[int], bool] = pileIsOpen(permutationSpace)
+		leafInPileRange: Callable[[int], bool] = compose(leafIsInPileRange(leaf), partial(DOTgetPileIfPileRangeOfLeaves, permutationSpace, default=bit_mask(len(permutationSpace))))
+		pinLeafAt: Callable[[int], PermutationSpace] = atPilePinLeaf(permutationSpace, leaf=leaf)
+		deconstructedPermutationSpace: list[PermutationSpace] = list(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
 	else:
-		deconstructedLeavesPinned = [leavesPinned]
-	return deconstructedLeavesPinned
+		deconstructedPermutationSpace = [permutationSpace]
+	return deconstructedPermutationSpace
 
-def deconstructPermutationSpaceByDomainsCombined(leavesPinned: PermutationSpace, leaves: tuple[int, ...], leavesDomain: Iterable[tuple[int, ...]]) -> list[PermutationSpace]:
+def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSpace, leaves: tuple[Leaf, ...], leavesDomain: Iterable[tuple[Pile, ...]]) -> list[PermutationSpace]:
 	"""Prototype."""
-	deconstructedLeavesPinned: list[PermutationSpace] = []
+	deconstructedPermutationSpace: list[PermutationSpace] = []
 
-	def pileOpenByIndex(index: int) -> Callable[[tuple[int, ...]], bool]:
-		def workhorse(domain: tuple[int, ...]) -> bool:
-			return pileIsOpen(leavesPinned, domain[index])
+	def pileOpenByIndex(index: int) -> Callable[[tuple[Pile, ...]], bool]:
+		def workhorse(domain: tuple[Pile, ...]) -> bool:
+			return pileIsOpen(permutationSpace, domain[index])
 		return workhorse
 
-	def leafInPileRangeByIndex(index: int) -> Callable[[tuple[int, ...]], bool]:
-		def workhorse(domain: tuple[int, ...]) -> bool:
-			pileRangeOfLeaves = DOTgetPileIfPileRangeOfLeaves(leavesPinned, domain[index], default=bit_mask(len(leavesPinned)))
+	def leafInPileRangeByIndex(index: int) -> Callable[[tuple[Pile, ...]], bool]:
+		def workhorse(domain: tuple[Pile, ...]) -> bool:
+			pileRangeOfLeaves = DOTgetPileIfPileRangeOfLeaves(permutationSpace, domain[index], default=bit_mask(len(permutationSpace)))
 			return leafIsInPileRange(leaves[index], pileRangeOfLeaves)
 		return workhorse
 
-	def isPinnedAtPileByIndex(leaf: int, index: int) -> Callable[[tuple[int, ...]], bool]:
-		def workhorse(domain: tuple[int, ...]) -> bool:
-			return isPinnedAtPile(leavesPinned, leaf, domain[index])
+	def isPinnedAtPileByIndex(leaf: Leaf, index: int) -> Callable[[tuple[Pile, ...]], bool]:
+		def workhorse(domain: tuple[Pile, ...]) -> bool:
+			return isPinnedAtPile(permutationSpace, leaf, domain[index])
 		return workhorse
 
-	if any(map(leafIsNotPinned(leavesPinned), leaves)):
+	if any(map(leafIsNotPinned(permutationSpace), leaves)):
 		for index in range(len(leaves)):
 			"""Redefine leavesDomain by filtering out domains that are not possible with the current `PermutationSpace`."""
-			if leafIsNotPinned(leavesPinned, leaves[index]):
+			if leafIsNotPinned(permutationSpace, leaves[index]):
 				"""`leaves[index]` is not pinned, so it needs a pile.
 				In each iteration of `leavesDomain`, `listOfPiles`, the pile it needs is `listOfPiles[index]`.
 				Therefore, if `listOfPiles[index]` is open, filter in the iteration. If `listOfPiles[index]` is occupied, filter out the iteration."""
@@ -232,26 +232,26 @@ def deconstructPermutationSpaceByDomainsCombined(leavesPinned: PermutationSpace,
 				leavesDomain = filter(isPinnedAtPileByIndex(leaves[index], index), leavesDomain)
 
 		for listOfPiles in leavesDomain:
-			"""Properly and safely deconstruct `leavesPinned` by the combined domain of leaves.
+			"""Properly and safely deconstruct `permutationSpace` by the combined domain of leaves.
 			The parameter `leavesDomain` is the full domain of the leaves, so deconstructing with `leavesDomain` preserves the permutation space.
 			For each leaf in leaves, I filter out occupied piles, so I will not overwrite any pinned leaves--that would invalidate the permutation space.
 			I apply filters that prevent pinning the same leaf twice.
 			Therefore, for each domain in `leavesDomain`, I can safely pin `leaves[index]` at `listOfPiles[index]` without corrupting the permutation space."""
-			leavesPinnedForListOfPiles: PermutationSpace = leavesPinned.copy()
+			permutationSpaceForListOfPiles: PermutationSpace = permutationSpace.copy()
 			for index in range(len(leaves)):
-				leavesPinnedForListOfPiles = atPilePinLeaf(leavesPinnedForListOfPiles, listOfPiles[index], leaves[index])
-			deconstructedLeavesPinned.append(leavesPinnedForListOfPiles)
+				permutationSpaceForListOfPiles = atPilePinLeaf(permutationSpaceForListOfPiles, listOfPiles[index], leaves[index])
+			deconstructedPermutationSpace.append(permutationSpaceForListOfPiles)
 	else:
-		deconstructedLeavesPinned = [leavesPinned]
+		deconstructedPermutationSpace = [permutationSpace]
 
-	return deconstructedLeavesPinned
+	return deconstructedPermutationSpace
 
 #======== Bulk modifications =======================
 
-def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], pile: int, leavesToPin: Iterable[int]) -> Iterator[PermutationSpace]:
+def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[PermutationSpace]:
 	"""Expand every dictionary in `listPermutationSpace` at `pile` into all pinning variants.
 
-	Applies `deconstructLeavesPinned` element-wise, then flattens the nested value collections (each a mapping leaf -> dictionary)
+	Applies `deconstructPermutationSpace` element-wise, then flattens the nested value collections (each a mapping leaf -> dictionary)
 	into a single list of dictionaries, discarding the intermediate keyed structure.
 
 	Parameters
@@ -270,11 +270,11 @@ def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[Permuta
 
 	See Also
 	--------
-	deconstructLeavesPinned
+	deconstructPermutationSpace
 	"""
 	return  flatten(map(DOTvalues, map(deconstructPermutationSpaceAtPile, listPermutationSpace, repeat(pile), repeat(leavesToPin))))
 
-def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: int, r: int, pile_k: int, domain_r: Iterable[int] | None = None, rangePile_k: Iterable[int] | None = None) -> EliminationState:
+def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: Leaf, r: Leaf, pile_k: Pile, domain_r: Iterable[Pile] | None = None, rangePile_k: Iterable[Leaf] | None = None) -> EliminationState:
 	"""Exclude leaf `r` before leaf `k` at pile `k`.
 
 	Parameters
@@ -308,7 +308,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: int, r: int, p
 
 	pile_kIsOpen: Callable[[PermutationSpace], bool] = pileIsOpen(pile=pile_k)
 	kIsNotPinned: Callable[[PermutationSpace], bool] = leafIsNotPinned(leaf=k)
-	def notLeaf_r(comparand: int, r: int = r) -> bool:
+	def notLeaf_r(comparand: Leaf, r: Leaf = r) -> bool:
 		return comparand != r
 
 	listPermutationSpace, iterator_kPinnedAt_pile_k = _segregateLeafPinnedAtPile(state.listPermutationSpace, k, pile_k)
@@ -331,9 +331,9 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: int, r: int, p
 	rangePile_k = frozenset(rangePile_k)
 
 	if k in rangePile_k:
-		for leavesPinned_kPinnedAt_pile_k, iterable_pile_kOccupied in segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace, k, pile_k, rangePile_k):
+		for permutationSpace_kPinnedAt_pile_k, iterable_pile_kOccupied in segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace, k, pile_k, rangePile_k):
 			listPermutationSpaceCompleted.extend(iterable_pile_kOccupied)
-			iterator_kPinnedAt_pile_k.append(leavesPinned_kPinnedAt_pile_k)
+			iterator_kPinnedAt_pile_k.append(permutationSpace_kPinnedAt_pile_k)
 	else:
 		listPermutationSpaceCompleted.extend(listPermutationSpace)
 
@@ -345,7 +345,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: int, r: int, p
 
 	return state
 
-def excludeLeaf_rBeforeLeaf_k(state: EliminationState, k: int, r: int, domain_k: Iterable[int] | None = None, domain_r: Iterable[int] | None = None) -> EliminationState:
+def excludeLeaf_rBeforeLeaf_k(state: EliminationState, k: Leaf, r: Leaf, domain_k: Iterable[Pile] | None = None, domain_r: Iterable[Pile] | None = None) -> EliminationState:
 	"""Apply a `leaf` ordering exclusion (`r` cannot precede `k`) at every `pile`.
 
 	Parameters
@@ -376,7 +376,7 @@ def excludeLeaf_rBeforeLeaf_k(state: EliminationState, k: int, r: int, domain_k:
 		state = excludeLeaf_rBeforeLeaf_kAtPile_k(state, k, r, pile_k, domain_r=domain_r)
 	return state
 
-def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: int, pile: int, leavesToPin: Iterable[int]) -> Iterator[PermutationSpace]:
+def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[PermutationSpace]:
 	"""Return a new list of pinned-leaves dictionaries that forbid `leaf` at `pile`.
 
 	Parameters
@@ -397,12 +397,12 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: in
 
 	See Also
 	--------
-	deconstructLeavesPinned : Performs the expansion for one dictionary.
+	deconstructPermutationSpace : Performs the expansion for one dictionary.
 	pinLeafAtPile : Complementary operation that forces a leaf at a pile.
 	"""
 	return deconstructListPermutationSpaceAtPile(getitem(_segregateLeafPinnedAtPile(list(listPermutationSpace), leaf, pile), 0), pile, leavesToPin)
 
-def requireLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], leaf: int, pile: int) -> list[PermutationSpace]:
+def requireLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], leaf: Leaf, pile: Pile) -> list[PermutationSpace]:
 	"""In every `PermutationSpace` dictionary, ensure `leaf`, and *only* `leaf`, is pinned at `pile`: excluding every other `leaf` at `pile`.
 
 	Parameters
@@ -427,9 +427,9 @@ def requireLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], leaf: 
 	listLeafAtPile.extend(map(atPilePinLeaf(pile=pile, leaf=leaf), filter(pileIsOpen(pile=pile), filter(leafIsNotPinned(leaf=leaf), listPermutationSpace))))
 	return listLeafAtPile
 
-def segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: int, pile: int, leavesToPin: Iterable[int]) -> Iterator[tuple[PermutationSpace, tuple[PermutationSpace, ...]]]:
-	for leavesPinned in listPermutationSpace:
-		deconstructedLeavesPinnedAtPile: dict[int, PermutationSpace] = deconstructPermutationSpaceAtPile(leavesPinned, pile, leavesToPin)
-		leafPinnedAtPile: PermutationSpace = deconstructedLeavesPinnedAtPile.pop(leaf)
-		yield (leafPinnedAtPile, tuple(deconstructedLeavesPinnedAtPile.values()))
+def segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[tuple[PermutationSpace, tuple[PermutationSpace, ...]]]:
+	for permutationSpace in listPermutationSpace:
+		deconstructedPermutationSpaceAtPile: dict[Leaf, PermutationSpace] = deconstructPermutationSpaceAtPile(permutationSpace, pile, leavesToPin)
+		leafPinnedAtPile: PermutationSpace = deconstructedPermutationSpaceAtPile.pop(leaf)
+		yield (leafPinnedAtPile, tuple(deconstructedPermutationSpaceAtPile.values()))
 

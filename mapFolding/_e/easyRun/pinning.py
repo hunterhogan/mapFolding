@@ -18,10 +18,10 @@ import time
 def printStatisticsPermutations(state: EliminationState) -> None:
 	def prodOfDOTvalues(listPileRangeOfLeaves: Iterable[PileRangeOfLeaves]) -> int:
 		return prod([pileRangeOfLeaves.bit_count() - 1 for pileRangeOfLeaves in listPileRangeOfLeaves])
-	permutationsLeavesPinnedTotal: Callable[[list[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, oopsAllPileRangesOfLeaves)))
+	permutationsPermutationSpaceTotal: Callable[[list[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, oopsAllPileRangesOfLeaves)))
 	print(len(str(mm:=fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
 	print(len(str(rr:=prod(toolz_map(len, filter(None, DOTvalues(getDictionaryPileRanges(state))))))), rr, "dictionaryPileRanges")
-	print(len(str(pp:=permutationsLeavesPinnedTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
+	print(len(str(pp:=permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
 	state = EliminationState((2,) * 6)
@@ -38,7 +38,8 @@ if __name__ == '__main__':
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinPilesAtEnds(state, 4)
+		state: EliminationState = pinLeavesDimensions0零一(state)
+		state: EliminationState = pinLeavesDimension首二(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -47,11 +48,10 @@ if __name__ == '__main__':
 
 	elif printThis:
 		state: EliminationState = pinPile首零Less零(state)
+		state: EliminationState = pinPilesAtEnds(state, 4)
 		print(state.sumsOfProductsOfDimensionsNearest首)
 		pprint(dictionaryPileRanges := getDictionaryPileRanges(state), width=200)
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))
-		state: EliminationState = pinLeavesDimensions0零一(state)
-		state: EliminationState = pinLeavesDimension首二(state)
 		pprint(getDictionaryConditionalLeafPredecessors(state), width=260)
 		state: EliminationState = pinLeavesDimension二(state)
 		print(*getLeavesCreaseNext(state, 22))

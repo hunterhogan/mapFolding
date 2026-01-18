@@ -21,9 +21,9 @@ def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8
 	rowsTotal: int = int(arrayFoldings.shape[0])
 	listRowMasks: list[numpy.ndarray] = []
 
-	for leavesPinned in state.listPermutationSpace:
+	for permutationSpace in state.listPermutationSpace:
 		maskRowsMatchThisDictionary: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-		for pile, leafOrPileRangeOfLeaves in oopsAllLeaves(leavesPinned).items():
+		for pile, leafOrPileRangeOfLeaves in oopsAllLeaves(permutationSpace).items():
 			if isinstance(leafOrPileRangeOfLeaves, int):
 				maskRowsMatchThisDictionary = maskRowsMatchThisDictionary & (arrayFoldings[:, pile] == leafOrPileRangeOfLeaves)
 				continue
