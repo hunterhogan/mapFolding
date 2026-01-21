@@ -289,7 +289,7 @@ def getDomainDimension二(state: EliminationState) -> tuple[tuple[int, int, int,
 	return _getDomainDimension二(domain二零and二, domain二一零and二一, state.dimensionsTotal)
 @cache
 def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], domain二一零and二一: tuple[tuple[int, int], ...], dimensionsTotal: int) -> tuple[tuple[int, int, int, int], ...]:
-	domain0corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive, domain二零and二))
+	domain0corners = tuple(filter(consecutive, domain二零and二))
 	domain一corners = tuple(filter(consecutive, domain二一零and二一))
 	pilesTotal: int = len(domain一corners)
 
@@ -800,8 +800,8 @@ def getLeaf首零Plus零Domain(state: EliminationState, leaf: Leaf | None = None
 	leaf一零: Leaf = 一+零
 	leaf首零一: Leaf = 首零一(state.dimensionsTotal)
 	if leafIsPinned(state.permutationSpace, leaf一零) and leafIsPinned(state.permutationSpace, leaf首零一):
-		pileOfLeaf一零: Pile = reverseLookup(state.permutationSpace, leaf一零)
-		pileOfLeaf首零一: Pile = reverseLookup(state.permutationSpace, leaf首零一)
+		pileOfLeaf一零: Pile = raiseIfNone(reverseLookup(state.permutationSpace, leaf一零))
+		pileOfLeaf首零一: Pile = raiseIfNone(reverseLookup(state.permutationSpace, leaf首零一))
 		domain首零Plus零 = _getLeaf首零Plus零Domain(domain首零Plus零, pileOfLeaf一零, pileOfLeaf首零一, state.dimensionsTotal, state.leavesTotal)
 	return domain首零Plus零
 @cache
@@ -950,7 +950,10 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 		return leafSpec(dimensionsTotal) if callable(leafSpec) else leafSpec
 
 	def getLeafName(leafSpec: int | Callable[[int], int]) -> str:
-		return leafSpec.__name__ if callable(leafSpec) else str(leafSpec)
+		leafSpecName: str = str(leafSpec)
+		if callable(leafSpec):
+			leafSpecName = getattr(leafSpec, "__name__", leafSpecName)
+		return leafSpecName
 
 	listLeafNames: list[str] = [getLeafName(leafSpec) for leafSpec in listLeaves]
 	filenameLeafPart: str = '_'.join(listLeafNames)

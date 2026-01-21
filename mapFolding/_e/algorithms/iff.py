@@ -27,7 +27,7 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding import getLeavesTotal, inclusive
-from mapFolding._e import between, Leaf, oopsAllLeaves, PermutationSpace, Pile, 零
+from mapFolding._e import between, Leaf, oopsAllLeaves, PermutationSpace, Pile
 from mapFolding._e.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf

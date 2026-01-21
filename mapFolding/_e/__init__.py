@@ -21,12 +21,11 @@ from mapFolding._e._beDRY import (
 	getProductsOfDimensions as getProductsOfDimensions, getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
 	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首, hasDuplicates as hasDuplicates,
 	leafIsInPileRange as leafIsInPileRange, leafIsNotPinned as leafIsNotPinned, leafIsPinned as leafIsPinned,
-	leafParityInDimension as leafParityInDimension, mappingHasKey as mappingHasKey,
-	mapShapeIs2上nDimensions as mapShapeIs2上nDimensions, notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零,
-	notPileLast as notPileLast, oopsAllLeaves as oopsAllLeaves, oopsAllPileRangesOfLeaves as oopsAllPileRangesOfLeaves,
-	pileIsNotOpen as pileIsNotOpen, pileIsOpen as pileIsOpen, pileRangeOfLeavesAND as pileRangeOfLeavesAND,
-	reverseLookup as reverseLookup, thisHasThat as thisHasThat, thisIsALeaf as thisIsALeaf,
-	thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves,
+	mappingHasKey as mappingHasKey, mapShapeIs2上nDimensions as mapShapeIs2上nDimensions,
+	notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零, notPileLast as notPileLast, oopsAllLeaves as oopsAllLeaves,
+	oopsAllPileRangesOfLeaves as oopsAllPileRangesOfLeaves, pileIsNotOpen as pileIsNotOpen, pileIsOpen as pileIsOpen,
+	pileRangeOfLeavesAND as pileRangeOfLeavesAND, reverseLookup as reverseLookup, thisHasThat as thisHasThat,
+	thisIsALeaf as thisIsALeaf, thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves,
 	Z0Z_getIndicesSameDimensionLength as Z0Z_getIndicesSameDimensionLength, Z0Z_invert as Z0Z_invert,
 	Z0Z_JeanValjean as Z0Z_JeanValjean)
 
@@ -48,3 +47,4 @@ from mapFolding._e._dataDynamic import (
 	getLeafDomain as getLeafDomain, getLeaf首零Plus零Domain as getLeaf首零Plus零Domain,
 	getLeavesCreaseBack as getLeavesCreaseBack, getLeavesCreaseNext as getLeavesCreaseNext, getPileRange as getPileRange,
 	getZ0Z_successor as getZ0Z_successor)
+from mapFolding._e.pin2上nDimensionsAnnex import leafParityInDimension as leafParityInDimension

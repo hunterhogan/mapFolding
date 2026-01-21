@@ -50,12 +50,12 @@ if __name__ == '__main__':
 	sys.stdout.write(f"{ansiColors[int(flow,36)%len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(5,6):
+	for n in range(4, 5):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 		if oeisID == 'A001417' and n > 3:
 			state = EliminationState(mapShape)
-			state = pinPilesAtEnds(state, 4)
+			# state = pinPilesAtEnds(state, 4)
 			# state = pinLeavesDimensions0零一(state)
 			# state = pinPile首零Less零(state)
 			# state = pinLeavesDimension二(state)

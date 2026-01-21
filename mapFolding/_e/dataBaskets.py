@@ -8,36 +8,56 @@ import dataclasses
 
 @dataclasses.dataclass(slots=True)
 class EliminationState:
-	"""Computational state for algorithms to compute foldsTotal by elimination.
+	"""Computational state for algorithms that compute `foldsTotal` by elimination.
+
+	This data basket stores both mutable workbench fields (which change during the search) and
+	precomputed constants derived from `mapShape` (which do not change after `__post_init__`).
 
 	Attributes
 	----------
 	mapShape : tuple[int, ...]
-		Dimension lengths of the map being analyzed for folding patterns.
+		Dimension lengths of the map being analyzed.
 	groupsOfFolds : int = 0
-		Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings.
-	listPermutationSpace : list[dict[int, int]]
-		A list of dictionaries that each define an exclusive permutation space: no overlap between dictionaries.
-	pile : int = -1
-		The `pile` on the workbench.
-	permutationSpace : dict[int, int]
-		The `permutationSpace` dictionary on the workbench.
+		Count of distinct `Folding` pattern groups found so far.
+	listFolding : list[`Folding`]
+		List of `Folding` patterns found.
+	listPermutationSpace : list[`PermutationSpace`]
+		List of exclusive `PermutationSpace` dictionaries.
+	pile : `Pile` = -1
+		The current `pile` on the workbench.
+	permutationSpace : `PermutationSpace`
+		The current `PermutationSpace` dictionary on the workbench.
 	Theorem2Multiplier : int = 1
-		Multiplier for Theorem 2 optimizations.
+		Multiplier applied by Theorem 2 optimizations.
 	Theorem3Multiplier : int = 1
-		Multiplier for Theorem 3 optimizations.
+		Multiplier applied by Theorem 3 optimizations.
 	Theorem4Multiplier : int = 1
-		Multiplier for Theorem 4 optimizations.
+		Multiplier applied by Theorem 4 optimizations.
 	dimensionsTotal : int
-		Unchanging total number of dimensions in the map.
-	leafLast : int
-		Unchanging 0-indexed final `leaf` of the map.
+		Unchanging total number of axes in `mapShape`.
+	foldingCheckSum : int
+		Unchanging triangular-number check-sum for a valid `Folding`.
+	leafLast : `Leaf`
+		Unchanging 0-indexed largest `leaf` value.
 	leavesTotal : int
-		Unchanging total number of leaves of the map.
-	pileLast : int
-		Unchanging 0-indexed final `pile` in a `Folding`.
-	productsOfDimensions : list[int]
-		Unchanging list of products of map dimensions from the product of no dimensions to the product of all dimensions.
+		Unchanging total number of leaves in the map.
+	pileLast : `Pile`
+		Unchanging 0-indexed largest `pile` value.
+	pilesTotal : int
+		Unchanging total number of piles in the map.
+	productsOfDimensions : tuple[int, ...]
+		Unchanging products of dimension lengths, from the empty product through all dimensions.
+	sumsOfProductsOfDimensions : tuple[int, ...]
+		Unchanging sums of `productsOfDimensions` from the head.
+	sumsOfProductsOfDimensionsNearest首 : tuple[int, ...]
+		Unchanging sums of `productsOfDimensions` from the head `首`.
+	首 : int
+		Unchanging single-base positional-numeral value of the first out-of-bounds Cartesian coordinate.
+
+	Notes
+	-----
+	The computed `foldsTotal` is `groupsOfFolds * leavesTotal * Theorem2Multiplier * Theorem3Multiplier * Theorem4Multiplier`.
+
 	"""
 
 	mapShape: tuple[int, ...] = dataclasses.field(init=True)

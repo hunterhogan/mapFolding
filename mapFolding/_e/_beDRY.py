@@ -2,7 +2,7 @@ from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
 from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import unique
 from functools import cache, partial, reduce
-from gmpy2 import bit_clear, bit_mask, bit_set, bit_test as isBit1吗, mpz, xmpz
+from gmpy2 import bit_clear, bit_mask, bit_set, mpz, xmpz
 from hunterMakesPy import Ordinals, raiseIfNone
 from hunterMakesPy.parseParameters import intInnit
 from itertools import accumulate
@@ -11,7 +11,7 @@ from mapFolding._e import (
 	Leaf, LeafOrPileRangeOfLeaves, PermutationSpace, Pile, PileRangeOfLeaves, PilesWithPileRangeOfLeaves, PinnedLeaves, 零)
 from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract, iter_index
 from operator import add, getitem, mul
-from typing import Any, TypeGuard
+from typing import Any, overload, TypeGuard
 
 #======== Boolean filters ================================================
 
@@ -50,8 +50,12 @@ def leafIsNotPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
 	"""
 	return leaf not in permutationSpace.values()
 
+@overload
+def leafIsPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:...
+@overload
+def leafIsPinned(permutationSpace: PinnedLeaves, leaf: Leaf) -> bool:...
 @syntacticCurry
-def leafIsPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
+def leafIsPinned(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) -> bool:
 	"""Return True if `leaf` is pinned in `permutationSpace`.
 
 	Parameters
@@ -214,10 +218,6 @@ def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRa
 
 def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRangeOfLeaves:
 	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
-
-@syntacticCurry
-def leafParityInDimension(leaf: Leaf, dimension: int) -> int:
-	return int(isBit1吗(leaf, dimension))
 
 def oopsAllLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: pileRangeOfLeaves`.

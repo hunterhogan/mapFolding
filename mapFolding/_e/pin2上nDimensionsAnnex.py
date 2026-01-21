@@ -4,16 +4,16 @@ from collections.abc import Iterable
 from cytoolz.dicttoolz import keyfilter, valfilter
 from cytoolz.functoolz import complement, curry as syntacticCurry
 from functools import cache
-from gmpy2 import bit_flip, xmpz
+from gmpy2 import bit_flip, bit_test as isBit1吗, xmpz
 from hunterMakesPy import raiseIfNone
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding import inclusive
 from mapFolding._e import (
 	between, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, DOTitems, DOTvalues, getAntiPileRangeOfLeaves,
 	getDictionaryConditionalLeafPredecessors, getLeafDomain, getLeavesCreaseBack, getLeavesCreaseNext, Leaf, leafIsPinned,
-	leafParityInDimension, mappingHasKey, mapShapeIs2上nDimensions, notLeafOriginOrLeaf零, notPileLast, oopsAllLeaves,
-	oopsAllPileRangesOfLeaves, PermutationSpace, Pile, pileIsOpen, PileRangeOfLeaves, pileRangeOfLeavesAND, PinnedLeaves,
-	thisHasThat, thisIsALeaf, Z0Z_JeanValjean, 一, 零, 首一, 首零一)
+	mappingHasKey, mapShapeIs2上nDimensions, notLeafOriginOrLeaf零, notPileLast, oopsAllLeaves, oopsAllPileRangesOfLeaves,
+	PermutationSpace, Pile, pileIsOpen, PileRangeOfLeaves, pileRangeOfLeavesAND, PinnedLeaves, thisHasThat, thisIsALeaf,
+	Z0Z_JeanValjean, 一, 零, 首一, 首零一)
 from mapFolding._e.algorithms.iff import removePermutationSpaceViolations
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import atPilePinLeaf, deconstructPermutationSpaceAtPile
@@ -79,7 +79,6 @@ def Z0Z_subroutine(state: EliminationState, permutationSpace: PermutationSpace, 
 	permutationSpaceHasNewLeaf: bool = False
 	while pilesWithPileRangeOfLeavesToUpdate and not permutationSpaceHasNewLeaf:
 		pileToUpdate, pileRangeOfLeaves = pilesWithPileRangeOfLeavesToUpdate.pop()
-		pileRangeOfLeaves = permutationSpace[pileToUpdate]
 		if (ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript := Z0Z_JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, pileRangeOfLeaves))) is None:
 			return {}
 # TODO These statements are syntactically necessary because I'm using subscripts AND walrus operators. Does that suggest there is
@@ -89,9 +88,17 @@ def Z0Z_subroutine(state: EliminationState, permutationSpace: PermutationSpace, 
 			if beansWithoutCornbread(state, permutationSpace) and not (permutationSpace := pinLeafCornbread(EliminationState(state.mapShape, pile=pileToUpdate, permutationSpace=permutationSpace)).permutationSpace):
 				return {}
 			permutationSpaceHasNewLeaf = True
-	if permutationSpaceHasNewLeaf and not (permutationSpace := _updatePileRangesOfLeavesLeafIsPinned(state, permutationSpace)):
-		return {}
+	if permutationSpaceHasNewLeaf:
+		qq: PermutationSpace | None = _updatePileRangesOfLeavesLeafIsPinned(state, permutationSpace)
+		if not qq:
+			return {}
+		else:
+			permutationSpace = qq
 	return permutationSpace
+
+@syntacticCurry
+def leafParityInDimension(leaf: Leaf, dimension: int) -> bool:
+	return isBit1吗(leaf, dimension)
 
 @syntacticCurry
 def _updatePileRangesOfLeavesCrossedCreases(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
@@ -218,7 +225,7 @@ def _updatePileRangesOfLeavesConditionalPredecessors(state: EliminationState, pe
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 
-		dequePileLeafToCheck: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(valfilter(mappingHasKey(dictionaryConditionalLeafPredecessors), keyfilter(notPileLast, valfilter(notLeafOriginOrLeaf零, oopsAllLeaves(permutationSpace)))))))
+		dequePileLeafToCheck: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(valfilter(mappingHasKey(dictionaryConditionalLeafPredecessors), keyfilter(notPileLast(state.pileLast), valfilter(notLeafOriginOrLeaf零, oopsAllLeaves(permutationSpace)))))))
 
 		while dequePileLeafToCheck and not permutationSpaceHasNewLeaf:
 			pile, leaf = dequePileLeafToCheck.pop()
@@ -244,7 +251,7 @@ def _updatePileRangesOfLeavesHeadsBeforeTails(state: EliminationState, permutati
 	permutationSpaceHasNewLeaf: bool = True
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
-		dequePileLeafToCheck: deque[tuple[Pile, Leaf]] = deque(sorted(keyfilter(notPileLast, valfilter(notLeafOriginOrLeaf零, oopsAllLeaves(permutationSpace))).items()))
+		dequePileLeafToCheck: deque[tuple[Pile, Leaf]] = deque(sorted(keyfilter(notPileLast(state.pileLast), valfilter(notLeafOriginOrLeaf零, oopsAllLeaves(permutationSpace))).items()))
 		while dequePileLeafToCheck and not permutationSpaceHasNewLeaf:
 			pile, leaf = dequePileLeafToCheck.pop()
 			dimensionTail: int = dimensionNearestTail(leaf)
@@ -389,7 +396,7 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:  # noqa: PLR0911
 		leavesNotPinned: frozenset[Leaf] = frozenset(range(Z0Z_tester.leavesTotal)).difference(leavesFixed)
 		pilesOpen: frozenset[Pile] = frozenset(range(Z0Z_tester.pileLast + inclusive)).difference(dictionaryPileLeaf.keys())
 
-		for pile, leaf in sorted(keyfilter(notPileLast, valfilter(notLeafOriginOrLeaf零, dictionaryPileLeaf)).items()):
+		for pile, leaf in sorted(keyfilter(notPileLast(state.pileLast), valfilter(notLeafOriginOrLeaf零, dictionaryPileLeaf)).items()):
 			dimensionTail: int = dimensionNearestTail(leaf)
 			dimensionHead: int = dimensionNearest首(leaf)
 			def notLeaf(comparand: Leaf, leaf: Leaf = leaf) -> bool:

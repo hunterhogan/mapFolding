@@ -7,6 +7,7 @@ from astToolkit import (
 from astToolkit.containers import IngredientsFunction, IngredientsModule
 from astToolkit.transformationTools import removeUnusedParameters, write_astModule
 from hunterMakesPy import raiseIfNone
+from io import TextIOBase
 from mapFolding import DatatypeLeavesTotal, getPathFilenameFoldsTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfThis
@@ -14,13 +15,10 @@ from mapFolding.someAssemblyRequired.RecipeJob import (
 	customizeDatatypeViaImport, moveShatteredDataclass_arg2body, RecipeJobTheorem2)
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
-from typing import cast, TYPE_CHECKING
+from typing import cast
+import ast
 import subprocess
 import sys
-
-if TYPE_CHECKING:
-	from io import TextIOBase
-	import ast
 
 # TODO Converge with `makeJobTheorem2Numba`.
 
