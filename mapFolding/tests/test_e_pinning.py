@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from gmpy2 import xmpz
-from mapFolding._e import oopsAllLeaves
+from mapFolding._e import extractPinnedLeaves
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensions import (
 	pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds)
@@ -23,7 +23,7 @@ def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8
 
 	for permutationSpace in state.listPermutationSpace:
 		maskRowsMatchThisDictionary: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-		for pile, leafOrPileRangeOfLeaves in oopsAllLeaves(permutationSpace).items():
+		for pile, leafOrPileRangeOfLeaves in extractPinnedLeaves(permutationSpace).items():
 			if isinstance(leafOrPileRangeOfLeaves, int):
 				maskRowsMatchThisDictionary = maskRowsMatchThisDictionary & (arrayFoldings[:, pile] == leafOrPileRangeOfLeaves)
 				continue

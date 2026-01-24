@@ -8,7 +8,7 @@ from pathlib import Path, PurePath
 from typing import Literal
 
 # ruff: noqa: PLC0415
-"""TODO new flow paradigm, incomplete
+"""# TODO new flow paradigm, incomplete
 
 - I don't want to FORCE people to use the meaningless OEIS ids without providing the definition of the ID at the same time.
 - On the other hand, I don't have any evidence that anyone is using this package except me.

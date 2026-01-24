@@ -1,119 +1,57 @@
 # Brain dump of things I wish were different
 
-## Real-time `listPermutationSpace`
+## Problems with Python installations, Windows, and VS Code
 
-As the pinning functions are working, I'd like to see the rate of change of `listPermutationSpace`.
-
-## At cmd, "python" forces a new terminal and it doesn't use the venv
+### At cmd, "python" forces a new terminal and it doesn't use the venv
 
 This is a relatively new problem.
+
+### In VS Code, Python environments picks 3.14z
+
+It always chooses 3.14z as the default, and it overwrites the setting if I change it.
 
 ## Consolidate and organize knowledge in "Elimination.md"
 
 - mapFolding\_e\analysisPython\Z0Z_p2d6.py
 - mapFolding\_e\analysisPython\Z0Z_hypothesis.py
 - mapFolding\_e\knowledgeDump.py
+- NOTE statements
+- Docstrings
 
 ## "./easyRun" functions
 
 These functions have matured, and I'll probably be using them for the foreseeable future. But their style diverges from the rest
 of the codebase, and I wish they were more consistent with it. They are not dry: I copy-paste the code from one module to another.
 
-## Share transcription of Lunnon 1971
+## Have clarity about allocating responsibility for the ordering of data
 
-In Z0Z_literature\Lunnon1971.txt, I have transcribed most of the image-only PDF into text.
+Who is "responsible" for putting data in order? And, when ought the order be predictable?
 
-## Ideas
+`getDomain二零and二` is returning an iterable of 2-tuple, and the 2-tuple is in a specific order: `(pileOfLeaf二零, pileOfLeaf二)`. If the function didn't want to order the 2-tuple, it would need to the data with a dictionary or a named tuple. It's cheaper and easier to use a 2-tuple and use the function identifier to signal the order: `getDomain二零and二` the first element is `pileOfLeaf二零`, and the second element is `pileOfLeaf二`.
 
-### Bifurcate `PermutationSpace` if a `PileRangeOfLeaves` has exactly two leaves
+Let's assume `getDomain二零and二` also tried to put the 2-tuples in a specific order, what would that order be? Rich-comparison ascending? Why not descending? It may be "natural" to sort a 2-tuple by the elements [0] then [1], but the elements in this case are leaf5 and leaf4: is it "natural" to sort the 2-tuples by leaf5 then leaf4?
 
-This is not a subtle implementation, but it might be useful. After `updateListPermutationSpacePileRangesOfLeaves`, something like
-`(any(valfilter(bit_count == 3)), oopsAllPileRangesOfLeaves, state.listPermutationSpace)` to find all `PileRangeOfLeaves` with
-exactly two leaves, then split the corresponding `PermutationSpace` into two `PermutationSpace` objects, replacing
-`PileRangeOfLeaves` with `int`. Should I then run the new `PermutationSpace` back through
-`updateListPermutationSpacePileRangesOfLeaves`? I _feel_ like `notEnoughOpenPiles`, for example, will eliminate some of the new
-`PermutationSpace` objects, which is the point.
+That is especially important with `getDomain二一零and二一`. The 2-tuple is (leaf7, leaf6). But the only function that really uses that
+domain is `getDomainDimension二`, which creates and returns a 4-tuple with order (leaf二一, leaf二一零, leaf二零, leaf二): leaf6
+precedes leaf7 in the 4-tuple. Which sorting by `getDomain二一零and二一` is more "natural"? Sorting the group of 2-tuples based on
 
-### Sophisticated bifurcation/separation of `PermutationSpace`
+1. the indices of the elements in the 2-tuples,
+2. the semantic value of the elements, specifically the values of leaf6 then leaf7 because of the ordinality of the elements, or
+3. the expected use of the group of 2-tuples?
 
-Many relationships cannot be expressed with `PileRangeOfLeaves`. In a 2^6 map, most of the time, leaf9 and leaf13 can be in any
-order, but if leaf13 is in pile3, pile5, or pile7, then leaf9 must precede leaf13. If leaf13 is pinned, `_conditionalPredecessors`
-will change the `PileRangeOfLeaves` and `notEnoughOpenPiles` might disqualify the `PermutationSpace`. Nevertheless, it _might_ be
-advantageous to divide the `PermutationSpace` into four dictionaries:
+I don't think any of those answers are satisfying, so I think this is proof by contradiction: because there isn't a "natural" or a required order, I think the function should disavow a predictable order.
 
-1. pile3: leaf13
-2. pile5: leaf13
-3. pile7: leaf13
-4. At pile3, pile5, or pile7, remove leaf13 from `PileRangeOfLeaves`.
+Should I force myself to consider the order of returned data and document my decision in the "Returns" section of the docstring? Yes, and I will permit myself to write "I don't know."
 
-Then other effects would cascade through the four dictionaries due to other functions.
+## `PileRangeOfLeaves` identifier
 
-### Make a 2^n-dimensional version of `thisLeafFoldingIsValid`
+I'm not satisfied with `PileRangeOfLeaves`, but the "Buffalo buffalo Buffalo buffalo buffalo buffalo Buffalo buffalo" problem limits my options.
 
-The math is far less complex with 2^n-dimensional maps: the computational savings might be multiple orders of magnitude.
+- `range` is obfuscated due to `range()`.
+- `leaves` is ambiguous.
 
-## Development tools
+Right now, I have `PermutationSpace = dict[int, LeafOrPileRangeOfLeaves]`. A good replacement for `PileRangeOfLeaves` would have the side effect of allowing me to create three _useful_ type aliases for three related dictionaries:
 
-### Pylance importing deprecated types from typing instead of collections
-
-Fix that shit already. I'm waiting for a reboot to confirm, but I might have a workaround. When I first install a venv, Pylance
-uses the types from pandas in "site-packages", but if I open my pandas stub file that correlates with the pandas class/function in
-my code, then Pylance seems to magically prefer all of my stub files in my directory over "site-packages". And it seems to stay
-that way until I create a new venv. This is despite already setting a value for custom types in Pylance. So I am going to try the
-trick with "C:\apps\mapFolding\typings\stdlib\_collections_abc.pyi". This did not work.
-
-### A Python formatter that formats my style
-
-There seem to be some tools for creating formats that aren't "Black" or "PEP 8", but they all seem to be a huge pain in the ass.
-
-### Simple sorting of functions
-
-I can easily sort lines. But I want a fast way to alpha sort functions.
-
-### Font
-
-I very much like Fira Code and there might be other fonts I would like. I haven't looked because Fira Code is great. But Fira Code
-doesn't seem to have the CJK code points I need, so I currently have two monospaced fonts with different widths. I just want the
-same width for everything. Maybe I could change the pitch/CPI of the CJK font to match Fira Code? CJK glyphs are double the width.
-
-### An easier way to type CJK
-
-I use code snippets to enter ideograms, which is limiting and annoying. I haven't been able to get alt-codes to work.
-
-### `__init__.py` and `# isort: split`
-
-I wish I could use a global setting that says "don't sort the modules, but sort the symbols within each module".
-
-### Ruff
-
-In general, I love it. But I need to have different "levels" of strictness for different files. When I am developing a file or
-function, I don't want diagnostics about commented out code or print or a bunch of other things.
-
-### Reduce the settings files in the repo root
-
-.editorconfig
-
-#### isort and ruff
-
-`hunterMakesPy` has a mechanism in Python for storing these settings so they can be used for `writePython()`.
-.isort.cfg
-ruff.toml
-
-#### I think I'm stuck with these
-
-.gitattributes
-.gitignore
-CITATION.cff
-LICENSE
-pyproject.toml
-README.md
-SECURITY.md
-uv.lock
-
-### grepWin
-
-Integrate grepWin. Maybe nirSoft searchMyFiles, too.
-
-### ss64.com knowledge
-
-Batch file support sucks.
+- ☑️ `PinnedLeaves = dict[pile, leaf]`
+- `dict[pile, pileRangeOfLeaves]`
+- ☑️ `PermutationSpace = dict[pile, leafOrPileRangeOfLeaves]`

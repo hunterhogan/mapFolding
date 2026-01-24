@@ -1,5 +1,4 @@
 from mapFolding import dictionaryOEISMapFolding
-from mapFolding._e.algorithms.eliminationCrease import pileProcessingOrderDefault
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
@@ -47,35 +46,3 @@ def test_eliminateFoldsMapShape(oeisID: str, n: int, flow: str, CPUlimit: float)
 	pathLikeWriteFoldsTotal: None = None
 	expected: int = dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]
 	standardizedEqualToCallableReturn(expected, eliminateFolds, mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow)
-
-@pytest.mark.parametrize(
-	"mapShape2上nDimensions",
-	[
-		pytest.param((2, 2, 2, 2), id="2d4"),
-		pytest.param((2, 2, 2, 2, 2), id="2d5"),
-		pytest.param((2, 2, 2, 2, 2, 2), id="2d6"),
-	],
-)
-def test_pileProcessingOrderDefault_properties(mapShape2上nDimensions: tuple[int, ...]) -> None:
-	"""Verify pileProcessingOrderDefault returns complete, unique, in-range pile ordering."""
-	state = EliminationState(mapShape=mapShape2上nDimensions)
-	sequencePileOrder: Sequence[int] = pileProcessingOrderDefault(state)
-
-	assert len(sequencePileOrder) == state.leavesTotal, (
-		f"pileProcessingOrderDefault: expected {state.leavesTotal} piles for {mapShape2上nDimensions=}, "
-		f"got {len(sequencePileOrder)}."
-	)
-	assert all_unique(sequencePileOrder), (
-		f"pileProcessingOrderDefault: duplicate piles for {mapShape2上nDimensions=}."
-	)
-	pilesExpected: tuple[int, ...] = tuple(range(state.leavesTotal))
-	pilesMissing, pilesExtra = unique_to_each(pilesExpected, sequencePileOrder)
-	pilesMissing = tuple(pilesMissing)
-	pilesExtra = tuple(pilesExtra)
-	assert len(pilesMissing) == 0 and len(pilesExtra) == 0, (
-		f"pileProcessingOrderDefault: missing or extra piles for {mapShape2上nDimensions=}. "
-		f"Missing={pilesMissing}, extra={pilesExtra}."
-	)
-	assert all(0 <= pile < state.leavesTotal for pile in sequencePileOrder), (
-		f"pileProcessingOrderDefault: out-of-range pile values for {mapShape2上nDimensions=}."
-	)

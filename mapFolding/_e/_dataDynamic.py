@@ -11,8 +11,9 @@ from mapFolding import ansiColorReset, ansiColorYellowOnBlack, decreasing, inclu
 from mapFolding._e import (
 	between, consecutive, dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首,
 	dimensionSecondNearest首, dimensionThirdNearest首, exclude, getPileRangeOfLeaves, getSumsOfProductsOfDimensionsNearest首,
-	howManyDimensionsHaveOddParity, Leaf, leafInSubHyperplane, leafIsPinned, leafOrigin, mapShapeIs2上nDimensions,
-	PermutationSpace, Pile, pileOrigin, reverseLookup, Z0Z_JeanValjean, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
+	howManyDimensionsHaveOddParity, JeanValjean, Leaf, leafInSubHyperplane, leafIsPinned, leafOrigin,
+	mapShapeIs2上nDimensions, PermutationSpace, Pile, pileOrigin, reverseLookup, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一,
+	首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import all_unique, loops
 from operator import add, sub
@@ -71,8 +72,7 @@ def _makeCreases(leaf: Leaf, dimensionsTotal: int) -> tuple[tuple[Leaf, ...], tu
 	return (tuple(listLeavesCreaseBack), tuple(listLeavesCreaseNext))
 
 #======== (mathematical) ranges of piles ====================
-# TODO Ideally, figure out the formula for pile ranges instead of deconstructing leaf domains.
-# TODO Second best, DRYer code.
+# TODO Ideally, figure out the formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
 
 #-------- Boolean filters for (mathematical) ranges of piles -----------------------------------
 
@@ -485,26 +485,6 @@ def getDomain二一零and二一(state: EliminationState) -> tuple[tuple[int, int
 	direction: Callable[[Any, Any], Any] = sub
 	return _getDomains二Or二一(domain二一零, domain二一, direction, state.dimensionsTotal, state.sumsOfProductsOfDimensions)
 
-# TODO Current return: `tuple[tuple[int, int], ...]`
-# Can and/or should I change to frozenset[tuple[int, int], ...]
-# or to 						Iterator[tuple[int, int], ...]
-
-# TODO The deeper philosophical question: who is "responsible" for putting data in order?
-# Domain二零and二 is promising the 2-tuple is in a specific order: `(pileOfLeaf二零, pileOfLeaf二)`. If I didn't want to order
-# them, I would need to label them with a dictionary or a named tuple.
-
-# Let's assume Domain二零and二 also promised the group of 2-tuples would be in a specific order, what would that order be?
-# Rich-comparison ascending? Why not descending? It may be "natural" to sort a 2-tuple by the elements [0] then [1], but the
-# elements in this case are leaf5 and leaf4: is it "natural" to sort the 2-tuples by leaf5 then leaf4?
-
-# That is especially important with Domain二一零and二一. The 2-tuple is leaf7, leaf6. But the only function that really uses that
-# domain is getDomainDimension二, which creates and returns a 4-tuple with order (leaf二一, leaf二一零, leaf二零, leaf二): leaf6
-# precedes leaf7 in the 4-tuple. Which sorting by Domain二一零and二一 is more "natural", sorting the group of 2-tuples based on 1)
-# the indices of the elements in the 2-tuples, 2) the semantic value of the elements, specifically the values of leaf6 then leaf7
-# because of the ordinality of the elements, or 3) the expected use of the group of 2-tuples? I don't think any of those answers
-# are satisfying, so I think this is proof by contradiction: because there isn't a "natural" order or a required order, I think
-# the function should disavow a predictable order.
-
 @cache
 def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...], direction: Callable[[Any, Any], Any], dimensionsTotal: int, sumsOfProductsOfDimensions: tuple[int, ...]) -> tuple[tuple[int, int], ...]:
 	if direction(0, 6009) == 6009:
@@ -596,14 +576,14 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 				indexDomain0 -= pilesFewerDomain0
 				if pileOfLeaf零 < 首一二(dimensionsTotal):
 # NOTE My thinking: because       首一二(dimensionsTotal)
-					Z0Z_indexPart首: int = dimensionsTotal
-					Z0Z_indexPart一: int = dimensionIndex(一)
-					Z0Z_indexPart二: int = dimensionIndex(二)
+					dimensionIndexPart首: int = dimensionsTotal
+					dimensionIndexPart一: int = dimensionIndex(一)
+					dimensionIndexPart二: int = dimensionIndex(二)
 
 					# Compute the index from the head `首`
-					Z0Z_index: int = Z0Z_indexPart首 - (Z0Z_indexPart一 + Z0Z_indexPart二)
+					indexSumsOfProductsOfDimensions: int = dimensionIndexPart首 - (dimensionIndexPart一 + dimensionIndexPart二)
 
-					addend: int = sumsOfProductsOfDimensions[Z0Z_index]
+					addend: int = sumsOfProductsOfDimensions[indexSumsOfProductsOfDimensions]
 					if ImaDomain二一零and二一:
 						addend -= 1 # decreasing?
 					pileOfLeaf0: int = addend + 首零(dimensionsTotal)
@@ -1009,13 +989,17 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 # ruff: noqa: SIM102
 # I am developing in this module because of Python's effing namespace and "circular import" issues.
 
+# TODO Continue developing getDictionaryConditionalLeafPredecessors
 def getDictionaryConditionalLeafPredecessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafPredecessor`].
 
 	Some leaves are always preceded by one or more leaves. Most leaves, however, are preceded by one or more other leaves only if
 	the leaf is in a specific pile.
 	"""
-	return _getDictionaryConditionalLeafPredecessors(state.mapShape)
+	dictionaryConditionalLeafPredecessors: dict[Leaf, dict[Pile, list[Leaf]]] = {}
+	if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
+		dictionaryConditionalLeafPredecessors = _getDictionaryConditionalLeafPredecessors(state.mapShape)
+	return dictionaryConditionalLeafPredecessors
 @cache
 def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""Prototype."""
@@ -1141,11 +1125,12 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 
 	return dictionaryPrecedence
 
-def getZ0Z_successor(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
+# TODO Implement and use getDictionaryConditionalLeafSuccessors
+def getDictionaryConditionalLeafSuccessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafSuccessor`]."""
-	return _getZ0Z_successor(state.mapShape)
+	return _getDictionaryConditionalLeafSuccessors(state.mapShape)
 @cache
-def _getZ0Z_successor(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
+def _getDictionaryConditionalLeafSuccessors(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	state = EliminationState(mapShape)
 	dictionaryDomains: dict[Leaf, range] = getDictionaryLeafDomains(state)
 
@@ -1174,7 +1159,7 @@ def _getZ0Z_successor(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[L
 
 # TODO Creation of `permutationSpace2上nDomainDefaults` could possibly be a function. To future proof the performance, I probably want to cache `permutationSpace2上nDomainDefaults`.
 def addPileRangesOfLeaves(state: EliminationState) -> EliminationState:
-	permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(Z0Z_JeanValjean(getPileRangeOfLeaves(state.leavesTotal, pileRangeOfLeaves)))
+	permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(getPileRangeOfLeaves(state.leavesTotal, pileRangeOfLeaves)))
 								for pile, pileRangeOfLeaves in getDictionaryPileRanges(state).items()}
 	state.permutationSpace = merge(permutationSpace2上nDomainDefaults, state.permutationSpace)
 	return state

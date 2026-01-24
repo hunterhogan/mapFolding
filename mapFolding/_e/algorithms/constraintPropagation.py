@@ -3,9 +3,9 @@ from cytoolz.itertoolz import last
 from itertools import pairwise, product as CartesianProduct
 from mapFolding import packageSettings
 from mapFolding._e import (
-	between, getIteratorOfLeaves, getLeavesCreaseNext, Leaf, leafOrigin, mapShapeIs2上nDimensions, oopsAllLeaves,
-	oopsAllPileRangesOfLeaves, pileOrigin, PileRangeOfLeaves, PilesWithPileRangeOfLeaves, PinnedLeaves,
-	Z0Z_getIndicesSameDimensionLength)
+	between, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves, getIteratorOfLeaves, getLeavesCreaseNext,
+	indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin, PileRangeOfLeaves,
+	PilesWithPileRangeOfLeaves, PinnedLeaves)
 from mapFolding._e.dataBaskets import EliminationState
 from math import factorial, prod
 from ortools.sat.python import cp_model
@@ -22,11 +22,11 @@ def count(state: EliminationState) -> int:
 	model.add_inverse(listLeavesInPileOrder, listPilingsInLeafOrder)
 
 #======== Manual concurrency and targeted constraints ============================
-	dictionaryOfPileLeaf: PinnedLeaves = oopsAllLeaves(state.permutationSpace)
+	dictionaryOfPileLeaf: PinnedLeaves = extractPinnedLeaves(state.permutationSpace)
 	for aPile, aLeaf in dictionaryOfPileLeaf.items():
 		model.add(listLeavesInPileOrder[aPile] == aLeaf)
 
-	pilesWithPileRangeOfLeaves: PilesWithPileRangeOfLeaves = oopsAllPileRangesOfLeaves(state.permutationSpace)
+	pilesWithPileRangeOfLeaves: PilesWithPileRangeOfLeaves = extractPilesWithPileRangeOfLeaves(state.permutationSpace)
 	for aPile, aLeaf in pilesWithPileRangeOfLeaves.items():
 		model.add_allowed_assignments([listLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(aLeaf))))
 
@@ -34,7 +34,7 @@ def count(state: EliminationState) -> int:
 	model.add(listLeavesInPileOrder[pileOrigin] == leafOrigin)
 
 #======== Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ============================
-	for indicesSameDimensionLength in Z0Z_getIndicesSameDimensionLength(state.mapShape):
+	for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
 		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
 		for index_k, index_r in pairwise(indicesSameDimensionLength):
 			model.add(listPilingsInLeafOrder[state.productsOfDimensions[index_k]] < listPilingsInLeafOrder[state.productsOfDimensions[index_r]])

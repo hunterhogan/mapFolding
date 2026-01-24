@@ -16,35 +16,34 @@ from mapFolding._e._theTypes import (
 from mapFolding._e._beDRY import (
 	between as between, consecutive as consecutive, DOTgetPileIfLeaf as DOTgetPileIfLeaf,
 	DOTgetPileIfPileRangeOfLeaves as DOTgetPileIfPileRangeOfLeaves, DOTitems as DOTitems, DOTkeys as DOTkeys,
-	DOTvalues as DOTvalues, exclude as exclude, getAntiPileRangeOfLeaves as getAntiPileRangeOfLeaves,
+	DOTvalues as DOTvalues, exclude as exclude, extractPilesWithPileRangeOfLeaves as extractPilesWithPileRangeOfLeaves,
+	extractPinnedLeaves as extractPinnedLeaves, getAntiPileRangeOfLeaves as getAntiPileRangeOfLeaves,
 	getIteratorOfLeaves as getIteratorOfLeaves, getPileRangeOfLeaves as getPileRangeOfLeaves,
 	getProductsOfDimensions as getProductsOfDimensions, getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
 	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首, hasDuplicates as hasDuplicates,
+	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, JeanValjean as JeanValjean,
 	leafIsInPileRange as leafIsInPileRange, leafIsNotPinned as leafIsNotPinned, leafIsPinned as leafIsPinned,
 	mappingHasKey as mappingHasKey, mapShapeIs2上nDimensions as mapShapeIs2上nDimensions,
-	notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零, notPileLast as notPileLast, oopsAllLeaves as oopsAllLeaves,
-	oopsAllPileRangesOfLeaves as oopsAllPileRangesOfLeaves, pileIsNotOpen as pileIsNotOpen, pileIsOpen as pileIsOpen,
-	pileRangeOfLeavesAND as pileRangeOfLeavesAND, reverseLookup as reverseLookup, thisHasThat as thisHasThat,
-	thisIsALeaf as thisIsALeaf, thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves,
-	Z0Z_getIndicesSameDimensionLength as Z0Z_getIndicesSameDimensionLength, Z0Z_invert as Z0Z_invert,
-	Z0Z_JeanValjean as Z0Z_JeanValjean)
+	notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零, notPileLast as notPileLast, pileIsNotOpen as pileIsNotOpen,
+	pileIsOpen as pileIsOpen, pileRangeOfLeavesAND as pileRangeOfLeavesAND, reverseLookup as reverseLookup,
+	thisHasThat as thisHasThat, thisIsALeaf as thisIsALeaf, thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves)
 
 # isort: split
 from mapFolding._e._measure import (
 	dimensionFourthNearest首 as dimensionFourthNearest首, dimensionNearestTail as dimensionNearestTail,
-	dimensionNearest首 as dimensionNearest首, dimensionSecondNearest首 as dimensionSecondNearest首,
-	dimensionThirdNearest首 as dimensionThirdNearest首, howManyDimensionsHaveOddParity as howManyDimensionsHaveOddParity,
-	leafInSubHyperplane as leafInSubHyperplane, ptount as ptount, Z0Z_0NearestTail as Z0Z_0NearestTail)
+	dimensionNearest首 as dimensionNearest首, dimensionsConsecutiveAtTail as dimensionsConsecutiveAtTail,
+	dimensionSecondNearest首 as dimensionSecondNearest首, dimensionThirdNearest首 as dimensionThirdNearest首,
+	howManyDimensionsHaveOddParity as howManyDimensionsHaveOddParity,
+	invertLeafIn2上nDimensions as invertLeafIn2上nDimensions, leafInSubHyperplane as leafInSubHyperplane, ptount as ptount)
 
 # isort: split
 from mapFolding._e._dataDynamic import (
 	addPileRangesOfLeaves as addPileRangesOfLeaves,
 	getDictionaryConditionalLeafPredecessors as getDictionaryConditionalLeafPredecessors,
+	getDictionaryConditionalLeafSuccessors as getDictionaryConditionalLeafSuccessors,
 	getDictionaryLeafDomains as getDictionaryLeafDomains, getDictionaryPileRanges as getDictionaryPileRanges,
 	getDomainDimension一 as getDomainDimension一, getDomainDimension二 as getDomainDimension二,
 	getDomainDimension首二 as getDomainDimension首二, getDomain二一零and二一 as getDomain二一零and二一,
 	getDomain二零and二 as getDomain二零and二, getDomain首零一二and首一二 as getDomain首零一二and首一二, getDomain首零二and首二 as getDomain首零二and首二,
 	getLeafDomain as getLeafDomain, getLeaf首零Plus零Domain as getLeaf首零Plus零Domain,
-	getLeavesCreaseBack as getLeavesCreaseBack, getLeavesCreaseNext as getLeavesCreaseNext, getPileRange as getPileRange,
-	getZ0Z_successor as getZ0Z_successor)
-from mapFolding._e.pin2上nDimensionsAnnex import leafParityInDimension as leafParityInDimension
+	getLeavesCreaseBack as getLeavesCreaseBack, getLeavesCreaseNext as getLeavesCreaseNext, getPileRange as getPileRange)

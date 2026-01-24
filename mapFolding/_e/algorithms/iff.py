@@ -27,7 +27,7 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding import getLeavesTotal, inclusive
-from mapFolding._e import between, Leaf, oopsAllLeaves, PermutationSpace, Pile
+from mapFolding._e import between, extractPinnedLeaves, Leaf, PermutationSpace, Pile
 from mapFolding._e.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf
@@ -167,7 +167,7 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 
 def permutationSpaceHasAViolation(state: EliminationState) -> bool:
 	"""Return `True` if `state.permutationSpace` has a violation."""
-	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in oopsAllLeaves(state.permutationSpace).items()}
+	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in extractPinnedLeaves(state.permutationSpace).items()}
 
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]

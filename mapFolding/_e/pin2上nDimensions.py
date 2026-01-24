@@ -1,5 +1,5 @@
 from collections import deque
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from functools import partial
 from hunterMakesPy.parseParameters import intInnit
@@ -13,7 +13,7 @@ from mapFolding._e.pin2上nDimensionsAnnex import (
 	appendPermutationSpaceAtPile as appendPermutationSpaceAtPile, beansWithoutCornbread as beansWithoutCornbread,
 	disqualifyAppendingLeafAtPile as disqualifyAppendingLeafAtPile, pinLeafCornbread as pinLeafCornbread,
 	removeInvalidPermutationSpace as removeInvalidPermutationSpace,
-	updateListPermutationSpacePileRangesOfLeaves as updateListPermutationSpacePileRangesOfLeaves)
+	updateListPermutationSpace as updateListPermutationSpace)
 from mapFolding._e.pin2上nDimensionsByCrease import (
 	pinPile一Crease, pinPile一零Crease, pinPile二Crease, pinPile首Less一Crease, pinPile首Less一零Crease, pinPile首Less二Crease)
 from mapFolding._e.pin2上nDimensionsByDomain import pinPile首零Less零AfterFourthOrder
@@ -32,13 +32,13 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	while pileProcessingOrder and (len(state.listPermutationSpace) < maximumSizeListPermutationSpace):
 		pile: Pile = pileProcessingOrder.popleft()
 
-		Z0Z_thesePilesAreOpen = partition(pileIsOpen(pile=pile), state.listPermutationSpace)
-		state.listPermutationSpace = list(Z0Z_thesePilesAreOpen[False])
+		thesePilesAreOpen: tuple[Iterator[PermutationSpace], Iterator[PermutationSpace]] = partition(pileIsOpen(pile=pile), state.listPermutationSpace)
+		state.listPermutationSpace = list(thesePilesAreOpen[False])
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 			listClaimTickets: list[Future[EliminationState]] = [
 				concurrencyManager.submit(_pinPilesConcurrentTask, EliminationState(mapShape=state.mapShape, permutationSpace=permutationSpace, pile=pile))
-				for permutationSpace in Z0Z_thesePilesAreOpen[True]
+				for permutationSpace in thesePilesAreOpen[True]
 			]
 
 			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), desc=f"Pinning pile {pile:3d} of {state.pileLast:3d}", disable=False):
@@ -169,7 +169,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: tuple[Leaf, ...], leaves
 def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: tuple[Leaf, ...], leavesDomain: tuple[tuple[Pile, ...], ...]) -> EliminationState:
 	"""Deconstruct `state.permutationSpace` by multiple leaves and their domains into `state.listPermutationSpace`."""
 	state.listPermutationSpace = deconstructPermutationSpaceByDomainsCombined(state.permutationSpace, leaves, leavesDomain)
-	return removeInvalidPermutationSpace(updateListPermutationSpacePileRangesOfLeaves(state))
+	return removeInvalidPermutationSpace(updateListPermutationSpace(state))
 
 # --- Logic that wants to join the shared logic ---
 
@@ -204,7 +204,7 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 
 def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leavesDomain: tuple[Pile, ...]) -> EliminationState:
 	state.listPermutationSpace = deconstructPermutationSpaceByDomainOfLeaf(state.permutationSpace, leaves, leavesDomain)
-	return removeInvalidPermutationSpace(updateListPermutationSpacePileRangesOfLeaves(state))
+	return removeInvalidPermutationSpace(updateListPermutationSpace(state))
 
 #-------- Plebian functions -----------------------------------------
 

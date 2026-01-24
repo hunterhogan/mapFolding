@@ -15,8 +15,8 @@ from gmpy2 import bit_mask
 from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
-	between, DOTgetPileIfLeaf, DOTgetPileIfPileRangeOfLeaves, DOTvalues, Folding, getLeafDomain, getPileRange, Leaf,
-	leafIsInPileRange, leafIsNotPinned, oopsAllLeaves, PermutationSpace, Pile, pileIsOpen, thisIsALeaf)
+	between, DOTgetPileIfLeaf, DOTgetPileIfPileRangeOfLeaves, DOTvalues, extractPinnedLeaves, Folding, getLeafDomain,
+	getPileRange, Leaf, leafIsInPileRange, leafIsNotPinned, PermutationSpace, Pile, pileIsOpen, thisIsALeaf)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten, ilen
 from operator import getitem
@@ -127,13 +127,13 @@ def makeFolding(permutationSpace: PermutationSpace, leavesToInsert: tuple[Leaf, 
 	if leavesToInsert:
 		permutand: Iterator[Leaf] = iter(leavesToInsert)
 		pilesTotal: int = ilen(filter(thisIsALeaf, DOTvalues(permutationSpace))) + len(leavesToInsert)
-		# pilesTotal: int = len(oopsAllLeaves(permutationSpace)) + len(leavesToInsert)  # noqa: ERA001
+		# pilesTotal: int = len(extractPinnedLeaves(permutationSpace)) + len(leavesToInsert)  # noqa: ERA001
 		folding: Folding = tuple([
 			leafOrLeafRange if (leafOrLeafRange := DOTgetPileIfLeaf(permutationSpace, pile)) else next(permutand)
 			for pile in range(pilesTotal)
 		])
 	else:
-		folding = tuple(DOTvalues(oopsAllLeaves(permutationSpace)))
+		folding = tuple(DOTvalues(extractPinnedLeaves(permutationSpace)))
 	return folding
 
 #======== Deconstruct a `PermutationSpace` dictionary =======

@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 from itertools import pairwise, permutations, repeat
-from mapFolding._e import leafOrigin, PermutationSpace, pileOrigin, Z0Z_getIndicesSameDimensionLength
+from mapFolding._e import indicesMapShapeDimensionLengthsAreEqual, leafOrigin, PermutationSpace, pileOrigin
 from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding
@@ -13,8 +13,7 @@ def count(state: EliminationState) -> EliminationState:
 	return state
 
 def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[int, ...], leavesToInsert: Iterable[int]) -> int:
-# TODO
-	"""Replace `permutations` with the `noDuplicates` filter on `CartesianProduct` of the domains of each leaf.
+	"""# TODO Replace `permutations` with the `noDuplicates` filter on `CartesianProduct` of the domains of each leaf.
 
 	permutationSpace must be in order by `pile`.
 	filter with `oop`.
@@ -28,7 +27,7 @@ def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[in
 		map(thisLeafFoldingIsValid
 			, map(makeFolding
 				, repeat(permutationSpace)
-				, CartesianProduct(*map(getIteratorOfLeaves, oopsAllPileRangesOfLeaves(permutationSpace).values()))
+				, CartesianProduct(*map(getIteratorOfLeaves, extractPilesWithPileRangeOfLeaves(permutationSpace).values()))
 			)
 			, repeat(mapShape)
 		)
@@ -97,7 +96,7 @@ def theorem4(state: EliminationState) -> EliminationState:
 	theorem2b : Applies the complementary 2(b) divisibility if theorem4 does not apply.
 	excludeLeafRBeforeLeafK : Performs the actual leaf ordering elimination.
 	"""
-	for indicesSameDimensionLength in Z0Z_getIndicesSameDimensionLength(state.mapShape):
+	for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
 		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
 		for index_k, index_r in pairwise(indicesSameDimensionLength):
 			state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])

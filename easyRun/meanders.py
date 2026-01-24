@@ -32,7 +32,7 @@ if __name__ == '__main__':
 				]:
 		sys.stdout.write(f"\n{oeisID}\n")
 
-		"""TODO Identifiers. improve
+		"""# TODO Identifiers. improve
 		"generate up to four targets."
 		1. Adding a new loop.
 		2. Dragging up a loop end.

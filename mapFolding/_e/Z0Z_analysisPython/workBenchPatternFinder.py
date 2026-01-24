@@ -9,9 +9,9 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing
 from mapFolding._e import (
 	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseBack, getLeavesCreaseNext,
-	getPileRange, getSumsOfProductsOfDimensionsNearest首, Leaf, leafInSubHyperplane, Pile, ptount, Z0Z_invert, 零, 首一, 首二,
-	首零, 首零一)
+	getPileRange, getSumsOfProductsOfDimensionsNearest首, Leaf, leafInSubHyperplane, Pile, ptount, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
+from mapFolding._e._measure import invertLeafIn2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState
 from math import prod
 from more_itertools import flatten, iter_index
@@ -213,7 +213,7 @@ pp3  = (3, 5, 9, 17, 33)
 
 			# 32 < even leaves
 			for yy in range(1):
-				pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy])
+				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy])
 					, Z0Z_alphaBeta(state
 						, alphaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
 						, betaStop=-(yy)
@@ -221,14 +221,14 @@ pp3  = (3, 5, 9, 17, 33)
 			# ? 32 < odd leaves < 52
 			# ? 32 < odd leaves < 36
 			for yy in range(1,3):
-				pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
+				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
 			# piles 51, 53, 55 need a higher start.
 			pileRange.extend(state.productsOfDimensions[1 + (首零(state.dimensionsTotal)+零 < pile):dimensionNearest首(pile+1)])
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
 			# pile5 needs a higher start.
-			pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), state.productsOfDimensions[0:state.dimensionsTotal]))
+			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), state.productsOfDimensions[0:state.dimensionsTotal]))
 
 			return tuple(sorted(pileRange))
 
@@ -258,7 +258,7 @@ pp3  = (3, 5, 9, 17, 33)
 			# dimension origins
 			pileRange.extend(map(partial(add, 1), state.productsOfDimensions[1 + (首零(state.dimensionsTotal)+零 < pile):dimensionNearest首(pile+1)]))
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
-			pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(add, 1), state.productsOfDimensions[1:state.dimensionsTotal])))
+			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(add, 1), state.productsOfDimensions[1:state.dimensionsTotal])))
 
 			return tuple(sorted(pileRange))
 

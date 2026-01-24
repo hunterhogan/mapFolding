@@ -2,10 +2,10 @@ from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
 from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing, zeroIndexed
 from mapFolding._e import (
-	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, DOTgetPileIfLeaf, exclude,
-	getDictionaryPileRanges, getLeavesCreaseBack, getLeavesCreaseNext, getSumsOfProductsOfDimensionsNearest首,
-	howManyDimensionsHaveOddParity, leafInSubHyperplane, notLeafOriginOrLeaf零, ptount, Z0Z_0NearestTail, 一, 三, 二, 五, 四, 零,
-	首一, 首一二, 首二, 首零, 首零一, 首零一二)
+	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首,
+	DOTgetPileIfLeaf, exclude, getDictionaryPileRanges, getLeavesCreaseBack, getLeavesCreaseNext,
+	getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity, leafInSubHyperplane, notLeafOriginOrLeaf零,
+	ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import last
 from operator import getitem
@@ -374,7 +374,7 @@ def pinPile首零Less零AfterFourthOrder(state: EliminationState) -> list[int]:
 		listRemoveLeaves.extend([leafAt首Less二 - dimension])
 
 		if (is_even(leafAt首Less二)
-		or (is_odd(leafAt首Less二) and (dimensionIndex(dimension) < Z0Z_0NearestTail(state, leafAt首Less二)))):
+		or (is_odd(leafAt首Less二) and (dimensionIndex(dimension) < dimensionsConsecutiveAtTail(state, leafAt首Less二)))):
 			listRemoveLeaves.extend([dimension])
 
 	dimension = 三

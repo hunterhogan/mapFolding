@@ -1,8 +1,8 @@
 from functools import cache
-from gmpy2 import bit_flip, bit_scan1, f_mod_2exp
+from gmpy2 import bit_flip, bit_mask, bit_scan1, f_mod_2exp
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.parseParameters import intInnit
-from mapFolding._e import Z0Z_invert, 一, 零
+from mapFolding._e import 一, 零
 from mapFolding._e.dataBaskets import EliminationState
 from operator import getitem
 
@@ -118,11 +118,19 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 		raise ValueError(message)
 	return bit_scan1(anInteger) or 0
 
-def Z0Z_0NearestTail(state: EliminationState, integerNonnegative: int) -> int:
-	"""Find the 0-indexed position of the least significant ZERO radix-2 digit in `integerNonnegative`."""
-# NOTE HEY! `Z0Z_invert` is pulling double duty: it sanitizes `integerNonnegative` and inverts it. So if you figure out how to
-# achieve this functionality without calling `Z0Z_invert`, you need to add defensive code here.
-	anInteger: int = Z0Z_invert(state.dimensionsTotal, integerNonnegative)
+@cache
+def invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int) -> int:
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)  # ty:ignore[invalid-argument-type]
+	if anInteger < 0:
+		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
+		raise ValueError(message)
+	return int(anInteger ^ bit_mask(dimensionsTotal))
+
+def dimensionsConsecutiveAtTail(state: EliminationState, integerNonnegative: int) -> int:
+	"""How many consecutive 1s at the tail: Find the 0-indexed position of the least significant ZERO radix-2 digit in `integerNonnegative`."""
+# NOTE HEY! `invertLeafIn2上nDimensions` is pulling double duty: it sanitizes `integerNonnegative` and inverts it. So if you figure out how to
+# achieve this functionality without calling `invertLeafIn2上nDimensions`, you need to add defensive code here.
+	anInteger: int = invertLeafIn2上nDimensions(state.dimensionsTotal, integerNonnegative)
 	return bit_scan1(anInteger) or 0
 
 @cache
@@ -152,6 +160,4 @@ def ptount(integerAbove3: int, /) -> int:
 		raise ValueError(message)
 
 	return leafInSubHyperplane(anInteger - (一+零)).bit_count()
-
-
 

@@ -1,16 +1,16 @@
+"""Avoid putting functions in here that only work on 2^n-dimensional maps."""
 from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
 from cytoolz.functoolz import curry as syntacticCurry
 from cytoolz.itertoolz import unique
-from functools import cache, partial, reduce
+from functools import partial, reduce
 from gmpy2 import bit_clear, bit_mask, bit_set, mpz, xmpz
 from hunterMakesPy import Ordinals, raiseIfNone
-from hunterMakesPy.parseParameters import intInnit
 from itertools import accumulate
 from mapFolding import inclusive, zeroIndexed
 from mapFolding._e import (
 	Leaf, LeafOrPileRangeOfLeaves, PermutationSpace, Pile, PileRangeOfLeaves, PilesWithPileRangeOfLeaves, PinnedLeaves, 零)
 from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract, iter_index
-from operator import add, getitem, mul
+from operator import add, mul
 from typing import Any, overload, TypeGuard
 
 #======== Boolean filters ================================================
@@ -122,7 +122,6 @@ def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	"""
 	return thisIsALeaf(permutationSpace.get(pile))
 
-# TODO Consider if it is possible to return TypeGuard[mpz] (or TypeGuard[None]?) here.
 @syntacticCurry
 def pileIsOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	"""Return True if `pile` is not presently pinned in `permutationSpace`.
@@ -177,13 +176,10 @@ def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | 
 
 #======== `LeafOrPileRangeOfLeaves` stuff ================================================
 # https://gmpy2.readthedocs.io/en/latest/mpz.html
-# xmpz: https://gmpy2.readthedocs.io/en/latest/advmpz.html
 
-# TODO I have a vague memory of using overload/TypeGuard in a similar function: I think it was in the stub file for `networkx`. Check that out.
+# TODO Should `PermutationSpace` be a subclass of `dict` so I can add methods? NOTE I REFUSE TO BE AN OBJECT-ORIENTED
+# PROGRAMMER!!! But, I'll use some OOP if it makes sense. I think collections has some my-first-dict-subclass functions.
 def DOTgetPileIfLeaf(permutationSpace: PermutationSpace, pile: Pile, default: Leaf | None = None) -> Leaf | None:
-# TODO I have a bad feeling that I am going to make `PermutationSpace` a subclass of `dict` and add methods.
-# NOTE I REFUSE TO BE AN OBJECT-ORIENTED PROGRAMMER!!! But, I'll use some OOP if it makes sense.
-# I think collections has some my-first-dict-subclass functions.
 	"""Like `permutationSpace.get(pile)`, but only return a `leaf` or `default`."""
 	ImaLeaf: LeafOrPileRangeOfLeaves | None = permutationSpace.get(pile)
 	if thisIsALeaf(ImaLeaf):
@@ -208,18 +204,23 @@ def getIteratorOfLeaves(pileRangeOfLeaves: PileRangeOfLeaves) -> Iterator[Leaf]:
 	-------
 	iteratorOfLeaves : Iterator[int]
 		An `Iterator` with one `int` for each `leaf` in `pileRangeOfLeaves`.
+
+	See Also
+	--------
+	https://gmpy2.readthedocs.io/en/latest/advmpz.html
 	"""
 	iteratorOfLeaves = xmpz(pileRangeOfLeaves)
 	iteratorOfLeaves[-1] = 0
 	return iteratorOfLeaves.iter_set()
 
+# TODO Improve semiotics of identifier `getAntiPileRangeOfLeaves`.
 def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRangeOfLeaves:
 	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))
 
 def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRangeOfLeaves:
 	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
 
-def oopsAllLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
+def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: pileRangeOfLeaves`.
 
 	Parameters
@@ -234,7 +235,7 @@ def oopsAllLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	"""
 	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in sorted(permutationSpace.items()) if thisIsALeaf(leafOrPileRangeOfLeaves)}
 
-def oopsAllPileRangesOfLeaves(permutationSpace: PermutationSpace) -> PilesWithPileRangeOfLeaves:
+def extractPilesWithPileRangeOfLeaves(permutationSpace: PermutationSpace) -> PilesWithPileRangeOfLeaves:
 	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
 
 	Parameters
@@ -249,6 +250,7 @@ def oopsAllPileRangesOfLeaves(permutationSpace: PermutationSpace) -> PilesWithPi
 	"""
 	return {pile: leafOrPileRangeOfLeaves for pile, leafOrPileRangeOfLeaves in permutationSpace.items() if thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves)}
 
+# TODO efficient implementation of Z0Z_bifurcatePermutationSpace
 def Z0Z_bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[PinnedLeaves, PilesWithPileRangeOfLeaves]:
 	"""Separate `permutationSpace` into two dictionaries: one of `pile: leaf` and one of `pile: pileRangeOfLeaves`.
 
@@ -276,7 +278,8 @@ def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: PileRangeOfLeaves, pileRan
 	"""
 	return pileRangeOfLeaves & pileRangeOfLeavesDISPOSABLE
 
-def Z0Z_JeanValjean(p24601: PileRangeOfLeaves) -> LeafOrPileRangeOfLeaves | None:
+# TODO docstring that includes notes from the comments.
+def JeanValjean(p24601: PileRangeOfLeaves, /) -> LeafOrPileRangeOfLeaves | None:
 	whoAmI: LeafOrPileRangeOfLeaves | None = p24601
 	if thisIsAPileRangeOfLeaves(p24601):
 		if p24601.bit_count() == 1:
@@ -359,17 +362,11 @@ def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: �
 			return key
 	return None
 
-@cache
-def Z0Z_invert(dimensionsTotal: int, integerNonnegative: int) -> int:
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)  # ty:ignore[invalid-argument-type]
-	if anInteger < 0:
-		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
-		raise ValueError(message)
-	return int(anInteger ^ bit_mask(dimensionsTotal))
-
+# TODO docstring
 def getProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	return tuple(accumulate(mapShape, mul, initial=1))
 
+# TODO docstring
 def getSumsOfProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	return tuple(accumulate(getProductsOfDimensions(mapShape), add, initial=0))
 
@@ -410,8 +407,10 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 
 #======== Flow control ================================================
 
+# TODO docstring
 def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsTallToPinThis: int = 3) -> bool:
 	return (youMustBeDimensionsTallToPinThis <= len(mapShape)) and all(dimensionLength == 2 for dimensionLength in mapShape)
 
-def Z0Z_getIndicesSameDimensionLength(mapShape: tuple[int, ...]) -> Iterator[tuple[int, ...]]:
+# TODO docstring
+def indicesMapShapeDimensionLengthsAreEqual(mapShape: tuple[int, ...]) -> Iterator[tuple[int, ...]]:
 	return filter(lambda indices: 1 < len(indices), map(tuple, map(partial(iter_index, mapShape), unique(mapShape))))

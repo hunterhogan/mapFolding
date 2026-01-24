@@ -14,16 +14,19 @@
 
 ## Data structures for better performance
 
-| Type      | Elements | Ordered | Notes                     |
-| --------- | -------- | ------- | ------------------------- |
-| iterator  | fixed?   | no      | Avoid unneeded evaluation |
-| frozenset | fixed    | no      |                           |
-| set       | changing | no      |                           |
-| tuple     | fixed    | yes     |                           |
-| deque     | changing | yes     | Fast at ends; slow index  |
-| list      | changing | yes     |                           |
+| Type      | Elements | Ordered | Notes                                      |
+| --------- | -------- | ------- | ------------------------------------------ |
+| iterator  | fixed?   | no      | Avoid unneeded evaluation. Single-use only |
+| frozenset | fixed    | no      |                                            |
+| set       | changing | no      |                                            |
+| range     | fixed    | yes     | Single-use only                            |
+| tuple     | fixed    | yes     |                                            |
+| deque     | changing | yes     | Fast at ends; slow index                   |
+| list      | changing | yes     |                                            |
 
 ## 2^n-dimensional maps
+
+The following observations are due to two factors: the map's geometry and "leveraged" enumeration: we enumerate a subset of the foldings.
 
 Truth:
 
@@ -77,6 +80,26 @@ step = rTheFirst
 
 leavesThatCannotPrecede_k = range(rTheFirst, state.leavesTotal, step)
 ```
+
+### Pairs of leaves with low entropy
+
+A 2^6-dimensional map has 7840 total sequences that must be enumerated.
+
+Number of Sequences they are Consecutive| absolute leaf numbers| generalized leaf numbers
+7840 | 3, 2 | 一+零, 一
+7840 | 16, 48 | 首一, 首零一
+6241 | 5,4, | 二+零, 二
+6241 | 6,7, | 二+一, 二+一+零
+6241 | 8,40, | 首二, 首零二
+6241 | 56,24, | 首零一二, 首一二
+5897 | 4,36, | 二, 首零二
+5897 | 9,8 | 零+首二, 首二
+5889 | 10,11, | 一+首二, 零+一+首二
+5889 | 52,20, | 首零一三, 首一三
+
+Interestingly, the 22 pairs of `leaf二一, leaf二一零` in consecutive piles cover 6241 of 7840 foldsTotal for (2,) * 6 maps.
+The combined domain is very small, only 76 pairs, but 22 pairs cover 80% and the other 54 pairs only cover 20%. Furthermore,
+in the 22 pairs, `leaf二一零` follows `leaf二一`, but in the rest of the domain, `leaf二一` always follows `leaf二一零`.
 
 ## Semiotics, notation, and givens
 

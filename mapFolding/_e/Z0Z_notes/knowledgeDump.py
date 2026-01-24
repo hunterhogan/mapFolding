@@ -1,10 +1,5 @@
 """A dump of knowledge accumulated during development."""
 
-"""Perspective changes and code changes:
-The `next` crease, in the sense of `k+1` and `r+1` in the inequalities is simple.
-- For example, given `k` and `dimension`, `k1 = bit_flip(k, dimension); k1 = k1 if k1 > k else None`. This doesn't require bit_test(k, dimension) first.
-"""
-
 """Random observation about progressions within a dimension:
 dimension end, 31, dimension origin, 16:
 11111 	10000 16
@@ -77,31 +72,6 @@ def Z0Z_inverseIsSmallEnough(leaf: int, pile: int, sumsOfProductsOfDimensionsNea
 		anotherFormula = int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)
 		print(firstPile_bb ==anotherFormula, leaf, firstPile_bb, anotherFormula)
 
-"""
-
-"""Pairs of leaves with low entropy.
-Always consecutive:
-...3, 2
-...16, 48			1/4 leavesTotal
-
-7840 sequences total
-Consecutive in most sequences:
-6241	...5,4,
-6241	...6,7,
-6241	...8,40,	1/8 leavesTotal
-6241	...56,24,	1/8 leavesTotal
-5897	...4,36,	1/16 leavesTotal
-5897	...9,8,
-5889	...10,11,
-5889	...52,20,	1/16 leavesTotal
-
-`getDomain二一零and二一` has the same basic pattern as `getDomain二零and二` with the parity switched.
-
-Interestingly, the 22 pairs of `leaf二一, leaf二一零` in consecutive piles cover 6241 of 7840 foldsTotal for (2,) * 6 maps.
-The combined domain is very small, only 76 pairs, but 22 pairs cover 80% and the other 54 pairs only cover 20%. Furthermore,
-in the 22 pairs, `leaf二一零` follows `leaf二一`, but in the rest of the domain, `leaf二一` always follows `leaf二一零`.
-
-The same for leaf二零 and leaf二, but reversed.
 """
 
 """General observations and analyzing pinning options.
