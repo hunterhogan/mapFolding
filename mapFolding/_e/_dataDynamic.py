@@ -7,7 +7,7 @@ from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writePython
-from mapFolding import ansiColorReset, ansiColorYellowOnBlack, decreasing, inclusive, packageSettings
+from mapFolding import ansiColorReset, ansiColors, decreasing, inclusive, packageSettings
 from mapFolding._e import (
 	between, consecutive, dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首,
 	dimensionSecondNearest首, dimensionThirdNearest首, exclude, getPileRangeOfLeaves, getSumsOfProductsOfDimensionsNearest首,
@@ -98,7 +98,7 @@ def getPileRange(state: EliminationState, pile: Pile) -> Iterator[Leaf]:
 	return iter(_getPileRange(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal))
 @cache
 def _getPileRange(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> tuple[Leaf, ...]:
-	if (dimensionsTotal > 3) and all(dimensionLength == 2 for dimensionLength in mapShape):
+	if mapShapeIs2上nDimensions(mapShape):
 		parityMatch: Callable[[Leaf], bool] = filterParity(pile)
 		pileAboveFloor: Callable[[Leaf], bool] = filterFloor(pile)
 		pileBelowCeiling: Callable[[Leaf], bool] = filterCeiling(pile, dimensionsTotal)
@@ -892,7 +892,7 @@ def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:
 	if pathFilename.exists():
 		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))  # noqa: S301
 	else:
-		message: str = f"{ansiColorYellowOnBlack}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
+		message: str = f"{ansiColors.YellowOnBlack}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
 		sys.stderr.write(message + '\n')
 		dataframeFoldings = None
 	return dataframeFoldings

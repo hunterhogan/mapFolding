@@ -2,9 +2,9 @@
 # NOTE to AI assistants: this module is not representative of my coding style. Most of it is AI generated, but because it's temporary code, I didn't strictly enforce my usual standards. Do not emulate it.
 from gmpy2 import bit_mask
 from hunterMakesPy import raiseIfNone
-from mapFolding import ansiColorBlackOnCyan, ansiColorReset
+from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeafDomain, getZ0Z_successor,
+	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeafDomain, getDictionaryConditionalLeafSuccessors,
 	howManyDimensionsHaveOddParity, Leaf, Pile, pileOrigin, 零)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
@@ -397,7 +397,7 @@ if __name__ == '__main__':
 	# leaf33 is wrong because of step = 4.
 	# leaf33 and leaf49 are already known from prior analysis.
 	dictionaryPilesAtDomainEnds = getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state)
-	print(ansiColorBlackOnCyan + 'dictionaryPilesAtDomainEnds' + ansiColorReset)
+	print(ansiColors.BlackOnCyan + 'dictionaryPilesAtDomainEnds' + ansiColorReset)
 	pprint(dictionaryPilesAtDomainEnds, width=140)
 	pprint(getDictionaryConditionalLeafPredecessors(state), width=380, compact=True)
-	pprint(getZ0Z_successor(state), width=380, compact=True)
+	pprint(getDictionaryConditionalLeafSuccessors(state), width=380, compact=True)

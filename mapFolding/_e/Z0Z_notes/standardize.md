@@ -2,10 +2,8 @@
 
 - [Standardizing instructions, identifiers, descriptions, and other semiotic elements for clarity](#standardizing-instructions-identifiers-descriptions-and-other-semiotic-elements-for-clarity)
 	- [Formatting instructions: Vertical alignment helps humans to skim information and understand relationships](#formatting-instructions-vertical-alignment-helps-humans-to-skim-information-and-understand-relationships)
-	- [One-time search and Replace: `k` and `r`](#one-time-search-and-replace-k-and-r)
 	- [One-time search and replace: Head, `首`, semiotics are backwards in some places](#one-time-search-and-replace-head-首-semiotics-are-backwards-in-some-places)
 	- [One-time review of code for Data structures for better performance](#one-time-review-of-code-for-data-structures-for-better-performance)
-	- [Identifier thoughts](#identifier-thoughts)
 	- [Code style? always `<`](#code-style-always-)
 	- [Code style? Replace "trailing operators" and "hidden" operators](#code-style-replace-trailing-operators-and-hidden-operators)
 		- [Trailing operators](#trailing-operators)
@@ -13,11 +11,6 @@
 			- [Explanation](#explanation)
 		- ["hidden" operators](#hidden-operators)
 		- [Semantically-useless operators](#semantically-useless-operators)
-	- [Improve identifier instructions](#improve-identifier-instructions)
-		- ["Identifiers and other labels"](#identifiers-and-other-labels)
-		- [example: OEIS](#example-oeis)
-		- [Identifiers: past to future, LTR; cause to effect, LTR; general to specific, LTR](#identifiers-past-to-future-ltr-cause-to-effect-ltr-general-to-specific-ltr)
-		- [Semiotics: 2^n-dimensional](#semiotics-2n-dimensional)
 	- [Improve error message instructions: Example of stupid error message](#improve-error-message-instructions-example-of-stupid-error-message)
 
 ## Formatting instructions: Vertical alignment helps humans to skim information and understand relationships
@@ -25,10 +18,6 @@
 Vertical alignment of related elements helps humans to skim information.
 
 In some cases, vertical alignment of type annotations, for example, would help humans to understand the lateral relationships of the variables.
-
-## One-time search and Replace: `k` and `r`
-
-Except "iff.py", `k` and `r` to something semantic. If the context does not offer anything better, use `leaf_k` and `leaf_r`.
 
 ## One-time search and replace: Head, `首`, semiotics are backwards in some places
 
@@ -56,18 +45,6 @@ But in `首一(state.dimensionsTotal)+(一+零)`, 一 are 零 in the order of co
 ## One-time review of code for Data structures for better performance
 
 Change `tuple` to `frozenset`, for example.
-
-## Identifier thoughts
-
-- Functions and methods
-  - SVO
-  - More emphasis on actors, e.g., librarian, quartermaster
-  - thisIsEven, not isEven, which I already do. use `import as` and append `吗` for poorly named boolean functions.
-- modules: places
-- types: Adjective-Noun (capitalization and order switched to increase distinction)
-- other: noun-adjective-adverb
-
-I wonder if this matches what I have been doing.
 
 ## Code style? always `<`
 
@@ -147,52 +124,6 @@ zeroIndexed: int = 1
 ```
 
 In the above example, `range(bottles + 1)`, `range(bottles + inclusive)`, and `range(bottles + zeroIndexed)` all have the same effect, but semantic identifiers explain why the adjustment is needed.
-
-## Improve identifier instructions
-
-### "Identifiers and other labels"
-
-In addition to the identifier instructions, I should do a global search for "identifier(s)" and replace most instances with "Identifiers and other labels".
-
-Labels include:
-
-- identifiers
-- file names
-- directory names
-- key names in mappings
-- parameter names
-
-### example: OEIS
-
-`def testCaseOeisFormula(request: pytest.FixtureRequest) -> TestCase:`
-
-- "OeisFormula" is a diminutive form of oeisIDbyFormula: NO MOTHERFUCKING DIMINUTIVES.
-- "OeisFormula" is referencing a very specific item, the module `oeisIDbyFormula`, and it is not a generalized form that includes
- `oeisIDbyFormula`, which means `oeisIDbyFormula` is used as a proper noun in this case: use the proper noun in the identifier.
-- "Oeis" is not a word: use 'oeis' or 'OEIS' but not OeIs, oEIs, oeiS, or Oeis.
-
-### Identifiers: past to future, LTR; cause to effect, LTR; general to specific, LTR
-
-`mapShapeFromTestCase`
-
-So testCase to mapShape, not mapShape from testCase.
-
-### Semiotics: 2^n-dimensional
-
-Previously, I used terms such as 2^d, 2Dn, p2d6. Furthermore, some (all?) academic papers use similar terms. But "d" is not obvious to all readers as "dimension". Therefore, I am standardizing on "2^n-dimensional" and `2上nDimensional`.
-
-- Text
-  - Morpheme root: 2^n-dimensional
-  - Alternatives:
-	- 2^n-dimensions
-- Identifiers, pseudo-identifiers (e.g., function parameters), and file system objects
-  - Morpheme suffix: 2上nDimensional
-  - Always use a string that would be a valid Python identifier even if the string is not being used as an identifier.
-  - Alternatives:
-	- 2上n
-  - Fallback prefix: p
-	- p2上nDimensional
-	- p2上n
 
 ## Improve error message instructions: Example of stupid error message
 

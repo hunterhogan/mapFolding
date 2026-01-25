@@ -85,7 +85,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		state.permutationSpace = {}
 		state.listPermutationSpace = [addPileRangesOfLeaves(state).permutationSpace]
 
-	depth: int = getitem(intInnit((pileDepth,), 'pileDepth', type[int]), 0)  # ty:ignore[invalid-argument-type]
+	depth: int = getitem(intInnit((pileDepth,), 'pileDepth', int), 0)
 	if depth < 0:
 		message: str = f"I received `{pileDepth = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -171,7 +171,7 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: tuple[Leaf
 	state.listPermutationSpace = deconstructPermutationSpaceByDomainsCombined(state.permutationSpace, leaves, leavesDomain)
 	return removeInvalidPermutationSpace(updateListPermutationSpace(state))
 
-# --- Logic that wants to join the shared logic ---
+#--- Logic that wants to join the shared logic ---
 
 def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callable[[EliminationState, Leaf], tuple[Pile, ...]], *, youMustBeDimensionsTallToPinThis: int = 3, CPUlimit: bool | float | int | None = None) -> EliminationState:
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=youMustBeDimensionsTallToPinThis):

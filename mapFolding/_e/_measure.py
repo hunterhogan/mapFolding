@@ -120,7 +120,7 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 
 @cache
 def invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int) -> int:
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', type[int]), 0)  # ty:ignore[invalid-argument-type]
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)

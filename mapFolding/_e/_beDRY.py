@@ -347,7 +347,6 @@ def exclude[个](flatContainer: Sequence[个], indices: Iterable[int]) -> Iterat
 	indicesInclude: list[int] = sorted(set(range(lengthIterable)).difference(map(normalizeIndex, indices)))
 	return extract(flatContainer, indicesInclude)
 
-@syntacticCurry
 def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: 文义) -> 文件 | None:
 	"""Return the key in `dictionary` that corresponds to `keyValue`.
 

@@ -264,7 +264,7 @@ pp3  = (3, 5, 9, 17, 33)
 
 		for pile in range(首一(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
 			print(pile, (real:=tuple(getPileRange(state, pile))) == (computed:=Z0Z_getPileRangeEven(state, pile)), end=': ')
-			# print(f"{ansiColorGreen}surplus: {set(computed).difference(real)}", f"{ansiColorMagenta}missing: {set(real).difference(computed)}{ansiColorReset}", sep='\n')
+			# print(f"{ansiColors.Green}surplus: {set(computed).difference(real)}", f"{ansiColors.Magenta}missing: {set(real).difference(computed)}{ansiColorReset}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
 		for pile in range(首二(state.dimensionsTotal)+零, 首零一(state.dimensionsTotal), 2):

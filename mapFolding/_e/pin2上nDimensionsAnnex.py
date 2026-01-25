@@ -13,13 +13,12 @@ from mapFolding._e import (
 	extractPilesWithPileRangeOfLeaves, extractPinnedLeaves, getAntiPileRangeOfLeaves,
 	getDictionaryConditionalLeafPredecessors, getLeafDomain, getLeavesCreaseBack, getLeavesCreaseNext, JeanValjean, Leaf,
 	leafIsInPileRange, leafIsPinned, mappingHasKey, mapShapeIs2上nDimensions, notLeafOriginOrLeaf零, notPileLast,
-	PermutationSpace, Pile, pileIsNotOpen, pileIsOpen, PileRangeOfLeaves, pileRangeOfLeavesAND, PilesWithPileRangeOfLeaves,
-	PinnedLeaves, reverseLookup, thisHasThat, thisIsALeaf, 一, 零, 首一, 首零一)
+	PermutationSpace, Pile, pileIsNotOpen, PileRangeOfLeaves, pileRangeOfLeavesAND, PilesWithPileRangeOfLeaves,
+	PinnedLeaves, thisHasThat, thisIsALeaf, 一, 零, 首一, 首零一)
 from mapFolding._e.algorithms.iff import removePermutationSpaceViolations, thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import atPilePinLeaf, deconstructPermutationSpaceAtPile
-from more_itertools import (
-	filter_map, ilen as lenIterator, one, only, partition as more_itertools_partition, split_at, windowed_complete)
+from more_itertools import filter_map, ilen as lenIterator, one, partition as more_itertools_partition, split_at
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -61,8 +60,12 @@ def disqualifyAppendingLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
 def _pileNotInRangeByLeaf(state: EliminationState, leaf: Leaf) -> bool:
 	return state.pile not in getLeafDomain(state, leaf)
 
-#======== Updating `PileRangeOfLeaves` =======
+#======== Reducing `PileRangeOfLeaves` =======
 
+# TODO implement - The signs of the magnitudes alternate: if the difference between two leaves is 2, for example, then before there can be another difference of 2, there must be a difference of -2.
+# TODO implement - Because `state.leavesTotal // 2` always has one more than `- state.leavesTotal // 2`, the first and last differences with magnitude `state.leavesTotal // 2` are positive.
+# TODO implement The absolute value of the differences in two consecutive piles cannot be the sameThe absolute value of the differences in two consecutive piles cannot be the same.
+# TODO implement The running total of the differences does not repeat in a Folding.
 def updateListPermutationSpace(state: EliminationState) -> EliminationState:
 	"""Flow control to apply per-`PermutationSpace` functions to all of `state.listPermutationSpace`."""
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
@@ -84,8 +87,6 @@ def updateListPermutationSpace(state: EliminationState) -> EliminationState:
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
 	state.listPermutationSpace = []
 	state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_leafDomainIs1(state), listPermutationSpace))
-
-# TODO implement - The signs of the magnitudes alternate: if the difference between two leaves is 2, for example, then before there can be another difference of 2, there must be a difference of -2.
 
 	return state
 
@@ -163,11 +164,13 @@ def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationS
 				leavesPinnedParityOpposite, ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) = dequePileLeafPileLeaf.pop()
 				leaf_kCrease: Leaf = int(bit_flip(leaf_k, dimension))
 				leaf_rCrease: Leaf = int(bit_flip(leaf_r, dimension))
+				pileOf_kCrease: Pile = 31212012
+				pileOf_rCrease: Pile = 31212012
 
 				if (leaf_kCreaseIsPinned := leafIsPinned(leavesPinnedParityOpposite, leaf_kCrease)):
-					pileOf_kCrease: Pile = dictionaryLeafToPile[leaf_kCrease]
+					pileOf_kCrease = dictionaryLeafToPile[leaf_kCrease]
 				if (leaf_rCreaseIsPinned := leafIsPinned(leavesPinnedParityOpposite, leaf_rCrease)):
-					pileOf_rCrease: Pile = dictionaryLeafToPile[leaf_rCrease]
+					pileOf_rCrease = dictionaryLeafToPile[leaf_rCrease]
 
 				pilesForbidden: Iterable[Pile] = []
 				antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, frozenset())
@@ -201,7 +204,7 @@ def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationS
 						return None
 
 				elif not leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
-				# case leaves: k, r
+				# case leaves: leaf_k, leaf_r
 				# I don't think I have enough information to do anything.
 					pass
 
@@ -414,12 +417,12 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:  # noqa: PLR0911
 				return dimensionNearestTail(r) >= dimensionHead
 
 			@cache
-			def mustBeBeforeLeaf(k: Leaf, leaf: Leaf = leaf, pile: Pile = pile, dimensionTail: int = dimensionTail) -> bool:
-				if dimensionNearest首(k) <= dimensionTail:
+			def mustBeBeforeLeaf(leaf_k: Leaf, leaf: Leaf = leaf, pile: Pile = pile, dimensionTail: int = dimensionTail) -> bool:
+				if dimensionNearest首(leaf_k) <= dimensionTail:
 					return True
 				if (mappingHasKey(dictionaryConditionalLeafPredecessors, leaf)
 				and mappingHasKey(dictionaryConditionalLeafPredecessors[leaf], pile)):
-					return k in dictionaryConditionalLeafPredecessors[leaf][pile]
+					return leaf_k in dictionaryConditionalLeafPredecessors[leaf][pile]
 				return False
 
 			leavesFixedBeforePile, leavesFixedAfterPile = split_at(leavesFixed, leaf.__eq__, maxsplit=1)

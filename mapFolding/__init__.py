@@ -2,18 +2,8 @@
 
 # isort: split
 from mapFolding._semiotics import (
-	ansiColorBlackOnCyan as ansiColorBlackOnCyan, ansiColorBlackOnMagenta as ansiColorBlackOnMagenta,
-	ansiColorBlackOnWhite as ansiColorBlackOnWhite, ansiColorBlackOnYellow as ansiColorBlackOnYellow,
-	ansiColorBlueOnWhite as ansiColorBlueOnWhite, ansiColorBlueOnYellow as ansiColorBlueOnYellow,
-	ansiColorCyanOnBlack as ansiColorCyanOnBlack, ansiColorCyanOnBlue as ansiColorCyanOnBlue,
-	ansiColorCyanOnMagenta as ansiColorCyanOnMagenta, ansiColorGreenOnBlack as ansiColorGreenOnBlack,
-	ansiColorMagentaOnBlack as ansiColorMagentaOnBlack, ansiColorMagentaOnBlue as ansiColorMagentaOnBlue,
-	ansiColorMagentaOnCyan as ansiColorMagentaOnCyan, ansiColorRedOnWhite as ansiColorRedOnWhite,
-	ansiColorReset as ansiColorReset, ansiColors as ansiColors, ansiColorWhiteOnBlack as ansiColorWhiteOnBlack,
-	ansiColorWhiteOnBlue as ansiColorWhiteOnBlue, ansiColorWhiteOnMagenta as ansiColorWhiteOnMagenta,
-	ansiColorWhiteOnRed as ansiColorWhiteOnRed, ansiColorYellowOnBlack as ansiColorYellowOnBlack,
-	ansiColorYellowOnBlue as ansiColorYellowOnBlue, ansiColorYellowOnRed as ansiColorYellowOnRed, decreasing as decreasing,
-	inclusive as inclusive, zeroIndexed as zeroIndexed)
+	ansiColorReset as ansiColorReset, ansiColors as ansiColors, decreasing as decreasing, inclusive as inclusive,
+	zeroIndexed as zeroIndexed)
 
 # isort: split
 from mapFolding._theTypes import (

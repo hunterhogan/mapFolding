@@ -65,12 +65,12 @@ def theorem2b(state: EliminationState) -> EliminationState:
 	--------
 	theorem4, excludeLeafRBeforeLeafK
 	"""
-	if state.Theorem4Multiplier == 1 and max(state.mapShape) > 2 and (state.leavesTotal > 4):
+	if state.Theorem4Multiplier == 1 and (2 < max(state.mapShape)) and (4 < state.leavesTotal):
 		state.Theorem2Multiplier = 2
 		dimension: int = state.mapShape.index(max(state.mapShape))
-		k: int = state.productsOfDimensions[dimension]
-		r: int = 2 * k
-		state = excludeLeaf_rBeforeLeaf_k(state, k, r)
+		leaf_k: int = state.productsOfDimensions[dimension]
+		leaf_r: int = 2 * leaf_k
+		state = excludeLeaf_rBeforeLeaf_k(state, leaf_k, leaf_r)
 	return state
 
 def theorem4(state: EliminationState) -> EliminationState:
@@ -96,14 +96,18 @@ def theorem4(state: EliminationState) -> EliminationState:
 	theorem2b : Applies the complementary 2(b) divisibility if theorem4 does not apply.
 	excludeLeafRBeforeLeafK : Performs the actual leaf ordering elimination.
 	"""
-	for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
-		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
-		for index_k, index_r in pairwise(indicesSameDimensionLength):
-			state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])
+	if 2 < max(state.mapShape):
+		for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
+			state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
+			for index_k, index_r in pairwise(indicesSameDimensionLength):
+				state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:  # noqa: ARG001
 	"""Count the number of valid foldings for a given number of leaves."""
+	if state.leavesTotal == 0:
+		state.groupsOfFolds = 1
+		return state
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.listPermutationSpace = [{pileOrigin: leafOrigin}]

@@ -34,10 +34,11 @@ def count(state: EliminationState) -> int:
 	model.add(listLeavesInPileOrder[pileOrigin] == leafOrigin)
 
 #======== Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ============================
-	for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
-		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
-		for index_k, index_r in pairwise(indicesSameDimensionLength):
-			model.add(listPilingsInLeafOrder[state.productsOfDimensions[index_k]] < listPilingsInLeafOrder[state.productsOfDimensions[index_r]])
+	if 2 < max(state.mapShape):
+		for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
+			state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
+			for index_k, index_r in pairwise(indicesSameDimensionLength):
+				model.add(listPilingsInLeafOrder[state.productsOfDimensions[index_k]] < listPilingsInLeafOrder[state.productsOfDimensions[index_r]])
 
 #======== Rules for 2^n-dimensional maps ============================
 
@@ -57,20 +58,20 @@ def count(state: EliminationState) -> int:
 		model.add(listPilingsInLeafOrder[comparatorRight] <= listPilingsInLeafOrder[comparatorLeft]).only_enforce_if(ruleΩ.Not())
 		return ruleΩ
 
-	def addForbiddenInequalityCycle(k: Leaf, r: Leaf, k1: Leaf, r1: Leaf) -> None:
-		k__小于_r: cp_model.IntVar = addLessThan(k, r) # 小, xiǎo: small, less; as in 李小龍, Lǐ Xiǎolóng, Lǐ little dragon, aka Bruce Lee
-		r1_小于_k: cp_model.IntVar = addLessThan(r1, k)
-		k1_小于_r1: cp_model.IntVar = addLessThan(k1, r1)
+	def addForbiddenInequalityCycle(leaf_k: Leaf, leaf_r: Leaf, leaf_kCrease: Leaf, leaf_rCrease: Leaf) -> None:
+		k__小于_r: cp_model.IntVar = addLessThan(leaf_k, leaf_r) # 小, xiǎo: small, less; as in 李小龍, Lǐ Xiǎolóng, Lǐ little dragon, aka Bruce Lee
+		r1_小于_k: cp_model.IntVar = addLessThan(leaf_rCrease, leaf_k)
+		k1_小于_r1: cp_model.IntVar = addLessThan(leaf_kCrease, leaf_rCrease)
 		model.add_bool_or([k1_小于_r1.Not(), r1_小于_k.Not(), k__小于_r.Not()])		# [k+1 < r+1 < k < r]
 
-		r__小于_k1: cp_model.IntVar = addLessThan(r, k1)
+		r__小于_k1: cp_model.IntVar = addLessThan(leaf_r, leaf_kCrease)
 		model.add_bool_or([r1_小于_k.Not(), k__小于_r.Not(), r__小于_k1.Not()])		# [r+1 < k < r < k+1]
 
 		model.add_bool_or([k__小于_r.Not(), r__小于_k1.Not(), k1_小于_r1.Not()])	# [k < r < k+1 < r+1]
 
-		k__小于_r1: cp_model.IntVar = addLessThan(k, r1)
-		r1_小于_k1: cp_model.IntVar = addLessThan(r1, k1)
-		k1_小于_r: cp_model.IntVar = addLessThan(k1, r)
+		k__小于_r1: cp_model.IntVar = addLessThan(leaf_k, leaf_rCrease)
+		r1_小于_k1: cp_model.IntVar = addLessThan(leaf_rCrease, leaf_kCrease)
+		k1_小于_r: cp_model.IntVar = addLessThan(leaf_kCrease, leaf_r)
 		model.add_bool_or([k__小于_r1.Not(), r1_小于_k1.Not(), k1_小于_r.Not()])	# [k < r+1 < k+1 < r]
 
 	def leaf2IndicesCartesian(leaf: Leaf) -> tuple[int, ...]:

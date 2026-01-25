@@ -1,7 +1,6 @@
 # ruff: noqa
 from collections import ChainMap
-from mapFolding import (
-	ansiColorGreenOnBlack, ansiColorReset, ansiColors, ansiColorYellowOnRed, dictionaryOEIS, dictionaryOEISMapFolding)
+from mapFolding import ansiColorReset, ansiColors, dictionaryOEIS, dictionaryOEISMapFolding
 from mapFolding.basecamp import NOTcountingFolds
 import sys
 import time
@@ -12,7 +11,7 @@ if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
 			f"{(match:=countTotal == dictionaryONE[oeisID]['valuesKnown'][n])}\t"
-			f"{(ansiColorYellowOnRed, ansiColorGreenOnBlack)[match]}"
+			f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
 			f"{n}\t"
 			f"{countTotal}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"

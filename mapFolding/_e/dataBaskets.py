@@ -76,6 +76,7 @@ class EliminationState:
 	permutationSpace: PermutationSpace = dataclasses.field(default_factory=dict[Pile, LeafOrPileRangeOfLeaves], init=True)
 	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
+	Theorem2aMultiplier: int = 1
 	Theorem2Multiplier: int = 1
 	Theorem3Multiplier: int = 1
 	Theorem4Multiplier: int = 1
@@ -104,12 +105,14 @@ class EliminationState:
 	@property
 	def foldsTotal(self) -> int:
 		"""The computed number of distinct `Folding` patterns for this `mapShape`."""
-		return prod((self.groupsOfFolds, self.leavesTotal, self.Theorem2Multiplier, self.Theorem3Multiplier, self.Theorem4Multiplier))
+		return prod((self.groupsOfFolds, self.Theorem2aMultiplier, self.Theorem2Multiplier, self.Theorem3Multiplier, self.Theorem4Multiplier))
 
 	def __post_init__(self) -> None:
 		"""One-time computation of unchanging values."""
 		self.dimensionsTotal = len(self.mapShape)
 		self.leavesTotal = getLeavesTotal(self.mapShape)
+		if 0 < self.leavesTotal:
+			self.Theorem2aMultiplier = self.leavesTotal
 		self.leafLast = self.leavesTotal - 1
 		self.foldingCheckSum = self.leafLast * self.leavesTotal // 2 # https://en.wikipedia.org/wiki/Triangular_number
 		self.pilesTotal = self.leavesTotal

@@ -12,11 +12,13 @@ from cytoolz.functoolz import compose, curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
 from functools import partial
 from gmpy2 import bit_mask
+from hunterMakesPy import raiseIfNone
 from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
 	between, DOTgetPileIfLeaf, DOTgetPileIfPileRangeOfLeaves, DOTvalues, extractPinnedLeaves, Folding, getLeafDomain,
-	getPileRange, Leaf, leafIsInPileRange, leafIsNotPinned, PermutationSpace, Pile, pileIsOpen, thisIsALeaf)
+	getPileRange, Leaf, leafIsInPileRange, leafIsNotPinned, PermutationSpace, Pile, pileIsOpen, PileRangeOfLeaves,
+	thisIsALeaf)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten, ilen
 from operator import getitem
@@ -157,7 +159,7 @@ def deconstructPermutationSpaceAtPile(permutationSpace: PermutationSpace, pile: 
 	deconstructedPermutationSpace : dict[int, PermutationSpace]
 		Dictionary mapping from `leaf` pinned at `pile` to the `PermutationSpace` dictionary with the `leaf` pinned at `pile`.
 	"""
-	if thisIsALeaf(leaf := permutationSpace.get(pile)):
+	if (leaf := DOTgetPileIfLeaf(permutationSpace, pile)):
 		deconstructedPermutationSpace: dict[Leaf, PermutationSpace] = {leaf: permutationSpace}
 	else:
 		pin: Callable[[Leaf], PermutationSpace] = atPilePinLeaf(permutationSpace, pile)
@@ -205,7 +207,7 @@ def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSp
 
 	def leafInPileRangeByIndex(index: int) -> Callable[[tuple[Pile, ...]], bool]:
 		def workhorse(domain: tuple[Pile, ...]) -> bool:
-			pileRangeOfLeaves = DOTgetPileIfPileRangeOfLeaves(permutationSpace, domain[index], default=bit_mask(len(permutationSpace)))
+			pileRangeOfLeaves: PileRangeOfLeaves = raiseIfNone(DOTgetPileIfPileRangeOfLeaves(permutationSpace, domain[index], default=bit_mask(len(permutationSpace))))
 			return leafIsInPileRange(leaves[index], pileRangeOfLeaves)
 		return workhorse
 
@@ -274,23 +276,23 @@ def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[Permuta
 	"""
 	return  flatten(map(DOTvalues, map(deconstructPermutationSpaceAtPile, listPermutationSpace, repeat(pile), repeat(leavesToPin))))
 
-def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: Leaf, r: Leaf, pile_k: Pile, domain_r: Iterable[Pile] | None = None, rangePile_k: Iterable[Leaf] | None = None) -> EliminationState:
-	"""Exclude leaf `r` before leaf `k` at pile `k`.
+def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, leaf_r: Leaf, pile_k: Pile, domain_r: Iterable[Pile] | None = None, rangePile_k: Iterable[Leaf] | None = None) -> EliminationState:
+	"""Exclude `leaf_r` from appearing before `leaf_k` at `pile_k`.
 
 	Parameters
 	----------
 	state : EliminationState
 		Mutable elimination state (provides `leavesTotal`, `pileLast`).
-	k : int
+	leaf_k : int
 		Reference leaf index derived from `productOfDimensions` for a dimension.
-	r : int
-		Leaf that must not appear before `k` (also dimension-derived).
+	leaf_r : int
+		Leaf that must not appear before `leaf_k` (also dimension-derived).
 	pile_k : int
-		Pile index currently under consideration for leaf `k`.
+		Pile index currently under consideration for leaf `leaf_k`.
 	domain_r : Iterable[int] | None = None
-		Optional domain of piles for leaf `r`. If `None`, the full domain from `state` is used.
+		Optional domain of piles for leaf `leaf_r`. If `None`, the full domain from `state` is used.
 	rangePile_k : Iterable[int] | None = None
-		Optional range of leaves for pile `k`. If `None`, the full range from `state` is used.
+		Optional range of leaves for pile `pile_k`. If `None`, the full range from `state` is used.
 
 	Returns
 	-------
@@ -307,11 +309,11 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: Leaf, r: Leaf,
 	listPermutationSpaceCompleted: list[PermutationSpace] = []
 
 	pile_kIsOpen: Callable[[PermutationSpace], bool] = pileIsOpen(pile=pile_k)
-	kIsNotPinned: Callable[[PermutationSpace], bool] = leafIsNotPinned(leaf=k)
-	def notLeaf_r(comparand: Leaf, r: Leaf = r) -> bool:
+	kIsNotPinned: Callable[[PermutationSpace], bool] = leafIsNotPinned(leaf=leaf_k)
+	def notLeaf_r(comparand: Leaf, r: Leaf = leaf_r) -> bool:
 		return comparand != r
 
-	listPermutationSpace, iterator_kPinnedAt_pile_k = _segregateLeafPinnedAtPile(state.listPermutationSpace, k, pile_k)
+	listPermutationSpace, iterator_kPinnedAt_pile_k = _segregateLeafPinnedAtPile(state.listPermutationSpace, leaf_k, pile_k)
 	state.listPermutationSpace = []
 
 	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(kIsNotPinned, listPermutationSpace)
@@ -321,7 +323,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: Leaf, r: Leaf,
 	listPermutationSpaceCompleted.extend(iterable_pile_kOccupied)
 
 	if domain_r is None:
-		domain_r = getLeafDomain(state, r)
+		domain_r = getLeafDomain(state, leaf_r)
 
 	domain_r = filter(between(0, pile_k - inclusive), domain_r)
 
@@ -330,36 +332,36 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, k: Leaf, r: Leaf,
 
 	rangePile_k = frozenset(rangePile_k)
 
-	if k in rangePile_k:
-		for permutationSpace_kPinnedAt_pile_k, iterable_pile_kOccupied in segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace, k, pile_k, rangePile_k):
+	if leaf_k in rangePile_k:
+		for permutationSpace_kPinnedAt_pile_k, iterable_pile_kOccupied in segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace, leaf_k, pile_k, rangePile_k):
 			listPermutationSpaceCompleted.extend(iterable_pile_kOccupied)
 			iterator_kPinnedAt_pile_k.append(permutationSpace_kPinnedAt_pile_k)
 	else:
 		listPermutationSpaceCompleted.extend(listPermutationSpace)
 
 	for pile_r in domain_r:
-		iterator_kPinnedAt_pile_k = excludeLeafAtPile(iterator_kPinnedAt_pile_k, r, pile_r, tuple(filter(notLeaf_r, getPileRange(state, pile_r))))
+		iterator_kPinnedAt_pile_k = excludeLeafAtPile(iterator_kPinnedAt_pile_k, leaf_r, pile_r, tuple(filter(notLeaf_r, getPileRange(state, pile_r))))
 
 	state.listPermutationSpace.extend(listPermutationSpaceCompleted)
 	state.listPermutationSpace.extend(iterator_kPinnedAt_pile_k)
 
 	return state
 
-def excludeLeaf_rBeforeLeaf_k(state: EliminationState, k: Leaf, r: Leaf, domain_k: Iterable[Pile] | None = None, domain_r: Iterable[Pile] | None = None) -> EliminationState:
-	"""Apply a `leaf` ordering exclusion (`r` cannot precede `k`) at every `pile`.
+def excludeLeaf_rBeforeLeaf_k(state: EliminationState, leaf_k: Leaf, leaf_r: Leaf, domain_k: Iterable[Pile] | None = None, domain_r: Iterable[Pile] | None = None) -> EliminationState:
+	"""Exclude `leaf_r` from appearing before `leaf_k` in every `pile` in the domain of `leaf_k`.
 
 	Parameters
 	----------
 	state : EliminationState
 		Data basket, state of the local context, and state of the global context.
-	k : int
-		`leaf` that must be in a `pile` preceding the `pile` of `r`.
-	r : int
-		`leaf` that must be in a `pile` succeeding the `pile` of `k`.
+	leaf_k : int
+		`leaf` that must be in a `pile` preceding the `pile` of `leaf_r`.
+	leaf_r : int
+		`leaf` that must be in a `pile` succeeding the `pile` of `leaf_k`.
 	domain_k : Iterable[int] | None = None
-		The domain of each `pile` at which `k` can be pinned. If `None`, every `pile` is in the domain.
+		The domain of each `pile` at which `leaf_k` can be pinned. If `None`, every `pile` is in the domain.
 	domain_r : Iterable[int] | None = None
-		The domain of each `pile` at which `r` can be pinned. If `None`, every `pile` is in the domain.
+		The domain of each `pile` at which `leaf_r` can be pinned. If `None`, every `pile` is in the domain.
 
 	Returns
 	-------
@@ -371,9 +373,9 @@ def excludeLeaf_rBeforeLeaf_k(state: EliminationState, k: Leaf, r: Leaf, domain_
 	_excludeLeafRBeforeLeafK, theorem4, theorem2b
 	"""
 	if domain_k is None:
-		domain_k = getLeafDomain(state, k)
+		domain_k = getLeafDomain(state, leaf_k)
 	for pile_k in reversed(tuple(domain_k)):
-		state = excludeLeaf_rBeforeLeaf_kAtPile_k(state, k, r, pile_k, domain_r=domain_r)
+		state = excludeLeaf_rBeforeLeaf_kAtPile_k(state, leaf_k, leaf_r, pile_k, domain_r=domain_r)
 	return state
 
 def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[PermutationSpace]:

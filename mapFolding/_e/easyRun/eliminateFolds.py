@@ -2,8 +2,7 @@
 # pyright: basic
 from functools import partial
 from itertools import filterfalse
-from mapFolding import (
-	ansiColorGreenOnBlack, ansiColorReset, ansiColors, ansiColorYellowOnRed, dictionaryOEISMapFolding, packageSettings)
+from mapFolding import ansiColorReset, ansiColors, dictionaryOEISMapFolding, packageSettings
 from mapFolding._e import between, extractPinnedLeaves, PermutationSpace
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
@@ -21,7 +20,7 @@ if __name__ == "__main__":
 	def _write() -> None:
 		sys.stdout.write(
 			f"{(match := foldsTotal == dictionaryOEISMapFolding[oeisID]['valuesKnown'][n])}\t"
-			f"{(ansiColorYellowOnRed, ansiColorGreenOnBlack)[match]}"
+			f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
 			f"{n}\t"
 			# f"{mapShape}\t"
 			f"{foldsTotal}\t"
@@ -36,22 +35,22 @@ if __name__ == "__main__":
 	CPUlimit: bool | float | int | None = -2
 	state: EliminationState | None = None
 
-	flow = "constraintPropagation"
 	flow = "crease"
+	flow = "constraintPropagation"
 	flow = "elimination"
 
 	oeisID: str = "A195646"
-	oeisID: str = "A001416"
 	oeisID: str = "A000136"
-	oeisID: str = "A001415"
+	oeisID: str = "A001416"
 	oeisID: str = "A001418"
+	oeisID: str = "A001415"
 	oeisID: str = "A001417"
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + "\n")
 
-	for n in range(2, 4):
+	for n in range(1, 3):
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 		if oeisID == "A001417" and n > 3:
 			state = EliminationState(mapShape)

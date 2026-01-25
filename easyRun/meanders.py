@@ -1,6 +1,6 @@
 # ruff: noqa
 # pyright: basic
-from mapFolding import ansiColorGreenOnBlack, ansiColorReset, ansiColorYellowOnRed, dictionaryOEIS
+from mapFolding import ansiColorReset, ansiColors, dictionaryOEIS
 from mapFolding.basecamp import NOTcountingFolds
 import gc
 import sys
@@ -10,7 +10,7 @@ import warnings
 def write() -> None:
 	sys.stdout.write(
 		f"{(match:=(countTotal == dictionaryOEIS[oeisID]['valuesKnown'][n]))}\t"
-		f"{(ansiColorYellowOnRed, ansiColorGreenOnBlack)[match]}"
+		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
 		f"{n}\t"
 		# f"{countTotal}\t"
 		# f"{dictionaryOEISMeanders[oeisID]['valuesKnown'][n]}\t"

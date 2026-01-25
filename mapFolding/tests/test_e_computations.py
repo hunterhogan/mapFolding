@@ -1,13 +1,7 @@
 from mapFolding import dictionaryOEISMapFolding
 from mapFolding._e.basecamp import eliminateFolds
-from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
-from more_itertools import all_unique, unique_to_each
-from typing import TYPE_CHECKING
 import pytest
-
-if TYPE_CHECKING:
-	from collections.abc import Sequence
 
 @pytest.mark.parametrize(
 	"oeisID, n, flow, CPUlimit",
@@ -22,7 +16,7 @@ if TYPE_CHECKING:
 		pytest.param("A195646", 2, "constraintPropagation", 0.25),
 		# *[pytest.param(oeisID, metadata["offset"], flow, 1)
 		# 	for oeisID, metadata in dictionaryOEISMapFolding.items()
-		# 		for flow in ["elimination", "constraintPropagation"]]
+		# 		for flow in ["elimination"]]
 
 
 	],
