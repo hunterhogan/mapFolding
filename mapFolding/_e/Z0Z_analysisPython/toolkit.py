@@ -1,16 +1,20 @@
 from collections.abc import Callable, Sequence
 from cytoolz.dicttoolz import valfilter as leafFilter
+from cytoolz.functoolz import curry as syntacticCurry
 from dataclasses import dataclass
 from mapFolding import ansiColorReset, ansiColors, packageSettings
-from mapFolding._e import PermutationSpace, thisIsALeaf
+from mapFolding._e import DOTvalues, PermutationSpace, thisIsALeaf, 一, 零, 首一, 首零一
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensionsAnnex import beansWithoutCornbread
 from pathlib import Path
 from pprint import pformat
 import csv
 import numpy
 import sys
+
+@syntacticCurry
+def beansWithoutCornbread(state: EliminationState, permutationSpace: PermutationSpace) -> bool:
+	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace)) for beans, cornbread in ((一+零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))))
 
 @dataclass
 class PermutationSpaceStatus:

@@ -16,7 +16,7 @@ from mapFolding._e import (
 	首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import all_unique, loops
-from operator import add, sub
+from operator import add, neg, sub
 from pathlib import Path, PurePath
 from typing import Any
 import pandas
@@ -24,21 +24,19 @@ import sys
 
 #======== Creases =================================
 
-def getLeavesCreaseBack(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
+def getLeavesCreaseAnte(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
 	"""1) `leaf` has at most `dimensionsTotal - 1` many creases.
 
-	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
-		`leaf` number.
+	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in `leaf` number.
 
 	3) The list of creases *might* be a list of Gray codes.
 	"""
 	return iter(_getCreases(state, leaf, increase=False))
 
-def getLeavesCreaseNext(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
+def getLeavesCreasePost(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
 	"""1) `leaf` has at most `dimensionsTotal - 1` many creases.
 
-	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in
-		`leaf` number.
+	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in `leaf` number.
 
 	3) The list of creases *might* be a list of Gray codes.
 	"""
@@ -51,25 +49,25 @@ def _makeCreases(leaf: Leaf, dimensionsTotal: int) -> tuple[tuple[Leaf, ...], tu
 	listLeavesCrease: list[Leaf] = [int(bit_flip(leaf, dimensionIndex)) for dimensionIndex in range(dimensionsTotal)]
 
 	if leaf == leafOrigin: # A special case I've been unable to figure out how to incorporate in the formula.
-		listLeavesCreaseNext: list[Leaf] = [1]
-		listLeavesCreaseBack: list[Leaf] = []
+		listLeavesCreasePost: list[Leaf] = [1]
+		listLeavesCreaseAnte: list[Leaf] = []
 	else:
 		slicingIndices: int = is_odd(howManyDimensionsHaveOddParity(leaf))
 
-		slicerBack: slice = slice(slicingIndices, dimensionNearest首(leaf) * bit_flip(slicingIndices, 0) or None)
-		slicerNext: slice = slice(bit_flip(slicingIndices, 0), dimensionNearest首(leaf) * slicingIndices or None)
+		slicerAnte: slice = slice(slicingIndices, dimensionNearest首(leaf) * bit_flip(slicingIndices, 0) or None)
+		slicerPost: slice = slice(bit_flip(slicingIndices, 0), dimensionNearest首(leaf) * slicingIndices or None)
 
 		if is_even(leaf):
-			if slicerBack.start == 1:
-				slicerBack = slice(slicerBack.start + dimensionNearestTail(leaf), slicerBack.stop)
-			if slicerNext.start == 1:
-				slicerNext = slice(slicerNext.start + dimensionNearestTail(leaf), slicerNext.stop)
-		listLeavesCreaseBack = listLeavesCrease[slicerBack]
-		listLeavesCreaseNext = listLeavesCrease[slicerNext]
+			if slicerAnte.start == 1:
+				slicerAnte = slice(slicerAnte.start + dimensionNearestTail(leaf), slicerAnte.stop)
+			if slicerPost.start == 1:
+				slicerPost = slice(slicerPost.start + dimensionNearestTail(leaf), slicerPost.stop)
+		listLeavesCreaseAnte = listLeavesCrease[slicerAnte]
+		listLeavesCreasePost = listLeavesCrease[slicerPost]
 
 		if leaf == 1: # A special case I've been unable to figure out how to incorporate in the formula.
-			listLeavesCreaseBack = [0]
-	return (tuple(listLeavesCreaseBack), tuple(listLeavesCreaseNext))
+			listLeavesCreaseAnte = [0]
+	return (tuple(listLeavesCreaseAnte), tuple(listLeavesCreasePost))
 
 #======== (mathematical) ranges of piles ====================
 # TODO Ideally, figure out the formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
@@ -775,7 +773,7 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 def getLeaf首零Plus零Domain(state: EliminationState, leaf: Leaf | None = None) -> tuple[Pile, ...]:
 	"""Get the full domain of `leaf首零Plus零` that is valid in all cases, or if `leaf一零` and `leaf首零一` are pinned in `state.permutationSpace`, get a domain of `leaf首零Plus零` customized to `pileOfLeaf一零` and `pileOfLeaf首零一`."""
 	if leaf is None:
-		leaf = 首零(state.dimensionsTotal)+零
+		leaf = (零)+首零(state.dimensionsTotal)
 	domain首零Plus零: tuple[Pile, ...] = tuple(getLeafDomain(state, leaf))
 	leaf一零: Leaf = 一+零
 	leaf首零一: Leaf = 首零一(state.dimensionsTotal)
@@ -1016,22 +1014,22 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 							for aPile in list(dictionaryDomains[leaf])[0: getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, dimensionFrom首=dimension - 1)[dimension - 2 - countDown] // 2]}
 
 #-------- The beginning of domain首一Plus零 --------------------------------
-	leaf = 首一(state.dimensionsTotal)+零
+	leaf = (零)+首一(state.dimensionsTotal)
 	dictionaryPrecedence[leaf] = {aPile: [2 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]
 									, 3 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]]
 							for aPile in list(dictionaryDomains[leaf])[1:2]}
 	del leaf
 
 #======== leaf首零一Plus零: conditional `leafPredecessor` in all piles of its domain ===========
-	leaf: Leaf = 首零一(state.dimensionsTotal)+零
+	leaf: Leaf = (零)+首零一(state.dimensionsTotal)
 	listOfPiles = list(dictionaryDomains[leaf])
 	dictionaryPrecedence[leaf] = {aPile: [] for aPile in list(dictionaryDomains[leaf])}
 	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions)
 	sumsOfProductsOfDimensionsNearest首InSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, dimensionFrom首=state.dimensionsTotal - 1)
 	pileStepAbsolute = 2
 
-	for aPile in listOfPiles[listOfPiles.index(一+零): listOfPiles.index(首零(state.dimensionsTotal)-零) + inclusive]:
-		dictionaryPrecedence[leaf][aPile].append(首零(state.dimensionsTotal)+零)
+	for aPile in listOfPiles[listOfPiles.index(一+零): listOfPiles.index(neg(零)+首零(state.dimensionsTotal)) + inclusive]:
+		dictionaryPrecedence[leaf][aPile].append((零)+首零(state.dimensionsTotal))
 
 	for indexUniversal in range(state.dimensionsTotal - 2):
 		leafPredecessorTheFirst: int = state.sumsOfProductsOfDimensions[indexUniversal + 2]
@@ -1082,7 +1080,7 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 													+ addend * (int(not(bool(indexUniversal))))
 													- (indexUniversal + 2)]
 					)
-					for aPile in listOfPiles[listOfPiles.index(pileFirst) + indexUniversal: listOfPiles.index(首零(state.dimensionsTotal)-零) - indexUniversal + inclusive]:
+					for aPile in listOfPiles[listOfPiles.index(pileFirst) + indexUniversal: listOfPiles.index(neg(零)+首零(state.dimensionsTotal)) - indexUniversal + inclusive]:
 						dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
 	del leaf, listOfPiles, sumsOfProductsOfDimensionsNearest首, pileStepAbsolute, sumsOfProductsOfDimensionsNearest首InSubHyperplane
@@ -1090,7 +1088,7 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 #======== leaf首零Plus零: Separate logic because the distance between absolute piles is 4, not 2 ==============
 # leaf has conditional `leafPredecessor` in all but the first pile of its domain
 # Reminder: has UNconditional `leafPredecessor` in the first pile: leaf零
-	leaf: Leaf = 首零(state.dimensionsTotal)+零
+	leaf: Leaf = (零)+首零(state.dimensionsTotal)
 	listOfPiles: list[Pile] = list(dictionaryDomains[leaf])[1: None]
 	dictionaryPrecedence[leaf] = {aPile: [] for aPile in listOfPiles}
 	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions)

@@ -3,7 +3,7 @@ from cytoolz.itertoolz import last
 from itertools import pairwise, product as CartesianProduct
 from mapFolding import packageSettings
 from mapFolding._e import (
-	between, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves, getIteratorOfLeaves, getLeavesCreaseNext,
+	between, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves, getIteratorOfLeaves, getLeavesCreasePost,
 	indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin, PileRangeOfLeaves,
 	PilesWithPileRangeOfLeaves, PinnedLeaves)
 from mapFolding._e.dataBaskets import EliminationState
@@ -77,11 +77,11 @@ def count(state: EliminationState) -> int:
 	def leaf2IndicesCartesian(leaf: Leaf) -> tuple[int, ...]:
 		return tuple((leaf // prod(state.mapShape[0:dimension])) % state.mapShape[dimension] for dimension in range(state.dimensionsTotal))
 
-	def leafNextCrease(leaf: Leaf, dimension: int) -> Leaf | None:
-		leafNext: Leaf | None = None
+	def leafCreasePost(leaf: Leaf, dimension: int) -> Leaf | None:
+		leafCrease: Leaf | None = None
 		if leaf2IndicesCartesian(leaf)[dimension] + 1 < state.mapShape[dimension]:
-			leafNext = leaf + prod(state.mapShape[0:dimension])
-		return leafNext
+			leafCrease = leaf + prod(state.mapShape[0:dimension])
+		return leafCrease
 
 	for leaf_k, leaf_r in CartesianProduct(range(state.leafLast), range(1, state.leafLast)):
 		if leaf_k == leaf_r:
@@ -91,8 +91,8 @@ def count(state: EliminationState) -> int:
 		r下_indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_r)
 
 		for aDimension in range(state.dimensionsTotal):
-			k1下_aDimension: Leaf | None = leafNextCrease(leaf_k, aDimension)
-			r1下_aDimension: Leaf | None = leafNextCrease(leaf_r, aDimension)
+			k1下_aDimension: Leaf | None = leafCreasePost(leaf_k, aDimension)
+			r1下_aDimension: Leaf | None = leafCreasePost(leaf_r, aDimension)
 
 			if k1下_aDimension and r1下_aDimension and ((k下_indicesCartesian[aDimension] - r下_indicesCartesian[aDimension]) % 2 == 0):
 				addForbiddenInequalityCycle(leaf_k, leaf_r, k1下_aDimension, r1下_aDimension)

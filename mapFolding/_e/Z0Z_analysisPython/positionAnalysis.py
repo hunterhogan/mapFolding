@@ -4,8 +4,8 @@ from gmpy2 import bit_mask
 from hunterMakesPy import raiseIfNone
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeafDomain, getDictionaryConditionalLeafSuccessors,
-	howManyDimensionsHaveOddParity, Leaf, Pile, pileOrigin, 零)
+	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors,
+	getDictionaryConditionalLeafSuccessors, getLeafDomain, howManyDimensionsHaveOddParity, Leaf, Pile, pileOrigin, 零)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
 from pprint import pprint

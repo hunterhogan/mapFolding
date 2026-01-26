@@ -1,5 +1,5 @@
 from mapFolding import packageSettings
-from mapFolding._e import getLeavesCreaseNext
+from mapFolding._e import getLeavesCreasePost
 from mapFolding._e.dataBaskets import EliminationState
 from pathlib import Path, PurePath
 from typing import TextIO
@@ -10,7 +10,7 @@ def subdivideP2d7s0_1_3_2CSVFile(state: EliminationState, pathDataRaw: Path) -> 
 
 	pathFilenameSource: Path = pathDataRaw / "p2d7s0_1_3_2.csv"
 	if pathFilenameSource.exists():
-		setLeavesAllowedAfterTwo: set[int] = set(getLeavesCreaseNext(state, 2))
+		setLeavesAllowedAfterTwo: set[int] = set(getLeavesCreasePost(state, 2))
 
 		dictionaryAppendStreams: dict[int, TextIO] = {}
 		try:
@@ -125,9 +125,9 @@ def sortP2d7GeneratedCSVFiles(state: EliminationState, pathDataRaw: Path) -> Non
 	pathSorted: Path = pathDataRaw / "sorted"
 	pathSorted.mkdir(exist_ok=True)
 
-	setLeavesAllowedAfterOne: set[int] = set(getLeavesCreaseNext(state, 1))
+	setLeavesAllowedAfterOne: set[int] = set(getLeavesCreasePost(state, 1))
 	dictionaryAllowedAfterThird: dict[int, set[int]] = {
-		leafThird: set(getLeavesCreaseNext(state, leafThird))
+		leafThird: set(getLeavesCreasePost(state, leafThird))
 		for leafThird in setLeavesAllowedAfterOne
 	}
 

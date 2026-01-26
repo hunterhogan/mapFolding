@@ -2,15 +2,16 @@ from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing
 from mapFolding._e import (
-	DOTgetPileIfPileRangeOfLeaves, Folding, getIteratorOfLeaves, getLeavesCreaseBack, getLeavesCreaseNext,
+	DOTgetPileIfPileRangeOfLeaves, Folding, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost,
 	getPileRangeOfLeaves, mapShapeIs2上nDimensions, pileIsOpen, pileOrigin, PileRangeOfLeaves, pileRangeOfLeavesAND,
 	thisIsALeaf, 一, 零, 首零)
 from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensions import appendPermutationSpaceAtPile, pinPilesAtEnds
+from mapFolding._e.pin2上nDimensions import deconstructPermutationSpaceAtPile2上nDimensions, pinPilesAtEnds
 from mapFolding._e.pinIt import makeFolding
 from math import factorial
 from more_itertools import interleave_longest
+from operator import neg
 from tqdm import tqdm
 from typing import TYPE_CHECKING
 
@@ -38,9 +39,9 @@ def nextPermutationSpaceWorkbench(state: EliminationState, pileProcessingOrder: 
 	return state
 
 def pileProcessingOrderDefault(state: EliminationState) -> list[int]:
-	pileProcessingOrder: list[int] = [pileOrigin, 零, state.首 - 零]
-	pileProcessingOrder.extend([一, state.首 - 一])
-	pileProcessingOrder.extend(interleave_longest(range(一+零, 首零(state.dimensionsTotal)), range(state.首 - (一+零), 首零(state.dimensionsTotal) + decreasing, decreasing)))
+	pileProcessingOrder: list[int] = [pileOrigin, 零, neg(零)+state.首]
+	pileProcessingOrder.extend([一, neg(一)+state.首])
+	pileProcessingOrder.extend(interleave_longest(range(一+零, 首零(state.dimensionsTotal)), range(neg(零+一)+state.首, 首零(state.dimensionsTotal) + decreasing, decreasing)))
 	return pileProcessingOrder
 
 def pinByCrease(state: EliminationState) -> EliminationState:
@@ -48,12 +49,12 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 	while state.permutationSpace:
 		pileRangeOfLeaves: PileRangeOfLeaves = raiseIfNone(DOTgetPileIfPileRangeOfLeaves(state.permutationSpace, state.pile))
 		if thisIsALeaf(leaf := state.permutationSpace.get(state.pile - 1)):
-			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, getPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseNext(state, leaf)))
+			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, getPileRangeOfLeaves(state.leavesTotal, getLeavesCreasePost(state, leaf)))
 		if thisIsALeaf(leaf := state.permutationSpace.get(state.pile + 1)):
-			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, getPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseBack(state, leaf)))
+			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, getPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseAnte(state, leaf)))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, permutationSpace=state.permutationSpace.copy())
-		sherpa = appendPermutationSpaceAtPile(sherpa, getIteratorOfLeaves(pileRangeOfLeaves)) # pyright: ignore[reportArgumentType]
+		sherpa = deconstructPermutationSpaceAtPile2上nDimensions(sherpa, getIteratorOfLeaves(pileRangeOfLeaves)) # pyright: ignore[reportArgumentType]
 
 		state.listPermutationSpace.extend(sherpa.listPermutationSpace)
 

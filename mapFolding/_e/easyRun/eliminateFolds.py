@@ -7,7 +7,7 @@ from mapFolding._e import between, extractPinnedLeaves, PermutationSpace
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensions import (
-	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile首零Less零)
+	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零)
 from os import PathLike
 from pathlib import Path, PurePath
 from tqdm import tqdm
@@ -56,7 +56,6 @@ if __name__ == "__main__":
 			state = EliminationState(mapShape)
 			# state = pinPilesAtEnds(state, 4)
 			# state = pinLeavesDimensions0零一(state)
-			# state = pinPile首零Less零(state)
 			# state = pinLeavesDimension二(state)
 			# state = pinLeavesDimension首二(state)
 

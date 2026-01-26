@@ -1,5 +1,5 @@
 from collections import deque
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from functools import partial
 from hunterMakesPy.parseParameters import intInnit
@@ -10,16 +10,17 @@ from mapFolding._e import (
 	首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensionsAnnex import (
-	appendPermutationSpaceAtPile as appendPermutationSpaceAtPile, beansWithoutCornbread as beansWithoutCornbread,
-	disqualifyAppendingLeafAtPile as disqualifyAppendingLeafAtPile, pinLeafCornbread as pinLeafCornbread,
+	deconstructPermutationSpaceAtPile2上nDimensions as deconstructPermutationSpaceAtPile2上nDimensions,
+	disqualifyAppendingLeafAtPile as disqualifyAppendingLeafAtPile,
 	removeInvalidPermutationSpace as removeInvalidPermutationSpace,
 	updateListPermutationSpace as updateListPermutationSpace)
 from mapFolding._e.pin2上nDimensionsByCrease import (
-	pinPile一Crease, pinPile一零Crease, pinPile二Crease, pinPile首Less一Crease, pinPile首Less一零Crease, pinPile首Less二Crease)
-from mapFolding._e.pin2上nDimensionsByDomain import pinPile首零Less零AfterFourthOrder
+	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease,
+	pinPile零一Ante首ByCrease)
+from mapFolding._e.pin2上nDimensionsByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e.pinIt import deconstructPermutationSpaceByDomainOfLeaf, deconstructPermutationSpaceByDomainsCombined
 from more_itertools import partition
-from operator import getitem
+from operator import getitem, neg
 from tqdm import tqdm
 
 #======== Pin by `pile` ===========================================
@@ -47,31 +48,31 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	return state
 
 def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
-	return appendPermutationSpaceAtPile(state, _getLeavesAtPile(state))
+	return deconstructPermutationSpaceAtPile2上nDimensions(state, _getLeavesAtPile(state))
 
-def _getLeavesAtPile(state: EliminationState) -> list[Leaf]:
-	listLeavesAtPile: list[Leaf] = []
+def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
+	leavesToPin: Iterable[Leaf] = frozenset()
 	if state.pile == pileOrigin:
-		listLeavesAtPile = [leafOrigin]
+		leavesToPin = frozenset([leafOrigin])
 	elif state.pile == 零:
-		listLeavesAtPile = [零]
-	elif state.pile == state.首 - 零:
-		listLeavesAtPile = [首零(state.dimensionsTotal)]
+		leavesToPin = frozenset([零])
+	elif state.pile == neg(零)+state.首:
+		leavesToPin = frozenset([首零(state.dimensionsTotal)])
 	elif state.pile == 一:
-		listLeavesAtPile = pinPile一Crease(state)
-	elif state.pile == state.首 - 一:
-		listLeavesAtPile = pinPile首Less一Crease(state)
+		leavesToPin = pinPile一ByCrease(state)
+	elif state.pile == neg(一)+state.首:
+		leavesToPin = pinPile一Ante首ByCrease(state)
 	elif state.pile == 一+零:
-		listLeavesAtPile = pinPile一零Crease(state)
-	elif state.pile == state.首 - (一+零):
-		listLeavesAtPile = pinPile首Less一零Crease(state)
+		leavesToPin = pinPile一零ByCrease(state)
+	elif state.pile == neg(零+一)+state.首:
+		leavesToPin = pinPile零一Ante首ByCrease(state)
 	elif state.pile == 二:
-		listLeavesAtPile = pinPile二Crease(state)
-	elif state.pile == state.首 - 二:
-		listLeavesAtPile = pinPile首Less二Crease(state)
-	elif state.pile == 首零(state.dimensionsTotal)-零:
-		listLeavesAtPile = pinPile首零Less零AfterFourthOrder(state)
-	return listLeavesAtPile
+		leavesToPin = pinPile二ByCrease(state)
+	elif state.pile == neg(二)+state.首:
+		leavesToPin = pinPile二Ante首ByCrease(state)
+	elif state.pile == neg(零)+首零(state.dimensionsTotal):
+		leavesToPin = pinPile零Ante首零AfterDepth4(state)
+	return leavesToPin
 
 #-------- Plebian functions -----------------------------------------
 
@@ -94,23 +95,23 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 	if 0 < depth:
 		pileProcessingOrder.extend([pileOrigin])
 	if 1 <= depth:
-		pileProcessingOrder.extend([零, state.首 - 零])
+		pileProcessingOrder.extend([零, neg(零)+state.首])
 	if 2 <= depth:
-		pileProcessingOrder.extend([一, state.首 - 一])
+		pileProcessingOrder.extend([一, neg(一)+state.首])
 	if 3 <= depth:
-		pileProcessingOrder.extend([一+零, state.首 - (一+零)])
+		pileProcessingOrder.extend([一+零, neg(零+一)+state.首])
 	if 4 <= depth:
 		youMustBeDimensionsTallToPinThis = 4
 		if youMustBeDimensionsTallToPinThis < state.dimensionsTotal:
 			pileProcessingOrder.extend([二])
 		youMustBeDimensionsTallToPinThis = 5
 		if youMustBeDimensionsTallToPinThis < state.dimensionsTotal:
-			pileProcessingOrder.extend([state.首 - 二])
+			pileProcessingOrder.extend([neg(二)+state.首])
 
 	return _pinPiles(state, maximumSizeListPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
-def pinPile首零Less零(state: EliminationState, maximumSizeListPermutationSpace: int = 2**14, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
-	"""Incompletely, but safely, pin `pile首零Less零`: the last pile in the first half of the sequence.
+def pinPile零Ante首零(state: EliminationState, maximumSizeListPermutationSpace: int = 2**14, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
+	"""Incompletely, but safely, pin `pile零Ante首零`: the last pile in the first half of the sequence.
 
 	Pinning all possible combinations at this pile is more valuable than pinning at most, if not all, other piles. Furthermore,
 	most of the time, bluntly deconstructing a pile's range or a leaf's domain creates 100-10000 times more surplus `PermutationSpace`
@@ -128,7 +129,7 @@ def pinPile首零Less零(state: EliminationState, maximumSizeListPermutationSpac
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=5):
 		return state
 
-	pileProcessingOrder: deque[Pile] = deque([首零(state.dimensionsTotal)-零])
+	pileProcessingOrder: deque[Pile] = deque([neg(零)+首零(state.dimensionsTotal)])
 
 	return _pinPiles(state, maximumSizeListPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
@@ -217,7 +218,7 @@ def pinLeavesDimension0(state: EliminationState, *, CPUlimit: bool | float | int
 	return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
 
 def pinLeaf首零Plus零(state: EliminationState, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
-	leaf: Leaf = 首零(state.dimensionsTotal)+零
+	leaf: Leaf = (零)+首零(state.dimensionsTotal)
 	return _pinLeafByDomain(state, leaf, getLeaf首零Plus零Domain, CPUlimit=CPUlimit)
 
 def pinLeavesDimension零(state: EliminationState, *, CPUlimit: bool | float | int | None = None) -> EliminationState:

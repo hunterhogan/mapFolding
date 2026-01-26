@@ -8,7 +8,7 @@ from gmpy2 import is_even, is_odd
 from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing
 from mapFolding._e import (
-	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseBack, getLeavesCreaseNext,
+	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseAnte, getLeavesCreasePost,
 	getPileRange, getSumsOfProductsOfDimensionsNearest首, Leaf, leafInSubHyperplane, Pile, ptount, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e._measure import invertLeafIn2上nDimensions
@@ -173,17 +173,17 @@ pp3  = (3, 5, 9, 17, 33)
 			continue
 
 			invert = int(excluder^63) # pyright: ignore[reportUnknownArgumentType, reportOperatorIssue]
-			creaseNextSS = tuple(getLeavesCreaseNext(state, invert)) # pyright: ignore[reportArgumentType]
-			allCreaseNextSSInRange = set(creaseNextSS).intersection(pileRange31)
-			creaseBack = tuple(getLeavesCreaseBack(state, excluder)) # pyright: ignore[reportArgumentType]
-			creaseNext = tuple(getLeavesCreaseNext(state, excluder)) # pyright: ignore[reportArgumentType]
-			allCreaseBackInRange = set(creaseBack).intersection(pileRange31)
-			allCreaseNextInRange = set(creaseNext).intersection(pileRange31)
-			notExcluded = allCreaseNextInRange.difference(listExcluded)
-			# print(excluder, invert, allCreaseNextSSInRange.intersection(listExcluded), notExcluded, allCreaseNextSSInRange.difference(listExcluded), set(creaseNextSS).symmetric_difference(creaseNext), creaseNextSS, allCreaseNextSSInRange)
-			# print(excluder.__format__('06b'), excluder, f"{notExcluded}\t", f"{creaseNext}", sep='\t')
-			print(excluder, f"{allCreaseBackInRange=}", f"{allCreaseNextInRange=}", sep='\t')
-			print(excluder, f"{allCreaseBackInRange.difference(listExcluded)}", f"{allCreaseNextInRange.difference(listExcluded)}", sep='\t')
+			creasePostSS = tuple(getLeavesCreasePost(state, invert)) # pyright: ignore[reportArgumentType]
+			allCreasePostSSInRange = set(creasePostSS).intersection(pileRange31)
+			creaseAnte = tuple(getLeavesCreaseAnte(state, excluder)) # pyright: ignore[reportArgumentType]
+			creasePost = tuple(getLeavesCreasePost(state, excluder)) # pyright: ignore[reportArgumentType]
+			allCreaseAnteInRange = set(creaseAnte).intersection(pileRange31)
+			allCreasePostInRange = set(creasePost).intersection(pileRange31)
+			notExcluded = allCreasePostInRange.difference(listExcluded)
+			# print(excluder, invert, allCreasePostSSInRange.intersection(listExcluded), notExcluded, allCreasePostSSInRange.difference(listExcluded), set(creasePostSS).symmetric_difference(creasePost), creasePostSS, allCreasePostSSInRange)
+			# print(excluder.__format__('06b'), excluder, f"{notExcluded}\t", f"{creasePost}", sep='\t')
+			print(excluder, f"{allCreaseAnteInRange=}", f"{allCreasePostInRange=}", sep='\t')
+			print(excluder, f"{allCreaseAnteInRange.difference(listExcluded)}", f"{allCreasePostInRange.difference(listExcluded)}", sep='\t')
 
 	pileRangeByFormula: bool = False
 	if pileRangeByFormula:
@@ -225,7 +225,7 @@ pp3  = (3, 5, 9, 17, 33)
 
 			# dimension origins
 			# piles 51, 53, 55 need a higher start.
-			pileRange.extend(state.productsOfDimensions[1 + (首零(state.dimensionsTotal)+零 < pile):dimensionNearest首(pile+1)])
+			pileRange.extend(state.productsOfDimensions[1 + ((零)+首零(state.dimensionsTotal) < pile):dimensionNearest首(pile+1)])
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
 			# pile5 needs a higher start.
 			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), state.productsOfDimensions[0:state.dimensionsTotal]))
@@ -256,7 +256,7 @@ pp3  = (3, 5, 9, 17, 33)
 			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
-			pileRange.extend(map(partial(add, 1), state.productsOfDimensions[1 + (首零(state.dimensionsTotal)+零 < pile):dimensionNearest首(pile+1)]))
+			pileRange.extend(map(partial(add, 1), state.productsOfDimensions[1 + ((零)+首零(state.dimensionsTotal) < pile):dimensionNearest首(pile+1)]))
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
 			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(add, 1), state.productsOfDimensions[1:state.dimensionsTotal])))
 
@@ -267,7 +267,7 @@ pp3  = (3, 5, 9, 17, 33)
 			# print(f"{ansiColors.Green}surplus: {set(computed).difference(real)}", f"{ansiColors.Magenta}missing: {set(real).difference(computed)}{ansiColorReset}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
-		for pile in range(首二(state.dimensionsTotal)+零, 首零一(state.dimensionsTotal), 2):
+		for pile in range((零)+首二(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
 			print(pile, (real:=tuple(getPileRange(state, pile))) == (computed:=Z0Z_getPileRange(state, pile)), end=': ')
 			# print(f"surplus: {set(computed).difference(real)}", f"missing: {set(real).difference(computed)}", sep='\n')
 			pprint(f"{computed=}", width=180)

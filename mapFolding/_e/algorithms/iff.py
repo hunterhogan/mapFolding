@@ -32,7 +32,7 @@ from mapFolding._e.dataBaskets import EliminationState
 from math import prod
 from operator import floordiv, indexOf
 
-def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafNextCrease: Callable[[], Leaf | None], getComparandNextCrease: Callable[[], Leaf | None], pileOf: Callable[[Leaf], Pile | None]) -> bool:  # noqa: PLR0911
+def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: Callable[[], Leaf | None], getComparandCrease: Callable[[], Leaf | None], pileOf: Callable[[Leaf], Pile | None]) -> bool:  # noqa: PLR0911
 	"""Validate.
 
 	Mathematical reasons for the design of this function
@@ -42,74 +42,79 @@ def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafNextCrea
 	2. To confirm that a one-dimensional folding is valid, check that all creases that might cross do not cross.
 
 	A "crease" is a convenient lie: it is a shorthand description of two leaves that are physically connected to each other.
-	Leaves in a one-dimensional folding are physically connected to at most two other leaves: the prior leaf and the next leaf.
-	When talking about a one-dimensional section of a multidimensional folding, we ignore the other dimensions and still
-	reference the prior and next leaves. To check whether two creases cross, we must compare the four leaves of the two creases.
+	Leaves in a one-dimensional folding are physically connected to at most two other leaves: the leaf before and the leaf after.
+	When talking about a one-dimensional section of a multidimensional folding, we ignore the other dimensions and still reference
+	the leaves before and after. To check whether two creases cross, we must compare the four leaves of the two creases.
 
 	¹ A so-called one-dimensional folding, map, or strip of stamps has two dimensions, but one of the dimensions has a width of 1.
 
 	Idiosyncratic reasons for the design of this function
 	-----------------------------------------------------
 
-	I name the first leaf of the first crease `leaf`. I name the leaf to which I am comparing it `comparand`. A crease² is a
-	connection between a leaf and the next leaf, therefore, the crease of `leaf` connects it to `leafNextCrease`. The crease of
-	`comparand` connects it to `comparandNextCrease`. Nearly everyone else uses letters for these names, such as k, k+1, r, and
-	r+1. (Which stand for Kahlo and Rivera, of course.)
+	I name the first `Leaf` of the first crease "`leaf`". I name the `Leaf` to which I am comparing `leaf` "`comparand`". A
+	crease² is a connection between a `Leaf` and the `Leaf` after it, therefore, the crease of "`leaf`" connects it to
+	"`leafCrease`". The crease of "`comparand`" connects it to "`comparandCrease`".
 
-	² "increase" from Latin *in-* "in" + *crescere* "to grow" (from PIE root ⋆ker- "to grow"). https://www.etymonline.com/word/increase
+	I name the `Pile` of `leaf` as "`pile`". I name the `Pile` of `comparand` as "`pileComparand`".
+
+	Nearly everyone else names the leaves with letters, such as k, k+1, r, and r+1. (Which stand for Kahlo and Rivera, of course.)
+
+	² "increase" from Latin *in-* "in" + *crescere* "to grow" (from PIE root ⋆ker- "to grow").
+	https://www.etymonline.com/word/increase
 
 	Computational reasons for the design of this function
 	-----------------------------------------------------
 
-	If `leaf` and `comparand` do not have matching parity in the dimension, then their creases cannot cross. To call this
-	function, you need to select values for `leaf` and `comparand`. You should check for matching parity-by-dimension before
-	calling this function, because the function will not check the parity of `leaf` and `comparand`.
+	If `leaf` and `comparand` do not have matching parity in the dimension, then their creases cannot cross. When you are
+	selecting the values of `leaf` and `comparand`, you ought to check that `leaf` and `comparand` have matching in the dimension.
+	This function cannot check the parity of `leaf` and `comparand`.
 
-	Computing the next leaf is not expensive, but 100,000,000 unnecessary-but-cheap-computations is expensive. Therefore, instead of
-	passing `leafNextCrease` and `comparandNextCrease`, pass the functions by which those values may be computed on demand.
+	Computing a `Leaf` crease is not expensive, but 100,000,000 unnecessary-but-cheap-computations is expensive. Therefore,
+	instead of passing `leafCrease` and `comparandCrease`, pass the functions by which those values may be computed on demand.
 
-	Finally, we need to compare the relative positions of the leaves, so pass a function that returns the position of the "next" leaf.
+	Finally, because we need to compare the relative positions of the leaves, pass a function that returns the position of the
+	`Leaf` crease.
 
 	"""
 	if pile < pileComparand:
 
-		comparandNextCrease: int | None = getComparandNextCrease()
-		if comparandNextCrease is None:
+		comparandCrease: int | None = getComparandCrease()
+		if comparandCrease is None:
 			return False
 
-		leafNextCrease: int | None = getLeafNextCrease()
-		if leafNextCrease is None:
+		leafCrease: int | None = getLeafCrease()
+		if leafCrease is None:
 			return False
 
-		pileComparandNextCrease: int | None = pileOf(comparandNextCrease)
-		if pileComparandNextCrease is None:
+		pileComparandCrease: int | None = pileOf(comparandCrease)
+		if pileComparandCrease is None:
 			return False
-		pileLeafNextCrease: int | None = pileOf(leafNextCrease)
-		if pileLeafNextCrease is None:
+		pileLeafCrease: int | None = pileOf(leafCrease)
+		if pileLeafCrease is None:
 			return False
 
-		if pileComparandNextCrease < pile:
-			if pileLeafNextCrease < pileComparandNextCrease:						# [k+1 < r+1 < k < r]
+		if pileComparandCrease < pile:
+			if pileLeafCrease < pileComparandCrease:						# [k+1 < r+1 < k < r]
 				return True
-			return pileComparand < pileLeafNextCrease								# [r+1 < k < r < k+1]
+			return pileComparand < pileLeafCrease							# [r+1 < k < r < k+1]
 
-		if pileComparand < pileLeafNextCrease:
-			if pileLeafNextCrease < pileComparandNextCrease:						# [k < r < k+1 < r+1]
+		if pileComparand < pileLeafCrease:
+			if pileLeafCrease < pileComparandCrease:						# [k < r < k+1 < r+1]
 				return True
-		elif pile < pileComparandNextCrease < pileLeafNextCrease < pileComparand:	# [k < r+1 < k+1 < r]
+		elif pile < pileComparandCrease < pileLeafCrease < pileComparand:	# [k < r+1 < k+1 < r]
 			return True
 	return False
 
-def thisIsAViolation(pile: Pile, pileIncrease: Pile, pileComparand: Pile, pileComparandIncrease: Pile) -> bool:
+def thisIsAViolation(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileComparandCrease: Pile) -> bool:
 	if pile < pileComparand:
-		if pileComparandIncrease < pile:
-			if pileIncrease < pileComparandIncrease:						# [k+1 < r+1 < k < r]
+		if pileComparandCrease < pile:
+			if pileCrease < pileComparandCrease:						# [k+1 < r+1 < k < r]
 				return True
-			return pileComparand < pileIncrease								# [r+1 < k < r < k+1]
-		if pileComparand < pileIncrease:
-			if pileIncrease < pileComparandIncrease:						# [k < r < k+1 < r+1]
+			return pileComparand < pileCrease							# [r+1 < k < r < k+1]
+		if pileComparand < pileCrease:
+			if pileCrease < pileComparandCrease:						# [k < r < k+1 < r+1]
 				return True
-		elif pile < pileComparandIncrease < pileIncrease < pileComparand:	# [k < r+1 < k+1 < r]
+		elif pile < pileComparandCrease < pileCrease < pileComparand:	# [k < r+1 < k+1 < r]
 			return True
 	return False
 
@@ -140,16 +145,16 @@ def matchingParityLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple
 	return repack
 
 @cache
-def nextCrease(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf | None:
-	leafNext: Leaf | None = None
+def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf | None:
+	leafCrease: Leaf | None = None
 	if ((leaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:
-		leafNext = leaf + productOfDimensions(mapShape, dimension)
-	return leafNext
+		leafCrease = leaf + productOfDimensions(mapShape, dimension)
+	return leafCrease
 
 inThis_pileOf = syntacticCurry(indexOf)
 
-def callNextCrease(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Callable[[], Leaf | None]:
-	return lambda: nextCrease(mapShape, leaf, dimension)
+def callGetCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Callable[[], Leaf | None]:
+	return lambda: getCreasePost(mapShape, leaf, dimension)
 
 def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) -> bool:
 	"""Return `True` if the folding is valid."""
@@ -160,7 +165,7 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 	parityInThisDimension: Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool] = matchingParityLeaf(mapShape)
 	leafAndComparandAcrossDimensionsFiltered: filter[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = filter(parityInThisDimension, leafAndComparandAcrossDimensions)
 
-	return all(not thisIsAViolationComplicated(pile, pileComparand, callNextCrease(mapShape, leaf, aDimension), callNextCrease(mapShape, comparand, aDimension), inThis_pileOf(folding))
+	return all(not thisIsAViolationComplicated(pile, pileComparand, callGetCreasePost(mapShape, leaf, aDimension), callGetCreasePost(mapShape, comparand, aDimension), inThis_pileOf(folding))
 			for ((pile, leaf), (pileComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
 
 #-------- Functions for `leaf` in `PermutationSpace` dictionary -------------
@@ -172,7 +177,7 @@ def permutationSpaceHasAViolation(state: EliminationState) -> bool:
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
 		for pile, leaf in sorted(leafFilter(between(0, state.leafLast - inclusive), state.permutationSpace).items()):
-			leafCrease: int | None = nextCrease(state.mapShape, leaf, dimension)
+			leafCrease: int | None = getCreasePost(state.mapShape, leaf, dimension)
 			if leafCrease is None:
 				continue
 			pileCrease: int | None = leafToPile.get(leafCrease)
@@ -182,8 +187,8 @@ def permutationSpaceHasAViolation(state: EliminationState) -> bool:
 		for groupedParity in listPileCreaseByParity:
 			if len(groupedParity) < 2:
 				continue
-			for (pilePrimary, pilePrimaryIncrease), (pileComparand, pileComparandIncrease) in combinations(groupedParity, 2):
-				if thisIsAViolation(pilePrimary, pilePrimaryIncrease, pileComparand, pileComparandIncrease):
+			for (pilePrimary, pilePrimaryCrease), (pileComparand, pileComparandCrease) in combinations(groupedParity, 2):
+				if thisIsAViolation(pilePrimary, pileComparand, pilePrimaryCrease, pileComparandCrease):
 					return True
 	return False
 
@@ -192,7 +197,6 @@ def removePermutationSpaceViolations(state: EliminationState) -> EliminationStat
 	state.listPermutationSpace = []
 	for permutationSpace in listPermutationSpace:
 		state.permutationSpace = permutationSpace
-		if permutationSpaceHasAViolation(state):
-			continue
-		state.listPermutationSpace.append(permutationSpace)
+		if not permutationSpaceHasAViolation(state):
+			state.listPermutationSpace.append(permutationSpace)
 	return state

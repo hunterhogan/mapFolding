@@ -16,8 +16,8 @@ and the tests will automatically pick them up via parametrization.
 from collections.abc import Callable, Iterable, Sequence
 from mapFolding._e import (
 	getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二,
-	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeafDomain, getLeavesCreaseBack,
-	getLeavesCreaseNext, getPileRange)
+	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeafDomain, getLeavesCreaseAnte,
+	getLeavesCreasePost, getPileRange)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.tests.dataSamples import (
 	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二,
@@ -147,8 +147,8 @@ def test_getPileRange(mapShape: tuple[int, ...]) -> None:
 @pytest.mark.parametrize(
 	"creaseKind,creaseFunction,dictionaryExpectedByMapShape",
 	[
-		("increase", getLeavesCreaseNext, A001417.dictionaryCreasesIncreaseKnown),
-		("decrease", getLeavesCreaseBack, A001417.dictionaryCreasesDecreaseKnown),
+		("increase", getLeavesCreasePost, A001417.dictionaryCreasesIncreaseKnown),
+		("decrease", getLeavesCreaseAnte, A001417.dictionaryCreasesDecreaseKnown),
 	],
 	ids=["increase", "decrease"],
 )
@@ -171,18 +171,18 @@ def test_getLeavesCrease(creaseKind: str, creaseFunction: Callable[[EliminationS
 			f"Actual={listLeavesActual}."
 		)
 
-		for leafNext in listLeavesActual:
-			assert 0 <= leafNext < state.leavesTotal, (
+		for leafPost in listLeavesActual:
+			assert 0 <= leafPost < state.leavesTotal, (
 				f"{creaseFunction.__name__} ({creaseKind}): out-of-range value for {mapShape=}, {leaf=}. "
-				f"Got {leafNext}, expected 0 <= leafNext < {state.leavesTotal}."
+				f"Got {leafPost}, expected 0 <= leafPost < {state.leavesTotal}."
 			)
-			bitFlip: int = leaf ^ leafNext
+			bitFlip: int = leaf ^ leafPost
 			assert (bitFlip > 0) and ((bitFlip & (bitFlip - 1)) == 0), (
 				f"{creaseFunction.__name__} ({creaseKind}): expected one-bit flip for {mapShape=}, {leaf=}. "
-				f"Got {leafNext=}, {bitFlip=} (leaf^leafNext)."
+				f"Got {leafPost=}, {bitFlip=} (leaf^leafPost)."
 			)
 
-		listBitFlips: list[int] = [leaf ^ leafNext for leafNext in listLeavesActual]
+		listBitFlips: list[int] = [leaf ^ leafPost for leafPost in listLeavesActual]
 		assert listBitFlips == sorted(listBitFlips), (
 			f"{creaseFunction.__name__} ({creaseKind}): expected bit flips in increasing dimension order for {mapShape=}, {leaf=}. "
 			f"Got bit flips {listBitFlips}."

@@ -5,7 +5,7 @@ from gmpy2 import bit_flip, bit_mask, bit_test, is_even
 from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing
 from mapFolding._e import dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, leafOrigin, 零
-from mapFolding._e.algorithms.iff import ImaOddLeaf, nextCrease
+from mapFolding._e.algorithms.iff import getCreasePost, ImaOddLeaf
 from mapFolding._e.dataBaskets import EliminationState
 from math import log2, prod
 from pprint import pprint
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 	printThis = False
 
 	for leaf in range(state.leavesTotal):
-		dictionaryNextCreaseLeafV0: dict[int, int | None] = {dimension: nextCrease(state.mapShape, leaf, dimension) for dimension in range(state.dimensionsTotal)}
+		dictionaryNextCreaseLeafV0: dict[int, int | None] = {dimension: getCreasePost(state.mapShape, leaf, dimension) for dimension in range(state.dimensionsTotal)}
 		listAddendLeaves = sorted([leaf + addend for addend in dictionaryAddends4Next[leaf]])
 		if printThis:
 			print(leaf, end='\t')
@@ -93,7 +93,7 @@ if __name__ == '__main__':
 				# NOTE parity of leaf is ALWAYS odd on this branch
 				# holy fuck, I've had all of this data for weeks but didn't realize it was huge.
 				# continue
-				dictionaryNextCreaseLeafW: dict[int, int | None] = {dimension: nextCrease(state.mapShape, leafW, dimension) for dimension in range(state.dimensionsTotal)}
+				dictionaryNextCreaseLeafW: dict[int, int | None] = {dimension: getCreasePost(state.mapShape, leafW, dimension) for dimension in range(state.dimensionsTotal)}
 				dimension = next(dim for dim, creaseLeaf in dictionaryNextCreaseLeafW.items() if creaseLeaf == leaf)
 				if printThis:
 					print(ImaOddLeaf(state.mapShape, leaf, dimension), end='\t')
@@ -108,7 +108,7 @@ if __name__ == '__main__':
 	dictionaryNextCreaseLeaf: dict[int, dict[int, int | None]] = {leaf: {} for leaf in range(state.leavesTotal)}
 	for leaf in range(state.leavesTotal):
 		dictionaryListNextCreaseLeaf[leaf] = list(dictionaryNextCreaseLeaf[leaf].values())
-		dictionaryNextCreaseLeaf[leaf] = {dimension: nextCrease(state.mapShape, leaf, dimension) for dimension in range(state.dimensionsTotal)}
+		dictionaryNextCreaseLeaf[leaf] = {dimension: getCreasePost(state.mapShape, leaf, dimension) for dimension in range(state.dimensionsTotal)}
 		dictionaryNextCreaseLeaf[leaf] = valfilter(bool, dictionaryNextCreaseLeaf[leaf])
 		listLeavesNextAndPriorInSequence = valfilter(lambda flipped: flipped > leaf, {dimension: bit_flip(leaf, dimension) for dimension in range(state.dimensionsTotal)})
 		if printThis:
