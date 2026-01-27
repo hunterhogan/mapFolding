@@ -27,10 +27,13 @@ from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding import getLeavesTotal, inclusive
-from mapFolding._e import between, extractPinnedLeaves, Leaf, PermutationSpace, Pile
+from mapFolding._e import Folding, Leaf, PermutationSpace, Pile
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.filters import between, extractPinnedLeaves
 from math import prod
 from operator import floordiv, indexOf
+
+#======== Forbidden inequalities ============================
 
 def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: Callable[[], Leaf | None], getComparandCrease: Callable[[], Leaf | None], pileOf: Callable[[Leaf], Pile | None]) -> bool:  # noqa: PLR0911
 	"""Validate.
@@ -118,46 +121,58 @@ def thisIsAViolation(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileComp
 			return True
 	return False
 
-#-------- ad hoc computations -----------------------------
-def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
-	return len(mapShape)
+#======== Functions for a `Folding` =============================
 
-@cache
-def _leavesTotal(mapShape: tuple[int, ...]) -> int:
-	return getLeavesTotal(mapShape)
+def thisLeafFoldingIsValid(folding: Folding, mapShape: tuple[int, ...]) -> bool:
+	"""You can validate a concrete `Folding` by checking for crease crossings in every dimension.
 
-def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
-	return prod(mapShape[0:dimension], start=1)
+	This function is the leaf-level validator used after a candidate `Folding` is constructed.
+	For example, `mapFolding._e.algorithms.eliminationCrease` uses `thisLeafFoldingIsValid` [1]
+	to post-filter candidate foldings that already satisfy arithmetic invariants such as
+	`state.foldingCheckSum`.
 
-#-------- Functions for `leaf`, named 0, 1, ... n-1, in a `folding` -------------
+	Algorithm Details
+	-----------------
+	`thisLeafFoldingIsValid` treats each dimension of `mapShape` as a one-dimensional strip
+	projection and checks that no pair of potentially-crossing creases violates the forbidden
+	inequalities encoded by `thisIsAViolationComplicated` [3].
 
-@cache
-def ImaOddLeaf(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
-	return (floordiv(leaf, productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
+	The leaf-boundary filter in `thisLeafFoldingIsValid` uses a cached leaf count derived from
+	`mapFolding.getLeavesTotal` [2].
 
-def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: Leaf, comparand: Leaf, dimension: int) -> bool:
-	return ImaOddLeaf(mapShape, leaf, dimension) == ImaOddLeaf(mapShape, comparand, dimension)
+	`thisLeafFoldingIsValid` enumerates each pair of `(pile, leaf)` positions from `folding`
+	and combines each pair with each `dimension` index. The parity filter from
+	`matchingParityLeaf` reduces work by skipping pairs that cannot cross in the selected
+	`dimension`.
 
-def matchingParityLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
-	def repack(aCartesianProduct: tuple[tuple[tuple[int, int], tuple[int, int]], int]) -> bool:
-		((_pile, leaf), (_pileComparand, comparand)), dimension = aCartesianProduct
-		return _matchingParityLeaf(mapShape, leaf, comparand, dimension)
-	return repack
+	Performance Considerations
+	--------------------------
+	`thisLeafFoldingIsValid` defers crease computation by passing thunk functions returned by
+	`callGetCreasePost` into `thisIsAViolationComplicated`. This design avoids computing
+	`Leaf` creases for pairs that are rejected by earlier comparisons.
 
-@cache
-def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf | None:
-	leafCrease: Leaf | None = None
-	if ((leaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:
-		leafCrease = leaf + productOfDimensions(mapShape, dimension)
-	return leafCrease
+	Parameters
+	----------
+	folding : Folding
+		A `Folding` represented as an order of `Leaf` values by `Pile` index.
+	mapShape : tuple[int, ...]
+		A shape tuple that defines the mixed-radix leaf indexing scheme.
 
-inThis_pileOf = syntacticCurry(indexOf)
+	Returns
+	-------
+	isValid : bool
+		`True` when `folding` contains no crease crossing in any `dimension`.
 
-def callGetCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Callable[[], Leaf | None]:
-	return lambda: getCreasePost(mapShape, leaf, dimension)
+	References
+	----------
+	[1] mapFolding._e.algorithms.eliminationCrease
+		Internal package reference
+	[2] mapFolding.getLeavesTotal
+		Internal package reference
+	[3] mapFolding._e.algorithms.iff.thisIsAViolationComplicated
+		Internal package reference
 
-def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) -> bool:
-	"""Return `True` if the folding is valid."""
+	"""
 	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileLeaf: pileLeaf[1] == _leavesTotal(mapShape) - 1, enumerate(folding)) # leafNPlus1 does not exist.
 	leafAndComparand: combinations[tuple[tuple[int, int], tuple[int, int]]] = combinations(foldingFiltered, 2)
 
@@ -168,10 +183,342 @@ def thisLeafFoldingIsValid(folding: tuple[int, ...], mapShape: tuple[int, ...]) 
 	return all(not thisIsAViolationComplicated(pile, pileComparand, callGetCreasePost(mapShape, leaf, aDimension), callGetCreasePost(mapShape, comparand, aDimension), inThis_pileOf(folding))
 			for ((pile, leaf), (pileComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
 
-#-------- Functions for `leaf` in `PermutationSpace` dictionary -------------
+@cache
+def _leavesTotal(mapShape: tuple[int, ...]) -> int:
+	"""You can compute and memoize the total number of leaves for `mapShape`.
+
+	(AI generated docstring)
+
+	`_leavesTotal` exists to centralize leaf-count computation for hot validation paths such as
+	`thisLeafFoldingIsValid`. The `functools.cache` decorator memoizes the result per
+	`mapShape` value [1]. The leaf-count computation uses `mapFolding.getLeavesTotal` [2].
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A shape tuple used to derive the total number of leaves.
+
+	Returns
+	-------
+	leavesTotal : int
+		The total number of leaves for `mapShape`.
+
+	References
+	----------
+	[1] functools.cache
+		https://docs.python.org/3/library/functools.html#functools.cache
+	[2] mapFolding.getLeavesTotal
+		Internal package reference
+
+	"""
+	return getLeavesTotal(mapShape)
+
+def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
+	"""You can compute the number of dimensions encoded by `mapShape`.
+
+	(AI generated docstring)
+
+	`_dimensionsTotal` exists as a small, named adapter for code that iterates over each
+	dimension of `mapShape` [1].
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A shape tuple.
+
+	Returns
+	-------
+	dimensionsTotal : int
+		The number of dimensions in `mapShape`.
+
+	References
+	----------
+	[1] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
+		Internal package reference
+
+	"""
+	return len(mapShape)
+
+def matchingParityLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
+	"""You can build a parity predicate for `Leaf` pairs in a selected `dimension`.
+
+	(AI generated docstring)
+
+	`matchingParityLeaf` returns a predicate that matches the tuple shape produced by
+	`itertools.product` [1] over `(leafAndComparand, dimension)` in `thisLeafFoldingIsValid` [3].
+	The returned predicate delegates to `_matchingParityLeaf` [2].
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A shape tuple that defines leaf parity in each dimension.
+
+	Returns
+	-------
+	parityPredicate : collections.abc.Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]
+		A predicate that returns `True` when the two `Leaf` values in the input tuple have
+		matching parity in the input `dimension`.
+
+	References
+	----------
+	[1] itertools.product
+		https://docs.python.org/3/library/itertools.html#itertools.product
+	[2] mapFolding._e.algorithms.iff._matchingParityLeaf
+		Internal package reference
+	[3] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
+		Internal package reference
+
+	"""
+	def repack(aCartesianProduct: tuple[tuple[tuple[int, int], tuple[int, int]], int]) -> bool:
+		((_pile, leaf), (_pileComparand, comparand)), dimension = aCartesianProduct
+		return _matchingParityLeaf(mapShape, leaf, comparand, dimension)
+	return repack
+
+def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: Leaf, comparand: Leaf, dimension: int) -> bool:
+	"""You can check whether `leaf` and `comparand` have matching parity in `dimension`.
+
+	(AI generated docstring)
+
+	`_matchingParityLeaf` is a small utility used to skip crease comparisons that cannot cross
+	in `thisLeafFoldingIsValid` [2].
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A shape tuple that defines the mixed-radix coordinate system.
+	leaf : Leaf
+		A leaf index.
+	comparand : Leaf
+		A second leaf index.
+	dimension : int
+		A dimension index into `mapShape`.
+
+	Returns
+	-------
+	hasMatchingParity : bool
+		`True` when `leaf` and `comparand` have matching parity in `dimension`.
+
+	References
+	----------
+	[1] mapFolding._e.algorithms.iff.ImaOddLeaf
+		Internal package reference
+	[2] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
+		Internal package reference
+
+	"""
+	return ImaOddLeaf(mapShape, leaf, dimension) == ImaOddLeaf(mapShape, comparand, dimension)
+
+@cache
+def ImaOddLeaf(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
+	r"""You can compute and memoize the parity bit of `leaf` in `dimension`.
+
+	(AI generated docstring)
+
+	`ImaOddLeaf` returns a parity bit ($0$ or $1$) derived from the mixed-radix coordinate of
+	`leaf` along `dimension`.
+
+	`ImaOddLeaf` uses the `functools.cache` decorator for memoization [1].
+
+	The coordinate extraction is:
+	$$
+	\left\lfloor \frac{leaf}{\prod mapShape[0:dimension]} \right\rfloor \bmod mapShape[dimension].
+	$$
+
+	The parity bit is the least-significant bit of the coordinate.
+	The coordinate extraction uses `productOfDimensions` to compute the stride [2].
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A shape tuple that defines the coordinate system.
+	leaf : Leaf
+		A leaf index.
+	dimension : int
+		A dimension index into `mapShape`.
+
+	Returns
+	-------
+	parityBit : int
+		A parity bit where `0` means even coordinate and `1` means odd coordinate.
+
+	References
+	----------
+	[1] functools.cache
+		https://docs.python.org/3/library/functools.html#functools.cache
+	[2] mapFolding._e.algorithms.iff.productOfDimensions
+		Internal package reference
+
+	"""
+	return (floordiv(leaf, productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
+
+def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
+	r"""You can compute the mixed-radix stride for the prefix of `mapShape`.
+
+	(AI generated docstring)
+
+	`productOfDimensions` computes $\prod mapShape[0:dimension]$ with a multiplicative
+	identity of $1$ using `math.prod` [1]. The return value acts as the stride that converts a
+	coordinate step in `dimension` into a `Leaf` index increment.
+
+	The return value is consumed by `getCreasePost` when converting a coordinate step into a
+	`Leaf` increment [2].
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A shape tuple.
+	dimension : int
+		A dimension index that selects the exclusive prefix length.
+
+	Returns
+	-------
+	stride : int
+		The product of the first `dimension` entries of `mapShape`.
+
+	References
+	----------
+	[1] math.prod
+		https://docs.python.org/3/library/math.html#math.prod
+	[2] mapFolding._e.algorithms.iff.getCreasePost
+		Internal package reference
+
+	"""
+	return prod(mapShape[0:dimension], start=1)
+
+def callGetCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Callable[[], Leaf | None]:
+	"""You can create a deferred crease computation for `leaf` in `dimension`.
+
+	(AI generated docstring)
+
+	`callGetCreasePost` returns a zero-argument callable that computes the same result as
+	`getCreasePost(mapShape, leaf, dimension)` [1] when the callable is invoked. This thunk shape
+	matches the interface required by `thisIsAViolationComplicated` [2]. `thisLeafFoldingIsValid`
+	constructs this thunk as part of crease validation [3].
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A shape tuple.
+	leaf : Leaf
+		A leaf index.
+	dimension : int
+		A dimension index.
+
+	Returns
+	-------
+	getCrease : collections.abc.Callable[[], Leaf | None]
+		A callable that computes the crease-post `Leaf` value, or `None` when the crease-post
+		leaf does not exist.
+
+	References
+	----------
+	[1] mapFolding._e.algorithms.iff.getCreasePost
+		Internal package reference
+	[2] mapFolding._e.algorithms.iff.thisIsAViolationComplicated
+		Internal package reference
+	[3] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
+		Internal package reference
+
+	"""
+	return lambda: getCreasePost(mapShape, leaf, dimension)
+
+@cache
+def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf | None:
+	"""You can compute and memoize the crease-post `Leaf` for `leaf` in `dimension`.
+
+	(AI generated docstring)
+
+	A crease-post `Leaf` is the adjacent leaf one step forward in `dimension`, expressed in
+	`Leaf` index space. When `leaf` is already at the boundary coordinate of `dimension`, the
+	crease-post `Leaf` does not exist and `getCreasePost` returns `None`.
+
+	`getCreasePost` uses the `functools.cache` decorator for memoization [1] and uses
+	`productOfDimensions` for stride computation [2].
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A shape tuple.
+	leaf : Leaf
+		A leaf index.
+	dimension : int
+		A dimension index.
+
+	Returns
+	-------
+	leafCreasePost : Leaf | None
+		The crease-post `Leaf` index, or `None` when the crease-post `Leaf` does not exist.
+
+	References
+	----------
+	[1] functools.cache
+		https://docs.python.org/3/library/functools.html#functools.cache
+	[2] mapFolding._e.algorithms.iff.productOfDimensions
+		Internal package reference
+
+	"""
+	leafCrease: Leaf | None = None
+	if ((leaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:
+		leafCrease = leaf + productOfDimensions(mapShape, dimension)
+	return leafCrease
+
+inThis_pileOf = syntacticCurry(indexOf)
+
+#======== Functions for a `PermutationSpace` ============================
 
 def permutationSpaceHasAViolation(state: EliminationState) -> bool:
-	"""Return `True` if `state.permutationSpace` has a violation."""
+	"""You can detect forbidden crease crossings inside `state.permutationSpace`.
+
+	`permutationSpaceHasAViolation` is a pruning predicate used before counting or expanding a
+	candidate `PermutationSpace`. `removePermutationSpaceViolations` uses
+	`permutationSpaceHasAViolation` to filter `state.listPermutationSpace` [5], and
+	`mapFolding._e.pin2上nDimensionsAnnex` calls `removePermutationSpaceViolations` [6] as part of
+	building a reduced search space.
+
+	Algorithm Details
+	-----------------
+	`permutationSpaceHasAViolation` interprets `state.permutationSpace` as a partial mapping
+	from `Pile` to `Leaf`. The pinned leaves extracted by `extractPinnedLeaves` [1] are inverted
+	to a `Leaf`-to-`Pile` mapping so crease-post leaves can be looked up by `Leaf` index.
+
+	`permutationSpaceHasAViolation` filters candidate assignments with `between` [2] to skip
+	leaves that cannot have a crease-post leaf in a selected dimension.
+
+	For each `dimension`, `permutationSpaceHasAViolation`:
+
+	- enumerates each `(pile, leaf)` assignment that can have a crease-post leaf,
+	- derives the crease-post leaf using `getCreasePost` [4],
+	- looks up the crease-post leaf pile using pinned assignments,
+	- groups crease pairs by parity using `ImaOddLeaf`,
+	- checks each pair of crease pairs with `thisIsAViolation` [3].
+
+	Parameters
+	----------
+	state : EliminationState
+		An elimination state that provides `state.mapShape`, `state.permutationSpace`, and
+		bounds such as `state.leafLast`.
+
+	Returns
+	-------
+	hasViolation : bool
+		`True` when at least one forbidden crease crossing is detected.
+
+	References
+	----------
+	[1] mapFolding._e.filters.extractPinnedLeaves
+		Internal package reference
+	[2] mapFolding._e.filters.between
+		Internal package reference
+	[3] mapFolding._e.algorithms.iff.thisIsAViolation
+		Internal package reference
+	[4] mapFolding._e.algorithms.iff.getCreasePost
+		Internal package reference
+	[5] mapFolding._e.algorithms.iff.removePermutationSpaceViolations
+		Internal package reference
+	[6] mapFolding._e.pin2上nDimensionsAnnex
+		Internal package reference
+
+	"""
 	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in extractPinnedLeaves(state.permutationSpace).items()}
 
 	for dimension in range(state.dimensionsTotal):
@@ -193,6 +540,41 @@ def permutationSpaceHasAViolation(state: EliminationState) -> bool:
 	return False
 
 def removePermutationSpaceViolations(state: EliminationState) -> EliminationState:
+	"""You can filter `state.listPermutationSpace` by removing crease-crossing candidates.
+
+	(AI generated docstring)
+
+	`removePermutationSpaceViolations` is a mutating filter step that keeps only those
+	`PermutationSpace` values that satisfy `permutationSpaceHasAViolation(state) == False` [1].
+	This function is used by pinning flows that enumerate multiple candidate permutation
+	spaces and then prune candidate permutation spaces before deeper elimination work.
+	A caller such as `mapFolding._e.pin2上nDimensionsAnnex` uses this function [2].
+
+	Thread Safety
+	------------
+	`removePermutationSpaceViolations` mutates `state.listPermutationSpace` and updates
+	`state.permutationSpace` while iterating. Do not share `state` across threads while
+	`removePermutationSpaceViolations` is running.
+
+	Parameters
+	----------
+	state : EliminationState
+		An elimination state that provides `state.listPermutationSpace` and a writable
+		`state.permutationSpace`.
+
+	Returns
+	-------
+	state : EliminationState
+		The same `state` instance with `state.listPermutationSpace` filtered.
+
+	References
+	----------
+	[1] mapFolding._e.algorithms.iff.permutationSpaceHasAViolation
+		Internal package reference
+	[2] mapFolding._e.pin2上nDimensionsAnnex
+		Internal package reference
+
+	"""
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace.copy()
 	state.listPermutationSpace = []
 	for permutationSpace in listPermutationSpace:

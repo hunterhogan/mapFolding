@@ -55,3 +55,14 @@ Right now, I have `PermutationSpace = dict[int, LeafOrPileRangeOfLeaves]`. A goo
 - ☑️ `PinnedLeaves = dict[pile, leaf]`
 - `dict[pile, pileRangeOfLeaves]`
 - ☑️ `PermutationSpace = dict[pile, leafOrPileRangeOfLeaves]`
+
+## "Packaging" and/or make repository cloning easier
+
+- Switch to uv?
+- How to include citations?
+- How to intelligently include the tests?
+- From hunterMakesPy.PackageSettings: the variables I wish were fixed during packaging and installation.
+- Snippets or something for entering ideograms.
+- Recommended VS Code extensions.
+- If I can get the font working, include the font.
+- Settings for formatters and linters.

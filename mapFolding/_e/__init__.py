@@ -14,19 +14,15 @@ from mapFolding._e._theTypes import (
 
 # isort: split
 from mapFolding._e._beDRY import (
-	between as between, consecutive as consecutive, DOTgetPileIfLeaf as DOTgetPileIfLeaf,
+	bifurcatePermutationSpace as bifurcatePermutationSpace, DOTgetPileIfLeaf as DOTgetPileIfLeaf,
 	DOTgetPileIfPileRangeOfLeaves as DOTgetPileIfPileRangeOfLeaves, DOTitems as DOTitems, DOTkeys as DOTkeys,
-	DOTvalues as DOTvalues, exclude as exclude, extractPilesWithPileRangeOfLeaves as extractPilesWithPileRangeOfLeaves,
-	extractPinnedLeaves as extractPinnedLeaves, getAntiPileRangeOfLeaves as getAntiPileRangeOfLeaves,
+	DOTvalues as DOTvalues, getAntiPileRangeOfLeaves as getAntiPileRangeOfLeaves,
 	getIteratorOfLeaves as getIteratorOfLeaves, getPileRangeOfLeaves as getPileRangeOfLeaves,
 	getProductsOfDimensions as getProductsOfDimensions, getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
-	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首, hasDuplicates as hasDuplicates,
+	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首,
 	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, JeanValjean as JeanValjean,
-	leafIsInPileRange as leafIsInPileRange, leafIsNotPinned as leafIsNotPinned, leafIsPinned as leafIsPinned,
-	mappingHasKey as mappingHasKey, mapShapeIs2上nDimensions as mapShapeIs2上nDimensions,
-	notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零, notPileLast as notPileLast, pileIsNotOpen as pileIsNotOpen,
-	pileIsOpen as pileIsOpen, pileRangeOfLeavesAND as pileRangeOfLeavesAND, reverseLookup as reverseLookup,
-	thisHasThat as thisHasThat, thisIsALeaf as thisIsALeaf, thisIsAPileRangeOfLeaves as thisIsAPileRangeOfLeaves)
+	mapShapeIs2上nDimensions as mapShapeIs2上nDimensions, pileRangeOfLeavesAND as pileRangeOfLeavesAND,
+	reverseLookup as reverseLookup)
 
 # isort: split
 from mapFolding._e._measure import (

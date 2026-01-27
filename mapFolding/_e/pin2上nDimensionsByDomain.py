@@ -3,10 +3,11 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing, zeroIndexed
 from mapFolding._e import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首,
-	DOTgetPileIfLeaf, exclude, getDictionaryPileRanges, getLeavesCreaseAnte, getLeavesCreasePost,
-	getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity, leafInSubHyperplane, notLeafOriginOrLeaf零,
-	ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二)
+	DOTgetPileIfLeaf, getDictionaryPileRanges, getLeavesCreaseAnte, getLeavesCreasePost,
+	getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity, leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零,
+	首一, 首一二, 首二, 首零, 首零一, 首零一二)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.filters import exclude, notLeafOriginOrLeaf零
 from more_itertools import last
 from operator import getitem, neg
 

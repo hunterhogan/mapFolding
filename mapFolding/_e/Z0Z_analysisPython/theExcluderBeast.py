@@ -9,10 +9,11 @@ from hunterMakesPy.filesystemToolkit import importPathFilename2Identifier, write
 from itertools import product as CartesianProduct, repeat
 from mapFolding import ansiColorReset, ansiColors, inclusive, packageSettings
 from mapFolding._e import (
-	between, exclude, getDictionaryLeafDomains, getLeafDomain, getPileRange, PermutationSpace, 首一, 首一三, 首一二, 首一二三, 首三, 首二,
-	首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
+	getDictionaryLeafDomains, getLeafDomain, getPileRange, PermutationSpace, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一,
+	首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
 from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.filters import between, exclude
 from mapFolding._e.pin2上nDimensions import pinPilesAtEnds
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
 from mapFolding._e.Z0Z_analysisPython.toolkit import detectPermutationSpaceErrors, PermutationSpaceStatus

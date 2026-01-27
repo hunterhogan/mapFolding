@@ -3,9 +3,10 @@ from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import raiseIfNone
 from mapFolding import inclusive
 from mapFolding._e import (
-	dimensionIndex, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, exclude, getLeavesCreaseAnte,
-	getLeavesCreasePost, Leaf, leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一)
+	dimensionIndex, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, getLeavesCreaseAnte, getLeavesCreasePost,
+	Leaf, leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.filters import exclude
 from operator import add, neg, sub
 from typing import TYPE_CHECKING
 

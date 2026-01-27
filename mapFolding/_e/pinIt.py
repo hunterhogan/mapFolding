@@ -16,10 +16,11 @@ from hunterMakesPy import raiseIfNone
 from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
-	between, DOTgetPileIfLeaf, DOTgetPileIfPileRangeOfLeaves, DOTvalues, extractPinnedLeaves, Folding, getLeafDomain,
-	getPileRange, Leaf, leafIsInPileRange, leafIsNotPinned, PermutationSpace, Pile, pileIsOpen, PileRangeOfLeaves,
-	thisIsALeaf)
+	DOTgetPileIfLeaf, DOTgetPileIfPileRangeOfLeaves, DOTvalues, Folding, getLeafDomain, getPileRange, Leaf,
+	PermutationSpace, Pile, PileRangeOfLeaves)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.filters import (
+	between, extractPinnedLeaves, leafIsInPileRange, leafIsNotPinned, pileIsOpen, thisIsALeaf)
 from more_itertools import flatten, ilen
 from operator import getitem
 

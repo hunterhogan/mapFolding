@@ -9,12 +9,12 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writePython
 from mapFolding import ansiColorReset, ansiColors, decreasing, inclusive, packageSettings
 from mapFolding._e import (
-	between, consecutive, dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首,
-	dimensionSecondNearest首, dimensionThirdNearest首, exclude, getPileRangeOfLeaves, getSumsOfProductsOfDimensionsNearest首,
-	howManyDimensionsHaveOddParity, JeanValjean, Leaf, leafInSubHyperplane, leafIsPinned, leafOrigin,
-	mapShapeIs2上nDimensions, PermutationSpace, Pile, pileOrigin, reverseLookup, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一,
-	首零一二, 首零二)
+	dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首,
+	dimensionThirdNearest首, getPileRangeOfLeaves, getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity,
+	JeanValjean, Leaf, leafInSubHyperplane, leafOrigin, mapShapeIs2上nDimensions, PermutationSpace, Pile, pileOrigin,
+	reverseLookup, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.filters import between, consecutive, exclude, leafIsPinned
 from more_itertools import all_unique, loops
 from operator import add, neg, sub
 from pathlib import Path, PurePath

@@ -3,10 +3,10 @@ from cytoolz.itertoolz import last
 from itertools import pairwise, product as CartesianProduct
 from mapFolding import packageSettings
 from mapFolding._e import (
-	between, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves, getIteratorOfLeaves, getLeavesCreasePost,
-	indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin, PileRangeOfLeaves,
+	getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin,
 	PilesWithPileRangeOfLeaves, PinnedLeaves)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.filters import between, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
@@ -45,13 +45,13 @@ def count(state: EliminationState) -> int:
 	if mapShapeIs2上nDimensions(state.mapShape):
 		pass
 
-#======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================-
+#======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================
 	if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
 		state.Theorem2Multiplier = 2
 		leafOrigin下_aDimension: int = last(filter(between(0, state.leafLast // 2), state.productsOfDimensions))
 		model.add(listPilingsInLeafOrder[leafOrigin下_aDimension] < listPilingsInLeafOrder[2 * leafOrigin下_aDimension])
 
-#======== Forbidden inequalities ============================-
+#======== Forbidden inequalities ============================
 	def addLessThan(comparatorLeft: Leaf, comparatorRight: Leaf) -> cp_model.IntVar:
 		ruleΩ: cp_model.IntVar = model.new_bool_var(f"this_{comparatorLeft}_lessThan_{comparatorRight}")
 		model.add(listPilingsInLeafOrder[comparatorLeft] < listPilingsInLeafOrder[comparatorRight]).only_enforce_if(ruleΩ)

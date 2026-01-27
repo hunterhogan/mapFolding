@@ -3,9 +3,10 @@
 from functools import partial
 from itertools import filterfalse
 from mapFolding import ansiColorReset, ansiColors, dictionaryOEISMapFolding, packageSettings
-from mapFolding._e import between, extractPinnedLeaves, PermutationSpace
+from mapFolding._e import PermutationSpace
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.filters import between, extractPinnedLeaves
 from mapFolding._e.pin2上nDimensions import (
 	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零)
 from os import PathLike
@@ -35,9 +36,9 @@ if __name__ == "__main__":
 	CPUlimit: bool | float | int | None = -2
 	state: EliminationState | None = None
 
-	flow = "crease"
 	flow = "constraintPropagation"
 	flow = "elimination"
+	flow = "crease"
 
 	oeisID: str = "A195646"
 	oeisID: str = "A000136"
@@ -50,11 +51,11 @@ if __name__ == "__main__":
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + "\n")
 
-	for n in range(1, 3):
+	for n in range(4,6):
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 		if oeisID == "A001417" and n > 3:
 			state = EliminationState(mapShape)
-			# state = pinPilesAtEnds(state, 4)
+			state = pinPilesAtEnds(state, 4)
 			# state = pinLeavesDimensions0零一(state)
 			# state = pinLeavesDimension二(state)
 			# state = pinLeavesDimension首二(state)

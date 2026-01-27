@@ -3,10 +3,9 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing
 from mapFolding._e import (
 	DOTgetPileIfPileRangeOfLeaves, Folding, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost,
-	getPileRangeOfLeaves, mapShapeIs2上nDimensions, pileIsOpen, pileOrigin, PileRangeOfLeaves, pileRangeOfLeavesAND,
-	thisIsALeaf, 一, 零, 首零)
-from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
+	getPileRangeOfLeaves, mapShapeIs2上nDimensions, pileOrigin, PileRangeOfLeaves, pileRangeOfLeavesAND, 一, 零, 首零)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.filters import leafIsNotPinned, pileIsOpen, thisIsALeaf
 from mapFolding._e.pin2上nDimensions import deconstructPermutationSpaceAtPile2上nDimensions, pinPilesAtEnds
 from mapFolding._e.pinIt import makeFolding
 from math import factorial
@@ -44,7 +43,20 @@ def pileProcessingOrderDefault(state: EliminationState) -> list[int]:
 	pileProcessingOrder.extend(interleave_longest(range(一+零, 首零(state.dimensionsTotal)), range(neg(零+一)+state.首, 首零(state.dimensionsTotal) + decreasing, decreasing)))
 	return pileProcessingOrder
 
+def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace.copy()
+	state.listPermutationSpace = []
+	for permutationSpace in listPermutationSpace:
+		if any(map(leafIsNotPinned(permutationSpace), range(state.leavesTotal))):
+			state.listPermutationSpace.append(permutationSpace)
+		else:
+			folding: Folding = makeFolding(permutationSpace, ())
+			state.listFolding.append(folding)
+
+	return state
+
 def pinByCrease(state: EliminationState) -> EliminationState:
+	listFolding: list[Folding] = []
 	state = nextPermutationSpaceWorkbench(state)
 	while state.permutationSpace:
 		pileRangeOfLeaves: PileRangeOfLeaves = raiseIfNone(DOTgetPileIfPileRangeOfLeaves(state.permutationSpace, state.pile))
@@ -53,26 +65,21 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 		if thisIsALeaf(leaf := state.permutationSpace.get(state.pile + 1)):
 			pileRangeOfLeaves = pileRangeOfLeavesAND(pileRangeOfLeaves, getPileRangeOfLeaves(state.leavesTotal, getLeavesCreaseAnte(state, leaf)))
 
+# NOTE IDK what the "best" idea is, but recreating `sherpa` each time silently clears `sherpa.listFolding` and `sherpa.listPermutationSpace`, which is good.
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, permutationSpace=state.permutationSpace.copy())
-		sherpa = deconstructPermutationSpaceAtPile2上nDimensions(sherpa, getIteratorOfLeaves(pileRangeOfLeaves)) # pyright: ignore[reportArgumentType]
+		sherpa = deconstructPermutationSpaceAtPile2上nDimensions(sherpa, getIteratorOfLeaves(pileRangeOfLeaves))
+		sherpa = moveFoldingToListFolding(sherpa)
 
+		listFolding.extend(sherpa.listFolding)
 		state.listPermutationSpace.extend(sherpa.listPermutationSpace)
 
 		state = nextPermutationSpaceWorkbench(state)
 
-	return _purgeInvalidLeafFoldings(state)
-
-def _purgeInvalidLeafFoldings(state: EliminationState) -> EliminationState:
-	listPermutationSpaceCopy: list[PermutationSpace] = state.listPermutationSpace.copy()
-	state.listPermutationSpace = []
-	for permutationSpace in listPermutationSpaceCopy:
-		folding: Folding = makeFolding(permutationSpace, ())
-		if thisLeafFoldingIsValid(folding, state.mapShape):
-			state.listPermutationSpace.append(permutationSpace)
+	state.listFolding.extend(listFolding)
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	"""Find the quantity of valid foldings for a given map."""
+	"""Do the things necessary so that `pinByCrease` operates efficiently."""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
 
@@ -90,10 +97,10 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		]
 
 		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
-			state.listPermutationSpace.extend(claimTicket.result().listPermutationSpace)
+			state.listFolding.extend(claimTicket.result().listFolding)
 
 	state.Theorem4Multiplier = factorial(state.dimensionsTotal)
-	state.groupsOfFolds = len(state.listPermutationSpace)
+	state.groupsOfFolds = len(state.listFolding)
 
 	return state
 

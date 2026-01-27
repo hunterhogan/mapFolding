@@ -1,9 +1,11 @@
 from collections.abc import Callable
 from gmpy2 import xmpz
-from mapFolding._e import extractPinnedLeaves
+from mapFolding._e import getLeafDomain, 一, 零
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.filters import extractPinnedLeaves
 from mapFolding._e.pin2上nDimensions import (
 	pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds)
+from mapFolding._e.pin2上nDimensionsAnnex import beansWithoutCornbread, pinLeafCornbread
 from numpy.typing import NDArray
 import numpy
 import pytest
@@ -57,3 +59,21 @@ def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8
 		f"{functionName} expected no overlapping dictionaries for {mapShape = }, "
 		f"got countOverlappingDictionaries={countOverlappingDictionaries}."
 	)
+
+
+def test_pinLeafCornbreadFindsUnpairedLeafWithoutPileContext() -> None:
+	mapShape: tuple[int, ...] = (2,) * 5
+	state: EliminationState = EliminationState(mapShape=mapShape)
+	leafBeans: int = 一 + 零
+	leafCornbread: int = 一
+	leafDomainBeans: range = getLeafDomain(state, leafBeans)
+	leafDomainCornbread: range = getLeafDomain(state, leafCornbread)
+	intPileBeans: int = next(pileCandidate for pileCandidate in leafDomainBeans if (pileCandidate + 1) in leafDomainCornbread)
+
+	state.pile = 0
+	state.permutationSpace = {intPileBeans: leafBeans}
+	assert beansWithoutCornbread(state) is True
+
+	state = pinLeafCornbread(state)
+	assert state.permutationSpace.get(intPileBeans + 1) == leafCornbread
+	assert beansWithoutCornbread(state) is False
