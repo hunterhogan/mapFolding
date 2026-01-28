@@ -1,13 +1,15 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from hunterMakesPy import raiseIfNone
+from itertools import filterfalse
 from mapFolding import decreasing
 from mapFolding._e import (
-	DOTgetPileIfPileRangeOfLeaves, Folding, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost,
+	DOTgetPileIfPileRangeOfLeaves, DOTvalues, Folding, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost,
 	getPileRangeOfLeaves, mapShapeIs2上nDimensions, pileOrigin, PileRangeOfLeaves, pileRangeOfLeavesAND, 一, 零, 首零)
+from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import leafIsNotPinned, pileIsOpen, thisIsALeaf
-from mapFolding._e.pin2上nDimensions import deconstructPermutationSpaceAtPile2上nDimensions, pinPilesAtEnds
-from mapFolding._e.pinIt import makeFolding
+from mapFolding._e.pin2上nDimensions import pinPilesAtEnds, reduceAllPermutationSpaceInEliminationState
+from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, disqualifyAppendingLeafAtPile, makeFolding
 from math import factorial
 from more_itertools import interleave_longest
 from operator import neg
@@ -67,8 +69,8 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 
 # NOTE IDK what the "best" idea is, but recreating `sherpa` each time silently clears `sherpa.listFolding` and `sherpa.listPermutationSpace`, which is good.
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=state.pile, permutationSpace=state.permutationSpace.copy())
-		sherpa = deconstructPermutationSpaceAtPile2上nDimensions(sherpa, getIteratorOfLeaves(pileRangeOfLeaves))
-		sherpa = moveFoldingToListFolding(sherpa)
+		sherpa.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(sherpa.permutationSpace, sherpa.pile, filterfalse(disqualifyAppendingLeafAtPile(sherpa), getIteratorOfLeaves(pileRangeOfLeaves)))))
+		sherpa = moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(sherpa)))
 
 		listFolding.extend(sherpa.listFolding)
 		state.listPermutationSpace.extend(sherpa.listPermutationSpace)

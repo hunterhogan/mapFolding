@@ -1,5 +1,7 @@
 # Brain dump of things I wish were different
 
+## More tests for computations
+
 ## Problems with Python installations, Windows, and VS Code
 
 ### At cmd, "python" forces a new terminal and it doesn't use the venv

@@ -174,6 +174,26 @@ def leafIsPinned(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) 
 	return leaf in permutationSpace.values()
 
 @syntacticCurry
+def leafIsPinnedAtPile(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pile) -> bool:
+	"""Return `True` if `leaf` is presently pinned at `pile` in `permutationSpace`.
+
+	Parameters
+	----------
+	permutationSpace : PermutationSpace
+		Partial folding mapping from pile -> leaf.
+	leaf : int
+		`leaf` whose presence at `pile` is being checked.
+	pile : int
+		`pile` index.
+
+	Returns
+	-------
+	leafIsPinnedAtPile : bool
+		True if the mapping includes `pile: leaf`.
+	"""
+	return leaf == permutationSpace.get(pile)
+
+@syntacticCurry
 def mappingHasKey[文件: Hashable](lookup: Mapping[文件, Any], key: 文件) -> bool:
 	"""Return `True` if `key` is in `lookup`."""
 	return key in lookup
@@ -361,3 +381,4 @@ def extractPilesWithPileRangeOfLeaves(permutationSpace: PermutationSpace) -> Pil
 		Dictionary of `pile: pileRangeOfLeaves`, if a `pileRangeOfLeaves` is defined at `pile`.
 	"""
 	return leafFilter(thisIsAPileRangeOfLeaves, permutationSpace)
+

@@ -9,3 +9,8 @@ In some cases, vertical alignment of type annotations, for example, would help h
 ## One-time review of code for Data structures for better performance
 
 Change `tuple` to `frozenset`, for example.
+
+## Convergence of the elimination algorithms
+
+- elimination can't use pilerangeofleaves
+- crease 

@@ -1,16 +1,16 @@
 """Developing elimination-based algorithms."""
 
 # isort: split
+from mapFolding._e._theTypes import (
+	DimensionIndex as DimensionIndex, Folding as Folding, Leaf as Leaf, LeafOrPileRangeOfLeaves as LeafOrPileRangeOfLeaves,
+	PermutationSpace as PermutationSpace, Pile as Pile, PileRangeOfLeaves as PileRangeOfLeaves,
+	PilesWithPileRangeOfLeaves as PilesWithPileRangeOfLeaves, PinnedLeaves as PinnedLeaves)
+
+# isort: split
 from mapFolding._e._semiotics import (
 	dimensionIndex as dimensionIndex, leafOrigin as leafOrigin, pileOrigin as pileOrigin, 一 as 一, 七 as 七, 三 as 三, 九 as 九,
 	二 as 二, 五 as 五, 八 as 八, 六 as 六, 四 as 四, 零 as 零, 首一 as 首一, 首一三 as 首一三, 首一二 as 首一二, 首一二三 as 首一二三, 首三 as 首三, 首二 as 首二,
 	首二三 as 首二三, 首零 as 首零, 首零一 as 首零一, 首零一三 as 首零一三, 首零一二 as 首零一二, 首零一二三 as 首零一二三, 首零三 as 首零三, 首零二 as 首零二, 首零二三 as 首零二三)
-
-# isort: split
-from mapFolding._e._theTypes import (
-	Folding as Folding, Leaf as Leaf, LeafOrPileRangeOfLeaves as LeafOrPileRangeOfLeaves,
-	PermutationSpace as PermutationSpace, Pile as Pile, PileRangeOfLeaves as PileRangeOfLeaves,
-	PilesWithPileRangeOfLeaves as PilesWithPileRangeOfLeaves, PinnedLeaves as PinnedLeaves)
 
 # isort: split
 from mapFolding._e._beDRY import (

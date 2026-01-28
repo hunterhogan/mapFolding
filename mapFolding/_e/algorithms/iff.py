@@ -466,25 +466,25 @@ inThis_pileOf = syntacticCurry(indexOf)
 
 #======== Functions for a `PermutationSpace` ============================
 
-def permutationSpaceHasAViolation(state: EliminationState) -> bool:
+def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 	"""You can detect forbidden crease crossings inside `state.permutationSpace`.
 
-	`permutationSpaceHasAViolation` is a pruning predicate used before counting or expanding a
-	candidate `PermutationSpace`. `removePermutationSpaceViolations` uses
-	`permutationSpaceHasAViolation` to filter `state.listPermutationSpace` [5], and
-	`mapFolding._e.pin2上nDimensionsAnnex` calls `removePermutationSpaceViolations` [6] as part of
-	building a reduced search space.
+	`permutationSpaceHasIFFViolation` is a pruning predicate used before counting or expanding a
+	candidate `PermutationSpace`. `removeIFFViolationsFromEliminationState` uses
+	`permutationSpaceHasIFFViolation` to filter `state.listPermutationSpace` [5], and
+	a caller such as `mapFolding._e.pin2上nDimensions` uses `removeIFFViolationsFromEliminationState`
+	[6] as part of building a reduced search space.
 
 	Algorithm Details
 	-----------------
-	`permutationSpaceHasAViolation` interprets `state.permutationSpace` as a partial mapping
+	`permutationSpaceHasIFFViolation` interprets `state.permutationSpace` as a partial mapping
 	from `Pile` to `Leaf`. The pinned leaves extracted by `extractPinnedLeaves` [1] are inverted
 	to a `Leaf`-to-`Pile` mapping so crease-post leaves can be looked up by `Leaf` index.
 
-	`permutationSpaceHasAViolation` filters candidate assignments with `between` [2] to skip
+	`permutationSpaceHasIFFViolation` filters candidate assignments with `between` [2] to skip
 	leaves that cannot have a crease-post leaf in a selected dimension.
 
-	For each `dimension`, `permutationSpaceHasAViolation`:
+	For each `dimension`, `permutationSpaceHasIFFViolation`:
 
 	- enumerates each `(pile, leaf)` assignment that can have a crease-post leaf,
 	- derives the crease-post leaf using `getCreasePost` [4],
@@ -513,9 +513,9 @@ def permutationSpaceHasAViolation(state: EliminationState) -> bool:
 		Internal package reference
 	[4] mapFolding._e.algorithms.iff.getCreasePost
 		Internal package reference
-	[5] mapFolding._e.algorithms.iff.removePermutationSpaceViolations
+	[5] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState
 		Internal package reference
-	[6] mapFolding._e.pin2上nDimensionsAnnex
+	[6] mapFolding._e.pin2上nDimensions
 		Internal package reference
 
 	"""
@@ -539,22 +539,22 @@ def permutationSpaceHasAViolation(state: EliminationState) -> bool:
 					return True
 	return False
 
-def removePermutationSpaceViolations(state: EliminationState) -> EliminationState:
+def removeIFFViolationsFromEliminationState(state: EliminationState) -> EliminationState:
 	"""You can filter `state.listPermutationSpace` by removing crease-crossing candidates.
 
 	(AI generated docstring)
 
-	`removePermutationSpaceViolations` is a mutating filter step that keeps only those
-	`PermutationSpace` values that satisfy `permutationSpaceHasAViolation(state) == False` [1].
+	`removeIFFViolationsFromEliminationState` is a mutating filter step that keeps only those
+	`PermutationSpace` values that satisfy `permutationSpaceHasIFFViolation(state) == False` [1].
 	This function is used by pinning flows that enumerate multiple candidate permutation
 	spaces and then prune candidate permutation spaces before deeper elimination work.
-	A caller such as `mapFolding._e.pin2上nDimensionsAnnex` uses this function [2].
+	A caller such as `mapFolding._e.pin2上nDimensions` uses this function [2].
 
 	Thread Safety
 	------------
-	`removePermutationSpaceViolations` mutates `state.listPermutationSpace` and updates
+	`removeIFFViolationsFromEliminationState` mutates `state.listPermutationSpace` and updates
 	`state.permutationSpace` while iterating. Do not share `state` across threads while
-	`removePermutationSpaceViolations` is running.
+	`removeIFFViolationsFromEliminationState` is running.
 
 	Parameters
 	----------
@@ -569,9 +569,9 @@ def removePermutationSpaceViolations(state: EliminationState) -> EliminationStat
 
 	References
 	----------
-	[1] mapFolding._e.algorithms.iff.permutationSpaceHasAViolation
+	[1] mapFolding._e.algorithms.iff.permutationSpaceHasIFFViolation
 		Internal package reference
-	[2] mapFolding._e.pin2上nDimensionsAnnex
+	[2] mapFolding._e.pin2上nDimensions
 		Internal package reference
 
 	"""
@@ -579,6 +579,6 @@ def removePermutationSpaceViolations(state: EliminationState) -> EliminationStat
 	state.listPermutationSpace = []
 	for permutationSpace in listPermutationSpace:
 		state.permutationSpace = permutationSpace
-		if not permutationSpaceHasAViolation(state):
+		if not permutationSpaceHasIFFViolation(state):
 			state.listPermutationSpace.append(permutationSpace)
 	return state

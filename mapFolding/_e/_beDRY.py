@@ -86,10 +86,10 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 
 	Returns
 	-------
-	pinnedLeaves, pilesWithPileRangeOfLeaves : tuple[PinnedLeaves, PilesWithPileRangeOfLeaves]
+	leavesPinned, pilesWithPileRangeOfLeaves : tuple[PinnedLeaves, PilesWithPileRangeOfLeaves]
 	"""
-	pinnedLeaves: PinnedLeaves = extractPinnedLeaves(permutationSpace)
-	return (pinnedLeaves, dissociatePiles(permutationSpace, *DOTkeys(pinnedLeaves))) # pyright: ignore[reportReturnType]
+	leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
+	return (leavesPinned, dissociatePiles(permutationSpace, *DOTkeys(leavesPinned))) # pyright: ignore[reportReturnType]
 
 #======== Disaggregation and deconstruction functions ================================================
 

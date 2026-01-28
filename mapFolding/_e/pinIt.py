@@ -20,7 +20,8 @@ from mapFolding._e import (
 	PermutationSpace, Pile, PileRangeOfLeaves)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
-	between, extractPinnedLeaves, leafIsInPileRange, leafIsNotPinned, pileIsOpen, thisIsALeaf)
+	between, extractPinnedLeaves, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen,
+	pileIsOpen, thisIsALeaf)
 from more_itertools import flatten, ilen
 from operator import getitem
 
@@ -28,7 +29,7 @@ from operator import getitem
 
 @syntacticCurry
 def atPilePinLeafSafetyFilter(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) -> bool:
-	"""Return `True` if it is safe to call `atPilePinLeafSafetyFilter(permutationSpace, pile, leaf)`.
+	"""Return `True` if it is safe to call `atPilePinLeaf(permutationSpace, pile, leaf)`.
 
 	For performance, you probably can and probably *should* create a set of filters for your circumstances.
 
@@ -46,27 +47,11 @@ def atPilePinLeafSafetyFilter(permutationSpace: PermutationSpace, pile: Pile, le
 	isSafeToPin : bool
 		True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
 	"""
-	return isPinnedAtPile(permutationSpace, leaf, pile) or (pileIsOpen(permutationSpace, pile) and leafIsNotPinned(permutationSpace, leaf))
+	return leafIsPinnedAtPile(permutationSpace, leaf, pile) or (pileIsOpen(permutationSpace, pile) and leafIsNotPinned(permutationSpace, leaf))
 
 @syntacticCurry
-def isPinnedAtPile(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pile) -> bool:
-	"""Return `True` if `leaf` is presently pinned at `pile` in `permutationSpace`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` whose presence at `pile` is being checked.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	leafIsPinnedAtPile : bool
-		True if the mapping includes `pile: leaf`.
-	"""
-	return leaf == permutationSpace.get(pile)
+def disqualifyAppendingLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
+	return any([state.pile not in getLeafDomain(state, leaf), leafIsPinned(state.permutationSpace, leaf), pileIsNotOpen(state.permutationSpace, state.pile)])
 
 #======== Group by =======================
 
@@ -88,7 +73,7 @@ def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], lea
 		First element: dictionaries where `leaf` is NOT pinned at `pile`.
 		Second element: dictionaries where `leaf` IS pinned at `pile`.
 	"""
-	isPinned: Callable[[PermutationSpace], bool] = isPinnedAtPile(leaf=leaf, pile=pile)
+	isPinned: Callable[[PermutationSpace], bool] = leafIsPinnedAtPile(leaf=leaf, pile=pile)
 	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(isPinned, listPermutationSpace)
 	return (grouped.get(False, []), grouped.get(True, []))
 
@@ -121,7 +106,7 @@ def atPilePinLeaf(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) ->
 
 	See Also
 	--------
-	deconstructPermutationSpace
+	deconstructPermutationSpaceAtPile
 	"""
 	return associate(permutationSpace, pile, leaf)
 
@@ -214,7 +199,7 @@ def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSp
 
 	def isPinnedAtPileByIndex(leaf: Leaf, index: int) -> Callable[[tuple[Pile, ...]], bool]:
 		def workhorse(domain: tuple[Pile, ...]) -> bool:
-			return isPinnedAtPile(permutationSpace, leaf, domain[index])
+			return leafIsPinnedAtPile(permutationSpace, leaf, domain[index])
 		return workhorse
 
 	if any(map(leafIsNotPinned(permutationSpace), leaves)):
@@ -254,7 +239,7 @@ def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSp
 def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[PermutationSpace]:
 	"""Expand every dictionary in `listPermutationSpace` at `pile` into all pinning variants.
 
-	Applies `deconstructPermutationSpace` element-wise, then flattens the nested value collections (each a mapping leaf -> dictionary)
+	Applies `deconstructPermutationSpaceAtPile` element-wise, then flattens the nested value collections (each a mapping leaf -> dictionary)
 	into a single list of dictionaries, discarding the intermediate keyed structure.
 
 	Parameters
@@ -273,7 +258,7 @@ def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[Permuta
 
 	See Also
 	--------
-	deconstructPermutationSpace
+	deconstructPermutationSpaceAtPile
 	"""
 	return  flatten(map(DOTvalues, map(deconstructPermutationSpaceAtPile, listPermutationSpace, repeat(pile), repeat(leavesToPin))))
 
@@ -400,8 +385,8 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 
 	See Also
 	--------
-	deconstructPermutationSpace : Performs the expansion for one dictionary.
-	pinLeafAtPile : Complementary operation that forces a leaf at a pile.
+	deconstructPermutationSpaceAtPile : Performs the expansion for one dictionary.
+	requireLeafPinnedAtPile : Complementary operation that forces a `leaf` at a `pile`.
 	"""
 	return deconstructListPermutationSpaceAtPile(getitem(_segregateLeafPinnedAtPile(list(listPermutationSpace), leaf, pile), 0), pile, leavesToPin)
 
@@ -424,7 +409,7 @@ def requireLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], leaf: 
 
 	See Also
 	--------
-	deconstructPermutationSpace, excludeLeafAtPile
+	deconstructPermutationSpaceAtPile, excludeLeafAtPile
 	"""
 	listPermutationSpace, listLeafAtPile = _segregateLeafPinnedAtPile(listPermutationSpace, leaf, pile)
 	listLeafAtPile.extend(map(atPilePinLeaf(pile=pile, leaf=leaf), filter(pileIsOpen(pile=pile), filter(leafIsNotPinned(leaf=leaf), listPermutationSpace))))
@@ -435,4 +420,5 @@ def segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace
 		deconstructedPermutationSpaceAtPile: dict[Leaf, PermutationSpace] = deconstructPermutationSpaceAtPile(permutationSpace, pile, leavesToPin)
 		leafPinnedAtPile: PermutationSpace = deconstructedPermutationSpaceAtPile.pop(leaf)
 		yield (leafPinnedAtPile, tuple(deconstructedPermutationSpaceAtPile.values()))
+
 

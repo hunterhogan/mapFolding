@@ -4,6 +4,8 @@ from gmpy2 import mpz
 
 #======== Scalars ================================
 
+type DimensionIndex = int
+"""Zero-based index of a dimension."""
 type Leaf = int
 type Pile = int
 
