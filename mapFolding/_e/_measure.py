@@ -188,7 +188,7 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
 	dimensionSecondNearest: int | None = None
-	anotherInteger = int(bit_flip(anInteger, dimensionNearest首(anInteger)))
+	anotherInteger: int = int(bit_flip(anInteger, dimensionNearest首(anInteger)))
 	if anotherInteger == 0:
 		dimensionSecondNearest = None
 	else:
@@ -251,7 +251,7 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	if dimensionSecondNearest in [0, None]:
 		dimensionThirdNearest = None
 	else:
-		anotherInteger = int(bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)))
+		anotherInteger: int = int(bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)))
 		if anotherInteger == 0:
 			dimensionThirdNearest = None
 		else:
@@ -316,7 +316,7 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	if dimensionThirdNearest in [0, None]:
 		dimensionFourthNearest = None
 	else:
-		anotherInteger = int(bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)).bit_flip(raiseIfNone(dimensionThirdNearest)))
+		anotherInteger: int = int(bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)).bit_flip(raiseIfNone(dimensionThirdNearest)))
 		if anotherInteger == 0:
 			dimensionFourthNearest = None
 		else:

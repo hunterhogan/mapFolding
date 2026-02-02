@@ -45,11 +45,11 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 	Therefore, if I continue to pin pile 零Ante首零, I should probably focus on different strategies.
 	"""
-	leafAt一:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 			一))
+	leafAt一:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace,	   一))
 	leafAt一Ante首:		int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(一)+state.首))
-	leafAt一零:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 			(一+零)))
+	leafAt一零:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace,	  (一+零)))
 	leafAt零一Ante首:	int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(零+一)+state.首))
-	leafAt二:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 			二))
+	leafAt二:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace,	   二))
 	leafAt二Ante首:		int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(二)+state.首))
 
 	dictionaryPileRanges: dict[int, tuple[int, ...]] = getDictionaryPileRanges(state)

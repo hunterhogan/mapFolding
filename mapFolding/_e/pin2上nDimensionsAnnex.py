@@ -1,6 +1,5 @@
 # ruff: noqa: ERA001
 from collections import Counter, deque
-from collections.abc import Iterable, Iterator
 from cytoolz.dicttoolz import get_in, keyfilter, valfilter
 from cytoolz.functoolz import complement, curry as syntacticCurry
 from functools import cache
@@ -21,6 +20,10 @@ from mapFolding._e.filters import (
 from mapFolding._e.pinIt import atPilePinLeaf, disqualifyAppendingLeafAtPile
 from more_itertools import (
 	filter_map, ilen as lenIterator, one, pairwise, partition as more_itertools_partition, split_at, triplewise)
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from collections.abc import Iterable, Iterator
 
 #======== Boolean filters ======================================
 
@@ -349,9 +352,9 @@ def _reducePermutationSpace_leafDomainIs1(state: EliminationState, permutationSp
 
 		leavesPinned, pilesWithPileRangeOfLeaves = bifurcatePermutationSpace(permutationSpace)
 
-		leafAndItsDomainSize: Counter[Leaf] = Counter(chain.from_iterable(
-			list(map(getIteratorOfLeaves, DOTvalues(pilesWithPileRangeOfLeaves)))
-			+ [DOTvalues(leavesPinned)]
+		leafAndItsDomainSize: Counter[Leaf] = Counter(chain(
+			chain.from_iterable(map(getIteratorOfLeaves, DOTvalues(pilesWithPileRangeOfLeaves))),
+			DOTvalues(leavesPinned)
 		))
 
 		if set(range(state.leavesTotal)).difference(leafAndItsDomainSize.keys()):
@@ -435,15 +438,7 @@ def _reducePermutationSpace_noConsecutiveDimensions(state: EliminationState, per
 				pilesToUpdate = deque([(pile_k, leafOrPileRangeOfLeaves_k)])
 				differenceOfLeaves: int = leafOrPileRangeOfLeaves_r - leafOrPileRangeOfLeaves_z
 				leafForbidden = leafOrPileRangeOfLeaves_r - differenceOfLeaves
-			elif thisIsALeaf(leafOrPileRangeOfLeaves_k) and thisIsALeaf(leafOrPileRangeOfLeaves_r) and thisIsALeaf(leafOrPileRangeOfLeaves_z):
-				continue
-			elif thisIsALeaf(leafOrPileRangeOfLeaves_k) and thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_r) and thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_z):
-				continue
-			elif thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_k) and thisIsALeaf(leafOrPileRangeOfLeaves_r) and thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_z):
-				continue
-			elif thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_k) and thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_r) and thisIsALeaf(leafOrPileRangeOfLeaves_z):
-				continue
-			elif thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_k) and thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_r) and thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_z):
+			else:
 				continue
 
 			antiPileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, [leafForbidden])
@@ -466,7 +461,7 @@ def sudoku(state: EliminationState, permutationSpace: PermutationSpace) -> Permu
 	^^^ generalizes to if n numbers have the same domain of n cells, all other numbers are excluded from that domain of n cells.
 	"""
 	return permutationSpace
-def notEnoughOpenPiles(state: EliminationState) -> bool:  # noqa: PLR0911
+def notEnoughOpenPiles(state: EliminationState) -> bool:
 	"""Decommissioned: implement with the sudoku trick.
 
 	Check `state.permutationSpace` for enough open piles for required leaves.
@@ -494,7 +489,7 @@ def notEnoughOpenPiles(state: EliminationState) -> bool:  # noqa: PLR0911
 		permutationSpaceHasNewLeaf = False
 
 # DEVELOPMENT Too many intermediate variables. And/or the wrong variables. And/or the wrong functions.
-		leavesPinned, pilesWithPileRangeOfLeaves = bifurcatePermutationSpace(stateWorkbench.permutationSpace) # pyright: ignore[reportUnusedVariable]
+		leavesPinned, _pilesWithPileRangeOfLeaves = bifurcatePermutationSpace(stateWorkbench.permutationSpace)
 		leavesFixed: tuple[Leaf, ...] = tuple(DOTvalues(leavesPinned))
 		leavesNotPinned: frozenset[Leaf] = frozenset(range(stateWorkbench.leavesTotal)).difference(leavesFixed)
 		pilesOpen: frozenset[Pile] = frozenset(range(stateWorkbench.pileLast + inclusive)).difference(leavesPinned.keys())

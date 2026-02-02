@@ -77,6 +77,17 @@ def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], lea
 	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(isPinned, listPermutationSpace)
 	return (grouped.get(False, []), grouped.get(True, []))
 
+def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace.copy()
+	state.listPermutationSpace = []
+	for permutationSpace in listPermutationSpace:
+		if any(map(leafIsNotPinned(permutationSpace), range(state.leavesTotal))):
+			state.listPermutationSpace.append(permutationSpace)
+		else:
+			folding: Folding = makeFolding(permutationSpace, ())
+			state.listFolding.append(folding)
+	return state
+
 #======== Pin a `leaf` in a `PermutationSpace` or `Folding` =======================
 # NOTE This section ought to contain all functions based on the "Elimination" algorithm that pin a `leaf` in a `PermutationSpace` or `Folding`.
 
@@ -420,5 +431,6 @@ def segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace
 		deconstructedPermutationSpaceAtPile: dict[Leaf, PermutationSpace] = deconstructPermutationSpaceAtPile(permutationSpace, pile, leavesToPin)
 		leafPinnedAtPile: PermutationSpace = deconstructedPermutationSpaceAtPile.pop(leaf)
 		yield (leafPinnedAtPile, tuple(deconstructedPermutationSpaceAtPile.values()))
+
 
 

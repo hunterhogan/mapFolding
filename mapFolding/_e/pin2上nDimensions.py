@@ -75,7 +75,7 @@ from mapFolding._e.pin2上nDimensionsByCrease import (
 from mapFolding._e.pin2上nDimensionsByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e.pinIt import (
 	deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf,
-	deconstructPermutationSpaceByDomainsCombined, disqualifyAppendingLeafAtPile)
+	deconstructPermutationSpaceByDomainsCombined, disqualifyAppendingLeafAtPile, moveFoldingToListFolding)
 from more_itertools import partition
 from operator import getitem, neg
 from tqdm import tqdm
@@ -150,6 +150,7 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 
 			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), desc=f"Pinning pile {pile:3d} of {state.pileLast:3d}", disable=False):
 				state.listPermutationSpace.extend(claimTicket.result().listPermutationSpace)
+				state.listFolding.extend(claimTicket.result().listFolding)
 
 	return state
 
@@ -180,7 +181,7 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 
 	"""
 	state.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(state.permutationSpace, state.pile, filterfalse(disqualifyAppendingLeafAtPile(state), _getLeavesAtPile(state)))))
-	return removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(state))
+	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(state)))
 
 def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 	"""You can select an `Iterable` of `Leaf` values to pin at `state.pile`.
@@ -474,7 +475,6 @@ def _pinLeavesByDomain(state: EliminationState, leaves: tuple[Leaf, ...], leaves
 
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
 	state.listPermutationSpace = []
-	qualifiedPermutationSpace: list[PermutationSpace] = []
 
 	assemblyLine: Callable[[EliminationState], EliminationState] = partial(_pinLeavesByDomainConcurrentTask, leaves=leaves, leavesDomain=leavesDomain)
 
@@ -486,9 +486,9 @@ def _pinLeavesByDomain(state: EliminationState, leaves: tuple[Leaf, ...], leaves
 		]
 
 		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), desc=f"Pinning leaves {leavesDescriptor} of {state.leafLast:{intWidth}d}", disable=False):
-			qualifiedPermutationSpace.extend(claimTicket.result().listPermutationSpace)
+			state.listPermutationSpace.extend(claimTicket.result().listPermutationSpace)
+			state.listFolding.extend(claimTicket.result().listFolding)
 
-	state.listPermutationSpace = qualifiedPermutationSpace
 	return state
 
 def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: tuple[Leaf, ...], leavesDomain: tuple[tuple[Pile, ...], ...]) -> EliminationState:
@@ -524,7 +524,7 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: tuple[Leaf
 
 	"""
 	state.listPermutationSpace = deconstructPermutationSpaceByDomainsCombined(state.permutationSpace, leaves, leavesDomain)
-	return removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(state))
+	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(state)))
 
 #--- Logic that wants to join the shared logic ---
 
@@ -592,7 +592,6 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
 	state.listPermutationSpace = []
-	qualifiedPermutationSpace: list[PermutationSpace] = []
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
@@ -605,9 +604,9 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 		]
 
 		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), desc=f"Pinning leaf {leaf:16d} of {state.leafLast:3d}", disable=False):
-			qualifiedPermutationSpace.extend(claimTicket.result().listPermutationSpace)
+			state.listPermutationSpace.extend(claimTicket.result().listPermutationSpace)
+			state.listFolding.extend(claimTicket.result().listFolding)
 
-	state.listPermutationSpace = qualifiedPermutationSpace
 	return state
 
 def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leavesDomain: tuple[Pile, ...]) -> EliminationState:
@@ -645,7 +644,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 
 	"""
 	state.listPermutationSpace = deconstructPermutationSpaceByDomainOfLeaf(state.permutationSpace, leaves, leavesDomain)
-	return removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(state))
+	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(state)))
 
 #-------- Plebian functions -----------------------------------------
 

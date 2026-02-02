@@ -1,0 +1,44 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"workbench.editorAssociations": {
+			"*.copilotmd": "vscode.markdown.preview.editor",
+		},
+		"python.testing.pytestArgs": [
+			"mapFolding"
+		],
+		"python.testing.unittestEnabled": false,
+		"python.testing.pytestEnabled": true,
+		"cSpell.customDictionaries": {
+			"custom": true, // Enable the `custom` dictionary
+			"internal-terms": false, // Disable the `internal-terms` dictionary
+			"project-words": {
+				"addWords": true,
+				"description": "Words used in this workspace.",
+				"name": "project-words",
+				"path": "${workspaceFolder}/.vscode/code-spell-dictionary-workspace.txt"
+			},
+		},
+		"python-envs.pythonProjects": [
+			{
+				"path": "${workspaceFolder}",
+				"envManager": "ms-python.python:venv",
+				"packageManager": "ms-python.python:pip"
+			}
+		],
+	},
+	"extensions": {
+		"recommendations": [
+			"charliermarsh.ruff",
+			"DavidAnson.vscode-markdownlint",
+			"editorconfig.editorconfig",
+			"ms-python.isort",
+			"streetsidesoftware.code-spell-checker",
+			"tombi-toml.tombi",
+		]
+	}
+}

@@ -49,7 +49,7 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 #-------- state ---------------------------------------------------------------------
 	if not state:
 		if not mapShape:
-			message = (f"""I received these values:
+			message: str = (f"""I received these values:
 	`{mapShape = }` and `{state = }`,
 	but I was unable to select a map of which to count the folds."""
 			)

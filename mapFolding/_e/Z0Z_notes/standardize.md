@@ -12,5 +12,5 @@ Change `tuple` to `frozenset`, for example.
 
 ## Convergence of the elimination algorithms
 
-- elimination can't use pilerangeofleaves
-- crease 
+- elimination can't use pileRangeOfLeaves
+- crease

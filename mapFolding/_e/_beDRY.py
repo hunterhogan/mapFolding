@@ -89,7 +89,7 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 	leavesPinned, pilesWithPileRangeOfLeaves : tuple[PinnedLeaves, PilesWithPileRangeOfLeaves]
 	"""
 	leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
-	return (leavesPinned, dissociatePiles(permutationSpace, *DOTkeys(leavesPinned))) # pyright: ignore[reportReturnType]
+	return (leavesPinned, dissociatePiles(permutationSpace, *DOTkeys(leavesPinned))) # pyright: ignore[reportReturnType]  # ty:ignore[invalid-return-type]
 
 #======== Disaggregation and deconstruction functions ================================================
 
@@ -155,7 +155,7 @@ def getIteratorOfLeaves(pileRangeOfLeaves: PileRangeOfLeaves) -> Iterator[Leaf]:
 	--------
 	https://gmpy2.readthedocs.io/en/latest/advmpz.html#gmpy2.xmpz.iter_set
 	"""
-	iteratorOfLeaves = xmpz(pileRangeOfLeaves)
+	iteratorOfLeaves: xmpz = xmpz(pileRangeOfLeaves)
 	iteratorOfLeaves[-1] = 0
 	return iteratorOfLeaves.iter_set()
 
@@ -291,10 +291,9 @@ def JeanValjean(p24601: PileRangeOfLeaves, /) -> LeafOrPileRangeOfLeaves | None:
 	When `p24601` is a `PileRangeOfLeaves`, `p24601` contains one sentinel bit that indicates the value is a `PileRangeOfLeaves`.
 	This function interprets the total set-bit count as a compact encoding of domain cardinality.
 
-	- When `p24601.bit_count() == 1`, `p24601` is an empty domain. The only set bit is the sentinel bit, so the function returns
-	  `None`.
+	- When `p24601.bit_count() == 1`, `p24601` is an empty domain. The only set bit is the sentinel bit, so the function returns `None`.
 	- When `p24601.bit_count() == 2`, `p24601` contains exactly one `Leaf` plus the sentinel bit. The function converts the range to a
-	  `Leaf` by returning `raiseIfNone(p24601.bit_scan1())`.
+		`Leaf` by returning `raiseIfNone(p24601.bit_scan1())`.
 	- Otherwise, the function returns `p24601` unchanged.
 
 	Parameters
@@ -332,10 +331,8 @@ def JeanValjean(p24601: PileRangeOfLeaves, /) -> LeafOrPileRangeOfLeaves | None:
 	whoAmI: LeafOrPileRangeOfLeaves | None = p24601
 	if thisIsAPileRangeOfLeaves(p24601):
 		if p24601.bit_count() == 1:
-			# The pile-range of leaves is null; the only "set bit" is the bit that means "I am a pileRangeOfLeaves."
 			whoAmI = None
 		elif p24601.bit_count() == 2:
-			# Only one `leaf` is in the pile-range of leaves, so convert it to a `type` `int`.
 			whoAmI = raiseIfNone(p24601.bit_scan1())
 	return whoAmI
 

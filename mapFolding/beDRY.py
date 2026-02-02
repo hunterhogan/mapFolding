@@ -2,7 +2,7 @@
 
 from collections.abc import Sequence
 from functools import cache
-from hunterMakesPy import defineConcurrencyLimit, intInnit, oopsieKwargsie
+from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit, oopsieKwargsie
 from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, inclusive, NumPyIntegerType
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
@@ -46,6 +46,7 @@ def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = 
 	to affect the Numba-jitted function.
 
 	"""
+	# TODO How do I clarify the type and sanitize the value of CPUlimit?
 	if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
 		CPUlimit = oopsieKwargsie(CPUlimit)
 
@@ -56,8 +57,6 @@ def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = 
 			set_num_threads(concurrencyLimit)
 			concurrencyLimit = get_num_threads()
 		case 'multiprocessing' | None | _:
-			# When to use multiprocessing.set_start_method
-			# https://github.com/hunterhogan/mapFolding/issues/6  # noqa: ERA001
 			concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
 	return concurrencyLimit
 
@@ -171,7 +170,7 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 			raise ValueError(message)
 
 	if taskDivisions > leavesTotal:
-		message = f"Problem: `{taskDivisions = }`, is greater than `{leavesTotal = }`, which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`: they are derived from parameters that may or may not be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from my dubious-quality Python code."  # noqa: E501
+		message = f"Problem: `{taskDivisions = }`, is greater than `{leavesTotal = }`, which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`: they are derived from parameters that may or may not be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from my dubious-quality Python code."
 		raise ValueError(message)
 	return int(max(0, taskDivisions))
 
