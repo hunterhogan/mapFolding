@@ -70,7 +70,7 @@ def _makeCreases(leaf: Leaf, dimensionsTotal: int) -> tuple[tuple[Leaf, ...], tu
 	return (tuple(listLeavesCreaseAnte), tuple(listLeavesCreasePost))
 
 #======== (mathematical) ranges of piles ====================
-# TODO Ideally, figure out the formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
+# TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
 
 #-------- Boolean filters for (mathematical) ranges of piles -----------------------------------
 
@@ -987,7 +987,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 # ruff: noqa: SIM102
 # I am developing in this module because of Python's effing namespace and "circular import" issues.
 
-# TODO Continue developing getDictionaryConditionalLeafPredecessors
+# TODO getDictionaryConditionalLeafPredecessors development
 def getDictionaryConditionalLeafPredecessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafPredecessor`].
 
@@ -1123,7 +1123,7 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 
 	return dictionaryPrecedence
 
-# TODO Implement and use getDictionaryConditionalLeafSuccessors
+# TODO getDictionaryConditionalLeafSuccessors development
 def getDictionaryConditionalLeafSuccessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafSuccessor`]."""
 	return _getDictionaryConditionalLeafSuccessors(state.mapShape)

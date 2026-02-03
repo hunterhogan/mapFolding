@@ -211,7 +211,7 @@ def DOTgetPileIfPileRangeOfLeaves(permutationSpace: PermutationSpace, pile: Pile
 		return ImaPileRangeOfLeaves
 	return default
 
-# TODO Improve semiotics of identifier `getAntiPileRangeOfLeaves`.
+# TODO semiotics `getAntiPileRangeOfLeaves`, Improve.
 def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRangeOfLeaves:
 	"""You can build a complement `PileRangeOfLeaves` by clearing each `Leaf` bit in `leaves`.
 

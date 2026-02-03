@@ -77,7 +77,7 @@ def between[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小于)
 	"""Inclusive `floor <= comparand <= ceiling`."""
 	return floor <= comparand <= ceiling
 
-def consecutive(flatContainer: Iterable[int]) -> bool:
+def consecutive[个: Iterable[int]](flatContainer: 个) -> bool:
 	"""The integers in the `flatContainer` are consecutive, either ascending or descending."""
 	return ((len(list(next(consecutive_groups(flatContainer)))) == len(list(flatContainer)))
 	or (len(list(next(consecutive_groups(always_reversible(flatContainer))))) == len(list(flatContainer))))

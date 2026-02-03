@@ -1,4 +1,3 @@
-from pprint import pprint
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from cytoolz.itertoolz import last
 from itertools import pairwise, product as CartesianProduct
