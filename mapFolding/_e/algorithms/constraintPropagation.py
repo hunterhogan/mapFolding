@@ -1,3 +1,4 @@
+from pprint import pprint
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from cytoolz.itertoolz import last
 from itertools import pairwise, product as CartesianProduct
@@ -14,7 +15,7 @@ from tqdm import tqdm
 import csv
 import uuid
 
-def count(state: EliminationState) -> int:
+def count(state: EliminationState) -> EliminationState:
 	model = cp_model.CpModel()
 
 	listLeavesInPileOrder: list[cp_model.IntVar] = [model.new_int_var(pileOrigin, state.pileLast, f"leafInPile[{pile}]") for pile in range(state.leavesTotal)]
@@ -107,22 +108,17 @@ def count(state: EliminationState) -> int:
 		def __init__(self, _listOfIndicesLeafInPilingsOrder: list[cp_model.IntVar]) -> None:
 			super().__init__()
 			self._listOfIndicesLeafInPilingsOrder: list[cp_model.IntVar] = _listOfIndicesLeafInPilingsOrder
-			self.listFoldings: list[list[Leaf]] = []
+			self.listFolding: list[list[Leaf]] = []
 
 		def on_solution_callback(self) -> None:
-			self.listFoldings.append([self.value(leaf) for leaf in self._listOfIndicesLeafInPilingsOrder])
+			self.listFolding.append([self.value(leaf) for leaf in self._listOfIndicesLeafInPilingsOrder])
 
 	foldingCollector = FoldingCollector(listLeavesInPileOrder)
 	solver.solve(model, foldingCollector)
 
-# TODO NOTE temporary data collection for p2d7
-	if (state.dimensionsTotal == 7) and (foldingCollector.listFoldings):
-		pathFilename: Path = packageSettings.pathPackage / "_e" / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
-		with Path.open(pathFilename, mode="w", newline="") as fileCSV:
-			csvWriter = csv.writer(fileCSV)
-			csvWriter.writerows(foldingCollector.listFoldings)
+	state.listFolding = list(map(tuple, foldingCollector.listFolding))
 
-	return len(foldingCollector.listFoldings) * state.Theorem2Multiplier * state.Theorem4Multiplier
+	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Do the things necessary so that `count` operates efficiently."""
@@ -134,15 +130,29 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 				pileForConcurrency: int = state.pileLast // 2
 				state.listPermutationSpace = [{pileForConcurrency: leaf} for leaf in range(state.leavesTotal)]
 
-			listClaimTickets: list[Future[int]] = [
+			listClaimTickets: list[Future[EliminationState]] = [
 				concurrencyManager.submit(count, EliminationState(state.mapShape, permutationSpace=permutationSpace))
 					for permutationSpace in state.listPermutationSpace
 			]
 
 			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
-				state.groupsOfFolds += claimTicket.result()
+				sherpa: EliminationState = claimTicket.result()
+
+			# TODO NOTE temporary data collection for p2d7
+				if (sherpa.dimensionsTotal == 7) and (sherpa.listFolding):
+					pathFilename: Path = packageSettings.pathPackage / "_e" / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
+					with Path.open(pathFilename, mode="w", newline="") as fileCSV:
+						csvWriter = csv.writer(fileCSV)
+						csvWriter.writerows(sherpa.listFolding)
+
+				state.groupsOfFolds += len(sherpa.listFolding)
+				state.Theorem2aMultiplier = sherpa.Theorem2aMultiplier
+				state.Theorem2Multiplier = sherpa.Theorem2Multiplier
+				state.Theorem3Multiplier = sherpa.Theorem3Multiplier
+				state.Theorem4Multiplier = sherpa.Theorem4Multiplier
 
 	else:
-		state.groupsOfFolds = count(state)
+		state = count(state)
+		state.groupsOfFolds = len(state.listFolding)
 
 	return state
