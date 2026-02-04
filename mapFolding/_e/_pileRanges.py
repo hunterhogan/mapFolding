@@ -83,7 +83,7 @@ if __name__ == '__main__':
 010111	(23, 24, 40)
 011011	(27, 29, 45)
 		33	33	(33, 34, 36, 40)
-
+realRange=(3, 5, 6, 9, 10, 15, 17, 18, 23, 27, 29, 34, 39, 43, 45, 51, 53, 57)
 100111	39		(39, 40)
 101011		43
 			45	(45, 46, 54)
@@ -146,21 +146,27 @@ pp3  = (3, 5, 9, 17, 33)
 	leafMinimum = is_even(pile) + state.productsOfDimensions[pileDimension]
 	pileRange: list[Leaf] = []
 
-	# pileRange.append(leafMinimum)
+	pileRange.append(leafMinimum)
 
 	if is_even(pile):
 		dd = pileDimension
 
 		ss = state.sumsOfProductsOfDimensions[dd]
-		# pileRange.extend(map(partial(iadd, leafMinimum - ss), state.sumsOfProductsOfDimensions[1:dd]))
-		# pileRange.extend(map(partial(iadd, leafMinimum - ss), state.sumsOfProductsOfDimensions[dd + 1: state.dimensionsTotal]))
+		pileRange.extend(map(partial(iadd, leafMinimum - ss), state.sumsOfProductsOfDimensions[1:dd]))
+		pileRange.extend(map(partial(iadd, leafMinimum - ss), state.sumsOfProductsOfDimensions[dd + 1: state.dimensionsTotal]))
 
 		if dd < dimensionNearest首(pile):
 			dd += 1
 
 			ss = state.productsOfDimensions[dd]
-			pileRange.extend(map(partial(isub, leafMinimum + ss), state.sumsOfProductsOfDimensions[1:dd]))
-			pileRange.extend(map(partial(iadd, leafMinimum + ss), state.sumsOfProductsOfDimensions[dd + 1: state.dimensionsTotal]))
+			# pileRange.extend(map(partial(isub, leafMinimum + ss), state.sumsOfProductsOfDimensions[1:dd]))
+			# pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+
+
+		if (pile % 4 == 0) and ((零)+首零(state.dimensionsTotal) in pileRange):
+			pileRange.remove((零)+首零(state.dimensionsTotal))
+			"""33 has step = 4"""
+
 
 	if is_odd(pile):
 		dd = pileDimension
@@ -187,18 +193,15 @@ pp3  = (3, 5, 9, 17, 33)
 		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[1:dd]))
 		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
 
-	print(pile, pileDimension)
-	print(sorted(set(pileRange)))
-	rr = tuple(getPileRange(state, pile))
-	print(rr)
-	rrLess1 = tuple(getPileRange(state, pile - 1))
-	print(rrLess1)
+	print(f"{pile=}\t{pileDimension=}")
+	print("computed=", sorted(set(pileRange)))
+	realRange = tuple(getPileRange(state, pile))
+	print(f"{realRange=}")
+	pileAnte = tuple(getPileRange(state, pile - 1))
+	print(f"{pileAnte=}")
 
-	"""Notes
-	33 has step = 4
-	"""
 
-	pileRangeByFormula: bool = True
+	pileRangeByFormula: bool = False
 	if pileRangeByFormula:
 		state = EliminationState((2,) * 6)
 
