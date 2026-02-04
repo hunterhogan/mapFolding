@@ -2,8 +2,8 @@
 """Analyze entropy of leaves in folding sequences to understand their distributional properties."""
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import dimensionNearestTail, getLeafDomain, pileOrigin, 零
-from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataDynamic import getDataFrameFoldings
 from typing import Any, TYPE_CHECKING
 import numpy
 import pandas

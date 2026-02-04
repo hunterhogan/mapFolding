@@ -6,8 +6,8 @@ from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors,
 	getDictionaryConditionalLeafSuccessors, getLeafDomain, howManyDimensionsHaveOddParity, Leaf, Pile, pileOrigin, 零)
-from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataDynamic import getDataFrameFoldings
 from pprint import pprint
 from typing import Any
 import numpy

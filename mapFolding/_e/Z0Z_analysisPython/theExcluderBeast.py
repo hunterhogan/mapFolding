@@ -1,9 +1,9 @@
 # NOTE to AI assistants: this module is not representative of my coding style. Most of it is AI generated, but because it's temporary code, I didn't strictly enforce my usual standards. Do not emulate it.
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from fractions import Fraction
 from functools import cache, reduce
 from gmpy2 import bit_flip
-from hunterMakesPy import CallableFunction, raiseIfNone
+from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import updateExtendPolishDictionaryLists
 from hunterMakesPy.filesystemToolkit import importPathFilename2Identifier, writePython
 from itertools import product as CartesianProduct, repeat
@@ -11,8 +11,8 @@ from mapFolding import ansiColorReset, ansiColors, inclusive, packageSettings
 from mapFolding._e import (
 	getDictionaryLeafDomains, getLeafDomain, getPileRange, PermutationSpace, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一,
 	首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
-from mapFolding._e._dataDynamic import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataDynamic import getDataFrameFoldings
 from mapFolding._e.filters import between, exclude
 from mapFolding._e.pin2上nDimensions import pinPilesAtEnds
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
@@ -59,10 +59,10 @@ type ExclusionData = dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, d
 pathExclusionData: Path = Path(f"{packageSettings.pathPackage}/_e/Z0Z_analysisPython/exclusionData")
 pathExclusionData.mkdir(parents=True, exist_ok=True)
 
-functionsHeadDimensions: list[CallableFunction[[int], int]] = [
+functionsHeadDimensions: list[Callable[[int], int]] = [
 	首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三,
 	首一1, 首一三1, 首一二1, 首一二三1, 首三1, 首二1, 首二三1, 首零1, 首零一1, 首零一三1, 首零一二1, 首零一二三1, 首零三1, 首零二1, 首零二三1]
-dictionaryFunctionsByName: dict[str, CallableFunction[[int], int]] = {function.__name__: function for function in functionsHeadDimensions}
+dictionaryFunctionsByName: dict[str, Callable[[int], int]] = {function.__name__: function for function in functionsHeadDimensions}
 
 #======== Collate exclusion data =======
 
@@ -71,7 +71,7 @@ def writeExclusionDataCollated(listDimensions: Sequence[int] = (5, 6)) -> list[P
 	dictionaryIndices: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]] = {}
 	dictionaryIndicesNegative: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]] = {}
 
-# TODO Use the docstring to explain this computation, and change the computation to a simpler statement.
+# NOTE Use the docstring to explain this computation, and change the computation to a simpler statement.
 	listsAreAlwaysLessThanHalfLeavesTotal = 1
 	integerDivisionIsSillyIfTheNumeratorIsLessThanTwiceTheDenominator = 1
 	qq = min(listDimensions) - listsAreAlwaysLessThanHalfLeavesTotal - integerDivisionIsSillyIfTheNumeratorIsLessThanTwiceTheDenominator
@@ -523,15 +523,15 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 	rowsTotal: int = int(arrayFoldings.shape[0])
 
 	for leafExcluderName in exclusionsFromAnalysisMethod:
-		leafExcluderFunction: CallableFunction[[int], int] = dictionaryFunctionsByName[leafExcluderName]
+		leafExcluderFunction: Callable[[int], int] = dictionaryFunctionsByName[leafExcluderName]
 		leafExcluder: int = leafExcluderFunction(dimensions)
 
 		for pileExcluderName in exclusionsFromAnalysisMethod[leafExcluderName]:
-			pileExcluderFunction: CallableFunction[[int], int] = dictionaryFunctionsByName[pileExcluderName]
+			pileExcluderFunction: Callable[[int], int] = dictionaryFunctionsByName[pileExcluderName]
 			pileExcluder: int = pileExcluderFunction(dimensions)
 
 			for leafExcludedName in exclusionsFromAnalysisMethod[leafExcluderName][pileExcluderName]:
-				leafExcludedFunction: CallableFunction[[int], int] = dictionaryFunctionsByName[leafExcludedName]
+				leafExcludedFunction: Callable[[int], int] = dictionaryFunctionsByName[leafExcludedName]
 				leafExcluded: int = leafExcludedFunction(dimensions)
 
 				listFractionAddends: list[FractionAddend] = exclusionsFromAnalysisMethod[leafExcluderName][pileExcluderName][leafExcludedName]
@@ -582,7 +582,7 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 	isValid: bool = len(listValidationErrors) == 0
 	return (isValid, listValidationErrors)
 
-def validateAnalysisMethod(analysisMethodCallable: CallableFunction[[ExclusionData], dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]]) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
+def validateAnalysisMethod(analysisMethodCallable: Callable[[ExclusionData], dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]]) -> dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]:
 	collatedIndices: ExclusionData = loadCollatedIndices()
 	listMapShapeNames: list[str] = list(collatedIndices.keys())
 	exclusionsFromMethod: dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]] = analysisMethodCallable(collatedIndices)

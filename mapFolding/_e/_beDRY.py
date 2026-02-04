@@ -540,7 +540,7 @@ def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsT
 	----------
 	[1] mapFolding._e.pin2上nDimensions.pinPilesAtEnds
 		Internal package reference
-	[2] mapFolding._e._dataDynamic.addPileRangesOfLeaves
+	[2] mapFolding._e.dataDynamic.addPileRangesOfLeaves
 		Internal package reference
 
 	"""

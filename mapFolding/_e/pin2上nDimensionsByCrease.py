@@ -121,9 +121,10 @@ def pinPile二Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	leafAt二: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 二))
 
 	addendDimension首零: int = leafAt零一Ante首 - leafAt一Ante首
+
 	addendDimension一零: int = leafAt二 - leafAt一零
-	addendDimension一: int = 			 leafAt一零 - leafAt一
-	addendDimension零: int =						 leafAt一 - 零
+	addendDimension一:	 int = 			  leafAt一零 - leafAt一
+	addendDimension零:	 int =						   leafAt一 - 零
 
 # ruff: noqa: SIM102
 

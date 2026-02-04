@@ -3,10 +3,10 @@ from cytoolz.dicttoolz import valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
 from dataclasses import dataclass
 from mapFolding import ansiColorReset, ansiColors, packageSettings
-from mapFolding._e import DOTvalues, PermutationSpace, 一, 零, 首一, 首零一
-from mapFolding._e._dataDynamic import getDataFrameFoldings
+from mapFolding._e import DOTvalues, PermutationSpace, PinnedLeaves, 一, 零, 首一, 首零一
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import thisIsALeaf
+from mapFolding._e.dataDynamic import getDataFrameFoldings
+from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf
 from pathlib import Path
 from pprint import pformat
 import csv
@@ -56,15 +56,15 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPermutationSp
 	return PermutationSpaceStatus(listSurplusDictionaries, maskUnion, indicesOverlappingRows, indicesOverlappingPermutationSpace, rowsRequired, rowsTotal)
 
 def verifyPinning2Dn(state: EliminationState) -> None:
-	def getPermutationSpaceWithLeafValuesOnly(permutationSpace: PermutationSpace) -> PermutationSpace:
-		return leafFilter(thisIsALeaf, permutationSpace)
+	def getPermutationSpaceWithLeafValuesOnly(permutationSpace: PermutationSpace) -> PinnedLeaves:
+		return extractPinnedLeaves(permutationSpace)
 	arrayFoldings = getDataFrameFoldings(state)
 	if arrayFoldings is not None:
 		arrayFoldings = arrayFoldings.to_numpy(dtype=numpy.uint8, copy=False)
 		pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.listPermutationSpace)
 
 		listSurplusDictionariesOriginal: list[PermutationSpace] = pinningCoverage.listSurplusDictionaries
-		listDictionaryPinned: list[PermutationSpace] = [
+		listDictionaryPinned: list[PinnedLeaves] = [
 			getPermutationSpaceWithLeafValuesOnly(permutationSpace)
 			for permutationSpace in listSurplusDictionariesOriginal
 		]

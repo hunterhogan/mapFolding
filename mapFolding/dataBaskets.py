@@ -95,21 +95,22 @@ class MapFoldingState:
 	leafConnectee: DatatypeLeavesTotal = DatatypeLeavesTotal(0)  # noqa: RUF009
 	"""Target leaf for connection operations."""
 
-	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+# TODO `MapFoldingState` restructure https://github.com/python/typing/discussions/2092
+	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment]
 	"""Count of dimensions not subject to folding constraints."""
 
-	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array tracking computed number of dimensions with gaps."""
-	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array tracking computed starting positions of gap ranges."""
-	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array indicating locations of gaps in the folding pattern."""
-	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation."""
-	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
 
-	connectionGraph: Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array3DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+	connectionGraph: Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array3DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]  # ty:ignore[unresolved-attribute]
 	"""Unchanging array representing connections between all leaves."""
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
@@ -218,23 +219,23 @@ class SymmetricFoldsState:
 	leafConnectee: DatatypeLeavesTotal = DatatypeLeavesTotal(0)  # noqa: RUF009
 	"""Target leaf for connection operations."""
 
-	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment]
 	"""Count of dimensions not subject to folding constraints."""
 
-	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	countDimensionsGapped: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array tracking computed number of dimensions with gaps."""
-	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	gapRangeStart: Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DElephino.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array tracking computed starting positions of gap ranges."""
-	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	gapsWhere: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array indicating locations of gaps in the folding pattern."""
-	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	leafAbove: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation."""
-	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	leafBelow: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
-	leafComparison: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	leafComparison: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""Array for finding symmetric folds."""
 
-	connectionGraph: Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array3DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]
+	connectionGraph: Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': Array3DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue]  # ty:ignore[unresolved-attribute]
 	"""Unchanging array representing connections between all leaves."""
 	dimensionsTotal: DatatypeLeavesTotal = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
@@ -351,7 +352,7 @@ class LeafSequenceState(MapFoldingState):
 
 	"""
 
-	leafSequence: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]
+	leafSequence: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]}) # pyright: ignore[reportAssignmentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty:ignore[invalid-assignment, unresolved-attribute]
 	"""
 	Array storing the sequence of leaf connections discovered during computation.
 

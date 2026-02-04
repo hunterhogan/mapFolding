@@ -266,7 +266,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 					raise ValueError(message)
 
 				state = State(oeis_n, oeisID, boundary, dictionaryMeanders)
-				countTotal = doTheNeedful(state) # pyright: ignore[reportArgumentType]
+				countTotal = doTheNeedful(state) # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
 			case 'A007822':
 				mapShape: tuple[Literal[1], int] = (1, 2 * oeis_n)
 				from mapFolding import defineProcessorLimit

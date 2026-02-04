@@ -52,7 +52,6 @@ References
 	Internal package reference.
 
 """
-
 from collections import deque
 from collections.abc import Callable, Iterable, Iterator
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
@@ -61,11 +60,11 @@ from hunterMakesPy.parseParameters import intInnit
 from itertools import filterfalse
 from mapFolding import defineProcessorLimit
 from mapFolding._e import (
-	addPileRangesOfLeaves, DOTvalues, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeaf首零Plus零Domain,
-	Leaf, leafOrigin, mapShapeIs2上nDimensions, PermutationSpace, Pile, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二,
-	首零二)
+	DOTvalues, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeaf首零Plus零Domain, Leaf, leafOrigin,
+	mapShapeIs2上nDimensions, PermutationSpace, Pile, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataDynamic import addPileRangesOfLeaves
 from mapFolding._e.filters import pileIsOpen
 from mapFolding._e.pin2上nDimensionsAnnex import (
 	reduceAllPermutationSpaceInEliminationState as reduceAllPermutationSpaceInEliminationState)

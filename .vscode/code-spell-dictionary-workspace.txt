@@ -22,6 +22,7 @@ asname
 atleast
 Autocode
 autoflake
+autopep
 autouse
 Azeem
 baat
@@ -62,6 +63,7 @@ cupy
 cytoolz
 databasket
 Dataclass
+datastructures
 DELECROIX
 Demaine
 Dickau
@@ -148,6 +150,7 @@ ilcm
 imensional
 infile
 Initializable
+inspectable
 integest
 intfunc
 intp
@@ -294,6 +297,7 @@ pypa
 pytastic
 PYTHONIOENCODING
 Quizas
+randint
 RECIPEPREFIX
 recurser
 redef
@@ -308,6 +312,7 @@ saam
 savez
 Sawada
 sayeth
+scannability
 schreier
 searchsorted
 Seress
@@ -356,6 +361,7 @@ udivisor
 udivisors
 unaryop
 uncompiled
+unparameterized
 unparses
 unrank
 Unroller
@@ -376,6 +382,7 @@ withitem
 wocky
 xlabel
 xmpz
+yapf
 yeong
 ylabel
 ZOGRAF

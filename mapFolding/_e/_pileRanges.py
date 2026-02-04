@@ -1,15 +1,14 @@
-# ruff: noqa: ERA001 T201 T203  # noqa: RUF100
+#======== (mathematical) ranges of piles ====================
 from bisect import bisect_left
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable, Iterator
 from cytoolz.functoolz import curry as syntacticCurry
-from functools import partial
-from gmpy2 import is_even, is_odd
+from functools import cache, partial
+from gmpy2 import bit_flip, bit_mask, is_even, is_odd
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import (
-	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseAnte, getLeavesCreasePost,
-	getPileRange, invertLeafIn2上nDimensions, Leaf, Pile, 零, 首一, 首二, 首零, 首零一)
+	dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, Leaf, leafOrigin,
+	mapShapeIs2上nDimensions, Pile, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.dataDynamic import getDataFrameFoldings
 from more_itertools import flatten
 from operator import add, iadd, isub, mul
 from pprint import pprint
@@ -18,7 +17,53 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	import pandas
 
+# TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
+
+@syntacticCurry
+def filterCeiling(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
+	return pile <  int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin)
+
+@syntacticCurry
+def filterFloor(pile: Pile, leaf: Leaf) -> bool:
+	return int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile
+
+@syntacticCurry
+def filterParity(pile: Pile, leaf: Leaf) -> bool:
+	return (pile & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1)
+
+@syntacticCurry
+def filterDoubleParity(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
+	if leaf != 首零(dimensionsTotal)+零:
+		return True
+	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
+
+def getPileRange(state: EliminationState, pile: Pile) -> Iterator[Leaf]:
+	return iter(_getPileRange(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal))
+@cache
+def _getPileRange(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> tuple[Leaf, ...]:
+	if mapShapeIs2上nDimensions(mapShape):
+		parityMatch: Callable[[Leaf], bool] = filterParity(pile)
+		pileAboveFloor: Callable[[Leaf], bool] = filterFloor(pile)
+		pileBelowCeiling: Callable[[Leaf], bool] = filterCeiling(pile, dimensionsTotal)
+		matchLargerStep: Callable[[Leaf], bool] = filterDoubleParity(pile, dimensionsTotal)
+
+		pileRange: Iterable[Leaf] = range(leavesTotal)
+		pileRange = filter(parityMatch, pileRange)
+		pileRange = filter(pileAboveFloor, pileRange)
+		pileRange = filter(pileBelowCeiling, pileRange)
+		return tuple(filter(matchLargerStep, pileRange))
+
+	return tuple(range(leavesTotal))
+
+def getDictionaryPileRanges(state: EliminationState) -> dict[Pile, tuple[Leaf, ...]]:
+	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
+	return {pile: tuple(getPileRange(state, pile)) for pile in range(state.leavesTotal)}
+
+# ruff: noqa: ERA001 T201 T203  # noqa: RUF100
+
 def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
+	from mapFolding._e.dataDynamic import getDataFrameFoldings  # noqa: PLC0415
+
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict() # pyright: ignore[reportAssignmentType]
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
@@ -153,7 +198,7 @@ pp3  = (3, 5, 9, 17, 33)
 	33 has step = 4
 	"""
 
-	pileRangeByFormula: bool = False
+	pileRangeByFormula: bool = True
 	if pileRangeByFormula:
 		state = EliminationState((2,) * 6)
 
@@ -249,32 +294,4 @@ pp3  = (3, 5, 9, 17, 33)
 			# print(pile, (ll:=getPileRange(state, pile)) == (zz), end=': ')
 			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			# pprint(zz, width=180)
-
-	leafExcluderStuff = False
-	if leafExcluderStuff:
-		pileExcluder = 60
-		pileTarget=31
-		dictionaryExcluded = getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pileExcluder,))
-		domains = getDictionaryLeafDomains(state)
-		pileRange31 = frozenset(getPileRange(state, 31))
-
-		for pile in range(state.leavesTotal):
-			continue
-			print(pile, set(getPileRange(state, pile)).difference(getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pile,)).keys()))
-
-		for excluder, listExcluded in dictionaryExcluded.items():
-			continue
-
-			invert = int(excluder^63) # pyright: ignore[reportUnknownArgumentType, reportOperatorIssue]
-			creasePostSS = tuple(getLeavesCreasePost(state, invert)) # pyright: ignore[reportArgumentType]
-			allCreasePostSSInRange = set(creasePostSS).intersection(pileRange31)
-			creaseAnte = tuple(getLeavesCreaseAnte(state, excluder)) # pyright: ignore[reportArgumentType]
-			creasePost = tuple(getLeavesCreasePost(state, excluder)) # pyright: ignore[reportArgumentType]
-			allCreaseAnteInRange = set(creaseAnte).intersection(pileRange31)
-			allCreasePostInRange = set(creasePost).intersection(pileRange31)
-			notExcluded = allCreasePostInRange.difference(listExcluded)
-			# print(excluder, invert, allCreasePostSSInRange.intersection(listExcluded), notExcluded, allCreasePostSSInRange.difference(listExcluded), set(creasePostSS).symmetric_difference(creasePost), creasePostSS, allCreasePostSSInRange)
-			# print(excluder.__format__('06b'), excluder, f"{notExcluded}\t", f"{creasePost}", sep='\t')
-			print(excluder, f"{allCreaseAnteInRange=}", f"{allCreasePostInRange=}", sep='\t')
-			print(excluder, f"{allCreaseAnteInRange.difference(listExcluded)}", f"{allCreasePostInRange.difference(listExcluded)}", sep='\t')
 

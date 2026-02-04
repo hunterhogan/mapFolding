@@ -68,7 +68,8 @@ from hunterMakesPy import Ordinals
 from mapFolding._e import (
 	Leaf, LeafOrPileRangeOfLeaves, PermutationSpace, Pile, PileRangeOfLeaves, PilesWithPileRangeOfLeaves, PinnedLeaves, 零)
 from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract
-from typing import Any, overload, TypeGuard
+from typing import Any, overload
+from typing_extensions import TypeIs
 
 #======== Boolean antecedents ================================================
 
@@ -77,10 +78,14 @@ def between[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小于)
 	"""Inclusive `floor <= comparand <= ceiling`."""
 	return floor <= comparand <= ceiling
 
-def consecutive[个: Iterable[int]](flatContainer: 个) -> bool:
+# TODO `consecutive` and `intInnit`?
+# TODO `consecutive`: `raise` if not `int`?
+# def consecutive[个: Iterable[int]](flatContainer: 个) -> bool:
+def consecutive[个: Iterable[int]](flatContainer: 个) -> TypeIs[个]:
 	"""The integers in the `flatContainer` are consecutive, either ascending or descending."""
-	return ((len(list(next(consecutive_groups(flatContainer)))) == len(list(flatContainer)))
-	or (len(list(next(consecutive_groups(always_reversible(flatContainer))))) == len(list(flatContainer))))
+	return (all(isinstance(item, int) for item in flatContainer)
+	and ((len(list(next(consecutive_groups(flatContainer)))) == len(list(flatContainer)))
+		or (len(list(next(consecutive_groups(always_reversible(flatContainer))))) == len(list(flatContainer)))))
 
 def hasDuplicates(flatContainer: Iterable[Any]) -> bool:
 	"""You can test whether `flatContainer` contains duplicate values.
@@ -310,7 +315,7 @@ def thisHasThat[个](this: Iterable[个], that: 个) -> bool:
 	"""
 	return that in this
 
-def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[Leaf]:
+def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeIs[Leaf]:
 	"""Return True if `leafOrPileRangeOfLeaves` is a `leaf`.
 
 	Parameters
@@ -320,12 +325,12 @@ def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> Type
 
 	Returns
 	-------
-	intIsProbablyALeaf : TypeGuard[int]
+	intIsProbablyALeaf : TypeIs[int]
 		Technically, we only know the type is `int`.
 	"""
 	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, int)
 
-def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeGuard[PileRangeOfLeaves]:
+def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeIs[PileRangeOfLeaves]:
 	"""Return True if `leafOrPileRangeOfLeaves` is a pile's range of leaves.
 
 	Parameters
@@ -335,7 +340,7 @@ def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | 
 
 	Returns
 	-------
-	youHaveAPileRange : TypeGuard[PileRangeOfLeaves]
+	youHaveAPileRange : TypeIs[PileRangeOfLeaves]
 		Congrats, you have a pile range!
 	"""
 	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, mpz)

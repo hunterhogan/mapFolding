@@ -4,25 +4,29 @@
 
 ## Rules for maintaining a valid permutation space
 
-1. In `permutationSpace`, if `leaf` is not pinned, deconstruct `permutationSpace` by the `Pile` domain of `leaf`.
+1. In a `PermutationSpace`, if `leaf` is not pinned, deconstruct `permutationSpace` by the `Pile` domain of `leaf`.
    1. For each `pile` in the domain of `leaf`, if `pile` in `permutationSpace` is not occupied, create a new `PermutationSpace` dictionary by appending `leaf` pinned at `pile` to `permutationSpace`.
    2. Replace `permutationSpace` with the group of newly created `PermutationSpace` dictionaries.
-2. In `permutationSpace`, if a `pile` is not pinned, deconstruct `permutationSpace` by the `Leaf` range (mathematical range) of `pile`.
+2. In a `PermutationSpace`, if a `pile` is not pinned, deconstruct `permutationSpace` by the `Leaf` range (mathematical range) of `pile`.
    1. For each `leaf` in the range of `pile`, if `leaf` is not already pinned in `permutationSpace`, create a new `PermutationSpace` dictionary by appending `leaf` pinned at `pile` to `permutationSpace`.
    2. Replace `permutationSpace` with the group of newly created `PermutationSpace` dictionaries.
 3. In `permutationSpace`, do not overwrite or delete a `Leaf` pinned at a `Pile`.
 
 ## Data structures for better performance
 
-| Type      | Elements | Ordered | Notes                                      |
-| --------- | -------- | ------- | ------------------------------------------ |
-| iterator  | fixed?   | no      | Avoid unneeded evaluation. Single-use only |
-| frozenset | fixed    | no      |                                            |
-| set       | changing | no      |                                            |
-| range     | fixed    | yes     | Single-use only                            |
-| tuple     | fixed    | yes     |                                            |
-| deque     | changing | yes     | Fast at ends; slow index                   |
-| list      | changing | yes     |                                            |
+| Type        | Stable   | Ordered | Best For...       | Performance / Limitation Note                           |
+| :---------- | :------- | :------ | :---------------- | :------------------------------------------------------ |
+| iterator    | Fixed    | Yes     | Lazy processing   | Memory-efficient; single-use only.                      |
+| range       | Fixed    | Yes     | Integer sequences | $O(1)$ memory; $O(1)$ membership check.                 |
+| frozenset   | Fixed    | No      | Membership keys   | Hashable; used as keys for other sets/dicts.            |
+| tuple       | Fixed    | Yes     | Static records    | Lower memory overhead than lists; faster iteration.     |
+| namedtuple  | Fixed    | Yes     | Named records     | Tuple performance with object-like access.              |
+| set         | Changing | No      | Uniqueness        | $O(1)$ lookup; high memory overhead (\~32 bytes/item).  |
+| Counter     | Changing | Yes     | Tallying          | Specialized for frequencies; supports multiset math.    |
+| deque       | Changing | Yes     | Stacks / Queues   | $O(1)$ at ends; $O(n)$ in middle; thread-safe ends.     |
+| list        | Changing | Yes     | General use       | $O(1)$ index; $O(n)$ insert/delete at start.            |
+| array.array | Changing | Yes     | Numeric data      | Stores raw C-types; memory compact; better cache use.   |
+| SortedList  | Changing | Sort    | Searchable data   | Maintains order automatically; $O(\\log n)$ operations. |
 
 ## 2^n-dimensional maps
 
