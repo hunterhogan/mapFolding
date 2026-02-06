@@ -34,14 +34,14 @@ if __name__ == '__main__':
 	oeisID: str = 'A001416'
 	oeisID: str = 'A001418'
 	oeisID: str = 'A001417'
-	oeisID: str = 'A000136'
 	oeisID: str = 'A001415'
+	oeisID: str = 'A000136'
 
 	sys.stdout.write(f"{ansiColors[int(oeisID,36)%len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow,36)%len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(2):
+	for n in range(2,15):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 

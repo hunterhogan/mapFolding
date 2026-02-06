@@ -2,16 +2,6 @@
 
 ## More tests for computations
 
-## Problems with Python installations, Windows, and VS Code
-
-### At cmd, "python" forces a new terminal and it doesn't use the venv
-
-This is a relatively new problem.
-
-### In VS Code, Python environments picks 3.14z
-
-It always chooses 3.14z as the default, and it overwrites the setting if I change it.
-
 ## Consolidate and organize knowledge in "Elimination.md"
 
 - mapFolding\_e\analysisPython\Z0Z_p2d6.py

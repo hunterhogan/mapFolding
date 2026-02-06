@@ -51,7 +51,11 @@ def atPilePinLeafSafetyFilter(permutationSpace: PermutationSpace, pile: Pile, le
 
 @syntacticCurry
 def disqualifyAppendingLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
-	return any([state.pile not in getLeafDomain(state, leaf), leafIsPinned(state.permutationSpace, leaf), pileIsNotOpen(state.permutationSpace, state.pile)])
+	return any((
+		leafIsPinned(state.permutationSpace, leaf),
+		pileIsNotOpen(state.permutationSpace, state.pile),
+		state.pile not in getLeafDomain(state, leaf),
+	))
 
 #======== Group by =======================
 

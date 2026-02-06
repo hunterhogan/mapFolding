@@ -247,7 +247,7 @@ def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	return pileLast != pile
 
 @syntacticCurry
-def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
+def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> TypeIs[Leaf]:
 	"""Return True if `pile` is not presently pinned in `permutationSpace`.
 
 	Do you want to know if the pile is open or do you really want to know the Python `type` of the value at that key?
@@ -268,7 +268,7 @@ def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	--------
 	thisIsALeaf, thisIsAPileRangeOfLeaves
 	"""
-	return thisIsALeaf(permutationSpace.get(pile))
+	return thisIsALeaf(permutationSpace[pile])
 
 @syntacticCurry
 def pileIsOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:

@@ -27,8 +27,10 @@ if TYPE_CHECKING:
 
 #======== Boolean filters ======================================
 
+# TODO `leafIsOddInDimension` semiotics clarify and converge with the generalized version.
 @syntacticCurry
 def leafIsOddInDimension(leaf: Leaf, dimension: int) -> bool:
+	"""A specialized version of parity checking for 2^n-dimensional maps."""
 	return isBit1吗(leaf, dimension)
 
 #======== Reducing `PileRangeOfLeaves` =======
@@ -69,6 +71,7 @@ def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> Elim
 	return state
 
 #-------- Shared logic -----------------------------------------
+
 def _reducePileRangesOfLeaves(state: EliminationState, permutationSpace: PermutationSpace, pilesToUpdate: deque[tuple[Pile, PileRangeOfLeaves]], antiPileRangeOfLeaves: PileRangeOfLeaves) -> PermutationSpace:
 	"""You can use this function to reduce `PileRangeOfLeaves` values in `permutationSpace` and propagate newly pinned `Leaf`.
 
@@ -161,6 +164,8 @@ def _reducePileRangesOfLeaves(state: EliminationState, permutationSpace: Permuta
 		else:
 			permutationSpace = sherpa
 	return permutationSpace
+
+#-------- Functions that use the shared logic -----------------------------------------
 
 @syntacticCurry
 def _reducePermutationSpace_byCrease(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
@@ -345,34 +350,6 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 	return permutationSpace
 
 @syntacticCurry
-def _reducePermutationSpace_leafDomainIs1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
-	permutationSpaceHasNewLeaf: bool = True
-	while permutationSpaceHasNewLeaf:
-		permutationSpaceHasNewLeaf = False
-
-		leavesPinned, pilesWithPileRangeOfLeaves = bifurcatePermutationSpace(permutationSpace)
-
-		leafAndItsDomainSize: Counter[Leaf] = Counter(chain(
-			chain.from_iterable(map(getIteratorOfLeaves, DOTvalues(pilesWithPileRangeOfLeaves))),
-			DOTvalues(leavesPinned)
-		))
-
-		if set(range(state.leavesTotal)).difference(leafAndItsDomainSize.keys()):
-			return None
-
-		leavesWithDomainOf1: set[Leaf] = set(DOTkeys(valfilter((1).__eq__, leafAndItsDomainSize))).difference(leavesPinned.values()).difference([state.leavesTotal])
-		if leavesWithDomainOf1:
-			permutationSpaceHasNewLeaf = True
-			leaf: Leaf = leavesWithDomainOf1.pop()
-			pile: Pile = one(DOTkeys(valfilter(leafIsInPileRange(leaf), pilesWithPileRangeOfLeaves)))
-			sherpa: PermutationSpace | None = _reducePermutationSpace_LeafIsPinned(state, atPilePinLeaf(permutationSpace, pile, leaf))
-			if (sherpa is None) or (not sherpa):
-				return None
-			else:
-				permutationSpace = sherpa
-	return permutationSpace
-
-@syntacticCurry
 def _reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""Update or invalidate `permutationSpace`: for every `leaf` pinned at a `pile`, remove `leaf` from `PileRangeOfLeaves` from every other `pile`; or return `None` if the updated `permutationSpace` is invalid.
 
@@ -419,25 +396,28 @@ def _reducePermutationSpace_noConsecutiveDimensions(state: EliminationState, per
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 
-		Z0Z_triple = deque(triplewise(sorted(permutationSpace.items())))
-		while Z0Z_triple and not permutationSpaceHasNewLeaf:
-			(pile_k, leafOrPileRangeOfLeaves_k), (pile_r, leafOrPileRangeOfLeaves_r), (pile_z, leafOrPileRangeOfLeaves_z) = Z0Z_triple.pop()
+		piles3consecutive: deque[tuple[
+			tuple[Pile, LeafOrPileRangeOfLeaves], tuple[Pile, LeafOrPileRangeOfLeaves], tuple[Pile, LeafOrPileRangeOfLeaves]
+			]] = deque(triplewise(sorted(DOTitems(permutationSpace))))
+
+		while piles3consecutive and not permutationSpaceHasNewLeaf:
+			(pile_k, leafOrPileRangeOfLeaves_k), (pile, leafOrPileRangeOfLeaves), (pile_r, leafOrPileRangeOfLeaves_r) = piles3consecutive.pop()
 
 			antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, frozenset())
 			leafForbidden: Leaf = 0
 			pilesToUpdate: deque[tuple[Pile, PileRangeOfLeaves]] = deque()
 
-			if thisIsALeaf(leafOrPileRangeOfLeaves_k) and thisIsALeaf(leafOrPileRangeOfLeaves_r) and thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_z):
-				pilesToUpdate = deque([(pile_z, leafOrPileRangeOfLeaves_z)])
-				differenceOfLeaves: int = leafOrPileRangeOfLeaves_k - leafOrPileRangeOfLeaves_r
-				leafForbidden = leafOrPileRangeOfLeaves_r + differenceOfLeaves
-			elif thisIsALeaf(leafOrPileRangeOfLeaves_k) and thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_r) and thisIsALeaf(leafOrPileRangeOfLeaves_z):
+			if thisIsALeaf(leafOrPileRangeOfLeaves_k) and thisIsALeaf(leafOrPileRangeOfLeaves) and thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_r):
 				pilesToUpdate = deque([(pile_r, leafOrPileRangeOfLeaves_r)])
-				leafForbidden = (leafOrPileRangeOfLeaves_k + leafOrPileRangeOfLeaves_z) // 2
-			elif thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_k) and thisIsALeaf(leafOrPileRangeOfLeaves_r) and thisIsALeaf(leafOrPileRangeOfLeaves_z):
+				differenceOfLeaves: int = leafOrPileRangeOfLeaves_k - leafOrPileRangeOfLeaves
+				leafForbidden = leafOrPileRangeOfLeaves + differenceOfLeaves
+			elif thisIsALeaf(leafOrPileRangeOfLeaves_k) and thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves) and thisIsALeaf(leafOrPileRangeOfLeaves_r):
+				pilesToUpdate = deque([(pile, leafOrPileRangeOfLeaves)])
+				leafForbidden = (leafOrPileRangeOfLeaves_k + leafOrPileRangeOfLeaves_r) // 2
+			elif thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves_k) and thisIsALeaf(leafOrPileRangeOfLeaves) and thisIsALeaf(leafOrPileRangeOfLeaves_r):
 				pilesToUpdate = deque([(pile_k, leafOrPileRangeOfLeaves_k)])
-				differenceOfLeaves: int = leafOrPileRangeOfLeaves_r - leafOrPileRangeOfLeaves_z
-				leafForbidden = leafOrPileRangeOfLeaves_r - differenceOfLeaves
+				differenceOfLeaves: int = leafOrPileRangeOfLeaves - leafOrPileRangeOfLeaves_r
+				leafForbidden = leafOrPileRangeOfLeaves - differenceOfLeaves
 			else:
 				continue
 
@@ -449,6 +429,55 @@ def _reducePermutationSpace_noConsecutiveDimensions(state: EliminationState, per
 			if sum(map(dimensionNearest首, permutationSpace.values())) < sumChecksForNewLeaves:
 				permutationSpaceHasNewLeaf = True
 
+	return permutationSpace
+
+#-------- Functions that do NOT use the shared logic -----------------------------------------
+
+@syntacticCurry
+def _reducePermutationSpace_leafDomainIs1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+	permutationSpaceHasNewLeaf: bool = True
+	while permutationSpaceHasNewLeaf:
+		permutationSpaceHasNewLeaf = False
+
+		leavesPinned, pilesWithPileRangeOfLeaves = bifurcatePermutationSpace(permutationSpace)
+
+		leafAndItsDomainSize: Counter[Leaf] = Counter(chain(
+			chain.from_iterable(map(getIteratorOfLeaves, DOTvalues(pilesWithPileRangeOfLeaves))),
+			DOTvalues(leavesPinned)
+		))
+
+		if set(range(state.leavesTotal)).difference(leafAndItsDomainSize.keys()):
+			return None
+
+		leavesWithDomainOf1: set[Leaf] = set(DOTkeys(valfilter((1).__eq__, leafAndItsDomainSize))).difference(leavesPinned.values()).difference([state.leavesTotal])
+		if leavesWithDomainOf1:
+			permutationSpaceHasNewLeaf = True
+			leaf: Leaf = leavesWithDomainOf1.pop()
+			pile: Pile = one(DOTkeys(valfilter(leafIsInPileRange(leaf), pilesWithPileRangeOfLeaves)))
+			sherpa: PermutationSpace | None = _reducePermutationSpace_LeafIsPinned(state, atPilePinLeaf(permutationSpace, pile, leaf))
+			if (sherpa is None) or (not sherpa):
+				return None
+			else:
+				permutationSpace = sherpa
+	return permutationSpace
+
+#-------- Not implemented / decommissioned ------------------------
+
+@syntacticCurry
+def Z0Z_reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:  # noqa: ARG001
+	"""New.
+
+	- extract PilesWithPileRangeOfLeaves
+	- groupby identical PileRangeOfLeaves
+	- in group `qq`, measure PileRangeOfLeaves population count - 1
+	- if len(qq) == population count - 1: qq is a "naked subset"
+	- the leaves of qq become the antiPileRangeOfLeaves for all other PileRangeOfLeaves: invoke _reducePileRangesOfLeaves
+
+	This is not supposed to be a comprehensive analysis of exact coverage.
+		- High-throughput for a strong ROI
+		- VERY STRONGLY mirror the structure of other functions because it is a near certainty some existing functions and some yet-to-exist functions will merge in the future.
+
+	"""
 	return permutationSpace
 
 @syntacticCurry
