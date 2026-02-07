@@ -74,7 +74,7 @@ from mapFolding._e.pin2上nDimensionsByCrease import (
 from mapFolding._e.pin2上nDimensionsByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e.pinIt import (
 	deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf,
-	deconstructPermutationSpaceByDomainsCombined, disqualifyAppendingLeafAtPile, moveFoldingToListFolding)
+	deconstructPermutationSpaceByDomainsCombined, disqualifyPinningLeafAtPile, moveFoldingToListFolding)
 from more_itertools import partition
 from operator import getitem, neg
 from tqdm import tqdm
@@ -179,7 +179,7 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 		Internal package reference.
 
 	"""
-	state.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(state.permutationSpace, state.pile, filterfalse(disqualifyAppendingLeafAtPile(state), _getLeavesAtPile(state)))))
+	state.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(state.permutationSpace, state.pile, filterfalse(disqualifyPinningLeafAtPile(state), _getLeavesAtPile(state)))))
 	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(state)))
 
 def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:

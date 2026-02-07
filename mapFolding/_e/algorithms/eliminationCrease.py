@@ -6,8 +6,7 @@ from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import thisIsAPileRangeOfLeaves
 from mapFolding._e.pin2上nDimensions import pinPilesAtEnds, reduceAllPermutationSpaceInEliminationState
-from mapFolding._e.pinIt import (
-	deconstructPermutationSpaceAtPile, disqualifyAppendingLeafAtPile, moveFoldingToListFolding)
+from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, disqualifyPinningLeafAtPile, moveFoldingToListFolding
 from math import factorial
 from more_itertools import first
 from tqdm import tqdm
@@ -26,7 +25,7 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 		pile, pileRangeOfLeaves = first(DOTitems(leafFilter(thisIsAPileRangeOfLeaves, permutationSpace)))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=pile, permutationSpace=permutationSpace)
-		sherpa.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(sherpa.permutationSpace, sherpa.pile, filterfalse(disqualifyAppendingLeafAtPile(sherpa), getIteratorOfLeaves(pileRangeOfLeaves)))))
+		sherpa.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(sherpa.permutationSpace, sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(pileRangeOfLeaves)))))
 		sherpa = moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(sherpa)))
 
 		listFolding.extend(sherpa.listFolding)

@@ -4,20 +4,19 @@ from cytoolz.dicttoolz import get_in, keyfilter, valfilter
 from cytoolz.functoolz import complement, curry as syntacticCurry
 from functools import cache
 from gmpy2 import bit_flip, bit_test as isBit1吗
-from hunterMakesPy import raiseIfNone
 from itertools import chain, combinations, product as CartesianProduct
 from mapFolding import inclusive
 from mapFolding._e import (
 	bifurcatePermutationSpace, DimensionIndex, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues,
 	getAntiPileRangeOfLeaves, getDictionaryConditionalLeafPredecessors, getIteratorOfLeaves, getLeafDomain,
 	getLeavesCreaseAnte, getLeavesCreasePost, JeanValjean, Leaf, LeafOrPileRangeOfLeaves, mapShapeIs2上nDimensions,
-	PermutationSpace, Pile, PileRangeOfLeaves, pileRangeOfLeavesAND, PinnedLeaves, reverseLookup, 一, 零, 首一, 首零一)
+	PermutationSpace, Pile, PileRangeOfLeaves, pileRangeOfLeavesAND, PinnedLeaves, 一, 零, 首一, 首零一)
 from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
 	between, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves, leafIsInPileRange, leafIsPinned, mappingHasKey,
 	notLeafOriginOrLeaf零, notPileLast, thisHasThat, thisIsALeaf, thisIsAPileRangeOfLeaves)
-from mapFolding._e.pinIt import atPilePinLeaf, disqualifyAppendingLeafAtPile
+from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile
 from more_itertools import (
 	filter_map, ilen as lenIterator, one, pairwise, partition as more_itertools_partition, split_at, triplewise)
 from typing import TYPE_CHECKING
@@ -73,94 +72,45 @@ def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> Elim
 #-------- Shared logic -----------------------------------------
 
 def _reducePileRangesOfLeaves(state: EliminationState, permutationSpace: PermutationSpace, pilesToUpdate: deque[tuple[Pile, PileRangeOfLeaves]], antiPileRangeOfLeaves: PileRangeOfLeaves) -> PermutationSpace:
-	"""You can use this function to reduce `PileRangeOfLeaves` values in `permutationSpace` and propagate newly pinned `Leaf`.
-
-	(AI generated docstring)
-
-	This function updates each `pile: pileRangeOfLeaves` pair from `pilesToUpdate` by intersecting
-	`pileRangeOfLeaves` with `antiPileRangeOfLeaves` using `pileRangeOfLeavesAND`.
-
-	This function converts an updated `PileRangeOfLeaves` to a `Leaf` using `JeanValjean` when the
-	intersection contains exactly one `leaf`. If the intersection is empty, `JeanValjean` returns `None`,
-	and this function returns `{}` to signal that `permutationSpace` is invalid.
-
-	When a new `Leaf` becomes pinned, this function applies the "beans without cornbread" rule by
-	pinning the complementary adjacent `Leaf` via a local subroutine. This function then calls
-	`_reducePermutationSpace_LeafIsPinned` to propagate the new `Leaf` to all other piles.
-
-	Parameters
-	----------
-	state : EliminationState
-		A data basket that provides `state.mapShape` for constructing follow-on `EliminationState` values.
-	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: pileRangeOfLeaves`.
-	pilesToUpdate : deque[tuple[Pile, PileRangeOfLeaves]]
-		A LIFO work list of `pile` and `pileRangeOfLeaves` pairs that must be reduced.
-	antiPileRangeOfLeaves : PileRangeOfLeaves
-		A `PileRangeOfLeaves` mask applied to each `pileRangeOfLeaves` using `pileRangeOfLeavesAND`.
-
-	Returns
-	-------
-	updatedPermutationSpace : PermutationSpace
-		An updated `permutationSpace` when reduction succeeds.
-		An empty dictionary `{}` when reduction invalidates `permutationSpace`.
-
-	References
-	----------
-	[1] mapFolding._e.pileRangeOfLeavesAND
-		Internal package reference.
-	[2] mapFolding._e.JeanValjean
-		Internal package reference.
-	[3] mapFolding._e.filters.thisIsALeaf
-		Internal package reference.
-	[4] mapFolding._e.pin2上nDimensionsAnnex._reducePermutationSpace_LeafIsPinned
-		Internal package reference.
-
-	"""
-	def pinLeafCornbread(state: EliminationState) -> EliminationState:
-		leafBeans: Leaf | None = None
-		for beans, cornbread in ((一+零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))):
-			beansPinned: bool = leafIsPinned(state.permutationSpace, beans)
-			cornbreadPinned: bool = leafIsPinned(state.permutationSpace, cornbread)
-			if beansPinned ^ cornbreadPinned:
-				leafBeans = beans if beansPinned else cornbread
-				break
-
-		if leafBeans is None:
-			return state
-
-		state.pile = raiseIfNone(reverseLookup(state.permutationSpace, leafBeans))
-		if leafBeans in [一+零, 首一(state.dimensionsTotal)]:
-			state.pile += 1
-			leafCornbread = one(getLeavesCreasePost(state, leafBeans))
-		else:
-			state.pile -= 1
-			leafCornbread = one(getLeavesCreaseAnte(state, leafBeans))
-
-		if disqualifyAppendingLeafAtPile(state, leafCornbread):
-			state.permutationSpace = {}
-		else:
-			state.permutationSpace = atPilePinLeaf(state.permutationSpace, state.pile, leafCornbread)
-
-		return state
-
 	permutationSpaceHasNewLeaf: bool = False
-	while pilesToUpdate and not permutationSpaceHasNewLeaf:
+	while permutationSpace and pilesToUpdate and not permutationSpaceHasNewLeaf:
 		pile, pileRangeOfLeaves = pilesToUpdate.pop()
-		if (ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript := JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, pileRangeOfLeaves))) is None:
-			return {}
-# TODO These statements are syntactically necessary because I'm using subscripts AND walrus operators. Does that suggest there is
-# a "better" flow paradigm, or is this merely a limitation of Python syntax?
-		permutationSpace[pile] = ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript
-		if thisIsALeaf(permutationSpace[pile]):
-			stateCornbread = EliminationState(state.mapShape, pile=pile, permutationSpace=permutationSpace)
-			if not (permutationSpace := pinLeafCornbread(stateCornbread).permutationSpace):
-				return {}
-			permutationSpaceHasNewLeaf = True
-	if permutationSpaceHasNewLeaf:
+
+		leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None = JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, pileRangeOfLeaves))
+		if leafOrPileRangeOfLeaves is not None:
+
+			permutationSpace[pile] = leafOrPileRangeOfLeaves
+			if thisIsALeaf(permutationSpace[pile]):
+				leafBeans: Leaf | None = None
+				for beans, cornbread in ((一+零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))):
+					beansPinned: bool = leafIsPinned(permutationSpace, beans)
+					cornbreadPinned: bool = leafIsPinned(permutationSpace, cornbread)
+					if beansPinned ^ cornbreadPinned:
+						leafBeans = beans if beansPinned else cornbread
+						break
+
+				if leafBeans is not None:
+
+					pileCornbread = pile
+					if leafBeans in [一+零, 首一(state.dimensionsTotal)]:
+						pileCornbread += 1
+						leafCornbread: int = one(getLeavesCreasePost(state, leafBeans))
+					else:
+						pileCornbread -= 1
+						leafCornbread = one(getLeavesCreaseAnte(state, leafBeans))
+
+					if disqualifyPinningLeafAtPile(EliminationState(state.mapShape, pile=pileCornbread, permutationSpace=permutationSpace), leafCornbread):
+						permutationSpace = {}
+					else:
+						permutationSpace = atPilePinLeaf(permutationSpace, pileCornbread, leafCornbread)
+				permutationSpaceHasNewLeaf = True
+		else:
+			permutationSpace = {}
+
+	if permutationSpace and permutationSpaceHasNewLeaf:
 		sherpa: PermutationSpace | None = _reducePermutationSpace_LeafIsPinned(state, permutationSpace)
 		if not sherpa:
-			return {}
+			permutationSpace = {}
 		else:
 			permutationSpace = sherpa
 	return permutationSpace

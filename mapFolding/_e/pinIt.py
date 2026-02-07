@@ -50,7 +50,7 @@ def atPilePinLeafSafetyFilter(permutationSpace: PermutationSpace, pile: Pile, le
 	return leafIsPinnedAtPile(permutationSpace, leaf, pile) or (pileIsOpen(permutationSpace, pile) and leafIsNotPinned(permutationSpace, leaf))
 
 @syntacticCurry
-def disqualifyAppendingLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
+def disqualifyPinningLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
 	return any((
 		leafIsPinned(state.permutationSpace, leaf),
 		pileIsNotOpen(state.permutationSpace, state.pile),
