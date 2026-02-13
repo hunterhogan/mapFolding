@@ -1,6 +1,6 @@
 # ruff: noqa: ERA001
 from collections import Counter, deque
-from cytoolz.dicttoolz import get_in, keyfilter, valfilter
+from cytoolz.dicttoolz import dissoc, get_in, keyfilter, valfilter
 from cytoolz.functoolz import complement, curry as syntacticCurry
 from functools import cache
 from gmpy2 import bit_flip, bit_test as isBit1吗
@@ -10,7 +10,8 @@ from mapFolding._e import (
 	bifurcatePermutationSpace, DimensionIndex, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues,
 	getAntiPileRangeOfLeaves, getDictionaryConditionalLeafPredecessors, getIteratorOfLeaves, getLeafDomain,
 	getLeavesCreaseAnte, getLeavesCreasePost, JeanValjean, Leaf, LeafOrPileRangeOfLeaves, mapShapeIs2上nDimensions,
-	PermutationSpace, Pile, PileRangeOfLeaves, pileRangeOfLeavesAND, PinnedLeaves, 一, 零, 首一, 首零一)
+	PermutationSpace, Pile, PileRangeOfLeaves, pileRangeOfLeavesAND, PilesWithPileRangeOfLeaves, PinnedLeaves,
+	sentinelBitAdjustment, 一, 零, 首一, 首零一)
 from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
@@ -18,7 +19,9 @@ from mapFolding._e.filters import (
 	notLeafOriginOrLeaf零, notPileLast, thisHasThat, thisIsALeaf, thisIsAPileRangeOfLeaves)
 from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile
 from more_itertools import (
-	filter_map, ilen as lenIterator, one, pairwise, partition as more_itertools_partition, split_at, triplewise)
+	filter_map, ilen as lenIterator, one, pairwise, partition as more_itertools_partition, split_at, split_when,
+	triplewise)
+from operator import getitem
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -66,6 +69,10 @@ def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> Elim
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
 	state.listPermutationSpace = []
 	state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_leafDomainIs1(state), listPermutationSpace))
+
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = []
+	state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_nakedSubset(state), listPermutationSpace))
 
 	return state
 
@@ -414,20 +421,73 @@ def _reducePermutationSpace_leafDomainIs1(state: EliminationState, permutationSp
 #-------- Not implemented / decommissioned ------------------------
 
 @syntacticCurry
-def Z0Z_reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:  # noqa: ARG001
+def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""New.
 
 	- extract PilesWithPileRangeOfLeaves
-	- groupby identical PileRangeOfLeaves
-	- in group `qq`, measure PileRangeOfLeaves population count - 1
-	- if len(qq) == population count - 1: qq is a "naked subset"
-	- the leaves of qq become the antiPileRangeOfLeaves for all other PileRangeOfLeaves: invoke _reducePileRangesOfLeaves
+	- sort by PileRangeOfLeaves
+	- more_itertools.split_when PileRangeOfLeavesX != PileRangeOfLeavesY
+	- filter: len of list == list[0].bit_count - 1
+	- if a list comes out, it's a naked subset
+	- the leaves of the naked subset become the antiPileRangeOfLeaves for all other PileRangeOfLeaves: invoke _reducePileRangesOfLeaves
 
 	This is not supposed to be a comprehensive analysis of exact coverage.
 		- High-throughput for a strong ROI
 		- VERY STRONGLY mirror the structure of other functions because it is a near certainty some existing functions and some yet-to-exist functions will merge in the future.
 
 	"""
+	permutationSpaceHasNewLeaf: bool = True
+	while permutationSpaceHasNewLeaf:
+		permutationSpaceHasNewLeaf = False
+
+		pilesWithPileRangeOfLeaves: PilesWithPileRangeOfLeaves = extractPilesWithPileRangeOfLeaves(permutationSpace)
+
+		listPileAndPileRangeOfLeavesSorted: list[tuple[Pile, PileRangeOfLeaves]] = sorted(
+			pilesWithPileRangeOfLeaves.items()
+			, key=lambda pileAndPileRangeOfLeaves: pileAndPileRangeOfLeaves[1]
+		)
+
+		iteratorPileAndPileRangeOfLeavesGrouped: Iterator[list[tuple[Pile, PileRangeOfLeaves]]] = map(
+			list
+			, split_when(
+				listPileAndPileRangeOfLeavesSorted
+				, lambda pileAndPileRangeOfLeavesLeft, pileAndPileRangeOfLeavesRight: (
+					pileAndPileRangeOfLeavesLeft[1] != pileAndPileRangeOfLeavesRight[1]
+				)
+			)
+		)
+
+		iteratorNakedSubsets: Iterable[list[tuple[Pile, PileRangeOfLeaves]]] = filter(
+			lambda listPileAndPileRangeOfLeavesGrouped: (
+				len(listPileAndPileRangeOfLeavesGrouped)
+				== (listPileAndPileRangeOfLeavesGrouped[0][1].bit_count() - 1)
+			)
+			, iteratorPileAndPileRangeOfLeavesGrouped
+		)
+
+		dequePileAndPileRangeOfLeavesGrouped: deque[list[tuple[Pile, PileRangeOfLeaves]]] = deque(iteratorNakedSubsets)
+
+		while dequePileAndPileRangeOfLeavesGrouped and not permutationSpaceHasNewLeaf:
+			listPileAndPileRangeOfLeavesGrouped: list[tuple[Pile, PileRangeOfLeaves]] = dequePileAndPileRangeOfLeavesGrouped.pop()
+			pileRangeOfLeavesNakedSubset: PileRangeOfLeaves = listPileAndPileRangeOfLeavesGrouped[0][1]
+
+			pilesNakedSubset: set[Pile] = {pileAndPileRangeOfLeaves[0] for pileAndPileRangeOfLeaves in listPileAndPileRangeOfLeavesGrouped}
+
+			pilesToUpdate: deque[tuple[Pile, PileRangeOfLeaves]] = deque(filter(
+				lambda pileAndPileRangeOfLeaves: pileAndPileRangeOfLeaves[0] not in pilesNakedSubset
+				, pilesWithPileRangeOfLeaves.items()
+			))
+
+			antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(
+				state.leavesTotal
+				, getIteratorOfLeaves(pileRangeOfLeavesNakedSubset)
+			)
+			sumChecksForNewLeaves: int = sum(map(dimensionNearest首, permutationSpace.values()))
+			if not (permutationSpace := _reducePileRangesOfLeaves(state, permutationSpace, pilesToUpdate, antiPileRangeOfLeaves)):
+				return None
+			if sum(map(dimensionNearest首, permutationSpace.values())) < sumChecksForNewLeaves:
+				permutationSpaceHasNewLeaf = True
+
 	return permutationSpace
 
 @syntacticCurry

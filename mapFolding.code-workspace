@@ -1,7 +1,7 @@
 {
 	"folders": [
 		{
-			"path": ".."
+			"path": "."
 		}
 	],
 	"settings": {
@@ -23,13 +23,6 @@
 				"path": "${workspaceFolder}/.vscode/code-spell-dictionary-workspace.txt"
 			},
 		},
-		"python-envs.pythonProjects": [
-			{
-				"path": "${workspaceFolder}",
-				"envManager": "ms-python.python:venv",
-				"packageManager": "ms-python.python:pip"
-			}
-		],
 	},
 	"extensions": {
 		"recommendations": [

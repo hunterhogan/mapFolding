@@ -361,3 +361,6 @@ leafOrigin: int = (0 * 九) + (0 * 八) + (0 * 七) + (0 * 六) + (0 * 五) + (0
 pileOrigin: int = (0 * 九) + (0 * 八) + (0 * 七) + (0 * 六) + (0 * 五) + (0 * 四) + (0 * 三) + (0 * 二) + (0 * 一) + (0 * 零)
 """The `pile` at the origin of all dimensions, with `0` in every `DimensionIndex`."""
 
+sentinelBitAdjustment: int = 1
+"""Adjust bit_count() to exclude the sentinel bit in PileRangeOfLeaves."""
+
