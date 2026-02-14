@@ -46,9 +46,11 @@ def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = 
 	to affect the Numba-jitted function.
 
 	"""
-	# TODO CPUlimit annotation, How do I clarify the type and sanitize the value of CPUlimit?
 	if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
 		CPUlimit = oopsieKwargsie(CPUlimit)
+		if isinstance(CPUlimit, str):
+			message: str = f"I received '{CPUlimit}' for the parameter, `CPUlimit`, but I need a value of type `bool`, `int`, `float`, or `None`."
+			raise TypeError(message)
 
 	match concurrencyPackage:
 		case 'numba':
