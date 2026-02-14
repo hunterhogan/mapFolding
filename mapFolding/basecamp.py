@@ -47,7 +47,8 @@ References
 """
 from collections.abc import Sequence
 from mapFolding import (
-	getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly, validateListDimensions)
+	getPathFilenameFoldsTotal, getPathRootJobDEFAULT, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly,
+	validateListDimensions)
 from os import PathLike
 from pathlib import Path, PurePath
 from typing import Literal
@@ -197,7 +198,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 # TODO `NOTcountingFolds`: improve identifier.
 def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
-# TODO , pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
+		, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 		, CPUlimit: bool | float | int | None = None  # noqa: FBT001
 		) -> int:
 	"""You can compute the n-th term of specified OEIS sequences using specialized algorithms.
@@ -315,6 +316,31 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 		Internal package reference (closed-form sequence formulas)
 
 	"""  # noqa: RUF002
+#-------- memorialization instructions ---------------------------------------------
+
+	if pathLikeWriteFoldsTotal is not None:
+		# For sequences without a natural mapShape, create filename based on oeisID and oeis_n
+		if oeisID == 'A007822':
+			# A007822 has a mapShape, so use the standard approach
+			mapShapeForFilename: tuple[int, ...] = (1, 2 * oeis_n)
+			pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(mapShapeForFilename, pathLikeWriteFoldsTotal)
+		else:
+			# Other sequences don't have mapShape, so create filename directly
+			filenameCountTotal: str = f"{oeisID}_n{oeis_n}.countTotal"
+			pathLikeSherpa = Path(pathLikeWriteFoldsTotal)
+			if pathLikeSherpa.is_dir():
+				pathFilenameFoldsTotal = pathLikeSherpa / filenameCountTotal
+			elif pathLikeSherpa.is_file() and pathLikeSherpa.is_absolute():
+				pathFilenameFoldsTotal = pathLikeSherpa
+			else:
+				pathFilenameFoldsTotal = getPathRootJobDEFAULT() / pathLikeSherpa
+			pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
+		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
+	else:
+		pathFilenameFoldsTotal = None
+
+#-------- Algorithm selection and execution ---------------------------------------------
+
 	countTotal: int = -31212012 # ERROR
 	matched_oeisID: bool = True
 
@@ -409,5 +435,10 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 				countTotal = symmetricState.symmetricFolds
 			case _:
 				matched_oeisID = False
+
+#-------- Follow memorialization instructions ---------------------------------------------
+
+	if pathFilenameFoldsTotal is not None:
+		saveFoldsTotal(pathFilenameFoldsTotal, countTotal)
 
 	return countTotal

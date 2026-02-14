@@ -42,7 +42,7 @@ class mapFoldingPackageSettings(PackageSettings):
 
 	concurrencyPackage: str = 'multiprocessing'
 	"""Package identifier for concurrent execution operations."""
-# TODO I made this a `TypedDict` before I knew how to make dataclasses and classes. Think about other data structures.
+
 OEISidMapFoldingManuallySet: dict[str, MetadataOEISidMapFoldingManuallySet] = {
 	'A000136': {'getMapShape': lambda n: (1, n)},
 	'A001415': {'getMapShape': lambda n: (2, n)},

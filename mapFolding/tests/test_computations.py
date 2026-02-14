@@ -40,6 +40,7 @@ import pytest
 import warnings
 
 if TYPE_CHECKING:
+	from os import PathLike
 	from importlib.machinery import ModuleSpec
 	from mapFolding import MetadataOEISid, MetadataOEISidMapFolding
 	from types import ModuleType
@@ -69,9 +70,10 @@ def test_A007822(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLi
 		CPU limit for the computation.
 
 	"""
+	pathLikeWriteFoldsTotal: PathLike[str] | None = None
 	warnings.filterwarnings("ignore", category=NumbaPendingDeprecationWarning)
 	expected: int = dictionaryOEIS[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	standardizedEqualToCallableReturn(expected, NOTcountingFolds, oeisIdentifier, sequenceIndex, flow, processorLimit)
+	standardizedEqualToCallableReturn(expected, NOTcountingFolds, oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
 
 @pytest.mark.parametrize(
 	"oeisIdentifier, sequenceIndex, flow, processorLimit",

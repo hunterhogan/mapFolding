@@ -24,7 +24,7 @@ show how to balance performance with system resource constraints.
 """
 
 from collections.abc import Callable
-from hunterMakesPy.pytestForYourUse import PytestFor_defineConcurrencyLimit
+from hunterMakesPy.tests.test_parseParameters import PytestFor_defineConcurrencyLimit
 from mapFolding import (
 	defineProcessorLimit, dictionaryOEISMapFolding, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions,
 	validateListDimensions)
@@ -65,7 +65,7 @@ def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], No
 )
 @pytest.mark.parametrize("CPUlimitParameter", [{"invalid": True}, ["weird"]])
 def test_countFolds_cpuLimitOopsie(mapShape: tuple[int, ...], CPUlimitParameter: dict[str, bool] | list[str]) -> None:
-	standardizedEqualToCallableReturn(ValueError, countFolds, mapShape, None, 'cpu', CPUlimitParameter)
+	standardizedEqualToCallableReturn(TypeError, countFolds, mapShape, None, 'cpu', CPUlimitParameter)
 
 @pytest.mark.parametrize("computationDivisions, concurrencyLimit, listDimensions, expectedTaskDivisions", [
 	(None, 4, [9, 11], 0),
@@ -85,13 +85,13 @@ def test_getTaskDivisions(
 	standardizedEqualToCallableReturn(expectedTaskDivisions, getTaskDivisions, computationDivisions, concurrencyLimit, leavesTotal)
 
 @pytest.mark.parametrize("expected,parameter", [
-	(ValueError, [4]),  # list
-	(ValueError, (2,)), # tuple
-	(ValueError, {2}),  # set
-	(ValueError, {"cores": 2}),  # dict
+	(TypeError, [4]),  # list
+	(TypeError, (2,)), # tuple
+	(TypeError, {2}),  # set
+	(TypeError, {"cores": 2}),  # dict
 ])
 def test_setCPUlimitMalformedParameter(
-	expected: type[ValueError] | Literal[2],
+	expected: type[TypeError] | Literal[2],
 	parameter: list[int] | tuple[int, ...] | set[int] | dict[str, int] | Literal['2']
 ) -> None:
 	"""Test that invalid CPUlimit types are properly handled."""
