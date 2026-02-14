@@ -1,3 +1,9 @@
+"""You can use this script to benchmark map-folding algorithms against known OEIS values.
+
+This script iterates through multiple OEIS map-folding sequences and algorithm implementations,
+verifying computed results against reference values and measuring execution time. The script
+prints colorized output indicating whether computed values match expected values.
+"""
 # ruff: noqa
 # pyright: basic
 from collections.abc import Sequence
