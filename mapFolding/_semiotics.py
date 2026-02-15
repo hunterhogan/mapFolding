@@ -3,15 +3,237 @@ from typing import NamedTuple
 #======== Semantic replacements for ambiguous values =======
 
 decreasing: int = -1
-"""Adjust the value due to Python syntax."""
-inclusive: int = 1
-"""Include the last value in a `range`: change from [p, q) to [p, q]."""
-zeroIndexed: int = 1
-"""Adjust the value due to Python syntax."""
+"""Express descending iteration or a reverse direction.
 
-#-------- Some color for printing text to the terminal -------
+(AI generated docstring)
+
+The identifier `decreasing` holds the value `-1` and serves as a semantic replacement for
+numeric literals in contexts where direction or ordering matters. You can use `decreasing`
+as an addend to adjust boundary values, as a multiplicand to reverse sign or direction,
+or in both roles simultaneously to express complex transformations.
+
+You can use `decreasing` wherever `-1` would appear but where the meaning "descending order"
+or "reverse direction" is more important than the specific numeric value. Using `decreasing`
+makes the code's intent explicit and communicates the semantic purpose to readers who might
+not immediately recognize `-1` as a directional indicator.
+
+Common contexts include: reverse iteration through sequences, computing predecessors or
+backward offsets, negating dimensions or indices, and constructing `range` objects that
+count downward.
+
+Examples
+--------
+You can use `decreasing` as an addend to compute a loop boundary:
+
+>>> for countDown in range(dimension - 2 + decreasing, decreasing, decreasing):
+...     processValue(countDown)
+
+In this example, `dimension - 2 + decreasing` computes the starting index (equivalent to
+`dimension - 3`), the second `decreasing` stops iteration at `-1` (to include `0`), and
+the third `decreasing` specifies the step direction (counting down by `1`).
+
+You can use `decreasing` as a multiplicand to reverse sign:
+
+>>> negatedOffset = baseOffset * decreasing
+
+You can use `decreasing` as both multiplicand and addend in a single expression:
+
+>>> adjustedIndex = dimensionHeadSecond * decreasing + decreasing
+
+This pattern appears when converting between coordinate systems or computing reverse-indexed
+positions with additional boundary adjustments.
+
+You can use `decreasing` as the step parameter in `range` [1] to iterate backward:
+
+>>> for leaf in range(leavesTotal + decreasing, 1, decreasing):
+...     processLeaf(leaf)
+
+You can combine `decreasing` with other semantic constants:
+
+>>> boundaryRange = range(
+...     (start + inclusive) * decreasing,
+...     (stop + inclusive) * decreasing,
+...     decreasing
+... )
+
+References
+----------
+[1] Built-in Functions - `range` (Python documentation)
+	https://docs.python.org/3/library/functions.html#func-range
+
+"""
+inclusive: int = 1
+"""Express inclusion (or exclusion) of a boundary value.
+
+(AI generated docstring)
+
+The identifier `inclusive` holds the value `1` and serves as a semantic replacement for
+the numeric literal `1` when adjusting boundary computations. You can use `inclusive` to
+convert Python's default half-open interval semantics `[start, stop)` into closed intervals
+`[start, stop]` by adding `inclusive` to the upper bound. You can also use `- inclusive`
+to signal explicit exclusion of a boundary value.
+
+You can use `inclusive` wherever `1` would appear but where the meaning "include this
+boundary" or "extend by one position" is more important than the specific numeric value.
+Using `inclusive` makes the code's intent explicit: the adjustment exists to change interval
+semantics, not to perform arbitrary arithmetic.
+
+Common contexts include: `range` objects [1], `slice` objects [2], sequence indexing,
+and any function that accepts boundary parameters with half-open semantics (such as
+`random.randrange` [3], `numpy.arange` [4], or `pandas.RangeIndex` [5]).
+
+Many functions in Python packages use half-open intervals by default. For example,
+`random.randrange(start, stop)` [3] excludes `stop`, while `random.randint(a, b)` [3]
+includes `b`. You can use `inclusive` to make the adjustment explicit when working with
+half-open functions:
+
+- `range(1, lastValue + inclusive)` includes `lastValue` in the iteration.
+- `slice(start, stop + inclusive)` includes the element at index `stop`.
+- `array[start : stop + inclusive]` includes `array[stop]` in the slice.
+- `boundary - inclusive` explicitly excludes `boundary` from consideration.
+
+Examples
+--------
+You can use `inclusive` to extend `range` [1] objects to include the final value:
+
+>>> for leaf1ndex in range(1, leavesTotal + inclusive):
+...     processLeaf(leaf1ndex)
+
+Without `inclusive`, `range(1, leavesTotal)` would stop before processing the leaf at
+index `leavesTotal`. Adding `inclusive` ensures the loop processes all leaves from
+`1` through `leavesTotal`.
+
+You can use `inclusive` in nested `range` [1] objects:
+
+>>> for activeLeaf1ndex in range(1, leavesTotal + inclusive):
+...     for connectee1ndex in range(1, activeLeaf1ndex + inclusive):
+...         processConnection(activeLeaf1ndex, connectee1ndex)
+
+You can use `inclusive` when constructing `frozenset` [6] objects from `range` [1]:
+
+>>> pilesOpen: frozenset[int] = frozenset(
+...     range(pileLast + inclusive)
+... ).difference(leavesPinned.keys())
+
+You can use `inclusive` to construct forbidden index ranges:
+
+>>> pilesForbidden = frozenset([
+...     *range(pileOf_k),
+...     *range(pileOf_kCrease + 1, pileLast + inclusive)
+... ])
+
+You can use `- inclusive` to signal explicit exclusion of a boundary:
+
+>>> for pile in filter(filterPredicate, range(0, pile_k - inclusive)):
+...     processPile(pile)
+
+In this example, `pile_k - inclusive` explicitly excludes the pile at index `pile_k` from
+the range. Filters or predicates that accept inclusive upper bounds (such as `between`-style
+functions) may require subtracting `inclusive` to express exclusive boundaries.
+
+You can combine `inclusive` with other semantic constants:
+
+>>> listIndicesPilesExcluded.extend(
+...     range(
+...         (1 + inclusive) * decreasing,
+...         (stop + inclusive) * decreasing,
+...         decreasing
+...     )
+... )
+
+References
+----------
+[1] Built-in Functions - `range` (Python documentation)
+	https://docs.python.org/3/library/functions.html#func-range
+[2] Built-in Types - `slice` (Python documentation)
+	https://docs.python.org/3/library/functions.html#slice
+[3] `random` - Generate pseudo-random numbers (Python documentation)
+	https://docs.python.org/3/library/random.html
+[4] `numpy.arange` (NumPy documentation)
+	https://numpy.org/doc/stable/reference/generated/numpy.arange.html
+[5] `pandas.RangeIndex` (pandas documentation)
+	https://pandas.pydata.org/docs/reference/api/pandas.RangeIndex.html
+[6] Built-in Types - `frozenset` (Python documentation)
+	https://docs.python.org/3/library/stdtypes.html#frozenset
+
+"""
+zeroIndexed: int = 1
+"""Express that the adjustment to a value is due to zero-based indexing.
+
+(AI generated docstring)
+
+The identifier `zeroIndexed` holds the value `1` and serves as a semantic replacement
+for the numeric literal `1` when converting between zero-based indexing (Python's default)
+and one-based indexing (common in mathematical notation, human-readable numbering, and
+many domain-specific conventions). You can use `zeroIndexed` as an addend or subtrahend
+to adjust index values, counts, or boundary computations.
+
+You can use `zeroIndexed` wherever `1` would appear but where the meaning "adjust for
+indexing convention" is more important than the specific numeric value. Using `zeroIndexed`
+makes the code's intent explicit: the adjustment exists to reconcile indexing systems, not
+to perform arbitrary arithmetic.
+
+The most common usage is `count - zeroIndexed` to convert a one-based count ("there are N
+items") to the zero-based index of the last item (`N - 1`). You can also use `+ zeroIndexed`
+when converting from zero-based indices back to one-based positions or counts, or when
+adjusting formulas that assume one-based indexing.
+
+Common contexts include: computing final indices from counts, converting between mathematical
+notation (often one-based) and Python code (zero-based), accessing the last valid index of
+a sequence, and boundary calculations in algorithms that mix indexing conventions.
+
+Examples
+--------
+You can use `- zeroIndexed` to convert a count to the last valid zero-based index:
+
+>>> lastDimensionIndex = dimensionsTotal - zeroIndexed
+
+If `dimensionsTotal` is `3` (representing three dimensions), then `lastDimensionIndex`
+becomes `2`, which correctly identifies the index of the third dimension in a zero-indexed
+array `[0, 1, 2]`.
+
+You can use `- zeroIndexed` when accessing elements by position:
+
+>>> voodooMath: int = creaseAnteAt二Ante首[
+...     largestPossibleLengthOfListOfCreases - zeroIndexed
+... ]
+
+Here, `largestPossibleLengthOfListOfCreases` represents a count ("how many elements"),
+and subtracting `zeroIndexed` produces the index of the last element.
+
+You can use `- zeroIndexed` in `range` [1] boundary computations:
+
+>>> listIndicesCreasePostToKeep.extend(
+...     range(
+...         dimensionsTotal - dimensionHead + 1,
+...         dimensionsTotal - zeroIndexed
+...     )
+... )
+
+You can use `- zeroIndexed` in conditional expressions:
+
+>>> if dimensionsTotal - zeroIndexed - dimensionHead == zerosAtThe首:
+...     applySpecialCase()
+
+You can use `+ zeroIndexed` when the adjustment goes in the opposite direction:
+
+>>> productsOfDimensionsTruncator: int = (
+...     dimensionFrom首 - (dimensionsTotal + zeroIndexed)
+... )
+
+In this example, `dimensionsTotal + zeroIndexed` adjusts the total count upward before
+subtraction, compensating for a formula that expects one-based indexing.
+
+References
+----------
+[1] Built-in Functions - `range` (Python documentation)
+	https://docs.python.org/3/library/functions.html#func-range
+
+"""
+
+#-------- Some colors for printing text to the terminal -------
 # Many values and options at https://gist.github.com/JBlond/2fea43a3049b38287e5e9cefc87b2124
-# Many, many, many at https://stackoverflow.com/a/33206814/4403878
+# Many, many, many options at https://stackoverflow.com/a/33206814/4403878
 # NOTE Always define color and background color at the same time.
 
 ansiColorReset: str = '\x1b[0m'
