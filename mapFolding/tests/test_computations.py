@@ -27,7 +27,8 @@ which is useful if you're working with the code synthesis features of the packag
 
 from mapFolding.basecamp import countFolds
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, NOTcountingFolds, oeisIDfor_n
+from mapFolding.oeis import (
+	dictionaryOEIS, dictionaryOEISMapFolding, librarianLookupsFoldsTotalKnown, NOTcountingFolds, oeisIDfor_n)
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -270,4 +271,4 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	module.__name__ = "__main__"
 	Don_Lapre_Road_to_Self_Improvement.loader.exec_module(module)
 
-	standardizedEqualToCallableReturn(str(getFoldsTotalKnown(oneTestCuzTestsOverwritingTests)), pathFilenameFoldsTotal.read_text(encoding="utf-8").strip)
+	standardizedEqualToCallableReturn(str(librarianLookupsFoldsTotalKnown(oneTestCuzTestsOverwritingTests)), pathFilenameFoldsTotal.read_text(encoding="utf-8").strip)

@@ -26,7 +26,7 @@ which is crucial for maintaining package reliability in production environments.
 
 from contextlib import redirect_stdout
 from mapFolding.oeis import (
-	_standardizeOEISid, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented)
+	_librarianStandardizesOEISid, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented)
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
 from typing import Any
 import io
@@ -36,12 +36,12 @@ import re as regex
 import unittest.mock
 
 def test__validateOEISid_valid_id(oeisIDmapFolding: str) -> None:
-	standardizedEqualToCallableReturn(oeisIDmapFolding, _standardizeOEISid, oeisIDmapFolding)
+	standardizedEqualToCallableReturn(oeisIDmapFolding, _librarianStandardizesOEISid, oeisIDmapFolding)
 
 def test__validateOEISid_valid_id_case_insensitive(oeisIDmapFolding: str) -> None:
-	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _standardizeOEISid, oeisIDmapFolding.lower())
-	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _standardizeOEISid, oeisIDmapFolding.upper())
-	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _standardizeOEISid, oeisIDmapFolding.swapcase())
+	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _librarianStandardizesOEISid, oeisIDmapFolding.lower())
+	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _librarianStandardizesOEISid, oeisIDmapFolding.upper())
+	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _librarianStandardizesOEISid, oeisIDmapFolding.swapcase())
 
 parameters_test_aOFn_invalid_n = [
 	(-random.randint(1, 100), "randomNegative"),  # noqa: S311
