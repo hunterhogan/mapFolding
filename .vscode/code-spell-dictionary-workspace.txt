@@ -373,6 +373,7 @@ Unroller
 unsignedinteger
 untenably
 urldate
+usegmt
 Valjean
 valmap
 vararg

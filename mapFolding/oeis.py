@@ -1,32 +1,7 @@
 # ruff: noqa: PLC0415 E701
-
-"""
-Mathematical validation and discovery through OEIS integration.
-
-(AI generated docstring)
-
-Complementing the unified computational interface, this module extends the map
-folding ecosystem into the broader mathematical community through comprehensive
-integration with the Online Encyclopedia of Integer Sequences (OEIS). This bridge
-enables validation of computational results against established mathematical
-knowledge while supporting the discovery of new sequence values through the
-sophisticated computational assembly line.
-
-The integration provides multiple pathways for mathematical verification: direct
-computation of OEIS sequences using the complete algorithmic implementation,
-cached access to published sequence data for rapid validation, and research
-support for extending known sequences through new computational discoveries.
-The module handles sequence families ranging from simple strip folding to
-complex multi-dimensional hypercube problems.
-
-Through intelligent caching and optimized lookup mechanisms, this module ensures
-that the computational power developed through the foundational layers can contribute
-meaningfully to mathematical research. Whether validating results, avoiding
-redundant computation, or extending mathematical knowledge, this integration
-completes the journey from configuration foundation to mathematical discovery.
-"""
-
 from datetime import datetime, timedelta, UTC
+from email.utils import format_datetime
+from functools import cache
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from itertools import chain
 from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, packageSettings
@@ -37,11 +12,10 @@ from mapFolding.filesystemToolkit import (
 from os import PathLike
 from pathlib import Path, PurePath
 from typing import Final, Literal
-from urllib.error import HTTPError, URLError
-from urllib.request import urlopen
 import argparse
 import sys
 import time
+import urllib3
 import warnings
 
 def _standardizeOEISid(oeisID: str) -> str:
@@ -149,22 +123,56 @@ def _getOEISofficial(pathFilenameCache: Path, url: str) -> None | str:
 
 	if not tryCache:
 		if not url.startswith(("http:", "https:")):
-			message = "URL must start with 'http:' or 'https:'"
+			message: str = "URL must start with 'http:' or 'https:'"
 			raise ValueError(message)
 
+		cachedInformation: str | None = None
+		cacheIsReadable: bool = False
+		if pathFilenameCache.exists():
+			try:
+				cachedInformation = pathFilenameCache.read_text(encoding="utf-8")
+				cacheIsReadable = True
+			except OSError:
+				cacheIsReadable = False
+
+		headers: dict[str, str] | None = None
+		if cacheIsReadable:
+			cacheDatetime: datetime = datetime.fromtimestamp(pathFilenameCache.stat().st_mtime, tz=UTC)
+			headers = {"If-Modified-Since": format_datetime(cacheDatetime, usegmt=True)}
+
+		httpPoolManager = urllib3.PoolManager(retries=False)
 		try:
-			with urlopen(url) as response:  # noqa: S310
-				oeisInformationRaw = response.read().decode('utf-8')
-			oeisInformation = str(oeisInformationRaw)
-			writeStringToHere(oeisInformation, pathFilenameCache)
-		except (HTTPError, URLError):
-			oeisInformation = pathFilenameCache.read_text(encoding="utf-8")
+			response = httpPoolManager.request(
+				"GET"
+				, url
+				, headers=headers
+				, preload_content=True
+				, decode_content=True
+			)
+			if response.status == 304:
+				oeisInformation = cachedInformation
+				if cacheIsReadable:
+					pathFilenameCache.touch()
+			elif response.status == 200:
+				oeisInformation = response.data.decode("utf-8")
+				if (cachedInformation is not None) and (oeisInformation == cachedInformation):
+					pathFilenameCache.touch()
+				else:
+					writeStringToHere(oeisInformation, pathFilenameCache)
+			else:
+				oeisInformation = cachedInformation
+		except urllib3.exceptions.HTTPError:
+			oeisInformation = cachedInformation
+		finally:
+			httpPoolManager.clear()
 
 	if not oeisInformation:
-		warnings.warn(f"Failed to retrieve OEIS sequence information for {pathFilenameCache.stem}.", stacklevel=2)
+		message: str = f"Failed to retrieve OEIS sequence information for {pathFilenameCache.stem}."
+		warnings.warn(message, stacklevel=2)
 
 	return oeisInformation
 
+@cache
 def getOEISidValues(oeisID: str) -> dict[int, int]:
 	"""Retrieve known sequence values for a specified OEIS sequence.
 
@@ -202,6 +210,7 @@ def getOEISidValues(oeisID: str) -> dict[int, int]:
 		return _parseBFileOEIS(oeisInformation)
 	return {-1: -1}
 
+@cache
 def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	"""Retrieve the description and offset metadata for an OEIS sequence.
 
@@ -258,6 +267,8 @@ def getOEISidInformation(oeisID: str) -> tuple[str, int]:
 	description: str = ' '.join(listDescriptionDeconstructed)
 	return description, offset
 
+#======== Dictionaries of OEIS sequence metadata ==============================================================
+
 def _makeDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMapFolding]:
 	"""Construct the comprehensive settings dictionary for all implemented OEIS sequences.
 
@@ -294,22 +305,27 @@ def _makeDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMapFolding]:
 		)
 	return dictionaryOEIS
 
+def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
+	dictionary: dict[str, MetadataOEISid] = {}
+	for oeisID in packageSettings.OEISidManuallySet:
+		valuesKnownSherpa: dict[int, int] = getOEISidValues(oeisID)
+		descriptionSherpa, offsetSherpa = getOEISidInformation(oeisID)
+		dictionary[oeisID] = MetadataOEISid(
+			description=descriptionSherpa,
+			offset=offsetSherpa,
+			valuesKnown=valuesKnownSherpa,
+			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1,
+		)
+	return dictionary
+
 dictionaryOEISMapFolding: dict[str, MetadataOEISidMapFolding] = _makeDictionaryOEISMapFolding()
 """Metadata for each MapFolding OEIS ID."""
 
-def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
-	"""Make a `mapShape` to known `foldsTotal` dictionary.
+dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
 
-	Returns
-	-------
-	dictionaryFoldsTotalKnown : dict[tuple[int, ...], int]
-		A dictionary where keys are tuples representing map shapes and values are the total number
-		of distinct folding patterns for those shapes.
+#======== getFoldsTotalKnown ==============================================================
 
-	"""
-	return dict(chain.from_iterable(zip(map(oeisIDmetadata['getMapShape'], oeisIDmetadata['valuesKnown'].keys())
-	, oeisIDmetadata['valuesKnown'].values(), strict=True) for oeisID, oeisIDmetadata in dictionaryOEISMapFolding.items() if oeisID != 'A007822'))
-
+@cache
 def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	"""Retrieve the known total number of distinct folding patterns for a given map shape.
 
@@ -331,6 +347,21 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	"""
 	lookupFoldsTotal: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
 	return lookupFoldsTotal.get(tuple(mapShape), 0)
+
+def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
+	"""Make a `mapShape` to known `foldsTotal` dictionary.
+
+	Returns
+	-------
+	dictionaryFoldsTotalKnown : dict[tuple[int, ...], int]
+		A dictionary where keys are tuples representing map shapes and values are the total number
+		of distinct folding patterns for those shapes.
+
+	"""
+	return dict(chain.from_iterable(zip(map(oeisIDmetadata['getMapShape'], oeisIDmetadata['valuesKnown'].keys())
+	, oeisIDmetadata['valuesKnown'].values(), strict=True) for oeisID, oeisIDmetadata in dictionaryOEISMapFolding.items() if oeisID != 'A007822'))
+
+#======== OEIS for n ==============================================================
 
 def _formatHelpText() -> str:
 	"""Format comprehensive help text for both command-line and interactive use.
@@ -483,29 +514,17 @@ def getOEISids() -> None:
 	"""
 	print(_formatHelpText())  # noqa: T201
 
-def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
-	dictionary: dict[str, MetadataOEISid] = {}
-	for oeisID in packageSettings.OEISidManuallySet:
-		valuesKnownSherpa: dict[int, int] = getOEISidValues(oeisID)
-		descriptionSherpa, offsetSherpa = getOEISidInformation(oeisID)
-		dictionary[oeisID] = MetadataOEISid(
-			description=descriptionSherpa,
-			offset=offsetSherpa,
-			valuesKnown=valuesKnownSherpa,
-			valueUnknown=max(valuesKnownSherpa.keys(), default=0) + 1,
-		)
-	return dictionary
+# SEMIOTICS `NOTcountingFolds`: improve identifier.
 
-dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
-
-if __name__ == "__main__":
-	getOEISids()
-
-
-def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
-		, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
-		, CPUlimit: bool | float | int | None = None  # noqa: FBT001
-	) -> int:
+# TODO A long time ago, I had an explicit rule written in "oeis.py" that the module contained only OEIS stuff and ALL OEIS stuff.
+# This function is fundamentally an OEIS function, but I have been trying to treat it the same as `countingFolds`. That mismatch
+# is a major reason for the many problems I've had with semiotics and flow design. `oeisIDfor_n` _might_ be the correct identifier
+# for this function. I created `oeisIDfor_n` a very very very long time ago, and I think my brain might have locked into it being
+# a frontend for `countFolds`. I made `oeisIDfor_n` before I had a need for the `flow` parameter. Since creating the `flow`
+# parameter, I have been trying to figure out how to put it into `oeisIDfor_n`. For a long time, `oeisIDfor_n` would call numba
+# theorem2 because it was the fastest, but I made numba an optional dependency. All of these seemingly unrelated issues underscore
+# the importance of the semiotics-first paradigm (for me).
+def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None, CPUlimit: bool | float | int | None = None) -> int:  # noqa: FBT001
 	"""You can compute the n-th term of specified OEIS sequences using specialized algorithms.
 
 	(AI generated docstring)
@@ -747,4 +766,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None
 		saveFoldsTotal(pathFilenameFoldsTotal, countTotal)
 
 	return countTotal
+
+if __name__ == "__main__":
+	getOEISids()
 

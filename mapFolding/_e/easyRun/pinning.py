@@ -47,9 +47,9 @@ if __name__ == '__main__':
 		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
+		state: EliminationState = pinLeavesDimensions0零一(state)
 		state: EliminationState = pinLeavesDimension首二(state)
 		state: EliminationState = pinPile零Ante首零(state)
-		state: EliminationState = pinLeavesDimensions0零一(state)
 		print(state.sumsOfProductsOfDimensionsNearest首)
 		pprint(dictionaryPileRanges := getDictionaryPileRanges(state), width=200)
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))

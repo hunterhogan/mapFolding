@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.18.0"
+version = "0.18.1"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -55,6 +55,7 @@ dependencies = [
   "numpy",
   "platformdirs",
   "tqdm",
+  "urllib3",
 ]
 optional-dependencies = { development = [
   "gmpy2-stubs",

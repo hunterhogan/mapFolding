@@ -195,13 +195,3 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	return foldsTotal
 
-# SEMIOTICS `NOTcountingFolds`: improve identifier.
-
-# TODO A long time ago, I had an explicit rule written in "oeis.py" that the module contained only OEIS stuff and ALL OEIS stuff.
-# This function is fundamentally an OEIS function, but I have been trying to treat it the same as `countingFolds`. That mismatch
-# is a major reason for the many problems I've had with semiotics and flow design. `oeisIDfor_n` _might_ be the correct identifier
-# for this function. I created `oeisIDfor_n` a very very very long time ago, and I think my brain might have locked into it being
-# a frontend for `countFolds`. I made `oeisIDfor_n` before I had a need for the `flow` parameter. Since creating the `flow`
-# parameter, I have been trying to figure out how to put it into `oeisIDfor_n`. For a long time, `oeisIDfor_n` would call numba
-# theorem2 because it was the fastest, but I made numba an optional dependency. All of these seemingly unrelated issues underscore
-# the importance of the semiotics-first paradigm (for me).
