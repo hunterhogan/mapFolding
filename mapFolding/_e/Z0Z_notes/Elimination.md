@@ -57,6 +57,7 @@ Analytically, the leaves differ by one in exactly one dimension, which means the
 - For all other magnitudes in `state.productsOfDimensions[0:-2]`, the total number of differences of that magnitude is always equal to the total number of differences of the negative of that magnitude.
 - The signs of the magnitudes alternate: if the difference between two leaves is 2, for example, then before there can be another difference of 2, there must be a difference of -2.
 - Because `state.leavesTotal // 2` always has one more than `- state.leavesTotal // 2`, the first and last differences with magnitude `state.leavesTotal // 2` are positive.
+- Because the other magnitudes have equal numbers of positive and negative differences, the first and last differences with those magnitudes are opposite in sign.
 
 #### The absolute value of the differences in two consecutive piles cannot be the same
 

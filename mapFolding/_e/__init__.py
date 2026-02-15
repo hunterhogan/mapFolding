@@ -2,9 +2,9 @@
 
 # isort: split
 from mapFolding._e._theTypes import (
-	DimensionIndex as DimensionIndex, Folding as Folding, Leaf as Leaf, LeafOrPileRangeOfLeaves as LeafOrPileRangeOfLeaves,
-	PermutationSpace as PermutationSpace, Pile as Pile, PileRangeOfLeaves as PileRangeOfLeaves,
-	PilesWithPileRangeOfLeaves as PilesWithPileRangeOfLeaves, PinnedLeaves as PinnedLeaves)
+	DimensionIndex as DimensionIndex, Folding as Folding, Leaf as Leaf, LeafOptions as LeafOptions, LeafSpace as LeafSpace,
+	PermutationSpace as PermutationSpace, Pile as Pile, PinnedLeaves as PinnedLeaves,
+	UndeterminedPiles as UndeterminedPiles)
 
 # isort: split
 from mapFolding._e._semiotics import (
@@ -15,14 +15,12 @@ from mapFolding._e._semiotics import (
 # isort: split
 from mapFolding._e._beDRY import (
 	bifurcatePermutationSpace as bifurcatePermutationSpace, DOTgetPileIfLeaf as DOTgetPileIfLeaf,
-	DOTgetPileIfPileRangeOfLeaves as DOTgetPileIfPileRangeOfLeaves, DOTitems as DOTitems, DOTkeys as DOTkeys,
-	DOTvalues as DOTvalues, getAntiPileRangeOfLeaves as getAntiPileRangeOfLeaves,
-	getIteratorOfLeaves as getIteratorOfLeaves, getPileRangeOfLeaves as getPileRangeOfLeaves,
+	DOTgetPileIfLeafOptions as DOTgetPileIfLeafOptions, DOTitems as DOTitems, DOTkeys as DOTkeys, DOTvalues as DOTvalues,
+	getIteratorOfLeaves as getIteratorOfLeaves, getLeafAntiOptions as getLeafAntiOptions, getLeafOptions as getLeafOptions,
 	getProductsOfDimensions as getProductsOfDimensions, getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
 	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首,
 	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, JeanValjean as JeanValjean,
-	mapShapeIs2上nDimensions as mapShapeIs2上nDimensions, pileRangeOfLeavesAND as pileRangeOfLeavesAND,
-	reverseLookup as reverseLookup)
+	leafOptionsAND as leafOptionsAND, mapShapeIs2上nDimensions as mapShapeIs2上nDimensions, reverseLookup as reverseLookup)
 
 # isort: split
 from mapFolding._e._measure import (

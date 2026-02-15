@@ -4,9 +4,9 @@ from itertools import pairwise, product as CartesianProduct
 from mapFolding import packageSettings
 from mapFolding._e import (
 	getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin,
-	PilesWithPileRangeOfLeaves, PinnedLeaves)
+	PinnedLeaves, UndeterminedPiles)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import between吗, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves
+from mapFolding._e.filters import between吗, extractPinnedLeaves, extractUndeterminedPiles
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
@@ -26,9 +26,9 @@ def count(state: EliminationState) -> EliminationState:
 	for aPile, aLeaf in dictionaryOfPileLeaf.items():
 		model.add(listLeavesInPileOrder[aPile] == aLeaf)
 
-	pilesWithPileRangeOfLeaves: PilesWithPileRangeOfLeaves = extractPilesWithPileRangeOfLeaves(state.permutationSpace)
-	for aPile, aLeaf in pilesWithPileRangeOfLeaves.items():
-		model.add_allowed_assignments([listLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(aLeaf))))
+	pilesUndetermined: UndeterminedPiles = extractUndeterminedPiles(state.permutationSpace)
+	for aPile, leafOptions in pilesUndetermined.items():
+		model.add_allowed_assignments([listLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(leafOptions))))
 
 #======== Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal ============================
 	model.add(listLeavesInPileOrder[pileOrigin] == leafOrigin)

@@ -66,8 +66,7 @@ from cytoolz.functoolz import curry as syntacticCurry
 from gmpy2 import mpz
 from hunterMakesPy import Ordinals
 from hunterMakesPy.parseParameters import intInnit
-from mapFolding._e import (
-	Leaf, LeafOrPileRangeOfLeaves, PermutationSpace, Pile, PileRangeOfLeaves, PilesWithPileRangeOfLeaves, PinnedLeaves, 零)
+from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles, 零
 from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract
 from typing import Any, overload
 from typing_extensions import TypeIs
@@ -111,23 +110,23 @@ def hasDuplicates(flatContainer: Iterable[Any]) -> bool:
 	return not allUnique吗(flatContainer)
 
 @syntacticCurry
-def leafIsInPileRange(leaf: Leaf, pileRangeOfLeaves: PileRangeOfLeaves) -> bool:
-	"""You can test whether `leaf` is present in `pileRangeOfLeaves`.
+def leafIsInLeafOptions(leaf: Leaf, leafOptions: LeafOptions) -> bool:
+	"""You can test whether `leaf` is present in `leafOptions`.
 
-	You can use `leafIsInPileRange` in an `if` statement, or you can pass `leafIsInPileRange`
+	You can use `leafIsInLeafOptions` in an `if` statement, or you can pass `leafIsInLeafOptions`
 	as a predicate to a filtering utility described in the module docstring.
 
 	Parameters
 	----------
 	leaf : Leaf
 		`leaf` index.
-	pileRangeOfLeaves : PileRangeOfLeaves
+	leafOptions : LeafOptions
 		Bitset of `leaf` membership for a pile.
 
 	Returns
 	-------
 	leafIsPresent : bool
-		`True` if `pileRangeOfLeaves` contains `leaf`.
+		`True` if `leafOptions` contains `leaf`.
 
 	References
 	----------
@@ -135,7 +134,7 @@ def leafIsInPileRange(leaf: Leaf, pileRangeOfLeaves: PileRangeOfLeaves) -> bool:
 		https://gmpy2.readthedocs.io/en/latest/mpz.html
 
 	"""
-	return pileRangeOfLeaves.bit_test(leaf)
+	return leafOptions.bit_test(leaf)
 
 @syntacticCurry
 def leafIsNotPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
@@ -258,11 +257,11 @@ def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	Returns
 	-------
 	pileIsOpen : bool
-		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is a `PileRangeOfLeaves`.
+		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is `LeafOptions`.
 
 	See Also
 	--------
-	thisIsALeaf, thisIsAPileRangeOfLeaves
+	thisIsALeaf, thisIsLeafOptions
 	"""
 	return thisIsALeaf(permutationSpace[pile])
 
@@ -280,7 +279,7 @@ def pileIsOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	Returns
 	-------
 	pileIsOpen : bool
-		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is a `PileRangeOfLeaves`.
+		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is `LeafOptions`.
 	"""
 	return not thisIsALeaf(permutationSpace.get(pile))
 
@@ -311,35 +310,35 @@ def thisHasThat[个](this: Iterable[个], that: 个) -> bool:
 	"""
 	return that in this
 
-def thisIsALeaf(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeIs[Leaf]:
-	"""Return True if `leafOrPileRangeOfLeaves` is a `leaf`.
+def thisIsALeaf(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
+	"""Return True if `leafSpace` is a `leaf`.
 
 	Parameters
 	----------
-	leafOrPileRangeOfLeaves : LeafOrPileRangeOfLeaves | None
-		`leaf`, `pile`-range, or `None` to check.
+	leafSpace : LeafSpace | None
+		`leaf`, `leafOptions`, or `None` to check.
 
 	Returns
 	-------
 	intIsProbablyALeaf : TypeIs[int]
 		Technically, we only know the type is `int`.
 	"""
-	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, int)
+	return (leafSpace is not None) and isinstance(leafSpace, int)
 
-def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None) -> TypeIs[PileRangeOfLeaves]:
-	"""Return True if `leafOrPileRangeOfLeaves` is a pile's range of leaves.
+def thisIsLeafOptions(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
+	"""Return True if `leafSpace` is a pile's leaf-options.
 
 	Parameters
 	----------
-	leafOrPileRangeOfLeaves : LeafOrPileRangeOfLeaves | None
-		`leaf`, `pile`-range, or `None` to check.
+	leafSpace : LeafSpace | None
+		`leaf`, `leafOptions`, or `None` to check.
 
 	Returns
 	-------
-	youHaveAPileRange : TypeIs[PileRangeOfLeaves]
-		Congrats, you have a pile range!
+	youHaveLeafOptions : TypeIs[LeafOptions]
+		Congrats, you have leaf options!
 	"""
-	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, mpz)
+	return (leafSpace is not None) and isinstance(leafSpace, mpz)
 
 #======== Filtering functions ================================================
 
@@ -354,12 +353,12 @@ def exclude[个](flatContainer: Sequence[个], indices: Iterable[int]) -> Iterat
 	return extract(flatContainer, indicesInclude)
 
 def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
-	"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: pileRangeOfLeaves`.
+	"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
 
 	Parameters
 	----------
 	permutationSpace : PermutationSpace
-		Dictionary of `pile: leaf` and `pile: pileRangeOfLeaves`.
+		Dictionary of `pile: leaf` and `pile: leafOptions`.
 
 	Returns
 	-------
@@ -368,18 +367,18 @@ def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	"""
 	return dict(sorted(leafFilter(thisIsALeaf, permutationSpace).items()))
 
-def extractPilesWithPileRangeOfLeaves(permutationSpace: PermutationSpace) -> PilesWithPileRangeOfLeaves:
-	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
+def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> UndeterminedPiles:
+	"""Return a dictionary of all leaf-options in `permutationSpace`.
 
 	Parameters
 	----------
 	permutationSpace : PermutationSpace
-		Dictionary of `pile: leaf` and `pile: pileRangeOfLeaves`.
+		Dictionary of `pile: leaf` and `pile: leafOptions`.
 
 	Returns
 	-------
-	pilesWithPileRangeOfLeaves : dict[int, PileRangeOfLeaves]
-		Dictionary of `pile: pileRangeOfLeaves`, if a `pileRangeOfLeaves` is defined at `pile`.
+	pilesUndetermined : dict[int, LeafOptions]
+		Dictionary of `pile: leafOptions`, if `leafOptions` is defined at `pile`.
 	"""
-	return leafFilter(thisIsAPileRangeOfLeaves, permutationSpace)
+	return leafFilter(thisIsLeafOptions, permutationSpace)
 

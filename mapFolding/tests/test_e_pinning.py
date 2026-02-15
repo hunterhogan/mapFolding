@@ -1,7 +1,6 @@
 from collections.abc import Callable
-from gmpy2 import xmpz
+from gmpy2 import mpz
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import extractPinnedLeaves
 from mapFolding._e.pin2上nDimensions import (
 	pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds)
 from numpy.typing import NDArray
@@ -23,13 +22,14 @@ def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8
 
 	for permutationSpace in state.listPermutationSpace:
 		maskRowsMatchThisDictionary: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-		for pile, leafOrPileRangeOfLeaves in extractPinnedLeaves(permutationSpace).items():
-			if isinstance(leafOrPileRangeOfLeaves, int):
-				maskRowsMatchThisDictionary = maskRowsMatchThisDictionary & (arrayFoldings[:, pile] == leafOrPileRangeOfLeaves)
+		for pile, leafSpace in permutationSpace.items():
+			if isinstance(leafSpace, int):
+				maskRowsMatchThisDictionary = maskRowsMatchThisDictionary & (arrayFoldings[:, pile] == leafSpace)
 				continue
-			if isinstance(leafOrPileRangeOfLeaves, xmpz):
+			if isinstance(leafSpace, mpz):
+				leafOptions: mpz = leafSpace
 				allowedLeaves: numpy.ndarray = numpy.fromiter(
-					(bool(leafOrPileRangeOfLeaves[leaf]) for leaf in range(state.leavesTotal)),
+					(leafOptions.bit_test(leaf) for leaf in range(state.leavesTotal)),
 					dtype=bool,
 					count=state.leavesTotal,
 				)
