@@ -198,6 +198,7 @@ Malkovich
 mappingproxy
 MASUR
 mathbb
+MATHEMATICA
 Mathématiques
 meandric
 memmap

@@ -45,7 +45,7 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> None:
 
 def getSymmetricFoldsTotal() -> DatatypeFoldsTotal:
 	for _thread in listThreads:
-		queueFutures.put(STOPsignal)  # pyright: ignore[reportArgumentType]
+		queueFutures.put(STOPsignal)  # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
 	for thread in listThreads:
 		thread.join()
 	return symmetricFoldsTotal

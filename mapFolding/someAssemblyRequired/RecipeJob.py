@@ -81,7 +81,7 @@ class RecipeJobTheorem2:
 	"""The map folding computation state containing dimensions and initial values."""
 	foldsTotalEstimated: int = 0
 	"""Estimated total number of folds for progress tracking."""
-	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
+	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
 	"""Deconstructed dataclass metadata for code transformation."""
 
 #-------- Source -----------------------------------------
@@ -109,7 +109,7 @@ class RecipeJobTheorem2:
 	"""Override path for the target module directory."""
 	fileExtension: str = packageSettings.fileExtension
 	"""File extension for generated modules."""
-	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
+	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
 	"""Path for writing fold count results."""
 
 #-------- Logical identifiers, as opposed to physical identifiers ------------------------
@@ -117,7 +117,7 @@ class RecipeJobTheorem2:
 	"""Target package identifier."""
 	logicalPathRoot: identifierDotAttribute | None = None
 	"""Logical path root; probably corresponds to physical filesystem directory."""
-	moduleIdentifier: str = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]
+	moduleIdentifier: str = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
 	"""Target module identifier."""
 	identifierCallable: str = identifierCallableSource
 	"""Name of the counting function in generated module."""

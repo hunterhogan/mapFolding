@@ -242,7 +242,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 		ingredientsModule, ingredientsCount = addLauncherNumbaProgress(ingredientsModule, ingredientsCount, job, spices)
 		spices.parametersNumba['nogil'] = True
 	else:
-		ingredientsModule, ingredientsCount = addLauncher(ingredientsModule, ingredientsCount, job)  # noqa: ERA001
+		ingredientsModule, ingredientsCount = addLauncher(ingredientsModule, ingredientsCount, job)
 		# ingredientsModule, ingredientsCount = addLauncherA007822(ingredientsModule, ingredientsCount, job)
 
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
@@ -311,6 +311,6 @@ def A007822(n: int) -> None:
 	makeJobNumba(aJob, spices)
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (2,21)  # noqa: ERA001
-	fromMapShape(mapShape)  # noqa: ERA001
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (2,21)
+	fromMapShape(mapShape)
 	# A007822(8)
