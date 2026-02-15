@@ -1,6 +1,5 @@
 """Compute a(n) for an OEIS ID by computing other OEIS IDs.
 
-TODO Implement A178961 for unknown values of A001010
 TODO A223094 For n >= 3: a(n) = n! - Sum_{k=3..n-1} (a(k)*n!/k!) - A000682(n+1). - _Roger Ford_, Aug 24 2024
 TODO A301620 a(n) = Sum_{k=3..floor((n+3)/2)} (A259689(n+1,k)*(k-2)). - _Roger Ford_, Dec 10 2018
 
@@ -88,7 +87,7 @@ def A001010(n: int) -> int:
         https://oeis.org/A001010
     """
     if n == 1:
-        countTotal = 1
+        countTotal: int = 1
     elif n & 1:
         countTotal = 2 * _A007822((n - 1) // 2 + 1)
     else:
@@ -120,7 +119,7 @@ def A001011(n: int) -> int:
         https://oeis.org/A001011
     """
     if n == 1:
-        countTotal = 1
+        countTotal: int = 1
     else:
         countTotal = (A001010(n) + A000136(n)) // 4
     return countTotal
@@ -151,7 +150,7 @@ def A005315(n: int) -> int:
         https://oeis.org/A005315
     """
     if n in {0, 1}:
-        countTotal = 1
+        countTotal: int = 1
     else:
         countTotal = _A005316(2 * n - 1)
     return countTotal
@@ -207,7 +206,7 @@ def A077460(n: int) -> int:
         https://oeis.org/A077460
     """
     if n in {0, 1}:
-        countTotal = 1
+        countTotal: int = 1
     elif n & 1:
         countTotal = (A005315(n) + _A005316(n) + A060206((n - 1) // 2)) // 4
     else:
@@ -239,7 +238,7 @@ def A078591(n: int) -> int:
         https://oeis.org/A078591
     """
     if n in {0, 1}:
-        countTotal = 1
+        countTotal: int = 1
     else:
         countTotal = A005315(n) // 2
     return countTotal
@@ -271,7 +270,10 @@ def A178961(n: int) -> int:
     A001010valuesKnown: dict[int, int] = dictionaryOEIS['A001010']['valuesKnown']
     countTotal: int = 0
     for n下i in range(1, n + inclusive):
-        countTotal += A001010valuesKnown[n下i]
+        if n下i in A001010valuesKnown:
+            countTotal += A001010valuesKnown[n下i]
+        else:
+            countTotal += A001010(n下i)
     return countTotal
 
 def A223094(n: int) -> int:
@@ -325,7 +327,7 @@ def A259702(n: int) -> int:
         https://oeis.org/A259702
     """
     if n == 2:
-        countTotal = 0
+        countTotal: int = 0
     else:
         countTotal = _A000682(n) // 2 - _A000682(n - 1)
     return countTotal
