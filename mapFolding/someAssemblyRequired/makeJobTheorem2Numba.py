@@ -11,9 +11,10 @@ progress integration for long-running calculations, and launcher generation for 
 from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy.dataStructures import autoDecodingRLE
-from mapFolding import (
-	DatatypeLeavesTotal, dictionaryOEIS, getFoldsTotalKnown, getPathFilenameFoldsTotal, packageSettings)
+from mapFolding import DatatypeLeavesTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
+from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
+from mapFolding.oeis import dictionaryOEIS, getFoldsTotalKnown
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultA007822, dictionaryEstimatesMapFolding, IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport, RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba

@@ -1,11 +1,11 @@
 # ruff: noqa
 from collections import ChainMap
-from mapFolding import ansiColorReset, ansiColors, dictionaryOEIS, dictionaryOEISMapFolding
-from mapFolding.basecamp import NOTcountingFolds
+from mapFolding import ansiColorReset, ansiColors
+from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, NOTcountingFolds
 import sys
 import time
 
-dictionaryONE = ChainMap(dictionaryOEISMapFolding, dictionaryOEIS) # pyright: ignore[reportArgumentType]
+dictionaryONE = ChainMap(dictionaryOEISMapFolding, dictionaryOEIS) # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
 
 if __name__ == '__main__':
 	def _write() -> None:
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 	for n in dict.fromkeys(nList):
 
 		timeStart = time.perf_counter()
-		countTotal = NOTcountingFolds(oeisID, n, flow, CPUlimit)
+		countTotal = NOTcountingFolds(oeisID, n, flow, None, CPUlimit)
 
 		_write()
 

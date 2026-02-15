@@ -1,8 +1,8 @@
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
-from mapFolding import getLeavesTotal
 from mapFolding._e import (
 	Folding, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, Leaf,
 	LeafOrPileRangeOfLeaves, PermutationSpace, Pile)
+from mapFolding.beDRY import getLeavesTotal
 from math import prod
 import dataclasses
 

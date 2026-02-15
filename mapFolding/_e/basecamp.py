@@ -1,8 +1,9 @@
 # ruff: noqa: E701
-from mapFolding import (
-	defineProcessorLimit, getPathFilenameFoldsTotal, packageSettings, saveFoldsTotal, saveFoldsTotalFAILearly)
+from mapFolding import packageSettings
 from mapFolding._e import mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding.beDRY import defineProcessorLimit
+from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from os import PathLike
 from pathlib import Path, PurePath
 

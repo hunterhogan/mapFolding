@@ -10,7 +10,7 @@ from mapFolding._e import (
 	mapShapeIs2上nDimensions, Pile, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten
-from operator import add, iadd, isub, mul
+from operator import add, iadd, mul
 from pprint import pprint
 from typing import TYPE_CHECKING
 

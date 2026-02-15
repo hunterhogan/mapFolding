@@ -21,8 +21,8 @@ integrity throughout the recursive analysis while providing the structured data
 access patterns that enable efficient result persistence and retrieval.
 """
 from mapFolding import (
-	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	getConnectionGraph, getLeavesTotal, makeDataContainer)
+	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal)
+from mapFolding.beDRY import getConnectionGraph, getLeavesTotal, makeDataContainer
 import dataclasses
 
 @dataclasses.dataclass(slots=True)

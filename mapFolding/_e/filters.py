@@ -65,6 +65,7 @@ from cytoolz.dicttoolz import valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
 from gmpy2 import mpz
 from hunterMakesPy import Ordinals
+from hunterMakesPy.parseParameters import intInnit
 from mapFolding._e import (
 	Leaf, LeafOrPileRangeOfLeaves, PermutationSpace, Pile, PileRangeOfLeaves, PilesWithPileRangeOfLeaves, PinnedLeaves, 零)
 from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract
@@ -74,18 +75,16 @@ from typing_extensions import TypeIs
 #======== Boolean antecedents ================================================
 
 @syntacticCurry
-def between[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小于) -> bool:
+def between吗[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小于) -> bool:
 	"""Inclusive `floor <= comparand <= ceiling`."""
 	return floor <= comparand <= ceiling
 
-# TODO `consecutive` and `intInnit`?
-# TODO `consecutive`: `raise` if not `int`?
-# def consecutive[个: Iterable[int]](flatContainer: 个) -> bool:
-def consecutive[个: Iterable[int]](flatContainer: 个) -> TypeIs[个]:
-	"""The integers in the `flatContainer` are consecutive, either ascending or descending."""
-	return (all(isinstance(item, int) for item in flatContainer)
-	and ((len(list(next(consecutive_groups(flatContainer)))) == len(list(flatContainer)))
-		or (len(list(next(consecutive_groups(always_reversible(flatContainer))))) == len(list(flatContainer)))))
+# NOTE `个` typevar exists to help ty with static type checking. See https://github.com/astral-sh/ty/issues/2799.
+def consecutive吗[个: Iterable[int]](flatContainer: 个) -> bool:
+	"""Are the integers in `flatContainer` consecutive, either ascending or descending?"""
+	ImaListOfInt: list[int] = intInnit(flatContainer, 'flatContainer', Iterable[int])
+	return ((len(list(next(consecutive_groups(ImaListOfInt)))) == len(list(ImaListOfInt)))
+		or (len(list(next(consecutive_groups(always_reversible(ImaListOfInt))))) == len(list(ImaListOfInt))))
 
 def hasDuplicates(flatContainer: Iterable[Any]) -> bool:
 	"""You can test whether `flatContainer` contains duplicate values.
@@ -204,11 +203,10 @@ def mappingHasKey[文件: Hashable](lookup: Mapping[文件, Any], key: 文件) -
 	return key in lookup
 
 def notLeafOriginOrLeaf零(leaf: Leaf) -> bool:
-	"""You can test whether `leaf` is greater than `零`.
+	"""Test to ensure `leaf` is not `leafOrigin` (0) or `leaf零` (1).
 
-	You can use `notLeafOriginOrLeaf零` in an `if` statement, or you can pass
-	`notLeafOriginOrLeaf零` as a predicate to a filtering utility described in the module
-	docstring.
+	You can use `notLeafOriginOrLeaf零` in an `if` statement, or you can pass `notLeafOriginOrLeaf零` as a predicate to a
+	filtering utility described in the module docstring.
 
 	Parameters
 	----------
@@ -223,8 +221,6 @@ def notLeafOriginOrLeaf零(leaf: Leaf) -> bool:
 	References
 	----------
 	[1] mapFolding._e.零
-		Internal package reference
-
 	"""
 	return 零 < leaf
 
@@ -247,7 +243,7 @@ def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	return pileLast != pile
 
 @syntacticCurry
-def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> TypeIs[Leaf]:
+def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	"""Return True if `pile` is not presently pinned in `permutationSpace`.
 
 	Do you want to know if the pile is open or do you really want to know the Python `type` of the value at that key?
@@ -345,7 +341,7 @@ def thisIsAPileRangeOfLeaves(leafOrPileRangeOfLeaves: LeafOrPileRangeOfLeaves | 
 	"""
 	return (leafOrPileRangeOfLeaves is not None) and isinstance(leafOrPileRangeOfLeaves, mpz)
 
-#======== Filter functions ================================================
+#======== Filtering functions ================================================
 
 def exclude[个](flatContainer: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
 	"""Yield items from `flatContainer` whose positions are not in `indices`."""

@@ -25,10 +25,9 @@ show how to balance performance with system resource constraints.
 
 from collections.abc import Callable
 from hunterMakesPy.tests.test_parseParameters import PytestFor_defineConcurrencyLimit
-from mapFolding import (
-	defineProcessorLimit, dictionaryOEISMapFolding, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions,
-	validateListDimensions)
 from mapFolding.basecamp import countFolds
+from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
+from mapFolding.oeis import dictionaryOEISMapFolding, getFoldsTotalKnown
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import Literal
 import pytest

@@ -1,7 +1,7 @@
 # ruff: noqa
 # pyright: basic
-from mapFolding import ansiColorReset, ansiColors, dictionaryOEIS
-from mapFolding.basecamp import NOTcountingFolds
+from mapFolding import ansiColorReset, ansiColors
+from mapFolding.oeis import dictionaryOEIS, NOTcountingFolds
 import gc
 import sys
 import time

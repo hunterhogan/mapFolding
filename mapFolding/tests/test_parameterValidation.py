@@ -28,7 +28,7 @@ dependencies while maintaining clear separation of concerns.
 from collections.abc import Callable
 from hunterMakesPy.parseParameters import intInnit
 from hunterMakesPy.tests.test_parseParameters import PytestFor_intInnit, PytestFor_oopsieKwargsie
-from mapFolding import defineProcessorLimit, getLeavesTotal, validateListDimensions
+from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, validateListDimensions
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import Any, Literal
 import multiprocessing

@@ -13,7 +13,7 @@ from mapFolding._e import (
 	首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.dataDynamic import getDataFrameFoldings
-from mapFolding._e.filters import between, exclude
+from mapFolding._e.filters import between吗, exclude
 from mapFolding._e.pin2上nDimensions import pinPilesAtEnds
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
 from mapFolding._e.Z0Z_analysisPython.toolkit import detectPermutationSpaceErrors, PermutationSpaceStatus
@@ -99,7 +99,7 @@ def writeExclusionDataCollated(listDimensions: Sequence[int] = (5, 6)) -> list[P
 			listIndicesExcluded: list[IndexPilesTotal] = sorted(map(indexOf, repeat(listOfPiles), listPilesExcluded))
 
 			pilesTotal = len(listOfPiles)
-			denominators: list[int] = list(filter(between(0, pilesTotal), denominatorsValid))
+			denominators: list[int] = list(filter(between吗(0, pilesTotal), denominatorsValid))
 			dictionaryIndices[mapKind].setdefault(leafExcluder.__name__, {}).setdefault(pileExcluder.__name__, {})[leafExcluded.__name__] = [
 				expressIndexAsFractionAddend(index, pilesTotal, tuple(denominators)) for index in listIndicesExcluded]
 			dictionaryIndicesNegative[mapKind].setdefault(leafExcluder.__name__, {}).setdefault(pileExcluder.__name__, {})[leafExcluded.__name__] = [

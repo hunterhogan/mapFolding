@@ -18,21 +18,3 @@ from mapFolding._theTypes import (
 
 # isort: split
 from mapFolding._theSSOT import packageSettings as packageSettings
-
-# isort: split
-from mapFolding.beDRY import (
-	defineProcessorLimit as defineProcessorLimit, getConnectionGraph as getConnectionGraph,
-	getLeavesTotal as getLeavesTotal, getTaskDivisions as getTaskDivisions, makeDataContainer as makeDataContainer,
-	validateListDimensions as validateListDimensions)
-
-# isort: split
-from mapFolding.filesystemToolkit import (
-	getFilenameFoldsTotal as getFilenameFoldsTotal, getPathFilenameFoldsTotal as getPathFilenameFoldsTotal,
-	getPathRootJobDEFAULT as getPathRootJobDEFAULT, saveFoldsTotal as saveFoldsTotal,
-	saveFoldsTotalFAILearly as saveFoldsTotalFAILearly)
-
-# isort: split
-from mapFolding.oeis import (
-	dictionaryOEIS as dictionaryOEIS, dictionaryOEISMapFolding as dictionaryOEISMapFolding,
-	getFoldsTotalKnown as getFoldsTotalKnown, getOEISids as getOEISids, OEIS_for_n as OEIS_for_n,
-	oeisIDfor_n as oeisIDfor_n)

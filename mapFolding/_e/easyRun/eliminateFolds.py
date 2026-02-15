@@ -2,13 +2,14 @@
 # pyright: basic
 from functools import partial
 from itertools import filterfalse
-from mapFolding import ansiColorReset, ansiColors, dictionaryOEISMapFolding, packageSettings
+from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e import PermutationSpace
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import between, extractPinnedLeaves
+from mapFolding._e.filters import between吗, extractPinnedLeaves
 from mapFolding._e.pin2上nDimensions import (
 	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零)
+from mapFolding.oeis import dictionaryOEISMapFolding
 from os import PathLike
 from pathlib import Path, PurePath
 from tqdm import tqdm

@@ -24,7 +24,8 @@ research domain.
 """
 
 from collections.abc import Callable, Generator, Sequence
-from mapFolding import _theSSOT, getLeavesTotal, makeDataContainer, packageSettings, validateListDimensions
+from mapFolding import _theSSOT, packageSettings
+from mapFolding.beDRY import getLeavesTotal, makeDataContainer, validateListDimensions
 from mapFolding.oeis import oeisIDsImplemented
 from numpy.typing import NDArray
 from pathlib import Path

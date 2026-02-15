@@ -6,7 +6,7 @@ from mapFolding._e import (
 	getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin,
 	PilesWithPileRangeOfLeaves, PinnedLeaves)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import between, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves
+from mapFolding._e.filters import between吗, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
@@ -48,7 +48,7 @@ def count(state: EliminationState) -> EliminationState:
 #======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================
 	if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
 		state.Theorem2Multiplier = 2
-		leafOrigin下_aDimension: int = last(filter(between(0, state.leafLast // 2), state.productsOfDimensions))
+		leafOrigin下_aDimension: int = last(filter(between吗(0, state.leafLast // 2), state.productsOfDimensions))
 		model.add(listPilingsInLeafOrder[leafOrigin下_aDimension] < listPilingsInLeafOrder[2 * leafOrigin下_aDimension])
 
 #======== Forbidden inequalities ============================

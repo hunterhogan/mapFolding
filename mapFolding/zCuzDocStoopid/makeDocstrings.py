@@ -3,7 +3,8 @@ from astToolkit import Grab, IfThis, Make, NodeChanger, parsePathFilename2astMod
 from astToolkit.transformationTools import makeDictionaryFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writeStringToHere
-from mapFolding import dictionaryOEIS, dictionaryOEISMapFolding, packageSettings
+from mapFolding import packageSettings
+from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding
 from pathlib import Path
 import ast
 

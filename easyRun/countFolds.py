@@ -7,8 +7,9 @@ prints colorized output indicating whether computed values match expected values
 # ruff: noqa
 # pyright: basic
 from collections.abc import Sequence
-from mapFolding import ansiColorReset, ansiColors, dictionaryOEISMapFolding
+from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countFolds
+from mapFolding.oeis import dictionaryOEISMapFolding
 from os import PathLike
 from pathlib import PurePath
 import sys

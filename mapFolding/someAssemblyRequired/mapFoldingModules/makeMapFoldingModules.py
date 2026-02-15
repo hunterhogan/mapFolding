@@ -4,7 +4,7 @@ from astToolkit import (
 	parseLogicalPath2astModule, parsePathFilename2astModule, Then)
 from astToolkit.containers import (
 	astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports)
-from astToolkit.transformationTools import inlineFunctionDef, removeUnusedParameters, write_astModule
+from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding import packageSettings

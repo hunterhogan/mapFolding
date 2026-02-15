@@ -25,9 +25,9 @@ The `test_writeJobNumba` function shows how to test dynamically generated code,
 which is useful if you're working with the code synthesis features of the package.
 """
 
-from mapFolding import dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, oeisIDfor_n
-from mapFolding.basecamp import countFolds, NOTcountingFolds
+from mapFolding.basecamp import countFolds
 from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, NOTcountingFolds, oeisIDfor_n
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -40,9 +40,9 @@ import pytest
 import warnings
 
 if TYPE_CHECKING:
-	from os import PathLike
 	from importlib.machinery import ModuleSpec
 	from mapFolding import MetadataOEISid, MetadataOEISidMapFolding
+	from os import PathLike
 	from types import ModuleType
 
 @pytest.mark.parametrize(

@@ -43,7 +43,7 @@ how code transformation and algorithm optimization can significantly reduce comp
 
 To use these values in your own research, you can access them through the OEIS_for_n function:
 ```
-from mapFolding import oeisIDfor_n
+from mapFolding.oeis import oeisIDfor_n
 result = oeisIDfor_n('A001415', 19)  # For the 2x19 calculation
 result = oeisIDfor_n('A001415', 20)  # For the 2x20 calculation
 ```

@@ -8,7 +8,7 @@ from mapFolding._e import (
 	dimensionThirdNearest首, howManyDimensionsHaveOddParity, Leaf, leafOrigin, mapShapeIs2上nDimensions, Pile, pileOrigin,
 	reverseLookup, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import between, consecutive, exclude, leafIsPinned
+from mapFolding._e.filters import between吗, consecutive吗, exclude, leafIsPinned
 from more_itertools import all_unique, loops
 from operator import add, sub
 
@@ -183,8 +183,8 @@ def getDomainDimension二(state: EliminationState) -> tuple[tuple[int, int, int,
 	return _getDomainDimension二(domain二零and二, domain二一零and二一, state.dimensionsTotal)
 @cache
 def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], domain二一零and二一: tuple[tuple[int, int], ...], dimensionsTotal: int) -> tuple[tuple[int, int, int, int], ...]:
-	domain0corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive, domain二零and二))
-	domain一corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive, domain二一零and二一))
+	domain0corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive吗, domain二零and二))
+	domain一corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive吗, domain二一零and二一))
 	pilesTotal: int = len(domain一corners)
 
 	domainCombined: list[tuple[int, int, int, int]] = []
@@ -289,8 +289,8 @@ def getDomainDimension首二(state: EliminationState) -> tuple[tuple[int, int, i
 	return _getDomainDimension首二(state.dimensionsTotal, domain首零二and首二, domain首零一二and首一二)
 @cache
 def _getDomainDimension首二(dimensionsTotal: int, domain首零二and首二: tuple[tuple[int, int], ...], domain首零一二and首一二: tuple[tuple[int, int], ...]) -> tuple[tuple[int, int, int, int], ...]:
-	domain0corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive, domain首零二and首二))
-	domain一corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive, domain首零一二and首一二))
+	domain0corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive吗, domain首零二and首二))
+	domain一corners: tuple[tuple[int, int], ...] = tuple(filter(consecutive吗, domain首零一二and首一二))
 	pilesTotal: Leaf = len(domain一corners)
 
 	domainCombined: list[tuple[int, int, int, int]] = []
@@ -394,7 +394,7 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 	pilesTotal: int = len(domain零)
 	pilesFewerDomain0: int = pilesTotal - len(domain0)
 
-	for indexDomain零, pileOfLeaf零 in enumerate(filter(between(pileOrigin, 首零(dimensionsTotal)-零), domain零)):
+	for indexDomain零, pileOfLeaf零 in enumerate(filter(between吗(pileOrigin, 首零(dimensionsTotal)-零), domain零)):
 		indicesDomain0ToExclude: list[int] = []
 
 		dimensionTail: int = dimensionNearestTail(pileOfLeaf零 - is_odd(pileOfLeaf零))

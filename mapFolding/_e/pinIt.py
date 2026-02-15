@@ -20,7 +20,7 @@ from mapFolding._e import (
 	PermutationSpace, Pile, PileRangeOfLeaves)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
-	between, extractPinnedLeaves, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen,
+	between吗, extractPinnedLeaves, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen,
 	pileIsOpen, thisIsALeaf)
 from more_itertools import flatten, ilen
 from operator import getitem
@@ -326,7 +326,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 	if domain_r is None:
 		domain_r = getLeafDomain(state, leaf_r)
 
-	domain_r = filter(between(0, pile_k - inclusive), domain_r)
+	domain_r = filter(between吗(0, pile_k - inclusive), domain_r)
 
 	if rangePile_k is None:
 		rangePile_k = getPileRange(state, pile_k)

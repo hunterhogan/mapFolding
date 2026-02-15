@@ -725,7 +725,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			return dataframeMeanders
 
 		def recordArcCodes(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
-			"""This abstraction makes it easier to do things such as write to disk."""  # noqa: D401, D404
+			"""This abstraction makes it easier to do things such as write to disk."""  # noqa: D404
 			nonlocal dataframeAnalyzed
 
 			indexStopAnalyzed: int = state.indexTarget + int((dataframeMeanders['analyzed'] > 0).sum())

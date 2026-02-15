@@ -37,7 +37,7 @@ def _blender(n: int) -> int:
 			nummaNumma += _goRight(integer, copies)
 			denominator *= _deFactorial(integer, copies)
 		numerator: int = 3 ** (numbinations + nummaNumma)
-		sumReBletionary += Fraction(numerator, denominator) # pyright: ignore[reportAssignmentType]
+		sumReBletionary += Fraction(numerator, denominator) # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
 	return sumReBletionary
 
 @cache

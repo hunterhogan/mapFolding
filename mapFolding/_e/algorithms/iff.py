@@ -26,10 +26,11 @@ from cytoolz.dicttoolz import valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from itertools import combinations, filterfalse, product as CartesianProduct
-from mapFolding import getLeavesTotal, inclusive
+from mapFolding import inclusive
 from mapFolding._e import Folding, Leaf, PermutationSpace, Pile
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import between, extractPinnedLeaves
+from mapFolding._e.filters import between吗, extractPinnedLeaves
+from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from operator import floordiv, indexOf
 
@@ -523,7 +524,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
-		for pile, leaf in sorted(leafFilter(between(0, state.leafLast - inclusive), state.permutationSpace).items()):
+		for pile, leaf in sorted(leafFilter(between吗(0, state.leafLast - inclusive), state.permutationSpace).items()):
 			leafCrease: int | None = getCreasePost(state.mapShape, leaf, dimension)
 			if leafCrease is None:
 				continue

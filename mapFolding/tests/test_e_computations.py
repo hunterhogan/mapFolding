@@ -1,5 +1,5 @@
-from mapFolding import dictionaryOEISMapFolding
 from mapFolding._e.basecamp import eliminateFolds
+from mapFolding.oeis import dictionaryOEISMapFolding
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 import pytest
 

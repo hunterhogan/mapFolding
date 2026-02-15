@@ -30,9 +30,8 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 			, Grab.idAttribute(Then.replaceWith(identifierDataclassNumPy))
 		).visit(astModule)
 
-	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(identifierDataclassOld))
-			, Grab.nameAttribute(Then.replaceWith(identifierDataclassNumPy))
-		).visit(astModule)
+	# Remove import from dataBaskets  # noqa: ERA001
+	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(identifierDataclassOld)), Then.removeIt).visit(astModule)
 
 	# while (state.boundary > 0 and areIntegersWide(state)):  # noqa: ERA001
 	Call_areIntegersWide: ast.Call = Make.Call(Make.Name('areIntegersWide'), listParameters=[Make.Name('state')])
@@ -46,8 +45,7 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 			, Grab.testAttribute(Then.replaceWith(newTest))
 	).visit(astModule)
 
-	# from mapFolding.algorithms.matrixMeandersBeDry import areIntegersWide  # noqa: ERA001
-	astModule.body.insert(0, Make.ImportFrom('mapFolding.algorithms.matrixMeandersBeDry', list_alias=[Make.alias('areIntegersWide')]))
+	astModule.body.insert(0, Make.ImportFrom('mapFolding.algorithms.matrixMeandersNumPyndas', list_alias=[Make.alias('areIntegersWide'), Make.alias(identifierDataclassNumPy)]))
 
 	pathFilename: PurePath = getPathFilename(logicalPathInfix=logicalPathInfix, identifierModule=identifierModule)
 

@@ -4,12 +4,13 @@ from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy.dataStructures import autoDecodingRLE
-# TODO 'The____' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different
+# SEMIOTICS 'The____' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different
 # identifiers better integrate into the current semiotics?
 from mapFolding import (
 	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal,
-	DatatypeLeavesTotal as TheDatatypeLeavesTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, packageSettings)
+	DatatypeLeavesTotal as TheDatatypeLeavesTotal, packageSettings)
 from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
+from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath

@@ -224,7 +224,7 @@ class DeReConstructField2ast: # slots?
 		self.astAnnotation = cast(ast.Name, raiseIfNone(NodeTourist(
 			findThis = Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
 			, doThat = Then.extractIt(DOT.annotation)
-			).captureLastMatch(dataclassClassDef)))
+		).captureLastMatch(dataclassClassDef)))
 
 		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
 

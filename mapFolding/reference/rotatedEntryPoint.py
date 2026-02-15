@@ -16,7 +16,7 @@ other modules to function. It serves primarily as a demonstration of how algorit
 structure can be creatively redesigned while maintaining the core computational approach.
 """
 
-from mapFolding import outfitFoldings
+from mapFolding.reference.flattened import outfitFoldings
 from numba import njit
 from numpy.typing import NDArray
 import numpy

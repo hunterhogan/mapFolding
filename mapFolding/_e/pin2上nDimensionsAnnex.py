@@ -10,12 +10,12 @@ from mapFolding._e import (
 	bifurcatePermutationSpace, DimensionIndex, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues,
 	getAntiPileRangeOfLeaves, getDictionaryConditionalLeafPredecessors, getIteratorOfLeaves, getLeafDomain,
 	getLeavesCreaseAnte, getLeavesCreasePost, JeanValjean, Leaf, LeafOrPileRangeOfLeaves, mapShapeIs2上nDimensions,
-	PermutationSpace, Pile, PileRangeOfLeaves, pileRangeOfLeavesAND, PilesWithPileRangeOfLeaves, PinnedLeaves,
-	sentinelBitAdjustment, 一, 零, 首一, 首零一)
+	PermutationSpace, Pile, PileRangeOfLeaves, pileRangeOfLeavesAND, PilesWithPileRangeOfLeaves, PinnedLeaves, 一, 零, 首一,
+	首零一)
 from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
-	between, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves, leafIsInPileRange, leafIsPinned, mappingHasKey,
+	between吗, extractPilesWithPileRangeOfLeaves, extractPinnedLeaves, leafIsInPileRange, leafIsPinned, mappingHasKey,
 	notLeafOriginOrLeaf零, notPileLast, thisHasThat, thisIsALeaf, thisIsAPileRangeOfLeaves)
 from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile
 from more_itertools import (
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 #======== Boolean filters ======================================
 
-# TODO `leafIsOddInDimension` semiotics clarify and converge with the generalized version.
+# SEMIOTICS `leafIsOddInDimension` clarify and converge with the generalized version.
 @syntacticCurry
 def leafIsOddInDimension(leaf: Leaf, dimension: int) -> bool:
 	"""A specialized version of parity checking for 2^n-dimensional maps."""
@@ -180,7 +180,7 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 				# from the `PileRangeOfLeaves` at piles after `pile`.
 				antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, dictionaryConditionalLeafPredecessors[leaf][pile])
 
-				pilesToUpdate: deque[tuple[Pile, PileRangeOfLeaves]] = deque(DOTitems(extractPilesWithPileRangeOfLeaves(keyfilter(between(pile + inclusive, state.pileLast), permutationSpace))))
+				pilesToUpdate: deque[tuple[Pile, PileRangeOfLeaves]] = deque(DOTitems(extractPilesWithPileRangeOfLeaves(keyfilter(between吗(pile + inclusive, state.pileLast), permutationSpace))))
 
 				sumChecksForNewLeaves: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reducePileRangesOfLeaves(state, permutationSpace, pilesToUpdate, antiPileRangeOfLeaves)):
@@ -282,7 +282,7 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 				ceiling: Pile = pile - inclusive
 
 				antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, leavesForbidden)
-				pilesToUpdate: deque[tuple[Pile, PileRangeOfLeaves]] = deque(extractPilesWithPileRangeOfLeaves(keyfilter(between(floor, ceiling), permutationSpace)).items())
+				pilesToUpdate: deque[tuple[Pile, PileRangeOfLeaves]] = deque(extractPilesWithPileRangeOfLeaves(keyfilter(between吗(floor, ceiling), permutationSpace)).items())
 
 				sumChecksForNewLeaves: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reducePileRangesOfLeaves(state, permutationSpace, pilesToUpdate, antiPileRangeOfLeaves)):
@@ -296,7 +296,7 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 				ceiling: Pile = state.pileLast
 
 				antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, leavesForbidden)
-				pilesToUpdate: deque[tuple[Pile, PileRangeOfLeaves]] = deque(extractPilesWithPileRangeOfLeaves(keyfilter(between(floor, ceiling), permutationSpace)).items())
+				pilesToUpdate: deque[tuple[Pile, PileRangeOfLeaves]] = deque(extractPilesWithPileRangeOfLeaves(keyfilter(between吗(floor, ceiling), permutationSpace)).items())
 
 				sumChecksForNewLeaves = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reducePileRangesOfLeaves(state, permutationSpace, pilesToUpdate, antiPileRangeOfLeaves)):

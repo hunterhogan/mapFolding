@@ -20,9 +20,10 @@ stores computational results or adding new file formats.
 """
 
 from contextlib import redirect_stdout
-from mapFolding import (
-	dictionaryOEISMapFolding, getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal,
-	validateListDimensions)
+from mapFolding.beDRY import validateListDimensions
+from mapFolding.filesystemToolkit import (
+	getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal)
+from mapFolding.oeis import dictionaryOEISMapFolding
 from pathlib import Path
 import io
 import pytest

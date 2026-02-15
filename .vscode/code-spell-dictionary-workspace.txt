@@ -210,6 +210,7 @@ Mersenne
 meshgrid
 Meshgrids
 metaprogramming
+mobius
 Mult
 mypy
 Natalya
@@ -238,6 +239,8 @@ nuitka
 numba
 numbinations
 NUMERICALPYTHON
+numma
+Numma
 NZER
 objmode
 objs
@@ -348,6 +351,7 @@ Tenabled
 testutil
 Tfinalbody
 thất
+thon
 threadfence
 tion
 Tkwd

@@ -261,7 +261,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	if ingredientsFunction.astFunctionDef.returns and isinstance(ingredientsFunction.astFunctionDef.returns, ast.Name):
 		theReturn: ast.Name = ingredientsFunction.astFunctionDef.returns
 		list_argsDecorator = [Make.Call(Make.Name(theReturn.id)
-							, list_arg4signature_or_function if list_arg4signature_or_function else [], [] )]
+							, list_arg4signature_or_function or [], [] )]
 	elif list_arg4signature_or_function:
 		list_argsDecorator = [Make.Tuple(list_arg4signature_or_function)]
 
@@ -269,7 +269,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
 
-	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()] # pyright: ignore[reportArgumentType]
+	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()] # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
 
 	decoratorModule = Z0Z_numbaDataTypeModule
 	decoratorCallable = Z0Z_decoratorCallable
