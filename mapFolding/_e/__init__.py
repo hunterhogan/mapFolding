@@ -16,7 +16,7 @@ from mapFolding._e._semiotics import (
 from mapFolding._e._beDRY import (
 	bifurcatePermutationSpace as bifurcatePermutationSpace, DOTgetPileIfLeaf as DOTgetPileIfLeaf,
 	DOTgetPileIfLeafOptions as DOTgetPileIfLeafOptions, DOTitems as DOTitems, DOTkeys as DOTkeys, DOTvalues as DOTvalues,
-	getAntiLeafOptions as getLeafAntiOptions, getIteratorOfLeaves as getIteratorOfLeaves, getLeafOptions as getLeafOptions,
+	getIteratorOfLeaves as getIteratorOfLeaves, getLeafAntiOptions as getLeafAntiOptions, getLeafOptions as getLeafOptions,
 	getProductsOfDimensions as getProductsOfDimensions, getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
 	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首,
 	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, JeanValjean as JeanValjean,
@@ -38,7 +38,8 @@ from mapFolding._e._leafDomains import (
 	getDomainDimension二 as getDomainDimension二, getDomainDimension首二 as getDomainDimension首二,
 	getDomain二一零and二一 as getDomain二一零and二一, getDomain二零and二 as getDomain二零and二, getDomain首零一二and首一二 as getDomain首零一二and首一二,
 	getDomain首零二and首二 as getDomain首零二and首二, getLeafDomain as getLeafDomain, getLeaf首零Plus零Domain as getLeaf首零Plus零Domain)
-from mapFolding._e._pileRanges import getDictionaryPileRanges as getDictionaryPileRanges, getPileRange as getPileRange
+from mapFolding._e._leafOptionsAtPile import (
+	getDictionaryLeafOptions as getDictionaryLeafOptions, getLeafOptionsAtPile as getLeafOptionsAtPile)
 
 # isort: split
 from mapFolding._e._development import (

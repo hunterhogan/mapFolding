@@ -6,8 +6,8 @@ from functools import partial
 from gmpy2 import is_even, is_odd
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import (
-	dimensionNearest首, getDictionaryLeafDomains, getDictionaryPileRanges, getLeavesCreaseAnte, getLeavesCreasePost,
-	getPileRange, invertLeafIn2上nDimensions, Leaf, Pile, 零, 首一, 首二, 首零, 首零一)
+	dimensionNearest首, getDictionaryLeafDomains, getDictionaryLeafOptions, getLeafOptionsAtPile, getLeavesCreaseAnte,
+	getLeavesCreasePost, invertLeafIn2上nDimensions, Leaf, Pile, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.dataDynamic import getDataFrameFoldings
 from more_itertools import flatten
@@ -24,7 +24,7 @@ def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPile
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	return {leaves: sorted(set(getDictionaryPileRanges(state)[pileTarget]).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
+	return {leaves: sorted(set(getDictionaryLeafOptions(state)[pileTarget]).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
 if __name__ == '__main__':
 
@@ -144,9 +144,9 @@ pp3  = (3, 5, 9, 17, 33)
 
 	print(pile, pileDimension)
 	print(sorted(set(pileRange)))
-	rr = tuple(getPileRange(state, pile))
+	rr = tuple(getLeafOptionsAtPile(state, pile))
 	print(rr)
-	rrLess1 = tuple(getPileRange(state, pile - 1))
+	rrLess1 = tuple(getLeafOptionsAtPile(state, pile - 1))
 	print(rrLess1)
 
 	"""Notes
@@ -231,12 +231,12 @@ pp3  = (3, 5, 9, 17, 33)
 			return tuple(sorted(pileRange))
 
 		for pile in range(首一(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
-			print(pile, (real:=tuple(getPileRange(state, pile))) == (computed:=Z0Z_getPileRangeEven(state, pile)), end=': ')
+			print(pile, (real:=tuple(getLeafOptionsAtPile(state, pile))) == (computed:=Z0Z_getPileRangeEven(state, pile)), end=': ')
 			# print(f"{ansiColors.Green}surplus: {set(computed).difference(real)}", f"{ansiColors.Magenta}missing: {set(real).difference(computed)}{ansiColorReset}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
 		for pile in range((零)+首二(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
-			print(pile, (real:=tuple(getPileRange(state, pile))) == (computed:=Z0Z_getPileRange(state, pile)), end=': ')
+			print(pile, (real:=tuple(getLeafOptionsAtPile(state, pile))) == (computed:=Z0Z_getPileRange(state, pile)), end=': ')
 			# print(f"surplus: {set(computed).difference(real)}", f"missing: {set(real).difference(computed)}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
@@ -246,7 +246,7 @@ pp3  = (3, 5, 9, 17, 33)
 			# else:
 			# 	pile+=1
 			# zz = tuple(map(partial(xor, 1), zz))
-			# print(pile, (ll:=getPileRange(state, pile)) == (zz), end=': ')
+			# print(pile, (ll:=getLeafOptionsAtPile(state, pile)) == (zz), end=': ')
 			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			# pprint(zz, width=180)
 
@@ -256,11 +256,11 @@ pp3  = (3, 5, 9, 17, 33)
 		pileTarget=31
 		dictionaryExcluded = getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pileExcluder,))
 		domains = getDictionaryLeafDomains(state)
-		pileRange31 = frozenset(getPileRange(state, 31))
+		pileRange31 = frozenset(getLeafOptionsAtPile(state, 31))
 
 		for pile in range(state.leavesTotal):
 			continue
-			print(pile, set(getPileRange(state, pile)).difference(getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pile,)).keys()))
+			print(pile, set(getLeafOptionsAtPile(state, pile)).difference(getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pile,)).keys()))
 
 		for excluder, listExcluded in dictionaryExcluded.items():
 			continue

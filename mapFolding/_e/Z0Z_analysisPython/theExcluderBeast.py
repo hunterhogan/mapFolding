@@ -9,12 +9,12 @@ from hunterMakesPy.filesystemToolkit import importPathFilename2Identifier, write
 from itertools import product as CartesianProduct, repeat
 from mapFolding import ansiColorReset, ansiColors, inclusive, packageSettings
 from mapFolding._e import (
-	getDictionaryLeafDomains, getLeafDomain, getPileRange, PermutationSpace, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一,
-	首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
+	getDictionaryLeafDomains, getLeafDomain, getLeafOptionsAtPile, PermutationSpace, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零,
+	首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.dataDynamic import getDataFrameFoldings
 from mapFolding._e.filters import between吗, exclude
-from mapFolding._e.pin2上nDimensions import pinPilesAtEnds
+from mapFolding._e.pin2上nDimensional import pinPilesAtEnds
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
 from mapFolding._e.Z0Z_analysisPython.toolkit import detectPermutationSpaceErrors, PermutationSpaceStatus
 from more_itertools import consecutive_groups
@@ -552,7 +552,7 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 
 				stateValidation = pinPilesAtEnds(stateValidation, 1)
 
-				pileRange: list[int] = list(getPileRange(stateValidation, pileExcluder))
+				pileRange: list[int] = list(getLeafOptionsAtPile(stateValidation, pileExcluder))
 				dictionaryDeconstructed: dict[int, PermutationSpace] = deconstructPermutationSpaceAtPile(stateValidation.listPermutationSpace[0], pileExcluder, pileRange)
 
 				permutationSpaceWithExcluder: PermutationSpace | None = dictionaryDeconstructed.get(leafExcluder)

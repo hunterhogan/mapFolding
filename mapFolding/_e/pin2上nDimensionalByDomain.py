@@ -3,7 +3,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing, zeroIndexed
 from mapFolding._e import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首,
-	DOTgetPileIfLeaf, getDictionaryPileRanges, getLeavesCreaseAnte, getLeavesCreasePost,
+	DOTgetPileIfLeaf, getDictionaryLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost,
 	getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity, leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零,
 	首一, 首一二, 首二, 首零, 首零一, 首零一二)
 from mapFolding._e.dataBaskets import EliminationState
@@ -52,7 +52,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	leafAt二:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace,	   二))
 	leafAt二Ante首:		int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(二)+state.首))
 
-	dictionaryPileRanges: dict[int, tuple[int, ...]] = getDictionaryPileRanges(state)
+	dictionaryPileRanges: dict[int, tuple[int, ...]] = getDictionaryLeafOptions(state)
 	listRemoveLeaves: list[int] = []
 
 #========= use `leafAt一` to exclude a `leaf` from `pile` ===================

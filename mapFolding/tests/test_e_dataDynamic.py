@@ -15,9 +15,9 @@ and the tests will automatically pick them up via parametrization.
 
 from collections.abc import Callable, Iterable, Sequence
 from mapFolding._e import (
-	getDictionaryLeafDomains, getDictionaryPileRanges, getDomainDimension一, getDomainDimension二, getDomainDimension首二,
-	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeafDomain, getLeavesCreaseAnte,
-	getLeavesCreasePost, getPileRange)
+	getDictionaryLeafDomains, getDictionaryLeafOptions, getDomainDimension一, getDomainDimension二, getDomainDimension首二,
+	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeafDomain, getLeafOptionsAtPile,
+	getLeavesCreaseAnte, getLeavesCreasePost)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.tests.dataSamples import (
 	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二,
@@ -55,20 +55,20 @@ def test_getDictionaryLeafDomains(mapShape: tuple[int, ...]) -> None:
 		)
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryPileRangesKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryPileRangesKnown])
-def test_getDictionaryPileRanges(mapShape: tuple[int, ...]) -> None:
-	"""Verify getDictionaryPileRanges against authoritative pile range data for all piles."""
+def test_getDictionaryLeafOptions(mapShape: tuple[int, ...]) -> None:
+	"""Verify getDictionaryLeafOptions against authoritative pile range data for all piles."""
 	state = EliminationState(mapShape=mapShape)
 	dictionaryPileRangesAuthoritativeData = A001417.dictionaryPileRangesKnown[mapShape]
 
-	dictionaryPileRangesActual = getDictionaryPileRanges(state)
+	dictionaryPileRangesActual = getDictionaryLeafOptions(state)
 
 	assert len(dictionaryPileRangesActual) == state.leavesTotal, (
-		f"getDictionaryPileRanges: dictionary length {len(dictionaryPileRangesActual)} != {state.leavesTotal} for {mapShape=}."
+		f"getDictionaryLeafOptions: dictionary length {len(dictionaryPileRangesActual)} != {state.leavesTotal} for {mapShape=}."
 	)
 
 	for pile in range(state.leavesTotal):
 		assert dictionaryPileRangesActual[pile] == dictionaryPileRangesAuthoritativeData[pile], (
-			f"getDictionaryPileRanges: mismatch at {pile=} for {mapShape=}. "
+			f"getDictionaryLeafOptions: mismatch at {pile=} for {mapShape=}. "
 			f"Expected {dictionaryPileRangesAuthoritativeData[pile]}, got {dictionaryPileRangesActual[pile]}."
 		)
 
@@ -129,17 +129,17 @@ def test_getLeafDomainsCombined(domainFunction: Callable[[EliminationState], Seq
 	)
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryPileRangesKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryPileRangesKnown])
-def test_getPileRange(mapShape: tuple[int, ...]) -> None:
-	"""Verify getPileRange against authoritative pile range data for all piles."""
+def test_getLeafOptionsAtPile(mapShape: tuple[int, ...]) -> None:
+	"""Verify getLeafOptionsAtPile against authoritative pile range data for all piles."""
 	state = EliminationState(mapShape=mapShape)
 	dictionaryPileRangesAuthoritativeData: dict[int, tuple[int, ...]] = A001417.dictionaryPileRangesKnown[mapShape]
 
 	for pile in range(state.leavesTotal):
-		tupleLeavesPileActual: tuple[int, ...] = tuple(getPileRange(state, pile))
+		tupleLeavesPileActual: tuple[int, ...] = tuple(getLeafOptionsAtPile(state, pile))
 		tupleLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryPileRangesAuthoritativeData[pile]
 
 		assert tupleLeavesPileActual == tupleLeavesPileAuthoritativeData, (
-			f"getPileRange: mismatch at {pile=} for {mapShape=}. "
+			f"getLeafOptionsAtPile: mismatch at {pile=} for {mapShape=}. "
 			f"Expected {tupleLeavesPileAuthoritativeData}, got {tupleLeavesPileActual}."
 		)
 

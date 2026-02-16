@@ -1,4 +1,3 @@
-#======== (mathematical) ranges of piles ====================
 from bisect import bisect_left
 from collections.abc import Callable, Iterable, Iterator
 from cytoolz.functoolz import curry as syntacticCurry
@@ -19,6 +18,8 @@ if TYPE_CHECKING:
 
 # TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
 
+#======== Boolean filters ======================================
+
 @syntacticCurry
 def filterCeiling(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
 	return pile <  int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin)
@@ -37,29 +38,33 @@ def filterDoubleParity(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
 		return True
 	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
 
-def getPileRange(state: EliminationState, pile: Pile) -> Iterator[Leaf]:
-	return iter(_getPileRange(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal))
+#======== getLeafOptions ======================================
+
+def getLeafOptionsAtPile(state: EliminationState, pile: Pile) -> Iterator[Leaf]:
+	return iter(_getLeafOptionsAtPile(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal))
 @cache
-def _getPileRange(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> tuple[Leaf, ...]:
+def _getLeafOptionsAtPile(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> tuple[Leaf, ...]:
+	leafOptions: Iterable[Leaf] = range(leavesTotal)
 	if mapShapeIs2上nDimensions(mapShape):
 		parityMatch: Callable[[Leaf], bool] = filterParity(pile)
 		pileAboveFloor: Callable[[Leaf], bool] = filterFloor(pile)
 		pileBelowCeiling: Callable[[Leaf], bool] = filterCeiling(pile, dimensionsTotal)
 		matchLargerStep: Callable[[Leaf], bool] = filterDoubleParity(pile, dimensionsTotal)
 
-		pileRange: Iterable[Leaf] = range(leavesTotal)
-		pileRange = filter(parityMatch, pileRange)
-		pileRange = filter(pileAboveFloor, pileRange)
-		pileRange = filter(pileBelowCeiling, pileRange)
-		return tuple(filter(matchLargerStep, pileRange))
+		leafOptions = filter(parityMatch, leafOptions)
+		leafOptions = filter(pileAboveFloor, leafOptions)
+		leafOptions = filter(pileBelowCeiling, leafOptions)
+		leafOptions = filter(matchLargerStep, leafOptions)
 
-	return tuple(range(leavesTotal))
+	return tuple(leafOptions)
 
-def getDictionaryPileRanges(state: EliminationState) -> dict[Pile, tuple[Leaf, ...]]:
+def getDictionaryLeafOptions(state: EliminationState) -> dict[Pile, tuple[Leaf, ...]]:
 	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
-	return {pile: tuple(getPileRange(state, pile)) for pile in range(state.leavesTotal)}
+	return {pile: tuple(getLeafOptionsAtPile(state, pile)) for pile in range(state.leavesTotal)}
 
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
+
+#======== Functions to help find a formula ======================================
 
 def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
 	from mapFolding._e.dataDynamic import getDataFrameFoldings  # noqa: PLC0415
@@ -69,7 +74,7 @@ def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPile
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	return {leaves: sorted(set(getDictionaryPileRanges(state)[pileTarget]).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
+	return {leaves: sorted(set(getDictionaryLeafOptions(state)[pileTarget]).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
 if __name__ == '__main__':
 
@@ -195,9 +200,9 @@ pp3  = (3, 5, 9, 17, 33)
 
 	print(f"{pile=}\t{pileDimension=}")
 	print("computed=", sorted(set(pileRange)))
-	realRange = tuple(getPileRange(state, pile))
+	realRange = tuple(getLeafOptionsAtPile(state, pile))
 	print(f"{realRange=}")
-	pileAnte = tuple(getPileRange(state, pile - 1))
+	pileAnte = tuple(getLeafOptionsAtPile(state, pile - 1))
 	print(f"{pileAnte=}")
 
 
@@ -279,12 +284,12 @@ pp3  = (3, 5, 9, 17, 33)
 			return tuple(sorted(pileRange))
 
 		for pile in range(首一(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
-			print(pile, (real:=tuple(getPileRange(state, pile))) == (computed:=Z0Z_getPileRangeEven(state, pile)), end=': ')
+			print(pile, (real:=tuple(getLeafOptionsAtPile(state, pile))) == (computed:=Z0Z_getPileRangeEven(state, pile)), end=': ')
 			# print(f"{ansiColors.Green}surplus: {set(computed).difference(real)}", f"{ansiColors.Magenta}missing: {set(real).difference(computed)}{ansiColorReset}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
 		for pile in range((零)+首二(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
-			print(pile, (real:=tuple(getPileRange(state, pile))) == (computed:=Z0Z_getPileRange(state, pile)), end=': ')
+			print(pile, (real:=tuple(getLeafOptionsAtPile(state, pile))) == (computed:=Z0Z_getPileRange(state, pile)), end=': ')
 			# print(f"surplus: {set(computed).difference(real)}", f"missing: {set(real).difference(computed)}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
@@ -294,7 +299,7 @@ pp3  = (3, 5, 9, 17, 33)
 			# else:
 			# 	pile+=1
 			# zz = tuple(map(partial(xor, 1), zz))
-			# print(pile, (ll:=getPileRange(state, pile)) == (zz), end=': ')
+			# print(pile, (ll:=getLeafOptionsAtPile(state, pile)) == (zz), end=': ')
 			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			# pprint(zz, width=180)
 

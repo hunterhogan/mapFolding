@@ -310,6 +310,10 @@ def thisHasThat[个](this: Iterable[个], that: 个) -> bool:
 	"""
 	return that in this
 
+@syntacticCurry
+def thisNotHaveThat[个](this: Iterable[个], that: 个) -> bool:
+	return not thisHasThat(this, that)
+
 def thisIsALeaf(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	"""Return True if `leafSpace` is a `leaf`.
 
@@ -325,7 +329,7 @@ def thisIsALeaf(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	"""
 	return (leafSpace is not None) and isinstance(leafSpace, int)
 
-def thisIsALeafOptions(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
+def thisIsLeafOptions(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	"""Return True if `leafSpace` is a pile's range of leaves.
 
 	Parameters
@@ -380,5 +384,5 @@ def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> Undetermined
 	pilesUndetermined : dict[int, LeafOptions]
 		Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
 	"""
-	return leafFilter(thisIsALeafOptions, permutationSpace)
+	return leafFilter(thisIsLeafOptions, permutationSpace)
 

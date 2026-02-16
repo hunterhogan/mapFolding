@@ -2,7 +2,7 @@ from collections.abc import Callable
 from gmpy2 import xmpz
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractPinnedLeaves
-from mapFolding._e.pin2上nDimensions import (
+from mapFolding._e.pin2上nDimensional import (
 	pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds)
 from numpy.typing import NDArray
 import numpy
