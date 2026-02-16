@@ -63,7 +63,7 @@ from mapFolding._e import (
 	mapShapeIs2上nDimensions, PermutationSpace, Pile, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.dataDynamic import addLeafOptions
+from mapFolding._e.dataDynamic import addPileRangesOfLeaves
 from mapFolding._e.filters import pileIsOpen
 from mapFolding._e.pin2上nDimensionsAnnex import (
 	reduceAllPermutationSpaceInEliminationState as reduceAllPermutationSpaceInEliminationState)
@@ -245,7 +245,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape)`
 	fails [1].
 
-	This function seeds `state.listPermutationSpace` using `addLeafOptions` [2]
+	This function seeds `state.listPermutationSpace` using `addPileRangesOfLeaves` [2]
 	when `state.listPermutationSpace` is empty. This function validates `pileDepth`
 	using `intInnit` from `hunterMakesPy` [3] and `operator.getitem` [4]. This
 	function then chooses a symmetric sequence of `pile` values near both ends of the
@@ -288,7 +288,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 	----------
 	[1] mapFolding._e._beDRY.mapShapeIs2上nDimensions.
 		Internal package reference.
-	[2] mapFolding._e.dataDynamic.addLeafOptions.
+	[2] mapFolding._e._beDRY.addPileRangesOfLeaves.
 		Internal package reference.
 	[3] hunterMakesPy - Context7.
 		https://context7.com/hunterhogan/huntermakespy
@@ -306,7 +306,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 	if not state.listPermutationSpace:
 		# NOTE `nextPermutationSpaceWorkbench` can't handle an empty `state.listPermutationSpace`.
 		state.permutationSpace = {}
-		state.listPermutationSpace = [addLeafOptions(state).permutationSpace]
+		state.listPermutationSpace = [addPileRangesOfLeaves(state).permutationSpace]
 
 	depth: int = getitem(intInnit((pileDepth,), 'pileDepth', int), 0)
 	if depth < 0:

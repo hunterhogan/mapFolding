@@ -1,7 +1,7 @@
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
 from mapFolding._e import (
 	Folding, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, Leaf,
-	LeafSpace, PermutationSpace, Pile)
+	LeafOrPileRangeOfLeaves, PermutationSpace, Pile)
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 import dataclasses
@@ -73,7 +73,7 @@ class EliminationState:
 
 	pile: Pile = -1
 	"""The `pile` on the workbench."""
-	permutationSpace: PermutationSpace = dataclasses.field(default_factory=dict[Pile, LeafSpace], init=True)
+	permutationSpace: PermutationSpace = dataclasses.field(default_factory=dict[Pile, LeafOrPileRangeOfLeaves], init=True)
 	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
 	Theorem2aMultiplier: int = 1

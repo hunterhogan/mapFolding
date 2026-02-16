@@ -9,10 +9,10 @@ type DimensionIndex = int
 type Leaf = int
 type Pile = int
 
-type LeafOptions = mpz
+type PileRangeOfLeaves = mpz
 """But I am le tired."""
 
-type LeafSpace = Leaf | LeafOptions
+type LeafOrPileRangeOfLeaves = Leaf | PileRangeOfLeaves
 """Zen take a nap, and then fire the missiles!"""
 
 #======== Containers ============================
@@ -20,11 +20,11 @@ type LeafSpace = Leaf | LeafOptions
 type Folding = tuple[Leaf, ...]
 """`leaf` indexed to `pile`; length must be `leavesTotal`."""
 
-type PermutationSpace = dict[Pile, LeafSpace]
-"""`pile: leaf` or `pile: leafOptions`; length must be `leavesTotal`."""
+type PermutationSpace = dict[Pile, LeafOrPileRangeOfLeaves]
+"""`pile: leaf` or `pile: pileRangeOfLeaves`; length must be `leavesTotal`."""
 
-type UndeterminedPiles = dict[Pile, LeafOptions]
-"""`pile: leafOptions`; length less than or equal to `leavesTotal`."""
+type PilesWithPileRangeOfLeaves = dict[Pile, PileRangeOfLeaves]
+"""`pile: pileRangeOfLeaves`; length less than or equal to `leavesTotal`."""
 
 type PinnedLeaves = dict[Pile, Leaf]
 """`pile: leaf`; length ought to be less than `leavesTotal`: when length equals `leavesTotal`, ought to convert to `Folding`."""
