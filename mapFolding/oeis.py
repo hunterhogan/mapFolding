@@ -52,7 +52,7 @@ from email.utils import format_datetime
 from functools import cache
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from itertools import chain
-from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, packageSettings
+from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, errorL33T, packageSettings
 from mapFolding._theSSOT import pathCache
 from mapFolding.basecamp import countFolds
 from mapFolding.filesystemToolkit import (
@@ -822,7 +822,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 
 #-------- Algorithm selection and execution ---------------------------------------------
 
-	countTotal: int = -31212012 # ERROR
+	countTotal: int = -errorL33T
 	matched_oeisID: bool = True
 
 	match oeisID:

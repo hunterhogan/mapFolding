@@ -23,13 +23,13 @@ def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8
 
 	for permutationSpace in state.listPermutationSpace:
 		maskRowsMatchThisDictionary: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-		for pile, leafOrPileRangeOfLeaves in extractPinnedLeaves(permutationSpace).items():
-			if isinstance(leafOrPileRangeOfLeaves, int):
-				maskRowsMatchThisDictionary = maskRowsMatchThisDictionary & (arrayFoldings[:, pile] == leafOrPileRangeOfLeaves)
+		for pile, leafSpace in extractPinnedLeaves(permutationSpace).items():
+			if isinstance(leafSpace, int):
+				maskRowsMatchThisDictionary = maskRowsMatchThisDictionary & (arrayFoldings[:, pile] == leafSpace)
 				continue
-			if isinstance(leafOrPileRangeOfLeaves, xmpz):
+			if isinstance(leafSpace, xmpz):
 				allowedLeaves: numpy.ndarray = numpy.fromiter(
-					(bool(leafOrPileRangeOfLeaves[leaf]) for leaf in range(state.leavesTotal)),
+					(bool(leafSpace[leaf]) for leaf in range(state.leavesTotal)),
 					dtype=bool,
 					count=state.leavesTotal,
 				)

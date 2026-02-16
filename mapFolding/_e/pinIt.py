@@ -16,8 +16,8 @@ from hunterMakesPy import raiseIfNone
 from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
-	DOTgetPileIfLeaf, DOTgetPileIfPileRangeOfLeaves, DOTvalues, Folding, getLeafDomain, getPileRange, Leaf,
-	PermutationSpace, Pile, PileRangeOfLeaves)
+	DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTvalues, Folding, getLeafDomain, getPileRange, Leaf, LeafOptions,
+	PermutationSpace, Pile)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
 	between吗, extractPinnedLeaves, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen,
@@ -190,7 +190,7 @@ def deconstructPermutationSpaceByDomainOfLeaf(permutationSpace: PermutationSpace
 	"""
 	if leafIsNotPinned(permutationSpace, leaf):
 		pileOpen: Callable[[int], bool] = pileIsOpen(permutationSpace)
-		leafInPileRange: Callable[[int], bool] = compose(leafIsInPileRange(leaf), partial(DOTgetPileIfPileRangeOfLeaves, permutationSpace, default=bit_mask(len(permutationSpace))))
+		leafInPileRange: Callable[[int], bool] = compose(leafIsInPileRange(leaf), partial(DOTgetPileIfLeafOptions, permutationSpace, default=bit_mask(len(permutationSpace))))
 		pinLeafAt: Callable[[int], PermutationSpace] = atPilePinLeaf(permutationSpace, leaf=leaf)
 		deconstructedPermutationSpace: list[PermutationSpace] = list(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
 	else:
@@ -208,8 +208,8 @@ def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSp
 
 	def leafInPileRangeByIndex(index: int) -> Callable[[tuple[Pile, ...]], bool]:
 		def workhorse(domain: tuple[Pile, ...]) -> bool:
-			pileRangeOfLeaves: PileRangeOfLeaves = raiseIfNone(DOTgetPileIfPileRangeOfLeaves(permutationSpace, domain[index], default=bit_mask(len(permutationSpace))))
-			return leafIsInPileRange(leaves[index], pileRangeOfLeaves)
+			leafOptions: LeafOptions = raiseIfNone(DOTgetPileIfLeafOptions(permutationSpace, domain[index], default=bit_mask(len(permutationSpace))))
+			return leafIsInPileRange(leaves[index], leafOptions)
 		return workhorse
 
 	def isPinnedAtPileByIndex(leaf: Leaf, index: int) -> Callable[[tuple[Pile, ...]], bool]:

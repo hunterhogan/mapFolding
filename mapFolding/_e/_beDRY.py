@@ -20,21 +20,21 @@ Disaggregation and deconstruction functions
 	DOTvalues
 		You can iterate over values in a `Mapping`.
 	getIteratorOfLeaves
-		You can iterate over each `Leaf` bit that is set in a `PileRangeOfLeaves`.
+		You can iterate over each `Leaf` bit that is set in a `LeafOptions`.
 
-`PileRangeOfLeaves` functions
+`LeafOptions` functions
 	DOTgetPileIfLeaf
 		You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `Leaf`.
-	DOTgetPileIfPileRangeOfLeaves
-		You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `PileRangeOfLeaves`.
-	getAntiPileRangeOfLeaves
-		You can build a complement `PileRangeOfLeaves` by clearing each `leaf` bit.
-	getPileRangeOfLeaves
-		You can build a `PileRangeOfLeaves` by setting each `leaf` bit.
+	DOTgetPileIfLeafOptions
+		You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
+	getAntiLeafOptions
+		You can build a complement `LeafOptions` by clearing each `leaf` bit.
+	getLeafOptions
+		You can build a `LeafOptions` by setting each `leaf` bit.
 	JeanValjean
-		You can normalize a `PileRangeOfLeaves` into a `Leaf` or `None` when the range is degenerate.
-	pileRangeOfLeavesAND
-		You can AND a `PileRangeOfLeaves` with a disposable mask in a curry-friendly parameter order.
+		You can normalize a `LeafOptions` into a `Leaf` or `None` when the range is degenerate.
+	leafOptionsAND
+		You can AND a `LeafOptions` with a disposable mask in a curry-friendly parameter order.
 
 Be DRY functions
 	getProductsOfDimensions
@@ -67,26 +67,25 @@ from gmpy2 import bit_clear, bit_mask, bit_set, xmpz
 from hunterMakesPy import raiseIfNone
 from itertools import accumulate
 from mapFolding import inclusive, zeroIndexed
-from mapFolding._e import (
-	Leaf, LeafOrPileRangeOfLeaves, PermutationSpace, Pile, PileRangeOfLeaves, PilesWithPileRangeOfLeaves, PinnedLeaves)
-from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf, thisIsAPileRangeOfLeaves
+from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf, thisIsALeafOptions
 from more_itertools import iter_index
 from operator import add, mul
 from typing import Any
 
 #======== Group-by functions ================================================
 
-def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[PinnedLeaves, PilesWithPileRangeOfLeaves]:
-	"""Separate `permutationSpace` into two dictionaries: one of `pile: leaf` and one of `pile: pileRangeOfLeaves`.
+def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[PinnedLeaves, UndeterminedPiles]:
+	"""Separate `permutationSpace` into two dictionaries: one of `pile: leaf` and one of `pile: leafOptions`.
 
 	Parameters
 	----------
 	permutationSpace : PermutationSpace
-		Dictionary of `pile: leaf` and `pile: pileRangeOfLeaves`.
+		Dictionary of `pile: leaf` and `pile: leafOptions`.
 
 	Returns
 	-------
-	leavesPinned, pilesWithPileRangeOfLeaves : tuple[PinnedLeaves, PilesWithPileRangeOfLeaves]
+	leavesPinned, pilesUndetermined : tuple[PinnedLeaves, UndeterminedPiles]
 	"""
 	leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
 	return (leavesPinned, dissociatePiles(permutationSpace, *DOTkeys(leavesPinned))) # pyright: ignore[reportReturnType]  # ty:ignore[invalid-return-type]
@@ -138,67 +137,67 @@ def DOTvalues[个](dictionary: Mapping[Any, 个], /) -> Iterator[个]:
 	"""
 	return iter(dictionary.values())
 
-def getIteratorOfLeaves(pileRangeOfLeaves: PileRangeOfLeaves) -> Iterator[Leaf]:
-	"""Convert `pileRangeOfLeaves` to an `Iterator` of `type` `int` `leaf`.
+def getIteratorOfLeaves(leafOptions: LeafOptions) -> Iterator[Leaf]:
+	"""Convert `leafOptions` to an `Iterator` of `type` `int` `leaf`.
 
 	Parameters
 	----------
-	pileRangeOfLeaves : PileRangeOfLeaves
-		An integer with one bit for each `leaf` in `leavesTotal`, plus an extra bit that means "I'm a `pileRangeOfLeaves` not a `leaf`.
+	leafOptions : LeafOptions
+		An integer with one bit for each `leaf` in `leavesTotal`, plus an extra bit that means "I'm a `leafOptions` not a `leaf`.
 
 	Returns
 	-------
 	iteratorOfLeaves : Iterator[int]
-		An `Iterator` with one `int` for each `leaf` in `pileRangeOfLeaves`.
+		An `Iterator` with one `int` for each `leaf` in `leafOptions`.
 
 	See Also
 	--------
 	https://gmpy2.readthedocs.io/en/latest/advmpz.html#gmpy2.xmpz.iter_set
 	"""
-	iteratorOfLeaves: xmpz = xmpz(pileRangeOfLeaves)
+	iteratorOfLeaves: xmpz = xmpz(leafOptions)
 	iteratorOfLeaves[-1] = 0
 	return iteratorOfLeaves.iter_set()
 
-#======== `PileRangeOfLeaves` functions ================================================
+#======== `LeafOptions` functions ================================================
 
 # TODO Should `PermutationSpace` be a subclass of `dict` so I can add methods? NOTE I REFUSE TO BE AN OBJECT-ORIENTED
 # PROGRAMMER!!! But, I'll use some OOP if it makes sense. I think collections has some my-first-dict-subclass functions.
 def DOTgetPileIfLeaf(permutationSpace: PermutationSpace, pile: Pile, default: Leaf | None = None) -> Leaf | None:
 	"""Like `permutationSpace.get(pile)`, but only return a `leaf` or `default`."""
-	ImaLeaf: LeafOrPileRangeOfLeaves | None = permutationSpace.get(pile)
+	ImaLeaf: LeafSpace | None = permutationSpace.get(pile)
 	if thisIsALeaf(ImaLeaf):
 		return ImaLeaf
 	return default
 
-def DOTgetPileIfPileRangeOfLeaves(permutationSpace: PermutationSpace, pile: Pile, default: PileRangeOfLeaves | None = None) -> PileRangeOfLeaves | None:
-	"""You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `PileRangeOfLeaves`.
+def DOTgetPileIfLeafOptions(permutationSpace: PermutationSpace, pile: Pile, default: LeafOptions | None = None) -> LeafOptions | None:
+	"""You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
 
-	This function is a typed analogue of `dict.get`. The function returns a `PileRangeOfLeaves` when `permutationSpace[pile]` is a
-	`PileRangeOfLeaves`, and the function returns `default` when `permutationSpace[pile]` is a `Leaf` or `None`.
+	This function is a typed analogue of `dict.get`. The function returns a `LeafOptions` when `permutationSpace[pile]` is a
+	`LeafOptions`, and the function returns `default` when `permutationSpace[pile]` is a `Leaf` or `None`.
 
 	Parameters
 	----------
 	permutationSpace : PermutationSpace
-		Dictionary that maps each `Pile` to either a pinned `Leaf` or a `PileRangeOfLeaves` domain.
+		Dictionary that maps each `Pile` to either a pinned `Leaf` or a `LeafOptions` domain.
 	pile : Pile
 		`Pile` key to look up.
-	default : PileRangeOfLeaves | None = None
-		Value to return when `permutationSpace[pile]` is not a `PileRangeOfLeaves`.
+	default : LeafOptions | None = None
+		Value to return when `permutationSpace[pile]` is not a `LeafOptions`.
 
 	Returns
 	-------
-	pileRangeOfLeavesOrNone : PileRangeOfLeaves | None
-		`PileRangeOfLeaves` value from `permutationSpace[pile]`, or `default`.
+	leafOptionsOrNone : LeafOptions | None
+		`LeafOptions` value from `permutationSpace[pile]`, or `default`.
 
 	Examples
 	--------
 	The function is used to retrieve a domain bitset with a fallback mask.
 
-		pileRangeOfLeaves: PileRangeOfLeaves = raiseIfNone(DOTgetPileIfPileRangeOfLeaves(permutationSpace, domain[index], default=bit_mask(len(permutationSpace))))
+		leafOptions: LeafOptions = raiseIfNone(DOTgetPileIfLeafOptions(permutationSpace, domain[index], default=bit_mask(len(permutationSpace))))
 
 	References
 	----------
-	[1] mapFolding._e.filters.thisIsAPileRangeOfLeaves
+	[1] mapFolding._e.filters.thisIsALeafOptions
 		Internal package reference
 	[2] gmpy2 - Integer arithmetic
 		https://gmpy2.readthedocs.io/en/latest/
@@ -206,39 +205,39 @@ def DOTgetPileIfPileRangeOfLeaves(permutationSpace: PermutationSpace, pile: Pile
 		https://context7.com/hunterhogan/huntermakespy
 
 	"""
-	ImaPileRangeOfLeaves: LeafOrPileRangeOfLeaves | None = permutationSpace.get(pile)
-	if thisIsAPileRangeOfLeaves(ImaPileRangeOfLeaves):
-		return ImaPileRangeOfLeaves
+	ImaLeafOptions: LeafSpace | None = permutationSpace.get(pile)
+	if thisIsALeafOptions(ImaLeafOptions):
+		return ImaLeafOptions
 	return default
 
-# SEMIOTICS `getAntiPileRangeOfLeaves`, Improve.
-def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRangeOfLeaves:
-	"""You can build a complement `PileRangeOfLeaves` by clearing each `Leaf` bit in `leaves`.
+# SEMIOTICS `getAntiLeafOptions`, Improve.
+def getAntiLeafOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
+	"""You can build a complement `LeafOptions` by clearing each `Leaf` bit in `leaves`.
 
-	The returned `PileRangeOfLeaves` contains a bit for every `Leaf` in `range(leavesTotal)` except each `Leaf` in `leaves`.
-	The returned `PileRangeOfLeaves` also preserves the sentinel bit that indicates the value is a `PileRangeOfLeaves`.
+	The returned `LeafOptions` contains a bit for every `Leaf` in `range(leavesTotal)` except each `Leaf` in `leaves`.
+	The returned `LeafOptions` also preserves the sentinel bit that indicates the value is a `LeafOptions`.
 
 	Parameters
 	----------
 	leavesTotal : int
 		Total number of leaves in the map.
 	leaves : Iterable[Leaf]
-		Iterable of `Leaf` indices to exclude from the returned `PileRangeOfLeaves`.
+		Iterable of `Leaf` indices to exclude from the returned `LeafOptions`.
 
 	Returns
 	-------
-	antiPileRangeOfLeaves : PileRangeOfLeaves
-		`PileRangeOfLeaves` bitset containing each allowed `Leaf` plus the `PileRangeOfLeaves` sentinel bit.
+	antiLeafOptions : LeafOptions
+		`LeafOptions` bitset containing each allowed `Leaf` plus the `LeafOptions` sentinel bit.
 
 	Examples
 	--------
 	The function is used to start from the full domain.
 
-		antiPileRangeOfLeaves: PileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, frozenset())
+		antiLeafOptions: LeafOptions = getAntiLeafOptions(state.leavesTotal, frozenset())
 
 	The function is used to exclude every `Leaf` not in a crease relation.
 
-		antiPileRangeOfLeaves = getAntiPileRangeOfLeaves(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
+		antiLeafOptions = getAntiLeafOptions(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
 
 	References
 	----------
@@ -250,30 +249,30 @@ def getAntiPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRa
 	"""
 	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))
 
-def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRangeOfLeaves:
-	"""You can build a `PileRangeOfLeaves` by setting each `Leaf` bit in `leaves`.
+def getLeafOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
+	"""You can build a `LeafOptions` by setting each `Leaf` bit in `leaves`.
 
-	The returned `PileRangeOfLeaves` contains the sentinel bit that indicates the value is a `PileRangeOfLeaves`. The returned
-	`PileRangeOfLeaves` also contains a bit for each `Leaf` in `leaves`.
+	The returned `LeafOptions` contains the sentinel bit that indicates the value is a `LeafOptions`. The returned
+	`LeafOptions` also contains a bit for each `Leaf` in `leaves`.
 
 	Parameters
 	----------
 	leavesTotal : int
 		Total number of leaves in the map.
 	leaves : Iterable[Leaf]
-		Iterable of `Leaf` indices to include in the returned `PileRangeOfLeaves`.
+		Iterable of `Leaf` indices to include in the returned `LeafOptions`.
 
 	Returns
 	-------
-	pileRangeOfLeaves : PileRangeOfLeaves
-		`PileRangeOfLeaves` bitset containing each `Leaf` in `leaves` plus the `PileRangeOfLeaves` sentinel bit.
+	leafOptions : LeafOptions
+		`LeafOptions` bitset containing each `Leaf` in `leaves` plus the `LeafOptions` sentinel bit.
 
 	Examples
 	--------
 	The function is used to create a domain bitset before normalizing with `JeanValjean`.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(getPileRangeOfLeaves(state.leavesTotal, pileRangeOfLeaves)))
-											for pile, pileRangeOfLeaves in getDictionaryPileRanges(state).items()}
+		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(getLeafOptions(state.leavesTotal, leafOptions)))
+											for pile, leafOptions in getDictionaryPileRanges(state).items()}
 
 	References
 	----------
@@ -285,10 +284,10 @@ def getPileRangeOfLeaves(leavesTotal: int, leaves: Iterable[Leaf]) -> PileRangeO
 	"""
 	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
 
-def JeanValjean(p24601: PileRangeOfLeaves, /) -> LeafOrPileRangeOfLeaves | None:
-	"""You can normalize a `PileRangeOfLeaves` into a `Leaf` or `None` when the range is degenerate.
+def JeanValjean(p24601: LeafOptions, /) -> LeafSpace | None:
+	"""You can normalize a `LeafOptions` into a `Leaf` or `None` when the range is degenerate.
 
-	When `p24601` is a `PileRangeOfLeaves`, `p24601` contains one sentinel bit that indicates the value is a `PileRangeOfLeaves`.
+	When `p24601` is a `LeafOptions`, `p24601` contains one sentinel bit that indicates the value is a `LeafOptions`.
 	This function interprets the total set-bit count as a compact encoding of domain cardinality.
 
 	- When `p24601.bit_count() == 1`, `p24601` is an empty domain. The only set bit is the sentinel bit, so the function returns `None`.
@@ -298,38 +297,38 @@ def JeanValjean(p24601: PileRangeOfLeaves, /) -> LeafOrPileRangeOfLeaves | None:
 
 	Parameters
 	----------
-	p24601 : PileRangeOfLeaves
-		Candidate `PileRangeOfLeaves` value.
+	p24601 : LeafOptions
+		Candidate `LeafOptions` value.
 
 	Returns
 	-------
-	leafOrPileRangeOfLeavesOrNone : LeafOrPileRangeOfLeaves | None
+	leafSpaceOrNone : LeafSpace | None
 		A `Leaf` when `p24601` encodes exactly one leaf, `None` when `p24601` encodes an empty domain, or `p24601` otherwise.
 
 	Examples
 	--------
 	The function is used to normalize a masked domain.
 
-		if (ImaLeafOrPileRangeOfLeavesNotAWalrusSubscript := JeanValjean(pileRangeOfLeavesAND(antiPileRangeOfLeaves, pileRangeOfLeaves))) is None:
+		if (ImaLeafSpaceNotAWalrusSubscript := JeanValjean(leafOptionsAND(antiLeafOptions, leafOptions))) is None:
 			return {}
 
 	The function is used to normalize per-pile domains into pinned leaves when possible.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(getPileRangeOfLeaves(state.leavesTotal, pileRangeOfLeaves)))
-											for pile, pileRangeOfLeaves in getDictionaryPileRanges(state).items()}
+		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(getLeafOptions(state.leavesTotal, leafOptions)))
+											for pile, leafOptions in getDictionaryPileRanges(state).items()}
 
 	References
 	----------
 	[1] gmpy2 - Integer arithmetic
 		https://gmpy2.readthedocs.io/en/latest/
-	[2] mapFolding._e.filters.thisIsAPileRangeOfLeaves
+	[2] mapFolding._e.filters.thisIsALeafOptions
 		Internal package reference
 	[3] hunterMakesPy - Context7
 		https://context7.com/hunterhogan/huntermakespy
 
 	"""
-	whoAmI: LeafOrPileRangeOfLeaves | None = p24601
-	if thisIsAPileRangeOfLeaves(p24601):
+	whoAmI: LeafSpace | None = p24601
+	if thisIsALeafOptions(p24601):
 		if p24601.bit_count() == 1:
 			whoAmI = None
 		elif p24601.bit_count() == 2:
@@ -337,14 +336,14 @@ def JeanValjean(p24601: PileRangeOfLeaves, /) -> LeafOrPileRangeOfLeaves | None:
 	return whoAmI
 
 @syntacticCurry
-def pileRangeOfLeavesAND(pileRangeOfLeavesDISPOSABLE: PileRangeOfLeaves, pileRangeOfLeaves: PileRangeOfLeaves) -> PileRangeOfLeaves:
-	"""Modify `pileRangeOfLeaves` by bitwise AND with `pileRangeOfLeavesDISPOSABLE`.
+def leafOptionsAND(leafOptionsDISPOSABLE: LeafOptions, leafOptions: LeafOptions) -> LeafOptions:
+	"""Modify `leafOptions` by bitwise AND with `leafOptionsDISPOSABLE`.
 
 	Important
 	---------
 	The order of the parameters is likely the opposite of what you expect. This is to facilitate currying.
 	"""
-	return pileRangeOfLeaves & pileRangeOfLeavesDISPOSABLE
+	return leafOptions & leafOptionsDISPOSABLE
 
 #======== Be DRY functions ================================================
 

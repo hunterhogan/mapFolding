@@ -62,6 +62,9 @@ References
 	https://docs.python.org/3/library/functions.html#func-range
 
 """
+
+errorL33T: int = 31212012
+
 inclusive: int = 1
 """Express inclusion (or exclusion) of a boundary value.
 
@@ -157,6 +160,7 @@ References
 	https://docs.python.org/3/library/stdtypes.html#frozenset
 
 """
+
 zeroIndexed: int = 1
 """Express that the adjustment to a value is due to zero-based indexing.
 

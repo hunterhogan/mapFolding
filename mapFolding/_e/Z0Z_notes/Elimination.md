@@ -57,6 +57,7 @@ Analytically, the leaves differ by one in exactly one dimension, which means the
 - For all other magnitudes in `state.productsOfDimensions[0:-2]`, the total number of differences of that magnitude is always equal to the total number of differences of the negative of that magnitude.
 - The signs of the magnitudes alternate: if the difference between two leaves is 2, for example, then before there can be another difference of 2, there must be a difference of -2.
 - Because `state.leavesTotal // 2` always has one more than `- state.leavesTotal // 2`, the first and last differences with magnitude `state.leavesTotal // 2` are positive.
+- Because the the other magnitudes have equal numbers of positive and negative differences, the first and last differences with those magnitudes must have opposite signs.
 
 #### The absolute value of the differences in two consecutive piles cannot be the same
 
@@ -111,5 +112,5 @@ Interestingly, the 22 pairs of `leaf二一, leaf二一零` in consecutive piles 
 - Each `Pile` is a distinct integer in the range `[0, state.pilesTotal)`.
 - `pile` is the archetypal variable name for a `Pile`.
 - A `PermutationSpace` is a dictionary
-dict[Pile, LeafOrPileRangeOfLeaves]
-`pile: leaf` or `pile: pileRangeOfLeaves`; length must be `leavesTotal`.
+dict[Pile, LeafSpace]
+`pile: leaf` or `pile: leafOptions`; length must be `leavesTotal`.

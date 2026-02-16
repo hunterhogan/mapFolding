@@ -2,8 +2,8 @@
 
 # isort: split
 from mapFolding._semiotics import (
-	ansiColorReset as ansiColorReset, ansiColors as ansiColors, decreasing as decreasing, inclusive as inclusive,
-	zeroIndexed as zeroIndexed)
+	ansiColorReset as ansiColorReset, ansiColors as ansiColors, decreasing as decreasing, errorL33T as errorL33T,
+	inclusive as inclusive, zeroIndexed as zeroIndexed)
 
 # isort: split
 from mapFolding._theTypes import (

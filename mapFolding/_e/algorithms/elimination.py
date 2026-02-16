@@ -17,7 +17,7 @@ def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[in
 
 	permutationSpace must be in order by `pile`.
 	filter with `oop`.
-	pileRangeOfLeaves.iter_set() returns an iterator of int corresponding to the leaves in the pile's range.
+	leafOptions.iter_set() returns an iterator of int corresponding to the leaves in the pile's range.
 	https://gmpy2.readthedocs.io/en/latest/advmpz.html#gmpy2.xmpz.iter_set
 	filter out "leaf" = state.leavesTotal
 	CartesianProduct over these iterators.
@@ -27,7 +27,7 @@ def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[in
 		map(thisLeafFoldingIsValid
 			, map(makeFolding
 				, repeat(permutationSpace)
-				, CartesianProduct(*map(getIteratorOfLeaves, extractPilesWithPileRangeOfLeaves(permutationSpace).values()))
+				, CartesianProduct(*map(getIteratorOfLeaves, extractUndeterminedPiles(permutationSpace).values()))
 			)
 			, repeat(mapShape)
 		)

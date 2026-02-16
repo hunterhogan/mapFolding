@@ -59,8 +59,8 @@ These are the “shop tools” that algorithms tend to import from `_e/__init__.
 	- Shared utilities that should work beyond the $(2,) * n$ special case.
 	- Includes:
 		- `mapShapeIs2上nDimensions(...)` flow guard
-		- `PileRangeOfLeaves` bitset utilities (via `gmpy2.mpz`/`xmpz`)
-		- “type-dispatch” helpers (`thisIsALeaf`, `thisIsAPileRangeOfLeaves`, `JeanValjean`)
+		- `LeafOptions` bitset utilities (via `gmpy2.mpz`/`xmpz`)
+		- “type-dispatch” helpers (`thisIsALeaf`, `thisIsALeafOptions`, `JeanValjean`)
 		- Iterators like `getIteratorOfLeaves(...)` (critical for domain enumeration)
 
 - `mapFolding/_e/_dataDynamic.py`
@@ -107,8 +107,8 @@ These are the “shop tools” that algorithms tend to import from `_e/__init__.
 	- This is encoded directly in `EliminationState` (`leafLast = leavesTotal - 1`, `pileLast = pilesTotal - 1`).
 
 - **Pile ranges are represented as bitsets** (`gmpy2.mpz`).
-	- A `PileRangeOfLeaves` contains one bit per leaf *plus* a sentinel bit indicating “this is a range, not a single leaf”.
-	- Use the existing helpers (`getPileRangeOfLeaves`, `getIteratorOfLeaves`, `JeanValjean`, etc.) rather than re-encoding.
+	- A `LeafOptions` contains one bit per leaf *plus* a sentinel bit indicating “this is a range, not a single leaf”.
+	- Use the existing helpers (`getLeafOptions`, `getIteratorOfLeaves`, `JeanValjean`, etc.) rather than re-encoding.
 
 - **Re-export discipline**: prefer importing from `mapFolding._e` (via `__init__.py`) when a symbol is intentionally re-exported.
 
