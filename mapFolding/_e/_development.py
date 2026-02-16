@@ -40,7 +40,7 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 #-------- The beginning of domain首一Plus零 --------------------------------
 	leaf = (零)+首一(state.dimensionsTotal)
 	dictionaryPrecedence[leaf] = {aPile: [2 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]
-									, 3 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]]
+										, 3 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]]
 							for aPile in list(dictionaryDomains[leaf])[1:2]}
 	del leaf
 

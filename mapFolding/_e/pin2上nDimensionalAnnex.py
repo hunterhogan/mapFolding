@@ -9,9 +9,8 @@ from mapFolding import errorL33T, inclusive
 from mapFolding._e import (
 	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues,
 	getDictionaryConditionalLeafPredecessors, getIteratorOfLeaves, getLeafAntiOptions, getLeavesCreaseAnte,
-	getLeavesCreasePost, JeanValjean, Leaf, LeafOptions, leafOptionsAND, leafOrigin, LeafSpace, mapShapeIs2上nDimensions,
-	PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles, 一, 零, 首一, 首零一)
-from mapFolding._e._beDRY import howManyLeavesInLeafOptions
+	getLeavesCreasePost, howManyLeavesInLeafOptions, JeanValjean, Leaf, LeafOptions, leafOptionsAND, leafOrigin, LeafSpace,
+	mapShapeIs2上nDimensions, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles, 一, 零, 首一, 首零一)
 from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (

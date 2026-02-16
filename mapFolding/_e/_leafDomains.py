@@ -325,7 +325,7 @@ def _getDomainDimension首二(dimensionsTotal: int, domain首零二and首二: tu
 				excludeAbove += 2
 
 			if ((howManyDimensionsHaveOddParity(pileOfLeaf首二) == dimensionsTotal - dimensionNearest首(pileOfLeaf首二))
-				and (dimensionNearest首(pileOfLeaf首二) >= 4)
+				and (4 <= dimensionNearest首(pileOfLeaf首二))
 				and (howManyDimensionsHaveOddParity(pileOfLeaf首二) > 1)
 			):
 				excludeAbove -= 1

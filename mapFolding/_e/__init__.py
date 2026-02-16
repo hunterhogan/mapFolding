@@ -19,6 +19,7 @@ from mapFolding._e._beDRY import (
 	getIteratorOfLeaves as getIteratorOfLeaves, getLeafAntiOptions as getLeafAntiOptions, getLeafOptions as getLeafOptions,
 	getProductsOfDimensions as getProductsOfDimensions, getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
 	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首,
+	howManyLeavesInLeafOptions as howManyLeavesInLeafOptions,
 	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, JeanValjean as JeanValjean,
 	leafOptionsAND as leafOptionsAND, mapShapeIs2上nDimensions as mapShapeIs2上nDimensions, reverseLookup as reverseLookup)
 
