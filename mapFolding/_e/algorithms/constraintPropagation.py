@@ -121,6 +121,14 @@ def count(state: EliminationState) -> EliminationState:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Do the things necessary so that `count` operates efficiently."""
+	if 0 in state.mapShape or not state.mapShape:
+		from mapFolding.oeis import librarianConstructsDictionaryFoldsTotalKnown  # noqa: PLC0415
+		dictionaryFoldsTotalKnown: dict[tuple[int, ...], int] = librarianConstructsDictionaryFoldsTotalKnown()
+		if state.mapShape in dictionaryFoldsTotalKnown:
+			state.groupsOfFolds = dictionaryFoldsTotalKnown[state.mapShape]
+			return state
+		message: str = f"I received `{state.mapShape = }`, but I could not find a known folding total for this degenerate map shape. To see which map shapes and OEIS sequences this package supports, run `getOEISids` at a command prompt."
+		raise ValueError(message)
 	if state.listPermutationSpace or (workersMaximum > 1):
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:

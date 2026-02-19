@@ -3,9 +3,9 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import decreasing, zeroIndexed
 from mapFolding._e import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首,
-	DOTgetPileIfLeaf, getDictionaryLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost,
-	getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity, leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零,
-	首一, 首一二, 首二, 首零, 首零一, 首零一二)
+	DOTgetPileIfLeaf, getDictionaryLeafOptions, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost,
+	getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity, Leaf, leafInSubHyperplane, LeafOptions, Pile,
+	ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import exclude, notLeafOriginOrLeaf零
 from more_itertools import last
@@ -45,20 +45,20 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 	Therefore, if I continue to pin pile 零Ante首零, I should probably focus on different strategies.
 	"""
-	leafAt一:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace,	   一))
-	leafAt一Ante首:		int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(一)+state.首))
-	leafAt一零:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace,	  (一+零)))
-	leafAt零一Ante首:	int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(零+一)+state.首))
-	leafAt二:			int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace,	   二))
-	leafAt二Ante首:		int = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(二)+state.首))
+	leafAt一:			Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace,		一))
+	leafAt一Ante首:		Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(一)+state.首))
+	leafAt一零:			Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace,	   (一+零)))
+	leafAt零一Ante首:	Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(零+一)+state.首))
+	leafAt二:			Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace,		二))
+	leafAt二Ante首:		Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(二)+state.首))
 
-	dictionaryPileRanges: dict[int, tuple[int, ...]] = getDictionaryLeafOptions(state)
+	dictionaryLeafOptions: dict[Pile, LeafOptions] = getDictionaryLeafOptions(state)
 	listRemoveLeaves: list[int] = []
 
 #========= use `leafAt一` to exclude a `leaf` from `pile` ===================
 
-	pileExcluder: int = 一
-	for dimension, leaf in enumerate(dictionaryPileRanges[pileExcluder]):
+	pileExcluder: Pile = 一
+	for dimension, leaf in enumerate(getIteratorOfLeaves(dictionaryLeafOptions[pileExcluder])):
 		if leaf == leafAt一:
 			if dimension < state.dimensionsTotal - 2:
 				listRemoveLeaves.extend([一, 首零(state.dimensionsTotal) + leafAt一])
@@ -79,7 +79,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 #========= use `leafAt一Ante首` to exclude a `leaf` from `pile` ===================
 
 	pileExcluder = neg(一)+state.首
-	for dimension, leaf in enumerate(dictionaryPileRanges[pileExcluder]):
+	for dimension, leaf in enumerate(getIteratorOfLeaves(dictionaryLeafOptions[pileExcluder])):
 		if leaf == leafAt一Ante首:
 			if dimension == 0:
 				listRemoveLeaves.extend([一])
@@ -253,7 +253,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		if state.dimensionsTotal - zeroIndexed - dimensionHead == zerosAtThe首:
 			sumsOfProductsOfDimensionsNearest首InSubSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, state.dimensionsTotal, state.dimensionsTotal - zerosAtThe首)
 			addendForUnknownReasons: int = -1
-			leavesWeDontWant: list[int] = [aLeaf + addendForUnknownReasons for aLeaf in filter(notLeafOriginOrLeaf零, sumsOfProductsOfDimensionsNearest首InSubSubHyperplane)]
+			leavesWeDontWant: list[int] = [aLeaf + addendForUnknownReasons for aLeaf in filter(notLeafOriginOrLeaf零, sumsOfProductsOfDimensionsNearest首InSubSubHyperplane)]  # ty:ignore[invalid-assignment]
 			listRemoveLeaves.extend(leavesWeDontWant)
 
 	if is_odd(leafAt二):
@@ -334,7 +334,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	dimensionTail: int = dimensionNearestTail(leafAt二Ante首)
 
 	#-------- I DON'T KNOW AND I DON'T CARE WHY THIS WORKS AS LONG AS IT WORKS -------
-	if (leafAt二Ante首 - 1) in getitem(dictionaryPileRanges, (neg(二)+state.首)):
+	if bit_test(getitem(dictionaryLeafOptions, (neg(二)+state.首)), leafAt二Ante首 - 1):
 		dimension = 三
 		if not bit_test(leafAt二Ante首, dimensionIndex(dimension)):
 
@@ -455,5 +455,5 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 	del dimensionHead, dimensionTail
 
-	return sorted(set(dictionaryPileRanges[state.pile]).difference(set(listRemoveLeaves)))
+	return sorted(set(getIteratorOfLeaves(dictionaryLeafOptions[state.pile])).difference(set(listRemoveLeaves)))
 

@@ -24,7 +24,8 @@ Treat `_e` as **internal research code**:
 - `mapFolding/_e/dataBaskets.py`
 	- Defines the state container `EliminationState`.
 	- Centralizes one-time derived constants from `mapShape` (e.g., `leavesTotal`, `productsOfDimensions`, `foldingCheckSum`).
-	- `EliminationState.foldsTotal` is computed from multiplicative factors (e.g., `groupsOfFolds`, theorem multipliers).
+	- `EliminationState.foldsTotal` is computed as `groupsOfFolds * Theorem2aMultiplier * Theorem2Multiplier * Theorem3Multiplier * Theorem4Multiplier`.
+		- `Theorem2aMultiplier` is initialized to `leavesTotal` in `__post_init__` (replacing the old explicit `* leavesTotal` in the formula).
 
 ## Core algorithm variations
 
@@ -59,20 +60,40 @@ These are the “shop tools” that algorithms tend to import from `_e/__init__.
 	- Shared utilities that should work beyond the $(2,) * n$ special case.
 	- Includes:
 		- `mapShapeIs2上nDimensions(...)` flow guard
-		- `LeafOptions` bitset utilities (via `gmpy2.mpz`/`xmpz`)
-		- “type-dispatch” helpers (`thisIsALeaf`, `thisIsALeafOptions`, `JeanValjean`)
+		- `LeafOptions` bitset utilities (via `gmpy2.mpz`/`xmpz`): `makeLeafOptions`, `makeLeafAntiOptions`, `JeanValjean`, `howManyLeavesInLeafOptions`, `leafOptionsAND`
+		- Type-guarded `dict.get` wrappers: `DOTgetPileIfLeaf`, `DOTgetPileIfLeafOptions`
 		- Iterators like `getIteratorOfLeaves(...)` (critical for domain enumeration)
+		- `bifurcatePermutationSpace` for splitting pinned leaves from undetermined pile domains
 
-- `mapFolding/_e/_dataDynamic.py`
-	- Dynamic domain computation for leaves/piles (conditional predecessors/successors, pile ranges, crease relations).
+- `mapFolding/_e/filters.py`
+	- Boolean predicates and specialized filter functions for map-folding data structures.
+	- Includes `thisIsALeaf`, `thisIsLeafOptions` (type-narrowing guards), `extractPinnedLeaves`, and helpers like `between`, `consecutive`, `leafIsInPileRange`, `leafIsPinned`, `mappingHasKey`, `pileIsOpen`.
+
+- `mapFolding/_e/_creases.py`
+	- Crease proximity helpers: `getLeavesCreaseAnte` and `getLeavesCreasePost`.
+	- Returns the leaves adjacent to a given leaf along each dimension (Gray-code crease neighbors).
+
+- `mapFolding/_e/_leafDomains.py`
+	- Domain functions for leaves/piles: `getLeafDomain`, `getDictionaryLeafDomains`, and several `getDomain*` helpers.
+	- Computes the valid pile-range for each leaf given `mapShape`.
+
+- `mapFolding/_e/_leafOptionsAtPile.py`
+	- `LeafOptions` bitset construction at a given pile: `getLeafOptions`, `getDictionaryLeafOptions`.
+
+- `mapFolding/_e/_development.py`
+	- Conditional predecessor/successor computation: `getDictionaryConditionalLeafPredecessors`, `getDictionaryConditionalLeafSuccessors`.
+
+- `mapFolding/_e/dataDynamic.py`
+	- Development/analysis tool that combines `EliminationState` data with pandas DataFrames.
+	- Includes `getDataFrameFoldings` and `makeVerificationDataLeavesDomain` for comparing computed domains against empirical folding data.
 
 - `mapFolding/_e/_measure.py`
 	- Coordinate/projection helpers used to reason about “nearest dimensions”, parity, sub-hyperplanes, etc.
 
 - `mapFolding/_e/_semiotics.py` and `mapFolding/_e/_theTypes.py`
 	- A naming + types system used throughout `_e`.
-	- Many algorithms rely on these symbols as a *semiotic contract*; avoid “normalizing” the vocabulary.
-
+	- Many algorithms rely on these symbols as a *semiotic contract*; avoid "normalizing" the vocabulary.
+	- Both re-exported through `mapFolding/_e/__init__.py`.
 - `mapFolding/_e/pinIt.py` and `mapFolding/_e/pin2上nDimensions*.py`
 	- Pinning and permutation-space manipulation.
 	- These modules are where “reduce the search space before counting” tactics live.
@@ -108,7 +129,7 @@ These are the “shop tools” that algorithms tend to import from `_e/__init__.
 
 - **Pile ranges are represented as bitsets** (`gmpy2.mpz`).
 	- A `LeafOptions` contains one bit per leaf *plus* a sentinel bit indicating “this is a range, not a single leaf”.
-	- Use the existing helpers (`getLeafOptions`, `getIteratorOfLeaves`, `JeanValjean`, etc.) rather than re-encoding.
+	- Use the existing helpers (`makeLeafOptions`, `getIteratorOfLeaves`, `JeanValjean`, etc.) rather than re-encoding.
 
 - **Re-export discipline**: prefer importing from `mapFolding._e` (via `__init__.py`) when a symbol is intentionally re-exported.
 

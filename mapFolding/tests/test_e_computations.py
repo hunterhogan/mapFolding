@@ -6,19 +6,19 @@ import pytest
 @pytest.mark.parametrize(
 	"oeisID, n, flow, CPUlimit",
 	[
-		pytest.param("A001417", 4, "crease", 0.25),
+		pytest.param("A001417", 4, "crease", 0.99),
+		pytest.param("A001417", 5, "crease", 0.99),
 
-		pytest.param("A000136", 5, "constraintPropagation", 0.25),
-		pytest.param("A001415", 5, "constraintPropagation", 0.25),
-		pytest.param("A001416", 4, "constraintPropagation", 0.25),
-		pytest.param("A001417", 4, "constraintPropagation", 0.25),
-		pytest.param("A001418", 3, "constraintPropagation", 0.25),
-		pytest.param("A195646", 2, "constraintPropagation", 0.25),
-		# *[pytest.param(oeisID, metadata["offset"], flow, 1)
-		# 	for oeisID, metadata in dictionaryOEISMapFolding.items()
-		# 		for flow in ["elimination"]]
-
-
+		pytest.param("A000136", 5, "constraintPropagation", 0.99),
+		pytest.param("A001415", 5, "constraintPropagation", 0.99),
+		pytest.param("A001416", 4, "constraintPropagation", 0.99),
+		pytest.param("A001417", 4, "constraintPropagation", 0.99),
+		pytest.param("A001418", 3, "constraintPropagation", 0.99),
+		pytest.param("A195646", 2, "constraintPropagation", 0.99),
+		# *[pytest.param(oeisID, metadata["offset"], "constraintPropagation", 1)
+		# 	for oeisID, metadata in dictionaryOEISMapFolding.items()],
+		*[pytest.param(oeisID, metadata["offset"] + 1, "constraintPropagation", 1)
+			for oeisID, metadata in dictionaryOEISMapFolding.items()],
 	],
 )
 def test_eliminateFoldsMapShape(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:

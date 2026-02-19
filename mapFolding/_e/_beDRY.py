@@ -29,7 +29,7 @@ Disaggregation and deconstruction functions
 		You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
 	getAntiLeafOptions
 		You can build a complement `LeafOptions` by clearing each `leaf` bit.
-	getLeafOptions
+	makeLeafOptions
 		You can build a `LeafOptions` by setting each `leaf` bit.
 	JeanValjean
 		You can normalize a `LeafOptions` into a `Leaf` or `None` when the range is degenerate.
@@ -206,7 +206,7 @@ def DOTvalues[个](dictionary: Mapping[Any, 个], /) -> Iterator[个]:
 	--------
 	The function is used to extract leaf domains for anti-option computation.
 
-		if not (permutationSpace := _reducePileRangesOfLeaves(state, permutationSpace, deque(pilesUndetermined.items()), getLeafAntiOptions(state.leavesTotal, DOTvalues(leavesPinned)))):
+		if not (permutationSpace := _reducePileRangesOfLeaves(state, permutationSpace, deque(pilesUndetermined.items()), makeLeafAntiOptions(state.leavesTotal, DOTvalues(leavesPinned)))):
 
 	The function is used to count leaf occurrences across domains.
 
@@ -248,7 +248,7 @@ def getIteratorOfLeaves(leafOptions: LeafOptions) -> Iterator[Leaf]:
 	--------
 	The function is used to enumerate leaves when building anti-options.
 
-		leafAntiOptions = getLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
+		leafAntiOptions = makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
 
 	The function is used to enumerate candidate leaves for constraint propagation.
 
@@ -358,7 +358,7 @@ def DOTgetPileIfLeafOptions(permutationSpace: PermutationSpace, pile: Pile, defa
 		return ImaLeafOptions
 	return default
 
-def getLeafAntiOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
+def makeLeafAntiOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
 	"""You can build a complement `LeafOptions` by clearing each `Leaf` bit in `leaves`.
 
 	The returned `LeafOptions` contains a bit for every `Leaf` in `range(leavesTotal)` except each `Leaf` in `leaves`.
@@ -396,7 +396,7 @@ def getLeafAntiOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
 	"""
 	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))
 
-def getLeafOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
+def makeLeafOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
 	"""You can build a `LeafOptions` by setting each `Leaf` bit in `leaves`.
 
 	The returned `LeafOptions` contains the sentinel bit that indicates the value is a `LeafOptions`. The returned
@@ -418,7 +418,7 @@ def getLeafOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
 	--------
 	The function is used to create a domain bitset before normalizing with `JeanValjean`.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(getLeafOptions(state.leavesTotal, leafOptions)))
+		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(makeLeafOptions(state.leavesTotal, leafOptions)))
 											for pile, leafOptions in getDictionaryLeafOptions(state).items()}
 
 	References
@@ -493,7 +493,7 @@ def JeanValjean(p24601: LeafOptions, /) -> LeafSpace | None:
 
 	The function is used to normalize per-pile domains into pinned leaves when possible.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(getLeafOptions(state.leavesTotal, leafOptions)))
+		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(makeLeafOptions(state.leavesTotal, leafOptions)))
 											for pile, leafOptions in getDictionaryLeafOptions(state).items()}
 
 	References

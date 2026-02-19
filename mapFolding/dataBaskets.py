@@ -379,8 +379,8 @@ class LeafSequenceState(MapFoldingState):
 
 		"""
 		super().__post_init__()
-		from mapFolding.oeis import librarianLookupsFoldsTotalKnown  # noqa: PLC0415
-		groupsOfFoldsKnown = librarianLookupsFoldsTotalKnown(self.mapShape) // self.leavesTotal
+		from mapFolding.oeis import getFoldsTotalKnown  # noqa: PLC0415
+		groupsOfFoldsKnown = getFoldsTotalKnown(self.mapShape) // self.leavesTotal
 		if self.leafSequence is None: # pyright: ignore[reportUnnecessaryComparison]
 			self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
 			self.leafSequence[self.groupsOfFolds] = self.leaf1ndex

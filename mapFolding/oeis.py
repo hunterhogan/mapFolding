@@ -52,7 +52,7 @@ from email.utils import format_datetime
 from functools import cache
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from itertools import chain
-from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, errorL33T, packageSettings
+from mapFolding import errorL33T, MetadataOEISid, MetadataOEISidMapFolding, packageSettings
 from mapFolding._theSSOT import pathCache
 from mapFolding.basecamp import countFolds
 from mapFolding.filesystemToolkit import (
@@ -415,7 +415,7 @@ dictionaryOEIS: dict[str, MetadataOEISid] = _librarianConstructsDictionaryOEIS()
 #======== librarianLookupsFoldsTotalKnown ==============================================================
 
 @cache
-def librarianLookupsFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
+def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	"""You can retrieve the known total number of distinct folding patterns for a given map shape.
 
 	(AI generated docstring)

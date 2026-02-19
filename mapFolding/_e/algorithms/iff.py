@@ -1,7 +1,46 @@
 """Verify that a folding sequence is possible.
 
-Notes
------
+You can use this module to validate stamp-folding sequences by detecting forbidden
+crease crossings. The module implements the forbidden inequality constraints established
+by Koehler (1968) [1] and simplified by Legendre (2014) [2]. The module provides both
+complete folding validators and permutation-space elimination functions.
+
+Mathematics
+-----------
+Let a strip of n stamps be a connected sequence of n rectangular leaves numbered 0, 1, 2, …,
+n−1. A folding π is a permutation that describes the final stacking order from bottom to top
+when the strip is folded along the connections between consecutive stamps without tearing
+the strip. Each connection between consecutive stamps forms a crease.
+
+Let leaf k have position π(k) in the final stack (the pile index). The crease connecting
+leaf k to leaf k+1 is denoted as the ordered pair (k, k+1). Two creases (k, k+1) and
+(r, r+1) cross when the relative ordering of the four leaves in the final pile violates
+physical realizability constraints: the crease connections cannot pass through each other
+in three-dimensional space.
+
+Koehler (1968) established that two creases (k, k+1) and (r, r+1) with matching parity
+(k ≡ r mod 2) cross if and only if the pile positions satisfy any of eight forbidden
+orderings. Legendre (2014) proved that four of these eight orderings are sufficient to
+characterize all crossings by exploiting symmetries in the folding configuration space.
+
+The parity constraint k ≡ r mod 2 arises from the alternating two-coloring inherent in
+linear stamp strips: consecutive stamps alternate between two classes under folding
+operations. Only creases whose constituent stamps belong to the same parity class can
+physically cross.
+
+For multidimensional map foldings, Lunnon (1971) [3] established that a pile (ordering) of
+leaves is a folding if and only if all its one-dimensional sections are proper foldings. The
+proof relies on two facts: (1) a pile is a folding if and only if no crease crosses any other
+crease, and (2) a pile is non-crease-crossing if and only if all its one-dimensional sections
+are non-crease-crossing. This reduction allows multidimensional validation to be performed by
+checking each dimension independently.
+
+This module implements Lunnon's theorem by projecting each dimension axis and testing crease
+pairs for forbidden orderings using the pile-position predicates `thisIsAViolation` and
+`thisIsAViolationComplicated`.
+
+Forbidden inequalities
+----------------------
 Eight forbidden inequalities of matching parity k and r *à la* Koehler (1968), indices of:
 	[k < r < k+1 < r+1] [r < k+1 < r+1 < k] [k+1 < r+1 < k < r] [r+1 < k < r < k+1]
 	[r < k < r+1 < k+1] [k < r+1 < k+1 < r] [r+1 < k+1 < r < k] [k+1 < r < k < r+1]
@@ -9,18 +48,23 @@ Eight forbidden inequalities of matching parity k and r *à la* Koehler (1968), 
 Four forbidden inequalities of matching parity k and r *à la* Legendre (2014), indices of:
 	[k < r < k+1 < r+1] [k+1 < r+1 < k < r] [r+1 < k < r < k+1] [k < r+1 < k+1 < r]
 
-Citations
----------
-- John E. Koehler, Folding a strip of stamps, Journal of Combinatorial Theory, Volume 5, Issue 2, 1968, Pages 135-152, ISSN
-0021-9800, https://doi.org/10.1016/S0021-9800(68)80048-1.
-- Stéphane Legendre, Foldings and meanders, The Australasian Journal of Combinatorics, Volume 58, Part 2, 2014, Pages 275-291,
-ISSN 2202-3518, https://ajc.maths.uq.edu.au/pdf/58/ajc_v58_p275.pdf.
+References
+----------
+[1] John E. Koehler, Folding a strip of stamps, Journal of Combinatorial Theory, Volume 5,
+	Issue 2, 1968, Pages 135-152, ISSN 0021-9800.
+	https://doi.org/10.1016/S0021-9800(68)80048-1
+[2] Stéphane Legendre, Foldings and meanders, The Australasian Journal of Combinatorics,
+	Volume 58, Part 2, 2014, Pages 275-291, ISSN 2202-3518.
+	https://ajc.maths.uq.edu.au/pdf/58/ajc_v58_p275.pdf
+[3] W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14,
+	Issue 1, 1971, Pages 75-80.
+	https://doi.org/10.1093/comjnl/14.1.75
 
 See Also
 --------
-- "[Annotated, corrected, scanned copy]" of Koehler (1968) at https://oeis.org/A001011.
-- Citations in BibTeX format "mapFolding/citations".
-"""
+Annotated, corrected, scanned copy of Koehler (1968) at https://oeis.org/A001011.
+Citations in BibTeX format at [mapFolding/citations](../../citations).
+"""  # noqa: RUF002
 from collections.abc import Callable
 from cytoolz.dicttoolz import valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
@@ -37,7 +81,14 @@ from operator import floordiv, indexOf
 #======== Forbidden inequalities ============================
 
 def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: Callable[[], Leaf | None], getComparandCrease: Callable[[], Leaf | None], pileOf: Callable[[Leaf], Pile | None]) -> bool:  # noqa: PLR0911
-	"""Validate.
+	"""Validate that two creases do not cross by checking forbidden pile orderings.
+
+	Mathematics
+	-----------
+	Let creases (k, k+1) and (r, r+1) have pile positions π(k), π(k+1), π(r), π(r+1)
+	respectively. The creases cross when the four pile positions violate one of the eight
+	forbidden orderings enumerated by Koehler (1968). This function evaluates the four simplified
+	orderings given the pile positions and crease-computation thunks.
 
 	Mathematical reasons for the design of this function
 	----------------------------------------------------
@@ -110,6 +161,15 @@ def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: 
 	return False
 
 def thisIsAViolation(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileComparandCrease: Pile) -> bool:
+	"""Validate that two creases do not cross using Legendre's simplified inequalities.
+
+	Mathematics
+	-----------
+	Legendre (2014) proved that four of Koehler's eight forbidden inequalities are sufficient
+	to characterize all crease crossings. This function evaluates those four simplified orderings
+	given the four pile positions π(k), π(r), π(k+1), π(r+1) directly.
+
+	"""
 	if pile < pileComparand:
 		if pileComparandCrease < pile:
 			if pileCrease < pileComparandCrease:						# [k+1 < r+1 < k < r]
@@ -131,6 +191,14 @@ def thisLeafFoldingIsValid(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	For example, `mapFolding._e.algorithms.eliminationCrease` uses `thisLeafFoldingIsValid` [1]
 	to post-filter candidate foldings that already satisfy arithmetic invariants such as
 	`state.foldingCheckSum`.
+
+	Mathematics
+	-----------
+	This function implements Lunnon's Theorem 1: a pile is a folding if and only if all its
+	one-dimensional sections are proper foldings. For a p₁ × p₂ × ⋯ × pₐ map, the function
+	extracts d one-dimensional sections (one per dimension) and validates each section by
+	checking that no crease pair violates the forbidden inequalities. The multidimensional
+	folding is valid when all d sections are valid.
 
 	Algorithm Details
 	-----------------
@@ -173,7 +241,7 @@ def thisLeafFoldingIsValid(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	[3] mapFolding._e.algorithms.iff.thisIsAViolationComplicated
 		Internal package reference
 
-	"""
+	"""  # noqa: RUF002
 	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileLeaf: pileLeaf[1] == _leavesTotal(mapShape) - 1, enumerate(folding)) # leafNPlus1 does not exist.
 	leafAndComparand: combinations[tuple[tuple[int, int], tuple[int, int]]] = combinations(foldingFiltered, 2)
 
@@ -315,7 +383,14 @@ def ImaOddLeaf(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
 
 	(AI generated docstring)
 
-	`ImaOddLeaf` returns a parity bit ($0$ or $1$) derived from the mixed-radix coordinate of
+	Mathematics
+	-----------
+	The parity constraint k ≡ r mod 2 determines which crease pairs can cross. Only creases
+	whose constituent leaves have matching parity in a dimension can physically cross in that
+	dimension. This function extracts the coordinate of `leaf` in `dimension` and returns the
+	least-significant bit (0 for even, 1 for odd).
+
+	`ImaOddLeaf` returns a parity bit (0 or 1) derived from the mixed-radix coordinate of
 	`leaf` along `dimension`.
 
 	`ImaOddLeaf` uses the `functools.cache` decorator for memoization [1].
@@ -428,6 +503,13 @@ def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf
 	"""You can compute and memoize the crease-post `Leaf` for `leaf` in `dimension`.
 
 	(AI generated docstring)
+
+	Mathematics
+	-----------
+	A crease in `dimension` connects leaf k to leaf k+1 along the coordinate axis of `dimension`.
+	This function computes the k+1 leaf (crease-post) given leaf k. The crease-post is found by
+	adding the mixed-radix stride for `dimension` to the `Leaf` index. When `leaf` is at the
+	boundary of `dimension`, no crease-post exists.
 
 	A crease-post `Leaf` is the adjacent leaf one step forward in `dimension`, expressed in
 	`Leaf` index space. When `leaf` is already at the boundary coordinate of `dimension`, the

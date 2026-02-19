@@ -201,7 +201,7 @@ def mappingHasKey[文件: Hashable](lookup: Mapping[文件, Any], key: 文件) -
 	"""Return `True` if `key` is in `lookup`."""
 	return key in lookup
 
-def notLeafOriginOrLeaf零(leaf: Leaf) -> bool:
+def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
 	"""Test to ensure `leaf` is not `leafOrigin` (0) or `leaf零` (1).
 
 	You can use `notLeafOriginOrLeaf零` in an `if` statement, or you can pass `notLeafOriginOrLeaf零` as a predicate to a

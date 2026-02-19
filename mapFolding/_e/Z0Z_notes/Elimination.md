@@ -4,7 +4,7 @@
 
 ## Rules for maintaining a valid permutation space
 
-1. In a dictionary of `Pile` keys with, if `leaf` is not pinned, deconstruct `permutationSpace` by the `Pile` domain of `leaf`.
+1. In a dictionary of `Pile` keys and `LeafSpace` values, if `leaf` is not pinned, deconstruct `permutationSpace` by the `Pile` domain of `leaf`.
    1. For each `pile` in the domain of `leaf`, if `pile` in `permutationSpace` is not occupied, create a new `PermutationSpace` dictionary by appending `leaf` pinned at `pile` to `permutationSpace`.
    2. Replace `permutationSpace` with the group of newly created `PermutationSpace` dictionaries.
 2. In a `PermutationSpace`, if a `pile` is not pinned, deconstruct `permutationSpace` by the `Leaf` range (mathematical range) of `pile`.
@@ -34,45 +34,37 @@ The following observations are due to two factors: the map's geometry and "lever
 
 Truth:
 
-- leaf0 is always in pile0
-- leaf1 is always in pile1
-- leaf首零 is always in `state.pileLast`
+1. `leafOrigin` (leaf0) is always in `pileOrigin` (pile0)
+2. `leaf1` is always in `pile1`
+3. `leaf首零` is always in `state.pileLast`
 
-### In a `Folding`, the absolute value of the difference between adjacent leaves is a value in `state.productsOfDimensions[0:-1]`
+### Given a `Folding` with `leaf` adjacent to `leaf_r`, the difference of `leaf` and `leaf_r` is a power of 2, with many restrictions
 
-Analytically, the leaves differ by one in exactly one dimension, which means the difference between adjacent leaves is always a power of 2.
+Reminders and general observations:
 
-#### The sum of differences between adjacent leaves equals the difference of the `leaf` in `state.pileLast` and the `leaf` in the first `pile`
+- [something, something] absolute value [yada yada] in `state.productsOfDimensions[0:-1]`
+- The difference between two adjacent leaves may be 1, -1, 2, -2, 4, -4, ..., `pos(state.leavesTotal // 2)`, `neg(state.leavesTotal // 2)`.
+- The total number of differences is `state.leavesTotal - 1`, which is an odd number. (_Cf._ fencepost problem.)
+- `state.productsOfDimensions[-1] == state.leavesTotal`, and `state.productsOfDimensions[-2] == state.leavesTotal // 2`.
 
-- For each `leaf_k` in `pileOfLeaf_k`, `leaf_r` is in `pileOfLeaf_k + 1`, and the difference between `leaf_r` and `leaf_k` is `leaf_r - leaf_k`.
-- Retain the sign.
-- The sum of the differences is `state.leavesTotal // 2`.
+Differences:
 
-#### The total number of differences in a `Folding` has symmetry
-
-- The total number of differences is `state.leavesTotal - 1`, which is an odd number.
-- Reminder: `state.productsOfDimensions[-1] == state.leavesTotal`, and `state.productsOfDimensions[-2] == state.leavesTotal // 2`.
-- The difference between two adjacent leaves may be 1, -1, 2, -2, 4, -4, ..., `state.leavesTotal // 2`, `- (state.leavesTotal // 2)`.
-- The total number of differences equal to `state.leavesTotal // 2` is always exactly one more than the total number of differences equal to `- (state.leavesTotal // 2)`.
-- For all other magnitudes in `state.productsOfDimensions[0:-2]`, the total number of differences of that magnitude is always equal to the total number of differences of the negative of that magnitude.
-- The signs of the magnitudes alternate: if the difference between two leaves is 2, for example, then before there can be another difference of 2, there must be a difference of -2.
-- Because `state.leavesTotal // 2` always has one more than `- state.leavesTotal // 2`, the first and last differences with magnitude `state.leavesTotal // 2` are positive.
-- Because the the other magnitudes have equal numbers of positive and negative differences, the first and last differences with those magnitudes must have opposite signs.
-
-#### The absolute value of the differences in two consecutive piles cannot be the same
-
-At `pile_k`, for example, if the difference is -4, then at `pile_k + 1`, the difference cannot be -4 or 4.
-
-#### The running total of the differences does not repeat in a `Folding`
-
-- The running total is a distinct integer in the range `[0, state.leavesTotal)`.
-- At pile0, the running total is 0.
-- At pile1, the running total is 1.
-- At `state.pileLast`, the running total is `state.leavesTotal // 2`.
+1. The signs of the magnitudes alternate: if the difference between two leaves is +2, for example, then before there can be another difference of +2, there must be a difference of -2.
+2. The total number of differences equal to `pos(state.leavesTotal // 2)` is always exactly one more than the total number of differences equal to `neg(state.leavesTotal // 2)`.
+   1. Therefore, the first and last differences with magnitude `state.leavesTotal // 2` are positive.
+3. For all other magnitudes in `state.productsOfDimensions[0:-2]`, the total number of positive and negative differences is always equal.
+   1. Therefore, the first and last differences with those magnitudes must have opposite signs.
+   2. Given Truth 1 and Truth 2,
+      1. every `Folding` has at least one difference of +1 and one difference of -1,
+      2. the first difference is +1, and
+      3. the last difference of magnitude 2^0 (1) is -1.
+4. In two consecutive piles, the absolute value of the differences cannot be the same. Given the difference at `pile_k` is -4, for example, then at `pile_k + 1`, the difference cannot be -4 or +4.
+5. The sum of all differences is `state.leavesTotal // 2`.
+6. Starting from `pileOrigin` in a `Folding`, the running total of differences is a distinct integer in the range `[0, state.leavesTotal)` and does not repeat.
 
 ### Given leaves `k` and `r`, if `dimensionNearest首(k) <= dimensionNearestTail(r)`, then `pileOf_k < pileOf_r`
 
-Physically, `pileOf_r` can exist before `pileOf_k`, but due to Lunnon Theorem 4, we can enumerate a subset of foldings and multiply by a formula.
+Physically, `pileOf_r` can exist before `pileOf_k`, so the limitation is due to leveraged enumeration.
 
 `dimensionNearest首(k)` is a 0-based index. Use the index on `state.productsOfDimensions`, and you get the lowest value of `r`. Furthermore, `k` precedes all multiples of `r`. This gives you multiple simple ways to make a list of the values of `r`.
 
@@ -90,20 +82,26 @@ leavesThatCannotPrecede_k = range(rTheFirst, state.leavesTotal, step)
 
 For example, a 2^6-dimensional map has 7840 total sequences that must be enumerated. Two pairs of leaves are always consecutive in a `Folding`, and I call them the "beans and cornbread" pairs. A few other pairs are regularly consecutive: the sets of pairs and their relatively entropy are predictable.
 
-| Consecutive Sequences | 1° leaf | 2° leaf | 1° leaf  | 2° leaf    |
-| --------------------- | ------- | ------- | -------- | ---------- |
-| 7840                  | 3       | 2       | 一+零    | 一         |
-| 7840                  | 16      | 48      | 首一     | 首零一     |
-| 6241                  | 5       | 4       | 二+零    | 二         |
-| 6241                  | 6       | 7       | 二+一    | 二+一+零   |
-| 6241                  | 8       | 40      | 首二     | 首零二     |
-| 6241                  | 56      | 24      | 首零一二 | 首一二     |
-| 5897                  | 4       | 36      | 二       | 首零二     |
-| 5897                  | 9       | 8       | 零+首二  | 首二       |
-| 5889                  | 10      | 11      | 一+首二  | 零+一+首二 |
-| 5889                  | 52      | 20      | 首零一三 | 首一三     |
+| Sequences | 1° leaf | 2° leaf | 1° leaf  | 2° leaf    |
+| --------- | ------- | ------- | -------- | ---------- |
+| 7840      | 3       | 2       | 一+零    | 一         |
+| 7840      | 16      | 48      | 首一     | 首零一     |
+| 6241      | 5       | 4       | 二+零    | 二         |
+| 6241      | 6       | 7       | 二+一    | 二+一+零   |
+| 6241      | 8       | 40      | 首二     | 首零二     |
+| 6241      | 56      | 24      | 首零一二 | 首一二     |
+| 5897      | 4       | 36      | 二       | 首零二     |
+| 5897      | 9       | 8       | 零+首二  | 首二       |
+| 5889      | 10      | 11      | 一+首二  | 零+一+首二 |
+| 5889      | 52      | 20      | 首零一三 | 首一三     |
 
 Interestingly, the 22 pairs of `leaf二一, leaf二一零` in consecutive piles have a very small combined domain, only 76 pairs, but 22 pairs cover 80% of the 7840 sequences and the other 54 (non-consecutive) pairs only cover 20%. Furthermore, in the 22 consecutive pairs, `leaf二一零` follows `leaf二一`, but in the rest of the domain, `leaf二一` always follows `leaf二一零`.
+
+Furthermore, it is easy to predict the pairs of pairs-of-leaves with low entropy.
+
+1. (一+零, 一) and (首一, 首零一)
+2. (leaf二一, leaf二一零) and (leaf二零, leaf二)
+3. (leaf首二, leaf首零二) and (leaf首零一二, leaf首一二)
 
 ## Semiotics, notation, and givens
 
@@ -111,6 +109,6 @@ Interestingly, the 22 pairs of `leaf二一, leaf二一零` in consecutive piles 
 - `leaf` is the archetypal variable name for a `Leaf`.
 - Each `Pile` is a distinct integer in the range `[0, state.pilesTotal)`.
 - `pile` is the archetypal variable name for a `Pile`.
-- A `PermutationSpace` is a dictionary
-dict[Pile, LeafSpace]
-`pile: leaf` or `pile: leafOptions`; length must be `leavesTotal`.
+- A `Folding` is a one-to-one correspondence between the set of `Pile` and the set of `Leaf`.
+- `folding` is the archetypal variable name for a `Folding`.
+****- A `PermutationSpace` is an exclusive subset of the undifferentiated permutation space of the factorial of `state.leavesTotal`.

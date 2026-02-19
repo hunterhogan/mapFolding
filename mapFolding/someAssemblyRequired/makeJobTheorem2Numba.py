@@ -14,7 +14,7 @@ from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding import DatatypeLeavesTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
-from mapFolding.oeis import dictionaryOEIS, librarianLookupsFoldsTotalKnown
+from mapFolding.oeis import dictionaryOEIS, getFoldsTotalKnown
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultA007822, dictionaryEstimatesMapFolding, IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport, RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
@@ -272,7 +272,7 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
 	from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
-	foldsTotalEstimated: int = librarianLookupsFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
+	foldsTotalEstimated: int = getFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
 	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal, foldsTotalEstimated=foldsTotalEstimated)

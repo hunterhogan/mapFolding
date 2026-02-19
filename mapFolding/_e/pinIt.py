@@ -16,8 +16,8 @@ from hunterMakesPy import raiseIfNone
 from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
-	DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTvalues, Folding, getLeafDomain, getLeafOptionsAtPile, Leaf, LeafOptions,
-	PermutationSpace, Pile)
+	DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTvalues, Folding, getIteratorOfLeaves, getLeafDomain, getLeafOptions, Leaf,
+	LeafOptions, PermutationSpace, Pile)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
 	between吗, extractPinnedLeaves, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen,
@@ -329,7 +329,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 	domain_r = filter(between吗(0, pile_k - inclusive), domain_r)
 
 	if rangePile_k is None:
-		rangePile_k = getLeafOptionsAtPile(state, pile_k)
+		rangePile_k = getIteratorOfLeaves(getLeafOptions(state, pile_k))
 
 	rangePile_k = frozenset(rangePile_k)
 
@@ -341,7 +341,12 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 		listPermutationSpaceCompleted.extend(listPermutationSpace)
 
 	for pile_r in domain_r:
-		iterator_kPinnedAt_pile_k = excludeLeafAtPile(iterator_kPinnedAt_pile_k, leaf_r, pile_r, tuple(filter(notLeaf_r, getLeafOptionsAtPile(state, pile_r))))
+		iterator_kPinnedAt_pile_k = excludeLeafAtPile(
+			iterator_kPinnedAt_pile_k
+			, leaf_r
+			, pile_r
+			, tuple(filter(notLeaf_r, getIteratorOfLeaves(getLeafOptions(state, pile_r))))
+		)
 
 	state.listPermutationSpace.extend(listPermutationSpaceCompleted)
 	state.listPermutationSpace.extend(iterator_kPinnedAt_pile_k)

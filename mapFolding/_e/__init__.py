@@ -16,12 +16,13 @@ from mapFolding._e._semiotics import (
 from mapFolding._e._beDRY import (
 	bifurcatePermutationSpace as bifurcatePermutationSpace, DOTgetPileIfLeaf as DOTgetPileIfLeaf,
 	DOTgetPileIfLeafOptions as DOTgetPileIfLeafOptions, DOTitems as DOTitems, DOTkeys as DOTkeys, DOTvalues as DOTvalues,
-	getIteratorOfLeaves as getIteratorOfLeaves, getLeafAntiOptions as getLeafAntiOptions, getLeafOptions as getLeafOptions,
-	getProductsOfDimensions as getProductsOfDimensions, getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
+	getIteratorOfLeaves as getIteratorOfLeaves, getProductsOfDimensions as getProductsOfDimensions,
+	getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
 	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首,
 	howManyLeavesInLeafOptions as howManyLeavesInLeafOptions,
 	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, JeanValjean as JeanValjean,
-	leafOptionsAND as leafOptionsAND, mapShapeIs2上nDimensions as mapShapeIs2上nDimensions, reverseLookup as reverseLookup)
+	leafOptionsAND as leafOptionsAND, makeLeafAntiOptions as makeLeafAntiOptions, makeLeafOptions as makeLeafOptions,
+	mapShapeIs2上nDimensions as mapShapeIs2上nDimensions, reverseLookup as reverseLookup)
 
 # isort: split
 from mapFolding._e._measure import (
@@ -40,7 +41,7 @@ from mapFolding._e._leafDomains import (
 	getDomain二一零and二一 as getDomain二一零and二一, getDomain二零and二 as getDomain二零and二, getDomain首零一二and首一二 as getDomain首零一二and首一二,
 	getDomain首零二and首二 as getDomain首零二and首二, getLeafDomain as getLeafDomain, getLeaf首零Plus零Domain as getLeaf首零Plus零Domain)
 from mapFolding._e._leafOptionsAtPile import (
-	getDictionaryLeafOptions as getDictionaryLeafOptions, getLeafOptionsAtPile as getLeafOptionsAtPile)
+	getDictionaryLeafOptions as getDictionaryLeafOptions, getLeafOptions as getLeafOptions)
 
 # isort: split
 from mapFolding._e._development import (

@@ -27,7 +27,7 @@ from collections.abc import Callable
 from hunterMakesPy.tests.test_parseParameters import PytestFor_defineConcurrencyLimit
 from mapFolding.basecamp import countFolds
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
-from mapFolding.oeis import dictionaryOEISMapFolding, librarianLookupsFoldsTotalKnown
+from mapFolding.oeis import dictionaryOEISMapFolding, getFoldsTotalKnown
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import Literal
 import pytest
@@ -49,7 +49,7 @@ def test_countFoldsComputationDivisionsInvalid(mapShape: tuple[int, ...]) -> Non
 	],
 )
 def test_countFoldsComputationDivisionsMaximum(mapShapeList: list[int]) -> None:
-	standardizedEqualToCallableReturn(librarianLookupsFoldsTotalKnown(tuple(mapShapeList)), countFolds, mapShapeList, None, 'maximum', None)
+	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(mapShapeList)), countFolds, mapShapeList, None, 'maximum', None)
 
 @pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_defineConcurrencyLimit())
 def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:

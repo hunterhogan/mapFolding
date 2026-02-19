@@ -5,8 +5,9 @@ from cytoolz.curried import map as toolz_map
 from cytoolz.functoolz import compose
 from gmpy2 import fac
 from mapFolding._e import (
-	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getLeafDomain,
-	getLeafOptionsAtPile, getLeavesCreaseAnte, getLeavesCreasePost, LeafOptions, PermutationSpace)
+	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions,
+	getIteratorOfLeaves, getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions,
+	LeafOptions, PermutationSpace)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pin2上nDimensional import (
@@ -21,7 +22,7 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 		return prod([leafOptions.bit_count() - 1 for leafOptions in listLeafOptions])
 	permutationsPermutationSpaceTotal: Callable[[list[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, extractUndeterminedPiles)))
 	print(len(str(mm:=fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
-	print(len(str(rr:=prod(toolz_map(len, filter(None, DOTvalues(getDictionaryLeafOptions(state))))))), rr, "dictionaryPileRanges")
+	print(len(str(rr:=prod(toolz_map(howManyLeavesInLeafOptions, filter(None, DOTvalues(getDictionaryLeafOptions(state))))))), rr, "dictionaryLeafOptions")
 	print(len(str(pp:=permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
@@ -51,12 +52,12 @@ if __name__ == '__main__':
 		state: EliminationState = pinPilesAtEnds(state, 4)
 		state: EliminationState = pinLeavesDimension首二(state)
 		print(state.sumsOfProductsOfDimensionsNearest首)
-		pprint(dictionaryPileRanges := getDictionaryLeafOptions(state), width=200)
+		pprint(dictionaryLeafOptions := getDictionaryLeafOptions(state), width=200)
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))
 		pprint(getDictionaryConditionalLeafPredecessors(state), width=260)
 		state: EliminationState = pinLeavesDimension二(state)
 		print(*getLeavesCreasePost(state, 22))
 		print(*getLeavesCreaseAnte(state, 53))
-		print(*(format(x, '06b') for x in getLeafOptionsAtPile(state, 60)))
+		print(*(format(x, '06b') for x in getIteratorOfLeaves(getLeafOptions(state, 60))))
 		print(list(getLeafDomain(state, 37)))
 		pprint(state.listPermutationSpace)

@@ -154,7 +154,7 @@ dictionaryLeafDomainKnown: dict[tuple[int, ...], dict[int, tuple[int, int, int]]
 	},
 }
 
-dictionaryPileRangesKnown: dict[tuple[int, ...], dict[int, tuple[int, ...]]] = {
+dictionaryLeafOptionsKnown: dict[tuple[int, ...], dict[int, tuple[int, ...]]] = {
 	mapShape2d4: {
 		0: (0,), 1: (1,), 2: (3, 5, 9), 3: (2, 7, 11, 13), 4: (3, 5, 6, 10, 15),
 		5: (2, 7, 11, 13, 14), 6: (3, 5, 6, 9, 10, 15), 7: (2, 4, 7, 11, 13, 14),

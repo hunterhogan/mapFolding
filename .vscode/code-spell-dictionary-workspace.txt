@@ -11,6 +11,7 @@ Anders
 antidivisor
 antidivisors
 appauthor
+appendleft
 appname
 argnames
 argnums
@@ -212,6 +213,7 @@ Meshgrids
 metaprogramming
 mobius
 Mult
+multiset
 mypy
 Natalya
 ncol
@@ -388,6 +390,7 @@ withitem
 wocky
 xlabel
 xmpz
+yada
 yapf
 yeong
 ylabel

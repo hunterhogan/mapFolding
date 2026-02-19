@@ -3,7 +3,7 @@
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensional import pinLeavesDimensions0零一, pinPilesAtEnds
+from mapFolding._e.pin2上nDimensional import pinLeavesDimensions0零一, pinPilesAtEnds, pinPile零Ante首零
 from mapFolding.oeis import dictionaryOEISMapFolding
 from os import PathLike
 from pathlib import PurePath
@@ -30,28 +30,28 @@ if __name__ == "__main__":
 	CPUlimit: bool | float | int | None = -2
 	state: EliminationState | None = None
 
-	flow = "elimination"
 	flow = "constraintPropagation"
 	flow = "crease"
+	flow = "elimination"
 
 	oeisID: str = "A195646"
 	oeisID: str = "A000136"
 	oeisID: str = "A001416"
 	oeisID: str = "A001418"
-	oeisID: str = "A001415"
 	oeisID: str = "A001417"
+	oeisID: str = "A001415"
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + "\n")
 
-	for n in range(6,7):
+	for n in range(4,5):
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 		if oeisID == "A001417" and n > 3:
 			state = EliminationState(mapShape)
-			# state = pinLeavesDimensions0零一(state)
-			state = pinPilesAtEnds(state, 4)
-			# state = pinPile零Ante首零(state)
+			state = pinPile零Ante首零(state)
+			state = pinLeavesDimensions0零一(state)
+			# state = pinPilesAtEnds(state, 4)
 			# state = pinLeavesDimension二(state)
 			# state = pinLeavesDimension首二(state)
 
