@@ -6,8 +6,8 @@ from cytoolz.functoolz import compose
 from gmpy2 import fac
 from mapFolding._e import (
 	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions,
-	getIteratorOfLeaves, getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions,
-	LeafOptions, PermutationSpace)
+	getIteratorOfLeaves, getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost,
+	howManyLeavesInLeafOptions, LeafOptions, PermutationSpace)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pin2上nDimensional import (
@@ -42,13 +42,13 @@ if __name__ == '__main__':
 		timeStart: float = time.perf_counter()
 		state: EliminationState = pinPile零Ante首零(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		state: EliminationState = pinLeavesDimensions0零一(state)
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 		printStatisticsPermutations(state)
 		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
+		state: EliminationState = pinLeavesDimensions0零一(state)
 		state: EliminationState = pinPilesAtEnds(state, 4)
 		state: EliminationState = pinLeavesDimension首二(state)
 		print(state.sumsOfProductsOfDimensionsNearest首)

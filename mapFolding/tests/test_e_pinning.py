@@ -3,10 +3,15 @@ from gmpy2 import xmpz
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractPinnedLeaves
 from mapFolding._e.pin2上nDimensional import (
-	pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds)
+	pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零)
+from mapFolding._e.Z0Z_analysisPython.toolkit import beansWithoutCornbread
 from numpy.typing import NDArray
+from typing import TYPE_CHECKING
 import numpy
 import pytest
+
+if TYPE_CHECKING:
+	from mapFolding._e import PermutationSpace
 
 @pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
 @pytest.mark.parametrize("pinningFunction", [pinPilesAtEnds, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二], ids=lambda pinningFunction: pinningFunction.__name__)
@@ -56,6 +61,21 @@ def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8
 	assert countOverlappingDictionaries == 0, (
 		f"{functionName} expected no overlapping dictionaries for {mapShape = }, "
 		f"got countOverlappingDictionaries={countOverlappingDictionaries}."
+	)
+
+
+@pytest.mark.parametrize("dimensionsTotal", [6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
+def test_pinPile零Ante首零_hasNoBeansWithoutCornbread(dimensionsTotal: int) -> None:
+	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
+	state: EliminationState = EliminationState(mapShape=mapShape)
+	state = pinPile零Ante首零(state)
+	beansOrCornbread: Callable[[PermutationSpace], bool] = beansWithoutCornbread(state)
+	listBeansWithoutCornbread: list[PermutationSpace] = list(filter(beansOrCornbread, state.listPermutationSpace))
+	countBeansWithoutCornbread: int = len(listBeansWithoutCornbread)
+
+	assert countBeansWithoutCornbread == 0, (
+		"pinPile零Ante首零 expected 0 dictionaries with beans but no cornbread "
+		f"for {mapShape = }, got countBeansWithoutCornbread={countBeansWithoutCornbread}."
 	)
 
 

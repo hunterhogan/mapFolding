@@ -31,21 +31,21 @@ if __name__ == "__main__":
 	state: EliminationState | None = None
 
 	flow = "constraintPropagation"
-	flow = "crease"
 	flow = "elimination"
+	flow = "crease"
 
 	oeisID: str = "A195646"
 	oeisID: str = "A000136"
 	oeisID: str = "A001416"
 	oeisID: str = "A001418"
-	oeisID: str = "A001417"
 	oeisID: str = "A001415"
+	oeisID: str = "A001417"
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + "\n")
 
-	for n in range(4,5):
+	for n in range(4,6):
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 		if oeisID == "A001417" and n > 3:
 			state = EliminationState(mapShape)
