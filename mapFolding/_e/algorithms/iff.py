@@ -379,34 +379,34 @@ def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: Leaf, comparand: Leaf, 
 
 @cache
 def ImaOddLeaf(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
-	r"""You can compute and memoize the parity bit of `leaf` in `dimension`.
+	r"""Compute and memoize the parity bit of `leaf` in `dimension`.
 
 	(AI generated docstring)
 
-	Mathematics
-	-----------
-	The parity constraint k ≡ r mod 2 determines which crease pairs can cross. Only creases
-	whose constituent leaves have matching parity in a dimension can physically cross in that
-	dimension. This function extracts the coordinate of `leaf` in `dimension` and returns the
-	least-significant bit (0 for even, 1 for odd).
+	You can use this function to determine whether `leaf` has an even or odd coordinate in
+	`dimension`. The function extracts the mixed-radix coordinate of `leaf` along `dimension`
+	and returns the least-significant bit (0 for even, 1 for odd). The function uses the
+	`functools.cache` decorator [1] for memoization.
 
-	`ImaOddLeaf` returns a parity bit (0 or 1) derived from the mixed-radix coordinate of
-	`leaf` along `dimension`.
+	Mathematical Basis
+	------------------
+	The parity constraint k ≡ r (mod 2) determines which crease pairs can cross. Only creases
+	whose constituent leaves have matching parity in `dimension` can physically cross in that
+	`dimension`. This function computes the parity by extracting the coordinate and returning
+	the least-significant bit.
 
-	`ImaOddLeaf` uses the `functools.cache` decorator for memoization [1].
+	Let `leaf` be a leaf index in a map with shape `mapShape`. The coordinate of `leaf` in
+	`dimension` is:
 
-	The coordinate extraction is:
-	$$
-	\left\lfloor \frac{leaf}{\prod mapShape[0:dimension]} \right\rfloor \bmod mapShape[dimension].
-	$$
+		⌊leaf ÷ ∏(mapShape[0:dimension])⌋ mod mapShape[dimension]
 
-	The parity bit is the least-significant bit of the coordinate.
-	The coordinate extraction uses `productOfDimensions` to compute the stride [2].
+	where ∏(mapShape[0:dimension]) is the stride computed by `productOfDimensions` [2]. The
+	parity bit is the least-significant bit of the coordinate, obtained using bitwise AND with 1.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
-		A shape tuple that defines the coordinate system.
+		A shape tuple that defines the mixed-radix coordinate system.
 	leaf : Leaf
 		A leaf index.
 	dimension : int
@@ -415,7 +415,7 @@ def ImaOddLeaf(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
 	Returns
 	-------
 	parityBit : int
-		A parity bit where `0` means even coordinate and `1` means odd coordinate.
+		A parity bit where `0` indicates even coordinate and `1` indicates odd coordinate.
 
 	References
 	----------

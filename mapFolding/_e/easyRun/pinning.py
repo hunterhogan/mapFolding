@@ -19,10 +19,14 @@ import time
 
 def printStatisticsPermutations(state: EliminationState) -> None:
 	def prodOfDOTvalues(listLeafOptions: Iterable[LeafOptions]) -> int:
-		return prod([leafOptions.bit_count() - 1 for leafOptions in listLeafOptions])
+		return prod(map(howManyLeavesInLeafOptions, listLeafOptions))
+
 	permutationsPermutationSpaceTotal: Callable[[list[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, extractUndeterminedPiles)))
+
 	print(len(str(mm:=fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
+
 	print(len(str(rr:=prod(toolz_map(howManyLeavesInLeafOptions, filter(None, DOTvalues(getDictionaryLeafOptions(state))))))), rr, "dictionaryLeafOptions")
+
 	print(len(str(pp:=permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
@@ -30,17 +34,11 @@ if __name__ == '__main__':
 
 	printThis = True
 
-	"""
-	4th order piles and leaves dimensions 0, 零, 一. 2d6.
-	11.42   seconds
-	2688492703286605023848766675550409414155249702868353306025321493319522402099200 permutations
-	len(state.listPermutationSpace)=3205
-	2537 surplus dictionaries: 79%
-	"""
-
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinPile零Ante首零(state)
+		state: EliminationState = pinLeavesDimensions0零一(state)
+		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
+		state: EliminationState = pinLeavesDimension二(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -48,14 +46,13 @@ if __name__ == '__main__':
 		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
-		state: EliminationState = pinLeavesDimensions0零一(state)
-		state: EliminationState = pinPilesAtEnds(state, 4)
 		state: EliminationState = pinLeavesDimension首二(state)
+		state: EliminationState = pinPilesAtEnds(state, 4)
+		state: EliminationState = pinPile零Ante首零(state)
 		print(state.sumsOfProductsOfDimensionsNearest首)
 		pprint(dictionaryLeafOptions := getDictionaryLeafOptions(state), width=200)
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))
 		pprint(getDictionaryConditionalLeafPredecessors(state), width=260)
-		state: EliminationState = pinLeavesDimension二(state)
 		print(*getLeavesCreasePost(state, 22))
 		print(*getLeavesCreaseAnte(state, 53))
 		print(*(format(x, '06b') for x in getIteratorOfLeaves(getLeafOptions(state, 60))))

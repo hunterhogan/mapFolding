@@ -16,8 +16,8 @@ from hunterMakesPy import raiseIfNone
 from itertools import repeat
 from mapFolding import inclusive
 from mapFolding._e import (
-	DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTvalues, Folding, getIteratorOfLeaves, getLeafDomain, getLeafOptions, Leaf,
-	LeafOptions, PermutationSpace, Pile)
+	DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTvalues, Folding, getIteratorOfLeaves, getLeafDomain, getLeafOptions,
+	Leaf, LeafOptions, PermutationSpace, Pile)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
 	between吗, extractPinnedLeaves, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen,
@@ -92,8 +92,8 @@ def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
 			state.listFolding.append(folding)
 	return state
 
-#======== Pin a `leaf` in a `PermutationSpace` or `Folding` =======================
-# NOTE This section ought to contain all functions based on the "Elimination" algorithm that pin a `leaf` in a `PermutationSpace` or `Folding`.
+#======== Pin a `Leaf` in a `PermutationSpace` or `Folding` =======================
+# NOTE This section ought to contain all functions based on the "Elimination" algorithm that pin a `Leaf` in a `PermutationSpace` or `Folding`.
 
 @syntacticCurry
 def atPilePinLeaf(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) -> PermutationSpace:
