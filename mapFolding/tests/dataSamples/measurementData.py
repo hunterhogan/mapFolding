@@ -784,6 +784,33 @@ dataDimensionThirdNearest: dict[int, int | None] = {
     256: None,
 }
 
+dataDimensionFourthNearest: dict[int, int | None] = {
+    7: None,
+    9: None,
+    22: None,
+    45: 0,
+    86: 1,
+}
+
+dataDimensionsConsecutiveAtTail: tuple[tuple[tuple[int, ...], int, int], ...] = (
+    ((2, 2, 2), 0, 0),
+    ((2, 2, 2), 1, 1),
+    ((2, 2, 2), 3, 2),
+    ((2, 2, 2, 2), 9, 1),
+    ((2, 2, 2, 2), 15, 0),
+    ((2, 2, 2, 2, 2), 15, 4),
+    ((2, 2, 2, 2, 2), 27, 2),
+)
+
+dataInvertLeafIn2上nDimensions: tuple[tuple[int, int, int], ...] = (
+    (0, 0, 0),
+    (1, 0, 1),
+    (1, 1, 0),
+    (3, 5, 2),
+    (4, 9, 6),
+    (6, 42, 21),
+)
+
 dataLeafInSubHyperplane: dict[int, int] = {
     2: 0,
     3: 1,

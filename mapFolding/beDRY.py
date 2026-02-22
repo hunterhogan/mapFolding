@@ -2,8 +2,9 @@
 
 from collections.abc import Sequence
 from functools import cache
+from hunterMakesPy import inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit, oopsieKwargsie
-from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, inclusive, NumPyIntegerType
+from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, NumPyIntegerType
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
 from typing import Any

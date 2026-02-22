@@ -6,7 +6,7 @@ from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding
 from math import factorial
 
-# TODO make sure all permutationSpace have pile-ranges and update their pile-ranges
+# TODO make sure all permutationSpace have LeafOptions and update their LeafOptions
 
 def count(state: EliminationState) -> EliminationState:
 	state.groupsOfFolds += sum(map(countPermutationSpace, state.listPermutationSpace, repeat(state.mapShape), repeat(range(state.leavesTotal))))

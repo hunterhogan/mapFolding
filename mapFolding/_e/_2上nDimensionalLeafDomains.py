@@ -1,8 +1,7 @@
 from collections.abc import Callable
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
-from hunterMakesPy import raiseIfNone
-from mapFolding import decreasing, inclusive
+from hunterMakesPy import decreasing, inclusive, raiseIfNone
 from mapFolding._e import (
 	dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首,
 	dimensionThirdNearest首, howManyDimensionsHaveOddParity, Leaf, leafOrigin, mapShapeIs2上nDimensions, Pile, pileOrigin,

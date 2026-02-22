@@ -7,7 +7,7 @@ TODO A301620 a(n) = Sum_{k=3..floor((n+3)/2)} (A259689(n+1,k)*(k-2)). - _Roger F
 NOTE: This is a generated file; edit the source file.
 """
 from functools import cache
-from mapFolding import inclusive
+from hunterMakesPy import inclusive
 from mapFolding.oeis import dictionaryOEIS, NOTcountingFolds
 
 @cache

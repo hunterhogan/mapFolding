@@ -5,7 +5,7 @@ TODO A223094 MATHEMATICA A000682 = Import["https://oeis.org/A000682/b000682.txt"
 TODO A301620 a(n) = Sum_{k=3..floor((n+3)/2)} (A259689(n+1,k)*(k-2)). - _Roger Ford_, Dec 10 2018
 """
 from functools import cache
-from mapFolding import inclusive
+from hunterMakesPy import inclusive
 from mapFolding.oeis import dictionaryOEIS, NOTcountingFolds
 
 @cache

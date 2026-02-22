@@ -1,6 +1,5 @@
 from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
-from hunterMakesPy import raiseIfNone
-from mapFolding import decreasing, zeroIndexed
+from hunterMakesPy import decreasing, raiseIfNone, zeroIndexed
 from mapFolding._e import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首,
 	DOTgetPileIfLeaf, getDictionaryLeafOptions, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost,

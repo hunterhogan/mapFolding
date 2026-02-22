@@ -2,8 +2,7 @@
 from cytoolz.dicttoolz import valfilter
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, bit_test, is_even
-from hunterMakesPy import raiseIfNone
-from mapFolding import decreasing
+from hunterMakesPy import decreasing, raiseIfNone
 from mapFolding._e import dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, leafOrigin, 零
 from mapFolding._e.algorithms.iff import getCreasePost, ImaOddLeaf
 from mapFolding._e.dataBaskets import EliminationState

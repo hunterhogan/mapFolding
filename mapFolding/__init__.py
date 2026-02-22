@@ -1,11 +1,6 @@
 """Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."""
 
-# isort: split
-from mapFolding._semiotics import (
-	ansiColorReset as ansiColorReset, ansiColors as ansiColors, decreasing as decreasing, errorL33T as errorL33T,
-	inclusive as inclusive, zeroIndexed as zeroIndexed)
-
-# isort: split
+from mapFolding._semiotics import ansiColorReset as ansiColorReset, ansiColors as ansiColors
 from mapFolding._theTypes import (
 	Array1DElephino as Array1DElephino, Array1DFoldsTotal as Array1DFoldsTotal, Array1DLeavesTotal as Array1DLeavesTotal,
 	Array2DLeavesTotal as Array2DLeavesTotal, Array3DLeavesTotal as Array3DLeavesTotal, axisOfLength as axisOfLength,

@@ -22,23 +22,18 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 		return prod(map(howManyLeavesInLeafOptions, listLeafOptions))
 
 	permutationsPermutationSpaceTotal: Callable[[list[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, extractUndeterminedPiles)))
-
 	print(len(str(mm:=fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
-
 	print(len(str(rr:=prod(toolz_map(howManyLeavesInLeafOptions, filter(None, DOTvalues(getDictionaryLeafOptions(state))))))), rr, "dictionaryLeafOptions")
-
 	print(len(str(pp:=permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 6)
+	state = EliminationState((2,) * 5)
 
 	printThis = True
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinLeavesDimensions0零一(state)
-		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		state: EliminationState = pinLeavesDimension二(state)
+		state: EliminationState = pinPilesAtEnds(state, 3)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -46,8 +41,9 @@ if __name__ == '__main__':
 		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
+		state: EliminationState = pinLeavesDimensions0零一(state)
+		state: EliminationState = pinLeavesDimension二(state)
 		state: EliminationState = pinLeavesDimension首二(state)
-		state: EliminationState = pinPilesAtEnds(state, 4)
 		state: EliminationState = pinPile零Ante首零(state)
 		print(state.sumsOfProductsOfDimensionsNearest首)
 		pprint(dictionaryLeafOptions := getDictionaryLeafOptions(state), width=200)

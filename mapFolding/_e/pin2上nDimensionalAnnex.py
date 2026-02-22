@@ -73,8 +73,8 @@ from cytoolz.dicttoolz import itemfilter, keyfilter, valfilter
 from cytoolz.functoolz import complement, compose, curry as syntacticCurry
 from cytoolz.itertoolz import unique
 from gmpy2 import bit_flip, bit_test as isBit1吗
+from hunterMakesPy import errorL33T, inclusive
 from itertools import chain, combinations, product as CartesianProduct
-from mapFolding import errorL33T, inclusive
 from mapFolding._e import (
 	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues,
 	getDictionaryConditionalLeafPredecessors, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost,

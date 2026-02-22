@@ -2,7 +2,7 @@ from bisect import bisect_right
 from collections import defaultdict
 from functools import cache
 from gmpy2 import is_even, is_odd
-from mapFolding import decreasing, inclusive
+from hunterMakesPy import decreasing, inclusive
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getSumsOfProductsOfDimensionsNearest首,
 	howManyDimensionsHaveOddParity, Leaf, leafInSubHyperplane, mapShapeIs2上nDimensions, Pile, 一, 零, 首一, 首零, 首零一)

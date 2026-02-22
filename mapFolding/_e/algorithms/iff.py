@@ -69,8 +69,8 @@ from collections.abc import Callable
 from cytoolz.dicttoolz import valfilter as leafFilter
 from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
+from hunterMakesPy import inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
-from mapFolding import inclusive
 from mapFolding._e import Folding, Leaf, PermutationSpace, Pile
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import between吗, extractPinnedLeaves

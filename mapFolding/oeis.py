@@ -50,9 +50,10 @@ References
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
 from functools import cache
+from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from itertools import chain
-from mapFolding import errorL33T, MetadataOEISid, MetadataOEISidMapFolding, packageSettings
+from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, packageSettings
 from mapFolding._theSSOT import pathCache
 from mapFolding.basecamp import countFolds
 from mapFolding.filesystemToolkit import (

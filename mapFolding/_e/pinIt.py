@@ -12,9 +12,8 @@ from cytoolz.functoolz import compose, curry as syntacticCurry
 from cytoolz.itertoolz import groupby as toolz_groupby
 from functools import partial
 from gmpy2 import bit_mask
-from hunterMakesPy import raiseIfNone
+from hunterMakesPy import inclusive, raiseIfNone
 from itertools import repeat
-from mapFolding import inclusive
 from mapFolding._e import (
 	DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTvalues, Folding, getIteratorOfLeaves, getLeafDomain, getLeafOptions,
 	Leaf, LeafOptions, PermutationSpace, Pile)

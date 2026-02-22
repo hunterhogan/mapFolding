@@ -22,6 +22,20 @@ expected七: Final[int] = 128
 expected八: Final[int] = 256
 expected九: Final[int] = 512
 
+# Dimension index lookup values
+expectedDimensionIndex: Final[tuple[tuple[int, int], ...]] = (
+	(expected零, 0)
+	, (expected一, 1)
+	, (expected二, 2)
+	, (expected三, 3)
+	, (expected四, 4)
+	, (expected五, 5)
+	, (expected六, 6)
+	, (expected七, 7)
+	, (expected八, 8)
+	, (expected九, 9)
+)
+
 # Origin constants
 expectedLeafOrigin: Final[int] = 0
 expectedPileOrigin: Final[int] = 0

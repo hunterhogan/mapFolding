@@ -1,7 +1,6 @@
 from collections.abc import Iterator
 from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
-from hunterMakesPy import raiseIfNone
-from mapFolding import inclusive
+from hunterMakesPy import inclusive, raiseIfNone
 from mapFolding._e import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, getLeavesCreaseAnte, getLeavesCreasePost,
 	Leaf, leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一)
