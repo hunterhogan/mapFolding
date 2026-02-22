@@ -43,7 +43,7 @@ def pinPile一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	leafAt一: Leaf | None = DOTgetPileIfLeaf(state.permutationSpace, 一)
 
 	if leafAt一 and (leafAt一.bit_length() < state.dimensionsTotal):
-		listCreaseIndicesExcluded.extend([*range(零, leafAt一.bit_length())])
+		listCreaseIndicesExcluded.extend([*range(零, dimensionNearest首(leafAt一)+inclusive)])
 	return exclude(tupleLeavesCrease, listCreaseIndicesExcluded)
 
 #-------- Depth 3 ------------------------------------

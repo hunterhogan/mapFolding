@@ -3,8 +3,9 @@ from cytoolz.itertoolz import last
 from itertools import pairwise, product as CartesianProduct
 from mapFolding import packageSettings
 from mapFolding._e import (
-	getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin,
-	PinnedLeaves, UndeterminedPiles)
+	getIteratorOfLeaves, getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost,
+	indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin, PinnedLeaves,
+	UndeterminedPiles)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import between吗, extractPinnedLeaves, extractUndeterminedPiles
 from math import factorial, prod
@@ -34,7 +35,7 @@ def count(state: EliminationState) -> EliminationState:
 	model.add(listLeavesInPileOrder[pileOrigin] == leafOrigin)
 
 #======== Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ============================
-	if 2 < max(state.mapShape):
+	if 2 <= max(state.mapShape):
 		for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
 			state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
 			for index_k, index_r in pairwise(indicesSameDimensionLength):
@@ -115,6 +116,7 @@ def count(state: EliminationState) -> EliminationState:
 	foldingCollector = FoldingCollector(listLeavesInPileOrder)
 	solver.solve(model, foldingCollector)
 
+	state.groupsOfFolds = len(foldingCollector.listFolding)
 	state.listFolding = list(map(tuple, foldingCollector.listFolding))
 
 	return state
@@ -131,10 +133,11 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		raise ValueError(message)
 	if state.listPermutationSpace or (workersMaximum > 1):
 
+		state.permutationSpace = {}
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
 			if not state.listPermutationSpace:
-				pileForConcurrency: int = state.pileLast // 2
+				pileForConcurrency: int = 2
 				state.listPermutationSpace = [{pileForConcurrency: leaf} for leaf in range(state.leavesTotal)]
 
 			listClaimTickets: list[Future[EliminationState]] = [
@@ -142,17 +145,17 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 					for permutationSpace in state.listPermutationSpace
 			]
 
-			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
+			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False, desc=f"PermutationSpace {len(listClaimTickets)}"):
 				sherpa: EliminationState = claimTicket.result()
 
-			# TODO NOTE temporary data collection for p2d7
+				# TODO NOTE temporary data collection for p2d7
 				if (sherpa.dimensionsTotal == 7) and (sherpa.listFolding):
 					pathFilename: Path = packageSettings.pathPackage / "_e" / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
 					with Path.open(pathFilename, mode="w", newline="") as fileCSV:
 						csvWriter = csv.writer(fileCSV)
 						csvWriter.writerows(sherpa.listFolding)
 
-				state.groupsOfFolds += len(sherpa.listFolding)
+				state.groupsOfFolds += sherpa.groupsOfFolds
 				state.Theorem2aMultiplier = sherpa.Theorem2aMultiplier
 				state.Theorem2Multiplier = sherpa.Theorem2Multiplier
 				state.Theorem3Multiplier = sherpa.Theorem3Multiplier

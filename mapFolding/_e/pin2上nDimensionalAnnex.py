@@ -14,15 +14,15 @@ The module is organized as one conceptual algorithm split across multiple functi
 readability and maintainability:
 
 1. `reduceAllPermutationSpaceInEliminationState` is the orchestrator that applies each
-   reduction function in sequence until the permutation space stabilizes.
+	reduction function in sequence until the permutation space stabilizes.
 
 2. The `_reducePermutationSpace_*` functions are specialized constraint encoders that each
-   implement one type of constraint. These functions are curried to accept `state` first,
-   then `permutationSpace`, enabling use with `filter_map` [1].
+	implement one type of constraint. These functions are curried to accept `state` first,
+	then `permutationSpace`, enabling use with `filter_map` [1].
 
 3. `_reduceLeafSpace` is the shared subroutine that handles the mechanical work of updating
-   `LeafOptions` at specified piles and propagating newly pinned leaves. All constraint
-   encoders call `_reduceLeafSpace` to perform the actual updates.
+	`LeafOptions` at specified piles and propagating newly pinned leaves. All constraint
+	encoders call `_reduceLeafSpace` to perform the actual updates.
 
 The functions are not independent algorithms; the functions are interdependent components of
 a constraint-propagation system. Each function assumes other functions will run afterward to
@@ -66,7 +66,6 @@ References
 	https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.filter_map
 
 """
-# ruff: noqa: ERA001
 from collections import Counter, deque
 from collections.abc import Iterable
 from cytoolz.curried import map as toolz_map
@@ -77,7 +76,7 @@ from gmpy2 import bit_flip, bit_test as isBit1吗
 from itertools import chain, combinations, product as CartesianProduct
 from mapFolding import errorL33T, inclusive
 from mapFolding._e import (
-	bifurcatePermutationSpace, dimensionIndex, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues,
+	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues,
 	getDictionaryConditionalLeafPredecessors, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost,
 	howManyLeavesInLeafOptions, JeanValjean, Leaf, LeafOptions, leafOptionsAND, leafOrigin, LeafSpace, makeLeafAntiOptions,
 	mapShapeIs2上nDimensions, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles, 一, 零, 首一, 首零一)
@@ -89,9 +88,7 @@ from mapFolding._e.filters import (
 from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile
 from math import prod
 from more_itertools import filter_map, one, pairwise, triplewise
-from operator import neg, pos
 from typing import TYPE_CHECKING
-from typing_extensions import TypeIs
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterator
@@ -245,10 +242,6 @@ def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> Elim
 		listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
 		state.listPermutationSpace = []
 		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_nakedSubset(state), listPermutationSpace))
-
-		# listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-		# state.listPermutationSpace = []
-		# state.listPermutationSpace.extend(filter_map(Z0Z_reducePermutationSpace_dimensionRestrictions(state), listPermutationSpace))
 
 		permutationSpaceTotalReduced: int = permutationsPermutationSpaceTotal(state.listPermutationSpace)
 
@@ -824,67 +817,6 @@ def _reducePermutationSpace_noConsecutiveDimensions(state: EliminationState, per
 					return None
 				if sum(map(dimensionNearest首, permutationSpace.values())) < sumBeforeReduction:
 					permutationSpaceHasNewLeaf = True
-
-	return permutationSpace
-
-"""# TODO implement
-1. The signs of the magnitudes alternate: if the difference between two leaves is +2, for example, then before there can be another difference of +2, there must be a difference of -2.
-2. The total number of differences equal to `pos(state.leavesTotal // 2)` is always exactly one more than the total number of differences equal to `neg(state.leavesTotal // 2)`.
-	1. Therefore, the first and last differences with magnitude `state.leavesTotal // 2` are positive.
-3. For all other magnitudes in `state.productsOfDimensions[0:-2]`, the total number of positive and negative differences is always equal.
-	1. Therefore, the first and last differences with those magnitudes must have opposite signs.
-"""
-@syntacticCurry
-def Z0Z_reducePermutationSpace_dimensionRestrictions(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
-	forbiddenLeaves: set[Leaf] = set()
-	thePile: int = 0
-	theLeaf: int = 1
-	Z0Z_limitSignFromOrigin: list[list[int]] = [[1]] + [[]] * len(state.productsOfDimensions[1:-2]) + [[-1]]
-	Z0Z_limitSignFromEnd: list[list[int]] = [[1]] + [[]] * len(state.productsOfDimensions[1:-2]) + [[-1]]
-	permutationSpaceHasNewLeaf: bool = True
-
-	def pileLeaf吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, Leaf]]:
-		return thisIsALeaf(pileLeafSpace[1])
-
-	while permutationSpaceHasNewLeaf:
-		permutationSpaceHasNewLeaf = False
-
-		leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
-		Z0Z_deque: deque[tuple[Pile, LeafSpace]] = deque(sorted(DOTitems(keyfilter(notPileLast(state.pileLast), valfilter(notLeafOriginOrLeaf零, permutationSpace)))))
-
-		while (pileLeaf吗(Z0Z_deque[0])) or (pileLeaf吗(Z0Z_deque[-1])):
-			thereIsNoLeftSpoon: tuple[Pile, LeafSpace] = Z0Z_deque.popleft()
-			if pileLeaf吗(thereIsNoLeftSpoon):
-				difference: int = thereIsNoLeftSpoon[theLeaf] - leavesPinned[thereIsNoLeftSpoon[thePile] - 1]
-				if 0 < difference:
-					sign: int = pos(1)
-				else:
-					sign = neg(1)
-				indexDimension: int = dimensionIndex(abs(difference))
-				Z0Z_limitSignFromOrigin[indexDimension].append(sign)
-				if not Z0Z_limitSignFromEnd[indexDimension]:
-					Z0Z_limitSignFromEnd[indexDimension].append(sign)
-			else:
-				Z0Z_deque.appendleft(thereIsNoLeftSpoon)
-				thereIsNoRightSpoon: tuple[Pile, LeafSpace] = Z0Z_deque.pop()
-				if pileLeaf吗(thereIsNoRightSpoon):
-					difference: int = leavesPinned[thereIsNoRightSpoon[thePile] + 1] - thereIsNoRightSpoon[theLeaf]
-					if 0 < difference:
-						sign = 1
-					else:
-						sign = -1
-					indexDimension: int = dimensionIndex(abs(difference))
-					Z0Z_limitSignFromEnd[indexDimension].append(sign)
-					if not Z0Z_limitSignFromOrigin[indexDimension]:
-						Z0Z_limitSignFromOrigin[indexDimension].append(sign)
-				else:
-					message: str = 'I think this is a logic error.'
-					raise ValueError(message)
-
-		while Z0Z_deque and not permutationSpaceHasNewLeaf:
-			something: tuple[Pile, LeafSpace] = Z0Z_deque.popleft()  # noqa: F841
-			# forbiddenLeaves
-			leafAntiOptions: LeafOptions = makeLeafAntiOptions(state.leavesTotal, forbiddenLeaves)  # noqa: F841
 
 	return permutationSpace
 

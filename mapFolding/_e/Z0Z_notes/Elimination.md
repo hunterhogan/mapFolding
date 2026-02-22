@@ -55,9 +55,8 @@ Differences:
 3. For all other magnitudes in `state.productsOfDimensions[0:-2]`, the total number of positive and negative differences is always equal.
    1. Therefore, the first and last differences with those magnitudes must have opposite signs.
    2. Given Truth 1 and Truth 2,
-      1. every `Folding` has at least one difference of +1 and one difference of -1,
-      2. the first difference is +1, and
-      3. the last difference of magnitude 2^0 (1) is -1.
+      1. the first difference in every `Folding` is +1,
+      2. the last difference of magnitude 1 is -1.
 4. In two consecutive piles, the absolute value of the differences cannot be the same. Given the difference at `pile_k` is -4, for example, then at `pile_k + 1`, the difference cannot be -4 or +4.
 5. The sum of all differences is `state.leavesTotal // 2`.
 6. Starting from `pileOrigin` in a `Folding`, the running total of differences is a distinct integer in the range `[0, state.leavesTotal)` and does not repeat.
