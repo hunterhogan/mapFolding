@@ -1,6 +1,5 @@
 from bisect import bisect_left
 from collections.abc import Callable, Iterable
-from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache, partial
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
 from hunterMakesPy import raiseIfNone
@@ -12,6 +11,7 @@ from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten
 from operator import add, iadd, mul
 from pprint import pprint
+from tlz.functoolz import curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

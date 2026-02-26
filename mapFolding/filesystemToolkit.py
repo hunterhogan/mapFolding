@@ -116,9 +116,10 @@ def getPathRootJobDEFAULT() -> Path:
 	Creates the directory if it doesn't exist.
 
 	"""
-	pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=packageSettings.identifierPackage, appauthor=False, ensure_exists=True))
 	if 'google.colab' in sysModules:
-		pathJobDEFAULT = Path("/content/drive/MyDrive") / packageSettings.identifierPackage
+		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / packageSettings.identifierPackage
+	else:
+		pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=packageSettings.identifierPackage, appauthor=False, ensure_exists=True))
 	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
 	return pathJobDEFAULT
 

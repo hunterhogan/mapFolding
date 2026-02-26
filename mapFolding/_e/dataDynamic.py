@@ -1,11 +1,11 @@
 from collections.abc import Callable, Sequence
-from cytoolz.dicttoolz import merge
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writePython
 from mapFolding import ansiColorReset, ansiColors, packageSettings
 from mapFolding._e import getDictionaryLeafOptions, JeanValjean, PermutationSpace
 from mapFolding._e.dataBaskets import EliminationState
 from pathlib import Path, PurePath
+from tlz.dicttoolz import merge  # pyright: ignore[reportMissingModuleSource]
 from typing import Any
 import pandas
 import sys
@@ -110,12 +110,11 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 
 	return pathFilename
 
-# TODO Creation of `permutationSpace2上nDomainDefaults` could possibly be a function. To future proof the performance, I probably want to cache `permutationSpace2上nDomainDefaults`.
 def addLeafOptions(state: EliminationState) -> EliminationState:
-	permutationSpace2上nDomainDefaults: PermutationSpace = {
+	permutationSpaceDefaults: PermutationSpace = {
 		pile: raiseIfNone(JeanValjean(leafOptions))
 		for pile, leafOptions in getDictionaryLeafOptions(state).items()
 	}
-	state.permutationSpace = merge(permutationSpace2上nDomainDefaults, state.permutationSpace)
+	state.permutationSpace = merge(permutationSpaceDefaults, state.permutationSpace)
 	return state
 

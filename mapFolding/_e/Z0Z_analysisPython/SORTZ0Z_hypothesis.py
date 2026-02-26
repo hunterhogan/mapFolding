@@ -1,5 +1,4 @@
 # ruff: noqa
-from cytoolz.dicttoolz import valfilter
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, bit_test, is_even
 from hunterMakesPy import decreasing, raiseIfNone
@@ -8,6 +7,7 @@ from mapFolding._e.algorithms.iff import getCreasePost, ImaOddLeaf
 from mapFolding._e.dataBaskets import EliminationState
 from math import log2, prod
 from pprint import pprint
+from tlz.dicttoolz import valfilter
 
 def getDictionaryAddends4Next(state: EliminationState) -> dict[int, list[int]]:
 	@cache

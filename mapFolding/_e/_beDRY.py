@@ -59,9 +59,6 @@ References
 
 """
 from collections.abc import Iterable, Iterator, Mapping
-from cytoolz.dicttoolz import dissoc as dissociatePiles
-from cytoolz.functoolz import curry as syntacticCurry
-from cytoolz.itertoolz import unique
 from functools import partial, reduce
 from gmpy2 import bit_clear, bit_mask, bit_set, xmpz
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
@@ -70,6 +67,9 @@ from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, 
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf, thisIsLeafOptions
 from more_itertools import iter_index
 from operator import add, mul
+from tlz.dicttoolz import dissoc as dissociatePiles  # pyright: ignore[reportMissingModuleSource]
+from tlz.functoolz import curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
+from tlz.itertoolz import unique  # pyright: ignore[reportMissingModuleSource]
 from typing import Any
 
 #======== Group-by functions ================================================

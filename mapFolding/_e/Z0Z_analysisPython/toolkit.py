@@ -1,6 +1,4 @@
 from collections.abc import Callable, Sequence
-from cytoolz.dicttoolz import valfilter as leafFilter
-from cytoolz.functoolz import curry as syntacticCurry
 from dataclasses import dataclass
 from mapFolding import ansiColorReset, ansiColors, packageSettings
 from mapFolding._e import DOTvalues, PermutationSpace, PinnedLeaves, 一, 零, 首一, 首零一
@@ -9,6 +7,8 @@ from mapFolding._e.dataDynamic import getDataFrameFoldings
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf
 from pathlib import Path
 from pprint import pformat
+from tlz.dicttoolz import valfilter as leafFilter
+from tlz.functoolz import curry as syntacticCurry
 import csv
 import numpy
 import sys

@@ -1,4 +1,4 @@
-"""You can use this module to pin `PermutationSpace` dictionaries for $(2,) * n$ map shapes.
+"""You can use this module to pin `PermutationSpace` dictionaries for (2,) * n map shapes.
 
 (AI generated docstring)
 
@@ -240,7 +240,7 @@ def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 #-------- Plebian functions -----------------------------------------
 
 def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListPermutationSpace: int = 2**14, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
-	"""You can pin piles near both ends of the pile sequence for $(2,) * n$ map shapes.
+	"""You can pin piles near both ends of the pile sequence for (2,) * n map shapes.
 
 	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape)`
 	fails [1].
@@ -333,7 +333,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 	return _pinPiles(state, maximumSizeListPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
 def pinPile零Ante首零(state: EliminationState, maximumSizeListPermutationSpace: int = 2**14, *, CPUlimit: bool | float | int | None = None) -> EliminationState:
-	"""You can pin `pile` `neg(零) + 首零(state.dimensionsTotal)` for $(2,) * n$ map shapes.
+	"""You can pin `pile` `neg(零) + 首零(state.dimensionsTotal)` for (2,) * n map shapes.
 
 	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape)`
 	fails [1].

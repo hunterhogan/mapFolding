@@ -68,10 +68,6 @@ References
 """
 from collections import Counter, deque
 from collections.abc import Iterable
-from cytoolz.curried import map as toolz_map
-from cytoolz.dicttoolz import itemfilter, keyfilter, valfilter
-from cytoolz.functoolz import complement, compose, curry as syntacticCurry
-from cytoolz.itertoolz import unique
 from gmpy2 import bit_flip, bit_test as isBit1吗
 from hunterMakesPy import errorL33T, inclusive
 from itertools import chain, combinations, product as CartesianProduct
@@ -88,6 +84,10 @@ from mapFolding._e.filters import (
 from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile
 from math import prod
 from more_itertools import filter_map, one, pairwise, triplewise
+from tlz.curried import map as toolz_map  # pyright: ignore[reportMissingModuleSource]
+from tlz.dicttoolz import itemfilter, keyfilter, valfilter  # pyright: ignore[reportMissingModuleSource]
+from tlz.functoolz import complement, compose, curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
+from tlz.itertoolz import unique  # pyright: ignore[reportMissingModuleSource]
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

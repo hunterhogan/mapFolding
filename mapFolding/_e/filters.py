@@ -61,13 +61,13 @@ References
 
 """
 from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
-from cytoolz.dicttoolz import valfilter as leafFilter
-from cytoolz.functoolz import curry as syntacticCurry
 from gmpy2 import mpz
 from hunterMakesPy import Ordinals
 from hunterMakesPy.parseParameters import intInnit
 from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles, 零
 from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract
+from tlz.dicttoolz import valfilter as leafFilter  # pyright: ignore[reportMissingModuleSource]
+from tlz.functoolz import curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
 from typing import Any, overload
 from typing_extensions import TypeIs
 

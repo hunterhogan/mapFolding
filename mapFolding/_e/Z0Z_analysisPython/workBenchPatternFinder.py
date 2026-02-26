@@ -1,18 +1,18 @@
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
 from bisect import bisect_left
 from collections.abc import Iterable
-from cytoolz.functoolz import curry as syntacticCurry
 from functools import partial
 from gmpy2 import is_even, is_odd
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import (
-	dimensionNearest首, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafOptions, getLeavesCreaseAnte,
-	getLeavesCreasePost, invertLeafIn2上nDimensions, Leaf, Pile, 零, 首一, 首二, 首零, 首零一)
+	dimensionNearest首, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafOptions,
+	getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, Leaf, Pile, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.dataDynamic import getDataFrameFoldings
 from more_itertools import flatten
 from operator import add, iadd, isub, mul
 from pprint import pprint
+from tlz.functoolz import curry as syntacticCurry
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

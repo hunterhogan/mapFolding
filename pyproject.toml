@@ -64,6 +64,7 @@ optional-dependencies = { development = [
   "memray; sys_platform == 'linux'",
   "py-spy",
   "pyarrow-stubs",
+  "toolz-stubs",
 ], numba = [
   "numba",
   "numba_progress",
@@ -110,7 +111,7 @@ run = { branch = true, concurrency = [
   ".",
 ] }
 
-[tool.pytest]
+[tool.pytest.ini]
 addopts = ["--color=auto", "-n 6"]
 log_auto_indent = "On"
 testpaths = ["mapFolding/tests"]

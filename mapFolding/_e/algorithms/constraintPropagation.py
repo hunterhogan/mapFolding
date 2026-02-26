@@ -1,5 +1,4 @@
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
-from cytoolz.itertoolz import last
 from itertools import pairwise, product as CartesianProduct
 from mapFolding import packageSettings
 from mapFolding._e import (
@@ -11,6 +10,7 @@ from mapFolding._e.filters import between吗, extractPinnedLeaves, extractUndete
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
+from tlz.itertoolz import last  # pyright: ignore[reportMissingModuleSource]
 from tqdm import tqdm
 import csv
 import uuid

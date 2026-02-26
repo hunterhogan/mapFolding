@@ -66,8 +66,6 @@ Annotated, corrected, scanned copy of Koehler (1968) at https://oeis.org/A001011
 Citations in BibTeX format at [mapFolding/citations](../../citations).
 """  # noqa: RUF002
 from collections.abc import Callable
-from cytoolz.dicttoolz import valfilter as leafFilter
-from cytoolz.functoolz import curry as syntacticCurry
 from functools import cache
 from hunterMakesPy import inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
@@ -77,6 +75,8 @@ from mapFolding._e.filters import between吗, extractPinnedLeaves
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from operator import floordiv, indexOf
+from tlz.dicttoolz import valfilter as leafFilter  # pyright: ignore[reportMissingModuleSource]
+from tlz.functoolz import curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
 
 #======== Forbidden inequalities ============================
 

@@ -1,8 +1,6 @@
 # ruff: noqa: T201, T203, D103, TC003, ERA001  # noqa: RUF100
 # pyright: reportUnusedImport=false
 from collections.abc import Callable, Iterable
-from cytoolz.curried import map as toolz_map
-from cytoolz.functoolz import compose
 from gmpy2 import fac
 from mapFolding._e import (
 	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions,
@@ -15,6 +13,8 @@ from mapFolding._e.pin2上nDimensional import (
 from mapFolding._e.Z0Z_analysisPython.toolkit import verifyPinning2Dn
 from math import prod
 from pprint import pprint
+from tlz.curried import map as toolz_map
+from tlz.functoolz import compose
 import time
 
 def printStatisticsPermutations(state: EliminationState) -> None:
