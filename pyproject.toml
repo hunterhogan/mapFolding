@@ -50,7 +50,7 @@ dependencies = [
   "astToolkit>=0.9.0",
   "cytoolz",
   "gmpy2",
-  "hunterMakesPy>=0.4.1",
+  "hunterMakesPy>=0.4.2",
   "more_itertools",
   "numpy",
   "platformdirs",
@@ -111,7 +111,7 @@ run = { branch = true, concurrency = [
   ".",
 ] }
 
-[tool.pytest.ini]
+[tool.pytest]
 addopts = ["--color=auto", "-n 6"]
 log_auto_indent = "On"
 testpaths = ["mapFolding/tests"]

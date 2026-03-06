@@ -12,7 +12,7 @@ from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
 from more_itertools import flatten
 from operator import add, iadd, isub, mul
 from pprint import pprint
-from tlz.functoolz import curry as syntacticCurry
+from tlz.functoolz import curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

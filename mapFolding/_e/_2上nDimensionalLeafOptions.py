@@ -68,7 +68,7 @@ def getDictionaryLeafOptions(state: EliminationState) -> dict[Pile, LeafOptions]
 #======== Functions to help find a formula ======================================
 
 def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	from mapFolding._e.dataDynamic import getDataFrameFoldings  # noqa: PLC0415
+	from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings  # noqa: PLC0415
 
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict() # pyright: ignore[reportAssignmentType]

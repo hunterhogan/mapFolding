@@ -1,7 +1,6 @@
-from collections.abc import Callable
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
-from hunterMakesPy import decreasing, inclusive, raiseIfNone
+from hunterMakesPy import CallableFunction, decreasing, inclusive, raiseIfNone
 from mapFolding._e import (
 	dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首,
 	dimensionThirdNearest首, howManyDimensionsHaveOddParity, Leaf, leafOrigin, mapShapeIs2上nDimensions, Pile, pileOrigin,
@@ -368,18 +367,18 @@ def getDomain二零and二(state: EliminationState) -> tuple[tuple[int, int], ...
 	"""Combined domain of leaf二零 and leaf二."""
 	domain二零: tuple[int, ...] = tuple(getLeafDomain(state, 二+零))
 	domain二: tuple[int, ...] = tuple(getLeafDomain(state, 二))
-	direction: Callable[[int, int], int] = add
+	direction: CallableFunction[[int, int], int] = add
 	return _getDomains二Or二一(domain二零, domain二, direction, state.dimensionsTotal, state.sumsOfProductsOfDimensions)
 
 def getDomain二一零and二一(state: EliminationState) -> tuple[tuple[int, int], ...]:
 	"""Combined domain of leaf二一零 and leaf二一."""
 	domain二一零: tuple[int, ...] = tuple(getLeafDomain(state, 二+一+零))
 	domain二一: tuple[int, ...] = tuple(getLeafDomain(state, 二+一))
-	direction: Callable[[int, int], int] = sub
+	direction: CallableFunction[[int, int], int] = sub
 	return _getDomains二Or二一(domain二一零, domain二一, direction, state.dimensionsTotal, state.sumsOfProductsOfDimensions)
 
 @cache
-def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...], direction: Callable[[int, int], int], dimensionsTotal: int, sumsOfProductsOfDimensions: tuple[int, ...]) -> tuple[tuple[int, int], ...]:
+def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...], direction: CallableFunction[[int, int], int], dimensionsTotal: int, sumsOfProductsOfDimensions: tuple[int, ...]) -> tuple[tuple[int, int], ...]:
 	if direction(0, 6009) == 6009:
 		ImaDomain二零and二: bool = True
 		ImaDomain二一零and二一: bool = False
@@ -515,7 +514,7 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 	domain0: tuple[int, ...] = domain首二
 
 #======== By inclusion of the piles, add consecutive piles (22 pairs)  ====================
-	direction: Callable[[int, int], int] = sub
+	direction: CallableFunction[[int, int], int] = sub
 	domainCombined.extend([(pile, direction(pile, 零)) for pile in domain零 if direction(pile, 零) in domain0])
 
 #======== By exclusion of the indices, add non-consecutive piles (54 pairs) ====================
@@ -588,10 +587,10 @@ def getDomain首零一二and首一二(state: EliminationState) -> tuple[tuple[in
 	"""Combined domain of leaf首零一二 and leaf首一二."""
 	domain首零一二: tuple[int, ...] = tuple(getLeafDomain(state, 首零一二(state.dimensionsTotal)))
 	domain首一二: tuple[int, ...] = tuple(getLeafDomain(state, 首一二(state.dimensionsTotal)))
-	direction: Callable[[int, int], int] = add
+	direction: CallableFunction[[int, int], int] = add
 	return _getDomain首零一二and首一二(domain首零一二, domain首一二, direction, state.dimensionsTotal)
 @cache
-def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tuple[int, ...], direction: Callable[[int, int], int], dimensionsTotal: int) -> tuple[tuple[int, int], ...]:
+def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tuple[int, ...], direction: CallableFunction[[int, int], int], dimensionsTotal: int) -> tuple[tuple[int, int], ...]:
 	domainCombined: list[tuple[int, int]] = []
 
 #======== By exclusion of the indices, add non-consecutive piles (54 pairs) ====================

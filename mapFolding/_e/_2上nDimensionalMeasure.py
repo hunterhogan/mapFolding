@@ -132,7 +132,7 @@ def dimensionNearest首(integerNonnegative: int, /) -> int:
 	[3] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -183,7 +183,7 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -239,7 +239,7 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -303,7 +303,7 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -370,7 +370,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([notLeafOrigin], 'notLeafOrigin', int), 0)
+	anInteger: int = getitem(intInnit([notLeafOrigin], 'notLeafOrigin', int), 0)  # ty:ignore[invalid-assignment]
 	if anInteger < 1:
 		message: str = f"I received `{notLeafOrigin = }`, but I need a value greater than 0."
 		raise ValueError(message)
@@ -418,7 +418,7 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -466,7 +466,7 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 	[3] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -519,7 +519,7 @@ def invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int) -
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -570,7 +570,7 @@ def ptount(integerAbove3: int, /) -> int:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerAbove3], 'integerAbove3', int), 0)
+	anInteger: int = getitem(intInnit([integerAbove3], 'integerAbove3', int), 0)  # ty:ignore[invalid-assignment]
 	if anInteger < 3:
 		message: str = f"I received `{integerAbove3 = }`, but I need a value greater than 3."
 		raise ValueError(message)

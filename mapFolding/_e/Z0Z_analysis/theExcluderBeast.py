@@ -1,5 +1,6 @@
 # NOTE to AI assistants: this module is not representative of my coding style. Most of it is AI generated, but because it's temporary code, I didn't strictly enforce my usual standards. Do not emulate it.
-from collections.abc import Sequence
+from collections import deque
+from collections.abc import Callable, Sequence
 from fractions import Fraction
 from functools import cache, reduce
 from gmpy2 import bit_flip
@@ -59,10 +60,10 @@ type ExclusionData = dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, d
 pathExclusionData: Path = Path(f"{packageSettings.pathPackage}/_e/Z0Z_analysisPython/exclusionData")
 pathExclusionData.mkdir(parents=True, exist_ok=True)
 
-functionsHeadDimensions: list[CallableFunction[[int], int]] = [
+functionsHeadDimensions: list[Callable[[int], int]] = [
 	首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三,
 	首一1, 首一三1, 首一二1, 首一二三1, 首三1, 首二1, 首二三1, 首零1, 首零一1, 首零一三1, 首零一二1, 首零一二三1, 首零三1, 首零二1, 首零二三1]
-dictionaryFunctionsByName: dict[str, CallableFunction[[int], int]] = {function.__name__: function for function in functionsHeadDimensions}
+dictionaryFunctionsByName: dict[str, Callable[[int], int]] = {function.__name__: function for function in functionsHeadDimensions}  # ty:ignore[unresolved-attribute]
 
 #======== Collate exclusion data =======
 
@@ -523,15 +524,15 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 	rowsTotal: int = int(arrayFoldings.shape[0])
 
 	for leafExcluderName in exclusionsFromAnalysisMethod:
-		leafExcluderFunction: CallableFunction[[int], int] = dictionaryFunctionsByName[leafExcluderName]
+		leafExcluderFunction: Callable[[int], int] = dictionaryFunctionsByName[leafExcluderName]
 		leafExcluder: int = leafExcluderFunction(dimensions)
 
 		for pileExcluderName in exclusionsFromAnalysisMethod[leafExcluderName]:
-			pileExcluderFunction: CallableFunction[[int], int] = dictionaryFunctionsByName[pileExcluderName]
+			pileExcluderFunction: Callable[[int], int] = dictionaryFunctionsByName[pileExcluderName]
 			pileExcluder: int = pileExcluderFunction(dimensions)
 
 			for leafExcludedName in exclusionsFromAnalysisMethod[leafExcluderName][pileExcluderName]:
-				leafExcludedFunction: CallableFunction[[int], int] = dictionaryFunctionsByName[leafExcludedName]
+				leafExcludedFunction: Callable[[int], int] = dictionaryFunctionsByName[leafExcludedName]
 				leafExcluded: int = leafExcludedFunction(dimensions)
 
 				listFractionAddends: list[FractionAddend] = exclusionsFromAnalysisMethod[leafExcluderName][pileExcluderName][leafExcludedName]
@@ -559,12 +560,12 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				if permutationSpaceWithExcluder is None:
 					continue
 
-				listPermutationSpaceOther: list[PermutationSpace] = [permutationSpace for leaf, permutationSpace in dictionaryDeconstructed.items() if leaf != leafExcluder]
+				listPermutationSpaceOther: deque[PermutationSpace] = deque([permutationSpace for leaf, permutationSpace in dictionaryDeconstructed.items() if leaf != leafExcluder])
 
 				domainOfLeafExcluded: list[int] = list(getLeafDomain(stateValidation, leafExcluded))
 				domainReduced: list[int] = list(exclude(domainOfLeafExcluded, listIndicesExcluded))
 
-				listPermutationSpaceFromExcluder: list[PermutationSpace] = deconstructPermutationSpaceByDomainOfLeaf(permutationSpaceWithExcluder, leafExcluded, domainReduced)
+				listPermutationSpaceFromExcluder: deque[PermutationSpace] = deconstructPermutationSpaceByDomainOfLeaf(permutationSpaceWithExcluder, leafExcluded, domainReduced)
 
 				stateValidation.listPermutationSpace = listPermutationSpaceOther + listPermutationSpaceFromExcluder
 

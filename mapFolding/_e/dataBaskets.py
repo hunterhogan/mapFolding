@@ -1,4 +1,5 @@
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
+from collections import deque
 from mapFolding._e import (
 	Folding, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, Leaf,
 	LeafSpace, PermutationSpace, Pile)
@@ -66,9 +67,9 @@ class EliminationState:
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `Folding` that represents a group of `leavesTotal`-many foldings."""
 
-	listFolding: list[Folding] = dataclasses.field(default_factory=list[Folding], init=True)
+	listFolding: deque[Folding] = dataclasses.field(default_factory=deque[Folding], init=True)
 	"""A list of `Folding` patterns found."""
-	listPermutationSpace: list[PermutationSpace] = dataclasses.field(default_factory=list[PermutationSpace], init=True)
+	listPermutationSpace: deque[PermutationSpace] = dataclasses.field(default_factory=deque[PermutationSpace], init=True)
 	"""A list of dictionaries (`{pile: leaf or possible leaves}`) that each define an exclusive permutation space: no overlap between dictionaries."""
 
 	pile: Pile = -1

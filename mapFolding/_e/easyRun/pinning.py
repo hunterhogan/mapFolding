@@ -1,5 +1,6 @@
 # ruff: noqa: T201, T203, D103, TC003, ERA001  # noqa: RUF100
 # pyright: reportUnusedImport=false
+from collections import deque
 from collections.abc import Callable, Iterable
 from gmpy2 import fac
 from mapFolding._e import (
@@ -9,31 +10,31 @@ from mapFolding._e import (
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pin2上nDimensional import (
-	pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零)
-from mapFolding._e.Z0Z_analysisPython.toolkit import verifyPinning2Dn
+	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零)
+from mapFolding._e.Z0Z_analysis.toolkit import verifyPinning2Dn
 from math import prod
 from pprint import pprint
-from tlz.curried import map as toolz_map
-from tlz.functoolz import compose
+from tlz.curried import map as toolz_map  # pyright: ignore[reportMissingModuleSource]
+from tlz.functoolz import compose  # pyright: ignore[reportMissingModuleSource]
 import time
 
 def printStatisticsPermutations(state: EliminationState) -> None:
 	def prodOfDOTvalues(listLeafOptions: Iterable[LeafOptions]) -> int:
 		return prod(map(howManyLeavesInLeafOptions, listLeafOptions))
 
-	permutationsPermutationSpaceTotal: Callable[[list[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, extractUndeterminedPiles)))
+	permutationsPermutationSpaceTotal: Callable[[deque[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, extractUndeterminedPiles)))
 	print(len(str(mm:=fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
 	print(len(str(rr:=prod(toolz_map(howManyLeavesInLeafOptions, filter(None, DOTvalues(getDictionaryLeafOptions(state))))))), rr, "dictionaryLeafOptions")
 	print(len(str(pp:=permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 5)
+	state = EliminationState((2,) * 6)
 
 	printThis = True
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinPilesAtEnds(state, 3)
+		state: EliminationState = pinLeavesDimension一(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -41,6 +42,7 @@ if __name__ == '__main__':
 		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
+		state: EliminationState = pinPilesAtEnds(state, 3)
 		state: EliminationState = pinLeavesDimensions0零一(state)
 		state: EliminationState = pinLeavesDimension二(state)
 		state: EliminationState = pinLeavesDimension首二(state)

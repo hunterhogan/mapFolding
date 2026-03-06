@@ -26,6 +26,7 @@ Classes:
 
 from astToolkit import Be, IfThis as astToolkit_IfThis
 from collections.abc import Callable
+from hunterMakesPy import CallableFunction
 from typing_extensions import TypeIs
 import ast
 
@@ -44,7 +45,7 @@ class IfThis(astToolkit_IfThis):
 	"""
 
 	@staticmethod
-	def isAttributeNamespaceIdentifierLessThanOrEqual0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeIs[ast.Compare]]:
+	def isAttributeNamespaceIdentifierLessThanOrEqual0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.Compare]]:
 		"""Generate a predicate that matches comparison expressions testing if a namespaced attribute is less than or equal to 0.
 
 		(AI generated docstring)
@@ -62,7 +63,7 @@ class IfThis(astToolkit_IfThis):
 
 		Returns
 		-------
-		predicate : Callable[[ast.AST], TypeIs[ast.Compare]]
+		predicate : CallableFunction[[ast.AST], TypeIs[ast.Compare]]
 			A predicate function that returns `True` for `Compare` nodes matching the pattern.
 
 		"""
@@ -71,7 +72,7 @@ class IfThis(astToolkit_IfThis):
 				)
 
 	@staticmethod
-	def isAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeIs[ast.Compare] | bool]:
+	def isAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.Compare] | bool]:
 		"""Generate a predicate that matches comparison expressions testing if a namespaced attribute is greater than 0.
 
 		(AI generated docstring)
@@ -89,7 +90,7 @@ class IfThis(astToolkit_IfThis):
 
 		Returns
 		-------
-		predicate : Callable[[ast.AST], TypeIs[ast.Compare]]
+		predicate : CallableFunction[[ast.AST], TypeIs[ast.Compare]]
 			A predicate function that returns `True` for `Compare` nodes matching the pattern.
 
 		"""
@@ -99,7 +100,7 @@ class IfThis(astToolkit_IfThis):
 				)
 
 	@staticmethod
-	def isIfAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeIs[ast.If]]:
+	def isIfAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.If]]:
 		"""Generate a predicate that matches If statements testing if a namespaced attribute is greater than 0.
 
 		(AI generated docstring)
@@ -117,14 +118,14 @@ class IfThis(astToolkit_IfThis):
 
 		Returns
 		-------
-		predicate : Callable[[ast.AST], TypeIs[ast.If]]
+		predicate : CallableFunction[[ast.AST], TypeIs[ast.If]]
 			A predicate function that returns `True` for `If` nodes with the specified test condition.
 
 		"""
 		return Be.If.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))
 
 	@staticmethod
-	def isWhileAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> Callable[[ast.AST], TypeIs[ast.While]]:
+	def isWhileAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.While]]:
 		"""Generate a predicate that matches While loops testing if a namespaced attribute is greater than 0.
 
 		(AI generated docstring)
@@ -142,7 +143,7 @@ class IfThis(astToolkit_IfThis):
 
 		Returns
 		-------
-		predicate : Callable[[ast.AST], TypeIs[ast.While]]
+		predicate : CallableFunction[[ast.AST], TypeIs[ast.While]]
 			A predicate function that returns `True` for `While` nodes with the specified test condition.
 
 		"""

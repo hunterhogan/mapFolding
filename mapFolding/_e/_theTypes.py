@@ -2,11 +2,12 @@ from gmpy2 import mpz
 
 #======== Scalars ================================
 
+type Limitation = bool | float | int | None
+
 type DimensionIndex = int
 """Zero-based index of a dimension."""
-type Leaf = int
-type Pile = int
 
+type Leaf = int
 type LeafOptions = mpz
 """Represent a set of `Leaf` indices as a bitset.
 
@@ -94,6 +95,8 @@ References
 
 type LeafSpace = Leaf | LeafOptions
 
+type Pile = int
+
 #======== Containers ============================
 
 type Folding = tuple[Leaf, ...]
@@ -102,9 +105,9 @@ type Folding = tuple[Leaf, ...]
 type PermutationSpace = dict[Pile, LeafSpace]
 """`pile: leaf` or `pile: leafOptions`; length must be `leavesTotal`."""
 
-type UndeterminedPiles = dict[Pile, LeafOptions]
-"""`pile: leafOptions`; length less than or equal to `leavesTotal`."""
-
 type PinnedLeaves = dict[Pile, Leaf]
 """`pile: leaf`; length ought to be less than `leavesTotal`: when length equals `leavesTotal`, ought to convert to `Folding`."""
+
+type UndeterminedPiles = dict[Pile, LeafOptions]
+"""`pile: leafOptions`; length less than or equal to `leavesTotal`."""
 

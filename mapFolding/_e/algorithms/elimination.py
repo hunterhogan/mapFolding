@@ -1,14 +1,14 @@
+from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from itertools import filterfalse, pairwise, product as CartesianProduct, repeat
 from mapFolding._e import (
 	DOTitems, getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, PermutationSpace, pileOrigin)
 from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.dataDynamic import addLeafOptions
 from mapFolding._e.filters import extractUndeterminedPiles, hasDuplicates
-from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, makeFolding, reduceAllPermutationSpace
-from math import e, factorial
-from pprint import pprint
+from mapFolding._e.pinIt import (
+	addMissingLeafOptionsToPermutationSpace, excludeLeaf_rBeforeLeaf_k, makeFolding, reduceAllPermutationSpace)
+from math import factorial
 from tqdm import tqdm
 
 def count(state: EliminationState) -> EliminationState:
@@ -17,9 +17,9 @@ def count(state: EliminationState) -> EliminationState:
 
 def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[int, ...]) -> int:
 	return sum(map(thisLeafFoldingIsValid
-			, map(makeFolding, repeat(permutationSpace)
+			, map(makeFolding, repeat(permutationSpace)  # ty:ignore[invalid-argument-type]
 		, filterfalse(hasDuplicates
-		, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions)) for _pile, leafOptions in sorted(DOTitems(extractUndeterminedPiles(permutationSpace)))))))  # ty:ignore[invalid-argument-type]
+		, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions)) for _pile, leafOptions in sorted(DOTitems(extractUndeterminedPiles(permutationSpace)))))))
 			, repeat(mapShape)))
 
 def theorem2b(state: EliminationState) -> EliminationState:
@@ -43,10 +43,11 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if state.leavesTotal == 0:
 		state.groupsOfFolds = 1
 		return state
+
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.permutationSpace = {pileOrigin: leafOrigin}
-		state.listPermutationSpace = [addLeafOptions(state).permutationSpace]
+		state.listPermutationSpace = deque([addMissingLeafOptionsToPermutationSpace(state).permutationSpace])
 		state = reduceAllPermutationSpace(state)
 
 		state = theorem4(state)
@@ -57,7 +58,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
 			listClaimTickets: list[Future[EliminationState]] = [
-				concurrencyManager.submit(count, EliminationState(state.mapShape, listPermutationSpace=[permutationSpace]))
+				concurrencyManager.submit(count, EliminationState(state.mapShape, listPermutationSpace=deque([permutationSpace])))
 					for permutationSpace in state.listPermutationSpace
 			]
 

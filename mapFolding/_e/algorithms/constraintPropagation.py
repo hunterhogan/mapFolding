@@ -1,12 +1,13 @@
+from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from itertools import pairwise, product as CartesianProduct
 from mapFolding import packageSettings
 from mapFolding._e import (
-	getIteratorOfLeaves, getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost,
-	indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin, PinnedLeaves,
-	UndeterminedPiles)
+	bifurcatePermutationSpace, getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin,
+	mapShapeIs2上nDimensions, pileOrigin)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import between吗, extractPinnedLeaves, extractUndeterminedPiles
+from mapFolding._e.filters import between吗
+from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, reduceAllPermutationSpace
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
@@ -23,15 +24,14 @@ def count(state: EliminationState) -> EliminationState:
 	model.add_inverse(listLeavesInPileOrder, listPilingsInLeafOrder)
 
 #======== Manual concurrency and targeted constraints ============================
-	dictionaryOfPileLeaf: PinnedLeaves = extractPinnedLeaves(state.permutationSpace)
-	for aPile, aLeaf in dictionaryOfPileLeaf.items():
+	leavesPinned, pilesUndetermined = bifurcatePermutationSpace(state.permutationSpace)
+	for aPile, aLeaf in leavesPinned.items():
 		model.add(listLeavesInPileOrder[aPile] == aLeaf)
 
-	pilesUndetermined: UndeterminedPiles = extractUndeterminedPiles(state.permutationSpace)
 	for aPile, aLeaf in pilesUndetermined.items():
 		model.add_allowed_assignments([listLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(aLeaf))))
 
-#======== Lunnon Theorem 2(a): foldsTotal is divisible by leavesTotal ============================
+#======== Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal` ============================
 	model.add(listLeavesInPileOrder[pileOrigin] == leafOrigin)
 
 #======== Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ============================
@@ -117,52 +117,50 @@ def count(state: EliminationState) -> EliminationState:
 	solver.solve(model, foldingCollector)
 
 	state.groupsOfFolds = len(foldingCollector.listFolding)
-	state.listFolding = list(map(tuple, foldingCollector.listFolding))
+	state.listFolding = deque(map(tuple, foldingCollector.listFolding))
 
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Do the things necessary so that `count` operates efficiently."""
-	if 0 in state.mapShape or not state.mapShape:
+#======== Edge cases for "small" map shapes ============================
+	if (0 in state.mapShape) or not state.mapShape:
 		from mapFolding.oeis import librarianConstructsDictionaryFoldsTotalKnown  # noqa: PLC0415
 		dictionaryFoldsTotalKnown: dict[tuple[int, ...], int] = librarianConstructsDictionaryFoldsTotalKnown()
 		if state.mapShape in dictionaryFoldsTotalKnown:
 			state.groupsOfFolds = dictionaryFoldsTotalKnown[state.mapShape]
 			return state
-		message: str = f"I received `{state.mapShape = }`, but I could not find a known folding total for this degenerate map shape. To see which map shapes and OEIS sequences this package supports, run `getOEISids` at a command prompt."
+		message: str = f"I received `{state.mapShape = }`, but I could not find a known folding total for this map shape. To see which map shapes and OEIS sequences this package supports, run `getOEISids` at a command prompt."
 		raise ValueError(message)
-	if state.listPermutationSpace or (workersMaximum > 1):
 
-		state.permutationSpace = {}
-		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
+	if not state.listPermutationSpace:
+		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
+		state.permutationSpace = {pileOrigin: leafOrigin}
+		state.listPermutationSpace = deque([addMissingLeafOptionsToPermutationSpace(state).permutationSpace])
+		state = reduceAllPermutationSpace(state)
 
-			if not state.listPermutationSpace:
-				pileForConcurrency: int = 2
-				state.listPermutationSpace = [{pileForConcurrency: leaf} for leaf in range(state.leavesTotal)]
+	state.permutationSpace = {}
+	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
-			listClaimTickets: list[Future[EliminationState]] = [
-				concurrencyManager.submit(count, EliminationState(state.mapShape, permutationSpace=permutationSpace))
-					for permutationSpace in state.listPermutationSpace
-			]
+		listClaimTickets: list[Future[EliminationState]] = [
+			concurrencyManager.submit(count, EliminationState(state.mapShape, permutationSpace=permutationSpace))
+				for permutationSpace in state.listPermutationSpace
+		]
 
-			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False, desc=f"PermutationSpace {len(listClaimTickets)}"):
-				sherpa: EliminationState = claimTicket.result()
+		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False, desc=f"PermutationSpace {len(listClaimTickets)}"):
+			sherpa: EliminationState = claimTicket.result()
 
-				# TODO NOTE temporary data collection for p2d7
-				if (sherpa.dimensionsTotal == 7) and (sherpa.listFolding):
-					pathFilename: Path = packageSettings.pathPackage / "_e" / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
-					with Path.open(pathFilename, mode="w", newline="") as fileCSV:
-						csvWriter = csv.writer(fileCSV)
-						csvWriter.writerows(sherpa.listFolding)
+			# TODO NOTE temporary data collection for p2d7
+			if (sherpa.dimensionsTotal == 7) and (sherpa.listFolding):
+				pathFilename: Path = packageSettings.pathPackage / "_e" / 'Z0Z_analysis' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
+				with Path.open(pathFilename, mode="w", newline="") as fileCSV:
+					csvWriter = csv.writer(fileCSV)
+					csvWriter.writerows(sherpa.listFolding)
 
-				state.groupsOfFolds += sherpa.groupsOfFolds
-				state.Theorem2aMultiplier = sherpa.Theorem2aMultiplier
-				state.Theorem2Multiplier = sherpa.Theorem2Multiplier
-				state.Theorem3Multiplier = sherpa.Theorem3Multiplier
-				state.Theorem4Multiplier = sherpa.Theorem4Multiplier
-
-	else:
-		state = count(state)
-		state.groupsOfFolds = len(state.listFolding)
+			state.groupsOfFolds += sherpa.groupsOfFolds
+			state.Theorem2aMultiplier = sherpa.Theorem2aMultiplier
+			state.Theorem2Multiplier = sherpa.Theorem2Multiplier
+			state.Theorem3Multiplier = sherpa.Theorem3Multiplier
+			state.Theorem4Multiplier = sherpa.Theorem4Multiplier
 
 	return state

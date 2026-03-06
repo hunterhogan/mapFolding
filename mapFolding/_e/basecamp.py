@@ -1,6 +1,6 @@
 # ruff: noqa: E701
 from mapFolding import packageSettings
-from mapFolding._e import mapShapeIs2上nDimensions
+from mapFolding._e import Limitation, mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.beDRY import defineProcessorLimit
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
@@ -11,7 +11,7 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 				, state: EliminationState | None = None
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 				# , * # TODO improve `standardizedEqualToCallableReturn` so it will work with keyword arguments
-				, CPUlimit: bool | float | int | None = None  # noqa: FBT001
+				, CPUlimit: Limitation = None
 				, flow: str | None = None
 				) -> int:
 	"""

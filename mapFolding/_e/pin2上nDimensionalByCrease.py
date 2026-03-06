@@ -1,16 +1,12 @@
 from collections.abc import Iterator
 from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
-from hunterMakesPy import inclusive, raiseIfNone
+from hunterMakesPy import CallableFunction, inclusive, raiseIfNone
 from mapFolding._e import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, getLeavesCreaseAnte, getLeavesCreasePost,
 	Leaf, leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import exclude
 from operator import add, neg, sub
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-	from collections.abc import Callable
 
 #======== crease-based subroutines for analyzing a specific `pile`. =======
 def _getLeavesCrease(state: EliminationState, leaf: Leaf) -> tuple[Leaf, ...]:
@@ -20,7 +16,7 @@ def _getLeavesCrease(state: EliminationState, leaf: Leaf) -> tuple[Leaf, ...]:
 
 #-------- Depth 2 ------------------------------------
 def pinPile一ByCrease(state: EliminationState) -> Iterator[Leaf]:
-	direction: Callable[[int, int], int] = sub
+	direction: CallableFunction[[int, int], int] = sub
 
 	listCreaseIndicesExcluded: list[int] = []
 	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
@@ -33,7 +29,7 @@ def pinPile一ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	return exclude(tupleLeavesCrease, listCreaseIndicesExcluded)
 
 def pinPile一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
-	direction: Callable[[int, int], int] = add
+	direction: CallableFunction[[int, int], int] = add
 
 	listCreaseIndicesExcluded: list[int] = []
 	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
@@ -47,7 +43,7 @@ def pinPile一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 
 #-------- Depth 3 ------------------------------------
 def pinPile一零ByCrease(state: EliminationState) -> Iterator[Leaf]:
-	direction: Callable[[int, int], int] = sub
+	direction: CallableFunction[[int, int], int] = sub
 
 	listCreaseIndicesExcluded: list[int] = []
 	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
@@ -63,7 +59,7 @@ def pinPile一零ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	return exclude(tupleLeavesCrease, listCreaseIndicesExcluded)
 
 def pinPile零一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
-	direction: Callable[[int, int], int] = add
+	direction: CallableFunction[[int, int], int] = add
 
 	listCreaseIndicesExcluded: list[int] = []
 	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
@@ -80,7 +76,7 @@ def pinPile零一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 
 #-------- Depth 4 ------------------------------------
 def pinPile二ByCrease(state: EliminationState) -> Iterator[Leaf]:
-	direction: Callable[[int, int], int] = sub
+	direction: CallableFunction[[int, int], int] = sub
 
 	listCreaseIndicesExcluded: list[int] = []
 	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
@@ -107,7 +103,7 @@ def pinPile二ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	return exclude(tupleLeavesCrease, listCreaseIndicesExcluded)
 
 def pinPile二Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
-	direction: Callable[[int, int], int] = add
+	direction: CallableFunction[[int, int], int] = add
 
 	listCreaseIndicesExcluded: list[int] = []
 	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")

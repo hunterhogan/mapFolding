@@ -129,11 +129,11 @@ _place_ValueIndex: int	= _dimensionIndex
 @cache
 def dimensionIndex(dimensionAsNonnegativeInteger: int, /, *, dimensionLength: int = _dimensionLength) -> int:
 	"""Convert the integer value of a single dimension into its corresponding `DimensionIndex`."""
-	dimension: int = getitem(intInnit([dimensionAsNonnegativeInteger], 'dimensionNonnegative', int), 0)
+	dimension: int = getitem(intInnit([dimensionAsNonnegativeInteger], 'dimensionNonnegative', int), 0)  # ty:ignore[invalid-assignment]
 	if dimension < 0:
 		message: str = f"I received `{dimensionAsNonnegativeInteger = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
-	base: int = getitem(intInnit([dimensionLength], 'dimensionLength', int), 0)
+	base: int = getitem(intInnit([dimensionLength], 'dimensionLength', int), 0)  # ty:ignore[invalid-assignment]
 	if base < 1:
 		message: str = f"I received `{dimensionLength = }`, but I need an integer value greater than 1."
 		raise ValueError(message)

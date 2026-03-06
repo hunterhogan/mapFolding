@@ -90,6 +90,7 @@ from tlz.functoolz import complement, compose, curry as syntacticCurry  # pyrigh
 from tlz.itertoolz import unique  # pyright: ignore[reportMissingModuleSource]
 from typing import TYPE_CHECKING
 
+# TODO Fix `tlz` and Pylance import resolution.
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterator
 
@@ -142,6 +143,9 @@ def ImaOddLeaf2上nDimensional(leaf: Leaf, dimension: int) -> bool:
 
 #======== Reducing `LeafOptions` ===============================
 
+# TODO Can I setup a flow that checks for changes per `PermutationSpace`, and stores unchanged `PermutationSpace`, instead of
+# trying to reduce irreducible `PermutationSpace` on subsequent iterations?
+# TODO overcome beans and cornbread, so I can generalize general subroutines and move them to "pinIt.py".
 def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> EliminationState:
 	"""Reduce permutation space by iteratively applying constraint propagation.
 
@@ -204,43 +208,43 @@ def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> Elim
 	def prodOfDOTvalues(listLeafOptions: Iterable[LeafOptions]) -> int:
 		return prod(map(howManyLeavesInLeafOptions, listLeafOptions))
 
-	permutationsPermutationSpaceTotal: Callable[[list[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, extractUndeterminedPiles)))
+	permutationsPermutationSpaceTotal: Callable[[deque[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, extractUndeterminedPiles)))
 	permutationSpaceTotal: int = permutationsPermutationSpaceTotal(state.listPermutationSpace)
 	continueReduction: bool = True
 
 	while continueReduction:
 		continueReduction = False
 
-		listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = []
+		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+		state.listPermutationSpace = deque()
 		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_byCrease(state), listPermutationSpace))
 
-		listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = []
+		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+		state.listPermutationSpace = deque()
 		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_LeafIsPinned(state), listPermutationSpace))
 
-		listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = []
+		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+		state.listPermutationSpace = deque()
 		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_HeadsBeforeTails(state), listPermutationSpace))
 
-		listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = []
+		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+		state.listPermutationSpace = deque()
 		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_ConditionalPredecessors(state), listPermutationSpace))
 
-		listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = []
+		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+		state.listPermutationSpace = deque()
 		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_CrossedCreases(state), listPermutationSpace))
 
-		listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = []
+		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+		state.listPermutationSpace = deque()
 		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_noConsecutiveDimensions(state), listPermutationSpace))
 
-		listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = []
+		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+		state.listPermutationSpace = deque()
 		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_leafDomainOf1(state), listPermutationSpace))
 
-		listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = []
+		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+		state.listPermutationSpace = deque()
 		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_nakedSubset(state), listPermutationSpace))
 
 		permutationSpaceTotalReduced: int = permutationsPermutationSpaceTotal(state.listPermutationSpace)

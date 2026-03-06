@@ -85,7 +85,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 			if dimension < state.dimensionsTotal - 2:
 				listRemoveLeaves.extend([首一(state.dimensionsTotal) + leafAt一Ante首])
 			if 0 < dimension < state.dimensionsTotal - 2:
-				listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimension), 首一(state.dimensionsTotal) + leafAt一Ante首 - getitem(state.sumsOfProductsOfDimensions, dimension)])
+				listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimension), 首一(state.dimensionsTotal) + leafAt一Ante首 - getitem(state.sumsOfProductsOfDimensions, dimension)])  # ty:ignore[no-matching-overload]
 			if 0 < dimension < state.dimensionsTotal - 3:
 				listRemoveLeaves.extend([零 + leafAt一Ante首])
 			if 0 < dimension < state.dimensionsTotal - 1:
@@ -118,13 +118,13 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionHeadSecond)])
 		if leafAt一零 < 首零(state.dimensionsTotal):
 			sumsOfProductsOfDimensionsNearest首InSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, state.dimensionsTotal, state.dimensionsTotal - 1)
-			listRemoveLeaves.extend([一, leafAt一零 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 1)), leafAt一零 + getitem(sumsOfProductsOfDimensionsNearest首InSubHyperplane, indexBy首Second)])
+			listRemoveLeaves.extend([一, leafAt一零 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 1)), leafAt一零 + getitem(sumsOfProductsOfDimensionsNearest首InSubHyperplane, indexBy首Second)])  # ty:ignore[no-matching-overload]
 			if dimensionHeadSecond == 2:
-				listRemoveLeaves.extend([getitem(state.sumsOfProductsOfDimensions, dimensionHeadSecond) + getitem(state.productsOfDimensions, dimensionNearest首(leafAt一零)), getitem(state.sumsOfProductsOfDimensions, dimensionHeadSecond) + 首零(state.dimensionsTotal)])
+				listRemoveLeaves.extend([getitem(state.sumsOfProductsOfDimensions, dimensionHeadSecond) + getitem(state.productsOfDimensions, dimensionNearest首(leafAt一零)), getitem(state.sumsOfProductsOfDimensions, dimensionHeadSecond) + 首零(state.dimensionsTotal)])  # ty:ignore[no-matching-overload]
 			if dimensionHeadSecond == 3:
-				listRemoveLeaves.extend([一 + leafAt一零 + getitem(state.productsOfDimensions, (state.dimensionsTotal - 1))])
+				listRemoveLeaves.extend([一 + leafAt一零 + getitem(state.productsOfDimensions, (state.dimensionsTotal - 1))])  # ty:ignore[no-matching-overload]
 		if 首零(state.dimensionsTotal) < leafAt一零:
-			listRemoveLeaves.extend([(零)+首零一(state.dimensionsTotal), getitem(state.productsOfDimensions, (dimensionNearest首(leafAt一零) - 1))])
+			listRemoveLeaves.extend([(零)+首零一(state.dimensionsTotal), getitem(state.productsOfDimensions, (dimensionNearest首(leafAt一零) - 1))])  # ty:ignore[no-matching-overload]
 
 #========= use `leafAt零一Ante首` to exclude a `leaf` from `pile` ===================
 # NOTE a leaf in pile首Less一零 does not have leafCrease in the pile-range of pile零Ante首零, but `leafInSubHyperplane(leafAt首
@@ -141,7 +141,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 			listRemoveLeaves.extend([首一(state.dimensionsTotal)])
 			dimension: int = 一
 			if bit_test(leafAt零一Ante首, dimensionIndex(dimension)):
-				listRemoveLeaves.extend([dimension, 首零(state.dimensionsTotal) + dimension + 零, state.首 - sum(state.productsOfDimensions[dimensionIndex(dimension): state.dimensionsTotal - 2]), leafAt零一Ante首 - dimension - getitem(state.sumsOfProductsOfDimensions, (dimensionIndex(dimension) + 1))])
+				listRemoveLeaves.extend([dimension, 首零(state.dimensionsTotal) + dimension + 零, state.首 - sum(state.productsOfDimensions[dimensionIndex(dimension): state.dimensionsTotal - 2]), leafAt零一Ante首 - dimension - getitem(state.sumsOfProductsOfDimensions, (dimensionIndex(dimension) + 1))])  # ty:ignore[no-matching-overload]
 			dimension = 二
 			if bit_test(leafAt零一Ante首, dimensionIndex(dimension)):
 				listRemoveLeaves.extend([dimension, 首零(state.dimensionsTotal) + dimension + 零])

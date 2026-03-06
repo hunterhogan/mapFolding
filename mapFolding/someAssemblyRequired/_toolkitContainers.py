@@ -29,7 +29,7 @@ from astToolkit import Be, DOT, identifierDotAttribute, Make, NodeTourist, Then
 from astToolkit.containers import LedgerOfImports
 from collections.abc import Callable
 from copy import deepcopy
-from hunterMakesPy import raiseIfNone
+from hunterMakesPy import CallableFunction, raiseIfNone
 from mapFolding.someAssemblyRequired import IfThis
 from typing import Any, cast, NamedTuple
 import ast
@@ -144,7 +144,7 @@ class DeReConstructField2ast: # slots?
 	default: Any | None = dataclasses.field(init=False)
 	"""Default value for the field, or None if no default is specified."""
 
-	default_factory: Callable[..., Any] | None = dataclasses.field(init=False)
+	default_factory: CallableFunction[..., Any] | None = dataclasses.field(init=False)
 	"""Default factory function for the field, or None if not specified."""
 
 	repr: bool = dataclasses.field(init=False)

@@ -3,7 +3,7 @@
 # isort: split
 from mapFolding._e._theTypes import (
 	DimensionIndex as DimensionIndex, Folding as Folding, Leaf as Leaf, LeafOptions as LeafOptions, LeafSpace as LeafSpace,
-	PermutationSpace as PermutationSpace, Pile as Pile, PinnedLeaves as PinnedLeaves,
+	Limitation as Limitation, PermutationSpace as PermutationSpace, Pile as Pile, PinnedLeaves as PinnedLeaves,
 	UndeterminedPiles as UndeterminedPiles)
 
 # isort: split

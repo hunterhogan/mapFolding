@@ -65,9 +65,10 @@ See Also
 Annotated, corrected, scanned copy of Koehler (1968) at https://oeis.org/A001011.
 Citations in BibTeX format at [mapFolding/citations](../../citations).
 """  # noqa: RUF002
+from collections import deque
 from collections.abc import Callable
 from functools import cache
-from hunterMakesPy import inclusive
+from hunterMakesPy import CallableFunction, inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding._e import Folding, Leaf, PermutationSpace, Pile
 from mapFolding._e.dataBaskets import EliminationState
@@ -80,7 +81,7 @@ from tlz.functoolz import curry as syntacticCurry  # pyright: ignore[reportMissi
 
 #======== Forbidden inequalities ============================
 
-def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: Callable[[], Leaf | None], getComparandCrease: Callable[[], Leaf | None], pileOf: Callable[[Leaf], Pile | None]) -> bool:  # noqa: PLR0911
+def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: CallableFunction[[], Leaf | None], getComparandCrease: CallableFunction[[], Leaf | None], pileOf: Callable[[Leaf], Pile | None]) -> bool:  # noqa: PLR0911
 	"""Validate that two creases do not cross by checking forbidden pile orderings.
 
 	Mathematics
@@ -308,7 +309,7 @@ def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
 	"""
 	return len(mapShape)
 
-def matchingParityLeaf(mapShape: tuple[int, ...]) -> Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
+def matchingParityLeaf(mapShape: tuple[int, ...]) -> CallableFunction[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
 	"""You can build a parity predicate for `Leaf` pairs in a selected `dimension`.
 
 	(AI generated docstring)
@@ -461,7 +462,7 @@ def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
 	"""
 	return prod(mapShape[0:dimension], start=1)
 
-def callGetCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Callable[[], Leaf | None]:
+def callGetCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> CallableFunction[[], Leaf | None]:
 	"""You can create a deferred crease computation for `leaf` in `dimension`.
 
 	(AI generated docstring)
@@ -658,8 +659,8 @@ def removeIFFViolationsFromEliminationState(state: EliminationState) -> Eliminat
 		Internal package reference
 
 	"""
-	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace.copy()
-	state.listPermutationSpace = []
+	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace.copy()
+	state.listPermutationSpace = deque()
 	for permutationSpace in listPermutationSpace:
 		state.permutationSpace = permutationSpace
 		if not permutationSpaceHasIFFViolation(state):

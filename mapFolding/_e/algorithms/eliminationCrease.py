@@ -1,3 +1,4 @@
+from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from itertools import filterfalse
 from mapFolding._e import DOTitems, DOTvalues, Folding, getIteratorOfLeaves, mapShapeIs2上nDimensions
@@ -47,11 +48,11 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
-		listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace.copy()
-		state.listPermutationSpace = []
+		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace.copy()
+		state.listPermutationSpace = deque()
 
 		listClaimTickets: list[Future[EliminationState]] = [
-			concurrencyManager.submit(pinByCrease, EliminationState(state.mapShape, listPermutationSpace=[permutationSpace]))
+			concurrencyManager.submit(pinByCrease, EliminationState(state.mapShape, listPermutationSpace=deque([permutationSpace])))
 			for permutationSpace in listPermutationSpace
 		]
 
