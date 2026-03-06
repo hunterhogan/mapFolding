@@ -3,14 +3,14 @@ from dataclasses import dataclass
 from mapFolding import ansiColorReset, ansiColors, packageSettings
 from mapFolding._e import DOTvalues, PermutationSpace, PinnedLeaves, 一, 零, 首一, 首零一
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.dataDynamic import getDataFrameFoldings
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf
 from pathlib import Path
 from pprint import pformat
-from tlz.dicttoolz import valfilter as leafFilter
-from tlz.functoolz import curry as syntacticCurry
+from tlz.dicttoolz import valfilter as leafFilter  # pyright: ignore[reportMissingModuleSource]
+from tlz.functoolz import curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
 import csv
 import numpy
+import pandas
 import sys
 
 @syntacticCurry
@@ -54,6 +54,18 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPermutationSp
 				indicesOverlappingPermutationSpace.add(indexMask)
 
 	return PermutationSpaceStatus(listSurplusDictionaries, maskUnion, indicesOverlappingRows, indicesOverlappingPermutationSpace, rowsRequired, rowsTotal)
+
+#======== Specialized tools ===============================
+
+def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:
+	pathFilename: Path = Path(f'{packageSettings.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
+	dataframeFoldings: pandas.DataFrame | None = None
+	if pathFilename.exists():
+		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))  # noqa: S301
+	else:
+		message: str = f"{ansiColors.YellowOnBlack}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
+		sys.stderr.write(message + '\n')
+	return dataframeFoldings
 
 def verifyPinning2Dn(state: EliminationState) -> None:
 	def getPermutationSpaceWithLeafValuesOnly(permutationSpace: PermutationSpace) -> PinnedLeaves:

@@ -20,9 +20,10 @@ from mapFolding._e import (
 	getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getIteratorOfLeaves, getLeafDomain,
 	getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, LeafOptions, Pile)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding.tests.dataSamples import (
+from mapFolding._e.tests.dataSamples import (
 	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二,
-	p2DnDomain首零一二_首一二, p2DnDomain首零二_首二)
+	p2DnDomain首零二_首二)
+from mapFolding.tests.dataSamples import p2DnDomain首零一二_首一二
 from more_itertools import all_unique, unique_to_each
 from types import ModuleType
 import pytest

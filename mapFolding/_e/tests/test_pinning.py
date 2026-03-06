@@ -3,7 +3,7 @@ from __future__ import annotations
 from gmpy2 import mpz
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractPinnedLeaves
-from mapFolding._e.Z0Z_analysisPython.toolkit import beansWithoutCornbread
+from mapFolding._e.Z0Z_analysis.toolkit import beansWithoutCornbread
 from typing import Protocol, TYPE_CHECKING
 import numpy
 import pytest

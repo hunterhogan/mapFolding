@@ -1,26 +1,14 @@
 from collections.abc import Callable, Sequence
-from hunterMakesPy import raiseIfNone
+from hunterMakesPy import CallableFunction, raiseIfNone
 from hunterMakesPy.filesystemToolkit import writePython
-from mapFolding import ansiColorReset, ansiColors, packageSettings
-from mapFolding._e import getDictionaryLeafOptions, JeanValjean, PermutationSpace
+from mapFolding import packageSettings
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
 from pathlib import Path, PurePath
-from tlz.dicttoolz import merge  # pyright: ignore[reportMissingModuleSource]
-from typing import Any
-import pandas
-import sys
+from typing import Any, TYPE_CHECKING
 
-#======== Specialized tools ===============================
-
-def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:
-	pathFilename: Path = Path(f'{packageSettings.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
-	dataframeFoldings: pandas.DataFrame | None = None
-	if pathFilename.exists():
-		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))  # noqa: S301
-	else:
-		message: str = f"{ansiColors.YellowOnBlack}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
-		sys.stderr.write(message + '\n')
-	return dataframeFoldings
+if TYPE_CHECKING:
+	import pandas
 
 def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: Sequence[int | Callable[[int], int]], pathFilename: PurePath | None = None, settings: dict[str, dict[str, Any]] | None = None) -> PurePath:
 	"""Create a Python module containing combined domain data for multiple leaves across multiple mapShapes.
@@ -51,10 +39,10 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 		The path where the module was written.
 
 	"""
-	def resolveLeaf(leafSpec: int | Callable[[int], int], dimensionsTotal: int) -> int:
+	def resolveLeaf(leafSpec: int | CallableFunction[[int], int], dimensionsTotal: int) -> int:
 		return leafSpec(dimensionsTotal) if callable(leafSpec) else leafSpec
 
-	def getLeafName(leafSpec: int | Callable[[int], int]) -> str:
+	def getLeafName(leafSpec: int | CallableFunction[[int], int]) -> str:
 		leafSpecName: str = str(leafSpec)
 		if callable(leafSpec):
 			leafSpecName = getattr(leafSpec, "__name__", leafSpecName)
@@ -109,12 +97,3 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 	writePython(pythonSource, pathFilename, settings)
 
 	return pathFilename
-
-def addLeafOptions(state: EliminationState) -> EliminationState:
-	permutationSpaceDefaults: PermutationSpace = {
-		pile: raiseIfNone(JeanValjean(leafOptions))
-		for pile, leafOptions in getDictionaryLeafOptions(state).items()
-	}
-	state.permutationSpace = merge(permutationSpaceDefaults, state.permutationSpace)
-	return state
-

@@ -8,7 +8,7 @@ from mapFolding._e import (
 	dimensionNearest首, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafOptions,
 	getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, Leaf, Pile, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.dataDynamic import getDataFrameFoldings
+from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
 from more_itertools import flatten
 from operator import add, iadd, isub, mul
 from pprint import pprint
