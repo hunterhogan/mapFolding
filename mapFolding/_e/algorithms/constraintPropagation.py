@@ -1,10 +1,10 @@
 from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
-from itertools import pairwise, product as CartesianProduct
+from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding import packageSettings
 from mapFolding._e import (
-	bifurcatePermutationSpace, getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin,
-	mapShapeIs2上nDimensions, pileOrigin)
+	bifurcatePermutationSpace, DOTvalues, getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost,
+	indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import between吗
 from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, reduceAllPermutationSpace
@@ -28,8 +28,8 @@ def count(state: EliminationState) -> EliminationState:
 	for aPile, aLeaf in leavesPinned.items():
 		model.add(listLeavesInPileOrder[aPile] == aLeaf)
 
-	for aPile, aLeaf in pilesUndetermined.items():
-		model.add_allowed_assignments([listLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(aLeaf))))
+	for aPile, leafOptions in pilesUndetermined.items():
+		model.add_allowed_assignments([listLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(leafOptions))))
 
 #======== Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal` ============================
 	model.add(listLeavesInPileOrder[pileOrigin] == leafOrigin)
@@ -44,7 +44,24 @@ def count(state: EliminationState) -> EliminationState:
 #======== Rules for 2^n-dimensional maps ============================
 
 	if mapShapeIs2上nDimensions(state.mapShape):
-		pass
+		for aPile, leaf in leavesPinned.items():
+			if aPile == pileOrigin:
+				continue
+			if aPile != state.pileLast:
+				model.add_allowed_assignments([listLeavesInPileOrder[aPile], listLeavesInPileOrder[aPile + 1]], zip(repeat(leaf), getLeavesCreasePost(state, leaf), strict=False))
+			model.add_allowed_assignments([listLeavesInPileOrder[aPile - 1], listLeavesInPileOrder[aPile]], zip(getLeavesCreaseAnte(state, leaf), repeat(leaf), strict=False))
+
+		for pile, leafOptions in pilesUndetermined.items():
+			assignmentsCreasePost: list[tuple[Leaf, Leaf]] = []
+			assignmentsCreaseAnte: list[tuple[Leaf, Leaf]] = []
+			for leaf in getIteratorOfLeaves(leafOptions):
+				assignmentsCreasePost.extend((leaf, leafCreasePost) for leafCreasePost in getLeavesCreasePost(state, leaf))
+				assignmentsCreaseAnte.extend((leafCreaseAnte, leaf) for leafCreaseAnte in getLeavesCreaseAnte(state, leaf))
+			model.add_allowed_assignments([listLeavesInPileOrder[pile], listLeavesInPileOrder[pile + 1]], assignmentsCreasePost)
+			model.add_allowed_assignments([listLeavesInPileOrder[pile - 1], listLeavesInPileOrder[pile]], assignmentsCreaseAnte)
+
+		for aLeaf in frozenset(range(state.leavesTotal)).difference(DOTvalues(leavesPinned)):
+			model.add_allowed_assignments([listPilingsInLeafOrder[aLeaf]], zip(getLeafDomain(state, aLeaf)))
 
 #======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================
 	if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
