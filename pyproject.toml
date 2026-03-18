@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.18.2"
+version = "0.18.3"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -9,15 +9,13 @@ authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 keywords = [
   "A001415",
   "A001417",
-  "Abstract Syntax Tree",
-  "AST",
+  "OEIS",
   "combinatorial geometry",
   "combinatorics",
   "computational combinatorics",
   "computational geometry",
   "map folding",
   "meanders",
-  "OEIS",
   "stamp folding",
 ]
 classifiers = [
@@ -31,7 +29,6 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
@@ -64,7 +61,7 @@ optional-dependencies = { development = [
   "memray; sys_platform == 'linux'",
   "py-spy",
   "pyarrow-stubs",
-  "toolz-stubs",
+  "toolz-stubs>=0.4.0",
 ], numba = [
   "numba",
   "numba_progress",
@@ -124,7 +121,7 @@ testpaths = ["mapFolding/tests"]
 
 [tool.setuptools]
 package-data = { "*" = ["py.typed"] }
-packages = { find = {  } }
+packages = { find = {} }
 
 [tool.updateCitation]
 filenameCitationDOTcff = "CITATION.cff"

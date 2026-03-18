@@ -59,8 +59,9 @@ from hunterMakesPy import CallableFunction
 from hunterMakesPy.parseParameters import intInnit
 from itertools import filterfalse
 from mapFolding._e import (
-	DOTvalues, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeaf首零Plus零Domain, Leaf, leafOrigin,
-	Limitation, mapShapeIs2上nDimensions, PermutationSpace, Pile, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+	DOTvalues, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, getLeaf首零Plus零Domain, Leaf,
+	leafOrigin, Limitation, mapShapeIs2上nDimensions, PermutationSpace, Pile, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一,
+	首零一二, 首零二)
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import pileIsOpen
@@ -409,18 +410,14 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 
 	(AI generated docstring)
 
-	This function uses `deconstructPermutationSpaceByDomainsCombined` [1] to deconstruct
-	each `PermutationSpace` dictionary in `state.listPermutationSpace` into a refined
-	list. The deconstruction is performed concurrently across a `ProcessPoolExecutor` [2]
-	and aggregated with `as_completed` [2]. This function uses `tqdm` [3] to show
-	progress.
+	This function uses `deconstructPermutationSpaceByDomainsCombined` [1] to deconstruct each `PermutationSpace` dictionary in
+	`state.listPermutationSpace` into a refined list. The deconstruction is performed concurrently across a `ProcessPoolExecutor`
+	[2] and aggregated with `as_completed` [2]. This function uses `tqdm` [3] to show progress.
 
-	This function calls `pinPilesAtEnds(state, 0)` [4] when `state.listPermutationSpace`
-	is empty. This function uses `functools.partial` [5] to bind `leaves` and
-	`leavesDomain` for worker calls.
+	This function calls `pinPilesAtEnds(state, 0)` [4] when `state.listPermutationSpace` is empty. This function uses
+	`functools.partial` [5] to bind `leaves` and `leavesDomain` for worker calls.
 
-	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape, ...)`
-	fails [6].
+	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape, ...)` fails [6].
 
 	This function forwards `CPUlimit` to `defineProcessorLimit` [7].
 
@@ -867,3 +864,8 @@ def pinLeavesDimension首二(state: EliminationState, *, CPUlimit: Limitation = 
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (首二(state.dimensionsTotal), 首零二(state.dimensionsTotal), 首零一二(state.dimensionsTotal), 首一二(state.dimensionsTotal))
 	return _pinLeavesByDomain(state, leaves, getDomainDimension首二(state), youMustBeDimensionsTallToPinThis=5, CPUlimit=CPUlimit)
 
+def pin3beans2(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+	return _pinLeavesByDomain(state, (一+零, 一), tuple((pile, pile+1) for pile in getLeafDomain(state, 一+零)), CPUlimit=CPUlimit)
+
+def pin首beans(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+	return _pinLeavesByDomain(state, (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal)), tuple((pile, pile+1) for pile in getLeafDomain(state, 首一(state.dimensionsTotal))), CPUlimit=CPUlimit)

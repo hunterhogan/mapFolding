@@ -10,7 +10,8 @@ from mapFolding._e import (
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pin2上nDimensional import (
-	pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零)
+	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds,
+	pinPile零Ante首零, pin首beans)
 from mapFolding._e.Z0Z_analysis.toolkit import verifyPinning2Dn
 from math import prod
 from pprint import pprint
@@ -28,13 +29,15 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(len(str(pp:=permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 6)
+	state = EliminationState((2,) * 5)
 
 	printThis = True
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinLeavesDimension一(state)
+		state: EliminationState = pin首beans(state)
+		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
+		state: EliminationState = pin3beans2(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -42,6 +45,7 @@ if __name__ == '__main__':
 		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
+		state: EliminationState = pinLeavesDimension一(state)
 		state: EliminationState = pinPilesAtEnds(state, 3)
 		state: EliminationState = pinLeavesDimensions0零一(state)
 		state: EliminationState = pinLeavesDimension二(state)

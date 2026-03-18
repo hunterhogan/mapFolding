@@ -1,41 +1,37 @@
-"""You can use this module to measure bit-level coordinate features of `leaf` and `pile` integers.
+"""Measure bit-level coordinate features of `Leaf` and `Pile` integers.
 
-(AI generated docstring)
-
-This module treats an `int` value as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
-For $2^n$-dimensional maps, the proxy uses base $2$ digits, where each digit position corresponds to a dimension index.
-The conventions for dimension-index ideographs and related constants live in `mapFolding._e._semiotics` [2].
+This module treats an `int` value as a single-base positional-numeral system as a proxy for Cartesian coordinates [1]. For
+2ⁿ-dimensional maps, the proxy uses base-2 digits, where each digit position corresponds to a dimension index. The conventions for
+dimension-index ideographs and related constants live in `mapFolding._e._2上nDimensionalSemiotics` [2].
 
 Contents
 --------
 dimensionFourthNearest首
-	You can locate the fourth most-significant non-zero digit index.
+	Locate the fourth most-significant non-zero digit index.
 dimensionNearestTail
-	You can locate the least-significant non-zero digit index.
+	Locate the least-significant non-zero digit index.
 dimensionNearest首
-	You can locate the most-significant non-zero digit index.
+	Locate the most-significant non-zero digit index.
 dimensionSecondNearest首
-	You can locate the second most-significant non-zero digit index.
+	Locate the second most-significant non-zero digit index.
 dimensionThirdNearest首
-	You can locate the third most-significant non-zero digit index.
+	Locate the third most-significant non-zero digit index.
 dimensionsConsecutiveAtTail
-	You can count consecutive tail digits with value `1` in a masked width.
+	Count consecutive tail digits with value `1` in a masked width.
 howManyDimensionsHaveOddParity
-	You can count non-head digits with value `1`.
+	Count non-head digits with value `1`.
 invertLeafIn2上nDimensions
-	You can invert base-2 digits within a fixed dimension count.
+	Invert base-2 digits within a fixed dimension count.
 leafInSubHyperplane
-	You can project a non-origin `leaf` to a sub-hyperplane by dropping the head digit.
+	Project a non-origin `leaf` to a sub-hyperplane by dropping the head digit.
 ptount
-	You can compute a bit-count-derived measurement after subtracting `一+零`.
+	Compute a bit-count-derived measurement after subtracting `一+零`.
 
 References
 ----------
 [1] Positional notation - Wikipedia
 	https://en.wikipedia.org/wiki/Positional_notation
-[2] mapFolding._e._semiotics
-	Internal package reference
-
+[2] mapFolding._e._2上nDimensionalSemiotics
 """
 
 from functools import cache
@@ -47,12 +43,9 @@ from mapFolding._e.dataBaskets import EliminationState
 from operator import getitem
 
 def dimensionsConsecutiveAtTail(state: EliminationState, integerNonnegative: int) -> int:
-	"""You can count consecutive tail radix-2 digits with value `1` in `integerNonnegative`.
+	"""Count consecutive tail radix-2 digits with value `1` in `integerNonnegative`.
 
-	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
-	This function uses the dimension-count `state.dimensionsTotal` to invert digits within a fixed width, using the conventions
-	in `mapFolding._e._semiotics` [2].
-	This function uses `gmpy2.bit_scan1` [3] on the inverted value.
+	(AI generated docstring)
 
 	Parameters
 	----------
@@ -73,20 +66,11 @@ def dimensionsConsecutiveAtTail(state: EliminationState, integerNonnegative: int
 
 	Examples
 	--------
-	This function is used when selecting leaf exclusions.
-
-	>>> if (is_even(leafAt二Ante首)
-	... 	or (is_odd(leafAt二Ante首) and (dimensionIndex(dimension) < dimensionsConsecutiveAtTail(state, leafAt二Ante首)))):
-	... 	listRemoveLeaves.extend([dimension])
-
-	References
-	----------
-	[1] Positional notation - Wikipedia
-		https://en.wikipedia.org/wiki/Positional_notation
-	[2] mapFolding._e._semiotics
-		Internal package reference
-	[3] gmpy2 documentation
-		https://gmpy2.readthedocs.io/en/latest/
+	```python
+	if ((is_even(leafAt二Ante首) or (is_odd(leafAt二Ante首)
+	and (dimensionIndex(dimension) < dimensionsConsecutiveAtTail(state, leafAt二Ante首))))):
+		listRemoveLeaves.extend([dimension])
+	```
 	"""
 # NOTE HEY! `invertLeafIn2上nDimensions` is pulling double duty: it sanitizes `integerNonnegative` and inverts it. So if you figure out how to
 # achieve this functionality without calling `invertLeafIn2上nDimensions`, you need to add defensive code here.
@@ -95,12 +79,9 @@ def dimensionsConsecutiveAtTail(state: EliminationState, integerNonnegative: int
 
 @cache
 def dimensionNearest首(integerNonnegative: int, /) -> int:
-	"""You can locate the most-significant non-zero radix-2 digit index in `integerNonnegative`.
+	"""Locate the most-significant non-zero radix-2 digit index in `integerNonnegative`.
 
-	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
-	The most-significant non-zero digit index corresponds to the dimension index nearest the head ideograph `首`, following
-	`mapFolding._e._semiotics` [2].
-	This function validates `integerNonnegative` using `hunterMakesPy.parseParameters.intInnit` [3].
+	(AI generated docstring)
 
 	Parameters
 	----------
@@ -119,18 +100,9 @@ def dimensionNearest首(integerNonnegative: int, /) -> int:
 
 	Examples
 	--------
-	This function is used to compute a head-dimension index.
-
-	>>> dimensionHead: int = dimensionNearest首(leafAt二)
-
-	References
-	----------
-	[1] Positional notation - Wikipedia
-		https://en.wikipedia.org/wiki/Positional_notation
-	[2] mapFolding._e._semiotics
-		Internal package reference
-	[3] hunterMakesPy
-		https://context7.com/hunterhogan/huntermakespy
+	```python
+	dimensionHead: int = dimensionNearest首(leafAt二)
+	```
 	"""
 	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
 	if anInteger < 0:
@@ -140,12 +112,14 @@ def dimensionNearest首(integerNonnegative: int, /) -> int:
 
 @cache
 def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
-	"""You can locate the second most-significant non-zero radix-2 digit index in `integerNonnegative`.
+	"""Locate the second most-significant non-zero radix-2 digit index in `integerNonnegative`.
+
+	(AI generated docstring)
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
-	The digit order is interpreted relative to the head ideograph `首`, following `mapFolding._e._semiotics` [2].
-	This function uses `gmpy2.bit_flip` [3] to clear the most-significant digit.
-	This function validates `integerNonnegative` using `hunterMakesPy.parseParameters.intInnit` [4].
+	The digit order is interpreted relative to the head ideograph `首`, following `mapFolding._e._2上nDimensionalSemiotics` [2].
+	This function uses `gmpy2.bit_flip` [3] to clear the most-significant digit. This function validates `integerNonnegative`
+	using `hunterMakesPy.parseParameters.intInnit` [4].
 
 	Parameters
 	----------
@@ -155,8 +129,8 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 	Returns
 	-------
 	dimensionIndexSecondNearest首 : int | None
-		The 0-indexed position of the second most-significant base-2 digit with value `1`.
-		The return value is `None` when `integerNonnegative` has fewer than two non-zero digits.
+		The 0-indexed position of the second most-significant base-2 digit with value `1`. The return value is `None` when
+		`integerNonnegative` has fewer than two non-zero digits.
 
 	Raises
 	------
@@ -165,20 +139,19 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 
 	Examples
 	--------
-	This function is used as part of exclusion rules.
-
-	>>> if (howManyDimensionsHaveOddParity(pileOfLeaf二一) == 1
-	... 	and (dimensionNearest首(pileOfLeaf二一) - raiseIfNone(dimensionSecondNearest首(pileOfLeaf二一)) < 2)
-	... ):
-	... 	addend: int = productsOfDimensions[dimensionsTotal-2] + 4
+	```python
+	if (howManyDimensionsHaveOddParity(pileOfLeaf二一) == 1
+		and (dimensionNearest首(pileOfLeaf二一) - raiseIfNone(dimensionSecondNearest首(pileOfLeaf二一)) < 2)
+	):
+		addend: int = productsOfDimensions[dimensionsTotal-2] + 4
+	```
 
 	References
 	----------
 	[1] Positional notation - Wikipedia
 		https://en.wikipedia.org/wiki/Positional_notation
-	[2] mapFolding._e._semiotics
-		Internal package reference
-	[3] gmpy2 documentation
+	[2] mapFolding._e._2上nDimensionalSemiotics
+	[3] gmpy2
 		https://gmpy2.readthedocs.io/en/latest/
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
@@ -197,12 +170,14 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 
 @cache
 def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
-	"""You can locate the third most-significant non-zero radix-2 digit index in `integerNonnegative`.
+	"""Locate the third most-significant non-zero radix-2 digit index in `integerNonnegative`.
+
+	(AI generated docstring)
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
-	The digit order is interpreted relative to the head ideograph `首`, following `mapFolding._e._semiotics` [2].
-	This function uses `gmpy2.bit_flip` [3] to clear digits.
-	This function validates `integerNonnegative` using `hunterMakesPy.parseParameters.intInnit` [4].
+	The digit order is interpreted relative to the head ideograph `首`, following `mapFolding._e._2上nDimensionalSemiotics` [2].
+	This function uses `gmpy2.bit_flip` [3] to clear digits. This function validates `integerNonnegative` using
+	`hunterMakesPy.parseParameters.intInnit` [4].
 
 	Parameters
 	----------
@@ -212,8 +187,8 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	Returns
 	-------
 	dimensionIndexThirdNearest首 : int | None
-		The 0-indexed position of the third most-significant base-2 digit with value `1`.
-		The return value is `None` when `integerNonnegative` has fewer than three non-zero digits.
+		The 0-indexed position of the third most-significant base-2 digit with value `1`. The return value is `None` when
+		`integerNonnegative` has fewer than three non-zero digits.
 
 	Raises
 	------
@@ -222,19 +197,18 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 
 	Examples
 	--------
-	This function is used in domain index elimination.
-
-	>>> if (dimensionThirdNearest首(pileOfLeaf零) == 一) and (二+零 <= dimensionNearest首(pileOfLeaf零)):
-	... 	indexDomain0: int = (pilesTotal // 2) + 1
-	... 	listIndicesPilesExcluded.extend([indexDomain0])
+	```python
+	if (dimensionThirdNearest首(pileOfLeaf零) == 一) and (二+零 <= dimensionNearest首(pileOfLeaf零)):
+		indexDomain0: int = (pilesTotal // 2) + 1
+		listIndicesPilesExcluded.extend([indexDomain0])
+	```
 
 	References
 	----------
 	[1] Positional notation - Wikipedia
 		https://en.wikipedia.org/wiki/Positional_notation
-	[2] mapFolding._e._semiotics
-		Internal package reference
-	[3] gmpy2 documentation
+	[2] mapFolding._e._2上nDimensionalSemiotics
+	[3] gmpy2
 		https://gmpy2.readthedocs.io/en/latest/
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
@@ -260,12 +234,14 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 
 @cache
 def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
-	"""You can locate the fourth most-significant non-zero radix-2 digit index in `integerNonnegative`.
+	"""Locate the fourth most-significant non-zero radix-2 digit index in `integerNonnegative`.
+
+	(AI generated docstring)
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
-	The digit order is interpreted relative to the head ideograph `首`, following `mapFolding._e._semiotics` [2].
-	This function uses `gmpy2.bit_flip` [3] to clear digits.
-	This function validates `integerNonnegative` using `hunterMakesPy.parseParameters.intInnit` [4].
+	The digit order is interpreted relative to the head ideograph `首`, following `mapFolding._e._2上nDimensionalSemiotics` [2].
+	This function uses `gmpy2.bit_flip` [3] to clear digits. This function validates `integerNonnegative` using
+	`hunterMakesPy.parseParameters.intInnit` [4].
 
 	Parameters
 	----------
@@ -275,8 +251,8 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	Returns
 	-------
 	dimensionIndexFourthNearest首 : int | None
-		The 0-indexed position of the fourth most-significant base-2 digit with value `1`.
-		The return value is `None` when `integerNonnegative` has fewer than four non-zero digits.
+		The 0-indexed position of the fourth most-significant base-2 digit with value `1`. The return value is `None` when
+		`integerNonnegative` has fewer than four non-zero digits.
 
 	Raises
 	------
@@ -285,20 +261,19 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 
 	Examples
 	--------
-	This function is used as a refinement when a third-nearest digit matches a specific pattern.
-
-	>>> if dimensionThirdNearest首(pileOfLeaf零) == 一+零:
-	... 	indexDomain0 = pilesTotal // 4
-	... 	if dimensionFourthNearest首(pileOfLeaf零) == 一:
-	... 		indicesDomain0ToExclude.extend([indexDomain0])
+	```python
+	if dimensionThirdNearest首(pileOfLeaf零) == 一+零:
+		indexDomain0 = pilesTotal // 4
+		if dimensionFourthNearest首(pileOfLeaf零) == 一:
+			indicesDomain0ToExclude.extend([indexDomain0])
+	```
 
 	References
 	----------
 	[1] Positional notation - Wikipedia
 		https://en.wikipedia.org/wiki/Positional_notation
-	[2] mapFolding._e._semiotics
-		Internal package reference
-	[3] gmpy2 documentation
+	[2] mapFolding._e._2上nDimensionalSemiotics
+	[3] gmpy2
 		https://gmpy2.readthedocs.io/en/latest/
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
@@ -325,17 +300,17 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 
 @cache
 def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
-	"""You can project `notLeafOrigin` to a sub-hyperplane by dropping the head radix-2 digit.
+	"""Project `notLeafOrigin` to a sub-hyperplane by dropping the head radix-2 digit.
 
 	(AI generated docstring, which may or may not have been accurate; edited by me, Hunter Hogan, which may or may not have improved it.)
 
-	This function treats `notLeafOrigin` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
-	For $2^n$-dimensional maps, the base $2$ most-significant digit marks the dimension index nearest the head ideograph `首`, following
-	`mapFolding._e._semiotics` [2].
+	This function treats `notLeafOrigin` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1]. For
+	2ⁿ-dimensional maps, the base-2 most-significant digit marks the dimension index nearest the head ideograph `首`, following
+	`mapFolding._e._2上nDimensionalSemiotics` [2].
 
 	This function returns the value formed by removing the most-significant non-zero digit and preserving the remaining digits.
-	This function is implemented as a modulus operation on a power of two using `gmpy2.f_mod_2exp` [3].
-	This function validates `notLeafOrigin` using `hunterMakesPy.parseParameters.intInnit` [4].
+	This function is implemented as a modulus operation on a power of two using `gmpy2.f_mod_2exp` [3]. This function validates
+	`notLeafOrigin` using `hunterMakesPy.parseParameters.intInnit` [4].
 
 	Parameters
 	----------
@@ -354,18 +329,17 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 
 	Examples
 	--------
-	This function is used when a `leaf` has a specific parity pattern.
-
-	>>> if howManyDimensionsHaveOddParity(leafAt二Ante首) == 1:
-	... 	listRemoveLeaves.extend([leafInSubHyperplane(leafAt二Ante首)])
+	```python
+	if howManyDimensionsHaveOddParity(leafAt二Ante首) == 1:
+		listRemoveLeaves.extend([leafInSubHyperplane(leafAt二Ante首)])
+	```
 
 	References
 	----------
 	[1] Positional notation - Wikipedia
 		https://en.wikipedia.org/wiki/Positional_notation
-	[2] mapFolding._e._semiotics
-		Internal package reference
-	[3] gmpy2 documentation
+	[2] mapFolding._e._2上nDimensionalSemiotics
+	[3] gmpy2
 		https://gmpy2.readthedocs.io/en/latest/
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
@@ -378,12 +352,13 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 
 @cache
 def dimensionNearestTail(integerNonnegative: int, /) -> int:
-	"""You can locate the least-significant non-zero radix-2 digit index in `integerNonnegative`.
+	"""Locate the least-significant non-zero radix-2 digit index in `integerNonnegative`.
+
+	(AI generated docstring)
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
-	The least-significant non-zero digit index is the count of trailing zeros in the base $2$ representation.
-	This function follows the dimension-index conventions in `mapFolding._e._semiotics` [2].
-	This function uses `gmpy2.bit_scan1` [3].
+	The least-significant non-zero digit index is the count of trailing zeros in the base-2 representation. This function follows
+	the dimension-index conventions in `mapFolding._e._2上nDimensionalSemiotics` [2]. This function uses `gmpy2.bit_scan1` [3].
 	This function validates `integerNonnegative` using `hunterMakesPy.parseParameters.intInnit` [4].
 
 	Parameters
@@ -403,17 +378,16 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 
 	Examples
 	--------
-	This function is used when building domain tuples.
-
-	>>> dimensionTail: int = dimensionNearestTail(pileOfLeaf二一)
+	```python
+	dimensionTail: int = dimensionNearestTail(pileOfLeaf二一)
+	```
 
 	References
 	----------
 	[1] Positional notation - Wikipedia
 		https://en.wikipedia.org/wiki/Positional_notation
-	[2] mapFolding._e._semiotics
-		Internal package reference
-	[3] gmpy2 documentation
+	[2] mapFolding._e._2上nDimensionalSemiotics
+	[3] gmpy2
 		https://gmpy2.readthedocs.io/en/latest/
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
@@ -426,14 +400,14 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 
 @cache
 def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
-	"""You can count non-head radix-2 digits with value `1` in `integerNonnegative`.
+	"""Count non-head radix-2 digits with value `1` in `integerNonnegative`.
 
 	(AI generated docstring)
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
 	For a non-zero value, the most-significant digit is treated as the head digit nearest the ideograph `首`, following
-	`mapFolding._e._semiotics` [2].
-	This function validates `integerNonnegative` using `hunterMakesPy.parseParameters.intInnit` [3].
+	`mapFolding._e._2上nDimensionalSemiotics` [2]. This function validates `integerNonnegative` using
+	`hunterMakesPy.parseParameters.intInnit` [3].
 
 	Parameters
 	----------
@@ -443,8 +417,8 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 	Returns
 	-------
 	countOnesExcludingHead : int
-		The count of digits equal to `1`, excluding the most-significant digit.
-		The return value is `0` when `integerNonnegative` is `0`.
+		The count of digits equal to `1`, excluding the most-significant digit. The return value is `0` when `integerNonnegative`
+		is `0`.
 
 	Raises
 	------
@@ -453,16 +427,15 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 
 	Examples
 	--------
-	This function is used to select the crease slicing index.
-
-	>>> slicingIndices: int = is_odd(howManyDimensionsHaveOddParity(leaf))
+	```python
+	slicingIndices: int = is_odd(howManyDimensionsHaveOddParity(leaf))
+	```
 
 	References
 	----------
 	[1] Positional notation - Wikipedia
 		https://en.wikipedia.org/wiki/Positional_notation
-	[2] mapFolding._e._semiotics
-		Internal package reference
+	[2] mapFolding._e._2上nDimensionalSemiotics
 	[3] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
@@ -474,15 +447,14 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 
 @cache
 def invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int) -> int:
-	"""You can invert base-2 digits in `integerNonnegative` within a dimension count `dimensionsTotal`.
+	"""Invert base-2 digits in `integerNonnegative` within a dimension count `dimensionsTotal`.
 
 	(AI generated docstring)
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
 	The fixed-width inversion uses `dimensionsTotal` as the digit width, which aligns with the dimension indexing conventions in
-	`mapFolding._e._semiotics` [2].
-	This function uses `gmpy2.bit_mask` [3] to build an inversion mask.
-	This function validates `integerNonnegative` using `hunterMakesPy.parseParameters.intInnit` [4].
+	`mapFolding._e._2上nDimensionalSemiotics` [2]. This function uses `gmpy2.bit_mask` [3] to build an inversion mask. This
+	function validates `integerNonnegative` using `hunterMakesPy.parseParameters.intInnit` [4].
 
 	Parameters
 	----------
@@ -503,18 +475,17 @@ def invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int) -
 
 	Examples
 	--------
-	This function is used to compute a tail measurement by inverting within `state.dimensionsTotal`.
-
-	>>> anInteger: int = invertLeafIn2上nDimensions(state.dimensionsTotal, integerNonnegative)
-	>>> return bit_scan1(anInteger) or 0
+	```python
+	anInteger: int = invertLeafIn2上nDimensions(state.dimensionsTotal, integerNonnegative)
+	return bit_scan1(anInteger) or 0
+	```
 
 	References
 	----------
 	[1] Positional notation - Wikipedia
 		https://en.wikipedia.org/wiki/Positional_notation
-	[2] mapFolding._e._semiotics
-		Internal package reference
-	[3] gmpy2 documentation
+	[2] mapFolding._e._2上nDimensionalSemiotics
+	[3] gmpy2
 		https://gmpy2.readthedocs.io/en/latest/
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
@@ -527,20 +498,21 @@ def invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int) -
 
 @cache
 def ptount(integerAbove3: int, /) -> int:
-	"""You can compute a bit-count-derived measurement after subtracting `一+零` from `integerAbove3`.
+	"""Compute a bit-count-derived measurement after subtracting `一+零` from `integerAbove3`.
 
-	This function treats `integerAbove3` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1].
-	This function follows the dimension-index conventions in `mapFolding._e._semiotics` [2].
+	(AI generated docstring)
 
-	This function delegates to `leafInSubHyperplane` [3].
-	This function validates `integerAbove3` using `hunterMakesPy.parseParameters.intInnit` [4].
-	This function computes `leafInSubHyperplane(integerAbove3 - (一+零)).bit_count()`.
+	This function treats `integerAbove3` as a single-base positional-numeral system as a proxy for Cartesian coordinates [1]. This
+	function follows the dimension-index conventions in `mapFolding._e._2上nDimensionalSemiotics` [2].
+
+	This function delegates to `leafInSubHyperplane` [3]. This function validates `integerAbove3` using
+	`hunterMakesPy.parseParameters.intInnit` [4]. This function computes `leafInSubHyperplane(integerAbove3 - (一+
+	零)).bit_count()`.
 
 	Parameters
 	----------
 	integerAbove3 : int
-		Input value interpreted as a base-2 positional coordinate encoding.
-		The value must be at least `3`.
+		Input value interpreted as a base-2 positional coordinate encoding. The value must be at least `3`.
 
 	Returns
 	-------
@@ -554,19 +526,17 @@ def ptount(integerAbove3: int, /) -> int:
 
 	Examples
 	--------
-	This function is used to choose crease indices.
-
-	>>> if isOdd吗(leafAt一零):
-	... 	listCreaseIndicesExcluded.extend([*range(dimensionNearest首(leafAt一零), 5), ptount(leafAt一零)])
+	```python
+	if isOdd吗(leafAt一零):
+		listCreaseIndicesExcluded.extend([*range(dimensionNearest首(leafAt一零), 5), ptount(leafAt一零)])
+	```
 
 	References
 	----------
 	[1] Positional notation - Wikipedia
 		https://en.wikipedia.org/wiki/Positional_notation
-	[2] mapFolding._e._semiotics
-		Internal package reference
-	[3] mapFolding._e._measure.leafInSubHyperplane
-		Internal package reference
+	[2] mapFolding._e._2上nDimensionalSemiotics
+	[3] mapFolding._e._2上nDimensionalMeasure.leafInSubHyperplane
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""

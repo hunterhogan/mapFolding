@@ -13,13 +13,13 @@ jobs:
       tests-python-versions: ${{ steps.get-project-info.outputs.versions }}
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: '>=3.11'
 
       - name: Cache, pip
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: pip-a-dee-doo-dah
@@ -54,15 +54,15 @@ jobs:
       matrix:
         tests-python-versions: ${{ fromJson(needs.get-project-info.outputs.tests-python-versions) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Cache, pip
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: pip-a-dee-doo-dah
           restore-keys: pip-a-dee-doo-dah
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.tests-python-versions }}
 

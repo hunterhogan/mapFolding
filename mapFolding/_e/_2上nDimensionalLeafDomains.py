@@ -134,8 +134,6 @@ def getDomainDimension一(state: EliminationState) -> tuple[tuple[int, int, int,
 
 	(leaf一零, leaf一, leaf首一, leaf首零一)
 	^^^ Can you see the symmetry? ^^^
-
-	Accurate in at least six dimensions.
 	"""
 	domain一零: tuple[int, ...] = tuple(getLeafDomain(state, 一+零))
 	domain首一: tuple[int, ...] = tuple(getLeafDomain(state, 首一(state.dimensionsTotal)))

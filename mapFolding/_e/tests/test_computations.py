@@ -1,11 +1,10 @@
+from collections.abc import Callable
 from mapFolding._e.basecamp import eliminateFolds
+from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.pin2上nDimensional import pinPilesAtEnds
 from mapFolding.oeis import dictionaryOEISMapFolding
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
-from typing import TYPE_CHECKING
 import pytest
-
-if TYPE_CHECKING:
-	from mapFolding._e.dataBaskets import EliminationState
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
 	*[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4), ('A001417', 5))],
@@ -33,3 +32,54 @@ def test_eliminateFoldsMapShape(expected: int | type[Exception], oeisID: str, n:
 	state: EliminationState | None = None
 	pathLikeWriteFoldsTotal: None = None
 	standardizedEqualToCallableReturn(expected, eliminateFolds, mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow)
+
+# @pytest.mark.parametrize("n", [4, 5], ids=lambda n: f"n={n}")
+@pytest.mark.parametrize("n", [4], ids=lambda n: f"n={n}")
+@pytest.mark.parametrize("flow", ["crease"])
+# @pytest.mark.parametrize("flow", ["crease", "constraintPropagation"])
+def test_eliminateFoldsPinnedState(
+	pinningFunctionEliminateFolds2上nDimensional: Callable[..., EliminationState],
+	CPUlimitPinningTests: float,
+	n: int,
+	flow: str,
+) -> None:
+	"""Validate `eliminateFolds` after applying state-only pinning functions to `A001417`.
+
+	This test uses the shared pinning fixtures in `conftest.py` so each requested
+	pinning function is exercised against both supported `_e` flows.
+	"""
+	oeisID: str = "A001417"
+	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
+	expectedFoldsTotal: int = dictionaryOEISMapFolding[oeisID]["valuesKnown"][n]
+	statePinned: EliminationState = pinningFunctionEliminateFolds2上nDimensional(EliminationState(mapShape), CPUlimit=CPUlimitPinningTests)
+	actualFoldsTotal: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWriteFoldsTotal=None, CPUlimit=CPUlimitPinningTests, flow=flow)
+	functionName: str = getattr(pinningFunctionEliminateFolds2上nDimensional, "__name__", pinningFunctionEliminateFolds2上nDimensional.__class__.__name__)
+
+	assert actualFoldsTotal == expectedFoldsTotal, (
+		f"eliminateFolds returned {actualFoldsTotal}, expected {expectedFoldsTotal} for {functionName=}, {oeisID=}, {n=}, and {flow=}."
+	)
+
+# @pytest.mark.parametrize("n", [4, 5], ids=lambda n: f"n={n}")
+@pytest.mark.parametrize("n", [4], ids=lambda n: f"n={n}")
+@pytest.mark.parametrize("flow", ["crease"])
+# @pytest.mark.parametrize("flow", ["crease", "constraintPropagation"])
+def test_eliminateFoldsPinPilesAtEnds(
+	pileDepthPinningTests: int,
+	CPUlimitPinningTests: float,
+	n: int,
+	flow: str,
+) -> None:
+	"""Validate `eliminateFolds` after applying `pinPilesAtEnds` with several pile depths.
+
+	This test keeps the special `pileDepth` parameter separate from the state-only
+	pinning fixture so the pytest matrix stays explicit and easy to debug.
+	"""
+	oeisID: str = "A001417"
+	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
+	expectedFoldsTotal: int = dictionaryOEISMapFolding[oeisID]["valuesKnown"][n]
+	statePinned: EliminationState = pinPilesAtEnds(EliminationState(mapShape), pileDepthPinningTests, CPUlimit=CPUlimitPinningTests)
+	actualFoldsTotal: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWriteFoldsTotal=None, CPUlimit=CPUlimitPinningTests, flow=flow)
+
+	assert actualFoldsTotal == expectedFoldsTotal, (
+		f"eliminateFolds returned {actualFoldsTotal}, expected {expectedFoldsTotal} for {oeisID=}, {n=}, {flow=}, and {pileDepthPinningTests=}."
+	)

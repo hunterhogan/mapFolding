@@ -44,13 +44,6 @@ cf:  NA, 18, 22, 24, 25
 
 """
 
-"""The 'meaning' of:
-- "CTZ" or `howMany0coordinatesAtTail()` measures trailing zeros.
-- `int.bit_length()` essentially measures leading zeros.
-- `int.bit_count() - 1` or `howManyDimensionsHaveOddParity()` measures how many ones other than the MSD, but unlike CTZ, it counts
-the absolute quantity, not just the consecutive ones relative to the LSD.
-"""
-
 """leaf metadata:
 	per dimension:
 		for inequality checking:

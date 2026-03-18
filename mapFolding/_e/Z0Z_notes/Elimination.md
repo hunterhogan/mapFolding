@@ -110,4 +110,4 @@ Furthermore, it is easy to predict the pairs of pairs-of-leaves with low entropy
 - `pile` is the archetypal variable name for a `Pile`.
 - A `Folding` is a one-to-one correspondence between the set of `Pile` and the set of `Leaf`.
 - `folding` is the archetypal variable name for a `Folding`.
-****- A `PermutationSpace` is an exclusive subset of the undifferentiated permutation space of the factorial of `state.leavesTotal`.
+- A `PermutationSpace` is an exclusive subset of the undifferentiated permutation space of the factorial of `state.leavesTotal`.

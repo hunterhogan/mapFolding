@@ -2,8 +2,8 @@ from collections.abc import Callable
 from mapFolding import packageSettings
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensional import (
-	pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二,
-	pinLeavesDimension零, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零)
+	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二,
+	pinLeavesDimension零, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
 from numpy.typing import NDArray
 from pathlib import Path
 import numpy
@@ -32,10 +32,18 @@ def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
 def CPUlimitPinningTests(request: pytest.FixtureRequest) -> float:
 	return float(request.param)
 
-def _getPinningFunctionName(pinningFunction: Callable[[EliminationState], EliminationState]) -> str:
+@pytest.fixture(params=(2, 3, 4), ids=lambda pileDepth: f"pileDepth={pileDepth}")
+def pileDepthPinningTests(request: pytest.FixtureRequest) -> int:
+	return int(request.param)
+
+def _getPinningFunctionName(pinningFunction: Callable[..., EliminationState]) -> str:
 	return getattr(pinningFunction, "__name__", pinningFunction.__class__.__name__)
 
-@pytest.fixture(params=(pinPilesAtEnds, pinPile零Ante首零, pinLeavesDimension0, pinLeaf首零Plus零, pinLeavesDimension零, pinLeavesDimension一, pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二), ids=_getPinningFunctionName)
-def pinningFunction2上nDimensional(request: pytest.FixtureRequest) -> Callable[[EliminationState], EliminationState]:
+@pytest.fixture(params=(pinPilesAtEnds, pinPile零Ante首零, pinLeavesDimension0, pinLeaf首零Plus零, pinLeavesDimension零, pinLeavesDimension一, pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pin3beans2, pin首beans), ids=_getPinningFunctionName)
+def pinningFunction2上nDimensional(request: pytest.FixtureRequest) -> Callable[..., EliminationState]:
+	return request.param
+
+@pytest.fixture(params=(pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPile零Ante首零, pin首beans), ids=_getPinningFunctionName)
+def pinningFunctionEliminateFolds2上nDimensional(request: pytest.FixtureRequest) -> Callable[..., EliminationState]:
 	return request.param
 
