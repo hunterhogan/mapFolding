@@ -2,14 +2,13 @@
 
 from collections.abc import Callable
 from mapFolding._e import (
-	dimensionIndex, leafOrigin, pileOrigin, 一, 七, 三, 九, 二, 五, 八, 六, 四, 零, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三,
-	首零一二, 首零一二三, 首零三, 首零二, 首零二三)
+	dimensionIndex, leafOrigin, pileOrigin, 一, 七, 三, 九, 二, 五, 八, 六, 四, 零, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三,
+	首零二, 首零二三)
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from mapFolding.tests.dataSamples.semioticsData import (
-	expectedDimensionIndex, expectedLeafOrigin, expectedPileOrigin, expected一, expected七, expected三, expected九, expected二,
-	expected五, expected八, expected六, expected四, expected零, expected首一, expected首一三, expected首一二, expected首一二三, expected首三,
-	expected首二, expected首二三, expected首零, expected首零一, expected首零一三, expected首零一二, expected首零一二三, expected首零三, expected首零二,
-	expected首零二三)
+	expectedDimensionIndex, expectedLeafOrigin, expectedPileOrigin, expected一, expected七, expected三, expected九, expected二, expected五,
+	expected八, expected六, expected四, expected零, expected首一, expected首一三, expected首一二, expected首一二三, expected首三, expected首二, expected首二三,
+	expected首零, expected首零一, expected首零一三, expected首零一二, expected首零一二三, expected首零三, expected首零二, expected首零二三)
 import pytest
 
 @pytest.mark.parametrize('actualValue, expectedValue, identifierName', [

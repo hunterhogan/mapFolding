@@ -1,13 +1,11 @@
 from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from itertools import filterfalse, pairwise, product as CartesianProduct, repeat
-from mapFolding._e import (
-	DOTitems, getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, PermutationSpace, pileOrigin)
+from mapFolding._e import DOTitems, getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, PermutationSpace, pileOrigin
 from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractUndeterminedPiles, hasDuplicates
-from mapFolding._e.pinIt import (
-	addMissingLeafOptionsToPermutationSpace, excludeLeaf_rBeforeLeaf_k, makeFolding, reduceAllPermutationSpace)
+from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, excludeLeaf_rBeforeLeaf_k, makeFolding, reduceAllPermutationSpace
 from math import factorial
 from tqdm import tqdm
 

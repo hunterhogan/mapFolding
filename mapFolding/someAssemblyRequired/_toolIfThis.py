@@ -25,7 +25,6 @@ Classes:
 """
 
 from astToolkit import Be, IfThis as astToolkit_IfThis
-from collections.abc import Callable
 from hunterMakesPy import CallableFunction
 from typing_extensions import TypeIs
 import ast
@@ -122,7 +121,7 @@ class IfThis(astToolkit_IfThis):
 			A predicate function that returns `True` for `If` nodes with the specified test condition.
 
 		"""
-		return Be.If.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))
+		return Be.If.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty:ignore[invalid-return-type]
 
 	@staticmethod
 	def isWhileAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.While]]:
@@ -147,4 +146,4 @@ class IfThis(astToolkit_IfThis):
 			A predicate function that returns `True` for `While` nodes with the specified test condition.
 
 		"""
-		return Be.While.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))
+		return Be.While.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty:ignore[invalid-return-type]

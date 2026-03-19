@@ -25,8 +25,7 @@ which is crucial for maintaining package reliability in production environments.
 """
 
 from contextlib import redirect_stdout
-from mapFolding.oeis import (
-	_librarianStandardizesOEISid, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented)
+from mapFolding.oeis import _librarianStandardizesOEISid, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
 from typing import Any
 import io

@@ -4,8 +4,8 @@ from functools import cache
 from gmpy2 import is_even, is_odd
 from hunterMakesPy import decreasing, inclusive
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getSumsOfProductsOfDimensionsNearest首,
-	howManyDimensionsHaveOddParity, Leaf, leafInSubHyperplane, mapShapeIs2上nDimensions, Pile, 一, 零, 首一, 首零, 首零一)
+	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity,
+	Leaf, leafInSubHyperplane, mapShapeIs2上nDimensions, Pile, 一, 零, 首一, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from operator import neg
 

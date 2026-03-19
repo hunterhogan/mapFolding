@@ -1,6 +1,5 @@
 """addSymmetryCheck."""
-from astToolkit import (
-	Be, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then)
+from astToolkit import Be, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone

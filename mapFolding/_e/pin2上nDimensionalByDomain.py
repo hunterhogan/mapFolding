@@ -1,10 +1,9 @@
 from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
 from hunterMakesPy import decreasing, raiseIfNone, zeroIndexed
 from mapFolding._e import (
-	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首,
-	DOTgetPileIfLeaf, getDictionaryLeafOptions, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost,
-	getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity, Leaf, leafInSubHyperplane, LeafOptions, Pile,
-	ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二)
+	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首, DOTgetPileIfLeaf,
+	getDictionaryLeafOptions, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost, getSumsOfProductsOfDimensionsNearest首,
+	howManyDimensionsHaveOddParity, Leaf, leafInSubHyperplane, LeafOptions, Pile, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import exclude, notLeafOriginOrLeaf零
 from more_itertools import last
@@ -107,7 +106,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	if leafAt一零 == 三+二+零:
 		listRemoveLeaves.extend([二+一+零, (零+二)+首零(state.dimensionsTotal)])
 	if leafAt一零 == (零+二)+首一(state.dimensionsTotal):
-		listRemoveLeaves.extend([首二(state.dimensionsTotal), leafAt一零 + getitem(state.productsOfDimensions, raiseIfNone(dimensionSecondNearest首(leafAt一零))), leafAt一零 + getitem(state.sumsOfProductsOfDimensions, raiseIfNone(dimensionSecondNearest首(leafAt一零)) + 1), 首零一二(state.dimensionsTotal)])
+		listRemoveLeaves.extend([首二(state.dimensionsTotal), leafAt一零 + getitem(state.productsOfDimensions, raiseIfNone(dimensionSecondNearest首(leafAt一零))), leafAt一零 + getitem(state.sumsOfProductsOfDimensions, raiseIfNone(dimensionSecondNearest首(leafAt一零)) + 1), 首零一二(state.dimensionsTotal)])  # ty:ignore[no-matching-overload]
 	if leafAt一零 == (零)+首一二(state.dimensionsTotal):
 		listRemoveLeaves.extend([首一(state.dimensionsTotal)+(一+零), last(getLeavesCreaseAnte(state, leafInSubHyperplane(leafAt一零)))])
 	if leafAt一零 == (零)+首零一(state.dimensionsTotal):
@@ -115,7 +114,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	if is_odd(leafAt一零):
 		dimensionHeadSecond: int = raiseIfNone(dimensionSecondNearest首(leafAt一零))
 		indexBy首Second: int = dimensionHeadSecond * decreasing + decreasing # Are you confused and/or annoyed by this? Blame Python. (Or figure out a better formula.)
-		listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionHeadSecond)])
+		listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionHeadSecond)])  # ty:ignore[no-matching-overload]
 		if leafAt一零 < 首零(state.dimensionsTotal):
 			sumsOfProductsOfDimensionsNearest首InSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, state.dimensionsTotal, state.dimensionsTotal - 1)
 			listRemoveLeaves.extend([一, leafAt一零 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 1)), leafAt一零 + getitem(sumsOfProductsOfDimensionsNearest首InSubHyperplane, indexBy首Second)])  # ty:ignore[no-matching-overload]
@@ -148,7 +147,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 				if 1 < dimensionNearestTail(leafAt零一Ante首):
 					listRemoveLeaves.extend([state.首 - sum(state.productsOfDimensions[dimensionIndex(dimension): state.dimensionsTotal - 2])])
 				else: # NOTE IDK and IDC why this works, but it does.
-					listRemoveLeaves.extend([getitem(tuple(getLeavesCreaseAnte(state, leafInSubHyperplane(leafAt零一Ante首))), dimensionIndex(dimension)) - 零])
+					listRemoveLeaves.extend([getitem(tuple(getLeavesCreaseAnte(state, leafInSubHyperplane(leafAt零一Ante首))), dimensionIndex(dimension)) - 零])  # ty:ignore[no-matching-overload]
 			dimension = 三
 			if bit_test(leafAt零一Ante首, dimensionIndex(dimension)):
 				if 1 < dimensionNearestTail(leafAt零一Ante首):
@@ -216,11 +215,11 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		if is_odd(leafAt二):
 			dimension = 二
 			if not bit_test(leafAt二, dimensionIndex(dimension)):
-				listRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) - getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])
+				listRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) - getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])  # ty:ignore[no-matching-overload]
 
 			dimension = 三
 			if not bit_test(leafAt二, dimensionIndex(dimension)):
-				listRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) - dimension, leafAt二 + 首零(state.dimensionsTotal) + getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])
+				listRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) - dimension, leafAt二 + 首零(state.dimensionsTotal) + getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])  # ty:ignore[no-matching-overload]
 
 			dimension = 四
 			if bit_test(leafAt二, dimensionIndex(dimension)):
@@ -230,7 +229,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		listIndicesCreasePostToKeep.extend(range(state.dimensionsTotal - dimensionHead + 1, (state.dimensionsTotal - zeroIndexed)))
 
 		listRemoveLeaves.extend([
-				leafAt二 + 零, leafAt二 + 首零(state.dimensionsTotal), leafAt二 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal-1)), getitem(state.productsOfDimensions, dimensionHead) + (一+零)])
+				leafAt二 + 零, leafAt二 + 首零(state.dimensionsTotal), leafAt二 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal-1)), getitem(state.productsOfDimensions, dimensionHead) + (一+零)])  # ty:ignore[no-matching-overload]
 
 		dimension = 一
 		if bit_test(leafAt二, dimensionIndex(dimension)):
@@ -241,11 +240,11 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 			listIndicesCreasePostToKeep.append(creasePostAt二.index(state.productsOfDimensions[dimensionHead]))
 
 		if leafAt二 < 首零(state.dimensionsTotal):
-			listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionIndex(二)), getitem(state.sumsOfProductsOfDimensions, (dimensionIndex(二) + 1))])
+			listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionIndex(二)), getitem(state.sumsOfProductsOfDimensions, (dimensionIndex(二) + 1))])  # ty:ignore[no-matching-overload]
 
 		dimension = 四
 		if (not bit_test(leafAt二, dimensionIndex(dimension))) and (首零(state.dimensionsTotal) < leafAt二):
-			listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionIndex(dimension))])
+			listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionIndex(dimension))])  # ty:ignore[no-matching-overload]
 
 # NOTE 1) I am sure this concept has validity. 2) I am sure there is a more accurate computation for it.
 		zerosAtThe首 = 2
@@ -310,7 +309,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 		# --- medium ---
 		if 首一(state.dimensionsTotal) < leafAt二 < 首零(state.dimensionsTotal):
-			listRemoveLeaves.extend([leafAt二 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 2)), 首一(state.dimensionsTotal)+(一+零)])
+			listRemoveLeaves.extend([leafAt二 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 2)), 首一(state.dimensionsTotal)+(一+零)])  # ty:ignore[no-matching-overload]
 
 		#  --- large ---
 		if 首零(state.dimensionsTotal) < leafAt二:
@@ -383,10 +382,10 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 		dimension = 四
 		if is_even(leafAt二Ante首) and (not bit_test(leafAt二Ante首, dimensionIndex(dimension))):
-			listRemoveLeaves.extend([leafAt二Ante首 - getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])
+			listRemoveLeaves.extend([leafAt二Ante首 - getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])  # ty:ignore[no-matching-overload]
 
 	if dimensionTail == 3:
-		listRemoveLeaves.extend([getitem(state.sumsOfProductsOfDimensionsNearest首, dimensionTail)])
+		listRemoveLeaves.extend([getitem(state.sumsOfProductsOfDimensionsNearest首, dimensionTail)])  # ty:ignore[no-matching-overload]
 
 	# --- large ---
 
@@ -401,7 +400,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 			dimension = 二
 			if bit_test(leafAt二Ante首, dimensionIndex(dimension)):
-				listRemoveLeaves.extend([首零(state.dimensionsTotal) + getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])
+				listRemoveLeaves.extend([首零(state.dimensionsTotal) + getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])  # ty:ignore[no-matching-overload]
 
 		dimension = 二
 		if bit_test(leafAt二Ante首, dimensionIndex(dimension)):
@@ -421,7 +420,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	if is_odd(leafAt二Ante首):
 		dimension = 零 # This is redundant but it might help expose patterns.
 		if bit_test(leafAt二Ante首, dimensionIndex(dimension)):
-			listRemoveLeaves.extend([一, leafAt二Ante首 - dimension, leafAt二Ante首 - getitem(state.productsOfDimensions, raiseIfNone(dimensionSecondNearest首(leafAt二Ante首)))])
+			listRemoveLeaves.extend([一, leafAt二Ante首 - dimension, leafAt二Ante首 - getitem(state.productsOfDimensions, raiseIfNone(dimensionSecondNearest首(leafAt二Ante首)))])  # ty:ignore[no-matching-overload]
 
 	if is_even(leafAt二Ante首):
 		dimension = 零 # This is redundant but it might help expose patterns.

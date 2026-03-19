@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from hunterMakesPy import CallableFunction, raiseIfNone
+from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writePython
 from mapFolding import packageSettings
 from mapFolding._e.dataBaskets import EliminationState
@@ -39,10 +39,10 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 		The path where the module was written.
 
 	"""
-	def resolveLeaf(leafSpec: int | CallableFunction[[int], int], dimensionsTotal: int) -> int:
-		return leafSpec(dimensionsTotal) if callable(leafSpec) else leafSpec
+	def resolveLeaf(leafSpec: int | Callable[[int], int], dimensionsTotal: int) -> int:
+		return leafSpec(dimensionsTotal) if callable(leafSpec) else leafSpec  # ty:ignore[call-top-callable]
 
-	def getLeafName(leafSpec: int | CallableFunction[[int], int]) -> str:
+	def getLeafName(leafSpec: int | Callable[[int], int]) -> str:
 		leafSpecName: str = str(leafSpec)
 		if callable(leafSpec):
 			leafSpecName = getattr(leafSpec, "__name__", leafSpecName)

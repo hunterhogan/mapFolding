@@ -4,8 +4,8 @@ from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensional import (
-	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds,
-	pinPile零Ante首零, pin首beans)
+	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
+	pin首beans)
 from mapFolding.oeis import dictionaryOEISMapFolding
 from os import PathLike
 from pathlib import PurePath

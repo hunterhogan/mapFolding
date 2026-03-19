@@ -20,13 +20,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ">=3.11"
-
-      - name: Cache, pip
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/pip
-          key: pip-a-dee-doo-dah
-          restore-keys: pip-a-dee-doo-dah
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
       - name: Install and run updateCitation
         run: |

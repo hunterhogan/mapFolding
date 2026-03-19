@@ -4,8 +4,7 @@ These transformation functions will work on at least two different algorithms. I
 specific type of algorithm, it will be in a subdirectory.
 """
 from astToolkit import Be, DOT, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
-from astToolkit.containers import (
-	astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports)
+from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings

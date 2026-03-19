@@ -1,16 +1,14 @@
 """makeMapFoldingModules."""
 from astToolkit import (
-	Be, DOT, extractClassDef, Grab, hasDOTbody, identifierDotAttribute, Make, NodeChanger, NodeTourist,
-	parseLogicalPath2astModule, parsePathFilename2astModule, Then)
-from astToolkit.containers import (
-	astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports)
+	Be, DOT, extractClassDef, Grab, hasDOTbody, identifierDotAttribute, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule,
+	parsePathFilename2astModule, Then)
+from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
-from mapFolding.someAssemblyRequired.makingModules_count import (
-	makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
+from mapFolding.someAssemblyRequired.makingModules_count import makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState
 from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
@@ -115,13 +113,12 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 # START add the parallel logic to the count function ------------------------------------------------
 
 	findThis = Be.While.testIs(Be.Compare.leftIs(IfThis.isNameIdentifier('leafConnectee')))
-	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat = Then.extractIt(DOT.body))
+	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat = Then.extractIt(DOT.body))  # ty:ignore[invalid-assignment]
 	countGapsCodeBlock: Sequence[ast.stmt] = raiseIfNone(captureCountGapsCodeBlock.captureLastMatch(ingredientsFunction.astFunctionDef))
 
-	thisIsMyTaskIndexCodeBlock = ast.If(ast.BoolOp(ast.Or()
-		, values=[ast.Compare(ast.Name('leaf1ndex'), ops=[ast.NotEq()], comparators=[ast.Name('taskDivisions')])
-				, ast.Compare(Make.Mod.join([ast.Name('leafConnectee'), ast.Name('taskDivisions')]), ops=[ast.Eq()], comparators=[ast.Name('taskIndex')])])
-	, body=list(countGapsCodeBlock[0:-1]))
+	thisIsMyTaskIndexCodeBlock = Make.If(Make.Or.join([Make.Compare(Make.Name('leaf1ndex'), ops=[Make.NotEq()], comparators=[Make.Name('taskDivisions')])
+				, Make.Compare(Make.Mod.join([Make.Name('leafConnectee'), Make.Name('taskDivisions')]), ops=[Make.Eq()], comparators=[Make.Name('taskIndex')])
+			]), body=list(countGapsCodeBlock[0:-1]))
 
 	countGapsCodeBlockNew: list[ast.stmt] = [thisIsMyTaskIndexCodeBlock, countGapsCodeBlock[-1]]
 	NodeChanger[ast.While, hasDOTbody](findThis, doThat = Grab.bodyAttribute(Then.replaceWith(countGapsCodeBlockNew))).visit(ingredientsFunction.astFunctionDef)
@@ -146,7 +143,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	targetCallableIdentifier: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
 	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
 
-	astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)) # pyright: ignore[reportArgumentType]
+	astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)) # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
 	astTuple.ctx = Make.Store()
 	changeAssignCallToTarget: NodeChanger[ast.Assign, ast.Assign] = NodeChanger(
 		findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
@@ -170,7 +167,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), listParameters=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name('state')]))])
 						, Make.For(Make.Name('indexSherpa', Make.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
 							, body=[Make.Assign([Make.Subscript(Make.Name('listStatesParallel'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa')), 'result')))
-								, Make.AugAssign(Make.Name('groupsOfFoldsTotal', Make.Store()), op=ast.Add(), value=Make.Attribute(Make.Subscript(Make.Name('listStatesParallel'), slice=Make.Name('indexSherpa')), 'groupsOfFolds'))])])
+								, Make.AugAssign(Make.Name('groupsOfFoldsTotal', Make.Store()), op=Make.Add(), value=Make.Attribute(Make.Subscript(Make.Name('listStatesParallel'), slice=Make.Name('indexSherpa')), 'groupsOfFolds'))])])
 
 				, Make.AnnAssign(Make.Name('foldsTotal', Make.Store()), annotation=Make.Name('int'), value=Make.Mult.join([Make.Name('groupsOfFoldsTotal'), Make.Attribute(Make.Name('stateParallel'), 'leavesTotal')]))
 				, Make.Return(Make.Tuple([Make.Name('foldsTotal'), Make.Name('listStatesParallel')]))]

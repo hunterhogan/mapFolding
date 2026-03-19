@@ -59,17 +59,14 @@ from hunterMakesPy import CallableFunction
 from hunterMakesPy.parseParameters import intInnit
 from itertools import filterfalse
 from mapFolding._e import (
-	DOTvalues, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, getLeaf首零Plus零Domain, Leaf,
-	leafOrigin, Limitation, mapShapeIs2上nDimensions, PermutationSpace, Pile, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一,
-	首零一二, 首零二)
+	DOTvalues, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, getLeaf首零Plus零Domain, Leaf, leafOrigin,
+	Limitation, mapShapeIs2上nDimensions, PermutationSpace, Pile, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import pileIsOpen
-from mapFolding._e.pin2上nDimensionalAnnex import (
-	reduceAllPermutationSpaceInEliminationState as reduceAllPermutationSpaceInEliminationState)
+from mapFolding._e.pin2上nDimensionalAnnex import reduceAllPermutationSpaceInEliminationState as reduceAllPermutationSpaceInEliminationState
 from mapFolding._e.pin2上nDimensionalByCrease import (
-	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease,
-	pinPile零一Ante首ByCrease)
+	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding._e.pin2上nDimensionalByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e.pinIt import (
 	addMissingLeafOptionsToPermutationSpace, deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf,

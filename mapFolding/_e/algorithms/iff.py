@@ -68,6 +68,8 @@ Citations in BibTeX format at [mapFolding/citations](../../citations).
 from collections import deque
 from collections.abc import Callable
 from functools import cache
+from humpy_cytoolz.dicttoolz import valfilter as leafFilter
+from humpy_cytoolz.functoolz import curry as syntacticCurry
 from hunterMakesPy import CallableFunction, inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding._e import Folding, Leaf, PermutationSpace, Pile
@@ -76,8 +78,6 @@ from mapFolding._e.filters import between吗, extractPinnedLeaves
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from operator import floordiv, indexOf
-from tlz.dicttoolz import valfilter as leafFilter  # pyright: ignore[reportMissingModuleSource]
-from tlz.functoolz import curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
 
 #======== Forbidden inequalities ============================
 

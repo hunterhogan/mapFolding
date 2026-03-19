@@ -10,25 +10,22 @@ from collections import Counter, deque
 from collections.abc import Callable, Iterable, Iterator, Sequence
 from functools import partial
 from gmpy2 import bit_clear, bit_mask
+from humpy_cytoolz.curried import map as toolz_map
+from humpy_cytoolz.dicttoolz import assoc as associate, itemfilter, keyfilter, merge, valfilter, valmap
+from humpy_cytoolz.functoolz import compose, curry as syntacticCurry
+from humpy_cytoolz.itertoolz import groupby as toolz_groupby, unique
 from hunterMakesPy import CallableFunction, inclusive, raiseIfNone
 from itertools import chain, repeat
 from mapFolding._e import (
-	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTitems, DOTkeys, DOTvalues,
-	Folding, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions,
-	JeanValjean, Leaf, LeafOptions, leafOptionsAND, LeafSpace, makeLeafAntiOptions, PermutationSpace, Pile, PinnedLeaves,
-	UndeterminedPiles)
+	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTitems, DOTkeys, DOTvalues, Folding,
+	getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, Leaf, LeafOptions,
+	leafOptionsAND, LeafSpace, makeLeafAntiOptions, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
-	between吗, extractUndeterminedPiles, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile,
-	pileIsNotOpen, pileIsOpen, thisIsALeaf, thisNotHaveThat)
+	between吗, extractUndeterminedPiles, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen, pileIsOpen,
+	thisIsALeaf, thisNotHaveThat)
 from math import prod
 from more_itertools import filter_map, flatten, one
-from tlz import valmap
-from tlz.curried import map as toolz_map  # pyright: ignore[reportMissingModuleSource]
-from tlz.dicttoolz import (  # pyright: ignore[reportMissingModuleSource]
-	assoc as associate, itemfilter, keyfilter, merge, valfilter)
-from tlz.functoolz import compose, curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
-from tlz.itertoolz import groupby as toolz_groupby, unique  # pyright: ignore[reportMissingModuleSource]
 from typing import cast
 
 #======== Boolean filters =======================

@@ -1,5 +1,6 @@
 from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
+from humpy_cytoolz.itertoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding import packageSettings
 from mapFolding._e import (
@@ -11,7 +12,6 @@ from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, reduceA
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
-from tlz.itertoolz import last  # pyright: ignore[reportMissingModuleSource]
 from tqdm import tqdm
 import csv
 import uuid

@@ -61,15 +61,15 @@ References
 from collections.abc import Iterable, Iterator, Mapping
 from functools import partial, reduce
 from gmpy2 import bit_clear, bit_mask, bit_set, xmpz
+from humpy_cytoolz.dicttoolz import dissoc as dissociatePiles
+from humpy_cytoolz.functoolz import curry as syntacticCurry
+from humpy_cytoolz.itertoolz import unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
 from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf, thisIsLeafOptions
 from more_itertools import iter_index
 from operator import add, mul
-from tlz.dicttoolz import dissoc as dissociatePiles  # pyright: ignore[reportMissingModuleSource]
-from tlz.functoolz import curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
-from tlz.itertoolz import unique  # pyright: ignore[reportMissingModuleSource]
 from typing import Any
 
 #======== Group-by functions ================================================

@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.18.3"
+version = "0.18.4"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -45,9 +45,8 @@ urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://gith
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
   "astToolkit>=0.9.0",
-  "cytoolz",
   "gmpy2",
-  "hunterMakesPy>=0.4.2",
+  "hunterMakesPy>=0.4.6",
   "more_itertools",
   "numpy",
   "platformdirs",
@@ -61,7 +60,6 @@ optional-dependencies = { development = [
   "memray; sys_platform == 'linux'",
   "py-spy",
   "pyarrow-stubs",
-  "toolz-stubs>=0.4.0",
 ], numba = [
   "numba",
   "numba_progress",
@@ -85,7 +83,7 @@ optional-dependencies = { development = [
 ] }
 
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.coverage]

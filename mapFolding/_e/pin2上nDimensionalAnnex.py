@@ -69,25 +69,25 @@ References
 from collections import Counter, deque
 from collections.abc import Iterable
 from gmpy2 import bit_flip, bit_test as isBit1吗
+from humpy_cytoolz.curried import map as toolz_map
+from humpy_cytoolz.dicttoolz import itemfilter, keyfilter, valfilter
+from humpy_cytoolz.functoolz import complement, compose, curry as syntacticCurry
+from humpy_cytoolz.itertoolz import unique
 from hunterMakesPy import errorL33T, inclusive
 from itertools import chain, combinations, product as CartesianProduct
 from mapFolding._e import (
-	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues,
-	getDictionaryConditionalLeafPredecessors, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost,
-	howManyLeavesInLeafOptions, JeanValjean, Leaf, LeafOptions, leafOptionsAND, leafOrigin, LeafSpace, makeLeafAntiOptions,
-	mapShapeIs2上nDimensions, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles, 一, 零, 首一, 首零一)
+	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues, getDictionaryConditionalLeafPredecessors,
+	getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, JeanValjean, Leaf, LeafOptions, leafOptionsAND,
+	leafOrigin, LeafSpace, makeLeafAntiOptions, mapShapeIs2上nDimensions, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles, 一, 零, 首一,
+	首零一)
 from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
-	between吗, extractPinnedLeaves, extractUndeterminedPiles, leafIsInPileRange, leafIsPinned, mappingHasKey,
-	notLeafOriginOrLeaf零, notPileLast, thisHasThat, thisIsALeaf, thisIsLeafOptions, thisNotHaveThat)
+	between吗, extractPinnedLeaves, extractUndeterminedPiles, leafIsInPileRange, leafIsPinned, mappingHasKey, notLeafOriginOrLeaf零, notPileLast,
+	thisHasThat, thisIsALeaf, thisIsLeafOptions, thisNotHaveThat)
 from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile
 from math import prod
 from more_itertools import filter_map, one, pairwise, triplewise
-from tlz.curried import map as toolz_map  # pyright: ignore[reportMissingModuleSource]
-from tlz.dicttoolz import itemfilter, keyfilter, valfilter  # pyright: ignore[reportMissingModuleSource]
-from tlz.functoolz import complement, compose, curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
-from tlz.itertoolz import unique  # pyright: ignore[reportMissingModuleSource]
 from typing import TYPE_CHECKING
 
 # TODO Fix `tlz` and Pylance import resolution.
@@ -455,7 +455,7 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 		permutationSpaceHasNewLeaf = False
 
 		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(valfilter(mappingHasKey(dictionaryConditionalLeafPredecessors),
-			keyfilter(notPileLast(state.pileLast), valfilter(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))))))
+			keyfilter(notPileLast(state.pileLast), valfilter(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))))))  # ty:ignore[invalid-assignment]
 
 		while dequePileLeaf and not permutationSpaceHasNewLeaf:
 			pile, leaf = dequePileLeaf.pop()
@@ -628,7 +628,7 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 
-		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(keyfilter(notPileLast(state.pileLast), valfilter(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace))))))
+		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(keyfilter(notPileLast(state.pileLast), valfilter(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace))))))  # ty:ignore[invalid-assignment]
 
 		while dequePileLeaf and not permutationSpaceHasNewLeaf:
 			pile, leaf = dequePileLeaf.pop()

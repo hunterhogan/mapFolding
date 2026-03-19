@@ -74,13 +74,11 @@ calculations through the strategic application of compiler optimization techniqu
 
 # isort: split
 from mapFolding.someAssemblyRequired.infoBooth import (
-	default as default, Default as Default, defaultA007822 as defaultA007822,
-	dictionaryEstimatesMapFolding as dictionaryEstimatesMapFolding)
+	default as default, Default as Default, defaultA007822 as defaultA007822, dictionaryEstimatesMapFolding as dictionaryEstimatesMapFolding)
 
 # isort: split
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis
 
 # isort: split
 from mapFolding.someAssemblyRequired._toolkitContainers import (
-	DatatypeConfiguration as DatatypeConfiguration, DeReConstructField2ast as DeReConstructField2ast,
-	ShatteredDataclass as ShatteredDataclass)
+	DatatypeConfiguration as DatatypeConfiguration, DeReConstructField2ast as DeReConstructField2ast, ShatteredDataclass as ShatteredDataclass)

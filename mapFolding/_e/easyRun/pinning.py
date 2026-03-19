@@ -1,22 +1,21 @@
-# ruff: noqa: T201, T203, D103, TC003, ERA001  # noqa: RUF100
+# ruff: noqa: T201, T203, TC003  # noqa: RUF100
 # pyright: reportUnusedImport=false
 from collections import deque
 from collections.abc import Callable, Iterable
 from gmpy2 import fac
+from humpy_cytoolz.curried import map as toolz_map
+from humpy_cytoolz.functoolz import compose
 from mapFolding._e import (
-	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions,
-	getIteratorOfLeaves, getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost,
-	howManyLeavesInLeafOptions, LeafOptions, PermutationSpace)
+	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves,
+	getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, LeafOptions, PermutationSpace)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pin2上nDimensional import (
-	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds,
-	pinPile零Ante首零, pin首beans)
+	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
+	pin首beans)
 from mapFolding._e.Z0Z_analysis.toolkit import verifyPinning2Dn
 from math import prod
 from pprint import pprint
-from tlz.curried import map as toolz_map  # pyright: ignore[reportMissingModuleSource]
-from tlz.functoolz import compose  # pyright: ignore[reportMissingModuleSource]
 import time
 
 def printStatisticsPermutations(state: EliminationState) -> None:

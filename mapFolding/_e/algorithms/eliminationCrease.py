@@ -1,5 +1,6 @@
 from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
+from humpy_cytoolz.dicttoolz import valfilter as leafFilter
 from itertools import filterfalse
 from mapFolding._e import DOTitems, DOTvalues, Folding, getIteratorOfLeaves, mapShapeIs2上nDimensions
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
@@ -9,7 +10,6 @@ from mapFolding._e.pin2上nDimensional import pinPilesAtEnds, reduceAllPermutati
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, disqualifyPinningLeafAtPile, moveFoldingToListFolding
 from math import factorial
 from more_itertools import first
-from tlz.dicttoolz import valfilter as leafFilter  # pyright: ignore[reportMissingModuleSource]
 from tqdm import tqdm
 from typing import TYPE_CHECKING
 

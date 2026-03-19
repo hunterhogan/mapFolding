@@ -1,13 +1,13 @@
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from humpy_cytoolz.dicttoolz import valfilter as leafFilter
+from humpy_cytoolz.functoolz import curry as syntacticCurry
 from mapFolding import ansiColorReset, ansiColors, packageSettings
 from mapFolding._e import DOTvalues, PermutationSpace, PinnedLeaves, 一, 零, 首一, 首零一
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf
 from pathlib import Path
 from pprint import pformat
-from tlz.dicttoolz import valfilter as leafFilter  # pyright: ignore[reportMissingModuleSource]
-from tlz.functoolz import curry as syntacticCurry  # pyright: ignore[reportMissingModuleSource]
 import csv
 import numpy
 import pandas

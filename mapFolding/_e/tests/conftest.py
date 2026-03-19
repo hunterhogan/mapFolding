@@ -2,8 +2,8 @@ from collections.abc import Callable
 from mapFolding import packageSettings
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensional import (
-	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二,
-	pinLeavesDimension零, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
+	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension零,
+	pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
 from numpy.typing import NDArray
 from pathlib import Path
 import numpy

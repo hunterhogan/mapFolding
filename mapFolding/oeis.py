@@ -56,8 +56,7 @@ from itertools import chain
 from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, packageSettings
 from mapFolding._theSSOT import pathCache
 from mapFolding.basecamp import countFolds
-from mapFolding.filesystemToolkit import (
-	getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly)
+from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
 from os import PathLike
 from pathlib import Path, PurePath
 from typing import Final, Literal
@@ -851,8 +850,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 					case 'matrixNumPy':
 						from mapFolding.algorithms.matrixMeandersNumPyndas import doTheNeedful, MatrixMeandersNumPyState as State
 					case 'matrixPandas':
-						from mapFolding.algorithms.matrixMeandersNumPyndas import (
-							doTheNeedfulPandas as doTheNeedful, MatrixMeandersNumPyState as State)
+						from mapFolding.algorithms.matrixMeandersNumPyndas import doTheNeedfulPandas as doTheNeedful, MatrixMeandersNumPyState as State
 					case 'matrixMeanders' | _:
 						from mapFolding.algorithms.matrixMeanders import doTheNeedful
 						from mapFolding.dataBaskets import MatrixMeandersState as State

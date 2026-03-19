@@ -2,9 +2,9 @@ from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
 from hunterMakesPy import CallableFunction, decreasing, inclusive, raiseIfNone
 from mapFolding._e import (
-	dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首,
-	dimensionThirdNearest首, howManyDimensionsHaveOddParity, Leaf, leafOrigin, mapShapeIs2上nDimensions, Pile, pileOrigin,
-	reverseLookup, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
+	dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
+	howManyDimensionsHaveOddParity, Leaf, leafOrigin, mapShapeIs2上nDimensions, Pile, pileOrigin, reverseLookup, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二,
+	首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import between吗, consecutive吗, exclude, leafIsPinned
 from more_itertools import all_unique, loops

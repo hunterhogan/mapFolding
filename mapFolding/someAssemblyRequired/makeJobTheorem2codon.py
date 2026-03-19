@@ -2,18 +2,16 @@
 
 https://docs.exaloop.io/start/install/
 """
-from astToolkit import (
-	Be, extractFunctionDef, Grab, identifierDotAttribute, Make, NodeChanger, parseLogicalPath2astModule, Then)
+from astToolkit import Be, extractFunctionDef, Grab, identifierDotAttribute, Make, NodeChanger, parseLogicalPath2astModule, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule
-from astToolkit.transformationTools import removeUnusedParameters, write_astModule
+from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from io import TextIOBase
 from mapFolding import DatatypeLeavesTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfThis
-from mapFolding.someAssemblyRequired.RecipeJob import (
-	customizeDatatypeViaImport, moveShatteredDataclass_arg2body, RecipeJobTheorem2)
+from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport, moveShatteredDataclass_arg2body, RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast

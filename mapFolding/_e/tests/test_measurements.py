@@ -16,9 +16,8 @@ from mapFolding._e import (
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from mapFolding.tests.dataSamples.measurementData import (
-	dataDimensionFourthNearest, dataDimensionNearest, dataDimensionsConsecutiveAtTail, dataDimensionSecondNearest,
-	dataDimensionThirdNearest, dataHowMany0coordinatesAtTail, dataInvertLeafIn2上nDimensions, dataLeafInSubHyperplane,
-	dataPtount)
+	dataDimensionFourthNearest, dataDimensionNearest, dataDimensionsConsecutiveAtTail, dataDimensionSecondNearest, dataDimensionThirdNearest,
+	dataHowMany0coordinatesAtTail, dataInvertLeafIn2上nDimensions, dataLeafInSubHyperplane, dataPtount)
 import pytest
 
 @pytest.mark.parametrize('functionTarget, inputValue, expectedResult', [

@@ -20,8 +20,7 @@ from mapFolding.algorithms.matrixMeanders import walkDyckPath
 from mapFolding.dataBaskets import MatrixMeandersState
 from mapFolding.reference.A000682facts import A000682_n_boundary_buckets
 from mapFolding.reference.A005316facts import A005316_n_boundary_buckets
-from numpy import (
-	bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract)
+from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
 from numpy.typing import NDArray
 from typing import Any, TYPE_CHECKING, TypeAlias
 from warnings import warn
@@ -275,7 +274,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			del storageAvailable, lengthDataTarget, lengthStorageTarget
 
-			return arrayStorage
+			return arrayStorage  # ty:ignore[invalid-return-type]
 
 		def recordAnalysis(arrayAnalyzed: NDArray[numpy.uint64], state: MatrixMeandersNumPyState, arcCode: NDArray[numpy.uint64]) -> MatrixMeandersNumPyState:
 			"""Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`.
@@ -791,7 +790,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		aggregateArcCodes()
 
-	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()
+	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict() # pyright: ignore[reportAttributeAccessIssue]
 	del dataframeAnalyzed
 	return state
 
