@@ -75,8 +75,6 @@ For function parameters that only read from containers, prefer abstract types fr
 | ------------------- | ------------------------------------------ | ----------------- |
 | Read-only sequence  | `Sequence[T]`                              | `list[T]`         |
 | Read-only mapping   | `Mapping[K, V]`                            | `dict[K, V]`      |
-| Read-only set       | `Set[T]` (or `set[T]`)                     | `set[T]`          |
-| Callable            | `collections.abc.Callable[[Args], Return]` | `typing.Callable` |
 | Iterable (one-time) | `Iterable[T]`                              | `list[T]`         |
 
 **Return types:** Use concrete types (`list[T]`, `dict[K, V]`) since callers can do whatever they want with the returned value.
