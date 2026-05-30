@@ -3,9 +3,11 @@ name = "mapFolding"
 version = "0.18.4"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 license = "CC-BY-NC-4.0"
+license-files = ["LICEN[CS]E*"]
 authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
+maintainers = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 keywords = [
   "A001415",
   "A001417",
@@ -29,24 +31,18 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Topic :: Scientific/Engineering :: Information Analysis",
   "Topic :: Scientific/Engineering :: Mathematics",
-  "Topic :: Software Development :: Code Generators",
-  "Topic :: Software Development :: Compilers",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "Topic :: Software Development :: Pre-processors",
   "Typing :: Typed",
 ]
-urls = { Donate = "https://www.patreon.com/integrated", Homepage = "https://github.com/hunterhogan/mapFolding", Issues = "https://github.com/hunterhogan/mapFolding/issues", Repository = "https://github.com/hunterhogan/mapFolding.git" }
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
-  "astToolkit>=0.9.0",
+  "astToolkit>=0.11.0",
   "gmpy2",
-  "hunterMakesPy>=0.4.7",
+  "hunterMakesPy>=0.5.0",
   "more_itertools",
   "numpy",
   "platformdirs",
@@ -60,6 +56,7 @@ optional-dependencies = { development = [
   "memray; sys_platform == 'linux'",
   "py-spy",
   "pyarrow-stubs",
+  "pytest-cov",
 ], numba = [
   "numba",
   "numba_progress",
@@ -75,12 +72,19 @@ optional-dependencies = { development = [
   "ortools",
   "pandas",
   "pyarrow",
-  "pytest-cov",
   "pytest-env",
   "pytest-xdist",
   "pytest",
   "sympy",
 ] }
+
+[project.urls]
+Context7 = "https://context7.com/hunterhogan/mapfolding"
+Donate = "https://www.patreon.com/integrated"
+Download = "https://pypi.org/project/mapFolding"
+Homepage = "https://github.com/hunterhogan/mapFolding"
+Issues = "https://github.com/hunterhogan/mapFolding/issues"
+Repository = "https://github.com/hunterhogan/mapFolding.git"
 
 [build-system]
 requires = ["setuptools"]

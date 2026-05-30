@@ -1,0 +1,8 @@
+- Install editable package with broad dev/test dependencies: `python -m pip install -e .[testing,development]`.
+- Run the default test suite: `python -m pytest`.
+- Run focused tests in stable or experimental trees: `python -m pytest mapFolding/tests` or `python -m pytest mapFolding/_e/tests`.
+- Run coverage with repo config: `python -m coverage run -m pytest`, then `python -m coverage combine`, then `python -m coverage report`.
+- Lint: `ruff check .`.
+- Type check: `pyright`.
+- Installed console entrypoints: `OEIS_for_n`, `getOEISids`.
+- Windows shell equivalents worth remembering outside editor tooling: `Get-ChildItem` instead of unix `ls`; `Select-String` instead of `grep`.

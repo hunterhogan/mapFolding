@@ -1,0 +1,7 @@
+- Pytest config lives in `pyproject.toml`: addopts `--color=auto -n 6`; default testpath is `mapFolding/tests`.
+- Within each test subtree, shared fixtures belong in the local `conftest.py`, not individual test files. Confirmed roots: `mapFolding/tests/conftest.py` and `mapFolding/_e/tests/conftest.py`.
+- Default to parametrized tests, even for single-case tests.
+- Use deterministic distinctive data and include assertion messages with actual/expected/input context.
+- Share expensive setup through fixtures instead of duplicating it across tests.
+- When tests intentionally violate types, prefer block-level pyright suppression over many per-line ignores.
+- Read `mem:task_completion` for what to run before finishing a task.

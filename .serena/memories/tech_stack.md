@@ -1,0 +1,7 @@
+- Python package on Windows, UTF-8 source. `pyproject.toml` requires Python `>=3.13`; build backend is `setuptools.build_meta`.
+- Runtime dependencies: `astToolkit`, `gmpy2`, `hunterMakesPy`, `more_itertools`, `numpy`, `platformdirs`, `tqdm`, `urllib3`.
+- Optional extras: `development` (`gmpy2-stubs`, `ipykernel`, `ipywidgets`, `py-spy`, `pytest-cov`, linux-only `memray`), `testing` (`pytest`, `pytest-xdist`, `pytest-env`, `numba`, `ortools`, `pandas`, `pyarrow`, `sympy`), plus separate `numba`, `ortools`, `pandas`, `sympy` extras.
+- Repo is typed (`py.typed`) and includes `pyrightconfig.json` plus `ty.toml`.
+- Ruff config lives in `ruff.toml`; `.editorconfig` enforces LF endings, tabs in code, and spaces in `.md/.toml/.yml`.
+- Console scripts from packaging: `OEIS_for_n` -> `mapFolding.oeis:OEIS_for_n`, `getOEISids` -> `mapFolding.oeis:getOEISids`.
+- Coverage config writes to `tests/coverage/.coverage`, enables branch + multiprocessing coverage, and omits `easyRun`, tests, references, and selected generated/research files.
