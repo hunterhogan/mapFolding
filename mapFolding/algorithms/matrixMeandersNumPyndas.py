@@ -1,3 +1,4 @@
+# ruff: noqa: RUF052 DOC201 E116
 """Transfer matrix algorithm implementations in NumPy (*Num*erical *Py*thon) and pandas.
 
 Citations
@@ -12,6 +13,8 @@ https://oeis.org/A000682
 https://oeis.org/A005316
 https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044558c5/src/irvine/oeis/a005/A005316.java
 """
+from __future__ import annotations
+
 from functools import cache
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
@@ -21,7 +24,6 @@ from mapFolding.dataBaskets import MatrixMeandersState
 from mapFolding.reference.A000682facts import A000682_n_boundary_buckets
 from mapFolding.reference.A005316facts import A005316_n_boundary_buckets
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
-from numpy.typing import NDArray
 from typing import Any, TYPE_CHECKING, TypeAlias
 from warnings import warn
 import dataclasses
@@ -31,6 +33,7 @@ import pandas
 # TODO Don't require pandas to run NumPy version. The "challenge" is that `areIntegersWide` can take a DataFrame.
 if TYPE_CHECKING:
 	from numpy.lib._arraysetops_impl import UniqueInverseResult
+	from numpy.typing import NDArray
 
 """Goals:
 - Extreme abstraction.
@@ -67,10 +70,10 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 	def __post_init__(self) -> None:
 		"""Post init."""
 		if self.bitWidthLimitArcCode is None:
-			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeArcCode).itemsize * 8 # bits
+			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeArcCode).itemsize * 8  # bits
 
-			_offsetNecessary: int = 3 # For example, `bitsZulu << 3`.
-			_offsetSafety: int = 1 # I don't have mathematical proof of how many extra bits I need.
+			_offsetNecessary: int = 3  # For example, `bitsZulu << 3`.
+			_offsetSafety: int = 1  # I don't have mathematical proof of how many extra bits I need.
 			_offset: int = _offsetNecessary + _offsetSafety
 
 			self.bitWidthLimitArcCode = _bitWidthOfFixedSizeInteger - _offset
@@ -78,10 +81,10 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetSafety, _offset
 
 		if self.bitWidthLimitCrossings is None:
-			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeCrossings).itemsize * 8 # bits
+			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeCrossings).itemsize * 8  # bits
 
-			_offsetNecessary: int = 0 # I don't know of any.
-			_offsetEstimation: int = 3 # See 'reference' directory.
+			_offsetNecessary: int = 0  # I don't know of any.
+			_offsetEstimation: int = 3  # See 'reference' directory.
 			_offsetSafety: int = 1
 			_offset: int = _offsetNecessary + _offsetEstimation + _offsetSafety
 
@@ -267,7 +270,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 				slicerStorageAtIndex: ShapeSlicer = ShapeSlicer(length=sliceStorage, indices=indexAssignment)
 				del sliceStorage
 				storageTarget[slicerStorageAtIndex] = dataTarget.copy()
-				arrayStorage = storageTarget[slicerStorageAtIndex].view() # pyright: ignore[reportAssignmentType]
+				arrayStorage = storageTarget[slicerStorageAtIndex].view()  # pyright: ignore[reportAssignmentType]
 				del slicerStorageAtIndex
 			else:
 				arrayStorage: NDArray[个] = dataTarget.copy()
@@ -328,7 +331,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 #================ analyze aligned ===== if bitsAlpha > 1 and bitsZulu > 1 =============================================
 # NOTE In other versions, this analysis step is last because I modify the data. In this version, I don't modify the data.
-		arrayBitsAlpha: NDArray[numpy.uint64] = bitwise_and(state.arrayArcCodes, state.bitsLocator)	# NOTE extra array
+		arrayBitsAlpha: NDArray[numpy.uint64] = bitwise_and(state.arrayArcCodes, state.bitsLocator)  # NOTE extra array
 #======== > * > bitsAlpha 1 bitsZulu 1 ====================
 		greater(arrayBitsAlpha, 1, out=prepArea)
 		bitsZuluStack: NDArray[numpy.uint64] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexCrossings)
@@ -372,7 +375,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 #======== bitsAlphaAtEven or bitsZuluAtEven =============== #======== ^ & & bitsAlpha 1 bitsZulu 1 ====================
 		bitwise_and(state.arrayArcCodes, state.bitsLocator, out=prepArea)
 		bitwise_and(prepArea, 1, out=prepArea)
-		sherpaBitsZulu: NDArray[numpy.uint64] = bitwise_right_shift(state.arrayArcCodes, 1) # NOTE 2° extra array
+		sherpaBitsZulu: NDArray[numpy.uint64] = bitwise_right_shift(state.arrayArcCodes, 1)  # NOTE 2° extra array
 		bitwise_and(sherpaBitsZulu, state.bitsLocator, out=sherpaBitsZulu)
 		bitwise_and(sherpaBitsZulu, prepArea, out=prepArea)
 		del sherpaBitsZulu															# NOTE del 2° extra array
@@ -488,9 +491,9 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		del arrayAnalyzed
 
-		if state.n >= 45: # Data collection for 'reference' directory.
-		# oeisID,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
-			print(state.oeisID, state.n, state.boundary+1, state.indexTarget, len(state.arrayArcCodes), int(state.arrayArcCodes.max()).bit_length(), int(state.arrayCrossings.max()).bit_length(), sep=',')  # noqa: T201
+		if state.n >= 45:  # Data collection for 'reference' directory.
+			# oeisID,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
+			print(state.oeisID, state.n, state.boundary + 1, state.indexTarget, len(state.arrayArcCodes), int(state.arrayArcCodes.max()).bit_length(), int(state.arrayCrossings.max()).bit_length(), sep=',')  # noqa: T201
 	return state
 
 def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
@@ -498,12 +501,12 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 	Parameters
 	----------
-	state : MatrixMeandersState
+	state : MatrixMeandersNumPyState
 		The algorithm state containing current `boundary`, `dictionaryMeanders`, and thresholds.
 
 	Returns
 	-------
-	state : MatrixMeandersState
+	state : MatrixMeandersNumPyState
 		Updated state with new `boundary` and `dictionaryMeanders`.
 	"""
 	dataframeAnalyzed = pandas.DataFrame({
@@ -643,7 +646,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			"""
 			dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']					# Truncated creation of `bitsAlpha`
 			dataframeMeanders.loc[:, 'analyzed'] &= 1 										# (bitsAlpha & 1)
-			dataframeMeanders.loc[:, 'analyzed'] = 1 - dataframeMeanders.loc[:, 'analyzed']	# (1 - (bitsAlpha ...))
+			dataframeMeanders.loc[:, 'analyzed'] = 1 - dataframeMeanders.loc[:, 'analyzed']  # (1 - (bitsAlpha ...))
 
 			dataframeMeanders.loc[:, 'analyzed'] *= 2**1 									# ((bitsAlpha ...) << 1)
 
@@ -697,7 +700,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**1
 			dataframeMeanders.loc[:, 'analyzed'] &= 1 										# Truncated creation of `bitsZulu`.
 			dataframeMeanders.loc[:, 'analyzed'] &= 1 										# (bitsZulu & 1)
-			dataframeMeanders.loc[:, 'analyzed'] = 1 - dataframeMeanders.loc[:, 'analyzed']	# (1 - (bitsZulu ...))
+			dataframeMeanders.loc[:, 'analyzed'] = 1 - dataframeMeanders.loc[:, 'analyzed']  # (1 - (bitsZulu ...))
 
 			bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy()
 			bitsTarget &= state.bitsLocator 												# `bitsAlpha`
@@ -790,7 +793,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		aggregateArcCodes()
 
-	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict() # pyright: ignore[reportAttributeAccessIssue]
+	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()  # pyright: ignore[reportAttributeAccessIssue]
 	del dataframeAnalyzed
 	return state
 
@@ -837,4 +840,3 @@ def doTheNeedfulPandas(state: MatrixMeandersNumPyState) -> int:
 		else:
 			state = countPandas(state)
 	return sum(state.dictionaryMeanders.values())
-

@@ -21,6 +21,8 @@ for the main interface to retrieve, validate, and present to users seeking
 solutions to their map folding challenges.
 """
 
+from __future__ import annotations
+
 from mapFolding import packageSettings
 from os import PathLike
 from pathlib import Path, PurePath
@@ -147,7 +149,7 @@ def _saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> 
 	"""
 	pathFilenameFoldsTotal = Path(pathFilename)
 	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
-	pathFilenameFoldsTotal.write_text(str(foldsTotal))
+	pathFilenameFoldsTotal.write_text(str(foldsTotal), encoding='utf-8')
 
 def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> None:
 	"""Save `foldsTotal` value to disk with multiple fallback mechanisms.
@@ -177,14 +179,14 @@ def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> N
 	try:
 		_saveFoldsTotal(pathFilename, foldsTotal)
 	except Exception as ERRORmessage:  # noqa: BLE001
-		try:
+		try:  # noqa: PLW0717
 			stdout.write(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal = }\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
 			stdout.writelines(str(ERRORmessage))
 			stdout.write(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal = }\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
 			randomnessPlanB: list[str] = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
 			filenameInfixUnique: str = ''.join(randomnessPlanB)
 			pathFilenamePlanB: str = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')  # noqa: PTH109, PTH118
-			writeStreamFallback: TextIOWrapper = open(pathFilenamePlanB, 'w')  # noqa: PTH123, SIM115
+			writeStreamFallback: TextIOWrapper = open(pathFilenamePlanB, 'w', encoding='utf-8')  # noqa: PTH123, SIM115
 			writeStreamFallback.write(str(foldsTotal))
 			writeStreamFallback.close()
 			stdout.write(str(pathFilenamePlanB))

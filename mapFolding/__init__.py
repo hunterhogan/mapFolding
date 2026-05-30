@@ -1,5 +1,7 @@
 """Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."""
 
+from __future__ import annotations
+
 from mapFolding._semiotics import ansiColorReset as ansiColorReset, ansiColors as ansiColors
 from mapFolding._theTypes import (
 	Array1DElephino as Array1DElephino, Array1DFoldsTotal as Array1DFoldsTotal, Array1DLeavesTotal as Array1DLeavesTotal,

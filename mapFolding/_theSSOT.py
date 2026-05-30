@@ -1,10 +1,15 @@
 """Access and configure package settings and metadata."""
 
+from __future__ import annotations
+
 from hunterMakesPy import PackageSettings
 from mapFolding import MetadataOEISidManuallySet, MetadataOEISidMapFoldingManuallySet
 from more_itertools import loops
-from pathlib import Path
+from typing import TYPE_CHECKING
 import dataclasses
+
+if TYPE_CHECKING:
+	from pathlib import Path
 
 @dataclasses.dataclass
 class mapFoldingPackageSettings(PackageSettings):

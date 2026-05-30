@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from functools import cache
-from mapFolding.dataBaskets import MatrixMeandersState
+from mapFolding.dataBaskets import MatrixMeandersState  # noqa: TC001
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -51,7 +53,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
     -----
     The matrix transfer algorithm is sophisticated, but this implementation is straightforward: compute each `boundary` one at a
     time, compute each `arcCode` one at a time, and compute each type of analysis one at a time.
-    """
+    """  # noqa: DOC201
     dictionaryArcCodeToCrossings: dict[int, int] = {}
 
     while state.boundary > 0:

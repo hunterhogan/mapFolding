@@ -1,16 +1,18 @@
-# ruff: noqa
+# ruff: noqa: ERA001, D100
+from __future__ import annotations
+
 from collections import ChainMap
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, NOTcountingFolds
 import sys
 import time
 
-dictionaryONE = ChainMap(dictionaryOEISMapFolding, dictionaryOEIS) # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
+dictionaryONE = ChainMap(dictionaryOEISMapFolding, dictionaryOEIS)  # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
 
 if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
-			f"{(match:=countTotal == dictionaryONE[oeisID]['valuesKnown'][n])}\t"
+			f"{(match := countTotal == dictionaryONE[oeisID]['valuesKnown'][n])}\t"  # ty:ignore[not-subscriptable]
 			f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
 			f"{n}\t"
 			f"{countTotal}\t"
@@ -27,8 +29,8 @@ if __name__ == '__main__':
 	flow = 'algorithm'
 	flow = 'theorem2'
 
-	sys.stdout.write(f"{ansiColors[int(oeisID,36)%len(ansiColors)]}{oeisID} ")
-	sys.stdout.write(f"{ansiColors[int(flow,36)%len(ansiColors)]}{flow}")
+	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
+	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
 	nList: list[int] = []

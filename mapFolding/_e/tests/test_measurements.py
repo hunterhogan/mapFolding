@@ -20,6 +20,11 @@ from mapFolding.tests.dataSamples.measurementData import (
 	dataHowMany0coordinatesAtTail, dataInvertLeafIn2上nDimensions, dataLeafInSubHyperplane, dataPtount)
 import pytest
 
+@pytest.mark.parametrize('mapShape, integerNonnegative, expectedResult', [*dataDimensionsConsecutiveAtTail, ((2, 2, 2), -1, ValueError), ((2, 2, 2), -8, ValueError)])
+def test_dimensionsConsecutiveAtTail(mapShape: tuple[int, ...], integerNonnegative: int, expectedResult: int | type[Exception]) -> None:
+	state: EliminationState = EliminationState(mapShape)
+	standardizedEqualToCallableReturn(expectedResult, dimensionsConsecutiveAtTail, state, integerNonnegative)
+
 @pytest.mark.parametrize('functionTarget, inputValue, expectedResult', [
 	*[(dimensionNearest首, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionNearest.items()],
 	*[(dimensionNearest首, invalidInput, ValueError) for invalidInput in (-1, -7, -13, -256)],
@@ -36,11 +41,6 @@ import pytest
 ])
 def test_integerNonnegativeFunctions(functionTarget: Callable[[int], int | None], inputValue: int, expectedResult: int | None | type[Exception]) -> None:
 	standardizedEqualToCallableReturn(expectedResult, functionTarget, inputValue)
-
-@pytest.mark.parametrize('mapShape, integerNonnegative, expectedResult', [*dataDimensionsConsecutiveAtTail, ((2, 2, 2), -1, ValueError), ((2, 2, 2), -8, ValueError)])
-def test_dimensionsConsecutiveAtTail(mapShape: tuple[int, ...], integerNonnegative: int, expectedResult: int | type[Exception]) -> None:
-	state: EliminationState = EliminationState(mapShape)
-	standardizedEqualToCallableReturn(expectedResult, dimensionsConsecutiveAtTail, state, integerNonnegative)
 
 @pytest.mark.parametrize('dimensionsTotal, integerNonnegative, expectedResult', [*dataInvertLeafIn2上nDimensions, (1, -1, ValueError), (3, -5, ValueError)])
 def test_invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int, expectedResult: int | type[Exception]) -> None:

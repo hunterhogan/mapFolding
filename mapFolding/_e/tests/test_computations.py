@@ -1,10 +1,15 @@
-from collections.abc import Callable
+from __future__ import annotations
+
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensional import pinPilesAtEnds
 from mapFolding.oeis import dictionaryOEISMapFolding
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
+from typing import TYPE_CHECKING
 import pytest
+
+if TYPE_CHECKING:
+	from collections.abc import Callable
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
 	*[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4), ('A001417', 5))],

@@ -45,12 +45,17 @@ References
 	Internal package reference (metadata for OEIS sequences)
 
 """
-from collections.abc import Sequence
+from __future__ import annotations
+
 from mapFolding import packageSettings
 from mapFolding.beDRY import validateListDimensions
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
-from os import PathLike
-from pathlib import Path, PurePath
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from collections.abc import Sequence
+	from os import PathLike
+	from pathlib import Path, PurePath
 
 # ruff: noqa: PLC0415
 
@@ -126,7 +131,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	take at least 5 hours but you might reduce the time to 9 hours. Most of the time, however, you will increase the
 	computation time. If logicalCores >= `leavesTotal`, it will probably be faster. If logicalCores <= 2 * `leavesTotal`, it
 	will almost certainly be slower for all map dimensions.
-	"""
+	"""  # noqa: DOC501
 #-------- mapShape ---------------------------------------------------------------------
 
 	if mapShape:
@@ -194,4 +199,3 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
 
 	return foldsTotal
-

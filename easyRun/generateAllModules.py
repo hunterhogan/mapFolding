@@ -1,4 +1,6 @@
 """Generate all modules that require some assembly."""
+from __future__ import annotations
+
 from mapFolding.someAssemblyRequired.A007822.makeA007822AsynchronousModules import makeA007822AsynchronousModules
 from mapFolding.someAssemblyRequired.A007822.makeA007822Modules import makeA007822Modules
 from mapFolding.someAssemblyRequired.mapFoldingModules.makeMapFoldingModules import makeMapFoldingModules

@@ -1,4 +1,6 @@
-from mapFolding.dataBaskets import MapFoldingState
+from __future__ import annotations
+
+from mapFolding.dataBaskets import MapFoldingState  # noqa: TC001
 
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
 	return state.leaf1ndex > 0

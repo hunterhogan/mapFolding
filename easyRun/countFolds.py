@@ -4,21 +4,25 @@ This script iterates through multiple OEIS map-folding sequences and algorithm i
 verifying computed results against reference values and measuring execution time. The script
 prints colorized output indicating whether computed values match expected values.
 """
-# ruff: noqa
-# pyright: basic
-from collections.abc import Sequence
+from __future__ import annotations
+
+# ruff: noqa: F811
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countFolds
 from mapFolding.oeis import dictionaryOEISMapFolding
-from os import PathLike
-from pathlib import PurePath
+from typing import TYPE_CHECKING
 import sys
 import time
+
+if TYPE_CHECKING:
+	from collections.abc import Sequence
+	from os import PathLike
+	from pathlib import PurePath
 
 if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
-			f"{(match:=foldsTotal == dictionaryOEISMapFolding[oeisID]['valuesKnown'][n])}\t"
+			f"{(match := foldsTotal == dictionaryOEISMapFolding[oeisID]['valuesKnown'][n])}\t"
 			f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
 			f"{n}\t"
 			f"{foldsTotal}\t"
@@ -31,7 +35,6 @@ if __name__ == '__main__':
 	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 	computationDivisions: int | str | None = None
 	CPUlimit: bool | float | int | None = None
-	# mapShape: tuple[int, ...] | None = None
 	flow = 'numba'
 	flow = 'theorem2'
 	flow = 'daoOfMapFolding'
@@ -44,11 +47,11 @@ if __name__ == '__main__':
 	oeisID: str = 'A001415'
 	oeisID: str = 'A001417'
 
-	sys.stdout.write(f"{ansiColors[int(oeisID,36)%len(ansiColors)]}{oeisID} ")
-	sys.stdout.write(f"{ansiColors[int(flow,36)%len(ansiColors)]}{flow}")
+	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
+	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(5,6):
+	for n in range(5, 6):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 

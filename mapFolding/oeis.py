@@ -46,6 +46,8 @@ References
 	https://oeis.org/wiki/Required_Files#b-Files
 
 """
+from __future__ import annotations
+
 # ruff: noqa: PLC0415 E701
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
@@ -57,14 +59,19 @@ from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, packageSettings
 from mapFolding._theSSOT import pathCache
 from mapFolding.basecamp import countFolds
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
-from os import PathLike
 from pathlib import Path, PurePath
-from typing import Final, Literal
+from typing import Final, Literal, TYPE_CHECKING
+from urllib3.exceptions import HTTPError
 import argparse
+import contextlib
 import sys
 import time
 import urllib3
 import warnings
+
+if TYPE_CHECKING:
+	from os import PathLike
+	from urllib3.response import BaseHTTPResponse
 
 def _librarianStandardizesOEISid(oeisID: str) -> str:
 	"""I use this to normalize OEIS sequence identifiers to a canonical form.
@@ -87,7 +94,7 @@ def _librarianStandardizesOEISid(oeisID: str) -> str:
 	"""
 	return str(oeisID).upper().strip()
 
-oeisIDsImplemented: Final[list[str]]  = sorted(map(_librarianStandardizesOEISid, packageSettings.OEISidMapFoldingManuallySet))
+oeisIDsImplemented: Final[list[str]] = sorted(map(_librarianStandardizesOEISid, packageSettings.OEISidMapFoldingManuallySet))
 """Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
 
 def _librarianEncodesOEISidToBFilename(oeisID: str) -> str:
@@ -129,12 +136,6 @@ def _librarianParsesBFileToSequence(OEISbFile: str) -> dict[int, int]:
 	-------
 	OEISsequence : dict[int, int]
 		A dictionary mapping sequence indices to their corresponding values.
-
-	Raises
-	------
-	ValueError
-		If the file content format is invalid or cannot be parsed.
-
 	"""
 	bFileLines: list[str] = OEISbFile.strip().splitlines()
 
@@ -146,7 +147,7 @@ def _librarianParsesBFileToSequence(OEISbFile: str) -> dict[int, int]:
 		OEISsequence[n] = aOFn
 	return OEISsequence
 
-def _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache: Path, url: str) -> None | str:
+def _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache: Path, url: str) -> str | None:
 	"""I use this to manage cached OEIS data retrieval with HTTP conditional requests.
 
 	This caching layer minimizes network traffic by checking local cache validity based on
@@ -174,69 +175,43 @@ def _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache: Path, url: str)
 	[2] urllib3 - Context7
 		https://urllib3.readthedocs.io/en/stable/
 
-	"""
-	tryCache: bool = False
+	"""  # noqa: DOC501
+	preferCache: bool = False
+	informationOEIS: str = ''
+	cacheDatetime: datetime | None = None
+
 	if pathFilenameCache.exists():
-		fileAge: timedelta = datetime.now(tz=UTC) - datetime.fromtimestamp(pathFilenameCache.stat().st_mtime, tz=UTC)
-		tryCache = fileAge < timedelta(days=packageSettings.cacheDays)
+		cacheDatetime = datetime.fromtimestamp(pathFilenameCache.stat().st_mtime, tz=UTC)
+		fileAge: timedelta = datetime.now(tz=UTC) - cacheDatetime
+		preferCache = fileAge < timedelta(days=packageSettings.cacheDays)
+		informationOEIS = pathFilenameCache.read_text(encoding="utf-8")
 
-	oeisInformation: str | None = None
-	if tryCache:
-		try:
-			oeisInformation = pathFilenameCache.read_text(encoding="utf-8")
-		except OSError:
-			tryCache = False
-
-	if not tryCache:
+	if not preferCache:
 		if not url.startswith(("http:", "https:")):
 			message: str = "URL must start with 'http:' or 'https:'"
 			raise ValueError(message)
 
-		cachedInformation: str | None = None
-		cacheIsReadable: bool = False
-		if pathFilenameCache.exists():
-			try:
-				cachedInformation = pathFilenameCache.read_text(encoding="utf-8")
-				cacheIsReadable = True
-			except OSError:
-				cacheIsReadable = False
-
 		headers: dict[str, str] | None = None
-		if cacheIsReadable:
-			cacheDatetime: datetime = datetime.fromtimestamp(pathFilenameCache.stat().st_mtime, tz=UTC)
+		if cacheDatetime is not None:
 			headers = {"If-Modified-Since": format_datetime(cacheDatetime, usegmt=True)}
 
+		response: BaseHTTPResponse | None = None
 		httpPoolManager: urllib3.PoolManager = urllib3.PoolManager(retries=False)
-		try:
-			response: urllib3.response.BaseHTTPResponse = httpPoolManager.request(
-				"GET"
-				, url
-				, headers=headers
-				, preload_content=True
-				, decode_content=True
-			)
+		with contextlib.suppress(HTTPError):
+			response = httpPoolManager.request("GET", url, headers=headers, preload_content=True, decode_content=True)
+		httpPoolManager.clear()
+
+		if response is not None:
 			if response.status == 304:
-				oeisInformation = cachedInformation
-				if cacheIsReadable:
-					pathFilenameCache.touch()
+				pathFilenameCache.touch()  # Update cache file's modification time to reflect recent validation with OEIS server
 			elif response.status == 200:
-				oeisInformation = response.data.decode("utf-8")
-				if (cachedInformation is not None) and (oeisInformation == cachedInformation):
-					pathFilenameCache.touch()
-				else:
-					writeStringToHere(oeisInformation, pathFilenameCache)
-			else:
-				oeisInformation = cachedInformation
-		except urllib3.exceptions.HTTPError:
-			oeisInformation = cachedInformation
-		finally:
-			httpPoolManager.clear()
+				writeStringToHere(response.data.decode("utf-8"), pathFilenameCache)
 
-	if not oeisInformation:
+	if not informationOEIS:
 		message: str = f"Failed to retrieve OEIS sequence information for {pathFilenameCache.stem}."
-		warnings.warn(message, stacklevel=2)
+		warnings.warn(message, stacklevel=0)
 
-	return oeisInformation
+	return informationOEIS
 
 @cache
 def librarianFetchesOEISidSequenceValues(oeisID: str) -> dict[int, int]:
@@ -258,19 +233,11 @@ def librarianFetchesOEISidSequenceValues(oeisID: str) -> dict[int, int]:
 	OEISsequence : dict[int, int]
 		A dictionary mapping sequence indices to their corresponding values, or a fallback
 		dictionary containing {-1: -1} if retrieval fails.
-
-	Raises
-	------
-	ValueError
-		If the cached or downloaded file format is invalid.
-	IOError
-		If there is an error reading from or writing to the local cache.
-
 	"""
 	pathFilenameCache: Path = pathCache / _librarianEncodesOEISidToBFilename(oeisID)
 	url: str = f"https://oeis.org/{oeisID}/{_librarianEncodesOEISidToBFilename(oeisID)}"
 
-	oeisInformation: None | str = _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache, url)
+	oeisInformation: str | None = _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache, url)
 
 	if oeisInformation:
 		return _librarianParsesBFileToSequence(oeisInformation)
@@ -309,7 +276,7 @@ def librarianFetchesOEISidDescriptionAndOffset(oeisID: str) -> tuple[str, int]:
 	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
 	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
-	oeisInformation: None | str = _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache, url)
+	oeisInformation: str | None = _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache, url)
 
 	if not oeisInformation:
 		return "Not found", -1
@@ -566,8 +533,6 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 	------
 	ValueError
 		If `n` is not a non-negative integer.
-	KeyError
-		If the OEIS sequence ID is not directly implemented.
 	ArithmeticError
 		If `n` is below the sequence's defined offset.
 
@@ -627,12 +592,6 @@ def OEIS_for_n() -> None:
 	Usage
 	-----
 	python -m mapFolding.oeis OEIS_for_n A001415 10
-
-	Raises
-	------
-	SystemExit
-		With code 1 if invalid arguments are provided or computation fails.
-
 	"""
 	parserCLI: argparse.ArgumentParser = argparse.ArgumentParser(
 		description="Calculate a(n) for an OEIS sequence.",
@@ -796,7 +755,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	[9] mapFolding.algorithms.oeisIDbyFormula
 		Internal package reference (closed-form sequence formulas)
 
-	"""  # noqa: RUF002
+	"""
 #-------- memorialization instructions ---------------------------------------------
 
 	if pathLikeWriteFoldsTotal is not None:
@@ -841,7 +800,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 		case 'A301620': from mapFolding.algorithms.oeisIDbyFormula import A301620 as doTheNeedful
 		case _: matched_oeisID = False
 	if matched_oeisID:
-		countTotal = doTheNeedful(oeis_n) # pyright: ignore[reportPossiblyUnboundVariable]
+		countTotal = doTheNeedful(oeis_n)  # pyright: ignore[reportPossiblyUnboundVariable]
 	else:
 		matched_oeisID = True
 		match oeisID:
@@ -865,20 +824,20 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 					else:
 						arcCode = 0b1
 					listArcCodes: list[int] = [(arcCode << 1) | arcCode]
-													#  0b1010 | 0b0101 is 0b1111, or 0xf
-													#    0b10 |   0b01 is   0b11, or 0x3
+													#  0b1010 | 0b0101 is 0b1111, or 0xf  # noqa: E116
+													#    0b10 |   0b01 is   0b11, or 0x3  # noqa: E116
 
 					MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
 					while listArcCodes[-1] < MAXIMUMarcCode:
-						arcCode = (arcCode << 4) | 0b0101 # e.g., 0b 10000 | 0b 0101 = 0b 10101
-						listArcCodes.append((arcCode << 1) | arcCode) # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
+						arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
+						listArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
 						# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
 						# See "mapFolding/reference/A000682facts.py"
 					dictionaryMeanders: dict[int, int] = dict.fromkeys(listArcCodes, 1)
 
 				elif oeisID == 'A005316':
 					if oeis_n & 0b1:
-						dictionaryMeanders: dict[int, int] = {0b1111: 1} # 0xf
+						dictionaryMeanders: dict[int, int] = {0b1111: 1}  # 0xf
 					else:
 						dictionaryMeanders = {0b10110: 1}
 				else:
@@ -886,7 +845,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 					raise ValueError(message)
 
 				state = State(oeis_n, oeisID, boundary, dictionaryMeanders)
-				countTotal = doTheNeedful(state) # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
+				countTotal = doTheNeedful(state)  # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
 			case 'A007822':
 				mapShape: tuple[Literal[1], int] = (1, 2 * oeis_n)
 				from mapFolding.beDRY import defineProcessorLimit
@@ -925,4 +884,3 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 
 if __name__ == "__main__":
 	getOEISids()
-

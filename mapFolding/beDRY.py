@@ -1,14 +1,18 @@
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 
-from collections.abc import Sequence
+from __future__ import annotations
+
 from functools import cache
 from hunterMakesPy import inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit, oopsieKwargsie
-from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, NumPyIntegerType
 from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
 from sys import maxsize as sysMaxsize
-from typing import Any
+from typing import Any, TYPE_CHECKING
 import numpy
+
+if TYPE_CHECKING:
+	from collections.abc import Sequence
+	from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, NumPyIntegerType
 
 #======== Flow control ======================================
 
@@ -34,8 +38,6 @@ def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = 
 	------
 	TypeError
 		If `CPUlimit` is not of the expected types.
-	NotImplementedError
-		If `concurrencyPackage` is not supported.
 
 	Notes
 	-----
@@ -303,6 +305,3 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	"""
 	# NOTE Do NOT sort the dimensions.
 	return tuple(mapDimensions)
-
-
-

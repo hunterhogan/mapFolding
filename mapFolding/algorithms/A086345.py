@@ -4,6 +4,8 @@ See Also
 --------
 mapFolding/reference/A086345Wu.py
 """
+from __future__ import annotations
+
 from fractions import Fraction
 from functools import cache
 from itertools import combinations
@@ -37,7 +39,7 @@ def _blender(n: int) -> int:
 			nummaNumma += _goRight(integer, copies)
 			denominator *= _deFactorial(integer, copies)
 		numerator: int = 3 ** (numbinations + nummaNumma)
-		sumReBletionary += Fraction(numerator, denominator) # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
+		sumReBletionary += Fraction(numerator, denominator)  # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
 	return sumReBletionary
 
 @cache
@@ -75,6 +77,6 @@ def A086345(n: int) -> int:
 	else:
 		aOFn: int = 0
 		for aDivisor in divisors(n, generator=True):
-			aOFn += mobius(aDivisor) * _recurser(n//aDivisor) # pyright: ignore[reportAssignmentType]
+			aOFn += mobius(aDivisor) * _recurser(n // aDivisor)  # pyright: ignore[reportAssignmentType]
 		aOFn //= n
 	return aOFn
