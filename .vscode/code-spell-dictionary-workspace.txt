@@ -50,6 +50,7 @@ cmap
 cmpop
 coefs
 Combin
+comjnl
 complevel
 Connectee
 Connectees
@@ -156,6 +157,7 @@ integest
 intfunc
 intp
 ionary
+ipsjjip
 ipykernel
 ipywidgets
 iroot

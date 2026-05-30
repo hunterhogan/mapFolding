@@ -26,13 +26,58 @@ There are cool and powerful tools in here, but as of 2025 September 17, I am dis
 
 I'm not a mathematician. I don't have training in or professional experience as a programmer. I'm not stupid: I'm ignorant.
 
+## Reference materials
+
+### A map-folding problem
+
+- [BibTeX citation.](citations/Lunnon1968.bib)
+- DOI: [10.1090/S0025-5718-1968-0221957-8](https://doi.org/10.1090/S0025-5718-1968-0221957-8)
+- PDF: [American Mathematical Society](https://pubs.ams.org/journals/mcom/1968-22-101/S0025-5718-1968-0221957-8/S0025-5718-1968-0221957-8.pdf)
+
+### Folding a strip of stamps
+
+- [BibTeX citation.](citations/Koehler1968.bib)
+- DOI: [10.1016/S0021-9800(68)80048-1](https://doi.org/10.1016/S0021-9800(68)80048-1)
+
+### Multi-dimensional map-folding
+
+- [BibTeX citation.](citations/Lunnon.bib)
+- DOI: [10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75)
+- PDF: [academic.oup.com](https://academic.oup.com/comjnl/article-pdf/14/1/75/1020149/140075.pdf)
+
+### A transfer matrix approach to the enumeration of plane meanders
+
+- [BibTeX citation.](citations/Jensen.bib) [TeX Source with precise formulas for AI agents.](https://arxiv.org/src/cond-mat/0008178)
+- DOI: [10.1088/0305-4470/33/34/301](https://doi.org/10.1088/0305-4470/33/34/301)
+- Free pre-print: [arXiv:cond-mat/0008178](https://arxiv.org/abs/cond-mat/0008178)
+
+### A new transfer-matrix algorithm for exact enumerations: self-avoiding polygons on the square lattice
+
+- [BibTeX citation.](citations/ClisbyJensen2012.bib) [TeX Source with precise formulas for AI agents.](https://arxiv.org/src/1111.5877)
+- DOI: [10.1088/1751-8113/45/11/115202](https://doi.org/10.1088/1751-8113/45/11/115202)
+- Free pre-print: [arXiv:1111.5877](https://arxiv.org/abs/1111.5877)
+
+### Stamp Foldings, Semi-Meanders, and Open Meanders: Fast Generation Algorithms
+
+- [BibTeX citation.](citations/Sawada2012.bib)
+- DOI: [10.37236/2404](https://doi.org/10.37236/2404)
+- PDF: [The Electronic Journal of Combinatorics](https://www.combinatorics.org/ojs/index.php/eljc/article/view/v19i2p43/pdf)
+
+### Foldings and meanders
+
+- [BibTeX citation.](citations/Legendre2014.bib) [TeX Source with precise formulas for AI agents.](https://arxiv.org/src/1302.2025)
+- PDF: [The Australasian Journal of Combinatorics](https://ajc.maths.uq.edu.au/pdf/58/ajc_v58_p275.pdf)
+- Free pre-print: [arXiv:1302.2025](https://arxiv.org/abs/1302.2025)
+
+### Valid Orderings of Layers When Simple-Folding a Map
+
+- [BibTeX citation.](citations/Jia2020.bib)
+- DOI: [10.2197/ipsjjip.28.816](https://doi.org/10.2197/ipsjjip.28.816)
+- PDF: [Journal of Information Processing](https://www.jstage.jst.go.jp/article/ipsjjip/28/0/28_816/_pdf/-char/en)
+
 ## My recovery
 
 [![Static Badge](https://img.shields.io/badge/2011_August-Homeless_since-blue?style=flat)](https://HunterThinks.com/support)
 [![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UC3Gx7kz61009NbhpRtPP7tw)](https://www.youtube.com/@HunterHogan)
 
 [![CC-BY-NC-4.0](https://raw.githubusercontent.com/hunterhogan/mapFolding/refs/heads/main/.github/CC-BY-NC-4.0.png)](https://creativecommons.org/licenses/by-nc/4.0/)
-
-## Citations
-
-
