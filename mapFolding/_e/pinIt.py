@@ -6,8 +6,9 @@ The development of this generalized module is severely hampered, however. Functi
 cornbread" problem that was difficult for me to "solve"--due to my programming skills. If I were able to decouple the "beans and
 cornbread" solution from the 2^n-dimensional functions, I would generalize more functions and move them here.
 """
+from __future__ import annotations
+
 from collections import Counter, deque
-from collections.abc import Callable, Iterable, Iterator, Sequence
 from functools import partial
 from gmpy2 import bit_clear, bit_mask
 from humpy_cytoolz.curried import map as toolz_map
@@ -20,13 +21,16 @@ from mapFolding._e import (
 	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTitems, DOTkeys, DOTvalues, Folding,
 	getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, Leaf, LeafOptions,
 	leafOptionsAND, LeafSpace, makeLeafAntiOptions, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles)
-from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
 	between吗, extractUndeterminedPiles, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen, pileIsOpen,
 	thisIsALeaf, thisNotHaveThat)
 from math import prod
 from more_itertools import filter_map, flatten, one
-from typing import cast
+from typing import cast, TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from collections.abc import Callable, Iterable, Iterator, Sequence
+	from mapFolding._e.dataBaskets import EliminationState
 
 #======== Boolean filters =======================
 
@@ -131,7 +135,7 @@ def atPilePinLeaf(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) ->
 def makeFolding(permutationSpace: PermutationSpace, leavesToInsert: Sequence[Leaf]) -> Folding:
 	pilesToInsert: Iterator[Pile] = DOTkeys(extractUndeterminedPiles(permutationSpace))
 	# NOTE `cast` because the type checkers cannot possible know that the prior logic leads to all int.
-	return tuple(DOTvalues(dict(sorted(DOTitems(cast(PinnedLeaves, merge(permutationSpace, dict(zip(pilesToInsert, leavesToInsert, strict=True)))))))))
+	return tuple(DOTvalues(dict(sorted(DOTitems(cast("PinnedLeaves", merge(permutationSpace, dict(zip(pilesToInsert, leavesToInsert, strict=True)))))))))
 
 #======== Deconstruct a `PermutationSpace` dictionary =======
 
@@ -270,7 +274,7 @@ def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[Permuta
 	--------
 	deconstructPermutationSpaceAtPile
 	"""
-	return  flatten(map(DOTvalues, map(deconstructPermutationSpaceAtPile, listPermutationSpace, repeat(pile), repeat(leavesToPin))))
+	return flatten(map(DOTvalues, map(deconstructPermutationSpaceAtPile, listPermutationSpace, repeat(pile), repeat(leavesToPin))))
 
 # TODO Fix this moronic bullshit created by an AI assistant that refused to follow instructions.
 def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, leaf_r: Leaf, pile_k: Pile, domain_r: Iterable[Pile] | None = None, rangePile_k: Iterable[Leaf] | None = None) -> EliminationState:
@@ -725,8 +729,8 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 
 			sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 			if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-					, pilesToUpdate = deque(DOTitems(keyfilter(thisNotHaveThat(setPiles), pilesUndetermined)))
-					, leafAntiOptions = makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
+					, pilesToUpdate=deque(DOTitems(keyfilter(thisNotHaveThat(setPiles), pilesUndetermined)))
+					, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
 				)):
 				return None
 			if sum(map(dimensionNearest首, permutationSpace.values())) < sumBeforeReduction:

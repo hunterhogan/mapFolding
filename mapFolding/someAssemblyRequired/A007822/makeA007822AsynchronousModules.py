@@ -1,4 +1,6 @@
 """addSymmetryCheckAsynchronous."""
+from __future__ import annotations
+
 from astToolkit import Be, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
@@ -7,8 +9,11 @@ from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import defaultA007822, IfThis
 from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import ExprCallFilterAsymmetricFoldsState
 from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename
-from pathlib import PurePath
-import ast
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from pathlib import PurePath
+	import ast
 
 # TODO figure out asynchronous + numba.
 
@@ -18,7 +23,7 @@ AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
 	, value=Make.Call(Make.Name(defaultA007822['function']['getSymmetricFoldsTotal']))
 )
 
-def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute  | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Make the check for symmetry in each folding pattern in a group of folds asynchronous to the rest of the symmetric map folding algorithm.
 
 	To do asynchronous filtering, a few things must happen.
@@ -32,10 +37,10 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	2. Filtering must start immediately to keep up with the finding process.
 	3. To discover A007822(27), which is currently unknown, I estimate there will be 369192702554 calls to filterAsymmetricFolds.
 	Each `leafBelow` array will be 28 * 8-bits, so if the queue has only 0.3% of the total calls in it, that is 28 GiB of data.
-	"""
+	"""  # noqa: DOC201
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
-		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultA007822['function']['counting']))
-		, doThat = Then.extractIt
+		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultA007822['function']['counting']))
+		, doThat=Then.extractIt
 		).captureLastMatch(astModule))
 
 	NodeChanger(
@@ -54,8 +59,8 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	del astFunctionDef_count
 
 	astFunctionDef_doTheNeedful: ast.FunctionDef = raiseIfNone(NodeTourist(
-		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableDispatcher))
-		, doThat = Then.extractIt
+		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableDispatcher))
+		, doThat=Then.extractIt
 		).captureLastMatch(astModule))
 
 	astFunctionDef_doTheNeedful.body.insert(0, astExprCall_initializeConcurrencyManager)
@@ -99,4 +104,3 @@ def makeA007822AsynchronousModules() -> None:
 
 if __name__ == '__main__':
 	makeA007822AsynchronousModules()
-

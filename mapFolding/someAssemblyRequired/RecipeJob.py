@@ -1,7 +1,8 @@
 """Configuration by dataclass."""
 
+from __future__ import annotations
+
 from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
-from astToolkit.containers import IngredientsFunction, IngredientsModule
 from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy.dataStructures import autoDecodingRLE
 # SEMIOTICS 'The____' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different
@@ -9,14 +10,17 @@ from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding import (
 	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal,
 	packageSettings)
-from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, ShatteredDataclass
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
-from typing import cast
-import ast
+from typing import cast, TYPE_CHECKING
 import dataclasses
+
+if TYPE_CHECKING:
+	from astToolkit.containers import IngredientsFunction, IngredientsModule
+	from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
+	import ast
 
 @dataclasses.dataclass(slots=True)
 class RecipeJobTheorem2:
@@ -82,7 +86,7 @@ class RecipeJobTheorem2:
 	"""The map folding computation state containing dimensions and initial values."""
 	foldsTotalEstimated: int = 0
 	"""Estimated total number of folds for progress tracking."""
-	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
+	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True)  # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
 	"""Deconstructed dataclass metadata for code transformation."""
 
 #-------- Source -----------------------------------------
@@ -110,7 +114,7 @@ class RecipeJobTheorem2:
 	"""Override path for the target module directory."""
 	fileExtension: str = packageSettings.fileExtension
 	"""File extension for generated modules."""
-	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
+	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True)  # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
 	"""Path for writing fold count results."""
 
 #-------- Logical identifiers, as opposed to physical identifiers ------------------------
@@ -118,7 +122,7 @@ class RecipeJobTheorem2:
 	"""Target package identifier."""
 	logicalPathRoot: identifierDotAttribute | None = None
 	"""Logical path root; probably corresponds to physical filesystem directory."""
-	moduleIdentifier: str = dataclasses.field(default=None, init=True) # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
+	moduleIdentifier: str = dataclasses.field(default=None, init=True)  # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
 	"""Target module identifier."""
 	identifierCallable: str = identifierCallableSource
 	"""Name of the counting function in generated module."""
@@ -202,13 +206,13 @@ class RecipeJobTheorem2:
 		"""
 		pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(self.state.mapShape))
 
-		if self.pathFilenameFoldsTotal is None: # pyright: ignore[reportUnnecessaryComparison]
+		if self.pathFilenameFoldsTotal is None:  # pyright: ignore[reportUnnecessaryComparison]
 			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
 
-		if self.moduleIdentifier is None: # pyright: ignore[reportUnnecessaryComparison]
+		if self.moduleIdentifier is None:  # pyright: ignore[reportUnnecessaryComparison]
 			self.moduleIdentifier = self.pathFilenameFoldsTotal.stem
 
-		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.identifierDataclass and self.identifierDataclassInstance: # pyright: ignore[reportUnnecessaryComparison]
+		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.identifierDataclass and self.identifierDataclassInstance:  # pyright: ignore[reportUnnecessaryComparison]
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)
 
 def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> ast.AnnAssign | ast.Assign:
@@ -236,11 +240,11 @@ def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> 
 	Ima___Assign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[identifier]
 	match elementConstructor:
 		case 'scalar':
-			cast(ast.Constant, cast(ast.Call, Ima___Assign.value).args[0]).value = int(eval(f"job.state.{identifier}"))  # noqa: S307
+			cast('ast.Constant', cast('ast.Call', Ima___Assign.value).args[0]).value = int(eval(f"job.state.{identifier}"))  # noqa: S307
 		case 'array':
 			dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{identifier}"), assumeAddSpaces=True)  # noqa: S307
 			dataAs_ast_expr: ast.expr = pythonCode2ast_expr(dataAsStrRLE)
-			cast(ast.Call, Ima___Assign.value).args = [dataAs_ast_expr]
+			cast('ast.Call', Ima___Assign.value).args = [dataAs_ast_expr]
 		case _:
 			pass
 	return Ima___Assign
@@ -258,7 +262,7 @@ def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredi
 	changing the import statements. You shouldn't need to change any "business" logic.
 
 	NOTE This will not remove potentially conflicting existing imports from other modules.
-	"""
+	"""  # noqa: DOC201
 	for datatypeConfig in listDatatypeConfigurations:
 		ingredientsFunction.imports.removeImportFrom(datatypeConfig.typeModule, None, datatypeConfig.datatypeIdentifier)
 		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier, datatypeConfig.type_asname)

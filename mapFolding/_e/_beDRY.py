@@ -58,7 +58,8 @@ References
 	Internal package reference
 
 """
-from collections.abc import Iterable, Iterator, Mapping
+from __future__ import annotations
+
 from functools import partial, reduce
 from gmpy2 import bit_clear, bit_mask, bit_set, xmpz
 from humpy_cytoolz.dicttoolz import dissoc as dissociatePiles
@@ -66,11 +67,14 @@ from humpy_cytoolz.functoolz import curry as syntacticCurry
 from humpy_cytoolz.itertoolz import unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
-from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf, thisIsLeafOptions
 from more_itertools import iter_index
 from operator import add, mul
-from typing import Any
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from collections.abc import Iterable, Iterator, Mapping
+	from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 #======== Group-by functions ================================================
 
@@ -109,7 +113,7 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 
 	"""
 	leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
-	return (leavesPinned, dissociatePiles(permutationSpace, *DOTkeys(leavesPinned))) # pyright: ignore[reportReturnType]  # ty:ignore[invalid-return-type]
+	return (leavesPinned, dissociatePiles(permutationSpace, *DOTkeys(leavesPinned)))  # pyright: ignore[reportReturnType]  # ty:ignore[invalid-return-type]
 
 #======== Disaggregation and deconstruction functions ================================================
 

@@ -8,6 +8,8 @@ internalization to convert function parameters into embedded variables, Numba de
 progress integration for long-running calculations, and launcher generation for standalone execution entry points.
 """
 
+from __future__ import annotations
+
 from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy.dataStructures import autoDecodingRLE
@@ -41,7 +43,7 @@ listDatatypeConfigurations: list[DatatypeConfiguration] = [
 ]
 
 def addLauncher(ingredientsModule: IngredientsModule, ingredientsCount: IngredientsFunction, job: RecipeJobTheorem2) -> tuple[IngredientsModule, IngredientsFunction]:
-	"""Add a standalone launcher section to a computation module."""
+	"""Add a standalone launcher section to a computation module."""  # noqa: DOC201
 	linesLaunch: str = f"""
 if __name__ == '__main__':
 	import time
@@ -60,7 +62,7 @@ if __name__ == '__main__':
 	return ingredientsModule, ingredientsCount
 
 def addLauncherA007822(ingredientsModule: IngredientsModule, ingredientsCount: IngredientsFunction, job: RecipeJobTheorem2) -> tuple[IngredientsModule, IngredientsFunction]:
-	"""Add a standalone launcher section to a computation module."""
+	"""Add a standalone launcher section to a computation module."""  # noqa: DOC201
 	linesLaunch: str = f"""
 if __name__ == '__main__':
 	import time
@@ -101,7 +103,7 @@ def addLauncherNumbaProgress(ingredientsModule: IngredientsModule, ingredientsFu
 # change the update value. This should be dynamic.
 	linesLaunch: str = f"""
 if __name__ == '__main__':
-	with ProgressBar(total={job.foldsTotalEstimated//job.state.leavesTotal}, update_interval=2) as statusUpdate:
+	with ProgressBar(total={job.foldsTotalEstimated // job.state.leavesTotal}, update_interval=2) as statusUpdate:
 		{job.identifierCallable}(statusUpdate)
 		foldsTotal = statusUpdate.n * {job.state.leavesTotal}
 		print('\\nmap {job.state.mapShape} =', foldsTotal)
@@ -118,8 +120,8 @@ if __name__ == '__main__':
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
 
 	NodeChanger(
-		findThis = Be.AugAssign.targetIs(IfThis.isNameIdentifier(job.shatteredDataclass.countingVariableName.id))
-		, doThat = Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier),'update'),[Make.Constant(2)])))
+		findThis=Be.AugAssign.targetIs(IfThis.isNameIdentifier(job.shatteredDataclass.countingVariableName.id))
+		, doThat=Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier), 'update'), [Make.Constant(2)])))
 	).visit(ingredientsFunction.astFunctionDef)
 
 	NodeChanger(Be.Return, Then.removeIt).visit(ingredientsFunction.astFunctionDef)
@@ -176,19 +178,19 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 				ImaAnnAssign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[ast_arg.arg]
 				match elementConstructor:
 					case 'scalar':
-						cast(ast.Constant, cast(ast.Call, ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # noqa: S307
+						cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # noqa: S307
 					case 'array':
 						dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{ast_arg.arg}"), assumeAddSpaces=True)  # noqa: S307
-						dataAs_astExpr: ast.expr = cast(ast.Expr, ast.parse(dataAsStrRLE).body[0]).value
-						cast(ast.Call, ImaAnnAssign.value).args = [dataAs_astExpr]
+						dataAs_astExpr: ast.expr = cast('ast.Expr', ast.parse(dataAsStrRLE).body[0]).value
+						cast('ast.Call', ImaAnnAssign.value).args = [dataAs_astExpr]
 					case _:
 						list_exprDOTannotation: list[ast.expr] = []
 						list_exprDOTvalue: list[ast.expr] = []
 						for dimension in job.state.mapShape:
 							list_exprDOTannotation.append(Make.Name(elementConstructor))
 							list_exprDOTvalue.append(Make.Call(Make.Name(elementConstructor), [Make.Constant(dimension)]))
-						cast(ast.Tuple, cast(ast.Subscript, cast(ast.AnnAssign, ImaAnnAssign).annotation).slice).elts = list_exprDOTannotation
-						cast(ast.Tuple, ImaAnnAssign.value).elts = list_exprDOTvalue
+						cast('ast.Tuple', cast('ast.Subscript', cast('ast.AnnAssign', ImaAnnAssign).annotation).slice).elts = list_exprDOTannotation
+						cast('ast.Tuple', ImaAnnAssign.value).elts = list_exprDOTvalue
 
 				ingredientsFunction.astFunctionDef.body.insert(0, ImaAnnAssign)
 
@@ -252,7 +254,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
 
-	ingredientsCount.astFunctionDef.decorator_list = [] # TODO low-priority, handle this more elegantly
+	ingredientsCount.astFunctionDef.decorator_list = []  # TODO low-priority, handle this more elegantly
 	ingredientsCount = decorateCallableWithNumba(ingredientsCount, spices.parametersNumba)
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
 	ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
@@ -312,6 +314,6 @@ def A007822(n: int) -> None:
 	makeJobNumba(aJob, spices)
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (2,21)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (2, 21)
 	fromMapShape(mapShape)
 	# A007822(8)

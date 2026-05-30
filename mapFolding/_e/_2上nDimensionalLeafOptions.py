@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from bisect import bisect_left
-from collections.abc import Callable, Iterable
 from functools import cache, partial
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
 from humpy_cytoolz.functoolz import curry as syntacticCurry
@@ -14,6 +15,7 @@ from pprint import pprint
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+	from collections.abc import Callable, Iterable
 	import pandas
 
 # TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
@@ -22,7 +24,7 @@ if TYPE_CHECKING:
 
 @syntacticCurry
 def filterCeiling(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
-	return pile <  int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin)
+	return pile < int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin)
 
 @syntacticCurry
 def filterFloor(pile: Pile, leaf: Leaf) -> bool:
@@ -34,7 +36,7 @@ def filterParity(pile: Pile, leaf: Leaf) -> bool:
 
 @syntacticCurry
 def filterDoubleParity(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
-	if leaf != 首零(dimensionsTotal)+零:
+	if leaf != 首零(dimensionsTotal) + 零:
 		return True
 	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
 
@@ -59,7 +61,7 @@ def _getLeafOptions(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...],
 	return makeLeafOptions(leavesTotal, leafOptions)
 
 def getDictionaryLeafOptions(state: EliminationState) -> dict[Pile, LeafOptions]:
-	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
+	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""  # noqa: DOC201
 	return {pile: getLeafOptions(state, pile) for pile in range(state.leavesTotal)}
 
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
@@ -70,7 +72,7 @@ def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPile
 	from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings  # noqa: PLC0415
 
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
-	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict() # pyright: ignore[reportAssignmentType]
+	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()  # pyright: ignore[reportAssignmentType]
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
@@ -147,7 +149,7 @@ pp3  = (3, 5, 9, 17, 33)
 	"""
 
 	pile: Pile = 4
-	pileDimension = bisect_left(state.sumsOfProductsOfDimensionsNearest首, pile>>1<<1)
+	pileDimension = bisect_left(state.sumsOfProductsOfDimensionsNearest首, pile >> 1 << 1)
 	leafMinimum = is_even(pile) + state.productsOfDimensions[pileDimension]
 	pileRange: list[Leaf] = []
 
@@ -168,8 +170,8 @@ pp3  = (3, 5, 9, 17, 33)
 			# pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
 
 
-		if (pile % 4 == 0) and ((零)+首零(state.dimensionsTotal) in pileRange):
-			pileRange.remove((零)+首零(state.dimensionsTotal))
+		if (pile % 4 == 0) and ((零) + 首零(state.dimensionsTotal) in pileRange):
+			pileRange.remove((零) + 首零(state.dimensionsTotal))
 			"""33 has step = 4"""
 
 
@@ -216,7 +218,7 @@ pp3  = (3, 5, 9, 17, 33)
 
 		@syntacticCurry
 		def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
-			return list(map(partial(add, dimensionOrigin+2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
+			return list(map(partial(add, dimensionOrigin + 2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
 
 		@syntacticCurry
 		def Z0Z_alphaBeta(state: EliminationState, alphaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
@@ -236,17 +238,17 @@ pp3  = (3, 5, 9, 17, 33)
 			for yy in range(1):
 				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy])
 					, Z0Z_alphaBeta(state
-						, alphaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
+						, alphaStart=yy + (state.dimensionsTotal - 2 - dimensionNearest首(pile))
 						, betaStop=-(yy)
 					))))
 			# ? 32 < odd leaves < 52
 			# ? 32 < odd leaves < 36
-			for yy in range(1,3):
+			for yy in range(1, 3):
 				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
 			# piles 51, 53, 55 need a higher start.
-			pileRange.extend(state.productsOfDimensions[1 + ((零)+首零(state.dimensionsTotal) < pile):dimensionNearest首(pile+1)])
+			pileRange.extend(state.productsOfDimensions[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)])
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
 			# pile5 needs a higher start.
 			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), state.productsOfDimensions[0:state.dimensionsTotal]))
@@ -261,7 +263,7 @@ pp3  = (3, 5, 9, 17, 33)
 					partial(add, 1)
 					, (map(
 						partial(mul, state.productsOfDimensions[yy])
-						, Z0Z_alphaBeta(state, alphaStart = 0, betaStop=-(yy))
+						, Z0Z_alphaBeta(state, alphaStart=0, betaStop=-(yy))
 				)
 			)
 		)
@@ -277,19 +279,19 @@ pp3  = (3, 5, 9, 17, 33)
 			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
-			pileRange.extend(map(partial(add, 1), state.productsOfDimensions[1 + ((零)+首零(state.dimensionsTotal) < pile):dimensionNearest首(pile+1)]))
+			pileRange.extend(map(partial(add, 1), state.productsOfDimensions[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)]))
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
 			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(add, 1), state.productsOfDimensions[1:state.dimensionsTotal])))
 
 			return tuple(sorted(pileRange))
 
 		for pile in range(首一(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
-			print(pile, (real:=tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))) == (computed:=Z0Z_getPileRangeEven(state, pile)), end=': ')
+			print(pile, (real := tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))) == (computed := Z0Z_getPileRangeEven(state, pile)), end=': ')
 			# print(f"{ansiColors.Green}surplus: {set(computed).difference(real)}", f"{ansiColors.Magenta}missing: {set(real).difference(computed)}{ansiColorReset}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
-		for pile in range((零)+首二(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
-			print(pile, (real:=tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))) == (computed:=Z0Z_getPileRange(state, pile)), end=': ')
+		for pile in range((零) + 首二(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
+			print(pile, (real := tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))) == (computed := Z0Z_getPileRange(state, pile)), end=': ')
 			# print(f"surplus: {set(computed).difference(real)}", f"missing: {set(real).difference(computed)}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
@@ -302,4 +304,3 @@ pp3  = (3, 5, 9, 17, 33)
 			# print(pile, (ll:=getLeafOptions(state, pile)) == (zz), end=': ')
 			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			# pprint(zz, width=180)
-

@@ -2,11 +2,12 @@
 
 https://docs.exaloop.io/start/install/
 """
+from __future__ import annotations
+
 from astToolkit import Be, extractFunctionDef, Grab, identifierDotAttribute, Make, NodeChanger, parseLogicalPath2astModule, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
-from io import TextIOBase
 from mapFolding import DatatypeLeavesTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
@@ -14,10 +15,13 @@ from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfTh
 from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport, moveShatteredDataclass_arg2body, RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
-from typing import cast
-import ast
+from typing import cast, TYPE_CHECKING
 import subprocess
 import sys
+
+if TYPE_CHECKING:
+	from io import TextIOBase
+	import ast
 
 # TODO Converge with `makeJobTheorem2Numba`.
 
@@ -75,8 +79,8 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 		NodeChanger(
 			IfThis.isAnyOf(
 							Be.AugAssign.targetIs(IfThis.isNestedNameIdentifier(identifier))
-			,   IfThis.isAllOf(Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
-							,  Be.Assign.valueIs(Be.Constant))
+			, IfThis.isAllOf(Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
+							, Be.Assign.valueIs(Be.Constant))
 			)
 			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
@@ -99,11 +103,11 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 
 	#-------- `identifier` has multiple index values. -------------------------
 		NodeChanger(IfThis.isAllOf(Be.Subscript.valueIs(IfThis.isNestedNameIdentifier(identifier))
-								,  Be.Subscript.sliceIs(Be.Tuple))
+								, Be.Subscript.sliceIs(Be.Tuple))
 			, doThat=lambda node: Grab.sliceAttribute(Grab.eltsAttribute(
 				Then.replaceWith([
-					Make.Call(Make.Name('int'), listParameters=[cast(ast.Tuple, node.slice).elts[index]])
-					for index in range(len(cast(ast.Tuple, node.slice).elts))])))(node)
+					Make.Call(Make.Name('int'), listParameters=[cast('ast.Tuple', node.slice).elts[index]])
+					for index in range(len(cast('ast.Tuple', node.slice).elts))])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
 	return ingredientsFunction
@@ -155,7 +159,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 			'-']
 		streamText = subprocess.Popen(buildCommand, stdin=subprocess.PIPE, text=True)
 		if streamText.stdin is not None:
-			write_astModule(ingredientsModule, pathFilename=cast(TextIOBase, streamText.stdin), packageName=job.packageIdentifier)
+			write_astModule(ingredientsModule, pathFilename=cast('TextIOBase', streamText.stdin), packageName=job.packageIdentifier)
 			streamText.stdin.close()
 		streamText.wait()
 		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)
@@ -188,4 +192,3 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 if __name__ == '__main__':
 	mapShape: tuple[DatatypeLeavesTotal, ...] = (1, 14)
 	fromMapShape(mapShape)
-

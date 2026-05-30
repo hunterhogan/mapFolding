@@ -1,11 +1,16 @@
 # ruff: noqa: E701
+from __future__ import annotations
+
 from mapFolding import packageSettings
 from mapFolding._e import Limitation, mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.beDRY import defineProcessorLimit
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
-from os import PathLike
-from pathlib import Path, PurePath
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from os import PathLike
+	from pathlib import Path, PurePath
 
 def eliminateFolds(mapShape: tuple[int, ...] | None = None
 				, state: EliminationState | None = None
@@ -46,7 +51,7 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 	-------
 	foldsTotal : int
 		Number of distinct ways to fold a map of the given dimensions.
-	"""
+	"""  # noqa: DOC501
 #-------- state ---------------------------------------------------------------------
 	if not state:
 		if not mapShape:

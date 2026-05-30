@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from humpy_cytoolz.itertoolz import last
@@ -77,7 +79,7 @@ def count(state: EliminationState) -> EliminationState:
 		return ruleΩ
 
 	def addForbiddenInequalityCycle(leaf_k: Leaf, leaf_r: Leaf, leaf_kCrease: Leaf, leaf_rCrease: Leaf) -> None:
-		k__小于_r: cp_model.IntVar = addLessThan(leaf_k, leaf_r) # 小, xiǎo: small, less; as in 李小龍, Lǐ Xiǎolóng, Lǐ little dragon, aka Bruce Lee
+		k__小于_r: cp_model.IntVar = addLessThan(leaf_k, leaf_r)  # 小, xiǎo: small, less; as in 李小龍, Lǐ Xiǎolóng, Lǐ little dragon, aka Bruce Lee
 		r1_小于_k: cp_model.IntVar = addLessThan(leaf_rCrease, leaf_k)
 		k1_小于_r1: cp_model.IntVar = addLessThan(leaf_kCrease, leaf_rCrease)
 		model.add_bool_or([k1_小于_r1.Not(), r1_小于_k.Not(), k__小于_r.Not()])		# [k+1 < r+1 < k < r]
@@ -85,12 +87,12 @@ def count(state: EliminationState) -> EliminationState:
 		r__小于_k1: cp_model.IntVar = addLessThan(leaf_r, leaf_kCrease)
 		model.add_bool_or([r1_小于_k.Not(), k__小于_r.Not(), r__小于_k1.Not()])		# [r+1 < k < r < k+1]
 
-		model.add_bool_or([k__小于_r.Not(), r__小于_k1.Not(), k1_小于_r1.Not()])	# [k < r < k+1 < r+1]
+		model.add_bool_or([k__小于_r.Not(), r__小于_k1.Not(), k1_小于_r1.Not()])  # [k < r < k+1 < r+1]
 
 		k__小于_r1: cp_model.IntVar = addLessThan(leaf_k, leaf_rCrease)
 		r1_小于_k1: cp_model.IntVar = addLessThan(leaf_rCrease, leaf_kCrease)
 		k1_小于_r: cp_model.IntVar = addLessThan(leaf_kCrease, leaf_r)
-		model.add_bool_or([k__小于_r1.Not(), r1_小于_k1.Not(), k1_小于_r.Not()])	# [k < r+1 < k+1 < r]
+		model.add_bool_or([k__小于_r1.Not(), r1_小于_k1.Not(), k1_小于_r.Not()])  # [k < r+1 < k+1 < r]
 
 	def leaf2IndicesCartesian(leaf: Leaf) -> tuple[int, ...]:
 		return tuple((leaf // prod(state.mapShape[0:dimension])) % state.mapShape[dimension] for dimension in range(state.dimensionsTotal))
@@ -105,7 +107,7 @@ def count(state: EliminationState) -> EliminationState:
 		if leaf_k == leaf_r:
 			continue
 
-		k下_indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_k) # 下, xià: below, subscript
+		k下_indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_k)  # 下, xià: below, subscript
 		r下_indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_r)
 
 		for aDimension in range(state.dimensionsTotal):
@@ -139,7 +141,7 @@ def count(state: EliminationState) -> EliminationState:
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	"""Do the things necessary so that `count` operates efficiently."""
+	"""Do the things necessary so that `count` operates efficiently."""  # noqa: DOC201, DOC501
 #======== Edge cases for "small" map shapes ============================
 	if (0 in state.mapShape) or not state.mapShape:
 		from mapFolding.oeis import librarianConstructsDictionaryFoldsTotalKnown  # noqa: PLC0415

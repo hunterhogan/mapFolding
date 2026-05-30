@@ -25,17 +25,18 @@ computational modules. The compilation layer integrates seamlessly with the broa
 system to produce standalone modules optimized for specific map dimensions and computational contexts.
 """
 
+from __future__ import annotations
+
 from astToolkit import identifierDotAttribute, Make
-from astToolkit.containers import IngredientsFunction
-from collections.abc import Callable
-from numba.core.compiler import CompilerBase as numbaCompilerBase
 from typing import Any, Final, NotRequired, TYPE_CHECKING, TypedDict
 import ast
 import dataclasses
 import warnings
 
 if TYPE_CHECKING:
-	from collections.abc import Sequence
+	from astToolkit.containers import IngredientsFunction
+	from collections.abc import Callable, Sequence
+	from numba.core.compiler import CompilerBase as numbaCompilerBase
 
 class ParametersNumba(TypedDict):
 	"""
@@ -84,7 +85,7 @@ class ParametersNumba(TypedDict):
 	signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
 	target: NotRequired[str]
 
-parametersNumbaDefault: Final[ParametersNumba] = { '_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False }
+parametersNumbaDefault: Final[ParametersNumba] = {'_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False}
 """
 Comprehensive Numba configuration for maximum performance optimization.
 
@@ -196,7 +197,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}", stacklevel=2)
 		return astCallable
 
-	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None: # pyright: ignore[reportUnusedFunction]
+	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None:  # pyright: ignore[reportUnusedFunction]
 		"""Generate Numba-compatible type signatures for function parameters.
 
 		(AI generated docstring)
@@ -261,7 +262,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	if ingredientsFunction.astFunctionDef.returns and isinstance(ingredientsFunction.astFunctionDef.returns, ast.Name):
 		theReturn: ast.Name = ingredientsFunction.astFunctionDef.returns
 		list_argsDecorator = [Make.Call(Make.Name(theReturn.id)
-							, list_arg4signature_or_function or [], [] )]
+							, list_arg4signature_or_function or [], [])]
 	elif list_arg4signature_or_function:
 		list_argsDecorator = [Make.Tuple(list_arg4signature_or_function)]
 
@@ -269,7 +270,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
 
-	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()] # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
+	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
 
 	decoratorModule = Z0Z_numbaDataTypeModule
 	decoratorCallable = Z0Z_decoratorCallable
@@ -282,7 +283,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	return ingredientsFunction
 
 @dataclasses.dataclass
-class SpicesJobNumba: # slots?
+class SpicesJobNumba:  # slots?
 	"""Configuration container for Numba-specific job processing options.
 
 	(AI generated docstring)
