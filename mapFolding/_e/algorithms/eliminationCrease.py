@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from humpy_cytoolz.dicttoolz import valfilter as leafFilter
@@ -37,7 +39,7 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	"""Do the things necessary so that `pinByCrease` operates efficiently."""
+	"""Do the things necessary so that `pinByCrease` operates efficiently."""  # noqa: DOC201
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
 
@@ -63,4 +65,3 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	state.groupsOfFolds = len(state.listFolding)
 
 	return state
-

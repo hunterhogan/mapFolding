@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
 from itertools import filterfalse, pairwise, product as CartesianProduct, repeat
@@ -15,7 +17,7 @@ def count(state: EliminationState) -> EliminationState:
 
 def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[int, ...]) -> int:
 	return sum(map(thisLeafFoldingIsValid
-			, map(makeFolding, repeat(permutationSpace)  # ty:ignore[invalid-argument-type]
+			, map(makeFolding, repeat(permutationSpace)
 		, filterfalse(hasDuplicates
 		, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions)) for _pile, leafOptions in sorted(DOTitems(extractUndeterminedPiles(permutationSpace)))))))
 			, repeat(mapShape)))
@@ -68,4 +70,3 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		state = count(state)
 
 	return state
-

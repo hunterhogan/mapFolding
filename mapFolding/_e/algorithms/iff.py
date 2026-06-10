@@ -64,20 +64,25 @@ See Also
 --------
 Annotated, corrected, scanned copy of Koehler (1968) at https://oeis.org/A001011.
 Citations in BibTeX format at [mapFolding/citations](../../citations).
-"""  # noqa: RUF002
+"""
+from __future__ import annotations
+
 from collections import deque
-from collections.abc import Callable
 from functools import cache
 from humpy_cytoolz.dicttoolz import valfilter as leafFilter
 from humpy_cytoolz.functoolz import curry as syntacticCurry
 from hunterMakesPy import CallableFunction, inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
-from mapFolding._e import Folding, Leaf, PermutationSpace, Pile
-from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import between吗, extractPinnedLeaves
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from operator import floordiv, indexOf
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from collections.abc import Callable
+	from mapFolding._e import Folding, Leaf, PermutationSpace, Pile
+	from mapFolding._e.dataBaskets import EliminationState
 
 #======== Forbidden inequalities ============================
 
@@ -131,7 +136,7 @@ def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: 
 	Finally, because we need to compare the relative positions of the leaves, pass a function that returns the position of the
 	`Leaf` crease.
 
-	"""
+	"""  # noqa: DOC201
 	if pile < pileComparand:
 
 		comparandCrease: int | None = getComparandCrease()
@@ -157,7 +162,7 @@ def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: 
 		if pileComparand < pileLeafCrease:
 			if pileLeafCrease < pileComparandCrease:						# [k < r < k+1 < r+1]
 				return True
-		elif pile < pileComparandCrease < pileLeafCrease < pileComparand:	# [k < r+1 < k+1 < r]
+		elif pile < pileComparandCrease < pileLeafCrease < pileComparand:  # [k < r+1 < k+1 < r]
 			return True
 	return False
 
@@ -170,7 +175,7 @@ def thisIsAViolation(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileComp
 	to characterize all crease crossings. This function evaluates those four simplified orderings
 	given the four pile positions π(k), π(r), π(k+1), π(r+1) directly.
 
-	"""
+	"""  # noqa: DOC201
 	if pile < pileComparand:
 		if pileComparandCrease < pile:
 			if pileCrease < pileComparandCrease:						# [k+1 < r+1 < k < r]
@@ -179,7 +184,7 @@ def thisIsAViolation(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileComp
 		if pileComparand < pileCrease:
 			if pileCrease < pileComparandCrease:						# [k < r < k+1 < r+1]
 				return True
-		elif pile < pileComparandCrease < pileCrease < pileComparand:	# [k < r+1 < k+1 < r]
+		elif pile < pileComparandCrease < pileCrease < pileComparand:   # [k < r+1 < k+1 < r]
 			return True
 	return False
 
@@ -242,8 +247,8 @@ def thisLeafFoldingIsValid(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	[3] mapFolding._e.algorithms.iff.thisIsAViolationComplicated
 		Internal package reference
 
-	"""  # noqa: RUF002
-	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileLeaf: pileLeaf[1] == _leavesTotal(mapShape) - 1, enumerate(folding)) # leafNPlus1 does not exist.
+	"""
+	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileLeaf: pileLeaf[1] == _leavesTotal(mapShape) - 1, enumerate(folding))  # leafNPlus1 does not exist.
 	leafAndComparand: combinations[tuple[tuple[int, int], tuple[int, int]]] = combinations(foldingFiltered, 2)
 
 	leafAndComparandAcrossDimensions: CartesianProduct[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = CartesianProduct(leafAndComparand, range(_dimensionsTotal(mapShape)))
