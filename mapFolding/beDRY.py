@@ -229,14 +229,14 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray
 					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
 	return connectionGraph
 
-def makeDataContainer(shape: int | tuple[int, ...], datatype: type[NumPyIntegerType]) -> ndarray[Any, numpy_dtype[NumPyIntegerType]]:
+def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[NumPyIntegerType]) -> ndarray[Any, numpy_dtype[NumPyIntegerType]]:
 	"""Create any data container as long as it is a `numpy.ndarray` full of zeroes of type `numpy.integer`.
 
 	By centralizing data container creation, you can more easily make global changes.
 
 	Parameters
 	----------
-	shape : int | tuple[int, ...]
+	shape : int | tuple[Any, ...]
 		The array shape, either as a single axis length or a tuple of axes lengths.
 	datatype : type[NumPyIntegerType]
 		The `numpy.integer` type for the array elements.

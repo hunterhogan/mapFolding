@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.18.4"
+version = "0.19.0"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -42,12 +42,13 @@ scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.
 dependencies = [
   "astToolkit>=0.11.0",
   "gmpy2",
-  "hunterMakesPy>=0.5.0",
+  "hunterMakesPy>=0.7.1",
   "more_itertools",
   "numpy",
   "platformdirs",
   "tqdm",
   "urllib3",
+  "Z0Z_tools>=2.2.0",
 ]
 optional-dependencies = { development = [
   "gmpy2-stubs",
@@ -56,18 +57,11 @@ optional-dependencies = { development = [
   "memray; sys_platform == 'linux'",
   "py-spy",
   "pyarrow-stubs",
-  "pytest-cov",
-], numba = [
-  "numba",
-  "numba_progress",
-], ortools = [
-  "ortools",
-], pandas = [
+  "pytest-cov"
+], numba = ["numba", "numba_progress"], ortools = ["ortools"], pandas = [
   "pandas",
-  "pyarrow",
-], sympy = [
-  "sympy",
-], testing = [
+  "pyarrow"
+], sympy = ["sympy"], testing = [
   "numba",
   "ortools",
   "pandas",
@@ -75,7 +69,7 @@ optional-dependencies = { development = [
   "pytest-env",
   "pytest-xdist",
   "pytest",
-  "sympy",
+  "sympy"
 ] }
 
 [project.urls]
@@ -94,11 +88,9 @@ build-backend = "setuptools.build_meta"
 report = { exclude_lines = [
   "if TYPE_CHECKING:",
   "if __name__ == \"__main__\":",
-  "numba.jit_module",
+  "numba.jit_module"
 ], ignore_errors = false }
-run = { branch = true, concurrency = [
-  "multiprocessing",
-], data_file = "tests/coverage/.coverage", omit = [
+run = { branch = true, concurrency = ["multiprocessing"], data_file = "mapFolding/tests/coverage/.coverage", omit = [
   "**/easyRun/**",
   "**/tests/*",
   "getLLVMforNoReason.py",
@@ -106,12 +98,10 @@ run = { branch = true, concurrency = [
   "mapFolding/reference/*",
   "Z0Z_*",
   "zCuzDocStoopid*.py",
-], parallel = true, source = [
-  ".",
-] }
+], parallel = true, source = ["."] }
 
 [tool.pytest]
-addopts = ["--color=auto", "-n 6"]
+addopts = ["--color=yes", "-n 6"]
 log_auto_indent = "On"
 testpaths = ["mapFolding/tests"]
 

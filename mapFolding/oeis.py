@@ -60,7 +60,7 @@ from mapFolding._theSSOT import pathCache
 from mapFolding.basecamp import countFolds
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
 from pathlib import Path, PurePath
-from typing import Final, Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from urllib3.exceptions import HTTPError
 import argparse
 import contextlib
@@ -71,6 +71,7 @@ import warnings
 
 if TYPE_CHECKING:
 	from os import PathLike
+	from typing import Final, Literal
 	from urllib3.response import BaseHTTPResponse
 
 def _librarianStandardizesOEISid(oeisID: str) -> str:

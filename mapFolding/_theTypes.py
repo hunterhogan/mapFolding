@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from numpy import dtype, int_ as numpy_int, integer, ndarray, uint64 as numpy_uint64
-from typing import Any, Final, NamedTuple, TYPE_CHECKING, TypeAlias, TypedDict, TypeVar
+from typing import Any, NamedTuple, TYPE_CHECKING, TypedDict, TypeVar
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from types import EllipsisType
+	from typing import Final, TypeAlias
 
 #======== Metadata management for OEIS sequences =======
 
