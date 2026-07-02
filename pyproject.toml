@@ -48,7 +48,7 @@ dependencies = [
   "platformdirs",
   "tqdm",
   "urllib3",
-  "Z0Z_tools>=2.2.0",
+  "Z0Z_tools>=2.2.1",
 ]
 optional-dependencies = { development = [
   "gmpy2-stubs",
