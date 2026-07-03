@@ -1,3 +1,4 @@
+# ruff: noqa: F811
 """You can use this script to benchmark map-folding algorithms against known OEIS values.
 
 This script iterates through multiple OEIS map-folding sequences and algorithm implementations,
@@ -6,7 +7,6 @@ prints colorized output indicating whether computed values match expected values
 """
 from __future__ import annotations
 
-# ruff: noqa: F811
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countFolds
 from mapFolding.oeis import dictionaryOEISMapFolding

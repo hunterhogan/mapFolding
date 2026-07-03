@@ -4,7 +4,7 @@ https://docs.exaloop.io/start/install/
 """
 from __future__ import annotations
 
-from astToolkit import Be, extractFunctionDef, Grab, identifierDotAttribute, Make, NodeChanger, parseLogicalPath2astModule, Then
+from astToolkit import Be, extractFunctionDef, Grab, Make, NodeChanger, parseLogicalPath2astModule, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
@@ -16,10 +16,11 @@ from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
-import subprocess
+import subprocess  # noqa: S404
 import sys
 
 if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
 	from io import TextIOBase
 	import ast
 

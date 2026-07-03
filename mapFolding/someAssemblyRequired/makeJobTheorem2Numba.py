@@ -316,4 +316,3 @@ def A007822(n: int) -> None:
 if __name__ == '__main__':
 	mapShape: tuple[DatatypeLeavesTotal, ...] = (2, 21)
 	fromMapShape(mapShape)
-	# A007822(8)

@@ -9,7 +9,8 @@ Most single-argument functions are tested across their valid input ranges
 Multi-argument functions use curated static cases plus invalid-input coverage.
 """
 
-from collections.abc import Callable
+from __future__ import annotations
+
 from mapFolding._e import (
 	dimensionFourthNearest首, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首,
 	dimensionThirdNearest首, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, leafInSubHyperplane, ptount)
@@ -18,7 +19,11 @@ from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from mapFolding.tests.dataSamples.measurementData import (
 	dataDimensionFourthNearest, dataDimensionNearest, dataDimensionsConsecutiveAtTail, dataDimensionSecondNearest, dataDimensionThirdNearest,
 	dataHowMany0coordinatesAtTail, dataInvertLeafIn2上nDimensions, dataLeafInSubHyperplane, dataPtount)
+from typing import TYPE_CHECKING
 import pytest
+
+if TYPE_CHECKING:
+	from collections.abc import Callable
 
 @pytest.mark.parametrize('mapShape, integerNonnegative, expectedResult', [*dataDimensionsConsecutiveAtTail, ((2, 2, 2), -1, ValueError), ((2, 2, 2), -8, ValueError)])
 def test_dimensionsConsecutiveAtTail(mapShape: tuple[int, ...], integerNonnegative: int, expectedResult: int | type[Exception]) -> None:
@@ -39,7 +44,7 @@ def test_dimensionsConsecutiveAtTail(mapShape: tuple[int, ...], integerNonnegati
 	(howManyDimensionsHaveOddParity, 45, 3),
 	*[(howManyDimensionsHaveOddParity, invalidInput, ValueError) for invalidInput in (-1, -5, -23, -89)],
 ])
-def test_integerNonnegativeFunctions(functionTarget: Callable[[int], int | None], inputValue: int, expectedResult: int | None | type[Exception]) -> None:
+def test_integerNonnegativeFunctions(functionTarget: Callable[[int], int | None], inputValue: int, expectedResult: int | type[Exception] | None) -> None:
 	standardizedEqualToCallableReturn(expectedResult, functionTarget, inputValue)
 
 @pytest.mark.parametrize('dimensionsTotal, integerNonnegative, expectedResult', [*dataInvertLeafIn2上nDimensions, (1, -1, ValueError), (3, -5, ValueError)])

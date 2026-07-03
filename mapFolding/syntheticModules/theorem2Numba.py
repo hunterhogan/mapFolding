@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from mapFolding.dataBaskets import (
-	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal,
-	MapFoldingState)
+	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, MapFoldingState)
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from numba import jit
 

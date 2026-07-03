@@ -1,13 +1,19 @@
 """makeMeandersModules."""
-from astToolkit import Be, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
+from __future__ import annotations
+
+from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, IfThis
 from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getModule, getPathFilename
-from pathlib import PurePath
-import ast
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
+	from pathlib import PurePath
+	import ast
 
 identifierDataclassNumPyHARDCODED = 'MatrixMeandersNumPyState'
 
@@ -30,15 +36,15 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 			, Grab.idAttribute(Then.replaceWith(identifierDataclassNumPy))
 		).visit(astModule)
 
-	# Remove import from dataBaskets  # noqa: ERA001
+	# Remove import from dataBaskets
 	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(identifierDataclassOld)), Then.removeIt).visit(astModule)
 
-	# while (state.boundary > 0 and areIntegersWide(state)):  # noqa: ERA001
+	# while (state.boundary > 0 and areIntegersWide(state)):
 	Call_areIntegersWide: ast.Call = Make.Call(Make.Name('areIntegersWide'), listParameters=[Make.Name('state')])
 	astCompare: ast.Compare = raiseIfNone(NodeTourist(
 		findThis=IfThis.isAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'boundary')
 		, doThat=Then.extractIt
-	).captureLastMatch(astModule))
+	).captureLastMatch(astModule))  # ty:ignore[invalid-assignment]
 	newTest: ast.expr = Make.And.join([astCompare, Call_areIntegersWide])
 
 	NodeChanger(IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'boundary')
@@ -60,4 +66,3 @@ def makeMeandersModules() -> None:
 
 if __name__ == '__main__':
 	makeMeandersModules()
-

@@ -1,5 +1,7 @@
 # ruff: noqa
 # pyright: basic
+from __future__ import annotations
+
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState

@@ -27,16 +27,18 @@ system to produce standalone modules optimized for specific map dimensions and c
 
 from __future__ import annotations
 
-from astToolkit import identifierDotAttribute, Make
-from typing import Any, Final, NotRequired, TYPE_CHECKING, TypedDict
+from astToolkit import Make
+from typing import TYPE_CHECKING, TypedDict
 import ast
 import dataclasses
 import warnings
 
 if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction
 	from collections.abc import Callable, Sequence
 	from numba.core.compiler import CompilerBase as numbaCompilerBase
+	from typing import Any, Final, NotRequired
 
 class ParametersNumba(TypedDict):
 	"""
@@ -277,7 +279,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.imports.addImportFrom_asStr(decoratorModule, decoratorCallable)
 	# Leave this line in so that global edits will change it.
 	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
-	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=listDecoratorKeywords)
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=listDecoratorKeywords)  # noqa: F811
 
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction
@@ -314,5 +316,5 @@ class SpicesJobNumba:  # slots?
 	numbaProgressBarIdentifier: str = 'ProgressBarGroupsOfFolds'
 	"""Identifier for the progress bar implementation used in Numba-compiled code."""
 
-	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba)  # pyright: ignore[reportArgumentType, reportCallIssue, reportUnknownVariableType]
+	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba)  # pyright: ignore[reportArgumentType, reportCallIssue, reportUnknownVariableType]  # ty:ignore[no-matching-overload]
 	"""Numba compilation parameters; defaults to empty dict allowing decorator defaults."""

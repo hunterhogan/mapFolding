@@ -1,7 +1,8 @@
 """makeMapFoldingModules."""
+from __future__ import annotations
+
 from astToolkit import (
-	Be, DOT, extractClassDef, Grab, hasDOTbody, identifierDotAttribute, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule,
-	parsePathFilename2astModule, Then)
+	Be, DOT, extractClassDef, Grab, hasDOTbody, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, parsePathFilename2astModule, Then)
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
@@ -14,13 +15,15 @@ from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPat
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
-from pathlib import PurePath
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import ast
 import dataclasses
 
 if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
 	from collections.abc import Sequence
+	from pathlib import PurePath
+	from typing import Any
 
 def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Generate parallel implementation with concurrent execution and task division.
@@ -29,11 +32,11 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	----------
 	astModule : ast.Module
 		Source module containing the base algorithm.
-	moduleIdentifier : str
+	identifierModule : str
 		Name for the generated parallel module.
-	callableIdentifier : str | None = None
+	identifierCallable : str | None = None
 		Name for the core parallel counting function.
-	logicalPathInfix : PathLike[str] | PurePath | str | None = None
+	logicalPathInfix : identifierDotAttribute | None = None
 		Directory path for organizing the generated module.
 	sourceCallableDispatcher : str | None = None
 		Optional dispatcher function identifier.
@@ -43,7 +46,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	pathFilename : PurePath
 		Filesystem path where the parallel module was written.
 
-	"""
+	"""  # noqa: DOC501
 	sourceCallableIdentifier = default['function']['counting']
 	if identifierCallable is None:
 		identifierCallable = sourceCallableIdentifier
@@ -113,7 +116,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 # START add the parallel logic to the count function ------------------------------------------------
 
 	findThis = Be.While.testIs(Be.Compare.leftIs(IfThis.isNameIdentifier('leafConnectee')))
-	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat = Then.extractIt(DOT.body))  # ty:ignore[invalid-assignment]
+	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat=Then.extractIt(DOT.body))  # ty:ignore[invalid-assignment]
 	countGapsCodeBlock: Sequence[ast.stmt] = raiseIfNone(captureCountGapsCodeBlock.captureLastMatch(ingredientsFunction.astFunctionDef))
 
 	thisIsMyTaskIndexCodeBlock = Make.If(Make.Or.join([Make.Compare(Make.Name('leaf1ndex'), ops=[Make.NotEq()], comparators=[Make.Name('taskDivisions')])
@@ -121,7 +124,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 			]), body=list(countGapsCodeBlock[0:-1]))
 
 	countGapsCodeBlockNew: list[ast.stmt] = [thisIsMyTaskIndexCodeBlock, countGapsCodeBlock[-1]]
-	NodeChanger[ast.While, hasDOTbody](findThis, doThat = Grab.bodyAttribute(Then.replaceWith(countGapsCodeBlockNew))).visit(ingredientsFunction.astFunctionDef)
+	NodeChanger[ast.While, hasDOTbody](findThis, doThat=Grab.bodyAttribute(Then.replaceWith(countGapsCodeBlockNew))).visit(ingredientsFunction.astFunctionDef)
 
 # END add the parallel logic to the count function ------------------------------------------------
 
@@ -136,23 +139,23 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclassIdentifierParallel
 	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
 	NodeChanger(
-			findThis = Be.arg.annotationIs(Be.Name.idIs(lambda thisAttribute: thisAttribute == dataclassIdentifier))
-			, doThat = Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel)))
+			findThis=Be.arg.annotationIs(Be.Name.idIs(lambda thisAttribute: thisAttribute == dataclassIdentifier))
+			, doThat=Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel)))
 		).visit(unRepackDataclass.astFunctionDef)
 	unRepackDataclass.astFunctionDef.returns = Make.Name(dataclassIdentifierParallel)
 	targetCallableIdentifier: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
 	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
 
-	astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)) # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
+	astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))  # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
 	astTuple.ctx = Make.Store()
 	changeAssignCallToTarget: NodeChanger[ast.Assign, ast.Assign] = NodeChanger(
-		findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-		, doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
+		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
+		, doThat=Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
 	)
 	changeAssignCallToTarget.visit(unRepackDataclass.astFunctionDef)
 
 	ingredientsDoTheNeedful: IngredientsFunction = IngredientsFunction(
-		astFunctionDef = Make.FunctionDef('doTheNeedful'
+		astFunctionDef=Make.FunctionDef('doTheNeedful'
 			, argumentSpecification=Make.arguments(list_arg=[Make.arg('state', annotation=Make.Name(dataclassIdentifierParallel)), Make.arg('concurrencyLimit', annotation=Make.Name('int'))])
 			, body=[Make.Assign([Make.Name('stateParallel', Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('state')]))
 				, Make.AnnAssign(Make.Name('listStatesParallel', Make.Store()), annotation=Make.Subscript(value=Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))
@@ -172,14 +175,14 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 				, Make.AnnAssign(Make.Name('foldsTotal', Make.Store()), annotation=Make.Name('int'), value=Make.Mult.join([Make.Name('groupsOfFoldsTotal'), Make.Attribute(Make.Name('stateParallel'), 'leavesTotal')]))
 				, Make.Return(Make.Tuple([Make.Name('foldsTotal'), Make.Name('listStatesParallel')]))]
 			, returns=Make.Subscript(Make.Name('tuple'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))])))
-		, imports = LedgerOfImports(Make.Module([Make.ImportFrom('concurrent.futures', list_alias=[Make.alias('Future', asName='ConcurrentFuture'), Make.alias('ProcessPoolExecutor')]),
+		, imports=LedgerOfImports(Make.Module([Make.ImportFrom('concurrent.futures', list_alias=[Make.alias('Future', asName='ConcurrentFuture'), Make.alias('ProcessPoolExecutor')]),
 			Make.ImportFrom('copy', list_alias=[Make.alias('deepcopy')]),
 			Make.ImportFrom('multiprocessing', list_alias=[Make.alias('set_start_method', asName='multiprocessing_set_start_method')])])
 		)
 	)
 
 	ingredientsModule = IngredientsModule([ingredientsFunction, unRepackDataclass, ingredientsDoTheNeedful]
-						, prologue = Make.Module([Make.If(test=Make.Compare(left=Make.Name('__name__'), ops=[Make.Eq()], comparators=[Make.Constant('__main__')]), body=[Make.Expr(Make.Call(Make.Name('multiprocessing_set_start_method'), listParameters=[Make.Constant('spawn')]))])])
+						, prologue=Make.Module([Make.If(test=Make.Compare(left=Make.Name('__name__'), ops=[Make.Eq()], comparators=[Make.Constant('__main__')]), body=[Make.Expr(Make.Call(Make.Name('multiprocessing_set_start_method'), listParameters=[Make.Constant('spawn')]))])])
 	)
 	ingredientsModule.removeImportFromModule('numpy')
 

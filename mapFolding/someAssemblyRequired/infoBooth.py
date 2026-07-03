@@ -11,16 +11,22 @@ on empirical measurements and theoretical analysis of map folding algorithms for
 specific dimensional configurations.
 """
 
+from __future__ import annotations
+
 from copy import deepcopy
-from hunterMakesPy import identifierDotAttribute
-from typing import Final, TypedDict
+from typing import TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+	from hunterMakesPy import identifierDotAttribute
+	from typing import Final
+
 
 dictionaryEstimatesMapFolding: Final[dict[tuple[int, ...], int]] = {
-	(2,2,2,2,2,2,2,2): 798148657152000,
-	(2,21): 776374224866624,
-	(3,15): 824761667826225,
-	(3,3,3,3): 85109616000000000000000000000000,
-	(8,8): 791274195985524900, # A test estimated 300,000 hours to compute.
+	(2, 2, 2, 2, 2, 2, 2, 2): 798148657152000,
+	(2, 21): 776374224866624,
+	(3, 15): 824761667826225,
+	(3, 3, 3, 3): 85109616000000000000000000000000,
+	(8, 8): 791274195985524900,  # A test estimated 300,000 hours to compute.
 }
 """Estimates of multidimensional map folding `foldsTotal`."""
 
@@ -33,21 +39,21 @@ class Default(TypedDict):
 	variable: dict[str, str]
 
 default = Default(
-	function = {
+	function={
 		'counting': 'count',
 		'dispatcher': 'doTheNeedful',
 		'initializeState': 'transitionOnGroupsOfFolds',
 	},
-	logicalPath = {
+	logicalPath={
 		'algorithm': 'algorithms',
 		'synthetic': 'syntheticModules',
 	},
-	module = {
+	module={
 		'algorithm': 'daoOfMapFolding',
 		'dataBasket': 'dataBaskets',
 		'initializeState': 'initializeState',
 	},
-	variable = {
+	variable={
 		'counting': 'groupsOfFolds',
 		'stateDataclass': 'MapFoldingState',
 		'stateInstance': 'state',

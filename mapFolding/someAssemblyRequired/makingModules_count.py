@@ -3,7 +3,9 @@
 These transformation functions will work on at least two different algorithms. If a transformation function only works on a
 specific type of algorithm, it will be in a subdirectory.
 """
-from astToolkit import Be, DOT, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
+from __future__ import annotations
+
+from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
@@ -13,9 +15,13 @@ from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, ge
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.transformationTools import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
-from pathlib import PurePath
-from typing import cast
-import ast
+from typing import cast, TYPE_CHECKING
+import operator
+
+if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
+	from pathlib import PurePath
+	import ast
 
 def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate Numba-optimized sequential implementation of an algorithm.
@@ -28,7 +34,7 @@ def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifier
 		Name for the generated optimized module.
 	identifierCallable : str | None = None
 		Name for the main computational function.
-	logicalPathInfix : PathLike[str] | PurePath | str | None = None
+	logicalPathInfix : identifierDotAttribute | None = None
 		Directory path for organizing the generated module.
 	sourceCallableDispatcher : str | None = None
 		Optional dispatcher function for dataclass integration.
@@ -58,13 +64,13 @@ def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifier
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
-		astTuple: ast.Tuple = cast(ast.Tuple, raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
+		astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
 				, doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)))
 		astTuple.ctx = Make.Store()
 
 		changeAssignCallToTarget = NodeChanger(
-			findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-			, doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts))))
+			findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
+			, doThat=Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts))))
 		changeAssignCallToTarget.visit(ingredientsFunctionDispatcher.astFunctionDef)
 
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
@@ -88,7 +94,7 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 		Name for the generated theorem-optimized module.
 	identifierCallable : str | None = None
 		Name for the optimized computational function.
-	logicalPathInfix : PathLike[str] | PurePath | str | None = None
+	logicalPathInfix : identifierDotAttribute | None = None
 		Directory path for organizing the generated module.
 	sourceCallableDispatcher : str | None = None
 		Optional dispatcher function identifier.
@@ -112,41 +118,41 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(Make.Name(dataclassInstanceIdentifier), theCountingIdentifier), Make.Mult(), Make.Constant(2))
 
 	NodeChanger(
-		findThis = IfThis.isAllOf(
+		findThis=IfThis.isAllOf(
 			IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
 			, Be.While.orelseIs(lambda ImaList: ImaList))
-		, doThat = Grab.orelseAttribute(Grab.index(0, Then.insertThisBelow([doubleTheCount])))
+		, doThat=Grab.orelseAttribute(Grab.index(0, Then.insertThisBelow([doubleTheCount])))
 	).visit(ingredientsFunction.astFunctionDef)
 
 	NodeChanger(
-		findThis = IfThis.isAllOf(
+		findThis=IfThis.isAllOf(
 			IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-			, Be.While.orelseIs(lambda ImaList: not ImaList))
-		, doThat = Grab.orelseAttribute(Then.replaceWith([doubleTheCount]))
+			, Be.While.orelseIs(operator.not_))
+		, doThat=Grab.orelseAttribute(Then.replaceWith([doubleTheCount]))
 	).visit(ingredientsFunction.astFunctionDef)
 
 	NodeChanger(
-		findThis = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-		, doThat = Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)])))
+		findThis=IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+		, doThat=Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)])))
 	).visit(ingredientsFunction.astFunctionDef)
 
 	insertLeaf = NodeTourist(
-		findThis = IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-		, doThat = Then.extractIt(DOT.body)
+		findThis=IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+		, doThat=Then.extractIt(DOT.body)
 	).captureLastMatch(ingredientsFunction.astFunctionDef)
 	NodeChanger(
-		findThis = IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-		, doThat = Then.replaceWith(insertLeaf)
+		findThis=IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+		, doThat=Then.replaceWith(insertLeaf)
 	).visit(ingredientsFunction.astFunctionDef)
 
 	NodeChanger(
-		findThis = IfThis.isAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-		, doThat = Then.removeIt
+		findThis=IfThis.isAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+		, doThat=Then.removeIt
 	).visit(ingredientsFunction.astFunctionDef)
 
 	NodeChanger(
-		findThis = IfThis.isAttributeNamespaceIdentifierLessThanOrEqual0(dataclassInstanceIdentifier, 'leaf1ndex')
-		, doThat = Then.removeIt
+		findThis=IfThis.isAttributeNamespaceIdentifierLessThanOrEqual0(dataclassInstanceIdentifier, 'leaf1ndex')
+		, doThat=Then.removeIt
 	).visit(ingredientsFunction.astFunctionDef)
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
@@ -157,8 +163,8 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 		# Update any calls to the original function name with the new target function name
 		NodeChanger(
-			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(dictionaryIdentifiers['function']['counting'])))
-			, doThat = Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
+			findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(dictionaryIdentifiers['function']['counting'])))
+			, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
 		).visit(ingredientsFunctionDispatcher.astFunctionDef)
 
 		AssignInitializedDataclass: ast.Assign = Make.Assign([Make.Name(dataclassInstanceIdentifier)], value=Make.Call(Make.Name(identifierCallableInitializeDataclass), [Make.Name(dataclassInstanceIdentifier)]))
@@ -220,13 +226,13 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
-		astTuple: ast.Tuple = cast(ast.Tuple, raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
+		astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
 				, doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)))
 		astTuple.ctx = Make.Store()
 
 		changeAssignCallToTarget = NodeChanger(
-			findThis = Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-			, doThat = Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts))))
+			findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
+			, doThat=Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts))))
 		changeAssignCallToTarget.visit(ingredientsFunctionDispatcher.astFunctionDef)
 
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
@@ -268,8 +274,8 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	identifierDataclassInstance: str = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 
 	NodeChanger(
-		findThis = IfThis.isIfUnaryNotAttributeNamespaceIdentifier(identifierDataclassInstance, 'dimensionsUnconstrained')
-		, doThat = Then.removeIt
+		findThis=IfThis.isIfUnaryNotAttributeNamespaceIdentifier(identifierDataclassInstance, 'dimensionsUnconstrained')
+		, doThat=Then.removeIt
 	).visit(ingredientsFunction.astFunctionDef)
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
@@ -281,8 +287,8 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 		# Update any calls to the original function name with the new target function name
 		NodeChanger(
-			findThis = Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(default['function']['counting'])))
-			, doThat = Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
+			findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(default['function']['counting'])))
+			, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
 		).visit(ingredientsFunctionDispatcher.astFunctionDef)
 
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
@@ -292,6 +298,3 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	ingredientsModule.write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
 
 	return pathFilename
-
-
-

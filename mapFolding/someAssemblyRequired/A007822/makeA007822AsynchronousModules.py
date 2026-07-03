@@ -1,7 +1,7 @@
 """addSymmetryCheckAsynchronous."""
 from __future__ import annotations
 
-from astToolkit import Be, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
+from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
@@ -12,6 +12,7 @@ from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPat
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
 	from pathlib import PurePath
 	import ast
 
@@ -41,7 +42,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
 		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultA007822['function']['counting']))
 		, doThat=Then.extractIt
-		).captureLastMatch(astModule))
+		).captureLastMatch(astModule))  # ty:ignore[invalid-assignment]
 
 	NodeChanger(
 		Be.Assign.valueIs(IfThis.isCallIdentifier(defaultA007822['function']['filterAsymmetricFolds']))
@@ -61,7 +62,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	astFunctionDef_doTheNeedful: ast.FunctionDef = raiseIfNone(NodeTourist(
 		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableDispatcher))
 		, doThat=Then.extractIt
-		).captureLastMatch(astModule))
+		).captureLastMatch(astModule))  # ty:ignore[invalid-assignment]
 
 	astFunctionDef_doTheNeedful.body.insert(0, astExprCall_initializeConcurrencyManager)
 	astFunctionDef_doTheNeedful.args.args.append(Make.arg('maxWorkers', Make.Name('int')))

@@ -25,22 +25,28 @@ to low-level optimized functions while maintaining semantic equivalence and type
 the compilation process.
 """
 
-from astToolkit import Be, DOT, identifierDotAttribute, Make, NodeTourist, Then
+from __future__ import annotations
+
+from astToolkit import Be, DOT, Make, NodeTourist, Then
 from astToolkit.containers import LedgerOfImports
-from collections.abc import Callable
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import IfThis
-from typing import Any, cast, NamedTuple
+from typing import cast, NamedTuple, TYPE_CHECKING
 import ast
 import dataclasses
+
+if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
+	from collections.abc import Callable
+	from typing import Any
 
 dummyAssign = Make.Assign([Make.Name("dummyTarget")], Make.Constant(None))
 dummySubscript = Make.Subscript(Make.Name("dummy"), Make.Name("slice"))
 dummyTuple = Make.Tuple([Make.Name("dummyElement")])
 
 @dataclasses.dataclass
-class ShatteredDataclass: # slots?
+class ShatteredDataclass:  # slots?
 	"""Container for decomposed dataclass components organized as AST nodes for code generation.
 
 	This class holds the decomposed representation of a dataclass, breaking it down into individual
@@ -103,7 +109,7 @@ class ShatteredDataclass: # slots?
 	"""Tuple-based return type annotation for functions returning decomposed field values."""
 
 @dataclasses.dataclass
-class DeReConstructField2ast: # slots?
+class DeReConstructField2ast:  # slots?
 	"""
 	Transform a dataclass field into AST node representations for code generation.
 
@@ -180,10 +186,10 @@ class DeReConstructField2ast: # slots?
 	ast_argAnnotated: ast.arg = dataclasses.field(init=False)
 	"""AST function argument with type annotation for parameter specification."""
 
-	astAnnAssignConstructor: ast.AnnAssign|ast.Assign = dataclasses.field(init=False)
+	astAnnAssignConstructor: ast.AnnAssign | ast.Assign = dataclasses.field(init=False)
 	"""AST assignment statement for field initialization with appropriate constructor."""
 
-	Z0Z_hack: tuple[ast.AnnAssign|ast.Assign, str] = dataclasses.field(init=False)
+	Z0Z_hack: tuple[ast.AnnAssign | ast.Assign, str] = dataclasses.field(init=False)
 	"""Temporary tuple containing assignment statement and constructor type information."""
 
 	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: identifierDotAttribute, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstanceIdentifier: str, field: dataclasses.Field[Any]) -> None:
@@ -221,9 +227,9 @@ class DeReConstructField2ast: # slots?
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstanceIdentifier), self.name)
 
-		self.astAnnotation = cast(ast.Name, raiseIfNone(NodeTourist(
-			findThis = Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
-			, doThat = Then.extractIt(DOT.annotation)
+		self.astAnnotation = cast("ast.Name", raiseIfNone(NodeTourist(
+			findThis=Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
+			, doThat=Then.extractIt(DOT.annotation)
 		).captureLastMatch(dataclassClassDef)))
 
 		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)

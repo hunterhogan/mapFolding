@@ -1,4 +1,7 @@
-from astToolkit import extractFunctionDef, Make  # noqa: D100
+# ruff: noqa: D100
+from __future__ import annotations
+
+from astToolkit import extractFunctionDef, Make
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import defaultA007822
 from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule

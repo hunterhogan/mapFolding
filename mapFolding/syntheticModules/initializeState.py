@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mapFolding.dataBaskets import MapFoldingState
 
 def transitionOnGroupsOfFolds(state: MapFoldingState) -> MapFoldingState:

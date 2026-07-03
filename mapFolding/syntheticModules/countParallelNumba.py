@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
 from copy import deepcopy
 from mapFolding.dataBaskets import (

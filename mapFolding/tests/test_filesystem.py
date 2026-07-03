@@ -19,6 +19,8 @@ Most users won't need to modify these tests unless they're changing how the pack
 stores computational results or adding new file formats.
 """
 
+from __future__ import annotations
+
 from contextlib import redirect_stdout
 from mapFolding.beDRY import validateListDimensions
 from mapFolding.filesystemToolkit import getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal

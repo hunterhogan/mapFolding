@@ -25,6 +25,8 @@ The `test_writeJobNumba` function shows how to test dynamically generated code,
 which is useful if you're working with the code synthesis features of the package.
 """
 
+from __future__ import annotations
+
 from mapFolding.basecamp import countFolds
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, NOTcountingFolds, oeisIDfor_n
@@ -216,7 +218,7 @@ def test_oeisIDfor_n(oeisIdentifier: str, sequenceIndex: int) -> None:
 	standardizedEqualToCallableReturn(expected, oeisIDfor_n, oeisIdentifier, sequenceIndex)
 
 @pytest.fixture
-def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]: # NOTE TO AI: DO NOT CHANGE THIS IDENTIFIER NAME.
+def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:  # NOTE TO AI: DO NOT CHANGE THIS IDENTIFIER NAME.
 	"""Return one deterministic map shape suitable for code generation tests."""
 	return dictionaryOEISMapFolding["A000136"]["getMapShape"](3)
 

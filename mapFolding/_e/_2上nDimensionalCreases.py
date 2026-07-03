@@ -1,8 +1,13 @@
-from collections.abc import Iterator
+from __future__ import annotations
+
 from functools import cache
 from gmpy2 import bit_flip, is_even, is_odd
 from mapFolding._e import dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, Leaf, leafOrigin
-from mapFolding._e.dataBaskets import EliminationState
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from collections.abc import Iterator
+	from mapFolding._e.dataBaskets import EliminationState
 
 def getLeavesCreaseAnte(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
 	"""1) `leaf` has at most `dimensionsTotal - 1` many creases.
@@ -28,7 +33,7 @@ def _getCreases(state: EliminationState, leaf: Leaf, *, increase: bool = True) -
 def _makeCreases(leaf: Leaf, dimensionsTotal: int) -> tuple[tuple[Leaf, ...], tuple[Leaf, ...]]:
 	listLeavesCrease: list[Leaf] = [int(bit_flip(leaf, dimension)) for dimension in range(dimensionsTotal)]
 
-	if leaf == leafOrigin: # A special case I've been unable to figure out how to incorporate in the formula.
+	if leaf == leafOrigin:  # A special case I've been unable to figure out how to incorporate in the formula.
 		listLeavesCreasePost: list[Leaf] = [1]
 		listLeavesCreaseAnte: list[Leaf] = []
 	else:
@@ -45,7 +50,6 @@ def _makeCreases(leaf: Leaf, dimensionsTotal: int) -> tuple[tuple[Leaf, ...], tu
 		listLeavesCreaseAnte: list[Leaf] = listLeavesCrease[slicerAnte]
 		listLeavesCreasePost: list[Leaf] = listLeavesCrease[slicerPost]
 
-		if leaf == 1: # A special case I've been unable to figure out how to incorporate in the formula.
+		if leaf == 1:  # A special case I've been unable to figure out how to incorporate in the formula.
 			listLeavesCreaseAnte = [0]
 	return (tuple(listLeavesCreaseAnte), tuple(listLeavesCreasePost))
-

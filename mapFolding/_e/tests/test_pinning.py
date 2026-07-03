@@ -36,11 +36,11 @@ def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8
 		maskRequiredRowsMatchThisPermutationSpace: numpy.ndarray = numpy.ones(requiredRowsTotal, dtype=bool)
 		for pile, leafSpace in extractPinnedLeaves(permutationSpace).items():
 			if isinstance(leafSpace, int):
-				maskRequiredRowsMatchThisPermutationSpace = maskRequiredRowsMatchThisPermutationSpace & (arrayFoldings[:, pile] == leafSpace)
+				maskRequiredRowsMatchThisPermutationSpace &= (arrayFoldings[:, pile] == leafSpace)
 				continue
 			if isinstance(leafSpace, mpz):
 				allowedLeaves: numpy.ndarray = numpy.fromiter((bool(leafSpace[leaf]) for leaf in range(state.leavesTotal)), dtype=bool, count=state.leavesTotal)
-				maskRequiredRowsMatchThisPermutationSpace = maskRequiredRowsMatchThisPermutationSpace & allowedLeaves[arrayFoldings[:, pile]]
+				maskRequiredRowsMatchThisPermutationSpace &= allowedLeaves[arrayFoldings[:, pile]]
 		listMaskRequiredRowsMatchThisPermutationSpace.append(maskRequiredRowsMatchThisPermutationSpace)
 
 	masksStacked: numpy.ndarray = numpy.column_stack(listMaskRequiredRowsMatchThisPermutationSpace)
@@ -62,4 +62,3 @@ def test_pinningFunctions(loadArrayFoldings: Callable[[int], NDArray[numpy.uint8
 	assert requiredRowsCoveredTotal == requiredRowsTotal, f"{functionName} expected all required rows to be covered for {mapShape=}, got requiredRowsCoveredTotal={requiredRowsCoveredTotal}, requiredRowsTotal={requiredRowsTotal}."
 	assert countOverlappingDictionaries == 0, f"{functionName} expected no overlapping dictionaries for {mapShape=}, got countOverlappingDictionaries={countOverlappingDictionaries}."
 	assert countBeansWithoutCornbread == 0, f"{functionName} expected 0 permutationSpace dictionaries with beans but no cornbread for {mapShape=}, got countBeansWithoutCornbread={countBeansWithoutCornbread}."
-

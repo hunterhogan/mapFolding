@@ -1,8 +1,14 @@
+# ruff: noqa: DOC201, DOC501
+from __future__ import annotations
+
 from functools import cache
 from hunterMakesPy.parseParameters import intInnit
-from mapFolding._e import DimensionIndex
 from math import log
 from operator import getitem
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from mapFolding._e import DimensionIndex
 
 #======== Using a single-base positional-numeral system as a proxy for Cartesian coordinates =======
 # https://en.wikipedia.org/wiki/Positional_notation
@@ -19,7 +25,7 @@ With relatively little effort you could use `astToolkit` (pip install astToolkit
 `state.productsOfDimensions[dimensionIndex]`. With `astToolkit`, you create a transformation that you can apply after any update.
 """
 
-_dimensionLength: int	= 2 # Hypothetically, change to 3 for 3^d-dimensional maps.
+_dimensionLength: int = 2  # Hypothetically, change to 3 for 3^d-dimensional maps.
 
 _dimensionIndex: DimensionIndex = 0						# == 0
 
@@ -34,9 +40,9 @@ _dimensionIndex: DimensionIndex = 0						# == 0
 """
 
 # 一
-_base: int				= _dimensionLength
-_dimensionIndex			+= 1					# == 1
-_power: int				= _dimensionIndex
+_base: int = _dimensionLength
+_dimensionIndex += 1					# == 1
+_power: int = _dimensionIndex
 一: int = _base ** _power						# == _dimensionLength ** _dimensionIndex
 """dimensionIndex = 1: assign `1` to `dimensionIndex = 1`, and assign `0` to each other `DimensionIndex`. Read as (any of):
 - index one
@@ -48,9 +54,9 @@ _power: int				= _dimensionIndex
 """
 
 # 二
-_radix: int				= _dimensionLength
-_dimensionIndex			+= 1					# == 2
-_place_ValueIndex: int	= _dimensionIndex
+_radix: int = _dimensionLength
+_dimensionIndex += 1					# == 2
+_place_ValueIndex: int = _dimensionIndex
 二: int = _radix ** _place_ValueIndex			# == _dimensionLength ** _dimensionIndex
 """dimensionIndex = 2: assign `1` to `dimensionIndex = 2`, and assign `0` to each other `DimensionIndex`. Read as (any of):
 - index two
@@ -129,11 +135,11 @@ _place_ValueIndex: int	= _dimensionIndex
 @cache
 def dimensionIndex(dimensionAsNonnegativeInteger: int, /, *, dimensionLength: int = _dimensionLength) -> int:
 	"""Convert the integer value of a single dimension into its corresponding `DimensionIndex`."""
-	dimension: int = getitem(intInnit([dimensionAsNonnegativeInteger], 'dimensionNonnegative', int), 0)  # ty:ignore[invalid-assignment]
+	dimension: int = getitem(intInnit([dimensionAsNonnegativeInteger], 'dimensionNonnegative', int), 0)
 	if dimension < 0:
 		message: str = f"I received `{dimensionAsNonnegativeInteger = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
-	base: int = getitem(intInnit([dimensionLength], 'dimensionLength', int), 0)  # ty:ignore[invalid-assignment]
+	base: int = getitem(intInnit([dimensionLength], 'dimensionLength', int), 0)
 	if base < 1:
 		message: str = f"I received `{dimensionLength = }`, but I need an integer value greater than 1."
 		raise ValueError(message)

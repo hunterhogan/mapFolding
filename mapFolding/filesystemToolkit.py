@@ -24,8 +24,7 @@ solutions to their map folding challenges.
 from __future__ import annotations
 
 from mapFolding import packageSettings
-from os import PathLike
-from pathlib import Path, PurePath
+from pathlib import Path
 from sys import modules as sysModules, stdout
 from typing import TYPE_CHECKING
 import os
@@ -33,6 +32,8 @@ import platformdirs
 
 if TYPE_CHECKING:
 	from io import TextIOWrapper
+	from os import PathLike
+	from pathlib import PurePath
 
 def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""Create a standardized filename for a computed `foldsTotal` value.

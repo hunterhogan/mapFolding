@@ -26,11 +26,11 @@ def test_eliminateFoldsMapShape(expected: int | type[Exception], oeisID: str, n:
 	----------
 	oeisID : str
 		OEIS identifier to validate.
-	sequenceIndex : int
+	n : int
 		Sequence index to validate.
 	flow : str
 		Computation flow to validate.
-	processorLimit : float
+	CPUlimit : float
 		CPU limit for the computation.
 	"""
 	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)

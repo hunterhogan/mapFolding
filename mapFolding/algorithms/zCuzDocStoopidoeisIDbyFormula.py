@@ -1,9 +1,12 @@
+# ruff: noqa: DOC201
 """Compute a(n) for an OEIS ID by computing other OEIS IDs.
 
 TODO A223094 For n >= 3: a(n) = n! - Sum_{k=3..n-1} (a(k)*n!/k!) - A000682(n+1). - _Roger Ford_, Aug 24 2024
 TODO A223094 MATHEMATICA A000682 = Import["https://oeis.org/A000682/b000682.txt", "Table"][[All, 2]]; a[n_] := n A000682[[n]] - A000682[[n + 1]]; Array[a, 43] (* Jean-François Alcover, Sep 02 2019 *)
 TODO A301620 a(n) = Sum_{k=3..floor((n+3)/2)} (A259689(n+1,k)*(k-2)). - _Roger Ford_, Dec 10 2018
 """
+from __future__ import annotations
+
 from functools import cache
 from hunterMakesPy import inclusive
 from mapFolding.oeis import dictionaryOEIS, NOTcountingFolds
@@ -22,7 +25,7 @@ def A001010(n: int) -> int:
 	if n == 1:
 		countTotal: int = 1
 	elif n & 0b1:
-		countTotal = 2 * _A007822((n - 1)//2 + 1)
+		countTotal = 2 * _A007822((n - 1) // 2 + 1)
 	else:
 		countTotal = 2 * _A000682(n // 2 + 1)
 	return countTotal

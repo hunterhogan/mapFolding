@@ -1,5 +1,8 @@
+# ruff: noqa: DOC201
 """addSymmetryCheck."""
-from astToolkit import Be, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
+from __future__ import annotations
+
+from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
@@ -10,8 +13,12 @@ from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
 from mapFolding.someAssemblyRequired.makingModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState
 from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename
-from pathlib import PurePath
-import ast
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
+	from pathlib import PurePath
+	import ast
 
 def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
 	"""Modify the multidimensional map folding algorithm by checking for symmetry in each folding pattern in a group of folds."""
@@ -24,9 +31,9 @@ def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCal
 		).visit(astModule)
 
 	FunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
-		findThis = Be.FunctionDef.nameIs(IfThis.isIdentifier(default['function']['counting']))
-		, doThat = Then.extractIt
-		).captureLastMatch(astModule))
+		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(default['function']['counting']))
+		, doThat=Then.extractIt
+		).captureLastMatch(astModule))  # ty:ignore[invalid-assignment]
 	FunctionDef_count.name = identifierCallable or defaultA007822['function']['counting']
 
 	NodeChanger(Be.Return, Then.insertThisAbove([A007822adjustFoldsTotal])).visit(FunctionDef_count)

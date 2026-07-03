@@ -3,13 +3,10 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from mapFolding import DatatypeFoldsTotal
+from mapFolding.dataBaskets import SymmetricFoldsState
 from queue import Queue
 from threading import Lock, Thread
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-	from mapFolding import DatatypeFoldsTotal
-	from mapFolding.dataBaskets import SymmetricFoldsState
 
 listThreads: list[Thread] = []
 queueFutures: Queue[SymmetricFoldsState] = Queue()

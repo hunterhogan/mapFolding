@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mapFolding.dataBaskets import SymmetricFoldsState
 
 def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:

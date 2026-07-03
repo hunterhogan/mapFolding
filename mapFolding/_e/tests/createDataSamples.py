@@ -1,13 +1,16 @@
-from collections.abc import Callable, Sequence
+from __future__ import annotations
+
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writePython
 from mapFolding import packageSettings
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
 from pathlib import Path, PurePath
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+	from collections.abc import Callable, Sequence
+	from typing import Any
 	import pandas
 
 def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: Sequence[int | Callable[[int], int]], pathFilename: PurePath | None = None, settings: dict[str, dict[str, Any]] | None = None) -> PurePath:
@@ -40,7 +43,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 
 	"""
 	def resolveLeaf(leafSpec: int | Callable[[int], int], dimensionsTotal: int) -> int:
-		return leafSpec(dimensionsTotal) if callable(leafSpec) else leafSpec  # ty:ignore[call-top-callable]
+		return leafSpec(dimensionsTotal) if callable(leafSpec) else leafSpec  # ty:ignore[call-top-callable, invalid-return-type]
 
 	def getLeafName(leafSpec: int | Callable[[int], int]) -> str:
 		leafSpecName: str = str(leafSpec)
@@ -90,8 +93,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 
 	for dimensionsTotal in sorted(dictionaryDomainsByDimensions):
 		variableName: str = f"listDomain2D{dimensionsTotal}"
-		listPythonSource.append(f'{variableName}: list[tuple[int, ...]] = {dictionaryDomainsByDimensions[dimensionsTotal]!r}')
-		listPythonSource.append('')
+		listPythonSource.extend((f'{variableName}: list[tuple[int, ...]] = {dictionaryDomainsByDimensions[dimensionsTotal]!r}', ''))
 
 	pythonSource: str = '\n'.join(listPythonSource)
 	writePython(pythonSource, pathFilename, settings)

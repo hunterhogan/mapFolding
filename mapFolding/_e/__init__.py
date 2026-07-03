@@ -1,6 +1,8 @@
 """Developing elimination-based algorithms."""
 
 # isort: split
+from __future__ import annotations
+
 from mapFolding._e._theTypes import (
 	DimensionIndex as DimensionIndex, Folding as Folding, Leaf as Leaf, LeafOptions as LeafOptions, LeafSpace as LeafSpace,
 	Limitation as Limitation, PermutationSpace as PermutationSpace, Pile as Pile, PinnedLeaves as PinnedLeaves,

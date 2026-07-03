@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsTallToPinThis: int = 3) -> bool:
 	"""You can test whether `mapShape` is a $2^n$-dimensional map with a configurable minimum dimension count.
 
@@ -38,4 +40,3 @@ def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsT
 
 	"""
 	return (youMustBeDimensionsTallToPinThis <= len(mapShape)) and all(dimensionLength == 2 for dimensionLength in mapShape)
-

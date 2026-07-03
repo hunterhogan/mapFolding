@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 

@@ -23,13 +23,13 @@ This makes tests more meaningful and easier to understand in the context of the
 research domain.
 """
 
-from collections.abc import Callable, Generator, Sequence
+from __future__ import annotations
+
 from mapFolding import _theSSOT, packageSettings
 from mapFolding.beDRY import getLeavesTotal, makeDataContainer, validateListDimensions
 from mapFolding.oeis import oeisIDsImplemented
-from numpy.typing import NDArray
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 import numpy
 import pickle
 import pytest
@@ -38,6 +38,11 @@ import shutil
 import unittest.mock
 import uuid
 import warnings
+
+if TYPE_CHECKING:
+	from collections.abc import Callable, Generator, Sequence
+	from numpy.typing import NDArray
+	from typing import Any
 
 #======== uniform messages and standardized test formats ==========
 
@@ -165,7 +170,7 @@ def registrarRecordsTemporaryFilesystemObject(path: Path) -> None:
 	registerOfTemporaryFilesystemObjects.add(path)
 
 @pytest.fixture
-def pathCacheTesting(path_tmpTesting: Path) -> Generator[Path, Any, None]:
+def pathCacheTesting(path_tmpTesting: Path) -> Generator[Path, Any]:
 	"""Temporarily replace the OEIS cache directory with a test directory.
 
 	Parameters
@@ -256,7 +261,7 @@ def path_tmpTesting(request: pytest.FixtureRequest) -> Path:
 	return path_tmp
 
 @pytest.fixture(scope="session", autouse=True)
-def setupTeardownTemporaryFilesystemObjects() -> Generator[None, None, None]:
+def setupTeardownTemporaryFilesystemObjects() -> Generator[None]:
 	"""Auto-fixture to setup test data directories and cleanup after.
 
 	Returns
@@ -304,7 +309,7 @@ def oeisID_1random() -> str:
 #======== Miscellaneous =====================================
 
 @pytest.fixture(autouse=True)
-def setupWarningsAsErrors() -> Generator[None, Any, None]:
+def setupWarningsAsErrors() -> Generator[None, Any]:
 	"""Convert all warnings to errors for all tests.
 
 	Returns
@@ -318,7 +323,7 @@ def setupWarningsAsErrors() -> Generator[None, Any, None]:
 	warnings.resetwarnings()
 
 @pytest.fixture
-def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]:
+def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any]:
 	"""Mock time.perf_counter_ns for consistent benchmark timing.
 
 	Returns
@@ -368,4 +373,3 @@ def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
 		return arrayFoldings
 
 	return loader
-

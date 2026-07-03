@@ -52,10 +52,10 @@ References
 	Internal package reference.
 
 """
+from __future__ import annotations
+
 from collections import deque
-from collections.abc import Iterable, Iterator, Sequence
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
-from hunterMakesPy import CallableFunction
 from hunterMakesPy.parseParameters import intInnit
 from itertools import filterfalse
 from mapFolding._e import (
@@ -75,6 +75,11 @@ from mapFolding.beDRY import defineProcessorLimit
 from more_itertools import partition
 from operator import getitem, neg
 from tqdm import tqdm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from collections.abc import Iterable, Iterator, Sequence
+	from hunterMakesPy import CallableFunction
 
 #======== Pin by `pile` ===========================================
 
@@ -216,21 +221,21 @@ def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 		leavesToPin = frozenset([leafOrigin])
 	elif state.pile == 零:
 		leavesToPin = frozenset([零])
-	elif state.pile == neg(零)+state.首:
+	elif state.pile == neg(零) + state.首:
 		leavesToPin = frozenset([首零(state.dimensionsTotal)])
 	elif state.pile == 一:
 		leavesToPin = pinPile一ByCrease(state)
-	elif state.pile == neg(一)+state.首:
+	elif state.pile == neg(一) + state.首:
 		leavesToPin = pinPile一Ante首ByCrease(state)
-	elif state.pile == 一+零:
+	elif state.pile == 一 + 零:
 		leavesToPin = pinPile一零ByCrease(state)
-	elif state.pile == neg(零+一)+state.首:
+	elif state.pile == neg(零 + 一) + state.首:
 		leavesToPin = pinPile零一Ante首ByCrease(state)
 	elif state.pile == 二:
 		leavesToPin = pinPile二ByCrease(state)
-	elif state.pile == neg(二)+state.首:
+	elif state.pile == neg(二) + state.首:
 		leavesToPin = pinPile二Ante首ByCrease(state)
-	elif state.pile == neg(零)+首零(state.dimensionsTotal):
+	elif state.pile == neg(零) + 首零(state.dimensionsTotal):
 		leavesToPin = pinPile零Ante首零AfterDepth4(state)
 	return leavesToPin
 
@@ -305,7 +310,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		state.permutationSpace = {}
 		state.listPermutationSpace = deque([addMissingLeafOptionsToPermutationSpace(state).permutationSpace])
 
-	depth: int = getitem(intInnit((pileDepth,), 'pileDepth', int), 0)  # ty:ignore[invalid-assignment]
+	depth: int = getitem(intInnit((pileDepth,), 'pileDepth', int), 0)
 	if depth < 0:
 		message: str = f"I received `{pileDepth = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -314,18 +319,18 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 	if 0 < depth:
 		pileProcessingOrder.extend([pileOrigin])
 	if 1 <= depth:
-		pileProcessingOrder.extend([零, neg(零)+state.首])
+		pileProcessingOrder.extend([零, neg(零) + state.首])
 	if 2 <= depth:
-		pileProcessingOrder.extend([一, neg(一)+state.首])
+		pileProcessingOrder.extend([一, neg(一) + state.首])
 	if 3 <= depth:
-		pileProcessingOrder.extend([一+零, neg(零+一)+state.首])
+		pileProcessingOrder.extend([一 + 零, neg(零 + 一) + state.首])
 	if 4 <= depth:
 		youMustBeDimensionsTallToPinThis = 4
 		if youMustBeDimensionsTallToPinThis < state.dimensionsTotal:
 			pileProcessingOrder.extend([二])
 		youMustBeDimensionsTallToPinThis = 5
 		if youMustBeDimensionsTallToPinThis < state.dimensionsTotal:
-			pileProcessingOrder.extend([neg(二)+state.首])
+			pileProcessingOrder.extend([neg(二) + state.首])
 
 	return _pinPiles(state, maximumSizeListPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
@@ -395,7 +400,7 @@ def pinPile零Ante首零(state: EliminationState, maximumSizeListPermutationSpac
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
 		return state
 
-	pileProcessingOrder: deque[Pile] = deque([neg(零)+首零(state.dimensionsTotal)])
+	pileProcessingOrder: deque[Pile] = deque([neg(零) + 首零(state.dimensionsTotal)])
 
 	return _pinPiles(state, maximumSizeListPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
@@ -471,7 +476,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 		]
 
 		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets)
-				, desc=f"Pinning leaves {", ".join(map(f"{{:{len(str(state.leafLast))}d}}".format, leaves))} of {state.leafLast}", disable=False):  # ty:ignore[no-matching-overload]
+				, desc=f"Pinning leaves {", ".join(map(f"{{:{len(str(state.leafLast))}d}}".format, leaves))} of {state.leafLast}", disable=False):
 			state.listPermutationSpace.extend(claimTicket.result().listPermutationSpace)
 			state.listFolding.extend(claimTicket.result().listFolding)
 
@@ -685,7 +690,7 @@ def pinLeaf首零Plus零(state: EliminationState, *, CPUlimit: Limitation = None
 		Internal package reference.
 
 	"""
-	leaf: Leaf = (零)+首零(state.dimensionsTotal)
+	leaf: Leaf = (零) + 首零(state.dimensionsTotal)
 	return _pinLeafByDomain(state, leaf, getLeaf首零Plus零Domain, CPUlimit=CPUlimit)
 
 def pinLeavesDimension零(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
@@ -743,7 +748,7 @@ def pinLeavesDimension一(state: EliminationState, *, CPUlimit: Limitation = Non
 		Internal package reference.
 
 	"""
-	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (一+零, 一, 首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))
+	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (一 + 零, 一, 首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))
 	return _pinLeavesByDomain(state, leaves, getDomainDimension一(state), CPUlimit=CPUlimit)
 
 def pinLeavesDimensions0零一(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
@@ -819,7 +824,7 @@ def pinLeavesDimension二(state: EliminationState, *, CPUlimit: Limitation = Non
 		Internal package reference.
 
 	"""
-	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (二+一, 二+一+零, 二+零, 二)
+	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (二 + 一, 二 + 一 + 零, 二 + 零, 二)
 	return _pinLeavesByDomain(state, leaves, getDomainDimension二(state), youMustBeDimensionsTallToPinThis=5, CPUlimit=CPUlimit)
 
 def pinLeavesDimension首二(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
@@ -862,7 +867,7 @@ def pinLeavesDimension首二(state: EliminationState, *, CPUlimit: Limitation = 
 	return _pinLeavesByDomain(state, leaves, getDomainDimension首二(state), youMustBeDimensionsTallToPinThis=5, CPUlimit=CPUlimit)
 
 def pin3beans2(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
-	return _pinLeavesByDomain(state, (一+零, 一), tuple((pile, pile+1) for pile in getLeafDomain(state, 一+零)), CPUlimit=CPUlimit)
+	return _pinLeavesByDomain(state, (一 + 零, 一), tuple((pile, pile + 1) for pile in getLeafDomain(state, 一 + 零)), CPUlimit=CPUlimit)
 
 def pin首beans(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
-	return _pinLeavesByDomain(state, (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal)), tuple((pile, pile+1) for pile in getLeafDomain(state, 首一(state.dimensionsTotal))), CPUlimit=CPUlimit)
+	return _pinLeavesByDomain(state, (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal)), tuple((pile, pile + 1) for pile in getLeafDomain(state, 首一(state.dimensionsTotal))), CPUlimit=CPUlimit)

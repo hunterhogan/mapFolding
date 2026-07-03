@@ -5,14 +5,16 @@ from __future__ import annotations
 from functools import cache
 from hunterMakesPy import inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit, oopsieKwargsie
-from numpy import dtype as numpy_dtype, int64 as numpy_int64, ndarray
+from numpy import int64 as numpy_int64
 from sys import maxsize as sysMaxsize
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, NumPyIntegerType
+	from numpy import dtype as numpy_dtype, ndarray
+	from typing import Any
 
 #======== Flow control ======================================
 

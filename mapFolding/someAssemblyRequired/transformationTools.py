@@ -25,13 +25,19 @@ This approach enables seamless integration between high-level dataclass-based in
 low-level optimized implementations, maintaining code clarity while achieving performance gains
 through specialized compilation paths essential for computationally intensive map folding research.
 """
-from astToolkit import Be, extractClassDef, identifierDotAttribute, Make, NodeChanger, parseLogicalPath2astModule, Then
-from astToolkit.containers import IngredientsFunction
+from __future__ import annotations
+
+from astToolkit import Be, extractClassDef, Make, NodeChanger, parseLogicalPath2astModule, Then
 from astToolkit.transformationTools import unparseFindReplace
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.someAssemblyRequired import DeReConstructField2ast, IfThis, ShatteredDataclass
+from typing import TYPE_CHECKING
 import ast
 import dataclasses
+
+if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
+	from astToolkit.containers import IngredientsFunction
 
 def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute, identifierDataclass: str, identifierDataclassInstance: str) -> ShatteredDataclass:
 	"""Decompose a dataclass definition into AST components for manipulation and code generation.
@@ -54,11 +60,11 @@ def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute
 
 	Parameters
 	----------
-	logicalPathModule : identifierDotAttribute
+	logicalPathDataclass : identifierDotAttribute
 		The fully qualified module path containing the dataclass definition.
-	dataclassIdentifier : str
+	identifierDataclass : str
 		The name of the dataclass to decompose.
-	instanceIdentifier : str
+	identifierDataclassInstance : str
 		The variable name to use for the dataclass instance in generated code.
 
 	Returns
@@ -82,7 +88,7 @@ def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute
 		raise ValueError(message)
 
 	countingVariable: str | None = None
-	for aField in dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)): # pyright: ignore [reportArgumentType]
+	for aField in dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)):  # pyright: ignore [reportArgumentType]
 		Official_fieldOrder.append(aField.name)
 		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathDataclass, dataclassClassDef, identifierDataclassInstance, aField)
 		if aField.metadata.get('theCountingIdentifier', False):
@@ -172,7 +178,7 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 	----------
 	ingredientsCaller : IngredientsFunction
 		The calling function definition and its dependencies to be transformed.
-	targetCallableIdentifier : str
+	identifierCallee : str
 		The name of the target function being called.
 	shatteredDataclass : ShatteredDataclass
 		The decomposed dataclass components providing unpacking and repacking logic.
@@ -188,5 +194,3 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisAbove(shatteredDataclass.listUnpack)).visit(ingredientsCaller.astFunctionDef)
 	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisBelow([shatteredDataclass.repack])).visit(ingredientsCaller.astFunctionDef)
 	return ingredientsCaller
-
-

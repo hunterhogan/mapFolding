@@ -1,31 +1,49 @@
+from __future__ import annotations
+
 from functools import cache
 from mapFolding.algorithms.matrixMeandersNumPyndas import areIntegersWide, MatrixMeandersNumPyState
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
-    """Find the bit position for flipping paired curve endpoints in meander transfer matrices.
+    """Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
+
+    You can use `walkDyckPath` to find the bit that must be toggled when an arc-joining transition in
+    the meander transfer matrix closes a mismatched pair [1]. The `intWithExtra_0b1` value stores one
+    side of the packed boundary state with parity bits at even positions.
 
     Parameters
     ----------
     intWithExtra_0b1 : int
-        Binary representation of curve locations with an extra bit encoding parity information.
+        Packed bit pattern for one half of the current meander boundary state.
 
     Returns
     -------
     flipExtra_0b1_Here : int
-        Bit mask indicating the position where the balance condition fails, formatted as 2^(2k).
+        Bit mask `2^(2k)` at the first even-bit position where the prefix balance becomes negative.
 
-    3L33T H@X0R
-    ------------
-    Binary search for first negative balance in shifted bit pairs. Returns 2^(2k) mask for
-    bit position k where cumulative balance counter transitions from non-negative to negative.
+    Bit Search
+    ----------
+    The scan advances by shifting `flipExtra_0b1_Here` left by `2` each step. The scan adds `1` when
+    the bit is `0` and subtracts `1` when the bit is `1`. The function returns immediately at the
+    first index where the running balance is negative in the Dyck-prefix sense [2].
 
     Mathematics
     -----------
-    Implements the Dyck path balance verification algorithm from Jensen's transfer matrix
-    enumeration. Computes the position where ∑(i=0 to k) (-1)^b_i < 0 for the first time,
-    where b_i are the bits of the input at positions 2i.
+    first negative prefix : equation
+        ```text
+        Let  x ≜ `intWithExtra_0b1`,  bᵢ ≜ bit(x, 2i),  sₖ ≜ ∑ᵢ₌₀ᵏ (1 if bᵢ = 0 else −1)
 
+        k* ≜ min { k ∈ ℕ : sₖ < 0 }
+        `flipExtra_0b1_Here` = 2^(2k*)
+        ```
+
+    References
+    ----------
+    [1] Jensen, I. (2000). A transfer matrix approach to the enumeration of plane meanders.
+        Journal of Physics A: Mathematical and General, 33(34), 5953-5963.
+        https://dx.doi.org/10.1088/0305-4470/33/34/301
+    [2] Dyck language and balanced-parenthesis paths.
+        https://en.wikipedia.org/wiki/Dyck_language
     """
     findTheExtra_0b1: int = 0
     flipExtra_0b1_Here: int = 1
@@ -40,17 +58,33 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
     return flipExtra_0b1_Here
 
 def countBigInt(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
-    """Count meanders with matrix transfer algorithm using Python `int` (*int*eger) contained in a Python `dict` (*dict*ionary).
+    """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
+
+    You can use `count` to apply all transition rules for each boundary layer in `state` and update
+    `state.dictionaryMeanders` in place [1]. The transition set includes new-arc insertion, left-right
+    crossing moves, and Dyck-path-based arc joining through `walkDyckPath` [2].
 
     Parameters
     ----------
     state : MatrixMeandersState
         The algorithm state.
 
-    Notes
-    -----
-    The matrix transfer algorithm is sophisticated, but this implementation is straightforward: compute each `boundary` one at a
-    time, compute each `arcCode` one at a time, and compute each type of analysis one at a time.
+    Returns
+    -------
+    state : MatrixMeandersState
+        The same `state` instance after all boundary layers have been processed.
+
+    Transfer Steps
+    --------------
+    The function decrements `state.boundary`, consumes each previous `arcCode`, and accumulates the
+    next boundary dictionary. The transition for joining arches conditionally flips one Dyck-matched
+    endpoint bit before packing the next `arcCode`.
+
+    References
+    ----------
+    [1] `mapFolding.dataBaskets.MatrixMeandersState`
+
+    [2] `walkDyckPath`
     """
     dictionaryArcCodeToCrossings: dict[int, int] = {}
     while state.boundary > 0 and areIntegersWide(state):

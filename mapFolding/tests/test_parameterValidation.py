@@ -25,16 +25,21 @@ The integration with external utility modules (hunterMakesPy) shows how to test
 dependencies while maintaining clear separation of concerns.
 """
 
-from collections.abc import Callable
+from __future__ import annotations
+
 from hunterMakesPy.parseParameters import intInnit
 from hunterMakesPy.tests.test_parseParameters import PytestFor_intInnit, PytestFor_oopsieKwargsie
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, validateListDimensions
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
-from typing import Any, Literal
+from typing import TYPE_CHECKING
 import multiprocessing
 import numba
 import pytest
 import sys
+
+if TYPE_CHECKING:
+	from collections.abc import Callable
+	from typing import Any, Literal
 
 @pytest.mark.parametrize("listDimensions,expected_intInnit,expected_validateListDimensions", [
 	(None, ValueError, ValueError),  # None instead of list
@@ -55,14 +60,14 @@ import sys
 	([True], TypeError, TypeError),  # bool
 	([[17, 39]], TypeError, TypeError),  # nested
 	([], ValueError, ValueError),  # empty
-	([complex(1,1)], ValueError, ValueError),  # complex number
+	([complex(1, 1)], ValueError, ValueError),  # complex number
 	([float('inf')], ValueError, ValueError),  # infinity
 	([float('nan')], ValueError, ValueError),  # NaN
 	([sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], (sys.maxsize, sys.maxsize)),  # overflow protection
 	(range(3, 7), [3, 4, 5, 6], (3, 4, 5, 6)),  # range sequence type
 	(tuple([3, 5, 7]), [3, 5, 7], (3, 5, 7)),  # tuple sequence type  # noqa: C409
 ])
-def test_listDimensionsAsParameter(listDimensions: None | list[Any] | range | tuple[Any, ...]
+def test_listDimensionsAsParameter(listDimensions: list[Any] | range | tuple[Any, ...] | None
 	, expected_intInnit: type[Any] | list[int]
 	, expected_validateListDimensions: type[Any] | tuple[int, ...]) -> None:
 	"""Test both validateListDimensions and getLeavesTotal with the same inputs."""
@@ -98,6 +103,6 @@ def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> N
 	(0, numba.get_num_threads()),
 	(1, 1),
 ])
-def test_setCPUlimitNumba(CPUlimit: Literal[4, -2, 0, 1] | None | float | bool, expectedLimit: Any | int) -> None:
+def test_setCPUlimitNumba(CPUlimit: Literal[4, -2, 0, 1] | float | bool | None, expectedLimit: Any | int) -> None:
 	numba.set_num_threads(multiprocessing.cpu_count())
 	standardizedEqualToCallableReturn(expectedLimit, defineProcessorLimit, CPUlimit, 'numba')

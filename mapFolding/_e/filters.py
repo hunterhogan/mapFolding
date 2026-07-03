@@ -60,6 +60,8 @@ References
 	https://more-itertools.readthedocs.io/en/stable/api.html
 
 """
+from __future__ import annotations
+
 from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
 from gmpy2 import mpz
 from humpy_cytoolz.dicttoolz import valfilter as leafFilter
@@ -68,8 +70,7 @@ from hunterMakesPy import Ordinals
 from hunterMakesPy.parseParameters import intInnit
 from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles, 零
 from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract
-from typing import Any, overload
-from typing_extensions import TypeIs
+from typing import Any, overload, TypeIs
 
 #======== Boolean antecedents ================================================
 
@@ -155,9 +156,9 @@ def leafIsNotPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
 	return leaf not in permutationSpace.values()
 
 @overload
-def leafIsPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:...
+def leafIsPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool: ...
 @overload
-def leafIsPinned(permutationSpace: PinnedLeaves, leaf: Leaf) -> bool:...
+def leafIsPinned(permutationSpace: PinnedLeaves, leaf: Leaf) -> bool: ...
 @syntacticCurry
 def leafIsPinned(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) -> bool:
 	"""Return True if `leaf` is pinned in `permutationSpace`.
@@ -349,6 +350,7 @@ def thisIsLeafOptions(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 def exclude[个](flatContainer: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
 	"""Yield items from `flatContainer` whose positions are not in `indices`."""
 	lengthIterable: int = len(flatContainer)
+
 	def normalizeIndex(index: int) -> int:
 		if index < 0:
 			index = (index + lengthIterable) % lengthIterable
@@ -385,4 +387,3 @@ def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> Undetermined
 		Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
 	"""
 	return leafFilter(thisIsLeafOptions, permutationSpace)
-

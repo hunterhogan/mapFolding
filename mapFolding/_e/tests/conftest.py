@@ -1,14 +1,19 @@
-from collections.abc import Callable
+from __future__ import annotations
+
 from mapFolding import packageSettings
-from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensional import (
 	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension零,
 	pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
-from numpy.typing import NDArray
 from pathlib import Path
-import numpy
+from typing import TYPE_CHECKING
 import pickle
 import pytest
+
+if TYPE_CHECKING:
+	from collections.abc import Callable
+	from mapFolding._e.dataBaskets import EliminationState
+	from numpy.typing import NDArray
+	import numpy
 
 pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
 
@@ -46,4 +51,3 @@ def pinningFunction2上nDimensional(request: pytest.FixtureRequest) -> Callable[
 @pytest.fixture(params=(pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPile零Ante首零, pin首beans), ids=_getPinningFunctionName)
 def pinningFunctionEliminateFolds2上nDimensional(request: pytest.FixtureRequest) -> Callable[..., EliminationState]:
 	return request.param
-

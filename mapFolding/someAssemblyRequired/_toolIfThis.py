@@ -24,10 +24,14 @@ Classes:
             algorithm transformations.
 """
 
+from __future__ import annotations
+
 from astToolkit import Be, IfThis as astToolkit_IfThis
-from hunterMakesPy import CallableFunction
-from typing_extensions import TypeIs
-import ast
+from typing import TYPE_CHECKING, TypeIs
+
+if TYPE_CHECKING:
+	from hunterMakesPy import CallableFunction
+	import ast
 
 class IfThis(astToolkit_IfThis):
 	"""Provide predicate functions for matching and filtering AST nodes based on various criteria.

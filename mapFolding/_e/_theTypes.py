@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from gmpy2 import mpz
 
 #======== Scalars ================================
@@ -110,4 +112,3 @@ type PinnedLeaves = dict[Pile, Leaf]
 
 type UndeterminedPiles = dict[Pile, LeafOptions]
 """`pile: leafOptions`; length less than or equal to `leavesTotal`."""
-

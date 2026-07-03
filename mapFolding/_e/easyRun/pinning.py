@@ -1,5 +1,7 @@
 # ruff: noqa: T201, T203, TC003  # noqa: RUF100
 # pyright: reportUnusedImport=false
+from __future__ import annotations
+
 from collections import deque
 from collections.abc import Callable, Iterable
 from gmpy2 import fac
@@ -23,9 +25,9 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 		return prod(map(howManyLeavesInLeafOptions, listLeafOptions))
 
 	permutationsPermutationSpaceTotal: Callable[[deque[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, extractUndeterminedPiles)))
-	print(len(str(mm:=fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
-	print(len(str(rr:=prod(toolz_map(howManyLeavesInLeafOptions, filter(None, DOTvalues(getDictionaryLeafOptions(state))))))), rr, "dictionaryLeafOptions")
-	print(len(str(pp:=permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
+	print(len(str(mm := fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
+	print(len(str(rr := prod(toolz_map(howManyLeavesInLeafOptions, filter(None, DOTvalues(getDictionaryLeafOptions(state))))))), rr, "dictionaryLeafOptions")
+	print(len(str(pp := permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
 	state = EliminationState((2,) * 5)

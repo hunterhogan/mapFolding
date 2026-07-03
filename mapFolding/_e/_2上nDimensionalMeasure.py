@@ -34,13 +34,18 @@ References
 [2] mapFolding._e._2上nDimensionalSemiotics
 """
 
+from __future__ import annotations
+
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, bit_scan1, f_mod_2exp
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.parseParameters import intInnit
 from mapFolding._e import 一, 零
-from mapFolding._e.dataBaskets import EliminationState
 from operator import getitem
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from mapFolding._e.dataBaskets import EliminationState
 
 def dimensionsConsecutiveAtTail(state: EliminationState, integerNonnegative: int) -> int:
 	"""Count consecutive tail radix-2 digits with value `1` in `integerNonnegative`.
@@ -58,11 +63,6 @@ def dimensionsConsecutiveAtTail(state: EliminationState, integerNonnegative: int
 	-------
 	digitsTrailingOnes : int
 		The count of consecutive least-significant base-2 digits equal to `1`, bounded by `state.dimensionsTotal`.
-
-	Raises
-	------
-	ValueError
-		Raised when `integerNonnegative` is less than `0`.
 
 	Examples
 	--------
@@ -104,7 +104,7 @@ def dimensionNearest首(integerNonnegative: int, /) -> int:
 	dimensionHead: int = dimensionNearest首(leafAt二)
 	```
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -156,7 +156,7 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -213,7 +213,7 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -222,7 +222,7 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	dimensionSecondNearest: int | None = dimensionSecondNearest首(anInteger)
 	dimensionThirdNearest: int | None = None
 
-	if dimensionSecondNearest in [0, None]:
+	if dimensionSecondNearest in {0, None}:
 		dimensionThirdNearest = None
 	else:
 		anotherInteger: int = int(bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)))
@@ -278,7 +278,7 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -288,7 +288,7 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	dimensionThirdNearest: int | None = dimensionThirdNearest首(anInteger)
 	dimensionFourthNearest: int | None = None
 
-	if dimensionThirdNearest in [0, None]:
+	if dimensionThirdNearest in {0, None}:
 		dimensionFourthNearest = None
 	else:
 		anotherInteger: int = int(bit_flip(anInteger, dimensionNearest).bit_flip(raiseIfNone(dimensionSecondNearest)).bit_flip(raiseIfNone(dimensionThirdNearest)))
@@ -344,7 +344,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([notLeafOrigin], 'notLeafOrigin', int), 0)  # ty:ignore[invalid-assignment]
+	anInteger: int = getitem(intInnit([notLeafOrigin], 'notLeafOrigin', int), 0)
 	if anInteger < 1:
 		message: str = f"I received `{notLeafOrigin = }`, but I need a value greater than 0."
 		raise ValueError(message)
@@ -392,7 +392,7 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -439,7 +439,7 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 	[3] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -490,7 +490,7 @@ def invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int) -
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)  # ty:ignore[invalid-assignment]
+	anInteger: int = getitem(intInnit([integerNonnegative], 'integerNonnegative', int), 0)
 	if anInteger < 0:
 		message: str = f"I received `{integerNonnegative = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
@@ -540,10 +540,9 @@ def ptount(integerAbove3: int, /) -> int:
 	[4] hunterMakesPy
 		https://context7.com/hunterhogan/huntermakespy
 	"""
-	anInteger: int = getitem(intInnit([integerAbove3], 'integerAbove3', int), 0)  # ty:ignore[invalid-assignment]
+	anInteger: int = getitem(intInnit([integerAbove3], 'integerAbove3', int), 0)
 	if anInteger < 3:
 		message: str = f"I received `{integerAbove3 = }`, but I need a value greater than 3."
 		raise ValueError(message)
 
-	return leafInSubHyperplane(anInteger - (一+零)).bit_count()
-
+	return leafInSubHyperplane(anInteger - (一 + 零)).bit_count()

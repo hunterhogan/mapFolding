@@ -2,24 +2,26 @@
 
 from __future__ import annotations
 
-from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
+from astToolkit import parseLogicalPath2astModule
 from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy.dataStructures import autoDecodingRLE
-# SEMIOTICS 'The____' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different
-# identifiers better integrate into the current semiotics?
-from mapFolding import (
-	DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal,
-	packageSettings)
+from mapFolding import packageSettings
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
-from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, ShatteredDataclass
+from mapFolding.someAssemblyRequired import default
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
 import dataclasses
 
 if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
+	# SEMIOTICS 'The____' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different
+	# identifiers better integrate into the current semiotics?
+	from mapFolding import (
+		DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal)
 	from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
+	from mapFolding.someAssemblyRequired import DatatypeConfiguration, ShatteredDataclass
 	import ast
 
 @dataclasses.dataclass(slots=True)

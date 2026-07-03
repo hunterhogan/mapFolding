@@ -1,13 +1,19 @@
 """Make functions that are complementary to the `count` function and are often called by `doTheNeedful`."""
-from astToolkit import Be, DOT, Grab, identifierDotAttribute, NodeChanger, NodeTourist, Then
+from __future__ import annotations
+
+from astToolkit import Be, DOT, Grab, NodeChanger, NodeTourist, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, Default, IfThis
 from mapFolding.someAssemblyRequired.toolkitMakeModules import getPathFilename
-from pathlib import PurePath
+from typing import TYPE_CHECKING
 import ast
+
+if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
+	from pathlib import PurePath
 
 def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:  # noqa: ARG001
 	"""Generate initialization module for counting variable setup.
@@ -30,7 +36,7 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 		Name for the generated initialization module.
 	callableIdentifier : str | None = None
 		Name for the initialization function.
-	logicalPathInfix : PathLike[str] | PurePath | str | None = None
+	logicalPathInfix : identifierDotAttribute | None = None
 		Directory path for organizing the generated module.
 	sourceCallableDispatcher : str | None = None
 		Optional dispatcher function identifier.

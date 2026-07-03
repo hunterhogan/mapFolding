@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from copy import deepcopy
 from mapFolding import DatatypeFoldsTotal
 from mapFolding.dataBaskets import SymmetricFoldsState

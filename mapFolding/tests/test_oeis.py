@@ -24,6 +24,8 @@ Network error handling tests verify graceful degradation when OEIS is unavailabl
 which is crucial for maintaining package reliability in production environments.
 """
 
+from __future__ import annotations
+
 from contextlib import redirect_stdout
 from mapFolding.oeis import _librarianStandardizesOEISid, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit

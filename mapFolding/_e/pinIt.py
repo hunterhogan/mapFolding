@@ -197,7 +197,7 @@ def deconstructPermutationSpaceByDomainOfLeaf(permutationSpace: PermutationSpace
 	return deconstructedPermutationSpace
 
 def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSpace, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> deque[PermutationSpace]:
-	"""Prototype."""
+	"""Prototype."""  # noqa: DOC201
 	deconstructedPermutationSpace: deque[PermutationSpace] = deque()
 
 	def pileOpenByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
@@ -388,8 +388,8 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 	leavesToPin : Iterable[int]
 		List of leaves available for pinning at `pile`. Don't include `leaf`.
 
-	Returns
-	-------
+	Yields
+	------
 	listPermutationSpace : Iterable[PermutationSpace]
 		Expanded / filtered list respecting the exclusion constraint.
 

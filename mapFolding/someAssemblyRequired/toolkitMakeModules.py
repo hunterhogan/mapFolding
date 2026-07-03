@@ -31,14 +31,20 @@ improvements through just-in-time compilation, parallel execution, and optimized
 tailored for specific computational requirements essential to large-scale map folding research.
 """
 
-from astToolkit import Be, DOT, identifierDotAttribute, NodeTourist, parseLogicalPath2astModule, Then
-from astToolkit.containers import IngredientsFunction
+from __future__ import annotations
+
+from astToolkit import Be, DOT, NodeTourist, parseLogicalPath2astModule, Then
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default
-from os import PathLike
 from pathlib import PurePath
-import ast
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from astToolkit import identifierDotAttribute
+	from astToolkit.containers import IngredientsFunction
+	from os import PathLike
+	import ast
 
 def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
 	"""Dynamically extract information about a `dataclass`: the instance identifier, the identifier, and the logical path module.

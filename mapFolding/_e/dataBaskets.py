@@ -1,4 +1,6 @@
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
+from __future__ import annotations
+
 from collections import deque
 from mapFolding._e import (
 	Folding, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, Leaf, LeafSpace, PermutationSpace,
@@ -115,7 +117,7 @@ class EliminationState:
 		if 0 < self.leavesTotal:
 			self.Theorem2aMultiplier = self.leavesTotal
 		self.leafLast = self.leavesTotal - 1
-		self.foldingCheckSum = self.leafLast * self.leavesTotal // 2 # https://en.wikipedia.org/wiki/Triangular_number
+		self.foldingCheckSum = self.leafLast * self.leavesTotal // 2  # https://en.wikipedia.org/wiki/Triangular_number
 		self.pilesTotal = self.leavesTotal
 		self.pileLast = self.pilesTotal - 1
 		self.首 = self.leavesTotal

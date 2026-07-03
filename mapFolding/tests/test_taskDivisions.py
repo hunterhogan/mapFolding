@@ -23,14 +23,19 @@ show how to balance performance with system resource constraints.
 
 """
 
-from collections.abc import Callable
+from __future__ import annotations
+
 from hunterMakesPy.tests.test_parseParameters import PytestFor_defineConcurrencyLimit
 from mapFolding.basecamp import countFolds
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
 from mapFolding.oeis import dictionaryOEISMapFolding, getFoldsTotalKnown
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
-from typing import Literal
+from typing import TYPE_CHECKING
 import pytest
+
+if TYPE_CHECKING:
+	from collections.abc import Callable
+	from typing import Literal
 
 @pytest.mark.parametrize(
 	"mapShape",
@@ -71,10 +76,10 @@ def test_countFolds_cpuLimitOopsie(mapShape: tuple[int, ...], CPUlimitParameter:
 	("maximum", 4, [7, 11], 77),
 	("cpu", 4, [3, 7], 4),
 	(["invalid"], 4, [19, 23], ValueError),
-	(20, 4, [3,5], ValueError)
+	(20, 4, [3, 5], ValueError)
 ])
 def test_getTaskDivisions(
-	computationDivisions: Literal['maximum', 'cpu', 20] | None | list[str],
+	computationDivisions: Literal['maximum', 'cpu', 20] | list[str] | None,
 	concurrencyLimit: Literal[4],
 	listDimensions: list[int],
 	expectedTaskDivisions: int | type[ValueError]
@@ -85,7 +90,7 @@ def test_getTaskDivisions(
 
 @pytest.mark.parametrize("expected,parameter", [
 	(TypeError, [4]),  # list
-	(TypeError, (2,)), # tuple
+	(TypeError, (2,)),  # tuple
 	(TypeError, {2}),  # set
 	(TypeError, {"cores": 2}),  # dict
 ])
