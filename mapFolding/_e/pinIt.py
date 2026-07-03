@@ -608,8 +608,6 @@ def _reduceLeafSpace(state: EliminationState, permutationSpace: PermutationSpace
 	References
 	----------
 	[1] mapFolding._e.JeanValjean
-		Internal package reference
-
 	"""
 	permutationSpaceHasNewLeaf: bool = False
 	while permutationSpace and pilesToUpdate and not permutationSpaceHasNewLeaf:
@@ -768,8 +766,6 @@ def _reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSp
 	References
 	----------
 	[1] mapFolding._e.pinIt.atPilePinLeaf
-		Internal package reference
-
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 	while permutationSpaceHasNewLeaf:

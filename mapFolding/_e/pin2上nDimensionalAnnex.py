@@ -133,9 +133,9 @@ def ImaOddLeaf2上nDimensional(leaf: Leaf, dimension: int) -> bool:
 	References
 	----------
 	[1] mapFolding._e.algorithms.iff.ImaOddLeaf
-		Internal package reference
+
 	[2] mapFolding._e.algorithms.iff
-		Internal package reference
+
 	[3] gmpy2.bit_test
 		https://gmpy2.readthedocs.io/en/latest/mpz.html#bit-test
 
@@ -317,8 +317,6 @@ def _reduceLeafSpace(state: EliminationState, permutationSpace: PermutationSpace
 	References
 	----------
 	[1] mapFolding._e.JeanValjean
-		Internal package reference
-
 	"""
 	permutationSpaceHasNewLeaf: bool = False
 	while permutationSpace and pilesToUpdate and not permutationSpaceHasNewLeaf:
@@ -443,8 +441,6 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 	References
 	----------
 	[1] mapFolding._e.getDictionaryConditionalLeafPredecessors
-		Internal package reference
-
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
 		return permutationSpace
@@ -508,8 +504,6 @@ def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationS
 	References
 	----------
 	[1] mapFolding._e.algorithms.iff.thisIsAViolation
-		Internal package reference
-
 	"""
 	pileOf_kCrease: Pile = errorL33T
 	pileOf_rCrease: Pile = errorL33T
@@ -619,10 +613,8 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 	References
 	----------
 	[1] mapFolding._e.dimensionNearest首
-		Internal package reference
-	[2] mapFolding._e.dimensionNearestTail
-		Internal package reference
 
+	[2] mapFolding._e.dimensionNearestTail
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 
@@ -855,8 +847,6 @@ def _reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSp
 	References
 	----------
 	[1] mapFolding._e.pinIt.atPilePinLeaf
-		Internal package reference
-
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 	while permutationSpaceHasNewLeaf:

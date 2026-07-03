@@ -124,16 +124,14 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	[1] more-itertools `partition`.
 		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.partition
 	[2] mapFolding._e.filters.pileIsOpen.
-		Internal package reference.
+
 	[3] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
 	[4] tqdm documentation.
 		https://tqdm.github.io/
 	[5] mapFolding._e.pinIt.deconstructPermutationSpaceAtPile.
-		Internal package reference.
-	[6] mapFolding.defineProcessorLimit.
-		Internal package reference.
 
+	[6] mapFolding.defineProcessorLimit.
 	"""
 	workersMaximum: int = defineProcessorLimit(CPUlimit)
 
@@ -176,10 +174,8 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 	References
 	----------
 	[1] mapFolding._e.pinIt.deconstructPermutationSpaceAtPile.
-		Internal package reference.
-	[2] mapFolding._e.pin2上nDimensions._getLeavesAtPile.
-		Internal package reference.
 
+	[2] mapFolding._e.pin2上nDimensions._getLeavesAtPile.
 	"""
 	state.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(state.permutationSpace, state.pile, filterfalse(disqualifyPinningLeafAtPile(state), _getLeavesAtPile(state)))))
 	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(state)))
@@ -211,10 +207,8 @@ def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 	[1] Python `operator` module documentation.
 		https://docs.python.org/3/library/operator.html
 	[2] mapFolding._e.pin2上nDimensionsByCrease.
-		Internal package reference.
-	[3] mapFolding._e.pin2上nDimensionsByDomain.pinPile零Ante首零AfterDepth4.
-		Internal package reference.
 
+	[3] mapFolding._e.pin2上nDimensionsByDomain.pinPile零Ante首零AfterDepth4.
 	"""
 	leavesToPin: Iterable[Leaf] = frozenset()
 	if state.pile == pileOrigin:
@@ -289,18 +283,16 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 	References
 	----------
 	[1] mapFolding._e._beDRY.mapShapeIs2上nDimensions.
-		Internal package reference.
+
 	[2] mapFolding._e._beDRY.addLeafOptions.
-		Internal package reference.
+
 	[3] hunterMakesPy - Context7.
 		https://context7.com/hunterhogan/huntermakespy
 	[4] Python `operator` module documentation.
 		https://docs.python.org/3/library/operator.html
 	[5] mapFolding._e.pin2上nDimensions._pinPiles.
-		Internal package reference.
-	[6] mapFolding.defineProcessorLimit.
-		Internal package reference.
 
+	[6] mapFolding.defineProcessorLimit.
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
@@ -378,16 +370,14 @@ def pinPile零Ante首零(state: EliminationState, maximumSizeListPermutationSpac
 	References
 	----------
 	[1] mapFolding._e._beDRY.mapShapeIs2上nDimensions.
-		Internal package reference.
+
 	[2] mapFolding._e.pin2上nDimensions.pinPilesAtEnds.
-		Internal package reference.
+
 	[3] Python `operator` module documentation.
 		https://docs.python.org/3/library/operator.html
 	[4] mapFolding._e.pin2上nDimensions._pinPiles.
-		Internal package reference.
-	[5] mapFolding.defineProcessorLimit.
-		Internal package reference.
 
+	[5] mapFolding.defineProcessorLimit.
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
@@ -444,20 +434,18 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 	References
 	----------
 	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainsCombined.
-		Internal package reference.
+
 	[2] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
 	[3] tqdm documentation.
 		https://tqdm.github.io/
 	[4] mapFolding._e.pin2上nDimensions.pinPilesAtEnds.
-		Internal package reference.
+
 	[5] Python `functools.partial` documentation.
 		https://docs.python.org/3/library/functools.html#functools.partial
 	[6] mapFolding._e._beDRY.mapShapeIs2上nDimensions.
-		Internal package reference.
-	[7] mapFolding.defineProcessorLimit.
-		Internal package reference.
 
+	[7] mapFolding.defineProcessorLimit.
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=youMustBeDimensionsTallToPinThis):
 		return state
@@ -507,12 +495,10 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 	References
 	----------
 	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainsCombined.
-		Internal package reference.
-	[2] mapFolding._e.pin2上nDimensionsAnnex.reduceAllPermutationSpaceInEliminationState.
-		Internal package reference.
-	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
-		Internal package reference.
 
+	[2] mapFolding._e.pin2上nDimensionsAnnex.reduceAllPermutationSpaceInEliminationState.
+
+	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
 	state.listPermutationSpace = deconstructPermutationSpaceByDomainsCombined(state.permutationSpace, leaves, leavesDomain)
 	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(state)))
@@ -556,18 +542,16 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 	References
 	----------
 	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainOfLeaf.
-		Internal package reference.
+
 	[2] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
 	[3] tqdm documentation.
 		https://tqdm.github.io/
 	[4] mapFolding._e.pin2上nDimensions.pinPilesAtEnds.
-		Internal package reference.
-	[5] mapFolding._e._beDRY.mapShapeIs2上nDimensions.
-		Internal package reference.
-	[6] mapFolding.defineProcessorLimit.
-		Internal package reference.
 
+	[5] mapFolding._e._beDRY.mapShapeIs2上nDimensions.
+
+	[6] mapFolding.defineProcessorLimit.
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=youMustBeDimensionsTallToPinThis):
 		return state
@@ -622,12 +606,10 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 	References
 	----------
 	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainOfLeaf.
-		Internal package reference.
-	[2] mapFolding._e.pin2上nDimensionsAnnex.reduceAllPermutationSpaceInEliminationState.
-		Internal package reference.
-	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
-		Internal package reference.
 
+	[2] mapFolding._e.pin2上nDimensionsAnnex.reduceAllPermutationSpaceInEliminationState.
+
+	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
 	state.listPermutationSpace = deconstructPermutationSpaceByDomainOfLeaf(state.permutationSpace, leaves, leavesDomain)
 	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpaceInEliminationState(state)))
@@ -656,8 +638,6 @@ def pinLeavesDimension0(state: EliminationState, *, CPUlimit: Limitation = None)
 	References
 	----------
 	[1] mapFolding._e.pin2上nDimensions._pinLeavesByDomain.
-		Internal package reference.
-
 	"""
 	leaves: tuple[Leaf, Leaf] = (leafOrigin, 首零(state.dimensionsTotal))
 	return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
@@ -685,10 +665,8 @@ def pinLeaf首零Plus零(state: EliminationState, *, CPUlimit: Limitation = None
 	References
 	----------
 	[1] mapFolding._e.pin2上nDimensions._pinLeafByDomain.
-		Internal package reference.
-	[2] mapFolding._e._dataDynamic.getLeaf首零Plus零Domain.
-		Internal package reference.
 
+	[2] mapFolding._e._dataDynamic.getLeaf首零Plus零Domain.
 	"""
 	leaf: Leaf = (零) + 首零(state.dimensionsTotal)
 	return _pinLeafByDomain(state, leaf, getLeaf首零Plus零Domain, CPUlimit=CPUlimit)
@@ -714,10 +692,8 @@ def pinLeavesDimension零(state: EliminationState, *, CPUlimit: Limitation = Non
 	References
 	----------
 	[1] mapFolding._e.pin2上nDimensions.pinPilesAtEnds.
-		Internal package reference.
-	[2] mapFolding._e.pin2上nDimensions.pinLeaf首零Plus零.
-		Internal package reference.
 
+	[2] mapFolding._e.pin2上nDimensions.pinLeaf首零Plus零.
 	"""
 	state = pinPilesAtEnds(state, 0)
 	return pinLeaf首零Plus零(state, CPUlimit=CPUlimit)
@@ -743,10 +719,8 @@ def pinLeavesDimension一(state: EliminationState, *, CPUlimit: Limitation = Non
 	References
 	----------
 	[1] mapFolding._e.pin2上nDimensions._pinLeavesByDomain.
-		Internal package reference.
-	[2] mapFolding._e._dataDynamic.getDomainDimension一.
-		Internal package reference.
 
+	[2] mapFolding._e._dataDynamic.getDomainDimension一.
 	"""
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (一 + 零, 一, 首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))
 	return _pinLeavesByDomain(state, leaves, getDomainDimension一(state), CPUlimit=CPUlimit)
@@ -781,10 +755,8 @@ def pinLeavesDimensions0零一(state: EliminationState, *, CPUlimit: Limitation 
 	References
 	----------
 	[1] mapFolding._e.pin2上nDimensions.pinLeavesDimension一.
-		Internal package reference.
-	[2] mapFolding._e.pin2上nDimensions.pinLeavesDimension零.
-		Internal package reference.
 
+	[2] mapFolding._e.pin2上nDimensions.pinLeavesDimension零.
 	"""
 	state = pinLeavesDimension一(state, CPUlimit=CPUlimit)
 	return pinLeavesDimension零(state, CPUlimit=CPUlimit)
@@ -819,10 +791,8 @@ def pinLeavesDimension二(state: EliminationState, *, CPUlimit: Limitation = Non
 	References
 	----------
 	[1] mapFolding._e.pin2上nDimensions._pinLeavesByDomain.
-		Internal package reference.
-	[2] mapFolding._e._dataDynamic.getDomainDimension二.
-		Internal package reference.
 
+	[2] mapFolding._e._dataDynamic.getDomainDimension二.
 	"""
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (二 + 一, 二 + 一 + 零, 二 + 零, 二)
 	return _pinLeavesByDomain(state, leaves, getDomainDimension二(state), youMustBeDimensionsTallToPinThis=5, CPUlimit=CPUlimit)
@@ -858,10 +828,8 @@ def pinLeavesDimension首二(state: EliminationState, *, CPUlimit: Limitation = 
 	References
 	----------
 	[1] mapFolding._e.pin2上nDimensions._pinLeavesByDomain.
-		Internal package reference.
-	[2] mapFolding._e._dataDynamic.getDomainDimension首二.
-		Internal package reference.
 
+	[2] mapFolding._e._dataDynamic.getDomainDimension首二.
 	"""
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (首二(state.dimensionsTotal), 首零二(state.dimensionsTotal), 首零一二(state.dimensionsTotal), 首一二(state.dimensionsTotal))
 	return _pinLeavesByDomain(state, leaves, getDomainDimension首二(state), youMustBeDimensionsTallToPinThis=5, CPUlimit=CPUlimit)

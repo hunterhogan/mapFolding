@@ -107,7 +107,7 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 	References
 	----------
 	[1] mapFolding._e.filters.extractPinnedLeaves
-		Internal package reference
+
 	[2] cytoolz.dicttoolz.dissoc
 		https://toolz.readthedocs.io/en/latest/api.html#toolz.dicttoolz.dissoc
 
@@ -312,8 +312,6 @@ def DOTgetPileIfLeaf(permutationSpace: PermutationSpace, pile: Pile, default: Le
 	References
 	----------
 	[1] mapFolding._e.filters.thisIsALeaf
-		Internal package reference
-
 	"""
 	ImaLeaf: LeafSpace | None = permutationSpace.get(pile)
 	if thisIsALeaf(ImaLeaf):
@@ -349,7 +347,7 @@ def DOTgetPileIfLeafOptions(permutationSpace: PermutationSpace, pile: Pile, defa
 	References
 	----------
 	[1] mapFolding._e.filters.thisIsALeafOptions
-		Internal package reference
+
 	[2] gmpy2 - Integer arithmetic
 		https://gmpy2.readthedocs.io/en/latest/
 	[3] hunterMakesPy - Context7
@@ -394,8 +392,6 @@ def makeLeafAntiOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions
 	[1] gmpy2 - Integer arithmetic
 		https://gmpy2.readthedocs.io/en/latest/
 	[2] mapFolding.inclusive
-		Internal package reference
-
 	"""
 	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))
 
@@ -429,8 +425,6 @@ def makeLeafOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
 	[1] gmpy2 - Integer arithmetic
 		https://gmpy2.readthedocs.io/en/latest/
 	[2] mapFolding._e._beDRY.JeanValjean
-		Internal package reference
-
 	"""
 	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
 
@@ -504,7 +498,7 @@ def JeanValjean(p24601: LeafOptions, /) -> LeafSpace | None:
 	[1] gmpy2 - Integer arithmetic
 		https://gmpy2.readthedocs.io/en/latest/
 	[2] mapFolding._e.filters.thisIsALeafOptions
-		Internal package reference
+
 	[3] hunterMakesPy - Context7
 		https://context7.com/hunterhogan/huntermakespy
 
@@ -597,8 +591,6 @@ def getProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	[2] operator.mul
 		https://docs.python.org/3/library/operator.html#operator.mul
 	[3] mapFolding._e.dataBaskets.EliminationState
-		Internal package reference
-
 	"""
 	return tuple(accumulate(mapShape, mul, initial=1))
 
@@ -631,10 +623,8 @@ def getSumsOfProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	[2] operator.add
 		https://docs.python.org/3/library/operator.html#operator.add
 	[3] mapFolding._e._beDRY.getProductsOfDimensions
-		Internal package reference
-	[4] mapFolding._e.dataBaskets.EliminationState
-		Internal package reference
 
+	[4] mapFolding._e.dataBaskets.EliminationState
 	"""
 	return tuple(accumulate(getProductsOfDimensions(mapShape), add, initial=0))
 
@@ -686,9 +676,9 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 	[2] itertools.accumulate
 		https://docs.python.org/3/library/itertools.html#itertools.accumulate
 	[3] mapFolding._e._beDRY.getSumsOfProductsOfDimensions
-		Internal package reference
+
 	[4] mapFolding._e._beDRY.getProductsOfDimensions
-		Internal package reference
+
 	"""
 	if dimensionsTotal is None:
 		dimensionsTotal = len(productsOfDimensions) - 1
@@ -788,7 +778,5 @@ def indicesMapShapeDimensionLengthsAreEqual(mapShape: tuple[int, ...]) -> Iterat
 	[2] more_itertools.iter_index
 		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.iter_index
 	[3] mapFolding._e.algorithms.elimination.theorem4
-		Internal package reference
-
 	"""
 	return filter(lambda indices: 1 < len(indices), map(tuple, map(partial(iter_index, mapShape), unique(mapShape))))

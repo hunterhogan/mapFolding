@@ -555,8 +555,6 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 	[1] OEIS - The On-Line Encyclopedia of Integer Sequences
 		https://oeis.org/
 	[2] mapFolding.basecamp.countFolds
-		Internal package reference
-
 	"""
 	oeisID = _librarianStandardizesOEISid(oeisID)
 
@@ -742,7 +740,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	[2] Meanders - Wikipedia
 		https://en.wikipedia.org/wiki/Meander_(mathematics)
 	[3] mapFolding.basecamp.countFolds
-		Internal package reference
+
 	[4] mapFolding.algorithms.A086345
 		Internal package reference (special formula implementation for A086345)
 	[5] OEIS A000682 - Semi-meanders: number of Folded meanders

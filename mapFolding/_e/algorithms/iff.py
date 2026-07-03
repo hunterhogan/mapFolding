@@ -162,7 +162,7 @@ def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: 
 		if pileComparand < pileLeafCrease:
 			if pileLeafCrease < pileComparandCrease:						# [k < r < k+1 < r+1]
 				return True
-		elif pile < pileComparandCrease < pileLeafCrease < pileComparand:  # [k < r+1 < k+1 < r]
+		elif pile < pileComparandCrease < pileLeafCrease < pileComparand:   # [k < r+1 < k+1 < r]
 			return True
 	return False
 
@@ -241,12 +241,10 @@ def thisLeafFoldingIsValid(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	References
 	----------
 	[1] mapFolding._e.algorithms.eliminationCrease
-		Internal package reference
-	[2] mapFolding.getLeavesTotal
-		Internal package reference
-	[3] mapFolding._e.algorithms.iff.thisIsAViolationComplicated
-		Internal package reference
 
+	[2] mapFolding.getLeavesTotal
+
+	[3] mapFolding._e.algorithms.iff.thisIsAViolationComplicated
 	"""
 	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileLeaf: pileLeaf[1] == _leavesTotal(mapShape) - 1, enumerate(folding))  # leafNPlus1 does not exist.
 	leafAndComparand: combinations[tuple[tuple[int, int], tuple[int, int]]] = combinations(foldingFiltered, 2)
@@ -283,8 +281,6 @@ def _leavesTotal(mapShape: tuple[int, ...]) -> int:
 	[1] functools.cache
 		https://docs.python.org/3/library/functools.html#functools.cache
 	[2] mapFolding.getLeavesTotal
-		Internal package reference
-
 	"""
 	return getLeavesTotal(mapShape)
 
@@ -309,8 +305,6 @@ def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
 	References
 	----------
 	[1] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
-		Internal package reference
-
 	"""
 	return len(mapShape)
 
@@ -339,10 +333,8 @@ def matchingParityLeaf(mapShape: tuple[int, ...]) -> CallableFunction[[tuple[tup
 	[1] itertools.product
 		https://docs.python.org/3/library/itertools.html#itertools.product
 	[2] mapFolding._e.algorithms.iff._matchingParityLeaf
-		Internal package reference
-	[3] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
-		Internal package reference
 
+	[3] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
 	"""
 	def repack(aCartesianProduct: tuple[tuple[tuple[int, int], tuple[int, int]], int]) -> bool:
 		((_pile, leaf), (_pileComparand, comparand)), dimension = aCartesianProduct
@@ -376,10 +368,8 @@ def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: Leaf, comparand: Leaf, 
 	References
 	----------
 	[1] mapFolding._e.algorithms.iff.ImaOddLeaf
-		Internal package reference
-	[2] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
-		Internal package reference
 
+	[2] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
 	"""
 	return ImaOddLeaf(mapShape, leaf, dimension) == ImaOddLeaf(mapShape, comparand, dimension)
 
@@ -428,8 +418,6 @@ def ImaOddLeaf(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
 	[1] functools.cache
 		https://docs.python.org/3/library/functools.html#functools.cache
 	[2] mapFolding._e.algorithms.iff.productOfDimensions
-		Internal package reference
-
 	"""
 	return (floordiv(leaf, productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
 
@@ -462,8 +450,6 @@ def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
 	[1] math.prod
 		https://docs.python.org/3/library/math.html#math.prod
 	[2] mapFolding._e.algorithms.iff.getCreasePost
-		Internal package reference
-
 	"""
 	return prod(mapShape[0:dimension], start=1)
 
@@ -495,12 +481,10 @@ def callGetCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> 
 	References
 	----------
 	[1] mapFolding._e.algorithms.iff.getCreasePost
-		Internal package reference
-	[2] mapFolding._e.algorithms.iff.thisIsAViolationComplicated
-		Internal package reference
-	[3] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
-		Internal package reference
 
+	[2] mapFolding._e.algorithms.iff.thisIsAViolationComplicated
+
+	[3] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
 	"""
 	return lambda: getCreasePost(mapShape, leaf, dimension)
 
@@ -543,8 +527,6 @@ def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf
 	[1] functools.cache
 		https://docs.python.org/3/library/functools.html#functools.cache
 	[2] mapFolding._e.algorithms.iff.productOfDimensions
-		Internal package reference
-
 	"""
 	leafCrease: Leaf | None = None
 	if ((leaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:
@@ -595,18 +577,16 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 	References
 	----------
 	[1] mapFolding._e.filters.extractPinnedLeaves
-		Internal package reference
-	[2] mapFolding._e.filters.between
-		Internal package reference
-	[3] mapFolding._e.algorithms.iff.thisIsAViolation
-		Internal package reference
-	[4] mapFolding._e.algorithms.iff.getCreasePost
-		Internal package reference
-	[5] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState
-		Internal package reference
-	[6] mapFolding._e.pin2上nDimensions
-		Internal package reference
 
+	[2] mapFolding._e.filters.between
+
+	[3] mapFolding._e.algorithms.iff.thisIsAViolation
+
+	[4] mapFolding._e.algorithms.iff.getCreasePost
+
+	[5] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState
+
+	[6] mapFolding._e.pin2上nDimensions
 	"""
 	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in extractPinnedLeaves(state.permutationSpace).items()}
 
@@ -659,10 +639,8 @@ def removeIFFViolationsFromEliminationState(state: EliminationState) -> Eliminat
 	References
 	----------
 	[1] mapFolding._e.algorithms.iff.permutationSpaceHasIFFViolation
-		Internal package reference
-	[2] mapFolding._e.pin2上nDimensions
-		Internal package reference
 
+	[2] mapFolding._e.pin2上nDimensions
 	"""
 	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace.copy()
 	state.listPermutationSpace = deque()
