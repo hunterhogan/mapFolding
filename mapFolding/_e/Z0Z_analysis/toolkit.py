@@ -1,21 +1,26 @@
-from collections.abc import Callable, Sequence
+from __future__ import annotations
+
 from dataclasses import dataclass
 from humpy_cytoolz.dicttoolz import valfilter as leafFilter
 from humpy_cytoolz.functoolz import curry as syntacticCurry
 from mapFolding import ansiColorReset, ansiColors, packageSettings
 from mapFolding._e import DOTvalues, PermutationSpace, PinnedLeaves, 一, 零, 首一, 首零一
-from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf
 from pathlib import Path
 from pprint import pformat
+from typing import TYPE_CHECKING
 import csv
 import numpy
 import pandas
 import sys
 
+if TYPE_CHECKING:
+	from collections.abc import Callable, Sequence
+	from mapFolding._e.dataBaskets import EliminationState
+
 @syntacticCurry
 def beansWithoutCornbread(state: EliminationState, permutationSpace: PermutationSpace) -> bool:
-	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace)) for beans, cornbread in ((一+零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))))
+	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace)) for beans, cornbread in ((一 + 零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))))
 
 @dataclass
 class PermutationSpaceStatus:
@@ -33,7 +38,7 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPermutationSp
 	for permutationSpace in listPermutationSpace:
 		maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
 		for pile, leaf in leafFilter(thisIsALeaf, permutationSpace).items():
-			maskMatches = maskMatches & (arrayFoldings[:, pile] == leaf)
+			maskMatches &= (arrayFoldings[:, pile] == leaf)
 		if not bool(maskMatches.any()):
 			listSurplusDictionaries.append(permutationSpace)
 		listMasks.append(maskMatches)
@@ -91,7 +96,7 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		pathFilename = Path(f"{packageSettings.pathPackage}/_e/Z0Z_analysis/excel/p2d{state.dimensionsTotal}SurplusDictionaries.csv")
 
 		if listDictionaryPinned:
-			with pathFilename.open('w', newline='') as writeStream:
+			with pathFilename.open('w', encoding='utf-8', newline='') as writeStream:
 				writerCSV = csv.writer(writeStream)
 				listPiles: list[int] = list(range(state.leavesTotal))
 				writerCSV.writerow(listPiles)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mapFolding import packageSettings
 from mapFolding._e import getLeavesCreasePost
 from mapFolding._e.dataBaskets import EliminationState
@@ -14,7 +16,7 @@ def subdivideP2d7s0_1_3_2CSVFile(state: EliminationState, pathDataRaw: Path) -> 
 
 		dictionaryAppendStreams: dict[int, TextIO] = {}
 		try:
-			with pathFilenameSource.open('r', newline='') as readStream:
+			with pathFilenameSource.open('r', encoding="utf-8", newline='') as readStream:
 				for lineRaw in readStream:
 					line: str = lineRaw.rstrip('\n').rstrip('\r')
 					if len(line) != 401:
@@ -38,7 +40,7 @@ def subdivideP2d7s0_1_3_2CSVFile(state: EliminationState, pathDataRaw: Path) -> 
 					appendStream: TextIO | None = dictionaryAppendStreams.get(leafFifth)
 					if appendStream is None:
 						pathFilenameOutput: Path = pathDataRaw / f"p2d7s0_1_3_2_{leafFifth}.csv"
-						appendStream = pathFilenameOutput.open('a', newline='')
+						appendStream = pathFilenameOutput.open('a', encoding="utf-8", newline='')
 						dictionaryAppendStreams[leafFifth] = appendStream
 
 					appendStream.write(line)
@@ -66,7 +68,7 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 	sortedAlready: bool = True
 	sequencePrior: tuple[int, ...] | None = None
 
-	with pathFilenameTarget.open('r', newline='') as readStream:
+	with pathFilenameTarget.open('r', encoding="utf-8", newline='') as readStream:
 		for indexLine, lineRaw in enumerate(readStream):
 			line: str = lineRaw.rstrip('\n').rstrip('\r')
 			if indexLine == 0 and line.startswith("0,1,2,"):
@@ -113,7 +115,7 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 	listSequencesSorted: list[tuple[int, ...]] = sorted(listSequencesUnique)
 	pathFilenameBackup: Path = pathSorted / pathFilenameTarget.name
 	pathFilenameTarget.replace(pathFilenameBackup)
-	with pathFilenameTarget.open('w', newline='') as writeStream:
+	with pathFilenameTarget.open('w', encoding="utf-8", newline='') as writeStream:
 		if lineHeader is not None:
 			writeStream.write(lineHeader)
 			writeStream.write('\n')
@@ -162,7 +164,7 @@ def sortP2d7GeneratedCSVFiles(state: EliminationState, pathDataRaw: Path) -> Non
 					appendStream: TextIO | None = dictionaryAppendStreams.get(key)
 					if appendStream is None:
 						pathFilenameOutput: Path = pathDataRaw / f"p2d7s0_1_{leafThird}_{leafFourth}.csv"
-						appendStream = pathFilenameOutput.open('a', newline='')
+						appendStream = pathFilenameOutput.open('a', encoding="utf-8", newline='')
 						dictionaryAppendStreams[key] = appendStream
 
 					appendStream.write(line)

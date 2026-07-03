@@ -1,6 +1,9 @@
 # NOTE to AI assistants: this module is not representative of my coding style. Most of it is AI generated, but because it's temporary code, I didn't strictly enforce my usual standards. Do not emulate it.
+# ruff: noqa: DOC201
+# ty:ignore[unresolved-attribute]
+from __future__ import annotations
+
 from collections import deque
-from collections.abc import Callable, Sequence
 from fractions import Fraction
 from functools import cache, reduce
 from gmpy2 import bit_flip
@@ -10,14 +13,13 @@ from hunterMakesPy.filesystemToolkit import importPathFilename2Identifier, write
 from itertools import product as CartesianProduct, repeat
 from mapFolding import ansiColorReset, ansiColors, packageSettings
 from mapFolding._e import (
-	getDictionaryLeafDomains, getIteratorOfLeaves, getLeafDomain, getLeafOptions, PermutationSpace, 首一, 首一三, 首一二, 首一二三, 首三,
-	首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
+	getDictionaryLeafDomains, getIteratorOfLeaves, getLeafDomain, getLeafOptions, PermutationSpace, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一,
+	首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import between吗, exclude
 from mapFolding._e.pin2上nDimensional import pinPilesAtEnds
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
-from mapFolding._e.Z0Z_analysis.toolkit import (
-	detectPermutationSpaceErrors, getDataFrameFoldings, PermutationSpaceStatus)
+from mapFolding._e.Z0Z_analysis.toolkit import detectPermutationSpaceErrors, getDataFrameFoldings, PermutationSpaceStatus
 from more_itertools import consecutive_groups
 from operator import indexOf, neg, pos
 from pathlib import Path, PurePath
@@ -27,6 +29,7 @@ import numpy
 import sys
 
 if TYPE_CHECKING:
+	from collections.abc import Callable, Sequence
 	import pandas
 
 def 首一1(dd: int, /) -> int: return 首一(dd) + 1
@@ -63,7 +66,7 @@ pathExclusionData.mkdir(parents=True, exist_ok=True)
 functionsHeadDimensions: list[Callable[[int], int]] = [
 	首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三,
 	首一1, 首一三1, 首一二1, 首一二三1, 首三1, 首二1, 首二三1, 首零1, 首零一1, 首零一三1, 首零一二1, 首零一二三1, 首零三1, 首零二1, 首零二三1]
-dictionaryFunctionsByName: dict[str, Callable[[int], int]] = {function.__name__: function for function in functionsHeadDimensions}  # ty:ignore[unresolved-attribute]
+dictionaryFunctionsByName: dict[str, Callable[[int], int]] = {function.__name__: function for function in functionsHeadDimensions}
 
 #======== Collate exclusion data =======
 
@@ -127,7 +130,7 @@ def writeExclusionDataCollated(listDimensions: Sequence[int] = (5, 6)) -> list[P
 @cache
 def expressIndexAsFractionAddend(index: IndexPilesTotal, pilesTotal: int, denominators: tuple[int, ...]) -> FractionAddend:
 	indexAsFractionAndAddend: FractionAddend = (Fraction(0, 1), index)
-	direction: CallableFunction[[int], int] = pos if 0 <=index else neg
+	direction: CallableFunction[[int], int] = pos if 0 <= index else neg
 
 	if denominators:
 		addendsMagnitude: int = pilesTotal // max(denominators)
@@ -471,10 +474,7 @@ def writeExclusionDictionaries(pathExclusionsFile: PurePath | None = None) -> Pu
 
 		mapKind: MapKind = f"2d{dimensionsTotal}"
 
-		listLines.append(f"dictionary{mapKind}LeafExcludedAtPileByPile: dict[int, dict[int, dict[int, list[int]]]] = {pformat(dictionaryLeafExcludedAtPileByPile, indent=4, width=160, compact=True)}")
-		listLines.append("")
-		listLines.append(f"dictionary{mapKind}AtPileLeafExcludedByPile: dict[int, dict[int, dict[int, list[int]]]] = {pformat(dictionaryAtPileLeafExcludedByPile, indent=4, width=160, compact=True)}")
-		listLines.append("")
+		listLines.extend((f"dictionary{mapKind}LeafExcludedAtPileByPile: dict[int, dict[int, dict[int, list[int]]]] = {pformat(dictionaryLeafExcludedAtPileByPile, indent=4, width=160, compact=True)}", "", f"dictionary{mapKind}AtPileLeafExcludedByPile: dict[int, dict[int, dict[int, list[int]]]] = {pformat(dictionaryAtPileLeafExcludedByPile, indent=4, width=160, compact=True)}", ""))
 
 	pathFilename: Path = Path(pathExclusionsFile) if pathExclusionsFile is not None else Path(f"{packageSettings.pathPackage}/_e/_exclusions.py")
 	pythonSource: str = "\n".join(listLines)
@@ -638,4 +638,3 @@ def runValidators() -> None:
 if __name__ == '__main__':
 	runGenerators()
 	runValidators()
-

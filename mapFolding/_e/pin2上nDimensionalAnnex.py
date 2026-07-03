@@ -70,17 +70,17 @@ from __future__ import annotations
 
 from collections import Counter, deque
 from gmpy2 import bit_flip, bit_test as isBit1吗
-from humpy_cytoolz.curried import map as toolz_map
 from humpy_cytoolz.dicttoolz import itemfilter, keyfilter, valfilter
 from humpy_cytoolz.functoolz import complement, compose, curry as syntacticCurry
 from humpy_cytoolz.itertoolz import unique
+# TODO the overload def are different between toolz and cytoolz. At least one of them is wrong.
+from humpy_toolz.curried import map as toolz_map
 from hunterMakesPy import errorL33T, inclusive
 from itertools import chain, combinations, product as CartesianProduct
 from mapFolding._e import (
 	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues, getDictionaryConditionalLeafPredecessors,
-	getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, JeanValjean, Leaf, LeafOptions, leafOptionsAND,
-	leafOrigin, LeafSpace, makeLeafAntiOptions, mapShapeIs2上nDimensions, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles, 一, 零, 首一,
-	首零一)
+	getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, leafOrigin,
+	makeLeafAntiOptions, mapShapeIs2上nDimensions, 一, 零, 首一, 首零一)
 from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
@@ -91,9 +91,9 @@ from math import prod
 from more_itertools import filter_map, one, pairwise, triplewise
 from typing import TYPE_CHECKING
 
-# TODO Fix `tlz` and Pylance import resolution.
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator
+	from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 #======== Boolean filters ======================================
 
@@ -146,6 +146,17 @@ def ImaOddLeaf2上nDimensional(leaf: Leaf, dimension: int) -> bool:
 
 # TODO Can I setup a flow that checks for changes per `PermutationSpace`, and stores unchanged `PermutationSpace`, instead of
 # trying to reduce irreducible `PermutationSpace` on subsequent iterations?
+# listPermutationSpaceIrreducible: deque[PermutationSpace] = deque()  # noqa: ERA001
+# listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace  # noqa: ERA001
+# state.listPermutationSpace = deque()  # noqa: ERA001
+# while listPermutationSpace:
+	# Take 1 PermutationSpace
+	# original = permutationSpace.copy()  # noqa: ERA001
+	# Run the PermutationSpace through all the reduction functions
+	# if original == permutationSpace:
+	#	state.listPermutationSpace.append(permutationSpace)  # noqa: ERA001
+	# else:  # noqa: ERA001
+	# 	listPermutationSpace.append(permutationSpace)  # noqa: ERA001
 # TODO overcome beans and cornbread, so I can generalize general subroutines and move them to "pinIt.py".
 def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> EliminationState:
 	"""Reduce permutation space by iteratively applying constraint propagation.

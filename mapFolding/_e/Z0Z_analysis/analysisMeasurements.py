@@ -1,5 +1,7 @@
 # ruff: noqa: T201
 """Analyze entropy of leaves in folding sequences to understand their distributional properties."""
+from __future__ import annotations
+
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import dimensionNearestTail, getLeafDomain, pileOrigin, 零
 from mapFolding._e.dataBaskets import EliminationState
@@ -92,7 +94,7 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 			'entropyMaximum': entropyMaximum,
 			'entropyRelative': entropyRelative,
 			'concentrationMaximum': concentrationMaximum,
-			'bitPattern': leaf.__format__('06b'),
+			'bitPattern': f"{leaf:06b}",
 			'bitCount': leaf.bit_count(),
 			'trailingZeros': dimensionNearestTail(leaf),
 		})
