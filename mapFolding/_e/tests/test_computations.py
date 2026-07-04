@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensional import pinPilesAtEnds
+from mapFolding._e.pin2上nDimensional import (
+	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
+	pin首beans)
 from mapFolding.oeis import dictionaryOEISMapFolding
 from mapFolding.tests.conftest import standardizedEqualToCallableReturn
 from typing import TYPE_CHECKING
@@ -10,6 +12,13 @@ import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
+
+def _getPinningFunctionName(pinningFunction: Callable[..., EliminationState]) -> str:
+	return getattr(pinningFunction, "__name__", pinningFunction.__class__.__name__)
+
+@pytest.fixture(params=(pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPile零Ante首零, pin首beans), ids=_getPinningFunctionName)
+def pinningFunctionEliminateFolds2上nDimensional(request: pytest.FixtureRequest) -> Callable[..., EliminationState]:
+	return request.param
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
 	*[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4), ('A001417', 5))],

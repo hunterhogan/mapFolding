@@ -15,16 +15,21 @@ from mapFolding._e._2上nDimensionalSemiotics import (
 	首零一三 as 首零一三, 首零一二 as 首零一二, 首零一二三 as 首零一二三, 首零三 as 首零三, 首零二 as 首零二, 首零二三 as 首零二三)
 
 # isort: split
-from mapFolding._e._2上nDimensionalBeDRY import mapShapeIs2上nDimensions as mapShapeIs2上nDimensions
+from mapFolding._e._disaggregation import (
+	DOTitems as DOTitems, DOTkeys as DOTkeys, DOTvalues as DOTvalues, getIteratorOfLeaves as getIteratorOfLeaves)
+
+# isort: split
 from mapFolding._e._beDRY import (
 	bifurcatePermutationSpace as bifurcatePermutationSpace, DOTgetPileIfLeaf as DOTgetPileIfLeaf,
-	DOTgetPileIfLeafOptions as DOTgetPileIfLeafOptions, DOTitems as DOTitems, DOTkeys as DOTkeys, DOTvalues as DOTvalues,
-	getIteratorOfLeaves as getIteratorOfLeaves, getProductsOfDimensions as getProductsOfDimensions,
+	DOTgetPileIfLeafOptions as DOTgetPileIfLeafOptions, getProductsOfDimensions as getProductsOfDimensions,
 	getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
 	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首, howManyLeavesInLeafOptions as howManyLeavesInLeafOptions,
 	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, JeanValjean as JeanValjean,
 	leafOptionsAND as leafOptionsAND, makeLeafAntiOptions as makeLeafAntiOptions, makeLeafOptions as makeLeafOptions,
 	reverseLookup as reverseLookup)
+
+# isort: split
+from mapFolding._e._2上nDimensionalBeDRY import mapShapeIs2上nDimensions as mapShapeIs2上nDimensions
 
 # isort: split
 from mapFolding._e._2上nDimensionalMeasure import (

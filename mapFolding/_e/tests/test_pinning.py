@@ -3,6 +3,9 @@ from __future__ import annotations
 from gmpy2 import mpz
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractPinnedLeaves
+from mapFolding._e.pin2上nDimensional import (
+	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension零,
+	pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
 from mapFolding._e.Z0Z_analysis.toolkit import beansWithoutCornbread
 from typing import Protocol, TYPE_CHECKING
 import numpy
@@ -12,6 +15,13 @@ if TYPE_CHECKING:
 	from collections.abc import Callable
 	from mapFolding._e import PermutationSpace
 	from numpy.typing import NDArray
+
+def _getPinningFunctionName(pinningFunction: Callable[..., EliminationState]) -> str:
+	return getattr(pinningFunction, "__name__", pinningFunction.__class__.__name__)
+
+@pytest.fixture(params=(pinPilesAtEnds, pinPile零Ante首零, pinLeavesDimension0, pinLeaf首零Plus零, pinLeavesDimension零, pinLeavesDimension一, pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pin3beans2, pin首beans), ids=_getPinningFunctionName)
+def pinningFunction2上nDimensional(request: pytest.FixtureRequest) -> Callable[..., EliminationState]:
+	return request.param
 
 class PinningFunction(Protocol):
 	__name__: str
