@@ -18,9 +18,9 @@ from humpy_cytoolz.itertoolz import groupby as toolz_groupby, unique
 from hunterMakesPy import CallableFunction, inclusive, raiseIfNone
 from itertools import chain, repeat
 from mapFolding._e import (
-	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTitems, DOTkeys, DOTvalues, Folding,
-	getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, Leaf, LeafOptions,
-	leafOptionsAND, LeafSpace, makeLeafAntiOptions, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles)
+	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTitems, DOTkeys, DOTvalues,
+	getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND,
+	makeLeafAntiOptions)
 from mapFolding._e.filters import (
 	between吗, extractUndeterminedPiles, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen, pileIsOpen,
 	thisIsALeaf, thisNotHaveThat)
@@ -30,6 +30,7 @@ from typing import cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
+	from mapFolding._e import Folding, Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 	from mapFolding._e.dataBaskets import EliminationState
 
 #======== Boolean filters =======================
@@ -59,9 +60,9 @@ def atPilePinLeafSafetyFilter(permutationSpace: PermutationSpace, pile: Pile, le
 @syntacticCurry
 def disqualifyPinningLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
 	return any((
-		leafIsPinned(state.permutationSpace, leaf),
-		pileIsNotOpen(state.permutationSpace, state.pile),
-		state.pile not in getLeafDomain(state, leaf),
+		leafIsPinned(state.permutationSpace, leaf)
+		, pileIsNotOpen(state.permutationSpace, state.pile)
+		, state.pile not in getLeafDomain(state, leaf),
 	))
 
 #======== Group by =======================

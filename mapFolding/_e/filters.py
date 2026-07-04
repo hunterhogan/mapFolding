@@ -1,3 +1,4 @@
+# ruff: noqa: DOC201
 """You can use this module to express boolean antecedents and apply antecedents as filters.
 
 This module groups small boolean antecedents (predicates) that are convenient to reuse.
@@ -62,15 +63,20 @@ References
 """
 from __future__ import annotations
 
-from collections.abc import Hashable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import Iterable
 from gmpy2 import mpz
 from humpy_cytoolz.dicttoolz import valfilter as leafFilter
 from humpy_cytoolz.functoolz import curry as syntacticCurry
-from hunterMakesPy import Ordinals
 from hunterMakesPy.parseParameters import intInnit
-from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles, 零
+from mapFolding._e import DOTitems, 零
 from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract
-from typing import Any, overload, TypeIs
+from typing import overload, TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from collections.abc import Hashable, Iterator, Mapping, Sequence
+	from hunterMakesPy import Ordinals
+	from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from typing import Any, TypeIs
 
 #======== Boolean antecedents ================================================
 
@@ -87,10 +93,10 @@ def consecutive吗[个: Iterable[int]](flatContainer: 个) -> bool:
 		or (len(list(next(consecutive_groups(always_reversible(ImaListOfInt))))) == len(list(ImaListOfInt))))
 
 def hasDuplicates(flatContainer: Iterable[Any]) -> bool:
-	"""You can test whether `flatContainer` contains duplicate values.
+	"""Test whether `flatContainer` contains duplicate values.
 
-	You can use `hasDuplicates` in an `if` statement, or you can pass `hasDuplicates` as a
-	predicate to a filtering utility described in the module docstring.
+	You can use `hasDuplicates` in an `if` statement, or you can pass `hasDuplicates` as a predicate
+	to a filtering utility described in the module docstring.
 
 	Parameters
 	----------
@@ -101,18 +107,12 @@ def hasDuplicates(flatContainer: Iterable[Any]) -> bool:
 	-------
 	flatContainerHasDuplicates : bool
 		`True` if `flatContainer` contains at least one duplicate value.
-
-	References
-	----------
-	[1] more-itertools - `all_unique`
-		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.all_unique
-
 	"""
 	return not allUnique吗(flatContainer)
 
 @syntacticCurry
 def leafIsInPileRange(leaf: Leaf, leafOptions: LeafOptions) -> bool:
-	"""You can test whether `leaf` is present in `leafOptions`.
+	"""Test whether `leaf` is present in `leafOptions`.
 
 	You can use `leafIsInPileRange` in an `if` statement, or you can pass `leafIsInPileRange`
 	as a predicate to a filtering utility described in the module docstring.
@@ -371,7 +371,7 @@ def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	dictionaryOfPileLeaf : dict[int, int]
 		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 	"""
-	return dict(sorted(leafFilter(thisIsALeaf, permutationSpace).items()))
+	return dict(sorted(DOTitems(leafFilter(thisIsALeaf, permutationSpace))))
 
 def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> UndeterminedPiles:
 	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.

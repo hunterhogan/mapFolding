@@ -73,6 +73,7 @@ from humpy_cytoolz.dicttoolz import valfilter as leafFilter
 from humpy_cytoolz.functoolz import curry as syntacticCurry
 from hunterMakesPy import CallableFunction, inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
+from mapFolding._e import DOTitems
 from mapFolding._e.filters import between吗, extractPinnedLeaves
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
@@ -588,11 +589,11 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 
 	[6] mapFolding._e.pin2上nDimensions
 	"""
-	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in extractPinnedLeaves(state.permutationSpace).items()}
+	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(extractPinnedLeaves(state.permutationSpace))}
 
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
-		for pile, leaf in sorted(leafFilter(between吗(0, state.leafLast - inclusive), state.permutationSpace).items()):
+		for pile, leaf in sorted(DOTitems(leafFilter(between吗(0, state.leafLast - inclusive), state.permutationSpace))):
 			leafCrease: int | None = getCreasePost(state.mapShape, leaf, dimension)
 			if leafCrease is None:
 				continue
