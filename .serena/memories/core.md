@@ -1,9 +1,0 @@
-- Front door: `mapFolding/basecamp.py`. `countFolds(...)` dispatches map-folding flows; `NOTcountingFolds(...)` dispatches OEIS and other non-map-folding computations.
-- Core state lives in `mapFolding/dataBaskets.py` (`MapFoldingState`, `ParallelMapFoldingState`, `SymmetricFoldsState`).
-- Leaf totals must come from `getLeavesTotal(mapShape)` in `mapFolding/beDRY.py`; many package indices are intentionally 1-indexed and should not be normalized.
-- Handmade algorithms live in `mapFolding/algorithms/`; generated/optimized code lives in `mapFolding/syntheticModules/`. Prefer editing handwritten/codegen sources and regenerating rather than patching generated modules.
-- AST/codegen pipeline lives in `mapFolding/someAssemblyRequired/`; `RecipeJob.py` holds job dataclasses.
-- Persistence/caching: standardized filenames live in `mapFolding/filesystemToolkit.py`; OEIS cache root is `mapFolding/_theSSOT.py:pathCache` and IO lives in `mapFolding/oeis.py`.
-- Tests live in `mapFolding/tests`; ad-hoc drivers live in `easyRun/`; reference materials live in `mapFolding/reference/`.
-- Read `mem:tech_stack` for dependencies/extras/tooling, `mem:suggested_commands` for Windows-friendly commands, `mem:task_completion` for done criteria, `mem:conventions` for coding rules, and `mem:testing` for pytest structure.
-- Read `mem:_e/core` before touching `mapFolding/_e/**`; read `mem:_e/pattern_discovery` when turning empirical combinatorics data into generalized formulas.

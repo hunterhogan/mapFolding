@@ -1,7 +1,0 @@
-- When `_e` has static tuple/dictionary data that clearly has a pattern but no usable rule yet, do progressive discovery instead of ad-hoc rewriting.
-- Reorganize the data first: group by plausible shared properties, sort within groups, and reshape into series. Physical/logical rearrangement is part of the method.
-- Then inspect binary structure: most-significant bit position, trailing zeros, bit counts, odd-parity counts, XOR/AND/OR relations, sub-hyperplane projections, and inversion symmetry.
-- Systematically apply the existing measurement/semiotics catalog before inventing helpers: `_measure.py` (`dimensionNearest首`, `dimensionSecondNearest首`, `howMany0coordinatesAtTail`, `howManyDimensionsHaveOddParity`, `leafInSubHyperplane`, `Z0Z_invert`, `Z0Z_sumsOfProductsOfDimensionsNearest首`) plus `_semiotics.py` constants/functions.
-- Common successful patterns in this repo: series sizes from `productsOfDimensions`, cumulative-sum sequences, parity-count offsets, and mirrored leaf pairs via inversion.
-- Capture intermediate observations in terse notes/comments, then replace static data with the smallest loop/formula that reproduces all known tuples exactly.
-- Validate the generalized rule on a different dimension count if possible; exact reproduction of the original data comes first, scalable parametrization second.

@@ -1,5 +1,0 @@
-- Minimum completion check for Python code changes: run `ruff check .` and `pyright`.
-- If behavior changed or tests exist for the touched area, run focused `python -m pytest` on the relevant files/directories; for broad or cross-cutting changes, run full `python -m pytest`.
-- If coverage is requested or algorithmic risk is high, run `python -m coverage run -m pytest`, `python -m coverage combine`, and `python -m coverage report`.
-- For packaging or console-entrypoint changes, verify the affected install/entrypoint behavior using the commands in `mem:suggested_commands`.
-- When touching `_e`, cross-check both `mem:conventions` and `mem:_e/core` before finishing.

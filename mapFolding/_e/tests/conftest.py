@@ -9,9 +9,32 @@ import pytest
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from numpy.typing import NDArray
+	from pytest import FixtureRequest
 	import numpy
 
 pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
+
+# ================== Test-function parameters ======================================================
+
+@pytest.fixture()
+def approx_abs(request: FixtureRequest) -> float:
+	"""The `abs` (***abs***olute tolerance) parameter value for `pytest.approx`."""
+	return 1e-12
+
+@pytest.fixture()
+def approx_rel(request: FixtureRequest) -> float:
+	"""The `rel` (***rel***ative tolerance) parameter value for `pytest.approx`."""
+	return 1e-6
+
+@pytest.fixture()
+def atol(request: FixtureRequest) -> float:
+	"""The `atol` (***a***bsolute ***tol***erance) parameter value for `numpy.allclose`."""
+	return 1e-08
+
+@pytest.fixture()
+def rtol(request: FixtureRequest) -> float:
+	"""The `rtol` (***r***elative ***tol***erance) parameter value for `numpy.allclose`."""
+	return 1e-05
 
 @pytest.fixture
 def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:

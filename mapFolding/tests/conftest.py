@@ -42,7 +42,30 @@ import warnings
 if TYPE_CHECKING:
 	from collections.abc import Callable, Generator, Sequence
 	from numpy.typing import NDArray
+	from pytest import FixtureRequest
 	from typing import Any
+
+# ================== Test-function parameters ======================================================
+
+@pytest.fixture()
+def approx_abs(request: FixtureRequest) -> float:
+	"""The `abs` (***abs***olute tolerance) parameter value for `pytest.approx`."""
+	return 1e-12
+
+@pytest.fixture()
+def approx_rel(request: FixtureRequest) -> float:
+	"""The `rel` (***rel***ative tolerance) parameter value for `pytest.approx`."""
+	return 1e-6
+
+@pytest.fixture()
+def atol(request: FixtureRequest) -> float:
+	"""The `atol` (***a***bsolute ***tol***erance) parameter value for `numpy.allclose`."""
+	return 1e-08
+
+@pytest.fixture()
+def rtol(request: FixtureRequest) -> float:
+	"""The `rtol` (***r***elative ***tol***erance) parameter value for `numpy.allclose`."""
+	return 1e-05
 
 #======== uniform messages and standardized test formats ==========
 
@@ -178,8 +201,8 @@ def pathCacheTesting(path_tmpTesting: Path) -> Generator[Path, Any]:
 	path_tmpTesting : Path
 		Temporary directory path from the `path_tmpTesting` fixture.
 
-	Returns
-	-------
+	Yields
+	------
 	temporaryCachePath : Generator[Path, Any, None]
 		Context manager that provides the temporary cache path and restores original.
 
@@ -262,18 +285,13 @@ def path_tmpTesting(request: pytest.FixtureRequest) -> Path:
 
 @pytest.fixture(scope="session", autouse=True)
 def setupTeardownTemporaryFilesystemObjects() -> Generator[None]:
-	"""Auto-fixture to setup test data directories and cleanup after.
-
-	Returns
-	-------
-	contextManager : Generator[None, None, None]
-		Context manager that sets up test directories and ensures cleanup.
-
-	"""
+	"""Auto-fixture to setup test data directories and cleanup after."""
 	pathDataSamples.mkdir(exist_ok=True)
 	path_tmpRoot.mkdir(exist_ok=True)
 	yield
 	registrarDeletesTemporaryFilesystemObjects()
+
+#======== OEIS ids =====================================
 
 @pytest.fixture(params=oeisIDsImplemented)
 def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:
@@ -310,14 +328,7 @@ def oeisID_1random() -> str:
 
 @pytest.fixture(autouse=True)
 def setupWarningsAsErrors() -> Generator[None, Any]:
-	"""Convert all warnings to errors for all tests.
-
-	Returns
-	-------
-	contextManager : Generator[None, Any, None]
-		Context manager that configures warnings as errors and restores settings.
-
-	"""
+	"""Convert all warnings to errors for all tests."""
 	warnings.filterwarnings("error")
 	yield
 	warnings.resetwarnings()
@@ -326,8 +337,8 @@ def setupWarningsAsErrors() -> Generator[None, Any]:
 def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any]:
 	"""Mock time.perf_counter_ns for consistent benchmark timing.
 
-	Returns
-	-------
+	Yields
+	------
 	mockTimer : Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]
 		Mock timer that returns predictable timing values for testing benchmarks.
 

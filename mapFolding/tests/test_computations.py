@@ -27,6 +27,7 @@ which is useful if you're working with the code synthesis features of the packag
 
 from __future__ import annotations
 
+from hunterMakesPy import raiseIfNone
 from mapFolding.basecamp import countFolds
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, NOTcountingFolds, oeisIDfor_n
@@ -48,14 +49,14 @@ if TYPE_CHECKING:
 	from types import ModuleType
 
 @pytest.mark.parametrize(
-	"oeisIdentifier, sequenceIndex, flow, processorLimit",
-	[
-		pytest.param("A007822", 4, "algorithm", 0.5, id="algorithm"),
-		pytest.param("A007822", 4, "asynchronous", 0.5, id="asynchronous"),
-		pytest.param("A007822", 4, "theorem2", 0.5, id="theorem2"),
-		pytest.param("A007822", 4, "theorem2Numba", 0.5, id="theorem2Numba"),
-		pytest.param("A007822", 4, "theorem2Trimmed", 0.5, id="theorem2Trimmed"),
-	],
+	"oeisIdentifier, sequenceIndex, flow, processorLimit"
+	, [
+		pytest.param("A007822", 4, "algorithm", 0.5, id="algorithm")
+		, pytest.param("A007822", 4, "asynchronous", 0.5, id="asynchronous")
+		, pytest.param("A007822", 4, "theorem2", 0.5, id="theorem2")
+		, pytest.param("A007822", 4, "theorem2Numba", 0.5, id="theorem2Numba")
+		, pytest.param("A007822", 4, "theorem2Trimmed", 0.5, id="theorem2Trimmed")
+	]
 )
 def test_A007822(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLimit: float) -> None:
 	"""Test A007822 flow options.
@@ -78,14 +79,14 @@ def test_A007822(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLi
 	standardizedEqualToCallableReturn(expected, NOTcountingFolds, oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
 
 @pytest.mark.parametrize(
-	"oeisIdentifier, sequenceIndex, flow, processorLimit",
-	[
-		pytest.param("A000136", 3, "daoOfMapFolding", None, id="A000136::daoOfMapFolding"),
-		pytest.param("A001415", 3, "numba", None, id="A001415::numba"),
-		pytest.param("A001416", 3, "theorem2Numba", None, id="A001416::theorem2Numba"),
-		pytest.param("A001417", 3, "theorem2", None, id="A001417::theorem2"),
-		pytest.param("A001418", 3, "theorem2Trimmed", None, id="A001418::theorem2Trimmed"),
-	],
+	"oeisIdentifier, sequenceIndex, flow, processorLimit"
+	, [
+		pytest.param("A000136", 3, "daoOfMapFolding", None, id="A000136::daoOfMapFolding")
+		, pytest.param("A001415", 3, "numba", None, id="A001415::numba")
+		, pytest.param("A001416", 3, "theorem2Numba", None, id="A001416::theorem2Numba")
+		, pytest.param("A001417", 3, "theorem2", None, id="A001417::theorem2")
+		, pytest.param("A001418", 3, "theorem2Trimmed", None, id="A001418::theorem2Trimmed")
+	]
 )
 def test_countFolds(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLimit: float | None) -> None:
 	"""Validate that different computational flows produce valid results.
@@ -116,15 +117,15 @@ def test_countFolds(oeisIdentifier: str, sequenceIndex: int, flow: str, processo
 	standardizedEqualToCallableReturn(expected, countFolds, None, None, None, processorLimit, mapShape, flow)
 
 @pytest.mark.parametrize(
-	"oeisIdentifier, sequenceIndex, flow",
-	[
-		pytest.param("A000682", 3, "matrixMeanders", id="A000682::matrixMeanders"),
-		pytest.param("A005316", 3, "matrixMeanders", id="A005316::matrixMeanders"),
-		pytest.param("A000682", 3, "matrixNumPy", id="A000682::matrixNumPy"),
-		pytest.param("A005316", 3, "matrixNumPy", id="A005316::matrixNumPy"),
-		pytest.param("A000682", 3, "matrixPandas", id="A000682::matrixPandas"),
-		pytest.param("A005316", 3, "matrixPandas", id="A005316::matrixPandas"),
-	],
+	"oeisIdentifier, sequenceIndex, flow"
+	, [
+		pytest.param("A000682", 3, "matrixMeanders", id="A000682::matrixMeanders")
+		, pytest.param("A005316", 3, "matrixMeanders", id="A005316::matrixMeanders")
+		, pytest.param("A000682", 3, "matrixNumPy", id="A000682::matrixNumPy")
+		, pytest.param("A005316", 3, "matrixNumPy", id="A005316::matrixNumPy")
+		, pytest.param("A000682", 3, "matrixPandas", id="A000682::matrixPandas")
+		, pytest.param("A005316", 3, "matrixPandas", id="A005316::matrixPandas")
+	]
 )
 def test_meanders(oeisIdentifier: str, sequenceIndex: int, flow: str) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
@@ -147,24 +148,24 @@ def test_meanders(oeisIdentifier: str, sequenceIndex: int, flow: str) -> None:
 	standardizedEqualToCallableReturn(expected, NOTcountingFolds, oeisIdentifier, sequenceIndex, flow, None)
 
 @pytest.mark.parametrize(
-	"oeisIdentifier, sequenceIndex",
-	[
-		pytest.param("A000560", 3, id="A000560::n3"),
-		pytest.param("A000682", 3, id="A000682::n3"),
-		pytest.param("A001010", 3, id="A001010::n3"),
-		pytest.param("A001011", 3, id="A001011::n3"),
-		pytest.param("A005315", 3, id="A005315::n3"),
-		pytest.param("A005316", 3, id="A005316::n3"),
-		pytest.param("A007822", 3, id="A007822::n3"),
-		pytest.param("A060206", 3, id="A060206::n3"),
-		pytest.param("A077460", 3, id="A077460::n3"),
-		pytest.param("A078591", 3, id="A078591::n3"),
-		pytest.param("A086345", 3, id="A086345::n3"),
-		pytest.param("A178961", 3, id="A178961::n3"),
-		pytest.param("A223094", 3, id="A223094::n3"),
-		pytest.param("A259702", 3, id="A259702::n3"),
-		pytest.param("A301620", 3, id="A301620::n3"),
-	],
+	"oeisIdentifier, sequenceIndex"
+	, [
+		pytest.param("A000560", 3, id="A000560::n3")
+		, pytest.param("A000682", 3, id="A000682::n3")
+		, pytest.param("A001010", 3, id="A001010::n3")
+		, pytest.param("A001011", 3, id="A001011::n3")
+		, pytest.param("A005315", 3, id="A005315::n3")
+		, pytest.param("A005316", 3, id="A005316::n3")
+		, pytest.param("A007822", 3, id="A007822::n3")
+		, pytest.param("A060206", 3, id="A060206::n3")
+		, pytest.param("A077460", 3, id="A077460::n3")
+		, pytest.param("A078591", 3, id="A078591::n3")
+		, pytest.param("A086345", 3, id="A086345::n3")
+		, pytest.param("A178961", 3, id="A178961::n3")
+		, pytest.param("A223094", 3, id="A223094::n3")
+		, pytest.param("A259702", 3, id="A259702::n3")
+		, pytest.param("A301620", 3, id="A301620::n3")
+	]
 )
 def test_NOTcountingFolds(oeisIdentifier: str, sequenceIndex: int) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
@@ -185,15 +186,15 @@ def test_NOTcountingFolds(oeisIdentifier: str, sequenceIndex: int) -> None:
 	standardizedEqualToCallableReturn(expected, NOTcountingFolds, oeisIdentifier, sequenceIndex, None, None)
 
 @pytest.mark.parametrize(
-	"oeisIdentifier, sequenceIndex",
-	[
-		pytest.param("A000136", 3, id="A000136::n3"),
-		pytest.param("A001415", 3, id="A001415::n3"),
-		pytest.param("A001416", 3, id="A001416::n3"),
-		pytest.param("A001417", 3, id="A001417::n3"),
-		pytest.param("A001418", 3, id="A001418::n3"),
-		pytest.param("A195646", 2, id="A195646::n2"),
-	],
+	"oeisIdentifier, sequenceIndex"
+	, [
+		pytest.param("A000136", 3, id="A000136::n3")
+		, pytest.param("A001415", 3, id="A001415::n3")
+		, pytest.param("A001416", 3, id="A001416::n3")
+		, pytest.param("A001417", 3, id="A001417::n3")
+		, pytest.param("A001418", 3, id="A001418::n3")
+		, pytest.param("A195646", 2, id="A195646::n2")
+	]
 )
 def test_oeisIDfor_n(oeisIdentifier: str, sequenceIndex: int) -> None:
 	"""Verify OEIS sequence value calculations against known reference values.
@@ -260,16 +261,11 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
 	makeJobNumba(jobTest, spices)
 
-	Don_Lapre_Road_to_Self_Improvement: ModuleSpec | None = importlib.util.spec_from_file_location("__main__", pathFilenameModule)
-	if Don_Lapre_Road_to_Self_Improvement is None:
-		message: str = f"Failed to create module specification from {pathFilenameModule}"
-		raise ImportError(message)
-	if Don_Lapre_Road_to_Self_Improvement.loader is None:
-		message = f"Failed to get loader for module {pathFilenameModule}"
-		raise ImportError(message)
+	Don_Lapre_Road_to_Self_Improvement: ModuleSpec = raiseIfNone(importlib.util.spec_from_file_location("__main__", pathFilenameModule))
 	module: ModuleType = importlib.util.module_from_spec(Don_Lapre_Road_to_Self_Improvement)
 
 	module.__name__ = "__main__"
+	assert Don_Lapre_Road_to_Self_Improvement.loader is not None
 	Don_Lapre_Road_to_Self_Improvement.loader.exec_module(module)
 
 	standardizedEqualToCallableReturn(str(getFoldsTotalKnown(oneTestCuzTestsOverwritingTests)), pathFilenameFoldsTotal.read_text(encoding="utf-8").strip)
