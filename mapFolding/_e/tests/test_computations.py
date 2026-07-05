@@ -44,7 +44,7 @@ def test_eliminateFoldsMapShape(expected: int, oeisID: str, n: int, flow: str, C
 	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 	state: EliminationState | None = None
 	pathLikeWriteFoldsTotal: None = None
-	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow), expected, 'eliminateFolds', mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow)
+	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit, flow=flow), expected, 'eliminateFolds', mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow)
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
 	*[pytest.param(ValueError, oeisID, dictionaryOEISMapFolding[oeisID]["offset"], "constraintPropagation", 1) for oeisID in ('A001417', 'A195646')],
@@ -54,7 +54,7 @@ def test_eliminateFoldsMapShapeError(expected: type[Exception], oeisID: str, n: 
 	state: EliminationState | None = None
 	pathLikeWriteFoldsTotal: None = None
 	with pytest.raises(expected):
-		eliminateFolds(mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow)
+		eliminateFolds(mapShape, state, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit, flow=flow)
 
 # @pytest.mark.parametrize("n", [4, 5], ids=lambda n: f"n={n}")
 @pytest.mark.parametrize("n", [4], ids=lambda n: f"n={n}")

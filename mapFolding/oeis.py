@@ -639,7 +639,7 @@ def getOEISids() -> None:
 # parameter, I have been trying to figure out how to put it into `oeisIDfor_n`. For a long time, `oeisIDfor_n` would call numba
 # theorem2 because it was the fastest, but I made numba an optional dependency. All of these seemingly unrelated issues underscore
 # the importance of the semiotics-first paradigm (for me).
-def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None, CPUlimit: bool | float | int | None = None) -> int:  # noqa: FBT001
+def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None, *, CPUlimit: bool | float | int | None = None) -> int:
 	"""Compute the n-th term of `oeisID`.
 
 	(AI generated docstring)

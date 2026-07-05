@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 def eliminateFolds(mapShape: tuple[int, ...] | None = None
 				, state: EliminationState | None = None
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
-				# , * # TODO improve `standardizedEqualToCallableReturn` so it will work with keyword arguments
+				, *
 				, CPUlimit: Limitation = None
 				, flow: str | None = None
 				) -> int:

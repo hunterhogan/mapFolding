@@ -77,7 +77,7 @@ def test_A007822(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLi
 	pathLikeWriteFoldsTotal: PathLike[str] | None = None
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
 	expected: int = dictionaryOEIS[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = countingMeanders(oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
+	actual: int = countingMeanders(oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, CPUlimit=processorLimit)
 	assertEqualTo(actual, expected, countingMeanders.__name__, oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
 
 @pytest.mark.parametrize(
@@ -116,7 +116,7 @@ def test_countFolds(oeisIdentifier: str, sequenceIndex: int, flow: str, processo
 	"""
 	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisIdentifier]['getMapShape'](sequenceIndex)
 	expected: int = dictionaryOEISMapFolding[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = countFolds(None, None, None, processorLimit, mapShape, flow)
+	actual: int = countFolds(None, None, None, CPUlimit=processorLimit, mapShape=mapShape, flow=flow)
 	assertEqualTo(actual, expected, countFolds.__name__, None, None, None, processorLimit, mapShape, flow)
 
 @pytest.mark.parametrize(
