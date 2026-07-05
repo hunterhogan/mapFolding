@@ -3,7 +3,7 @@ from __future__ import annotations
 from bisect import bisect_right
 from collections import defaultdict
 from functools import cache
-from gmpy2 import is_even, is_odd
+from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity,
@@ -66,15 +66,15 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 				sumsOfProductsOfDimensionsNearest首[indexUniversal]
 				+ state.sumsOfProductsOfDimensions[2]
 				+ state.productsOfDimensions[state.dimensionsTotal - (indexUniversal + 2)]
-				- ((pileStepAbsolute * 2 * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + is_even(leafPredecessor)))
-					* (1 + (2 == (howManyDimensionsHaveOddParity(leafPredecessor) + is_even(leafPredecessor)) == dimensionNearest首(leafPredecessor)))
+				- ((pileStepAbsolute * 2 * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + isEven吗(leafPredecessor)))
+					* (1 + (2 == (howManyDimensionsHaveOddParity(leafPredecessor) + isEven吗(leafPredecessor)) == dimensionNearest首(leafPredecessor)))
 				)
 			)
 			for aPile in listOfPiles[listOfPiles.index(pileFirst): None]:
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor)
 
 			leafPredecessor首零: int = leafPredecessor + 首零(state.dimensionsTotal)
-			if (leafInSubHyperplane(leafPredecessor) == 0) and is_odd(dimensionNearestTail(leafPredecessor)):
+			if (leafInSubHyperplane(leafPredecessor) == 0) and isOdd吗(dimensionNearestTail(leafPredecessor)):
 				dictionaryPrecedence[leaf][pileFirst].append(leafPredecessor首零)
 			if leafPredecessor首零 == leaf:
 				continue
@@ -82,8 +82,8 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 					pileStepAbsolute * (
 					howManyDimensionsHaveOddParity(leafPredecessor首零)
 					- 1
-					+ is_even(leafPredecessor首零)
-					- is_odd(leafPredecessor首零)
+					+ isEven吗(leafPredecessor首零)
+					- isOdd吗(leafPredecessor首零)
 					- int(dimensionNearestTail(leafPredecessor首零) == state.dimensionsTotal - 2)
 					- int(leaf < leafPredecessor首零)
 				))
@@ -91,15 +91,15 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
 			if indexUniversal < state.dimensionsTotal - 4:
-				if is_odd(dimensionNearestTail(leafPredecessor - is_odd(leafPredecessor))):
+				if isOdd吗(dimensionNearestTail(leafPredecessor - isOdd吗(leafPredecessor))):
 					pileFirst = (
 						sumsOfProductsOfDimensionsNearest首InSubHyperplane[indexUniversal]
 						+ state.sumsOfProductsOfDimensions[2 + 1 + indexUniversal]
 						- (pileStepAbsolute
 							* 2
 							* (howManyDimensionsHaveOddParity(leafPredecessor首零) - 1
-								+ is_even(leafPredecessor首零) * indexUniversal
-								- is_even(leafPredecessor首零) * (int(not (bool(indexUniversal))))
+								+ isEven吗(leafPredecessor首零) * indexUniversal
+								- isEven吗(leafPredecessor首零) * (int(not (bool(indexUniversal))))
 							)
 						)
 						+ state.productsOfDimensions[state.dimensionsTotal - 1
@@ -125,7 +125,7 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 		for addend in range(leavesPredecessorInThisSeries):
 			leafPredecessor: int = leafPredecessorTheFirst + (addend * decreasing)
 			leafPredecessor首零: int = leafPredecessor + 首零(state.dimensionsTotal)
-			pileFirst = sumsOfProductsOfDimensionsNearest首[indexUniversal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + is_even(leafPredecessor)))
+			pileFirst = sumsOfProductsOfDimensionsNearest首[indexUniversal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + isEven吗(leafPredecessor)))
 			for aPile in listOfPiles[listOfPiles.index(pileFirst): None]:
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor)
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)

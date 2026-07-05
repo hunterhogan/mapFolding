@@ -62,9 +62,7 @@ from __future__ import annotations
 
 from functools import partial, reduce
 from gmpy2 import bit_clear, bit_mask, bit_set
-from humpy_cytoolz.dicttoolz import dissoc as dissociatePiles
-from humpy_cytoolz.functoolz import curry as syntacticCurry
-from humpy_cytoolz.itertoolz import unique
+from humpy_cytoolz import curry as syntacticCurry, dissoc as dissociatePile, unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
 from mapFolding._e import DOTkeys
@@ -114,7 +112,7 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 
 	"""
 	leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
-	return (leavesPinned, dissociatePiles(permutationSpace, *DOTkeys(leavesPinned)))  # pyright: ignore[reportReturnType]  # ty:ignore[invalid-return-type]
+	return (leavesPinned, dissociatePile(permutationSpace, *DOTkeys(leavesPinned)))  # pyright: ignore[reportReturnType]  # ty:ignore[invalid-return-type]
 
 #======== `LeafOptions` functions ================================================
 

@@ -1,21 +1,25 @@
+# pyright: reportUnknownVariableType=false
+# pyright: reportUnknownArgumentType=false
+# ruff: noqa: PLC0415 DOC201
 from __future__ import annotations
 
 from bisect import bisect_left
 from functools import cache, partial
-from gmpy2 import bit_flip, bit_mask, is_even, is_odd
-from humpy_cytoolz.functoolz import curry as syntacticCurry
+from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
+from humpy_cytoolz import curry as syntacticCurry
+from humpy_toolz.curried.operator import add, iadd, mul
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getIteratorOfLeaves, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, Leaf, LeafOptions,
-	leafOrigin, makeLeafOptions, mapShapeIs2上nDimensions, Pile, 零, 首一, 首二, 首零, 首零一)
+	dimensionNearestTail, dimensionNearest首, getIteratorOfLeaves, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, leafOrigin,
+	makeLeafOptions, mapShapeIs2上nDimensions, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten
-from operator import add, iadd, mul
 from pprint import pprint
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
+	from mapFolding._e import Leaf, LeafOptions, Pile
 	import pandas
 
 # TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
@@ -61,7 +65,7 @@ def _getLeafOptions(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...],
 	return makeLeafOptions(leavesTotal, leafOptions)
 
 def getDictionaryLeafOptions(state: EliminationState) -> dict[Pile, LeafOptions]:
-	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""  # noqa: DOC201
+	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
 	return {pile: getLeafOptions(state, pile) for pile in range(state.leavesTotal)}
 
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
@@ -69,7 +73,7 @@ def getDictionaryLeafOptions(state: EliminationState) -> dict[Pile, LeafOptions]
 #======== Functions to help find a formula ======================================
 
 def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings  # noqa: PLC0415
+	from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
 
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()  # pyright: ignore[reportAssignmentType]
@@ -150,55 +154,53 @@ pp3  = (3, 5, 9, 17, 33)
 
 	pile: Pile = 4
 	pileDimension = bisect_left(state.sumsOfProductsOfDimensionsNearest首, pile >> 1 << 1)
-	leafMinimum = is_even(pile) + state.productsOfDimensions[pileDimension]
+	leafMinimum = isEven吗(pile) + state.productsOfDimensions[pileDimension]
 	pileRange: list[Leaf] = []
 
 	pileRange.append(leafMinimum)
 
-	if is_even(pile):
+	if isEven吗(pile):
 		dd = pileDimension
 
 		ss = state.sumsOfProductsOfDimensions[dd]
-		pileRange.extend(map(partial(iadd, leafMinimum - ss), state.sumsOfProductsOfDimensions[1:dd]))
-		pileRange.extend(map(partial(iadd, leafMinimum - ss), state.sumsOfProductsOfDimensions[dd + 1: state.dimensionsTotal]))
+		pileRange.extend(map(iadd(leafMinimum - ss), state.sumsOfProductsOfDimensions[1:dd]))
+		pileRange.extend(map(iadd(leafMinimum - ss), state.sumsOfProductsOfDimensions[dd + 1: state.dimensionsTotal]))
 
 		if dd < dimensionNearest首(pile):
 			dd += 1
 
 			ss = state.productsOfDimensions[dd]
 			# pileRange.extend(map(partial(isub, leafMinimum + ss), state.sumsOfProductsOfDimensions[1:dd]))
-			# pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
-
+			# pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
 
 		if (pile % 4 == 0) and ((零) + 首零(state.dimensionsTotal) in pileRange):
 			pileRange.remove((零) + 首零(state.dimensionsTotal))
 			"""33 has step = 4"""
 
-
-	if is_odd(pile):
+	if isOdd吗(pile):
 		dd = pileDimension
 
 		ss = state.sumsOfProductsOfDimensions[dd]
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[1:dd]))
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[1:dd]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
 
 		dd += 1
 
 		ss = state.sumsOfProductsOfDimensions[dd]
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[1:dd]))
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[1:dd]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
 
 		dd += 1
 
 		ss = state.sumsOfProductsOfDimensions[dd]
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[1:dd]))
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[1:dd]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
 
 		dd += 1
 
 		ss = state.sumsOfProductsOfDimensions[dd]
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[1:dd]))
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[1:dd]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
 
 	print(f"{pile=}\t{pileDimension=}")
 	print("computed=", sorted(set(pileRange)))
@@ -206,7 +208,6 @@ pp3  = (3, 5, 9, 17, 33)
 	print(f"{realRange=}")
 	pileAnte = tuple(getIteratorOfLeaves(getLeafOptions(state, pile - 1)))
 	print(f"{pileAnte=}")
-
 
 	pileRangeByFormula: bool = False
 	if pileRangeByFormula:
@@ -218,7 +219,7 @@ pp3  = (3, 5, 9, 17, 33)
 
 		@syntacticCurry
 		def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
-			return list(map(partial(add, dimensionOrigin + 2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
+			return list(map(add(dimensionOrigin + 2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
 
 		@syntacticCurry
 		def Z0Z_alphaBeta(state: EliminationState, alphaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
@@ -232,11 +233,11 @@ pp3  = (3, 5, 9, 17, 33)
 			# ? 24 < even leaves < 32.
 			# piles 49, 51, 53, 55 need a higher start on yy=0.
 			for yy in range(3):
-				pileRange.extend(map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy))))
+				pileRange.extend(map(mul(state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy))))
 
 			# 32 < even leaves
 			for yy in range(1):
-				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy])
+				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(mul(state.productsOfDimensions[yy])
 					, Z0Z_alphaBeta(state
 						, alphaStart=yy + (state.dimensionsTotal - 2 - dimensionNearest首(pile))
 						, betaStop=-(yy)
@@ -244,7 +245,7 @@ pp3  = (3, 5, 9, 17, 33)
 			# ? 32 < odd leaves < 52
 			# ? 32 < odd leaves < 36
 			for yy in range(1, 3):
-				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
+				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(mul(state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
 			# piles 51, 53, 55 need a higher start.
@@ -260,9 +261,9 @@ pp3  = (3, 5, 9, 17, 33)
 
 			for yy in range(3):
 				pileRange.extend(map(
-					partial(add, 1)
+					add(1)
 					, (map(
-						partial(mul, state.productsOfDimensions[yy])
+						mul(state.productsOfDimensions[yy])
 						, Z0Z_alphaBeta(state, alphaStart=0, betaStop=-(yy))
 				)
 			)
@@ -270,18 +271,18 @@ pp3  = (3, 5, 9, 17, 33)
 	)
 
 			# for yy in range(1):
-			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy])
+			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(mul(state.productsOfDimensions[yy])
 			# 		, Z0Z_alphaBeta(state
 			# 			, alphaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
 			# 			, betaStop=-(yy)
 			# 		))))
 			# for yy in range(1,3):
-			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
+			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(mul(state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
-			pileRange.extend(map(partial(add, 1), state.productsOfDimensions[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)]))
+			pileRange.extend(map(add(1), state.productsOfDimensions[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)]))
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
-			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(add, 1), state.productsOfDimensions[1:state.dimensionsTotal])))
+			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(add(1), state.productsOfDimensions[1:state.dimensionsTotal])))
 
 			return tuple(sorted(pileRange))
 

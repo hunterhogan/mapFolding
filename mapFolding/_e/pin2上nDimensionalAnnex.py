@@ -68,21 +68,22 @@ References
 """
 from __future__ import annotations
 
-from collections import Counter, deque
+from collections import deque
 from gmpy2 import bit_flip, bit_test as isBit1吗
-from humpy_cytoolz import complement, curry as syntacticCurry, itemfilter, keyfilter, keyfilter as pileFilter, unique, valfilter, valfilter as leafFilter
+from humpy_cytoolz import (
+	complement, curry as syntacticCurry, itemfilter, keyfilter as filterPile, unique, valfilter as filterLeaf, valfilter as filterLeafOptions)
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
-from itertools import chain, combinations, product as CartesianProduct
+from itertools import combinations, product as CartesianProduct
 from mapFolding._e import (
-	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues, getDictionaryConditionalLeafPredecessors,
+	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, DOTitems, DOTvalues, getDictionaryConditionalLeafPredecessors,
 	getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, leafOrigin,
 	makeLeafAntiOptions, mapShapeIs2上nDimensions, 一, 零, 首一, 首零一)
 from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
-	between吗, extractPinnedLeaves, extractUndeterminedPiles, leafIsInPileRange, leafIsPinned, mappingHasKey, notLeafOriginOrLeaf零, notPileLast,
-	thisHasThat, thisIsALeaf, thisIsLeafOptions, thisNotHaveThat)
-from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile
+	between吗, extractPinnedLeaves, extractUndeterminedPiles, leafIsPinned, mappingHasKey, notLeafOriginOrLeaf零, notPileLast, thisHasThat,
+	thisIsALeaf, thisIsLeafOptions, thisNotHaveThat)
+from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile, reducePermutationSpace_leafDomainOf1
 from more_itertools import one, pairwise, triplewise
 from typing import TYPE_CHECKING
 
@@ -173,7 +174,7 @@ def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> Elim
 		, _reducePermutationSpace_ConditionalPredecessors
 		, _reducePermutationSpace_CrossedCreases
 		, _reducePermutationSpace_noConsecutiveDimensions
-		, _reducePermutationSpace_leafDomainOf1
+		, reducePermutationSpace_leafDomainOf1
 		, _reducePermutationSpace_nakedSubset
 	)
 
@@ -418,8 +419,8 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 
-		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(valfilter(mappingHasKey(dictionaryConditionalLeafPredecessors),
-			keyfilter(notPileLast(state.pileLast), valfilter(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))))))
+		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(filterLeaf(mappingHasKey(dictionaryConditionalLeafPredecessors),
+			filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))))))
 
 		while dequePileLeaf and not permutationSpaceHasNewLeaf:
 			pile, leaf = dequePileLeaf.pop()
@@ -427,7 +428,7 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 			if mappingHasKey(dictionaryConditionalLeafPredecessors[leaf], pile):
 				sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-						, pilesToUpdate=deque(DOTitems(extractUndeterminedPiles(keyfilter(between吗(pile + inclusive, state.pileLast), permutationSpace))))
+						, pilesToUpdate=deque(DOTitems(extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast), permutationSpace))))
 						, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, dictionaryConditionalLeafPredecessors[leaf][pile])
 					)):
 					return None
@@ -485,8 +486,8 @@ def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationS
 
 			# For efficiency, I wish I could create the two dictionaries with one operation and without the intermediate `leavesPinned`.
 			leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
-			leavesPinnedEvenInDimension: PinnedLeaves = valfilter(complement(ImaOddLeaf2上nDimensional(dimension=dimension)), leavesPinned)
-			leavesPinnedOddInDimension: PinnedLeaves = valfilter(ImaOddLeaf2上nDimensional(dimension=dimension), leavesPinned)
+			leavesPinnedEvenInDimension: PinnedLeaves = filterLeaf(complement(ImaOddLeaf2上nDimensional(dimension=dimension)), leavesPinned)
+			leavesPinnedOddInDimension: PinnedLeaves = filterLeaf(ImaOddLeaf2上nDimensional(dimension=dimension), leavesPinned)
 
 			dequePileLeafPileLeaf: deque[tuple[PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]] = deque(
 												CartesianProduct((leavesPinnedOddInDimension,), combinations(leavesPinnedEvenInDimension.items(), 2)))
@@ -536,7 +537,7 @@ def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationS
 
 				sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-					, pilesToUpdate=deque(DOTitems(keyfilter(thisHasThat(pilesForbidden), extractUndeterminedPiles(permutationSpace))))
+					, pilesToUpdate=deque(DOTitems(filterPile(thisHasThat(pilesForbidden), extractUndeterminedPiles(permutationSpace))))
 					, leafAntiOptions=leafAntiOptions)):
 					return None
 				if sum(map(dimensionNearest首, permutationSpace.values())) < sumBeforeReduction:
@@ -586,7 +587,7 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 
-		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(keyfilter(notPileLast(state.pileLast), valfilter(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace))))))
+		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace))))))
 
 		while dequePileLeaf and not permutationSpaceHasNewLeaf:
 			pile, leaf = dequePileLeaf.pop()
@@ -595,7 +596,7 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 			if 0 < dimensionHead:
 				sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-						, pilesToUpdate=deque(extractUndeterminedPiles(keyfilter(between吗(2, pile - inclusive), permutationSpace)).items())
+						, pilesToUpdate=deque(extractUndeterminedPiles(filterPile(between吗(2, pile - inclusive), permutationSpace)).items())
 						, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
 					)):
 					return None
@@ -606,7 +607,7 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 			if 0 < dimensionTail:
 				sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-						, pilesToUpdate=deque(extractUndeterminedPiles(keyfilter(between吗(pile + inclusive, state.pileLast), permutationSpace)).items())
+						, pilesToUpdate=deque(extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast), permutationSpace)).items())
 						, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
 					)):
 					return None
@@ -697,7 +698,7 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 		pilesUndetermined: UndeterminedPiles = extractUndeterminedPiles(permutationSpace)
 
 		groupByLeafOptions: dict[LeafOptions, set[Pile]] = {}
-		for pile, leafOptions in valfilter(thisNotHaveThat(unique(pilesUndetermined.values())), pilesUndetermined).items():
+		for pile, leafOptions in filterLeafOptions(thisNotHaveThat(unique(pilesUndetermined.values())), pilesUndetermined).items():
 			groupByLeafOptions.setdefault(leafOptions, set()).add(pile)
 
 		dequeLeafOptionsAndPiles: deque[tuple[LeafOptions, set[Pile]]] = deque(DOTitems(
@@ -708,7 +709,7 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 
 			sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 			if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-					, pilesToUpdate=deque(DOTitems(keyfilter(thisNotHaveThat(setPiles), pilesUndetermined)))
+					, pilesToUpdate=deque(DOTitems(filterPile(thisNotHaveThat(setPiles), pilesUndetermined)))
 					, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
 				)):
 				return None
@@ -777,56 +778,4 @@ def _reducePermutationSpace_noConsecutiveDimensions(state: EliminationState, per
 				if sum(map(dimensionNearest首, permutationSpace.values())) < sumBeforeReduction:
 					permutationSpaceHasNewLeaf = True
 
-	return permutationSpace
-
-#-------- Functions that do NOT use the shared logic -----------------------------------------
-
-def _reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
-	"""I use this to detect and pin leaves with domain size one.
-
-	I use this constraint encoder to detect leaves that can appear at only one pile (domain size
-	one) and pin those leaves. I compute the domain size for each leaf by counting how many piles
-	contain that leaf (either pinned or in `LeafOptions`). When a leaf appears at exactly one
-	pile, I pin that leaf at that pile using `atPilePinLeaf` [1] and propagate the pinning using
-	`_reducePermutationSpace_LeafIsPinned`.
-
-	The function also validates that every leaf has nonzero domain size. When any leaf has zero
-	domain (cannot appear anywhere), I invalidate `permutationSpace` by returning `None`.
-
-	Parameters
-	----------
-	state : EliminationState
-		A data basket to facilitate computations and actions.
-	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
-
-	Returns
-	-------
-	updatedPermutationSpace : PermutationSpace | None
-		The updated `permutationSpace` if valid; otherwise `None`.
-
-	References
-	----------
-	[1] mapFolding._e.pinIt.atPilePinLeaf
-	"""
-	permutationSpaceHasNewLeaf: bool = True
-	while permutationSpaceHasNewLeaf:
-		permutationSpaceHasNewLeaf = False
-
-		leavesPinned, pilesUndetermined = bifurcatePermutationSpace(permutationSpace)
-
-		counterLeafDomainSize: Counter[Leaf] = Counter(chain(chain.from_iterable(map(getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
-
-		if set(range(state.leavesTotal)).difference(counterLeafDomainSize.keys()):
-			return None
-
-		leavesWithDomainOf1: set[Leaf] = set(DOTkeys(valfilter((1).__eq__, counterLeafDomainSize))).difference(leavesPinned.values()).difference([state.leavesTotal])
-		if leavesWithDomainOf1:
-			leaf: Leaf = leavesWithDomainOf1.pop()
-			sherpa: PermutationSpace | None = _reducePermutationSpace_LeafIsPinned(state, atPilePinLeaf(permutationSpace, one(DOTkeys(valfilter(leafIsInPileRange(leaf), pilesUndetermined))), leaf))
-			if (sherpa is None) or (not sherpa):
-				return None
-			else:
-				permutationSpace = sherpa
-			permutationSpaceHasNewLeaf = True
 	return permutationSpace

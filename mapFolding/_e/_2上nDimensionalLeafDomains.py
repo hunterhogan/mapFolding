@@ -1,7 +1,8 @@
+# ruff: noqa: DOC201
 from __future__ import annotations
 
 from functools import cache
-from gmpy2 import bit_flip, bit_mask, is_even, is_odd
+from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import CallableFunction, decreasing, inclusive, raiseIfNone
 from mapFolding._e import (
 	dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
@@ -21,11 +22,11 @@ def _getLeafDomain(leaf: Leaf, dimensionsTotal: int, mapShape: tuple[int, ...], 
 	if mapShapeIs2上nDimensions(state.mapShape):
 		originPinned: bool = leaf == leafOrigin
 		return range(
-					state.sumsOfProductsOfDimensions[dimensionNearestTail(leaf) + inclusive]  # `start`, first value included in the `range`.
+					state.sumsOfProductsOfDimensions[dimensionNearestTail(leaf) + inclusive]  		# `start`, first value included in the `range`.
 						+ howManyDimensionsHaveOddParity(leaf)
 						- originPinned
 
-					, state.sumsOfProductsOfDimensionsNearest首[dimensionNearest首(leaf)]		# `stop`, first value excluded from the `range`.
+					, state.sumsOfProductsOfDimensionsNearest首[dimensionNearest首(leaf)]  			# `stop`, first value excluded from the `range`.
 						+ 2
 						- howManyDimensionsHaveOddParity(leaf)
 						- originPinned
@@ -343,12 +344,12 @@ def _getDomainDimension首二(dimensionsTotal: int, domain首零二and首二: tu
 		listIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
 
 #-------- Exclude "knock-out" indices ---------------------------------
-		if dimensionTail == 1 and (abs(pileOfLeaf首零二 - 首零(dimensionsTotal)) == 2) and is_even(dimensionsTotal):
+		if dimensionTail == 1 and (abs(pileOfLeaf首零二 - 首零(dimensionsTotal)) == 2) and isEven吗(dimensionsTotal):
 			listIndicesPilesExcluded.extend([excludeAbove - 2])
 		if dimensionTail != 1 and 首一二(dimensionsTotal) <= pileOfLeaf首零二 <= 首零一(dimensionsTotal):
 			if (dimensionTail == 2) and (howManyDimensionsHaveOddParity(pileOfLeaf首零二) + 1 != dimensionNearest首(pileOfLeaf首零二) - raiseIfNone(dimensionSecondNearest首(pileOfLeaf首零二))):
 				listIndicesPilesExcluded.extend([pilesTotal - (int(pileOfLeaf首零二 ^ bit_mask(dimensionsTotal)) // 8 + 2)])
-				if (pileOfLeaf首零二 <= 首零(dimensionsTotal)) and is_even(dimensionsTotal):
+				if (pileOfLeaf首零二 <= 首零(dimensionsTotal)) and isEven吗(dimensionsTotal):
 					listIndicesPilesExcluded.extend([pilesTotal - (int(pileOfLeaf首零二 ^ bit_mask(dimensionsTotal)) // 4 - 1)])
 			if dimensionTail == 3:
 				listIndicesPilesExcluded.extend([excludeAbove - 2])
@@ -395,7 +396,7 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 	for indexDomain零, pileOfLeaf零 in enumerate(filter(between吗(pileOrigin, 首零(dimensionsTotal) - 零), domain零)):
 		indicesDomain0ToExclude: list[int] = []
 
-		dimensionTail: int = dimensionNearestTail(pileOfLeaf零 - is_odd(pileOfLeaf零))
+		dimensionTail: int = dimensionNearestTail(pileOfLeaf零 - isOdd吗(pileOfLeaf零))
 
 # ******* (Almost) All differences between `_getDomain二零and二` and `_getDomain二一零and二一` *******
 #-------- Two identifiers with different values -------------------
@@ -406,7 +407,7 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 			excludeBelowAddend = 0
 			steppingBasisForUnknownReasons = int(bit_mask(dimensionTail - 1).bit_flip(0))  # How the hell did I figure out this bizarre formula?
 		elif ImaDomain二一零and二一:
-			excludeBelowAddend = int(is_even(indexDomain零) or dimensionTail)
+			excludeBelowAddend = int(isEven吗(indexDomain零) or dimensionTail)
 			steppingBasisForUnknownReasons = indexDomain零
 
 # - - - - Two special cases that 1) might be inherent, such as the differences in `pilesFewerDomain0`, or 2) might be because the formulas could be better. I'd bet on number 2.
@@ -446,7 +447,7 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 					if 4 < domain0[indexDomain0].bit_length():
 						indicesDomain0ToExclude.extend([indexDomain0])
 					if 首一(dimensionsTotal) < pileOfLeaf零:
-						indexDomain0 = -(pilesTotal // 4 - is_odd(pileOfLeaf零))
+						indexDomain0 = -(pilesTotal // 4 - isOdd吗(pileOfLeaf零))
 						indexDomain0 -= -(pilesFewerDomain0)
 						indicesDomain0ToExclude.extend([indexDomain0])
 				if dimensionSecondNearest首(pileOfLeaf零) == 一:
@@ -466,8 +467,8 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 
 				indexDomain0 = 3 * pilesTotal // 4
 				indexDomain0 -= pilesFewerDomain0
+				# NOTE thinking:  首一二(dimensionsTotal)
 				if pileOfLeaf零 < 首一二(dimensionsTotal):
-# NOTE My thinking: because       首一二(dimensionsTotal)
 					dimensionIndexPart首: int = dimensionsTotal
 					dimensionIndexPart一: int = dimensionIndex(一)
 					dimensionIndexPart二: int = dimensionIndex(二)
@@ -489,7 +490,7 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 					if dimensionNearest首(pileOfLeaf零) == 一 + 零:
 						indicesDomain0ToExclude.extend([indexDomain0 - 2])
 
-		elif 首一(dimensionsTotal) + 首三(dimensionsTotal) + is_odd(pileOfLeaf零) == pileOfLeaf零:
+		elif 首一(dimensionsTotal) + 首三(dimensionsTotal) + isOdd吗(pileOfLeaf零) == pileOfLeaf零:
 			indexDomain0 = (3 * pilesTotal // 4) - 1
 			indexDomain0 -= pilesFewerDomain0
 			indicesDomain0ToExclude.extend([indexDomain0])
@@ -526,13 +527,13 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 			continue
 		listIndicesPilesExcluded: list[int] = []
 
-		dimensionTail: int = dimensionNearestTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
+		dimensionTail: int = dimensionNearestTail(direction(pileOfLeaf零, isOdd吗(pileOfLeaf零)))
 
 #-------- `excludeBelow` `index` ---------------------------------
 		if 首零一(dimensionsTotal) < pileOfLeaf零:
 			excludeBelow: int = index + 3 - (3 * pilesTotal // 4)
 		else:
-			excludeBelow = 2 + (首零一(dimensionsTotal) - direction(pileOfLeaf零, is_odd(pileOfLeaf零))) // 2
+			excludeBelow = 2 + (首零一(dimensionsTotal) - direction(pileOfLeaf零, isOdd吗(pileOfLeaf零))) // 2
 		excludeBelow -= pilesFewerDomain0
 		listIndicesPilesExcluded.extend(range(excludeBelow))
 
@@ -574,7 +575,7 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 					indexDomain0 -= pilesFewerDomain0
 					listIndicesPilesExcluded.extend([indexDomain0])
 
-		elif (首零一(dimensionsTotal) - direction(首三(dimensionsTotal), is_odd(pileOfLeaf零))) == pileOfLeaf零:
+		elif (首零一(dimensionsTotal) - direction(首三(dimensionsTotal), isOdd吗(pileOfLeaf零))) == pileOfLeaf零:
 			indexDomain0 = (pilesTotal // 4) + 2
 			indexDomain0 -= pilesFewerDomain0
 			listIndicesPilesExcluded.extend([indexDomain0])
@@ -602,13 +603,13 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 			continue
 		indicesDomain0ToExclude: list[int] = []
 
-		dimensionTail: int = dimensionNearestTail(direction(pileOfLeaf零, is_odd(pileOfLeaf零)))
+		dimensionTail: int = dimensionNearestTail(direction(pileOfLeaf零, isOdd吗(pileOfLeaf零)))
 
 #-------- `excludeBelow` `index` ---------------------------------
 		if 首零一(dimensionsTotal) < pileOfLeaf零:
 			excludeBelow: int = indexDomain零 + 1 - (3 * pilesTotal // 4)
 		else:
-			excludeBelow = (首零一(dimensionsTotal) - direction(pileOfLeaf零, is_odd(pileOfLeaf零))) // 2
+			excludeBelow = (首零一(dimensionsTotal) - direction(pileOfLeaf零, isOdd吗(pileOfLeaf零))) // 2
 		excludeBelow -= pilesFewerDomain0
 		indicesDomain0ToExclude.extend(range(excludeBelow))
 
@@ -652,7 +653,7 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 					indexDomain0 -= pilesFewerDomain0
 					indicesDomain0ToExclude.extend([indexDomain0])
 
-		elif (首零一(dimensionsTotal) - direction(首三(dimensionsTotal), is_odd(pileOfLeaf零))) == pileOfLeaf零:
+		elif (首零一(dimensionsTotal) - direction(首三(dimensionsTotal), isOdd吗(pileOfLeaf零))) == pileOfLeaf零:
 			indexDomain0 = (pilesTotal // 4) + 1
 			indexDomain0 -= pilesFewerDomain0
 			indicesDomain0ToExclude.extend([indexDomain0])
@@ -739,7 +740,7 @@ def _getLeaf首零Plus零Domain(domain首零Plus零: tuple[Pile, ...], pileOfLea
 		listIndicesPilesExcluded.extend([-1])
 
 	if 首零一(dimensionsTotal) < pileOfLeaf首零一 < 首零一二(dimensionsTotal):
-		if pileOfLeaf一零 in [首一(dimensionsTotal), 首零(dimensionsTotal)]:
+		if pileOfLeaf一零 in {首一(dimensionsTotal), 首零(dimensionsTotal)}:
 			listIndicesPilesExcluded.extend([-1])
 		elif 二 < pileOfLeaf一零 < 首二(dimensionsTotal):
 			listIndicesPilesExcluded.extend([0])

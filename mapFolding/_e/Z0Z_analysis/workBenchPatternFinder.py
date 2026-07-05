@@ -1,10 +1,12 @@
-# ruff: noqa: ERA001 T201 T203  # noqa: RUF100
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownVariableType=false
+# ruff: noqa: ERA001 T201 T203
 from __future__ import annotations
 
 from bisect import bisect_left
 from functools import partial
-from gmpy2 import is_even, is_odd
-from humpy_cytoolz.functoolz import curry as syntacticCurry
+from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
+from humpy_cytoolz import curry as syntacticCurry
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import (
 	dimensionNearest首, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafOptions, getLeavesCreaseAnte,
@@ -101,12 +103,12 @@ pp3  = (3, 5, 9, 17, 33)
 
 	pile: Pile = 4
 	pileDimension = bisect_left(state.sumsOfProductsOfDimensionsNearest首, pile >> 1 << 1)
-	leafMinimum = is_even(pile) + state.productsOfDimensions[pileDimension]
+	leafMinimum = isEven吗(pile) + state.productsOfDimensions[pileDimension]
 	pileRange: list[Leaf] = []
 
 	# pileRange.append(leafMinimum)
 
-	if is_even(pile):
+	if isEven吗(pile):
 		dd = pileDimension
 
 		ss = state.sumsOfProductsOfDimensions[dd]
@@ -120,7 +122,7 @@ pp3  = (3, 5, 9, 17, 33)
 			pileRange.extend(map(partial(isub, leafMinimum + ss), state.sumsOfProductsOfDimensions[1:dd]))
 			pileRange.extend(map(partial(iadd, leafMinimum + ss), state.sumsOfProductsOfDimensions[dd + 1: state.dimensionsTotal]))
 
-	if is_odd(pile):
+	if isOdd吗(pile):
 		dd = pileDimension
 
 		ss = state.sumsOfProductsOfDimensions[dd]

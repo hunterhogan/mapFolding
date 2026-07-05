@@ -50,7 +50,7 @@ def test_countFoldsComputationDivisionsInvalid(mapShape: tuple[int, ...]) -> Non
 @pytest.mark.parametrize('mapShapeList', [pytest.param(list(dictionaryOEISMapFolding['A001417']['getMapShape'](5)), id='A001417::n5')])
 def test_countFoldsComputationDivisionsMaximum(mapShapeList: list[int]) -> None:
 	expected: int = getFoldsTotalKnown(tuple(mapShapeList))
-	actual: int = countFolds(mapShapeList, None, 'maximum', None)
+	actual: int = countFolds(mapShapeList, None, 'maximum', CPUlimit=None)
 	assertEqualTo(actual, expected, countFolds.__name__, mapShapeList, None, 'maximum', None)
 
 @pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_defineConcurrencyLimit())
@@ -64,7 +64,7 @@ def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], No
 def test_countFolds_cpuLimitOopsie(mapShape: tuple[int, ...], CPUlimitParameter: dict[str, bool] | list[str]) -> None:
 	expected: type[TypeError] = TypeError
 	with pytest.raises(expected) as exceptionInfo:
-		countFolds(mapShape, None, 'cpu', CPUlimitParameter)
+		countFolds(mapShape, None, 'cpu', CPUlimit=CPUlimitParameter)
 	assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, mapShape, None, 'cpu', CPUlimitParameter)
 
 @pytest.mark.parametrize('computationDivisions, concurrencyLimit, listDimensions, expectedTaskDivisions', [(None, 4, [9, 11], 0), ('maximum', 4, [7, 11], 77), ('cpu', 4, [3, 7], 4)])

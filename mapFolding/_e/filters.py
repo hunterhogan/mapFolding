@@ -65,8 +65,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from gmpy2 import mpz
-from humpy_cytoolz.dicttoolz import valfilter as leafFilter
-from humpy_cytoolz.functoolz import curry as syntacticCurry
+from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from hunterMakesPy.parseParameters import intInnit
 from mapFolding._e import DOTitems, 零
 from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract
@@ -371,7 +370,7 @@ def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	dictionaryOfPileLeaf : dict[int, int]
 		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 	"""
-	return dict(sorted(DOTitems(leafFilter(thisIsALeaf, permutationSpace))))
+	return dict(sorted(DOTitems(filterLeaf(thisIsALeaf, permutationSpace))))
 
 def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> UndeterminedPiles:
 	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
@@ -386,4 +385,4 @@ def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> Undetermined
 	pilesUndetermined : dict[int, LeafOptions]
 		Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
 	"""
-	return leafFilter(thisIsLeafOptions, permutationSpace)
+	return filterLeaf(thisIsLeafOptions, permutationSpace)

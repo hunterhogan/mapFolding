@@ -67,7 +67,7 @@ def dimensionsConsecutiveAtTail(state: EliminationState, integerNonnegative: int
 	Examples
 	--------
 	```python
-	if ((is_even(leafAt二Ante首) or (is_odd(leafAt二Ante首)
+	if ((isEven吗(leafAt二Ante首) or (isOdd吗(leafAt二Ante首)
 	and (dimensionIndex(dimension) < dimensionsConsecutiveAtTail(state, leafAt二Ante首))))):
 		listRemoveLeaves.extend([dimension])
 	```
@@ -428,7 +428,7 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 	Examples
 	--------
 	```python
-	slicingIndices: int = is_odd(howManyDimensionsHaveOddParity(leaf))
+	slicingIndices: int = isOdd吗(howManyDimensionsHaveOddParity(leaf))
 	```
 
 	References

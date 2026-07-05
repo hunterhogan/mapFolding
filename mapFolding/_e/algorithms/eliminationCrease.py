@@ -1,10 +1,11 @@
+# ruff: noqa: DOC201
 from __future__ import annotations
 
 from collections import deque
-from concurrent.futures import as_completed, Future, ProcessPoolExecutor
-from humpy_cytoolz.dicttoolz import valfilter as leafFilter
+from concurrent.futures import as_completed, ProcessPoolExecutor
+from humpy_cytoolz import valfilter as filterLeaf
 from itertools import filterfalse
-from mapFolding._e import DOTitems, DOTvalues, Folding, getIteratorOfLeaves, mapShapeIs2上nDimensions
+from mapFolding._e import DOTitems, DOTvalues, getIteratorOfLeaves, mapShapeIs2上nDimensions
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import thisIsLeafOptions
@@ -16,7 +17,8 @@ from tqdm import tqdm
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e import PermutationSpace
+	from concurrent.futures import Future
+	from mapFolding._e import Folding, PermutationSpace
 
 def pinByCrease(state: EliminationState) -> EliminationState:
 	listFolding: list[Folding] = []
@@ -25,7 +27,7 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 
 		permutationSpace: PermutationSpace = state.listPermutationSpace.pop()
 
-		pile, leafOptions = first(DOTitems(leafFilter(thisIsLeafOptions, permutationSpace)))
+		pile, leafOptions = first(DOTitems(filterLeaf(thisIsLeafOptions, permutationSpace)))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=pile, permutationSpace=permutationSpace)
 		sherpa.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(sherpa.permutationSpace, sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))
@@ -39,7 +41,7 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	"""Do the things necessary so that `pinByCrease` operates efficiently."""  # noqa: DOC201
+	"""Do the things necessary so that `pinByCrease` operates efficiently."""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
 

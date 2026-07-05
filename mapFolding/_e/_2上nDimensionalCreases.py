@@ -1,12 +1,14 @@
+# ruff: noqa: DOC201
 from __future__ import annotations
 
 from functools import cache
-from gmpy2 import bit_flip, is_even, is_odd
-from mapFolding._e import dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, Leaf, leafOrigin
+from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
+from mapFolding._e import dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, leafOrigin
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator
+	from mapFolding._e import Leaf
 	from mapFolding._e.dataBaskets import EliminationState
 
 def getLeavesCreaseAnte(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
@@ -37,12 +39,12 @@ def _makeCreases(leaf: Leaf, dimensionsTotal: int) -> tuple[tuple[Leaf, ...], tu
 		listLeavesCreasePost: list[Leaf] = [1]
 		listLeavesCreaseAnte: list[Leaf] = []
 	else:
-		slicingIndices: int = is_odd(howManyDimensionsHaveOddParity(leaf))
+		slicingIndices: int = isOdd吗(howManyDimensionsHaveOddParity(leaf))
 
 		slicerAnte: slice = slice(slicingIndices, dimensionNearest首(leaf) * bit_flip(slicingIndices, 0) or None)
 		slicerPost: slice = slice(bit_flip(slicingIndices, 0), dimensionNearest首(leaf) * slicingIndices or None)
 
-		if is_even(leaf):
+		if isEven吗(leaf):
 			if slicerAnte.start == 1:
 				slicerAnte = slice(slicerAnte.start + dimensionNearestTail(leaf), slicerAnte.stop)
 			if slicerPost.start == 1:

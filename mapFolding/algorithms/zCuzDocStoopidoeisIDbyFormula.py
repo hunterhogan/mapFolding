@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from functools import cache
 from hunterMakesPy import inclusive
-from mapFolding.oeis import dictionaryOEIS, NOTcountingFolds
+from mapFolding.oeis import countingMeanders, dictionaryOEIS
 
 @cache
 def A000136(n: int) -> int:
@@ -101,11 +101,11 @@ def A301620(n: int) -> int:
 
 @cache
 def _A000682(n: int) -> int:
-	return NOTcountingFolds('A000682', n)
+	return countingMeanders('A000682', n)
 
 def _A007822(n: int) -> int:
-	return NOTcountingFolds('A007822', n)
+	return countingMeanders('A007822', n)
 
 @cache
 def _A005316(n: int) -> int:
-	return NOTcountingFolds('A005316', n)
+	return countingMeanders('A005316', n)

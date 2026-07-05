@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from collections import deque
-from concurrent.futures import as_completed, Future, ProcessPoolExecutor
-from humpy_cytoolz.itertoolz import last
+from concurrent.futures import as_completed, ProcessPoolExecutor
+from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding import packageSettings
 from mapFolding._e import (
 	bifurcatePermutationSpace, DOTvalues, getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost,
-	indicesMapShapeDimensionLengthsAreEqual, Leaf, leafOrigin, mapShapeIs2上nDimensions, pileOrigin)
+	indicesMapShapeDimensionLengthsAreEqual, leafOrigin, mapShapeIs2上nDimensions, pileOrigin)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import between吗
 from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, reduceAllPermutationSpace
@@ -15,8 +15,13 @@ from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
 from tqdm import tqdm
+from typing import TYPE_CHECKING
 import csv
 import uuid
+
+if TYPE_CHECKING:
+	from concurrent.futures import Future
+	from mapFolding._e import Leaf
 
 def count(state: EliminationState) -> EliminationState:
 	model = cp_model.CpModel()

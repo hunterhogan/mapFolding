@@ -1,3 +1,5 @@
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownVariableType=false
 """Verify that a folding sequence is possible.
 
 You can use this module to validate stamp-folding sequences by detecting forbidden
@@ -69,15 +71,15 @@ from __future__ import annotations
 
 from collections import deque
 from functools import cache
-from humpy_cytoolz.dicttoolz import valfilter as leafFilter
-from humpy_cytoolz.functoolz import curry as syntacticCurry
+from humpy_cytoolz import valfilter as filterLeaf
+from humpy_toolz.curried.operator import indexOf
 from hunterMakesPy import CallableFunction, inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding._e import DOTitems
 from mapFolding._e.filters import between吗, extractPinnedLeaves
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
-from operator import floordiv, indexOf
+from operator import floordiv
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -534,7 +536,7 @@ def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf
 		leafCrease = leaf + productOfDimensions(mapShape, dimension)
 	return leafCrease
 
-inThis_pileOf = syntacticCurry(indexOf)
+inThis_pileOf = indexOf
 
 #======== Functions for a `PermutationSpace` ============================
 
@@ -593,7 +595,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
-		for pile, leaf in sorted(DOTitems(leafFilter(between吗(0, state.leafLast - inclusive), state.permutationSpace))):
+		for pile, leaf in sorted(DOTitems(filterLeaf(between吗(0, state.leafLast - inclusive), state.permutationSpace))):
 			leafCrease: int | None = getCreasePost(state.mapShape, leaf, dimension)
 			if leafCrease is None:
 				continue

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from humpy_cytoolz.dicttoolz import valfilter as leafFilter
-from humpy_cytoolz.functoolz import curry as syntacticCurry
+from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from mapFolding import ansiColorReset, ansiColors, packageSettings
 from mapFolding._e import DOTvalues, PermutationSpace, PinnedLeaves, 一, 零, 首一, 首零一
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf
@@ -37,7 +36,7 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPermutationSp
 	listSurplusDictionaries: list[PermutationSpace] = []
 	for permutationSpace in listPermutationSpace:
 		maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-		for pile, leaf in leafFilter(thisIsALeaf, permutationSpace).items():
+		for pile, leaf in filterLeaf(thisIsALeaf, permutationSpace).items():
 			maskMatches &= (arrayFoldings[:, pile] == leaf)
 		if not bool(maskMatches.any()):
 			listSurplusDictionaries.append(permutationSpace)
@@ -106,7 +105,7 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		if pinningCoverage.indicesOverlappingPermutationSpace:
 			sys.stdout.write(f"{ansiColors.RedOnWhite}{len(pinningCoverage.indicesOverlappingPermutationSpace)} overlapping dictionaries{ansiColorReset}\n")
 			for indexDictionary in sorted(pinningCoverage.indicesOverlappingPermutationSpace)[0:2]:
-				sys.stdout.write(pformat(leafFilter(thisIsALeaf, state.listPermutationSpace[indexDictionary]), width=140) + '\n')
+				sys.stdout.write(pformat(filterLeaf(thisIsALeaf, state.listPermutationSpace[indexDictionary]), width=140) + '\n')
 
 		beansOrCornbread: Callable[[PermutationSpace], bool] = beansWithoutCornbread(state)
 		listBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.listPermutationSpace))

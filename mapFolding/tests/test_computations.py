@@ -30,7 +30,7 @@ from __future__ import annotations
 from hunterMakesPy import raiseIfNone
 from mapFolding.basecamp import countFolds
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, NOTcountingFolds, oeisIDfor_n
+from mapFolding.oeis import countingMeanders, dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, oeisIDfor_n
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -77,8 +77,8 @@ def test_A007822(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLi
 	pathLikeWriteFoldsTotal: PathLike[str] | None = None
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
 	expected: int = dictionaryOEIS[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = NOTcountingFolds(oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
-	assertEqualTo(actual, expected, NOTcountingFolds.__name__, oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
+	actual: int = countingMeanders(oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, CPUlimit=processorLimit)
+	assertEqualTo(actual, expected, countingMeanders.__name__, oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
 
 @pytest.mark.parametrize(
 	'oeisIdentifier, sequenceIndex, flow, processorLimit'
@@ -116,7 +116,7 @@ def test_countFolds(oeisIdentifier: str, sequenceIndex: int, flow: str, processo
 	"""
 	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisIdentifier]['getMapShape'](sequenceIndex)
 	expected: int = dictionaryOEISMapFolding[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = countFolds(None, None, None, processorLimit, mapShape, flow)
+	actual: int = countFolds(None, None, None, CPUlimit=processorLimit, mapShape=mapShape, flow=flow)
 	assertEqualTo(actual, expected, countFolds.__name__, None, None, None, processorLimit, mapShape, flow)
 
 @pytest.mark.parametrize(
@@ -148,8 +148,8 @@ def test_meanders(oeisIdentifier: str, sequenceIndex: int, flow: str) -> None:
 	"""
 	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisIdentifier in dictionaryOEISMapFolding else dictionaryOEIS
 	expected: int = dictionaryCurrent[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = NOTcountingFolds(oeisIdentifier, sequenceIndex, flow, None)
-	assertEqualTo(actual, expected, NOTcountingFolds.__name__, oeisIdentifier, sequenceIndex, flow, None)
+	actual: int = countingMeanders(oeisIdentifier, sequenceIndex, flow, None)
+	assertEqualTo(actual, expected, countingMeanders.__name__, oeisIdentifier, sequenceIndex, flow, None)
 
 @pytest.mark.parametrize(
 	'oeisIdentifier, sequenceIndex'
@@ -171,7 +171,7 @@ def test_meanders(oeisIdentifier: str, sequenceIndex: int, flow: str) -> None:
 		, pytest.param('A301620', 3, id='A301620::n3')
 	]
 )
-def test_NOTcountingFolds(oeisIdentifier: str, sequenceIndex: int) -> None:
+def test_countingMeanders(oeisIdentifier: str, sequenceIndex: int) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -187,8 +187,8 @@ def test_NOTcountingFolds(oeisIdentifier: str, sequenceIndex: int) -> None:
 	"""
 	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisIdentifier in dictionaryOEISMapFolding else dictionaryOEIS
 	expected: int = dictionaryCurrent[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = NOTcountingFolds(oeisIdentifier, sequenceIndex, None, None)
-	assertEqualTo(actual, expected, NOTcountingFolds.__name__, oeisIdentifier, sequenceIndex, None, None)
+	actual: int = countingMeanders(oeisIdentifier, sequenceIndex, None, None)
+	assertEqualTo(actual, expected, countingMeanders.__name__, oeisIdentifier, sequenceIndex, None, None)
 
 @pytest.mark.parametrize(
 	'oeisIdentifier, sequenceIndex'

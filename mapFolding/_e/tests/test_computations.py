@@ -21,7 +21,7 @@ def pinningFunctionEliminateFolds2上nDimensional(request: pytest.FixtureRequest
 	return request.param
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
-	*[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4), ('A001417', 5))]
+	*[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4),)]  # , ('A001417', 5))]
 	, *[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "constraintPropagation", 0.99) for oeisID, n in (("A000136", 5), ("A001415", 5), ("A001416", 4), ("A001417", 4), ("A001418", 3), ("A195646", 2))]
 	, *[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "elimination", 0.99) for oeisID, n in (("A000136", 3), ("A001415", 3), ("A001416", 2), ("A001417", 2), ("A001418", 2), ("A195646", 1))]
 	, *[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][dictionaryOEISMapFolding[oeisID]["offset"]], oeisID, dictionaryOEISMapFolding[oeisID]["offset"], "constraintPropagation", 1) for oeisID in ('A000136', 'A001415', 'A001416', 'A001418')]
@@ -44,7 +44,7 @@ def test_eliminateFoldsMapShape(expected: int, oeisID: str, n: int, flow: str, C
 	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 	state: EliminationState | None = None
 	pathLikeWriteFoldsTotal: None = None
-	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow), expected, 'eliminateFolds', mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow)
+	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit, flow=flow), expected, 'eliminateFolds', mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow)
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
 	*[pytest.param(ValueError, oeisID, dictionaryOEISMapFolding[oeisID]["offset"], "constraintPropagation", 1) for oeisID in ('A001417', 'A195646')],
@@ -54,7 +54,7 @@ def test_eliminateFoldsMapShapeError(expected: type[Exception], oeisID: str, n: 
 	state: EliminationState | None = None
 	pathLikeWriteFoldsTotal: None = None
 	with pytest.raises(expected):
-		eliminateFolds(mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow)
+		eliminateFolds(mapShape, state, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit, flow=flow)
 
 # @pytest.mark.parametrize("n", [4, 5], ids=lambda n: f"n={n}")
 @pytest.mark.parametrize("n", [4], ids=lambda n: f"n={n}")

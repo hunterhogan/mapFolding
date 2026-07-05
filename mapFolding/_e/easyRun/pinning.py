@@ -5,8 +5,7 @@ from __future__ import annotations
 from collections import deque
 from collections.abc import Callable, Iterable
 from gmpy2 import fac
-from humpy_cytoolz.curried import map as toolz_map
-from humpy_cytoolz.functoolz import compose
+from humpy_cytoolz import compose, map as toolz_map
 from mapFolding._e import (
 	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves,
 	getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, LeafOptions, PermutationSpace)

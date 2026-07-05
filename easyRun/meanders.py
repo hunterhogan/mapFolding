@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.oeis import dictionaryOEIS, NOTcountingFolds
+from mapFolding.oeis import countingMeanders, dictionaryOEIS
 import gc
 import sys
 import time
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 		for n in nList:
 			gc.collect()
 			timeStart = time.perf_counter()
-			countTotal = NOTcountingFolds(oeisID, n, flow)
+			countTotal = countingMeanders(oeisID, n, flow)
 			if n < dictionaryOEIS[oeisID]['valueUnknown']:
 				write()
 			else:

@@ -138,7 +138,7 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
     """Compute the total meander count encoded in `state.dictionaryMeanders`.
 
     You can use `doTheNeedful` as the meander transfer-matrix entry point for the `matrixMeanders`
-    flow selected by `mapFolding.oeis.NOTcountingFolds` [1]. The function runs `count(state)` and
+    flow selected by `mapFolding.oeis.countingMeanders` [1]. The function runs `count(state)` and
     returns the sum of final state multiplicities for the semi-meander and meandric counting context
     documented in OEIS entries A000682 and A005316 [2][3], the Jensen transfer-matrix method [4],
     and implementation lineages by Howroyd and Irvine [5][6].
@@ -162,7 +162,7 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
 
     References
     ----------
-    [1] `mapFolding.oeis.NOTcountingFolds`
+    [1] `mapFolding.oeis.countingMeanders`
 
     [2] OEIS A000682, Semi-meanders.
         https://oeis.org/A000682
