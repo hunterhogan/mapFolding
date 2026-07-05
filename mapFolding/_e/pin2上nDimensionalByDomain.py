@@ -1,3 +1,4 @@
+# ruff: noqa: DOC201
 from __future__ import annotations
 
 from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd

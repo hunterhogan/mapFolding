@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+# SEMIOTICS is_even as isEven吗
 from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
-from hunterMakesPy import CallableFunction, inclusive, raiseIfNone
+from hunterMakesPy import inclusive, raiseIfNone
 from mapFolding._e import (
-	dimensionIndex, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, getLeavesCreaseAnte, getLeavesCreasePost, Leaf,
-	leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一)
+	dimensionIndex, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, getLeavesCreaseAnte, getLeavesCreasePost, leafInSubHyperplane,
+	ptount, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一)
 from mapFolding._e.filters import exclude
 from operator import add, neg, sub
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator
+	from hunterMakesPy import CallableFunction
+	from mapFolding._e import Leaf
 	from mapFolding._e.dataBaskets import EliminationState
 
 #======== crease-based subroutines for analyzing a specific `pile`. =======

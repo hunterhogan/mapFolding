@@ -1,3 +1,4 @@
+# ruff: noqa: DOC201
 from __future__ import annotations
 
 from functools import cache
@@ -21,11 +22,11 @@ def _getLeafDomain(leaf: Leaf, dimensionsTotal: int, mapShape: tuple[int, ...], 
 	if mapShapeIs2上nDimensions(state.mapShape):
 		originPinned: bool = leaf == leafOrigin
 		return range(
-					state.sumsOfProductsOfDimensions[dimensionNearestTail(leaf) + inclusive]  # `start`, first value included in the `range`.
+					state.sumsOfProductsOfDimensions[dimensionNearestTail(leaf) + inclusive]  		# `start`, first value included in the `range`.
 						+ howManyDimensionsHaveOddParity(leaf)
 						- originPinned
 
-					, state.sumsOfProductsOfDimensionsNearest首[dimensionNearest首(leaf)]		# `stop`, first value excluded from the `range`.
+					, state.sumsOfProductsOfDimensionsNearest首[dimensionNearest首(leaf)]  			# `stop`, first value excluded from the `range`.
 						+ 2
 						- howManyDimensionsHaveOddParity(leaf)
 						- originPinned
@@ -466,8 +467,8 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 
 				indexDomain0 = 3 * pilesTotal // 4
 				indexDomain0 -= pilesFewerDomain0
+				# NOTE thinking:  首一二(dimensionsTotal)
 				if pileOfLeaf零 < 首一二(dimensionsTotal):
-# NOTE My thinking: because       首一二(dimensionsTotal)
 					dimensionIndexPart首: int = dimensionsTotal
 					dimensionIndexPart一: int = dimensionIndex(一)
 					dimensionIndexPart二: int = dimensionIndex(二)
@@ -739,7 +740,7 @@ def _getLeaf首零Plus零Domain(domain首零Plus零: tuple[Pile, ...], pileOfLea
 		listIndicesPilesExcluded.extend([-1])
 
 	if 首零一(dimensionsTotal) < pileOfLeaf首零一 < 首零一二(dimensionsTotal):
-		if pileOfLeaf一零 in [首一(dimensionsTotal), 首零(dimensionsTotal)]:
+		if pileOfLeaf一零 in {首一(dimensionsTotal), 首零(dimensionsTotal)}:
 			listIndicesPilesExcluded.extend([-1])
 		elif 二 < pileOfLeaf一零 < 首二(dimensionsTotal):
 			listIndicesPilesExcluded.extend([0])
