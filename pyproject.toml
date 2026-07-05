@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.19.0"
+version = "0.20.0"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -101,7 +101,7 @@ run = { branch = true, concurrency = ["multiprocessing"], data_file = "mapFoldin
 ], parallel = true, source = ["."] }
 
 [tool.pytest]
-addopts = ["--color=no", "-n 6"]
+addopts = ["--color=auto", "-n 6"]
 log_auto_indent = "On"
 testpaths = ["mapFolding/tests"]
 
