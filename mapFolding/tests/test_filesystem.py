@@ -25,69 +25,55 @@ from contextlib import redirect_stdout
 from mapFolding.beDRY import validateListDimensions
 from mapFolding.filesystemToolkit import getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal
 from mapFolding.oeis import dictionaryOEISMapFolding
+from mapFolding.tests import assertEqualTo
 from pathlib import Path
 import io
 import pytest
 import unittest.mock
 
-@pytest.mark.parametrize("foldsTotal", [pytest.param(123, id="foldsTotal-123")])
+@pytest.mark.parametrize('foldsTotal', [pytest.param(123, id='foldsTotal-123')])
 def test_saveFoldsTotal_fallback(path_tmpTesting: Path, foldsTotal: int) -> None:
-	pathFilename: Path = path_tmpTesting / "foldsTotal.txt"
-	with unittest.mock.patch("pathlib.Path.write_text", side_effect=OSError("Simulated write failure")), unittest.mock.patch("os.getcwd", return_value=str(path_tmpTesting)):
+	pathFilename: Path = path_tmpTesting / 'foldsTotal.txt'
+	with unittest.mock.patch('pathlib.Path.write_text', side_effect=OSError('Simulated write failure')), unittest.mock.patch('os.getcwd', return_value=str(path_tmpTesting)):
 		capturedOutput: io.StringIO = io.StringIO()
 		with redirect_stdout(capturedOutput):
 			saveFoldsTotal(pathFilename, foldsTotal)
-	fallbackFiles: list[Path] = list(path_tmpTesting.glob("foldsTotalYO_*.txt"))
-	assert len(fallbackFiles) == 1, "Fallback file was not created upon write failure."
+	fallbackFiles: list[Path] = list(path_tmpTesting.glob('foldsTotalYO_*.txt'))
+	assertEqualTo(len(fallbackFiles), 1, saveFoldsTotal.__name__, pathFilename, foldsTotal)
 
-@pytest.mark.parametrize("listDimensions, expectedFilename", [
-	([11, 13], "p11x13.foldsTotal"),
-	([17, 13, 11], "p11x13x17.foldsTotal"),
-])
+@pytest.mark.parametrize('listDimensions, expectedFilename', [([11, 13], 'p11x13.foldsTotal'), ([17, 13, 11], 'p11x13x17.foldsTotal')])
 def test_getFilenameFoldsTotal(listDimensions: list[int], expectedFilename: str) -> None:
 	"""Test that getFilenameFoldsTotal generates correct filenames with dimensions sorted."""
 	mapShape: tuple[int, ...] = validateListDimensions(listDimensions)
 	filenameActual: str = getFilenameFoldsTotal(mapShape)
-	assert filenameActual == expectedFilename, f"Expected filename {expectedFilename} but got {filenameActual}"
+	assertEqualTo(filenameActual, expectedFilename, getFilenameFoldsTotal.__name__, mapShape)
 
 @pytest.mark.parametrize(
-	"mapShape",
-	[
-		pytest.param(dictionaryOEISMapFolding["A000136"]["getMapShape"](3), id="A000136::n3"),
-		pytest.param(dictionaryOEISMapFolding["A001415"]["getMapShape"](3), id="A001415::n3"),
-	],
+	'mapShape', [pytest.param(dictionaryOEISMapFolding['A000136']['getMapShape'](3), id='A000136::n3'), pytest.param(dictionaryOEISMapFolding['A001415']['getMapShape'](3), id='A001415::n3')]
 )
 def test_getPathFilenameFoldsTotal_defaultPath(mapShape: tuple[int, ...]) -> None:
 	"""Test getPathFilenameFoldsTotal with default path."""
 	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(mapShape)
-	assert pathFilenameFoldsTotal.is_absolute(), "Path should be absolute"
-	assert pathFilenameFoldsTotal.name == getFilenameFoldsTotal(mapShape), "Filename should match getFilenameFoldsTotal output"
-	assert pathFilenameFoldsTotal.parent == getPathRootJobDEFAULT(), "Parent directory should match default job root"
+	assertEqualTo(pathFilenameFoldsTotal.is_absolute(), True, getPathFilenameFoldsTotal.__name__, mapShape)
+	assertEqualTo(pathFilenameFoldsTotal.name, getFilenameFoldsTotal(mapShape), getPathFilenameFoldsTotal.__name__, mapShape)
+	assertEqualTo(pathFilenameFoldsTotal.parent, getPathRootJobDEFAULT(), getPathFilenameFoldsTotal.__name__, mapShape)
 
 @pytest.mark.parametrize(
-	"mapShape",
-	[
-		pytest.param(dictionaryOEISMapFolding["A000136"]["getMapShape"](3), id="A000136::n3"),
-		pytest.param(dictionaryOEISMapFolding["A001415"]["getMapShape"](3), id="A001415::n3"),
-	],
+	'mapShape', [pytest.param(dictionaryOEISMapFolding['A000136']['getMapShape'](3), id='A000136::n3'), pytest.param(dictionaryOEISMapFolding['A001415']['getMapShape'](3), id='A001415::n3')]
 )
 def test_getPathFilenameFoldsTotal_relativeFilename(mapShape: tuple[int, ...]) -> None:
 	"""Test getPathFilenameFoldsTotal with relative filename."""
-	relativeFilename: Path = Path("custom/path/test.foldsTotal")
+	relativeFilename: Path = Path('custom/path/test.foldsTotal')
 	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(mapShape, relativeFilename)
-	assert pathFilenameFoldsTotal.is_absolute(), "Path should be absolute"
-	assert pathFilenameFoldsTotal == getPathRootJobDEFAULT() / relativeFilename, "Relative path should be appended to default job root"
+	assertEqualTo(pathFilenameFoldsTotal.is_absolute(), True, getPathFilenameFoldsTotal.__name__, mapShape, relativeFilename)
+	assertEqualTo(pathFilenameFoldsTotal, getPathRootJobDEFAULT() / relativeFilename, getPathFilenameFoldsTotal.__name__, mapShape, relativeFilename)
 
 @pytest.mark.parametrize(
-	"mapShape",
-	[
-		pytest.param(dictionaryOEISMapFolding["A000136"]["getMapShape"](3), id="A000136::n3"),
-		pytest.param(dictionaryOEISMapFolding["A001415"]["getMapShape"](3), id="A001415::n3"),
-	],
+	'mapShape', [pytest.param(dictionaryOEISMapFolding['A000136']['getMapShape'](3), id='A000136::n3'), pytest.param(dictionaryOEISMapFolding['A001415']['getMapShape'](3), id='A001415::n3')]
 )
 def test_getPathFilenameFoldsTotal_createsDirs(path_tmpTesting: Path, mapShape: tuple[int, ...]) -> None:
 	"""Test that getPathFilenameFoldsTotal creates necessary directories."""
-	nestedPath: Path = path_tmpTesting / "deep/nested/structure"
+	nestedPath: Path = path_tmpTesting / 'deep/nested/structure'
 	pathFilenameFoldsTotal: Path = getPathFilenameFoldsTotal(mapShape, nestedPath)
-	assert pathFilenameFoldsTotal.parent.exists(), "Parent directories should be created"
-	assert pathFilenameFoldsTotal.parent.is_dir(), "Created path should be a directory"
+	assertEqualTo(pathFilenameFoldsTotal.parent.exists(), True, getPathFilenameFoldsTotal.__name__, mapShape, nestedPath)
+	assertEqualTo(pathFilenameFoldsTotal.parent.is_dir(), True, getPathFilenameFoldsTotal.__name__, mapShape, nestedPath)

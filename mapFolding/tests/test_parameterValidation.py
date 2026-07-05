@@ -30,7 +30,7 @@ from __future__ import annotations
 from hunterMakesPy.parseParameters import intInnit
 from hunterMakesPy.tests.test_parseParameters import PytestFor_intInnit, PytestFor_oopsieKwargsie
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, validateListDimensions
-from mapFolding.tests.conftest import standardizedEqualToCallableReturn
+from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
 import multiprocessing
 import numba
@@ -41,68 +41,127 @@ if TYPE_CHECKING:
 	from collections.abc import Callable
 	from typing import Any, Literal
 
-@pytest.mark.parametrize("listDimensions,expected_intInnit,expected_validateListDimensions", [
-	(None, ValueError, ValueError),  # None instead of list
-	(['a'], ValueError, ValueError),  # string
-	([-4, 2], [-4, 2], ValueError),  # negative
-	([-3], [-3], ValueError),  # negative
-	([1, 2, 3, 4, 5], [1, 2, 3, 4, 5], (1, 2, 3, 4, 5)),  # sequential
-	([1, sys.maxsize], [1, sys.maxsize], (1, sys.maxsize)),  # maxint
-	([7.5], ValueError, ValueError),  # float
-	([1] * 1000, [1] * 1000, (1,) * 1000),  # long list
-	([11], [11], NotImplementedError),  # single dimension
-	([2, 2, 2, 2], [2, 2, 2, 2], (2, 2, 2, 2)),  # repeated dimensions
-	([2, 3, 4], [2, 3, 4], (2, 3, 4)),
-	([2, 3], [2, 3], (2, 3)),
-	([2] * 11, [2] * 11, (2,) * 11),  # power of 2
-	([3] * 5, [3] * 5, (3,) * 5),  # power of 3
-	([None], TypeError, TypeError),  # None
-	([True], TypeError, TypeError),  # bool
-	([[17, 39]], TypeError, TypeError),  # nested
-	([], ValueError, ValueError),  # empty
-	([complex(1, 1)], ValueError, ValueError),  # complex number
-	([float('inf')], ValueError, ValueError),  # infinity
-	([float('nan')], ValueError, ValueError),  # NaN
-	([sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize], (sys.maxsize, sys.maxsize)),  # overflow protection
-	(range(3, 7), [3, 4, 5, 6], (3, 4, 5, 6)),  # range sequence type
-	(tuple([3, 5, 7]), [3, 5, 7], (3, 5, 7)),  # tuple sequence type  # noqa: C409
-])
-def test_listDimensionsAsParameter(listDimensions: list[Any] | range | tuple[Any, ...] | None
-	, expected_intInnit: type[Any] | list[int]
-	, expected_validateListDimensions: type[Any] | tuple[int, ...]) -> None:
-	"""Test both validateListDimensions and getLeavesTotal with the same inputs."""
-	standardizedEqualToCallableReturn(expected_intInnit, intInnit, listDimensions)
-	standardizedEqualToCallableReturn(expected_validateListDimensions, validateListDimensions, listDimensions)
+@pytest.mark.parametrize(
+	'listDimensions,expected'
+	, [
+		([-4, 2], [-4, 2])
+		, ([-3], [-3])
+		, ([1, 2, 3, 4, 5], [1, 2, 3, 4, 5])
+		, ([1, sys.maxsize], [1, sys.maxsize])
+		, ([1] * 1000, [1] * 1000)
+		, ([11], [11])
+		, ([2, 2, 2, 2], [2, 2, 2, 2])
+		, ([2, 3, 4], [2, 3, 4])
+		, ([2, 3], [2, 3])
+		, ([2] * 11, [2] * 11)
+		, ([3] * 5, [3] * 5)
+		, ([sys.maxsize, sys.maxsize], [sys.maxsize, sys.maxsize])
+		, (range(3, 7), [3, 4, 5, 6])
+		, ((3, 5, 7), [3, 5, 7])
+	]
+)
+def test_intInnit(listDimensions: list[Any] | range | tuple[Any, ...], expected: list[int]) -> None:
+	actual: list[int] = intInnit(listDimensions)
+	assertEqualTo(actual, expected, intInnit.__name__, listDimensions)
+
+@pytest.mark.parametrize(
+	'listDimensions,expected'
+	, [
+		(None, ValueError)
+		, (['a'], ValueError)
+		, ([7.5], ValueError)
+		, ([None], TypeError)
+		, ([True], TypeError)
+		, ([[17, 39]], TypeError)
+		, ([], ValueError)
+		, ([complex(1, 1)], ValueError)
+		, ([float('inf')], ValueError)
+		, ([float('nan')], ValueError)
+	]
+)
+def test_intInnitError(listDimensions: list[Any] | None, expected: type[Exception]) -> None:
+	with pytest.raises(expected) as exceptionInfo:
+		intInnit(listDimensions)
+	assertEqualTo(type(exceptionInfo.value), expected, intInnit.__name__, listDimensions)
+
+@pytest.mark.parametrize(
+	'listDimensions,expected'
+	, [
+		([1, 2, 3, 4, 5], (1, 2, 3, 4, 5))
+		, ([1, sys.maxsize], (1, sys.maxsize))
+		, ([1] * 1000, (1,) * 1000)
+		, ([2, 2, 2, 2], (2, 2, 2, 2))
+		, ([2, 3, 4], (2, 3, 4))
+		, ([2, 3], (2, 3))
+		, ([2] * 11, (2,) * 11)
+		, ([3] * 5, (3,) * 5)
+		, ([sys.maxsize, sys.maxsize], (sys.maxsize, sys.maxsize))
+		, (range(3, 7), (3, 4, 5, 6))
+		, ((3, 5, 7), (3, 5, 7))
+	]
+)
+def test_validateListDimensions(listDimensions: list[Any] | range | tuple[Any, ...], expected: tuple[int, ...]) -> None:
+	actual: tuple[int, ...] = validateListDimensions(listDimensions)
+	assertEqualTo(actual, expected, validateListDimensions.__name__, listDimensions)
+
+@pytest.mark.parametrize(
+	'listDimensions,expected'
+	, [
+		(None, ValueError)
+		, (['a'], ValueError)
+		, ([-4, 2], ValueError)
+		, ([-3], ValueError)
+		, ([7.5], ValueError)
+		, ([11], NotImplementedError)
+		, ([None], TypeError)
+		, ([True], TypeError)
+		, ([[17, 39]], TypeError)
+		, ([], ValueError)
+		, ([complex(1, 1)], ValueError)
+		, ([float('inf')], ValueError)
+		, ([float('nan')], ValueError)
+	]
+)
+def test_validateListDimensionsError(listDimensions: list[Any] | None, expected: type[Exception]) -> None:
+	with pytest.raises(expected) as exceptionInfo:
+		validateListDimensions(listDimensions)
+	assertEqualTo(type(exceptionInfo.value), expected, validateListDimensions.__name__, listDimensions)
 
 def test_getLeavesTotal_edge_cases() -> None:
 	"""Test edge cases for getLeavesTotal."""
 	# Order independence
-	standardizedEqualToCallableReturn(getLeavesTotal((2, 3, 4)), getLeavesTotal, (4, 2, 3))
+	actual: int = getLeavesTotal((4, 2, 3))
+	assertEqualTo(actual, 24, getLeavesTotal.__name__, (4, 2, 3))
 
 	# Input preservation
-	mapShape = (2, 3)
-	standardizedEqualToCallableReturn(6, getLeavesTotal, mapShape)
-	assert mapShape == (2, 3), "Input tuple was modified"
+	mapShape: tuple[int, ...] = (2, 3)
+	actual = getLeavesTotal(mapShape)
+	assertEqualTo(actual, 6, getLeavesTotal.__name__, mapShape)
+	assertEqualTo(mapShape, (2, 3), getLeavesTotal.__name__, mapShape)
 
-@pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_intInnit())
+@pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_intInnit())
 def testIntInnit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
 	callablePytest()
 
-@pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_oopsieKwargsie())
+@pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_oopsieKwargsie())
 def testOopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
 	callablePytest()
 
-@pytest.mark.parametrize("CPUlimit, expectedLimit", [
-	(None, numba.get_num_threads()),
-	(False, numba.get_num_threads()),
-	(True, 1),
-	(4, 4),
-	(0.5, max(1, numba.get_num_threads() // 2)),
-	(-0.5, max(1, numba.get_num_threads() // 2)),
-	(-2, max(1, numba.get_num_threads() - 2)),
-	(0, numba.get_num_threads()),
-	(1, 1),
-])
+@pytest.mark.parametrize(
+	'CPUlimit, expectedLimit'
+	, [
+		(None, numba.get_num_threads())
+		, (False, numba.get_num_threads())
+		, (True, 1)
+		, (4, 4)
+		, (0.5, max(1, numba.get_num_threads() // 2))
+		, (-0.5, max(1, numba.get_num_threads() // 2))
+		, (-2, max(1, numba.get_num_threads() - 2))
+		, (0, numba.get_num_threads())
+		, (1, 1)
+	]
+)
 def test_setCPUlimitNumba(CPUlimit: Literal[4, -2, 0, 1] | float | bool | None, expectedLimit: Any | int) -> None:
 	numba.set_num_threads(multiprocessing.cpu_count())
-	standardizedEqualToCallableReturn(expectedLimit, defineProcessorLimit, CPUlimit, 'numba')
+	actual: int = defineProcessorLimit(CPUlimit, 'numba')
+	assertEqualTo(actual, expectedLimit, defineProcessorLimit.__name__, CPUlimit, 'numba')

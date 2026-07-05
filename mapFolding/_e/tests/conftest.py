@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 	from pytest import FixtureRequest
 	import numpy
 
-pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
+pathDataSamples: Path = Path(packageSettings.pathPackage, "_e/tests/dataSamples").absolute()
 
 # ================== Test-function parameters ======================================================
 

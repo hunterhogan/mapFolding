@@ -29,7 +29,7 @@ from hunterMakesPy.tests.test_parseParameters import PytestFor_defineConcurrency
 from mapFolding.basecamp import countFolds
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
 from mapFolding.oeis import dictionaryOEISMapFolding, getFoldsTotalKnown
-from mapFolding.tests.conftest import standardizedEqualToCallableReturn
+from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
 import pytest
 
@@ -38,65 +38,53 @@ if TYPE_CHECKING:
 	from typing import Literal
 
 @pytest.mark.parametrize(
-	"mapShape",
-	[
-		pytest.param(dictionaryOEISMapFolding["A000136"]["getMapShape"](3), id="A000136::n3"),
-		pytest.param(dictionaryOEISMapFolding["A001415"]["getMapShape"](3), id="A001415::n3"),
-	],
+	'mapShape', [pytest.param(dictionaryOEISMapFolding['A000136']['getMapShape'](3), id='A000136::n3'), pytest.param(dictionaryOEISMapFolding['A001415']['getMapShape'](3), id='A001415::n3')]
 )
 def test_countFoldsComputationDivisionsInvalid(mapShape: tuple[int, ...]) -> None:
-	standardizedEqualToCallableReturn(ValueError, countFolds, mapShape, None, {"wrong": "value"})
+	expected: type[ValueError] = ValueError
+	computationDivisions: dict[str, str] = {'wrong': 'value'}
+	with pytest.raises(expected) as exceptionInfo:
+		countFolds(mapShape, None, computationDivisions)
+	assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, mapShape, None, computationDivisions)
 
-@pytest.mark.parametrize(
-	"mapShapeList",
-	[
-		pytest.param(list(dictionaryOEISMapFolding["A001417"]["getMapShape"](5)), id="A001417::n5"),
-	],
-)
+@pytest.mark.parametrize('mapShapeList', [pytest.param(list(dictionaryOEISMapFolding['A001417']['getMapShape'](5)), id='A001417::n5')])
 def test_countFoldsComputationDivisionsMaximum(mapShapeList: list[int]) -> None:
-	standardizedEqualToCallableReturn(getFoldsTotalKnown(tuple(mapShapeList)), countFolds, mapShapeList, None, 'maximum', None)
+	expected: int = getFoldsTotalKnown(tuple(mapShapeList))
+	actual: int = countFolds(mapShapeList, None, 'maximum', None)
+	assertEqualTo(actual, expected, countFolds.__name__, mapShapeList, None, 'maximum', None)
 
-@pytest.mark.parametrize("nameOfTest,callablePytest", PytestFor_defineConcurrencyLimit())
+@pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_defineConcurrencyLimit())
 def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
 	callablePytest()
 
 @pytest.mark.parametrize(
-	"mapShape",
-	[
-		pytest.param(dictionaryOEISMapFolding["A000136"]["getMapShape"](3), id="A000136::n3"),
-		pytest.param(dictionaryOEISMapFolding["A001415"]["getMapShape"](3), id="A001415::n3"),
-	],
+	'mapShape', [pytest.param(dictionaryOEISMapFolding['A000136']['getMapShape'](3), id='A000136::n3'), pytest.param(dictionaryOEISMapFolding['A001415']['getMapShape'](3), id='A001415::n3')]
 )
-@pytest.mark.parametrize("CPUlimitParameter", [{"invalid": True}, ["weird"]])
+@pytest.mark.parametrize('CPUlimitParameter', [{'invalid': True}, ['weird']])
 def test_countFolds_cpuLimitOopsie(mapShape: tuple[int, ...], CPUlimitParameter: dict[str, bool] | list[str]) -> None:
-	standardizedEqualToCallableReturn(TypeError, countFolds, mapShape, None, 'cpu', CPUlimitParameter)
+	expected: type[TypeError] = TypeError
+	with pytest.raises(expected) as exceptionInfo:
+		countFolds(mapShape, None, 'cpu', CPUlimitParameter)
+	assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, mapShape, None, 'cpu', CPUlimitParameter)
 
-@pytest.mark.parametrize("computationDivisions, concurrencyLimit, listDimensions, expectedTaskDivisions", [
-	(None, 4, [9, 11], 0),
-	("maximum", 4, [7, 11], 77),
-	("cpu", 4, [3, 7], 4),
-	(["invalid"], 4, [19, 23], ValueError),
-	(20, 4, [3, 5], ValueError)
-])
-def test_getTaskDivisions(
-	computationDivisions: Literal['maximum', 'cpu', 20] | list[str] | None,
-	concurrencyLimit: Literal[4],
-	listDimensions: list[int],
-	expectedTaskDivisions: int | type[ValueError]
-) -> None:
+@pytest.mark.parametrize('computationDivisions, concurrencyLimit, listDimensions, expectedTaskDivisions', [(None, 4, [9, 11], 0), ('maximum', 4, [7, 11], 77), ('cpu', 4, [3, 7], 4)])
+def test_getTaskDivisions(computationDivisions: Literal['maximum', 'cpu', 20] | list[str] | None, concurrencyLimit: Literal[4], listDimensions: list[int], expectedTaskDivisions: int) -> None:
 	mapShape: tuple[int, ...] = validateListDimensions(listDimensions)
 	leavesTotal: int = getLeavesTotal(mapShape)
-	standardizedEqualToCallableReturn(expectedTaskDivisions, getTaskDivisions, computationDivisions, concurrencyLimit, leavesTotal)
+	actual: int = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
+	assertEqualTo(actual, expectedTaskDivisions, getTaskDivisions.__name__, computationDivisions, concurrencyLimit, leavesTotal)
 
-@pytest.mark.parametrize("expected,parameter", [
-	(TypeError, [4]),  # list
-	(TypeError, (2,)),  # tuple
-	(TypeError, {2}),  # set
-	(TypeError, {"cores": 2}),  # dict
-])
-def test_setCPUlimitMalformedParameter(
-	expected: type[TypeError] | Literal[2],
-	parameter: list[int] | tuple[int, ...] | set[int] | dict[str, int] | Literal['2']
-) -> None:
+@pytest.mark.parametrize('computationDivisions, concurrencyLimit, listDimensions, expected', [(['invalid'], 4, [19, 23], ValueError), (20, 4, [3, 5], ValueError)])
+def test_getTaskDivisionsError(computationDivisions: Literal[20] | list[str], concurrencyLimit: Literal[4], listDimensions: list[int], expected: type[ValueError]) -> None:
+	mapShape: tuple[int, ...] = validateListDimensions(listDimensions)
+	leavesTotal: int = getLeavesTotal(mapShape)
+	with pytest.raises(expected) as exceptionInfo:
+		getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
+	assertEqualTo(type(exceptionInfo.value), expected, getTaskDivisions.__name__, computationDivisions, concurrencyLimit, leavesTotal)
+
+@pytest.mark.parametrize('expected,parameter', [(TypeError, [4]), (TypeError, (2,)), (TypeError, {2}), (TypeError, {'cores': 2})])
+def test_setCPUlimitMalformedParameter(expected: type[TypeError], parameter: list[int] | tuple[int, ...] | set[int] | dict[str, int]) -> None:
 	"""Test that invalid CPUlimit types are properly handled."""
-	standardizedEqualToCallableReturn(expected, defineProcessorLimit, parameter)
+	with pytest.raises(expected) as exceptionInfo:
+		defineProcessorLimit(parameter)
+	assertEqualTo(type(exceptionInfo.value), expected, defineProcessorLimit.__name__, parameter)

@@ -32,7 +32,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 		- Integers for absolute leaf indices (e.g., `4`, `5`, `6`, `7`)
 		- Callables that take `dimensionsTotal` and return a leaf index (e.g., `首二`, `首零二`)
 	pathFilename : PurePath | None = None
-		The output file path. If `None`, defaults to `tests/dataSamples/p2DnDomain{leafNames}.py`.
+		The output file path. If `None`, defaults to `_e/tests/dataSamples/p2DnDomain{leafNames}.py`.
 	settings : dict[str, dict[str, Any]] | None = None
 		Settings for `writePython` formatter. If `None`, uses defaults.
 
@@ -55,7 +55,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 	filenameLeafPart: str = '_'.join(listLeafNames)
 
 	if pathFilename is None:
-		pathFilename = Path(f"{packageSettings.pathPackage}/tests/dataSamples/p2DnDomain{filenameLeafPart}.py")
+		pathFilename = Path(f"{packageSettings.pathPackage}/_e/tests/dataSamples/p2DnDomain{filenameLeafPart}.py")
 	else:
 		pathFilename = Path(pathFilename)
 

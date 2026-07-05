@@ -3,7 +3,7 @@
 These tests verify the correctness of functions in `mapFolding._e._data` that compute
 leaf domains, pile ranges, and addend dictionaries for map folding elimination algorithms.
 
-The test data is stored in `tests/dataSamples/A001417.py` and supports multiple `mapShape`
+The test data is stored in `_e/tests/dataSamples/A001417.py` and supports multiple `mapShape`
 configurations. Currently, data exists for:
 - (2,)*4 → 16 leaves (2d4)
 - (2,)*5 → 32 leaves (2d5)
@@ -20,9 +20,10 @@ from mapFolding._e import (
 	getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getIteratorOfLeaves, getLeafDomain, getLeafOptions, getLeavesCreaseAnte,
 	getLeavesCreasePost)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.tests.conftestAnnex import assertEqualTo
 from mapFolding._e.tests.dataSamples import (
-	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二, p2DnDomain首零二_首二)
-from mapFolding.tests.dataSamples import p2DnDomain首零一二_首一二
+	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二, p2DnDomain首零一二_首一二,
+	p2DnDomain首零二_首二)
 from more_itertools import all_unique, unique_to_each
 from typing import TYPE_CHECKING
 import pytest
@@ -41,14 +42,14 @@ def test_getDictionaryLeafDomains(mapShape: tuple[int, ...]) -> None:
 
 	dictionaryLeafDomainsActual: dict[int, range] = getDictionaryLeafDomains(state)
 
-	assert len(dictionaryLeafDomainsActual) == state.leavesTotal, f"getDictionaryLeafDomains: dictionary length {len(dictionaryLeafDomainsActual)} != {state.leavesTotal} for {mapShape=}."
+	assertEqualTo(len(dictionaryLeafDomainsActual), state.leavesTotal, 'getDictionaryLeafDomains', mapShape)
 
 	for leaf in range(state.leavesTotal):
 		rangeActual: range = dictionaryLeafDomainsActual[leaf]
 		startAuthoritativeData, stopAuthoritativeData, stepAuthoritativeData = dictionaryLeafDomainsAuthoritativeData[leaf]
-		assert rangeActual.start == startAuthoritativeData, f"getDictionaryLeafDomains: range.start mismatch at {leaf=} for {mapShape=}. Expected {startAuthoritativeData}, got {rangeActual.start}."
-		assert rangeActual.stop == stopAuthoritativeData, f"getDictionaryLeafDomains: range.stop mismatch at {leaf=} for {mapShape=}. Expected {stopAuthoritativeData}, got {rangeActual.stop}."
-		assert rangeActual.step == stepAuthoritativeData, f"getDictionaryLeafDomains: range.step mismatch at {leaf=} for {mapShape=}. Expected {stepAuthoritativeData}, got {rangeActual.step}."
+		assertEqualTo(rangeActual.start, startAuthoritativeData, 'getDictionaryLeafDomains.range.start', leaf, mapShape)
+		assertEqualTo(rangeActual.stop, stopAuthoritativeData, 'getDictionaryLeafDomains.range.stop', leaf, mapShape)
+		assertEqualTo(rangeActual.step, stepAuthoritativeData, 'getDictionaryLeafDomains.range.step', leaf, mapShape)
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafOptionsKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafOptionsKnown])
 def test_getDictionaryLeafOptions(mapShape: tuple[int, ...]) -> None:
@@ -58,12 +59,12 @@ def test_getDictionaryLeafOptions(mapShape: tuple[int, ...]) -> None:
 
 	dictionaryLeafOptionsActual: dict[Pile, LeafOptions] = getDictionaryLeafOptions(state)
 
-	assert len(dictionaryLeafOptionsActual) == state.leavesTotal, f"getDictionaryLeafOptions: dictionary length {len(dictionaryLeafOptionsActual)} != {state.leavesTotal} for {mapShape=}."
+	assertEqualTo(len(dictionaryLeafOptionsActual), state.leavesTotal, 'getDictionaryLeafOptions', mapShape)
 
 	for pile in range(state.leavesTotal):
 		tupleLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(dictionaryLeafOptionsActual[pile]))
 		tupleLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryLeafOptionsAuthoritativeData[pile]
-		assert tupleLeavesPileActual == tupleLeavesPileAuthoritativeData, f"getDictionaryLeafOptions: mismatch at {pile=} for {mapShape=}. Expected {tupleLeavesPileAuthoritativeData}, got {tupleLeavesPileActual}."
+		assertEqualTo(tupleLeavesPileActual, tupleLeavesPileAuthoritativeData, 'getDictionaryLeafOptions', pile, mapShape)
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
 def test_getLeafDomain(mapShape: tuple[int, ...]) -> None:
@@ -73,23 +74,20 @@ def test_getLeafDomain(mapShape: tuple[int, ...]) -> None:
 
 	for leaf in range(state.leavesTotal):
 		rangeActual: range = getLeafDomain(state, leaf)
-		startAuthoritativeData: int
-		stopAuthoritativeData: int
-		stepAuthoritativeData: int
 		startAuthoritativeData, stopAuthoritativeData, stepAuthoritativeData = dictionaryLeafDomainsAuthoritativeData[leaf]
-		assert rangeActual.start == startAuthoritativeData, f"getLeafDomain: range.start mismatch at {leaf=} for {mapShape=}. Expected {startAuthoritativeData}, got {rangeActual.start}."
-		assert rangeActual.stop == stopAuthoritativeData, f"getLeafDomain: range.stop mismatch at {leaf=} for {mapShape=}. Expected {stopAuthoritativeData}, got {rangeActual.stop}."
-		assert rangeActual.step == stepAuthoritativeData, f"getLeafDomain: range.step mismatch at {leaf=} for {mapShape=}. Expected {stepAuthoritativeData}, got {rangeActual.step}."
+		assertEqualTo(rangeActual.start, startAuthoritativeData, 'getLeafDomain.range.start', leaf, mapShape)
+		assertEqualTo(rangeActual.stop, stopAuthoritativeData, 'getLeafDomain.range.stop', leaf, mapShape)
+		assertEqualTo(rangeActual.step, stepAuthoritativeData, 'getLeafDomain.range.step', leaf, mapShape)
 
 @pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
 @pytest.mark.parametrize("domainFunction,moduleAuthoritativeData", [
-	(getDomainDimension一, p2DnDomain3_2_首一_首零一),
-	(getDomainDimension二, p2DnDomain6_7_5_4),
-	(getDomainDimension首二, p2DnDomain首二_首零二_首零一二_首一二),
-	(getDomain二一零and二一, p2DnDomain7_6),
-	(getDomain二零and二, p2DnDomain5_4),
-	(getDomain首零一二and首一二, p2DnDomain首零一二_首一二),
-	(getDomain首零二and首二, p2DnDomain首零二_首二),
+	(getDomainDimension一, p2DnDomain3_2_首一_首零一)
+	, (getDomainDimension二, p2DnDomain6_7_5_4)
+	, (getDomainDimension首二, p2DnDomain首二_首零二_首零一二_首一二)
+	, (getDomain二一零and二一, p2DnDomain7_6)
+	, (getDomain二零and二, p2DnDomain5_4)
+	, (getDomain首零一二and首一二, p2DnDomain首零一二_首一二)
+	, (getDomain首零二and首二, p2DnDomain首零二_首二)
 ], ids=lambda domainFunction: domainFunction.__name__)
 def test_getLeafDomainsCombined(domainFunction: CallableFunction[[EliminationState], Sequence[tuple[int, ...]]], moduleAuthoritativeData: ModuleType, dimensionsTotal: int) -> None:
 	"""Verify combined domain function against authoritative dataset: completeness, uniqueness, correctness."""
@@ -103,9 +101,9 @@ def test_getLeafDomainsCombined(domainFunction: CallableFunction[[EliminationSta
 	tuplesExtraInActual = tuple(tuplesExtraInActual)
 	hasAllUnique: bool = all_unique(tuplesDomainActual)
 
-	assert hasAllUnique, f"{domainFunction.__name__}: returned duplicate tuples for {mapShape=}."
-	assert len(tuplesMissingFromActual) == 0, f"{domainFunction.__name__}: missing {len(tuplesMissingFromActual)} tuples from authoritative data for {mapShape=}. Missing samples: {sorted(tuplesMissingFromActual)[:3]}"
-	assert len(tuplesExtraInActual) == 0, f"{domainFunction.__name__}: returned {len(tuplesExtraInActual)} tuples not in authoritative data for {mapShape=}. Extra samples: {sorted(tuplesExtraInActual)[:3]}"
+	assertEqualTo(hasAllUnique, True, domainFunction.__name__, mapShape)
+	assertEqualTo(len(tuplesMissingFromActual), 0, domainFunction.__name__, mapShape)
+	assertEqualTo(len(tuplesExtraInActual), 0, domainFunction.__name__, mapShape)
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafOptionsKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafOptionsKnown])
 def test_getLeafOptions(mapShape: tuple[int, ...]) -> None:
@@ -117,7 +115,7 @@ def test_getLeafOptions(mapShape: tuple[int, ...]) -> None:
 		tupleLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))
 		tupleLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryLeafOptionsAuthoritativeData[pile]
 
-		assert tupleLeavesPileActual == tupleLeavesPileAuthoritativeData, f"getLeafOptions: mismatch at {pile=} for {mapShape=}. Expected {tupleLeavesPileAuthoritativeData}, got {tupleLeavesPileActual}."
+		assertEqualTo(tupleLeavesPileActual, tupleLeavesPileAuthoritativeData, 'getLeafOptions', pile, mapShape)
 
 @pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
 @pytest.mark.parametrize("creaseKind,creaseFunction,dictionaryExpectedByMapShape", [("increase", getLeavesCreasePost, A001417.dictionaryCreasesIncreaseKnown), ("decrease", getLeavesCreaseAnte, A001417.dictionaryCreasesDecreaseKnown)], ids=["increase", "decrease"])
@@ -130,14 +128,14 @@ def test_getLeavesCrease(creaseKind: str, creaseFunction: CallableFunction[[Elim
 		listLeavesActual: list[int] = list(creaseFunction(state, leaf))
 		listLeavesExpectedSorted: list[int] = dictionaryExpectedByLeaf[leaf]
 
-		assert sorted(listLeavesActual) == listLeavesExpectedSorted, f"{creaseFunction.__name__} ({creaseKind}): mismatch for {mapShape=}, {leaf=}. Expected(sorted)={listLeavesExpectedSorted}, got(sorted)={sorted(listLeavesActual)}."
+		assertEqualTo(sorted(listLeavesActual), listLeavesExpectedSorted, creaseFunction.__name__, mapShape, leaf)
 
-		assert all_unique(listLeavesActual), f"{creaseFunction.__name__} ({creaseKind}): duplicates found for {mapShape=}, {leaf=}. Actual={listLeavesActual}."
+		assertEqualTo(all_unique(listLeavesActual), True, creaseFunction.__name__, mapShape, leaf)
 
 		for leafPost in listLeavesActual:
-			assert 0 <= leafPost < state.leavesTotal, f"{creaseFunction.__name__} ({creaseKind}): out-of-range value for {mapShape=}, {leaf=}. Got {leafPost}, expected 0 <= leafPost < {state.leavesTotal}."
+			assertEqualTo(0 <= leafPost < state.leavesTotal, True, creaseFunction.__name__, mapShape, leaf, leafPost=leafPost)
 			bitFlip: int = leaf ^ leafPost
-			assert (bitFlip > 0) and ((bitFlip & (bitFlip - 1)) == 0), f"{creaseFunction.__name__} ({creaseKind}): expected one-bit flip for {mapShape=}, {leaf=}. Got {leafPost=}, {bitFlip=} (leaf^leafPost)."
+			assertEqualTo((bitFlip > 0) and ((bitFlip & (bitFlip - 1)) == 0), True, creaseFunction.__name__, mapShape, leaf, leafPost=leafPost, bitFlip=bitFlip)
 
 		listBitFlips: list[int] = [leaf ^ leafPost for leafPost in listLeavesActual]
-		assert listBitFlips == sorted(listBitFlips), f"{creaseFunction.__name__} ({creaseKind}): expected bit flips in increasing dimension order for {mapShape=}, {leaf=}. Got bit flips {listBitFlips}."
+		assertEqualTo(listBitFlips, sorted(listBitFlips), creaseFunction.__name__, mapShape, leaf)

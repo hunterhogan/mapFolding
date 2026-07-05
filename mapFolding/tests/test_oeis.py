@@ -1,3 +1,4 @@
+# ruff: noqa: S311
 """OEIS (Online Encyclopedia of Integer Sequences) integration testing.
 
 This module validates the package's integration with OEIS, ensuring that sequence
@@ -28,7 +29,8 @@ from __future__ import annotations
 
 from contextlib import redirect_stdout
 from mapFolding.oeis import _librarianStandardizesOEISid, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented
-from mapFolding.tests.conftest import standardizedEqualToCallableReturn, standardizedSystemExit
+from mapFolding.tests import assertEqualTo, messageTestFailure
+from mapFolding.tests.conftest import standardizedSystemExit
 from typing import Any
 import io
 import pytest
@@ -37,26 +39,34 @@ import re as regex
 import unittest.mock
 
 def test__validateOEISid_valid_id(oeisIDmapFolding: str) -> None:
-	standardizedEqualToCallableReturn(oeisIDmapFolding, _librarianStandardizesOEISid, oeisIDmapFolding)
+	actual: str = _librarianStandardizesOEISid(oeisIDmapFolding)
+	assertEqualTo(actual, oeisIDmapFolding, _librarianStandardizesOEISid.__name__, oeisIDmapFolding)
 
 def test__validateOEISid_valid_id_case_insensitive(oeisIDmapFolding: str) -> None:
-	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _librarianStandardizesOEISid, oeisIDmapFolding.lower())
-	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _librarianStandardizesOEISid, oeisIDmapFolding.upper())
-	standardizedEqualToCallableReturn(oeisIDmapFolding.upper(), _librarianStandardizesOEISid, oeisIDmapFolding.swapcase())
+	expected: str = oeisIDmapFolding.upper()
+	actualLower: str = _librarianStandardizesOEISid(oeisIDmapFolding.lower())
+	actualUpper: str = _librarianStandardizesOEISid(oeisIDmapFolding.upper())
+	actualSwapcase: str = _librarianStandardizesOEISid(oeisIDmapFolding.swapcase())
+	assertEqualTo(actualLower, expected, _librarianStandardizesOEISid.__name__, oeisIDmapFolding.lower())
+	assertEqualTo(actualUpper, expected, _librarianStandardizesOEISid.__name__, oeisIDmapFolding.upper())
+	assertEqualTo(actualSwapcase, expected, _librarianStandardizesOEISid.__name__, oeisIDmapFolding.swapcase())
 
-parameters_test_aOFn_invalid_n = [
-	(-random.randint(1, 100), "randomNegative"),  # noqa: S311
-	("foo", "string"),
-	(1.5, "float")
-]
+parameters_test_aOFn_invalid_n = [(-random.randint(1, 100), 'randomNegative'), ('foo', 'string'), (1.5, 'float')]
 badValues, badValuesIDs = zip(*parameters_test_aOFn_invalid_n, strict=True)
-@pytest.mark.parametrize("badN", badValues, ids=badValuesIDs)
+
+@pytest.mark.parametrize('badN', badValues, ids=badValuesIDs)
 def test_aOFn_invalid_n(oeisID_1random: str, badN: Any) -> None:
 	"""Check that negative or non-integer n raises ValueError."""
-	standardizedEqualToCallableReturn(ValueError, oeisIDfor_n, oeisID_1random, badN)
+	expected: type[ValueError] = ValueError
+	with pytest.raises(expected) as exceptionInfo:
+		oeisIDfor_n(oeisID_1random, badN)
+	assertEqualTo(type(exceptionInfo.value), expected, oeisIDfor_n.__name__, oeisID_1random, badN)
 
 def test_aOFn_zeroDim_A001418() -> None:
-	standardizedEqualToCallableReturn(ArithmeticError, oeisIDfor_n, 'A001418', 0)
+	expected: type[ArithmeticError] = ArithmeticError
+	with pytest.raises(expected) as exceptionInfo:
+		oeisIDfor_n('A001418', 0)
+	assertEqualTo(type(exceptionInfo.value), expected, oeisIDfor_n.__name__, 'A001418', 0)
 
 # ===== Command Line Interface Tests =====
 def testHelpText() -> None:
@@ -69,20 +79,21 @@ def testHelpText() -> None:
 
 	# Verify content
 	for oeisID in oeisIDsImplemented:
-		assert oeisID in helpText
-		assert dictionaryOEISMapFolding[oeisID]['description'] in helpText
+		assertEqualTo(oeisID in helpText, True, getOEISids.__name__, oeisID)
+		assertEqualTo(dictionaryOEISMapFolding[oeisID]['description'] in helpText, True, getOEISids.__name__, oeisID)
 
 	# Extract and verify examples
 
 	cliMatch = regex.search(r'OEIS_for_n (\w+) (\d+)', helpText)
 	pythonMatch = regex.search(r"oeisIDfor_n\('(\w+)', (\d+)\)", helpText)
 
-	assert cliMatch and pythonMatch, "Help text missing examples"
+	assert cliMatch is not None, messageTestFailure(cliMatch, 'a CLI example match', getOEISids.__name__)
+	assert pythonMatch is not None, messageTestFailure(pythonMatch, 'a Python example match', getOEISids.__name__)
 	oeisID, n = pythonMatch.groups()
 	n = int(n)
 
 	# Verify CLI and Python examples use same values
-	assert cliMatch.groups() == (oeisID, str(n)), "CLI and Python examples inconsistent"
+	assertEqualTo(cliMatch.groups(), (oeisID, str(n)), getOEISids.__name__)
 
 	# Verify the example works
 	expectedValue = oeisIDfor_n(oeisID, n)
@@ -92,29 +103,30 @@ def testHelpText() -> None:
 		outputStream = io.StringIO()
 		with redirect_stdout(outputStream):
 			OEIS_for_n()
-		standardizedEqualToCallableReturn(expectedValue, lambda: int(outputStream.getvalue().strip().split()[0]))
+		actual: int = int(outputStream.getvalue().strip().split()[0])
+		assertEqualTo(actual, expectedValue, OEIS_for_n.__name__, oeisID, n)
 
 def testCLI_InvalidInputs() -> None:
 	"""Test CLI error handling."""
 	testCases = [
-		(['OEIS_for_n'], "missing arguments"),
-		(['OEIS_for_n', 'A999999', '1'], "invalid OEIS ID"),
-		(['OEIS_for_n', 'A001415', '-1'], "negative n"),
-		(['OEIS_for_n', 'A001415', 'abc'], "non-integer n"),
+		(['OEIS_for_n'], 'missing arguments')
+		, (['OEIS_for_n', 'A999999', '1'], 'invalid OEIS ID')
+		, (['OEIS_for_n', 'A001415', '-1'], 'negative n')
+		, (['OEIS_for_n', 'A001415', 'abc'], 'non-integer n')
 	]
 
 	for arguments, _testID in testCases:
 		with unittest.mock.patch('sys.argv', arguments):
-			standardizedSystemExit("error", OEIS_for_n)
+			standardizedSystemExit('error', OEIS_for_n)
 
 def testCLI_HelpFlag() -> None:
 	"""Verify --help output contains required information."""
 	with unittest.mock.patch('sys.argv', ['OEIS_for_n', '--help']):
 		outputStream = io.StringIO()
 		with redirect_stdout(outputStream):
-			standardizedSystemExit("nonError", OEIS_for_n)
+			standardizedSystemExit('nonError', OEIS_for_n)
 
 		helpOutput = outputStream.getvalue()
-		assert "Available OEIS sequences:" in helpOutput
-		assert "Usage examples:" in helpOutput
-		assert all(oeisID in helpOutput for oeisID in oeisIDsImplemented)
+		assertEqualTo('Available OEIS sequences:' in helpOutput, True, OEIS_for_n.__name__, '--help')
+		assertEqualTo('Usage examples:' in helpOutput, True, OEIS_for_n.__name__, '--help')
+		assertEqualTo(all(oeisID in helpOutput for oeisID in oeisIDsImplemented), True, OEIS_for_n.__name__, '--help')

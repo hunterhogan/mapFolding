@@ -34,7 +34,8 @@ from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTo
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import parametersNumbaLight
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
-from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject, standardizedEqualToCallableReturn
+from mapFolding.tests import assertEqualTo, messageTestFailure
+from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject
 from numba.core.errors import NumbaPendingDeprecationWarning
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
@@ -49,13 +50,13 @@ if TYPE_CHECKING:
 	from types import ModuleType
 
 @pytest.mark.parametrize(
-	"oeisIdentifier, sequenceIndex, flow, processorLimit"
+	'oeisIdentifier, sequenceIndex, flow, processorLimit'
 	, [
-		pytest.param("A007822", 4, "algorithm", 0.5, id="algorithm")
-		, pytest.param("A007822", 4, "asynchronous", 0.5, id="asynchronous")
-		, pytest.param("A007822", 4, "theorem2", 0.5, id="theorem2")
-		, pytest.param("A007822", 4, "theorem2Numba", 0.5, id="theorem2Numba")
-		, pytest.param("A007822", 4, "theorem2Trimmed", 0.5, id="theorem2Trimmed")
+		pytest.param('A007822', 4, 'algorithm', 0.5, id='algorithm')
+		, pytest.param('A007822', 4, 'asynchronous', 0.5, id='asynchronous')
+		, pytest.param('A007822', 4, 'theorem2', 0.5, id='theorem2')
+		, pytest.param('A007822', 4, 'theorem2Numba', 0.5, id='theorem2Numba')
+		, pytest.param('A007822', 4, 'theorem2Trimmed', 0.5, id='theorem2Trimmed')
 	]
 )
 def test_A007822(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLimit: float) -> None:
@@ -74,18 +75,19 @@ def test_A007822(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLi
 
 	"""
 	pathLikeWriteFoldsTotal: PathLike[str] | None = None
-	warnings.filterwarnings("ignore", category=NumbaPendingDeprecationWarning)
+	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
 	expected: int = dictionaryOEIS[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	standardizedEqualToCallableReturn(expected, NOTcountingFolds, oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
+	actual: int = NOTcountingFolds(oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
+	assertEqualTo(actual, expected, NOTcountingFolds.__name__, oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
 
 @pytest.mark.parametrize(
-	"oeisIdentifier, sequenceIndex, flow, processorLimit"
+	'oeisIdentifier, sequenceIndex, flow, processorLimit'
 	, [
-		pytest.param("A000136", 3, "daoOfMapFolding", None, id="A000136::daoOfMapFolding")
-		, pytest.param("A001415", 3, "numba", None, id="A001415::numba")
-		, pytest.param("A001416", 3, "theorem2Numba", None, id="A001416::theorem2Numba")
-		, pytest.param("A001417", 3, "theorem2", None, id="A001417::theorem2")
-		, pytest.param("A001418", 3, "theorem2Trimmed", None, id="A001418::theorem2Trimmed")
+		pytest.param('A000136', 3, 'daoOfMapFolding', None, id='A000136::daoOfMapFolding')
+		, pytest.param('A001415', 3, 'numba', None, id='A001415::numba')
+		, pytest.param('A001416', 3, 'theorem2Numba', None, id='A001416::theorem2Numba')
+		, pytest.param('A001417', 3, 'theorem2', None, id='A001417::theorem2')
+		, pytest.param('A001418', 3, 'theorem2Trimmed', None, id='A001418::theorem2Trimmed')
 	]
 )
 def test_countFolds(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLimit: float | None) -> None:
@@ -114,17 +116,18 @@ def test_countFolds(oeisIdentifier: str, sequenceIndex: int, flow: str, processo
 	"""
 	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisIdentifier]['getMapShape'](sequenceIndex)
 	expected: int = dictionaryOEISMapFolding[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	standardizedEqualToCallableReturn(expected, countFolds, None, None, None, processorLimit, mapShape, flow)
+	actual: int = countFolds(None, None, None, processorLimit, mapShape, flow)
+	assertEqualTo(actual, expected, countFolds.__name__, None, None, None, processorLimit, mapShape, flow)
 
 @pytest.mark.parametrize(
-	"oeisIdentifier, sequenceIndex, flow"
+	'oeisIdentifier, sequenceIndex, flow'
 	, [
-		pytest.param("A000682", 3, "matrixMeanders", id="A000682::matrixMeanders")
-		, pytest.param("A005316", 3, "matrixMeanders", id="A005316::matrixMeanders")
-		, pytest.param("A000682", 3, "matrixNumPy", id="A000682::matrixNumPy")
-		, pytest.param("A005316", 3, "matrixNumPy", id="A005316::matrixNumPy")
-		, pytest.param("A000682", 3, "matrixPandas", id="A000682::matrixPandas")
-		, pytest.param("A005316", 3, "matrixPandas", id="A005316::matrixPandas")
+		pytest.param('A000682', 3, 'matrixMeanders', id='A000682::matrixMeanders')
+		, pytest.param('A005316', 3, 'matrixMeanders', id='A005316::matrixMeanders')
+		, pytest.param('A000682', 3, 'matrixNumPy', id='A000682::matrixNumPy')
+		, pytest.param('A005316', 3, 'matrixNumPy', id='A005316::matrixNumPy')
+		, pytest.param('A000682', 3, 'matrixPandas', id='A000682::matrixPandas')
+		, pytest.param('A005316', 3, 'matrixPandas', id='A005316::matrixPandas')
 	]
 )
 def test_meanders(oeisIdentifier: str, sequenceIndex: int, flow: str) -> None:
@@ -145,26 +148,27 @@ def test_meanders(oeisIdentifier: str, sequenceIndex: int, flow: str) -> None:
 	"""
 	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisIdentifier in dictionaryOEISMapFolding else dictionaryOEIS
 	expected: int = dictionaryCurrent[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	standardizedEqualToCallableReturn(expected, NOTcountingFolds, oeisIdentifier, sequenceIndex, flow, None)
+	actual: int = NOTcountingFolds(oeisIdentifier, sequenceIndex, flow, None)
+	assertEqualTo(actual, expected, NOTcountingFolds.__name__, oeisIdentifier, sequenceIndex, flow, None)
 
 @pytest.mark.parametrize(
-	"oeisIdentifier, sequenceIndex"
+	'oeisIdentifier, sequenceIndex'
 	, [
-		pytest.param("A000560", 3, id="A000560::n3")
-		, pytest.param("A000682", 3, id="A000682::n3")
-		, pytest.param("A001010", 3, id="A001010::n3")
-		, pytest.param("A001011", 3, id="A001011::n3")
-		, pytest.param("A005315", 3, id="A005315::n3")
-		, pytest.param("A005316", 3, id="A005316::n3")
-		, pytest.param("A007822", 3, id="A007822::n3")
-		, pytest.param("A060206", 3, id="A060206::n3")
-		, pytest.param("A077460", 3, id="A077460::n3")
-		, pytest.param("A078591", 3, id="A078591::n3")
-		, pytest.param("A086345", 3, id="A086345::n3")
-		, pytest.param("A178961", 3, id="A178961::n3")
-		, pytest.param("A223094", 3, id="A223094::n3")
-		, pytest.param("A259702", 3, id="A259702::n3")
-		, pytest.param("A301620", 3, id="A301620::n3")
+		pytest.param('A000560', 3, id='A000560::n3')
+		, pytest.param('A000682', 3, id='A000682::n3')
+		, pytest.param('A001010', 3, id='A001010::n3')
+		, pytest.param('A001011', 3, id='A001011::n3')
+		, pytest.param('A005315', 3, id='A005315::n3')
+		, pytest.param('A005316', 3, id='A005316::n3')
+		, pytest.param('A007822', 3, id='A007822::n3')
+		, pytest.param('A060206', 3, id='A060206::n3')
+		, pytest.param('A077460', 3, id='A077460::n3')
+		, pytest.param('A078591', 3, id='A078591::n3')
+		, pytest.param('A086345', 3, id='A086345::n3')
+		, pytest.param('A178961', 3, id='A178961::n3')
+		, pytest.param('A223094', 3, id='A223094::n3')
+		, pytest.param('A259702', 3, id='A259702::n3')
+		, pytest.param('A301620', 3, id='A301620::n3')
 	]
 )
 def test_NOTcountingFolds(oeisIdentifier: str, sequenceIndex: int) -> None:
@@ -183,17 +187,18 @@ def test_NOTcountingFolds(oeisIdentifier: str, sequenceIndex: int) -> None:
 	"""
 	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisIdentifier in dictionaryOEISMapFolding else dictionaryOEIS
 	expected: int = dictionaryCurrent[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	standardizedEqualToCallableReturn(expected, NOTcountingFolds, oeisIdentifier, sequenceIndex, None, None)
+	actual: int = NOTcountingFolds(oeisIdentifier, sequenceIndex, None, None)
+	assertEqualTo(actual, expected, NOTcountingFolds.__name__, oeisIdentifier, sequenceIndex, None, None)
 
 @pytest.mark.parametrize(
-	"oeisIdentifier, sequenceIndex"
+	'oeisIdentifier, sequenceIndex'
 	, [
-		pytest.param("A000136", 3, id="A000136::n3")
-		, pytest.param("A001415", 3, id="A001415::n3")
-		, pytest.param("A001416", 3, id="A001416::n3")
-		, pytest.param("A001417", 3, id="A001417::n3")
-		, pytest.param("A001418", 3, id="A001418::n3")
-		, pytest.param("A195646", 2, id="A195646::n2")
+		pytest.param('A000136', 3, id='A000136::n3')
+		, pytest.param('A001415', 3, id='A001415::n3')
+		, pytest.param('A001416', 3, id='A001416::n3')
+		, pytest.param('A001417', 3, id='A001417::n3')
+		, pytest.param('A001418', 3, id='A001418::n3')
+		, pytest.param('A195646', 2, id='A195646::n2')
 	]
 )
 def test_oeisIDfor_n(oeisIdentifier: str, sequenceIndex: int) -> None:
@@ -216,12 +221,13 @@ def test_oeisIDfor_n(oeisIdentifier: str, sequenceIndex: int) -> None:
 
 	"""
 	expected: int = dictionaryOEISMapFolding[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	standardizedEqualToCallableReturn(expected, oeisIDfor_n, oeisIdentifier, sequenceIndex)
+	actual: int = oeisIDfor_n(oeisIdentifier, sequenceIndex)
+	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisIdentifier, sequenceIndex)
 
 @pytest.fixture
 def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:  # NOTE TO AI: DO NOT CHANGE THIS IDENTIFIER NAME.
 	"""Return one deterministic map shape suitable for code generation tests."""
-	return dictionaryOEISMapFolding["A000136"]["getMapShape"](3)
+	return dictionaryOEISMapFolding['A000136']['getMapShape'](3)
 
 @pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:
@@ -247,6 +253,7 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	"""
 	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # noqa: PLC0415
 	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba  # noqa: PLC0415
+
 	mapShape: tuple[int, ...] = oneTestCuzTestsOverwritingTests
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 
@@ -254,18 +261,18 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	pathFilenameFoldsTotal: Path = pathFilenameModule.with_suffix('.foldsTotalTesting')
 	registrarRecordsTemporaryFilesystemObject(pathFilenameFoldsTotal)
 
-	jobTest = RecipeJobTheorem2(state
-						, pathModule=PurePosixPath(pathFilenameModule.parent)
-						, moduleIdentifier=pathFilenameModule.stem
-						, pathFilenameFoldsTotal=PurePosixPath(pathFilenameFoldsTotal))
+	jobTest = RecipeJobTheorem2(state, pathModule=PurePosixPath(pathFilenameModule.parent), moduleIdentifier=pathFilenameModule.stem, pathFilenameFoldsTotal=PurePosixPath(pathFilenameFoldsTotal))
 	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
 	makeJobNumba(jobTest, spices)
 
-	Don_Lapre_Road_to_Self_Improvement: ModuleSpec = raiseIfNone(importlib.util.spec_from_file_location("__main__", pathFilenameModule))
+	Don_Lapre_Road_to_Self_Improvement: ModuleSpec = raiseIfNone(importlib.util.spec_from_file_location('__main__', pathFilenameModule))
 	module: ModuleType = importlib.util.module_from_spec(Don_Lapre_Road_to_Self_Improvement)
 
-	module.__name__ = "__main__"
-	assert Don_Lapre_Road_to_Self_Improvement.loader is not None
-	Don_Lapre_Road_to_Self_Improvement.loader.exec_module(module)
+	module.__name__ = '__main__'
+	loader = Don_Lapre_Road_to_Self_Improvement.loader
+	assert loader is not None, messageTestFailure(loader, 'a module loader', 'importlib.util.spec_from_file_location', '__main__', pathFilenameModule)
+	loader.exec_module(module)
 
-	standardizedEqualToCallableReturn(str(getFoldsTotalKnown(oneTestCuzTestsOverwritingTests)), pathFilenameFoldsTotal.read_text(encoding="utf-8").strip)
+	expected: str = str(getFoldsTotalKnown(oneTestCuzTestsOverwritingTests))
+	actual: str = pathFilenameFoldsTotal.read_text(encoding='utf-8').strip()
+	assertEqualTo(actual, expected, 'Path.read_text', pathFilenameFoldsTotal, encoding='utf-8')

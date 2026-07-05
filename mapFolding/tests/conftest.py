@@ -28,6 +28,7 @@ from __future__ import annotations
 from mapFolding import _theSSOT, packageSettings
 from mapFolding.beDRY import getLeavesTotal, makeDataContainer, validateListDimensions
 from mapFolding.oeis import oeisIDsImplemented
+from mapFolding.tests.conftestAnnex import assertEqualTo, messageTestFailure
 from pathlib import Path
 from typing import TYPE_CHECKING
 import numpy
@@ -67,71 +68,7 @@ def rtol(request: FixtureRequest) -> float:
 	"""The `rtol` (***r***elative ***tol***erance) parameter value for `numpy.allclose`."""
 	return 1e-05
 
-#======== uniform messages and standardized test formats ==========
-
-def uniformTestMessage(expected: Any, actual: Any, functionName: str, *arguments: Any) -> str:
-	"""Format assertion message for any test comparison.
-
-	Creates standardized, machine-parsable error messages that clearly display
-	what was expected versus what was received. This uniform formatting makes
-	test failures easier to debug and maintains consistency across the entire
-	test suite.
-
-	Parameters
-	----------
-	expected : Any
-		The value or exception type that was expected.
-	actual : Any
-		The value or exception type that was actually received.
-	functionName : str
-		Name of the function being tested.
-	arguments : Any
-		Arguments that were passed to the function.
-
-	Returns
-	-------
-	formattedMessage : str
-		A formatted string showing the test context and comparison.
-
-	"""
-	return (f"\nTesting: `{functionName}({', '.join(str(parameter) for parameter in arguments)})`\n"
-			f"Expected: {expected}\n"
-			f"Got: {actual}")
-
-def standardizedEqualToCallableReturn(expected: Any, functionTarget: Callable[..., Any], *arguments: Any) -> None:
-	"""Use with callables that produce a return or an error.
-
-	This is the primary testing function for validating both successful returns
-	and expected exceptions. It provides consistent error messaging and handles
-	the comparison logic that most tests in the suite rely on.
-
-	When testing a function that should raise an exception, pass the exception
-	type as the `expected` parameter. For successful returns, pass the expected
-	return value.
-
-	Parameters
-	----------
-	expected : Any
-		Expected return value or exception type.
-	functionTarget : Callable[..., Any]
-		The function to test.
-	arguments : Any
-		Arguments to pass to the function.
-
-	"""
-	if type(expected) is type[Exception]:
-		messageExpected = expected.__name__
-	else:
-		messageExpected = expected
-
-	try:
-		messageActual = actual = functionTarget(*arguments)
-	except Exception as actualError:
-		messageActual = type(actualError).__name__
-		actual = type(actualError)
-
-	functionName: str = getattr(functionTarget, "__name__", functionTarget.__class__.__name__)
-	assert actual == expected, uniformTestMessage(messageExpected, messageActual, functionName, *arguments)
+#======== standardized test formats ==========
 
 def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: Callable[..., Any], *arguments: Any) -> None:
 	"""Template for tests expecting SystemExit.
@@ -154,15 +91,16 @@ def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: 
 		functionTarget(*arguments)
 
 	exitCode = exitInfo.value.code
+	functionName: str = getattr(functionTarget, "__name__", functionTarget.__class__.__name__)
 
 	if expected == "error":
-		assert exitCode != 0, f"Expected error exit (non-zero) but got code {exitCode}"
+		assert exitCode != 0, messageTestFailure(exitCode, "a non-zero exit code", functionName, *arguments)
 	elif expected == "nonError":
-		assert exitCode == 0, f"Expected non-error exit (0) but got code {exitCode}"
+		assertEqualTo(exitCode, 0, functionName, *arguments)
 	elif isinstance(expected, (list, tuple)):
-		assert exitCode in expected, f"Expected exit code to be one of {expected} but got {exitCode}"
+		assert exitCode in expected, messageTestFailure(exitCode, expected, functionName, *arguments)
 	else:
-		assert exitCode == expected, f"Expected exit code {expected} but got {exitCode}"
+		assertEqualTo(exitCode, expected, functionName, *arguments)
 
 #======== SSOT for test data paths and filenames ==============
 pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
