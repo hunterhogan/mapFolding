@@ -69,7 +69,7 @@ from __future__ import annotations
 
 from collections import deque
 from functools import cache
-from humpy_cytoolz.dicttoolz import valfilter as leafFilter
+from humpy_cytoolz.dicttoolz import valfilter as filterLeaf
 from humpy_cytoolz.functoolz import curry as syntacticCurry
 from hunterMakesPy import CallableFunction, inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
@@ -593,7 +593,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
-		for pile, leaf in sorted(DOTitems(leafFilter(between吗(0, state.leafLast - inclusive), state.permutationSpace))):
+		for pile, leaf in sorted(DOTitems(filterLeaf(between吗(0, state.leafLast - inclusive), state.permutationSpace))):
 			leafCrease: int | None = getCreasePost(state.mapShape, leaf, dimension)
 			if leafCrease is None:
 				continue

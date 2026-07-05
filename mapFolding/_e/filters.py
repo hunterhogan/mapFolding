@@ -65,7 +65,10 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from gmpy2 import mpz
-from humpy_cytoolz.dicttoolz import valfilter as leafFilter
+# SEMIOTICS a "selector" is an `object` that most people call a "mask". `builtins.filter` is a
+# `Callable`. `filterLeaf` is a `Callable` similar to `filter` but specialized: identifiers are
+# general-to-specific.
+from humpy_cytoolz.dicttoolz import valfilter as filterLeaf
 from humpy_cytoolz.functoolz import curry as syntacticCurry
 from hunterMakesPy.parseParameters import intInnit
 from mapFolding._e import DOTitems, 零
@@ -371,7 +374,7 @@ def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	dictionaryOfPileLeaf : dict[int, int]
 		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 	"""
-	return dict(sorted(DOTitems(leafFilter(thisIsALeaf, permutationSpace))))
+	return dict(sorted(DOTitems(filterLeaf(thisIsALeaf, permutationSpace))))
 
 def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> UndeterminedPiles:
 	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
@@ -386,4 +389,4 @@ def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> Undetermined
 	pilesUndetermined : dict[int, LeafOptions]
 		Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
 	"""
-	return leafFilter(thisIsLeafOptions, permutationSpace)
+	return filterLeaf(thisIsLeafOptions, permutationSpace)

@@ -12,7 +12,9 @@ from collections import Counter, deque
 from functools import partial
 from gmpy2 import bit_clear, bit_mask
 from humpy_cytoolz.curried import map as toolz_map
-from humpy_cytoolz.dicttoolz import assoc as associate, itemfilter, keyfilter, merge, valfilter, valmap
+from humpy_cytoolz.dicttoolz import (
+	assoc as associate, itemfilter, keyfilter, merge, valfilter as filterLeaf, valfilter as filterLeafOptions, valfilter as filterValue,
+	valmap)
 from humpy_cytoolz.functoolz import compose, curry as syntacticCurry
 from humpy_cytoolz.itertoolz import groupby as toolz_groupby, unique
 from hunterMakesPy import CallableFunction, inclusive, raiseIfNone
@@ -534,7 +536,7 @@ def reduceAllPermutationSpace(state: EliminationState) -> EliminationState:
 
 		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
 		state.listPermutationSpace = deque()
-		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_leafDomainOf1(state), listPermutationSpace))
+		state.listPermutationSpace.extend(filter_map(reducePermutationSpace_leafDomainOf1(state), listPermutationSpace))
 
 		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
 		state.listPermutationSpace = deque()
@@ -717,7 +719,7 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 		pilesUndetermined: UndeterminedPiles = extractUndeterminedPiles(permutationSpace)
 
 		groupByLeafOptions: dict[LeafOptions, set[Pile]] = {}
-		for pile, leafOptions in valfilter(thisNotHaveThat(unique(pilesUndetermined.values())), pilesUndetermined).items():
+		for pile, leafOptions in filterLeafOptions(thisNotHaveThat(unique(pilesUndetermined.values())), pilesUndetermined).items():
 			groupByLeafOptions.setdefault(leafOptions, set()).add(pile)
 
 		dequeLeafOptionsAndPiles: deque[tuple[LeafOptions, set[Pile]]] = deque(DOTitems(
@@ -740,14 +742,14 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 #-------- Functions that do NOT use the shared logic -----------------------------------------
 
 @syntacticCurry
-def _reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to detect and pin leaves with domain size one.
 
 	I use this constraint encoder to detect leaves that can appear at only one pile (domain size
 	one) and pin those leaves. I compute the domain size for each leaf by counting how many piles
 	contain that leaf (either pinned or in `LeafOptions`). When a leaf appears at exactly one
 	pile, I pin that leaf at that pile using `atPilePinLeaf` [1] and propagate the pinning using
-	`_reducePermutationSpace_LeafIsPinned`.
+	`reducePermutationSpace_leafDomainOf1`.
 
 	The function also validates that every leaf has nonzero domain size. When any leaf has zero
 	domain (cannot appear anywhere), I invalidate `permutationSpace` by returning `None`.
@@ -779,10 +781,10 @@ def _reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSp
 		if set(range(state.leavesTotal)).difference(counterLeafDomainSize.keys()):
 			return None
 
-		leavesWithDomainOf1: set[Leaf] = set(DOTkeys(valfilter((1).__eq__, counterLeafDomainSize))).difference(leavesPinned.values()).difference([state.leavesTotal])
+		leavesWithDomainOf1: set[Leaf] = set(DOTkeys(filterValue((1).__eq__, counterLeafDomainSize))).difference(leavesPinned.values()).difference([state.leavesTotal])
 		if leavesWithDomainOf1:
 			leaf: Leaf = leavesWithDomainOf1.pop()
-			sherpa: PermutationSpace | None = _reducePermutationSpace_LeafIsPinned(state, atPilePinLeaf(permutationSpace, one(DOTkeys(valfilter(leafIsInPileRange(leaf), pilesUndetermined))), leaf))
+			sherpa: PermutationSpace | None = _reducePermutationSpace_LeafIsPinned(state, atPilePinLeaf(permutationSpace, one(DOTkeys(filterLeaf(leafIsInPileRange(leaf), pilesUndetermined))), leaf))
 			if (sherpa is None) or (not sherpa):
 				return None
 			else:

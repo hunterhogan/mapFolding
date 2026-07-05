@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import deque
 from concurrent.futures import as_completed, Future, ProcessPoolExecutor
-from humpy_cytoolz.dicttoolz import valfilter as leafFilter
+from humpy_cytoolz.dicttoolz import valfilter as filterLeaf
 from itertools import filterfalse
 from mapFolding._e import DOTitems, DOTvalues, Folding, getIteratorOfLeaves, mapShapeIs2上nDimensions
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
@@ -25,7 +25,7 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 
 		permutationSpace: PermutationSpace = state.listPermutationSpace.pop()
 
-		pile, leafOptions = first(DOTitems(leafFilter(thisIsLeafOptions, permutationSpace)))
+		pile, leafOptions = first(DOTitems(filterLeaf(thisIsLeafOptions, permutationSpace)))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=pile, permutationSpace=permutationSpace)
 		sherpa.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(sherpa.permutationSpace, sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))
