@@ -1,7 +1,7 @@
 # ruff: noqa: DOC201
 from __future__ import annotations
 
-from gmpy2 import bit_flip, bit_mask, bit_test, is_even, is_odd
+from gmpy2 import bit_flip, bit_mask, bit_test, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, raiseIfNone, zeroIndexed
 from mapFolding._e import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首, DOTgetPileIfLeaf,
@@ -118,7 +118,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		listRemoveLeaves.extend([首一(state.dimensionsTotal) + (一 + 零), last(getLeavesCreaseAnte(state, leafInSubHyperplane(leafAt一零)))])
 	if leafAt一零 == (零) + 首零一(state.dimensionsTotal):
 		listRemoveLeaves.extend([首零一二(state.dimensionsTotal)])
-	if is_odd(leafAt一零):
+	if isOdd吗(leafAt一零):
 		dimensionHeadSecond: int = raiseIfNone(dimensionSecondNearest首(leafAt一零))
 		indexBy首Second: int = dimensionHeadSecond * decreasing + decreasing  # Are you confused and/or annoyed by this? Blame Python. (Or figure out a better formula.)
 		listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionHeadSecond)])
@@ -143,7 +143,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 	if 首零(state.dimensionsTotal) < leafAt零一Ante首:
 		listRemoveLeaves.extend([(零) + 首零一(state.dimensionsTotal)])
-		if is_even(leafAt零一Ante首):
+		if isEven吗(leafAt零一Ante首):
 			listRemoveLeaves.extend([首一(state.dimensionsTotal)])
 			dimension: int = 一
 			if bit_test(leafAt零一Ante首, dimensionIndex(dimension)):
@@ -173,7 +173,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 				if 0 < sheepOrGoat < state.dimensionsTotal - 4:
 					comebackOffset = state.productsOfDimensions[raiseIfNone(dimensionSecondNearest首(leafAt零一Ante首))] - 二
 					listRemoveLeaves.extend([leafAt零一Ante首 - comebackOffset])
-		if is_odd(leafAt零一Ante首):
+		if isOdd吗(leafAt零一Ante首):
 			listRemoveLeaves.extend([一])
 			if leafAt零一Ante首 & bit_mask(4) == 0b001001:
 				listRemoveLeaves.extend([0b001011])
@@ -207,7 +207,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		if not bit_test(leafAt二, dimensionIndex(dimension)):
 			listRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) - dimension])
 
-		if is_odd(leafAt二):
+		if isOdd吗(leafAt二):
 			dimension = 三
 			if bit_test(leafAt二, dimensionIndex(dimension)):
 				listRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) + dimension])
@@ -219,7 +219,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	if ((首一(state.dimensionsTotal) < leafAt二 < 首零(state.dimensionsTotal)) and raiseIfNone(dimensionSecondNearest首(leafAt二)) != 2):
 		listRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal)])
 
-		if is_odd(leafAt二):
+		if isOdd吗(leafAt二):
 			dimension = 二
 			if not bit_test(leafAt二, dimensionIndex(dimension)):
 				listRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) - getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])
@@ -232,7 +232,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 			if bit_test(leafAt二, dimensionIndex(dimension)):
 				listRemoveLeaves.extend([leafAt二 - dimension])
 
-	if is_even(leafAt二):
+	if isEven吗(leafAt二):
 		listIndicesCreasePostToKeep.extend(range(state.dimensionsTotal - dimensionHead + 1, (state.dimensionsTotal - zeroIndexed)))
 
 		listRemoveLeaves.extend([
@@ -261,7 +261,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 			leavesWeDontWant: list[int] = [aLeaf + addendForUnknownReasons for aLeaf in filter(notLeafOriginOrLeaf零, sumsOfProductsOfDimensionsNearest首InSubSubHyperplane)]
 			listRemoveLeaves.extend(leavesWeDontWant)
 
-	if is_odd(leafAt二):
+	if isOdd吗(leafAt二):
 
 		if dimensionNearestTail(leafAt二 - 1) == 1:
 			listRemoveLeaves.extend([一])
@@ -379,8 +379,8 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	if bit_test(leafAt二Ante首, dimensionIndex(dimension)):
 		listRemoveLeaves.extend([leafAt二Ante首 - dimension])
 
-		if (is_even(leafAt二Ante首)
-		or (is_odd(leafAt二Ante首) and (dimensionIndex(dimension) < dimensionsConsecutiveAtTail(state, leafAt二Ante首)))):
+		if (isEven吗(leafAt二Ante首)
+		or (isOdd吗(leafAt二Ante首) and (dimensionIndex(dimension) < dimensionsConsecutiveAtTail(state, leafAt二Ante首)))):
 			listRemoveLeaves.extend([dimension])
 
 	dimension = 三
@@ -388,7 +388,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		listRemoveLeaves.extend([leafAt二Ante首 - dimension])
 
 		dimension = 四
-		if is_even(leafAt二Ante首) and (not bit_test(leafAt二Ante首, dimensionIndex(dimension))):
+		if isEven吗(leafAt二Ante首) and (not bit_test(leafAt二Ante首, dimensionIndex(dimension))):
 			listRemoveLeaves.extend([leafAt二Ante首 - getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])
 
 	if dimensionTail == 3:
@@ -402,7 +402,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		if bit_test(leafAt二Ante首, dimensionIndex(dimension)):
 			listRemoveLeaves.extend([dimension, 首零(state.dimensionsTotal) + dimension + 零])
 
-		if is_odd(leafAt二Ante首) and (not bit_test(leafAt二Ante首, dimensionIndex(dimension))):
+		if isOdd吗(leafAt二Ante首) and (not bit_test(leafAt二Ante首, dimensionIndex(dimension))):
 			listRemoveLeaves.extend([leafAt二Ante首 - 首零(state.dimensionsTotal) - dimension])
 
 			dimension = 二
@@ -414,7 +414,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 			listRemoveLeaves.extend([首零(state.dimensionsTotal) + dimension + 零])
 
 			dimension = 三
-			if is_even(leafAt二Ante首) and bit_test(leafAt二Ante首, dimensionIndex(dimension)):
+			if isEven吗(leafAt二Ante首) and bit_test(leafAt二Ante首, dimensionIndex(dimension)):
 				listRemoveLeaves.extend([dimension])
 
 		dimension = 四
@@ -424,12 +424,12 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		if not bit_test(leafAt二Ante首, dimensionIndex(dimension)):
 			listRemoveLeaves.extend([leafAt二Ante首 + dimension])
 
-	if is_odd(leafAt二Ante首):
+	if isOdd吗(leafAt二Ante首):
 		dimension = 零  # This is redundant but it might help expose patterns.
 		if bit_test(leafAt二Ante首, dimensionIndex(dimension)):
 			listRemoveLeaves.extend([一, leafAt二Ante首 - dimension, leafAt二Ante首 - getitem(state.productsOfDimensions, raiseIfNone(dimensionSecondNearest首(leafAt二Ante首)))])
 
-	if is_even(leafAt二Ante首):
+	if isEven吗(leafAt二Ante首):
 		dimension = 零  # This is redundant but it might help expose patterns.
 		if not bit_test(leafAt二Ante首, dimensionIndex(dimension)):
 			listRemoveLeaves.extend([leafAt二Ante首 + dimension, state.productsOfDimensions[dimensionTail], leafAt二Ante首 - state.productsOfDimensions[dimensionTail]])

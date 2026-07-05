@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from bisect import bisect_left
 from functools import cache, partial
-from gmpy2 import bit_flip, bit_mask, is_even, is_odd
+from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
 from humpy_cytoolz import curry as syntacticCurry
 from humpy_toolz.curried.operator import add, iadd, mul
 from hunterMakesPy import raiseIfNone
@@ -154,12 +154,12 @@ pp3  = (3, 5, 9, 17, 33)
 
 	pile: Pile = 4
 	pileDimension = bisect_left(state.sumsOfProductsOfDimensionsNearest首, pile >> 1 << 1)
-	leafMinimum = is_even(pile) + state.productsOfDimensions[pileDimension]
+	leafMinimum = isEven吗(pile) + state.productsOfDimensions[pileDimension]
 	pileRange: list[Leaf] = []
 
 	pileRange.append(leafMinimum)
 
-	if is_even(pile):
+	if isEven吗(pile):
 		dd = pileDimension
 
 		ss = state.sumsOfProductsOfDimensions[dd]
@@ -177,7 +177,7 @@ pp3  = (3, 5, 9, 17, 33)
 			pileRange.remove((零) + 首零(state.dimensionsTotal))
 			"""33 has step = 4"""
 
-	if is_odd(pile):
+	if isOdd吗(pile):
 		dd = pileDimension
 
 		ss = state.sumsOfProductsOfDimensions[dd]
