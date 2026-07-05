@@ -70,12 +70,8 @@ from __future__ import annotations
 
 from collections import Counter, deque
 from gmpy2 import bit_flip, bit_test as isBit1吗
-from humpy_cytoolz.dicttoolz import itemfilter, keyfilter, valfilter
-from humpy_cytoolz.functoolz import complement, compose, curry as syntacticCurry
-from humpy_cytoolz.itertoolz import unique
-# TODO the overload def are different between toolz and cytoolz. At least one of them is wrong.
-from humpy_toolz.curried import map as toolz_map
-from hunterMakesPy import errorL33T, inclusive
+from humpy_cytoolz import complement, curry as syntacticCurry, itemfilter, keyfilter, keyfilter as pileFilter, unique, valfilter, valfilter as leafFilter
+from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations, product as CartesianProduct
 from mapFolding._e import (
 	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, DOTitems, DOTkeys, DOTvalues, getDictionaryConditionalLeafPredecessors,
@@ -87,12 +83,11 @@ from mapFolding._e.filters import (
 	between吗, extractPinnedLeaves, extractUndeterminedPiles, leafIsInPileRange, leafIsPinned, mappingHasKey, notLeafOriginOrLeaf零, notPileLast,
 	thisHasThat, thisIsALeaf, thisIsLeafOptions, thisNotHaveThat)
 from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile
-from math import prod
-from more_itertools import filter_map, one, pairwise, triplewise
+from more_itertools import one, pairwise, triplewise
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Iterable, Iterator
+	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 #======== Boolean filters ======================================
@@ -144,126 +139,89 @@ def ImaOddLeaf2上nDimensional(leaf: Leaf, dimension: int) -> bool:
 
 #======== Reducing `LeafOptions` ===============================
 
-# TODO Can I setup a flow that checks for changes per `PermutationSpace`, and stores unchanged `PermutationSpace`, instead of
-# trying to reduce irreducible `PermutationSpace` on subsequent iterations?
-# listPermutationSpaceIrreducible: deque[PermutationSpace] = deque()  # noqa: ERA001
-# listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace  # noqa: ERA001
-# state.listPermutationSpace = deque()  # noqa: ERA001
-# while listPermutationSpace:
-	# Take 1 PermutationSpace
-	# original = permutationSpace.copy()  # noqa: ERA001
-	# Run the PermutationSpace through all the reduction functions
-	# if original == permutationSpace:
-	#	state.listPermutationSpace.append(permutationSpace)  # noqa: ERA001
-	# else:  # noqa: ERA001
-	# 	listPermutationSpace.append(permutationSpace)  # noqa: ERA001
 # TODO overcome beans and cornbread, so I can generalize general subroutines and move them to "pinIt.py".
 def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> EliminationState:
 	"""Reduce permutation space by iteratively applying constraint propagation.
 
 	You can use this function to shrink the search space for map-folding computations by applying
-	multiple constraint-propagation strategies in a loop until the permutation space stabilizes.
-	The function orchestrates the unified constraint-satisfaction algorithm implemented across
-	the specialized `_reducePermutationSpace_*` functions in this module. Each iteration applies
-	each constraint type in sequence. The function continues iterating until the total permutation
-	space size stops decreasing.
+	multiple constraint-propagation strategies in a loop until the permutation space stabilizes. The
+	function orchestrates the unified constraint-satisfaction algorithm implemented across the
+	specialized `_reducePermutationSpace_*` functions in this module. Each iteration applies each
+	constraint type in sequence. The function continues iterating until the total permutation space
+	size stops decreasing.
 
-	The function is the orchestrator for the constraint-propagation system. The function treats
-	the specialized reduction functions as interdependent components of a single large algorithm,
-	not as independent transformations. Each function assumes other functions will run afterward
-	to propagate newly discovered constraints.
-
-	Algorithm Details
-	-----------------
-	The function applies these constraint types in sequence:
-
-	1. Crease adjacency (via `_reducePermutationSpace_byCrease`)
-	2. Pinned leaf propagation (via `_reducePermutationSpace_LeafIsPinned`)
-	3. Head-before-tail ordering (via `_reducePermutationSpace_HeadsBeforeTails`)
-	4. Conditional predecessors (via `_reducePermutationSpace_ConditionalPredecessors`)
-	5. Crossed crease detection (via `_reducePermutationSpace_CrossedCreases`)
-	6. Non-consecutive dimensions (via `_reducePermutationSpace_noConsecutiveDimensions`)
-	7. Domain size one detection (via `_reducePermutationSpace_leafDomainOf1`)
-	8. Naked subset elimination (via `_reducePermutationSpace_nakedSubset`)
-
-	The function measures the total permutation space size before and after each full iteration.
-	When the size stops decreasing, the function terminates and returns `state` with the reduced
-	`state.listPermutationSpace`.
-
-	The function uses `filter_map` [1] to apply each reduction function, automatically filtering
-	out invalidated permutation spaces (those that return `None`).
+	The function is the orchestrator for the constraint-propagation system. The function treats the
+	specialized reduction functions as interdependent components of a single large algorithm, not as
+	independent transformations. Each function assumes other functions will run afterward to propagate
+	newly discovered constraints.
 
 	Parameters
 	----------
 	state : EliminationState
-		A data basket containing `listPermutationSpace` to reduce and supporting computed
-		properties.
+		A data basket containing `listPermutationSpace` to reduce and supporting computed properties.
 
 	Returns
 	-------
 	updatedState : EliminationState
 		The `state` with `state.listPermutationSpace` reduced by constraint propagation.
-
-	Examples
-	--------
-	>>> from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
-	>>> sherpa = moveFoldingToListFolding(
-	...     removeIFFViolationsFromEliminationState(
-	...         reduceAllPermutationSpaceInEliminationState(sherpa)))
-
-	References
-	----------
-	[1] more_itertools.filter_map
-		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.filter_map
-
 	"""
-	def prodOfDOTvalues(listLeafOptions: Iterable[LeafOptions]) -> int:
-		return prod(map(howManyLeavesInLeafOptions, listLeafOptions))
+	#------------ Initialize `listPermutationSpace` ------------------------------
+	listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
+		_reducePermutationSpace_byCrease
+		, _reducePermutationSpace_LeafIsPinned
+		, _reducePermutationSpace_HeadsBeforeTails
+		, _reducePermutationSpace_ConditionalPredecessors
+		, _reducePermutationSpace_CrossedCreases
+		, _reducePermutationSpace_noConsecutiveDimensions
+		, _reducePermutationSpace_leafDomainOf1
+		, _reducePermutationSpace_nakedSubset
+	)
 
-	permutationsPermutationSpaceTotal: Callable[[deque[PermutationSpace]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, extractUndeterminedPiles)))
-	permutationSpaceTotal: int = permutationsPermutationSpaceTotal(state.listPermutationSpace)
-	continueReduction: bool = True
+	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = deque()
+	listPermutationSpaceIrreducible: deque[PermutationSpace] = deque()
 
-	while continueReduction:
-		continueReduction = False
+	# TODO (dissatisfied) I'm not satisfied with this function, and I _think_ the fundamental issue is the lack of no-op.
 
-		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = deque()
-		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_byCrease(state), listPermutationSpace))
+	while listPermutationSpace:
+		#------------ Initialize `permutationSpace` ------------------------------
+		# TODO (dissatisfied) `... | None` is not natural.
+		permutationSpace: PermutationSpace | None = listPermutationSpace.pop()
+		sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
+		# TODO I feel like this could be a dynamic self-ordering queue based on how often a
+		# `reducePermutationSpace` function returns `None` or an altered `PermutationSpace`. Even
+		# better would be if the self-ordering persisted across sessions so that previous computations
+		# inform the current computation. At the very least, I think it would be computationally
+		# inexpensive to order the queue based on the functions that most recently returned `None` or
+		# an altered `PermutationSpace`. That would be a MRU, most recently used, queue, right? If LRU
+		# is cheap, then is MRU cheap?
+		functionsReduction: deque[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = deque(listFunctionsReduction)
+		keepGoing: bool = True
 
-		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = deque()
-		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_LeafIsPinned(state), listPermutationSpace))
+		while keepGoing:
+			reducePermutationSpace: Callable[[EliminationState, PermutationSpace], PermutationSpace | None] = functionsReduction.popleft()
+			# TODO (dissatisfied) `raiseIfNone` is _only_ necessary because of `... | None`.
+			permutationSpace = reducePermutationSpace(state, raiseIfNone(permutationSpace))
 
-		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = deque()
-		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_HeadsBeforeTails(state), listPermutationSpace))
+			if not permutationSpace:
+				# TODO (dissatisfied) In this previous version of this function, this check was
+				# handled by `more_itertools.filter_map`. In this version, it is necessary because the
+				# signatures of `_reducePermutationSpace_*` are `reducePermutationSpace:
+				# Callable[[EliminationState, PermutationSpace], PermutationSpace | None]` passing
+				# `PermutationSpace | None` will raise an exception instead of no-op. I will NOT add a
+				# guard to every `_reducePermutationSpace_*` function to handle `None`.
+				keepGoing = False
+			elif sumPermutationSpace != sum(permutationSpace.values()):
+				# TODO I suspect there are faster ways to check if an object has been altered.
+				# NOTE Reset the `functionsReduction` queue.
+				functionsReduction = deque(listFunctionsReduction)
+				sumPermutationSpace = sum(permutationSpace.values())
+			elif not functionsReduction:
+				# NOTE due to the previous `elif`, `... and (sumPermutationSpace == sum(permutationSpace.values()))` is implied.
+				listPermutationSpaceIrreducible.append(permutationSpace)
+				keepGoing = False
 
-		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = deque()
-		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_ConditionalPredecessors(state), listPermutationSpace))
-
-		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = deque()
-		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_CrossedCreases(state), listPermutationSpace))
-
-		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = deque()
-		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_noConsecutiveDimensions(state), listPermutationSpace))
-
-		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = deque()
-		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_leafDomainOf1(state), listPermutationSpace))
-
-		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-		state.listPermutationSpace = deque()
-		state.listPermutationSpace.extend(filter_map(_reducePermutationSpace_nakedSubset(state), listPermutationSpace))
-
-		permutationSpaceTotalReduced: int = permutationsPermutationSpaceTotal(state.listPermutationSpace)
-
-		if permutationSpaceTotalReduced < permutationSpaceTotal:
-			continueReduction = True
-			permutationSpaceTotal = permutationSpaceTotalReduced
+	state.listPermutationSpace.extend(listPermutationSpaceIrreducible)
 
 	return state
 
@@ -374,7 +332,6 @@ def _reduceLeafSpace(state: EliminationState, permutationSpace: PermutationSpace
 
 #-------- Functions that use the shared logic -----------------------------------------
 
-@syntacticCurry
 def _reducePermutationSpace_byCrease(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to enforce crease adjacency constraints.
 
@@ -424,7 +381,6 @@ def _reducePermutationSpace_byCrease(state: EliminationState, permutationSpace: 
 
 	return permutationSpace
 
-@syntacticCurry
 def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to enforce conditional predecessor constraints.
 
@@ -480,7 +436,6 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 
 	return permutationSpace
 
-@syntacticCurry
 def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to detect and eliminate crossed creases.
 
@@ -589,7 +544,6 @@ def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationS
 
 	return permutationSpace
 
-@syntacticCurry
 def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to enforce head-before-tail ordering constraints.
 
@@ -661,7 +615,6 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 
 	return permutationSpace
 
-@syntacticCurry
 def _reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to propagate leaf pinning constraints.
 
@@ -701,7 +654,6 @@ def _reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpa
 
 	return permutationSpace
 
-@syntacticCurry
 def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to detect and exploit naked subset constraints.
 
@@ -765,7 +717,6 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 
 	return permutationSpace
 
-@syntacticCurry
 def _reducePermutationSpace_noConsecutiveDimensions(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to enforce non-consecutive dimension constraints.
 
@@ -830,7 +781,6 @@ def _reducePermutationSpace_noConsecutiveDimensions(state: EliminationState, per
 
 #-------- Functions that do NOT use the shared logic -----------------------------------------
 
-@syntacticCurry
 def _reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to detect and pin leaves with domain size one.
 
