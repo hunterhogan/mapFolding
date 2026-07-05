@@ -65,9 +65,6 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from gmpy2 import mpz
-# SEMIOTICS a "selector" is an `object` that most people call a "mask". `builtins.filter` is a
-# `Callable`. `filterLeaf` is a `Callable` similar to `filter` but specialized: identifiers are
-# general-to-specific.
 from humpy_cytoolz.dicttoolz import valfilter as filterLeaf
 from humpy_cytoolz.functoolz import curry as syntacticCurry
 from hunterMakesPy.parseParameters import intInnit
@@ -81,6 +78,11 @@ if TYPE_CHECKING:
 	from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 	from typing import Any, TypeIs
 
+# SEMIOTICS
+# a "selector" is an `object` that most people call a "mask".
+# `builtins.filter` is a `Callable`.
+# `filterLeaf` is a `Callable` similar to `filter` but specific: identifiers are general-to-specific.
+# TODO This module's identifier? filters, antecedents, filtering
 #======== Boolean antecedents ================================================
 
 @syntacticCurry

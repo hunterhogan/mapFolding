@@ -21,7 +21,7 @@ Functions
 		You can retrieve known sequence values for a specified OEIS sequence.
 	librarianLookupsFoldsTotalKnown
 		You can retrieve the known total number of distinct folding patterns for a given map shape.
-	NOTcountingFolds
+	countingMeanders
 		You can compute the n-th term of specified OEIS sequences using specialized algorithms.
 	oeisIDfor_n
 		You can calculate the value a(n) for a specified OEIS ID and index.
@@ -545,7 +545,7 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 
 	See Also
 	--------
-	mapFolding.oeis.NOTcountingFolds
+	mapFolding.oeis.countingMeanders
 		Compute values for sequences requiring specialized algorithms.
 	mapFolding.basecamp.countFolds
 		General multidimensional map-folding computation.
@@ -629,7 +629,7 @@ def getOEISids() -> None:
 	"""
 	print(_librarianFormatsHelpText())  # noqa: T201
 
-# SEMIOTICS `NOTcountingFolds`: improve identifier.
+# SEMIOTICS segregate `countingFoldsSymmetric`?
 
 # TODO A long time ago, I had an explicit rule written in "oeis.py" that the module contained only OEIS stuff and ALL OEIS stuff.
 # This function is fundamentally an OEIS function, but I have been trying to treat it the same as `countingFolds`. That mismatch
@@ -639,7 +639,7 @@ def getOEISids() -> None:
 # parameter, I have been trying to figure out how to put it into `oeisIDfor_n`. For a long time, `oeisIDfor_n` would call numba
 # theorem2 because it was the fastest, but I made numba an optional dependency. All of these seemingly unrelated issues underscore
 # the importance of the semiotics-first paradigm (for me).
-def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None, CPUlimit: bool | float | int | None = None) -> int:  # noqa: FBT001
+def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None, CPUlimit: bool | float | int | None = None) -> int:  # noqa: FBT001
 	"""Compute the n-th term of `oeisID`.
 
 	(AI generated docstring)
@@ -692,18 +692,18 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	--------
 	Formula-based sequence:
 
-	>>> from mapFolding.basecamp import NOTcountingFolds
-	>>> NOTcountingFolds('A000136', 3)
+	>>> from mapFolding.basecamp import countingMeanders
+	>>> countingMeanders('A000136', 3)
 	8
 
 	Meander computation with matrix algorithm:
 
-	>>> NOTcountingFolds('A000682', 5, flow='matrixMeanders')
+	>>> countingMeanders('A000682', 5, flow='matrixMeanders')
 	42
 
 	Symmetric folding with Numba-optimized implementation:
 
-	>>> NOTcountingFolds('A007822', 6, flow='theorem2Numba')
+	>>> countingMeanders('A007822', 6, flow='theorem2Numba')
 	144
 
 	See Also
@@ -711,7 +711,7 @@ def NOTcountingFolds(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	mapFolding.basecamp.countFolds
 		General multidimensional map-folding computation.
 	mapFolding.oeis.oeisIDfor_n
-		Convenience function that routes to either `countFolds` or `NOTcountingFolds` based on `oeisID`.
+		Convenience function that routes to either `countFolds` or `countingMeanders` based on `oeisID`.
 
 	Algorithm Details
 	-----------------

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections import ChainMap
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding, NOTcountingFolds
+from mapFolding.oeis import countingMeanders, dictionaryOEIS, dictionaryOEISMapFolding
 import sys
 import time
 
@@ -42,11 +42,11 @@ if __name__ == '__main__':
 	for n in dict.fromkeys(nList):
 
 		timeStart = time.perf_counter()
-		countTotal = NOTcountingFolds(oeisID, n, flow, None, CPUlimit)
+		countTotal = countingMeanders(oeisID, n, flow, None, CPUlimit)
 
 		_write()
 
 r"""
 
-title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\NOTcountingFolds.py & title I'm done
+title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\countingMeanders.py & title I'm done
 """

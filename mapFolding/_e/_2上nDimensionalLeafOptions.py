@@ -1,3 +1,4 @@
+# ruff: noqa: PLC0415 DOC201
 from __future__ import annotations
 
 from bisect import bisect_left
@@ -61,7 +62,7 @@ def _getLeafOptions(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...],
 	return makeLeafOptions(leavesTotal, leafOptions)
 
 def getDictionaryLeafOptions(state: EliminationState) -> dict[Pile, LeafOptions]:
-	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""  # noqa: DOC201
+	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
 	return {pile: getLeafOptions(state, pile) for pile in range(state.leavesTotal)}
 
 # ruff: noqa: ERA001 T201 T203  # noqa: RUF100
@@ -69,7 +70,7 @@ def getDictionaryLeafOptions(state: EliminationState) -> dict[Pile, LeafOptions]
 #======== Functions to help find a formula ======================================
 
 def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings  # noqa: PLC0415
+	from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
 
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()  # pyright: ignore[reportAssignmentType]
