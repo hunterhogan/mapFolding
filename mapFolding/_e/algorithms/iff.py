@@ -69,8 +69,7 @@ from __future__ import annotations
 
 from collections import deque
 from functools import cache
-from humpy_cytoolz.dicttoolz import valfilter as filterLeaf
-from humpy_cytoolz.functoolz import curry as syntacticCurry
+from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from hunterMakesPy import CallableFunction, inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding._e import DOTitems

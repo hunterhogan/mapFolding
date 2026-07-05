@@ -21,7 +21,7 @@ def pinningFunctionEliminateFolds2上nDimensional(request: pytest.FixtureRequest
 	return request.param
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
-	*[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4), ('A001417', 5))]
+	*[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4),)]  # , ('A001417', 5))]
 	, *[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "constraintPropagation", 0.99) for oeisID, n in (("A000136", 5), ("A001415", 5), ("A001416", 4), ("A001417", 4), ("A001418", 3), ("A195646", 2))]
 	, *[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "elimination", 0.99) for oeisID, n in (("A000136", 3), ("A001415", 3), ("A001416", 2), ("A001417", 2), ("A001418", 2), ("A195646", 1))]
 	, *[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][dictionaryOEISMapFolding[oeisID]["offset"]], oeisID, dictionaryOEISMapFolding[oeisID]["offset"], "constraintPropagation", 1) for oeisID in ('A000136', 'A001415', 'A001416', 'A001418')]

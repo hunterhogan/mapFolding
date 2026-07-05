@@ -4,11 +4,11 @@ from __future__ import annotations
 from bisect import bisect_left
 from functools import cache, partial
 from gmpy2 import bit_flip, bit_mask, is_even, is_odd
-from humpy_cytoolz.functoolz import curry as syntacticCurry
+from humpy_cytoolz import curry as syntacticCurry
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getIteratorOfLeaves, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, Leaf, LeafOptions,
-	leafOrigin, makeLeafOptions, mapShapeIs2上nDimensions, Pile, 零, 首一, 首二, 首零, 首零一)
+	dimensionNearestTail, dimensionNearest首, getIteratorOfLeaves, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, leafOrigin,
+	makeLeafOptions, mapShapeIs2上nDimensions, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from more_itertools import flatten
 from operator import add, iadd, mul
@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
+	from mapFolding._e import Leaf, LeafOptions, Pile
 	import pandas
 
 # TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.

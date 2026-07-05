@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from humpy_cytoolz.dicttoolz import valfilter as filterLeaf
-from humpy_cytoolz.functoolz import curry as syntacticCurry
+from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from mapFolding import ansiColorReset, ansiColors, packageSettings
 from mapFolding._e import DOTvalues, PermutationSpace, PinnedLeaves, 一, 零, 首一, 首零一
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf

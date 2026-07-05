@@ -11,12 +11,11 @@ from __future__ import annotations
 from collections import Counter, deque
 from functools import partial
 from gmpy2 import bit_clear, bit_mask
-from humpy_cytoolz.curried import map as toolz_map
-from humpy_cytoolz.dicttoolz import (
-	assoc as associate, itemfilter, keyfilter as filterPile, merge, valfilter as filterLeaf, valfilter as filterLeafOptions,
-	valfilter as filterValue, valmap as mapLeaf)
-from humpy_cytoolz.functoolz import compose, curry as syntacticCurry
-from humpy_cytoolz.itertoolz import groupby as toolz_groupby, unique
+from humpy_cytoolz import (
+	assoc as associate, compose, curry as syntacticCurry, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, merge, unique,
+	valfilter as filterLeaf, valfilter as filterLeafOptions, valfilter as filterValue, valmap as mapLeaf)
+# TODO One or more things is messed up with humpy_*toolz.*.map
+from humpy_toolz.curried import map as toolz_map
 from hunterMakesPy import CallableFunction, inclusive, raiseIfNone
 from itertools import chain, repeat
 from mapFolding._e import (

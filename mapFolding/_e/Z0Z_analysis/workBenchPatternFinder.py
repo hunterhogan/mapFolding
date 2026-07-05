@@ -4,7 +4,7 @@ from __future__ import annotations
 from bisect import bisect_left
 from functools import partial
 from gmpy2 import is_even, is_odd
-from humpy_cytoolz.functoolz import curry as syntacticCurry
+from humpy_cytoolz import curry as syntacticCurry
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import (
 	dimensionNearest首, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafOptions, getLeavesCreaseAnte,
