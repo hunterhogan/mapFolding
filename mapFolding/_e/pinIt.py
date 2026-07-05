@@ -12,10 +12,9 @@ from collections import Counter, deque
 from functools import partial
 from gmpy2 import bit_clear, bit_mask
 from humpy_cytoolz.curried import map as toolz_map
-# SEMIOTICS valmap and keymap
 from humpy_cytoolz.dicttoolz import (
 	assoc as associate, itemfilter, keyfilter as filterPile, merge, valfilter as filterLeaf, valfilter as filterLeafOptions,
-	valfilter as filterValue, valmap)
+	valfilter as filterValue, valmap as mapLeaf)
 from humpy_cytoolz.functoolz import compose, curry as syntacticCurry
 from humpy_cytoolz.itertoolz import groupby as toolz_groupby, unique
 from hunterMakesPy import CallableFunction, inclusive, raiseIfNone
@@ -796,5 +795,5 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 #======== Initialization =====================
 
 def addMissingLeafOptionsToPermutationSpace(state: EliminationState) -> EliminationState:
-	state.permutationSpace = merge(valmap(compose(raiseIfNone, JeanValjean), getDictionaryLeafOptions(state)), state.permutationSpace)
+	state.permutationSpace = merge(mapLeaf(compose(raiseIfNone, JeanValjean), getDictionaryLeafOptions(state)), state.permutationSpace)
 	return state
