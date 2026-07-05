@@ -71,7 +71,7 @@ from __future__ import annotations
 from collections import deque
 from gmpy2 import bit_flip, bit_test as isBit1吗
 from humpy_cytoolz import (
-	complement, curry as syntacticCurry, itemfilter, keyfilter, unique, valfilter as filterLeaf, valfilter as filterLeafOptions)
+	complement, curry as syntacticCurry, itemfilter, keyfilter as filterPile, unique, valfilter as filterLeaf, valfilter as filterLeafOptions)
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations, product as CartesianProduct
 from mapFolding._e import (
@@ -420,7 +420,7 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 		permutationSpaceHasNewLeaf = False
 
 		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(filterLeaf(mappingHasKey(dictionaryConditionalLeafPredecessors),
-			keyfilter(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))))))
+			filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))))))
 
 		while dequePileLeaf and not permutationSpaceHasNewLeaf:
 			pile, leaf = dequePileLeaf.pop()
@@ -428,7 +428,7 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 			if mappingHasKey(dictionaryConditionalLeafPredecessors[leaf], pile):
 				sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-						, pilesToUpdate=deque(DOTitems(extractUndeterminedPiles(keyfilter(between吗(pile + inclusive, state.pileLast), permutationSpace))))
+						, pilesToUpdate=deque(DOTitems(extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast), permutationSpace))))
 						, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, dictionaryConditionalLeafPredecessors[leaf][pile])
 					)):
 					return None
@@ -537,7 +537,7 @@ def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationS
 
 				sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-					, pilesToUpdate=deque(DOTitems(keyfilter(thisHasThat(pilesForbidden), extractUndeterminedPiles(permutationSpace))))
+					, pilesToUpdate=deque(DOTitems(filterPile(thisHasThat(pilesForbidden), extractUndeterminedPiles(permutationSpace))))
 					, leafAntiOptions=leafAntiOptions)):
 					return None
 				if sum(map(dimensionNearest首, permutationSpace.values())) < sumBeforeReduction:
@@ -587,7 +587,7 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 
-		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(keyfilter(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace))))))
+		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace))))))
 
 		while dequePileLeaf and not permutationSpaceHasNewLeaf:
 			pile, leaf = dequePileLeaf.pop()
@@ -596,7 +596,7 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 			if 0 < dimensionHead:
 				sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-						, pilesToUpdate=deque(extractUndeterminedPiles(keyfilter(between吗(2, pile - inclusive), permutationSpace)).items())
+						, pilesToUpdate=deque(extractUndeterminedPiles(filterPile(between吗(2, pile - inclusive), permutationSpace)).items())
 						, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
 					)):
 					return None
@@ -607,7 +607,7 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 			if 0 < dimensionTail:
 				sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-						, pilesToUpdate=deque(extractUndeterminedPiles(keyfilter(between吗(pile + inclusive, state.pileLast), permutationSpace)).items())
+						, pilesToUpdate=deque(extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast), permutationSpace)).items())
 						, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
 					)):
 					return None
@@ -709,7 +709,7 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 
 			sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 			if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-					, pilesToUpdate=deque(DOTitems(keyfilter(thisNotHaveThat(setPiles), pilesUndetermined)))
+					, pilesToUpdate=deque(DOTitems(filterPile(thisNotHaveThat(setPiles), pilesUndetermined)))
 					, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
 				)):
 				return None

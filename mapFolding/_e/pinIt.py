@@ -13,8 +13,8 @@ from functools import partial
 from gmpy2 import bit_clear, bit_mask
 from humpy_cytoolz.curried import map as toolz_map
 from humpy_cytoolz.dicttoolz import (
-	assoc as associate, itemfilter, keyfilter, merge, valfilter as filterLeaf, valfilter as filterLeafOptions, valfilter as filterValue,
-	valmap)
+	assoc as associate, itemfilter, keyfilter as filterPile, merge, valfilter as filterLeaf, valfilter as filterLeafOptions,
+	valfilter as filterValue, valmap)
 from humpy_cytoolz.functoolz import compose, curry as syntacticCurry
 from humpy_cytoolz.itertoolz import groupby as toolz_groupby, unique
 from hunterMakesPy import CallableFunction, inclusive, raiseIfNone
@@ -730,7 +730,7 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 
 			sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 			if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-					, pilesToUpdate=deque(DOTitems(keyfilter(thisNotHaveThat(setPiles), pilesUndetermined)))
+					, pilesToUpdate=deque(DOTitems(filterPile(thisNotHaveThat(setPiles), pilesUndetermined)))
 					, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
 				)):
 				return None
