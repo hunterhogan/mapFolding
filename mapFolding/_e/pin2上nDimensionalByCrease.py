@@ -6,7 +6,7 @@ from hunterMakesPy import inclusive, raiseIfNone
 from mapFolding._e import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, getLeavesCreaseAnte, getLeavesCreasePost, leafInSubHyperplane,
 	ptount, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一)
-from mapFolding._e.filters import exclude
+from mapFolding.genericNeedsNewHome import exclude
 from operator import add, neg, sub
 from typing import TYPE_CHECKING
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from gmpy2 import fac
 from humpy_cytoolz import compose
-from humpy_toolz import map as toolz_map
+from humpy_toolz.curried import map as toolz_map
 from mapFolding._e import (
 	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves,
 	getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions)
@@ -39,6 +39,7 @@ if __name__ == '__main__':
 
 	if printThis:
 		timeStart: float = time.perf_counter()
+		state: EliminationState = pinLeavesDimension二(state)
 		state: EliminationState = pin首beans(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		state: EliminationState = pin3beans2(state)
@@ -52,7 +53,6 @@ if __name__ == '__main__':
 		state: EliminationState = pinLeavesDimension一(state)
 		state: EliminationState = pinPilesAtEnds(state, 3)
 		state: EliminationState = pinLeavesDimensions0零一(state)
-		state: EliminationState = pinLeavesDimension二(state)
 		state: EliminationState = pinLeavesDimension首二(state)
 		state: EliminationState = pinPile零Ante首零(state)
 		print(state.sumsOfProductsOfDimensionsNearest首)

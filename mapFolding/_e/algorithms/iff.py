@@ -76,8 +76,9 @@ from humpy_toolz.curried.operator import indexOf
 from hunterMakesPy import inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding._e import DOTitems
-from mapFolding._e.filters import between吗, extractPinnedLeaves
+from mapFolding._e.filters import extractPinnedLeaves
 from mapFolding.beDRY import getLeavesTotal
+from mapFolding.genericNeedsNewHome import between吗
 from math import prod
 from operator import floordiv
 from typing import TYPE_CHECKING

@@ -9,8 +9,8 @@ from mapFolding._e import (
 	bifurcatePermutationSpace, DOTvalues, getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost,
 	indicesMapShapeDimensionLengthsAreEqual, leafOrigin, mapShapeIs2上nDimensions, pileOrigin)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import between吗
 from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, reduceAllPermutationSpace
+from mapFolding.genericNeedsNewHome import between吗
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path

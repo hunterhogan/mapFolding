@@ -23,8 +23,8 @@ from mapFolding._e import (
 	getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND,
 	makeLeafAntiOptions)
 from mapFolding._e.filters import (
-	between吗, extractUndeterminedPiles, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen, pileIsOpen,
-	thisIsALeaf, thisNotHaveThat)
+	extractUndeterminedPiles, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen, pileIsOpen, thisIsALeaf)
+from mapFolding.genericNeedsNewHome import between吗, thisNotHaveThat吗
 from math import prod
 from more_itertools import filter_map, flatten, one
 from typing import cast, TYPE_CHECKING
@@ -719,7 +719,7 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 		pilesUndetermined: UndeterminedPiles = extractUndeterminedPiles(permutationSpace)
 
 		groupByLeafOptions: dict[LeafOptions, set[Pile]] = {}
-		for pile, leafOptions in filterLeafOptions(thisNotHaveThat(unique(pilesUndetermined.values())), pilesUndetermined).items():
+		for pile, leafOptions in filterLeafOptions(thisNotHaveThat吗(unique(pilesUndetermined.values())), pilesUndetermined).items():
 			groupByLeafOptions.setdefault(leafOptions, set()).add(pile)
 
 		dequeLeafOptionsAndPiles: deque[tuple[LeafOptions, set[Pile]]] = deque(DOTitems(
@@ -730,7 +730,7 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 
 			sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 			if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
-					, pilesToUpdate=deque(DOTitems(filterPile(thisNotHaveThat(setPiles), pilesUndetermined)))
+					, pilesToUpdate=deque(DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined)))
 					, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
 				)):
 				return None
