@@ -77,19 +77,19 @@ from itertools import combinations, product as CartesianProduct
 from mapFolding._e import (
 	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getIteratorOfLeaves,
 	getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, leafOrigin, makeLeafAntiOptions,
-	mapShapeIs2上nDimensions, 一, 零, 首一, 首零一)
+	mapShapeIs2上nDimensions)
 from mapFolding._e.algorithms.iff import thisIsAViolation
-from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
 	extractPinnedLeaves, extractUndeterminedPiles, isLeafOptions吗, isLeaf吗, leafPinned吗, notLeafOriginOrLeaf零, notPileLast)
-from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile, reducePermutationSpace_leafDomainOf1
+from mapFolding._e.pinIt import reducePermutationSpace_leafDomainOf1
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTvalues, thisHasThat吗, thisNotHaveThat吗
-from more_itertools import one, pairwise, triplewise
+from more_itertools import pairwise, triplewise
 from operator import contains as contains吗
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
+	from mapFolding._e.dataBaskets import EliminationState
 	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 # ======== Boolean filters ======================================
@@ -141,7 +141,6 @@ def oddLeaf2上nDimensional吗(leaf: Leaf, dimension: int) -> bool:
 
 # ======== Reducing `LeafOptions` ===============================
 
-# TODO Does "Reset the `functionsReduction` queue." fix beans and cornbread?
 # TODO overcome beans and cornbread, so I can generalize general subroutines and move them to "pinIt.py".
 def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> EliminationState:
 	"""Reduce permutation space by iteratively applying constraint propagation.
@@ -243,9 +242,7 @@ def _reduceLeafSpace(  # DOCUMENT If a function uses this shared logic, then tha
 	I use this shared subroutine to handle the mechanical work of updating `LeafOptions` at
 	specified piles by removing forbidden leaves. All constraint encoders (`_reducePermutationSpace_*`)
 	call this function to perform the actual updates. I process each pile in `pilesToUpdate`,
-	remove leaves specified by `leafAntiOptions`, and propagate newly pinned leaves. I detect
-	beans-without-cornbread configurations and pin the complementary cornbread leaf when
-	appropriate.
+	remove leaves specified by `leafAntiOptions`, and propagate newly pinned leaves.
 
 	I do not return a `bool` for `permutationSpaceHasNewLeaf`. Calling functions compare
 	`permutationSpace` properties before and after calling this function to detect whether new
@@ -259,10 +256,6 @@ def _reduceLeafSpace(  # DOCUMENT If a function uses this shared logic, then tha
 	2. Use `JeanValjean` [1] to convert the result to `LeafSpace` (either `Leaf` or
 		`LeafOptions`).
 	3. If the result is `None` (empty domain), invalidate `permutationSpace` by setting to `{}`.
-	4. If the result is a `Leaf`, check for beans-without-cornbread configurations:
-		- Beans-without-cornbread occurs when one member of a crease pair (beans/cornbread) is pinned but the adjacent crease neighbor (cornbread/beans) is not.
-		- Pin the complementary cornbread leaf at the appropriate adjacent pile.
-		- Set `permutationSpaceHasNewLeaf = True` to signal the calling function.
 
 	When `permutationSpaceHasNewLeaf` becomes `True`, I call `_reducePermutationSpace_LeafIsPinned`
 	to propagate the newly pinned leaf before returning.
@@ -282,31 +275,10 @@ def _reduceLeafSpace(  # DOCUMENT If a function uses this shared logic, then tha
 	-------
 	updatedPermutationSpace : PermutationSpace
 		The updated `permutationSpace` if valid; otherwise an empty dictionary (invalid).
-
-	Examples
-	--------
-	Calling functions detect `permutationSpaceHasNewLeaf` by comparing properties before and
-	after:
-
-	>>> sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
-	>>> permutationSpace = _reduceLeafSpace(state, permutationSpace, pilesToUpdate, leafAntiOptions)
-	>>> if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
-	...     permutationSpaceHasNewLeaf = True
-
-	References
-	----------
-	[1] mapFolding._e.JeanValjean
 	"""
-	# -------------- Initialize -----------------------------------------------------
-	"""beansAndCornbreadANDbeansAndCornbread: deque[tuple[int, int]] = deque(
-		((一 + 零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal)))
-	)"""
 	permutationSpaceHasNewLeaf: bool = False
 
-	#-------------- Update the piles with the bitwise AND of `leafAntiOptions` and `leafOptions` ----------------
-	while (permutationSpace
-			and pilesToUpdate
-			and not permutationSpaceHasNewLeaf):
+	while (permutationSpace and pilesToUpdate and not permutationSpaceHasNewLeaf):
 		pile, leafOptions = pilesToUpdate.pop()
 
 		leafSpace: LeafSpace | None = JeanValjean(leafOptionsAND(leafAntiOptions, leafOptions))
@@ -318,36 +290,6 @@ def _reduceLeafSpace(  # DOCUMENT If a function uses this shared logic, then tha
 			if isLeaf吗(permutationSpace[pile]):
 				permutationSpaceHasNewLeaf = True
 
-				#---------- Prevent beans-without-cornbread configurations by pinning the complementary cornbread leaf ----------
-				"""leafBeans: Leaf | None = None
-				while beansAndCornbreadANDbeansAndCornbread and (leafBeans is None):
-					beans, cornbread = beansAndCornbreadANDbeansAndCornbread.pop()
-					beansPinned: bool = leafPinned吗(permutationSpace, beans)
-					cornbreadPinned: bool = leafPinned吗(permutationSpace, cornbread)
-					if beansPinned ^ cornbreadPinned:
-						if beansPinned:
-							leafBeans = beans
-						else:
-							leafBeans = cornbread
-
-				if leafBeans:
-					pileCornbread: Pile = pile
-					if leafBeans in {一 + 零, 首一(state.dimensionsTotal)}:#NOT DRY!!!!!!!!!!!!!
-						pileCornbread += 1
-						leafCornbread: Leaf = one(getLeavesCreasePost(state, leafBeans))
-					else:
-						pileCornbread -= 1
-						leafCornbread = one(getLeavesCreaseAnte(state, leafBeans))
-
-					if disqualifyPinningLeafAtPile(
-						EliminationState(state.mapShape, pile=pileCornbread, permutationSpace=permutationSpace), leafCornbread
-					):
-						permutationSpace = {}
-					else:
-						permutationSpace = atPilePinLeaf(permutationSpace, pileCornbread, leafCornbread)"""
-				#-END------ Prevent beans-without-cornbread configurations by pinning the complementary cornbread leaf ----------
-
-	#-------------- `permutationSpaceHasNewLeaf` RECURSION ----------------
 	if permutationSpace and permutationSpaceHasNewLeaf:
 		sherpa: PermutationSpace | None = _reducePermutationSpace_LeafIsPinned(state, permutationSpace)
 		if not sherpa:  # NOTE checks for `None` and for `{}` (invalid).
@@ -365,19 +307,14 @@ def _reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpa
 	I use this constraint encoder to enforce that every pinned leaf can appear at only one pile.
 	For every leaf pinned at a pile, I remove that leaf from `LeafOptions` at all other piles.
 	When `LeafOptions` at a pile reduces to a single leaf, I convert `pile: leafOptions` to
-	`pile: leaf` (pinning the leaf). When that creates a beans-without-cornbread configuration,
-	I pin the complementary cornbread leaf at the appropriate adjacent pile.
-
-	This function is the primary propagator for newly pinned leaves. All other constraint encoders
-	call `_reduceLeafSpace`, which calls this function when new leaves are pinned. This function
-	iteratively applies pinning until no new leaves are discovered.
+	`pile: leaf` (pinning the leaf).
 
 	Parameters
 	----------
 	state : EliminationState
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+		A dictionary of `pile: leafOptions`.
 
 	Returns
 	-------
@@ -459,10 +396,10 @@ def _reducePermutationSpace_byCrease(state: EliminationState, permutationSpace: 
 			sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 			if not (
 				permutationSpace := _reduceLeafSpace(
-					state,
-					permutationSpace,
-					pilesToUpdate,
-					makeLeafAntiOptions(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease)),
+					state
+					, permutationSpace
+					, pilesToUpdate
+					, makeLeafAntiOptions(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
 				)
 			):
 				return None
@@ -512,8 +449,8 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 			sorted(
 				DOTitems(
 					filterLeaf(
-						leafAtPilePredecessors.__contains__,
-						filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace))),
+						leafAtPilePredecessors.__contains__
+						, filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))
 					)
 				)
 			)
@@ -526,12 +463,12 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 				sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (
 					permutationSpace := _reduceLeafSpace(
-						state,
-						permutationSpace,
-						pilesToUpdate=deque(
+						state
+						, permutationSpace
+						, pilesToUpdate=deque(
 							DOTitems(extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast), permutationSpace)))
-						),
-						leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile]),
+						)
+						, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
 					)
 				):
 					return None
@@ -543,21 +480,21 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to detect and eliminate crossed creases.
 
-	I use this constraint encoder to detect configurations where two creases would cross
-	physically and either invalidate `permutationSpace` or restrict forbidden pile positions
-	for unpinned crease leaves. For each dimension, I partition pinned leaves by parity (even/odd
-	coordinate in that dimension), identify crease pairs where one leaf is pinned and the other
-	is not, and compute forbidden pile positions where the unpinned leaf cannot appear without
-	causing a crease crossing. I use `thisIsAViolation` [1] to detect invalid configurations
-	and `_reduceLeafSpace` to remove forbidden leaves from forbidden piles.
+	I use this constraint encoder to detect configurations where two creases would cross physically
+	and either invalidate `permutationSpace` or restrict forbidden pile positions for unpinned crease
+	leaves. For each dimension, I partition pinned leaves by parity (even/odd coordinate in that
+	dimension), identify crease pairs where one leaf is pinned and the other is not, and compute
+	forbidden pile positions where the unpinned leaf cannot appear without causing a crease crossing.
+	I use `thisIsAViolation` [1] to detect invalid configurations and `_reduceLeafSpace` to remove
+	forbidden leaves from forbidden piles.
 
 	Mathematical Basis
 	------------------
-	Only creases whose constituent leaves have matching parity in a dimension can physically
-	cross in that dimension. For two creases (k, k+1) and (r, r+1), if k and r have matching
-	parity in `dimension`, the creases can cross. The function checks all pairs of pinned leaves
-	with matching parity and determines forbidden pile positions for their unpinned crease
-	partners based on the relative positions of the pinned leaves.
+	Only creases whose constituent leaves have matching parity in a dimension can physically cross in
+	that dimension. For two creases (k, k+1) and (r, r+1), if k and r have matching parity in
+	`dimension`, the creases can cross. The function checks all pairs of pinned leaves with matching
+	parity and determines forbidden pile positions for their unpinned crease partners based on the
+	relative positions of the pinned leaves.
 
 	Parameters
 	----------
@@ -645,12 +582,12 @@ def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationS
 				sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (
 					permutationSpace := _reduceLeafSpace(
-						state,
-						permutationSpace,
-						pilesToUpdate=deque(
+						state
+						, permutationSpace
+						, pilesToUpdate=deque(
 							DOTitems(filterPile(thisHasThat吗(pilesForbidden), extractUndeterminedPiles(permutationSpace)))
-						),
-						leafAntiOptions=leafAntiOptions,
+						)
+						, leafAntiOptions=leafAntiOptions
 					)
 				):
 					return None
@@ -715,13 +652,13 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 				sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (
 					permutationSpace := _reduceLeafSpace(
-						state,
-						permutationSpace,
-						pilesToUpdate=deque(extractUndeterminedPiles(filterPile(between吗(2, pile - inclusive), permutationSpace)).items()),
-						leafAntiOptions=makeLeafAntiOptions(
-							state.leavesTotal,
-							range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]),
-						),
+						state
+						, permutationSpace
+						, pilesToUpdate=deque(extractUndeterminedPiles(filterPile(between吗(2, pile - inclusive), permutationSpace)).items())
+						, leafAntiOptions=makeLeafAntiOptions(
+							state.leavesTotal
+							, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead])
+						)
 					)
 				):
 					return None
@@ -733,14 +670,14 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 				sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (
 					permutationSpace := _reduceLeafSpace(
-						state,
-						permutationSpace,
-						pilesToUpdate=deque(
+						state
+						, permutationSpace
+						, pilesToUpdate=deque(
 							extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast), permutationSpace)).items()
-						),
-						leafAntiOptions=makeLeafAntiOptions(
+						)
+						, leafAntiOptions=makeLeafAntiOptions(
 							state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail])
-						),
+						)
 					)
 				):
 					return None
@@ -807,10 +744,10 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 			sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 			if not (
 				permutationSpace := _reduceLeafSpace(
-					state,
-					permutationSpace,
-					pilesToUpdate=deque(DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined))),
-					leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions)),
+					state
+					, permutationSpace
+					, pilesToUpdate=deque(DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined)))
+					, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
 				)
 			):
 				return None

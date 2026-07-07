@@ -129,6 +129,7 @@ class EliminationState:
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
 
 #==== PermutationSpace(dict) ====
+# addMissingLeafOptionsToPermutationSpace: maybe this should be on `EliminationState`, but maybe `PermutationSpace`.
 #---- method (only?) ------------
 # atPilePinLeaf
 # atPilePinLeafSafetyFilter

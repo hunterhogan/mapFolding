@@ -34,16 +34,14 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 5)
+	state = EliminationState((2,) * 6)
 
 	printThis = True
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinLeavesDimension二(state)
-		state: EliminationState = pin首beans(state)
+		state: EliminationState = pinLeavesDimensions0零一(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		state: EliminationState = pin3beans2(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -51,11 +49,13 @@ if __name__ == '__main__':
 		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
-		state: EliminationState = pinLeavesDimension一(state)
-		state: EliminationState = pinPilesAtEnds(state, 3)
-		state: EliminationState = pinLeavesDimensions0零一(state)
-		state: EliminationState = pinLeavesDimension首二(state)
 		state: EliminationState = pinPile零Ante首零(state)
+		state: EliminationState = pinPilesAtEnds(state, 4)
+		state: EliminationState = pinLeavesDimension一(state)
+		state: EliminationState = pinLeavesDimension二(state)
+		state: EliminationState = pin首beans(state)
+		state: EliminationState = pin3beans2(state)
+		state: EliminationState = pinLeavesDimension首二(state)
 		print(state.sumsOfProductsOfDimensionsNearest首)
 		pprint(dictionaryLeafOptions := getDictionaryLeafOptions(state), width=200)
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))
