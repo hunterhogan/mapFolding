@@ -360,18 +360,13 @@ def _reducePermutationSpace_byCrease(state: EliminationState, permutationSpace: 
 		The updated `permutationSpace` if valid; otherwise `None`.
 
 	"""
-	leavesCrease: Iterator[Leaf] = iter(())
-	pilesToUpdate: deque[tuple[Pile, LeafOptions]] = deque()
-
 	permutationSpaceHasNewLeaf: bool = True
+
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
+		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 
-		dequePileLeafSpacePileLeafSpace: deque[tuple[tuple[Pile, LeafSpace], tuple[Pile, LeafSpace]]] = deque(
-			pairwise(sorted(permutationSpace.items()))
-		)
-		while dequePileLeafSpacePileLeafSpace and not permutationSpaceHasNewLeaf:
-			(pile_k, leafSpace_k), (pile_r, leafSpace_r) = dequePileLeafSpacePileLeafSpace.pop()
+		for (pile_k, leafSpace_k), (pile_r, leafSpace_r) in pairwise(permutationSpace.items()):
 
 			if isLeaf吗(leafSpace_k) and isLeafOptions吗(leafSpace_r):
 				pilesToUpdate = deque([(pile_r, leafSpace_r)])
@@ -382,18 +377,13 @@ def _reducePermutationSpace_byCrease(state: EliminationState, permutationSpace: 
 			else:
 				continue
 
-			sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
-			if not (
-				permutationSpace := _reduceLeafSpace(
-					state
-					, permutationSpace
-					, pilesToUpdate
+			if not (permutationSpace := _reduceLeafSpace(state, permutationSpace, pilesToUpdate
 					, makeLeafAntiOptions(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
-				)
-			):
+			)):
 				return None
-			if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
-				permutationSpaceHasNewLeaf = True
+
+		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
+			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
