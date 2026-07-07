@@ -8,7 +8,7 @@ from itertools import filterfalse
 from mapFolding._e import getIteratorOfLeaves, mapShapeIs2上nDimensions
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import thisIsLeafOptions
+from mapFolding._e.filters import isLeafOptions吗
 from mapFolding._e.pin2上nDimensional import pinPilesAtEnds, reduceAllPermutationSpaceInEliminationState
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, disqualifyPinningLeafAtPile, moveFoldingToListFolding
 from mapFolding.genericNeedsNewHome import DOTitems, DOTvalues
@@ -28,7 +28,7 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 
 		permutationSpace: PermutationSpace = state.listPermutationSpace.pop()
 
-		pile, leafOptions = first(DOTitems(filterLeaf(thisIsLeafOptions, permutationSpace)))
+		pile, leafOptions = first(DOTitems(filterLeaf(isLeafOptions吗, permutationSpace)))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=pile, permutationSpace=permutationSpace)
 		sherpa.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(sherpa.permutationSpace, sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))

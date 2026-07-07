@@ -81,7 +81,7 @@ from mapFolding._e import (
 from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
-	extractPinnedLeaves, extractUndeterminedPiles, leafIsPinned, notLeafOriginOrLeaf零, notPileLast, thisIsALeaf, thisIsLeafOptions)
+	extractPinnedLeaves, extractUndeterminedPiles, isLeafOptions吗, isLeaf吗, leafPinned吗, notLeafOriginOrLeaf零, notPileLast)
 from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile, reducePermutationSpace_leafDomainOf1
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTvalues, thisHasThat吗, thisNotHaveThat吗
 from more_itertools import one, pairwise, triplewise
@@ -297,11 +297,11 @@ def _reduceLeafSpace(state: EliminationState, permutationSpace: PermutationSpace
 		if leafSpace is not None:
 
 			permutationSpace[pile] = leafSpace
-			if thisIsALeaf(permutationSpace[pile]):
+			if isLeaf吗(permutationSpace[pile]):
 				leafBeans: Leaf | None = None
 				for beans, cornbread in ((一 + 零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))):
-					beansPinned: bool = leafIsPinned(permutationSpace, beans)
-					cornbreadPinned: bool = leafIsPinned(permutationSpace, cornbread)
+					beansPinned: bool = leafPinned吗(permutationSpace, beans)
+					cornbreadPinned: bool = leafPinned吗(permutationSpace, cornbread)
 					if beansPinned ^ cornbreadPinned:
 						leafBeans = beans if beansPinned else cornbread
 						break
@@ -366,10 +366,10 @@ def _reducePermutationSpace_byCrease(state: EliminationState, permutationSpace: 
 		while dequePileLeafSpacePileLeafSpace and not permutationSpaceHasNewLeaf:
 			(pile_k, leafSpace_k), (pile_r, leafSpace_r) = dequePileLeafSpacePileLeafSpace.pop()
 
-			if thisIsALeaf(leafSpace_k) and thisIsLeafOptions(leafSpace_r):
+			if isLeaf吗(leafSpace_k) and isLeafOptions吗(leafSpace_r):
 				pilesToUpdate = deque([(pile_r, leafSpace_r)])
 				leavesCrease = getLeavesCreasePost(state, leafSpace_k)
-			elif thisIsLeafOptions(leafSpace_k) and thisIsALeaf(leafSpace_r):
+			elif isLeafOptions吗(leafSpace_k) and isLeaf吗(leafSpace_r):
 				pilesToUpdate = deque([(pile_k, leafSpace_k)])
 				leavesCrease = getLeavesCreaseAnte(state, leafSpace_r)
 			else:
@@ -499,9 +499,9 @@ def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationS
 				leaf_kCrease: Leaf = int(bit_flip(leaf_k, dimension))
 				leaf_rCrease: Leaf = int(bit_flip(leaf_r, dimension))
 
-				if (leaf_kCreaseIsPinned := leafIsPinned(leavesPinnedParityOpposite, leaf_kCrease)):
+				if (leaf_kCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_kCrease)):
 					pileOf_kCrease = dictionaryLeafToPile[leaf_kCrease]
-				if (leaf_rCreaseIsPinned := leafIsPinned(leavesPinnedParityOpposite, leaf_rCrease)):
+				if (leaf_rCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_rCrease)):
 					pileOf_rCrease = dictionaryLeafToPile[leaf_rCrease]
 
 				if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
@@ -760,13 +760,13 @@ def _reducePermutationSpace_noConsecutiveDimensions(state: EliminationState, per
 		while dequeTriplePileLeafSpace and not permutationSpaceHasNewLeaf:
 			(pile_k, leafSpace_k), (pile, leafSpace), (pile_r, leafSpace_r) = dequeTriplePileLeafSpace.pop()
 
-			if thisIsALeaf(leafSpace_k) and thisIsALeaf(leafSpace) and thisIsLeafOptions(leafSpace_r):
+			if isLeaf吗(leafSpace_k) and isLeaf吗(leafSpace) and isLeafOptions吗(leafSpace_r):
 				pilesToUpdate = deque([(pile_r, leafSpace_r)])
 				leafForbidden = leafSpace + (leafSpace - leafSpace_k)
-			elif thisIsALeaf(leafSpace_k) and thisIsLeafOptions(leafSpace) and thisIsALeaf(leafSpace_r):
+			elif isLeaf吗(leafSpace_k) and isLeafOptions吗(leafSpace) and isLeaf吗(leafSpace_r):
 				pilesToUpdate = deque([(pile, leafSpace)])
 				leafForbidden = (leafSpace_k + leafSpace_r) // 2
-			elif thisIsLeafOptions(leafSpace_k) and thisIsALeaf(leafSpace) and thisIsALeaf(leafSpace_r):
+			elif isLeafOptions吗(leafSpace_k) and isLeaf吗(leafSpace) and isLeaf吗(leafSpace_r):
 				pilesToUpdate = deque([(pile_k, leafSpace_k)])
 				leafForbidden = leafSpace - (leafSpace_r - leafSpace)
 			else:

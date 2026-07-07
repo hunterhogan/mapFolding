@@ -63,7 +63,7 @@ from mapFolding._e import (
 	pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import pileIsOpen
+from mapFolding._e.filters import pileOpen吗
 from mapFolding._e.pin2上nDimensionalAnnex import reduceAllPermutationSpaceInEliminationState as reduceAllPermutationSpaceInEliminationState
 from mapFolding._e.pin2上nDimensionalByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
@@ -141,7 +141,7 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	while pileProcessingOrder and (len(state.listPermutationSpace) < maximumSizeListPermutationSpace):
 		pile: Pile = pileProcessingOrder.popleft()
 
-		thesePilesAreOpen: tuple[Iterator[PermutationSpace], Iterator[PermutationSpace]] = partition(pileIsOpen(pile=pile), state.listPermutationSpace)
+		thesePilesAreOpen: tuple[Iterator[PermutationSpace], Iterator[PermutationSpace]] = partition(pileOpen吗(pile=pile), state.listPermutationSpace)
 		state.listPermutationSpace = deque(thesePilesAreOpen[False])
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:

@@ -127,3 +127,23 @@ class EliminationState:
 		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
+
+#==== PermutationSpace(dict) ====
+#---- method (only?) ------------
+# atPilePinLeaf
+# atPilePinLeafSafetyFilter
+# bifurcatePermutationSpace
+# DOTgetPileIfLeaf
+# DOTgetPileIfLeafOptions
+# extractPinnedLeaves
+# extractUndeterminedPiles
+# makeFolding
+#---- method and function (?) ---
+# deconstructPermutationSpaceAtPile
+# deconstructPermutationSpaceByDomainOfLeaf
+# deconstructPermutationSpaceByDomainsCombined
+# leafIsNotPinned
+# leafPinned吗
+# leafIsPinnedAtPile
+# pileIsNotOpen
+# pileIsOpen

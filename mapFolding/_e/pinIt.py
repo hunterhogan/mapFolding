@@ -22,7 +22,7 @@ from mapFolding._e import (
 	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, getDictionaryLeafOptions, getIteratorOfLeaves,
 	getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
 from mapFolding._e.filters import (
-	extractUndeterminedPiles, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen, pileIsOpen, thisIsALeaf)
+	extractUndeterminedPiles, isLeaf吗, leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗)
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTkeys, DOTvalues, thisNotHaveThat吗
 from math import prod
 from more_itertools import filter_map, flatten, one
@@ -56,13 +56,13 @@ def atPilePinLeafSafetyFilter(permutationSpace: PermutationSpace, pile: Pile, le
 	isSafeToPin : bool
 		True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
 	"""
-	return leafIsPinnedAtPile(permutationSpace, leaf, pile) or (pileIsOpen(permutationSpace, pile) and leafIsNotPinned(permutationSpace, leaf))
+	return leafPinnedAtPile吗(permutationSpace, leaf, pile) or (pileOpen吗(permutationSpace, pile) and leafNotPinned吗(permutationSpace, leaf))
 
 @syntacticCurry
 def disqualifyPinningLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
 	return any((
-		leafIsPinned(state.permutationSpace, leaf)
-		, pileIsNotOpen(state.permutationSpace, state.pile)
+		leafPinned吗(state.permutationSpace, leaf)
+		, pileNotOpen吗(state.permutationSpace, state.pile)
 		, state.pile not in getLeafDomain(state, leaf),
 	))
 
@@ -86,7 +86,7 @@ def _segregateLeafPinnedAtPile(listPermutationSpace: list[PermutationSpace], lea
 		First element: dictionaries where `leaf` is NOT pinned at `pile`.
 		Second element: dictionaries where `leaf` IS pinned at `pile`.
 	"""
-	isPinned: Callable[[PermutationSpace], bool] = leafIsPinnedAtPile(leaf=leaf, pile=pile)
+	isPinned: Callable[[PermutationSpace], bool] = leafPinnedAtPile吗(leaf=leaf, pile=pile)
 	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(isPinned, listPermutationSpace)
 	return (grouped.get(False, []), grouped.get(True, []))
 
@@ -94,7 +94,7 @@ def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
 	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace.copy()
 	state.listPermutationSpace = deque()
 	for permutationSpace in listPermutationSpace:
-		if any(map(leafIsNotPinned(permutationSpace), range(state.leavesTotal))):
+		if any(map(leafNotPinned吗(permutationSpace), range(state.leavesTotal))):
 			state.listPermutationSpace.append(permutationSpace)
 		else:
 			folding: Folding = makeFolding(permutationSpace, ())
@@ -165,7 +165,7 @@ def deconstructPermutationSpaceAtPile(permutationSpace: PermutationSpace, pile: 
 		deconstructedPermutationSpace: dict[Leaf, PermutationSpace] = {leaf: permutationSpace}
 	else:
 		pin: Callable[[Leaf], PermutationSpace] = atPilePinLeaf(permutationSpace, pile)
-		leafCanBePinned: Callable[[Leaf], bool] = leafIsNotPinned(permutationSpace)
+		leafCanBePinned: Callable[[Leaf], bool] = leafNotPinned吗(permutationSpace)
 		deconstructedPermutationSpace = {leaf: pin(leaf) for leaf in filter(leafCanBePinned, leavesToPin)}
 	return deconstructedPermutationSpace
 
@@ -189,9 +189,9 @@ def deconstructPermutationSpaceByDomainOfLeaf(permutationSpace: PermutationSpace
 	deconstructedPermutationSpace : deque[PermutationSpace]
 		Deque of `PermutationSpace` dictionaries with `leaf` pinned at each open `pile` in `leafDomain`.
 	"""
-	if leafIsNotPinned(permutationSpace, leaf):
-		pileOpen: Callable[[int], bool] = pileIsOpen(permutationSpace)
-		leafInPileRange: Callable[[int], bool] = compose(leafIsInPileRange(leaf), partial(DOTgetPileIfLeafOptions, permutationSpace, default=bit_mask(len(permutationSpace))))
+	if leafNotPinned吗(permutationSpace, leaf):
+		pileOpen: Callable[[int], bool] = pileOpen吗(permutationSpace)
+		leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(DOTgetPileIfLeafOptions, permutationSpace, default=bit_mask(len(permutationSpace))))
 		pinLeafAt: Callable[[int], PermutationSpace] = atPilePinLeaf(permutationSpace, leaf=leaf)
 		deconstructedPermutationSpace: deque[PermutationSpace] = deque(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
 	else:
@@ -204,24 +204,24 @@ def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSp
 
 	def pileOpenByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 		def workhorse(domain: Sequence[Pile]) -> bool:
-			return pileIsOpen(permutationSpace, domain[index])
+			return pileOpen吗(permutationSpace, domain[index])
 		return workhorse
 
 	def leafInPileRangeByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 		def workhorse(domain: Sequence[Pile]) -> bool:
 			leafOptions: LeafOptions = raiseIfNone(DOTgetPileIfLeafOptions(permutationSpace, domain[index], default=bit_mask(len(permutationSpace))))
-			return leafIsInPileRange(leaves[index], leafOptions)
+			return leafInLeafOptions吗(leaves[index], leafOptions)
 		return workhorse
 
 	def isPinnedAtPileByIndex(leaf: Leaf, index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 		def workhorse(domain: Sequence[Pile]) -> bool:
-			return leafIsPinnedAtPile(permutationSpace, leaf, domain[index])
+			return leafPinnedAtPile吗(permutationSpace, leaf, domain[index])
 		return workhorse
 
-	if any(map(leafIsNotPinned(permutationSpace), leaves)):
+	if any(map(leafNotPinned吗(permutationSpace), leaves)):
 		for index in range(len(leaves)):
 			"""Redefine leavesDomain by filtering out domains that are not possible with the current `PermutationSpace`."""
-			if leafIsNotPinned(permutationSpace, leaves[index]):
+			if leafNotPinned吗(permutationSpace, leaves[index]):
 				"""`leaves[index]` is not pinned, so it needs a pile.
 				In each iteration of `leavesDomain`, `listOfPiles`, the pile it needs is `listOfPiles[index]`.
 				Therefore, if `listOfPiles[index]` is open, filter in the iteration. If `listOfPiles[index]` is occupied, filter out the iteration."""
@@ -320,13 +320,13 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 		listPermutationSpace_kPinnedAt_pile_k: list[PermutationSpace] = []
 		listPermutationSpaceCompleted: list[PermutationSpace] = []
 
-		if leafIsPinnedAtPile(permutationSpace, leaf_k, pile_k):
+		if leafPinnedAtPile吗(permutationSpace, leaf_k, pile_k):
 			listPermutationSpace_kPinnedAt_pile_k.append(permutationSpace)
-		elif leafIsPinned(permutationSpace, leaf_k) or pileIsNotOpen(permutationSpace, pile_k) or leaf_k not in rangePile_k:
+		elif leafPinned吗(permutationSpace, leaf_k) or pileNotOpen吗(permutationSpace, pile_k) or leaf_k not in rangePile_k:
 			listPermutationSpaceCompleted.append(permutationSpace)
 		else:
 			leafOptionsAt_pile_k: LeafOptions = raiseIfNone(DOTgetPileIfLeafOptions(permutationSpace, pile_k, default=bit_mask(len(permutationSpace))))
-			if leafIsInPileRange(leaf_k, leafOptionsAt_pile_k):
+			if leafInLeafOptions吗(leaf_k, leafOptionsAt_pile_k):
 				listPermutationSpace_kPinnedAt_pile_k.append(atPilePinLeaf(permutationSpace, pile_k, leaf_k))
 				leafSpaceWithoutLeaf_k = JeanValjean(bit_clear(leafOptionsAt_pile_k, leaf_k))
 				if leafSpaceWithoutLeaf_k is not None:
@@ -403,14 +403,14 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 	del leavesToPin
 
 	for permutationSpace in listPermutationSpace:
-		if leafIsPinnedAtPile(permutationSpace, leaf, pile):
+		if leafPinnedAtPile吗(permutationSpace, leaf, pile):
 			continue
 
 		if (leafOptionsAtPile := DOTgetPileIfLeafOptions(permutationSpace, pile)) is None:
 			yield permutationSpace
 			continue
 
-		if leafIsInPileRange(leaf, leafOptionsAtPile):
+		if leafInLeafOptions吗(leaf, leafOptionsAtPile):
 			leafSpaceWithoutLeaf = JeanValjean(bit_clear(leafOptionsAtPile, leaf))
 			if leafSpaceWithoutLeaf is not None:
 				yield associate(permutationSpace, pile, leafSpaceWithoutLeaf)
@@ -441,13 +441,13 @@ def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], le
 	listLeafAtPile: deque[PermutationSpace] = deque()
 
 	for permutationSpace in listPermutationSpace:
-		if leafIsPinnedAtPile(permutationSpace, leaf, pile):
+		if leafPinnedAtPile吗(permutationSpace, leaf, pile):
 			listLeafAtPile.append(permutationSpace)
-		elif leafIsPinned(permutationSpace, leaf) or pileIsNotOpen(permutationSpace, pile):
+		elif leafPinned吗(permutationSpace, leaf) or pileNotOpen吗(permutationSpace, pile):
 			continue
 		else:
 			leafOptionsAtPile: LeafOptions = raiseIfNone(DOTgetPileIfLeafOptions(permutationSpace, pile, default=bit_mask(len(permutationSpace))))
-			if leafIsInPileRange(leaf, leafOptionsAtPile):
+			if leafInLeafOptions吗(leaf, leafOptionsAtPile):
 				listLeafAtPile.append(atPilePinLeaf(permutationSpace, pile, leaf))
 
 	return listLeafAtPile
@@ -619,7 +619,7 @@ def _reduceLeafSpace(state: EliminationState, permutationSpace: PermutationSpace
 		if leafSpace is not None:
 
 			permutationSpace[pile] = leafSpace
-			if thisIsALeaf(permutationSpace[pile]):
+			if isLeaf吗(permutationSpace[pile]):
 				permutationSpaceHasNewLeaf = True
 		else:
 			permutationSpace = {}
@@ -783,7 +783,7 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 		leavesWithDomainOf1: set[Leaf] = set(DOTkeys(filterValue((1).__eq__, counterLeafDomainSize))).difference(leavesPinned.values()).difference([state.leavesTotal])
 		if leavesWithDomainOf1:
 			leaf: Leaf = leavesWithDomainOf1.pop()
-			sherpa: PermutationSpace | None = _reducePermutationSpace_LeafIsPinned(state, atPilePinLeaf(permutationSpace, one(DOTkeys(filterLeaf(leafIsInPileRange(leaf), pilesUndetermined))), leaf))
+			sherpa: PermutationSpace | None = _reducePermutationSpace_LeafIsPinned(state, atPilePinLeaf(permutationSpace, one(DOTkeys(filterLeaf(leafInLeafOptions吗(leaf), pilesUndetermined))), leaf))
 			if (sherpa is None) or (not sherpa):
 				return None
 			else:

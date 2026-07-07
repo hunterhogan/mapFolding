@@ -17,7 +17,7 @@ Boolean antecedents
 		You can test whether a `leaf` is present in `leafOptions`.
 	leafIsNotPinned
 		You can test whether a `leaf` is absent from `permutationSpace.values()`.
-	leafIsPinned
+	leafPinned吗
 		You can test whether a `leaf` is present in `permutationSpace.values()`.
 	notLeafOriginOrLeaf零
 		You can test whether `leaf` is greater than `零`.
@@ -63,10 +63,10 @@ if TYPE_CHECKING:
 #======== Boolean antecedents ================================================
 
 @syntacticCurry
-def leafIsInPileRange(leaf: Leaf, leafOptions: LeafOptions) -> bool:
+def leafInLeafOptions吗(leaf: Leaf, leafOptions: LeafOptions) -> bool:
 	"""Test whether `leaf` is present in `leafOptions`.
 
-	You can use `leafIsInPileRange` in an `if` statement, or you can pass `leafIsInPileRange`
+	You can use `leafInLeafOptions吗` in an `if` statement, or you can pass `leafInLeafOptions吗`
 	as a predicate to a filtering utility described in the module docstring.
 
 	Parameters
@@ -90,7 +90,7 @@ def leafIsInPileRange(leaf: Leaf, leafOptions: LeafOptions) -> bool:
 	return leafOptions.bit_test(leaf)
 
 @syntacticCurry
-def leafIsNotPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
+def leafNotPinned吗(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
 	"""Return True if `leaf` is not presently pinned in `permutationSpace`.
 
 	Parameters
@@ -108,11 +108,11 @@ def leafIsNotPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
 	return leaf not in permutationSpace.values()
 
 @overload
-def leafIsPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool: ...
+def leafPinned吗(permutationSpace: PermutationSpace, leaf: Leaf) -> bool: ...
 @overload
-def leafIsPinned(permutationSpace: PinnedLeaves, leaf: Leaf) -> bool: ...
+def leafPinned吗(permutationSpace: PinnedLeaves, leaf: Leaf) -> bool: ...
 @syntacticCurry
-def leafIsPinned(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) -> bool:
+def leafPinned吗(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) -> bool:
 	"""Return True if `leaf` is pinned in `permutationSpace`.
 
 	Parameters
@@ -124,13 +124,13 @@ def leafIsPinned(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) 
 
 	Returns
 	-------
-	leafIsPinned : bool
+	leafPinned吗 : bool
 		True if the mapping includes `leaf`.
 	"""
 	return leaf in permutationSpace.values()
 
 @syntacticCurry
-def leafIsPinnedAtPile(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pile) -> bool:
+def leafPinnedAtPile吗(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pile) -> bool:
 	"""Return `True` if `leaf` is presently pinned at `pile` in `permutationSpace`.
 
 	Parameters
@@ -190,7 +190,7 @@ def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	return pileLast != pile
 
 @syntacticCurry
-def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
+def pileNotOpen吗(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	"""Return True if `pile` is not presently pinned in `permutationSpace`.
 
 	Do you want to know if the pile is open or do you really want to know the Python `type` of the value at that key?
@@ -211,10 +211,10 @@ def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	--------
 	thisIsALeaf, thisIsALeafOptions
 	"""
-	return thisIsALeaf(permutationSpace[pile])
+	return isLeaf吗(permutationSpace[pile])
 
 @syntacticCurry
-def pileIsOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
+def pileOpen吗(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	"""Return True if `pile` is not presently pinned in `permutationSpace`.
 
 	Parameters
@@ -229,9 +229,9 @@ def pileIsOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	pileIsOpen : bool
 		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is a `LeafOptions`.
 	"""
-	return not thisIsALeaf(permutationSpace[pile])
+	return not isLeaf吗(permutationSpace[pile])
 
-def thisIsALeaf(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
+def isLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	"""Return True if `leafSpace` is a `leaf`.
 
 	Parameters
@@ -244,9 +244,9 @@ def thisIsALeaf(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	intIsProbablyALeaf : TypeIs[int]
 		Technically, we only know the type is `int`.
 	"""
-	return (leafSpace is not None) and isinstance(leafSpace, int)
+	return isinstance(leafSpace, int)
 
-def thisIsLeafOptions(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
+def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	"""Return True if `leafSpace` is a pile's range of leaves.
 
 	Parameters
@@ -259,7 +259,7 @@ def thisIsLeafOptions(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	youHaveAPileRange : TypeIs[LeafOptions]
 		Congrats, you have a pile range!
 	"""
-	return (leafSpace is not None) and isinstance(leafSpace, mpz)
+	return isinstance(leafSpace, mpz)
 
 #======== Filtering functions ================================================
 
@@ -276,7 +276,7 @@ def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	dictionaryOfPileLeaf : dict[int, int]
 		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 	"""
-	return dict(sorted(DOTitems(filterLeaf(thisIsALeaf, permutationSpace))))
+	return dict(sorted(DOTitems(filterLeaf(isLeaf吗, permutationSpace))))
 
 def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> UndeterminedPiles:
 	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
@@ -291,4 +291,4 @@ def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> Undetermined
 	pilesUndetermined : dict[int, LeafOptions]
 		Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
 	"""
-	return filterLeaf(thisIsLeafOptions, permutationSpace)
+	return filterLeaf(isLeafOptions吗, permutationSpace)

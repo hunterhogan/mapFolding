@@ -65,7 +65,7 @@ from gmpy2 import bit_clear, bit_mask, bit_set
 from humpy_cytoolz import curry as syntacticCurry, dissoc as dissociatePile, unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
-from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf, thisIsLeafOptions
+from mapFolding._e.filters import extractPinnedLeaves, isLeafOptions吗, isLeaf吗
 from mapFolding.genericNeedsNewHome import DOTkeys
 from more_itertools import iter_index
 from operator import add, mul
@@ -143,7 +143,7 @@ def DOTgetPileIfLeaf(permutationSpace: PermutationSpace, pile: Pile, default: Le
 	[1] mapFolding._e.filters.thisIsALeaf
 	"""
 	ImaLeaf: LeafSpace | None = permutationSpace.get(pile)
-	if thisIsALeaf(ImaLeaf):
+	if isLeaf吗(ImaLeaf):
 		return ImaLeaf
 	return default
 
@@ -184,7 +184,7 @@ def DOTgetPileIfLeafOptions(permutationSpace: PermutationSpace, pile: Pile, defa
 
 	"""
 	ImaLeafOptions: LeafSpace | None = permutationSpace.get(pile)
-	if thisIsLeafOptions(ImaLeafOptions):
+	if isLeafOptions吗(ImaLeafOptions):
 		return ImaLeafOptions
 	return default
 
@@ -333,7 +333,7 @@ def JeanValjean(p24601: LeafOptions, /) -> LeafSpace | None:
 
 	"""
 	whoAmI: LeafSpace | None = p24601
-	if thisIsLeafOptions(p24601):
+	if isLeafOptions吗(p24601):
 		if p24601.bit_count() == 1:
 			whoAmI = None
 		elif p24601.bit_count() == 2:
