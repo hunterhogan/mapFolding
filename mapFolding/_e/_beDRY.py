@@ -523,8 +523,7 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 	[4] mapFolding._e._beDRY.getProductsOfDimensions
 
 	"""
-	if dimensionsTotal is None:
-		dimensionsTotal = len(productsOfDimensions) - 1
+	dimensionsTotal = dimensionsTotal or len(productsOfDimensions) - 1
 
 	if dimensionFrom首 is None:
 		dimensionFrom首 = dimensionsTotal
@@ -533,10 +532,8 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 
 	productsOfDimensionsFrom首: tuple[int, ...] = productsOfDimensions[0:productsOfDimensionsTruncator][::-1]
 
-	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = tuple(
-						sum(productsOfDimensionsFrom首[0:aProduct], start=0)
-							for aProduct in range(len(productsOfDimensionsFrom首) + inclusive)
-	)
+	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = tuple(accumulate(productsOfDimensionsFrom首, add, initial=0))
+
 	return sumsOfProductsOfDimensionsNearest首
 
 #======== Flow control ================================================
