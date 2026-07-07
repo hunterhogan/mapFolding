@@ -5,12 +5,13 @@ from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import valfilter as filterLeaf
 from itertools import filterfalse
-from mapFolding._e import DOTitems, DOTvalues, getIteratorOfLeaves, mapShapeIs2上nDimensions
+from mapFolding._e import getIteratorOfLeaves, mapShapeIs2上nDimensions
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import thisIsLeafOptions
+from mapFolding._e.filters import isLeafOptions吗
 from mapFolding._e.pin2上nDimensional import pinPilesAtEnds, reduceAllPermutationSpaceInEliminationState
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, disqualifyPinningLeafAtPile, moveFoldingToListFolding
+from mapFolding.genericNeedsNewHome import DOTitems, DOTvalues
 from math import factorial
 from more_itertools import first
 from tqdm import tqdm
@@ -18,7 +19,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future
-	from mapFolding._e import Folding, PermutationSpace
+	from mapFolding._e.theTypes import Folding, PermutationSpace
 
 def pinByCrease(state: EliminationState) -> EliminationState:
 	listFolding: list[Folding] = []
@@ -27,7 +28,7 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 
 		permutationSpace: PermutationSpace = state.listPermutationSpace.pop()
 
-		pile, leafOptions = first(DOTitems(filterLeaf(thisIsLeafOptions, permutationSpace)))
+		pile, leafOptions = first(DOTitems(filterLeaf(isLeafOptions吗, permutationSpace)))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=pile, permutationSpace=permutationSpace)
 		sherpa.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(sherpa.permutationSpace, sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))

@@ -67,7 +67,7 @@ These are the “shop tools” that algorithms tend to import from `_e/__init__.
 
 - `mapFolding/_e/filters.py`
 	- Boolean predicates and specialized filter functions for map-folding data structures.
-	- Includes `thisIsALeaf`, `thisIsLeafOptions` (type-narrowing guards), `extractPinnedLeaves`, and helpers like `between`, `consecutive`, `leafIsInPileRange`, `leafIsPinned`, `mappingHasKey`, `pileIsOpen`.
+	- Includes `thisIsALeaf`, `thisIsLeafOptions` (type-narrowing guards), `extractPinnedLeaves`, and helpers like `between`, `consecutive`, `leafIsInPileRange`, `leafPinned吗`, `mappingHasKey`, `pileIsOpen`.
 
 - `mapFolding/_e/_creases.py`
 	- Crease proximity helpers: `getLeavesCreaseAnte` and `getLeavesCreasePost`.

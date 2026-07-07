@@ -13,7 +13,7 @@ import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
-	from mapFolding._e import PermutationSpace
+	from mapFolding._e.theTypes import PermutationSpace
 	from numpy.typing import NDArray
 
 def _getPinningFunctionName(pinningFunction: Callable[..., EliminationState]) -> str:

@@ -1,23 +1,28 @@
-# ruff: noqa: T201, T203, TC003  # noqa: RUF100
-# pyright: reportUnusedImport=false
+# ruff: noqa: T201, T203
 from __future__ import annotations
 
-from collections import deque
-from collections.abc import Callable, Iterable
 from gmpy2 import fac
-from humpy_cytoolz import compose, map as toolz_map
+from humpy_cytoolz import compose
+from humpy_toolz.curried import map as toolz_map
 from mapFolding._e import (
-	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves,
-	getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, LeafOptions, PermutationSpace)
+	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain,
+	getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pin2上nDimensional import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
 	pin首beans)
 from mapFolding._e.Z0Z_analysis.toolkit import verifyPinning2Dn
+from mapFolding.genericNeedsNewHome import DOTvalues
 from math import prod
 from pprint import pprint
+from typing import TYPE_CHECKING
 import time
+
+if TYPE_CHECKING:
+	from collections.abc import Iterable
+	from mapFolding._e.theTypes import LeafOptions
+
 
 def printStatisticsPermutations(state: EliminationState) -> None:
 	def prodOfDOTvalues(listLeafOptions: Iterable[LeafOptions]) -> int:
@@ -35,6 +40,7 @@ if __name__ == '__main__':
 
 	if printThis:
 		timeStart: float = time.perf_counter()
+		state: EliminationState = pinLeavesDimension二(state)
 		state: EliminationState = pin首beans(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		state: EliminationState = pin3beans2(state)
@@ -48,7 +54,6 @@ if __name__ == '__main__':
 		state: EliminationState = pinLeavesDimension一(state)
 		state: EliminationState = pinPilesAtEnds(state, 3)
 		state: EliminationState = pinLeavesDimensions0零一(state)
-		state: EliminationState = pinLeavesDimension二(state)
 		state: EliminationState = pinLeavesDimension首二(state)
 		state: EliminationState = pinPile零Ante首零(state)
 		print(state.sumsOfProductsOfDimensionsNearest首)

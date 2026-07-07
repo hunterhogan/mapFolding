@@ -1,0 +1,8 @@
+extend = "../../ruff.toml"
+# TODO turn of linting and formatting and type checking
+[lint]
+preview = true
+allowed-confusables = []
+ignore = []
+select = []
+task-tags = ["DEVELOPMENT", "FailEarly", "NOTE", "SEMIOTICS", "TODO"]

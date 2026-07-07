@@ -107,7 +107,8 @@ Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]  # no
 """A `numpy.ndarray` with one axis and elements of type `NumPyFoldsTotal`."""
 
 #======== Managing data structures in `matrixMeandersNumPyndas` algorithm =======
-# TODO Figure out how to have a SSOT for the axis order.
+
+# TODO To have a SSOT for the axis order, implement the system I created in `hunterHearsPy`.
 axisOfLength: Final[int] = 0
 
 class ShapeArray(NamedTuple):

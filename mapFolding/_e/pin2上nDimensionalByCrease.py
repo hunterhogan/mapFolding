@@ -6,15 +6,15 @@ from hunterMakesPy import inclusive, raiseIfNone
 from mapFolding._e import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, getLeavesCreaseAnte, getLeavesCreasePost, leafInSubHyperplane,
 	ptount, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一)
-from mapFolding._e.filters import exclude
+from mapFolding.genericNeedsNewHome import exclude
 from operator import add, neg, sub
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e import Leaf
 	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.theTypes import Leaf
 
 #======== crease-based subroutines for analyzing a specific `pile`. =======
 def _getLeavesCrease(state: EliminationState, leaf: Leaf) -> tuple[Leaf, ...]:

@@ -2,19 +2,21 @@ from __future__ import annotations
 
 from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
-from itertools import filterfalse, pairwise, product as CartesianProduct, repeat
-from mapFolding._e import DOTitems, getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
+from itertools import pairwise, product as CartesianProduct, repeat
+from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
 from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import extractUndeterminedPiles, hasDuplicates
+from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, excludeLeaf_rBeforeLeaf_k, makeFolding, reduceAllPermutationSpace
+from mapFolding.genericNeedsNewHome import DOTitems
 from math import factorial
+from more_itertools import all_unique as allUnique吗
 from tqdm import tqdm
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future
-	from mapFolding._e import PermutationSpace
+	from mapFolding._e.theTypes import PermutationSpace
 
 def count(state: EliminationState) -> EliminationState:
 	state.groupsOfFolds += sum(map(countPermutationSpace, state.listPermutationSpace, repeat(state.mapShape)))
@@ -23,7 +25,7 @@ def count(state: EliminationState) -> EliminationState:
 def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[int, ...]) -> int:
 	return sum(map(thisLeafFoldingIsValid
 			, map(makeFolding, repeat(permutationSpace)
-		, filterfalse(hasDuplicates
+		, filter(allUnique吗
 		, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions)) for _pile, leafOptions in sorted(DOTitems(extractUndeterminedPiles(permutationSpace)))))))
 			, repeat(mapShape)))
 

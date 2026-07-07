@@ -65,25 +65,24 @@ from gmpy2 import bit_clear, bit_mask, bit_set
 from humpy_cytoolz import curry as syntacticCurry, dissoc as dissociatePile, unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
-from mapFolding._e import DOTkeys
-from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf, thisIsLeafOptions
+from mapFolding._e.filters import extractPinnedLeaves, isLeafOptions吗, isLeaf吗
+from mapFolding.genericNeedsNewHome import DOTkeys
 from more_itertools import iter_index
 from operator import add, mul
-from typing import TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
-	from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 #======== Group-by functions ================================================
 
 def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[PinnedLeaves, UndeterminedPiles]:
-	"""Split a `PermutationSpace` into pinned leaves and undetermined pile domains.
+	"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
 
 	You can use this function to partition `permutationSpace` into two dictionaries. The first
 	dictionary contains each `Pile` mapped to a pinned `Leaf`. The second dictionary contains
-	each `Pile` mapped to a `LeafOptions` domain. This separation is useful when you need to
-	process pinned assignments separately from domain constraints [1].
+	each `Pile` mapped to a `LeafOptions` domain.
 
 	Parameters
 	----------
@@ -96,23 +95,10 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 		Dictionary of `Pile` to pinned `Leaf` mappings.
 	pilesUndetermined : UndeterminedPiles
 		Dictionary of `Pile` to `LeafOptions` domain mappings.
-
-	Examples
-	--------
-	The function is used to separate pinned leaves from pile domains before domain reduction.
-
-		leavesPinned, pilesUndetermined = bifurcatePermutationSpace(permutationSpace)
-
-	References
-	----------
-	[1] mapFolding._e.filters.extractPinnedLeaves
-
-	[2] cytoolz.dicttoolz.dissoc
-		https://toolz.readthedocs.io/en/latest/api.html#toolz.dicttoolz.dissoc
-
 	"""
 	leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
-	return (leavesPinned, dissociatePile(permutationSpace, *DOTkeys(leavesPinned)))  # pyright: ignore[reportReturnType]  # ty:ignore[invalid-return-type]
+	# NOTE `cast` because type checkers don't know `PermutationSpace` - `PinnedLeaves` = `UndeterminedPiles`.
+	return (leavesPinned, cast("UndeterminedPiles", dissociatePile(permutationSpace, *DOTkeys(leavesPinned))))
 
 #======== `LeafOptions` functions ================================================
 
@@ -157,7 +143,7 @@ def DOTgetPileIfLeaf(permutationSpace: PermutationSpace, pile: Pile, default: Le
 	[1] mapFolding._e.filters.thisIsALeaf
 	"""
 	ImaLeaf: LeafSpace | None = permutationSpace.get(pile)
-	if thisIsALeaf(ImaLeaf):
+	if isLeaf吗(ImaLeaf):
 		return ImaLeaf
 	return default
 
@@ -198,7 +184,7 @@ def DOTgetPileIfLeafOptions(permutationSpace: PermutationSpace, pile: Pile, defa
 
 	"""
 	ImaLeafOptions: LeafSpace | None = permutationSpace.get(pile)
-	if thisIsLeafOptions(ImaLeafOptions):
+	if isLeafOptions吗(ImaLeafOptions):
 		return ImaLeafOptions
 	return default
 
@@ -347,7 +333,7 @@ def JeanValjean(p24601: LeafOptions, /) -> LeafSpace | None:
 
 	"""
 	whoAmI: LeafSpace | None = p24601
-	if thisIsLeafOptions(p24601):
+	if isLeafOptions吗(p24601):
 		if p24601.bit_count() == 1:
 			whoAmI = None
 		elif p24601.bit_count() == 2:
@@ -523,8 +509,7 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 	[4] mapFolding._e._beDRY.getProductsOfDimensions
 
 	"""
-	if dimensionsTotal is None:
-		dimensionsTotal = len(productsOfDimensions) - 1
+	dimensionsTotal = dimensionsTotal or len(productsOfDimensions) - 1
 
 	if dimensionFrom首 is None:
 		dimensionFrom首 = dimensionsTotal
@@ -533,59 +518,9 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 
 	productsOfDimensionsFrom首: tuple[int, ...] = productsOfDimensions[0:productsOfDimensionsTruncator][::-1]
 
-	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = tuple(
-						sum(productsOfDimensionsFrom首[0:aProduct], start=0)
-							for aProduct in range(len(productsOfDimensionsFrom首) + inclusive)
-	)
+	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = tuple(accumulate(productsOfDimensionsFrom首, add, initial=0))
+
 	return sumsOfProductsOfDimensionsNearest首
-
-def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: 文义) -> 文件 | None:
-	"""Find the key in a dictionary that maps to a specified value.
-
-	You can use this function to perform reverse dictionary lookup: given a value, find the
-	key that maps to that value. The function iterates through `dictionary.items()` [1] and
-	returns the first key where `dictionary[key] == keyValue`. When no matching key exists,
-	the function returns `None`.
-
-	Parameters
-	----------
-	dictionary : dict[文件, 文义]
-		Dictionary to search for `keyValue`.
-	keyValue : 文义
-		Value to locate in `dictionary.values()`.
-
-	Returns
-	-------
-	keyOrNone : 文件 | None
-		The key that maps to `keyValue`, or `None` when no key maps to `keyValue`.
-
-	Examples
-	--------
-	The function is used to find which pile contains a specific leaf.
-
-		pileOfLeaf一零: Pile = raiseIfNone(reverseLookup(state.permutationSpace, leaf一零))
-		pileOfLeaf首零一: Pile = raiseIfNone(reverseLookup(state.permutationSpace, leaf首零一))
-
-	Important
-	---------
-	The function assumes all values in `dictionary` are distinct. When multiple keys map to
-	`keyValue`, the function returns an arbitrary matching key (whichever appears first during
-	iteration). The function is not efficient for membership testing: use `keyValue in dictionary.values()`
-	instead. When you expect a key to exist, combine with `raiseIfNone` [2] rather than checking
-	for `None`.
-
-	References
-	----------
-	[1] dict.items() - Python documentation
-		https://docs.python.org/3/library/stdtypes.html#dict.items
-	[2] hunterMakesPy.raiseIfNone - Context7
-		https://context7.com/hunterhogan/huntermakespy
-
-	"""
-	for key, value in dictionary.items():
-		if value == keyValue:
-			return key
-	return None
 
 #======== Flow control ================================================
 

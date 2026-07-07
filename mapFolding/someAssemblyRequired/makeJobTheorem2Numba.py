@@ -1,3 +1,4 @@
+# ruff: noqa: ERA001
 """
 Map folding AST transformation system: Specialized job generation and optimization implementation.
 
@@ -11,9 +12,9 @@ progress integration for long-running calculations, and launcher generation for 
 from __future__ import annotations
 
 from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
-from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
+from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule
 from hunterMakesPy.dataStructures import autoDecodingRLE
-from mapFolding import DatatypeLeavesTotal, packageSettings
+from mapFolding import packageSettings
 from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
 from mapFolding.oeis import dictionaryOEIS, getFoldsTotalKnown
@@ -26,7 +27,9 @@ from typing import cast, TYPE_CHECKING
 import ast
 
 if TYPE_CHECKING:
+	from astToolkit.containers import IngredientsFunction
 	from hunterMakesPy import identifierDotAttribute
+	from mapFolding import DatatypeLeavesTotal
 
 # TODO More convergence with `makeJobTheorem2codon`
 
@@ -229,7 +232,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 		Optimization settings including Numba parameters and progress options.
 
 	"""
-	# ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.identifierCallableSource)))  # noqa: ERA001
+	# ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.identifierCallableSource)))
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(job.source_astModule, job.identifierCallableSource)
 
 	for identifier in job.shatteredDataclass.listIdentifiersStaticScalars:

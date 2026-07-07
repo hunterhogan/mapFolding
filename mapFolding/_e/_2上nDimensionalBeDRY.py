@@ -37,4 +37,4 @@ def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsT
 
 	[2] mapFolding._e.dataDynamic.addLeafOptions
 	"""
-	return (youMustBeDimensionsTallToPinThis <= len(mapShape)) and all(dimensionLength == 2 for dimensionLength in mapShape)
+	return (youMustBeDimensionsTallToPinThis <= len(mapShape)) and all(map((2).__eq__, mapShape))

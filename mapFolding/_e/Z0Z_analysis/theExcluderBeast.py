@@ -7,19 +7,19 @@ from collections import deque
 from fractions import Fraction
 from functools import cache, reduce
 from gmpy2 import bit_flip
-from hunterMakesPy import CallableFunction, inclusive, raiseIfNone
+from hunterMakesPy import inclusive, raiseIfNone
 from hunterMakesPy.dataStructures import updateExtendPolishDictionaryLists
 from hunterMakesPy.filesystemToolkit import importPathFilename2Identifier, writePython
 from itertools import product as CartesianProduct, repeat
 from mapFolding import ansiColorReset, ansiColors, packageSettings
 from mapFolding._e import (
-	getDictionaryLeafDomains, getIteratorOfLeaves, getLeafDomain, getLeafOptions, PermutationSpace, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一,
-	首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
+	getDictionaryLeafDomains, getIteratorOfLeaves, getLeafDomain, getLeafOptions, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三,
+	首零三, 首零二, 首零二三)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import between吗, exclude
 from mapFolding._e.pin2上nDimensional import pinPilesAtEnds
 from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
-from mapFolding._e.Z0Z_analysis.toolkit import detectPermutationSpaceErrors, getDataFrameFoldings, PermutationSpaceStatus
+from mapFolding._e.Z0Z_analysis.toolkit import detectPermutationSpaceErrors, getDataFrameFoldings
+from mapFolding.genericNeedsNewHome import between吗, exclude
 from more_itertools import consecutive_groups
 from operator import indexOf, neg, pos
 from pathlib import Path, PurePath
@@ -30,6 +30,9 @@ import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
+	from hunterMakesPy import CallableFunction
+	from mapFolding._e.theTypes import PermutationSpace
+	from mapFolding._e.Z0Z_analysis.toolkit import PermutationSpaceStatus
 	import pandas
 
 def 首一1(dd: int, /) -> int: return 首一(dd) + 1

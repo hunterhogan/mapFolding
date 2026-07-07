@@ -83,7 +83,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 		'This module contains empirically extracted combined domain data for leaves',
 		f'{listLeafNames} across multiple mapShape configurations.',
 		'',
-		'Each list is named `listDomain2D{dimensionsTotal}` where `dimensionsTotal`',
+		'Each list is named `listDomain2D{dimensionsTotal}` where `dimensionsTotal`',  # noqa: RUF027
 		'is the exponent in the 2^dimensionsTotal mapShape, and it contains tuples representing',
 		'valid pile positions for the specified leaves. The tuple order follows the original',
 		'leaf argument order.',

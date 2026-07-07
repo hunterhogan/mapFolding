@@ -14,3 +14,4 @@ from mapFolding._theTypes import (
 
 # isort: split
 from mapFolding._theSSOT import packageSettings as packageSettings
+from mapFolding.genericNeedsNewHome import Limitation as Limitation

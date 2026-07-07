@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 from mapFolding import packageSettings
-from mapFolding._e import Limitation, mapShapeIs2上nDimensions
+from mapFolding._e import mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.beDRY import defineProcessorLimit
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+	from mapFolding import Limitation
 	from os import PathLike
 	from pathlib import Path, PurePath
 

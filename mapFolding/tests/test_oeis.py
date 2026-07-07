@@ -1,4 +1,3 @@
-# ruff: noqa: S311
 """OEIS (Online Encyclopedia of Integer Sequences) integration testing.
 
 This module validates the package's integration with OEIS, ensuring that sequence
@@ -30,13 +29,48 @@ from __future__ import annotations
 from contextlib import redirect_stdout
 from mapFolding.oeis import _librarianStandardizesOEISid, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented
 from mapFolding.tests import assertEqualTo, messageTestFailure
-from mapFolding.tests.conftest import standardizedSystemExit
-from typing import Any
+from typing import TYPE_CHECKING
 import io
 import pytest
 import random
 import re as regex
 import unittest.mock
+
+if TYPE_CHECKING:
+	from collections.abc import Callable, Sequence
+	from typing import Any
+
+def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: Callable[..., Any], *arguments: Any) -> None:
+	"""Template for tests expecting SystemExit.
+
+	Parameters
+	----------
+	expected : str | int | Sequence[int]
+		Exit code expectation:
+		- "error": any non-zero exit code
+		- "nonError": specifically zero exit code
+		- int: exact exit code match
+		- Sequence[int]: exit code must be one of these values
+	functionTarget : Callable[..., Any]
+		The function to test.
+	arguments : Any
+		Arguments to pass to the function.
+
+	"""
+	with pytest.raises(SystemExit) as exitInfo:
+		functionTarget(*arguments)
+
+	exitCode = exitInfo.value.code
+	functionName: str = getattr(functionTarget, "__name__", functionTarget.__class__.__name__)
+
+	if expected == "error":
+		assert exitCode != 0, messageTestFailure(exitCode, "a non-zero exit code", functionName, *arguments)
+	elif expected == "nonError":
+		assertEqualTo(exitCode, 0, functionName, *arguments)
+	elif isinstance(expected, (list, tuple)):
+		assert exitCode in expected, messageTestFailure(exitCode, expected, functionName, *arguments)
+	else:
+		assertEqualTo(exitCode, expected, functionName, *arguments)
 
 def test__validateOEISid_valid_id(oeisIDmapFolding: str) -> None:
 	actual: str = _librarianStandardizesOEISid(oeisIDmapFolding)

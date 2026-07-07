@@ -6,11 +6,11 @@ from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding import packageSettings
 from mapFolding._e import (
-	bifurcatePermutationSpace, DOTvalues, getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost,
+	bifurcatePermutationSpace, getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost,
 	indicesMapShapeDimensionLengthsAreEqual, leafOrigin, mapShapeIs2上nDimensions, pileOrigin)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import between吗
 from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, reduceAllPermutationSpace
+from mapFolding.genericNeedsNewHome import between吗, DOTvalues
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
@@ -21,7 +21,7 @@ import uuid
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future
-	from mapFolding._e import Leaf
+	from mapFolding._e.theTypes import Leaf
 
 def count(state: EliminationState) -> EliminationState:
 	model = cp_model.CpModel()

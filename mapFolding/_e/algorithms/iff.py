@@ -73,19 +73,20 @@ from collections import deque
 from functools import cache
 from humpy_cytoolz import valfilter as filterLeaf
 from humpy_toolz.curried.operator import indexOf
-from hunterMakesPy import CallableFunction, inclusive
+from hunterMakesPy import inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
-from mapFolding._e import DOTitems
-from mapFolding._e.filters import between吗, extractPinnedLeaves
+from mapFolding._e.filters import extractPinnedLeaves
 from mapFolding.beDRY import getLeavesTotal
+from mapFolding.genericNeedsNewHome import between吗, DOTitems
 from math import prod
 from operator import floordiv
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
-	from mapFolding._e import Folding, Leaf, PermutationSpace, Pile
+	from hunterMakesPy import CallableFunction
 	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.theTypes import Folding, Leaf, PermutationSpace, Pile
 
 #======== Forbidden inequalities ============================
 

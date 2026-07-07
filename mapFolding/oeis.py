@@ -1,3 +1,4 @@
+# ruff: noqa: PLC0415 E701
 """You can use this module to access OEIS sequence data and compute sequence values.
 
 (AI generated docstring)
@@ -48,7 +49,6 @@ References
 """
 from __future__ import annotations
 
-# ruff: noqa: PLC0415 E701
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
 from functools import cache
@@ -605,13 +605,13 @@ def OEIS_for_n() -> None:
 	timeStart: float = time.perf_counter()
 
 	try:
-		print(oeisIDfor_n(argumentsCLI.oeisID, argumentsCLI.n), "distinct folding patterns.")  # noqa: T201
+		sys.stdout.write(f"{oeisIDfor_n(argumentsCLI.oeisID, argumentsCLI.n)} distinct folding patterns.\n")
 	except (KeyError, ValueError, ArithmeticError) as ERRORmessage:
-		print(f"Error: {ERRORmessage}", file=sys.stderr)  # noqa: T201
+		sys.stderr.write(f"Error: {ERRORmessage}\n")
 		sys.exit(1)
 
 	timeElapsed: float = time.perf_counter() - timeStart
-	print(f"Time elapsed: {timeElapsed:.3f} seconds")  # noqa: T201
+	sys.stdout.write(f"Time elapsed: {timeElapsed:.3f} seconds\n")
 
 def getOEISids() -> None:
 	"""Display comprehensive information about all implemented OEIS sequences.
@@ -627,7 +627,7 @@ def getOEISids() -> None:
 	to help users understand how to access and utilize the OEIS interface functionality.
 
 	"""
-	print(_librarianFormatsHelpText())  # noqa: T201
+	sys.stdout.write(_librarianFormatsHelpText())
 
 # SEMIOTICS segregate `countingFoldsSymmetric`?
 
@@ -783,6 +783,7 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	countTotal: int = -errorL33T
 	matched_oeisID: bool = True
 
+	# TODO convert match/case to if/elif
 	match oeisID:
 		case 'A000136': from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
 		case 'A000560': from mapFolding.algorithms.oeisIDbyFormula import A000560 as doTheNeedful

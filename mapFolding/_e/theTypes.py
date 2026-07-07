@@ -4,12 +4,12 @@ from gmpy2 import mpz
 
 #======== Scalars ================================
 
-type Limitation = bool | float | int | None
-
 type DimensionIndex = int
 """Zero-based index of a dimension."""
 
 type Leaf = int
+# TODO Why does this change how everything behaves?
+# LeafOptions: TypeAlias = mpz  # noqa: ERA001
 type LeafOptions = mpz
 """Represent a set of `Leaf` indices as a bitset.
 

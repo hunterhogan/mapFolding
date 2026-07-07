@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator
-	from mapFolding._e import Leaf
 	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.theTypes import Leaf
 
 def getLeavesCreaseAnte(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
 	"""1) `leaf` has at most `dimensionsTotal - 1` many creases.

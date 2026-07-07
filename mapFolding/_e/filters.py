@@ -1,4 +1,3 @@
-# ruff: noqa: DOC201
 """You can use this module to express boolean antecedents and apply antecedents as filters.
 
 This module groups small boolean antecedents (predicates) that are convenient to reuse.
@@ -14,20 +13,12 @@ specialized to the map-folding data structures used by `_e` algorithms.
 Contents
 --------
 Boolean antecedents
-	between
-		You can test whether `floor <= comparand <= ceiling`.
-	consecutive
-		You can test whether the integers in `flatContainer` are consecutive.
-	hasDuplicates
-		You can test whether `flatContainer` contains duplicate values.
 	leafIsInPileRange
 		You can test whether a `leaf` is present in `leafOptions`.
 	leafIsNotPinned
 		You can test whether a `leaf` is absent from `permutationSpace.values()`.
-	leafIsPinned
+	leafPinned吗
 		You can test whether a `leaf` is present in `permutationSpace.values()`.
-	mappingHasKey
-		You can test whether `key` is present in `lookup`.
 	notLeafOriginOrLeaf零
 		You can test whether `leaf` is greater than `零`.
 	notPileLast
@@ -36,16 +27,12 @@ Boolean antecedents
 		You can test whether `permutationSpace[pile]` is a `Leaf`.
 	pileIsOpen
 		You can test whether `permutationSpace[pile]` is not a `Leaf`.
-	thisHasThat
-		You can test whether `that` is present in `this`.
 	thisIsALeaf
 		You can narrow `leafSpace` to a `Leaf`.
 	thisIsALeafOptions
 		You can narrow `leafSpace` to a `LeafOptions`.
 
 Filter functions
-	exclude
-		You can yield items from `flatContainer` whose positions are not in `indices`.
 	extractPinnedLeaves
 		You can extract only `pile: leaf` mappings from a `PermutationSpace`.
 	extractUndeterminedPiles
@@ -63,57 +50,23 @@ References
 """
 from __future__ import annotations
 
-from collections.abc import Iterable
 from gmpy2 import mpz
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
-from hunterMakesPy.parseParameters import intInnit
-from mapFolding._e import DOTitems, 零
-from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract
+from mapFolding._e import 零
+from mapFolding.genericNeedsNewHome import DOTitems
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from collections.abc import Hashable, Iterator, Mapping, Sequence
-	from hunterMakesPy import Ordinals
-	from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
-	from typing import Any, TypeIs
+	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from typing import TypeIs
 
 #======== Boolean antecedents ================================================
 
 @syntacticCurry
-def between吗[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小于) -> bool:
-	"""Inclusive `floor <= comparand <= ceiling`."""
-	return floor <= comparand <= ceiling
-
-# NOTE `个` typevar exists to help ty with static type checking. See https://github.com/astral-sh/ty/issues/2799.
-def consecutive吗[个: Iterable[int]](flatContainer: 个) -> bool:
-	"""Are the integers in `flatContainer` consecutive, either ascending or descending?"""
-	ImaListOfInt: list[int] = intInnit(flatContainer, 'flatContainer', Iterable[int])
-	return ((len(list(next(consecutive_groups(ImaListOfInt)))) == len(list(ImaListOfInt)))
-		or (len(list(next(consecutive_groups(always_reversible(ImaListOfInt))))) == len(list(ImaListOfInt))))
-
-def hasDuplicates(flatContainer: Iterable[Any]) -> bool:
-	"""Test whether `flatContainer` contains duplicate values.
-
-	You can use `hasDuplicates` in an `if` statement, or you can pass `hasDuplicates` as a predicate
-	to a filtering utility described in the module docstring.
-
-	Parameters
-	----------
-	flatContainer : Iterable[Any]
-		Iterable of values to test for duplicate values.
-
-	Returns
-	-------
-	flatContainerHasDuplicates : bool
-		`True` if `flatContainer` contains at least one duplicate value.
-	"""
-	return not allUnique吗(flatContainer)
-
-@syntacticCurry
-def leafIsInPileRange(leaf: Leaf, leafOptions: LeafOptions) -> bool:
+def leafInLeafOptions吗(leaf: Leaf, leafOptions: LeafOptions) -> bool:
 	"""Test whether `leaf` is present in `leafOptions`.
 
-	You can use `leafIsInPileRange` in an `if` statement, or you can pass `leafIsInPileRange`
+	You can use `leafInLeafOptions吗` in an `if` statement, or you can pass `leafInLeafOptions吗`
 	as a predicate to a filtering utility described in the module docstring.
 
 	Parameters
@@ -137,7 +90,7 @@ def leafIsInPileRange(leaf: Leaf, leafOptions: LeafOptions) -> bool:
 	return leafOptions.bit_test(leaf)
 
 @syntacticCurry
-def leafIsNotPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
+def leafNotPinned吗(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
 	"""Return True if `leaf` is not presently pinned in `permutationSpace`.
 
 	Parameters
@@ -155,11 +108,11 @@ def leafIsNotPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
 	return leaf not in permutationSpace.values()
 
 @overload
-def leafIsPinned(permutationSpace: PermutationSpace, leaf: Leaf) -> bool: ...
+def leafPinned吗(permutationSpace: PermutationSpace, leaf: Leaf) -> bool: ...
 @overload
-def leafIsPinned(permutationSpace: PinnedLeaves, leaf: Leaf) -> bool: ...
+def leafPinned吗(permutationSpace: PinnedLeaves, leaf: Leaf) -> bool: ...
 @syntacticCurry
-def leafIsPinned(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) -> bool:
+def leafPinned吗(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) -> bool:
 	"""Return True if `leaf` is pinned in `permutationSpace`.
 
 	Parameters
@@ -171,13 +124,13 @@ def leafIsPinned(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) 
 
 	Returns
 	-------
-	leafIsPinned : bool
+	leafPinned吗 : bool
 		True if the mapping includes `leaf`.
 	"""
 	return leaf in permutationSpace.values()
 
 @syntacticCurry
-def leafIsPinnedAtPile(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pile) -> bool:
+def leafPinnedAtPile吗(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pile) -> bool:
 	"""Return `True` if `leaf` is presently pinned at `pile` in `permutationSpace`.
 
 	Parameters
@@ -195,11 +148,6 @@ def leafIsPinnedAtPile(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pil
 		True if the mapping includes `pile: leaf`.
 	"""
 	return leaf == permutationSpace.get(pile)
-
-@syntacticCurry
-def mappingHasKey[文件: Hashable](lookup: Mapping[文件, Any], key: 文件) -> bool:
-	"""Return `True` if `key` is in `lookup`."""
-	return key in lookup
 
 def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
 	"""Test to ensure `leaf` is not `leafOrigin` (0) or `leaf零` (1).
@@ -242,7 +190,7 @@ def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	return pileLast != pile
 
 @syntacticCurry
-def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
+def pileNotOpen吗(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	"""Return True if `pile` is not presently pinned in `permutationSpace`.
 
 	Do you want to know if the pile is open or do you really want to know the Python `type` of the value at that key?
@@ -263,10 +211,10 @@ def pileIsNotOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	--------
 	thisIsALeaf, thisIsALeafOptions
 	"""
-	return thisIsALeaf(permutationSpace[pile])
+	return isLeaf吗(permutationSpace[pile])
 
 @syntacticCurry
-def pileIsOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
+def pileOpen吗(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	"""Return True if `pile` is not presently pinned in `permutationSpace`.
 
 	Parameters
@@ -281,40 +229,9 @@ def pileIsOpen(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	pileIsOpen : bool
 		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is a `LeafOptions`.
 	"""
-	return not thisIsALeaf(permutationSpace.get(pile))
+	return not isLeaf吗(permutationSpace[pile])
 
-@syntacticCurry
-def thisHasThat[个](this: Iterable[个], that: 个) -> bool:
-	"""You can test whether `that` is present in `this`.
-
-	You can use `thisHasThat` in an `if` statement, or you can pass `thisHasThat` as a
-	predicate to a filtering utility described in the module docstring.
-
-	Parameters
-	----------
-	this : Iterable[个]
-		Iterable to search.
-	that : 个
-		Value to find.
-
-	Returns
-	-------
-	thatIsPresent : bool
-		`True` if `that in this`.
-
-	References
-	----------
-	[1] `operator.contains` (Python documentation)
-		https://docs.python.org/3/library/operator.html#operator.contains
-
-	"""
-	return that in this
-
-@syntacticCurry
-def thisNotHaveThat[个](this: Iterable[个], that: 个) -> bool:
-	return not thisHasThat(this, that)
-
-def thisIsALeaf(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
+def isLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	"""Return True if `leafSpace` is a `leaf`.
 
 	Parameters
@@ -327,9 +244,9 @@ def thisIsALeaf(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	intIsProbablyALeaf : TypeIs[int]
 		Technically, we only know the type is `int`.
 	"""
-	return (leafSpace is not None) and isinstance(leafSpace, int)
+	return isinstance(leafSpace, int)
 
-def thisIsLeafOptions(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
+def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	"""Return True if `leafSpace` is a pile's range of leaves.
 
 	Parameters
@@ -342,20 +259,9 @@ def thisIsLeafOptions(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	youHaveAPileRange : TypeIs[LeafOptions]
 		Congrats, you have a pile range!
 	"""
-	return (leafSpace is not None) and isinstance(leafSpace, mpz)
+	return isinstance(leafSpace, mpz)
 
 #======== Filtering functions ================================================
-
-def exclude[个](flatContainer: Sequence[个], indices: Iterable[int]) -> Iterator[个]:
-	"""Yield items from `flatContainer` whose positions are not in `indices`."""
-	lengthIterable: int = len(flatContainer)
-
-	def normalizeIndex(index: int) -> int:
-		if index < 0:
-			index = (index + lengthIterable) % lengthIterable
-		return index
-	indicesInclude: list[int] = sorted(set(range(lengthIterable)).difference(map(normalizeIndex, indices)))
-	return extract(flatContainer, indicesInclude)
 
 def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
@@ -370,7 +276,7 @@ def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
 	dictionaryOfPileLeaf : dict[int, int]
 		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 	"""
-	return dict(sorted(DOTitems(filterLeaf(thisIsALeaf, permutationSpace))))
+	return dict(sorted(DOTitems(filterLeaf(isLeaf吗, permutationSpace))))
 
 def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> UndeterminedPiles:
 	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
@@ -385,4 +291,4 @@ def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> Undetermined
 	pilesUndetermined : dict[int, LeafOptions]
 		Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
 	"""
-	return filterLeaf(thisIsLeafOptions, permutationSpace)
+	return filterLeaf(isLeafOptions吗, permutationSpace)

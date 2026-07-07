@@ -1,3 +1,4 @@
+# ruff: noqa: SIM102 DOC201
 from __future__ import annotations
 
 from bisect import bisect_right
@@ -7,11 +8,13 @@ from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity,
-	Leaf, leafInSubHyperplane, mapShapeIs2上nDimensions, Pile, 一, 零, 首一, 首零, 首零一)
+	leafInSubHyperplane, mapShapeIs2上nDimensions, 一, 零, 首一, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from operator import neg
+from typing import TYPE_CHECKING
 
-# ruff: noqa: SIM102
+if TYPE_CHECKING:
+	from mapFolding._e.theTypes import Leaf, Pile
 
 # TODO getDictionaryConditionalLeafPredecessors development
 def getDictionaryConditionalLeafPredecessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
@@ -19,14 +22,14 @@ def getDictionaryConditionalLeafPredecessors(state: EliminationState) -> dict[Le
 
 	Some leaves are always preceded by one or more leaves. Most leaves, however, are preceded by one or more other leaves only if
 	the leaf is in a specific pile.
-	"""  # noqa: DOC201
+	"""
 	dictionaryConditionalLeafPredecessors: dict[Leaf, dict[Pile, list[Leaf]]] = {}
 	if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
 		dictionaryConditionalLeafPredecessors = _getDictionaryConditionalLeafPredecessors(state.mapShape)
 	return dictionaryConditionalLeafPredecessors
 @cache
 def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
-	"""Prototype."""  # noqa: DOC201
+	"""Prototype."""
 	state = EliminationState(mapShape)
 	dictionaryDomains: dict[Leaf, range] = getDictionaryLeafDomains(state)
 
@@ -151,7 +154,7 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 
 # TODO getDictionaryConditionalLeafSuccessors development
 def getDictionaryConditionalLeafSuccessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
-	"""leaf: pile: [conditional `leafSuccessor`]."""  # noqa: DOC201
+	"""leaf: pile: [conditional `leafSuccessor`]."""
 	return _getDictionaryConditionalLeafSuccessors(state.mapShape)
 @cache
 def _getDictionaryConditionalLeafSuccessors(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:

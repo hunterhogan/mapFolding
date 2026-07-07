@@ -1,5 +1,7 @@
 # NOTE The real module is generated from this incomplete module. Comments are not preserved.
-# ruff: noqa: PLW0603
+# ruff: noqa: PLW0603 TC001 DOC201
+# pyright: reportArgumentType=false
+# ty:ignore[invalid-argument-type]
 from __future__ import annotations
 
 from copy import deepcopy
@@ -31,7 +33,7 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> No
 def _threadDoesSomething() -> None:
 	global symmetricFoldsTotal
 	while True:
-		state = queueFutures.get()
+		state: SymmetricFoldsState = queueFutures.get()
 		if state is STOPsignal:
 			break
 		state = _filterAsymmetricFolds(state)
@@ -39,7 +41,7 @@ def _threadDoesSomething() -> None:
 			symmetricFoldsTotal += state.symmetricFolds
 
 def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
-	"""Add real function during generation; the signature is here to preview its interactions with the module."""  # noqa: DOC201
+	"""Add real function during generation; the signature is here to preview its interactions with the module."""
 	return state
 
 def filterAsymmetricFolds(state: SymmetricFoldsState) -> None:
@@ -47,7 +49,7 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> None:
 
 def getSymmetricFoldsTotal() -> DatatypeFoldsTotal:
 	for _thread in listThreads:
-		queueFutures.put(STOPsignal)  # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
+		queueFutures.put(STOPsignal)
 	for thread in listThreads:
 		thread.join()
 	return symmetricFoldsTotal
