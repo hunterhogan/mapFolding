@@ -46,4 +46,3 @@ from mapFolding._e._2上nDimensionalLeafOptions import getDictionaryLeafOptions 
 from mapFolding._e._2上nDimensionalConditionalOrdering import (
 	getDictionaryConditionalLeafPredecessors as getDictionaryConditionalLeafPredecessors,
 	getDictionaryConditionalLeafSuccessors as getDictionaryConditionalLeafSuccessors)
-from mapFolding.genericNeedsNewHome import DOTitems as DOTitems, DOTkeys as DOTkeys, DOTvalues as DOTvalues, reverseLookup as reverseLookup
