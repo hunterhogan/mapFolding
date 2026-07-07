@@ -616,52 +616,34 @@ def _reducePermutationSpace_HeadsBeforeTails(state: EliminationState, permutatio
 
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
+		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 
-		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(
-			sorted(
-				DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace))))
-			)
-		)
-
-		while dequePileLeaf and not permutationSpaceHasNewLeaf:
-			pile, leaf = dequePileLeaf.pop()
+		# TODO `notLeafOriginOrLeaf零` and `pile1stOpen` are specific to 2ⁿ-dimensional maps. Adjust these if moved to `pinIt`.
+		pile1stOpen: int = 2
+		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))):
 
 			dimensionHead: int = dimensionNearest首(leaf)
-			if 0 < dimensionHead:
-				sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
-				if not (
-					permutationSpace := _reduceLeafSpace(
-						state
-						, permutationSpace
-						, pilesToUpdate=deque(extractUndeterminedPiles(filterPile(between吗(2, pile - inclusive), permutationSpace)).items())
-						, leafAntiOptions=makeLeafAntiOptions(
-							state.leavesTotal
-							, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead])
-						)
-					)
-				):
-					return None
-				if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
-					permutationSpaceHasNewLeaf = True
+			if 0 < dimensionHead and not (
+				permutationSpace := _reduceLeafSpace(state, permutationSpace
+					, pilesToUpdate=deque(extractUndeterminedPiles(filterPile(between吗(pile1stOpen, pile - inclusive), permutationSpace)).items())
+					, leafAntiOptions=makeLeafAntiOptions(
+						state.leavesTotal
+						, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead])
+			))):
+				return None
 
 			dimensionTail: int = dimensionNearestTail(leaf)
-			if 0 < dimensionTail:
-				sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
-				if not (
-					permutationSpace := _reduceLeafSpace(
-						state
-						, permutationSpace
-						, pilesToUpdate=deque(
-							extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast), permutationSpace)).items()
-						)
-						, leafAntiOptions=makeLeafAntiOptions(
-							state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail])
-						)
+			if 0 < dimensionTail and not (
+				permutationSpace := _reduceLeafSpace(state, permutationSpace
+					, pilesToUpdate=deque(
+						extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace)).items()
 					)
-				):
-					return None
-				if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
-					permutationSpaceHasNewLeaf = True
+					, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
+			)):
+				return None
+
+		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
+			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
