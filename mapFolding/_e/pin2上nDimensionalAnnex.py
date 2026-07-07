@@ -423,36 +423,20 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 	permutationSpaceHasNewLeaf: bool = True
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
+		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 
-		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(
-			sorted(
-				DOTitems(
-					filterLeaf(
-						leafAtPilePredecessors.__contains__
-						, filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))
+		for pile, leaf in DOTitems(filterLeaf(leafAtPilePredecessors.__contains__, filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace))))):
+
+			if contains吗(leafAtPilePredecessors[leaf], pile) and not (
+				permutationSpace := _reduceLeafSpace(state, permutationSpace
+					, pilesToUpdate=deque(
+						DOTitems(extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast), permutationSpace)))
 					)
-				)
-			)
-		)
-
-		while dequePileLeaf and not permutationSpaceHasNewLeaf:
-			pile, leaf = dequePileLeaf.pop()
-
-			if contains吗(leafAtPilePredecessors[leaf], pile):
-				sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
-				if not (
-					permutationSpace := _reduceLeafSpace(
-						state
-						, permutationSpace
-						, pilesToUpdate=deque(
-							DOTitems(extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast), permutationSpace)))
-						)
-						, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
-					)
-				):
-					return None
-				if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
-					permutationSpaceHasNewLeaf = True
+					, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
+			)):
+				return None
+		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
+			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
