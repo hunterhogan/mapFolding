@@ -69,7 +69,7 @@ from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf, thisIsLeafOp
 from mapFolding.genericNeedsNewHome import DOTkeys
 from more_itertools import iter_index
 from operator import add, mul
-from typing import TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
@@ -78,12 +78,11 @@ if TYPE_CHECKING:
 #======== Group-by functions ================================================
 
 def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[PinnedLeaves, UndeterminedPiles]:
-	"""Split a `PermutationSpace` into pinned leaves and undetermined pile domains.
+	"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
 
 	You can use this function to partition `permutationSpace` into two dictionaries. The first
 	dictionary contains each `Pile` mapped to a pinned `Leaf`. The second dictionary contains
-	each `Pile` mapped to a `LeafOptions` domain. This separation is useful when you need to
-	process pinned assignments separately from domain constraints [1].
+	each `Pile` mapped to a `LeafOptions` domain.
 
 	Parameters
 	----------
@@ -96,23 +95,10 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 		Dictionary of `Pile` to pinned `Leaf` mappings.
 	pilesUndetermined : UndeterminedPiles
 		Dictionary of `Pile` to `LeafOptions` domain mappings.
-
-	Examples
-	--------
-	The function is used to separate pinned leaves from pile domains before domain reduction.
-
-		leavesPinned, pilesUndetermined = bifurcatePermutationSpace(permutationSpace)
-
-	References
-	----------
-	[1] mapFolding._e.filters.extractPinnedLeaves
-
-	[2] cytoolz.dicttoolz.dissoc
-		https://toolz.readthedocs.io/en/latest/api.html#toolz.dicttoolz.dissoc
-
 	"""
 	leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
-	return (leavesPinned, dissociatePile(permutationSpace, *DOTkeys(leavesPinned)))  # pyright: ignore[reportReturnType]  # ty:ignore[invalid-return-type]
+	# NOTE `cast` because type checkers don't know `PermutationSpace` - `PinnedLeaves` = `UndeterminedPiles`.
+	return (leavesPinned, cast("UndeterminedPiles", dissociatePile(permutationSpace, *DOTkeys(leavesPinned))))
 
 #======== `LeafOptions` functions ================================================
 
