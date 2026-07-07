@@ -1,10 +1,10 @@
+# ruff: noqa: PLC0415
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
-
 from __future__ import annotations
 
 from functools import cache
 from hunterMakesPy import inclusive
-from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit, oopsieKwargsie
+from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
 from numpy import int64 as numpy_int64
 from sys import maxsize as sysMaxsize
 from typing import TYPE_CHECKING
@@ -12,18 +12,18 @@ import numpy
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
-	from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, NumPyIntegerType
+	from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, Limitation, NumPyIntegerType
 	from numpy import dtype as numpy_dtype, ndarray
 	from typing import Any
 
 #======== Flow control ======================================
 
-def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = None) -> int:
+def defineProcessorLimit(CPUlimit: Limitation, concurrencyPackage: str | None = None) -> int:
 	"""Compute the CPU usage limit for concurrent operations; for `numba` managed concurrency, set the global limit.
 
 	Parameters
 	----------
-	CPUlimit : Any | None
+	CPUlimit : bool | float | int | None
 		Please see the documentation in `countFolds` for details. I know it is annoying, but I want to be sure you
 		have the most accurate information.
 	concurrencyPackage : str | None = None
@@ -36,12 +36,7 @@ def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = 
 	concurrencyLimit : int
 		The actual concurrency limit that was set.
 
-	Raises
-	------
-	TypeError
-		If `CPUlimit` is not of the expected types.
-
-	Notes
+	Numba
 	-----
 	If using `'numba'` as the concurrency package, the maximum number of processors is retrieved from
 	`numba.get_num_threads()` rather than by polling the hardware. If Numba environment variables limit available
@@ -49,22 +44,16 @@ def defineProcessorLimit(CPUlimit: Any | None, concurrencyPackage: str | None = 
 
 	When using Numba, this function must be called before importing any Numba-jitted function for this processor limit
 	to affect the Numba-jitted function.
-
 	"""
-	if not (CPUlimit is None or isinstance(CPUlimit, (bool, int, float))):
-		CPUlimit = oopsieKwargsie(CPUlimit)
-		if isinstance(CPUlimit, str):
-			message: str = f"I received '{CPUlimit}' for the parameter, `CPUlimit`, but I need a value of type `bool`, `int`, `float`, or `None`."
-			raise TypeError(message)
-
-	match concurrencyPackage:
-		case 'numba':
-			from numba import get_num_threads, set_num_threads  # noqa: PLC0415
-			concurrencyLimit: int = defineConcurrencyLimit(limit=CPUlimit, cpuTotal=get_num_threads())
-			set_num_threads(concurrencyLimit)
-			concurrencyLimit = get_num_threads()
-		case 'multiprocessing' | None | _:
-			concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
+	if concurrencyPackage == 'numba':
+		from numba import get_num_threads, set_num_threads
+		concurrencyLimit: int = defineConcurrencyLimit(limit=CPUlimit, cpuTotal=get_num_threads())
+		set_num_threads(concurrencyLimit)
+		concurrencyLimit = get_num_threads()
+	elif concurrencyPackage in {'multiprocessing', None}:
+		concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
+	else:
+		concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
 	return concurrencyLimit
 
 #======== map folding ===================================

@@ -9,7 +9,7 @@ from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, saveFoldsTot
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import Limitation
+	from mapFolding import Limitation
 	from os import PathLike
 	from pathlib import Path, PurePath
 

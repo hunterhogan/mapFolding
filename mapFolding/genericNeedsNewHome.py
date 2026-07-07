@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 	from hunterMakesPy import Ordinals
 	from typing import Any
 
+type Limitation = bool | float | int | None
+
 #======== Boolean antecedents ================================================
 
 @syntacticCurry

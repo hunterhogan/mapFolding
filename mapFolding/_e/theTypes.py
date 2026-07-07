@@ -4,8 +4,6 @@ from gmpy2 import mpz
 
 #======== Scalars ================================
 
-type Limitation = bool | float | int | None
-
 type DimensionIndex = int
 """Zero-based index of a dimension."""
 

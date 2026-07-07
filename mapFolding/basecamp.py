@@ -52,12 +52,13 @@ References
 from __future__ import annotations
 
 from mapFolding import packageSettings
-from mapFolding.beDRY import validateListDimensions
+from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
+	from mapFolding import Limitation
 	from os import PathLike
 	from pathlib import Path, PurePath
 
@@ -65,7 +66,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 				, computationDivisions: int | str | None = None
 				, *
-				, CPUlimit: bool | float | int | None = None
+				, CPUlimit: Limitation = None
 				, mapShape: tuple[int, ...] | None = None
 				, flow: str | None = None
 				) -> int:
@@ -142,20 +143,14 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		mapShape = validateListDimensions(listDimensions)
 
 	if mapShape is None:
-		message = (f"""I received these values:
-	`{listDimensions = }` and `{mapShape = }`,
-	but I was unable to select a map for which to count the folds."""
-		)
+		message: str = (f"I received `{listDimensions = }` and `{mapShape = }`, but I was unable to select a map for which to count the folds.")
 		raise ValueError(message)
 
 #-------- task division instructions -----------------------------------------------------
 
 	if computationDivisions:
-		from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions
 		concurrencyLimit: int = defineProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
-		leavesTotal: int = getLeavesTotal(mapShape)
-		taskDivisions: int = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
-		del leavesTotal
+		taskDivisions: int = getTaskDivisions(computationDivisions, concurrencyLimit, getLeavesTotal(mapShape))
 	else:
 		concurrencyLimit = 1
 		taskDivisions = 0
@@ -169,7 +164,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		pathFilenameFoldsTotal = None
 
 #-------- Algorithm version -----------------------------------------------------
-	if taskDivisions > 1:
+
+	if 1 < taskDivisions:
 		from mapFolding.dataBaskets import ParallelMapFoldingState
 		from mapFolding.syntheticModules.countParallelNumba import doTheNeedful
 
@@ -178,17 +174,19 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		# NOTE `listStatesParallel` exists so you can research the parallel computation.
 		foldsTotal, _listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
 
-# ruff: noqa: E701
 	else:
-		if all(dimension <= 2 for dimension in mapShape):
+		if all(map((2).__le__, mapShape)) or (flow in {'daoOfMapFolding', None}):
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+		elif flow == 'numba':
+			from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
+		elif flow == 'theorem2':
+			from mapFolding.syntheticModules.theorem2 import doTheNeedful
+		elif flow == 'theorem2Numba':
+			from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
+		elif flow == 'theorem2Trimmed':
+			from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
 		else:
-			match flow:
-				case 'numba': from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
-				case 'theorem2': from mapFolding.syntheticModules.theorem2 import doTheNeedful
-				case 'theorem2Numba': from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
-				case 'theorem2Trimmed': from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
-				case 'daoOfMapFolding' | _: from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 
 		from mapFolding.dataBaskets import MapFoldingState
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
