@@ -3,8 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from mapFolding import ansiColorReset, ansiColors, packageSettings
-from mapFolding._e import DOTvalues, 一, 零, 首一, 首零一
+from mapFolding._e import 一, 零, 首一, 首零一
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf
+from mapFolding.genericNeedsNewHome import DOTvalues
 from pathlib import Path
 from pprint import pformat
 from typing import TYPE_CHECKING

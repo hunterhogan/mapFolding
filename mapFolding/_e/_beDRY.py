@@ -65,8 +65,8 @@ from gmpy2 import bit_clear, bit_mask, bit_set
 from humpy_cytoolz import curry as syntacticCurry, dissoc as dissociatePile, unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
-from mapFolding._e import DOTkeys
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf, thisIsLeafOptions
+from mapFolding.genericNeedsNewHome import DOTkeys
 from more_itertools import iter_index
 from operator import add, mul
 from typing import TYPE_CHECKING
@@ -538,54 +538,6 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 							for aProduct in range(len(productsOfDimensionsFrom首) + inclusive)
 	)
 	return sumsOfProductsOfDimensionsNearest首
-
-def reverseLookup[文件, 文义](dictionary: dict[文件, 文义], keyValue: 文义) -> 文件 | None:
-	"""Find the key in a dictionary that maps to a specified value.
-
-	You can use this function to perform reverse dictionary lookup: given a value, find the
-	key that maps to that value. The function iterates through `dictionary.items()` [1] and
-	returns the first key where `dictionary[key] == keyValue`. When no matching key exists,
-	the function returns `None`.
-
-	Parameters
-	----------
-	dictionary : dict[文件, 文义]
-		Dictionary to search for `keyValue`.
-	keyValue : 文义
-		Value to locate in `dictionary.values()`.
-
-	Returns
-	-------
-	keyOrNone : 文件 | None
-		The key that maps to `keyValue`, or `None` when no key maps to `keyValue`.
-
-	Examples
-	--------
-	The function is used to find which pile contains a specific leaf.
-
-		pileOfLeaf一零: Pile = raiseIfNone(reverseLookup(state.permutationSpace, leaf一零))
-		pileOfLeaf首零一: Pile = raiseIfNone(reverseLookup(state.permutationSpace, leaf首零一))
-
-	Important
-	---------
-	The function assumes all values in `dictionary` are distinct. When multiple keys map to
-	`keyValue`, the function returns an arbitrary matching key (whichever appears first during
-	iteration). The function is not efficient for membership testing: use `keyValue in dictionary.values()`
-	instead. When you expect a key to exist, combine with `raiseIfNone` [2] rather than checking
-	for `None`.
-
-	References
-	----------
-	[1] dict.items() - Python documentation
-		https://docs.python.org/3/library/stdtypes.html#dict.items
-	[2] hunterMakesPy.raiseIfNone - Context7
-		https://context7.com/hunterhogan/huntermakespy
-
-	"""
-	for key, value in dictionary.items():
-		if value == keyValue:
-			return key
-	return None
 
 #======== Flow control ================================================
 

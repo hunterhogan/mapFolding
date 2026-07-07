@@ -19,12 +19,11 @@ from humpy_toolz.curried import map as toolz_map
 from hunterMakesPy import inclusive, raiseIfNone
 from itertools import chain, repeat
 from mapFolding._e import (
-	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTitems, DOTkeys, DOTvalues,
-	getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND,
-	makeLeafAntiOptions)
+	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, getDictionaryLeafOptions, getIteratorOfLeaves,
+	getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
 from mapFolding._e.filters import (
 	extractUndeterminedPiles, leafIsInPileRange, leafIsNotPinned, leafIsPinned, leafIsPinnedAtPile, pileIsNotOpen, pileIsOpen, thisIsALeaf)
-from mapFolding.genericNeedsNewHome import between吗, thisNotHaveThat吗
+from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTkeys, DOTvalues, thisNotHaveThat吗
 from math import prod
 from more_itertools import filter_map, flatten, one
 from typing import cast, TYPE_CHECKING

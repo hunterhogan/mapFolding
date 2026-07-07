@@ -75,15 +75,15 @@ from humpy_cytoolz import (
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations, product as CartesianProduct
 from mapFolding._e import (
-	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, DOTitems, DOTvalues, getDictionaryConditionalLeafPredecessors,
-	getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, leafOrigin,
-	makeLeafAntiOptions, mapShapeIs2上nDimensions, 一, 零, 首一, 首零一)
+	bifurcatePermutationSpace, dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getIteratorOfLeaves,
+	getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, leafOrigin, makeLeafAntiOptions,
+	mapShapeIs2上nDimensions, 一, 零, 首一, 首零一)
 from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
 	extractPinnedLeaves, extractUndeterminedPiles, leafIsPinned, notLeafOriginOrLeaf零, notPileLast, thisIsALeaf, thisIsLeafOptions)
 from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile, reducePermutationSpace_leafDomainOf1
-from mapFolding.genericNeedsNewHome import between吗, thisHasThat吗, thisNotHaveThat吗
+from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTvalues, thisHasThat吗, thisNotHaveThat吗
 from more_itertools import one, pairwise, triplewise
 from operator import contains as contains吗
 from typing import TYPE_CHECKING

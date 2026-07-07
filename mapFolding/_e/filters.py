@@ -52,7 +52,8 @@ from __future__ import annotations
 
 from gmpy2 import mpz
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
-from mapFolding._e import DOTitems, 零
+from mapFolding._e import 零
+from mapFolding.genericNeedsNewHome import DOTitems
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
