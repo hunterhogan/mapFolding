@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 from collections import deque
-from mapFolding._e import (
-	Folding, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, Leaf, LeafSpace, PermutationSpace,
-	Pile)
+from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首
+from mapFolding._e.theTypes import Folding, LeafSpace, PermutationSpace, Pile
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
+from typing import TYPE_CHECKING
 import dataclasses
+
+if TYPE_CHECKING:
+	from mapFolding._e.theTypes import Leaf
 
 @dataclasses.dataclass(slots=True)
 class EliminationState:

@@ -13,8 +13,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Iterator
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e import Leaf
 	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.theTypes import Leaf
 
 #======== crease-based subroutines for analyzing a specific `pile`. =======
 def _getLeavesCrease(state: EliminationState, leaf: Leaf) -> tuple[Leaf, ...]:

@@ -3,15 +3,20 @@ from __future__ import annotations
 
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
-from hunterMakesPy import CallableFunction, decreasing, inclusive, raiseIfNone
+from hunterMakesPy import decreasing, inclusive, raiseIfNone
 from mapFolding._e import (
 	dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
-	howManyDimensionsHaveOddParity, Leaf, leafOrigin, mapShapeIs2上nDimensions, Pile, pileOrigin, reverseLookup, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二,
-	首零, 首零一, 首零一二, 首零二)
+	howManyDimensionsHaveOddParity, leafOrigin, mapShapeIs2上nDimensions, pileOrigin, reverseLookup, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一,
+	首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import between吗, consecutive吗, exclude, leafIsPinned
-from more_itertools import all_unique, loops
+from more_itertools import all_unique as allUnique吗, loops
 from operator import add, sub
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from hunterMakesPy import CallableFunction
+	from mapFolding._e.theTypes import Leaf, Pile
 
 def getLeafDomain(state: EliminationState, leaf: Leaf) -> range:
 	return _getLeafDomain(leaf, state.dimensionsTotal, state.mapShape, state.leavesTotal)
@@ -173,7 +178,7 @@ def _getDomainDimension一(domain一零: tuple[int, ...], domain首一: tuple[in
 
 		domainCombined.extend([(pileOfLeaf一零, pileOfLeaf一零 + 1, pileOfLeaf首一, pileOfLeaf首一 + 1) for pileOfLeaf首一 in domainOfLeaf首一])
 
-	return tuple(filter(all_unique, domainCombined))
+	return tuple(filter(allUnique吗, domainCombined))
 
 def getDomainDimension二(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
 	"""(leaf二一, leaf二一零, leaf二零, leaf二)."""
@@ -279,7 +284,7 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 	domain一nonCorners: tuple[tuple[int, int], ...] = tuple(set(domain二一零and二一).difference(set(domain一corners)))
 	domainCombined.extend([(pileOfLeaf一二, pileOfLeaf二一零, pileOfLeaf二一零 - 1, pileOfLeaf一二 + 1) for pileOfLeaf二一零, pileOfLeaf一二 in domain一nonCorners])
 
-	return tuple(sorted(filter(all_unique, set(domainCombined))))
+	return tuple(sorted(filter(allUnique吗, set(domainCombined))))
 
 def getDomainDimension首二(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
 	"""(leaf首二, leaf首零二, leaf首零一二, leaf首一二)."""
@@ -362,7 +367,7 @@ def _getDomainDimension首二(dimensionsTotal: int, domain首零二and首二: tu
 	domain0nonCorners: tuple[tuple[int, int], ...] = tuple(set(domain首零二and首二).difference(set(domain0corners)))
 	domainCombined.extend([(pileOfLeaf首二, pileOfLeaf首零二, pileOfLeaf首零二 - 1, pileOfLeaf首二 + 1) for pileOfLeaf首零二, pileOfLeaf首二 in domain0nonCorners])
 
-	return tuple(sorted(filter(all_unique, set(domainCombined))))
+	return tuple(sorted(filter(allUnique吗, set(domainCombined))))
 
 def getDomain二零and二(state: EliminationState) -> tuple[tuple[int, int], ...]:
 	"""Combined domain of leaf二零 and leaf二."""

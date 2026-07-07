@@ -81,15 +81,16 @@ from mapFolding._e import (
 from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import (
-	between吗, extractPinnedLeaves, extractUndeterminedPiles, leafIsPinned, mappingHasKey, notLeafOriginOrLeaf零, notPileLast, thisHasThat,
-	thisIsALeaf, thisIsLeafOptions, thisNotHaveThat)
+	between吗, extractPinnedLeaves, extractUndeterminedPiles, leafIsPinned, notLeafOriginOrLeaf零, notPileLast, thisHasThat, thisIsALeaf,
+	thisIsLeafOptions, thisNotHaveThat)
 from mapFolding._e.pinIt import atPilePinLeaf, disqualifyPinningLeafAtPile, reducePermutationSpace_leafDomainOf1
 from more_itertools import one, pairwise, triplewise
+from operator import contains as contains吗
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
-	from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 #======== Boolean filters ======================================
 
@@ -413,23 +414,23 @@ def _reducePermutationSpace_ConditionalPredecessors(state: EliminationState, per
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
 		return permutationSpace
 
-	dictionaryConditionalLeafPredecessors: dict[Leaf, dict[Pile, list[Leaf]]] = getDictionaryConditionalLeafPredecessors(state)
+	leafAtPilePredecessors: dict[Leaf, dict[Pile, list[Leaf]]] = getDictionaryConditionalLeafPredecessors(state)
 
 	permutationSpaceHasNewLeaf: bool = True
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 
-		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(filterLeaf(mappingHasKey(dictionaryConditionalLeafPredecessors),
+		dequePileLeaf: deque[tuple[Pile, Leaf]] = deque(sorted(DOTitems(filterLeaf(leafAtPilePredecessors.__contains__,
 			filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))))))
 
 		while dequePileLeaf and not permutationSpaceHasNewLeaf:
 			pile, leaf = dequePileLeaf.pop()
 
-			if mappingHasKey(dictionaryConditionalLeafPredecessors[leaf], pile):
+			if contains吗(leafAtPilePredecessors[leaf], pile):
 				sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
 				if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
 						, pilesToUpdate=deque(DOTitems(extractUndeterminedPiles(filterPile(between吗(pile + inclusive, state.pileLast), permutationSpace))))
-						, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, dictionaryConditionalLeafPredecessors[leaf][pile])
+						, leafAntiOptions=makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
 					)):
 					return None
 				if sum(map(dimensionNearest首, permutationSpace.values())) < sumBeforeReduction:

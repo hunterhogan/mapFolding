@@ -1,3 +1,4 @@
+# ruff: noqa D201
 """makeMeandersModules."""
 from __future__ import annotations
 

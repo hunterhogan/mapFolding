@@ -26,25 +26,22 @@ research domain.
 from __future__ import annotations
 
 from mapFolding import _theSSOT, packageSettings
-from mapFolding.beDRY import getLeavesTotal, makeDataContainer, validateListDimensions
 from mapFolding.oeis import oeisIDsImplemented
-from mapFolding.tests.conftestAnnex import assertEqualTo, messageTestFailure
 from pathlib import Path
 from typing import TYPE_CHECKING
-import numpy
 import pickle
 import pytest
 import random
 import shutil
-import unittest.mock
 import uuid
 import warnings
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Generator, Sequence
+	from collections.abc import Callable, Generator
 	from numpy.typing import NDArray
 	from pytest import FixtureRequest
 	from typing import Any
+	import numpy
 
 # ================== Test-function parameters ======================================================
 
@@ -68,41 +65,17 @@ def rtol(request: FixtureRequest) -> float:
 	"""The `rtol` (***r***elative ***tol***erance) parameter value for `numpy.allclose`."""
 	return 1e-05
 
-#======== standardized test formats ==========
-
-def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: Callable[..., Any], *arguments: Any) -> None:
-	"""Template for tests expecting SystemExit.
-
-	Parameters
-	----------
-	expected : str | int | Sequence[int]
-		Exit code expectation:
-		- "error": any non-zero exit code
-		- "nonError": specifically zero exit code
-		- int: exact exit code match
-		- Sequence[int]: exit code must be one of these values
-	functionTarget : Callable[..., Any]
-		The function to test.
-	arguments : Any
-		Arguments to pass to the function.
-
-	"""
-	with pytest.raises(SystemExit) as exitInfo:
-		functionTarget(*arguments)
-
-	exitCode = exitInfo.value.code
-	functionName: str = getattr(functionTarget, "__name__", functionTarget.__class__.__name__)
-
-	if expected == "error":
-		assert exitCode != 0, messageTestFailure(exitCode, "a non-zero exit code", functionName, *arguments)
-	elif expected == "nonError":
-		assertEqualTo(exitCode, 0, functionName, *arguments)
-	elif isinstance(expected, (list, tuple)):
-		assert exitCode in expected, messageTestFailure(exitCode, expected, functionName, *arguments)
-	else:
-		assertEqualTo(exitCode, expected, functionName, *arguments)
+@pytest.fixture(autouse=True)
+def setupWarningsAsErrors() -> Generator[None, Any]:
+	"""Convert all warnings to errors for all tests."""
+	warnings.filterwarnings("error")
+	yield
+	warnings.resetwarnings()
 
 #======== SSOT for test data paths and filenames ==============
+# TODO I might still need something like
+# this to test the creation of a job. But I don't need to use this for every tmp dir or file, and it
+# doesn't need to be this complicated.
 pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
 path_tmpRoot: Path = pathDataSamples / "tmp"
 path_tmpRoot.mkdir(parents=True, exist_ok=True)
@@ -235,8 +208,6 @@ def setupTeardownTemporaryFilesystemObjects() -> Generator[None]:
 def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:
 	"""Parametrized fixture providing all implemented OEIS sequence identifiers.
 
-	(AI generated docstring)
-
 	Parameters
 	----------
 	request : pytest.FixtureRequest
@@ -246,7 +217,6 @@ def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:
 	-------
 	sequenceIdentifier : Any
 		OEIS sequence identifier for testing across all implemented sequences.
-
 	"""
 	return request.param
 
@@ -258,54 +228,10 @@ def oeisID_1random() -> str:
 	-------
 	randomSequenceIdentifier : str
 		Randomly selected OEIS sequence identifier from implemented sequences.
-
 	"""
-	return random.choice(oeisIDsImplemented)  # noqa: S311
+	return random.choice(oeisIDsImplemented)
 
 #======== Miscellaneous =====================================
-
-@pytest.fixture(autouse=True)
-def setupWarningsAsErrors() -> Generator[None, Any]:
-	"""Convert all warnings to errors for all tests."""
-	warnings.filterwarnings("error")
-	yield
-	warnings.resetwarnings()
-
-@pytest.fixture
-def mockBenchmarkTimer() -> Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any]:
-	"""Mock time.perf_counter_ns for consistent benchmark timing.
-
-	Yields
-	------
-	mockTimer : Generator[unittest.mock.MagicMock | unittest.mock.AsyncMock, Any, None]
-		Mock timer that returns predictable timing values for testing benchmarks.
-
-	"""
-	with unittest.mock.patch('time.perf_counter_ns') as mockTimer:
-		mockTimer.side_effect = [0, 1e9]  # Start and end times for 1 second
-		yield mockTimer
-
-@pytest.fixture
-def mockFoldingFunction() -> Callable[..., Callable[..., None]]:
-	"""Creates a mock function that simulates _countFolds behavior.
-
-	Returns
-	-------
-	mockFactory : Callable[..., Callable[..., None]]
-		Factory function that creates mock folding functions with specified behavior.
-
-	"""
-	def makeMock(foldsValue: int, listDimensions: list[int]) -> Callable[..., None]:
-		arrayMock = makeDataContainer(2, numpy.int32)
-		arrayMock[0] = foldsValue
-		mapShape: tuple[int, ...] = validateListDimensions(listDimensions)
-		arrayMock[-1] = getLeavesTotal(mapShape)
-
-		def mockCountFolds(**keywordArguments: Any) -> None:
-			keywordArguments['foldGroups'][:] = arrayMock
-
-		return mockCountFolds
-	return makeMock
 
 @pytest.fixture
 def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:

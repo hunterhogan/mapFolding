@@ -8,7 +8,7 @@ from operator import getitem
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e import DimensionIndex
+	from mapFolding._e.theTypes import DimensionIndex
 
 #======== Using a single-base positional-numeral system as a proxy for Cartesian coordinates =======
 # https://en.wikipedia.org/wiki/Positional_notation

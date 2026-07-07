@@ -16,7 +16,7 @@ from humpy_cytoolz import (
 	valfilter as filterLeaf, valfilter as filterLeafOptions, valfilter as filterValue, valmap as mapLeaf)
 # TODO One or more things is messed up with humpy_*toolz.*.map
 from humpy_toolz.curried import map as toolz_map
-from hunterMakesPy import CallableFunction, inclusive, raiseIfNone
+from hunterMakesPy import inclusive, raiseIfNone
 from itertools import chain, repeat
 from mapFolding._e import (
 	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, DOTitems, DOTkeys, DOTvalues,
@@ -31,8 +31,9 @@ from typing import cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
-	from mapFolding._e import Folding, Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from hunterMakesPy import CallableFunction
 	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.theTypes import Folding, Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 #======== Boolean filters =======================
 

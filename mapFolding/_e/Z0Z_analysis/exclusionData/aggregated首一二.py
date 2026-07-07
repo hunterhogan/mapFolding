@@ -508,4 +508,3 @@ dictionaryExclusions: dict[str, dict[str, list[FractionAddend]]] = {'首一': {'
         '首零二三': [],
         '首零二三1': []},
 '首零二三1': {}}
-

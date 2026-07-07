@@ -21,7 +21,7 @@ import uuid
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future
-	from mapFolding._e import Leaf
+	from mapFolding._e.theTypes import Leaf
 
 def count(state: EliminationState) -> EliminationState:
 	model = cp_model.CpModel()

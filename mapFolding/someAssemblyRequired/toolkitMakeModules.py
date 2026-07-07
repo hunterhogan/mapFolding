@@ -1,3 +1,4 @@
+# ruff: noqa D201
 """
 Map folding AST transformation system: Comprehensive transformation orchestration and module generation.
 

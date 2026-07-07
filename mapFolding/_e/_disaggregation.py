@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator, Mapping
-	from mapFolding._e import Leaf, LeafOptions
+	from mapFolding._e.theTypes import Leaf, LeafOptions
 	from typing import Any
 
 #======== Disaggregation and deconstruction functions ================================================

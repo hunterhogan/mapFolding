@@ -1,14 +1,12 @@
-# ruff: noqa: T201, T203, TC003  # noqa: RUF100
-# pyright: reportUnusedImport=false
+# ruff: noqa: T201, T203
 from __future__ import annotations
 
-from collections import deque
-from collections.abc import Callable, Iterable
 from gmpy2 import fac
-from humpy_cytoolz import compose, map as toolz_map
+from humpy_cytoolz import compose
+from humpy_toolz import map as toolz_map
 from mapFolding._e import (
 	DOTvalues, getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves,
-	getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions, LeafOptions, PermutationSpace)
+	getLeafDomain, getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pin2上nDimensional import (
@@ -17,7 +15,13 @@ from mapFolding._e.pin2上nDimensional import (
 from mapFolding._e.Z0Z_analysis.toolkit import verifyPinning2Dn
 from math import prod
 from pprint import pprint
+from typing import TYPE_CHECKING
 import time
+
+if TYPE_CHECKING:
+	from collections.abc import Iterable
+	from mapFolding._e.theTypes import LeafOptions
+
 
 def printStatisticsPermutations(state: EliminationState) -> None:
 	def prodOfDOTvalues(listLeafOptions: Iterable[LeafOptions]) -> int:

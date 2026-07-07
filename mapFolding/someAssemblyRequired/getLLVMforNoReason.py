@@ -1,3 +1,6 @@
+# pyright: reportMissingTypeStubs=false
+# pyright: reportUnknownMemberType=false
+# ruff: noqa: DOC501
 """
 Utility for extracting LLVM IR from compiled Python modules.
 
@@ -24,13 +27,15 @@ While originally part of a tighter integration with the code generation assembly
 this module now operates as a standalone utility that can be applied to any module
 containing Numba-compiled functions.
 """
-from pathlib import Path
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 import importlib.util
 import llvmlite.binding
 
 if TYPE_CHECKING:
 	from importlib.machinery import ModuleSpec
+	from pathlib import Path
 	from types import ModuleType
 
 def writeModuleLLVM(pathFilename: Path, identifierCallable: str) -> Path:
@@ -53,7 +58,7 @@ def writeModuleLLVM(pathFilename: Path, identifierCallable: str) -> Path:
 	"""
 	specTarget: ModuleSpec | None = importlib.util.spec_from_file_location("generatedModule", pathFilename)
 	if specTarget is None or specTarget.loader is None:
-		message = f"Could not create module spec or loader for {pathFilename}"
+		message: str = f"Could not create module spec or loader for {pathFilename}"
 		raise ImportError(message)
 	moduleTarget: ModuleType = importlib.util.module_from_spec(specTarget)
 	specTarget.loader.exec_module(moduleTarget)
@@ -62,5 +67,5 @@ def writeModuleLLVM(pathFilename: Path, identifierCallable: str) -> Path:
 	linesLLVM = moduleTarget.__dict__[identifierCallable].inspect_llvm()[()]
 	moduleLLVM: llvmlite.binding.ModuleRef = llvmlite.binding.module.parse_assembly(linesLLVM)
 	pathFilenameLLVM: Path = pathFilename.with_suffix(".ll")
-	pathFilenameLLVM.write_text(str(moduleLLVM))
+	pathFilenameLLVM.write_text(str(moduleLLVM), encoding="utf-8")
 	return pathFilenameLLVM

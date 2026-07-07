@@ -24,14 +24,14 @@ from mapFolding._e.tests.conftestAnnex import assertEqualTo
 from mapFolding._e.tests.dataSamples import (
 	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二, p2DnDomain首零一二_首一二,
 	p2DnDomain首零二_首二)
-from more_itertools import all_unique, unique_to_each
+from more_itertools import all_unique as allUnique吗, unique_to_each
 from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e import LeafOptions, Pile
+	from mapFolding._e.theTypes import LeafOptions, Pile
 	from types import ModuleType
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
@@ -99,7 +99,7 @@ def test_getLeafDomainsCombined(domainFunction: CallableFunction[[EliminationSta
 	tuplesMissingFromActual, tuplesExtraInActual = unique_to_each(tuplesDomainAuthoritativeData, tuplesDomainActual)
 	tuplesMissingFromActual = tuple(tuplesMissingFromActual)
 	tuplesExtraInActual = tuple(tuplesExtraInActual)
-	hasAllUnique: bool = all_unique(tuplesDomainActual)
+	hasAllUnique: bool = allUnique吗(tuplesDomainActual)
 
 	assertEqualTo(hasAllUnique, True, domainFunction.__name__, mapShape)
 	assertEqualTo(len(tuplesMissingFromActual), 0, domainFunction.__name__, mapShape)
@@ -130,7 +130,7 @@ def test_getLeavesCrease(creaseKind: str, creaseFunction: CallableFunction[[Elim
 
 		assertEqualTo(sorted(listLeavesActual), listLeavesExpectedSorted, creaseFunction.__name__, mapShape, leaf)
 
-		assertEqualTo(all_unique(listLeavesActual), True, creaseFunction.__name__, mapShape, leaf)
+		assertEqualTo(allUnique吗(listLeavesActual), True, creaseFunction.__name__, mapShape, leaf)
 
 		for leafPost in listLeavesActual:
 			assertEqualTo(0 <= leafPost < state.leavesTotal, True, creaseFunction.__name__, mapShape, leaf, leafPost=leafPost)

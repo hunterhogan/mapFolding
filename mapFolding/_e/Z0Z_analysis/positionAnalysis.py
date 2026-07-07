@@ -7,13 +7,17 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getDictionaryConditionalLeafSuccessors, getLeafDomain,
-	howManyDimensionsHaveOddParity, Leaf, Pile, pileOrigin, 零)
+	howManyDimensionsHaveOddParity, pileOrigin, 零)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
 from pprint import pprint
-from typing import Any
+from typing import TYPE_CHECKING
 import numpy
 import pandas
+
+if TYPE_CHECKING:
+	from mapFolding._e.theTypes import Leaf, Pile
+	from typing import Any
 
 def getLeafUnconditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 	"""Identify leaves that always precede other leaves across all folding sequences.

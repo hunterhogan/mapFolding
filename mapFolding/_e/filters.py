@@ -63,19 +63,21 @@ References
 """
 from __future__ import annotations
 
-from collections.abc import Iterable
-from gmpy2 import mpz
+from collections.abc import Sequence
+from gmpy2 import mpz, sign
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
+from hunterMakesPy import inclusive
 from hunterMakesPy.parseParameters import intInnit
 from mapFolding._e import DOTitems, 零
-from more_itertools import all_unique as allUnique吗, always_reversible, consecutive_groups, extract
+from more_itertools import always_reversible, consecutive_groups, extract
 from typing import overload, TYPE_CHECKING
+from operator import eq
 
 if TYPE_CHECKING:
-	from collections.abc import Hashable, Iterator, Mapping, Sequence
+	from collections.abc import Iterable, Iterator
 	from hunterMakesPy import Ordinals
-	from mapFolding._e import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
-	from typing import Any, TypeIs
+	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from typing import TypeIs
 
 #======== Boolean antecedents ================================================
 
@@ -85,29 +87,18 @@ def between吗[小于: Ordinals](floor: 小于, ceiling: 小于, comparand: 小�
 	return floor <= comparand <= ceiling
 
 # NOTE `个` typevar exists to help ty with static type checking. See https://github.com/astral-sh/ty/issues/2799.
-def consecutive吗[个: Iterable[int]](flatContainer: 个) -> bool:
+def consecutive吗[个: Sequence[int]](flatContainer: 个) -> bool:
 	"""Are the integers in `flatContainer` consecutive, either ascending or descending?"""
-	ImaListOfInt: list[int] = intInnit(flatContainer, 'flatContainer', Iterable[int])
-	return ((len(list(next(consecutive_groups(ImaListOfInt)))) == len(list(ImaListOfInt)))
-		or (len(list(next(consecutive_groups(always_reversible(ImaListOfInt))))) == len(list(ImaListOfInt))))
-
-def hasDuplicates(flatContainer: Iterable[Any]) -> bool:
-	"""Test whether `flatContainer` contains duplicate values.
-
-	You can use `hasDuplicates` in an `if` statement, or you can pass `hasDuplicates` as a predicate
-	to a filtering utility described in the module docstring.
-
-	Parameters
-	----------
-	flatContainer : Iterable[Any]
-		Iterable of values to test for duplicate values.
-
-	Returns
-	-------
-	flatContainerHasDuplicates : bool
-		`True` if `flatContainer` contains at least one duplicate value.
-	"""
-	return not allUnique吗(flatContainer)
+	ImaListOfInt: list[int] = intInnit(flatContainer, 'flatContainer', Sequence[int])
+	qty = ImaListOfInt[-1] - ImaListOfInt[0]
+	mustBeTrue = qty == len(ImaListOfInt)
+	direction = sign(qty)
+	rr = range(ImaListOfInt[0], ImaListOfInt[0] + qty, direction)
+	jj = all(map(eq, ImaListOfInt, rr))
+	ll = list(rr)
+	bb = ll == ImaListOfInt
+	return ((len(list(next(consecutive_groups(ImaListOfInt)))) == len(ImaListOfInt))
+		or (len(list(next(consecutive_groups(always_reversible(ImaListOfInt))))) == len(ImaListOfInt)))
 
 @syntacticCurry
 def leafIsInPileRange(leaf: Leaf, leafOptions: LeafOptions) -> bool:
@@ -195,11 +186,6 @@ def leafIsPinnedAtPile(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pil
 		True if the mapping includes `pile: leaf`.
 	"""
 	return leaf == permutationSpace.get(pile)
-
-@syntacticCurry
-def mappingHasKey[文件: Hashable](lookup: Mapping[文件, Any], key: 文件) -> bool:
-	"""Return `True` if `key` is in `lookup`."""
-	return key in lookup
 
 def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
 	"""Test to ensure `leaf` is not `leafOrigin` (0) or `leaf零` (1).

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from mapFolding import ansiColorReset, ansiColors, packageSettings
-from mapFolding._e import DOTvalues, PermutationSpace, PinnedLeaves, 一, 零, 首一, 首零一
+from mapFolding._e import DOTvalues, 一, 零, 首一, 首零一
 from mapFolding._e.filters import extractPinnedLeaves, thisIsALeaf
 from pathlib import Path
 from pprint import pformat
@@ -16,6 +16,7 @@ import sys
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
 	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.theTypes import PermutationSpace, PinnedLeaves
 
 @syntacticCurry
 def beansWithoutCornbread(state: EliminationState, permutationSpace: PermutationSpace) -> bool:
