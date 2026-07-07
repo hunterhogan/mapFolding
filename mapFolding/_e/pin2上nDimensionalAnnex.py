@@ -232,21 +232,21 @@ def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> Elim
 # -------- Shared logic -----------------------------------------
 
 def _reduceLeafSpace(  # DOCUMENT If a function uses this shared logic, then that function ought not to modify `permutationSpace` directly.
-	state: EliminationState
+	state: EliminationState  # noqa: ARG001
 	, permutationSpace: PermutationSpace
 	, pilesToUpdate: deque[tuple[Pile, LeafOptions]]  # DOCUMENT `tuple[Pile, LeafOptions]` because `permutationSpace[pile]` is not _necessarily_ equal to `leafOptions`.
 	, leafAntiOptions: LeafOptions
 ) -> PermutationSpace:
 	"""I use this to update permutation space by removing forbidden leaves from piles.
 
-	I use this shared subroutine to handle the mechanical work of updating `LeafOptions` at
-	specified piles by removing forbidden leaves. All constraint encoders (`_reducePermutationSpace_*`)
-	call this function to perform the actual updates. I process each pile in `pilesToUpdate`,
-	remove leaves specified by `leafAntiOptions`, and propagate newly pinned leaves.
+	I use this shared subroutine to handle the mechanical work of updating `LeafOptions` at specified
+	piles by removing forbidden leaves. All constraint encoders (`_reducePermutationSpace_*`) call
+	this function to perform the actual updates. I process each pile in `pilesToUpdate`, remove leaves
+	specified by `leafAntiOptions`, and propagate newly pinned leaves.
 
 	I do not return a `bool` for `permutationSpaceHasNewLeaf`. Calling functions compare
-	`permutationSpace` properties before and after calling this function to detect whether new
-	leaves were pinned.
+	`permutationSpace` properties before and after calling this function to detect whether new leaves
+	were pinned.
 
 	Algorithm Details
 	-----------------
@@ -257,8 +257,8 @@ def _reduceLeafSpace(  # DOCUMENT If a function uses this shared logic, then tha
 		`LeafOptions`).
 	3. If the result is `None` (empty domain), invalidate `permutationSpace` by setting to `{}`.
 
-	When `permutationSpaceHasNewLeaf` becomes `True`, I call `_reducePermutationSpace_LeafIsPinned`
-	to propagate the newly pinned leaf before returning.
+	When `permutationSpaceHasNewLeaf` becomes `True`, I call `_reducePermutationSpace_LeafIsPinned` to
+	propagate the newly pinned leaf before returning.
 
 	Parameters
 	----------
@@ -276,9 +276,7 @@ def _reduceLeafSpace(  # DOCUMENT If a function uses this shared logic, then tha
 	updatedPermutationSpace : PermutationSpace
 		The updated `permutationSpace` if valid; otherwise an empty dictionary (invalid).
 	"""
-	permutationSpaceHasNewLeaf: bool = False
-
-	while (permutationSpace and pilesToUpdate and not permutationSpaceHasNewLeaf):
+	while permutationSpace and pilesToUpdate:
 		pile, leafOptions = pilesToUpdate.pop()
 
 		leafSpace: LeafSpace | None = JeanValjean(leafOptionsAND(leafAntiOptions, leafOptions))
@@ -287,20 +285,10 @@ def _reduceLeafSpace(  # DOCUMENT If a function uses this shared logic, then tha
 			permutationSpace = {}
 		else:
 			permutationSpace[pile] = leafSpace
-			if isLeaf吗(permutationSpace[pile]):
-				permutationSpaceHasNewLeaf = True
-
-	if permutationSpace and permutationSpaceHasNewLeaf:
-		sherpa: PermutationSpace | None = _reducePermutationSpace_LeafIsPinned(state, permutationSpace)
-		if not sherpa:  # NOTE checks for `None` and for `{}` (invalid).
-			permutationSpace = {}
-		else:
-			permutationSpace = sherpa
 	return permutationSpace
 
-# -------- PART OF the shared logic AND uses the shared logic -----------------------------------------
+# -------- Functions that use the shared logic -----------------------------------------
 
-# TODO With "Reset the `functionsReduction` queue.", can I eliminate the check for a new leaf?
 def _reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to propagate leaf pinning constraints.
 
@@ -328,11 +316,14 @@ def _reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpa
 		permutationSpaceHasNewLeaf = False
 		leavesPinned, pilesUndetermined = bifurcatePermutationSpace(permutationSpace)
 		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
-		if not (
-			permutationSpace := _reduceLeafSpace(
+		# NOTE using the walrus operator here `if not (permutationSpace := _reduceLeafSpace...` means
+		# that type checkers are ok with `permutationSpace: PermutationSpace`. If I assigned without
+		# the `if` check, `permutationSpace = _reduceLeafSpace...`, then the annotation would need to
+		# be `permutationSpace: PermutationSpace | None` because `_reduceLeafSpace` can return `None`.
+		# Furthermore, not creating an intermediate variable is more efficient.
+		if not (permutationSpace := _reduceLeafSpace(
 				state, permutationSpace, deque(pilesUndetermined.items()), makeLeafAntiOptions(state.leavesTotal, DOTvalues(leavesPinned))
-			)
-		):
+		)):
 			return None
 		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
 			# NOTE 2026 July 7 Does this produces false positives?
@@ -347,8 +338,6 @@ def _reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpa
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
-
-# -------- Functions that use the shared logic -----------------------------------------
 
 def _reducePermutationSpace_byCrease(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to enforce crease adjacency constraints.
