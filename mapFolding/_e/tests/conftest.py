@@ -1,3 +1,4 @@
+# ruff: noqa: S301
 from __future__ import annotations
 
 from mapFolding import packageSettings
@@ -8,6 +9,7 @@ import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
+	from mapFolding import Limitation
 	from numpy.typing import NDArray
 	from pytest import FixtureRequest
 	import numpy
@@ -47,14 +49,14 @@ def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
 	"""
 	def loader(dimensionsTotal: int) -> NDArray[numpy.uint8]:
 		pathFilename: Path = pathDataSamples / f"arrayFoldingsP2d{dimensionsTotal}.pkl"
-		arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())  # noqa: S301
+		arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())
 		return arrayFoldings
 
 	return loader
 
-@pytest.fixture(params=(0.25,))
-def CPUlimitPinningTests(request: pytest.FixtureRequest) -> float:
-	return float(request.param)
+@pytest.fixture(params=(None,))
+def CPUlimit(request: pytest.FixtureRequest) -> Limitation:
+	return request.param
 
 @pytest.fixture(params=(2, 3, 4), ids=lambda pileDepth: f"pileDepth={pileDepth}")
 def pileDepthPinningTests(request: pytest.FixtureRequest) -> int:

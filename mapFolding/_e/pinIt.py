@@ -552,65 +552,6 @@ def reduceAllPermutationSpace(state: EliminationState) -> EliminationState:
 #-------- Shared logic -----------------------------------------
 
 def _reduceLeafSpace(state: EliminationState, permutationSpace: PermutationSpace, pilesToUpdate: deque[tuple[Pile, LeafOptions]], leafAntiOptions: LeafOptions) -> PermutationSpace:
-	"""I use this to update permutation space by removing forbidden leaves from piles.
-
-	I use this shared subroutine to handle the mechanical work of updating `LeafOptions` at
-	specified piles by removing forbidden leaves. All constraint encoders (`_reducePermutationSpace_*`)
-	call this function to perform the actual updates. I process each pile in `pilesToUpdate`,
-	remove leaves specified by `leafAntiOptions`, and propagate newly pinned leaves. I detect
-	beans-without-cornbread configurations and pin the complementary cornbread leaf when
-	appropriate.
-
-	I do not return a `bool` for `permutationSpaceHasNewLeaf`. Calling functions compare
-	`permutationSpace` properties before and after calling this function to detect whether new
-	leaves were pinned.
-
-	Algorithm Details
-	-----------------
-	For each pile in `pilesToUpdate`:
-
-	1. Remove forbidden leaves by computing `leafOptionsAND(leafAntiOptions, leafOptions)`.
-	2. Use `JeanValjean` [1] to convert the result to `LeafSpace` (either `Leaf` or
-		`LeafOptions`).
-	3. If the result is `None` (empty domain), invalidate `permutationSpace` by setting to `{}`.
-	4. If the result is a `Leaf`, check for beans-without-cornbread configurations:
-		- Beans-without-cornbread occurs when one member of a crease pair (beans/cornbread) is pinned but the adjacent crease neighbor (cornbread/beans) is not.
-		- Pin the complementary cornbread leaf at the appropriate adjacent pile.
-		- Set `permutationSpaceHasNewLeaf = True` to signal the calling function.
-
-	When `permutationSpaceHasNewLeaf` becomes `True`, I call `_reducePermutationSpace_LeafIsPinned`
-	to propagate the newly pinned leaf before returning.
-
-	Parameters
-	----------
-	state : EliminationState
-		A data basket to facilitate computations and actions.
-	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
-	pilesToUpdate : deque[tuple[Pile, LeafOptions]]
-		Piles to update with `pile` and existing `leafOptions`.
-	leafAntiOptions : LeafOptions
-		A bitset of leaves to remove from `LeafOptions`.
-
-	Returns
-	-------
-	updatedPermutationSpace : PermutationSpace
-		The updated `permutationSpace` if valid; otherwise an empty dictionary (invalid).
-
-	Examples
-	--------
-	Calling functions detect `permutationSpaceHasNewLeaf` by comparing properties before and
-	after:
-
-	>>> sumBeforeReduction: int = sum(map(dimensionNearest首, permutationSpace.values()))
-	>>> permutationSpace = _reduceLeafSpace(state, permutationSpace, pilesToUpdate, leafAntiOptions)
-	>>> if sum(map(dimensionNearest首, permutationSpace.values())) < sumBeforeReduction:
-	...     permutationSpaceHasNewLeaf = True
-
-	References
-	----------
-	[1] mapFolding._e.JeanValjean
-	"""
 	permutationSpaceHasNewLeaf: bool = False
 	while permutationSpace and pilesToUpdate and not permutationSpaceHasNewLeaf:
 		pile, leafOptions = pilesToUpdate.pop()
@@ -636,31 +577,6 @@ def _reduceLeafSpace(state: EliminationState, permutationSpace: PermutationSpace
 
 @syntacticCurry
 def _reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
-	"""I use this to propagate leaf pinning constraints.
-
-	I use this constraint encoder to enforce that every pinned leaf can appear at only one pile.
-	For every leaf pinned at a pile, I remove that leaf from `LeafOptions` at all other piles.
-	When `LeafOptions` at a pile reduces to a single leaf, I convert `pile: leafOptions` to
-	`pile: leaf` (pinning the leaf). When that creates a beans-without-cornbread configuration,
-	I pin the complementary cornbread leaf at the appropriate adjacent pile.
-
-	This function is the primary propagator for newly pinned leaves. All other constraint encoders
-	call `_reduceLeafSpace`, which calls this function when new leaves are pinned. This function
-	iteratively applies pinning until no new leaves are discovered.
-
-	Parameters
-	----------
-	state : EliminationState
-		A data basket to facilitate computations and actions.
-	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
-
-	Returns
-	-------
-	updatedPermutationSpace : PermutationSpace | None
-		The updated `permutationSpace` if valid; otherwise `None`.
-
-	"""
 	permutationSpaceHasNewLeaf: bool = True
 
 	while permutationSpaceHasNewLeaf:

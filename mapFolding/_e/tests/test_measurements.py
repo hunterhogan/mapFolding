@@ -15,7 +15,7 @@ from mapFolding._e import (
 	dimensionFourthNearest首, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首,
 	dimensionThirdNearest首, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, leafInSubHyperplane, ptount)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.tests.conftestAnnex import assertEqualTo
+from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples.measurementData import (
 	dataDimensionFourthNearest, dataDimensionNearest, dataDimensionsConsecutiveAtTail, dataDimensionSecondNearest, dataDimensionThirdNearest,
 	dataHowMany0coordinatesAtTail, dataInvertLeafIn2上nDimensions, dataLeafInSubHyperplane, dataPtount)
