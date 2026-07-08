@@ -71,7 +71,7 @@ from __future__ import annotations
 from collections import deque
 from gmpy2 import bit_flip, bit_test as isBit1吗
 from humpy_cytoolz import (
-	complement, curry as syntacticCurry, itemfilter, keyfilter as filterPile, unique, valfilter as filterLeaf, valfilter as filterLeafOptions)
+	concat, curry as syntacticCurry, itemfilter, keyfilter as filterPile, unique, valfilter as filterLeaf, valfilter as filterLeafOptions)
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations, product as CartesianProduct
 from mapFolding._e import (
@@ -82,7 +82,7 @@ from mapFolding._e.algorithms.iff import thisIsAViolation
 from mapFolding._e.filters import (
 	extractPinnedLeaves, extractUndeterminedPiles, isLeafOptions吗, isLeaf吗, leafPinned吗, notLeafOriginOrLeaf零, notPileLast)
 from mapFolding._e.pinIt import reducePermutationSpace_leafDomainOf1
-from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTvalues, thisHasThat吗, thisNotHaveThat吗
+from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTvalues, reverseLookup, thisHasThat吗, thisNotHaveThat吗
 from more_itertools import pairwise, triplewise
 from operator import contains as contains吗
 from typing import TYPE_CHECKING
@@ -90,7 +90,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from mapFolding._e.dataBaskets import EliminationState
-	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import DimensionIndex, Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 # ======== Boolean filters ======================================
 
@@ -478,84 +478,76 @@ def _reducePermutationSpace_CrossedCreases(state: EliminationState, permutationS
 	pileOf_kCrease: Pile = errorL33T
 	pileOf_rCrease: Pile = errorL33T
 	pilesForbidden: Iterable[Pile] = []
-	leafAntiOptions: LeafOptions = makeLeafAntiOptions(state.leavesTotal, frozenset())
-
 	permutationSpaceHasNewLeaf: bool = True
+
+	# TODO identifier names.
+	def gen_gen(ss: PermutationSpace, dimensionsTotal: int) -> Iterator[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]:
+		qq: deque[CartesianProduct[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]] = deque()
+		for dimension in range(dimensionsTotal):
+			even: PinnedLeaves = {}
+			odd: PinnedLeaves = {}
+			for pileLeaf in DOTitems(extractPinnedLeaves(ss)):
+				if oddLeaf2上nDimensional吗(pileLeaf[1], dimension):
+					odd.update((pileLeaf,))
+				else:
+					even.update((pileLeaf,))
+			qq.append(CartesianProduct((dimension,), (odd,), combinations(even.items(), 2)))
+			qq.append(CartesianProduct((dimension,), (even,), combinations(odd.items(), 2)))
+		return concat(qq)
+
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
-		for dimension in range(state.dimensionsTotal):
-			dictionaryLeafToPile: dict[Leaf, Pile] = {
-				leafValue: pileKey for pileKey, leafValue in extractPinnedLeaves(permutationSpace).items()
-			}
+		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 
-			# For efficiency, I wish I could create the two dictionaries with one operation and without the intermediate `leavesPinned`.
-			leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
-			leavesPinnedEvenInDimension: PinnedLeaves = filterLeaf(complement(oddLeaf2上nDimensional吗(dimension=dimension)), leavesPinned)
-			leavesPinnedOddInDimension: PinnedLeaves = filterLeaf(oddLeaf2上nDimensional吗(dimension=dimension), leavesPinned)
+		for dimension, leavesPinnedParityOpposite, ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in gen_gen(permutationSpace, state.dimensionsTotal):
+			leaf_kCrease: Leaf = int(bit_flip(leaf_k, dimension))
+			leaf_rCrease: Leaf = int(bit_flip(leaf_r, dimension))
 
-			dequePileLeafPileLeaf: deque[tuple[PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]] = deque(
-				CartesianProduct((leavesPinnedOddInDimension,), combinations(leavesPinnedEvenInDimension.items(), 2))
-			)
-			dequePileLeafPileLeaf.extend(
-				deque(CartesianProduct((leavesPinnedEvenInDimension,), combinations(leavesPinnedOddInDimension.items(), 2)))
-			)
+			if leaf_kCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_kCrease):
+				pileOf_kCrease = raiseIfNone(reverseLookup(permutationSpace, leaf_kCrease))
+			if leaf_rCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_rCrease):
+				pileOf_rCrease = raiseIfNone(reverseLookup(permutationSpace, leaf_rCrease))
 
-			while dequePileLeafPileLeaf and not permutationSpaceHasNewLeaf:
-				leavesPinnedParityOpposite, ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) = dequePileLeafPileLeaf.pop()
-				leaf_kCrease: Leaf = int(bit_flip(leaf_k, dimension))
-				leaf_rCrease: Leaf = int(bit_flip(leaf_r, dimension))
+			if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
+				leafAntiOptions: LeafOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_rCrease,))
 
-				if leaf_kCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_kCrease):
-					pileOf_kCrease = dictionaryLeafToPile[leaf_kCrease]
-				if leaf_rCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_rCrease):
-					pileOf_rCrease = dictionaryLeafToPile[leaf_rCrease]
+				if pileOf_k < pileOf_r < pileOf_kCrease:
+					pilesForbidden = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
+				elif pileOf_kCrease < pileOf_r < pileOf_k:
+					pilesForbidden = frozenset([*range(pileOf_kCrease), *range(pileOf_k + 1, state.pileLast + inclusive)])
+				elif (pileOf_r < pileOf_kCrease < pileOf_k) or (pileOf_kCrease < pileOf_k < pileOf_r):
+					pilesForbidden = range(pileOf_kCrease + 1, pileOf_k)
+				elif (pileOf_r < pileOf_k < pileOf_kCrease) or (pileOf_k < pileOf_kCrease < pileOf_r):
+					pilesForbidden = range(pileOf_k + 1, pileOf_kCrease)
 
-				if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
-					leafAntiOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_rCrease,))
+			elif not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
+				leafAntiOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_kCrease,))
 
-					if pileOf_k < pileOf_r < pileOf_kCrease:
-						pilesForbidden = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
-					elif pileOf_kCrease < pileOf_r < pileOf_k:
-						pilesForbidden = frozenset([*range(pileOf_kCrease), *range(pileOf_k + 1, state.pileLast + inclusive)])
-					elif (pileOf_r < pileOf_kCrease < pileOf_k) or (pileOf_kCrease < pileOf_k < pileOf_r):
-						pilesForbidden = frozenset(range(pileOf_kCrease + 1, pileOf_k))
-					elif (pileOf_r < pileOf_k < pileOf_kCrease) or (pileOf_k < pileOf_kCrease < pileOf_r):
-						pilesForbidden = frozenset(range(pileOf_k + 1, pileOf_kCrease))
+				if pileOf_rCrease < pileOf_k < pileOf_r:
+					pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
+				elif pileOf_r < pileOf_k < pileOf_rCrease:
+					pilesForbidden = frozenset([*range(pileOf_r), *range(pileOf_rCrease + 1, state.pileLast + inclusive)])
+				elif (pileOf_k < pileOf_r < pileOf_rCrease) or (pileOf_r < pileOf_rCrease < pileOf_k):
+					pilesForbidden = range(pileOf_r + 1, pileOf_rCrease)
+				elif (pileOf_k < pileOf_rCrease < pileOf_r) or (pileOf_rCrease < pileOf_r < pileOf_k):
+					pilesForbidden = range(pileOf_rCrease + 1, pileOf_r)
 
-				elif not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
-					leafAntiOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_kCrease,))
-
-					if pileOf_rCrease < pileOf_k < pileOf_r:
-						pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
-					elif pileOf_r < pileOf_k < pileOf_rCrease:
-						pilesForbidden = frozenset([*range(pileOf_r), *range(pileOf_rCrease + 1, state.pileLast + inclusive)])
-					elif (pileOf_k < pileOf_r < pileOf_rCrease) or (pileOf_r < pileOf_rCrease < pileOf_k):
-						pilesForbidden = frozenset(range(pileOf_r + 1, pileOf_rCrease))
-					elif (pileOf_k < pileOf_rCrease < pileOf_r) or (pileOf_rCrease < pileOf_r < pileOf_k):
-						pilesForbidden = frozenset(range(pileOf_rCrease + 1, pileOf_r))
-
-				elif leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
-					if thisIsAViolation(pileOf_k, pileOf_r, pileOf_kCrease, pileOf_rCrease):
-						return None
-					continue
-
-				else:  # elif not leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
-					continue
-
-				sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
-				if not (
-					permutationSpace := _reduceLeafSpace(
-						state
-						, permutationSpace
-						, pilesToUpdate=deque(
-							DOTitems(filterPile(thisHasThat吗(pilesForbidden), extractUndeterminedPiles(permutationSpace)))
-						)
-						, leafAntiOptions=leafAntiOptions
-					)
-				):
+			elif leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
+				if thisIsAViolation(pileOf_k, pileOf_r, pileOf_kCrease, pileOf_rCrease):
 					return None
-				if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
-					permutationSpaceHasNewLeaf = True
+				continue
+
+			else:  # elif not leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
+				continue
+
+			if not (permutationSpace := _reduceLeafSpace(state, permutationSpace
+					, deque(DOTitems(filterPile(thisHasThat吗(pilesForbidden), extractUndeterminedPiles(permutationSpace))))
+					, leafAntiOptions
+			)):
+				return None
+
+		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
+			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
