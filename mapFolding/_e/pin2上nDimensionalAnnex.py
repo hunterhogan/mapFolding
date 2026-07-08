@@ -141,7 +141,7 @@ def oddLeaf2上nDimensional吗(leaf: Leaf, dimension: int) -> bool:
 
 # ======== Reducing `LeafOptions` ===============================
 
-# TODO overcome beans and cornbread, so I can generalize general subroutines and move them to "pinIt.py".
+# TODO Generalize general subroutines and move them to "pinIt.py".
 def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> EliminationState:
 	"""Reduce permutation space by iteratively applying constraint propagation.
 
@@ -174,6 +174,7 @@ def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> Elim
 		_reducePermutationSpace_HeadsBeforeTails,
 		_reducePermutationSpace_ConditionalPredecessors,
 		_reducePermutationSpace_CrossedCreases,
+
 		_reducePermutationSpace_noConsecutiveDimensions,
 		reducePermutationSpace_leafDomainOf1,
 		_reducePermutationSpace_nakedSubset,
@@ -722,23 +723,16 @@ def _reducePermutationSpace_noConsecutiveDimensions(state: EliminationState, per
 		The updated `permutationSpace` if valid; otherwise `None`.
 
 	"""
-	leafForbidden: Leaf = -errorL33T
-	pilesToUpdate: deque[tuple[Pile, LeafOptions]] = deque()
-
 	permutationSpaceHasNewLeaf: bool = True
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
+		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 
-		dequeTriplePileLeafSpace: deque[tuple[tuple[Pile, LeafSpace], tuple[Pile, LeafSpace], tuple[Pile, LeafSpace]]] = deque(
-			triplewise(sorted(DOTitems(permutationSpace)))
-		)
-
-		while dequeTriplePileLeafSpace and not permutationSpaceHasNewLeaf:
-			(pile_k, leafSpace_k), (pile, leafSpace), (pile_r, leafSpace_r) = dequeTriplePileLeafSpace.pop()
+		for (pile_k, leafSpace_k), (pile, leafSpace), (pile_r, leafSpace_r) in triplewise(sorted(DOTitems(permutationSpace))):
 
 			if isLeaf吗(leafSpace_k) and isLeaf吗(leafSpace) and isLeafOptions吗(leafSpace_r):
-				pilesToUpdate = deque([(pile_r, leafSpace_r)])
-				leafForbidden = leafSpace + (leafSpace - leafSpace_k)
+				pilesToUpdate: deque[tuple[Pile, LeafOptions]] = deque([(pile_r, leafSpace_r)])
+				leafForbidden: Leaf = leafSpace + (leafSpace - leafSpace_k)
 			elif isLeaf吗(leafSpace_k) and isLeafOptions吗(leafSpace) and isLeaf吗(leafSpace_r):
 				pilesToUpdate = deque([(pile, leafSpace)])
 				leafForbidden = (leafSpace_k + leafSpace_r) // 2
@@ -748,15 +742,14 @@ def _reducePermutationSpace_noConsecutiveDimensions(state: EliminationState, per
 			else:
 				continue
 
-			if 0 <= leafForbidden < state.leavesTotal:
-				sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
-				if not (
-					permutationSpace := _reduceLeafSpace(
-						state, permutationSpace, pilesToUpdate, makeLeafAntiOptions(state.leavesTotal, [leafForbidden])
-					)
-				):
-					return None
-				if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
-					permutationSpaceHasNewLeaf = True
+			if 0 <= leafForbidden < state.leavesTotal and not (
+				permutationSpace := _reduceLeafSpace(
+					state, permutationSpace, pilesToUpdate, makeLeafAntiOptions(state.leavesTotal, [leafForbidden])
+				)
+			):
+				return None
+
+		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
+			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
